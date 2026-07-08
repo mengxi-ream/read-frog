@@ -5,7 +5,7 @@ import { openOptionsPage } from "../navigation"
 describe("navigation", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    browser.tabs.create = vi.fn().mockResolvedValue({})
+    browser.tabs.create = vi.fn<(...args: any[]) => any>().mockResolvedValue({})
   })
 
   it("opens the options page as an extension tab", async () => {

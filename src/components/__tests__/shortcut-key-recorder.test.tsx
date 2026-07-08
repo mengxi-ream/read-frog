@@ -12,7 +12,7 @@ vi.mock("#imports", () => ({
 
 describe("shortcut key recorder", () => {
   it("records modifier shortcuts as portable strings", async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(...args: any[]) => any>()
 
     render(<ShortcutKeyRecorder shortcutKey="Alt+E" onChange={onChange} />)
 
@@ -26,7 +26,7 @@ describe("shortcut key recorder", () => {
   })
 
   it("uses the physical digit key for mac option combinations", async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(...args: any[]) => any>()
 
     render(<ShortcutKeyRecorder shortcutKey="Alt+E" onChange={onChange} />)
 
@@ -40,7 +40,7 @@ describe("shortcut key recorder", () => {
   })
 
   it("keeps recording after a single non-modifier key", async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(...args: any[]) => any>()
 
     render(<ShortcutKeyRecorder shortcutKey="Alt+E" onChange={onChange} />)
 
@@ -60,7 +60,7 @@ describe("shortcut key recorder", () => {
   })
 
   it("cancels recording with Escape", async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(...args: any[]) => any>()
 
     render(<ShortcutKeyRecorder shortcutKey="Alt+E" onChange={onChange} />)
 
@@ -75,7 +75,7 @@ describe("shortcut key recorder", () => {
   })
 
   it("clears the shortcut with Backspace and Delete", async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(...args: any[]) => any>()
 
     render(<ShortcutKeyRecorder shortcutKey="Alt+E" onChange={onChange} />)
 

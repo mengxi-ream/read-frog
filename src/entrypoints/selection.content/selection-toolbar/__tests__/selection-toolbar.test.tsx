@@ -54,16 +54,18 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     // Mock requestAnimationFrame to execute callbacks synchronously
     rafCallbacks = []
     originalRequestAnimationFrame = window.requestAnimationFrame
-    window.requestAnimationFrame = vi.fn((callback: FrameRequestCallback) => {
-      rafCallbacks.push(callback)
-      return 0
-    })
+    window.requestAnimationFrame = vi.fn<(...args: any[]) => any>(
+      (callback: FrameRequestCallback) => {
+        rafCallbacks.push(callback)
+        return 0
+      },
+    )
 
     // Initialize mock selection text function
-    mockSelectionToString = vi.fn(() => MOCK_SELECTED_TEXT)
+    mockSelectionToString = vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT)
 
     // Mock window.getSelection with dynamic text
-    window.getSelection = vi.fn(() => ({
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
       toString: mockSelectionToString,
       getRangeAt: () => ({
         startContainer: document.body,
@@ -71,7 +73,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn(() => true),
+      containsNode: vi.fn<(...args: any[]) => any>(() => true),
     })) as unknown as typeof window.getSelection
   })
 
@@ -83,15 +85,15 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
   })
 
   const setMockSelectionText = (text: string, containsNodeResult = true) => {
-    window.getSelection = vi.fn(() => ({
-      toString: vi.fn(() => text),
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: vi.fn<(...args: any[]) => any>(() => text),
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn(() => containsNodeResult),
+      containsNode: vi.fn<(...args: any[]) => any>(() => containsNodeResult),
     })) as unknown as typeof window.getSelection
   }
 
@@ -152,7 +154,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     )
 
     await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
   })
 
   it("should show toolbar when selecting text in input and target equals activeElement", async () => {
@@ -167,7 +169,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     const spy = vi.spyOn(document, "activeElement", "get").mockReturnValue(element)
 
     await triggerMouseUpWithSelection(element)
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
 
     spy.mockRestore()
   })
@@ -184,7 +186,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     const spy = vi.spyOn(document, "activeElement", "get").mockReturnValue(element)
 
     await triggerMouseUpWithSelection(element)
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
 
     spy.mockRestore()
   })
@@ -260,7 +262,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     await clearToolbarState()
 
     await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
   })
 
   it("should keep the toolbar visible on right-click so context menu translation can reuse the selection", async () => {
@@ -274,7 +276,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     const target = screen.getByTestId("test-element")
 
     await triggerMouseUpWithSelection(target)
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
 
     await act(async () => {
       target.dispatchEvent(
@@ -305,15 +307,15 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     // Mock selection that doesn't contain the click target
     const clickElement = screen.getByTestId("click-element")
-    window.getSelection = vi.fn(() => ({
-      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn((node: Node) => node !== clickElement),
+      containsNode: vi.fn<(...args: any[]) => any>((node: Node) => node !== clickElement),
     })) as unknown as typeof window.getSelection
 
     await triggerMouseUpWithSelection(clickElement)
@@ -336,15 +338,15 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     const clickButton = screen.getByTestId("click-button")
     const clickTarget = screen.getByTestId("click-button-label")
 
-    window.getSelection = vi.fn(() => ({
-      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn((node: Node) => node !== clickButton),
+      containsNode: vi.fn<(...args: any[]) => any>((node: Node) => node !== clickButton),
     })) as unknown as typeof window.getSelection
 
     await triggerMouseUpWithSelection(clickTarget)
@@ -366,15 +368,15 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     shadowButton.type = "button"
     let dispatchComplete = false
 
-    window.getSelection = vi.fn(() => ({
-      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn((node: Node) => node !== shadowButton),
+      containsNode: vi.fn<(...args: any[]) => any>((node: Node) => node !== shadowButton),
     })) as unknown as typeof window.getSelection
 
     const mouseUpEvent = new MouseEvent("mouseup", {
@@ -427,18 +429,18 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
       throw new Error("Missing overlay text node")
     }
 
-    window.getSelection = vi.fn(() => ({
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
       anchorNode: textNode,
       focusNode: textNode,
       rangeCount: 1,
-      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
       getRangeAt: () => ({
         startContainer: textNode,
         startOffset: 0,
         endContainer: textNode,
         endOffset: MOCK_SELECTED_TEXT.length,
       }),
-      containsNode: vi.fn(() => true),
+      containsNode: vi.fn<(...args: any[]) => any>(() => true),
     })) as unknown as typeof window.getSelection
 
     await triggerMouseUpWithSelection(overlayTextElement)
@@ -457,19 +459,21 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     const element = screen.getByTestId("test-element")
     // Mock selection that contains the click target
-    window.getSelection = vi.fn(() => ({
-      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn((node: Node) => node === element || element.contains(node as Node)),
+      containsNode: vi.fn<(...args: any[]) => any>(
+        (node: Node) => node === element || element.contains(node as Node),
+      ),
     })) as unknown as typeof window.getSelection
 
     await triggerMouseUpWithSelection(element)
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
   })
 
   it("should show toolbar when selection contains the clicked button ancestor", async () => {
@@ -487,19 +491,21 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     const clickButton = screen.getByTestId("click-button")
     const clickTarget = screen.getByTestId("click-button-label")
 
-    window.getSelection = vi.fn(() => ({
-      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn((node: Node) => node === clickButton || clickButton.contains(node)),
+      containsNode: vi.fn<(...args: any[]) => any>(
+        (node: Node) => node === clickButton || clickButton.contains(node),
+      ),
     })) as unknown as typeof window.getSelection
 
     await triggerMouseUpWithSelection(clickTarget)
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
   })
 
   it("should show toolbar in input even when selection does not contain click target", async () => {
@@ -515,19 +521,19 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     // Mock selection that doesn't contain the click target
     // But this should still show toolbar because it's an input element
-    window.getSelection = vi.fn(() => ({
-      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn(() => false),
+      containsNode: vi.fn<(...args: any[]) => any>(() => false),
     })) as unknown as typeof window.getSelection
 
     await triggerMouseUpWithSelection(element)
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
 
     spy.mockRestore()
   })
@@ -548,7 +554,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expect(toolbar).not.toHaveAttribute("aria-hidden")
 
     await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
 
     expect(toolbar).not.toHaveAttribute("aria-hidden")
   })
@@ -562,21 +568,23 @@ describe("selectionToolbar - positioning logic", () => {
     // Mock requestAnimationFrame to execute callbacks synchronously
     rafCallbacks = []
     originalRequestAnimationFrame = window.requestAnimationFrame
-    window.requestAnimationFrame = vi.fn((callback: FrameRequestCallback) => {
-      rafCallbacks.push(callback)
-      return 0
-    })
+    window.requestAnimationFrame = vi.fn<(...args: any[]) => any>(
+      (callback: FrameRequestCallback) => {
+        rafCallbacks.push(callback)
+        return 0
+      },
+    )
 
     // Mock window.getSelection with valid selection
-    window.getSelection = vi.fn(() => ({
-      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn(() => true),
+      containsNode: vi.fn<(...args: any[]) => any>(() => true),
     })) as unknown as typeof window.getSelection
 
     // Mock window dimensions

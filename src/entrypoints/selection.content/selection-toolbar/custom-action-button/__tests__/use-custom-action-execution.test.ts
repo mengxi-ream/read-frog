@@ -11,7 +11,7 @@ import {
   useCustomActionWebPageContext,
 } from "../use-custom-action-execution"
 
-const getOrCreateWebPageContextMock = vi.fn()
+const getOrCreateWebPageContextMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("@/utils/host/translate/webpage-context", async () => {
   const actual = await vi.importActual<typeof import("@/utils/host/translate/webpage-context")>(

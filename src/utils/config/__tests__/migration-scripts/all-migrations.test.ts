@@ -1,5 +1,5 @@
 import type { VersionTestData } from "../example/types"
-import { describe, expect, it } from "vitest"
+import { assert, describe, expect, it } from "vitest"
 import { configSchema } from "@/types/config/config"
 import { CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
 import { logger } from "@/utils/logger"
@@ -57,6 +57,7 @@ describe("all Config Migrations", () => {
 
         // All version files now use testSeries structure
         let seriesProcessed = 0
+        const migrationResults: Array<{ actual: unknown; expected: unknown }> = []
 
         for (const [seriesId, oldSeriesData] of Object.entries(oldConfigModule.testSeries)) {
           const newSeriesData = newConfigModule.testSeries[seriesId]
@@ -64,8 +65,7 @@ describe("all Config Migrations", () => {
             // Execute migration for this series
             const actualNewConfig = await runMigration(toVersion, oldSeriesData.config)
 
-            // Validate migration result
-            expect(actualNewConfig).toEqual(newSeriesData.config)
+            migrationResults.push({ actual: actualNewConfig, expected: newSeriesData.config })
 
             seriesProcessed++
 
@@ -83,31 +83,34 @@ describe("all Config Migrations", () => {
           }
         }
 
+        // Validate migration results
+        migrationResults.forEach(({ actual, expected }) => {
+          expect(actual).toEqual(expected)
+        })
+
         // Ensure at least one series was tested
-        if (seriesProcessed === 0) {
-          expect(
-            seriesProcessed,
-            `No test series found for migration v${fromVersion} -> v${toVersion}`,
-          ).toBeGreaterThan(0)
-        }
+        expect(
+          seriesProcessed,
+          `No test series found for migration v${fromVersion} -> v${toVersion}`,
+        ).toBeGreaterThan(0)
       } catch (error) {
         // 如果找不到对应的示例文件，标记为跳过
-        if (
+        const isMissingExampleFile =
           error instanceof Error &&
           (error.message.includes("Cannot resolve module") ||
             error.message.includes("Failed to resolve import"))
-        ) {
-          console.warn(
-            `⚠ Skipping migration test v${fromVersion} -> v${toVersion}: Missing example files`,
-          )
-          // 使用 skip 而不是直接 return，这样测试报告会显示跳过的测试
-          expect(true).toBe(true) // placeholder assertion
-          return
+
+        if (!isMissingExampleFile) {
+          // 其他错误重新抛出
+          console.error(`❌ Migration test failed v${fromVersion} -> v${toVersion}:`, error)
+          throw error
         }
 
-        // 其他错误重新抛出
-        console.error(`❌ Migration test failed v${fromVersion} -> v${toVersion}:`, error)
-        throw error
+        console.warn(
+          `⚠ Skipping migration test v${fromVersion} -> v${toVersion}: Missing example files`,
+        )
+        // 使用 skip 而不是直接 return，这样测试报告会显示跳过的测试
+        assert.isTrue(isMissingExampleFile)
       }
     })
   }

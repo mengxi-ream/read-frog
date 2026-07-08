@@ -7,7 +7,7 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { sendMessage } from "@/utils/message"
 import FloatingButton from ".."
 
-const toastInfoMock = vi.fn()
+const toastInfoMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("#imports", () => ({
   browser: {
@@ -58,7 +58,7 @@ vi.mock("../../../index", () => ({
 }))
 
 vi.mock("@/utils/message", () => ({
-  sendMessage: vi.fn(),
+  sendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("sonner", () => ({

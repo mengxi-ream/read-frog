@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { deeplTranslate, getDeepLBaseURL } from "../deepl"
 
-const fetchMock = vi.fn()
+const fetchMock = vi.fn<(...args: any[]) => any>()
 
 describe("deepl translate adapter", () => {
   beforeEach(() => {
@@ -23,10 +23,10 @@ describe("deepl translate adapter", () => {
       ok: true,
       status: 200,
       statusText: "OK",
-      json: vi.fn().mockResolvedValue({
+      json: vi.fn<(...args: any[]) => any>().mockResolvedValue({
         translations: [{ text: "你好" }],
       }),
-      text: vi.fn().mockResolvedValue(""),
+      text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
     })
 
     const result = await deeplTranslate("Hello", "auto", "zh", {
@@ -61,10 +61,10 @@ describe("deepl translate adapter", () => {
       ok: true,
       status: 200,
       statusText: "OK",
-      json: vi.fn().mockResolvedValue({
+      json: vi.fn<(...args: any[]) => any>().mockResolvedValue({
         translations: [{ text: "A" }],
       }),
-      text: vi.fn().mockResolvedValue(""),
+      text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
     })
 
     await deeplTranslate("甲", "zh-TW", "en", {
@@ -88,10 +88,10 @@ describe("deepl translate adapter", () => {
       ok: true,
       status: 200,
       statusText: "OK",
-      json: vi.fn().mockResolvedValue({
+      json: vi.fn<(...args: any[]) => any>().mockResolvedValue({
         translations: [],
       }),
-      text: vi.fn().mockResolvedValue(""),
+      text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
     })
 
     await expect(

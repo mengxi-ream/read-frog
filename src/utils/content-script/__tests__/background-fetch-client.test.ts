@@ -2,7 +2,7 @@ import { Buffer } from "node:buffer"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const { sendMessageMock } = vi.hoisted(() => ({
-  sendMessageMock: vi.fn(),
+  sendMessageMock: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/message", () => ({

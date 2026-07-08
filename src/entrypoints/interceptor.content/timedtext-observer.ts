@@ -45,8 +45,8 @@ export function waitForTimedtextUrl(videoId: string, timeoutMs: number): Promise
 }
 
 export function setupTimedtextObserver(): void {
-  const originalXhrOpen = XMLHttpRequest.prototype.open
-  const originalXhrSend = XMLHttpRequest.prototype.send
+  const originalXhrOpen = Reflect.get(XMLHttpRequest.prototype, "open") as XMLHttpRequest["open"]
+  const originalXhrSend = Reflect.get(XMLHttpRequest.prototype, "send") as XMLHttpRequest["send"]
 
   XMLHttpRequest.prototype.open = function (method: string, url: string | URL, ...args: any[]) {
     ;(this as any)._url = url.toString()

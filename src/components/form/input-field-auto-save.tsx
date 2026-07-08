@@ -34,7 +34,7 @@ export function InputFieldAutoSave({
       field.handleChange(value)
     }
 
-    void formForSubmit.handleSubmit()
+    formForSubmit.handleSubmit()
   }
 
   return (

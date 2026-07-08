@@ -10,7 +10,7 @@ import { findTranslatedContentWrapper, unwrapDeepestOnlyHTMLChild } from "../fin
 vi.mock("@/utils/config/storage", async () => {
   const { DEFAULT_CONFIG } = await import("@/utils/constants/config")
   return {
-    getLocalConfig: vi.fn(async () => DEFAULT_CONFIG),
+    getLocalConfig: vi.fn<(...args: any[]) => any>(async () => DEFAULT_CONFIG),
   }
 })
 

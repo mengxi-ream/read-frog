@@ -5,7 +5,7 @@ import { getSubtitlesTranslatePrompt } from "../subtitles"
 import { getTranslatePromptFromConfig } from "../translate"
 
 vi.mock("@/utils/config/storage", () => ({
-  getLocalConfig: vi.fn(),
+  getLocalConfig: vi.fn<(...args: any[]) => any>(),
 }))
 
 let mockGetLocalConfig: any

@@ -994,16 +994,16 @@ describe("requestQueue – reconfigure the request queue", () => {
   it("should throw error when options are invalid", () => {
     const q = new RequestQueue({ ...baseConfig, rate: 5, capacity: 10 })
 
-    expect(() => q.setQueueOptions({ rate: 0, capacity: 0 })).toThrow()
+    expect(() => q.setQueueOptions({ rate: 0, capacity: 0 })).toThrow(/Too small/)
 
-    expect(() => q.setQueueOptions({ rate: -1, capacity: -1 })).toThrow()
+    expect(() => q.setQueueOptions({ rate: -1, capacity: -1 })).toThrow(/Too small/)
 
-    expect(() => q.setQueueOptions({ rate: 0 })).toThrow()
+    expect(() => q.setQueueOptions({ rate: 0 })).toThrow(/Too small/)
 
-    expect(() => q.setQueueOptions({ capacity: 0 })).toThrow()
+    expect(() => q.setQueueOptions({ capacity: 0 })).toThrow(/Too small/)
 
-    expect(() => q.setQueueOptions({ rate: -1 })).toThrow()
+    expect(() => q.setQueueOptions({ rate: -1 })).toThrow(/Too small/)
 
-    expect(() => q.setQueueOptions({ capacity: -1 })).toThrow()
+    expect(() => q.setQueueOptions({ capacity: -1 })).toThrow(/Too small/)
   })
 })

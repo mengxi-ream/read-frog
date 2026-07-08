@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { UniversalVideoAdapter } from "../universal-adapter"
 
 const mocks = vi.hoisted(() => ({
-  getLocalConfig: vi.fn(),
+  getLocalConfig: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/config/storage", async (importOriginal) => {
@@ -15,11 +15,11 @@ vi.mock("@/utils/config/storage", async (importOriginal) => {
 
 function createAdapter(fetchResult: Array<{ text: string; start: number; end: number }>) {
   const subtitlesFetcher = {
-    fetch: vi.fn().mockResolvedValue(fetchResult),
-    cleanup: vi.fn(),
-    shouldUseSameTrack: vi.fn().mockResolvedValue(false),
+    fetch: vi.fn<(...args: any[]) => any>().mockResolvedValue(fetchResult),
+    cleanup: vi.fn<(...args: any[]) => any>(),
+    shouldUseSameTrack: vi.fn<(...args: any[]) => any>().mockResolvedValue(false),
     getSourceLanguage: () => "en",
-    hasAvailableSubtitles: vi.fn().mockResolvedValue(true),
+    hasAvailableSubtitles: vi.fn<(...args: any[]) => any>().mockResolvedValue(true),
   }
 
   const adapter = new UniversalVideoAdapter({
@@ -40,10 +40,10 @@ function createAdapter(fetchResult: Array<{ text: string; start: number; end: nu
 
 function attachScheduler(adapter: UniversalVideoAdapter, active: boolean) {
   const subtitlesScheduler = {
-    isActive: vi.fn(() => active),
-    reset: vi.fn(),
-    stop: vi.fn(),
-    setState: vi.fn(),
+    isActive: vi.fn<(...args: any[]) => any>(() => active),
+    reset: vi.fn<(...args: any[]) => any>(),
+    stop: vi.fn<(...args: any[]) => any>(),
+    setState: vi.fn<(...args: any[]) => any>(),
   }
 
   ;(adapter as any).subtitlesScheduler = subtitlesScheduler
@@ -143,8 +143,8 @@ describe("universalVideoAdapter", () => {
   it("delegates translated subtitle downloads to the downloader", async () => {
     const { adapter } = createAdapter([])
     const downloader = {
-      download: vi.fn().mockResolvedValue(undefined),
-      dispose: vi.fn(),
+      download: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
+      dispose: vi.fn<(...args: any[]) => any>(),
     }
     ;(adapter as any).translatedSubtitlesDownloader = downloader
 
@@ -156,8 +156,8 @@ describe("universalVideoAdapter", () => {
   it("disposes translated subtitle download state when navigation starts", () => {
     const { adapter } = createAdapter([])
     const downloader = {
-      download: vi.fn(),
-      dispose: vi.fn(),
+      download: vi.fn<(...args: any[]) => any>(),
+      dispose: vi.fn<(...args: any[]) => any>(),
     }
     ;(adapter as any).translatedSubtitlesDownloader = downloader
     attachScheduler(adapter, false)

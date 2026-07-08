@@ -127,12 +127,12 @@ describe("provider constants", () => {
         ...DEFAULT_PROVIDER_CONFIG.openrouter,
         reasoning: "none",
       }),
-    ).toThrow()
+    ).toThrow(/Unrecognized key/)
     expect(() =>
       apiProviderConfigItemSchema.parse({
         ...DEFAULT_PROVIDER_CONFIG.azure,
         reasoning: "none",
       }),
-    ).toThrow()
+    ).toThrow(/Unrecognized key/)
   })
 })

@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { browser, storage } from "#imports"
 import { i18n } from "@/utils/i18n"
 
-const sendMessageMock = vi.fn()
-const ensureInitializedConfigMock = vi.fn()
+const sendMessageMock = vi.fn<(...args: any[]) => any>()
+const ensureInitializedConfigMock = vi.fn<(...args: any[]) => any>()
 const contextMenuClickListeners: Array<(info: any, tab?: any) => Promise<void> | void> = []
 
 vi.mock("@/utils/message", () => ({
@@ -31,23 +31,23 @@ describe("background context menu", () => {
     contextMenuClickListeners.length = 0
     vi.clearAllMocks()
 
-    browser.contextMenus.create = vi.fn()
-    browser.contextMenus.removeAll = vi.fn().mockResolvedValue(undefined)
-    browser.contextMenus.update = vi.fn().mockResolvedValue(undefined)
-    browser.contextMenus.onClicked.addListener = vi.fn((listener) => {
+    browser.contextMenus.create = vi.fn<(...args: any[]) => any>()
+    browser.contextMenus.removeAll = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
+    browser.contextMenus.update = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
+    browser.contextMenus.onClicked.addListener = vi.fn<(...args: any[]) => any>((listener) => {
       contextMenuClickListeners.push(listener as (info: any, tab?: any) => Promise<void> | void)
     })
 
-    browser.tabs.query = vi.fn().mockResolvedValue([{ id: 1 }])
-    browser.tabs.onActivated.addListener = vi.fn()
-    browser.tabs.onUpdated.addListener = vi.fn()
-    browser.storage.session.onChanged.addListener = vi.fn()
+    browser.tabs.query = vi.fn<(...args: any[]) => any>().mockResolvedValue([{ id: 1 }])
+    browser.tabs.onActivated.addListener = vi.fn<(...args: any[]) => any>()
+    browser.tabs.onUpdated.addListener = vi.fn<(...args: any[]) => any>()
+    browser.storage.session.onChanged.addListener = vi.fn<(...args: any[]) => any>()
 
-    storage.watch = vi.fn()
-    storage.getItem = vi.fn().mockResolvedValue({ enabled: true })
-    storage.setItem = vi.fn().mockResolvedValue(undefined)
+    storage.watch = vi.fn<(...args: any[]) => any>()
+    storage.getItem = vi.fn<(...args: any[]) => any>().mockResolvedValue({ enabled: true })
+    storage.setItem = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
 
-    i18n.t = vi.fn(
+    i18n.t = vi.fn<(...args: any[]) => any>(
       (key: string) =>
         ({
           "contextMenu.translate": "Translate",

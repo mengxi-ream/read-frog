@@ -8,8 +8,8 @@ import {
 
 function createLogger() {
   return {
-    error: vi.fn(),
-    warn: vi.fn(),
+    error: vi.fn<(...args: any[]) => any>(),
+    warn: vi.fn<(...args: any[]) => any>(),
   }
 }
 
@@ -45,10 +45,10 @@ describe("background side panel", () => {
     const logger = createLogger()
     const calls: string[] = []
     const sidePanel = {
-      setOptions: vi.fn(() => {
+      setOptions: vi.fn<(...args: any[]) => any>(() => {
         calls.push("setOptions")
       }),
-      open: vi.fn((_options: { windowId: number }) => {
+      open: vi.fn<(...args: any[]) => any>((_options: { windowId: number }) => {
         calls.push("open")
         return Promise.resolve()
       }),
@@ -73,11 +73,11 @@ describe("background side panel", () => {
     const windowState = createSidePanelWindowState()
     const calls: string[] = []
     const sidePanel = {
-      close: vi.fn((_options: { windowId: number }) => {
+      close: vi.fn<(...args: any[]) => any>((_options: { windowId: number }) => {
         calls.push("close")
         return Promise.resolve()
       }),
-      open: vi.fn((_options: { windowId: number }) => {
+      open: vi.fn<(...args: any[]) => any>((_options: { windowId: number }) => {
         calls.push("open")
         return Promise.resolve()
       }),
@@ -107,15 +107,15 @@ describe("background side panel", () => {
       (message: typeof senderWindowMessage) => Promise<{ ok: true } | { ok: false; reason: string }>
     >()
     const sidePanel = {
-      close: vi.fn().mockResolvedValue(undefined),
-      open: vi.fn().mockResolvedValue(undefined),
+      close: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
+      open: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
       onClosed: {
-        addListener: vi.fn((listener) => {
+        addListener: vi.fn<(...args: any[]) => any>((listener) => {
           onClosedListeners.push(listener)
         }),
       },
       onOpened: {
-        addListener: vi.fn((listener) => {
+        addListener: vi.fn<(...args: any[]) => any>((listener) => {
           onOpenedListeners.push(listener)
         }),
       },
@@ -153,7 +153,7 @@ describe("background side panel", () => {
     const logger = createLogger()
     const windowState = createSidePanelWindowState()
     const sidePanel = {
-      open: vi.fn(),
+      open: vi.fn<(...args: any[]) => any>(),
     }
     windowState.markOpened({ windowId: 456 })
 
@@ -176,8 +176,8 @@ describe("background side panel", () => {
     const windowState = createSidePanelWindowState()
     const error = new Error("No active global side panel")
     const sidePanel = {
-      close: vi.fn().mockRejectedValue(error),
-      open: vi.fn().mockResolvedValue(undefined),
+      close: vi.fn<(...args: any[]) => any>().mockRejectedValue(error),
+      open: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
     }
     windowState.markOpened({ windowId: 456 })
 
@@ -215,7 +215,7 @@ describe("background side panel", () => {
   it("does not open the Firefox sidebar from a content-script message", async () => {
     const logger = createLogger()
     const sidebarAction = {
-      open: vi.fn(),
+      open: vi.fn<(...args: any[]) => any>(),
     }
     const handler = createToggleSidePanelHandler({
       getApi: () => firefoxSidebarAction(sidebarAction),
@@ -233,7 +233,7 @@ describe("background side panel", () => {
   it("opens the Firefox sidebar when called from an extension user action", async () => {
     const logger = createLogger()
     const sidebarAction = {
-      open: vi.fn().mockResolvedValue(undefined),
+      open: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
     }
     const handler = createToggleSidePanelHandler({
       getApi: () => firefoxSidebarAction(sidebarAction),
@@ -249,7 +249,7 @@ describe("background side panel", () => {
   it("returns a missing-window result when the sender window id is unavailable", async () => {
     const logger = createLogger()
     const handler = createToggleSidePanelHandler({
-      getApi: () => chromiumSidePanel({ open: vi.fn() }),
+      getApi: () => chromiumSidePanel({ open: vi.fn<(...args: any[]) => any>() }),
       logger,
     })
 
@@ -268,7 +268,7 @@ describe("background side panel", () => {
     const handler = createToggleSidePanelHandler({
       getApi: () =>
         chromiumSidePanel({
-          open: vi.fn().mockRejectedValue(error),
+          open: vi.fn<(...args: any[]) => any>().mockRejectedValue(error),
         }),
       logger,
     })
@@ -282,7 +282,7 @@ describe("background side panel", () => {
 
   it("finds the Chrome sidePanel API when the WXT browser wrapper does not expose it", () => {
     const sidePanel = {
-      open: vi.fn(),
+      open: vi.fn<(...args: any[]) => any>(),
     }
     vi.stubGlobal("chrome", {
       sidePanel,
@@ -296,7 +296,7 @@ describe("background side panel", () => {
 
   it("finds the Firefox sidebarAction API from the WXT browser wrapper", () => {
     const sidebarAction = {
-      open: vi.fn(),
+      open: vi.fn<(...args: any[]) => any>(),
     }
 
     expect(getSidePanelApi({ sidebarAction } as any)).toEqual({

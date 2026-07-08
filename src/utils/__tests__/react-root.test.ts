@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { renderPersistentReactRoot, unmountPersistentReactRoot } from "../react-root"
 
-const createRootMock = vi.hoisted(() => vi.fn())
+const createRootMock = vi.hoisted(() => vi.fn<(...args: any[]) => any>())
 
 vi.mock("react-dom/client", () => ({
   createRoot: createRootMock,
@@ -12,8 +12,8 @@ const REACT_ROOT_REGISTRY_KEY = Symbol.for("read-frog.react-root-registry")
 
 function createMockRoot() {
   return {
-    render: vi.fn(),
-    unmount: vi.fn(),
+    render: vi.fn<(...args: any[]) => any>(),
+    unmount: vi.fn<(...args: any[]) => any>(),
   }
 }
 

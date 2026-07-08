@@ -40,7 +40,6 @@ export class RequestQueue {
   private lastRefill: number
 
   constructor(private options: QueueOptions) {
-    this.options = options
     this.retryPolicy = options.retryPolicy ?? defaultRequestRetryPolicy
     this.bucketTokens = options.capacity
     this.lastRefill = Date.now()

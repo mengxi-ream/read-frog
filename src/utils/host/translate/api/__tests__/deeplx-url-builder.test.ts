@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { buildDeepLXUrl, deeplxTranslate } from "../deeplx"
 
-const fetchMock = vi.fn()
+const fetchMock = vi.fn<(...args: any[]) => any>()
 
 describe("buildDeepLXUrl", () => {
   describe("token placeholder functionality", () => {
@@ -62,8 +62,8 @@ describe("deeplxTranslate default URL fallback", () => {
       ok: true,
       status: 200,
       statusText: "OK",
-      json: vi.fn().mockResolvedValue({ data: "你好" }),
-      text: vi.fn().mockResolvedValue(""),
+      json: vi.fn<(...args: any[]) => any>().mockResolvedValue({ data: "你好" }),
+      text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
     })
     vi.stubGlobal("fetch", fetchMock)
   })

@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { TranslateButton } from ".."
 
-const prepareToolbarOpenMock = vi.fn()
+const prepareToolbarOpenMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("#imports", () => ({
   i18n: {

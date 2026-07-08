@@ -21,7 +21,7 @@ vi.mock("@/utils/i18n", () => ({
 }))
 
 vi.mock("@/utils/message", () => ({
-  sendMessage: vi.fn(),
+  sendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
 function createAction(): SelectionToolbarCustomAction {

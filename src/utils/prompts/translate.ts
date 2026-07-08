@@ -39,7 +39,7 @@ export function getTranslatePromptFromConfig(
   options?: TranslatePromptOptions<WebPagePromptContext>,
 ): TranslatePromptResult {
   const customPromptsConfig = translateConfig.customPromptsConfig
-  const { patterns = [], promptId } = customPromptsConfig
+  const { patterns, promptId } = customPromptsConfig
 
   // Resolve system prompt and user prompt
   let systemPrompt: string

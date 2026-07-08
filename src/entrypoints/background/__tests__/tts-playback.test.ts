@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-const onMessageMock = vi.fn()
-const sendMessageMock = vi.fn()
-const loggerWarnMock = vi.fn()
+const onMessageMock = vi.fn<(...args: any[]) => any>()
+const sendMessageMock = vi.fn<(...args: any[]) => any>()
+const loggerWarnMock = vi.fn<(...args: any[]) => any>()
 const createObjectURLDescriptor = Object.getOwnPropertyDescriptor(URL, "createObjectURL")
 const revokeObjectURLDescriptor = Object.getOwnPropertyDescriptor(URL, "revokeObjectURL")
 
@@ -35,8 +35,8 @@ function getRegisteredMessageHandler<TData = unknown, TResult = unknown>(name: s
 }
 
 function installFakeAudio() {
-  const createObjectURLMock = vi.fn(() => "blob:tts-test")
-  const revokeObjectURLMock = vi.fn()
+  const createObjectURLMock = vi.fn<(...args: any[]) => any>(() => "blob:tts-test")
+  const revokeObjectURLMock = vi.fn<(...args: any[]) => any>()
 
   Object.defineProperty(URL, "createObjectURL", {
     configurable: true,
@@ -52,10 +52,10 @@ function installFakeAudio() {
 
     onended: (() => void) | null = null
     onerror: (() => void) | null = null
-    play = vi.fn().mockResolvedValue(undefined)
-    pause = vi.fn()
-    removeAttribute = vi.fn()
-    load = vi.fn()
+    play = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
+    pause = vi.fn<(...args: any[]) => any>()
+    removeAttribute = vi.fn<(...args: any[]) => any>()
+    load = vi.fn<(...args: any[]) => any>()
 
     constructor(readonly src: string) {
       FakeAudio.instances.push(this)
@@ -95,8 +95,8 @@ describe("setupTTSPlaybackMessageHandlers", () => {
   })
 
   it("recreates offscreen document after it disappears", async () => {
-    const getContextsMock = vi.fn().mockResolvedValue([])
-    const createDocumentMock = vi.fn().mockResolvedValue(undefined)
+    const getContextsMock = vi.fn<(...args: any[]) => any>().mockResolvedValue([])
+    const createDocumentMock = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
     ;(globalThis as { chrome?: unknown }).chrome = {
       runtime: {
         getContexts: getContextsMock,
@@ -144,13 +144,15 @@ describe("setupTTSPlaybackMessageHandlers", () => {
   })
 
   it("retries once when offscreen receiver is temporarily missing", async () => {
-    const getContextsMock = vi.fn().mockResolvedValue([{ contextType: "OFFSCREEN_DOCUMENT" }])
+    const getContextsMock = vi
+      .fn<(...args: any[]) => any>()
+      .mockResolvedValue([{ contextType: "OFFSCREEN_DOCUMENT" }])
     ;(globalThis as { chrome?: unknown }).chrome = {
       runtime: {
         getContexts: getContextsMock,
       },
       offscreen: {
-        createDocument: vi.fn(),
+        createDocument: vi.fn<(...args: any[]) => any>(),
       },
     }
 
@@ -199,8 +201,8 @@ describe("setupTTSPlaybackMessageHandlers", () => {
 
   it("uses offscreen playback whenever the offscreen API is available", async () => {
     vi.stubEnv("BROWSER", "custom-chromium")
-    const getContextsMock = vi.fn().mockResolvedValue([])
-    const createDocumentMock = vi.fn().mockResolvedValue(undefined)
+    const getContextsMock = vi.fn<(...args: any[]) => any>().mockResolvedValue([])
+    const createDocumentMock = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
     ;(globalThis as { chrome?: unknown }).chrome = {
       runtime: {
         getContexts: getContextsMock,

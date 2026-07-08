@@ -13,26 +13,26 @@ import { syncConfig } from "../sync"
 
 // Mock the storage modules
 vi.mock("@/utils/config/storage", () => ({
-  getLocalConfigAndMeta: vi.fn(),
-  setLocalConfigAndMeta: vi.fn(),
+  getLocalConfigAndMeta: vi.fn<(...args: any[]) => any>(),
+  setLocalConfigAndMeta: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/config/sync", () => ({
-  getLastSyncedConfigAndMeta: vi.fn(),
-  setLastSyncConfigAndMeta: vi.fn(),
+  getLastSyncedConfigAndMeta: vi.fn<(...args: any[]) => any>(),
+  setLastSyncConfigAndMeta: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("../storage", () => ({
-  getRemoteConfigAndMetaWithUserEmail: vi.fn(),
-  setRemoteConfigAndMeta: vi.fn(),
+  getRemoteConfigAndMetaWithUserEmail: vi.fn<(...args: any[]) => any>(),
+  setRemoteConfigAndMeta: vi.fn<(...args: any[]) => any>(),
 }))
 
 // Mock the logger
 vi.mock("@/utils/logger", () => ({
   logger: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
+    info: vi.fn<(...args: any[]) => any>(),
+    warn: vi.fn<(...args: any[]) => any>(),
+    error: vi.fn<(...args: any[]) => any>(),
   },
 }))
 

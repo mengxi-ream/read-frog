@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { SelectionToolbarCustomActionTrigger } from "../custom-action-trigger"
 
-const openToolbarCustomActionMock = vi.fn()
+const openToolbarCustomActionMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("../../../components/selection-tooltip", () => ({
   SelectionToolbarTooltip: ({ render }: { render: ReactElement }) => render,

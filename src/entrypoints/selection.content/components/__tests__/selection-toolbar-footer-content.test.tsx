@@ -54,8 +54,8 @@ describe("selectionToolbarFooterContent", () => {
   ]
 
   it("renders the provider selector and forwards footer actions", async () => {
-    const onProviderChange = vi.fn()
-    const onRegenerate = vi.fn()
+    const onProviderChange = vi.fn<(...args: any[]) => any>()
+    const onRegenerate = vi.fn<(...args: any[]) => any>()
 
     render(
       <TooltipProvider>
@@ -107,8 +107,8 @@ describe("selectionToolbarFooterContent", () => {
           providers={providers}
           titleText=""
           value="google-translate-default"
-          onProviderChange={vi.fn()}
-          onRegenerate={vi.fn()}
+          onProviderChange={vi.fn<(...args: any[]) => any>()}
+          onRegenerate={vi.fn<(...args: any[]) => any>()}
         />
       </TooltipProvider>,
     )

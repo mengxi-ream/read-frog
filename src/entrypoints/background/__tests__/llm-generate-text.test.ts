@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-const onMessageMock = vi.fn()
-const getModelByIdMock = vi.fn()
-const generateTextMock = vi.fn()
-const loggerErrorMock = vi.fn()
+const onMessageMock = vi.fn<(...args: any[]) => any>()
+const getModelByIdMock = vi.fn<(...args: any[]) => any>()
+const generateTextMock = vi.fn<(...args: any[]) => any>()
+const loggerErrorMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("@/utils/message", () => ({
   onMessage: onMessageMock,

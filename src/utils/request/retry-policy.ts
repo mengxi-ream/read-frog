@@ -102,10 +102,7 @@ export function getRetryAfterMs(meta: RequestErrorMeta, now = Date.now()): numbe
   return getRetryAfterMsFromHeaders(meta.responseHeaders, now)
 }
 
-export function getHeaderValue(
-  headers: RequestErrorMeta["responseHeaders"] | unknown,
-  key: string,
-): string | undefined {
+export function getHeaderValue(headers: unknown, key: string): string | undefined {
   if (!headers) {
     return undefined
   }

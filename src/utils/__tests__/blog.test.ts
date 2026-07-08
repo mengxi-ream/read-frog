@@ -129,24 +129,20 @@ describe("semanticVersionSchema", () => {
 
   describe("error messages", () => {
     it("should provide clear error message for regex validation failure", () => {
-      try {
-        semanticVersionSchema.parse("v1.0.0")
-      } catch (error) {
-        expect(error).toBeInstanceOf(z.ZodError)
-        const zodError = error as z.ZodError
-        expect(zodError.issues[0]?.message).toContain("Must be a valid semantic version")
-      }
+      const result = semanticVersionSchema.safeParse("v1.0.0")
+      const zodError = result.success ? undefined : result.error
+
+      expect(zodError).toBeInstanceOf(z.ZodError)
+      expect(zodError?.issues[0]?.message).toContain("Must be a valid semantic version")
     })
 
     it("should provide clear error message for negative number validation", () => {
-      try {
-        semanticVersionSchema.parse("1.-1.0")
-      } catch (error) {
-        expect(error).toBeInstanceOf(z.ZodError)
-        const zodError = error as z.ZodError
-        // Should have both regex and refine errors
-        expect(zodError.issues.length).toBeGreaterThan(0)
-      }
+      const result = semanticVersionSchema.safeParse("1.-1.0")
+      const zodError = result.success ? undefined : result.error
+
+      expect(zodError).toBeInstanceOf(z.ZodError)
+      // Should have both regex and refine errors
+      expect(zodError?.issues.length).toBeGreaterThan(0)
     })
   })
 })

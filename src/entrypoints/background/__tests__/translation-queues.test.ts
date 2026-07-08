@@ -2,15 +2,15 @@ import type { ProviderConfig } from "@/types/config/provider"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 
-const onMessageMock = vi.fn()
-const ensureInitializedConfigMock = vi.fn()
-const executeTranslateMock = vi.fn()
-const generateArticleSummaryMock = vi.fn()
-const putBatchRequestRecordMock = vi.fn()
-const articleSummaryCacheGetMock = vi.fn()
-const articleSummaryCachePutMock = vi.fn()
-const translationCacheGetMock = vi.fn()
-const translationCachePutMock = vi.fn()
+const onMessageMock = vi.fn<(...args: any[]) => any>()
+const ensureInitializedConfigMock = vi.fn<(...args: any[]) => any>()
+const executeTranslateMock = vi.fn<(...args: any[]) => any>()
+const generateArticleSummaryMock = vi.fn<(...args: any[]) => any>()
+const putBatchRequestRecordMock = vi.fn<(...args: any[]) => any>()
+const articleSummaryCacheGetMock = vi.fn<(...args: any[]) => any>()
+const articleSummaryCachePutMock = vi.fn<(...args: any[]) => any>()
+const translationCacheGetMock = vi.fn<(...args: any[]) => any>()
+const translationCachePutMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("@/utils/message", () => ({
   onMessage: onMessageMock,

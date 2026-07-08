@@ -5,8 +5,10 @@ const createObjectURLDescriptor = Object.getOwnPropertyDescriptor(URL, "createOb
 const revokeObjectURLDescriptor = Object.getOwnPropertyDescriptor(URL, "revokeObjectURL")
 
 function installFakeAudio() {
-  const createObjectURLMock = vi.fn(() => `blob:tts-test-${createObjectURLMock.mock.calls.length}`)
-  const revokeObjectURLMock = vi.fn()
+  const createObjectURLMock = vi.fn<(...args: any[]) => any>(
+    () => `blob:tts-test-${createObjectURLMock.mock.calls.length}`,
+  )
+  const revokeObjectURLMock = vi.fn<(...args: any[]) => any>()
 
   Object.defineProperty(URL, "createObjectURL", {
     configurable: true,
@@ -22,10 +24,10 @@ function installFakeAudio() {
 
     onended: (() => void) | null = null
     onerror: (() => void) | null = null
-    play = vi.fn().mockResolvedValue(undefined)
-    pause = vi.fn()
-    removeAttribute = vi.fn()
-    load = vi.fn()
+    play = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
+    pause = vi.fn<(...args: any[]) => any>()
+    removeAttribute = vi.fn<(...args: any[]) => any>()
+    load = vi.fn<(...args: any[]) => any>()
 
     constructor(readonly src: string) {
       FakeAudio.instances.push(this)

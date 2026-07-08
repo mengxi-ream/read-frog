@@ -5,7 +5,7 @@ import { shouldSkipByLanguage } from "../translate-text"
 
 // Mock detectLanguage
 vi.mock("@/utils/content/language", () => ({
-  detectLanguage: vi.fn(),
+  detectLanguage: vi.fn<(...args: any[]) => any>(),
 }))
 
 const mockedDetect = vi.mocked(detectLanguage)

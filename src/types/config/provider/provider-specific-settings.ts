@@ -108,9 +108,12 @@ export function getProviderSpecificSettingFields(
     }
 
     if (ui.type !== "text" && ui.type !== "select") {
-      throw new Error(
-        `Unsupported providerSpecificSettings.${key} field type: ${(ui as { type: unknown }).type}`,
-      )
+      const unsupportedTypeValue = (ui as { type: unknown }).type
+      const unsupportedType =
+        typeof unsupportedTypeValue === "string"
+          ? unsupportedTypeValue
+          : JSON.stringify(unsupportedTypeValue)
+      throw new Error(`Unsupported providerSpecificSettings.${key} field type: ${unsupportedType}`)
     }
 
     return {

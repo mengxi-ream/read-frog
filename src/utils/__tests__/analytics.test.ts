@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 
 const { sendMessageMock, loggerWarnMock } = vi.hoisted(() => ({
-  sendMessageMock: vi.fn(),
-  loggerWarnMock: vi.fn(),
+  sendMessageMock: vi.fn<(...args: any[]) => any>(),
+  loggerWarnMock: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/message", () => ({

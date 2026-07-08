@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { SettingsSearch } from "../settings-search"
 
 const mockedRouter = vi.hoisted(() => ({
-  navigate: vi.fn(),
+  navigate: vi.fn<(...args: any[]) => any>(),
   location: {
     pathname: "/",
     search: "",

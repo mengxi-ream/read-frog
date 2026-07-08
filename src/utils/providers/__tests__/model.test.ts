@@ -15,22 +15,26 @@ const {
   createOllamaMock,
   createOpenAICompatibleMock,
 } = vi.hoisted(() => {
-  const anthropicLanguageModelMock = vi.fn()
-  const azureChatModelMock = vi.fn()
-  const azureLanguageModelMock = vi.fn()
-  const openAICompatibleLanguageModelMock = vi.fn()
-  const ollamaLanguageModelMock = vi.fn()
-  const createAnthropicMock = vi.fn((_options?: Record<string, unknown>) => ({
-    languageModel: anthropicLanguageModelMock,
-  }))
-  const createAzureMock = vi.fn((_options?: Record<string, unknown>) => ({
+  const anthropicLanguageModelMock = vi.fn<(...args: any[]) => any>()
+  const azureChatModelMock = vi.fn<(...args: any[]) => any>()
+  const azureLanguageModelMock = vi.fn<(...args: any[]) => any>()
+  const openAICompatibleLanguageModelMock = vi.fn<(...args: any[]) => any>()
+  const ollamaLanguageModelMock = vi.fn<(...args: any[]) => any>()
+  const createAnthropicMock = vi.fn<(...args: any[]) => any>(
+    (_options?: Record<string, unknown>) => ({
+      languageModel: anthropicLanguageModelMock,
+    }),
+  )
+  const createAzureMock = vi.fn<(...args: any[]) => any>((_options?: Record<string, unknown>) => ({
     chat: azureChatModelMock,
     languageModel: azureLanguageModelMock,
   }))
-  const createOpenAICompatibleMock = vi.fn((_options?: Record<string, unknown>) => ({
-    languageModel: openAICompatibleLanguageModelMock,
-  }))
-  const createOllamaMock = vi.fn((_options?: Record<string, unknown>) => ({
+  const createOpenAICompatibleMock = vi.fn<(...args: any[]) => any>(
+    (_options?: Record<string, unknown>) => ({
+      languageModel: openAICompatibleLanguageModelMock,
+    }),
+  )
+  const createOllamaMock = vi.fn<(...args: any[]) => any>((_options?: Record<string, unknown>) => ({
     languageModel: ollamaLanguageModelMock,
   }))
 
@@ -120,7 +124,7 @@ describe("getModelById", () => {
     azureLanguageModelMock.mockReturnValue("azure-model")
     openAICompatibleLanguageModelMock.mockReturnValue("custom-model")
     ollamaLanguageModelMock.mockReturnValue("ollama-model")
-    getStorageItemMock = vi.fn()
+    getStorageItemMock = vi.fn<(...args: any[]) => any>()
     ;(storage.getItem as unknown as ReturnType<typeof vi.fn>) = getStorageItemMock
   })
 

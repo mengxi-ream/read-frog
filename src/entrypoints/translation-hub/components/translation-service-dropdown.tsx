@@ -26,7 +26,7 @@ import { i18n } from "@/utils/i18n"
 import { selectedProviderIdsAtom } from "../atoms"
 
 export function TranslationServiceDropdown() {
-  const { theme = "light" } = useTheme()
+  const { theme } = useTheme()
   const [selectedIds, setSelectedIds] = useAtom(selectedProviderIdsAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const translateProviders = getTranslateProvidersConfig(providersConfig)

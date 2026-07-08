@@ -6,7 +6,7 @@ import { TranslatedDownloadPhase, translatedSubtitlesDownloadStatusAtom } from "
 import { DownloadTranslatedSubtitles } from "../download-translated-subtitles"
 import { DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS } from "../download-translated-subtitles.constants"
 
-const downloadTranslatedSubtitles = vi.hoisted(() => vi.fn())
+const downloadTranslatedSubtitles = vi.hoisted(() => vi.fn<(...args: any[]) => any>())
 
 vi.mock("../../../subtitles-ui-context", () => ({
   useSubtitlesUI: () => ({ downloadTranslatedSubtitles }),

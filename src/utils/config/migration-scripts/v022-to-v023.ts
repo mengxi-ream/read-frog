@@ -23,7 +23,7 @@ export function migrate(oldConfig: any): any {
   const newTranslateProviderId =
     ID_MAPPING[oldConfig.translate.providerName as keyof typeof ID_MAPPING]
 
-  const { providerName, ...restTranslateConfig } = oldConfig.translate
+  const { providerName: _providerName, ...restTranslateConfig } = oldConfig.translate
   const newTranslateConfig = {
     providerId: newTranslateProviderId,
     ...restTranslateConfig,

@@ -4,10 +4,10 @@ import { getRequestErrorMeta } from "@/utils/request/retry-policy"
 import { aiTranslate } from "../ai"
 
 const mocks = vi.hoisted(() => ({
-  generateText: vi.fn(),
-  getModelById: vi.fn(),
-  resolveModelId: vi.fn(),
-  getProviderOptionsWithOverride: vi.fn(),
+  generateText: vi.fn<(...args: any[]) => any>(),
+  getModelById: vi.fn<(...args: any[]) => any>(),
+  resolveModelId: vi.fn<(...args: any[]) => any>(),
+  getProviderOptionsWithOverride: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("ai", () => ({
@@ -35,7 +35,7 @@ const providerConfig: LLMProviderConfig = {
   model: { model: "gpt-5-mini", isCustomModel: false, customModel: null },
 }
 
-const promptResolver = vi.fn().mockResolvedValue({
+const promptResolver = vi.fn<(...args: any[]) => any>().mockResolvedValue({
   systemPrompt: "system",
   prompt: "prompt",
 })

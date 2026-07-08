@@ -64,14 +64,14 @@ describe("background analytics", () => {
   }
 
   beforeEach(() => {
-    onMessageMock = vi.fn()
-    storageGetItemMock = vi.fn()
-    storageSetItemMock = vi.fn()
-    getTargetLanguageMock = vi.fn().mockResolvedValue("cmn")
-    posthogInitMock = vi.fn()
-    posthogCaptureMock = vi.fn()
-    posthogRegisterMock = vi.fn()
-    loggerWarnMock = vi.fn()
+    onMessageMock = vi.fn<(...args: any[]) => any>()
+    storageGetItemMock = vi.fn<(...args: any[]) => any>()
+    storageSetItemMock = vi.fn<(...args: any[]) => any>()
+    getTargetLanguageMock = vi.fn<(...args: any[]) => any>().mockResolvedValue("cmn")
+    posthogInitMock = vi.fn<(...args: any[]) => any>()
+    posthogCaptureMock = vi.fn<(...args: any[]) => any>()
+    posthogRegisterMock = vi.fn<(...args: any[]) => any>()
+    loggerWarnMock = vi.fn<(...args: any[]) => any>()
   })
 
   it("registers a handler that initializes PostHog with the shared anonymous distinct ID", async () => {

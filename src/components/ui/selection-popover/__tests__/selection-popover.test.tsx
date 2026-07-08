@@ -6,9 +6,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { SelectionPopover } from ".."
 
 let latestRndProps: Record<string, any> | null = null
-const updatePositionSpy = vi.fn()
-const updateSizeSpy = vi.fn()
-const onOpenChangeSpy = vi.fn()
+const updatePositionSpy = vi.fn<(...args: any[]) => any>()
+const updateSizeSpy = vi.fn<(...args: any[]) => any>()
+const onOpenChangeSpy = vi.fn<(...args: any[]) => any>()
 let rafCallbacks = new Map<number, FrameRequestCallback>()
 let nextRafId = 1
 let mockRndOffset = { left: 0, top: 0 }
@@ -139,8 +139,8 @@ let resizeObservers: MockResizeObserver[] = []
 
 class MockResizeObserver {
   callback: ResizeObserverCallback
-  observe = vi.fn()
-  disconnect = vi.fn()
+  observe = vi.fn<(...args: any[]) => any>()
+  disconnect = vi.fn<(...args: any[]) => any>()
 
   constructor(callback: ResizeObserverCallback) {
     this.callback = callback
@@ -254,8 +254,8 @@ function renderPopover({
 }
 
 function renderTwoPopovers() {
-  const firstOnOpenChange = vi.fn()
-  const secondOnOpenChange = vi.fn()
+  const firstOnOpenChange = vi.fn<(...args: any[]) => any>()
+  const secondOnOpenChange = vi.fn<(...args: any[]) => any>()
 
   render(
     <>
@@ -385,12 +385,14 @@ describe("selectionPopover", () => {
     updateSizeSpy.mockReset()
 
     globalThis.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver
-    window.requestAnimationFrame = vi.fn((callback: FrameRequestCallback) => {
-      const id = nextRafId++
-      rafCallbacks.set(id, callback)
-      return id
-    })
-    window.cancelAnimationFrame = vi.fn((id: number) => {
+    window.requestAnimationFrame = vi.fn<(...args: any[]) => any>(
+      (callback: FrameRequestCallback) => {
+        const id = nextRafId++
+        rafCallbacks.set(id, callback)
+        return id
+      },
+    )
+    window.cancelAnimationFrame = vi.fn<(...args: any[]) => any>((id: number) => {
       rafCallbacks.delete(id)
     })
 

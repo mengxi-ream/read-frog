@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 import { SegmentationPipeline } from "../segmentation-pipeline"
 
 vi.mock("@/utils/config/storage", () => ({
-  getLocalConfig: vi.fn().mockResolvedValue({
+  getLocalConfig: vi.fn<(...args: any[]) => any>().mockResolvedValue({
     videoSubtitles: {
       aiSegmentation: true,
     },
@@ -10,7 +10,7 @@ vi.mock("@/utils/config/storage", () => ({
 }))
 
 vi.mock("@/utils/subtitles/processor/ai-segmentation", () => ({
-  aiSegmentBlock: vi.fn().mockRejectedValue(new Error("ai failed")),
+  aiSegmentBlock: vi.fn<(...args: any[]) => any>().mockRejectedValue(new Error("ai failed")),
 }))
 
 describe("segmentation pipeline", () => {

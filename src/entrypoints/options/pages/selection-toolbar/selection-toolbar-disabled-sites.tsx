@@ -8,7 +8,7 @@ export function SelectionToolbarDisabledSites() {
   const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(
     configFieldsAtomMap.selectionToolbar,
   )
-  const { disabledSelectionToolbarPatterns = [] } = selectionToolbarConfig
+  const { disabledSelectionToolbarPatterns } = selectionToolbarConfig
 
   const addPattern = (pattern: string) => {
     const cleanedPattern = pattern.trim()

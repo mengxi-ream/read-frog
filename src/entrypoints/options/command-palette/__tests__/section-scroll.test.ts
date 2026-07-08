@@ -6,7 +6,7 @@ import {
   scrollToSectionWhenReady,
 } from "../section-scroll"
 
-const mockedWaitForElement = vi.hoisted(() => vi.fn())
+const mockedWaitForElement = vi.hoisted(() => vi.fn<(...args: any[]) => any>())
 
 vi.mock("@/utils/dom/wait-for-element", () => ({
   waitForElement: mockedWaitForElement,
@@ -36,7 +36,7 @@ describe("section-scroll", () => {
     section.id = "request-rate"
     document.body.appendChild(section)
 
-    const scrollIntoViewSpy = vi.fn()
+    const scrollIntoViewSpy = vi.fn<(...args: any[]) => any>()
     Object.defineProperty(section, "scrollIntoView", {
       value: scrollIntoViewSpy,
       configurable: true,
@@ -52,7 +52,7 @@ describe("section-scroll", () => {
   it("waits for section mount when section is not yet in the DOM", async () => {
     const delayedSection = document.createElement("section")
     delayedSection.id = "request-rate"
-    const scrollIntoViewSpy = vi.fn()
+    const scrollIntoViewSpy = vi.fn<(...args: any[]) => any>()
     Object.defineProperty(delayedSection, "scrollIntoView", {
       value: scrollIntoViewSpy,
       configurable: true,

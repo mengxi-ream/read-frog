@@ -12,8 +12,8 @@ describe("subtitles scheduler", () => {
 
     const videoElement = {
       currentTime: 0,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
+      addEventListener: vi.fn<(...args: any[]) => any>(),
+      removeEventListener: vi.fn<(...args: any[]) => any>(),
     } as unknown as HTMLVideoElement
 
     const scheduler = new SubtitlesScheduler({ videoElement })

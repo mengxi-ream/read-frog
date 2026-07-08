@@ -21,15 +21,15 @@ import { SelectionToolbar } from "../index"
 import { TranslateButton } from "../translate-button"
 import { SelectionTranslationProvider } from "../translate-button/provider"
 
-const streamBackgroundTextMock = vi.fn()
-const streamBackgroundStructuredObjectMock = vi.fn()
-const translateTextCoreMock = vi.fn()
-const getOrCreateWebPageContextMock = vi.fn().mockResolvedValue(null)
-const getOrGenerateWebPageSummaryMock = vi.fn()
-const toastErrorMock = vi.fn()
-const onMessageMock = vi.fn()
-const hotkeyRegisterMock = vi.fn()
-const hotkeyUnregisterMock = vi.fn()
+const streamBackgroundTextMock = vi.fn<(...args: any[]) => any>()
+const streamBackgroundStructuredObjectMock = vi.fn<(...args: any[]) => any>()
+const translateTextCoreMock = vi.fn<(...args: any[]) => any>()
+const getOrCreateWebPageContextMock = vi.fn<(...args: any[]) => any>().mockResolvedValue(null)
+const getOrGenerateWebPageSummaryMock = vi.fn<(...args: any[]) => any>()
+const toastErrorMock = vi.fn<(...args: any[]) => any>()
+const onMessageMock = vi.fn<(...args: any[]) => any>()
+const hotkeyRegisterMock = vi.fn<(...args: any[]) => any>()
+const hotkeyUnregisterMock = vi.fn<(...args: any[]) => any>()
 const originalGetSelection = window.getSelection
 
 vi.mock("@tanstack/hotkeys", async (importOriginal) => {
@@ -265,21 +265,21 @@ vi.mock("@/utils/host/translate/webpage-summary", () => ({
 vi.mock("sonner", () => ({
   toast: {
     error: (...args: unknown[]) => toastErrorMock(...args),
-    success: vi.fn(),
+    success: vi.fn<(...args: any[]) => any>(),
   },
 }))
 
 vi.mock("@/utils/logger", () => ({
   logger: {
-    info: vi.fn(),
-    log: vi.fn(),
-    error: vi.fn(),
+    info: vi.fn<(...args: any[]) => any>(),
+    log: vi.fn<(...args: any[]) => any>(),
+    error: vi.fn<(...args: any[]) => any>(),
   },
 }))
 
 vi.mock("@/utils/message", () => ({
   onMessage: (...args: unknown[]) => onMessageMock(...args),
-  sendMessage: vi.fn(),
+  sendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
 function cloneConfig(config: Config): Config {
@@ -343,7 +343,7 @@ function createDeferredPromise<T>() {
 }
 
 function mockWindowSelection(range: Range | null) {
-  window.getSelection = vi.fn(() => {
+  window.getSelection = vi.fn<(...args: any[]) => any>(() => {
     if (!range) {
       return null
     }
@@ -354,7 +354,7 @@ function mockWindowSelection(range: Range | null) {
       rangeCount: 1,
       toString: () => range.toString(),
       getRangeAt: () => range,
-      containsNode: vi.fn(() => false),
+      containsNode: vi.fn<(...args: any[]) => any>(() => false),
     } as unknown as Selection
   }) as unknown as typeof window.getSelection
 }
@@ -428,11 +428,11 @@ function mockLiveRangeRects(
 
   Object.defineProperty(Range.prototype, "getClientRects", {
     configurable: true,
-    value: vi.fn(() => rects),
+    value: vi.fn<(...args: any[]) => any>(() => rects),
   })
   Object.defineProperty(Range.prototype, "getBoundingClientRect", {
     configurable: true,
-    value: vi.fn(() => boundingRect),
+    value: vi.fn<(...args: any[]) => any>(() => boundingRect),
   })
 
   return () => {

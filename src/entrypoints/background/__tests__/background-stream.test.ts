@@ -4,13 +4,13 @@ import type {
 } from "@/types/background-stream"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-const streamTextMock = vi.fn()
-const outputObjectMock = vi.fn((params: Record<string, unknown>) => params)
-const getModelByIdMock = vi.fn()
-const loggerErrorMock = vi.fn()
-const hostedStreamTextMock = vi.fn()
-const hostedStreamStructuredObjectMock = vi.fn()
-const parsePartialJsonMock = vi.fn(async (text: string | undefined) => {
+const streamTextMock = vi.fn<(...args: any[]) => any>()
+const outputObjectMock = vi.fn<(...args: any[]) => any>((params: Record<string, unknown>) => params)
+const getModelByIdMock = vi.fn<(...args: any[]) => any>()
+const loggerErrorMock = vi.fn<(...args: any[]) => any>()
+const hostedStreamTextMock = vi.fn<(...args: any[]) => any>()
+const hostedStreamStructuredObjectMock = vi.fn<(...args: any[]) => any>()
+const parsePartialJsonMock = vi.fn<(...args: any[]) => any>(async (text: string | undefined) => {
   if (!text) {
     return { state: "undefined-input", value: undefined }
   }
@@ -68,28 +68,32 @@ function createMockPort(name: string) {
   let messageListener: ((message: unknown) => void | Promise<void>) | undefined
   let disconnectListener: (() => void) | undefined
 
-  const postMessage = vi.fn()
-  const disconnect = vi.fn()
+  const postMessage = vi.fn<(...args: any[]) => any>()
+  const disconnect = vi.fn<(...args: any[]) => any>()
 
   const port = {
     name,
     postMessage,
     disconnect,
     onMessage: {
-      addListener: vi.fn((listener: (message: unknown) => void | Promise<void>) => {
-        messageListener = listener
-      }),
-      removeListener: vi.fn((listener: (message: unknown) => void | Promise<void>) => {
-        if (messageListener === listener) {
-          messageListener = undefined
-        }
-      }),
+      addListener: vi.fn<(...args: any[]) => any>(
+        (listener: (message: unknown) => void | Promise<void>) => {
+          messageListener = listener
+        },
+      ),
+      removeListener: vi.fn<(...args: any[]) => any>(
+        (listener: (message: unknown) => void | Promise<void>) => {
+          if (messageListener === listener) {
+            messageListener = undefined
+          }
+        },
+      ),
     },
     onDisconnect: {
-      addListener: vi.fn((listener: () => void) => {
+      addListener: vi.fn<(...args: any[]) => any>((listener: () => void) => {
         disconnectListener = listener
       }),
-      removeListener: vi.fn((listener: () => void) => {
+      removeListener: vi.fn<(...args: any[]) => any>((listener: () => void) => {
         if (disconnectListener === listener) {
           disconnectListener = undefined
         }
@@ -564,13 +568,20 @@ describe("background-stream", () => {
     streamTextMock.mockImplementation((options: { abortSignal?: AbortSignal }) => {
       streamSignal = options.abortSignal
       return {
-        stream: (async function* () {
-          await new Promise<void>((_resolve, reject) => {
-            options.abortSignal?.addEventListener("abort", () => {
-              reject(options.abortSignal?.reason ?? new DOMException("aborted", "AbortError"))
-            })
-          })
-        })(),
+        stream: {
+          [Symbol.asyncIterator]() {
+            return {
+              async next() {
+                await new Promise<void>((_resolve, reject) => {
+                  options.abortSignal?.addEventListener("abort", () => {
+                    reject(options.abortSignal?.reason ?? new DOMException("aborted", "AbortError"))
+                  })
+                })
+                return { done: true, value: undefined }
+              },
+            }
+          },
+        },
         output: new Promise<string>(() => {}),
       }
     })

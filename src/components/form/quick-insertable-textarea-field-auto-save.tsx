@@ -28,7 +28,7 @@ export function QuickInsertableTextareaFieldAutoSave({
         value={field.state.value}
         onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => {
           field.handleChange(event.target.value)
-          void formForSubmit.handleSubmit()
+          formForSubmit.handleSubmit()
         }}
         aria-invalid={hasError}
         className={className}

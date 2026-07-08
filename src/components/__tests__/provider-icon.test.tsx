@@ -10,12 +10,12 @@ const {
   drawImageMock,
   setTransformMock,
 } = vi.hoisted(() => ({
-  resolveContentScriptAssetBlobMock: vi.fn(),
-  shouldProxyAssetUrlMock: vi.fn(),
-  createImageBitmapMock: vi.fn(),
-  clearRectMock: vi.fn(),
-  drawImageMock: vi.fn(),
-  setTransformMock: vi.fn(),
+  resolveContentScriptAssetBlobMock: vi.fn<(...args: any[]) => any>(),
+  shouldProxyAssetUrlMock: vi.fn<(...args: any[]) => any>(),
+  createImageBitmapMock: vi.fn<(...args: any[]) => any>(),
+  clearRectMock: vi.fn<(...args: any[]) => any>(),
+  drawImageMock: vi.fn<(...args: any[]) => any>(),
+  setTransformMock: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/content-script/background-asset-url", () => ({
@@ -34,7 +34,7 @@ describe("provider icon", () => {
     })
     Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
       configurable: true,
-      value: vi.fn(() => ({
+      value: vi.fn<(...args: any[]) => any>(() => ({
         clearRect: clearRectMock,
         drawImage: drawImageMock,
         setTransform: setTransformMock,
@@ -70,7 +70,7 @@ describe("provider icon", () => {
     const bitmap = {
       width: 32,
       height: 16,
-      close: vi.fn(),
+      close: vi.fn<(...args: any[]) => any>(),
     }
 
     shouldProxyAssetUrlMock.mockReturnValue(true)

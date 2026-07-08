@@ -77,7 +77,7 @@ describe("getRandomUUID", () => {
   })
 
   it("should use crypto.randomUUID when available", () => {
-    const randomUUID = vi.fn(() => "native-uuid")
+    const randomUUID = vi.fn<(...args: any[]) => any>(() => "native-uuid")
     Object.defineProperty(globalThis, "crypto", {
       configurable: true,
       value: {
@@ -91,7 +91,7 @@ describe("getRandomUUID", () => {
   })
 
   it("should fall back to crypto.getRandomValues when crypto.randomUUID is unavailable", () => {
-    const getRandomValues = vi.fn((array: Uint8Array<ArrayBuffer>) =>
+    const getRandomValues = vi.fn<(...args: any[]) => any>((array: Uint8Array<ArrayBuffer>) =>
       originalCrypto.getRandomValues(array),
     )
     Object.defineProperty(globalThis, "crypto", {
@@ -118,6 +118,6 @@ describe("getRandomUUID", () => {
     vi.resetModules()
     await import("@/utils/crypto-polyfill")
 
-    expect(globalThis.crypto.randomUUID).toBeUndefined()
+    expect("randomUUID" in globalThis.crypto).toBe(false)
   })
 })

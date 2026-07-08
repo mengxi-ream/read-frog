@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { createLightweightSpinner, createSpinnerInside } from "../spinner"
 
 const { ensurePresetStylesMock } = vi.hoisted(() => ({
-  ensurePresetStylesMock: vi.fn(),
+  ensurePresetStylesMock: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/host/translate/ui/style-injector", () => ({
@@ -75,21 +75,21 @@ describe("spinner", () => {
 
   it("keeps the gray segment visible when reduced motion is enabled", () => {
     Object.defineProperty(window, "matchMedia", {
-      value: vi.fn().mockReturnValue({
+      value: vi.fn<(...args: any[]) => any>().mockReturnValue({
         matches: true,
         media: "(prefers-reduced-motion: reduce)",
         onchange: null,
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
+        addListener: vi.fn<(...args: any[]) => any>(),
+        removeListener: vi.fn<(...args: any[]) => any>(),
+        addEventListener: vi.fn<(...args: any[]) => any>(),
+        removeEventListener: vi.fn<(...args: any[]) => any>(),
+        dispatchEvent: vi.fn<(...args: any[]) => any>(),
       }),
       configurable: true,
       writable: true,
     })
 
-    const animateMock = vi.fn()
+    const animateMock = vi.fn<(...args: any[]) => any>()
     Object.defineProperty(HTMLElement.prototype, "animate", {
       value: animateMock,
       configurable: true,

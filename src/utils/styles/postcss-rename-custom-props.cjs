@@ -35,7 +35,7 @@ function rewriteValueVars(rawValue, fromPrefix, toPrefix) {
   }
 
   visit(ast.nodes)
-  return ast.toString()
+  return valueParser.stringify(ast.nodes)
 }
 
 /**

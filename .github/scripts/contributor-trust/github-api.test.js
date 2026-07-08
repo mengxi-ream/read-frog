@@ -154,7 +154,9 @@ describe("listPullRequestFiles", () => {
     const originalFetch = globalThis.fetch
     const requests = []
     globalThis.fetch = async (input) => {
-      requests.push(String(input))
+      const requestUrl =
+        typeof input === "string" ? input : input instanceof URL ? input.href : input.url
+      requests.push(requestUrl)
 
       return new Response(
         JSON.stringify([

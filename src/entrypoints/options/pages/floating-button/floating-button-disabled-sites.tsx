@@ -8,7 +8,7 @@ export function FloatingButtonDisabledSites() {
   const [floatingButtonConfig, setFloatingButtonConfig] = useAtom(
     configFieldsAtomMap.floatingButton,
   )
-  const { disabledFloatingButtonPatterns = [] } = floatingButtonConfig
+  const { disabledFloatingButtonPatterns } = floatingButtonConfig
 
   const addPattern = (pattern: string) => {
     const cleanedPattern = pattern.trim()

@@ -12,7 +12,7 @@ describe("dEFAULT_CONFIG", () => {
   })
 
   it("initializes when crypto.randomUUID is unavailable but crypto.getRandomValues exists", async () => {
-    const getRandomValues = vi.fn((array: Uint8Array<ArrayBuffer>) =>
+    const getRandomValues = vi.fn<(...args: any[]) => any>((array: Uint8Array<ArrayBuffer>) =>
       originalCrypto.getRandomValues(array),
     )
 

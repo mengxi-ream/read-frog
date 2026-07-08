@@ -201,6 +201,6 @@ describe("extension env parsing", () => {
       resolveExtensionEnv({
         WXT_USE_LOCAL_PACKAGES: "yes",
       }),
-    ).toThrowError()
+    ).toThrowError(/Invalid/)
   })
 })

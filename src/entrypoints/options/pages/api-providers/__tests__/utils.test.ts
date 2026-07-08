@@ -31,10 +31,12 @@ describe("api provider utils", () => {
     }
     const providersConfig = [sourceProvider, existingCopy] as Config["providersConfig"]
     let updatedProviders: Config["providersConfig"] | undefined
-    const setProvidersConfig = vi.fn(async (config: Partial<Config["providersConfig"]>) => {
-      updatedProviders = config as Config["providersConfig"]
-    })
-    const setSelectedProviderId = vi.fn()
+    const setProvidersConfig = vi.fn<(...args: any[]) => any>(
+      async (config: Partial<Config["providersConfig"]>) => {
+        updatedProviders = config as Config["providersConfig"]
+      },
+    )
+    const setSelectedProviderId = vi.fn<(...args: any[]) => any>()
 
     const newProviderId = await duplicateProvider(
       sourceProvider,

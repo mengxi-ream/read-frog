@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { detectLanguageWithSource } from "../language"
 
 vi.mock("franc", () => ({
-  franc: vi.fn(),
+  franc: vi.fn<(...args: any[]) => any>(),
 }))
 
 const mockFranc = vi.mocked(franc)

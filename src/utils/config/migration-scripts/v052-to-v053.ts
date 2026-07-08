@@ -71,20 +71,20 @@ function migrateProviderModel(provider: any): any {
 
   const hasUnifiedModel = isObject(provider.model)
   if (hasUnifiedModel) {
-    const { models, ...rest } = provider
+    const { models: _models, ...rest } = provider
     return rest
   }
 
   const translateModel = provider.models?.translate
   if (isObject(translateModel)) {
-    const { models, ...rest } = provider
+    const { models: _models, ...rest } = provider
     return {
       ...rest,
       model: translateModel,
     }
   }
 
-  const { models, ...rest } = provider
+  const { models: _models, ...rest } = provider
   return rest
 }
 

@@ -74,7 +74,7 @@ export function migrate(oldConfig: any): any {
   const newTranslateProviderName =
     NAME_MAPPING[oldConfig.translate.provider as keyof typeof NAME_MAPPING]
 
-  const { models, provider, ...restTranslateConfig } = oldConfig.translate
+  const { models: _models, provider: _provider, ...restTranslateConfig } = oldConfig.translate
   const newTranslateConfig = {
     providerName: newTranslateProviderName,
     ...restTranslateConfig,

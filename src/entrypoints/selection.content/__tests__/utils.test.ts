@@ -178,7 +178,7 @@ describe("readSelectionSnapshot", () => {
     range.setStart(selectionNode, 0)
     range.setEnd(selectionNode, selectionNode.textContent?.length ?? 0)
 
-    const getComposedRanges = vi.fn(() => [range])
+    const getComposedRanges = vi.fn<(...args: any[]) => any>(() => [range])
     const selection = {
       toString: () => "Beta",
       anchorNode: selectionNode,
@@ -212,7 +212,7 @@ describe("readSelectionSnapshot", () => {
     range.setStart(selectedText, 0)
     range.setEnd(selectedText, selectedText.textContent?.length ?? 0)
 
-    const getComposedRanges = vi.fn(() => [range])
+    const getComposedRanges = vi.fn<(...args: any[]) => any>(() => [range])
     const selection = {
       toString: () => "Beta",
       anchorNode: selectedText,
@@ -251,7 +251,7 @@ describe("readSelectionSnapshot", () => {
     range.setStart(selectedText, 0)
     range.setEnd(selectedText, selectedText.textContent?.length ?? 0)
 
-    const getComposedRanges = vi.fn(() => [range])
+    const getComposedRanges = vi.fn<(...args: any[]) => any>(() => [range])
     const selection = {
       toString: () => "Beta",
       anchorNode: selectedText,
@@ -305,8 +305,9 @@ describe("readSelectionSnapshot", () => {
     fallbackRange.setStart(fallbackNode, 0)
     fallbackRange.setEnd(fallbackNode, fallbackNode.textContent?.length ?? 0)
 
-    const getComposedRanges = vi.fn((options?: { shadowRoots?: ShadowRoot[] }) =>
-      options?.shadowRoots?.includes(subtitlesShadowRoot) ? [subtitleRange] : [],
+    const getComposedRanges = vi.fn<(...args: any[]) => any>(
+      (options?: { shadowRoots?: ShadowRoot[] }) =>
+        options?.shadowRoots?.includes(subtitlesShadowRoot) ? [subtitleRange] : [],
     )
     const selection = {
       toString: () => "against",
@@ -348,8 +349,8 @@ describe("readSelectionSnapshot", () => {
     range.setStart(selectionNode, 0)
     range.setEnd(selectionNode, selectionNode.textContent?.length ?? 0)
 
-    const getRangeAt = vi.fn(() => range)
-    const getComposedRanges = vi.fn(() => [])
+    const getRangeAt = vi.fn<(...args: any[]) => any>(() => range)
+    const getComposedRanges = vi.fn<(...args: any[]) => any>(() => [])
     const selection = {
       toString: () => "Beta",
       anchorNode: selectionNode,

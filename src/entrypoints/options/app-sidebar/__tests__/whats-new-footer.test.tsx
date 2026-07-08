@@ -6,9 +6,9 @@ import * as React from "react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { WhatsNewFooter } from "../whats-new-footer"
 
-const getLastViewedBlogDateMock = vi.fn()
-const getLatestBlogDateMock = vi.fn()
-const saveLastViewedBlogDateMock = vi.fn()
+const getLastViewedBlogDateMock = vi.fn<(...args: any[]) => any>()
+const getLatestBlogDateMock = vi.fn<(...args: any[]) => any>()
+const saveLastViewedBlogDateMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("#imports", () => ({
   i18n: {
@@ -113,8 +113,8 @@ vi.mock("@/components/ui/base-ui/popover", async () => {
 
 vi.mock("@/utils/blog", async () => {
   return {
-    buildBilibiliEmbedUrl: vi.fn(() => null),
-    getBlogLocaleFromUILanguage: vi.fn(() => "zh"),
+    buildBilibiliEmbedUrl: vi.fn<(...args: any[]) => any>(() => null),
+    getBlogLocaleFromUILanguage: vi.fn<(...args: any[]) => any>(() => "zh"),
     getLastViewedBlogDate: (...args: unknown[]) => getLastViewedBlogDateMock(...args),
     getLatestBlogDate: (...args: unknown[]) => getLatestBlogDateMock(...args),
     hasNewBlogPost: (latestViewedDate: Date | null, latestDate: Date | null) => {

@@ -6,16 +6,16 @@ import { SITE_CONTROL_URL_WINDOW_KEY } from "@/utils/site-control"
 const HOST_CONTENT_SCRIPT_FILE = "/content-scripts/host.js"
 const SELECTION_CONTENT_SCRIPT_FILE = "/content-scripts/selection.js"
 
-const tabsOnRemovedAddListenerMock = vi.fn()
-const webNavigationOnBeforeNavigateAddListenerMock = vi.fn()
-const webNavigationOnCompletedAddListenerMock = vi.fn()
-const getAllFramesMock = vi.fn()
-const executeScriptMock = vi.fn()
-const storageGetItemMock = vi.fn()
+const tabsOnRemovedAddListenerMock = vi.fn<(...args: any[]) => any>()
+const webNavigationOnBeforeNavigateAddListenerMock = vi.fn<(...args: any[]) => any>()
+const webNavigationOnCompletedAddListenerMock = vi.fn<(...args: any[]) => any>()
+const getAllFramesMock = vi.fn<(...args: any[]) => any>()
+const executeScriptMock = vi.fn<(...args: any[]) => any>()
+const storageGetItemMock = vi.fn<(...args: any[]) => any>()
 
-const getLocalConfigMock = vi.fn()
-const loggerErrorMock = vi.fn()
-const loggerWarnMock = vi.fn()
+const getLocalConfigMock = vi.fn<(...args: any[]) => any>()
+const loggerErrorMock = vi.fn<(...args: any[]) => any>()
+const loggerWarnMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("@/utils/config/storage", () => ({
   getLocalConfig: getLocalConfigMock,

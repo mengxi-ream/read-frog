@@ -216,7 +216,7 @@ function migratePathTokenProvider(
   parsed: ParsedURL,
   apiKey: string | undefined,
   hostname: string | null,
-): any | null {
+): any {
   const cleanPathname = trimPathTrailingSlashes(parsed.pathname)
   if (!cleanPathname.endsWith("/translate")) {
     return null

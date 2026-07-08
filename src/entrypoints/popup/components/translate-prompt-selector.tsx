@@ -22,7 +22,7 @@ export default function TranslatePromptSelector() {
     return null
 
   const customPromptsConfig = translateConfig.customPromptsConfig
-  const { patterns = [], promptId } = customPromptsConfig
+  const { patterns, promptId } = customPromptsConfig
 
   const items = [
     {

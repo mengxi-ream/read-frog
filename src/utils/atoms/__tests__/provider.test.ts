@@ -67,6 +67,6 @@ describe("provider config updates", () => {
 
     expect(() =>
       updateProviderConfig(DEFAULT_PROVIDER_CONFIG["google-translate"], invalidUpdates),
-    ).toThrow()
+    ).toThrow(/Invalid/)
   })
 })

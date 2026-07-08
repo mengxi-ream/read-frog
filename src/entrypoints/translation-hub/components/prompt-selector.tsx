@@ -21,7 +21,7 @@ export function PromptSelector() {
   const hasLLMProvider = selectedProviders.some((p) => isLLMProvider(p.provider))
   if (!hasLLMProvider) return null
 
-  const { patterns = [], promptId } = translateConfig.customPromptsConfig
+  const { patterns, promptId } = translateConfig.customPromptsConfig
 
   return (
     <Select

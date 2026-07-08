@@ -30,7 +30,7 @@ describe("providerOptionsRecommendationTrigger", () => {
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
         modelId="plain-model"
-        onApply={vi.fn()}
+        onApply={vi.fn<(...args: any[]) => any>()}
       />,
     )
 
@@ -46,7 +46,7 @@ describe("providerOptionsRecommendationTrigger", () => {
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
         modelId="gpt-5.3-chat-latest"
-        onApply={vi.fn()}
+        onApply={vi.fn<(...args: any[]) => any>()}
       />,
     )
 
@@ -62,7 +62,7 @@ describe("providerOptionsRecommendationTrigger", () => {
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
         modelId="gpt-5-mini"
-        onApply={vi.fn()}
+        onApply={vi.fn<(...args: any[]) => any>()}
       />,
     )
 
@@ -75,7 +75,7 @@ describe("providerOptionsRecommendationTrigger", () => {
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
         modelId="gpt-5.4-mini"
-        onApply={vi.fn()}
+        onApply={vi.fn<(...args: any[]) => any>()}
       />,
     )
 
@@ -89,7 +89,7 @@ describe("providerOptionsRecommendationTrigger", () => {
   })
 
   it("shows the recommendation preview and applies it on demand", () => {
-    const onApply = vi.fn()
+    const onApply = vi.fn<(...args: any[]) => any>()
 
     render(
       <ProviderOptionsRecommendationTrigger
@@ -126,7 +126,7 @@ describe("providerOptionsRecommendationTrigger", () => {
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
         modelId="moonshotai/Kimi-K2-Instruct"
-        onApply={vi.fn()}
+        onApply={vi.fn<(...args: any[]) => any>()}
       />,
     )
 

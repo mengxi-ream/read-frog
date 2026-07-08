@@ -8,15 +8,17 @@ import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { BatchQueue } from "../batch-queue"
 import { RequestQueue } from "../request-queue"
 
-const mockPromptResolver = vi.fn().mockResolvedValue({ systemPrompt: "", prompt: "" })
+const mockPromptResolver = vi
+  .fn<(...args: any[]) => any>()
+  .mockResolvedValue({ systemPrompt: "", prompt: "" })
 
 // Mock dependencies
 vi.mock("@/utils/host/translate/execute-translate", () => ({
-  executeTranslate: vi.fn(),
+  executeTranslate: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/hash", () => ({
-  Sha256Hex: vi.fn((...args: string[]) => `hash-${args.join("-")}`),
+  Sha256Hex: vi.fn<(...args: any[]) => any>((...args: string[]) => `hash-${args.join("-")}`),
 }))
 
 const mockExecuteTranslate = vi.mocked(executeTranslate)
@@ -524,7 +526,7 @@ describe("batchQueue – error handling", () => {
   it("does not fall back to individual requests on request errors", async () => {
     vi.useFakeTimers()
     let batchAttemptCount = 0
-    const executeIndividual = vi.fn(async (data: TranslateBatchData) => {
+    const executeIndividual = vi.fn<(...args: any[]) => any>(async (data: TranslateBatchData) => {
       const result = await executeTranslate(
         data.text,
         data.langConfig,
@@ -576,7 +578,7 @@ describe("batchQueue – error handling", () => {
   it("does not fall back to individual requests after rate limit errors", async () => {
     vi.useFakeTimers()
     let batchAttemptCount = 0
-    const executeIndividual = vi.fn(async (data: TranslateBatchData) => {
+    const executeIndividual = vi.fn<(...args: any[]) => any>(async (data: TranslateBatchData) => {
       const result = await executeTranslate(
         data.text,
         data.langConfig,
@@ -636,7 +638,7 @@ describe("batchQueue – error handling", () => {
     // Always return wrong count to trigger retries
     mockExecuteTranslate.mockImplementation(() => Promise.resolve("single-result"))
 
-    const onError = vi.fn()
+    const onError = vi.fn<(...args: any[]) => any>()
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
     const batchQueue = createBatchQueue(requestQueue, baseBatchConfig, {
       maxRetries: 2,
@@ -692,7 +694,7 @@ describe("batchQueue – error handling", () => {
     const error = new Error("Request failed")
     mockTranslateError(error)
 
-    const onError = vi.fn()
+    const onError = vi.fn<(...args: any[]) => any>()
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
     const batchQueue = createBatchQueue(requestQueue, baseBatchConfig, {
       maxRetries: 3,
@@ -759,9 +761,9 @@ describe("batchQueue – configuration", () => {
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
     const batchQueue = createBatchQueue(requestQueue)
 
-    expect(() => batchQueue.setBatchConfig({ maxCharactersPerBatch: 0 })).toThrow()
-    expect(() => batchQueue.setBatchConfig({ maxItemsPerBatch: 0 })).toThrow()
-    expect(() => batchQueue.setBatchConfig({ maxCharactersPerBatch: -1 })).toThrow()
-    expect(() => batchQueue.setBatchConfig({ maxItemsPerBatch: -1 })).toThrow()
+    expect(() => batchQueue.setBatchConfig({ maxCharactersPerBatch: 0 })).toThrow(/Too small/)
+    expect(() => batchQueue.setBatchConfig({ maxItemsPerBatch: 0 })).toThrow(/Too small/)
+    expect(() => batchQueue.setBatchConfig({ maxCharactersPerBatch: -1 })).toThrow(/Too small/)
+    expect(() => batchQueue.setBatchConfig({ maxItemsPerBatch: -1 })).toThrow(/Too small/)
   })
 })

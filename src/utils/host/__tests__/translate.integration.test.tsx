@@ -27,11 +27,11 @@ import {
 } from "./utils"
 
 vi.mock("@/utils/host/translate/translate-variants", () => ({
-  translateTextForPage: vi.fn(() => Promise.resolve(MOCK_TRANSLATION)),
+  translateTextForPage: vi.fn<(...args: any[]) => any>(() => Promise.resolve(MOCK_TRANSLATION)),
 }))
 
 vi.mock("@/utils/config/storage", () => ({
-  getLocalConfig: vi.fn(),
+  getLocalConfig: vi.fn<(...args: any[]) => any>(),
 }))
 
 const BILINGUAL_CONFIG: Config = {
@@ -102,7 +102,7 @@ describe("translate", () => {
     const { getLocalConfig } = await import("@/utils/config/storage")
     vi.mocked(getLocalConfig).mockResolvedValue(DEFAULT_CONFIG)
 
-    window.getComputedStyle = vi.fn((element) => {
+    window.getComputedStyle = vi.fn<(...args: any[]) => any>((element) => {
       const originalStyle = originalGetComputedStyle(element)
 
       // Check if element has inline style float property

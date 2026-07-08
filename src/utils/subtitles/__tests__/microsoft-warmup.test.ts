@@ -4,11 +4,15 @@ import { sendMessage } from "@/utils/message"
 import { microsoftWarmupTranslate } from "../warmup/microsoft-warmup"
 
 vi.mock("@/utils/message", () => ({
-  sendMessage: vi.fn(),
+  sendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/logger", () => ({
-  logger: { warn: vi.fn(), info: vi.fn(), error: vi.fn() },
+  logger: {
+    warn: vi.fn<(...args: any[]) => any>(),
+    info: vi.fn<(...args: any[]) => any>(),
+    error: vi.fn<(...args: any[]) => any>(),
+  },
 }))
 
 const mockSendMessage = vi.mocked(sendMessage)

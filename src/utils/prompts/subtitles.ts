@@ -22,7 +22,7 @@ export async function getSubtitlesTranslatePrompt(
 ): Promise<TranslatePromptResult> {
   const config = (await getLocalConfig()) ?? DEFAULT_CONFIG
   const customPromptsConfig = config.videoSubtitles.customPromptsConfig
-  const { patterns = [], promptId } = customPromptsConfig
+  const { patterns, promptId } = customPromptsConfig
 
   // Resolve system prompt and user prompt
   let systemPrompt: string

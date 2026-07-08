@@ -28,11 +28,11 @@ const mockAuthState = vi.hoisted(() => ({
 }))
 
 const toastMock = vi.hoisted(() => ({
-  success: vi.fn(),
-  error: vi.fn(),
+  success: vi.fn<(...args: any[]) => any>(),
+  error: vi.fn<(...args: any[]) => any>(),
 }))
 
-const notebaseRowCreateMock = vi.hoisted(() => vi.fn())
+const notebaseRowCreateMock = vi.hoisted(() => vi.fn<(...args: any[]) => any>())
 
 vi.mock("@/utils/auth/auth-client", () => ({
   authClient: {
@@ -44,7 +44,7 @@ vi.mock("@/utils/auth/auth-client", () => ({
 }))
 
 vi.mock("@/utils/message", () => ({
-  sendMessage: vi.fn(),
+  sendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("sonner", () => ({
@@ -57,7 +57,7 @@ vi.mock("@/utils/orpc/client", () => ({
       getSchema: {
         queryOptions: (options: unknown) => ({
           queryKey: ["notebase", "schema"],
-          queryFn: vi.fn(),
+          queryFn: vi.fn<(...args: any[]) => any>(),
           ...(options as object),
         }),
       },
@@ -73,9 +73,9 @@ vi.mock("@/utils/orpc/client", () => ({
   },
   orpcClient: {
     notebase: {
-      create: vi.fn(),
-      getSchema: vi.fn(),
-      list: vi.fn(),
+      create: vi.fn<(...args: any[]) => any>(),
+      getSchema: vi.fn<(...args: any[]) => any>(),
+      list: vi.fn<(...args: any[]) => any>(),
     },
   },
 }))
@@ -273,7 +273,9 @@ describe("saveToNotebaseButton notebase availability", () => {
     const openPageCall = vi
       .mocked(sendMessage)
       .mock.calls.find(([message]) => message === "openPage")
-    const loginUrl = new URL((openPageCall?.[1] as { url: string }).url)
+    expect(openPageCall).toBeDefined()
+    const [, openPagePayload] = openPageCall as ["openPage", { url: string }]
+    const loginUrl = new URL(openPagePayload.url)
 
     expect(loginUrl.pathname).toBe("/log-in")
     expect(loginUrl.searchParams.get("redirectTo")).toBe("/home")

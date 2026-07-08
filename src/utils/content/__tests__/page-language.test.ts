@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { detectPageLanguageLightweight, PAGE_LANGUAGE_TEXT_SAMPLE_LIMIT } from "../page-language"
 
 const { mockDetectLanguageWithSource } = vi.hoisted(() => ({
-  mockDetectLanguageWithSource: vi.fn(),
+  mockDetectLanguageWithSource: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("../language", () => ({

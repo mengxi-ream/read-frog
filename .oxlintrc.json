@@ -9,7 +9,7 @@
     "node": true
   },
   "categories": {
-    "correctness": "off",
+    "correctness": "error",
     "nursery": "off",
     "pedantic": "off",
     "perf": "off",
@@ -38,12 +38,30 @@
   "rules": {
     "no-inner-declarations": "error",
     "react/exhaustive-deps": "warn",
+    "react/react-in-jsx-scope": "off",
     "react/rules-of-hooks": "error",
     "typescript/no-floating-promises": "error",
     "oxlint-plugin-query/exhaustive-deps": "error",
     "oxlint-plugin-query/no-rest-destructuring": "warn",
     "oxlint-plugin-query/stable-query-client": "error",
     "vitest/consistent-test-it": ["error", { "fn": "it" }],
+    "vitest/expect-expect": [
+      "error",
+      {
+        "assertFunctionNames": [
+          "assert",
+          "assertType",
+          "expect",
+          "expectLatestPosition",
+          "expectNodeLabels",
+          "expectToolbarHidden",
+          "expectToolbarVisible",
+          "expectTranslatedContent",
+          "expectTranslationWrapper",
+          "expectTypeOf"
+        ]
+      }
+    ],
     "vitest/no-identical-title": "error",
     "vitest/prefer-hooks-on-top": "error"
   }

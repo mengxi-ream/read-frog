@@ -11,12 +11,12 @@ import {
 import { TranslatedSubtitlesDownloader } from "../translated-subtitles-downloader"
 
 const mocks = vi.hoisted(() => ({
-  aiSegmentBlock: vi.fn(),
-  downloadSubtitlesAsSrt: vi.fn(),
-  fetchSubtitlesSummary: vi.fn(),
-  getLocalConfig: vi.fn(),
-  toastError: vi.fn(),
-  translateSubtitles: vi.fn(),
+  aiSegmentBlock: vi.fn<(...args: any[]) => any>(),
+  downloadSubtitlesAsSrt: vi.fn<(...args: any[]) => any>(),
+  fetchSubtitlesSummary: vi.fn<(...args: any[]) => any>(),
+  getLocalConfig: vi.fn<(...args: any[]) => any>(),
+  toastError: vi.fn<(...args: any[]) => any>(),
+  translateSubtitles: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("sonner", () => ({ toast: { error: mocks.toastError } }))
@@ -49,11 +49,11 @@ function createConfig({
 
 function createDownloader(fragments: SubtitlesFragment[], preSegmented = true) {
   const fetcher = {
-    fetch: vi.fn().mockResolvedValue(fragments),
-    cleanup: vi.fn(),
-    shouldUseSameTrack: vi.fn().mockResolvedValue(false),
+    fetch: vi.fn<(...args: any[]) => any>().mockResolvedValue(fragments),
+    cleanup: vi.fn<(...args: any[]) => any>(),
+    shouldUseSameTrack: vi.fn<(...args: any[]) => any>().mockResolvedValue(false),
     getSourceLanguage: () => "en",
-    hasAvailableSubtitles: vi.fn().mockResolvedValue(true),
+    hasAvailableSubtitles: vi.fn<(...args: any[]) => any>().mockResolvedValue(true),
     isPreSegmented: () => preSegmented,
   }
   return {

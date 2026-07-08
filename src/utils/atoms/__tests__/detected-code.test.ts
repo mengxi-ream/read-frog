@@ -6,9 +6,9 @@ import { DEFAULT_DETECTED_CODE } from "@/utils/constants/config"
 import { detectedCodeAtom } from "../detected-code"
 
 const { cleanupMock, onMessageMock, sendMessageMock } = vi.hoisted(() => ({
-  cleanupMock: vi.fn(),
-  onMessageMock: vi.fn(),
-  sendMessageMock: vi.fn(),
+  cleanupMock: vi.fn<(...args: any[]) => any>(),
+  onMessageMock: vi.fn<(...args: any[]) => any>(),
+  sendMessageMock: vi.fn<(...args: any[]) => any>(),
 }))
 
 const messageHandlers = new Map<string, (msg: any) => void>()

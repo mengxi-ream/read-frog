@@ -16,16 +16,16 @@ const {
   mockValidateTranslationConfigAndToast,
   mockWalkAndLabelElement,
 } = vi.hoisted(() => ({
-  mockGetDetectedCodeFromStorage: vi.fn(),
-  mockGetLocalConfig: vi.fn(),
-  mockDeepQueryTopLevelSelector: vi.fn(),
-  mockWalkAndLabelElement: vi.fn(),
-  mockRemoveAllTranslatedWrapperNodes: vi.fn(),
-  mockTranslateWalkedElement: vi.fn(),
-  mockTranslateTextForPageTitle: vi.fn(),
-  mockGetOrCreateWebPageContext: vi.fn(),
-  mockValidateTranslationConfigAndToast: vi.fn(),
-  mockSendMessage: vi.fn(),
+  mockGetDetectedCodeFromStorage: vi.fn<(...args: any[]) => any>(),
+  mockGetLocalConfig: vi.fn<(...args: any[]) => any>(),
+  mockDeepQueryTopLevelSelector: vi.fn<(...args: any[]) => any>(),
+  mockWalkAndLabelElement: vi.fn<(...args: any[]) => any>(),
+  mockRemoveAllTranslatedWrapperNodes: vi.fn<(...args: any[]) => any>(),
+  mockTranslateWalkedElement: vi.fn<(...args: any[]) => any>(),
+  mockTranslateTextForPageTitle: vi.fn<(...args: any[]) => any>(),
+  mockGetOrCreateWebPageContext: vi.fn<(...args: any[]) => any>(),
+  mockValidateTranslationConfigAndToast: vi.fn<(...args: any[]) => any>(),
+  mockSendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/config/languages", () => ({
@@ -37,9 +37,11 @@ vi.mock("@/utils/config/storage", () => ({
 }))
 
 vi.mock("@/utils/host/dom/filter", () => ({
-  hasNoWalkAncestor: vi.fn().mockReturnValue(false),
-  isDontWalkIntoAndDontTranslateAsChildElement: vi.fn().mockReturnValue(false),
-  isDontWalkIntoButTranslateAsChildElement: vi.fn().mockReturnValue(false),
+  hasNoWalkAncestor: vi.fn<(...args: any[]) => any>().mockReturnValue(false),
+  isDontWalkIntoAndDontTranslateAsChildElement: vi
+    .fn<(...args: any[]) => any>()
+    .mockReturnValue(false),
+  isDontWalkIntoButTranslateAsChildElement: vi.fn<(...args: any[]) => any>().mockReturnValue(false),
   isHTMLElement: (node: unknown) => node instanceof HTMLElement,
 }))
 
@@ -70,9 +72,9 @@ vi.mock("@/utils/host/translate/translate-text", () => ({
 
 vi.mock("@/utils/logger", () => ({
   logger: {
-    error: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
+    error: vi.fn<(...args: any[]) => any>(),
+    info: vi.fn<(...args: any[]) => any>(),
+    warn: vi.fn<(...args: any[]) => any>(),
   },
 }))
 
@@ -81,9 +83,9 @@ vi.mock("@/utils/message", () => ({
 }))
 
 class MockIntersectionObserver {
-  observe = vi.fn()
-  unobserve = vi.fn()
-  disconnect = vi.fn()
+  observe = vi.fn<(...args: any[]) => any>()
+  unobserve = vi.fn<(...args: any[]) => any>()
+  disconnect = vi.fn<(...args: any[]) => any>()
 
   constructor(_callback: IntersectionObserverCallback, _options?: IntersectionObserverInit) {}
 }

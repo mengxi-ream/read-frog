@@ -13,35 +13,35 @@ import { getTranslatePrompt } from "@/utils/prompts/translate"
 
 // Mock dependencies
 vi.mock("@/utils/config/storage", () => ({
-  getLocalConfig: vi.fn(),
+  getLocalConfig: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/message", () => ({
-  sendMessage: vi.fn(),
+  sendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/host/translate/api/microsoft", () => ({
-  microsoftTranslate: vi.fn(),
+  microsoftTranslate: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/host/translate/api/google", () => ({
-  googleTranslate: vi.fn(),
+  googleTranslate: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/prompts/translate", () => ({
-  getTranslatePrompt: vi.fn(),
+  getTranslatePrompt: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/content/language", () => ({
-  detectLanguage: vi.fn(),
+  detectLanguage: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/host/translate/webpage-context", () => ({
-  getOrCreateWebPageContext: vi.fn(),
+  getOrCreateWebPageContext: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/host/translate/webpage-summary", () => ({
-  getOrGenerateWebPageSummary: vi.fn(),
+  getOrGenerateWebPageSummary: vi.fn<(...args: any[]) => any>(),
 }))
 
 let mockSendMessage: any

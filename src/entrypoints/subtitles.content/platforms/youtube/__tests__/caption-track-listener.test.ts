@@ -58,7 +58,7 @@ describe("youtube caption track listener", () => {
       summary: "英语 >> 中文",
     })
 
-    const onTrackChanged = vi.fn()
+    const onTrackChanged = vi.fn<(...args: any[]) => any>()
     const listener = createYoutubeCaptionTrackListener({
       playerContainerSelector: "#movie_player",
       onTrackChanged,
@@ -76,7 +76,7 @@ describe("youtube caption track listener", () => {
       summary: "英语 >> 中文",
     })
 
-    const onTrackChanged = vi.fn()
+    const onTrackChanged = vi.fn<(...args: any[]) => any>()
     const listener = createYoutubeCaptionTrackListener({
       playerContainerSelector: "#movie_player",
       onTrackChanged,
@@ -107,7 +107,7 @@ describe("youtube caption track listener", () => {
       summary: "English (auto-generated) >> Arabic",
     })
 
-    const onTrackChanged = vi.fn()
+    const onTrackChanged = vi.fn<(...args: any[]) => any>()
     const listener = createYoutubeCaptionTrackListener({
       playerContainerSelector: "#movie_player",
       onTrackChanged,
@@ -137,7 +137,7 @@ describe("youtube caption track listener", () => {
       summary: "英语 >> 中文",
     })
 
-    const onTrackChanged = vi.fn()
+    const onTrackChanged = vi.fn<(...args: any[]) => any>()
     const listener = createYoutubeCaptionTrackListener({
       playerContainerSelector: "#movie_player",
       onTrackChanged,
@@ -161,7 +161,7 @@ describe("youtube caption track listener", () => {
       summary: "英语 >> 中文",
     })
 
-    const onTrackChanged = vi.fn()
+    const onTrackChanged = vi.fn<(...args: any[]) => any>()
     const listener = createYoutubeCaptionTrackListener({
       playerContainerSelector: "#movie_player",
       onTrackChanged,
@@ -195,7 +195,7 @@ describe("youtube caption track listener", () => {
       summary: "英语 >> 中文",
     })
 
-    const onTrackChanged = vi.fn()
+    const onTrackChanged = vi.fn<(...args: any[]) => any>()
     const listener = createYoutubeCaptionTrackListener({
       playerContainerSelector: "#movie_player",
       onTrackChanged,

@@ -84,9 +84,11 @@ export async function bootstrapHostContent(
   const cleanupTranslationStateListener = onMessage("askManagerToTogglePageTranslation", (msg) => {
     const { enabled, analyticsContext } = msg.data
     if (enabled === manager.isActive) return
-    enabled
-      ? void manager.start(window === window.top ? analyticsContext : undefined)
-      : manager.stop()
+    if (enabled) {
+      void manager.start(window === window.top ? analyticsContext : undefined)
+    } else {
+      manager.stop()
+    }
   })
 
   const cleanupFrameTranslationStateListener =
@@ -95,7 +97,11 @@ export async function bootstrapHostContent(
       : onMessage("notifyTranslationStateChanged", (msg) => {
           const { enabled } = msg.data
           if (enabled === manager.isActive) return
-          enabled ? void manager.start() : manager.stop()
+          if (enabled) {
+            void manager.start()
+          } else {
+            manager.stop()
+          }
         })
 
   const cleanupDetectedLanguageRefreshListener =

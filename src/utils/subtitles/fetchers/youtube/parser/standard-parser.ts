@@ -10,8 +10,8 @@ export function parseStandardSubtitles(events: YoutubeTimedText[] = []): Subtitl
   const segments: SubtitlesFragment[] = []
   let buffer: SubtitlesFragment | null = null
 
-  events.forEach(({ segs = [], tStartMs = 0, dDurationMs = 0 }) => {
-    segs.forEach(({ utf8 = "", tOffsetMs = 0 }, segIndex) => {
+  events.forEach(({ segs = [], tStartMs, dDurationMs = 0 }) => {
+    segs.forEach(({ utf8, tOffsetMs = 0 }, segIndex) => {
       const text = utf8.trim().replace(WHITESPACE_PATTERN, " ")
       const start = tStartMs + tOffsetMs
 

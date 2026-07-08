@@ -2,9 +2,9 @@ import type { ProviderConfig } from "@/types/config/provider"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 
-const getLocalConfigMock = vi.fn()
-const sendMessageMock = vi.fn()
-const getSubtitlesTranslatePromptMock = vi.fn()
+const getLocalConfigMock = vi.fn<(...args: any[]) => any>()
+const sendMessageMock = vi.fn<(...args: any[]) => any>()
+const getSubtitlesTranslatePromptMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("@/utils/config/storage", () => ({
   getLocalConfig: getLocalConfigMock,

@@ -25,7 +25,7 @@ export function SelectFieldAutoSave({
     (value: unknown) => {
       if (typeof value !== "string") return
       field.handleChange(value)
-      void formForSubmit.handleSubmit()
+      formForSubmit.handleSubmit()
     },
     [field, formForSubmit],
   )

@@ -3,20 +3,21 @@ import { browser, storage } from "#imports"
 import { DEFAULT_DETECTED_CODE } from "@/utils/constants/config"
 import { getDetectedCodeStateKey, getTranslationStateKey } from "@/utils/constants/storage-keys"
 
-const sendMessageMock = vi.fn()
-const onMessageMock = vi.fn()
-const storageGetItemMock = vi.fn()
-const storageSetItemMock = vi.fn()
-const storageRemoveItemMock = vi.fn()
-const tabsOnRemovedAddListenerMock = vi.fn()
-const tabsOnActivatedAddListenerMock = vi.fn()
-const tabsQueryMock = vi.fn()
-const webNavigationOnCommittedAddListenerMock = vi.fn()
-const injectHostContentIntoTabIframesMock = vi.fn()
-const injectHostContentIntoCurrentTabIframesAfterNodeTranslationMock = vi.fn()
-const loggerErrorMock = vi.fn()
-const loggerWarnMock = vi.fn()
-const shouldEnableAutoTranslationMock = vi.fn()
+const sendMessageMock = vi.fn<(...args: any[]) => any>()
+const onMessageMock = vi.fn<(...args: any[]) => any>()
+const storageGetItemMock = vi.fn<(...args: any[]) => any>()
+const storageSetItemMock = vi.fn<(...args: any[]) => any>()
+const storageRemoveItemMock = vi.fn<(...args: any[]) => any>()
+const tabsOnRemovedAddListenerMock = vi.fn<(...args: any[]) => any>()
+const tabsOnActivatedAddListenerMock = vi.fn<(...args: any[]) => any>()
+const tabsQueryMock = vi.fn<(...args: any[]) => any>()
+const webNavigationOnCommittedAddListenerMock = vi.fn<(...args: any[]) => any>()
+const injectHostContentIntoTabIframesMock = vi.fn<(...args: any[]) => any>()
+const injectHostContentIntoCurrentTabIframesAfterNodeTranslationMock =
+  vi.fn<(...args: any[]) => any>()
+const loggerErrorMock = vi.fn<(...args: any[]) => any>()
+const loggerWarnMock = vi.fn<(...args: any[]) => any>()
+const shouldEnableAutoTranslationMock = vi.fn<(...args: any[]) => any>()
 
 const messageHandlers = new Map<string, (msg: any) => any>()
 
@@ -94,7 +95,7 @@ describe("translationMessage", () => {
 
     onMessageMock.mockImplementation((name: string, handler: (msg: any) => any) => {
       messageHandlers.set(name, handler)
-      return vi.fn()
+      return vi.fn<(...args: any[]) => any>()
     })
     sendMessageMock.mockResolvedValue(undefined)
     tabsQueryMock.mockResolvedValue([{ id: 42 }])

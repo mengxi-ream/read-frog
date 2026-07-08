@@ -239,7 +239,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.mutationObservers = []
 
     removeSiteRuleCSS(document)
-    void removeAllTranslatedWrapperNodes()
+    removeAllTranslatedWrapperNodes()
   }
 
   registerPageTranslationTriggers(): () => void {
@@ -274,14 +274,16 @@ export class PageTranslationManager implements IPageTranslationManager {
     const onEnd = () => {
       if (!startTouches) return
       if (performance.now() - startTime < PageTranslationManager.MAX_DURATION) {
-        this.isPageTranslating
-          ? this.stop()
-          : void this.start(
-              createFeatureUsageContext(
-                ANALYTICS_FEATURE.PAGE_TRANSLATION,
-                ANALYTICS_SURFACE.TOUCH_GESTURE,
-              ),
-            )
+        if (this.isPageTranslating) {
+          this.stop()
+        } else {
+          void this.start(
+            createFeatureUsageContext(
+              ANALYTICS_FEATURE.PAGE_TRANSLATION,
+              ANALYTICS_SURFACE.TOUCH_GESTURE,
+            ),
+          )
+        }
       }
       reset()
     }
