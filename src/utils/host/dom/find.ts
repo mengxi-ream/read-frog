@@ -4,7 +4,6 @@ import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
 import { isDontWalkIntoAndDontTranslateAsChildElement, isHTMLElement, isShallowInlineHTMLElement, isTranslatedContentNode, isTranslatedWrapperNode } from "./filter"
-import { smashTruncationStyle } from "./style"
 
 /**
  * Find the deepest element at the given point, including inside shadow roots
@@ -121,8 +120,6 @@ export async function unwrapDeepestOnlyHTMLChild(element: HTMLElement) {
   const config = await getLocalConfig() ?? DEFAULT_CONFIG
   let currentElement = element
   while (currentElement) {
-    smashTruncationStyle(currentElement)
-
     const shouldKeepNode = (child: ChildNode) => {
       if (!child.textContent?.trim())
         return false
