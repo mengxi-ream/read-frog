@@ -169,7 +169,7 @@ export function useCustomActionWebPageContext(open: boolean, popoverSessionKey: 
 
   useEffect(() => {
     if (!open) {
-      return
+      return undefined
     }
 
     let isCancelled = false
@@ -319,16 +319,16 @@ export function useCustomActionExecution({
 
   useEffect(() => {
     if (!open || !executionRequestKey) {
-      return
+      return undefined
     }
 
     const request = executionRequestRef.current
     if (!request || request.key !== executionRequestKey) {
-      return
+      return undefined
     }
 
     if (lastRunKeyRef.current === executionRequestKey) {
-      return
+      return undefined
     }
     lastRunKeyRef.current = executionRequestKey
 
@@ -378,8 +378,8 @@ export function useCustomActionExecution({
           ...analyticsContext,
           outcome: "success",
         })
-      } catch (error) {
-        if (isAbortError(error)) {
+      } catch (caughtError) {
+        if (isAbortError(caughtError)) {
           return
         }
 
@@ -388,7 +388,7 @@ export function useCustomActionExecution({
         }
 
         setThinking((prev) => (prev?.text ? { ...prev, status: "complete" } : null))
-        setError(createSelectionToolbarRuntimeError("customAction", error))
+        setError(createSelectionToolbarRuntimeError("customAction", caughtError))
         void trackFeatureUsed({
           ...analyticsContext,
           outcome: "failure",

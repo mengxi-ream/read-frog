@@ -96,14 +96,12 @@ function toFirefoxSidebarActionApi(
 
   return {
     kind: "firefox-sidebar-action",
-    api: api as FirefoxSidebarActionApi,
+    api,
   }
 }
 
 export function getSidePanelApi(extensionBrowser: typeof browser): BrowserSidePanelApi | null {
-  const browserWithSidePanel = extensionBrowser as typeof extensionBrowser & {
-    sidePanel?: Partial<ChromiumSidePanelApi>
-  }
+  const browserWithSidePanel = extensionBrowser
   if (typeof browserWithSidePanel.sidePanel?.open === "function") {
     return toChromiumSidePanelApi(browserWithSidePanel.sidePanel)
   }

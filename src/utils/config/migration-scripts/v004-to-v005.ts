@@ -1,7 +1,7 @@
 export function migrate(oldConfig: any): any {
-  const oldProvidersConfig = oldConfig.providersConfig
+  const oldProvidersConfig: Record<string, { apiKey?: string }> = oldConfig.providersConfig
   const newProvidersConfig = Object.fromEntries(
-    (Object.entries(oldProvidersConfig) as [string, { apiKey?: string }][]).map(([key, value]) => {
+    Object.entries(oldProvidersConfig).map(([key, value]) => {
       const baseURLs = {
         openai: "https://api.openai.com/v1",
         deepseek: "https://api.deepseek.com/v1",

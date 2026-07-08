@@ -1,10 +1,8 @@
-const TIMEDTEXT_API_RE = /api\/timedtext/
-
 const timedtextUrlCache: Map<string, string> = new Map()
 const timedtextUrlWaiters: Map<string, Array<(url: string) => void>> = new Map()
 
 function cacheTimedtextUrl(url: string): void {
-  if (TIMEDTEXT_API_RE.test(url)) {
+  if (url.includes("api/timedtext")) {
     const parsedUrl = new URL(url)
     const videoId = parsedUrl.searchParams.get("v")
     const pot = parsedUrl.searchParams.get("pot")
@@ -45,8 +43,8 @@ export function waitForTimedtextUrl(videoId: string, timeoutMs: number): Promise
 }
 
 export function setupTimedtextObserver(): void {
-  const originalXhrOpen = Reflect.get(XMLHttpRequest.prototype, "open") as XMLHttpRequest["open"]
-  const originalXhrSend = Reflect.get(XMLHttpRequest.prototype, "send") as XMLHttpRequest["send"]
+  const originalXhrOpen = Reflect.get(XMLHttpRequest.prototype, "open")
+  const originalXhrSend = Reflect.get(XMLHttpRequest.prototype, "send")
 
   XMLHttpRequest.prototype.open = function (method: string, url: string | URL, ...args: any[]) {
     ;(this as any)._url = url.toString()

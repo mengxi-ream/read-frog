@@ -47,6 +47,7 @@ export async function googleTranslateLegacySingle(
 
     return translatedText
   } catch (error) {
-    throw new Error(`Failed to parse translation response: ${(error as Error).message}`)
+    const message = error instanceof Error ? error.message : String(error)
+    throw new Error(`Failed to parse translation response: ${message}`, { cause: error })
   }
 }

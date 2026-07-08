@@ -30,11 +30,11 @@ vi.mock("@/components/ui/base-ui/tooltip", async () => {
   }
 
   function TooltipTrigger({
-    render,
+    render: renderElement,
   }: {
     render?: React.ReactElement<React.ComponentProps<"button">>
   }) {
-    return render ?? null
+    return renderElement ?? null
   }
 
   function TooltipContent({ children }: { children: ReactNode }) {

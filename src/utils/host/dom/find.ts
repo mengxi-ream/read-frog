@@ -68,7 +68,6 @@ export function findNearestAncestorBlockNodeFor(element: Element) {
   const startElement = element.closest(`.${CONTENT_WRAPPER_CLASS}`)?.parentElement || element
   let currentNode = startElement
   while (
-    currentNode &&
     currentNode.parentElement &&
     isHTMLElement(currentNode) &&
     isShallowInlineHTMLElement(currentNode)

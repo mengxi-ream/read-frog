@@ -62,11 +62,11 @@ function assertChunkConcatSupported(chunkRequests: EdgeTTSSynthesizeRequest[]): 
   const requestedFormats = chunkRequests.map((chunkRequest) =>
     resolveOutputFormat(chunkRequest.outputFormat),
   )
-  const firstFormat = requestedFormats[0]!
+  const firstFormat = requestedFormats[0]
   const firstFormatNormalized = firstFormat.toLowerCase()
 
   for (let index = 0; index < requestedFormats.length; index++) {
-    const requestedFormat = requestedFormats[index]!
+    const requestedFormat = requestedFormats[index]
     const requestedFormatNormalized = requestedFormat.toLowerCase()
 
     if (!isConcatenationSafeOutputFormat(requestedFormat)) {
@@ -165,7 +165,11 @@ export async function synthesizeEdgeTTSChunkWithRetry(
   }
 
   if (lastError instanceof EdgeTTSError) {
-    throw lastError
+    throw new EdgeTTSError(lastError.code, lastError.message, {
+      cause: lastError,
+      retryable: lastError.retryable,
+      status: lastError.status,
+    })
   }
 
   if (lastError instanceof TypeError) {

@@ -34,10 +34,10 @@ function InsertableTextarea({ className, ref, ...props }: InsertableTextareaProp
 
     return Object.assign(textarea, {
       insertTextAtCursor(text: string) {
-        const textarea = textareaRef.current
-        if (!textarea) return
+        const currentTextarea = textareaRef.current
+        if (!currentTextarea) return
 
-        const { selectionStart, selectionEnd, value } = textarea
+        const { selectionStart, selectionEnd, value } = currentTextarea
         const newValue = value.slice(0, selectionStart) + text + value.slice(selectionEnd)
 
         // Get the native value setter to bypass React's control
@@ -48,13 +48,13 @@ function InsertableTextarea({ className, ref, ...props }: InsertableTextareaProp
 
         if (nativeInputValueDescriptor?.set) {
           // Use the native setter to avoid React's internal tracking conflicts
-          nativeInputValueDescriptor.set.call(textarea, newValue)
-          textarea.dispatchEvent(new Event("input", { bubbles: true }))
+          nativeInputValueDescriptor.set.call(currentTextarea, newValue)
+          currentTextarea.dispatchEvent(new Event("input", { bubbles: true }))
         }
 
         const newCursorPos = selectionStart + text.length
-        textarea.setSelectionRange(newCursorPos, newCursorPos)
-        textarea.focus()
+        currentTextarea.setSelectionRange(newCursorPos, newCursorPos)
+        currentTextarea.focus()
       },
     })
   }, [])

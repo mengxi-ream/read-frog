@@ -98,7 +98,8 @@ async function parseDeepLResponse(resp: Response, expectedCount: number): Promis
       return translation.text
     })
   } catch (error) {
-    throw new Error(`Failed to parse DeepL translation response: ${(error as Error).message}`)
+    const message = error instanceof Error ? error.message : String(error)
+    throw new Error(`Failed to parse DeepL translation response: ${message}`, { cause: error })
   }
 }
 

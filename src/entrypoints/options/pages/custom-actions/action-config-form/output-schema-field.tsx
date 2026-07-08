@@ -68,15 +68,8 @@ type CustomActionFormKey =
   | "addFieldDialog.title"
   | "editFieldDialog.title"
 
-type CustomActionFormI18nKey =
-  `options.floatingButtonAndToolbar.selectionToolbar.customActions.form.${CustomActionFormKey}`
-type CustomActionTokenI18nKey =
-  `options.floatingButtonAndToolbar.selectionToolbar.customActions.form.tokens.${(typeof SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS)[number]}`
-
 function t(key: CustomActionFormKey) {
-  return i18n.t(
-    `options.floatingButtonAndToolbar.selectionToolbar.customActions.form.${key}` as CustomActionFormI18nKey,
-  )
+  return i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customActions.form.${key}`)
 }
 
 function FieldDialog({
@@ -123,7 +116,7 @@ function FieldDialog({
   const customActionInsertCells = SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS.map((token) => ({
     text: getSelectionToolbarCustomActionTokenCellText(token),
     description: i18n.t(
-      `options.floatingButtonAndToolbar.selectionToolbar.customActions.form.tokens.${token}` as CustomActionTokenI18nKey,
+      `options.floatingButtonAndToolbar.selectionToolbar.customActions.form.tokens.${token}`,
     ),
   }))
 

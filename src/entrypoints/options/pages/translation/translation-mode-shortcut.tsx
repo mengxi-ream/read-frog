@@ -8,10 +8,10 @@ export function TranslationModeShortcut() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
   const shortcut = translateConfig.modeShortcut ?? ""
 
-  const updateShortcut = (shortcut: string) => {
+  const updateShortcut = (nextShortcut: string) => {
     void setTranslateConfig({
       ...translateConfig,
-      modeShortcut: shortcut,
+      modeShortcut: nextShortcut,
     })
   }
 

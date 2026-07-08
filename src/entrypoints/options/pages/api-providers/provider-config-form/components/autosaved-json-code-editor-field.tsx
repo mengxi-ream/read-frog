@@ -22,7 +22,7 @@ interface AutosavedJsonCodeEditorFieldProps<TValue extends Record<string, unknow
   height?: string
 }
 
-function defaultSerializeJson<TValue extends Record<string, unknown>>(value: TValue | undefined) {
+function defaultSerializeJson(value: Record<string, unknown> | undefined) {
   return value ? JSON.stringify(value, null, 2) : ""
 }
 

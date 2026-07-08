@@ -61,8 +61,8 @@ function findSlateEditor(fiber: ReactFiber): SlateEditor | null {
 
 function findLeafPath(node: SlateNode, path: number[], first: boolean): number[] | null {
   if ("text" in node && typeof node.text === "string") return path
-  const children = (node as SlateElement).children
-  if (!children || !children.length) return null
+  const children = node.children
+  if (!children?.length) return null
   const index = first ? 0 : children.length - 1
   return findLeafPath(children[index], path.concat(index), first)
 }
@@ -71,11 +71,11 @@ export function replaceSlate(element: Element, text: string): boolean {
   const editor = getEditorFromElement(element)
   if (!editor) return false
 
-  const startPath = findLeafPath({ children: editor.children } as SlateElement, [], true)
-  const endPath = findLeafPath({ children: editor.children } as SlateElement, [], false)
+  const startPath = findLeafPath({ children: editor.children }, [], true)
+  const endPath = findLeafPath({ children: editor.children }, [], false)
   if (!startPath || !endPath) return false
 
-  let endNode: SlateNode = { children: editor.children } as SlateElement
+  let endNode: SlateNode = { children: editor.children }
   for (let i = 0; i < endPath.length; i++) endNode = (endNode as SlateElement).children[endPath[i]]
 
   editor.apply({

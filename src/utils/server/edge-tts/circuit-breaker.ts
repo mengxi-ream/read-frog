@@ -9,7 +9,7 @@ let circuitOpenUntil: number | null = null
 
 function pruneOldFailures(now: number): void {
   const threshold = now - EDGE_TTS_CIRCUIT_WINDOW_MS
-  while (failureTimestamps.length > 0 && failureTimestamps[0]! < threshold) {
+  while (failureTimestamps.length > 0 && failureTimestamps[0] < threshold) {
     failureTimestamps.shift()
   }
 }

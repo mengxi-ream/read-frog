@@ -141,7 +141,7 @@ export function resolveSiteRule(
     }
     const injectedCssParts = [rule.injectedCss, ...(rule["injectedCss.add"] ?? [])]
     for (const css of injectedCssParts) {
-      if (css !== undefined && css.trim()) {
+      if (css?.trim()) {
         cssParts.push(css)
       }
     }

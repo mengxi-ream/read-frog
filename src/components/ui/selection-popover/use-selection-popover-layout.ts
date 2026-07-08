@@ -289,23 +289,26 @@ export function useSelectionPopoverLayout({
     updatePositionState(nextPosition, popoverRect.rect)
   }, [updatePositionState])
 
-  const handleDrag = useCallback((position: Position) => {
-    const popoverRect = getPopoverRect(rndRef)
-    if (!popoverRect) {
-      return
-    }
+  const handleDrag = useCallback(
+    (dragPosition: Position) => {
+      const popoverRect = getPopoverRect(rndRef)
+      if (!popoverRect) {
+        return
+      }
 
-    const nextPosition = getBoundedPosition(
-      position.x,
-      position.y,
-      popoverRect.rect.width,
-      popoverRect.rect.height,
-    )
+      const nextPosition = getBoundedPosition(
+        dragPosition.x,
+        dragPosition.y,
+        popoverRect.rect.width,
+        popoverRect.rect.height,
+      )
 
-    if (nextPosition.x !== position.x || nextPosition.y !== position.y) {
-      setPosition(nextPosition)
-    }
-  }, [])
+      if (nextPosition.x !== position?.x || nextPosition.y !== position?.y) {
+        setPosition(nextPosition)
+      }
+    },
+    [position?.x, position?.y],
+  )
 
   const applyViewportLayout = useCallback(
     (options?: { immediate?: boolean }) => {
@@ -420,10 +423,10 @@ export function useSelectionPopoverLayout({
         }
 
         if (!preferredLayoutRef.current.manualSize) {
-          const popoverRect = getPopoverRect(rndRef)
+          const currentPopoverRect = getPopoverRect(rndRef)
           if (
-            popoverRect?.rect.bottom &&
-            popoverRect.rect.bottom > window.innerHeight + BOTTOM_EDGE_TOLERANCE
+            currentPopoverRect?.rect.bottom &&
+            currentPopoverRect.rect.bottom > window.innerHeight + BOTTOM_EDGE_TOLERANCE
           ) {
             cancelScheduledViewportLayout()
             applyViewportLayout({ immediate: true })
@@ -446,14 +449,14 @@ export function useSelectionPopoverLayout({
   }, [cancelScheduledViewportLayout])
 
   const handleDragStop = useCallback(
-    (position: Position) => {
+    (stoppedPosition: Position) => {
       isDraggingRef.current = false
       setDragging(false)
 
       const popoverRect = getPopoverRect(rndRef)
       const nextPosition = getBoundedPosition(
-        position.x,
-        position.y,
+        stoppedPosition.x,
+        stoppedPosition.y,
         popoverRect?.rect.width ?? 0,
         popoverRect?.rect.height ?? 0,
       )
@@ -470,14 +473,14 @@ export function useSelectionPopoverLayout({
   )
 
   const handleResizeStop = useCallback(
-    (element: HTMLElement, position: Position) => {
+    (element: HTMLElement, resizedPosition: Position) => {
       const manualSize = {
         width: element.offsetWidth,
         height: element.offsetHeight,
       }
       const nextPosition = getBoundedPosition(
-        position.x,
-        position.y,
+        resizedPosition.x,
+        resizedPosition.y,
         manualSize.width,
         manualSize.height,
       )
@@ -530,7 +533,7 @@ export function useSelectionPopoverLayout({
 
   useEffect(() => {
     if (!isVisible) {
-      return
+      return undefined
     }
 
     const handleWindowResize = () => {

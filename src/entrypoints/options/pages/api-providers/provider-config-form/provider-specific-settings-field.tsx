@@ -1,8 +1,4 @@
-import type {
-  APIProviderConfig,
-  LLMProviderTypes,
-  ProviderSpecificSettingField,
-} from "@/types/config/provider"
+import type { APIProviderConfig, ProviderSpecificSettingField } from "@/types/config/provider"
 import { useSelector } from "@tanstack/react-store"
 import { useEffect, useEffectEvent, useMemo, useState } from "react"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
@@ -27,7 +23,7 @@ import { withForm } from "./form"
 
 function getProviderSpecificSettings(providerConfig: APIProviderConfig) {
   return "providerSpecificSettings" in providerConfig
-    ? ((providerConfig.providerSpecificSettings as Record<string, unknown> | undefined) ?? {})
+    ? (providerConfig.providerSpecificSettings ?? {})
     : {}
 }
 
@@ -54,7 +50,7 @@ export const ProviderSpecificSettingsField = withForm({
 
     const settingsSchema = useMemo(() => {
       if (!isLLMProvider(providerType)) return null
-      return PROVIDER_SPECIFIC_SETTINGS_SCHEMAS[providerType as LLMProviderTypes] ?? null
+      return PROVIDER_SPECIFIC_SETTINGS_SCHEMAS[providerType] ?? null
     }, [providerType])
 
     // Submit when debounced value changes

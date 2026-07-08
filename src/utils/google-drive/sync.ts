@@ -79,16 +79,15 @@ export async function syncConfig(): Promise<SyncResult> {
           lastSyncedAt: now,
         })
         return { status: "success", action: "downloaded" }
-      } else {
-        logger.info("No remote config found, uploading local config")
-        await setRemoteConfigAndMeta(localConfigValueAndMeta)
-        await setLastSyncConfigAndMeta(localConfigValueAndMeta.value, {
-          ...localConfigValueAndMeta.meta,
-          email,
-          lastSyncedAt: now,
-        })
-        return { status: "success", action: "uploaded" }
       }
+      logger.info("No remote config found, uploading local config")
+      await setRemoteConfigAndMeta(localConfigValueAndMeta)
+      await setLastSyncConfigAndMeta(localConfigValueAndMeta.value, {
+        ...localConfigValueAndMeta.meta,
+        email,
+        lastSyncedAt: now,
+      })
+      return { status: "success", action: "uploaded" }
     }
 
     // Check if both local and remote changed since last sync
@@ -109,12 +108,12 @@ export async function syncConfig(): Promise<SyncResult> {
 
       if (sameLocalAndRemote) {
         logger.info("Local and remote configurations are the same, no conflicts detected")
-        const now = Date.now()
+        const syncedAt = Date.now()
 
         // if the schemaVersion is different, use local config's schemaVersion
         const mergedConfigValueAndMeta = {
           value: localConfigValueAndMeta.value,
-          meta: { schemaVersion: CONFIG_SCHEMA_VERSION, lastModifiedAt: now },
+          meta: { schemaVersion: CONFIG_SCHEMA_VERSION, lastModifiedAt: syncedAt },
         }
 
         await setLocalConfigAndMeta(mergedConfigValueAndMeta.value, mergedConfigValueAndMeta.meta)
@@ -154,15 +153,14 @@ export async function syncConfig(): Promise<SyncResult> {
         lastSyncedAt: now,
       })
       return { status: "success", action: "downloaded" }
-    } else {
-      logger.info("No changes, skipping sync")
-      await setLastSyncConfigAndMeta(localConfigValueAndMeta.value, {
-        ...localConfigValueAndMeta.meta,
-        email,
-        lastSyncedAt: now,
-      })
-      return { status: "success", action: "no-change" }
     }
+    logger.info("No changes, skipping sync")
+    await setLastSyncConfigAndMeta(localConfigValueAndMeta.value, {
+      ...localConfigValueAndMeta.meta,
+      email,
+      lastSyncedAt: now,
+    })
+    return { status: "success", action: "no-change" }
   } catch (error) {
     logger.error("Config sync failed", error)
     return {

@@ -98,8 +98,7 @@ export function parseDetectedLanguageCode(rawOutput: string): LangCodeISO6393 | 
 
   if (parseResult.success) {
     return parseResult.data.code
-  } else {
-    logger.warn("Failed to parse language detection output. Fallback to null.", data)
-    return null
   }
+  logger.warn("Failed to parse language detection output. Fallback to null.", data)
+  return null
 }

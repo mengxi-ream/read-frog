@@ -154,7 +154,7 @@ describe("notebase pending save processor", () => {
       pending,
       config: createConfig({
         ...action,
-        outputSchema: [{ ...action.outputSchema[0]!, name: "changed" }],
+        outputSchema: [{ ...action.outputSchema[0], name: "changed" }],
       }),
       authenticated: true,
     })

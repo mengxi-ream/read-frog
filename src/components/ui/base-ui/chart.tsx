@@ -44,8 +44,9 @@ function ChartContainer({
 }) {
   const uniqueId = React.useId()
   const chartId = `chart-${id || uniqueId.replace(CHART_ID_SANITIZER_REGEX, "")}`
+  const contextValue = React.useMemo(() => ({ config }), [config])
   return (
-    <ChartContext value={{ config }}>
+    <ChartContext value={contextValue}>
       <div
         data-slot="chart"
         data-chart={chartId}
@@ -62,7 +63,9 @@ function ChartContainer({
   )
 }
 function ChartStyle({ id, config }: { id: string; config: ChartConfig }) {
-  const colorConfig = Object.entries(config).filter(([, config]) => config.theme || config.color)
+  const colorConfig = Object.entries(config).filter(
+    ([, configItem]) => configItem.theme || configItem.color,
+  )
   if (!colorConfig.length) {
     return null
   }
@@ -124,9 +127,7 @@ function ChartTooltipContent({
     const key = getChartKey(labelKey || item?.dataKey || item?.name)
     const itemConfig = getPayloadConfigFromPayload(config, item, key)
     const value =
-      !labelKey && typeof label === "string"
-        ? config[label as keyof typeof config]?.label || label
-        : itemConfig?.label
+      !labelKey && typeof label === "string" ? config[label]?.label || label : itemConfig?.label
     if (labelFormatter) {
       return (
         <div className={cn("font-medium", labelClassName)}>{labelFormatter(value, payload)}</div>
@@ -300,15 +301,15 @@ function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key:
       : undefined
   let configLabelKey: string = key
   if (key in payload && typeof payload[key as keyof typeof payload] === "string") {
-    configLabelKey = payload[key as keyof typeof payload] as string
+    configLabelKey = payload[key as keyof typeof payload]
   } else if (
     payloadPayload &&
     key in payloadPayload &&
     typeof payloadPayload[key as keyof typeof payloadPayload] === "string"
   ) {
-    configLabelKey = payloadPayload[key as keyof typeof payloadPayload] as string
+    configLabelKey = payloadPayload[key as keyof typeof payloadPayload]
   }
-  return configLabelKey in config ? config[configLabelKey] : config[key as keyof typeof config]
+  return configLabelKey in config ? config[configLabelKey] : config[key]
 }
 export {
   ChartContainer,

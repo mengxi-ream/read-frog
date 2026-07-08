@@ -84,14 +84,14 @@ export function ProviderOptionsRecommendationTrigger({
       hasMountedRef.current = true
       previousProviderIdRef.current = providerId
       previousMatchIndexRef.current = recommendation?.matchIndex
-      return
+      return undefined
     }
 
     if (previousProviderIdRef.current !== providerId) {
       previousProviderIdRef.current = providerId
       previousMatchIndexRef.current = recommendation?.matchIndex
       stopFlashing()
-      return
+      return undefined
     }
 
     if (previousMatchIndexRef.current !== recommendation?.matchIndex) {
@@ -110,6 +110,7 @@ export function ProviderOptionsRecommendationTrigger({
 
       stopFlashing()
     }
+    return undefined
   }, [providerId, recommendation])
 
   if (!recommendation) {

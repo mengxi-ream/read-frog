@@ -27,6 +27,8 @@ function toFriendlyErrorMessage(error: unknown): string {
       case 502:
       case 503:
         return i18n.t("subtitles.errors.aiServiceUnavailable")
+      default:
+        break
     }
   }
 
@@ -207,7 +209,7 @@ export async function translateSubtitles(
   }
 
   const langConfig = config.language
-  const enableAIContentAware = !!config.translate.enableAIContentAware
+  const enableAIContentAware = config.translate.enableAIContentAware
 
   const translationPromises = fragments.map((fragment) =>
     translateSingleSubtitle(

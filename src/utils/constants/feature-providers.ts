@@ -103,5 +103,5 @@ export function buildFeatureProviderPatch(
     patch = mergeWithArrayOverwrite(patch, fragment)
   }
 
-  return patch as Partial<Config>
+  return patch
 }

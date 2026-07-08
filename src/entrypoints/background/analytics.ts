@@ -100,7 +100,7 @@ function setPropertyIfDefined(
 }
 
 export function filterAnalyticsCaptureResult(data: CaptureResult): CaptureResult {
-  const properties = (data.properties ?? {}) as AnalyticsCaptureProperties
+  const properties = data.properties ?? {}
   const filteredProperties: AnalyticsCaptureProperties = {}
 
   setPropertyIfDefined(filteredProperties, "token", properties.token)

@@ -140,7 +140,7 @@ function getPlayerData(request: PlayerDataRequest): PlayerDataResponse {
 }
 
 function ensureSubtitlesEnabled(): void {
-  const button = document.querySelector(".ytp-subtitles-button") as HTMLElement | null
+  const button = document.querySelector(".ytp-subtitles-button")
   if (!button) return
 
   if (button.getAttribute("aria-pressed") === "true") return
@@ -149,7 +149,7 @@ function ensureSubtitlesEnabled(): void {
 
   if (player?.toggleSubtitles) {
     player.toggleSubtitles()
-  } else {
+  } else if (button instanceof HTMLElement) {
     button.click()
   }
 }

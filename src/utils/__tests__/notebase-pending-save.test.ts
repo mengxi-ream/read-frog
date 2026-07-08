@@ -89,8 +89,8 @@ describe("notebase pending save", () => {
       },
     ])
     expect(pending.cells).toEqual({
-      [pending.columns[0]!.notebaseColumnId]: "A short summary",
-      [pending.columns[1]!.notebaseColumnId]: 9,
+      [pending.columns[0].notebaseColumnId]: "A short summary",
+      [pending.columns[1].notebaseColumnId]: 9,
     })
 
     expect(buildNotebaseCreateInputFromPending(pending)).toEqual({
@@ -99,12 +99,12 @@ describe("notebase pending save", () => {
       options: {
         initialColumns: [
           {
-            id: pending.columns[0]!.notebaseColumnId,
+            id: pending.columns[0].notebaseColumnId,
             name: "summary",
             config: { type: "string" },
           },
           {
-            id: pending.columns[1]!.notebaseColumnId,
+            id: pending.columns[1].notebaseColumnId,
             name: "score",
             config: { type: "number", decimal: 0, format: "number" },
           },
@@ -150,12 +150,12 @@ describe("notebase pending save", () => {
       mappings: [
         {
           localFieldId: "field-summary",
-          notebaseColumnId: pending.columns[0]!.notebaseColumnId,
+          notebaseColumnId: pending.columns[0].notebaseColumnId,
           notebaseColumnNameSnapshot: "summary",
         },
         {
           localFieldId: "field-score",
-          notebaseColumnId: pending.columns[1]!.notebaseColumnId,
+          notebaseColumnId: pending.columns[1].notebaseColumnId,
           notebaseColumnNameSnapshot: "score",
         },
       ],
@@ -170,10 +170,10 @@ describe("notebase pending save", () => {
         ...action,
         outputSchema: [
           {
-            ...action.outputSchema[0]!,
+            ...action.outputSchema[0],
             name: "changed",
           },
-          action.outputSchema[1]!,
+          action.outputSchema[1],
         ],
       },
     ]

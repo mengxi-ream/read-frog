@@ -181,11 +181,8 @@ export async function detectLanguageWithLLM(
         if (detectedCode) {
           logger.info(`LLM language detection succeeded on attempt ${attempt}: ${detectedCode}`)
           return detectedCode
-        } else {
-          logger.warn(
-            `LLM returned invalid language code on attempt ${attempt}: "${response.text}"`,
-          )
         }
+        logger.warn(`LLM returned invalid language code on attempt ${attempt}: "${response.text}"`)
       } catch (error) {
         logger.error(`LLM language detection attempt ${attempt}/${MAX_ATTEMPTS} failed:`, error)
       }

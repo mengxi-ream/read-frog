@@ -65,7 +65,7 @@ module.exports = (opts = {}) => {
         }
 
         // 2b) Rewrite any var(--tw-...) references appearing in values
-        if (decl.value && decl.value.includes("var(") && decl.value.includes(fromPrefix)) {
+        if (decl.value?.includes("var(") && decl.value.includes(fromPrefix)) {
           decl.value = rewriteValueVars(decl.value, fromPrefix, toPrefix)
         }
       })

@@ -1,6 +1,6 @@
 import type { GeneratedI18nStructure } from "#i18n"
 import type { UiLanguage } from "@/types/config/config"
-import i18next from "i18next"
+import i18next, { changeLanguage, init, t as translate } from "i18next"
 import { resolveUiLocale } from "./locale-map"
 import { DEFAULT_UI_LOCALE, resources } from "./resources"
 
@@ -76,17 +76,17 @@ export async function initI18n(uiLanguage: UiLanguage = "auto"): Promise<void> {
   const lng = resolveUiLocale(uiLanguage)
   if (initialized) {
     if (i18next.language !== lng) {
-      await i18next.changeLanguage(lng)
+      await changeLanguage(lng)
     }
     return
   }
   initialized = true
-  await i18next.init({ ...I18NEXT_OPTIONS, lng })
+  await init({ ...I18NEXT_OPTIONS, lng })
 }
 
 /** Switch the active UI language (synchronous with bundled resources). */
 export async function setUiLanguage(uiLanguage: UiLanguage): Promise<void> {
-  await i18next.changeLanguage(resolveUiLocale(uiLanguage))
+  await changeLanguage(resolveUiLocale(uiLanguage))
 }
 
 /**
@@ -99,7 +99,7 @@ function rawT(key: string, substitutions?: Substitution[]): string {
   const options = substitutions
     ? Object.fromEntries(substitutions.map((value, index) => [String(index), value]))
     : undefined
-  return i18next.t(key, options)
+  return translate(key, options)
 }
 
-export const i18n: { t: FacadeT } = { t: rawT as FacadeT }
+export const i18n: { t: FacadeT } = { t: rawT }

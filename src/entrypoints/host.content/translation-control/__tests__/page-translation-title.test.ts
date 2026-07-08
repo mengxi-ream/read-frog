@@ -86,8 +86,6 @@ class MockIntersectionObserver {
   observe = vi.fn<(...args: any[]) => any>()
   unobserve = vi.fn<(...args: any[]) => any>()
   disconnect = vi.fn<(...args: any[]) => any>()
-
-  constructor(_callback: IntersectionObserverCallback, _options?: IntersectionObserverInit) {}
 }
 
 function createDeferred<T>() {

@@ -133,7 +133,7 @@ function mockRect(element: Element, rect: Partial<DOMRect>) {
     right: rect.right ?? left + width,
     bottom: rect.bottom ?? top + height,
     toJSON: () => {},
-  } as DOMRect)
+  })
 }
 
 describe("floatingButton controls", () => {

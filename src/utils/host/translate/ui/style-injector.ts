@@ -65,7 +65,7 @@ function supportsConstructableStyleSheets(
 
 function injectStyleElement(root: StyleRoot, id: string, cssText: string): void {
   const container = root instanceof Document ? root.head : root
-  let styleElement = root.querySelector(`#${id}`) as HTMLStyleElement | null
+  let styleElement = root.querySelector<HTMLStyleElement>(`#${id}`)
   if (!styleElement) {
     styleElement = document.createElement("style")
     styleElement.id = id

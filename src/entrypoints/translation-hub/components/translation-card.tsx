@@ -40,9 +40,7 @@ export function TranslationCard({
   const setExpandedById = useSetAtom(translationCardExpandedStateAtom)
 
   const provider = getProviderConfigById(providersConfig, providerId)
-  const providerItem = provider
-    ? PROVIDER_ITEMS[provider.provider as keyof typeof PROVIDER_ITEMS]
-    : undefined
+  const providerItem = provider ? PROVIDER_ITEMS[provider.provider] : undefined
 
   // Track request IDs to ignore stale responses from slow providers
   const requestIdRef = useRef(0)

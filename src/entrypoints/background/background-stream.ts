@@ -208,7 +208,9 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
         })
 
         if (streamError !== undefined) {
-          throw streamError
+          throw streamError instanceof Error
+            ? new Error(streamError.message, { cause: streamError })
+            : new Error(typeof streamError === "string" ? streamError : "Unknown stream error")
         }
 
         if (!abortController.signal.aborted) {
@@ -243,7 +245,7 @@ function createStreamSnapshot<TOutput>(
   thinking: ThinkingSnapshot,
 ): BackgroundStreamSnapshot<TOutput> {
   return {
-    output: output !== null && typeof output === "object" ? ({ ...output } as TOutput) : output,
+    output: output !== null && typeof output === "object" ? { ...output } : output,
     thinking: { ...thinking },
   }
 }

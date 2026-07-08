@@ -33,7 +33,7 @@ export function proxyFetch() {
   }
 
   // Listen for cookie changes to invalidate auth-related cache
-  if (browser.cookies && browser.cookies.onChanged) {
+  if (browser.cookies?.onChanged) {
     browser.cookies.onChanged.addListener(async (changeInfo) => {
       const { cookie, removed } = changeInfo
       // Check if it's an auth-related cookie for monitored domains

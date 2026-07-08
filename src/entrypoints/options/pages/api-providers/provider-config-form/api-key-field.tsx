@@ -32,7 +32,7 @@ export const APIKeyField = withForm({
               <Checkbox
                 id={`apiKey-${providerConfig.id}`}
                 checked={showAPIKey}
-                onCheckedChange={(checked) => setShowAPIKey(checked === true)}
+                onCheckedChange={(checked) => setShowAPIKey(checked)}
               />
               <label
                 htmlFor={`apiKey-${providerConfig.id}`}

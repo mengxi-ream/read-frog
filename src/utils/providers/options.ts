@@ -68,6 +68,7 @@ export function getRecommendedProviderOptionsMatch(
       return { matchIndex, options }
     }
   }
+  return undefined
 }
 
 /**

@@ -64,23 +64,24 @@ vi.mock("@/components/ui/base-ui/popover", async () => {
     open?: boolean
     onOpenChange?: (open: boolean) => void
   }) {
-    return <PopoverContext value={{ open, onOpenChange }}>{children}</PopoverContext>
+    const contextValue = React.useMemo(() => ({ open, onOpenChange }), [open, onOpenChange])
+    return <PopoverContext value={contextValue}>{children}</PopoverContext>
   }
 
   function PopoverTrigger({
     children,
-    render,
+    render: renderElement,
   }: {
     children: ReactNode
     render?: React.ReactElement<React.ComponentProps<"button">>
   }) {
     const { open, onOpenChange } = usePopoverContext()
 
-    if (render && React.isValidElement(render)) {
-      const originalOnClick = render.props.onClick
+    if (renderElement && React.isValidElement(renderElement)) {
+      const originalOnClick = renderElement.props.onClick
 
       // eslint-disable-next-line react/no-clone-element
-      return React.cloneElement(render, {
+      return React.cloneElement(renderElement, {
         children,
         onClick: (event: React.MouseEvent<HTMLButtonElement>) => {
           originalOnClick?.(event)

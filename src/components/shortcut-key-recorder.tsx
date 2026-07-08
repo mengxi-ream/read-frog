@@ -80,7 +80,7 @@ export function ShortcutKeyRecorder({
 
   useEffect(() => {
     if (!inRecording) {
-      return
+      return undefined
     }
 
     const handleKeydown = (event: KeyboardEvent) => {

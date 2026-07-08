@@ -33,7 +33,7 @@ export function ThemeProvider({
       mq.addEventListener("change", cb)
       return () => mq.removeEventListener("change", cb)
     },
-    () => !!window?.matchMedia?.("(prefers-color-scheme: dark)")?.matches,
+    () => window?.matchMedia?.("(prefers-color-scheme: dark)")?.matches ?? false,
   )
 
   const theme: Theme =

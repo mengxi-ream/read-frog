@@ -53,7 +53,7 @@ describe("customActionConfigForm notebase availability", () => {
         id: "action-1",
         name: "Summarize",
         icon: "tabler:sparkles",
-        providerId: config.providersConfig[0]!.id,
+        providerId: config.providersConfig[0].id,
         systemPrompt: "You are helpful.",
         prompt: "Summarize the selected text.",
         outputSchema: [],

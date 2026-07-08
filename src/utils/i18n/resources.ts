@@ -62,13 +62,13 @@ function convertTree(node: LocaleTree): LocaleTree {
 }
 
 const rawResources: Record<SupportedUiLocale, LocaleTree> = {
-  en: en,
-  es: es,
-  ja: ja,
-  ko: ko,
-  ru: ru,
-  tr: tr,
-  vi: vi,
+  en,
+  es,
+  ja,
+  ko,
+  ru,
+  tr,
+  vi,
   "zh-CN": zhCN,
   "zh-TW": zhTW,
 }

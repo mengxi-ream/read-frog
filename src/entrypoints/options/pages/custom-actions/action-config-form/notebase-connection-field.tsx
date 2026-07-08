@@ -101,6 +101,8 @@ function getMappingStatusMessage(
       return t("mappingIncompatible")
     case "valid":
       return null
+    default:
+      return null
   }
 }
 

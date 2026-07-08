@@ -24,14 +24,3 @@ describeFreeApi("microsoftTranslate", () => {
     expect(result).toBe("圖書館")
   })
 })
-
-// describe('deeplxTranslate', () => {
-//   it('should translate text', async () => {
-//     const result = await deeplxTranslate('Library', 'en', 'zh', DEFAULT_PROVIDER_CONFIG.deeplx)
-//     expect(result).toBe('图书馆')
-//   })
-//   it('should translate text to traditional chinese', async () => {
-//     const result = await deeplxTranslate('Library', 'en', 'zh-TW', DEFAULT_PROVIDER_CONFIG.deeplx)
-//     expect(result).toBe('圖書館')
-//   })
-// })

@@ -59,7 +59,7 @@ describe("aiTranslate", () => {
     mocks.generateText.mockRejectedValue(rateLimitedError)
 
     const error = await aiTranslate("hello", "Chinese", providerConfig, promptResolver).catch(
-      (error) => error,
+      (caughtError) => caughtError,
     )
 
     expect(error).toBe(rateLimitedError)
@@ -83,7 +83,7 @@ describe("aiTranslate", () => {
     mocks.generateText.mockRejectedValue(invalidModelError)
 
     const error = await aiTranslate("hello", "Chinese", providerConfig, promptResolver).catch(
-      (error) => error,
+      (caughtError) => caughtError,
     )
 
     expect(error).toBe(invalidModelError)

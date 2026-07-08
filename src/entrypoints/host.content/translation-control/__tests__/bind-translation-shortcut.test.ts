@@ -83,7 +83,7 @@ describe("bindTranslationShortcutKey", () => {
     const { manager: inactiveManager, start: inactiveStart } = createManager(false)
     await bindTranslationShortcutKey(inactiveManager)
     const startCallback = mockRegister.mock.calls[0]?.[1]
-    startCallback?.({} as KeyboardEvent, { hotkey: "Mod+E" })
+    startCallback?.({}, { hotkey: "Mod+E" })
     expect(inactiveStart).toHaveBeenCalledTimes(1)
 
     vi.clearAllMocks()
@@ -101,7 +101,7 @@ describe("bindTranslationShortcutKey", () => {
     const { manager: activeManager, stop: activeStop } = createManager(true)
     await bindTranslationShortcutKey(activeManager)
     const stopCallback = mockRegister.mock.calls[0]?.[1]
-    stopCallback?.({} as KeyboardEvent, { hotkey: "Mod+E" })
+    stopCallback?.({}, { hotkey: "Mod+E" })
     expect(activeStop).toHaveBeenCalledTimes(1)
   })
 

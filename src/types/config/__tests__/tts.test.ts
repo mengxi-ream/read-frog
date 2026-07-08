@@ -93,9 +93,12 @@ describe("tts config defaults", () => {
   it("excludes Azure OpenAI voices that are not exposed by Edge consumer TTS", () => {
     expect(isKnownEdgeTTSVoice("en-US-FableMultilingualNeural")).toBe(false)
     expect(isKnownEdgeTTSVoice("en-US-FableMultilingualNeuralHD")).toBe(false)
-    expect(EDGE_TTS_VOICE_ITEMS.some((item) => String(item.type) === "Multilingual (OpenAI)")).toBe(
-      false,
-    )
+    expect(
+      EDGE_TTS_VOICE_ITEMS.some((item) => {
+        const voiceType: string = item.type
+        return voiceType === "Multilingual (OpenAI)"
+      }),
+    ).toBe(false)
   })
 
   it("temporarily excludes region-dependent HD and DragonHD voices from Edge TTS options", () => {

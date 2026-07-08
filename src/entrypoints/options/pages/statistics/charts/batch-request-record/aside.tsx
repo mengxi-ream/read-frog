@@ -30,13 +30,13 @@ export default function Aside() {
       </div>
       <Tabs className="w-full flex" defaultValue={recentDay} onValueChange={setRecentDay}>
         <TabsList className="w-full bg-background">
-          {recentDays.map((recentDay) => (
+          {recentDays.map((recentDayOption) => (
             <TabsTrigger
-              key={recentDay}
-              value={recentDay.toString()}
+              key={recentDayOption}
+              value={recentDayOption}
               className="transition-none data-[state=active]:bg-primary-weak! data-[state=active]:shadow-none"
             >
-              {recentDay}D
+              {recentDayOption}D
             </TabsTrigger>
           ))}
         </TabsList>

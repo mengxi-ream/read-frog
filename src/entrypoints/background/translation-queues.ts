@@ -258,7 +258,7 @@ export async function setUpWebPageTranslationQueue() {
       }
     }
 
-    let result = ""
+    let result: string
     const context: WebPagePromptContext = {
       webTitle: normalizePromptContextValue(webTitle),
       webDescription: normalizePromptContextValue(webDescription),
@@ -345,7 +345,7 @@ export async function setUpSubtitlesTranslationQueue() {
       }
     }
 
-    let result = ""
+    let result: string
     const context: SubtitlePromptContext = {
       webTitle: normalizePromptContextValue(webTitle),
       webDescription: normalizePromptContextValue(webDescription),

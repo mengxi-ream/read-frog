@@ -17,6 +17,9 @@ describe("shortcut key recorder", () => {
     render(<ShortcutKeyRecorder shortcutKey="Alt+E" onChange={onChange} />)
 
     const input = screen.getByPlaceholderText("shortcutKeySelector.placeholder")
+    if (!(input instanceof HTMLInputElement)) {
+      throw new TypeError("Shortcut key input is missing")
+    }
     fireEvent.focus(input)
     fireEvent.keyDown(document, { key: "K", ctrlKey: true, shiftKey: true })
 
@@ -31,6 +34,9 @@ describe("shortcut key recorder", () => {
     render(<ShortcutKeyRecorder shortcutKey="Alt+E" onChange={onChange} />)
 
     const input = screen.getByPlaceholderText("shortcutKeySelector.placeholder")
+    if (!(input instanceof HTMLInputElement)) {
+      throw new TypeError("Shortcut key input is missing")
+    }
     fireEvent.focus(input)
     fireEvent.keyDown(document, { key: "£", altKey: true, code: "Digit3" })
 
@@ -64,13 +70,17 @@ describe("shortcut key recorder", () => {
 
     render(<ShortcutKeyRecorder shortcutKey="Alt+E" onChange={onChange} />)
 
-    const input = screen.getByPlaceholderText("shortcutKeySelector.placeholder") as HTMLInputElement
-    fireEvent.focus(input)
+    const input = screen.getByPlaceholderText("shortcutKeySelector.placeholder")
+    if (!(input instanceof HTMLInputElement)) {
+      throw new TypeError("Shortcut key input is missing")
+    }
+    const inputElement: HTMLInputElement = input
+    fireEvent.focus(inputElement)
     fireEvent.keyDown(document, { key: "Escape" })
 
     await waitFor(() => {
       expect(onChange).not.toHaveBeenCalled()
-      expect(input.value).toBe("Alt+E")
+      expect(inputElement.value).toBe("Alt+E")
     })
   })
 

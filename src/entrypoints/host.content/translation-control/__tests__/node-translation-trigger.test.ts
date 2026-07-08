@@ -106,7 +106,7 @@ describe("registerNodeTranslationTriggerListeners", () => {
       x: 20,
       y: 30,
       toJSON: () => ({}),
-    } as DOMRect)
+    })
     vi.spyOn(document, "querySelectorAll").mockImplementation((selector) => {
       if (selector === ":hover") {
         const hoveredElements = [document.documentElement, document.body, hovered]

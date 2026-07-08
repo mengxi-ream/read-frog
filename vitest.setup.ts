@@ -103,10 +103,6 @@ vi.mock("wxt/testing", async () => {
 // Uint8Array objects, so some functions that compare their types explode.
 // https://github.com/vitest-dev/vitest/issues/4043#issuecomment-1905172846
 class ESBuildAndJSDOMCompatibleTextEncoder extends TextEncoder {
-  constructor() {
-    super()
-  }
-
   encode(input: string) {
     if (typeof input !== "string") {
       throw new TypeError("`input` must be a string")

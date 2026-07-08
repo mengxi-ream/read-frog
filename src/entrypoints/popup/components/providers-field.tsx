@@ -22,14 +22,14 @@ function getSelectedProviderOptions(config: Config, providersConfig: ProvidersCo
   const selectedProviders: ProviderSelectorOption[] = []
 
   const addProvider = (capability: ProviderCapability, providerId: string) => {
-    const provider = getSelectableProvidersForCapability(capability, providersConfig).find(
-      (provider) => provider.id === providerId,
+    const selectedProvider = getSelectableProvidersForCapability(capability, providersConfig).find(
+      (providerOption) => providerOption.id === providerId,
     )
-    if (!provider) {
+    if (!selectedProvider) {
       return
     }
 
-    selectedProviders.push(provider)
+    selectedProviders.push(selectedProvider)
   }
 
   for (const featureKey of FEATURE_KEYS) {

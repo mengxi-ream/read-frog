@@ -86,8 +86,11 @@ function RestoreButton({ backup }: { backup: ConfigBackup }) {
   const setConfig = useSetAtom(writeConfigAtom)
 
   const { mutate: restoreBackup, isPending: isRestoring } = useMutation({
-    mutationFn: async (backup: ConfigBackup) => {
-      const migratedBackup = await migrateConfig(backup.config, backup.schemaVersion)
+    mutationFn: async (backupToRestore: ConfigBackup) => {
+      const migratedBackup = await migrateConfig(
+        backupToRestore.config,
+        backupToRestore.schemaVersion,
+      )
 
       const isSame = await isSameAsLatestBackup(currentConfig, CONFIG_SCHEMA_VERSION)
 
@@ -134,8 +137,8 @@ function MoreOptions({ backupId, backup }: { backupId: string; backup: ConfigBac
   const [showExportDialog, setShowExportDialog] = useState(false)
 
   const { mutate: deleteBackup, isPending: isDeleting } = useMutation({
-    mutationFn: async (backupId: string) => {
-      await removeBackup(backupId)
+    mutationFn: async (backupIdToDelete: string) => {
+      await removeBackup(backupIdToDelete)
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["config-backups"] })

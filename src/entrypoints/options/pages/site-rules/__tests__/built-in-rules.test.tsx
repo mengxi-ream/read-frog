@@ -96,7 +96,7 @@ describe("builtInRules", () => {
     const copyButtons = screen.getAllByRole("button", { name: "action.copy" })
 
     await act(async () => {
-      fireEvent.click(copyButtons[0]!)
+      fireEvent.click(copyButtons[0])
       await Promise.resolve()
     })
 

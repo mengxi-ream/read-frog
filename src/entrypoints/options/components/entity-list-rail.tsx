@@ -53,7 +53,7 @@ export function EntityListRail({ children, className, containerClassName }: Enti
 
     const container = scrollContainerRef.current
     if (!container) {
-      return
+      return undefined
     }
 
     container.addEventListener("scroll", handleScroll)

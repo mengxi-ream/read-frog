@@ -24,7 +24,7 @@ export function detectConflicts(base: Config, local: Config, remote: Config): Di
   const conflicts: FieldConflict[] = []
 
   const isAtomicValue = (val: unknown) =>
-    val == null || typeof val !== "object" || Array.isArray(val)
+    val === null || val === undefined || typeof val !== "object" || Array.isArray(val)
 
   function traverse(basePath: string[], baseVal: any, localVal: any, remoteVal: any) {
     // Handle atomic values (primitives, nulls, arrays)
@@ -36,17 +36,16 @@ export function detectConflicts(base: Config, local: Config, remote: Config): Di
         if (dequal(localVal, remoteVal)) {
           // Both changed to same value - auto apply
           return localVal
-        } else {
-          // Both changed to different values - conflict
-          conflicts.push({
-            path: basePath,
-            baseValue: baseVal,
-            localValue: localVal,
-            remoteValue: remoteVal,
-          })
-          // Keep base value until user resolves
-          return baseVal
         }
+        // Both changed to different values - conflict
+        conflicts.push({
+          path: basePath,
+          baseValue: baseVal,
+          localValue: localVal,
+          remoteValue: remoteVal,
+        })
+        // Keep base value until user resolves
+        return baseVal
       } else if (localChanged) {
         // Only local changed - track as conflict for user to confirm
         conflicts.push({
@@ -67,10 +66,9 @@ export function detectConflicts(base: Config, local: Config, remote: Config): Di
         })
         // Keep base value until user resolves
         return baseVal
-      } else {
-        // No change
-        return baseVal
       }
+      // No change
+      return baseVal
     }
 
     // Handle objects - recurse into properties

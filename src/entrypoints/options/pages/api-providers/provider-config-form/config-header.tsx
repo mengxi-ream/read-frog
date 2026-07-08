@@ -68,7 +68,7 @@ export function ConfigHeader({
 }
 
 function getHowToConfigureURL(providerType: APIProviderTypes): string | undefined {
-  if (SPECIFIC_TUTORIAL_PROVIDER_TYPES.includes(providerType as any)) {
+  if (SPECIFIC_TUTORIAL_PROVIDER_TYPES.includes(providerType)) {
     return `${env.WXT_WEBSITE_URL}/docs/providers/${providerType}`
   }
   const groupSlug = getProviderGroupSlug(providerType)

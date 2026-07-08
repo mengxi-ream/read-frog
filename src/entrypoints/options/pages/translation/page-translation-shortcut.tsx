@@ -9,12 +9,12 @@ export function PageTranslationShortcut() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
   const shortcut = translateConfig.page.shortcut ?? DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY
 
-  const updateShortcut = (shortcut: string) => {
+  const updateShortcut = (nextShortcut: string) => {
     void setTranslateConfig({
       ...translateConfig,
       page: {
         ...translateConfig.page,
-        shortcut,
+        shortcut: nextShortcut,
       },
     })
   }

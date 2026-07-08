@@ -25,16 +25,16 @@ export function getObjectWithoutAPIKeys<T extends Record<string, any>>(originalO
 }
 
 export function hasAPIKey(obj: any): boolean {
-  function deepCheck(obj: any): boolean {
-    if (Array.isArray(obj)) {
-      return obj.some(deepCheck)
+  function deepCheck(value: any): boolean {
+    if (Array.isArray(value)) {
+      return value.some(deepCheck)
     }
-    if (obj && typeof obj === "object") {
-      for (const key in obj) {
-        if (key === "apiKey" && obj[key]) {
+    if (value && typeof value === "object") {
+      for (const key in value) {
+        if (key === "apiKey" && value[key]) {
           return true
         }
-        if (deepCheck(obj[key])) {
+        if (deepCheck(value[key])) {
           return true
         }
       }

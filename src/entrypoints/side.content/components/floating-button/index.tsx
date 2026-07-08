@@ -136,7 +136,7 @@ export default function FloatingButton() {
   const isMainButtonAttached = isFloatingButtonLocked || isFloatingButtonExpanded
 
   useEffect(() => {
-    if (!isDraggingButton) return
+    if (!isDraggingButton) return undefined
 
     const previousUserSelect = document.body.style.userSelect
     const previousCursor = document.body.style.cursor
@@ -174,7 +174,7 @@ export default function FloatingButton() {
     }
 
     void Promise.resolve(sendMessage("toggleSidePanel", undefined)).then((result) => {
-      if (result?.ok === false && result.reason === "requires-extension-user-action") {
+      if (result && !result.ok && result.reason === "requires-extension-user-action") {
         toast.info(<FirefoxSidebarHelpToast />)
       }
     })

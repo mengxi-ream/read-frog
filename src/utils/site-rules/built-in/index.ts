@@ -8,4 +8,4 @@ import rules from "./rules.json"
  * later in the array take precedence, and the `readfrog-*` rules at the end
  * win over the rest of the data set.
  */
-export const BUILT_IN_SITE_RULES: SiteRule[] = rules as SiteRule[]
+export const BUILT_IN_SITE_RULES: SiteRule[] = rules

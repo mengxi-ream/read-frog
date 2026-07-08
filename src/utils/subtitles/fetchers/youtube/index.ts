@@ -127,7 +127,10 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
 
     const response = await this.requestPlayerData(videoId)
     return (
-      response.success === true && response.data != null && response.data.captionTracks.length > 0
+      response.success &&
+      response.data !== null &&
+      response.data !== undefined &&
+      response.data.captionTracks.length > 0
     )
   }
 
@@ -387,9 +390,9 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
               throw new OverlaySubtitlesError(i18n.t("subtitles.errors.http429"))
             // Retryable errors - throw and let retry logic handle
             case 500:
-              throw new Error(`${i18n.t("subtitles.errors.http500")}`)
+              throw new Error(i18n.t("subtitles.errors.http500"))
             default:
-              throw new Error(`${i18n.t("subtitles.errors.httpUnknown", [status])}`)
+              throw new Error(i18n.t("subtitles.errors.httpUnknown", [status]))
           }
         }
 

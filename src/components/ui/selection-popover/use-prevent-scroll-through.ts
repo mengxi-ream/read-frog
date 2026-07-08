@@ -25,12 +25,12 @@ export function usePreventScrollThrough({ isEnabled, elementRef }: UsePreventScr
 
   useEffect(() => {
     if (!isEnabled) {
-      return
+      return undefined
     }
 
     const element = elementRef.current
     if (!element) {
-      return
+      return undefined
     }
 
     element.addEventListener("wheel", handleWheel, { passive: false })

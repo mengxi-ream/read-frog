@@ -46,7 +46,7 @@ export function Thinking({ status, content, defaultExpanded = false, className }
 
   useEffect(() => {
     if (!open || !shouldAutoScrollRef.current) {
-      return
+      return undefined
     }
 
     const frame = requestAnimationFrame(() => {

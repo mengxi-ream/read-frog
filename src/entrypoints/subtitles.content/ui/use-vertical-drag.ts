@@ -188,7 +188,7 @@ export function useVerticalDrag() {
   const setupListeners = useEffectEvent(() => {
     const handle = handleRef.current
     const container = containerRef.current
-    if (!handle || !container) return
+    if (!handle || !container) return undefined
 
     const videoContainer = getVideoContainer(container)
 

@@ -68,7 +68,7 @@ export function renderSubtitlesTranslateButton({
     cssContent: [themeCSS, adapter.embedded ? embedWrapperCSS : wrapperCSS],
     forcedTheme: SUBTITLES_THEME,
     ...(adapter.embedded && { style: { position: "relative" } }),
-  }) as HTMLDivElement
+  })
 
   shadowHost.id = TRANSLATE_BUTTON_CONTAINER_ID
 

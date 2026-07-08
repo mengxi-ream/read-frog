@@ -34,7 +34,7 @@ export function ImportPrompts() {
   const importPrompts = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const files = e.target.files
-      if (!files || !files[0]) return
+      if (!files?.[0]) return
       const promptConfig = await analysisJSONFile(files[0])
       injectPrompts(promptConfig)
       toast.success(`${i18n.t("options.translation.personalizedPrompts.importSuccess")} !`)

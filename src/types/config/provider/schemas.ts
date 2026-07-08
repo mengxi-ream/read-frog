@@ -264,6 +264,7 @@ export type TopLevelReasoningProviderConfig = Extract<
   ────────────────────────────── */
 
 type ModelTuple = readonly [string, ...string[]] // 至少一个元素才能给 z.enum
+// oxlint-disable-next-line typescript/no-unnecessary-type-parameters -- T preserves literal model tuple inference for z.enum.
 function providerConfigSchema<T extends ModelTuple>(models: T) {
   return z.object({
     model: z.enum(models),

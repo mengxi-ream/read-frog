@@ -15,39 +15,43 @@ const {
   createOllamaMock,
   createOpenAICompatibleMock,
 } = vi.hoisted(() => {
-  const anthropicLanguageModelMock = vi.fn<(...args: any[]) => any>()
-  const azureChatModelMock = vi.fn<(...args: any[]) => any>()
-  const azureLanguageModelMock = vi.fn<(...args: any[]) => any>()
-  const openAICompatibleLanguageModelMock = vi.fn<(...args: any[]) => any>()
-  const ollamaLanguageModelMock = vi.fn<(...args: any[]) => any>()
-  const createAnthropicMock = vi.fn<(...args: any[]) => any>(
+  const innerAnthropicLanguageModelMock = vi.fn<(...args: any[]) => any>()
+  const innerAzureChatModelMock = vi.fn<(...args: any[]) => any>()
+  const innerAzureLanguageModelMock = vi.fn<(...args: any[]) => any>()
+  const innerOpenAICompatibleLanguageModelMock = vi.fn<(...args: any[]) => any>()
+  const innerOllamaLanguageModelMock = vi.fn<(...args: any[]) => any>()
+  const innerCreateAnthropicMock = vi.fn<(...args: any[]) => any>(
     (_options?: Record<string, unknown>) => ({
-      languageModel: anthropicLanguageModelMock,
+      languageModel: innerAnthropicLanguageModelMock,
     }),
   )
-  const createAzureMock = vi.fn<(...args: any[]) => any>((_options?: Record<string, unknown>) => ({
-    chat: azureChatModelMock,
-    languageModel: azureLanguageModelMock,
-  }))
-  const createOpenAICompatibleMock = vi.fn<(...args: any[]) => any>(
+  const innerCreateAzureMock = vi.fn<(...args: any[]) => any>(
     (_options?: Record<string, unknown>) => ({
-      languageModel: openAICompatibleLanguageModelMock,
+      chat: innerAzureChatModelMock,
+      languageModel: innerAzureLanguageModelMock,
     }),
   )
-  const createOllamaMock = vi.fn<(...args: any[]) => any>((_options?: Record<string, unknown>) => ({
-    languageModel: ollamaLanguageModelMock,
-  }))
+  const innerCreateOpenAICompatibleMock = vi.fn<(...args: any[]) => any>(
+    (_options?: Record<string, unknown>) => ({
+      languageModel: innerOpenAICompatibleLanguageModelMock,
+    }),
+  )
+  const innerCreateOllamaMock = vi.fn<(...args: any[]) => any>(
+    (_options?: Record<string, unknown>) => ({
+      languageModel: innerOllamaLanguageModelMock,
+    }),
+  )
 
   return {
-    anthropicLanguageModelMock,
-    azureChatModelMock,
-    azureLanguageModelMock,
-    openAICompatibleLanguageModelMock,
-    ollamaLanguageModelMock,
-    createAnthropicMock,
-    createAzureMock,
-    createOllamaMock,
-    createOpenAICompatibleMock,
+    anthropicLanguageModelMock: innerAnthropicLanguageModelMock,
+    azureChatModelMock: innerAzureChatModelMock,
+    azureLanguageModelMock: innerAzureLanguageModelMock,
+    openAICompatibleLanguageModelMock: innerOpenAICompatibleLanguageModelMock,
+    ollamaLanguageModelMock: innerOllamaLanguageModelMock,
+    createAnthropicMock: innerCreateAnthropicMock,
+    createAzureMock: innerCreateAzureMock,
+    createOllamaMock: innerCreateOllamaMock,
+    createOpenAICompatibleMock: innerCreateOpenAICompatibleMock,
   }
 })
 

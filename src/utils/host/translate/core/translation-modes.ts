@@ -78,11 +78,10 @@ export async function translateNodesBilingualMode(
       removeTranslatedWrapperWithRestore(existedTranslatedWrapper)
       if (toggle) {
         return
-      } else {
-        nodes.forEach((node) => translatingNodes.delete(node))
-        void translateNodesBilingualMode(nodes, walkId, config, toggle)
-        return
       }
+      nodes.forEach((node) => translatingNodes.delete(node))
+      void translateNodesBilingualMode(nodes, walkId, config, toggle)
+      return
     }
 
     const textContent = transNodes
@@ -221,17 +220,16 @@ export async function translateNodeTranslationOnlyMode(
       removeTranslatedWrapperWithRestore(finalTranslatedWrapper)
       if (toggle) {
         return
-      } else {
-        // In translationOnly mode, removeTranslatedWrapperWithRestore uses innerHTML to restore content,
-        // which destroys the original DOM nodes and creates new ones. The 'nodes' array still references
-        // the old detached nodes, and targetNode can't reference to the new dom added by innerHTML anymore.
-        // Therefore, by recursively calling translateNodeTranslationOnlyMode here with the
-        // same nodes array, we ensure the translation uses the newly created DOM elements since the
-        // function will re-query and find the correct parent and child nodes from the restored DOM.
-        nodes.forEach((node) => translatingNodes.delete(node))
-        void translateNodeTranslationOnlyMode(nodes, walkId, config, toggle)
-        return
       }
+      // In translationOnly mode, removeTranslatedWrapperWithRestore uses innerHTML to restore content,
+      // which destroys the original DOM nodes and creates new ones. The 'nodes' array still references
+      // the old detached nodes, and targetNode can't reference to the new dom added by innerHTML anymore.
+      // Therefore, by recursively calling translateNodeTranslationOnlyMode here with the
+      // same nodes array, we ensure the translation uses the newly created DOM elements since the
+      // function will re-query and find the correct parent and child nodes from the restored DOM.
+      nodes.forEach((node) => translatingNodes.delete(node))
+      void translateNodeTranslationOnlyMode(nodes, walkId, config, toggle)
+      return
     }
 
     const innerTextContent = transNodes.map((node) => extractTextContent(node, config)).join("")

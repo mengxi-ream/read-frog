@@ -50,14 +50,14 @@ function flushRaf() {
 }
 
 vi.mock("react-rnd", async () => {
-  const React = await import("react")
+  const ReactModule = await import("react")
 
   function MockRnd({ ref, ...props }: any) {
     latestRndProps = props
-    const elementRef = React.useRef<HTMLDivElement>(null)
-    const appliedDefaultRef = React.useRef(false)
+    const elementRef = ReactModule.useRef<HTMLDivElement>(null)
+    const appliedDefaultRef = ReactModule.useRef(false)
 
-    React.useImperativeHandle(
+    ReactModule.useImperativeHandle(
       ref,
       () => ({
         updatePosition: (position: { x: number; y: number }) => {
@@ -76,7 +76,7 @@ vi.mock("react-rnd", async () => {
       [],
     )
 
-    React.useLayoutEffect(() => {
+    ReactModule.useLayoutEffect(() => {
       if (!elementRef.current) {
         return
       }
@@ -220,7 +220,7 @@ function renderPopover({
       <SelectionPopover.Trigger
         render={
           customTrigger ? (
-            <button data-testid="custom-trigger" className="custom-trigger" />
+            <button data-testid="custom-trigger" className="custom-trigger" type="button" />
           ) : undefined
         }
       >

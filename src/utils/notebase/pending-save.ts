@@ -316,16 +316,16 @@ export function applyCreatedNotebaseConnectionToConfig(
       ...config,
       selectionToolbar: {
         ...config.selectionToolbar,
-        customActions: config.selectionToolbar.customActions.map((action, index) =>
+        customActions: config.selectionToolbar.customActions.map((customAction, index) =>
           index === actionIndex
             ? {
-                ...action,
+                ...customAction,
                 notebaseConnection: buildNotebaseConnectionFromPending(
                   pending,
                   options.connectedAccount,
                 ),
               }
-            : action,
+            : customAction,
         ),
       },
     },

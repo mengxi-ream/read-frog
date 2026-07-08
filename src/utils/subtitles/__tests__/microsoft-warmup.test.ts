@@ -71,8 +71,8 @@ describe("microsoftWarmupTranslate", () => {
     const fragments = Array.from({ length: 150 }, (_, i) => makeFragment(`Text ${i}`, i * 1000))
 
     mockSendMessage
-      .mockResolvedValueOnce(Array.from({ length: 100 }, (_, i) => `翻译 ${i}`) as never)
-      .mockResolvedValueOnce(Array.from({ length: 50 }, (_, i) => `翻译 ${100 + i}`) as never)
+      .mockResolvedValueOnce(Array.from({ length: 100 }, (_, i) => `翻译 ${i}`))
+      .mockResolvedValueOnce(Array.from({ length: 50 }, (_, i) => `翻译 ${100 + i}`))
 
     const result = await microsoftWarmupTranslate(fragments, "en", "zh")
 
@@ -110,8 +110,8 @@ describe("microsoftWarmupTranslate", () => {
 
     // chunk1: 100 fragments succeeds, chunk2: 50 fragments fails
     mockSendMessage
-      .mockResolvedValueOnce(Array.from({ length: 100 }, (_, i) => `翻译 ${i}`) as never)
-      .mockRejectedValueOnce(new Error("Network error") as never)
+      .mockResolvedValueOnce(Array.from({ length: 100 }, (_, i) => `翻译 ${i}`))
+      .mockRejectedValueOnce(new Error("Network error"))
 
     const result = await microsoftWarmupTranslate(fragments, "en", "zh")
 

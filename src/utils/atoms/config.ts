@@ -168,6 +168,7 @@ function buildConfigFieldsAtomMap<C extends Config>(cfg: C) {
 
   const res = {} as Map
 
+  // oxlint-disable-next-line typescript/no-unnecessary-type-parameters -- K preserves key-specific atom value inference.
   const add = <K extends ValidKey>(key: K) => {
     res[key] = getConfigFieldAtom(key)
   }

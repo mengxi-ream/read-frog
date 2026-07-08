@@ -32,7 +32,7 @@ export function useDownloadTranslatedSubtitles() {
     if (!shouldShowPreparingMessageAfterDelay) {
       // eslint-disable-next-line react/set-state-in-effect
       setShowPreparingMessage(false)
-      return
+      return undefined
     }
 
     const timeoutId = setTimeout(

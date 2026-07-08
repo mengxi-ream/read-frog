@@ -405,7 +405,7 @@ function extractModelTables(providerHtml: string): ProviderTable[] {
         if (!header) {
           continue
         }
-        const value = parseCapabilityCell(row.cells[cellIndex]!)
+        const value = parseCapabilityCell(row.cells[cellIndex])
         assignUniqueKey(rawCapabilities, header, value)
       }
 
@@ -450,7 +450,7 @@ function discoverProvidersFromHtml(html: string, baseUrl: string): ProviderLink[
       continue
     }
 
-    const slug = decodeURIComponent(match[1]!)
+    const slug = decodeURIComponent(match[1])
     if (!slug || providers.has(slug)) {
       continue
     }
@@ -486,7 +486,7 @@ function isRetryable(error: unknown): boolean {
 }
 
 function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
+  return new Promise((settle) => setTimeout(settle, ms))
 }
 
 async function fetchText(url: string, timeoutMs: number): Promise<string> {
@@ -525,7 +525,7 @@ async function fetchTextWithRetry(url: string, timeoutMs: number, retries = 1): 
   }
 
   if (lastError instanceof Error) {
-    throw lastError
+    throw new Error(lastError.message, { cause: lastError })
   }
   throw new Error(String(lastError))
 }
@@ -539,7 +539,7 @@ async function mapWithConcurrency<T, R>(
     return []
   }
 
-  const results = Array.from({ length: values.length }) as R[]
+  const results: R[] = []
   let cursor = 0
   const workerCount = Math.min(concurrency, values.length)
 
@@ -550,7 +550,7 @@ async function mapWithConcurrency<T, R>(
       if (index >= values.length) {
         return
       }
-      results[index] = await worker(values[index]!, index)
+      results[index] = await worker(values[index], index)
     }
   })
 

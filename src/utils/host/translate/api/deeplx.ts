@@ -73,7 +73,8 @@ async function parseDeepLXResponse(resp: {
     }
     return result.data
   } catch (error) {
-    throw new Error(`Failed to parse DeepLX translation response: ${(error as Error).message}`)
+    const message = error instanceof Error ? error.message : String(error)
+    throw new Error(`Failed to parse DeepLX translation response: ${message}`, { cause: error })
   }
 }
 

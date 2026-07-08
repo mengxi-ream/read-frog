@@ -72,10 +72,7 @@ describe("node translation", () => {
     it("should show the translation when point is over the original text", async () => {
       render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
       const node = screen.getByTestId("test-node")
-      const originalElementFromPoint = Reflect.get(
-        document,
-        "elementFromPoint",
-      ) as typeof document.elementFromPoint
+      const originalElementFromPoint = Reflect.get(document, "elementFromPoint")
       document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => node)
       await act(async () => {
         await removeOrShowNodeTranslation({ x: 150, y: 125 }, TEST_CONFIG)
@@ -96,10 +93,7 @@ describe("node translation", () => {
       render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
       const node = screen.getByTestId("test-node")
 
-      const originalElementFromPoint = Reflect.get(
-        document,
-        "elementFromPoint",
-      ) as typeof document.elementFromPoint
+      const originalElementFromPoint = Reflect.get(document, "elementFromPoint")
       document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => node)
       await act(async () => {
         await removeOrShowNodeTranslation({ x: 150, y: 125 }, TEST_CONFIG)
@@ -121,10 +115,7 @@ describe("node translation", () => {
     it("should hide the translation when point is over the translation wrapper", async () => {
       render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
       const node = screen.getByTestId("test-node")
-      const originalElementFromPoint = Reflect.get(
-        document,
-        "elementFromPoint",
-      ) as typeof document.elementFromPoint
+      const originalElementFromPoint = Reflect.get(document, "elementFromPoint")
       document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => node)
       await act(async () => {
         await removeOrShowNodeTranslation({ x: 150, y: 125 }, TEST_CONFIG)

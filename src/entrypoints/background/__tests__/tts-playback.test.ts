@@ -25,13 +25,15 @@ vi.mock("@/utils/logger", () => ({
   },
 }))
 
-function getRegisteredMessageHandler<TData = unknown, TResult = unknown>(name: string) {
+function getRegisteredMessageHandler<TResult = unknown>(
+  name: string,
+): (message: { data: unknown }) => Promise<TResult> {
   const registration = onMessageMock.mock.calls.find((call) => call[0] === name)
   if (!registration) {
     throw new Error(`Message handler not registered: ${name}`)
   }
 
-  return registration[1] as (message: { data: TData }) => Promise<TResult>
+  return registration[1] as (message: { data: unknown }) => Promise<TResult>
 }
 
 function installFakeAudio() {
@@ -120,14 +122,7 @@ describe("setupTTSPlaybackMessageHandlers", () => {
 
     const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
     setupTTSPlaybackMessageHandlers()
-    const startHandler = getRegisteredMessageHandler<
-      {
-        requestId: string
-        audioBase64: string
-        contentType: string
-      },
-      { ok: boolean }
-    >("ttsPlaybackStart")
+    const startHandler = getRegisteredMessageHandler<{ ok: boolean }>("ttsPlaybackStart")
 
     const payload = {
       data: {
@@ -175,14 +170,7 @@ describe("setupTTSPlaybackMessageHandlers", () => {
 
     const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
     setupTTSPlaybackMessageHandlers()
-    const startHandler = getRegisteredMessageHandler<
-      {
-        requestId: string
-        audioBase64: string
-        contentType: string
-      },
-      { ok: boolean }
-    >("ttsPlaybackStart")
+    const startHandler = getRegisteredMessageHandler<{ ok: boolean }>("ttsPlaybackStart")
 
     const result = await startHandler({
       data: {
@@ -222,9 +210,7 @@ describe("setupTTSPlaybackMessageHandlers", () => {
 
     const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
     setupTTSPlaybackMessageHandlers()
-    const prepareHandler = getRegisteredMessageHandler<undefined, { ok: true }>(
-      "ttsPlaybackPrepare",
-    )
+    const prepareHandler = getRegisteredMessageHandler<{ ok: true }>("ttsPlaybackPrepare")
 
     await prepareHandler({ data: undefined })
 
@@ -237,14 +223,7 @@ describe("setupTTSPlaybackMessageHandlers", () => {
 
     const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
     setupTTSPlaybackMessageHandlers()
-    const startHandler = getRegisteredMessageHandler<
-      {
-        requestId: string
-        audioBase64: string
-        contentType: string
-      },
-      { ok: boolean }
-    >("ttsPlaybackStart")
+    const startHandler = getRegisteredMessageHandler<{ ok: boolean }>("ttsPlaybackStart")
 
     const playbackPromise = startHandler({
       data: {
@@ -256,10 +235,10 @@ describe("setupTTSPlaybackMessageHandlers", () => {
     await Promise.resolve()
 
     expect(FakeAudio.instances).toHaveLength(1)
-    expect(FakeAudio.instances[0]!.play).toHaveBeenCalled()
+    expect(FakeAudio.instances[0].play).toHaveBeenCalled()
     expect(sendMessageMock).not.toHaveBeenCalled()
 
-    FakeAudio.instances[0]!.onended?.()
+    FakeAudio.instances[0].onended?.()
 
     await expect(playbackPromise).resolves.toEqual({ ok: true })
     expect(revokeObjectURLMock).toHaveBeenCalledWith("blob:tts-test")
@@ -271,17 +250,8 @@ describe("setupTTSPlaybackMessageHandlers", () => {
 
     const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
     setupTTSPlaybackMessageHandlers()
-    const startHandler = getRegisteredMessageHandler<
-      {
-        requestId: string
-        audioBase64: string
-        contentType: string
-      },
-      { ok: boolean }
-    >("ttsPlaybackStart")
-    const stopHandler = getRegisteredMessageHandler<{ requestId?: string }, { ok: true }>(
-      "ttsPlaybackStop",
-    )
+    const startHandler = getRegisteredMessageHandler<{ ok: boolean }>("ttsPlaybackStart")
+    const stopHandler = getRegisteredMessageHandler<{ ok: true }>("ttsPlaybackStop")
 
     const playbackPromise = startHandler({
       data: {
@@ -293,11 +263,11 @@ describe("setupTTSPlaybackMessageHandlers", () => {
     await Promise.resolve()
 
     await stopHandler({ data: { requestId: "req-other" } })
-    expect(FakeAudio.instances[0]!.pause).not.toHaveBeenCalled()
+    expect(FakeAudio.instances[0].pause).not.toHaveBeenCalled()
 
     await stopHandler({ data: { requestId: "req-active" } })
 
     await expect(playbackPromise).resolves.toEqual({ ok: false, reason: "stopped" })
-    expect(FakeAudio.instances[0]!.pause).toHaveBeenCalled()
+    expect(FakeAudio.instances[0].pause).toHaveBeenCalled()
   })
 })

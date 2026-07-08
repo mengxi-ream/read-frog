@@ -7,7 +7,7 @@ import { SelectionToolbarCustomActionTrigger } from "../custom-action-trigger"
 const openToolbarCustomActionMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("../../../components/selection-tooltip", () => ({
-  SelectionToolbarTooltip: ({ render }: { render: ReactElement }) => render,
+  SelectionToolbarTooltip: ({ render: renderElement }: { render: ReactElement }) => renderElement,
 }))
 
 vi.mock("../provider", () => ({
@@ -56,7 +56,7 @@ describe("selectionToolbarCustomActionTrigger", () => {
     expect(openToolbarCustomActionMock).toHaveBeenCalledOnce()
     expect(openToolbarCustomActionMock).toHaveBeenCalledWith("summarize", trigger)
     expect(blurSpy.mock.invocationCallOrder[0]).toBeLessThan(
-      openToolbarCustomActionMock.mock.invocationCallOrder[0]!,
+      openToolbarCustomActionMock.mock.invocationCallOrder[0],
     )
     expect(document.activeElement).not.toBe(trigger)
   })

@@ -164,7 +164,7 @@ function TextStyleGroup({
       <SettingRow label={i18n.t("options.videoSubtitles.style.fontFamily")}>
         <Select
           value={textStyle.fontFamily}
-          onValueChange={(v) => v && onChange({ fontFamily: v as SubtitlesFontFamily })}
+          onValueChange={(v) => v && onChange({ fontFamily: v })}
         >
           <SelectTrigger size="sm" className={SELECT_TRIGGER_CLASS}>
             <SelectValue>{textStyle.fontFamily}</SelectValue>

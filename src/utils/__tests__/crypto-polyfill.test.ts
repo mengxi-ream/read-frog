@@ -83,7 +83,7 @@ describe("getRandomUUID", () => {
       value: {
         getRandomValues: originalCrypto.getRandomValues.bind(originalCrypto),
         randomUUID,
-      } as unknown as Crypto,
+      },
     })
 
     expect(getRandomUUID()).toBe("native-uuid")
@@ -98,7 +98,7 @@ describe("getRandomUUID", () => {
       configurable: true,
       value: {
         getRandomValues,
-      } as unknown as Crypto,
+      },
     })
 
     const uuid = getRandomUUID()
@@ -112,7 +112,7 @@ describe("getRandomUUID", () => {
       configurable: true,
       value: {
         getRandomValues: originalCrypto.getRandomValues.bind(originalCrypto),
-      } as unknown as Crypto,
+      },
     })
 
     vi.resetModules()

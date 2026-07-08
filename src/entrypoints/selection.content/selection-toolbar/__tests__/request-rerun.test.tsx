@@ -84,7 +84,11 @@ vi.mock("@/components/ui/selection-popover", async () => {
     open: boolean
     onOpenChange?: (open: boolean) => void
   }) {
-    return <PopoverContext value={{ anchor, open, onOpenChange }}>{children}</PopoverContext>
+    const contextValue = React.useMemo(
+      () => ({ anchor, open, onOpenChange }),
+      [anchor, open, onOpenChange],
+    )
+    return <PopoverContext value={contextValue}>{children}</PopoverContext>
   }
 
   function Trigger({
@@ -355,17 +359,17 @@ function mockWindowSelection(range: Range | null) {
       toString: () => range.toString(),
       getRangeAt: () => range,
       containsNode: vi.fn<(...args: any[]) => any>(() => false),
-    } as unknown as Selection
-  }) as unknown as typeof window.getSelection
+    }
+  })
 }
 
-function getRegisteredMessageHandler<T>(name: string) {
+function getRegisteredMessageHandler(name: string): (message: { data: unknown }) => void {
   const registration = onMessageMock.mock.calls.find((call) => call[0] === name)
   if (!registration) {
     throw new Error(`Message handler not registered: ${name}`)
   }
 
-  return registration[1] as (message: { data: T }) => void
+  return registration[1] as (message: { data: unknown }) => void
 }
 
 async function getRegisteredShortcutCallback(shortcut = "Alt+T") {
@@ -1046,9 +1050,7 @@ describe("selection toolbar requests", () => {
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     renderWithProviders(<TranslateButton />, store)
 
-    const handler = getRegisteredMessageHandler<{ selectionText: string }>(
-      "openSelectionTranslationFromContextMenu",
-    )
+    const handler = getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")
 
     act(() => {
       handler({ data: { selectionText: "Missing selection" } })
@@ -1288,9 +1290,7 @@ describe("selection toolbar requests", () => {
       )
     })
 
-    const handler = getRegisteredMessageHandler<{ actionId: string; selectionText: string }>(
-      "openSelectionCustomActionFromContextMenu",
-    )
+    const handler = getRegisteredMessageHandler("openSelectionCustomActionFromContextMenu")
 
     await act(async () => {
       handler({
@@ -1402,9 +1402,7 @@ describe("selection toolbar requests", () => {
       throw new Error("Default custom action is missing")
     }
 
-    const handler = getRegisteredMessageHandler<{ actionId: string; selectionText: string }>(
-      "openSelectionCustomActionFromContextMenu",
-    )
+    const handler = getRegisteredMessageHandler("openSelectionCustomActionFromContextMenu")
 
     act(() => {
       handler({
@@ -1475,7 +1473,7 @@ describe("selection toolbar requests", () => {
       throw new Error("No alternate LLM provider available for custom action test")
     }
     updatedConfig.selectionToolbar.customActions[0] = {
-      ...updatedConfig.selectionToolbar.customActions[0]!,
+      ...updatedConfig.selectionToolbar.customActions[0],
       providerId: nextProviderId,
     }
 

@@ -90,7 +90,7 @@ function createRect({
         y: top,
       }
     },
-  } as DOMRect
+  }
 }
 
 describe("translate", () => {
@@ -927,11 +927,11 @@ describe("translate", () => {
 
         expectNodeLabels(node, [BLOCK_ATTRIBUTE])
         const wrapper1 = node.children[0]
-        expectTranslatedContent(wrapper1 as Element, BLOCK_CONTENT_CLASS)
+        expectTranslatedContent(wrapper1, BLOCK_CONTENT_CLASS)
         const wrapper2 = node.children[2]
-        expectTranslatedContent(wrapper2 as Element, BLOCK_CONTENT_CLASS)
+        expectTranslatedContent(wrapper2, BLOCK_CONTENT_CLASS)
         const wrapper3 = node.children[4]
-        expectTranslatedContent(wrapper3 as Element, BLOCK_CONTENT_CLASS)
+        expectTranslatedContent(wrapper3, BLOCK_CONTENT_CLASS)
 
         await removeOrShowPageTranslation("bilingual", true)
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
@@ -959,11 +959,11 @@ describe("translate", () => {
 
         expectNodeLabels(node, [BLOCK_ATTRIBUTE])
         const wrapper1 = node.children[0]
-        expectTranslatedContent(wrapper1 as Element, BLOCK_CONTENT_CLASS)
+        expectTranslatedContent(wrapper1, BLOCK_CONTENT_CLASS)
         const wrapper2 = node.children[2]
-        expectTranslatedContent(wrapper2 as Element, BLOCK_CONTENT_CLASS)
+        expectTranslatedContent(wrapper2, BLOCK_CONTENT_CLASS)
         const wrapper3 = node.children[4]
-        expectTranslatedContent(wrapper3 as Element, BLOCK_CONTENT_CLASS)
+        expectTranslatedContent(wrapper3, BLOCK_CONTENT_CLASS)
 
         await removeOrShowPageTranslation("bilingual", true)
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
@@ -1294,7 +1294,7 @@ describe("translate", () => {
 
       await removeOrShowPageTranslation("bilingual", true)
       expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-      expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}`)
+      expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT)
     })
   })
   describe("empty text nodes with only one inline node in middle", () => {

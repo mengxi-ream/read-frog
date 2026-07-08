@@ -39,17 +39,17 @@ function findDraftEditor(
     const props = fiber.memoizedProps
     if (props && isDraftEditorState(props.editorState) && typeof props.onChange === "function") {
       return {
-        editorState: props.editorState as DraftEditorState,
+        editorState: props.editorState,
         onChange: props.onChange as (state: DraftEditorState) => void,
       }
     }
 
     // Also check stateNode for class components
-    const stateNode = fiber.stateNode as Record<string, unknown> | null
+    const stateNode = fiber.stateNode
     const stateNodeProps = (stateNode?.props ?? {}) as Record<string, unknown>
     if (isDraftEditorState(stateNodeProps.editorState)) {
       return {
-        editorState: stateNodeProps.editorState as DraftEditorState,
+        editorState: stateNodeProps.editorState,
         onChange: stateNodeProps.onChange as (state: DraftEditorState) => void,
       }
     }

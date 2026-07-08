@@ -403,13 +403,13 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
           ...analyticsContext,
           outcome: "success",
         })
-      } catch (error) {
-        if (!isAbortError(error) && runIdRef.current === runId) {
+      } catch (caughtError) {
+        if (!isAbortError(caughtError) && runIdRef.current === runId) {
           setThinking((prev) => (prev?.text ? { ...prev, status: "complete" } : null))
-          setError(createSelectionToolbarRuntimeError("translate", error))
+          setError(createSelectionToolbarRuntimeError("translate", caughtError))
         }
 
-        if (!isAbortError(error)) {
+        if (!isAbortError(caughtError)) {
           void trackFeatureUsed({
             ...analyticsContext,
             outcome: "failure",
@@ -431,7 +431,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
 
   useEffect(() => {
     if (!isOpen) {
-      return
+      return undefined
     }
 
     const nextRunKey = JSON.stringify({
@@ -441,7 +441,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
       translateRequestKey,
     })
     if (lastTranslationRunKeyRef.current === nextRunKey) {
-      return
+      return undefined
     }
     lastTranslationRunKeyRef.current = nextRunKey
 
@@ -584,7 +584,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
       isPageTranslationShortcutEmpty(shortcut) ||
       !isValidConfiguredPageTranslationShortcut(shortcut)
     ) {
-      return
+      return undefined
     }
 
     const registration = HotkeyManager.getInstance().register(

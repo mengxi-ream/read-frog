@@ -44,16 +44,16 @@ export class ShadowHostBuilder {
     if (!inheritStyles) {
       css.push(resetCss)
     }
-    if (cssContent) css.push(...cssContent.map((css) => css.replaceAll(":root", ":host")))
+    if (cssContent) css.push(...cssContent.map((cssText) => cssText.replaceAll(":root", ":host")))
 
     const { shadowCss, documentCss } = this.splitShadowRootCss(css.join("\n"))
     if (documentCss) {
       this.documentCssKey = cssRegistry.inject(documentCss)
     }
     if (shadowCss) {
-      const style = document.createElement("style")
-      style.textContent = shadowCss
-      this.shadowRoot.appendChild(style)
+      const shadowStyleElement = document.createElement("style")
+      shadowStyleElement.textContent = shadowCss
+      this.shadowRoot.appendChild(shadowStyleElement)
     }
 
     // add wrapper

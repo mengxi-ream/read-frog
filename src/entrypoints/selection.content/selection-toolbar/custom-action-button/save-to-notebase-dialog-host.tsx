@@ -91,23 +91,23 @@ export function SaveToNotebaseDialogHost() {
       suppressToast: true,
     },
     mutationFn: async ({
-      pendingNotebaseSave,
+      pendingNotebaseSave: pendingCreateSave,
     }: {
       pendingNotebaseSave: PendingCreateNotebaseSave
       connectedAccount: SelectionToolbarCustomActionNotebaseAccount
     }) => {
-      await orpcClient.notebase.create(buildNotebaseCreateInputFromPending(pendingNotebaseSave))
-      return pendingNotebaseSave
+      await orpcClient.notebase.create(buildNotebaseCreateInputFromPending(pendingCreateSave))
+      return pendingCreateSave
     },
-    onSuccess: async (pendingNotebaseSave, variables) => {
+    onSuccess: async (createdPendingSave, variables) => {
       const nextConnection = buildNotebaseConnectionFromPending(
-        pendingNotebaseSave,
+        createdPendingSave,
         variables.connectedAccount,
       )
       await setSelectionToolbarConfig({
         ...selectionToolbarConfig,
         customActions: selectionToolbarConfig.customActions.map((item) =>
-          item.id === pendingNotebaseSave.actionId
+          item.id === createdPendingSave.actionId
             ? { ...item, notebaseConnection: nextConnection }
             : item,
         ),
@@ -115,12 +115,12 @@ export function SaveToNotebaseDialogHost() {
 
       closeDialog()
       toast.success(i18n.t("action.saveToNotebaseSuccess"), {
-        description: pendingNotebaseSave.actionName,
+        description: createdPendingSave.actionName,
       })
 
       try {
         await sendMessage("openPage", {
-          url: getNotebaseDetailUrl(pendingNotebaseSave.notebaseId),
+          url: getNotebaseDetailUrl(createdPendingSave.notebaseId),
           active: true,
         })
       } catch (error) {
@@ -155,7 +155,7 @@ export function SaveToNotebaseDialogHost() {
   })
 
   const handleCreateAndSave = () => {
-    if (!pendingNotebaseSave || pendingNotebaseSave.kind !== "create_notebase") {
+    if (pendingNotebaseSave?.kind !== "create_notebase") {
       return
     }
 
@@ -167,14 +167,14 @@ export function SaveToNotebaseDialogHost() {
     createAndSaveMutation.mutate({ pendingNotebaseSave, connectedAccount: currentAccount })
   }
 
-  const handleLoginWithPending = async (pendingNotebaseSave: PendingNotebaseSave) => {
-    if (!pendingNotebaseSave) {
+  const handleLoginWithPending = async (pendingSave: PendingNotebaseSave) => {
+    if (!pendingSave) {
       return
     }
 
     setIsPreparingLogin(true)
     try {
-      await setPendingNotebaseSave(pendingNotebaseSave)
+      await setPendingNotebaseSave(pendingSave)
 
       const loginUrl = new URL("/log-in", env.WXT_WEBSITE_URL)
       loginUrl.searchParams.set("redirectTo", "/home")
@@ -187,7 +187,7 @@ export function SaveToNotebaseDialogHost() {
       closeDialog()
       toast.success(i18n.t("action.saveToNotebasePendingLogin"), {
         description:
-          pendingNotebaseSave.kind === "save_to_connected_notebase"
+          pendingSave.kind === "save_to_connected_notebase"
             ? i18n.t("action.saveToNotebasePendingConnectedLoginDescription")
             : i18n.t("action.saveToNotebasePendingLoginDescription"),
       })
@@ -201,7 +201,7 @@ export function SaveToNotebaseDialogHost() {
   }
 
   const handleLoginAndAutoCreate = async () => {
-    if (!pendingNotebaseSave || pendingNotebaseSave.kind !== "create_notebase") {
+    if (pendingNotebaseSave?.kind !== "create_notebase") {
       return
     }
 
@@ -209,7 +209,7 @@ export function SaveToNotebaseDialogHost() {
   }
 
   const handleLoginAndContinueConnectedSave = async () => {
-    if (!pendingNotebaseSave || pendingNotebaseSave.kind !== "save_to_connected_notebase") {
+    if (pendingNotebaseSave?.kind !== "save_to_connected_notebase") {
       return
     }
 

@@ -61,8 +61,8 @@ export const TranslateModelSelector = withForm({
                       <ModelSuggestionButton
                         baseURL={providerConfig.baseURL}
                         apiKey={providerConfig.apiKey}
-                        onSelect={(model) => {
-                          field.handleChange(model)
+                        onSelect={(selectedModel) => {
+                          field.handleChange(selectedModel)
                           void form.handleSubmit()
                         }}
                       />
@@ -88,9 +88,9 @@ export const TranslateModelSelector = withForm({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {LLM_PROVIDER_MODELS[providerConfig.provider].map((model) => (
-                      <SelectItem key={model} value={model}>
-                        {model}
+                    {LLM_PROVIDER_MODELS[providerConfig.provider].map((modelOption) => (
+                      <SelectItem key={modelOption} value={modelOption}>
+                        {modelOption}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -108,7 +108,7 @@ export const TranslateModelSelector = withForm({
                   checked={field.state.value}
                   onCheckedChange={(checked) => {
                     try {
-                      if (checked === false) {
+                      if (!checked) {
                         void setProviderConfig(
                           updateLLMProviderConfig(providerConfig, {
                             model: {
@@ -117,7 +117,7 @@ export const TranslateModelSelector = withForm({
                             },
                           }),
                         )
-                      } else if (checked === true) {
+                      } else if (checked) {
                         void setProviderConfig(
                           updateLLMProviderConfig(providerConfig, {
                             model: {

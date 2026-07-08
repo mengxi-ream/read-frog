@@ -39,8 +39,8 @@ export function analysisJSONFile(file: File): Promise<PromptConfigList> {
         } else {
           reject(new Error("Prompt config is invalid"))
         }
-      } catch (e) {
-        reject(e)
+      } catch (readError) {
+        reject(readError)
       }
     }
     reader.onerror = (error) => reject(error)

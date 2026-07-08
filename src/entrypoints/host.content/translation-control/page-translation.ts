@@ -522,7 +522,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       this.walkBlockedElementsCache.delete(element)
     }
 
-    return wasWalkBlocked === true && isWalkBlockedNow === false
+    return wasWalkBlocked && !isWalkBlockedNow
   }
 
   /**

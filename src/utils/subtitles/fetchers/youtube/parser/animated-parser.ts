@@ -24,7 +24,7 @@ export function parseAnimatedSubtitles(events: YoutubeTimedText[]): SubtitlesFra
     const end = start + (event.dDurationMs ?? 0)
     const last = fragments.at(-1)
 
-    if (last && last.text === text) {
+    if (last?.text === text) {
       last.end = end
     } else {
       if (last && last.end > start) last.end = start

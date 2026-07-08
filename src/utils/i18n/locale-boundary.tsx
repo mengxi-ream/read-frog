@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import i18next from "i18next"
+import i18next, { changeLanguage } from "i18next"
 import { useAtomValue } from "jotai"
 import { Fragment } from "react"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -24,7 +24,7 @@ export function LocaleBoundary({ children }: { children: ReactNode }) {
 
   if (i18next.language !== resolvedLocale) {
     // Synchronous with bundled resources; the returned promise is already resolved.
-    void i18next.changeLanguage(resolvedLocale)
+    void changeLanguage(resolvedLocale)
   }
 
   return <Fragment key={resolvedLocale}>{children}</Fragment>

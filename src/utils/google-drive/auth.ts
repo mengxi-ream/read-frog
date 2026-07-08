@@ -83,7 +83,7 @@ export async function authenticateGoogleDriveAndSaveTokenToStorage(): Promise<st
       throw new Error("No access token in OAuth response")
     }
 
-    const expiresAt = Date.now() + (expiresIn ? Number.parseInt(expiresIn) * 1000 : 3600 * 1000)
+    const expiresAt = Date.now() + (expiresIn ? Number.parseInt(expiresIn, 10) * 1000 : 3600 * 1000)
 
     const tokenData: GoogleAuthToken = {
       access_token: accessToken,

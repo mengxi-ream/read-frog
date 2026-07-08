@@ -23,13 +23,13 @@ export function useControlsInfo(
   })
 
   const setupObserver = useEffectEvent(() => {
-    if (!controlsConfig) return
+    if (!controlsConfig) return undefined
 
     const element = elementRef.current
     const shadowRoot = element ? getContainingShadowRoot(element) : null
     const shadowHost = shadowRoot?.host as HTMLElement | undefined
     const videoContainer = shadowHost?.parentElement ?? controlsConfig.findVideoContainer?.()
-    if (!videoContainer) return
+    if (!videoContainer) return undefined
 
     updateInfo(videoContainer)
 

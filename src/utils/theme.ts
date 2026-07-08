@@ -7,7 +7,7 @@ export function isDarkMode(themeMode: ThemeMode = "system"): boolean {
   if (themeMode === "system") {
     return (
       typeof window !== "undefined" &&
-      !!window.matchMedia?.("(prefers-color-scheme: dark)")?.matches
+      (window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ?? false)
     )
   }
   return themeMode === "dark"

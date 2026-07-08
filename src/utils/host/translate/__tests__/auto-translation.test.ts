@@ -1,4 +1,3 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
@@ -89,7 +88,7 @@ describe("shouldEnableAutoTranslation", () => {
 
   it("returns false for undetected language when no pattern matches", async () => {
     const config = createConfig({
-      autoTranslateLanguages: ["spa" as LangCodeISO6393],
+      autoTranslateLanguages: ["spa"],
     })
 
     await expect(

@@ -152,7 +152,7 @@ export function ProviderConfigForm() {
           ...config.languageDetection,
           providerId: ldFallback,
         },
-      } as Partial<Config>
+      }
     }
 
     if (Object.keys(patch).length > 0) {
@@ -177,10 +177,10 @@ export function ProviderConfigForm() {
             name="name"
             validators={{
               onChange: ({ value }) => {
-                const duplicateProvider = allProvidersConfig.find(
+                const providerWithSameName = allProvidersConfig.find(
                   (provider) => provider.name === value && provider.id !== providerConfig.id,
                 )
-                if (duplicateProvider) {
+                if (providerWithSameName) {
                   return i18n.t("options.apiProviders.form.duplicateProviderName", [value])
                 }
                 return undefined

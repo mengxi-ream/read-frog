@@ -219,7 +219,7 @@ export function useInputTranslation() {
   )
 
   useEffect(() => {
-    if (!inputTranslationConfig.enabled) return
+    if (!inputTranslationConfig.enabled) return undefined
 
     const handleKeyDown = (event: KeyboardEvent) => {
       // Only process space key
@@ -264,9 +264,7 @@ export function useInputTranslation() {
         if (allWithinThreshold) {
           event.preventDefault()
           spaceTimestampsRef.current = []
-          void handleTranslation(
-            activeElement as HTMLInputElement | HTMLTextAreaElement | HTMLElement,
-          )
+          void handleTranslation(activeElement)
         }
       }
     }

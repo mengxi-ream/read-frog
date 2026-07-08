@@ -59,7 +59,7 @@ export async function microsoftTranslate(
     const translations = result.map(
       (item: { translations?: { text?: string }[] }, index: number) => {
         const text = item?.translations?.[0]?.text
-        if (text == null) {
+        if (text === null || text === undefined) {
           throw new Error(`Missing translation for item at index ${index}`)
         }
         return text
@@ -68,7 +68,8 @@ export async function microsoftTranslate(
 
     return isSingle ? translations[0] : translations
   } catch (error) {
-    throw new Error(`Failed to parse Microsoft translation response: ${(error as Error).message}`)
+    const message = error instanceof Error ? error.message : String(error)
+    throw new Error(`Failed to parse Microsoft translation response: ${message}`, { cause: error })
   }
 }
 
@@ -82,6 +83,7 @@ export async function refreshMicrosoftToken(): Promise<string> {
 
     return await resp.text()
   } catch (error) {
-    throw new Error(`Error refreshing Microsoft token: ${(error as Error).message}`)
+    const message = error instanceof Error ? error.message : String(error)
+    throw new Error(`Error refreshing Microsoft token: ${message}`, { cause: error })
   }
 }

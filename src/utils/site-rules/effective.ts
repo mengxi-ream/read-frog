@@ -14,7 +14,7 @@ const cache = new WeakMap<Config, { url: string; rule: ResolvedSiteRule }>()
  */
 export function getEffectiveSiteRule(config: Config, url: string): ResolvedSiteRule {
   const cached = cache.get(config)
-  if (cached && cached.url === url) {
+  if (cached?.url === url) {
     return cached.rule
   }
 

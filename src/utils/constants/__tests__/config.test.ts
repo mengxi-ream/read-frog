@@ -20,7 +20,7 @@ describe("dEFAULT_CONFIG", () => {
       configurable: true,
       value: {
         getRandomValues,
-      } as unknown as Crypto,
+      },
     })
     vi.resetModules()
 

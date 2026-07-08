@@ -141,7 +141,7 @@ function SelectionPopoverRoot({
 
   React.useEffect(() => {
     if (!open) {
-      return
+      return undefined
     }
 
     const handlePeerPopoverOpen = (event: Event) => {
@@ -339,8 +339,8 @@ function SelectionPopoverShell({
       onDragStop={(_, data) => {
         handleDragStop({ x: data.x, y: data.y })
       }}
-      onResizeStop={(_, __, elementRef, ___, position) => {
-        handleResizeStop(elementRef, { x: position.x, y: position.y })
+      onResizeStop={(_, __, elementRef, ___, resizedPosition) => {
+        handleResizeStop(elementRef, { x: resizedPosition.x, y: resizedPosition.y })
       }}
       onWheel={handleWheel}
     >

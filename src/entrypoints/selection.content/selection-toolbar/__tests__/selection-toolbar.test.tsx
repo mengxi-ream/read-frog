@@ -74,7 +74,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
         endOffset: 1,
       }),
       containsNode: vi.fn<(...args: any[]) => any>(() => true),
-    })) as unknown as typeof window.getSelection
+    }))
   })
 
   afterEach(() => {
@@ -94,7 +94,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
         endOffset: 1,
       }),
       containsNode: vi.fn<(...args: any[]) => any>(() => containsNodeResult),
-    })) as unknown as typeof window.getSelection
+    }))
   }
 
   const clearToolbarState = async () => {
@@ -133,10 +133,10 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expect(document.querySelector(".absolute.z-2147483647")).toHaveClass("opacity-0")
   }
 
-  const getToolbar = () => document.querySelector(".absolute.z-2147483647") as HTMLElement | null
+  const getToolbar = () => document.querySelector<HTMLElement>(".absolute.z-2147483647")
 
   const getToolbarSurface = () =>
-    document.querySelector("[data-slot='selection-toolbar-surface']") as HTMLElement | null
+    document.querySelector<HTMLElement>("[data-slot='selection-toolbar-surface']")
 
   it("applies configured opacity on the toolbar surface instead of the overlay host", () => {
     render(<SelectionToolbar />)
@@ -316,7 +316,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
         endOffset: 1,
       }),
       containsNode: vi.fn<(...args: any[]) => any>((node: Node) => node !== clickElement),
-    })) as unknown as typeof window.getSelection
+    }))
 
     await triggerMouseUpWithSelection(clickElement)
     expectToolbarHidden()
@@ -347,7 +347,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
         endOffset: 1,
       }),
       containsNode: vi.fn<(...args: any[]) => any>((node: Node) => node !== clickButton),
-    })) as unknown as typeof window.getSelection
+    }))
 
     await triggerMouseUpWithSelection(clickTarget)
     expectToolbarHidden()
@@ -377,7 +377,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
         endOffset: 1,
       }),
       containsNode: vi.fn<(...args: any[]) => any>((node: Node) => node !== shadowButton),
-    })) as unknown as typeof window.getSelection
+    }))
 
     const mouseUpEvent = new MouseEvent("mouseup", {
       bubbles: true,
@@ -441,7 +441,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
         endOffset: MOCK_SELECTED_TEXT.length,
       }),
       containsNode: vi.fn<(...args: any[]) => any>(() => true),
-    })) as unknown as typeof window.getSelection
+    }))
 
     await triggerMouseUpWithSelection(overlayTextElement)
     expectToolbarHidden()
@@ -468,9 +468,9 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
         endOffset: 1,
       }),
       containsNode: vi.fn<(...args: any[]) => any>(
-        (node: Node) => node === element || element.contains(node as Node),
+        (node: Node) => node === element || element.contains(node),
       ),
-    })) as unknown as typeof window.getSelection
+    }))
 
     await triggerMouseUpWithSelection(element)
     await waitFor(() => expectToolbarVisible())
@@ -502,7 +502,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
       containsNode: vi.fn<(...args: any[]) => any>(
         (node: Node) => node === clickButton || clickButton.contains(node),
       ),
-    })) as unknown as typeof window.getSelection
+    }))
 
     await triggerMouseUpWithSelection(clickTarget)
     await waitFor(() => expectToolbarVisible())
@@ -530,7 +530,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
         endOffset: 1,
       }),
       containsNode: vi.fn<(...args: any[]) => any>(() => false),
-    })) as unknown as typeof window.getSelection
+    }))
 
     await triggerMouseUpWithSelection(element)
     await waitFor(() => expectToolbarVisible())
@@ -546,7 +546,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
       </div>,
     )
 
-    const toolbar = document.querySelector(".absolute.z-2147483647") as HTMLElement | null
+    const toolbar = document.querySelector<HTMLElement>(".absolute.z-2147483647")
     if (!toolbar) {
       throw new Error("Selection toolbar is missing")
     }
@@ -585,7 +585,7 @@ describe("selectionToolbar - positioning logic", () => {
         endOffset: 1,
       }),
       containsNode: vi.fn<(...args: any[]) => any>(() => true),
-    })) as unknown as typeof window.getSelection
+    }))
 
     // Mock window dimensions
     Object.defineProperty(window, "innerHeight", {
@@ -697,8 +697,8 @@ describe("selectionToolbar - positioning logic", () => {
       expect(toolbar).toBeTruthy()
       // For bottom-right, toolbar should be positioned at mouseUp coordinates (200, 200)
       // Accounting for scroll offset (0) and potential clamping
-      const leftValue = Number.parseInt(toolbar.style.left)
-      const topValue = Number.parseInt(toolbar.style.top)
+      const leftValue = Number.parseInt(toolbar.style.left, 10)
+      const topValue = Number.parseInt(toolbar.style.top, 10)
       // Should be close to mouseUp position (200, 200) for bottom-right direction
       expect(leftValue).toBeGreaterThanOrEqual(175) // Allow some margin for clamping
       expect(leftValue).toBeLessThanOrEqual(225) // Allow some margin for clamping
@@ -722,7 +722,7 @@ describe("selectionToolbar - positioning logic", () => {
     await triggerMouseDownAndUp(target, 100, 100, 200, 200)
 
     await waitFor(() => {
-      const topValue = Number.parseInt(toolbar.style.top)
+      const topValue = Number.parseInt(toolbar.style.top, 10)
 
       expect(topValue - 200).toBeGreaterThanOrEqual(20)
     })
@@ -746,8 +746,8 @@ describe("selectionToolbar - positioning logic", () => {
       expect(toolbar).toBeTruthy()
       // For bottom-left, toolbar should be positioned at (endX - tooltipWidth, endY)
       // MouseUp is at (100, 200), so left should be less than 100 (minus tooltip width)
-      const leftValue = Number.parseInt(toolbar.style.left)
-      const topValue = Number.parseInt(toolbar.style.top)
+      const leftValue = Number.parseInt(toolbar.style.left, 10)
+      const topValue = Number.parseInt(toolbar.style.top, 10)
       const toolbarWidth = toolbar.offsetWidth || 0
       // Left should be near endX - tooltipWidth, with direction offset margin
       expect(leftValue).toBeLessThanOrEqual(125) // Should be near mouseUp X position (offset by direction margin)
@@ -775,8 +775,8 @@ describe("selectionToolbar - positioning logic", () => {
       expect(toolbar).toBeTruthy()
       // For top-right, toolbar should be positioned at (endX, endY - tooltipHeight)
       // MouseUp is at (200, 100), so top should be less than 100 (minus tooltip height)
-      const leftValue = Number.parseInt(toolbar.style.left)
-      const topValue = Number.parseInt(toolbar.style.top)
+      const leftValue = Number.parseInt(toolbar.style.left, 10)
+      const topValue = Number.parseInt(toolbar.style.top, 10)
       const toolbarHeight = toolbar.offsetHeight || 0
       // Left should be near mouseUp X position (200)
       expect(leftValue).toBeGreaterThanOrEqual(175) // Allow some margin for clamping
@@ -805,8 +805,8 @@ describe("selectionToolbar - positioning logic", () => {
       expect(toolbar).toBeTruthy()
       // For top-left, toolbar should be positioned at (endX - tooltipWidth, endY - tooltipHeight)
       // MouseUp is at (100, 100), so both left and top should account for toolbar dimensions
-      const leftValue = Number.parseInt(toolbar.style.left)
-      const topValue = Number.parseInt(toolbar.style.top)
+      const leftValue = Number.parseInt(toolbar.style.left, 10)
+      const topValue = Number.parseInt(toolbar.style.top, 10)
       const toolbarWidth = toolbar.offsetWidth || 0
       const toolbarHeight = toolbar.offsetHeight || 0
       // Left should be near mouseUp X (100) minus tooltip width, with direction offset margin
@@ -835,7 +835,7 @@ describe("selectionToolbar - positioning logic", () => {
       const toolbar = getToolbarElement()
       expect(toolbar).toBeTruthy()
       // Should be clamped to at least MARGIN (10px)
-      const leftValue = Number.parseInt(toolbar.style.left)
+      const leftValue = Number.parseInt(toolbar.style.left, 10)
       expect(leftValue).toBeGreaterThanOrEqual(10)
     })
   })
@@ -857,7 +857,7 @@ describe("selectionToolbar - positioning logic", () => {
       const toolbar = getToolbarElement()
       expect(toolbar).toBeTruthy()
       // Should be clamped to at least MARGIN (10px)
-      const topValue = Number.parseInt(toolbar.style.top)
+      const topValue = Number.parseInt(toolbar.style.top, 10)
       expect(topValue).toBeGreaterThanOrEqual(10)
     })
   })
@@ -898,7 +898,7 @@ describe("selectionToolbar - positioning logic", () => {
 
     await waitFor(() => {
       const toolbar = getToolbarElement()
-      const leftValue = Number.parseInt(toolbar.style.left)
+      const leftValue = Number.parseInt(toolbar.style.left, 10)
       const toolbarWidth = toolbar.offsetWidth
       // Should be clamped within right boundary
       // rightBoundary = clientWidth - tooltipWidth - MARGIN = 1200 - 200 - 25 = 975
@@ -943,7 +943,7 @@ describe("selectionToolbar - positioning logic", () => {
 
     await waitFor(() => {
       const toolbar = getToolbarElement()
-      const topValue = Number.parseInt(toolbar.style.top)
+      const topValue = Number.parseInt(toolbar.style.top, 10)
       const toolbarHeight = toolbar.offsetHeight
       // Should be clamped within bottom boundary
       // bottomBoundary = scrollY + viewportHeight - tooltipHeight - MARGIN = 0 + 800 - 50 - 25 = 725
@@ -987,7 +987,7 @@ describe("selectionToolbar - positioning logic", () => {
     })
 
     // After scrolling, the toolbar position should be updated
-    const updatedTop = Number.parseInt(toolbar.style.top)
+    const updatedTop = Number.parseInt(toolbar.style.top, 10)
     // The toolbar should be clamped to at least scrollY + MARGIN (100 + 10 = 110)
     expect(updatedTop).toBeGreaterThanOrEqual(110)
   })
@@ -1023,7 +1023,7 @@ describe("selectionToolbar - positioning logic", () => {
       const toolbar = getToolbarElement()
       expect(toolbar).toBeTruthy()
       // Toolbar position should account for scroll offset
-      const topValue = Number.parseInt(toolbar.style.top)
+      const topValue = Number.parseInt(toolbar.style.top, 10)
       // Should be at least scrollY + MARGIN (200 + 10 = 210)
       expect(topValue).toBeGreaterThanOrEqual(210)
     })

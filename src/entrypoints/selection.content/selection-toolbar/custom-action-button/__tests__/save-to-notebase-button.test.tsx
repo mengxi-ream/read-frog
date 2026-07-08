@@ -23,7 +23,7 @@ const mockAuthState = vi.hoisted(() => ({
       email: "reader@example.com",
       image: null,
     },
-  } as { user: { id: string; name: string; email: string; image?: string | null } } | null,
+  },
   isPending: false,
 }))
 
@@ -195,7 +195,7 @@ describe("saveToNotebaseButton notebase availability", () => {
     ])
     vi.mocked(orpcClient.notebase.getSchema).mockResolvedValue(createSchema())
     notebaseRowCreateMock.mockResolvedValue({ txid: 1 })
-    vi.mocked(sendMessage).mockResolvedValue(undefined as never)
+    vi.mocked(sendMessage).mockResolvedValue(undefined)
   })
 
   it("renders when beta experience is disabled", () => {
@@ -251,7 +251,7 @@ describe("saveToNotebaseButton notebase availability", () => {
   })
 
   it("redirects logged-out users to home while the background save opens the notebase later", async () => {
-    mockAuthState.session = null
+    mockAuthState.session = null as unknown as typeof mockAuthState.session
     const config = cloneConfig(DEFAULT_CONFIG)
     config.betaExperience.enabled = true
     renderButton(config, createAction())
@@ -283,7 +283,7 @@ describe("saveToNotebaseButton notebase availability", () => {
   })
 
   it("keeps the connected save button enabled while logged out and opens the login-connected dialog", () => {
-    mockAuthState.session = null
+    mockAuthState.session = null as unknown as typeof mockAuthState.session
     const config = cloneConfig(DEFAULT_CONFIG)
     config.betaExperience.enabled = true
     renderButton(config, createConnectedAction())

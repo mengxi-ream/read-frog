@@ -44,7 +44,7 @@ function renderWithConfig(config: Config) {
 describe("featureProviderSelectorList custom action filtering", () => {
   it("only renders provider rows for enabled custom actions", () => {
     const config = cloneConfig(DEFAULT_CONFIG)
-    const providerId = config.providersConfig[0]!.id
+    const providerId = config.providersConfig[0].id
 
     config.selectionToolbar.customActions = [
       makeAction({ id: "enabled-action", name: "Enabled Action", providerId, enabled: true }),
@@ -59,7 +59,7 @@ describe("featureProviderSelectorList custom action filtering", () => {
 
   it("treats actions without an explicit enabled flag as enabled", () => {
     const config = cloneConfig(DEFAULT_CONFIG)
-    const providerId = config.providersConfig[0]!.id
+    const providerId = config.providersConfig[0].id
 
     config.selectionToolbar.customActions = [
       makeAction({ id: "implicit-action", name: "Implicit Action", providerId }),
@@ -72,7 +72,7 @@ describe("featureProviderSelectorList custom action filtering", () => {
 
   it("hides the custom actions section when every action is disabled", () => {
     const config = cloneConfig(DEFAULT_CONFIG)
-    const providerId = config.providersConfig[0]!.id
+    const providerId = config.providersConfig[0].id
 
     config.selectionToolbar.customActions = [
       makeAction({ id: "disabled-action", name: "Disabled Action", providerId, enabled: false }),

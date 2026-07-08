@@ -131,6 +131,7 @@ export function WhatsNewFooter() {
               allowFullScreen
               loading="eager"
               referrerPolicy="strict-origin-when-cross-origin"
+              sandbox="allow-popups allow-presentation allow-scripts"
             />
           </div>
         )}

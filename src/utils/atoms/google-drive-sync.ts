@@ -46,9 +46,12 @@ export const resolutionStatusAtom = atom((get) => {
     conflictCount,
     resolvedCount,
     allResolved,
-    hasValidationError: resolvedConfig?.validationError != null,
+    hasValidationError:
+      resolvedConfig?.validationError !== null && resolvedConfig?.validationError !== undefined,
     validationError: resolvedConfig?.validationError ?? null,
-    isValid: allResolved && resolvedConfig?.validationError == null,
+    isValid:
+      allResolved &&
+      (resolvedConfig?.validationError === null || resolvedConfig?.validationError === undefined),
   }
 })
 

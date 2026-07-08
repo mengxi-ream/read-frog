@@ -10,14 +10,14 @@ export function SelectionTranslationShortcut() {
   const shortcut =
     selectionToolbar.features.translate.shortcut ?? DEFAULT_SELECTION_TRANSLATION_SHORTCUT_KEY
 
-  const updateShortcut = (shortcut: string) => {
+  const updateShortcut = (nextShortcut: string) => {
     void setSelectionToolbar({
       ...selectionToolbar,
       features: {
         ...selectionToolbar.features,
         translate: {
           ...selectionToolbar.features.translate,
-          shortcut,
+          shortcut: nextShortcut,
         },
       },
     })

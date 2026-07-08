@@ -16,15 +16,13 @@ export function getFaviconUrl(): string {
   const candidates: { url: string; size: number; type: string }[] = []
 
   for (const rel of relList) {
-    const links = document.head.querySelectorAll(
-      `link[rel="${rel}"]`,
-    ) as NodeListOf<HTMLLinkElement>
+    const links = document.head.querySelectorAll<HTMLLinkElement>(`link[rel="${rel}"]`)
 
     links.forEach((link) => {
       if (link.href) {
         const size =
           link.sizes.length > 0
-            ? Math.max(...Array.from(link.sizes, (s) => Number.parseInt(s) || 0))
+            ? Math.max(...Array.from(link.sizes, (s) => Number.parseInt(s, 10) || 0))
             : 0
 
         candidates.push({

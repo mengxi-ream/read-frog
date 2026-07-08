@@ -9,9 +9,9 @@ import { getRandomUUID } from "@/utils/crypto-polyfill"
 /**
  * Handles cleanup, abort signals, and disconnection automatically
  */
-export function createPortStreamPromise<TResponse = string, TSerializablePayload = unknown>(
+export function createPortStreamPromise<TResponse = string>(
   portName: string,
-  serializablePayload: TSerializablePayload,
+  serializablePayload: unknown,
   options: {
     signal?: AbortSignal
     onChunk?: (data: TResponse) => void
@@ -103,7 +103,7 @@ export function createPortStreamPromise<TResponse = string, TSerializablePayload
       signal.addEventListener("abort", abortListener)
     }
 
-    const startMessage: StreamPortStartMessage<TSerializablePayload> = {
+    const startMessage: StreamPortStartMessage<unknown> = {
       type: "start",
       requestId,
       payload: serializablePayload,

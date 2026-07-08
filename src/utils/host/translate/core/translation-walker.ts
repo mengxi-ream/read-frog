@@ -55,7 +55,6 @@ export async function translateWalkedElement(
 
       if (consecutiveInlineNodes.length) {
         promises.push(translateNodes(consecutiveInlineNodes, walkId, toggle, config, !isFlexParent))
-        consecutiveInlineNodes = []
       }
     }
   } else {
