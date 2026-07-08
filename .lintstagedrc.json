@@ -1,3 +1,8 @@
 {
-  "*": ["pnpm lint:fix"]
+  "*.{js,jsx,ts,tsx,cjs,mjs}": [
+    "pnpm exec oxlint --type-aware --fix --no-error-on-unmatched-pattern"
+  ],
+  "*.{js,jsx,ts,tsx,cjs,mjs,json,jsonc,css,md,yml,yaml}": [
+    "pnpm exec oxfmt --write --no-error-on-unmatched-pattern"
+  ]
 }
