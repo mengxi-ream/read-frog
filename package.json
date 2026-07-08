@@ -13,8 +13,8 @@
     "dev": "wxt",
     "dev:edge": "wxt -b edge",
     "dev:firefox": "wxt -b firefox --mv3",
-    "fmt": "oxfmt --write .",
-    "fmt:check": "oxfmt --check .",
+    "fmt": "nx fmt",
+    "fmt:check": "nx fmt:check",
     "lint": "oxlint --type-aware --type-check",
     "lint:fix": "oxlint --type-aware --fix",
     "postinstall": "WXT_SKIP_ENV_VALIDATION=true wxt prepare",
@@ -194,6 +194,18 @@
         "executor": "nx:run-commands",
         "options": {
           "command": "vitest run --coverage"
+        }
+      },
+      "fmt": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "oxfmt --write ."
+        }
+      },
+      "fmt:check": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "oxfmt --check ."
         }
       },
       "lint": {

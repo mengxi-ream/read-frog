@@ -45,7 +45,7 @@ jobs:
         shell: bash
 
       - name: Format check
-        run: pnpm fmt:check
+        run: pnpm exec nx fmt:check
 
       - name: Lint and type check
         run: pnpm lint
