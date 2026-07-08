@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.39.2
+
+### Patch Changes
+
+- [#1801](https://github.com/mengxi-ream/read-frog/pull/1801) [`5ef7b8a`](https://github.com/mengxi-ream/read-frog/commit/5ef7b8ac32e88c9e92b2e7637174a447f2471dd4) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(page-translation): allow site rules to control aria-hidden exclusions
+
+- [#1799](https://github.com/mengxi-ream/read-frog/pull/1799) [`a2f4273`](https://github.com/mengxi-ream/read-frog/commit/a2f4273875fec2e77e4aa669325c92749a5a0ee2) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(page-translation): remove global truncation style mutation
+
 ## 1.39.1
 
 ### Patch Changes
