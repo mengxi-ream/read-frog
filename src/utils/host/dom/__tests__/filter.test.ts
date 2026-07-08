@@ -141,10 +141,32 @@ describe("isDontWalkIntoAndDontTranslateAsChildElement", () => {
     expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(true)
   })
 
-  it("should return true for aria-hidden=\"true\"", () => {
+  it("should not block aria-hidden=\"true\" by default", () => {
+    setHost("non-configured-example.org")
     const element = document.createElement("div")
     element.setAttribute("aria-hidden", "true")
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(false)
+  })
+
+  it("should still block aria-hidden=\"true\" on WhatsApp through the built-in site rule", () => {
+    setHost("web.whatsapp.com")
+    const element = document.createElement("div")
+    element.setAttribute("aria-hidden", "true")
+
     expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(true)
+  })
+
+  it("should still block Twitch aria-hidden chat decorations through the built-in site rule", () => {
+    setHost("www.twitch.tv")
+    const container = document.createElement("div")
+    container.className = "chat-line__no-background"
+    const element = document.createElement("span")
+    element.setAttribute("aria-hidden", "true")
+    container.appendChild(element)
+    document.body.appendChild(container)
+
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(true)
+    document.body.removeChild(container)
   })
 
   it("should return true for SCRIPT tag", () => {

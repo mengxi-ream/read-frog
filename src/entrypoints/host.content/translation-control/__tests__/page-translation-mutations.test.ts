@@ -157,7 +157,7 @@ function deepQueryTopLevelSelectorImpl(
 
 function isBlockedForTraversal(element: HTMLElement): boolean {
   return Boolean(element.hidden)
-    || element.getAttribute("aria-hidden") === "true"
+    || element.matches("[data-site-rule-blocked][aria-hidden='true']")
     || element.classList.contains("closed")
 }
 
@@ -245,9 +245,9 @@ describe("pageTranslationManager mutation re-walk", () => {
     manager.stop()
   })
 
-  it("observes and translates aria-hidden accordion content after it becomes visible", async () => {
+  it("observes and translates aria-hidden content after a site-rule block becomes walkable", async () => {
     document.body.innerHTML = `
-      <section id="accordion" aria-hidden="true">
+      <section id="accordion" data-site-rule-blocked aria-hidden="true">
         <p id="panel">Accordion body</p>
       </section>
     `

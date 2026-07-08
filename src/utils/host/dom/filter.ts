@@ -190,12 +190,11 @@ export function isDontWalkIntoAndDontTranslateAsChildElement(element: HTMLElemen
     = window.getComputedStyle(element).display === "none"
       || window.getComputedStyle(element).visibility === "hidden"
   const dontWalkHidden = element.hidden
-  const dontWalkAriaHidden = element.getAttribute("aria-hidden") === "true"
   const dontWalkVisuallyHidden = ["sr-only", "visually-hidden"].some(cls =>
     element.classList.contains(cls),
   )
 
-  if (dontWalkCustomElement || dontWalkContent || dontWalkInvalidTag || dontWalkCSS || dontWalkHidden || dontWalkAriaHidden || dontWalkVisuallyHidden) {
+  if (dontWalkCustomElement || dontWalkContent || dontWalkInvalidTag || dontWalkCSS || dontWalkHidden || dontWalkVisuallyHidden) {
     return true
   }
 
