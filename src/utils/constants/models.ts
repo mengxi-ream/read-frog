@@ -181,6 +181,13 @@ export const LLM_MODEL_OPTIONS: Array<{
     options: { thinking: { type: "disabled" } },
   },
 
+  // MiniMax reasoning-capable models - disable thinking/history by default.
+  // Keep this provider-agnostic because recommendation matching is model-name based.
+  {
+    pattern: /(?:^|\/)minimax-m(?:2(?:[.-].*)?|3)$/i,
+    options: { thinking: { type: "disabled" }, reasoningHistory: "disabled" },
+  },
+
   // Fireworks reasoning-focused models - disable thinking/history by default
   {
     pattern: /^accounts\/fireworks\/models\/(?:kimi-k2(?:[a-z0-9.-].*)?|minimax-m2(?:[.-].*)?)$/i,
