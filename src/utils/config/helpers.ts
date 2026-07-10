@@ -1,13 +1,30 @@
 import type { Config } from "@/types/config/config"
 import type { LanguageDetectionMode } from "@/types/config/language-detection"
-import type { APIProviderConfig, LLMProviderConfig, NonAPIProviderConfig, ProviderConfig, ProvidersConfig, PureAPIProviderConfig, TranslateProviderConfig } from "@/types/config/provider"
+import type {
+  APIProviderConfig,
+  LLMProviderConfig,
+  NonAPIProviderConfig,
+  ProviderConfig,
+  ProvidersConfig,
+  PureAPIProviderConfig,
+  TranslateProviderConfig,
+} from "@/types/config/provider"
 import type { FeatureKey } from "@/utils/constants/feature-providers"
-import { isAPIProviderConfig, isLLMProviderConfig, isNonAPIProviderConfig, isPureAPIProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
+import {
+  isAPIProviderConfig,
+  isLLMProviderConfig,
+  isNonAPIProviderConfig,
+  isPureAPIProviderConfig,
+  isTranslateProviderConfig,
+} from "@/types/config/provider"
 import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
 import { getProviderIdsForCapability } from "@/utils/providers/provider-registry"
 
-export function getProviderConfigById<T extends ProviderConfig>(providersConfig: T[], providerId: string): T | undefined {
-  return providersConfig.find(p => p.id === providerId)
+export function getProviderConfigById<T extends ProviderConfig>(
+  providersConfig: T[],
+  providerId: string,
+): T | undefined {
+  return providersConfig.find((p) => p.id === providerId)
 }
 
 export function getLLMProvidersConfig(providersConfig: ProvidersConfig): LLMProviderConfig[] {
@@ -18,7 +35,9 @@ export function getAPIProvidersConfig(providersConfig: ProvidersConfig): APIProv
   return providersConfig.filter(isAPIProviderConfig)
 }
 
-export function getPureAPIProvidersConfig(providersConfig: ProvidersConfig): PureAPIProviderConfig[] {
+export function getPureAPIProvidersConfig(
+  providersConfig: ProvidersConfig,
+): PureAPIProviderConfig[] {
   return providersConfig.filter(isPureAPIProviderConfig)
 }
 
@@ -26,19 +45,26 @@ export function getNonAPIProvidersConfig(providersConfig: ProvidersConfig): NonA
   return providersConfig.filter(isNonAPIProviderConfig)
 }
 
-export function getTranslateProvidersConfig(providersConfig: ProvidersConfig): TranslateProviderConfig[] {
+export function getTranslateProvidersConfig(
+  providersConfig: ProvidersConfig,
+): TranslateProviderConfig[] {
   return providersConfig.filter(isTranslateProviderConfig)
 }
 
 export function filterEnabledProvidersConfig(providersConfig: ProvidersConfig): ProvidersConfig {
-  return providersConfig.filter(p => p.enabled)
+  return providersConfig.filter((p) => p.enabled)
 }
 
-export function getEnabledLLMProvidersConfig(providersConfig: ProvidersConfig): LLMProviderConfig[] {
+export function getEnabledLLMProvidersConfig(
+  providersConfig: ProvidersConfig,
+): LLMProviderConfig[] {
   return filterEnabledProvidersConfig(providersConfig).filter(isLLMProviderConfig)
 }
 
-export function getProviderKeyByName(providersConfig: ProvidersConfig, providerId: string): string | undefined {
+export function getProviderKeyByName(
+  providersConfig: ProvidersConfig,
+  providerId: string,
+): string | undefined {
   const provider = getProviderConfigById(providersConfig, providerId)
   return provider?.provider
 }
@@ -51,7 +77,10 @@ export function getProviderModelConfig(config: Config, providerId: string) {
   return undefined
 }
 
-export function getProviderApiKey(providersConfig: ProvidersConfig, providerId: string): string | undefined {
+export function getProviderApiKey(
+  providersConfig: ProvidersConfig,
+  providerId: string,
+): string | undefined {
   const providerConfig = getProviderConfigById(providersConfig, providerId)
   if (providerConfig && isAPIProviderConfig(providerConfig)) {
     return providerConfig.apiKey
@@ -59,7 +88,10 @@ export function getProviderApiKey(providersConfig: ProvidersConfig, providerId: 
   return undefined
 }
 
-export function getProviderBaseURL(providersConfig: ProvidersConfig, providerId: string): string | undefined {
+export function getProviderBaseURL(
+  providersConfig: ProvidersConfig,
+  providerId: string,
+): string | undefined {
   const providerConfig = getProviderConfigById(providersConfig, providerId)
   if (providerConfig && isAPIProviderConfig(providerConfig) && "baseURL" in providerConfig) {
     return providerConfig.baseURL
@@ -81,7 +113,9 @@ export function resolveLanguageDetectionConfigForModeChange(
     return null
   }
 
-  const hasSelectedProvider = enabledLLMProviders.some(provider => provider.id === currentConfig.providerId)
+  const hasSelectedProvider = enabledLLMProviders.some(
+    (provider) => provider.id === currentConfig.providerId,
+  )
   return {
     mode: "llm",
     providerId: hasSelectedProvider ? currentConfig.providerId : enabledLLMProviders[0].id,
@@ -101,11 +135,11 @@ export function computeProviderFallbacksAfterDeletion(
   for (const key of FEATURE_KEYS) {
     const def = FEATURE_PROVIDER_DEFS[key]
     const currentId = def.getProviderId(config)
-    if (currentId !== deletedProviderId)
-      continue
-    const fallbackProviderId = getProviderIdsForCapability(key, remainingProviders, { requireEnable: true })[0]
-    if (fallbackProviderId)
-      updates[key] = fallbackProviderId
+    if (currentId !== deletedProviderId) continue
+    const fallbackProviderId = getProviderIdsForCapability(key, remainingProviders, {
+      requireEnable: true,
+    })[0]
+    if (fallbackProviderId) updates[key] = fallbackProviderId
   }
   return updates
 }
@@ -119,7 +153,10 @@ export function findFeatureMissingProvider(
       return key
   }
 
-  if (config?.languageDetection.mode === "llm" && getEnabledLLMProvidersConfig(remainingProviders).length === 0) {
+  if (
+    config?.languageDetection.mode === "llm" &&
+    getEnabledLLMProvidersConfig(remainingProviders).length === 0
+  ) {
     return "languageDetection"
   }
 
@@ -136,14 +173,19 @@ export function computeSelectionToolbarCustomActionFallbacksAfterDeletion(
   config: Config,
   remainingProviders: ProvidersConfig,
 ): Config["selectionToolbar"]["customActions"] | null {
-  const hasAffectedCustomAction = config.selectionToolbar.customActions
-    .some(action => action.providerId === deletedProviderId)
+  const hasAffectedCustomAction = config.selectionToolbar.customActions.some(
+    (action) => action.providerId === deletedProviderId,
+  )
 
   if (!hasAffectedCustomAction) {
     return null
   }
 
-  const fallbackProviderId = getProviderIdsForCapability("selectionToolbar.customAction", remainingProviders, { requireEnable: true })[0]
+  const fallbackProviderId = getProviderIdsForCapability(
+    "selectionToolbar.customAction",
+    remainingProviders,
+    { requireEnable: true },
+  )[0]
   if (!fallbackProviderId) {
     return null
   }
@@ -171,10 +213,8 @@ export function computeLanguageDetectionFallbackAfterDeletion(
   config: Config,
   remainingProviders: ProvidersConfig,
 ): string | undefined | null {
-  if (config.languageDetection.mode !== "llm")
-    return null
-  if (config.languageDetection.providerId !== deletedProviderId)
-    return null
+  if (config.languageDetection.mode !== "llm") return null
+  if (config.languageDetection.providerId !== deletedProviderId) return null
 
   const fallback = getEnabledLLMProvidersConfig(remainingProviders)[0]
   return fallback?.id

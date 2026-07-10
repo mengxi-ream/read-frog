@@ -20,12 +20,12 @@ export interface FeatureProviderDef {
 }
 
 export const FEATURE_PROVIDER_DEFS = {
-  "translate": {
+  translate: {
     isProvider: isTranslateProvider,
     getProviderId: (c: Config) => c.translate.providerId,
     configPath: ["translate", "providerId"],
   },
-  "videoSubtitles": {
+  videoSubtitles: {
     isProvider: isTranslateProvider,
     getProviderId: (c: Config) => c.videoSubtitles.providerId,
     configPath: ["videoSubtitles", "providerId"],
@@ -35,7 +35,7 @@ export const FEATURE_PROVIDER_DEFS = {
     getProviderId: (c: Config) => c.selectionToolbar.features.translate.providerId,
     configPath: ["selectionToolbar", "features", "translate", "providerId"],
   },
-  "inputTranslation": {
+  inputTranslation: {
     isProvider: isTranslateProvider,
     getProviderId: (c: Config) => c.inputTranslation.providerId,
     configPath: ["inputTranslation", "providerId"],
@@ -44,13 +44,14 @@ export const FEATURE_PROVIDER_DEFS = {
 
 /** Maps FeatureKey (with dots) to i18n-safe key (with underscores) for `options.general.featureProviders.features.*` */
 export const FEATURE_KEY_I18N_MAP = {
-  "translate": "translate",
-  "videoSubtitles": "videoSubtitles",
+  translate: "translate",
+  videoSubtitles: "videoSubtitles",
   "selectionToolbar.translate": "selectionToolbar_translate",
-  "inputTranslation": "inputTranslation",
+  inputTranslation: "inputTranslation",
 } as const satisfies Record<FeatureKey, string>
 
-export type FeatureLabelI18nKey = `options.general.featureProviders.features.${(typeof FEATURE_KEY_I18N_MAP)[FeatureKey]}`
+export type FeatureLabelI18nKey =
+  `options.general.featureProviders.features.${(typeof FEATURE_KEY_I18N_MAP)[FeatureKey]}`
 
 export function getFeatureLabelI18nKey(featureKey: FeatureKey): FeatureLabelI18nKey {
   return `options.general.featureProviders.features.${FEATURE_KEY_I18N_MAP[featureKey]}`
@@ -86,8 +87,7 @@ export function buildFeatureProviderPatch(
 
   for (const key of FEATURE_KEYS) {
     const newId = assignments[key]
-    if (newId === undefined)
-      continue
+    if (newId === undefined) continue
 
     const def = FEATURE_PROVIDER_DEFS[key]
 
@@ -103,5 +103,5 @@ export function buildFeatureProviderPatch(
     patch = mergeWithArrayOverwrite(patch, fragment)
   }
 
-  return patch as Partial<Config>
+  return patch
 }

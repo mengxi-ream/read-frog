@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { deeplTranslate, getDeepLBaseURL } from "../deepl"
 
-const fetchMock = vi.fn()
+const fetchMock = vi.fn<(...args: any[]) => any>()
 
 describe("deepl translate adapter", () => {
   beforeEach(() => {
@@ -23,10 +23,10 @@ describe("deepl translate adapter", () => {
       ok: true,
       status: 200,
       statusText: "OK",
-      json: vi.fn().mockResolvedValue({
+      json: vi.fn<(...args: any[]) => any>().mockResolvedValue({
         translations: [{ text: "你好" }],
       }),
-      text: vi.fn().mockResolvedValue(""),
+      text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
     })
 
     const result = await deeplTranslate("Hello", "auto", "zh", {
@@ -38,13 +38,16 @@ describe("deepl translate adapter", () => {
     })
 
     expect(result).toBe("你好")
-    expect(fetchMock).toHaveBeenCalledWith("https://api-free.deepl.com/v2/translate", expect.objectContaining({
-      method: "POST",
-      headers: expect.objectContaining({
-        "Authorization": "DeepL-Auth-Key test-key:fx",
-        "Content-Type": "application/json",
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api-free.deepl.com/v2/translate",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          Authorization: "DeepL-Auth-Key test-key:fx",
+          "Content-Type": "application/json",
+        }),
       }),
-    }))
+    )
 
     const [, requestInit] = fetchMock.mock.calls[0]
     expect(JSON.parse(requestInit.body)).toEqual({
@@ -58,10 +61,10 @@ describe("deepl translate adapter", () => {
       ok: true,
       status: 200,
       statusText: "OK",
-      json: vi.fn().mockResolvedValue({
+      json: vi.fn<(...args: any[]) => any>().mockResolvedValue({
         translations: [{ text: "A" }],
       }),
-      text: vi.fn().mockResolvedValue(""),
+      text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
     })
 
     await deeplTranslate("甲", "zh-TW", "en", {
@@ -85,18 +88,20 @@ describe("deepl translate adapter", () => {
       ok: true,
       status: 200,
       statusText: "OK",
-      json: vi.fn().mockResolvedValue({
+      json: vi.fn<(...args: any[]) => any>().mockResolvedValue({
         translations: [],
       }),
-      text: vi.fn().mockResolvedValue(""),
+      text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
     })
 
-    await expect(deeplTranslate("A", "en", "de", {
-      id: "deepl-default",
-      enabled: true,
-      name: "DeepL",
-      provider: "deepl",
-      apiKey: "test-key",
-    })).rejects.toThrow("DeepL translation response count mismatch")
+    await expect(
+      deeplTranslate("A", "en", "de", {
+        id: "deepl-default",
+        enabled: true,
+        name: "DeepL",
+        provider: "deepl",
+        apiKey: "test-key",
+      }),
+    ).rejects.toThrow("DeepL translation response count mismatch")
   })
 })

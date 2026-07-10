@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { SettingsSearch } from "../settings-search"
 
 const mockedRouter = vi.hoisted(() => ({
-  navigate: vi.fn(),
+  navigate: vi.fn<(...args: any[]) => any>(),
   location: {
     pathname: "/",
     search: "",
@@ -14,9 +14,13 @@ const mockedRouter = vi.hoisted(() => ({
 }))
 
 const mockedSectionScroll = vi.hoisted(() => ({
-  buildSectionSearch: vi.fn<(sectionId: string) => string>((sectionId: string) => `?section=${sectionId}`),
+  buildSectionSearch: vi.fn<(sectionId: string) => string>(
+    (sectionId: string) => `?section=${sectionId}`,
+  ),
   getSectionIdFromSearch: vi.fn<(search: string) => string | null>(() => null),
-  scrollToSectionWhenReady: vi.fn<(sectionId: string) => Promise<boolean>>().mockResolvedValue(true),
+  scrollToSectionWhenReady: vi
+    .fn<(sectionId: string) => Promise<boolean>>()
+    .mockResolvedValue(true),
 }))
 
 vi.mock("#imports", () => ({
@@ -64,7 +68,7 @@ vi.mock("@/components/ui/base-ui/command", () => ({
   CommandList: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CommandEmpty: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CommandGroup: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  CommandItem: ({ children, onSelect }: { children: React.ReactNode, onSelect?: () => void }) => (
+  CommandItem: ({ children, onSelect }: { children: React.ReactNode; onSelect?: () => void }) => (
     <button type="button" onClick={() => onSelect?.()}>
       {children}
     </button>
@@ -88,7 +92,9 @@ describe("settings search navigation", () => {
     mockedRouter.location.key = "loc-1"
 
     mockedSectionScroll.buildSectionSearch.mockClear()
-    mockedSectionScroll.buildSectionSearch.mockImplementation((sectionId: string) => `?section=${sectionId}`)
+    mockedSectionScroll.buildSectionSearch.mockImplementation(
+      (sectionId: string) => `?section=${sectionId}`,
+    )
     mockedSectionScroll.getSectionIdFromSearch.mockReset()
     mockedSectionScroll.getSectionIdFromSearch.mockReturnValue(null)
     mockedSectionScroll.scrollToSectionWhenReady.mockReset()

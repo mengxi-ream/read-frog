@@ -11,7 +11,7 @@ describe("splitTextByUtf8Bytes", () => {
     const chunks = splitTextByUtf8Bytes(text, 1800, 60)
 
     expect(chunks.length).toBeGreaterThan(1)
-    expect(chunks.every(chunk => getUtf8Bytes(chunk) <= 1800)).toBe(true)
+    expect(chunks.every((chunk) => getUtf8Bytes(chunk) <= 1800)).toBe(true)
   })
 
   it("does not split inside html entities when possible", () => {
@@ -25,7 +25,7 @@ describe("splitTextByUtf8Bytes", () => {
     const text = "🙂🙂🙂"
     const chunks = splitTextByUtf8Bytes(text, 5, 10)
 
-    expect(chunks.every(chunk => !chunk.includes("\uFFFD"))).toBe(true)
+    expect(chunks.every((chunk) => !chunk.includes("\uFFFD"))).toBe(true)
     expect(chunks.join("")).toBe(text)
   })
 
@@ -33,7 +33,7 @@ describe("splitTextByUtf8Bytes", () => {
     const maxBytes = 9
     const chunks = splitTextByUtf8Bytes("你你你 你好", maxBytes, 10)
 
-    expect(chunks.every(chunk => getUtf8Bytes(chunk) <= maxBytes)).toBe(true)
+    expect(chunks.every((chunk) => getUtf8Bytes(chunk) <= maxBytes)).toBe(true)
   })
 
   it("throws when chunk count exceeds the configured limit", () => {

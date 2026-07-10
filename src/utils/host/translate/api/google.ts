@@ -9,34 +9,28 @@ export async function googleTranslate(
   fromLang: string,
   toLang: string,
 ): Promise<string> {
-  const resp = await fetch(
-    GOOGLE_TRANSLATE_HTML_URL,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json+protobuf",
-        "X-Goog-API-Key": GOOGLE_TRANSLATE_HTML_API_KEY,
-      },
-      body: JSON.stringify([
-        [[sourceText], fromLang, toLang],
-        GOOGLE_TRANSLATE_HTML_CLIENT,
-      ]),
+  const resp = await fetch(GOOGLE_TRANSLATE_HTML_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json+protobuf",
+      "X-Goog-API-Key": GOOGLE_TRANSLATE_HTML_API_KEY,
     },
-  ).catch((error) => {
-    throw attachRequestErrorMeta(
-      new Error(`Network error during translation: ${error.message}`),
-      { kind: "network", isRetryable: true },
-    )
+    body: JSON.stringify([[[sourceText], fromLang, toLang], GOOGLE_TRANSLATE_HTML_CLIENT]),
+  }).catch((error) => {
+    throw attachRequestErrorMeta(new Error(`Network error during translation: ${error.message}`), {
+      kind: "network",
+      isRetryable: true,
+    })
   })
 
   if (!resp.ok) {
-    const errorText = await resp
-      .text()
-      .catch(() => "Unable to read error response")
+    const errorText = await resp.text().catch(() => "Unable to read error response")
     throw attachRequestErrorMeta(
-      new Error(`Translation request failed: ${resp.status} ${resp.statusText}${
-        errorText ? ` - ${errorText}` : ""
-      }`),
+      new Error(
+        `Translation request failed: ${resp.status} ${resp.statusText}${
+          errorText ? ` - ${errorText}` : ""
+        }`,
+      ),
       {
         statusCode: resp.status,
         responseHeaders: resp.headers,
@@ -52,10 +46,8 @@ export async function googleTranslate(
     }
 
     return result[0][0]
-  }
-  catch (error) {
-    throw new Error(
-      `Failed to parse translation response: ${(error as Error).message}`,
-    )
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    throw new Error(`Failed to parse translation response: ${message}`, { cause: error })
   }
 }

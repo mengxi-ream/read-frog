@@ -59,8 +59,7 @@ export function protectSelectAllShadowRoot(shadowHost: HTMLElement, wrapper: HTM
 
 /* 检查元素是否可编辑 */
 function isEditableElement(element: Element | null): boolean {
-  if (!element)
-    return false
+  if (!element) return false
 
   const tagName = element.tagName.toLowerCase()
 
@@ -88,8 +87,7 @@ function isEditableElement(element: Element | null): boolean {
 /* 全选组件内部（只需 1 个 Range） */
 function selectAllInside(root: HTMLElement) {
   const sel = window.getSelection()
-  if (!sel)
-    return
+  if (!sel) return
   sel.removeAllRanges()
 
   const range = document.createRange()
@@ -100,8 +98,7 @@ function selectAllInside(root: HTMLElement) {
 // 选中整个页面，但跳过你的 shadow host 组件。
 function rebuildSelectionWithoutHost(shadowHost: HTMLElement) {
   const sel = window.getSelection()
-  if (!sel)
-    return
+  if (!sel) return
   sel.removeAllRanges()
 
   const before = document.createRange()

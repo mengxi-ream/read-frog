@@ -25,15 +25,15 @@ const {
     restart: ReturnType<typeof vi.fn>
     registerPageTranslationTriggers: ReturnType<typeof vi.fn>
   }>,
-  mockBindTranslationShortcutKey: vi.fn(),
-  mockClearEffectiveSiteControlUrl: vi.fn(),
-  mockDetectPageLanguageLightweight: vi.fn(),
-  mockEnsurePresetStyles: vi.fn(),
-  mockMountHostToast: vi.fn(),
-  mockOnMessage: vi.fn(),
-  mockRegisterNodeTranslationTriggers: vi.fn(),
-  mockSendMessage: vi.fn(),
-  mockSetupUrlChangeListener: vi.fn(),
+  mockBindTranslationShortcutKey: vi.fn<(...args: any[]) => any>(),
+  mockClearEffectiveSiteControlUrl: vi.fn<(...args: any[]) => any>(),
+  mockDetectPageLanguageLightweight: vi.fn<(...args: any[]) => any>(),
+  mockEnsurePresetStyles: vi.fn<(...args: any[]) => any>(),
+  mockMountHostToast: vi.fn<(...args: any[]) => any>(),
+  mockOnMessage: vi.fn<(...args: any[]) => any>(),
+  mockRegisterNodeTranslationTriggers: vi.fn<(...args: any[]) => any>(),
+  mockSendMessage: vi.fn<(...args: any[]) => any>(),
+  mockSetupUrlChangeListener: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/content/page-language", () => ({
@@ -46,9 +46,9 @@ vi.mock("@/utils/host/translate/ui/style-injector", () => ({
 
 vi.mock("@/utils/logger", () => ({
   logger: {
-    error: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
+    error: vi.fn<(...args: any[]) => any>(),
+    info: vi.fn<(...args: any[]) => any>(),
+    warn: vi.fn<(...args: any[]) => any>(),
   },
 }))
 
@@ -80,19 +80,21 @@ vi.mock("../translation-control/node-translation", () => ({
 vi.mock("../translation-control/page-translation", () => ({
   PageTranslationManager: class {
     isActive = false
-    start = vi.fn(async () => {
+    start = vi.fn<(...args: any[]) => any>(async () => {
       this.isActive = true
     })
 
-    stop = vi.fn(() => {
+    stop = vi.fn<(...args: any[]) => any>(() => {
       this.isActive = false
     })
 
-    restart = vi.fn(async () => {
+    restart = vi.fn<(...args: any[]) => any>(async () => {
       this.isActive = true
     })
 
-    registerPageTranslationTriggers = vi.fn(() => vi.fn())
+    registerPageTranslationTriggers = vi.fn<(...args: any[]) => any>(() =>
+      vi.fn<(...args: any[]) => any>(),
+    )
 
     constructor() {
       managerInstances.push(this)
@@ -119,7 +121,7 @@ function createContentScriptContext() {
 
 async function flushAsyncWork(): Promise<void> {
   await Promise.resolve()
-  await new Promise(resolve => setTimeout(resolve, 0))
+  await new Promise((resolve) => setTimeout(resolve, 0))
   await Promise.resolve()
 }
 
@@ -129,18 +131,17 @@ describe("bootstrapHostContent URL changes", () => {
     messageHandlers.clear()
     managerInstances.length = 0
 
-    mockSetupUrlChangeListener.mockReturnValue(vi.fn())
-    mockMountHostToast.mockReturnValue(vi.fn())
-    mockRegisterNodeTranslationTriggers.mockReturnValue(vi.fn())
-    mockBindTranslationShortcutKey.mockResolvedValue(vi.fn())
+    mockSetupUrlChangeListener.mockReturnValue(vi.fn<(...args: any[]) => any>())
+    mockMountHostToast.mockReturnValue(vi.fn<(...args: any[]) => any>())
+    mockRegisterNodeTranslationTriggers.mockReturnValue(vi.fn<(...args: any[]) => any>())
+    mockBindTranslationShortcutKey.mockResolvedValue(vi.fn<(...args: any[]) => any>())
     mockOnMessage.mockImplementation((name: string, handler: (msg?: any) => any) => {
       messageHandlers.set(name, handler)
-      return vi.fn()
+      return vi.fn<(...args: any[]) => any>()
     })
     mockDetectPageLanguageLightweight.mockResolvedValue({ detectedCodeOrUnd: "fra" })
     mockSendMessage.mockImplementation((name: string) => {
-      if (name === "getEnablePageTranslationFromContentScript")
-        return Promise.resolve(false)
+      if (name === "getEnablePageTranslationFromContentScript") return Promise.resolve(false)
 
       return Promise.resolve(undefined)
     })
@@ -148,8 +149,7 @@ describe("bootstrapHostContent URL changes", () => {
 
   it("refreshes active page translation on same-origin SPA navigation without disabling the session", async () => {
     mockSendMessage.mockImplementation((name: string) => {
-      if (name === "getEnablePageTranslationFromContentScript")
-        return Promise.resolve(true)
+      if (name === "getEnablePageTranslationFromContentScript") return Promise.resolve(true)
 
       return Promise.resolve(undefined)
     })
@@ -158,12 +158,14 @@ describe("bootstrapHostContent URL changes", () => {
     await bootstrapHostContent(ctx, null)
     const manager = managerInstances[0]
 
-    window.dispatchEvent(new CustomEvent("extension:URLChange", {
-      detail: {
-        from: "https://example.com/articles/1",
-        to: "https://example.com/articles/2?ref=nav#comments",
-      },
-    }))
+    window.dispatchEvent(
+      new CustomEvent("extension:URLChange", {
+        detail: {
+          from: "https://example.com/articles/1",
+          to: "https://example.com/articles/2?ref=nav#comments",
+        },
+      }),
+    )
     await flushAsyncWork()
 
     expect(manager.start).toHaveBeenCalledTimes(1)
@@ -182,12 +184,14 @@ describe("bootstrapHostContent URL changes", () => {
     await bootstrapHostContent(ctx, null)
     const manager = managerInstances[0]
 
-    window.dispatchEvent(new CustomEvent("extension:URLChange", {
-      detail: {
-        from: "https://example.com/articles/1",
-        to: "https://example.com/articles/2",
-      },
-    }))
+    window.dispatchEvent(
+      new CustomEvent("extension:URLChange", {
+        detail: {
+          from: "https://example.com/articles/1",
+          to: "https://example.com/articles/2",
+        },
+      }),
+    )
     await flushAsyncWork()
 
     expect(manager.start).not.toHaveBeenCalled()

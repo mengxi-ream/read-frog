@@ -67,7 +67,12 @@ function migrateLegacyShortcut(legacyShortcut: unknown): string {
       return FALLBACK_SHORTCUT
     }
 
-    if (normalizedToken === "ctrl" || normalizedToken === "control" || normalizedToken === "command" || normalizedToken === "meta") {
+    if (
+      normalizedToken === "ctrl" ||
+      normalizedToken === "control" ||
+      normalizedToken === "command" ||
+      normalizedToken === "meta"
+    ) {
       hasMod = true
       continue
     }
@@ -93,12 +98,9 @@ function migrateLegacyShortcut(legacyShortcut: unknown): string {
     return FALLBACK_SHORTCUT
   }
 
-  return [
-    hasMod ? "Mod" : null,
-    hasAlt ? "Alt" : null,
-    hasShift ? "Shift" : null,
-    key,
-  ].filter(Boolean).join("+")
+  return [hasMod ? "Mod" : null, hasAlt ? "Alt" : null, hasShift ? "Shift" : null, key]
+    .filter(Boolean)
+    .join("+")
 }
 
 function removeVocabularyInsightFeature(oldFeatures: any): any {

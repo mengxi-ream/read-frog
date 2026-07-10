@@ -8,25 +8,13 @@ import BatchRequestRecord from "./tables/batch-request-record"
 import TranslationCache from "./tables/translation-cache"
 
 export default class AppDB extends Dexie {
-  translationCache!: EntityTable<
-    TranslationCache,
-    "key"
-  >
+  translationCache!: EntityTable<TranslationCache, "key">
 
-  batchRequestRecord!: EntityTable<
-    BatchRequestRecord,
-    "key"
-  >
+  batchRequestRecord!: EntityTable<BatchRequestRecord, "key">
 
-  articleSummaryCache!: EntityTable<
-    ArticleSummaryCache,
-    "key"
-  >
+  articleSummaryCache!: EntityTable<ArticleSummaryCache, "key">
 
-  aiSegmentationCache!: EntityTable<
-    AiSegmentationCache,
-    "key"
-  >
+  aiSegmentationCache!: EntityTable<AiSegmentationCache, "key">
 
   constructor() {
     super(`${upperCamelCase(APP_NAME)}DB`)

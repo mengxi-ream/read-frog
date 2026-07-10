@@ -1,8 +1,8 @@
 import { Icon } from "@iconify/react"
 import { useAtom, useSetAtom } from "jotai"
 import { Activity } from "react"
-import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
+import { i18n } from "@/utils/i18n"
 import { ConfigurePrompt } from "./configure-prompt"
 import { usePromptAtoms } from "./context"
 import { ExportPrompts } from "./export-prompts"
@@ -27,7 +27,7 @@ export function PromptList() {
 
   return (
     <section className="w-full">
-      <div className="w-full text-end mb-4 gap-3 flex justify-end">
+      <div className="mb-4 flex w-full justify-end gap-3 text-end">
         <Activity mode={isExportMode ? "visible" : "hidden"}>
           <Button
             variant="outline"
@@ -54,10 +54,7 @@ export function PromptList() {
           <ConfigurePrompt />
         </Activity>
       </div>
-      <PromptGrid
-        currentPromptId={currentPromptId}
-        setCurrentPromptId={setCurrentPromptId}
-      />
+      <PromptGrid currentPromptId={currentPromptId} setCurrentPromptId={setCurrentPromptId} />
     </section>
   )
 }

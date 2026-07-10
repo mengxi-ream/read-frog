@@ -151,12 +151,14 @@ describe("readSelectionSnapshot", () => {
 
     expect(readSelectionSnapshot(selection)).toMatchObject({
       text: "Beta",
-      ranges: [expect.objectContaining({
-        startContainer: selectionNode,
-        startOffset: 0,
-        endContainer: selectionNode,
-        endOffset: 4,
-      })],
+      ranges: [
+        expect.objectContaining({
+          startContainer: selectionNode,
+          startOffset: 0,
+          endContainer: selectionNode,
+          endOffset: 4,
+        }),
+      ],
     })
   })
 
@@ -176,7 +178,7 @@ describe("readSelectionSnapshot", () => {
     range.setStart(selectionNode, 0)
     range.setEnd(selectionNode, selectionNode.textContent?.length ?? 0)
 
-    const getComposedRanges = vi.fn(() => [range])
+    const getComposedRanges = vi.fn<(...args: any[]) => any>(() => [range])
     const selection = {
       toString: () => "Beta",
       anchorNode: selectionNode,
@@ -210,7 +212,7 @@ describe("readSelectionSnapshot", () => {
     range.setStart(selectedText, 0)
     range.setEnd(selectedText, selectedText.textContent?.length ?? 0)
 
-    const getComposedRanges = vi.fn(() => [range])
+    const getComposedRanges = vi.fn<(...args: any[]) => any>(() => [range])
     const selection = {
       toString: () => "Beta",
       anchorNode: selectedText,
@@ -249,7 +251,7 @@ describe("readSelectionSnapshot", () => {
     range.setStart(selectedText, 0)
     range.setEnd(selectedText, selectedText.textContent?.length ?? 0)
 
-    const getComposedRanges = vi.fn(() => [range])
+    const getComposedRanges = vi.fn<(...args: any[]) => any>(() => [range])
     const selection = {
       toString: () => "Beta",
       anchorNode: selectedText,
@@ -281,7 +283,8 @@ describe("readSelectionSnapshot", () => {
     const subtitlesShadowRoot = subtitlesHost.attachShadow({ mode: "open" })
     const subtitleLine = document.createElement("div")
     subtitleLine.className = "subtitles-main"
-    subtitleLine.textContent = "fears that anti-immigration protests could descend into widespread violence against foreigners."
+    subtitleLine.textContent =
+      "fears that anti-immigration protests could descend into widespread violence against foreigners."
     subtitlesShadowRoot.appendChild(subtitleLine)
 
     const subtitleNode = subtitleLine.firstChild
@@ -302,8 +305,9 @@ describe("readSelectionSnapshot", () => {
     fallbackRange.setStart(fallbackNode, 0)
     fallbackRange.setEnd(fallbackNode, fallbackNode.textContent?.length ?? 0)
 
-    const getComposedRanges = vi.fn((options?: { shadowRoots?: ShadowRoot[] }) =>
-      options?.shadowRoots?.includes(subtitlesShadowRoot) ? [subtitleRange] : [],
+    const getComposedRanges = vi.fn<(...args: any[]) => any>(
+      (options?: { shadowRoots?: ShadowRoot[] }) =>
+        options?.shadowRoots?.includes(subtitlesShadowRoot) ? [subtitleRange] : [],
     )
     const selection = {
       toString: () => "against",
@@ -327,7 +331,9 @@ describe("readSelectionSnapshot", () => {
     })
     expect(buildContextSnapshot(snapshot)).toEqual({
       text: "fears that anti-immigration protests could descend into widespread violence against foreigners.",
-      paragraphs: ["fears that anti-immigration protests could descend into widespread violence against foreigners."],
+      paragraphs: [
+        "fears that anti-immigration protests could descend into widespread violence against foreigners.",
+      ],
     })
   })
 
@@ -343,8 +349,8 @@ describe("readSelectionSnapshot", () => {
     range.setStart(selectionNode, 0)
     range.setEnd(selectionNode, selectionNode.textContent?.length ?? 0)
 
-    const getRangeAt = vi.fn(() => range)
-    const getComposedRanges = vi.fn(() => [])
+    const getRangeAt = vi.fn<(...args: any[]) => any>(() => range)
+    const getComposedRanges = vi.fn<(...args: any[]) => any>(() => [])
     const selection = {
       toString: () => "Beta",
       anchorNode: selectionNode,
@@ -356,12 +362,14 @@ describe("readSelectionSnapshot", () => {
 
     expect(readSelectionSnapshot(selection)).toMatchObject({
       text: "Beta",
-      ranges: [expect.objectContaining({
-        startContainer: selectionNode,
-        startOffset: 0,
-        endContainer: selectionNode,
-        endOffset: 4,
-      })],
+      ranges: [
+        expect.objectContaining({
+          startContainer: selectionNode,
+          startOffset: 0,
+          endContainer: selectionNode,
+          endOffset: 4,
+        }),
+      ],
     })
     expect(getRangeAt).toHaveBeenCalledWith(0)
   })

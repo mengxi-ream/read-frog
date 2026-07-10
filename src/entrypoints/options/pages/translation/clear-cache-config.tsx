@@ -1,6 +1,5 @@
 import { IconTrash } from "@tabler/icons-react"
 import { useState } from "react"
-import { i18n } from "#imports"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,6 +12,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/base-ui/alert-dialog"
 import { Button } from "@/components/ui/base-ui/button"
+import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { ConfigCard } from "../../components/config-card"
 
@@ -24,23 +24,27 @@ export function ClearCacheConfig() {
     try {
       setIsClearing(true)
       await sendMessage("clearAllTranslationRelatedCache")
-    }
-    catch (error) {
+    } catch (error) {
       console.error("Failed to clear cache:", error)
-    }
-    finally {
+    } finally {
       setIsClearing(false)
       setOpen(false)
     }
   }
 
   return (
-    <ConfigCard id="clear-cache" title={i18n.t("options.general.clearCache.title")} description={i18n.t("options.general.clearCache.description")}>
+    <ConfigCard
+      id="clear-cache"
+      title={i18n.t("options.general.clearCache.title")}
+      description={i18n.t("options.general.clearCache.description")}
+    >
       <AlertDialog open={open} onOpenChange={setOpen}>
-        <div className="w-full flex justify-end">
+        <div className="flex w-full justify-end">
           <AlertDialogTrigger render={<Button variant="destructive" disabled={isClearing} />}>
             <IconTrash className="size-4" />
-            {isClearing ? i18n.t("options.general.clearCache.clearing") : i18n.t("options.general.clearCache.dialog.trigger")}
+            {isClearing
+              ? i18n.t("options.general.clearCache.clearing")
+              : i18n.t("options.general.clearCache.dialog.trigger")}
           </AlertDialogTrigger>
         </div>
         <AlertDialogContent>
@@ -51,9 +55,17 @@ export function ClearCacheConfig() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{i18n.t("options.general.clearCache.dialog.cancel")}</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={handleClearCache} disabled={isClearing}>
-              {isClearing ? i18n.t("options.general.clearCache.clearing") : i18n.t("options.general.clearCache.dialog.confirm")}
+            <AlertDialogCancel>
+              {i18n.t("options.general.clearCache.dialog.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleClearCache}
+              disabled={isClearing}
+            >
+              {isClearing
+                ? i18n.t("options.general.clearCache.clearing")
+                : i18n.t("options.general.clearCache.dialog.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

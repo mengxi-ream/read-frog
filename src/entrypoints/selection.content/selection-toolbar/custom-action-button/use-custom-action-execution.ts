@@ -3,7 +3,10 @@ import type { RefObject } from "react"
 import type { SelectionToolbarCustomActionRequestSlice } from "../atoms"
 import type { SelectionToolbarInlineError } from "../inline-error"
 import type { AnalyticsSurface } from "@/types/analytics"
-import type { BackgroundStructuredObjectStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
+import type {
+  BackgroundStructuredObjectStreamSnapshot,
+  ThinkingSnapshot,
+} from "@/types/background-stream"
 import type { AISDKReasoning } from "@/types/config/provider"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { CachedWebPageContext } from "@/utils/host/translate/webpage-context"
@@ -18,7 +21,10 @@ import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { getTopLevelReasoning } from "@/utils/providers/reasoning"
 import { truncateContextTextForCustomAction } from "../../utils"
-import { buildSelectionToolbarCustomActionSystemPrompt, replaceSelectionToolbarCustomActionPromptTokens } from "../custom-action-prompt"
+import {
+  buildSelectionToolbarCustomActionSystemPrompt,
+  replaceSelectionToolbarCustomActionPromptTokens,
+} from "../custom-action-prompt"
 import {
   createSelectionToolbarPrecheckError,
   createSelectionToolbarRuntimeError,
@@ -55,7 +61,10 @@ interface CustomActionExecutionRequest {
   }
   key: string
   payload: {
-    outputSchema: Array<{ name: string, type: SelectionToolbarCustomAction["outputSchema"][number]["type"] }>
+    outputSchema: Array<{
+      name: string
+      type: SelectionToolbarCustomAction["outputSchema"][number]["type"]
+    }>
     prompt: string
     providerId: string
     providerOptions?: Record<string, Record<string, JSONValue>>
@@ -155,11 +164,12 @@ export function buildCustomActionExecutionPlan(
 }
 
 export function useCustomActionWebPageContext(open: boolean, popoverSessionKey: number) {
-  const [resolvedWebPageContext, setResolvedWebPageContext] = useState<ResolvedWebPageContext | null>(null)
+  const [resolvedWebPageContext, setResolvedWebPageContext] =
+    useState<ResolvedWebPageContext | null>(null)
 
   useEffect(() => {
     if (!open) {
-      return
+      return undefined
     }
 
     let isCancelled = false
@@ -215,16 +225,17 @@ function buildCustomActionExecutionRequest({
   const outputSchema = action.outputSchema.map(({ name, type }) => ({ name, type }))
   const providerKey = provider.kind === "local" ? provider.config.provider : provider.id
   const model = provider.kind === "local" ? provider.config.model : undefined
-  const modelName = provider.kind === "local" ? resolveModelId(provider.config.model) ?? "" : ""
+  const modelName = provider.kind === "local" ? (resolveModelId(provider.config.model) ?? "") : ""
   const reasoning = provider.kind === "local" ? getTopLevelReasoning(provider.config) : undefined
-  const providerOptions = provider.kind === "local"
-    ? getProviderOptionsWithOverride(
-        modelName,
-        provider.config.provider,
-        provider.config.providerOptions,
-        reasoning,
-      )
-    : undefined
+  const providerOptions =
+    provider.kind === "local"
+      ? getProviderOptionsWithOverride(
+          modelName,
+          provider.config.provider,
+          provider.config.providerOptions,
+          reasoning,
+        )
+      : undefined
   const temperature = provider.kind === "local" ? provider.config.temperature : undefined
 
   return {
@@ -237,7 +248,11 @@ function buildCustomActionExecutionRequest({
       actionId: action.id,
       analyticsSurface,
       model,
-      outputSchema: action.outputSchema.map(({ description, name, type }) => ({ description, name, type })),
+      outputSchema: action.outputSchema.map(({ description, name, type }) => ({
+        description,
+        name,
+        type,
+      })),
       popoverSessionKey,
       prompt,
       promptTokens,
@@ -304,16 +319,16 @@ export function useCustomActionExecution({
 
   useEffect(() => {
     if (!open || !executionRequestKey) {
-      return
+      return undefined
     }
 
     const request = executionRequestRef.current
     if (!request || request.key !== executionRequestKey) {
-      return
+      return undefined
     }
 
     if (lastRunKeyRef.current === executionRequestKey) {
-      return
+      return undefined
     }
     lastRunKeyRef.current = executionRequestKey
 
@@ -340,21 +355,18 @@ export function useCustomActionExecution({
       })
 
       try {
-        const finalResult = await streamBackgroundStructuredObject(
-          request.payload,
-          {
-            signal: abortController.signal,
-            onChunk: (partial: BackgroundStructuredObjectStreamSnapshot) => {
-              if (isCancelled) {
-                return
-              }
+        const finalResult = await streamBackgroundStructuredObject(request.payload, {
+          signal: abortController.signal,
+          onChunk: (partial: BackgroundStructuredObjectStreamSnapshot) => {
+            if (isCancelled) {
+              return
+            }
 
-              setResult(partial.output)
-              setThinking(partial.thinking)
-              scrollSelectionPopoverBodyToBottom(bodyRefRef.current)
-            },
+            setResult(partial.output)
+            setThinking(partial.thinking)
+            scrollSelectionPopoverBodyToBottom(bodyRefRef.current)
           },
-        )
+        })
 
         if (isCancelled) {
           return
@@ -366,9 +378,8 @@ export function useCustomActionExecution({
           ...analyticsContext,
           outcome: "success",
         })
-      }
-      catch (error) {
-        if (isAbortError(error)) {
+      } catch (caughtError) {
+        if (isAbortError(caughtError)) {
           return
         }
 
@@ -376,14 +387,13 @@ export function useCustomActionExecution({
           return
         }
 
-        setThinking(prev => prev?.text ? { ...prev, status: "complete" } : null)
-        setError(createSelectionToolbarRuntimeError("customAction", error))
+        setThinking((prev) => (prev?.text ? { ...prev, status: "complete" } : null))
+        setError(createSelectionToolbarRuntimeError("customAction", caughtError))
         void trackFeatureUsed({
           ...analyticsContext,
           outcome: "failure",
         })
-      }
-      finally {
+      } finally {
         if (!isCancelled) {
           setIsRunning(false)
         }

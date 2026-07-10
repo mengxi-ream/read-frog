@@ -17,18 +17,17 @@ export const storageAdapter = {
     const parsedValue = schema.safeParse(value)
     if (parsedValue.success) {
       await storage.setItem(`local:${key}`, parsedValue.data)
-    }
-    else {
+    } else {
       throw new Error(parsedValue.error.message)
     }
   },
   async setMeta(key: string, meta: Record<string, unknown>) {
     await storage.setMeta(`local:${key}`, meta)
   },
+  // oxlint-disable-next-line typescript/no-unnecessary-type-parameters -- T preserves caller callback typing for typed storage values.
   watch<T>(key: string, callback: (newValue: T) => void) {
     const unwatch = storage.watch<T>(`local:${key}`, (newValue) => {
-      if (isNonNullish(newValue))
-        callback(newValue)
+      if (isNonNullish(newValue)) callback(newValue)
     })
     return unwatch
   },

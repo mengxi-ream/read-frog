@@ -21,14 +21,25 @@ export async function aiTranslate<TContext>(
   targetLangName: string,
   providerConfig: LLMProviderConfig,
   promptResolver: PromptResolver<TContext>,
-  options?: { isBatch?: boolean, context?: TContext },
+  options?: { isBatch?: boolean; context?: TContext },
 ) {
-  const { id: providerId, model: providerModel, provider, providerOptions: userProviderOptions, temperature } = providerConfig
+  const {
+    id: providerId,
+    model: providerModel,
+    provider,
+    providerOptions: userProviderOptions,
+    temperature,
+  } = providerConfig
   const reasoning = getTopLevelReasoning(providerConfig)
   const modelName = resolveModelId(providerModel)
   const model = await getModelById(providerId)
 
-  const providerOptions = getProviderOptionsWithOverride(modelName ?? "", provider, userProviderOptions, reasoning)
+  const providerOptions = getProviderOptionsWithOverride(
+    modelName ?? "",
+    provider,
+    userProviderOptions,
+    reasoning,
+  )
   const { systemPrompt, prompt } = await promptResolver(targetLangName, text, options)
 
   try {
@@ -45,8 +56,7 @@ export async function aiTranslate<TContext>(
     const [, finalTranslation = translatedText] = translatedText.match(THINK_TAG_RE) || []
 
     return finalTranslation
-  }
-  catch (error) {
+  } catch (error) {
     const message = extractAISDKErrorMessage(error)
     const meta = getRequestErrorMeta(error)
     if (error instanceof Error) {

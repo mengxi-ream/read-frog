@@ -1,9 +1,13 @@
 import type { ThinkingSnapshot } from "@/types/background-stream"
 import { IconChevronDown } from "@tabler/icons-react"
 import { useEffect, useRef, useState } from "react"
-import { i18n } from "#imports"
 import { ThinkingIcon } from "@/components/icons/thinking-icon"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/base-ui/collapsible"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/base-ui/collapsible"
+import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 
 interface ThinkingProps {
@@ -15,26 +19,20 @@ interface ThinkingProps {
 
 const AUTO_SCROLL_BOTTOM_THRESHOLD = 8
 
-export function Thinking({
-  status,
-  content,
-  defaultExpanded = false,
-  className,
-}: ThinkingProps) {
+export function Thinking({ status, content, defaultExpanded = false, className }: ThinkingProps) {
   const [open, setOpen] = useState(defaultExpanded)
   const contentRef = useRef<HTMLDivElement | null>(null)
   const shouldAutoScrollRef = useRef(true)
   const trimmedContent = content?.trim() ?? ""
   const hasContent = trimmedContent.length > 0
   const isThinking = status === "thinking"
-  const statusLabel = isThinking
-    ? i18n.t("thinking.label")
-    : i18n.t("thinking.complete")
+  const statusLabel = isThinking ? i18n.t("thinking.label") : i18n.t("thinking.complete")
   const containerClassName = cn(
     "rounded-lg border border-border/70 bg-muted/30 text-muted-foreground",
     className,
   )
-  const triggerClassName = "flex w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left text-xs"
+  const triggerClassName =
+    "flex w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left text-xs"
   const thinkingIconClassName = cn(
     "shrink-0",
     isThinking ? "text-primary" : "text-muted-foreground",
@@ -48,7 +46,7 @@ export function Thinking({
 
   useEffect(() => {
     if (!open || !shouldAutoScrollRef.current) {
-      return
+      return undefined
     }
 
     const frame = requestAnimationFrame(() => {
@@ -91,20 +89,13 @@ export function Thinking({
   }
 
   return (
-    <Collapsible
-      open={open}
-      onOpenChange={setOpen}
-      className={containerClassName}
-    >
+    <Collapsible open={open} onOpenChange={setOpen} className={containerClassName}>
       <CollapsibleTrigger
         className={triggerClassName}
         aria-label={open ? i18n.t("thinking.collapse") : i18n.t("thinking.expand")}
       >
         <span className="flex min-w-0 items-center gap-2">
-          <ThinkingIcon
-            animated={isThinking}
-            className={thinkingIconClassName}
-          />
+          <ThinkingIcon animated={isThinking} className={thinkingIconClassName} />
           <span className="font-medium tracking-[0.01em]">{statusLabel}</span>
         </span>
         <IconChevronDown
@@ -119,7 +110,7 @@ export function Thinking({
         className="max-h-32 overflow-y-auto px-3 pb-2.5"
         onScroll={handleContentScroll}
       >
-        <p className="text-xs whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-muted-foreground">
+        <p className="text-xs [overflow-wrap:anywhere] break-words whitespace-pre-wrap text-muted-foreground">
           {trimmedContent}
         </p>
       </CollapsibleContent>

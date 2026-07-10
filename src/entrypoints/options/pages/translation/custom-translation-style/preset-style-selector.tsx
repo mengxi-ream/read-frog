@@ -2,11 +2,18 @@ import type { TranslationNodeStylePreset } from "@/types/config/translate"
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
 import { Activity } from "react"
-import { i18n } from "#imports"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/base-ui/select"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { TRANSLATION_NODE_STYLE } from "@/utils/constants/translation-node-style"
+import { i18n } from "@/utils/i18n"
 
 export function PresetStyleSelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
@@ -21,8 +28,7 @@ export function PresetStyleSelector() {
         <Select
           value={translationNodeStyle.preset}
           onValueChange={(preset: TranslationNodeStylePreset | null) => {
-            if (!preset)
-              return
+            if (!preset) return
             void setTranslateConfig(
               deepmerge(translateConfig, {
                 translationNodeStyle: { preset },
@@ -37,7 +43,7 @@ export function PresetStyleSelector() {
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              {TRANSLATION_NODE_STYLE.map(nodeStyle => (
+              {TRANSLATION_NODE_STYLE.map((nodeStyle) => (
                 <SelectItem key={nodeStyle} value={nodeStyle}>
                   {i18n.t(`options.translation.translationStyle.style.${nodeStyle}`)}
                 </SelectItem>

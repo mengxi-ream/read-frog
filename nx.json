@@ -46,17 +46,46 @@
       ],
       "outputs": ["{projectRoot}/coverage"]
     },
+    "fmt:check": {
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/**/*.{js,jsx,ts,tsx,cjs,mjs,json,jsonc,css,md,yml,yaml}",
+        "!{projectRoot}/node_modules/**",
+        "!{projectRoot}/.wxt/**",
+        "!{projectRoot}/.output/**",
+        "!{projectRoot}/coverage/**",
+        "!{projectRoot}/dist/**",
+        "!{projectRoot}/.nx/**",
+        "!{projectRoot}/.turbo/**",
+        "!{projectRoot}/repos/**",
+        "!{projectRoot}/scripts/output/**",
+        "!{projectRoot}/.agents/**",
+        "!{projectRoot}/.claude/**",
+        "!{projectRoot}/.codex/**",
+        "!{projectRoot}/.cursor/**",
+        "{projectRoot}/.oxfmtrc.json",
+        "{projectRoot}/package.json",
+        "{projectRoot}/pnpm-lock.yaml"
+      ]
+    },
     "lint": {
       "cache": true,
       "inputs": [
         "{projectRoot}/src/**/*",
-        "{projectRoot}/eslint.config.*"
+        "{projectRoot}/.oxlintrc.json",
+        "{projectRoot}/.oxfmtrc.json",
+        "{projectRoot}/package.json",
+        "{projectRoot}/pnpm-lock.yaml",
+        "{projectRoot}/tsconfig.json"
       ]
     },
     "type-check": {
       "cache": true,
       "inputs": [
         "{projectRoot}/src/**/*",
+        "{projectRoot}/.oxlintrc.json",
+        "{projectRoot}/package.json",
+        "{projectRoot}/pnpm-lock.yaml",
         "{projectRoot}/tsconfig.json"
       ]
     }

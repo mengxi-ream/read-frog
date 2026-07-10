@@ -3,11 +3,11 @@ import { Icon } from "@iconify/react/dist/iconify.js"
 import { useAtom } from "jotai"
 import { useId } from "react"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { Input } from "@/components/ui/base-ui/input"
 import { Label } from "@/components/ui/base-ui/label"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
+import { i18n } from "@/utils/i18n"
 import { usePromptAtoms } from "./context"
 import { analysisJSONFile } from "./utils/prompt-file"
 
@@ -18,7 +18,7 @@ export function ImportPrompts() {
 
   const injectPrompts = (list: PromptConfigList) => {
     const originPatterns = config.patterns
-    const patterns = list.map(item => ({
+    const patterns = list.map((item) => ({
       ...item,
       id: getRandomUUID(),
       // Backwards compatibility: add systemPrompt if missing from imported file
@@ -34,21 +34,17 @@ export function ImportPrompts() {
   const importPrompts = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const files = e.target.files
-      if (!files || !files[0])
-        return
+      if (!files?.[0]) return
       const promptConfig = await analysisJSONFile(files[0])
       injectPrompts(promptConfig)
       toast.success(`${i18n.t("options.translation.personalizedPrompts.importSuccess")} !`)
-    }
-    catch (error) {
+    } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message)
-      }
-      else {
+      } else {
         toast.error("Something went error when importing")
       }
-    }
-    finally {
+    } finally {
       e.target.value = ""
       e.target.files = null
     }
@@ -60,13 +56,7 @@ export function ImportPrompts() {
         <Icon icon="tabler:file-import" className="size-4" />
         {i18n.t("options.translation.personalizedPrompts.import")}
       </Label>
-      <Input
-        type="file"
-        id={inputId}
-        className="hidden"
-        accept=".json"
-        onChange={importPrompts}
-      />
+      <Input type="file" id={inputId} className="hidden" accept=".json" onChange={importPrompts} />
     </Button>
   )
 }

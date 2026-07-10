@@ -44,8 +44,7 @@ async function performAutoBackup() {
     await addBackup(config, EXTENSION_VERSION)
 
     logger.info("Auto backup completed successfully")
-  }
-  catch (error) {
+  } catch (error) {
     logger.error("Failed to perform auto backup:", error)
   }
 }

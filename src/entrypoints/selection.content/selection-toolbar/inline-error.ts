@@ -1,5 +1,5 @@
-import { i18n } from "#imports"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
+import { i18n } from "@/utils/i18n"
 
 export interface SelectionToolbarInlineError {
   title: string
@@ -7,7 +7,11 @@ export interface SelectionToolbarInlineError {
 }
 
 type SelectionToolbarErrorKind = "translate" | "customAction"
-type SelectionToolbarPrecheckErrorCode = "actionUnavailable" | "missingSelection" | "providerDisabled" | "providerUnavailable"
+type SelectionToolbarPrecheckErrorCode =
+  | "actionUnavailable"
+  | "missingSelection"
+  | "providerDisabled"
+  | "providerUnavailable"
 
 const UNEXPECTED_ERROR_MESSAGE = "Unexpected error occurred"
 

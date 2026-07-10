@@ -61,9 +61,7 @@ function parseAbsoluteURL(value: string): ParsedURL | null {
   const hash = hashIndex === -1 ? "" : rest.slice(hashIndex)
   const searchIndex = beforeHash.indexOf("?")
 
-  const pathname = searchIndex === -1
-    ? beforeHash
-    : beforeHash.slice(0, searchIndex)
+  const pathname = searchIndex === -1 ? beforeHash : beforeHash.slice(0, searchIndex)
   const search = searchIndex === -1 ? "" : beforeHash.slice(searchIndex)
 
   return {
@@ -91,8 +89,7 @@ function isValidLiteralHTTPURL(value: string): boolean {
   try {
     const url = new URL(value)
     return (url.protocol === "http:" || url.protocol === "https:") && url.hostname.length > 0
-  }
-  catch {
+  } catch {
     return false
   }
 }
@@ -100,8 +97,7 @@ function isValidLiteralHTTPURL(value: string): boolean {
 function getLiteralHostname(value: string): string | null {
   try {
     return new URL(value).hostname
-  }
-  catch {
+  } catch {
     return null
   }
 }
@@ -133,29 +129,31 @@ function parseQuery(search: string): QueryParam[] {
     return []
   }
 
-  return search.slice(1).split("&").map((part) => {
-    const equalsIndex = part.indexOf("=")
-    if (equalsIndex === -1) {
-      return {
-        name: part,
-        value: "",
-        hasEquals: false,
+  return search
+    .slice(1)
+    .split("&")
+    .map((part) => {
+      const equalsIndex = part.indexOf("=")
+      if (equalsIndex === -1) {
+        return {
+          name: part,
+          value: "",
+          hasEquals: false,
+        }
       }
-    }
 
-    return {
-      name: part.slice(0, equalsIndex),
-      value: part.slice(equalsIndex + 1),
-      hasEquals: true,
-    }
-  })
+      return {
+        name: part.slice(0, equalsIndex),
+        value: part.slice(equalsIndex + 1),
+        hasEquals: true,
+      }
+    })
 }
 
 function decodeQueryValue(value: string): string {
   try {
     return decodeURIComponent(value.replace(/\+/g, " "))
-  }
-  catch {
+  } catch {
     return value
   }
 }
@@ -164,7 +162,10 @@ function isTokenParam(param: QueryParam): boolean {
   return param.name === "token"
 }
 
-function getSingleTokenQueryValue(search: string): { status: "none" | "duplicate" | "empty" | "value", value?: string } {
+function getSingleTokenQueryValue(search: string): {
+  status: "none" | "duplicate" | "empty" | "value"
+  value?: string
+} {
   const tokenParams = parseQuery(search).filter(isTokenParam)
 
   if (tokenParams.length === 0) {
@@ -181,9 +182,8 @@ function getSingleTokenQueryValue(search: string): { status: "none" | "duplicate
   }
 
   const decodedToken = decodeQueryValue(rawToken)
-  const normalizedToken = rawToken.endsWith("/") && decodedToken.endsWith("/")
-    ? decodedToken.slice(0, -1)
-    : decodedToken
+  const normalizedToken =
+    rawToken.endsWith("/") && decodedToken.endsWith("/") ? decodedToken.slice(0, -1) : decodedToken
 
   return normalizedToken.length > 0
     ? { status: "value", value: normalizedToken }
@@ -206,13 +206,17 @@ function replaceSingleTokenQueryValue(search: string): string {
 function decodePathSegment(segment: string): string | null {
   try {
     return decodeURIComponent(segment)
-  }
-  catch {
+  } catch {
     return null
   }
 }
 
-function migratePathTokenProvider(provider: any, parsed: ParsedURL, apiKey: string | undefined, hostname: string | null): any | null {
+function migratePathTokenProvider(
+  provider: any,
+  parsed: ParsedURL,
+  apiKey: string | undefined,
+  hostname: string | null,
+): any {
   const cleanPathname = trimPathTrailingSlashes(parsed.pathname)
   if (!cleanPathname.endsWith("/translate")) {
     return null
@@ -241,7 +245,10 @@ function migratePathTokenProvider(provider: any, parsed: ParsedURL, apiKey: stri
     return provider
   }
 
-  const tokenPathPrefix = pathBeforeTranslate.slice(0, pathBeforeTranslate.length - tokenSegment.length)
+  const tokenPathPrefix = pathBeforeTranslate.slice(
+    0,
+    pathBeforeTranslate.length - tokenSegment.length,
+  )
   const placeholderPathname = `${tokenPathPrefix}${API_KEY_PLACEHOLDER}/translate`
 
   return {
@@ -262,7 +269,12 @@ function migratePlaceholderURL(provider: any, parsed: ParsedURL): any {
   }
 }
 
-function migrateQueryTokenURL(provider: any, parsed: ParsedURL, apiKey: string | undefined, token: string): any {
+function migrateQueryTokenURL(
+  provider: any,
+  parsed: ParsedURL,
+  apiKey: string | undefined,
+  token: string,
+): any {
   if (apiKey && apiKey !== token) {
     return provider
   }
@@ -327,7 +339,8 @@ function migrateProvider(provider: any): any {
     return pathTokenProvider
   }
 
-  const isDefaultDeepLXOrgBaseURL = hostname === "api.deeplx.org" && trimPathTrailingSlashes(parsed.pathname) === ""
+  const isDefaultDeepLXOrgBaseURL =
+    hostname === "api.deeplx.org" && trimPathTrailingSlashes(parsed.pathname) === ""
   if (isDefaultDeepLXOrgBaseURL) {
     return {
       ...provider,

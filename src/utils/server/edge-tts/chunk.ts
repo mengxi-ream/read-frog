@@ -10,11 +10,11 @@ function measureBytes(text: string): number {
 }
 
 function isHighSurrogateCode(code: number): boolean {
-  return code >= 0xD800 && code <= 0xDBFF
+  return code >= 0xd800 && code <= 0xdbff
 }
 
 function isLowSurrogateCode(code: number): boolean {
-  return code >= 0xDC00 && code <= 0xDFFF
+  return code >= 0xdc00 && code <= 0xdfff
 }
 
 function alignToCodePointBoundary(text: string, index: number): number {
@@ -44,8 +44,7 @@ function findLargestSliceByBytes(text: string, maxBytes: number): number {
     if (bytes <= maxBytes) {
       best = safeMiddle
       low = middle + 1
-    }
-    else {
+    } else {
       high = middle - 1
     }
   }

@@ -4,14 +4,12 @@ import { RequestQueue } from "../request-queue"
 // Convenience helper: returns a thunk that resolves with <value>
 // after <delayMs> real / fake milliseconds.
 function makeThunk<T>(value: T, delayMs = 0) {
-  return () =>
-    new Promise<T>(res => setTimeout(res, delayMs, value))
+  return () => new Promise<T>((res) => setTimeout(res, delayMs, value))
 }
 
 // rejectThunk – rejects after delayMs
 function rejectThunk(error: any, delayMs = 0) {
-  return () =>
-    new Promise((_, rej) => setTimeout(rej, delayMs, error))
+  return () => new Promise((_, rej) => setTimeout(rej, delayMs, error))
 }
 
 function createDeferred<T>() {
@@ -310,9 +308,7 @@ describe("requestQueue – timeout handling", () => {
     })
 
     // Task that takes 3000ms (longer than 2000ms timeout)
-    const slowThunk = () => new Promise(resolve =>
-      setTimeout(resolve, 3000, "too-slow"),
-    )
+    const slowThunk = () => new Promise((resolve) => setTimeout(resolve, 3000, "too-slow"))
 
     const promise = q.enqueue(slowThunk, Date.now(), "slow")
 
@@ -331,9 +327,7 @@ describe("requestQueue – timeout handling", () => {
     })
 
     // Task that takes 1000ms (less than 2000ms timeout)
-    const fastThunk = () => new Promise(resolve =>
-      setTimeout(resolve, 1000, "fast"),
-    )
+    const fastThunk = () => new Promise((resolve) => setTimeout(resolve, 1000, "fast"))
 
     const promise = q.enqueue(fastThunk, Date.now(), "fast")
 
@@ -357,7 +351,8 @@ describe("requestQueue – retry functionality", () => {
 
     const eventuallySucceedsThunk = () => {
       attempts++
-      if (attempts < 2) { // Change to succeed on second attempt
+      if (attempts < 2) {
+        // Change to succeed on second attempt
         return Promise.reject(new Error(`Attempt ${attempts} failed`))
       }
       return Promise.resolve("success!")
@@ -453,7 +448,7 @@ describe("requestQueue – retry with timeout combined", () => {
 
     const timeoutThunk = () => {
       // Task takes 200ms, but timeout is 100ms
-      return new Promise(resolve => setTimeout(resolve, 200, "too slow"))
+      return new Promise((resolve) => setTimeout(resolve, 200, "too slow"))
     }
 
     const promise = q.enqueue(timeoutThunk, Date.now(), "timeout-test")
@@ -493,16 +488,24 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
     const error = createError()
     const completed: string[] = []
 
-    const firstPromise = q.enqueue(() => {
-      attempts++
-      return Promise.reject(error)
-    }, Date.now(), "current-only")
+    const firstPromise = q.enqueue(
+      () => {
+        attempts++
+        return Promise.reject(error)
+      },
+      Date.now(),
+      "current-only",
+    )
     firstPromise.catch(() => {})
 
-    const secondPromise = q.enqueue(() => {
-      completed.push("second")
-      return Promise.resolve("second")
-    }, Date.now(), "second")
+    const secondPromise = q.enqueue(
+      () => {
+        completed.push("second")
+        return Promise.resolve("second")
+      },
+      Date.now(),
+      "second",
+    )
 
     await vi.advanceTimersByTimeAsync(100)
 
@@ -531,11 +534,7 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
       },
     })
 
-    const firstPromise = q.enqueue(
-      () => Promise.reject(rateLimitedError),
-      Date.now(),
-      "first",
-    )
+    const firstPromise = q.enqueue(() => Promise.reject(rateLimitedError), Date.now(), "first")
     firstPromise.catch(() => {})
 
     const secondPromise = q.enqueue(
@@ -571,18 +570,10 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
     })
     const secondDeferred = createDeferred<string>()
 
-    const firstPromise = q.enqueue(
-      () => Promise.reject(rateLimitedError),
-      Date.now(),
-      "first",
-    )
+    const firstPromise = q.enqueue(() => Promise.reject(rateLimitedError), Date.now(), "first")
     firstPromise.catch(() => {})
 
-    const secondPromise = q.enqueue(
-      () => secondDeferred.promise,
-      Date.now(),
-      "second",
-    )
+    const secondPromise = q.enqueue(() => secondDeferred.promise, Date.now(), "second")
     secondPromise.catch(() => {})
 
     await vi.advanceTimersByTimeAsync(0)
@@ -615,28 +606,16 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
     const oldDeferred = createDeferred<string>()
     const newDeferred = createDeferred<string>()
 
-    const firstPromise = q.enqueue(
-      () => Promise.reject(rateLimitedError),
-      Date.now(),
-      "first",
-    )
+    const firstPromise = q.enqueue(() => Promise.reject(rateLimitedError), Date.now(), "first")
     firstPromise.catch(() => {})
 
-    const oldPromise = q.enqueue(
-      () => oldDeferred.promise,
-      Date.now(),
-      "old",
-    )
+    const oldPromise = q.enqueue(() => oldDeferred.promise, Date.now(), "old")
     oldPromise.catch(() => {})
 
     await vi.advanceTimersByTimeAsync(0)
     await expect(oldPromise).rejects.toBe(rateLimitedError)
 
-    const newPromise = q.enqueue(
-      () => newDeferred.promise,
-      Date.now(),
-      "new",
-    )
+    const newPromise = q.enqueue(() => newDeferred.promise, Date.now(), "new")
 
     oldDeferred.reject(laterError)
     await vi.advanceTimersByTimeAsync(0)
@@ -666,28 +645,16 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
     const newDeferred = createDeferred<string>()
     let duplicateStarted = false
 
-    const firstPromise = q.enqueue(
-      () => Promise.reject(rateLimitedError),
-      Date.now(),
-      "first",
-    )
+    const firstPromise = q.enqueue(() => Promise.reject(rateLimitedError), Date.now(), "first")
     firstPromise.catch(() => {})
 
-    const oldPromise = q.enqueue(
-      () => oldDeferred.promise,
-      Date.now(),
-      "same",
-    )
+    const oldPromise = q.enqueue(() => oldDeferred.promise, Date.now(), "same")
     oldPromise.catch(() => {})
 
     await vi.advanceTimersByTimeAsync(0)
     await expect(oldPromise).rejects.toBe(rateLimitedError)
 
-    const newPromise = q.enqueue(
-      () => newDeferred.promise,
-      Date.now(),
-      "same",
-    )
+    const newPromise = q.enqueue(() => newDeferred.promise, Date.now(), "same")
 
     oldDeferred.resolve("old success")
     await vi.advanceTimersByTimeAsync(0)
@@ -727,11 +694,7 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
       statusCode,
     })
 
-    const firstPromise = q.enqueue(
-      () => Promise.reject(error),
-      Date.now(),
-      "first",
-    )
+    const firstPromise = q.enqueue(() => Promise.reject(error), Date.now(), "first")
     firstPromise.catch(() => {})
 
     const secondPromise = q.enqueue(
@@ -767,13 +730,17 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
       statusCode,
     })
 
-    const promise = q.enqueue(() => {
-      attempts++
-      if (attempts === 1) {
-        return Promise.reject(error)
-      }
-      return Promise.resolve("success")
-    }, Date.now(), `transient-${statusCode}`)
+    const promise = q.enqueue(
+      () => {
+        attempts++
+        if (attempts === 1) {
+          return Promise.reject(error)
+        }
+        return Promise.resolve("success")
+      },
+      Date.now(),
+      `transient-${statusCode}`,
+    )
 
     await vi.advanceTimersByTimeAsync(0)
     expect(attempts).toBe(1)
@@ -1027,16 +994,16 @@ describe("requestQueue – reconfigure the request queue", () => {
   it("should throw error when options are invalid", () => {
     const q = new RequestQueue({ ...baseConfig, rate: 5, capacity: 10 })
 
-    expect(() => q.setQueueOptions({ rate: 0, capacity: 0 })).toThrow()
+    expect(() => q.setQueueOptions({ rate: 0, capacity: 0 })).toThrow(/Too small/)
 
-    expect(() => q.setQueueOptions({ rate: -1, capacity: -1 })).toThrow()
+    expect(() => q.setQueueOptions({ rate: -1, capacity: -1 })).toThrow(/Too small/)
 
-    expect(() => q.setQueueOptions({ rate: 0 })).toThrow()
+    expect(() => q.setQueueOptions({ rate: 0 })).toThrow(/Too small/)
 
-    expect(() => q.setQueueOptions({ capacity: 0 })).toThrow()
+    expect(() => q.setQueueOptions({ capacity: 0 })).toThrow(/Too small/)
 
-    expect(() => q.setQueueOptions({ rate: -1 })).toThrow()
+    expect(() => q.setQueueOptions({ rate: -1 })).toThrow(/Too small/)
 
-    expect(() => q.setQueueOptions({ capacity: -1 })).toThrow()
+    expect(() => q.setQueueOptions({ capacity: -1 })).toThrow(/Too small/)
   })
 })

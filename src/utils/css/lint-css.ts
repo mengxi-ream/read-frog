@@ -53,8 +53,7 @@ export function lintCSS(css: string): CSSLintResult {
 
     // If parsing succeeded but there were errors in onParseError, the CSS is invalid
     // css-tree can recover from some errors, but we want to report them all
-  }
-  catch (error) {
+  } catch (error) {
     // Catch fatal parsing errors (e.g., completely broken CSS)
     const err = error as any
     errors.push({

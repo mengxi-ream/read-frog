@@ -20,10 +20,10 @@ export function waitForElement(
     }
 
     const observer = new MutationObserver(() => {
-      const found = tryFind()
-      if (found) {
+      const nextFound = tryFind()
+      if (nextFound) {
         observer.disconnect()
-        resolve(found)
+        resolve(nextFound)
       }
     })
 

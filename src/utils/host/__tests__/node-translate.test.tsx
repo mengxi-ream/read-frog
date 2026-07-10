@@ -3,10 +3,20 @@ import type { Config } from "@/types/config/config"
 import { act, render, screen } from "@testing-library/react"
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { BLOCK_ATTRIBUTE, BLOCK_CONTENT_CLASS, CONTENT_WRAPPER_CLASS, PARAGRAPH_ATTRIBUTE } from "@/utils/constants/dom-labels"
+import {
+  BLOCK_ATTRIBUTE,
+  BLOCK_CONTENT_CLASS,
+  CONTENT_WRAPPER_CLASS,
+  PARAGRAPH_ATTRIBUTE,
+} from "@/utils/constants/dom-labels"
 import { flushBatchedOperations } from "../dom/batch-dom"
 import { removeOrShowNodeTranslation } from "../translate/node-manipulation"
-import { expectNodeLabels, expectTranslatedContent, expectTranslationWrapper, MOCK_ORIGINAL_TEXT } from "./utils"
+import {
+  expectNodeLabels,
+  expectTranslatedContent,
+  expectTranslationWrapper,
+  MOCK_ORIGINAL_TEXT,
+} from "./utils"
 
 // Test config with fixed bilingual mode - won't change with DEFAULT_CONFIG
 const TEST_CONFIG: Config = {
@@ -18,19 +28,19 @@ const TEST_CONFIG: Config = {
 }
 
 vi.mock("@/utils/host/translate/translate-variants", () => ({
-  translateTextForPage: vi.fn(() => Promise.resolve("translation")),
+  translateTextForPage: vi.fn<(...args: any[]) => any>(() => Promise.resolve("translation")),
 }))
 
 vi.mock("@/utils/host/translate/translate-text", () => ({
-  validateTranslationConfigAndToast: vi.fn(() => true),
+  validateTranslationConfigAndToast: vi.fn<(...args: any[]) => any>(() => true),
 }))
 
 vi.mock("@/utils/config/storage", () => ({
-  getLocalConfig: vi.fn(),
+  getLocalConfig: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/config/languages", () => ({
-  getDetectedCodeFromStorage: vi.fn(() => Promise.resolve("eng")),
+  getDetectedCodeFromStorage: vi.fn<(...args: any[]) => any>(() => Promise.resolve("eng")),
 }))
 
 describe("node translation", () => {
@@ -41,7 +51,7 @@ describe("node translation", () => {
     const { getLocalConfig } = await import("@/utils/config/storage")
     vi.mocked(getLocalConfig).mockResolvedValue(TEST_CONFIG)
 
-    window.getComputedStyle = vi.fn((element) => {
+    window.getComputedStyle = vi.fn<(...args: any[]) => any>((element) => {
       const originalStyle = originalGetComputedStyle(element)
       if (originalStyle.float === "") {
         Object.defineProperty(originalStyle, "float", {
@@ -60,14 +70,10 @@ describe("node translation", () => {
   })
   describe("show translation", () => {
     it("should show the translation when point is over the original text", async () => {
-      render(
-        <div data-testid="test-node">
-          {MOCK_ORIGINAL_TEXT}
-        </div>,
-      )
+      render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
       const node = screen.getByTestId("test-node")
-      const originalElementFromPoint = document.elementFromPoint
-      document.elementFromPoint = vi.fn(() => node)
+      const originalElementFromPoint = Reflect.get(document, "elementFromPoint")
+      document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => node)
       await act(async () => {
         await removeOrShowNodeTranslation({ x: 150, y: 125 }, TEST_CONFIG)
         // Flush batched DOM operations to ensure all changes are applied before assertions
@@ -84,22 +90,18 @@ describe("node translation", () => {
   })
   describe("hide translation", () => {
     it("should hide the translation when point is over the translation content node", async () => {
-      render(
-        <div data-testid="test-node">
-          {MOCK_ORIGINAL_TEXT}
-        </div>,
-      )
+      render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
       const node = screen.getByTestId("test-node")
 
-      const originalElementFromPoint = document.elementFromPoint
-      document.elementFromPoint = vi.fn(() => node)
+      const originalElementFromPoint = Reflect.get(document, "elementFromPoint")
+      document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => node)
       await act(async () => {
         await removeOrShowNodeTranslation({ x: 150, y: 125 }, TEST_CONFIG)
         flushBatchedOperations()
       })
 
       const translatedContent = node.querySelector(`.${BLOCK_CONTENT_CLASS}`)
-      document.elementFromPoint = vi.fn(() => translatedContent as Element)
+      document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => translatedContent as Element)
       await act(async () => {
         await removeOrShowNodeTranslation({ x: 150, y: 125 }, TEST_CONFIG)
         flushBatchedOperations()
@@ -111,20 +113,16 @@ describe("node translation", () => {
       document.elementFromPoint = originalElementFromPoint
     })
     it("should hide the translation when point is over the translation wrapper", async () => {
-      render(
-        <div data-testid="test-node">
-          {MOCK_ORIGINAL_TEXT}
-        </div>,
-      )
+      render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
       const node = screen.getByTestId("test-node")
-      const originalElementFromPoint = document.elementFromPoint
-      document.elementFromPoint = vi.fn(() => node)
+      const originalElementFromPoint = Reflect.get(document, "elementFromPoint")
+      document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => node)
       await act(async () => {
         await removeOrShowNodeTranslation({ x: 150, y: 125 }, TEST_CONFIG)
         flushBatchedOperations()
       })
       const wrapper = node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)
-      document.elementFromPoint = vi.fn(() => wrapper as Element)
+      document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => wrapper as Element)
       await act(async () => {
         await removeOrShowNodeTranslation({ x: 150, y: 125 }, TEST_CONFIG)
         flushBatchedOperations()

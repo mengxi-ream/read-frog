@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { buildTrustComment } from "./comment-template.js"
 
 describe("buildTrustComment", () => {
@@ -65,8 +64,12 @@ describe("buildTrustComment", () => {
     expect(comment.body).toContain("Migration-related changed lines excluded: 1662 (+1662 / -0)")
     expect(comment.body).toContain("Repo permission: write")
     expect(comment.body).toContain("Auto-close: score < 20 and counted changed lines > 1000")
-    expect(comment.body).toContain("Migration-related files are excluded from the auto-close line count")
-    expect(comment.body).toContain("Owned non-fork repos considered: max 42, total 42 (kilidoc/browser-tools (42))")
+    expect(comment.body).toContain(
+      "Migration-related files are excluded from the auto-close line count",
+    )
+    expect(comment.body).toContain(
+      "Owned non-fork repos considered: max 42, total 42 (kilidoc/browser-tools (42))",
+    )
     expect(comment.body).not.toContain("Fork repos excluded from OSS influence")
     expect(comment.body).not.toContain("Public repos:")
   })

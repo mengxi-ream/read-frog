@@ -11,19 +11,26 @@ import { DOMAudioPlaybackController } from "@/utils/tts-playback/dom-audio-contr
 const OFFSCREEN_DOCUMENT_PATH = "/offscreen.html" as const
 const OFFSCREEN_DOCUMENT_URL = browser.runtime.getURL(OFFSCREEN_DOCUMENT_PATH)
 const OFFSCREEN_REASON = "AUDIO_PLAYBACK"
-const OFFSCREEN_JUSTIFICATION
-  = "Play synthesized speech from extension context to avoid webpage CSP media restrictions."
+const OFFSCREEN_JUSTIFICATION =
+  "Play synthesized speech from extension context to avoid webpage CSP media restrictions."
 
 interface ChromeRuntimeContext {
   contextType?: string
 }
 
 interface ChromeRuntimeApi {
-  getContexts?: (filter: { contextTypes: string[], documentUrls?: string[] }) => Promise<ChromeRuntimeContext[]>
+  getContexts?: (filter: {
+    contextTypes: string[]
+    documentUrls?: string[]
+  }) => Promise<ChromeRuntimeContext[]>
 }
 
 interface ChromeOffscreenApi {
-  createDocument: (options: { url: string, reasons: string[], justification: string }) => Promise<void>
+  createDocument: (options: {
+    url: string
+    reasons: string[]
+    justification: string
+  }) => Promise<void>
 }
 
 interface ChromeLike {
@@ -46,22 +53,28 @@ function hasChromeOffscreenApi(): boolean {
 }
 
 function hasBackgroundDOMAudioApi(): boolean {
-  return typeof Audio === "function"
-    && typeof Blob === "function"
-    && typeof URL.createObjectURL === "function"
+  return (
+    typeof Audio === "function" &&
+    typeof Blob === "function" &&
+    typeof URL.createObjectURL === "function"
+  )
 }
 
 function isSingleOffscreenDocumentError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error)
-  return message.includes("Only a single offscreen document may be created")
-    || message.includes("already exists")
+  return (
+    message.includes("Only a single offscreen document may be created") ||
+    message.includes("already exists")
+  )
 }
 
 function isMissingReceiverError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error)
-  return message.includes("Could not establish connection")
-    || message.includes("Receiving end does not exist")
-    || message.includes("No response")
+  return (
+    message.includes("Could not establish connection") ||
+    message.includes("Receiving end does not exist") ||
+    message.includes("No response")
+  )
 }
 
 class ChromeOffscreenPlaybackAdapter implements TTSPlaybackAdapter {
@@ -88,8 +101,7 @@ class ChromeOffscreenPlaybackAdapter implements TTSPlaybackAdapter {
           reasons: [OFFSCREEN_REASON],
           justification: OFFSCREEN_JUSTIFICATION,
         })
-      }
-      catch (error) {
+      } catch (error) {
         if (!isSingleOffscreenDocumentError(error)) {
           throw error
         }
@@ -109,8 +121,7 @@ class ChromeOffscreenPlaybackAdapter implements TTSPlaybackAdapter {
 
     try {
       return await sendMessage("ttsOffscreenPlay", request)
-    }
-    catch (error) {
+    } catch (error) {
       if (!isMissingReceiverError(error)) {
         throw error
       }
@@ -126,8 +137,7 @@ class ChromeOffscreenPlaybackAdapter implements TTSPlaybackAdapter {
   async stop(request: TTSPlaybackStopRequest): Promise<void> {
     try {
       await sendMessage("ttsOffscreenStop", request)
-    }
-    catch (error) {
+    } catch (error) {
       if (!isMissingReceiverError(error)) {
         throw error
       }
@@ -145,12 +155,14 @@ class ChromeOffscreenPlaybackAdapter implements TTSPlaybackAdapter {
       documentUrls: [OFFSCREEN_DOCUMENT_URL],
     })
 
-    return contexts.some(context => context.contextType === "OFFSCREEN_DOCUMENT")
+    return contexts.some((context) => context.contextType === "OFFSCREEN_DOCUMENT")
   }
 }
 
 class BackgroundDOMAudioPlaybackAdapter implements TTSPlaybackAdapter {
-  private readonly controller = new DOMAudioPlaybackController("Failed to play audio in background page")
+  private readonly controller = new DOMAudioPlaybackController(
+    "Failed to play audio in background page",
+  )
 
   async prepare(): Promise<void> {
     if (!hasBackgroundDOMAudioApi()) {
@@ -180,8 +192,7 @@ class UnsupportedPlaybackAdapter implements TTSPlaybackAdapter {
     return { ok: false, reason: "stopped" }
   }
 
-  async stop(): Promise<void> {
-  }
+  async stop(): Promise<void> {}
 }
 
 function createTTSPlaybackAdapter(): TTSPlaybackAdapter {
@@ -214,8 +225,7 @@ export function setupTTSPlaybackMessageHandlers() {
         requestId: message.data.requestId,
         reason: message.data.reason ?? "stopped",
       })
-    }
-    catch (error) {
+    } catch (error) {
       logger.warn("[Background][TTSPlayback] stop failed", error)
       throw error
     }

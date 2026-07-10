@@ -1,5 +1,6 @@
 export function migrate(oldConfig: any): any {
-  const isUsingDefaultPrompt = oldConfig.translate.promptsConfig.prompt === "Read Frog: TRANSLATE_DEFAULT_PROMPT"
+  const isUsingDefaultPrompt =
+    oldConfig.translate.promptsConfig.prompt === "Read Frog: TRANSLATE_DEFAULT_PROMPT"
 
   const newPromptConfig = {
     ...oldConfig.translate.promptsConfig,

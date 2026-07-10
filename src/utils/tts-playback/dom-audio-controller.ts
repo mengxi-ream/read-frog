@@ -71,8 +71,7 @@ export class DOMAudioPlaybackController {
         audio.play().catch((error) => {
           this.failPlayback(playback!, toError(error, "Unknown audio playback error"))
         })
-      }
-      catch (error) {
+      } catch (error) {
         if (playback) {
           this.failPlayback(playback, toError(error, this.playbackErrorMessage))
           return

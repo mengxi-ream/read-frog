@@ -1,4 +1,4 @@
-import { i18n } from "#imports"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../../components/config-card"
 import { GeneralSettings } from "./components/general-settings"
 import { MainSubtitlesStyle } from "./components/main-subtitles-style"
@@ -15,7 +15,7 @@ export function SubtitlesStyleSettings() {
     >
       <SubtitlesPreview />
 
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <GeneralSettings />
         <MainSubtitlesStyle />
         <TranslationSubtitlesStyle />

@@ -2,14 +2,21 @@ import { Icon } from "@iconify/react/dist/iconify.js"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useAtomValue } from "jotai"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/base-ui/empty"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/base-ui/empty"
 import { ConfigCard } from "@/entrypoints/options/components/config-card"
 import { configAtom } from "@/utils/atoms/config"
 import { addBackup, getAllBackupsWithMetadata } from "@/utils/backup/storage"
 import { EXTENSION_VERSION } from "@/utils/constants/app"
 import { MAX_BACKUPS_COUNT } from "@/utils/constants/backup"
+import { i18n } from "@/utils/i18n"
 import { queryClient } from "@/utils/tanstack-query"
 import { BackupConfigItem } from "./components/backup-config-item"
 
@@ -27,18 +34,16 @@ export function ConfigBackup() {
     >
       <div className="space-y-4">
         {isPending && (
-          <div className="text-center text-muted-foreground py-8">
+          <div className="py-8 text-center text-muted-foreground">
             {i18n.t("options.config.backup.loading")}
           </div>
         )}
 
-        {backupsWithMetadata && backupsWithMetadata?.length === 0 && (
-          <EmptyState />
-        )}
+        {backupsWithMetadata && backupsWithMetadata?.length === 0 && <EmptyState />}
         {backupsWithMetadata && backupsWithMetadata?.length > 0 && (
           <>
             <Toolbar />
-            {backupsWithMetadata.map(backupWithMetadata => (
+            {backupsWithMetadata.map((backupWithMetadata) => (
               <BackupConfigItem
                 key={backupWithMetadata.id}
                 backupId={backupWithMetadata.id}
@@ -95,9 +100,7 @@ function EmptyState() {
           <Icon icon="tabler:file-off" />
         </EmptyMedia>
         <EmptyTitle>{i18n.t("options.config.backup.empty.title")}</EmptyTitle>
-        <EmptyDescription>
-          {i18n.t("options.config.backup.empty.description")}
-        </EmptyDescription>
+        <EmptyDescription>{i18n.t("options.config.backup.empty.description")}</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <Button variant="outline" size="sm" disabled={isBackingUp} onClick={() => backupConfig()}>

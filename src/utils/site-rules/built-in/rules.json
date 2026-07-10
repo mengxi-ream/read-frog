@@ -1,0 +1,4445 @@
+[
+  {
+    "id": "readfrog-preserve-text-defaults",
+    "description": "Preserve common inline math/code tokens as source text",
+    "matches": "*",
+    "preserveTextSelectors": [
+      "span.katex",
+      ".math-block",
+      ".MathJax_Preview",
+      ".MathJax_Display",
+      ".math-container",
+      ".MathJax",
+      ".MathJax_SVG",
+      "math-renderer",
+      "[aria-labelledby^=\"MathJax-SVG\"]",
+      ".mwe-math-element",
+      "em[translate=no]",
+      "code[translate=no]",
+      "a[translate=no]",
+      "b[translate=no]",
+      "span.math.inline",
+      "span.math.display",
+      ".ltx_Math",
+      ".mathjax-block",
+      ".MathJax_CHTML",
+      "kbd",
+      "span.pretex-inline",
+      "span.math-inline",
+      ".reference-citations",
+      ".code",
+      "[data-test='json-editor']",
+      ".jp-CodeMirrorEditor",
+      "cds-code-snippet",
+      ".interactive-markdown__code",
+      "span.variable[translate=no]",
+      "#ace-editor",
+      "table.processedcode"
+    ]
+  },
+  {
+    "id": "pdf",
+    "matches": "https://app.infread.com/pdf/*",
+    "includeSelectors": ["#viewerContainer p"],
+    "injectedCss": ".read-frog-translated-content-wrapper {display: contents!important;position:absolute;}\n.read-frog-translated-content-wrapper br {display: none;!important;}\n.read-frog-translated-content-wrapper span {position: relative;!important;}\n.read-frog-translated-content-wrapper[dir='rtl'] {text-align: right;display: inline-block!important;position:unset;}",
+    "excludeSelectors.remove": ["[contenteditable=\"true\"]"]
+  },
+  {
+    "id": "isEbookBuilder",
+    "matches": "https://app.infread.com/ebook/make*",
+    "excludeSelectors": [
+      "h1.notranslate",
+      "#drop-target",
+      "#drop-target h1",
+      "#side-bar",
+      "h1#side-bar-title",
+      "#tool",
+      ".Code",
+      "[default-translate]"
+    ],
+    "minCharacters": 1,
+    "minWords": 1
+  },
+  {
+    "id": "infread",
+    "matches": "https://app.infread.com",
+    "excludeSelectors": [".preview-original-body *"],
+    "injectedCss": ".docx-wrapper p {line-height: unset!important;}"
+  },
+  {
+    "id": "shopee",
+    "matches": ["seller.shopee.*", "shopee.*"],
+    "injectedCss.add": [".WBVL_7,.ellipsis-content {-webkit-line-clamp:unset!important;}"]
+  },
+  {
+    "id": "wikipedia",
+    "matches": "*.wikipedia.org",
+    "excludeSelectors": [
+      ".mw-editsection",
+      ".mw-cite-backlink",
+      "#p-lang-btn",
+      "#right-navigation",
+      "#p-associated-pages",
+      ".vector-header"
+    ],
+    "forceInlineSelectors": [".chemf", ".mwe-math-element", "[role=math]", ".nowrap"],
+    "minCharacters": 4,
+    "minWords": 2,
+    "injectedCss": ".read-frog-translated-content-wrapper {content-visibility:auto;}\n.no-article-text-sister-projects li { height:unset; }",
+    "excludeSelectors.add": [".lazy-image-placeholder"],
+    "preserveTextSelectors": [".chemf", ".mwe-math-element", "[role=math]", ".nowrap"],
+    "injectedCss.add": [".mwe-popups-extract {max-height:unset!important;height:unset!important;}"]
+  },
+  {
+    "id": "twitter",
+    "matches": [
+      "twitter.com",
+      "mobile.twitter.com",
+      "tweetdeck.twitter.com",
+      "pro.twitter.com",
+      "platform.twitter.com/embed*",
+      "x.com",
+      "mobile.x.com",
+      "tweetdeck.x.com",
+      "pro.x.com",
+      "platform.x.com/embed*"
+    ],
+    "excludeMatches": [
+      "twitter.com/i/premium_sign_up",
+      "twitter.com/settings/subscription",
+      "twitter.com/jobs/*",
+      "x.com/i/premium_sign_up",
+      "x.com/settings/subscription",
+      "x.com/settings/account",
+      "x.com/jobs/*",
+      "x.com/*/tos*",
+      "x.com/*/privacy*",
+      "x.com/account/access*",
+      "x.com/i/account_analytics*",
+      "x.com/i/chat*",
+      "x.com/settings*"
+    ],
+    "includeSelectors": [
+      "[data-testid='tweetText']",
+      "[style*='-webkit-line-clamp']",
+      ".tweet-text",
+      "[data-testid='tweet'] [class='css-175oi2r r-13awgt0 r-eqz5dr r-iphfwy r-3o4zer r-ttdzmv']",
+      "[data-testid='tweet'] .css-175oi2r span",
+      ".js-quoted-tweet-text",
+      "[data-testid='card.layoutSmall.detail'] > div:nth-child(2)",
+      "[data-testid='developerBuiltCardContainer'] > div:nth-child(2)",
+      "[data-testid='card.layoutLarge.detail'] > div:nth-child(2)",
+      "[data-testid='cellInnerDiv'] div[data-testid='UserCell'] > div> div:nth-child(2)",
+      "[data-testid='UserDescription']",
+      "[data-testid='HoverCard'] div[dir=auto]",
+      "[data-testid='HoverCard'] span[dir=auto]",
+      "[data-testid='HoverCard'] [role='dialog'] div[dir=ltr]",
+      "[data-testid='birdwatch-pivot'] div[dir=ltr]",
+      "[data-testid='twitterArticleReadView']",
+      "[aria-label='Grok']",
+      "[role=dialog]",
+      "[class='css-175oi2r r-1awozwy r-13awgt0 r-1rnoaur r-13qz1uu']",
+      "[class='css-175oi2r r-kemksi r-1kqtdi0 r-1q9bdsx r-1phboty r-rs99b7 r-1udh08x r-13qz1uu']",
+      "[class='css-175oi2r r-uef6q5 r-dnmrzs r-97e31f r-13qz1uu r-13awgt0 r-dgnwoc r-1me0s30 r-t3sqpr r-1dqxon3']",
+      "[class='css-901oao css-16my406 r-poiln3 r-bcqeeo r-qvutc0']",
+      "[data-testid='inlinePrompt']",
+      "span[class='css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3 r-n6v787 r-1cwl3u0']",
+      "[data-testid=primaryColumn] [class='css-175oi2r r-kzbkwu r-3pj75a'] > div > span[class='css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3']",
+      ".font-chirp.text-body.font-normal"
+    ],
+    "forceInlineSelectors": [
+      "[data-testid=\"tweetText\"] div.r-xoduu5",
+      "[data-testid=\"tweetText\"] span",
+      "[data-testid=\"UserDescription\"] div",
+      "[data-testid='HoverCard'] div[dir=auto] div",
+      "[data-testid='HoverCard'] span[dir=auto] div"
+    ],
+    "minCharacters": 2,
+    "minWords": 1,
+    "excludeSelectors.add": [
+      "[aria-describedby][role=button]",
+      "header",
+      "[data-testid='radioGroupplayback_rate'] div",
+      "[data-testid='userFollowIndicator']",
+      "[class='css-901oao r-14j79pv r-37j5jr r-n6v787 r-16dba41 r-1cwl3u0 r-bcqeeo r-qvutc0']",
+      "[class='css-175oi2r r-1wbh5a2 r-dnmrzs']",
+      "[aria-label=Grok] button",
+      "[aria-label=Grok] [style*='rgb(89, 93, 98)']",
+      "[aria-label=Grok] .r-uho16t",
+      "[data-testid=User-Name]",
+      "[data-testid=socialContext]",
+      "[data-testid=tweet-text-show-more-link]",
+      "[aria-label=Grok] [class='css-175oi2r r-1habvwh r-vqp9x9 r-1q9bdsx r-1loqt21 r-9njtsq r-1wtj0ep r-nsbfu8 r-xbdcod r-13c7hvr'] > div:last-child",
+      "[role='tab']",
+      "[data-testid=hoverCardParent] [role=menuitem]",
+      "[data-testid=sidebarColumn]",
+      "h2[role=heading]",
+      "[class='css-175oi2r r-1awozwy r-18u37iz r-1wtj0ep r-6gpygo'],[class='css-175oi2r r-1d09ksm r-18u37iz r-1wbh5a2 r-1471scf'],[class='css-175oi2r r-1kbdv8c r-18u37iz r-1wtj0ep r-1ye8kvj r-1s2bzr4']",
+      ".imt-caption-container *",
+      "[data-testid=videoComponent]"
+    ],
+    "forceBlockSelectors.add": ["[data-testid=\"tweetText\"] div.r-6koalj"],
+    "preserveTextSelectors.add": [
+      "[data-testid=\"tweetText\"] a",
+      "[data-testid='UserDescription'] a",
+      "[data-testid='HoverCard'] a",
+      "[data-testid='UserCell'] a",
+      "[data-testid='birdwatch-pivot'] a",
+      ".DocsMarkdown--link-external-icon"
+    ],
+    "injectedCss.add": [
+      "[data-testid='card.layoutLarge.detail'] > div:nth-child(2) {-webkit-line-clamp: unset!important;}",
+      "[data-testid='card.layoutSmall.detail'] > div:nth-child(2) {-webkit-line-clamp: unset!important;}",
+      "[data-testid='tweetText'],[style*='-webkit-line-clamp'] {-webkit-line-clamp: unset!important;}",
+      "[role=dialog] [style*='webkit-line-clamp'] {-webkit-line-clamp: unset!important;}",
+      ".r-h9hxbl{width:unset;}",
+      "[aria-label=Grok] [data-testid=ScrollSnap-SwipeableList] [role=presentation] > div > div { max-height: unset !important; }"
+    ]
+  },
+  {
+    "id": "zoom-asu",
+    "matches": "*.zoom.us/rec/*",
+    "excludeSelectors.add": [".player-share .video-js"]
+  },
+  {
+    "id": "zoom",
+    "matches": "*.zoom.us",
+    "excludeSelectors.add": [".live-transcription-subtitle__box"],
+    "forceInlineSelectors.add": [".live-transcription-subtitle__item"]
+  },
+  {
+    "id": "team",
+    "matches": ["teams.live.com", "teams.microsoft.com"],
+    "excludeSelectors.add": [
+      ".ui-box .ui-box[class='ui-box']",
+      "[data-tid='author']",
+      ".fui-ChatMessageCompact__author"
+    ],
+    "forceInlineSelectors.add": ["[data-tid='closed-caption-text']"],
+    "preserveTextSelectors.add": ["span[title][style='min-width: 20px; height: 20px;']"]
+  },
+  {
+    "id": "googleMeet",
+    "matches": "meet.google.com",
+    "excludeSelectors.add": [".iOzk7[jsname='dsyhDe']", ".ygicle.VbkSUe"],
+    "forceInlineSelectors.add": [".ygicle.VbkSUe"]
+  },
+  {
+    "id": "openrouter",
+    "matches": "openrouter.ai",
+    "injectedCss": "button.text-primary-foreground { height: 100%;white-space: normal;word-wrap: break-word; }",
+    "excludeSelectors.add": [
+      ".line-clamp-1.text-lg",
+      ".text-muted-foreground.text-sm.col-span-4.text-right",
+      "div[title='Tokens this week']",
+      ".text-green-600.font-medium",
+      ".text-xl.text-slate-11",
+      "button[role='tab']",
+      "[data-badge-type=http-method]",
+      "div[role='region'] > div > ul"
+    ]
+  },
+  {
+    "id": "polymarket",
+    "matches": "polymarket.com",
+    "excludeSelectors.add": ["number-flow-react", "button", "a.inline-flex"],
+    "injectedCss.add": [
+      "div[data-index] p.decoration-2 {-webkit-line-clamp:unset;}",
+      "div[data-index] .items-start.relative.gap-2.px-3.flex.w-full {height:unset; max-height:unset;}",
+      "div[data-index] .absolute.w-full {overflow:scroll;}"
+    ]
+  },
+  {
+    "id": "hoyolab",
+    "matches": "www.hoyolab.com",
+    "excludeSelectors": [
+      ".reply-card__nickname",
+      ".mhy-user-card__name",
+      ".mhy-account-title__name"
+    ],
+    "forceBlockSelectors.add": [
+      ".reply-card__content__detail p:first-child",
+      ".reply-card-inner-reply__content > p:first-child"
+    ]
+  },
+  {
+    "id": "chatter.hume.ai",
+    "matches": "chatter.hume.ai",
+    "forceInlineSelectors.add": ["[class*=' flex-wrap'] > span"]
+  },
+  {
+    "id": "threads",
+    "matches": ["www.threads.net", "www.threads.com"],
+    "injectedCss": "span,.x569fbc { max-height:unset;-webkit-line-clamp:unset;height:unset;white-space:unset; }",
+    "excludeSelectors.add": [
+      ".x6s0dn4.x40hh3e.xrvj5dj.xxfwaov",
+      ".x6s0dn4.x78zum5",
+      ".xpvyfi4.x1xdureb.x1agbcgv,.xqcrz7y.x1xdureb.x1agbcgv",
+      ".xpvyfi4.x1npkx4u.x1ms6mhf"
+    ],
+    "preserveTextSelectors": [".x1rg5ohu", ".xat24cr.xdj266r a"]
+  },
+  {
+    "id": "stackoverflow",
+    "matches": [
+      "stackoverflow.com",
+      "*.stackexchange.com",
+      "superuser.com",
+      "askubuntu.com",
+      "serverfault.com"
+    ],
+    "minCharacters": 4,
+    "minWords": 2,
+    "injectedCss": ".s-post-summary--content-excerpt { -webkit-line-clamp:unset; }",
+    "excludeSelectors.add": [
+      ".votecell",
+      "header",
+      "#footer",
+      "#question-header + div",
+      "div.postcell div.mb0",
+      "div[id^=comments-link-]",
+      "#answers-header",
+      ".new-post-login",
+      ".form-submit",
+      "a[href='/questions/ask']",
+      "#left-sidebar",
+      "a.comment-user",
+      "span.comment-date",
+      "div.s-prose.js-post-body + div",
+      ".bottom-notice",
+      "div[data-campaign-name=stk]",
+      ".s-post-summary--stats",
+      ".s-post-summary--meta"
+    ],
+    "forceBlockSelectors.add": ["span.comment-copy"]
+  },
+  {
+    "id": "appleDeveloper",
+    "matches": "developer.apple.com/documentation/*",
+    "includeSelectors": [".container", "h3.title", "div.content"],
+    "excludeSelectors.add": [".vue-recycle-scroller"]
+  },
+  {
+    "id": "hackerNews",
+    "matches": "news.ycombinator.com",
+    "excludeMatches": [
+      "https://news.ycombinator.com/submit",
+      "https://news.ycombinator.com/newsfaq.html",
+      "https://news.ycombinator.com/newsguidelines.html",
+      "https://news.ycombinator.com/security.html"
+    ],
+    "excludeSelectors": [".reply", ".comhead", ".subtext"],
+    "includeSelectors": [
+      ".titleline > a",
+      ".comment > .commtext",
+      ".toptext",
+      "a.hn-item-title",
+      ".hn-comment-text",
+      ".hn-story-title"
+    ],
+    "injectedCss": ".read-frog-translated-content-wrapper {content-visibility:auto;}"
+  },
+  {
+    "id": "quora",
+    "matches": ["*.quora.com", "quora.com"],
+    "excludeSelectors": [
+      ".dom_annotate_multifeed_bundle_AskQuestionPromptBundle",
+      ".dom_annotate_feed_switcher",
+      "[class='q-box qu-py--small qu-color--gray_light']",
+      "[class='q-box spacing_log_answer_header']",
+      "[class='q-box qu-flex--auto']",
+      "[class='q-text qu-dynamicFontSize--small qu-mt--small qu-color--gray_light qu-passColorToLinks']",
+      ".AnswerFooter___StyledFlex-sc-2xbo88-0",
+      "[class='q-box qu-mb--small']",
+      "button.q-click-wrapper",
+      "[class='q-text qu-dynamicFontSize--tiny qu-pb--tiny qu-mt--small qu-color--gray_light qu-passColorToLinks']",
+      "[class='q-text qu-dynamicFontSize--tiny qu-mt--small qu-color--gray_light qu-passColorToLinks']",
+      ".qt_read_more",
+      "[class='q-flex qu-alignItems--flex-start']",
+      "[class='q-box qu-pl--tiny']"
+    ],
+    "injectedCss": ".qu-truncateLines--3 { -webkit-line-clamp: unset; }",
+    "excludeSelectors.add": [".qu-zIndex--action_bar"]
+  },
+  {
+    "id": "oldReddit",
+    "matches": [
+      "old.reddit.com/*/.compact",
+      "old.reddit.com/.compact",
+      "www.reddit.com/*/.compact",
+      "www.reddit.com/.compact"
+    ],
+    "includeSelectors": [".title > a", ".usertext-body"]
+  },
+  {
+    "id": "otherOldReddit",
+    "matches": "old.reddit.com",
+    "includeSelectors": [
+      "p.title > a",
+      "[role=main] .md-container",
+      ".media-gallery .usertext",
+      ".expando .usertext",
+      ".res-expando-box .md"
+    ]
+  },
+  {
+    "id": "redditList",
+    "matches": [
+      "https://www.reddit.com/r/*/comments/*/*",
+      "https://www.reddit.com/",
+      "https://www.reddit.com/hot/",
+      "https://www.reddit.com/new/",
+      "https://www.reddit.com/top/"
+    ],
+    "excludeMatches": ["https://www.reddit.com/r/*/wiki/*"],
+    "includeSelectors": [
+      "h1",
+      ".PostHeader__post-title-line",
+      "[data-click-id=body] h3",
+      "[data-click-id=background] h3",
+      "[data-testid=comment]",
+      "[data-adclicklocation='title'] h3",
+      "[data-adclicklocation=media]",
+      "[data-testid='post-title-text']",
+      ".PostContent",
+      ".post-content",
+      ".Comment__body",
+      "faceplate-batch .md",
+      "[slot=comment]",
+      ".RichTextJSON-root",
+      "[slot=title]",
+      "[slot=text-body]",
+      "p.title > a",
+      "[role=main] .md-container",
+      ".room-message-text",
+      ".crosspost-title",
+      "div.md[id^=t3_]",
+      ".pt-md"
+    ],
+    "injectedCss": "div.XPromoBottomBar { display:none; }\n[class*='line-clamp'] { -webkit-line-clamp: unset; }\na.pointer-events-none { pointer-events: unset; }\na.absolute.inset-0 { inset: unset !important; }",
+    "excludeSelectors.add": ["shreddit-comment-action-row", "faceplate-hovercard"]
+  },
+  {
+    "id": "reddit",
+    "matches": "www.reddit.com",
+    "excludeMatches": [
+      "https://www.reddit.com/r/*/wiki/*",
+      "https://www.reddit.com/settings/*",
+      "https://www.reddit.com/message/sent/*"
+    ],
+    "excludeSelectors": [".text-neutral-content-weak"],
+    "includeSelectors": [
+      "#search-results-tab-slot",
+      "h1",
+      ".PostHeader__post-title-line",
+      "[data-click-id=body] h3",
+      "[data-click-id=background] h3",
+      "[data-testid=comment]",
+      "[data-adclicklocation='title'] h3",
+      "[data-testid='post-title-text']",
+      "[data-testid=search-subreddit-desc-text]",
+      "[slot=comment]",
+      "[data-adclicklocation=media]",
+      ".PostContent",
+      ".post-content",
+      ".Comment__body",
+      "faceplate-batch .md",
+      "[slot=text-body]",
+      "p.title > a",
+      "[role=main] .md-container",
+      "#-post-rtjson-content",
+      ".RichTextJSON-root",
+      "[slot='title']",
+      ".room-message-text",
+      "[source=re_reddit] div > a.text-neutral-content-weak",
+      "#response-container",
+      "#streaming-response",
+      "[noun='recommendation']",
+      "#subgrid-container h1, #subgrid-container h2",
+      ".i18n-subreddit-description",
+      "#response-container_streaming",
+      "search-telemetry-tracker > a.text-neutral-content-strong",
+      "span[data-testid='guides-title']",
+      ".rendererd-rtjson > p",
+      "community-recommendation p"
+    ],
+    "minCharacters": 5,
+    "minWords": 2,
+    "injectedCss": "div.XPromoBottomBar { display:none; }\n[class*='line-clamp'] { -webkit-line-clamp: unset; }"
+  },
+  {
+    "id": "angel",
+    "matches": "www.angel.com",
+    "excludeSelectors.add": [".bmpui-subtitle-position-vtt *"]
+  },
+  {
+    "id": "reuters",
+    "matches": "www.reuters.com",
+    "excludeSelectors": [
+      "[promotext]",
+      "[data-testid=Leaderboard]",
+      "[data-testid=HomeTickerV2]",
+      "[data-testid=SiteFooter]",
+      "[class^=refinitiv-promo-bar__container]",
+      "[data-testid=ResponsiveAdSlot]"
+    ]
+  },
+  {
+    "id": "npmjs",
+    "matches": "https://www.npmjs.com/package/*",
+    "includeSelectors": ["#tabpanel-readme > div:first-child"]
+  },
+  {
+    "id": "github",
+    "matches": "github.com",
+    "excludeMatches": [
+      "https://github.com/*/*/settings",
+      "https://github.com/*/*/settings/*",
+      "https://github.com/settings/*",
+      "https://github.com/sponsors/*",
+      "https://github.com/readme/*",
+      "https://github.com/readme/",
+      "https://github.com/features/*",
+      "https://github.com/codespaces",
+      "https://github.com/customer-stories/*",
+      "https://github.com/signup",
+      "https://github.com/login",
+      "https://github.com/marketplace",
+      "https://github.com/github-copilot*",
+      "https://github.com/collections*",
+      "https://github.com/resources/events*",
+      "https://github.com/pricing*"
+    ],
+    "includeSelectors": [
+      "h1",
+      "[aria-label=Issues] .markdown-title",
+      "[aria-labelledby=discussions-list] .markdown-title",
+      "h3 .markdown-title",
+      ".markdown-body",
+      ".Layout-sidebar p",
+      "div > span.search-match",
+      "li.repo-list-item p",
+      "#responsive-meta-container p",
+      "article p",
+      "feed-container article ul li a span",
+      "feed-container article .FormControl-caption",
+      "div.repo-description p",
+      "[itemprop=description]",
+      ".integrations-auth-wrapper",
+      ".new-feed-onboarding-notice",
+      "article section[aria-label='card content'] > div > div > div  > div:nth-child(2)",
+      ".js-notice h2, .js-notice p",
+      ".TimelineItem-body a span, .TimelineItem-body a div, .TimelineItem-body form span, .TimelineItem-body form div",
+      "[role=\"navigation\"] p",
+      "[data-testid=\"commit-row-item\"] h4",
+      ".font-mktg",
+      ".search-title,.search-match",
+      ".pinned-item-desc",
+      "#repo-content-turbo-frame .markdown-title",
+      "[app-name='blackbird-search'] [data-hpc='true']",
+      ".topic-box > a > p:nth-of-type(2)",
+      "[data-testid=\"listitem-title-link\"]",
+      "#repo-content-turbo-frame p",
+      "#repo-content-turbo-frame h4",
+      "[aria-label=\"card content\"] .flex-column > div:nth-child(2)",
+      "[class*=TitleHeader]",
+      ".bpDald",
+      ".discussion-title",
+      ".copilotPreview__footer",
+      ".heading-element",
+      ".js-feed-item-component h3 a[data-hovercard-type=pull_request]",
+      "[aria-labelledby=outline-id] nav",
+      "[data-testid='issue-pr-title-link']",
+      "div.user-profile-bio",
+      "div.news > div.js-notice",
+      "#memex-project-view-root a [class^='prc-Text-Text']",
+      "[class^=OverviewContent] [class*=DirectoryRichtextContent]",
+      "[id^=pullrequestreview]",
+      "[class^='ChatMessage']",
+      "a[data-hovercard-type='issue']",
+      "[class*=prc-FormControl] > [class*=prc-Text], [class*=prc-FormControl] [class*=prc-FormControl-LabelContainer] [class*=prc-Text]",
+      "[data-testid='beginners-playlist-section']",
+      "[data-testid='getting-started-checklist-section']",
+      "[data-testid='docs-section']",
+      "[data-testid='recommendations-section']",
+      ".Layout-main react-partial pre",
+      ".feed-item-content section[data-view-component] [class='flex-1 d-flex flex-column'] div:nth-child(2)",
+      "#org-new-form",
+      ".trial-info-large",
+      ".dfd-trial__container-form",
+      "dialog-helper",
+      ".blankslate-heading",
+      ".activity-overview-box",
+      "#spaces-list",
+      "[class*='ContentView-module__serviceDescription']",
+      ".BannerDescription",
+      "copilot-user-settings",
+      "h2:has(~ copilot-user-settings)",
+      "div:has(~ copilot-user-settings)",
+      "[class='f4 color-fg-muted col-md-6 mx-auto']",
+      "[class='col-lg-9 position-relative pr-lg-5 mb-6 mr-lg-5']",
+      "[class*='IssueIndexPage-module__middlePaneGrid'] div[class='p-4 text-center rounded-2 border color-border-muted']",
+      "[class*='ModelsPlaygroundRoute-module__playgroundContainer']",
+      "article [class='f6 color-fg-muted mt-1']"
+    ],
+    "forceInlineSelectors": ["g-emoji", "a.anchor"],
+    "injectedCss": ".TimelineItem-body .Link--primary { -webkit-line-clamp: unset; }",
+    "excludeSelectors.add": [
+      "a[data-hovercard-type]",
+      "[data-test-selector='commit-tease-commit-message']",
+      "[data-test-selector='create-branch.developmentForm']",
+      "div.Box-header.position-relative",
+      "div.blob-wrapper-embedded",
+      "div.Box.Box--condensed.my-2",
+      "div.jp-CodeCell",
+      "[aria-label=\"Account\"] .markdown-title",
+      ".js-repos-container .markdown-title",
+      "a.anchor",
+      "div.file-navigation + div.Box",
+      "[data-testid^='breadcrumbs']",
+      "[data-ga-click*=Star]",
+      ".markdown-body h3",
+      "div.vcard-names-container",
+      "div.js-disable-context-menu",
+      ".BorderGrid-cell a[role='link']",
+      ".BorderGrid-cell .topic-tag-link",
+      "table[class*='Table-module__Box']",
+      ".author,.assignee",
+      ".blob-code",
+      ".timeline-comment-header",
+      ".review-thread-reply",
+      ".codeRepository",
+      "[title='Label: Private']",
+      "[aria-label*='language']",
+      ".js-suggested-changes-blob.diff-view",
+      "h1[data-component=PH_Title] span[class*='issueNumberText']",
+      "[data-testid=list-row-repo-name-and-number]"
+    ],
+    "forceBlockSelectors.add": ["bdi"],
+    "preserveTextSelectors.add": [".issue-link"],
+    "injectedCss.add": [
+      ".bpDald,.discussion-title {-webkit-line-clamp:unset!important;}",
+      "li>div[class*='Box-sc'],div[class*='Box-sc']>button[class*='prc-Token-TokenBase'],li[class*='card-label-module']>button[class*='prc-Token-TokenBase'] {height:unset!important;}",
+      "#memex-project-view-root [class*=table-row__StyledTableRow-sc],#memex-project-view-root [class*=base-cell-module__Box] {height:unset!important;}",
+      "[class*='GridCard-module__description'] {-webkit-line-clamp: unset;}"
+    ]
+  },
+  {
+    "id": "github-blog",
+    "matches": "github.blog",
+    "injectedCss": "font {word-break: break-all !important;}",
+    "excludeSelectors.remove": [".notranslate", "[translate=no]"]
+  },
+  {
+    "id": "githubNotebook",
+    "matches": "notebooks.githubusercontent.com",
+    "excludeSelectors": ["div.jp-CodeCell"]
+  },
+  {
+    "id": "rmit",
+    "matches": "www.rmit.edu.au",
+    "injectedCss": ".colfeature-content{height:unset!important;}"
+  },
+  {
+    "id": "mfacebook",
+    "matches": "m.facebook.com",
+    "includeSelectors": [
+      "div[dir=auto][style]",
+      "div[dir=auto][class]",
+      "span[lang]",
+      "[data-pagelet=BizInboxMessengerMessageListContainer] span",
+      "[data-pagelet=BizInboxContextCardDetail] span",
+      "[data-type=container][data-mcomponent=MContainer][class='m displayed'] .native-text",
+      "[data-mcomponent=ServerTextArea] .native-text"
+    ],
+    "injectedCss": ".native-text.rslh {line-height:unset!important;}",
+    "excludeSelectors.add": ["[data-ad-comet-preview=message] [role=button]", "[role=button]"]
+  },
+  {
+    "id": "facebook",
+    "matches": "*.facebook.com",
+    "excludeMatches": [
+      "www.facebook.com/business/*",
+      "business.facebook.com/*",
+      "www.facebook.com/help*",
+      "www.facebook.com/settings*",
+      "www.facebook.com/ads/library/*",
+      "developers.facebook.com/*",
+      "www.facebook.com/v20.0/plugins/*",
+      "www.facebook.com/support*",
+      "www.facebook.com/terms*",
+      "www.facebook.com/privacy*"
+    ],
+    "includeSelectors": [
+      "div[dir=auto][style]",
+      "div[dir=auto][class]",
+      "span[lang]",
+      "[data-pagelet=BizInboxMessengerMessageListContainer] span",
+      "[data-pagelet=BizInboxContextCardDetail] span",
+      ".xod5an3",
+      "[class='x1i10hfl xjbqb8w x1ejq31n xd10rxx x1sy0etr x17r0tee x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz x1sur9pj xkrqix3 xzsf02u x1pd3egz']",
+      "#PNG_EXPORT",
+      ".fb_content.clearfix",
+      "[role='main']",
+      "[role='region']",
+      "[role='presentation']",
+      "form#platformDialogForm"
+    ],
+    "excludeSelectors.add": [
+      "[data-ad-comet-preview=message] [role=button]",
+      "object[type='nested/pressable']",
+      "[data-ad-rendering-role=profile_name]"
+    ],
+    "injectedCss.add": ["._4ik4._4ik5 {max-height:unset!important;}"]
+  },
+  {
+    "id": "youtubeMobile",
+    "matches": "m.youtube.com",
+    "includeSelectors": [
+      ".comment-text",
+      "#content-text",
+      ".media-item-headline",
+      ".slim-video-information-title",
+      ".yt-spec-button-view-model",
+      ".yt-core-attributed-string > span",
+      ".yt-core-attributed-string",
+      ".shortsLockupViewModelHostMetadataTitle",
+      ".YtmCommentRendererText",
+      ".ytAttributedStringHost",
+      ".title"
+    ],
+    "injectedCss": ".read-frog-translated-content-wrapper img { width: 16px; height: 16px }\n.shortsLockupViewModelHostMetadataTitle,h4.compact-media-item-headline {max-height:unset !important;line-clamp:unset !important;overflow:unset !important;-webkit-line-clamp:unset !important;}\n.comment-text {max-height:unset;}\n.details,.subhead,.video-card-title,.media-item-headline {max-height:unset!important;-webkit-line-clamp:unset!important;}\ntruncated-text-content {max-height: unset !important;}",
+    "excludeSelectors.add": [
+      ".ytm-badge-and-byline-item-byline",
+      ".ytp-caption-window-container",
+      "text",
+      ".imt-caption-container",
+      "ytd-live-chat-frame"
+    ],
+    "forceBlockSelectors.add": [".caption-visual-line"]
+  },
+  {
+    "id": "twitch",
+    "matches": "www.twitch.tv",
+    "excludeSelectors.add": [
+      ".persistent-player",
+      ".chat-line__username-container",
+      ".chat-line__no-background span[aria-hidden=true]",
+      "[data-a-target=animated-channel-viewers-count],.live-time"
+    ]
+  },
+  {
+    "id": "youtube",
+    "matches": "www.youtube.com",
+    "includeSelectors": [
+      "yt-formatted-string[slot=content].ytd-comment-renderer",
+      "yt-formatted-string.ytd-video-renderer",
+      "yt-formatted-string#content-text",
+      "h1",
+      "yt-formatted-string#video-title",
+      ".ytLockupMetadataViewModelTitle,.shortsLockupViewModelHostOutsideMetadataTitle",
+      "yt-formatted-string.span",
+      "span#video-title",
+      "a#video-title",
+      "yt-formatted-string.ytd-transcript-segment-renderer",
+      "#description-inline-expander > yt-attributed-string > span",
+      "yt-attributed-string > span",
+      "yt-formatted-string > span",
+      "ytd-notification-renderer .message",
+      "#message",
+      ".yt_to_text_transcript_text",
+      "video-summary-content-view-model",
+      ".yt-core-attributed-string",
+      "#title",
+      ".product-item-title",
+      ".product-item-price",
+      "#commentCanvas .cmt",
+      ".ytwTranscriptSegmentViewModelHost"
+    ],
+    "injectedCss": ".read-frog-translated-content-wrapper img { width: 16px; height: 16px }\n.metadata-snippet-container {max-height: unset !important;}\n.read-frog-translated-content-wrapper {text-align: left;}\n.read-frog-translated-content-wrapper[dir=rtl] {text-align: right;}\n#commentCanvas .cmt {display:flex;flex-direction: column;}\n#commentCanvas .cmt font br {display: none;}\n#video-title,h1.ytd-watch-metadata,.ytd-video-renderer,.yt-lockup-metadata-view-model-wiz__title {-webkit-line-clamp: unset !important;max-height: unset !important;}\nyt-formatted-string#video-title,.ShortsLockupViewModelHostOutsideMetadataTitle {-webkit-line-clamp: unset !important;max-height: unset !important;}\nytd-expander.ytd-comment-renderer {--ytd-expander-max-lines: 1000;}\n.page-header-view-model-wiz__page-header-title--page-header-title-large {-webkit-line-clamp: unset !important;max-height: unset !important;}\n#title,#video-title,.yt-lockup-metadata-view-model__title,.ytLockupMetadataViewModelTitle,.shortsLockupViewModelHostOutsideMetadataTitle,h1.ytd-watch-metadata,.ytwFeedAdMetadataViewModelHostTextsStyleStandardHeadline {-webkit-line-clamp: unset !important;max-height: unset !important;}",
+    "excludeSelectors.add": [
+      ".ytp-caption-window-container",
+      "text",
+      ".imt-caption-container",
+      "ytd-button-renderer",
+      ".ytp-sfn-content div :last-child",
+      "ytd-live-chat-frame",
+      "yt-button-shape",
+      "ytd-comments-header-renderer",
+      "yt-content-metadata-view-model",
+      "yt-description-preview-view-model button",
+      ".yt-page-header-view-model__page-header-title"
+    ],
+    "forceBlockSelectors.add": [
+      "yt-formatted-string.ytd-transcript-segment-renderer",
+      ".caption-visual-line"
+    ]
+  },
+  {
+    "id": "youtubekids",
+    "matches": "www.youtubekids.com",
+    "injectedCss": "#video-title { -webkit-line-clamp: unset;max-height: unset; }\nh1.ytd-watch-metadata { -webkit-line-clamp: unset;max-height: unset; }\nyt-formatted-string#video-title { -webkit-line-clamp: unset;max-height: unset; }\nytd-expander.ytd-comment-renderer { --ytd-expander-max-lines: 1000; }\n.details.ytk-compact-video-renderer { height: unset; }\n.primary-text.ytk-compact-video-renderer { -webkit-line-clamp: unset;max-height: unset; }"
+  },
+  {
+    "id": "youtube-subtitle",
+    "matches": ["www.youtube-nocookie.com", "music.youtube.com"],
+    "excludeSelectors.add": [".captions-text", ".ytp-caption-segment"],
+    "forceBlockSelectors.add": [".caption-visual-line"]
+  },
+  {
+    "id": "instagramMessage",
+    "matches": "https://www.instagram.com/direct/*",
+    "includeSelectors": ["div[dir=auto].html-div"]
+  },
+  {
+    "id": "instagramPost",
+    "matches": ["https://www.instagram.com/p/*", "https://www.instagram.com/reels/*"],
+    "excludeSelectors": ["hr+div span[dir=auto][style] > span"],
+    "includeSelectors": [
+      "h1",
+      "ul li h3+div span[dir=auto]",
+      "hr+div span[dir=auto][style]",
+      "div > div[dir=auto]",
+      "div:not([class]) > div > div:nth-child(2)"
+    ],
+    "minCharacters": 2,
+    "excludeSelectors.remove": ["h1 br"],
+    "injectedCss.add": ["article ._aagw {position:unset !important;}"]
+  },
+  {
+    "id": "otherInstagram",
+    "matches": "https://www.instagram.com/*",
+    "excludeMatches": ["https://www.instagram.com/b/*"],
+    "includeSelectors": [
+      "h1",
+      "article span[dir=auto] > span[dir=auto]",
+      "._ab1y",
+      "ul li h3+div span[dir=auto]",
+      "hr+div span[dir=auto][style]",
+      "span[dir=auto] > div > span",
+      "div > h1[dir=auto]",
+      ".x1fkh5qu.x1ddbhtg.x1dlrdel",
+      "a[href*='explore/locations/']"
+    ],
+    "minCharacters": 2
+  },
+  {
+    "id": "1paragraph",
+    "matches": "1paragraph.app",
+    "includeSelectors": ["#book"]
+  },
+  {
+    "id": "poeditor",
+    "matches": "https://poeditor.com/projects/*",
+    "includeSelectors": [".comment-body", ".reference_language .source-string"]
+  },
+  {
+    "id": "substack",
+    "matches": ["*.substack.com", "newsletter.rootsofprogress.org", "www.lennysnewsletter.com"],
+    "excludeSelectors": [
+      ".publication-footer",
+      ".subscribe-footer",
+      ".main-menu",
+      ".navbar-title-link",
+      "[data-testid='navbar']",
+      ".navbar-title",
+      ".captioned-button-wrap",
+      ".subscription-widget-wrap",
+      ".tweet-header",
+      ".tweet-link-bottom",
+      ".expanded-link",
+      ".meta-subheader",
+      ".comment-meta",
+      ".comment-actions"
+    ],
+    "injectedCss": ".reader2-clamp-lines { max-height: unset; -webkit-line-clamp: unset; }\n[class*='clamp-'] { max-height: unset; -webkit-line-clamp:unset; }\n.blurb-text { max-height: unset; }\n.comment-body { max-height: unset; }\n[class*='_hideSelectio'] { overflow: scroll; }",
+    "forceBlockSelectors.add": [
+      ".reader2-post-title",
+      ".tweet-link-top",
+      ".tweet-link-bottom",
+      ".expanded-link"
+    ]
+  },
+  {
+    "id": "seekingalpha",
+    "matches": ["seekingalpha.com/article/*", "seekingalpha.com/news/*"],
+    "excludeSelectors": ["[data-test-id=post-page-meta]", "header > div:first-child"],
+    "includeSelectors": ["[data-test-id=card-container]", "[data-test-id=comments-section]"]
+  },
+  {
+    "id": "hnAlgolia",
+    "matches": "hn.algolia.com",
+    "includeSelectors": [".Story_title > a:first-child", ".Story_comment > span"]
+  },
+  {
+    "id": "readwise",
+    "matches": "read.readwise.io",
+    "includeSelectors": ["div[class^='_titleRow_']", "#document-text-content"]
+  },
+  {
+    "id": "inoreader",
+    "matches": ["www.inoreader.com", "*.inoreader.com"],
+    "excludeMatches": [
+      "https://www.inoreader.com/features*",
+      "https://www.inoreader.com/blog*",
+      "https://www.inoreader.com/discover*",
+      "https://www.inoreader.com/contact*",
+      "https://www.inoreader.com/pricing*",
+      "https://www.inoreader.com/enterprise*"
+    ],
+    "includeSelectors": [
+      ".article_header_title",
+      ".article_title_link",
+      ".article_content",
+      ".article_magazine_title_link",
+      ".blog-post-page",
+      "#welcome_center",
+      ".gad_overview_articles_wrapper",
+      ".library_article_text h4",
+      ".header_name",
+      ".blog-content"
+    ],
+    "injectedCss.add": [
+      ".article_title_link,.library_article_text h4,.gadget_overview_article_title,.article_magazine_title_link,.reader_pane_view_style_2 .column_view_title {-webkit-line-clamp: unset!important;max-height: unset!important;}",
+      ".article_tile_content_wraper,div.article_tile {overflow:auto}",
+      ".article_header_title {white-space:normal;max-height: unset!important;}",
+      ".article_header_title span {display:flex !important;flex-direction: column;}",
+      ".ar.article_no_thumbnail,[data-type=article] {height:unset!important;}",
+      ".view_style_2 #reader_pane .ar .article_header_text .column_view_info {position:relative!important;}"
+    ]
+  },
+  {
+    "id": "aha",
+    "matches": "*.ideas.aha.io",
+    "excludeSelectors": [
+      ".comment-header",
+      ".vote-status",
+      ".idea-meta",
+      ".filters-title",
+      ".ideas-showing-count",
+      ".my-ideas-filters-wrapper",
+      ".statuses-filters-wrapper",
+      ".categories-filters-wrapper",
+      "[class^='attachment']",
+      "span[class^='attachment-name']"
+    ]
+  },
+  {
+    "id": "googleScholar",
+    "matches": ["scholar.google.*/*", "scholar.google.com.*/*", "scholar.google.co.*/*"],
+    "includeSelectors": [
+      "h3 a[data-clk]",
+      "div.gs_rs",
+      "td a.gsc_a_at",
+      "td div.gs_gray:last-of-type",
+      "div.gsc_oci_value",
+      "#gs_opinion",
+      ".gs_rt",
+      ".gsh_csp",
+      ".gs_fma_wpr",
+      "#gs_as_hp_main"
+    ],
+    "forceInlineSelectors": ["br"]
+  },
+  {
+    "id": "googleMail",
+    "matches": "mail.google.com",
+    "injectedCss": "[role='listitem'] > div { height:auto!important;white-space:unset!important; }"
+  },
+  {
+    "id": "googleNews",
+    "matches": "news.google.com",
+    "excludeSelectors": [
+      ".EyERq",
+      ".AOl7G.eejsDc",
+      "[aria-label='Home']",
+      "[aria-label='For you']",
+      "[aria-label='Following']",
+      "[aria-label='World']",
+      "[aria-label='Local']",
+      ".gb_Fc",
+      ".wBQf7b",
+      ".yPI8Rb",
+      ".jKHa4e",
+      ".u43Gd",
+      ".Zgjpyb",
+      "[role='button']",
+      "[jsname='rymPhb']",
+      ".cbz1ld",
+      ".VfPpkd-P5QLlc",
+      ".XvhY1d",
+      "time",
+      ".bInasb"
+    ],
+    "injectedCss.add": [
+      ".oovtQ,.MCAGUe,.To2ZZb.DbQnIe {height: unset;}",
+      "h4,.IBr9hb,.gPFEn{-webkit-line-clamp: unset!important;}",
+      ".cp7Yvc > h2 {display: block;}"
+    ]
+  },
+  {
+    "id": "outlook",
+    "matches": "outlook.live.com",
+    "excludeSelectors": [
+      ".jHAG3.XG5Jd",
+      ".OZZZK",
+      ".lDdSm",
+      ".ZfoST.VlT6S.azUpZ",
+      ".GssDD,.xpAva,.oHwUF,.D1eg_",
+      "[id=CenterRegion]",
+      "[id=RibbonRoot]",
+      "[role=toolbar]",
+      ".qQbyL,.bkYAr,.gpJ9q,.threeColumnCirclePersonaDivWidth",
+      "[class='_rWRU Ejrkd qq2gS D8iyG']"
+    ]
+  },
+  {
+    "id": "producthunt",
+    "matches": "www.producthunt.com",
+    "excludeMatches": ["https://www.producthunt.com/stories/*"],
+    "injectedCss": "h5 + p { height:unset; }\n.noOfLines-1,.noOfLines-2,.noOfLines-3,.styles_noOfLines-2__k_Ta_,[data-test=\"post-name-481116\"] { -webkit-line-clamp:unset; }",
+    "excludeSelectors.add": [
+      ".styles_extraInfo__Xs_5Y",
+      "[data-test=\"show-more-shoutouts-button\"]",
+      ".styles_buttons__kKy_S",
+      ".styles_count___6_8F"
+    ]
+  },
+  {
+    "id": "discord",
+    "matches": "https://discord.com/channels/*",
+    "includeSelectors": [
+      "li[id^=chat-messages] div[id^=message-content]",
+      "div[class^=headerText]",
+      "section[aria-label='Search Results'] div[id^=message-content]",
+      "div[class^=messagesPopout]",
+      "[class^='embedTitle']",
+      "[class^='embedDescription']",
+      "[class^='promptContent']",
+      "li[class^='container'] > div[class^='header']"
+    ],
+    "minCharacters": 4,
+    "minWords": 2,
+    "excludeSelectors.add": ["[class*='username']", "[class*='repliedMessage']"],
+    "forceBlockSelectors.add": [
+      "[class^='embedFieldValue']",
+      "li[class^='card'] div[class^='message']",
+      "[data-list-item-id^='forum-channel-list'] div[class^='headerText']"
+    ],
+    "injectedCss.add": [
+      "main div[class^=headerText],main div[class^=message],main div[class^=text] {max-height: unset;}",
+      "h3[data-text-variant='heading-lg/semibold'] {-webkit-line-clamp: unset;line-height: unset;}",
+      "[class*='guildDetails'] > [class*='description'] {-webkit-line-clamp: unset;}"
+    ]
+  },
+  {
+    "id": "telegram",
+    "matches": [
+      "web.telegram.org/z/*",
+      "web.telegram.org/a/*",
+      "web.telegram.org/k/*",
+      "web.telegram.org/k/"
+    ],
+    "excludeSelectors": [
+      ".time",
+      ".peer-title",
+      ".document-wrapper",
+      ".message.spoilers-container custom-emoji-element"
+    ],
+    "includeSelectors": [
+      ".text-content",
+      ".message",
+      ".reply-markup-button-text",
+      ".bot-commands-list-element-description",
+      "[class*='tabs-tab page-password active']",
+      "#auth-qr-form"
+    ],
+    "excludeSelectors.remove": [".notranslate", "[translate=no]"],
+    "forceBlockSelectors.add": [
+      ".message.spoilers-container em",
+      ".message.spoilers-container strong"
+    ]
+  },
+  {
+    "id": "githubGist",
+    "matches": "gist.github.com",
+    "includeSelectors": [".markdown-body", ".readme"]
+  },
+  {
+    "id": "lobste",
+    "matches": "lobste.rs",
+    "excludeMatches": ["https://lobste.rs/about", "https://lobste.rs/chat"],
+    "includeSelectors": [".u-repost-of", ".comment_text", ".story_text"]
+  },
+  {
+    "id": "slack",
+    "matches": "*.slack.com",
+    "includeSelectors": [
+      ".p-rich_text_block",
+      ".p-message_pane__foreword",
+      ".c-alert__message",
+      "[data-qa=message_attachment_text]"
+    ],
+    "preserveTextSelectors.add": ["[data-qa=emoji]"]
+  },
+  {
+    "id": "artstationArtwork",
+    "matches": "www.artstation.com/artwork/*",
+    "excludeSelectors": [".project-description a"],
+    "includeSelectors": [".project-description", "div.project-comment-text", ".asset-caption"]
+  },
+  {
+    "id": "artstationLearning",
+    "matches": "www.artstation.com/learning/courses/*",
+    "excludeSelectors": [".learning-card-meta", ".vjs-text-track-display"],
+    "includeSelectors": ["footer.learning-course-description.ng-star-inserted > span"]
+  },
+  {
+    "id": "artstationBlog",
+    "matches": ["https://www.artstation.com/blogs", "https://www.artstation.com/blogs/*"],
+    "excludeSelectors": [
+      "blog-card-thumbnail",
+      "blog-card-header",
+      ".blog-card-author",
+      ".blog-card-meta",
+      ".blog-view-header",
+      ".blog-grid-title",
+      ".post-meta-header"
+    ],
+    "includeSelectors": [".comment-item-body"]
+  },
+  {
+    "id": "figmaCommunity",
+    "matches": "www.figma.com/community/*",
+    "excludeSelectors": ["div[class*='metadataRight']", "div[class*='commentMetaAndOptions']"],
+    "includeSelectors": ["div[class*='mini_cardBottomRow_Metadata']"],
+    "injectedCss": "div[class*='mini_cardBottomRowSizing'] { height: 3em; }",
+    "preserveTextSelectors": ["[data-tooltip='tooltip-user-info']"]
+  },
+  {
+    "id": "googleIndex",
+    "matches": ["https://www.google.com/", "https://www.google.com.hk/"],
+    "excludeSelectors": ["#gb", "#SIvCob"]
+  },
+  {
+    "id": "googleSearch",
+    "matches": "www.google.*/search*",
+    "excludeSelectors": [
+      "a h3 + div",
+      "div#sfooter",
+      ".b5ZQcf",
+      ".CEMjEf",
+      ".MgUUmf.NUnG9d",
+      "#result-stats",
+      "[role=navigation]",
+      "div.sCuL3",
+      "div.eFM0qc.BCF2pd",
+      "div.WZ8Tjf",
+      "div.adDDi",
+      "#headerSection",
+      "#rateChatDiv",
+      ".title-D5Lgyj",
+      "[data-attrid='VisualDigestVideoResult']",
+      ".search-enhance-WDIEkP h4",
+      ".SPZz6b h2",
+      ".CtCigf",
+      ".VLkRKc",
+      ".EbH0bb",
+      ".Wr0c6d",
+      ".jleFbf",
+      "#searchform",
+      ".yg51vc",
+      ".CbAZb",
+      ".B6fmyf.byrV5b.Mg1HEd",
+      "[class='SPa6uf Hqu6dd OSrXXb']",
+      "[class='ZtihLe YrbPuc']",
+      "[class='kb0PBd A9Y9g'] .TXwUJf,[class='kb0PBd cvP2Ce'] .TXwUJf",
+      "[class='wep10b vDF3Oc jIrdcd'],[class='gqF9jc YrbPuc']",
+      "span[data-ts]"
+    ],
+    "excludeSelectors.add": ["[jscontroller='UsftYd']"],
+    "forceBlockSelectors.add": [".MUFPAc", "[role=heading]"],
+    "injectedCss.add": [
+      ".V82bz,.uAKcGb,.F0FGWb,.Hdw6tb,.M1Sizc,.XVPTd,.Yt787.JGD2rd,.ITZIwc {-webkit-line-clamp: unset!important;max-height: unset!important;}",
+      ".pe7FNb {-webkit-line-clamp: unset!important;}",
+      ".promotion-3PDMAb {display: none!important;}",
+      "div[data-content-feature='1'] > div {-webkit-line-clamp: unset!important;max-height: unset!important;}",
+      "div[style='-webkit-line-clamp:*'] {-webkit-line-clamp: unset!important;max-height: unset!important;}",
+      ".Pw4Ldf.RsCEN {height:unset!important;}",
+      ".related-question-pair {overflow:auto!important;}"
+    ]
+  },
+  {
+    "id": "lowendtalk",
+    "matches": "lowendtalk.com",
+    "excludeSelectors": [".ClearFix .Count"],
+    "includeSelectors": [
+      "[role=heading]",
+      "h1",
+      ".userContent",
+      ".DismissMessage",
+      ".PanelColumn",
+      ".Meta-Discussion"
+    ]
+  },
+  {
+    "id": "linkedinFeed",
+    "matches": "https://linkedin.com/feed/*",
+    "includeSelectors": ["h1", ".feed-shared-update-v2__description-wrapper"]
+  },
+  {
+    "id": "indiehackers",
+    "matches": "www.indiehackers.com",
+    "excludeSelectors.add": [
+      ".portal-entry__date",
+      ".portal-entry__byline",
+      ".firestore-post__header-metadata",
+      ".story__counts",
+      ".story__time-ago",
+      ".story__byline",
+      ".partnerships__age",
+      ".job__pay",
+      ".author-bio__name-link",
+      ".comment__footer"
+    ],
+    "excludeSelectors.remove": [".notranslate", "[translate=no]"],
+    "injectedCss.add": [
+      ".meetups__meetup-name,.partnerships__title { -webkit-line-clamp: unset!important;max-height: unset!important; }"
+    ]
+  },
+  {
+    "id": "deepwiki",
+    "matches": "deepwiki.com",
+    "excludeSelectors.add": [
+      "[class*='flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r']",
+      "[class*='mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75']"
+    ]
+  },
+  {
+    "id": "libreddit",
+    "matches": "libreddit.de",
+    "includeSelectors": ["h2.post_title", ".comment_body > .md"]
+  },
+  {
+    "id": "notionSite",
+    "matches": ["notion.site", "*.notion.site"],
+    "excludeSelectors": [".notion-code-block"],
+    "injectedCss": "[aria-label='Templates'] font br {display:none;}"
+  },
+  {
+    "id": "newyorker",
+    "matches": "www.newyorker.com",
+    "excludeSelectors": ["[data-testid=PersistentTop]", "[data-testid=StackedNavigationHeader]"],
+    "includeSelectors": ["h1", "[data-testid=SummaryItemHed]"]
+  },
+  {
+    "id": "typora",
+    "matches": "typora.io",
+    "excludeSelectors": [".tab-slider--nav"]
+  },
+  {
+    "id": "startme",
+    "matches": "start.me",
+    "includeSelectors": [
+      ".rss-article__title",
+      ".rss-articles-list__article-link",
+      ".rss-showcase__title",
+      ".rss-showcase__text"
+    ]
+  },
+  {
+    "id": "scmp",
+    "matches": "www.scmp.com",
+    "includeSelectors": [".info__subHeadline", ".section-content h2"],
+    "injectedCss": ".topic__article-list { height: unset; }\n.adverisers__adveriser { height: unset; }\n.advertiser__content { height: unset; }\n.content-title__link { display:unset;overflow:unset;-webkit-line-clamp:unset; }\n.title__text { max-height:unset; -webkit-line-clamp:unset; }\n.news-list-item__news-title { max-height:unset; -webkit-line-clamp:unset; }\na[class*='link'] > .link__headline { max-height:unset; -webkit-line-clamp:unset; }"
+  },
+  {
+    "id": "lesswrong",
+    "matches": "www.lesswrong.com",
+    "excludeSelectors.add": [
+      ".PostsPagePostHeader-authorAndSecondaryInfo",
+      ".Answer-answerHeader",
+      "time",
+      ".CommentsItemMeta-root",
+      ".CommentsListMeta-root",
+      ".CommentsTableOfContents-tocPostedAt",
+      ".CommentsTableOfContents-commentAuthor",
+      ".CommentBottom-bottom"
+    ],
+    "forceBlockSelectors.add": ["span.commentOnSelection"]
+  },
+  {
+    "id": "mastodon",
+    "matches": [
+      "mastodon.social",
+      "mastodon.online",
+      "kolektiva.social",
+      "indieweb.social",
+      "mastodon.world",
+      "infosec.exchange"
+    ],
+    "includeSelectors": [
+      "div.status__content__text",
+      ".about__section__body",
+      ".content",
+      ".form-container",
+      ".account__header__extra"
+    ]
+  },
+  {
+    "id": "cnbc",
+    "matches": "www.cnbc.com",
+    "injectedCss": "div.Card-titleContainer > div { -webkit-line-clamp: unset;max-height: unset; }",
+    "excludeSelectors.add": [
+      "#GlobalNavigation",
+      "#GlobalFooter",
+      ".LiveBlogHeader-timestampAndShareBarContainer",
+      ".LiveBlogHeader-liveUpdatesPill",
+      ".QuoteInBody-inlineButton"
+    ],
+    "forceBlockSelectors.remove": ["button"]
+  },
+  {
+    "id": "dailyDev",
+    "matches": "app.daily.dev",
+    "includeSelectors": ["h1", ".typo-body", "article h3", "[class^=markdown_markdown]"],
+    "injectedCss": ".line-clamp-3 { -webkit-line-clamp: unset; }"
+  },
+  {
+    "id": "pornhub",
+    "matches": ["*.pornhub.com", "pornhub.com"],
+    "excludeMatches": ["*.pornhub.com/insights/*", "pornhub.com/insights/*"],
+    "injectedCss": "span.title { height:unset; max-height:unset; }\n.detailedInfo { max-height:unset; }\n.pcVideoListItem { max-height:unset; }\n.wrap { height:unset; }\n.entry-header { height:unset; }\n.entry-title > a { height:unset;-webkit-line-clamp:unset; }",
+    "forceBlockSelectors.add": [".trendingNow", ".searchItem", ".tagcloud > a"]
+  },
+  {
+    "id": "missav",
+    "matches": "https://missav.*/*",
+    "injectedCss": ".truncate { white-space:unset; }\n.overflow-y-hidden { max-height:unset;overflow-y:unset; }",
+    "excludeSelectors.add": [
+      ".leading-normal",
+      "[class='absolute bottom-1 right-1 rounded-lg px-2 py-1 text-xs text-nord5 bg-gray-800 bg-opacity-75']",
+      "[class='absolute bottom-1 left-1 rounded-lg px-2 py-1 text-xs text-nord5 bg-blue-800 bg-opacity-75']"
+    ]
+  },
+  {
+    "id": "javbus",
+    "matches": "https://www.javbus.com/*",
+    "excludeSelectors": [".item-tag", "date"],
+    "injectedCss": ".photo-info { height:unset; }"
+  },
+  {
+    "id": "spankbang",
+    "matches": "https://spankbang.com/*",
+    "excludeSelectors": [".stats", ".thumb"],
+    "injectedCss": ".video-item > a { white-space:unset; }",
+    "forceBlockSelectors.add": [".searches > a", ".tag > a", ".extra > a", ".positions > li"]
+  },
+  {
+    "id": "javdb",
+    "matches": "https://javdb*.com/*",
+    "excludeSelectors": [".video-number", ".score", ".has-addons"],
+    "injectedCss": ".video-title { white-space:unset; }"
+  },
+  {
+    "id": "jable",
+    "matches": "https://jable.tv/*",
+    "injectedCss": ".title { white-space:unset;max-height:unset; }\n.img-box > a { position:relative; }"
+  },
+  {
+    "id": "netflav",
+    "matches": "https://netflav*.com/*",
+    "injectedCss": ".grid_title { max-height:unset; }",
+    "forceBlockSelectors.add": [".genre_filter_item", "button"]
+  },
+  {
+    "id": "czechvideo",
+    "matches": "https://czechvideo.co/*",
+    "injectedCss": ".short-story { height:unset; }\n.short-title { height:unset; }"
+  },
+  {
+    "id": "weibo",
+    "matches": ["weibo.com", "*.weibo.*"],
+    "excludeMatches": ["passport.weibo.com/sso/signin*"],
+    "includeSelectors": [
+      "div[class^='detail_wbtext']",
+      ".weibo-text",
+      ".m-feed",
+      ".wbpro-feed-content",
+      ".wbpro-list .text"
+    ],
+    "preserveTextSelectors.add": [".expand"]
+  },
+  {
+    "id": "uxtension",
+    "matches": "www.uxento.io",
+    "excludeSelectors": [
+      "article div[class='flex justify-between items-center px-3']",
+      "article div[class='flex items-center gap-2 mb-2']",
+      "article div[class='flex justify-between items-center pr-4']",
+      "article div[class='px-3 pb-3 pt-1 grid grid-cols-2 gap-4']",
+      "article div[class='flex flex-wrap gap-1 mt-1']",
+      "article div[class='flex items-center gap-3 pr-12']"
+    ],
+    "includeSelectors": [
+      "[class='px-4 pb-4 text-sm leading-relaxed break-words text-white overflow-hidden']",
+      "[class='text-xs leading-relaxed break-words text-[#AAAAB9] mb-2 overflow-hidden']",
+      "[class='px-4 pb-4 text-sm leading-relaxed break-words text-white']",
+      "[class='text-xs leading-relaxed break-words text-[#AAAAB9] mb-2']",
+      "[class='flex min-h-screen flex-col overflow-hidden supports-[overflow:clip]:overflow-clip'] section",
+      "h2",
+      "article",
+      "article h2",
+      "article p"
+    ]
+  },
+  {
+    "id": "medium",
+    "matches": ["medium.com", "*.medium.com"],
+    "excludeSelectors": [
+      "[aria-label='Post Preview Reading Time']",
+      ".speechify-ignore",
+      "article pre"
+    ],
+    "injectedCss": ".u-lineClamp4,.u-lineClamp3,.u-lineClamp2 {-webkit-line-clamp:unset!important;max-height:unset!important;}\nh2,h3 { -webkit-line-clamp: unset;max-height:unset; }\narticle p { -webkit-line-clamp: unset;max-height:unset; }",
+    "excludeSelectors.add": ["pre > span"],
+    "excludeSelectors.remove": ["i.fa", "i[class^=fa-]", ".navmenu-container", ".google-symbols"]
+  },
+  {
+    "id": "economist",
+    "matches": "www.economist.com",
+    "excludeSelectors": ["footer.ds-footer", ".vjs-text-track-display"],
+    "forceInlineSelectors": ["span[data-caps='initial']"],
+    "injectedCss": "a::before {position:relative!important;}\n[class^=button] span font {white-space:pre-wrap;}"
+  },
+  {
+    "id": "healthline",
+    "matches": "www.healthline.com",
+    "excludeSelectors": [".icon-hl-trusted-source-after"]
+  },
+  {
+    "id": "ebay",
+    "matches": "www.ebay.com",
+    "excludeSelectors": ["headers", "[itemprop=offers]", ".dne-itemtile-original-price"],
+    "minCharacters": 4,
+    "minWords": 2,
+    "injectedCss.add": [
+      ".iS4T .zgfQ .uHzw .Ep66 {-webkit-line-clamp: unset;max-height: unset;}",
+      "[itemprop=name],.merch-item-title {-webkit-line-clamp: unset;max-height: unset;}"
+    ]
+  },
+  {
+    "id": "skinstore",
+    "matches": "www.skinstore.com",
+    "excludeSelectors": [".responsiveFlyoutMenu_levelOneLink"],
+    "minCharacters": 4,
+    "minWords": 2
+  },
+  {
+    "id": "primevideo",
+    "matches": [
+      "www.primevideo.com",
+      "https://*.amazon.co.*/*video*",
+      "https://*.amazon.com/*video*",
+      "https://*.amazon.*/*video*"
+    ],
+    "description": "应该是有广告会破坏时间轴，所以暂时不加自托管",
+    "excludeSelectors.add": ["#dv-web-player"]
+  },
+  {
+    "id": "amazon",
+    "matches": "www.amazon.*",
+    "minCharacters": 1,
+    "minWords": 1,
+    "excludeSelectors.add": [
+      "#navFooter",
+      ".s-price-instructions-style",
+      "[class*='-star ']",
+      "[data-hook='acr-average-stars-rating-text']",
+      ".a-color-price,.a-price",
+      "[data-testid='price-section']",
+      "[data-component='dui-badge']",
+      "#glow-ingress-block,#nav-link-accountList,#nav-orders,#nav-cart",
+      ".a-profile-content,[data-hook=product-variation-attributes],[data-hook=helpfulVoteWidget],[data-hook=reportAbuseButton],[data-hook=helpful-vote-statement]"
+    ],
+    "forceBlockSelectors.add": [".a-size-small.a-link-normal.page-banner-link.a-nowrap"],
+    "injectedCss.add": [
+      ".a-carousel-viewport {height:unset;}",
+      "[class*='clamp'] {max-height: unset!important;-webkit-line-clamp: unset!important;}",
+      "[data-rows] {max-height: unset!important;-webkit-line-clamp: unset!important;}",
+      "[data-a-expander-name='review_text_read_more'] { max-height: unset;}",
+      ".compact.primaryText.primaryTextOnly {max-height: unset;-webkit-line-clamp: unset;}",
+      ".format {-webkit-line-clamp: unset;}",
+      ".dcl-truncate,[class*='textButton'],span[data-a-max-rows] {max-height:unset!important;-webkit-line-clamp: unset!important;}",
+      ".a-reactive-container-transition,.a-cardui-uninitialized {height:unset!important;max-height:unset!important;}"
+    ]
+  },
+  {
+    "id": "visualstudioMarketplace",
+    "matches": "marketplace.visualstudio.com",
+    "injectedCss": ".item-details-control-root.ux-item-shortdesc { height: unset; overflow: visible; max-height:unset; }",
+    "excludeSelectors.add": [
+      ".core-info-second-row",
+      ".core-info-third-row",
+      ".meta-data-list",
+      ".item-title",
+      ".breadcrumb",
+      ".itemDetails-right",
+      ".ux-user-name",
+      ".ux-updated-date",
+      ".ux-item-second-row-wrapper",
+      ".stats-and-offer",
+      ".header-container"
+    ]
+  },
+  {
+    "id": "bloomberg",
+    "matches": "www.bloomberg.com",
+    "excludeMatches": ["https://www.bloomberg.com/live/*"],
+    "excludeSelectors": [
+      ".ticker-bar",
+      "nav",
+      "[aria-label=Banner]",
+      "aside",
+      "[data-component=ticker-bar]",
+      "footer.bb-global-footer",
+      ".vjs-text-track-display"
+    ]
+  },
+  {
+    "id": "baiduXueshu",
+    "matches": "xueshu.baidu.com",
+    "injectedCss": ".abstract_wr { height: unset; overflow: visible; max-height:unset; }"
+  },
+  {
+    "id": "sciencedirect",
+    "matches": "www.sciencedirect.com",
+    "excludeMatches": ["www.sciencedirect.com/*/pdf/download/*"],
+    "injectedCss": ".read-frog-translated-content-wrapper {content-visibility:auto;}",
+    "excludeSelectors.add": [".bibliography", ".author-group"],
+    "forceBlockSelectors.add": ["span.display", "span.captions", "span[id^=cap]"],
+    "preserveTextSelectors": ["span.display", "span.math"],
+    "injectedCss.add": [
+      "h2 {font-size:unset;}",
+      ".u-clamp-2-lines {-webkit-line-clamp:unset!important;}"
+    ]
+  },
+  {
+    "id": "thehighestofthemountains",
+    "matches": "www.thehighestofthemountains.com",
+    "forceBlockSelectors.add": ["div"]
+  },
+  {
+    "id": "annasArchive",
+    "matches": ["*.annas-archive.org", "annas-archive.org"],
+    "injectedCss": "div[id^='link-index-'] { height: unset; max-height: unset; }\nmain div[class*='h-[125]'] { height:auto; }",
+    "forceBlockSelectors.add": ["a.custom-a"]
+  },
+  {
+    "id": "explainshell",
+    "matches": "explainshell.com",
+    "includeSelectors": ["[class='help-box']"]
+  },
+  {
+    "id": "googlePlay",
+    "matches": "play.google.com",
+    "excludeSelectors": [".vlGucd", ".ubGTjb", ".page-nums"],
+    "injectedCss": ".Epkrse { -webkit-line-clamp:unset; }\ndiv[data-g-id='description'] { -webkit-line-clamp:unset;max-height:unset; }"
+  },
+  {
+    "id": "tumblr",
+    "matches": "www.tumblr.com",
+    "excludeSelectors": ["div.fAAi8", "div.wvu3V"],
+    "includeSelectors": [
+      "article h1",
+      "article > header + div",
+      "[data-testid=notes-root] p",
+      "div.k31gt",
+      "p",
+      "article ul",
+      "article h2",
+      "article h3",
+      "article h4",
+      "article h5",
+      "article h6",
+      "article blockquote",
+      "article ol"
+    ]
+  },
+  {
+    "id": "tinytask",
+    "matches": "https://www.tinytask.net",
+    "injectedCss": "table > tbody > tr > td > center > table > tbody > tr > td > ul > li { height: 100%; }"
+  },
+  {
+    "id": "foxnews",
+    "matches": "www.foxnews.com",
+    "excludeSelectors": [
+      ".site-footer",
+      ".components-MessageDetails-index__message-details-wrapper",
+      "div[class^=SlideDown__container]",
+      ".components-MessageActions-index__messageActionsWrapper",
+      "span[data-openweb-allow-amp]",
+      "div.spcv_typing-users",
+      "text",
+      "img",
+      "sub",
+      "sup",
+      "code",
+      "tt",
+      "aside"
+    ]
+  },
+  {
+    "id": "opennet",
+    "matches": "opennet.ru",
+    "excludeSelectors": ["label", "img", "sub", "sup", "code", "tt"]
+  },
+  {
+    "id": "construct",
+    "matches": "www.construct.net",
+    "excludeMatches": ["preview.construct.net", "editor.construct.net"],
+    "includeSelectors": ["aside", "div.manualContent"],
+    "forceInlineSelectors": ["a.forumLink"],
+    "injectedCss": "td.location a#LocationLink { padding-top: 4px; }\ndiv.articleMain .tutCourseWrap { align-items: flex-start; }",
+    "excludeSelectors.add": [
+      "div.topNav",
+      "div.usernameLink",
+      "ul.authorDetails",
+      "ul.tagViewer",
+      "ul.breadCrumbNav",
+      "ul.subForumForums",
+      "ul.postTools",
+      "li.comment ul.controls",
+      "div.forumTopNavWrap",
+      "div.downloadWrap",
+      "div.articleLeftMenu",
+      "div.usernameTextWrap",
+      "div.favouriteWrap",
+      "div.bannerWrapper",
+      "div.viewAddonRightMenu",
+      "div.extendedMenu.addonsSubMenu",
+      "#BottomLinks.bottomLinks",
+      "div#LeftSide.leftSide",
+      "div#BottomWrap.bottomWrap",
+      "div.courseListWrap div.overview",
+      "div.conversationControls",
+      "div.contentWrapper h1",
+      "td.location a#LocationLink",
+      "#TopLevelComments .topBar",
+      "#TopLevelComments .controls",
+      ".tagViewWrap",
+      ".changeCount",
+      ".otherStats",
+      ".FilterMenu",
+      ".mobileTopicStats",
+      ".forumControlsWrapper",
+      ".forumsBottomNavWrap",
+      ".breadCrumbNav",
+      ".favouriteWrap",
+      ".usernameLink",
+      ".followWrapper",
+      ".blogPostStats",
+      ".manualContent dl dt"
+    ],
+    "preserveTextSelectors": ["a.usernameReference"]
+  },
+  {
+    "id": "fandom",
+    "matches": "*.fandom.com",
+    "injectedCss": "#mw-content-text > div > div:nth-child(1) { height:100%; }",
+    "excludeSelectors.add": ["header.fandom-community-header", "div.ph-registration-buttons"],
+    "forceBlockSelectors.add": [".mp-nav a"]
+  },
+  {
+    "id": "huggingface",
+    "matches": "huggingface.co",
+    "injectedCss": ".line-clamp-2 { -webkit-line-clamp:unset;max-height:unset; }",
+    "excludeSelectors.add": [
+      "thead",
+      "ul.text-base",
+      "a.group > div.flex-1",
+      "div.absolute.truncate",
+      "nav",
+      "ul[class*='dark:border-gray-800']",
+      "div[class*='from-gray-100-to-white']"
+    ]
+  },
+  {
+    "id": "statista",
+    "matches": "www.statista.com",
+    "injectedCss": ".itemContent__text { height:unset;max-height:unset; }\n.itemContent__subline { height:unset;max-height:unset; }"
+  },
+  {
+    "id": "epubReader",
+    "matches": "epub-reader.online",
+    "injectedCss": "span.slide-contents-item-label { overflow:visible;max-height:unset;white-space:normal; }"
+  },
+  {
+    "id": "auth0Openai",
+    "matches": "auth0.openai.com",
+    "excludeSelectors": ["form", "header > h1"]
+  },
+  {
+    "id": "chatOpenai",
+    "matches": ["chat.openai.com", "chatgpt.com"],
+    "excludeSelectors": [
+      "div.absolute.bottom-0.left-0.w-full",
+      "h1",
+      "div#headlessui-portal-root",
+      "nav",
+      "ul[aria-multiselectable]",
+      ".markdown *",
+      "div[class='flex flex-col items-start']",
+      "div[class='flex items-center justify-center gap-1 border-b border-black/10 bg-gray-50 p-3 text-gray-500 dark:border-gray-900/50 dark:bg-gray-700 dark:text-gray-300']"
+    ],
+    "injectedCss": "[class*='line-clamp'] { max-height:unset;-webkit-line-clamp:unset;height:unset;white-space:unset; }"
+  },
+  {
+    "id": "poe",
+    "matches": "https://poe.com/*",
+    "excludeSelectors": [
+      ".Markdown_markdownContainer__Tz3HQ *",
+      ".MarkdownLink_linkifiedLink__KxC9G",
+      "menu",
+      "aside"
+    ],
+    "injectedCss": "[class^='BotListItem_botDescription'] { -webkit-line-clamp: unset; }"
+  },
+  {
+    "id": "janitorai",
+    "matches": "https://janitorai.com",
+    "description": "它的流式的段落无法变更，只能等到结束之后一起翻译",
+    "excludeSelectors": ["[data-testid=virtuoso-scroller] .css-104fsj *"]
+  },
+  {
+    "id": "glasp",
+    "matches": "glasp.co",
+    "excludeSelectors": [".home_overview_list_content_wrapper"]
+  },
+  {
+    "id": "developerChrome",
+    "matches": "developer.chrome.com",
+    "excludeSelectors": ["web-tabs", "ul.code-sections--summary"]
+  },
+  {
+    "id": "android",
+    "matches": ["developer.android.google.cn", "developer.android.com"],
+    "includeSelectors": ["aside", "google-codelab-step"]
+  },
+  {
+    "id": "ft",
+    "matches": "www.ft.com",
+    "excludeSelectors": ["footer", "[aria-labelledby=cookie-banner-aria-label]"]
+  },
+  {
+    "id": "microsoft",
+    "matches": "https://apps.microsoft.com/store/detail/*",
+    "includeSelectors": ["pre"],
+    "injectedCss": ".line-clamp { -webkit-line-clamp:unset;max-height:unset; }"
+  },
+  {
+    "id": "gitlab",
+    "matches": "gitlab.com",
+    "excludeSelectors": [
+      ".tree-content-holder",
+      "nav",
+      ".home-panel-metadata",
+      "div[data-testid=project_topic_list]",
+      ".commit"
+    ]
+  },
+  {
+    "id": "tiktok",
+    "matches": ["https://www.tiktok.com/*/video/*", "https://www.tiktok.com/*"],
+    "excludeSelectors.add": [
+      "[class*='DivInfoPosition']",
+      "[data-e2e*='-count']",
+      "[data-e2e='nav-foryou']",
+      "[data-e2e*='view-more']",
+      "[data-e2e*='comment-reply']",
+      "[data-e2e*='comment-username']",
+      "[class*='DivCommentSubContentSplitWrapper']",
+      "[class*='DivViewRepliesContainer']"
+    ],
+    "excludeSelectors.remove": [".notranslate", "[translate=no]"]
+  },
+  {
+    "id": "rfcEditor",
+    "matches": ["www.rfc-editor.org", "docs.haproxy.org"],
+    "excludeSelectors": ["img", "sub", "sup", "code", "tt", "aside", "footer"]
+  },
+  {
+    "id": "steamcommunity",
+    "matches": "steamcommunity.com",
+    "excludeSelectors": [
+      ".forum_paging",
+      ".forum_topic_reply_count",
+      ".forum_topic_lastpost",
+      ".forum_topic_award_count",
+      ".discussion_search_pagingcontrols",
+      ".found_helpful,.vote_header,.date_posted,.early_access_review,.apphub_CardContentAuthorBlock"
+    ],
+    "forceBlockSelectors.add": [".apphub_sectionTab"],
+    "injectedCss.add": [
+      ".forum_topic,.rightbox_list_option,.appHubShortcut {height: unset;}",
+      ".forum_topic_name {white-space:normal;line-height: 1.25rem; padding: 6px 20px 0 0;}",
+      ".forum_topic_op {clear: left; padding: 0 0 6px 2rem;}"
+    ]
+  },
+  {
+    "id": "steampoweredApp",
+    "matches": "store.steampowered.com/app/*",
+    "excludeSelectors": [
+      "#global_actions",
+      "#store_controls",
+      "#foryou_tab",
+      "[class*=persona]",
+      "a.btn_medium",
+      ".persona_name",
+      ".hours.ellipsis",
+      ".checkcol",
+      ".postedDate",
+      ".dev_row .summary",
+      ".already_in_library",
+      ".game_header_image_ctn .grid_content",
+      ".ds_flag.ds_wishlist_flag",
+      ".early_access_review.tooltip",
+      ".communitylink_achievement_images",
+      ".user_reviews_summary_row.summary",
+      ".review_award_ctn",
+      ".add_to_wishlist_area",
+      ".next_in_queue_content",
+      ".glance_tags.popular_tags",
+      ".game_purchase_action",
+      ".vote_button_ctn",
+      "#VoteUpDownBtnCtn",
+      "#footer",
+      "#ViewAllReviewssummary",
+      ".user_reviews",
+      ".ReviewContentCtn .title",
+      ".author_counts,.control_block,.vote_info"
+    ],
+    "includeSelectors": [".game_page_autocollapse_ctn iframe"],
+    "forceInlineSelectors": [".pulldown"],
+    "injectedCss": ".game_description_snippet { max-height:unset; overflow: scroll; }\n.game_purchase_area_friends_want { height: auto; padding-bottom: 6px; }\n.div.early_access_banner { height: 84px; }\n.franchise_notice > * { height: 84px; }"
+  },
+  {
+    "id": "nature",
+    "matches": "https://www.nature.com/articles/*",
+    "excludeMatches": ["https://www.nature.com/articles/*.pdf"],
+    "excludeSelectors": [
+      ".c-header",
+      ".c-recommendations-header",
+      ".c-recommendations-list-container",
+      ".c-article-references__links",
+      ".c-article-identifiers",
+      ".c-article-author-list",
+      ".c-article-metrics-bar__wrapper",
+      ".c-article__pill-button",
+      "#author-information-content",
+      "#article-info-section",
+      ".pdf-content"
+    ],
+    "injectedCss": ".read-frog-translated-content-wrapper {content-visibility:auto;}"
+  },
+  {
+    "id": "webofscience",
+    "matches": [
+      "https://www.webofscience.com/*",
+      "https://webofscience.clarivate.*/*",
+      "www-webofscience-com-*.*",
+      "webofscience-clarivate*.*",
+      "*.ustc.edu.*/*wos*"
+    ],
+    "injectedCss": ".abstract { height:auto !important; }\n.show-more-lines { height:unset !important; }",
+    "excludeSelectors.add": [
+      "app-custom-breadcrumbs",
+      ".summary-left-panel",
+      ".authors",
+      "app-full-record-keywords mark",
+      "mat-sidenav",
+      "[name=pubdate]",
+      "[data-ta^=Summary-]",
+      "app-summary-authors",
+      ".search-text",
+      ".mat-drawer-inner-container",
+      "[class*='sidenav-panel']"
+    ],
+    "forceBlockSelectors.add": [
+      "app-summary-authors + div",
+      "app-full-record-keywords span span",
+      "[data-ta=summary-record-title-link]",
+      "[cdxanalyticscategory=wos-recordCard_ExpandAbstract]"
+    ]
+  },
+  {
+    "id": "science",
+    "matches": "www.science.org",
+    "excludeSelectors.add": [".core-self-citation", ".contributors"],
+    "preserveTextSelectors.add": [".open-in-viewer"]
+  },
+  {
+    "id": "appleinsider",
+    "matches": "appleinsider.com",
+    "excludeSelectors": ["#topic-nav"]
+  },
+  {
+    "id": "jetbrains",
+    "matches": "https://*.jetbrains.com",
+    "excludeSelectors": [".toolbar__ee8", "[data-test=\"left-sidebar\"]"],
+    "injectedCss": ".card p,.card h4 { -webkit-line-clamp:unset; }",
+    "excludeSelectors.add": [".comment__info", ".symbol.monospace"],
+    "forceBlockSelectors.add": ["[data-test=prompt]"]
+  },
+  {
+    "id": "theverge",
+    "matches": "www.theverge.com",
+    "excludeSelectors.add": [".k8dtcj0", "._2xqpwjf._2xqpwj0"],
+    "forceBlockSelectors.add": ["[role='article'] p"]
+  },
+  {
+    "id": "lookintobitcoin",
+    "matches": "https://www.lookintobitcoin.com/charts/*",
+    "excludeSelectors": ["svg"]
+  },
+  {
+    "id": "openaiDocs",
+    "matches": "https://platform.openai.com/docs*",
+    "excludeSelectors.add": [".pheader"]
+  },
+  {
+    "id": "pkgStd",
+    "matches": "https://pkg.go.dev/std",
+    "includeSelectors": ["td.UnitDirectories-desktopSynopsis"]
+  },
+  {
+    "id": "pkg",
+    "matches": "https://pkg.go.dev/*",
+    "includeSelectors": [
+      "div.UnitDetails",
+      "#_nav_group_README",
+      "p.SearchSnippet-infoLabel",
+      ".go-Container"
+    ]
+  },
+  {
+    "id": "explainpaper",
+    "matches": "https://www.explainpaper.com/reader*",
+    "includeSelectors": [".leading-relaxed", ".chat-messages p", ".text-sm"]
+  },
+  {
+    "id": "coinmarketcap",
+    "matches": "coinmarketcap.com",
+    "forceBlockSelectors.add": ["div[class='sc-3502f6cd-0 JxHqg']"]
+  },
+  {
+    "id": "wandb",
+    "matches": "wandb.ai",
+    "includeSelectors": [".report-page-top"],
+    "preserveTextSelectors.add": ["span[data-slate-inline=true]"]
+  },
+  {
+    "id": "paulgraham",
+    "matches": "paulgraham.com",
+    "includeSelectors": ["font[face=verdana]"],
+    "forceBlockSelectors.add": ["font[face=verdana]"]
+  },
+  {
+    "id": "zendesk",
+    "matches": "https://*.zendesk.com/agent/*",
+    "includeSelectors": [
+      "[data-test-id*=subject]",
+      "[data-test-id*=content] > span",
+      ".zd-comment",
+      ".title"
+    ]
+  },
+  {
+    "id": "migadu",
+    "matches": "webmail.migadu.com",
+    "includeSelectors": [".bodyText"]
+  },
+  {
+    "id": "thehackernews",
+    "matches": "thehackernews.com",
+    "excludeSelectors": ["span#blog-pager-older-link", "span.h-datetime"],
+    "includeSelectors": [".pop-title"]
+  },
+  {
+    "id": "brown",
+    "matches": "cs.brown.edu",
+    "excludeSelectors": [".SCodeFlow"]
+  },
+  {
+    "id": "tass",
+    "matches": "tass.ru",
+    "injectedCss": "#__next { font-size: 19px;line-height:28px; }"
+  },
+  {
+    "id": "fiverr",
+    "matches": "https://www.fiverr.com/inbox/*",
+    "includeSelectors": [".message-body", "article[data-testid=index-container]"],
+    "excludeSelectors.add": [
+      "[data-testid=basic-message-header]",
+      "[data-testid=message-header-timestamp]",
+      "time",
+      ".user-name",
+      ".user-info",
+      ".header"
+    ]
+  },
+  {
+    "id": "jira",
+    "matches": ["jira.*.com/browse/*", "jira.*.com/projects/*"],
+    "includeSelectors": [
+      "[id=descriptionmodule]",
+      "[id=summary-val]",
+      "div.action-body",
+      "td.stsummary"
+    ]
+  },
+  {
+    "id": "thehill",
+    "matches": "thehill.com",
+    "excludeSelectors": [
+      "div.featured-cards__byline",
+      "div.list-item__meta",
+      ".tags__item",
+      "div.extended-scroll__header",
+      ".submitted-by",
+      ".site-header--has-alert-banner",
+      ".homepage__container__opinion__item__byline",
+      ".homepage__container__header",
+      ".archive__item__meta"
+    ],
+    "injectedCss": ".most-popular-item { max-height: unset !important; }\n.most-popular-item__link { -webkit-line-clamp: unset !important; }"
+  },
+  {
+    "id": "ubuntu",
+    "matches": "manpages.ubuntu.com",
+    "includeSelectors": ["pre"]
+  },
+  {
+    "id": "spiedigitallibrary",
+    "matches": "www.spiedigitallibrary.org",
+    "excludeSelectors": ["img", "sub", "sup", "code", "tt", "aside", "footer"]
+  },
+  {
+    "id": "promptingguide",
+    "matches": "www.promptingguide.ai",
+    "includeSelectors": ["article", "li"]
+  },
+  {
+    "id": "ground",
+    "matches": "ground.news",
+    "injectedCss": ".line-clamp-3 { -webkit-line-clamp: unset !important; }"
+  },
+  {
+    "id": "ietf",
+    "matches": "*.ietf.org/doc/html/*",
+    "forceBlockSelectors.add": ["[href^='#page']"]
+  },
+  {
+    "id": "newsminimalist",
+    "matches": "https://www.newsminimalist.com/",
+    "forceBlockSelectors.add": [".inline-flex"]
+  },
+  {
+    "id": "yandexIndex",
+    "matches": "https://yandex.com/",
+    "includeSelectors": [".tabs__item-text"]
+  },
+  {
+    "id": "yandexSearch",
+    "matches": "https://yandex.com/search/*",
+    "excludeSelectors": [
+      ".KeyValue-Row",
+      ".EntityFeedbackFooter",
+      ".Organic-Subtitle",
+      ".SerpFooter-Content",
+      ".serp-user",
+      ".Pager"
+    ],
+    "injectedCss": ".ExtendedText-Toggle { white-space:normal; }"
+  },
+  {
+    "id": "yandex",
+    "matches": "https://yandex.com/video/*",
+    "includeSelectors": [
+      ".serp-item__title",
+      ".serp-item__text",
+      ".Keypoints-ItemTitle",
+      ".bes-epmjnzm-idtktyj",
+      ".OrganicTitle-LinkText",
+      "h1.VideoTitle"
+    ],
+    "injectedCss": ".serp-item__title { -webkit-line-clamp: unset;max-height:unset; }\n.serp-item__text { -webkit-line-clamp: unset;max-height:unset; }\n.OrganicTitle-LinkText { -webkit-line-clamp: unset;max-height:unset; }\nh1.VideoTitle { -webkit-line-clamp: unset;max-height:unset; }\n.link .serp-item__keypoints { bottom:2px; }\n.OrganicTitle { max-height:unset; }"
+  },
+  {
+    "id": "react",
+    "matches": "react.dev",
+    "injectedCss.add": ["[class*='h-\\[40px\\]'] {height: unset !important;}"]
+  },
+  {
+    "id": "perplexity",
+    "matches": "https://www.perplexity.ai",
+    "excludeMatches": [
+      "https://www.perplexity.ai/hub/*",
+      "https://www.perplexity.ai/*/hub/*",
+      "https://www.perplexity.ai/onboarding",
+      "https://www.perplexity.ai/enterprise*",
+      "https://www.perplexity.ai/2024recap"
+    ],
+    "injectedCss": "[class*=line-clamp] { -webkit-line-clamp: unset !important; }",
+    "excludeSelectors.add": ["[data-framer-name='Desktop']"],
+    "preserveTextSelectors.add": ["a.citation", "[class='my-md pb-xs pt-sm']"]
+  },
+  {
+    "id": "allmyfaves",
+    "matches": "https://allmyfaves.com/",
+    "includeSelectors": ["p"],
+    "minCharacters": 2,
+    "minWords": 1
+  },
+  {
+    "id": "kadaza",
+    "matches": "https://www.kadaza.com/",
+    "includeSelectors": [".header span.title", ".custom-content-footer"],
+    "minCharacters": 2,
+    "minWords": 1
+  },
+  {
+    "id": "genuine",
+    "matches": "blog.genuine.com",
+    "excludeSelectors": ["div.enlighter"]
+  },
+  {
+    "id": "chinadaily",
+    "matches": "www.chinadaily.com.cn",
+    "excludeSelectors": [
+      ".topNav",
+      ".topNav2_art > span",
+      ".topNav_art2 > .dropdown",
+      ".dibu-three",
+      ".topBar"
+    ],
+    "injectedCss": "a { height: unset !important; }\nli { height: unset !important; }\ndiv { height: unset !important; }"
+  },
+  {
+    "id": "braynzarsoft",
+    "matches": "www.braynzarsoft.net",
+    "excludeSelectors.add": [
+      "#content-header",
+      ".sidebar-section",
+      ".rating-box",
+      ".tutorial-stat",
+      "#bookmark-btn",
+      ".question-footer",
+      ".adsbygoogle",
+      ".footer",
+      ".type",
+      ".views",
+      ".questioninputcode"
+    ],
+    "injectedCss.add": [
+      ".tutorial-desc {overflow: scroll !important;}",
+      ".question-title {display:inline-flex !important;}"
+    ]
+  },
+  {
+    "id": "yuque",
+    "matches": "https://www.yuque.com/*",
+    "excludeSelectors": [".lark-virtual-tree"]
+  },
+  {
+    "id": "researchgate",
+    "matches": "www.researchgate.net",
+    "excludeSelectors": [
+      ".nova-legacy-v-publication-item__meta-data",
+      ".nova-legacy-v-publication-item__person-list",
+      ".js-authors-list"
+    ]
+  },
+  {
+    "id": "theatlantic",
+    "matches": ["www.theatlantic.com", "https://mashable.com/*"],
+    "excludeSelectors.add": ["footer:last-of-type", "nav", "header div.subtitle-2.w-full"]
+  },
+  {
+    "id": "dw",
+    "matches": "www.dw.com",
+    "excludeSelectors": [".focus-menu-shown"]
+  },
+  {
+    "id": "sentry",
+    "matches": "docs.sentry.io",
+    "forceInlineSelectors.add": [".term-wrapper", "span.description"]
+  },
+  {
+    "id": "feedly",
+    "matches": "feedly.com",
+    "excludeSelectors": [".Leftnav"],
+    "injectedCss": ".TitleOnlyLayout,.SelectedEntryScroller > div { height:unset !important; }\n.EntrySummary--u4,.EntrySummary--u5 { -webkit-line-clamp: unset;max-height:unset; }\n.EntryTitleLink { -webkit-line-clamp: unset; }\n.SelectedEntryScroller > div :nth-child(2) :last-child { -webkit-line-clamp: unset !important; }"
+  },
+  {
+    "id": "whatsapp",
+    "matches": "web.whatsapp.com",
+    "includeSelectors": ["._akbu", "[role=list]", ".copyable-text", ".quoted-mention"],
+    "excludeSelectors.add": ["[aria-hidden=true]"],
+    "forceInlineSelectors.add": [".x1lliihq"]
+  },
+  {
+    "id": "bing",
+    "matches": "https://*.bing.com/search*",
+    "forceInlineSelectors": ["a", "i"],
+    "injectedCss": "[class*='lineclamp'],.b_title { -webkit-line-clamp:unset; }\n.b_gwaDl,.b_snipwithnsl { height:unset !important; }",
+    "excludeSelectors.add": [".tptxt"]
+  },
+  {
+    "id": "bingNews",
+    "matches": "https://*.bing.com/news/search*",
+    "injectedCss": ".newsitem .title { max-height: none; -webkit-line-clamp: 10; }\n.newsitem .snippet { max-height: none; -webkit-line-clamp: 10; }"
+  },
+  {
+    "id": "drizzle",
+    "matches": "orm.drizzle.team",
+    "excludeSelectors.add": ["[class^='codetabs_tab']", ".npm__tab"]
+  },
+  {
+    "id": "yahoo",
+    "matches": "*.yahoo.*",
+    "excludeSelectors.add": [
+      "._ys_jiqava",
+      "#Col2-5-Rmp-Proxy",
+      ".readmore",
+      ".ticker-item-wrapper",
+      ".ticker-list",
+      ".footer"
+    ],
+    "forceBlockSelectors.add": [".SIPGg", ".sc-kzMCTH.pSZXj"],
+    "injectedCss.add": [
+      "[class*='line-clamp'],h3.clamp {-webkit-line-clamp:unset!important;}",
+      "#atomic .Mt\\(20px\\) {margin-top: 100px;}",
+      "[class*='LineClamp'] {-webkit-line-clamp:unset;max-height:unset;}",
+      "a[class*='js-content-viewer']> div[class*='Td\\(n\\)'] {overflow: scroll;}",
+      "[class*='_ys_24482e'] {-webkit-line-clamp:unset;}",
+      "#Aside > :first-child {overflow:scroll;}"
+    ]
+  },
+  {
+    "id": "wsj",
+    "matches": ["www.wsj.com", "cn.wsj.com"],
+    "excludeSelectors": ["header", "footer", "nav", "[aria-label='Markets summary']"],
+    "injectedCss": ".read-frog-translated-content-wrapper br {display:none;}",
+    "forceBlockSelectors.add": [".series-nav__link-thumbnail"]
+  },
+  {
+    "id": "businessinsider",
+    "matches": "www.businessinsider.com",
+    "excludeSelectors": ["header", "nav", "section.live-updates-module"]
+  },
+  {
+    "id": "goodreads",
+    "matches": "www.goodreads.com",
+    "excludeSelectors": [
+      ".badgeYear",
+      ".gr-mediaBox__desc",
+      ".bookVotedRow",
+      ".minirating",
+      "div[itemprop='aggregateRating']",
+      ".wtrButtonContainer",
+      ".RatingsHistogram__labelTitle",
+      ".FollowButton",
+      ".siteHeader__topLevelLink",
+      "#books > thead",
+      "td[class*='rating']",
+      "td[class*='shelves']",
+      "td[class*='date_read']",
+      "td[class*='date_added']",
+      "td[class*='actions']"
+    ]
+  },
+  {
+    "id": "nytimes",
+    "matches": "www.nytimes.com",
+    "excludeSelectors": ["#in-story-masthead"],
+    "injectedCss": "a::after {position:relative!important;}\nfooter {line-height: unset!important;;}",
+    "excludeSelectors.add": [
+      "[data-testid=user-header]",
+      "[data-testid^='recommend-button']",
+      "[data-testid=copy-link]",
+      ".css-mydst6 > a"
+    ]
+  },
+  {
+    "id": "bugsKde",
+    "matches": "bugs.kde.org",
+    "excludeSelectors.add": [".bz_first_comment_head", ".bz_comment_head", ".related_actions"]
+  },
+  {
+    "id": "plati",
+    "matches": "plati.market",
+    "injectedCss.add": [".card .custom-link{-webkit-line-clamp: unset !important;}"]
+  },
+  {
+    "id": "bmvrMarseille",
+    "matches": "www.bmvr.marseille.fr",
+    "injectedCss": "a > div { display:block; }\n[style*='358px;'] { width: 33.3333%; height: auto; padding: 0px; position: relative; margin: 0px; }"
+  },
+  {
+    "id": "piAi",
+    "matches": "pi.ai/talk",
+    "injectedCss": "[class*='text-brand-green'] { flex-direction:column; }"
+  },
+  {
+    "id": "claudeAi",
+    "matches": "claude.ai",
+    "excludeSelectors": [".contents *", ".code-block__code"],
+    "injectedCss": "[data-testid='chat-menu-trigger'] br {display:none;}\n[data-test-render-count] {overflow: scroll;}"
+  },
+  {
+    "id": "feishu",
+    "matches": ["*.feishu.cn", "*.larkoffice.com", "*.larksuite.com"],
+    "excludeSelectors.add": [".catalogue__list"],
+    "excludeSelectors.remove": [".notranslate", "[translate=no]"]
+  },
+  {
+    "id": "mitre",
+    "matches": "cwe.mitre.org",
+    "injectedCss": "span.list_entry { height: unset; }"
+  },
+  {
+    "id": "kaggle",
+    "matches": "www.kaggle.com",
+    "excludeSelectors.add": [
+      ".sc-kHItYk.kCjSZT",
+      ".sc-hagvSa.guBIfV",
+      ".sc-jhZTHU.btgPPn",
+      "#editor-sidebar-scroll-container"
+    ],
+    "injectedCss.add": [
+      ".km-listitem--large {height:unset !important;}",
+      ".km-listitem--large .jWyUHl {height:unset !important;}",
+      "[role=listitem] {overflow:scroll;}",
+      "[role=listitem] div {-webkit-line-clamp:unset;}",
+      "[class*='km-listitem--medium'] {height:unset !important;}",
+      ".MuiListItem-root a > div :nth-child(2) {height:unset !important;}"
+    ]
+  },
+  {
+    "id": "ieee",
+    "matches": "spectrum.ieee.org",
+    "forceBlockSelectors.add": ["small"]
+  },
+  {
+    "id": "cnn",
+    "matches": "*.cnn.com",
+    "description": "多视频页面不好处理，暂时不支持",
+    "excludeSelectors.add": [".ad-slot-header__wrapper", "#pageFooter"]
+  },
+  {
+    "id": "githubBlog",
+    "matches": "github.blog",
+    "injectedCss": ".font-mktg { word-break:normal; }"
+  },
+  {
+    "id": "uni-trier",
+    "matches": "dblp.uni-trier.de",
+    "excludeSelectors": [".side-column"],
+    "includeSelectors": ["h1", "h2", ".title", ".external", "dd p"]
+  },
+  {
+    "id": "bilibili",
+    "matches": "www.bilibili.com",
+    "excludeSelectors.add": [
+      ".bpx-player-subtitle-panel-text",
+      ".bili-video-card__info--author, .bili-video-card__info--date",
+      "#pictures,#note,#info,#footer,#expander-footer,.playinfo,.upname,#bilibili-player"
+    ]
+  },
+  {
+    "id": "docs-swift",
+    "matches": "docs.swift.org",
+    "includeSelectors": [".content", "#menu"]
+  },
+  {
+    "id": "forums.zotero",
+    "matches": "forums.zotero.org",
+    "includeSelectors": [".page-sidebar", ".page-content"]
+  },
+  {
+    "id": "pubmed",
+    "matches": ["pubmed.ncbi.nlm.nih.gov", "pubmed*.pubmed*", "*.ncbi.nlm.nih.gov"],
+    "excludeMatches": ["*.ncbi.nlm.nih.gov/*.pdf", "pubmed*.pubmed*/*.pdf"],
+    "excludeSelectors": [
+      ".docsum-journal-citation",
+      ".citation-part",
+      ".docsum-authors",
+      ".top-wrapper",
+      ".article-source",
+      ".citation-doi",
+      ".identifiers",
+      ".cite",
+      ".share",
+      ".arrow-link",
+      ".multiple-results-actions",
+      ".sort-dropdown .option-label",
+      ".display-options .button-label",
+      ".actions-buttons.sidebar",
+      ".title-copy"
+    ],
+    "injectedCss": "#Scholarscope_HighlightOrigin > p font,#Scholarscope_HighlightContent > p font {display: inline!important;}\n#Scholarscope_HighlightOrigin > p font br,#Scholarscope_HighlightContent > p font br {display: none!important;}\n.title-translate {display:block;}\n.read-frog-translated-content-wrapper {content-visibility:auto;}",
+    "forceBlockSelectors.add": [".mixed-citation"]
+  },
+  {
+    "id": "chosun",
+    "matches": "www.chosun.com",
+    "injectedCss": "body {word-break: unset!important;}"
+  },
+  {
+    "id": "yna",
+    "matches": "*.yna*",
+    "injectedCss": "font > br {display:none}\na,strong { max-height:unset;-webkit-line-clamp:unset;height:unset;white-space:unset; }\ndiv,p,li,.item-box01,.news-con { height:unset;max-height:unset;-webkit-line-clamp:unset; }",
+    "excludeSelectors.remove": [".notranslate", "[translate=no]"]
+  },
+  {
+    "id": "digitimes",
+    "matches": "www.digitimes.com",
+    "injectedCss": "a,.title,.abstract,.display-5,.top { max-height:unset;-webkit-line-clamp:unset;height:unset;white-space:unset; }",
+    "excludeSelectors.add": [".main-nav-frame", ".sub-header-wrapper", ".footer", ".date"],
+    "excludeSelectors.remove": [".notranslate", "[translate=no]"]
+  },
+  {
+    "id": "vdi-nachrichten",
+    "matches": "www.vdi-nachrichten.com",
+    "excludeSelectors.add": [".header-menu__item > a", ".linkbar__item", ".header__button-group"]
+  },
+  {
+    "id": "qqMail",
+    "matches": "*.mail.qq.com",
+    "injectedCss": ".mail-list-page-wide-item { height:unset; }",
+    "excludeSelectors.add": [".xmail-cmp-account"]
+  },
+  {
+    "id": "indeed",
+    "matches": "*.indeed.com",
+    "injectedCss": "span,.css-19rjr9w.e1wnkr790 { max-height:unset;-webkit-line-clamp:unset;height:unset;white-space:unset; }"
+  },
+  {
+    "id": "brutalist",
+    "matches": "brutalist.report",
+    "includeSelectors": ["li > a:first-child", "aside", "nav > a", "h1 > a", "h3 > a", "h2 >a"],
+    "excludeSelectors.remove": [".notranslate", "[translate=no]"]
+  },
+  {
+    "id": "maxroll",
+    "matches": "maxroll.gg",
+    "forceInlineSelectors": [".d4t-sprite-icon", ".d4t-icon"],
+    "injectedCss": "font {font-family: sans-serif !important;}\n.d4t-sprite-icon {display: unset !important;}",
+    "excludeSelectors.add": ["span[class^='text-opac'] + span[class^='text-']"]
+  },
+  {
+    "id": "gradioappdocs",
+    "matches": "www.gradio.app/docs/*",
+    "excludeSelectors": ["div#examples"],
+    "includeSelectors": ["div.obj"]
+  },
+  {
+    "id": "arca",
+    "matches": "arca.live",
+    "injectedCss": ".vrow.column { height:unset !important; }\n.body .board-article .article-list .list-table .vrow.column .vcol { width:unset !important; }",
+    "excludeSelectors.add": ["span.user-info"]
+  },
+  {
+    "id": "chatpdf",
+    "matches": "www.chatpdf.com",
+    "excludeSelectors": [".chat-message-row.ai *", ".pdf-viewer"],
+    "excludeSelectors.remove": [".notranslate"]
+  },
+  {
+    "id": "app.element.io",
+    "matches": "app.element.io",
+    "excludeSelectors.add": [
+      ".mx_DisambiguatedProfile",
+      ".mx_ReplyChain_wrapper",
+      ".mx_ThreadSummary_replies_amount"
+    ],
+    "excludeSelectors.remove": [".notranslate"]
+  },
+  {
+    "id": "hub.logseq",
+    "matches": "hub.logseq.com",
+    "injectedCss": "[class*=':h-['] { height:unset; }"
+  },
+  {
+    "id": "epam",
+    "matches": "*.epam.com",
+    "injectedCss": "[class*='ContentAnchorLinkList'] { word-break:unset; }",
+    "excludeSelectors.add": ["#blog-page-sidebar-wrapper"]
+  },
+  {
+    "id": "discussions.apple",
+    "matches": "discussions.apple.com",
+    "excludeSelectors.add": [".page-number"]
+  },
+  {
+    "id": "www.sixthtone.com",
+    "matches": "www.sixthtone.com",
+    "excludeSelectors.add": [
+      "#footer",
+      "[class^=index_time]",
+      "[class^=index_anthorList]",
+      "[class^=index_node]",
+      "[class^=index_popupWrapper]"
+    ]
+  },
+  {
+    "id": "forum.unity",
+    "matches": "forum.unity.com",
+    "excludeSelectors.add": [".bbCodeCode"]
+  },
+  {
+    "id": "wattpad",
+    "matches": "www.wattpad.com",
+    "injectedCss": ".story-info .item-description { overflow: scroll; }"
+  },
+  {
+    "id": "netflix",
+    "matches": "www.netflix.com",
+    "excludeSelectors.add": [".player-timedtext", ".source-cue"]
+  },
+  {
+    "id": "udemy",
+    "matches": "*.udemy.com",
+    "excludeSelectors.add": ["[data-purpose='captions-cue-text']", ".shaka-text-container"]
+  },
+  {
+    "id": "iview",
+    "matches": "iview.abc.net.au",
+    "excludeSelectors": [".jwplayer"]
+  },
+  {
+    "id": "marketsurge",
+    "matches": "marketsurge.investors.com",
+    "excludeSelectors": [".jwplayer"]
+  },
+  {
+    "id": "nmaart",
+    "matches": "www.nma.art",
+    "excludeSelectors": [".video-container"]
+  },
+  {
+    "id": "wiley",
+    "matches": "*.wiley.com",
+    "excludeMatches": [
+      "onlinelibrary.wiley.com/action/downloadSupplement*",
+      "onlinelibrary.wiley.com/doi/pdf/*",
+      "onlinelibrary.wiley.com/doi/am-pdf/*"
+    ],
+    "excludeSelectors.add": [
+      ".loa-authors",
+      ".MuiBox-root > .MuiTypography-root.MuiTypography-body2"
+    ]
+  },
+  {
+    "id": "patreon",
+    "matches": "www.patreon.com",
+    "excludeSelectors": [".video-container"]
+  },
+  {
+    "id": "thaipbs",
+    "matches": ["www.thaipbs.*", "players.brightcove.net"],
+    "excludeSelectors": [".video-container"]
+  },
+  {
+    "id": "hstream",
+    "matches": "hstream.moe",
+    "excludeSelectors": [".video-container"]
+  },
+  {
+    "id": "zenva",
+    "matches": "academy.zenva.com",
+    "excludeSelectors": [".video-container"]
+  },
+  {
+    "id": "lowstresshandling",
+    "matches": "university.lowstresshandling.com",
+    "excludeSelectors": ["div[data-vjs-player]"]
+  },
+  {
+    "id": "apple",
+    "matches": "developer.apple.com",
+    "excludeSelectors.add": [".developer-video-player", ".vue-recycle-scroller"]
+  },
+  {
+    "id": "nebula",
+    "matches": "nebula.tv",
+    "excludeSelectors.add": ["[data-subtitles-container='true']"]
+  },
+  {
+    "id": "mangaplus-shueisha",
+    "matches": "mangaplus.shueisha.*",
+    "description": "all",
+    "excludeSelectors.add": [".zao-surface"]
+  },
+  {
+    "id": "zebrack-shueisha",
+    "matches": "zebrack-comic.shueisha.*",
+    "description": "all",
+    "excludeSelectors.add": [".eAvsta_root"]
+  },
+  {
+    "id": "scholar.cnki.net",
+    "matches": "scholar.cnki.net",
+    "injectedCss.add": [".result .searchItem {height: auto!important;}"]
+  },
+  {
+    "id": "datalab.naver",
+    "matches": "datalab.naver.com",
+    "injectedCss.add": [
+      ".tab_list_area .list_itm {height: unset !important;}",
+      ".section.main_tab_opt .select {height: unset !important;}"
+    ]
+  },
+  {
+    "id": "championcross.jp",
+    "matches": "https://championcross.jp",
+    "injectedCss.add": ["[class^='Original_section_title'] {overflow:hidden!important;}"]
+  },
+  {
+    "id": "shonenjumpplus",
+    "matches": [
+      "shonenjumpplus.com",
+      "viewer.heros-web.com",
+      "comic-days.com",
+      "www.corocoro.jp",
+      "tonarinoyj.jp",
+      "rimacomiplus.jp",
+      "kuragebunch.com",
+      "comic-gardo.com",
+      "ichicomi.com",
+      "rookie.shonenjump.com"
+    ],
+    "description": "all",
+    "injectedCss.add": ["[class^='Original_section_title'] {overflow:hidden!important;}"]
+  },
+  {
+    "id": "runoob",
+    "matches": "www.runoob.com",
+    "excludeSelectors.add": [".example_code"]
+  },
+  {
+    "id": "pixiv",
+    "matches": "www.pixiv.net",
+    "injectedCss": "[id*='expandable-paragraph'] {max-height:unset!important;}"
+  },
+  {
+    "id": "nicovideo",
+    "matches": "seiga.nicovideo.*/watch/mg*",
+    "excludeSelectors.add": [".page"]
+  },
+  {
+    "id": "frontendmasters",
+    "matches": "frontendmasters.com",
+    "excludeSelectors.add": [".vjs-text-track-display"]
+  },
+  {
+    "id": "udacity",
+    "matches": "*.udacity.com",
+    "excludeSelectors.add": [".vjs-text-track-display"]
+  },
+  {
+    "id": "skillshare",
+    "matches": "www.skillshare.com",
+    "excludeSelectors.add": [".vjs-text-track-display"]
+  },
+  {
+    "id": "tubitv",
+    "matches": "tubitv.com",
+    "excludeSelectors.add": [".vjs-text-track-display"]
+  },
+  {
+    "id": "iaabcfoundation",
+    "matches": "learning.iaabcfoundation.org",
+    "excludeSelectors.add": ["[data-testid=\"video-player\"]"]
+  },
+  {
+    "id": "domestika",
+    "matches": "www.domestika.org",
+    "excludeSelectors.add": [".vjs-text-track-display"]
+  },
+  {
+    "id": "barrons",
+    "matches": "www.barrons.com",
+    "injectedCss": "font.read-frog-translated-content-wrapper > br {display:none;}",
+    "forceInlineSelectors.add": ["article p span"]
+  },
+  {
+    "id": "scrimba",
+    "matches": "scrimba.com",
+    "injectedCss": "[class*='trunc'] {-webkit-line-clamp: unset !important;}\n.tile {overflow: scroll;}"
+  },
+  {
+    "id": "hbomax",
+    "matches": ["play.max.com", "play.hbomax.com"],
+    "description": "自托管会导致时间轴对应不上",
+    "excludeSelectors.add": ["[data-testid='playerContainer']", "[data-testid='CueBoxContainer']"]
+  },
+  {
+    "id": "mindvalley",
+    "matches": "home.mindvalley.com",
+    "excludeSelectors.add": [".vjs-text-track-display"]
+  },
+  {
+    "id": "viki",
+    "matches": "www.viki.com",
+    "excludeSelectors.add": [".vjs-text-track-display"]
+  },
+  {
+    "id": "masterclass",
+    "matches": ["www.masterclass.com", "learn.microsoft.com"],
+    "excludeSelectors.add": [".mc-video--text-track"]
+  },
+  {
+    "id": "slideslive",
+    "matches": "slideslive.com",
+    "excludeSelectors.add": [".slp__video"]
+  },
+  {
+    "id": "viu",
+    "matches": "www.viu.com",
+    "excludeSelectors.add": [".bmpui-ui-viu-subtitle-overlay"]
+  },
+  {
+    "id": "linkin",
+    "matches": "*.linkedin.com",
+    "excludeSelectors.add": [".vjs-text-track-display"],
+    "injectedCss.add": [".linked-area * {max-height: unset !important;}"]
+  },
+  {
+    "id": "kanopy",
+    "matches": "*.kanopy.com",
+    "excludeSelectors.add": [".vjs-text-track-display"]
+  },
+  {
+    "id": "iflix",
+    "matches": ["www.iflix.com", "wetv.vip"],
+    "excludeSelectors.add": [".text-track"]
+  },
+  {
+    "id": "app.rapidlaunch.wtf",
+    "matches": "app.rapidlaunch.wtf",
+    "injectedCss": ".max-h-24 { max-height: unset !important; }\n.line-clamp-2 {-webkit-line-clamp: unset !important;}",
+    "excludeSelectors.add": [
+      "div.border-b.border-gray-700\\/50.flex",
+      "a.text-blue-400",
+      ".flex.items-center.text-xs.text-gray-400",
+      ".flex.items-center.gap-1\\.5.mb-1"
+    ]
+  },
+  {
+    "id": "letsjelly",
+    "matches": "app.letsjelly.com",
+    "includeSelectors": [
+      ".message-content",
+      ".h1-subject-button",
+      ".cil-subject",
+      ".cil-body-wrapper",
+      ".text-body"
+    ]
+  },
+  {
+    "id": "imdb",
+    "matches": ["www.imdb.com", "m.imdb.com"],
+    "excludeSelectors.add": [".jw-text-track-container"],
+    "injectedCss.add": ["[class*=overflow] {max-height:unset!important;}"]
+  },
+  {
+    "id": "foxnews-video",
+    "matches": "https://static.foxnews.com/static/orion/html/video/iframe/vod.html*",
+    "excludeSelectors.add": ["#player"]
+  },
+  {
+    "id": "quark",
+    "matches": "pan.quark.*",
+    "excludeSelectors.add": [".video-container"]
+  },
+  {
+    "id": "ocrtraining",
+    "matches": ["ocrtraining.cit.nih.gov", "videocast.nih.gov"],
+    "excludeSelectors.add": ["#videocastPlayer"]
+  },
+  {
+    "id": "espn",
+    "matches": "*.espn.com",
+    "excludeSelectors.add": ["#fittPageContainer"]
+  },
+  {
+    "id": "orchestraltools",
+    "matches": "www.orchestraltools.com",
+    "injectedCss": ".read-frog-translated-content-wrapper *, .read-frog-translated-content-wrapper {font-size: inherit !important;}"
+  },
+  {
+    "id": "bank",
+    "matches": "xfb.nbcb.com.cn",
+    "forceBlockSelectors.add": [".ibm, .ibt", ".cell-box", "[role=tab]"]
+  },
+  {
+    "id": "fmoviesz",
+    "matches": [
+      "fmovies24.to",
+      "*.fmovies.co",
+      "vidplay.online",
+      "c8365730d4.nl",
+      "kerapoxy.cc",
+      "vid41c.site",
+      "https://*/*sub.info=*fmovies24.to*",
+      "https://*/*sub.info=*bflixhd.to*",
+      "mcloud.vvid30c.site",
+      "rabbitstream.net",
+      "kerolaunochan.*",
+      "megacloud.*",
+      "netusa.xyz",
+      "cdnstreame.net",
+      "9animetv.to",
+      "hianime.to",
+      "videostr.net",
+      "anthropic.skilljar.com",
+      "streameeeeee.site"
+    ],
+    "excludeSelectors.add": [".jw-wrapper", "#immersive-translate-caption-window"]
+  },
+  {
+    "id": "dailymotion",
+    "matches": "*.dailymotion.com",
+    "excludeSelectors.add": [".player"]
+  },
+  {
+    "id": "crunchyroll",
+    "matches": "*.crunchyroll.com",
+    "excludeSelectors.add": ["#vilos", "#immersive-translate-caption-window"]
+  },
+  {
+    "id": "osmosis",
+    "matches": "*.osmosis.org",
+    "excludeSelectors.add": ["#video-player-container", "#immersive-translate-caption-window"]
+  },
+  {
+    "id": "pbs",
+    "matches": "*.pbs.org",
+    "excludeSelectors.add": [".wrapper", "#immersive-translate-caption-window"]
+  },
+  {
+    "id": "internetfundamentals",
+    "matches": "internetfundamentals.com",
+    "excludeSelectors.add": ["#vjs_video_3", "#immersive-translate-caption-window"]
+  },
+  {
+    "id": "movie-web",
+    "matches": [
+      "movie-web.app/media*",
+      "movie-web-me.vercel.app/media*",
+      "*.vidbinge.com",
+      "vidsrc.xyz"
+    ],
+    "excludeSelectors.add": ["#root"]
+  },
+  {
+    "id": "deeplearning",
+    "matches": "learn.deeplearning.ai",
+    "excludeSelectors.add": ["[data-layout=\"video\"]"]
+  },
+  {
+    "id": "weverse",
+    "matches": "weverse.io",
+    "excludeSelectors.add": [".pzp-pc__video"]
+  },
+  {
+    "id": "quantinsti",
+    "matches": "quantra.quantinsti.com",
+    "excludeSelectors.add": ["#vjs_video_3"]
+  },
+  {
+    "id": "paramountplus",
+    "matches": "*.paramountplus.com",
+    "excludeSelectors.add": [".aa-player-skin"]
+  },
+  {
+    "id": "pluto",
+    "matches": "pluto.tv",
+    "excludeSelectors.add": [".video-player-layout"]
+  },
+  {
+    "id": "ted",
+    "matches": "www.ted.com",
+    "excludeSelectors.add": ["#video"]
+  },
+  {
+    "id": "devEpicGames",
+    "matches": "dev.epicgames.com",
+    "excludeSelectors.add": [".vjs-poster"]
+  },
+  {
+    "id": "hikaritv",
+    "matches": "boosterx.stream",
+    "excludeSelectors.add": [".jw-wrapper"]
+  },
+  {
+    "id": "khflix",
+    "matches": ["khflix.com", "watch.globaltv.com"],
+    "excludeSelectors.add": ["#video-playlist"]
+  },
+  {
+    "id": "donghuaworld",
+    "matches": "dwserver.donghuaworld.com",
+    "excludeSelectors.add": [".jw-media"]
+  },
+  {
+    "id": "lecturio",
+    "matches": "app.lecturio.com",
+    "excludeSelectors.add": ["#vjs_video_3"]
+  },
+  {
+    "id": "ganjingworld",
+    "matches": "www.ganjingworld.com",
+    "excludeSelectors.add": [".vidPlayerWrap"]
+  },
+  {
+    "id": "fautv",
+    "matches": "www.fau.tv",
+    "excludeSelectors.add": [".jw-wrapper"]
+  },
+  {
+    "id": "vimeo",
+    "matches": ["vimeo.com", "training.leveleffect.com"],
+    "excludeSelectors.add": [".vp-captions"]
+  },
+  {
+    "id": "player.vimeo",
+    "matches": ["https://player.vimeo.com/video/*", "www.physeo.com"],
+    "excludeSelectors.add": [".vp-captions-line"],
+    "excludeSelectors.remove": [".notranslate", "[translate=no]"],
+    "forceBlockSelectors.add": ["span.vp-captions-line", "span[class^=CaptionsRenderer_]"]
+  },
+  {
+    "id": "tv.adobe",
+    "matches": "https://*.tv.adobe.com",
+    "excludeSelectors.add": [".mpc-player"]
+  },
+  {
+    "id": "threejs-journey",
+    "matches": "threejs-journey.com",
+    "excludeSelectors.add": [".video-area"]
+  },
+  {
+    "id": "codewithchris",
+    "matches": [
+      "learn.codewithchris.com",
+      "*.rachelsenglishacademy.com",
+      "www.unrealsenseiacademy.com",
+      "www.comsol.com/video/*",
+      "www.comsol.com/blogs/*"
+    ],
+    "excludeSelectors.add": [".w-captions", ".w-captions-line > div > span"]
+  },
+  {
+    "id": "panopto",
+    "matches": "southampton.cloud.panopto.eu_no_subitle",
+    "excludeSelectors.add": [".primaryPlayer"]
+  },
+  {
+    "id": "edx",
+    "matches": ["*.edx.org", "courses.mitxonline.mit.edu"],
+    "excludeSelectors.add": [
+      ".closed-captions",
+      ".wrapper-video-bottom-section",
+      ".secondary-controls"
+    ]
+  },
+  {
+    "id": "ardmediathek",
+    "matches": "www.ardmediathek.*",
+    "excludeSelectors.add": [".ardplayer-viewport-addon-overlays"]
+  },
+  {
+    "id": "bbc-iplayer",
+    "matches": "https://www.bbc.*/iplayer*",
+    "excludeSelectors.add": [".player"]
+  },
+  {
+    "id": "bbc-emp",
+    "matches": "https://emp.bbc.*/emp/*",
+    "excludeSelectors.add": [".p_accessibleHitArea"]
+  },
+  {
+    "id": "bbc",
+    "matches": "*.bbc.*",
+    "excludeSelectors.add": [
+      "section.module--languages",
+      ".drop-capped",
+      ".smp-toucan-player",
+      "smp-subtitles",
+      "#subtitle_subtitle2"
+    ]
+  },
+  {
+    "id": "zdf.de",
+    "matches": "www.zdf.de",
+    "excludeSelectors.add": [".zdfplayer-video-container", "#immersive-translate-caption-window"]
+  },
+  {
+    "id": "disneyplus",
+    "matches": "www.disneyplus.com",
+    "excludeSelectors.add": [".dss-hls-subtitle-overlay"]
+  },
+  {
+    "id": "hulu",
+    "matches": ["https://*.hulu.com", "https://*.hulu.*"],
+    "description": "无法自托管，自托管字幕广告后会偏移",
+    "excludeSelectors.add": [".PlayerMetadata__subTitle", ".CaptionBox"]
+  },
+  {
+    "id": "youku.tv",
+    "matches": "www.youku.tv",
+    "excludeSelectors.add": ["#subtitle"]
+  },
+  {
+    "id": "starz",
+    "matches": "www.starz.com",
+    "excludeSelectors.add": ["starz-player"]
+  },
+  {
+    "id": "rtve",
+    "matches": "www.rtve.*",
+    "injectedCss.add": [".errorHead * {font-size: 3.2rem!important;}"]
+  },
+  {
+    "id": "www.iq.com",
+    "matches": "www.iq.com",
+    "excludeSelectors.add": [".iqp-subtitle"]
+  },
+  {
+    "id": "cbsnews",
+    "matches": "www.cbsnews.com",
+    "excludeSelectors.add": [".avia-container"]
+  },
+  {
+    "id": "gaia",
+    "matches": "www.gaia.com",
+    "excludeSelectors.add": ["video-js"]
+  },
+  {
+    "id": "medbridge",
+    "matches": "www.medbridge.com",
+    "excludeSelectors.add": ["#player-video"]
+  },
+  {
+    "id": "urplay",
+    "matches": "urplay.se",
+    "excludeSelectors.add": [".jw-media"]
+  },
+  {
+    "id": "medici",
+    "matches": "www.medici.tv",
+    "excludeSelectors.add": ["#player-movie-page"]
+  },
+  {
+    "id": "asu",
+    "matches": "api.playposit.com",
+    "excludeSelectors.add": ["#overlay-container"]
+  },
+  {
+    "id": "gagaoolala",
+    "matches": "www.gagaoolala.com",
+    "excludeSelectors.add": ["#gl-id-video-container"]
+  },
+  {
+    "id": "curiositystream",
+    "matches": "curiositystream.com",
+    "excludeSelectors.add": ["[data-testid=\"video-player\"]"]
+  },
+  {
+    "id": "shangpaAcademy",
+    "matches": "shangpa-academy.mn.co",
+    "excludeSelectors.add": [".mighty-video-player-container"]
+  },
+  {
+    "id": "ucdavis",
+    "matches": "aggievideo.canvas.ucdavis.edu",
+    "excludeSelectors.add": ["[data-testid=\"video-player\"]"]
+  },
+  {
+    "id": "f1tv",
+    "matches": "f1tv.formula1.com",
+    "excludeSelectors.add": ["#main-embeddedPlayer"]
+  },
+  {
+    "id": "datacamp",
+    "matches": "projector.datacamp.com",
+    "excludeSelectors.add": [".video"]
+  },
+  {
+    "id": "imigresen-online",
+    "matches": "imigresen-online.imi.gov.my",
+    "excludeSelectors.add": ["#clock"],
+    "excludeSelectors.remove": ["[default-translate]"]
+  },
+  {
+    "id": "orvehogar",
+    "matches": "www.orvehogar.com",
+    "injectedCss": "h3.vtex-product-summary-2-x-productNameContainer{height: unset!important;}"
+  },
+  {
+    "id": "coindesk",
+    "matches": "www.coindesk.com",
+    "excludeSelectors.add": ["[data-subtitles-container='true']"]
+  },
+  {
+    "id": "dr",
+    "matches": "*.dr.dk",
+    "excludeSelectors.add": [".vjs-text-track-display > div", "#immersive-translate-caption-window"]
+  },
+  {
+    "id": "nrk",
+    "matches": "tv.nrk.no",
+    "excludeSelectors.add": [
+      "tv-player[data-testid=\"tv-player\"]",
+      "#immersive-translate-caption-window"
+    ]
+  },
+  {
+    "id": "mediadelivery",
+    "matches": "iframe.mediadelivery.net",
+    "excludeSelectors.add": [".plyr__captions", "#immersive-translate-caption-window"]
+  },
+  {
+    "id": "tver",
+    "matches": "tver.jp",
+    "excludeSelectors.add": [
+      "div[class*=\"player_container\"]",
+      "#immersive-translate-caption-window"
+    ]
+  },
+  {
+    "id": "learningSap",
+    "matches": "learning.sap.com",
+    "excludeSelectors.add": [".playkit-subtitles", "#immersive-translate-caption-window"]
+  },
+  {
+    "id": "feynmanlectures",
+    "matches": "www.feynmanlectures.caltech.edu",
+    "excludeSelectors.add": [".videoview", "#immersive-translate-caption-window"]
+  },
+  {
+    "id": "archiveToday",
+    "matches": ["archive.today", "archive.ph", "archive.is", "archive.md"],
+    "excludeSelectors.add": ["#HEADER"]
+  },
+  {
+    "id": "arxiv-vanity.com",
+    "matches": "www.arxiv-vanity.com",
+    "excludeSelectors.add": [".arxiv-vanity-wrapper"]
+  },
+  {
+    "id": "bardGoogle",
+    "matches": "bard.google.com",
+    "excludeSelectors": [
+      "mat-sidenav",
+      "div.capabilities-disclaimer",
+      "#cdk-overlay-6",
+      "message-actions button",
+      ".mdc-button__label .ng-star-inserted",
+      ".mdc-list-item__primary-text",
+      "mat-tooltip-component"
+    ]
+  },
+  {
+    "id": "chatGoogle",
+    "matches": "chat.google.com",
+    "includeSelectors": ["[jsname=bgckF]"]
+  },
+  {
+    "id": "gemini.google",
+    "matches": "gemini.google.com",
+    "injectedCss.add": ["[data-test-id=conversation] {height: unset!important;}"]
+  },
+  {
+    "id": "otherGoogle",
+    "matches": ["*.google.com", "dart.dev", "*.google", "*.googleapis.com"],
+    "excludeSelectors.add": [
+      ".o_35",
+      "[style*='Google Symbols']",
+      "md-icon-button",
+      ".material-symbols-outlined",
+      ".cfc-result-card-table",
+      ".material-symbols",
+      ".gemini-large-text__overlay",
+      "code",
+      "view-line",
+      "#modelSelector",
+      ".leaderboard-content",
+      "#selected-count",
+      "#selected-cat",
+      ".GmuOkf,.d8aLif,.JYW4cc"
+    ],
+    "forceInlineSelectors.add": [
+      "ms-cmark-node > strong > ms-cmark-node",
+      "p ms-cmark-node",
+      "span > button"
+    ],
+    "injectedCss.add": [
+      ".scSearchSearch_results_listSearchresultslistsnippet { -webkit-line-clamp:unset;}"
+    ]
+  },
+  {
+    "id": "arxiv",
+    "matches": ["https://browse.arxiv.org", "https://arxiv.org/html/*"],
+    "excludeSelectors.add": [
+      ".desktop_header",
+      "[class*='ltx_lst_language_']",
+      "div.package-alerts",
+      ".ltx_toclist",
+      ".ltx_authors",
+      ".ltx_bibliography"
+    ]
+  },
+  {
+    "id": "ar5iv",
+    "matches": "ar5iv.labs.arxiv.org",
+    "excludeSelectors.add": [
+      ".ltx_bibliography",
+      ".ltx_tag.ltx_tag_item",
+      ".ltx_listing.ltx_lstlisting.ltx_listing",
+      ".ltx_eqn_table"
+    ],
+    "forceBlockSelectors.add": [".ltx_p"],
+    "preserveTextSelectors.add": [".ltx_note"]
+  },
+  {
+    "id": "jstor",
+    "matches": "www.jstor.org",
+    "excludeMatches": ["www.jstor.org/stable/pdf*"],
+    "injectedCss": ".card__heading { -webkit-line-clamp:unset; }\nsearch-results-vue-pharos-image-card,search-ui-pharos-image-card { display:flex; }\nsearch-results-vue-pharos-link { display:inline; }",
+    "excludeSelectors.add": [".audio-duration", "[data-qa='card-item-count']"]
+  },
+  {
+    "id": "tandfonline",
+    "matches": "*.tandfonline.com",
+    "description": "该站点服务器对pdf资源做了保护，会严格要求host以及cookie才会响应application/pdf的请求 https://www.tandfonline.com/doi/pdf/10.1111/ajpy.12198",
+    "forceInlineSelectors.add": ["span.off-screen"]
+  },
+  {
+    "id": "bsky.app",
+    "matches": "https://bsky.app",
+    "forceInlineSelectors": [
+      "a[role=link][href^='/hashtag/']",
+      "[data-testid*=postThread] a[role=link]",
+      "[data-feed-context] button",
+      "[data-feed-context] a[role=link]"
+    ],
+    "excludeSelectors.add": [
+      "[data-testid^=homeScreenFeedTabs]",
+      "[data-testid^=repostCount]",
+      "[data-testid^=likeCount]",
+      "[data-testid^=quoteCount]",
+      "[data-testid^=replyBtn]",
+      "[aria-label='View profile']"
+    ],
+    "forceBlockSelectors.remove": ["button"],
+    "injectedCss.add": [
+      ".r-xoduu5 {display:inline!important;}",
+      "[style*='-webkit-line-clamp'] {-webkit-line-clamp:unset!important;}"
+    ]
+  },
+  {
+    "id": "peacocktv",
+    "matches": "*.peacocktv.com",
+    "injectedCss": ".video-player__subtitles__line > font,.video-player__subtitles__line:only-child{display:block;}"
+  },
+  {
+    "id": "jmir",
+    "matches": "*.jmir.org",
+    "forceInlineSelectors": [".tooltiptext"],
+    "preserveTextSelectors.add": [".article-content .footers"]
+  },
+  {
+    "id": "smzdm",
+    "matches": "www.smzdm.com",
+    "injectedCss": ".feed-block-title { height:unset; }",
+    "excludeSelectors.add": [
+      ".z-highlight",
+      ".feed-block-info",
+      ".z-feed-foot",
+      ".feed-block-descripe",
+      "#J_column_tab_box",
+      ".crumbs"
+    ]
+  },
+  {
+    "id": "xiaohongshu.com",
+    "matches": "www.xiaohongshu.com",
+    "injectedCss": "a.title { -webkit-line-clamp:3; }",
+    "excludeSelectors.add": [
+      ".author-wrapper",
+      ".info",
+      ".side-bar",
+      ".interactions",
+      ".show-more",
+      ".bottom-container",
+      ".total",
+      ".reds-sticky"
+    ]
+  },
+  {
+    "id": "learnopengl",
+    "matches": "learnopengl.com",
+    "injectedCss": "function { position:relative;z-index:1000; }"
+  },
+  {
+    "id": "notateslaapp",
+    "matches": "www.notateslaapp.com",
+    "forceBlockSelectors.add": [".nav > *"]
+  },
+  {
+    "id": "eightfold",
+    "matches": "*.eightfold.ai",
+    "injectedCss": ".flexbox{width:100%}"
+  },
+  {
+    "id": "soundcloud",
+    "matches": "soundcloud.com",
+    "injectedCss": ".compactTrackListItem {height: unset !important;}",
+    "excludeSelectors.add": [
+      ".searchTitle__textContent",
+      ".searchOptions__container",
+      ".compactTrackListItem__additional",
+      ".soundTitle__tagContainer",
+      ".searchResultGroupHeading",
+      ".sc-ministats-group",
+      ".compactTrackList__moreLink",
+      ".sound__soundActions"
+    ]
+  },
+  {
+    "id": "section.blog.naver.com",
+    "matches": "section.blog.naver.com",
+    "injectedCss": ".text,.title_post,.text_post,p,strong,div { -webkit-line-clamp:unset;max-height:unset;height:unset; }",
+    "excludeSelectors.add": [".comments", ".time"],
+    "forceBlockSelectors.add": [".item", ".heading a", ".info_find a"]
+  },
+  {
+    "id": "hadoop.apache.org",
+    "matches": "hadoop.apache.org",
+    "excludeSelectors.add": [".xleft", ".xright", "#navcolumn"]
+  },
+  {
+    "id": "pubs.acs.org",
+    "matches": "pubs.acs.org",
+    "excludeMatches": ["pubs.acs.org/doi/pdf*"],
+    "excludeSelectors.add": [".articleHeaderDropzone2", "header"]
+  },
+  {
+    "id": "liquipedia",
+    "matches": "liquipedia.net",
+    "excludeSelectors.add": [".carousel-item"]
+  },
+  {
+    "id": "archiveofourown",
+    "matches": ["archiveofourown.org", "ao3-cn.top"],
+    "excludeSelectors.add": [
+      ".meta,.navigation,.byline,.pagination,.datetime,.stats",
+      "#add_comment",
+      "#footer",
+      ".summary > h3",
+      ".notes > h3"
+    ],
+    "excludeSelectors.remove": [".notranslate", "[translate=no]"],
+    "injectedCss.add": ["sub {line-height: unset !important;}"]
+  },
+  {
+    "id": "bitwarden.com",
+    "matches": "bitwarden.com",
+    "excludeSelectors.add": [".status-widget__state"]
+  },
+  {
+    "id": "www.ey.com",
+    "matches": "www.ey.com",
+    "injectedCss.add": [".up-rich-text__container {height: unset!important;}"]
+  },
+  {
+    "id": "yodayo.chat",
+    "matches": "https://yodayo.com/*/chat/*",
+    "forceBlockSelectors.add": [".inline-flex span"]
+  },
+  {
+    "id": "ipinfo",
+    "matches": "ipinfo.io",
+    "injectedCss.add": [".text-bali-hai-primary:last-child {display:none!important;}"]
+  },
+  {
+    "id": "help.maxon.net",
+    "matches": "help.maxon.net",
+    "excludeSelectors.add": ["#contentBody"]
+  },
+  {
+    "id": "character.ai",
+    "matches": "character.ai",
+    "injectedCss": ".read-frog-translated-content-wrapper br {display:none;}\n.swiper,.rah-static,[class*=max-h],.line-clamp-1 { overflow:scroll;-webkit-line-clamp:unset; }",
+    "forceInlineSelectors.add": [
+      ".auto-content",
+      ".auto-content *",
+      "#chat-messages > .group:first-child .prose *",
+      "#chat-messages > .group:not(:first-child) .font-display *"
+    ]
+  },
+  {
+    "id": "queenslibrary.org",
+    "matches": "queenslibrary.org",
+    "injectedCss": "font.notranslate { all: unset!important;}",
+    "excludeSelectors.add": ["#Web-QBPL-Menu"]
+  },
+  {
+    "id": "ac.nowcoder",
+    "matches": "ac.nowcoder.com",
+    "excludeSelectors.add": [".answer-module", ".question-intr", ".language-list", ".question-oi"]
+  },
+  {
+    "id": "chromium",
+    "matches": "*.chromium.org",
+    "excludeSelectors.add": [
+      "ancestors-breadcrumbs",
+      "depth-finder[role='tree']",
+      "repository-detail",
+      "issue-metadata-sidebar",
+      "nav",
+      ".bv2-event-user",
+      ".b-description-heading",
+      "b-attachment-viewer",
+      "i"
+    ],
+    "injectedCss.add": ["font svg {display:none;}"]
+  },
+  {
+    "id": "ffmpeg",
+    "matches": "ffmpeg.org",
+    "excludeSelectors.add": [".memproto", ".memtitle"]
+  },
+  {
+    "id": "podcasts",
+    "matches": "podcasts.apple.com",
+    "excludeSelectors.add": [".detailed-play-button-wrapper"],
+    "injectedCss.add": [
+      ".multiline-clamp { display: flex!important;flex-direction: column; }",
+      ".headings__title,.powerswoosh__title,[data-testid=truncate-text] {-webkit-line-clamp:unset!important;}",
+      ".show-artwork {height:fit-content!important;}",
+      ".powerswoosh__lockup-details-container,.powerswoosh__chin,[data-testid=amp-review__text] {max-height:unset!important;height:unset!important;}",
+      ".episode-hero__overlay {overflow:auto!important;}",
+      "ul .multiline-clamp {display:unset!important;}"
+    ]
+  },
+  {
+    "id": "sp-codeSites",
+    "matches": "docs.wxwidgets.org",
+    "excludeSelectors.add": [".doxygen-awesome-fragment-wrapper"],
+    "injectedCss.add": [".textblock p > font{display:flex;}"]
+  },
+  {
+    "id": "wayfair",
+    "matches": "www.wayfair.com",
+    "injectedCss.add": ["[data-enzyme-id=\"Collapse-Collapsible\"] {height:unset!important;}"]
+  },
+  {
+    "id": "followis",
+    "matches": "https://app.follow.is/feeds/*",
+    "excludeSelectors.add": [".bg-native", "main > div > div.h-full:first-child span"],
+    "injectedCss.add": ["[class*='line-clamp'] {-webkit-line-clamp:unset;}"]
+  },
+  {
+    "id": "svelte",
+    "matches": ["svelte.dev/docs/*", "learn.svelte.dev"],
+    "includeSelectors": [".text"]
+  },
+  {
+    "id": "gitpod",
+    "matches": "www.gitpod.io/docs/*",
+    "includeSelectors": [".content-docs"]
+  },
+  {
+    "id": "service-now",
+    "matches": "*.service-now.com",
+    "includeSelectors": ["article", ".email-content", "section"]
+  },
+  {
+    "id": "realpython",
+    "matches": "realpython.com",
+    "includeSelectors": [
+      "h1",
+      "h2",
+      ".my-0",
+      ".my-1",
+      ".article-body",
+      "table-of-contents",
+      "#disqus_recommendations"
+    ]
+  },
+  {
+    "id": "casino",
+    "matches": "www.casino.org",
+    "excludeSelectors.add": [".material-symbols-outlined"]
+  },
+  {
+    "id": "wisdom",
+    "matches": "wisdom.nec.com",
+    "injectedCss.add": ["a > font {width: max-content;}"]
+  },
+  {
+    "id": "www.acrobiosystems.com",
+    "matches": "www.acrobiosystems.com",
+    "injectedCss.add": [
+      ".productDetialDetail .productLink {overflow: hidden;}",
+      ".productDetialDetail .productLink .box a {display: flex; justify-content: center; white-space: nowrap;}"
+    ]
+  },
+  {
+    "id": "www.metacritic.com",
+    "matches": "www.metacritic.com",
+    "injectedCss.add": [".c-finderProductCard_info .c-finderProductCard_meta {display: block;}"]
+  },
+  {
+    "id": "motrix.app",
+    "matches": "motrix.app",
+    "excludeSelectors.add": [".download-section__right .el-tabs__nav"]
+  },
+  {
+    "id": "xgo",
+    "matches": "www.xgo.ing",
+    "injectedCss.add": ["[class*='line-clamp']{-webkit-line-clamp:unset !important;}"]
+  },
+  {
+    "id": "nebula.starbreeze",
+    "matches": "https://nebula.starbreeze.com/support",
+    "injectedCss.add": [
+      "main section>div {overflow-y:scroll !important;}",
+      "main section>div::-webkit-scrollbar {display: none;width: 0px;background: transparent;}"
+    ]
+  },
+  {
+    "id": "app.schildi.chat",
+    "matches": "app.schildi.chat",
+    "excludeSelectors.add": [
+      ".mx_DisambiguatedProfile",
+      ".mx_MessageTimestamp",
+      ".mx_EventTile_avatar"
+    ],
+    "excludeSelectors.remove": [".notranslate", "[translate=no]"]
+  },
+  {
+    "id": "balthild",
+    "matches": "balthild.github.io",
+    "description": "暂时单独给他处理公式",
+    "injectedCss": ".read-frog-translated-content-wrapper [aria-hidden=true] {display:none;}"
+  },
+  {
+    "id": "csust",
+    "matches": "tsgvpn2.csust.edu.cn",
+    "injectedCss.add": ["h2 {font-size:unset;}"]
+  },
+  {
+    "id": "curseforge",
+    "matches": "www.curseforge.com",
+    "injectedCss": ".project-card { height:unset;grid-template-rows: auto auto auto auto; }\n.project-card .description { height:unset;-webkit-line-clamp:unset; }\nul.details-list { height:unset; }\n.project-card .categories { height:unset; }"
+  },
+  {
+    "id": "ml4vis",
+    "matches": "ml4vis.github.io",
+    "injectedCss": ".jss42 { height:unset; }\n.jss44 { max-height:unset; }",
+    "excludeSelectors.add": [".jss45"]
+  },
+  {
+    "id": "www.dgl.ai",
+    "matches": "www.dgl.ai",
+    "excludeSelectors.add": ["header"]
+  },
+  {
+    "id": "monmouthcoffee",
+    "matches": "www.monmouthcoffee.*",
+    "excludeSelectors.add": ["#basket"]
+  },
+  {
+    "id": "jddonline.com",
+    "matches": "jddonline.com",
+    "injectedCss.add": [
+      ".article-body {column-count:unset;-webkit-column-count:unset;-moz-column-count:unset;}"
+    ]
+  },
+  {
+    "id": "novel-site",
+    "matches": ["www.piaotia.com", "www.zhenhunxiaoshuo.com", "www.hetushu.com"],
+    "injectedCss.add": [
+      ".centent ul { display: flex; }",
+      ".centent ul li { height: unset !important; float: none !important; }",
+      "article.excerpt { white-space: normal !important; overflow: visible !important; }",
+      "#dir dd { white-space: normal !important; overflow: visible !important; }"
+    ]
+  },
+  {
+    "id": "xianqihaotianmi",
+    "matches": "www.xianqihaotianmi.org",
+    "injectedCss.add": [
+      ".list-charts { display: flex; flex-wrap: wrap; }",
+      ".list-charts li { white-space: normal !important; overflow: visible !important; }"
+    ]
+  },
+  {
+    "id": "sobqg",
+    "matches": "www.sobqg.com/book/*",
+    "excludeSelectors.add": ["#hot .g_book > span"],
+    "injectedCss.add": [
+      "#volumes { display: flex; flex-wrap: wrap; }",
+      "a.ell { white-space: normal !important; overflow: visible !important; }",
+      "#hot .g_book > a > h3 { white-space: normal; overflow: visible; max-height: none; -webkit-line-clamp: none; }",
+      "#hot .g_book { height: 330px; }"
+    ]
+  },
+  {
+    "id": "luminousfox",
+    "matches": "www.luminousfox.com/book/*",
+    "injectedCss.add": [
+      "#detail_chapter .box_content ul li { height: unset !important; overflow: visible !important; }"
+    ]
+  },
+  {
+    "id": "doupocangqiong",
+    "matches": "www.doupocangqiong.org",
+    "injectedCss.add": [
+      "#play_0 ul { display: grid; grid-template-columns: repeat(3, 1fr); }",
+      "#play_0 ul li { height: unset !important; }"
+    ]
+  },
+  {
+    "id": "proko",
+    "matches": "www.proko.com",
+    "excludeSelectors.add": [
+      ".proko-preview-statistic-wrap",
+      ".lesson-instructors-wrap",
+      ".proko-comments-item-title",
+      ".proko-comments-item-vote-wrap",
+      ".course-card__details .border-outline075",
+      ".category-subscribe"
+    ],
+    "injectedCss.add": [
+      ".lesson-video-banner-skip,.lesson-title,.lesson-content,.course-card__details {height:unset!important;overflow:scroll;}",
+      "[class*='clamp'],.course-card__description{-webkit-line-clamp:unset!important;overflow:unset;}",
+      "proko-button{z-index:1;}",
+      ".truncate {white-space:unset;}"
+    ]
+  },
+  {
+    "id": "vodtw",
+    "matches": "www.vodtw.com/book/*",
+    "injectedCss.add": [
+      "dl { display: flex; flex-wrap: wrap; }",
+      "dl dd { white-space: normal !important; overflow: visible !important; }",
+      "#info p { height: unset !important; }"
+    ]
+  },
+  {
+    "id": "jwxs",
+    "matches": "www.jwxs.org/book/*",
+    "injectedCss.add": [
+      "#list dd { height: 5rem !important; line-height: unset !important; }",
+      ".readbtn .chapterlist { margin: unset !important; }"
+    ]
+  },
+  {
+    "id": "ceros",
+    "matches": "view.ceros.com",
+    "injectedCss.add": [
+      ".page-object.group > .page-object.text > p { height: 100% !important; overflow: auto !important; }"
+    ]
+  },
+  {
+    "id": "aliexpress",
+    "matches": "*.aliexpress.*",
+    "excludeSelectors.add": ["[class*='multi--price']"],
+    "excludeSelectors.remove": [".notranslate", "[translate=no]"],
+    "injectedCss.add": ["[class*='multi--title'],.G7dOC {-webkit-line-clamp:unset;}"]
+  },
+  {
+    "id": "journals.aps",
+    "matches": "journals.aps.*",
+    "forceInlineSelectors": ["[class*='article'] button"],
+    "preserveTextSelectors.add": ["button"]
+  },
+  {
+    "id": "mobalytics",
+    "matches": "mobalytics.gg",
+    "forceInlineSelectors.add": ["p.xlpi6m9.x5qbwci.xw7yly9 span span"]
+  },
+  {
+    "id": "batchUnlimitHeight",
+    "matches": ["https://www.inven.co.kr/*", "*.grandefratello.mediaset.*"],
+    "injectedCss.add": [
+      "li {height:unset!important;}",
+      ".big_box,article .text,article .title {height:unset!important;}"
+    ]
+  },
+  {
+    "id": "codeium",
+    "matches": "codeium.com",
+    "excludeSelectors.add": ["nav a[class*=C]"]
+  },
+  {
+    "id": "book-douban",
+    "matches": "book.douban.com",
+    "excludeSelectors.add": [
+      "a.author-name",
+      "p.user > a",
+      "div#collector > div > div[style^='padding-left'] > a",
+      "div#info a"
+    ]
+  },
+  {
+    "id": "taobao",
+    "matches": "*.taobao.com",
+    "excludeSelectors.add": [".text-price"]
+  },
+  {
+    "id": "graphcore",
+    "matches": "www.graphcore.ai",
+    "excludeSelectors.add": [".morph"]
+  },
+  {
+    "id": "digitaltrends",
+    "matches": "www.digitaltrends.com",
+    "forceBlockSelectors.add": [".b-mem-post__title"],
+    "injectedCss.add": [
+      ".b-mem__inner .b-mem-post:first-child h3{-webkit-line-clamp: 2;}",
+      ".b-mem__inner .b-mem-post:first-child .b-mem-post__excerpt{display:inline;}"
+    ]
+  },
+  {
+    "id": "jscires",
+    "matches": "jscires.org",
+    "excludeSelectors.add": [".jatsa_contrib_info"],
+    "forceBlockSelectors.add": [".jatsauthtab_title"]
+  },
+  {
+    "id": "vaseven",
+    "matches": "www.vaseven.com",
+    "excludeSelectors.add": [".et_pb_main_blurb_image"]
+  },
+  {
+    "id": "qidian",
+    "matches": "www.qidian.com",
+    "forceBlockSelectors.add": [".type-list a"]
+  },
+  {
+    "id": "alphaxiv",
+    "matches": "www.alphaxiv.org",
+    "injectedCss.add": ["[class*=line-clamp] {-webkit-line-clamp:unset;}"]
+  },
+  {
+    "id": "nexusmods",
+    "matches": "www.nexusmods.com",
+    "description": "适合仅译文模式翻译",
+    "excludeMatches": ["https://www.nexusmods.com/games/*"],
+    "injectedCss.add": [
+      "[class*='line-clamp-'] {-webkit-line-clamp: unset!important; max-height: unset!important;}"
+    ]
+  },
+  {
+    "id": "ollama",
+    "matches": "ollama.com",
+    "excludeSelectors.add": [
+      "#file-explorer",
+      "span[x-test-search-response-title]",
+      "a[x-test-model-name]",
+      "span[x-test-size]",
+      "span[x-test-capability]"
+    ]
+  },
+  {
+    "id": "swaycloud",
+    "matches": "sway.cloud.microsoft",
+    "injectedCss.add": [
+      ".text_wrapper ul li {max-height:unset!important;}",
+      ".container {overflow:scroll;}"
+    ]
+  },
+  {
+    "id": "teacherspayteachers",
+    "matches": "www.teacherspayteachers.com/browse/*",
+    "injectedCss.add": [
+      ".ProductRowCard-module__cardTitleLink--YPqiC { display:unset !important; }"
+    ]
+  },
+  {
+    "id": "claudeartifacts",
+    "matches": "claudeartifacts.com",
+    "excludeSelectors": ["h1"],
+    "injectedCss": ".line-clamp-3 { -webkit-line-clamp: unset; }",
+    "excludeSelectors.add": [
+      "h3 + span.rounded-full",
+      "[class='p-6 pt-0 flex justify-between items-center']",
+      "[class='text-xs text-gray-500']"
+    ]
+  },
+  {
+    "id": "1password",
+    "matches": "*.1password.com",
+    "excludeSelectors.add": [".secret-key"]
+  },
+  {
+    "id": "descript",
+    "matches": "www.descript.com",
+    "injectedCss": ".read-frog-translated-content-wrapper, .read-frog-translated-content-wrapper *{color:unset!important;}",
+    "excludeSelectors.add": ["h1.home-hero"]
+  },
+  {
+    "id": "law.mit.edu",
+    "matches": "law.mit.edu",
+    "excludeSelectors.remove": [".notranslate", "[translate=no]"],
+    "injectedCss.add": [
+      "@media screen and (min-width: 768px) { .pub-header-theme-light {top:-80% !important;} }"
+    ]
+  },
+  {
+    "id": "noon",
+    "matches": "www.noon.com",
+    "excludeSelectors.add": [
+      "[class*='priceContainer']",
+      "[class*='ProductImageFooter']",
+      "[class*='Nudges_nudges']"
+    ],
+    "injectedCss.add": [
+      "[class*='ProductDetailsSection'] {-webkit-line-clamp:unset!important;}",
+      "[class*='title'] {-webkit-line-clamp:unset!important;}"
+    ]
+  },
+  {
+    "id": "klibs",
+    "matches": "klibs.io",
+    "excludeSelectors.add": [
+      "[class*='styles_footerWrapper']",
+      "[class*='styles_searchFilterContainerWrapper']",
+      "[class*='styles_headingWrapper']",
+      "[class*='styles_navigation']",
+      "[class*='styles_rightSideColumnWrapper']",
+      ".breadcrumb"
+    ],
+    "injectedCss.add": [
+      "[class*='styles_card'] {height:unset!important; -webkit-line-clamp:unset!important; max-height:unset!important;}"
+    ]
+  },
+  {
+    "id": "androidpolice",
+    "matches": "www.androidpolice.com",
+    "excludeSelectors.add": [
+      ".author",
+      ".w-total-info",
+      ".images-header-menu-list",
+      ".w-display-card-details",
+      ".w-display-card-extra"
+    ],
+    "injectedCss.add": [
+      ".display-card-title,.display-card-title * {height:unset!important;-webkit-line-clamp:unset!important;}"
+    ]
+  },
+  {
+    "id": "doc2x",
+    "matches": ["doc2x.com", "doc2x.noedgeai.com"],
+    "excludeSelectors.add": ["#md-scroll-top-dom"]
+  },
+  {
+    "id": "trade",
+    "matches": "axiom.trade",
+    "forceInlineSelectors.add": ["[class^=tweet-body_root]"]
+  },
+  {
+    "id": "pytorch",
+    "matches": "pytorch.org",
+    "excludeSelectors.add": [".with-down-arrow", ".hello-bar", "[data-cta='join']"]
+  },
+  {
+    "id": "1688",
+    "matches": "www.1688.com",
+    "injectedCss.add": [
+      "[class^='defaultSubNav'],[class^='loginButton'] {height:unset!important;}",
+      "[data-tracker='category'] > font {white-space:nowrap!important;}"
+    ]
+  },
+  {
+    "id": "seller-tiktok",
+    "matches": [
+      "seller.tiktok.com",
+      "seller-my.tiktok.com",
+      "affiliate.tiktok*.com",
+      "seller.*.tiktokglobalshop.com",
+      "seller.tiktokshopglobalselling.com"
+    ],
+    "excludeSelectors.add": [".chatd-message-userName"],
+    "excludeSelectors.remove": [".notranslate", "[translate=no]"],
+    "injectedCss.add": [
+      "[data-tid=m4b_overflow_text_multiply] {height:unset!important;-webkit-line-clamp:unset!important;}",
+      "[class^=replyText],[class^=productItemInfo],[class^=reviewText] {height:unset!important;-webkit-line-clamp:unset!important;}"
+    ]
+  },
+  {
+    "id": "ccfddl",
+    "matches": "ccfddl.com",
+    "excludeSelectors.add": ["div.conf-timer > span[style^='color: black']"]
+  },
+  {
+    "id": "pinboard",
+    "matches": "pinboard.in",
+    "injectedCss.add": [
+      "div.blurb_box,div.homepage_quad,div.signup_button {height: unset !important;}",
+      "h1.magazine_title {line-height: 1.2 !important;}"
+    ]
+  },
+  {
+    "id": "flutterDev",
+    "matches": ["docs.flutter.dev", "docs.flutter.cn"],
+    "excludeSelectors.add": ["span.expander.material-symbols", "span.material-symbols"]
+  },
+  {
+    "id": "dtmstation",
+    "matches": "www.dtmstation.com",
+    "forceBlockSelectors.add": [".entry-card-title,.entry-card-snippet"],
+    "injectedCss.add": [
+      ".entry-card-title,.entry-card-snippet { -webkit-line-clamp: unset!important; max-height: unset!important;}"
+    ]
+  },
+  {
+    "id": "docs-tutorials",
+    "matches": "docs.pytorch.org",
+    "forceBlockSelectors.add": [".tutorial-filter"]
+  },
+  {
+    "id": "ru-sites",
+    "matches": ["www.wildberries.ru", "www.ozon.ru"],
+    "excludeSelectors.add": [
+      ".product-card__tip--sale",
+      ".price,[class^=priceWrap]",
+      ".j-big-media-placements-block",
+      "[class^='priceBlock'],[class^='product-card__rating'],[class^=productLinePrice],[class^=sizesList]",
+      ".c35_3_16-a0,.pdp_jb1,.b5_6_3-a3,.tsHeadline600Large,.tsHeadline500Medium"
+    ],
+    "injectedCss.add": [
+      ".product-page,.comment-card,.comment-card__message {block-size:unset!important;}",
+      "[class^=supplierName],[class^=supplierName] * {white-space:unset;}",
+      "[class*=categoryLinkNav] {width:min-content;}",
+      ".bq03_5_3-a6,.bq03_5_3-a5,.a2p5_6_9-a0 {-webkit-line-clamp:unset!important;height:unset!important;}"
+    ]
+  },
+  {
+    "id": "wistia-hook",
+    "matches": ["agencysupremacy.io", "dynamous.ai", "dynamous.wistia.com"],
+    "excludeSelectors.add": ["div[data-handle='captions']"]
+  },
+  {
+    "id": "graphpad",
+    "matches": "www.graphpad.com",
+    "excludeSelectors.add": ["div[data-handle='captions']", "#immersive-translate-caption-window"]
+  },
+  {
+    "id": "wistia",
+    "matches": [
+      "ahrefs.com",
+      "*.wistia.net",
+      "*.thinkific.com",
+      "courses.kevinpowell.co",
+      "learn.ni.com",
+      "cgcookie.com",
+      "academy.yoast.com",
+      "courses.mavenanalytics.io",
+      "apclassroom.collegeboard.org"
+    ],
+    "excludeSelectors.add": ["div[data-handle='captions']", "#immersive-translate-caption-window"]
+  },
+  {
+    "id": "barotem",
+    "matches": "www.barotem.com",
+    "injectedCss.add": [
+      ".product_name {-webkit-line-clamp: unset!important;}",
+      ".lists_goods_content > div {height: unset!important; min-height: 76px}"
+    ]
+  },
+  {
+    "id": "msn",
+    "matches": "www.msn.com",
+    "excludeSelectors.add": [
+      ".attribution",
+      ".super-nav-container",
+      "#follow-button",
+      ".media-info-container",
+      ".ad-label",
+      ".provider-name",
+      ".weather-container",
+      ".money-info-content",
+      "casual-games-card",
+      ".match-data",
+      ".me-stripe-container"
+    ],
+    "injectedCss.add": [
+      ".root {overflow-y: scroll!important;}",
+      ".heading {-webkit-line-clamp: unset!important;}",
+      ".content .text {overflow-y: scroll !important;}"
+    ]
+  },
+  {
+    "id": "edclub.com",
+    "matches": "www.edclub.com",
+    "excludeSelectors.add": [".vjs-text-track-display"]
+  },
+  {
+    "id": "mediaspace",
+    "matches": "mediaspace.illinois.edu",
+    "excludeSelectors": [".playkit-overlay-action"],
+    "excludeSelectors.add": [".playkit-overlay-action "]
+  },
+  {
+    "id": "nbcnews",
+    "matches": "www.nbcnews.com",
+    "excludeSelectors.add": [".jw-wrapper.jw-reset"]
+  },
+  {
+    "id": "skool",
+    "matches": "www.skool.com",
+    "excludeSelectors.add": [
+      "[class^=styled__ShowMore]",
+      "[class^=styled__UserNameText]",
+      "[class^=styled__GroupNameWrapper]",
+      "[class^=styled__ButtonWrapper]",
+      "[class^=styled__LeaderboardsPreviewTitle]",
+      "[class^=styled__ExpandRepliesWrapper]",
+      "[class^=styled__GroupFeedLinkLabel]",
+      "[class^=styled__HeaderLinks]",
+      "[class^=styled__RecentActivityLabel]",
+      "[class^=styled__PostedDate]",
+      "[class^=styled__MemberInfo]",
+      "[class^=styled__UserRoleTag]",
+      "[class^=styled__DateAndLabelWrapper]",
+      "[class^=styled__PinnedOverlay]",
+      "[class^=styled__CommentsCount]",
+      "[class^=styled__LastMessageTime]",
+      "[class^=styled__LikeLabel]",
+      "[class^=styled__TypographyWrapper]",
+      "[class^=styled__MemberPercentage]",
+      "[class^=styled__LevelBlockTitle]"
+    ],
+    "excludeSelectors.remove": [".notranslate", "[translate=no]"],
+    "injectedCss.add": [".erGJuk {max-height:unset!important;}"]
+  },
+  {
+    "id": "futuretools",
+    "matches": "www.futuretools.io",
+    "injectedCss": ".collection-item-6 { height: unset !important; }"
+  },
+  {
+    "id": "xiaosaas",
+    "matches": "*.xiaosaas.com",
+    "excludeSelectors.add": ["p.marginRight10", "p.marginLeft10"]
+  },
+  {
+    "id": "freecodecamp",
+    "matches": "www.freecodecamp.org",
+    "excludeSelectors.add": [".monaco-mouse-cursor-text", ".challenge-preview"],
+    "excludeSelectors.remove": [".notranslate", "[translate=no]", "[role=code]"]
+  },
+  {
+    "id": "gta5-mods",
+    "matches": "www.gta5-mods.com",
+    "excludeSelectors.add": ["#main-nav"]
+  },
+  {
+    "id": "cooperativa",
+    "matches": "cooperativa.cl",
+    "injectedCss.add": ["font.notranslate {display:unset!important}"]
+  },
+  {
+    "id": "sdk-cooperate",
+    "matches": "pandaily.com",
+    "excludeSelectors.add": ["[data-discover]", "header"],
+    "forceInlineSelectors.add": ["h3"]
+  },
+  {
+    "id": "read.amazon",
+    "matches": "read.amazon.com",
+    "forceInlineSelectors.add": ["span.kg-a11y-rel[role=text]"],
+    "injectedCss.add": [
+      "font { color:#333!important; white-space: pre-wrap;}",
+      "p > font { position:absolute;left:0;right:0; }",
+      ".kg-a11y-rel { background:white!important; }"
+    ]
+  },
+  {
+    "id": "dcinside",
+    "matches": "*.dcinside.com",
+    "excludeSelectors.add": [".num", ".time"],
+    "injectedCss.add": [
+      ".time_best .typet_list li a {font-size:unset !important;}",
+      "font {background:unset!important;padding:unset!important;}"
+    ]
+  },
+  {
+    "id": "f95zone",
+    "matches": "f95zone.to",
+    "excludeSelectors.add": [".pageNavWrapper", ".message-userExtras", ".message-name"]
+  },
+  {
+    "id": "marquee-gs",
+    "matches": "marquee.gs.com",
+    "excludeSelectors.add": ["[class*='article-header-sub-header']", "[role=img]"]
+  },
+  {
+    "id": "toneking",
+    "matches": "www.toneking.com",
+    "description": "解决莫名奇妙的ul li text-wrap: pretty 卡顿问题",
+    "injectedCss.add": ["ul li {text-wrap:unset!important;}"]
+  },
+  {
+    "id": "folo",
+    "matches": "app.folo.is",
+    "excludeSelectors.add": ["[role=button]"]
+  },
+  {
+    "id": "fontFmaily",
+    "matches": ["skyvipservices.com", "book.novelpia.com"],
+    "injectedCss.add": [
+      "font {display:block !important;}",
+      "#book-box font {font-family:unset!important;}"
+    ]
+  },
+  {
+    "id": "arena",
+    "matches": "lmarena.ai",
+    "excludeSelectors.add": ["table"]
+  },
+  {
+    "id": "murlok",
+    "matches": "murlok.io",
+    "injectedCss.add": [".vi-media-object {display:flex;}"]
+  },
+  {
+    "id": "vercel",
+    "matches": "vercel.com",
+    "injectedCss": "[data-docs-heading] .read-frog-translated-content-wrapper,[data-docs-heading] .read-frog-translated-content-wrapper * {visibility:visible!important;opacity:1!important;display:inline!important;margin-left:0!important;}",
+    "excludeSelectors.add": ["[class^=fade-in-words]"]
+  },
+  {
+    "id": "ai-sdk",
+    "matches": "ai-sdk.dev",
+    "injectedCss": "[data-docs-heading] .read-frog-translated-content-wrapper,[data-docs-heading] .read-frog-translated-content-wrapper * {visibility:visible!important;opacity:1!important;display:inline!important;margin-left:0!important;}"
+  },
+  {
+    "id": "moltbook",
+    "matches": "www.moltbook.com",
+    "excludeSelectors.add": [
+      "[class='flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs text-[#7c7c7c] mb-1.5 sm:mb-2 flex-wrap']",
+      "[class='flex items-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-[#7c7c7c]']",
+      "[class='flex items-center gap-2 p-2 rounded-lg transition-all duration-200 group animate-fadeIn bg-gradient-to-r from-[#ffd700]/10 to-transparent hover:from-[#ffd700]/20']",
+      "[class='flex flex-col items-center gap-0.5 sm:gap-1 text-center min-w-[32px] sm:min-w-[40px]']",
+      "[class='bg-white border border-[#e0e0e0] rounded-lg overflow-hidden'] .p-2",
+      "[class='text-xs text-[#818384] mb-2']",
+      "[class='w-12 bg-[#161617] rounded-l-lg flex flex-col items-center py-3 text-sm']",
+      "[class='bg-[#1a1a1b] px-4 py-3 flex items-center justify-between sticky top-[52px] z-40 rounded-t-lg border border-[#333] shadow-md']",
+      "[class='flex items-center gap-3 text-xs text-[#818384]']",
+      "a[class='text-[#d7dadc] font-medium hover:underline']"
+    ],
+    "injectedCss.add": ["[class*='line-clamp']{-webkit-line-clamp:unset !important;}"]
+  },
+  {
+    "id": "common-vtt-jw",
+    "matches": ["*.rottentomatoes.com", "megaplay.buzz", "www.brighttalk.com"],
+    "excludeSelectors.add": [".jw-wrapper"]
+  },
+  {
+    "id": "autoHeight",
+    "matches": [
+      "*.sooplive.*",
+      "zen-browser.app",
+      "message.alibaba.com",
+      "erp.91miaoshou.com",
+      "jddonline.com",
+      "cis.vemic.com",
+      "scripod.com",
+      "drjoedispenza.com",
+      "www.x-mol.com",
+      "webvpn.bnu.*",
+      "www.connectedpapers.com",
+      "isappscience.org",
+      "www.dtmstation.com",
+      "kalshi.com",
+      "engoo.com",
+      "puchipurabu.com",
+      "www.wildberries.ru",
+      "m.163.com",
+      "discord.com/discovery*",
+      "zhenghedata.com",
+      "yoeshop.ssweet.*",
+      "sinocism.com",
+      "*.z-lib.*",
+      "duckduckgo.com",
+      "www.postype.com",
+      "rebang.today",
+      "appsumo.com",
+      "*.xiapibuy.*",
+      "www.modelhub.com",
+      "www.xvideos.com",
+      "www.tripadvisor.com",
+      "www.afreecatv.com",
+      "getpocket.com",
+      "https://you.com/search",
+      "*.fiverr.com",
+      "https://feeder.co/*",
+      "time.com",
+      "www.cnet.com",
+      "www.nikkei.com",
+      "dolmods.net",
+      "detail.1688.com"
+    ],
+    "excludeSelectors.remove": [".notranslate", "[translate=no]"],
+    "injectedCss.add": [
+      ".side_list a,.title a,.tit,.item-title {-webkit-line-clamp:unset!important;height:unset!important;}",
+      "details {height:unset!important;}",
+      ".product-title {height:unset!important;-webkit-line-clamp:unset!important;}",
+      ".plugin-product-comment-content {height:unset!important;-webkit-line-clamp:unset!important;}",
+      "div.jdd-product-info-box {height:unset!important;}",
+      "span.hotData-text { -webkit-line-clamp: unset !important; line-clamp: unset !important;}",
+      "div.line-clamp-4 { -webkit-line-clamp: unset; max-height: unset;}",
+      "[class*='titleTypography'] {-webkit-line-clamp: unset !important;}",
+      ".div-text-line-three { -webkit-line-clamp: unset; max-height: unset;}",
+      ".data-title { -webkit-line-clamp: unset!important; max-height: unset!important;}",
+      ".paper-title,.search-result-abstract.folded,.list-group-item-mod h5 { -webkit-line-clamp: unset!important; max-height: unset!important;}",
+      ".kb-advanced-heading-link,.limited-text { -webkit-line-clamp: unset!important; max-height: unset!important;}",
+      ".entry-card-title,.entry-card-snippet { -webkit-line-clamp: unset!important; max-height: unset!important;}",
+      "span.line-clamp-2 { -webkit-line-clamp: unset!important; max-height: unset!important;}",
+      ".css-1yo0yr8 {-webkit-line-clamp: unset!important; max-height: unset!important;}",
+      "[class*='line-clamp-'],[class*='line-clamp-'] font {white-space:unset!important;-webkit-line-clamp: unset!important; max-height: unset!important;}",
+      ".product-card__brand-wrap {white-space:unset;}",
+      ".card-recommend-oneImg article h4 {max-height:unset;-webkit-line-clamp:unset;}",
+      ".description__4cb8a {max-height:unset;-webkit-line-clamp:unset;}",
+      ".link-container {height:unset!important;-webkit-line-clamp:unset!important;}"
+    ]
+  },
+  {
+    "id": "other-chatapps",
+    "matches": "app.salesmartly.com",
+    "includeSelectors.add": [".chat__inbox_item_text_ordinary", ".ivu-tooltip [title]"],
+    "injectedCss.add": ["._ss_2FLBr4_u {height:unset!important;}"]
+  },
+  {
+    "id": "dynamic-repets",
+    "matches": "khovar.tj",
+    "description": "1.25.3 在这种情况下会导致脏段落重新翻译",
+    "excludeSelectors.add": [".slide_container [style*='position: absolute']"]
+  },
+  {
+    "id": "txt",
+    "matches": "*://*/*.txt",
+    "excludeSelectors.add": [".api-code", "pre.highlight.def"]
+  },
+  {
+    "id": "overflow-sites",
+    "matches": [
+      "www.highfrequencyelectronics.com",
+      "www.uzh.ch",
+      "www-mail.icloud-sandbox.com",
+      "*.cpaaustralia.com.*",
+      "www.8du8.net/*",
+      "ieltscat.xdf.*",
+      "moddota.com",
+      "www.nogizaka46.com"
+    ],
+    "injectedCss.add": [
+      "#main-content {overflow:unset;}",
+      ".TextImage--inner {overflow:auto !important;}",
+      "body{overflow-y:scroll!important;}",
+      "li.expanded > div{ overflow:scroll; }",
+      ".book_list ul li { height: unset !important; overflow: visible !important; }",
+      "#tabs-content-wrap {overflow:scroll;}",
+      ".ReactVirtualized__Grid__innerScrollContainer {overflow:scroll!important;}",
+      ".b--wrap {overflow:scroll!important;}"
+    ]
+  },
+  {
+    "id": "mailSites",
+    "matches": "mail.126.com",
+    "excludeSelectors.add": [".mail-list-time", ".mail-list-frome"],
+    "injectedCss.add": [".mail-list-frome {display:none;}"]
+  },
+  {
+    "id": "fix-header",
+    "matches": ["societyforpsychotherapy.org", "cbtm.manifestlao.com", "notefolio.net"],
+    "description": "给部分网页开后门翻译 header标签",
+    "excludeSelectors.add": [".site-header"],
+    "excludeSelectors.remove": [".notranslate", "[translate=no]"],
+    "forceBlockSelectors.add": [".btn"],
+    "injectedCss.add": [
+      "[class*='line-clamp-'] {-webkit-line-clamp: unset!important; max-height: unset!important;}"
+    ]
+  },
+  {
+    "id": "readfrog-chatgpt",
+    "description": "Skip the ChatGPT prompt editor",
+    "matches": "chatgpt.com",
+    "excludeSelectors": [".ProseMirror"]
+  },
+  {
+    "id": "readfrog-arxiv",
+    "description": "Skip code listings on arXiv",
+    "matches": "arxiv.org",
+    "excludeSelectors": [".ltx_listing"]
+  },
+  {
+    "id": "readfrog-reddit",
+    "description": "Skip Reddit chrome and force block layout for post bodies",
+    "matches": "www.reddit.com",
+    "excludeSelectors": [
+      "faceplate-screen-reader-content > *",
+      "reddit-header-large *",
+      "shreddit-comment-action-row > *",
+      "shreddit-post-flair"
+    ],
+    "forceBlockSelectors": ["shreddit-post-text-body"]
+  },
+  {
+    "id": "readfrog-youtube",
+    "description": "Skip YouTube chrome, metadata, and Read Frog subtitle UI",
+    "matches": "www.youtube.com",
+    "excludeSelectors": [
+      "#masthead-container *",
+      "#guide-inner-content *",
+      "#metadata *",
+      "#channel-name",
+      ".translate-button",
+      ".yt-lockup-metadata-view-model__metadata",
+      ".yt-spec-avatar-shape__badge-text",
+      ".shortsLockupViewModelHostOutsideMetadataSubhead",
+      "ytd-comments-header-renderer",
+      "#top-row",
+      "#header-author",
+      "#reply-button-end",
+      "#more-replies",
+      "#info",
+      "#badges *",
+      ".ytp-caption-window-container",
+      ".read-frog-subtitles-view",
+      ".read-frog-subtitles-state-message",
+      ".read-frog-subtitles-translate-button"
+    ],
+    "forceBlockSelectors": ["yt-attributed-string > span"]
+  },
+  {
+    "id": "readfrog-discord",
+    "description": "Skip Discord usernames, timestamps, and channel chrome",
+    "matches": "discord.com",
+    "excludeSelectors": [
+      "[id^=\"message-username\"]",
+      "span[class*=\"-timestamp\"]",
+      "div[class*=\"-repliedMessage\"]",
+      "li[class*=\"-containerDefault\"]",
+      "[class*=\"-subtitleContainer\"]",
+      "[class*=\"-formWithLoadedChatInput\"]"
+    ]
+  },
+  {
+    "id": "readfrog-github",
+    "description": "Skip GitHub file tree, headers, and diffs (#1174); force block layout for task lists (#867)",
+    "matches": "github.com",
+    "excludeSelectors": [
+      "[aria-labelledby=\"folders-and-files\"] *",
+      "header *",
+      "#repository-container-header *",
+      "[class*=\"OverviewContent-module__Box_1--\"] *",
+      "table.diff-table"
+    ],
+    "forceBlockSelectors": ["task-lists"]
+  },
+  {
+    "id": "readfrog-engoo",
+    "description": "Force block layout for Engoo exercises",
+    "matches": "engoo.com",
+    "forceBlockSelectors": [
+      "#windowexercise-2 > div > div > div.css-ep7xq6 > div > div > div.css-19m2fbm *"
+    ]
+  },
+  {
+    "id": "ieeexplore",
+    "matches": "ieeexplore.ieee.org",
+    "preserveTextSelectors": ["a[ref-type]", ".inline-formula", ".display-formula"]
+  },
+  {
+    "id": "htdp",
+    "matches": "htdp.org",
+    "preserveTextSelectors": [".RktIn"]
+  },
+  {
+    "id": "pubs.rsc.org",
+    "matches": "pubs.rsc.org",
+    "preserveTextSelectors.add": ["[class*='eqn']"]
+  },
+  {
+    "id": "khanacademy",
+    "matches": ["www.khanacademy.org"],
+    "preserveTextSelectors.add": [".mathjax-wrapper"]
+  },
+  {
+    "id": "ideastatica",
+    "matches": "www.ideastatica.com",
+    "preserveTextSelectors.remove": [".math-container"]
+  },
+  {
+    "id": "fibery",
+    "matches": ["the.fibery.io"],
+    "preserveTextSelectors.add": [".entity-node-view-container"]
+  },
+  {
+    "id": "docs.unity3d",
+    "matches": "docs.unity3d.com",
+    "preserveTextSelectors": [".tooltip"]
+  },
+  {
+    "id": "docs.unity.cn",
+    "matches": "docs.unity.cn",
+    "preserveTextSelectors": [".tooltip"]
+  },
+  {
+    "id": "typeset.io",
+    "matches": "typeset.io",
+    "preserveTextSelectors.remove": ["span.notranslate"]
+  },
+  {
+    "id": "transformer-circuits.pub",
+    "matches": ["transformer-circuits.pub"],
+    "preserveTextSelectors.add": ["d-cite"]
+  },
+  {
+    "id": "next_westlaw",
+    "matches": "*.next.westlaw.com",
+    "preserveTextSelectors.add": [".docLinkWrapper"]
+  },
+  {
+    "id": "mathsisfun",
+    "matches": "www.mathsisfun.com",
+    "preserveTextSelectors.add": [".center.large"]
+  },
+  {
+    "id": "jfrog",
+    "matches": "jfrog.com",
+    "preserveTextSelectors.add": [".readercontent-topic-codeblockcontainer"]
+  },
+  {
+    "id": "solidity-by-example",
+    "matches": ["solidity-by-example.org"],
+    "preserveTextSelectors.remove": [".code"]
+  },
+  {
+    "id": "remove_em",
+    "matches": ["git-scm.com", "models.com"],
+    "preserveTextSelectors.add": ["em"]
+  }
+]

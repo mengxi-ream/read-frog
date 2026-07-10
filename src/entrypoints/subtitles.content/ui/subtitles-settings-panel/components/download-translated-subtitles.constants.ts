@@ -5,5 +5,5 @@ export const DOWNLOAD_TRANSLATED_SUBTITLES_MESSAGE_TONE = {
   Success: "success",
 } as const
 
-export type DownloadTranslatedSubtitlesMessageTone
-  = typeof DOWNLOAD_TRANSLATED_SUBTITLES_MESSAGE_TONE[keyof typeof DOWNLOAD_TRANSLATED_SUBTITLES_MESSAGE_TONE]
+export type DownloadTranslatedSubtitlesMessageTone =
+  (typeof DOWNLOAD_TRANSLATED_SUBTITLES_MESSAGE_TONE)[keyof typeof DOWNLOAD_TRANSLATED_SUBTITLES_MESSAGE_TONE]

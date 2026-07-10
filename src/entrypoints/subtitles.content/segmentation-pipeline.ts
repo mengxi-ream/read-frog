@@ -37,7 +37,7 @@ export class SegmentationPipeline {
   }
 
   hasUnprocessedChunks(): boolean {
-    return this.rawFragments.some(f => !this.segmentedRawStarts.has(f.start))
+    return this.rawFragments.some((f) => !this.segmentedRawStarts.has(f.start))
   }
 
   start() {
@@ -61,8 +61,7 @@ export class SegmentationPipeline {
   }
 
   private async runLoop() {
-    if (this.running)
-      return
+    if (this.running) return
     this.running = true
 
     const video = this.getVideoElement()
@@ -74,21 +73,18 @@ export class SegmentationPipeline {
     try {
       while (!this.stopped && this.hasUnprocessedChunks()) {
         const didWork = await this.processNextChunk(video.currentTime * 1000)
-        if (!didWork)
-          break
+        if (!didWork) break
       }
-    }
-    finally {
+    } finally {
       this.running = false
     }
   }
 
   private async processNextChunk(currentTimeMs: number): Promise<boolean> {
     const chunk = this.findNextChunk(currentTimeMs)
-    if (chunk.length === 0)
-      return false
+    if (chunk.length === 0) return false
 
-    chunk.forEach(f => this.segmentedRawStarts.add(f.start))
+    chunk.forEach((f) => this.segmentedRawStarts.add(f.start))
 
     if (this.preSegmented) {
       this.replaceProcessedChunk(chunk, chunk)
@@ -102,9 +98,8 @@ export class SegmentationPipeline {
         const optimized = optimizeSubtitles(segmented, this.getSourceLanguage())
         this.replaceProcessedChunk(chunk, optimized)
       }
-    }
-    catch {
-      chunk.forEach(f => this.aiSegmentFailedRawStarts.add(f.start))
+    } catch {
+      chunk.forEach((f) => this.aiSegmentFailedRawStarts.add(f.start))
       const optimized = optimizeSubtitles(chunk, this.getSourceLanguage())
       this.replaceProcessedChunk(chunk, optimized)
     }
@@ -117,7 +112,7 @@ export class SegmentationPipeline {
     const chunkEnd = chunk.at(-1)!.end
 
     this.processedFragments = this.processedFragments.filter(
-      fragment => fragment.start < chunkStart || fragment.start > chunkEnd,
+      (fragment) => fragment.start < chunkStart || fragment.start > chunkEnd,
     )
     this.processedFragments.push(...nextFragments)
     this.processedFragments.sort((a, b) => a.start - b.start)
@@ -126,15 +121,16 @@ export class SegmentationPipeline {
   private findNextChunk(currentTimeMs: number): SubtitlesFragment[] {
     const searchStart = Math.max(0, currentTimeMs - 10_000)
     const firstUnprocessed = this.rawFragments.find(
-      f => f.start >= searchStart && !this.segmentedRawStarts.has(f.start),
+      (f) => f.start >= searchStart && !this.segmentedRawStarts.has(f.start),
     )
-    if (!firstUnprocessed)
-      return []
+    if (!firstUnprocessed) return []
 
     const windowEnd = firstUnprocessed.start + PROCESS_LOOK_AHEAD_MS
     return this.rawFragments.filter(
-      f => f.start >= firstUnprocessed.start && f.start < windowEnd
-        && !this.segmentedRawStarts.has(f.start),
+      (f) =>
+        f.start >= firstUnprocessed.start &&
+        f.start < windowEnd &&
+        !this.segmentedRawStarts.has(f.start),
     )
   }
 }

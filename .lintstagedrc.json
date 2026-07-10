@@ -1,3 +1,6 @@
 {
-  "*": ["pnpm lint:fix"]
+  "*": [
+    "pnpm exec oxlint --type-aware --fix --no-error-on-unmatched-pattern",
+    "pnpm exec oxfmt --write --no-error-on-unmatched-pattern"
+  ]
 }

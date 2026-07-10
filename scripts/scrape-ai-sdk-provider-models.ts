@@ -89,25 +89,10 @@ const PROVIDER_PATH_RE = /^\/providers\/ai-sdk-providers\/([^/]+)$/
 const RETRYABLE_ERROR_RE = /network|fetch|timeout/i
 
 const NORMALIZATION_RULES: Record<keyof NormalizedCapabilities, RegExp[]> = {
-  imageInput: [
-    /\bimage\b/i,
-    /\bvision\b/i,
-  ],
-  audioInput: [
-    /\baudio\b/i,
-    /\bspeech\b/i,
-  ],
-  objectGeneration: [
-    /object generation/i,
-    /structured output/i,
-    /json schema/i,
-    /json mode/i,
-  ],
-  toolUsage: [
-    /tool usage/i,
-    /function calling/i,
-    /\btools?\b/i,
-  ],
+  imageInput: [/\bimage\b/i, /\bvision\b/i],
+  audioInput: [/\baudio\b/i, /\bspeech\b/i],
+  objectGeneration: [/object generation/i, /structured output/i, /json schema/i, /json mode/i],
+  toolUsage: [/tool usage/i, /function calling/i, /\btools?\b/i],
 }
 
 function cleanText(value: string | null | undefined): string {
@@ -117,7 +102,7 @@ function cleanText(value: string | null | undefined): string {
 function slugToName(slug: string): string {
   return slug
     .split("-")
-    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ")
 }
 
@@ -176,14 +161,18 @@ function parseArgs(argv: string[]): ScrapeOptions {
   }
 
   const normalizedBase = options.baseUrl.replace(TRAILING_SLASHES_RE, "")
-  const normalizedIndex = options.indexPath.startsWith("/") ? options.indexPath : `/${options.indexPath}`
+  const normalizedIndex = options.indexPath.startsWith("/")
+    ? options.indexPath
+    : `/${options.indexPath}`
 
   return {
     ...options,
     baseUrl: normalizedBase,
     indexPath: normalizedIndex,
     outPath: resolve(process.cwd(), options.outPath),
-    providersHtmlFile: options.providersHtmlFile ? resolve(process.cwd(), options.providersHtmlFile) : undefined,
+    providersHtmlFile: options.providersHtmlFile
+      ? resolve(process.cwd(), options.providersHtmlFile)
+      : undefined,
   }
 }
 
@@ -193,10 +182,10 @@ function classNameValue(el: Element): string {
     return className
   }
   if (
-    className
-    && typeof className === "object"
-    && "baseVal" in className
-    && typeof (className as { baseVal: unknown }).baseVal === "string"
+    className &&
+    typeof className === "object" &&
+    "baseVal" in className &&
+    typeof (className as { baseVal: unknown }).baseVal === "string"
   ) {
     return (className as { baseVal: string }).baseVal
   }
@@ -235,15 +224,19 @@ function parseCapabilityCell(cell: HTMLTableCellElement): CapabilityValue {
 
   if (hasSvg) {
     const classTokens = collectClassTokens(cell)
-    if (classTokens.some(token => token.startsWith("text-green"))) {
+    if (classTokens.some((token) => token.startsWith("text-green"))) {
       return true
     }
-    if (classTokens.some(token => token.startsWith("text-gray") || token.startsWith("text-red"))) {
+    if (
+      classTokens.some((token) => token.startsWith("text-gray") || token.startsWith("text-red"))
+    ) {
       return false
     }
 
-    const pathValues = Array.from(cell.querySelectorAll("path"), path => path.getAttribute("d") ?? "")
-      .join(" ")
+    const pathValues = Array.from(
+      cell.querySelectorAll("path"),
+      (path) => path.getAttribute("d") ?? "",
+    ).join(" ")
     if (pathValues.includes("11.5303 6.53033")) {
       return true
     }
@@ -282,7 +275,7 @@ function normalizeCapabilities(raw: Record<string, CapabilityValue>): Normalized
   for (const key of Object.keys(normalized) as Array<keyof NormalizedCapabilities>) {
     const patterns = NORMALIZATION_RULES[key]
     const matches = entries
-      .filter(([header]) => patterns.some(pattern => pattern.test(header)))
+      .filter(([header]) => patterns.some((pattern) => pattern.test(header)))
       .map(([, value]) => booleanFromCapability(value))
       .filter((value): value is boolean => value !== null)
 
@@ -298,7 +291,11 @@ function normalizeCapabilities(raw: Record<string, CapabilityValue>): Normalized
   return normalized
 }
 
-function assignUniqueKey(target: Record<string, CapabilityValue>, key: string, value: CapabilityValue): void {
+function assignUniqueKey(
+  target: Record<string, CapabilityValue>,
+  key: string,
+  value: CapabilityValue,
+): void {
   if (!(key in target)) {
     target[key] = value
     return
@@ -326,17 +323,18 @@ function extractHeadersAndRows(table: HTMLTableElement): ExtractedTableRows {
 
   const headRow = table.tHead?.rows.item(0)
   if (headRow) {
-    const headers = Array.from(headRow.cells, cell => cleanText(cell.textContent) || "Column")
-    const bodyRows = table.tBodies.length > 0
-      ? [...table.tBodies].flatMap(body => [...body.rows])
-      : allRows.filter(row => row !== headRow)
+    const headers = Array.from(headRow.cells, (cell) => cleanText(cell.textContent) || "Column")
+    const bodyRows =
+      table.tBodies.length > 0
+        ? [...table.tBodies].flatMap((body) => [...body.rows])
+        : allRows.filter((row) => row !== headRow)
     return { headers, rows: bodyRows }
   }
 
   const firstRow = allRows[0]
-  const headerLike = [...firstRow.cells].every(cell => cell.tagName === "TH")
+  const headerLike = [...firstRow.cells].every((cell) => cell.tagName === "TH")
   if (headerLike) {
-    const headers = Array.from(firstRow.cells, cell => cleanText(cell.textContent) || "Column")
+    const headers = Array.from(firstRow.cells, (cell) => cleanText(cell.textContent) || "Column")
     return {
       headers,
       rows: allRows.slice(1),
@@ -361,11 +359,11 @@ function extractModelCellText(row: HTMLTableRowElement, index: number): string {
 }
 
 function tableLooksLikeModelTable(headers: string[], rows: HTMLTableRowElement[]): boolean {
-  const hasModelHeader = headers.some(header => MODEL_HEADER_RE.test(header))
+  const hasModelHeader = headers.some((header) => MODEL_HEADER_RE.test(header))
   if (hasModelHeader) {
     return true
   }
-  return rows.some(row => Boolean(row.querySelector("code")))
+  return rows.some((row) => Boolean(row.querySelector("code")))
 }
 
 function extractModelTables(providerHtml: string): ProviderTable[] {
@@ -383,7 +381,7 @@ function extractModelTables(providerHtml: string): ProviderTable[] {
       continue
     }
 
-    const modelColumnIndex = headers.findIndex(header => MODEL_HEADER_RE.test(header))
+    const modelColumnIndex = headers.findIndex((header) => MODEL_HEADER_RE.test(header))
     const resolvedModelColumnIndex = modelColumnIndex >= 0 ? modelColumnIndex : 0
 
     const models: ModelRow[] = []
@@ -407,7 +405,7 @@ function extractModelTables(providerHtml: string): ProviderTable[] {
         if (!header) {
           continue
         }
-        const value = parseCapabilityCell(row.cells[cellIndex]!)
+        const value = parseCapabilityCell(row.cells[cellIndex])
         assignUniqueKey(rawCapabilities, header, value)
       }
 
@@ -442,8 +440,7 @@ function discoverProvidersFromHtml(html: string, baseUrl: string): ProviderLink[
     let url: URL
     try {
       url = new URL(href, baseUrl)
-    }
-    catch {
+    } catch {
       continue
     }
 
@@ -453,7 +450,7 @@ function discoverProvidersFromHtml(html: string, baseUrl: string): ProviderLink[
       continue
     }
 
-    const slug = decodeURIComponent(match[1]!)
+    const slug = decodeURIComponent(match[1])
     if (!slug || providers.has(slug)) {
       continue
     }
@@ -474,7 +471,12 @@ function isRetryable(error: unknown): boolean {
   if (error instanceof HttpError) {
     return error.status === 429 || error.status >= 500
   }
-  if (error && typeof error === "object" && "name" in error && (error as { name?: string }).name === "AbortError") {
+  if (
+    error &&
+    typeof error === "object" &&
+    "name" in error &&
+    (error as { name?: string }).name === "AbortError"
+  ) {
     return true
   }
   if (error instanceof Error) {
@@ -484,7 +486,7 @@ function isRetryable(error: unknown): boolean {
 }
 
 function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
+  return new Promise((settle) => setTimeout(settle, ms))
 }
 
 async function fetchText(url: string, timeoutMs: number): Promise<string> {
@@ -495,7 +497,7 @@ async function fetchText(url: string, timeoutMs: number): Promise<string> {
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
-        "accept": "text/html,application/xhtml+xml",
+        accept: "text/html,application/xhtml+xml",
         "user-agent": "read-frog-ai-sdk-provider-scraper/1.0",
       },
     })
@@ -503,8 +505,7 @@ async function fetchText(url: string, timeoutMs: number): Promise<string> {
       throw new HttpError(response.status, url)
     }
     return await response.text()
-  }
-  finally {
+  } finally {
     clearTimeout(timer)
   }
 }
@@ -514,8 +515,7 @@ async function fetchTextWithRetry(url: string, timeoutMs: number, retries = 1): 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       return await fetchText(url, timeoutMs)
-    }
-    catch (error) {
+    } catch (error) {
       lastError = error
       if (attempt === retries || !isRetryable(error)) {
         break
@@ -525,7 +525,7 @@ async function fetchTextWithRetry(url: string, timeoutMs: number, retries = 1): 
   }
 
   if (lastError instanceof Error) {
-    throw lastError
+    throw new Error(lastError.message, { cause: lastError })
   }
   throw new Error(String(lastError))
 }
@@ -539,7 +539,7 @@ async function mapWithConcurrency<T, R>(
     return []
   }
 
-  const results = Array.from({ length: values.length }) as R[]
+  const results: R[] = []
   let cursor = 0
   const workerCount = Math.min(concurrency, values.length)
 
@@ -550,7 +550,7 @@ async function mapWithConcurrency<T, R>(
       if (index >= values.length) {
         return
       }
-      results[index] = await worker(values[index]!, index)
+      results[index] = await worker(values[index], index)
     }
   })
 
@@ -579,8 +579,7 @@ async function main(): Promise<void> {
       const html = await fetchTextWithRetry(provider.url, options.timeoutMs)
       const tables = extractModelTables(html)
       return { provider: { ...provider, tables }, error: null }
-    }
-    catch (error) {
+    } catch (error) {
       return {
         provider: null,
         error: {

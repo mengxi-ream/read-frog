@@ -40,7 +40,6 @@ export class RequestQueue {
   private lastRefill: number
 
   constructor(private options: QueueOptions) {
-    this.options = options
     this.retryPolicy = options.retryPolicy ?? defaultRequestRetryPolicy
     this.bucketTokens = options.capacity
     this.lastRefill = Date.now()
@@ -112,8 +111,7 @@ export class RequestQueue {
         this.executingTasks.set(task.hash, task)
         this.bucketTokens--
         void this.executeTask(task)
-      }
-      else {
+      } else {
         break
       }
     }
@@ -128,7 +126,10 @@ export class RequestQueue {
       if (nextTask) {
         const now = Date.now()
         const delayUntilScheduled = Math.max(0, nextTask.scheduleAt - now)
-        const msUntilNextToken = this.bucketTokens >= 1 ? 0 : Math.ceil((1 - this.bucketTokens) / this.options.rate * 1000)
+        const msUntilNextToken =
+          this.bucketTokens >= 1
+            ? 0
+            : Math.ceil(((1 - this.bucketTokens) / this.options.rate) * 1000)
         const delay = Math.max(delayUntilScheduled, msUntilNextToken)
 
         this.nextScheduleTimer = setTimeout(() => {
@@ -154,10 +155,7 @@ export class RequestQueue {
       })
 
       // Race between the actual task and timeout
-      const result = await Promise.race([
-        task.thunk(),
-        timeoutPromise,
-      ])
+      const result = await Promise.race([task.thunk(), timeoutPromise])
 
       // Clear timeout if task completed successfully
       if (timeoutId) {
@@ -169,8 +167,7 @@ export class RequestQueue {
       if (!task.drained) {
         task.resolve(result)
       }
-    }
-    catch (error) {
+    } catch (error) {
       // Clear timeout if it hasn't fired yet
       if (timeoutId) {
         clearTimeout(timeoutId)
@@ -204,19 +201,16 @@ export class RequestQueue {
         this.waitingTasks.set(task.hash, task)
         this.waitingQueue.push(task, retryAt)
         this.schedule()
-      }
-      else {
+      } else {
         // Max retries exceeded, reject the promise
         // console.error(`💀 Task ${task.id} failed permanently after ${this.options.maxRetries} retries`)
         if (decision.failQueue) {
           this.failCurrentBacklog(error)
-        }
-        else {
+        } else {
           task.reject(error)
         }
       }
-    }
-    finally {
+    } finally {
       // Ensure timeout is always cleared
       if (timeoutId) {
         clearTimeout(timeoutId)

@@ -11,15 +11,15 @@ function isRecord(value: unknown): value is Record<string, any> {
 }
 
 function getNonEmptyString(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim().length > 0
-    ? value.trim()
-    : undefined
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined
 }
 
 function resolveCustomModel(provider: any): string | null {
-  return getNonEmptyString(provider?.model?.customModel)
-    ?? getNonEmptyString(provider?.model?.model)
-    ?? null
+  return (
+    getNonEmptyString(provider?.model?.customModel) ??
+    getNonEmptyString(provider?.model?.model) ??
+    null
+  )
 }
 
 function migrateProvider(provider: any): any {

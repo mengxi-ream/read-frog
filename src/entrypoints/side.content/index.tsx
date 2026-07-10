@@ -15,6 +15,8 @@ import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { APP_NAME } from "@/utils/constants/app"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { initI18n } from "@/utils/i18n"
+import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
 import { protectSelectAllShadowRoot } from "@/utils/select-all"
 import { insertShadowRootUIWrapperInto } from "@/utils/shadow-root"
 import { isSiteEnabled } from "@/utils/site-control"
@@ -27,17 +29,16 @@ import "@/assets/styles/theme.css"
 import "@/assets/styles/text-small.css"
 
 const ReactQueryDevtools = import.meta.env.DEV
-  ? lazy(() => import("@tanstack/react-query-devtools").then(m => ({ default: m.ReactQueryDevtools })))
+  ? lazy(() =>
+      import("@tanstack/react-query-devtools").then((m) => ({ default: m.ReactQueryDevtools })),
+    )
   : null
 
 function HydrateAtoms({
   initialValues,
   children,
 }: {
-  initialValues: [
-    [typeof configAtom, Config],
-    [typeof baseThemeModeAtom, ThemeMode],
-  ]
+  initialValues: [[typeof configAtom, Config], [typeof baseThemeModeAtom, ThemeMode]]
   children: React.ReactNode
 }) {
   useHydrateAtoms(initialValues)
@@ -51,12 +52,14 @@ export default defineContentScript({
   matches: ["*://*/*", "file:///*"],
   cssInjectionMode: "ui",
   async main(ctx) {
-    const config = await getLocalConfig() ?? DEFAULT_CONFIG
+    const config = (await getLocalConfig()) ?? DEFAULT_CONFIG
 
     // Check global site control
     if (!isSiteEnabled(window.location.href, config)) {
       return
     }
+
+    await initI18n(config.uiLanguage)
 
     const themeMode = await getLocalThemeMode()
 
@@ -98,17 +101,16 @@ export default defineContentScript({
               >
                 <ThemeProvider container={wrapper}>
                   <TooltipProvider>
-                    <App />
+                    <LocaleBoundary>
+                      <App />
+                    </LocaleBoundary>
                   </TooltipProvider>
                 </ThemeProvider>
               </HydrateAtoms>
             </JotaiProvider>
             {ReactQueryDevtools && (
               <Suspense>
-                <ReactQueryDevtools
-                  initialIsOpen={false}
-                  buttonPosition="bottom-right"
-                />
+                <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
               </Suspense>
             )}
           </QueryClientProvider>,

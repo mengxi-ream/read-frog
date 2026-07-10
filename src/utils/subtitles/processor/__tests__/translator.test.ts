@@ -2,9 +2,9 @@ import type { ProviderConfig } from "@/types/config/provider"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 
-const getLocalConfigMock = vi.fn()
-const sendMessageMock = vi.fn()
-const getSubtitlesTranslatePromptMock = vi.fn()
+const getLocalConfigMock = vi.fn<(...args: any[]) => any>()
+const sendMessageMock = vi.fn<(...args: any[]) => any>()
+const getSubtitlesTranslatePromptMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("@/utils/config/storage", () => ({
   getLocalConfig: getLocalConfigMock,
@@ -104,11 +104,14 @@ describe("subtitles translator", () => {
     })
 
     expect(result).toBe("Generated summary")
-    expect(sendMessageMock).toHaveBeenCalledWith("getSubtitlesSummary", expect.objectContaining({
-      videoTitle: "Video title",
-      subtitlesContext: "subtitle transcript",
-      providerConfig: expect.objectContaining({ id: "openai-default" }),
-    }))
+    expect(sendMessageMock).toHaveBeenCalledWith(
+      "getSubtitlesSummary",
+      expect.objectContaining({
+        videoTitle: "Video title",
+        subtitlesContext: "subtitle transcript",
+        providerConfig: expect.objectContaining({ id: "openai-default" }),
+      }),
+    )
   })
 
   it("returns null when subtitle summary is unavailable", async () => {
@@ -204,7 +207,11 @@ describe("subtitles translator", () => {
     const videoContext = { videoTitle: "Video title", subtitlesTextContent: "subtitle transcript" }
 
     await fetchSubtitlesSummary(videoContext, configSnapshot)
-    await translateSubtitles([{ text: "hello", start: 0, end: 1_000 }], videoContext, configSnapshot)
+    await translateSubtitles(
+      [{ text: "hello", start: 0, end: 1_000 }],
+      videoContext,
+      configSnapshot,
+    )
 
     expect(getLocalConfigMock).not.toHaveBeenCalled()
     expect(sendMessageMock).toHaveBeenCalledWith(
@@ -225,18 +232,30 @@ describe("subtitles translator", () => {
       model: { model: "gpt-5-mini", isCustomModel: false, customModel: null },
     }
 
-    const first = buildSubtitlesSummaryContextHash({
-      subtitlesTextContent: "same transcript",
-    }, baseProviderConfig)
-    const sameTextDifferentTitle = buildSubtitlesSummaryContextHash({
-      subtitlesTextContent: "same transcript",
-    }, baseProviderConfig)
-    const differentText = buildSubtitlesSummaryContextHash({
-      subtitlesTextContent: "different transcript",
-    }, baseProviderConfig)
-    const differentProvider = buildSubtitlesSummaryContextHash({
-      subtitlesTextContent: "same transcript",
-    }, { ...baseProviderConfig, id: "other-provider" })
+    const first = buildSubtitlesSummaryContextHash(
+      {
+        subtitlesTextContent: "same transcript",
+      },
+      baseProviderConfig,
+    )
+    const sameTextDifferentTitle = buildSubtitlesSummaryContextHash(
+      {
+        subtitlesTextContent: "same transcript",
+      },
+      baseProviderConfig,
+    )
+    const differentText = buildSubtitlesSummaryContextHash(
+      {
+        subtitlesTextContent: "different transcript",
+      },
+      baseProviderConfig,
+    )
+    const differentProvider = buildSubtitlesSummaryContextHash(
+      {
+        subtitlesTextContent: "same transcript",
+      },
+      { ...baseProviderConfig, id: "other-provider" },
+    )
 
     expect(first).toBe(sameTextDifferentTitle)
     expect(first).not.toBe(differentText)
@@ -256,15 +275,24 @@ describe("subtitles translator", () => {
     }
 
     const prefix = "a".repeat(3000)
-    const first = buildSubtitlesSummaryContextHash({
-      subtitlesTextContent: `${prefix}tail-a`,
-    }, baseProviderConfig)
-    const second = buildSubtitlesSummaryContextHash({
-      subtitlesTextContent: `${prefix}tail-b`,
-    }, baseProviderConfig)
-    const differentWithinLimit = buildSubtitlesSummaryContextHash({
-      subtitlesTextContent: `${"b".repeat(3000)}tail-a`,
-    }, baseProviderConfig)
+    const first = buildSubtitlesSummaryContextHash(
+      {
+        subtitlesTextContent: `${prefix}tail-a`,
+      },
+      baseProviderConfig,
+    )
+    const second = buildSubtitlesSummaryContextHash(
+      {
+        subtitlesTextContent: `${prefix}tail-b`,
+      },
+      baseProviderConfig,
+    )
+    const differentWithinLimit = buildSubtitlesSummaryContextHash(
+      {
+        subtitlesTextContent: `${"b".repeat(3000)}tail-a`,
+      },
+      baseProviderConfig,
+    )
 
     expect(first).toBe(second)
     expect(first).not.toBe(differentWithinLimit)

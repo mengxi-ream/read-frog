@@ -6,10 +6,7 @@ interface UsePreventScrollThroughOptions {
   elementRef: RefObject<HTMLElement | null>
 }
 
-export function usePreventScrollThrough({
-  isEnabled,
-  elementRef,
-}: UsePreventScrollThroughOptions) {
+export function usePreventScrollThrough({ isEnabled, elementRef }: UsePreventScrollThroughOptions) {
   const handleWheel = useEffectEvent((event: WheelEvent) => {
     const element = elementRef.current
     if (!element) {
@@ -28,12 +25,12 @@ export function usePreventScrollThrough({
 
   useEffect(() => {
     if (!isEnabled) {
-      return
+      return undefined
     }
 
     const element = elementRef.current
     if (!element) {
-      return
+      return undefined
     }
 
     element.addEventListener("wheel", handleWheel, { passive: false })

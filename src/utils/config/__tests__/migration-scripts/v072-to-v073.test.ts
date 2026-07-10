@@ -95,6 +95,8 @@ describe("v072-to-v073 migration", () => {
   it("preserves malformed config shapes as much as possible", () => {
     expect(migrate({})).toEqual({})
     expect(migrate({ providersConfig: null })).toEqual({ providersConfig: null })
-    expect(migrate({ providersConfig: ["bad-provider"] })).toEqual({ providersConfig: ["bad-provider"] })
+    expect(migrate({ providersConfig: ["bad-provider"] })).toEqual({
+      providersConfig: ["bad-provider"],
+    })
   })
 })

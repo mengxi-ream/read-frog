@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-const onMessageMock = vi.fn()
-const sendMessageMock = vi.fn()
-const loggerWarnMock = vi.fn()
+const onMessageMock = vi.fn<(...args: any[]) => any>()
+const sendMessageMock = vi.fn<(...args: any[]) => any>()
+const loggerWarnMock = vi.fn<(...args: any[]) => any>()
 const createObjectURLDescriptor = Object.getOwnPropertyDescriptor(URL, "createObjectURL")
 const revokeObjectURLDescriptor = Object.getOwnPropertyDescriptor(URL, "revokeObjectURL")
 
@@ -25,18 +25,20 @@ vi.mock("@/utils/logger", () => ({
   },
 }))
 
-function getRegisteredMessageHandler<TData = unknown, TResult = unknown>(name: string) {
-  const registration = onMessageMock.mock.calls.find(call => call[0] === name)
+function getRegisteredMessageHandler<TResult = unknown>(
+  name: string,
+): (message: { data: unknown }) => Promise<TResult> {
+  const registration = onMessageMock.mock.calls.find((call) => call[0] === name)
   if (!registration) {
     throw new Error(`Message handler not registered: ${name}`)
   }
 
-  return registration[1] as (message: { data: TData }) => Promise<TResult>
+  return registration[1] as (message: { data: unknown }) => Promise<TResult>
 }
 
 function installFakeAudio() {
-  const createObjectURLMock = vi.fn(() => "blob:tts-test")
-  const revokeObjectURLMock = vi.fn()
+  const createObjectURLMock = vi.fn<(...args: any[]) => any>(() => "blob:tts-test")
+  const revokeObjectURLMock = vi.fn<(...args: any[]) => any>()
 
   Object.defineProperty(URL, "createObjectURL", {
     configurable: true,
@@ -52,10 +54,10 @@ function installFakeAudio() {
 
     onended: (() => void) | null = null
     onerror: (() => void) | null = null
-    play = vi.fn().mockResolvedValue(undefined)
-    pause = vi.fn()
-    removeAttribute = vi.fn()
-    load = vi.fn()
+    play = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
+    pause = vi.fn<(...args: any[]) => any>()
+    removeAttribute = vi.fn<(...args: any[]) => any>()
+    load = vi.fn<(...args: any[]) => any>()
 
     constructor(readonly src: string) {
       FakeAudio.instances.push(this)
@@ -83,22 +85,20 @@ describe("setupTTSPlaybackMessageHandlers", () => {
     vi.unstubAllGlobals()
     if (createObjectURLDescriptor) {
       Object.defineProperty(URL, "createObjectURL", createObjectURLDescriptor)
-    }
-    else {
+    } else {
       delete (URL as { createObjectURL?: unknown }).createObjectURL
     }
 
     if (revokeObjectURLDescriptor) {
       Object.defineProperty(URL, "revokeObjectURL", revokeObjectURLDescriptor)
-    }
-    else {
+    } else {
       delete (URL as { revokeObjectURL?: unknown }).revokeObjectURL
     }
   })
 
   it("recreates offscreen document after it disappears", async () => {
-    const getContextsMock = vi.fn().mockResolvedValue([])
-    const createDocumentMock = vi.fn().mockResolvedValue(undefined)
+    const getContextsMock = vi.fn<(...args: any[]) => any>().mockResolvedValue([])
+    const createDocumentMock = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
     ;(globalThis as { chrome?: unknown }).chrome = {
       runtime: {
         getContexts: getContextsMock,
@@ -122,11 +122,7 @@ describe("setupTTSPlaybackMessageHandlers", () => {
 
     const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
     setupTTSPlaybackMessageHandlers()
-    const startHandler = getRegisteredMessageHandler<{
-      requestId: string
-      audioBase64: string
-      contentType: string
-    }, { ok: boolean }>("ttsPlaybackStart")
+    const startHandler = getRegisteredMessageHandler<{ ok: boolean }>("ttsPlaybackStart")
 
     const payload = {
       data: {
@@ -143,15 +139,15 @@ describe("setupTTSPlaybackMessageHandlers", () => {
   })
 
   it("retries once when offscreen receiver is temporarily missing", async () => {
-    const getContextsMock = vi.fn().mockResolvedValue([
-      { contextType: "OFFSCREEN_DOCUMENT" },
-    ])
+    const getContextsMock = vi
+      .fn<(...args: any[]) => any>()
+      .mockResolvedValue([{ contextType: "OFFSCREEN_DOCUMENT" }])
     ;(globalThis as { chrome?: unknown }).chrome = {
       runtime: {
         getContexts: getContextsMock,
       },
       offscreen: {
-        createDocument: vi.fn(),
+        createDocument: vi.fn<(...args: any[]) => any>(),
       },
     }
 
@@ -174,11 +170,7 @@ describe("setupTTSPlaybackMessageHandlers", () => {
 
     const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
     setupTTSPlaybackMessageHandlers()
-    const startHandler = getRegisteredMessageHandler<{
-      requestId: string
-      audioBase64: string
-      contentType: string
-    }, { ok: boolean }>("ttsPlaybackStart")
+    const startHandler = getRegisteredMessageHandler<{ ok: boolean }>("ttsPlaybackStart")
 
     const result = await startHandler({
       data: {
@@ -189,14 +181,16 @@ describe("setupTTSPlaybackMessageHandlers", () => {
     })
 
     expect(result).toEqual({ ok: true })
-    expect(sendMessageMock.mock.calls.filter(call => call[0] === "ttsOffscreenPlay")).toHaveLength(2)
+    expect(
+      sendMessageMock.mock.calls.filter((call) => call[0] === "ttsOffscreenPlay"),
+    ).toHaveLength(2)
     expect(loggerWarnMock).toHaveBeenCalled()
   })
 
   it("uses offscreen playback whenever the offscreen API is available", async () => {
     vi.stubEnv("BROWSER", "custom-chromium")
-    const getContextsMock = vi.fn().mockResolvedValue([])
-    const createDocumentMock = vi.fn().mockResolvedValue(undefined)
+    const getContextsMock = vi.fn<(...args: any[]) => any>().mockResolvedValue([])
+    const createDocumentMock = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
     ;(globalThis as { chrome?: unknown }).chrome = {
       runtime: {
         getContexts: getContextsMock,
@@ -216,7 +210,7 @@ describe("setupTTSPlaybackMessageHandlers", () => {
 
     const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
     setupTTSPlaybackMessageHandlers()
-    const prepareHandler = getRegisteredMessageHandler<undefined, { ok: true }>("ttsPlaybackPrepare")
+    const prepareHandler = getRegisteredMessageHandler<{ ok: true }>("ttsPlaybackPrepare")
 
     await prepareHandler({ data: undefined })
 
@@ -229,11 +223,7 @@ describe("setupTTSPlaybackMessageHandlers", () => {
 
     const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
     setupTTSPlaybackMessageHandlers()
-    const startHandler = getRegisteredMessageHandler<{
-      requestId: string
-      audioBase64: string
-      contentType: string
-    }, { ok: boolean }>("ttsPlaybackStart")
+    const startHandler = getRegisteredMessageHandler<{ ok: boolean }>("ttsPlaybackStart")
 
     const playbackPromise = startHandler({
       data: {
@@ -245,10 +235,10 @@ describe("setupTTSPlaybackMessageHandlers", () => {
     await Promise.resolve()
 
     expect(FakeAudio.instances).toHaveLength(1)
-    expect(FakeAudio.instances[0]!.play).toHaveBeenCalled()
+    expect(FakeAudio.instances[0].play).toHaveBeenCalled()
     expect(sendMessageMock).not.toHaveBeenCalled()
 
-    FakeAudio.instances[0]!.onended?.()
+    FakeAudio.instances[0].onended?.()
 
     await expect(playbackPromise).resolves.toEqual({ ok: true })
     expect(revokeObjectURLMock).toHaveBeenCalledWith("blob:tts-test")
@@ -260,12 +250,8 @@ describe("setupTTSPlaybackMessageHandlers", () => {
 
     const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
     setupTTSPlaybackMessageHandlers()
-    const startHandler = getRegisteredMessageHandler<{
-      requestId: string
-      audioBase64: string
-      contentType: string
-    }, { ok: boolean }>("ttsPlaybackStart")
-    const stopHandler = getRegisteredMessageHandler<{ requestId?: string }, { ok: true }>("ttsPlaybackStop")
+    const startHandler = getRegisteredMessageHandler<{ ok: boolean }>("ttsPlaybackStart")
+    const stopHandler = getRegisteredMessageHandler<{ ok: true }>("ttsPlaybackStop")
 
     const playbackPromise = startHandler({
       data: {
@@ -277,11 +263,11 @@ describe("setupTTSPlaybackMessageHandlers", () => {
     await Promise.resolve()
 
     await stopHandler({ data: { requestId: "req-other" } })
-    expect(FakeAudio.instances[0]!.pause).not.toHaveBeenCalled()
+    expect(FakeAudio.instances[0].pause).not.toHaveBeenCalled()
 
     await stopHandler({ data: { requestId: "req-active" } })
 
     await expect(playbackPromise).resolves.toEqual({ ok: false, reason: "stopped" })
-    expect(FakeAudio.instances[0]!.pause).toHaveBeenCalled()
+    expect(FakeAudio.instances[0].pause).toHaveBeenCalled()
   })
 })

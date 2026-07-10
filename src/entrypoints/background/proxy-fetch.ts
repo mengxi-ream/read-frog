@@ -3,7 +3,6 @@ import { AUTH_COOKIE_PATTERNS } from "@read-frog/definitions"
 import { browser } from "#imports"
 import { env } from "@/env"
 import { DEFAULT_PROXY_CACHE_TTL_MS } from "@/utils/constants/proxy-fetch"
-
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { SessionCacheGroupRegistry } from "../../utils/session-cache/session-cache-group-registry"
@@ -34,13 +33,16 @@ export function proxyFetch() {
   }
 
   // Listen for cookie changes to invalidate auth-related cache
-  if (browser.cookies && browser.cookies.onChanged) {
+  if (browser.cookies?.onChanged) {
     browser.cookies.onChanged.addListener(async (changeInfo) => {
       const { cookie, removed } = changeInfo
       // Check if it's an auth-related cookie for monitored domains
-      if (cookie.domain && env.WXT_AUTH_COOKIE_DOMAINS.some((domain: string) => cookie.domain.includes(domain))) {
+      if (
+        cookie.domain &&
+        env.WXT_AUTH_COOKIE_DOMAINS.some((domain: string) => cookie.domain.includes(domain))
+      ) {
         // Check against defined auth cookie patterns
-        if (AUTH_COOKIE_PATTERNS.some(name => cookie.name.includes(name))) {
+        if (AUTH_COOKIE_PATTERNS.some((name) => cookie.name.includes(name))) {
           // Get current cookie value for before/after comparison
           let beforeValue: string | undefined
           let afterValue: string | undefined
@@ -49,8 +51,7 @@ export function proxyFetch() {
             // Cookie was removed - before value was the cookie value, after is undefined
             beforeValue = cookie.value
             afterValue = undefined
-          }
-          else {
+          } else {
             // Cookie was added/updated - get the previous value by querying all cookies
             try {
               const existingCookies = await browser.cookies.getAll({
@@ -58,12 +59,12 @@ export function proxyFetch() {
                 name: cookie.name,
               })
               // If cookie exists, this was an update; if not, this was creation
-              beforeValue = existingCookies.length > 0 && existingCookies[0].value !== cookie.value
-                ? existingCookies[0].value
-                : undefined
+              beforeValue =
+                existingCookies.length > 0 && existingCookies[0].value !== cookie.value
+                  ? existingCookies[0].value
+                  : undefined
               afterValue = cookie.value
-            }
-            catch (error) {
+            } catch (error) {
               logger.warn("[ProxyFetch] Could not retrieve previous cookie value:", error)
               beforeValue = "unknown"
               afterValue = cookie.value
@@ -77,7 +78,7 @@ export function proxyFetch() {
             beforeValue,
             afterValue,
           })
-          invalidateAllCache().catch(error =>
+          invalidateAllCache().catch((error) =>
             logger.error("[ProxyFetch] Failed to invalidate cache:", error),
           )
         }
@@ -106,17 +107,22 @@ export function proxyFetch() {
       ttl: cacheTtl = DEFAULT_PROXY_CACHE_TTL_MS,
     } = cacheConfig ?? {}
 
-    async function getCached(reqMethod: string, targetUrl: string): Promise<ProxyResponse | undefined> {
-      if (!cacheEnabled)
-        return undefined
+    async function getCached(
+      reqMethod: string,
+      targetUrl: string,
+    ): Promise<ProxyResponse | undefined> {
+      if (!cacheEnabled) return undefined
 
       const sessionCache = await getSessionCache(cacheGroupKey)
       return await sessionCache.get(reqMethod, targetUrl, cacheTtl)
     }
 
-    async function setCached(reqMethod: string, targetUrl: string, resp: ProxyResponse): Promise<void> {
-      if (!cacheEnabled)
-        return
+    async function setCached(
+      reqMethod: string,
+      targetUrl: string,
+      resp: ProxyResponse,
+    ): Promise<void> {
+      if (!cacheEnabled) return
 
       const sessionCache = await getSessionCache(cacheGroupKey)
       await sessionCache.set(reqMethod, targetUrl, resp)
@@ -127,8 +133,7 @@ export function proxyFetch() {
       if (groupKey) {
         const sessionCache = await getSessionCache(groupKey)
         await sessionCache.clear()
-      }
-      else {
+      } else {
         await invalidateAllCache()
       }
     }
@@ -138,8 +143,7 @@ export function proxyFetch() {
     // Check cache for GET requests
     if (finalMethod === "GET" && cacheEnabled) {
       const cached = await getCached(finalMethod, url)
-      if (cached)
-        return cached
+      if (cached) return cached
     }
 
     // Aggressive mode: pre-clear cache before mutations to avoid race with subsequent GETs
@@ -156,9 +160,10 @@ export function proxyFetch() {
     })
 
     const responseHeaders: [string, string][] = [...response.headers.entries()]
-    const responseBody = responseType === "base64"
-      ? encodeArrayBufferToBase64(await response.arrayBuffer())
-      : await response.text()
+    const responseBody =
+      responseType === "base64"
+        ? encodeArrayBufferToBase64(await response.arrayBuffer())
+        : await response.text()
 
     const result = {
       status: response.status,
@@ -181,8 +186,7 @@ export function proxyFetch() {
         else if (result.status >= 200 && result.status < 300) {
           await setCached(finalMethod, url, result)
         }
-      }
-      else {
+      } else {
         // For auth mutations: only invalidate cache if mutation succeeded
         if (result.status >= 200 && result.status < 300) {
           await invalidateCache(cacheGroupKey)

@@ -11,10 +11,7 @@ const WHITESPACE_PATTERN = /\s+/g
  * Clean karaoke text: remove zero-width spaces and extra whitespace
  */
 function cleanKaraokeText(text: string): string {
-  return text
-    .replace(ZERO_WIDTH_SPACE_PATTERN, "")
-    .replace(WHITESPACE_PATTERN, " ")
-    .trim()
+  return text.replace(ZERO_WIDTH_SPACE_PATTERN, "").replace(WHITESPACE_PATTERN, " ").trim()
 }
 
 /**
@@ -35,14 +32,11 @@ export function parseKaraokeSubtitles(events: YoutubeTimedText[]): SubtitlesFrag
 
   const merged: SubtitlesFragment[] = []
   for (const event of events) {
-    if (event.wpWinPosId !== mainTrackId)
-      continue
-    if (!event.segs || event.segs.length === 0)
-      continue
+    if (event.wpWinPosId !== mainTrackId) continue
+    if (!event.segs || event.segs.length === 0) continue
 
-    const text = cleanKaraokeText(event.segs.map(seg => seg.utf8 || "").join(""))
-    if (!text)
-      continue
+    const text = cleanKaraokeText(event.segs.map((seg) => seg.utf8 || "").join(""))
+    if (!text) continue
 
     const last = merged.at(-1)
     if (last && last.end > event.tStartMs) {
@@ -61,8 +55,7 @@ export function parseKaraokeSubtitles(events: YoutubeTimedText[]): SubtitlesFrag
     const last = result.at(-1)
     if (last && last.text === fragment.text) {
       last.end = fragment.end
-    }
-    else {
+    } else {
       result.push({ ...fragment })
     }
   }

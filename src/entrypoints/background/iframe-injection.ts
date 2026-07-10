@@ -12,9 +12,9 @@ const HOST_CONTENT_SCRIPT_FILE = "/content-scripts/host.js" as const
 const SELECTION_CONTENT_SCRIPT_FILE = "/content-scripts/selection.js" as const
 const IFRAME_FULL_RUNTIME_AUTO_INJECT_PATTERNS = ["browse.library.kiwix.org"] as const
 
-type IframeContentScriptFile
-  = | typeof HOST_CONTENT_SCRIPT_FILE
-    | typeof SELECTION_CONTENT_SCRIPT_FILE
+type IframeContentScriptFile =
+  | typeof HOST_CONTENT_SCRIPT_FILE
+  | typeof SELECTION_CONTENT_SCRIPT_FILE
 
 const pendingScriptDocumentKeys = new Set<string>()
 const injectedDocumentKeysByFrameAndScript = new Map<string, string>()
@@ -40,11 +40,14 @@ function getDocumentInjectionKey(details: FrameInjectionDetails) {
   return `${details.tabId}:${details.frameId}:${details.documentId ?? details.url ?? "unknown"}`
 }
 
-function getFrameInjectionKey(details: { tabId: number, frameId: number }) {
+function getFrameInjectionKey(details: { tabId: number; frameId: number }) {
   return `${details.tabId}:${details.frameId}`
 }
 
-function getScriptDocumentInjectionKey(details: FrameInjectionDetails, file: IframeContentScriptFile) {
+function getScriptDocumentInjectionKey(
+  details: FrameInjectionDetails,
+  file: IframeContentScriptFile,
+) {
   return `${getDocumentInjectionKey(details)}:${file}`
 }
 
@@ -111,17 +114,20 @@ function getInjectionTarget(details: FrameInjectionDetails) {
 }
 
 async function getFrameSnapshot(tabId: number): Promise<FrameInfoForSiteControl[]> {
-  return await browser.webNavigation.getAllFrames({ tabId }) ?? []
+  return (await browser.webNavigation.getAllFrames({ tabId })) ?? []
 }
 
 function isFullRuntimeAutoInjectUrl(url: string | undefined): url is string {
-  if (!url)
-    return false
+  if (!url) return false
 
-  return IFRAME_FULL_RUNTIME_AUTO_INJECT_PATTERNS.some(pattern => matchDomainPattern(url, pattern))
+  return IFRAME_FULL_RUNTIME_AUTO_INJECT_PATTERNS.some((pattern) =>
+    matchDomainPattern(url, pattern),
+  )
 }
 
-function getIframeContentScriptFiles(options: InjectHostContentIntoTabIframesOptions): IframeContentScriptFile[] {
+function getIframeContentScriptFiles(
+  options: InjectHostContentIntoTabIframesOptions,
+): IframeContentScriptFile[] {
   return options.includeSelectionContent
     ? [HOST_CONTENT_SCRIPT_FILE, SELECTION_CONTENT_SCRIPT_FILE]
     : [HOST_CONTENT_SCRIPT_FILE]
@@ -131,7 +137,7 @@ async function getShouldInjectHostContentIntoTabIframes(
   tabId: number,
   existingConfig?: Config | null,
   options: InjectHostContentIntoTabIframesOptions = {},
-): Promise<{ config: Config | null, shouldInject: boolean }> {
+): Promise<{ config: Config | null; shouldInject: boolean }> {
   const requirePageTranslationEnabled = options.requirePageTranslationEnabled ?? true
   const [isPageTranslationEnabled, config] = await Promise.all([
     requirePageTranslationEnabled ? getPageTranslationEnabled(tabId) : Promise.resolve(true),
@@ -154,8 +160,10 @@ async function injectHostContentIntoFrame(
   const filesToInject = getIframeContentScriptFiles(options).filter((file) => {
     const scriptDocumentKey = getScriptDocumentInjectionKey(details, file)
     const scriptFrameKey = getScriptFrameInjectionKey(details, file)
-    return !pendingScriptDocumentKeys.has(scriptDocumentKey)
-      && injectedDocumentKeysByFrameAndScript.get(scriptFrameKey) !== documentKey
+    return (
+      !pendingScriptDocumentKeys.has(scriptDocumentKey) &&
+      injectedDocumentKeysByFrameAndScript.get(scriptFrameKey) !== documentKey
+    )
   })
 
   if (filesToInject.length === 0) {
@@ -174,28 +182,34 @@ async function injectHostContentIntoFrame(
         existingConfig === undefined ? getLocalConfig() : Promise.resolve(existingConfig),
         frames === undefined ? getFrameSnapshot(details.tabId) : Promise.resolve(frames),
       ])
-      const liveFrameIds = new Set(frameSnapshot.map(frame => frame.frameId))
+      const liveFrameIds = new Set(frameSnapshot.map((frame) => frame.frameId))
       liveFrameIds.add(details.frameId)
       pruneInjectedFrames(details.tabId, liveFrameIds)
 
-      siteControlUrl = options.siteControlUrlOverride ?? resolveSiteControlUrl(
-        details.frameId,
-        details.url,
-        frameSnapshot,
-        getParentFrameIdHint(details),
-      )
+      siteControlUrl =
+        options.siteControlUrlOverride ??
+        resolveSiteControlUrl(
+          details.frameId,
+          details.url,
+          frameSnapshot,
+          getParentFrameIdHint(details),
+        )
 
       if (!siteControlUrl || !isSiteEnabled(siteControlUrl, config)) {
         return
       }
-    }
-    catch (error) {
-      logger.error("[Background][IframeInjection] Failed to resolve iframe injection prerequisites", error)
+    } catch (error) {
+      logger.error(
+        "[Background][IframeInjection] Failed to resolve iframe injection prerequisites",
+        error,
+      )
       return
     }
 
     try {
-      const target = getInjectionTarget(details) as Parameters<typeof browser.scripting.executeScript>[0]["target"]
+      const target = getInjectionTarget(details) as Parameters<
+        typeof browser.scripting.executeScript
+      >[0]["target"]
 
       await browser.scripting.executeScript({
         target,
@@ -214,12 +228,10 @@ async function injectHostContentIntoFrame(
           documentKey,
         )
       }
-    }
-    catch (error) {
+    } catch (error) {
       logger.warn("[Background][IframeInjection] Failed to inject iframe content scripts", error)
     }
-  }
-  finally {
+  } finally {
     for (const file of filesToInject) {
       pendingScriptDocumentKeys.delete(getScriptDocumentInjectionKey(details, file))
     }
@@ -233,36 +245,49 @@ export async function injectHostContentIntoTabIframes(
   let config: Config | null
   let shouldInject: boolean
   try {
-    ({ config, shouldInject } = await getShouldInjectHostContentIntoTabIframes(tabId, undefined, options))
-  }
-  catch (error) {
+    ;({ config, shouldInject } = await getShouldInjectHostContentIntoTabIframes(
+      tabId,
+      undefined,
+      options,
+    ))
+  } catch (error) {
     logger.warn("[Background][IframeInjection] Failed to resolve iframe injection state", error)
     return
   }
 
-  if (!shouldInject)
-    return
+  if (!shouldInject) return
 
   let frames: FrameInfoForSiteControl[]
   try {
     frames = await getFrameSnapshot(tabId)
-  }
-  catch (error) {
-    logger.error("[Background][IframeInjection] Failed to resolve tab iframe injection prerequisites", error)
+  } catch (error) {
+    logger.error(
+      "[Background][IframeInjection] Failed to resolve tab iframe injection prerequisites",
+      error,
+    )
     return
   }
 
-  const liveFrameIds = new Set(frames.map(frame => frame.frameId))
+  const liveFrameIds = new Set(frames.map((frame) => frame.frameId))
   pruneInjectedFrames(tabId, liveFrameIds)
 
-  await Promise.all(frames
-    .filter(frame => frame.frameId !== 0)
-    .map(frame => injectHostContentIntoFrame({
-      tabId,
-      frameId: frame.frameId,
-      parentFrameId: frame.parentFrameId,
-      url: frame.url,
-    }, frames, config, options)))
+  await Promise.all(
+    frames
+      .filter((frame) => frame.frameId !== 0)
+      .map((frame) =>
+        injectHostContentIntoFrame(
+          {
+            tabId,
+            frameId: frame.frameId,
+            parentFrameId: frame.parentFrameId,
+            url: frame.url,
+          },
+          frames,
+          config,
+          options,
+        ),
+      ),
+  )
 }
 
 export async function injectHostContentIntoCurrentTabIframesAfterNodeTranslation(tabId: number) {
@@ -302,8 +327,9 @@ export function setupIframeInjection() {
       return
     }
 
-    const fullRuntimeAutoInjectUrl = fullRuntimeAutoInjectUrlByTab.get(details.tabId)
-      ?? (isFullRuntimeAutoInjectUrl(details.url) ? details.url : undefined)
+    const fullRuntimeAutoInjectUrl =
+      fullRuntimeAutoInjectUrlByTab.get(details.tabId) ??
+      (isFullRuntimeAutoInjectUrl(details.url) ? details.url : undefined)
     if (fullRuntimeAutoInjectUrl) {
       await injectHostContentIntoFrame(details, undefined, undefined, {
         includeSelectionContent: true,
@@ -315,11 +341,9 @@ export function setupIframeInjection() {
     let config: Config | null
     let shouldInject: boolean
     try {
-      ({ config, shouldInject } = await getShouldInjectHostContentIntoTabIframes(details.tabId))
-      if (!shouldInject)
-        return
-    }
-    catch (error) {
+      ;({ config, shouldInject } = await getShouldInjectHostContentIntoTabIframes(details.tabId))
+      if (!shouldInject) return
+    } catch (error) {
       logger.warn("[Background][IframeInjection] Failed to resolve iframe injection state", error)
       return
     }

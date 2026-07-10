@@ -1,5 +1,11 @@
 import type { StateData, SubtitlesFragment, SubtitlesState } from "@/utils/subtitles/types"
-import { currentSubtitleAtom, currentTimeMsAtom, subtitlesStateAtom, subtitlesStore, subtitlesVisibleAtom } from "./atoms"
+import {
+  currentSubtitleAtom,
+  currentTimeMsAtom,
+  subtitlesStateAtom,
+  subtitlesStore,
+  subtitlesVisibleAtom,
+} from "./atoms"
 
 const ERROR_STATE_AUTO_HIDE_MS = 5_000
 
@@ -29,7 +35,7 @@ export class SubtitlesScheduler {
       return
     }
 
-    const existingMap = new Map(this.subtitles.map(s => [s.start, s]))
+    const existingMap = new Map(this.subtitles.map((s) => [s.start, s]))
     const currentSubtitle = this.currentIndex >= 0 ? this.subtitles[this.currentIndex] : null
     let currentSubtitleUpdated = false
 
@@ -43,7 +49,7 @@ export class SubtitlesScheduler {
 
       if (newSub.translation) {
         const updatedSub = { ...existing, translation: newSub.translation }
-        const idx = this.subtitles.findIndex(s => s.start === existing.start)
+        const idx = this.subtitles.findIndex((s) => s.start === existing.start)
         if (idx >= 0) {
           this.subtitles[idx] = updatedSub
         }
@@ -126,16 +132,14 @@ export class SubtitlesScheduler {
   }
 
   private handleTimeUpdate = () => {
-    if (!this.active)
-      return
+    if (!this.active) return
 
     const currentTime = this.videoElement.currentTime
     this.updateSubtitles(currentTime)
   }
 
   private handleSeeking = () => {
-    if (!this.active)
-      return
+    if (!this.active) return
 
     const currentTime = this.videoElement.currentTime
     this.updateSubtitles(currentTime)
@@ -145,7 +149,7 @@ export class SubtitlesScheduler {
     const timeMs = currentTime * 1000
     subtitlesStore.set(currentTimeMsAtom, timeMs)
 
-    const subtitle = this.subtitles.find(sub => sub.start <= timeMs && sub.end > timeMs)
+    const subtitle = this.subtitles.find((sub) => sub.start <= timeMs && sub.end > timeMs)
     const newIndex = subtitle ? this.subtitles.indexOf(subtitle) : -1
 
     if (newIndex !== this.currentIndex) {

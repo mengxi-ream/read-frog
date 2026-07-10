@@ -60,7 +60,7 @@ export function resolveSiteControlUrl(
     return frameUrl
   }
 
-  const framesById = new Map(frames.map(frame => [frame.frameId, frame]))
+  const framesById = new Map(frames.map((frame) => [frame.frameId, frame]))
   const startFrameId = framesById.has(frameId) ? frameId : parentFrameId
   return findNearestSiteControlUrl(startFrameId, framesById)
 }

@@ -19,7 +19,7 @@ function generateBackupId(timestamp: number): string {
  * Get all backups sorted by timestamp (newest first)
  */
 export async function getAllBackupsWithMetadata(): Promise<Array<ConfigBackupWithMetadata>> {
-  const backupIds = await storage.getItem<string[]>("local:backup_ids") ?? []
+  const backupIds = (await storage.getItem<string[]>("local:backup_ids")) ?? []
 
   const backups: Array<ConfigBackupWithMetadata> = []
 
@@ -39,7 +39,10 @@ export async function getAllBackupsWithMetadata(): Promise<Array<ConfigBackupWit
 /**
  * Check if config is the same as the latest backup
  */
-export async function isSameAsLatestBackup(config: Config, configSchemaVersion: number): Promise<boolean> {
+export async function isSameAsLatestBackup(
+  config: Config,
+  configSchemaVersion: number,
+): Promise<boolean> {
   const backupsWithMetadata = await getAllBackupsWithMetadata()
   if (backupsWithMetadata.length === 0) {
     return false
@@ -71,7 +74,7 @@ export async function addBackup(config: Config, extensionVersion: string): Promi
     }
 
     // Get current backup IDs
-    const backupIds = await storage.getItem<string[]>("local:backup_ids") ?? []
+    const backupIds = (await storage.getItem<string[]>("local:backup_ids")) ?? []
 
     // Add new backup ID to the beginning
     backupIds.unshift(backupId)
@@ -82,9 +85,7 @@ export async function addBackup(config: Config, extensionVersion: string): Promi
 
       // Remove the old backup items from storage
       await storage.removeItems(
-        removedIds.map(
-          id => ({ key: `local:${id}` as const, options: { removeMeta: true } }),
-        ),
+        removedIds.map((id) => ({ key: `local:${id}` as const, options: { removeMeta: true } })),
       )
     }
 
@@ -96,8 +97,7 @@ export async function addBackup(config: Config, extensionVersion: string): Promi
     await storage.setItem("local:backup_ids", backupIds)
 
     logger.info("Backup created:", backupId)
-  }
-  catch (error) {
+  } catch (error) {
     logger.error("Error adding backup:", error)
     throw error
   }
@@ -108,15 +108,14 @@ export async function addBackup(config: Config, extensionVersion: string): Promi
  */
 export async function removeBackup(backupId: string): Promise<void> {
   try {
-    const backupIds = await storage.getItem<string[]>("local:backup_ids") ?? []
+    const backupIds = (await storage.getItem<string[]>("local:backup_ids")) ?? []
 
     const updatedIds = backupIds.filter((id: string) => id !== backupId)
     await storage.setItem("local:backup_ids", updatedIds)
     await storage.removeItem(`local:${backupId}`, { removeMeta: true })
 
     logger.info("Backup removed:", backupId)
-  }
-  catch (error) {
+  } catch (error) {
     logger.error("Error removing backup:", error)
     throw error
   }
@@ -127,19 +126,18 @@ export async function removeBackup(backupId: string): Promise<void> {
  */
 export async function clearAllBackups(): Promise<void> {
   try {
-    const backupIds = await storage.getItem<string[]>("local:backup_ids") ?? []
+    const backupIds = (await storage.getItem<string[]>("local:backup_ids")) ?? []
 
     // Remove all backup items
     await storage.removeItems(
-      backupIds.map(id => ({ key: `local:${id}` as const, options: { removeMeta: true } })),
+      backupIds.map((id) => ({ key: `local:${id}` as const, options: { removeMeta: true } })),
     )
 
     // Clear backup IDs list
     await storage.removeItem("local:backup_ids")
 
     logger.info("All backups cleared")
-  }
-  catch (error) {
+  } catch (error) {
     logger.error("Error clearing backups:", error)
     throw error
   }

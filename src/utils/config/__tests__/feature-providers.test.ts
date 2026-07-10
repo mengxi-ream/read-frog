@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import { isProviderSelectorItem } from "@/utils/providers/provider-display"
-import { FREE_AI_PROVIDER_LOGO, getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
+import {
+  FREE_AI_PROVIDER_LOGO,
+  getSelectableProvidersForCapability,
+} from "@/utils/providers/provider-registry"
 import {
   computeLanguageDetectionFallbackAfterDeletion,
   computeProviderFallbacksAfterDeletion,
@@ -13,9 +16,8 @@ import {
 } from "../helpers"
 
 function getProviderById(id: string): ProviderConfig {
-  const provider = DEFAULT_CONFIG.providersConfig.find(item => item.id === id)
-  if (!provider)
-    throw new Error(`Provider "${id}" not found in DEFAULT_CONFIG.providersConfig`)
+  const provider = DEFAULT_CONFIG.providersConfig.find((item) => item.id === id)
+  if (!provider) throw new Error(`Provider "${id}" not found in DEFAULT_CONFIG.providersConfig`)
   return provider
 }
 
@@ -35,7 +37,7 @@ describe("feature providers", () => {
 
     it("builds patch for multiple feature assignments", () => {
       const patch = buildFeatureProviderPatch({
-        "translate": "microsoft-translate-default",
+        translate: "microsoft-translate-default",
         "selectionToolbar.translate": "openai-default",
       })
 
@@ -56,10 +58,7 @@ describe("feature providers", () => {
 
   describe("getSelectableProvidersForCapability", () => {
     it("marks registry-backed system providers for selector grouping", () => {
-      const providers = getSelectableProvidersForCapability(
-        "selectionToolbar.customAction",
-        [],
-      )
+      const providers = getSelectableProvidersForCapability("selectionToolbar.customAction", [])
 
       expect(providers).toEqual([
         expect.objectContaining({
@@ -108,13 +107,17 @@ describe("feature providers", () => {
         getProviderById("openai-default"),
       ]
 
-      const fallbacks = computeProviderFallbacksAfterDeletion("deleted-provider", config, remainingProviders)
+      const fallbacks = computeProviderFallbacksAfterDeletion(
+        "deleted-provider",
+        config,
+        remainingProviders,
+      )
 
       expect(fallbacks).toEqual({
-        "translate": "microsoft-translate-default",
-        "videoSubtitles": "microsoft-translate-default",
+        translate: "microsoft-translate-default",
+        videoSubtitles: "microsoft-translate-default",
         "selectionToolbar.translate": "microsoft-translate-default",
-        "inputTranslation": "microsoft-translate-default",
+        inputTranslation: "microsoft-translate-default",
       })
     })
 
@@ -129,7 +132,11 @@ describe("feature providers", () => {
 
       const remainingProviders: ProviderConfig[] = []
 
-      const fallbacks = computeProviderFallbacksAfterDeletion("deleted-provider", config, remainingProviders)
+      const fallbacks = computeProviderFallbacksAfterDeletion(
+        "deleted-provider",
+        config,
+        remainingProviders,
+      )
 
       expect(fallbacks.translate).toBeUndefined()
     })
@@ -150,7 +157,11 @@ describe("feature providers", () => {
         },
       ]
 
-      const fallbacks = computeProviderFallbacksAfterDeletion("deleted-provider", config, remainingProviders)
+      const fallbacks = computeProviderFallbacksAfterDeletion(
+        "deleted-provider",
+        config,
+        remainingProviders,
+      )
 
       expect(fallbacks.translate).toBeUndefined()
     })
@@ -181,9 +192,7 @@ describe("feature providers", () => {
     })
 
     it("returns null when all features have at least one compatible provider", () => {
-      const remainingProviders = [
-        getProviderById("microsoft-translate-default"),
-      ]
+      const remainingProviders = [getProviderById("microsoft-translate-default")]
 
       expect(findFeatureMissingProvider(remainingProviders)).toBeNull()
     })
@@ -207,9 +216,7 @@ describe("feature providers", () => {
           providerId: "deleted-provider",
         },
       }
-      const remainingProviders = [
-        getProviderById("microsoft-translate-default"),
-      ]
+      const remainingProviders = [getProviderById("microsoft-translate-default")]
 
       expect(findFeatureMissingProvider(remainingProviders, config)).toBe("languageDetection")
     })
@@ -376,17 +383,13 @@ describe("feature providers", () => {
         },
       }
 
-      const result = computeLanguageDetectionFallbackAfterDeletion(
-        "deleted-provider",
-        config,
-        [
-          {
-            ...getProviderById("openai-default"),
-            enabled: false,
-          },
-          getProviderById("deepseek-default"),
-        ],
-      )
+      const result = computeLanguageDetectionFallbackAfterDeletion("deleted-provider", config, [
+        {
+          ...getProviderById("openai-default"),
+          enabled: false,
+        },
+        getProviderById("deepseek-default"),
+      ])
 
       expect(result).toBe("deepseek-default")
     })

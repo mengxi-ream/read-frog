@@ -30,8 +30,7 @@ export async function getRemoteConfigAndMetaWithUserEmail(): Promise<{
     let migratedConfig: Config
     try {
       migratedConfig = await migrateConfig(remoteData.value, remoteData.meta.schemaVersion)
-    }
-    catch (error) {
+    } catch (error) {
       if (error instanceof ConfigVersionTooNewError) {
         throw error
       }
@@ -49,8 +48,7 @@ export async function getRemoteConfigAndMetaWithUserEmail(): Promise<{
       },
       email: userInfo.email,
     }
-  }
-  catch (error) {
+  } catch (error) {
     logger.error("Failed to get remote config", error)
     throw error
   }
@@ -64,8 +62,7 @@ export async function setRemoteConfigAndMeta(
 
     const content = JSON.stringify(configValueAndMeta, null, 2)
     await uploadFile(GOOGLE_DRIVE_CONFIG_FILENAME, content, existingFile?.id)
-  }
-  catch (error) {
+  } catch (error) {
     logger.error("Failed to upload local config", error)
     throw error
   }

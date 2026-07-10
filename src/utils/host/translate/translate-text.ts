@@ -4,11 +4,10 @@ import type { ProviderConfig } from "@/types/config/provider"
 import type { WebPagePromptContext } from "@/types/content"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
 import { getProviderConfigById } from "@/utils/config/helpers"
-
 import { detectLanguage } from "@/utils/content/language"
+import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { Sha256Hex } from "../../hash"
@@ -44,14 +43,18 @@ export async function shouldSkipByLanguage(
   return skipLanguages.includes(detectedLang)
 }
 
-export function normalizePromptContextValue(value: string | null | undefined): string | null | undefined {
-  if (value == null) {
+export function normalizePromptContextValue(
+  value: string | null | undefined,
+): string | null | undefined {
+  if (value === null || value === undefined) {
     return value
   }
   return value.trim() === "" ? null : value
 }
 
-function normalizeWebPagePromptContext(webPageContext?: WebPagePromptContext): WebPagePromptContext | undefined {
+function normalizeWebPagePromptContext(
+  webPageContext?: WebPagePromptContext,
+): WebPagePromptContext | undefined {
   if (!webPageContext) {
     return undefined
   }
@@ -67,7 +70,7 @@ function normalizeWebPagePromptContext(webPageContext?: WebPagePromptContext): W
 async function buildWebPageHashComponents(
   text: string,
   providerConfig: ProviderConfig,
-  partialLangConfig: { sourceCode: LangCodeISO6393 | "auto", targetCode: LangCodeISO6393 },
+  partialLangConfig: { sourceCode: LangCodeISO6393 | "auto"; targetCode: LangCodeISO6393 },
   enableAIContentAware: boolean,
   webPageContext?: WebPagePromptContext,
 ): Promise<string[]> {
@@ -90,7 +93,9 @@ async function buildWebPageHashComponents(
     context: normalizedWebPageContext,
   })
   hashComponents.push(systemPrompt, prompt)
-  hashComponents.push(enableAIContentAware ? "enableAIContentAware=true" : "enableAIContentAware=false")
+  hashComponents.push(
+    enableAIContentAware ? "enableAIContentAware=true" : "enableAIContentAware=false",
+  )
 
   if (enableAIContentAware && normalizedWebPageContext) {
     if (normalizedWebPageContext.webTitle) {
@@ -113,7 +118,11 @@ async function buildWebPageHashComponents(
 
 export interface TranslateTextOptions {
   text: string
-  langConfig: { sourceCode: LangCodeISO6393 | "auto", targetCode: LangCodeISO6393, level: LangLevel }
+  langConfig: {
+    sourceCode: LangCodeISO6393 | "auto"
+    targetCode: LangCodeISO6393
+    level: LangLevel
+  }
   providerConfig: ProviderConfig
   enableAIContentAware?: boolean
   extraHashTags?: string[]
@@ -181,7 +190,11 @@ export function validateTranslationConfigAndToast(
   }
 
   // check if the API key is configured
-  if (isAPIProviderConfig(providerConfig) && !providerConfig.apiKey?.trim() && !["deeplx", "ollama"].includes(providerConfig.provider)) {
+  if (
+    isAPIProviderConfig(providerConfig) &&
+    !providerConfig.apiKey?.trim() &&
+    !["deeplx", "ollama"].includes(providerConfig.provider)
+  ) {
     toast.error(i18n.t("noAPIKeyConfig.warning"))
     logger.info("validateTranslationConfig: returning false (no API key)")
     return false

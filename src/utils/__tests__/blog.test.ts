@@ -1,7 +1,12 @@
 import { semanticVersionSchema } from "@read-frog/definitions"
 import { describe, expect, it } from "vitest"
 import { z } from "zod"
-import { buildBilibiliEmbedUrl, extractBilibiliVideoId, hasNewBlogPost, resolveBlogLocale } from "../blog"
+import {
+  buildBilibiliEmbedUrl,
+  extractBilibiliVideoId,
+  hasNewBlogPost,
+  resolveBlogLocale,
+} from "../blog"
 
 describe("hasNewBlogPost", () => {
   const baseDate = new Date("2025-01-01")
@@ -124,32 +129,27 @@ describe("semanticVersionSchema", () => {
 
   describe("error messages", () => {
     it("should provide clear error message for regex validation failure", () => {
-      try {
-        semanticVersionSchema.parse("v1.0.0")
-      }
-      catch (error) {
-        expect(error).toBeInstanceOf(z.ZodError)
-        const zodError = error as z.ZodError
-        expect(zodError.issues[0]?.message).toContain("Must be a valid semantic version")
-      }
+      const result = semanticVersionSchema.safeParse("v1.0.0")
+      const zodError = result.success ? undefined : result.error
+
+      expect(zodError).toBeInstanceOf(z.ZodError)
+      expect(zodError?.issues[0]?.message).toContain("Must be a valid semantic version")
     })
 
     it("should provide clear error message for negative number validation", () => {
-      try {
-        semanticVersionSchema.parse("1.-1.0")
-      }
-      catch (error) {
-        expect(error).toBeInstanceOf(z.ZodError)
-        const zodError = error as z.ZodError
-        // Should have both regex and refine errors
-        expect(zodError.issues.length).toBeGreaterThan(0)
-      }
+      const result = semanticVersionSchema.safeParse("1.-1.0")
+      const zodError = result.success ? undefined : result.error
+
+      expect(zodError).toBeInstanceOf(z.ZodError)
+      // Should have both regex and refine errors
+      expect(zodError?.issues.length).toBeGreaterThan(0)
     })
   })
 })
 
 describe("bilibili helpers", () => {
-  const videoUrl = "https://www.bilibili.com/video/BV1JoAszwEfF/?vd_source=2c109749b890f71dc77161d6ddf1d5ce"
+  const videoUrl =
+    "https://www.bilibili.com/video/BV1JoAszwEfF/?vd_source=2c109749b890f71dc77161d6ddf1d5ce"
 
   it("extracts the BVID from a bilibili watch URL", () => {
     expect(extractBilibiliVideoId(videoUrl)).toBe("BV1JoAszwEfF")

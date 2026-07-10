@@ -24,12 +24,15 @@ describe("getEdgeTTSEndpointToken", () => {
 
   it("caches endpoint token until refresh threshold", async () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(JSON.stringify({
-        r: "eastus",
-        t: createJwt(Math.floor(Date.now() / 1000) + 600),
-      }), {
-        status: 200,
-      }),
+      new Response(
+        JSON.stringify({
+          r: "eastus",
+          t: createJwt(Math.floor(Date.now() / 1000) + 600),
+        }),
+        {
+          status: 200,
+        },
+      ),
     )
 
     const first = await getEdgeTTSEndpointToken()
@@ -44,12 +47,15 @@ describe("getEdgeTTSEndpointToken", () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch")
 
     fetchSpy.mockResolvedValueOnce(
-      new Response(JSON.stringify({
-        r: "eastus",
-        t: createJwt(nowSeconds + 60),
-      }), {
-        status: 200,
-      }),
+      new Response(
+        JSON.stringify({
+          r: "eastus",
+          t: createJwt(nowSeconds + 60),
+        }),
+        {
+          status: 200,
+        },
+      ),
     )
 
     fetchSpy.mockRejectedValueOnce(new TypeError("network down"))
@@ -66,12 +72,15 @@ describe("getEdgeTTSEndpointToken", () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch")
 
     fetchSpy.mockResolvedValueOnce(
-      new Response(JSON.stringify({
-        r: "eastus",
-        t: createJwt(nowSeconds - 10),
-      }), {
-        status: 200,
-      }),
+      new Response(
+        JSON.stringify({
+          r: "eastus",
+          t: createJwt(nowSeconds - 10),
+        }),
+        {
+          status: 200,
+        },
+      ),
     )
 
     fetchSpy.mockRejectedValueOnce(new TypeError("network down"))

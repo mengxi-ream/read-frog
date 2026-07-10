@@ -1,10 +1,7 @@
 import type { ViewId } from "./views"
 import { useAtom } from "jotai"
 import { useRef } from "react"
-import {
-  subtitlesSettingsPanelOpenAtom,
-  subtitlesSettingsPanelViewAtom,
-} from "../../atoms"
+import { subtitlesSettingsPanelOpenAtom, subtitlesSettingsPanelViewAtom } from "../../atoms"
 import { PanelShell } from "./panel-shell"
 import { MainMenu, ROOT_VIEW, SUBPAGE_MAP } from "./views"
 
@@ -35,13 +32,15 @@ export function SubtitlesSettingsPanel() {
     <PanelShell
       open={isOpen}
       onClose={close}
-      header={subpage ? { title: subpage.title, onBack: navigateBack } : undefined}
-      transition={subpage
-        ? {
-            key: view,
-            direction: prevViewRef.current === ROOT_VIEW ? "forward" : "back",
-          }
-        : undefined}
+      header={subpage ? { title: subpage.title(), onBack: navigateBack } : undefined}
+      transition={
+        subpage
+          ? {
+              key: view,
+              direction: prevViewRef.current === ROOT_VIEW ? "forward" : "back",
+            }
+          : undefined
+      }
     >
       {subpage ? <subpage.component /> : <MainMenu onNavigate={navigateTo} />}
     </PanelShell>

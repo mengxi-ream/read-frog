@@ -44,12 +44,10 @@ function getVideoContainer(element: HTMLElement): HTMLElement | null {
 
 function getRects(containerRef: RefObject<HTMLDivElement | null>): Rects | null {
   const container = containerRef.current
-  if (!container)
-    return null
+  if (!container) return null
 
   const videoContainer = getVideoContainer(container)
-  if (!videoContainer)
-    return null
+  if (!videoContainer) return null
 
   return {
     container,
@@ -102,8 +100,7 @@ export function useVerticalDrag() {
 
   const updateWindowStyle = useEffectEvent(() => {
     const rects = getRects(containerRef)
-    if (!rects)
-      return
+    if (!rects) return
 
     const shrinkRatio = containerShrinkRatio?.(rects.videoContainer) ?? 1
 
@@ -115,8 +112,7 @@ export function useVerticalDrag() {
   })
 
   const onMouseDown = useEffectEvent((e: MouseEvent) => {
-    if (e.button !== 0)
-      return
+    if (e.button !== 0) return
     isDraggingRef.current = true
     setIsDragging(true)
     startYRef.current = e.clientY
@@ -126,12 +122,10 @@ export function useVerticalDrag() {
   })
 
   const onMouseMove = useEffectEvent((e: MouseEvent) => {
-    if (!isDraggingRef.current)
-      return
+    if (!isDraggingRef.current) return
 
     const rects = getRects(containerRef)
-    if (!rects)
-      return
+    if (!rects) return
 
     const { videoRect, containerRect } = rects
     const videoHeight = videoRect.height
@@ -146,9 +140,8 @@ export function useVerticalDrag() {
       ? startPositionRef.current.percent - deltaPercent
       : startPositionRef.current.percent + deltaPercent
 
-    const reservedHeight = controlsVisible && startPositionRef.current.anchor === "bottom"
-      ? controlsHeight
-      : 0
+    const reservedHeight =
+      controlsVisible && startPositionRef.current.anchor === "bottom" ? controlsHeight : 0
     const maxPercent = ((videoHeight - containerRect.height - reservedHeight) / videoHeight) * 100
     newPercent = Math.max(0, Math.min(maxPercent, newPercent))
 
@@ -172,8 +165,7 @@ export function useVerticalDrag() {
   })
 
   const onMouseUp = useEffectEvent(() => {
-    if (!isDraggingRef.current)
-      return
+    if (!isDraggingRef.current) return
     isDraggingRef.current = false
     setIsDragging(false)
 
@@ -182,8 +174,7 @@ export function useVerticalDrag() {
 
   const clampPosition = useEffectEvent(() => {
     const rects = getRects(containerRef)
-    if (!rects)
-      return
+    if (!rects) return
 
     const { videoRect, containerRect } = rects
     const maxPercent = ((videoRect.height - containerRect.height) / videoRect.height) * 100
@@ -197,8 +188,7 @@ export function useVerticalDrag() {
   const setupListeners = useEffectEvent(() => {
     const handle = handleRef.current
     const container = containerRef.current
-    if (!handle || !container)
-      return
+    if (!handle || !container) return undefined
 
     const videoContainer = getVideoContainer(container)
 
@@ -228,13 +218,15 @@ export function useVerticalDrag() {
     return setupListeners()
   }, [])
 
-  const controlsOffsetPercent = controlsVisible && position.anchor === "bottom" && windowStyle.height > 0
-    ? (controlsHeight / windowStyle.height) * 100
-    : 0
+  const controlsOffsetPercent =
+    controlsVisible && position.anchor === "bottom" && windowStyle.height > 0
+      ? (controlsHeight / windowStyle.height) * 100
+      : 0
 
-  const positionStyle: SubtitlePositionStyle = position.anchor === "top"
-    ? { top: `${position.percent}%`, bottom: "unset" }
-    : { bottom: `${position.percent + controlsOffsetPercent}%`, top: "unset" }
+  const positionStyle: SubtitlePositionStyle =
+    position.anchor === "top"
+      ? { top: `${position.percent}%`, bottom: "unset" }
+      : { bottom: `${position.percent + controlsOffsetPercent}%`, top: "unset" }
 
   return {
     refs: { window: windowRef, container: containerRef, handle: handleRef },

@@ -74,10 +74,20 @@ export async function runAiSegmentSubtitles(data: AiSegmentSubtitlesData): Promi
     return cached.result
   }
 
-  const { model: providerModel, provider, providerOptions: userProviderOptions, temperature } = providerConfig
+  const {
+    model: providerModel,
+    provider,
+    providerOptions: userProviderOptions,
+    temperature,
+  } = providerConfig
   const reasoning = getTopLevelReasoning(providerConfig)
   const modelName = resolveModelId(providerModel)
-  const providerOptions = getProviderOptionsWithOverride(modelName ?? "", provider, userProviderOptions, reasoning)
+  const providerOptions = getProviderOptionsWithOverride(
+    modelName ?? "",
+    provider,
+    userProviderOptions,
+    reasoning,
+  )
   const model = await getModelById(providerId)
 
   const { systemPrompt, prompt } = getSubtitlesSegmentationPrompt(jsonContent)
@@ -104,8 +114,7 @@ export async function runAiSegmentSubtitles(data: AiSegmentSubtitlesData): Promi
 
     logger.info("[Background] AI subtitle segmentation completed")
     return result
-  }
-  catch (error) {
+  } catch (error) {
     logger.error("[Background] AI subtitle segmentation failed:", error)
     throw error
   }

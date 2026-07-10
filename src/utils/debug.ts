@@ -8,19 +8,17 @@ export function printNodeStructure(node: Node, indent = 0): string {
     if (text) {
       result += `${spacing}"${text}"\n`
     }
-  }
-  else if (node.nodeType === 1) {
+  } else if (node.nodeType === 1) {
     // 元素节点
     const elem = node as HTMLElement
     const tagName = elem.tagName.toLowerCase()
-    const attrs = Array.from(elem.attributes, attr => `${attr.name}="${attr.value}"`)
-      .join(" ")
+    const attrs = Array.from(elem.attributes, (attr) => `${attr.name}="${attr.value}"`).join(" ")
 
     result += `${spacing}<${tagName}${attrs ? ` ${attrs}` : ""}>\n`
 
     // 递归处理子节点
     if (elem.childNodes.length > 0) {
-      [...elem.childNodes].forEach((child) => {
+      ;[...elem.childNodes].forEach((child) => {
         result += printNodeStructure(child, indent + 1)
       })
     }

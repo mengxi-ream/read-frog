@@ -6,9 +6,9 @@ import * as React from "react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { WhatsNewFooter } from "../whats-new-footer"
 
-const getLastViewedBlogDateMock = vi.fn()
-const getLatestBlogDateMock = vi.fn()
-const saveLastViewedBlogDateMock = vi.fn()
+const getLastViewedBlogDateMock = vi.fn<(...args: any[]) => any>()
+const getLatestBlogDateMock = vi.fn<(...args: any[]) => any>()
+const saveLastViewedBlogDateMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("#imports", () => ({
   i18n: {
@@ -17,7 +17,7 @@ vi.mock("#imports", () => ({
 }))
 
 vi.mock("@iconify/react", () => ({
-  Icon: ({ className, icon }: { className?: string, icon: string }) => (
+  Icon: ({ className, icon }: { className?: string; icon: string }) => (
     <span
       aria-hidden="true"
       className={className}
@@ -64,27 +64,24 @@ vi.mock("@/components/ui/base-ui/popover", async () => {
     open?: boolean
     onOpenChange?: (open: boolean) => void
   }) {
-    return (
-      <PopoverContext value={{ open, onOpenChange }}>
-        {children}
-      </PopoverContext>
-    )
+    const contextValue = React.useMemo(() => ({ open, onOpenChange }), [open, onOpenChange])
+    return <PopoverContext value={contextValue}>{children}</PopoverContext>
   }
 
   function PopoverTrigger({
     children,
-    render,
+    render: renderElement,
   }: {
     children: ReactNode
     render?: React.ReactElement<React.ComponentProps<"button">>
   }) {
     const { open, onOpenChange } = usePopoverContext()
 
-    if (render && React.isValidElement(render)) {
-      const originalOnClick = render.props.onClick
+    if (renderElement && React.isValidElement(renderElement)) {
+      const originalOnClick = renderElement.props.onClick
 
       // eslint-disable-next-line react/no-clone-element
-      return React.cloneElement(render, {
+      return React.cloneElement(renderElement, {
         children,
         onClick: (event: React.MouseEvent<HTMLButtonElement>) => {
           originalOnClick?.(event)
@@ -117,8 +114,8 @@ vi.mock("@/components/ui/base-ui/popover", async () => {
 
 vi.mock("@/utils/blog", async () => {
   return {
-    buildBilibiliEmbedUrl: vi.fn(() => null),
-    getBlogLocaleFromUILanguage: vi.fn(() => "zh"),
+    buildBilibiliEmbedUrl: vi.fn<(...args: any[]) => any>(() => null),
+    getBlogLocaleFromUILanguage: vi.fn<(...args: any[]) => any>(() => "zh"),
     getLastViewedBlogDate: (...args: unknown[]) => getLastViewedBlogDateMock(...args),
     getLatestBlogDate: (...args: unknown[]) => getLatestBlogDateMock(...args),
     hasNewBlogPost: (latestViewedDate: Date | null, latestDate: Date | null) => {
@@ -226,9 +223,7 @@ describe("whatsNewFooter", () => {
 
   it("does not auto-open or mark the post as viewed when it is already read", async () => {
     getLatestBlogDateMock.mockResolvedValue(latestBlogPost)
-    getLastViewedBlogDateMock.mockResolvedValue(
-      new Date("2026-03-21T12:00:00.000Z"),
-    )
+    getLastViewedBlogDateMock.mockResolvedValue(new Date("2026-03-21T12:00:00.000Z"))
     saveLastViewedBlogDateMock.mockResolvedValue(undefined)
 
     renderWhatsNewFooter()
@@ -270,7 +265,7 @@ describe("whatsNewFooter", () => {
     const links = await screen.findAllByRole("link", { name: latestBlogPost.title })
     expect(links).toHaveLength(2)
     const expectedHref = new URL(urlOverride).toString()
-    expect(links.map(link => link.getAttribute("href"))).toEqual([expectedHref, expectedHref])
+    expect(links.map((link) => link.getAttribute("href"))).toEqual([expectedHref, expectedHref])
   })
 
   it("marks the post as viewed after a manual open once the unread query finishes", async () => {

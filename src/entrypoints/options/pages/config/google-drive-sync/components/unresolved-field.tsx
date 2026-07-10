@@ -1,9 +1,9 @@
 import type { CSSProperties } from "react"
 import { Icon } from "@iconify/react"
 import { dequal } from "dequal"
-import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { useConflictField } from "@/hooks/use-unresolved-field"
+import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 import { FieldOptionRow, STYLE_MAP } from "./field-option-row"
 import { isMeaningfulFieldKey } from "./utils"
@@ -16,8 +16,7 @@ interface ConflictFieldProps {
 export function ConflictField({ pathKey, indent }: ConflictFieldProps) {
   const { conflict, resolution, selectLocal, selectRemote, reset } = useConflictField(pathKey)
 
-  if (!conflict)
-    return null
+  if (!conflict) return null
 
   const fieldKey = conflict.path.at(-1) ?? ""
   const showFieldKey = isMeaningfulFieldKey(fieldKey)
@@ -29,8 +28,7 @@ export function ConflictField({ pathKey, indent }: ConflictFieldProps) {
 
   // Select appropriate container style
   const getContainerStyle = () => {
-    if (resolution)
-      return STYLE_MAP[resolution]
+    if (resolution) return STYLE_MAP[resolution]
     return STYLE_MAP.unresolved
   }
   const containerStyle = getContainerStyle()
@@ -59,22 +57,20 @@ export function ConflictField({ pathKey, indent }: ConflictFieldProps) {
 
   return (
     <div
-      className={cn("border-l-4 my-1", containerStyle.bg, containerStyle.border)}
+      className={cn("my-1 border-l-4", containerStyle.bg, containerStyle.border)}
       style={{ "--indent": `${indent}px` } as CSSProperties}
     >
-      <div className="flex items-center py-1 ps-(--indent) h-8">
-        <Icon icon={icon} className={cn("size-4 shrink-0 mr-2", iconClass)} />
-        <span className={cn("text-xs", labelClass)}>
-          {label}
-        </span>
+      <div className="flex h-8 items-center py-1 ps-(--indent)">
+        <Icon icon={icon} className={cn("mr-2 size-4 shrink-0", iconClass)} />
+        <span className={cn("text-xs", labelClass)}>{label}</span>
         {resolution && (
           <Button
             size="sm"
             variant="ghost"
-            className="h-6 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 ml-2"
+            className="ml-2 h-6 text-xs text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
             onClick={reset}
           >
-            <Icon icon="mdi:undo" className="size-3 mr-1" />
+            <Icon icon="mdi:undo" className="mr-1 size-3" />
             {i18n.t("options.config.sync.googleDrive.unresolved.reset")}
           </Button>
         )}

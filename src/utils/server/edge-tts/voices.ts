@@ -41,8 +41,7 @@ export async function listEdgeTTSVoices(): Promise<EdgeTTSVoice[]> {
     }
 
     return voicesCache.voices
-  }
-  catch (error) {
+  } catch (error) {
     if (voicesCache) {
       return voicesCache.voices
     }
@@ -62,6 +61,9 @@ export function clearEdgeTTSVoicesCache(): void {
   voicesCache = null
 }
 
-export function filterEdgeTTSVoicesByLocale(voices: EdgeTTSVoice[], locale: string): EdgeTTSVoice[] {
-  return voices.filter(voice => voice.Locale === locale || voice.Locale.startsWith(locale))
+export function filterEdgeTTSVoicesByLocale(
+  voices: EdgeTTSVoice[],
+  locale: string,
+): EdgeTTSVoice[] {
+  return voices.filter((voice) => voice.Locale === locale || voice.Locale.startsWith(locale))
 }

@@ -13,11 +13,7 @@ import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import {
-  buildContextSnapshot,
-  createRangeSnapshot,
-  normalizeSelectedText,
-} from "../../utils"
+import { buildContextSnapshot, createRangeSnapshot, normalizeSelectedText } from "../../utils"
 import { setSelectionStateAtom } from "../atoms"
 import { SelectionToolbarCustomActionButtons } from "../custom-action-button"
 import { SelectionCustomActionProvider } from "../custom-action-button/provider"
@@ -25,15 +21,15 @@ import { SelectionToolbar } from "../index"
 import { TranslateButton } from "../translate-button"
 import { SelectionTranslationProvider } from "../translate-button/provider"
 
-const streamBackgroundTextMock = vi.fn()
-const streamBackgroundStructuredObjectMock = vi.fn()
-const translateTextCoreMock = vi.fn()
-const getOrCreateWebPageContextMock = vi.fn().mockResolvedValue(null)
-const getOrGenerateWebPageSummaryMock = vi.fn()
-const toastErrorMock = vi.fn()
-const onMessageMock = vi.fn()
-const hotkeyRegisterMock = vi.fn()
-const hotkeyUnregisterMock = vi.fn()
+const streamBackgroundTextMock = vi.fn<(...args: any[]) => any>()
+const streamBackgroundStructuredObjectMock = vi.fn<(...args: any[]) => any>()
+const translateTextCoreMock = vi.fn<(...args: any[]) => any>()
+const getOrCreateWebPageContextMock = vi.fn<(...args: any[]) => any>().mockResolvedValue(null)
+const getOrGenerateWebPageSummaryMock = vi.fn<(...args: any[]) => any>()
+const toastErrorMock = vi.fn<(...args: any[]) => any>()
+const onMessageMock = vi.fn<(...args: any[]) => any>()
+const hotkeyRegisterMock = vi.fn<(...args: any[]) => any>()
+const hotkeyUnregisterMock = vi.fn<(...args: any[]) => any>()
 const originalGetSelection = window.getSelection
 
 vi.mock("@tanstack/hotkeys", async (importOriginal) => {
@@ -62,7 +58,7 @@ vi.mock("@/components/ui/selection-popover", async () => {
   const React = await import("react")
 
   interface PopoverContextValue {
-    anchor?: { x: number, y: number } | null
+    anchor?: { x: number; y: number } | null
     open: boolean
     onOpenChange?: (open: boolean) => void
   }
@@ -83,16 +79,16 @@ vi.mock("@/components/ui/selection-popover", async () => {
     open,
     onOpenChange,
   }: {
-    anchor?: { x: number, y: number } | null
+    anchor?: { x: number; y: number } | null
     children: React.ReactNode
     open: boolean
     onOpenChange?: (open: boolean) => void
   }) {
-    return (
-      <PopoverContext value={{ anchor, open, onOpenChange }}>
-        {children}
-      </PopoverContext>
+    const contextValue = React.useMemo(
+      () => ({ anchor, open, onOpenChange }),
+      [anchor, open, onOpenChange],
     )
+    return <PopoverContext value={contextValue}>{children}</PopoverContext>
   }
 
   function Trigger({
@@ -117,27 +113,19 @@ vi.mock("@/components/ui/selection-popover", async () => {
     )
   }
 
-  function Content({
-    children,
-    finalFocus,
-  }: {
-    children: React.ReactNode
-    finalFocus?: boolean
-  }) {
+  function Content({ children, finalFocus }: { children: React.ReactNode; finalFocus?: boolean }) {
     const { anchor, open } = usePopoverContext()
-    return open
-      ? (
-          <div
-            data-testid="selection-popover-content"
-            data-anchor-x={anchor?.x}
-            data-anchor-y={anchor?.y}
-            data-final-focus={finalFocus === false ? "false" : undefined}
-            data-rf-selection-overlay-root=""
-          >
-            {children}
-          </div>
-        )
-      : null
+    return open ? (
+      <div
+        data-testid="selection-popover-content"
+        data-anchor-x={anchor?.x}
+        data-anchor-y={anchor?.y}
+        data-final-focus={finalFocus === false ? "false" : undefined}
+        data-rf-selection-overlay-root=""
+      >
+        {children}
+      </div>
+    ) : null
   }
 
   function Body({
@@ -209,7 +197,7 @@ vi.mock("../../components/selection-toolbar-footer-content", () => ({
     titleText: string | null | undefined
     value: string
   }) => {
-    const nextProvider = providers.find(provider => provider.id !== value)
+    const nextProvider = providers.find((provider) => provider.id !== value)
 
     return (
       <div>
@@ -262,7 +250,8 @@ vi.mock("../custom-action-button/structured-object-renderer", () => ({
 
 vi.mock("@/utils/content-script/background-stream-client", () => ({
   streamBackgroundText: (...args: unknown[]) => streamBackgroundTextMock(...args),
-  streamBackgroundStructuredObject: (...args: unknown[]) => streamBackgroundStructuredObjectMock(...args),
+  streamBackgroundStructuredObject: (...args: unknown[]) =>
+    streamBackgroundStructuredObjectMock(...args),
 }))
 
 vi.mock("@/utils/host/translate/translate-text", () => ({
@@ -280,21 +269,21 @@ vi.mock("@/utils/host/translate/webpage-summary", () => ({
 vi.mock("sonner", () => ({
   toast: {
     error: (...args: unknown[]) => toastErrorMock(...args),
-    success: vi.fn(),
+    success: vi.fn<(...args: any[]) => any>(),
   },
 }))
 
 vi.mock("@/utils/logger", () => ({
   logger: {
-    info: vi.fn(),
-    log: vi.fn(),
-    error: vi.fn(),
+    info: vi.fn<(...args: any[]) => any>(),
+    log: vi.fn<(...args: any[]) => any>(),
+    error: vi.fn<(...args: any[]) => any>(),
   },
 }))
 
 vi.mock("@/utils/message", () => ({
   onMessage: (...args: unknown[]) => onMessageMock(...args),
-  sendMessage: vi.fn(),
+  sendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
 function cloneConfig(config: Config): Config {
@@ -307,10 +296,7 @@ function createRangeFor(node: Node) {
   return range
 }
 
-function createRangeAcrossNodes(
-  startNode: Text,
-  endNode: Text,
-) {
+function createRangeAcrossNodes(startNode: Text, endNode: Text) {
   const range = document.createRange()
   range.setStart(startNode, 0)
   range.setEnd(endNode, endNode.textContent?.length ?? 0)
@@ -334,9 +320,8 @@ function setSelectionState(
     return
   }
 
-  const normalizedText = text !== undefined
-    ? normalizeSelectedText(text)
-    : normalizeSelectedText(range?.toString())
+  const normalizedText =
+    text !== undefined ? normalizeSelectedText(text) : normalizeSelectedText(range?.toString())
   const selection = {
     text: normalizedText,
     ranges: range ? [createRangeSnapshot(range)] : [],
@@ -344,9 +329,8 @@ function setSelectionState(
 
   store.set(setSelectionStateAtom, {
     selection,
-    context: selection.ranges.length > 0 && selection.text !== ""
-      ? buildContextSnapshot(selection)
-      : null,
+    context:
+      selection.ranges.length > 0 && selection.text !== "" ? buildContextSnapshot(selection) : null,
   })
 }
 
@@ -363,7 +347,7 @@ function createDeferredPromise<T>() {
 }
 
 function mockWindowSelection(range: Range | null) {
-  window.getSelection = vi.fn(() => {
+  window.getSelection = vi.fn<(...args: any[]) => any>(() => {
     if (!range) {
       return null
     }
@@ -374,26 +358,26 @@ function mockWindowSelection(range: Range | null) {
       rangeCount: 1,
       toString: () => range.toString(),
       getRangeAt: () => range,
-      containsNode: vi.fn(() => false),
-    } as unknown as Selection
-  }) as unknown as typeof window.getSelection
+      containsNode: vi.fn<(...args: any[]) => any>(() => false),
+    }
+  })
 }
 
-function getRegisteredMessageHandler<T>(name: string) {
-  const registration = onMessageMock.mock.calls.find(call => call[0] === name)
+function getRegisteredMessageHandler(name: string): (message: { data: unknown }) => void {
+  const registration = onMessageMock.mock.calls.find((call) => call[0] === name)
   if (!registration) {
     throw new Error(`Message handler not registered: ${name}`)
   }
 
-  return registration[1] as (message: { data: T }) => void
+  return registration[1] as (message: { data: unknown }) => void
 }
 
 async function getRegisteredShortcutCallback(shortcut = "Alt+T") {
   await waitFor(() => {
-    expect(hotkeyRegisterMock.mock.calls.some(call => call[0] === shortcut)).toBe(true)
+    expect(hotkeyRegisterMock.mock.calls.some((call) => call[0] === shortcut)).toBe(true)
   })
 
-  const registration = hotkeyRegisterMock.mock.calls.find(call => call[0] === shortcut)
+  const registration = hotkeyRegisterMock.mock.calls.find((call) => call[0] === shortcut)
   if (!registration) {
     throw new Error(`Shortcut not registered: ${shortcut}`)
   }
@@ -429,44 +413,50 @@ function createRect({
   } as DOMRect
 }
 
-function mockLiveRangeRects(rects: DOMRect[], boundingRect = createRect({
-  bottom: 0,
-  height: 0,
-  left: 0,
-  right: 0,
-  top: 0,
-  width: 0,
-})) {
+function mockLiveRangeRects(
+  rects: DOMRect[],
+  boundingRect = createRect({
+    bottom: 0,
+    height: 0,
+    left: 0,
+    right: 0,
+    top: 0,
+    width: 0,
+  }),
+) {
   const previousGetClientRects = Object.getOwnPropertyDescriptor(Range.prototype, "getClientRects")
-  const previousGetBoundingClientRect = Object.getOwnPropertyDescriptor(Range.prototype, "getBoundingClientRect")
+  const previousGetBoundingClientRect = Object.getOwnPropertyDescriptor(
+    Range.prototype,
+    "getBoundingClientRect",
+  )
 
   Object.defineProperty(Range.prototype, "getClientRects", {
     configurable: true,
-    value: vi.fn(() => rects),
+    value: vi.fn<(...args: any[]) => any>(() => rects),
   })
   Object.defineProperty(Range.prototype, "getBoundingClientRect", {
     configurable: true,
-    value: vi.fn(() => boundingRect),
+    value: vi.fn<(...args: any[]) => any>(() => boundingRect),
   })
 
   return () => {
     if (previousGetClientRects) {
       Object.defineProperty(Range.prototype, "getClientRects", previousGetClientRects)
-    }
-    else {
+    } else {
       Reflect.deleteProperty(Range.prototype, "getClientRects")
     }
 
     if (previousGetBoundingClientRect) {
       Object.defineProperty(Range.prototype, "getBoundingClientRect", previousGetBoundingClientRect)
-    }
-    else {
+    } else {
       Reflect.deleteProperty(Range.prototype, "getBoundingClientRect")
     }
   }
 }
 
-function createStructuredObjectSnapshot(output: Record<string, unknown>): BackgroundStructuredObjectStreamSnapshot {
+function createStructuredObjectSnapshot(
+  output: Record<string, unknown>,
+): BackgroundStructuredObjectStreamSnapshot {
   return {
     output,
     thinking: {
@@ -477,8 +467,8 @@ function createStructuredObjectSnapshot(output: Record<string, unknown>): Backgr
 }
 
 function findAlternateLLMProviderId(config: Config, currentProviderId: string) {
-  return config.providersConfig.find(provider =>
-    provider.id !== currentProviderId && isLLMProviderConfig(provider),
+  return config.providersConfig.find(
+    (provider) => provider.id !== currentProviderId && isLLMProviderConfig(provider),
   )?.id
 }
 
@@ -500,9 +490,7 @@ function renderWithProviders(ui: ReactElement, store = createStore()) {
       <Provider store={store}>
         <TooltipProvider>
           <SelectionTranslationProvider>
-            <SelectionCustomActionProvider>
-              {ui}
-            </SelectionCustomActionProvider>
+            <SelectionCustomActionProvider>{ui}</SelectionCustomActionProvider>
           </SelectionTranslationProvider>
         </TooltipProvider>
       </Provider>
@@ -637,7 +625,10 @@ describe("selection toolbar requests", () => {
     fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
 
     await waitFor(() => {
-      expect(screen.getByTestId("selection-popover-content")).toHaveAttribute("data-final-focus", "false")
+      expect(screen.getByTestId("selection-popover-content")).toHaveAttribute(
+        "data-final-focus",
+        "false",
+      )
     })
   })
 
@@ -702,7 +693,9 @@ describe("selection toolbar requests", () => {
     })
     renderWithProviders(<SelectionToolbar />, store)
 
-    const toolbarTranslateButton = document.querySelector<HTMLButtonElement>("button[aria-label='action.translation']")
+    const toolbarTranslateButton = document.querySelector<HTMLButtonElement>(
+      "button[aria-label='action.translation']",
+    )
     if (!toolbarTranslateButton) {
       throw new Error("Selection toolbar translate trigger is missing")
     }
@@ -715,7 +708,9 @@ describe("selection toolbar requests", () => {
     await waitFor(() => {
       expect(screen.getByTestId("translation-result").textContent).toBe("Overlay panel content")
     })
-    expect(screen.getByTestId("footer-paragraphs").textContent).toBe("Original page paragraph with surrounding context.")
+    expect(screen.getByTestId("footer-paragraphs").textContent).toBe(
+      "Original page paragraph with surrounding context.",
+    )
 
     const overlayText = screen.getByTestId("translation-result")
     const overlaySelectionRange = createRangeFor(overlayText)
@@ -751,25 +746,35 @@ describe("selection toolbar requests", () => {
     expect(translateTextCoreMock.mock.calls[1]?.[0]).toMatchObject({
       text: "Original page selection",
     })
-    expect(screen.getByTestId("footer-paragraphs").textContent).toBe("Original page paragraph with surrounding context.")
+    expect(screen.getByTestId("footer-paragraphs").textContent).toBe(
+      "Original page paragraph with surrounding context.",
+    )
   })
 
   it("aborts llm translations when the popover closes without surfacing an error", async () => {
-    const streamCalls: Array<{ signal?: AbortSignal, onChunk?: (data: BackgroundTextStreamSnapshot) => void }> = []
-    translateTextCoreMock.mockResolvedValue("")
-
-    streamBackgroundTextMock.mockImplementation((_payload, options: {
+    const streamCalls: Array<{
       signal?: AbortSignal
       onChunk?: (data: BackgroundTextStreamSnapshot) => void
-    }) => {
-      streamCalls.push({ signal: options.signal, onChunk: options.onChunk })
+    }> = []
+    translateTextCoreMock.mockResolvedValue("")
 
-      return new Promise<BackgroundTextStreamSnapshot>((_resolve, reject) => {
-        options.signal?.addEventListener("abort", () => {
-          reject(new DOMException("aborted", "AbortError"))
+    streamBackgroundTextMock.mockImplementation(
+      (
+        _payload,
+        options: {
+          signal?: AbortSignal
+          onChunk?: (data: BackgroundTextStreamSnapshot) => void
+        },
+      ) => {
+        streamCalls.push({ signal: options.signal, onChunk: options.onChunk })
+
+        return new Promise<BackgroundTextStreamSnapshot>((_resolve, reject) => {
+          options.signal?.addEventListener("abort", () => {
+            reject(new DOMException("aborted", "AbortError"))
+          })
         })
-      })
-    })
+      },
+    )
 
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
@@ -866,8 +871,13 @@ describe("selection toolbar requests", () => {
     expect(toastErrorMock).not.toHaveBeenCalled()
 
     const translationContent = screen.getByTestId("translation-content")
-    expect(translationContent.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(alert.compareDocumentPosition(screen.getByRole("button", { name: "Change provider" })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(
+      translationContent.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(
+      alert.compareDocumentPosition(screen.getByRole("button", { name: "Change provider" })) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
 
     fireEvent.click(screen.getByRole("button", { name: "Regenerate" }))
 
@@ -894,7 +904,9 @@ describe("selection toolbar requests", () => {
 
     const alert = await screen.findByRole("alert")
     expect(alert).toHaveTextContent("translationHub.translationFailed")
-    expect(alert).toHaveTextContent("options.floatingButtonAndToolbar.selectionToolbar.errors.providerUnavailable")
+    expect(alert).toHaveTextContent(
+      "options.floatingButtonAndToolbar.selectionToolbar.errors.providerUnavailable",
+    )
     expect(translateTextCoreMock).not.toHaveBeenCalled()
     expect(streamBackgroundTextMock).not.toHaveBeenCalled()
   })
@@ -935,12 +947,14 @@ describe("selection toolbar requests", () => {
     renderWithProviders(<TranslateButton />, store)
 
     act(() => {
-      paragraph.dispatchEvent(new MouseEvent("contextmenu", {
-        bubbles: true,
-        button: 2,
-        clientX: 140,
-        clientY: 180,
-      }))
+      paragraph.dispatchEvent(
+        new MouseEvent("contextmenu", {
+          bubbles: true,
+          button: 2,
+          clientX: 140,
+          clientY: 180,
+        }),
+      )
     })
 
     const handler = getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")
@@ -996,12 +1010,14 @@ describe("selection toolbar requests", () => {
     renderWithProviders(<TranslateButton />, store)
 
     act(() => {
-      container.dispatchEvent(new MouseEvent("contextmenu", {
-        bubbles: true,
-        button: 2,
-        clientX: 180,
-        clientY: 220,
-      }))
+      container.dispatchEvent(
+        new MouseEvent("contextmenu", {
+          bubbles: true,
+          button: 2,
+          clientX: 180,
+          clientY: 220,
+        }),
+      )
     })
 
     const handler = getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")
@@ -1022,7 +1038,9 @@ describe("selection toolbar requests", () => {
     expect(screen.getByTestId("translation-selection").textContent).toBe(
       "As long as you're alive, there's no bad ending.",
     )
-    expect(screen.getByTestId("footer-paragraphs").textContent).toContain("As long as you're alive,")
+    expect(screen.getByTestId("footer-paragraphs").textContent).toContain(
+      "As long as you're alive,",
+    )
     expect(screen.getByTestId("footer-paragraphs").textContent).toContain("there's no bad ending.")
     expect(toastErrorMock).not.toHaveBeenCalled()
   })
@@ -1032,7 +1050,7 @@ describe("selection toolbar requests", () => {
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     renderWithProviders(<TranslateButton />, store)
 
-    const handler = getRegisteredMessageHandler<{ selectionText: string }>("openSelectionTranslationFromContextMenu")
+    const handler = getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")
 
     act(() => {
       handler({ data: { selectionText: "Missing selection" } })
@@ -1112,7 +1130,9 @@ describe("selection toolbar requests", () => {
       expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
     })
 
-    expect(screen.getByTestId("translation-result").textContent).toBe("Toolbar disabled shortcut result")
+    expect(screen.getByTestId("translation-result").textContent).toBe(
+      "Toolbar disabled shortcut result",
+    )
   })
 
   it("ignores the selection translation shortcut when no selection is available", async () => {
@@ -1182,8 +1202,7 @@ describe("selection toolbar requests", () => {
         shortcutCallback()
         await Promise.resolve()
       })
-    }
-    finally {
+    } finally {
       restoreCreateRange()
     }
 
@@ -1210,11 +1229,13 @@ describe("selection toolbar requests", () => {
     renderWithProviders(<TranslateButton />, store)
 
     act(() => {
-      document.dispatchEvent(new MouseEvent("mousemove", {
-        bubbles: true,
-        clientX: 321,
-        clientY: 123,
-      }))
+      document.dispatchEvent(
+        new MouseEvent("mousemove", {
+          bubbles: true,
+          clientX: 321,
+          clientY: 123,
+        }),
+      )
     })
 
     const restoreCreateRange = mockLiveRangeRects([])
@@ -1226,8 +1247,7 @@ describe("selection toolbar requests", () => {
         shortcutCallback()
         await Promise.resolve()
       })
-    }
-    finally {
+    } finally {
       restoreCreateRange()
     }
 
@@ -1241,7 +1261,9 @@ describe("selection toolbar requests", () => {
   })
 
   it("opens a custom action from the context menu with the captured selection session", async () => {
-    streamBackgroundStructuredObjectMock.mockResolvedValue(createStructuredObjectSnapshot({ summary: "Context menu result" }))
+    streamBackgroundStructuredObjectMock.mockResolvedValue(
+      createStructuredObjectSnapshot({ summary: "Context menu result" }),
+    )
 
     const paragraph = document.createElement("p")
     paragraph.textContent = "Selected text inside a paragraph."
@@ -1258,17 +1280,17 @@ describe("selection toolbar requests", () => {
     }
 
     act(() => {
-      paragraph.dispatchEvent(new MouseEvent("contextmenu", {
-        bubbles: true,
-        button: 2,
-        clientX: 140,
-        clientY: 180,
-      }))
+      paragraph.dispatchEvent(
+        new MouseEvent("contextmenu", {
+          bubbles: true,
+          button: 2,
+          clientX: 140,
+          clientY: 180,
+        }),
+      )
     })
 
-    const handler = getRegisteredMessageHandler<{ actionId: string, selectionText: string }>(
-      "openSelectionCustomActionFromContextMenu",
-    )
+    const handler = getRegisteredMessageHandler("openSelectionCustomActionFromContextMenu")
 
     await act(async () => {
       handler({
@@ -1285,10 +1307,12 @@ describe("selection toolbar requests", () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByText("{\"summary\":\"Context menu result\"}")).toBeInTheDocument()
+      expect(screen.getByText('{"summary":"Context menu result"}')).toBeInTheDocument()
     })
 
-    expect(screen.getByTestId("footer-paragraphs").textContent).toContain("Selected text inside a paragraph.")
+    expect(screen.getByTestId("footer-paragraphs").textContent).toContain(
+      "Selected text inside a paragraph.",
+    )
     expect(toastErrorMock).not.toHaveBeenCalled()
 
     const { sendMessage } = await import("@/utils/message")
@@ -1305,7 +1329,9 @@ describe("selection toolbar requests", () => {
   })
 
   it("renders a custom action footer tool button that opens the action options", async () => {
-    streamBackgroundStructuredObjectMock.mockResolvedValue(createStructuredObjectSnapshot({ summary: "done" }))
+    streamBackgroundStructuredObjectMock.mockResolvedValue(
+      createStructuredObjectSnapshot({ summary: "done" }),
+    )
 
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
@@ -1376,9 +1402,7 @@ describe("selection toolbar requests", () => {
       throw new Error("Default custom action is missing")
     }
 
-    const handler = getRegisteredMessageHandler<{ actionId: string, selectionText: string }>(
-      "openSelectionCustomActionFromContextMenu",
-    )
+    const handler = getRegisteredMessageHandler("openSelectionCustomActionFromContextMenu")
 
     act(() => {
       handler({
@@ -1408,7 +1432,9 @@ describe("selection toolbar requests", () => {
   })
 
   it("does not rerun custom action requests on passive config refresh, but reruns when request values change", async () => {
-    streamBackgroundStructuredObjectMock.mockResolvedValue(createStructuredObjectSnapshot({ summary: "done" }))
+    streamBackgroundStructuredObjectMock.mockResolvedValue(
+      createStructuredObjectSnapshot({ summary: "done" }),
+    )
 
     const paragraph = document.createElement("p")
     paragraph.textContent = "Selected text inside a paragraph."
@@ -1447,7 +1473,7 @@ describe("selection toolbar requests", () => {
       throw new Error("No alternate LLM provider available for custom action test")
     }
     updatedConfig.selectionToolbar.customActions[0] = {
-      ...updatedConfig.selectionToolbar.customActions[0]!,
+      ...updatedConfig.selectionToolbar.customActions[0],
       providerId: nextProviderId,
     }
 
@@ -1464,10 +1490,12 @@ describe("selection toolbar requests", () => {
     const pendingRun = createDeferredPromise<BackgroundStructuredObjectStreamSnapshot>()
     const signals: AbortSignal[] = []
 
-    streamBackgroundStructuredObjectMock.mockImplementationOnce((_payload, options: { signal?: AbortSignal }) => {
-      signals.push(options.signal as AbortSignal)
-      return pendingRun.promise
-    })
+    streamBackgroundStructuredObjectMock.mockImplementationOnce(
+      (_payload, options: { signal?: AbortSignal }) => {
+        signals.push(options.signal as AbortSignal)
+        return pendingRun.promise
+      },
+    )
 
     const paragraph = document.createElement("p")
     paragraph.textContent = "Selected text inside a paragraph."
@@ -1506,7 +1534,7 @@ describe("selection toolbar requests", () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByText("{\"summary\":\"still alive\"}")).toBeInTheDocument()
+      expect(screen.getByText('{"summary":"still alive"}')).toBeInTheDocument()
     })
   })
 
@@ -1562,7 +1590,7 @@ describe("selection toolbar requests", () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByText("{\"summary\":\"fresh\"}")).toBeInTheDocument()
+      expect(screen.getByText('{"summary":"fresh"}')).toBeInTheDocument()
     })
   })
 
@@ -1633,7 +1661,7 @@ describe("selection toolbar requests", () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByText("{\"summary\":\"provider switched\"}")).toBeInTheDocument()
+      expect(screen.getByText('{"summary":"provider switched"}')).toBeInTheDocument()
     })
     expect(screen.queryByRole("alert")).toBeNull()
     expect(store.get(configAtom).selectionToolbar.customActions[0]?.providerId).toBe(nextProviderId)
@@ -1657,8 +1685,12 @@ describe("selection toolbar requests", () => {
     fireEvent.click(screen.getByRole("button", { name: actionName }))
 
     const alert = await screen.findByRole("alert")
-    expect(alert).toHaveTextContent("options.floatingButtonAndToolbar.selectionToolbar.errors.customActionFailed")
-    expect(alert).toHaveTextContent("options.floatingButtonAndToolbar.selectionToolbar.errors.missingSelection")
+    expect(alert).toHaveTextContent(
+      "options.floatingButtonAndToolbar.selectionToolbar.errors.customActionFailed",
+    )
+    expect(alert).toHaveTextContent(
+      "options.floatingButtonAndToolbar.selectionToolbar.errors.missingSelection",
+    )
     expect(streamBackgroundStructuredObjectMock).not.toHaveBeenCalled()
 
     const { sendMessage } = await import("@/utils/message")
@@ -1696,7 +1728,9 @@ describe("selection toolbar requests", () => {
     fireEvent.click(screen.getByRole("button", { name: actionName }))
 
     const alert = await screen.findByRole("alert")
-    expect(alert).toHaveTextContent("options.floatingButtonAndToolbar.selectionToolbar.errors.customActionFailed")
+    expect(alert).toHaveTextContent(
+      "options.floatingButtonAndToolbar.selectionToolbar.errors.customActionFailed",
+    )
     expect(alert).toHaveTextContent("Structured output failed")
 
     fireEvent.click(screen.getByRole("button", { name: "Regenerate" }))
@@ -1706,7 +1740,7 @@ describe("selection toolbar requests", () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByText("{\"summary\":\"fresh\"}")).toBeInTheDocument()
+      expect(screen.getByText('{"summary":"fresh"}')).toBeInTheDocument()
     })
     expect(screen.queryByRole("alert")).toBeNull()
   })

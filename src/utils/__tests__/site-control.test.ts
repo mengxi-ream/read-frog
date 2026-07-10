@@ -87,7 +87,9 @@ describe("resolveEffectiveSiteControlUrl", () => {
   })
 
   it("falls back to the current frame URL when no injected override exists", () => {
-    expect(resolveEffectiveSiteControlUrl("https://example.com/app")).toBe("https://example.com/app")
+    expect(resolveEffectiveSiteControlUrl("https://example.com/app")).toBe(
+      "https://example.com/app",
+    )
   })
 
   it("lets whitelist mode honor an allowed ancestor for blank iframes", () => {

@@ -1,22 +1,23 @@
 import type { APIProviderConfig } from "@/types/config/provider"
 import { useSelector } from "@tanstack/react-store"
 import { useCallback } from "react"
-import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { isLLMProviderConfig } from "@/types/config/provider"
+import { i18n } from "@/utils/i18n"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getRecommendedProviderOptions } from "@/utils/providers/options"
 import { AutosavedJsonCodeEditorField } from "./components/autosaved-json-code-editor-field"
 import { withForm } from "./form"
 
-function parseJson(input: string): { valid: true, value: Record<string, unknown> | undefined } | { valid: false, error: string } {
+function parseJson(
+  input: string,
+): { valid: true; value: Record<string, unknown> | undefined } | { valid: false; error: string } {
   if (!input.trim()) {
     return { valid: true, value: undefined }
   }
   try {
     return { valid: true, value: JSON.parse(input) }
-  }
-  catch {
+  } catch {
     return { valid: false, error: i18n.t("options.apiProviders.form.invalidJson") }
   }
 }
@@ -28,12 +29,15 @@ function toJson(options: APIProviderConfig["providerOptions"]) {
 export const ProviderOptionsField = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
-    const providerConfig = useSelector(form.store, state => state.values)
+    const providerConfig = useSelector(form.store, (state) => state.values)
     const isLLMProvider = isLLMProviderConfig(providerConfig)
 
-    const handleProviderOptionsCommit = useCallback((value: Record<string, unknown> | undefined) => {
-      form.setFieldValue("providerOptions", value)
-    }, [form])
+    const handleProviderOptionsCommit = useCallback(
+      (value: Record<string, unknown> | undefined) => {
+        form.setFieldValue("providerOptions", value)
+      },
+      [form],
+    )
 
     const handleSubmit = useCallback(() => form.handleSubmit(), [form])
 
@@ -60,8 +64,8 @@ export const ProviderOptionsField = withForm({
         onSubmit={handleSubmit}
         editorAriaLabel="provider-options-editor"
         placeholder={placeholderText}
-        label={(
-          <div className="flex items-center justify-between w-full">
+        label={
+          <div className="flex w-full items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span>{i18n.t("options.apiProviders.form.providerOptions")}</span>
               <HelpTooltip>{i18n.t("options.apiProviders.form.providerOptionsHint")}</HelpTooltip>
@@ -75,7 +79,7 @@ export const ProviderOptionsField = withForm({
               {i18n.t("options.apiProviders.form.providerOptionsDocsLink")}
             </a>
           </div>
-        )}
+        }
       />
     )
   },

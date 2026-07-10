@@ -19,19 +19,19 @@ const {
   mockValidateTranslationConfigAndToast,
   mockWalkAndLabelElement,
 } = vi.hoisted(() => ({
-  mockGetDetectedCodeFromStorage: vi.fn(),
-  mockGetLocalConfig: vi.fn(),
-  mockGetOrCreateWebPageContext: vi.fn(),
-  mockDeepQueryTopLevelSelector: vi.fn(),
-  mockHasNoWalkAncestor: vi.fn(),
-  mockIsDontWalkIntoAndDontTranslateAsChildElement: vi.fn(),
-  mockIsDontWalkIntoButTranslateAsChildElement: vi.fn(),
-  mockWalkAndLabelElement: vi.fn(),
-  mockRemoveAllTranslatedWrapperNodes: vi.fn(),
-  mockTranslateWalkedElement: vi.fn(),
-  mockTranslateTextForPageTitle: vi.fn(),
-  mockValidateTranslationConfigAndToast: vi.fn(),
-  mockSendMessage: vi.fn(),
+  mockGetDetectedCodeFromStorage: vi.fn<(...args: any[]) => any>(),
+  mockGetLocalConfig: vi.fn<(...args: any[]) => any>(),
+  mockGetOrCreateWebPageContext: vi.fn<(...args: any[]) => any>(),
+  mockDeepQueryTopLevelSelector: vi.fn<(...args: any[]) => any>(),
+  mockHasNoWalkAncestor: vi.fn<(...args: any[]) => any>(),
+  mockIsDontWalkIntoAndDontTranslateAsChildElement: vi.fn<(...args: any[]) => any>(),
+  mockIsDontWalkIntoButTranslateAsChildElement: vi.fn<(...args: any[]) => any>(),
+  mockWalkAndLabelElement: vi.fn<(...args: any[]) => any>(),
+  mockRemoveAllTranslatedWrapperNodes: vi.fn<(...args: any[]) => any>(),
+  mockTranslateWalkedElement: vi.fn<(...args: any[]) => any>(),
+  mockTranslateTextForPageTitle: vi.fn<(...args: any[]) => any>(),
+  mockValidateTranslationConfigAndToast: vi.fn<(...args: any[]) => any>(),
+  mockSendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/config/languages", () => ({
@@ -80,9 +80,9 @@ vi.mock("@/utils/host/translate/webpage-context", () => ({
 
 vi.mock("@/utils/logger", () => ({
   logger: {
-    error: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
+    error: vi.fn<(...args: any[]) => any>(),
+    info: vi.fn<(...args: any[]) => any>(),
+    warn: vi.fn<(...args: any[]) => any>(),
   },
 }))
 
@@ -93,15 +93,15 @@ vi.mock("@/utils/message", () => ({
 const intersectionObservers: MockIntersectionObserver[] = []
 
 class MockIntersectionObserver {
-  observe = vi.fn((target: Element) => {
+  observe = vi.fn<(...args: any[]) => any>((target: Element) => {
     this.targets.add(target)
   })
 
-  unobserve = vi.fn((target: Element) => {
+  unobserve = vi.fn<(...args: any[]) => any>((target: Element) => {
     this.targets.delete(target)
   })
 
-  disconnect = vi.fn(() => {
+  disconnect = vi.fn<(...args: any[]) => any>(() => {
     this.targets.clear()
   })
 
@@ -115,16 +115,21 @@ class MockIntersectionObserver {
   }
 
   async triggerIntersect(target: Element): Promise<void> {
-    await this.callback([{
-      isIntersecting: true,
-      target,
-    } as IntersectionObserverEntry], this as unknown as IntersectionObserver)
+    this.callback(
+      [
+        {
+          isIntersecting: true,
+          target,
+        } as IntersectionObserverEntry,
+      ],
+      this as unknown as IntersectionObserver,
+    )
   }
 }
 
 async function flushDomUpdates(): Promise<void> {
   await Promise.resolve()
-  await new Promise(resolve => setTimeout(resolve, 0))
+  await new Promise((resolve) => setTimeout(resolve, 0))
   await Promise.resolve()
 }
 
@@ -156,9 +161,11 @@ function deepQueryTopLevelSelectorImpl(
 }
 
 function isBlockedForTraversal(element: HTMLElement): boolean {
-  return Boolean(element.hidden)
-    || element.getAttribute("aria-hidden") === "true"
-    || element.classList.contains("closed")
+  return (
+    Boolean(element.hidden) ||
+    element.matches("[data-site-rule-blocked][aria-hidden='true']") ||
+    element.classList.contains("closed")
+  )
 }
 
 function walkAndLabelVisibleParagraphs(element: HTMLElement, walkId: string) {
@@ -207,9 +214,13 @@ describe("pageTranslationManager mutation re-walk", () => {
     })
     mockHasNoWalkAncestor.mockReturnValue(false)
     mockIsDontWalkIntoButTranslateAsChildElement.mockReturnValue(false)
-    mockIsDontWalkIntoAndDontTranslateAsChildElement.mockImplementation((element: HTMLElement) => isBlockedForTraversal(element))
+    mockIsDontWalkIntoAndDontTranslateAsChildElement.mockImplementation((element: HTMLElement) =>
+      isBlockedForTraversal(element),
+    )
     mockDeepQueryTopLevelSelector.mockImplementation(deepQueryTopLevelSelectorImpl)
-    mockWalkAndLabelElement.mockImplementation((element: HTMLElement, walkId: string) => walkAndLabelVisibleParagraphs(element, walkId))
+    mockWalkAndLabelElement.mockImplementation((element: HTMLElement, walkId: string) =>
+      walkAndLabelVisibleParagraphs(element, walkId),
+    )
     mockTranslateTextForPageTitle.mockResolvedValue("")
     mockValidateTranslationConfigAndToast.mockReturnValue(true)
     mockSendMessage.mockResolvedValue(undefined)
@@ -245,9 +256,9 @@ describe("pageTranslationManager mutation re-walk", () => {
     manager.stop()
   })
 
-  it("observes and translates aria-hidden accordion content after it becomes visible", async () => {
+  it("observes and translates aria-hidden content after a site-rule block becomes walkable", async () => {
     document.body.innerHTML = `
-      <section id="accordion" aria-hidden="true">
+      <section id="accordion" data-site-rule-blocked aria-hidden="true">
         <p id="panel">Accordion body</p>
       </section>
     `

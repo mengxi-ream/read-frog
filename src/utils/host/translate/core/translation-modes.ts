@@ -44,8 +44,7 @@ export async function translateNodes(
   const translationMode = config.translate.mode
   if (translationMode === "translationOnly") {
     await translateNodeTranslationOnlyMode(nodes, walkId, config, toggle)
-  }
-  else if (translationMode === "bilingual") {
+  } else if (translationMode === "bilingual") {
     await translateNodesBilingualMode(nodes, walkId, config, toggle, forceBlockTranslation)
   }
 }
@@ -57,20 +56,20 @@ export async function translateNodesBilingualMode(
   toggle: boolean = false,
   forceBlockTranslation: boolean = false,
 ): Promise<void> {
-  const transNodes = nodes.filter(node => isTransNode(node))
+  const transNodes = nodes.filter((node) => isTransNode(node))
   if (transNodes.length === 0) {
     return
   }
   try {
     // prevent duplicate translation
-    if (transNodes.every(node => translatingNodes.has(node))) {
+    if (transNodes.every((node) => translatingNodes.has(node))) {
       return
     }
-    transNodes.forEach(node => translatingNodes.add(node))
+    transNodes.forEach((node) => translatingNodes.add(node))
 
     const lastNode = transNodes.at(-1)!
-    const targetNode
-      = transNodes.length === 1 && isBlockTransNode(lastNode) && isHTMLElement(lastNode)
+    const targetNode =
+      transNodes.length === 1 && isBlockTransNode(lastNode) && isHTMLElement(lastNode)
         ? await unwrapDeepestOnlyHTMLChild(lastNode)
         : lastNode
 
@@ -80,24 +79,26 @@ export async function translateNodesBilingualMode(
       if (toggle) {
         return
       }
-      else {
-        nodes.forEach(node => translatingNodes.delete(node))
-        void translateNodesBilingualMode(nodes, walkId, config, toggle)
-        return
-      }
+      nodes.forEach((node) => translatingNodes.delete(node))
+      void translateNodesBilingualMode(nodes, walkId, config, toggle)
+      return
     }
 
-    const textContent = transNodes.map(node => extractTextContent(node, config)).join("").trim()
-    if (!textContent || isNumericContent(textContent))
-      return
+    const textContent = transNodes
+      .map((node) => extractTextContent(node, config))
+      .join("")
+      .trim()
+    if (!textContent || isNumericContent(textContent)) return
 
-    if (await shouldFilterSmallParagraph(textContent, config))
-      return
+    if (await shouldFilterSmallParagraph(textContent, config)) return
 
     const ownerDoc = getOwnerDocument(targetNode)
     const translatedWrapperNode = ownerDoc.createElement("span")
     translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
-    translatedWrapperNode.setAttribute(TRANSLATION_MODE_ATTRIBUTE, "bilingual" satisfies TranslationMode)
+    translatedWrapperNode.setAttribute(
+      TRANSLATION_MODE_ATTRIBUTE,
+      "bilingual" satisfies TranslationMode,
+    )
     translatedWrapperNode.setAttribute(WALKED_ATTRIBUTE, walkId)
     setTranslationDirAndLang(translatedWrapperNode, config)
     const spinner = createSpinnerInside(translatedWrapperNode)
@@ -105,18 +106,19 @@ export async function translateNodesBilingualMode(
     // Batch DOM insertion to reduce layout thrashing
     const insertOperation = () => {
       if (isTextNode(targetNode) || transNodes.length > 1) {
-        targetNode.parentNode?.insertBefore(
-          translatedWrapperNode,
-          targetNode.nextSibling,
-        )
-      }
-      else {
+        targetNode.parentNode?.insertBefore(translatedWrapperNode, targetNode.nextSibling)
+      } else {
         targetNode.appendChild(translatedWrapperNode)
       }
     }
     batchDOMOperation(insertOperation)
 
-    const realTranslatedText = await getTranslatedTextAndRemoveSpinner(nodes, textContent, spinner, translatedWrapperNode)
+    const realTranslatedText = await getTranslatedTextAndRemoveSpinner(
+      nodes,
+      textContent,
+      spinner,
+      translatedWrapperNode,
+    )
 
     const translatedText = getDisplayTranslation(textContent, realTranslatedText)
 
@@ -135,11 +137,11 @@ export async function translateNodesBilingualMode(
       targetNode,
       translatedText,
       config.translate.translationNodeStyle,
+      config,
       forceBlockTranslation,
     )
-  }
-  finally {
-    transNodes.forEach(node => translatingNodes.delete(node))
+  } finally {
+    transNodes.forEach((node) => translatingNodes.delete(node))
   }
 }
 
@@ -150,8 +152,7 @@ export async function translateNodeTranslationOnlyMode(
   toggle: boolean = false,
 ): Promise<void> {
   const isTransNodeAndNotTranslatedWrapper = (node: Node): node is TransNode => {
-    if (isHTMLElement(node) && node.classList.contains(CONTENT_WRAPPER_CLASS))
-      return false
+    if (isHTMLElement(node) && node.classList.contains(CONTENT_WRAPPER_CLASS)) return false
     return isTransNode(node)
   }
 
@@ -184,8 +185,7 @@ export async function translateNodeTranslationOnlyMode(
     const unwrappedHTMLChild = await unwrapDeepestOnlyHTMLChild(outerTransNodes[0])
     allChildNodes = [...unwrappedHTMLChild.childNodes]
     transNodes = allChildNodes.filter(isTransNodeAndNotTranslatedWrapper)
-  }
-  else {
+  } else {
     transNodes = outerTransNodes
     allChildNodes = nodes
   }
@@ -195,10 +195,10 @@ export async function translateNodeTranslationOnlyMode(
   }
 
   try {
-    if (nodes.every(node => translatingNodes.has(node))) {
+    if (nodes.every((node) => translatingNodes.has(node))) {
       return
     }
-    nodes.forEach(node => translatingNodes.add(node))
+    nodes.forEach((node) => translatingNodes.add(node))
 
     const targetNode = transNodes.at(-1)!
 
@@ -207,8 +207,13 @@ export async function translateNodeTranslationOnlyMode(
       console.error("targetNode.parentElement is not HTMLElement", targetNode.parentElement)
       return
     }
-    const existedTranslatedWrapper = findPreviousTranslatedWrapperInside(targetNode.parentElement, walkId)
-    const existedTranslatedWrapperOutside = targetNode.parentElement.closest(`.${CONTENT_WRAPPER_CLASS}`)
+    const existedTranslatedWrapper = findPreviousTranslatedWrapperInside(
+      targetNode.parentElement,
+      walkId,
+    )
+    const existedTranslatedWrapperOutside = targetNode.parentElement.closest(
+      `.${CONTENT_WRAPPER_CLASS}`,
+    )
 
     const finalTranslatedWrapper = existedTranslatedWrapperOutside ?? existedTranslatedWrapper
     if (finalTranslatedWrapper && isHTMLElement(finalTranslatedWrapper)) {
@@ -216,29 +221,24 @@ export async function translateNodeTranslationOnlyMode(
       if (toggle) {
         return
       }
-      else {
-        // In translationOnly mode, removeTranslatedWrapperWithRestore uses innerHTML to restore content,
-        // which destroys the original DOM nodes and creates new ones. The 'nodes' array still references
-        // the old detached nodes, and targetNode can't reference to the new dom added by innerHTML anymore.
-        // Therefore, by recursively calling translateNodeTranslationOnlyMode here with the
-        // same nodes array, we ensure the translation uses the newly created DOM elements since the
-        // function will re-query and find the correct parent and child nodes from the restored DOM.
-        nodes.forEach(node => translatingNodes.delete(node))
-        void translateNodeTranslationOnlyMode(nodes, walkId, config, toggle)
-        return
-      }
+      // In translationOnly mode, removeTranslatedWrapperWithRestore uses innerHTML to restore content,
+      // which destroys the original DOM nodes and creates new ones. The 'nodes' array still references
+      // the old detached nodes, and targetNode can't reference to the new dom added by innerHTML anymore.
+      // Therefore, by recursively calling translateNodeTranslationOnlyMode here with the
+      // same nodes array, we ensure the translation uses the newly created DOM elements since the
+      // function will re-query and find the correct parent and child nodes from the restored DOM.
+      nodes.forEach((node) => translatingNodes.delete(node))
+      void translateNodeTranslationOnlyMode(nodes, walkId, config, toggle)
+      return
     }
 
-    const innerTextContent = transNodes.map(node => extractTextContent(node, config)).join("")
-    if (!innerTextContent.trim() || isNumericContent(innerTextContent))
-      return
+    const innerTextContent = transNodes.map((node) => extractTextContent(node, config)).join("")
+    if (!innerTextContent.trim() || isNumericContent(innerTextContent)) return
 
-    if (await shouldFilterSmallParagraph(innerTextContent, config))
-      return
+    if (await shouldFilterSmallParagraph(innerTextContent, config)) return
 
     const cleanTextContent = (content: string): string => {
-      if (!content)
-        return content
+      if (!content) return content
 
       let cleanedContent = content.replace(MARK_ATTRIBUTES_REGEX, "")
       cleanedContent = cleanedContent.replace(HTML_COMMENT_RE, " ")
@@ -260,13 +260,15 @@ export async function translateNodeTranslationOnlyMode(
     }
 
     const textContent = cleanTextContent(transNodes.map(getStringFormatFromNode).join(""))
-    if (!textContent)
-      return
+    if (!textContent) return
 
     const ownerDoc = getOwnerDocument(targetNode)
     const translatedWrapperNode = ownerDoc.createElement("span")
     translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
-    translatedWrapperNode.setAttribute(TRANSLATION_MODE_ATTRIBUTE, "translationOnly" satisfies TranslationMode)
+    translatedWrapperNode.setAttribute(
+      TRANSLATION_MODE_ATTRIBUTE,
+      "translationOnly" satisfies TranslationMode,
+    )
     translatedWrapperNode.setAttribute(WALKED_ATTRIBUTE, walkId)
     translatedWrapperNode.style.display = "contents"
     setTranslationDirAndLang(translatedWrapperNode, config)
@@ -275,19 +277,22 @@ export async function translateNodeTranslationOnlyMode(
     // Batch DOM insertion to reduce layout thrashing
     const insertOperation = () => {
       if (isTextNode(targetNode) || transNodes.length > 1) {
-        targetNode.parentNode?.insertBefore(
-          translatedWrapperNode,
-          targetNode.nextSibling,
-        )
-      }
-      else {
+        targetNode.parentNode?.insertBefore(translatedWrapperNode, targetNode.nextSibling)
+      } else {
         targetNode.appendChild(translatedWrapperNode)
       }
     }
     batchDOMOperation(insertOperation)
 
-    const realTranslatedText = await getTranslatedTextAndRemoveSpinner(nodes, textContent, spinner, translatedWrapperNode)
-    const translatedText = realTranslatedText ? getDisplayTranslation(textContent, realTranslatedText) : realTranslatedText
+    const realTranslatedText = await getTranslatedTextAndRemoveSpinner(
+      nodes,
+      textContent,
+      spinner,
+      translatedWrapperNode,
+    )
+    const translatedText = realTranslatedText
+      ? getDisplayTranslation(textContent, realTranslatedText)
+      : realTranslatedText
 
     if (!translatedText) {
       // Keep the wrapper when translation failed so the injected error UI remains visible.
@@ -308,10 +313,9 @@ export async function translateNodeTranslationOnlyMode(
       lastChildNode.parentNode?.insertBefore(translatedWrapperNode, lastChildNode.nextSibling)
 
       // Remove all original nodes
-      allChildNodes.forEach(childNode => childNode.remove())
+      allChildNodes.forEach((childNode) => childNode.remove())
     })
-  }
-  finally {
-    nodes.forEach(node => translatingNodes.delete(node))
+  } finally {
+    nodes.forEach((node) => translatingNodes.delete(node))
   }
 }

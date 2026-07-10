@@ -16,6 +16,8 @@ import { configAtom } from "@/utils/atoms/config"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { initI18n } from "@/utils/i18n"
+import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
 import { renderPersistentReactRoot } from "@/utils/react-root"
 import { queryClient } from "@/utils/tanstack-query"
 import { applyTheme, getLocalThemeMode, isDarkMode } from "@/utils/theme"
@@ -29,10 +31,7 @@ function HydrateAtoms({
   initialValues,
   children,
 }: {
-  initialValues: [
-    [typeof configAtom, Config],
-    [typeof baseThemeModeAtom, ThemeMode],
-  ]
+  initialValues: [[typeof configAtom, Config], [typeof baseThemeModeAtom, ThemeMode]]
   children: React.ReactNode
 }) {
   useHydrateAtoms(initialValues)
@@ -43,30 +42,37 @@ async function initApp() {
   const root = document.getElementById("root")!
   root.className = "antialiased bg-background"
 
-  const [configValue, themeMode] = await Promise.all([
-    getLocalConfig(),
-    getLocalThemeMode(),
-  ])
+  const [configValue, themeMode] = await Promise.all([getLocalConfig(), getLocalThemeMode()])
   const config = configValue ?? DEFAULT_CONFIG
+
+  await initI18n(config.uiLanguage)
 
   applyTheme(document.documentElement, isDarkMode(themeMode) ? "dark" : "light")
 
-  renderPersistentReactRoot(root, (
+  renderPersistentReactRoot(
+    root,
     <React.StrictMode>
       <JotaiProvider>
-        <HydrateAtoms initialValues={[[configAtom, config], [baseThemeModeAtom, themeMode]]}>
+        <HydrateAtoms
+          initialValues={[
+            [configAtom, config],
+            [baseThemeModeAtom, themeMode],
+          ]}
+        >
           <QueryClientProvider client={queryClient}>
             <HashRouter>
               <SidebarProvider>
                 <ThemeProvider>
                   <TooltipProvider>
                     <FrogToast />
-                    <RecoveryBoundary>
-                      <AppSidebar />
-                      <App />
-                      <HelpButton />
-                      <SettingsSearch />
-                    </RecoveryBoundary>
+                    <LocaleBoundary>
+                      <RecoveryBoundary>
+                        <AppSidebar />
+                        <App />
+                        <HelpButton />
+                        <SettingsSearch />
+                      </RecoveryBoundary>
+                    </LocaleBoundary>
                   </TooltipProvider>
                 </ThemeProvider>
               </SidebarProvider>
@@ -74,8 +80,8 @@ async function initApp() {
           </QueryClientProvider>
         </HydrateAtoms>
       </JotaiProvider>
-    </React.StrictMode>
-  ))
+    </React.StrictMode>,
+  )
 }
 
 void initApp()

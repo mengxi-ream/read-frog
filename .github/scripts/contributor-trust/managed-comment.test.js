@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { findManagedTrustComment, isManagedTrustComment } from "./managed-comment.js"
 
 describe("managed trust comments", () => {

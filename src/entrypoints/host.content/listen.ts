@@ -10,20 +10,16 @@ export function setupUrlChangeListener(signal?: AbortSignal): () => void {
       const fromUrl = new URL(from)
       const toUrl = new URL(to)
 
-      return fromUrl.origin === toUrl.origin
-        && fromUrl.pathname === toUrl.pathname
-    }
-    catch {
+      return fromUrl.origin === toUrl.origin && fromUrl.pathname === toUrl.pathname
+    } catch {
       return false
     }
   }
 
   const fire = (from: string, to: string, reason: string) => {
-    if (from === to)
-      return
+    if (from === to) return
 
-    if (isSamePage(from, to))
-      return
+    if (isSamePage(from, to)) return
 
     const ev = new CustomEvent(EVENT_NAME, { detail: { from, to, reason } })
     window.dispatchEvent(ev)
@@ -31,8 +27,8 @@ export function setupUrlChangeListener(signal?: AbortSignal): () => void {
 
   /* ---------- 1. pushState / replaceState ---------- */
   let prev = location.href
-  const originals: Record<string, typeof history.pushState> = {};
-  (["pushState", "replaceState"] as const).forEach((fn) => {
+  const originals: Record<string, typeof history.pushState> = {}
+  ;(["pushState", "replaceState"] as const).forEach((fn) => {
     const orig = history[fn]
     originals[fn] = orig
     history[fn] = function (...args) {
@@ -68,7 +64,7 @@ export function setupUrlChangeListener(signal?: AbortSignal): () => void {
     }
     ;(window as any).navigation.addEventListener("navigate", onNavigate, { signal })
     removeNavigateListener = () => {
-      (window as any).navigation.removeEventListener("navigate", onNavigate)
+      ;(window as any).navigation.removeEventListener("navigate", onNavigate)
     }
   }
 

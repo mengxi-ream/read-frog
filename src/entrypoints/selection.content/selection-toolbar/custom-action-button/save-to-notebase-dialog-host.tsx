@@ -4,7 +4,6 @@ import { useMutation } from "@tanstack/react-query"
 import { useAtom } from "jotai"
 import { useState } from "react"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
 import { Button } from "@/components/ui/base-ui/button"
 import {
@@ -20,6 +19,7 @@ import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.conten
 import { env } from "@/env"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { authClient } from "@/utils/auth/auth-client"
+import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
 import {
@@ -43,10 +43,17 @@ import { saveToNotebaseDialogAtom } from "./save-to-notebase-dialog-atom"
 
 function getAccountFallback(account: SelectionToolbarCustomActionNotebaseAccount | undefined) {
   const label = formatNotebaseConnectedAccountLabel(account)
-  return Array.from(label ?? "U").slice(0, 2).join("").toUpperCase()
+  return Array.from(label ?? "U")
+    .slice(0, 2)
+    .join("")
+    .toUpperCase()
 }
 
-function ConnectedAccountDisplay({ account }: { account: SelectionToolbarCustomActionNotebaseAccount | undefined }) {
+function ConnectedAccountDisplay({
+  account,
+}: {
+  account: SelectionToolbarCustomActionNotebaseAccount | undefined
+}) {
   const label = formatNotebaseConnectedAccountLabel(account)
   if (!label) {
     return null
@@ -65,7 +72,9 @@ function ConnectedAccountDisplay({ account }: { account: SelectionToolbarCustomA
 
 export function SaveToNotebaseDialogHost() {
   const [dialogState, setDialogState] = useAtom(saveToNotebaseDialogAtom)
-  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(configFieldsAtomMap.selectionToolbar)
+  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(
+    configFieldsAtomMap.selectionToolbar,
+  )
   const { data: session } = authClient.useSession()
   const isAuthenticated = !!session?.user
   const currentAccount = createNotebaseConnectedAccountSnapshot(session?.user)
@@ -81,19 +90,24 @@ export function SaveToNotebaseDialogHost() {
     meta: {
       suppressToast: true,
     },
-    mutationFn: async ({ pendingNotebaseSave }: {
+    mutationFn: async ({
+      pendingNotebaseSave: pendingCreateSave,
+    }: {
       pendingNotebaseSave: PendingCreateNotebaseSave
       connectedAccount: SelectionToolbarCustomActionNotebaseAccount
     }) => {
-      await orpcClient.notebase.create(buildNotebaseCreateInputFromPending(pendingNotebaseSave))
-      return pendingNotebaseSave
+      await orpcClient.notebase.create(buildNotebaseCreateInputFromPending(pendingCreateSave))
+      return pendingCreateSave
     },
-    onSuccess: async (pendingNotebaseSave, variables) => {
-      const nextConnection = buildNotebaseConnectionFromPending(pendingNotebaseSave, variables.connectedAccount)
+    onSuccess: async (createdPendingSave, variables) => {
+      const nextConnection = buildNotebaseConnectionFromPending(
+        createdPendingSave,
+        variables.connectedAccount,
+      )
       await setSelectionToolbarConfig({
         ...selectionToolbarConfig,
-        customActions: selectionToolbarConfig.customActions.map(item =>
-          item.id === pendingNotebaseSave.actionId
+        customActions: selectionToolbarConfig.customActions.map((item) =>
+          item.id === createdPendingSave.actionId
             ? { ...item, notebaseConnection: nextConnection }
             : item,
         ),
@@ -101,16 +115,15 @@ export function SaveToNotebaseDialogHost() {
 
       closeDialog()
       toast.success(i18n.t("action.saveToNotebaseSuccess"), {
-        description: pendingNotebaseSave.actionName,
+        description: createdPendingSave.actionName,
       })
 
       try {
         await sendMessage("openPage", {
-          url: getNotebaseDetailUrl(pendingNotebaseSave.notebaseId),
+          url: getNotebaseDetailUrl(createdPendingSave.notebaseId),
           active: true,
         })
-      }
-      catch (error) {
+      } catch (error) {
         logger.warn("[SaveToNotebaseDialogHost] Failed to open Notebase detail page", error)
       }
     },
@@ -142,7 +155,7 @@ export function SaveToNotebaseDialogHost() {
   })
 
   const handleCreateAndSave = () => {
-    if (!pendingNotebaseSave || pendingNotebaseSave.kind !== "create_notebase") {
+    if (pendingNotebaseSave?.kind !== "create_notebase") {
       return
     }
 
@@ -154,14 +167,14 @@ export function SaveToNotebaseDialogHost() {
     createAndSaveMutation.mutate({ pendingNotebaseSave, connectedAccount: currentAccount })
   }
 
-  const handleLoginWithPending = async (pendingNotebaseSave: PendingNotebaseSave) => {
-    if (!pendingNotebaseSave) {
+  const handleLoginWithPending = async (pendingSave: PendingNotebaseSave) => {
+    if (!pendingSave) {
       return
     }
 
     setIsPreparingLogin(true)
     try {
-      await setPendingNotebaseSave(pendingNotebaseSave)
+      await setPendingNotebaseSave(pendingSave)
 
       const loginUrl = new URL("/log-in", env.WXT_WEBSITE_URL)
       loginUrl.searchParams.set("redirectTo", "/home")
@@ -173,23 +186,22 @@ export function SaveToNotebaseDialogHost() {
 
       closeDialog()
       toast.success(i18n.t("action.saveToNotebasePendingLogin"), {
-        description: pendingNotebaseSave.kind === "save_to_connected_notebase"
-          ? i18n.t("action.saveToNotebasePendingConnectedLoginDescription")
-          : i18n.t("action.saveToNotebasePendingLoginDescription"),
+        description:
+          pendingSave.kind === "save_to_connected_notebase"
+            ? i18n.t("action.saveToNotebasePendingConnectedLoginDescription")
+            : i18n.t("action.saveToNotebasePendingLoginDescription"),
       })
-    }
-    catch (error) {
+    } catch (error) {
       toast.error(i18n.t("action.saveToNotebaseFailed"), {
         description: error instanceof Error ? error.message : undefined,
       })
-    }
-    finally {
+    } finally {
       setIsPreparingLogin(false)
     }
   }
 
   const handleLoginAndAutoCreate = async () => {
-    if (!pendingNotebaseSave || pendingNotebaseSave.kind !== "create_notebase") {
+    if (pendingNotebaseSave?.kind !== "create_notebase") {
       return
     }
 
@@ -197,7 +209,7 @@ export function SaveToNotebaseDialogHost() {
   }
 
   const handleLoginAndContinueConnectedSave = async () => {
-    if (!pendingNotebaseSave || pendingNotebaseSave.kind !== "save_to_connected_notebase") {
+    if (pendingNotebaseSave?.kind !== "save_to_connected_notebase") {
       return
     }
 
@@ -216,14 +228,14 @@ export function SaveToNotebaseDialogHost() {
   }
 
   const isCreateFlowBusy = createAndSaveMutation.isPending || isPreparingLogin
-  const connectedAccount = dialogState.open && "connectedAccount" in dialogState
-    ? dialogState.connectedAccount
-    : undefined
-  const dialogTitle = mode === "connected_login_required"
-    ? i18n.t("action.saveToNotebaseLoginConnectedTitle")
-    : mode === "foreign_connection"
-      ? i18n.t("action.saveToNotebaseConnectionUnavailableTitle")
-      : i18n.t("action.saveToNotebaseCreateTitle")
+  const connectedAccount =
+    dialogState.open && "connectedAccount" in dialogState ? dialogState.connectedAccount : undefined
+  const dialogTitle =
+    mode === "connected_login_required"
+      ? i18n.t("action.saveToNotebaseLoginConnectedTitle")
+      : mode === "foreign_connection"
+        ? i18n.t("action.saveToNotebaseConnectionUnavailableTitle")
+        : i18n.t("action.saveToNotebaseCreateTitle")
   const primaryButtonLabel = isCreateFlowBusy
     ? i18n.t("action.saveToNotebaseSaving")
     : mode === "connected_login_required"

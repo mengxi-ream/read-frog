@@ -17,7 +17,7 @@ This is the main test file that:
 
 ```typescript
 // For each version, tests like this are generated
-it('should migrate config from v5 to v6', async () => {
+it("should migrate config from v5 to v6", async () => {
   // Automatically loads v005.ts and v006.ts
   // Executes migration
   // Validates results
@@ -30,29 +30,29 @@ The new approach supporting multiple test scenarios per version:
 
 ```typescript
 // example/v007.ts
-import type { TestSeriesObject } from './types'
+import type { TestSeriesObject } from "./types"
 
-export const description = 'Add autoTranslate feature'
-export const configExample = { /* legacy compatibility */ }
+export const description = "Add autoTranslate feature"
+export const configExample = {/* legacy compatibility */}
 
 // New multi-series structure
 export const testSeries: TestSeriesObject = {
-  'default': {
-    description: 'Standard migration case',
-    config: configExample // Reuse for backward compatibility
+  default: {
+    description: "Standard migration case",
+    config: configExample, // Reuse for backward compatibility
   },
-  'empty-patterns': {
-    description: 'Edge case with empty autoTranslatePatterns',
+  "empty-patterns": {
+    description: "Edge case with empty autoTranslatePatterns",
     config: {
       // Different configuration scenario
-    }
+    },
   },
-  'multiple-patterns': {
-    description: 'Complex case with multiple patterns',
+  "multiple-patterns": {
+    description: "Complex case with multiple patterns",
     config: {
       // Another configuration scenario
-    }
-  }
+    },
+  },
 }
 ```
 
@@ -88,44 +88,44 @@ When you add a new migration version, you have two options:
 
 ```typescript
 // example/v016.ts - Translation mode migration
-import type { TestSeriesObject } from './types'
+import type { TestSeriesObject } from "./types"
 
-export const description = 'Add translation mode'
-export const configExample = { /* standard config */ }
+export const description = "Add translation mode"
+export const configExample = {/* standard config */}
 
 export const testSeries: TestSeriesObject = {
-  'default': {
-    description: 'Standard bilingual mode migration',
-    config: configExample
+  default: {
+    description: "Standard bilingual mode migration",
+    config: configExample,
   },
-  'translation-only': {
-    description: 'Edge case: translation-only mode',
+  "translation-only": {
+    description: "Edge case: translation-only mode",
     config: {
       translate: {
-        mode: 'translation-only', // Different mode
+        mode: "translation-only", // Different mode
         // ... other config
-      }
-    }
+      },
+    },
   },
-  'boundary-values': {
-    description: 'Edge case: minimum/maximum values',
+  "boundary-values": {
+    description: "Edge case: minimum/maximum values",
     config: {
       translate: {
         requestQueueConfig: {
           capacity: 1, // Minimum
-          rate: 1 // Minimum
-        }
-      }
-    }
+          rate: 1, // Minimum
+        },
+      },
+    },
   },
-  'unicode-patterns': {
-    description: 'Edge case: unicode in patterns',
+  "unicode-patterns": {
+    description: "Edge case: unicode in patterns",
     config: {
       translate: {
-        autoTranslatePatterns: ['*.中文.com', 'παγιά.gr']
-      }
-    }
-  }
+        autoTranslatePatterns: ["*.中文.com", "παγιά.gr"],
+      },
+    },
+  },
 }
 ```
 

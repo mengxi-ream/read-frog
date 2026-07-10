@@ -33,15 +33,16 @@ export function useBatchRequestRecords(currentDaysBack: number) {
       const daysBack = dayRange - 1
       return {
         queryKey: ["previous-period-records", daysBack],
-        queryFn: () => getRangeBatchRequestRecords(
-          previousPeriodStartDay(daysBack),
-          previousPeriodEndDay(daysBack),
-        ),
+        queryFn: () =>
+          getRangeBatchRequestRecords(
+            previousPeriodStartDay(daysBack),
+            previousPeriodEndDay(daysBack),
+          ),
       }
     }),
   })
 
-  const currentIndex = RECENT_DAYS.findIndex(days => days - 1 === currentDaysBack)
+  const currentIndex = RECENT_DAYS.findIndex((days) => days - 1 === currentDaysBack)
   const currentPeriodQuery = currentPeriodQueries[currentIndex] ?? currentPeriodQueries[0]
   const previousPeriodQuery = previousPeriodQueries[currentIndex] ?? previousPeriodQueries[0]
 

@@ -18,14 +18,20 @@ import { flushBatchedOperations } from "@/utils/host/dom/batch-dom"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
 import { translateWalkedElement } from "@/utils/host/translate/node-manipulation"
 import { translateTextForPage } from "@/utils/host/translate/translate-variants"
-import { expectNodeLabels, expectTranslatedContent, expectTranslationWrapper, MOCK_ORIGINAL_TEXT, MOCK_TRANSLATION } from "./utils"
+import {
+  expectNodeLabels,
+  expectTranslatedContent,
+  expectTranslationWrapper,
+  MOCK_ORIGINAL_TEXT,
+  MOCK_TRANSLATION,
+} from "./utils"
 
 vi.mock("@/utils/host/translate/translate-variants", () => ({
-  translateTextForPage: vi.fn(() => Promise.resolve(MOCK_TRANSLATION)),
+  translateTextForPage: vi.fn<(...args: any[]) => any>(() => Promise.resolve(MOCK_TRANSLATION)),
 }))
 
 vi.mock("@/utils/config/storage", () => ({
-  getLocalConfig: vi.fn(),
+  getLocalConfig: vi.fn<(...args: any[]) => any>(),
 }))
 
 const BILINGUAL_CONFIG: Config = {
@@ -52,7 +58,17 @@ function setHost(host: string) {
   })
 }
 
-function createRect({ top, left, width, height }: { top: number, left: number, width: number, height: number }): DOMRect {
+function createRect({
+  top,
+  left,
+  width,
+  height,
+}: {
+  top: number
+  left: number
+  width: number
+  height: number
+}): DOMRect {
   return {
     top,
     left,
@@ -74,7 +90,7 @@ function createRect({ top, left, width, height }: { top: number, left: number, w
         y: top,
       }
     },
-  } as DOMRect
+  }
 }
 
 describe("translate", () => {
@@ -86,7 +102,7 @@ describe("translate", () => {
     const { getLocalConfig } = await import("@/utils/config/storage")
     vi.mocked(getLocalConfig).mockResolvedValue(DEFAULT_CONFIG)
 
-    window.getComputedStyle = vi.fn((element) => {
+    window.getComputedStyle = vi.fn<(...args: any[]) => any>((element) => {
       const originalStyle = originalGetComputedStyle(element)
 
       // Check if element has inline style float property
@@ -110,12 +126,24 @@ describe("translate", () => {
   })
 
   // Helper functions
-  async function removeOrShowPageTranslation(translationMode: TranslationMode, toggle: boolean = false) {
+  async function removeOrShowPageTranslation(
+    translationMode: TranslationMode,
+    toggle: boolean = false,
+  ) {
     const id = crypto.randomUUID()
 
-    walkAndLabelElement(document.body, id, translationMode === "bilingual" ? BILINGUAL_CONFIG : TRANSLATION_ONLY_CONFIG)
+    walkAndLabelElement(
+      document.body,
+      id,
+      translationMode === "bilingual" ? BILINGUAL_CONFIG : TRANSLATION_ONLY_CONFIG,
+    )
     await act(async () => {
-      await translateWalkedElement(document.body, id, translationMode === "bilingual" ? BILINGUAL_CONFIG : TRANSLATION_ONLY_CONFIG, toggle)
+      await translateWalkedElement(
+        document.body,
+        id,
+        translationMode === "bilingual" ? BILINGUAL_CONFIG : TRANSLATION_ONLY_CONFIG,
+        toggle,
+      )
       // Flush batched DOM operations to ensure all changes are applied before assertions
       flushBatchedOperations()
     })
@@ -136,11 +164,7 @@ describe("translate", () => {
   describe("block node with single child node", () => {
     describe("text node", () => {
       it("bilingual mode: should insert translation wrapper after original text node", async () => {
-        render(
-          <div data-testid="test-node">
-            {MOCK_ORIGINAL_TEXT}
-          </div>,
-        )
+        render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
         const node = screen.getByTestId("test-node")
         await removeOrShowPageTranslation("bilingual", true)
 
@@ -154,11 +178,7 @@ describe("translate", () => {
         expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT)
       })
       it("translation only mode: should replace original text with translation wrapper", async () => {
-        render(
-          <div data-testid="test-node">
-            {MOCK_ORIGINAL_TEXT}
-          </div>,
-        )
+        render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
         const node = screen.getByTestId("test-node")
         await removeOrShowPageTranslation("translationOnly", true)
 
@@ -175,9 +195,7 @@ describe("translate", () => {
       it("bilingual mode: should insert translation wrapper after inline node content", async () => {
         render(
           <div data-testid="test-node">
-            <div style={{ display: "inline" }}>
-              {MOCK_ORIGINAL_TEXT}
-            </div>
+            <div style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</div>
           </div>,
         )
         const node = screen.getByTestId("test-node")
@@ -196,9 +214,7 @@ describe("translate", () => {
       it("translation only mode: should replace inline node content with translation wrapper", async () => {
         render(
           <div data-testid="test-node">
-            <span style={{ display: "inline" }}>
-              {MOCK_ORIGINAL_TEXT}
-            </span>
+            <span style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</span>
           </div>,
         )
         const node = screen.getByTestId("test-node")
@@ -257,7 +273,9 @@ describe("translate", () => {
       it("bilingual mode: should insert translation wrapper after deepest inline node", async () => {
         render(
           <div data-testid="test-node">
-            <div><span style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</span></div>
+            <div>
+              <span style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</span>
+            </div>
           </div>,
         )
         const node = screen.getByTestId("test-node")
@@ -277,7 +295,9 @@ describe("translate", () => {
       it("translation only mode: should replace deepest inline node content with translation wrapper", async () => {
         render(
           <div data-testid="test-node">
-            <div><span style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</span></div>
+            <div>
+              <span style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</span>
+            </div>
           </div>,
         )
         const node = screen.getByTestId("test-node")
@@ -298,7 +318,9 @@ describe("translate", () => {
       it("bilingual mode: should insert translation wrapper after deepest block node content", async () => {
         render(
           <div data-testid="test-node">
-            <div style={{ display: "inline" }}><div>{MOCK_ORIGINAL_TEXT}</div></div>
+            <div style={{ display: "inline" }}>
+              <div>{MOCK_ORIGINAL_TEXT}</div>
+            </div>
           </div>,
         )
         const node = screen.getByTestId("test-node")
@@ -318,7 +340,9 @@ describe("translate", () => {
       it("translation only mode: should replace deepest block node content with translation wrapper", async () => {
         render(
           <div data-testid="test-node">
-            <div style={{ display: "inline" }}><div>{MOCK_ORIGINAL_TEXT}</div></div>
+            <div style={{ display: "inline" }}>
+              <div>{MOCK_ORIGINAL_TEXT}</div>
+            </div>
           </div>,
         )
         const node = screen.getByTestId("test-node")
@@ -339,7 +363,9 @@ describe("translate", () => {
       it("bilingual mode: should insert translation wrapper after nested inline node content", async () => {
         render(
           <div data-testid="test-node">
-            <div style={{ display: "inline" }}><span style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</span></div>
+            <div style={{ display: "inline" }}>
+              <span style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</span>
+            </div>
           </div>,
         )
         const node = screen.getByTestId("test-node")
@@ -359,7 +385,9 @@ describe("translate", () => {
       it("translation only mode: should replace nested inline node content with translation wrapper", async () => {
         render(
           <div data-testid="test-node">
-            <div style={{ display: "inline" }}><span style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</span></div>
+            <div style={{ display: "inline" }}>
+              <span style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</span>
+            </div>
           </div>,
         )
         const node = screen.getByTestId("test-node")
@@ -549,7 +577,9 @@ describe("translate", () => {
 
         await removeOrShowPageTranslation("bilingual", true)
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-        expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
+        expect(node.textContent).toBe(
+          `${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`,
+        )
       })
 
       it("translation only mode: should replace all inline nodes with single wrapper", async () => {
@@ -569,7 +599,9 @@ describe("translate", () => {
 
         await removeOrShowPageTranslation("translationOnly", true)
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-        expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
+        expect(node.textContent).toBe(
+          `${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`,
+        )
       })
     })
     describe("inline nodes with aria-hidden block children", () => {
@@ -620,7 +652,9 @@ describe("translate", () => {
 
         await removeOrShowPageTranslation("bilingual", true)
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-        expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
+        expect(node.textContent).toBe(
+          `${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`,
+        )
       })
       it("translation only mode: should replace mixed text and inline nodes with single wrapper", async () => {
         render(
@@ -640,7 +674,9 @@ describe("translate", () => {
 
         await removeOrShowPageTranslation("translationOnly", true)
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-        expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
+        expect(node.textContent).toBe(
+          `${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`,
+        )
       })
     })
     describe("inline nodes + block node + inline nodes", () => {
@@ -670,7 +706,9 @@ describe("translate", () => {
 
         await removeOrShowPageTranslation("bilingual", true)
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-        expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
+        expect(node.textContent).toBe(
+          `${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`,
+        )
       })
       it("translation only mode: should replace inline groups and block node with separate wrappers", async () => {
         render(
@@ -694,7 +732,9 @@ describe("translate", () => {
 
         await removeOrShowPageTranslation("translationOnly", true)
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-        expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
+        expect(node.textContent).toBe(
+          `${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`,
+        )
       })
     })
     describe("floating inline HTML nodes", () => {
@@ -794,7 +834,9 @@ describe("translate", () => {
         it("bilingual mode: marks block translation for float wrap when inline-block would drop below the float", async () => {
           render(
             <div data-testid="test-node">
-              <figure data-testid="float-node" style={{ float: "right" }}><span aria-hidden="true" /></figure>
+              <figure data-testid="float-node" style={{ float: "right" }}>
+                <span aria-hidden="true" />
+              </figure>
               <p data-testid="paragraph">{MOCK_ORIGINAL_TEXT}</p>
             </div>,
           )
@@ -802,23 +844,24 @@ describe("translate", () => {
           const paragraph = screen.getByTestId("paragraph")
           const floatNode = screen.getByTestId("float-node")
 
-          const rectSpy = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
-            if (this === floatNode) {
-              return createRect({ top: 80, left: 600, width: 200, height: 320 })
-            }
-            if (this === paragraph) {
-              return createRect({ top: 100, left: 0, width: 600, height: 60 })
-            }
-            if (this.classList.contains(BLOCK_CONTENT_CLASS)) {
-              return createRect({ top: 420, left: 0, width: 500, height: 40 })
-            }
-            return createRect({ top: 0, left: 0, width: 200, height: 20 })
-          })
+          const rectSpy = vi
+            .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+            .mockImplementation(function (this: HTMLElement) {
+              if (this === floatNode) {
+                return createRect({ top: 80, left: 600, width: 200, height: 320 })
+              }
+              if (this === paragraph) {
+                return createRect({ top: 100, left: 0, width: 600, height: 60 })
+              }
+              if (this.classList.contains(BLOCK_CONTENT_CLASS)) {
+                return createRect({ top: 420, left: 0, width: 500, height: 40 })
+              }
+              return createRect({ top: 0, left: 0, width: 200, height: 20 })
+            })
 
           try {
             await removeOrShowPageTranslation("bilingual", true)
-          }
-          finally {
+          } finally {
             rectSpy.mockRestore()
           }
 
@@ -832,30 +875,33 @@ describe("translate", () => {
         it("bilingual mode: leaves block translation unchanged when the translated node stays beside the float", async () => {
           render(
             <div data-testid="test-node">
-              <figure data-testid="float-node" style={{ float: "right" }}><span aria-hidden="true" /></figure>
+              <figure data-testid="float-node" style={{ float: "right" }}>
+                <span aria-hidden="true" />
+              </figure>
               <p data-testid="paragraph">{MOCK_ORIGINAL_TEXT}</p>
             </div>,
           )
           const paragraph = screen.getByTestId("paragraph")
           const floatNode = screen.getByTestId("float-node")
 
-          const rectSpy = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
-            if (this === floatNode) {
-              return createRect({ top: 80, left: 600, width: 200, height: 320 })
-            }
-            if (this === paragraph) {
-              return createRect({ top: 420, left: 0, width: 600, height: 60 })
-            }
-            if (this.classList.contains(BLOCK_CONTENT_CLASS)) {
-              return createRect({ top: 500, left: 0, width: 500, height: 40 })
-            }
-            return createRect({ top: 0, left: 0, width: 200, height: 20 })
-          })
+          const rectSpy = vi
+            .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+            .mockImplementation(function (this: HTMLElement) {
+              if (this === floatNode) {
+                return createRect({ top: 80, left: 600, width: 200, height: 320 })
+              }
+              if (this === paragraph) {
+                return createRect({ top: 420, left: 0, width: 600, height: 60 })
+              }
+              if (this.classList.contains(BLOCK_CONTENT_CLASS)) {
+                return createRect({ top: 500, left: 0, width: 500, height: 40 })
+              }
+              return createRect({ top: 0, left: 0, width: 200, height: 20 })
+            })
 
           try {
             await removeOrShowPageTranslation("bilingual", true)
-          }
-          finally {
+          } finally {
             rectSpy.mockRestore()
           }
 
@@ -881,24 +927,30 @@ describe("translate", () => {
 
         expectNodeLabels(node, [BLOCK_ATTRIBUTE])
         const wrapper1 = node.children[0]
-        expectTranslatedContent(wrapper1 as Element, BLOCK_CONTENT_CLASS)
+        expectTranslatedContent(wrapper1, BLOCK_CONTENT_CLASS)
         const wrapper2 = node.children[2]
-        expectTranslatedContent(wrapper2 as Element, BLOCK_CONTENT_CLASS)
+        expectTranslatedContent(wrapper2, BLOCK_CONTENT_CLASS)
         const wrapper3 = node.children[4]
-        expectTranslatedContent(wrapper3 as Element, BLOCK_CONTENT_CLASS)
+        expectTranslatedContent(wrapper3, BLOCK_CONTENT_CLASS)
 
         await removeOrShowPageTranslation("bilingual", true)
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-        expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
+        expect(node.textContent).toBe(
+          `${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`,
+        )
       })
       it("bilingual mode: should let br node to make its ancestor node to be forced block node", async () => {
         // Github issue: https://github.com/mengxi-ream/read-frog/issues/587
         render(
           <div data-testid="test-node">
             {MOCK_ORIGINAL_TEXT}
-            <span><br /></span>
+            <span>
+              <br />
+            </span>
             {MOCK_ORIGINAL_TEXT}
-            <span><br /></span>
+            <span>
+              <br />
+            </span>
             {MOCK_ORIGINAL_TEXT}
           </div>,
         )
@@ -907,15 +959,17 @@ describe("translate", () => {
 
         expectNodeLabels(node, [BLOCK_ATTRIBUTE])
         const wrapper1 = node.children[0]
-        expectTranslatedContent(wrapper1 as Element, BLOCK_CONTENT_CLASS)
+        expectTranslatedContent(wrapper1, BLOCK_CONTENT_CLASS)
         const wrapper2 = node.children[2]
-        expectTranslatedContent(wrapper2 as Element, BLOCK_CONTENT_CLASS)
+        expectTranslatedContent(wrapper2, BLOCK_CONTENT_CLASS)
         const wrapper3 = node.children[4]
-        expectTranslatedContent(wrapper3 as Element, BLOCK_CONTENT_CLASS)
+        expectTranslatedContent(wrapper3, BLOCK_CONTENT_CLASS)
 
         await removeOrShowPageTranslation("bilingual", true)
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-        expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
+        expect(node.textContent).toBe(
+          `${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`,
+        )
       })
       it("bilingual mode: should insert separate wrappers for inline groups separated by br", async () => {
         render(
@@ -947,7 +1001,9 @@ describe("translate", () => {
 
         await removeOrShowPageTranslation("bilingual", true)
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-        expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
+        expect(node.textContent).toBe(
+          `${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`,
+        )
       })
       it("translation only mode: should replace inline groups separated by br with wrappers", async () => {
         render(
@@ -974,7 +1030,9 @@ describe("translate", () => {
 
         await removeOrShowPageTranslation("translationOnly", true)
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-        expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
+        expect(node.textContent).toBe(
+          `${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`,
+        )
       })
     })
     describe("inline node has only one block node child", () => {
@@ -983,7 +1041,9 @@ describe("translate", () => {
         render(
           <div data-testid="test-node">
             {MOCK_ORIGINAL_TEXT}
-            <span style={{ display: "inline" }}><div style={{ display: "block" }}>{MOCK_ORIGINAL_TEXT}</div></span>
+            <span style={{ display: "inline" }}>
+              <div style={{ display: "block" }}>{MOCK_ORIGINAL_TEXT}</div>
+            </span>
             <span style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</span>
           </div>,
         )
@@ -998,13 +1058,17 @@ describe("translate", () => {
 
         await removeOrShowPageTranslation("bilingual", true)
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-        expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
+        expect(node.textContent).toBe(
+          `${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`,
+        )
       })
       it("translation only mode: should replace inline node with only one block node child with single wrapper", async () => {
         render(
           <div data-testid="test-node">
             {MOCK_ORIGINAL_TEXT}
-            <span style={{ display: "inline" }}><div style={{ display: "block" }}>{MOCK_ORIGINAL_TEXT}</div></span>
+            <span style={{ display: "inline" }}>
+              <div style={{ display: "block" }}>{MOCK_ORIGINAL_TEXT}</div>
+            </span>
             <span style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</span>
           </div>,
         )
@@ -1017,7 +1081,9 @@ describe("translate", () => {
 
         await removeOrShowPageTranslation("translationOnly", true)
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-        expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
+        expect(node.textContent).toBe(
+          `${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`,
+        )
       })
       it("should treat inline element with only one meaningful block child as inline (not block)", async () => {
         // https://github.com/mengxi-ream/read-frog/issues/530
@@ -1083,11 +1149,15 @@ describe("translate", () => {
         const wrapper = expectTranslationWrapper(node.children[0].children[0], "bilingual")
         expect(wrapper).toBe(node.children[0].children[0].lastChild)
         expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS)
-        expect(node.children[0].children[0].querySelectorAll(`.${CONTENT_WRAPPER_CLASS}`)).toHaveLength(1)
+        expect(
+          node.children[0].children[0].querySelectorAll(`.${CONTENT_WRAPPER_CLASS}`),
+        ).toHaveLength(1)
 
         await removeOrShowPageTranslation("bilingual", true)
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-        expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
+        expect(node.textContent).toBe(
+          `${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`,
+        )
       })
     })
     describe("force inline tags inside paragraphs", () => {
@@ -1113,7 +1183,9 @@ describe("translate", () => {
 
         await removeOrShowPageTranslation("bilingual", true)
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-        expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
+        expect(node.textContent).toBe(
+          `${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`,
+        )
       })
       it("bilingual mode: should skip ruby annotations without splitting the paragraph", async () => {
         // https://github.com/mengxi-ream/read-frog/pull/1055
@@ -1143,7 +1215,9 @@ describe("translate", () => {
 
         await removeOrShowPageTranslation("bilingual", true)
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-        expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}(${MOCK_ORIGINAL_TEXT})${MOCK_ORIGINAL_TEXT}`)
+        expect(node.textContent).toBe(
+          `${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}(${MOCK_ORIGINAL_TEXT})${MOCK_ORIGINAL_TEXT}`,
+        )
       })
     })
   })
@@ -1202,7 +1276,9 @@ describe("translate", () => {
       // https://github.com/mengxi-ream/read-frog/issues/717
       render(
         <div data-testid="test-node">
-          <div><div style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</div></div>
+          <div>
+            <div style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</div>
+          </div>
           <div></div>
         </div>,
       )
@@ -1218,7 +1294,7 @@ describe("translate", () => {
 
       await removeOrShowPageTranslation("bilingual", true)
       expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-      expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}`)
+      expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT)
     })
   })
   describe("empty text nodes with only one inline node in middle", () => {
@@ -1262,13 +1338,12 @@ describe("translate", () => {
       expect(node.textContent).toBe(` ${MOCK_ORIGINAL_TEXT}\n `)
     })
   })
-  describe("empty text nodes with \"no need to translate\" node in middle", () => {
+  describe('empty text nodes with "no need to translate" node in middle', () => {
     it("bilingual mode: should not insert translation wrapper", async () => {
       render(
         <div data-testid="test-node">
           {" "}
-          <div>{MOCK_TRANSLATION}</div>
-          {" "}
+          <div>{MOCK_TRANSLATION}</div>{" "}
         </div>,
       )
       const node = screen.getByTestId("test-node")
@@ -1283,7 +1358,7 @@ describe("translate", () => {
       expect(node.textContent).toBe(` ${MOCK_TRANSLATION} `)
     })
     it("translation only mode: should have translation wrapper", async () => {
-    // Mock translateTextForPage to return the exact HTML string with spaces
+      // Mock translateTextForPage to return the exact HTML string with spaces
       const TRANSLATED_TEXT = `<div>${MOCK_TRANSLATION}</div>`
       vi.mocked(translateTextForPage).mockResolvedValueOnce(TRANSLATED_TEXT)
 
@@ -1305,11 +1380,7 @@ describe("translate", () => {
   })
   describe("switching between translation modes", () => {
     it("should properly clean up translations when switching from bilingual to translation-only mode", async () => {
-      render(
-        <div data-testid="test-node">
-          {MOCK_ORIGINAL_TEXT}
-        </div>,
-      )
+      render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
       const node = screen.getByTestId("test-node")
       await removeOrShowPageTranslation("bilingual", true)
       await removeOrShowPageTranslation("translationOnly", true)
@@ -1318,11 +1389,7 @@ describe("translate", () => {
       expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT)
     })
     it("should properly clean up translations when switching from translation-only to bilingual mode", async () => {
-      render(
-        <div data-testid="test-node">
-          {MOCK_ORIGINAL_TEXT}
-        </div>,
-      )
+      render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
       const node = screen.getByTestId("test-node")
       await removeOrShowPageTranslation("translationOnly", true)
       await removeOrShowPageTranslation("bilingual", true)
@@ -1336,11 +1403,7 @@ describe("translate", () => {
     it("bilingual mode: should keep original text and show inline error UI when translation fails", async () => {
       vi.mocked(translateTextForPage).mockRejectedValueOnce(new Error("Translation failed"))
 
-      render(
-        <div data-testid="test-node">
-          {MOCK_ORIGINAL_TEXT}
-        </div>,
-      )
+      render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
       const node = screen.getByTestId("test-node")
       await removeOrShowPageTranslation("bilingual", true)
 
@@ -1352,11 +1415,7 @@ describe("translate", () => {
     it("translationOnly mode: should keep original text and show inline error UI when translation fails", async () => {
       vi.mocked(translateTextForPage).mockRejectedValueOnce(new Error("Translation failed"))
 
-      render(
-        <div data-testid="test-node">
-          {MOCK_ORIGINAL_TEXT}
-        </div>,
-      )
+      render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
       const node = screen.getByTestId("test-node")
       await removeOrShowPageTranslation("translationOnly", true)
 
@@ -1368,11 +1427,7 @@ describe("translate", () => {
     it("translationOnly mode: should still remove the wrapper when translation returns an empty string", async () => {
       vi.mocked(translateTextForPage).mockResolvedValueOnce("")
 
-      render(
-        <div data-testid="test-node">
-          {MOCK_ORIGINAL_TEXT}
-        </div>,
-      )
+      render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
       const node = screen.getByTestId("test-node")
       await removeOrShowPageTranslation("translationOnly", true)
 
@@ -1429,6 +1484,57 @@ describe("translate", () => {
     })
 
     describe("github diff table - should not translate review code snippets", () => {
+      it("bilingual mode: should keep github release attribution in translation source", async () => {
+        const originalLocation = window.location
+        setHost("github.com")
+        vi.mocked(translateTextForPage).mockClear()
+
+        try {
+          render(
+            <div data-testid="test-node" className="markdown-body">
+              <ul>
+                <li>
+                  {"perf(main): drop localhost label routes when a worktree is removed by "}
+                  <a
+                    className="user-mention notranslate"
+                    data-hovercard-type="user"
+                    href="/taiiiyang"
+                  >
+                    @taiiiyang
+                  </a>
+                  {" in "}
+                  <a
+                    className="issue-link js-issue-link"
+                    data-hovercard-type="pull_request"
+                    href="/stablyai/orca/pull/7557"
+                  >
+                    #7557
+                  </a>
+                </li>
+              </ul>
+            </div>,
+          )
+
+          await removeOrShowPageTranslation("bilingual", true)
+
+          expect(translateTextForPage).toHaveBeenCalledWith(
+            "perf(main): drop localhost label routes when a worktree is removed by @taiiiyang in #7557",
+          )
+          expect(document.querySelector(".user-mention")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(
+            false,
+          )
+          expect(document.querySelector(".issue-link")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(
+            false,
+          )
+        } finally {
+          Object.defineProperty(window, "location", {
+            value: originalLocation,
+            writable: true,
+            configurable: true,
+          })
+        }
+      })
+
       it("bilingual mode: should skip github diff-table content entirely", async () => {
         const originalLocation = window.location
         setHost("github.com")
@@ -1452,8 +1558,7 @@ describe("translate", () => {
           expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
           expect(node.textContent).toBe("const foo = 1")
           expect(translateTextForPage).not.toHaveBeenCalled()
-        }
-        finally {
+        } finally {
           Object.defineProperty(window, "location", {
             value: originalLocation,
             writable: true,
@@ -1502,11 +1607,7 @@ describe("translate", () => {
   describe("numeric content handling", () => {
     describe("bilingual mode", () => {
       it("should not translate pure numbers", async () => {
-        render(
-          <div data-testid="test-node">
-            12345
-          </div>,
-        )
+        render(<div data-testid="test-node">12345</div>)
         const node = screen.getByTestId("test-node")
         await removeOrShowPageTranslation("bilingual", true)
 
@@ -1516,11 +1617,7 @@ describe("translate", () => {
       })
 
       it("should not translate numbers with thousand separators", async () => {
-        render(
-          <div data-testid="test-node">
-            1,234,567
-          </div>,
-        )
+        render(<div data-testid="test-node">1,234,567</div>)
         const node = screen.getByTestId("test-node")
         await removeOrShowPageTranslation("bilingual", true)
 
@@ -1529,11 +1626,7 @@ describe("translate", () => {
       })
 
       it("should not translate decimal numbers", async () => {
-        render(
-          <div data-testid="test-node">
-            3.14159
-          </div>,
-        )
+        render(<div data-testid="test-node">3.14159</div>)
         const node = screen.getByTestId("test-node")
         await removeOrShowPageTranslation("bilingual", true)
 
@@ -1542,11 +1635,7 @@ describe("translate", () => {
       })
 
       it("should translate text with numbers mixed in", async () => {
-        render(
-          <div data-testid="test-node">
-            原文 123 文字
-          </div>,
-        )
+        render(<div data-testid="test-node">原文 123 文字</div>)
         const node = screen.getByTestId("test-node")
         await removeOrShowPageTranslation("bilingual", true)
 
@@ -1558,11 +1647,7 @@ describe("translate", () => {
 
     describe("translation only mode", () => {
       it("should not translate pure numbers", async () => {
-        render(
-          <div data-testid="test-node">
-            67890
-          </div>,
-        )
+        render(<div data-testid="test-node">67890</div>)
         const node = screen.getByTestId("test-node")
         await removeOrShowPageTranslation("translationOnly", true)
 
@@ -1572,11 +1657,7 @@ describe("translate", () => {
       })
 
       it("should not translate numbers with spaces", async () => {
-        render(
-          <div data-testid="test-node">
-            1 234 567
-          </div>,
-        )
+        render(<div data-testid="test-node">1 234 567</div>)
         const node = screen.getByTestId("test-node")
         await removeOrShowPageTranslation("translationOnly", true)
 
@@ -1585,11 +1666,7 @@ describe("translate", () => {
       })
 
       it("should not translate European format numbers", async () => {
-        render(
-          <div data-testid="test-node">
-            1.234,56
-          </div>,
-        )
+        render(<div data-testid="test-node">1.234,56</div>)
         const node = screen.getByTestId("test-node")
         await removeOrShowPageTranslation("translationOnly", true)
 
@@ -1598,11 +1675,7 @@ describe("translate", () => {
       })
 
       it("should translate text with numbers", async () => {
-        render(
-          <div data-testid="test-node">
-            原文包含数字 999
-          </div>,
-        )
+        render(<div data-testid="test-node">原文包含数字 999</div>)
         const node = screen.getByTestId("test-node")
         await removeOrShowPageTranslation("translationOnly", true)
 
@@ -1714,7 +1787,9 @@ describe("translate", () => {
 
       await removeOrShowPageTranslation("bilingual", true)
       expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-      expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
+      expect(node.textContent).toBe(
+        `${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`,
+      )
     })
     it("inline-flex parent: should unwrap into the inline-flex container and translate it once", async () => {
       render(
@@ -1739,7 +1814,9 @@ describe("translate", () => {
 
       await removeOrShowPageTranslation("bilingual", true)
       expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-      expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
+      expect(node.textContent).toBe(
+        `${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`,
+      )
     })
   })
 
@@ -1759,7 +1836,9 @@ describe("translate", () => {
         await removeOrShowPageTranslation("bilingual", true)
 
         // Whitespace-only nodes return single space for word separation
-        expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`)
+        expect(translateTextForPage).toHaveBeenCalledWith(
+          `${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`,
+        )
       })
     })
 
@@ -1774,7 +1853,9 @@ describe("translate", () => {
         )
         await removeOrShowPageTranslation("bilingual", true)
 
-        expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`)
+        expect(translateTextForPage).toHaveBeenCalledWith(
+          `${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`,
+        )
       })
     })
 
@@ -1783,11 +1864,7 @@ describe("translate", () => {
         vi.mocked(translateTextForPage).mockClear()
         // Text like "\nHello\n" - the newlines are trimmed without adding spaces
         // Final text is trimmed before translation anyway
-        render(
-          <div data-testid="test-node">
-            {`\n${MOCK_ORIGINAL_TEXT} \n`}
-          </div>,
-        )
+        render(<div data-testid="test-node">{`\n${MOCK_ORIGINAL_TEXT} \n`}</div>)
         await removeOrShowPageTranslation("bilingual", true)
 
         expect(translateTextForPage).toHaveBeenCalledWith(MOCK_ORIGINAL_TEXT)
@@ -1796,11 +1873,7 @@ describe("translate", () => {
       it("bilingual mode: space leading/trailing is trimmed before translation", async () => {
         vi.mocked(translateTextForPage).mockClear()
         // Text like " Hello " - extracted with spaces, then trimmed before translation
-        render(
-          <div data-testid="test-node">
-            {` ${MOCK_ORIGINAL_TEXT} `}
-          </div>,
-        )
+        render(<div data-testid="test-node">{` ${MOCK_ORIGINAL_TEXT} `}</div>)
         await removeOrShowPageTranslation("bilingual", true)
 
         // Final text is trimmed before translation
@@ -1821,21 +1894,24 @@ describe("translate", () => {
         await removeOrShowPageTranslation("bilingual", true)
 
         // Whitespace-only node returns single space to preserve word separation
-        expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`)
+        expect(translateTextForPage).toHaveBeenCalledWith(
+          `${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`,
+        )
       })
 
       it("bilingual mode: space-separated inline elements", async () => {
         vi.mocked(translateTextForPage).mockClear()
         render(
           <div data-testid="test-node">
-            <span style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</span>
-            {" "}
+            <span style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</span>{" "}
             <span style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</span>
           </div>,
         )
         await removeOrShowPageTranslation("bilingual", true)
 
-        expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`)
+        expect(translateTextForPage).toHaveBeenCalledWith(
+          `${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`,
+        )
       })
     })
 
@@ -1917,11 +1993,7 @@ describe("translate", () => {
     describe("minCharactersPerNode filter", () => {
       it("should skip translation for text shorter than minCharactersPerNode", async () => {
         vi.mocked(translateTextForPage).mockClear()
-        render(
-          <div data-testid="test-node">
-            {SHORT_TEXT}
-          </div>,
-        )
+        render(<div data-testid="test-node">{SHORT_TEXT}</div>)
         const node = screen.getByTestId("test-node")
         await translateWithConfig(MIN_CHARS_CONFIG, true)
 
@@ -1932,11 +2004,7 @@ describe("translate", () => {
 
       it("should translate text longer than minCharactersPerNode", async () => {
         vi.mocked(translateTextForPage).mockClear()
-        render(
-          <div data-testid="test-node">
-            {LONG_TEXT}
-          </div>,
-        )
+        render(<div data-testid="test-node">{LONG_TEXT}</div>)
         const node = screen.getByTestId("test-node")
         await translateWithConfig(MIN_CHARS_CONFIG, true)
 
@@ -1949,11 +2017,7 @@ describe("translate", () => {
     describe("minWordsPerNode filter", () => {
       it("should skip translation for text with fewer words than minWordsPerNode", async () => {
         vi.mocked(translateTextForPage).mockClear()
-        render(
-          <div data-testid="test-node">
-            Two words
-          </div>,
-        )
+        render(<div data-testid="test-node">Two words</div>)
         const node = screen.getByTestId("test-node")
         await translateWithConfig(MIN_WORDS_CONFIG, true)
 
@@ -1964,11 +2028,7 @@ describe("translate", () => {
 
       it("should translate text with more words than minWordsPerNode", async () => {
         vi.mocked(translateTextForPage).mockClear()
-        render(
-          <div data-testid="test-node">
-            {LONG_TEXT}
-          </div>,
-        )
+        render(<div data-testid="test-node">{LONG_TEXT}</div>)
         const node = screen.getByTestId("test-node")
         await translateWithConfig(MIN_WORDS_CONFIG, true)
 

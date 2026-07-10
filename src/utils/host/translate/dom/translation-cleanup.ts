@@ -50,9 +50,7 @@ export function removeTranslatedWrapperWithRestore(wrapper: HTMLElement): void {
   batchDOMOperation(() => wrapper.remove())
 }
 
-export function removeAllTranslatedWrapperNodes(
-  root: Document | ShadowRoot = document,
-): void {
+export function removeAllTranslatedWrapperNodes(root: Document | ShadowRoot = document): void {
   const translatedNodes = deepQueryTopLevelSelector(root, isTranslatedWrapperNode)
   translatedNodes.forEach((contentWrapperNode) => {
     removeTranslatedWrapperWithRestore(contentWrapperNode)

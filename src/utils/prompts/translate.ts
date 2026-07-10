@@ -25,7 +25,10 @@ export interface TranslatePromptResult {
   prompt: string
 }
 
-export function resolvePromptReplacementValue(value: string | null | undefined, fallback: string): string {
+export function resolvePromptReplacementValue(
+  value: string | null | undefined,
+  fallback: string,
+): string {
   return typeof value === "string" && value.trim() !== "" ? value : fallback
 }
 
@@ -36,7 +39,7 @@ export function getTranslatePromptFromConfig(
   options?: TranslatePromptOptions<WebPagePromptContext>,
 ): TranslatePromptResult {
   const customPromptsConfig = translateConfig.customPromptsConfig
-  const { patterns = [], promptId } = customPromptsConfig
+  const { patterns, promptId } = customPromptsConfig
 
   // Resolve system prompt and user prompt
   let systemPrompt: string
@@ -46,10 +49,9 @@ export function getTranslatePromptFromConfig(
     // Use default prompts from constants
     systemPrompt = DEFAULT_TRANSLATE_SYSTEM_PROMPT
     prompt = DEFAULT_TRANSLATE_PROMPT
-  }
-  else {
+  } else {
     // Find custom prompt, fallback to default
-    const customPrompt = patterns.find(pattern => pattern.id === promptId)
+    const customPrompt = patterns.find((pattern) => pattern.id === promptId)
     systemPrompt = customPrompt?.systemPrompt ?? DEFAULT_TRANSLATE_SYSTEM_PROMPT
     prompt = customPrompt?.prompt ?? DEFAULT_TRANSLATE_PROMPT
   }
@@ -63,9 +65,18 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
 
   // Build title and summary replacement values
   const title = resolvePromptReplacementValue(options?.context?.webTitle, "No title available")
-  const description = resolvePromptReplacementValue(options?.context?.webDescription, "No description available")
-  const contentText = resolvePromptReplacementValue(options?.context?.webContent, "No content available")
-  const summary = resolvePromptReplacementValue(options?.context?.webSummary, "No summary available")
+  const description = resolvePromptReplacementValue(
+    options?.context?.webDescription,
+    "No description available",
+  )
+  const contentText = resolvePromptReplacementValue(
+    options?.context?.webContent,
+    "No content available",
+  )
+  const summary = resolvePromptReplacementValue(
+    options?.context?.webSummary,
+    "No summary available",
+  )
 
   // Replace tokens in both prompts
   const replaceTokens = (text: string) =>
@@ -88,6 +99,6 @@ export async function getTranslatePrompt(
   input: string,
   options?: TranslatePromptOptions<WebPagePromptContext>,
 ): Promise<TranslatePromptResult> {
-  const config = await getLocalConfig() ?? DEFAULT_CONFIG
+  const config = (await getLocalConfig()) ?? DEFAULT_CONFIG
   return getTranslatePromptFromConfig(config.translate, targetLang, input, options)
 }

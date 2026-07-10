@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { buildDeepLXUrl, deeplxTranslate } from "../deeplx"
 
-const fetchMock = vi.fn()
+const fetchMock = vi.fn<(...args: any[]) => any>()
 
 describe("buildDeepLXUrl", () => {
   describe("token placeholder functionality", () => {
@@ -16,7 +16,10 @@ describe("buildDeepLXUrl", () => {
     })
 
     it("replaces multiple {{apiKey}} occurrences", () => {
-      const result = buildDeepLXUrl("https://{{apiKey}}.api.deeplx.com/{{apiKey}}/translate", "test")
+      const result = buildDeepLXUrl(
+        "https://{{apiKey}}.api.deeplx.com/{{apiKey}}/translate",
+        "test",
+      )
       expect(result).toBe("https://test.api.deeplx.com/test/translate")
     })
 
@@ -40,7 +43,9 @@ describe("buildDeepLXUrl", () => {
       expect(buildDeepLXUrl("https://deeplx.vercel.app")).toBe("https://deeplx.vercel.app")
       expect(buildDeepLXUrl("https://deeplx.vercel.app/")).toBe("https://deeplx.vercel.app/")
       expect(buildDeepLXUrl("https://api.deeplx.org", "token123")).toBe("https://api.deeplx.org")
-      expect(buildDeepLXUrl("https://api.example.com/v1/translate?token=abc/")).toBe("https://api.example.com/v1/translate?token=abc/")
+      expect(buildDeepLXUrl("https://api.example.com/v1/translate?token=abc/")).toBe(
+        "https://api.example.com/v1/translate?token=abc/",
+      )
     })
 
     it("does not append /translate after placeholder replacement", () => {
@@ -57,8 +62,8 @@ describe("deeplxTranslate default URL fallback", () => {
       ok: true,
       status: 200,
       statusText: "OK",
-      json: vi.fn().mockResolvedValue({ data: "你好" }),
-      text: vi.fn().mockResolvedValue(""),
+      json: vi.fn<(...args: any[]) => any>().mockResolvedValue({ data: "你好" }),
+      text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
     })
     vi.stubGlobal("fetch", fetchMock)
   })
@@ -77,18 +82,23 @@ describe("deeplxTranslate default URL fallback", () => {
     })
 
     expect(result).toBe("你好")
-    expect(fetchMock).toHaveBeenCalledWith("https://api.deeplx.org/token123/translate", expect.objectContaining({
-      method: "POST",
-    }))
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.deeplx.org/token123/translate",
+      expect.objectContaining({
+        method: "POST",
+      }),
+    )
   })
 
   it("throws the placeholder API key error when fallback URL needs a missing key", async () => {
-    await expect(deeplxTranslate("Hi", "auto", "zh", {
-      id: "deeplx-default",
-      enabled: true,
-      name: "DeepLX",
-      provider: "deeplx",
-    })).rejects.toThrow("API key is required when using {{apiKey}} placeholder in DeepLX baseURL")
+    await expect(
+      deeplxTranslate("Hi", "auto", "zh", {
+        id: "deeplx-default",
+        enabled: true,
+        name: "DeepLX",
+        provider: "deeplx",
+      }),
+    ).rejects.toThrow("API key is required when using {{apiKey}} placeholder in DeepLX baseURL")
 
     expect(fetchMock).not.toHaveBeenCalled()
   })

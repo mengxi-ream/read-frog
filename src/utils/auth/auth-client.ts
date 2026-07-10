@@ -7,8 +7,12 @@ import { normalizeHeaders } from "../http"
 
 // Avoid CORS in content scripts by using background proxy
 function createCustomFetch(cacheConfig?: CacheConfig) {
-  return async (input: string | URL | globalThis.Request, init?: RequestInit): Promise<Response> => {
-    const inputUrl = typeof input === "string" ? input : (input instanceof URL ? input.toString() : input.url)
+  return async (
+    input: string | URL | globalThis.Request,
+    init?: RequestInit,
+  ): Promise<Response> => {
+    const inputUrl =
+      typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url
     const url = inputUrl.startsWith("http")
       ? inputUrl
       : `${env.WXT_API_URL}${inputUrl.startsWith("/") ? "" : "/"}${inputUrl}`

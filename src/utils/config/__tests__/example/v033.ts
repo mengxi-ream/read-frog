@@ -116,7 +116,8 @@ export const testSeries: TestSeriesObject = {
             {
               id: "123e4567-e89b-12d3-a456-426614174000",
               name: "Technical Translation",
-              prompt: "Technical translation from Spanish to {{targetLang}}. Preserve technical terms and accuracy:\n{{input}}",
+              prompt:
+                "Technical translation from Spanish to {{targetLang}}. Preserve technical terms and accuracy:\n{{input}}",
             },
           ],
         },
@@ -230,14 +231,9 @@ export const testSeries: TestSeriesObject = {
         },
         page: {
           autoTranslateLanguages: [],
-          autoTranslatePatterns: [
-            "news.ycombinator.com",
-          ],
+          autoTranslatePatterns: ["news.ycombinator.com"],
           range: "all",
-          shortcut: [
-            "alt",
-            "q",
-          ],
+          shortcut: ["alt", "q"],
           enableLLMDetection: false,
         },
         customPromptsConfig: {

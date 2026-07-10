@@ -5,7 +5,7 @@ import { getSubtitlesTranslatePrompt } from "../subtitles"
 import { getTranslatePromptFromConfig } from "../translate"
 
 vi.mock("@/utils/config/storage", () => ({
-  getLocalConfig: vi.fn(),
+  getLocalConfig: vi.fn<(...args: any[]) => any>(),
 }))
 
 let mockGetLocalConfig: any
@@ -24,8 +24,10 @@ describe("translate prompt tokens", () => {
           {
             id: "custom-prompt",
             name: "Custom",
-            systemPrompt: "Target {{targetLanguage}} | Title {{webTitle}} | Description {{webDescription}} | Content {{webContent}} | Summary {{webSummary}}",
-            prompt: "Translate {{input}} for {{targetLanguage}} with {{webTitle}} / {{webDescription}} / {{webContent}} / {{webSummary}}",
+            systemPrompt:
+              "Target {{targetLanguage}} | Title {{webTitle}} | Description {{webDescription}} | Content {{webContent}} | Summary {{webSummary}}",
+            prompt:
+              "Translate {{input}} for {{targetLanguage}} with {{webTitle}} / {{webDescription}} / {{webContent}} / {{webSummary}}",
           },
         ],
       },
@@ -40,8 +42,12 @@ describe("translate prompt tokens", () => {
       },
     })
 
-    expect(result.systemPrompt).toBe("Target English | Title Article Title | Description Article Description | Content Article Content | Summary Article Summary")
-    expect(result.prompt).toBe("Translate Hola for English with Article Title / Article Description / Article Content / Article Summary")
+    expect(result.systemPrompt).toBe(
+      "Target English | Title Article Title | Description Article Description | Content Article Content | Summary Article Summary",
+    )
+    expect(result.prompt).toBe(
+      "Translate Hola for English with Article Title / Article Description / Article Content / Article Summary",
+    )
   })
 
   it("does not replace legacy translate prompt tokens at runtime", () => {
@@ -82,8 +88,10 @@ describe("translate prompt tokens", () => {
             {
               id: "subtitle-prompt",
               name: "Subtitles",
-              systemPrompt: "Use {{targetLanguage}} with {{webTitle}}, {{webDescription}}, and {{videoSummary}}",
-              prompt: "{{input}} => {{targetLanguage}} / {{webTitle}} / {{webDescription}} / {{videoSummary}}",
+              systemPrompt:
+                "Use {{targetLanguage}} with {{webTitle}}, {{webDescription}}, and {{videoSummary}}",
+              prompt:
+                "{{input}} => {{targetLanguage}} / {{webTitle}} / {{webDescription}} / {{videoSummary}}",
             },
           ],
         },
@@ -98,8 +106,12 @@ describe("translate prompt tokens", () => {
       },
     })
 
-    expect(result.systemPrompt).toBe("Use Japanese with Video Title, Video Description, and Video Summary")
-    expect(result.prompt).toBe("Hello world => Japanese / Video Title / Video Description / Video Summary")
+    expect(result.systemPrompt).toBe(
+      "Use Japanese with Video Title, Video Description, and Video Summary",
+    )
+    expect(result.prompt).toBe(
+      "Hello world => Japanese / Video Title / Video Description / Video Summary",
+    )
   })
 
   it("falls back when subtitle prompt context is null or undefined", async () => {

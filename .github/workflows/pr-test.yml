@@ -44,11 +44,11 @@ jobs:
           fi
         shell: bash
 
-      - name: ESLint
-        run: pnpm lint
+      - name: Format check
+        run: pnpm exec nx fmt:check
 
-      - name: Type check
-        run: pnpm type-check
+      - name: Lint and type check
+        run: pnpm lint
 
       - name: Build
         run: pnpm build

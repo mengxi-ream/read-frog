@@ -128,7 +128,8 @@ Translate to {{targetLang}}:
             {
               id: "123e4567-e89b-12d3-a456-426614174000",
               name: "Technical Translation",
-              prompt: "Technical translation from Spanish to {{targetLang}}. Preserve technical terms and accuracy:\n{{input}}",
+              prompt:
+                "Technical translation from Spanish to {{targetLang}}. Preserve technical terms and accuracy:\n{{input}}",
             },
           ],
         },
@@ -227,10 +228,7 @@ Translate to {{targetLang}}:
         width: 420,
       },
       translate: {
-        customAutoTranslateShortcutKey: [
-          "alt",
-          "q",
-        ],
+        customAutoTranslateShortcutKey: ["alt", "q"],
         mode: "translationOnly",
         node: {
           enabled: true,
@@ -238,9 +236,7 @@ Translate to {{targetLang}}:
         },
         page: {
           autoTranslateLanguages: [],
-          autoTranslatePatterns: [
-            "news.ycombinator.com",
-          ],
+          autoTranslatePatterns: ["news.ycombinator.com"],
           range: "all",
         },
         promptsConfig: {
@@ -248,7 +244,8 @@ Translate to {{targetLang}}:
             {
               id: "default",
               name: "default",
-              prompt: "You are a professional {{targetLang}} native translator who needs to fluently translate text into {{targetLang}}.\n\n## Translation Rules\n1. Output only the translated content, without explanations or additional content (such as \"Here's the translation:\" or \"Translation as follows:\")\n2. The returned translation must maintain exactly the same number of paragraphs and format as the original text.\n3. If the text contains HTML tags, consider where the tags should be placed in the translation while maintaining fluency.\n4. For content that should not be translated (such as proper nouns, code, etc.), keep the original text.\n\nTranslate to {{targetLang}}:\n{{input}}\n",
+              prompt:
+                'You are a professional {{targetLang}} native translator who needs to fluently translate text into {{targetLang}}.\n\n## Translation Rules\n1. Output only the translated content, without explanations or additional content (such as "Here\'s the translation:" or "Translation as follows:")\n2. The returned translation must maintain exactly the same number of paragraphs and format as the original text.\n3. If the text contains HTML tags, consider where the tags should be placed in the translation while maintaining fluency.\n4. For content that should not be translated (such as proper nouns, code, etc.), keep the original text.\n\nTranslate to {{targetLang}}:\n{{input}}\n',
             },
           ],
           prompt: "default",

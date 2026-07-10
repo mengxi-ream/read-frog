@@ -1,13 +1,13 @@
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
 import { useMemo } from "react"
-import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { Field, FieldContent, FieldLabel } from "@/components/ui/base-ui/field"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { getProviderConfigById } from "@/utils/config/helpers"
+import { i18n } from "@/utils/i18n"
 import { LLMStatusIndicator } from "../../../../components/llm-status-indicator"
 import { ConfigCard } from "../../components/config-card"
 
@@ -24,18 +24,23 @@ export function AIContentAware() {
     <ConfigCard
       id="ai-content-aware"
       title={i18n.t("options.translation.aiContentAware.title")}
-      description={(
+      description={
         <>
           {i18n.t("options.translation.aiContentAware.description")}
-          <LLMStatusIndicator hasLLMProvider={hasLLMProvider} featureName={i18n.t("options.general.featureProviders.features.translate")} />
+          <LLMStatusIndicator
+            hasLLMProvider={hasLLMProvider}
+            featureName={i18n.t("options.general.featureProviders.features.translate")}
+          />
         </>
-      )}
+      }
     >
       <Field orientation="horizontal">
         <FieldContent className="self-center">
           <FieldLabel htmlFor="ai-content-aware-toggle">
             {i18n.t("options.translation.aiContentAware.enable")}
-            <HelpTooltip>{i18n.t("options.translation.aiContentAware.enableDescription")}</HelpTooltip>
+            <HelpTooltip>
+              {i18n.t("options.translation.aiContentAware.enableDescription")}
+            </HelpTooltip>
           </FieldLabel>
         </FieldContent>
         <Switch

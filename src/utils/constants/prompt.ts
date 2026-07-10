@@ -1,5 +1,18 @@
-export const WEB_PAGE_PROMPT_TOKENS = ["targetLanguage", "input", "webTitle", "webDescription", "webContent", "webSummary"] as const
-export const SUBTITLE_PROMPT_TOKENS = ["targetLanguage", "input", "webTitle", "webDescription", "videoSummary"] as const
+export const WEB_PAGE_PROMPT_TOKENS = [
+  "targetLanguage",
+  "input",
+  "webTitle",
+  "webDescription",
+  "webContent",
+  "webSummary",
+] as const
+export const SUBTITLE_PROMPT_TOKENS = [
+  "targetLanguage",
+  "input",
+  "webTitle",
+  "webDescription",
+  "videoSummary",
+] as const
 export const TOKENS = WEB_PAGE_PROMPT_TOKENS
 
 /**

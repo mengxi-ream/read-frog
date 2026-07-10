@@ -1,12 +1,14 @@
-import { i18n } from "#imports"
 import { PromptConfigurator } from "@/components/prompt-configurator"
 import { getTokenCellText, WEB_PAGE_PROMPT_TOKENS } from "@/utils/constants/prompt"
+import { i18n } from "@/utils/i18n"
 import { promptAtoms } from "./atoms"
 
 export function PersonalizedPrompts() {
-  const insertCells = WEB_PAGE_PROMPT_TOKENS.map(token => ({
+  const insertCells = WEB_PAGE_PROMPT_TOKENS.map((token) => ({
     text: getTokenCellText(token),
-    description: i18n.t(`options.translation.personalizedPrompts.editPrompt.promptCellInput.${token}`),
+    description: i18n.t(
+      `options.translation.personalizedPrompts.editPrompt.promptCellInput.${token}`,
+    ),
   }))
 
   return (
@@ -15,10 +17,9 @@ export function PersonalizedPrompts() {
       promptAtoms={promptAtoms}
       insertCells={insertCells}
       title={i18n.t("options.translation.personalizedPrompts.title")}
-      description={(
+      description={
         <p>
-          {i18n.t("options.translation.personalizedPrompts.description")}
-          {" "}
+          {i18n.t("options.translation.personalizedPrompts.description")}{" "}
           <a
             href={i18n.t("options.translation.personalizedPrompts.communityPromptsUrl")}
             target="_blank"
@@ -28,7 +29,7 @@ export function PersonalizedPrompts() {
             {i18n.t("options.translation.personalizedPrompts.communityPrompts")}
           </a>
         </p>
-      )}
+      }
     />
   )
 }

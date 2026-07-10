@@ -7,7 +7,7 @@ export function isNonNullish<T>(value: T): value is NonNullable<T> {
 }
 
 export function getActiveTabUrl() {
-  return browser.tabs.query({ active: true, currentWindow: true }).then(tabs => tabs[0].url)
+  return browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => tabs[0].url)
 }
 
 /**

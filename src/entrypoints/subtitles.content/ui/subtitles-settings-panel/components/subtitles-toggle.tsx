@@ -1,8 +1,8 @@
 import { IconSubtitles } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
-import { i18n } from "#imports"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { APP_NAME } from "@/utils/constants/app"
+import { i18n } from "@/utils/i18n"
 import { subtitlesVisibleAtom } from "../../../atoms"
 import { useSubtitlesUI } from "../../subtitles-ui-context"
 import { SubtitlesSettingsItem } from "./subtitles-settings-item"
@@ -23,7 +23,7 @@ export function SubtitlesToggle() {
       <Switch
         id={switchId}
         checked={isVisible}
-        onCheckedChange={checked => toggleSubtitles(checked)}
+        onCheckedChange={(checked) => toggleSubtitles(checked)}
         aria-label={title}
       />
     </SubtitlesSettingsItem>

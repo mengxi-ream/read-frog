@@ -1,10 +1,10 @@
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
-import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { Field, FieldContent, FieldLabel } from "@/components/ui/base-ui/field"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 
 export function CustomTranslationStyleSwitch() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
@@ -15,7 +15,9 @@ export function CustomTranslationStyleSwitch() {
       <FieldContent className="self-center">
         <FieldLabel htmlFor="custom-style-toggle">
           {i18n.t("options.translation.translationStyle.useCustomStyle")}
-          <HelpTooltip>{i18n.t("options.translation.translationStyle.useCustomStyleDescription")}</HelpTooltip>
+          <HelpTooltip>
+            {i18n.t("options.translation.translationStyle.useCustomStyleDescription")}
+          </HelpTooltip>
         </FieldLabel>
       </FieldContent>
       <Switch

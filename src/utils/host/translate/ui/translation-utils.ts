@@ -12,11 +12,9 @@ export function isNumericContent(text: string): boolean {
   // Remove whitespace and check if remaining content is numeric
   // Allow numbers, decimals, commas, and common numeric separators
   const cleanedText = text.trim()
-  if (!cleanedText)
-    return false
+  if (!cleanedText) return false
 
-  if (!NUMERIC_PATTERN.test(cleanedText))
-    return false
+  if (!NUMERIC_PATTERN.test(cleanedText)) return false
 
   // Additional check: ensure there's at least one digit
   return CONTAINS_DIGIT_RE.test(cleanedText)
@@ -25,7 +23,10 @@ export function isNumericContent(text: string): boolean {
 export function isForceInlineTranslation(targetNode: TransNode): boolean {
   if (isHTMLElement(targetNode)) {
     const computedStyle = window.getComputedStyle(targetNode)
-    return FORCE_INLINE_TRANSLATION_TAGS.has(targetNode.tagName) || computedStyle.display.includes("flex")
+    return (
+      FORCE_INLINE_TRANSLATION_TAGS.has(targetNode.tagName) ||
+      computedStyle.display.includes("flex")
+    )
   }
   return false
 }

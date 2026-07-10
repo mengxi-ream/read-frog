@@ -21,7 +21,10 @@ export function migrate(oldConfig: any): any {
       name: NAME_MAPPING.openai,
       provider: "openai",
       apiKey: oldConfig.providersConfig.openai.apiKey,
-      baseURL: oldConfig.providersConfig.openai.baseURL === "" ? undefined : oldConfig.providersConfig.openai.baseURL,
+      baseURL:
+        oldConfig.providersConfig.openai.baseURL === ""
+          ? undefined
+          : oldConfig.providersConfig.openai.baseURL,
       models: {
         read: oldConfig.read.models.openai,
         translate: oldConfig.translate.models.openai,
@@ -31,7 +34,10 @@ export function migrate(oldConfig: any): any {
       name: NAME_MAPPING.deepseek,
       provider: "deepseek",
       apiKey: oldConfig.providersConfig.deepseek.apiKey,
-      baseURL: oldConfig.providersConfig.deepseek.baseURL === "" ? undefined : oldConfig.providersConfig.deepseek.baseURL,
+      baseURL:
+        oldConfig.providersConfig.deepseek.baseURL === ""
+          ? undefined
+          : oldConfig.providersConfig.deepseek.baseURL,
       models: {
         read: oldConfig.read.models.deepseek,
         translate: oldConfig.translate.models.deepseek,
@@ -41,7 +47,10 @@ export function migrate(oldConfig: any): any {
       name: NAME_MAPPING.gemini,
       provider: "gemini",
       apiKey: oldConfig.providersConfig.gemini.apiKey,
-      baseURL: oldConfig.providersConfig.gemini.baseURL === "" ? undefined : oldConfig.providersConfig.gemini.baseURL,
+      baseURL:
+        oldConfig.providersConfig.gemini.baseURL === ""
+          ? undefined
+          : oldConfig.providersConfig.gemini.baseURL,
       models: {
         read: oldConfig.read.models.gemini,
         translate: oldConfig.translate.models.gemini,
@@ -51,7 +60,10 @@ export function migrate(oldConfig: any): any {
       name: NAME_MAPPING.deeplx,
       provider: "deeplx",
       apiKey: oldConfig.providersConfig.deeplx.apiKey,
-      baseURL: oldConfig.providersConfig.deeplx.baseURL === "" ? undefined : oldConfig.providersConfig.deeplx.baseURL,
+      baseURL:
+        oldConfig.providersConfig.deeplx.baseURL === ""
+          ? undefined
+          : oldConfig.providersConfig.deeplx.baseURL,
     },
   ]
 
@@ -59,9 +71,10 @@ export function migrate(oldConfig: any): any {
     providerName: NAME_MAPPING[oldConfig.read.provider as keyof typeof NAME_MAPPING],
   }
 
-  const newTranslateProviderName = NAME_MAPPING[oldConfig.translate.provider as keyof typeof NAME_MAPPING]
+  const newTranslateProviderName =
+    NAME_MAPPING[oldConfig.translate.provider as keyof typeof NAME_MAPPING]
 
-  const { models, provider, ...restTranslateConfig } = oldConfig.translate
+  const { models: _models, provider: _provider, ...restTranslateConfig } = oldConfig.translate
   const newTranslateConfig = {
     providerName: newTranslateProviderName,
     ...restTranslateConfig,

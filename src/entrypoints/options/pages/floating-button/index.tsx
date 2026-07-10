@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import floatingButtonDemoImage from "@/assets/demo/floating-button.png"
 import { GradientBackground } from "@/components/gradient-background"
+import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
 import { FloatingButtonClickAction } from "./floating-button-click-action"
 import { FloatingButtonDisabledSites } from "./floating-button-disabled-sites"
@@ -14,7 +14,7 @@ export function FloatingButtonPage() {
         <img
           src={floatingButtonDemoImage}
           alt={i18n.t("options.floatingButtonAndToolbar.floatingButtonDemoImageAlt")}
-          className="w-100 h-auto"
+          className="h-auto w-100"
         />
       </GradientBackground>
       <div className="*:border-b [&>*:last-child]:border-b-0">

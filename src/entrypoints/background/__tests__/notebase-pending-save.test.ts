@@ -75,26 +75,30 @@ function createDeps({
   authenticated: boolean
 }) {
   return {
-    getPendingNotebaseSave: vi.fn().mockResolvedValue(pending),
-    clearPendingNotebaseSave: vi.fn().mockResolvedValue(undefined),
-    getConfig: vi.fn().mockResolvedValue(config),
-    setConfig: vi.fn().mockResolvedValue(undefined),
-    getAuthenticatedAccount: vi.fn().mockResolvedValue(
-      authenticated
-        ? { id: "user-1", name: "Reader", email: "reader@example.com", image: null }
-        : null,
-    ),
-    createNotebase: vi.fn().mockResolvedValue({ txid: 1 }),
-    createRow: vi.fn().mockResolvedValue({ txid: 1 }),
-    listNotebases: vi.fn().mockResolvedValue([{ id: "notebase-1", name: "Summarize Notes" }]),
-    getSchema: vi.fn(),
-    openNotebasePage: vi.fn().mockResolvedValue(undefined),
-    openActionOptions: vi.fn().mockResolvedValue(undefined),
+    getPendingNotebaseSave: vi.fn<(...args: any[]) => any>().mockResolvedValue(pending),
+    clearPendingNotebaseSave: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
+    getConfig: vi.fn<(...args: any[]) => any>().mockResolvedValue(config),
+    setConfig: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
+    getAuthenticatedAccount: vi
+      .fn<(...args: any[]) => any>()
+      .mockResolvedValue(
+        authenticated
+          ? { id: "user-1", name: "Reader", email: "reader@example.com", image: null }
+          : null,
+      ),
+    createNotebase: vi.fn<(...args: any[]) => any>().mockResolvedValue({ txid: 1 }),
+    createRow: vi.fn<(...args: any[]) => any>().mockResolvedValue({ txid: 1 }),
+    listNotebases: vi
+      .fn<(...args: any[]) => any>()
+      .mockResolvedValue([{ id: "notebase-1", name: "Summarize Notes" }]),
+    getSchema: vi.fn<(...args: any[]) => any>(),
+    openNotebasePage: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
+    openActionOptions: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
     now: () => 1_000,
     log: {
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
+      info: vi.fn<(...args: any[]) => any>(),
+      warn: vi.fn<(...args: any[]) => any>(),
+      error: vi.fn<(...args: any[]) => any>(),
     },
   }
 }
@@ -108,9 +112,10 @@ function createMatchingSchema(pending: PendingCreateNotebaseSave): NotebaseGetSc
       id: column.notebaseColumnId,
       notebaseId: pending.notebaseId,
       name: column.notebaseColumnName,
-      config: column.localFieldType === "number"
-        ? { type: "number", decimal: 0, format: "number" }
-        : { type: "string" },
+      config:
+        column.localFieldType === "number"
+          ? { type: "number", decimal: 0, format: "number" }
+          : { type: "string" },
       position: index,
       isPrimary: index === 0,
       width: null,
@@ -149,7 +154,7 @@ describe("notebase pending save processor", () => {
       pending,
       config: createConfig({
         ...action,
-        outputSchema: [{ ...action.outputSchema[0]!, name: "changed" }],
+        outputSchema: [{ ...action.outputSchema[0], name: "changed" }],
       }),
       authenticated: true,
     })
@@ -185,19 +190,23 @@ describe("notebase pending save processor", () => {
 
     await createNotebasePendingSaveProcessor(loggedInDeps)("auth-cookie-change")
 
-    expect(loggedInDeps.createNotebase).toHaveBeenCalledWith(buildNotebaseCreateInputFromPending(pending))
-    expect(loggedInDeps.setConfig).toHaveBeenCalledWith(expect.objectContaining({
-      selectionToolbar: expect.objectContaining({
-        customActions: [
-          expect.objectContaining({
-            id: "action-1",
-            notebaseConnection: expect.objectContaining({
-              notebaseId: pending.notebaseId,
+    expect(loggedInDeps.createNotebase).toHaveBeenCalledWith(
+      buildNotebaseCreateInputFromPending(pending),
+    )
+    expect(loggedInDeps.setConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        selectionToolbar: expect.objectContaining({
+          customActions: [
+            expect.objectContaining({
+              id: "action-1",
+              notebaseConnection: expect.objectContaining({
+                notebaseId: pending.notebaseId,
+              }),
             }),
-          }),
-        ],
+          ],
+        }),
       }),
-    }))
+    )
     expect(loggedInDeps.clearPendingNotebaseSave).toHaveBeenCalledTimes(1)
     expect(loggedInDeps.openNotebasePage).toHaveBeenCalledWith(pending.notebaseId)
   })

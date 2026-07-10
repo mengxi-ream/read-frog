@@ -1,22 +1,23 @@
 import { useAtom } from "jotai"
-import { i18n } from "#imports"
 import { ShortcutKeyRecorder } from "@/components/shortcut-key-recorder"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { DEFAULT_SELECTION_TRANSLATION_SHORTCUT_KEY } from "@/utils/constants/translate"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function SelectionTranslationShortcut() {
   const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
-  const shortcut = selectionToolbar.features.translate.shortcut ?? DEFAULT_SELECTION_TRANSLATION_SHORTCUT_KEY
+  const shortcut =
+    selectionToolbar.features.translate.shortcut ?? DEFAULT_SELECTION_TRANSLATION_SHORTCUT_KEY
 
-  const updateShortcut = (shortcut: string) => {
+  const updateShortcut = (nextShortcut: string) => {
     void setSelectionToolbar({
       ...selectionToolbar,
       features: {
         ...selectionToolbar.features,
         translate: {
           ...selectionToolbar.features.translate,
-          shortcut,
+          shortcut: nextShortcut,
         },
       },
     })

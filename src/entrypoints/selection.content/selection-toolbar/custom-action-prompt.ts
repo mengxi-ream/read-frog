@@ -16,17 +16,23 @@ export function replaceSelectionToolbarCustomActionPromptTokens(
   return prompt
     .replaceAll(getSelectionToolbarCustomActionTokenCellText("selection"), tokens.selection)
     .replaceAll(getSelectionToolbarCustomActionTokenCellText("paragraphs"), tokens.paragraphs)
-    .replaceAll(getSelectionToolbarCustomActionTokenCellText("targetLanguage"), tokens.targetLanguage)
+    .replaceAll(
+      getSelectionToolbarCustomActionTokenCellText("targetLanguage"),
+      tokens.targetLanguage,
+    )
     .replaceAll(getSelectionToolbarCustomActionTokenCellText("webTitle"), tokens.webTitle)
     .replaceAll(getSelectionToolbarCustomActionTokenCellText("webContent"), tokens.webContent)
 }
 
-type StructuredOutputField = Pick<SelectionToolbarCustomActionOutputField, "name" | "type" | "description">
+type StructuredOutputField = Pick<
+  SelectionToolbarCustomActionOutputField,
+  "name" | "type" | "description"
+>
 
 function formatYamlMultiline(value: string) {
   return value
     .split("\n")
-    .map(line => `    ${line}`)
+    .map((line) => `    ${line}`)
     .join("\n")
 }
 
@@ -34,10 +40,13 @@ function formatStructuredOutputField(
   field: StructuredOutputField,
   tokens: SelectionToolbarCustomActionPromptTokens,
 ) {
-  const resolvedDescription = replaceSelectionToolbarCustomActionPromptTokens(field.description, tokens).trim()
+  const resolvedDescription = replaceSelectionToolbarCustomActionPromptTokens(
+    field.description,
+    tokens,
+  ).trim()
   const descriptionBlock = resolvedDescription
     ? `  description: |-\n${formatYamlMultiline(resolvedDescription)}`
-    : "  description: \"\""
+    : '  description: ""'
 
   return [
     `- key: ${JSON.stringify(field.name)}`,
@@ -52,7 +61,7 @@ function buildStructuredOutputContract(
   tokens: SelectionToolbarCustomActionPromptTokens,
 ) {
   const fieldsAndTypes = outputSchema
-    .map(field => formatStructuredOutputField(field, tokens))
+    .map((field) => formatStructuredOutputField(field, tokens))
     .join("\n")
 
   return `## Structured Output Contract
@@ -80,7 +89,5 @@ export function buildSelectionToolbarCustomActionSystemPrompt(
   const resolvedPrompt = replaceSelectionToolbarCustomActionPromptTokens(prompt, tokens).trim()
   const contract = buildStructuredOutputContract(outputSchema, tokens)
 
-  return resolvedPrompt
-    ? `${resolvedPrompt}\n\n${contract}`
-    : contract
+  return resolvedPrompt ? `${resolvedPrompt}\n\n${contract}` : contract
 }

@@ -2,12 +2,14 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-const { mockCreateMarkdownContent, mockDefuddleConstructor, mockParse, mockWarn } = vi.hoisted(() => ({
-  mockCreateMarkdownContent: vi.fn(),
-  mockDefuddleConstructor: vi.fn(),
-  mockParse: vi.fn(),
-  mockWarn: vi.fn(),
-}))
+const { mockCreateMarkdownContent, mockDefuddleConstructor, mockParse, mockWarn } = vi.hoisted(
+  () => ({
+    mockCreateMarkdownContent: vi.fn<(...args: any[]) => any>(),
+    mockDefuddleConstructor: vi.fn<(...args: any[]) => any>(),
+    mockParse: vi.fn<(...args: any[]) => any>(),
+    mockWarn: vi.fn<(...args: any[]) => any>(),
+  }),
+)
 
 vi.mock("@/utils/logger", () => ({
   logger: {

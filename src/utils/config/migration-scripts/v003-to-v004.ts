@@ -2,9 +2,12 @@ export function migrate(oldConfig: any): any {
   const oldProvidersConfig = oldConfig.providersConfig
   const transferredProvidersConfig = Object.fromEntries(
     Object.entries(oldProvidersConfig).map(([key, value]) => {
-      return [key, {
-        apiKey: (value as any).apiKey,
-      }]
+      return [
+        key,
+        {
+          apiKey: (value as any).apiKey,
+        },
+      ]
     }),
   )
 
@@ -17,11 +20,14 @@ export function migrate(oldConfig: any): any {
 
   const transferredModelsConfig = Object.fromEntries(
     Object.entries(oldProvidersConfig).map(([key, value]) => {
-      return [key, {
-        model: (value as any).model,
-        isCustomModel: (value as any).isCustomModel,
-        customModel: (value as any).customModel,
-      }]
+      return [
+        key,
+        {
+          model: (value as any).model,
+          isCustomModel: (value as any).isCustomModel,
+          customModel: (value as any).customModel,
+        },
+      ]
     }),
   )
   const newReadConfig = {

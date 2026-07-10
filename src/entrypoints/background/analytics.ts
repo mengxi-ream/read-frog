@@ -35,7 +35,10 @@ interface BackgroundAnalyticsRuntime {
   extensionVersion: string
   getStorageItem: (key: string) => Promise<unknown>
   getTargetLanguage: () => Promise<LangCodeISO6393 | undefined>
-  onMessage: (type: "trackFeatureUsedEvent", handler: (message: { data: FeatureUsedEventProperties }) => Promise<void>) => unknown
+  onMessage: (
+    type: "trackFeatureUsedEvent",
+    handler: (message: { data: FeatureUsedEventProperties }) => Promise<void>,
+  ) => unknown
   posthog: BackgroundAnalyticsClient
   setStorageItem: (key: string, value: unknown) => Promise<void>
   warn: typeof logger.warn
@@ -70,12 +73,9 @@ function createDefaultRuntime(): BackgroundAnalyticsRuntime {
     apiKey: env.WXT_POSTHOG_API_KEY,
     createDistinctId: () => getRandomUUID(),
     defaultAnalyticsEnabled: DEFAULT_ANALYTICS_ENABLED,
-    distinctIdOverride: resolveDistinctIdOverride(
-      env.WXT_POSTHOG_TEST_UUID,
-      import.meta.env.DEV,
-    ),
+    distinctIdOverride: resolveDistinctIdOverride(env.WXT_POSTHOG_TEST_UUID, import.meta.env.DEV),
     extensionVersion: EXTENSION_VERSION,
-    getStorageItem: key => storage.getItem(key as `local:${string}`),
+    getStorageItem: (key) => storage.getItem(key as `local:${string}`),
     getTargetLanguage: async () => {
       const config = await getLocalConfig()
       return config?.language.targetCode
@@ -100,7 +100,7 @@ function setPropertyIfDefined(
 }
 
 export function filterAnalyticsCaptureResult(data: CaptureResult): CaptureResult {
-  const properties = (data.properties ?? {}) as AnalyticsCaptureProperties
+  const properties = data.properties ?? {}
   const filteredProperties: AnalyticsCaptureProperties = {}
 
   setPropertyIfDefined(filteredProperties, "token", properties.token)
@@ -118,7 +118,11 @@ export function filterAnalyticsCaptureResult(data: CaptureResult): CaptureResult
   setPropertyIfDefined(filteredProperties, "$time", properties.$time)
   setPropertyIfDefined(filteredProperties, "$lib", properties.$lib)
   setPropertyIfDefined(filteredProperties, "$lib_version", properties.$lib_version)
-  setPropertyIfDefined(filteredProperties, "$process_person_profile", properties.$process_person_profile)
+  setPropertyIfDefined(
+    filteredProperties,
+    "$process_person_profile",
+    properties.$process_person_profile,
+  )
   setPropertyIfDefined(filteredProperties, "extension_version", properties.extension_version)
 
   return {
@@ -160,7 +164,9 @@ export function createBackgroundAnalytics(
     if (!runtime.apiKey || !runtime.apiHost) {
       if (!missingConfigWarned) {
         missingConfigWarned = true
-        runtime.warn("[Analytics] PostHog is disabled because WXT_POSTHOG_API_KEY or WXT_POSTHOG_HOST is missing")
+        runtime.warn(
+          "[Analytics] PostHog is disabled because WXT_POSTHOG_API_KEY or WXT_POSTHOG_HOST is missing",
+        )
       }
       return null
     }
@@ -202,7 +208,7 @@ export function createBackgroundAnalytics(
   async function captureFeatureUsedEventInBackground(
     properties: FeatureUsedEventProperties,
   ): Promise<void> {
-    if (!await isAnalyticsEnabled()) {
+    if (!(await isAnalyticsEnabled())) {
       return
     }
 
@@ -212,14 +218,21 @@ export function createBackgroundAnalytics(
         return
       }
 
-      client.capture(ANALYTICS_FEATURE_USED_EVENT, await buildBackgroundFeatureUsedEventProperties(properties))
-    }
-    catch (error) {
-      runtime.warn(`[Analytics] Failed to capture ${ANALYTICS_FEATURE_USED_EVENT} in background`, error)
+      client.capture(
+        ANALYTICS_FEATURE_USED_EVENT,
+        await buildBackgroundFeatureUsedEventProperties(properties),
+      )
+    } catch (error) {
+      runtime.warn(
+        `[Analytics] Failed to capture ${ANALYTICS_FEATURE_USED_EVENT} in background`,
+        error,
+      )
     }
   }
 
-  async function getBackgroundFeatureUsedEventProperties(): Promise<Partial<BackgroundFeatureUsedEventProperties>> {
+  async function getBackgroundFeatureUsedEventProperties(): Promise<
+    Partial<BackgroundFeatureUsedEventProperties>
+  > {
     const backgroundProperties: Partial<BackgroundFeatureUsedEventProperties> = {}
 
     try {
@@ -227,8 +240,7 @@ export function createBackgroundAnalytics(
       if (targetLanguage) {
         backgroundProperties.target_language = targetLanguage
       }
-    }
-    catch (error) {
+    } catch (error) {
       runtime.warn("[Analytics] Failed to read target language for analytics event", error)
     }
 
@@ -240,7 +252,7 @@ export function createBackgroundAnalytics(
   ): Promise<BackgroundFeatureUsedEventProperties> {
     return {
       ...properties,
-      ...await getBackgroundFeatureUsedEventProperties(),
+      ...(await getBackgroundFeatureUsedEventProperties()),
     }
   }
 
@@ -258,7 +270,5 @@ export function createBackgroundAnalytics(
 
 const backgroundAnalytics = createBackgroundAnalytics()
 
-export const {
-  captureFeatureUsedEventInBackground,
-  setupAnalyticsMessageHandlers,
-} = backgroundAnalytics
+export const { captureFeatureUsedEventInBackground, setupAnalyticsMessageHandlers } =
+  backgroundAnalytics

@@ -1,5 +1,4 @@
 import { useAtom, useAtomValue } from "jotai"
-import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import {
   Select,
@@ -13,6 +12,7 @@ import { isLLMProvider } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { featureProviderConfigAtom } from "@/utils/atoms/provider"
 import { DEFAULT_TRANSLATE_PROMPT_ID } from "@/utils/constants/prompt"
+import { i18n } from "@/utils/i18n"
 
 export default function TranslatePromptSelector() {
   const translateProviderConfig = useAtomValue(featureProviderConfigAtom("translate"))
@@ -22,20 +22,21 @@ export default function TranslatePromptSelector() {
     return null
 
   const customPromptsConfig = translateConfig.customPromptsConfig
-  const { patterns = [], promptId } = customPromptsConfig
+  const { patterns, promptId } = customPromptsConfig
 
   const items = [
-    { value: DEFAULT_TRANSLATE_PROMPT_ID, label: i18n.t("options.translation.personalizedPrompts.default") },
-    ...patterns.map(prompt => ({ value: prompt.id, label: prompt.name })),
+    {
+      value: DEFAULT_TRANSLATE_PROMPT_ID,
+      label: i18n.t("options.translation.personalizedPrompts.default"),
+    },
+    ...patterns.map((prompt) => ({ value: prompt.id, label: prompt.name })),
   ]
 
   return (
     <div className="flex items-center justify-between gap-2">
-      <span className="text-[13px] font-medium flex items-center gap-1.5">
+      <span className="flex items-center gap-1.5 text-[13px] font-medium">
         {i18n.t("translatePrompt.title")}
-        <HelpTooltip>
-          {i18n.t("translatePrompt.description")}
-        </HelpTooltip>
+        <HelpTooltip>{i18n.t("translatePrompt.description")}</HelpTooltip>
       </span>
       <Select
         items={items}
@@ -54,7 +55,7 @@ export default function TranslatePromptSelector() {
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {items.map(item => (
+            {items.map((item) => (
               <SelectItem key={item.value} value={item.value}>
                 {item.label}
               </SelectItem>

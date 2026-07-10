@@ -12,9 +12,7 @@ function isRecord(value: unknown): value is Record<string, any> {
 }
 
 function normalizeRegion(value: unknown): string {
-  return typeof value === "string" && value.trim().length > 0
-    ? value.trim()
-    : "us-east-1"
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : "us-east-1"
 }
 
 function migrateProvider(provider: any): any {
@@ -22,19 +20,13 @@ function migrateProvider(provider: any): any {
     return provider
   }
 
-  const {
-    connectionOptions,
-    providerSpecificSettings,
-    ...providerWithoutLegacySettings
-  } = provider
+  const { connectionOptions, providerSpecificSettings, ...providerWithoutLegacySettings } = provider
 
   if (provider.provider !== "bedrock") {
     return providerWithoutLegacySettings
   }
 
-  const connectionRegion = isRecord(connectionOptions)
-    ? connectionOptions.region
-    : undefined
+  const connectionRegion = isRecord(connectionOptions) ? connectionOptions.region : undefined
   const existingRegion = isRecord(providerSpecificSettings)
     ? providerSpecificSettings.region
     : undefined

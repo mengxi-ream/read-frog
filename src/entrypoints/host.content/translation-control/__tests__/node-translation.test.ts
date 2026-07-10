@@ -4,9 +4,9 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import { registerNodeTranslationTriggers } from "../node-translation"
 
 const mocks = vi.hoisted(() => ({
-  getLocalConfig: vi.fn(),
-  removeOrShowNodeTranslation: vi.fn(),
-  sendMessage: vi.fn(),
+  getLocalConfig: vi.fn<(...args: any[]) => any>(),
+  removeOrShowNodeTranslation: vi.fn<(...args: any[]) => any>(),
+  sendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/config/storage", () => ({

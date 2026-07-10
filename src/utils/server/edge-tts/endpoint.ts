@@ -25,15 +25,16 @@ function decodeJwtExpiryMs(token: string): number | null {
   }
 
   try {
-    const normalized = payloadBase64.replace(BASE64_URL_SAFE_HYPHEN_PATTERN, "+").replace(BASE64_URL_SAFE_UNDERSCORE_PATTERN, "/")
+    const normalized = payloadBase64
+      .replace(BASE64_URL_SAFE_HYPHEN_PATTERN, "+")
+      .replace(BASE64_URL_SAFE_UNDERSCORE_PATTERN, "/")
     const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=")
     const payload = JSON.parse(atob(padded)) as { exp?: number }
     if (typeof payload.exp !== "number") {
       return null
     }
     return payload.exp * 1000
-  }
-  catch {
+  } catch {
     return null
   }
 }
@@ -43,7 +44,7 @@ function hasValidCachedToken(now = Date.now()): boolean {
     return false
   }
 
-  return now < (tokenInfo.expiredAt - EDGE_TTS_TOKEN_REFRESH_BEFORE_EXPIRY_MS)
+  return now < tokenInfo.expiredAt - EDGE_TTS_TOKEN_REFRESH_BEFORE_EXPIRY_MS
 }
 
 function hasUnexpiredCachedToken(now = Date.now()): boolean {
@@ -60,7 +61,12 @@ function ensureEndpointPayload(data: unknown): EdgeTTSEndpointResponse {
   }
 
   const endpoint = data as EdgeTTSEndpointResponse
-  if (!endpoint.t || !endpoint.r || typeof endpoint.t !== "string" || typeof endpoint.r !== "string") {
+  if (
+    !endpoint.t ||
+    !endpoint.r ||
+    typeof endpoint.t !== "string" ||
+    typeof endpoint.r !== "string"
+  ) {
     throw new EdgeTTSError("TOKEN_FETCH_FAILED", "Endpoint response is missing token or region")
   }
 
@@ -92,14 +98,18 @@ export async function getEdgeTTSEndpointToken(): Promise<EdgeTTSTokenInfo> {
     })
 
     if (!response.ok) {
-      throw new EdgeTTSError("TOKEN_FETCH_FAILED", `Failed to fetch endpoint token: ${response.status}`, {
-        status: response.status,
-        retryable: response.status >= 500,
-      })
+      throw new EdgeTTSError(
+        "TOKEN_FETCH_FAILED",
+        `Failed to fetch endpoint token: ${response.status}`,
+        {
+          status: response.status,
+          retryable: response.status >= 500,
+        },
+      )
     }
 
     const data = ensureEndpointPayload(await response.json())
-    const expiry = decodeJwtExpiryMs(data.t) ?? (Date.now() + EDGE_TTS_DEFAULT_TOKEN_TTL_MS)
+    const expiry = decodeJwtExpiryMs(data.t) ?? Date.now() + EDGE_TTS_DEFAULT_TOKEN_TTL_MS
 
     tokenInfo = {
       endpoint: data,
@@ -108,8 +118,7 @@ export async function getEdgeTTSEndpointToken(): Promise<EdgeTTSTokenInfo> {
     }
 
     return tokenInfo
-  }
-  catch (error) {
+  } catch (error) {
     if (hasUnexpiredCachedToken() && tokenInfo) {
       return tokenInfo
     }

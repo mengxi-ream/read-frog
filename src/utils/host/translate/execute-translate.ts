@@ -30,36 +30,39 @@ export async function executeTranslate<TContext>(
   let translatedText = ""
 
   if (isNonAPIProvider(provider)) {
-    const sourceLang = langConfig.sourceCode === "auto" ? "auto" : (ISO6393_TO_6391[langConfig.sourceCode] ?? "auto")
+    const sourceLang =
+      langConfig.sourceCode === "auto" ? "auto" : (ISO6393_TO_6391[langConfig.sourceCode] ?? "auto")
     const targetLang = ISO6393_TO_6391[langConfig.targetCode]
     if (!targetLang) {
       throw new Error(`Invalid target language code: ${langConfig.targetCode}`)
     }
     if (provider === "google-translate") {
       translatedText = await googleTranslate(preparedText, sourceLang, targetLang)
-    }
-    else if (provider === "microsoft-translate") {
+    } else if (provider === "microsoft-translate") {
       translatedText = await microsoftTranslate(preparedText, sourceLang, targetLang)
     }
-  }
-  else if (isPureAPIProvider(provider)) {
-    const sourceLang = langConfig.sourceCode === "auto" ? "auto" : (ISO6393_TO_6391[langConfig.sourceCode] ?? "auto")
+  } else if (isPureAPIProvider(provider)) {
+    const sourceLang =
+      langConfig.sourceCode === "auto" ? "auto" : (ISO6393_TO_6391[langConfig.sourceCode] ?? "auto")
     const targetLang = ISO6393_TO_6391[langConfig.targetCode]
     if (!targetLang) {
       throw new Error(`Invalid target language code: ${langConfig.targetCode}`)
     }
     if (provider === "deeplx") {
       translatedText = await deeplxTranslate(preparedText, sourceLang, targetLang, providerConfig)
-    }
-    else if (provider === "deepl") {
+    } else if (provider === "deepl") {
       translatedText = await deeplTranslate(text, sourceLang, targetLang, providerConfig)
     }
-  }
-  else if (isLLMProviderConfig(providerConfig)) {
+  } else if (isLLMProviderConfig(providerConfig)) {
     const targetLangName = LANG_CODE_TO_EN_NAME[langConfig.targetCode]
-    translatedText = await aiTranslate(preparedText, targetLangName, providerConfig, promptResolver, options)
-  }
-  else {
+    translatedText = await aiTranslate(
+      preparedText,
+      targetLangName,
+      providerConfig,
+      promptResolver,
+      options,
+    )
+  } else {
     throw new Error(`Unknown provider: ${provider}`)
   }
 

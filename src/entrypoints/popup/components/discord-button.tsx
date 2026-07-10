@@ -1,19 +1,21 @@
 import { Icon } from "@iconify/react"
-import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
+import { i18n } from "@/utils/i18n"
 
 export function DiscordButton() {
   return (
     <Tooltip>
       <TooltipTrigger
-        render={(
+        render={
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => window.open("https://discord.gg/ej45e3PezJ", "_blank", "noopener,noreferrer")}
+            onClick={() =>
+              window.open("https://discord.gg/ej45e3PezJ", "_blank", "noopener,noreferrer")
+            }
           />
-        )}
+        }
       >
         <Icon icon="logos:discord-icon" />
       </TooltipTrigger>

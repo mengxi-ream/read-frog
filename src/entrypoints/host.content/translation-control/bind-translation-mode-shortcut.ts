@@ -2,9 +2,12 @@ import type { Hotkey } from "@tanstack/hotkeys"
 import type { TranslationMode } from "@/types/config/translate"
 import { HotkeyManager } from "@tanstack/hotkeys"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import { getLocalConfig, setLocalConfig } from "@/utils/config/storage"
-import { isPageTranslationShortcutEmpty, isValidConfiguredPageTranslationShortcut } from "@/utils/page-translation-shortcut"
+import { i18n } from "@/utils/i18n"
+import {
+  isPageTranslationShortcutEmpty,
+  isValidConfiguredPageTranslationShortcut,
+} from "@/utils/page-translation-shortcut"
 
 const NEXT_MODE: Record<TranslationMode, TranslationMode> = {
   bilingual: "translationOnly",
@@ -26,8 +29,7 @@ export async function bindTranslationModeShortcutKey() {
     shortcut as Hotkey,
     async () => {
       const currentConfig = await getLocalConfig()
-      if (!currentConfig)
-        return
+      if (!currentConfig) return
 
       const currentMode = currentConfig.translate.mode
       const nextMode = NEXT_MODE[currentMode]

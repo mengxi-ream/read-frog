@@ -6,16 +6,16 @@ import { SITE_CONTROL_URL_WINDOW_KEY } from "@/utils/site-control"
 const HOST_CONTENT_SCRIPT_FILE = "/content-scripts/host.js"
 const SELECTION_CONTENT_SCRIPT_FILE = "/content-scripts/selection.js"
 
-const tabsOnRemovedAddListenerMock = vi.fn()
-const webNavigationOnBeforeNavigateAddListenerMock = vi.fn()
-const webNavigationOnCompletedAddListenerMock = vi.fn()
-const getAllFramesMock = vi.fn()
-const executeScriptMock = vi.fn()
-const storageGetItemMock = vi.fn()
+const tabsOnRemovedAddListenerMock = vi.fn<(...args: any[]) => any>()
+const webNavigationOnBeforeNavigateAddListenerMock = vi.fn<(...args: any[]) => any>()
+const webNavigationOnCompletedAddListenerMock = vi.fn<(...args: any[]) => any>()
+const getAllFramesMock = vi.fn<(...args: any[]) => any>()
+const executeScriptMock = vi.fn<(...args: any[]) => any>()
+const storageGetItemMock = vi.fn<(...args: any[]) => any>()
 
-const getLocalConfigMock = vi.fn()
-const loggerErrorMock = vi.fn()
-const loggerWarnMock = vi.fn()
+const getLocalConfigMock = vi.fn<(...args: any[]) => any>()
+const loggerErrorMock = vi.fn<(...args: any[]) => any>()
+const loggerWarnMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("@/utils/config/storage", () => ({
   getLocalConfig: getLocalConfigMock,
@@ -84,7 +84,9 @@ async function setupSubject() {
   const { setupIframeInjection } = await import("../iframe-injection")
   setupIframeInjection()
 
-  const onRemoved = tabsOnRemovedAddListenerMock.mock.calls.at(-1)?.[0] as ((tabId: number) => void) | undefined
+  const onRemoved = tabsOnRemovedAddListenerMock.mock.calls.at(-1)?.[0] as
+    | ((tabId: number) => void)
+    | undefined
   const onBeforeNavigate = webNavigationOnBeforeNavigateAddListenerMock.mock.calls.at(-1)?.[0] as
     | ((details: NavigationDetails) => void)
     | undefined
@@ -109,7 +111,8 @@ describe("setupIframeInjection", () => {
     currentTabId += 1
 
     browser.tabs.onRemoved.addListener = tabsOnRemovedAddListenerMock
-    browser.webNavigation.onBeforeNavigate.addListener = webNavigationOnBeforeNavigateAddListenerMock
+    browser.webNavigation.onBeforeNavigate.addListener =
+      webNavigationOnBeforeNavigateAddListenerMock
     browser.webNavigation.onCompleted.addListener = webNavigationOnCompletedAddListenerMock
     browser.webNavigation.getAllFrames = getAllFramesMock
     browser.scripting.executeScript = executeScriptMock
@@ -154,13 +157,18 @@ describe("setupIframeInjection", () => {
     await onCompleted(createDetails())
 
     expect(executeScriptMock).toHaveBeenCalledTimes(2)
-    expect(executeScriptMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
-      target: { tabId: currentTabId, documentIds: ["doc-1"] },
-      files: [HOST_CONTENT_SCRIPT_FILE],
-    }))
-    expect(executeScriptMock).not.toHaveBeenCalledWith(expect.objectContaining({
-      files: [SELECTION_CONTENT_SCRIPT_FILE],
-    }))
+    expect(executeScriptMock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        target: { tabId: currentTabId, documentIds: ["doc-1"] },
+        files: [HOST_CONTENT_SCRIPT_FILE],
+      }),
+    )
+    expect(executeScriptMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        files: [SELECTION_CONTENT_SCRIPT_FILE],
+      }),
+    )
   })
 
   it("auto-injects host and selection content for allowlisted iframes when page translation is disabled", async () => {
@@ -168,27 +176,38 @@ describe("setupIframeInjection", () => {
     storageGetItemMock.mockResolvedValue({ enabled: false })
     getLocalConfigMock.mockResolvedValue(createConfig({ nodeTranslationEnabled: false }))
 
-    await onCompleted(createDetails({
-      url: "https://browse.library.kiwix.org/content/wikipedia_en_all_maxi_2026-02/A/Computer_science",
-    }))
+    await onCompleted(
+      createDetails({
+        url: "https://browse.library.kiwix.org/content/wikipedia_en_all_maxi_2026-02/A/Computer_science",
+      }),
+    )
 
     expect(executeScriptMock).toHaveBeenCalledTimes(3)
-    expect(executeScriptMock).toHaveBeenNthCalledWith(1, expect.objectContaining({
-      target: { tabId: currentTabId, documentIds: ["doc-1"] },
-      func: expect.any(Function),
-      args: [
-        SITE_CONTROL_URL_WINDOW_KEY,
-        "https://browse.library.kiwix.org/content/wikipedia_en_all_maxi_2026-02/A/Computer_science",
-      ],
-    }))
-    expect(executeScriptMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
-      target: { tabId: currentTabId, documentIds: ["doc-1"] },
-      files: [HOST_CONTENT_SCRIPT_FILE],
-    }))
-    expect(executeScriptMock).toHaveBeenNthCalledWith(3, expect.objectContaining({
-      target: { tabId: currentTabId, documentIds: ["doc-1"] },
-      files: [SELECTION_CONTENT_SCRIPT_FILE],
-    }))
+    expect(executeScriptMock).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        target: { tabId: currentTabId, documentIds: ["doc-1"] },
+        func: expect.any(Function),
+        args: [
+          SITE_CONTROL_URL_WINDOW_KEY,
+          "https://browse.library.kiwix.org/content/wikipedia_en_all_maxi_2026-02/A/Computer_science",
+        ],
+      }),
+    )
+    expect(executeScriptMock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        target: { tabId: currentTabId, documentIds: ["doc-1"] },
+        files: [HOST_CONTENT_SCRIPT_FILE],
+      }),
+    )
+    expect(executeScriptMock).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({
+        target: { tabId: currentTabId, documentIds: ["doc-1"] },
+        files: [SELECTION_CONTENT_SCRIPT_FILE],
+      }),
+    )
   })
 
   it("auto-injects existing and late iframes for allowlisted top pages", async () => {
@@ -200,26 +219,37 @@ describe("setupIframeInjection", () => {
       createFrame(2, "https://reader.example/frame"),
     ])
 
-    await onCompleted(createDetails({
-      frameId: 0,
-      documentId: "top-doc",
-      parentFrameId: -1,
-      url: "https://browse.library.kiwix.org/viewer",
-    }))
+    await onCompleted(
+      createDetails({
+        frameId: 0,
+        documentId: "top-doc",
+        parentFrameId: -1,
+        url: "https://browse.library.kiwix.org/viewer",
+      }),
+    )
 
     expect(executeScriptMock).toHaveBeenCalledTimes(3)
-    expect(executeScriptMock).toHaveBeenNthCalledWith(1, expect.objectContaining({
-      target: { tabId: currentTabId, frameIds: [2] },
-      args: [SITE_CONTROL_URL_WINDOW_KEY, "https://browse.library.kiwix.org/viewer"],
-    }))
-    expect(executeScriptMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
-      target: { tabId: currentTabId, frameIds: [2] },
-      files: [HOST_CONTENT_SCRIPT_FILE],
-    }))
-    expect(executeScriptMock).toHaveBeenNthCalledWith(3, expect.objectContaining({
-      target: { tabId: currentTabId, frameIds: [2] },
-      files: [SELECTION_CONTENT_SCRIPT_FILE],
-    }))
+    expect(executeScriptMock).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        target: { tabId: currentTabId, frameIds: [2] },
+        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://browse.library.kiwix.org/viewer"],
+      }),
+    )
+    expect(executeScriptMock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        target: { tabId: currentTabId, frameIds: [2] },
+        files: [HOST_CONTENT_SCRIPT_FILE],
+      }),
+    )
+    expect(executeScriptMock).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({
+        target: { tabId: currentTabId, frameIds: [2] },
+        files: [SELECTION_CONTENT_SCRIPT_FILE],
+      }),
+    )
 
     executeScriptMock.mockClear()
     getAllFramesMock.mockResolvedValue([
@@ -227,49 +257,64 @@ describe("setupIframeInjection", () => {
       createFrame(4, "https://reader.example/late-frame"),
     ])
 
-    await onCompleted(createDetails({
-      frameId: 4,
-      documentId: "doc-late",
-      url: "https://reader.example/late-frame",
-    }))
+    await onCompleted(
+      createDetails({
+        frameId: 4,
+        documentId: "doc-late",
+        url: "https://reader.example/late-frame",
+      }),
+    )
 
     expect(executeScriptMock).toHaveBeenCalledTimes(3)
-    expect(executeScriptMock).toHaveBeenNthCalledWith(1, expect.objectContaining({
-      target: { tabId: currentTabId, documentIds: ["doc-late"] },
-      args: [SITE_CONTROL_URL_WINDOW_KEY, "https://browse.library.kiwix.org/viewer"],
-    }))
-    expect(executeScriptMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
-      target: { tabId: currentTabId, documentIds: ["doc-late"] },
-      files: [HOST_CONTENT_SCRIPT_FILE],
-    }))
-    expect(executeScriptMock).toHaveBeenNthCalledWith(3, expect.objectContaining({
-      target: { tabId: currentTabId, documentIds: ["doc-late"] },
-      files: [SELECTION_CONTENT_SCRIPT_FILE],
-    }))
+    expect(executeScriptMock).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        target: { tabId: currentTabId, documentIds: ["doc-late"] },
+        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://browse.library.kiwix.org/viewer"],
+      }),
+    )
+    expect(executeScriptMock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        target: { tabId: currentTabId, documentIds: ["doc-late"] },
+        files: [HOST_CONTENT_SCRIPT_FILE],
+      }),
+    )
+    expect(executeScriptMock).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({
+        target: { tabId: currentTabId, documentIds: ["doc-late"] },
+        files: [SELECTION_CONTENT_SCRIPT_FILE],
+      }),
+    )
   })
 
   it("respects site control during allowlisted full-runtime iframe injection", async () => {
     const { onCompleted } = await setupSubject()
     storageGetItemMock.mockResolvedValue({ enabled: false })
-    getLocalConfigMock.mockResolvedValue(createConfig({
-      nodeTranslationEnabled: false,
-      siteControl: {
-        mode: "blacklist",
-        blacklistPatterns: ["browse.library.kiwix.org"],
-        whitelistPatterns: [],
-      },
-    }))
+    getLocalConfigMock.mockResolvedValue(
+      createConfig({
+        nodeTranslationEnabled: false,
+        siteControl: {
+          mode: "blacklist",
+          blacklistPatterns: ["browse.library.kiwix.org"],
+          whitelistPatterns: [],
+        },
+      }),
+    )
     getAllFramesMock.mockResolvedValue([
       createFrame(0, "https://browse.library.kiwix.org/viewer", -1),
       createFrame(2, "https://reader.example/frame"),
     ])
 
-    await onCompleted(createDetails({
-      frameId: 0,
-      documentId: "top-doc",
-      parentFrameId: -1,
-      url: "https://browse.library.kiwix.org/viewer",
-    }))
+    await onCompleted(
+      createDetails({
+        frameId: 0,
+        documentId: "top-doc",
+        parentFrameId: -1,
+        url: "https://browse.library.kiwix.org/viewer",
+      }),
+    )
 
     expect(executeScriptMock).not.toHaveBeenCalled()
   })
@@ -286,10 +331,13 @@ describe("setupIframeInjection", () => {
     await injectHostContentIntoTabIframes(currentTabId, { requirePageTranslationEnabled: false })
 
     expect(executeScriptMock).toHaveBeenCalledTimes(2)
-    expect(executeScriptMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
-      target: { tabId: currentTabId, frameIds: [2] },
-      files: [HOST_CONTENT_SCRIPT_FILE],
-    }))
+    expect(executeScriptMock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        target: { tabId: currentTabId, frameIds: [2] },
+        files: [HOST_CONTENT_SCRIPT_FILE],
+      }),
+    )
 
     executeScriptMock.mockClear()
 
@@ -299,17 +347,25 @@ describe("setupIframeInjection", () => {
     })
 
     expect(executeScriptMock).toHaveBeenCalledTimes(2)
-    expect(executeScriptMock).toHaveBeenNthCalledWith(1, expect.objectContaining({
-      target: { tabId: currentTabId, frameIds: [2] },
-      args: [SITE_CONTROL_URL_WINDOW_KEY, "https://browse.library.kiwix.org/content/article"],
-    }))
-    expect(executeScriptMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
-      target: { tabId: currentTabId, frameIds: [2] },
-      files: [SELECTION_CONTENT_SCRIPT_FILE],
-    }))
-    expect(executeScriptMock).not.toHaveBeenCalledWith(expect.objectContaining({
-      files: [HOST_CONTENT_SCRIPT_FILE],
-    }))
+    expect(executeScriptMock).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        target: { tabId: currentTabId, frameIds: [2] },
+        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://browse.library.kiwix.org/content/article"],
+      }),
+    )
+    expect(executeScriptMock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        target: { tabId: currentTabId, frameIds: [2] },
+        files: [SELECTION_CONTENT_SCRIPT_FILE],
+      }),
+    )
+    expect(executeScriptMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        files: [HOST_CONTENT_SCRIPT_FILE],
+      }),
+    )
   })
 
   it("injects each document once and targets documentIds when available", async () => {
@@ -320,11 +376,14 @@ describe("setupIframeInjection", () => {
     await onCompleted(details)
 
     expect(executeScriptMock).toHaveBeenCalledTimes(2)
-    expect(executeScriptMock).toHaveBeenNthCalledWith(1, expect.objectContaining({
-      target: { tabId: currentTabId, documentIds: ["doc-1"] },
-      func: expect.any(Function),
-      args: [SITE_CONTROL_URL_WINDOW_KEY, "https://example.com/frame"],
-    }))
+    expect(executeScriptMock).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        target: { tabId: currentTabId, documentIds: ["doc-1"] },
+        func: expect.any(Function),
+        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://example.com/frame"],
+      }),
+    )
 
     for (const [call] of executeScriptMock.mock.calls) {
       expect(call.target).toEqual({ tabId: currentTabId, documentIds: ["doc-1"] })
@@ -373,27 +432,35 @@ describe("setupIframeInjection", () => {
         createFrame(3, "https://example.com/old-frame"),
       ])
 
-    await onCompleted(createDetails({
-      frameId: 3,
-      documentId: "doc-stale",
-      url: "https://example.com/old-frame",
-    }))
-    await onCompleted(createDetails({
-      frameId: 2,
-      documentId: "doc-live",
-      url: "https://example.com/frame",
-    }))
-    await onCompleted(createDetails({
-      frameId: 3,
-      documentId: "doc-stale",
-      url: "https://example.com/old-frame",
-    }))
+    await onCompleted(
+      createDetails({
+        frameId: 3,
+        documentId: "doc-stale",
+        url: "https://example.com/old-frame",
+      }),
+    )
+    await onCompleted(
+      createDetails({
+        frameId: 2,
+        documentId: "doc-live",
+        url: "https://example.com/frame",
+      }),
+    )
+    await onCompleted(
+      createDetails({
+        frameId: 3,
+        documentId: "doc-stale",
+        url: "https://example.com/old-frame",
+      }),
+    )
 
     expect(executeScriptMock).toHaveBeenCalledTimes(6)
-    expect(executeScriptMock).toHaveBeenLastCalledWith(expect.objectContaining({
-      target: { tabId: currentTabId, documentIds: ["doc-stale"] },
-      files: [HOST_CONTENT_SCRIPT_FILE],
-    }))
+    expect(executeScriptMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        target: { tabId: currentTabId, documentIds: ["doc-stale"] },
+        files: [HOST_CONTENT_SCRIPT_FILE],
+      }),
+    )
   })
 
   it("clears tab state on main-frame navigation and tab removal", async () => {
@@ -414,7 +481,8 @@ describe("setupIframeInjection", () => {
   })
 
   it("injects current tab iframes after top-frame node translation even when page translation is disabled", async () => {
-    const { injectHostContentIntoCurrentTabIframesAfterNodeTranslation } = await import("../iframe-injection")
+    const { injectHostContentIntoCurrentTabIframesAfterNodeTranslation } =
+      await import("../iframe-injection")
     storageGetItemMock.mockResolvedValue({ enabled: false })
     getLocalConfigMock.mockResolvedValue(createConfig({ nodeTranslationEnabled: true }))
     getAllFramesMock.mockResolvedValue([
@@ -427,36 +495,55 @@ describe("setupIframeInjection", () => {
 
     const calls = executeScriptMock.mock.calls.map(([call]) => call)
     expect(executeScriptMock).toHaveBeenCalledTimes(4)
-    expect(calls).toEqual(expect.arrayContaining([expect.objectContaining({
-      target: { tabId: currentTabId, frameIds: [2] },
-      func: expect.any(Function),
-      args: [SITE_CONTROL_URL_WINDOW_KEY, "https://example.com/frame-a"],
-    })]))
-    expect(calls).toEqual(expect.arrayContaining([expect.objectContaining({
-      target: { tabId: currentTabId, frameIds: [2] },
-      files: [HOST_CONTENT_SCRIPT_FILE],
-    })]))
-    expect(calls).toEqual(expect.arrayContaining([expect.objectContaining({
-      target: { tabId: currentTabId, frameIds: [3] },
-      func: expect.any(Function),
-      args: [SITE_CONTROL_URL_WINDOW_KEY, "https://example.com/frame-b"],
-    })]))
-    expect(calls).toEqual(expect.arrayContaining([expect.objectContaining({
-      target: { tabId: currentTabId, frameIds: [3] },
-      files: [HOST_CONTENT_SCRIPT_FILE],
-    })]))
+    expect(calls).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          target: { tabId: currentTabId, frameIds: [2] },
+          func: expect.any(Function),
+          args: [SITE_CONTROL_URL_WINDOW_KEY, "https://example.com/frame-a"],
+        }),
+      ]),
+    )
+    expect(calls).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          target: { tabId: currentTabId, frameIds: [2] },
+          files: [HOST_CONTENT_SCRIPT_FILE],
+        }),
+      ]),
+    )
+    expect(calls).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          target: { tabId: currentTabId, frameIds: [3] },
+          func: expect.any(Function),
+          args: [SITE_CONTROL_URL_WINDOW_KEY, "https://example.com/frame-b"],
+        }),
+      ]),
+    )
+    expect(calls).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          target: { tabId: currentTabId, frameIds: [3] },
+          files: [HOST_CONTENT_SCRIPT_FILE],
+        }),
+      ]),
+    )
   })
 
   it("respects site control during top-frame node activation iframe injection", async () => {
-    const { injectHostContentIntoCurrentTabIframesAfterNodeTranslation } = await import("../iframe-injection")
-    getLocalConfigMock.mockResolvedValue(createConfig({
-      nodeTranslationEnabled: true,
-      siteControl: {
-        mode: "blacklist",
-        blacklistPatterns: ["example.com"],
-        whitelistPatterns: [],
-      },
-    }))
+    const { injectHostContentIntoCurrentTabIframesAfterNodeTranslation } =
+      await import("../iframe-injection")
+    getLocalConfigMock.mockResolvedValue(
+      createConfig({
+        nodeTranslationEnabled: true,
+        siteControl: {
+          mode: "blacklist",
+          blacklistPatterns: ["example.com"],
+          whitelistPatterns: [],
+        },
+      }),
+    )
 
     await injectHostContentIntoCurrentTabIframesAfterNodeTranslation(currentTabId)
 
@@ -465,7 +552,8 @@ describe("setupIframeInjection", () => {
 
   it("does not enable late iframe injection after top-frame node activation", async () => {
     const { onCompleted } = await setupSubject()
-    const { injectHostContentIntoCurrentTabIframesAfterNodeTranslation } = await import("../iframe-injection")
+    const { injectHostContentIntoCurrentTabIframesAfterNodeTranslation } =
+      await import("../iframe-injection")
     storageGetItemMock.mockResolvedValue({ enabled: false })
     getLocalConfigMock.mockResolvedValue(createConfig({ nodeTranslationEnabled: true }))
 
@@ -473,11 +561,13 @@ describe("setupIframeInjection", () => {
     executeScriptMock.mockClear()
     getAllFramesMock.mockClear()
 
-    await onCompleted(createDetails({
-      frameId: 4,
-      documentId: "doc-late",
-      url: "https://example.com/late-frame",
-    }))
+    await onCompleted(
+      createDetails({
+        frameId: 4,
+        documentId: "doc-late",
+        url: "https://example.com/late-frame",
+      }),
+    )
 
     expect(getAllFramesMock).not.toHaveBeenCalled()
     expect(executeScriptMock).not.toHaveBeenCalled()
