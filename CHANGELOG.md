@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.39.4
+
+### Patch Changes
+
+- [#1820](https://github.com/mengxi-ream/read-frog/pull/1820) [`5f51908`](https://github.com/mengxi-ream/read-frog/commit/5f51908151aed4375d93d96ea4ec22e53e6c575e) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - Track Guide Step 3 Dictionary saves across direct and login-resumed Notebase flows.
+
 ## 1.39.3
 
 ### Patch Changes
