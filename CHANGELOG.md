@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.39.3
+
+### Patch Changes
+
+- [#1816](https://github.com/mengxi-ream/read-frog/pull/1816) [`ccec16f`](https://github.com/mengxi-ream/read-frog/commit/ccec16f678de2021cbe73f8d7e381f28014df174) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(site-rules): keep excluded descendants untranslated
+
+- [#1804](https://github.com/mengxi-ream/read-frog/pull/1804) [`09f8d48`](https://github.com/mengxi-ream/read-frog/commit/09f8d48eecf3fb36492fc648f21bcc2abfb2c3f4) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(popup): hide disabled custom AI actions from the provider selector list
+
+- [#1784](https://github.com/mengxi-ream/read-frog/pull/1784) [`e3dcb91`](https://github.com/mengxi-ream/read-frog/commit/e3dcb91bab15a4c539965a9f3783345a00a8d6e9) Thanks [@octo-patch](https://github.com/octo-patch)! - feat: add MiniMax-M3 model
+
 ## 1.39.2
 
 ### Patch Changes
