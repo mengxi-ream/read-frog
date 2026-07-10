@@ -745,7 +745,7 @@ options:
         description: Porcentaje de visibilidad del elemento requerido para activar la traducción (0-1). Los valores más altos retrasan la traducción hasta que sea visible una mayor parte del elemento.
     smallParagraphFilter:
       title: Filtro de párrafos pequeños
-      description: Omitir la traducción de nodos de texto con menos caracteres o palabras que el umbral (0 = desactivado)
+      description: Estos valores predeterminados globales omiten la traducción de nodos de texto con menos caracteres o palabras que los umbrales. Las reglas de sitio coincidentes pueden anularlos (0 = desactivado)
       minCharacters:
         title: Caracteres mínimos
         description: Los nodos de texto con menos caracteres que este valor no se traducirán. El recuento de caracteres incluye espacios en blanco.

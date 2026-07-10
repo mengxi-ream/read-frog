@@ -3,7 +3,7 @@ import type { Config } from "@/types/config/config"
 import type { SiteRule } from "@/types/config/site-rules"
 import { afterEach, describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { PARAGRAPH_ATTRIBUTE } from "@/utils/constants/dom-labels"
+import { PARAGRAPH_ATTRIBUTE, WALKED_ATTRIBUTE } from "@/utils/constants/dom-labels"
 import { walkAndLabelElement } from "../traversal"
 
 function setHost(host: string) {
@@ -88,12 +88,12 @@ describe("includeSelectors whitelist", () => {
     expect(document.querySelector("#outside")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
   })
 
-  it("descends into an excluded subtree to reach nested include targets", () => {
+  it("does not descend into an excluded subtree for nested include targets", () => {
     setHost("include-example.org")
     document.body.innerHTML = `
       <div class="sidebar">
         <p id="noise">Ad text that stays untranslated</p>
-        <div class="recommended"><p id="rescued">Recommended article title</p></div>
+        <div class="recommended"><p id="nested-include">Recommended article title</p></div>
       </div>
     `
 
@@ -106,7 +106,8 @@ describe("includeSelectors whitelist", () => {
       }),
     )
 
-    expect(document.querySelector("#rescued")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
+    expect(document.querySelector("#nested-include")!.hasAttribute(WALKED_ATTRIBUTE)).toBe(false)
+    expect(document.querySelector("#nested-include")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(false)
     expect(document.querySelector("#noise")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(false)
   })
 
@@ -170,5 +171,31 @@ describe("includeSelectors whitelist", () => {
 
     expect(document.querySelector("#issue-title")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
     expect(document.querySelector("#user-link")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(false)
+  })
+
+  it("keeps X usernames excluded when a nested span matches a broad include selector", () => {
+    setHost("x.com")
+    document.body.innerHTML = `
+      <article data-testid="tweet">
+        <div data-testid="User-Name" id="user-name">
+          <div class="css-175oi2r">
+            <span id="display-name" style="-webkit-line-clamp: 1">Read Frog</span>
+            <span id="handle">@read_frog</span>
+          </div>
+        </div>
+        <div data-testid="tweetText" id="tweet-text">
+          <span>Translate this tweet</span>
+        </div>
+      </article>
+    `
+
+    walkAndLabelElement(document.body, "w1", structuredClone(DEFAULT_CONFIG))
+
+    expect(document.querySelector("#user-name")!.hasAttribute(WALKED_ATTRIBUTE)).toBe(false)
+    expect(document.querySelector("#display-name")!.hasAttribute(WALKED_ATTRIBUTE)).toBe(false)
+    expect(document.querySelector("#display-name")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(false)
+    expect(document.querySelector("#handle")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(false)
+    expect(document.querySelector("#tweet-text")!.hasAttribute(WALKED_ATTRIBUTE)).toBe(true)
+    expect(document.querySelector("#tweet-text")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
   })
 })

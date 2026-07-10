@@ -117,12 +117,8 @@ export function isSiteRuleExcludedElement(element: HTMLElement, config: Config):
     if (element.matches(includeSelector)) {
       return false
     }
-    // Keep descending when the excluded subtree still contains include
-    // targets deeper down — isWithinIncludeScope guarantees only those
-    // targets get translated, so the rest of the subtree stays untouched.
-    if (element.querySelector(includeSelector) !== null) {
-      return false
-    }
+    // A nested include target does not reopen an excluded subtree. Traversal
+    // stops at this element, so its descendants remain excluded as well.
   }
   return true
 }

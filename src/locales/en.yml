@@ -745,7 +745,7 @@ options:
         description: Percentage of element visibility required to trigger translation (0-1). Higher values delay translation until more of the element is visible.
     smallParagraphFilter:
       title: Small Paragraph Filter
-      description: Skip translating text nodes with fewer characters or words than the threshold (0 = disabled)
+      description: These global defaults skip translating text nodes with fewer characters or words than the thresholds. Matching site rules can override them (0 = disabled)
       minCharacters:
         title: Minimum Characters
         description: Text nodes with fewer characters than this value will not be translated. Character count includes whitespace.

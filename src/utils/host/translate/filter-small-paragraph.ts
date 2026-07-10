@@ -4,6 +4,8 @@ import { ISO6393_TO_6391 } from "@read-frog/definitions"
 import { getDetectedCodeFromStorage, getFinalSourceCode } from "@/utils/config/languages"
 import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
 
+const PURE_HANDLE_RE = /^@\S+$/u
+
 function countWords(text: string, sourceCode: LangCodeISO6393): number {
   // Convert ISO 639-3 (e.g., 'eng') to ISO 639-1 (e.g., 'en') for Intl.Segmenter
   const locale = ISO6393_TO_6391[sourceCode] ?? "en"
@@ -17,6 +19,8 @@ async function getSourceCode(configSourceCode: LangCodeISO6393 | "auto"): Promis
 }
 
 export async function shouldFilterSmallParagraph(text: string, config: Config): Promise<boolean> {
+  if (PURE_HANDLE_RE.test(text.trim())) return true
+
   const siteRule = getEffectiveSiteRule(config, window.location.href)
   const minCharactersPerNode = siteRule.minCharacters ?? config.translate.page.minCharactersPerNode
   const minWordsPerNode = siteRule.minWords ?? config.translate.page.minWordsPerNode
