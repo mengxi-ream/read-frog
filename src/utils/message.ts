@@ -1,4 +1,5 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { GuideDictionaryNotebaseCompletionInput } from "./guide/dictionary-notebase"
 import type { FeatureUsageContext, FeatureUsedEventProperties } from "@/types/analytics"
 import type {
   BackgroundGenerateTextPayload,
@@ -81,6 +82,8 @@ interface ProtocolMap {
   pinStateChanged: (data: { isPinned: boolean }) => void
   getPinState: () => boolean
   returnPinState: (data: { isPinned: boolean }) => void
+  guideDictionaryNotebaseStateChanged: (data: { completed: boolean }) => void
+  completeGuideDictionaryNotebase: (data: GuideDictionaryNotebaseCompletionInput) => void
   // request
   enqueueTranslateRequest: (data: {
     text: string

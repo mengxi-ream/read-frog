@@ -2,6 +2,7 @@ import type {
   SelectionToolbarCustomAction,
   SelectionToolbarCustomActionNotebaseAccount,
 } from "@/types/config/selection-toolbar"
+import type { GuideDictionaryNotebaseTracking } from "@/utils/guide/dictionary-notebase"
 import { useMutation } from "@tanstack/react-query"
 import { useAtom, useSetAtom } from "jotai"
 import { useRef, useState } from "react"
@@ -9,6 +10,10 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/base-ui/button"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { authClient } from "@/utils/auth/auth-client"
+import {
+  canUseGuideDictionaryNotebaseTracking,
+  getActiveGuideDictionaryNotebaseTrackingForAction,
+} from "@/utils/guide/dictionary-notebase"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import {
@@ -56,6 +61,7 @@ export function SaveToNotebaseButton({
   const currentAccount = createNotebaseConnectedAccountSnapshot(session?.user)
   const [isPreparingSave, setIsPreparingSave] = useState(false)
   const savingNotebaseNameRef = useRef<string | undefined>(connection?.notebaseNameSnapshot)
+  const savingGuideTrackingRef = useRef<GuideDictionaryNotebaseTracking | null>(null)
 
   const openCustomActionOptions = () => {
     void sendMessage("openOptionsPage", {
@@ -72,6 +78,18 @@ export function SaveToNotebaseButton({
     })
   }
 
+  const completeGuideDictionaryNotebase = (
+    tracking: GuideDictionaryNotebaseTracking,
+    notebaseId: string,
+  ) => {
+    void sendMessage("completeGuideDictionaryNotebase", {
+      trackingId: tracking.id,
+      actionId: tracking.actionId,
+      notebaseId,
+      sourceUrl: tracking.sourceUrl,
+    }).catch(() => {})
+  }
+
   const saveMutation = useMutation(
     orpc.notebaseRow.create.mutationOptions({
       meta: {
@@ -79,6 +97,11 @@ export function SaveToNotebaseButton({
       },
       onSuccess: (_data, variables) => {
         const notebaseUrl = getNotebaseDetailUrl(variables.notebaseId)
+        const guideTracking = savingGuideTrackingRef.current
+        savingGuideTrackingRef.current = null
+        if (guideTracking) {
+          completeGuideDictionaryNotebase(guideTracking, variables.notebaseId)
+        }
         toast.success(i18n.t("action.saveToNotebaseSuccess"), {
           description: savingNotebaseNameRef.current ?? connection?.notebaseNameSnapshot,
           action: {
@@ -93,6 +116,7 @@ export function SaveToNotebaseButton({
         })
       },
       onError: (error: unknown) => {
+        savingGuideTrackingRef.current = null
         if (isORPCUnauthorizedError(error)) {
           toast.error(i18n.t("action.saveToNotebaseLoginRequired"))
           return
@@ -125,29 +149,52 @@ export function SaveToNotebaseButton({
     }),
   )
 
-  const openCreateOrConnectDialog = () => {
+  const getCurrentGuideDictionaryNotebaseUrl = () => {
+    const currentUrl = window.location.href
+    return canUseGuideDictionaryNotebaseTracking(action.id, currentUrl) ? currentUrl : null
+  }
+
+  const openCreateOrConnectDialog = async () => {
     if (!result) {
       return
     }
 
+    const guideDictionaryNotebaseUrl = getCurrentGuideDictionaryNotebaseUrl()
+    const guideDictionaryNotebaseTracking = guideDictionaryNotebaseUrl
+      ? await getActiveGuideDictionaryNotebaseTrackingForAction(
+          action.id,
+          guideDictionaryNotebaseUrl,
+        )
+      : null
     setSaveToNotebaseDialog({
       open: true,
       mode: "create_or_connect",
-      pendingNotebaseSave: createPendingNotebaseSave(action, result),
+      pendingNotebaseSave: createPendingNotebaseSave(action, result, Date.now(), {
+        guideDictionaryNotebaseTracking: guideDictionaryNotebaseTracking ?? undefined,
+      }),
     })
   }
 
-  const openForeignConnectionDialog = (
+  const openForeignConnectionDialog = async (
     connectedAccount: SelectionToolbarCustomActionNotebaseAccount,
   ) => {
     if (!result) {
       return
     }
 
+    const guideDictionaryNotebaseUrl = getCurrentGuideDictionaryNotebaseUrl()
+    const guideDictionaryNotebaseTracking = guideDictionaryNotebaseUrl
+      ? await getActiveGuideDictionaryNotebaseTrackingForAction(
+          action.id,
+          guideDictionaryNotebaseUrl,
+        )
+      : null
     setSaveToNotebaseDialog({
       open: true,
       mode: "foreign_connection",
-      pendingNotebaseSave: createPendingNotebaseSave(action, result),
+      pendingNotebaseSave: createPendingNotebaseSave(action, result, Date.now(), {
+        guideDictionaryNotebaseTracking: guideDictionaryNotebaseTracking ?? undefined,
+      }),
       connectedAccount,
     })
   }
@@ -161,7 +208,7 @@ export function SaveToNotebaseButton({
         variant="brand"
         size="sm"
         disabled={isUnconnectedDisabled}
-        onClick={openCreateOrConnectDialog}
+        onClick={() => void openCreateOrConnectDialog()}
       >
         {i18n.t("action.saveToNotebase")}
       </Button>
@@ -183,7 +230,22 @@ export function SaveToNotebaseButton({
     }
 
     if (!isAuthenticated) {
-      const pendingNotebaseSave = createPendingConnectedNotebaseSave(action, connection, result)
+      const guideDictionaryNotebaseUrl = getCurrentGuideDictionaryNotebaseUrl()
+      const guideDictionaryNotebaseTracking = guideDictionaryNotebaseUrl
+        ? await getActiveGuideDictionaryNotebaseTrackingForAction(
+            action.id,
+            guideDictionaryNotebaseUrl,
+          )
+        : null
+      const pendingNotebaseSave = createPendingConnectedNotebaseSave(
+        action,
+        connection,
+        result,
+        Date.now(),
+        {
+          guideDictionaryNotebaseTracking: guideDictionaryNotebaseTracking ?? undefined,
+        },
+      )
       setSaveToNotebaseDialog({
         open: true,
         mode: "connected_login_required",
@@ -208,12 +270,12 @@ export function SaveToNotebaseButton({
       })
 
       if (ownership.kind === "notebase_unavailable") {
-        openCreateOrConnectDialog()
+        await openCreateOrConnectDialog()
         return
       }
 
       if (ownership.kind === "foreign_account") {
-        openForeignConnectionDialog(connection.connectedAccount)
+        await openForeignConnectionDialog(connection.connectedAccount)
         return
       }
 
@@ -237,6 +299,13 @@ export function SaveToNotebaseButton({
 
       const { cells } = buildNotebaseRowCells(actionWithRefreshedConnection, schema, result)
       savingNotebaseNameRef.current = refreshedConnection.notebaseNameSnapshot
+      const guideDictionaryNotebaseUrl = getCurrentGuideDictionaryNotebaseUrl()
+      savingGuideTrackingRef.current = guideDictionaryNotebaseUrl
+        ? await getActiveGuideDictionaryNotebaseTrackingForAction(
+            action.id,
+            guideDictionaryNotebaseUrl,
+          )
+        : null
       saveMutation.mutate({
         notebaseId: refreshedConnection.notebaseId,
         data: {
@@ -255,7 +324,7 @@ export function SaveToNotebaseButton({
       }
 
       if (isORPCNotFoundError(error)) {
-        openCreateOrConnectDialog()
+        await openCreateOrConnectDialog()
         return
       }
 

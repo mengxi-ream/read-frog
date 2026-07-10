@@ -70,6 +70,27 @@ function ConnectedAccountDisplay({
   )
 }
 
+async function completeGuideDictionaryNotebaseFromPending(pendingSave: PendingCreateNotebaseSave) {
+  const tracking = pendingSave.guideDictionaryNotebaseTracking
+  if (!tracking || tracking.actionId !== pendingSave.actionId) {
+    return
+  }
+
+  try {
+    await sendMessage("completeGuideDictionaryNotebase", {
+      trackingId: tracking.id,
+      actionId: tracking.actionId,
+      notebaseId: pendingSave.notebaseId,
+      sourceUrl: tracking.sourceUrl,
+    })
+  } catch (error) {
+    logger.warn(
+      "[SaveToNotebaseDialogHost] Failed to complete guide Dictionary Notebase flow",
+      error,
+    )
+  }
+}
+
 export function SaveToNotebaseDialogHost() {
   const [dialogState, setDialogState] = useAtom(saveToNotebaseDialogAtom)
   const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(
@@ -117,6 +138,7 @@ export function SaveToNotebaseDialogHost() {
       toast.success(i18n.t("action.saveToNotebaseSuccess"), {
         description: createdPendingSave.actionName,
       })
+      await completeGuideDictionaryNotebaseFromPending(createdPendingSave)
 
       try {
         await sendMessage("openPage", {

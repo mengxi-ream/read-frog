@@ -94,6 +94,7 @@ function createDeps({
     getSchema: vi.fn<(...args: any[]) => any>(),
     openNotebasePage: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
     openActionOptions: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
+    completeGuideDictionaryNotebase: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
     now: () => 1_000,
     log: {
       info: vi.fn<(...args: any[]) => any>(),
@@ -209,6 +210,39 @@ describe("notebase pending save processor", () => {
     )
     expect(loggedInDeps.clearPendingNotebaseSave).toHaveBeenCalledTimes(1)
     expect(loggedInDeps.openNotebasePage).toHaveBeenCalledWith(pending.notebaseId)
+    expect(loggedInDeps.completeGuideDictionaryNotebase).not.toHaveBeenCalled()
+  })
+
+  it("completes the guide Dictionary Notebase flow after pending create resume when guide metadata is present", async () => {
+    const action = {
+      ...createAction(),
+      id: "default-dictionary",
+      name: "Dictionary",
+    }
+    const pending = createPendingNotebaseSave(action, { summary: "A short summary" }, 1_000, {
+      guideDictionaryNotebaseTracking: {
+        id: "tracking-1",
+        actionId: "default-dictionary",
+        sourceUrl: "https://readfrog.app/guide/step-3",
+        startedAt: 1_000,
+        expiresAt: 1_801_000,
+      },
+    })
+    const deps = createDeps({
+      pending,
+      config: createConfig(action),
+      authenticated: true,
+    })
+
+    await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+    expect(deps.createNotebase).toHaveBeenCalledWith(buildNotebaseCreateInputFromPending(pending))
+    expect(deps.completeGuideDictionaryNotebase).toHaveBeenCalledWith({
+      trackingId: "tracking-1",
+      actionId: "default-dictionary",
+      notebaseId: pending.notebaseId,
+      sourceUrl: "https://readfrog.app/guide/step-3",
+    })
   })
 
   it("opens the notebase page after duplicate-create recovery succeeds", async () => {
@@ -257,6 +291,46 @@ describe("notebase pending save processor", () => {
     expect(deps.createNotebase).not.toHaveBeenCalled()
     expect(deps.clearPendingNotebaseSave).toHaveBeenCalledTimes(1)
     expect(deps.openNotebasePage).toHaveBeenCalledWith("notebase-1")
+    expect(deps.completeGuideDictionaryNotebase).not.toHaveBeenCalled()
+  })
+
+  it("completes the guide Dictionary Notebase flow after connected pending row resume when guide metadata is present", async () => {
+    const action = {
+      ...createConnectedAction(),
+      id: "default-dictionary",
+      name: "Dictionary",
+    }
+    const pending = createPendingConnectedNotebaseSave(
+      action,
+      action.notebaseConnection!,
+      { summary: "A short summary" },
+      1_000,
+      {
+        guideDictionaryNotebaseTracking: {
+          id: "tracking-1",
+          actionId: "default-dictionary",
+          sourceUrl: "https://readfrog.app/guide/step-3",
+          startedAt: 1_000,
+          expiresAt: 1_801_000,
+        },
+      },
+    )
+    const deps = createDeps({
+      pending,
+      config: createConfig(action),
+      authenticated: true,
+    })
+    deps.getSchema.mockResolvedValueOnce(createConnectedSchema())
+
+    await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+    expect(deps.createRow).toHaveBeenCalledTimes(1)
+    expect(deps.completeGuideDictionaryNotebase).toHaveBeenCalledWith({
+      trackingId: "tracking-1",
+      actionId: "default-dictionary",
+      notebaseId: "notebase-1",
+      sourceUrl: "https://readfrog.app/guide/step-3",
+    })
   })
 
   it("creates a replacement Notebase for a connected pending save when the logged-in account differs", async () => {
@@ -294,5 +368,52 @@ describe("notebase pending save processor", () => {
       email: "other@example.com",
     })
     expect(deps.clearPendingNotebaseSave).toHaveBeenCalledTimes(1)
+    expect(deps.completeGuideDictionaryNotebase).not.toHaveBeenCalled()
+  })
+
+  it("carries guide metadata into connected pending replacement creates", async () => {
+    const action = {
+      ...createConnectedAction(),
+      id: "default-dictionary",
+      name: "Dictionary",
+    }
+    const pending = createPendingConnectedNotebaseSave(
+      action,
+      action.notebaseConnection!,
+      { summary: "A short summary" },
+      1_000,
+      {
+        guideDictionaryNotebaseTracking: {
+          id: "tracking-1",
+          actionId: "default-dictionary",
+          sourceUrl: "https://readfrog.app/guide/step-3",
+          startedAt: 1_000,
+          expiresAt: 1_801_000,
+        },
+      },
+    )
+    const deps = createDeps({
+      pending,
+      config: createConfig(action),
+      authenticated: true,
+    })
+    deps.getAuthenticatedAccount.mockResolvedValueOnce({
+      id: "user-2",
+      name: "Other Reader",
+      email: "other@example.com",
+      image: null,
+    })
+    deps.listNotebases.mockResolvedValueOnce([])
+
+    await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+    expect(deps.createRow).not.toHaveBeenCalled()
+    expect(deps.createNotebase).toHaveBeenCalledTimes(1)
+    expect(deps.completeGuideDictionaryNotebase).toHaveBeenCalledWith({
+      trackingId: "tracking-1",
+      actionId: "default-dictionary",
+      notebaseId: expect.any(String),
+      sourceUrl: "https://readfrog.app/guide/step-3",
+    })
   })
 })

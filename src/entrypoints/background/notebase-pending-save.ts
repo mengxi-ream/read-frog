@@ -6,6 +6,7 @@ import type {
 } from "@read-frog/api-contract"
 import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomActionNotebaseAccount } from "@/types/config/selection-toolbar"
+import type { GuideDictionaryNotebaseCompletionInput } from "@/utils/guide/dictionary-notebase"
 import type {
   PendingConnectedNotebaseSave,
   PendingCreateNotebaseSave,
@@ -44,6 +45,7 @@ import {
   validateStillCanSavePendingCreateNotebaseSave,
 } from "@/utils/notebase/pending-save"
 import { backgroundOrpcClient } from "@/utils/orpc/background-client"
+import { completeGuideDictionaryNotebaseAndNotify } from "./new-user-guide"
 
 interface PendingNotebaseSaveProcessorDeps {
   getPendingNotebaseSave: () => Promise<PendingNotebaseSave | null>
@@ -57,6 +59,7 @@ interface PendingNotebaseSaveProcessorDeps {
   getSchema: (id: string) => Promise<NotebaseGetSchemaOutput>
   openNotebasePage: (notebaseId: string) => Promise<void>
   openActionOptions: (actionId: string) => Promise<void>
+  completeGuideDictionaryNotebase: (input: GuideDictionaryNotebaseCompletionInput) => Promise<void>
   now: () => number
   log: Pick<typeof logger, "info" | "warn" | "error">
 }
@@ -93,6 +96,28 @@ function shouldClearCreateError(error: unknown) {
   return isORPCForbiddenError(error) || isORPCValidationError(error)
 }
 
+async function completeGuideDictionaryNotebaseIfNeeded(
+  deps: PendingNotebaseSaveProcessorDeps,
+  pendingNotebaseSave: PendingNotebaseSave,
+  notebaseId: string,
+) {
+  const tracking = pendingNotebaseSave.guideDictionaryNotebaseTracking
+  if (!tracking || tracking.actionId !== pendingNotebaseSave.actionId) {
+    return
+  }
+
+  try {
+    await deps.completeGuideDictionaryNotebase({
+      trackingId: tracking.id,
+      actionId: tracking.actionId,
+      notebaseId,
+      sourceUrl: tracking.sourceUrl,
+    })
+  } catch (error) {
+    deps.log.warn("[NotebasePendingSave] Failed to complete guide Dictionary Notebase flow", error)
+  }
+}
+
 async function completePendingSave(
   deps: PendingNotebaseSaveProcessorDeps,
   pendingNotebaseSave: PendingCreateNotebaseSave,
@@ -118,6 +143,11 @@ async function completePendingSave(
 
   await deps.setConfig(applied.config)
   await deps.clearPendingNotebaseSave()
+  await completeGuideDictionaryNotebaseIfNeeded(
+    deps,
+    pendingNotebaseSave,
+    pendingNotebaseSave.notebaseId,
+  )
   deps.log.info("[NotebasePendingSave] Pending save completed", {
     pendingId: pendingNotebaseSave.id,
     actionId: pendingNotebaseSave.actionId,
@@ -236,6 +266,9 @@ async function createReplacementNotebaseFromConnectedPending(
     validation.action,
     pendingNotebaseSave.result,
     deps.now(),
+    {
+      guideDictionaryNotebaseTracking: pendingNotebaseSave.guideDictionaryNotebaseTracking,
+    },
   )
 
   try {
@@ -297,6 +330,11 @@ async function createReplacementNotebaseFromConnectedPending(
 
   await deps.setConfig(applied.config)
   await deps.clearPendingNotebaseSave()
+  await completeGuideDictionaryNotebaseIfNeeded(
+    deps,
+    replacementPendingNotebaseSave,
+    replacementPendingNotebaseSave.notebaseId,
+  )
   deps.log.info(
     "[NotebasePendingSave] Connected pending save completed with replacement Notebase",
     {
@@ -611,6 +649,11 @@ async function processConnectedPendingSave(
   }
 
   await deps.clearPendingNotebaseSave()
+  await completeGuideDictionaryNotebaseIfNeeded(
+    deps,
+    pendingNotebaseSave,
+    refreshedConnection.notebaseId,
+  )
   deps.log.info("[NotebasePendingSave] Connected pending row save completed", {
     pendingId: pendingNotebaseSave.id,
     actionId: pendingNotebaseSave.actionId,
@@ -665,6 +708,7 @@ export function setupNotebasePendingSaveProcessor() {
     createRow: (input) => backgroundOrpcClient.notebaseRow.create(input),
     listNotebases: () => backgroundOrpcClient.notebase.list({}),
     getSchema: (id) => backgroundOrpcClient.notebase.getSchema({ id }),
+    completeGuideDictionaryNotebase: completeGuideDictionaryNotebaseAndNotify,
     openNotebasePage: async (notebaseId) => {
       await browser.tabs.create({
         active: true,

@@ -33,6 +33,10 @@ const toastMock = vi.hoisted(() => ({
 }))
 
 const notebaseRowCreateMock = vi.hoisted(() => vi.fn<(...args: any[]) => any>())
+const guideTrackingMocks = vi.hoisted(() => ({
+  canUseGuideDictionaryNotebaseTracking: vi.fn<(...args: any[]) => any>(),
+  getActiveGuideDictionaryNotebaseTrackingForAction: vi.fn<(...args: any[]) => any>(),
+}))
 
 vi.mock("@/utils/auth/auth-client", () => ({
   authClient: {
@@ -46,6 +50,17 @@ vi.mock("@/utils/auth/auth-client", () => ({
 vi.mock("@/utils/message", () => ({
   sendMessage: vi.fn<(...args: any[]) => any>(),
 }))
+
+vi.mock("@/utils/guide/dictionary-notebase", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/utils/guide/dictionary-notebase")>()
+
+  return {
+    ...actual,
+    canUseGuideDictionaryNotebaseTracking: guideTrackingMocks.canUseGuideDictionaryNotebaseTracking,
+    getActiveGuideDictionaryNotebaseTrackingForAction:
+      guideTrackingMocks.getActiveGuideDictionaryNotebaseTrackingForAction,
+  }
+})
 
 vi.mock("sonner", () => ({
   toast: toastMock,
@@ -128,6 +143,41 @@ function createConnectedAction(): SelectionToolbarCustomAction {
   }
 }
 
+function createDictionaryAction(): SelectionToolbarCustomAction {
+  const action = cloneConfig(DEFAULT_CONFIG).selectionToolbar.customActions.find(
+    (item) => item.id === "default-dictionary",
+  )
+  if (!action) {
+    throw new Error("Default Dictionary action is not configured")
+  }
+
+  return action
+}
+
+function createConnectedDictionaryAction(): SelectionToolbarCustomAction {
+  const action = createDictionaryAction()
+
+  return {
+    ...action,
+    notebaseConnection: {
+      notebaseId: "notebase-1",
+      notebaseNameSnapshot: "Dictionary Notes",
+      connectedAccount: {
+        id: "user-1",
+        name: "Reader",
+        email: "reader@example.com",
+        image: null,
+      },
+      mappings: action.outputSchema.map((field) => ({
+        id: `mapping-${field.id}`,
+        localFieldId: field.id,
+        notebaseColumnId: `column-${field.id}`,
+        notebaseColumnNameSnapshot: field.name,
+      })),
+    },
+  }
+}
+
 function createSchema(columnId = "column-summary"): NotebaseGetSchemaOutput {
   return {
     id: "notebase-1",
@@ -146,6 +196,28 @@ function createSchema(columnId = "column-summary"): NotebaseGetSchemaOutput {
         updatedAt: new Date(),
       },
     ],
+  }
+}
+
+function createSchemaForAction(action: SelectionToolbarCustomAction): NotebaseGetSchemaOutput {
+  return {
+    id: "notebase-1",
+    name: "Dictionary Notes",
+    updatedAt: new Date(),
+    notebaseColumns: action.outputSchema.map((field, index) => ({
+      id: `column-${field.id}`,
+      notebaseId: "notebase-1",
+      name: field.name,
+      config:
+        field.type === "number"
+          ? { type: "number", decimal: 0, format: "number" }
+          : { type: "string" },
+      position: index,
+      isPrimary: index === 0,
+      width: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })),
   }
 }
 
@@ -196,6 +268,8 @@ describe("saveToNotebaseButton notebase availability", () => {
     vi.mocked(orpcClient.notebase.getSchema).mockResolvedValue(createSchema())
     notebaseRowCreateMock.mockResolvedValue({ txid: 1 })
     vi.mocked(sendMessage).mockResolvedValue(undefined)
+    guideTrackingMocks.canUseGuideDictionaryNotebaseTracking.mockReturnValue(false)
+    guideTrackingMocks.getActiveGuideDictionaryNotebaseTrackingForAction.mockResolvedValue(null)
   })
 
   it("renders when beta experience is disabled", () => {
@@ -246,6 +320,38 @@ describe("saveToNotebaseButton notebase availability", () => {
       expect(sendMessage).toHaveBeenCalledWith("openPage", {
         url: expect.stringContaining(`/notebase/${encodeURIComponent(createInput!.id)}`),
         active: true,
+      })
+    })
+  })
+
+  it("marks guide Dictionary Notebase complete after direct create-and-save with guide tracking", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    guideTrackingMocks.canUseGuideDictionaryNotebaseTracking.mockReturnValue(true)
+    guideTrackingMocks.getActiveGuideDictionaryNotebaseTrackingForAction.mockResolvedValue({
+      id: "tracking-1",
+      actionId: "default-dictionary",
+      sourceUrl: "https://readfrog.app/guide/step-3",
+      startedAt: 1_000,
+      expiresAt: 1_801_000,
+    })
+    const action = createDictionaryAction()
+    renderButton(config, action)
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+    await waitFor(() => {
+      expect(screen.getByText(i18n.t("action.saveToNotebaseCreateTitle"))).toBeInTheDocument()
+    })
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }),
+    )
+
+    await waitFor(() => {
+      expect(sendMessage).toHaveBeenCalledWith("completeGuideDictionaryNotebase", {
+        trackingId: "tracking-1",
+        actionId: "default-dictionary",
+        notebaseId: expect.any(String),
+        sourceUrl: "https://readfrog.app/guide/step-3",
       })
     })
   })
@@ -364,6 +470,72 @@ describe("saveToNotebaseButton notebase availability", () => {
       url: expect.stringContaining("/notebase/notebase-1"),
       active: true,
     })
+  })
+
+  it("marks guide Dictionary Notebase complete after direct connected row save with guide tracking", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    guideTrackingMocks.canUseGuideDictionaryNotebaseTracking.mockReturnValue(true)
+    guideTrackingMocks.getActiveGuideDictionaryNotebaseTrackingForAction.mockResolvedValue({
+      id: "tracking-1",
+      actionId: "default-dictionary",
+      sourceUrl: "https://readfrog.app/guide/step-3",
+      startedAt: 1_000,
+      expiresAt: 1_801_000,
+    })
+    const action = createConnectedDictionaryAction()
+    vi.mocked(orpcClient.notebase.getSchema).mockResolvedValueOnce(createSchemaForAction(action))
+    renderButton(config, action)
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(notebaseRowCreateMock).toHaveBeenCalledTimes(1)
+    })
+    await waitFor(() => {
+      expect(sendMessage).toHaveBeenCalledWith("completeGuideDictionaryNotebase", {
+        trackingId: "tracking-1",
+        actionId: "default-dictionary",
+        notebaseId: "notebase-1",
+        sourceUrl: "https://readfrog.app/guide/step-3",
+      })
+    })
+  })
+
+  it("does not mark guide complete for default Dictionary saves outside guide step 3", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    guideTrackingMocks.canUseGuideDictionaryNotebaseTracking.mockReturnValue(false)
+    const action = createConnectedDictionaryAction()
+    vi.mocked(orpcClient.notebase.getSchema).mockResolvedValueOnce(createSchemaForAction(action))
+    renderButton(config, action)
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(notebaseRowCreateMock).toHaveBeenCalledTimes(1)
+    })
+    expect(sendMessage).not.toHaveBeenCalledWith(
+      "completeGuideDictionaryNotebase",
+      expect.anything(),
+    )
+  })
+
+  it("does not mark guide complete for non-Dictionary custom actions", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    guideTrackingMocks.canUseGuideDictionaryNotebaseTracking.mockReturnValue(false)
+    renderButton(config, createConnectedAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(notebaseRowCreateMock).toHaveBeenCalledTimes(1)
+    })
+    expect(sendMessage).not.toHaveBeenCalledWith(
+      "completeGuideDictionaryNotebase",
+      expect.anything(),
+    )
   })
 
   it("shows a Custom AI Actions toast action instead of disabling invalid mappings", async () => {

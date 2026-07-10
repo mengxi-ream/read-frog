@@ -12,6 +12,7 @@ import { storage } from "#imports"
 import { env } from "@/env"
 import { selectionToolbarCustomActionNotebaseConnectionSchema } from "@/types/config/selection-toolbar"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
+import { guideDictionaryNotebaseTrackingSchema } from "@/utils/guide/dictionary-notebase"
 import { buildNotebaseRowCells } from "./mapping"
 
 export const NOTEBASE_PENDING_SAVE_STORAGE_KEY = "notebasePendingSave"
@@ -32,6 +33,7 @@ const pendingNotebaseSaveBaseSchema = zod.object({
   actionId: zod.string().nonempty(),
   actionName: zod.string().min(1),
   outputSchemaFingerprint: zod.string(),
+  guideDictionaryNotebaseTracking: guideDictionaryNotebaseTrackingSchema.optional(),
 })
 
 export const pendingCreateNotebaseSaveSchema = pendingNotebaseSaveBaseSchema.extend({
@@ -56,6 +58,10 @@ export const pendingNotebaseSaveSchema = zod.union([
 export type PendingNotebaseSave = z.infer<typeof pendingNotebaseSaveSchema>
 export type PendingCreateNotebaseSave = z.infer<typeof pendingCreateNotebaseSaveSchema>
 export type PendingConnectedNotebaseSave = z.infer<typeof pendingConnectedNotebaseSaveSchema>
+
+interface PendingNotebaseSaveOptions {
+  guideDictionaryNotebaseTracking?: PendingNotebaseSave["guideDictionaryNotebaseTracking"]
+}
 
 export type PendingNotebaseSaveActionStatus =
   | "valid"
@@ -87,6 +93,7 @@ export function createPendingNotebaseSave(
   action: SelectionToolbarCustomAction,
   result: Record<string, unknown>,
   now = Date.now(),
+  options?: PendingNotebaseSaveOptions,
 ): PendingCreateNotebaseSave {
   const columns = action.outputSchema.map((field) => ({
     localFieldId: field.id,
@@ -104,6 +111,9 @@ export function createPendingNotebaseSave(
     actionId: action.id,
     actionName: action.name.trim() || action.name,
     outputSchemaFingerprint: getOutputSchemaFingerprint(action.outputSchema),
+    ...(options?.guideDictionaryNotebaseTracking
+      ? { guideDictionaryNotebaseTracking: options.guideDictionaryNotebaseTracking }
+      : {}),
     notebaseId: getRandomUUID(),
     rowId: getRandomUUID(),
     columns,
@@ -118,6 +128,7 @@ export function createPendingConnectedNotebaseSave(
   connection: SelectionToolbarCustomActionNotebaseConnection,
   result: Record<string, unknown>,
   now = Date.now(),
+  options?: PendingNotebaseSaveOptions,
 ): PendingConnectedNotebaseSave {
   return {
     kind: "save_to_connected_notebase",
@@ -127,6 +138,9 @@ export function createPendingConnectedNotebaseSave(
     actionId: action.id,
     actionName: action.name.trim() || action.name,
     outputSchemaFingerprint: getOutputSchemaFingerprint(action.outputSchema),
+    ...(options?.guideDictionaryNotebaseTracking
+      ? { guideDictionaryNotebaseTracking: options.guideDictionaryNotebaseTracking }
+      : {}),
     connectionSnapshot: connection,
     result,
   }
