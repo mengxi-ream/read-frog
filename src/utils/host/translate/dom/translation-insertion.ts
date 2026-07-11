@@ -19,6 +19,11 @@ import { getOwnerDocument } from "../../dom/node"
 import { decorateTranslationNode } from "../ui/decorate-translation"
 import { isForceInlineTranslation } from "../ui/translation-utils"
 
+interface TranslationInsertionContext {
+  insertionTarget: TransNode
+  layoutSource: TransNode
+}
+
 function isFloatedElement(element: HTMLElement): boolean {
   const floatValue = window.getComputedStyle(element).float
   return floatValue === "left" || floatValue === "right"
@@ -88,7 +93,7 @@ export function addBlockTranslation(
 
 export async function insertTranslatedNodeIntoWrapper(
   translatedWrapperNode: HTMLElement,
-  targetNode: TransNode,
+  { insertionTarget, layoutSource }: TranslationInsertionContext,
   translatedText: string,
   translationNodeStyle: TranslationNodeStyleConfig,
   config: Config,
@@ -98,10 +103,10 @@ export async function insertTranslatedNodeIntoWrapper(
   const ownerDoc = getOwnerDocument(translatedWrapperNode)
   const translatedNode = ownerDoc.createElement("span")
   const siteRuleForceInline =
-    isHTMLElement(targetNode) && isSiteRuleForceInlineElement(targetNode, config)
-  const forceInlineTranslation = isForceInlineTranslation(targetNode) || siteRuleForceInline
+    isHTMLElement(layoutSource) && isSiteRuleForceInlineElement(layoutSource, config)
+  const forceInlineTranslation = isForceInlineTranslation(layoutSource) || siteRuleForceInline
   const siteRuleForceBlock =
-    isHTMLElement(targetNode) && isSiteRuleForceBlockElement(targetNode, config)
+    isHTMLElement(layoutSource) && isSiteRuleForceBlockElement(layoutSource, config)
 
   // priority: siteRuleForceBlock > forceInlineTranslation > forceBlockTranslation > isInlineTransNode > isBlockTransNode
   if (siteRuleForceBlock) {
@@ -110,9 +115,9 @@ export async function insertTranslatedNodeIntoWrapper(
     addInlineTranslation(ownerDoc, translatedWrapperNode, translatedNode)
   } else if (forceBlockTranslation) {
     addBlockTranslation(ownerDoc, translatedWrapperNode, translatedNode)
-  } else if (isInlineTransNode(targetNode)) {
+  } else if (isInlineTransNode(layoutSource)) {
     addInlineTranslation(ownerDoc, translatedWrapperNode, translatedNode)
-  } else if (isBlockTransNode(targetNode)) {
+  } else if (isBlockTransNode(layoutSource)) {
     addBlockTranslation(ownerDoc, translatedWrapperNode, translatedNode)
   } else {
     // not inline or block, maybe notranslate
@@ -125,7 +130,7 @@ export async function insertTranslatedNodeIntoWrapper(
 
   if (
     translatedNode.classList.contains(BLOCK_CONTENT_CLASS) &&
-    shouldWrapInsideFloatFlow(targetNode)
+    shouldWrapInsideFloatFlow(insertionTarget)
   ) {
     translatedNode.setAttribute(FLOAT_WRAP_ATTRIBUTE, "true")
   }

@@ -4360,14 +4360,6 @@
     "forceBlockSelectors": ["task-lists"]
   },
   {
-    "id": "readfrog-engoo",
-    "description": "Force block layout for Engoo exercises",
-    "matches": "engoo.com",
-    "forceBlockSelectors": [
-      "#windowexercise-2 > div > div > div.css-ep7xq6 > div > div > div.css-19m2fbm *"
-    ]
-  },
-  {
     "id": "ieeexplore",
     "matches": "ieeexplore.ieee.org",
     "preserveTextSelectors": ["a[ref-type]", ".inline-formula", ".display-formula"]

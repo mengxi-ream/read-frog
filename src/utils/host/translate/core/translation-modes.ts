@@ -67,13 +67,13 @@ export async function translateNodesBilingualMode(
     }
     transNodes.forEach((node) => translatingNodes.add(node))
 
-    const lastNode = transNodes.at(-1)!
-    const targetNode =
-      transNodes.length === 1 && isBlockTransNode(lastNode) && isHTMLElement(lastNode)
-        ? await unwrapDeepestOnlyHTMLChild(lastNode)
-        : lastNode
+    const layoutSource = transNodes.at(-1)!
+    const insertionTarget =
+      transNodes.length === 1 && isBlockTransNode(layoutSource) && isHTMLElement(layoutSource)
+        ? unwrapDeepestOnlyHTMLChild(layoutSource, config)
+        : layoutSource
 
-    const existedTranslatedWrapper = findPreviousTranslatedWrapperInside(targetNode, walkId)
+    const existedTranslatedWrapper = findPreviousTranslatedWrapperInside(insertionTarget, walkId)
     if (existedTranslatedWrapper) {
       removeTranslatedWrapperWithRestore(existedTranslatedWrapper)
       if (toggle) {
@@ -92,7 +92,7 @@ export async function translateNodesBilingualMode(
 
     if (await shouldFilterSmallParagraph(textContent, config)) return
 
-    const ownerDoc = getOwnerDocument(targetNode)
+    const ownerDoc = getOwnerDocument(insertionTarget)
     const translatedWrapperNode = ownerDoc.createElement("span")
     translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
     translatedWrapperNode.setAttribute(
@@ -105,10 +105,10 @@ export async function translateNodesBilingualMode(
 
     // Batch DOM insertion to reduce layout thrashing
     const insertOperation = () => {
-      if (isTextNode(targetNode) || transNodes.length > 1) {
-        targetNode.parentNode?.insertBefore(translatedWrapperNode, targetNode.nextSibling)
+      if (isTextNode(insertionTarget) || transNodes.length > 1) {
+        insertionTarget.parentNode?.insertBefore(translatedWrapperNode, insertionTarget.nextSibling)
       } else {
-        targetNode.appendChild(translatedWrapperNode)
+        insertionTarget.appendChild(translatedWrapperNode)
       }
     }
     batchDOMOperation(insertOperation)
@@ -134,7 +134,7 @@ export async function translateNodesBilingualMode(
 
     await insertTranslatedNodeIntoWrapper(
       translatedWrapperNode,
-      targetNode,
+      { insertionTarget, layoutSource },
       translatedText,
       config.translate.translationNodeStyle,
       config,
@@ -182,7 +182,7 @@ export async function translateNodeTranslationOnlyMode(
   let transNodes: TransNode[] = []
   let allChildNodes: ChildNode[] = []
   if (outerTransNodes.length === 1 && isHTMLElement(outerTransNodes[0])) {
-    const unwrappedHTMLChild = await unwrapDeepestOnlyHTMLChild(outerTransNodes[0])
+    const unwrappedHTMLChild = unwrapDeepestOnlyHTMLChild(outerTransNodes[0], config)
     allChildNodes = [...unwrappedHTMLChild.childNodes]
     transNodes = allChildNodes.filter(isTransNodeAndNotTranslatedWrapper)
   } else {

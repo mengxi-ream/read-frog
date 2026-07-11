@@ -1,6 +1,5 @@
+import type { Config } from "@/types/config/config"
 import type { Point } from "@/types/dom"
-import { getLocalConfig } from "@/utils/config/storage"
-import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
 import {
   isDontWalkIntoAndDontTranslateAsChildElement,
@@ -127,8 +126,7 @@ export function deepQueryTopLevelSelector(
   return result
 }
 
-export async function unwrapDeepestOnlyHTMLChild(element: HTMLElement) {
-  const config = (await getLocalConfig()) ?? DEFAULT_CONFIG
+export function unwrapDeepestOnlyHTMLChild(element: HTMLElement, config: Config) {
   let currentElement = element
   while (currentElement) {
     const shouldKeepNode = (child: ChildNode) => {

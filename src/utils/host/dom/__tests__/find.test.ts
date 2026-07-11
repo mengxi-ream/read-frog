@@ -1,18 +1,12 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it } from "vitest"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
   BLOCK_CONTENT_CLASS,
   CONTENT_WRAPPER_CLASS,
   INLINE_CONTENT_CLASS,
 } from "@/utils/constants/dom-labels"
 import { findTranslatedContentWrapper, unwrapDeepestOnlyHTMLChild } from "../find"
-
-vi.mock("@/utils/config/storage", async () => {
-  const { DEFAULT_CONFIG } = await import("@/utils/constants/config")
-  return {
-    getLocalConfig: vi.fn<(...args: any[]) => any>(async () => DEFAULT_CONFIG),
-  }
-})
 
 describe("findTranslatedContentWrapper", () => {
   beforeEach(() => {
@@ -92,13 +86,9 @@ describe("findTranslatedContentWrapper", () => {
 describe("unwrapDeepestOnlyHTMLChild", () => {
   beforeEach(() => {
     document.body.innerHTML = ""
-    Object.defineProperty(window, "location", {
-      value: new URL("https://example.com/some/path"),
-      writable: true,
-    })
   })
 
-  it("unwraps nested single-child elements without mutating truncation styles", async () => {
+  it("unwraps nested single-child elements without mutating truncation styles", () => {
     const outer = document.createElement("div")
     outer.style.webkitLineClamp = "2"
     outer.style.maxHeight = "24px"
@@ -116,7 +106,7 @@ describe("unwrapDeepestOnlyHTMLChild", () => {
     outer.appendChild(middle)
     document.body.appendChild(outer)
 
-    await expect(unwrapDeepestOnlyHTMLChild(outer)).resolves.toBe(leaf)
+    expect(unwrapDeepestOnlyHTMLChild(outer, DEFAULT_CONFIG)).toBe(leaf)
 
     expect(outer.style.webkitLineClamp).toBe("2")
     expect(outer.style.maxHeight).toBe("24px")
