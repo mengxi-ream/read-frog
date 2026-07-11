@@ -15,8 +15,10 @@ import {
 } from "@/utils/host/dom/filter"
 import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
+import { findStaleBilingualLayoutSource } from "@/utils/host/translate/core/translation-state"
 import {
   removeAllTranslatedWrapperNodes,
+  translateNodesBilingualMode,
   translateWalkedElement,
 } from "@/utils/host/translate/node-manipulation"
 import { validateTranslationConfigAndToast } from "@/utils/host/translate/translate-text"
@@ -76,6 +78,9 @@ export class PageTranslationManager implements IPageTranslationManager {
   private walkId: string | null = null
   private intersectionOptions: IntersectionObserverInit
   private walkBlockedElementsCache = new WeakSet<HTMLElement>()
+  private refreshingTranslatedSources = new WeakSet<HTMLElement>()
+  private translatedSourceMutationVersions = new WeakMap<HTMLElement, number>()
+  private translationSessionVersion = 0
   private titleObserver: MutationObserver | null = null
   private lastSourceTitle: string | null = null
   private lastAppliedTranslatedTitle: string | null = null
@@ -143,6 +148,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       })
 
       this.isPageTranslating = true
+      this.translationSessionVersion += 1
 
       const siteRule = getEffectiveSiteRule(config, window.location.href)
       if (siteRule.injectedCss) {
@@ -227,8 +233,11 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
 
     this.isPageTranslating = false
+    this.translationSessionVersion += 1
     this.walkId = null
     this.walkBlockedElementsCache = new WeakSet()
+    this.refreshingTranslatedSources = new WeakSet()
+    this.translatedSourceMutationVersions = new WeakMap()
     this.stopDocumentTitleTracking()
 
     if (this.intersectionObserver) {
@@ -546,6 +555,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     mutationObserver.observe(container, {
       childList: true,
       subtree: true,
+      characterData: true,
       attributes: true,
       attributeFilter: ["style", "class", "hidden", "aria-hidden"],
     })
@@ -555,11 +565,26 @@ export class PageTranslationManager implements IPageTranslationManager {
   }
 
   private async handleMutationRecords(records: MutationRecord[]): Promise<void> {
+    const sessionVersion = this.translationSessionVersion
+    const staleTranslatedSources = new Set<HTMLElement>()
+    for (const record of records) {
+      const staleSource = findStaleBilingualLayoutSource(record.target)
+      if (staleSource) staleTranslatedSources.add(staleSource)
+    }
+    staleTranslatedSources.forEach((source) => {
+      const nextVersion = (this.translatedSourceMutationVersions.get(source) ?? 0) + 1
+      this.translatedSourceMutationVersions.set(source, nextVersion)
+    })
+
+    const needsTraversalHandling = records.some((record) => record.type !== "characterData")
+    if (staleTranslatedSources.size === 0 && !needsTraversalHandling) return
+
     const config = await getLocalConfig()
     if (!config) {
       logger.error("Global config is not initialized")
       return
     }
+    if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return
 
     for (const rec of records) {
       if (rec.type === "childList") {
@@ -575,6 +600,52 @@ export class PageTranslationManager implements IPageTranslationManager {
         if (isHTMLElement(el) && this.didChangeToWalkable(el, config)) {
           void this.observeTopLevelParagraphs(el, config)
         }
+      }
+    }
+
+    await Promise.all(
+      [...staleTranslatedSources].map((source) =>
+        this.retranslateChangedSource(source, config, sessionVersion),
+      ),
+    )
+  }
+
+  private async retranslateChangedSource(
+    source: HTMLElement,
+    config: Config,
+    sessionVersion: number,
+  ): Promise<void> {
+    const walkId = this.walkId
+    const refreshingSources = this.refreshingTranslatedSources
+    const mutationVersions = this.translatedSourceMutationVersions
+    if (
+      !this.isPageTranslating ||
+      this.translationSessionVersion !== sessionVersion ||
+      !walkId ||
+      !source.isConnected ||
+      refreshingSources.has(source)
+    ) {
+      return
+    }
+
+    refreshingSources.add(source)
+    let handledVersion = 0
+    try {
+      do {
+        handledVersion = mutationVersions.get(source) ?? 0
+        walkAndLabelElement(source, walkId, config)
+        await translateNodesBilingualMode([source], walkId, config)
+      } while (
+        this.isPageTranslating &&
+        this.translationSessionVersion === sessionVersion &&
+        this.walkId === walkId &&
+        source.isConnected &&
+        (mutationVersions.get(source) ?? 0) !== handledVersion
+      )
+    } finally {
+      refreshingSources.delete(source)
+      if (mutationVersions.get(source) === handledVersion) {
+        mutationVersions.delete(source)
       }
     }
   }

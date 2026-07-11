@@ -10,6 +10,7 @@ export const BLOCK_ATTRIBUTE = "data-read-frog-block-node"
 export const INLINE_ATTRIBUTE = "data-read-frog-inline-node"
 
 export const TRANSLATION_MODE_ATTRIBUTE = "data-read-frog-translation-mode"
+export const VIRTUAL_PARAGRAPH_ATTRIBUTE = "data-read-frog-virtual-paragraph"
 
 export const MARK_ATTRIBUTES = new Set([
   WALKED_ATTRIBUTE,

@@ -76,12 +76,17 @@ export async function getTranslatedTextAndRemoveSpinner(
   textContent: string,
   spinner: HTMLElement,
   translatedWrapperNode: HTMLElement,
+  isCurrent: () => boolean = () => true,
 ): Promise<string | undefined> {
   let translatedText: string | undefined
 
   try {
+    if (!isCurrent()) return undefined
     translatedText = await translateTextForPage(textContent)
+    if (!isCurrent()) return undefined
   } catch (error) {
+    if (!isCurrent()) return undefined
+
     const errorComponent = React.createElement(TranslationError, {
       nodes,
       error: error as APICallError,

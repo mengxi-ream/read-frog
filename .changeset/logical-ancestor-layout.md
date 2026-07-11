@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-fix(translate): preserve logical ancestor layout when unwrapping only-child content
+fix(translate): preserve rendered paragraph pairing and logical ancestor layout

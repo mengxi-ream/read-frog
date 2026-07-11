@@ -2,11 +2,17 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import {
+  registerBilingualTranslationState,
+  unregisterBilingualTranslationState,
+  type BilingualTranslationState,
+} from "@/utils/host/translate/core/translation-state"
 import { PageTranslationManager } from "../page-translation"
 
 const {
   mockDeepQueryTopLevelSelector,
   mockGetDetectedCodeFromStorage,
+  mockGetRandomUUID,
   mockGetLocalConfig,
   mockGetOrCreateWebPageContext,
   mockHasNoWalkAncestor,
@@ -15,11 +21,13 @@ const {
   mockRemoveAllTranslatedWrapperNodes,
   mockSendMessage,
   mockTranslateTextForPageTitle,
+  mockTranslateNodesBilingualMode,
   mockTranslateWalkedElement,
   mockValidateTranslationConfigAndToast,
   mockWalkAndLabelElement,
 } = vi.hoisted(() => ({
   mockGetDetectedCodeFromStorage: vi.fn<(...args: any[]) => any>(),
+  mockGetRandomUUID: vi.fn<(...args: any[]) => any>(),
   mockGetLocalConfig: vi.fn<(...args: any[]) => any>(),
   mockGetOrCreateWebPageContext: vi.fn<(...args: any[]) => any>(),
   mockDeepQueryTopLevelSelector: vi.fn<(...args: any[]) => any>(),
@@ -30,6 +38,7 @@ const {
   mockRemoveAllTranslatedWrapperNodes: vi.fn<(...args: any[]) => any>(),
   mockTranslateWalkedElement: vi.fn<(...args: any[]) => any>(),
   mockTranslateTextForPageTitle: vi.fn<(...args: any[]) => any>(),
+  mockTranslateNodesBilingualMode: vi.fn<(...args: any[]) => any>(),
   mockValidateTranslationConfigAndToast: vi.fn<(...args: any[]) => any>(),
   mockSendMessage: vi.fn<(...args: any[]) => any>(),
 }))
@@ -43,7 +52,7 @@ vi.mock("@/utils/config/storage", () => ({
 }))
 
 vi.mock("@/utils/crypto-polyfill", () => ({
-  getRandomUUID: () => "walk-id",
+  getRandomUUID: mockGetRandomUUID,
 }))
 
 vi.mock("@/utils/host/dom/filter", () => ({
@@ -63,6 +72,7 @@ vi.mock("@/utils/host/dom/traversal", () => ({
 
 vi.mock("@/utils/host/translate/node-manipulation", () => ({
   removeAllTranslatedWrapperNodes: mockRemoveAllTranslatedWrapperNodes,
+  translateNodesBilingualMode: mockTranslateNodesBilingualMode,
   translateWalkedElement: mockTranslateWalkedElement,
 }))
 
@@ -206,6 +216,7 @@ describe("pageTranslationManager mutation re-walk", () => {
     vi.stubGlobal("IntersectionObserver", MockIntersectionObserver)
 
     mockGetDetectedCodeFromStorage.mockResolvedValue("eng")
+    mockGetRandomUUID.mockReset().mockReturnValue("walk-id")
     mockGetLocalConfig.mockResolvedValue(DEFAULT_CONFIG)
     mockGetOrCreateWebPageContext.mockResolvedValue({
       url: window.location.href,
@@ -222,6 +233,7 @@ describe("pageTranslationManager mutation re-walk", () => {
       walkAndLabelVisibleParagraphs(element, walkId),
     )
     mockTranslateTextForPageTitle.mockResolvedValue("")
+    mockTranslateNodesBilingualMode.mockReset().mockResolvedValue(undefined)
     mockValidateTranslationConfigAndToast.mockReturnValue(true)
     mockSendMessage.mockResolvedValue(undefined)
   })
@@ -313,6 +325,200 @@ describe("pageTranslationManager mutation re-walk", () => {
 
     expect(mockTranslateWalkedElement).toHaveBeenCalledWith(panel, "walk-id", DEFAULT_CONFIG)
 
+    manager.stop()
+  })
+
+  it("retranslates an existing logical source after its text expands in place", async () => {
+    document.body.innerHTML = `
+      <p id="tweet"><span id="source">Truncated tweet</span></p>
+    `
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const tweet = document.getElementById("tweet") as HTMLElement
+    const source = document.getElementById("source")!.firstChild as Text
+    const wrapper = document.createElement("span")
+    wrapper.className = "read-frog-translated-content-wrapper"
+    wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+    tweet.append(wrapper)
+    const state: BilingualTranslationState = {
+      layoutSource: tweet,
+      sourceTextContent: "Truncated tweet",
+      status: "active",
+      walkId: "walk-id",
+      wrapper,
+    }
+    registerBilingualTranslationState(state)
+    mockTranslateNodesBilingualMode.mockImplementation(async () => {
+      unregisterBilingualTranslationState(state)
+    })
+    await flushDomUpdates()
+    mockTranslateNodesBilingualMode.mockClear()
+
+    source.data = "Expanded tweet content"
+    await flushDomUpdates()
+
+    expect(mockWalkAndLabelElement).toHaveBeenCalledWith(tweet, "walk-id", DEFAULT_CONFIG)
+    expect(mockTranslateNodesBilingualMode).toHaveBeenCalledWith([tweet], "walk-id", DEFAULT_CONFIG)
+
+    unregisterBilingualTranslationState(state)
+    manager.stop()
+  })
+
+  it("runs another refresh when the source changes during a pending retranslation", async () => {
+    document.body.innerHTML = `
+      <p id="tweet"><span id="source">Initial tweet</span></p>
+    `
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const tweet = document.getElementById("tweet") as HTMLElement
+    const source = document.getElementById("source")!.firstChild as Text
+    const createState = (): BilingualTranslationState => {
+      const wrapper = document.createElement("span")
+      wrapper.className = "read-frog-translated-content-wrapper"
+      wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+      const state: BilingualTranslationState = {
+        layoutSource: tweet,
+        sourceTextContent: source.data,
+        status: "active",
+        walkId: "walk-id",
+        wrapper,
+      }
+      tweet.append(wrapper)
+      registerBilingualTranslationState(state)
+      return state
+    }
+
+    let activeState = createState()
+    let resolveFirstRefresh!: () => void
+    const firstRefresh = new Promise<void>((resolve) => {
+      resolveFirstRefresh = resolve
+    })
+    mockTranslateNodesBilingualMode.mockImplementation(async () => {
+      unregisterBilingualTranslationState(activeState)
+      activeState.wrapper?.remove()
+      if (mockTranslateNodesBilingualMode.mock.calls.length === 1) {
+        activeState = createState()
+        await firstRefresh
+      }
+    })
+    await flushDomUpdates()
+    mockTranslateNodesBilingualMode.mockClear()
+
+    source.data = "Expanded once"
+    await flushDomUpdates()
+    expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(1)
+
+    source.data = "Expanded twice"
+    await flushDomUpdates()
+    expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(1)
+
+    resolveFirstRefresh()
+    await flushDomUpdates()
+    expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(2)
+
+    unregisterBilingualTranslationState(activeState)
+    manager.stop()
+  })
+
+  it("does not let a deferred refresh from an old session touch the restarted session", async () => {
+    mockGetRandomUUID.mockReturnValueOnce("old-walk").mockReturnValueOnce("new-walk")
+    document.body.innerHTML = `
+      <p id="tweet"><span id="source">Initial tweet</span></p>
+    `
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const tweet = document.getElementById("tweet") as HTMLElement
+    const source = document.getElementById("source")!.firstChild as Text
+    const createState = (walkId: string): BilingualTranslationState => {
+      const wrapper = document.createElement("span")
+      wrapper.className = "read-frog-translated-content-wrapper"
+      wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+      const state: BilingualTranslationState = {
+        layoutSource: tweet,
+        sourceTextContent: source.data,
+        status: "active",
+        walkId,
+        wrapper,
+      }
+      tweet.append(wrapper)
+      registerBilingualTranslationState(state)
+      return state
+    }
+
+    let resolveOldRefresh!: () => void
+    let resolveNewRefresh!: () => void
+    const oldRefresh = new Promise<void>((resolve) => {
+      resolveOldRefresh = resolve
+    })
+    const newRefresh = new Promise<void>((resolve) => {
+      resolveNewRefresh = resolve
+    })
+    let activeOldState: BilingualTranslationState | undefined
+    let activeNewState: BilingualTranslationState | undefined
+    let newWalkCalls = 0
+    mockTranslateNodesBilingualMode.mockImplementation(async (_nodes, walkId) => {
+      if (walkId === "old-walk") {
+        if (activeOldState) {
+          unregisterBilingualTranslationState(activeOldState)
+          activeOldState.wrapper?.remove()
+          activeOldState = undefined
+        }
+        await oldRefresh
+      } else if (walkId === "new-walk") {
+        if (activeNewState) {
+          unregisterBilingualTranslationState(activeNewState)
+          activeNewState.wrapper?.remove()
+        }
+        activeNewState = createState("new-walk")
+        newWalkCalls += 1
+        if (newWalkCalls === 1) await newRefresh
+      }
+    })
+
+    activeOldState = createState("old-walk")
+    await flushDomUpdates()
+    mockTranslateNodesBilingualMode.mockClear()
+    source.data = "Old session mutation"
+    await flushDomUpdates()
+    expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(1)
+
+    manager.stop()
+    await manager.start()
+    await flushDomUpdates()
+
+    activeNewState = createState("new-walk")
+    source.data = "New session mutation one"
+    await flushDomUpdates()
+    source.data = "New session mutation two"
+    await flushDomUpdates()
+    expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(2)
+
+    resolveOldRefresh()
+    await flushDomUpdates()
+    expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(2)
+
+    resolveNewRefresh()
+    await flushDomUpdates()
+    expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(3)
+    expect(mockTranslateNodesBilingualMode.mock.calls.map((call) => call[1])).toEqual([
+      "old-walk",
+      "new-walk",
+      "new-walk",
+    ])
+
+    if (activeNewState) {
+      unregisterBilingualTranslationState(activeNewState)
+      activeNewState.wrapper?.remove()
+    }
     manager.stop()
   })
 })

@@ -20,8 +20,9 @@ import { decorateTranslationNode } from "../ui/decorate-translation"
 import { isForceInlineTranslation } from "../ui/translation-utils"
 
 interface TranslationInsertionContext {
-  insertionTarget: TransNode
+  flowSource: TransNode
   layoutSource: TransNode
+  isCurrent?: () => boolean
 }
 
 function isFloatedElement(element: HTMLElement): boolean {
@@ -93,12 +94,14 @@ export function addBlockTranslation(
 
 export async function insertTranslatedNodeIntoWrapper(
   translatedWrapperNode: HTMLElement,
-  { insertionTarget, layoutSource }: TranslationInsertionContext,
+  { flowSource, layoutSource, isCurrent }: TranslationInsertionContext,
   translatedText: string,
   translationNodeStyle: TranslationNodeStyleConfig,
   config: Config,
   forceBlockTranslation: boolean = false,
 ): Promise<void> {
+  if (isCurrent && !isCurrent()) return
+
   // Use the wrapper's owner document
   const ownerDoc = getOwnerDocument(translatedWrapperNode)
   const translatedNode = ownerDoc.createElement("span")
@@ -128,9 +131,11 @@ export async function insertTranslatedNodeIntoWrapper(
   translatedWrapperNode.appendChild(translatedNode)
   await decorateTranslationNode(translatedNode, translationNodeStyle)
 
+  if (isCurrent && !isCurrent()) return
+
   if (
     translatedNode.classList.contains(BLOCK_CONTENT_CLASS) &&
-    shouldWrapInsideFloatFlow(insertionTarget)
+    shouldWrapInsideFloatFlow(flowSource)
   ) {
     translatedNode.setAttribute(FLOAT_WRAP_ATTRIBUTE, "true")
   }
