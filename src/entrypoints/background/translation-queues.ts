@@ -13,6 +13,11 @@ import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
 import { microsoftTranslate } from "@/utils/host/translate/api/microsoft"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
+import {
+  assertHtmlAttributeMarkerIntegrity,
+  hasHtmlAttributeMarkerProtocol,
+  isHtmlAttributeMarkerIntegrityError,
+} from "@/utils/host/translate/html-attribute-markers"
 import { normalizePromptContextValue } from "@/utils/host/translate/translate-text"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
@@ -31,6 +36,27 @@ export function parseBatchResult(result: string): string[] {
 
 export function shouldUseBatchQueue(providerConfig: ProviderConfig): boolean {
   return isLLMProviderConfig(providerConfig)
+}
+
+async function getValidatedCachedTranslation(
+  hash: string,
+  sourceText: string,
+  validateHtmlAttributeMarkers: boolean,
+): Promise<string | undefined> {
+  const cached = await db.translationCache.get(hash)
+  if (!cached) return undefined
+  if (!validateHtmlAttributeMarkers) return cached.translation
+
+  try {
+    assertHtmlAttributeMarkerIntegrity(sourceText, cached.translation)
+    return cached.translation
+  } catch (error) {
+    if (!isHtmlAttributeMarkerIntegrityError(error)) throw error
+
+    await db.translationCache.delete(hash)
+    logger.warn("Deleted cached translation with invalid HTML attribute markers", error)
+    return undefined
+  }
 }
 
 export async function executeBatchTranslation<TContext>(
@@ -250,12 +276,20 @@ export async function setUpWebPageTranslationQueue() {
       },
     } = message
 
+    const validateHtmlAttributeMarkers =
+      textFormat === "html" && hasHtmlAttributeMarkerProtocol(text)
+    if (validateHtmlAttributeMarkers) {
+      assertHtmlAttributeMarkerIntegrity(text, text)
+    }
+
     // Check cache first
     if (hash) {
-      const cached = await db.translationCache.get(hash)
-      if (cached) {
-        return cached.translation
-      }
+      const cachedTranslation = await getValidatedCachedTranslation(
+        hash,
+        text,
+        validateHtmlAttributeMarkers,
+      )
+      if (cachedTranslation !== undefined) return cachedTranslation
     }
 
     let result: string
@@ -274,6 +308,10 @@ export async function setUpWebPageTranslationQueue() {
       const thunk = () =>
         executeTranslate(text, langConfig, providerConfig, getTranslatePrompt, { textFormat })
       result = await requestQueue.enqueue(thunk, scheduleAt, hash)
+    }
+
+    if (validateHtmlAttributeMarkers) {
+      assertHtmlAttributeMarkerIntegrity(text, result)
     }
 
     // Cache the translation result if successful

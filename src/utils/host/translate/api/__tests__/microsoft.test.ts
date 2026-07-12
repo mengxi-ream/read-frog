@@ -2,10 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { microsoftTranslate } from "../microsoft"
 
 const fetchMock = vi.fn<(...args: any[]) => any>()
+let translatedText = "你好"
 
 describe("microsoft translate adapter", () => {
   beforeEach(() => {
     fetchMock.mockReset()
+    translatedText = "你好"
     fetchMock.mockImplementation((url: string) => {
       if (url === "https://edge.microsoft.com/translate/auth") {
         return Promise.resolve({
@@ -21,7 +23,7 @@ describe("microsoft translate adapter", () => {
         statusText: "OK",
         json: vi
           .fn<(...args: any[]) => any>()
-          .mockResolvedValue([{ translations: [{ text: "你好" }] }]),
+          .mockImplementation(async () => [{ translations: [{ text: translatedText }] }]),
         text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
       })
     })
@@ -40,6 +42,14 @@ describe("microsoft translate adapter", () => {
     return String(translateCall![0])
   }
 
+  function sentTranslationText(): string {
+    const translateCall = fetchMock.mock.calls.find(([url]) =>
+      String(url).includes("microsofttranslator.com/translate"),
+    )
+    expect(translateCall).toBeDefined()
+    return JSON.parse(translateCall![1].body)[0].Text
+  }
+
   it("requests plain textType so tag-like text is translated instead of skipped", async () => {
     const result = await microsoftTranslate("if x <b then stop", "en", "zh")
 
@@ -49,10 +59,15 @@ describe("microsoft translate adapter", () => {
   })
 
   it("requests html textType for html-format input so markup is preserved", async () => {
-    await microsoftTranslate('See the <a href="/pricing">pricing</a>', "en", "zh", {
+    const source = 'See the <a data-rf-attr="0">pricing &amp; plans</a>'
+    translatedText = '查看<a data-rf-attr="0">价格与方案</a>'
+
+    const result = await microsoftTranslate(source, "en", "zh", {
       textFormat: "html",
     })
 
     expect(translateCallURL()).toContain("textType=html")
+    expect(sentTranslationText()).toBe(source)
+    expect(result).toBe(translatedText)
   })
 })

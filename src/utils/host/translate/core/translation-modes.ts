@@ -1,6 +1,8 @@
 import type { Config } from "@/types/config/config"
 import type { TranslationMode } from "@/types/config/translate"
 import type { TransNode } from "@/types/dom"
+import { resolveProviderConfig } from "@/utils/constants/feature-providers"
+import { logger } from "@/utils/logger"
 import {
   CONTENT_WRAPPER_CLASS,
   NOTRANSLATE_CLASS,
@@ -21,11 +23,14 @@ import {
   removeOrphanVirtualParagraphWrappers,
   removeTranslatedWrapperWithRestore,
 } from "../dom/translation-cleanup"
+import { protectTranslationHtmlAttributes } from "../dom/translation-html-attributes"
 import { insertTranslatedNodeIntoWrapper } from "../dom/translation-insertion"
 import { findPreviousTranslatedWrapperInside } from "../dom/translation-wrapper"
 import { insertVirtualParagraphWrappers } from "../dom/virtual-paragraph-insertion"
 import { shouldFilterSmallParagraph } from "../filter-small-paragraph"
+import { isHtmlAttributeMarkerIntegrityError } from "../html-attribute-markers"
 import { prepareTranslationText } from "../text-preparation"
+import { translateTextForPage } from "../translate-variants"
 import { setTranslationDirAndLang } from "../translation-attributes"
 import { createSpinnerInside, getTranslatedTextAndRemoveSpinner } from "../ui/spinner"
 import { isNumericContent } from "../ui/translation-utils"
@@ -35,7 +40,6 @@ import {
   getVirtualParagraphGroupForSource,
   isBilingualTranslationStateCurrent,
   isVirtualParagraphGroupCurrent,
-  MARK_ATTRIBUTES_REGEX,
   markVirtualParagraphGroupInserted,
   originalContentMap,
   registerBilingualTranslationState,
@@ -48,15 +52,75 @@ import {
   type VirtualParagraphSourceSnapshot,
 } from "./translation-state"
 
-const HTML_COMMENT_RE = /<!--[\s\S]*?-->/g
 let virtualParagraphGroupSequence = 0
+const unsupportedDeepLXHtmlAttributeProviders = new Set<string>()
+const supportedDeepLXHtmlAttributeProviders = new Set<string>()
+type DeepLXHtmlAttributeProbeResult = "supported" | "unsupported" | "unknown"
+interface DeepLXHtmlAttributeProbe {
+  promise: Promise<DeepLXHtmlAttributeProbeResult>
+  resolve: (result: DeepLXHtmlAttributeProbeResult) => void
+}
+const deepLXHtmlAttributeProbes = new Map<string, DeepLXHtmlAttributeProbe>()
 
-function getDisplayTranslation(sourceText: string, translatedText: string | undefined) {
+function createDeepLXHtmlAttributeProbe(): DeepLXHtmlAttributeProbe {
+  let resolve!: (result: DeepLXHtmlAttributeProbeResult) => void
+  const promise = new Promise<DeepLXHtmlAttributeProbeResult>((resolvePromise) => {
+    resolve = resolvePromise
+  })
+  return { promise, resolve }
+}
+
+function finishDeepLXHtmlAttributeProbe(
+  providerKey: string,
+  probe: DeepLXHtmlAttributeProbe | undefined,
+  result: DeepLXHtmlAttributeProbeResult,
+): void {
+  if (!probe || deepLXHtmlAttributeProbes.get(providerKey) !== probe) return
+  deepLXHtmlAttributeProbes.delete(providerKey)
+  probe.resolve(result)
+}
+
+async function acquireDeepLXHtmlAttributeProbe(providerKey: string): Promise<{
+  probe?: DeepLXHtmlAttributeProbe
+  useLegacy: boolean
+}> {
+  while (true) {
+    if (unsupportedDeepLXHtmlAttributeProviders.has(providerKey)) {
+      return { useLegacy: true }
+    }
+    if (supportedDeepLXHtmlAttributeProviders.has(providerKey)) {
+      return { useLegacy: false }
+    }
+
+    const activeProbe = deepLXHtmlAttributeProbes.get(providerKey)
+    if (!activeProbe) {
+      const probe = createDeepLXHtmlAttributeProbe()
+      deepLXHtmlAttributeProbes.set(providerKey, probe)
+      return { probe, useLegacy: false }
+    }
+
+    // An empty/skipped request or a transient error proves neither support nor
+    // incompatibility. Re-enter the loop so exactly one waiter owns the next probe.
+    await activeProbe.promise
+  }
+}
+
+function getDeepLXHtmlAttributeProviderKey(config: Config): string | undefined {
+  const providerConfig = resolveProviderConfig(config, "translate")
+  if (providerConfig.provider !== "deeplx") return undefined
+  return `${providerConfig.id}:${providerConfig.baseURL ?? ""}`
+}
+
+function getDisplayTranslation(
+  sourceText: string,
+  translatedText: string | undefined,
+  comparisonText: string | undefined = translatedText,
+) {
   if (translatedText === undefined) {
     return undefined
   }
 
-  return prepareTranslationText(sourceText) === prepareTranslationText(translatedText)
+  return prepareTranslationText(sourceText) === prepareTranslationText(comparisonText)
     ? ""
     : translatedText
 }
@@ -528,32 +592,17 @@ export async function translateNodeTranslationOnlyMode(
 
     if (await shouldFilterSmallParagraph(innerTextContent, config)) return
 
-    const cleanTextContent = (content: string): string => {
-      if (!content) return content
-
-      let cleanedContent = content.replace(MARK_ATTRIBUTES_REGEX, "")
-      cleanedContent = cleanedContent.replace(HTML_COMMENT_RE, " ")
-
-      return cleanedContent
-    }
-
     // Only save originalContent when there's no existing translation wrapper
     const hasExistingWrapperInParent = parentNode.querySelector(`.${CONTENT_WRAPPER_CLASS}`)
     if (!originalContentMap.has(parentNode) && !hasExistingWrapperInParent) {
       originalContentMap.set(parentNode, parentNode.innerHTML)
     }
 
-    const getStringFormatFromNode = (node: Element | Text) => {
-      if (isTextNode(node)) {
-        return node.textContent
-      }
-      return node.outerHTML
-    }
-
-    const textContent = cleanTextContent(transNodes.map(getStringFormatFromNode).join(""))
+    const ownerDoc = getOwnerDocument(targetNode)
+    const protectedHtml = protectTranslationHtmlAttributes(transNodes, ownerDoc)
+    const textContent = protectedHtml.sourceHtml
     if (!textContent) return
 
-    const ownerDoc = getOwnerDocument(targetNode)
     const translatedWrapperNode = ownerDoc.createElement("span")
     translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
     translatedWrapperNode.setAttribute(
@@ -578,6 +627,54 @@ export async function translateNodeTranslationOnlyMode(
     // The source string mixes text nodes with element outerHTML and the result
     // is re-rendered via innerHTML, so providers must treat it as HTML to keep
     // its tags intact.
+    const deepLXProviderKey = getDeepLXHtmlAttributeProviderKey(config)
+    const translateLegacyHtml = async () => {
+      const translatedHtml = await translateTextForPage(protectedHtml.legacyRequestHtml, "html")
+      return translatedHtml ? protectedHtml.restoreLegacy(translatedHtml) : translatedHtml
+    }
+    const translateRequest = async () => {
+      if (!protectedHtml.hasPlaceholders) return translateLegacyHtml()
+
+      let ownedDeepLXProbe: DeepLXHtmlAttributeProbe | undefined
+      if (deepLXProviderKey) {
+        const probeDecision = await acquireDeepLXHtmlAttributeProbe(deepLXProviderKey)
+        if (probeDecision.useLegacy) return translateLegacyHtml()
+        ownedDeepLXProbe = probeDecision.probe
+      }
+
+      try {
+        const translatedHtml = await translateTextForPage(protectedHtml.requestHtml, "html")
+        if (!translatedHtml) {
+          if (deepLXProviderKey) {
+            finishDeepLXHtmlAttributeProbe(deepLXProviderKey, ownedDeepLXProbe, "unknown")
+          }
+          return translatedHtml
+        }
+
+        const restoredHtml = protectedHtml.restore(translatedHtml)
+        if (deepLXProviderKey) {
+          supportedDeepLXHtmlAttributeProviders.add(deepLXProviderKey)
+          finishDeepLXHtmlAttributeProbe(deepLXProviderKey, ownedDeepLXProbe, "supported")
+        }
+        return restoredHtml
+      } catch (error) {
+        if (!isHtmlAttributeMarkerIntegrityError(error)) {
+          if (deepLXProviderKey) {
+            finishDeepLXHtmlAttributeProbe(deepLXProviderKey, ownedDeepLXProbe, "unknown")
+          }
+          throw error
+        }
+
+        if (deepLXProviderKey) {
+          unsupportedDeepLXHtmlAttributeProviders.add(deepLXProviderKey)
+          supportedDeepLXHtmlAttributeProviders.delete(deepLXProviderKey)
+          finishDeepLXHtmlAttributeProbe(deepLXProviderKey, ownedDeepLXProbe, "unsupported")
+        }
+        logger.warn("HTML attribute placeholders were not preserved; retrying full HTML", error)
+        return translateLegacyHtml()
+      }
+    }
+
     const realTranslatedText = await getTranslatedTextAndRemoveSpinner(
       nodes,
       textContent,
@@ -585,9 +682,14 @@ export async function translateNodeTranslationOnlyMode(
       translatedWrapperNode,
       () => true,
       "html",
+      translateRequest,
     )
     const translatedText = realTranslatedText
-      ? getDisplayTranslation(textContent, realTranslatedText)
+      ? getDisplayTranslation(
+          protectedHtml.comparisonSourceHtml,
+          realTranslatedText,
+          protectedHtml.normalizeForComparison(realTranslatedText),
+        )
       : realTranslatedText
 
     if (!translatedText) {

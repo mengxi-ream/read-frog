@@ -11,6 +11,7 @@ const articleSummaryCacheGetMock = vi.fn<(...args: any[]) => any>()
 const articleSummaryCachePutMock = vi.fn<(...args: any[]) => any>()
 const translationCacheGetMock = vi.fn<(...args: any[]) => any>()
 const translationCachePutMock = vi.fn<(...args: any[]) => any>()
+const translationCacheDeleteMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("@/utils/message", () => ({
   onMessage: onMessageMock,
@@ -39,6 +40,7 @@ vi.mock("@/utils/db/dexie/db", () => ({
       put: articleSummaryCachePutMock,
     },
     translationCache: {
+      delete: translationCacheDeleteMock,
       get: translationCacheGetMock,
       put: translationCachePutMock,
     },
@@ -108,6 +110,7 @@ describe("translation queue helpers", () => {
     articleSummaryCachePutMock.mockResolvedValue(undefined)
     translationCacheGetMock.mockResolvedValue(undefined)
     translationCachePutMock.mockResolvedValue(undefined)
+    translationCacheDeleteMock.mockResolvedValue(undefined)
   })
 
   it("routes only llm providers through the batch queue", async () => {
@@ -133,6 +136,63 @@ describe("translation queue helpers", () => {
     expect(shouldUseBatchQueue(deeplxProvider)).toBe(false)
     expect(shouldUseBatchQueue(llmProvider)).toBe(true)
   }, 15_000)
+
+  it("keeps request-local marker zero isolated across LLM batch items", async () => {
+    ensureInitializedConfigMock.mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      translate: {
+        ...DEFAULT_CONFIG.translate,
+        providerId: llmProvider.id,
+        batchQueueConfig: {
+          maxCharactersPerBatch: 1000,
+          maxItemsPerBatch: 10,
+        },
+      },
+    })
+    executeTranslateMock.mockResolvedValueOnce(
+      `<span data-rf-attr="0">Bonjour</span>\n\n%%\n\n<a data-rf-attr="0">Lire</a>`,
+    )
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+
+    const results = await Promise.all([
+      handler({
+        data: {
+          text: `<span data-rf-attr="0">Hello</span>`,
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          scheduleAt: Date.now(),
+          hash: "marker-batch-one",
+          textFormat: "html",
+        },
+      }),
+      handler({
+        data: {
+          text: `<a data-rf-attr="0">Read</a>`,
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          scheduleAt: Date.now(),
+          hash: "marker-batch-two",
+          textFormat: "html",
+        },
+      }),
+    ])
+
+    expect(results).toEqual([
+      `<span data-rf-attr="0">Bonjour</span>`,
+      `<a data-rf-attr="0">Lire</a>`,
+    ])
+    expect(executeTranslateMock).toHaveBeenCalledTimes(1)
+    expect(executeTranslateMock).toHaveBeenCalledWith(
+      `<span data-rf-attr="0">Hello</span>\n\n%%\n\n<a data-rf-attr="0">Read</a>`,
+      DEFAULT_CONFIG.language,
+      llmProvider,
+      expect.any(Function),
+      expect.objectContaining({ isBatch: true }),
+    )
+  })
 
   it("passes subtitle summary through the translation queue without generating a new summary", async () => {
     const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
@@ -343,6 +403,202 @@ describe("translation queue helpers", () => {
       expect.objectContaining({
         key: "webpage-hash",
         translation: "write &amp; for ampersand — It's fine",
+      }),
+    )
+  })
+
+  it("uses cached HTML translations when all attribute markers remain on their tags", async () => {
+    translationCacheGetMock.mockResolvedValueOnce({
+      key: "webpage-hash",
+      translation: `<a data-rf-attr="1">Lire</a><span data-rf-attr="0">Bonjour</span>`,
+    })
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: `<span data-rf-attr="0">Hello</span><a data-rf-attr="1">Read</a>`,
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "webpage-hash",
+        textFormat: "html",
+      },
+    })
+
+    expect(result).toBe(`<a data-rf-attr="1">Lire</a><span data-rf-attr="0">Bonjour</span>`)
+    expect(executeTranslateMock).not.toHaveBeenCalled()
+    expect(translationCacheDeleteMock).not.toHaveBeenCalled()
+  })
+
+  it("deletes an invalid cached HTML translation and replaces it with a valid fresh result", async () => {
+    translationCacheGetMock.mockResolvedValueOnce({
+      key: "webpage-hash",
+      translation: `<span>Bonjour</span>`,
+    })
+    executeTranslateMock.mockResolvedValueOnce(`<span data-rf-attr="0">Bonjour</span>`)
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: `<span data-rf-attr="0">Hello</span>`,
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "webpage-hash",
+        textFormat: "html",
+      },
+    })
+
+    expect(result).toBe(`<span data-rf-attr="0">Bonjour</span>`)
+    expect(translationCacheDeleteMock).toHaveBeenCalledWith("webpage-hash")
+    expect(executeTranslateMock).toHaveBeenCalledTimes(1)
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "webpage-hash",
+        translation: `<span data-rf-attr="0">Bonjour</span>`,
+      }),
+    )
+  })
+
+  it("validates escaped page-marker fallback results before using or caching them", async () => {
+    translationCacheGetMock.mockResolvedValueOnce({
+      key: "legacy-marker-hash",
+      translation: `<span>Cached without the protected page attribute</span>`,
+    })
+    executeTranslateMock.mockResolvedValueOnce(
+      `<span data-rf-attr="rf-page-0">Fresh translation</span>`,
+    )
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: `<span data-rf-attr="rf-page-0">Hello</span>`,
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "legacy-marker-hash",
+        textFormat: "html",
+      },
+    })
+
+    expect(result).toBe(`<span data-rf-attr="rf-page-0">Fresh translation</span>`)
+    expect(translationCacheDeleteMock).toHaveBeenCalledWith("legacy-marker-hash")
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "legacy-marker-hash",
+        translation: `<span data-rf-attr="rf-page-0">Fresh translation</span>`,
+      }),
+    )
+  })
+
+  it("throws and does not cache a fresh translation with invalid HTML markers", async () => {
+    executeTranslateMock.mockResolvedValueOnce(`<div data-rf-attr="0">Bonjour</div>`)
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const request = handler({
+      data: {
+        text: `<span data-rf-attr="0">Hello</span>`,
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "webpage-hash",
+        textFormat: "html",
+      },
+    })
+
+    await expect(request).rejects.toMatchObject({
+      code: "HTML_ATTR_MARKER_INTEGRITY",
+      reason: "wrong-output-tag",
+    })
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
+  it("treats an empty provider result as a missing-marker integrity failure", async () => {
+    executeTranslateMock.mockResolvedValueOnce("")
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const request = handler({
+      data: {
+        text: `<span data-rf-attr="0">Hello</span>`,
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "empty-html-result",
+        textFormat: "html",
+      },
+    })
+
+    await expect(request).rejects.toMatchObject({
+      code: "HTML_ATTR_MARKER_INTEGRITY",
+      reason: "missing-output-marker",
+    })
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
+  it("rejects duplicate input marker IDs before reading the cache or translating", async () => {
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const request = handler({
+      data: {
+        text: `<span data-rf-attr="0">Hello</span><a data-rf-attr="0">Read</a>`,
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "webpage-hash",
+        textFormat: "html",
+      },
+    })
+
+    await expect(request).rejects.toMatchObject({
+      code: "HTML_ATTR_MARKER_INTEGRITY",
+      reason: "duplicate-input-marker",
+    })
+    expect(translationCacheGetMock).not.toHaveBeenCalled()
+    expect(executeTranslateMock).not.toHaveBeenCalled()
+    expect(translationCacheDeleteMock).not.toHaveBeenCalled()
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
+  it("does not treat marker-shaped plain text as the translationOnly HTML protocol", async () => {
+    executeTranslateMock.mockResolvedValueOnce("translated plain text")
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: `Explain <span data-rf-attr="0">this example</span>`,
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "plain-marker-shaped-text",
+        textFormat: "plain",
+      },
+    })
+
+    expect(result).toBe("translated plain text")
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "plain-marker-shaped-text",
+        translation: "translated plain text",
       }),
     )
   })
