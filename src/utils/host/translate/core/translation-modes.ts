@@ -31,6 +31,7 @@ import { createSpinnerInside, getTranslatedTextAndRemoveSpinner } from "../ui/sp
 import { isNumericContent } from "../ui/translation-utils"
 import {
   attachBilingualTranslationWrapper,
+  collectSourceTextExcludingWrappers,
   getBilingualTranslationStateForSource,
   getVirtualParagraphGroupForSource,
   isBilingualTranslationStateCurrent,
@@ -155,12 +156,12 @@ async function translateVirtualParagraphs(
     wrappers: new Set(),
     splitRecords: [],
     sourceSnapshots,
-    sourceTextContent: layoutSource.textContent ?? "",
+    sourceTextContent: collectSourceTextExcludingWrappers(layoutSource),
     wrapperPlacements: new Map(),
   }
   registerVirtualParagraphGroup(group)
 
-  const sourceTextSnapshot = layoutSource.textContent
+  const sourceTextSnapshot = collectSourceTextExcludingWrappers(layoutSource)
   let includedUnits: VirtualParagraphUnit[]
   try {
     includedUnits = await filterVirtualParagraphUnits(units, config)
@@ -169,7 +170,10 @@ async function translateVirtualParagraphs(
     throw error
   }
 
-  if (!isVirtualParagraphGroupCurrent(group) || layoutSource.textContent !== sourceTextSnapshot) {
+  if (
+    !isVirtualParagraphGroupCurrent(group) ||
+    collectSourceTextExcludingWrappers(layoutSource) !== sourceTextSnapshot
+  ) {
     disposeVirtualParagraphGroup(group)
     return
   }
@@ -327,7 +331,9 @@ export async function translateNodesBilingualMode(
       return translateNodesBilingualMode(nodes, walkId, config, toggle, forceBlockTranslation)
     }
 
-    const sourceTextBeforeFilter = isHTMLElement(layoutSource) ? layoutSource.textContent : null
+    const sourceTextBeforeFilter = isHTMLElement(layoutSource)
+      ? collectSourceTextExcludingWrappers(layoutSource)
+      : null
     const textContent = transNodes
       .map((node) => extractTextContent(node, config))
       .join("")

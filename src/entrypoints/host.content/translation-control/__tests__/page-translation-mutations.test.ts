@@ -60,6 +60,8 @@ vi.mock("@/utils/host/dom/filter", () => ({
   isDontWalkIntoAndDontTranslateAsChildElement: mockIsDontWalkIntoAndDontTranslateAsChildElement,
   isDontWalkIntoButTranslateAsChildElement: mockIsDontWalkIntoButTranslateAsChildElement,
   isHTMLElement: (node: unknown) => node instanceof HTMLElement,
+  isTranslatedWrapperNode: (node: unknown) =>
+    node instanceof HTMLElement && node.classList.contains("read-frog-translated-content-wrapper"),
 }))
 
 vi.mock("@/utils/host/dom/find", () => ({
