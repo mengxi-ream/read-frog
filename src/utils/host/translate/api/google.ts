@@ -10,7 +10,7 @@ export async function googleTranslate(
   sourceText: string,
   fromLang: string,
   toLang: string,
-  options?: { textFormat?: TranslationTextFormat },
+  options?: { textFormat?: TranslationTextFormat; signal?: AbortSignal },
 ): Promise<string> {
   // translateHtml parses the request text as HTML, so plain source text must be
   // escaped (& < > nbsp) before sending, while html input (translationOnly page
@@ -35,6 +35,7 @@ export async function googleTranslate(
       "X-Goog-API-Key": GOOGLE_TRANSLATE_HTML_API_KEY,
     },
     body: JSON.stringify([[[requestText], fromLang, toLang], GOOGLE_TRANSLATE_HTML_CLIENT]),
+    signal: options?.signal,
   }).catch((error) => {
     throw attachRequestErrorMeta(new Error(`Network error during translation: ${error.message}`), {
       kind: "network",

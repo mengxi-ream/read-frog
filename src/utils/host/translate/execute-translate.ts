@@ -21,6 +21,7 @@ export async function executeTranslate<TContext>(
     isBatch?: boolean
     context?: TContext
     textFormat?: TranslationTextFormat
+    signal?: AbortSignal
   },
 ) {
   const preparedText = prepareTranslationText(text)
@@ -41,10 +42,12 @@ export async function executeTranslate<TContext>(
     if (provider === "google-translate") {
       translatedText = await googleTranslate(preparedText, sourceLang, targetLang, {
         textFormat: options?.textFormat,
+        signal: options?.signal,
       })
     } else if (provider === "microsoft-translate") {
       translatedText = await microsoftTranslate(preparedText, sourceLang, targetLang, {
         textFormat: options?.textFormat,
+        signal: options?.signal,
       })
     }
   } else if (isPureAPIProvider(provider)) {
@@ -57,10 +60,12 @@ export async function executeTranslate<TContext>(
     if (provider === "deeplx") {
       translatedText = await deeplxTranslate(preparedText, sourceLang, targetLang, providerConfig, {
         textFormat: options?.textFormat,
+        signal: options?.signal,
       })
     } else if (provider === "deepl") {
       translatedText = await deeplTranslate(text, sourceLang, targetLang, providerConfig, {
         textFormat: options?.textFormat,
+        signal: options?.signal,
       })
     }
   } else if (isLLMProviderConfig(providerConfig)) {

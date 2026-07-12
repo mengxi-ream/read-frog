@@ -4,19 +4,19 @@ export async function microsoftTranslate(
   source: string,
   fromLang: string,
   toLang: string,
-  options?: { textFormat?: TranslationTextFormat },
+  options?: { textFormat?: TranslationTextFormat; signal?: AbortSignal },
 ): Promise<string>
 export async function microsoftTranslate(
   source: string[],
   fromLang: string,
   toLang: string,
-  options?: { textFormat?: TranslationTextFormat },
+  options?: { textFormat?: TranslationTextFormat; signal?: AbortSignal },
 ): Promise<string[]>
 export async function microsoftTranslate(
   source: string | string[],
   fromLang: string,
   toLang: string,
-  options?: { textFormat?: TranslationTextFormat },
+  options?: { textFormat?: TranslationTextFormat; signal?: AbortSignal },
 ): Promise<string | string[]> {
   const isSingle = typeof source === "string"
   const texts = isSingle ? [source] : source
@@ -26,7 +26,7 @@ export async function microsoftTranslate(
   }
 
   const effectiveFromLang = fromLang === "auto" ? "" : fromLang
-  const token = await refreshMicrosoftToken()
+  const token = await refreshMicrosoftToken(options?.signal)
 
   // plain translates the source as literal text (tag-like text such as "<b then"
   // is otherwise left untranslated); html preserves the markup structure of
@@ -43,6 +43,7 @@ export async function microsoftTranslate(
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(texts.map((text) => ({ Text: text }))),
+      signal: options?.signal,
     },
   ).catch((error) => {
     throw new Error(`Network error during Microsoft translation: ${error.message}`)
@@ -83,9 +84,9 @@ export async function microsoftTranslate(
   }
 }
 
-export async function refreshMicrosoftToken(): Promise<string> {
+export async function refreshMicrosoftToken(signal?: AbortSignal): Promise<string> {
   try {
-    const resp = await fetch("https://edge.microsoft.com/translate/auth")
+    const resp = await fetch("https://edge.microsoft.com/translate/auth", { signal })
 
     if (!resp.ok) {
       throw new Error(`Failed to refresh Microsoft token: ${resp.status} ${resp.statusText}`)

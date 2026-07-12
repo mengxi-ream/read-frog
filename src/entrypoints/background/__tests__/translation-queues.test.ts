@@ -195,6 +195,33 @@ describe("translation queue helpers", () => {
     )
   })
 
+  it("coalesces concurrent identical translate requests into one provider call", async () => {
+    executeTranslateMock.mockResolvedValue("translated")
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+
+    const makeRequest = () =>
+      handler({
+        data: {
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          scheduleAt: Date.now(),
+          hash: "same-request-hash",
+        },
+      })
+
+    // both requests arrive before the first result lands in the translation cache
+    const results = await Promise.all([makeRequest(), makeRequest()])
+
+    expect(results).toEqual(["translated", "translated"])
+    expect(executeTranslateMock).toHaveBeenCalledTimes(1)
+    // the shared item is sent once, not as a two-item batch
+    expect(executeTranslateMock.mock.calls[0][0]).toBe("hello")
+  })
+
   it("passes subtitle summary through the translation queue without generating a new summary", async () => {
     const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
     await setUpSubtitlesTranslationQueue()
@@ -653,7 +680,7 @@ describe("translation queue helpers", () => {
       DEFAULT_CONFIG.language,
       googleProvider,
       expect.any(Function),
-      { textFormat: "html" },
+      { textFormat: "html", signal: expect.any(AbortSignal) },
     )
   })
 

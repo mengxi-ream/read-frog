@@ -82,6 +82,7 @@ function createBatchQueue(
   options?: {
     maxRetries?: number
     enableFallbackToIndividual?: boolean
+    getDedupKey?: (data: TranslateBatchData) => string | undefined
     executeIndividual?: (data: TranslateBatchData) => Promise<string>
     onError?: (
       error: Error,
@@ -93,6 +94,7 @@ function createBatchQueue(
     ...config,
     maxRetries: options?.maxRetries,
     enableFallbackToIndividual: options?.enableFallbackToIndividual,
+    getDedupKey: options?.getDedupKey,
     getBatchKey: (data) => {
       return `${data.langConfig.sourceCode}-${data.langConfig.targetCode}-${data.providerConfig.id}`
     },
@@ -720,6 +722,140 @@ describe("batchQueue – error handling", () => {
       error,
       expect.objectContaining({ retryCount: 0, isFallback: false }),
     )
+  })
+})
+
+describe("batchQueue – in-flight coalescing", () => {
+  const dedupOptions = {
+    getDedupKey: (data: TranslateBatchData) => data.hash,
+  }
+
+  it("coalesces concurrent enqueues with the same dedup key into one request", async () => {
+    vi.useFakeTimers()
+    mockTranslateSuccess(["result"])
+
+    const requestQueue = new RequestQueue(baseRequestQueueConfig)
+    const batchQueue = createBatchQueue(requestQueue, baseBatchConfig, dedupOptions)
+
+    const first = batchQueue.enqueue({
+      text: "Hello",
+      langConfig: sampleLangConfig,
+      providerConfig: sampleProviderConfig,
+      hash: "same-hash",
+    })
+    const second = batchQueue.enqueue({
+      text: "Hello",
+      langConfig: sampleLangConfig,
+      providerConfig: sampleProviderConfig,
+      hash: "same-hash",
+    })
+
+    expect(second).toBe(first)
+
+    vi.advanceTimersByTime(baseBatchConfig.batchDelay)
+    vi.advanceTimersByTime(0)
+
+    await expect(Promise.all([first, second])).resolves.toEqual(["result", "result"])
+    expect(mockExecuteTranslate).toHaveBeenCalledTimes(1)
+    // the coalesced item appears once in the batch payload, not twice
+    expect(mockExecuteTranslate.mock.calls[0][0]).toBe("Hello")
+  })
+
+  it("does not coalesce enqueues with different dedup keys", async () => {
+    vi.useFakeTimers()
+    mockTranslateSuccess(["result1", "result2"])
+
+    const requestQueue = new RequestQueue(baseRequestQueueConfig)
+    const batchQueue = createBatchQueue(requestQueue, baseBatchConfig, dedupOptions)
+
+    const first = batchQueue.enqueue({
+      text: "Hello",
+      langConfig: sampleLangConfig,
+      providerConfig: sampleProviderConfig,
+      hash: "hash-one",
+    })
+    const second = batchQueue.enqueue({
+      text: "Hello",
+      langConfig: sampleLangConfig,
+      providerConfig: sampleProviderConfig,
+      hash: "hash-two",
+    })
+
+    expect(second).not.toBe(first)
+
+    vi.advanceTimersByTime(baseBatchConfig.batchDelay)
+    vi.advanceTimersByTime(0)
+
+    await expect(Promise.all([first, second])).resolves.toEqual(["result1", "result2"])
+    // both items are translated as distinct entries of a single batch
+    expect(mockExecuteTranslate).toHaveBeenCalledTimes(1)
+    expect(mockExecuteTranslate.mock.calls[0][0]).toBe(`Hello\n\n${BATCH_SEPARATOR}\n\nHello`)
+  })
+
+  it("issues a fresh request for the same key after the in-flight one resolves", async () => {
+    vi.useFakeTimers()
+    let callCount = 0
+    mockExecuteTranslate.mockImplementation(() => {
+      callCount++
+      return Promise.resolve(`result-${callCount}`)
+    })
+
+    const requestQueue = new RequestQueue(baseRequestQueueConfig)
+    const batchQueue = createBatchQueue(requestQueue, baseBatchConfig, dedupOptions)
+
+    const data = {
+      text: "Hello",
+      langConfig: sampleLangConfig,
+      providerConfig: sampleProviderConfig,
+      hash: "same-hash",
+    }
+
+    const first = batchQueue.enqueue(data)
+    await vi.advanceTimersByTimeAsync(baseBatchConfig.batchDelay)
+    await expect(first).resolves.toBe("result-1")
+
+    const second = batchQueue.enqueue(data)
+    await vi.advanceTimersByTimeAsync(baseBatchConfig.batchDelay)
+    await expect(second).resolves.toBe("result-2")
+
+    expect(mockExecuteTranslate).toHaveBeenCalledTimes(2)
+  })
+
+  it("shares the failure across coalesced enqueues and releases the key", async () => {
+    vi.useFakeTimers()
+    const error = new Error("Translation failed")
+    mockTranslateError(error)
+
+    const requestQueue = new RequestQueue(baseRequestQueueConfig)
+    const batchQueue = createBatchQueue(requestQueue, baseBatchConfig, {
+      ...dedupOptions,
+      maxRetries: 0,
+      enableFallbackToIndividual: false,
+    })
+
+    const data = {
+      text: "Hello",
+      langConfig: sampleLangConfig,
+      providerConfig: sampleProviderConfig,
+      hash: "same-hash",
+    }
+
+    const first = batchQueue.enqueue(data)
+    const second = batchQueue.enqueue(data)
+
+    await vi.advanceTimersByTimeAsync(baseBatchConfig.batchDelay)
+
+    await expect(first).rejects.toBe(error)
+    await expect(second).rejects.toBe(error)
+    expect(mockExecuteTranslate).toHaveBeenCalledTimes(1)
+
+    // the failed key is released, so a later enqueue retries
+    mockTranslateSuccess(["recovered"])
+    const third = batchQueue.enqueue(data)
+    await vi.advanceTimersByTimeAsync(baseBatchConfig.batchDelay)
+
+    await expect(third).resolves.toBe("recovered")
+    expect(mockExecuteTranslate).toHaveBeenCalledTimes(2)
   })
 })
 
