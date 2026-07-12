@@ -4,9 +4,9 @@ import type { TranslationTextFormat } from "@/types/config/translate"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { getDetectedCodeFromStorage, getFinalSourceCode } from "@/utils/config/languages"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
-import { detectLanguage } from "@/utils/content/language"
 import { logger } from "@/utils/logger"
 import { getLocalConfig } from "../../config/storage"
+import { shouldSkipAsTargetLanguage } from "./target-language-skip"
 import { prepareTranslationText } from "./text-preparation"
 import {
   MIN_LENGTH_FOR_SKIP_LLM_DETECTION,
@@ -16,20 +16,12 @@ import {
 import { getOrCreateWebPageContext } from "./webpage-context"
 import { getOrGenerateWebPageSummary } from "./webpage-summary"
 
-const MIN_LENGTH_FOR_TARGET_LANG_DETECTION = 50
-
 async function getConfigOrThrow(): Promise<Config> {
   const config = await getLocalConfig()
   if (!config) {
     throw new Error("No global config when translate text")
   }
   return config
-}
-
-async function isTextAlreadyInTargetLanguage(text: string, targetCode: LangCodeISO6393) {
-  if (text.length < MIN_LENGTH_FOR_TARGET_LANG_DETECTION) return false
-  const detected = await detectLanguage(text, { enableLLM: false })
-  return detected === targetCode
 }
 
 async function getWebPagePromptContext(
@@ -81,10 +73,9 @@ async function translateTextUsingPageConfig(
 
   const providerConfig = resolveProviderConfig(config, "translate")
 
-  if (
-    config.translate.page.enableTargetLanguageSkip &&
-    (await isTextAlreadyInTargetLanguage(preparedText, config.language.targetCode))
-  ) {
+  // Backstop only: the page modes hoist this check before DOM insertion, but
+  // other callers (e.g. the page title) still rely on it here.
+  if (await shouldSkipAsTargetLanguage(preparedText, config)) {
     logger.info(
       `translateTextForPage: skipping translation because text is already in target language. text: ${preparedText}`,
     )

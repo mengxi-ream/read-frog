@@ -25,6 +25,7 @@ import { insertTranslatedNodeIntoWrapper } from "../dom/translation-insertion"
 import { findPreviousTranslatedWrapperInside } from "../dom/translation-wrapper"
 import { insertVirtualParagraphWrappers } from "../dom/virtual-paragraph-insertion"
 import { shouldFilterSmallParagraph } from "../filter-small-paragraph"
+import { shouldSkipAsTargetLanguage } from "../target-language-skip"
 import { prepareTranslationText } from "../text-preparation"
 import { setTranslationDirAndLang } from "../translation-attributes"
 import { createSpinnerInside, getTranslatedTextAndRemoveSpinner } from "../ui/spinner"
@@ -85,7 +86,8 @@ async function filterVirtualParagraphUnits(
   const included = await Promise.all(
     units.map(async (unit) => {
       if (isNumericContent(unit.text)) return false
-      return !(await shouldFilterSmallParagraph(unit.text, config))
+      if (await shouldFilterSmallParagraph(unit.text, config)) return false
+      return !(await shouldSkipAsTargetLanguage(unit.text, config))
     }),
   )
   return units.filter((_, index) => included[index])
@@ -348,7 +350,11 @@ export async function translateNodesBilingualMode(
 
     let shouldFilter: boolean
     try {
-      shouldFilter = await shouldFilterSmallParagraph(textContent, config)
+      // Target-language skip runs here, BEFORE the wrapper/spinner is inserted,
+      // so same-language paragraphs never touch the DOM.
+      shouldFilter =
+        (await shouldFilterSmallParagraph(textContent, config)) ||
+        (await shouldSkipAsTargetLanguage(textContent, config))
     } catch (error) {
       if (bilingualState) unregisterBilingualTranslationState(bilingualState)
       throw error
@@ -527,6 +533,10 @@ export async function translateNodeTranslationOnlyMode(
     if (!innerTextContent.trim() || isNumericContent(innerTextContent)) return
 
     if (await shouldFilterSmallParagraph(innerTextContent, config)) return
+
+    // Check the plain text, not the HTML string sent to the provider — franc
+    // on markup is noise. Runs before the wrapper is inserted into the DOM.
+    if (await shouldSkipAsTargetLanguage(innerTextContent, config)) return
 
     const cleanTextContent = (content: string): string => {
       if (!content) return content
