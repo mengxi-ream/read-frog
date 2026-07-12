@@ -69,6 +69,23 @@ vi.mock("@/utils/i18n/locale-boundary", () => ({
   LocaleBoundary: ({ children }: { children: unknown }) => children,
 }))
 
+// Iconify's <Icon> fetches icon data from api.iconify.design on mount and schedules
+// retry timers when that fetch stalls (common in CI). Those Node timers outlive the
+// test file's jsdom environment and crash React with "window is not defined" as an
+// unhandled error attributed to whichever file runs next. Render an inert placeholder
+// instead; no test exercises real icon loading. iconify-internal-api.test.ts opts back
+// in via vi.unmock to keep its _api canary pointed at the real package.
+vi.mock("@iconify/react", async () => {
+  const { createElement } = await import("react")
+  return {
+    Icon: ({ className, icon }: { className?: string; icon: string }) =>
+      createElement("span", { "aria-hidden": true, className, "data-icon": icon }),
+    _api: {
+      setFetch: () => {},
+    },
+  }
+})
+
 // Mock the fakeBrowser's i18n.getMessage method which is not implemented in fake-browser
 // This is used when WxtVitest plugin replaces browser imports with fake-browser
 vi.mock("wxt/testing", async () => {
