@@ -2387,10 +2387,11 @@
       ".sort-dropdown .option-label",
       ".display-options .button-label",
       ".actions-buttons.sidebar",
-      ".title-copy"
+      ".title-copy",
+      ".search-result-position"
     ],
     "injectedCss": "#Scholarscope_HighlightOrigin > p font,#Scholarscope_HighlightContent > p font {display: inline!important;}\n#Scholarscope_HighlightOrigin > p font br,#Scholarscope_HighlightContent > p font br {display: none!important;}\n.title-translate {display:block;}\n.read-frog-translated-content-wrapper {content-visibility:auto;}",
-    "forceBlockSelectors.add": [".mixed-citation"]
+    "forceBlockSelectors.add": [".mixed-citation", ".docsum-wrap", "a.docsum-title"]
   },
   {
     "id": "chosun",
