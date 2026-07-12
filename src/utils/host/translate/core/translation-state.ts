@@ -1,4 +1,5 @@
 import { MARK_ATTRIBUTES } from "../../../constants/dom-labels"
+import { isTranslatedWrapperNode } from "../../dom/filter"
 
 export interface TextSplitRecord {
   source: Text
@@ -86,13 +87,44 @@ function collectHostText(
     for (const child of node.childNodes) {
       if (child.nodeType === Node.TEXT_NODE) {
         text += (child as Text).data
-      } else if (!excludedWrappers.has(child as HTMLElement)) {
+      } else if (
+        // Skip ALL extension translation wrappers, not only this state's own:
+        // a descendant state's wrapper inside an ancestor source otherwise counts
+        // as a host-text change and keeps the ancestor permanently stale (#1831).
+        !excludedWrappers.has(child as HTMLElement) &&
+        !isTranslatedWrapperNode(child)
+      ) {
         collect(child)
       }
     }
   }
   collect(layoutSource)
   return text
+}
+
+const EMPTY_WRAPPER_SET: ReadonlySet<HTMLElement> = new Set()
+
+// Removals we initiate must not be mistaken for host-page mutations by the
+// page MutationObserver, while genuine site-driven removals of our wrappers
+// must keep triggering retranslation (#1831). Membership is checked, never
+// consumed — duplicate observers may deliver the same removal record.
+const extensionDrivenRemovals = new WeakSet<Node>()
+
+export function markExtensionDrivenNodeRemoval(node: Node): void {
+  extensionDrivenRemovals.add(node)
+}
+
+export function wasNodeRemovedByExtension(node: Node): boolean {
+  return extensionDrivenRemovals.has(node)
+}
+
+/**
+ * Source-text snapshot that matches what collectHostText will see later.
+ * Raw `layoutSource.textContent` would include descendant wrapper text and
+ * make the staleness comparison asymmetric.
+ */
+export function collectSourceTextExcludingWrappers(layoutSource: HTMLElement): string {
+  return collectHostText(layoutSource, EMPTY_WRAPPER_SET)
 }
 
 export function registerBilingualTranslationState(state: BilingualTranslationState): void {

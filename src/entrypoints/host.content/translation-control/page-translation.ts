@@ -1,10 +1,15 @@
 import type { FeatureUsageContext } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
+import debounce from "debounce"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { getLocalConfig } from "@/utils/config/storage"
-import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
+import {
+  CONTENT_WRAPPER_CLASS,
+  REACT_SHADOW_HOST_CLASS,
+  SPINNER_CLASS,
+} from "@/utils/constants/dom-labels"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import {
@@ -15,7 +20,10 @@ import {
 } from "@/utils/host/dom/filter"
 import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
-import { findStaleBilingualLayoutSource } from "@/utils/host/translate/core/translation-state"
+import {
+  findStaleBilingualLayoutSource,
+  wasNodeRemovedByExtension,
+} from "@/utils/host/translate/core/translation-state"
 import {
   removeAllTranslatedWrapperNodes,
   translateNodesBilingualMode,
@@ -27,10 +35,18 @@ import { ensureSiteRuleCSS, removeSiteRuleCSS } from "@/utils/host/translate/ui/
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
+import { removeReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
 import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
 
 type SimpleIntersectionOptions = Omit<IntersectionObserverInit, "threshold"> & {
   threshold?: number
+}
+
+type DebouncedRetry = (() => void) & { clear: () => void }
+
+interface RetranslationBudget {
+  windowStart: number
+  passes: number
 }
 
 interface IPageTranslationManager {
@@ -66,6 +82,12 @@ interface IPageTranslationManager {
 export class PageTranslationManager implements IPageTranslationManager {
   private static readonly MAX_DURATION = 500
   private static readonly MOVE_THRESHOLD = 30 * 30
+  /** Max synchronous passes of the retranslation loop per invocation. */
+  private static readonly MAX_REFRESH_PASSES = 3
+  /** Rolling budget: at most MAX_PASSES_PER_WINDOW passes per source per window. */
+  private static readonly RETRANSLATE_WINDOW_MS = 10_000
+  private static readonly MAX_PASSES_PER_WINDOW = 6
+  private static readonly RETRANSLATE_RETRY_DEBOUNCE_MS = 1_000
   private static readonly DEFAULT_INTERSECTION_OPTIONS: SimpleIntersectionOptions = {
     root: null,
     rootMargin: "600px",
@@ -75,11 +97,17 @@ export class PageTranslationManager implements IPageTranslationManager {
   private isPageTranslating: boolean = false
   private intersectionObserver: IntersectionObserver | null = null
   private mutationObservers: MutationObserver[] = []
+  private observedMutationRoots = new WeakSet<Node>()
   private walkId: string | null = null
   private intersectionOptions: IntersectionObserverInit
   private walkBlockedElementsCache = new WeakSet<HTMLElement>()
   private refreshingTranslatedSources = new WeakSet<HTMLElement>()
   private translatedSourceMutationVersions = new WeakMap<HTMLElement, number>()
+  private retranslationBudgets = new WeakMap<HTMLElement, RetranslationBudget>()
+  private retranslateRetries = new WeakMap<HTMLElement, DebouncedRetry>()
+  // Strong and enumerable so stop() can cancel in-flight retries; entries are
+  // removed when a retry fires, so the set only holds armed timers.
+  private pendingRetranslateRetries = new Set<DebouncedRetry>()
   private translationSessionVersion = 0
   private titleObserver: MutationObserver | null = null
   private lastSourceTitle: string | null = null
@@ -238,6 +266,10 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.walkBlockedElementsCache = new WeakSet()
     this.refreshingTranslatedSources = new WeakSet()
     this.translatedSourceMutationVersions = new WeakMap()
+    this.pendingRetranslateRetries.forEach((retry) => retry.clear())
+    this.pendingRetranslateRetries.clear()
+    this.retranslateRetries = new WeakMap()
+    this.retranslationBudgets = new WeakMap()
     this.stopDocumentTitleTracking()
 
     if (this.intersectionObserver) {
@@ -246,6 +278,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
     this.mutationObservers.forEach((observer) => observer.disconnect())
     this.mutationObservers = []
+    this.observedMutationRoots = new WeakSet()
 
     removeSiteRuleCSS(document)
     removeAllTranslatedWrapperNodes()
@@ -548,26 +581,99 @@ export class PageTranslationManager implements IPageTranslationManager {
    * Start observing mutations for a container and all its shadow roots
    */
   private observeMutations(container: HTMLElement): void {
-    const mutationObserver = new MutationObserver((records) => {
-      void this.handleMutationRecords(records)
-    })
+    // Dynamic pages re-add the same subtrees repeatedly; without dedup every
+    // re-added shadow host gained a duplicate subtree observer (#1831).
+    if (!this.observedMutationRoots.has(container)) {
+      this.observedMutationRoots.add(container)
+      const mutationObserver = new MutationObserver((records) => {
+        void this.handleMutationRecords(records)
+      })
 
-    mutationObserver.observe(container, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-      attributes: true,
-      attributeFilter: ["style", "class", "hidden", "aria-hidden"],
-    })
+      mutationObserver.observe(container, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: ["style", "class", "hidden", "aria-hidden"],
+      })
 
-    this.mutationObservers.push(mutationObserver)
+      this.mutationObservers.push(mutationObserver)
+    }
     this.observeIsolatedDescendantsMutations(container)
+  }
+
+  private static readonly SELF_NODE_CLASSES = [
+    CONTENT_WRAPPER_CLASS,
+    REACT_SHADOW_HOST_CLASS,
+    SPINNER_CLASS,
+  ]
+
+  private isExtensionUtilityNode(node: Node): boolean {
+    return (
+      isHTMLElement(node) &&
+      PageTranslationManager.SELF_NODE_CLASSES.some((cls) => node.classList.contains(cls))
+    )
+  }
+
+  /**
+   * Mutations the extension itself causes (wrapper/spinner/error-UI churn) must
+   * not re-enter the staleness/traversal pipeline, or every translation becomes
+   * fuel for the next retranslation (#1831). Site-driven removals of our
+   * wrappers stay classified as host mutations so they retranslate once.
+   */
+  private isSelfInflictedRecord(record: MutationRecord): boolean {
+    // Wrapper classes/styles are set before insertion and data-read-frog-*
+    // labels are not observed, so attribute records are never self-caused.
+    if (record.type === "attributes") return false
+    const targetElement = isHTMLElement(record.target) ? record.target : record.target.parentElement
+    if (targetElement?.closest(`.${CONTENT_WRAPPER_CLASS}`)) return true
+    if (record.type !== "childList") return false
+    const added = [...record.addedNodes]
+    const removed = [...record.removedNodes]
+    if (added.length === 0 && removed.length === 0) return false
+    return (
+      added.every((node) => this.isExtensionUtilityNode(node)) &&
+      removed.every((node) => this.isExtensionUtilityNode(node) && wasNodeRemovedByExtension(node))
+    )
+  }
+
+  /**
+   * When the SITE removes a subtree containing our error UI or spinners, none
+   * of the extension's cleanup paths run: the React root never unmounts and
+   * its window.matchMedia listener + store subscription pin the detached
+   * subtree forever; infinite spinner animations likewise root their targets.
+   */
+  private cleanupDetachedTranslationArtifacts(removedNodes: NodeList): void {
+    for (const node of removedNodes) {
+      if (!isHTMLElement(node) || node.isConnected) continue
+      if (wasNodeRemovedByExtension(node)) continue
+      if (node.classList.contains(REACT_SHADOW_HOST_CLASS)) {
+        removeReactShadowHost(node)
+        continue
+      }
+      if (!node.firstElementChild) continue
+      node
+        .querySelectorAll<HTMLElement>(`.${REACT_SHADOW_HOST_CLASS}`)
+        .forEach((host) => removeReactShadowHost(host))
+      node
+        .querySelectorAll<HTMLElement>(`.${SPINNER_CLASS}`)
+        .forEach((spinner) => spinner.getAnimations?.().forEach((animation) => animation.cancel()))
+    }
   }
 
   private async handleMutationRecords(records: MutationRecord[]): Promise<void> {
     const sessionVersion = this.translationSessionVersion
-    const staleTranslatedSources = new Set<HTMLElement>()
+    const hostRecords: MutationRecord[] = []
     for (const record of records) {
+      if (record.type === "childList") {
+        this.cleanupDetachedTranslationArtifacts(record.removedNodes)
+      }
+      if (!this.isSelfInflictedRecord(record)) hostRecords.push(record)
+    }
+    if (hostRecords.length === 0) return
+
+    const staleTranslatedSources = new Set<HTMLElement>()
+    for (const record of hostRecords) {
       const staleSource = findStaleBilingualLayoutSource(record.target)
       if (staleSource) staleTranslatedSources.add(staleSource)
     }
@@ -576,7 +682,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       this.translatedSourceMutationVersions.set(source, nextVersion)
     })
 
-    const needsTraversalHandling = records.some((record) => record.type !== "characterData")
+    const needsTraversalHandling = hostRecords.some((record) => record.type !== "characterData")
     if (staleTranslatedSources.size === 0 && !needsTraversalHandling) return
 
     const config = await getLocalConfig()
@@ -586,7 +692,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
     if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return
 
-    for (const rec of records) {
+    for (const rec of hostRecords) {
       if (rec.type === "childList") {
         rec.addedNodes.forEach((node) => {
           if (isHTMLElement(node)) {
@@ -630,8 +736,15 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     refreshingSources.add(source)
     let handledVersion = 0
+    let passes = 0
     try {
       do {
+        if (!this.consumeRetranslationBudget(source)) {
+          // Budget exhausted: converge later instead of looping now (#1831).
+          this.scheduleRetranslateRetry(source, sessionVersion)
+          return
+        }
+        passes += 1
         handledVersion = mutationVersions.get(source) ?? 0
         walkAndLabelElement(source, walkId, config)
         await translateNodesBilingualMode([source], walkId, config)
@@ -640,14 +753,64 @@ export class PageTranslationManager implements IPageTranslationManager {
         this.translationSessionVersion === sessionVersion &&
         this.walkId === walkId &&
         source.isConnected &&
-        (mutationVersions.get(source) ?? 0) !== handledVersion
+        (mutationVersions.get(source) ?? 0) !== handledVersion &&
+        passes < PageTranslationManager.MAX_REFRESH_PASSES
       )
+      if (
+        this.isPageTranslating &&
+        this.translationSessionVersion === sessionVersion &&
+        this.walkId === walkId &&
+        source.isConnected &&
+        (mutationVersions.get(source) ?? 0) !== handledVersion
+      ) {
+        // Still dirty after the pass cap — defer the follow-up.
+        this.scheduleRetranslateRetry(source, sessionVersion)
+      }
     } finally {
       refreshingSources.delete(source)
       if (mutationVersions.get(source) === handledVersion) {
         mutationVersions.delete(source)
       }
     }
+  }
+
+  private consumeRetranslationBudget(source: HTMLElement): boolean {
+    const now = Date.now()
+    const budget = this.retranslationBudgets.get(source)
+    if (!budget || now - budget.windowStart > PageTranslationManager.RETRANSLATE_WINDOW_MS) {
+      this.retranslationBudgets.set(source, { windowStart: now, passes: 1 })
+      return true
+    }
+    if (budget.passes >= PageTranslationManager.MAX_PASSES_PER_WINDOW) return false
+    budget.passes += 1
+    return true
+  }
+
+  private scheduleRetranslateRetry(source: HTMLElement, sessionVersion: number): void {
+    let retry = this.retranslateRetries.get(source)
+    if (!retry) {
+      const debounced = debounce(() => {
+        this.pendingRetranslateRetries.delete(debounced)
+        void this.runScheduledRetranslate(source, sessionVersion)
+      }, PageTranslationManager.RETRANSLATE_RETRY_DEBOUNCE_MS) as unknown as DebouncedRetry
+      retry = debounced
+      this.retranslateRetries.set(source, retry)
+    }
+    this.pendingRetranslateRetries.add(retry)
+    retry()
+  }
+
+  private async runScheduledRetranslate(
+    source: HTMLElement,
+    sessionVersion: number,
+  ): Promise<void> {
+    if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return
+    // No pending mutation version means the source converged in the meantime.
+    if (this.translatedSourceMutationVersions.get(source) === undefined) return
+    const config = await getLocalConfig()
+    if (!config) return
+    if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return
+    await this.retranslateChangedSource(source, config, sessionVersion)
   }
 
   private isWalkabilityAttributeMutation(record: MutationRecord): boolean {

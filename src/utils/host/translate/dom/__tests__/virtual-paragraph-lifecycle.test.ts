@@ -1,10 +1,13 @@
 import type { VirtualParagraphUnit } from "../paragraph-segmentation"
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from "vitest"
+import { CONTENT_WRAPPER_CLASS, NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
 import {
+  collectSourceTextExcludingWrappers,
   getBilingualTranslationStateForSource,
   getVirtualParagraphGroupForSource,
   getVirtualParagraphGroupForWrapper,
+  isBilingualTranslationStateCurrent,
   isVirtualParagraphGroupCurrent,
   markVirtualParagraphGroupInserted,
   registerBilingualTranslationState,
@@ -261,6 +264,78 @@ describe("virtual paragraph lifecycle", () => {
 
     expect(state.status).toBe("disposed")
     expect(getBilingualTranslationStateForSource(layoutSource)).toBeUndefined()
+  })
+
+  it("does not stale a bilingual state when a foreign translation wrapper is inserted (#1831)", () => {
+    const layoutSource = document.createElement("div")
+    layoutSource.textContent = "Host paragraph text"
+    const ownWrapper = document.createElement("span")
+    ownWrapper.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
+    ownWrapper.textContent = "自己的译文"
+    layoutSource.append(ownWrapper)
+    document.body.append(layoutSource)
+    const state: BilingualTranslationState = {
+      layoutSource,
+      sourceTextContent: "Host paragraph text",
+      status: "active",
+      walkId: "foreign-wrapper",
+      wrapper: ownWrapper,
+    }
+    registerBilingualTranslationState(state)
+    expect(isBilingualTranslationStateCurrent(state)).toBe(true)
+
+    const foreignWrapper = document.createElement("span")
+    foreignWrapper.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
+    foreignWrapper.textContent = "后代状态的译文"
+    layoutSource.append(foreignWrapper)
+    expect(isBilingualTranslationStateCurrent(state)).toBe(true)
+
+    layoutSource.append("real host change")
+    expect(isBilingualTranslationStateCurrent(state)).toBe(false)
+  })
+
+  it("does not stale a virtual paragraph group when a foreign translation wrapper is inserted (#1831)", () => {
+    const layoutSource = document.createElement("div")
+    const nested = document.createElement("em")
+    nested.textContent = "nested"
+    const source = document.createTextNode("one\n\ntwo")
+    layoutSource.append(nested, source)
+    document.body.append(layoutSource)
+    const { group } = createSplitGroup(layoutSource, source, [3, source.data.length])
+    expect(isVirtualParagraphGroupCurrent(group)).toBe(true)
+
+    // A descendant paragraph's wrapper lands inside a nested element, away from
+    // the group's own wrappers, so placement fingerprints stay intact.
+    const foreignWrapper = document.createElement("span")
+    foreignWrapper.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
+    foreignWrapper.textContent = "后代状态的译文"
+    nested.append(foreignWrapper)
+    expect(isVirtualParagraphGroupCurrent(group)).toBe(true)
+
+    nested.append("real host change")
+    expect(isVirtualParagraphGroupCurrent(group)).toBe(false)
+    disposeVirtualParagraphGroup(group)
+  })
+
+  it("captures registration snapshots that exclude pre-existing wrappers (snapshot symmetry)", () => {
+    const layoutSource = document.createElement("div")
+    layoutSource.textContent = "Host text"
+    const preexistingWrapper = document.createElement("span")
+    preexistingWrapper.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
+    preexistingWrapper.textContent = "旧译文"
+    layoutSource.append(preexistingWrapper)
+    document.body.append(layoutSource)
+
+    const state: BilingualTranslationState = {
+      layoutSource,
+      sourceTextContent: collectSourceTextExcludingWrappers(layoutSource),
+      status: "active",
+      walkId: "snapshot-symmetry",
+      wrapper: null,
+    }
+    registerBilingualTranslationState(state)
+
+    expect(isBilingualTranslationStateCurrent(state)).toBe(true)
   })
 
   it("treats a removed tracked wrapper as stale after insertion", () => {

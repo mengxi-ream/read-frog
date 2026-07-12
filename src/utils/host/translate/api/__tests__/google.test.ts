@@ -55,13 +55,16 @@ describe("google translate adapter", () => {
   it("sends html-format input unescaped so the endpoint preserves its tags", async () => {
     // translationOnly page mode sends outerHTML fragments and re-renders the
     // result via innerHTML — escaping them would expose tags to translation.
-    mockTranslateResponse("ok")
+    const source = 'See the <a data-rf-attr="0">docs &amp; API</a>'
+    const translated = '请参阅<a data-rf-attr="0">文档 &amp; API</a>'
+    mockTranslateResponse(translated)
 
-    await googleTranslate('See the <a href="/docs?a=1&b=2">docs</a>', "en", "zh", {
+    const result = await googleTranslate(source, "en", "zh", {
       textFormat: "html",
     })
 
-    expect(sentSourceText()).toBe('See the <a href="/docs?a=1&b=2">docs</a>')
+    expect(sentSourceText()).toBe(source)
+    expect(result).toBe(translated)
   })
 
   it("returns the HTML-encoded API payload without decoding it", async () => {
