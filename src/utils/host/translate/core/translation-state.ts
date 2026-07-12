@@ -104,6 +104,20 @@ function collectHostText(
 
 const EMPTY_WRAPPER_SET: ReadonlySet<HTMLElement> = new Set()
 
+// Removals we initiate must not be mistaken for host-page mutations by the
+// page MutationObserver, while genuine site-driven removals of our wrappers
+// must keep triggering retranslation (#1831). Membership is checked, never
+// consumed — duplicate observers may deliver the same removal record.
+const extensionDrivenRemovals = new WeakSet<Node>()
+
+export function markExtensionDrivenNodeRemoval(node: Node): void {
+  extensionDrivenRemovals.add(node)
+}
+
+export function wasNodeRemovedByExtension(node: Node): boolean {
+  return extensionDrivenRemovals.has(node)
+}
+
 /**
  * Source-text snapshot that matches what collectHostText will see later.
  * Raw `layoutSource.textContent` would include descendant wrapper text and

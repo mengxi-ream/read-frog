@@ -4,7 +4,11 @@ import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { getLocalConfig } from "@/utils/config/storage"
-import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
+import {
+  CONTENT_WRAPPER_CLASS,
+  REACT_SHADOW_HOST_CLASS,
+  SPINNER_CLASS,
+} from "@/utils/constants/dom-labels"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import {
@@ -15,7 +19,10 @@ import {
 } from "@/utils/host/dom/filter"
 import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
-import { findStaleBilingualLayoutSource } from "@/utils/host/translate/core/translation-state"
+import {
+  findStaleBilingualLayoutSource,
+  wasNodeRemovedByExtension,
+} from "@/utils/host/translate/core/translation-state"
 import {
   removeAllTranslatedWrapperNodes,
   translateNodesBilingualMode,
@@ -571,10 +578,51 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.observeIsolatedDescendantsMutations(container)
   }
 
+  private static readonly SELF_NODE_CLASSES = [
+    CONTENT_WRAPPER_CLASS,
+    REACT_SHADOW_HOST_CLASS,
+    SPINNER_CLASS,
+  ]
+
+  private isExtensionUtilityNode(node: Node): boolean {
+    return (
+      isHTMLElement(node) &&
+      PageTranslationManager.SELF_NODE_CLASSES.some((cls) => node.classList.contains(cls))
+    )
+  }
+
+  /**
+   * Mutations the extension itself causes (wrapper/spinner/error-UI churn) must
+   * not re-enter the staleness/traversal pipeline, or every translation becomes
+   * fuel for the next retranslation (#1831). Site-driven removals of our
+   * wrappers stay classified as host mutations so they retranslate once.
+   */
+  private isSelfInflictedRecord(record: MutationRecord): boolean {
+    // Wrapper classes/styles are set before insertion and data-read-frog-*
+    // labels are not observed, so attribute records are never self-caused.
+    if (record.type === "attributes") return false
+    const targetElement = isHTMLElement(record.target) ? record.target : record.target.parentElement
+    if (targetElement?.closest(`.${CONTENT_WRAPPER_CLASS}`)) return true
+    if (record.type !== "childList") return false
+    const added = [...record.addedNodes]
+    const removed = [...record.removedNodes]
+    if (added.length === 0 && removed.length === 0) return false
+    return (
+      added.every((node) => this.isExtensionUtilityNode(node)) &&
+      removed.every((node) => this.isExtensionUtilityNode(node) && wasNodeRemovedByExtension(node))
+    )
+  }
+
   private async handleMutationRecords(records: MutationRecord[]): Promise<void> {
     const sessionVersion = this.translationSessionVersion
-    const staleTranslatedSources = new Set<HTMLElement>()
+    const hostRecords: MutationRecord[] = []
     for (const record of records) {
+      if (!this.isSelfInflictedRecord(record)) hostRecords.push(record)
+    }
+    if (hostRecords.length === 0) return
+
+    const staleTranslatedSources = new Set<HTMLElement>()
+    for (const record of hostRecords) {
       const staleSource = findStaleBilingualLayoutSource(record.target)
       if (staleSource) staleTranslatedSources.add(staleSource)
     }
@@ -583,7 +631,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       this.translatedSourceMutationVersions.set(source, nextVersion)
     })
 
-    const needsTraversalHandling = records.some((record) => record.type !== "characterData")
+    const needsTraversalHandling = hostRecords.some((record) => record.type !== "characterData")
     if (staleTranslatedSources.size === 0 && !needsTraversalHandling) return
 
     const config = await getLocalConfig()
@@ -593,7 +641,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
     if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return
 
-    for (const rec of records) {
+    for (const rec of hostRecords) {
       if (rec.type === "childList") {
         rec.addedNodes.forEach((node) => {
           if (isHTMLElement(node)) {

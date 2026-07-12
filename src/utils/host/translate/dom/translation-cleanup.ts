@@ -1,6 +1,7 @@
 import type { TextSplitRecord, VirtualParagraphGroup } from "../core/translation-state"
 import {
   REACT_SHADOW_HOST_CLASS,
+  SPINNER_CLASS,
   TRANSLATION_MODE_ATTRIBUTE,
   VIRTUAL_PARAGRAPH_ATTRIBUTE,
 } from "../../../constants/dom-labels"
@@ -14,6 +15,7 @@ import {
   getPendingVirtualParagraphGroups,
   getVirtualParagraphGroupForSource,
   getVirtualParagraphGroupForWrapper,
+  markExtensionDrivenNodeRemoval,
   originalContentMap,
   unregisterBilingualTranslationState,
   unregisterVirtualParagraphGroup,
@@ -28,7 +30,7 @@ export function removeShadowHostInTranslatedWrapper(wrapper: HTMLElement): void 
   }
 
   // Remove lightweight spinners
-  const spinner = wrapper.querySelector(".read-frog-spinner")
+  const spinner = wrapper.querySelector(`.${SPINNER_CLASS}`)
   spinner?.remove()
 }
 
@@ -86,6 +88,7 @@ export function disposeVirtualParagraphGroup(group: VirtualParagraphGroup): {
 
   for (const wrapper of group.wrappers) {
     removeShadowHostInTranslatedWrapper(wrapper)
+    markExtensionDrivenNodeRemoval(wrapper)
     wrapper.remove()
   }
   group.wrappers.clear()
@@ -114,6 +117,7 @@ export function removeOrphanVirtualParagraphWrappers(source: HTMLElement): boole
 
   orphanWrappers.forEach((wrapper) => {
     removeShadowHostInTranslatedWrapper(wrapper)
+    markExtensionDrivenNodeRemoval(wrapper)
     wrapper.remove()
   })
   return orphanWrappers.length > 0
@@ -126,14 +130,19 @@ export function dropVirtualParagraphWrapper(
   if (group.status !== "active" || !group.wrappers.has(wrapper)) return
   removeShadowHostInTranslatedWrapper(wrapper)
   unregisterVirtualParagraphWrapper(group, wrapper)
+  markExtensionDrivenNodeRemoval(wrapper)
   wrapper.remove()
   if (group.wrappers.size === 0) disposeVirtualParagraphGroup(group)
 }
 
 export function removeVirtualParagraphWrapper(wrapper: HTMLElement): void {
   const group = getVirtualParagraphGroupForWrapper(wrapper)
-  if (group) dropVirtualParagraphWrapper(group, wrapper)
-  else wrapper.remove()
+  if (group) {
+    dropVirtualParagraphWrapper(group, wrapper)
+  } else {
+    markExtensionDrivenNodeRemoval(wrapper)
+    wrapper.remove()
+  }
 }
 
 /**
@@ -141,6 +150,8 @@ export function removeVirtualParagraphWrapper(wrapper: HTMLElement): void {
  * @param wrapper - The translated wrapper element to remove
  */
 export function removeTranslatedWrapperWithRestore(wrapper: HTMLElement): void {
+  // Every path below removes the wrapper (directly or via an innerHTML restore).
+  markExtensionDrivenNodeRemoval(wrapper)
   const virtualParagraphGroup = getVirtualParagraphGroupForWrapper(wrapper)
   if (virtualParagraphGroup) {
     disposeVirtualParagraphGroup(virtualParagraphGroup)

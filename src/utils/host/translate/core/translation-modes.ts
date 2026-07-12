@@ -37,6 +37,7 @@ import {
   isBilingualTranslationStateCurrent,
   isVirtualParagraphGroupCurrent,
   MARK_ATTRIBUTES_REGEX,
+  markExtensionDrivenNodeRemoval,
   markVirtualParagraphGroupInserted,
   originalContentMap,
   registerBilingualTranslationState,
@@ -600,6 +601,7 @@ export async function translateNodeTranslationOnlyMode(
       // Keep the wrapper when translation failed so the injected error UI remains visible.
       // Only remove the wrapper when translation returned an empty string.
       if (translatedText === "") {
+        markExtensionDrivenNodeRemoval(translatedWrapperNode)
         // Batch the remove operation to execute remove operation after insert operation
         batchDOMOperation(() => translatedWrapperNode.remove())
       }
