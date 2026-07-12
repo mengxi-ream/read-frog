@@ -106,6 +106,10 @@ export async function getTranslatedTextAndRemoveSpinner(
 
     translatedWrapperNode.appendChild(container)
   } finally {
+    // The spin animation runs with iterations: Infinity; a running animation
+    // roots its detached target in the renderer, leaking one node per
+    // translated paragraph (#1831). jsdom lacks getAnimations, hence the `?.`.
+    spinner.getAnimations?.().forEach((animation) => animation.cancel())
     spinner.remove()
   }
 

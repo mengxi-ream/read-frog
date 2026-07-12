@@ -34,6 +34,7 @@ import { ensureSiteRuleCSS, removeSiteRuleCSS } from "@/utils/host/translate/ui/
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
+import { removeReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
 import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
 
 type SimpleIntersectionOptions = Omit<IntersectionObserverInit, "threshold"> & {
@@ -613,10 +614,37 @@ export class PageTranslationManager implements IPageTranslationManager {
     )
   }
 
+  /**
+   * When the SITE removes a subtree containing our error UI or spinners, none
+   * of the extension's cleanup paths run: the React root never unmounts and
+   * its window.matchMedia listener + store subscription pin the detached
+   * subtree forever; infinite spinner animations likewise root their targets.
+   */
+  private cleanupDetachedTranslationArtifacts(removedNodes: NodeList): void {
+    for (const node of removedNodes) {
+      if (!isHTMLElement(node) || node.isConnected) continue
+      if (wasNodeRemovedByExtension(node)) continue
+      if (node.classList.contains(REACT_SHADOW_HOST_CLASS)) {
+        removeReactShadowHost(node)
+        continue
+      }
+      if (!node.firstElementChild) continue
+      node
+        .querySelectorAll<HTMLElement>(`.${REACT_SHADOW_HOST_CLASS}`)
+        .forEach((host) => removeReactShadowHost(host))
+      node
+        .querySelectorAll<HTMLElement>(`.${SPINNER_CLASS}`)
+        .forEach((spinner) => spinner.getAnimations?.().forEach((animation) => animation.cancel()))
+    }
+  }
+
   private async handleMutationRecords(records: MutationRecord[]): Promise<void> {
     const sessionVersion = this.translationSessionVersion
     const hostRecords: MutationRecord[] = []
     for (const record of records) {
+      if (record.type === "childList") {
+        this.cleanupDetachedTranslationArtifacts(record.removedNodes)
+      }
       if (!this.isSelfInflictedRecord(record)) hostRecords.push(record)
     }
     if (hostRecords.length === 0) return

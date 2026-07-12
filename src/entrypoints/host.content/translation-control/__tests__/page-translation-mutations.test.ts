@@ -666,6 +666,40 @@ describe("pageTranslationManager mutation re-walk", () => {
     manager.stop()
   })
 
+  it("unmounts the error-UI React root when the site removes an ancestor of our wrapper (#1831)", async () => {
+    document.body.innerHTML = `
+      <div id="comment"><p id="tweet"><span id="source">Original content</span></p></div>
+    `
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const comment = document.getElementById("comment") as HTMLElement
+    const tweet = document.getElementById("tweet") as HTMLElement
+    const wrapper = document.createElement("span")
+    wrapper.className = "notranslate read-frog-translated-content-wrapper"
+    const errorHost = document.createElement("div")
+    errorHost.className = "read-frog-react-shadow-host"
+    const cleanupSpy = vi.fn<() => void>()
+    ;(errorHost as any).__reactShadowContainerCleanup = cleanupSpy
+    wrapper.append(errorHost)
+    tweet.append(wrapper)
+    await flushDomUpdates()
+
+    // Site-driven removal of the whole comment subtree.
+    comment.remove()
+    await flushDomUpdates()
+
+    expect(cleanupSpy).toHaveBeenCalledTimes(1)
+
+    // Idempotent on a duplicate delivery of the same removal.
+    ;(manager as any).cleanupDetachedTranslationArtifacts([comment])
+    expect(cleanupSpy).toHaveBeenCalledTimes(1)
+
+    manager.stop()
+  })
+
   it("does not accumulate mutation observers when a shadow-root element is re-added (#1831)", async () => {
     const host = document.createElement("div")
     host.id = "shadow-host"

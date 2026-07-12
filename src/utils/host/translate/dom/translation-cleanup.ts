@@ -29,9 +29,13 @@ export function removeShadowHostInTranslatedWrapper(wrapper: HTMLElement): void 
     removeReactShadowHost(translationShadowHost)
   }
 
-  // Remove lightweight spinners
+  // Remove lightweight spinners; cancel their infinite animation first so the
+  // detached node is not rooted by the renderer (#1831).
   const spinner = wrapper.querySelector(`.${SPINNER_CLASS}`)
-  spinner?.remove()
+  if (spinner && isHTMLElement(spinner)) {
+    spinner.getAnimations?.().forEach((animation) => animation.cancel())
+    spinner.remove()
+  }
 }
 
 function restoreTextSplit(record: TextSplitRecord): boolean {
