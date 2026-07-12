@@ -955,6 +955,37 @@ describe("translate", () => {
         })
       })
 
+      it("drops near-echo translations that differ only by cosmetic drift", async () => {
+        await withHost("x.com", async () => {
+          const paragraphs = ['It\'s a "first" paragraph… REALLY.', "Second paragraph stays."]
+          const sourceText = paragraphs.join("\n\n")
+          // LLM-style echo: NBSP for spaces, curly quotes, real ellipsis, case drift.
+          vi.mocked(translateTextForPage).mockImplementation(async (text) =>
+            text
+              .replace(/ /g, " ")
+              .replace(/'/g, "’")
+              .replace(/"/g, "“")
+              .replace(/\.\.\./g, "…")
+              .toLowerCase(),
+          )
+
+          render(
+            <div data-testid="tweetText" style={{ whiteSpace: "pre-wrap" }}>
+              <span>{sourceText}</span>
+            </div>,
+          )
+          const tweet = screen.getByTestId("tweetText")
+          const sourceSpan = tweet.querySelector("span")!
+          const originalInnerHTML = sourceSpan.innerHTML
+
+          await removeOrShowPageTranslation("bilingual", true)
+
+          expect(translateTextForPage).toHaveBeenCalledTimes(2)
+          expect(getTranslationWrappers(tweet)).toHaveLength(0)
+          expect(sourceSpan.innerHTML).toBe(originalInnerHTML)
+        })
+      })
+
       it("keeps Bora's mention in the first of five interleaved paragraphs", async () => {
         await withHost("x.com", async () => {
           const paragraphs = [

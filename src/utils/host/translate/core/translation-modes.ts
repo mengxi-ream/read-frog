@@ -25,7 +25,7 @@ import { insertTranslatedNodeIntoWrapper } from "../dom/translation-insertion"
 import { findPreviousTranslatedWrapperInside } from "../dom/translation-wrapper"
 import { insertVirtualParagraphWrappers } from "../dom/virtual-paragraph-insertion"
 import { shouldFilterSmallParagraph } from "../filter-small-paragraph"
-import { prepareTranslationText } from "../text-preparation"
+import { normalizeForComparison } from "../text-preparation"
 import { setTranslationDirAndLang } from "../translation-attributes"
 import { createSpinnerInside, getTranslatedTextAndRemoveSpinner } from "../ui/spinner"
 import { isNumericContent } from "../ui/translation-utils"
@@ -56,7 +56,7 @@ function getDisplayTranslation(sourceText: string, translatedText: string | unde
     return undefined
   }
 
-  return prepareTranslationText(sourceText) === prepareTranslationText(translatedText)
+  return normalizeForComparison(sourceText) === normalizeForComparison(translatedText)
     ? ""
     : translatedText
 }
