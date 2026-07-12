@@ -55,9 +55,13 @@ export async function executeTranslate<TContext>(
       throw new Error(`Invalid target language code: ${langConfig.targetCode}`)
     }
     if (provider === "deeplx") {
-      translatedText = await deeplxTranslate(preparedText, sourceLang, targetLang, providerConfig)
+      translatedText = await deeplxTranslate(preparedText, sourceLang, targetLang, providerConfig, {
+        textFormat: options?.textFormat,
+      })
     } else if (provider === "deepl") {
-      translatedText = await deeplTranslate(text, sourceLang, targetLang, providerConfig)
+      translatedText = await deeplTranslate(text, sourceLang, targetLang, providerConfig, {
+        textFormat: options?.textFormat,
+      })
     }
   } else if (isLLMProviderConfig(providerConfig)) {
     const targetLangName = LANG_CODE_TO_EN_NAME[langConfig.targetCode]

@@ -4434,5 +4434,18 @@
     "id": "remove_em",
     "matches": ["git-scm.com", "models.com"],
     "preserveTextSelectors.add": ["em"]
+  },
+  {
+    "id": "hltv",
+    "matches": ["hltv.org", "*.hltv.org"],
+    "excludeSelectors": [
+      ".navbar",
+      "[data-nav-item]",
+      "[data-nav-extras]",
+      "[data-navbar-main-menu-item-container]",
+      "[data-navbar-extra-items-container]",
+      ".forum-topbar",
+      ".forum-bottombar"
+    ]
   }
 ]
