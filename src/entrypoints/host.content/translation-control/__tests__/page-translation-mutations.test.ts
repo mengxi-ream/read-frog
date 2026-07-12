@@ -666,6 +666,82 @@ describe("pageTranslationManager mutation re-walk", () => {
     manager.stop()
   })
 
+  it("caps retranslation passes and defers perpetual churn behind a debounced retry (#1831)", async () => {
+    vi.useFakeTimers()
+    const flushWithFakeTimers = async (rounds = 4) => {
+      for (let i = 0; i < rounds; i++) {
+        await Promise.resolve()
+        await vi.advanceTimersByTimeAsync(0)
+        await Promise.resolve()
+      }
+    }
+
+    try {
+      document.body.innerHTML = `
+        <p id="tweet"><span id="source">Ticker 0</span></p>
+      `
+
+      const manager = new PageTranslationManager()
+      await manager.start()
+      await flushWithFakeTimers()
+
+      const tweet = document.getElementById("tweet") as HTMLElement
+      const source = document.getElementById("source")!.firstChild as Text
+      const wrapper = document.createElement("span")
+      wrapper.className = "notranslate read-frog-translated-content-wrapper"
+      wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+      tweet.append(wrapper)
+      // Snapshot never matches, so every mutation marks the source stale —
+      // the pathological ticker page.
+      const state: BilingualTranslationState = {
+        layoutSource: tweet,
+        sourceTextContent: "never matches",
+        status: "active",
+        walkId: "walk-id",
+        wrapper,
+      }
+      registerBilingualTranslationState(state)
+      await flushWithFakeTimers()
+      mockTranslateNodesBilingualMode.mockClear()
+
+      let churn = 0
+      mockTranslateNodesBilingualMode.mockImplementation(async () => {
+        churn += 1
+        source.data = `Ticker ${churn}`
+        // Let the observer deliver the mutation before this pass resolves so
+        // the do/while sees a bumped version every time.
+        await flushWithFakeTimers(2)
+      })
+
+      source.data = "Ticker start"
+      await flushWithFakeTimers(8)
+
+      // Per-invocation cap: exactly MAX_REFRESH_PASSES synchronous passes.
+      expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(3)
+      expect((manager as any).pendingRetranslateRetries.size).toBe(1)
+
+      // Debounced retry fires and burns the rest of the per-window budget.
+      await vi.advanceTimersByTimeAsync(1000)
+      await flushWithFakeTimers()
+      expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(6)
+
+      // Budget exhausted: the next retry is a no-op that re-arms itself.
+      await vi.advanceTimersByTimeAsync(1000)
+      await flushWithFakeTimers()
+      expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(6)
+
+      // stop() cancels pending retries; nothing fires afterwards.
+      manager.stop()
+      expect((manager as any).pendingRetranslateRetries.size).toBe(0)
+      await vi.advanceTimersByTimeAsync(30_000)
+      expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(6)
+
+      unregisterBilingualTranslationState(state)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it("unmounts the error-UI React root when the site removes an ancestor of our wrapper (#1831)", async () => {
     document.body.innerHTML = `
       <div id="comment"><p id="tweet"><span id="source">Original content</span></p></div>

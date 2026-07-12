@@ -1,5 +1,6 @@
 import type { FeatureUsageContext } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
+import debounce from "debounce"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
@@ -41,6 +42,13 @@ type SimpleIntersectionOptions = Omit<IntersectionObserverInit, "threshold"> & {
   threshold?: number
 }
 
+type DebouncedRetry = (() => void) & { clear: () => void }
+
+interface RetranslationBudget {
+  windowStart: number
+  passes: number
+}
+
 interface IPageTranslationManager {
   /**
    * Indicates whether the page translation is currently active
@@ -74,6 +82,12 @@ interface IPageTranslationManager {
 export class PageTranslationManager implements IPageTranslationManager {
   private static readonly MAX_DURATION = 500
   private static readonly MOVE_THRESHOLD = 30 * 30
+  /** Max synchronous passes of the retranslation loop per invocation. */
+  private static readonly MAX_REFRESH_PASSES = 3
+  /** Rolling budget: at most MAX_PASSES_PER_WINDOW passes per source per window. */
+  private static readonly RETRANSLATE_WINDOW_MS = 10_000
+  private static readonly MAX_PASSES_PER_WINDOW = 6
+  private static readonly RETRANSLATE_RETRY_DEBOUNCE_MS = 1_000
   private static readonly DEFAULT_INTERSECTION_OPTIONS: SimpleIntersectionOptions = {
     root: null,
     rootMargin: "600px",
@@ -89,6 +103,11 @@ export class PageTranslationManager implements IPageTranslationManager {
   private walkBlockedElementsCache = new WeakSet<HTMLElement>()
   private refreshingTranslatedSources = new WeakSet<HTMLElement>()
   private translatedSourceMutationVersions = new WeakMap<HTMLElement, number>()
+  private retranslationBudgets = new WeakMap<HTMLElement, RetranslationBudget>()
+  private retranslateRetries = new WeakMap<HTMLElement, DebouncedRetry>()
+  // Strong and enumerable so stop() can cancel in-flight retries; entries are
+  // removed when a retry fires, so the set only holds armed timers.
+  private pendingRetranslateRetries = new Set<DebouncedRetry>()
   private translationSessionVersion = 0
   private titleObserver: MutationObserver | null = null
   private lastSourceTitle: string | null = null
@@ -247,6 +266,10 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.walkBlockedElementsCache = new WeakSet()
     this.refreshingTranslatedSources = new WeakSet()
     this.translatedSourceMutationVersions = new WeakMap()
+    this.pendingRetranslateRetries.forEach((retry) => retry.clear())
+    this.pendingRetranslateRetries.clear()
+    this.retranslateRetries = new WeakMap()
+    this.retranslationBudgets = new WeakMap()
     this.stopDocumentTitleTracking()
 
     if (this.intersectionObserver) {
@@ -713,8 +736,15 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     refreshingSources.add(source)
     let handledVersion = 0
+    let passes = 0
     try {
       do {
+        if (!this.consumeRetranslationBudget(source)) {
+          // Budget exhausted: converge later instead of looping now (#1831).
+          this.scheduleRetranslateRetry(source, sessionVersion)
+          return
+        }
+        passes += 1
         handledVersion = mutationVersions.get(source) ?? 0
         walkAndLabelElement(source, walkId, config)
         await translateNodesBilingualMode([source], walkId, config)
@@ -723,14 +753,64 @@ export class PageTranslationManager implements IPageTranslationManager {
         this.translationSessionVersion === sessionVersion &&
         this.walkId === walkId &&
         source.isConnected &&
-        (mutationVersions.get(source) ?? 0) !== handledVersion
+        (mutationVersions.get(source) ?? 0) !== handledVersion &&
+        passes < PageTranslationManager.MAX_REFRESH_PASSES
       )
+      if (
+        this.isPageTranslating &&
+        this.translationSessionVersion === sessionVersion &&
+        this.walkId === walkId &&
+        source.isConnected &&
+        (mutationVersions.get(source) ?? 0) !== handledVersion
+      ) {
+        // Still dirty after the pass cap — defer the follow-up.
+        this.scheduleRetranslateRetry(source, sessionVersion)
+      }
     } finally {
       refreshingSources.delete(source)
       if (mutationVersions.get(source) === handledVersion) {
         mutationVersions.delete(source)
       }
     }
+  }
+
+  private consumeRetranslationBudget(source: HTMLElement): boolean {
+    const now = Date.now()
+    const budget = this.retranslationBudgets.get(source)
+    if (!budget || now - budget.windowStart > PageTranslationManager.RETRANSLATE_WINDOW_MS) {
+      this.retranslationBudgets.set(source, { windowStart: now, passes: 1 })
+      return true
+    }
+    if (budget.passes >= PageTranslationManager.MAX_PASSES_PER_WINDOW) return false
+    budget.passes += 1
+    return true
+  }
+
+  private scheduleRetranslateRetry(source: HTMLElement, sessionVersion: number): void {
+    let retry = this.retranslateRetries.get(source)
+    if (!retry) {
+      const debounced = debounce(() => {
+        this.pendingRetranslateRetries.delete(debounced)
+        void this.runScheduledRetranslate(source, sessionVersion)
+      }, PageTranslationManager.RETRANSLATE_RETRY_DEBOUNCE_MS) as unknown as DebouncedRetry
+      retry = debounced
+      this.retranslateRetries.set(source, retry)
+    }
+    this.pendingRetranslateRetries.add(retry)
+    retry()
+  }
+
+  private async runScheduledRetranslate(
+    source: HTMLElement,
+    sessionVersion: number,
+  ): Promise<void> {
+    if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return
+    // No pending mutation version means the source converged in the meantime.
+    if (this.translatedSourceMutationVersions.get(source) === undefined) return
+    const config = await getLocalConfig()
+    if (!config) return
+    if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return
+    await this.retranslateChangedSource(source, config, sessionVersion)
   }
 
   private isWalkabilityAttributeMutation(record: MutationRecord): boolean {
