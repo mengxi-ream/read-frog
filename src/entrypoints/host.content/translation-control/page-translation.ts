@@ -75,6 +75,7 @@ export class PageTranslationManager implements IPageTranslationManager {
   private isPageTranslating: boolean = false
   private intersectionObserver: IntersectionObserver | null = null
   private mutationObservers: MutationObserver[] = []
+  private observedMutationRoots = new WeakSet<Node>()
   private walkId: string | null = null
   private intersectionOptions: IntersectionObserverInit
   private walkBlockedElementsCache = new WeakSet<HTMLElement>()
@@ -246,6 +247,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
     this.mutationObservers.forEach((observer) => observer.disconnect())
     this.mutationObservers = []
+    this.observedMutationRoots = new WeakSet()
 
     removeSiteRuleCSS(document)
     removeAllTranslatedWrapperNodes()
@@ -548,19 +550,24 @@ export class PageTranslationManager implements IPageTranslationManager {
    * Start observing mutations for a container and all its shadow roots
    */
   private observeMutations(container: HTMLElement): void {
-    const mutationObserver = new MutationObserver((records) => {
-      void this.handleMutationRecords(records)
-    })
+    // Dynamic pages re-add the same subtrees repeatedly; without dedup every
+    // re-added shadow host gained a duplicate subtree observer (#1831).
+    if (!this.observedMutationRoots.has(container)) {
+      this.observedMutationRoots.add(container)
+      const mutationObserver = new MutationObserver((records) => {
+        void this.handleMutationRecords(records)
+      })
 
-    mutationObserver.observe(container, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-      attributes: true,
-      attributeFilter: ["style", "class", "hidden", "aria-hidden"],
-    })
+      mutationObserver.observe(container, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: ["style", "class", "hidden", "aria-hidden"],
+      })
 
-    this.mutationObservers.push(mutationObserver)
+      this.mutationObservers.push(mutationObserver)
+    }
     this.observeIsolatedDescendantsMutations(container)
   }
 

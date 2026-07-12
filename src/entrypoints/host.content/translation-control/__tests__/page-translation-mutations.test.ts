@@ -523,4 +523,32 @@ describe("pageTranslationManager mutation re-walk", () => {
     }
     manager.stop()
   })
+
+  it("does not accumulate mutation observers when a shadow-root element is re-added (#1831)", async () => {
+    const host = document.createElement("div")
+    host.id = "shadow-host"
+    const shadowRoot = host.attachShadow({ mode: "open" })
+    const shadowChild = document.createElement("div")
+    shadowChild.innerHTML = "<p>Shadow paragraph</p>"
+    shadowRoot.append(shadowChild)
+    document.body.append(host)
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const observerCountAfterStart = (manager as any).mutationObservers.length
+    expect(observerCountAfterStart).toBeGreaterThan(0)
+
+    for (let i = 0; i < 5; i++) {
+      host.remove()
+      await flushDomUpdates()
+      document.body.append(host)
+      await flushDomUpdates()
+    }
+
+    expect((manager as any).mutationObservers.length).toBe(observerCountAfterStart)
+
+    manager.stop()
+  })
 })
