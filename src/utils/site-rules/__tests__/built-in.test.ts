@@ -106,4 +106,16 @@ describe("built-in site rules", () => {
       ]),
     )
   })
+
+  it("excludes the hltv.org navigation whose overflow handler loops on width changes (#1831)", () => {
+    const resolved = resolveSiteRule(
+      "https://www.hltv.org/matches/2395002/furia-vs-falcons-iem-cologne-major-2026",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+    expect(resolved.excludeSelector).toContain("[data-nav-item]")
+    expect(resolved.excludeSelector).toContain("[data-nav-extras]")
+    expect(resolved.excludeSelector).toContain(".navbar")
+  })
 })
