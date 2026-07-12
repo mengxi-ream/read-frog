@@ -120,6 +120,9 @@ describe.each(["bilingual", "translationOnly"] as const)("%s translation", (mode
     await translateNodes([textNode], "walk-id", false, createConfig({ mode }))
 
     expect(mocks.translateTextForPage).toHaveBeenCalledOnce()
-    expect(mocks.translateTextForPage).toHaveBeenCalledWith("Hello @openai")
+    expect(mocks.translateTextForPage).toHaveBeenCalledWith(
+      "Hello @openai",
+      mode === "translationOnly" ? "html" : "plain",
+    )
   })
 })

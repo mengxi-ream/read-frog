@@ -30,4 +30,18 @@ describe("normalizeTranslationOutput", () => {
   it("does not normalize non-Google providers", () => {
     expect(normalizeTranslationOutput(microsoftProvider, "A&amp;B")).toBe("A&amp;B")
   })
+
+  it("decodes apostrophes in input-translation results (issue #1517)", () => {
+    expect(normalizeTranslationOutput(googleProvider, "It&#39;s")).toBe("It's")
+  })
+
+  it("does not decode semicolon-less legacy entities such as URL query params", () => {
+    expect(normalizeTranslationOutput(googleProvider, "?page=1&copy=true")).toBe(
+      "?page=1&copy=true",
+    )
+  })
+
+  it("decodes escaped entity mentions exactly once", () => {
+    expect(normalizeTranslationOutput(googleProvider, "&amp;amp;")).toBe("&amp;")
+  })
 })

@@ -14,7 +14,6 @@ import { Sha256Hex } from "@/utils/hash"
 import { microsoftTranslate } from "@/utils/host/translate/api/microsoft"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { normalizePromptContextValue } from "@/utils/host/translate/translate-text"
-import { normalizeTranslationOutput } from "@/utils/host/translate/translation-output-normalization"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
@@ -243,6 +242,7 @@ export async function setUpWebPageTranslationQueue() {
         providerConfig,
         scheduleAt,
         hash,
+        textFormat,
         webTitle,
         webDescription,
         webContent,
@@ -254,7 +254,7 @@ export async function setUpWebPageTranslationQueue() {
     if (hash) {
       const cached = await db.translationCache.get(hash)
       if (cached) {
-        return normalizeTranslationOutput(providerConfig, cached.translation)
+        return cached.translation
       }
     }
 
@@ -271,13 +271,13 @@ export async function setUpWebPageTranslationQueue() {
       result = await batchQueue.enqueue(data)
     } else {
       // Create thunk based on type and params
-      const thunk = () => executeTranslate(text, langConfig, providerConfig, getTranslatePrompt)
+      const thunk = () =>
+        executeTranslate(text, langConfig, providerConfig, getTranslatePrompt, { textFormat })
       result = await requestQueue.enqueue(thunk, scheduleAt, hash)
     }
 
     // Cache the translation result if successful
     if (result && hash) {
-      result = normalizeTranslationOutput(providerConfig, result)
       await db.translationCache.put({
         key: hash,
         translation: result,
@@ -341,7 +341,7 @@ export async function setUpSubtitlesTranslationQueue() {
     if (hash) {
       const cached = await db.translationCache.get(hash)
       if (cached) {
-        return normalizeTranslationOutput(providerConfig, cached.translation)
+        return cached.translation
       }
     }
 
@@ -362,7 +362,6 @@ export async function setUpSubtitlesTranslationQueue() {
     }
 
     if (result && hash) {
-      result = normalizeTranslationOutput(providerConfig, result)
       await db.translationCache.put({
         key: hash,
         translation: result,

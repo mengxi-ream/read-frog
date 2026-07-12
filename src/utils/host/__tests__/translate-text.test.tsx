@@ -397,7 +397,9 @@ describe("translate-text", () => {
       )
       expect(result).toBe("你好")
       // Shared translation core should send minimally prepared text to the provider
-      expect(mockMicrosoftTranslate).toHaveBeenCalledWith("hello", "en", "zh")
+      expect(mockMicrosoftTranslate).toHaveBeenCalledWith("hello", "en", "zh", {
+        textFormat: undefined,
+      })
     })
 
     it("should trim translation result", async () => {
@@ -432,7 +434,9 @@ describe("translate-text", () => {
       )
 
       expect(result).toBe('L\'Iran chiama "Dichiarazione" AT&T <span>')
-      expect(mockGoogleTranslate).toHaveBeenCalledWith("test input", "en", "zh")
+      expect(mockGoogleTranslate).toHaveBeenCalledWith("test input", "en", "zh", {
+        textFormat: undefined,
+      })
     })
   })
 })

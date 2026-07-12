@@ -1,17 +1,22 @@
+import type { TranslationTextFormat } from "@/types/config/translate"
+
 export async function microsoftTranslate(
   source: string,
   fromLang: string,
   toLang: string,
+  options?: { textFormat?: TranslationTextFormat },
 ): Promise<string>
 export async function microsoftTranslate(
   source: string[],
   fromLang: string,
   toLang: string,
+  options?: { textFormat?: TranslationTextFormat },
 ): Promise<string[]>
 export async function microsoftTranslate(
   source: string | string[],
   fromLang: string,
   toLang: string,
+  options?: { textFormat?: TranslationTextFormat },
 ): Promise<string | string[]> {
   const isSingle = typeof source === "string"
   const texts = isSingle ? [source] : source
@@ -23,8 +28,13 @@ export async function microsoftTranslate(
   const effectiveFromLang = fromLang === "auto" ? "" : fromLang
   const token = await refreshMicrosoftToken()
 
+  // plain translates the source as literal text (tag-like text such as "<b then"
+  // is otherwise left untranslated); html preserves the markup structure of
+  // translationOnly page-mode fragments.
+  const textType = options?.textFormat === "html" ? "html" : "plain"
+
   const resp = await fetch(
-    `https://api-edge.cognitive.microsofttranslator.com/translate?from=${effectiveFromLang}&to=${toLang}&api-version=3.0&includeSentenceLength=true&textType=html`,
+    `https://api-edge.cognitive.microsofttranslator.com/translate?from=${effectiveFromLang}&to=${toLang}&api-version=3.0&includeSentenceLength=true&textType=${textType}`,
     {
       method: "POST",
       headers: {

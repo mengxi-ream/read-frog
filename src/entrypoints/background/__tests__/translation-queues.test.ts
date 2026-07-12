@@ -292,10 +292,14 @@ describe("translation queue helpers", () => {
     )
   })
 
-  it("normalizes cached Google translations before returning them", async () => {
+  // Cached values are already decoded once by executeTranslate; a second decode
+  // would corrupt legitimate entity mentions ("Tom &amp; Jerry" -> "Tom & Jerry").
+  // The fixtures below intentionally contain semicolon-terminated entities so a
+  // re-introduced decode call fails these tests.
+  it("returns cached Google translations verbatim without re-decoding", async () => {
     translationCacheGetMock.mockResolvedValueOnce({
       key: "webpage-hash",
-      translation: "L&#39;Iran chiama &quot;Dichiarazione&quot; &lt;span&gt;",
+      translation: "Tom &amp; Jerry — It's on https://example.com/?page=1&copy=true <span>",
     })
 
     const { setUpWebPageTranslationQueue } = await import("../translation-queues")
@@ -312,9 +316,111 @@ describe("translation queue helpers", () => {
       },
     })
 
-    expect(result).toBe('L\'Iran chiama "Dichiarazione" <span>')
+    expect(result).toBe("Tom &amp; Jerry — It's on https://example.com/?page=1&copy=true <span>")
     expect(executeTranslateMock).not.toHaveBeenCalled()
     expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
+  it("returns and caches fresh Google translations verbatim without re-decoding", async () => {
+    executeTranslateMock.mockResolvedValue("write &amp; for ampersand — It's fine")
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: "hello",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "webpage-hash",
+      },
+    })
+
+    expect(result).toBe("write &amp; for ampersand — It's fine")
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "webpage-hash",
+        translation: "write &amp; for ampersand — It's fine",
+      }),
+    )
+  })
+
+  it("forwards the textFormat to executeTranslate for non-batch providers", async () => {
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    await handler({
+      data: {
+        text: "<b>hello</b>",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "webpage-hash",
+        textFormat: "html",
+      },
+    })
+
+    expect(executeTranslateMock).toHaveBeenCalledWith(
+      "<b>hello</b>",
+      DEFAULT_CONFIG.language,
+      googleProvider,
+      expect.any(Function),
+      { textFormat: "html" },
+    )
+  })
+
+  it("returns cached Google subtitle translations verbatim without re-decoding", async () => {
+    translationCacheGetMock.mockResolvedValueOnce({
+      key: "subtitle-hash",
+      translation: "Tom &amp; Jerry — It's a subtitle",
+    })
+
+    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
+    await setUpSubtitlesTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
+    const result = await handler({
+      data: {
+        text: "hello",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "subtitle-hash",
+      },
+    })
+
+    expect(result).toBe("Tom &amp; Jerry — It's a subtitle")
+    expect(executeTranslateMock).not.toHaveBeenCalled()
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
+  it("returns and caches fresh Google subtitle translations verbatim without re-decoding", async () => {
+    executeTranslateMock.mockResolvedValue("write &amp; for ampersand — It's a subtitle")
+
+    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
+    await setUpSubtitlesTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
+    const result = await handler({
+      data: {
+        text: "hello",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "subtitle-hash",
+      },
+    })
+
+    expect(result).toBe("write &amp; for ampersand — It's a subtitle")
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "subtitle-hash",
+        translation: "write &amp; for ampersand — It's a subtitle",
+      }),
+    )
   })
 
   it("does not normalize cached non-Google translations", async () => {

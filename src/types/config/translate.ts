@@ -126,5 +126,10 @@ export const translateConfigSchema = z.object({
 
 export type RequestQueueConfig = z.infer<typeof requestQueueConfigSchema>
 export type BatchQueueConfig = z.infer<typeof batchQueueConfigSchema>
+
+// How the source text sent to a translation provider should be interpreted:
+// "plain" for plain text (the default), "html" for markup-bearing strings such
+// as the outerHTML fragments produced by translationOnly page mode.
+export type TranslationTextFormat = "plain" | "html"
 export type TranslateConfig = z.infer<typeof translateConfigSchema>
 export type TranslationMode = z.infer<typeof translationModeSchema>

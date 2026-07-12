@@ -1,6 +1,7 @@
 import type { PromptResolver } from "./api/ai"
 import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
+import type { TranslationTextFormat } from "@/types/config/translate"
 import { ISO6393_TO_6391, LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { isLLMProviderConfig, isNonAPIProvider, isPureAPIProvider } from "@/types/config/provider"
 import { aiTranslate } from "./api/ai"
@@ -19,6 +20,7 @@ export async function executeTranslate<TContext>(
   options?: {
     isBatch?: boolean
     context?: TContext
+    textFormat?: TranslationTextFormat
   },
 ) {
   const preparedText = prepareTranslationText(text)
@@ -37,9 +39,13 @@ export async function executeTranslate<TContext>(
       throw new Error(`Invalid target language code: ${langConfig.targetCode}`)
     }
     if (provider === "google-translate") {
-      translatedText = await googleTranslate(preparedText, sourceLang, targetLang)
+      translatedText = await googleTranslate(preparedText, sourceLang, targetLang, {
+        textFormat: options?.textFormat,
+      })
     } else if (provider === "microsoft-translate") {
-      translatedText = await microsoftTranslate(preparedText, sourceLang, targetLang)
+      translatedText = await microsoftTranslate(preparedText, sourceLang, targetLang, {
+        textFormat: options?.textFormat,
+      })
     }
   } else if (isPureAPIProvider(provider)) {
     const sourceLang =

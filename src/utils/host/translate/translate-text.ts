@@ -1,6 +1,7 @@
 import type { LangCodeISO6393, LangLevel } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
+import type { TranslationTextFormat } from "@/types/config/translate"
 import type { WebPagePromptContext } from "@/types/content"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { toast } from "sonner"
@@ -72,6 +73,7 @@ async function buildWebPageHashComponents(
   providerConfig: ProviderConfig,
   partialLangConfig: { sourceCode: LangCodeISO6393 | "auto"; targetCode: LangCodeISO6393 },
   enableAIContentAware: boolean,
+  textFormat: TranslationTextFormat,
   webPageContext?: WebPagePromptContext,
 ): Promise<string[]> {
   const preparedText = prepareTranslationText(text)
@@ -84,6 +86,10 @@ async function buildWebPageHashComponents(
   ]
 
   if (!isLLMProviderConfig(providerConfig)) {
+    // The provider request depends on the text format (escaping / textType), so
+    // cache entries must too. This component also orphans entries cached before
+    // the format-aware pipeline existed, which could hold corrupted output.
+    hashComponents.push(`textFormat:${textFormat}`)
     return hashComponents
   }
 
@@ -127,6 +133,7 @@ export interface TranslateTextOptions {
   enableAIContentAware?: boolean
   extraHashTags?: string[]
   webPageContext?: WebPagePromptContext
+  textFormat?: TranslationTextFormat
 }
 
 /**
@@ -141,6 +148,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     enableAIContentAware = false,
     extraHashTags = [],
     webPageContext,
+    textFormat = "plain",
   } = options
 
   const preparedText = prepareTranslationText(text)
@@ -155,6 +163,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     providerConfig,
     { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
     enableAIContentAware,
+    textFormat,
     normalizedWebPageContext,
   )
 
@@ -167,6 +176,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     providerConfig,
     scheduleAt: Date.now(),
     hash: Sha256Hex(...hashComponents),
+    textFormat,
     webTitle: normalizedWebPageContext?.webTitle,
     webDescription: normalizedWebPageContext?.webDescription,
     webContent: normalizedWebPageContext?.webContent,

@@ -1,5 +1,6 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { Config, InputTranslationLang } from "@/types/config/config"
+import type { TranslationTextFormat } from "@/types/config/translate"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { getDetectedCodeFromStorage, getFinalSourceCode } from "@/utils/config/languages"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
@@ -70,6 +71,7 @@ async function translateTextUsingPageConfig(
       webContent?: string | null
       webSummary?: string | null
     }
+    textFormat?: TranslationTextFormat
   } = {},
 ): Promise<string> {
   const preparedText = prepareTranslationText(text)
@@ -112,6 +114,7 @@ async function translateTextUsingPageConfig(
     enableAIContentAware: config.translate.enableAIContentAware,
     extraHashTags: options.extraHashTags,
     webPageContext: options.webPageContext,
+    textFormat: options.textFormat,
   })
 }
 
@@ -119,7 +122,10 @@ async function translateTextUsingPageConfig(
  * Page translation — uses FEATURE_PROVIDER_DEFS['translate'].
  * Includes skip-language logic (page translation only).
  */
-export async function translateTextForPage(text: string): Promise<string> {
+export async function translateTextForPage(
+  text: string,
+  textFormat: TranslationTextFormat = "plain",
+): Promise<string> {
   const config = await getConfigOrThrow()
   const providerConfig = resolveProviderConfig(config, "translate")
   const webPageContext = await getWebPagePromptContext(
@@ -130,6 +136,7 @@ export async function translateTextForPage(text: string): Promise<string> {
 
   return translateTextUsingPageConfig(config, text, {
     webPageContext,
+    textFormat,
   })
 }
 

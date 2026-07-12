@@ -1,4 +1,5 @@
 import type { APICallError } from "ai"
+import type { TranslationTextFormat } from "@/types/config/translate"
 import * as React from "react"
 import textSmallCSS from "@/assets/styles/text-small.css?inline"
 import themeCSS from "@/assets/styles/theme.css?inline"
@@ -77,12 +78,13 @@ export async function getTranslatedTextAndRemoveSpinner(
   spinner: HTMLElement,
   translatedWrapperNode: HTMLElement,
   isCurrent: () => boolean = () => true,
+  textFormat: TranslationTextFormat = "plain",
 ): Promise<string | undefined> {
   let translatedText: string | undefined
 
   try {
     if (!isCurrent()) return undefined
-    translatedText = await translateTextForPage(textContent)
+    translatedText = await translateTextForPage(textContent, textFormat)
     if (!isCurrent()) return undefined
   } catch (error) {
     if (!isCurrent()) return undefined

@@ -611,7 +611,7 @@ describe("translate", () => {
           await removeOrShowPageTranslation("bilingual", true)
 
           expect(translateTextForPage).toHaveBeenCalledTimes(1)
-          expect(translateTextForPage).toHaveBeenCalledWith(sourceText)
+          expect(translateTextForPage).toHaveBeenCalledWith(sourceText, "plain")
           const wrapper = expectTranslationWrapper(deepestSpan, "bilingual")
           expect(wrapper).toBe(deepestSpan.lastChild)
           expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS)
@@ -701,9 +701,9 @@ describe("translate", () => {
           })
 
           expect(translateTextForPage).toHaveBeenCalledTimes(3)
-          expect(translateTextForPage).toHaveBeenNthCalledWith(1, truncatedRequestText)
-          expect(translateTextForPage).toHaveBeenNthCalledWith(2, expandedFirstParagraph)
-          expect(translateTextForPage).toHaveBeenNthCalledWith(3, hashtagParagraph)
+          expect(translateTextForPage).toHaveBeenNthCalledWith(1, truncatedRequestText, "plain")
+          expect(translateTextForPage).toHaveBeenNthCalledWith(2, expandedFirstParagraph, "plain")
+          expect(translateTextForPage).toHaveBeenNthCalledWith(3, hashtagParagraph, "plain")
           expectBlockTranslations(tweet, [translations.expanded, translations.hashtags])
           expect(tweet).not.toHaveTextContent(translations.truncated)
           expectTextInDocumentOrder(tweet, [
@@ -815,8 +815,8 @@ describe("translate", () => {
           resolveFirst(translations[0])
           await translationPromise
 
-          expect(translateTextForPage).toHaveBeenNthCalledWith(1, paragraphs[0])
-          expect(translateTextForPage).toHaveBeenNthCalledWith(2, paragraphs[1])
+          expect(translateTextForPage).toHaveBeenNthCalledWith(1, paragraphs[0], "plain")
+          expect(translateTextForPage).toHaveBeenNthCalledWith(2, paragraphs[1], "plain")
           expectBlockTranslations(tweet, translations)
           expectTextInDocumentOrder(tweet, [
             paragraphs[0],
@@ -999,7 +999,7 @@ describe("translate", () => {
 
           expect(translateTextForPage).toHaveBeenCalledTimes(5)
           paragraphs.forEach((paragraph, index) => {
-            expect(translateTextForPage).toHaveBeenNthCalledWith(index + 1, paragraph)
+            expect(translateTextForPage).toHaveBeenNthCalledWith(index + 1, paragraph, "plain")
           })
           expectBlockTranslations(tweet, translations)
           expectTextInDocumentOrder(
@@ -1057,7 +1057,7 @@ describe("translate", () => {
 
           expect(translateTextForPage).toHaveBeenCalledTimes(3)
           paragraphs.forEach((paragraph, index) => {
-            expect(translateTextForPage).toHaveBeenNthCalledWith(index + 1, paragraph)
+            expect(translateTextForPage).toHaveBeenNthCalledWith(index + 1, paragraph, "plain")
           })
           expectBlockTranslations(tweet, translations)
           expectTextInDocumentOrder(
@@ -1088,7 +1088,7 @@ describe("translate", () => {
             await removeOrShowPageTranslation("bilingual", true)
 
             expect(translateTextForPage).toHaveBeenCalledTimes(1)
-            expect(translateTextForPage).toHaveBeenCalledWith(sourceText)
+            expect(translateTextForPage).toHaveBeenCalledWith(sourceText, "plain")
             expectBlockTranslations(tweet, ["【整段译文】"])
           })
         },
@@ -1108,7 +1108,7 @@ describe("translate", () => {
           await removeOrShowPageTranslation("bilingual", true)
 
           expect(translateTextForPage).toHaveBeenCalledTimes(1)
-          expect(translateTextForPage).toHaveBeenCalledWith(sourceText)
+          expect(translateTextForPage).toHaveBeenCalledWith(sourceText, "plain")
           expectBlockTranslations(tweet, ["【标签整段译文】"])
         })
       })
@@ -1129,7 +1129,7 @@ describe("translate", () => {
           await removeOrShowPageTranslation("bilingual", true)
 
           expect(translateTextForPage).toHaveBeenCalledTimes(1)
-          expect(translateTextForPage).toHaveBeenCalledWith("Translate this paragraph.")
+          expect(translateTextForPage).toHaveBeenCalledWith("Translate this paragraph.", "plain")
           expectBlockTranslations(tweet, ["【唯一译文】"])
           expectTextInDocumentOrder(tweet, [
             "Translate this paragraph.",
@@ -1221,8 +1221,8 @@ describe("translate", () => {
         await removeOrShowPageTranslation("bilingual", true)
 
         expect(translateTextForPage).toHaveBeenCalledTimes(2)
-        expect(translateTextForPage).toHaveBeenCalledWith(nestedText)
-        expect(translateTextForPage).toHaveBeenCalledWith(mixedText)
+        expect(translateTextForPage).toHaveBeenCalledWith(nestedText, "plain")
+        expect(translateTextForPage).toHaveBeenCalledWith(mixedText, "plain")
 
         const nestedWrapper = expectTranslationWrapper(deepestSpan, "bilingual")
         expect(nestedWrapper).toBe(deepestSpan.lastChild)
@@ -2263,6 +2263,7 @@ describe("translate", () => {
 
           expect(translateTextForPage).toHaveBeenCalledWith(
             "perf(main): drop localhost label routes when a worktree is removed by @taiiiyang in #7557",
+            "plain",
           )
           expect(document.querySelector(".user-mention")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(
             false,
@@ -2582,6 +2583,7 @@ describe("translate", () => {
         // Whitespace-only nodes return single space for word separation
         expect(translateTextForPage).toHaveBeenCalledWith(
           `${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`,
+          "plain",
         )
       })
     })
@@ -2599,6 +2601,7 @@ describe("translate", () => {
 
         expect(translateTextForPage).toHaveBeenCalledWith(
           `${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`,
+          "plain",
         )
       })
     })
@@ -2611,7 +2614,7 @@ describe("translate", () => {
         render(<div data-testid="test-node">{`\n${MOCK_ORIGINAL_TEXT} \n`}</div>)
         await removeOrShowPageTranslation("bilingual", true)
 
-        expect(translateTextForPage).toHaveBeenCalledWith(MOCK_ORIGINAL_TEXT)
+        expect(translateTextForPage).toHaveBeenCalledWith(MOCK_ORIGINAL_TEXT, "plain")
       })
 
       it("bilingual mode: space leading/trailing is trimmed before translation", async () => {
@@ -2621,7 +2624,7 @@ describe("translate", () => {
         await removeOrShowPageTranslation("bilingual", true)
 
         // Final text is trimmed before translation
-        expect(translateTextForPage).toHaveBeenCalledWith(MOCK_ORIGINAL_TEXT)
+        expect(translateTextForPage).toHaveBeenCalledWith(MOCK_ORIGINAL_TEXT, "plain")
       })
     })
 
@@ -2640,6 +2643,7 @@ describe("translate", () => {
         // Whitespace-only node returns single space to preserve word separation
         expect(translateTextForPage).toHaveBeenCalledWith(
           `${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`,
+          "plain",
         )
       })
 
@@ -2655,6 +2659,7 @@ describe("translate", () => {
 
         expect(translateTextForPage).toHaveBeenCalledWith(
           `${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`,
+          "plain",
         )
       })
     })
@@ -2673,8 +2678,8 @@ describe("translate", () => {
 
         // BR elements are handled as paragraph separators, each paragraph translated separately
         expect(translateTextForPage).toHaveBeenCalledTimes(2)
-        expect(translateTextForPage).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT)
-        expect(translateTextForPage).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT)
+        expect(translateTextForPage).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT, "plain")
+        expect(translateTextForPage).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT, "plain")
       })
 
       it("translationOnly mode: should handle BR elements as paragraph separators", async () => {
@@ -2689,8 +2694,8 @@ describe("translate", () => {
         await removeOrShowPageTranslation("translationOnly", true)
 
         expect(translateTextForPage).toHaveBeenCalledTimes(2)
-        expect(translateTextForPage).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT)
-        expect(translateTextForPage).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT)
+        expect(translateTextForPage).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT, "html")
+        expect(translateTextForPage).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT, "html")
       })
     })
   })

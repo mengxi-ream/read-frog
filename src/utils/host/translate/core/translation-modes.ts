@@ -575,11 +575,16 @@ export async function translateNodeTranslationOnlyMode(
     }
     batchDOMOperation(insertOperation)
 
+    // The source string mixes text nodes with element outerHTML and the result
+    // is re-rendered via innerHTML, so providers must treat it as HTML to keep
+    // its tags intact.
     const realTranslatedText = await getTranslatedTextAndRemoveSpinner(
       nodes,
       textContent,
       spinner,
       translatedWrapperNode,
+      () => true,
+      "html",
     )
     const translatedText = realTranslatedText
       ? getDisplayTranslation(textContent, realTranslatedText)
