@@ -1,16 +1,15 @@
 import type { APIProviderConfig } from "@/types/config/provider"
-
 import { useSelector } from "@tanstack/react-store"
-import { i18n } from "#imports"
 import { isNonCustomLLMProvider } from "@/types/config/provider"
 import { PROVIDER_BASE_URL_PLACEHOLDERS } from "@/utils/constants/providers"
+import { i18n } from "@/utils/i18n"
 import { ConnectionTestButton } from "./components/connection-button"
 import { withForm } from "./form"
 
 export const BaseURLField = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
-    const providerConfig = useSelector(form.store, state => state.values)
+    const providerConfig = useSelector(form.store, (state) => state.values)
     const providerType = providerConfig.provider
 
     if (providerType === "deepl") {
@@ -18,22 +17,20 @@ export const BaseURLField = withForm({
     }
 
     const isOptionalBaseURL = isNonCustomLLMProvider(providerType)
-    const labelText = `${i18n.t("options.apiProviders.form.fields.baseURL")}${isOptionalBaseURL
-      ? ` (${i18n.t("options.apiProviders.form.fields.optional")})`
-      : ""}`
+    const labelText = `${i18n.t("options.apiProviders.form.fields.baseURL")}${
+      isOptionalBaseURL ? ` (${i18n.t("options.apiProviders.form.fields.optional")})` : ""
+    }`
 
     return (
       <form.AppField name="baseURL">
-        {field => (
+        {(field) => (
           <field.InputFieldAutoSave
             formForSubmit={form}
             label={labelText}
             placeholder={PROVIDER_BASE_URL_PLACEHOLDERS[providerType]}
-            labelExtra={providerType === "ollama" && (
-              <ConnectionTestButton
-                providerConfig={providerConfig}
-              />
-            )}
+            labelExtra={
+              providerType === "ollama" && <ConnectionTestButton providerConfig={providerConfig} />
+            }
           />
         )}
       </form.AppField>

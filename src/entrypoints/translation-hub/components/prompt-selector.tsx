@@ -1,5 +1,4 @@
 import { useAtom, useAtomValue } from "jotai"
-import { i18n } from "#imports"
 import {
   Select,
   SelectContent,
@@ -11,6 +10,7 @@ import {
 import { isLLMProvider } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { DEFAULT_TRANSLATE_PROMPT_ID } from "@/utils/constants/prompt"
+import { i18n } from "@/utils/i18n"
 import { selectedProvidersAtom } from "../atoms"
 
 export function PromptSelector() {
@@ -18,11 +18,10 @@ export function PromptSelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
 
   // Only show when at least one LLM provider is selected
-  const hasLLMProvider = selectedProviders.some(p => isLLMProvider(p.provider))
-  if (!hasLLMProvider)
-    return null
+  const hasLLMProvider = selectedProviders.some((p) => isLLMProvider(p.provider))
+  if (!hasLLMProvider) return null
 
-  const { patterns = [], promptId } = translateConfig.customPromptsConfig
+  const { patterns, promptId } = translateConfig.customPromptsConfig
 
   return (
     <Select
@@ -40,7 +39,8 @@ export function PromptSelector() {
         <SelectValue placeholder={i18n.t("translatePrompt.title")}>
           <span className="truncate">
             {promptId
-              ? patterns.find(p => p.id === promptId)?.name ?? i18n.t("options.translation.personalizedPrompts.default")
+              ? (patterns.find((p) => p.id === promptId)?.name ??
+                i18n.t("options.translation.personalizedPrompts.default"))
               : i18n.t("options.translation.personalizedPrompts.default")}
           </span>
         </SelectValue>
@@ -50,7 +50,7 @@ export function PromptSelector() {
           <SelectItem value={DEFAULT_TRANSLATE_PROMPT_ID}>
             {i18n.t("options.translation.personalizedPrompts.default")}
           </SelectItem>
-          {patterns.map(prompt => (
+          {patterns.map((prompt) => (
             <SelectItem key={prompt.id} value={prompt.id}>
               {prompt.name}
             </SelectItem>

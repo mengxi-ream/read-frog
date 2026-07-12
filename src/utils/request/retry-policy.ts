@@ -15,9 +15,9 @@ export interface RequestRetryContext {
   now: number
 }
 
-export type RetryDecision
-  = | { action: "retry", delayMs: number }
-    | { action: "fail", failQueue?: boolean }
+export type RetryDecision =
+  | { action: "retry"; delayMs: number }
+  | { action: "fail"; failQueue?: boolean }
 
 export interface RequestRetryPolicy {
   decide: (error: unknown, context: RequestRetryContext) => RetryDecision
@@ -57,30 +57,32 @@ export function attachRequestErrorMeta<T extends Error>(error: T, meta: RequestE
 }
 
 export function getRequestErrorMeta(error: unknown): RequestErrorMeta {
-  const source = isObject(error) ? error as RetryAwareError : undefined
+  const source = isObject(error) ? (error as RetryAwareError) : undefined
   const attachedMeta = source?.[REQUEST_ERROR_META] ?? source?.requestErrorMeta
-  const response = isObject(source?.response) ? source.response as RetryAwareError : undefined
+  const response = isObject(source?.response) ? (source.response as RetryAwareError) : undefined
 
   const statusCode = normalizeStatusCode(
-    attachedMeta?.statusCode
-    ?? source?.statusCode
-    ?? source?.status
-    ?? response?.statusCode
-    ?? response?.status,
+    attachedMeta?.statusCode ??
+      source?.statusCode ??
+      source?.status ??
+      response?.statusCode ??
+      response?.status,
   )
   const responseHeaders = normalizeHeaders(
-    attachedMeta?.responseHeaders
-    ?? source?.responseHeaders
-    ?? source?.headers
-    ?? response?.responseHeaders
-    ?? response?.headers,
+    attachedMeta?.responseHeaders ??
+      source?.responseHeaders ??
+      source?.headers ??
+      response?.responseHeaders ??
+      response?.headers,
   )
-  const retryAfterMs = normalizeNonNegativeNumber(attachedMeta?.retryAfterMs ?? source?.retryAfterMs)
-    ?? getRetryAfterMsFromHeaders(responseHeaders)
+  const retryAfterMs =
+    normalizeNonNegativeNumber(attachedMeta?.retryAfterMs ?? source?.retryAfterMs) ??
+    getRetryAfterMsFromHeaders(responseHeaders)
   const isRetryable = normalizeBoolean(attachedMeta?.isRetryable ?? source?.isRetryable)
   const message = typeof source?.message === "string" ? source.message : ""
-  const kind = normalizeKind(attachedMeta?.kind ?? source?.kind)
-    ?? inferRequestErrorKind({ statusCode, message })
+  const kind =
+    normalizeKind(attachedMeta?.kind ?? source?.kind) ??
+    inferRequestErrorKind({ statusCode, message })
 
   return removeUndefined({
     statusCode,
@@ -100,7 +102,7 @@ export function getRetryAfterMs(meta: RequestErrorMeta, now = Date.now()): numbe
   return getRetryAfterMsFromHeaders(meta.responseHeaders, now)
 }
 
-export function getHeaderValue(headers: RequestErrorMeta["responseHeaders"] | unknown, key: string): string | undefined {
+export function getHeaderValue(headers: unknown, key: string): string | undefined {
   if (!headers) {
     return undefined
   }
@@ -113,14 +115,20 @@ export function getHeaderValue(headers: RequestErrorMeta["responseHeaders"] | un
 
   if (Array.isArray(headers)) {
     const entry = headers.find((header): header is [unknown, unknown] => {
-      return Array.isArray(header) && header.length >= 2 && String(header[0]).toLowerCase() === normalizedKey
+      return (
+        Array.isArray(header) &&
+        header.length >= 2 &&
+        String(header[0]).toLowerCase() === normalizedKey
+      )
     })
     const value = entry?.[1]
     return typeof value === "string" ? value : undefined
   }
 
   if (isObject(headers)) {
-    const entry = Object.entries(headers).find(([headerKey]) => headerKey.toLowerCase() === normalizedKey)
+    const entry = Object.entries(headers).find(
+      ([headerKey]) => headerKey.toLowerCase() === normalizedKey,
+    )
     const value = entry?.[1]
     return typeof value === "string" ? value : undefined
   }
@@ -145,7 +153,7 @@ export const defaultRequestRetryPolicy: RequestRetryPolicy = {
       return { action: "fail" }
     }
 
-    const baseDelayMs = context.baseRetryDelayMs * (2 ** context.retryCount)
+    const baseDelayMs = context.baseRetryDelayMs * 2 ** context.retryCount
     const delayMs = clampRetryDelay(withJitter(baseDelayMs, false))
 
     return { action: "retry", delayMs }
@@ -157,9 +165,7 @@ function isQueueFatalRequestErrorMeta(meta: RequestErrorMeta): boolean {
     return true
   }
 
-  return meta.statusCode === 401
-    || meta.statusCode === 403
-    || meta.statusCode === 404
+  return meta.statusCode === 401 || meta.statusCode === 403 || meta.statusCode === 404
 }
 
 function isRetryableRequestErrorMeta(meta: RequestErrorMeta): boolean {
@@ -188,7 +194,10 @@ function isRetryableRequestErrorMeta(meta: RequestErrorMeta): boolean {
   return true
 }
 
-function getRetryAfterMsFromHeaders(headers: RequestErrorMeta["responseHeaders"] | undefined, now = Date.now()): number | undefined {
+function getRetryAfterMsFromHeaders(
+  headers: RequestErrorMeta["responseHeaders"] | undefined,
+  now = Date.now(),
+): number | undefined {
   const retryAfterMs = getHeaderValue(headers, "retry-after-ms")
   if (retryAfterMs) {
     const parsed = Number.parseFloat(retryAfterMs)
@@ -251,7 +260,13 @@ function normalizeHeaders(headers: unknown): RequestErrorMeta["responseHeaders"]
   return undefined
 }
 
-function inferRequestErrorKind({ statusCode, message }: { statusCode?: number, message: string }): RequestErrorKind {
+function inferRequestErrorKind({
+  statusCode,
+  message,
+}: {
+  statusCode?: number
+  message: string
+}): RequestErrorKind {
   if (statusCode === 429 || RATE_LIMIT_ERROR_RE.test(message)) {
     return "rate-limit"
   }
@@ -280,11 +295,11 @@ function inferRequestErrorKind({ statusCode, message }: { statusCode?: number, m
 }
 
 function normalizeKind(value: unknown): RequestErrorKind | undefined {
-  return value === "rate-limit"
-    || value === "timeout"
-    || value === "network"
-    || value === "bad-request"
-    || value === "unknown"
+  return value === "rate-limit" ||
+    value === "timeout" ||
+    value === "network" ||
+    value === "bad-request" ||
+    value === "unknown"
     ? value
     : undefined
 }

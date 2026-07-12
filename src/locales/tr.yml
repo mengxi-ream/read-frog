@@ -2,6 +2,11 @@ name: Read Frog
 extName: Read Frog - Çevir ve Öğren
 extDescription: Read Frog, herhangi bir web sitesinden dilleri derinlemesine öğrenmenize yardımcı olmak için tasarlanmış açık kaynaklı bir tarayıcı uzantısıdır.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+account:
+  login: Giriş yap
+  webApp: Web uygulaması
+  logout: Çıkış yap
+  logoutError: Çıkış yapılamadı. Lütfen tekrar deneyin.
 dataTypes:
   string: Metin
   number: Sayı
@@ -216,6 +221,10 @@ options:
       slow: Yavaş (düşünme modunu ayarlamanız önerilir)
   general:
     title: Genel
+    interfaceLanguage:
+      title: Arayüz Dili
+      description: Uzantı arayüzünün dilini tarayıcı dilinizden bağımsız olarak seçin.
+      auto: Otomatik (tarayıcıyı izle)
     appearance:
       title: Görünüm
       theme: Tema
@@ -622,7 +631,7 @@ options:
         description: Çeviriyi tetiklemek için gereken öğe görünürlük yüzdesi (0-1). Daha yüksek değerler, öğenin daha fazlası görünür olana kadar çeviriyi geciktirir.
     smallParagraphFilter:
       title: Kısa Metin Filtresi
-      description: Eşik değerinden az karakterli veya kelimeli metin düğümlerinin çevirisini atla (0 = devre dışı)
+      description: Bu genel varsayılanlar, eşiklerden daha az karakter veya sözcük içeren metin düğümlerinin çevirisini atlar. Eşleşen site kuralları bunları geçersiz kılabilir (0 = devre dışı)
       minCharacters:
         title: Minimum Karakter
         description: Bu değerden az karakterli metin düğümleri çevrilmeyecektir. Karakter sayısı boşlukları içerir.
@@ -661,6 +670,31 @@ options:
       description: AI'ya web sayfası bağlamı sağlayarak çeviri kalitesini artırın
       enable: AI Akıllı Bağlam Çevirisini Etkinleştir
       enableDescription: AI, çeviri doğruluğunu artırmak için web sayfası özetini kullanır. LLM sağlayıcısı gerektirir. Bir sayfayı çevirmeye başlarken gecikme ekler ve API maliyetlerini artırır.
+  siteRules:
+    title: Site Kuralları
+    description: Belirli web sitelerinin nasıl çevrileceğini ayarlayan site bazlı kurallar.
+    userRules:
+      title: Kullanıcı Kuralları
+      description: Kendi site kurallarınızı JSON dizisi olarak tanımlayın. Kurallar, URL'si kalıplarıyla eşleşen sayfalara uygulanır; kullanıcı kuralları yerleşik kurallardan önceliklidir.
+      saveButton: Kaydet
+      savedButton: Kaydedildi
+      validation:
+        validating: Doğrulanıyor...
+        valid: Kurallar geçerli
+        syntaxError: JSON sözdizimi hataları içeriyor
+        notArray: JSON'un en üst düzey değeri bir kural dizisi olmalıdır
+        tooLong: Kural belgesi çok uzun
+        tooMany: Çok fazla kural var
+        duplicateIds: Yinelenen kural id'leri
+        schemaErrors: Bazı kurallar geçersiz
+        moreErrors: ...ve $1 hata daha
+        saved: Tüm değişiklikler kaydedildi
+    builtIn:
+      title: Yerleşik Kurallar
+      description: Eklentiyle birlikte gelen site kuralları. Bir kural bir sitede soruna yol açıyorsa anahtarıyla devre dışı bırakın.
+      searchPlaceholder: id, açıklama veya URL kalıbına göre ara
+      showMore: Daha fazla göster
+      count: $2 kuraldan $1 tanesi gösteriliyor
   tts:
     title: Metinden Konuşmaya
     description: Konuş butonunu Edge TTS ses ayarlarıyla özelleştirin.
@@ -953,6 +987,7 @@ action:
   saveToNotebasePendingLogin: Kaydetmeyi tamamlamak için giriş yapın
   saveToNotebasePendingLoginDescription: Giriş yaptıktan sonra Read Frog Notebase'i oluşturur ve bu sonucu otomatik olarak kaydeder.
   saveToNotebasePendingConnectedLoginDescription: Girişten sonra Read Frog mümkünse bağlı Notebase'e kaydeder. Bu hesap onu kullanamazsa yeni bir Notebase oluşturup kaydeder.
+  upgrade: Yükselt
   openCustomActions: Custom AI Actions'ı aç
   openNotebase: Notebase'i aç
   contextDetailsTitleLabel: Başlık

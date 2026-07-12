@@ -38,7 +38,9 @@ export function migrate(oldConfig: any): any {
     ...oldConfig,
     videoSubtitles: {
       ...oldConfig?.videoSubtitles,
-      customPromptsConfig: migrateCustomPromptsConfig(oldConfig?.videoSubtitles?.customPromptsConfig),
+      customPromptsConfig: migrateCustomPromptsConfig(
+        oldConfig?.videoSubtitles?.customPromptsConfig,
+      ),
     },
   }
 }

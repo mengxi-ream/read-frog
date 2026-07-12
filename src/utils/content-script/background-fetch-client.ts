@@ -1,7 +1,10 @@
 import type { ProxyRequest, ProxyResponse } from "@/types/proxy-fetch"
 import { sendMessage } from "@/utils/message"
 
-export interface BackgroundFetchOptions extends Pick<ProxyRequest, "cacheConfig" | "credentials" | "responseType"> {}
+export interface BackgroundFetchOptions extends Pick<
+  ProxyRequest,
+  "cacheConfig" | "credentials" | "responseType"
+> {}
 
 function getRequestUrl(input: RequestInfo | URL) {
   if (typeof input === "string") {
@@ -15,7 +18,10 @@ function getRequestUrl(input: RequestInfo | URL) {
   return input.url
 }
 
-function getRequestHeaders(input: RequestInfo | URL, init?: RequestInit): [string, string][] | undefined {
+function getRequestHeaders(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+): [string, string][] | undefined {
   const headers = init?.headers ?? (input instanceof Request ? input.headers : undefined)
   if (!headers) {
     return undefined
@@ -26,7 +32,11 @@ function getRequestHeaders(input: RequestInfo | URL, init?: RequestInit): [strin
 }
 
 function getRequestMethod(input: RequestInfo | URL, init?: RequestInit) {
-  return (init?.method ?? (input instanceof Request ? input.method : undefined) ?? "GET").toUpperCase()
+  return (
+    init?.method ??
+    (input instanceof Request ? input.method : undefined) ??
+    "GET"
+  ).toUpperCase()
 }
 
 function getRequestBody(init?: RequestInit) {
@@ -53,9 +63,10 @@ function decodeBase64ToUint8Array(base64: string) {
 }
 
 export function proxyResponseToResponse(response: ProxyResponse) {
-  const body = (response.bodyEncoding ?? "text") === "base64"
-    ? decodeBase64ToUint8Array(response.body)
-    : response.body
+  const body =
+    (response.bodyEncoding ?? "text") === "base64"
+      ? decodeBase64ToUint8Array(response.body)
+      : response.body
 
   return new Response(body, {
     status: response.status,
@@ -64,7 +75,11 @@ export function proxyResponseToResponse(response: ProxyResponse) {
   })
 }
 
-function buildProxyRequest(input: RequestInfo | URL, init?: RequestInit, options?: BackgroundFetchOptions): ProxyRequest {
+function buildProxyRequest(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+  options?: BackgroundFetchOptions,
+): ProxyRequest {
   return {
     url: getRequestUrl(input),
     method: getRequestMethod(input, init),

@@ -38,8 +38,10 @@ describe("registerNodeTranslationTriggerListeners", () => {
   })
 
   it("triggers backtick node translation at the latest mouse position", async () => {
-    const onTrigger = vi.fn()
-    const getConfig = vi.fn(() => Promise.resolve(createConfig("backtick")))
+    const onTrigger = vi.fn<(...args: any[]) => any>()
+    const getConfig = vi.fn<(...args: any[]) => any>(() =>
+      Promise.resolve(createConfig("backtick")),
+    )
 
     teardown = registerNodeTranslationTriggerListeners({
       getConfig,
@@ -66,7 +68,7 @@ describe("registerNodeTranslationTriggerListeners", () => {
   })
 
   it("triggers node translation at the latest mouseover position", async () => {
-    const onTrigger = vi.fn()
+    const onTrigger = vi.fn<(...args: any[]) => any>()
 
     teardown = registerNodeTranslationTriggerListeners({
       getConfig: () => Promise.resolve(createConfig("control")),
@@ -91,7 +93,7 @@ describe("registerNodeTranslationTriggerListeners", () => {
   })
 
   it("falls back to the hovered element center when no mouse position was recorded", async () => {
-    const onTrigger = vi.fn()
+    const onTrigger = vi.fn<(...args: any[]) => any>()
     const hovered = document.createElement("p")
     document.body.append(hovered)
     vi.spyOn(hovered, "getBoundingClientRect").mockReturnValue({
@@ -104,7 +106,7 @@ describe("registerNodeTranslationTriggerListeners", () => {
       x: 20,
       y: 30,
       toJSON: () => ({}),
-    } as DOMRect)
+    })
     vi.spyOn(document, "querySelectorAll").mockImplementation((selector) => {
       if (selector === ":hover") {
         const hoveredElements = [document.documentElement, document.body, hovered]
@@ -140,7 +142,7 @@ describe("registerNodeTranslationTriggerListeners", () => {
 
   it("triggers click-and-hold node translation after the hold delay", async () => {
     vi.useFakeTimers()
-    const onTrigger = vi.fn()
+    const onTrigger = vi.fn<(...args: any[]) => any>()
     const target = document.createElement("div")
     document.body.append(target)
 
@@ -165,7 +167,7 @@ describe("registerNodeTranslationTriggerListeners", () => {
 
   it("triggers held hover hotkeys after the shorter hold delay without firing twice", async () => {
     vi.useFakeTimers()
-    const onTrigger = vi.fn()
+    const onTrigger = vi.fn<(...args: any[]) => any>()
 
     teardown = registerNodeTranslationTriggerListeners({
       getConfig: () => Promise.resolve(createConfig("control")),
@@ -200,7 +202,7 @@ describe("registerNodeTranslationTriggerListeners", () => {
 
   it("cancels held hover hotkey translation when another key creates a combo", async () => {
     vi.useFakeTimers()
-    const onTrigger = vi.fn()
+    const onTrigger = vi.fn<(...args: any[]) => any>()
 
     teardown = registerNodeTranslationTriggerListeners({
       getConfig: () => Promise.resolve(createConfig("control")),
@@ -223,7 +225,7 @@ describe("registerNodeTranslationTriggerListeners", () => {
   })
 
   it("does not trigger while the caller says the event should be ignored", async () => {
-    const onTrigger = vi.fn()
+    const onTrigger = vi.fn<(...args: any[]) => any>()
 
     teardown = registerNodeTranslationTriggerListeners({
       getConfig: () => Promise.resolve(createConfig("control")),
@@ -242,7 +244,7 @@ describe("registerNodeTranslationTriggerListeners", () => {
 
   it("does not start click-and-hold translation from document surface targets", async () => {
     vi.useFakeTimers()
-    const onTrigger = vi.fn()
+    const onTrigger = vi.fn<(...args: any[]) => any>()
 
     teardown = registerNodeTranslationTriggerListeners({
       getConfig: () => Promise.resolve(createConfig("clickAndHold")),
@@ -253,7 +255,11 @@ describe("registerNodeTranslationTriggerListeners", () => {
     await Promise.resolve()
     await vi.advanceTimersByTimeAsync(500)
 
-    dispatchMouseEvent("mousedown", { button: 0, clientX: 900, clientY: 100 }, document.documentElement)
+    dispatchMouseEvent(
+      "mousedown",
+      { button: 0, clientX: 900, clientY: 100 },
+      document.documentElement,
+    )
     await Promise.resolve()
     await vi.advanceTimersByTimeAsync(500)
 

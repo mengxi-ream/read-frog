@@ -1,4 +1,9 @@
-import { YOUTUBE_EMBED_PATH_PATTERN, YOUTUBE_NAVIGATE_FINISH_EVENT, YOUTUBE_SHORTS_PATH_PATTERN, YOUTUBE_WATCH_URL_PATTERN } from "@/utils/constants/subtitles"
+import {
+  YOUTUBE_EMBED_PATH_PATTERN,
+  YOUTUBE_NAVIGATE_FINISH_EVENT,
+  YOUTUBE_SHORTS_PATH_PATTERN,
+  YOUTUBE_WATCH_URL_PATTERN,
+} from "@/utils/constants/subtitles"
 import { createYoutubeSubtitlesAdapter } from "./platforms/youtube"
 import { createYoutubeCaptionTrackListener } from "./platforms/youtube/caption-track-listener"
 import { getYoutubeConfig } from "./platforms/youtube/config"

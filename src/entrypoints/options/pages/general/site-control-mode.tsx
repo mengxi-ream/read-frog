@@ -1,23 +1,23 @@
 import { useAtom } from "jotai"
-import { i18n } from "#imports"
 import { Label } from "@/components/ui/base-ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/base-ui/radio-group"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 import { PatternsTable } from "../../components/patterns-table"
 
 export default function SiteControlMode() {
   const [siteControl, setSiteControl] = useAtom(configFieldsAtomMap.siteControl)
 
-  const patternsKey = siteControl.mode === "blacklist"
-    ? "blacklistPatterns" as const
-    : "whitelistPatterns" as const
+  const patternsKey =
+    siteControl.mode === "blacklist"
+      ? ("blacklistPatterns" as const)
+      : ("whitelistPatterns" as const)
   const patterns = siteControl[patternsKey] ?? []
 
   const addPattern = async (pattern: string) => {
     const cleanedPattern = pattern.trim()
-    if (!cleanedPattern || patterns.includes(cleanedPattern))
-      return
+    if (!cleanedPattern || patterns.includes(cleanedPattern)) return
 
     await setSiteControl({
       ...siteControl,
@@ -28,7 +28,7 @@ export default function SiteControlMode() {
   const removePattern = async (pattern: string) => {
     await setSiteControl({
       ...siteControl,
-      [patternsKey]: patterns.filter(p => p !== pattern),
+      [patternsKey]: patterns.filter((p) => p !== pattern),
     })
   }
 

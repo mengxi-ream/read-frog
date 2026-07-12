@@ -4,7 +4,6 @@ import type { ProviderConfig } from "@/types/config/provider"
 import type { SubtitlePromptContext } from "@/types/content"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { APICallError } from "ai"
-import { i18n } from "#imports"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { getLocalConfig } from "@/utils/config/storage"
@@ -12,6 +11,7 @@ import { cleanText } from "@/utils/content/utils"
 import { Sha256Hex } from "@/utils/hash"
 import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { normalizePromptContextValue } from "@/utils/host/translate/translate-text"
+import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
 
@@ -27,6 +27,8 @@ function toFriendlyErrorMessage(error: unknown): string {
       case 502:
       case 503:
         return i18n.t("subtitles.errors.aiServiceUnavailable")
+      default:
+        break
     }
   }
 
@@ -59,7 +61,9 @@ export function buildSubtitlesSummaryContextHash(
   return Sha256Hex(textHash, providerConfig ? JSON.stringify(providerConfig) : "")
 }
 
-function normalizeSubtitlePromptContext(videoContext: SubtitlesVideoContext): SubtitlePromptContext {
+function normalizeSubtitlePromptContext(
+  videoContext: SubtitlesVideoContext,
+): SubtitlePromptContext {
   return {
     webTitle: normalizePromptContextValue(videoContext.videoTitle),
     webDescription: normalizePromptContextValue(videoContext.videoDescription),
@@ -70,7 +74,10 @@ function normalizeSubtitlePromptContext(videoContext: SubtitlesVideoContext): Su
 async function buildSubtitleHashComponents(
   text: string,
   providerConfig: ProviderConfig,
-  partialLangConfig: { sourceCode: Config["language"]["sourceCode"], targetCode: Config["language"]["targetCode"] },
+  partialLangConfig: {
+    sourceCode: Config["language"]["sourceCode"]
+    targetCode: Config["language"]["targetCode"]
+  },
   enableAIContentAware: boolean,
   subtitlePromptContext: SubtitlePromptContext,
   subtitlesTextContent: string,
@@ -97,7 +104,9 @@ async function buildSubtitleHashComponents(
     context: promptContext,
   })
   hashComponents.push(systemPrompt, prompt)
-  hashComponents.push(enableAIContentAware ? "enableAIContentAware=true" : "enableAIContentAware=false")
+  hashComponents.push(
+    enableAIContentAware ? "enableAIContentAware=true" : "enableAIContentAware=false",
+  )
 
   if (subtitlePromptContext.webTitle) {
     hashComponents.push(`webTitle:${subtitlePromptContext.webTitle}`)
@@ -155,12 +164,15 @@ export async function fetchSubtitlesSummary(
   videoContext: SubtitlesVideoContext,
   configOverride?: Config,
 ): Promise<string | null> {
-  const config = configOverride ?? await getLocalConfig()
+  const config = configOverride ?? (await getLocalConfig())
   if (!config?.translate.enableAIContentAware) {
     return null
   }
 
-  const providerConfig = getProviderConfigById(config.providersConfig, config.videoSubtitles.providerId)
+  const providerConfig = getProviderConfigById(
+    config.providersConfig,
+    config.videoSubtitles.providerId,
+  )
 
   if (!providerConfig || !isLLMProviderConfig(providerConfig)) {
     return null
@@ -182,22 +194,31 @@ export async function translateSubtitles(
   videoContext: SubtitlesVideoContext,
   configOverride?: Config,
 ): Promise<SubtitlesFragment[]> {
-  const config = configOverride ?? await getLocalConfig()
+  const config = configOverride ?? (await getLocalConfig())
   if (!config) {
-    return fragments.map(f => ({ ...f, translation: "" }))
+    return fragments.map((f) => ({ ...f, translation: "" }))
   }
 
-  const providerConfig = getProviderConfigById(config.providersConfig, config.videoSubtitles.providerId)
+  const providerConfig = getProviderConfigById(
+    config.providersConfig,
+    config.videoSubtitles.providerId,
+  )
 
   if (!providerConfig) {
-    return fragments.map(f => ({ ...f, translation: "" }))
+    return fragments.map((f) => ({ ...f, translation: "" }))
   }
 
   const langConfig = config.language
-  const enableAIContentAware = !!config.translate.enableAIContentAware
+  const enableAIContentAware = config.translate.enableAIContentAware
 
-  const translationPromises = fragments.map(fragment =>
-    translateSingleSubtitle(fragment.text, langConfig, providerConfig, enableAIContentAware, videoContext),
+  const translationPromises = fragments.map((fragment) =>
+    translateSingleSubtitle(
+      fragment.text,
+      langConfig,
+      providerConfig,
+      enableAIContentAware,
+      videoContext,
+    ),
   )
 
   const results = await Promise.allSettled(translationPromises)

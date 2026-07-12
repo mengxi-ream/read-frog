@@ -7,17 +7,21 @@ function createMockConfig(mode: "bilingual" | "translationOnly"): Config {
   return { translate: { mode } } as Config
 }
 
-function createMockManager(isActive: boolean): PageTranslationManager {
-  return {
+function createMockManager(isActive: boolean) {
+  const start = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
+  const stop = vi.fn<(...args: any[]) => any>()
+  const manager = {
     isActive,
-    start: vi.fn().mockResolvedValue(undefined),
-    stop: vi.fn(),
+    start,
+    stop,
   } as unknown as PageTranslationManager
+
+  return { manager, start, stop }
 }
 
 describe("handleTranslationModeChange", () => {
   it("should trigger re-translation when mode changes and manager is active", () => {
-    const manager = createMockManager(true)
+    const { manager, start, stop } = createMockManager(true)
 
     handleTranslationModeChange(
       createMockConfig("translationOnly"),
@@ -25,12 +29,12 @@ describe("handleTranslationModeChange", () => {
       manager,
     )
 
-    expect(manager.stop).toHaveBeenCalled()
-    expect(manager.start).toHaveBeenCalled()
+    expect(stop).toHaveBeenCalled()
+    expect(start).toHaveBeenCalled()
   })
 
   it("should not trigger when mode stays the same", () => {
-    const manager = createMockManager(true)
+    const { manager, stop } = createMockManager(true)
 
     handleTranslationModeChange(
       createMockConfig("bilingual"),
@@ -38,11 +42,11 @@ describe("handleTranslationModeChange", () => {
       manager,
     )
 
-    expect(manager.stop).not.toHaveBeenCalled()
+    expect(stop).not.toHaveBeenCalled()
   })
 
   it("should not trigger when manager is not active", () => {
-    const manager = createMockManager(false)
+    const { manager, stop } = createMockManager(false)
 
     handleTranslationModeChange(
       createMockConfig("translationOnly"),
@@ -50,6 +54,6 @@ describe("handleTranslationModeChange", () => {
       manager,
     )
 
-    expect(manager.stop).not.toHaveBeenCalled()
+    expect(stop).not.toHaveBeenCalled()
   })
 })

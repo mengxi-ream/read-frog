@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { TranslateButton } from ".."
 
-const prepareToolbarOpenMock = vi.fn()
+const prepareToolbarOpenMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("#imports", () => ({
   i18n: {
@@ -23,7 +23,7 @@ vi.mock("@/components/ui/selection-popover", () => ({
 }))
 
 vi.mock("../../../components/selection-tooltip", () => ({
-  SelectionToolbarTooltip: ({ render }: { render: ReactElement }) => render,
+  SelectionToolbarTooltip: ({ render: renderElement }: { render: ReactElement }) => renderElement,
 }))
 
 vi.mock("../provider", () => ({
@@ -50,7 +50,9 @@ describe("translateButton", () => {
 
     expect(blurSpy).toHaveBeenCalledOnce()
     expect(prepareToolbarOpenMock).toHaveBeenCalledOnce()
-    expect(blurSpy.mock.invocationCallOrder[0]).toBeLessThan(prepareToolbarOpenMock.mock.invocationCallOrder[0]!)
+    expect(blurSpy.mock.invocationCallOrder[0]).toBeLessThan(
+      prepareToolbarOpenMock.mock.invocationCallOrder[0],
+    )
     expect(document.activeElement).not.toBe(trigger)
   })
 })

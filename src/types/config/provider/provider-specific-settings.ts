@@ -1,9 +1,8 @@
 import type { LLMProviderTypes } from "./constants"
-
 import { z } from "zod"
 
 export const AZURE_API_MODES = ["responses", "chat"] as const
-export type AzureApiMode = typeof AZURE_API_MODES[number]
+export type AzureApiMode = (typeof AZURE_API_MODES)[number]
 export const DEFAULT_AZURE_API_MODE: AzureApiMode = "responses"
 
 interface ProviderSettingBaseUiMeta {
@@ -39,44 +38,61 @@ export type ProviderSpecificSettingField = ProviderSettingUiMeta & {
 export type ProviderSpecificSettingsSchema = z.ZodObject<z.ZodRawShape>
 
 export const bedrockProviderSpecificSettingsSchema = z.strictObject({
-  region: z.string().trim().min(1).meta({
-    providerSettingUi: {
-      labelKey: "region",
-      type: "text",
-      placeholder: "us-east-1",
-    },
-  }),
+  region: z
+    .string()
+    .trim()
+    .min(1)
+    .meta({
+      providerSettingUi: {
+        labelKey: "region",
+        type: "text",
+        placeholder: "us-east-1",
+      },
+    }),
 })
 
 export const azureProviderSpecificSettingsSchema = z.strictObject({
-  apiMode: z.enum(AZURE_API_MODES).optional().meta({
-    providerSettingUi: {
-      labelKey: "apiMode",
-      type: "select",
-      defaultValue: DEFAULT_AZURE_API_MODE,
-      options: [
-        { value: "responses", labelKey: "responses" },
-        { value: "chat", labelKey: "chatCompletions" },
-      ],
-    },
-  }),
-  resourceName: z.string().trim().optional().meta({
-    providerSettingUi: {
-      labelKey: "resourceName",
-      type: "text",
-      placeholder: "my-azure-openai-resource",
-    },
-  }),
-  apiVersion: z.string().trim().optional().meta({
-    providerSettingUi: {
-      labelKey: "apiVersion",
-      type: "text",
-      placeholder: "v1",
-    },
-  }),
+  apiMode: z
+    .enum(AZURE_API_MODES)
+    .optional()
+    .meta({
+      providerSettingUi: {
+        labelKey: "apiMode",
+        type: "select",
+        defaultValue: DEFAULT_AZURE_API_MODE,
+        options: [
+          { value: "responses", labelKey: "responses" },
+          { value: "chat", labelKey: "chatCompletions" },
+        ],
+      },
+    }),
+  resourceName: z
+    .string()
+    .trim()
+    .optional()
+    .meta({
+      providerSettingUi: {
+        labelKey: "resourceName",
+        type: "text",
+        placeholder: "my-azure-openai-resource",
+      },
+    }),
+  apiVersion: z
+    .string()
+    .trim()
+    .optional()
+    .meta({
+      providerSettingUi: {
+        labelKey: "apiVersion",
+        type: "text",
+        placeholder: "v1",
+      },
+    }),
 })
 
-export const PROVIDER_SPECIFIC_SETTINGS_SCHEMAS: Partial<Record<LLMProviderTypes, ProviderSpecificSettingsSchema>> = {
+export const PROVIDER_SPECIFIC_SETTINGS_SCHEMAS: Partial<
+  Record<LLMProviderTypes, ProviderSpecificSettingsSchema>
+> = {
   azure: azureProviderSpecificSettingsSchema,
   bedrock: bedrockProviderSpecificSettingsSchema,
 }
@@ -92,7 +108,12 @@ export function getProviderSpecificSettingFields(
     }
 
     if (ui.type !== "text" && ui.type !== "select") {
-      throw new Error(`Unsupported providerSpecificSettings.${key} field type: ${(ui as { type: unknown }).type}`)
+      const unsupportedTypeValue = (ui as { type: unknown }).type
+      const unsupportedType =
+        typeof unsupportedTypeValue === "string"
+          ? unsupportedTypeValue
+          : JSON.stringify(unsupportedTypeValue)
+      throw new Error(`Unsupported providerSpecificSettings.${key} field type: ${unsupportedType}`)
     }
 
     return {

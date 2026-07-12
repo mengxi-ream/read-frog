@@ -6,7 +6,7 @@ export function getTranslationStateKey(tabId: number): `session:translationState
 
 export function parseTabIdFromStorageKey(key: string): number {
   const parts = key.split(".")
-  return Number.parseInt(parts[1] ?? "")
+  return Number.parseInt(parts[1] ?? "", 10)
 }
 
 export const DETECTED_CODE_STATE_KEY_PREFIX = "session:detectedCode" as const

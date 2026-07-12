@@ -5,6 +5,7 @@ import themeCSS from "@/assets/styles/theme.css?inline"
 import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
 import { READ_FROG_SUBTITLES_UI_HOST_ID, SUBTITLES_THEME } from "@/utils/constants/subtitles"
 import { waitForElement } from "@/utils/dom/wait-for-element"
+import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder"
 import { applyTheme } from "@/utils/theme"
@@ -18,12 +19,13 @@ interface MountSubtitlesUIOptions {
   menuBelow?: boolean
 }
 
-export async function mountSubtitlesUI(
-  { adapter, config, menuBelow }: MountSubtitlesUIOptions,
-): Promise<void> {
+export async function mountSubtitlesUI({
+  adapter,
+  config,
+  menuBelow,
+}: MountSubtitlesUIOptions): Promise<void> {
   const videoContainer = await waitForElement(config.selectors.playerContainer)
-  if (!videoContainer)
-    return
+  if (!videoContainer) return
 
   const parentEl = videoContainer as HTMLElement
   const computedStyle = window.getComputedStyle(parentEl)
@@ -31,7 +33,9 @@ export async function mountSubtitlesUI(
     parentEl.style.position = "relative"
   }
 
-  const existingHost = document.getElementById(READ_FROG_SUBTITLES_UI_HOST_ID) as HTMLDivElement | null
+  const existingHost = document.getElementById(
+    READ_FROG_SUBTITLES_UI_HOST_ID,
+  ) as HTMLDivElement | null
   if (existingHost) {
     if (existingHost.parentElement === parentEl) {
       return
@@ -88,7 +92,9 @@ export async function mountSubtitlesUI(
   const app = (
     <ShadowWrapperContext value={reactContainer}>
       <SubtitlesProviders adapter={adapter} openBelow={menuBelow}>
-        <SubtitlesContainer />
+        <LocaleBoundary>
+          <SubtitlesContainer />
+        </LocaleBoundary>
       </SubtitlesProviders>
     </ShadowWrapperContext>
   )

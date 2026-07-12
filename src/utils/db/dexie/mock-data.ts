@@ -1,5 +1,8 @@
 import { faker } from "@faker-js/faker"
-import { REQUEST_RECORD_MAX_AGE_DAYS, REQUEST_RECORD_MAX_COUNT } from "@/entrypoints/background/db-cleanup"
+import {
+  REQUEST_RECORD_MAX_AGE_DAYS,
+  REQUEST_RECORD_MAX_COUNT,
+} from "@/entrypoints/background/db-cleanup"
 import { LLM_PROVIDER_MODELS, LLM_PROVIDER_TYPES } from "@/types/config/provider"
 import { logger } from "@/utils/logger"
 import { db } from "./db"

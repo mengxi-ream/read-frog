@@ -12,11 +12,7 @@ import { SelectionCustomActionProvider } from "./selection-toolbar/custom-action
 import { SelectionTranslationProvider } from "./selection-toolbar/translate-button/provider"
 import { useContextMenuReadAloud } from "./use-context-menu-read-aloud"
 
-export default function App({
-  uiContainer,
-}: {
-  uiContainer: HTMLElement
-}) {
+export default function App({ uiContainer }: { uiContainer: HTMLElement }) {
   useInputTranslation()
   useContextMenuReadAloud()
   const opacity = useAtomValue(configFieldsAtomMap.selectionToolbar).opacity / 100

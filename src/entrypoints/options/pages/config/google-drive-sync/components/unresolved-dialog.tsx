@@ -2,7 +2,6 @@ import { Icon } from "@iconify/react"
 import { useAtomValue, useSetAtom } from "jotai"
 import { Activity, useMemo, useState } from "react"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/base-ui/alert"
 import {
   AlertDialog,
@@ -24,6 +23,7 @@ import {
   unresolvedConfigsAtom,
 } from "@/utils/atoms/google-drive-sync"
 import { syncMergedConfig } from "@/utils/google-drive/sync"
+import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { JsonTreeView } from "./json-tree-view"
 
@@ -33,17 +33,10 @@ interface UnresolvedDialogProps {
   onCancelled: () => void
 }
 
-export function UnresolvedDialog({
-  open,
-  onResolved,
-  onCancelled,
-}: UnresolvedDialogProps) {
+export function UnresolvedDialog({ open, onResolved, onCancelled }: UnresolvedDialogProps) {
   return (
     <AlertDialog open={open}>
-      <DialogContent
-        onResolved={onResolved}
-        onCancelled={onCancelled}
-      />
+      <DialogContent onResolved={onResolved} onCancelled={onCancelled} />
     </AlertDialog>
   )
 }
@@ -60,7 +53,9 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
   const status = useAtomValue(resolutionStatusAtom)
   const selectAllLocal = useSetAtom(selectAllLocalAtom)
   const selectAllRemote = useSetAtom(selectAllRemoteAtom)
-  const { query: { data: authData } } = useGoogleDriveAuth()
+  const {
+    query: { data: authData },
+  } = useGoogleDriveAuth()
 
   const email = useMemo(() => authData?.userInfo?.email, [authData])
 
@@ -76,12 +71,10 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
     try {
       await syncMergedConfig(resolvedConfigResult.config, email)
       onResolved()
-    }
-    catch (error) {
+    } catch (error) {
       logger.error("Failed to sync merged config", error)
       onCancelled()
-    }
-    finally {
+    } finally {
       setIsConfirming(false)
     }
   }
@@ -94,7 +87,7 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
   const canConfirm = status.isValid && !isConfirming
 
   return (
-    <AlertDialogContent className="data-[size=default]:max-w-[calc(100vw-2rem)] data-[size=default]:md:max-w-2xl data-[size=default]:lg:max-w-4xl data-[size=default]:xl:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+    <AlertDialogContent className="flex max-h-[90vh] flex-col overflow-hidden data-[size=default]:max-w-[calc(100vw-2rem)] data-[size=default]:md:max-w-2xl data-[size=default]:lg:max-w-4xl data-[size=default]:xl:max-w-5xl">
       <AlertDialogHeader>
         <AlertDialogTitle className="flex items-center gap-2">
           <Icon icon="mdi:alert" className="size-5 text-yellow-500" />
@@ -106,28 +99,26 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
       </AlertDialogHeader>
 
       {/* Status bar */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-4 text-xs">
-          {status.allResolved
-            ? (!status.isValid
-                ? (
-                    <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
-                      <Icon icon="tabler:alert-circle-filled" className="size-4" />
-                      {i18n.t("options.config.sync.googleDrive.unresolved.configInvalid")}
-                    </span>
-                  )
-                : (
-                    <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                      <Icon icon="tabler:circle-check-filled" className="size-4" />
-                      {i18n.t("options.config.sync.googleDrive.unresolved.configValid")}
-                    </span>
-                  ))
-            : (
-                <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                  <Icon icon="tabler:circle-dashed-check" className="size-4" />
-                  {i18n.t("options.config.sync.googleDrive.unresolved.resolveToContinue")}
-                </span>
-              )}
+          {status.allResolved ? (
+            !status.isValid ? (
+              <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
+                <Icon icon="tabler:alert-circle-filled" className="size-4" />
+                {i18n.t("options.config.sync.googleDrive.unresolved.configInvalid")}
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                <Icon icon="tabler:circle-check-filled" className="size-4" />
+                {i18n.t("options.config.sync.googleDrive.unresolved.configValid")}
+              </span>
+            )
+          ) : (
+            <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+              <Icon icon="tabler:circle-dashed-check" className="size-4" />
+              {i18n.t("options.config.sync.googleDrive.unresolved.resolveToContinue")}
+            </span>
+          )}
         </div>
         <div className="flex gap-2">
           <Button
@@ -136,7 +127,7 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
             onClick={() => selectAllLocal()}
             disabled={isConfirming}
           >
-            <Icon icon="mdi:check-all" className="size-4 mr-1 text-green-600 dark:text-green-400" />
+            <Icon icon="mdi:check-all" className="mr-1 size-4 text-green-600 dark:text-green-400" />
             {i18n.t("options.config.sync.googleDrive.unresolved.useAllLocal")}
           </Button>
           <Button
@@ -145,7 +136,7 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
             onClick={() => selectAllRemote()}
             disabled={isConfirming}
           >
-            <Icon icon="mdi:check-all" className="size-4 mr-1 text-blue-600 dark:text-blue-400" />
+            <Icon icon="mdi:check-all" className="mr-1 size-4 text-blue-600 dark:text-blue-400" />
             {i18n.t("options.config.sync.googleDrive.unresolved.useAllRemote")}
           </Button>
         </div>
@@ -159,9 +150,11 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
             {i18n.t("options.config.sync.googleDrive.unresolved.validationAlert.title")}
           </AlertTitle>
           <AlertDescription>
-            <p>{i18n.t("options.config.sync.googleDrive.unresolved.validationAlert.description")}</p>
-            <ul className="list-disc list-inside text-xs">
-              {status.validationError.issues.slice(0, 5).map(issue => (
+            <p>
+              {i18n.t("options.config.sync.googleDrive.unresolved.validationAlert.description")}
+            </p>
+            <ul className="list-inside list-disc text-xs">
+              {status.validationError.issues.slice(0, 5).map((issue) => (
                 <li key={`${issue.path.join(".")}-${issue.message}`}>
                   <code className="text-xs">{issue.path.join(".")}</code>
                   {": "}
@@ -180,7 +173,7 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
         </Alert>
       )}
 
-      <div className="flex-1 min-h-0 flex flex-col">
+      <div className="flex min-h-0 flex-1 flex-col">
         <Activity mode={resolvedConfigResult?.config ? "visible" : "hidden"}>
           <MergeConfigView />
         </Activity>
@@ -210,12 +203,11 @@ function MergeConfigView() {
   const resolvedConfigResult = useAtomValue(resolvedConfigResultAtom)
   const status = useAtomValue(resolutionStatusAtom)
   const resolvedConfig = resolvedConfigResult?.config
-  if (!resolvedConfig)
-    return null
+  if (!resolvedConfig) return null
 
   return (
-    <div className="h-full rounded-lg overflow-hidden flex flex-col bg-muted">
-      <div className="px-4 py-2 flex items-center gap-4 text-xs border-b bg-muted">
+    <div className="flex h-full flex-col overflow-hidden rounded-lg bg-muted">
+      <div className="flex items-center gap-4 border-b bg-muted px-4 py-2 text-xs">
         {status.conflictCount > 0 && (
           <span className="text-zinc-700 dark:text-zinc-300">
             {i18n.t("options.config.sync.googleDrive.unresolved.progress", [
@@ -224,18 +216,18 @@ function MergeConfigView() {
             ])}
           </span>
         )}
-        <div className="flex items-center gap-4 ml-auto text-zinc-600 dark:text-zinc-400">
+        <div className="ml-auto flex items-center gap-4 text-zinc-600 dark:text-zinc-400">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-green-500" />
+            <div className="h-2 w-2 rounded-full bg-green-500" />
             <span>{i18n.t("options.config.sync.googleDrive.unresolved.localValue")}</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-blue-500" />
+            <div className="h-2 w-2 rounded-full bg-blue-500" />
             <span>{i18n.t("options.config.sync.googleDrive.unresolved.remoteValue")}</span>
           </div>
         </div>
       </div>
-      <div className="flex-1 overflow-auto min-h-0">
+      <div className="min-h-0 flex-1 overflow-auto">
         <JsonTreeView resolvedConfig={resolvedConfig} />
       </div>
     </div>

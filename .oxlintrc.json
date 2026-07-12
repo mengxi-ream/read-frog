@@ -1,0 +1,92 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["import", "react", "typescript", "vitest"],
+  "jsPlugins": ["./node_modules/oxlint-plugin-query/dist/index.js"],
+  "env": {
+    "browser": true,
+    "builtin": true,
+    "es2026": true,
+    "node": true
+  },
+  "categories": {
+    "correctness": "error",
+    "perf": "error",
+    "suspicious": "error"
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/.wxt/**",
+    "**/.output/**",
+    "**/coverage/**",
+    "**/dist/**",
+    "**/.nx/**",
+    "**/.turbo/**",
+    "repos/**",
+    "scripts/output/**",
+    ".agents/**",
+    ".claude/**",
+    ".codex/**",
+    ".cursor/**",
+    "**/skills/**",
+    "**/*.md/**",
+    "**/pnpm-lock.yaml"
+  ],
+  "rules": {
+    "no-inner-declarations": "error",
+    "eslint/no-await-in-loop": "off",
+    "eslint/default-case": "error",
+    "eslint/eqeqeq": "error",
+    "eslint/no-else-return": "error",
+    "eslint/no-shadow": "error",
+    "eslint/no-throw-literal": "error",
+    "eslint/no-underscore-dangle": "off",
+    "eslint/no-useless-assignment": "error",
+    "eslint/no-useless-constructor": "error",
+    "eslint/preserve-caught-error": "error",
+    "eslint/radix": "error",
+    "import/no-unassigned-import": "off",
+    "import/no-named-as-default-member": "error",
+    "react/button-has-type": "error",
+    "react/exhaustive-deps": "warn",
+    "react/iframe-missing-sandbox": "error",
+    "react/jsx-no-constructed-context-values": "error",
+    "react/no-unstable-nested-components": "error",
+    "react/react-in-jsx-scope": "off",
+    "react/rules-of-hooks": "error",
+    "typescript/consistent-return": "error",
+    "typescript/no-floating-promises": "error",
+    "typescript/no-extraneous-class": "error",
+    "typescript/no-unnecessary-boolean-literal-compare": "error",
+    "typescript/no-unnecessary-template-expression": "error",
+    "typescript/no-unnecessary-type-assertion": "error",
+    "typescript/no-unnecessary-type-conversion": "error",
+    "typescript/no-unnecessary-type-parameters": "error",
+    "typescript/no-unsafe-type-assertion": "off",
+    "typescript/prefer-includes": "error",
+    "typescript/prefer-optional-chain": "error",
+    "vitest/no-commented-out-tests": "error",
+    "oxlint-plugin-query/exhaustive-deps": "error",
+    "oxlint-plugin-query/no-rest-destructuring": "warn",
+    "oxlint-plugin-query/stable-query-client": "error",
+    "vitest/consistent-test-it": ["error", { "fn": "it" }],
+    "vitest/expect-expect": [
+      "error",
+      {
+        "assertFunctionNames": [
+          "assert",
+          "assertType",
+          "expect",
+          "expectLatestPosition",
+          "expectNodeLabels",
+          "expectToolbarHidden",
+          "expectToolbarVisible",
+          "expectTranslatedContent",
+          "expectTranslationWrapper",
+          "expectTypeOf"
+        ]
+      }
+    ],
+    "vitest/no-identical-title": "error",
+    "vitest/prefer-hooks-on-top": "error"
+  }
+}

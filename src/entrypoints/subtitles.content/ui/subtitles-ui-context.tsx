@@ -1,7 +1,7 @@
 import type { ControlsConfig } from "@/entrypoints/subtitles.content/platforms"
 import type { UniversalVideoAdapter } from "@/entrypoints/subtitles.content/universal-adapter"
 import { Provider as JotaiProvider } from "jotai"
-import { createContext, use } from "react"
+import { createContext, use, useMemo } from "react"
 import { subtitlesStore } from "../atoms"
 
 interface SubtitlesUIContextValue {
@@ -26,7 +26,12 @@ export function useSubtitlesUI() {
 
 export type SubtitlesProvidersAdapter = Pick<
   UniversalVideoAdapter,
-  "downloadSourceSubtitles" | "downloadTranslatedSubtitles" | "embedded" | "containerShrinkRatio" | "getControlsConfig" | "toggleSubtitlesManually"
+  | "downloadSourceSubtitles"
+  | "downloadTranslatedSubtitles"
+  | "embedded"
+  | "containerShrinkRatio"
+  | "getControlsConfig"
+  | "toggleSubtitlesManually"
 >
 
 export function SubtitlesProviders({
@@ -38,21 +43,22 @@ export function SubtitlesProviders({
   children: React.ReactNode
   openBelow?: boolean
 }) {
+  const contextValue = useMemo(
+    () => ({
+      toggleSubtitles: adapter.toggleSubtitlesManually,
+      downloadSourceSubtitles: adapter.downloadSourceSubtitles,
+      downloadTranslatedSubtitles: adapter.downloadTranslatedSubtitles,
+      controlsConfig: adapter.getControlsConfig(),
+      embedded: adapter.embedded,
+      openBelow,
+      containerShrinkRatio: adapter.containerShrinkRatio,
+    }),
+    [adapter, openBelow],
+  )
+
   return (
     <JotaiProvider store={subtitlesStore}>
-      <SubtitlesUIContext
-        value={{
-          toggleSubtitles: adapter.toggleSubtitlesManually,
-          downloadSourceSubtitles: adapter.downloadSourceSubtitles,
-          downloadTranslatedSubtitles: adapter.downloadTranslatedSubtitles,
-          controlsConfig: adapter.getControlsConfig(),
-          embedded: adapter.embedded,
-          openBelow,
-          containerShrinkRatio: adapter.containerShrinkRatio,
-        }}
-      >
-        {children}
-      </SubtitlesUIContext>
+      <SubtitlesUIContext value={contextValue}>{children}</SubtitlesUIContext>
     </JotaiProvider>
   )
 }

@@ -3,7 +3,7 @@
 import { describe, expect, it, vi } from "vitest"
 
 vi.mock("@/utils/message", () => ({
-  sendMessage: vi.fn(),
+  sendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
 describe("getOrGenerateWebPageSummary", () => {

@@ -1,19 +1,17 @@
 import { useAtom } from "jotai"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { Field, FieldContent, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 const MIN_THRESHOLD = 100
 const MAX_THRESHOLD = 1000
 
 export function InputTranslationThreshold() {
-  const [inputTranslation, setInputTranslation] = useAtom(
-    configFieldsAtomMap.inputTranslation,
-  )
+  const [inputTranslation, setInputTranslation] = useAtom(configFieldsAtomMap.inputTranslation)
 
   return (
     <ConfigCard
@@ -43,15 +41,19 @@ export function InputTranslationThreshold() {
                 ...inputTranslation,
                 timeThreshold: newValue,
               })
-            }
-            else {
-              toast.error(i18n.t("options.inputTranslation.threshold.error", [MIN_THRESHOLD, MAX_THRESHOLD]))
+            } else {
+              toast.error(
+                i18n.t("options.inputTranslation.threshold.error", [MIN_THRESHOLD, MAX_THRESHOLD]),
+              )
             }
           }}
           onBlur={(e) => {
             // Format and clamp value on blur (removes leading zeros like 0000300 → 300)
             const rawValue = Number(e.target.value)
-            const clampedValue = Math.min(MAX_THRESHOLD, Math.max(MIN_THRESHOLD, rawValue || MIN_THRESHOLD))
+            const clampedValue = Math.min(
+              MAX_THRESHOLD,
+              Math.max(MIN_THRESHOLD, rawValue || MIN_THRESHOLD),
+            )
             void setInputTranslation({
               ...inputTranslation,
               timeThreshold: clampedValue,

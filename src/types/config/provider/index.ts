@@ -25,7 +25,9 @@ export * from "./constants"
 export * from "./provider-specific-settings"
 export * from "./schemas"
 
-export function isTranslateProviderConfig(config: ProviderConfig): config is TranslateProviderConfig {
+export function isTranslateProviderConfig(
+  config: ProviderConfig,
+): config is TranslateProviderConfig {
   return isTranslateProvider(config.provider)
 }
 
@@ -33,15 +35,21 @@ export function isLLMProviderConfig(config: ProviderConfig): config is LLMProvid
   return isLLMProvider(config.provider)
 }
 
-export function isTopLevelReasoningProviderConfig(config: LLMProviderConfig): config is TopLevelReasoningProviderConfig {
+export function isTopLevelReasoningProviderConfig(
+  config: LLMProviderConfig,
+): config is TopLevelReasoningProviderConfig {
   return supportsTopLevelReasoning(config.provider)
 }
 
-export function isCustomLLMProviderConfig(config: ProviderConfig): config is CustomLLMProviderConfig {
+export function isCustomLLMProviderConfig(
+  config: ProviderConfig,
+): config is CustomLLMProviderConfig {
   return isCustomLLMProvider(config.provider)
 }
 
-export function isNonCustomLLMProviderConfig(config: ProviderConfig): config is NonCustomLLMProviderConfig {
+export function isNonCustomLLMProviderConfig(
+  config: ProviderConfig,
+): config is NonCustomLLMProviderConfig {
   return isNonCustomLLMProvider(config.provider)
 }
 

@@ -1,12 +1,6 @@
 import { IconSearch } from "@tabler/icons-react"
 import { useSetAtom } from "jotai"
-import { i18n } from "#imports"
-import readFrogLogo from "@/assets/icons/read-frog.png"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/base-ui/input-group"
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/base-ui/input-group"
 import { Kbd } from "@/components/ui/base-ui/kbd"
 import {
   Sidebar,
@@ -14,8 +8,9 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/base-ui/sidebar"
+import { UserAccountMenuSidebar } from "@/components/user-account-menu"
+import { i18n } from "@/utils/i18n"
 import { getCommandPaletteShortcutHint } from "@/utils/os"
-import { version } from "../../../../package.json"
 import { commandPaletteOpenAtom } from "../command-palette/atoms"
 import { SettingsNav } from "./settings-nav"
 import { ToolsNav } from "./tools-nav"
@@ -27,18 +22,9 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="group-data-[state=expanded]:px-5 group-data-[state=expanded]:pt-4 transition-all">
-        <a href="https://readfrog.app" className="flex items-center gap-2">
-          <img src={readFrogLogo} alt="Logo" className="h-8 w-8 shrink-0" />
-          <span className="text-md font-bold overflow-hidden truncate">{i18n.t("name")}</span>
-          <span className="text-xs text-muted-foreground overflow-hidden truncate">
-            {`v${version}`}
-          </span>
-        </a>
-        <InputGroup
-          onClick={() => setCommandPaletteOpen(true)}
-          className="bg-background"
-        >
+      <SidebarHeader className="transition-all group-data-[state=expanded]:px-5 group-data-[state=expanded]:pt-4">
+        <UserAccountMenuSidebar />
+        <InputGroup onClick={() => setCommandPaletteOpen(true)} className="bg-background">
           <InputGroupInput
             readOnly
             placeholder={i18n.t("options.commandPalette.placeholder")}
@@ -47,19 +33,16 @@ export function AppSidebar() {
           <InputGroupAddon>
             <IconSearch className="size-4 text-muted-foreground group-data-[state=collapsed]:-mx-px" />
           </InputGroupAddon>
-          <InputGroupAddon
-            align="inline-end"
-            className="group-data-[state=collapsed]:hidden"
-          >
+          <InputGroupAddon align="inline-end" className="group-data-[state=collapsed]:hidden">
             <Kbd>{commandPaletteShortcutHint}</Kbd>
           </InputGroupAddon>
         </InputGroup>
       </SidebarHeader>
-      <SidebarContent className="group-data-[state=expanded]:px-2 transition-all">
+      <SidebarContent className="transition-all group-data-[state=expanded]:px-2">
         <SettingsNav />
         <ToolsNav />
       </SidebarContent>
-      <SidebarFooter className="group-data-[state=expanded]:px-2 transition-all">
+      <SidebarFooter className="transition-all group-data-[state=expanded]:px-2">
         <WhatsNewFooter />
       </SidebarFooter>
     </Sidebar>

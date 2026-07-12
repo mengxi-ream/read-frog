@@ -2,6 +2,11 @@ name: Read Frog
 extName: "Read Frog - Translate & Learn"
 extDescription: Read Frog is an open source browser extension designed to help you learn languages deeply from any website.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+account:
+  login: Log in
+  webApp: Web app
+  logout: Log out
+  logoutError: Failed to log out. Please try again.
 dataTypes:
   string: Text
   number: Number
@@ -217,6 +222,10 @@ options:
       slow: Slow (try adjusting thinking mode)
   general:
     title: General
+    interfaceLanguage:
+      title: Interface Language
+      description: Choose the language for the extension's interface, independent of your browser language.
+      auto: Auto (follow browser)
     appearance:
       title: Appearance
       theme: Theme
@@ -737,7 +746,7 @@ options:
         description: Percentage of element visibility required to trigger translation (0-1). Higher values delay translation until more of the element is visible.
     smallParagraphFilter:
       title: Small Paragraph Filter
-      description: Skip translating text nodes with fewer characters or words than the threshold (0 = disabled)
+      description: These global defaults skip translating text nodes with fewer characters or words than the thresholds. Matching site rules can override them (0 = disabled)
       minCharacters:
         title: Minimum Characters
         description: Text nodes with fewer characters than this value will not be translated. Character count includes whitespace.
@@ -776,6 +785,31 @@ options:
       description: Enhance translation quality by providing webpage context to the AI
       enable: Enable AI Smart Context Translation
       enableDescription: AI uses webpage summary to improve translation accuracy. Requires LLM provider. Adds latency when starting to translate a page and increases API costs.
+  siteRules:
+    title: Site Rules
+    description: Per-site rules that adjust how specific websites are translated.
+    userRules:
+      title: User Rules
+      description: Define your own site rules as a JSON array. Rules apply to pages whose URL matches their patterns; user rules take precedence over built-in rules.
+      saveButton: Save
+      savedButton: Saved
+      validation:
+        validating: Validating...
+        valid: Rules are valid
+        syntaxError: JSON has syntax errors
+        notArray: The top-level JSON value must be an array of rules
+        tooLong: Rules document is too long
+        tooMany: Too many rules
+        duplicateIds: Duplicate rule ids
+        schemaErrors: Some rules are invalid
+        moreErrors: ...and $1 more errors
+        saved: All changes saved
+    builtIn:
+      title: Built-in Rules
+      description: Site rules shipped with the extension. Disable a rule with its switch if it causes problems on a site.
+      searchPlaceholder: Search by id, description, or URL pattern
+      showMore: Show more
+      count: Showing $1 of $2 rules
   tts:
     title: Text to Speech
     description: Use Edge TTS voice settings for the Speak button.
@@ -1068,6 +1102,7 @@ action:
   saveToNotebasePendingLogin: Log in to finish saving
   saveToNotebasePendingLoginDescription: After login, Read Frog will create the Notebase and save this result automatically.
   saveToNotebasePendingConnectedLoginDescription: After login, Read Frog will save to the connected Notebase when possible. If this account cannot use it, Read Frog will create a new Notebase and save this result.
+  upgrade: Upgrade
   openCustomActions: Open Custom AI Actions
   openNotebase: Open Notebase
   contextDetailsTitleLabel: Title

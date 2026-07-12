@@ -60,8 +60,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
         const wrapper = document.querySelector(".quick-actions-wrapper")
         const player = document.querySelector("#movie_player")
         const progressBar = player?.querySelector(".ytp-progress-bar-container")
-        if (!wrapper || !progressBar)
-          return DEFAULT_CONTROLS_HEIGHT
+        if (!wrapper || !progressBar) return DEFAULT_CONTROLS_HEIGHT
         return wrapper.getBoundingClientRect().top - progressBar.getBoundingClientRect().top
       },
       checkVisibility: () => true,
@@ -73,7 +72,9 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
     embedded: true,
     silentErrors: true,
     containerShrinkRatio: (container) => {
-      const ratio = Number.parseFloat(getComputedStyle(container).getPropertyValue("--ytd-shorts-player-ratio"))
+      const ratio = Number.parseFloat(
+        getComputedStyle(container).getPropertyValue("--ytd-shorts-player-ratio"),
+      )
       return Number.isFinite(ratio) && ratio > 0 ? ratio : null
     },
     selectors: {

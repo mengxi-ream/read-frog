@@ -14,14 +14,24 @@ import { configAtom } from "@/utils/atoms/config"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { initI18n } from "@/utils/i18n"
+import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
 import { sendMessage } from "@/utils/message"
 import { renderPersistentReactRoot } from "@/utils/react-root"
 import { queryClient } from "@/utils/tanstack-query"
 import { getLocalThemeMode } from "@/utils/theme"
 import App from "./app"
-import { getIsInPatterns, isCurrentSiteInPatternsAtom, isPageTranslatedAtom } from "./atoms/auto-translate"
+import {
+  getIsInPatterns,
+  isCurrentSiteInPatternsAtom,
+  isPageTranslatedAtom,
+} from "./atoms/auto-translate"
 import { isIgnoreTabAtom, isIgnoreUrl } from "./atoms/ignore"
-import { isCurrentSiteInBlacklistAtom, isCurrentSiteInWhitelistAtom, isInSiteControlList } from "./atoms/site-control"
+import {
+  isCurrentSiteInBlacklistAtom,
+  isCurrentSiteInWhitelistAtom,
+  isInSiteControlList,
+} from "./atoms/site-control"
 import "@/assets/styles/text-small.css"
 import "@/assets/styles/theme.css"
 
@@ -58,19 +68,19 @@ async function initApp() {
   ])
   const config = configValue ?? DEFAULT_CONFIG
 
+  await initI18n(config.uiLanguage)
+
   const tabId = activeTab[0].id
 
   let isPageTranslated: boolean = false
   if (tabId) {
-    isPageTranslated
-      = (await sendMessage("getEnablePageTranslationByTabId", {
+    isPageTranslated =
+      (await sendMessage("getEnablePageTranslationByTabId", {
         tabId,
       })) ?? false
   }
 
-  const isInPatterns = tabId
-    ? await getIsInPatterns(config.translate)
-    : false
+  const isInPatterns = tabId ? await getIsInPatterns(config.translate) : false
 
   const activeTabUrl = activeTab[0]?.url || ""
   const isIgnoreTab = isIgnoreUrl(activeTabUrl)
@@ -81,7 +91,8 @@ async function initApp() {
     ? isInSiteControlList(config.siteControl.blacklistPatterns, activeTabUrl)
     : false
 
-  renderPersistentReactRoot(root, (
+  renderPersistentReactRoot(
+    root,
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <JotaiProvider>
@@ -99,16 +110,18 @@ async function initApp() {
             <ThemeProvider>
               <TooltipProvider>
                 <FrogToast />
-                <RecoveryBoundary>
-                  <App />
-                </RecoveryBoundary>
+                <LocaleBoundary>
+                  <RecoveryBoundary>
+                    <App />
+                  </RecoveryBoundary>
+                </LocaleBoundary>
               </TooltipProvider>
             </ThemeProvider>
           </HydrateAtoms>
         </JotaiProvider>
       </QueryClientProvider>
-    </React.StrictMode>
-  ))
+    </React.StrictMode>,
+  )
 }
 
 void initApp()

@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest"
 import { pageTranslationShortcutSchema } from "@/types/config/translate"
-import { formatPageTranslationShortcut, isValidConfiguredPageTranslationShortcut, normalizePageTranslationShortcut } from "../page-translation-shortcut"
+import {
+  formatPageTranslationShortcut,
+  isValidConfiguredPageTranslationShortcut,
+  normalizePageTranslationShortcut,
+} from "../page-translation-shortcut"
 
 describe("page translation shortcut helpers", () => {
   it("normalizes shortcuts to a portable Mod-based format", () => {
     expect(normalizePageTranslationShortcut("Ctrl+e", "windows")).toBe("Mod+E")
     expect(normalizePageTranslationShortcut("Meta+e", "mac")).toBe("Mod+E")
-    expect(normalizePageTranslationShortcut("Control+Alt+Shift+k", "windows")).toBe("Mod+Alt+Shift+K")
+    expect(normalizePageTranslationShortcut("Control+Alt+Shift+k", "windows")).toBe(
+      "Mod+Alt+Shift+K",
+    )
   })
 
   it("formats shortcuts for platform-native display", () => {

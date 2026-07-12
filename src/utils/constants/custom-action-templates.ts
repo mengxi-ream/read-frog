@@ -1,17 +1,10 @@
 import type { GeneratedI18nStructure } from "#i18n"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
-import { i18n } from "#imports"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
+import { i18n } from "@/utils/i18n"
 import { createOutputSchemaField } from "./custom-action"
 
 const T_PREFIX = "options.floatingButtonAndToolbar.selectionToolbar.customActions.templates"
-// TODO: Remove after @wxt-dev/i18n handles literal {{tokens}}. https://github.com/wxt-dev/wxt/issues/2482
-const TEMPLATE_TOKEN_SUBSTITUTIONS = {
-  originLanguage: "{originLanguage}",
-  paragraphs: "{paragraphs}",
-  selection: "{selection}",
-  targetLanguage: "{targetLanguage}",
-} as const
 type I18nKey = keyof GeneratedI18nStructure
 
 export interface CustomActionTemplate {
@@ -39,16 +32,53 @@ export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
       enabled: true,
       icon: "tabler:book-2",
       providerId,
-      systemPrompt: i18n.t(`${T_PREFIX}.dictionary.systemPrompt`, TEMPLATE_TOKEN_SUBSTITUTIONS),
-      prompt: i18n.t(`${T_PREFIX}.dictionary.prompt`, TEMPLATE_TOKEN_SUBSTITUTIONS),
+      systemPrompt: i18n.t(`${T_PREFIX}.dictionary.systemPrompt`),
+      prompt: i18n.t(`${T_PREFIX}.dictionary.prompt`),
       outputSchema: [
-        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldTerm`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldTermDescription`), "dictionary-term", true),
-        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldPhonetic`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldPhoneticDescription`), "dictionary-phonetic"),
-        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldPartOfSpeech`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldPartOfSpeechDescription`), "dictionary-part-of-speech"),
-        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldDefinition`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldDefinitionDescription`), "dictionary-definition"),
-        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldParagraphs`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldParagraphsDescription`), "dictionary-context", true),
-        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldParagraphsTranslation`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldParagraphsTranslationDescription`), "dictionary-context-translation"),
-        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldDifficulty`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldDifficultyDescription`), "dictionary-difficulty"),
+        createOutputSchemaField(
+          i18n.t(`${T_PREFIX}.dictionary.fieldTerm`),
+          "string",
+          i18n.t(`${T_PREFIX}.dictionary.fieldTermDescription`),
+          "dictionary-term",
+          true,
+        ),
+        createOutputSchemaField(
+          i18n.t(`${T_PREFIX}.dictionary.fieldPhonetic`),
+          "string",
+          i18n.t(`${T_PREFIX}.dictionary.fieldPhoneticDescription`),
+          "dictionary-phonetic",
+        ),
+        createOutputSchemaField(
+          i18n.t(`${T_PREFIX}.dictionary.fieldPartOfSpeech`),
+          "string",
+          i18n.t(`${T_PREFIX}.dictionary.fieldPartOfSpeechDescription`),
+          "dictionary-part-of-speech",
+        ),
+        createOutputSchemaField(
+          i18n.t(`${T_PREFIX}.dictionary.fieldDefinition`),
+          "string",
+          i18n.t(`${T_PREFIX}.dictionary.fieldDefinitionDescription`),
+          "dictionary-definition",
+        ),
+        createOutputSchemaField(
+          i18n.t(`${T_PREFIX}.dictionary.fieldParagraphs`),
+          "string",
+          i18n.t(`${T_PREFIX}.dictionary.fieldParagraphsDescription`),
+          "dictionary-context",
+          true,
+        ),
+        createOutputSchemaField(
+          i18n.t(`${T_PREFIX}.dictionary.fieldParagraphsTranslation`),
+          "string",
+          i18n.t(`${T_PREFIX}.dictionary.fieldParagraphsTranslationDescription`),
+          "dictionary-context-translation",
+        ),
+        createOutputSchemaField(
+          i18n.t(`${T_PREFIX}.dictionary.fieldDifficulty`),
+          "string",
+          i18n.t(`${T_PREFIX}.dictionary.fieldDifficultyDescription`),
+          "dictionary-difficulty",
+        ),
       ],
     }),
   },
@@ -63,11 +93,19 @@ export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
       enabled: true,
       icon: "tabler:pencil-check",
       providerId,
-      systemPrompt: i18n.t(`${T_PREFIX}.improveWriting.systemPrompt`, TEMPLATE_TOKEN_SUBSTITUTIONS),
-      prompt: i18n.t(`${T_PREFIX}.improveWriting.prompt`, TEMPLATE_TOKEN_SUBSTITUTIONS),
+      systemPrompt: i18n.t(`${T_PREFIX}.improveWriting.systemPrompt`),
+      prompt: i18n.t(`${T_PREFIX}.improveWriting.prompt`),
       outputSchema: [
-        createOutputSchemaField(i18n.t(`${T_PREFIX}.improveWriting.fieldErrorAnalysis`), "string", i18n.t(`${T_PREFIX}.improveWriting.fieldErrorAnalysisDescription`, TEMPLATE_TOKEN_SUBSTITUTIONS)),
-        createOutputSchemaField(i18n.t(`${T_PREFIX}.improveWriting.fieldImprovedVersion`), "string", i18n.t(`${T_PREFIX}.improveWriting.fieldImprovedVersionDescription`)),
+        createOutputSchemaField(
+          i18n.t(`${T_PREFIX}.improveWriting.fieldErrorAnalysis`),
+          "string",
+          i18n.t(`${T_PREFIX}.improveWriting.fieldErrorAnalysisDescription`),
+        ),
+        createOutputSchemaField(
+          i18n.t(`${T_PREFIX}.improveWriting.fieldImprovedVersion`),
+          "string",
+          i18n.t(`${T_PREFIX}.improveWriting.fieldImprovedVersionDescription`),
+        ),
       ],
     }),
   },
@@ -85,7 +123,11 @@ export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
       systemPrompt: "",
       prompt: "",
       outputSchema: [
-        createOutputSchemaField(i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.defaultFieldName")),
+        createOutputSchemaField(
+          i18n.t(
+            "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.defaultFieldName",
+          ),
+        ),
       ],
     }),
   },

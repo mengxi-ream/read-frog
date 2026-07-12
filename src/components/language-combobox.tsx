@@ -1,7 +1,6 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { LanguageItem } from "./language-combobox-options"
 import { useMemo } from "react"
-import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import {
   Combobox,
@@ -13,6 +12,7 @@ import {
   ComboboxTrigger,
   ComboboxValue,
 } from "@/components/ui/base-ui/combobox"
+import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 import { filterLanguage, getLanguageItems } from "./language-combobox-options"
 
@@ -35,30 +35,26 @@ export function LanguageCombobox({
   placeholder,
   className,
 }: LanguageComboboxProps) {
-  const languageItems = useMemo(
-    () => getLanguageItems(detectedLangCode),
-    [detectedLangCode],
-  )
+  const languageItems = useMemo(() => getLanguageItems(detectedLangCode), [detectedLangCode])
 
   return (
     <Combobox
-      value={languageItems.find(item => item.value === value) ?? null}
+      value={languageItems.find((item) => item.value === value) ?? null}
       onValueChange={(item) => {
-        if (item)
-          onValueChange(item.value)
+        if (item) onValueChange(item.value)
       }}
       items={languageItems}
       filter={filterLanguage}
       autoHighlight
     >
       <ComboboxTrigger
-        render={(
+        render={
           <Button
             type="button"
             variant="outline"
             className={cn("w-auto min-w-0 justify-between font-normal", className)}
           />
-        )}
+        }
       >
         <ComboboxValue placeholder={placeholder ?? i18n.t("translationHub.searchLanguages")}>
           {(item: LanguageItem | null) => (

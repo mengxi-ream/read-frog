@@ -13,8 +13,8 @@ class GitHubApiError extends Error {
 
 function buildHeaders(token, extraHeaders = {}) {
   return {
-    "Accept": "application/vnd.github+json",
-    "Authorization": `Bearer ${token}`,
+    Accept: "application/vnd.github+json",
+    Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
     "User-Agent": "read-frog-contributor-trust",
     ...extraHeaders,
@@ -23,21 +23,18 @@ function buildHeaders(token, extraHeaders = {}) {
 
 async function parseResponse(response) {
   const text = await response.text()
-  if (!text)
-    return null
+  if (!text) return null
 
   try {
     return JSON.parse(text)
-  }
-  catch {
+  } catch {
     return text
   }
 }
 
 function buildErrorMessage(method, path, response, payload) {
-  const suffix = payload && typeof payload === "object" && "message" in payload
-    ? `: ${payload.message}`
-    : ""
+  const suffix =
+    payload && typeof payload === "object" && "message" in payload ? `: ${payload.message}` : ""
   return `${method} ${path} failed with ${response.status} ${response.statusText}${suffix}`
 }
 
@@ -76,7 +73,7 @@ export async function graphqlRequest(token, query, variables) {
   }
 
   if (payload.errors?.length) {
-    throw new GitHubApiError(payload.errors.map(error => error.message).join("; "), {
+    throw new GitHubApiError(payload.errors.map((error) => error.message).join("; "), {
       payload,
       response,
     })
@@ -99,10 +96,13 @@ export async function paginate(token, path) {
     const payload = await parseResponse(response)
 
     if (!response.ok) {
-      throw new GitHubApiError(buildErrorMessage("GET", `${path}?page=${page}`, response, payload), {
-        payload,
-        response,
-      })
+      throw new GitHubApiError(
+        buildErrorMessage("GET", `${path}?page=${page}`, response, payload),
+        {
+          payload,
+          response,
+        },
+      )
     }
 
     if (!Array.isArray(payload)) {
@@ -110,8 +110,7 @@ export async function paginate(token, path) {
     }
 
     items.push(...payload)
-    if (payload.length < 100)
-      break
+    if (payload.length < 100) break
   }
 
   return items
@@ -126,8 +125,11 @@ export async function listPullRequestFiles(token, owner, repo, pullNumber) {
 }
 
 export async function listIssueLabels(token, owner, repo, issueNumber) {
-  const labels = await apiRequest(token, `/repos/${owner}/${repo}/issues/${issueNumber}/labels?per_page=100`)
-  return labels.map(label => label.name)
+  const labels = await apiRequest(
+    token,
+    `/repos/${owner}/${repo}/issues/${issueNumber}/labels?per_page=100`,
+  )
+  return labels.map((label) => label.name)
 }
 
 export async function listIssueComments(token, owner, repo, issueNumber) {
@@ -149,8 +151,7 @@ export async function updateIssueComment(token, owner, repo, commentId, body) {
 }
 
 export async function addLabelsToIssue(token, owner, repo, issueNumber, labels) {
-  if (labels.length === 0)
-    return []
+  if (labels.length === 0) return []
 
   return apiRequest(token, `/repos/${owner}/${repo}/issues/${issueNumber}/labels`, {
     body: { labels },
@@ -159,9 +160,13 @@ export async function addLabelsToIssue(token, owner, repo, issueNumber, labels) 
 }
 
 export async function removeLabelFromIssue(token, owner, repo, issueNumber, labelName) {
-  return apiRequest(token, `/repos/${owner}/${repo}/issues/${issueNumber}/labels/${encodeURIComponent(labelName)}`, {
-    method: "DELETE",
-  })
+  return apiRequest(
+    token,
+    `/repos/${owner}/${repo}/issues/${issueNumber}/labels/${encodeURIComponent(labelName)}`,
+    {
+      method: "DELETE",
+    },
+  )
 }
 
 export async function closePullRequestIssue(token, owner, repo, issueNumber) {
@@ -173,24 +178,23 @@ export async function closePullRequestIssue(token, owner, repo, issueNumber) {
 
 export async function getCollaboratorPermission(token, owner, repo, username) {
   try {
-    const response = await apiRequest(token, `/repos/${owner}/${repo}/collaborators/${encodeURIComponent(username)}/permission`)
+    const response = await apiRequest(
+      token,
+      `/repos/${owner}/${repo}/collaborators/${encodeURIComponent(username)}/permission`,
+    )
     return response.permission ?? null
-  }
-  catch (error) {
-    if (error instanceof GitHubApiError && error.details.response?.status === 404)
-      return null
+  } catch (error) {
+    if (error instanceof GitHubApiError && error.details.response?.status === 404) return null
     throw error
   }
 }
 
 function getPageNumberFromLinkHeader(linkHeader, relation) {
-  if (!linkHeader)
-    return null
+  if (!linkHeader) return null
 
   for (const entry of linkHeader.split(",")) {
     const match = entry.trim().match(LINK_HEADER_ENTRY_PATTERN)
-    if (!match || match[2] !== relation)
-      continue
+    if (!match || match[2] !== relation) continue
 
     const page = new URL(match[1]).searchParams.get("page")
     const parsedPage = Number.parseInt(page ?? "", 10)
@@ -211,18 +215,20 @@ export async function countAuthorCommitsInRepo(token, owner, repo, authorLogin) 
   const payload = await parseResponse(response)
 
   if (!response.ok) {
-    throw new GitHubApiError(buildErrorMessage("GET", `${url.pathname}${url.search}`, response, payload), {
-      payload,
-      response,
-    })
+    throw new GitHubApiError(
+      buildErrorMessage("GET", `${url.pathname}${url.search}`, response, payload),
+      {
+        payload,
+        response,
+      },
+    )
   }
 
   if (!Array.isArray(payload))
     throw new GitHubApiError(`Expected array payload from ${url.pathname}`, { payload })
 
   const lastPage = getPageNumberFromLinkHeader(response.headers.get("link"), "last")
-  if (lastPage !== null)
-    return lastPage
+  if (lastPage !== null) return lastPage
 
   return payload.length
 }
@@ -233,12 +239,11 @@ export async function listRepositoryLabels(token, owner, repo) {
 
 export async function ensureRepositoryLabels(token, owner, repo, labelDefinitions) {
   const existingLabels = new Set(
-    (await listRepositoryLabels(token, owner, repo)).map(label => label.name),
+    (await listRepositoryLabels(token, owner, repo)).map((label) => label.name),
   )
 
   for (const [name, definition] of Object.entries(labelDefinitions)) {
-    if (existingLabels.has(name))
-      continue
+    if (existingLabels.has(name)) continue
 
     try {
       await apiRequest(token, `/repos/${owner}/${repo}/labels`, {
@@ -249,8 +254,7 @@ export async function ensureRepositoryLabels(token, owner, repo, labelDefinition
         },
         method: "POST",
       })
-    }
-    catch (createError) {
+    } catch (createError) {
       if (!(createError instanceof GitHubApiError) || createError.details.response?.status !== 422)
         throw createError
     }
@@ -263,8 +267,7 @@ function countReviewsOnOthersPullRequests(nodes, authorLogin) {
 
   for (const node of nodes ?? []) {
     const pullRequestAuthor = node?.author?.login?.toLowerCase()
-    if (!pullRequestAuthor || pullRequestAuthor === normalizedAuthorLogin)
-      continue
+    if (!pullRequestAuthor || pullRequestAuthor === normalizedAuthorLogin) continue
 
     reviews += 1
   }
@@ -280,15 +283,23 @@ function getReviewSearchPageInfo(searchResult) {
 }
 
 function normalizeReviewSearchNodes(searchResult) {
-  return (searchResult?.nodes ?? []).filter(node => node?.__typename === "PullRequest")
+  return (searchResult?.nodes ?? []).filter((node) => node?.__typename === "PullRequest")
 }
 
-export async function countReviewsOnOthersPullRequestsInRepo(token, owner, repo, authorLogin, pageSize) {
+export async function countReviewsOnOthersPullRequestsInRepo(
+  token,
+  owner,
+  repo,
+  authorLogin,
+  pageSize,
+) {
   let reviews = 0
   let cursor = null
 
   while (true) {
-    const data = await graphqlRequest(token, `
+    const data = await graphqlRequest(
+      token,
+      `
       query ReviewsOnOthersPullRequests(
         $cursor: String
         $pageSize: Int!
@@ -309,11 +320,13 @@ export async function countReviewsOnOthersPullRequestsInRepo(token, owner, repo,
           }
         }
       }
-    `, {
-      cursor,
-      pageSize,
-      reviewsQuery: `repo:${owner}/${repo} reviewed-by:${authorLogin} type:pr`,
-    })
+    `,
+      {
+        cursor,
+        pageSize,
+        reviewsQuery: `repo:${owner}/${repo} reviewed-by:${authorLogin} type:pr`,
+      },
+    )
 
     const searchResult = data.search
     reviews += countReviewsOnOthersPullRequests(
@@ -322,12 +335,10 @@ export async function countReviewsOnOthersPullRequestsInRepo(token, owner, repo,
     )
 
     const pageInfo = getReviewSearchPageInfo(searchResult)
-    if (!pageInfo.hasNextPage)
-      break
+    if (!pageInfo.hasNextPage) break
 
     cursor = pageInfo.endCursor
-    if (!cursor)
-      break
+    if (!cursor) break
   }
 
   return reviews
@@ -365,20 +376,17 @@ export function createContributorMetrics({ author, permission, repoHistory }) {
     prsInRepo: createPullRequestStateList(repoHistory),
     repoPermission: permission ?? null,
     reviewsInRepo: repoHistory.reviews,
-    topRepoStars: repoHistory.topRepositories.map(repository => repository.stargazerCount),
+    topRepoStars: repoHistory.topRepositories.map((repository) => repository.stargazerCount),
   }
 }
 
 function normalizeOwnedRepository(node, ownerLogin) {
-  if (!node?.nameWithOwner || !ownerLogin)
-    return null
+  if (!node?.nameWithOwner || !ownerLogin) return null
 
   const repositoryOwner = node.owner?.login?.toLowerCase()
-  if (repositoryOwner !== ownerLogin.toLowerCase())
-    return null
+  if (repositoryOwner !== ownerLogin.toLowerCase()) return null
 
-  if (node.isFork === true)
-    return null
+  if (node.isFork === true) return null
 
   return {
     nameWithOwner: node.nameWithOwner,
@@ -391,8 +399,7 @@ export function selectOwnedNonForkRepositories(nodes, ownerLogin) {
 
   for (const node of nodes ?? []) {
     const repository = normalizeOwnedRepository(node, ownerLogin)
-    if (!repository)
-      continue
+    if (!repository) continue
 
     topRepositories.push(repository)
   }
@@ -468,7 +475,10 @@ export async function getAuthorMetrics(token, owner, repo, authorLogin) {
       POLICY.reviewQueryPageSize,
     ),
   ])
-  const topRepositories = selectOwnedNonForkRepositories(data.user?.ownedNonForkRepositories?.nodes ?? [], authorLogin)
+  const topRepositories = selectOwnedNonForkRepositories(
+    data.user?.ownedNonForkRepositories?.nodes ?? [],
+    authorLogin,
+  )
 
   return {
     author,
@@ -486,10 +496,8 @@ export async function getAuthorMetrics(token, owner, repo, authorLogin) {
 async function getUserFallback(token, authorLogin) {
   try {
     return await apiRequest(token, `/users/${encodeURIComponent(authorLogin)}`)
-  }
-  catch (error) {
-    if (error instanceof GitHubApiError && error.details.response?.status === 404)
-      return null
+  } catch (error) {
+    if (error instanceof GitHubApiError && error.details.response?.status === 404) return null
     throw error
   }
 }

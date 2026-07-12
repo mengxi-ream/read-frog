@@ -11,8 +11,7 @@ export async function decorateTranslationNode(
   translatedNode: HTMLElement,
   styleConfig: TranslationNodeStyleConfig,
 ): Promise<void> {
-  if (translationNodeStylePresetSchema.safeParse(styleConfig.preset).error)
-    return
+  if (translationNodeStylePresetSchema.safeParse(styleConfig.preset).error) return
 
   const root = getContainingShadowRoot(translatedNode) ?? document
 

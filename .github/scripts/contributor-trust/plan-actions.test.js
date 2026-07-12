@@ -1,17 +1,26 @@
 import { describe, expect, it } from "vitest"
-
 import { POLICY } from "./config.js"
 import { isMigrationChangedLineFile, planTrustActions } from "./plan-actions.js"
 
 describe("isMigrationChangedLineFile", () => {
   it("matches read-frog config migration scripts, tests, and generated fixtures", () => {
-    expect(isMigrationChangedLineFile("src/utils/config/migration-scripts/v080-to-v081.ts")).toBe(true)
-    expect(isMigrationChangedLineFile("src/utils/config/__tests__/migration-scripts/v079-to-v080.test.ts")).toBe(true)
+    expect(isMigrationChangedLineFile("src/utils/config/migration-scripts/v080-to-v081.ts")).toBe(
+      true,
+    )
+    expect(
+      isMigrationChangedLineFile(
+        "src/utils/config/__tests__/migration-scripts/v079-to-v080.test.ts",
+      ),
+    ).toBe(true)
     expect(isMigrationChangedLineFile("src/utils/config/__tests__/example/v081.ts")).toBe(true)
     expect(isMigrationChangedLineFile(".agents/skills/migration-scripts/SKILL.md")).toBe(false)
     expect(isMigrationChangedLineFile("src/utils/config/migration.ts")).toBe(false)
     expect(isMigrationChangedLineFile("src/utils/config/migration-scripts/types.ts")).toBe(false)
-    expect(isMigrationChangedLineFile("src/utils/config/__tests__/migration-scripts/all-migrations.test.ts")).toBe(false)
+    expect(
+      isMigrationChangedLineFile(
+        "src/utils/config/__tests__/migration-scripts/all-migrations.test.ts",
+      ),
+    ).toBe(false)
     expect(isMigrationChangedLineFile("src/utils/config/__tests__/example/types.ts")).toBe(false)
     expect(isMigrationChangedLineFile("src/entrypoints/host.content/runtime.ts")).toBe(false)
   })

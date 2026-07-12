@@ -1,14 +1,12 @@
 // @vitest-environment jsdom
 import type { Config } from "@/types/config/config"
 import { describe, expect, it } from "vitest"
-
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
   BLOCK_CONTENT_CLASS,
   INLINE_CONTENT_CLASS,
   NOTRANSLATE_CLASS,
 } from "@/utils/constants/dom-labels"
-
 import {
   isDontWalkIntoAndDontTranslateAsChildElement,
   isDontWalkIntoButTranslateAsChildElement,
@@ -112,6 +110,22 @@ function createConfig(range: "main" | "all"): Config {
   return { translate: { page: { range } } } as unknown as Config
 }
 
+function setHost(host: string) {
+  Object.defineProperty(window, "location", {
+    value: new URL(`https://${host}/some/path`),
+    writable: true,
+  })
+}
+
+function configWithSiteRule(rule: NonNullable<Config["siteRules"]>["userRules"][number]): Config {
+  const config = structuredClone(DEFAULT_CONFIG)
+  config.siteRules = {
+    userRules: [rule],
+    disabledBuiltInRules: [],
+  }
+  return config
+}
+
 describe("isDontWalkIntoAndDontTranslateAsChildElement", () => {
   it("should return true for sr-only class", () => {
     const element = document.createElement("span")
@@ -125,10 +139,32 @@ describe("isDontWalkIntoAndDontTranslateAsChildElement", () => {
     expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(true)
   })
 
-  it("should return true for aria-hidden=\"true\"", () => {
+  it('should not block aria-hidden="true" by default', () => {
+    setHost("non-configured-example.org")
     const element = document.createElement("div")
     element.setAttribute("aria-hidden", "true")
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(false)
+  })
+
+  it('should still block aria-hidden="true" on WhatsApp through the built-in site rule', () => {
+    setHost("web.whatsapp.com")
+    const element = document.createElement("div")
+    element.setAttribute("aria-hidden", "true")
+
     expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(true)
+  })
+
+  it("should still block Twitch aria-hidden chat decorations through the built-in site rule", () => {
+    setHost("www.twitch.tv")
+    const container = document.createElement("div")
+    container.className = "chat-line__no-background"
+    const element = document.createElement("span")
+    element.setAttribute("aria-hidden", "true")
+    container.appendChild(element)
+    document.body.appendChild(container)
+
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(true)
+    document.body.removeChild(container)
   })
 
   it("should return true for SCRIPT tag", () => {
@@ -139,6 +175,36 @@ describe("isDontWalkIntoAndDontTranslateAsChildElement", () => {
   it("should return false for regular elements", () => {
     const element = document.createElement("div")
     expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(false)
+  })
+
+  it("should treat preserveTextSelectors as dont-walk-but-translate", () => {
+    setHost("preserve-example.org")
+    const config = configWithSiteRule({
+      id: "preserve",
+      matches: "preserve-example.org",
+      preserveTextSelectors: [".token"],
+    })
+    const element = document.createElement("span")
+    element.classList.add("token")
+
+    expect(isDontWalkIntoButTranslateAsChildElement(element, config)).toBe(true)
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(element, config)).toBe(false)
+  })
+
+  it("should let preserveTextSelectors win over excludeSelectors on the same element", () => {
+    setHost("preserve-example.org")
+    const config = configWithSiteRule({
+      id: "preserve",
+      matches: "preserve-example.org",
+      excludeSelectors: ["a[data-hovercard-type]"],
+      preserveTextSelectors: [".issue-link"],
+    })
+    const element = document.createElement("a")
+    element.classList.add("issue-link")
+    element.setAttribute("data-hovercard-type", "pull_request")
+
+    expect(isDontWalkIntoButTranslateAsChildElement(element, config)).toBe(true)
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(element, config)).toBe(false)
   })
 
   it("should skip top-level <header> in main mode", () => {

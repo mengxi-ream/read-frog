@@ -16,10 +16,12 @@ interface DraftSelectionState {
 }
 
 function isDraftEditorState(value: unknown): value is DraftEditorState {
-  return !!value
-    && typeof value === "object"
-    && typeof (value as DraftEditorState).getCurrentContent === "function"
-    && typeof (value as DraftEditorState).getSelection === "function"
+  return (
+    !!value &&
+    typeof value === "object" &&
+    typeof (value as DraftEditorState).getCurrentContent === "function" &&
+    typeof (value as DraftEditorState).getSelection === "function"
+  )
 }
 
 export function isDraftElement(element: Element): boolean {
@@ -28,24 +30,26 @@ export function isDraftElement(element: Element): boolean {
 
 // Draft.js editor components store { editorState, onChange } in their props
 // or manage EditorState in a parent component's React state.
-function findDraftEditor(element: Element): { editorState: DraftEditorState, onChange: (state: DraftEditorState) => void } | null {
+function findDraftEditor(
+  element: Element,
+): { editorState: DraftEditorState; onChange: (state: DraftEditorState) => void } | null {
   const contentEl = element.closest(".public-DraftEditor-content") ?? element
   let fiber: ReactFiber | null = findReactFiber(contentEl)
   while (fiber) {
     const props = fiber.memoizedProps
     if (props && isDraftEditorState(props.editorState) && typeof props.onChange === "function") {
       return {
-        editorState: props.editorState as DraftEditorState,
+        editorState: props.editorState,
         onChange: props.onChange as (state: DraftEditorState) => void,
       }
     }
 
     // Also check stateNode for class components
-    const stateNode = fiber.stateNode as Record<string, unknown> | null
+    const stateNode = fiber.stateNode
     const stateNodeProps = (stateNode?.props ?? {}) as Record<string, unknown>
     if (isDraftEditorState(stateNodeProps.editorState)) {
       return {
-        editorState: stateNodeProps.editorState as DraftEditorState,
+        editorState: stateNodeProps.editorState,
         onChange: stateNodeProps.onChange as (state: DraftEditorState) => void,
       }
     }
@@ -58,8 +62,7 @@ function findDraftEditor(element: Element): { editorState: DraftEditorState, onC
 
 export function replaceDraft(element: Element, text: string): boolean {
   const editor = findDraftEditor(element)
-  if (!editor)
-    return false
+  if (!editor) return false
 
   const { editorState, onChange } = editor
   const contentState = editorState.getCurrentContent()
@@ -74,7 +77,10 @@ export function replaceDraft(element: Element, text: string): boolean {
   const ContentStateProto = Object.getPrototypeOf(contentState)
   const ContentStateConstructor = ContentStateProto.constructor
 
-  if (typeof ContentStateConstructor.createFromText !== "function" || typeof EditorStateConstructor.push !== "function")
+  if (
+    typeof ContentStateConstructor.createFromText !== "function" ||
+    typeof EditorStateConstructor.push !== "function"
+  )
     return false
 
   const newContent = ContentStateConstructor.createFromText(text)
@@ -84,8 +90,7 @@ export function replaceDraft(element: Element, text: string): boolean {
   if (typeof EditorStateConstructor.moveSelectionToEnd === "function") {
     const finalState = EditorStateConstructor.moveSelectionToEnd(newEditorState)
     onChange(finalState)
-  }
-  else {
+  } else {
     onChange(newEditorState)
   }
 

@@ -18,23 +18,25 @@ export function registerNodeTranslationTriggers(): () => void {
 
   const getCurrentConfig = async (): Promise<Config | null> => {
     const config = await getLocalConfig()
-    if (signal.aborted)
-      return null
+    if (signal.aborted) return null
     return config ?? DEFAULT_CONFIG
   }
 
   let hasRequestedIframeInjection = false
 
   const requestIframeInjectionAfterSuccessfulTopFrameNodeTranslation = () => {
-    if (hasRequestedIframeInjection || window !== window.top || signal.aborted)
-      return
+    if (hasRequestedIframeInjection || window !== window.top || signal.aborted) return
 
     hasRequestedIframeInjection = true
-    void sendMessage("injectCurrentIframesAfterTopFrameNodeTranslation", undefined)
-      .catch(() => undefined)
+    void sendMessage("injectCurrentIframesAfterTopFrameNodeTranslation", undefined).catch(
+      () => undefined,
+    )
   }
 
-  const translateNode = async (point: Parameters<typeof removeOrShowNodeTranslation>[0], config: Config) => {
+  const translateNode = async (
+    point: Parameters<typeof removeOrShowNodeTranslation>[0],
+    config: Config,
+  ) => {
     const didTranslate = await removeOrShowNodeTranslation(point, config)
     if (didTranslate) {
       requestIframeInjectionAfterSuccessfulTopFrameNodeTranslation()

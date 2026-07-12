@@ -13,22 +13,24 @@ declare global {
 }
 
 export function isSiteEnabled(url: string, config: Config | null): boolean {
-  if (!config)
-    return true
+  if (!config) return true
 
   const { mode, blacklistPatterns, whitelistPatterns } = config.siteControl
 
   if (mode === "blacklist")
-    return !blacklistPatterns.some(pattern => matchDomainPattern(url, pattern))
+    return !blacklistPatterns.some((pattern) => matchDomainPattern(url, pattern))
 
-  return whitelistPatterns.some(pattern => matchDomainPattern(url, pattern))
+  return whitelistPatterns.some((pattern) => matchDomainPattern(url, pattern))
 }
 
 // "Effective site-control URL" means the URL we ultimately use to decide
 // whether this frame should enable the extension. For normal pages that is
 // window.location.href. For blank/srcdoc iframes it is the resolved ancestor
 // page URL injected by the background script.
-export function resolveEffectiveSiteControlUrl(url: string, injectedSiteControlUrl?: string): string {
+export function resolveEffectiveSiteControlUrl(
+  url: string,
+  injectedSiteControlUrl?: string,
+): string {
   return injectedSiteControlUrl ?? url
 }
 

@@ -23,8 +23,14 @@ describe("v070-to-v071 migration", () => {
 
     expect(migrated.providersConfig).toEqual([
       deeplxProvider({ baseURL: "https://api.deeplx.org/{{apiKey}}/translate" }),
-      deeplxProvider({ id: "deeplx-empty", baseURL: "https://api.deeplx.org/{{apiKey}}/translate" }),
-      deeplxProvider({ id: "deeplx-blank", baseURL: "https://api.deeplx.org/{{apiKey}}/translate" }),
+      deeplxProvider({
+        id: "deeplx-empty",
+        baseURL: "https://api.deeplx.org/{{apiKey}}/translate",
+      }),
+      deeplxProvider({
+        id: "deeplx-blank",
+        baseURL: "https://api.deeplx.org/{{apiKey}}/translate",
+      }),
     ])
   })
 
@@ -49,7 +55,11 @@ describe("v070-to-v071 migration", () => {
     const migrated = migrate({
       providersConfig: [
         deeplxProvider({ baseURL: "https://deeplx.vercel.app" }),
-        deeplxProvider({ id: "with-key", baseURL: "https://deeplx.example.com/api", apiKey: "abc" }),
+        deeplxProvider({
+          id: "with-key",
+          baseURL: "https://deeplx.example.com/api",
+          apiKey: "abc",
+        }),
       ],
     })
 
@@ -65,7 +75,10 @@ describe("v070-to-v071 migration", () => {
       providersConfig: [
         deeplxProvider({ baseURL: "https://host.example/translate?token=abc" }),
         deeplxProvider({ id: "host-only", baseURL: "https://host.example?token=abc" }),
-        deeplxProvider({ id: "path", baseURL: "https://host.example/api?foo=1&token=abc/&bar=2#frag" }),
+        deeplxProvider({
+          id: "path",
+          baseURL: "https://host.example/api?foo=1&token=abc/&bar=2#frag",
+        }),
       ],
     })
 
@@ -111,7 +124,9 @@ describe("v070-to-v071 migration", () => {
     })
 
     expect(migrated.providersConfig[0].baseURL).toBe("https://host.example/{{apiKey}}/translate")
-    expect(migrated.providersConfig[1].baseURL).toBe("https://host.example/translate?token={{apiKey}}")
+    expect(migrated.providersConfig[1].baseURL).toBe(
+      "https://host.example/translate?token={{apiKey}}",
+    )
     expect(migrated.providersConfig[2].baseURL).toBe("https://{{apiKey}}.host.example/translate")
     expect(migrated.providersConfig[3].baseURL).toBe("https://host.example/{{apiKey}}/translate")
   })
@@ -124,7 +139,11 @@ describe("v070-to-v071 migration", () => {
       providersConfig: [
         genericPathToken,
         deeplxProvider({ id: "deeplx-org-token", baseURL: "https://api.deeplx.org/abc/translate" }),
-        deeplxProvider({ id: "confirmed-token", baseURL: "https://host.example/api/abc/translate", apiKey: "abc" }),
+        deeplxProvider({
+          id: "confirmed-token",
+          baseURL: "https://host.example/api/abc/translate",
+          apiKey: "abc",
+        }),
       ],
     })
 

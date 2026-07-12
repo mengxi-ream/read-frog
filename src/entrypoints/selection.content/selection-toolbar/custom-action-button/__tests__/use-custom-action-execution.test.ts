@@ -6,9 +6,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { CUSTOM_ACTION_CONTEXT_CHAR_LIMIT } from "../../../utils"
-import { buildCustomActionExecutionPlan, useCustomActionWebPageContext } from "../use-custom-action-execution"
+import {
+  buildCustomActionExecutionPlan,
+  useCustomActionWebPageContext,
+} from "../use-custom-action-execution"
 
-const getOrCreateWebPageContextMock = vi.fn()
+const getOrCreateWebPageContextMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("@/utils/host/translate/webpage-context", async () => {
   const actual = await vi.importActual<typeof import("@/utils/host/translate/webpage-context")>(
@@ -40,11 +43,12 @@ function WebPageContextProbe({
   popoverSessionKey: number
 }) {
   const webPageContext = useCustomActionWebPageContext(open, popoverSessionKey)
-  const status = webPageContext === undefined
-    ? "pending"
-    : webPageContext === null
-      ? "null"
-      : webPageContext.webTitle
+  const status =
+    webPageContext === undefined
+      ? "pending"
+      : webPageContext === null
+        ? "null"
+        : webPageContext.webTitle
 
   return createElement("div", { "data-testid": "web-page-context" }, status)
 }
@@ -55,7 +59,11 @@ function createCustomActionRequest() {
     throw new Error("Default custom action is missing")
   }
 
-  const provider = resolveProviderRefForCapability("selectionToolbar.customAction", DEFAULT_CONFIG.providersConfig, action.providerId)
+  const provider = resolveProviderRefForCapability(
+    "selectionToolbar.customAction",
+    DEFAULT_CONFIG.providersConfig,
+    action.providerId,
+  )
 
   if (!provider) {
     throw new Error("Default custom action provider must be available")
@@ -85,7 +93,9 @@ describe("useCustomActionWebPageContext", () => {
       .mockImplementationOnce(() => firstRequest.promise)
       .mockImplementationOnce(() => secondRequest.promise)
 
-    const { rerender } = render(createElement(WebPageContextProbe, { open: true, popoverSessionKey: 0 }))
+    const { rerender } = render(
+      createElement(WebPageContextProbe, { open: true, popoverSessionKey: 0 }),
+    )
 
     expect(screen.getByTestId("web-page-context")).toHaveTextContent("pending")
 
@@ -127,7 +137,9 @@ describe("useCustomActionWebPageContext", () => {
       .mockImplementationOnce(() => firstRequest.promise)
       .mockImplementationOnce(() => secondRequest.promise)
 
-    const { rerender } = render(createElement(WebPageContextProbe, { open: true, popoverSessionKey: 0 }))
+    const { rerender } = render(
+      createElement(WebPageContextProbe, { open: true, popoverSessionKey: 0 }),
+    )
 
     await act(async () => {
       firstRequest.resolve({
@@ -181,9 +193,7 @@ describe("buildCustomActionExecutionPlan", () => {
     expect(plan.executionContext?.promptTokens.paragraphs).toBe(
       contextText.slice(0, CUSTOM_ACTION_CONTEXT_CHAR_LIMIT),
     )
-    expect(plan.executionContext?.promptTokens.webContent).toBe(
-      webPageContext.webContent,
-    )
+    expect(plan.executionContext?.promptTokens.webContent).toBe(webPageContext.webContent)
     expect(plan.executionContext?.promptTokens.selection).toBe("Selected text")
   })
 })

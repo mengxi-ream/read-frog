@@ -2,7 +2,6 @@ import { IconAlertCircle } from "@tabler/icons-react"
 import { useAtomValue, useSetAtom } from "jotai"
 import { useState } from "react"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,6 +17,7 @@ import { Button } from "@/components/ui/base-ui/button"
 import { useExportConfig } from "@/hooks/use-export-config"
 import { configAtom, writeConfigAtom } from "@/utils/atoms/config"
 import { CONFIG_SCHEMA_VERSION, DEFAULT_CONFIG } from "@/utils/constants/config"
+import { i18n } from "@/utils/i18n"
 import { Alert, AlertDescription, AlertTitle } from "../ui/base-ui/alert"
 
 interface RecoveryFallbackProps {
@@ -41,18 +41,16 @@ export function RecoveryFallback({ error, onRecovered }: RecoveryFallbackProps) 
       await setConfig(DEFAULT_CONFIG)
       toast.success(i18n.t("errorRecovery.resetSuccess"))
       onRecovered()
-    }
-    catch {
+    } catch {
       toast.error(i18n.t("errorRecovery.resetFailed"))
-    }
-    finally {
+    } finally {
       setIsResetting(false)
     }
   }
 
   return (
-    <div className="w-full min-h-full p-4 md:p-6">
-      <div className="mx-auto max-w-xl rounded-xl border bg-card p-4 md:p-6 space-y-4">
+    <div className="min-h-full w-full p-4 md:p-6">
+      <div className="mx-auto max-w-xl space-y-4 rounded-xl border bg-card p-4 md:p-6">
         <div className="space-y-2">
           <h2 className="text-lg font-semibold">{i18n.t("errorRecovery.title")}</h2>
           <p className="text-sm text-muted-foreground">{i18n.t("errorRecovery.description")}</p>
@@ -92,7 +90,9 @@ export function RecoveryFallback({ error, onRecovered }: RecoveryFallbackProps) 
             {i18n.t("errorRecovery.refreshPage")}
           </Button>
           <AlertDialog>
-            <AlertDialogTrigger render={<Button variant="destructive" disabled={isExporting || isResetting} />}>
+            <AlertDialogTrigger
+              render={<Button variant="destructive" disabled={isExporting || isResetting} />}
+            >
               {i18n.t("errorRecovery.resetAction")}
             </AlertDialogTrigger>
             <AlertDialogContent>

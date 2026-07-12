@@ -13,18 +13,17 @@ export async function getRangeBatchRequestRecords(startDay: number, endDay?: num
   startDate.setHours(0, 0, 0, 0)
   endDate.setHours(23, 59, 59, 999)
 
-  return await db.batchRequestRecord
-    .where("createdAt")
-    .between(startDate, endDate)
-    .toArray()
+  return await db.batchRequestRecord.where("createdAt").between(startDate, endDate).toArray()
 }
 
-export async function putBatchRequestRecord(
-  { originalRequestCount, providerConfig }:
-  { originalRequestCount: number, providerConfig: ProviderConfig },
-) {
-  if (!isLLMProviderConfig(providerConfig))
-    return
+export async function putBatchRequestRecord({
+  originalRequestCount,
+  providerConfig,
+}: {
+  originalRequestCount: number
+  providerConfig: ProviderConfig
+}) {
+  if (!isLLMProviderConfig(providerConfig)) return
 
   const { provider, model: providerModel } = providerConfig
   const modelName = providerModel.isCustomModel ? providerModel.customModel : providerModel.model
@@ -37,17 +36,18 @@ export async function putBatchRequestRecord(
       provider,
       model: modelName ?? "",
     })
-  }
-  catch (error) {
+  } catch (error) {
     logger.error("Failed to put batch request record", error)
   }
 }
 
 export function calculateAverageSavePercentage(batchRequestRecords: BatchRequestRecord[]): string {
-  if (!batchRequestRecords.length)
-    return "0%"
+  if (!batchRequestRecords.length) return "0%"
 
-  const originalRequestCount = batchRequestRecords.reduce((acc, record) => acc + record.originalRequestCount, 0)
+  const originalRequestCount = batchRequestRecords.reduce(
+    (acc, record) => acc + record.originalRequestCount,
+    0,
+  )
   const batchRequestCount = batchRequestRecords.length
 
   const averageSavePercent = (originalRequestCount - batchRequestCount) / originalRequestCount

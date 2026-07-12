@@ -5,8 +5,8 @@ import { openOptionsPage } from "../navigation"
 describe("navigation", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    browser.runtime.openOptionsPage = vi.fn().mockResolvedValue(undefined)
-    browser.tabs.create = vi.fn().mockResolvedValue({})
+    browser.runtime.openOptionsPage = vi.fn<() => Promise<void>>().mockResolvedValue(undefined)
+    browser.tabs.create = vi.fn<(...args: any[]) => any>().mockResolvedValue({})
   })
 
   it("opens the options page through the runtime API", async () => {
@@ -17,7 +17,9 @@ describe("navigation", () => {
   })
 
   it("falls back to an extension tab when the runtime API fails", async () => {
-    browser.runtime.openOptionsPage = vi.fn().mockRejectedValue(new Error("failed"))
+    browser.runtime.openOptionsPage = vi
+      .fn<() => Promise<void>>()
+      .mockRejectedValue(new Error("failed"))
 
     await openOptionsPage()
 

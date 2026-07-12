@@ -51,11 +51,17 @@ function isObject(value: unknown): value is Record<string, any> {
 }
 
 function isTranslateProviderName(providerName: unknown): boolean {
-  return typeof providerName === "string" && TRANSLATE_PROVIDER_TYPES.includes(providerName as (typeof TRANSLATE_PROVIDER_TYPES)[number])
+  return (
+    typeof providerName === "string" &&
+    TRANSLATE_PROVIDER_TYPES.includes(providerName as (typeof TRANSLATE_PROVIDER_TYPES)[number])
+  )
 }
 
 function isLLMProviderName(providerName: unknown): boolean {
-  return typeof providerName === "string" && LLM_PROVIDER_TYPES.includes(providerName as (typeof LLM_PROVIDER_TYPES)[number])
+  return (
+    typeof providerName === "string" &&
+    LLM_PROVIDER_TYPES.includes(providerName as (typeof LLM_PROVIDER_TYPES)[number])
+  )
 }
 
 function migrateProviderModel(provider: any): any {
@@ -65,20 +71,20 @@ function migrateProviderModel(provider: any): any {
 
   const hasUnifiedModel = isObject(provider.model)
   if (hasUnifiedModel) {
-    const { models, ...rest } = provider
+    const { models: _models, ...rest } = provider
     return rest
   }
 
   const translateModel = provider.models?.translate
   if (isObject(translateModel)) {
-    const { models, ...rest } = provider
+    const { models: _models, ...rest } = provider
     return {
       ...rest,
       model: translateModel,
     }
   }
 
-  const { models, ...rest } = provider
+  const { models: _models, ...rest } = provider
   return rest
 }
 
@@ -92,30 +98,43 @@ function migrateProviderModels(providersConfig: unknown): any[] {
 
 function getTranslateProviderIds(providersConfig: any[]): string[] {
   return providersConfig
-    .filter(provider => isObject(provider)
-      && typeof provider.id === "string"
-      && isTranslateProviderName(provider.provider))
-    .map(provider => provider.id)
+    .filter(
+      (provider) =>
+        isObject(provider) &&
+        typeof provider.id === "string" &&
+        isTranslateProviderName(provider.provider),
+    )
+    .map((provider) => provider.id)
 }
 
 function getLLMProviderIds(providersConfig: any[]): string[] {
   return providersConfig
-    .filter(provider => isObject(provider)
-      && typeof provider.id === "string"
-      && isLLMProviderName(provider.provider))
-    .map(provider => provider.id)
+    .filter(
+      (provider) =>
+        isObject(provider) &&
+        typeof provider.id === "string" &&
+        isLLMProviderName(provider.provider),
+    )
+    .map((provider) => provider.id)
 }
 
 function resolveTranslateProviderId(oldConfig: any, translateProviderIds: string[]): string {
   const configuredProviderId = oldConfig?.translate?.providerId
-  if (typeof configuredProviderId === "string" && translateProviderIds.includes(configuredProviderId)) {
+  if (
+    typeof configuredProviderId === "string" &&
+    translateProviderIds.includes(configuredProviderId)
+  ) {
     return configuredProviderId
   }
 
   return translateProviderIds[0] ?? "microsoft-translate-default"
 }
 
-function resolveVocabularyInsightProviderId(oldConfig: any, fallbackProviderId: string, llmProviderIds: string[]): string {
+function resolveVocabularyInsightProviderId(
+  oldConfig: any,
+  fallbackProviderId: string,
+  llmProviderIds: string[],
+): string {
   // Prefer legacy read provider (vocabulary insight is the successor to read)
   const readProviderId = oldConfig?.read?.providerId
   if (typeof readProviderId === "string" && llmProviderIds.includes(readProviderId)) {
@@ -134,9 +153,12 @@ function normalizeFeatureConfig(
   fallbackProviderId: string,
   allowedProviderIds: string[],
 ): SelectionToolbarFeatureConfig {
-  const providerId = isObject(rawFeatureConfig) && typeof rawFeatureConfig.providerId === "string" && allowedProviderIds.includes(rawFeatureConfig.providerId)
-    ? rawFeatureConfig.providerId
-    : fallbackProviderId
+  const providerId =
+    isObject(rawFeatureConfig) &&
+    typeof rawFeatureConfig.providerId === "string" &&
+    allowedProviderIds.includes(rawFeatureConfig.providerId)
+      ? rawFeatureConfig.providerId
+      : fallbackProviderId
 
   return {
     providerId,
@@ -144,14 +166,20 @@ function normalizeFeatureConfig(
 }
 
 function migrateSelectionToolbarFeatures(oldConfig: any, providersConfig: any[]) {
-  const oldSelectionToolbar = isObject(oldConfig?.selectionToolbar) ? oldConfig.selectionToolbar : {}
+  const oldSelectionToolbar = isObject(oldConfig?.selectionToolbar)
+    ? oldConfig.selectionToolbar
+    : {}
   const oldFeatures = isObject(oldSelectionToolbar.features) ? oldSelectionToolbar.features : {}
 
   const translateProviderIds = getTranslateProviderIds(providersConfig)
   const llmProviderIds = getLLMProviderIds(providersConfig)
 
   const defaultTranslateProviderId = resolveTranslateProviderId(oldConfig, translateProviderIds)
-  const defaultVocabularyInsightProviderId = resolveVocabularyInsightProviderId(oldConfig, defaultTranslateProviderId, llmProviderIds)
+  const defaultVocabularyInsightProviderId = resolveVocabularyInsightProviderId(
+    oldConfig,
+    defaultTranslateProviderId,
+    llmProviderIds,
+  )
 
   const features = {
     translate: normalizeFeatureConfig(
@@ -168,7 +196,9 @@ function migrateSelectionToolbarFeatures(oldConfig: any, providersConfig: any[])
 
   return {
     enabled: oldSelectionToolbar.enabled ?? true,
-    disabledSelectionToolbarPatterns: Array.isArray(oldSelectionToolbar.disabledSelectionToolbarPatterns)
+    disabledSelectionToolbarPatterns: Array.isArray(
+      oldSelectionToolbar.disabledSelectionToolbarPatterns,
+    )
       ? oldSelectionToolbar.disabledSelectionToolbarPatterns
       : [],
     features,
@@ -176,8 +206,12 @@ function migrateSelectionToolbarFeatures(oldConfig: any, providersConfig: any[])
 }
 
 function reorderProviders(providersConfig: any[]): any[] {
-  const msIndex = providersConfig.findIndex(p => isObject(p) && p.provider === "microsoft-translate")
-  const googleIndex = providersConfig.findIndex(p => isObject(p) && p.provider === "google-translate")
+  const msIndex = providersConfig.findIndex(
+    (p) => isObject(p) && p.provider === "microsoft-translate",
+  )
+  const googleIndex = providersConfig.findIndex(
+    (p) => isObject(p) && p.provider === "google-translate",
+  )
 
   if (msIndex === -1 || googleIndex === -1 || msIndex < googleIndex) {
     return providersConfig
@@ -222,7 +256,9 @@ export function migrate(oldConfig: any): any {
   }
 
   const configWithoutRead = removeReadConfig(oldConfig)
-  const migratedProvidersConfig = reorderProviders(migrateProviderModels(configWithoutRead.providersConfig))
+  const migratedProvidersConfig = reorderProviders(
+    migrateProviderModels(configWithoutRead.providersConfig),
+  )
   const translateProviderIds = getTranslateProviderIds(migratedProvidersConfig)
 
   return {

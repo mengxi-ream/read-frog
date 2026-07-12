@@ -7,6 +7,6 @@ export const isSideOpenAtom = atom(false)
 
 export const isDraggingButtonAtom = atom(false)
 
-export const enablePageTranslationAtom = createTranslationStateAtomForContentScript(
-  { enabled: false },
-)
+export const enablePageTranslationAtom = createTranslationStateAtomForContentScript({
+  enabled: false,
+})

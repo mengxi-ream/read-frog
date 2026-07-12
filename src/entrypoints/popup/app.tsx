@@ -1,6 +1,6 @@
 import { Icon } from "@iconify/react"
-import { i18n } from "#imports"
-import { UserAccount } from "@/components/user-account"
+import { UserAccountMenuPopup } from "@/components/user-account-menu"
+import { i18n } from "@/utils/i18n"
 import { openOptionsPage } from "@/utils/navigation"
 import { version } from "../../../package.json"
 import { AISmartContext } from "./components/ai-smart-context"
@@ -20,9 +20,9 @@ import TranslationModeSelector from "./components/translation-mode-selector"
 function App() {
   return (
     <>
-      <div className="bg-background flex flex-col gap-4 px-6 pt-5 pb-4">
+      <div className="flex flex-col gap-4 bg-background px-6 pt-5 pb-4">
         <div className="flex items-center justify-between">
-          <UserAccount />
+          <UserAccountMenuPopup />
           <div className="flex items-center">
             <TranslationHubButton />
             <DiscordButton />
@@ -50,13 +50,9 @@ function App() {
           }}
         >
           <Icon icon="tabler:settings" className="size-4" strokeWidth={1.6} />
-          <span className="text-[13px] font-medium">
-            {i18n.t("popup.options")}
-          </span>
+          <span className="text-[13px] font-medium">{i18n.t("popup.options")}</span>
         </button>
-        <span className="text-sm text-neutral-500 dark:text-neutral-400">
-          {version}
-        </span>
+        <span className="text-sm text-neutral-500 dark:text-neutral-400">{version}</span>
         <MoreMenu />
       </div>
     </>

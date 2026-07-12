@@ -6,8 +6,8 @@
 function getCryptoWithRandomValues(): Crypto {
   if (typeof crypto === "undefined" || typeof crypto.getRandomValues !== "function") {
     throw new TypeError(
-      "[crypto-polyfill] crypto.getRandomValues is required but not available. "
-      + "This polyfill only works in browser environments.",
+      "[crypto-polyfill] crypto.getRandomValues is required but not available. " +
+        "This polyfill only works in browser environments.",
     )
   }
 
@@ -19,11 +19,10 @@ export function generateUUIDv4(): string {
   const cryptoWithRandomValues = getCryptoWithRandomValues()
   const bytes = new Uint8Array(16)
   cryptoWithRandomValues.getRandomValues(bytes)
-  bytes[6] = (bytes[6]! & 0x0F) | 0x40 // Version 4: set bits 12-15 to 0100
-  bytes[8] = (bytes[8]! & 0x3F) | 0x80 // Variant 1: set bits 6-7 to 10
+  bytes[6] = (bytes[6] & 0x0f) | 0x40 // Version 4: set bits 12-15 to 0100
+  bytes[8] = (bytes[8] & 0x3f) | 0x80 // Variant 1: set bits 6-7 to 10
 
-  const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, "0"))
-    .join("")
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")
 
   // Format: xxxxxxxx-xxxx-4xxx-Nxxx-xxxxxxxxxxxx (8-4-4-4-12)
   return [

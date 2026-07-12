@@ -14,7 +14,7 @@ function pad(value: number, size: number): string {
 function sanitizeFilenamePart(value: string): string {
   return value
     .split("")
-    .filter(char => char >= " ")
+    .filter((char) => char >= " ")
     .join("")
     .replace(INVALID_FILENAME_CHARS_PATTERN, " ")
     .replace(WHITESPACE_PATTERN, " ")
@@ -36,7 +36,7 @@ export function formatSrtTimestamp(timeMs: number): string {
 function normalizeSubtitleText(text: string): string {
   return text
     .split(LINE_BREAK_PATTERN)
-    .map(line => line.trim())
+    .map((line) => line.trim())
     .filter(Boolean)
     .join("\n")
 }
@@ -84,7 +84,9 @@ export function buildSubtitlesSrtFilename({
   const safeTitle = sanitizeFilenamePart(pageTitle)
   const safeVideoId = sanitizeFilenamePart(videoId ?? "")
   const safeSuffix = sanitizeFilenamePart(suffix ?? "")
-  const baseName = [safeTitle || "video-subtitles", safeVideoId, safeSuffix].filter(Boolean).join("-")
+  const baseName = [safeTitle || "video-subtitles", safeVideoId, safeSuffix]
+    .filter(Boolean)
+    .join("-")
 
   return `${baseName}.srt`
 }

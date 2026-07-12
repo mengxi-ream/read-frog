@@ -1,39 +1,38 @@
-import type { ConfigMeta, ConfigValueAndMeta, LastSyncedConfigMeta, LastSyncedConfigValueAndMeta } from "@/types/config/meta"
+import type {
+  ConfigMeta,
+  ConfigValueAndMeta,
+  LastSyncedConfigMeta,
+  LastSyncedConfigValueAndMeta,
+} from "@/types/config/meta"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { ConfigVersionTooNewError } from "@/utils/config/errors"
-import {
-  getLocalConfigAndMeta,
-  setLocalConfigAndMeta,
-} from "@/utils/config/storage"
-import {
-  getLastSyncedConfigAndMeta,
-  setLastSyncConfigAndMeta,
-} from "@/utils/config/sync"
+import { getLocalConfigAndMeta, setLocalConfigAndMeta } from "@/utils/config/storage"
+import { getLastSyncedConfigAndMeta, setLastSyncConfigAndMeta } from "@/utils/config/sync"
 import { getRemoteConfigAndMetaWithUserEmail, setRemoteConfigAndMeta } from "../storage"
 import { syncConfig } from "../sync"
 
 // Mock the storage modules
 vi.mock("@/utils/config/storage", () => ({
-  getLocalConfigAndMeta: vi.fn(),
-  setLocalConfigAndMeta: vi.fn(),
+  getLocalConfigAndMeta: vi.fn<(...args: any[]) => any>(),
+  setLocalConfigAndMeta: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/config/sync", () => ({
-  getLastSyncedConfigAndMeta: vi.fn(),
-  setLastSyncConfigAndMeta: vi.fn(),
+  getLastSyncedConfigAndMeta: vi.fn<(...args: any[]) => any>(),
+  setLastSyncConfigAndMeta: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("../storage", () => ({
-  getRemoteConfigAndMetaWithUserEmail: vi.fn(),
-  setRemoteConfigAndMeta: vi.fn(),
+  getRemoteConfigAndMetaWithUserEmail: vi.fn<(...args: any[]) => any>(),
+  setRemoteConfigAndMeta: vi.fn<(...args: any[]) => any>(),
 }))
 
 // Mock the logger
 vi.mock("@/utils/logger", () => ({
   logger: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
+    info: vi.fn<(...args: any[]) => any>(),
+    warn: vi.fn<(...args: any[]) => any>(),
+    error: vi.fn<(...args: any[]) => any>(),
   },
 }))
 
@@ -146,7 +145,10 @@ describe("syncConfig", () => {
         createConfigValueAndMeta(localConfig, { lastModifiedAt: 2000 }),
       )
       vi.mocked(getLastSyncedConfigAndMeta).mockResolvedValue(
-        createLastSyncedConfigValueAndMeta(localConfig, { email: "a@test.com", lastModifiedAt: 1000 }),
+        createLastSyncedConfigValueAndMeta(localConfig, {
+          email: "a@test.com",
+          lastModifiedAt: 1000,
+        }),
       )
       vi.mocked(getRemoteConfigAndMetaWithUserEmail).mockResolvedValue({
         configValueAndMeta: createConfigValueAndMeta(remoteBConfig, { lastModifiedAt: 3000 }),
@@ -171,7 +173,10 @@ describe("syncConfig", () => {
         createConfigValueAndMeta(localConfig, { lastModifiedAt: 2000 }),
       )
       vi.mocked(getLastSyncedConfigAndMeta).mockResolvedValue(
-        createLastSyncedConfigValueAndMeta(localConfig, { email: "a@test.com", lastModifiedAt: 1000 }),
+        createLastSyncedConfigValueAndMeta(localConfig, {
+          email: "a@test.com",
+          lastModifiedAt: 1000,
+        }),
       )
       vi.mocked(getRemoteConfigAndMetaWithUserEmail).mockResolvedValue({
         configValueAndMeta: null,
@@ -200,7 +205,10 @@ describe("syncConfig", () => {
           createConfigValueAndMeta(changedConfig, { lastModifiedAt: 2000 }),
         )
         vi.mocked(getLastSyncedConfigAndMeta).mockResolvedValue(
-          createLastSyncedConfigValueAndMeta(baseConfig, { email: "a@test.com", lastModifiedAt: 1000 }),
+          createLastSyncedConfigValueAndMeta(baseConfig, {
+            email: "a@test.com",
+            lastModifiedAt: 1000,
+          }),
         )
         vi.mocked(getRemoteConfigAndMetaWithUserEmail).mockResolvedValue({
           configValueAndMeta: createConfigValueAndMeta(changedConfig, { lastModifiedAt: 2500 }),
@@ -227,7 +235,10 @@ describe("syncConfig", () => {
           createConfigValueAndMeta(localConfig, { lastModifiedAt: 2000 }),
         )
         vi.mocked(getLastSyncedConfigAndMeta).mockResolvedValue(
-          createLastSyncedConfigValueAndMeta(baseConfig, { email: "a@test.com", lastModifiedAt: 1000 }),
+          createLastSyncedConfigValueAndMeta(baseConfig, {
+            email: "a@test.com",
+            lastModifiedAt: 1000,
+          }),
         )
         vi.mocked(getRemoteConfigAndMetaWithUserEmail).mockResolvedValue({
           configValueAndMeta: createConfigValueAndMeta(remoteConfig, { lastModifiedAt: 2500 }),
@@ -259,7 +270,10 @@ describe("syncConfig", () => {
         createConfigValueAndMeta(baseConfig, { lastModifiedAt: 1000 }),
       )
       vi.mocked(getLastSyncedConfigAndMeta).mockResolvedValue(
-        createLastSyncedConfigValueAndMeta(baseConfig, { email: "a@test.com", lastModifiedAt: 1000 }),
+        createLastSyncedConfigValueAndMeta(baseConfig, {
+          email: "a@test.com",
+          lastModifiedAt: 1000,
+        }),
       )
       vi.mocked(getRemoteConfigAndMetaWithUserEmail).mockResolvedValue({
         configValueAndMeta: createConfigValueAndMeta(remoteConfig, { lastModifiedAt: 2000 }),
@@ -282,7 +296,10 @@ describe("syncConfig", () => {
         createConfigValueAndMeta(localConfig, { lastModifiedAt: 2000 }),
       )
       vi.mocked(getLastSyncedConfigAndMeta).mockResolvedValue(
-        createLastSyncedConfigValueAndMeta(baseConfig, { email: "a@test.com", lastModifiedAt: 1000 }),
+        createLastSyncedConfigValueAndMeta(baseConfig, {
+          email: "a@test.com",
+          lastModifiedAt: 1000,
+        }),
       )
       vi.mocked(getRemoteConfigAndMetaWithUserEmail).mockResolvedValue({
         configValueAndMeta: createConfigValueAndMeta(baseConfig, { lastModifiedAt: 1000 }),
@@ -329,7 +346,10 @@ describe("syncConfig", () => {
           createConfigValueAndMeta(localConfig, { lastModifiedAt: 2000 }),
         )
         vi.mocked(getLastSyncedConfigAndMeta).mockResolvedValue(
-          createLastSyncedConfigValueAndMeta(baseConfig, { email: "a@test.com", lastModifiedAt: 1000 }),
+          createLastSyncedConfigValueAndMeta(baseConfig, {
+            email: "a@test.com",
+            lastModifiedAt: 1000,
+          }),
         )
         vi.mocked(getRemoteConfigAndMetaWithUserEmail).mockResolvedValue({
           configValueAndMeta: null,

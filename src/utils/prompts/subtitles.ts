@@ -20,9 +20,9 @@ export async function getSubtitlesTranslatePrompt(
   input: string,
   options?: TranslatePromptOptions<SubtitlePromptContext>,
 ): Promise<TranslatePromptResult> {
-  const config = await getLocalConfig() ?? DEFAULT_CONFIG
+  const config = (await getLocalConfig()) ?? DEFAULT_CONFIG
   const customPromptsConfig = config.videoSubtitles.customPromptsConfig
-  const { patterns = [], promptId } = customPromptsConfig
+  const { patterns, promptId } = customPromptsConfig
 
   // Resolve system prompt and user prompt
   let systemPrompt: string
@@ -32,10 +32,9 @@ export async function getSubtitlesTranslatePrompt(
     // Use default prompts from constants
     systemPrompt = DEFAULT_SUBTITLE_TRANSLATE_SYSTEM_PROMPT
     prompt = DEFAULT_SUBTITLE_TRANSLATE_PROMPT
-  }
-  else {
+  } else {
     // Find custom prompt, fallback to default
-    const customPrompt = patterns.find(pattern => pattern.id === promptId)
+    const customPrompt = patterns.find((pattern) => pattern.id === promptId)
     systemPrompt = customPrompt?.systemPrompt ?? DEFAULT_SUBTITLE_TRANSLATE_SYSTEM_PROMPT
     prompt = customPrompt?.prompt ?? DEFAULT_SUBTITLE_TRANSLATE_PROMPT
   }
@@ -49,8 +48,14 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
 
   // Build title and summary replacement values
   const title = resolvePromptReplacementValue(options?.context?.webTitle, "No title available")
-  const description = resolvePromptReplacementValue(options?.context?.webDescription, "No description available")
-  const summary = resolvePromptReplacementValue(options?.context?.videoSummary, "No summary available")
+  const description = resolvePromptReplacementValue(
+    options?.context?.webDescription,
+    "No description available",
+  )
+  const summary = resolvePromptReplacementValue(
+    options?.context?.videoSummary,
+    "No summary available",
+  )
 
   // Replace tokens in both prompts
   const replaceTokens = (text: string) =>

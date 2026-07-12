@@ -1,6 +1,10 @@
 import type { Config } from "@/types/config/config"
 import type { APIProviderConfig, APIProviderTypes } from "@/types/config/provider"
-import { API_PROVIDER_ITEMS, DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
+import {
+  API_PROVIDER_ITEMS,
+  DEFAULT_PROVIDER_CONFIG,
+  getDefaultProviderDescription,
+} from "@/utils/constants/providers"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { getUniqueName } from "@/utils/name"
 
@@ -10,11 +14,13 @@ export async function addProvider(
   setProvidersConfig: (config: Partial<Config["providersConfig"]>) => Promise<void>,
   setSelectedProviderId?: (id: string) => void,
 ): Promise<string> {
-  const existingNames = new Set(providersConfig.map(p => p.name))
+  const existingNames = new Set(providersConfig.map((p) => p.name))
   const providerName = getUniqueName(API_PROVIDER_ITEMS[providerType].name, existingNames)
 
+  const description = getDefaultProviderDescription(providerType)
   const newProvider: APIProviderConfig = {
     ...structuredClone(DEFAULT_PROVIDER_CONFIG[providerType]),
+    ...(description ? { description } : {}),
     id: getRandomUUID(),
     name: providerName,
   }
@@ -35,7 +41,7 @@ export async function duplicateProvider(
   setProvidersConfig: (config: Partial<Config["providersConfig"]>) => Promise<void>,
   setSelectedProviderId?: (id: string) => void,
 ): Promise<string> {
-  const existingNames = new Set(providersConfig.map(p => p.name))
+  const existingNames = new Set(providersConfig.map((p) => p.name))
   const newProvider: APIProviderConfig = {
     ...structuredClone(providerConfig),
     id: getRandomUUID(),

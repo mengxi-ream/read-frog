@@ -5,7 +5,7 @@ import { shouldSkipByLanguage } from "../translate-text"
 
 // Mock detectLanguage
 vi.mock("@/utils/content/language", () => ({
-  detectLanguage: vi.fn(),
+  detectLanguage: vi.fn<(...args: any[]) => any>(),
 }))
 
 const mockedDetect = vi.mocked(detectLanguage)
@@ -22,11 +22,7 @@ describe("shouldSkipByLanguage", () => {
       const japaneseText = "これは日本語のテストです。日本語で書かれたテキストです。"
       const skipLanguages: LangCodeISO6393[] = ["jpn"]
 
-      const result = await shouldSkipByLanguage(
-        japaneseText,
-        skipLanguages,
-        false,
-      )
+      const result = await shouldSkipByLanguage(japaneseText, skipLanguages, false)
 
       expect(result).toBe(true)
     })
@@ -37,11 +33,7 @@ describe("shouldSkipByLanguage", () => {
       const englishText = "This is a test written in English."
       const skipLanguages: LangCodeISO6393[] = ["jpn"]
 
-      const result = await shouldSkipByLanguage(
-        englishText,
-        skipLanguages,
-        false,
-      )
+      const result = await shouldSkipByLanguage(englishText, skipLanguages, false)
 
       expect(result).toBe(false)
     })
@@ -52,11 +44,7 @@ describe("shouldSkipByLanguage", () => {
       const japaneseText = "これは日本語のテストです。日本語で書かれたテキストです。"
       const skipLanguages: LangCodeISO6393[] = []
 
-      const result = await shouldSkipByLanguage(
-        japaneseText,
-        skipLanguages,
-        false,
-      )
+      const result = await shouldSkipByLanguage(japaneseText, skipLanguages, false)
 
       expect(result).toBe(false)
     })
@@ -67,11 +55,7 @@ describe("shouldSkipByLanguage", () => {
       const undetectableText = "12345 67890 !@#$%"
       const skipLanguages: LangCodeISO6393[] = ["jpn", "eng"]
 
-      const result = await shouldSkipByLanguage(
-        undetectableText,
-        skipLanguages,
-        false,
-      )
+      const result = await shouldSkipByLanguage(undetectableText, skipLanguages, false)
 
       expect(result).toBe(false)
     })
@@ -84,11 +68,7 @@ describe("shouldSkipByLanguage", () => {
       const text = "これは日本語のテストです。日本語で書かれたテキストです。"
       const skipLanguages: LangCodeISO6393[] = ["jpn"]
 
-      const result = await shouldSkipByLanguage(
-        text,
-        skipLanguages,
-        true,
-      )
+      const result = await shouldSkipByLanguage(text, skipLanguages, true)
 
       expect(mockedDetect).toHaveBeenCalledWith(text, {
         minLength: 10,
@@ -103,11 +83,7 @@ describe("shouldSkipByLanguage", () => {
       const japaneseText = "これは日本語のテストです。日本語で書かれたテキストです。"
       const skipLanguages: LangCodeISO6393[] = ["jpn"]
 
-      const result = await shouldSkipByLanguage(
-        japaneseText,
-        skipLanguages,
-        true,
-      )
+      const result = await shouldSkipByLanguage(japaneseText, skipLanguages, true)
 
       expect(mockedDetect).toHaveBeenCalled()
       expect(result).toBe(false) // null detection means no skip
@@ -119,11 +95,7 @@ describe("shouldSkipByLanguage", () => {
       const japaneseText = "これは日本語のテストです。日本語で書かれたテキストです。"
       const skipLanguages: LangCodeISO6393[] = ["jpn"]
 
-      await shouldSkipByLanguage(
-        japaneseText,
-        skipLanguages,
-        true,
-      )
+      await shouldSkipByLanguage(japaneseText, skipLanguages, true)
 
       expect(mockedDetect).toHaveBeenCalledWith(japaneseText, {
         minLength: 10,

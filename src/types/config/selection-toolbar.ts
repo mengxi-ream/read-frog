@@ -31,82 +31,85 @@ export const selectionToolbarCustomActionNotebaseConnectionSchema = z.object({
   mappings: z.array(selectionToolbarCustomActionNotebaseMappingSchema),
 })
 
-export const selectionToolbarCustomActionSchema = z.object({
-  id: z.string().nonempty(),
-  name: z.string().nonempty(),
-  enabled: z.boolean().optional(),
-  icon: z.string(),
-  providerId: z.string().nonempty(),
-  systemPrompt: z.string(),
-  prompt: z.string(),
-  outputSchema: z.array(selectionToolbarCustomActionOutputFieldSchema).min(1),
-  notebaseConnection: selectionToolbarCustomActionNotebaseConnectionSchema.optional(),
-}).superRefine((action, ctx) => {
-  const nameSet = new Set<string>()
-  const outputFieldIds = new Set<string>()
+export const selectionToolbarCustomActionSchema = z
+  .object({
+    id: z.string().nonempty(),
+    name: z.string().nonempty(),
+    enabled: z.boolean().optional(),
+    icon: z.string(),
+    providerId: z.string().nonempty(),
+    systemPrompt: z.string(),
+    prompt: z.string(),
+    outputSchema: z.array(selectionToolbarCustomActionOutputFieldSchema).min(1),
+    notebaseConnection: selectionToolbarCustomActionNotebaseConnectionSchema.optional(),
+  })
+  .superRefine((action, ctx) => {
+    const nameSet = new Set<string>()
+    const outputFieldIds = new Set<string>()
 
-  action.outputSchema.forEach((field, index) => {
-    if (nameSet.has(field.name)) {
-      ctx.addIssue({
-        code: "custom",
-        message: `Duplicate output schema name "${field.name}".`,
-        path: ["outputSchema", index, "name"],
-      })
+    action.outputSchema.forEach((field, index) => {
+      if (nameSet.has(field.name)) {
+        ctx.addIssue({
+          code: "custom",
+          message: `Duplicate output schema name "${field.name}".`,
+          path: ["outputSchema", index, "name"],
+        })
+        return
+      }
+      nameSet.add(field.name)
+      outputFieldIds.add(field.id)
+    })
+
+    const connection = action.notebaseConnection
+    if (!connection) {
       return
     }
-    nameSet.add(field.name)
-    outputFieldIds.add(field.id)
+
+    const mappingIdSet = new Set<string>()
+    const localFieldIdSet = new Set<string>()
+    const notebaseColumnIdSet = new Set<string>()
+
+    connection.mappings.forEach((mapping, index) => {
+      if (mappingIdSet.has(mapping.id)) {
+        ctx.addIssue({
+          code: "custom",
+          message: `Duplicate notebase mapping id "${mapping.id}".`,
+          path: ["notebaseConnection", "mappings", index, "id"],
+        })
+      }
+      mappingIdSet.add(mapping.id)
+
+      if (!outputFieldIds.has(mapping.localFieldId)) {
+        ctx.addIssue({
+          code: "custom",
+          message: `Unknown output field id "${mapping.localFieldId}" in notebase mapping.`,
+          path: ["notebaseConnection", "mappings", index, "localFieldId"],
+        })
+      }
+
+      if (localFieldIdSet.has(mapping.localFieldId)) {
+        ctx.addIssue({
+          code: "custom",
+          message: `Duplicate local field id "${mapping.localFieldId}" in notebase mappings.`,
+          path: ["notebaseConnection", "mappings", index, "localFieldId"],
+        })
+      }
+      localFieldIdSet.add(mapping.localFieldId)
+
+      if (notebaseColumnIdSet.has(mapping.notebaseColumnId)) {
+        ctx.addIssue({
+          code: "custom",
+          message: `Duplicate notebase column id "${mapping.notebaseColumnId}" in notebase mappings.`,
+          path: ["notebaseConnection", "mappings", index, "notebaseColumnId"],
+        })
+      }
+      notebaseColumnIdSet.add(mapping.notebaseColumnId)
+    })
   })
 
-  const connection = action.notebaseConnection
-  if (!connection) {
-    return
-  }
-
-  const mappingIdSet = new Set<string>()
-  const localFieldIdSet = new Set<string>()
-  const notebaseColumnIdSet = new Set<string>()
-
-  connection.mappings.forEach((mapping, index) => {
-    if (mappingIdSet.has(mapping.id)) {
-      ctx.addIssue({
-        code: "custom",
-        message: `Duplicate notebase mapping id "${mapping.id}".`,
-        path: ["notebaseConnection", "mappings", index, "id"],
-      })
-    }
-    mappingIdSet.add(mapping.id)
-
-    if (!outputFieldIds.has(mapping.localFieldId)) {
-      ctx.addIssue({
-        code: "custom",
-        message: `Unknown output field id "${mapping.localFieldId}" in notebase mapping.`,
-        path: ["notebaseConnection", "mappings", index, "localFieldId"],
-      })
-    }
-
-    if (localFieldIdSet.has(mapping.localFieldId)) {
-      ctx.addIssue({
-        code: "custom",
-        message: `Duplicate local field id "${mapping.localFieldId}" in notebase mappings.`,
-        path: ["notebaseConnection", "mappings", index, "localFieldId"],
-      })
-    }
-    localFieldIdSet.add(mapping.localFieldId)
-
-    if (notebaseColumnIdSet.has(mapping.notebaseColumnId)) {
-      ctx.addIssue({
-        code: "custom",
-        message: `Duplicate notebase column id "${mapping.notebaseColumnId}" in notebase mappings.`,
-        path: ["notebaseConnection", "mappings", index, "notebaseColumnId"],
-      })
-    }
-    notebaseColumnIdSet.add(mapping.notebaseColumnId)
-  })
-})
-
-export const selectionToolbarCustomActionsSchema = z.array(selectionToolbarCustomActionSchema).superRefine(
-  (actions, ctx) => {
+export const selectionToolbarCustomActionsSchema = z
+  .array(selectionToolbarCustomActionSchema)
+  .superRefine((actions, ctx) => {
     const idSet = new Set<string>()
     actions.forEach((action, index) => {
       if (idSet.has(action.id)) {
@@ -130,13 +133,22 @@ export const selectionToolbarCustomActionsSchema = z.array(selectionToolbarCusto
       }
       nameSet.add(action.name)
     })
-  },
-)
+  })
 
 // TODO: make these vairbale shorter by deleteing SelectionToolbar or "selectionToolbar"
-export type SelectionToolbarCustomActionOutputType = z.infer<typeof selectionToolbarCustomActionOutputTypeSchema>
-export type SelectionToolbarCustomActionOutputField = z.infer<typeof selectionToolbarCustomActionOutputFieldSchema>
-export type SelectionToolbarCustomActionNotebaseMapping = z.infer<typeof selectionToolbarCustomActionNotebaseMappingSchema>
-export type SelectionToolbarCustomActionNotebaseAccount = z.infer<typeof selectionToolbarCustomActionNotebaseAccountSchema>
-export type SelectionToolbarCustomActionNotebaseConnection = z.infer<typeof selectionToolbarCustomActionNotebaseConnectionSchema>
+export type SelectionToolbarCustomActionOutputType = z.infer<
+  typeof selectionToolbarCustomActionOutputTypeSchema
+>
+export type SelectionToolbarCustomActionOutputField = z.infer<
+  typeof selectionToolbarCustomActionOutputFieldSchema
+>
+export type SelectionToolbarCustomActionNotebaseMapping = z.infer<
+  typeof selectionToolbarCustomActionNotebaseMappingSchema
+>
+export type SelectionToolbarCustomActionNotebaseAccount = z.infer<
+  typeof selectionToolbarCustomActionNotebaseAccountSchema
+>
+export type SelectionToolbarCustomActionNotebaseConnection = z.infer<
+  typeof selectionToolbarCustomActionNotebaseConnectionSchema
+>
 export type SelectionToolbarCustomAction = z.infer<typeof selectionToolbarCustomActionSchema>

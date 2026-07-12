@@ -40,8 +40,6 @@ function buildIdSelector(sectionId: string): string {
     return `#${CSS.escape(sectionId)}`
   }
 
-  const escapedSectionId = sectionId
-    .replaceAll("\\", "\\\\")
-    .replaceAll("\"", "\\\"")
+  const escapedSectionId = sectionId.replaceAll("\\", "\\\\").replaceAll('"', '\\"')
   return `[id="${escapedSectionId}"]`
 }

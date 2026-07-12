@@ -14,8 +14,7 @@ const SPINNER_ID = "read-frog-input-translation-spinner"
 function getLastCycleSwapped(): boolean {
   try {
     return sessionStorage.getItem(LAST_CYCLE_SWAPPED_KEY) === "true"
-  }
-  catch {
+  } catch {
     return false
   }
 }
@@ -23,8 +22,7 @@ function getLastCycleSwapped(): boolean {
 function setLastCycleSwapped(swapped: boolean): void {
   try {
     sessionStorage.setItem(LAST_CYCLE_SWAPPED_KEY, String(swapped))
-  }
-  catch {
+  } catch {
     // sessionStorage may not be available
   }
 }
@@ -61,23 +59,17 @@ function showSpinner(element: HTMLElement): () => void {
   `
 
   // Respect user's motion preferences for accessibility
-  const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
+  const prefersReducedMotion =
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
 
   if (!prefersReducedMotion) {
     // Use Web Animations API for rotation
-    spinner.animate(
-      [
-        { transform: "rotate(0deg)" },
-        { transform: "rotate(360deg)" },
-      ],
-      {
-        duration: 600,
-        iterations: Infinity,
-        easing: "linear",
-      },
-    )
-  }
-  else {
+    spinner.animate([{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], {
+      duration: 600,
+      iterations: Infinity,
+      easing: "linear",
+    })
+  } else {
     // For reduced motion, keep the spinner static but preserve the brand
     // segment so the loading state remains visible without animation.
     spinner.style.borderTopColor = "var(--rf-brand)"
@@ -108,7 +100,10 @@ function showSpinner(element: HTMLElement): () => void {
  * Set text content with undo support using execCommand.
  * This allows Ctrl+Z to restore the original text.
  */
-function setTextWithUndo(element: HTMLInputElement | HTMLTextAreaElement | HTMLElement, text: string) {
+function setTextWithUndo(
+  element: HTMLInputElement | HTMLTextAreaElement | HTMLElement,
+  text: string,
+) {
   element.focus()
 
   if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
@@ -129,104 +124,102 @@ export function useInputTranslation() {
   const spaceTimestampsRef = useRef<number[]>([])
   const isTranslatingRef = useRef(false)
 
-  const handleTranslation = useCallback(async (element: HTMLInputElement | HTMLTextAreaElement | HTMLElement) => {
-    if (isTranslatingRef.current)
-      return
+  const handleTranslation = useCallback(
+    async (element: HTMLInputElement | HTMLTextAreaElement | HTMLElement) => {
+      if (isTranslatingRef.current) return
 
-    // Security: skip password fields to prevent exposing sensitive data
-    if (element instanceof HTMLInputElement && element.type === "password") {
-      return
-    }
-
-    // Get the text content based on element type
-    let text: string
-    if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
-      text = element.value
-    }
-    else if (element.isContentEditable) {
-      text = element.textContent || ""
-    }
-    else {
-      return
-    }
-
-    // Remove trailing whitespace added by space key presses
-    text = text.trim()
-
-    // For input/textarea, trim whitespace immediately (execCommand works reliably).
-    // For contenteditable, skip — we'll do a single replacement after translation
-    // returns, because rich text editors can't be updated reliably from isolated world.
-    if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
-      setTextWithUndo(element, text)
-    }
-
-    if (!text) {
-      return
-    }
-
-    // Determine fromLang and toLang, possibly swapped if cycle is enabled
-    let fromLang = inputTranslationConfig.fromLang
-    let toLang = inputTranslationConfig.toLang
-
-    if (inputTranslationConfig.enableCycle) {
-      const wasSwapped = getLastCycleSwapped()
-      if (wasSwapped) {
-        // Already swapped last time, use original direction
-        setLastCycleSwapped(false)
+      // Security: skip password fields to prevent exposing sensitive data
+      if (element instanceof HTMLInputElement && element.type === "password") {
+        return
       }
-      else {
-        // Swap direction
-        ;[fromLang, toLang] = [toLang, fromLang]
-        setLastCycleSwapped(true)
-      }
-    }
 
-    isTranslatingRef.current = true
-
-    // Show spinner near the input element
-    const hideSpinner = showSpinner(element)
-
-    // Store original text to detect if user edited during translation
-    const originalText = text
-
-    try {
-      const translatedText = await trackFeatureAttempt(
-        createFeatureUsageContext(
-          ANALYTICS_FEATURE.INPUT_TRANSLATION,
-          ANALYTICS_SURFACE.INPUT_TRANSLATION,
-        ),
-        () => translateTextForInput(text, fromLang, toLang),
-      )
-
-      // Check if element content changed during translation (user input)
-      let currentText: string
+      // Get the text content based on element type
+      let text: string
       if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
-        currentText = element.value
-      }
-      else if (element.isContentEditable) {
-        currentText = element.textContent || ""
-      }
-      else {
-        currentText = originalText
+        text = element.value
+      } else if (element.isContentEditable) {
+        text = element.textContent || ""
+      } else {
+        return
       }
 
-      // Only apply translation if content hasn't changed during async operation
-      if (currentText.trim() === originalText && translatedText) {
-        setTextWithUndo(element, translatedText)
+      // Remove trailing whitespace added by space key presses
+      text = text.trim()
+
+      // For input/textarea, trim whitespace immediately (execCommand works reliably).
+      // For contenteditable, skip — we'll do a single replacement after translation
+      // returns, because rich text editors can't be updated reliably from isolated world.
+      if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+        setTextWithUndo(element, text)
       }
-    }
-    catch (error) {
-      console.error("Input translation error:", error)
-    }
-    finally {
-      hideSpinner()
-      isTranslatingRef.current = false
-    }
-  }, [inputTranslationConfig.fromLang, inputTranslationConfig.toLang, inputTranslationConfig.enableCycle])
+
+      if (!text) {
+        return
+      }
+
+      // Determine fromLang and toLang, possibly swapped if cycle is enabled
+      let fromLang = inputTranslationConfig.fromLang
+      let toLang = inputTranslationConfig.toLang
+
+      if (inputTranslationConfig.enableCycle) {
+        const wasSwapped = getLastCycleSwapped()
+        if (wasSwapped) {
+          // Already swapped last time, use original direction
+          setLastCycleSwapped(false)
+        } else {
+          // Swap direction
+          ;[fromLang, toLang] = [toLang, fromLang]
+          setLastCycleSwapped(true)
+        }
+      }
+
+      isTranslatingRef.current = true
+
+      // Show spinner near the input element
+      const hideSpinner = showSpinner(element)
+
+      // Store original text to detect if user edited during translation
+      const originalText = text
+
+      try {
+        const translatedText = await trackFeatureAttempt(
+          createFeatureUsageContext(
+            ANALYTICS_FEATURE.INPUT_TRANSLATION,
+            ANALYTICS_SURFACE.INPUT_TRANSLATION,
+          ),
+          () => translateTextForInput(text, fromLang, toLang),
+        )
+
+        // Check if element content changed during translation (user input)
+        let currentText: string
+        if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+          currentText = element.value
+        } else if (element.isContentEditable) {
+          currentText = element.textContent || ""
+        } else {
+          currentText = originalText
+        }
+
+        // Only apply translation if content hasn't changed during async operation
+        if (currentText.trim() === originalText && translatedText) {
+          setTextWithUndo(element, translatedText)
+        }
+      } catch (error) {
+        console.error("Input translation error:", error)
+      } finally {
+        hideSpinner()
+        isTranslatingRef.current = false
+      }
+    },
+    [
+      inputTranslationConfig.fromLang,
+      inputTranslationConfig.toLang,
+      inputTranslationConfig.enableCycle,
+    ],
+  )
 
   useEffect(() => {
-    if (!inputTranslationConfig.enabled)
-      return
+    if (!inputTranslationConfig.enabled) return undefined
 
     const handleKeyDown = (event: KeyboardEvent) => {
       // Only process space key
@@ -238,9 +231,10 @@ export function useInputTranslation() {
 
       // Check if the active element is an input field
       const activeElement = document.activeElement
-      const isInputField = activeElement instanceof HTMLInputElement
-        || activeElement instanceof HTMLTextAreaElement
-        || (activeElement instanceof HTMLElement && activeElement.isContentEditable)
+      const isInputField =
+        activeElement instanceof HTMLInputElement ||
+        activeElement instanceof HTMLTextAreaElement ||
+        (activeElement instanceof HTMLElement && activeElement.isContentEditable)
 
       if (!isInputField || !activeElement) {
         spaceTimestampsRef.current = []
@@ -263,15 +257,14 @@ export function useInputTranslation() {
       if (timestamps.length >= TRIGGER_COUNT) {
         // Check if all presses are within the time threshold
         const allWithinThreshold = timestamps.every((ts, i) => {
-          if (i === 0)
-            return true
+          if (i === 0) return true
           return ts - timestamps[i - 1] <= timeThreshold
         })
 
         if (allWithinThreshold) {
           event.preventDefault()
           spaceTimestampsRef.current = []
-          void handleTranslation(activeElement as HTMLInputElement | HTMLTextAreaElement | HTMLElement)
+          void handleTranslation(activeElement)
         }
       }
     }

@@ -2,7 +2,7 @@ import { Buffer } from "node:buffer"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const { sendMessageMock } = vi.hoisted(() => ({
-  sendMessageMock: vi.fn(),
+  sendMessageMock: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/message", () => ({
@@ -45,27 +45,35 @@ describe("resolveContentScriptAssetUrl", () => {
   })
 
   it("bypasses proxying for non-remote and extension asset URLs", async () => {
-    const { resolveContentScriptAssetBlob, shouldProxyAssetUrl } = await import("../background-asset-url")
+    const { resolveContentScriptAssetBlob, shouldProxyAssetUrl } =
+      await import("../background-asset-url")
 
     await expect(resolveContentScriptAssetBlob("data:image/svg+xml;base64,AAA")).resolves.toBeNull()
-    await expect(resolveContentScriptAssetBlob("moz-extension://abc/assets/provider.png")).resolves.toBeNull()
-    expect(shouldProxyAssetUrl("https://cdn.example.com/logo.webp", "moz-extension://abc/options.html")).toBe(false)
+    await expect(
+      resolveContentScriptAssetBlob("moz-extension://abc/assets/provider.png"),
+    ).resolves.toBeNull()
+    expect(
+      shouldProxyAssetUrl("https://cdn.example.com/logo.webp", "moz-extension://abc/options.html"),
+    ).toBe(false)
     expect(sendMessageMock).not.toHaveBeenCalled()
   })
 
   it("deduplicates concurrent requests for the same asset URL", async () => {
     let resolveFetch:
       | ((value: {
-        status: number
-        statusText: string
-        headers: [string, string][]
-        body: string
-        bodyEncoding: "base64"
-      }) => void)
+          status: number
+          statusText: string
+          headers: [string, string][]
+          body: string
+          bodyEncoding: "base64"
+        }) => void)
       | undefined
-    sendMessageMock.mockImplementation(() => new Promise((resolve) => {
-      resolveFetch = resolve
-    }))
+    sendMessageMock.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveFetch = resolve
+        }),
+    )
 
     const { resolveContentScriptAssetBlob } = await import("../background-asset-url")
     const firstRequest = resolveContentScriptAssetBlob("https://cdn.example.com/logo.webp")
@@ -91,6 +99,8 @@ describe("resolveContentScriptAssetUrl", () => {
 
     const { resolveContentScriptAssetBlob } = await import("../background-asset-url")
 
-    await expect(resolveContentScriptAssetBlob("https://cdn.example.com/logo.webp")).resolves.toBeNull()
+    await expect(
+      resolveContentScriptAssetBlob("https://cdn.example.com/logo.webp"),
+    ).resolves.toBeNull()
   })
 })

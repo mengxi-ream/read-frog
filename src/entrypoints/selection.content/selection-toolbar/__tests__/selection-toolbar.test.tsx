@@ -32,7 +32,11 @@ vi.mock("@/utils/atoms/config", async (importOriginal) => {
         disabledSelectionToolbarPatterns: [],
         opacity: 100,
         features: {
-          translate: { enabled: true, providerId: "microsoft-translate-default", shortcut: "Alt+T" },
+          translate: {
+            enabled: true,
+            providerId: "microsoft-translate-default",
+            shortcut: "Alt+T",
+          },
           speak: { enabled: true },
         },
         customActions: [],
@@ -50,16 +54,18 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     // Mock requestAnimationFrame to execute callbacks synchronously
     rafCallbacks = []
     originalRequestAnimationFrame = window.requestAnimationFrame
-    window.requestAnimationFrame = vi.fn((callback: FrameRequestCallback) => {
-      rafCallbacks.push(callback)
-      return 0
-    })
+    window.requestAnimationFrame = vi.fn<(...args: any[]) => any>(
+      (callback: FrameRequestCallback) => {
+        rafCallbacks.push(callback)
+        return 0
+      },
+    )
 
     // Initialize mock selection text function
-    mockSelectionToString = vi.fn(() => MOCK_SELECTED_TEXT)
+    mockSelectionToString = vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT)
 
     // Mock window.getSelection with dynamic text
-    window.getSelection = vi.fn(() => ({
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
       toString: mockSelectionToString,
       getRangeAt: () => ({
         startContainer: document.body,
@@ -67,8 +73,8 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn(() => true),
-    })) as unknown as typeof window.getSelection
+      containsNode: vi.fn<(...args: any[]) => any>(() => true),
+    }))
   })
 
   afterEach(() => {
@@ -79,16 +85,16 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
   })
 
   const setMockSelectionText = (text: string, containsNodeResult = true) => {
-    window.getSelection = vi.fn(() => ({
-      toString: vi.fn(() => text),
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: vi.fn<(...args: any[]) => any>(() => text),
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn(() => containsNodeResult),
-    })) as unknown as typeof window.getSelection
+      containsNode: vi.fn<(...args: any[]) => any>(() => containsNodeResult),
+    }))
   }
 
   const clearToolbarState = async () => {
@@ -99,11 +105,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     setMockSelectionText(MOCK_SELECTED_TEXT)
   }
 
-  const triggerMouseUpWithSelection = async (
-    target: Element,
-    clientX = 100,
-    clientY = 100,
-  ) => {
+  const triggerMouseUpWithSelection = async (target: Element, clientX = 100, clientY = 100) => {
     const mouseUpEvent = new MouseEvent("mouseup", {
       bubbles: true,
       clientX,
@@ -119,7 +121,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
       target.dispatchEvent(mouseUpEvent)
       const callbacks = [...rafCallbacks]
       rafCallbacks = []
-      callbacks.forEach(cb => cb(0))
+      callbacks.forEach((cb) => cb(0))
     })
   }
 
@@ -131,9 +133,10 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expect(document.querySelector(".absolute.z-2147483647")).toHaveClass("opacity-0")
   }
 
-  const getToolbar = () => document.querySelector(".absolute.z-2147483647") as HTMLElement | null
+  const getToolbar = () => document.querySelector<HTMLElement>(".absolute.z-2147483647")
 
-  const getToolbarSurface = () => document.querySelector("[data-slot='selection-toolbar-surface']") as HTMLElement | null
+  const getToolbarSurface = () =>
+    document.querySelector<HTMLElement>("[data-slot='selection-toolbar-surface']")
 
   it("applies configured opacity on the toolbar surface instead of the overlay host", () => {
     render(<SelectionToolbar />)
@@ -151,7 +154,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     )
 
     await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
   })
 
   it("should show toolbar when selecting text in input and target equals activeElement", async () => {
@@ -166,7 +169,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     const spy = vi.spyOn(document, "activeElement", "get").mockReturnValue(element)
 
     await triggerMouseUpWithSelection(element)
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
 
     spy.mockRestore()
   })
@@ -183,7 +186,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     const spy = vi.spyOn(document, "activeElement", "get").mockReturnValue(element)
 
     await triggerMouseUpWithSelection(element)
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
 
     spy.mockRestore()
   })
@@ -199,9 +202,9 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     await clearToolbarState()
 
-    const spy = vi.spyOn(document, "activeElement", "get").mockReturnValue(
-      screen.getByTestId("input-element"),
-    )
+    const spy = vi
+      .spyOn(document, "activeElement", "get")
+      .mockReturnValue(screen.getByTestId("input-element"))
 
     await triggerMouseUpWithSelection(screen.getByTestId("outside-div"))
     expectToolbarHidden()
@@ -220,9 +223,9 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     await clearToolbarState()
 
-    const spy = vi.spyOn(document, "activeElement", "get").mockReturnValue(
-      screen.getByTestId("textarea-element"),
-    )
+    const spy = vi
+      .spyOn(document, "activeElement", "get")
+      .mockReturnValue(screen.getByTestId("textarea-element"))
 
     await triggerMouseUpWithSelection(screen.getByTestId("outside-div"))
     expectToolbarHidden()
@@ -259,7 +262,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     await clearToolbarState()
 
     await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
   })
 
   it("should keep the toolbar visible on right-click so context menu translation can reuse the selection", async () => {
@@ -273,15 +276,17 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     const target = screen.getByTestId("test-element")
 
     await triggerMouseUpWithSelection(target)
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
 
     await act(async () => {
-      target.dispatchEvent(new MouseEvent("mousedown", {
-        bubbles: true,
-        button: 2,
-        clientX: 100,
-        clientY: 100,
-      }))
+      target.dispatchEvent(
+        new MouseEvent("mousedown", {
+          bubbles: true,
+          button: 2,
+          clientX: 100,
+          clientY: 100,
+        }),
+      )
     })
 
     expectToolbarVisible()
@@ -292,7 +297,9 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
       <div>
         <SelectionToolbar />
         <input data-testid="selected-element" type="text" defaultValue={MOCK_SELECTED_TEXT} />
-        <button data-testid="click-element" type="button">Click target</button>
+        <button data-testid="click-element" type="button">
+          Click target
+        </button>
       </div>,
     )
 
@@ -300,16 +307,16 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     // Mock selection that doesn't contain the click target
     const clickElement = screen.getByTestId("click-element")
-    window.getSelection = vi.fn(() => ({
-      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn((node: Node) => node !== clickElement),
-    })) as unknown as typeof window.getSelection
+      containsNode: vi.fn<(...args: any[]) => any>((node: Node) => node !== clickElement),
+    }))
 
     await triggerMouseUpWithSelection(clickElement)
     expectToolbarHidden()
@@ -331,16 +338,16 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     const clickButton = screen.getByTestId("click-button")
     const clickTarget = screen.getByTestId("click-button-label")
 
-    window.getSelection = vi.fn(() => ({
-      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn((node: Node) => node !== clickButton),
-    })) as unknown as typeof window.getSelection
+      containsNode: vi.fn<(...args: any[]) => any>((node: Node) => node !== clickButton),
+    }))
 
     await triggerMouseUpWithSelection(clickTarget)
     expectToolbarHidden()
@@ -361,16 +368,16 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     shadowButton.type = "button"
     let dispatchComplete = false
 
-    window.getSelection = vi.fn(() => ({
-      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn((node: Node) => node !== shadowButton),
-    })) as unknown as typeof window.getSelection
+      containsNode: vi.fn<(...args: any[]) => any>((node: Node) => node !== shadowButton),
+    }))
 
     const mouseUpEvent = new MouseEvent("mouseup", {
       bubbles: true,
@@ -385,7 +392,8 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     })
 
     Object.defineProperty(mouseUpEvent, "composedPath", {
-      value: () => dispatchComplete ? [] : [shadowButton, shadowHost, document.body, document, window],
+      value: () =>
+        dispatchComplete ? [] : [shadowButton, shadowHost, document.body, document, window],
     })
 
     await act(async () => {
@@ -393,7 +401,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
       dispatchComplete = true
       const callbacks = [...rafCallbacks]
       rafCallbacks = []
-      callbacks.forEach(cb => cb(0))
+      callbacks.forEach((cb) => cb(0))
     })
 
     expectToolbarHidden()
@@ -421,19 +429,19 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
       throw new Error("Missing overlay text node")
     }
 
-    window.getSelection = vi.fn(() => ({
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
       anchorNode: textNode,
       focusNode: textNode,
       rangeCount: 1,
-      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
       getRangeAt: () => ({
         startContainer: textNode,
         startOffset: 0,
         endContainer: textNode,
         endOffset: MOCK_SELECTED_TEXT.length,
       }),
-      containsNode: vi.fn(() => true),
-    })) as unknown as typeof window.getSelection
+      containsNode: vi.fn<(...args: any[]) => any>(() => true),
+    }))
 
     await triggerMouseUpWithSelection(overlayTextElement)
     expectToolbarHidden()
@@ -451,19 +459,21 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     const element = screen.getByTestId("test-element")
     // Mock selection that contains the click target
-    window.getSelection = vi.fn(() => ({
-      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn((node: Node) => node === element || element.contains(node as Node)),
-    })) as unknown as typeof window.getSelection
+      containsNode: vi.fn<(...args: any[]) => any>(
+        (node: Node) => node === element || element.contains(node),
+      ),
+    }))
 
     await triggerMouseUpWithSelection(element)
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
   })
 
   it("should show toolbar when selection contains the clicked button ancestor", async () => {
@@ -481,19 +491,21 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     const clickButton = screen.getByTestId("click-button")
     const clickTarget = screen.getByTestId("click-button-label")
 
-    window.getSelection = vi.fn(() => ({
-      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn((node: Node) => node === clickButton || clickButton.contains(node)),
-    })) as unknown as typeof window.getSelection
+      containsNode: vi.fn<(...args: any[]) => any>(
+        (node: Node) => node === clickButton || clickButton.contains(node),
+      ),
+    }))
 
     await triggerMouseUpWithSelection(clickTarget)
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
   })
 
   it("should show toolbar in input even when selection does not contain click target", async () => {
@@ -509,19 +521,19 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     // Mock selection that doesn't contain the click target
     // But this should still show toolbar because it's an input element
-    window.getSelection = vi.fn(() => ({
-      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn(() => false),
-    })) as unknown as typeof window.getSelection
+      containsNode: vi.fn<(...args: any[]) => any>(() => false),
+    }))
 
     await triggerMouseUpWithSelection(element)
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
 
     spy.mockRestore()
   })
@@ -534,7 +546,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
       </div>,
     )
 
-    const toolbar = document.querySelector(".absolute.z-2147483647") as HTMLElement | null
+    const toolbar = document.querySelector<HTMLElement>(".absolute.z-2147483647")
     if (!toolbar) {
       throw new Error("Selection toolbar is missing")
     }
@@ -542,7 +554,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expect(toolbar).not.toHaveAttribute("aria-hidden")
 
     await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
-    await waitFor(expectToolbarVisible)
+    await waitFor(() => expectToolbarVisible())
 
     expect(toolbar).not.toHaveAttribute("aria-hidden")
   })
@@ -556,22 +568,24 @@ describe("selectionToolbar - positioning logic", () => {
     // Mock requestAnimationFrame to execute callbacks synchronously
     rafCallbacks = []
     originalRequestAnimationFrame = window.requestAnimationFrame
-    window.requestAnimationFrame = vi.fn((callback: FrameRequestCallback) => {
-      rafCallbacks.push(callback)
-      return 0
-    })
+    window.requestAnimationFrame = vi.fn<(...args: any[]) => any>(
+      (callback: FrameRequestCallback) => {
+        rafCallbacks.push(callback)
+        return 0
+      },
+    )
 
     // Mock window.getSelection with valid selection
-    window.getSelection = vi.fn(() => ({
-      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
         endOffset: 1,
       }),
-      containsNode: vi.fn(() => true),
-    })) as unknown as typeof window.getSelection
+      containsNode: vi.fn<(...args: any[]) => any>(() => true),
+    }))
 
     // Mock window dimensions
     Object.defineProperty(window, "innerHeight", {
@@ -644,7 +658,7 @@ describe("selectionToolbar - positioning logic", () => {
       target.dispatchEvent(mouseUpEvent)
       const callbacks = [...rafCallbacks]
       rafCallbacks = []
-      callbacks.forEach(cb => cb(0))
+      callbacks.forEach((cb) => cb(0))
     })
   }
 
@@ -683,8 +697,8 @@ describe("selectionToolbar - positioning logic", () => {
       expect(toolbar).toBeTruthy()
       // For bottom-right, toolbar should be positioned at mouseUp coordinates (200, 200)
       // Accounting for scroll offset (0) and potential clamping
-      const leftValue = Number.parseInt(toolbar.style.left)
-      const topValue = Number.parseInt(toolbar.style.top)
+      const leftValue = Number.parseInt(toolbar.style.left, 10)
+      const topValue = Number.parseInt(toolbar.style.top, 10)
       // Should be close to mouseUp position (200, 200) for bottom-right direction
       expect(leftValue).toBeGreaterThanOrEqual(175) // Allow some margin for clamping
       expect(leftValue).toBeLessThanOrEqual(225) // Allow some margin for clamping
@@ -708,7 +722,7 @@ describe("selectionToolbar - positioning logic", () => {
     await triggerMouseDownAndUp(target, 100, 100, 200, 200)
 
     await waitFor(() => {
-      const topValue = Number.parseInt(toolbar.style.top)
+      const topValue = Number.parseInt(toolbar.style.top, 10)
 
       expect(topValue - 200).toBeGreaterThanOrEqual(20)
     })
@@ -732,8 +746,8 @@ describe("selectionToolbar - positioning logic", () => {
       expect(toolbar).toBeTruthy()
       // For bottom-left, toolbar should be positioned at (endX - tooltipWidth, endY)
       // MouseUp is at (100, 200), so left should be less than 100 (minus tooltip width)
-      const leftValue = Number.parseInt(toolbar.style.left)
-      const topValue = Number.parseInt(toolbar.style.top)
+      const leftValue = Number.parseInt(toolbar.style.left, 10)
+      const topValue = Number.parseInt(toolbar.style.top, 10)
       const toolbarWidth = toolbar.offsetWidth || 0
       // Left should be near endX - tooltipWidth, with direction offset margin
       expect(leftValue).toBeLessThanOrEqual(125) // Should be near mouseUp X position (offset by direction margin)
@@ -761,8 +775,8 @@ describe("selectionToolbar - positioning logic", () => {
       expect(toolbar).toBeTruthy()
       // For top-right, toolbar should be positioned at (endX, endY - tooltipHeight)
       // MouseUp is at (200, 100), so top should be less than 100 (minus tooltip height)
-      const leftValue = Number.parseInt(toolbar.style.left)
-      const topValue = Number.parseInt(toolbar.style.top)
+      const leftValue = Number.parseInt(toolbar.style.left, 10)
+      const topValue = Number.parseInt(toolbar.style.top, 10)
       const toolbarHeight = toolbar.offsetHeight || 0
       // Left should be near mouseUp X position (200)
       expect(leftValue).toBeGreaterThanOrEqual(175) // Allow some margin for clamping
@@ -791,8 +805,8 @@ describe("selectionToolbar - positioning logic", () => {
       expect(toolbar).toBeTruthy()
       // For top-left, toolbar should be positioned at (endX - tooltipWidth, endY - tooltipHeight)
       // MouseUp is at (100, 100), so both left and top should account for toolbar dimensions
-      const leftValue = Number.parseInt(toolbar.style.left)
-      const topValue = Number.parseInt(toolbar.style.top)
+      const leftValue = Number.parseInt(toolbar.style.left, 10)
+      const topValue = Number.parseInt(toolbar.style.top, 10)
       const toolbarWidth = toolbar.offsetWidth || 0
       const toolbarHeight = toolbar.offsetHeight || 0
       // Left should be near mouseUp X (100) minus tooltip width, with direction offset margin
@@ -821,7 +835,7 @@ describe("selectionToolbar - positioning logic", () => {
       const toolbar = getToolbarElement()
       expect(toolbar).toBeTruthy()
       // Should be clamped to at least MARGIN (10px)
-      const leftValue = Number.parseInt(toolbar.style.left)
+      const leftValue = Number.parseInt(toolbar.style.left, 10)
       expect(leftValue).toBeGreaterThanOrEqual(10)
     })
   })
@@ -843,7 +857,7 @@ describe("selectionToolbar - positioning logic", () => {
       const toolbar = getToolbarElement()
       expect(toolbar).toBeTruthy()
       // Should be clamped to at least MARGIN (10px)
-      const topValue = Number.parseInt(toolbar.style.top)
+      const topValue = Number.parseInt(toolbar.style.top, 10)
       expect(topValue).toBeGreaterThanOrEqual(10)
     })
   })
@@ -878,13 +892,13 @@ describe("selectionToolbar - positioning logic", () => {
         window.dispatchEvent(new Event("scroll"))
         const callbacks = [...rafCallbacks]
         rafCallbacks = []
-        callbacks.forEach(cb => cb(0))
+        callbacks.forEach((cb) => cb(0))
       })
     })
 
     await waitFor(() => {
       const toolbar = getToolbarElement()
-      const leftValue = Number.parseInt(toolbar.style.left)
+      const leftValue = Number.parseInt(toolbar.style.left, 10)
       const toolbarWidth = toolbar.offsetWidth
       // Should be clamped within right boundary
       // rightBoundary = clientWidth - tooltipWidth - MARGIN = 1200 - 200 - 25 = 975
@@ -923,13 +937,13 @@ describe("selectionToolbar - positioning logic", () => {
         window.dispatchEvent(new Event("scroll"))
         const callbacks = [...rafCallbacks]
         rafCallbacks = []
-        callbacks.forEach(cb => cb(0))
+        callbacks.forEach((cb) => cb(0))
       })
     })
 
     await waitFor(() => {
       const toolbar = getToolbarElement()
-      const topValue = Number.parseInt(toolbar.style.top)
+      const topValue = Number.parseInt(toolbar.style.top, 10)
       const toolbarHeight = toolbar.offsetHeight
       // Should be clamped within bottom boundary
       // bottomBoundary = scrollY + viewportHeight - tooltipHeight - MARGIN = 0 + 800 - 50 - 25 = 725
@@ -969,11 +983,11 @@ describe("selectionToolbar - positioning logic", () => {
       window.dispatchEvent(new Event("scroll"))
       const callbacks = [...rafCallbacks]
       rafCallbacks = []
-      callbacks.forEach(cb => cb(0))
+      callbacks.forEach((cb) => cb(0))
     })
 
     // After scrolling, the toolbar position should be updated
-    const updatedTop = Number.parseInt(toolbar.style.top)
+    const updatedTop = Number.parseInt(toolbar.style.top, 10)
     // The toolbar should be clamped to at least scrollY + MARGIN (100 + 10 = 110)
     expect(updatedTop).toBeGreaterThanOrEqual(110)
   })
@@ -1009,7 +1023,7 @@ describe("selectionToolbar - positioning logic", () => {
       const toolbar = getToolbarElement()
       expect(toolbar).toBeTruthy()
       // Toolbar position should account for scroll offset
-      const topValue = Number.parseInt(toolbar.style.top)
+      const topValue = Number.parseInt(toolbar.style.top, 10)
       // Should be at least scrollY + MARGIN (200 + 10 = 210)
       expect(topValue).toBeGreaterThanOrEqual(210)
     })

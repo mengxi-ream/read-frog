@@ -8,13 +8,14 @@ import {
 } from "@/utils/constants/dom-labels"
 import { FORCE_BLOCK_TAGS } from "@/utils/constants/dom-rules"
 import {
-  isCustomForceBlockTranslation,
   isDontWalkIntoAndDontTranslateAsChildElement,
   isDontWalkIntoButTranslateAsChildElement,
   isHTMLElement,
   isShallowBlockHTMLElement,
   isShallowInlineHTMLElement,
+  isSiteRuleForceBlockElement,
   isTextNode,
+  isWithinIncludeScope,
 } from "./filter"
 
 const NON_NEWLINE_WHITESPACE_RE = /[^\S\n]/
@@ -23,8 +24,7 @@ export function extractTextContent(node: TransNode, config: Config): string {
   if (isTextNode(node)) {
     const text = node.textContent ?? ""
     const trimmed = text.trim()
-    if (trimmed === "")
-      return " "
+    if (trimmed === "") return " "
     const leadingWs = text.slice(0, text.length - text.trimStart().length)
     const trailingWs = text.slice(text.trimEnd().length)
     const hasLeading = NON_NEWLINE_WHITESPACE_RE.test(leadingWs)
@@ -63,8 +63,11 @@ export function walkAndLabelElement(
   element: HTMLElement,
   walkId: string,
   config: Config,
-): { forceBlock: boolean, isInlineNode: boolean } {
-  if (isDontWalkIntoButTranslateAsChildElement(element) || isDontWalkIntoAndDontTranslateAsChildElement(element, config)) {
+): { forceBlock: boolean; isInlineNode: boolean } {
+  if (
+    isDontWalkIntoButTranslateAsChildElement(element, config) ||
+    isDontWalkIntoAndDontTranslateAsChildElement(element, config)
+  ) {
     return {
       forceBlock: false,
       isInlineNode: false,
@@ -85,10 +88,12 @@ export function walkAndLabelElement(
   let forceBlock = false
 
   const validChildNodes = [...element.childNodes].filter((child: ChildNode) => {
-    if (child.nodeType === Node.TEXT_NODE)
-      return true
+    if (child.nodeType === Node.TEXT_NODE) return true
     if (isHTMLElement(child)) {
-      return !((isDontWalkIntoButTranslateAsChildElement(child) || isDontWalkIntoAndDontTranslateAsChildElement(child, config)))
+      return !(
+        isDontWalkIntoButTranslateAsChildElement(child, config) ||
+        isDontWalkIntoAndDontTranslateAsChildElement(child, config)
+      )
     }
     return false
   })
@@ -112,7 +117,7 @@ export function walkAndLabelElement(
     }
   }
 
-  if (hasInlineNodeChild) {
+  if (hasInlineNodeChild && isWithinIncludeScope(element, config)) {
     element.setAttribute(PARAGRAPH_ATTRIBUTE, "")
   }
 
@@ -128,10 +133,13 @@ export function walkAndLabelElement(
 
   const isInlineNode = isShallowInlineHTMLElement(element)
 
-  if (isShallowBlockHTMLElement(element) || forceBlock || isCustomForceBlockTranslation(element)) {
+  if (
+    isShallowBlockHTMLElement(element) ||
+    forceBlock ||
+    isSiteRuleForceBlockElement(element, config)
+  ) {
     element.setAttribute(BLOCK_ATTRIBUTE, "")
-  }
-  else if (isInlineNode) {
+  } else if (isInlineNode) {
     element.setAttribute(INLINE_ATTRIBUTE, "")
   }
 

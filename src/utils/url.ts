@@ -4,12 +4,10 @@ export function getPageTranslationOriginScope(url: string): string | null {
   try {
     const urlObj = new URL(url)
 
-    if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:")
-      return null
+    if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") return null
 
     return urlObj.origin
-  }
-  catch {
+  } catch {
     return null
   }
 }

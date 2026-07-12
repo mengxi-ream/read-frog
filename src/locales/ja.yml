@@ -2,6 +2,11 @@ name: 読書カエル
 extName: 読書カエル - 翻訳して学ぶ
 extDescription: 読書カエルは、あらゆるウェブサイトから言語を深く学ぶために設計されたオープンソースのブラウザ拡張機能です。
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+account:
+  login: ログイン
+  webApp: ウェブアプリ
+  logout: ログアウト
+  logoutError: ログアウトに失敗しました。もう一度お試しください。
 dataTypes:
   string: テキスト
   number: 数値
@@ -216,6 +221,10 @@ options:
       slow: 低速（思考モードの調整を推奨）
   general:
     title: 一般
+    interfaceLanguage:
+      title: インターフェース言語
+      description: ブラウザの言語とは別に、拡張機能のインターフェース言語を選択します。
+      auto: 自動（ブラウザに従う）
     appearance:
       title: 外観
       theme: テーマ
@@ -622,7 +631,7 @@ options:
         description: 翻訳をトリガーするために必要な要素の可視性の割合（0-1）。高い値は、要素がより多く表示されるまで翻訳を遅らせます。
     smallParagraphFilter:
       title: 短いテキストフィルター
-      description: 指定した文字数または単語数より少ないテキストノードの翻訳をスキップします（0 = 無効）
+      description: これらのグローバル既定値を使用して、指定した文字数または単語数より少ないテキストノードの翻訳をスキップします。一致するサイトルールで上書きできます（0 = 無効）
       minCharacters:
         title: 最小文字数
         description: この値より少ない文字数のテキストノードは翻訳されません。文字数には空白が含まれます。
@@ -661,6 +670,31 @@ options:
       description: ウェブページのコンテキストを AI に提供して翻訳品質を向上させます
       enable: AI スマートコンテキスト翻訳を有効にする
       enableDescription: AI はウェブページの要約を使用して翻訳精度を向上させます。LLM プロバイダーが必要です。翻訳開始時に遅延が発生し、API コストが増加します。
+  siteRules:
+    title: サイトルール
+    description: 特定のウェブサイトの翻訳動作を調整するルールです。
+    userRules:
+      title: ユーザールール
+      description: JSON 配列として独自のサイトルールを定義します。URL がパターンに一致するページに適用され、ユーザールールは組み込みルールより優先されます。
+      saveButton: 保存
+      savedButton: 保存済み
+      validation:
+        validating: 検証中...
+        valid: ルールは有効です
+        syntaxError: JSON に構文エラーがあります
+        notArray: JSON のトップレベルはルールの配列である必要があります
+        tooLong: ルールのドキュメントが長すぎます
+        tooMany: ルールが多すぎます
+        duplicateIds: ルール id が重複しています
+        schemaErrors: 無効なルールがあります
+        moreErrors: ...他 $1 件のエラー
+        saved: すべての変更が保存されました
+    builtIn:
+      title: 組み込みルール
+      description: 拡張機能に同梱されているサイトルールです。サイトで問題が発生する場合は、スイッチで個別に無効化できます。
+      searchPlaceholder: id、説明、URL パターンで検索
+      showMore: さらに表示
+      count: $2 件中 $1 件のルールを表示
   tts:
     title: テキスト読み上げ
     description: Edge TTS の音声設定で読み上げボタンをカスタマイズします。
@@ -953,6 +987,7 @@ action:
   saveToNotebasePendingLogin: ログイン後に保存を完了
   saveToNotebasePendingLoginDescription: ログイン後、Read Frog が Notebase を作成し、この結果を自動で保存します。
   saveToNotebasePendingConnectedLoginDescription: ログイン後、Read Frog は可能であれば接続済み Notebase に保存します。このアカウントで利用できない場合は、新しい Notebase を作成して保存します。
+  upgrade: アップグレード
   openCustomActions: Custom AI Actions を開く
   openNotebase: Notebase を開く
   contextDetailsTitleLabel: タイトル

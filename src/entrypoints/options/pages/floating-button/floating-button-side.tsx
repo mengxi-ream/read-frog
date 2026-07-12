@@ -1,6 +1,5 @@
 import type { FloatingButtonSide as FloatingButtonSideValue } from "@/types/config/floating-button"
 import { useAtom } from "jotai"
-import { i18n } from "#imports"
 import {
   Select,
   SelectContent,
@@ -11,17 +10,17 @@ import {
 } from "@/components/ui/base-ui/select"
 import { floatingButtonSideSchema } from "@/types/config/floating-button"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
-const items = [
-  { value: "right", label: i18n.t("options.floatingButtonAndToolbar.floatingButton.side.right") },
-  { value: "left", label: i18n.t("options.floatingButtonAndToolbar.floatingButton.side.left") },
-] satisfies Array<{ value: FloatingButtonSideValue, label: string }>
-
 export function FloatingButtonSide() {
-  const [floatingButton, setFloatingButton] = useAtom(
-    configFieldsAtomMap.floatingButton,
-  )
+  const [floatingButton, setFloatingButton] = useAtom(configFieldsAtomMap.floatingButton)
+
+  // Resolved at render (not module scope) so labels follow a runtime UI-language switch.
+  const items = [
+    { value: "right", label: i18n.t("options.floatingButtonAndToolbar.floatingButton.side.right") },
+    { value: "left", label: i18n.t("options.floatingButtonAndToolbar.floatingButton.side.left") },
+  ] satisfies Array<{ value: FloatingButtonSideValue; label: string }>
 
   return (
     <ConfigCard
@@ -29,14 +28,13 @@ export function FloatingButtonSide() {
       title={i18n.t("options.floatingButtonAndToolbar.floatingButton.side.title")}
       description={i18n.t("options.floatingButtonAndToolbar.floatingButton.side.description")}
     >
-      <div className="w-full flex justify-end">
+      <div className="flex w-full justify-end">
         <Select
           items={items}
           value={floatingButton.side}
           onValueChange={(value) => {
             const parsedValue = floatingButtonSideSchema.safeParse(value)
-            if (!parsedValue.success)
-              return
+            if (!parsedValue.success) return
             void setFloatingButton({ ...floatingButton, side: parsedValue.data })
           }}
         >
@@ -45,7 +43,7 @@ export function FloatingButtonSide() {
           </SelectTrigger>
           <SelectContent align="end" className="min-w-fit">
             <SelectGroup>
-              {items.map(item => (
+              {items.map((item) => (
                 <SelectItem key={item.value} value={item.value}>
                   {item.label}
                 </SelectItem>

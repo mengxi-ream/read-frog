@@ -1,4 +1,5 @@
 import type { APICallError } from "ai"
+import type { TranslationTextFormat } from "@/types/config/translate"
 import * as React from "react"
 import textSmallCSS from "@/assets/styles/text-small.css?inline"
 import themeCSS from "@/assets/styles/theme.css?inline"
@@ -47,19 +48,12 @@ export function createLightweightSpinner(ownerDoc: Document): HTMLElement {
     ? ownerDoc.defaultView.matchMedia("(prefers-reduced-motion: reduce)").matches
     : false
   if (!prefersReducedMotion && spinner.animate) {
-    spinner.animate(
-      [
-        { transform: "rotate(0deg)" },
-        { transform: "rotate(360deg)" },
-      ],
-      {
-        duration: 600,
-        iterations: Infinity,
-        easing: "linear",
-      },
-    )
-  }
-  else {
+    spinner.animate([{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], {
+      duration: 600,
+      iterations: Infinity,
+      easing: "linear",
+    })
+  } else {
     // For reduced motion or when Web Animations API isn't available,
     // keep a static muted segment so the loading state stays visible
     // without requiring animation.
@@ -83,34 +77,36 @@ export async function getTranslatedTextAndRemoveSpinner(
   textContent: string,
   spinner: HTMLElement,
   translatedWrapperNode: HTMLElement,
+  isCurrent: () => boolean = () => true,
+  textFormat: TranslationTextFormat = "plain",
+  translateRequest: () => Promise<string> = () => translateTextForPage(textContent, textFormat),
 ): Promise<string | undefined> {
   let translatedText: string | undefined
 
   try {
-    translatedText = await translateTextForPage(textContent)
-  }
-  catch (error) {
+    if (!isCurrent()) return undefined
+    translatedText = await translateRequest()
+    if (!isCurrent()) return undefined
+  } catch (error) {
+    if (!isCurrent()) return undefined
+
     const errorComponent = React.createElement(TranslationError, {
       nodes,
       error: error as APICallError,
     })
 
-    const container = createReactShadowHost(
-      errorComponent,
-      {
-        className: TRANSLATION_ERROR_CONTAINER_CLASS,
-        position: "inline",
-        inheritStyles: false,
-        cssContent: [themeCSS, textSmallCSS],
-        style: {
-          verticalAlign: "middle",
-        },
+    const container = createReactShadowHost(errorComponent, {
+      className: TRANSLATION_ERROR_CONTAINER_CLASS,
+      position: "inline",
+      inheritStyles: false,
+      cssContent: [themeCSS, textSmallCSS],
+      style: {
+        verticalAlign: "middle",
       },
-    )
+    })
 
     translatedWrapperNode.appendChild(container)
-  }
-  finally {
+  } finally {
     spinner.remove()
   }
 

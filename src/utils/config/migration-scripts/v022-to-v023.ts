@@ -1,8 +1,8 @@
 const ID_MAPPING = {
-  "OpenAI": "openai-default",
-  "DeepSeek": "deepseek-default",
-  "Gemini": "gemini-default",
-  "DeepLX": "deeplx-default",
+  OpenAI: "openai-default",
+  DeepSeek: "deepseek-default",
+  Gemini: "gemini-default",
+  DeepLX: "deeplx-default",
   "Microsoft Translator": "microsoft-default",
   "Google Translate": "google-default",
 }
@@ -20,9 +20,10 @@ export function migrate(oldConfig: any): any {
     providerId: ID_MAPPING[oldConfig.read.providerName as keyof typeof ID_MAPPING],
   }
 
-  const newTranslateProviderId = ID_MAPPING[oldConfig.translate.providerName as keyof typeof ID_MAPPING]
+  const newTranslateProviderId =
+    ID_MAPPING[oldConfig.translate.providerName as keyof typeof ID_MAPPING]
 
-  const { providerName, ...restTranslateConfig } = oldConfig.translate
+  const { providerName: _providerName, ...restTranslateConfig } = oldConfig.translate
   const newTranslateConfig = {
     providerId: newTranslateProviderId,
     ...restTranslateConfig,

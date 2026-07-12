@@ -29,16 +29,20 @@ describe("v081-to-v082 migration", () => {
       ],
     })
 
-    expect(migrated.providersConfig[0]).toEqual(expect.objectContaining({
-      provider: "openrouter",
-      baseURL: "https://openrouter.ai/api/v1",
-      apiKey: "openrouter-key",
-    }))
-    expect(migrated.providersConfig[1]).toEqual(expect.objectContaining({
-      provider: "minimax",
-      baseURL: "https://api.minimax.io/v1",
-      apiKey: "minimax-key",
-    }))
+    expect(migrated.providersConfig[0]).toEqual(
+      expect.objectContaining({
+        provider: "openrouter",
+        baseURL: "https://openrouter.ai/api/v1",
+        apiKey: "openrouter-key",
+      }),
+    )
+    expect(migrated.providersConfig[1]).toEqual(
+      expect.objectContaining({
+        provider: "minimax",
+        baseURL: "https://api.minimax.io/v1",
+        apiKey: "minimax-key",
+      }),
+    )
   })
 
   it("preserves custom base URLs", () => {

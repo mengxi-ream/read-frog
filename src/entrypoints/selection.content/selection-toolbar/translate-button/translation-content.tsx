@@ -25,11 +25,11 @@ export function TranslationContent({
     <div className="p-4">
       <SelectionSourceContent text={selectionContent} separatorClassName="mb-3" />
       <div className="space-y-2">
-        {thinking && (
-          <Thinking status={thinking.status} content={thinking.text} />
-        )}
-        <p className="text-sm whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
-          {showLoadingIndicator && <IconLoader2 className="inline size-4 animate-spin" strokeWidth={1.6} />}
+        {thinking && <Thinking status={thinking.status} content={thinking.text} />}
+        <p className="text-sm [overflow-wrap:anywhere] break-words whitespace-pre-wrap">
+          {showLoadingIndicator && (
+            <IconLoader2 className="inline size-4 animate-spin" strokeWidth={1.6} />
+          )}
           {translatedText}
           {showStreamingIndicator && " ●"}
         </p>

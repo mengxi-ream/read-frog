@@ -22,10 +22,7 @@ vi.mock("../components/provider-options-recommendation-trigger", () => ({
     onApply: (options: Record<string, unknown>) => void
   }) => (
     <div>
-      <button
-        type="button"
-        onClick={() => onApply({ reasoningEffort: "minimal" })}
-      >
+      <button type="button" onClick={() => onApply({ reasoningEffort: "minimal" })}>
         apply-recommendation
       </button>
       <output aria-label="current-provider-options-prop">
@@ -67,11 +64,11 @@ function TranslateModelSelectorHarness({
     ...formOpts,
     defaultValues: providerConfig,
     onSubmit: async ({ value }) => {
-      setSubmitCount(count => count + 1)
+      setSubmitCount((count) => count + 1)
       setProviderConfig(value)
     },
   })
-  const formValues = useSelector(form.store, state => state.values)
+  const formValues = useSelector(form.store, (state) => state.values)
 
   useEffect(() => {
     form.reset(providerConfig)
@@ -82,10 +79,11 @@ function TranslateModelSelectorHarness({
       <form.AppField
         name="name"
         validators={{
-          onChange: ({ value }) => value === duplicateProviderName ? "Duplicate provider name" : undefined,
+          onChange: ({ value }) =>
+            value === duplicateProviderName ? "Duplicate provider name" : undefined,
         }}
       >
-        {field => (
+        {(field) => (
           <input
             aria-label="provider-name"
             value={field.state.value}
@@ -99,9 +97,13 @@ function TranslateModelSelectorHarness({
       </form.AppField>
       <TranslateModelSelector form={form} />
       <output aria-label="form-name">{formValues.name}</output>
-      <output aria-label="form-provider-options">{JSON.stringify(formValues.providerOptions ?? null)}</output>
+      <output aria-label="form-provider-options">
+        {JSON.stringify(formValues.providerOptions ?? null)}
+      </output>
       <output aria-label="persisted-name">{providerConfig.name}</output>
-      <output aria-label="persisted-provider-options">{JSON.stringify(providerConfig.providerOptions ?? null)}</output>
+      <output aria-label="persisted-provider-options">
+        {JSON.stringify(providerConfig.providerOptions ?? null)}
+      </output>
       <output aria-label="submit-count">{String(submitCount)}</output>
     </form.AppForm>
   )
@@ -122,8 +124,12 @@ describe("translateModelSelector", () => {
     expect(screen.getByLabelText("provider-name")).toHaveValue(duplicateProviderName)
     expect(screen.getByLabelText("form-name")).toHaveTextContent(duplicateProviderName)
     expect(screen.getByLabelText("persisted-name")).toHaveTextContent("OpenAI")
-    expect(screen.getByLabelText("form-provider-options")).toHaveTextContent("{\"reasoningEffort\":\"minimal\"}")
-    expect(screen.getByLabelText("current-provider-options-prop")).toHaveTextContent("{\"reasoningEffort\":\"minimal\"}")
+    expect(screen.getByLabelText("form-provider-options")).toHaveTextContent(
+      '{"reasoningEffort":"minimal"}',
+    )
+    expect(screen.getByLabelText("current-provider-options-prop")).toHaveTextContent(
+      '{"reasoningEffort":"minimal"}',
+    )
     expect(screen.getByLabelText("persisted-provider-options")).toHaveTextContent("null")
     expect(screen.getByLabelText("submit-count")).toHaveTextContent("0")
   })
@@ -145,7 +151,9 @@ describe("translateModelSelector", () => {
     await flushUpdates()
 
     expect(screen.getByLabelText("persisted-name")).toHaveTextContent("OpenAI Saved")
-    expect(screen.getByLabelText("persisted-provider-options")).toHaveTextContent("{\"reasoningEffort\":\"minimal\"}")
+    expect(screen.getByLabelText("persisted-provider-options")).toHaveTextContent(
+      '{"reasoningEffort":"minimal"}',
+    )
     expect(screen.getByLabelText("submit-count")).toHaveTextContent("1")
   })
 
@@ -156,7 +164,9 @@ describe("translateModelSelector", () => {
     await flushUpdates()
 
     expect(screen.getByLabelText("persisted-name")).toHaveTextContent("OpenAI")
-    expect(screen.getByLabelText("persisted-provider-options")).toHaveTextContent("{\"reasoningEffort\":\"minimal\"}")
+    expect(screen.getByLabelText("persisted-provider-options")).toHaveTextContent(
+      '{"reasoningEffort":"minimal"}',
+    )
     expect(screen.getByLabelText("submit-count")).toHaveTextContent("1")
   })
 })

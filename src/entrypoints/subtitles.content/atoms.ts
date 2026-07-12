@@ -29,7 +29,8 @@ export const TranslatedDownloadPhase = {
 } as const
 
 // eslint-disable-next-line ts/no-redeclare
-export type TranslatedDownloadPhase = typeof TranslatedDownloadPhase[keyof typeof TranslatedDownloadPhase]
+export type TranslatedDownloadPhase =
+  (typeof TranslatedDownloadPhase)[keyof typeof TranslatedDownloadPhase]
 
 export const translatedSubtitlesDownloadStatusAtom = atom<{
   phase: TranslatedDownloadPhase
@@ -64,8 +65,7 @@ export const subtitlesShowStateAtom = atom((get): Exclude<SubtitlesState, "idle"
   const hasRenderable = hasRenderableSubtitleByMode(subtitle, style.displayMode)
   const isError = stateData?.state === "error"
 
-  if (isError)
-    return "error"
+  if (isError) return "error"
 
   return isAwaitingTranslation(subtitle, stateData) && !hasRenderable ? "loading" : undefined
 })
@@ -74,11 +74,9 @@ export const subtitlesShowContentAtom = atom((get): boolean => {
   const { subtitle, stateData, isVisible } = get(subtitlesDisplayAtom)
   const { style } = get(configFieldsAtomMap.videoSubtitles)
 
-  if (!isVisible)
-    return false
+  if (!isVisible) return false
 
-  if (stateData?.state === "error")
-    return false
+  if (stateData?.state === "error") return false
 
   return hasRenderableSubtitleByMode(subtitle, style.displayMode)
 })

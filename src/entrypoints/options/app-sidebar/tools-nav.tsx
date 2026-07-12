@@ -1,5 +1,5 @@
 import { Icon } from "@iconify/react"
-import { browser, i18n } from "#imports"
+import { browser } from "#imports"
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -8,6 +8,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/base-ui/sidebar"
+import { i18n } from "@/utils/i18n"
 
 export function ToolsNav() {
   return (
@@ -16,7 +17,15 @@ export function ToolsNav() {
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton render={<a href={browser.runtime.getURL("/translation-hub.html")} target="_blank" rel="noopener noreferrer" />}>
+            <SidebarMenuButton
+              render={
+                <a
+                  href={browser.runtime.getURL("/translation-hub.html")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />
+              }
+            >
               <Icon icon="tabler:language-hiragana" />
               <span>{i18n.t("options.tools.translationHub")}</span>
             </SidebarMenuButton>

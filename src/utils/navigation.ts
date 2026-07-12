@@ -11,8 +11,7 @@ export async function openOptionsPage(options?: OpenOptionsPageOptions) {
     try {
       await browser.runtime.openOptionsPage()
       return
-    }
-    catch {
+    } catch {
       // Some extension hosts expose the API but still fail to open the page.
     }
   }

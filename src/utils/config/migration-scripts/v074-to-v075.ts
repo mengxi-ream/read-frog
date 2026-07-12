@@ -12,11 +12,7 @@ function migrateNotebaseMapping(mapping: any): any {
     return mapping
   }
 
-  const {
-    remoteColumnId,
-    remoteColumnNameSnapshot,
-    ...rest
-  } = mapping
+  const { remoteColumnId, remoteColumnNameSnapshot, ...rest } = mapping
 
   const notebaseColumnId = rest.notebaseColumnId ?? remoteColumnId
   const notebaseColumnNameSnapshot = rest.notebaseColumnNameSnapshot ?? remoteColumnNameSnapshot
@@ -33,12 +29,7 @@ function migrateNotebaseConnection(connection: any): any {
     return connection
   }
 
-  const {
-    tableId,
-    tableNameSnapshot,
-    mappings,
-    ...rest
-  } = connection
+  const { tableId, tableNameSnapshot, mappings, ...rest } = connection
 
   const notebaseId = rest.notebaseId ?? tableId
   const notebaseNameSnapshot = rest.notebaseNameSnapshot ?? tableNameSnapshot

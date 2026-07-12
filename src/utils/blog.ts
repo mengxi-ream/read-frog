@@ -38,7 +38,7 @@ function getBilibiliVideoIdFromParsedUrl(parsedUrl: URL): string | null {
     return null
   }
 
-  return BILIBILI_VIDEO_ID_PATTERN.test(maybeVideoId ?? "") ? maybeVideoId ?? null : null
+  return BILIBILI_VIDEO_ID_PATTERN.test(maybeVideoId ?? "") ? (maybeVideoId ?? null) : null
 }
 
 const bilibiliVideoUrlSchema = z.url().superRefine((url, ctx) => {
@@ -87,15 +87,10 @@ export async function getLastViewedBlogDate(): Promise<Date | null> {
  * @param latestViewedDate - The last date the user viewed the blog
  * @param latestDate - The date of the latest blog post
  */
-export function hasNewBlogPost(
-  latestViewedDate: Date | null,
-  latestDate: Date | null,
-): boolean {
-  if (!latestDate)
-    return false
+export function hasNewBlogPost(latestViewedDate: Date | null, latestDate: Date | null): boolean {
+  if (!latestDate) return false
 
-  if (!latestViewedDate)
-    return true
+  if (!latestViewedDate) return true
   return latestDate > latestViewedDate
 }
 
@@ -129,23 +124,25 @@ export function resolveBlogLocale(uiLocale?: string | null): BlogLocale {
   }
 
   if (normalizedLocale.startsWith("zh")) {
-    return normalizedLocale.includes("hant")
-      || normalizedLocale === "zh-tw"
-      || normalizedLocale === "zh-hk"
-      || normalizedLocale === "zh-mo"
+    return normalizedLocale.includes("hant") ||
+      normalizedLocale === "zh-tw" ||
+      normalizedLocale === "zh-hk" ||
+      normalizedLocale === "zh-mo"
       ? "zh-Hant"
       : "zh"
   }
 
-  return BLOG_LOCALE_BY_PRIMARY_LANGUAGE[normalizedLocale.split("-")[0] ?? ""]
-    ?? DEFAULT_BLOG_LOCALE
+  return (
+    BLOG_LOCALE_BY_PRIMARY_LANGUAGE[normalizedLocale.split("-")[0] ?? ""] ?? DEFAULT_BLOG_LOCALE
+  )
 }
 
 export function getBlogLocaleFromUILanguage(): BlogLocale {
-  const uiLocale = browser.i18n.getUILanguage?.()
-    || browser.i18n.getMessage?.("@@ui_locale")
-    || globalThis.navigator?.language
-    || DEFAULT_BLOG_LOCALE
+  const uiLocale =
+    browser.i18n.getUILanguage?.() ||
+    browser.i18n.getMessage?.("@@ui_locale") ||
+    globalThis.navigator?.language ||
+    DEFAULT_BLOG_LOCALE
 
   return resolveBlogLocale(uiLocale)
 }
@@ -209,8 +206,7 @@ export async function getLatestBlogDate(
     }
 
     return blogApiResponseSchema.parse(JSON.parse(response.body))
-  }
-  catch (error) {
+  } catch (error) {
     logger.error("Error fetching latest blog post:", error)
     return null
   }

@@ -1,5 +1,57 @@
 # @read-frog/extension
 
+## 1.39.4
+
+### Patch Changes
+
+- [#1820](https://github.com/mengxi-ream/read-frog/pull/1820) [`5f51908`](https://github.com/mengxi-ream/read-frog/commit/5f51908151aed4375d93d96ea4ec22e53e6c575e) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - Track Guide Step 3 Dictionary saves across direct and login-resumed Notebase flows.
+
+## 1.39.3
+
+### Patch Changes
+
+- [#1816](https://github.com/mengxi-ream/read-frog/pull/1816) [`ccec16f`](https://github.com/mengxi-ream/read-frog/commit/ccec16f678de2021cbe73f8d7e381f28014df174) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(site-rules): keep excluded descendants untranslated
+
+- [#1804](https://github.com/mengxi-ream/read-frog/pull/1804) [`09f8d48`](https://github.com/mengxi-ream/read-frog/commit/09f8d48eecf3fb36492fc648f21bcc2abfb2c3f4) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(popup): hide disabled custom AI actions from the provider selector list
+
+- [#1784](https://github.com/mengxi-ream/read-frog/pull/1784) [`e3dcb91`](https://github.com/mengxi-ream/read-frog/commit/e3dcb91bab15a4c539965a9f3783345a00a8d6e9) Thanks [@octo-patch](https://github.com/octo-patch)! - feat: add MiniMax-M3 model
+
+## 1.39.2
+
+### Patch Changes
+
+- [#1801](https://github.com/mengxi-ream/read-frog/pull/1801) [`5ef7b8a`](https://github.com/mengxi-ream/read-frog/commit/5ef7b8ac32e88c9e92b2e7637174a447f2471dd4) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(page-translation): allow site rules to control aria-hidden exclusions
+
+- [#1799](https://github.com/mengxi-ream/read-frog/pull/1799) [`a2f4273`](https://github.com/mengxi-ream/read-frog/commit/a2f4273875fec2e77e4aa669325c92749a5a0ee2) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(page-translation): remove global truncation style mutation
+
+## 1.39.1
+
+### Patch Changes
+
+- [#1796](https://github.com/mengxi-ream/read-frog/pull/1796) [`e2aa840`](https://github.com/mengxi-ream/read-frog/commit/e2aa8400db04915dd4fcd4cc5e55291345373661) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(site-rules): preserve original inline link text in page translation
+
+## 1.39.0
+
+### Minor Changes
+
+- [#1794](https://github.com/mengxi-ream/read-frog/pull/1794) [`2b60271`](https://github.com/mengxi-ream/read-frog/commit/2b602716b04bdca90943f3044bbf256f375efd48) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add a per-site translation rule engine. 463 built-in rules plus user-defined JSON rules control what gets translated per site: exclude/include selectors, force block/inline rendering, minimum character/word thresholds, and per-site injected CSS. URL matching now supports subdomain, TLD, and path wildcards. A new "Site Rules" options page provides a zod-validated JSON editor for custom rules and a searchable, per-rule-disableable viewer for built-in rules. The previous hardcoded site adaptations are migrated into built-in rules.
+
+## 1.38.0
+
+### Minor Changes
+
+- [#1791](https://github.com/mengxi-ream/read-frog/pull/1791) [`9621107`](https://github.com/mengxi-ream/read-frog/commit/96211079841a0d48e8afbc2ee30a05ea65c2b1c9) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(i18n): support switching the extension interface language independently of the browser
+
+### Patch Changes
+
+- [#1756](https://github.com/mengxi-ream/read-frog/pull/1756) [`d961a47`](https://github.com/mengxi-ream/read-frog/commit/d961a47d0d50b1137f669471009861fb4293819f) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(auth): add log out from the popup and options sidebar
+
+## 1.37.5
+
+### Patch Changes
+
+- [#1783](https://github.com/mengxi-ream/read-frog/pull/1783) [`d4c4545`](https://github.com/mengxi-ream/read-frog/commit/d4c4545e1315ffc0cfe55ca086c82a344ca66372) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(options): resolve settings crash "Unrecognized extension value in extension set" when opening pages with code editors ([#1782](https://github.com/mengxi-ream/read-frog/issues/1782)) by deduplicating bundled CodeMirror packages
+
 ## 1.37.4
 
 ### Patch Changes

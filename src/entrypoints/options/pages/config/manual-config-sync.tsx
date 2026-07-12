@@ -3,7 +3,6 @@ import { useMutation } from "@tanstack/react-query"
 import { useAtomValue, useSetAtom } from "jotai"
 import { useState } from "react"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +23,7 @@ import { addBackup } from "@/utils/backup/storage"
 import { migrateConfig } from "@/utils/config/migration"
 import { EXTENSION_VERSION } from "@/utils/constants/app"
 import { CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
+import { i18n } from "@/utils/i18n"
 import { queryClient } from "@/utils/tanstack-query"
 import { ConfigCard } from "../../components/config-card"
 import { ViewConfig } from "./components/view-config"
@@ -37,7 +37,7 @@ export function ManualConfigSync() {
       description={i18n.t("options.config.sync.description")}
     >
       <div className="w-full space-y-4">
-        <div className="text-end gap-3 flex justify-end">
+        <div className="flex justify-end gap-3 text-end">
           <ImportConfig />
           <ExportConfig />
         </div>
@@ -59,8 +59,7 @@ function ImportConfig() {
           const result = event.target?.result
           if (typeof result === "string") {
             resolve(result)
-          }
-          else {
+          } else {
             reject(new Error("Invalid file content"))
           }
         }
@@ -74,7 +73,10 @@ function ImportConfig() {
       }
 
       const importConfigSchemaVersion = parsed.schemaVersion
-      if (typeof importConfigSchemaVersion !== "number" || !Number.isInteger(importConfigSchemaVersion)) {
+      if (
+        typeof importConfigSchemaVersion !== "number" ||
+        !Number.isInteger(importConfigSchemaVersion)
+      ) {
         throw new TypeError("Invalid config schemaVersion")
       }
 
@@ -146,12 +148,21 @@ function ExportConfig() {
         </AlertDialogHeader>
 
         <AlertDialogFooter className="flex justify-between!">
-          <AlertDialogCancel>{i18n.t("options.config.sync.exportOptions.cancel")}</AlertDialogCancel>
+          <AlertDialogCancel>
+            {i18n.t("options.config.sync.exportOptions.cancel")}
+          </AlertDialogCancel>
           <div className="flex gap-2">
-            <AlertDialogAction variant="secondary" onClick={() => exportConfig(true, { onSettled: () => setOpen(false) })} disabled={isExporting}>
+            <AlertDialogAction
+              variant="secondary"
+              onClick={() => exportConfig(true, { onSettled: () => setOpen(false) })}
+              disabled={isExporting}
+            >
               {i18n.t("options.config.sync.exportOptions.includeAPIKeys")}
             </AlertDialogAction>
-            <AlertDialogAction onClick={() => exportConfig(false, { onSettled: () => setOpen(false) })} disabled={isExporting}>
+            <AlertDialogAction
+              onClick={() => exportConfig(false, { onSettled: () => setOpen(false) })}
+              disabled={isExporting}
+            >
               {i18n.t("options.config.sync.exportOptions.excludeAPIKeys")}
             </AlertDialogAction>
           </div>

@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { detectPageLanguageLightweight, PAGE_LANGUAGE_TEXT_SAMPLE_LIMIT } from "../page-language"
 
 const { mockDetectLanguageWithSource } = vi.hoisted(() => ({
-  mockDetectLanguageWithSource: vi.fn(),
+  mockDetectLanguageWithSource: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("../language", () => ({
@@ -52,7 +52,10 @@ describe("detectPageLanguageLightweight", () => {
     mockDetectLanguageWithSource.mockResolvedValueOnce({ code: "cmn", source: "franc" })
     document.documentElement.lang = "en"
     document.title = "阅读 - 源仓库"
-    document.body.textContent = "源仓库 资源中心 文章列表 地址发布页 首页 阅读 登录 阅读 书源 书源合集 订阅源 订阅源合集 其他 新建".repeat(2)
+    document.body.textContent =
+      "源仓库 资源中心 文章列表 地址发布页 首页 阅读 登录 阅读 书源 书源合集 订阅源 订阅源合集 其他 新建".repeat(
+        2,
+      )
 
     const result = await detectPageLanguageLightweight()
 
@@ -69,7 +72,8 @@ describe("detectPageLanguageLightweight", () => {
   it("prefers text detection over conflicting non-English metadata", async () => {
     mockDetectLanguageWithSource.mockResolvedValueOnce({ code: "eng", source: "franc" })
     document.documentElement.lang = "ja-JP"
-    document.body.textContent = "English body text with enough visible content to verify incorrect page metadata. ".repeat(2)
+    document.body.textContent =
+      "English body text with enough visible content to verify incorrect page metadata. ".repeat(2)
 
     const result = await detectPageLanguageLightweight()
 
@@ -82,7 +86,8 @@ describe("detectPageLanguageLightweight", () => {
   it("keeps English metadata when text detection agrees", async () => {
     mockDetectLanguageWithSource.mockResolvedValueOnce({ code: "eng", source: "franc" })
     document.documentElement.lang = "en"
-    document.body.textContent = "English body text with enough visible content to verify matching page metadata. ".repeat(2)
+    document.body.textContent =
+      "English body text with enough visible content to verify matching page metadata. ".repeat(2)
 
     const result = await detectPageLanguageLightweight()
 
@@ -95,7 +100,10 @@ describe("detectPageLanguageLightweight", () => {
   it("keeps traditional Chinese metadata when text detection returns generic Chinese", async () => {
     mockDetectLanguageWithSource.mockResolvedValueOnce({ code: "cmn", source: "franc" })
     document.head.innerHTML = `<meta property="og:locale" content="zh_TW">`
-    document.body.textContent = "繁體中文內容用來驗證頁面語言中繼資料，這段文字需要足夠長，避免短文本時跳過正文偵測。".repeat(2)
+    document.body.textContent =
+      "繁體中文內容用來驗證頁面語言中繼資料，這段文字需要足夠長，避免短文本時跳過正文偵測。".repeat(
+        2,
+      )
 
     const result = await detectPageLanguageLightweight()
 
@@ -127,7 +135,9 @@ describe("detectPageLanguageLightweight", () => {
     )
     const [textForDetection] = mockDetectLanguageWithSource.mock.calls[0]
     expect(textForDetection).not.toContain("hidden")
-    expect(textForDetection.length).toBeLessThanOrEqual(PAGE_LANGUAGE_TEXT_SAMPLE_LIMIT + document.title.length + 2)
+    expect(textForDetection.length).toBeLessThanOrEqual(
+      PAGE_LANGUAGE_TEXT_SAMPLE_LIMIT + document.title.length + 2,
+    )
   })
 
   it("does not clone the document or read computed styles during initial detection", async () => {

@@ -2,6 +2,11 @@ name: Read Frog
 extName: Read Frog - 번역하고 배우기
 extDescription: Read Frog는 모든 웹사이트에서 언어를 깊이 있게 학습할 수 있도록 도와주는 오픈 소스 브라우저 확장 프로그램입니다.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+account:
+  login: 로그인
+  webApp: 웹 앱
+  logout: 로그아웃
+  logoutError: 로그아웃하지 못했습니다. 다시 시도해 주세요.
 dataTypes:
   string: 텍스트
   number: 숫자
@@ -216,6 +221,10 @@ options:
       slow: 느림(사고 모드 조정 권장)
   general:
     title: 일반
+    interfaceLanguage:
+      title: 인터페이스 언어
+      description: 브라우저 언어와 별개로 확장 프로그램의 인터페이스 언어를 선택합니다.
+      auto: 자동(브라우저 따름)
     appearance:
       title: 외관
       theme: 테마
@@ -622,7 +631,7 @@ options:
         description: 번역을 트리거하는 데 필요한 요소 가시성 비율 (0-1). 높은 값은 요소가 더 많이 보일 때까지 번역을 지연시킵니다.
     smallParagraphFilter:
       title: 짧은 텍스트 필터
-      description: 지정한 문자 수 또는 단어 수보다 적은 텍스트 노드의 번역을 건너뜁니다 (0 = 비활성화)
+      description: 이 전역 기본값을 사용하여 지정한 문자 수 또는 단어 수보다 적은 텍스트 노드의 번역을 건너뜁니다. 일치하는 사이트 규칙에서 재정의할 수 있습니다 (0 = 비활성화)
       minCharacters:
         title: 최소 문자 수
         description: 이 값보다 적은 문자 수의 텍스트 노드는 번역되지 않습니다. 문자 수에는 공백이 포함됩니다.
@@ -661,6 +670,31 @@ options:
       description: AI에 웹페이지 컨텍스트를 제공하여 번역 품질을 향상시킵니다
       enable: AI 스마트 컨텍스트 번역 활성화
       enableDescription: AI가 웹페이지 요약을 사용하여 번역 정확도를 향상시킵니다. LLM 제공업체가 필요합니다. 번역 시작 시 지연이 발생하고 API 비용이 증가합니다.
+  siteRules:
+    title: 사이트 규칙
+    description: 특정 웹사이트의 번역 동작을 조정하는 규칙입니다.
+    userRules:
+      title: 사용자 규칙
+      description: JSON 배열로 자신만의 사이트 규칙을 정의합니다. URL이 패턴과 일치하는 페이지에 적용되며, 사용자 규칙이 내장 규칙보다 우선합니다.
+      saveButton: 저장
+      savedButton: 저장됨
+      validation:
+        validating: 검증 중...
+        valid: 규칙이 유효합니다
+        syntaxError: JSON에 구문 오류가 있습니다
+        notArray: JSON 최상위 값은 규칙 배열이어야 합니다
+        tooLong: 규칙 문서가 너무 깁니다
+        tooMany: 규칙이 너무 많습니다
+        duplicateIds: 규칙 id가 중복되었습니다
+        schemaErrors: 유효하지 않은 규칙이 있습니다
+        moreErrors: ...그리고 $1개의 오류가 더 있습니다
+        saved: 모든 변경사항이 저장되었습니다
+    builtIn:
+      title: 내장 규칙
+      description: 확장 프로그램과 함께 제공되는 사이트 규칙입니다. 특정 사이트에서 문제가 생기면 스위치로 개별 비활성화할 수 있습니다.
+      searchPlaceholder: id, 설명 또는 URL 패턴으로 검색
+      showMore: 더 보기
+      count: 규칙 $2개 중 $1개 표시
   tts:
     title: 텍스트 음성 변환
     description: Edge TTS 음성 설정으로 말하기 버튼을 사용자 지정하세요.
@@ -953,6 +987,7 @@ action:
   saveToNotebasePendingLogin: 로그인 후 저장 완료
   saveToNotebasePendingLoginDescription: 로그인 후 Read Frog가 Notebase를 만들고 이 결과를 자동으로 저장합니다.
   saveToNotebasePendingConnectedLoginDescription: 로그인 후 Read Frog는 가능하면 연결된 Notebase에 저장합니다. 이 계정에서 사용할 수 없으면 새 Notebase를 만들고 저장합니다.
+  upgrade: 업그레이드
   openCustomActions: Custom AI Actions 열기
   openNotebase: Notebase 열기
   contextDetailsTitleLabel: 제목

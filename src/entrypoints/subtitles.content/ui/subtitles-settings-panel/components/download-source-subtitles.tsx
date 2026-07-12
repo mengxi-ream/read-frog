@@ -1,8 +1,8 @@
 import { IconDownload, IconLoader2 } from "@tabler/icons-react"
 import { useState } from "react"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
+import { i18n } from "@/utils/i18n"
 import { useSubtitlesUI } from "../../subtitles-ui-context"
 import { SubtitlesSettingsItem } from "./subtitles-settings-item"
 
@@ -21,11 +21,9 @@ export function DownloadSourceSubtitles() {
 
     try {
       await downloadSourceSubtitles()
-    }
-    catch (error) {
+    } catch (error) {
       toast.error(error instanceof Error ? error.message : String(error))
-    }
-    finally {
+    } finally {
       setIsDownloading(false)
     }
   }
@@ -44,9 +42,11 @@ export function DownloadSourceSubtitles() {
         onClick={downloadSubtitles}
         disabled={isDownloading}
       >
-        {isDownloading
-          ? <IconLoader2 className="size-3.5 animate-spin" />
-          : <IconDownload className="size-3.5" />}
+        {isDownloading ? (
+          <IconLoader2 className="size-3.5 animate-spin" />
+        ) : (
+          <IconDownload className="size-3.5" />
+        )}
       </Button>
     </SubtitlesSettingsItem>
   )

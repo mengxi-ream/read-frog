@@ -11,7 +11,7 @@ export function createPromptAtoms<T extends ConfigWithCustomPrompts>(
 ): PromptAtoms {
   return {
     config: atom(
-      get => get(configAtom).customPromptsConfig,
+      (get) => get(configAtom).customPromptsConfig,
       (get, set, newConfig: CustomPromptsConfig) => {
         void set(configAtom, { ...get(configAtom), customPromptsConfig: newConfig })
       },

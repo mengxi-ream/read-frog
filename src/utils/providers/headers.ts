@@ -12,7 +12,9 @@ export const DEFAULT_PROVIDER_HEADERS: Partial<Record<LLMProviderTypes, Record<s
   },
 }
 
-function compactStringRecord(record?: Readonly<Record<string, unknown>>): Record<string, string> | undefined {
+function compactStringRecord(
+  record?: Readonly<Record<string, unknown>>,
+): Record<string, string> | undefined {
   if (!record) {
     return undefined
   }
@@ -27,7 +29,9 @@ function compactStringRecord(record?: Readonly<Record<string, unknown>>): Record
   return Object.keys(compacted).length > 0 ? compacted : undefined
 }
 
-export function getDefaultProviderHeaders(provider: LLMProviderTypes): Record<string, string> | undefined {
+export function getDefaultProviderHeaders(
+  provider: LLMProviderTypes,
+): Record<string, string> | undefined {
   return compactStringRecord(DEFAULT_PROVIDER_HEADERS[provider])
 }
 

@@ -1,10 +1,12 @@
 import type { FeatureUsedEventProperties } from "@/types/analytics"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { createBackgroundAnalytics, filterAnalyticsCaptureResult, resolveDistinctIdOverride } from "../analytics"
+import {
+  createBackgroundAnalytics,
+  filterAnalyticsCaptureResult,
+  resolveDistinctIdOverride,
+} from "../analytics"
 
-type RegisteredMessageHandler = (message: {
-  data: FeatureUsedEventProperties
-}) => Promise<void>
+type RegisteredMessageHandler = (message: { data: FeatureUsedEventProperties }) => Promise<void>
 
 describe("background analytics", () => {
   let onMessageMock: ReturnType<typeof vi.fn>
@@ -17,7 +19,7 @@ describe("background analytics", () => {
   let loggerWarnMock: ReturnType<typeof vi.fn>
 
   function getRegisteredMessageHandler(name: string) {
-    const registration = onMessageMock.mock.calls.find(call => call[0] === name)
+    const registration = onMessageMock.mock.calls.find((call) => call[0] === name)
     if (!registration) {
       throw new Error(`Message handler not registered: ${name}`)
     }
@@ -31,7 +33,8 @@ describe("background analytics", () => {
     defaultAnalyticsEnabled?: boolean
     distinctIdOverride?: string
   }) {
-    const apiHost = overrides && "apiHost" in overrides ? overrides.apiHost : "https://us.i.posthog.com"
+    const apiHost =
+      overrides && "apiHost" in overrides ? overrides.apiHost : "https://us.i.posthog.com"
     const apiKey = overrides && "apiKey" in overrides ? overrides.apiKey : "phc_test"
 
     return createBackgroundAnalytics({
@@ -43,10 +46,16 @@ describe("background analytics", () => {
       extensionVersion: "1.0.0",
       getStorageItem: storageGetItemMock as (key: string) => Promise<unknown>,
       getTargetLanguage: getTargetLanguageMock as () => Promise<"cmn" | undefined>,
-      onMessage: onMessageMock as (type: "trackFeatureUsedEvent", handler: RegisteredMessageHandler) => unknown,
+      onMessage: onMessageMock as (
+        type: "trackFeatureUsedEvent",
+        handler: RegisteredMessageHandler,
+      ) => unknown,
       posthog: {
         init: posthogInitMock as (token: string, config: Record<string, unknown>) => void,
-        capture: posthogCaptureMock as (eventName: string, properties: FeatureUsedEventProperties) => void,
+        capture: posthogCaptureMock as (
+          eventName: string,
+          properties: FeatureUsedEventProperties,
+        ) => void,
         register: posthogRegisterMock as (properties: { extension_version: string }) => void,
       },
       setStorageItem: storageSetItemMock as (key: string, value: unknown) => Promise<void>,
@@ -55,20 +64,18 @@ describe("background analytics", () => {
   }
 
   beforeEach(() => {
-    onMessageMock = vi.fn()
-    storageGetItemMock = vi.fn()
-    storageSetItemMock = vi.fn()
-    getTargetLanguageMock = vi.fn().mockResolvedValue("cmn")
-    posthogInitMock = vi.fn()
-    posthogCaptureMock = vi.fn()
-    posthogRegisterMock = vi.fn()
-    loggerWarnMock = vi.fn()
+    onMessageMock = vi.fn<(...args: any[]) => any>()
+    storageGetItemMock = vi.fn<(...args: any[]) => any>()
+    storageSetItemMock = vi.fn<(...args: any[]) => any>()
+    getTargetLanguageMock = vi.fn<(...args: any[]) => any>().mockResolvedValue("cmn")
+    posthogInitMock = vi.fn<(...args: any[]) => any>()
+    posthogCaptureMock = vi.fn<(...args: any[]) => any>()
+    posthogRegisterMock = vi.fn<(...args: any[]) => any>()
+    loggerWarnMock = vi.fn<(...args: any[]) => any>()
   })
 
   it("registers a handler that initializes PostHog with the shared anonymous distinct ID", async () => {
-    storageGetItemMock
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce("install-123")
+    storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
 
     const { setupAnalyticsMessageHandlers } = createAnalytics()
     setupAnalyticsMessageHandlers()
@@ -118,9 +125,7 @@ describe("background analytics", () => {
   })
 
   it("adds the configured target language to non-translation feature events", async () => {
-    storageGetItemMock
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce("install-123")
+    storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
 
     const { captureFeatureUsedEventInBackground } = createAnalytics()
     await captureFeatureUsedEventInBackground({
@@ -172,9 +177,7 @@ describe("background analytics", () => {
   })
 
   it("creates and persists a new anonymous distinct ID when one does not exist", async () => {
-    storageGetItemMock
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(null)
+    storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce(null)
 
     const { captureFeatureUsedEventInBackground } = createAnalytics()
     await captureFeatureUsedEventInBackground({
@@ -229,9 +232,7 @@ describe("background analytics", () => {
   })
 
   it("treats blank distinct ID overrides as unset", async () => {
-    storageGetItemMock
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce("install-123")
+    storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
 
     const { captureFeatureUsedEventInBackground } = createAnalytics({
       distinctIdOverride: "   ",
@@ -274,33 +275,35 @@ describe("background analytics", () => {
   })
 
   it("filters PostHog properties down to the allowlist", () => {
-    expect(filterAnalyticsCaptureResult({
-      event: "feature_used",
-      properties: {
-        token: "phc_test",
-        distinct_id: "install-123",
-        feature: "custom_ai_action",
-        surface: "context_menu",
-        outcome: "success",
-        latency_ms: 250,
-        action_id: "dictionary",
-        action_name: "Dictionary",
-        target_language: "cmn",
-        $browser: "Chrome",
-        $browser_version: "145.0.0.0",
-        $insert_id: "insert-123",
-        $time: 1234,
-        $lib: "web",
-        $lib_version: "1.360.2",
-        $process_person_profile: false,
-        extension_version: "1.0.0",
-        $current_url: "chrome-extension://abc/background.js",
-        $raw_user_agent: "Mozilla/5.0",
-        $timezone: "America/Vancouver",
-      },
-      timestamp: new Date("2026-03-16T19:02:43.960Z"),
-      uuid: "test-uuid",
-    }).properties).toEqual({
+    expect(
+      filterAnalyticsCaptureResult({
+        event: "feature_used",
+        properties: {
+          token: "phc_test",
+          distinct_id: "install-123",
+          feature: "custom_ai_action",
+          surface: "context_menu",
+          outcome: "success",
+          latency_ms: 250,
+          action_id: "dictionary",
+          action_name: "Dictionary",
+          target_language: "cmn",
+          $browser: "Chrome",
+          $browser_version: "145.0.0.0",
+          $insert_id: "insert-123",
+          $time: 1234,
+          $lib: "web",
+          $lib_version: "1.360.2",
+          $process_person_profile: false,
+          extension_version: "1.0.0",
+          $current_url: "chrome-extension://abc/background.js",
+          $raw_user_agent: "Mozilla/5.0",
+          $timezone: "America/Vancouver",
+        },
+        timestamp: new Date("2026-03-16T19:02:43.960Z"),
+        uuid: "test-uuid",
+      }).properties,
+    ).toEqual({
       token: "phc_test",
       distinct_id: "install-123",
       feature: "custom_ai_action",

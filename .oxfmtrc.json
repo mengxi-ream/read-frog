@@ -1,0 +1,51 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "semi": false,
+  "singleQuote": false,
+  "jsxSingleQuote": false,
+  "trailingComma": "all",
+  "proseWrap": "preserve",
+  "ignorePatterns": [
+    "node_modules/**",
+    ".wxt/**",
+    ".output/**",
+    "coverage/**",
+    "dist/**",
+    ".nx/**",
+    ".turbo/**",
+    "repos/**",
+    "scripts/output/**",
+    ".agents/**",
+    ".claude/**",
+    ".codex/**",
+    ".cursor/**",
+    "pnpm-lock.yaml",
+    "**/*.svg"
+  ],
+  "sortTailwindcss": {
+    "stylesheet": "./src/assets/styles/theme.css",
+    "functions": ["clsx", "cn", "cva"]
+  },
+  "sortImports": {
+    "groups": [
+      "setup",
+      "type-import",
+      ["type-parent", "type-sibling", "type-index", "type-internal"],
+      "value-builtin",
+      "value-external",
+      "value-internal",
+      ["value-parent", "value-sibling", "value-index"],
+      "side_effect",
+      "unknown"
+    ],
+    "customGroups": [
+      {
+        "groupName": "setup",
+        "elementNamePattern": ["@/utils/zod-config"]
+      }
+    ],
+    "newlinesBetween": false,
+    "order": "asc",
+    "sortSideEffects": false
+  }
+}

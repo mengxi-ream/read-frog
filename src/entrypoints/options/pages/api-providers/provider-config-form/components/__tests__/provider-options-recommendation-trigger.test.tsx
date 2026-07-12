@@ -10,16 +10,8 @@ vi.mock("#imports", () => ({
 }))
 
 vi.mock("@/components/ui/json-code-editor", () => ({
-  JSONCodeEditor: ({
-    value,
-    placeholder,
-  }: {
-    value?: string
-    placeholder?: string
-  }) => (
-    <pre data-testid="provider-options-preview">
-      {value || placeholder}
-    </pre>
+  JSONCodeEditor: ({ value, placeholder }: { value?: string; placeholder?: string }) => (
+    <pre data-testid="provider-options-preview">{value || placeholder}</pre>
   ),
 }))
 
@@ -38,13 +30,15 @@ describe("providerOptionsRecommendationTrigger", () => {
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
         modelId="plain-model"
-        onApply={vi.fn()}
+        onApply={vi.fn<(...args: any[]) => any>()}
       />,
     )
 
-    expect(screen.queryByRole("button", {
-      name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
-    })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", {
+        name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
+      }),
+    ).not.toBeInTheDocument()
   })
 
   it("does not render a trigger for GPT-5 chat-latest models", () => {
@@ -52,13 +46,15 @@ describe("providerOptionsRecommendationTrigger", () => {
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
         modelId="gpt-5.3-chat-latest"
-        onApply={vi.fn()}
+        onApply={vi.fn<(...args: any[]) => any>()}
       />,
     )
 
-    expect(screen.queryByRole("button", {
-      name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
-    })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", {
+        name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
+      }),
+    ).not.toBeInTheDocument()
   })
 
   it("flashes once when the model starts matching a new recommendation rule", () => {
@@ -66,7 +62,7 @@ describe("providerOptionsRecommendationTrigger", () => {
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
         modelId="gpt-5-mini"
-        onApply={vi.fn()}
+        onApply={vi.fn<(...args: any[]) => any>()}
       />,
     )
 
@@ -79,7 +75,7 @@ describe("providerOptionsRecommendationTrigger", () => {
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
         modelId="gpt-5.4-mini"
-        onApply={vi.fn()}
+        onApply={vi.fn<(...args: any[]) => any>()}
       />,
     )
 
@@ -93,7 +89,7 @@ describe("providerOptionsRecommendationTrigger", () => {
   })
 
   it("shows the recommendation preview and applies it on demand", () => {
-    const onApply = vi.fn()
+    const onApply = vi.fn<(...args: any[]) => any>()
 
     render(
       <ProviderOptionsRecommendationTrigger
@@ -103,16 +99,24 @@ describe("providerOptionsRecommendationTrigger", () => {
       />,
     )
 
-    fireEvent.click(screen.getByRole("button", {
-      name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
-    }))
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
+      }),
+    )
 
-    expect(screen.getByText("options.apiProviders.form.providerOptionsRecommendationTitle")).toBeInTheDocument()
-    expect(screen.getByTestId("provider-options-preview")).toHaveTextContent("\"reasoningEffort\": \"none\"")
+    expect(
+      screen.getByText("options.apiProviders.form.providerOptionsRecommendationTitle"),
+    ).toBeInTheDocument()
+    expect(screen.getByTestId("provider-options-preview")).toHaveTextContent(
+      '"reasoningEffort": "none"',
+    )
 
-    fireEvent.click(screen.getByRole("button", {
-      name: "options.apiProviders.form.providerOptionsRecommendationApply",
-    }))
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "options.apiProviders.form.providerOptionsRecommendationApply",
+      }),
+    )
 
     expect(onApply).toHaveBeenCalledWith({ reasoningEffort: "none" })
   })
@@ -122,12 +126,14 @@ describe("providerOptionsRecommendationTrigger", () => {
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
         modelId="moonshotai/Kimi-K2-Instruct"
-        onApply={vi.fn()}
+        onApply={vi.fn<(...args: any[]) => any>()}
       />,
     )
 
-    expect(screen.queryByRole("button", {
-      name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
-    })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", {
+        name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
+      }),
+    ).not.toBeInTheDocument()
   })
 })

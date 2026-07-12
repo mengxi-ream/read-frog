@@ -1,8 +1,8 @@
 import type { APIProviderConfig } from "@/types/config/provider"
 import { useSelector } from "@tanstack/react-store"
 import { useState } from "react"
-import { i18n } from "#imports"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
+import { i18n } from "@/utils/i18n"
 import { ConnectionTestButton } from "./components/connection-button"
 import { withForm } from "./form"
 
@@ -11,7 +11,7 @@ export const APIKeyField = withForm({
   render: function Render({ form }) {
     // const providerConfig = form.state.values
     const [showAPIKey, setShowAPIKey] = useState(false)
-    const providerConfig = useSelector(form.store, state => state.values)
+    const providerConfig = useSelector(form.store, (state) => state.values)
 
     const providerType = providerConfig.provider
     if (providerType === "ollama") {
@@ -20,23 +20,19 @@ export const APIKeyField = withForm({
 
     return (
       <form.AppField name="apiKey">
-        {field => (
+        {(field) => (
           <div className="flex flex-col gap-2">
             <field.InputFieldAutoSave
               formForSubmit={form}
               label="API Key"
-              labelExtra={(
-                <ConnectionTestButton
-                  providerConfig={providerConfig}
-                />
-              )}
+              labelExtra={<ConnectionTestButton providerConfig={providerConfig} />}
               type={showAPIKey ? "text" : "password"}
             />
             <div className="mt-0.5 flex items-center space-x-2">
               <Checkbox
                 id={`apiKey-${providerConfig.id}`}
                 checked={showAPIKey}
-                onCheckedChange={checked => setShowAPIKey(checked === true)}
+                onCheckedChange={(checked) => setShowAPIKey(checked)}
               />
               <label
                 htmlFor={`apiKey-${providerConfig.id}`}

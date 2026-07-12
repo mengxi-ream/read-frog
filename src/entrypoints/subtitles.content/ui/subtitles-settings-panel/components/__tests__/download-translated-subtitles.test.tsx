@@ -6,7 +6,7 @@ import { TranslatedDownloadPhase, translatedSubtitlesDownloadStatusAtom } from "
 import { DownloadTranslatedSubtitles } from "../download-translated-subtitles"
 import { DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS } from "../download-translated-subtitles.constants"
 
-const downloadTranslatedSubtitles = vi.hoisted(() => vi.fn())
+const downloadTranslatedSubtitles = vi.hoisted(() => vi.fn<(...args: any[]) => any>())
 
 vi.mock("../../../subtitles-ui-context", () => ({
   useSubtitlesUI: () => ({ downloadTranslatedSubtitles }),
@@ -52,14 +52,22 @@ describe("download translated subtitles", () => {
     expect(downloadTranslatedSubtitles).toHaveBeenCalledTimes(1)
 
     setStatus(store, TranslatedDownloadPhase.Checking, null)
-    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+    expect(
+      screen.queryByText("subtitles.actions.downloadTranslatedPreparing"),
+    ).not.toBeInTheDocument()
     expect(button).toBeDisabled()
 
-    await act(() => vi.advanceTimersByTime(DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS - 1))
-    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+    await act(() =>
+      vi.advanceTimersByTime(DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS - 1),
+    )
+    expect(
+      screen.queryByText("subtitles.actions.downloadTranslatedPreparing"),
+    ).not.toBeInTheDocument()
 
     setStatus(store, TranslatedDownloadPhase.Preparing, 0)
-    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+    expect(
+      screen.queryByText("subtitles.actions.downloadTranslatedPreparing"),
+    ).not.toBeInTheDocument()
 
     await act(() => vi.advanceTimersByTime(1))
     const message = screen.getByText("subtitles.actions.downloadTranslatedPreparing")
@@ -68,7 +76,9 @@ describe("download translated subtitles", () => {
     expect(message).not.toHaveTextContent("(0%)")
 
     setStatus(store, TranslatedDownloadPhase.Idle, null)
-    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+    expect(
+      screen.queryByText("subtitles.actions.downloadTranslatedPreparing"),
+    ).not.toBeInTheDocument()
     expect(button).not.toBeDisabled()
   })
 
@@ -78,11 +88,17 @@ describe("download translated subtitles", () => {
     const button = screen.getByRole("button")
 
     setStatus(store, TranslatedDownloadPhase.Preparing, 0)
-    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+    expect(
+      screen.queryByText("subtitles.actions.downloadTranslatedPreparing"),
+    ).not.toBeInTheDocument()
     expect(button).toBeDisabled()
 
-    await act(() => vi.advanceTimersByTime(DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS - 1))
-    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+    await act(() =>
+      vi.advanceTimersByTime(DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS - 1),
+    )
+    expect(
+      screen.queryByText("subtitles.actions.downloadTranslatedPreparing"),
+    ).not.toBeInTheDocument()
 
     await act(() => vi.advanceTimersByTime(1))
     const message = screen.getByText("subtitles.actions.downloadTranslatedPreparing")
@@ -96,17 +112,27 @@ describe("download translated subtitles", () => {
     const store = renderComponent()
 
     setStatus(store, TranslatedDownloadPhase.Preparing, 0)
-    await act(() => vi.advanceTimersByTime(DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS))
+    await act(() =>
+      vi.advanceTimersByTime(DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS),
+    )
     expect(screen.getByText("subtitles.actions.downloadTranslatedPreparing")).toBeInTheDocument()
 
     setStatus(store, TranslatedDownloadPhase.Translating, 20)
-    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+    expect(
+      screen.queryByText("subtitles.actions.downloadTranslatedPreparing"),
+    ).not.toBeInTheDocument()
 
     setStatus(store, TranslatedDownloadPhase.Preparing, 0)
-    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+    expect(
+      screen.queryByText("subtitles.actions.downloadTranslatedPreparing"),
+    ).not.toBeInTheDocument()
 
-    await act(() => vi.advanceTimersByTime(DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS - 1))
-    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+    await act(() =>
+      vi.advanceTimersByTime(DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS - 1),
+    )
+    expect(
+      screen.queryByText("subtitles.actions.downloadTranslatedPreparing"),
+    ).not.toBeInTheDocument()
 
     await act(() => vi.advanceTimersByTime(1))
     expect(screen.getByText("subtitles.actions.downloadTranslatedPreparing")).toBeInTheDocument()
@@ -117,7 +143,9 @@ describe("download translated subtitles", () => {
     const button = screen.getByRole("button")
 
     setStatus(store, TranslatedDownloadPhase.Translating, 45)
-    const translatingMessage = screen.getByText("subtitles.actions.downloadTranslatedTranslating (45%)")
+    const translatingMessage = screen.getByText(
+      "subtitles.actions.downloadTranslatedTranslating (45%)",
+    )
     expect(translatingMessage).toBeInTheDocument()
     expect(translatingMessage).toHaveClass("text-muted-foreground")
     expect(button).toBeDisabled()

@@ -1,9 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { renderPersistentReactRoot, unmountPersistentReactRoot } from "../react-root"
 
-const createRootMock = vi.hoisted(() => vi.fn())
+const createRootMock = vi.hoisted(() => vi.fn<(...args: any[]) => any>())
 
 vi.mock("react-dom/client", () => ({
   createRoot: createRootMock,
@@ -13,8 +12,8 @@ const REACT_ROOT_REGISTRY_KEY = Symbol.for("read-frog.react-root-registry")
 
 function createMockRoot() {
   return {
-    render: vi.fn(),
-    unmount: vi.fn(),
+    render: vi.fn<(...args: any[]) => any>(),
+    unmount: vi.fn<(...args: any[]) => any>(),
   }
 }
 
@@ -42,9 +41,7 @@ describe("react root registry", () => {
   it("creates separate roots for different containers", () => {
     const firstRoot = createMockRoot()
     const secondRoot = createMockRoot()
-    createRootMock
-      .mockReturnValueOnce(firstRoot)
-      .mockReturnValueOnce(secondRoot)
+    createRootMock.mockReturnValueOnce(firstRoot).mockReturnValueOnce(secondRoot)
 
     const firstContainer = document.createElement("div")
     const secondContainer = document.createElement("div")
@@ -60,9 +57,7 @@ describe("react root registry", () => {
   it("unmounts and removes a cached root so the container can create a new one later", () => {
     const firstRoot = createMockRoot()
     const secondRoot = createMockRoot()
-    createRootMock
-      .mockReturnValueOnce(firstRoot)
-      .mockReturnValueOnce(secondRoot)
+    createRootMock.mockReturnValueOnce(firstRoot).mockReturnValueOnce(secondRoot)
 
     const container = document.createElement("div")
 

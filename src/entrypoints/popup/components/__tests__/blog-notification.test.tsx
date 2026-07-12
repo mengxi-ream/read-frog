@@ -6,9 +6,9 @@ import * as React from "react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import BlogNotification from "../blog-notification"
 
-const getLastViewedBlogDateMock = vi.fn()
-const getLatestBlogDateMock = vi.fn()
-const saveLastViewedBlogDateMock = vi.fn()
+const getLastViewedBlogDateMock = vi.fn<(...args: any[]) => any>()
+const getLatestBlogDateMock = vi.fn<(...args: any[]) => any>()
+const saveLastViewedBlogDateMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("#imports", () => ({
   i18n: {
@@ -30,11 +30,11 @@ vi.mock("@/components/ui/base-ui/tooltip", async () => {
   }
 
   function TooltipTrigger({
-    render,
+    render: renderElement,
   }: {
     render?: React.ReactElement<React.ComponentProps<"button">>
   }) {
-    return render ?? null
+    return renderElement ?? null
   }
 
   function TooltipContent({ children }: { children: ReactNode }) {
@@ -54,7 +54,7 @@ vi.mock("@iconify/react/dist/iconify.js", () => ({
 
 vi.mock("@/utils/blog", async () => {
   return {
-    getBlogLocaleFromUILanguage: vi.fn(() => "zh"),
+    getBlogLocaleFromUILanguage: vi.fn<(...args: any[]) => any>(() => "zh"),
     getLastViewedBlogDate: (...args: unknown[]) => getLastViewedBlogDateMock(...args),
     getLatestBlogDate: (...args: unknown[]) => getLatestBlogDateMock(...args),
     hasNewBlogPost: (latestViewedDate: Date | null, latestDate: Date | null) => {

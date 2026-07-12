@@ -12,26 +12,34 @@ describe("dEFAULT_CONFIG", () => {
   })
 
   it("initializes when crypto.randomUUID is unavailable but crypto.getRandomValues exists", async () => {
-    const getRandomValues = vi.fn((array: Uint8Array<ArrayBuffer>) => originalCrypto.getRandomValues(array))
+    const getRandomValues = vi.fn<(...args: any[]) => any>((array: Uint8Array<ArrayBuffer>) =>
+      originalCrypto.getRandomValues(array),
+    )
 
     Object.defineProperty(globalThis, "crypto", {
       configurable: true,
       value: {
         getRandomValues,
-      } as unknown as Crypto,
+      },
     })
     vi.resetModules()
 
     const { DEFAULT_CONFIG } = await import("../config")
     const defaultDictionaryAction = DEFAULT_CONFIG.selectionToolbar.customActions[0]
 
-    expect(defaultDictionaryAction).toEqual(expect.objectContaining({
-      id: "default-dictionary",
-    }))
-    expect(defaultDictionaryAction?.outputSchema).toEqual(expect.arrayContaining([
-      expect.objectContaining({ id: "default-dictionary-term" }),
-    ]))
-    expect(defaultDictionaryAction?.outputSchema.every(field => typeof field.id === "string" && field.id.length > 0)).toBe(true)
+    expect(defaultDictionaryAction).toEqual(
+      expect.objectContaining({
+        id: "default-dictionary",
+      }),
+    )
+    expect(defaultDictionaryAction?.outputSchema).toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: "default-dictionary-term" })]),
+    )
+    expect(
+      defaultDictionaryAction?.outputSchema.every(
+        (field) => typeof field.id === "string" && field.id.length > 0,
+      ),
+    ).toBe(true)
     expect(getRandomValues).toHaveBeenCalled()
   })
 
@@ -45,7 +53,7 @@ describe("dEFAULT_CONFIG", () => {
     }
 
     expect(parseResult.success).toBe(true)
-    expect(DEFAULT_CONFIG.providersConfig.map(provider => provider.id)).toEqual([
+    expect(DEFAULT_CONFIG.providersConfig.map((provider) => provider.id)).toEqual([
       "microsoft-translate-default",
       "google-translate-default",
       "openai-default",
@@ -53,10 +61,14 @@ describe("dEFAULT_CONFIG", () => {
       "atlascloud-default",
     ])
     expect(DEFAULT_CONFIG.translate.providerId).toBe("microsoft-translate-default")
-    expect(DEFAULT_CONFIG.selectionToolbar.features.translate.providerId).toBe("microsoft-translate-default")
+    expect(DEFAULT_CONFIG.selectionToolbar.features.translate.providerId).toBe(
+      "microsoft-translate-default",
+    )
     expect(DEFAULT_CONFIG.inputTranslation.providerId).toBe("microsoft-translate-default")
     expect(DEFAULT_CONFIG.videoSubtitles.providerId).toBe("microsoft-translate-default")
-    expect(DEFAULT_CONFIG.providersConfig.find(provider => provider.id === "deepseek-default")).toEqual(
+    expect(
+      DEFAULT_CONFIG.providersConfig.find((provider) => provider.id === "deepseek-default"),
+    ).toEqual(
       expect.objectContaining({
         model: {
           model: "deepseek-v4-flash",
@@ -65,7 +77,9 @@ describe("dEFAULT_CONFIG", () => {
         },
       }),
     )
-    expect(DEFAULT_CONFIG.providersConfig.find(provider => provider.id === "atlascloud-default")).toEqual(
+    expect(
+      DEFAULT_CONFIG.providersConfig.find((provider) => provider.id === "atlascloud-default"),
+    ).toEqual(
       expect.objectContaining({
         model: {
           model: "deepseek-ai/deepseek-v4-flash",

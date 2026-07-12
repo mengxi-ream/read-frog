@@ -14,7 +14,13 @@ interface PromptConfiguratorProps {
   description: React.ReactNode
 }
 
-export function PromptConfigurator({ id, promptAtoms, insertCells, title, description }: PromptConfiguratorProps) {
+export function PromptConfigurator({
+  id,
+  promptAtoms,
+  insertCells,
+  title,
+  description,
+}: PromptConfiguratorProps) {
   return (
     <PromptConfiguratorContext value={{ promptAtoms, insertCells }}>
       <ConfigCard id={id} className="lg:flex-col" title={title} description={description}>

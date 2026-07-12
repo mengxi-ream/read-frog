@@ -1,21 +1,21 @@
 import { useAtom } from "jotai"
-import { i18n } from "#imports"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function FloatingButtonGlobalToggle() {
-  const [floatingButton, setFloatingButton] = useAtom(
-    configFieldsAtomMap.floatingButton,
-  )
+  const [floatingButton, setFloatingButton] = useAtom(configFieldsAtomMap.floatingButton)
 
   return (
     <ConfigCard
       id="floating-button-toggle"
       title={i18n.t("options.floatingButtonAndToolbar.floatingButton.globalToggle.title")}
-      description={i18n.t("options.floatingButtonAndToolbar.floatingButton.globalToggle.description")}
+      description={i18n.t(
+        "options.floatingButtonAndToolbar.floatingButton.globalToggle.description",
+      )}
     >
-      <div className="w-full flex justify-end">
+      <div className="flex w-full justify-end">
         <Switch
           checked={floatingButton.enabled}
           onCheckedChange={(checked) => {

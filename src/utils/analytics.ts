@@ -1,4 +1,9 @@
-import type { AnalyticsOutcome, AnalyticsSurface, FeatureUsageContext, FeatureUsedEventProperties } from "@/types/analytics"
+import type {
+  AnalyticsOutcome,
+  AnalyticsSurface,
+  FeatureUsageContext,
+  FeatureUsedEventProperties,
+} from "@/types/analytics"
 import { ANALYTICS_FEATURE_USED_EVENT } from "@/utils/constants/analytics"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
@@ -22,10 +27,7 @@ export function createFeatureUsageContext(
   }
 }
 
-export function getLatencyMs(
-  startedAt: number,
-  finishedAt = Date.now(),
-): number {
+export function getLatencyMs(startedAt: number, finishedAt = Date.now()): number {
   return Math.max(0, finishedAt - startedAt)
 }
 
@@ -50,12 +52,8 @@ export function buildFeatureUsedEventProperties({
 
 export async function trackFeatureUsed(input: FeatureUsedEventInput): Promise<void> {
   try {
-    await sendMessage(
-      "trackFeatureUsedEvent",
-      buildFeatureUsedEventProperties(input),
-    )
-  }
-  catch (error) {
+    await sendMessage("trackFeatureUsedEvent", buildFeatureUsedEventProperties(input))
+  } catch (error) {
     if (typeof logger.warn === "function") {
       logger.warn(`[Analytics] Failed to track ${ANALYTICS_FEATURE_USED_EVENT}`, error)
     }
@@ -73,8 +71,7 @@ export async function trackFeatureAttempt<T>(
       outcome: "success",
     })
     return result
-  }
-  catch (error) {
+  } catch (error) {
     void trackFeatureUsed({
       ...context,
       outcome: "failure",

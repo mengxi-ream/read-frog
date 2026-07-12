@@ -27,7 +27,7 @@ export function MainSubtitle({ content, className }: SubtitleLineProps) {
 
   return (
     <div
-      className={cn("subtitles-main leading-tight text-xl", className)}
+      className={cn("subtitles-main text-xl leading-tight", className)}
       style={getTextStyles(style.main)}
     >
       {text}
@@ -44,7 +44,7 @@ export function TranslationSubtitle({ content, className }: SubtitleLineProps) {
 
   return (
     <div
-      className={cn("subtitles-translation leading-tight text-xl", className)}
+      className={cn("subtitles-translation text-xl leading-tight", className)}
       style={getTextStyles(style.translation)}
       dir={dir}
       lang={lang}

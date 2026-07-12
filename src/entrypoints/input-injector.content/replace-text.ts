@@ -3,14 +3,11 @@ import { isSlateElement, replaceSlate } from "./editors/slate"
 
 export function replaceText(text: string): boolean {
   const element = document.activeElement
-  if (!element || !(element as HTMLElement).isContentEditable)
-    return false
+  if (!element || !(element as HTMLElement).isContentEditable) return false
 
-  if (isSlateElement(element))
-    return replaceSlate(element, text)
+  if (isSlateElement(element)) return replaceSlate(element, text)
 
-  if (isDraftElement(element))
-    return replaceDraft(element, text)
+  if (isDraftElement(element)) return replaceDraft(element, text)
 
   return replaceFallback(element as HTMLElement, text)
 }

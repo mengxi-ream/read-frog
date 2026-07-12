@@ -10,7 +10,9 @@ type StyleRoot = Document | ShadowRoot
 // Cache the probe result per root so we only touch adoptedStyleSheets once.
 const constructableStyleSheetSupportMap = new WeakMap<StyleRoot, boolean>()
 
-function supportsConstructableStyleSheets(root: StyleRoot): root is StyleRoot & { adoptedStyleSheets: CSSStyleSheet[] } {
+function supportsConstructableStyleSheets(
+  root: StyleRoot,
+): root is StyleRoot & { adoptedStyleSheets: CSSStyleSheet[] } {
   const cachedSupport = constructableStyleSheetSupportMap.get(root)
   if (cachedSupport !== undefined) {
     return cachedSupport
@@ -46,15 +48,16 @@ function supportsConstructableStyleSheets(root: StyleRoot): root is StyleRoot & 
       constructableStyleSheetSupportMap.set(root, supportsAssignment)
 
       return supportsAssignment
-    }
-    finally {
+    } finally {
       root.adoptedStyleSheets = previousSheets
     }
-  }
-  catch (error) {
+  } catch (error) {
     // When the browser/runtime only partially exposes constructable
     // stylesheets, fall back to injecting a normal <style> element.
-    logger.warn("[style-injector] constructable stylesheet assignment failed, falling back to <style>", error)
+    logger.warn(
+      "[style-injector] constructable stylesheet assignment failed, falling back to <style>",
+      error,
+    )
     constructableStyleSheetSupportMap.set(root, false)
     return false
   }
@@ -62,7 +65,7 @@ function supportsConstructableStyleSheets(root: StyleRoot): root is StyleRoot & 
 
 function injectStyleElement(root: StyleRoot, id: string, cssText: string): void {
   const container = root instanceof Document ? root.head : root
-  let styleElement = root.querySelector(`#${id}`) as HTMLStyleElement | null
+  let styleElement = root.querySelector<HTMLStyleElement>(`#${id}`)
   if (!styleElement) {
     styleElement = document.createElement("style")
     styleElement.id = id
@@ -75,7 +78,8 @@ function injectStyleElement(root: StyleRoot, id: string, cssText: string): void 
 
 // ============ Preset Styles Injection ============
 
-const BASE_PRESET_CSS = customTranslationNodeCss.replace(/@import[^;]+;/g, "") + translationNodePresetCss
+const BASE_PRESET_CSS =
+  customTranslationNodeCss.replace(/@import[^;]+;/g, "") + translationNodePresetCss
 const DOCUMENT_PRESET_CSS = hostThemeCss + BASE_PRESET_CSS
 const SHADOW_PRESET_CSS = hostThemeCss.replace(/:root/g, ":host") + BASE_PRESET_CSS
 
@@ -107,18 +111,51 @@ function getPresetStyleSheet(root: StyleRoot): CSSStyleSheet {
 
 /** Ensure preset styles are injected into the given root */
 export function ensurePresetStyles(root: StyleRoot): void {
-  if (injectedPresetRoots.has(root))
-    return
+  if (injectedPresetRoots.has(root)) return
 
   // Mark as injected first to prevent race condition with concurrent calls
   injectedPresetRoots.add(root)
 
   if (supportsConstructableStyleSheets(root)) {
     root.adoptedStyleSheets = [...root.adoptedStyleSheets, getPresetStyleSheet(root)]
-  }
-  else {
+  } else {
     injectStyleElement(root, "read-frog-preset-styles", getPresetCSS(root))
   }
+}
+
+// ============ Site Rule CSS Injection ============
+
+const SITE_RULE_STYLE_ID = "read-frog-site-rule-styles"
+const siteRuleCSSMap = new WeakMap<StyleRoot, CSSStyleSheet>()
+
+/**
+ * Inject per-site rule CSS into the given root. Unlike the custom-style slot
+ * below, this one is removable: it only applies while a translation session
+ * is active on a matched site (see PageTranslationManager).
+ */
+export async function ensureSiteRuleCSS(root: StyleRoot, cssText: string): Promise<void> {
+  if (supportsConstructableStyleSheets(root)) {
+    let sheet = siteRuleCSSMap.get(root)
+    if (!sheet) {
+      sheet = new CSSStyleSheet()
+      // Set in map first to prevent race condition with concurrent calls
+      siteRuleCSSMap.set(root, sheet)
+      root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet]
+    }
+    await sheet.replace(cssText)
+  } else {
+    injectStyleElement(root, SITE_RULE_STYLE_ID, cssText)
+  }
+}
+
+/** Remove per-site rule CSS previously injected by ensureSiteRuleCSS */
+export function removeSiteRuleCSS(root: StyleRoot): void {
+  const sheet = siteRuleCSSMap.get(root)
+  if (sheet && supportsConstructableStyleSheets(root)) {
+    root.adoptedStyleSheets = root.adoptedStyleSheets.filter((adopted) => adopted !== sheet)
+    siteRuleCSSMap.delete(root)
+  }
+  root.querySelector(`#${SITE_RULE_STYLE_ID}`)?.remove()
 }
 
 // ============ Custom CSS Injection ============
@@ -145,8 +182,7 @@ export async function ensureCustomCSS(root: StyleRoot, cssText: string): Promise
       root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet]
     }
     await sheet.replace(cssText)
-  }
-  else {
+  } else {
     injectStyleElement(root, "read-frog-custom-styles", cssText)
   }
 

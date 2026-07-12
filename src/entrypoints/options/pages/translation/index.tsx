@@ -1,4 +1,4 @@
-import { i18n } from "#imports"
+import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
 import { AIContentAware } from "./ai-content-aware"
 import { AutoTranslateLanguages } from "./auto-translate-languages"
@@ -20,7 +20,10 @@ import { TranslationModeShortcut } from "./translation-mode-shortcut"
 
 export function TranslationPage() {
   return (
-    <PageLayout title={i18n.t("options.translation.title")} innerClassName="*:border-b [&>*:last-child]:border-b-0">
+    <PageLayout
+      title={i18n.t("options.translation.title")}
+      innerClassName="*:border-b [&>*:last-child]:border-b-0"
+    >
       <TranslationMode />
       <TranslationModeShortcut />
       <TranslateRange />

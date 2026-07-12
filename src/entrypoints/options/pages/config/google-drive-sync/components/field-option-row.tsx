@@ -1,5 +1,5 @@
 import { Icon } from "@iconify/react"
-import { i18n } from "#imports"
+import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 import { formatValue } from "./utils"
 
@@ -39,36 +39,44 @@ interface FieldOptionRowProps {
   onClick: () => void
 }
 
-export function FieldOptionRow({ type, value, isSelected, fieldKey, showFieldKey, onClick }: FieldOptionRowProps) {
+export function FieldOptionRow({
+  type,
+  value,
+  isSelected,
+  fieldKey,
+  showFieldKey,
+  onClick,
+}: FieldOptionRowProps) {
   const { text, hover, selected, badge, label } = STYLE_MAP[type]
   const isComplexValue = typeof value === "object" && value !== null
 
   return (
     <div
-      className={cn("flex cursor-pointer py-1 ps-(--indent) text-xs", hover, isSelected && selected, isComplexValue ? "flex-col items-start gap-1" : "items-center")}
+      className={cn(
+        "flex cursor-pointer py-1 ps-(--indent) text-xs",
+        hover,
+        isSelected && selected,
+        isComplexValue ? "flex-col items-start gap-1" : "items-center",
+      )}
       onClick={onClick}
     >
       <div className="flex items-center">
-        <span className={cn("px-2 py-0.5 rounded mr-2 shrink-0", text, badge)}>
+        <span className={cn("mr-2 shrink-0 rounded px-2 py-0.5", text, badge)}>
           {i18n.t(label)}
         </span>
         {showFieldKey && (
           <>
-            <span className={text}>
-              "
-              {fieldKey}
-              "
-            </span>
-            <span className="text-slate-500 mx-1">:</span>
+            <span className={text}>"{fieldKey}"</span>
+            <span className="mx-1 text-slate-500">:</span>
           </>
         )}
         {!isComplexValue && (
           <span className="text-slate-700 dark:text-slate-300">{formatValue(value)}</span>
         )}
-        {isSelected && <Icon icon="mdi:check-circle" className={cn("size-4 ml-2", text)} />}
+        {isSelected && <Icon icon="mdi:check-circle" className={cn("ml-2 size-4", text)} />}
       </div>
       {isComplexValue && (
-        <pre className="text-slate-700 dark:text-slate-300 ml-4 max-h-40 overflow-auto whitespace-pre-wrap break-all">
+        <pre className="ml-4 max-h-40 overflow-auto break-all whitespace-pre-wrap text-slate-700 dark:text-slate-300">
           {formatValue(value)}
         </pre>
       )}

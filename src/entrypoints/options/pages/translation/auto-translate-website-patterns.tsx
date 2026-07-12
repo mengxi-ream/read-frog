@@ -1,6 +1,6 @@
 import { useAtom } from "jotai"
-import { i18n } from "#imports"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 import { PatternsTable } from "../../components/patterns-table"
 
@@ -10,8 +10,7 @@ export function AutoTranslateWebsitePatterns() {
 
   const addPattern = (pattern: string) => {
     const cleanedPattern = pattern.trim()
-    if (!cleanedPattern || autoTranslatePatterns.includes(cleanedPattern))
-      return
+    if (!cleanedPattern || autoTranslatePatterns.includes(cleanedPattern)) return
 
     void setTranslateConfig({
       page: {
@@ -25,13 +24,17 @@ export function AutoTranslateWebsitePatterns() {
     void setTranslateConfig({
       page: {
         ...translateConfig.page,
-        autoTranslatePatterns: autoTranslatePatterns.filter(p => p !== pattern),
+        autoTranslatePatterns: autoTranslatePatterns.filter((p) => p !== pattern),
       },
     })
   }
 
   return (
-    <ConfigCard id="auto-translate-website" title={i18n.t("options.translation.autoTranslateWebsite.title")} description={i18n.t("options.translation.autoTranslateWebsite.description")}>
+    <ConfigCard
+      id="auto-translate-website"
+      title={i18n.t("options.translation.autoTranslateWebsite.title")}
+      description={i18n.t("options.translation.autoTranslateWebsite.description")}
+    >
       <PatternsTable
         patterns={autoTranslatePatterns}
         onAddPattern={addPattern}

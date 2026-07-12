@@ -23,8 +23,11 @@ export function createOutputSchemaField(
   }
 }
 
-export function getNextOutputFieldName(fields: SelectionToolbarCustomActionOutputField[], prefix: string): string {
-  const existingNames = new Set(fields.map(f => f.name))
+export function getNextOutputFieldName(
+  fields: SelectionToolbarCustomActionOutputField[],
+  prefix: string,
+): string {
+  const existingNames = new Set(fields.map((f) => f.name))
   existingNames.add(prefix)
   return getUniqueName(prefix, existingNames, "")
 }
@@ -43,8 +46,9 @@ export function isDuplicateOutputSchemaFieldName(
   currentFieldId?: string,
 ) {
   const normalizedName = normalizeOutputSchemaFieldName(name)
-  return fields.some(field =>
-    field.id !== currentFieldId && normalizeOutputSchemaFieldName(field.name) === normalizedName,
+  return fields.some(
+    (field) =>
+      field.id !== currentFieldId && normalizeOutputSchemaFieldName(field.name) === normalizedName,
   )
 }
 
@@ -64,10 +68,19 @@ export function getOutputSchemaFieldNameError(
   return undefined
 }
 
-export const SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS = ["selection", "paragraphs", "targetLanguage", "webTitle", "webContent"] as const
+export const SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS = [
+  "selection",
+  "paragraphs",
+  "targetLanguage",
+  "webTitle",
+  "webContent",
+] as const
 
-export type SelectionToolbarCustomActionToken = (typeof SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS)[number]
+export type SelectionToolbarCustomActionToken =
+  (typeof SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS)[number]
 
-export function getSelectionToolbarCustomActionTokenCellText(token: SelectionToolbarCustomActionToken) {
+export function getSelectionToolbarCustomActionTokenCellText(
+  token: SelectionToolbarCustomActionToken,
+) {
   return `{{${token}}}`
 }

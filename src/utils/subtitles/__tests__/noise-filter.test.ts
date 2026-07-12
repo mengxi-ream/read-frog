@@ -60,9 +60,7 @@ describe("noise Filter", () => {
     })
 
     it("should preserve events without segs", () => {
-      const events: YoutubeTimedText[] = [
-        { tStartMs: 0, dDurationMs: 1000 },
-      ]
+      const events: YoutubeTimedText[] = [{ tStartMs: 0, dDurationMs: 1000 }]
       const result = filterNoiseFromEvents(events)
       expect(result).toHaveLength(1)
       expect(result[0].segs).toBeUndefined()
@@ -87,11 +85,7 @@ describe("noise Filter", () => {
         {
           tStartMs: 0,
           dDurationMs: 1000,
-          segs: [
-            { utf8: "[Music]" },
-            { utf8: "Hello" },
-            { utf8: "(Applause)" },
-          ],
+          segs: [{ utf8: "[Music]" }, { utf8: "Hello" }, { utf8: "(Applause)" }],
         },
       ]
       const result = filterNoiseFromEvents(events)

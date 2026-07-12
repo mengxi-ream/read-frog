@@ -1,13 +1,13 @@
 import type { BatchQueueConfig } from "@/types/config/translate"
 import { useAtom } from "jotai"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
 import { batchQueueConfigSchema } from "@/types/config/translate"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS } from "@/utils/constants/translate"
+import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { ConfigCard } from "../../components/config-card"
 
@@ -28,14 +28,18 @@ export function SubtitlesRequestBatch() {
   )
 }
 
+// Resolve labels lazily (thunks) so a runtime UI-language switch re-reads them at render
+// instead of freezing the strings at module-import time.
 const propertyInfo = {
   maxCharactersPerBatch: {
-    label: i18n.t("options.videoSubtitles.batchQueueConfig.maxCharactersPerBatch.title"),
-    description: i18n.t("options.videoSubtitles.batchQueueConfig.maxCharactersPerBatch.description"),
+    label: () => i18n.t("options.videoSubtitles.batchQueueConfig.maxCharactersPerBatch.title"),
+    description: () =>
+      i18n.t("options.videoSubtitles.batchQueueConfig.maxCharactersPerBatch.description"),
   },
   maxItemsPerBatch: {
-    label: i18n.t("options.videoSubtitles.batchQueueConfig.maxItemsPerBatch.title"),
-    description: i18n.t("options.videoSubtitles.batchQueueConfig.maxItemsPerBatch.description"),
+    label: () => i18n.t("options.videoSubtitles.batchQueueConfig.maxItemsPerBatch.title"),
+    description: () =>
+      i18n.t("options.videoSubtitles.batchQueueConfig.maxItemsPerBatch.description"),
   },
 }
 
@@ -45,7 +49,9 @@ const propertyMinValue = {
 }
 
 function SubtitlesBatchNumberSelector({ property }: { property: KeyOfBatchQueueConfig }) {
-  const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
+  const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(
+    configFieldsAtomMap.videoSubtitles,
+  )
   const { batchQueueConfig } = videoSubtitlesConfig
 
   const currentConfigValue = batchQueueConfig[property]
@@ -57,8 +63,8 @@ function SubtitlesBatchNumberSelector({ property }: { property: KeyOfBatchQueueC
     <Field orientation="responsive">
       <FieldContent className="self-center">
         <FieldLabel htmlFor={`subtitles-batch-${property}`}>
-          {info.label}
-          <HelpTooltip>{info.description}</HelpTooltip>
+          {info.label()}
+          <HelpTooltip>{info.description()}</HelpTooltip>
         </FieldLabel>
       </FieldContent>
       <Input
@@ -69,7 +75,9 @@ function SubtitlesBatchNumberSelector({ property }: { property: KeyOfBatchQueueC
         value={currentConfigValue}
         onChange={(e) => {
           const newConfigValue = Number(e.target.value)
-          const configParseResult = batchQueueConfigSchema.partial().safeParse({ [property]: newConfigValue })
+          const configParseResult = batchQueueConfigSchema
+            .partial()
+            .safeParse({ [property]: newConfigValue })
           if (configParseResult.success) {
             void setVideoSubtitlesConfig({
               ...videoSubtitlesConfig,
@@ -81,8 +89,7 @@ function SubtitlesBatchNumberSelector({ property }: { property: KeyOfBatchQueueC
             void sendMessage("setSubtitlesBatchQueueConfig", {
               [property]: newConfigValue,
             })
-          }
-          else {
+          } else {
             toast.error(configParseResult.error?.issues[0].message)
           }
         }}

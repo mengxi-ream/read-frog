@@ -23,7 +23,7 @@ export function useConflictField(pathKey: string): UseConflictFieldResult {
   const resetResolution = useSetAtom(resetResolutionAtom)
 
   return useMemo(() => {
-    const conflict = diffResult?.conflicts.find(c => c.path.join(".") === pathKey)
+    const conflict = diffResult?.conflicts.find((c) => c.path.join(".") === pathKey)
 
     return {
       conflict,

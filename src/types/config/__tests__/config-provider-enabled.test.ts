@@ -8,7 +8,7 @@ function getIssuePaths(input: unknown) {
     return []
   }
 
-  return result.error.issues.map(issue => issue.path.join("."))
+  return result.error.issues.map((issue) => issue.path.join("."))
 }
 
 describe("config provider enabled validation", () => {
@@ -41,7 +41,7 @@ describe("config provider enabled validation", () => {
       providersConfig,
       selectionToolbar: {
         ...DEFAULT_CONFIG.selectionToolbar,
-        customActions: DEFAULT_CONFIG.selectionToolbar.customActions.map(action => ({
+        customActions: DEFAULT_CONFIG.selectionToolbar.customActions.map((action) => ({
           ...action,
           providerId: "openai-default",
         })),
@@ -56,7 +56,7 @@ describe("config provider enabled validation", () => {
       ...DEFAULT_CONFIG,
       selectionToolbar: {
         ...DEFAULT_CONFIG.selectionToolbar,
-        customActions: DEFAULT_CONFIG.selectionToolbar.customActions.map(action => ({
+        customActions: DEFAULT_CONFIG.selectionToolbar.customActions.map((action) => ({
           ...action,
           providerId: "read-frog-free-ai",
         })),

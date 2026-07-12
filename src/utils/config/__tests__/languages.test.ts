@@ -3,7 +3,7 @@ import { DEFAULT_DETECTED_CODE } from "@/utils/constants/config"
 import { getDetectedCodeFromStorage, normalizeDetectedCode } from "../languages"
 
 const { sendMessageMock } = vi.hoisted(() => ({
-  sendMessageMock: vi.fn(),
+  sendMessageMock: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/message", () => ({

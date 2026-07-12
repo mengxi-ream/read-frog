@@ -1,13 +1,11 @@
 import { useAtom } from "jotai"
-import { i18n } from "#imports"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function ContextMenuTranslateToggle() {
-  const [contextMenu, setContextMenu] = useAtom(
-    configFieldsAtomMap.contextMenu,
-  )
+  const [contextMenu, setContextMenu] = useAtom(configFieldsAtomMap.contextMenu)
 
   return (
     <ConfigCard
@@ -15,7 +13,7 @@ export function ContextMenuTranslateToggle() {
       title={i18n.t("options.floatingButtonAndToolbar.contextMenu.translate.title")}
       description={i18n.t("options.floatingButtonAndToolbar.contextMenu.translate.description")}
     >
-      <div className="w-full flex justify-end">
+      <div className="flex w-full justify-end">
         <Switch
           checked={contextMenu.enabled}
           onCheckedChange={(checked) => {

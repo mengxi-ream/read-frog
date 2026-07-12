@@ -1,15 +1,15 @@
 import type { TranslationMode as TranslationModeType } from "@/types/config/translate"
 import { Icon } from "@iconify/react"
 import { useAtom } from "jotai"
-import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 
 const TABLER_ICON_STROKE_WIDTH_CLASS = "[&_path]:[stroke-width:1.2]"
 
-const MODE_ICON: Record<TranslationModeType, { icon: string, className?: string }> = {
+const MODE_ICON: Record<TranslationModeType, { icon: string; className?: string }> = {
   bilingual: { icon: "garden:translation-exists-stroke-16" },
   translationOnly: { icon: "tabler:text-resize", className: TABLER_ICON_STROKE_WIDTH_CLASS },
 }
@@ -39,15 +39,13 @@ export default function TranslationModeSelector() {
   const actionLabel = i18n.t(tooltipKey.action)
 
   const handleModeToggle = () => {
-    void setTranslateConfig(
-      { mode: nextMode },
-    )
+    void setTranslateConfig({ mode: nextMode })
   }
 
   return (
     <Tooltip>
       <TooltipTrigger
-        render={(
+        render={
           <Button
             type="button"
             variant="outline"
@@ -55,14 +53,11 @@ export default function TranslationModeSelector() {
             aria-label={actionLabel}
             onClick={handleModeToggle}
           />
-        )}
+        }
       >
         <Icon
           {...currentModeIcon}
-          className={cn(
-            currentModeIcon.className,
-            currentMode === "translationOnly" && "size-4.5",
-          )}
+          className={cn(currentModeIcon.className, currentMode === "translationOnly" && "size-4.5")}
         />
       </TooltipTrigger>
       <TooltipContent>

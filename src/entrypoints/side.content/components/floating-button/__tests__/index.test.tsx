@@ -7,7 +7,7 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { sendMessage } from "@/utils/message"
 import FloatingButton from ".."
 
-const toastInfoMock = vi.fn()
+const toastInfoMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("#imports", () => ({
   browser: {
@@ -30,7 +30,7 @@ vi.mock("@/utils/atoms/config", () => {
     locked: false,
   })
   const floatingButtonAtom = atom(
-    get => get(floatingButtonBaseAtom),
+    (get) => get(floatingButtonBaseAtom),
     (get, set, patch: Partial<FloatingButtonConfig>) => {
       set(floatingButtonBaseAtom, {
         ...get(floatingButtonBaseAtom),
@@ -58,7 +58,7 @@ vi.mock("../../../index", () => ({
 }))
 
 vi.mock("@/utils/message", () => ({
-  sendMessage: vi.fn(),
+  sendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("sonner", () => ({
@@ -96,9 +96,7 @@ function setViewport(width: number, height: number) {
   })
 }
 
-function renderFloatingButton(
-  floatingButtonOverrides: Partial<FloatingButtonConfig> = {},
-) {
+function renderFloatingButton(floatingButtonOverrides: Partial<FloatingButtonConfig> = {}) {
   const store = createStore()
   void store.set(configFieldsAtomMap.floatingButton, floatingButtonOverrides)
 
@@ -135,7 +133,7 @@ function mockRect(element: Element, rect: Partial<DOMRect>) {
     right: rect.right ?? left + width,
     bottom: rect.bottom ?? top + height,
     toJSON: () => {},
-  } as DOMRect)
+  })
 }
 
 describe("floatingButton controls", () => {
@@ -220,7 +218,9 @@ describe("floatingButton controls", () => {
 
     expect(closeTrigger).toHaveClass("visible")
     expect(closeTrigger).toHaveClass("pointer-events-auto")
-    expect(screen.getByText("options.floatingButtonAndToolbar.floatingButton.closeMenu.disableForSite")).toBeInTheDocument()
+    expect(
+      screen.getByText("options.floatingButtonAndToolbar.floatingButton.closeMenu.disableForSite"),
+    ).toBeInTheDocument()
   })
 
   it("toggles the browser side panel on a normal panel click", () => {
@@ -229,9 +229,21 @@ describe("floatingButton controls", () => {
 
     const mainButton = getMainButton()
 
-    fireEvent.pointerDown(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 900, clientY: 500 })
+    fireEvent.pointerDown(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 900,
+      clientY: 500,
+    })
     vi.advanceTimersByTime(349)
-    fireEvent.pointerUp(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 900, clientY: 500 })
+    fireEvent.pointerUp(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 900,
+      clientY: 500,
+    })
 
     expect(sendMessage).toHaveBeenCalledWith("toggleSidePanel", undefined)
   })
@@ -246,9 +258,21 @@ describe("floatingButton controls", () => {
 
     const mainButton = getMainButton()
 
-    fireEvent.pointerDown(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 900, clientY: 500 })
+    fireEvent.pointerDown(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 900,
+      clientY: 500,
+    })
     vi.advanceTimersByTime(349)
-    fireEvent.pointerUp(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 900, clientY: 500 })
+    fireEvent.pointerUp(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 900,
+      clientY: 500,
+    })
 
     await act(async () => {
       await Promise.resolve()
@@ -260,10 +284,7 @@ describe("floatingButton controls", () => {
 
     expect(screen.getByText("sidePanel.firefoxUserActionHint")).toBeInTheDocument()
     const link = screen.getByRole("link", { name: "sidePanel.firefoxUserActionHelpText" })
-    expect(link).toHaveAttribute(
-      "href",
-      "sidePanel.firefoxUserActionHelpUrl",
-    )
+    expect(link).toHaveAttribute("href", "sidePanel.firefoxUserActionHelpUrl")
     expect(link).toHaveAttribute("target", "_blank")
     expect(link).toHaveAttribute("rel", "noopener noreferrer")
   })
@@ -274,9 +295,21 @@ describe("floatingButton controls", () => {
 
     const mainButton = getMainButton()
 
-    fireEvent.pointerDown(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 900, clientY: 500 })
+    fireEvent.pointerDown(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 900,
+      clientY: 500,
+    })
     vi.advanceTimersByTime(349)
-    fireEvent.pointerUp(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 900, clientY: 500 })
+    fireEvent.pointerUp(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 900,
+      clientY: 500,
+    })
 
     expect(sendMessage).toHaveBeenCalledWith(
       "tryToSetEnablePageTranslationOnContentScript",
@@ -291,7 +324,13 @@ describe("floatingButton controls", () => {
     const mainButton = getMainButton()
     expect(screen.getAllByRole("button")).toHaveLength(4)
 
-    fireEvent.pointerDown(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 900, clientY: 500 })
+    fireEvent.pointerDown(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 900,
+      clientY: 500,
+    })
     act(() => {
       vi.advanceTimersByTime(350)
     })
@@ -299,7 +338,13 @@ describe("floatingButton controls", () => {
     expect(mainButton).toHaveClass("rounded-full")
     expect(screen.queryAllByRole("button")).toHaveLength(0)
 
-    fireEvent.pointerUp(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 900, clientY: 500 })
+    fireEvent.pointerUp(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 900,
+      clientY: 500,
+    })
     expect(sendMessage).not.toHaveBeenCalled()
   })
 
@@ -309,13 +354,31 @@ describe("floatingButton controls", () => {
 
     const mainButton = getMainButton()
 
-    fireEvent.pointerDown(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 900, clientY: 500 })
-    fireEvent.pointerMove(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 908, clientY: 500 })
+    fireEvent.pointerDown(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 900,
+      clientY: 500,
+    })
+    fireEvent.pointerMove(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 908,
+      clientY: 500,
+    })
 
     expect(mainButton).toHaveClass("rounded-full")
     expect(screen.queryAllByRole("button")).toHaveLength(0)
 
-    fireEvent.pointerUp(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 908, clientY: 500 })
+    fireEvent.pointerUp(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 908,
+      clientY: 500,
+    })
     expect(sendMessage).not.toHaveBeenCalled()
   })
 
@@ -329,12 +392,30 @@ describe("floatingButton controls", () => {
     mockRect(floatingButtonContainer, { left: 956, top: 600, width: 44, height: 120 })
     mockRect(mainButton, { left: 956, top: 640, width: 44, height: 40 })
 
-    fireEvent.pointerDown(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 978, clientY: 660 })
+    fireEvent.pointerDown(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 978,
+      clientY: 660,
+    })
     act(() => {
       vi.advanceTimersByTime(350)
     })
-    fireEvent.pointerMove(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 120, clientY: 520 })
-    fireEvent.pointerUp(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 120, clientY: 520 })
+    fireEvent.pointerMove(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 120,
+      clientY: 520,
+    })
+    fireEvent.pointerUp(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 120,
+      clientY: 520,
+    })
 
     expect(getFloatingButtonConfig(store).side).toBe("left")
     expect(getFloatingButtonConfig(store).position).toBeCloseTo(0.46)
@@ -350,12 +431,30 @@ describe("floatingButton controls", () => {
     mockRect(floatingButtonContainer, { left: 0, top: 600, width: 44, height: 120 })
     mockRect(mainButton, { left: 0, top: 640, width: 44, height: 40 })
 
-    fireEvent.pointerDown(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 22, clientY: 660 })
+    fireEvent.pointerDown(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 22,
+      clientY: 660,
+    })
     act(() => {
       vi.advanceTimersByTime(350)
     })
-    fireEvent.pointerMove(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 900, clientY: 520 })
-    fireEvent.pointerUp(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 900, clientY: 520 })
+    fireEvent.pointerMove(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 900,
+      clientY: 520,
+    })
+    fireEvent.pointerUp(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 900,
+      clientY: 520,
+    })
 
     expect(getFloatingButtonConfig(store).side).toBe("right")
     expect(getFloatingButtonConfig(store).position).toBeCloseTo(0.46)
@@ -367,9 +466,9 @@ describe("floatingButton controls", () => {
     const closeTrigger = screen.getByRole("button", { name: "Close floating button" })
     const lockTrigger = screen.getByRole("button", { name: "Lock floating button" })
     const mainButton = getMainButton()
-    const hiddenButtons = screen.getAllByRole("button").filter(button => (
-      button !== closeTrigger && button !== lockTrigger
-    ))
+    const hiddenButtons = screen
+      .getAllByRole("button")
+      .filter((button) => button !== closeTrigger && button !== lockTrigger)
 
     expect(mainButton).toHaveClass("rounded-r-full")
     expect(mainButton).toHaveClass("-translate-x-6")

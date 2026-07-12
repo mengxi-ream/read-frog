@@ -1,6 +1,9 @@
 import { browser } from "#imports"
 import { translationStateSchema } from "@/types/translation-state"
-import { parseTabIdFromStorageKey, TRANSLATION_STATE_KEY_PREFIX } from "@/utils/constants/storage-keys"
+import {
+  parseTabIdFromStorageKey,
+  TRANSLATION_STATE_KEY_PREFIX,
+} from "@/utils/constants/storage-keys"
 import { logger } from "@/utils/logger"
 import { getPageTranslationEnabled } from "./page-translation-state"
 
@@ -58,8 +61,7 @@ export async function initializeActionIcons() {
 
       try {
         await updateActionIconForPageTranslation(tab.id, await getPageTranslationEnabled(tab.id))
-      }
-      catch (error) {
+      } catch (error) {
         logger.warn("Failed to initialize action icon for tab", { error, tabId: tab.id })
       }
     }),

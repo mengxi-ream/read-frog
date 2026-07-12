@@ -1,4 +1,12 @@
-import { detectPlatform, formatForDisplay, hasNonModifierKey, normalizeKeyName, parseHotkey, PUNCTUATION_CODE_MAP, validateHotkey } from "@tanstack/hotkeys"
+import {
+  detectPlatform,
+  formatForDisplay,
+  hasNonModifierKey,
+  normalizeKeyName,
+  parseHotkey,
+  PUNCTUATION_CODE_MAP,
+  validateHotkey,
+} from "@tanstack/hotkeys"
 
 export type HotkeyPlatform = ReturnType<typeof detectPlatform>
 
@@ -9,7 +17,10 @@ export function isPageTranslationShortcutEmpty(hotkey: string | null | undefined
   return !hotkey?.trim()
 }
 
-export function formatPageTranslationShortcut(hotkey: string | null | undefined, platform?: HotkeyPlatform): string {
+export function formatPageTranslationShortcut(
+  hotkey: string | null | undefined,
+  platform?: HotkeyPlatform,
+): string {
   if (isPageTranslationShortcutEmpty(hotkey)) {
     return ""
   }
@@ -18,7 +29,10 @@ export function formatPageTranslationShortcut(hotkey: string | null | undefined,
   return formatForDisplay(configuredHotkey, platform ? { platform } : undefined)
 }
 
-export function isValidConfiguredPageTranslationShortcut(hotkey: string, platform: HotkeyPlatform = detectPlatform()): boolean {
+export function isValidConfiguredPageTranslationShortcut(
+  hotkey: string,
+  platform: HotkeyPlatform = detectPlatform(),
+): boolean {
   const normalizedHotkey = normalizePageTranslationShortcut(hotkey, platform)
   if (!normalizedHotkey) {
     return false
@@ -28,7 +42,10 @@ export function isValidConfiguredPageTranslationShortcut(hotkey: string, platfor
   return parsedHotkey.modifiers.length > 0 && hasNonModifierKey(parsedHotkey, platform)
 }
 
-export function normalizePageTranslationShortcut(hotkey: string, platform: HotkeyPlatform = detectPlatform()): string | null {
+export function normalizePageTranslationShortcut(
+  hotkey: string,
+  platform: HotkeyPlatform = detectPlatform(),
+): string | null {
   if (isPageTranslationShortcutEmpty(hotkey)) {
     return ""
   }
@@ -44,9 +61,10 @@ export function normalizePageTranslationShortcut(hotkey: string, platform: Hotke
   }
 
   const modifiers: string[] = []
-  const shouldUseMod = platform === "mac"
-    ? parsedHotkey.meta && !parsedHotkey.ctrl
-    : parsedHotkey.ctrl && !parsedHotkey.meta
+  const shouldUseMod =
+    platform === "mac"
+      ? parsedHotkey.meta && !parsedHotkey.ctrl
+      : parsedHotkey.ctrl && !parsedHotkey.meta
 
   if (shouldUseMod) {
     modifiers.push("Mod")
