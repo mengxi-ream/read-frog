@@ -1,6 +1,7 @@
 import type { ProviderConfig } from "@/types/config/provider"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
 
 const onMessageMock = vi.fn<(...args: any[]) => any>()
 const ensureInitializedConfigMock = vi.fn<(...args: any[]) => any>()
@@ -343,6 +344,34 @@ describe("translation queue helpers", () => {
       expect.objectContaining({
         key: "webpage-hash",
         translation: "write &amp; for ampersand — It's fine",
+      }),
+    )
+  })
+
+  it("returns and caches the no-translation sentinel RAW (mapping is content-side)", async () => {
+    executeTranslateMock.mockResolvedValue(NO_TRANSLATION_SENTINEL)
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: "already in target language",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "sentinel-hash",
+      },
+    })
+
+    // Mapping the sentinel to "" here would fall out of the truthy-only cache
+    // write and re-hit the provider on every request; translateTextCore maps it.
+    expect(result).toBe(NO_TRANSLATION_SENTINEL)
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "sentinel-hash",
+        translation: NO_TRANSLATION_SENTINEL,
       }),
     )
   })

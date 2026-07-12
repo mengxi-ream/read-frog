@@ -22,6 +22,19 @@ export const TOKENS = WEB_PAGE_PROMPT_TOKENS
 export const BATCH_SEPARATOR = "%%"
 export const BATCH_SEPARATOR_LINE_PATTERN = /\r?\n[ \t]*%%[ \t]*\r?\n/
 
+/**
+ * Marker an LLM outputs instead of a translation when the input paragraph is
+ * already entirely in the target language. Cached RAW (the background cache
+ * only stores truthy results); mapped to "" content-side in translateTextCore.
+ * The literal deliberately looks like a prompt token: replaceTokens only
+ * substitutes the known tokens, so it survives prompt assembly verbatim.
+ */
+export const NO_TRANSLATION_SENTINEL = "{{NO_TRANSLATION_NEEDED}}"
+
+export function isNoTranslationSentinel(text: string): boolean {
+  return text.trim() === NO_TRANSLATION_SENTINEL
+}
+
 export const TARGET_LANGUAGE = WEB_PAGE_PROMPT_TOKENS[0]
 export const INPUT = WEB_PAGE_PROMPT_TOKENS[1]
 export const WEB_TITLE = WEB_PAGE_PROMPT_TOKENS[2]
@@ -108,6 +121,9 @@ Single paragraph content
 ### Single paragraph Output:
 Direct translation without separators
 `
+
+export const DEFAULT_SENTINEL_TRANSLATE_PROMPT = `## Already-translated Input Rule
+If a paragraph of the input is already entirely written in ${getTokenCellText(TARGET_LANGUAGE)} and needs no translation, output the exact marker ${NO_TRANSLATION_SENTINEL} as that paragraph's entire translation instead of repeating the paragraph. Never mix the marker with translated text. If only part of a paragraph is in ${getTokenCellText(TARGET_LANGUAGE)}, translate the whole paragraph normally.`
 
 /**
  * UI sentinel value for default prompt selection

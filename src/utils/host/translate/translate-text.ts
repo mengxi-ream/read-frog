@@ -7,6 +7,7 @@ import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { toast } from "sonner"
 import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
 import { getProviderConfigById } from "@/utils/config/helpers"
+import { isNoTranslationSentinel } from "@/utils/constants/prompt"
 import { detectLanguage } from "@/utils/content/language"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
@@ -170,7 +171,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
   // Add extra hash tags for cache differentiation
   hashComponents.push(...extraHashTags)
 
-  return await sendMessage("enqueueTranslateRequest", {
+  const result = await sendMessage("enqueueTranslateRequest", {
     text: preparedText,
     langConfig,
     providerConfig,
@@ -182,6 +183,12 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     webContent: normalizedWebPageContext?.webContent,
     webSummary: normalizedWebPageContext?.webSummary,
   })
+  // The sentinel must be mapped here and only here: every batch-pipeline
+  // consumer (page paragraphs, document title, input translation, selection
+  // toolbar standard path) routes through this function and already handles
+  // "" gracefully. Mapping earlier — in the background — would fall out of
+  // the truthy-only cache write and re-hit the provider on every request.
+  return isNoTranslationSentinel(result) ? "" : result
 }
 
 export function validateTranslationConfigAndToast(
