@@ -1,5 +1,6 @@
 import type { LangCodeISO6391 } from "@read-frog/definitions"
 import type { ProviderConfig } from "@/types/config/provider"
+import type { TranslationTextFormat } from "@/types/config/translate"
 
 type DeepLProviderConfig = Extract<ProviderConfig, { provider: "deepl" }>
 
@@ -13,12 +14,14 @@ export async function deeplTranslate(
   fromLang: LangCodeISO6391 | "auto",
   toLang: LangCodeISO6391,
   providerConfig: DeepLProviderConfig,
+  options?: { textFormat?: TranslationTextFormat },
 ): Promise<string> {
   const [translatedText] = await requestDeepLTranslations(
     [sourceText],
     fromLang,
     toLang,
     providerConfig,
+    options,
   )
 
   if (translatedText === undefined) {
@@ -33,6 +36,7 @@ async function requestDeepLTranslations(
   fromLang: LangCodeISO6391 | "auto",
   toLang: LangCodeISO6391,
   providerConfig: DeepLProviderConfig,
+  options?: { textFormat?: TranslationTextFormat },
 ): Promise<string[]> {
   const apiKey = providerConfig.apiKey?.trim()
   if (!apiKey) {
@@ -47,6 +51,7 @@ async function requestDeepLTranslations(
     text: sourceTexts,
     ...(normalizedLanguages.source ? { source_lang: normalizedLanguages.source } : {}),
     target_lang: normalizedLanguages.target,
+    ...(options?.textFormat === "html" ? { tag_handling: "html" } : {}),
   })
 
   const fetchResponse = await fetchDirect(url, apiKey, requestBody)

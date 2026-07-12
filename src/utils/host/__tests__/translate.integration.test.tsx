@@ -2,7 +2,7 @@ import type { Config } from "@/types/config/config"
 // @vitest-environment jsdom
 import type { TranslationMode } from "@/types/config/translate"
 import { act, render, screen, waitFor } from "@testing-library/react"
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest"
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
   BLOCK_ATTRIBUTE,
@@ -18,6 +18,7 @@ import {
 import { flushBatchedOperations } from "@/utils/host/dom/batch-dom"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
 import {
+  translateNodeTranslationOnlyMode,
   translateNodesBilingualMode,
   translateWalkedElement,
 } from "@/utils/host/translate/node-manipulation"
@@ -139,21 +140,15 @@ describe("translate", () => {
   async function removeOrShowPageTranslation(
     translationMode: TranslationMode,
     toggle: boolean = false,
+    config?: Config,
   ) {
     const id = crypto.randomUUID()
+    const effectiveConfig =
+      config ?? (translationMode === "bilingual" ? BILINGUAL_CONFIG : TRANSLATION_ONLY_CONFIG)
 
-    walkAndLabelElement(
-      document.body,
-      id,
-      translationMode === "bilingual" ? BILINGUAL_CONFIG : TRANSLATION_ONLY_CONFIG,
-    )
+    walkAndLabelElement(document.body, id, effectiveConfig)
     await act(async () => {
-      await translateWalkedElement(
-        document.body,
-        id,
-        translationMode === "bilingual" ? BILINGUAL_CONFIG : TRANSLATION_ONLY_CONFIG,
-        toggle,
-      )
+      await translateWalkedElement(document.body, id, effectiveConfig, toggle)
       // Flush batched DOM operations to ensure all changes are applied before assertions
       flushBatchedOperations()
     })
@@ -2177,6 +2172,354 @@ describe("translate", () => {
 
       expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
       expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT)
+    })
+  })
+
+  describe("translationOnly HTML attribute placeholders", () => {
+    beforeEach(() => {
+      vi.mocked(translateTextForPage).mockReset().mockResolvedValue(MOCK_TRANSLATION)
+    })
+
+    afterEach(() => {
+      vi.mocked(translateTextForPage).mockReset().mockResolvedValue(MOCK_TRANSLATION)
+    })
+
+    it("keeps bilingual translation on the existing plain-text path", async () => {
+      render(
+        <div data-testid="bilingual-node">
+          Hello <strong className="long framework classes">world</strong>.
+        </div>,
+      )
+
+      await removeOrShowPageTranslation("bilingual", true)
+
+      expect(translateTextForPage).toHaveBeenCalled()
+      expect(
+        vi
+          .mocked(translateTextForPage)
+          .mock.calls.every(
+            ([request, textFormat]) => !request.includes("data-rf-attr") && textFormat === "plain",
+          ),
+      ).toBe(true)
+    })
+
+    it("sends a compact HTML skeleton and restores attributes after translated tag movement", async () => {
+      const longClassName = `place ${"utility-class-".repeat(40)}`
+      vi.mocked(translateTextForPage).mockImplementation(async (text) => {
+        if (text.includes("data-rf-attr")) {
+          return `这个星期一我去了<strong data-rf-attr="0" title="城市" onclick="evil()">温哥华</strong>。`
+        }
+        return MOCK_TRANSLATION
+      })
+
+      render(
+        <div data-testid="test-node">
+          I went to
+          <strong className={longClassName} style={{ color: "red" }} data-place="yvr" title="City">
+            Vancouver
+          </strong>
+          this Monday.
+        </div>,
+      )
+      const node = screen.getByTestId("test-node")
+
+      await removeOrShowPageTranslation("translationOnly", true)
+
+      expect(translateTextForPage).toHaveBeenCalledOnce()
+      const [requestHtml, textFormat] = vi.mocked(translateTextForPage).mock.calls[0]
+      expect(textFormat).toBe("html")
+      expect(requestHtml).toContain(`<strong title="City" data-rf-attr="0">`)
+      expect(requestHtml).not.toContain(longClassName)
+      expect(requestHtml).not.toContain("data-place")
+
+      const wrapper = expectTranslationWrapper(node, "translationOnly")
+      const translatedStrong = wrapper?.querySelector("strong")
+      expect(translatedStrong?.className).toBe(longClassName)
+      expect((translatedStrong as HTMLElement | null)?.style.color).toBe("red")
+      expect(translatedStrong?.getAttribute("data-place")).toBe("yvr")
+      expect(translatedStrong?.getAttribute("title")).toBe("城市")
+      expect(translatedStrong?.hasAttribute("data-rf-attr")).toBe(false)
+      expect(translatedStrong?.hasAttribute("onclick")).toBe(false)
+      expect(wrapper?.textContent).toBe("这个星期一我去了温哥华。")
+
+      await removeOrShowPageTranslation("translationOnly", true)
+      const restoredStrong = node.querySelector("strong")
+      expect(restoredStrong?.className).toBe(longClassName)
+      expect(restoredStrong?.getAttribute("data-place")).toBe("yvr")
+      expect(restoredStrong?.textContent).toBe("Vancouver")
+    })
+
+    it("keeps the original DOM when only restored attribute order differs", async () => {
+      vi.mocked(translateTextForPage).mockImplementation(async (request) => request)
+      render(
+        <div data-testid="same-html-node">
+          <strong className="place" title="City" data-place="yvr">
+            Vancouver
+          </strong>
+        </div>,
+      )
+      const node = screen.getByTestId("same-html-node")
+      const originalStrong = node.querySelector("strong")
+
+      await removeOrShowPageTranslation("translationOnly", true)
+
+      expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
+      expect(node.querySelector("strong")).toBe(originalStrong)
+    })
+
+    it("retries the canonical full HTML once when a marker contract is corrupted", async () => {
+      vi.mocked(translateTextForPage)
+        .mockResolvedValueOnce(`<strong>损坏的 marker</strong>`)
+        .mockResolvedValueOnce("完整 HTML 回退译文")
+
+      render(
+        <div data-testid="test-node">
+          I visited{" "}
+          <strong className="place" data-place="yvr">
+            Vancouver
+          </strong>
+          .
+        </div>,
+      )
+      const node = screen.getByTestId("test-node")
+
+      await removeOrShowPageTranslation("translationOnly", true)
+
+      expect(translateTextForPage).toHaveBeenCalledTimes(2)
+      expect(vi.mocked(translateTextForPage).mock.calls[0][0]).toContain(`data-rf-attr="0"`)
+      expect(vi.mocked(translateTextForPage).mock.calls[0][0]).not.toContain(`class="place"`)
+      expect(vi.mocked(translateTextForPage).mock.calls[1][0]).toContain(`class="place"`)
+      expect(vi.mocked(translateTextForPage).mock.calls[1][0]).not.toContain("data-rf-attr")
+      expect(expectTranslationWrapper(node, "translationOnly")?.textContent).toBe(
+        "完整 HTML 回退译文",
+      )
+    })
+
+    it("escapes and restores a page-owned numeric marker during full HTML fallback", async () => {
+      vi.mocked(translateTextForPage)
+        .mockResolvedValueOnce(`<strong>损坏的 marker</strong>`)
+        .mockResolvedValueOnce(`<strong class="place" data-rf-attr="rf-page-0">温哥华</strong>`)
+
+      render(
+        <div data-testid="test-node">
+          I visited{" "}
+          <strong className="place" data-rf-attr="0">
+            Vancouver
+          </strong>
+          .
+        </div>,
+      )
+      const node = screen.getByTestId("test-node")
+
+      await removeOrShowPageTranslation("translationOnly", true)
+
+      expect(translateTextForPage).toHaveBeenCalledTimes(2)
+      expect(vi.mocked(translateTextForPage).mock.calls[1][0]).toContain(`data-rf-attr="rf-page-0"`)
+      const translatedStrong = expectTranslationWrapper(node, "translationOnly")?.querySelector(
+        "strong",
+      )
+      expect(translatedStrong?.getAttribute("data-rf-attr")).toBe("0")
+      expect(translatedStrong?.className).toBe("place")
+    })
+
+    it("keeps the source DOM and existing error UI when the full HTML fallback fails", async () => {
+      vi.mocked(translateTextForPage)
+        .mockResolvedValueOnce(`<strong>损坏的 marker</strong>`)
+        .mockRejectedValueOnce(new Error("Fallback failed"))
+
+      render(
+        <div data-testid="test-node">
+          I visited <strong className="place">Vancouver</strong>.
+        </div>,
+      )
+      const node = screen.getByTestId("test-node")
+
+      await removeOrShowPageTranslation("translationOnly", true)
+
+      expect(translateTextForPage).toHaveBeenCalledTimes(2)
+      const wrapper = expectTranslationWrapper(node, "translationOnly")
+      expect(node.textContent).toContain("I visited Vancouver.")
+      await waitForTranslationError(wrapper)
+    })
+
+    it("disables placeholders for the current DeepLX endpoint after its first integrity failure", async () => {
+      const deeplxConfig: Config = {
+        ...TRANSLATION_ONLY_CONFIG,
+        providersConfig: [
+          ...TRANSLATION_ONLY_CONFIG.providersConfig,
+          {
+            id: "deeplx-default",
+            name: "DeepLX",
+            enabled: true,
+            provider: "deeplx",
+            baseURL: "https://deeplx.example/translate",
+          },
+        ],
+        translate: {
+          ...TRANSLATION_ONLY_CONFIG.translate,
+          providerId: "deeplx-default",
+        },
+      }
+      vi.mocked(translateTextForPage)
+        .mockResolvedValueOnce(`<strong>损坏的 marker</strong>`)
+        .mockResolvedValueOnce("第一次完整 HTML 回退")
+        .mockResolvedValueOnce("第二次直接使用完整 HTML")
+
+      const firstRender = render(
+        <div data-testid="first-node">
+          First <strong className="place">Vancouver</strong>.
+        </div>,
+      )
+      await removeOrShowPageTranslation("translationOnly", true, deeplxConfig)
+      firstRender.unmount()
+
+      render(
+        <div data-testid="second-node">
+          Second <strong className="place">Vancouver</strong>.
+        </div>,
+      )
+      await removeOrShowPageTranslation("translationOnly", true, deeplxConfig)
+
+      expect(translateTextForPage).toHaveBeenCalledTimes(3)
+      expect(vi.mocked(translateTextForPage).mock.calls[0][0]).toContain("data-rf-attr")
+      expect(vi.mocked(translateTextForPage).mock.calls[1][0]).not.toContain("data-rf-attr")
+      expect(vi.mocked(translateTextForPage).mock.calls[2][0]).not.toContain("data-rf-attr")
+      expect(vi.mocked(translateTextForPage).mock.calls[2][0]).toContain(`class="place"`)
+    })
+
+    it("shares the first DeepLX capability probe across concurrent paragraphs", async () => {
+      const deeplxConfig: Config = {
+        ...TRANSLATION_ONLY_CONFIG,
+        providersConfig: [
+          ...TRANSLATION_ONLY_CONFIG.providersConfig,
+          {
+            id: "deeplx-concurrent",
+            name: "DeepLX Concurrent",
+            enabled: true,
+            provider: "deeplx",
+            baseURL: "https://deeplx-concurrent.example/translate",
+          },
+        ],
+        translate: {
+          ...TRANSLATION_ONLY_CONFIG.translate,
+          providerId: "deeplx-concurrent",
+        },
+      }
+      let resolveProbe!: (value: string) => void
+      const probeResult = new Promise<string>((resolve) => {
+        resolveProbe = resolve
+      })
+      vi.mocked(translateTextForPage)
+        .mockImplementationOnce(() => probeResult)
+        .mockResolvedValueOnce("第一段完整 HTML 回退")
+        .mockResolvedValueOnce("第二段直接使用完整 HTML")
+
+      render(
+        <>
+          <div data-testid="first-concurrent-node">
+            First <strong className="first-place">Vancouver</strong>.
+          </div>
+          <div data-testid="second-concurrent-node">
+            Second <strong className="second-place">Victoria</strong>.
+          </div>
+        </>,
+      )
+      const firstNode = screen.getByTestId("first-concurrent-node")
+      const secondNode = screen.getByTestId("second-concurrent-node")
+      const translations = Promise.all([
+        translateNodeTranslationOnlyMode(
+          [...firstNode.childNodes],
+          "concurrent-walk",
+          deeplxConfig,
+        ),
+        translateNodeTranslationOnlyMode(
+          [...secondNode.childNodes],
+          "concurrent-walk",
+          deeplxConfig,
+        ),
+      ])
+
+      await waitFor(() => expect(translateTextForPage).toHaveBeenCalledTimes(1))
+      resolveProbe(`<strong>损坏的 marker</strong>`)
+      await act(async () => {
+        await translations
+        flushBatchedOperations()
+      })
+
+      expect(translateTextForPage).toHaveBeenCalledTimes(3)
+      expect(vi.mocked(translateTextForPage).mock.calls[0][0]).toContain("data-rf-attr")
+      const fallbackRequests = vi.mocked(translateTextForPage).mock.calls.slice(1)
+      expect(fallbackRequests.every(([request]) => !request.includes("data-rf-attr"))).toBe(true)
+      expect(fallbackRequests.some(([request]) => request.includes(`class="first-place"`))).toBe(
+        true,
+      )
+      expect(fallbackRequests.some(([request]) => request.includes(`class="second-place"`))).toBe(
+        true,
+      )
+    })
+
+    it("hands an inconclusive empty DeepLX probe to one waiter at a time", async () => {
+      const deeplxConfig: Config = {
+        ...TRANSLATION_ONLY_CONFIG,
+        providersConfig: [
+          ...TRANSLATION_ONLY_CONFIG.providersConfig,
+          {
+            id: "deeplx-empty-probe",
+            name: "DeepLX Empty Probe",
+            enabled: true,
+            provider: "deeplx",
+            baseURL: "https://deeplx-empty-probe.example/translate",
+          },
+        ],
+        translate: {
+          ...TRANSLATION_ONLY_CONFIG.translate,
+          providerId: "deeplx-empty-probe",
+        },
+      }
+      let compactRequestCount = 0
+      vi.mocked(translateTextForPage).mockImplementation(async (request) => {
+        if (request.includes("data-rf-attr")) {
+          compactRequestCount += 1
+          return compactRequestCount === 1 ? "" : `<strong>损坏的 marker</strong>`
+        }
+        return "完整 HTML 回退"
+      })
+
+      render(
+        <>
+          <div data-testid="empty-probe-one">
+            One <strong className="one">Vancouver</strong>.
+          </div>
+          <div data-testid="empty-probe-two">
+            Two <strong className="two">Victoria</strong>.
+          </div>
+          <div data-testid="empty-probe-three">
+            Three <strong className="three">Burnaby</strong>.
+          </div>
+        </>,
+      )
+      const nodes = [
+        screen.getByTestId("empty-probe-one"),
+        screen.getByTestId("empty-probe-two"),
+        screen.getByTestId("empty-probe-three"),
+      ]
+
+      await act(async () => {
+        await Promise.all(
+          nodes.map((node) =>
+            translateNodeTranslationOnlyMode(
+              [...node.childNodes],
+              "empty-probe-walk",
+              deeplxConfig,
+            ),
+          ),
+        )
+        flushBatchedOperations()
+      })
+
+      const requests = vi.mocked(translateTextForPage).mock.calls.map(([request]) => request)
+      expect(requests.filter((request) => request.includes("data-rf-attr"))).toHaveLength(2)
+      expect(requests.filter((request) => !request.includes("data-rf-attr"))).toHaveLength(2)
     })
   })
 

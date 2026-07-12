@@ -79,12 +79,13 @@ export async function getTranslatedTextAndRemoveSpinner(
   translatedWrapperNode: HTMLElement,
   isCurrent: () => boolean = () => true,
   textFormat: TranslationTextFormat = "plain",
+  translateRequest: () => Promise<string> = () => translateTextForPage(textContent, textFormat),
 ): Promise<string | undefined> {
   let translatedText: string | undefined
 
   try {
     if (!isCurrent()) return undefined
-    translatedText = await translateTextForPage(textContent, textFormat)
+    translatedText = await translateRequest()
     if (!isCurrent()) return undefined
   } catch (error) {
     if (!isCurrent()) return undefined

@@ -83,6 +83,76 @@ describe("deepl translate adapter", () => {
     })
   })
 
+  it.each(["plain", undefined] as const)(
+    "omits tag_handling for %s text format",
+    async (textFormat) => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        json: vi.fn<(...args: any[]) => any>().mockResolvedValue({
+          translations: [{ text: "Hello" }],
+        }),
+        text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
+      })
+
+      await deeplTranslate(
+        "Hello",
+        "en",
+        "de",
+        {
+          id: "deepl-default",
+          enabled: true,
+          name: "DeepL",
+          provider: "deepl",
+          apiKey: "test-key",
+        },
+        { textFormat },
+      )
+
+      const [, requestInit] = fetchMock.mock.calls[0]
+      expect(JSON.parse(requestInit.body)).toEqual({
+        text: ["Hello"],
+        source_lang: "EN",
+        target_lang: "DE",
+      })
+    },
+  )
+
+  it("sets tag_handling to html for html input", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: "OK",
+      json: vi.fn<(...args: any[]) => any>().mockResolvedValue({
+        translations: [{ text: "<p>Hallo</p>" }],
+      }),
+      text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
+    })
+
+    await deeplTranslate(
+      '<p class="message">Hello</p>',
+      "en",
+      "de",
+      {
+        id: "deepl-default",
+        enabled: true,
+        name: "DeepL",
+        provider: "deepl",
+        apiKey: "test-key",
+      },
+      { textFormat: "html" },
+    )
+
+    const [, requestInit] = fetchMock.mock.calls[0]
+    expect(JSON.parse(requestInit.body)).toEqual({
+      text: ['<p class="message">Hello</p>'],
+      source_lang: "EN",
+      target_lang: "DE",
+      tag_handling: "html",
+    })
+  })
+
   it("throws when the response count does not match the request count", async () => {
     fetchMock.mockResolvedValue({
       ok: true,

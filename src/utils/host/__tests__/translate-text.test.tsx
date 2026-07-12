@@ -28,6 +28,14 @@ vi.mock("@/utils/host/translate/api/google", () => ({
   googleTranslate: vi.fn<(...args: any[]) => any>(),
 }))
 
+vi.mock("@/utils/host/translate/api/deepl", () => ({
+  deeplTranslate: vi.fn<(...args: any[]) => any>(),
+}))
+
+vi.mock("@/utils/host/translate/api/deeplx", () => ({
+  deeplxTranslate: vi.fn<(...args: any[]) => any>(),
+}))
+
 vi.mock("@/utils/prompts/translate", () => ({
   getTranslatePrompt: vi.fn<(...args: any[]) => any>(),
 }))
@@ -47,6 +55,8 @@ vi.mock("@/utils/host/translate/webpage-summary", () => ({
 let mockSendMessage: any
 let mockMicrosoftTranslate: any
 let mockGoogleTranslate: any
+let mockDeepLTranslate: any
+let mockDeepLXTranslate: any
 let mockGetConfigFromStorage: any
 let mockGetTranslatePrompt: any
 let mockGetOrCreateWebPageContext: any
@@ -64,6 +74,12 @@ describe("translate-text", () => {
     )
     mockGoogleTranslate = vi.mocked(
       (await import("@/utils/host/translate/api/google")).googleTranslate,
+    )
+    mockDeepLTranslate = vi.mocked(
+      (await import("@/utils/host/translate/api/deepl")).deeplTranslate,
+    )
+    mockDeepLXTranslate = vi.mocked(
+      (await import("@/utils/host/translate/api/deeplx")).deeplxTranslate,
     )
     mockGetConfigFromStorage = vi.mocked((await import("@/utils/config/storage")).getLocalConfig)
     mockGetTranslatePrompt = vi.mocked(
@@ -436,6 +452,47 @@ describe("translate-text", () => {
       expect(result).toBe('L\'Iran chiama "Dichiarazione" AT&T <span>')
       expect(mockGoogleTranslate).toHaveBeenCalledWith("test input", "en", "zh", {
         textFormat: undefined,
+      })
+    })
+
+    it("forwards html text format to DeepL", async () => {
+      const deeplProviderConfig = {
+        id: "deepl-default",
+        enabled: true,
+        name: "DeepL",
+        provider: "deepl" as const,
+        apiKey: "test-key",
+      }
+      const html = '<p class="message">Hello</p>'
+      mockDeepLTranslate.mockResolvedValue("<p>你好</p>")
+
+      await executeTranslate(html, langConfig, deeplProviderConfig, getTranslatePrompt, {
+        textFormat: "html",
+      })
+
+      expect(mockDeepLTranslate).toHaveBeenCalledWith(html, "en", "zh", deeplProviderConfig, {
+        textFormat: "html",
+      })
+    })
+
+    it("forwards html text format to DeepLX", async () => {
+      const deeplxProviderConfig = {
+        id: "deeplx-default",
+        enabled: true,
+        name: "DeepLX",
+        provider: "deeplx" as const,
+        apiKey: "test-key",
+        baseURL: "https://api.deeplx.org/{{apiKey}}/translate",
+      }
+      const html = '<p class="message">Hello</p>'
+      mockDeepLXTranslate.mockResolvedValue("<p>你好</p>")
+
+      await executeTranslate(html, langConfig, deeplxProviderConfig, getTranslatePrompt, {
+        textFormat: "html",
+      })
+
+      expect(mockDeepLXTranslate).toHaveBeenCalledWith(html, "en", "zh", deeplxProviderConfig, {
+        textFormat: "html",
       })
     })
   })
