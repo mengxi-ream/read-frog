@@ -47,11 +47,25 @@ function restoreTextSplit(record: TextSplitRecord): boolean {
     sourceValueAfterSplit,
     tailValuesAfterSplit,
   } = record
-  if (!source.isConnected || source.parentNode !== parent) return false
+  const isUnchangedTail = (tail: Text, index: number) => tail.data === tailValuesAfterSplit[index]
+
+  if (!source.isConnected || source.parentNode !== parent) {
+    // The host replaced or moved the original Text node, so the split can never
+    // be rejoined. Tails still connected with their post-split values are stale
+    // fragments of content the replacement already owns; leaving them would
+    // duplicate the old tail text next to the host's new content (#1831).
+    createdTails.forEach((tail, index) => {
+      if (tail.isConnected && isUnchangedTail(tail, index)) tail.remove()
+    })
+    return false
+  }
 
   let previous: Text = source
   for (const tail of createdTails) {
     if (!tail.isConnected || tail.parentNode !== parent || previous.nextSibling !== tail) {
+      // The site inserted its own nodes between the fragments. The tails are
+      // real halves of live host content there, and removing them would delete
+      // host text (#249) — leave the split in place.
       return false
     }
     previous = tail
@@ -64,16 +78,13 @@ function restoreTextSplit(record: TextSplitRecord): boolean {
     return true
   }
 
-  const tailsAreUnchanged = createdTails.every(
-    (tail, index) => tail.data === tailValuesAfterSplit[index],
-  )
-  const hostReconstructedFullText =
-    source.data !== sourceValueAfterSplit && source.data.startsWith(originalValue)
-  if (tailsAreUnchanged && hostReconstructedFullText) {
-    // Frameworks such as React can update their original Text node with the
-    // complete expanded value while leaving splitText-created tails behind.
-    // The unchanged tails are then proven duplicates; keep the host value and
-    // remove only the fragments Read Frog created.
+  const tailsAreUnchanged = createdTails.every(isUnchangedTail)
+  if (tailsAreUnchanged && source.data !== sourceValueAfterSplit) {
+    // Frameworks such as React rewrite their original Text node with the
+    // complete new value while leaving splitText-created tails behind. With
+    // the chain intact and every tail still holding its post-split value, the
+    // tails are proven duplicates; keep the host value and remove only the
+    // fragments Read Frog created.
     createdTails.forEach((tail) => tail.remove())
     return true
   }
