@@ -4443,7 +4443,9 @@
       "[data-nav-item]",
       "[data-nav-extras]",
       "[data-navbar-main-menu-item-container]",
-      "[data-navbar-extra-items-container]"
+      "[data-navbar-extra-items-container]",
+      ".forum-topbar",
+      ".forum-bottombar"
     ]
   }
 ]
