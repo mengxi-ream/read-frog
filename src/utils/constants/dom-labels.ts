@@ -23,4 +23,6 @@ export const NOTRANSLATE_CLASS = "notranslate"
 
 export const REACT_SHADOW_HOST_CLASS = "read-frog-react-shadow-host"
 
+export const SPINNER_CLASS = "read-frog-spinner"
+
 export const TRANSLATION_ERROR_CONTAINER_CLASS = "read-frog-translation-error-container"

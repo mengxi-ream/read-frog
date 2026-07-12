@@ -106,4 +106,30 @@ describe("built-in site rules", () => {
       ]),
     )
   })
+
+  it("excludes the hltv.org navigation whose overflow handler loops on width changes (#1831)", () => {
+    const resolved = resolveSiteRule(
+      "https://www.hltv.org/matches/2395002/furia-vs-falcons-iem-cologne-major-2026",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+    expect(resolved.excludeSelector).toContain("[data-nav-item]")
+    expect(resolved.excludeSelector).toContain("[data-nav-extras]")
+    expect(resolved.excludeSelector).toContain(".navbar")
+  })
+
+  it("excludes hltv.org comment metadata bars (floor number, author, time, votes)", () => {
+    const resolved = resolveSiteRule(
+      "https://www.hltv.org/matches/2395002/furia-vs-falcons-iem-cologne-major-2026",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+    // .forum-topbar carries the floor number (a.replyNum), fan badge, flag and
+    // author anchor; .forum-bottombar carries the timestamp (span.time) and the
+    // vote button with its login tooltip. Post bodies live outside both bars.
+    expect(resolved.excludeSelector).toContain(".forum-topbar")
+    expect(resolved.excludeSelector).toContain(".forum-bottombar")
+  })
 })

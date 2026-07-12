@@ -118,4 +118,23 @@ describe("extractTextContent", () => {
       expect(extractTextContent(div, DEFAULT_CONFIG)).toBe("Hello World")
     })
   })
+
+  describe("extension wrapper exclusion", () => {
+    it("should exclude translated wrapper text but keep host notranslate children (issues #1831, #249)", () => {
+      const p = document.createElement("p")
+      p.innerHTML =
+        'Host <span class="notranslate">keep</span><span class="notranslate read-frog-translated-content-wrapper">译文</span>'
+      const extracted = extractTextContent(p, DEFAULT_CONFIG)
+      expect(extracted).toContain("Host")
+      expect(extracted).toContain("keep")
+      expect(extracted).not.toContain("译文")
+    })
+
+    it("should exclude nested translated wrappers deep inside the subtree", () => {
+      const div = document.createElement("div")
+      div.innerHTML =
+        '<span>Outer</span><em>Inner<span class="read-frog-translated-content-wrapper">内层译文</span></em>'
+      expect(extractTextContent(div, DEFAULT_CONFIG)).toBe("OuterInner")
+    })
+  })
 })
