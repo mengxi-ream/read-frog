@@ -44,7 +44,9 @@ export interface BilingualTranslationState {
 
 // State management for translation operations
 export const translatingNodes = new WeakSet<ChildNode>()
-export const originalContentMap = new Map<Element, string>()
+// WeakMap so elements removed by the site (SPA re-renders, infinite scroll)
+// don't pin themselves and their innerHTML snapshots for the page's lifetime.
+export const originalContentMap = new WeakMap<Element, string>()
 
 const virtualParagraphGroupsBySource = new WeakMap<HTMLElement, VirtualParagraphGroup>()
 const virtualParagraphGroupsByWrapper = new WeakMap<HTMLElement, VirtualParagraphGroup>()
