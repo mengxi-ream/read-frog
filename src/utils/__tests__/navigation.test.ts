@@ -9,24 +9,22 @@ describe("navigation", () => {
     browser.tabs.create = vi.fn<(...args: any[]) => any>().mockResolvedValue({})
   })
 
-  it("opens the options page through the runtime API", async () => {
-    await openOptionsPage()
-
-    expect(browser.runtime.openOptionsPage).toHaveBeenCalledOnce()
-    expect(browser.tabs.create).not.toHaveBeenCalled()
-  })
-
-  it("falls back to an extension tab when the runtime API fails", async () => {
-    browser.runtime.openOptionsPage = vi
-      .fn<() => Promise<void>>()
-      .mockRejectedValue(new Error("failed"))
-
+  it("opens the options page as an extension tab", async () => {
     await openOptionsPage()
 
     expect(browser.tabs.create).toHaveBeenCalledWith({
       active: true,
       url: "chrome-extension://test-extension-id/options.html",
     })
+    expect(browser.runtime.openOptionsPage).not.toHaveBeenCalled()
+  })
+
+  it("falls back to the runtime API when opening an extension tab fails", async () => {
+    browser.tabs.create = vi.fn<(...args: any[]) => any>().mockRejectedValue(new Error("failed"))
+
+    await openOptionsPage()
+
+    expect(browser.runtime.openOptionsPage).toHaveBeenCalledOnce()
   })
 
   it("opens the options page with a hash route", async () => {

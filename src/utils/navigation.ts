@@ -7,17 +7,17 @@ export interface OpenOptionsPageOptions {
 export async function openOptionsPage(options?: OpenOptionsPageOptions) {
   const route = options?.route ?? ""
 
-  if (!route && browser.runtime.openOptionsPage) {
-    try {
-      await browser.runtime.openOptionsPage()
-      return
-    } catch {
-      // Some extension hosts expose the API but still fail to open the page.
+  try {
+    await browser.tabs.create({
+      active: true,
+      url: browser.runtime.getURL(`/options.html${route ? `#${route}` : ""}`),
+    })
+    return
+  } catch (error) {
+    if (!browser.runtime.openOptionsPage) {
+      throw error
     }
   }
 
-  await browser.tabs.create({
-    active: true,
-    url: browser.runtime.getURL(`/options.html${route ? `#${route}` : ""}`),
-  })
+  await browser.runtime.openOptionsPage()
 }
