@@ -14,6 +14,7 @@ import {
   PARAGRAPH_ATTRIBUTE,
   TRANSLATION_ERROR_CONTAINER_CLASS,
   VIRTUAL_PARAGRAPH_ATTRIBUTE,
+  WALKED_ATTRIBUTE,
 } from "@/utils/constants/dom-labels"
 import { flushBatchedOperations } from "@/utils/host/dom/batch-dom"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
@@ -2645,6 +2646,53 @@ describe("translate", () => {
           expect(document.querySelector(".issue-link")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(
             false,
           )
+        } finally {
+          Object.defineProperty(window, "location", {
+            value: originalLocation,
+            writable: true,
+            configurable: true,
+          })
+        }
+      })
+
+      it("bilingual mode: should keep classless PR reference links in release notes source", async () => {
+        // Modern GitHub release markup renders PR references as a bare
+        // `a[data-hovercard-type='pull_request']` with no `.issue-link` class,
+        // so the old preserveText rule no longer matched and the broad
+        // `a[data-hovercard-type]` exclude dropped "#1837" from the source
+        // (issue: PR numbers missing from release-notes translations).
+        const originalLocation = window.location
+        setHost("github.com")
+        vi.mocked(translateTextForPage).mockClear()
+
+        try {
+          render(
+            <div data-testid="test-node" className="markdown-body">
+              <ul>
+                <li>
+                  <a
+                    data-hovercard-type="pull_request"
+                    data-hovercard-url="/mengxi-ream/read-frog/pull/1837/hovercard"
+                    href="/mengxi-ream/read-frog/pull/1837"
+                  >
+                    #1837
+                  </a>
+                  {" feat(translate): return a NO_TRANSLATION_NEEDED sentinel"}
+                </li>
+              </ul>
+            </div>,
+          )
+
+          await removeOrShowPageTranslation("bilingual", true)
+
+          expect(translateTextForPage).toHaveBeenCalledWith(
+            "#1837 feat(translate): return a NO_TRANSLATION_NEEDED sentinel",
+            "plain",
+          )
+          // Preserved as source text, not promoted to its own paragraph/walked node.
+          const prLink = document.querySelector("a[data-hovercard-type='pull_request']")!
+          expect(prLink.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(false)
+          expect(prLink.hasAttribute(WALKED_ATTRIBUTE)).toBe(false)
         } finally {
           Object.defineProperty(window, "location", {
             value: originalLocation,

@@ -616,7 +616,12 @@
       "[data-testid=list-row-repo-name-and-number]"
     ],
     "forceBlockSelectors.add": ["bdi"],
-    "preserveTextSelectors.add": [".issue-link"],
+    "preserveTextSelectors.add": [
+      ".issue-link",
+      ".markdown-body a[data-hovercard-type='pull_request']",
+      ".markdown-body a[data-hovercard-type='discussion']",
+      ".markdown-body a[data-hovercard-type='commit']"
+    ],
     "injectedCss.add": [
       ".bpDald,.discussion-title {-webkit-line-clamp:unset!important;}",
       "li>div[class*='Box-sc'],div[class*='Box-sc']>button[class*='prc-Token-TokenBase'],li[class*='card-label-module']>button[class*='prc-Token-TokenBase'] {height:unset!important;}",
