@@ -64,6 +64,7 @@
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@fontsource-variable/onest": "^5.2.11",
     "@headless-tree/core": "^1.7.0",
     "@headless-tree/react": "^1.7.0",
     "@json-render/core": "^0.19.0",
