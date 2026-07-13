@@ -161,3 +161,12 @@
     @apply bg-background text-foreground antialiased;
   }
 }
+
+/* Chromium injects `body { font-family: system-ui, … }` (extension_fonts.css)
+   into every extension page, which intercepts the font-family inherited from
+   Tailwind preflight's `html` rule. The injected sheet cascades as UNLAYERED
+   author CSS, so this override must be unlayered too — inside @layer base it
+   would lose. */
+body {
+  font-family: var(--rf-font-sans);
+}
