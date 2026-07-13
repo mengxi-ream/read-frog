@@ -1,5 +1,23 @@
 # @read-frog/extension
 
+## 1.40.1
+
+### Patch Changes
+
+- [#1844](https://github.com/mengxi-ream/read-frog/pull/1844) [`29f18a0`](https://github.com/mengxi-ream/read-frog/commit/29f18a0d188a5844653c53fcf7cd007f5f585003) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(site-rules): keep PR/discussion/commit reference links in GitHub markdown translations
+
+  Modern GitHub markup renders references like `[#1837](https://github.com/mengxi-ream/read-frog/issues/1837)` as a bare `a[data-hovercard-type='pull_request']` with no `.issue-link` class, so the broad `a[data-hovercard-type]` exclude dropped them from the translation source (e.g. release notes lost every PR number). Preserve `pull_request`, `discussion`, and `commit` hovercard links inside `.markdown-body` as source text so they survive translation verbatim.
+
+- [#1845](https://github.com/mengxi-ream/read-frog/pull/1845) [`05134f5`](https://github.com/mengxi-ream/read-frog/commit/05134f5c06633200e9f86c95e75517de6b836fb7) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(ui): bundle Onest Variable (~62 KB) and use it for the extension's Latin UI text, matching the web app. Imported only in the extension's own pages (popup / options / side panel / translation hub), so no webfont is injected into content scripts on host pages. Also adds an unlayered `body { font-family: var(--rf-font-sans) }` override — Chromium injects `body { font-family: system-ui, … }` into every extension page (extension_fonts.css), which otherwise intercepts the inherited font stack so neither Onest nor the CJK fallbacks would ever apply
+
+- [#1841](https://github.com/mengxi-ream/read-frog/pull/1841) [`0263b50`](https://github.com/mengxi-ream/read-frog/commit/0263b50ff00586a6630a15aa8e9bf9dd2cdc049e) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translate): store translationOnly original-content snapshots in a WeakMap so elements removed by the site (SPA re-renders, infinite scroll) no longer retain detached DOM nodes and their HTML strings for the page's lifetime
+
+- [#1840](https://github.com/mengxi-ream/read-frog/pull/1840) [`a150c78`](https://github.com/mengxi-ream/read-frog/commit/a150c7807bc9f13f919aebd57a8186187e5f9898) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translate): remove orphan splitText tails when the host rewrites or replaces the source Text node, so failed split restores no longer duplicate stale tail text on pre-wrap sites
+
+- [#1839](https://github.com/mengxi-ream/read-frog/pull/1839) [`0a7eab2`](https://github.com/mengxi-ream/read-frog/commit/0a7eab2e064977daa2e4d4be86d0d1068a13f3ff) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translate): cancel timed-out queue attempts with an AbortSignal before retrying and coalesce concurrent identical batch requests by cache hash, so provider slowdowns no longer stack duplicate in-flight requests
+
+- [#1845](https://github.com/mengxi-ream/read-frog/pull/1845) [`05134f5`](https://github.com/mengxi-ream/read-frog/commit/05134f5c06633200e9f86c95e75517de6b836fb7) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(ui): add 思源黑体 (Source Han Sans / Noto Sans CJK) to the extension UI font fallback stack, after system-ui and before the generic sans-serif, so Chinese UI text resolves to it by name on platforms where it is the default (Android / ChromeOS / Linux) while macOS/Windows keep their lang-correct native PingFang / 微软雅黑
+
 ## 1.40.0
 
 ### Minor Changes
