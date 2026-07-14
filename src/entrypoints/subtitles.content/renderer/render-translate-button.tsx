@@ -1,4 +1,4 @@
-import type { SubtitlesProvidersAdapter } from "../ui/subtitles-ui-context"
+import type { SubtitlesProvidersAdapter } from "../universal-adapter"
 import themeCSS from "@/assets/styles/theme.css?inline"
 import { SUBTITLES_THEME, TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
 import { createReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"

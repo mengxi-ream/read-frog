@@ -26,7 +26,7 @@ export function StateMessage({ state, message }: StateMessageProps) {
 
   const { color, getText } = STATE_CONFIG[state]
 
-  const text = state === "error" ? message : getText()
+  const text = state === "error" ? message : (message ?? getText())
 
   if (!text) return null
 

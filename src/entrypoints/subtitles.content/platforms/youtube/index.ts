@@ -1,11 +1,16 @@
 import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
-import { YoutubeSubtitlesFetcher } from "@/utils/subtitles/fetchers"
+import { AiSubtitlesFetcher, YoutubeSubtitlesFetcher } from "@/utils/subtitles/fetchers"
 import { UniversalVideoAdapter } from "../../universal-adapter"
 
 export function createYoutubeSubtitlesAdapter(config: PlatformConfig) {
-  const subtitlesFetcher = new YoutubeSubtitlesFetcher()
+  const { createAiSubtitlesContext } = config
   return new UniversalVideoAdapter({
     config,
-    subtitlesFetcher,
+    fetchers: {
+      native: () => new YoutubeSubtitlesFetcher(),
+      ...(createAiSubtitlesContext
+        ? { ai: () => new AiSubtitlesFetcher(createAiSubtitlesContext) }
+        : {}),
+    },
   })
 }

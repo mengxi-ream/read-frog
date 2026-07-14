@@ -1028,6 +1028,15 @@ options:
           webTitle: 网页标题
           webDescription: 页面元信息中的网页描述
           videoSummary: 视频摘要（需启用 AI 智能上下文）
+    aiQuota:
+      title: AI 字幕额度
+      description: 你账户本月的 AI 字幕转写额度使用情况
+      loginRequired: 登录后查看你的 AI 字幕额度
+      logIn: 登录
+      betaRequired: AI 字幕内测中，你的账号暂未获得使用资格
+      betaApply: 申请资格
+      loadError: 无法加载额度，请稍后重试。
+      summary: 已用 $1 分钟 / 共 $2 分钟，剩余 $3 分钟
   whatsNew:
     title: 最近更新
   rateUs:
@@ -1127,6 +1136,9 @@ thinking:
 shortcutKeySelector:
   placeholder: 请输入快捷键
 subtitles:
+  loadingAiSubtitles: 正在加载 AI 字幕中
+  requestAiSubtitles: 请求 AI 字幕（Beta）
+  usingAiSubtitles: 正在使用 AI 字幕中
   actions:
     downloadTranslated: 下载翻译字幕
     downloadTranslatedPreparing: 正在准备字幕，长视频可能需要更久
@@ -1152,6 +1164,8 @@ subtitles:
     aiRateLimited: 请求过于频繁，请稍后再试
     aiAuthFailed: API 认证失败，请检查您的 API 密钥
     aiServiceUnavailable: 翻译服务暂时不可用
+    aiQuotaExceeded: 本月 AI 字幕额度已用完
+    aiRequestFailed: AI 字幕请求失败，请稍后重试
     aiNoResponse: AI 服务未响应，使用原文显示
     translatedExportFailed: 生成翻译字幕失败
     translatedExportIncomplete: 未能翻译所有字幕行

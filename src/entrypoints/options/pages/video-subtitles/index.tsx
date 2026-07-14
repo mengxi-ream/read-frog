@@ -1,6 +1,7 @@
 import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
 import { ClearAiSegmentationCache } from "./clear-ai-segmentation-cache"
+import { SubtitlesAiQuota } from "./subtitles-ai-quota"
 import { SubtitlesConfig } from "./subtitles-config"
 import { SubtitlesCustomPrompts } from "./subtitles-custom-prompts"
 import { SubtitlesRequestBatch } from "./subtitles-request-batch"
@@ -12,6 +13,7 @@ export function VideoSubtitlesPage() {
     <PageLayout title={i18n.t("options.videoSubtitles.title")}>
       <div className="*:border-b [&>*:last-child]:border-b-0">
         <SubtitlesConfig />
+        <SubtitlesAiQuota />
         <SubtitlesStyleSettings />
         <SubtitlesCustomPrompts />
         <SubtitlesRequestRate />

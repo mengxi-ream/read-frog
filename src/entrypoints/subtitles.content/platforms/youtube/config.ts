@@ -20,6 +20,11 @@ const NAVIGATE_EVENTS = {
 
 const SHORTS_ACTIVE_PLAYER = "#reel-overlay-container .html5-video-player"
 
+function createYoutubeAiSubtitlesContext() {
+  const videoId = getYoutubeVideoId()
+  return videoId ? { platform: "youtube", videoId, url: location.href } : null
+}
+
 const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
   watch: {
     embedded: false,
@@ -43,6 +48,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
       },
     },
     getVideoId: getYoutubeVideoId,
+    createAiSubtitlesContext: createYoutubeAiSubtitlesContext,
   },
 
   embed: {
@@ -66,6 +72,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
       checkVisibility: () => true,
     },
     getVideoId: getYoutubeVideoId,
+    createAiSubtitlesContext: createYoutubeAiSubtitlesContext,
   },
 
   shorts: {
@@ -89,6 +96,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
       checkVisibility: () => true,
     },
     getVideoId: getYoutubeVideoId,
+    createAiSubtitlesContext: createYoutubeAiSubtitlesContext,
   },
 }
 

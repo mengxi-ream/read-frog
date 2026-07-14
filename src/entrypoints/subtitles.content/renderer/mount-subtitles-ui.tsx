@@ -1,4 +1,4 @@
-import type { SubtitlesProvidersAdapter } from "../ui/subtitles-ui-context"
+import type { SubtitlesProvidersAdapter } from "../universal-adapter"
 import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import ReactDOM from "react-dom/client"
 import themeCSS from "@/assets/styles/theme.css?inline"

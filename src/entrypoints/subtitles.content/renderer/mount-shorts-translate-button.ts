@@ -1,4 +1,4 @@
-import type { SubtitlesProvidersAdapter } from "../ui/subtitles-ui-context"
+import type { SubtitlesProvidersAdapter } from "../universal-adapter"
 import { waitForElement } from "@/utils/dom/wait-for-element"
 import { renderSubtitlesTranslateButton } from "./render-translate-button"
 
