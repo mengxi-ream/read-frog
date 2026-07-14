@@ -1,5 +1,6 @@
 import type {
   TextSplitRecord,
+  TranslationOnlyAnchorState,
   TranslationOnlySwapRecord,
   VirtualParagraphGroup,
 } from "../core/translation-state"
@@ -15,15 +16,18 @@ import { removeReactShadowHost } from "../../../react-shadow-host/create-shadow-
 import { isHTMLElement, isTranslatedWrapperNode } from "../../dom/filter"
 import { deepQueryAllSelector, deepQueryTopLevelSelector } from "../../dom/find"
 import {
+  dropTranslationOnlySwapRecords,
   getBilingualTranslationStateForWrapper,
   getPendingBilingualTranslationStates,
   getPendingVirtualParagraphGroups,
   getTranslationOnlyAnchorState,
   getVirtualParagraphGroupForSource,
   getVirtualParagraphGroupForWrapper,
+  isTranslationOnlySwapRecordDead,
   markExtensionDrivenCharacterData,
   markExtensionDrivenNodeRemoval,
-  refreshTranslationOnlyAnchorExpectedText,
+  refreshTranslationOnlySwapRecordExpectedText,
+  swapRecordIntersectsNodes,
   takeTranslationOnlyOriginals,
   unregisterBilingualTranslationState,
   unregisterTranslationOnlyAnchorState,
@@ -232,15 +236,52 @@ function restoreSwapRecord(record: TranslationOnlySwapRecord): void {
   }
 }
 
+function finalizeTranslationOnlyAnchorIfEmpty(state: TranslationOnlyAnchorState): void {
+  if (state.swaps.length > 0) return
+  for (const { name, previousValue } of state.attributeAdjustments) {
+    if (previousValue === null) state.anchor.removeAttribute(name)
+    else state.anchor.setAttribute(name, previousValue)
+  }
+  unregisterTranslationOnlyAnchorState(state.anchor)
+}
+
+/**
+ * Drop an anchor's swap records touching the given nodes WITHOUT writing any
+ * values back — used when the fallback wrapper strategy takes over a run whose
+ * previous swap was already restored (the displaced nodes now belong to the
+ * wrapper's node-identity registry).
+ */
+export function dropTranslationOnlySwapRecordsForNodes(
+  anchor: HTMLElement,
+  nodes: readonly ChildNode[],
+): void {
+  const state = getTranslationOnlyAnchorState(anchor)
+  if (!state) return
+  dropTranslationOnlySwapRecords(
+    state,
+    state.swaps.filter(
+      (record) =>
+        swapRecordIntersectsNodes(record, nodes) || isTranslationOnlySwapRecordDead(record),
+    ),
+  )
+  finalizeTranslationOnlyAnchorIfEmpty(state)
+}
+
 /**
  * Undo in-place text swaps registered on an anchor. With `filterNodes`, only
- * swap records whose text nodes intersect those nodes are restored (the
- * walker toggles one run at a time); without it, everything is restored.
+ * swap records whose nodes intersect those nodes are restored (the walker
+ * toggles one run at a time); without it, everything is restored.
+ * `keepRecords` is the retranslation mode: values return to source but the
+ * records stay registered (expected text refreshed) so the anchor keeps being
+ * monitored through the provider round-trip — a dropped re-swap must not
+ * leave the region untranslated AND unwatched. The incoming swap replaces the
+ * kept records.
  * @returns true when at least one swap record was restored
  */
 export function restoreTranslationOnlySwapsForAnchor(
   anchor: HTMLElement,
   filterNodes?: readonly ChildNode[],
+  options?: { keepRecords?: boolean },
 ): boolean {
   const state = getTranslationOnlyAnchorState(anchor)
   if (!state) {
@@ -250,28 +291,29 @@ export function restoreTranslationOnlySwapsForAnchor(
     return false
   }
 
-  const intersects = (record: TranslationOnlySwapRecord) =>
-    !filterNodes ||
-    record.items.some((item) =>
-      filterNodes.some(
-        (node) => node === item.node || (isHTMLElement(node) && node.contains(item.node)),
-      ),
-    )
+  // Records whose every node the host disconnected are unrestorable debris;
+  // letting them linger would pin detached subtrees and hold the marker (and
+  // the walker skip) forever.
+  const deadRecords = state.swaps.filter(isTranslationOnlySwapRecordDead)
+  dropTranslationOnlySwapRecords(state, deadRecords)
 
-  const toRestore = state.swaps.filter(intersects)
-  if (toRestore.length === 0) return false
+  const toRestore = state.swaps.filter(
+    (record) => !filterNodes || swapRecordIntersectsNodes(record, filterNodes),
+  )
+  if (toRestore.length === 0) {
+    finalizeTranslationOnlyAnchorIfEmpty(state)
+    // Pruning emptied the anchor: the host rebuilt the translated content, so
+    // a toggle pressing "hide" here has nothing left to hide — report the
+    // clear so the caller flips OFF instead of translating the fresh content.
+    return deadRecords.length > 0 && state.swaps.length === 0
+  }
 
   toRestore.forEach(restoreSwapRecord)
-  state.swaps = state.swaps.filter((record) => !toRestore.includes(record))
-
-  if (state.swaps.length === 0) {
-    for (const { name, previousValue } of state.attributeAdjustments) {
-      if (previousValue === null) anchor.removeAttribute(name)
-      else anchor.setAttribute(name, previousValue)
-    }
-    unregisterTranslationOnlyAnchorState(anchor)
+  if (options?.keepRecords) {
+    toRestore.forEach(refreshTranslationOnlySwapRecordExpectedText)
   } else {
-    refreshTranslationOnlyAnchorExpectedText(state)
+    dropTranslationOnlySwapRecords(state, toRestore)
+    finalizeTranslationOnlyAnchorIfEmpty(state)
   }
   return true
 }

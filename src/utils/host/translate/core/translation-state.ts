@@ -85,6 +85,15 @@ export interface TranslationOnlySwapAttributeItem {
 
 export interface TranslationOnlySwapRecord {
   walkId: string
+  // The run's top-level nodes at swap time. Staleness is judged per record
+  // against exactly these nodes — NEVER against an anchor-wide text aggregate,
+  // which would couple the record to unrelated nested content (a descendant
+  // anchor registering/unregistering, a sibling run's fallback displacement)
+  // and produce permanent false staleness (adversarial-review finding).
+  runNodes: ChildNode[]
+  // Aggregate run text right after our swap wrote it; host deviation means
+  // this run needs retranslation (expand/"show more" re-renders).
+  expectedRunText: string
   items: TranslationOnlySwapItem[]
   attributeItems: TranslationOnlySwapAttributeItem[]
 }
@@ -95,53 +104,44 @@ export interface TranslationOnlyAnchorState {
   // guardedly when the last swap is undone.
   attributeAdjustments: { name: string; previousValue: string | null }[]
   swaps: TranslationOnlySwapRecord[]
-  // Aggregate anchor text right after our last swap/restore write. Deviation
-  // means the HOST changed content inside the anchor (e.g. an expand/"show
-  // more" re-render) and the anchor needs retranslation (mirrors the bilingual
-  // sourceTextContent staleness contract).
-  expectedTextContent: string
 }
 
 const translationOnlyAnchorStates = new WeakMap<HTMLElement, TranslationOnlyAnchorState>()
 
-/**
- * Aggregate comparable text under an anchor: non-whitespace text nodes,
- * excluding translated-wrapper subtrees and NESTED anchors (those track their
- * own expected text).
- */
-export function collectTranslationOnlyAnchorText(anchor: HTMLElement): string {
-  const parts: string[] = []
-  const visit = (node: Node): void => {
-    if (node.nodeType === Node.TEXT_NODE) {
-      const data = (node as Text).data
-      if (data.trim()) parts.push(data)
-      return
-    }
-    if (!(node instanceof HTMLElement)) return
-    if (node !== anchor) {
-      if (isTranslatedWrapperNode(node)) return
-      if (translationOnlyAnchorStates.has(node)) return
-    }
-    for (const child of node.childNodes) visit(child)
+function collectRunText(node: Node, parts: string[]): void {
+  if (node.nodeType === Node.TEXT_NODE) {
+    const data = (node as Text).data
+    if (data.trim()) parts.push(data)
+    return
   }
-  visit(anchor)
+  if (!(node instanceof HTMLElement)) return
+  if (isTranslatedWrapperNode(node)) return
+  for (const child of node.childNodes) collectRunText(child, parts)
+}
+
+/** Aggregate comparable text of a swap record's run, in document order. */
+export function collectTranslationOnlyRunText(runNodes: readonly ChildNode[]): string {
+  const parts: string[] = []
+  for (const node of runNodes) collectRunText(node, parts)
   return parts.join("")
 }
 
-export function refreshTranslationOnlyAnchorExpectedText(state: TranslationOnlyAnchorState): void {
-  state.expectedTextContent = collectTranslationOnlyAnchorText(state.anchor)
-}
-
-function isTranslationOnlyAnchorCurrent(state: TranslationOnlyAnchorState): boolean {
-  return (
-    state.anchor.isConnected &&
-    collectTranslationOnlyAnchorText(state.anchor) === state.expectedTextContent
+export function refreshTranslationOnlySwapRecordExpectedText(
+  record: TranslationOnlySwapRecord,
+): void {
+  record.expectedRunText = collectTranslationOnlyRunText(
+    record.runNodes.filter((node) => node.isConnected),
   )
 }
 
+export function isTranslationOnlySwapRecordCurrent(record: TranslationOnlySwapRecord): boolean {
+  if (record.runNodes.some((node) => !node.isConnected)) return false
+  return collectTranslationOnlyRunText(record.runNodes) === record.expectedRunText
+}
+
 /**
- * Nearest ancestor anchor whose content the host changed since our swap —
- * the translationOnly counterpart of findStaleBilingualLayoutSource. Feeds the
+ * Nearest ancestor anchor one of whose swapped runs the host changed — the
+ * translationOnly counterpart of findStaleBilingualLayoutSource. Feeds the
  * same budgeted retranslation pipeline so expand/"show more" re-renders get
  * translated instead of staying in the source language.
  */
@@ -149,10 +149,45 @@ export function findStaleTranslationOnlyAnchor(node: Node): HTMLElement | undefi
   let current = node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement
   while (current) {
     const state = translationOnlyAnchorStates.get(current)
-    if (state && !isTranslationOnlyAnchorCurrent(state)) return current
+    if (
+      state?.anchor.isConnected &&
+      state.swaps.some((record) => !isTranslationOnlySwapRecordCurrent(record))
+    ) {
+      return current
+    }
     current = current.parentElement
   }
   return undefined
+}
+
+/** A record every one of whose nodes the host disconnected: nothing restorable. */
+export function isTranslationOnlySwapRecordDead(record: TranslationOnlySwapRecord): boolean {
+  return (
+    record.runNodes.every((node) => !node.isConnected) &&
+    record.items.every((item) => !item.node.isConnected)
+  )
+}
+
+export function swapRecordIntersectsNodes(
+  record: TranslationOnlySwapRecord,
+  nodes: readonly ChildNode[],
+): boolean {
+  const touches = (candidate: ChildNode) =>
+    nodes.some(
+      (node) =>
+        node === candidate ||
+        (node instanceof HTMLElement && node.contains(candidate)) ||
+        (candidate instanceof HTMLElement && candidate.contains(node)),
+    )
+  return record.runNodes.some(touches) || record.items.some((item) => touches(item.node))
+}
+
+export function dropTranslationOnlySwapRecords(
+  state: TranslationOnlyAnchorState,
+  records: readonly TranslationOnlySwapRecord[],
+): void {
+  if (records.length === 0) return
+  state.swaps = state.swaps.filter((record) => !records.includes(record))
 }
 
 export function getTranslationOnlyAnchorState(

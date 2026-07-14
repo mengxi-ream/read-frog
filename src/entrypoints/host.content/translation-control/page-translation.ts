@@ -23,7 +23,6 @@ import { walkAndLabelElement } from "@/utils/host/dom/traversal"
 import {
   findStaleBilingualLayoutSource,
   findStaleTranslationOnlyAnchor,
-  getTranslationOnlyAnchorState,
   wasCharacterDataChangeExtensionDriven,
   wasNodeRemovedByExtension,
 } from "@/utils/host/translate/core/translation-state"
@@ -759,10 +758,12 @@ export class PageTranslationManager implements IPageTranslationManager {
         }
         passes += 1
         handledVersion = mutationVersions.get(source) ?? 0
-        if (getTranslationOnlyAnchorState(source)) {
-          // In-place-swapped anchor: translateNodes routes to the
+        if (config.translate.mode === "translationOnly") {
+          // Swapped-anchor staleness: translateNodes routes to the
           // translationOnly path, which restores surviving swaps first so the
-          // provider sees current host text, then re-swaps.
+          // provider sees current host text, then re-swaps. Keyed on the MODE,
+          // not on anchor-state presence — a scheduled retry must never insert
+          // bilingual wrappers into a translationOnly session.
           await translateNodes([source], walkId, false, config)
         } else {
           walkAndLabelElement(source, walkId, config)

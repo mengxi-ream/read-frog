@@ -3,12 +3,15 @@ import type { TransNode } from "@/types/dom"
 import { CONTENT_WRAPPER_CLASS, TRANSLATION_ONLY_ATTRIBUTE } from "../../../constants/dom-labels"
 import { isHTMLElement, isTextNode } from "../../dom/filter"
 import {
+  dropTranslationOnlySwapRecords,
   markExtensionDrivenCharacterData,
-  refreshTranslationOnlyAnchorExpectedText,
+  refreshTranslationOnlySwapRecordExpectedText,
   registerTranslationOnlyAnchorState,
+  swapRecordIntersectsNodes,
   type TranslationOnlyAnchorState,
   type TranslationOnlySwapAttributeItem,
   type TranslationOnlySwapItem,
+  type TranslationOnlySwapRecord,
 } from "../core/translation-state"
 import { setTranslationDirAndLang } from "../translation-attributes"
 import {
@@ -289,10 +292,12 @@ export function planInPlaceTextSwap(
 
 /**
  * Write the paired translated values into the site's own text nodes and
- * register the guarded-restore state on the anchor.
+ * register the guarded-restore state on the anchor. An existing record for
+ * the same run (a retranslation pass) is replaced, not appended.
  */
 export function applyInPlaceTextSwap(
   plan: TextSwapPlan,
+  runNodes: readonly TransNode[],
   anchor: HTMLElement,
   walkId: string,
   config: Config,
@@ -316,10 +321,25 @@ export function applyInPlaceTextSwap(
     element.setAttribute(name, translatedValue)
   }
 
+  const record: TranslationOnlySwapRecord = {
+    walkId,
+    runNodes: [...runNodes],
+    expectedRunText: "",
+    items,
+    attributeItems,
+  }
+  refreshTranslationOnlySwapRecordExpectedText(record)
+
   const existingState = getAnchorState(anchor)
   if (existingState) {
-    existingState.swaps.push({ walkId, items, attributeItems })
-    refreshTranslationOnlyAnchorExpectedText(existingState)
+    // A retranslation pass replaces its run's previous record — appending
+    // would leave a dead record whose stale references keep flagging the
+    // anchor as host-changed.
+    dropTranslationOnlySwapRecords(
+      existingState,
+      existingState.swaps.filter((existing) => swapRecordIntersectsNodes(existing, runNodes)),
+    )
+    existingState.swaps.push(record)
     return
   }
 
@@ -333,13 +353,9 @@ export function applyInPlaceTextSwap(
   ]
   anchor.setAttribute(TRANSLATION_ONLY_ATTRIBUTE, "")
   setTranslationDirAndLang(anchor, config)
-  const state: TranslationOnlyAnchorState = {
+  registerTranslationOnlyAnchorState({
     anchor,
     attributeAdjustments,
-    swaps: [{ walkId, items, attributeItems }],
-    expectedTextContent: "",
-  }
-  registerTranslationOnlyAnchorState(state)
-  // After registration so nested-anchor exclusion sees a consistent registry
-  refreshTranslationOnlyAnchorExpectedText(state)
+    swaps: [record],
+  })
 }

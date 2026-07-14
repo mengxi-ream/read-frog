@@ -8,6 +8,25 @@ import {
 } from "../../../constants/dom-labels"
 import { isBlockTransNode, isHTMLElement, isTextNode, isTransNode } from "../../dom/filter"
 import { translateNodes } from "./translation-modes"
+import { getTranslationOnlyAnchorState } from "./translation-state"
+
+/**
+ * Marker attributes can outlive their WeakMap state (extension reload on a
+ * live tab). A ghost marker must not block walks forever — heal it and treat
+ * the region as untranslated.
+ */
+function hasLiveTranslationOnlyAnchor(element: HTMLElement): boolean {
+  const candidates: HTMLElement[] = element.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+    ? [element]
+    : []
+  candidates.push(...element.querySelectorAll<HTMLElement>(`[${TRANSLATION_ONLY_ATTRIBUTE}]`))
+  let live = false
+  for (const candidate of candidates) {
+    if (getTranslationOnlyAnchorState(candidate)) live = true
+    else candidate.removeAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+  }
+  return live
+}
 
 export async function translateWalkedElement(
   element: HTMLElement,
@@ -19,9 +38,7 @@ export async function translateWalkedElement(
   // paragraphs leave no wrapper, so also check the anchor marker attribute.
   if (
     !toggle &&
-    (element.querySelector(`.${CONTENT_WRAPPER_CLASS}`) ||
-      element.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE) ||
-      element.querySelector(`[${TRANSLATION_ONLY_ATTRIBUTE}]`))
+    (element.querySelector(`.${CONTENT_WRAPPER_CLASS}`) || hasLiveTranslationOnlyAnchor(element))
   ) {
     return
   }

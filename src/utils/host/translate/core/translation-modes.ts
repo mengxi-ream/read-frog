@@ -20,6 +20,7 @@ import { extractTextContent } from "../../dom/traversal"
 import { buildVirtualParagraphPlan, type VirtualParagraphUnit } from "../dom/paragraph-segmentation"
 import {
   disposeVirtualParagraphGroup,
+  dropTranslationOnlySwapRecordsForNodes,
   dropVirtualParagraphWrapper,
   removeOrphanVirtualParagraphWrappers,
   removeTranslatedWrapperWithRestore,
@@ -637,9 +638,16 @@ export async function translateNodeTranslationOnlyMode(
     // own swap, never let an unrelated nested run's wrapper stand in for it.
     // Also runs before the filter/language checks below so they (and a
     // retranslation) see original text, not the previous translation.
+    // Non-toggle (retranslation) keeps the records registered so the anchor
+    // stays monitored through the provider round-trip — a re-swap dropped by
+    // the mid-flight snapshot guard must not leave the region unwatched.
     const swapAnchor = parentNode.closest<HTMLElement>(`[${TRANSLATION_ONLY_ATTRIBUTE}]`)
     const restoredOwnSwap = swapAnchor
-      ? restoreTranslationOnlySwapsForAnchor(swapAnchor, transNodes)
+      ? restoreTranslationOnlySwapsForAnchor(
+          swapAnchor,
+          transNodes,
+          toggle ? undefined : { keepRecords: true },
+        )
       : false
 
     // Own-run wrapper discovery is scoped to the run itself: the fallback
@@ -807,8 +815,17 @@ export async function translateNodeTranslationOnlyMode(
         markExtensionDrivenNodeRemoval(translatedWrapperNode)
         translatedWrapperNode.remove()
         // Host mutated the run mid-flight: the translation is stale, drop it.
+        // Any kept (restore-first) records still reference the run, so the
+        // staleness pipeline retries with the host's fresh text.
         if (!verifySourceSnapshot(transNodes, sourceSnapshot)) return
-        applyInPlaceTextSwap(swapPlan, parentNode, walkId, config, getTranslationOnlyAnchorState)
+        applyInPlaceTextSwap(
+          swapPlan,
+          transNodes,
+          parentNode,
+          walkId,
+          config,
+          getTranslationOnlyAnchorState,
+        )
       })
       return
     }
@@ -830,6 +847,10 @@ export async function translateNodeTranslationOnlyMode(
 
       registerTranslationOnlyOriginals(translatedWrapperNode, allChildNodes)
       allChildNodes.forEach((childNode) => childNode.remove())
+      // The wrapper now owns this run; kept swap records (restore-first
+      // retranslation) would reference displaced nodes and read as
+      // permanently stale — drop them.
+      if (swapAnchor) dropTranslationOnlySwapRecordsForNodes(swapAnchor, transNodes)
     })
   } finally {
     nodes.forEach((node) => translatingNodes.delete(node))

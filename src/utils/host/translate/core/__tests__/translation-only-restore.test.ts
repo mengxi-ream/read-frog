@@ -429,7 +429,7 @@ describe("translationOnly node-identity restore (#1846)", () => {
     expect(mockTranslateTextForPage).toHaveBeenCalledTimes(1)
   })
 
-  it("detects text nodes the host appended into a swapped anchor", async () => {
+  it("detects a host replacement of a swapped run's text node", async () => {
     const p = document.createElement("p")
     p.textContent = "Existing sentence"
     document.body.append(p)
@@ -437,9 +437,90 @@ describe("translationOnly node-identity restore (#1846)", () => {
     await translateNodeTranslationOnlyMode([p], "walk-1", DEFAULT_CONFIG)
     flushBatchedOperations()
 
-    const appended = document.createTextNode(" Newly appended sentence.")
-    p.append(appended)
-    expect(findStaleTranslationOnlyAnchor(appended)).toBe(p)
+    // Framework re-render swaps the text node object for a fresh one
+    p.replaceChildren(document.createTextNode("Expanded replacement sentence"))
+    expect(findStaleTranslationOnlyAnchor(p)).toBe(p)
+  })
+
+  it("nested anchors never make an ancestor anchor falsely stale (per-record staleness)", async () => {
+    // div[looseText, p[text]] — both runs swap, anchors nest (div ⊃ p). The
+    // old anchor-wide aggregate went permanently stale when the nested anchor
+    // registered/unregistered; per-record staleness must stay quiet.
+    const container = document.createElement("div")
+    const looseText = document.createTextNode("Loose intro text. ")
+    const inner = document.createElement("p")
+    inner.textContent = "Nested paragraph text"
+    container.append(looseText, inner)
+    document.body.append(container)
+
+    // Outer run swaps FIRST (its expected text computed while inner is
+    // unregistered — the old design's poison window)
+    await translateNodeTranslationOnlyMode([looseText], "walk-1", DEFAULT_CONFIG)
+    flushBatchedOperations()
+    await translateNodeTranslationOnlyMode([inner], "walk-1", DEFAULT_CONFIG)
+    flushBatchedOperations()
+
+    expect(findStaleTranslationOnlyAnchor(looseText)).toBeUndefined()
+    expect(findStaleTranslationOnlyAnchor(inner.firstChild!)).toBeUndefined()
+
+    // Toggling the nested run off must not flip the ancestor stale either
+    await translateNodeTranslationOnlyMode([inner], "walk-2", DEFAULT_CONFIG, true)
+    flushBatchedOperations()
+    expect(findStaleTranslationOnlyAnchor(looseText)).toBeUndefined()
+    expect(findStaleTranslationOnlyAnchor(inner)).toBeUndefined()
+  })
+
+  it("keeps monitoring a run whose retranslation was dropped by the mid-flight guard", async () => {
+    const p = document.createElement("p")
+    p.textContent = "Original sentence"
+    document.body.append(p)
+
+    await translateNodeTranslationOnlyMode([p], "walk-1", DEFAULT_CONFIG)
+    flushBatchedOperations()
+    expect(p.textContent).toBe("中文译文")
+
+    // Host rewrite triggers a retranslation pass; the host rewrites AGAIN
+    // while that pass's request is in flight, so the re-swap is dropped.
+    const textNode = p.firstChild as Text
+    textNode.data = "Expanded sentence one"
+    let resolveTranslation!: (value: string) => void
+    mockTranslateTextForPage.mockReturnValue(
+      new Promise<string>((resolve) => {
+        resolveTranslation = resolve
+      }),
+    )
+    const retranslation = translateNodeTranslationOnlyMode([p], "walk-2", DEFAULT_CONFIG)
+    await vi.waitFor(() => expect(mockTranslateTextForPage).toHaveBeenCalledTimes(2))
+    textNode.data = "Expanded sentence two (host rewrote mid-flight)"
+    resolveTranslation("过期译文")
+    await retranslation
+    flushBatchedOperations()
+
+    // The stale translation was dropped, but the anchor is still registered
+    // and reads as stale — the budgeted pipeline will retry with fresh text.
+    expect(p.textContent).toBe("Expanded sentence two (host rewrote mid-flight)")
+    expect(p.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE)).toBe(true)
+    expect(findStaleTranslationOnlyAnchor(textNode)).toBe(p)
+  })
+
+  it("prunes unrestorable records so a toggled-off anchor releases its marker", async () => {
+    const p = document.createElement("p")
+    p.textContent = "Original sentence"
+    document.body.append(p)
+
+    await translateNodeTranslationOnlyMode([p], "walk-1", DEFAULT_CONFIG)
+    flushBatchedOperations()
+
+    // Host replaces the entire content: every node the record references is
+    // disconnected, nothing is restorable.
+    p.replaceChildren(document.createTextNode("Host rebuilt everything"))
+
+    await translateNodeTranslationOnlyMode([p], "walk-2", DEFAULT_CONFIG, true)
+    flushBatchedOperations()
+
+    expect(p.textContent).toBe("Host rebuilt everything")
+    expect(p.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE)).toBe(false)
+    expect(findStaleTranslationOnlyAnchor(p)).toBeUndefined()
   })
 
   it("keeps originals when the provider returns an empty translation", async () => {
