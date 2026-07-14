@@ -1,5 +1,17 @@
 # @read-frog/extension
 
+## 1.40.2
+
+### Patch Changes
+
+- [#1849](https://github.com/mengxi-ream/read-frog/pull/1849) [`a1e9253`](https://github.com/mengxi-ream/read-frog/commit/a1e9253cabec15bc45be13b2c3a63e100cdbeb15) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(analytics): deduplicate daily feature usage events
+
+- [#1851](https://github.com/mengxi-ream/read-frog/pull/1851) [`1a1d969`](https://github.com/mengxi-ream/read-frog/commit/1a1d9690ce45c75a26466ec8d2f5fc833604d494) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(config): rebuild localized defaults when resetting settings
+
+- [#1856](https://github.com/mengxi-ream/read-frog/pull/1856) [`da900e3`](https://github.com/mengxi-ream/read-frog/commit/da900e3693f72089534c430b46a3b6bb44a00fa1) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translate): keep trailing emoji with source paragraphs
+
+- [#1858](https://github.com/mengxi-ream/read-frog/pull/1858) [`3cd1e48`](https://github.com/mengxi-ream/read-frog/commit/3cd1e48769124a6d8c99b164cead04440c49c050) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translation): keep short bilingual UI labels inline
+
 ## 1.40.1
 
 ### Patch Changes
