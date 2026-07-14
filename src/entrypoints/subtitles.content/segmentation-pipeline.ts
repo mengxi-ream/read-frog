@@ -125,6 +125,14 @@ export class SegmentationPipeline {
     )
     if (!firstUnprocessed) return []
 
+    // Only segment chunks within the look-ahead window ahead of the current
+    // position. Without this bound the loop keeps segmenting until the end of
+    // the video regardless of how far playback has actually reached, which
+    // eagerly sends the entire remaining video to the AI segmentation model.
+    // Chunks further ahead are picked up later, once playback advances and the
+    // translation coordinator restarts the pipeline.
+    if (firstUnprocessed.start > currentTimeMs + PROCESS_LOOK_AHEAD_MS) return []
+
     const windowEnd = firstUnprocessed.start + PROCESS_LOOK_AHEAD_MS
     return this.rawFragments.filter(
       (f) =>
