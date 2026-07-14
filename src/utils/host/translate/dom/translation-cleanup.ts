@@ -1,12 +1,12 @@
 import type { TextSplitRecord, VirtualParagraphGroup } from "../core/translation-state"
 import {
+  CONTENT_WRAPPER_CLASS,
   REACT_SHADOW_HOST_CLASS,
   SPINNER_CLASS,
   TRANSLATION_MODE_ATTRIBUTE,
   VIRTUAL_PARAGRAPH_ATTRIBUTE,
 } from "../../../constants/dom-labels"
 import { removeReactShadowHost } from "../../../react-shadow-host/create-shadow-host"
-import { batchDOMOperation } from "../../dom/batch-dom"
 import { isHTMLElement, isTranslatedWrapperNode } from "../../dom/filter"
 import { deepQueryTopLevelSelector } from "../../dom/find"
 import {
@@ -16,7 +16,7 @@ import {
   getVirtualParagraphGroupForSource,
   getVirtualParagraphGroupForWrapper,
   markExtensionDrivenNodeRemoval,
-  originalContentMap,
+  takeTranslationOnlyOriginals,
   unregisterBilingualTranslationState,
   unregisterVirtualParagraphGroup,
   unregisterVirtualParagraphWrapper,
@@ -161,16 +161,63 @@ export function removeVirtualParagraphWrapper(wrapper: HTMLElement): void {
 }
 
 /**
+ * Restore the original ChildNode objects a translationOnly wrapper displaced,
+ * re-inserting the SAME nodes at the wrapper's position (node-identity restore).
+ * Synchronous on purpose: the walker can issue several translate calls against
+ * one parent in a single tick, and a deferred restore would let a later call
+ * find a wrapper whose registry entry is already consumed.
+ * @returns the original nodes this call re-inserted
+ */
+function restoreTranslationOnlyWrapper(wrapper: HTMLElement): ChildNode[] {
+  const originals = takeTranslationOnlyOriginals(wrapper)
+  if (!originals) {
+    // Translation never completed (spinner / error UI / empty result), so the
+    // originals were never removed — removing the wrapper IS the restore.
+    wrapper.remove()
+    return []
+  }
+
+  const parent = wrapper.parentNode
+  if (!parent) {
+    // The host rebuilt the region that owned the wrapper; never force stale
+    // nodes back into a framework-rebuilt DOM.
+    return []
+  }
+
+  const restored: ChildNode[] = []
+  for (const node of originals) {
+    if (node.isConnected) continue // the host re-attached this original itself
+    parent.insertBefore(node, wrapper)
+    restored.push(node)
+  }
+  wrapper.remove()
+
+  // Restored originals may carry wrappers from an older walk (cross-walk
+  // nesting); finish those restores so "show original" leaves no translation.
+  for (const node of restored) {
+    if (!isHTMLElement(node)) continue
+    const nested = node.classList.contains(CONTENT_WRAPPER_CLASS)
+      ? [node]
+      : [...node.querySelectorAll<HTMLElement>(`.${CONTENT_WRAPPER_CLASS}`)]
+    for (const nestedWrapper of nested) {
+      if (nestedWrapper.isConnected) removeTranslatedWrapperWithRestore(nestedWrapper)
+    }
+  }
+  return restored
+}
+
+/**
  * Remove translated wrapper and restore original content based on translation mode
  * @param wrapper - The translated wrapper element to remove
+ * @returns for translationOnly wrappers, the original nodes re-inserted by the restore
  */
-export function removeTranslatedWrapperWithRestore(wrapper: HTMLElement): void {
-  // Every path below removes the wrapper (directly or via an innerHTML restore).
+export function removeTranslatedWrapperWithRestore(wrapper: HTMLElement): ChildNode[] {
+  // Every path below removes the wrapper (directly or via restore).
   markExtensionDrivenNodeRemoval(wrapper)
   const virtualParagraphGroup = getVirtualParagraphGroupForWrapper(wrapper)
   if (virtualParagraphGroup) {
     disposeVirtualParagraphGroup(virtualParagraphGroup)
-    return
+    return []
   }
 
   const bilingualState = getBilingualTranslationStateForWrapper(wrapper)
@@ -181,30 +228,11 @@ export function removeTranslatedWrapperWithRestore(wrapper: HTMLElement): void {
   const translationMode = wrapper.getAttribute(TRANSLATION_MODE_ATTRIBUTE)
 
   if (translationMode === "translationOnly") {
-    // For translation-only mode, find nearest ancestor in originalContentMap and restore
-    let currentNode = wrapper.parentNode
-
-    while (currentNode && isHTMLElement(currentNode)) {
-      const originalContent = originalContentMap.get(currentNode)
-      if (originalContent) {
-        const nodeToRestore = currentNode
-        batchDOMOperation(() => {
-          nodeToRestore.innerHTML = originalContent
-        })
-        originalContentMap.delete(currentNode)
-        return
-      }
-      currentNode = currentNode.parentNode
-    }
+    return restoreTranslationOnlyWrapper(wrapper)
   }
 
-  if (translationMode === "bilingual") {
-    wrapper.remove()
-    return
-  }
-
-  // When no original content is found, just remove the wrapper.
-  batchDOMOperation(() => wrapper.remove())
+  wrapper.remove()
+  return []
 }
 
 export function removeAllTranslatedWrapperNodes(root: Document | ShadowRoot = document): void {

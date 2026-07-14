@@ -44,8 +44,8 @@ import {
   isVirtualParagraphGroupCurrent,
   markExtensionDrivenNodeRemoval,
   markVirtualParagraphGroupInserted,
-  originalContentMap,
   registerBilingualTranslationState,
+  registerTranslationOnlyOriginals,
   registerVirtualParagraphGroup,
   registerVirtualParagraphWrapper,
   translatingNodes,
@@ -532,24 +532,6 @@ export async function translateNodeTranslationOnlyMode(
     return
   }
 
-  // snapshot the outer parent element, to prevent lose it if we go to deeper by unwrapDeepestOnlyHTMLChild
-  // test case is:
-  // <div data-testid="test-node">
-  //   <span style={{ display: 'inline' }}>原文</span> // get the outer parent snapshot before go to inner element
-  //   <br />
-  //   <span style={{ display: 'inline' }}>原文</span>
-  //   原文
-  //   <br />
-  //   <span style={{ display: 'inline' }}>原文</span>
-  // </div>,
-  // Only save originalContent when there's no existing translation wrapper
-  // If wrapper exists, we're removing translation and should restore from saved content
-  const outerParentElement = outerTransNodes[0].parentElement
-  const hasExistingWrapper = outerParentElement?.querySelector(`.${CONTENT_WRAPPER_CLASS}`)
-  if (outerParentElement && !originalContentMap.has(outerParentElement) && !hasExistingWrapper) {
-    originalContentMap.set(outerParentElement, outerParentElement.innerHTML)
-  }
-
   let transNodes: TransNode[] = []
   let allChildNodes: ChildNode[] = []
   if (outerTransNodes.length === 1 && isHTMLElement(outerTransNodes[0])) {
@@ -588,18 +570,23 @@ export async function translateNodeTranslationOnlyMode(
 
     const finalTranslatedWrapper = existedTranslatedWrapperOutside ?? existedTranslatedWrapper
     if (finalTranslatedWrapper && isHTMLElement(finalTranslatedWrapper)) {
-      removeTranslatedWrapperWithRestore(finalTranslatedWrapper)
+      const restoredNodes = removeTranslatedWrapperWithRestore(finalTranslatedWrapper)
       if (toggle) {
         return
       }
-      // In translationOnly mode, removeTranslatedWrapperWithRestore uses innerHTML to restore content,
-      // which destroys the original DOM nodes and creates new ones. The 'nodes' array still references
-      // the old detached nodes, and targetNode can't reference to the new dom added by innerHTML anymore.
-      // Therefore, by recursively calling translateNodeTranslationOnlyMode here with the
-      // same nodes array, we ensure the translation uses the newly created DOM elements since the
-      // function will re-query and find the correct parent and child nodes from the restored DOM.
+      // The restore synchronously re-inserted the SAME original node objects,
+      // so when `nodes` are still connected they remain the correct
+      // retranslation input. When they referenced the removed wrapper or its
+      // translated content (both detached now), retranslate the restored
+      // originals instead. Neither side connected means the host rebuilt the
+      // region — leave it alone rather than loop.
       nodes.forEach((node) => translatingNodes.delete(node))
-      void translateNodeTranslationOnlyMode(nodes, walkId, config, toggle)
+      const retryNodes = nodes.some((node) => node.isConnected)
+        ? nodes
+        : restoredNodes.filter((node) => node.isConnected)
+      if (retryNodes.length > 0) {
+        void translateNodeTranslationOnlyMode(retryNodes, walkId, config, toggle)
+      }
       return
     }
 
@@ -611,12 +598,6 @@ export async function translateNodeTranslationOnlyMode(
     // Check the plain text, not the HTML string sent to the provider — franc
     // on markup is noise. Runs before the wrapper is inserted into the DOM.
     if (await shouldSkipAsTargetLanguage(innerTextContent, config)) return
-
-    // Only save originalContent when there's no existing translation wrapper
-    const hasExistingWrapperInParent = parentNode.querySelector(`.${CONTENT_WRAPPER_CLASS}`)
-    if (!originalContentMap.has(parentNode) && !hasExistingWrapperInParent) {
-      originalContentMap.set(parentNode, parentNode.innerHTML)
-    }
 
     const ownerDoc = getOwnerDocument(targetNode)
     const protectedHtml = protectTranslationHtmlAttributes(transNodes, ownerDoc)
@@ -727,11 +708,18 @@ export async function translateNodeTranslationOnlyMode(
 
     // Batch final DOM mutations to reduce layout thrashing
     batchDOMOperation(() => {
+      // Wrapper gone from the document: a global cleanup ran while the provider
+      // call was in flight, or the host re-rendered the region. The originals
+      // are the live content — don't remove them to apply a stale translation.
+      if (!translatedWrapperNode.isConnected) return
+
       // Insert translated content after the last node
       const lastChildNode = allChildNodes.at(-1)!
       lastChildNode.parentNode?.insertBefore(translatedWrapperNode, lastChildNode.nextSibling)
 
-      // Remove all original nodes
+      // Displace the originals, retaining the node objects so restore can
+      // re-insert the same nodes (#1846)
+      registerTranslationOnlyOriginals(translatedWrapperNode, allChildNodes)
       allChildNodes.forEach((childNode) => childNode.remove())
     })
   } finally {

@@ -44,9 +44,23 @@ export interface BilingualTranslationState {
 
 // State management for translation operations
 export const translatingNodes = new WeakSet<ChildNode>()
-// WeakMap so elements removed by the site (SPA re-renders, infinite scroll)
-// don't pin themselves and their innerHTML snapshots for the page's lifetime.
-export const originalContentMap = new WeakMap<Element, string>()
+// Original ChildNode objects a translationOnly wrapper displaced, keyed by that
+// wrapper. Restore re-inserts these SAME node objects at the wrapper's position
+// (node-identity restore) — never an ancestor innerHTML rewrite, which destroys
+// framework-owned node identity and untouched sibling content (#1846).
+// WeakMap so a wrapper deleted by the site (SPA re-renders) releases its
+// retained originals instead of pinning them for the page's lifetime.
+const translationOnlyOriginalNodes = new WeakMap<HTMLElement, ChildNode[]>()
+
+export function registerTranslationOnlyOriginals(wrapper: HTMLElement, nodes: ChildNode[]): void {
+  translationOnlyOriginalNodes.set(wrapper, nodes)
+}
+
+export function takeTranslationOnlyOriginals(wrapper: HTMLElement): ChildNode[] | undefined {
+  const nodes = translationOnlyOriginalNodes.get(wrapper)
+  if (nodes) translationOnlyOriginalNodes.delete(wrapper)
+  return nodes
+}
 
 const virtualParagraphGroupsBySource = new WeakMap<HTMLElement, VirtualParagraphGroup>()
 const virtualParagraphGroupsByWrapper = new WeakMap<HTMLElement, VirtualParagraphGroup>()
