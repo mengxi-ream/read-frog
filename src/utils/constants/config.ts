@@ -218,6 +218,20 @@ export const DEFAULT_CONFIG: Config = {
   uiLanguage: "auto",
 }
 
+/**
+ * Build a default config whose persisted custom-action strings use the initialized UI locale.
+ * Callers must initialize i18n before calling this function.
+ */
+export function buildFreshDefaultConfig(): Config {
+  return {
+    ...DEFAULT_CONFIG,
+    selectionToolbar: {
+      ...DEFAULT_CONFIG.selectionToolbar,
+      customActions: buildDefaultCustomActions(),
+    },
+  }
+}
+
 export const PAGE_TRANSLATE_RANGE_ITEMS: Record<PageTranslateRange, { label: string }> = {
   main: { label: "Main" },
   all: { label: "All" },
