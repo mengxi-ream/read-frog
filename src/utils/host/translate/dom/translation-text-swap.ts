@@ -11,6 +11,10 @@ import {
   type TranslationOnlySwapItem,
 } from "../core/translation-state"
 import { setTranslationDirAndLang } from "../translation-attributes"
+import {
+  TRANSLATABLE_ATTRIBUTE_NAMES,
+  TRANSLATABLE_INPUT_VALUE_TYPES,
+} from "./translation-html-attributes"
 
 // All-or-nothing for now: a partially swapped paragraph mixes languages, and
 // the detach-with-node-refs fallback is acceptable. Named so it can be relaxed
@@ -100,10 +104,11 @@ export function verifySourceSnapshot(
   )
 }
 
-// Human-visible attributes the provider may legitimately translate. The
-// placeholder protection keeps structural attributes (href, class, …) intact,
-// so only these need swapping onto the source element.
-const TRANSLATABLE_ATTRIBUTES = ["title", "alt", "placeholder", "aria-label"]
+// Element identity attributes: pairing is positional, so when a provider
+// legitimately reorders same-tag siblings (links for target grammar), these
+// must still match pairwise or the plan would cross-bind text onto the wrong
+// element (wrong link text on the wrong href). Mismatch -> fallback strategy.
+const IDENTITY_ATTRIBUTES = ["href", "src", "id"]
 
 interface AlignmentAccumulator {
   pairs: TextSwapPair[]
@@ -111,12 +116,17 @@ interface AlignmentAccumulator {
   coveredChars: number
   totalChars: number
   orphanTargetText: boolean
+  // Last document-ordered text pair, used to carry provider-inserted
+  // whitespace separators between adjacent inline elements.
+  lastTextPair: TextSwapPair | null
 }
 
 function partitionLevel(nodes: readonly Node[]): {
   sequence: (Element | Text[])[]
 } {
   // A level is a sequence of elements with text-node "gaps" between them.
+  // Whitespace-only text nodes stay in the gaps: the provider may emit one as
+  // the only word separator between adjacent inline elements.
   const sequence: (Element | Text[])[] = []
   let gap: Text[] = []
   for (const node of nodes) {
@@ -124,35 +134,47 @@ function partitionLevel(nodes: readonly Node[]): {
       sequence.push(gap)
       gap = []
       sequence.push(node)
-    } else if (isSwapRelevantText(node)) {
+    } else if (isTextNode(node)) {
       gap.push(node)
     }
-    // comments / whitespace-only text / wrappers don't participate
+    // comments / wrappers don't participate
   }
   sequence.push(gap)
   return { sequence }
 }
 
 function alignGap(sourceGap: Text[], targetGap: Text[], acc: AlignmentAccumulator): void {
-  const gapChars = sourceGap.reduce((sum, node) => sum + node.data.length, 0)
+  const relevantSource = sourceGap.filter((node) => node.data.trim())
+  const gapChars = relevantSource.reduce((sum, node) => sum + node.data.length, 0)
   acc.totalChars += gapChars
 
-  if (sourceGap.length === 0) {
-    if (targetGap.some((node) => node.data.trim())) {
+  const joinedTarget = targetGap.map((node) => node.data).join("")
+
+  if (relevantSource.length === 0) {
+    if (joinedTarget.trim()) {
       // Translated text with no source slot would be dropped silently — bail.
       acc.orphanTargetText = true
+    } else if (joinedTarget.length > 0 && acc.lastTextPair) {
+      // Provider inserted a pure-whitespace separator where the source had
+      // none (adjacent inline elements in CJK markup translated to a
+      // Latin-script target). Carry it on the preceding text so words don't
+      // jam together ("ApplesOranges").
+      if (!/\s$/.test(acc.lastTextPair.translatedValue)) {
+        acc.lastTextPair.translatedValue += " "
+      }
     }
     return
   }
-  if (targetGap.length === 0) return // uncovered source text
+  if (!joinedTarget) return // uncovered source text
 
-  const joinedTarget = targetGap.map((node) => node.data).join("")
-  acc.pairs.push({ node: sourceGap[0], translatedValue: joinedTarget })
+  const pair: TextSwapPair = { node: relevantSource[0], translatedValue: joinedTarget }
+  acc.pairs.push(pair)
   // Provider merged several source fragments: the first node carries the whole
   // translation, the rest are blanked (same parent, so visually identical).
-  for (const extra of sourceGap.slice(1)) {
+  for (const extra of relevantSource.slice(1)) {
     acc.pairs.push({ node: extra, translatedValue: "" })
   }
+  acc.lastTextPair = pair
   acc.coveredChars += gapChars
 }
 
@@ -169,29 +191,54 @@ function alignLevel(
   if (sourceElements.length !== targetElements.length) return false
   for (let i = 0; i < sourceElements.length; i++) {
     if (sourceElements[i].localName !== targetElements[i].localName) return false
-  }
-  for (let i = 0; i < sourceElements.length; i++) {
-    for (const name of TRANSLATABLE_ATTRIBUTES) {
-      const translatedValue = targetElements[i].getAttribute(name)
-      if (translatedValue !== null && translatedValue !== sourceElements[i].getAttribute(name)) {
-        acc.attributePairs.push({ element: sourceElements[i], name, translatedValue })
+    for (const name of IDENTITY_ATTRIBUTES) {
+      if (sourceElements[i].getAttribute(name) !== targetElements[i].getAttribute(name)) {
+        return false
       }
     }
   }
 
-  // With equal element counts both sequences interleave identically:
-  // gap, el, gap, el, ..., gap
-  const sourceGaps = source.sequence.filter((item): item is Text[] => Array.isArray(item))
-  const targetGaps = target.sequence.filter((item): item is Text[] => Array.isArray(item))
-  for (let i = 0; i < sourceGaps.length; i++) {
-    alignGap(sourceGaps[i], targetGaps[i] ?? [], acc)
-  }
-  for (let i = 0; i < sourceElements.length; i++) {
-    if (!alignLevel([...sourceElements[i].childNodes], [...targetElements[i].childNodes], acc)) {
+  // Both sequences strictly alternate gap, el, gap, el, ..., gap and element
+  // counts are equal, so positions line up. Walk them interleaved in document
+  // order so lastTextPair (the whitespace-separator carrier) is correct.
+  for (let i = 0; i < source.sequence.length; i++) {
+    const sourceItem = source.sequence[i]
+    const targetItem = target.sequence[i]
+    if (Array.isArray(sourceItem)) {
+      alignGap(sourceItem, Array.isArray(targetItem) ? targetItem : [], acc)
+      continue
+    }
+    const targetElement = targetItem as Element
+    collectTranslatedAttributePairs(sourceItem, targetElement, acc)
+    if (!alignLevel([...sourceItem.childNodes], [...targetElement.childNodes], acc)) {
       return false
     }
   }
   return true
+}
+
+function collectTranslatedAttributePairs(
+  source: Element,
+  target: Element,
+  acc: AlignmentAccumulator,
+): void {
+  // Same attribute set the protection layer exposes to providers for
+  // translation — anything narrower silently drops translated values.
+  for (const name of TRANSLATABLE_ATTRIBUTE_NAMES) {
+    const translatedValue = target.getAttribute(name)
+    if (translatedValue !== null && translatedValue !== source.getAttribute(name)) {
+      acc.attributePairs.push({ element: source, name, translatedValue })
+    }
+  }
+  if (
+    source.localName === "input" &&
+    TRANSLATABLE_INPUT_VALUE_TYPES.has((source.getAttribute("type") ?? "").toLowerCase())
+  ) {
+    const translatedValue = target.getAttribute("value")
+    if (translatedValue !== null && translatedValue !== source.getAttribute("value")) {
+      acc.attributePairs.push({ element: source, name: "value", translatedValue })
+    }
+  }
 }
 
 /**
@@ -229,6 +276,7 @@ export function planInPlaceTextSwap(
     coveredChars: 0,
     totalChars: 0,
     orphanTargetText: false,
+    lastTextPair: null,
   }
   if (!alignLevel(transNodes, targetNodes, acc)) return null
   if (acc.orphanTargetText) return null

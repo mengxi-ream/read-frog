@@ -75,6 +75,46 @@ describe("planInPlaceTextSwap", () => {
     expect(planInPlaceTextSwap(run, "<b>粗体</b>", document)).toBeNull()
   })
 
+  it("returns null when the provider reorders same-tag siblings (identity attributes differ)", () => {
+    const { run } = buildRun('Click <a href="/a">here</a> and <a href="/b">there</a> now.')
+    // Provider legitimately reorders the links for target grammar — positional
+    // pairing would cross-bind text onto the wrong hrefs.
+    const plan = planInPlaceTextSwap(
+      run,
+      '点击<a href="/b">那里</a>和<a href="/a">这里</a>就现在',
+      document,
+    )
+    expect(plan).toBeNull()
+  })
+
+  it("carries a provider-inserted whitespace separator between adjacent inline elements", () => {
+    const { container, run } = buildRun("<span>苹果</span><span>橙子</span>")
+    const plan = planInPlaceTextSwap(run, "<span>Apples</span> <span>Oranges</span>", document)
+    expect(plan).not.toBeNull()
+    const first = plan!.pairs.find((pair) => pair.node === container.children[0].firstChild)
+    const second = plan!.pairs.find((pair) => pair.node === container.children[1].firstChild)
+    expect(first!.translatedValue).toBe("Apples ")
+    expect(second!.translatedValue).toBe("Oranges")
+  })
+
+  it("collects the full protection-layer attribute set, including input value", () => {
+    const { container, run } = buildRun(
+      '<span aria-valuetext="fifty percent">progress</span> <input type="submit" value="Send">x',
+    )
+    const plan = planInPlaceTextSwap(
+      run,
+      '<span aria-valuetext="百分之五十">进度</span> <input type="submit" value="发送">乙',
+      document,
+    )
+    expect(plan).not.toBeNull()
+    expect(plan!.attributePairs).toEqual(
+      expect.arrayContaining([
+        { element: container.children[0], name: "aria-valuetext", translatedValue: "百分之五十" },
+        { element: container.children[1], name: "value", translatedValue: "发送" },
+      ]),
+    )
+  })
+
   it("collects translated human-visible attributes as attribute pairs", () => {
     const { container, run } = buildRun('<a href="/x" title="City">link</a> tail')
     const plan = planInPlaceTextSwap(run, '<a href="/x" title="城市">链接</a> 尾部', document)

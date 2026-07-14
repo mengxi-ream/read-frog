@@ -11,7 +11,7 @@ import {
   removeAllTranslatedWrapperNodes,
   removeTranslatedWrapperWithRestore,
 } from "../../dom/translation-cleanup"
-import { translateNodeTranslationOnlyMode } from "../translation-modes"
+import { translateNodesBilingualMode, translateNodeTranslationOnlyMode } from "../translation-modes"
 import { findStaleTranslationOnlyAnchor } from "../translation-state"
 
 const { mockShouldFilterSmallParagraph, mockTranslateTextForPage, mockShouldSkipAsTargetLanguage } =
@@ -366,6 +366,67 @@ describe("translationOnly node-identity restore (#1846)", () => {
     flushBatchedOperations()
     expect(p.textContent).toBe("Short truncated tweet plus the long expanded remainder")
     expect(p.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE)).toBe(false)
+  })
+
+  it("toggle-off converges for a container mixing a swapped run and a nested wrapper run", async () => {
+    // Adversarial-review finding: the loose-text run's toggle must restore its
+    // OWN swap, not steal the nested li's wrapper and re-translate forever.
+    const container = document.createElement("div")
+    const introText = document.createTextNode("Intro paragraph text. ")
+    const ul = document.createElement("ul")
+    const li = document.createElement("li")
+    const bold = document.createElement("b")
+    bold.textContent = "Keep any of them"
+    li.append(bold, document.createTextNode(" by setting its key to false"))
+    ul.append(li)
+    container.append(introText, ul)
+    document.body.append(container)
+    const originalHTML = container.innerHTML
+
+    // Press 1: translate (walker order — loose run first, then the li)
+    await translateNodeTranslationOnlyMode([introText], "walk-1", DEFAULT_CONFIG)
+    flushBatchedOperations()
+    await translateNodeTranslationOnlyMode([li], "walk-1", DEFAULT_CONFIG)
+    flushBatchedOperations()
+    expect(mockTranslateTextForPage).toHaveBeenCalledTimes(2)
+    expect(container.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE)).toBe(true)
+    expect(getWrappers(container).length).toBe(1)
+
+    // Press 2 ("hide"): same walker order, fresh walkId, toggle=true
+    await translateNodeTranslationOnlyMode([introText], "walk-2", DEFAULT_CONFIG, true)
+    flushBatchedOperations()
+    await translateNodeTranslationOnlyMode([li], "walk-2", DEFAULT_CONFIG, true)
+    flushBatchedOperations()
+
+    expect(container.innerHTML).toBe(originalHTML)
+    expect(container.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE)).toBe(false)
+    expect(getWrappers().length).toBe(0)
+    // No extra provider calls: the hide press translated nothing
+    expect(mockTranslateTextForPage).toHaveBeenCalledTimes(2)
+  })
+
+  it("bilingual toggle restores an in-place swap left by a translationOnly session", async () => {
+    const p = document.createElement("p")
+    p.textContent = "Original sentence"
+    const originalText = p.firstChild
+    document.body.append(p)
+
+    await translateNodeTranslationOnlyMode([p], "walk-1", DEFAULT_CONFIG)
+    flushBatchedOperations()
+    expect(p.textContent).toBe("中文译文")
+
+    // Mode switched to bilingual without a full cleanup; node-level toggle
+    const bilingualConfig = {
+      ...DEFAULT_CONFIG,
+      translate: { ...DEFAULT_CONFIG.translate, mode: "bilingual" as const },
+    }
+    await translateNodesBilingualMode([p], "walk-2", bilingualConfig, true)
+    flushBatchedOperations()
+
+    expect(p.textContent).toBe("Original sentence")
+    expect(p.firstChild).toBe(originalText)
+    expect(p.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE)).toBe(false)
+    expect(mockTranslateTextForPage).toHaveBeenCalledTimes(1)
   })
 
   it("detects text nodes the host appended into a swapped anchor", async () => {

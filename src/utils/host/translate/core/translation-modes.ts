@@ -410,6 +410,20 @@ export async function translateNodesBilingualMode(
       return translateNodesBilingualMode(nodes, walkId, config, toggle, forceBlockTranslation)
     }
 
+    // After a translationOnly session, an in-place-swapped paragraph has no
+    // wrapper — only the anchor marker. A bilingual toggle over it must undo
+    // the swap (and a bilingual translate must see the original text).
+    const swappedAnchor = (
+      isHTMLElement(insertionTarget) ? insertionTarget : insertionTarget.parentElement
+    )?.closest<HTMLElement>(`[${TRANSLATION_ONLY_ATTRIBUTE}]`)
+    if (
+      swappedAnchor &&
+      restoreTranslationOnlySwapsForAnchor(swappedAnchor, transNodes) &&
+      toggle
+    ) {
+      return
+    }
+
     const sourceTextBeforeFilter = isHTMLElement(layoutSource)
       ? collectSourceTextExcludingWrappers(layoutSource)
       : null
@@ -525,6 +539,33 @@ export async function translateNodesBilingualMode(
   }
 }
 
+/**
+ * A run's own translationOnly wrapper, scoped to the run: the insertion code
+ * only ever places the wrapper as a sibling within the run or appends it into
+ * a single-element run, so nested runs' wrappers (a li's inside this run's
+ * subtree) are out of reach by construction.
+ */
+function findRunTranslationOnlyWrapper(
+  allChildNodes: ChildNode[],
+  walkId: string,
+): HTMLElement | null {
+  // Any-mode wrapper: a bilingual wrapper here is this run's own previous
+  // translation too (node-level translate, then a mode switch, then toggle).
+  const isForeignWrapper = (element: HTMLElement) =>
+    element.classList.contains(CONTENT_WRAPPER_CLASS) &&
+    element.getAttribute(WALKED_ATTRIBUTE) !== walkId
+
+  for (const node of allChildNodes) {
+    if (!isHTMLElement(node)) continue
+    if (isForeignWrapper(node)) return node
+    // Spinner phase of a single-element run: wrapper appended INSIDE it
+    for (const child of node.children) {
+      if (isHTMLElement(child) && isForeignWrapper(child)) return child
+    }
+  }
+  return null
+}
+
 export async function translateNodeTranslationOnlyMode(
   nodes: ChildNode[],
   walkId: string,
@@ -553,6 +594,28 @@ export async function translateNodeTranslationOnlyMode(
   }
 
   if (transNodes.length === 0) {
+    // The run may be nothing but a fallback wrapper whose originals were
+    // displaced (e.g. a <li> holding only the translation). Its toggle must
+    // still restore, so handle the wrapper before giving up on the run.
+    const runWrappers = allChildNodes.filter(
+      (node): node is HTMLElement =>
+        isHTMLElement(node) &&
+        node.classList.contains(CONTENT_WRAPPER_CLASS) &&
+        node.getAttribute(TRANSLATION_MODE_ATTRIBUTE) ===
+          ("translationOnly" satisfies TranslationMode) &&
+        node.getAttribute(WALKED_ATTRIBUTE) !== walkId,
+    )
+    if (runWrappers.length === 0) return
+    const restored: ChildNode[] = []
+    for (const wrapper of runWrappers) {
+      restored.push(...removeTranslatedWrapperWithRestore(wrapper))
+    }
+    if (!toggle) {
+      const retryNodes = restored.filter((node) => node.isConnected)
+      if (retryNodes.length > 0) {
+        void translateNodeTranslationOnlyMode(retryNodes, walkId, config, toggle)
+      }
+    }
     return
   }
 
@@ -569,15 +632,25 @@ export async function translateNodeTranslationOnlyMode(
       console.error("targetNode.parentElement is not HTMLElement", targetNode.parentElement)
       return
     }
-    const existedTranslatedWrapper = findPreviousTranslatedWrapperInside(
-      targetNode.parentElement,
-      walkId,
-    )
+    // An in-place swap leaves no wrapper — the anchor marker is the handle.
+    // Restore FIRST (before any wrapper handling): a swapped run must undo its
+    // own swap, never let an unrelated nested run's wrapper stand in for it.
+    // Also runs before the filter/language checks below so they (and a
+    // retranslation) see original text, not the previous translation.
+    const swapAnchor = parentNode.closest<HTMLElement>(`[${TRANSLATION_ONLY_ATTRIBUTE}]`)
+    const restoredOwnSwap = swapAnchor
+      ? restoreTranslationOnlySwapsForAnchor(swapAnchor, transNodes)
+      : false
+
+    // Own-run wrapper discovery is scoped to the run itself: the fallback
+    // wrapper is always inserted as a sibling within the run or appended into
+    // a single-element run — a deep subtree query would steal a NESTED run's
+    // wrapper (e.g. a li's) and leave this run's state untouched (#1846 review).
     const existedTranslatedWrapperOutside = targetNode.parentElement.closest(
       `.${CONTENT_WRAPPER_CLASS}`,
     )
-
-    const finalTranslatedWrapper = existedTranslatedWrapperOutside ?? existedTranslatedWrapper
+    const finalTranslatedWrapper =
+      existedTranslatedWrapperOutside ?? findRunTranslationOnlyWrapper(allChildNodes, walkId)
     if (finalTranslatedWrapper && isHTMLElement(finalTranslatedWrapper)) {
       const restoredNodes = removeTranslatedWrapperWithRestore(finalTranslatedWrapper)
       if (toggle) {
@@ -599,11 +672,7 @@ export async function translateNodeTranslationOnlyMode(
       return
     }
 
-    // An in-place swap leaves no wrapper — the anchor marker is the handle.
-    // Restore BEFORE the filter/language checks below so they (and a
-    // retranslation) see original text, not the previous translation.
-    const swapAnchor = parentNode.closest<HTMLElement>(`[${TRANSLATION_ONLY_ATTRIBUTE}]`)
-    if (swapAnchor && restoreTranslationOnlySwapsForAnchor(swapAnchor, transNodes) && toggle) {
+    if (restoredOwnSwap && toggle) {
       return
     }
 
