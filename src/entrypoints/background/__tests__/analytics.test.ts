@@ -1,3 +1,4 @@
+import type { FeatureUsageCache } from "../analytics-feature-cache"
 import type { FeatureUsedEventProperties } from "@/types/analytics"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import {
@@ -32,6 +33,8 @@ describe("background analytics", () => {
     apiKey?: string
     defaultAnalyticsEnabled?: boolean
     distinctIdOverride?: string
+    featureUsageCache?: FeatureUsageCache
+    getCurrentDate?: () => Date
   }) {
     const apiHost =
       overrides && "apiHost" in overrides ? overrides.apiHost : "https://us.i.posthog.com"
@@ -44,6 +47,8 @@ describe("background analytics", () => {
       defaultAnalyticsEnabled: overrides?.defaultAnalyticsEnabled ?? true,
       distinctIdOverride: overrides?.distinctIdOverride,
       extensionVersion: "1.0.0",
+      featureUsageCache: overrides?.featureUsageCache,
+      getCurrentDate: overrides?.getCurrentDate ?? (() => new Date("2026-07-14T12:00:00.000Z")),
       getStorageItem: storageGetItemMock as (key: string) => Promise<unknown>,
       getTargetLanguage: getTargetLanguageMock as () => Promise<"cmn" | undefined>,
       onMessage: onMessageMock as (
@@ -61,6 +66,32 @@ describe("background analytics", () => {
       setStorageItem: storageSetItemMock as (key: string, value: unknown) => Promise<void>,
       warn: loggerWarnMock as (...args: any[]) => void,
     })
+  }
+
+  function mockEnabledAnalyticsStorage() {
+    storageGetItemMock.mockImplementation(async (key: string) => {
+      if (key === "local:analyticsEnabled") {
+        return true
+      }
+      if (key === "local:analyticsInstallId") {
+        return "install-123"
+      }
+      return undefined
+    })
+  }
+
+  function createMemoryFeatureUsageCache() {
+    const lastReportedDays = new Map<string, string>()
+    const cache: FeatureUsageCache = {
+      getLastReportedDay: vi.fn<FeatureUsageCache["getLastReportedDay"]>(async (feature) =>
+        lastReportedDays.get(feature),
+      ),
+      setLastReportedDay: vi.fn<FeatureUsageCache["setLastReportedDay"]>(async (feature, day) => {
+        lastReportedDays.set(feature, day)
+      }),
+    }
+
+    return { cache, lastReportedDays }
   }
 
   beforeEach(() => {
@@ -144,6 +175,227 @@ describe("background analytics", () => {
     })
   })
 
+  it("keeps reporting repeated feature events when no cache is configured", async () => {
+    mockEnabledAnalyticsStorage()
+    const { captureFeatureUsedEventInBackground } = createAnalytics()
+    const properties: FeatureUsedEventProperties = {
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 100,
+    }
+
+    await captureFeatureUsedEventInBackground(properties)
+    await captureFeatureUsedEventInBackground(properties)
+
+    expect(posthogCaptureMock).toHaveBeenCalledTimes(2)
+  })
+
+  it("reports only the first event for a feature each Shanghai day", async () => {
+    mockEnabledAnalyticsStorage()
+    const { cache } = createMemoryFeatureUsageCache()
+    const { captureFeatureUsedEventInBackground } = createAnalytics({
+      featureUsageCache: cache,
+    })
+
+    await captureFeatureUsedEventInBackground({
+      feature: "custom_ai_action",
+      surface: "context_menu",
+      outcome: "failure",
+      latency_ms: 100,
+      action_id: "dictionary",
+      action_name: "Dictionary",
+    })
+    await captureFeatureUsedEventInBackground({
+      feature: "custom_ai_action",
+      surface: "selection_toolbar",
+      outcome: "success",
+      latency_ms: 200,
+      action_id: "explain",
+      action_name: "Explain",
+    })
+
+    expect(posthogCaptureMock).toHaveBeenCalledOnce()
+    expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", {
+      feature: "custom_ai_action",
+      surface: "context_menu",
+      outcome: "failure",
+      latency_ms: 100,
+      action_id: "dictionary",
+      action_name: "Dictionary",
+      target_language: "cmn",
+    })
+    expect(cache.setLastReportedDay).toHaveBeenCalledOnce()
+  })
+
+  it("reports different features independently on the same day", async () => {
+    mockEnabledAnalyticsStorage()
+    const { cache } = createMemoryFeatureUsageCache()
+    const { captureFeatureUsedEventInBackground } = createAnalytics({
+      featureUsageCache: cache,
+    })
+
+    await captureFeatureUsedEventInBackground({
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 100,
+    })
+    await captureFeatureUsedEventInBackground({
+      feature: "text_to_speech",
+      surface: "tts_settings",
+      outcome: "success",
+      latency_ms: 200,
+    })
+
+    expect(posthogCaptureMock).toHaveBeenCalledTimes(2)
+    expect(cache.setLastReportedDay).toHaveBeenCalledTimes(2)
+  })
+
+  it("reports a feature again after the Shanghai calendar day changes", async () => {
+    mockEnabledAnalyticsStorage()
+    const { cache } = createMemoryFeatureUsageCache()
+    let currentDate = new Date("2026-07-13T15:59:59.999Z")
+    const { captureFeatureUsedEventInBackground } = createAnalytics({
+      featureUsageCache: cache,
+      getCurrentDate: () => currentDate,
+    })
+    const properties: FeatureUsedEventProperties = {
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 100,
+    }
+
+    await captureFeatureUsedEventInBackground(properties)
+    await captureFeatureUsedEventInBackground(properties)
+    currentDate = new Date("2026-07-13T16:00:00.000Z")
+    await captureFeatureUsedEventInBackground(properties)
+
+    expect(posthogCaptureMock).toHaveBeenCalledTimes(2)
+    expect(cache.setLastReportedDay).toHaveBeenNthCalledWith(1, "page_translation", "2026-07-13")
+    expect(cache.setLastReportedDay).toHaveBeenNthCalledWith(2, "page_translation", "2026-07-14")
+  })
+
+  it("serializes concurrent events for the same feature", async () => {
+    mockEnabledAnalyticsStorage()
+    const { cache } = createMemoryFeatureUsageCache()
+    const { captureFeatureUsedEventInBackground } = createAnalytics({
+      featureUsageCache: cache,
+    })
+    const properties: FeatureUsedEventProperties = {
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 100,
+    }
+
+    await Promise.all([
+      captureFeatureUsedEventInBackground(properties),
+      captureFeatureUsedEventInBackground(properties),
+    ])
+
+    expect(posthogCaptureMock).toHaveBeenCalledOnce()
+    expect(cache.getLastReportedDay).toHaveBeenCalledTimes(2)
+    expect(cache.setLastReportedDay).toHaveBeenCalledOnce()
+  })
+
+  it("uses persisted cache state after background analytics is recreated", async () => {
+    mockEnabledAnalyticsStorage()
+    const { cache } = createMemoryFeatureUsageCache()
+    const properties: FeatureUsedEventProperties = {
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 100,
+    }
+
+    await createAnalytics({ featureUsageCache: cache }).captureFeatureUsedEventInBackground(
+      properties,
+    )
+    await createAnalytics({ featureUsageCache: cache }).captureFeatureUsedEventInBackground(
+      properties,
+    )
+
+    expect(posthogCaptureMock).toHaveBeenCalledOnce()
+  })
+
+  it("continues reporting when the feature cache cannot be read", async () => {
+    mockEnabledAnalyticsStorage()
+    const featureUsageCache: FeatureUsageCache = {
+      getLastReportedDay: vi
+        .fn<FeatureUsageCache["getLastReportedDay"]>()
+        .mockRejectedValue(new Error("read failed")),
+      setLastReportedDay: vi
+        .fn<FeatureUsageCache["setLastReportedDay"]>()
+        .mockResolvedValue(undefined),
+    }
+    const { captureFeatureUsedEventInBackground } = createAnalytics({ featureUsageCache })
+
+    await captureFeatureUsedEventInBackground({
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 100,
+    })
+
+    expect(posthogCaptureMock).toHaveBeenCalledOnce()
+    expect(featureUsageCache.setLastReportedDay).toHaveBeenCalledOnce()
+    expect(loggerWarnMock).toHaveBeenCalledWith(
+      "[Analytics] Failed to read the daily feature usage cache",
+      expect.any(Error),
+    )
+  })
+
+  it("keeps a captured event when the feature cache cannot be written", async () => {
+    mockEnabledAnalyticsStorage()
+    const featureUsageCache: FeatureUsageCache = {
+      getLastReportedDay: vi
+        .fn<FeatureUsageCache["getLastReportedDay"]>()
+        .mockResolvedValue(undefined),
+      setLastReportedDay: vi
+        .fn<FeatureUsageCache["setLastReportedDay"]>()
+        .mockRejectedValue(new Error("write failed")),
+    }
+    const { captureFeatureUsedEventInBackground } = createAnalytics({ featureUsageCache })
+
+    await captureFeatureUsedEventInBackground({
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 100,
+    })
+
+    expect(posthogCaptureMock).toHaveBeenCalledOnce()
+    expect(loggerWarnMock).toHaveBeenCalledWith(
+      "[Analytics] Failed to write the daily feature usage cache",
+      expect.any(Error),
+    )
+  })
+
+  it("does not cache a feature when capture fails", async () => {
+    mockEnabledAnalyticsStorage()
+    const { cache } = createMemoryFeatureUsageCache()
+    posthogCaptureMock.mockImplementationOnce(() => {
+      throw new Error("capture failed")
+    })
+    const { captureFeatureUsedEventInBackground } = createAnalytics({
+      featureUsageCache: cache,
+    })
+    const properties: FeatureUsedEventProperties = {
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 100,
+    }
+
+    await captureFeatureUsedEventInBackground(properties)
+    await captureFeatureUsedEventInBackground(properties)
+
+    expect(posthogCaptureMock).toHaveBeenCalledTimes(2)
+    expect(cache.setLastReportedDay).toHaveBeenCalledOnce()
+  })
+
   it("does not initialize PostHog when analytics is disabled", async () => {
     storageGetItemMock.mockResolvedValueOnce(false)
 
@@ -157,6 +409,24 @@ describe("background analytics", () => {
 
     expect(posthogInitMock).not.toHaveBeenCalled()
     expect(posthogCaptureMock).not.toHaveBeenCalled()
+  })
+
+  it("does not write feature cache state when analytics is disabled", async () => {
+    storageGetItemMock.mockResolvedValueOnce(false)
+    const { cache } = createMemoryFeatureUsageCache()
+    const { captureFeatureUsedEventInBackground } = createAnalytics({
+      featureUsageCache: cache,
+    })
+
+    await captureFeatureUsedEventInBackground({
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 100,
+    })
+
+    expect(cache.getLastReportedDay).not.toHaveBeenCalled()
+    expect(cache.setLastReportedDay).not.toHaveBeenCalled()
   })
 
   it("uses the runtime default when the preference has not been stored yet", async () => {
@@ -257,10 +527,12 @@ describe("background analytics", () => {
 
   it("warns and no-ops when PostHog env configuration is missing", async () => {
     storageGetItemMock.mockResolvedValueOnce(true)
+    const { cache } = createMemoryFeatureUsageCache()
 
     const { captureFeatureUsedEventInBackground } = createAnalytics({
       apiHost: undefined,
       apiKey: undefined,
+      featureUsageCache: cache,
     })
     await captureFeatureUsedEventInBackground({
       feature: "page_translation",
@@ -271,6 +543,7 @@ describe("background analytics", () => {
 
     expect(posthogInitMock).not.toHaveBeenCalled()
     expect(posthogCaptureMock).not.toHaveBeenCalled()
+    expect(cache.setLastReportedDay).not.toHaveBeenCalled()
     expect(loggerWarnMock).toHaveBeenCalledOnce()
   })
 
