@@ -2849,7 +2849,7 @@ describe("translate", () => {
 
         // Should have translation wrapper since it contains text
         const wrapper = expectTranslationWrapper(node, "bilingual")
-        expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS)
+        expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS)
       })
     })
 
@@ -2941,6 +2941,99 @@ describe("translate", () => {
         expectNodeLabels(node, [BLOCK_ATTRIBUTE])
         expectNodeLabels(node.children[0], [BLOCK_ATTRIBUTE])
         expectNodeLabels(node.children[1], [BLOCK_ATTRIBUTE])
+      })
+    })
+  })
+  describe("short single-line block content", () => {
+    it.each([
+      { flexDirection: "row", label: "Introduction" },
+      { flexDirection: "row", label: "Solution" },
+      { flexDirection: "column", label: "Output" },
+    ] as const)(
+      "keeps $label inline inside a flex-$flexDirection container",
+      async ({ flexDirection, label }) => {
+        render(
+          <div style={{ display: "flex", flexDirection }}>
+            <p data-testid="test-node">{label}</p>
+          </div>,
+        )
+
+        const node = screen.getByTestId("test-node")
+        await removeOrShowPageTranslation("bilingual", true)
+
+        expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        const wrapper = expectTranslationWrapper(node, "bilingual")!
+        expect(wrapper).toBe(node.lastChild)
+        expect(wrapper.querySelector("br")).toBeFalsy()
+        expect(wrapper.firstChild?.textContent).toBe("\u00A0\u00A0")
+        expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS)
+
+        await removeOrShowPageTranslation("bilingual", true)
+        expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
+        expect(node.textContent).toBe(label)
+      },
+    )
+
+    it("keeps a long block paragraph on a separate line", async () => {
+      const text = "Python is one of the world's easiest and most popular programming languages."
+      render(<p data-testid="test-node">{text}</p>)
+
+      const node = screen.getByTestId("test-node")
+      await removeOrShowPageTranslation("bilingual", true)
+
+      const wrapper = expectTranslationWrapper(node, "bilingual")!
+      expect(wrapper.querySelector("br")).toBeTruthy()
+      expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS)
+    })
+
+    it("keeps structural force-block priority over the short-text heuristic", async () => {
+      render(
+        <div data-testid="test-node">
+          <div>
+            Introduction
+            <div>{MOCK_ORIGINAL_TEXT}</div>
+          </div>
+        </div>,
+      )
+
+      const node = screen.getByTestId("test-node")
+      await removeOrShowPageTranslation("bilingual", true)
+
+      const paragraph = node.children[0]
+      const wrapper = paragraph.childNodes[1] as Element
+      expect(wrapper).toHaveClass(CONTENT_WRAPPER_CLASS)
+      expect(wrapper.querySelector("br")).toBeTruthy()
+      expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS)
+    })
+
+    it("keeps a matching site force-block rule above the short-text heuristic", async () => {
+      const config: Config = {
+        ...BILINGUAL_CONFIG,
+        siteRules: {
+          ...BILINGUAL_CONFIG.siteRules,
+          userRules: [
+            {
+              id: "force-short-label-block",
+              matches: "example.com",
+              forceBlockSelectors: [".force-block"],
+            },
+          ],
+        },
+      }
+
+      await withHost("example.com", async () => {
+        render(
+          <p className="force-block" data-testid="test-node">
+            Introduction
+          </p>,
+        )
+
+        const node = screen.getByTestId("test-node")
+        await removeOrShowPageTranslation("bilingual", true, config)
+
+        const wrapper = expectTranslationWrapper(node, "bilingual")!
+        expect(wrapper.querySelector("br")).toBeTruthy()
+        expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS)
       })
     })
   })

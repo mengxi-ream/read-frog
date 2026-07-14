@@ -8,7 +8,8 @@ import {
 } from "@/utils/constants/dom-labels"
 
 export const MOCK_TRANSLATION = "translation"
-export const MOCK_ORIGINAL_TEXT = "原文"
+export const MOCK_ORIGINAL_TEXT =
+  "This is deliberately long source text for block translation layout tests"
 
 export function expectTranslationWrapper(node: Element, mode: TranslationMode) {
   const wrapper = node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)

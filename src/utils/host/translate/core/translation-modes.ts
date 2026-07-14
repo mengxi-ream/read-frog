@@ -210,7 +210,7 @@ async function translateVirtualParagraph(
 
   await insertTranslatedNodeIntoWrapper(
     wrapper,
-    { flowSource, isCurrent, layoutSource: group.layoutSource },
+    { flowSource, isCurrent, layoutSource: group.layoutSource, sourceText: unit.text },
     translatedText,
     config.translate.translationNodeStyle,
     config,
@@ -383,6 +383,8 @@ export async function translateNodesBilingualMode(
     if (virtualLayoutSource) {
       const virtualParagraphPlan = buildVirtualParagraphPlan(virtualLayoutSource, config)
       if (virtualParagraphPlan.units.length >= 2) {
+        // Explicit blank-line boundaries represent block paragraphs even when
+        // an individual unit is short enough for the compact-label heuristic.
         await translateVirtualParagraphs(
           nodes,
           virtualParagraphPlan.units,
@@ -390,7 +392,7 @@ export async function translateNodesBilingualMode(
           virtualLayoutSource,
           walkId,
           config,
-          forceBlockTranslation,
+          true,
         )
         return
       }
@@ -528,7 +530,7 @@ export async function translateNodesBilingualMode(
 
     await insertTranslatedNodeIntoWrapper(
       translatedWrapperNode,
-      { flowSource: insertionTarget, isCurrent, layoutSource },
+      { flowSource: insertionTarget, isCurrent, layoutSource, sourceText: textContent },
       translatedText,
       config.translate.translationNodeStyle,
       config,
