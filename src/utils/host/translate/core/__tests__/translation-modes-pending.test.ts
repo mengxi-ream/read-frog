@@ -52,6 +52,17 @@ describe("legacy bilingual pending lifecycle", () => {
     removeAllTranslatedWrapperNodes(document)
   })
 
+  it("marks the state complete only after final translated content is inserted", async () => {
+    const source = createSource()
+    mockShouldFilterSmallParagraph.mockResolvedValue(false)
+
+    await translateNodesBilingualMode([source], "completed", DEFAULT_CONFIG)
+
+    const state = getBilingualTranslationStateForSource(source)
+    expect(state?.phase).toBe("complete")
+    expect(state?.wrapper?.textContent).toContain("translated")
+  })
+
   it("does not insert a wrapper after global cleanup while filtering is pending", async () => {
     const source = createSource()
     const filter = deferredFilter()

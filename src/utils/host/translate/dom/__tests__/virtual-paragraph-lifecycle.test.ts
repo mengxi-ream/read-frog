@@ -297,6 +297,7 @@ describe("virtual paragraph lifecycle", () => {
     const state: BilingualTranslationState = {
       layoutSource,
       sourceTextContent: "Pending source",
+      phase: "pending",
       status: "active",
       walkId: "pending-legacy",
       wrapper: null,
@@ -320,6 +321,7 @@ describe("virtual paragraph lifecycle", () => {
     const state: BilingualTranslationState = {
       layoutSource,
       sourceTextContent: "Host paragraph text",
+      phase: "complete",
       status: "active",
       walkId: "foreign-wrapper",
       wrapper: ownWrapper,
@@ -372,6 +374,7 @@ describe("virtual paragraph lifecycle", () => {
     const state: BilingualTranslationState = {
       layoutSource,
       sourceTextContent: collectSourceTextExcludingWrappers(layoutSource),
+      phase: "complete",
       status: "active",
       walkId: "snapshot-symmetry",
       wrapper: null,

@@ -21,6 +21,15 @@ import {
 import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
 import {
+  captureBilingualReplacements,
+  isBilingualReplacementMatchCurrent,
+  matchBilingualReplacement,
+  restoreCompletedBilingualReplacement,
+  type BilingualReplacementMatch,
+  type BilingualReplacementSnapshot,
+} from "@/utils/host/translate/core/bilingual-replacement"
+import {
+  collectSourceTextExcludingWrappers,
   findStaleBilingualLayoutSource,
   findStaleTranslationOnlyAnchor,
   wasCharacterDataChangeExtensionDriven,
@@ -50,6 +59,17 @@ type DebouncedRetry = (() => void) & { clear: () => void }
 interface RetranslationBudget {
   windowStart: number
   passes: number
+}
+
+interface CachedBilingualReplacement {
+  budget?: RetranslationBudget
+  snapshot: BilingualReplacementSnapshot
+  suppressed: boolean
+}
+
+interface SuppressedBilingualReplacement {
+  match: BilingualReplacementMatch
+  snapshot: BilingualReplacementSnapshot
 }
 
 interface IPageTranslationManager {
@@ -91,6 +111,8 @@ export class PageTranslationManager implements IPageTranslationManager {
   private static readonly RETRANSLATE_WINDOW_MS = 10_000
   private static readonly MAX_PASSES_PER_WINDOW = 6
   private static readonly RETRANSLATE_RETRY_DEBOUNCE_MS = 1_000
+  private static readonly MAX_BILINGUAL_REPLACEMENT_CACHE_ENTRIES = 500
+  private static readonly USER_SCROLL_INTENT_GRACE_MS = 1_000
   private static readonly DEFAULT_INTERSECTION_OPTIONS: SimpleIntersectionOptions = {
     root: null,
     rootMargin: "600px",
@@ -108,6 +130,11 @@ export class PageTranslationManager implements IPageTranslationManager {
   private translatedSourceMutationVersions = new WeakMap<HTMLElement, number>()
   private retranslationBudgets = new WeakMap<HTMLElement, RetranslationBudget>()
   private retranslateRetries = new WeakMap<HTMLElement, DebouncedRetry>()
+  private bilingualReplacementCache = new Map<string, CachedBilingualReplacement>()
+  private suppressedBilingualReplacements = new WeakMap<
+    HTMLElement,
+    SuppressedBilingualReplacement
+  >()
   // Strong and enumerable so stop() can cancel in-flight retries; entries are
   // removed when a retry fires, so the set only holds armed timers.
   private pendingRetranslateRetries = new Set<DebouncedRetry>()
@@ -116,6 +143,8 @@ export class PageTranslationManager implements IPageTranslationManager {
   private lastSourceTitle: string | null = null
   private lastAppliedTranslatedTitle: string | null = null
   private titleRequestVersion = 0
+  private lastUserScrollIntentAt = 0
+  private removeScrollIntentListeners: (() => void) | null = null
 
   constructor(intersectionOptions: SimpleIntersectionOptions = {}) {
     if (intersectionOptions.threshold !== undefined) {
@@ -180,6 +209,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
       this.isPageTranslating = true
       this.translationSessionVersion += 1
+      this.startUserScrollIntentTracking()
 
       const siteRule = getEffectiveSiteRule(config, window.location.href)
       if (siteRule.injectedCss) {
@@ -199,6 +229,10 @@ export class PageTranslationManager implements IPageTranslationManager {
           if (entry.isIntersecting) {
             if (isHTMLElement(entry.target)) {
               if (!entry.target.closest(`.${CONTENT_WRAPPER_CLASS}`)) {
+                if (this.isBilingualReplacementSuppressed(entry.target)) {
+                  observer.unobserve(entry.target)
+                  continue
+                }
                 const currentConfig = await getLocalConfig()
                 if (!currentConfig) {
                   logger.error("Global config is not initialized")
@@ -273,6 +307,9 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.pendingRetranslateRetries.clear()
     this.retranslateRetries = new WeakMap()
     this.retranslationBudgets = new WeakMap()
+    this.bilingualReplacementCache.clear()
+    this.suppressedBilingualReplacements = new WeakMap()
+    this.stopUserScrollIntentTracking()
     this.stopDocumentTitleTracking()
 
     if (this.intersectionObserver) {
@@ -490,7 +527,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       container.hasAttribute("data-read-frog-paragraph") &&
       container.getAttribute("data-read-frog-walked") === this.walkId
     ) {
-      observer.observe(container)
+      if (!this.isBilingualReplacementSuppressed(container)) observer.observe(container)
       return
     }
 
@@ -502,7 +539,9 @@ export class PageTranslationManager implements IPageTranslationManager {
       //  • the ancestor is *not* inside container
       return !ancestor || !container.contains(ancestor)
     })
-    topLevelParagraphs.forEach((el) => observer.observe(el))
+    topLevelParagraphs.forEach((el) => {
+      if (!this.isBilingualReplacementSuppressed(el)) observer.observe(el)
+    })
   }
 
   /**
@@ -673,14 +712,18 @@ export class PageTranslationManager implements IPageTranslationManager {
     const sessionVersion = this.translationSessionVersion
     const hostRecords: MutationRecord[] = []
     for (const record of records) {
+      if (!this.isSelfInflictedRecord(record)) hostRecords.push(record)
+    }
+    this.restoreReplacedBilingualTranslations(hostRecords)
+    for (const record of records) {
       if (record.type === "childList") {
         this.cleanupDetachedTranslationArtifacts(record.removedNodes)
       }
-      if (!this.isSelfInflictedRecord(record)) hostRecords.push(record)
     }
     if (hostRecords.length === 0) return
 
     const staleTranslatedSources = new Set<HTMLElement>()
+    const releasedSuppressedSources = new Set<HTMLElement>()
     for (const record of hostRecords) {
       const staleSource = findStaleBilingualLayoutSource(record.target)
       if (staleSource) staleTranslatedSources.add(staleSource)
@@ -688,13 +731,17 @@ export class PageTranslationManager implements IPageTranslationManager {
       // expand/"show more" must retranslate, not stay in the source language.
       const staleAnchor = findStaleTranslationOnlyAnchor(record.target)
       if (staleAnchor) staleTranslatedSources.add(staleAnchor)
+      const releasedSource = this.releaseChangedBilingualReplacementSuppression(record.target)
+      if (releasedSource) releasedSuppressedSources.add(releasedSource)
     }
     staleTranslatedSources.forEach((source) => {
       const nextVersion = (this.translatedSourceMutationVersions.get(source) ?? 0) + 1
       this.translatedSourceMutationVersions.set(source, nextVersion)
     })
 
-    const needsTraversalHandling = hostRecords.some((record) => record.type !== "characterData")
+    const needsTraversalHandling =
+      releasedSuppressedSources.size > 0 ||
+      hostRecords.some((record) => record.type !== "characterData")
     if (staleTranslatedSources.size === 0 && !needsTraversalHandling) return
 
     const config = await getLocalConfig()
@@ -720,6 +767,9 @@ export class PageTranslationManager implements IPageTranslationManager {
         }
       }
     }
+    for (const source of releasedSuppressedSources) {
+      if (source.isConnected) void this.observeTopLevelParagraphs(source, config)
+    }
 
     await Promise.all(
       [...staleTranslatedSources].map((source) =>
@@ -741,6 +791,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       this.translationSessionVersion !== sessionVersion ||
       !walkId ||
       !source.isConnected ||
+      this.isBilingualReplacementSuppressed(source) ||
       refreshingSources.has(source)
     ) {
       return
@@ -825,13 +876,186 @@ export class PageTranslationManager implements IPageTranslationManager {
     source: HTMLElement,
     sessionVersion: number,
   ): Promise<void> {
-    if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return
+    if (
+      !this.isPageTranslating ||
+      this.translationSessionVersion !== sessionVersion ||
+      this.isBilingualReplacementSuppressed(source)
+    ) {
+      return
+    }
     // No pending mutation version means the source converged in the meantime.
     if (this.translatedSourceMutationVersions.get(source) === undefined) return
     const config = await getLocalConfig()
     if (!config) return
     if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return
     await this.retranslateChangedSource(source, config, sessionVersion)
+  }
+
+  private rememberBilingualReplacement(
+    snapshot: BilingualReplacementSnapshot,
+  ): CachedBilingualReplacement {
+    const existing = this.bilingualReplacementCache.get(snapshot.key)
+    const entry: CachedBilingualReplacement = existing
+      ? { ...existing, snapshot }
+      : { snapshot, suppressed: false }
+
+    this.bilingualReplacementCache.delete(snapshot.key)
+    this.bilingualReplacementCache.set(snapshot.key, entry)
+    while (
+      this.bilingualReplacementCache.size >
+      PageTranslationManager.MAX_BILINGUAL_REPLACEMENT_CACHE_ENTRIES
+    ) {
+      const oldestKey = this.bilingualReplacementCache.keys().next().value
+      if (oldestKey === undefined) break
+      this.bilingualReplacementCache.delete(oldestKey)
+    }
+    return entry
+  }
+
+  private consumeBilingualReplacementBudget(entry: CachedBilingualReplacement): boolean {
+    const now = Date.now()
+    if (now - this.lastUserScrollIntentAt < PageTranslationManager.USER_SCROLL_INTENT_GRACE_MS) {
+      entry.budget = undefined
+      return true
+    }
+    if (
+      !entry.budget ||
+      now - entry.budget.windowStart > PageTranslationManager.RETRANSLATE_WINDOW_MS
+    ) {
+      entry.budget = { windowStart: now, passes: 1 }
+      return true
+    }
+    if (entry.budget.passes >= PageTranslationManager.MAX_PASSES_PER_WINDOW) return false
+    entry.budget.passes += 1
+    return true
+  }
+
+  /**
+   * Frameworks may replace a translated paragraph with an equivalent fresh
+   * node. Move/clone the completed wrapper before the first await in the
+   * mutation pipeline so layout never observes a source-only intermediate
+   * state. Exact host structure and source text matching prevents stale reuse.
+   */
+  private restoreReplacedBilingualTranslations(records: MutationRecord[]): void {
+    const walkId = this.walkId
+    if (!this.isPageTranslating || !walkId) return
+
+    const capturedEntries = new Set<CachedBilingualReplacement>()
+    for (const record of records) {
+      if (record.type !== "childList") continue
+      for (const removedNode of record.removedNodes) {
+        if (!isHTMLElement(removedNode)) continue
+        for (const snapshot of captureBilingualReplacements(removedNode, walkId)) {
+          capturedEntries.add(this.rememberBilingualReplacement(snapshot))
+        }
+      }
+    }
+    if (this.bilingualReplacementCache.size === 0) return
+
+    const entries = [...this.bilingualReplacementCache.values()].reverse()
+    const handledSources = new Set<HTMLElement>()
+    for (const record of records) {
+      if (record.type !== "childList") continue
+      for (const addedNode of record.addedNodes) {
+        if (!isHTMLElement(addedNode)) continue
+        const addedRootTextContent = collectSourceTextExcludingWrappers(addedNode)
+        for (const entry of entries) {
+          const match = matchBilingualReplacement(addedNode, addedRootTextContent, entry.snapshot)
+          if (!match || handledSources.has(match.source)) continue
+
+          handledSources.add(match.source)
+          if (entry.suppressed || !this.consumeBilingualReplacementBudget(entry)) {
+            entry.suppressed = true
+            this.suppressedBilingualReplacements.set(match.source, {
+              match,
+              snapshot: entry.snapshot,
+            })
+            continue
+          }
+
+          // Pending/error generations contribute to the logical replacement
+          // budget but are never copied. The fresh node proceeds through the
+          // normal translation path unless the circuit breaker trips.
+          if (!entry.snapshot.reusable) continue
+
+          restoreCompletedBilingualReplacement(
+            match,
+            entry.snapshot,
+            walkId,
+            capturedEntries.has(entry),
+          )
+          this.bilingualReplacementCache.delete(entry.snapshot.key)
+          this.bilingualReplacementCache.set(entry.snapshot.key, entry)
+        }
+      }
+    }
+    for (const entry of capturedEntries) entry.snapshot.detachedWrapper = undefined
+  }
+
+  private isBilingualReplacementSuppressed(source: HTMLElement): boolean {
+    const suppressed = this.suppressedBilingualReplacements.get(source)
+    if (!suppressed) return false
+    if (isBilingualReplacementMatchCurrent(suppressed.match, suppressed.snapshot)) return true
+    this.suppressedBilingualReplacements.delete(source)
+    return false
+  }
+
+  private startUserScrollIntentTracking(): void {
+    this.stopUserScrollIntentTracking()
+
+    const markIntent = () => {
+      this.lastUserScrollIntentAt = Date.now()
+    }
+    const markPointerDrag = (event: PointerEvent) => {
+      if (event.buttons !== 0) markIntent()
+    }
+    const markScrollKey = (event: KeyboardEvent) => {
+      if (
+        [
+          "ArrowDown",
+          "ArrowLeft",
+          "ArrowRight",
+          "ArrowUp",
+          "End",
+          "Home",
+          "PageDown",
+          "PageUp",
+          " ",
+        ].includes(event.key)
+      ) {
+        markIntent()
+      }
+    }
+
+    document.addEventListener("wheel", markIntent, { capture: true, passive: true })
+    document.addEventListener("touchmove", markIntent, { capture: true, passive: true })
+    document.addEventListener("pointerdown", markIntent, { capture: true, passive: true })
+    document.addEventListener("pointermove", markPointerDrag, { capture: true, passive: true })
+    document.addEventListener("keydown", markScrollKey, true)
+    this.removeScrollIntentListeners = () => {
+      document.removeEventListener("wheel", markIntent, true)
+      document.removeEventListener("touchmove", markIntent, true)
+      document.removeEventListener("pointerdown", markIntent, true)
+      document.removeEventListener("pointermove", markPointerDrag, true)
+      document.removeEventListener("keydown", markScrollKey, true)
+    }
+  }
+
+  private stopUserScrollIntentTracking(): void {
+    this.removeScrollIntentListeners?.()
+    this.removeScrollIntentListeners = null
+    this.lastUserScrollIntentAt = 0
+  }
+
+  private releaseChangedBilingualReplacementSuppression(node: Node): HTMLElement | undefined {
+    let current = isHTMLElement(node) ? node : node.parentElement
+    while (current) {
+      if (this.suppressedBilingualReplacements.has(current)) {
+        return this.isBilingualReplacementSuppressed(current) ? undefined : current
+      }
+      current = current.parentElement
+    }
+    return undefined
   }
 
   private isWalkabilityAttributeMutation(record: MutationRecord): boolean {

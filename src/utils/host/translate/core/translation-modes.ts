@@ -439,6 +439,7 @@ export async function translateNodesBilingualMode(
       bilingualState = {
         layoutSource,
         sourceTextContent: sourceTextBeforeFilter,
+        phase: "pending",
         status: "active",
         walkId,
         wrapper: null,
@@ -534,7 +535,11 @@ export async function translateNodesBilingualMode(
       config,
       forceBlockTranslation,
     )
-    if (!isCurrent()) removeTranslatedWrapperWithRestore(translatedWrapperNode)
+    if (!isCurrent()) {
+      removeTranslatedWrapperWithRestore(translatedWrapperNode)
+    } else if (bilingualState) {
+      bilingualState.phase = "complete"
+    }
   } finally {
     transNodes.forEach((node) => translatingNodes.delete(node))
   }

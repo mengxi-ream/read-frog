@@ -37,6 +37,7 @@ export interface VirtualParagraphGroup {
 export interface BilingualTranslationState {
   layoutSource: HTMLElement
   sourceTextContent: string
+  phase: "pending" | "complete"
   status: "active" | "disposed"
   walkId: string
   wrapper: HTMLElement | null

@@ -3,6 +3,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
+  getBilingualTranslationStateForSource,
   markExtensionDrivenNodeRemoval,
   registerBilingualTranslationState,
   unregisterBilingualTranslationState,
@@ -207,6 +208,42 @@ function walkAndLabelVisibleParagraphs(element: HTMLElement, walkId: string) {
   }
 }
 
+function attachBilingualTranslationState(
+  source: HTMLElement,
+  translatedText: string,
+  options: {
+    error?: boolean
+    insertionParent?: HTMLElement
+    phase?: BilingualTranslationState["phase"]
+  } = {},
+): { state: BilingualTranslationState; wrapper: HTMLElement } {
+  const wrapper = document.createElement("span")
+  wrapper.className = "notranslate read-frog-translated-content-wrapper"
+  wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+  wrapper.setAttribute("data-read-frog-walked", "walk-id")
+  const translated = document.createElement("span")
+  translated.className = "notranslate read-frog-translated-block-content"
+  translated.textContent = translatedText
+  wrapper.append(document.createElement("br"), translated)
+  if (options.error) {
+    const error = document.createElement("span")
+    error.className = "read-frog-translation-error-container"
+    wrapper.append(error)
+  }
+  ;(options.insertionParent ?? source).append(wrapper)
+
+  const state: BilingualTranslationState = {
+    layoutSource: source,
+    sourceTextContent: source.textContent?.replace(translatedText, "").trim() ?? "",
+    phase: options.phase ?? "complete",
+    status: "active",
+    walkId: "walk-id",
+    wrapper,
+  }
+  registerBilingualTranslationState(state)
+  return { state, wrapper }
+}
+
 describe("pageTranslationManager mutation re-walk", () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -239,6 +276,300 @@ describe("pageTranslationManager mutation re-walk", () => {
     mockTranslateNodesBilingualMode.mockReset().mockResolvedValue(undefined)
     mockValidateTranslationConfigAndToast.mockReturnValue(true)
     mockSendMessage.mockResolvedValue(undefined)
+  })
+
+  it("moves a completed translation to an equivalent replacement before config lookup resolves (#1854)", async () => {
+    document.body.innerHTML = `<main id="lesson"><p id="source">Python variables</p></main>`
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const lesson = document.getElementById("lesson") as HTMLElement
+    const oldSource = document.getElementById("source") as HTMLElement
+    const { wrapper } = attachBilingualTranslationState(oldSource, "Python 变量")
+    await flushDomUpdates()
+    mockTranslateWalkedElement.mockClear()
+
+    let resolveConfig!: (config: typeof DEFAULT_CONFIG) => void
+    mockGetLocalConfig.mockReturnValue(
+      new Promise<typeof DEFAULT_CONFIG>((resolve) => {
+        resolveConfig = resolve
+      }),
+    )
+
+    const newSource = document.createElement("p")
+    newSource.id = "source"
+    newSource.textContent = "Python variables"
+    lesson.replaceChild(newSource, oldSource)
+
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(newSource.querySelector(".read-frog-translated-content-wrapper")).toBe(wrapper)
+    expect(getBilingualTranslationStateForSource(newSource)).toMatchObject({
+      phase: "complete",
+      sourceTextContent: "Python variables",
+      walkId: "walk-id",
+    })
+    expect(mockTranslateWalkedElement).not.toHaveBeenCalled()
+
+    resolveConfig(DEFAULT_CONFIG)
+    await flushDomUpdates()
+    manager.stop()
+  })
+
+  it("restores a cached translation when removal and insertion arrive separately (#1854)", async () => {
+    document.body.innerHTML = `<main id="lesson"><p id="source">Python lists</p></main>`
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const lesson = document.getElementById("lesson") as HTMLElement
+    const oldSource = document.getElementById("source") as HTMLElement
+    const { wrapper: oldWrapper } = attachBilingualTranslationState(oldSource, "Python 列表")
+    await flushDomUpdates()
+
+    oldSource.remove()
+    await flushDomUpdates()
+
+    const newSource = document.createElement("p")
+    newSource.id = "source"
+    newSource.textContent = "Python lists"
+    lesson.append(newSource)
+    await flushDomUpdates()
+
+    const restoredWrapper = newSource.querySelector<HTMLElement>(
+      ".read-frog-translated-content-wrapper",
+    )
+    expect(restoredWrapper).not.toBeNull()
+    expect(restoredWrapper).not.toBe(oldWrapper)
+    expect(restoredWrapper?.textContent).toContain("Python 列表")
+    expect(getBilingualTranslationStateForSource(newSource)?.phase).toBe("complete")
+    expect(mockTranslateNodesBilingualMode).not.toHaveBeenCalled()
+
+    manager.stop()
+  })
+
+  it("does not reuse a translation when source text or host structure changed (#1854)", async () => {
+    document.body.innerHTML = `
+      <main id="lesson">
+        <p id="changed-text">Python tuples</p>
+        <p id="changed-structure"><span>Python dictionaries</span></p>
+      </main>
+    `
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const lesson = document.getElementById("lesson") as HTMLElement
+    const changedText = document.getElementById("changed-text") as HTMLElement
+    const changedStructure = document.getElementById("changed-structure") as HTMLElement
+    attachBilingualTranslationState(changedText, "Python 元组")
+    attachBilingualTranslationState(changedStructure, "Python 字典", {
+      insertionParent: changedStructure.firstElementChild as HTMLElement,
+    })
+    await flushDomUpdates()
+
+    const newTextSource = document.createElement("p")
+    newTextSource.textContent = "Python sets"
+    lesson.replaceChild(newTextSource, changedText)
+
+    const newStructureSource = document.createElement("p")
+    newStructureSource.innerHTML = "<em><span>Python dictionaries</span></em>"
+    lesson.replaceChild(newStructureSource, changedStructure)
+    await flushDomUpdates()
+
+    expect(newTextSource.querySelector(".read-frog-translated-content-wrapper")).toBeNull()
+    expect(newStructureSource.querySelector(".read-frog-translated-content-wrapper")).toBeNull()
+
+    manager.stop()
+  })
+
+  it("does not cache pending or error translations (#1854)", async () => {
+    document.body.innerHTML = `
+      <main id="lesson">
+        <p id="pending">Pending paragraph</p>
+        <p id="error">Error paragraph</p>
+      </main>
+    `
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const lesson = document.getElementById("lesson") as HTMLElement
+    const pending = document.getElementById("pending") as HTMLElement
+    const error = document.getElementById("error") as HTMLElement
+    attachBilingualTranslationState(pending, "等待中的译文", { phase: "pending" })
+    attachBilingualTranslationState(error, "错误译文", { error: true })
+    await flushDomUpdates()
+
+    const newPending = document.createElement("p")
+    newPending.textContent = "Pending paragraph"
+    const newError = document.createElement("p")
+    newError.textContent = "Error paragraph"
+    lesson.replaceChildren(newPending, newError)
+    await flushDomUpdates()
+
+    expect(newPending.querySelector(".read-frog-translated-content-wrapper")).toBeNull()
+    expect(newError.querySelector(".read-frog-translated-content-wrapper")).toBeNull()
+
+    manager.stop()
+  })
+
+  it("counts pending generations toward the cross-node circuit breaker without copying them (#1854)", async () => {
+    document.body.innerHTML = `<main id="lesson"><p>Pending loop</p></main>`
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const lesson = document.getElementById("lesson") as HTMLElement
+    let current = lesson.firstElementChild as HTMLElement
+    attachBilingualTranslationState(current, "未完成", { phase: "pending" })
+    await flushDomUpdates()
+
+    for (let index = 0; index < 6; index++) {
+      const replacement = document.createElement("p")
+      replacement.textContent = "Pending loop"
+      lesson.replaceChild(replacement, current)
+      current = replacement
+      await flushDomUpdates()
+      expect(current.querySelector(".read-frog-translated-content-wrapper")).toBeNull()
+      attachBilingualTranslationState(current, "未完成", { phase: "pending" })
+      await flushDomUpdates()
+    }
+
+    const suppressed = document.createElement("p")
+    suppressed.textContent = "Pending loop"
+    lesson.replaceChild(suppressed, current)
+    current = suppressed
+    await flushDomUpdates()
+
+    expect(current.querySelector(".read-frog-translated-content-wrapper")).toBeNull()
+    expect(intersectionObservers[0].observe.mock.calls.some(([target]) => target === current)).toBe(
+      false,
+    )
+
+    manager.stop()
+  })
+
+  it("restores repeated identical paragraphs without duplicating wrappers (#1854)", async () => {
+    document.body.innerHTML = `
+      <main id="lesson">
+        <p>Shared paragraph</p>
+        <p>Shared paragraph</p>
+      </main>
+    `
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const lesson = document.getElementById("lesson") as HTMLElement
+    const oldSources = [...lesson.querySelectorAll<HTMLElement>("p")]
+    oldSources.forEach((source) => attachBilingualTranslationState(source, "重复段落"))
+    await flushDomUpdates()
+
+    const replacements = [document.createElement("p"), document.createElement("p")]
+    replacements.forEach((source) => {
+      source.textContent = "Shared paragraph"
+    })
+    lesson.replaceChildren(...replacements)
+    await flushDomUpdates()
+
+    expect(
+      replacements.map(
+        (source) => source.querySelectorAll(".read-frog-translated-content-wrapper").length,
+      ),
+    ).toEqual([1, 1])
+    expect(replacements.map((source) => source.textContent)).toEqual([
+      "Shared paragraph重复段落",
+      "Shared paragraph重复段落",
+    ])
+
+    manager.stop()
+  })
+
+  it("stops restoring one logical paragraph after six rapid replacements and resets on restart (#1854)", async () => {
+    document.body.innerHTML = `<main id="lesson"><p>Looping paragraph</p></main>`
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const lesson = document.getElementById("lesson") as HTMLElement
+    let current = lesson.firstElementChild as HTMLElement
+    attachBilingualTranslationState(current, "循环段落")
+    await flushDomUpdates()
+
+    for (let index = 0; index < 6; index++) {
+      const replacement = document.createElement("p")
+      replacement.textContent = "Looping paragraph"
+      lesson.replaceChild(replacement, current)
+      current = replacement
+      await flushDomUpdates()
+      expect(current.querySelectorAll(".read-frog-translated-content-wrapper")).toHaveLength(1)
+    }
+
+    const suppressed = document.createElement("p")
+    suppressed.textContent = "Looping paragraph"
+    lesson.replaceChild(suppressed, current)
+    current = suppressed
+    await flushDomUpdates()
+
+    expect(current.querySelector(".read-frog-translated-content-wrapper")).toBeNull()
+    expect(intersectionObservers[0].observe.mock.calls.some(([target]) => target === current)).toBe(
+      false,
+    )
+
+    const stillSuppressed = document.createElement("p")
+    stillSuppressed.textContent = "Looping paragraph"
+    lesson.replaceChild(stillSuppressed, current)
+    current = stillSuppressed
+    await flushDomUpdates()
+    expect(current.querySelector(".read-frog-translated-content-wrapper")).toBeNull()
+
+    current.textContent = "Looping paragraph changed"
+    await flushDomUpdates()
+    expect(intersectionObservers[0].observe.mock.calls.some(([target]) => target === current)).toBe(
+      true,
+    )
+
+    manager.stop()
+    await manager.start()
+    await flushDomUpdates()
+    expect(intersectionObservers[1].observe).toHaveBeenCalledWith(current)
+
+    manager.stop()
+  })
+
+  it("does not spend the autonomous-loop budget while the user is actively scrolling (#1854)", async () => {
+    document.body.innerHTML = `<main id="lesson"><p>Scrolling paragraph</p></main>`
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const lesson = document.getElementById("lesson") as HTMLElement
+    let current = lesson.firstElementChild as HTMLElement
+    attachBilingualTranslationState(current, "滚动段落")
+    await flushDomUpdates()
+
+    for (let index = 0; index < 10; index++) {
+      document.dispatchEvent(new WheelEvent("wheel"))
+      const replacement = document.createElement("p")
+      replacement.textContent = "Scrolling paragraph"
+      lesson.replaceChild(replacement, current)
+      current = replacement
+      await flushDomUpdates()
+      expect(current.querySelectorAll(".read-frog-translated-content-wrapper")).toHaveLength(1)
+    }
+
+    manager.stop()
   })
 
   it("observes and translates hidden accordion content after it becomes visible", async () => {
@@ -349,6 +680,7 @@ describe("pageTranslationManager mutation re-walk", () => {
     const state: BilingualTranslationState = {
       layoutSource: tweet,
       sourceTextContent: "Truncated tweet",
+      phase: "complete",
       status: "active",
       walkId: "walk-id",
       wrapper,
@@ -388,6 +720,7 @@ describe("pageTranslationManager mutation re-walk", () => {
       const state: BilingualTranslationState = {
         layoutSource: tweet,
         sourceTextContent: source.data,
+        phase: "complete",
         status: "active",
         walkId: "walk-id",
         wrapper,
@@ -448,6 +781,7 @@ describe("pageTranslationManager mutation re-walk", () => {
       const state: BilingualTranslationState = {
         layoutSource: tweet,
         sourceTextContent: source.data,
+        phase: "complete",
         status: "active",
         walkId,
         wrapper,
@@ -542,6 +876,7 @@ describe("pageTranslationManager mutation re-walk", () => {
     const state: BilingualTranslationState = {
       layoutSource: tweet,
       sourceTextContent: "Original tweet",
+      phase: "complete",
       status: "active",
       walkId: "walk-id",
       wrapper,
@@ -588,6 +923,7 @@ describe("pageTranslationManager mutation re-walk", () => {
       const state: BilingualTranslationState = {
         layoutSource: tweet,
         sourceTextContent: sourceText,
+        phase: "complete",
         status: "active",
         walkId: "walk-id",
         wrapper,
@@ -645,6 +981,7 @@ describe("pageTranslationManager mutation re-walk", () => {
     const state: BilingualTranslationState = {
       layoutSource: tweet,
       sourceTextContent: "Original content",
+      phase: "complete",
       status: "active",
       walkId: "walk-id",
       wrapper,
@@ -696,6 +1033,7 @@ describe("pageTranslationManager mutation re-walk", () => {
       const state: BilingualTranslationState = {
         layoutSource: tweet,
         sourceTextContent: "never matches",
+        phase: "complete",
         status: "active",
         walkId: "walk-id",
         wrapper,
