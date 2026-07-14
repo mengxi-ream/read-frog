@@ -1,23 +1,31 @@
-import type { TextSplitRecord, VirtualParagraphGroup } from "../core/translation-state"
+import type {
+  TextSplitRecord,
+  TranslationOnlySwapRecord,
+  VirtualParagraphGroup,
+} from "../core/translation-state"
 import {
   CONTENT_WRAPPER_CLASS,
   REACT_SHADOW_HOST_CLASS,
   SPINNER_CLASS,
   TRANSLATION_MODE_ATTRIBUTE,
+  TRANSLATION_ONLY_ATTRIBUTE,
   VIRTUAL_PARAGRAPH_ATTRIBUTE,
 } from "../../../constants/dom-labels"
 import { removeReactShadowHost } from "../../../react-shadow-host/create-shadow-host"
 import { isHTMLElement, isTranslatedWrapperNode } from "../../dom/filter"
-import { deepQueryTopLevelSelector } from "../../dom/find"
+import { deepQueryAllSelector, deepQueryTopLevelSelector } from "../../dom/find"
 import {
   getBilingualTranslationStateForWrapper,
   getPendingBilingualTranslationStates,
   getPendingVirtualParagraphGroups,
+  getTranslationOnlyAnchorState,
   getVirtualParagraphGroupForSource,
   getVirtualParagraphGroupForWrapper,
+  markExtensionDrivenCharacterData,
   markExtensionDrivenNodeRemoval,
   takeTranslationOnlyOriginals,
   unregisterBilingualTranslationState,
+  unregisterTranslationOnlyAnchorState,
   unregisterVirtualParagraphGroup,
   unregisterVirtualParagraphWrapper,
 } from "../core/translation-state"
@@ -206,6 +214,65 @@ function restoreTranslationOnlyWrapper(wrapper: HTMLElement): ChildNode[] {
   return restored
 }
 
+function restoreSwapRecord(record: TranslationOnlySwapRecord): void {
+  for (const item of record.items) {
+    if (!item.node.isConnected) continue
+    // The framework rewrote this node since we swapped it — its current value
+    // is host-owned content; never clobber it with our stale original.
+    if (item.node.data.trim() !== item.translatedValue.trim()) continue
+    markExtensionDrivenCharacterData(item.node, item.originalValue)
+    item.node.data = item.originalValue
+  }
+  for (const item of record.attributeItems) {
+    if (!item.element.isConnected) continue
+    if (item.element.getAttribute(item.name) !== item.translatedValue) continue
+    if (item.originalValue === null) item.element.removeAttribute(item.name)
+    else item.element.setAttribute(item.name, item.originalValue)
+  }
+}
+
+/**
+ * Undo in-place text swaps registered on an anchor. With `filterNodes`, only
+ * swap records whose text nodes intersect those nodes are restored (the
+ * walker toggles one run at a time); without it, everything is restored.
+ * @returns true when at least one swap record was restored
+ */
+export function restoreTranslationOnlySwapsForAnchor(
+  anchor: HTMLElement,
+  filterNodes?: readonly ChildNode[],
+): boolean {
+  const state = getTranslationOnlyAnchorState(anchor)
+  if (!state) {
+    // Stale marker from a previous content-script realm: the payload is gone,
+    // so the marker is the only thing left to clean up.
+    anchor.removeAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+    return false
+  }
+
+  const intersects = (record: TranslationOnlySwapRecord) =>
+    !filterNodes ||
+    record.items.some((item) =>
+      filterNodes.some(
+        (node) => node === item.node || (isHTMLElement(node) && node.contains(item.node)),
+      ),
+    )
+
+  const toRestore = state.swaps.filter(intersects)
+  if (toRestore.length === 0) return false
+
+  toRestore.forEach(restoreSwapRecord)
+  state.swaps = state.swaps.filter((record) => !toRestore.includes(record))
+
+  if (state.swaps.length === 0) {
+    for (const { name, previousValue } of state.attributeAdjustments) {
+      if (previousValue === null) anchor.removeAttribute(name)
+      else anchor.setAttribute(name, previousValue)
+    }
+    unregisterTranslationOnlyAnchorState(anchor)
+  }
+  return true
+}
+
 /**
  * Remove translated wrapper and restore original content based on translation mode
  * @param wrapper - The translated wrapper element to remove
@@ -251,4 +318,10 @@ export function removeAllTranslatedWrapperNodes(root: Document | ShadowRoot = do
   translatedNodes.forEach((contentWrapperNode) => {
     removeTranslatedWrapperWithRestore(contentWrapperNode)
   })
+  // In-place-swapped paragraphs have no wrapper; their anchors are found by
+  // marker attribute. Collect ALL matches — nested anchors are independent.
+  const swapAnchors = deepQueryAllSelector(root, (element) =>
+    element.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE),
+  )
+  swapAnchors.forEach((anchor) => restoreTranslationOnlySwapsForAnchor(anchor))
 }

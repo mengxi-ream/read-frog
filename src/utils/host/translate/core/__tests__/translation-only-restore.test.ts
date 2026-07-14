@@ -5,7 +5,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
+import { CONTENT_WRAPPER_CLASS, TRANSLATION_ONLY_ATTRIBUTE } from "@/utils/constants/dom-labels"
 import { flushBatchedOperations } from "../../../dom/batch-dom"
 import {
   removeAllTranslatedWrapperNodes,
@@ -67,13 +67,17 @@ describe("translationOnly node-identity restore (#1846)", () => {
     await translateNodeTranslationOnlyMode([introText], "walk-1", DEFAULT_CONFIG)
     flushBatchedOperations()
 
-    expect(getWrappers(container).length).toBe(2)
+    // The structural li run falls back to a wrapper (plain-text mock can't be
+    // paired); the loose text run swaps in place on the container anchor.
+    expect(getWrappers(container).length).toBe(1)
+    expect(container.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE)).toBe(true)
     expect(container.textContent).not.toContain("Intro paragraph text.")
 
     removeAllTranslatedWrapperNodes(document)
     flushBatchedOperations()
 
     expect(container.innerHTML).toBe(originalHTML)
+    expect(container.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE)).toBe(false)
     // Node identity, not just markup: the same Text object is back in place
     expect(container.firstChild).toBe(introText)
     expect(li.firstChild).toBe(bold)
@@ -138,27 +142,29 @@ describe("translationOnly node-identity restore (#1846)", () => {
     expect(mockTranslateTextForPage).toHaveBeenCalledTimes(1)
   })
 
-  it("retranslate (non-toggle) restores then translates the same nodes again", async () => {
+  it("retranslate (non-toggle) restores the swap then translates again", async () => {
     const p = document.createElement("p")
     p.textContent = "Original sentence"
+    const originalText = p.firstChild
     document.body.append(p)
 
     await translateNodeTranslationOnlyMode([p], "walk-1", DEFAULT_CONFIG)
     flushBatchedOperations()
+    expect(p.textContent).toBe("中文译文")
 
     await translateNodeTranslationOnlyMode([p], "walk-2", DEFAULT_CONFIG, false)
-    await vi.waitFor(() => {
-      flushBatchedOperations()
-      expect(mockTranslateTextForPage).toHaveBeenCalledTimes(2)
-    })
     flushBatchedOperations()
 
-    expect(getWrappers(p).length).toBe(1)
-    expect(p.textContent).toContain("中文译文")
+    expect(mockTranslateTextForPage).toHaveBeenCalledTimes(2)
+    expect(getWrappers(p).length).toBe(0)
+    expect(p.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE)).toBe(true)
+    expect(p.firstChild).toBe(originalText)
+    expect(p.textContent).toBe("中文译文")
 
     removeAllTranslatedWrapperNodes(document)
     flushBatchedOperations()
     expect(p.textContent).toBe("Original sentence")
+    expect(p.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE)).toBe(false)
   })
 
   it("does not remove originals when cleanup ran while translation was in flight", async () => {
@@ -191,8 +197,11 @@ describe("translationOnly node-identity restore (#1846)", () => {
   })
 
   it("returns nothing and leaves the DOM alone when the host removed the wrapper", async () => {
+    // Structural content so the plain-text mock forces the wrapper fallback
     const p = document.createElement("p")
-    p.textContent = "Original sentence"
+    const bold = document.createElement("b")
+    bold.textContent = "Bold lead"
+    p.append(bold, document.createTextNode(" tail text"))
     document.body.append(p)
 
     await translateNodeTranslationOnlyMode([p], "walk-1", DEFAULT_CONFIG)
@@ -228,6 +237,100 @@ describe("translationOnly node-identity restore (#1846)", () => {
 
     expect(p.textContent).toBe("Original sentence")
     expect([...p.childNodes].filter((n) => n === originalText).length).toBe(1)
+  })
+
+  it("swaps a single-text paragraph in place, preserving node identity", async () => {
+    const p = document.createElement("p")
+    p.textContent = "Original sentence"
+    const originalText = p.firstChild as Text
+    document.body.append(p)
+
+    await translateNodeTranslationOnlyMode([p], "walk-1", DEFAULT_CONFIG)
+    flushBatchedOperations()
+
+    expect(getWrappers().length).toBe(0)
+    expect(p.firstChild).toBe(originalText)
+    expect(originalText.data).toBe("中文译文")
+    expect(p.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE)).toBe(true)
+
+    removeAllTranslatedWrapperNodes(document)
+    flushBatchedOperations()
+    expect(p.firstChild).toBe(originalText)
+    expect(originalText.data).toBe("Original sentence")
+    expect(p.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE)).toBe(false)
+  })
+
+  it("guarded restore never clobbers text the framework rewrote after the swap", async () => {
+    const p = document.createElement("p")
+    p.textContent = "Original sentence"
+    const originalText = p.firstChild as Text
+    document.body.append(p)
+
+    await translateNodeTranslationOnlyMode([p], "walk-1", DEFAULT_CONFIG)
+    flushBatchedOperations()
+    expect(originalText.data).toBe("中文译文")
+
+    // Framework re-render rewrites the swapped node with fresh host content
+    originalText.data = "Fresh host content"
+
+    removeAllTranslatedWrapperNodes(document)
+    flushBatchedOperations()
+
+    expect(originalText.data).toBe("Fresh host content")
+    expect(p.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE)).toBe(false)
+  })
+
+  it("drops the translation when the host mutated the run while the request was in flight", async () => {
+    const p = document.createElement("p")
+    p.textContent = "Original sentence"
+    const originalText = p.firstChild as Text
+    document.body.append(p)
+
+    let resolveTranslation!: (value: string) => void
+    mockTranslateTextForPage.mockReturnValue(
+      new Promise<string>((resolve) => {
+        resolveTranslation = resolve
+      }),
+    )
+
+    const translation = translateNodeTranslationOnlyMode([p], "walk-1", DEFAULT_CONFIG)
+    // Wait until the request is actually in flight (snapshot already taken),
+    // then let the host rewrite the text before the response lands
+    await vi.waitFor(() => expect(mockTranslateTextForPage).toHaveBeenCalled())
+    originalText.data = "Host changed this mid-flight"
+
+    resolveTranslation("中文译文")
+    await translation
+    flushBatchedOperations()
+
+    expect(originalText.data).toBe("Host changed this mid-flight")
+    expect(getWrappers().length).toBe(0)
+    expect(p.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE)).toBe(false)
+  })
+
+  it("swaps translated human-visible attributes and restores them guardedly", async () => {
+    mockTranslateTextForPage.mockResolvedValue('前缀 <a href="/x" title="城市">链接</a> 后缀')
+    const p = document.createElement("p")
+    const link = document.createElement("a")
+    link.setAttribute("href", "/x")
+    link.setAttribute("title", "City")
+    link.textContent = "link"
+    p.append(document.createTextNode("prefix "), link, document.createTextNode(" suffix"))
+    document.body.append(p)
+
+    await translateNodeTranslationOnlyMode([p], "walk-1", DEFAULT_CONFIG)
+    flushBatchedOperations()
+
+    expect(getWrappers().length).toBe(0)
+    expect(p.children[0]).toBe(link)
+    expect(link.getAttribute("title")).toBe("城市")
+    expect(link.textContent).toBe("链接")
+
+    removeAllTranslatedWrapperNodes(document)
+    flushBatchedOperations()
+    expect(link.getAttribute("title")).toBe("City")
+    expect(link.textContent).toBe("link")
+    expect(p.textContent).toBe("prefix link suffix")
   })
 
   it("keeps originals when the provider returns an empty translation", async () => {

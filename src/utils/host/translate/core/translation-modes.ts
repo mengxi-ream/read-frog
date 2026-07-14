@@ -8,6 +8,7 @@ import {
   NOTRANSLATE_CLASS,
   TRANSLATION_ERROR_CONTAINER_CLASS,
   TRANSLATION_MODE_ATTRIBUTE,
+  TRANSLATION_ONLY_ATTRIBUTE,
   VIRTUAL_PARAGRAPH_ATTRIBUTE,
   WALKED_ATTRIBUTE,
 } from "../../../constants/dom-labels"
@@ -22,9 +23,16 @@ import {
   dropVirtualParagraphWrapper,
   removeOrphanVirtualParagraphWrappers,
   removeTranslatedWrapperWithRestore,
+  restoreTranslationOnlySwapsForAnchor,
 } from "../dom/translation-cleanup"
 import { protectTranslationHtmlAttributes } from "../dom/translation-html-attributes"
 import { insertTranslatedNodeIntoWrapper } from "../dom/translation-insertion"
+import {
+  applyInPlaceTextSwap,
+  planInPlaceTextSwap,
+  snapshotSourceTextNodes,
+  verifySourceSnapshot,
+} from "../dom/translation-text-swap"
 import { findPreviousTranslatedWrapperInside } from "../dom/translation-wrapper"
 import { insertVirtualParagraphWrappers } from "../dom/virtual-paragraph-insertion"
 import { shouldFilterSmallParagraph } from "../filter-small-paragraph"
@@ -39,6 +47,7 @@ import {
   attachBilingualTranslationWrapper,
   collectSourceTextExcludingWrappers,
   getBilingualTranslationStateForSource,
+  getTranslationOnlyAnchorState,
   getVirtualParagraphGroupForSource,
   isBilingualTranslationStateCurrent,
   isVirtualParagraphGroupCurrent,
@@ -590,6 +599,14 @@ export async function translateNodeTranslationOnlyMode(
       return
     }
 
+    // An in-place swap leaves no wrapper — the anchor marker is the handle.
+    // Restore BEFORE the filter/language checks below so they (and a
+    // retranslation) see original text, not the previous translation.
+    const swapAnchor = parentNode.closest<HTMLElement>(`[${TRANSLATION_ONLY_ATTRIBUTE}]`)
+    if (swapAnchor && restoreTranslationOnlySwapsForAnchor(swapAnchor, transNodes) && toggle) {
+      return
+    }
+
     const innerTextContent = transNodes.map((node) => extractTextContent(node, config)).join("")
     if (!innerTextContent.trim() || isNumericContent(innerTextContent)) return
 
@@ -603,6 +620,11 @@ export async function translateNodeTranslationOnlyMode(
     const protectedHtml = protectTranslationHtmlAttributes(transNodes, ownerDoc)
     const textContent = protectedHtml.sourceHtml
     if (!textContent) return
+
+    // Taken before the provider request; the response handler compares against
+    // it to detect host mutations that happened while the request was in
+    // flight (never swap over content the host has since rewritten).
+    const sourceSnapshot = snapshotSourceTextNodes(transNodes)
 
     const translatedWrapperNode = ownerDoc.createElement("span")
     translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
@@ -704,6 +726,26 @@ export async function translateNodeTranslationOnlyMode(
       return
     }
 
+    // Preferred strategy: swap the translation into the site's OWN text nodes,
+    // leaving element identity (framework fibers, listeners) untouched. The
+    // wrapper was only the spinner vehicle and is removed.
+    const swapPlan = planInPlaceTextSwap(transNodes, translatedText, ownerDoc)
+    if (swapPlan) {
+      batchDOMOperation(() => {
+        // Wrapper gone: a global cleanup ran while the provider call was in
+        // flight, or the host re-rendered the region — leave originals alone.
+        if (!translatedWrapperNode.isConnected) return
+        markExtensionDrivenNodeRemoval(translatedWrapperNode)
+        translatedWrapperNode.remove()
+        // Host mutated the run mid-flight: the translation is stale, drop it.
+        if (!verifySourceSnapshot(transNodes, sourceSnapshot)) return
+        applyInPlaceTextSwap(swapPlan, parentNode, walkId, config, getTranslationOnlyAnchorState)
+      })
+      return
+    }
+
+    // Fallback strategy: render into the wrapper and displace the originals,
+    // retaining the node objects so restore can re-insert the same nodes (#1846).
     translatedWrapperNode.innerHTML = translatedText
 
     // Batch final DOM mutations to reduce layout thrashing
@@ -717,8 +759,6 @@ export async function translateNodeTranslationOnlyMode(
       const lastChildNode = allChildNodes.at(-1)!
       lastChildNode.parentNode?.insertBefore(translatedWrapperNode, lastChildNode.nextSibling)
 
-      // Displace the originals, retaining the node objects so restore can
-      // re-insert the same nodes (#1846)
       registerTranslationOnlyOriginals(translatedWrapperNode, allChildNodes)
       allChildNodes.forEach((childNode) => childNode.remove())
     })

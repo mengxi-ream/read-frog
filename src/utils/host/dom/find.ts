@@ -126,6 +126,51 @@ export function deepQueryTopLevelSelector(
   return result
 }
 
+/**
+ * Collect EVERY matching element under the root (shadow roots included),
+ * without stopping at the first match the way deepQueryTopLevelSelector does —
+ * nested matches (e.g. in-place-swap anchors inside each other) must all be
+ * returned.
+ */
+export function deepQueryAllSelector(
+  element: HTMLElement | ShadowRoot | Document,
+  selectorFn: (element: HTMLElement) => boolean,
+): HTMLElement[] {
+  if (element instanceof Document) {
+    return element.body ? deepQueryAllSelector(element.body, selectorFn) : []
+  }
+
+  const result: HTMLElement[] = []
+  if (element instanceof ShadowRoot) {
+    for (const child of element.children) {
+      if (isHTMLElement(child)) {
+        result.push(...deepQueryAllSelector(child, selectorFn))
+      }
+    }
+    return result
+  }
+
+  if (selectorFn(element)) {
+    result.push(element)
+  }
+
+  if (element.shadowRoot) {
+    for (const child of element.shadowRoot.children) {
+      if (isHTMLElement(child)) {
+        result.push(...deepQueryAllSelector(child, selectorFn))
+      }
+    }
+  }
+
+  for (const child of element.children) {
+    if (isHTMLElement(child)) {
+      result.push(...deepQueryAllSelector(child, selectorFn))
+    }
+  }
+
+  return result
+}
+
 export function unwrapDeepestOnlyHTMLChild(element: HTMLElement, config: Config) {
   let currentElement = element
   while (currentElement) {

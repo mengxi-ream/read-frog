@@ -22,6 +22,7 @@ import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
 import {
   findStaleBilingualLayoutSource,
+  wasCharacterDataChangeExtensionDriven,
   wasNodeRemovedByExtension,
 } from "@/utils/host/translate/core/translation-state"
 import {
@@ -625,6 +626,11 @@ export class PageTranslationManager implements IPageTranslationManager {
     // Wrapper classes/styles are set before insertion and data-read-frog-*
     // labels are not observed, so attribute records are never self-caused.
     if (record.type === "attributes") return false
+    // In-place swaps/restores write the site's own text nodes (no wrapper
+    // ancestor); classify by the exact value the extension last wrote.
+    if (record.type === "characterData" && wasCharacterDataChangeExtensionDriven(record.target)) {
+      return true
+    }
     const targetElement = isHTMLElement(record.target) ? record.target : record.target.parentElement
     if (targetElement?.closest(`.${CONTENT_WRAPPER_CLASS}`)) return true
     if (record.type !== "childList") return false

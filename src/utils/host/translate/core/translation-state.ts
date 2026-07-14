@@ -62,6 +62,72 @@ export function takeTranslationOnlyOriginals(wrapper: HTMLElement): ChildNode[] 
   return nodes
 }
 
+// ---- In-place text swap state (translationOnly preferred strategy) ----
+// A successful swap leaves NO wrapper in the DOM: the site's own text nodes
+// hold the translated values. The anchor element (the swapped run's parent)
+// carries TRANSLATION_ONLY_ATTRIBUTE as the queryable handle and this WeakMap
+// holds the restore payload.
+
+export interface TranslationOnlySwapItem {
+  node: Text
+  originalValue: string
+  translatedValue: string
+}
+
+// Human-visible attributes the provider translated (title, alt, …) — swapped
+// on the source element alongside its text, restored with the same guard.
+export interface TranslationOnlySwapAttributeItem {
+  element: Element
+  name: string
+  originalValue: string | null
+  translatedValue: string
+}
+
+export interface TranslationOnlySwapRecord {
+  walkId: string
+  items: TranslationOnlySwapItem[]
+  attributeItems: TranslationOnlySwapAttributeItem[]
+}
+
+export interface TranslationOnlyAnchorState {
+  anchor: HTMLElement
+  // Attribute values before we touched the anchor (dir/lang/marker), restored
+  // guardedly when the last swap is undone.
+  attributeAdjustments: { name: string; previousValue: string | null }[]
+  swaps: TranslationOnlySwapRecord[]
+}
+
+const translationOnlyAnchorStates = new WeakMap<HTMLElement, TranslationOnlyAnchorState>()
+
+export function getTranslationOnlyAnchorState(
+  anchor: HTMLElement,
+): TranslationOnlyAnchorState | undefined {
+  return translationOnlyAnchorStates.get(anchor)
+}
+
+export function registerTranslationOnlyAnchorState(state: TranslationOnlyAnchorState): void {
+  translationOnlyAnchorStates.set(state.anchor, state)
+}
+
+export function unregisterTranslationOnlyAnchorState(anchor: HTMLElement): void {
+  translationOnlyAnchorStates.delete(anchor)
+}
+
+// Extension-written text-node values, so the mutation observer can classify
+// characterData records from in-place swaps/restores as self-inflicted. Value
+// comparison rather than membership: a later SITE write to the same node must
+// still count as a host mutation.
+const extensionDrivenCharacterData = new WeakMap<Node, string>()
+
+export function markExtensionDrivenCharacterData(node: Node, writtenValue: string): void {
+  extensionDrivenCharacterData.set(node, writtenValue)
+}
+
+export function wasCharacterDataChangeExtensionDriven(node: Node): boolean {
+  const written = extensionDrivenCharacterData.get(node)
+  return written !== undefined && written === (node as CharacterData).data
+}
+
 const virtualParagraphGroupsBySource = new WeakMap<HTMLElement, VirtualParagraphGroup>()
 const virtualParagraphGroupsByWrapper = new WeakMap<HTMLElement, VirtualParagraphGroup>()
 const bilingualTranslationsBySource = new WeakMap<HTMLElement, BilingualTranslationState>()
