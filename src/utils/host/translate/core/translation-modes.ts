@@ -17,7 +17,11 @@ import { isBlockTransNode, isHTMLElement, isTextNode, isTransNode } from "../../
 import { unwrapDeepestOnlyHTMLChild } from "../../dom/find"
 import { getOwnerDocument } from "../../dom/node"
 import { extractTextContent } from "../../dom/traversal"
-import { buildVirtualParagraphPlan, type VirtualParagraphUnit } from "../dom/paragraph-segmentation"
+import {
+  buildVirtualParagraphPlan,
+  moveParagraphInsertionBoundaryAfterTrailingInlineImages,
+  type VirtualParagraphUnit,
+} from "../dom/paragraph-segmentation"
 import {
   disposeVirtualParagraphGroup,
   dropTranslationOnlySwapRecordsForNodes,
@@ -481,7 +485,16 @@ export async function translateNodesBilingualMode(
       config,
     )
 
-    if (isTextNode(insertionTarget) || transNodes.length > 1) {
+    if (transNodes.length === 1 && isHTMLElement(layoutSource) && isHTMLElement(insertionTarget)) {
+      const insertionBoundary = moveParagraphInsertionBoundaryAfterTrailingInlineImages(
+        { container: insertionTarget, offset: insertionTarget.childNodes.length },
+        layoutSource,
+      )
+      insertionBoundary.container.insertBefore(
+        translatedWrapperNode,
+        insertionBoundary.container.childNodes[insertionBoundary.offset] ?? null,
+      )
+    } else if (isTextNode(insertionTarget) || transNodes.length > 1) {
       insertionTarget.parentNode?.insertBefore(translatedWrapperNode, insertionTarget.nextSibling)
     } else {
       insertionTarget.appendChild(translatedWrapperNode)
