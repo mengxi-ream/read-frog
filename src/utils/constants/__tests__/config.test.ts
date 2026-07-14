@@ -61,6 +61,7 @@ describe("dEFAULT_CONFIG", () => {
       "atlascloud-default",
     ])
     expect(DEFAULT_CONFIG.translate.providerId).toBe("microsoft-translate-default")
+    expect(DEFAULT_CONFIG.translate.page.range).toBe("main")
     expect(DEFAULT_CONFIG.selectionToolbar.features.translate.providerId).toBe(
       "microsoft-translate-default",
     )

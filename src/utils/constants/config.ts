@@ -96,7 +96,7 @@ export const DEFAULT_CONFIG: Config = {
       hotkey: "control",
     },
     page: {
-      range: "all",
+      range: "main",
       autoTranslatePatterns: ["news.ycombinator.com"],
       neverAutoTranslatePatterns: [],
       autoTranslateLanguages: [],
