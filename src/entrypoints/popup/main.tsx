@@ -32,6 +32,7 @@ import {
   isCurrentSiteInWhitelistAtom,
   isInSiteControlList,
 } from "./atoms/site-control"
+import "@fontsource-variable/onest/index.css"
 import "@/assets/styles/text-small.css"
 import "@/assets/styles/theme.css"
 

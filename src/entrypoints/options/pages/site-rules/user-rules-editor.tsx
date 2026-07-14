@@ -79,6 +79,7 @@ export function UserRulesEditor() {
       id="site-rules-user-rules"
       title={i18n.t("options.siteRules.userRules.title")}
       description={i18n.t("options.siteRules.userRules.description")}
+      className="lg:flex-col lg:[&>div]:basis-auto"
     >
       <div className="flex flex-col gap-3">
         <JSONCodeEditor

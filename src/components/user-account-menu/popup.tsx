@@ -1,14 +1,37 @@
 import { match } from "ts-pattern"
 import { Button } from "@/components/ui/base-ui/button"
-import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/base-ui/dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/base-ui/dropdown-menu"
 import { i18n } from "@/utils/i18n"
 import {
   ACCOUNT_STATE,
   AccountAvatar,
-  AccountDropdownContent,
+  AccountDetails,
+  LogoutMenuItem,
+  WebAppMenuItem,
   openLogIn,
   useUserAccountMenu,
 } from "./shared"
+
+function PopupAccountDropdownContent({
+  account,
+}: {
+  account: ReturnType<typeof useUserAccountMenu>
+}) {
+  return (
+    <DropdownMenuContent align="end" side="bottom" className="min-w-56">
+      <AccountDetails account={account} />
+      <DropdownMenuSeparator />
+      <WebAppMenuItem />
+      <DropdownMenuSeparator />
+      <LogoutMenuItem account={account} />
+    </DropdownMenuContent>
+  )
+}
 
 export function UserAccountMenuPopup() {
   const account = useUserAccountMenu()
@@ -40,7 +63,7 @@ export function UserAccountMenuPopup() {
           {avatar}
           <span className="truncate text-sm font-medium">{displayName}</span>
         </DropdownMenuTrigger>
-        <AccountDropdownContent account={account} align="end" side="bottom" />
+        <PopupAccountDropdownContent account={account} />
       </DropdownMenu>
     ))
     .exhaustive()

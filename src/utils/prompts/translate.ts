@@ -1,9 +1,15 @@
 import type { Config } from "@/types/config/config"
 import type { WebPagePromptContext } from "@/types/content"
 import { getLocalConfig } from "@/utils/config/storage"
+import {
+  HTML_ATTRIBUTE_MARKER,
+  parseHtmlAttributeMarkers,
+} from "@/utils/host/translate/html-attribute-markers"
 import { DEFAULT_CONFIG } from "../constants/config"
 import {
-  DEFAULT_BATCH_TRANSLATE_PROMPT,
+  BATCH_SEPARATOR,
+  DEFAULT_BATCH_TRANSLATE_PROMPT_WITH_SENTINEL,
+  DEFAULT_SENTINEL_TRANSLATE_PROMPT,
   DEFAULT_TRANSLATE_PROMPT,
   DEFAULT_TRANSLATE_SYSTEM_PROMPT,
   getTokenCellText,
@@ -14,6 +20,13 @@ import {
   WEB_SUMMARY,
   WEB_TITLE,
 } from "../constants/prompt"
+
+const HTML_ATTRIBUTE_MARKER_SYSTEM_PROMPT = `## Protected HTML Marker Rules
+These mandatory rules override any conflicting instructions above:
+1. Within each input segment (segments are separated by a standalone ${BATCH_SEPARATOR} line when present), preserve every \`${HTML_ATTRIBUTE_MARKER}\` attribute occurrence and its value exactly once in that segment's output.
+2. Never add, remove, change, duplicate, rename, renumber, or move a marker to another segment.
+3. Keep each marker on its original HTML element.
+4. The HTML element carrying a marker may move within its segment to follow the target-language word order.`
 
 export interface TranslatePromptOptions<TContext = unknown> {
   isBatch?: boolean
@@ -56,11 +69,24 @@ export function getTranslatePromptFromConfig(
     prompt = customPrompt?.prompt ?? DEFAULT_TRANSLATE_PROMPT
   }
 
-  // For batch mode, append batch rules to system prompt
+  // For batch mode, append batch rules to system prompt. The sentinel rule and
+  // the sentinel-bearing format example are appended ONLY here: batch prompts
+  // are built exclusively for the background translation pipeline, whose
+  // results all return through translateTextCore where the sentinel is mapped
+  // — the selection-toolbar streaming path never sees this instruction and can
+  // never render the marker raw.
   if (options?.isBatch) {
     systemPrompt = `${systemPrompt}
 
-${DEFAULT_BATCH_TRANSLATE_PROMPT}`
+${DEFAULT_BATCH_TRANSLATE_PROMPT_WITH_SENTINEL}
+
+${DEFAULT_SENTINEL_TRANSLATE_PROMPT}`
+  }
+
+  if (parseHtmlAttributeMarkers(input).length > 0) {
+    systemPrompt = `${systemPrompt}
+
+${HTML_ATTRIBUTE_MARKER_SYSTEM_PROMPT}`
   }
 
   // Build title and summary replacement values

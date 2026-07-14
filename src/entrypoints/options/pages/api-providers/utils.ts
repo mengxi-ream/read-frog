@@ -1,20 +1,12 @@
 import type { Config } from "@/types/config/config"
 import type { APIProviderConfig, APIProviderTypes } from "@/types/config/provider"
-import { API_PROVIDER_ITEMS, DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
+import {
+  API_PROVIDER_ITEMS,
+  DEFAULT_PROVIDER_CONFIG,
+  getDefaultProviderDescription,
+} from "@/utils/constants/providers"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
-import { i18n } from "@/utils/i18n"
 import { getUniqueName } from "@/utils/name"
-
-/**
- * Resolve a provider's default description in the current interface language at creation
- * time (it is no longer baked into DEFAULT_PROVIDER_CONFIG at module-import, which would
- * freeze the string). Returns undefined for provider types without a description key
- * (the facade returns "" for a missing key).
- */
-function getDefaultProviderDescription(providerType: APIProviderTypes): string | undefined {
-  const description = i18n.t(`options.apiProviders.providers.description.${providerType}` as never)
-  return description || undefined
-}
 
 export async function addProvider(
   providerType: APIProviderTypes,

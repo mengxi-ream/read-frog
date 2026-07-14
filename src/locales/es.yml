@@ -4,6 +4,7 @@ extDescription: Read Frog es una extensión de navegador de código abierto dise
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: Iniciar sesión
+  webApp: Aplicación web
   logout: Cerrar sesión
   logoutError: No se pudo cerrar sesión. Inténtalo de nuevo.
 dataTypes:
@@ -1101,6 +1102,7 @@ action:
   saveToNotebasePendingLogin: Inicia sesión para terminar de guardar
   saveToNotebasePendingLoginDescription: Después de iniciar sesión, Read Frog creará la Notebase y guardará este resultado automáticamente.
   saveToNotebasePendingConnectedLoginDescription: Después de iniciar sesión, Read Frog guardará en la Notebase conectada si es posible. Si esta cuenta no puede usarla, creará una nueva Notebase y guardará este resultado.
+  upgrade: Mejorar plan
   openCustomActions: Abrir Custom AI Actions
   openNotebase: Abrir Notebase
   contextDetailsTitleLabel: Título

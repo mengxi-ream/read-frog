@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { env } from "@/env"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { i18n } from "@/utils/i18n"
@@ -324,6 +325,42 @@ describe("saveToNotebaseButton notebase availability", () => {
     })
   })
 
+  it("shows an upgrade action when creating a Notebase exceeds the note limit", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    vi.mocked(orpcClient.notebase.create).mockRejectedValueOnce(
+      new ORPCError("NOTE_LIMIT_EXCEEDED", { status: 403 }),
+    )
+    renderButton(config, createAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }),
+    )
+
+    await waitFor(() => {
+      expect(toastMock.error).toHaveBeenCalledWith(
+        i18n.t("action.saveToNotebaseLimitExceeded"),
+        expect.objectContaining({
+          action: expect.objectContaining({
+            label: i18n.t("action.upgrade"),
+            onClick: expect.any(Function),
+          }),
+        }),
+      )
+    })
+
+    const toastOptions = toastMock.error.mock.calls[0]?.[1] as
+      | { action?: { onClick?: () => void } }
+      | undefined
+    toastOptions?.action?.onClick?.()
+
+    expect(sendMessage).toHaveBeenCalledWith("openPage", {
+      url: new URL("/pricing", env.WXT_WEBSITE_URL).toString(),
+      active: true,
+    })
+  })
+
   it("marks guide Dictionary Notebase complete after direct create-and-save with guide tracking", async () => {
     const config = cloneConfig(DEFAULT_CONFIG)
     config.betaExperience.enabled = true
@@ -583,7 +620,7 @@ describe("saveToNotebaseButton notebase availability", () => {
     })
   })
 
-  it("shows a note limit toast when the backend rejects the save for quota", async () => {
+  it("shows an upgrade action when the backend rejects the save for quota", async () => {
     const config = cloneConfig(DEFAULT_CONFIG)
     config.betaExperience.enabled = false
     notebaseRowCreateMock.mockRejectedValueOnce(
@@ -594,7 +631,25 @@ describe("saveToNotebaseButton notebase availability", () => {
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
 
     await waitFor(() => {
-      expect(toastMock.error).toHaveBeenCalledWith(i18n.t("action.saveToNotebaseLimitExceeded"))
+      expect(toastMock.error).toHaveBeenCalledWith(
+        i18n.t("action.saveToNotebaseLimitExceeded"),
+        expect.objectContaining({
+          action: expect.objectContaining({
+            label: i18n.t("action.upgrade"),
+            onClick: expect.any(Function),
+          }),
+        }),
+      )
+    })
+
+    const toastOptions = toastMock.error.mock.calls[0]?.[1] as
+      | { action?: { onClick?: () => void } }
+      | undefined
+    toastOptions?.action?.onClick?.()
+
+    expect(sendMessage).toHaveBeenCalledWith("openPage", {
+      url: new URL("/pricing", env.WXT_WEBSITE_URL).toString(),
+      active: true,
     })
   })
 

@@ -1,15 +1,35 @@
 import { IconSelector } from "@tabler/icons-react"
 import { match } from "ts-pattern"
-import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/base-ui/dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/base-ui/dropdown-menu"
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/base-ui/sidebar"
 import { i18n } from "@/utils/i18n"
 import {
   ACCOUNT_STATE,
   AccountAvatar,
-  AccountDropdownContent,
+  LogoutMenuItem,
+  WebAppMenuItem,
   openLogIn,
   useUserAccountMenu,
 } from "./shared"
+
+function SidebarAccountDropdownContent({
+  account,
+}: {
+  account: ReturnType<typeof useUserAccountMenu>
+}) {
+  return (
+    <DropdownMenuContent align="start" side="bottom" className="min-w-56">
+      <WebAppMenuItem />
+      <DropdownMenuSeparator />
+      <LogoutMenuItem account={account} />
+    </DropdownMenuContent>
+  )
+}
 
 export function UserAccountMenuSidebar() {
   const account = useUserAccountMenu()
@@ -66,7 +86,7 @@ export function UserAccountMenuSidebar() {
               </div>
               <IconSelector aria-hidden className="ml-auto size-4" />
             </DropdownMenuTrigger>
-            <AccountDropdownContent account={account} align="start" side="bottom" />
+            <SidebarAccountDropdownContent account={account} />
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>

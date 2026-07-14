@@ -7,7 +7,11 @@ import type {
 } from "@/types/background-generate-text"
 import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
-import type { BatchQueueConfig, RequestQueueConfig } from "@/types/config/translate"
+import type {
+  BatchQueueConfig,
+  RequestQueueConfig,
+  TranslationTextFormat,
+} from "@/types/config/translate"
 import type {
   EdgeTTSHealthStatus,
   EdgeTTSSynthesizeRequest,
@@ -91,6 +95,7 @@ interface ProtocolMap {
     providerConfig: ProviderConfig
     scheduleAt: number
     hash: string
+    textFormat?: TranslationTextFormat
     webTitle?: string | null
     webDescription?: string | null
     webContent?: string | null

@@ -21,7 +21,7 @@ export async function aiTranslate<TContext>(
   targetLangName: string,
   providerConfig: LLMProviderConfig,
   promptResolver: PromptResolver<TContext>,
-  options?: { isBatch?: boolean; context?: TContext },
+  options?: { isBatch?: boolean; context?: TContext; signal?: AbortSignal },
 ) {
   const {
     id: providerId,
@@ -50,6 +50,7 @@ export async function aiTranslate<TContext>(
       reasoning,
       temperature,
       providerOptions,
+      abortSignal: options?.signal,
       maxRetries: 0, // Disable SDK built-in retries, let RequestQueue/BatchQueue handle it
     })
 

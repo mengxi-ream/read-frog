@@ -1,11 +1,13 @@
 import type { LangCodeISO6393, LangLevel } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
+import type { TranslationTextFormat } from "@/types/config/translate"
 import type { WebPagePromptContext } from "@/types/content"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { toast } from "sonner"
 import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
 import { getProviderConfigById } from "@/utils/config/helpers"
+import { isNoTranslationSentinel } from "@/utils/constants/prompt"
 import { detectLanguage } from "@/utils/content/language"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
@@ -72,6 +74,7 @@ async function buildWebPageHashComponents(
   providerConfig: ProviderConfig,
   partialLangConfig: { sourceCode: LangCodeISO6393 | "auto"; targetCode: LangCodeISO6393 },
   enableAIContentAware: boolean,
+  textFormat: TranslationTextFormat,
   webPageContext?: WebPagePromptContext,
 ): Promise<string[]> {
   const preparedText = prepareTranslationText(text)
@@ -84,6 +87,10 @@ async function buildWebPageHashComponents(
   ]
 
   if (!isLLMProviderConfig(providerConfig)) {
+    // The provider request depends on the text format (escaping / textType), so
+    // cache entries must too. This component also orphans entries cached before
+    // the format-aware pipeline existed, which could hold corrupted output.
+    hashComponents.push(`textFormat:${textFormat}`)
     return hashComponents
   }
 
@@ -127,6 +134,7 @@ export interface TranslateTextOptions {
   enableAIContentAware?: boolean
   extraHashTags?: string[]
   webPageContext?: WebPagePromptContext
+  textFormat?: TranslationTextFormat
 }
 
 /**
@@ -141,6 +149,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     enableAIContentAware = false,
     extraHashTags = [],
     webPageContext,
+    textFormat = "plain",
   } = options
 
   const preparedText = prepareTranslationText(text)
@@ -155,23 +164,31 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     providerConfig,
     { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
     enableAIContentAware,
+    textFormat,
     normalizedWebPageContext,
   )
 
   // Add extra hash tags for cache differentiation
   hashComponents.push(...extraHashTags)
 
-  return await sendMessage("enqueueTranslateRequest", {
+  const result = await sendMessage("enqueueTranslateRequest", {
     text: preparedText,
     langConfig,
     providerConfig,
     scheduleAt: Date.now(),
     hash: Sha256Hex(...hashComponents),
+    textFormat,
     webTitle: normalizedWebPageContext?.webTitle,
     webDescription: normalizedWebPageContext?.webDescription,
     webContent: normalizedWebPageContext?.webContent,
     webSummary: normalizedWebPageContext?.webSummary,
   })
+  // The sentinel must be mapped here and only here: every batch-pipeline
+  // consumer (page paragraphs, document title, input translation, selection
+  // toolbar standard path) routes through this function and already handles
+  // "" gracefully. Mapping earlier — in the background — would fall out of
+  // the truthy-only cache write and re-hit the provider on every request.
+  return isNoTranslationSentinel(result) ? "" : result
 }
 
 export function validateTranslationConfigAndToast(

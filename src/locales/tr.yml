@@ -4,6 +4,7 @@ extDescription: Read Frog, herhangi bir web sitesinden dilleri derinlemesine ö�
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: Giriş yap
+  webApp: Web uygulaması
   logout: Çıkış yap
   logoutError: Çıkış yapılamadı. Lütfen tekrar deneyin.
 dataTypes:
@@ -986,6 +987,7 @@ action:
   saveToNotebasePendingLogin: Kaydetmeyi tamamlamak için giriş yapın
   saveToNotebasePendingLoginDescription: Giriş yaptıktan sonra Read Frog Notebase'i oluşturur ve bu sonucu otomatik olarak kaydeder.
   saveToNotebasePendingConnectedLoginDescription: Girişten sonra Read Frog mümkünse bağlı Notebase'e kaydeder. Bu hesap onu kullanamazsa yeni bir Notebase oluşturup kaydeder.
+  upgrade: Yükselt
   openCustomActions: Custom AI Actions'ı aç
   openNotebase: Notebase'i aç
   contextDetailsTitleLabel: Başlık

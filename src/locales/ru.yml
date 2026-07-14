@@ -4,6 +4,7 @@ extDescription: Read Frog — расширение браузера с откр�
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: Войти
+  webApp: Веб-приложение
   logout: Выйти
   logoutError: Не удалось выйти. Попробуйте ещё раз.
 dataTypes:
@@ -986,6 +987,7 @@ action:
   saveToNotebasePendingLogin: Войдите, чтобы завершить сохранение
   saveToNotebasePendingLoginDescription: После входа Read Frog автоматически создаст Notebase и сохранит этот результат.
   saveToNotebasePendingConnectedLoginDescription: После входа Read Frog сохранит в подключённую Notebase, если это возможно. Если аккаунт не может её использовать, будет создана новая Notebase.
+  upgrade: Повысить тариф
   openCustomActions: Открыть Custom AI Actions
   openNotebase: Открыть Notebase
   contextDetailsTitleLabel: Заголовок

@@ -7,6 +7,7 @@ import type {
   ProviderSponsorConfig,
 } from "@/types/config/provider"
 import type { Theme } from "@/types/config/theme"
+import { camelCase } from "case-anything"
 import customProviderLogo from "@/assets/providers/custom-provider.svg?url&no-inline"
 import deeplxLogoDark from "@/assets/providers/deeplx-dark.svg?url&no-inline"
 import deeplxLogoLight from "@/assets/providers/deeplx-light.svg?url&no-inline"
@@ -21,8 +22,10 @@ import {
   PURE_API_PROVIDER_TYPES,
   PURE_TRANSLATE_PROVIDERS,
   TRANSLATE_PROVIDER_TYPES,
+  isAPIProviderConfig,
 } from "@/types/config/provider"
 import { omit, pick } from "@/types/utils"
+import { i18n } from "@/utils/i18n"
 import { getLobeIconsCDNUrlFn } from "../logo"
 
 export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
@@ -622,6 +625,30 @@ export const DEFAULT_PROVIDER_CONFIG_LIST: ProvidersConfig = [
   DEFAULT_PROVIDER_CONFIG.deepseek,
   DEFAULT_PROVIDER_CONFIG.atlascloud,
 ]
+
+/** Resolve a provider's default description in the active interface language. */
+export function getDefaultProviderDescription(providerType: APIProviderTypes): string | undefined {
+  const descriptionKey = camelCase(providerType)
+  const description = i18n.t(
+    `options.apiProviders.providers.description.${descriptionKey}` as never,
+  )
+  return description || undefined
+}
+
+/**
+ * Build providers for a fresh config after i18n has initialized, so descriptions are
+ * persisted in the same interface language as providers created from the options page.
+ */
+export function buildDefaultProviderConfigList(): ProvidersConfig {
+  return structuredClone(DEFAULT_PROVIDER_CONFIG_LIST).map((providerConfig) => {
+    if (!isAPIProviderConfig(providerConfig)) {
+      return providerConfig
+    }
+
+    const description = getDefaultProviderDescription(providerConfig.provider)
+    return description ? { ...providerConfig, description } : providerConfig
+  })
+}
 
 export const NON_API_TRANSLATE_PROVIDER_ITEMS = pick(PROVIDER_ITEMS, NON_API_TRANSLATE_PROVIDERS)
 

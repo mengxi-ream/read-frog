@@ -37,6 +37,7 @@ import {
   getNotebaseDetailUrl,
 } from "@/utils/notebase/pending-save"
 import { orpc, orpcClient } from "@/utils/orpc/client"
+import { showNotebaseLimitExceededToast } from "./notebase-limit-toast"
 import { saveToNotebaseDialogAtom } from "./save-to-notebase-dialog-atom"
 
 export function SaveToNotebaseButton({
@@ -123,7 +124,7 @@ export function SaveToNotebaseButton({
         }
 
         if (isORPCNoteLimitExceededError(error)) {
-          toast.error(i18n.t("action.saveToNotebaseLimitExceeded"))
+          showNotebaseLimitExceededToast()
           return
         }
 

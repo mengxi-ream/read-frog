@@ -34,6 +34,7 @@ export function BuiltInRules() {
       id="site-rules-built-in"
       title={i18n.t("options.siteRules.builtIn.title")}
       description={i18n.t("options.siteRules.builtIn.description")}
+      className="lg:flex-col lg:[&>div]:basis-auto"
     >
       <div className="flex flex-col gap-3">
         <Input

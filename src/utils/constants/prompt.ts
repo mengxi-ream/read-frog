@@ -22,6 +22,19 @@ export const TOKENS = WEB_PAGE_PROMPT_TOKENS
 export const BATCH_SEPARATOR = "%%"
 export const BATCH_SEPARATOR_LINE_PATTERN = /\r?\n[ \t]*%%[ \t]*\r?\n/
 
+/**
+ * Marker an LLM outputs instead of a translation when the input paragraph is
+ * already entirely in the target language. Cached RAW (the background cache
+ * only stores truthy results); mapped to "" content-side in translateTextCore.
+ * The literal deliberately looks like a prompt token: replaceTokens only
+ * substitutes the known tokens, so it survives prompt assembly verbatim.
+ */
+export const NO_TRANSLATION_SENTINEL = "{{NO_TRANSLATION_NEEDED}}"
+
+export function isNoTranslationSentinel(text: string): boolean {
+  return text.trim() === NO_TRANSLATION_SENTINEL
+}
+
 export const TARGET_LANGUAGE = WEB_PAGE_PROMPT_TOKENS[0]
 export const INPUT = WEB_PAGE_PROMPT_TOKENS[1]
 export const WEB_TITLE = WEB_PAGE_PROMPT_TOKENS[2]
@@ -108,6 +121,33 @@ Single paragraph content
 ### Single paragraph Output:
 Direct translation without separators
 `
+
+export const DEFAULT_SENTINEL_TRANSLATE_PROMPT = `## Already-translated Input Rule
+If a paragraph of the input is already entirely written in ${getTokenCellText(TARGET_LANGUAGE)} and needs no translation, output the exact marker ${NO_TRANSLATION_SENTINEL} as that paragraph's entire translation instead of repeating the paragraph. Never mix the marker with translated text. If only part of a paragraph is in ${getTokenCellText(TARGET_LANGUAGE)}, translate the whole paragraph normally.`
+
+/**
+ * Batch prompt for the WEBPAGE pipeline only: the format example demonstrates
+ * the no-translation marker in place, which measurably doubles marker usage on
+ * mixed batches versus the rule alone (models imitate examples more reliably
+ * than they follow rules). Subtitles keep DEFAULT_BATCH_TRANSLATE_PROMPT —
+ * their pipeline has no sentinel mapping and must never see the marker.
+ * Derived via replace; the prompt unit tests pin that both anchors matched.
+ */
+export const DEFAULT_BATCH_TRANSLATE_PROMPT_WITH_SENTINEL = DEFAULT_BATCH_TRANSLATE_PROMPT.replace(
+  `Paragraph B
+
+${BATCH_SEPARATOR}`,
+  `Paragraph B (this one is already written in ${getTokenCellText(TARGET_LANGUAGE)})
+
+${BATCH_SEPARATOR}`,
+).replace(
+  `Translation B
+
+${BATCH_SEPARATOR}`,
+  `${NO_TRANSLATION_SENTINEL}
+
+${BATCH_SEPARATOR}`,
+)
 
 /**
  * UI sentinel value for default prompt selection

@@ -1,11 +1,12 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { Config, InputTranslationLang } from "@/types/config/config"
+import type { TranslationTextFormat } from "@/types/config/translate"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { getDetectedCodeFromStorage, getFinalSourceCode } from "@/utils/config/languages"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
-import { detectLanguage } from "@/utils/content/language"
 import { logger } from "@/utils/logger"
 import { getLocalConfig } from "../../config/storage"
+import { shouldSkipAsTargetLanguage } from "./target-language-skip"
 import { prepareTranslationText } from "./text-preparation"
 import {
   MIN_LENGTH_FOR_SKIP_LLM_DETECTION,
@@ -15,20 +16,12 @@ import {
 import { getOrCreateWebPageContext } from "./webpage-context"
 import { getOrGenerateWebPageSummary } from "./webpage-summary"
 
-const MIN_LENGTH_FOR_TARGET_LANG_DETECTION = 50
-
 async function getConfigOrThrow(): Promise<Config> {
   const config = await getLocalConfig()
   if (!config) {
     throw new Error("No global config when translate text")
   }
   return config
-}
-
-async function isTextAlreadyInTargetLanguage(text: string, targetCode: LangCodeISO6393) {
-  if (text.length < MIN_LENGTH_FOR_TARGET_LANG_DETECTION) return false
-  const detected = await detectLanguage(text, { enableLLM: false })
-  return detected === targetCode
 }
 
 async function getWebPagePromptContext(
@@ -70,6 +63,7 @@ async function translateTextUsingPageConfig(
       webContent?: string | null
       webSummary?: string | null
     }
+    textFormat?: TranslationTextFormat
   } = {},
 ): Promise<string> {
   const preparedText = prepareTranslationText(text)
@@ -79,10 +73,9 @@ async function translateTextUsingPageConfig(
 
   const providerConfig = resolveProviderConfig(config, "translate")
 
-  if (
-    config.translate.page.enableTargetLanguageSkip &&
-    (await isTextAlreadyInTargetLanguage(preparedText, config.language.targetCode))
-  ) {
+  // Backstop only: the page modes hoist this check before DOM insertion, but
+  // other callers (e.g. the page title) still rely on it here.
+  if (await shouldSkipAsTargetLanguage(preparedText, config)) {
     logger.info(
       `translateTextForPage: skipping translation because text is already in target language. text: ${preparedText}`,
     )
@@ -112,6 +105,7 @@ async function translateTextUsingPageConfig(
     enableAIContentAware: config.translate.enableAIContentAware,
     extraHashTags: options.extraHashTags,
     webPageContext: options.webPageContext,
+    textFormat: options.textFormat,
   })
 }
 
@@ -119,7 +113,10 @@ async function translateTextUsingPageConfig(
  * Page translation — uses FEATURE_PROVIDER_DEFS['translate'].
  * Includes skip-language logic (page translation only).
  */
-export async function translateTextForPage(text: string): Promise<string> {
+export async function translateTextForPage(
+  text: string,
+  textFormat: TranslationTextFormat = "plain",
+): Promise<string> {
   const config = await getConfigOrThrow()
   const providerConfig = resolveProviderConfig(config, "translate")
   const webPageContext = await getWebPagePromptContext(
@@ -130,6 +127,7 @@ export async function translateTextForPage(text: string): Promise<string> {
 
   return translateTextUsingPageConfig(config, text, {
     webPageContext,
+    textFormat,
   })
 }
 

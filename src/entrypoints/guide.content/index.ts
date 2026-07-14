@@ -9,6 +9,8 @@ import {
   getGuideDictionaryNotebaseState,
   startGuideDictionaryNotebaseTracking,
 } from "@/utils/guide/dictionary-notebase"
+import { resolveGuideTargetLanguage } from "@/utils/guide/target-language"
+import { logger } from "@/utils/logger"
 import { onMessage, sendMessage } from "@/utils/message"
 
 export default defineContentScript({
@@ -58,7 +60,11 @@ export default defineContentScript({
         if (!config) return
 
         if (type === "setTargetLanguage") {
-          const langCodeISO6393 = e.data.langCodeISO6393 ?? "eng"
+          const langCodeISO6393 = resolveGuideTargetLanguage(e.data)
+          if (!langCodeISO6393) {
+            logger.warn("guide setTargetLanguage ignored: missing or invalid language code", e.data)
+            return
+          }
           // If we set storage too early, react of side content has not been mounted yet,
           // so this set storage will not trigger the watch of storage adapter of atom in react of side content
           // i.e. the side content will not be updated with the new config

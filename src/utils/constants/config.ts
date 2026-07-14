@@ -5,7 +5,7 @@ import type { PageTranslateRange } from "@/types/config/translate"
 import { FREE_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
 import { CUSTOM_ACTION_TEMPLATES } from "./custom-action-templates"
 import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from "./prompt"
-import { DEFAULT_PROVIDER_CONFIG_LIST } from "./providers"
+import { buildDefaultProviderConfigList, DEFAULT_PROVIDER_CONFIG_LIST } from "./providers"
 import { DEFAULT_SELECTION_OVERLAY_OPACITY } from "./selection"
 import { DEFAULT_SIDE_CONTENT_WIDTH } from "./side"
 import {
@@ -225,6 +225,7 @@ export const DEFAULT_CONFIG: Config = {
 export function buildFreshDefaultConfig(): Config {
   return {
     ...DEFAULT_CONFIG,
+    providersConfig: buildDefaultProviderConfigList(),
     selectionToolbar: {
       ...DEFAULT_CONFIG.selectionToolbar,
       customActions: buildDefaultCustomActions(),

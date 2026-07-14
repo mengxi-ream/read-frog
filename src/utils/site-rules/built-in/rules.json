@@ -616,7 +616,12 @@
       "[data-testid=list-row-repo-name-and-number]"
     ],
     "forceBlockSelectors.add": ["bdi"],
-    "preserveTextSelectors.add": [".issue-link"],
+    "preserveTextSelectors.add": [
+      ".issue-link",
+      ".markdown-body a[data-hovercard-type='pull_request']",
+      ".markdown-body a[data-hovercard-type='discussion']",
+      ".markdown-body a[data-hovercard-type='commit']"
+    ],
     "injectedCss.add": [
       ".bpDald,.discussion-title {-webkit-line-clamp:unset!important;}",
       "li>div[class*='Box-sc'],div[class*='Box-sc']>button[class*='prc-Token-TokenBase'],li[class*='card-label-module']>button[class*='prc-Token-TokenBase'] {height:unset!important;}",
@@ -2387,10 +2392,11 @@
       ".sort-dropdown .option-label",
       ".display-options .button-label",
       ".actions-buttons.sidebar",
-      ".title-copy"
+      ".title-copy",
+      ".search-result-position"
     ],
     "injectedCss": "#Scholarscope_HighlightOrigin > p font,#Scholarscope_HighlightContent > p font {display: inline!important;}\n#Scholarscope_HighlightOrigin > p font br,#Scholarscope_HighlightContent > p font br {display: none!important;}\n.title-translate {display:block;}\n.read-frog-translated-content-wrapper {content-visibility:auto;}",
-    "forceBlockSelectors.add": [".mixed-citation"]
+    "forceBlockSelectors.add": [".mixed-citation", ".docsum-wrap", "a.docsum-title"]
   },
   {
     "id": "chosun",
@@ -4360,14 +4366,6 @@
     "forceBlockSelectors": ["task-lists"]
   },
   {
-    "id": "readfrog-engoo",
-    "description": "Force block layout for Engoo exercises",
-    "matches": "engoo.com",
-    "forceBlockSelectors": [
-      "#windowexercise-2 > div > div > div.css-ep7xq6 > div > div > div.css-19m2fbm *"
-    ]
-  },
-  {
     "id": "ieeexplore",
     "matches": "ieeexplore.ieee.org",
     "preserveTextSelectors": ["a[ref-type]", ".inline-formula", ".display-formula"]
@@ -4441,5 +4439,18 @@
     "id": "remove_em",
     "matches": ["git-scm.com", "models.com"],
     "preserveTextSelectors.add": ["em"]
+  },
+  {
+    "id": "hltv",
+    "matches": ["hltv.org", "*.hltv.org"],
+    "excludeSelectors": [
+      ".navbar",
+      "[data-nav-item]",
+      "[data-nav-extras]",
+      "[data-navbar-main-menu-item-container]",
+      "[data-navbar-extra-items-container]",
+      ".forum-topbar",
+      ".forum-bottombar"
+    ]
   }
 ]

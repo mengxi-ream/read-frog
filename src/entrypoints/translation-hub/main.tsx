@@ -18,6 +18,7 @@ import { renderPersistentReactRoot } from "@/utils/react-root"
 import { queryClient } from "@/utils/tanstack-query"
 import { applyTheme, getLocalThemeMode, isDarkMode } from "@/utils/theme"
 import App from "./app"
+import "@fontsource-variable/onest/index.css"
 import "@/assets/styles/theme.css"
 
 interface HydrateAtomsProps {

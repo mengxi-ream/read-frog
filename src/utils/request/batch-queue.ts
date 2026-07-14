@@ -34,6 +34,7 @@ export interface BatchOptions<T, R> {
   enableFallbackToIndividual?: boolean
   getBatchKey: (data: T) => string
   getCharacters: (data: T) => number
+  getDedupKey?: (data: T) => string | undefined
   executeBatch: (dataList: T[]) => Promise<R[]>
   executeIndividual?: (data: T) => Promise<R>
   onError?: (
@@ -44,6 +45,7 @@ export interface BatchOptions<T, R> {
 
 export class BatchQueue<T, R> {
   private pendingBatchMap = new Map<string, PendingBatch<T, R>>()
+  private inFlightTasks = new Map<string, Promise<R>>()
   private nextScheduleTimer: NodeJS.Timeout | null = null
   private maxCharactersPerBatch: number
   private maxItemsPerBatch: number
@@ -52,6 +54,7 @@ export class BatchQueue<T, R> {
   private enableFallbackToIndividual: boolean
   private getBatchKey: (data: T) => string
   private getCharacters: (data: T) => number
+  private getDedupKey?: (data: T) => string | undefined
   private executeBatch: (dataList: T[]) => Promise<R[]>
   private executeIndividual?: (data: T) => Promise<R>
   private onError?: (
@@ -67,12 +70,21 @@ export class BatchQueue<T, R> {
     this.enableFallbackToIndividual = config.enableFallbackToIndividual ?? true
     this.getBatchKey = config.getBatchKey
     this.getCharacters = config.getCharacters
+    this.getDedupKey = config.getDedupKey
     this.executeBatch = config.executeBatch
     this.executeIndividual = config.executeIndividual
     this.onError = config.onError
   }
 
   enqueue(data: T): Promise<R> {
+    const dedupKey = this.getDedupKey?.(data)
+    if (dedupKey) {
+      const inFlightPromise = this.inFlightTasks.get(dedupKey)
+      if (inFlightPromise) {
+        return inFlightPromise
+      }
+    }
+
     let resolve!: (value: R) => void
     let reject!: (error: Error) => void
     const promise = new Promise<R>((res, rej) => {
@@ -82,6 +94,16 @@ export class BatchQueue<T, R> {
 
     const batchKey = this.getBatchKey(data)
     const task: BatchTask<T, R> = { data, resolve, reject }
+
+    if (dedupKey) {
+      this.inFlightTasks.set(dedupKey, promise)
+      const release = () => {
+        if (this.inFlightTasks.get(dedupKey) === promise) {
+          this.inFlightTasks.delete(dedupKey)
+        }
+      }
+      promise.then(release, release)
+    }
 
     this.addTaskToBatch(task, batchKey)
     this.schedule()

@@ -13,8 +13,12 @@ import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
 import { microsoftTranslate } from "@/utils/host/translate/api/microsoft"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
+import {
+  assertHtmlAttributeMarkerIntegrity,
+  hasHtmlAttributeMarkerProtocol,
+  isHtmlAttributeMarkerIntegrityError,
+} from "@/utils/host/translate/html-attribute-markers"
 import { normalizePromptContextValue } from "@/utils/host/translate/translate-text"
-import { normalizeTranslationOutput } from "@/utils/host/translate/translation-output-normalization"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
@@ -34,9 +38,31 @@ export function shouldUseBatchQueue(providerConfig: ProviderConfig): boolean {
   return isLLMProviderConfig(providerConfig)
 }
 
+async function getValidatedCachedTranslation(
+  hash: string,
+  sourceText: string,
+  validateHtmlAttributeMarkers: boolean,
+): Promise<string | undefined> {
+  const cached = await db.translationCache.get(hash)
+  if (!cached) return undefined
+  if (!validateHtmlAttributeMarkers) return cached.translation
+
+  try {
+    assertHtmlAttributeMarkerIntegrity(sourceText, cached.translation)
+    return cached.translation
+  } catch (error) {
+    if (!isHtmlAttributeMarkerIntegrityError(error)) throw error
+
+    await db.translationCache.delete(hash)
+    logger.warn("Deleted cached translation with invalid HTML attribute markers", error)
+    return undefined
+  }
+}
+
 export async function executeBatchTranslation<TContext>(
   dataList: TranslateBatchData<TContext>[],
   promptResolver: PromptResolver<TContext>,
+  signal?: AbortSignal,
 ): Promise<string[]> {
   const { langConfig, providerConfig, context } = dataList[0]
   const texts = dataList.map((d) => d.text)
@@ -45,6 +71,7 @@ export async function executeBatchTranslation<TContext>(
   const result = await executeTranslate(batchText, langConfig, providerConfig, promptResolver, {
     isBatch: true,
     context,
+    signal,
   })
   return parseBatchResult(result)
 }
@@ -190,23 +217,27 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
       )
     },
     getCharacters: (data) => data.text.length,
+    getDedupKey: (data) => data.hash,
     executeBatch: async (dataList) => {
       const { providerConfig } = dataList[0]
       const hash = Sha256Hex(...dataList.map((d) => d.hash))
       const earliestScheduleAt = Math.min(...dataList.map((d) => d.scheduleAt))
 
-      const batchThunk = async (): Promise<string[]> => {
+      const batchThunk = async (signal?: AbortSignal): Promise<string[]> => {
         await putBatchRequestRecord({ originalRequestCount: dataList.length, providerConfig })
-        return await executeBatchTranslation(dataList, promptResolver)
+        return await executeBatchTranslation(dataList, promptResolver, signal)
       }
 
       return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash)
     },
     executeIndividual: async (data) => {
       const { text, langConfig, providerConfig, hash, scheduleAt, context } = data
-      const thunk = async () => {
+      const thunk = async (signal?: AbortSignal) => {
         await putBatchRequestRecord({ originalRequestCount: 1, providerConfig })
-        return executeTranslate(text, langConfig, providerConfig, promptResolver, { context })
+        return executeTranslate(text, langConfig, providerConfig, promptResolver, {
+          context,
+          signal,
+        })
       }
       return requestQueue.enqueue(thunk, scheduleAt, hash)
     },
@@ -243,6 +274,7 @@ export async function setUpWebPageTranslationQueue() {
         providerConfig,
         scheduleAt,
         hash,
+        textFormat,
         webTitle,
         webDescription,
         webContent,
@@ -250,12 +282,20 @@ export async function setUpWebPageTranslationQueue() {
       },
     } = message
 
+    const validateHtmlAttributeMarkers =
+      textFormat === "html" && hasHtmlAttributeMarkerProtocol(text)
+    if (validateHtmlAttributeMarkers) {
+      assertHtmlAttributeMarkerIntegrity(text, text)
+    }
+
     // Check cache first
     if (hash) {
-      const cached = await db.translationCache.get(hash)
-      if (cached) {
-        return normalizeTranslationOutput(providerConfig, cached.translation)
-      }
+      const cachedTranslation = await getValidatedCachedTranslation(
+        hash,
+        text,
+        validateHtmlAttributeMarkers,
+      )
+      if (cachedTranslation !== undefined) return cachedTranslation
     }
 
     let result: string
@@ -271,13 +311,20 @@ export async function setUpWebPageTranslationQueue() {
       result = await batchQueue.enqueue(data)
     } else {
       // Create thunk based on type and params
-      const thunk = () => executeTranslate(text, langConfig, providerConfig, getTranslatePrompt)
+      const thunk = (signal?: AbortSignal) =>
+        executeTranslate(text, langConfig, providerConfig, getTranslatePrompt, {
+          textFormat,
+          signal,
+        })
       result = await requestQueue.enqueue(thunk, scheduleAt, hash)
+    }
+
+    if (validateHtmlAttributeMarkers) {
+      assertHtmlAttributeMarkerIntegrity(text, result)
     }
 
     // Cache the translation result if successful
     if (result && hash) {
-      result = normalizeTranslationOutput(providerConfig, result)
       await db.translationCache.put({
         key: hash,
         translation: result,
@@ -341,7 +388,7 @@ export async function setUpSubtitlesTranslationQueue() {
     if (hash) {
       const cached = await db.translationCache.get(hash)
       if (cached) {
-        return normalizeTranslationOutput(providerConfig, cached.translation)
+        return cached.translation
       }
     }
 
@@ -356,13 +403,12 @@ export async function setUpSubtitlesTranslationQueue() {
       const data = { text, langConfig, providerConfig, hash, scheduleAt, context }
       result = await batchQueue.enqueue(data)
     } else {
-      const thunk = () =>
-        executeTranslate(text, langConfig, providerConfig, getSubtitlesTranslatePrompt)
+      const thunk = (signal?: AbortSignal) =>
+        executeTranslate(text, langConfig, providerConfig, getSubtitlesTranslatePrompt, { signal })
       result = await requestQueue.enqueue(thunk, scheduleAt, hash)
     }
 
     if (result && hash) {
-      result = normalizeTranslationOutput(providerConfig, result)
       await db.translationCache.put({
         key: hash,
         translation: result,
@@ -391,7 +437,7 @@ export async function setUpSubtitlesTranslationQueue() {
   onMessage("microsoftBatchTranslate", async (message) => {
     const { texts, fromLang, toLang } = message.data
     const hash = Sha256Hex("ms-batch", fromLang, toLang, ...texts)
-    const thunk = () => microsoftTranslate(texts, fromLang, toLang)
+    const thunk = (signal?: AbortSignal) => microsoftTranslate(texts, fromLang, toLang, { signal })
     return requestQueue.enqueue(thunk, Date.now(), hash)
   })
 

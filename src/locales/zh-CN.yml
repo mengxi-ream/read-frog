@@ -4,6 +4,7 @@ extDescription: 陪读蛙是一款开放源代码的浏览器插件，旨在帮�
 uninstallSurveyUrl: https://tally.so/r/3E9XDL
 account:
   login: 登录
+  webApp: 网页应用
   logout: 退出登录
   logoutError: 退出登录失败，请重试
 dataTypes:
@@ -1101,6 +1102,7 @@ action:
   saveToNotebasePendingLogin: 登录后继续保存
   saveToNotebasePendingLoginDescription: 登录完成后，Read Frog 会自动创建笔记库并保存当前结果。
   saveToNotebasePendingConnectedLoginDescription: 登录完成后，Read Frog 会优先保存到已连接的笔记库；如果当前账号无法使用它，会创建新的笔记库并保存当前结果。
+  upgrade: 升级
   openCustomActions: 打开 Custom AI Actions
   openNotebase: 打开笔记库
   contextDetailsTitleLabel: 标题

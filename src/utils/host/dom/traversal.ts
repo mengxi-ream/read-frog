@@ -15,6 +15,7 @@ import {
   isShallowInlineHTMLElement,
   isSiteRuleForceBlockElement,
   isTextNode,
+  isTranslatedWrapperNode,
   isWithinIncludeScope,
 } from "./filter"
 
@@ -44,6 +45,13 @@ export function extractTextContent(node: TransNode, config: Config): string {
   // if (isDontWalkIntoButTranslateAsChildElement(node)) {
   //   return ''
   // }
+
+  // Extension-injected translation wrappers must never feed back into the
+  // source text (issue #1831 retranslation storm). Host `notranslate` elements
+  // stay included per issue #249 above — only our own wrappers are skipped.
+  if (isTranslatedWrapperNode(node)) {
+    return ""
+  }
 
   if (isDontWalkIntoAndDontTranslateAsChildElement(node, config)) {
     return ""

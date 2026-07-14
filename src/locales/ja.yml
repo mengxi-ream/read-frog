@@ -4,6 +4,7 @@ extDescription: 読書カエルは、あらゆるウェブサイトから言語�
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: ログイン
+  webApp: ウェブアプリ
   logout: ログアウト
   logoutError: ログアウトに失敗しました。もう一度お試しください。
 dataTypes:
@@ -986,6 +987,7 @@ action:
   saveToNotebasePendingLogin: ログイン後に保存を完了
   saveToNotebasePendingLoginDescription: ログイン後、Read Frog が Notebase を作成し、この結果を自動で保存します。
   saveToNotebasePendingConnectedLoginDescription: ログイン後、Read Frog は可能であれば接続済み Notebase に保存します。このアカウントで利用できない場合は、新しい Notebase を作成して保存します。
+  upgrade: アップグレード
   openCustomActions: Custom AI Actions を開く
   openNotebase: Notebase を開く
   contextDetailsTitleLabel: タイトル

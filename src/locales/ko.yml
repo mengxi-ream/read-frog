@@ -4,6 +4,7 @@ extDescription: Read Frog는 모든 웹사이트에서 언어를 깊이 있게 �
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: 로그인
+  webApp: 웹 앱
   logout: 로그아웃
   logoutError: 로그아웃하지 못했습니다. 다시 시도해 주세요.
 dataTypes:
@@ -986,6 +987,7 @@ action:
   saveToNotebasePendingLogin: 로그인 후 저장 완료
   saveToNotebasePendingLoginDescription: 로그인 후 Read Frog가 Notebase를 만들고 이 결과를 자동으로 저장합니다.
   saveToNotebasePendingConnectedLoginDescription: 로그인 후 Read Frog는 가능하면 연결된 Notebase에 저장합니다. 이 계정에서 사용할 수 없으면 새 Notebase를 만들고 저장합니다.
+  upgrade: 업그레이드
   openCustomActions: Custom AI Actions 열기
   openNotebase: Notebase 열기
   contextDetailsTitleLabel: 제목

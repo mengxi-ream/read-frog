@@ -4,6 +4,7 @@ extDescription: Read Frog is an open source browser extension designed to help y
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: Log in
+  webApp: Web app
   logout: Log out
   logoutError: Failed to log out. Please try again.
 dataTypes:
@@ -1101,6 +1102,7 @@ action:
   saveToNotebasePendingLogin: Log in to finish saving
   saveToNotebasePendingLoginDescription: After login, Read Frog will create the Notebase and save this result automatically.
   saveToNotebasePendingConnectedLoginDescription: After login, Read Frog will save to the connected Notebase when possible. If this account cannot use it, Read Frog will create a new Notebase and save this result.
+  upgrade: Upgrade
   openCustomActions: Open Custom AI Actions
   openNotebase: Open Notebase
   contextDetailsTitleLabel: Title
