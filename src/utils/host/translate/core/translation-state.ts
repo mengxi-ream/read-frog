@@ -95,9 +95,65 @@ export interface TranslationOnlyAnchorState {
   // guardedly when the last swap is undone.
   attributeAdjustments: { name: string; previousValue: string | null }[]
   swaps: TranslationOnlySwapRecord[]
+  // Aggregate anchor text right after our last swap/restore write. Deviation
+  // means the HOST changed content inside the anchor (e.g. an expand/"show
+  // more" re-render) and the anchor needs retranslation (mirrors the bilingual
+  // sourceTextContent staleness contract).
+  expectedTextContent: string
 }
 
 const translationOnlyAnchorStates = new WeakMap<HTMLElement, TranslationOnlyAnchorState>()
+
+/**
+ * Aggregate comparable text under an anchor: non-whitespace text nodes,
+ * excluding translated-wrapper subtrees and NESTED anchors (those track their
+ * own expected text).
+ */
+export function collectTranslationOnlyAnchorText(anchor: HTMLElement): string {
+  const parts: string[] = []
+  const visit = (node: Node): void => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const data = (node as Text).data
+      if (data.trim()) parts.push(data)
+      return
+    }
+    if (!(node instanceof HTMLElement)) return
+    if (node !== anchor) {
+      if (isTranslatedWrapperNode(node)) return
+      if (translationOnlyAnchorStates.has(node)) return
+    }
+    for (const child of node.childNodes) visit(child)
+  }
+  visit(anchor)
+  return parts.join("")
+}
+
+export function refreshTranslationOnlyAnchorExpectedText(state: TranslationOnlyAnchorState): void {
+  state.expectedTextContent = collectTranslationOnlyAnchorText(state.anchor)
+}
+
+function isTranslationOnlyAnchorCurrent(state: TranslationOnlyAnchorState): boolean {
+  return (
+    state.anchor.isConnected &&
+    collectTranslationOnlyAnchorText(state.anchor) === state.expectedTextContent
+  )
+}
+
+/**
+ * Nearest ancestor anchor whose content the host changed since our swap —
+ * the translationOnly counterpart of findStaleBilingualLayoutSource. Feeds the
+ * same budgeted retranslation pipeline so expand/"show more" re-renders get
+ * translated instead of staying in the source language.
+ */
+export function findStaleTranslationOnlyAnchor(node: Node): HTMLElement | undefined {
+  let current = node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement
+  while (current) {
+    const state = translationOnlyAnchorStates.get(current)
+    if (state && !isTranslationOnlyAnchorCurrent(state)) return current
+    current = current.parentElement
+  }
+  return undefined
+}
 
 export function getTranslationOnlyAnchorState(
   anchor: HTMLElement,

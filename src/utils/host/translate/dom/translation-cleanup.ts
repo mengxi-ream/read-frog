@@ -23,6 +23,7 @@ import {
   getVirtualParagraphGroupForWrapper,
   markExtensionDrivenCharacterData,
   markExtensionDrivenNodeRemoval,
+  refreshTranslationOnlyAnchorExpectedText,
   takeTranslationOnlyOriginals,
   unregisterBilingualTranslationState,
   unregisterTranslationOnlyAnchorState,
@@ -269,6 +270,8 @@ export function restoreTranslationOnlySwapsForAnchor(
       else anchor.setAttribute(name, previousValue)
     }
     unregisterTranslationOnlyAnchorState(anchor)
+  } else {
+    refreshTranslationOnlyAnchorExpectedText(state)
   }
   return true
 }

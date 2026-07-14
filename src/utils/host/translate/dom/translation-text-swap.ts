@@ -4,6 +4,7 @@ import { CONTENT_WRAPPER_CLASS, TRANSLATION_ONLY_ATTRIBUTE } from "../../../cons
 import { isHTMLElement, isTextNode } from "../../dom/filter"
 import {
   markExtensionDrivenCharacterData,
+  refreshTranslationOnlyAnchorExpectedText,
   registerTranslationOnlyAnchorState,
   type TranslationOnlyAnchorState,
   type TranslationOnlySwapAttributeItem,
@@ -270,6 +271,7 @@ export function applyInPlaceTextSwap(
   const existingState = getAnchorState(anchor)
   if (existingState) {
     existingState.swaps.push({ walkId, items, attributeItems })
+    refreshTranslationOnlyAnchorExpectedText(existingState)
     return
   }
 
@@ -283,9 +285,13 @@ export function applyInPlaceTextSwap(
   ]
   anchor.setAttribute(TRANSLATION_ONLY_ATTRIBUTE, "")
   setTranslationDirAndLang(anchor, config)
-  registerTranslationOnlyAnchorState({
+  const state: TranslationOnlyAnchorState = {
     anchor,
     attributeAdjustments,
     swaps: [{ walkId, items, attributeItems }],
-  })
+    expectedTextContent: "",
+  }
+  registerTranslationOnlyAnchorState(state)
+  // After registration so nested-anchor exclusion sees a consistent registry
+  refreshTranslationOnlyAnchorExpectedText(state)
 }

@@ -12,6 +12,7 @@ import {
   removeTranslatedWrapperWithRestore,
 } from "../../dom/translation-cleanup"
 import { translateNodeTranslationOnlyMode } from "../translation-modes"
+import { findStaleTranslationOnlyAnchor } from "../translation-state"
 
 const { mockShouldFilterSmallParagraph, mockTranslateTextForPage, mockShouldSkipAsTargetLanguage } =
   vi.hoisted(() => ({
@@ -331,6 +332,53 @@ describe("translationOnly node-identity restore (#1846)", () => {
     expect(link.getAttribute("title")).toBe("City")
     expect(link.textContent).toBe("link")
     expect(p.textContent).toBe("prefix link suffix")
+  })
+
+  it("detects host expansion of swapped content and retranslates it (X show-more)", async () => {
+    const p = document.createElement("p")
+    p.textContent = "Short truncated tweet"
+    const textNode = p.firstChild as Text
+    document.body.append(p)
+
+    await translateNodeTranslationOnlyMode([p], "walk-1", DEFAULT_CONFIG)
+    flushBatchedOperations()
+    expect(textNode.data).toBe("中文译文")
+    // Untouched anchor is NOT stale
+    expect(findStaleTranslationOnlyAnchor(textNode)).toBeUndefined()
+
+    // Host expands the tweet ("show more"): rewrites the swapped node
+    textNode.data = "Short truncated tweet plus the long expanded remainder"
+    expect(findStaleTranslationOnlyAnchor(textNode)).toBe(p)
+
+    // What the manager's retranslation pipeline runs for a stale anchor
+    mockTranslateTextForPage.mockResolvedValue("完整中文译文")
+    await translateNodeTranslationOnlyMode([p], "walk-1", DEFAULT_CONFIG)
+    flushBatchedOperations()
+
+    // Provider saw the CURRENT host text, not the old translation
+    const lastRequest = String(mockTranslateTextForPage.mock.calls.at(-1)![0])
+    expect(lastRequest).toContain("expanded remainder")
+    expect(p.textContent).toBe("完整中文译文")
+    expect(findStaleTranslationOnlyAnchor(textNode)).toBeUndefined()
+
+    // Show original returns the host's EXPANDED text, not the stale short one
+    removeAllTranslatedWrapperNodes(document)
+    flushBatchedOperations()
+    expect(p.textContent).toBe("Short truncated tweet plus the long expanded remainder")
+    expect(p.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE)).toBe(false)
+  })
+
+  it("detects text nodes the host appended into a swapped anchor", async () => {
+    const p = document.createElement("p")
+    p.textContent = "Existing sentence"
+    document.body.append(p)
+
+    await translateNodeTranslationOnlyMode([p], "walk-1", DEFAULT_CONFIG)
+    flushBatchedOperations()
+
+    const appended = document.createTextNode(" Newly appended sentence.")
+    p.append(appended)
+    expect(findStaleTranslationOnlyAnchor(appended)).toBe(p)
   })
 
   it("keeps originals when the provider returns an empty translation", async () => {
