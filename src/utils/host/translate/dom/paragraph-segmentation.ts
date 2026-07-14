@@ -15,6 +15,8 @@ const BLANK_LINE_DELIMITER_RE = /(?:\r\n?|\n)[^\S\r\n]*(?:\r\n?|\n)(?:[^\S\r\n]*
 
 const PROTECTED_INSERTION_TAGS = new Set(["A", "BUTTON"])
 
+const HORIZONTAL_WHITESPACE_RE = /^[^\S\r\n]*$/
+
 export interface DOMBoundary {
   container: Node
   offset: number
@@ -358,6 +360,84 @@ export function liftParagraphInsertionBoundary(
   return liftEdgeBoundary(outsideProtected, layoutSource)
 }
 
+function isHorizontalWhitespaceText(node: Node): node is Text {
+  return isTextNode(node) && HORIZONTAL_WHITESPACE_RE.test(node.data)
+}
+
+function isVisibleInlineImageWithAlt(node: Node): node is HTMLImageElement {
+  if (!isHTMLElement(node) || node.tagName !== "IMG" || !node.getAttribute("alt")?.trim()) {
+    return false
+  }
+
+  const computedStyle = window.getComputedStyle(node)
+  return (
+    computedStyle.visibility !== "hidden" &&
+    computedStyle.display.trim().toLowerCase().startsWith("inline")
+  )
+}
+
+/**
+ * Keep textless inline images such as X/Twitter's twemoji with the source
+ * paragraph for layout purposes. Their alt text is intentionally not added to
+ * the translation stream: this only moves the bilingual wrapper boundary.
+ */
+export function moveParagraphInsertionBoundaryAfterTrailingInlineImages(
+  boundary: DOMBoundary,
+  layoutSource: HTMLElement,
+): DOMBoundary {
+  const originalBoundary = boundary
+  let container = boundary.container
+  let offset = boundary.offset
+  let committedBoundary = originalBoundary
+  let sawInlineImage = false
+
+  if (isTextNode(container)) {
+    if (offset !== container.data.length) return originalBoundary
+    const parent = container.parentNode
+    if (!parent) return originalBoundary
+    const index = [...parent.childNodes].indexOf(container)
+    if (index === -1) return originalBoundary
+    container = parent
+    offset = index + 1
+  }
+
+  while (container === layoutSource || layoutSource.contains(container)) {
+    const children = [...container.childNodes]
+    let index = offset
+
+    while (index < children.length) {
+      const child = children[index]
+
+      if (isHorizontalWhitespaceText(child)) {
+        if (sawInlineImage) {
+          committedBoundary = { container, offset: index + 1 }
+        }
+        index += 1
+        continue
+      }
+
+      if (!isVisibleInlineImageWithAlt(child)) {
+        return sawInlineImage ? committedBoundary : originalBoundary
+      }
+
+      sawInlineImage = true
+      committedBoundary = { container, offset: index + 1 }
+      index += 1
+    }
+
+    if (container === layoutSource) break
+
+    const parent = container.parentNode
+    if (!parent) break
+    const indexInParent = [...parent.childNodes].indexOf(container as ChildNode)
+    if (indexInParent === -1) break
+    container = parent
+    offset = indexInParent + 1
+  }
+
+  return sawInlineImage ? committedBoundary : originalBoundary
+}
+
 /**
  * Build virtual bilingual paragraphs from literal blank lines without changing
  * the host DOM. An empty result means the caller should use the existing
@@ -393,11 +473,15 @@ export function buildVirtualParagraphPlan(
     const contentStart = segment.start + (rawText.length - rawText.trimStart().length)
     const contentEnd = segment.end - (rawText.length - rawText.trimEnd().length)
     const boundary = boundaryAtStreamOffset(state.chunks, segment.insertionIndex, layoutSource)
+    const liftedBoundary = liftParagraphInsertionBoundary(boundary, layoutSource, config)
 
     units.push({
       id: units.length,
       text,
-      insertionBoundary: liftParagraphInsertionBoundary(boundary, layoutSource, config),
+      insertionBoundary: moveParagraphInsertionBoundaryAfterTrailingInlineImages(
+        liftedBoundary,
+        layoutSource,
+      ),
       sourceFragments: createSourceFragments(state.chunks, contentStart, contentEnd),
     })
   }

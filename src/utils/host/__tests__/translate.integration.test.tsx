@@ -618,6 +618,137 @@ describe("translate", () => {
         })
       })
 
+      it("keeps trailing twemoji images before a single bilingual translation", async () => {
+        await withHost("x.com", async () => {
+          const sourceText = "Finish the job"
+          const translatedText = "完成这项工作"
+          vi.mocked(translateTextForPage).mockResolvedValue(translatedText)
+          render(
+            <div data-testid="tweetText">
+              <span>{sourceText}</span>{" "}
+              {[
+                ["👍", "thumbs-up.svg"],
+                ["🇺🇸", "flag-us.svg"],
+                ["💪", "flexed-biceps.svg"],
+                ["❤️", "red-heart.svg"],
+              ].map(([alt, src]) => (
+                <img key={alt} alt={alt} src={src} style={{ display: "inline-block" }} />
+              ))}
+            </div>,
+          )
+          const tweet = screen.getByTestId("tweetText")
+          const sourceSpan = tweet.querySelector("span")!
+          const emojiImages = [...tweet.querySelectorAll("img")]
+
+          await removeOrShowPageTranslation("bilingual", true)
+
+          expect(translateTextForPage).toHaveBeenCalledTimes(1)
+          expect(translateTextForPage).toHaveBeenCalledWith(sourceText, "plain")
+          const [wrapper] = expectBlockTranslations(tweet, [translatedText])
+          expect(sourceSpan.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
+          expect([...tweet.children]).toEqual([sourceSpan, ...emojiImages, wrapper])
+
+          await removeOrShowPageTranslation("bilingual", true)
+
+          expect(getTranslationWrappers(tweet)).toHaveLength(0)
+          expect([...tweet.children]).toEqual([sourceSpan, ...emojiImages])
+        })
+      })
+
+      it("keeps trailing twemoji images after translation-only swaps and restore", async () => {
+        await withHost("x.com", async () => {
+          const sourceText = "Finish the job"
+          const translatedText = "完成这项工作"
+          vi.mocked(translateTextForPage).mockResolvedValue(translatedText)
+          render(
+            <div data-testid="tweetText">
+              <span>{sourceText}</span>
+              {[
+                ["👍", "thumbs-up.svg"],
+                ["🇺🇸", "flag-us.svg"],
+                ["💪", "flexed-biceps.svg"],
+                ["❤️", "red-heart.svg"],
+              ].map(([alt, src]) => (
+                <img key={alt} alt={alt} src={src} style={{ display: "inline-block" }} />
+              ))}
+            </div>,
+          )
+          const tweet = screen.getByTestId("tweetText")
+          const sourceSpan = tweet.querySelector("span")!
+          const sourceTextNode = sourceSpan.firstChild
+          const emojiImages = [...tweet.querySelectorAll("img")]
+
+          await removeOrShowPageTranslation("translationOnly", true)
+
+          expect(translateTextForPage).toHaveBeenCalledTimes(1)
+          expect(translateTextForPage).toHaveBeenCalledWith(sourceText, "html")
+          expectInPlaceTranslation(sourceSpan, translatedText)
+          expect(sourceSpan.firstChild).toBe(sourceTextNode)
+          expect([...tweet.children]).toEqual([sourceSpan, ...emojiImages])
+
+          await removeOrShowPageTranslation("translationOnly", true)
+
+          expect(sourceSpan).not.toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+          expect(sourceSpan.firstChild).toBe(sourceTextNode)
+          expect(sourceSpan).toHaveTextContent(sourceText)
+          expect([...tweet.children]).toEqual([sourceSpan, ...emojiImages])
+        })
+      })
+
+      it("places the final virtual translation after trailing twemoji images", async () => {
+        await withHost("x.com", async () => {
+          const paragraphs = [
+            "The U.S. is destroying all Iranian military bases.",
+            "Finish The Job, Remove & Replace This Iranian Tyranny Terror Regime!\nFree Iran\nGod Bless The U.S. Troops & The Israeli Troops",
+          ]
+          const translations = ["【军事基地译文】", "【完成任务与祝福译文】"]
+          const translationByParagraph = new Map(
+            paragraphs.map((paragraph, index) => [paragraph, translations[index]]),
+          )
+          vi.mocked(translateTextForPage).mockImplementation(async (text) => {
+            const translatedText = translationByParagraph.get(text)
+            if (!translatedText) throw new Error(`Unexpected paragraph: ${text}`)
+            return translatedText
+          })
+
+          render(
+            <div data-testid="tweetText" style={{ whiteSpace: "pre-wrap" }}>
+              <img alt="🇺🇸" src="leading-flag.svg" style={{ display: "inline-block" }} />
+              <span>{paragraphs[0]}</span>
+              <img alt="🇺🇸" src="first-paragraph-flag.svg" style={{ display: "inline-block" }} />
+              <span>{`\n\n${paragraphs[1]} `}</span>
+              {[
+                ["✡️", "star-of-david.svg"],
+                ["✝️", "cross.svg"],
+                ["🙏🏻", "folded-hands.svg"],
+                ["♥️", "heart-suit.svg"],
+              ].map(([alt, src]) => (
+                <img key={alt} alt={alt} src={src} style={{ display: "inline-block" }} />
+              ))}
+            </div>,
+          )
+          const tweet = screen.getByTestId("tweetText")
+          const originalChildren = [...tweet.childNodes]
+          const emojiImages = [...tweet.querySelectorAll("img")]
+
+          await removeOrShowPageTranslation("bilingual", true)
+
+          expect(translateTextForPage).toHaveBeenCalledTimes(2)
+          paragraphs.forEach((paragraph, index) => {
+            expect(translateTextForPage).toHaveBeenNthCalledWith(index + 1, paragraph, "plain")
+          })
+          const wrappers = expectBlockTranslations(tweet, translations)
+          expect(wrappers[0].previousSibling).toBe(emojiImages[1])
+          expect(wrappers[1]).toBe(tweet.lastElementChild)
+          expect(wrappers[1].previousSibling).toBe(emojiImages.at(-1))
+
+          await removeOrShowPageTranslation("bilingual", true)
+
+          expect(getTranslationWrappers(tweet)).toHaveLength(0)
+          expect([...tweet.childNodes]).toEqual(originalChildren)
+        })
+      })
+
       it("removes orphan virtual wrappers on toggle without changing source fragments", async () => {
         await withHost("x.com", async () => {
           const sourceText = "First paragraph.\n\nSecond paragraph."

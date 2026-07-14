@@ -6,6 +6,7 @@ import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
 import {
   buildVirtualParagraphUnits,
   liftParagraphInsertionBoundary,
+  moveParagraphInsertionBoundaryAfterTrailingInlineImages,
   type DOMBoundary,
 } from "../paragraph-segmentation"
 
@@ -113,6 +114,118 @@ describe("buildVirtualParagraphUnits", () => {
     expect(units[1].sourceFragments).toEqual([
       { source: secondText, startOffset: 1, endOffset: 7, atomic: false },
     ])
+  })
+
+  it("places the final virtual paragraph after trailing inline images with alt text", () => {
+    const root = createRoot()
+    const source = document.createElement("span")
+    source.textContent = "First paragraph\n\nSecond paragraph"
+    const emojiImages = ["✡️", "✝️", "🙏🏻", "♥️"].map((alt) => {
+      const image = document.createElement("img")
+      image.alt = alt
+      image.style.display = "inline-block"
+      return image
+    })
+    root.append(
+      source,
+      " ",
+      emojiImages[0],
+      "\t",
+      emojiImages[1],
+      "  ",
+      emojiImages[2],
+      emojiImages[3],
+      " ",
+    )
+
+    const units = buildVirtualParagraphUnits(root, DEFAULT_CONFIG)
+
+    expect(units.map((unit) => unit.text)).toEqual(["First paragraph", "Second paragraph"])
+    expect(units[1].insertionBoundary).toEqual({
+      container: root,
+      offset: root.childNodes.length,
+    })
+    expect(
+      units.flatMap((unit) => unit.sourceFragments).map((fragment) => fragment.source),
+    ).not.toEqual(expect.arrayContaining(emojiImages))
+  })
+
+  it.each([
+    {
+      label: "a block image",
+      createTrailingNode: () => {
+        const image = document.createElement("img")
+        image.alt = "♥️"
+        image.style.display = "block"
+        return image
+      },
+    },
+    {
+      label: "an inline image without alt text",
+      createTrailingNode: () => {
+        const image = document.createElement("img")
+        image.style.display = "inline-block"
+        return image
+      },
+    },
+    {
+      label: "an inline SVG",
+      createTrailingNode: () => {
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+        svg.style.display = "inline-block"
+        return svg
+      },
+    },
+    {
+      label: "a hidden inline image",
+      createTrailingNode: () => {
+        const image = document.createElement("img")
+        image.alt = "♥️"
+        image.style.display = "inline-block"
+        image.style.visibility = "hidden"
+        return image
+      },
+    },
+  ])("does not move the final boundary past $label", ({ createTrailingNode }) => {
+    const root = createRoot()
+    const source = document.createElement("span")
+    source.textContent = "First paragraph\n\nSecond paragraph"
+    root.append(source, createTrailingNode())
+
+    const units = buildVirtualParagraphUnits(root, DEFAULT_CONFIG)
+
+    expect(units[1].insertionBoundary).toEqual({ container: root, offset: 1 })
+  })
+
+  it("does not move a paragraph boundary past a trailing control", () => {
+    const root = createRoot()
+    const source = document.createElement("span")
+    source.textContent = "Paragraph"
+    const button = document.createElement("button")
+    button.textContent = "Show more"
+    root.append(source, button)
+
+    expect(
+      moveParagraphInsertionBoundaryAfterTrailingInlineImages(
+        { container: source, offset: source.childNodes.length },
+        root,
+      ),
+    ).toEqual({ container: source, offset: source.childNodes.length })
+  })
+
+  it.each([
+    ["a newline", "\n"],
+    ["real text", "next paragraph"],
+  ])("does not move a paragraph boundary past %s", (_label, trailingText) => {
+    const root = createRoot()
+    const source = document.createElement("span")
+    source.textContent = "Paragraph"
+    root.append(source, document.createTextNode(trailingText))
+    const originalBoundary = { container: source, offset: source.childNodes.length }
+
+    expect(moveParagraphInsertionBoundaryAfterTrailingInlineImages(originalBoundary, root)).toEqual(
+      originalBoundary,
+    )
   })
 
   it("keeps a preserve-text mention atomic inside its surrounding paragraph", () => {
