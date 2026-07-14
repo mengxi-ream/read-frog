@@ -52,11 +52,48 @@ describe("segmentation pipeline", () => {
     await (pipeline as any).runLoop()
 
     const segmentedStarts = (pipeline as any).segmentedRawStarts as Set<number>
-    const furthestSegmented = Math.max(...segmentedStarts)
 
-    // Only the look-ahead window ahead of the current position should be segmented,
-    // not the whole remaining video. The rest waits until playback advances.
-    expect(furthestSegmented).toBeLessThanOrEqual(2 * PROCESS_LOOK_AHEAD_MS)
+    // The window ahead of the playhead is segmented...
+    expect(segmentedStarts.has(0)).toBe(true)
+
+    // ...and nothing beyond it. Chunks are kept a whole PROCESS_LOOK_AHEAD_MS wide and are
+    // only started while their first fragment is within the look-ahead window, so the buffer
+    // reaches at most two windows ahead of the playhead — not the rest of the video.
+    const furthestSegmented = Math.max(...segmentedStarts)
+    expect(furthestSegmented).toBeLessThan(2 * PROCESS_LOOK_AHEAD_MS)
     expect(pipeline.hasUnprocessedChunks()).toBe(true)
+  })
+
+  it("segments the next window once playback advances into it", async () => {
+    const rawFragments = Array.from({ length: 600 }, (_, i) => ({
+      text: `w${i}`,
+      start: i * 1000,
+      end: i * 1000 + 1000,
+    }))
+
+    let currentTime = 0
+    const pipeline = new SegmentationPipeline({
+      rawFragments,
+      getVideoElement: () =>
+        ({
+          get currentTime() {
+            return currentTime
+          },
+        }) as HTMLVideoElement,
+      getSourceLanguage: () => "en",
+      preSegmented: true,
+    })
+
+    await (pipeline as any).runLoop()
+    const afterStart = Math.max(...((pipeline as any).segmentedRawStarts as Set<number>))
+
+    // Playback moves into the buffered region; the pipeline should top the window back up
+    // rather than stay starved behind its own bound.
+    currentTime = 150
+    await (pipeline as any).runLoop()
+    const afterAdvance = Math.max(...((pipeline as any).segmentedRawStarts as Set<number>))
+
+    expect(afterAdvance).toBeGreaterThan(afterStart)
+    expect(afterAdvance).toBeLessThan(150_000 + 2 * PROCESS_LOOK_AHEAD_MS)
   })
 })
