@@ -486,12 +486,20 @@ export async function translateNodesBilingualMode(
       walkId,
       config,
     )
+    let hasTrailingInlineImageAttachment = false
 
     if (transNodes.length === 1 && isHTMLElement(layoutSource) && isHTMLElement(insertionTarget)) {
+      const originalInsertionBoundary = {
+        container: insertionTarget,
+        offset: insertionTarget.childNodes.length,
+      }
       const insertionBoundary = moveParagraphInsertionBoundaryAfterTrailingInlineImages(
-        { container: insertionTarget, offset: insertionTarget.childNodes.length },
+        originalInsertionBoundary,
         layoutSource,
       )
+      hasTrailingInlineImageAttachment =
+        insertionBoundary.container !== originalInsertionBoundary.container ||
+        insertionBoundary.offset !== originalInsertionBoundary.offset
       insertionBoundary.container.insertBefore(
         translatedWrapperNode,
         insertionBoundary.container.childNodes[insertionBoundary.offset] ?? null,
@@ -547,7 +555,7 @@ export async function translateNodesBilingualMode(
       translatedText,
       config.translate.translationNodeStyle,
       config,
-      forceBlockTranslation,
+      forceBlockTranslation || hasTrailingInlineImageAttachment,
     )
     if (!isCurrent()) removeTranslatedWrapperWithRestore(translatedWrapperNode)
   } finally {
