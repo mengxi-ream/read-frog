@@ -34,6 +34,7 @@ const toastMock = vi.hoisted(() => ({
 }))
 
 const notebaseRowCreateMock = vi.hoisted(() => vi.fn<(...args: any[]) => any>())
+const notebaseRowCreateManyMock = vi.hoisted(() => vi.fn<(...args: any[]) => any>())
 const guideTrackingMocks = vi.hoisted(() => ({
   canUseGuideDictionaryNotebaseTracking: vi.fn<(...args: any[]) => any>(),
   getActiveGuideDictionaryNotebaseTrackingForAction: vi.fn<(...args: any[]) => any>(),
@@ -82,6 +83,12 @@ vi.mock("@/utils/orpc/client", () => ({
       create: {
         mutationOptions: (options: unknown) => ({
           mutationFn: notebaseRowCreateMock,
+          ...(options as object),
+        }),
+      },
+      createMany: {
+        mutationOptions: (options: unknown) => ({
+          mutationFn: notebaseRowCreateManyMock,
           ...(options as object),
         }),
       },

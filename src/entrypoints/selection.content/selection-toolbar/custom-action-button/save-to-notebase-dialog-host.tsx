@@ -1,4 +1,7 @@
-import type { SelectionToolbarCustomActionNotebaseAccount } from "@/types/config/selection-toolbar"
+import type {
+  SelectionToolbarCustomAction,
+  SelectionToolbarCustomActionNotebaseAccount,
+} from "@/types/config/selection-toolbar"
 import type { PendingCreateNotebaseSave, PendingNotebaseSave } from "@/utils/notebase/pending-save"
 import { useMutation } from "@tanstack/react-query"
 import { useAtom } from "jotai"
@@ -22,6 +25,7 @@ import { authClient } from "@/utils/auth/auth-client"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
+import { getUniqueName } from "@/utils/name"
 import {
   createNotebaseConnectedAccountSnapshot,
   formatNotebaseConnectedAccountLabel,
@@ -39,6 +43,8 @@ import {
   setPendingNotebaseSave,
 } from "@/utils/notebase/pending-save"
 import { orpcClient } from "@/utils/orpc/client"
+import { trackSaveSuggestionEvent } from "@/utils/save-suggestion/analytics"
+import { recordSaveSuggestionAccepted } from "@/utils/save-suggestion/cooldown"
 import { showNotebaseLimitExceededToast } from "./notebase-limit-toast"
 import { saveToNotebaseDialogAtom } from "./save-to-notebase-dialog-atom"
 
@@ -103,9 +109,47 @@ export function SaveToNotebaseDialogHost() {
   const [isPreparingLogin, setIsPreparingLogin] = useState(false)
   const pendingNotebaseSave = dialogState.open ? dialogState.pendingNotebaseSave : null
   const mode = dialogState.open ? dialogState.mode : null
+  const pendingActionDraft =
+    dialogState.open && dialogState.mode === "create_or_connect"
+      ? dialogState.pendingActionDraft
+      : undefined
+  const analyticsSource = dialogState.open ? dialogState.analyticsSource : undefined
 
   const closeDialog = () => {
     setDialogState({ open: false })
+  }
+
+  const recordSuggestionAcceptedIfNeeded = (actionName?: string) => {
+    if (analyticsSource !== "save_suggestion") {
+      return
+    }
+
+    void recordSaveSuggestionAccepted()
+    trackSaveSuggestionEvent("suggestion_accepted", { actionName })
+  }
+
+  const buildCustomActionsWithDraft = (draft: SelectionToolbarCustomAction) => {
+    const existingNames = new Set(selectionToolbarConfig.customActions.map((item) => item.name))
+    const named = existingNames.has(draft.name)
+      ? { ...draft, name: getUniqueName(draft.name, existingNames) }
+      : draft
+    return [...selectionToolbarConfig.customActions, named]
+  }
+
+  /**
+   * Append a draft action (save suggestion flow) to config. Called at the
+   * dialog confirm — the "real action button" moment — before login redirects,
+   * so the background pending-save processor finds the action afterwards.
+   */
+  const ensureDraftActionInConfig = async (draft: SelectionToolbarCustomAction) => {
+    if (selectionToolbarConfig.customActions.some((item) => item.id === draft.id)) {
+      return
+    }
+
+    await setSelectionToolbarConfig({
+      ...selectionToolbarConfig,
+      customActions: buildCustomActionsWithDraft(draft),
+    })
   }
 
   const createAndSaveMutation = useMutation({
@@ -117,6 +161,7 @@ export function SaveToNotebaseDialogHost() {
     }: {
       pendingNotebaseSave: PendingCreateNotebaseSave
       connectedAccount: SelectionToolbarCustomActionNotebaseAccount
+      pendingActionDraft?: SelectionToolbarCustomAction
     }) => {
       await orpcClient.notebase.create(buildNotebaseCreateInputFromPending(pendingCreateSave))
       return pendingCreateSave
@@ -126,19 +171,30 @@ export function SaveToNotebaseDialogHost() {
         createdPendingSave,
         variables.connectedAccount,
       )
+      const draft = variables.pendingActionDraft
+      const hasAction = selectionToolbarConfig.customActions.some(
+        (item) => item.id === createdPendingSave.actionId,
+      )
+      // Draft path appends the action together with its connection in one
+      // config write, so a failed notebase.create never leaves an orphan action.
+      const nextCustomActions =
+        draft && !hasAction
+          ? buildCustomActionsWithDraft({ ...draft, notebaseConnection: nextConnection })
+          : selectionToolbarConfig.customActions.map((item) =>
+              item.id === createdPendingSave.actionId
+                ? { ...item, notebaseConnection: nextConnection }
+                : item,
+            )
       await setSelectionToolbarConfig({
         ...selectionToolbarConfig,
-        customActions: selectionToolbarConfig.customActions.map((item) =>
-          item.id === createdPendingSave.actionId
-            ? { ...item, notebaseConnection: nextConnection }
-            : item,
-        ),
+        customActions: nextCustomActions,
       })
 
       closeDialog()
       toast.success(i18n.t("action.saveToNotebaseSuccess"), {
         description: createdPendingSave.actionName,
       })
+      recordSuggestionAcceptedIfNeeded(createdPendingSave.actionName)
       await completeGuideDictionaryNotebaseFromPending(createdPendingSave)
 
       try {
@@ -187,7 +243,11 @@ export function SaveToNotebaseDialogHost() {
       return
     }
 
-    createAndSaveMutation.mutate({ pendingNotebaseSave, connectedAccount: currentAccount })
+    createAndSaveMutation.mutate({
+      pendingNotebaseSave,
+      connectedAccount: currentAccount,
+      pendingActionDraft,
+    })
   }
 
   const handleLoginWithPending = async (pendingSave: PendingNotebaseSave) => {
@@ -214,6 +274,7 @@ export function SaveToNotebaseDialogHost() {
             ? i18n.t("action.saveToNotebasePendingConnectedLoginDescription")
             : i18n.t("action.saveToNotebasePendingLoginDescription"),
       })
+      recordSuggestionAcceptedIfNeeded(pendingSave.actionName)
     } catch (error) {
       toast.error(i18n.t("action.saveToNotebaseFailed"), {
         description: error instanceof Error ? error.message : undefined,
@@ -228,6 +289,10 @@ export function SaveToNotebaseDialogHost() {
       return
     }
 
+    if (pendingActionDraft) {
+      await ensureDraftActionInConfig(pendingActionDraft)
+    }
+
     await handleLoginWithPending(pendingNotebaseSave)
   }
 
@@ -239,9 +304,13 @@ export function SaveToNotebaseDialogHost() {
     await handleLoginWithPending(pendingNotebaseSave)
   }
 
-  const handleConnectExisting = () => {
+  const handleConnectExisting = async () => {
     if (!pendingNotebaseSave) {
       return
+    }
+
+    if (pendingActionDraft) {
+      await ensureDraftActionInConfig(pendingActionDraft)
     }
 
     closeDialog()
@@ -326,7 +395,7 @@ export function SaveToNotebaseDialogHost() {
             type="button"
             variant="outline"
             disabled={isCreateFlowBusy}
-            onClick={handleConnectExisting}
+            onClick={() => void handleConnectExisting()}
           >
             {mode === "connected_login_required"
               ? i18n.t("action.saveToNotebaseGoConfigure")

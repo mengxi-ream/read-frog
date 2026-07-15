@@ -36,19 +36,60 @@ const pendingNotebaseSaveBaseSchema = zod.object({
   guideDictionaryNotebaseTracking: guideDictionaryNotebaseTrackingSchema.optional(),
 })
 
-export const pendingCreateNotebaseSaveSchema = pendingNotebaseSaveBaseSchema.extend({
-  kind: zod.literal("create_notebase"),
-  notebaseId: zod.uuid(),
-  rowId: zod.uuid(),
-  columns: zod.array(pendingNotebaseSaveColumnSchema).min(1),
+const pendingNotebaseSaveRowSchema = zod.object({
+  id: zod.uuid(),
   cells: zod.record(zod.string(), zod.unknown()),
 })
 
-export const pendingConnectedNotebaseSaveSchema = pendingNotebaseSaveBaseSchema.extend({
+const currentPendingCreateNotebaseSaveSchema = pendingNotebaseSaveBaseSchema.extend({
+  kind: zod.literal("create_notebase"),
+  notebaseId: zod.uuid(),
+  columns: zod.array(pendingNotebaseSaveColumnSchema).min(1),
+  rows: zod.array(pendingNotebaseSaveRowSchema).min(1),
+})
+
+// Pending saves persisted before the multi-row upgrade carried a single
+// `rowId` + `cells`. The TTL is only 10 minutes, but an in-flight save must
+// survive the extension update, so upgrade the legacy shape on read.
+const legacyPendingCreateNotebaseSaveSchema = pendingNotebaseSaveBaseSchema
+  .extend({
+    kind: zod.literal("create_notebase"),
+    notebaseId: zod.uuid(),
+    columns: zod.array(pendingNotebaseSaveColumnSchema).min(1),
+    rowId: zod.uuid(),
+    cells: zod.record(zod.string(), zod.unknown()),
+  })
+  .transform(({ rowId, cells, ...rest }) => ({
+    ...rest,
+    rows: [{ id: rowId, cells }],
+  }))
+
+export const pendingCreateNotebaseSaveSchema = zod.union([
+  currentPendingCreateNotebaseSaveSchema,
+  legacyPendingCreateNotebaseSaveSchema,
+])
+
+const currentPendingConnectedNotebaseSaveSchema = pendingNotebaseSaveBaseSchema.extend({
   kind: zod.literal("save_to_connected_notebase"),
   connectionSnapshot: selectionToolbarCustomActionNotebaseConnectionSchema,
-  result: zod.record(zod.string(), zod.unknown()),
+  results: zod.array(zod.record(zod.string(), zod.unknown())).min(1),
 })
+
+const legacyPendingConnectedNotebaseSaveSchema = pendingNotebaseSaveBaseSchema
+  .extend({
+    kind: zod.literal("save_to_connected_notebase"),
+    connectionSnapshot: selectionToolbarCustomActionNotebaseConnectionSchema,
+    result: zod.record(zod.string(), zod.unknown()),
+  })
+  .transform(({ result, ...rest }) => ({
+    ...rest,
+    results: [result],
+  }))
+
+export const pendingConnectedNotebaseSaveSchema = zod.union([
+  currentPendingConnectedNotebaseSaveSchema,
+  legacyPendingConnectedNotebaseSaveSchema,
+])
 
 export const pendingNotebaseSaveSchema = zod.union([
   pendingCreateNotebaseSaveSchema,
@@ -91,7 +132,7 @@ export function getOutputSchemaFingerprint(
 
 export function createPendingNotebaseSave(
   action: SelectionToolbarCustomAction,
-  result: Record<string, unknown>,
+  results: Array<Record<string, unknown>>,
   now = Date.now(),
   options?: PendingNotebaseSaveOptions,
 ): PendingCreateNotebaseSave {
@@ -115,18 +156,20 @@ export function createPendingNotebaseSave(
       ? { guideDictionaryNotebaseTracking: options.guideDictionaryNotebaseTracking }
       : {}),
     notebaseId: getRandomUUID(),
-    rowId: getRandomUUID(),
     columns,
-    cells: Object.fromEntries(
-      columns.map((column) => [column.notebaseColumnId, result[column.localFieldName] ?? null]),
-    ),
+    rows: results.map((result) => ({
+      id: getRandomUUID(),
+      cells: Object.fromEntries(
+        columns.map((column) => [column.notebaseColumnId, result[column.localFieldName] ?? null]),
+      ),
+    })),
   }
 }
 
 export function createPendingConnectedNotebaseSave(
   action: SelectionToolbarCustomAction,
   connection: SelectionToolbarCustomActionNotebaseConnection,
-  result: Record<string, unknown>,
+  results: Array<Record<string, unknown>>,
   now = Date.now(),
   options?: PendingNotebaseSaveOptions,
 ): PendingConnectedNotebaseSave {
@@ -142,13 +185,15 @@ export function createPendingConnectedNotebaseSave(
       ? { guideDictionaryNotebaseTracking: options.guideDictionaryNotebaseTracking }
       : {}),
     connectionSnapshot: connection,
-    result,
+    results,
   }
 }
 
 export function buildNotebaseCreateInputFromPending(
   pending: PendingCreateNotebaseSave,
 ): NotebaseCreateInput {
+  const [firstRow] = pending.rows
+
   return {
     id: pending.notebaseId,
     name: pending.actionName,
@@ -161,10 +206,11 @@ export function buildNotebaseCreateInputFromPending(
             ? { type: "number", decimal: 0, format: "number" }
             : { type: "string" },
       })),
-      initialRow: {
-        id: pending.rowId,
-        cells: pending.cells,
-      },
+      // Keep the single-row shape while only one row is saved so the request
+      // stays compatible with backends that predate `initialRows`.
+      ...(pending.rows.length === 1 && firstRow
+        ? { initialRow: firstRow }
+        : { initialRows: pending.rows }),
     },
   }
 }
@@ -346,18 +392,20 @@ export function applyCreatedNotebaseConnectionToConfig(
   }
 }
 
-export function buildConnectedPendingRow(
+export function buildConnectedPendingRows(
   action: SelectionToolbarCustomAction,
   pending: PendingConnectedNotebaseSave,
   schema: NotebaseGetSchemaOutput,
 ) {
-  return buildNotebaseRowCells(
-    {
-      ...action,
-      notebaseConnection: pending.connectionSnapshot,
-    },
-    schema,
-    pending.result,
+  return pending.results.map((result) =>
+    buildNotebaseRowCells(
+      {
+        ...action,
+        notebaseConnection: pending.connectionSnapshot,
+      },
+      schema,
+      result,
+    ),
   )
 }
 

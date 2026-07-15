@@ -88,6 +88,7 @@ function createDeps({
       ),
     createNotebase: vi.fn<(...args: any[]) => any>().mockResolvedValue({ txid: 1 }),
     createRow: vi.fn<(...args: any[]) => any>().mockResolvedValue({ txid: 1 }),
+    createRows: vi.fn<(...args: any[]) => any>().mockResolvedValue({ txid: 1 }),
     listNotebases: vi
       .fn<(...args: any[]) => any>()
       .mockResolvedValue([{ id: "notebase-1", name: "Summarize Notes" }]),
@@ -150,7 +151,7 @@ function createConnectedSchema(): NotebaseGetSchemaOutput {
 describe("notebase pending save processor", () => {
   it("clears schema-changed pending saves without probing auth or calling create", async () => {
     const action = createAction()
-    const pending = createPendingNotebaseSave(action, { summary: "A short summary" }, 1_000)
+    const pending = createPendingNotebaseSave(action, [{ summary: "A short summary" }], 1_000)
     const deps = createDeps({
       pending,
       config: createConfig({
@@ -170,7 +171,7 @@ describe("notebase pending save processor", () => {
 
   it("keeps pending work while logged out and resumes after auth", async () => {
     const action = createAction()
-    const pending = createPendingNotebaseSave(action, { summary: "A short summary" }, 1_000)
+    const pending = createPendingNotebaseSave(action, [{ summary: "A short summary" }], 1_000)
     const loggedOutDeps = createDeps({
       pending,
       config: createConfig(action),
@@ -219,7 +220,7 @@ describe("notebase pending save processor", () => {
       id: "default-dictionary",
       name: "Dictionary",
     }
-    const pending = createPendingNotebaseSave(action, { summary: "A short summary" }, 1_000, {
+    const pending = createPendingNotebaseSave(action, [{ summary: "A short summary" }], 1_000, {
       guideDictionaryNotebaseTracking: {
         id: "tracking-1",
         actionId: "default-dictionary",
@@ -247,7 +248,7 @@ describe("notebase pending save processor", () => {
 
   it("opens the notebase page after duplicate-create recovery succeeds", async () => {
     const action = createAction()
-    const pending = createPendingNotebaseSave(action, { summary: "A short summary" }, 1_000)
+    const pending = createPendingNotebaseSave(action, [{ summary: "A short summary" }], 1_000)
     const deps = createDeps({
       pending,
       config: createConfig(action),
@@ -268,7 +269,7 @@ describe("notebase pending save processor", () => {
     const pending = createPendingConnectedNotebaseSave(
       action,
       action.notebaseConnection!,
-      { summary: "A short summary" },
+      [{ summary: "A short summary" }],
       1_000,
     )
     const deps = createDeps({
@@ -288,10 +289,38 @@ describe("notebase pending save processor", () => {
         },
       },
     })
+    expect(deps.createRows).not.toHaveBeenCalled()
     expect(deps.createNotebase).not.toHaveBeenCalled()
     expect(deps.clearPendingNotebaseSave).toHaveBeenCalledTimes(1)
     expect(deps.openNotebasePage).toHaveBeenCalledWith("notebase-1")
     expect(deps.completeGuideDictionaryNotebase).not.toHaveBeenCalled()
+  })
+
+  it("batch-saves a connected pending save carrying multiple rows via createRows", async () => {
+    const action = createConnectedAction()
+    const pending = createPendingConnectedNotebaseSave(
+      action,
+      action.notebaseConnection!,
+      [{ summary: "First" }, { summary: "Second" }],
+      1_000,
+    )
+    const deps = createDeps({
+      pending,
+      config: createConfig(action),
+      authenticated: true,
+    })
+    deps.getSchema.mockResolvedValueOnce(createConnectedSchema())
+
+    await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+    expect(deps.createRow).not.toHaveBeenCalled()
+    expect(deps.createRows).toHaveBeenCalledTimes(1)
+    expect(deps.createRows).toHaveBeenCalledWith({
+      notebaseId: "notebase-1",
+      rows: [{ cells: { "column-summary": "First" } }, { cells: { "column-summary": "Second" } }],
+    })
+    expect(deps.clearPendingNotebaseSave).toHaveBeenCalledTimes(1)
+    expect(deps.openNotebasePage).toHaveBeenCalledWith("notebase-1")
   })
 
   it("completes the guide Dictionary Notebase flow after connected pending row resume when guide metadata is present", async () => {
@@ -303,7 +332,7 @@ describe("notebase pending save processor", () => {
     const pending = createPendingConnectedNotebaseSave(
       action,
       action.notebaseConnection!,
-      { summary: "A short summary" },
+      [{ summary: "A short summary" }],
       1_000,
       {
         guideDictionaryNotebaseTracking: {
@@ -338,7 +367,7 @@ describe("notebase pending save processor", () => {
     const pending = createPendingConnectedNotebaseSave(
       action,
       action.notebaseConnection!,
-      { summary: "A short summary" },
+      [{ summary: "A short summary" }],
       1_000,
     )
     const deps = createDeps({
@@ -380,7 +409,7 @@ describe("notebase pending save processor", () => {
     const pending = createPendingConnectedNotebaseSave(
       action,
       action.notebaseConnection!,
-      { summary: "A short summary" },
+      [{ summary: "A short summary" }],
       1_000,
       {
         guideDictionaryNotebaseTracking: {
