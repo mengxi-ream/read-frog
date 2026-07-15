@@ -37,9 +37,13 @@ export class TranslatedSubtitlesDownloader {
   private successTimeout: ReturnType<typeof setTimeout> | null = null
 
   constructor(
-    private fetcher: SubtitlesFetcher,
+    private getFetcher: () => SubtitlesFetcher,
     private config: PlatformConfig,
   ) {}
+
+  private get fetcher(): SubtitlesFetcher {
+    return this.getFetcher()
+  }
 
   download = async (): Promise<void> => {
     if (this.isDownloading) {
