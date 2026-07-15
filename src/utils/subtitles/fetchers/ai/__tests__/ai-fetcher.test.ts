@@ -44,6 +44,26 @@ describe("aiSubtitlesFetcher", () => {
     await expect(fetcher.shouldUseSameTrack()).resolves.toBe(true)
   })
 
+  it("shares the in-flight request between concurrent callers for the same video", async () => {
+    let resolveRequest: (value: unknown) => void = () => {}
+    requestAiSubtitles.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveRequest = resolve
+        }),
+    )
+    const fetcher = new AiSubtitlesFetcher(() => contextFor("abc"))
+
+    const first = fetcher.fetch()
+    const second = fetcher.fetch()
+    resolveRequest({ segments: [{ text: "hi", start: 0, end: 100 }], detectedLanguage: "en" })
+    const [r1, r2] = await Promise.all([first, second])
+
+    expect(requestAiSubtitles).toHaveBeenCalledTimes(1)
+    expect(r1).toEqual([{ text: "hi", start: 0, end: 100 }])
+    expect(r2).toBe(r1)
+  })
+
   it("re-fetches when the videoId changes", async () => {
     let videoId = "abc"
     requestAiSubtitles.mockImplementation(async () => ({

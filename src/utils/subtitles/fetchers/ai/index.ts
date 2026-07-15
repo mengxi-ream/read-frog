@@ -10,6 +10,7 @@ export class AiSubtitlesFetcher implements SubtitlesFetcher {
   private sourceLanguage: string = ""
   private cachedVideoId: string | null = null
   private abortController: AbortController | null = null
+  private inFlight: { videoId: string; promise: Promise<SubtitlesFragment[]> } | null = null
 
   constructor(private createAiSubtitlesContext: () => AiSubtitlesContext | null) {}
 
@@ -23,23 +24,38 @@ export class AiSubtitlesFetcher implements SubtitlesFetcher {
       return this.subtitles
     }
 
-    this.abortController?.abort()
-    const controller = new AbortController()
-    this.abortController = controller
-
-    const { segments, detectedLanguage } = await requestAiSubtitles(ctx, {
-      signal: controller.signal,
-    })
-
-    if (this.createAiSubtitlesContext()?.videoId !== ctx.videoId) {
-      throw new DOMException("Aborted", "AbortError")
+    if (this.inFlight?.videoId === ctx.videoId) {
+      return this.inFlight.promise
     }
 
-    this.subtitles = segments
-    this.sourceLanguage = detectedLanguage
-    this.cachedVideoId = ctx.videoId
+    const controller = new AbortController()
+    this.abortController = controller
+    const promise = this.runRequest(ctx, controller.signal)
+    this.inFlight = { videoId: ctx.videoId, promise }
+    return promise
+  }
 
-    return this.subtitles
+  private async runRequest(
+    ctx: AiSubtitlesContext,
+    signal: AbortSignal,
+  ): Promise<SubtitlesFragment[]> {
+    try {
+      const { segments, detectedLanguage } = await requestAiSubtitles(ctx, { signal })
+
+      if (this.createAiSubtitlesContext()?.videoId !== ctx.videoId) {
+        throw new DOMException("Aborted", "AbortError")
+      }
+
+      this.subtitles = segments
+      this.sourceLanguage = detectedLanguage
+      this.cachedVideoId = ctx.videoId
+
+      return this.subtitles
+    } finally {
+      if (this.inFlight?.videoId === ctx.videoId) {
+        this.inFlight = null
+      }
+    }
   }
 
   getSourceLanguage(): string {
@@ -67,5 +83,6 @@ export class AiSubtitlesFetcher implements SubtitlesFetcher {
     this.cachedVideoId = null
     this.abortController?.abort()
     this.abortController = null
+    this.inFlight = null
   }
 }
