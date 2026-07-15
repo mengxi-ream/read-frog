@@ -1028,6 +1028,15 @@ options:
           webTitle: Título de la página web
           webDescription: Descripción de la página web desde los metadatos
           videoSummary: Resumen del video (requiere contexto inteligente de IA)
+    aiQuota:
+      title: Cuota de subtítulos con IA
+      description: Uso mensual de tu cuota de transcripción de subtítulos con IA
+      loginRequired: Inicia sesión para ver tu cuota de subtítulos con IA
+      logIn: Iniciar sesión
+      betaRequired: Los subtítulos con IA están en beta y aún no están habilitados para tu cuenta
+      betaApply: Solicitar acceso
+      loadError: No se pudo cargar tu cuota. Inténtalo de nuevo más tarde.
+      summary: Usados $1 de $2 minutos, quedan $3
   whatsNew:
     title: Novedades
   rateUs:
@@ -1127,6 +1136,9 @@ thinking:
 shortcutKeySelector:
   placeholder: Introduce el atajo
 subtitles:
+  loadingAiSubtitles: Cargando subtítulos con IA…
+  requestAiSubtitles: Solicitar subtítulos con IA (Beta)
+  usingAiSubtitles: Usando subtítulos con IA
   actions:
     downloadTranslated: Descargar subtítulos traducidos
     downloadTranslatedPreparing: Preparando subtítulos, los videos largos pueden tardar más
@@ -1152,6 +1164,8 @@ subtitles:
     aiRateLimited: Demasiadas solicitudes, inténtalo de nuevo más tarde
     aiAuthFailed: Error de autenticación de API; revisa tu clave API
     aiServiceUnavailable: Servicio de traducción temporalmente no disponible
+    aiQuotaExceeded: Cuota mensual de subtítulos con IA agotada
+    aiRequestFailed: Error al solicitar subtítulos con IA, inténtalo de nuevo más tarde
     aiNoResponse: El servicio AI no respondió; se usa el texto original
     translatedExportFailed: No se pudieron generar los subtítulos traducidos
     translatedExportIncomplete: No se pudieron traducir todas las líneas de subtítulos

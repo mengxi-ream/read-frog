@@ -913,6 +913,15 @@ options:
           webTitle: 웹페이지 제목
           webDescription: 페이지 메타데이터의 웹페이지 설명
           videoSummary: 동영상 요약 (AI 스마트 컨텍스트 필요)
+    aiQuota:
+      title: AI 자막 사용량
+      description: 이번 달 AI 자막 전사 사용량 현황
+      loginRequired: 로그인하여 AI 자막 사용량 확인
+      logIn: 로그인
+      betaRequired: AI 자막은 베타 기능이며 아직 계정에 활성화되지 않았습니다
+      betaApply: 사용 신청
+      loadError: 사용량을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.
+      summary: $2분 중 $1분 사용, $3분 남음
   whatsNew:
     title: 새로운 기능
   rateUs:
@@ -1012,6 +1021,9 @@ thinking:
 shortcutKeySelector:
   placeholder: 단축키를 입력해 주세요
 subtitles:
+  loadingAiSubtitles: AI 자막 불러오는 중…
+  requestAiSubtitles: AI 자막 요청 (Beta)
+  usingAiSubtitles: AI 자막 사용 중
   actions:
     downloadTranslated: 번역 자막 다운로드
     downloadTranslatedPreparing: 자막 준비 중, 긴 동영상은 시간이 더 걸릴 수 있습니다
@@ -1037,6 +1049,8 @@ subtitles:
     aiRateLimited: 요청이 너무 많습니다. 나중에 다시 시도해 주세요
     aiAuthFailed: API 인증에 실패했습니다. API 키를 확인해 주세요
     aiServiceUnavailable: 번역 서비스를 일시적으로 사용할 수 없습니다
+    aiQuotaExceeded: 이번 달 AI 자막 사용량을 모두 사용했습니다
+    aiRequestFailed: AI 자막 요청에 실패했습니다. 잠시 후 다시 시도해 주세요
     aiNoResponse: AI 서비스가 응답하지 않았습니다. 원문을 표시합니다
     translatedExportFailed: 번역 자막 생성에 실패했습니다
     translatedExportIncomplete: 모든 자막 줄을 번역하지 못했습니다

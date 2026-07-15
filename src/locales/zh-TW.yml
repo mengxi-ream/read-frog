@@ -1028,6 +1028,15 @@ options:
           webTitle: 網頁標題
           webDescription: 頁面中繼資料的網頁描述
           videoSummary: 影片摘要（需啟用 AI 智慧上下文）
+    aiQuota:
+      title: AI 字幕額度
+      description: 你帳號本月的 AI 字幕轉寫額度使用情況
+      loginRequired: 登入後查看你的 AI 字幕額度
+      logIn: 登入
+      betaRequired: AI 字幕測試中，你的帳號尚未取得使用資格
+      betaApply: 申請資格
+      loadError: 無法載入額度，請稍後重試。
+      summary: 已用 $1 分鐘 / 共 $2 分鐘，剩餘 $3 分鐘
   whatsNew:
     title: 最近更新
   rateUs:
@@ -1127,6 +1136,9 @@ thinking:
 shortcutKeySelector:
   placeholder: 請輸入快速鍵
 subtitles:
+  loadingAiSubtitles: 正在載入 AI 字幕
+  requestAiSubtitles: 請求 AI 字幕（Beta）
+  usingAiSubtitles: 正在使用 AI 字幕
   actions:
     downloadTranslated: 下載翻譯字幕
     downloadTranslatedPreparing: 正在準備字幕，長影片可能需要更久
@@ -1152,6 +1164,8 @@ subtitles:
     aiRateLimited: 請求過於頻繁，請稍後再試
     aiAuthFailed: API 認證失敗，請檢查 API 金鑰
     aiServiceUnavailable: 翻譯服務暫時無法使用
+    aiQuotaExceeded: 本月 AI 字幕額度已用完
+    aiRequestFailed: AI 字幕請求失敗，請稍後重試
     aiNoResponse: AI 服務未回應，使用原文顯示
     translatedExportFailed: 產生翻譯字幕失敗
     translatedExportIncomplete: 未能翻譯所有字幕行

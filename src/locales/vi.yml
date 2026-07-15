@@ -913,6 +913,15 @@ options:
           webTitle: Tiêu đề trang web
           webDescription: Mô tả trang web từ siêu dữ liệu trang
           videoSummary: Tóm tắt video (yêu cầu Ngữ cảnh thông minh AI)
+    aiQuota:
+      title: Hạn mức phụ đề AI
+      description: Mức sử dụng hạn mức chuyển lời phụ đề AI trong tháng của bạn
+      loginRequired: Đăng nhập để xem hạn mức phụ đề AI của bạn
+      logIn: Đăng nhập
+      betaRequired: Phụ đề AI đang ở giai đoạn beta và chưa được bật cho tài khoản của bạn
+      betaApply: Đăng ký sử dụng
+      loadError: Không thể tải hạn mức. Vui lòng thử lại sau.
+      summary: Đã dùng $1 trong $2 phút, còn lại $3
   whatsNew:
     title: Có gì mới
   rateUs:
@@ -1012,6 +1021,9 @@ thinking:
 shortcutKeySelector:
   placeholder: Vui lòng nhập phím tắt
 subtitles:
+  loadingAiSubtitles: Đang tải phụ đề AI…
+  requestAiSubtitles: Yêu cầu phụ đề AI (Beta)
+  usingAiSubtitles: Đang dùng phụ đề AI
   actions:
     downloadTranslated: Tải phụ đề đã dịch
     downloadTranslatedPreparing: Đang chuẩn bị phụ đề, video dài có thể mất nhiều thời gian hơn
@@ -1037,6 +1049,8 @@ subtitles:
     aiRateLimited: Quá nhiều yêu cầu, vui lòng thử lại sau
     aiAuthFailed: Xác thực API thất bại, vui lòng kiểm tra API key của bạn
     aiServiceUnavailable: Dịch vụ dịch thuật tạm thời không khả dụng
+    aiQuotaExceeded: Đã dùng hết hạn mức phụ đề AI trong tháng
+    aiRequestFailed: Yêu cầu phụ đề AI thất bại, vui lòng thử lại sau
     aiNoResponse: Dịch vụ AI không phản hồi, hiển thị văn bản gốc
     translatedExportFailed: Không thể tạo phụ đề đã dịch
     translatedExportIncomplete: Không thể dịch tất cả các dòng phụ đề

@@ -913,6 +913,15 @@ options:
           webTitle: Заголовок веб-страницы
           webDescription: Описание веб-страницы из метаданных
           videoSummary: Краткое содержание видео (требуется умный контекст ИИ)
+    aiQuota:
+      title: Лимит ИИ-субтитров
+      description: Использование вашего месячного лимита транскрипции ИИ-субтитров
+      loginRequired: Войдите, чтобы посмотреть лимит ИИ-субтитров
+      logIn: Войти
+      betaRequired: ИИ-субтитры находятся в бете и пока недоступны для вашего аккаунта
+      betaApply: Подать заявку на доступ
+      loadError: Не удалось загрузить лимит. Повторите попытку позже.
+      summary: Использовано $1 из $2 минут, осталось $3
   whatsNew:
     title: Что нового
   rateUs:
@@ -1012,6 +1021,9 @@ thinking:
 shortcutKeySelector:
   placeholder: Пожалуйста, введите горячую клавишу
 subtitles:
+  loadingAiSubtitles: Загрузка ИИ-субтитров…
+  requestAiSubtitles: Запросить ИИ-субтитры (Beta)
+  usingAiSubtitles: Используются ИИ-субтитры
   actions:
     downloadTranslated: Скачать переведённые субтитры
     downloadTranslatedPreparing: Подготовка субтитров, длинные видео могут занять больше времени
@@ -1037,6 +1049,8 @@ subtitles:
     aiRateLimited: Слишком много запросов, пожалуйста, повторите позже
     aiAuthFailed: Ошибка аутентификации API, проверьте ваш API ключ
     aiServiceUnavailable: Служба перевода временно недоступна
+    aiQuotaExceeded: Месячный лимит ИИ-субтитров исчерпан
+    aiRequestFailed: Не удалось запросить ИИ-субтитры, повторите попытку позже
     aiNoResponse: Служба AI не ответила, отображается оригинальный текст
     translatedExportFailed: Не удалось создать переведённые субтитры
     translatedExportIncomplete: Не удалось перевести все строки субтитров

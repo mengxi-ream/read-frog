@@ -913,6 +913,15 @@ options:
           webTitle: ウェブページタイトル
           webDescription: ページメタデータのウェブページ説明
           videoSummary: 動画要約（AI スマートコンテキストが必要）
+    aiQuota:
+      title: AI字幕の利用枠
+      description: 今月のAI字幕文字起こし利用枠の使用状況
+      loginRequired: ログインしてAI字幕の利用枠を確認
+      logIn: ログイン
+      betaRequired: AI字幕はベータ版で、まだあなたのアカウントでは利用できません
+      betaApply: 利用を申請
+      loadError: 利用枠を読み込めませんでした。しばらくしてから再試行してください。
+      summary: $2 分中 $1 分を使用、残り $3 分
   whatsNew:
     title: 新機能
   rateUs:
@@ -1012,6 +1021,9 @@ thinking:
 shortcutKeySelector:
   placeholder: ショートカットを入力してください
 subtitles:
+  loadingAiSubtitles: AI字幕を読み込み中…
+  requestAiSubtitles: AI字幕をリクエスト（Beta）
+  usingAiSubtitles: AI字幕を使用中
   actions:
     downloadTranslated: 翻訳字幕をダウンロード
     downloadTranslatedPreparing: 字幕を準備中。長い動画は時間がかかる場合があります
@@ -1037,6 +1049,8 @@ subtitles:
     aiRateLimited: リクエストが多すぎます。後でもう一度お試しください
     aiAuthFailed: API認証に失敗しました。APIキーを確認してください
     aiServiceUnavailable: 翻訳サービスは一時的に利用できません
+    aiQuotaExceeded: 今月のAI字幕の利用枠を使い切りました
+    aiRequestFailed: AI字幕のリクエストに失敗しました。しばらくしてから再試行してください
     aiNoResponse: AIサービスが応答しませんでした。原文を表示します
     translatedExportFailed: 翻訳字幕の生成に失敗しました
     translatedExportIncomplete: すべての字幕行を翻訳できませんでした

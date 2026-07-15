@@ -913,6 +913,15 @@ options:
           webTitle: Web sayfası başlığı
           webDescription: Sayfa meta verilerinden web sayfası açıklaması
           videoSummary: Video özeti (AI Akıllı Bağlam gerektirir)
+    aiQuota:
+      title: Yapay Zeka Altyazı Kotası
+      description: Yapay zeka altyazı deşifre kotanızın aylık kullanımı
+      loginRequired: Yapay zeka altyazı kotanızı görmek için giriş yapın
+      logIn: Giriş Yap
+      betaRequired: Yapay zeka altyazıları beta aşamasında ve hesabınız için henüz etkin değil
+      betaApply: Erişim başvurusu yap
+      loadError: Kotanız yüklenemedi. Lütfen daha sonra tekrar deneyin.
+      summary: $2 dakikanın $1 dakikası kullanıldı, $3 kaldı
   whatsNew:
     title: Yenilikler
   rateUs:
@@ -1012,6 +1021,9 @@ thinking:
 shortcutKeySelector:
   placeholder: Lütfen kısayolu girin
 subtitles:
+  loadingAiSubtitles: Yapay zeka altyazıları yükleniyor…
+  requestAiSubtitles: Yapay zeka altyazısı iste (Beta)
+  usingAiSubtitles: Yapay zeka altyazısı kullanılıyor
   actions:
     downloadTranslated: Çevrilmiş altyazıları indir
     downloadTranslatedPreparing: Altyazılar hazırlanıyor, uzun videolar daha uzun sürebilir
@@ -1037,6 +1049,8 @@ subtitles:
     aiRateLimited: Çok fazla istek, lütfen daha sonra tekrar deneyin
     aiAuthFailed: API kimlik doğrulaması başarısız, lütfen API anahtarınızı kontrol edin
     aiServiceUnavailable: Çeviri hizmeti geçici olarak kullanılamıyor
+    aiQuotaExceeded: Aylık yapay zeka altyazı kotanız doldu
+    aiRequestFailed: Yapay zeka altyazı isteği başarısız oldu, lütfen daha sonra tekrar deneyin
     aiNoResponse: AI hizmeti yanıt vermedi, orijinal metin gösteriliyor
     translatedExportFailed: Çevrilmiş altyazılar oluşturulamadı
     translatedExportIncomplete: Tüm altyazı satırları çevrilemedi
