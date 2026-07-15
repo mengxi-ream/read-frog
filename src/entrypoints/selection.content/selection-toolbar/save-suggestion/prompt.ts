@@ -27,7 +27,7 @@ export interface SaveSuggestionPromptInput {
   dictionaryDraft: SelectionToolbarCustomAction
 }
 
-const SAVE_SUGGESTION_SYSTEM_PROMPT = `You are a vocabulary note assistant for a language-learning browser extension. The user just requested a translation of text they selected on a web page. Identify the words or phrases from the selected text that are the most valuable for the user to save into their vocabulary notebook, and produce notes for them.
+const SAVE_SUGGESTION_SYSTEM_PROMPT = `You are a vocabulary note assistant for a language-learning browser extension. The user reads foreign-language web pages and translates selections into their own language (the target language). They are learning the language the selected text is written in. Identify the words or phrases from the selected text that are the most valuable for them to save into their vocabulary notebook, and produce notes for them.
 
 ## Structured Output Contract
 Return exactly one JSON object and nothing else, with this shape:
@@ -47,11 +47,12 @@ Return exactly one JSON object and nothing else, with this shape:
 3. Only when no candidate fits vocabulary notes at all (or no candidates exist), set "createNewDictionaryAction" to true and "targetActionId" to null, and use the Default Dictionary Schema from the user prompt for the notes instead.
 
 ### Producing notes
-1. Return 1 or ${SAVE_SUGGESTION_MAX_NOTES} notes covering only the most valuable words or phrases from the selected text for a learner of the target language. Prefer returning at least 1. Return an empty "notes" array only if truly nothing is worth saving.
+1. Return 1 or ${SAVE_SUGGESTION_MAX_NOTES} notes covering only the most valuable words or phrases from the selected text, in the selected text's original language. Prefer returning at least 1. Return an empty "notes" array only if truly nothing is worth saving.
 2. Each note's "fields" must contain exactly one entry per field of the chosen schema, in the schema's order.
 3. Each entry's "name" must exactly match a schema field key. Never invent field names.
 4. Each entry's "value" must match the field's declared type ("string" or "number"); use null when unknown.
 5. Follow each field's description when writing its value.
+6. Values describe the term itself: a phonetic field transcribes the term in the term's own language (e.g., IPA for English, pinyin for Mandarin), never its translation. Explanatory fields such as definitions are written in the target language unless their description says otherwise.
 
 ### Hard requirements
 1. Output valid JSON only. No markdown, no code fences, no commentary.

@@ -80,6 +80,13 @@ describe("buildSaveSuggestionPrompts", () => {
     expect(systemPrompt).toContain("valid JSON only")
   })
 
+  it("frames the language direction: user learns the selected text's language", () => {
+    const { systemPrompt } = buildSaveSuggestionPrompts(input)
+    expect(systemPrompt).toContain("learning the language the selected text is written in")
+    expect(systemPrompt).toContain("transcribes the term in the term's own language")
+    expect(systemPrompt).not.toContain("for a learner of the target language")
+  })
+
   it("truncates oversized page text below the hosted prompt limit", () => {
     const { prompt } = buildSaveSuggestionPrompts({
       ...input,

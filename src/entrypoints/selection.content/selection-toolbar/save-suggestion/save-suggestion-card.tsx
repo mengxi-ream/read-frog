@@ -76,7 +76,14 @@ export function SaveSuggestionCard({
   if (!primaryFieldName) {
     return null
   }
-  const secondaryFieldNames = actionSnapshot.outputSchema.slice(1).map((field) => field.name)
+  // Definition-like fields make the most useful one-line summary (the
+  // dictionary template's second field is the phonetic transcription, which
+  // reads poorly as the only supplement); fall back to schema order.
+  const secondaryFields = actionSnapshot.outputSchema.slice(1)
+  const secondaryFieldNames = [
+    ...secondaryFields.filter((field) => field.id.includes("definition")),
+    ...secondaryFields.filter((field) => !field.id.includes("definition")),
+  ].map((field) => field.name)
 
   const handleSave = async () => {
     if (validated.target.kind === "create_dictionary") {
