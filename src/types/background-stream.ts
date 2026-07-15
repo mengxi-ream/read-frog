@@ -2,6 +2,7 @@ import type { JSONValue, StreamTextOnErrorCallback } from "ai"
 import type { Browser } from "#imports"
 import type { AISDKReasoning } from "@/types/config/provider"
 import type { SelectionToolbarCustomActionOutputType } from "@/types/config/selection-toolbar"
+import type { SaveSuggestionEnvelope } from "@/utils/save-suggestion/types"
 
 interface BaseBackgroundStreamSerializablePayload {
   providerId: string
@@ -47,9 +48,16 @@ export type BackgroundStreamStructuredObjectSerializablePayload =
     outputSchema: BackgroundStructuredObjectOutputField[]
   }
 
+export type BackgroundStreamNoteSuggestionSerializablePayload =
+  BaseBackgroundStreamSerializablePayload
+
+export type BackgroundNoteSuggestionStreamSnapshot =
+  BackgroundStreamSnapshot<SaveSuggestionEnvelope>
+
 export const BACKGROUND_STREAM_PORTS = {
   streamText: "stream-text",
   streamStructuredObject: "stream-structured-object",
+  streamNoteSuggestion: "stream-note-suggestion",
 } as const
 
 export type BackgroundStreamChannel = keyof typeof BACKGROUND_STREAM_PORTS
@@ -58,6 +66,7 @@ export type BackgroundStreamPortName = (typeof BACKGROUND_STREAM_PORTS)[Backgrou
 export interface BackgroundStreamResponseMap {
   streamText: BackgroundTextStreamSnapshot
   streamStructuredObject: BackgroundStructuredObjectStreamSnapshot
+  streamNoteSuggestion: BackgroundNoteSuggestionStreamSnapshot
 }
 
 export interface StreamPortErrorPayload {

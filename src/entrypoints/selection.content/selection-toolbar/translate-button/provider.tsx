@@ -48,11 +48,14 @@ import {
   selectionSessionAtom,
   selectionToolbarTranslateRequestAtom,
 } from "../atoms"
+import { isSaveToNotebaseDialogOpenAtom } from "../custom-action-button/save-to-notebase-dialog-atom"
 import {
   createSelectionToolbarPrecheckError,
   createSelectionToolbarRuntimeError,
   isAbortError,
 } from "../inline-error"
+import { SaveSuggestionCard } from "../save-suggestion/save-suggestion-card"
+import { useSaveSuggestion } from "../save-suggestion/use-save-suggestion"
 import { useSelectionOpenRequestResolver } from "../use-selection-open-request"
 import { TargetLanguageSelector } from "./target-language-selector"
 import { TranslationContent } from "./translation-content"
@@ -243,6 +246,24 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     [providersConfig],
   )
   const translateRequestKey = useMemo(() => JSON.stringify(translateRequest), [translateRequest])
+  const isSaveToNotebaseDialogOpen = useAtomValue(isSaveToNotebaseDialogOpenAtom)
+  const {
+    suggestion: saveSuggestion,
+    maybeFire: maybeFireSaveSuggestion,
+    cancel: cancelSaveSuggestion,
+    resetSession: resetSaveSuggestionSession,
+    markShownOnce: markSaveSuggestionShownOnce,
+  } = useSaveSuggestion()
+
+  const fireSaveSuggestion = useEffectEvent((preparedText: string) => {
+    maybeFireSaveSuggestion({
+      sessionKey: popoverSessionKey,
+      selectionText: preparedText,
+      paragraphsText: paragraphsText ?? preparedText,
+      targetLangName: LANG_CODE_TO_EN_NAME[translateRequest.language.targetCode],
+      webTitle: titleText ?? "",
+    })
+  })
 
   const resetPopoverSession = useCallback((options?: { clearAnchor?: boolean }) => {
     setActiveSession(null)
@@ -258,15 +279,19 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     setError(null)
   }, [])
 
-  const cancelCurrentTranslation = useCallback((runId?: number) => {
-    if (runId !== undefined && runIdRef.current !== runId) {
-      return
-    }
+  const cancelCurrentTranslation = useCallback(
+    (runId?: number) => {
+      if (runId !== undefined && runIdRef.current !== runId) {
+        return
+      }
 
-    runIdRef.current += 1
-    abortControllerRef.current?.abort()
-    abortControllerRef.current = null
-  }, [])
+      runIdRef.current += 1
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = null
+      cancelSaveSuggestion()
+    },
+    [cancelSaveSuggestion],
+  )
 
   const commitOpenRequest = useCallback((request: SelectionTranslatePendingOpenRequest) => {
     pendingOpenRequestRef.current = request
@@ -426,6 +451,21 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
   )
 
   const startTranslation = useEffectEvent((runId: number) => {
+    // Kick off the save suggestion together with a translation run that will
+    // actually start (mirrors runTranslation's prechecks so a run that only
+    // surfaces an error never spends hosted-AI quota). Its card renders only
+    // after the translation stream finishes.
+    const preparedText = prepareTranslationText(selectionText)
+    const provider = translateRequest.provider
+    if (
+      preparedText !== "" &&
+      provider?.kind === "local" &&
+      provider.config.enabled &&
+      isTranslateProviderConfig(provider.config)
+    ) {
+      fireSaveSuggestion(preparedText)
+    }
+
     void runTranslation(runId)
   })
 
@@ -484,6 +524,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
           clearAnchor: pendingOpenRequestRef.current === null,
         })
         lastTranslationRunKeyRef.current = null
+        resetSaveSuggestionSession()
       }
 
       setIsOpen(nextOpen)
@@ -491,6 +532,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     [
       cancelCurrentTranslation,
       resetPopoverSession,
+      resetSaveSuggestionSession,
       resetTranslationState,
       selectionSession,
       setIsSelectionToolbarVisible,
@@ -632,6 +674,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
         onOpenChange={handleOpenChange}
         anchor={anchor}
         onAnchorChange={setAnchor}
+        disablePointerDismissal={isSaveToNotebaseDialogOpen}
       >
         {children}
         <SelectionPopover.Content
@@ -655,6 +698,15 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
               isTranslating={isTranslating}
               thinking={thinking}
             />
+            {!isTranslating &&
+              !!translatedText &&
+              !error &&
+              saveSuggestion?.sessionKey === popoverSessionKey && (
+                <SaveSuggestionCard
+                  suggestion={saveSuggestion}
+                  markShownOnce={markSaveSuggestionShownOnce}
+                />
+              )}
             <SelectionToolbarErrorAlert error={error} className="-mt-3" />
           </SelectionPopover.Body>
           <SelectionToolbarFooterContent

@@ -1,10 +1,11 @@
 import type { Browser } from "#imports"
 import type {
+  BackgroundNoteSuggestionStreamSnapshot,
+  BackgroundStreamNoteSuggestionSerializablePayload,
   BackgroundStreamPortName,
   BackgroundStreamSnapshot,
   BackgroundStreamStructuredObjectSerializablePayload,
   BackgroundStreamTextSerializablePayload,
-  BackgroundStructuredObjectOutputField,
   BackgroundStructuredObjectStreamSnapshot,
   BackgroundTextStreamSnapshot,
   StartMessageParseResult,
@@ -18,12 +19,14 @@ import type {
 import { Output, parsePartialJson, streamText } from "ai"
 import { z } from "zod"
 import { BACKGROUND_STREAM_PORTS } from "@/types/background-stream"
+import { createStructuredObjectSchema } from "@/utils/ai/structured-object-schema"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { backgroundOrpcClient } from "@/utils/orpc/background-client"
 import { getModelById } from "@/utils/providers/model"
 import { isFreeAiProviderId } from "@/utils/providers/provider-registry"
+import { saveSuggestionEnvelopeSchema } from "@/utils/save-suggestion/types"
 
 const invalidStreamStartPayloadMessage = "Invalid stream start payload"
 const aiStreamProtocolErrorMessage = "Invalid AI stream response."
@@ -275,22 +278,6 @@ function toAiStreamPart(part: unknown): AiStreamPart {
   return part as AiStreamPart
 }
 
-function createStructuredObjectSchema(
-  outputSchema: BackgroundStructuredObjectOutputField[],
-): z.ZodObject<Record<string, z.ZodTypeAny>> {
-  const fieldTypeToZodSchema: Record<string, z.ZodTypeAny> = {
-    string: z.string().nullable(),
-    number: z.number().nullable(),
-  }
-
-  const schemaShape: Record<string, z.ZodTypeAny> = {}
-  for (const field of outputSchema) {
-    schemaShape[field.name] = fieldTypeToZodSchema[field.type] ?? z.string().nullable()
-  }
-
-  return z.strictObject(schemaShape)
-}
-
 function getStringPartField(part: Record<string, unknown>, field: string): string {
   const value = part[field]
   if (typeof value !== "string") {
@@ -440,14 +427,14 @@ async function consumeTextPartStream(
   return createStreamSnapshot(cumulativeText, thinking)
 }
 
-async function consumeStructuredObjectPartStream(
+async function consumeStructuredObjectPartStream<TOutput extends Record<string, unknown>>(
   partStream: AsyncIterable<unknown>,
   options: {
-    objectSchema: z.ZodObject<Record<string, z.ZodTypeAny>>
+    objectSchema: z.ZodType<TOutput>
     onChunk?: StreamRuntimeOptions<BackgroundStructuredObjectStreamSnapshot>["onChunk"]
     signal?: AbortSignal
   },
-): Promise<BackgroundStructuredObjectStreamSnapshot> {
+): Promise<BackgroundStreamSnapshot<TOutput>> {
   const { objectSchema, onChunk, signal } = options
   let cumulativeText = ""
   let cumulativeValue: Record<string, unknown> = {}
@@ -667,11 +654,65 @@ export async function runStructuredObjectStreamInBackground(
   })
 }
 
+async function createHostedNoteSuggestionPartStream(
+  serializablePayload: BackgroundStreamNoteSuggestionSerializablePayload,
+  signal?: AbortSignal,
+): Promise<AsyncIterable<unknown>> {
+  const { prompt, instructions, temperature } = serializablePayload
+
+  if (!instructions || !prompt) {
+    throw new BackgroundStreamError("invalid_request", "Invalid hosted AI request")
+  }
+
+  try {
+    return await backgroundOrpcClient.hostedAi.noteSuggestion.streamStructuredObject(
+      {
+        instructions,
+        prompt,
+        temperature,
+      },
+      { signal },
+    )
+  } catch (error) {
+    throw normalizeHostedAiError(error)
+  }
+}
+
+export async function runNoteSuggestionStreamInBackground(
+  serializablePayload: BackgroundStreamNoteSuggestionSerializablePayload,
+  options: StreamRuntimeOptions<BackgroundNoteSuggestionStreamSnapshot> = {},
+): Promise<BackgroundNoteSuggestionStreamSnapshot> {
+  const { signal } = options
+
+  if (signal?.aborted) {
+    throw new DOMException("stream aborted", "AbortError")
+  }
+
+  if (!isFreeAiProviderId(serializablePayload.providerId)) {
+    throw new BackgroundStreamError(
+      "invalid_request",
+      "Note suggestion requires the hosted free AI provider",
+    )
+  }
+
+  const partStream = await createHostedNoteSuggestionPartStream(serializablePayload, signal)
+
+  // The card renders only the final result, so no onChunk forwarding.
+  return consumeStructuredObjectPartStream(partStream, {
+    objectSchema: saveSuggestionEnvelopeSchema,
+    signal,
+  })
+}
+
 const parseStreamTextStartMessage =
   createStartMessageParser<BackgroundStreamTextSerializablePayload>(streamTextPayloadSchema)
 const parseStructuredObjectStartMessage =
   createStartMessageParser<BackgroundStreamStructuredObjectSerializablePayload>(
     structuredObjectPayloadSchema,
+  )
+const parseNoteSuggestionStartMessage =
+  createStartMessageParser<BackgroundStreamNoteSuggestionSerializablePayload>(
+    streamTextPayloadSchema,
   )
 
 export const handleStreamTextPort = createStreamPortHandler<
@@ -684,11 +725,17 @@ export const handleStreamStructuredObjectPort = createStreamPortHandler<
   BackgroundStructuredObjectStreamSnapshot
 >(runStructuredObjectStreamInBackground, parseStructuredObjectStartMessage)
 
+export const handleStreamNoteSuggestionPort = createStreamPortHandler<
+  BackgroundStreamNoteSuggestionSerializablePayload,
+  BackgroundNoteSuggestionStreamSnapshot
+>(runNoteSuggestionStreamInBackground, parseNoteSuggestionStartMessage)
+
 export const BACKGROUND_STREAM_PORT_HANDLERS: Readonly<
   Record<BackgroundStreamPortName, StreamPortHandler>
 > = {
   [BACKGROUND_STREAM_PORTS.streamText]: handleStreamTextPort,
   [BACKGROUND_STREAM_PORTS.streamStructuredObject]: handleStreamStructuredObjectPort,
+  [BACKGROUND_STREAM_PORTS.streamNoteSuggestion]: handleStreamNoteSuggestionPort,
 }
 
 export function dispatchBackgroundStreamPort(port: Browser.runtime.Port): boolean {

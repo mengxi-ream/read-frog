@@ -1,4 +1,5 @@
 import type {
+  BackgroundStreamNoteSuggestionSerializablePayload,
   BackgroundStreamResponseMap,
   BackgroundStreamStructuredObjectSerializablePayload,
   BackgroundStreamTextSerializablePayload,
@@ -29,6 +30,17 @@ export function streamBackgroundStructuredObject(
 ) {
   return createPortStreamPromise<BackgroundStreamResponseMap["streamStructuredObject"]>(
     BACKGROUND_STREAM_PORTS.streamStructuredObject,
+    serializablePayload,
+    options,
+  )
+}
+
+export function streamBackgroundNoteSuggestion(
+  serializablePayload: BackgroundStreamNoteSuggestionSerializablePayload,
+  options: ContentScriptStreamOptions<BackgroundStreamResponseMap["streamNoteSuggestion"]> = {},
+) {
+  return createPortStreamPromise<BackgroundStreamResponseMap["streamNoteSuggestion"]>(
+    BACKGROUND_STREAM_PORTS.streamNoteSuggestion,
     serializablePayload,
     options,
   )
