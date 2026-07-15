@@ -347,6 +347,9 @@ options:
         description: Elige qué funciones integradas mostrar en la barra de selección
         translate: Traducir
         speak: Leer en voz alta
+      saveSuggestion:
+        title: Sugerencias de guardado
+        description: Después de traducir una selección, sugerir palabras para guardar en tu Notebase
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -1110,6 +1113,12 @@ action:
   translation: Traducción
   speak: Leer en voz alta
   playing: Reproduciendo
+saveSuggestion:
+  title: Quizás quieras guardar
+  description: Guarda estas palabras en tu Notebase y repásalas cuando quieras.
+  save: Guardar
+  saved: Guardado
+  staleSuggestion: Esta sugerencia está desactualizada
 thinking:
   label: Pensando
   complete: Razonamiento completo

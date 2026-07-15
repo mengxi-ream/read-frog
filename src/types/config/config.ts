@@ -45,6 +45,9 @@ const selectionToolbarSchema = z.object({
     speak: selectionToolbarSpeakFeatureSchema,
   }),
   customActions: selectionToolbarCustomActionsSchema,
+  saveSuggestion: z.object({
+    enabled: z.boolean(),
+  }),
 })
 
 // side content schema

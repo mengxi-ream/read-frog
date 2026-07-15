@@ -24,7 +24,7 @@ export function replaceSelectionToolbarCustomActionPromptTokens(
     .replaceAll(getSelectionToolbarCustomActionTokenCellText("webContent"), tokens.webContent)
 }
 
-type StructuredOutputField = Pick<
+export type StructuredOutputField = Pick<
   SelectionToolbarCustomActionOutputField,
   "name" | "type" | "description"
 >
@@ -56,13 +56,18 @@ function formatStructuredOutputField(
   ].join("\n")
 }
 
+export function buildStructuredOutputFieldList(
+  outputSchema: StructuredOutputField[],
+  tokens: SelectionToolbarCustomActionPromptTokens,
+) {
+  return outputSchema.map((field) => formatStructuredOutputField(field, tokens)).join("\n")
+}
+
 function buildStructuredOutputContract(
   outputSchema: StructuredOutputField[],
   tokens: SelectionToolbarCustomActionPromptTokens,
 ) {
-  const fieldsAndTypes = outputSchema
-    .map((field) => formatStructuredOutputField(field, tokens))
-    .join("\n")
+  const fieldsAndTypes = buildStructuredOutputFieldList(outputSchema, tokens)
 
   return `## Structured Output Contract
 Return exactly one JSON object and nothing else.

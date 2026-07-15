@@ -346,6 +346,9 @@ options:
         description: Chọn các tính năng tích hợp để hiển thị trên thanh công cụ chọn văn bản
         translate: Dịch
         speak: Đọc
+      saveSuggestion:
+        title: Gợi ý lưu
+        description: Sau khi dịch vùng chọn, gợi ý các từ để lưu vào Notebase
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -995,6 +998,12 @@ action:
   translation: Dịch
   speak: Đọc
   playing: Đang phát
+saveSuggestion:
+  title: Có thể bạn muốn lưu
+  description: Lưu những từ dưới đây vào Notebase để ôn tập bất cứ lúc nào.
+  save: Lưu
+  saved: Đã lưu
+  staleSuggestion: Gợi ý này đã cũ
 thinking:
   label: Đang suy luận
   complete: Suy luận hoàn tất
