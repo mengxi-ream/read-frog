@@ -17,15 +17,18 @@ import {
 } from "./atoms"
 import { CloseButton, DropEvent } from "./close-button"
 import { SelectionToolbarCustomActionButtons } from "./custom-action-button"
+import {
+  collectSelectionScrollTargets,
+  createSelectionAnchorTracker,
+  getSelectionDirection,
+  getToolbarViewportPosition,
+  getViewportRect,
+  measureSelectionAnchor,
+  SelectionDirection,
+  viewportPointToHostPoint,
+} from "./positioning"
 import { SpeakButton } from "./speak-button"
 import { TranslateButton } from "./translate-button"
-
-enum SelectionDirection {
-  TOP_LEFT = "TOP_LEFT",
-  TOP_RIGHT = "TOP_RIGHT",
-  BOTTOM_LEFT = "BOTTOM_LEFT",
-  BOTTOM_RIGHT = "BOTTOM_RIGHT",
-}
 
 const SELECTION_GUARD_INTERACTIVE_SELECTOR = [
   "button",
@@ -174,51 +177,14 @@ function isMouseEventInsideSelectionOverlay(
   )
 }
 
-function getSelectionDirection(
-  startX: number,
-  startY: number,
-  endX: number,
-  endY: number,
-): SelectionDirection {
-  const DOWNWARD_TOLERANCE = 8
-
-  const isRightward = startX <= endX
-  const isDownward = startY - DOWNWARD_TOLERANCE <= endY
-
-  if (isRightward && isDownward) return SelectionDirection.BOTTOM_RIGHT
-  if (isRightward && !isDownward) return SelectionDirection.TOP_RIGHT
-  if (!isRightward && isDownward) return SelectionDirection.BOTTOM_LEFT
-  return SelectionDirection.TOP_LEFT
-}
-
-function applyDirectionOffset(
-  direction: SelectionDirection,
-  baseX: number,
-  baseY: number,
-  tooltipWidth: number,
-  tooltipHeight: number,
-): { x: number; y: number } {
-  const CURSOR_CLEARANCE = 20
-  switch (direction) {
-    case SelectionDirection.BOTTOM_RIGHT:
-      return { x: baseX, y: baseY + CURSOR_CLEARANCE }
-    case SelectionDirection.BOTTOM_LEFT:
-      return { x: baseX - tooltipWidth, y: baseY + CURSOR_CLEARANCE }
-    case SelectionDirection.TOP_RIGHT:
-      return { x: baseX, y: baseY - tooltipHeight - CURSOR_CLEARANCE }
-    case SelectionDirection.TOP_LEFT:
-      return { x: baseX - tooltipWidth, y: baseY - tooltipHeight - CURSOR_CLEARANCE }
-    default:
-      return { x: baseX, y: baseY + CURSOR_CLEARANCE }
-  }
-}
-
 export function SelectionToolbar() {
   const tooltipRef = useRef<HTMLDivElement>(null)
   const tooltipContainerRef = useRef<HTMLDivElement>(null)
   const selectionPositionRef = useRef<{ x: number; y: number } | null>(null) // store selection position (base position without direction offset)
   const selectionStartRef = useRef<{ x: number; y: number } | null>(null) // store selection start position
   const selectionDirectionRef = useRef<SelectionDirection>(SelectionDirection.BOTTOM_RIGHT) // store selection direction
+  const selectionAnchorTrackerRef = useRef<ReturnType<typeof createSelectionAnchorTracker>>(null)
+  const selectionScrollTargetsRef = useRef<Array<Element | ShadowRoot>>([])
   const isPointerDownInsideOverlayRef = useRef(false)
   const preserveSelectionStateRef = useRef(false)
   const [isSelectionToolbarVisible, setIsSelectionToolbarVisible] = useAtom(
@@ -229,46 +195,124 @@ export function SelectionToolbar() {
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const dropdownOpenRef = useRef(false)
 
-  const updatePosition = useCallback(() => {
-    if (!isSelectionToolbarVisible || !tooltipRef.current || !selectionPositionRef.current) return
+  const updatePosition = useCallback(
+    ({ remeasureSelection = false }: { remeasureSelection?: boolean } = {}) => {
+      const tooltip = tooltipRef.current
+      const viewportHost = tooltipContainerRef.current
+      const selectionPosition = selectionPositionRef.current
 
-    const scrollY = window.scrollY
-    const viewportHeight = window.innerHeight
-    const clientWidth = document.documentElement.clientWidth
-    const tooltipWidth = tooltipRef.current.offsetWidth
-    const tooltipHeight = tooltipRef.current.offsetHeight
+      if (!isSelectionToolbarVisible || !tooltip || !viewportHost || !selectionPosition) {
+        return
+      }
 
-    // Apply direction offset based on selection direction and tooltip dimensions
-    const { x: offsetX, y: offsetY } = applyDirectionOffset(
-      selectionDirectionRef.current,
-      selectionPositionRef.current.x,
-      selectionPositionRef.current.y,
-      tooltipWidth,
-      tooltipHeight,
-    )
+      const viewport = getViewportRect()
+      const tracker = selectionAnchorTrackerRef.current
 
-    // calculate strict boundaries
-    const topBoundary = scrollY + MARGIN
-    const bottomBoundary = scrollY + viewportHeight - tooltipHeight - MARGIN
-    const leftBoundary = MARGIN
-    const rightBoundary = clientWidth - tooltipWidth - MARGIN
+      if (remeasureSelection && tracker) {
+        const measurement = measureSelectionAnchor(tracker, viewport)
 
-    // calculate the position of the tooltip, but strictly limit it within the boundaries
-    const clampedX = Math.max(leftBoundary, Math.min(rightBoundary, offsetX))
-    const clampedY = Math.max(topBoundary, Math.min(bottomBoundary, offsetY))
+        if (measurement.status === "invalid") {
+          selectionAnchorTrackerRef.current = null
+          selectionScrollTargetsRef.current = []
+          selectionPositionRef.current = null
+          clearSelectionState()
+          setIsSelectionToolbarVisible(false)
+          return
+        }
 
-    // directly operate the DOM, avoid React re-rendering
-    tooltipRef.current.style.top = `${clampedY}px`
-    tooltipRef.current.style.left = `${clampedX}px`
-  }, [isSelectionToolbarVisible])
+        if (measurement.status === "offscreen") {
+          selectionAnchorTrackerRef.current = null
+          selectionScrollTargetsRef.current = []
+          selectionPositionRef.current = null
+          setIsSelectionToolbarVisible(false)
+          return
+        }
+
+        selectionAnchorTrackerRef.current = measurement.tracker
+        selectionPositionRef.current = measurement.anchor
+      }
+
+      const nextSelectionPosition = selectionPositionRef.current
+      if (!nextSelectionPosition) {
+        return
+      }
+
+      const tooltipRect = tooltip.getBoundingClientRect()
+      const viewportPosition = getToolbarViewportPosition(
+        selectionDirectionRef.current,
+        nextSelectionPosition,
+        {
+          width: tooltipRect.width || tooltip.offsetWidth,
+          height: tooltipRect.height || tooltip.offsetHeight,
+        },
+        viewport,
+        MARGIN,
+      )
+      const hostPosition = viewportPointToHostPoint(viewportPosition, viewportHost)
+
+      tooltip.style.top = `${hostPosition.y}px`
+      tooltip.style.left = `${hostPosition.x}px`
+    },
+    [clearSelectionState, isSelectionToolbarVisible, setIsSelectionToolbarVisible],
+  )
 
   useLayoutEffect(() => {
-    updatePosition()
+    updatePosition({ remeasureSelection: true })
   }, [updatePosition])
 
   useEffect(() => {
-    let animationFrameId: number
+    if (!isSelectionToolbarVisible) {
+      return undefined
+    }
 
+    let animationFrameId: number | null = null
+    const schedulePositionUpdate = () => {
+      if (animationFrameId !== null) {
+        return
+      }
+
+      animationFrameId = requestAnimationFrame(() => {
+        animationFrameId = null
+        updatePosition({ remeasureSelection: true })
+      })
+    }
+
+    const captureScrollOptions: AddEventListenerOptions = { capture: true, passive: true }
+    const passiveOptions: AddEventListenerOptions = { passive: true }
+    const selectionScrollTargets = selectionScrollTargetsRef.current
+    const visualViewport = window.visualViewport
+    const resizeObserver =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(schedulePositionUpdate)
+
+    document.addEventListener("scroll", schedulePositionUpdate, captureScrollOptions)
+    window.addEventListener("scroll", schedulePositionUpdate, passiveOptions)
+    window.addEventListener("resize", schedulePositionUpdate)
+    visualViewport?.addEventListener("scroll", schedulePositionUpdate, passiveOptions)
+    visualViewport?.addEventListener("resize", schedulePositionUpdate)
+    selectionScrollTargets.forEach((target) =>
+      target.addEventListener("scroll", schedulePositionUpdate, captureScrollOptions),
+    )
+    if (tooltipRef.current) {
+      resizeObserver?.observe(tooltipRef.current)
+    }
+
+    return () => {
+      document.removeEventListener("scroll", schedulePositionUpdate, true)
+      window.removeEventListener("scroll", schedulePositionUpdate)
+      window.removeEventListener("resize", schedulePositionUpdate)
+      visualViewport?.removeEventListener("scroll", schedulePositionUpdate)
+      visualViewport?.removeEventListener("resize", schedulePositionUpdate)
+      selectionScrollTargets.forEach((target) =>
+        target.removeEventListener("scroll", schedulePositionUpdate, true),
+      )
+      resizeObserver?.disconnect()
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId)
+      }
+    }
+  }, [isSelectionToolbarVisible, updatePosition])
+
+  useEffect(() => {
     const handleMouseUp = (e: MouseEvent) => {
       if (isPointerDownInsideOverlayRef.current) {
         isPointerDownInsideOverlayRef.current = false
@@ -322,10 +366,6 @@ export function SelectionToolbar() {
             selection: selectionSnapshot,
             context: buildContextSnapshot(selectionSnapshot),
           })
-          // calculate the position relative to the document
-          const scrollY = window.scrollY
-          const scrollX = window.scrollX
-
           if (selectionStartRef.current) {
             // Get selection start and end positions
             const startX = selectionStartRef.current.x
@@ -339,11 +379,15 @@ export function SelectionToolbar() {
             selectionDirectionRef.current = SelectionDirection.BOTTOM_RIGHT
           }
 
-          const docX = e.clientX + scrollX
-          const docY = e.clientY + scrollY
-
-          // Store pending position for useLayoutEffect to process
-          selectionPositionRef.current = { x: docX, y: docY }
+          const selectionPosition = { x: e.clientX, y: e.clientY }
+          selectionPositionRef.current = selectionPosition
+          selectionAnchorTrackerRef.current = createSelectionAnchorTracker(
+            selectionSnapshot.ranges,
+            selectionPosition,
+          )
+          selectionScrollTargetsRef.current = collectSelectionScrollTargets(
+            selectionSnapshot.ranges,
+          )
           setIsSelectionToolbarVisible(true)
         }
       })
@@ -370,6 +414,9 @@ export function SelectionToolbar() {
 
       // Record selection start position
       selectionStartRef.current = { x: e.clientX, y: e.clientY }
+      selectionPositionRef.current = null
+      selectionAnchorTrackerRef.current = null
+      selectionScrollTargetsRef.current = []
 
       clearSelectionState()
       setIsSelectionToolbarVisible(false)
@@ -393,43 +440,25 @@ export function SelectionToolbar() {
         }
 
         clearSelectionState()
+        selectionPositionRef.current = null
+        selectionAnchorTrackerRef.current = null
+        selectionScrollTargetsRef.current = []
         // Don't hide toolbar when dropdown is open to prevent unwanted dismissal
         // (Firefox clears selection when dropdown gains focus)
         if (!dropdownOpenRef.current) setIsSelectionToolbarVisible(false)
       }
     }
 
-    const handleScroll = () => {
-      // cancel the previous animation frame
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId)
-      }
-
-      // use requestAnimationFrame to ensure rendering synchronization
-      animationFrameId = requestAnimationFrame(updatePosition)
-    }
-
     document.addEventListener("mouseup", handleMouseUp)
     document.addEventListener("mousedown", handleMouseDown)
     document.addEventListener("selectionchange", handleSelectionChange)
-    window.addEventListener("scroll", handleScroll, { passive: true })
 
     return () => {
       document.removeEventListener("mouseup", handleMouseUp)
       document.removeEventListener("mousedown", handleMouseDown)
       document.removeEventListener("selectionchange", handleSelectionChange)
-      window.removeEventListener("scroll", handleScroll)
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId)
-      }
     }
-  }, [
-    clearSelectionState,
-    isSelectionToolbarVisible,
-    setIsSelectionToolbarVisible,
-    setSelectionState,
-    updatePosition,
-  ])
+  }, [clearSelectionState, setIsSelectionToolbarVisible, setSelectionState])
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -453,7 +482,7 @@ export function SelectionToolbar() {
   return (
     <div
       ref={tooltipContainerRef}
-      className={NOTRANSLATE_CLASS}
+      className={`${NOTRANSLATE_CLASS} pointer-events-none fixed inset-0`}
       {...{ [SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE]: "" }}
     >
       {selectionToolbar.enabled && !isSiteDisabled && hasAnyEnabledFeature && (
