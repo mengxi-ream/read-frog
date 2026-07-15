@@ -3,7 +3,7 @@ import { kebabCase } from "case-anything"
 import { defineContentScript, storage } from "#imports"
 import { env } from "@/env"
 import { getLocalConfig } from "@/utils/config/storage"
-import { APP_NAME } from "@/utils/constants/app"
+import { APP_NAME, EXTENSION_VERSION } from "@/utils/constants/app"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 import {
   getGuideDictionaryNotebaseState,
@@ -12,6 +12,7 @@ import {
 import { resolveGuideTargetLanguage } from "@/utils/guide/target-language"
 import { logger } from "@/utils/logger"
 import { onMessage, sendMessage } from "@/utils/message"
+import { createExtensionStatusResponse } from "./extension-status"
 
 export default defineContentScript({
   matches: env.WXT_OFFICIAL_SITE_ORIGINS.map((origin: string) => `${origin}/*`),
@@ -26,6 +27,13 @@ export default defineContentScript({
 
     window.addEventListener("message", async (e) => {
       if (e.source !== window) return
+
+      const extensionStatusResponse = createExtensionStatusResponse(e, window, EXTENSION_VERSION)
+      if (extensionStatusResponse) {
+        window.postMessage(extensionStatusResponse, window.location.origin)
+        return
+      }
+
       const { source, type } = e.data || {}
       if (source !== "read-frog-page") return
 
