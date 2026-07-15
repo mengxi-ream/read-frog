@@ -3,6 +3,18 @@ import type { SelectionToolbarCustomAction } from "@/types/config/selection-tool
 import { SAVE_SUGGESTION_MAX_NOTES } from "@/utils/save-suggestion/types"
 import { buildStructuredOutputFieldList } from "../custom-action-prompt"
 
+// The hosted note-suggestion endpoint rejects prompts above 32k characters;
+// cap the page-derived free text well below that so candidate action schemas
+// always fit.
+const SAVE_SUGGESTION_MAX_SELECTION_CHARS = 1500
+const SAVE_SUGGESTION_MAX_PARAGRAPHS_CHARS = 2500
+const SAVE_SUGGESTION_MAX_WEB_TITLE_CHARS = 200
+
+function truncateForPrompt(text: string, maxChars: number): string {
+  const trimmed = text.trim()
+  return trimmed.length > maxChars ? `${trimmed.slice(0, maxChars)}…` : trimmed
+}
+
 export interface SaveSuggestionPromptInput {
   selection: string
   paragraphs: string
@@ -65,11 +77,14 @@ export function buildSaveSuggestionPrompts(input: SaveSuggestionPromptInput): {
   systemPrompt: string
   prompt: string
 } {
+  const selection = truncateForPrompt(input.selection, SAVE_SUGGESTION_MAX_SELECTION_CHARS)
+  const paragraphs = truncateForPrompt(input.paragraphs, SAVE_SUGGESTION_MAX_PARAGRAPHS_CHARS)
+  const webTitle = truncateForPrompt(input.webTitle, SAVE_SUGGESTION_MAX_WEB_TITLE_CHARS)
   const tokens: SelectionToolbarCustomActionPromptTokens = {
-    selection: input.selection,
-    paragraphs: input.paragraphs,
+    selection,
+    paragraphs,
     targetLanguage: input.targetLanguage,
-    webTitle: input.webTitle,
+    webTitle,
     webContent: "",
   }
 
@@ -79,13 +94,13 @@ export function buildSaveSuggestionPrompts(input: SaveSuggestionPromptInput): {
       : "None."
 
   const prompt = `## Web Page Title
-${input.webTitle}
+${webTitle}
 
 ## Selected Text
-${input.selection}
+${selection}
 
 ## Surrounding Paragraphs
-${input.paragraphs}
+${paragraphs}
 
 ## Target Language
 ${input.targetLanguage}

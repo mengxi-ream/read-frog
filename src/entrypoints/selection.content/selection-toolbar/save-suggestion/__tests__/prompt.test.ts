@@ -79,4 +79,16 @@ describe("buildSaveSuggestionPrompts", () => {
     expect(systemPrompt).toContain("Return 1 or 2 notes")
     expect(systemPrompt).toContain("valid JSON only")
   })
+
+  it("truncates oversized page text below the hosted prompt limit", () => {
+    const { prompt } = buildSaveSuggestionPrompts({
+      ...input,
+      selection: "s".repeat(20_000),
+      paragraphs: "p".repeat(40_000),
+      webTitle: "t".repeat(5_000),
+    })
+    expect(prompt.length).toBeLessThan(16_000)
+    expect(prompt).toContain("s".repeat(1_500))
+    expect(prompt).not.toContain("s".repeat(1_501))
+  })
 })
