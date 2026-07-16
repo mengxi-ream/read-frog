@@ -4,7 +4,7 @@ import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import { isProviderSelectorItem } from "@/utils/providers/provider-display"
 import {
-  FREE_AI_PROVIDER_LOGO,
+  BUILT_IN_AI_PROVIDER_LOGO,
   getSelectableProvidersForCapability,
 } from "@/utils/providers/provider-registry"
 import {
@@ -68,12 +68,12 @@ describe("feature providers", () => {
         }),
       ])
 
-      const freeAiProvider = providers[0]
-      expect(freeAiProvider && isProviderSelectorItem(freeAiProvider)).toBe(true)
-      if (!freeAiProvider || !isProviderSelectorItem(freeAiProvider)) {
-        throw new Error("Free AI provider selector item was not returned")
+      const builtInAiProvider = providers[0]
+      expect(builtInAiProvider && isProviderSelectorItem(builtInAiProvider)).toBe(true)
+      if (!builtInAiProvider || !isProviderSelectorItem(builtInAiProvider)) {
+        throw new Error("Built-in AI provider selector item was not returned")
       }
-      expect(freeAiProvider.logo("light")).toBe(FREE_AI_PROVIDER_LOGO)
+      expect(builtInAiProvider.logo("light")).toBe(BUILT_IN_AI_PROVIDER_LOGO)
     })
   })
 
@@ -273,7 +273,7 @@ describe("feature providers", () => {
       ])
     })
 
-    it("falls back to free AI when no enabled llm provider is available", () => {
+    it("falls back to built-in AI when no enabled llm provider is available", () => {
       const config = {
         ...DEFAULT_CONFIG,
         selectionToolbar: {

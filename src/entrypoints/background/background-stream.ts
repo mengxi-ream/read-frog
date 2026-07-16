@@ -23,7 +23,7 @@ import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { backgroundOrpcClient } from "@/utils/orpc/background-client"
 import { getModelById } from "@/utils/providers/model"
-import { isFreeAiProviderId } from "@/utils/providers/provider-registry"
+import { isBuiltInAiProviderId } from "@/utils/providers/provider-registry"
 
 const invalidStreamStartPayloadMessage = "Invalid stream start payload"
 const aiStreamProtocolErrorMessage = "Invalid AI stream response."
@@ -586,7 +586,7 @@ export async function runStreamTextInBackground(
     throw new DOMException("stream aborted", "AbortError")
   }
 
-  const partStream = isFreeAiProviderId(serializablePayload.providerId)
+  const partStream = isBuiltInAiProviderId(serializablePayload.providerId)
     ? await createHostedTextPartStream(serializablePayload, signal)
     : await createLocalTextPartStream(serializablePayload, options)
 
@@ -656,7 +656,7 @@ export async function runStructuredObjectStreamInBackground(
   }
 
   const objectSchema = createStructuredObjectSchema(serializablePayload.outputSchema)
-  const partStream = isFreeAiProviderId(serializablePayload.providerId)
+  const partStream = isBuiltInAiProviderId(serializablePayload.providerId)
     ? await createHostedStructuredObjectPartStream(serializablePayload, signal)
     : await createLocalStructuredObjectPartStream(serializablePayload, objectSchema, options)
 
