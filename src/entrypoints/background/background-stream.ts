@@ -654,48 +654,36 @@ export async function runStructuredObjectStreamInBackground(
   })
 }
 
-async function createHostedNoteSuggestionPartStream(
-  serializablePayload: BackgroundStreamNoteSuggestionSerializablePayload,
-  signal?: AbortSignal,
-): Promise<AsyncIterable<unknown>> {
-  const { prompt, instructions, temperature } = serializablePayload
-
-  if (!instructions || !prompt) {
-    throw new BackgroundStreamError("invalid_request", "Invalid hosted AI request")
-  }
-
-  try {
-    return await backgroundOrpcClient.hostedAi.noteSuggestion.streamStructuredObject(
-      {
-        instructions,
-        prompt,
-        temperature,
-      },
-      { signal },
-    )
-  } catch (error) {
-    throw normalizeHostedAiError(error)
-  }
-}
-
 export async function runNoteSuggestionStreamInBackground(
   serializablePayload: BackgroundStreamNoteSuggestionSerializablePayload,
   options: StreamRuntimeOptions<BackgroundNoteSuggestionStreamSnapshot> = {},
 ): Promise<BackgroundNoteSuggestionStreamSnapshot> {
   const { signal } = options
+  const { providerId, prompt, instructions, temperature } = serializablePayload
 
   if (signal?.aborted) {
     throw new DOMException("stream aborted", "AbortError")
   }
 
-  if (!isFreeAiProviderId(serializablePayload.providerId)) {
+  // Note suggestion always runs on the hosted free AI: the fixed nested envelope
+  // schema lives server-side, so there is no local-provider path and no
+  // client-sent outputSchema. The shared consume/parse/validate logic is reused.
+  if (!isFreeAiProviderId(providerId) || !instructions || !prompt) {
     throw new BackgroundStreamError(
       "invalid_request",
-      "Note suggestion requires the hosted free AI provider",
+      "Note suggestion requires the hosted free AI provider with instructions and prompt",
     )
   }
 
-  const partStream = await createHostedNoteSuggestionPartStream(serializablePayload, signal)
+  let partStream: AsyncIterable<unknown>
+  try {
+    partStream = await backgroundOrpcClient.hostedAi.noteSuggestion.streamStructuredObject(
+      { instructions, prompt, temperature },
+      { signal },
+    )
+  } catch (error) {
+    throw normalizeHostedAiError(error)
+  }
 
   // The card renders only the final result, so no onChunk forwarding.
   return consumeStructuredObjectPartStream(partStream, {
