@@ -15,15 +15,17 @@ export function SelectionToolbarSaveSuggestionToggle() {
         "options.floatingButtonAndToolbar.selectionToolbar.saveSuggestion.description",
       )}
     >
-      <Switch
-        checked={selectionToolbar.saveSuggestion.enabled}
-        onCheckedChange={(checked) =>
-          void setSelectionToolbar({
-            ...selectionToolbar,
-            saveSuggestion: { ...selectionToolbar.saveSuggestion, enabled: checked },
-          })
-        }
-      />
+      <div className="flex w-full justify-end">
+        <Switch
+          checked={selectionToolbar.saveSuggestion.enabled}
+          onCheckedChange={(checked) =>
+            void setSelectionToolbar({
+              ...selectionToolbar,
+              saveSuggestion: { ...selectionToolbar.saveSuggestion, enabled: checked },
+            })
+          }
+        />
+      </div>
     </ConfigCard>
   )
 }
