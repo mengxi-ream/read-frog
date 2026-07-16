@@ -3,16 +3,39 @@ import type { SelectionToolbarCustomAction } from "@/types/config/selection-tool
 import { SAVE_SUGGESTION_MAX_NOTES } from "@/utils/save-suggestion/types"
 import { buildStructuredOutputFieldList } from "../custom-action-prompt"
 
-// The hosted note-suggestion endpoint rejects prompts above 32k characters;
-// cap the page-derived free text well below that so candidate action schemas
-// always fit.
+// The hosted note-suggestion endpoint rejects prompts above 32k characters.
+// Cap the page-derived free text, cap each candidate field description, and
+// keep total headroom below the hard limit so a valid request is always sent.
 const SAVE_SUGGESTION_MAX_SELECTION_CHARS = 1500
 const SAVE_SUGGESTION_MAX_PARAGRAPHS_CHARS = 2500
 const SAVE_SUGGESTION_MAX_WEB_TITLE_CHARS = 200
+const SAVE_SUGGESTION_MAX_FIELD_DESCRIPTION_CHARS = 300
+// User-prompt budget, comfortably under the endpoint's 32000-char hard limit.
+const SAVE_SUGGESTION_MAX_PROMPT_CHARS = 30000
 
 function truncateForPrompt(text: string, maxChars: number): string {
   const trimmed = text.trim()
   return trimmed.length > maxChars ? `${trimmed.slice(0, maxChars)}…` : trimmed
+}
+
+/**
+ * Clone an action with each output-field description capped, so a candidate with
+ * very long descriptions cannot alone blow the prompt budget. Only used for the
+ * save-suggestion prompt — the shared field formatter is left untouched.
+ */
+function capActionFieldDescriptions(
+  action: SelectionToolbarCustomAction,
+): SelectionToolbarCustomAction {
+  return {
+    ...action,
+    outputSchema: action.outputSchema.map((field) => ({
+      ...field,
+      description: truncateForPrompt(
+        field.description,
+        SAVE_SUGGESTION_MAX_FIELD_DESCRIPTION_CHARS,
+      ),
+    })),
+  }
 }
 
 export interface SaveSuggestionPromptInput {
@@ -91,12 +114,16 @@ export function buildSaveSuggestionPrompts(input: SaveSuggestionPromptInput): {
     webContent: "",
   }
 
-  const candidatesBlock =
-    input.candidates.length > 0
-      ? input.candidates.map((action) => formatCandidateAction(action, tokens)).join("\n")
-      : "None."
+  const dictionaryBlock = buildStructuredOutputFieldList(input.dictionaryDraft.outputSchema, tokens)
+  const cappedCandidates = input.candidates.map(capActionFieldDescriptions)
 
-  const prompt = `## Web Page Title
+  const assemble = (candidates: SelectionToolbarCustomAction[]) => {
+    const candidatesBlock =
+      candidates.length > 0
+        ? candidates.map((action) => formatCandidateAction(action, tokens)).join("\n")
+        : "None."
+
+    return `## Web Page Title
 ${webTitle}
 
 ## Selected Text
@@ -112,7 +139,19 @@ ${input.targetLanguage}
 ${candidatesBlock}
 
 ## Default Dictionary Schema (only when "createNewDictionaryAction" is true)
-${buildStructuredOutputFieldList(input.dictionaryDraft.outputSchema, tokens)}`
+${dictionaryBlock}`
+  }
+
+  // Drop candidate actions from the end until within budget. A dropped action is
+  // simply not offered as a target (the model falls back to createNewDictionaryAction),
+  // which degrades gracefully instead of sending an over-limit request that fails
+  // and suppresses suggestions for the whole page session.
+  let candidates = cappedCandidates
+  let prompt = assemble(candidates)
+  while (prompt.length > SAVE_SUGGESTION_MAX_PROMPT_CHARS && candidates.length > 0) {
+    candidates = candidates.slice(0, -1)
+    prompt = assemble(candidates)
+  }
 
   return { systemPrompt: SAVE_SUGGESTION_SYSTEM_PROMPT, prompt }
 }

@@ -104,4 +104,51 @@ describe("buildSaveSuggestionPrompts", () => {
     expect(prompt).toContain("s".repeat(1_500))
     expect(prompt).not.toContain("s".repeat(1_501))
   })
+
+  it("caps each candidate field description", () => {
+    const { prompt } = buildSaveSuggestionPrompts({
+      ...input,
+      candidates: [
+        createAction({
+          outputSchema: [
+            {
+              id: "f1",
+              name: "Term",
+              type: "string",
+              description: "d".repeat(2000),
+              speaking: false,
+            },
+          ],
+        }),
+      ],
+    })
+    expect(prompt).toContain("d".repeat(300))
+    expect(prompt).not.toContain("d".repeat(301))
+  })
+
+  it("drops candidate actions from the end to keep the prompt under budget", () => {
+    // Many candidates, each with a long description, would blow the 32k limit.
+    const many = Array.from({ length: 60 }, (_unusedA, i) =>
+      createAction({
+        id: `action-${i}`,
+        name: `Action ${i}`,
+        outputSchema: Array.from({ length: 8 }, (_unusedB, f) => ({
+          id: `a${i}-f${f}`,
+          name: `Field ${f}`,
+          type: "string" as const,
+          description: `desc ${i}-${f} ${"x".repeat(280)}`,
+          speaking: false,
+        })),
+      }),
+    )
+    const { prompt } = buildSaveSuggestionPrompts({ ...input, candidates: many })
+
+    // A valid request is always sent (under the 32000 hard limit, with headroom).
+    expect(prompt.length).toBeLessThanOrEqual(30_000)
+    // The first candidate survives; later ones are dropped to fit.
+    expect(prompt).toContain('- id: "action-0"')
+    expect(prompt).not.toContain('- id: "action-59"')
+    // The default dictionary schema is always retained (createNew fallback).
+    expect(prompt).toContain("Default Dictionary Schema")
+  })
 })
