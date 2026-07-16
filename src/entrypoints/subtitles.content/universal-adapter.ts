@@ -70,7 +70,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private fetchers: SubtitlesFetcherFactories
   private source: SubtitlesSource = SUBTITLES_SOURCE.NATIVE
   private fetcher: SubtitlesFetcher
-  private switching = false
+  private switchOperationId = 0
   private navigationReinitTimeoutId: ReturnType<typeof setTimeout> | null = null
   private hasPendingNavigationReset = false
   private trackChangeRefreshPromise: Promise<void> | null = null
@@ -177,6 +177,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private resetForNavigation() {
+    this.switchOperationId++
     this.clearNavigationReinitTimeout()
     this.destroyScheduler()
     this.clearRuntimeSession()
@@ -428,41 +429,37 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     next: SubtitlesSource,
     analyticsContext?: FeatureUsageContext,
   ): Promise<void> {
-    if (this.switching) {
-      return
-    }
-
     const make = this.fetchers[next]
     if (!make) {
       return
     }
 
-    this.switching = true
-    try {
-      if (next !== this.source) {
-        this.fetcher.cleanup()
-        this.source = next
-        subtitlesStore.set(subtitlesSourceAtom, next)
-        this.fetcher = make()
-        this.clearSourceCache()
-        this.clearRuntimeSession()
-      }
+    const operationId = ++this.switchOperationId
 
-      this.subtitlesScheduler?.start()
-      this.subtitlesScheduler?.show()
-      this.hideNativeSubtitles()
+    if (next !== this.source) {
+      this.fetcher.cleanup()
+      this.source = next
+      subtitlesStore.set(subtitlesSourceAtom, next)
+      this.fetcher = make()
+      this.clearSourceCache()
+      this.clearRuntimeSession()
+    }
 
-      const message = LOADING_MESSAGE[next]
-      if (message) {
-        this.subtitlesScheduler?.setState("loading", { message })
-      }
+    this.subtitlesScheduler?.start()
+    this.subtitlesScheduler?.show()
+    this.hideNativeSubtitles()
 
-      const succeeded = await this.startTranslation(analyticsContext)
-      if (!succeeded && next !== SUBTITLES_SOURCE.NATIVE) {
-        this.revertToNativeSource()
-      }
-    } finally {
-      this.switching = false
+    const message = LOADING_MESSAGE[next]
+    if (message) {
+      this.subtitlesScheduler?.setState("loading", { message })
+    }
+
+    const succeeded = await this.startTranslation(analyticsContext)
+    if (operationId !== this.switchOperationId) {
+      return
+    }
+    if (!succeeded && next !== SUBTITLES_SOURCE.NATIVE) {
+      this.revertToNativeSource()
     }
   }
 
