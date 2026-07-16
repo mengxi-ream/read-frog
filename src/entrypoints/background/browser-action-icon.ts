@@ -5,7 +5,11 @@ import {
   TRANSLATION_STATE_KEY_PREFIX,
 } from "@/utils/constants/storage-keys"
 import { logger } from "@/utils/logger"
-import { getPageTranslationEnabled } from "./page-translation-state"
+import {
+  getPageTranslationEnabled,
+  getPageTranslationState,
+  isPageTranslationStateInUrlScope,
+} from "./page-translation-state"
 
 type ActionIconSize = 16 | 32 | 48
 type ActionIconPathMap = Record<ActionIconSize, string>
@@ -47,6 +51,23 @@ export function registerActionIconListeners() {
         await updateActionIconForPageTranslation(tabId, enabled)
       }),
     )
+  })
+
+  browser.webNavigation.onCommitted.addListener(async (details) => {
+    if (details.frameId !== 0) return
+
+    try {
+      const state = await getPageTranslationState(details.tabId)
+      await updateActionIconForPageTranslation(
+        details.tabId,
+        isPageTranslationStateInUrlScope(state, details.url),
+      )
+    } catch (error) {
+      logger.warn("Failed to restore action icon after navigation", {
+        error,
+        tabId: details.tabId,
+      })
+    }
   })
 }
 
