@@ -252,6 +252,34 @@ describe("background analytics", () => {
     expect(cache.setLastReportedDay).toHaveBeenCalledTimes(2)
   })
 
+  it("records every save-suggestion funnel step on the same day, bypassing the daily cache", async () => {
+    mockEnabledAnalyticsStorage()
+    const { cache } = createMemoryFeatureUsageCache()
+    const { captureFeatureUsedEventInBackground } = createAnalytics({
+      featureUsageCache: cache,
+    })
+
+    await captureFeatureUsedEventInBackground({
+      feature: "save_suggestion",
+      surface: "selection_toolbar",
+      outcome: "success",
+      latency_ms: 100,
+      action_id: "suggestion_shown",
+    })
+    await captureFeatureUsedEventInBackground({
+      feature: "save_suggestion",
+      surface: "selection_toolbar",
+      outcome: "success",
+      latency_ms: 200,
+      action_id: "suggestion_accepted",
+    })
+
+    // Both funnel steps captured; the daily cache is never consulted for them.
+    expect(posthogCaptureMock).toHaveBeenCalledTimes(2)
+    expect(cache.getLastReportedDay).not.toHaveBeenCalled()
+    expect(cache.setLastReportedDay).not.toHaveBeenCalled()
+  })
+
   it("reports a feature again after the Shanghai calendar day changes", async () => {
     mockEnabledAnalyticsStorage()
     const { cache } = createMemoryFeatureUsageCache()

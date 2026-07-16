@@ -4,6 +4,7 @@ import type { AnalyticsFeature, FeatureUsedEventProperties } from "@/types/analy
 import posthog from "posthog-js/dist/module.no-external"
 import { storage } from "#imports"
 import { env } from "@/env"
+import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
   ANALYTICS_ENABLED_STORAGE_KEY,
@@ -24,6 +25,15 @@ import {
 type BackgroundFeatureUsedEventProperties = FeatureUsedEventProperties & {
   target_language?: LangCodeISO6393
 }
+
+/**
+ * Features whose events are multi-step funnels (every step must be recorded) and
+ * are already rate-limited elsewhere, so they bypass the once-per-day-per-feature
+ * adoption throttle instead of losing their second same-day event to it.
+ */
+const FEATURES_BYPASSING_DAILY_FEATURE_CACHE = new Set<AnalyticsFeature>([
+  ANALYTICS_FEATURE.SAVE_SUGGESTION,
+])
 
 interface BackgroundAnalyticsClient {
   capture: (eventName: string, properties: BackgroundFeatureUsedEventProperties) => void
@@ -299,7 +309,15 @@ export function createBackgroundAnalytics(
       return
     }
 
-    if (!runtime.featureUsageCache) {
+    // Funnel features must record every step (e.g. save-suggestion shown vs
+    // accepted), so they skip the once-per-day-per-feature adoption throttle —
+    // the daily cache keys on feature only and would drop the second same-day
+    // event. These features are already rate-limited (save suggestions by their
+    // cooldown), so bypassing does not inflate volume.
+    if (
+      !runtime.featureUsageCache ||
+      FEATURES_BYPASSING_DAILY_FEATURE_CACHE.has(properties.feature)
+    ) {
       await captureFeatureUsedEvent(properties)
       return
     }
