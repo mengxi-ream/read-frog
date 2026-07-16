@@ -1,10 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { SUBTITLES_SOURCE } from "@/utils/constants/subtitles"
 import { subtitlesSourceAtom, subtitlesStore } from "../atoms"
+import { TranslationCoordinator } from "../translation-coordinator"
 import { UniversalVideoAdapter } from "../universal-adapter"
 
 const mocks = vi.hoisted(() => ({
   getLocalConfig: vi.fn<(...args: any[]) => any>(),
+  buildSubtitlesSummaryContextHash: vi.fn<(...args: any[]) => any>(() => null),
+  fetchSubtitlesSummary: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
+  translateSubtitles: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/config/storage", async (importOriginal) => {
@@ -14,6 +18,12 @@ vi.mock("@/utils/config/storage", async (importOriginal) => {
     getLocalConfig: mocks.getLocalConfig,
   }
 })
+
+vi.mock("@/utils/subtitles/processor/translator", () => ({
+  buildSubtitlesSummaryContextHash: mocks.buildSubtitlesSummaryContextHash,
+  fetchSubtitlesSummary: mocks.fetchSubtitlesSummary,
+  translateSubtitles: mocks.translateSubtitles,
+}))
 
 function createAdapter(fetchResult: Array<{ text: string; start: number; end: number }>) {
   const subtitlesFetcher = {
@@ -48,6 +58,10 @@ function attachScheduler(adapter: UniversalVideoAdapter, active: boolean) {
     reset: vi.fn<(...args: any[]) => any>(),
     stop: vi.fn<(...args: any[]) => any>(),
     setState: vi.fn<(...args: any[]) => any>(),
+    supplementSubtitles: vi.fn<(...args: any[]) => any>(),
+    replaceTimeWindow: vi.fn<(...args: any[]) => any>(),
+    getVideoElement: vi.fn<(...args: any[]) => any>(() => ({ currentTime: 0 })),
+    getState: vi.fn<(...args: any[]) => any>(() => "idle"),
   }
 
   ;(adapter as any).subtitlesScheduler = subtitlesScheduler
@@ -57,7 +71,10 @@ function attachScheduler(adapter: UniversalVideoAdapter, active: boolean) {
 describe("universalVideoAdapter", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.stubGlobal("document", { title: "Test video" })
+    vi.stubGlobal("document", {
+      title: "Test video",
+      querySelector: vi.fn<(...args: any[]) => any>(() => null),
+    })
     mocks.getLocalConfig.mockResolvedValue({
       language: {},
       providersConfig: [],
@@ -222,5 +239,46 @@ describe("universalVideoAdapter", () => {
     ;(adapter as any).clearVisibleStateForNavigation()
 
     expect(downloader.dispose).toHaveBeenCalledTimes(1)
+  })
+
+  it("seeds original subtitles into the scheduler before starting translation", async () => {
+    const subtitles = [
+      { text: "I agree.", start: 0, end: 500 },
+      { text: "It is true.", start: 500, end: 1000 },
+    ]
+    const { adapter } = createAdapter(subtitles)
+    const subtitlesScheduler = attachScheduler(adapter, true)
+
+    mocks.getLocalConfig.mockResolvedValue({
+      language: { targetCode: "zh-CN" },
+      providersConfig: [],
+      videoSubtitles: {
+        aiSegmentation: false,
+        providerId: null,
+      },
+    })
+
+    await (adapter as any).getOrLoadSourceSubtitles()
+    ;(adapter as any).sessionSubtitles = (adapter as any).sourceSubtitles
+
+    const startSpy = vi
+      .spyOn(TranslationCoordinator.prototype, "start")
+      .mockImplementation(() => undefined)
+
+    await (adapter as any).processTranslatedSubtitles()
+
+    expect(subtitlesScheduler.supplementSubtitles).toHaveBeenCalled()
+    const seedCall = vi.mocked(subtitlesScheduler.supplementSubtitles).mock.calls[0]
+    const seeded = seedCall[0]
+    expect(seeded.length).toBeGreaterThan(0)
+    expect(seeded.every((fragment: { translation?: string }) => !fragment.translation)).toBe(true)
+    // Seed must upsert (not mergeOnly); translations later use mergeOnly.
+    expect(seedCall[1]?.mergeOnly).toBeFalsy()
+
+    const seedOrder = vi.mocked(subtitlesScheduler.supplementSubtitles).mock.invocationCallOrder[0]
+    const startOrder = startSpy.mock.invocationCallOrder[0]
+    expect(seedOrder).toBeLessThan(startOrder)
+
+    startSpy.mockRestore()
   })
 })

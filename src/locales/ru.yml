@@ -1055,6 +1055,7 @@ subtitles:
     downloadSource: Скачать исходные субтитры
   state:
     loading: Read Frog загрузка субтитров
+    translating: Перевод…
     error: Произошла ошибка
   errors:
     http429: 429 Слишком много запросов к API YouTube субтитров, пожалуйста, попробуйте снова позже

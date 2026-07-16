@@ -96,4 +96,27 @@ describe("segmentation pipeline", () => {
     expect(afterAdvance).toBeGreaterThan(afterStart)
     expect(afterAdvance).toBeLessThan(150_000 + 2 * PROCESS_LOOK_AHEAD_MS)
   })
+
+  it("notifies onChunkSegmented after replacing a processed chunk", async () => {
+    const rawFragments = [
+      { text: "hello", start: 0, end: 500 },
+      { text: "world", start: 500, end: 1000 },
+    ]
+    const onChunkSegmented = vi.fn<(...args: any[]) => any>()
+
+    const pipeline = new SegmentationPipeline({
+      baselineFragments: [{ text: "hello world", start: 0, end: 1000 }],
+      rawFragments,
+      getVideoElement: () => ({ currentTime: 0 }) as HTMLVideoElement,
+      getSourceLanguage: () => "en",
+      onChunkSegmented,
+    })
+
+    await (pipeline as any).processNextChunk(0)
+
+    expect(onChunkSegmented).toHaveBeenCalledTimes(1)
+    expect(onChunkSegmented).toHaveBeenCalledWith(rawFragments, [
+      { text: "hello world", start: 0, end: 1000 },
+    ])
+  })
 })

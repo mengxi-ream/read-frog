@@ -650,17 +650,25 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       subtitlesTextContent: this.sessionSubtitles.map((f) => f.text).join(""),
     }
 
+    this.sessionProcessedFragments = [...this.sourceProcessedSubtitles]
+
+    // Seed originals immediately so bilingual/originalOnly can render before translations arrive.
+    scheduler.supplementSubtitles(this.sessionProcessedFragments)
+
     if (useAiSegmentation) {
-      this.sessionProcessedFragments = [...this.sourceProcessedSubtitles]
       this.segmentationPipeline = new SegmentationPipeline({
         baselineFragments: this.sourceProcessedSubtitles,
         rawFragments: this.sessionSubtitles,
         getVideoElement: () => this.subtitlesScheduler?.getVideoElement() ?? null,
         getSourceLanguage: () => this.fetcher.getSourceLanguage(),
         preSegmented: this.fetcher.isPreSegmented?.(),
+        onChunkSegmented: (chunk, nextFragments) => {
+          const chunkStart = chunk[0].start
+          const chunkEnd = chunk.at(-1)!.end
+          scheduler.replaceTimeWindow(chunkStart, chunkEnd, nextFragments)
+          this.translationCoordinator?.noteFragmentListChanged()
+        },
       })
-    } else {
-      this.sessionProcessedFragments = [...this.sourceProcessedSubtitles]
     }
 
     this.translationCoordinator = new TranslationCoordinator({
@@ -671,7 +679,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       getVideoElement: () => scheduler.getVideoElement(),
       getCurrentState: () => scheduler.getState(),
       segmentationPipeline: this.segmentationPipeline,
-      onTranslated: (fragments) => scheduler.supplementSubtitles(fragments),
+      onTranslated: (fragments) => scheduler.supplementSubtitles(fragments, { mergeOnly: true }),
       onStateChange: (state, data) => scheduler.setState(state, data),
     })
     this.translationCoordinator.start(videoContext)

@@ -1055,6 +1055,7 @@ subtitles:
     downloadSource: Tải phụ đề gốc
   state:
     loading: Read Frog đang tải phụ đề
+    translating: Đang dịch…
     error: Đã xảy ra lỗi
   errors:
     http429: 429 Đã gửi quá nhiều yêu cầu đến API phụ đề Youtube, vui lòng thử lại sau

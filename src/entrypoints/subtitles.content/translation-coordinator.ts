@@ -79,6 +79,32 @@ export class TranslationCoordinator {
     this.failedStarts.clear()
   }
 
+  /**
+   * Drop bookkeeping for starts that no longer exist after AI re-segmentation,
+   * then re-evaluate nearby translation.
+   */
+  noteFragmentListChanged() {
+    const validStarts = new Set(this.getFragments().map((fragment) => fragment.start))
+
+    for (const start of [...this.translatedStarts]) {
+      if (!validStarts.has(start)) {
+        this.translatedStarts.delete(start)
+      }
+    }
+    for (const start of [...this.translatingStarts]) {
+      if (!validStarts.has(start)) {
+        this.translatingStarts.delete(start)
+      }
+    }
+    for (const start of [...this.failedStarts]) {
+      if (!validStarts.has(start)) {
+        this.failedStarts.delete(start)
+      }
+    }
+
+    this.handleTranslationTick()
+  }
+
   private handleTranslationTick = () => {
     const video = this.getVideoElement()
     if (!video) return
@@ -125,11 +151,19 @@ export class TranslationCoordinator {
 
     try {
       const translated = await translateSubtitles(batch, this.videoContext)
-      translated.forEach((f) => {
+      // Drop results for starts removed by AI re-segmentation while the request was in flight.
+      const validStarts = new Set(this.getFragments().map((fragment) => fragment.start))
+      const stillValid = translated.filter((fragment) => validStarts.has(fragment.start))
+
+      stillValid.forEach((f) => {
         this.translatingStarts.delete(f.start)
         this.translatedStarts.add(f.start)
       })
-      this.onTranslated(translated)
+      // Starts that disappeared mid-request should not stay "translating" forever.
+      batch.forEach((f) => {
+        this.translatingStarts.delete(f.start)
+      })
+      this.onTranslated(stillValid)
 
       const latestTimeMs = this.getCurrentVideoTimeMs(currentTimeMs)
       const latestFragments = this.getFragments()
@@ -153,6 +187,8 @@ export class TranslationCoordinator {
       this.onStateChange("error", { message: errorMessage })
     } finally {
       this.isTranslating = false
+      // Kick the next nearby batch without waiting for the next timeupdate.
+      this.handleTranslationTick()
     }
   }
 
@@ -183,13 +219,14 @@ export class TranslationCoordinator {
       return
     }
 
-    // Gap: keep loading if next cue needs translation
-    const nextCue = fragments.find((f) => f.start > timeMs)
-    const nextState: SubtitlesState =
-      nextCue && !this.isCueResolved(nextCue.start) ? "loading" : "idle"
-    if (nextState === this.lastEmittedState) return
-    this.lastEmittedState = nextState
-    this.onStateChange(nextState)
+    // Gap / music intro / before first cue: never keep the corner loading badge up.
+    // Adapter may have set "loading" before fragments were ready; lastEmittedState can
+    // still be "idle" while the scheduler state remains "loading" — always clear it.
+    if (this.lastEmittedState === "idle" && this.getCurrentState() !== "loading") {
+      return
+    }
+    this.lastEmittedState = "idle"
+    this.onStateChange("idle")
   }
 
   private handleSeek = () => {

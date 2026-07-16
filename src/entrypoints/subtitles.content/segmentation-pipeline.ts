@@ -4,6 +4,11 @@ import { PROCESS_LOOK_AHEAD_MS } from "@/utils/constants/subtitles"
 import { aiSegmentBlock } from "@/utils/subtitles/processor/ai-segmentation"
 import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
 
+export type ChunkSegmentedHandler = (
+  chunk: SubtitlesFragment[],
+  nextFragments: SubtitlesFragment[],
+) => void
+
 export class SegmentationPipeline {
   // Segmented results, read by translation pipeline
   processedFragments: SubtitlesFragment[] = []
@@ -17,6 +22,7 @@ export class SegmentationPipeline {
   private getVideoElement: () => HTMLVideoElement | null
   private getSourceLanguage: () => string
   private preSegmented: boolean
+  private onChunkSegmented: ChunkSegmentedHandler | null
 
   constructor(options: {
     baselineFragments?: SubtitlesFragment[]
@@ -24,12 +30,14 @@ export class SegmentationPipeline {
     getVideoElement: () => HTMLVideoElement | null
     getSourceLanguage: () => string
     preSegmented?: boolean
+    onChunkSegmented?: ChunkSegmentedHandler
   }) {
     this.rawFragments = options.rawFragments
     this.processedFragments = [...(options.baselineFragments ?? [])]
     this.getVideoElement = options.getVideoElement
     this.getSourceLanguage = options.getSourceLanguage
     this.preSegmented = options.preSegmented ?? false
+    this.onChunkSegmented = options.onChunkSegmented ?? null
   }
 
   get isRunning(): boolean {
@@ -116,6 +124,8 @@ export class SegmentationPipeline {
     )
     this.processedFragments.push(...nextFragments)
     this.processedFragments.sort((a, b) => a.start - b.start)
+
+    this.onChunkSegmented?.(chunk, nextFragments)
   }
 
   private findNextChunk(currentTimeMs: number): SubtitlesFragment[] {

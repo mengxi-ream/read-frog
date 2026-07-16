@@ -13,6 +13,8 @@ export class SubtitlesScheduler {
   private videoElement: HTMLVideoElement
   private subtitles: SubtitlesFragment[] = []
   private currentIndex = -1
+  /** Stable identity for sticky active-cue selection across array rewrites. */
+  private currentStart: number | null = null
   private active = false
   private currentState: StateData = {
     state: "idle",
@@ -30,31 +32,42 @@ export class SubtitlesScheduler {
     this.updateVisibility()
   }
 
-  supplementSubtitles(subtitles: SubtitlesFragment[]) {
+  /**
+   * @param mergeOnly - when true, only update translations on existing cues
+   *   (do not insert). Used for on-demand translation results so stale starts
+   *   from an in-flight batch cannot reappear after AI re-segmentation.
+   */
+  supplementSubtitles(subtitles: SubtitlesFragment[], options?: { mergeOnly?: boolean }) {
     if (subtitles.length === 0) {
       return
     }
 
+    const mergeOnly = options?.mergeOnly === true
     const existingMap = new Map(this.subtitles.map((s) => [s.start, s]))
-    const currentSubtitle = this.currentIndex >= 0 ? this.subtitles[this.currentIndex] : null
     let currentSubtitleUpdated = false
 
     for (const newSub of subtitles) {
       const existing = existingMap.get(newSub.start)
 
       if (!existing) {
+        if (mergeOnly) {
+          continue
+        }
         this.subtitles.push(newSub)
+        existingMap.set(newSub.start, newSub)
         continue
       }
 
-      if (newSub.translation) {
+      // Apply empty-string translations too (error fallback for bilingual).
+      if (newSub.translation !== undefined) {
         const updatedSub = { ...existing, translation: newSub.translation }
         const idx = this.subtitles.findIndex((s) => s.start === existing.start)
         if (idx >= 0) {
           this.subtitles[idx] = updatedSub
+          existingMap.set(existing.start, updatedSub)
         }
 
-        if (currentSubtitle && existing.start === currentSubtitle.start) {
+        if (this.currentStart !== null && existing.start === this.currentStart) {
           currentSubtitleUpdated = true
         }
       }
@@ -65,8 +78,46 @@ export class SubtitlesScheduler {
 
     // Force update store if current subtitle's translation was modified
     if (currentSubtitleUpdated) {
+      this.syncCurrentIndexFromStart()
       this.updateCurrentSubtitle()
     }
+  }
+
+  /**
+   * Replace cues whose start falls in [windowStartMs, windowEndMs] with nextFragments.
+   * Protects the currently displayed cue so AI re-segmentation does not jump mid-line.
+   */
+  replaceTimeWindow(
+    windowStartMs: number,
+    windowEndMs: number,
+    nextFragments: SubtitlesFragment[],
+  ) {
+    const timeMs = this.videoElement.currentTime * 1000
+    const protectedCue = this.getProtectedActiveCue(timeMs)
+
+    this.subtitles = this.subtitles.filter((fragment) => {
+      if (protectedCue && fragment.start === protectedCue.start) {
+        return true
+      }
+      return fragment.start < windowStartMs || fragment.start > windowEndMs
+    })
+
+    const existingStarts = new Set(this.subtitles.map((fragment) => fragment.start))
+
+    for (const next of nextFragments) {
+      if (protectedCue && next.start === protectedCue.start) {
+        // Keep the protected original text until its natural end.
+        continue
+      }
+      if (existingStarts.has(next.start)) {
+        continue
+      }
+      this.subtitles.push(next)
+      existingStarts.add(next.start)
+    }
+
+    this.subtitles.sort((a, b) => a.start - b.start)
+    this.updateSubtitles(this.videoElement.currentTime)
   }
 
   getVideoElement(): HTMLVideoElement {
@@ -118,7 +169,25 @@ export class SubtitlesScheduler {
     this.setState("idle")
     this.subtitles = []
     this.currentIndex = -1
+    this.currentStart = null
     this.updateCurrentSubtitle()
+  }
+
+  private getProtectedActiveCue(timeMs: number): SubtitlesFragment | null {
+    if (this.currentStart === null) {
+      return null
+    }
+
+    const current = this.subtitles.find((fragment) => fragment.start === this.currentStart)
+    if (!current) {
+      return null
+    }
+
+    if (current.start <= timeMs && current.end > timeMs) {
+      return current
+    }
+
+    return null
   }
 
   private attachListeners() {
@@ -145,15 +214,43 @@ export class SubtitlesScheduler {
     this.updateSubtitles(currentTime)
   }
 
+  private syncCurrentIndexFromStart() {
+    if (this.currentStart === null) {
+      this.currentIndex = -1
+      return
+    }
+
+    this.currentIndex = this.subtitles.findIndex((fragment) => fragment.start === this.currentStart)
+    if (this.currentIndex < 0) {
+      this.currentStart = null
+    }
+  }
+
   private updateSubtitles(currentTime: number) {
     const timeMs = currentTime * 1000
     subtitlesStore.set(currentTimeMsAtom, timeMs)
 
+    // Sticky: keep the active cue while playback remains inside its range,
+    // even if a re-segmented cue also covers this timestamp.
+    if (this.currentStart !== null) {
+      const sticky = this.subtitles.find((fragment) => fragment.start === this.currentStart)
+      if (sticky && sticky.start <= timeMs && sticky.end > timeMs) {
+        const stickyIndex = this.subtitles.indexOf(sticky)
+        if (stickyIndex !== this.currentIndex) {
+          this.currentIndex = stickyIndex
+          this.updateCurrentSubtitle()
+        }
+        return
+      }
+    }
+
     const subtitle = this.subtitles.find((sub) => sub.start <= timeMs && sub.end > timeMs)
     const newIndex = subtitle ? this.subtitles.indexOf(subtitle) : -1
+    const newStart = subtitle?.start ?? null
 
-    if (newIndex !== this.currentIndex) {
+    if (newIndex !== this.currentIndex || newStart !== this.currentStart) {
       this.currentIndex = newIndex
+      this.currentStart = newStart
       this.updateCurrentSubtitle()
     }
   }

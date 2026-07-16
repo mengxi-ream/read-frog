@@ -1055,6 +1055,7 @@ subtitles:
     downloadSource: 元字幕をダウンロード
   state:
     loading: Read Frog 字幕読み込み中
+    translating: 翻訳中…
     error: エラーが発生しました
   errors:
     http429: 429 YouTube字幕APIへのリクエストが多すぎます。しばらくしてから再試行してください
