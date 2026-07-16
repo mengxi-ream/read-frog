@@ -6,7 +6,7 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { CUSTOM_ACTION_TEMPLATES } from "@/utils/constants/custom-action-templates"
 import { streamBackgroundNoteSuggestion } from "@/utils/content-script/background-stream-client"
 import { logger } from "@/utils/logger"
-import { FREE_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
+import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
 import { isSaveSuggestionEligible } from "@/utils/save-suggestion/cooldown"
 import { saveSuggestionEnvelopeSchema } from "@/utils/save-suggestion/types"
 import { validateSaveSuggestion } from "@/utils/save-suggestion/validate"
@@ -110,7 +110,7 @@ export function useSaveSuggestion() {
       // prompt, the validation schema, and the action created at dialog
       // confirm all share identical fields.
       const enabledActions = config.customActions.filter((action) => action.enabled !== false)
-      const dictionaryDraft = dictionaryTemplate.createAction(FREE_AI_PROVIDER_ID)
+      const dictionaryDraft = dictionaryTemplate.createAction(BUILT_IN_AI_PROVIDER_ID)
 
       const { systemPrompt, prompt } = buildSaveSuggestionPrompts({
         selection: input.selectionText,
@@ -123,7 +123,7 @@ export function useSaveSuggestion() {
 
       const snapshot = await streamBackgroundNoteSuggestion(
         {
-          providerId: FREE_AI_PROVIDER_ID,
+          providerId: BUILT_IN_AI_PROVIDER_ID,
           instructions: systemPrompt,
           prompt,
         },

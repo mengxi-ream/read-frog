@@ -1,11 +1,17 @@
 // @vitest-environment jsdom
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react"
-import { atom } from "jotai"
+import { atom, useAtomValue } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE } from "@/entrypoints/selection.content/overlay-layers"
+import { selectionSessionAtom } from "../atoms"
 import { SelectionToolbar } from "../index"
 
 const MOCK_SELECTED_TEXT = "Selected Text"
+
+function SelectionSessionProbe() {
+  const session = useAtomValue(selectionSessionAtom)
+  return <div data-testid="selection-session">{session?.selectionSnapshot.text ?? "empty"}</div>
+}
 
 // Mock child components
 vi.mock("../translate-button", () => ({
@@ -563,6 +569,35 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 describe("selectionToolbar - positioning logic", () => {
   let originalRequestAnimationFrame: typeof requestAnimationFrame
   let rafCallbacks: FrameRequestCallback[]
+  let selectionRects: DOMRect[]
+  let rangeInvalid: boolean
+  let getClientRectsDescriptor: PropertyDescriptor | undefined
+  let getBoundingClientRectDescriptor: PropertyDescriptor | undefined
+  let visualViewportDescriptor: PropertyDescriptor | undefined
+  let resizeObserverDescriptor: PropertyDescriptor | undefined
+
+  const createRect = ({
+    left,
+    top,
+    width,
+    height,
+  }: {
+    left: number
+    top: number
+    width: number
+    height: number
+  }) =>
+    ({
+      x: left,
+      y: top,
+      top,
+      right: left + width,
+      bottom: top + height,
+      left,
+      width,
+      height,
+      toJSON: () => ({}),
+    }) as DOMRect
 
   beforeEach(() => {
     // Mock requestAnimationFrame to execute callbacks synchronously
@@ -587,6 +622,31 @@ describe("selectionToolbar - positioning logic", () => {
       containsNode: vi.fn<(...args: any[]) => any>(() => true),
     }))
 
+    selectionRects = [createRect({ left: 100, top: 100, width: 100, height: 20 })]
+    rangeInvalid = false
+    getClientRectsDescriptor = Object.getOwnPropertyDescriptor(Range.prototype, "getClientRects")
+    getBoundingClientRectDescriptor = Object.getOwnPropertyDescriptor(
+      Range.prototype,
+      "getBoundingClientRect",
+    )
+    visualViewportDescriptor = Object.getOwnPropertyDescriptor(window, "visualViewport")
+    resizeObserverDescriptor = Object.getOwnPropertyDescriptor(globalThis, "ResizeObserver")
+    Reflect.deleteProperty(window, "visualViewport")
+    Object.defineProperty(Range.prototype, "getClientRects", {
+      configurable: true,
+      value: () => {
+        if (rangeInvalid) throw new Error("detached range")
+        return selectionRects
+      },
+    })
+    Object.defineProperty(Range.prototype, "getBoundingClientRect", {
+      configurable: true,
+      value: () => {
+        if (rangeInvalid) throw new Error("detached range")
+        return selectionRects[0] ?? createRect({ left: 0, top: 0, width: 0, height: 0 })
+      },
+    })
+
     // Mock window dimensions
     Object.defineProperty(window, "innerHeight", {
       writable: true,
@@ -594,20 +654,19 @@ describe("selectionToolbar - positioning logic", () => {
       value: 800,
     })
 
-    Object.defineProperty(document.documentElement, "clientWidth", {
+    Object.defineProperty(window, "innerWidth", {
       writable: true,
       configurable: true,
       value: 1200,
     })
 
-    // Mock scrollY and scrollX
-    Object.defineProperty(window, "scrollY", {
+    Object.defineProperty(window, "scrollX", {
       writable: true,
       configurable: true,
       value: 0,
     })
 
-    Object.defineProperty(window, "scrollX", {
+    Object.defineProperty(window, "scrollY", {
       writable: true,
       configurable: true,
       value: 0,
@@ -618,6 +677,30 @@ describe("selectionToolbar - positioning logic", () => {
     cleanup()
     window.requestAnimationFrame = originalRequestAnimationFrame
     rafCallbacks = []
+    if (getClientRectsDescriptor) {
+      Object.defineProperty(Range.prototype, "getClientRects", getClientRectsDescriptor)
+    } else {
+      Reflect.deleteProperty(Range.prototype, "getClientRects")
+    }
+    if (getBoundingClientRectDescriptor) {
+      Object.defineProperty(
+        Range.prototype,
+        "getBoundingClientRect",
+        getBoundingClientRectDescriptor,
+      )
+    } else {
+      Reflect.deleteProperty(Range.prototype, "getBoundingClientRect")
+    }
+    if (visualViewportDescriptor) {
+      Object.defineProperty(window, "visualViewport", visualViewportDescriptor)
+    } else {
+      Reflect.deleteProperty(window, "visualViewport")
+    }
+    if (resizeObserverDescriptor) {
+      Object.defineProperty(globalThis, "ResizeObserver", resizeObserverDescriptor)
+    } else {
+      Reflect.deleteProperty(globalThis, "ResizeObserver")
+    }
     vi.clearAllMocks()
   })
 
@@ -628,14 +711,25 @@ describe("selectionToolbar - positioning logic", () => {
     endX: number,
     endY: number,
   ) => {
+    selectionRects = [
+      createRect({
+        left: Math.min(startX, endX),
+        top: Math.min(startY, endY),
+        width: Math.max(Math.abs(endX - startX), 1),
+        height: Math.max(Math.abs(endY - startY), 20),
+      }),
+    ]
+
     const mouseDownEvent = new MouseEvent("mousedown", {
       bubbles: true,
+      composed: true,
       clientX: startX,
       clientY: startY,
     })
 
     const mouseUpEvent = new MouseEvent("mouseup", {
       bubbles: true,
+      composed: true,
       clientX: endX,
       clientY: endY,
     })
@@ -705,6 +799,12 @@ describe("selectionToolbar - positioning logic", () => {
       expect(topValue).toBeGreaterThanOrEqual(175) // Allow some margin for clamping
       expect(topValue).toBeLessThanOrEqual(225) // Allow some margin for clamping
     })
+  })
+
+  it("renders inside a fixed viewport host", () => {
+    render(<SelectionToolbar />)
+
+    expect(getToolbarElement().parentElement).toHaveClass("fixed", "inset-0", "pointer-events-none")
   })
 
   it("should keep the bottom-right toolbar below the cursor to reduce accidental clicks", async () => {
@@ -929,9 +1029,8 @@ describe("selectionToolbar - positioning logic", () => {
       const mockToolbarHeight = 50
       mockToolbarDimensions(toolbar, 200, mockToolbarHeight)
 
-      // Trigger position update with mocked dimensions
-      // Simulate what updatePosition does: bottomBoundary = scrollY + viewportHeight - tooltipHeight - MARGIN = 0 + 800 - 50 - 25 = 725
-      // Since mouseUp is at y=795, toolbar should be clamped to top <= 725
+      // Trigger position update with mocked dimensions. The viewport bottom boundary is
+      // 800 - 50 - 25 = 725, so a mouseup at y=795 must be clamped.
       // Manually trigger updatePosition by dispatching a scroll event
       act(() => {
         window.dispatchEvent(new Event("scroll"))
@@ -945,8 +1044,7 @@ describe("selectionToolbar - positioning logic", () => {
       const toolbar = getToolbarElement()
       const topValue = Number.parseInt(toolbar.style.top, 10)
       const toolbarHeight = toolbar.offsetHeight
-      // Should be clamped within bottom boundary
-      // bottomBoundary = scrollY + viewportHeight - tooltipHeight - MARGIN = 0 + 800 - 50 - 25 = 725
+      // Should be clamped within the visual viewport bottom boundary.
       expect(topValue).toBeLessThanOrEqual(725)
       expect(topValue + toolbarHeight + 25).toBeLessThanOrEqual(800) // top + height + margin <= innerHeight
     })
@@ -962,7 +1060,6 @@ describe("selectionToolbar - positioning logic", () => {
 
     const target = screen.getByTestId("test-element")
 
-    // Initial selection at client position (100, 100) with scrollY = 0
     await triggerMouseDownAndUp(target, 100, 100, 200, 200)
 
     await waitFor(() => {
@@ -971,13 +1068,8 @@ describe("selectionToolbar - positioning logic", () => {
     })
 
     const toolbar = getToolbarElement()
-
-    // Simulate scroll down by 100px
-    Object.defineProperty(window, "scrollY", {
-      writable: true,
-      configurable: true,
-      value: 100,
-    })
+    const initialTop = Number.parseInt(toolbar.style.top, 10)
+    selectionRects = [createRect({ left: 100, top: 0, width: 100, height: 100 })]
 
     await act(async () => {
       window.dispatchEvent(new Event("scroll"))
@@ -986,14 +1078,11 @@ describe("selectionToolbar - positioning logic", () => {
       callbacks.forEach((cb) => cb(0))
     })
 
-    // After scrolling, the toolbar position should be updated
     const updatedTop = Number.parseInt(toolbar.style.top, 10)
-    // The toolbar should be clamped to at least scrollY + MARGIN (100 + 10 = 110)
-    expect(updatedTop).toBeGreaterThanOrEqual(110)
+    expect(updatedTop).toBe(initialTop - 100)
   })
 
-  it("should account for scroll offset when positioning toolbar", async () => {
-    // Set initial scroll position
+  it("should keep client coordinates independent from window scroll offsets", async () => {
     Object.defineProperty(window, "scrollY", {
       writable: true,
       configurable: true,
@@ -1015,18 +1104,226 @@ describe("selectionToolbar - positioning logic", () => {
 
     const target = screen.getByTestId("test-element")
 
-    // Select at client position (100, 100)
-    // Document position should be (150, 300) considering scroll
     await triggerMouseDownAndUp(target, 100, 100, 100, 100)
 
     await waitFor(() => {
       const toolbar = getToolbarElement()
       expect(toolbar).toBeTruthy()
-      // Toolbar position should account for scroll offset
       const topValue = Number.parseInt(toolbar.style.top, 10)
-      // Should be at least scrollY + MARGIN (200 + 10 = 210)
-      expect(topValue).toBeGreaterThanOrEqual(210)
+      expect(topValue).toBe(120)
     })
+  })
+
+  it("should follow a selection when body is the scroll container", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    await triggerMouseDownAndUp(screen.getByTestId("test-element"), 100, 100, 200, 200)
+    const toolbar = getToolbarElement()
+    const initialTop = Number.parseInt(toolbar.style.top, 10)
+    selectionRects = [createRect({ left: 100, top: 50, width: 100, height: 100 })]
+
+    await act(async () => {
+      document.body.dispatchEvent(new Event("scroll"))
+      const callbacks = [...rafCallbacks]
+      rafCallbacks = []
+      callbacks.forEach((callback) => callback(0))
+    })
+
+    expect(Number.parseInt(toolbar.style.top, 10)).toBe(initialTop - 50)
+  })
+
+  it("should follow a selection inside a nested scroll container", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="scroller">
+          <div data-testid="test-element">Test content</div>
+        </div>
+      </div>,
+    )
+
+    await triggerMouseDownAndUp(screen.getByTestId("test-element"), 100, 100, 200, 200)
+    const toolbar = getToolbarElement()
+    const initialTop = Number.parseInt(toolbar.style.top, 10)
+    selectionRects = [createRect({ left: 100, top: 25, width: 100, height: 100 })]
+
+    await act(async () => {
+      screen.getByTestId("scroller").dispatchEvent(new Event("scroll"))
+      const callbacks = [...rafCallbacks]
+      rafCallbacks = []
+      callbacks.forEach((callback) => callback(0))
+    })
+
+    expect(Number.parseInt(toolbar.style.top, 10)).toBe(initialTop - 75)
+  })
+
+  it("should follow a selection when a scroller lives inside shadow DOM", async () => {
+    const shadowHost = document.createElement("div")
+    const shadowRoot = shadowHost.attachShadow({ mode: "open" })
+    const target = document.createElement("span")
+    const textNode = document.createTextNode("Shadow selection")
+    target.append(textNode)
+    shadowRoot.append(target)
+    document.body.append(shadowHost)
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: () => MOCK_SELECTED_TEXT,
+      getRangeAt: () => ({
+        startContainer: textNode,
+        startOffset: 0,
+        endContainer: textNode,
+        endOffset: textNode.length,
+      }),
+      containsNode: () => true,
+    }))
+
+    render(<SelectionToolbar />)
+    await triggerMouseDownAndUp(target, 100, 100, 200, 200)
+    const toolbar = getToolbarElement()
+    const initialTop = Number.parseInt(toolbar.style.top, 10)
+    selectionRects = [createRect({ left: 100, top: 20, width: 100, height: 100 })]
+
+    await act(async () => {
+      shadowRoot.dispatchEvent(new Event("scroll"))
+      const callbacks = [...rafCallbacks]
+      rafCallbacks = []
+      callbacks.forEach((callback) => callback(0))
+    })
+
+    expect(Number.parseInt(toolbar.style.top, 10)).toBe(initialTop - 80)
+  })
+
+  it("should close after the selection leaves the viewport and stay closed", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <SelectionSessionProbe />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    await triggerMouseDownAndUp(screen.getByTestId("test-element"), 100, 100, 200, 200)
+    const toolbar = getToolbarElement()
+    selectionRects = [createRect({ left: 100, top: -200, width: 100, height: 100 })]
+
+    await act(async () => {
+      document.body.dispatchEvent(new Event("scroll"))
+      const callbacks = [...rafCallbacks]
+      rafCallbacks = []
+      callbacks.forEach((callback) => callback(0))
+    })
+
+    expect(toolbar).toHaveClass("pointer-events-none", "opacity-0")
+    expect(screen.getByTestId("selection-session")).toHaveTextContent(MOCK_SELECTED_TEXT)
+
+    selectionRects = [createRect({ left: 100, top: 100, width: 100, height: 100 })]
+    await act(async () => {
+      document.body.dispatchEvent(new Event("scroll"))
+      const callbacks = [...rafCallbacks]
+      rafCallbacks = []
+      callbacks.forEach((callback) => callback(0))
+    })
+
+    expect(toolbar).toHaveClass("pointer-events-none", "opacity-0")
+  })
+
+  it("should clear a selection session when its range becomes invalid", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <SelectionSessionProbe />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    await triggerMouseDownAndUp(screen.getByTestId("test-element"), 100, 100, 200, 200)
+    expect(screen.getByTestId("selection-session")).toHaveTextContent(MOCK_SELECTED_TEXT)
+    rangeInvalid = true
+
+    await act(async () => {
+      document.body.dispatchEvent(new Event("scroll"))
+      const callbacks = [...rafCallbacks]
+      rafCallbacks = []
+      callbacks.forEach((callback) => callback(0))
+    })
+
+    expect(getToolbarElement()).toHaveClass("pointer-events-none", "opacity-0")
+    expect(screen.getByTestId("selection-session")).toHaveTextContent("empty")
+  })
+
+  it("should remeasure and clamp when the visual viewport is resized", async () => {
+    const visualViewport = Object.assign(new EventTarget(), {
+      offsetLeft: 0,
+      offsetTop: 0,
+      width: 1200,
+      height: 800,
+    })
+    Object.defineProperty(window, "visualViewport", {
+      configurable: true,
+      value: visualViewport,
+    })
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    await triggerMouseDownAndUp(screen.getByTestId("test-element"), 800, 500, 850, 570)
+    const toolbar = getToolbarElement()
+    mockToolbarDimensions(toolbar, 200, 50)
+    visualViewport.width = 860
+    visualViewport.height = 600
+
+    await act(async () => {
+      visualViewport.dispatchEvent(new Event("resize"))
+      const callbacks = [...rafCallbacks]
+      rafCallbacks = []
+      callbacks.forEach((callback) => callback(0))
+    })
+
+    expect(toolbar.style.left).toBe("635px")
+    expect(toolbar.style.top).toBe("525px")
+  })
+
+  it("should re-clamp when ResizeObserver reports a toolbar size change", async () => {
+    let resizeCallback: ResizeObserverCallback | null = null
+    class ResizeObserverMock {
+      constructor(callback: ResizeObserverCallback) {
+        resizeCallback = callback
+      }
+
+      observe() {}
+      disconnect() {}
+    }
+    Object.defineProperty(globalThis, "ResizeObserver", {
+      configurable: true,
+      value: ResizeObserverMock,
+    })
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    await triggerMouseDownAndUp(screen.getByTestId("test-element"), 900, 600, 1100, 700)
+    const toolbar = getToolbarElement()
+    mockToolbarDimensions(toolbar, 300, 100)
+
+    await act(async () => {
+      resizeCallback?.([], {} as ResizeObserver)
+      const callbacks = [...rafCallbacks]
+      rafCallbacks = []
+      callbacks.forEach((callback) => callback(0))
+    })
+
+    expect(toolbar.style.left).toBe("875px")
+    expect(toolbar.style.top).toBe("675px")
   })
 
   it("should maintain toolbar visibility when window is resized", async () => {

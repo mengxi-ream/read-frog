@@ -176,9 +176,9 @@ options:
       invalidJson: Geçersiz JSON formatı
     providers:
       name:
-        freeAi: Ücretsiz AI Hizmeti
+        builtInAi: Yerleşik AI
       attribution:
-        freeAi: Atlas Cloud tarafından sağlanır. Şu anda yalnızca özel AI eylemleri için kullanılabilir. Sınırsız deneyimin kilidini açmak için resmi web sitesinden uygun maliyetli kredi satın alabilirsiniz.
+        builtInAi: Atlas Cloud tarafından sağlanır. Şu anda yalnızca özel AI eylemleri için kullanılabilir. Sınırsız deneyimin kilidini açmak için resmi web sitesinden uygun maliyetli kredi satın alabilirsiniz.
       description:
         openai: GPT-4o gibi modeller sağlar
         azure: Azure dağıtımlarınız üzerinden OpenAI modelleri

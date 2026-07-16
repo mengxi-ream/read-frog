@@ -25,7 +25,7 @@ import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { backgroundOrpcClient } from "@/utils/orpc/background-client"
 import { getModelById } from "@/utils/providers/model"
-import { isFreeAiProviderId } from "@/utils/providers/provider-registry"
+import { isBuiltInAiProviderId } from "@/utils/providers/provider-registry"
 import { saveSuggestionEnvelopeSchema } from "@/utils/save-suggestion/types"
 
 const invalidStreamStartPayloadMessage = "Invalid stream start payload"
@@ -573,7 +573,7 @@ export async function runStreamTextInBackground(
     throw new DOMException("stream aborted", "AbortError")
   }
 
-  const partStream = isFreeAiProviderId(serializablePayload.providerId)
+  const partStream = isBuiltInAiProviderId(serializablePayload.providerId)
     ? await createHostedTextPartStream(serializablePayload, signal)
     : await createLocalTextPartStream(serializablePayload, options)
 
@@ -643,7 +643,7 @@ export async function runStructuredObjectStreamInBackground(
   }
 
   const objectSchema = createStructuredObjectSchema(serializablePayload.outputSchema)
-  const partStream = isFreeAiProviderId(serializablePayload.providerId)
+  const partStream = isBuiltInAiProviderId(serializablePayload.providerId)
     ? await createHostedStructuredObjectPartStream(serializablePayload, signal)
     : await createLocalStructuredObjectPartStream(serializablePayload, objectSchema, options)
 
@@ -665,13 +665,13 @@ export async function runNoteSuggestionStreamInBackground(
     throw new DOMException("stream aborted", "AbortError")
   }
 
-  // Note suggestion always runs on the hosted free AI: the fixed nested envelope
+  // Note suggestion always runs on the hosted built-in AI: the fixed nested envelope
   // schema lives server-side, so there is no local-provider path and no
   // client-sent outputSchema. The shared consume/parse/validate logic is reused.
-  if (!isFreeAiProviderId(providerId) || !instructions || !prompt) {
+  if (!isBuiltInAiProviderId(providerId) || !instructions || !prompt) {
     throw new BackgroundStreamError(
       "invalid_request",
-      "Note suggestion requires the hosted free AI provider with instructions and prompt",
+      "Note suggestion requires the hosted built-in AI provider with instructions and prompt",
     )
   }
 

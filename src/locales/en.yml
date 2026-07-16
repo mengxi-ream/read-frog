@@ -177,9 +177,9 @@ options:
       invalidJson: Invalid JSON format
     providers:
       name:
-        freeAi: Free AI Service
+        builtInAi: Built-in AI
       attribution:
-        freeAi: Provided by Atlas Cloud. Currently only available for Custom AI Actions. To unlock an unrestricted experience, purchase highly cost-effective credits on the official website.
+        builtInAi: Provided by Atlas Cloud. Currently only available for Custom AI Actions. To unlock an unrestricted experience, purchase highly cost-effective credits on the official website.
       description:
         openai: Provides models like GPT-4o
         azure: Azure-hosted OpenAI models through your deployments

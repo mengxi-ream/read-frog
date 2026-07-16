@@ -176,9 +176,9 @@ options:
       invalidJson: Định dạng JSON không hợp lệ
     providers:
       name:
-        freeAi: Dịch vụ AI miễn phí
+        builtInAi: AI tích hợp
       attribution:
-        freeAi: Được cung cấp bởi Atlas Cloud. Hiện chỉ khả dụng cho Hành động AI tùy chỉnh. Để mở khóa trải nghiệm không giới hạn, bạn có thể mua tín dụng có chi phí rất hiệu quả trên trang web chính thức.
+        builtInAi: Được cung cấp bởi Atlas Cloud. Hiện chỉ khả dụng cho Hành động AI tùy chỉnh. Để mở khóa trải nghiệm không giới hạn, bạn có thể mua tín dụng có chi phí rất hiệu quả trên trang web chính thức.
       description:
         openai: Cung cấp các mô hình như GPT-4o
         azure: Mô hình OpenAI lưu trữ trên Azure qua các bản triển khai của bạn

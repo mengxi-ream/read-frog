@@ -28,7 +28,10 @@ import {
 } from "@/utils/constants/feature-providers"
 import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { i18n } from "@/utils/i18n"
-import { FREE_AI_PROVIDER_ID, FREE_AI_PROVIDER_LOGO } from "@/utils/providers/provider-registry"
+import {
+  BUILT_IN_AI_PROVIDER_ID,
+  BUILT_IN_AI_PROVIDER_LOGO,
+} from "@/utils/providers/provider-registry"
 import { cn } from "@/utils/styles/utils"
 import { ConfigCard } from "../../components/config-card"
 import { EntityEditorLayout } from "../../components/entity-editor-layout"
@@ -40,7 +43,7 @@ import { ProviderConfigForm } from "./provider-config-form"
 export function ProvidersConfig() {
   const selectedProviderId = useAtomValue(selectedProviderIdAtom)
   const editor =
-    selectedProviderId === FREE_AI_PROVIDER_ID ? (
+    selectedProviderId === BUILT_IN_AI_PROVIDER_ID ? (
       <BuiltInProviderPanel />
     ) : (
       <ProviderConfigForm key={selectedProviderId} />
@@ -261,9 +264,9 @@ function ProviderListCell({
 function BuiltInProviderSection() {
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const config = useAtomValue(configAtom)
-  const providerName = i18n.t("options.apiProviders.providers.name.freeAi")
+  const providerName = i18n.t("options.apiProviders.providers.name.builtInAi")
   const assignedCustomActions = config.selectionToolbar.customActions.filter(
-    (action) => action.providerId === FREE_AI_PROVIDER_ID,
+    (action) => action.providerId === BUILT_IN_AI_PROVIDER_ID,
   )
 
   return (
@@ -272,13 +275,13 @@ function BuiltInProviderSection() {
         {i18n.t("options.apiProviders.builtInProvider" as never)}
       </h3>
       <ProviderListCell
-        providerId={FREE_AI_PROVIDER_ID}
-        logo={FREE_AI_PROVIDER_LOGO}
+        providerId={BUILT_IN_AI_PROVIDER_ID}
+        logo={BUILT_IN_AI_PROVIDER_LOGO}
         name={providerName}
         checked
         disabled
-        selected={selectedProviderId === FREE_AI_PROVIDER_ID}
-        onSelect={() => setSelectedProviderId(FREE_AI_PROVIDER_ID)}
+        selected={selectedProviderId === BUILT_IN_AI_PROVIDER_ID}
+        onSelect={() => setSelectedProviderId(BUILT_IN_AI_PROVIDER_ID)}
         badges={
           <FeatureCountBadge count={assignedCustomActions.length}>
             {assignedCustomActions.map((action) => (
@@ -292,7 +295,7 @@ function BuiltInProviderSection() {
 }
 
 function BuiltInProviderPanel() {
-  const providerName = i18n.t("options.apiProviders.providers.name.freeAi")
+  const providerName = i18n.t("options.apiProviders.providers.name.builtInAi")
   const atlasCloudProvider = API_PROVIDER_ITEMS.atlascloud
   const atlasCloudUrl = atlasCloudProvider.sponsor?.referUrl ?? atlasCloudProvider.website
 
@@ -301,14 +304,14 @@ function BuiltInProviderPanel() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <ProviderIcon
-            logo={FREE_AI_PROVIDER_LOGO}
+            logo={BUILT_IN_AI_PROVIDER_LOGO}
             name={providerName}
             size="base"
             textClassName="font-medium"
           />
           <div className="flex flex-col items-start gap-3">
             <p className="text-sm leading-6 text-muted-foreground">
-              {i18n.t("options.apiProviders.providers.attribution.freeAi" as never)}
+              {i18n.t("options.apiProviders.providers.attribution.builtInAi" as never)}
             </p>
             <Button
               variant="brand"
@@ -346,7 +349,7 @@ function BuiltInFeatureProviderSection() {
       <CollapsibleContent>
         <div className="flex flex-col gap-3">
           {customActions.map((action) => {
-            const isAssigned = action.providerId === FREE_AI_PROVIDER_ID
+            const isAssigned = action.providerId === BUILT_IN_AI_PROVIDER_ID
             return (
               <div key={action.id} className="flex items-center gap-2">
                 <Switch
@@ -360,7 +363,7 @@ function BuiltInFeatureProviderSection() {
                     const updatedCustomActions = config.selectionToolbar.customActions.map(
                       (currentAction) =>
                         currentAction.id === action.id
-                          ? { ...currentAction, providerId: FREE_AI_PROVIDER_ID }
+                          ? { ...currentAction, providerId: BUILT_IN_AI_PROVIDER_ID }
                           : currentAction,
                     )
 

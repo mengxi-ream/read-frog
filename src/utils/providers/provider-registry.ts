@@ -10,11 +10,12 @@ import readFrogLogo from "@/assets/providers/read-frog-provider.png?url&no-inlin
 import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
 import { i18n } from "@/utils/i18n"
 
-export const FREE_AI_PROVIDER_ID = "read-frog-free-ai"
-export const FREE_AI_PROVIDER_LOGO = readFrogLogo
+// Keep the persisted provider ID stable so existing user configurations continue to work.
+export const BUILT_IN_AI_PROVIDER_ID = "read-frog-free-ai"
+export const BUILT_IN_AI_PROVIDER_LOGO = readFrogLogo
 
-const FREE_AI_PROVIDER_NAME_KEY = "options.apiProviders.providers.name.freeAi"
-const FREE_AI_PROVIDER_FALLBACK_NAME = "Free AI Service"
+const BUILT_IN_AI_PROVIDER_NAME_KEY = "options.apiProviders.providers.name.builtInAi"
+const BUILT_IN_AI_PROVIDER_FALLBACK_NAME = "Built-in AI"
 
 export type ProviderCapability = FeatureKey | "selectionToolbar.customAction"
 type SystemProviderNameKey = keyof GeneratedI18nStructure
@@ -48,12 +49,12 @@ export type ResolvedProviderRef<T extends ProviderConfig = ProviderConfig> =
   | SystemProviderRef
 
 const SYSTEM_PROVIDER_DEFS = {
-  [FREE_AI_PROVIDER_ID]: {
-    id: FREE_AI_PROVIDER_ID,
-    nameKey: FREE_AI_PROVIDER_NAME_KEY,
-    fallbackName: FREE_AI_PROVIDER_FALLBACK_NAME,
+  [BUILT_IN_AI_PROVIDER_ID]: {
+    id: BUILT_IN_AI_PROVIDER_ID,
+    nameKey: BUILT_IN_AI_PROVIDER_NAME_KEY,
+    fallbackName: BUILT_IN_AI_PROVIDER_FALLBACK_NAME,
     capabilities: ["selectionToolbar.customAction"],
-    logo: () => FREE_AI_PROVIDER_LOGO,
+    logo: () => BUILT_IN_AI_PROVIDER_LOGO,
   },
 } as const satisfies Record<string, SystemProviderDef>
 
@@ -103,8 +104,10 @@ function getSystemProviderDef(providerId: string): SystemProviderDef | undefined
   return Object.values(SYSTEM_PROVIDER_DEFS).find((def) => def.id === providerId)
 }
 
-export function isFreeAiProviderId(providerId: string): providerId is typeof FREE_AI_PROVIDER_ID {
-  return providerId === FREE_AI_PROVIDER_ID
+export function isBuiltInAiProviderId(
+  providerId: string,
+): providerId is typeof BUILT_IN_AI_PROVIDER_ID {
+  return providerId === BUILT_IN_AI_PROVIDER_ID
 }
 
 export function isSystemProviderId(providerId: string): boolean {

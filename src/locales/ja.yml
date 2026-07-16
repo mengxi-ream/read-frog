@@ -176,9 +176,9 @@ options:
       invalidJson: 無効なJSON形式
     providers:
       name:
-        freeAi: 無料 AI サービス
+        builtInAi: 組み込み AI
       attribution:
-        freeAi: Atlas Cloud 提供。現在はカスタム AI アクションでのみ利用できます。無制限の体験を利用するには、公式サイトで高コスパのクレジットを購入してください。
+        builtInAi: Atlas Cloud 提供。現在はカスタム AI アクションでのみ利用できます。無制限の体験を利用するには、公式サイトで高コスパのクレジットを購入してください。
       description:
         openai: GPT-4oなどのモデルを提供
         azure: Azure のデプロイ経由で OpenAI モデルを利用

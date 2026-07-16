@@ -177,9 +177,9 @@ options:
       invalidJson: JSON 格式无效
     providers:
       name:
-        freeAi: 免费 AI 服务
+        builtInAi: 内置 AI
       attribution:
-        freeAi: Provided by Atlas Cloud. 目前仅对自定义 AI 指令开放。若要解锁无限制体验，可以前往官网购买超高性价比额度。
+        builtInAi: Provided by Atlas Cloud. 目前仅对自定义 AI 指令开放。若要解锁无限制体验，可以前往官网购买超高性价比额度。
       description:
         openai: 提供 GPT-4o 等模型
         azure: 通过 Azure 部署使用 OpenAI 模型
