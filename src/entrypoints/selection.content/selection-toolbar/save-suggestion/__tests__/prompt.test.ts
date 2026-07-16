@@ -80,6 +80,12 @@ describe("buildSaveSuggestionPrompts", () => {
     expect(systemPrompt).toContain("valid JSON only")
   })
 
+  it("instructs the model to pick a summary field explaining the first field's term", () => {
+    const { systemPrompt } = buildSaveSuggestionPrompts(input)
+    expect(systemPrompt).toContain('"summaryFieldName": string or null')
+    expect(systemPrompt).toContain("explains the first field's term")
+  })
+
   it("frames the language direction: user learns the selected text's language", () => {
     const { systemPrompt } = buildSaveSuggestionPrompts(input)
     expect(systemPrompt).toContain("learning the language the selected text is written in")

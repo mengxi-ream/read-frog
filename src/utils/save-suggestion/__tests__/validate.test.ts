@@ -77,7 +77,11 @@ describe("validateSaveSuggestion", () => {
   const dictionaryDraft = createDraft()
 
   function validate(
-    action: { createNewDictionaryAction: boolean; targetActionId: string | null },
+    action: {
+      createNewDictionaryAction: boolean
+      targetActionId: string | null
+      summaryFieldName?: string | null
+    },
     notes: SaveSuggestionNote[],
   ) {
     return validateSaveSuggestion({
@@ -100,7 +104,36 @@ describe("validateSaveSuggestion", () => {
     expect(result).toEqual({
       target: { kind: "existing", actionId: "action-1" },
       notes: [{ Term: "ephemeral", Definition: "lasting a very short time", Difficulty: 4 }],
+      summaryFieldName: null,
     })
+  })
+
+  it("keeps a summary hint naming a non-primary field of the chosen action", () => {
+    const result = validate(
+      {
+        createNewDictionaryAction: false,
+        targetActionId: "action-1",
+        summaryFieldName: "Definition",
+      },
+      [validNote],
+    )
+    expect(result?.summaryFieldName).toBe("Definition")
+  })
+
+  it("nulls a bad summary hint without discarding the suggestion", () => {
+    const unknownField = validate(
+      { createNewDictionaryAction: false, targetActionId: "action-1", summaryFieldName: "Bogus" },
+      [validNote],
+    )
+    expect(unknownField).not.toBeNull()
+    expect(unknownField?.summaryFieldName).toBeNull()
+
+    const primaryField = validate(
+      { createNewDictionaryAction: false, targetActionId: "action-1", summaryFieldName: "Term" },
+      [validNote],
+    )
+    expect(primaryField).not.toBeNull()
+    expect(primaryField?.summaryFieldName).toBeNull()
   })
 
   it("resolves the dictionary draft when createNewDictionaryAction is true, ignoring a stray id", () => {

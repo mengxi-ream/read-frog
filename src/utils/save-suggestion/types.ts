@@ -20,6 +20,12 @@ export const saveSuggestionEnvelopeSchema = z.strictObject({
   action: z.strictObject({
     createNewDictionaryAction: z.boolean(),
     targetActionId: z.string().nullable(),
+    /**
+     * Display hint: which schema field's value best explains the term in one
+     * line. Optional client-side so a not-yet-redeployed server (whose fixed
+     * schema predates the field) still parses; required nullable server-side.
+     */
+    summaryFieldName: z.string().nullable().optional(),
   }),
   notes: z.array(saveSuggestionNoteSchema).max(SAVE_SUGGESTION_MAX_NOTES),
 })
@@ -37,4 +43,9 @@ export interface ValidatedSaveSuggestion {
   target: SaveSuggestionTarget
   /** Notes keyed by output-field name, validated against the target action's schema. */
   notes: SaveSuggestionNoteRecord[]
+  /**
+   * Sanitized display hint: a non-primary field name of the target action
+   * whose value best explains the term, or null (fall back to schema order).
+   */
+  summaryFieldName: string | null
 }

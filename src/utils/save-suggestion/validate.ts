@@ -33,13 +33,36 @@ export function notePairsToRecord(
 
 export interface ValidateSaveSuggestionInput {
   envelope: {
-    action: { createNewDictionaryAction: boolean; targetActionId: string | null }
+    action: {
+      createNewDictionaryAction: boolean
+      targetActionId: string | null
+      summaryFieldName?: string | null
+    }
     notes: SaveSuggestionNote[]
   }
   /** Enabled custom actions snapshot taken when the request was fired. */
   candidates: SelectionToolbarCustomAction[]
   /** Dictionary action draft created when the request was fired. */
   dictionaryDraft: SelectionToolbarCustomAction
+}
+
+/**
+ * Sanitize the AI's display hint: it must name a non-primary field of the
+ * chosen action, otherwise fall back to null (schema-order display). A bad
+ * hint is cosmetic and never discards the suggestion.
+ */
+function sanitizeSummaryFieldName(
+  summaryFieldName: string | null | undefined,
+  outputSchema: SelectionToolbarCustomActionOutputField[],
+): string | null {
+  if (!summaryFieldName) {
+    return null
+  }
+
+  const isNonPrimaryField = outputSchema.some(
+    (field, index) => index > 0 && field.name === summaryFieldName,
+  )
+  return isNonPrimaryField ? summaryFieldName : null
 }
 
 /**
@@ -97,5 +120,9 @@ export function validateSaveSuggestion(
   return {
     target: createNew ? { kind: "create_dictionary" } : { kind: "existing", actionId: action.id },
     notes,
+    summaryFieldName: sanitizeSummaryFieldName(
+      envelope.action.summaryFieldName,
+      action.outputSchema,
+    ),
   }
 }

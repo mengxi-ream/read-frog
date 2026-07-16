@@ -34,7 +34,8 @@ Return exactly one JSON object and nothing else, with this shape:
 {
   "action": {
     "createNewDictionaryAction": boolean,
-    "targetActionId": string or null
+    "targetActionId": string or null,
+    "summaryFieldName": string or null
   },
   "notes": [
     { "fields": [ { "name": string, "value": string or number or null } ] }
@@ -45,6 +46,7 @@ Return exactly one JSON object and nothing else, with this shape:
 1. The user prompt lists candidate note actions, each with an id, a name, and a field schema.
 2. Pick the single candidate that fits dictionary/vocabulary notes best: set "targetActionId" to its id and "createNewDictionaryAction" to false.
 3. Only when no candidate fits vocabulary notes at all (or no candidates exist), set "createNewDictionaryAction" to true and "targetActionId" to null, and use the Default Dictionary Schema from the user prompt for the notes instead.
+4. Set "summaryFieldName" to the name of one field from the chosen schema whose value best explains the first field's term in one line (usually a definition or meaning field). Use null if no field fits.
 
 ### Producing notes
 1. Return 1 or ${SAVE_SUGGESTION_MAX_NOTES} notes covering only the most valuable words or phrases from the selected text, in the selected text's original language. Prefer returning at least 1. Return an empty "notes" array only if truly nothing is worth saving.

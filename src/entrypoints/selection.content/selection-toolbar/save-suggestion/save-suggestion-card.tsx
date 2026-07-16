@@ -76,13 +76,20 @@ export function SaveSuggestionCard({
   if (!primaryFieldName) {
     return null
   }
-  // Definition-like fields make the most useful one-line summary (the
-  // dictionary template's second field is the phonetic transcription, which
-  // reads poorly as the only supplement); fall back to schema order.
+  // Secondary line preference: the AI-designated summary field first (it
+  // knows which field explains the term, whatever the user named it), then
+  // definition-like fields (dictionary template's stable ids), then schema
+  // order. Later entries only show when earlier ones are empty.
+  const aiSummaryFieldName = validated.summaryFieldName
   const secondaryFields = actionSnapshot.outputSchema.slice(1)
   const secondaryFieldNames = [
-    ...secondaryFields.filter((field) => field.id.includes("definition")),
-    ...secondaryFields.filter((field) => !field.id.includes("definition")),
+    ...secondaryFields.filter((field) => field.name === aiSummaryFieldName),
+    ...secondaryFields.filter(
+      (field) => field.name !== aiSummaryFieldName && field.id.includes("definition"),
+    ),
+    ...secondaryFields.filter(
+      (field) => field.name !== aiSummaryFieldName && !field.id.includes("definition"),
+    ),
   ].map((field) => field.name)
 
   const handleSave = async () => {
