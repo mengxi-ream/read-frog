@@ -6,6 +6,7 @@ import {
   applyCreatedNotebaseConnectionToConfig,
   buildNotebaseCreateInputFromPending,
   createPendingNotebaseSave,
+  pendingCreateNotebaseSaveSchema,
   doesSchemaMatchPendingColumns,
   getNotebaseDetailUrl,
   getOutputSchemaFingerprint,
@@ -56,10 +57,12 @@ describe("notebase pending save", () => {
   it("creates a pending payload and Notebase create input with one-to-one columns", () => {
     const pending = createPendingNotebaseSave(
       createAction(),
-      {
-        summary: "A short summary",
-        score: 9,
-      },
+      [
+        {
+          summary: "A short summary",
+          score: 9,
+        },
+      ],
       1_000,
     )
 
@@ -88,7 +91,8 @@ describe("notebase pending save", () => {
         notebaseColumnName: "score",
       },
     ])
-    expect(pending.cells).toEqual({
+    expect(pending.rows).toHaveLength(1)
+    expect(pending.rows[0].cells).toEqual({
       [pending.columns[0].notebaseColumnId]: "A short summary",
       [pending.columns[1].notebaseColumnId]: 9,
     })
@@ -110,11 +114,49 @@ describe("notebase pending save", () => {
           },
         ],
         initialRow: {
-          id: pending.rowId,
-          cells: pending.cells,
+          id: pending.rows[0].id,
+          cells: pending.rows[0].cells,
         },
       },
     })
+  })
+
+  it("creates one row per result and emits initialRows for multi-row saves", () => {
+    const pending = createPendingNotebaseSave(
+      createAction(),
+      [
+        { summary: "First", score: 1 },
+        { summary: "Second", score: 2 },
+      ],
+      1_000,
+    )
+
+    expect(pending.rows).toHaveLength(2)
+    expect(pending.rows[0].cells[pending.columns[0].notebaseColumnId]).toBe("First")
+    expect(pending.rows[1].cells[pending.columns[0].notebaseColumnId]).toBe("Second")
+    expect(pending.rows[0].id).not.toBe(pending.rows[1].id)
+
+    const createInput = buildNotebaseCreateInputFromPending(pending)
+    expect(createInput.options?.initialRow).toBeUndefined()
+    expect(createInput.options?.initialRows).toEqual(pending.rows)
+  })
+
+  it("upgrades a legacy persisted single-row pending save on parse", () => {
+    const pending = createPendingNotebaseSave(
+      createAction(),
+      [{ summary: "A short summary", score: 9 }],
+      1_000,
+    )
+    const { rows, ...legacyBase } = pending
+    const legacyValue = {
+      ...legacyBase,
+      rowId: rows[0].id,
+      cells: rows[0].cells,
+    }
+
+    const parsed = pendingCreateNotebaseSaveSchema.parse(legacyValue)
+    expect(parsed.rows).toEqual([{ id: rows[0].id, cells: rows[0].cells }])
+    expect(pendingCreateNotebaseSaveSchema.parse(pending)).toEqual(pending)
   })
 
   it("builds the website detail URL from the pending notebase id", () => {
@@ -130,7 +172,7 @@ describe("notebase pending save", () => {
     config.selectionToolbar.customActions = [action]
     const pending = createPendingNotebaseSave(
       action,
-      { summary: "A short summary", score: 9 },
+      [{ summary: "A short summary", score: 9 }],
       1_000,
     )
     const connectedAccount = {
@@ -179,7 +221,7 @@ describe("notebase pending save", () => {
     ]
     const pending = createPendingNotebaseSave(
       action,
-      { summary: "A short summary", score: 9 },
+      [{ summary: "A short summary", score: 9 }],
       1_000,
     )
 
@@ -191,10 +233,12 @@ describe("notebase pending save", () => {
   it("matches duplicate-recovery schema exactly", () => {
     const pending = createPendingNotebaseSave(
       createAction(),
-      {
-        summary: "A short summary",
-        score: 9,
-      },
+      [
+        {
+          summary: "A short summary",
+          score: 9,
+        },
+      ],
       1_000,
     )
 

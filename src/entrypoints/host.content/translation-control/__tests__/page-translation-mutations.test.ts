@@ -3,6 +3,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
+  markExtensionDrivenNodeRemoval,
   registerBilingualTranslationState,
   unregisterBilingualTranslationState,
   type BilingualTranslationState,
@@ -60,6 +61,8 @@ vi.mock("@/utils/host/dom/filter", () => ({
   isDontWalkIntoAndDontTranslateAsChildElement: mockIsDontWalkIntoAndDontTranslateAsChildElement,
   isDontWalkIntoButTranslateAsChildElement: mockIsDontWalkIntoButTranslateAsChildElement,
   isHTMLElement: (node: unknown) => node instanceof HTMLElement,
+  isTranslatedWrapperNode: (node: unknown) =>
+    node instanceof HTMLElement && node.classList.contains("read-frog-translated-content-wrapper"),
 }))
 
 vi.mock("@/utils/host/dom/find", () => ({
@@ -519,6 +522,285 @@ describe("pageTranslationManager mutation re-walk", () => {
       unregisterBilingualTranslationState(activeNewState)
       activeNewState.wrapper?.remove()
     }
+    manager.stop()
+  })
+
+  it("ignores the extension's own wrapper and error-host insertions (#1831)", async () => {
+    document.body.innerHTML = `
+      <p id="tweet"><span id="source">Original tweet</span></p>
+    `
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const tweet = document.getElementById("tweet") as HTMLElement
+    const wrapper = document.createElement("span")
+    wrapper.className = "notranslate read-frog-translated-content-wrapper"
+    wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+    tweet.append(wrapper)
+    const state: BilingualTranslationState = {
+      layoutSource: tweet,
+      sourceTextContent: "Original tweet",
+      status: "active",
+      walkId: "walk-id",
+      wrapper,
+    }
+    registerBilingualTranslationState(state)
+    await flushDomUpdates()
+    mockWalkAndLabelElement.mockClear()
+    mockTranslateNodesBilingualMode.mockClear()
+
+    // Everything the extension inserts during a translation pass: translated
+    // text inside the wrapper, an error shadow host, and a sibling wrapper.
+    wrapper.append("译文文本")
+    const errorHost = document.createElement("div")
+    errorHost.className = "read-frog-react-shadow-host"
+    wrapper.append(errorHost)
+    const siblingWrapper = document.createElement("span")
+    siblingWrapper.className = "notranslate read-frog-translated-content-wrapper"
+    tweet.append(siblingWrapper)
+    await flushDomUpdates()
+
+    expect(mockWalkAndLabelElement).not.toHaveBeenCalled()
+    expect(mockTranslateNodesBilingualMode).not.toHaveBeenCalled()
+
+    unregisterBilingualTranslationState(state)
+    manager.stop()
+  })
+
+  it("retranslates exactly once when the site re-renders a node containing our wrapper (#1831)", async () => {
+    document.body.innerHTML = `
+      <p id="tweet"><span id="source">Original content</span></p>
+    `
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const tweet = document.getElementById("tweet") as HTMLElement
+    const createState = (sourceText: string): BilingualTranslationState => {
+      const wrapper = document.createElement("span")
+      wrapper.className = "notranslate read-frog-translated-content-wrapper"
+      wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+      wrapper.append(`${sourceText} 的译文`)
+      tweet.append(wrapper)
+      const state: BilingualTranslationState = {
+        layoutSource: tweet,
+        sourceTextContent: sourceText,
+        status: "active",
+        walkId: "walk-id",
+        wrapper,
+      }
+      registerBilingualTranslationState(state)
+      return state
+    }
+
+    let activeState = createState("Original content")
+    await flushDomUpdates()
+    mockTranslateNodesBilingualMode.mockClear()
+    mockTranslateNodesBilingualMode.mockImplementation(async () => {
+      // The real translation dance: tear down the stale generation, insert a
+      // fresh wrapper, re-register state for the current host text.
+      unregisterBilingualTranslationState(activeState)
+      if (activeState.wrapper) {
+        markExtensionDrivenNodeRemoval(activeState.wrapper)
+        activeState.wrapper.remove()
+      }
+      activeState = createState("Re-rendered content")
+    })
+
+    // Site re-render: replace the source span wholesale (framework-style).
+    const oldSpan = document.getElementById("source") as HTMLElement
+    const newSpan = document.createElement("span")
+    newSpan.id = "source"
+    newSpan.textContent = "Re-rendered content"
+    tweet.replaceChild(newSpan, oldSpan)
+    await flushDomUpdates()
+    await flushDomUpdates()
+    await flushDomUpdates()
+
+    expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(1)
+    expect(document.querySelectorAll(".read-frog-translated-content-wrapper").length).toBe(1)
+
+    unregisterBilingualTranslationState(activeState)
+    manager.stop()
+  })
+
+  it("still retranslates once when the site removes our wrapper (#1831)", async () => {
+    document.body.innerHTML = `
+      <p id="tweet"><span id="source">Original content</span></p>
+    `
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const tweet = document.getElementById("tweet") as HTMLElement
+    const wrapper = document.createElement("span")
+    wrapper.className = "notranslate read-frog-translated-content-wrapper"
+    wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+    wrapper.append("译文文本")
+    tweet.append(wrapper)
+    const state: BilingualTranslationState = {
+      layoutSource: tweet,
+      sourceTextContent: "Original content",
+      status: "active",
+      walkId: "walk-id",
+      wrapper,
+    }
+    registerBilingualTranslationState(state)
+    await flushDomUpdates()
+    mockTranslateNodesBilingualMode.mockClear()
+    mockTranslateNodesBilingualMode.mockImplementation(async () => {
+      unregisterBilingualTranslationState(state)
+    })
+
+    // Site-driven removal — NOT marked as extension-initiated.
+    wrapper.remove()
+    await flushDomUpdates()
+
+    expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(1)
+    expect(mockTranslateNodesBilingualMode).toHaveBeenCalledWith([tweet], "walk-id", DEFAULT_CONFIG)
+
+    manager.stop()
+  })
+
+  it("caps retranslation passes and defers perpetual churn behind a debounced retry (#1831)", async () => {
+    vi.useFakeTimers()
+    const flushWithFakeTimers = async (rounds = 4) => {
+      for (let i = 0; i < rounds; i++) {
+        await Promise.resolve()
+        await vi.advanceTimersByTimeAsync(0)
+        await Promise.resolve()
+      }
+    }
+
+    try {
+      document.body.innerHTML = `
+        <p id="tweet"><span id="source">Ticker 0</span></p>
+      `
+
+      const manager = new PageTranslationManager()
+      await manager.start()
+      await flushWithFakeTimers()
+
+      const tweet = document.getElementById("tweet") as HTMLElement
+      const source = document.getElementById("source")!.firstChild as Text
+      const wrapper = document.createElement("span")
+      wrapper.className = "notranslate read-frog-translated-content-wrapper"
+      wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+      tweet.append(wrapper)
+      // Snapshot never matches, so every mutation marks the source stale —
+      // the pathological ticker page.
+      const state: BilingualTranslationState = {
+        layoutSource: tweet,
+        sourceTextContent: "never matches",
+        status: "active",
+        walkId: "walk-id",
+        wrapper,
+      }
+      registerBilingualTranslationState(state)
+      await flushWithFakeTimers()
+      mockTranslateNodesBilingualMode.mockClear()
+
+      let churn = 0
+      mockTranslateNodesBilingualMode.mockImplementation(async () => {
+        churn += 1
+        source.data = `Ticker ${churn}`
+        // Let the observer deliver the mutation before this pass resolves so
+        // the do/while sees a bumped version every time.
+        await flushWithFakeTimers(2)
+      })
+
+      source.data = "Ticker start"
+      await flushWithFakeTimers(8)
+
+      // Per-invocation cap: exactly MAX_REFRESH_PASSES synchronous passes.
+      expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(3)
+      expect((manager as any).pendingRetranslateRetries.size).toBe(1)
+
+      // Debounced retry fires and burns the rest of the per-window budget.
+      await vi.advanceTimersByTimeAsync(1000)
+      await flushWithFakeTimers()
+      expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(6)
+
+      // Budget exhausted: the next retry is a no-op that re-arms itself.
+      await vi.advanceTimersByTimeAsync(1000)
+      await flushWithFakeTimers()
+      expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(6)
+
+      // stop() cancels pending retries; nothing fires afterwards.
+      manager.stop()
+      expect((manager as any).pendingRetranslateRetries.size).toBe(0)
+      await vi.advanceTimersByTimeAsync(30_000)
+      expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(6)
+
+      unregisterBilingualTranslationState(state)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it("unmounts the error-UI React root when the site removes an ancestor of our wrapper (#1831)", async () => {
+    document.body.innerHTML = `
+      <div id="comment"><p id="tweet"><span id="source">Original content</span></p></div>
+    `
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const comment = document.getElementById("comment") as HTMLElement
+    const tweet = document.getElementById("tweet") as HTMLElement
+    const wrapper = document.createElement("span")
+    wrapper.className = "notranslate read-frog-translated-content-wrapper"
+    const errorHost = document.createElement("div")
+    errorHost.className = "read-frog-react-shadow-host"
+    const cleanupSpy = vi.fn<() => void>()
+    ;(errorHost as any).__reactShadowContainerCleanup = cleanupSpy
+    wrapper.append(errorHost)
+    tweet.append(wrapper)
+    await flushDomUpdates()
+
+    // Site-driven removal of the whole comment subtree.
+    comment.remove()
+    await flushDomUpdates()
+
+    expect(cleanupSpy).toHaveBeenCalledTimes(1)
+
+    // Idempotent on a duplicate delivery of the same removal.
+    ;(manager as any).cleanupDetachedTranslationArtifacts([comment])
+    expect(cleanupSpy).toHaveBeenCalledTimes(1)
+
+    manager.stop()
+  })
+
+  it("does not accumulate mutation observers when a shadow-root element is re-added (#1831)", async () => {
+    const host = document.createElement("div")
+    host.id = "shadow-host"
+    const shadowRoot = host.attachShadow({ mode: "open" })
+    const shadowChild = document.createElement("div")
+    shadowChild.innerHTML = "<p>Shadow paragraph</p>"
+    shadowRoot.append(shadowChild)
+    document.body.append(host)
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const observerCountAfterStart = (manager as any).mutationObservers.length
+    expect(observerCountAfterStart).toBeGreaterThan(0)
+
+    for (let i = 0; i < 5; i++) {
+      host.remove()
+      await flushDomUpdates()
+      document.body.append(host)
+      await flushDomUpdates()
+    }
+
+    expect((manager as any).mutationObservers.length).toBe(observerCountAfterStart)
+
     manager.stop()
   })
 })

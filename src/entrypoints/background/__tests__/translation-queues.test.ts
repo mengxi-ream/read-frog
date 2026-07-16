@@ -1,6 +1,7 @@
 import type { ProviderConfig } from "@/types/config/provider"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
 
 const onMessageMock = vi.fn<(...args: any[]) => any>()
 const ensureInitializedConfigMock = vi.fn<(...args: any[]) => any>()
@@ -192,6 +193,33 @@ describe("translation queue helpers", () => {
       expect.any(Function),
       expect.objectContaining({ isBatch: true }),
     )
+  })
+
+  it("coalesces concurrent identical translate requests into one provider call", async () => {
+    executeTranslateMock.mockResolvedValue("translated")
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+
+    const makeRequest = () =>
+      handler({
+        data: {
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          scheduleAt: Date.now(),
+          hash: "same-request-hash",
+        },
+      })
+
+    // both requests arrive before the first result lands in the translation cache
+    const results = await Promise.all([makeRequest(), makeRequest()])
+
+    expect(results).toEqual(["translated", "translated"])
+    expect(executeTranslateMock).toHaveBeenCalledTimes(1)
+    // the shared item is sent once, not as a two-item batch
+    expect(executeTranslateMock.mock.calls[0][0]).toBe("hello")
   })
 
   it("passes subtitle summary through the translation queue without generating a new summary", async () => {
@@ -603,6 +631,34 @@ describe("translation queue helpers", () => {
     )
   })
 
+  it("returns and caches the no-translation sentinel RAW (mapping is content-side)", async () => {
+    executeTranslateMock.mockResolvedValue(NO_TRANSLATION_SENTINEL)
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: "already in target language",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "sentinel-hash",
+      },
+    })
+
+    // Mapping the sentinel to "" here would fall out of the truthy-only cache
+    // write and re-hit the provider on every request; translateTextCore maps it.
+    expect(result).toBe(NO_TRANSLATION_SENTINEL)
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "sentinel-hash",
+        translation: NO_TRANSLATION_SENTINEL,
+      }),
+    )
+  })
+
   it("forwards the textFormat to executeTranslate for non-batch providers", async () => {
     const { setUpWebPageTranslationQueue } = await import("../translation-queues")
     await setUpWebPageTranslationQueue()
@@ -624,7 +680,7 @@ describe("translation queue helpers", () => {
       DEFAULT_CONFIG.language,
       googleProvider,
       expect.any(Function),
-      { textFormat: "html" },
+      { textFormat: "html", signal: expect.any(AbortSignal) },
     )
   })
 

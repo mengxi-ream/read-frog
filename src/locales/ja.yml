@@ -176,9 +176,9 @@ options:
       invalidJson: 無効なJSON形式
     providers:
       name:
-        freeAi: 無料 AI サービス
+        builtInAi: 組み込み AI
       attribution:
-        freeAi: Atlas Cloud 提供。現在はカスタム AI アクションでのみ利用できます。無制限の体験を利用するには、公式サイトで高コスパのクレジットを購入してください。
+        builtInAi: Atlas Cloud 提供。現在はカスタム AI アクションでのみ利用できます。無制限の体験を利用するには、公式サイトで高コスパのクレジットを購入してください。
       description:
         openai: GPT-4oなどのモデルを提供
         azure: Azure のデプロイ経由で OpenAI モデルを利用
@@ -346,6 +346,9 @@ options:
         description: 選択ツールバーに表示する組み込み機能を選択
         translate: 翻訳
         speak: 読み上げ
+      saveSuggestion:
+        title: 保存の提案
+        description: 選択テキストの翻訳後、Notebase に保存する単語を提案します
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -995,6 +998,12 @@ action:
   translation: 翻訳
   speak: 読み上げ
   playing: 再生中
+saveSuggestion:
+  title: 保存におすすめ
+  description: 以下の単語を Notebase に保存して、いつでも復習できます。
+  save: 保存
+  saved: 保存済み
+  staleSuggestion: この提案は古くなっています
 thinking:
   label: 思考中
   complete: 思考完了

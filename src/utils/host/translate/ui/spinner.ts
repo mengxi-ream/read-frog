@@ -5,7 +5,7 @@ import textSmallCSS from "@/assets/styles/text-small.css?inline"
 import themeCSS from "@/assets/styles/theme.css?inline"
 import { TranslationError } from "@/components/translation/error"
 import { createReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
-import { TRANSLATION_ERROR_CONTAINER_CLASS } from "../../../constants/dom-labels"
+import { SPINNER_CLASS, TRANSLATION_ERROR_CONTAINER_CLASS } from "../../../constants/dom-labels"
 import { getContainingShadowRoot, getOwnerDocument } from "../../dom/node"
 import { translateTextForPage } from "../translate-variants"
 import { ensurePresetStyles } from "./style-injector"
@@ -17,7 +17,7 @@ import { ensurePresetStyles } from "./style-injector"
  */
 export function createLightweightSpinner(ownerDoc: Document): HTMLElement {
   const spinner = ownerDoc.createElement("span")
-  spinner.className = "read-frog-spinner"
+  spinner.className = SPINNER_CLASS
   // Inline styles keep the spinner resilient against host page CSS overrides.
   // Use a thin muted arc with transparent sides so bulk page translation does
   // not paint a dense field of high-contrast rings across the screen.
@@ -107,6 +107,10 @@ export async function getTranslatedTextAndRemoveSpinner(
 
     translatedWrapperNode.appendChild(container)
   } finally {
+    // The spin animation runs with iterations: Infinity; a running animation
+    // roots its detached target in the renderer, leaking one node per
+    // translated paragraph (#1831). jsdom lacks getAnimations, hence the `?.`.
+    spinner.getAnimations?.().forEach((animation) => animation.cancel())
     spinner.remove()
   }
 

@@ -8,6 +8,7 @@ import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { APP_NAME } from "@/utils/constants/app"
 import { renderPersistentReactRoot } from "@/utils/react-root"
 import { getLocalThemeMode } from "@/utils/theme"
+import "@fontsource-variable/onest/index.css"
 import "@/assets/styles/text-small.css"
 import "@/assets/styles/theme.css"
 

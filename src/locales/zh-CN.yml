@@ -177,9 +177,9 @@ options:
       invalidJson: JSON 格式无效
     providers:
       name:
-        freeAi: 免费 AI 服务
+        builtInAi: 内置 AI
       attribution:
-        freeAi: Provided by Atlas Cloud. 目前仅对自定义 AI 指令开放。若要解锁无限制体验，可以前往官网购买超高性价比额度。
+        builtInAi: Provided by Atlas Cloud. 目前仅对自定义 AI 指令开放。若要解锁无限制体验，可以前往官网购买超高性价比额度。
       description:
         openai: 提供 GPT-4o 等模型
         azure: 通过 Azure 部署使用 OpenAI 模型
@@ -347,6 +347,9 @@ options:
         description: 选择在选择工具栏中显示哪些内置功能
         translate: 翻译
         speak: 朗读
+      saveSuggestion:
+        title: 保存建议
+        description: 划词翻译后，推荐可存入笔记库的词条
       shortcut:
         title: 划词翻译快捷键
         description: 自定义翻译选中文本的快捷键
@@ -1110,6 +1113,12 @@ action:
   translation: 翻译
   speak: 朗读
   playing: 播放中
+saveSuggestion:
+  title: 猜你想存
+  description: 把下列词存入笔记库，将来随时复习
+  save: 保存
+  saved: 已保存
+  staleSuggestion: 该建议已过期
 thinking:
   label: 思考中
   complete: 思考完成

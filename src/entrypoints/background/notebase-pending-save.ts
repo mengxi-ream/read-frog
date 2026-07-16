@@ -3,6 +3,7 @@ import type {
   NotebaseGetSchemaOutput,
   NotebaseListOutput,
   NotebaseRowCreateInput,
+  NotebaseRowCreateManyInput,
 } from "@read-frog/api-contract"
 import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomActionNotebaseAccount } from "@/types/config/selection-toolbar"
@@ -55,6 +56,7 @@ interface PendingNotebaseSaveProcessorDeps {
   getAuthenticatedAccount: () => Promise<SelectionToolbarCustomActionNotebaseAccount | null>
   createNotebase: (input: NotebaseCreateInput) => Promise<unknown>
   createRow: (input: NotebaseRowCreateInput) => Promise<unknown>
+  createRows: (input: NotebaseRowCreateManyInput) => Promise<unknown>
   listNotebases: () => Promise<NotebaseListOutput>
   getSchema: (id: string) => Promise<NotebaseGetSchemaOutput>
   openNotebasePage: (notebaseId: string) => Promise<void>
@@ -264,7 +266,7 @@ async function createReplacementNotebaseFromConnectedPending(
 
   const replacementPendingNotebaseSave = createPendingNotebaseSave(
     validation.action,
-    pendingNotebaseSave.result,
+    pendingNotebaseSave.results,
     deps.now(),
     {
       guideDictionaryNotebaseTracking: pendingNotebaseSave.guideDictionaryNotebaseTracking,
@@ -589,19 +591,25 @@ async function processConnectedPendingSave(
     return
   }
 
-  const { cells } = buildNotebaseRowCells(
-    actionWithRefreshedConnection,
-    schema,
-    pendingNotebaseSave.result,
+  const cellsList = pendingNotebaseSave.results.map(
+    (result) => buildNotebaseRowCells(actionWithRefreshedConnection, schema, result).cells,
   )
 
   try {
-    await deps.createRow({
-      notebaseId: refreshedConnection.notebaseId,
-      data: {
-        cells,
-      },
-    })
+    const [firstCells] = cellsList
+    if (cellsList.length === 1 && firstCells) {
+      await deps.createRow({
+        notebaseId: refreshedConnection.notebaseId,
+        data: {
+          cells: firstCells,
+        },
+      })
+    } else {
+      await deps.createRows({
+        notebaseId: refreshedConnection.notebaseId,
+        rows: cellsList.map((cells) => ({ cells })),
+      })
+    }
   } catch (error) {
     if (isORPCUnauthorizedError(error)) {
       deps.log.info(
@@ -706,6 +714,7 @@ export function setupNotebasePendingSaveProcessor() {
     getAuthenticatedAccount,
     createNotebase: (input) => backgroundOrpcClient.notebase.create(input),
     createRow: (input) => backgroundOrpcClient.notebaseRow.create(input),
+    createRows: (input) => backgroundOrpcClient.notebaseRow.createMany(input),
     listNotebases: () => backgroundOrpcClient.notebase.list({}),
     getSchema: (id) => backgroundOrpcClient.notebase.getSchema({ id }),
     completeGuideDictionaryNotebase: completeGuideDictionaryNotebaseAndNotify,

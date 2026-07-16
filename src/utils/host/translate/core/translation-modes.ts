@@ -8,6 +8,7 @@ import {
   NOTRANSLATE_CLASS,
   TRANSLATION_ERROR_CONTAINER_CLASS,
   TRANSLATION_MODE_ATTRIBUTE,
+  TRANSLATION_ONLY_ATTRIBUTE,
   VIRTUAL_PARAGRAPH_ATTRIBUTE,
   WALKED_ATTRIBUTE,
 } from "../../../constants/dom-labels"
@@ -16,33 +17,49 @@ import { isBlockTransNode, isHTMLElement, isTextNode, isTransNode } from "../../
 import { unwrapDeepestOnlyHTMLChild } from "../../dom/find"
 import { getOwnerDocument } from "../../dom/node"
 import { extractTextContent } from "../../dom/traversal"
-import { buildVirtualParagraphPlan, type VirtualParagraphUnit } from "../dom/paragraph-segmentation"
+import {
+  buildVirtualParagraphPlan,
+  moveParagraphInsertionBoundaryAfterTrailingInlineImages,
+  type VirtualParagraphUnit,
+} from "../dom/paragraph-segmentation"
 import {
   disposeVirtualParagraphGroup,
+  dropTranslationOnlySwapRecordsForNodes,
   dropVirtualParagraphWrapper,
   removeOrphanVirtualParagraphWrappers,
   removeTranslatedWrapperWithRestore,
+  restoreTranslationOnlySwapsForAnchor,
 } from "../dom/translation-cleanup"
 import { protectTranslationHtmlAttributes } from "../dom/translation-html-attributes"
 import { insertTranslatedNodeIntoWrapper } from "../dom/translation-insertion"
+import {
+  applyInPlaceTextSwap,
+  planInPlaceTextSwap,
+  snapshotSourceTextNodes,
+  verifySourceSnapshot,
+} from "../dom/translation-text-swap"
 import { findPreviousTranslatedWrapperInside } from "../dom/translation-wrapper"
 import { insertVirtualParagraphWrappers } from "../dom/virtual-paragraph-insertion"
 import { shouldFilterSmallParagraph } from "../filter-small-paragraph"
 import { isHtmlAttributeMarkerIntegrityError } from "../html-attribute-markers"
-import { prepareTranslationText } from "../text-preparation"
+import { shouldSkipAsTargetLanguage } from "../target-language-skip"
+import { normalizeForComparison } from "../text-preparation"
 import { translateTextForPage } from "../translate-variants"
 import { setTranslationDirAndLang } from "../translation-attributes"
 import { createSpinnerInside, getTranslatedTextAndRemoveSpinner } from "../ui/spinner"
 import { isNumericContent } from "../ui/translation-utils"
 import {
   attachBilingualTranslationWrapper,
+  collectSourceTextExcludingWrappers,
   getBilingualTranslationStateForSource,
+  getTranslationOnlyAnchorState,
   getVirtualParagraphGroupForSource,
   isBilingualTranslationStateCurrent,
   isVirtualParagraphGroupCurrent,
+  markExtensionDrivenNodeRemoval,
   markVirtualParagraphGroupInserted,
-  originalContentMap,
   registerBilingualTranslationState,
+  registerTranslationOnlyOriginals,
   registerVirtualParagraphGroup,
   registerVirtualParagraphWrapper,
   translatingNodes,
@@ -120,7 +137,10 @@ function getDisplayTranslation(
     return undefined
   }
 
-  return prepareTranslationText(sourceText) === prepareTranslationText(comparisonText)
+  // comparisonText lets the HTML-marker path (#1832) compare a normalized
+  // variant while the raw translatedText is what gets displayed; the folding
+  // normalization (#1835) applies on top for both paths.
+  return normalizeForComparison(sourceText) === normalizeForComparison(comparisonText)
     ? ""
     : translatedText
 }
@@ -149,7 +169,8 @@ async function filterVirtualParagraphUnits(
   const included = await Promise.all(
     units.map(async (unit) => {
       if (isNumericContent(unit.text)) return false
-      return !(await shouldFilterSmallParagraph(unit.text, config))
+      if (await shouldFilterSmallParagraph(unit.text, config)) return false
+      return !(await shouldSkipAsTargetLanguage(unit.text, config))
     }),
   )
   return units.filter((_, index) => included[index])
@@ -193,7 +214,7 @@ async function translateVirtualParagraph(
 
   await insertTranslatedNodeIntoWrapper(
     wrapper,
-    { flowSource, isCurrent, layoutSource: group.layoutSource },
+    { flowSource, isCurrent, layoutSource: group.layoutSource, sourceText: unit.text },
     translatedText,
     config.translate.translationNodeStyle,
     config,
@@ -219,12 +240,12 @@ async function translateVirtualParagraphs(
     wrappers: new Set(),
     splitRecords: [],
     sourceSnapshots,
-    sourceTextContent: layoutSource.textContent ?? "",
+    sourceTextContent: collectSourceTextExcludingWrappers(layoutSource),
     wrapperPlacements: new Map(),
   }
   registerVirtualParagraphGroup(group)
 
-  const sourceTextSnapshot = layoutSource.textContent
+  const sourceTextSnapshot = collectSourceTextExcludingWrappers(layoutSource)
   let includedUnits: VirtualParagraphUnit[]
   try {
     includedUnits = await filterVirtualParagraphUnits(units, config)
@@ -233,7 +254,10 @@ async function translateVirtualParagraphs(
     throw error
   }
 
-  if (!isVirtualParagraphGroupCurrent(group) || layoutSource.textContent !== sourceTextSnapshot) {
+  if (
+    !isVirtualParagraphGroupCurrent(group) ||
+    collectSourceTextExcludingWrappers(layoutSource) !== sourceTextSnapshot
+  ) {
     disposeVirtualParagraphGroup(group)
     return
   }
@@ -363,6 +387,8 @@ export async function translateNodesBilingualMode(
     if (virtualLayoutSource) {
       const virtualParagraphPlan = buildVirtualParagraphPlan(virtualLayoutSource, config)
       if (virtualParagraphPlan.units.length >= 2) {
+        // Explicit blank-line boundaries represent block paragraphs even when
+        // an individual unit is short enough for the compact-label heuristic.
         await translateVirtualParagraphs(
           nodes,
           virtualParagraphPlan.units,
@@ -370,7 +396,7 @@ export async function translateNodesBilingualMode(
           virtualLayoutSource,
           walkId,
           config,
-          forceBlockTranslation,
+          true,
         )
         return
       }
@@ -391,7 +417,23 @@ export async function translateNodesBilingualMode(
       return translateNodesBilingualMode(nodes, walkId, config, toggle, forceBlockTranslation)
     }
 
-    const sourceTextBeforeFilter = isHTMLElement(layoutSource) ? layoutSource.textContent : null
+    // After a translationOnly session, an in-place-swapped paragraph has no
+    // wrapper — only the anchor marker. A bilingual toggle over it must undo
+    // the swap (and a bilingual translate must see the original text).
+    const swappedAnchor = (
+      isHTMLElement(insertionTarget) ? insertionTarget : insertionTarget.parentElement
+    )?.closest<HTMLElement>(`[${TRANSLATION_ONLY_ATTRIBUTE}]`)
+    if (
+      swappedAnchor &&
+      restoreTranslationOnlySwapsForAnchor(swappedAnchor, transNodes) &&
+      toggle
+    ) {
+      return
+    }
+
+    const sourceTextBeforeFilter = isHTMLElement(layoutSource)
+      ? collectSourceTextExcludingWrappers(layoutSource)
+      : null
     const textContent = transNodes
       .map((node) => extractTextContent(node, config))
       .join("")
@@ -412,7 +454,11 @@ export async function translateNodesBilingualMode(
 
     let shouldFilter: boolean
     try {
-      shouldFilter = await shouldFilterSmallParagraph(textContent, config)
+      // Target-language skip runs here, BEFORE the wrapper/spinner is inserted,
+      // so same-language paragraphs never touch the DOM.
+      shouldFilter =
+        (await shouldFilterSmallParagraph(textContent, config)) ||
+        (await shouldSkipAsTargetLanguage(textContent, config))
     } catch (error) {
       if (bilingualState) unregisterBilingualTranslationState(bilingualState)
       throw error
@@ -440,8 +486,25 @@ export async function translateNodesBilingualMode(
       walkId,
       config,
     )
+    let hasTrailingInlineImageAttachment = false
 
-    if (isTextNode(insertionTarget) || transNodes.length > 1) {
+    if (transNodes.length === 1 && isHTMLElement(layoutSource) && isHTMLElement(insertionTarget)) {
+      const originalInsertionBoundary = {
+        container: insertionTarget,
+        offset: insertionTarget.childNodes.length,
+      }
+      const insertionBoundary = moveParagraphInsertionBoundaryAfterTrailingInlineImages(
+        originalInsertionBoundary,
+        layoutSource,
+      )
+      hasTrailingInlineImageAttachment =
+        insertionBoundary.container !== originalInsertionBoundary.container ||
+        insertionBoundary.offset !== originalInsertionBoundary.offset
+      insertionBoundary.container.insertBefore(
+        translatedWrapperNode,
+        insertionBoundary.container.childNodes[insertionBoundary.offset] ?? null,
+      )
+    } else if (isTextNode(insertionTarget) || transNodes.length > 1) {
       insertionTarget.parentNode?.insertBefore(translatedWrapperNode, insertionTarget.nextSibling)
     } else {
       insertionTarget.appendChild(translatedWrapperNode)
@@ -488,16 +551,43 @@ export async function translateNodesBilingualMode(
 
     await insertTranslatedNodeIntoWrapper(
       translatedWrapperNode,
-      { flowSource: insertionTarget, isCurrent, layoutSource },
+      { flowSource: insertionTarget, isCurrent, layoutSource, sourceText: textContent },
       translatedText,
       config.translate.translationNodeStyle,
       config,
-      forceBlockTranslation,
+      forceBlockTranslation || hasTrailingInlineImageAttachment,
     )
     if (!isCurrent()) removeTranslatedWrapperWithRestore(translatedWrapperNode)
   } finally {
     transNodes.forEach((node) => translatingNodes.delete(node))
   }
+}
+
+/**
+ * A run's own translationOnly wrapper, scoped to the run: the insertion code
+ * only ever places the wrapper as a sibling within the run or appends it into
+ * a single-element run, so nested runs' wrappers (a li's inside this run's
+ * subtree) are out of reach by construction.
+ */
+function findRunTranslationOnlyWrapper(
+  allChildNodes: ChildNode[],
+  walkId: string,
+): HTMLElement | null {
+  // Any-mode wrapper: a bilingual wrapper here is this run's own previous
+  // translation too (node-level translate, then a mode switch, then toggle).
+  const isForeignWrapper = (element: HTMLElement) =>
+    element.classList.contains(CONTENT_WRAPPER_CLASS) &&
+    element.getAttribute(WALKED_ATTRIBUTE) !== walkId
+
+  for (const node of allChildNodes) {
+    if (!isHTMLElement(node)) continue
+    if (isForeignWrapper(node)) return node
+    // Spinner phase of a single-element run: wrapper appended INSIDE it
+    for (const child of node.children) {
+      if (isHTMLElement(child) && isForeignWrapper(child)) return child
+    }
+  }
+  return null
 }
 
 export async function translateNodeTranslationOnlyMode(
@@ -516,24 +606,6 @@ export async function translateNodeTranslationOnlyMode(
     return
   }
 
-  // snapshot the outer parent element, to prevent lose it if we go to deeper by unwrapDeepestOnlyHTMLChild
-  // test case is:
-  // <div data-testid="test-node">
-  //   <span style={{ display: 'inline' }}>原文</span> // get the outer parent snapshot before go to inner element
-  //   <br />
-  //   <span style={{ display: 'inline' }}>原文</span>
-  //   原文
-  //   <br />
-  //   <span style={{ display: 'inline' }}>原文</span>
-  // </div>,
-  // Only save originalContent when there's no existing translation wrapper
-  // If wrapper exists, we're removing translation and should restore from saved content
-  const outerParentElement = outerTransNodes[0].parentElement
-  const hasExistingWrapper = outerParentElement?.querySelector(`.${CONTENT_WRAPPER_CLASS}`)
-  if (outerParentElement && !originalContentMap.has(outerParentElement) && !hasExistingWrapper) {
-    originalContentMap.set(outerParentElement, outerParentElement.innerHTML)
-  }
-
   let transNodes: TransNode[] = []
   let allChildNodes: ChildNode[] = []
   if (outerTransNodes.length === 1 && isHTMLElement(outerTransNodes[0])) {
@@ -546,6 +618,28 @@ export async function translateNodeTranslationOnlyMode(
   }
 
   if (transNodes.length === 0) {
+    // The run may be nothing but a fallback wrapper whose originals were
+    // displaced (e.g. a <li> holding only the translation). Its toggle must
+    // still restore, so handle the wrapper before giving up on the run.
+    const runWrappers = allChildNodes.filter(
+      (node): node is HTMLElement =>
+        isHTMLElement(node) &&
+        node.classList.contains(CONTENT_WRAPPER_CLASS) &&
+        node.getAttribute(TRANSLATION_MODE_ATTRIBUTE) ===
+          ("translationOnly" satisfies TranslationMode) &&
+        node.getAttribute(WALKED_ATTRIBUTE) !== walkId,
+    )
+    if (runWrappers.length === 0) return
+    const restored: ChildNode[] = []
+    for (const wrapper of runWrappers) {
+      restored.push(...removeTranslatedWrapperWithRestore(wrapper))
+    }
+    if (!toggle) {
+      const retryNodes = restored.filter((node) => node.isConnected)
+      if (retryNodes.length > 0) {
+        void translateNodeTranslationOnlyMode(retryNodes, walkId, config, toggle)
+      }
+    }
     return
   }
 
@@ -562,28 +656,54 @@ export async function translateNodeTranslationOnlyMode(
       console.error("targetNode.parentElement is not HTMLElement", targetNode.parentElement)
       return
     }
-    const existedTranslatedWrapper = findPreviousTranslatedWrapperInside(
-      targetNode.parentElement,
-      walkId,
-    )
+    // An in-place swap leaves no wrapper — the anchor marker is the handle.
+    // Restore FIRST (before any wrapper handling): a swapped run must undo its
+    // own swap, never let an unrelated nested run's wrapper stand in for it.
+    // Also runs before the filter/language checks below so they (and a
+    // retranslation) see original text, not the previous translation.
+    // Non-toggle (retranslation) keeps the records registered so the anchor
+    // stays monitored through the provider round-trip — a re-swap dropped by
+    // the mid-flight snapshot guard must not leave the region unwatched.
+    const swapAnchor = parentNode.closest<HTMLElement>(`[${TRANSLATION_ONLY_ATTRIBUTE}]`)
+    const restoredOwnSwap = swapAnchor
+      ? restoreTranslationOnlySwapsForAnchor(
+          swapAnchor,
+          transNodes,
+          toggle ? undefined : { keepRecords: true },
+        )
+      : false
+
+    // Own-run wrapper discovery is scoped to the run itself: the fallback
+    // wrapper is always inserted as a sibling within the run or appended into
+    // a single-element run — a deep subtree query would steal a NESTED run's
+    // wrapper (e.g. a li's) and leave this run's state untouched (#1846 review).
     const existedTranslatedWrapperOutside = targetNode.parentElement.closest(
       `.${CONTENT_WRAPPER_CLASS}`,
     )
-
-    const finalTranslatedWrapper = existedTranslatedWrapperOutside ?? existedTranslatedWrapper
+    const finalTranslatedWrapper =
+      existedTranslatedWrapperOutside ?? findRunTranslationOnlyWrapper(allChildNodes, walkId)
     if (finalTranslatedWrapper && isHTMLElement(finalTranslatedWrapper)) {
-      removeTranslatedWrapperWithRestore(finalTranslatedWrapper)
+      const restoredNodes = removeTranslatedWrapperWithRestore(finalTranslatedWrapper)
       if (toggle) {
         return
       }
-      // In translationOnly mode, removeTranslatedWrapperWithRestore uses innerHTML to restore content,
-      // which destroys the original DOM nodes and creates new ones. The 'nodes' array still references
-      // the old detached nodes, and targetNode can't reference to the new dom added by innerHTML anymore.
-      // Therefore, by recursively calling translateNodeTranslationOnlyMode here with the
-      // same nodes array, we ensure the translation uses the newly created DOM elements since the
-      // function will re-query and find the correct parent and child nodes from the restored DOM.
+      // The restore synchronously re-inserted the SAME original node objects,
+      // so when `nodes` are still connected they remain the correct
+      // retranslation input. When they referenced the removed wrapper or its
+      // translated content (both detached now), retranslate the restored
+      // originals instead. Neither side connected means the host rebuilt the
+      // region — leave it alone rather than loop.
       nodes.forEach((node) => translatingNodes.delete(node))
-      void translateNodeTranslationOnlyMode(nodes, walkId, config, toggle)
+      const retryNodes = nodes.some((node) => node.isConnected)
+        ? nodes
+        : restoredNodes.filter((node) => node.isConnected)
+      if (retryNodes.length > 0) {
+        void translateNodeTranslationOnlyMode(retryNodes, walkId, config, toggle)
+      }
+      return
+    }
+
+    if (restoredOwnSwap && toggle) {
       return
     }
 
@@ -592,16 +712,19 @@ export async function translateNodeTranslationOnlyMode(
 
     if (await shouldFilterSmallParagraph(innerTextContent, config)) return
 
-    // Only save originalContent when there's no existing translation wrapper
-    const hasExistingWrapperInParent = parentNode.querySelector(`.${CONTENT_WRAPPER_CLASS}`)
-    if (!originalContentMap.has(parentNode) && !hasExistingWrapperInParent) {
-      originalContentMap.set(parentNode, parentNode.innerHTML)
-    }
+    // Check the plain text, not the HTML string sent to the provider — franc
+    // on markup is noise. Runs before the wrapper is inserted into the DOM.
+    if (await shouldSkipAsTargetLanguage(innerTextContent, config)) return
 
     const ownerDoc = getOwnerDocument(targetNode)
     const protectedHtml = protectTranslationHtmlAttributes(transNodes, ownerDoc)
     const textContent = protectedHtml.sourceHtml
     if (!textContent) return
+
+    // Taken before the provider request; the response handler compares against
+    // it to detect host mutations that happened while the request was in
+    // flight (never swap over content the host has since rewritten).
+    const sourceSnapshot = snapshotSourceTextNodes(transNodes)
 
     const translatedWrapperNode = ownerDoc.createElement("span")
     translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
@@ -696,22 +819,61 @@ export async function translateNodeTranslationOnlyMode(
       // Keep the wrapper when translation failed so the injected error UI remains visible.
       // Only remove the wrapper when translation returned an empty string.
       if (translatedText === "") {
+        markExtensionDrivenNodeRemoval(translatedWrapperNode)
         // Batch the remove operation to execute remove operation after insert operation
         batchDOMOperation(() => translatedWrapperNode.remove())
       }
       return
     }
 
+    // Preferred strategy: swap the translation into the site's OWN text nodes,
+    // leaving element identity (framework fibers, listeners) untouched. The
+    // wrapper was only the spinner vehicle and is removed.
+    const swapPlan = planInPlaceTextSwap(transNodes, translatedText, ownerDoc)
+    if (swapPlan) {
+      batchDOMOperation(() => {
+        // Wrapper gone: a global cleanup ran while the provider call was in
+        // flight, or the host re-rendered the region — leave originals alone.
+        if (!translatedWrapperNode.isConnected) return
+        markExtensionDrivenNodeRemoval(translatedWrapperNode)
+        translatedWrapperNode.remove()
+        // Host mutated the run mid-flight: the translation is stale, drop it.
+        // Any kept (restore-first) records still reference the run, so the
+        // staleness pipeline retries with the host's fresh text.
+        if (!verifySourceSnapshot(transNodes, sourceSnapshot)) return
+        applyInPlaceTextSwap(
+          swapPlan,
+          transNodes,
+          parentNode,
+          walkId,
+          config,
+          getTranslationOnlyAnchorState,
+        )
+      })
+      return
+    }
+
+    // Fallback strategy: render into the wrapper and displace the originals,
+    // retaining the node objects so restore can re-insert the same nodes (#1846).
     translatedWrapperNode.innerHTML = translatedText
 
     // Batch final DOM mutations to reduce layout thrashing
     batchDOMOperation(() => {
+      // Wrapper gone from the document: a global cleanup ran while the provider
+      // call was in flight, or the host re-rendered the region. The originals
+      // are the live content — don't remove them to apply a stale translation.
+      if (!translatedWrapperNode.isConnected) return
+
       // Insert translated content after the last node
       const lastChildNode = allChildNodes.at(-1)!
       lastChildNode.parentNode?.insertBefore(translatedWrapperNode, lastChildNode.nextSibling)
 
-      // Remove all original nodes
+      registerTranslationOnlyOriginals(translatedWrapperNode, allChildNodes)
       allChildNodes.forEach((childNode) => childNode.remove())
+      // The wrapper now owns this run; kept swap records (restore-first
+      // retranslation) would reference displaced nodes and read as
+      // permanently stale — drop them.
+      if (swapAnchor) dropTranslationOnlySwapRecordsForNodes(swapAnchor, transNodes)
     })
   } finally {
     nodes.forEach((node) => translatingNodes.delete(node))

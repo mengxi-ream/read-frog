@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/base-ui/alert-dialog"
 import { Button } from "@/components/ui/base-ui/button"
 import { writeConfigAtom } from "@/utils/atoms/config"
-import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { buildFreshDefaultConfig } from "@/utils/constants/config"
 import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
@@ -22,7 +22,7 @@ export function ResetConfig() {
   const [open, setOpen] = useState(false)
   const setConfig = useSetAtom(writeConfigAtom)
   async function resetToDefaultConfig() {
-    await setConfig(DEFAULT_CONFIG)
+    await setConfig(buildFreshDefaultConfig())
     setOpen(false)
   }
 

@@ -89,4 +89,25 @@ describe("dEFAULT_CONFIG", () => {
       }),
     )
   })
+
+  it("rebuilds schema-valid default custom actions for persistence", async () => {
+    const { buildFreshDefaultConfig, DEFAULT_CONFIG } = await import("../config")
+    const { configSchema } = await import("@/types/config/config")
+
+    const config = buildFreshDefaultConfig()
+
+    expect(config).not.toBe(DEFAULT_CONFIG)
+    expect(config.selectionToolbar.customActions).not.toBe(
+      DEFAULT_CONFIG.selectionToolbar.customActions,
+    )
+    expect(config.selectionToolbar.customActions[0]).toEqual(
+      expect.objectContaining({
+        id: "default-dictionary",
+        name: expect.any(String),
+        systemPrompt: expect.any(String),
+        prompt: expect.any(String),
+      }),
+    )
+    expect(configSchema.safeParse(config).success).toBe(true)
+  })
 })

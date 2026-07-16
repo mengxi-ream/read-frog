@@ -3,10 +3,30 @@ import {
   BLOCK_ATTRIBUTE,
   CONTENT_WRAPPER_CLASS,
   PARAGRAPH_ATTRIBUTE,
+  TRANSLATION_ONLY_ATTRIBUTE,
   WALKED_ATTRIBUTE,
 } from "../../../constants/dom-labels"
 import { isBlockTransNode, isHTMLElement, isTextNode, isTransNode } from "../../dom/filter"
 import { translateNodes } from "./translation-modes"
+import { getTranslationOnlyAnchorState } from "./translation-state"
+
+/**
+ * Marker attributes can outlive their WeakMap state (extension reload on a
+ * live tab). A ghost marker must not block walks forever — heal it and treat
+ * the region as untranslated.
+ */
+function hasLiveTranslationOnlyAnchor(element: HTMLElement): boolean {
+  const candidates: HTMLElement[] = element.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+    ? [element]
+    : []
+  candidates.push(...element.querySelectorAll<HTMLElement>(`[${TRANSLATION_ONLY_ATTRIBUTE}]`))
+  let live = false
+  for (const candidate of candidates) {
+    if (getTranslationOnlyAnchorState(candidate)) live = true
+    else candidate.removeAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+  }
+  return live
+}
 
 export async function translateWalkedElement(
   element: HTMLElement,
@@ -14,7 +34,14 @@ export async function translateWalkedElement(
   config: Config,
   toggle: boolean = false,
 ): Promise<void> {
-  if (!toggle && element.querySelector(`.${CONTENT_WRAPPER_CLASS}`)) return
+  // Translated regions are skipped on non-toggle walks. In-place-swapped
+  // paragraphs leave no wrapper, so also check the anchor marker attribute.
+  if (
+    !toggle &&
+    (element.querySelector(`.${CONTENT_WRAPPER_CLASS}`) || hasLiveTranslationOnlyAnchor(element))
+  ) {
+    return
+  }
 
   // if the walkId is not the same, return
   if (element.getAttribute(WALKED_ATTRIBUTE) !== walkId) return

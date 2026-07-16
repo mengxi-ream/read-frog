@@ -177,9 +177,9 @@ options:
       invalidJson: Invalid JSON format
     providers:
       name:
-        freeAi: Free AI Service
+        builtInAi: Built-in AI
       attribution:
-        freeAi: Provided by Atlas Cloud. Currently only available for Custom AI Actions. To unlock an unrestricted experience, purchase highly cost-effective credits on the official website.
+        builtInAi: Provided by Atlas Cloud. Currently only available for Custom AI Actions. To unlock an unrestricted experience, purchase highly cost-effective credits on the official website.
       description:
         openai: Provides models like GPT-4o
         azure: Azure-hosted OpenAI models through your deployments
@@ -347,6 +347,9 @@ options:
         description: Choose which built-in features to show in the selection toolbar
         translate: Translate
         speak: Speak
+      saveSuggestion:
+        title: Save Suggestions
+        description: After selection translation, suggest words to save to your Notebase
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -1110,6 +1113,12 @@ action:
   translation: Translation
   speak: Speak
   playing: Playing
+saveSuggestion:
+  title: You might want to save
+  description: Save these words to your Notebase and review them anytime.
+  save: Save
+  saved: Saved
+  staleSuggestion: This suggestion is out of date
 thinking:
   label: Thinking
   complete: Thinking complete

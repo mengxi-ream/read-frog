@@ -337,6 +337,130 @@ describe("requestQueue – timeout handling", () => {
   })
 })
 
+// 8b. Timeout aborts the in-flight attempt
+describe("requestQueue – timeout aborts the in-flight attempt", () => {
+  it("cancels the timed-out attempt so the retry never runs concurrently", async () => {
+    vi.useFakeTimers()
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      timeoutMs: 1000,
+      maxRetries: 2,
+      baseRetryDelayMs: 100,
+    })
+
+    let running = 0
+    let maxConcurrent = 0
+    const attemptSignals: (AbortSignal | undefined)[] = []
+
+    const thunk = (signal?: AbortSignal) => {
+      const attempt = attemptSignals.push(signal)
+      running++
+      maxConcurrent = Math.max(maxConcurrent, running)
+      return new Promise<string>((resolve, reject) => {
+        // first attempt hangs far past the timeout, the retry finishes quickly
+        const timer = setTimeout(
+          () => {
+            running--
+            resolve("done")
+          },
+          attempt === 1 ? 60_000 : 100,
+        )
+        signal?.addEventListener("abort", () => {
+          clearTimeout(timer)
+          running--
+          reject(signal.reason)
+        })
+      })
+    }
+
+    const promise = q.enqueue(thunk, Date.now(), "abort-on-timeout")
+
+    await vi.advanceTimersByTimeAsync(0)
+    expect(running).toBe(1)
+
+    // timeout fires: the attempt must be cancelled before the retry starts
+    await vi.advanceTimersByTimeAsync(1000)
+    expect(attemptSignals).toHaveLength(1)
+    expect(attemptSignals[0]?.aborted).toBe(true)
+    expect(running).toBe(0)
+
+    // retry (100ms base delay + jitter) runs alone and succeeds
+    await vi.advanceTimersByTimeAsync(500)
+    expect(attemptSignals).toHaveLength(2)
+    expect(maxConcurrent).toBe(1)
+    await expect(promise).resolves.toBe("done")
+  })
+
+  it("still rejects with the timeout error when retries are exhausted", async () => {
+    vi.useFakeTimers()
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      timeoutMs: 1000,
+      maxRetries: 0,
+    })
+
+    let sawAbort = false
+    const thunk = (signal?: AbortSignal) =>
+      new Promise<string>((resolve, reject) => {
+        const timer = setTimeout(resolve, 60_000, "too-slow")
+        signal?.addEventListener("abort", () => {
+          clearTimeout(timer)
+          sawAbort = true
+          reject(signal.reason)
+        })
+      })
+
+    const promise = q.enqueue(thunk, Date.now(), "timeout-no-retry")
+    promise.catch(() => {})
+
+    await vi.advanceTimersByTimeAsync(1000)
+
+    expect(sawAbort).toBe(true)
+    await expect(promise).rejects.toThrow("timed out after 1000ms")
+  })
+
+  it("aborts other in-flight attempts when a 429 drains the backlog", async () => {
+    vi.useFakeTimers()
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      rate: 10,
+      capacity: 2,
+      maxRetries: 2,
+      baseRetryDelayMs: 100,
+    })
+
+    const rateLimitedError = Object.assign(new Error("Too Many Requests"), {
+      statusCode: 429,
+    })
+    let aborted = false
+
+    const firstPromise = q.enqueue(() => Promise.reject(rateLimitedError), Date.now(), "first")
+    firstPromise.catch(() => {})
+
+    const secondPromise = q.enqueue(
+      (signal?: AbortSignal) =>
+        new Promise((_, reject) => {
+          signal?.addEventListener("abort", () => {
+            aborted = true
+            reject(signal.reason)
+          })
+        }),
+      Date.now(),
+      "second",
+    )
+    secondPromise.catch(() => {})
+
+    await vi.advanceTimersByTimeAsync(0)
+
+    expect(aborted).toBe(true)
+    await expect(firstPromise).rejects.toBe(rateLimitedError)
+    await expect(secondPromise).rejects.toBe(rateLimitedError)
+  })
+})
+
 // 9. Retry functionality
 describe("requestQueue – retry functionality", () => {
   it("succeeds when retry eventually works", async () => {

@@ -17,11 +17,12 @@ import {
 } from "../../dom/filter"
 import { getOwnerDocument } from "../../dom/node"
 import { decorateTranslationNode } from "../ui/decorate-translation"
-import { isForceInlineTranslation } from "../ui/translation-utils"
+import { isForceInlineTranslation, isShortInlineTranslationText } from "../ui/translation-utils"
 
 interface TranslationInsertionContext {
   flowSource: TransNode
   layoutSource: TransNode
+  sourceText: string
   isCurrent?: () => boolean
 }
 
@@ -77,7 +78,7 @@ export function addInlineTranslation(
   translatedNode: HTMLElement,
 ): void {
   const spaceNode = ownerDoc.createElement("span")
-  spaceNode.textContent = "  "
+  spaceNode.textContent = "\u00A0\u00A0"
   translatedWrapperNode.appendChild(spaceNode)
   translatedNode.className = `${NOTRANSLATE_CLASS} ${INLINE_CONTENT_CLASS}`
 }
@@ -94,7 +95,7 @@ export function addBlockTranslation(
 
 export async function insertTranslatedNodeIntoWrapper(
   translatedWrapperNode: HTMLElement,
-  { flowSource, layoutSource, isCurrent }: TranslationInsertionContext,
+  { flowSource, layoutSource, sourceText, isCurrent }: TranslationInsertionContext,
   translatedText: string,
   translationNodeStyle: TranslationNodeStyleConfig,
   config: Config,
@@ -105,19 +106,28 @@ export async function insertTranslatedNodeIntoWrapper(
   // Use the wrapper's owner document
   const ownerDoc = getOwnerDocument(translatedWrapperNode)
   const translatedNode = ownerDoc.createElement("span")
+  const layoutSourceDisplay = isHTMLElement(layoutSource)
+    ? window.getComputedStyle(layoutSource).display
+    : undefined
   const siteRuleForceInline =
     isHTMLElement(layoutSource) && isSiteRuleForceInlineElement(layoutSource, config)
-  const forceInlineTranslation = isForceInlineTranslation(layoutSource) || siteRuleForceInline
+  const forceInlineTranslation =
+    isForceInlineTranslation(layoutSource, layoutSourceDisplay) || siteRuleForceInline
+  const shortInlineTranslation =
+    isShortInlineTranslationText(sourceText) && layoutSourceDisplay !== "contents"
   const siteRuleForceBlock =
     isHTMLElement(layoutSource) && isSiteRuleForceBlockElement(layoutSource, config)
 
-  // priority: siteRuleForceBlock > forceInlineTranslation > forceBlockTranslation > isInlineTransNode > isBlockTransNode
+  // priority: siteRuleForceBlock > forceInlineTranslation > forceBlockTranslation >
+  // shortInlineTranslation > isInlineTransNode > isBlockTransNode
   if (siteRuleForceBlock) {
     addBlockTranslation(ownerDoc, translatedWrapperNode, translatedNode)
   } else if (forceInlineTranslation) {
     addInlineTranslation(ownerDoc, translatedWrapperNode, translatedNode)
   } else if (forceBlockTranslation) {
     addBlockTranslation(ownerDoc, translatedWrapperNode, translatedNode)
+  } else if (shortInlineTranslation) {
+    addInlineTranslation(ownerDoc, translatedWrapperNode, translatedNode)
   } else if (isInlineTransNode(layoutSource)) {
     addInlineTranslation(ownerDoc, translatedWrapperNode, translatedNode)
   } else if (isBlockTransNode(layoutSource)) {

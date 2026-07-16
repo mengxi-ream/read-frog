@@ -1,6 +1,7 @@
 import type { Config } from "@/types/config/config"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { isNoTranslationSentinel, NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
 import { HTML_ATTRIBUTE_MARKER } from "@/utils/host/translate/html-attribute-markers"
 import { getSubtitlesTranslatePrompt } from "../subtitles"
 import { getTranslatePromptFromConfig } from "../translate"
@@ -204,5 +205,79 @@ describe("translate prompt tokens", () => {
     expect(result.systemPrompt).toContain("Video title: No title available")
     expect(result.systemPrompt).toContain("Video summary: No summary available")
     expect(result.systemPrompt).not.toContain("Video description:")
+  })
+})
+
+describe("no-translation sentinel", () => {
+  const defaultPromptsConfig: Pick<Config["translate"], "customPromptsConfig"> = {
+    customPromptsConfig: { promptId: null, patterns: [] },
+  }
+
+  it("appends the sentinel rule to batch prompts with the target language substituted", () => {
+    const result = getTranslatePromptFromConfig(defaultPromptsConfig, "Simplified Chinese", "Hi", {
+      isBatch: true,
+    })
+
+    expect(result.systemPrompt).toContain("Already-translated Input Rule")
+    expect(result.systemPrompt).toContain(NO_TRANSLATION_SENTINEL)
+    expect(result.systemPrompt).toContain("already entirely written in Simplified Chinese")
+    expect(result.systemPrompt).not.toContain("{{targetLanguage}}")
+  })
+
+  it("demonstrates the sentinel inside the batch format example (both anchors replaced)", () => {
+    const result = getTranslatePromptFromConfig(defaultPromptsConfig, "Simplified Chinese", "Hi", {
+      isBatch: true,
+    })
+
+    // Input example: Paragraph B is annotated as already in the target language.
+    expect(result.systemPrompt).toContain(
+      "Paragraph B (this one is already written in Simplified Chinese)",
+    )
+    // Output example: Paragraph B's slot is the sentinel, not "Translation B".
+    expect(result.systemPrompt).toContain(`${NO_TRANSLATION_SENTINEL}\n\n%%`)
+    expect(result.systemPrompt).not.toContain("Translation B")
+  })
+
+  it("never leaks the sentinel into subtitle prompts, which share the batch rules", async () => {
+    mockGetLocalConfig.mockResolvedValue(DEFAULT_CONFIG)
+
+    const result = await getSubtitlesTranslatePrompt("Japanese", "Hello world", {
+      context: { webTitle: "Video", webDescription: "Desc", videoSummary: "Sum" },
+    })
+
+    // The subtitle pipeline has no sentinel mapping; the marker must never
+    // appear in its prompts (rule or example).
+    expect(result.systemPrompt).not.toContain(NO_TRANSLATION_SENTINEL)
+    expect(result.systemPrompt).not.toContain("Already-translated Input Rule")
+  })
+
+  it("appends the sentinel rule after a custom system prompt in batch mode", () => {
+    const config: Pick<Config["translate"], "customPromptsConfig"> = {
+      customPromptsConfig: {
+        promptId: "custom",
+        patterns: [
+          { id: "custom", name: "Custom", systemPrompt: "My prompt", prompt: "{{input}}" },
+        ],
+      },
+    }
+
+    const result = getTranslatePromptFromConfig(config, "English", "Hi", { isBatch: true })
+
+    expect(result.systemPrompt).toContain("My prompt")
+    expect(result.systemPrompt).toContain(NO_TRANSLATION_SENTINEL)
+  })
+
+  it("does not add the sentinel rule to non-batch prompts", () => {
+    const result = getTranslatePromptFromConfig(defaultPromptsConfig, "English", "Hi")
+
+    expect(result.systemPrompt).not.toContain(NO_TRANSLATION_SENTINEL)
+  })
+
+  it("matches only a full trimmed sentinel segment", () => {
+    expect(isNoTranslationSentinel(NO_TRANSLATION_SENTINEL)).toBe(true)
+    expect(isNoTranslationSentinel(`  ${NO_TRANSLATION_SENTINEL}\n`)).toBe(true)
+    expect(isNoTranslationSentinel(`text ${NO_TRANSLATION_SENTINEL}`)).toBe(false)
+    expect(isNoTranslationSentinel("{{NO_TRANSLATION")).toBe(false)
+    expect(isNoTranslationSentinel("")).toBe(false)
   })
 })

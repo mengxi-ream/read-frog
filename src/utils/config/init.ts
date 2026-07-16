@@ -5,30 +5,13 @@ import { configSchema } from "@/types/config/config"
 import { isAPIProviderConfig } from "@/types/config/provider"
 import { initI18n } from "@/utils/i18n"
 import {
-  buildDefaultCustomActions,
+  buildFreshDefaultConfig,
   CONFIG_SCHEMA_VERSION,
   CONFIG_STORAGE_KEY,
   DEFAULT_CONFIG,
 } from "../constants/config"
-import { buildDefaultProviderConfigList } from "../constants/providers"
 import { logger } from "../logger"
 import { runMigration } from "./migration"
-
-/**
- * DEFAULT_CONFIG whose default custom-action strings are resolved against the current
- * i18next language. Callers MUST `await initI18n(...)` first so the persisted strings
- * match the user's `uiLanguage` rather than the module-import-time singleton language.
- */
-function buildFreshDefaultConfig(): Config {
-  return {
-    ...DEFAULT_CONFIG,
-    providersConfig: buildDefaultProviderConfigList(),
-    selectionToolbar: {
-      ...DEFAULT_CONFIG.selectionToolbar,
-      customActions: buildDefaultCustomActions(),
-    },
-  }
-}
 
 /**
  * Initialize the config, this function should only be called once in the background script

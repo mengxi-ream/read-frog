@@ -1,9 +1,10 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { CaptureResult } from "posthog-js/dist/module.no-external"
-import type { FeatureUsedEventProperties } from "@/types/analytics"
+import type { AnalyticsFeature, FeatureUsedEventProperties } from "@/types/analytics"
 import posthog from "posthog-js/dist/module.no-external"
 import { storage } from "#imports"
 import { env } from "@/env"
+import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
   ANALYTICS_ENABLED_STORAGE_KEY,
@@ -15,10 +16,24 @@ import { EXTENSION_VERSION } from "@/utils/constants/app"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
+import {
+  createStorageFeatureUsageCache,
+  getFeatureUsageDay,
+  type FeatureUsageCache,
+} from "./analytics-feature-cache"
 
 type BackgroundFeatureUsedEventProperties = FeatureUsedEventProperties & {
   target_language?: LangCodeISO6393
 }
+
+/**
+ * Features whose events are multi-step funnels (every step must be recorded) and
+ * are already rate-limited elsewhere, so they bypass the once-per-day-per-feature
+ * adoption throttle instead of losing their second same-day event to it.
+ */
+const FEATURES_BYPASSING_DAILY_FEATURE_CACHE = new Set<AnalyticsFeature>([
+  ANALYTICS_FEATURE.SAVE_SUGGESTION,
+])
 
 interface BackgroundAnalyticsClient {
   capture: (eventName: string, properties: BackgroundFeatureUsedEventProperties) => void
@@ -33,6 +48,8 @@ interface BackgroundAnalyticsRuntime {
   defaultAnalyticsEnabled: boolean
   distinctIdOverride?: string
   extensionVersion: string
+  featureUsageCache?: FeatureUsageCache
+  getCurrentDate: () => Date
   getStorageItem: (key: string) => Promise<unknown>
   getTargetLanguage: () => Promise<LangCodeISO6393 | undefined>
   onMessage: (
@@ -68,6 +85,10 @@ export function resolveDistinctIdOverride(
 }
 
 function createDefaultRuntime(): BackgroundAnalyticsRuntime {
+  const getStorageItem = (key: string) => storage.getItem(key as `local:${string}`)
+  const setStorageItem = (key: string, value: unknown) =>
+    storage.setItem(key as `local:${string}`, value)
+
   return {
     apiHost: env.WXT_POSTHOG_HOST,
     apiKey: env.WXT_POSTHOG_API_KEY,
@@ -75,14 +96,21 @@ function createDefaultRuntime(): BackgroundAnalyticsRuntime {
     defaultAnalyticsEnabled: DEFAULT_ANALYTICS_ENABLED,
     distinctIdOverride: resolveDistinctIdOverride(env.WXT_POSTHOG_TEST_UUID, import.meta.env.DEV),
     extensionVersion: EXTENSION_VERSION,
-    getStorageItem: (key) => storage.getItem(key as `local:${string}`),
+    featureUsageCache: env.WXT_ANALYTICS_DAILY_FEATURE_CACHE_ENABLED
+      ? createStorageFeatureUsageCache({
+          getItem: getStorageItem,
+          setItem: setStorageItem,
+        })
+      : undefined,
+    getCurrentDate: () => new Date(),
+    getStorageItem,
     getTargetLanguage: async () => {
       const config = await getLocalConfig()
       return config?.language.targetCode
     },
     onMessage,
     posthog,
-    setStorageItem: (key, value) => storage.setItem(key as `local:${string}`, value),
+    setStorageItem,
     warn: logger.warn,
   }
 }
@@ -136,6 +164,7 @@ export function createBackgroundAnalytics(
 ) {
   let clientPromise: Promise<BackgroundAnalyticsClient | null> | null = null
   let missingConfigWarned = false
+  const featureCaptureQueues = new Map<AnalyticsFeature, Promise<void>>()
 
   async function isAnalyticsEnabled(): Promise<boolean> {
     const enabled = await runtime.getStorageItem(`local:${ANALYTICS_ENABLED_STORAGE_KEY}`)
@@ -205,6 +234,74 @@ export function createBackgroundAnalytics(
     return clientPromise
   }
 
+  async function captureFeatureUsedEvent(properties: FeatureUsedEventProperties): Promise<boolean> {
+    try {
+      const client = await getPostHogClient()
+      if (!client) {
+        return false
+      }
+
+      client.capture(
+        ANALYTICS_FEATURE_USED_EVENT,
+        await buildBackgroundFeatureUsedEventProperties(properties),
+      )
+      return true
+    } catch (error) {
+      runtime.warn(
+        `[Analytics] Failed to capture ${ANALYTICS_FEATURE_USED_EVENT} in background`,
+        error,
+      )
+      return false
+    }
+  }
+
+  async function runFeatureCaptureSerially(
+    feature: AnalyticsFeature,
+    capture: () => Promise<void>,
+  ): Promise<void> {
+    const previousCapture = featureCaptureQueues.get(feature) ?? Promise.resolve()
+    const currentCapture = previousCapture.catch(() => undefined).then(capture)
+    featureCaptureQueues.set(feature, currentCapture)
+
+    try {
+      await currentCapture
+    } finally {
+      if (featureCaptureQueues.get(feature) === currentCapture) {
+        featureCaptureQueues.delete(feature)
+      }
+    }
+  }
+
+  async function captureFeatureUsedEventWithCache(
+    properties: FeatureUsedEventProperties,
+    featureUsageCache: FeatureUsageCache,
+  ): Promise<void> {
+    await runFeatureCaptureSerially(properties.feature, async () => {
+      const currentDay = getFeatureUsageDay(runtime.getCurrentDate())
+      let lastReportedDay: string | undefined
+
+      try {
+        lastReportedDay = await featureUsageCache.getLastReportedDay(properties.feature)
+      } catch (error) {
+        runtime.warn("[Analytics] Failed to read the daily feature usage cache", error)
+      }
+
+      if (lastReportedDay === currentDay) {
+        return
+      }
+
+      if (!(await captureFeatureUsedEvent(properties))) {
+        return
+      }
+
+      try {
+        await featureUsageCache.setLastReportedDay(properties.feature, currentDay)
+      } catch (error) {
+        runtime.warn("[Analytics] Failed to write the daily feature usage cache", error)
+      }
+    })
+  }
+
   async function captureFeatureUsedEventInBackground(
     properties: FeatureUsedEventProperties,
   ): Promise<void> {
@@ -212,22 +309,20 @@ export function createBackgroundAnalytics(
       return
     }
 
-    try {
-      const client = await getPostHogClient()
-      if (!client) {
-        return
-      }
-
-      client.capture(
-        ANALYTICS_FEATURE_USED_EVENT,
-        await buildBackgroundFeatureUsedEventProperties(properties),
-      )
-    } catch (error) {
-      runtime.warn(
-        `[Analytics] Failed to capture ${ANALYTICS_FEATURE_USED_EVENT} in background`,
-        error,
-      )
+    // Funnel features must record every step (e.g. save-suggestion shown vs
+    // accepted), so they skip the once-per-day-per-feature adoption throttle —
+    // the daily cache keys on feature only and would drop the second same-day
+    // event. These features are already rate-limited (save suggestions by their
+    // cooldown), so bypassing does not inflate volume.
+    if (
+      !runtime.featureUsageCache ||
+      FEATURES_BYPASSING_DAILY_FEATURE_CACHE.has(properties.feature)
+    ) {
+      await captureFeatureUsedEvent(properties)
+      return
     }
+
+    await captureFeatureUsedEventWithCache(properties, runtime.featureUsageCache)
   }
 
   async function getBackgroundFeatureUsedEventProperties(): Promise<

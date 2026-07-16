@@ -2,6 +2,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
 import { detectLanguage } from "@/utils/content/language"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import {
@@ -132,6 +133,24 @@ describe("translate-text", () => {
       )
       expect(mockGetOrCreateWebPageContext).not.toHaveBeenCalled()
       expect(mockGetOrGenerateWebPageSummary).not.toHaveBeenCalled()
+    })
+
+    it("maps a full no-translation sentinel response to an empty string", async () => {
+      mockSendMessage.mockResolvedValue(NO_TRANSLATION_SENTINEL)
+
+      const result = await translateTextForPage("test text")
+
+      expect(result).toBe("")
+      expect(mockSendMessage).toHaveBeenCalledOnce()
+    })
+
+    it("returns a response containing the sentinel inside longer text verbatim", async () => {
+      const mixed = `some translation ${NO_TRANSLATION_SENTINEL}`
+      mockSendMessage.mockResolvedValue(mixed)
+
+      const result = await translateTextForPage("test text")
+
+      expect(result).toBe(mixed)
     })
 
     it("skips target-language text before sending a translation request by default", async () => {

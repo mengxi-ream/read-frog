@@ -176,9 +176,9 @@ options:
       invalidJson: 잘못된 JSON 형식
     providers:
       name:
-        freeAi: 무료 AI 서비스
+        builtInAi: 내장 AI
       attribution:
-        freeAi: Atlas Cloud 제공. 현재는 사용자 지정 AI 작업에서만 사용할 수 있습니다. 제한 없는 경험을 사용하려면 공식 웹사이트에서 가성비 높은 크레딧을 구매하세요.
+        builtInAi: Atlas Cloud 제공. 현재는 사용자 지정 AI 작업에서만 사용할 수 있습니다. 제한 없는 경험을 사용하려면 공식 웹사이트에서 가성비 높은 크레딧을 구매하세요.
       description:
         openai: GPT-4o 같은 모델을 제공합니다
         azure: Azure 배포를 통해 OpenAI 모델 사용
@@ -346,6 +346,9 @@ options:
         description: 선택 툴바에 표시할 기본 제공 기능 선택
         translate: 번역
         speak: 읽기
+      saveSuggestion:
+        title: 저장 제안
+        description: 선택 번역 후 Notebase에 저장할 단어를 추천합니다
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -995,6 +998,12 @@ action:
   translation: 번역
   speak: 읽기
   playing: 재생 중
+saveSuggestion:
+  title: 저장 추천
+  description: 아래 단어를 Notebase에 저장하고 언제든지 복습하세요.
+  save: 저장
+  saved: 저장됨
+  staleSuggestion: 이 제안은 더 이상 유효하지 않습니다
 thinking:
   label: 사고 중
   complete: 사고 완료

@@ -7,7 +7,7 @@ import { defaultRequestRetryPolicy } from "./retry-policy"
 
 export interface RequestTask {
   id: string
-  thunk: () => Promise<any>
+  thunk: (signal?: AbortSignal) => Promise<any>
   promise: Promise<any>
   resolve: (value: any) => void
   reject: (error: any) => void
@@ -17,7 +17,7 @@ export interface RequestTask {
   drained: boolean
 }
 
-type QueuedRequestTask = RequestTask & { hash: string }
+type QueuedRequestTask = RequestTask & { hash: string; abortController?: AbortController }
 
 export interface QueueOptions {
   rate: number // tokens/sec
@@ -46,7 +46,11 @@ export class RequestQueue {
     this.waitingQueue = new BinaryHeapPQ<QueuedRequestTask>()
   }
 
-  enqueue<T>(thunk: () => Promise<T>, scheduleAt: number, hash: string): Promise<T> {
+  enqueue<T>(
+    thunk: (signal?: AbortSignal) => Promise<T>,
+    scheduleAt: number,
+    hash: string,
+  ): Promise<T> {
     const duplicateTask = this.duplicateTask(hash)
     if (duplicateTask) {
       // console.info(`🔄 Found duplicate task for hash: ${hash}, returning existing promise`)
@@ -144,18 +148,28 @@ export class RequestQueue {
     // console.info(`🏃 Starting execution of task ${task.id} (attempt ${task.retryCount + 1}) at ${Date.now()}`)
 
     let timeoutId: NodeJS.Timeout | null = null
+    const abortController = new AbortController()
+    task.abortController = abortController
 
     try {
       // Create a timeout promise
       const timeoutPromise = new Promise((_, reject) => {
         timeoutId = setTimeout(() => {
           // console.info(`⏰ Task ${task.id} timed out after ${this.options.timeoutMs}ms`)
-          reject(new Error(`Task ${task.id} timed out after ${this.options.timeoutMs}ms`))
+          const timeoutError = new Error(
+            `Task ${task.id} timed out after ${this.options.timeoutMs}ms`,
+          )
+          // Reject before aborting: the race must settle with the timeout error
+          // (which the retry policy treats as retryable), not with whatever abort
+          // error the cancelled thunk rejects with.
+          reject(timeoutError)
+          abortController.abort(timeoutError)
         }, this.options.timeoutMs)
       })
 
-      // Race between the actual task and timeout
-      const result = await Promise.race([task.thunk(), timeoutPromise])
+      // Race between the actual task and timeout; the signal cancels the
+      // in-flight attempt on timeout so a retry never runs concurrently with it
+      const result = await Promise.race([task.thunk(abortController.signal), timeoutPromise])
 
       // Clear timeout if task completed successfully
       if (timeoutId) {
@@ -216,6 +230,10 @@ export class RequestQueue {
         clearTimeout(timeoutId)
       }
 
+      if (task.abortController === abortController) {
+        task.abortController = undefined
+      }
+
       if (this.executingTasks.get(task.hash) === task) {
         this.executingTasks.delete(task.hash)
       }
@@ -256,6 +274,7 @@ export class RequestQueue {
 
     task.drained = true
     task.reject(error)
+    task.abortController?.abort(error)
   }
 
   private refillTokens() {

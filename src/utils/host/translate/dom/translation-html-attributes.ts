@@ -6,7 +6,7 @@ import {
   HtmlAttributeMarkerIntegrityError,
 } from "../html-attribute-markers"
 
-const TRANSLATABLE_ATTRIBUTE_NAMES = new Set([
+export const TRANSLATABLE_ATTRIBUTE_NAMES = new Set([
   "abbr",
   "alt",
   "aria-description",
@@ -19,7 +19,7 @@ const TRANSLATABLE_ATTRIBUTE_NAMES = new Set([
   "title",
 ])
 
-const TRANSLATABLE_INPUT_VALUE_TYPES = new Set(["button", "reset", "submit"])
+export const TRANSLATABLE_INPUT_VALUE_TYPES = new Set(["button", "reset", "submit"])
 const SHOW_COMMENT = 128
 const ELEMENT_NODE = 1
 

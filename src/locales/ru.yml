@@ -176,9 +176,9 @@ options:
       invalidJson: Неверный формат JSON
     providers:
       name:
-        freeAi: Бесплатный ИИ-сервис
+        builtInAi: Встроенный ИИ
       attribution:
-        freeAi: Предоставлено Atlas Cloud. Сейчас доступно только для пользовательских AI-действий. Чтобы открыть неограниченный опыт, купите выгодные кредиты на официальном сайте.
+        builtInAi: Предоставлено Atlas Cloud. Сейчас доступно только для пользовательских AI-действий. Чтобы открыть неограниченный опыт, купите выгодные кредиты на официальном сайте.
       description:
         openai: Предоставляет модели, такие как GPT-4o
         azure: Модели OpenAI в Azure через ваши развертывания
@@ -346,6 +346,9 @@ options:
         description: Выберите, какие встроенные функции показывать в панели выделения
         translate: Перевод
         speak: Озвучивание
+      saveSuggestion:
+        title: Предложения по сохранению
+        description: После перевода выделенного текста предлагать слова для сохранения в Notebase
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -995,6 +998,12 @@ action:
   translation: Перевод
   speak: Озвучить
   playing: Воспроизведение
+saveSuggestion:
+  title: Стоит сохранить
+  description: Сохраните эти слова в Notebase, чтобы повторять их в любое время.
+  save: Сохранить
+  saved: Сохранено
+  staleSuggestion: Это предложение устарело
 thinking:
   label: Размышление
   complete: Размышление завершено

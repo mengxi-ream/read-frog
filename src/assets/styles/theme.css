@@ -60,9 +60,16 @@
 }
 
 :root {
+  /* Latin → Onest Variable (bundled via @fontsource-variable/onest, imported
+     only in the extension's own pages — not content scripts). CJK stays on the
+     lang-correct native font via system-ui (PingFang / 微软雅黑 on macOS/
+     Windows), then falls to 思源黑体 (Source Han Sans / Noto Sans CJK) — the
+     default on Android/ChromeOS/Linux — before the generic sans-serif. Emoji
+     families stay last. */
   --rf-font-sans:
-    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-    "Noto Color Emoji";
+    "Onest Variable", ui-sans-serif, system-ui, "Source Han Sans SC", "Noto Sans SC",
+    "Source Han Sans TC", "Noto Sans TC", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
   --rf-font-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
     monospace;
@@ -153,4 +160,13 @@
   body {
     @apply bg-background text-foreground antialiased;
   }
+}
+
+/* Chromium injects `body { font-family: system-ui, … }` (extension_fonts.css)
+   into every extension page, which intercepts the font-family inherited from
+   Tailwind preflight's `html` rule. The injected sheet cascades as UNLAYERED
+   author CSS, so this override must be unlayered too — inside @layer base it
+   would lose. */
+body {
+  font-family: var(--rf-font-sans);
 }

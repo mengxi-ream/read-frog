@@ -93,6 +93,7 @@ describe("extension env parsing", () => {
       WXT_POSTHOG_HOST: undefined,
       WXT_POSTHOG_API_KEY: undefined,
       WXT_POSTHOG_TEST_UUID: undefined,
+      WXT_ANALYTICS_DAILY_FEATURE_CACHE_ENABLED: false,
     })
   })
 
@@ -163,6 +164,7 @@ describe("extension env parsing", () => {
       WXT_POSTHOG_HOST: PRODUCTION_REQUIRED_ENV.WXT_POSTHOG_HOST,
       WXT_POSTHOG_API_KEY: PRODUCTION_REQUIRED_ENV.WXT_POSTHOG_API_KEY,
       WXT_POSTHOG_TEST_UUID: undefined,
+      WXT_ANALYTICS_DAILY_FEATURE_CACHE_ENABLED: false,
     })
   })
 
@@ -184,6 +186,7 @@ describe("extension env parsing", () => {
       WXT_POSTHOG_HOST: undefined,
       WXT_POSTHOG_API_KEY: undefined,
       WXT_POSTHOG_TEST_UUID: undefined,
+      WXT_ANALYTICS_DAILY_FEATURE_CACHE_ENABLED: false,
     })
   })
 
@@ -200,6 +203,24 @@ describe("extension env parsing", () => {
     expect(() =>
       resolveExtensionEnv({
         WXT_USE_LOCAL_PACKAGES: "yes",
+      }),
+    ).toThrowError(/Invalid/)
+  })
+
+  it("parses the analytics daily feature cache flag strictly", () => {
+    expect(
+      parseResolvedExtensionEnv({
+        WXT_ANALYTICS_DAILY_FEATURE_CACHE_ENABLED: "true",
+      }).WXT_ANALYTICS_DAILY_FEATURE_CACHE_ENABLED,
+    ).toBe(true)
+    expect(
+      parseResolvedExtensionEnv({
+        WXT_ANALYTICS_DAILY_FEATURE_CACHE_ENABLED: "false",
+      }).WXT_ANALYTICS_DAILY_FEATURE_CACHE_ENABLED,
+    ).toBe(false)
+    expect(() =>
+      parseResolvedExtensionEnv({
+        WXT_ANALYTICS_DAILY_FEATURE_CACHE_ENABLED: "yes",
       }),
     ).toThrowError(/Invalid/)
   })

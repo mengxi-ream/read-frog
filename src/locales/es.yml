@@ -177,9 +177,9 @@ options:
       invalidJson: Formato JSON no válido
     providers:
       name:
-        freeAi: Servicio AI gratuito
+        builtInAi: IA integrada
       attribution:
-        freeAi: Proporcionado por Atlas Cloud. Actualmente solo está disponible para acciones de IA personalizadas. Para desbloquear una experiencia sin restricciones, compra créditos muy rentables en el sitio web oficial.
+        builtInAi: Proporcionado por Atlas Cloud. Actualmente solo está disponible para acciones de IA personalizadas. Para desbloquear una experiencia sin restricciones, compra créditos muy rentables en el sitio web oficial.
       description:
         openai: Proporciona modelos como GPT-4o
         azure: Modelos OpenAI hospedados en Azure mediante tus implementaciones
@@ -347,6 +347,9 @@ options:
         description: Elige qué funciones integradas mostrar en la barra de selección
         translate: Traducir
         speak: Leer en voz alta
+      saveSuggestion:
+        title: Sugerencias de guardado
+        description: Después de traducir una selección, sugerir palabras para guardar en tu Notebase
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -1110,6 +1113,12 @@ action:
   translation: Traducción
   speak: Leer en voz alta
   playing: Reproduciendo
+saveSuggestion:
+  title: Quizás quieras guardar
+  description: Guarda estas palabras en tu Notebase y repásalas cuando quieras.
+  save: Guardar
+  saved: Guardado
+  staleSuggestion: Esta sugerencia está desactualizada
 thinking:
   label: Pensando
   complete: Razonamiento completo

@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/base-ui/button"
 import { useExportConfig } from "@/hooks/use-export-config"
 import { configAtom, writeConfigAtom } from "@/utils/atoms/config"
-import { CONFIG_SCHEMA_VERSION, DEFAULT_CONFIG } from "@/utils/constants/config"
+import { buildFreshDefaultConfig, CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
 import { i18n } from "@/utils/i18n"
 import { Alert, AlertDescription, AlertTitle } from "../ui/base-ui/alert"
 
@@ -38,7 +38,7 @@ export function RecoveryFallback({ error, onRecovered }: RecoveryFallbackProps) 
   const handleResetConfig = async () => {
     setIsResetting(true)
     try {
-      await setConfig(DEFAULT_CONFIG)
+      await setConfig(buildFreshDefaultConfig())
       toast.success(i18n.t("errorRecovery.resetSuccess"))
       onRecovered()
     } catch {

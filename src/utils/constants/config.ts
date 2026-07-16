@@ -2,10 +2,10 @@ import type { Config } from "@/types/config/config"
 import type { FloatingButtonSide } from "@/types/config/floating-button"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { PageTranslateRange } from "@/types/config/translate"
-import { FREE_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
+import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
 import { CUSTOM_ACTION_TEMPLATES } from "./custom-action-templates"
 import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from "./prompt"
-import { DEFAULT_PROVIDER_CONFIG_LIST } from "./providers"
+import { buildDefaultProviderConfigList, DEFAULT_PROVIDER_CONFIG_LIST } from "./providers"
 import { DEFAULT_SELECTION_OVERLAY_OPACITY } from "./selection"
 import { DEFAULT_SIDE_CONTENT_WIDTH } from "./side"
 import {
@@ -39,7 +39,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 85
+export const CONFIG_SCHEMA_VERSION = 86
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
@@ -59,7 +59,7 @@ export function createDefaultDictionaryAction(): SelectionToolbarCustomAction | 
   const template = CUSTOM_ACTION_TEMPLATES.find((t) => t.id === "dictionary")
   if (!template) return null
 
-  const action = template.createAction(FREE_AI_PROVIDER_ID)
+  const action = template.createAction(BUILT_IN_AI_PROVIDER_ID)
   return {
     ...action,
     id: "default-dictionary",
@@ -153,6 +153,9 @@ export const DEFAULT_CONFIG: Config = {
       },
     },
     customActions: defaultDictionaryAction ? [defaultDictionaryAction] : [],
+    saveSuggestion: {
+      enabled: true,
+    },
   },
   sideContent: {
     width: DEFAULT_SIDE_CONTENT_WIDTH,
@@ -216,6 +219,21 @@ export const DEFAULT_CONFIG: Config = {
     disabledBuiltInRules: [],
   },
   uiLanguage: "auto",
+}
+
+/**
+ * Build a default config whose persisted custom-action strings use the initialized UI locale.
+ * Callers must initialize i18n before calling this function.
+ */
+export function buildFreshDefaultConfig(): Config {
+  return {
+    ...DEFAULT_CONFIG,
+    providersConfig: buildDefaultProviderConfigList(),
+    selectionToolbar: {
+      ...DEFAULT_CONFIG.selectionToolbar,
+      customActions: buildDefaultCustomActions(),
+    },
+  }
 }
 
 export const PAGE_TRANSLATE_RANGE_ITEMS: Record<PageTranslateRange, { label: string }> = {

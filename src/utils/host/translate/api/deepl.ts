@@ -14,7 +14,7 @@ export async function deeplTranslate(
   fromLang: LangCodeISO6391 | "auto",
   toLang: LangCodeISO6391,
   providerConfig: DeepLProviderConfig,
-  options?: { textFormat?: TranslationTextFormat },
+  options?: { textFormat?: TranslationTextFormat; signal?: AbortSignal },
 ): Promise<string> {
   const [translatedText] = await requestDeepLTranslations(
     [sourceText],
@@ -36,7 +36,7 @@ async function requestDeepLTranslations(
   fromLang: LangCodeISO6391 | "auto",
   toLang: LangCodeISO6391,
   providerConfig: DeepLProviderConfig,
-  options?: { textFormat?: TranslationTextFormat },
+  options?: { textFormat?: TranslationTextFormat; signal?: AbortSignal },
 ): Promise<string[]> {
   const apiKey = providerConfig.apiKey?.trim()
   if (!apiKey) {
@@ -54,12 +54,17 @@ async function requestDeepLTranslations(
     ...(options?.textFormat === "html" ? { tag_handling: "html" } : {}),
   })
 
-  const fetchResponse = await fetchDirect(url, apiKey, requestBody)
+  const fetchResponse = await fetchDirect(url, apiKey, requestBody, options?.signal)
 
   return await parseDeepLResponse(fetchResponse, sourceTexts.length)
 }
 
-async function fetchDirect(url: string, apiKey: string, body: string): Promise<Response> {
+async function fetchDirect(
+  url: string,
+  apiKey: string,
+  body: string,
+  signal?: AbortSignal,
+): Promise<Response> {
   const resp = await fetch(url, {
     method: "POST",
     headers: {
@@ -67,6 +72,7 @@ async function fetchDirect(url: string, apiKey: string, body: string): Promise<R
       "Content-Type": "application/json",
     },
     body,
+    signal,
   }).catch((error) => {
     throw new Error(`Network error during DeepL translation: ${error.message}`)
   })

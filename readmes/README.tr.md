@@ -39,16 +39,6 @@ AI ile dilleri doğrudan tarayıcınızda daha kolay ve derin öğrenin.
 
 </div>
 
-<div align="center">
-  <img src="../assets/promotion/sponsor-title.svg" alt="Sponsor" width="120" />
-  <br />
-  注册<a href="https://readfrog.s.gy/RWqJeX">优云智算</a>：用最少的钱，换最高的编程效率。
-  <br /><br />
-  <a href="https://readfrog.s.gy/RWqJeX">
-    <img src="../assets/promotion/ucloud.jpg" alt="UCloud" />
-  </a>
-</div>
-
 <details>
 <summary><kbd>İçindekiler</kbd></summary>
 
@@ -112,11 +102,11 @@ Kullanıcı ya da geliştirici olmanız fark etmez; Read Frog bu vizyona giden y
   <kbd>Star geçmişi</kbd>
 </summary>
 
-<a href="https://www.star-history.com/#mengxi-ream/read-frog&Timeline">
+<a href="https://www.star-history.com/?type=timeline&repos=mengxi-ream%2Fread-frog">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=mengxi-ream/read-frog&type=Timeline&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=mengxi-ream/read-frog&type=Timeline" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=mengxi-ream/read-frog&type=Timeline" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=mengxi-ream/read-frog&type=timeline&theme=dark&legend=top-left&sealed_token=vUW24BwE2sgnq-CzlWEAT6gnzZqNrXl9ai4A05Pc3CQcPGdBqbts3tq5VRWEerfrqVdonsJasb04WcKd5AKSSCjlsdj_TwyI3j9xytMG4FQNw7yXDe9IUA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=mengxi-ream/read-frog&type=timeline&legend=top-left&sealed_token=vUW24BwE2sgnq-CzlWEAT6gnzZqNrXl9ai4A05Pc3CQcPGdBqbts3tq5VRWEerfrqVdonsJasb04WcKd5AKSSCjlsdj_TwyI3j9xytMG4FQNw7yXDe9IUA" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=mengxi-ream/read-frog&type=timeline&legend=top-left&sealed_token=vUW24BwE2sgnq-CzlWEAT6gnzZqNrXl9ai4A05Pc3CQcPGdBqbts3tq5VRWEerfrqVdonsJasb04WcKd5AKSSCjlsdj_TwyI3j9xytMG4FQNw7yXDe9IUA" />
  </picture>
 </a>
 
@@ -125,6 +115,18 @@ Kullanıcı ya da geliştirici olmanız fark etmez; Read Frog bu vizyona giden y
 ## ✨ Özellikler
 
 Read Frog'un güçlü özellikleriyle günlük web okumalarınızı sürükleyici bir dil öğrenme deneyimine dönüştürün.
+
+### 🪄 [Özel AI Eylemleri][docs-tutorial]
+
+Seçtiğiniz metni okuma ve öğrenme biçiminize uygun, yeniden kullanılabilir AI araçlarına dönüştürün. Kendi istemlerinizi ve yapılandırılmış çıktı alanlarınızı tanımlayın; sağlayıcı, model ve simgeyi seçin; ardından sözlük arama, yeniden yazma, özetleme, açıklama veya tasarladığınız herhangi bir iş akışını seçim araç çubuğundan çalıştırın.
+
+Yerleşik **Sözlük** ve **Yazıyı İyileştir** şablonlarıyla başlayabilir ya da sıfırdan bir eylem oluşturabilirsiniz. Yapılandırılmış sonuçları daha sonra çalışmak üzere Notebase alanlarına eşleyip kaydedebilirsiniz.
+
+### 🧠 [Bilgi kartları ve aralıklı tekrar][docs-tutorial]
+
+Kelimeleri, tanımları, örnek cümleleri, çevirileri ve okuma notlarını Notebase'e kaydedin; ardından özelleştirilebilir kart şablonlarıyla bilgi kartlarına dönüştürün. Okurken keşfettiğiniz içerik, akışınızı bozmadan çalışma materyaline dönüşür.
+
+Zamanı gelen kartları çevrimiçi gözden geçirin ve her birini **Tekrar**, **Zor**, **İyi** veya **Kolay** olarak değerlendirin. Read Frog'un aralıklı tekrar planlayıcısı, geri bildiriminize göre her kartı unutmanızdan hemen önce yeniden gösterir.
 
 ### 🔄 [İki dilli / Yalnızca çeviri][docs-tutorial]
 
