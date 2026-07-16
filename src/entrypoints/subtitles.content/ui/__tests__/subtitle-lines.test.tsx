@@ -92,7 +92,7 @@ describe("subtitle lines", () => {
     expect(line).not.toHaveAttribute("lang")
   })
 
-  it("delays pending loading dots so fast translations do not flash", () => {
+  it("delays pending translating label so fast translations do not flash", () => {
     vi.useFakeTimers()
     const store = createStoreWithLanguage("eng")
     store.set(currentSubtitleAtom, {
@@ -109,14 +109,15 @@ describe("subtitle lines", () => {
 
     const pending = container.querySelector("[data-pending='true']")
     expect(pending).not.toBeNull()
-    expect(pending?.querySelectorAll(".animate-bounce")).toHaveLength(0)
+    expect(pending?.querySelector("[data-subtitle-pending-indicator]")).toBeNull()
 
     act(() => {
       vi.advanceTimersByTime(TRANSLATION_PENDING_INDICATOR_DELAY_MS)
     })
 
-    expect(pending?.querySelectorAll(".animate-bounce")).toHaveLength(3)
-    expect(screen.queryByText("Translating…")).toBeNull()
+    expect(pending?.querySelector("[data-subtitle-pending-indicator]")).not.toBeNull()
+    expect(pending?.querySelectorAll("[data-subtitle-pending-dots] span")).toHaveLength(3)
+    expect(screen.getByText("Translating")).toBeTruthy()
     expect(pending).toHaveAttribute("aria-label", "Translating…")
   })
 

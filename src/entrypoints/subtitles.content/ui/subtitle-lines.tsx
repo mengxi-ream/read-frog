@@ -1,7 +1,6 @@
 import type { SubtitleTextStyle } from "@/types/config/subtitles"
 import { useAtomValue } from "jotai"
 import { useEffect, useState } from "react"
-import LoadingDots from "@/components/loading-dots"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
   SUBTITLE_FONT_FAMILIES,
@@ -12,6 +11,7 @@ import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 import { isTranslationPending } from "@/utils/subtitles/display-rules"
 import { currentSubtitleAtom } from "../atoms"
+import { SubtitlePendingLabel } from "./subtitle-pending-label"
 
 interface SubtitleLineProps {
   content?: string
@@ -111,7 +111,7 @@ export function TranslationSubtitle({ content, className }: SubtitleLineProps) {
         aria-label={i18n.t("subtitles.state.translating")}
       >
         {showPendingDots ? (
-          <LoadingDots className="scale-75 opacity-70 [&>div]:bg-current" />
+          <SubtitlePendingLabel label={i18n.t("subtitles.state.translating")} />
         ) : null}
       </div>
     )
