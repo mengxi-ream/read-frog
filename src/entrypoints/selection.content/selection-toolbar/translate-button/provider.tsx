@@ -255,9 +255,15 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     markShownOnce: markSaveSuggestionShownOnce,
   } = useSaveSuggestion()
 
+  // Suggestion identity must change whenever a translation re-run would produce
+  // different notes (target language / provider change bumps translateRequestKey;
+  // regenerate bumps rerunNonce). Keying only on popoverSessionKey would leave a
+  // stale old-language suggestion rendered after the new translation.
+  const saveSuggestionSessionKey = `${popoverSessionKey}:${translateRequestKey}:${rerunNonce}`
+
   const fireSaveSuggestion = useEffectEvent((preparedText: string) => {
     maybeFireSaveSuggestion({
-      sessionKey: popoverSessionKey,
+      sessionKey: saveSuggestionSessionKey,
       selectionText: preparedText,
       paragraphsText: paragraphsText ?? preparedText,
       targetLangName: LANG_CODE_TO_EN_NAME[translateRequest.language.targetCode],
@@ -701,7 +707,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
             {!isTranslating &&
               !!translatedText &&
               !error &&
-              saveSuggestion?.sessionKey === popoverSessionKey && (
+              saveSuggestion?.sessionKey === saveSuggestionSessionKey && (
                 <SaveSuggestionCard
                   suggestion={saveSuggestion}
                   markShownOnce={markSaveSuggestionShownOnce}

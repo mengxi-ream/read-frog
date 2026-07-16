@@ -18,7 +18,8 @@ import {
 } from "./session-guard"
 
 export interface SaveSuggestionSessionResult {
-  sessionKey: number
+  /** Composite key: popoverSessionKey:translateRequestKey:rerunNonce. */
+  sessionKey: string
   validated: ValidatedSaveSuggestion
   /** The chosen action as of fire time (config copy, or the dictionary draft). */
   actionSnapshot: SelectionToolbarCustomAction
@@ -29,7 +30,7 @@ export interface SaveSuggestionSessionResult {
 }
 
 export interface SaveSuggestionFireInput {
-  sessionKey: number
+  sessionKey: string
   selectionText: string
   paragraphsText: string
   /** English name of the target language. */
@@ -47,8 +48,8 @@ export function useSaveSuggestion() {
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const [suggestion, setSuggestion] = useState<SaveSuggestionSessionResult | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
-  const completedSessionKeyRef = useRef<number | null>(null)
-  const shownSessionKeyRef = useRef<number | null>(null)
+  const completedSessionKeyRef = useRef<string | null>(null)
+  const shownSessionKeyRef = useRef<string | null>(null)
   const latestRef = useRef(selectionToolbar)
   latestRef.current = selectionToolbar
 
@@ -63,7 +64,7 @@ export function useSaveSuggestion() {
   }, [cancel])
 
   /** Returns true only the first time it is called for a session. */
-  const markShownOnce = useCallback((sessionKey: number) => {
+  const markShownOnce = useCallback((sessionKey: string) => {
     if (shownSessionKeyRef.current === sessionKey) {
       return false
     }

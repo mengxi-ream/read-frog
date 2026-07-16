@@ -53,7 +53,7 @@ export function SaveSuggestionCard({
   markShownOnce,
 }: {
   suggestion: SaveSuggestionSessionResult
-  markShownOnce: (sessionKey: number) => boolean
+  markShownOnce: (sessionKey: string) => boolean
 }) {
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const { save, isSaving } = useSaveToNotebase()
