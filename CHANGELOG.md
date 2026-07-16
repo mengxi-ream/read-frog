@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.41.0
+
+### Minor Changes
+
+- [#1861](https://github.com/mengxi-ream/read-frog/pull/1861) [`a972c61`](https://github.com/mengxi-ream/read-frog/commit/a972c6197c57f94084c18ed9ec4556a1750cec14) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(save-suggestion): suggest words to save to your notebase after selection translation
+
+### Patch Changes
+
+- [#1865](https://github.com/mengxi-ream/read-frog/pull/1865) [`ecbd287`](https://github.com/mengxi-ream/read-frog/commit/ecbd28794ded986b673b2cdc3b9187852ed445d3) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection-toolbar): keep the selection toolbar anchored across custom scroll containers
+
+- [#1868](https://github.com/mengxi-ream/read-frog/pull/1868) [`a93e0da`](https://github.com/mengxi-ream/read-frog/commit/a93e0da460d07522bf2ff6177bd327568a40e83f) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translate): restore the active toolbar icon after page refresh
+
+- [#1867](https://github.com/mengxi-ream/read-frog/pull/1867) [`a0015da`](https://github.com/mengxi-ream/read-frog/commit/a0015dad4b37081bf577a5128bd7316ec18dfb65) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - i18n(api-providers): rename the free AI service to built-in AI
+
 ## 1.40.2
 
 ### Patch Changes
