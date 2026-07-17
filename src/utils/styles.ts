@@ -1,17 +1,30 @@
-export function addStyleToShadow(shadow: ShadowRoot) {
-  document.head.querySelectorAll("style").forEach((styleEl) => {
-    if (styleEl.textContent?.includes("[data-sonner-toaster]")) {
-      const shadowHead = shadow.querySelector("head")
-      // Clone the style element instead of moving it to preserve the original
-      // Otherwise, append api will move the style element to the shadow root and cause the bug
-      const clonedStyle = styleEl.cloneNode(true)
-      if (shadowHead) {
-        shadowHead.append(clonedStyle)
-      } else {
-        shadow.append(clonedStyle)
-      }
+import "sonner"
+
+const SONNER_STYLE_SELECTOR = "[data-sonner-toaster]"
+
+function findInjectedSonnerStyle() {
+  const styles = document.head.querySelectorAll<HTMLStyleElement>("style")
+
+  for (let index = styles.length - 1; index >= 0; index -= 1) {
+    const style = styles[index]
+    if (style.textContent?.includes(SONNER_STYLE_SELECTOR)) {
+      return style
     }
-  })
+  }
+
+  return null
+}
+
+// Importing Sonner inserts its stylesheet synchronously. Retain the exact node
+// created for this content-script bundle so host-page Sonner styles stay untouched.
+const injectedSonnerStyle = typeof document === "undefined" ? null : findInjectedSonnerStyle()
+
+export function addStyleToShadow(shadow: ShadowRoot) {
+  if (!injectedSonnerStyle) return
+
+  const shadowHead = shadow.querySelector("head")
+  const styleTarget = shadowHead ?? shadow
+  styleTarget.append(injectedSonnerStyle)
 }
 
 function isInternalStyleElement(node: Node) {
@@ -25,10 +38,6 @@ function isInternalStyleElement(node: Node) {
   }
 
   if (node instanceof HTMLStyleElement && node.id === "_goober") {
-    return true
-  }
-
-  if (node instanceof HTMLStyleElement && node.textContent?.includes("[data-sonner-toaster]")) {
     return true
   }
 
