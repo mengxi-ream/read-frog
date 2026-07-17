@@ -26,6 +26,17 @@ export const MIN_PRELOAD_THRESHOLD = 0
 export const MAX_PRELOAD_THRESHOLD = 1
 export const DEFAULT_PRELOAD_THRESHOLD = 0
 
+// A single observed paragraph taller than this many viewports is split into
+// its descendant paragraphs before observation, otherwise one flat giant
+// container (e.g. docs.docker.com's 185k-px <article>) defeats viewport-lazy
+// translation and enqueues the whole page at once (#1881).
+export const GIANT_PARAGRAPH_SPLIT_VIEWPORT_MULTIPLIER = 3
+// Floor for the viewport height used in the split cap, so tiny embedded
+// frames don't shred normal paragraphs into fragments.
+export const GIANT_PARAGRAPH_SPLIT_MIN_VIEWPORT_PX = 800
+// Defensive bound on split recursion.
+export const GIANT_PARAGRAPH_MAX_SPLIT_DEPTH = 10
+
 export const MIN_CHARACTERS_PER_NODE = 0
 export const MAX_CHARACTERS_PER_NODE = 1000
 export const DEFAULT_MIN_CHARACTERS_PER_NODE = 0

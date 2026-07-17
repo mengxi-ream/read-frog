@@ -100,7 +100,15 @@ interface ProtocolMap {
     webDescription?: string | null
     webContent?: string | null
     webSummary?: string | null
+    // Page-translation session this request belongs to; scopes the request
+    // for cancelPageTranslationRequests. Absent for non-page requests
+    // (input/selection translation), which are never cancellable.
+    sessionId?: string
   }) => Promise<string>
+  // Drain queued/in-flight page-translation requests of one session (#1881).
+  // The background composes the scope as `${sender.tab.id}:${sessionId}`, so a
+  // tab can only ever cancel its own requests.
+  cancelPageTranslationRequests: (data: { sessionId: string }) => void
   getOrGenerateWebPageSummary: (data: {
     webTitle: string
     webContent: string

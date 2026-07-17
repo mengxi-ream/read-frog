@@ -12,9 +12,11 @@ import { detectLanguage } from "@/utils/content/language"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { TranslationCancelledError } from "@/utils/request/cancellation"
 import { Sha256Hex } from "../../hash"
 import { sendMessage } from "../../message"
 import { prepareTranslationText } from "./text-preparation"
+import { getPageTranslationSessionId } from "./translation-session"
 
 // Minimum text length for skip language detection (shorter than general detection
 // to catch short phrases like "Bonjour!" or "こんにちは")
@@ -135,6 +137,9 @@ export interface TranslateTextOptions {
   extraHashTags?: string[]
   webPageContext?: WebPagePromptContext
   textFormat?: TranslationTextFormat
+  // Page-translation session id used for cancellation scoping. Deliberately
+  // NOT part of the cache hash — cache identity must not vary per session.
+  sessionId?: string
 }
 
 /**
@@ -150,6 +155,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     extraHashTags = [],
     webPageContext,
     textFormat = "plain",
+    sessionId,
   } = options
 
   const preparedText = prepareTranslationText(text)
@@ -171,6 +177,17 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
   // Add extra hash tags for cache differentiation
   hashComponents.push(...extraHashTags)
 
+  // Final gate before dispatch: if the page-translation session that owned
+  // this request has ended (or been replaced) while we were preparing it,
+  // abort instead of enqueueing. Sending now would either be unscoped (if the
+  // id had gone null) or re-populate the queue AFTER the session's cancel
+  // message already drained it — both defeat cancellation (#1881). Callers on
+  // the page path swallow this error; input/selection requests carry no
+  // sessionId and skip the gate entirely.
+  if (sessionId !== undefined && getPageTranslationSessionId() !== sessionId) {
+    throw new TranslationCancelledError(sessionId)
+  }
+
   const result = await sendMessage("enqueueTranslateRequest", {
     text: preparedText,
     langConfig,
@@ -182,6 +199,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     webDescription: normalizedWebPageContext?.webDescription,
     webContent: normalizedWebPageContext?.webContent,
     webSummary: normalizedWebPageContext?.webSummary,
+    sessionId,
   })
   // The sentinel must be mapped here and only here: every batch-pipeline
   // consumer (page paragraphs, document title, input translation, selection

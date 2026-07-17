@@ -42,6 +42,7 @@ vi.mock("@/utils/host/dom/filter", () => ({
     .fn<(...args: any[]) => any>()
     .mockReturnValue(false),
   isDontWalkIntoButTranslateAsChildElement: vi.fn<(...args: any[]) => any>().mockReturnValue(false),
+  isWalkBlockedElement: vi.fn<(...args: any[]) => any>().mockReturnValue(false),
   isHTMLElement: (node: unknown) => node instanceof HTMLElement,
 }))
 
@@ -51,6 +52,9 @@ vi.mock("@/utils/host/dom/find", () => ({
 
 vi.mock("@/utils/host/dom/traversal", () => ({
   walkAndLabelElement: mockWalkAndLabelElement,
+  walkAndLabelElementChunked: vi
+    .fn<(...args: any[]) => any>()
+    .mockResolvedValue({ forceBlock: false, isInlineNode: false }),
 }))
 
 vi.mock("@/utils/host/translate/node-manipulation", () => ({

@@ -3,6 +3,7 @@ import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
 import type { BatchQueueConfig, RequestQueueConfig } from "@/types/config/translate"
 import type { SubtitlePromptContext, WebPagePromptContext } from "@/types/content"
 import type { PromptResolver } from "@/utils/host/translate/api/ai"
+import { browser } from "#imports"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { putBatchRequestRecord } from "@/utils/batch-request-record"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
@@ -183,6 +184,21 @@ export interface TranslateBatchData<TContext = unknown> {
   hash: string
   scheduleAt: number
   context?: TContext
+  // Cancellation scope (`${tabId}:${sessionId}`); absent = uncancellable.
+  scope?: string
+}
+
+/**
+ * Compose the cancellation scope from the message sender and the content
+ * script's session id. Building it background-side from `sender.tab.id` makes
+ * cross-tab cancellation impossible by construction.
+ */
+export function buildTranslationScopeKey(
+  sender: { tab?: { id?: number } } | undefined,
+  sessionId: string | undefined,
+): string | undefined {
+  const tabId = sender?.tab?.id
+  return typeof tabId === "number" && sessionId ? `${tabId}:${sessionId}` : undefined
 }
 
 interface TranslationQueueSetupConfig<TContext = unknown> {
@@ -218,7 +234,8 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
     },
     getCharacters: (data) => data.text.length,
     getDedupKey: (data) => data.hash,
-    executeBatch: async (dataList) => {
+    getScope: (data) => data.scope,
+    executeBatch: async (dataList, meta) => {
       const { providerConfig } = dataList[0]
       const hash = Sha256Hex(...dataList.map((d) => d.hash))
       const earliestScheduleAt = Math.min(...dataList.map((d) => d.scheduleAt))
@@ -228,10 +245,10 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
         return await executeBatchTranslation(dataList, promptResolver, signal)
       }
 
-      return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash)
+      return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash, meta.scopes)
     },
     executeIndividual: async (data) => {
-      const { text, langConfig, providerConfig, hash, scheduleAt, context } = data
+      const { text, langConfig, providerConfig, hash, scheduleAt, context, scope } = data
       const thunk = async (signal?: AbortSignal) => {
         await putBatchRequestRecord({ originalRequestCount: 1, providerConfig })
         return executeTranslate(text, langConfig, providerConfig, promptResolver, {
@@ -239,7 +256,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
           signal,
         })
       }
-      return requestQueue.enqueue(thunk, scheduleAt, hash)
+      return requestQueue.enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)
     },
     onError: (error, context) => {
       const errorType = context.isFallback ? "Individual request" : "Batch request"
@@ -279,8 +296,10 @@ export async function setUpWebPageTranslationQueue() {
         webDescription,
         webContent,
         webSummary,
+        sessionId,
       },
     } = message
+    const scope = buildTranslationScopeKey(message.sender, sessionId)
 
     const validateHtmlAttributeMarkers =
       textFormat === "html" && hasHtmlAttributeMarkerProtocol(text)
@@ -307,7 +326,7 @@ export async function setUpWebPageTranslationQueue() {
     }
 
     if (shouldUseBatchQueue(providerConfig)) {
-      const data = { text, langConfig, providerConfig, hash, scheduleAt, context }
+      const data = { text, langConfig, providerConfig, hash, scheduleAt, context, scope }
       result = await batchQueue.enqueue(data)
     } else {
       // Create thunk based on type and params
@@ -316,7 +335,7 @@ export async function setUpWebPageTranslationQueue() {
           textFormat,
           signal,
         })
-      result = await requestQueue.enqueue(thunk, scheduleAt, hash)
+      result = await requestQueue.enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)
     }
 
     if (validateHtmlAttributeMarkers) {
@@ -353,6 +372,28 @@ export async function setUpWebPageTranslationQueue() {
   onMessage("setTranslateBatchQueueConfig", (message) => {
     const { data } = message
     batchQueue.setBatchConfig(data)
+  })
+
+  onMessage("cancelPageTranslationRequests", (message) => {
+    const scope = buildTranslationScopeKey(message.sender, message.data.sessionId)
+    if (!scope) return
+    // Batch queue first so pending batches cannot flush new request-queue
+    // tasks between the two drains.
+    const cancelledBatch = batchQueue.cancelByScope(scope)
+    const cancelledRequests = requestQueue.cancelByScope(scope)
+    if (cancelledBatch + cancelledRequests > 0) {
+      logger.info(
+        `Cancelled ${cancelledBatch + cancelledRequests} page-translation requests (scope: ${scope})`,
+      )
+    }
+  })
+
+  // A closed tab can never send its cancel message — sweep every scope the
+  // tab ever registered (#1881).
+  browser.tabs.onRemoved.addListener((tabId) => {
+    const prefix = `${tabId}:`
+    batchQueue.cancelWhere((scope) => scope.startsWith(prefix))
+    requestQueue.cancelWhere((scope) => scope.startsWith(prefix))
   })
 }
 

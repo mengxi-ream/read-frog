@@ -26,6 +26,7 @@ const {
   mockTranslateWalkedElement,
   mockValidateTranslationConfigAndToast,
   mockWalkAndLabelElement,
+  mockWalkAndLabelElementChunked,
 } = vi.hoisted(() => ({
   mockGetDetectedCodeFromStorage: vi.fn<(...args: any[]) => any>(),
   mockGetRandomUUID: vi.fn<(...args: any[]) => any>(),
@@ -36,6 +37,7 @@ const {
   mockIsDontWalkIntoAndDontTranslateAsChildElement: vi.fn<(...args: any[]) => any>(),
   mockIsDontWalkIntoButTranslateAsChildElement: vi.fn<(...args: any[]) => any>(),
   mockWalkAndLabelElement: vi.fn<(...args: any[]) => any>(),
+  mockWalkAndLabelElementChunked: vi.fn<(...args: any[]) => any>(),
   mockRemoveAllTranslatedWrapperNodes: vi.fn<(...args: any[]) => any>(),
   mockTranslateWalkedElement: vi.fn<(...args: any[]) => any>(),
   mockTranslateTextForPageTitle: vi.fn<(...args: any[]) => any>(),
@@ -60,6 +62,9 @@ vi.mock("@/utils/host/dom/filter", () => ({
   hasNoWalkAncestor: mockHasNoWalkAncestor,
   isDontWalkIntoAndDontTranslateAsChildElement: mockIsDontWalkIntoAndDontTranslateAsChildElement,
   isDontWalkIntoButTranslateAsChildElement: mockIsDontWalkIntoButTranslateAsChildElement,
+  isWalkBlockedElement: (element: HTMLElement, config: unknown) =>
+    mockIsDontWalkIntoButTranslateAsChildElement(element, config) ||
+    mockIsDontWalkIntoAndDontTranslateAsChildElement(element, config),
   isHTMLElement: (node: unknown) => node instanceof HTMLElement,
   isTranslatedWrapperNode: (node: unknown) =>
     node instanceof HTMLElement && node.classList.contains("read-frog-translated-content-wrapper"),
@@ -71,6 +76,7 @@ vi.mock("@/utils/host/dom/find", () => ({
 
 vi.mock("@/utils/host/dom/traversal", () => ({
   walkAndLabelElement: mockWalkAndLabelElement,
+  walkAndLabelElementChunked: mockWalkAndLabelElementChunked,
 }))
 
 vi.mock("@/utils/host/translate/node-manipulation", () => ({
@@ -181,8 +187,13 @@ function isBlockedForTraversal(element: HTMLElement): boolean {
   )
 }
 
-function walkAndLabelVisibleParagraphs(element: HTMLElement, walkId: string) {
+function walkAndLabelVisibleParagraphs(
+  element: HTMLElement,
+  walkId: string,
+  onBlockedElement?: (blocked: HTMLElement) => void,
+) {
   if (isBlockedForTraversal(element)) {
+    onBlockedElement?.(element)
     return {
       forceBlock: false,
       isInlineNode: false,
@@ -193,7 +204,7 @@ function walkAndLabelVisibleParagraphs(element: HTMLElement, walkId: string) {
 
   for (const child of element.children) {
     if (child instanceof HTMLElement) {
-      walkAndLabelVisibleParagraphs(child, walkId)
+      walkAndLabelVisibleParagraphs(child, walkId, onBlockedElement)
     }
   }
 
@@ -232,8 +243,21 @@ describe("pageTranslationManager mutation re-walk", () => {
       isBlockedForTraversal(element),
     )
     mockDeepQueryTopLevelSelector.mockImplementation(deepQueryTopLevelSelectorImpl)
-    mockWalkAndLabelElement.mockImplementation((element: HTMLElement, walkId: string) =>
-      walkAndLabelVisibleParagraphs(element, walkId),
+    mockWalkAndLabelElement.mockImplementation(
+      (
+        element: HTMLElement,
+        walkId: string,
+        _config: unknown,
+        callbacks?: { onBlockedElement?: (blocked: HTMLElement) => void },
+      ) => walkAndLabelVisibleParagraphs(element, walkId, callbacks?.onBlockedElement),
+    )
+    mockWalkAndLabelElementChunked.mockImplementation(
+      async (
+        element: HTMLElement,
+        walkId: string,
+        _config: unknown,
+        options?: { onBlockedElement?: (blocked: HTMLElement) => void },
+      ) => walkAndLabelVisibleParagraphs(element, walkId, options?.onBlockedElement),
     )
     mockTranslateTextForPageTitle.mockResolvedValue("")
     mockTranslateNodesBilingualMode.mockReset().mockResolvedValue(undefined)
@@ -266,7 +290,14 @@ describe("pageTranslationManager mutation re-walk", () => {
     await observer.triggerIntersect(panel)
     await flushDomUpdates()
 
-    expect(mockTranslateWalkedElement).toHaveBeenCalledWith(panel, "walk-id", DEFAULT_CONFIG)
+    expect(mockTranslateWalkedElement).toHaveBeenCalledWith(
+      panel,
+      "walk-id",
+      DEFAULT_CONFIG,
+      false,
+      expect.anything(),
+      expect.anything(),
+    )
 
     manager.stop()
   })
@@ -296,7 +327,14 @@ describe("pageTranslationManager mutation re-walk", () => {
     await observer.triggerIntersect(panel)
     await flushDomUpdates()
 
-    expect(mockTranslateWalkedElement).toHaveBeenCalledWith(panel, "walk-id", DEFAULT_CONFIG)
+    expect(mockTranslateWalkedElement).toHaveBeenCalledWith(
+      panel,
+      "walk-id",
+      DEFAULT_CONFIG,
+      false,
+      expect.anything(),
+      expect.anything(),
+    )
 
     manager.stop()
   })
@@ -326,7 +364,14 @@ describe("pageTranslationManager mutation re-walk", () => {
     await observer.triggerIntersect(panel)
     await flushDomUpdates()
 
-    expect(mockTranslateWalkedElement).toHaveBeenCalledWith(panel, "walk-id", DEFAULT_CONFIG)
+    expect(mockTranslateWalkedElement).toHaveBeenCalledWith(
+      panel,
+      "walk-id",
+      DEFAULT_CONFIG,
+      false,
+      expect.anything(),
+      expect.anything(),
+    )
 
     manager.stop()
   })
@@ -800,6 +845,48 @@ describe("pageTranslationManager mutation re-walk", () => {
     }
 
     expect((manager as any).mutationObservers.length).toBe(observerCountAfterStart)
+
+    manager.stop()
+  })
+
+  it("splits a giant paragraph into its descendant paragraphs for observation (#1881)", async () => {
+    // docs.docker.com regression shape: one flat container labeled as a
+    // paragraph spanning the whole document, with real paragraphs nested
+    // inside. Built via DOM APIs — the HTML parser refuses nested <p>.
+    const giant = document.createElement("p")
+    giant.id = "giant"
+    giant.append("direct inline text of the giant")
+    const inner1 = document.createElement("p")
+    inner1.id = "inner1"
+    inner1.textContent = "Nested paragraph one"
+    const inner2 = document.createElement("p")
+    inner2.id = "inner2"
+    inner2.textContent = "Nested paragraph two"
+    giant.append(inner1, inner2)
+
+    const unsplittable = document.createElement("p")
+    unsplittable.id = "unsplittable"
+    unsplittable.textContent = "One enormous paragraph without nested paragraphs"
+
+    document.body.append(giant, unsplittable)
+    // jsdom rects default to 0 — mark only the giants as taller than the
+    // split cap (3 viewports).
+    const tall = { height: 200_000 } as DOMRect
+    giant.getBoundingClientRect = () => tall
+    unsplittable.getBoundingClientRect = () => tall
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const observer = intersectionObservers[0]
+    const observed = observer.observe.mock.calls.map((call) => call[0])
+    // The giant is split: its nested paragraphs are observed individually.
+    expect(observed).toContain(inner1)
+    expect(observed).toContain(inner2)
+    expect(observed).not.toContain(giant)
+    // A giant with no nested paragraphs cannot be split — observed whole.
+    expect(observed).toContain(unsplittable)
 
     manager.stop()
   })

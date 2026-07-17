@@ -7,15 +7,16 @@ import {
   WALKED_ATTRIBUTE,
 } from "@/utils/constants/dom-labels"
 import { FORCE_BLOCK_TAGS } from "@/utils/constants/dom-rules"
+import { DEFAULT_WALK_BUDGET_MS, yieldToMain } from "@/utils/scheduler"
 import {
   isDontWalkIntoAndDontTranslateAsChildElement,
-  isDontWalkIntoButTranslateAsChildElement,
   isHTMLElement,
   isShallowBlockHTMLElement,
   isShallowInlineHTMLElement,
   isSiteRuleForceBlockElement,
   isTextNode,
   isTranslatedWrapperNode,
+  isWalkBlockedElement,
   isWithinIncludeScope,
 } from "./filter"
 
@@ -67,46 +68,62 @@ export function extractTextContent(node: TransNode, config: Config): string {
   }, "")
 }
 
-export function walkAndLabelElement(
+export interface WalkResult {
+  forceBlock: boolean
+  isInlineNode: boolean
+}
+
+export interface WalkCallbacks {
+  /** Invoked for each element the walk refuses to descend into. */
+  onBlockedElement?: (element: HTMLElement) => void
+}
+
+export interface ChunkedWalkOptions extends WalkCallbacks {
+  budgetMs?: number
+  /** Checked at every slice boundary; returning false aborts the walk. */
+  shouldContinue?: () => boolean
+}
+
+const SKIPPED_WALK_RESULT: WalkResult = { forceBlock: false, isInlineNode: false }
+
+/**
+ * Recursive generator holding the single copy of the labeling logic. Each
+ * `yield` (one per element, BEFORE any attribute write) is a potential pause
+ * point for the chunked driver; `yield*` delegation preserves the post-order
+ * dataflow (a parent's paragraph label depends on every child's isInlineNode,
+ * and forceBlock propagates child → parent).
+ *
+ * Precondition: `element` already passed the blocked check.
+ */
+function* walkNode(
   element: HTMLElement,
   walkId: string,
   config: Config,
-): { forceBlock: boolean; isInlineNode: boolean } {
-  if (
-    isDontWalkIntoButTranslateAsChildElement(element, config) ||
-    isDontWalkIntoAndDontTranslateAsChildElement(element, config)
-  ) {
-    return {
-      forceBlock: false,
-      isInlineNode: false,
-    }
-  }
+  callbacks: WalkCallbacks,
+): Generator<void, WalkResult> {
+  yield
 
   element.setAttribute(WALKED_ATTRIBUTE, walkId)
 
   if (element.shadowRoot) {
-    for (const child of element.shadowRoot.children) {
-      if (isHTMLElement(child)) {
-        walkAndLabelElement(child, walkId, config)
+    // Snapshot the live HTMLCollection: the chunked driver yields between
+    // elements, and a page mutation during a pause could otherwise shift the
+    // collection and skip an unvisited sibling (which no mutation record would
+    // repair, since observers do not pierce the shadow boundary).
+    for (const child of [...element.shadowRoot.children]) {
+      if (!isHTMLElement(child)) continue
+      if (isWalkBlockedElement(child, config)) {
+        callbacks.onBlockedElement?.(child)
+        continue
       }
+      yield* walkNode(child, walkId, config, callbacks)
     }
   }
 
   let hasInlineNodeChild = false
   let forceBlock = false
 
-  const validChildNodes = [...element.childNodes].filter((child: ChildNode) => {
-    if (child.nodeType === Node.TEXT_NODE) return true
-    if (isHTMLElement(child)) {
-      return !(
-        isDontWalkIntoButTranslateAsChildElement(child, config) ||
-        isDontWalkIntoAndDontTranslateAsChildElement(child, config)
-      )
-    }
-    return false
-  })
-
-  for (const child of validChildNodes) {
+  for (const child of [...element.childNodes]) {
     if (child.nodeType === Node.TEXT_NODE) {
       if (child.textContent?.trim()) {
         hasInlineNodeChild = true
@@ -115,7 +132,14 @@ export function walkAndLabelElement(
     }
 
     if (isHTMLElement(child)) {
-      const result = walkAndLabelElement(child, walkId, config)
+      // Evaluate the blocked predicate once per child, here — the recursive
+      // call's precondition replaces the old duplicate entry re-check.
+      if (isWalkBlockedElement(child, config)) {
+        callbacks.onBlockedElement?.(child)
+        continue
+      }
+
+      const result = yield* walkNode(child, walkId, config, callbacks)
 
       forceBlock = forceBlock || result.forceBlock
 
@@ -139,11 +163,14 @@ export function walkAndLabelElement(
     }
   }
 
-  const isInlineNode = isShallowInlineHTMLElement(element)
+  // One computed-style resolution feeds both shallow-shape checks (was up to
+  // four separate getComputedStyle calls per element, #1881).
+  const computedStyle = window.getComputedStyle(element)
+  const isInlineNode = isShallowInlineHTMLElement(element, computedStyle)
 
   if (
-    isShallowBlockHTMLElement(element) ||
     forceBlock ||
+    isShallowBlockHTMLElement(element, computedStyle) ||
     isSiteRuleForceBlockElement(element, config)
   ) {
     element.setAttribute(BLOCK_ATTRIBUTE, "")
@@ -155,4 +182,59 @@ export function walkAndLabelElement(
     forceBlock,
     isInlineNode,
   }
+}
+
+export function walkAndLabelElement(
+  element: HTMLElement,
+  walkId: string,
+  config: Config,
+  callbacks: WalkCallbacks = {},
+): WalkResult {
+  if (isWalkBlockedElement(element, config)) {
+    callbacks.onBlockedElement?.(element)
+    return SKIPPED_WALK_RESULT
+  }
+
+  const iterator = walkNode(element, walkId, config, callbacks)
+  let step = iterator.next()
+  while (!step.done) {
+    step = iterator.next()
+  }
+  return step.value
+}
+
+/**
+ * Time-sliced variant of walkAndLabelElement: labels identically, but yields
+ * to the main thread whenever a slice's budget is spent so input and
+ * rendering stay responsive on huge pages (#1881). Returns `null` when
+ * aborted via `shouldContinue`. The generator suspends at element ENTRY
+ * (before any attribute write), so an abort never leaves a half-labeled
+ * element — the frontier element is simply unwalked.
+ */
+export async function walkAndLabelElementChunked(
+  element: HTMLElement,
+  walkId: string,
+  config: Config,
+  options: ChunkedWalkOptions = {},
+): Promise<WalkResult | null> {
+  const { budgetMs = DEFAULT_WALK_BUDGET_MS, shouldContinue = () => true, ...callbacks } = options
+
+  if (!shouldContinue()) return null
+  if (isWalkBlockedElement(element, config)) {
+    callbacks.onBlockedElement?.(element)
+    return SKIPPED_WALK_RESULT
+  }
+
+  const iterator = walkNode(element, walkId, config, callbacks)
+  let deadline = performance.now() + budgetMs
+  let step = iterator.next()
+  while (!step.done) {
+    if (performance.now() >= deadline) {
+      await yieldToMain()
+      if (!shouldContinue()) return null
+      deadline = performance.now() + budgetMs
+    }
+    step = iterator.next()
+  }
+  return step.value
 }

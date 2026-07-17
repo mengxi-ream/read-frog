@@ -34,6 +34,7 @@ import {
   unregisterVirtualParagraphGroup,
   unregisterVirtualParagraphWrapper,
 } from "../core/translation-state"
+import { cancelSpinnerAnimation } from "../ui/spinner"
 
 export function removeShadowHostInTranslatedWrapper(wrapper: HTMLElement): void {
   // Remove React shadow hosts (for error components)
@@ -46,7 +47,7 @@ export function removeShadowHostInTranslatedWrapper(wrapper: HTMLElement): void 
   // detached node is not rooted by the renderer (#1831).
   const spinner = wrapper.querySelector(`.${SPINNER_CLASS}`)
   if (spinner && isHTMLElement(spinner)) {
-    spinner.getAnimations?.().forEach((animation) => animation.cancel())
+    cancelSpinnerAnimation(spinner)
     spinner.remove()
   }
 }

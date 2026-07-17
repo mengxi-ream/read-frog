@@ -36,8 +36,10 @@ export function isShallowInlineTransNode(node: Node): boolean {
 
 // treat large floating letter on some news websites as inline node
 // for example: https://www.economist.com/business/2025/08/21/china-is-quietly-upstaging-america-with-its-open-models
-function isLargeInitialFloatingLetter(element: HTMLElement): boolean {
-  const computedStyle = window.getComputedStyle(element)
+function isLargeInitialFloatingLetter(
+  element: HTMLElement,
+  computedStyle: CSSStyleDeclaration = window.getComputedStyle(element),
+): boolean {
   return (
     computedStyle.float === "left" &&
     !!element.nextSibling &&
@@ -61,7 +63,10 @@ function isInlineDisplay(display: string): boolean {
   )
 }
 
-export function isShallowInlineHTMLElement(element: HTMLElement): boolean {
+export function isShallowInlineHTMLElement(
+  element: HTMLElement,
+  computedStyle?: CSSStyleDeclaration,
+): boolean {
   // to prevent too many inline nodes that make <body> as a paragraph node
   if (!element.textContent?.trim()) {
     return false
@@ -71,13 +76,13 @@ export function isShallowInlineHTMLElement(element: HTMLElement): boolean {
     return false
   }
 
-  const computedStyle = window.getComputedStyle(element)
+  const style = computedStyle ?? window.getComputedStyle(element)
 
-  if (isLargeInitialFloatingLetter(element)) {
+  if (isLargeInitialFloatingLetter(element, style)) {
     return true
   }
 
-  return isInlineDisplay(computedStyle.display)
+  return isInlineDisplay(style.display)
 }
 
 // Note: !(inline node) != block node because of `notranslate` class and all cases not in the if else block
@@ -90,18 +95,21 @@ export function isShallowBlockTransNode(node: Node): boolean {
   return false
 }
 
-export function isShallowBlockHTMLElement(element: HTMLElement): boolean {
-  const computedStyle = window.getComputedStyle(element)
-
+export function isShallowBlockHTMLElement(
+  element: HTMLElement,
+  computedStyle?: CSSStyleDeclaration,
+): boolean {
   if (FORCE_BLOCK_TAGS.has(element.tagName)) {
     return true
   }
 
-  if (isLargeInitialFloatingLetter(element)) {
+  const style = computedStyle ?? window.getComputedStyle(element)
+
+  if (isLargeInitialFloatingLetter(element, style)) {
     return false
   }
 
-  return !isInlineDisplay(computedStyle.display)
+  return !isInlineDisplay(style.display)
 }
 
 export function isSiteRuleExcludedElement(element: HTMLElement, config: Config): boolean {
@@ -185,34 +193,44 @@ export function isDontWalkIntoAndDontTranslateAsChildElement(
   element: HTMLElement,
   config: Config,
 ): boolean {
-  const dontWalkCustomElement =
-    !isDontWalkIntoButTranslateAsChildElement(element, config) &&
-    isSiteRuleExcludedElement(element, config)
+  // Cheap structural predicates first; the getComputedStyle check runs last
+  // because it can force a style recalculation, and the full-page walk
+  // evaluates this predicate for every element (#1881).
+  const dontWalkInvalidTag = DONT_WALK_AND_TRANSLATE_TAGS.has(element.tagName)
+  if (dontWalkInvalidTag) return true
+
+  const dontWalkHidden = element.hidden
+  if (dontWalkHidden) return true
+
+  const dontWalkVisuallyHidden = ["sr-only", "visually-hidden"].some((cls) =>
+    element.classList.contains(cls),
+  )
+  if (dontWalkVisuallyHidden) return true
+
   const dontWalkContent =
     config.translate.page.range !== "all" &&
     MAIN_CONTENT_IGNORE_TAGS.has(element.tagName) &&
     !isInsideContentContainer(element)
-  const dontWalkInvalidTag = DONT_WALK_AND_TRANSLATE_TAGS.has(element.tagName)
-  const dontWalkCSS =
-    window.getComputedStyle(element).display === "none" ||
-    window.getComputedStyle(element).visibility === "hidden"
-  const dontWalkHidden = element.hidden
-  const dontWalkVisuallyHidden = ["sr-only", "visually-hidden"].some((cls) =>
-    element.classList.contains(cls),
+  if (dontWalkContent) return true
+
+  const dontWalkCustomElement =
+    !isDontWalkIntoButTranslateAsChildElement(element, config) &&
+    isSiteRuleExcludedElement(element, config)
+  if (dontWalkCustomElement) return true
+
+  const computedStyle = window.getComputedStyle(element)
+  return computedStyle.display === "none" || computedStyle.visibility === "hidden"
+}
+
+/**
+ * The walk-blocking predicate shared by the traversal (which stops descent at
+ * such elements) and the mutation pipeline's walkability cache.
+ */
+export function isWalkBlockedElement(element: HTMLElement, config: Config): boolean {
+  return (
+    isDontWalkIntoButTranslateAsChildElement(element, config) ||
+    isDontWalkIntoAndDontTranslateAsChildElement(element, config)
   )
-
-  if (
-    dontWalkCustomElement ||
-    dontWalkContent ||
-    dontWalkInvalidTag ||
-    dontWalkCSS ||
-    dontWalkHidden ||
-    dontWalkVisuallyHidden
-  ) {
-    return true
-  }
-
-  return false
 }
 
 export function isInlineTransNode(node: TransNode): boolean {
@@ -287,10 +305,7 @@ export function isTranslatedContentNode(node: Node): boolean {
 export function hasNoWalkAncestor(element: HTMLElement, config: Config): boolean {
   let current: HTMLElement | null = element.parentElement
   while (current) {
-    if (
-      isDontWalkIntoButTranslateAsChildElement(current, config) ||
-      isDontWalkIntoAndDontTranslateAsChildElement(current, config)
-    ) {
+    if (isWalkBlockedElement(current, config)) {
       return true
     }
     current = current.parentElement

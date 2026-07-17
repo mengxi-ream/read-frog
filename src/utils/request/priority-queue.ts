@@ -5,6 +5,7 @@ interface PriorityQueue<T> {
   size: () => number
   isEmpty: () => boolean
   clear: () => void
+  removeWhere: (predicate: (value: T) => boolean) => void
 }
 
 export class BinaryHeapPQ<T> implements PriorityQueue<T> {
@@ -45,6 +46,21 @@ export class BinaryHeapPQ<T> implements PriorityQueue<T> {
 
   clear() {
     this.heap = []
+  }
+
+  /**
+   * Remove every entry matching the predicate. Removal (rather than
+   * mark-and-skip-on-pop) matters: schedule() derives its next timer delay
+   * from peek(), so a cancelled head with a far-future priority would stall
+   * dispatch of the live tasks behind it.
+   */
+  removeWhere(predicate: (value: T) => boolean) {
+    const kept = this.heap.filter((entry) => !predicate(entry.value))
+    if (kept.length === this.heap.length) return
+    this.heap = kept
+    for (let i = Math.floor(this.heap.length / 2) - 1; i >= 0; i--) {
+      this.heapifyDown(i)
+    }
   }
 
   private heapifyUp(index: number) {

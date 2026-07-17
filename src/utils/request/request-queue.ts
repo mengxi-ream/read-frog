@@ -2,6 +2,7 @@ import type { RequestRetryPolicy } from "./retry-policy"
 import { deepmerge } from "deepmerge-ts"
 import { requestQueueConfigSchema } from "@/types/config/translate"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
+import { TranslationCancelledError } from "./cancellation"
 import { BinaryHeapPQ } from "./priority-queue"
 import { defaultRequestRetryPolicy } from "./retry-policy"
 
@@ -17,7 +18,15 @@ export interface RequestTask {
   drained: boolean
 }
 
-type QueuedRequestTask = RequestTask & { hash: string; abortController?: AbortController }
+type QueuedRequestTask = RequestTask & {
+  hash: string
+  abortController?: AbortController
+  // Cancellation scopes subscribed to this task. Dedup can attach several
+  // (same hash from multiple tabs/sessions); the task is only cancelled when
+  // its LAST scope is cancelled. `null` means an unscoped subscriber exists,
+  // which pins the task as uncancellable.
+  cancelScopes: Set<string> | null
+}
 
 export interface QueueOptions {
   rate: number // tokens/sec
@@ -50,10 +59,16 @@ export class RequestQueue {
     thunk: (signal?: AbortSignal) => Promise<T>,
     scheduleAt: number,
     hash: string,
+    scopes?: readonly string[],
   ): Promise<T> {
     const duplicateTask = this.duplicateTask(hash)
     if (duplicateTask) {
       // console.info(`🔄 Found duplicate task for hash: ${hash}, returning existing promise`)
+      if (!scopes?.length) {
+        duplicateTask.cancelScopes = null
+      } else if (duplicateTask.cancelScopes !== null) {
+        scopes.forEach((scope) => duplicateTask.cancelScopes!.add(scope))
+      }
       return duplicateTask.promise
     }
 
@@ -75,6 +90,7 @@ export class RequestQueue {
       createdAt: Date.now(),
       retryCount: 0,
       drained: false,
+      cancelScopes: scopes?.length ? new Set(scopes) : null,
     }
 
     this.waitingTasks.set(hash, task)
@@ -102,6 +118,55 @@ export class RequestQueue {
     }
   }
 
+  /**
+   * Cancel every task subscribed to the given scope. Refcounted: a task shared
+   * with another scope (dedup) or with an unscoped subscriber survives; only
+   * tasks whose LAST scope this is are rejected/aborted (#1881).
+   */
+  cancelByScope(scopeKey: string): number {
+    return this.cancelWhere((scope) => scope === scopeKey)
+  }
+
+  /**
+   * Cancel every task all of whose scopes match the predicate. Unscoped tasks
+   * (`cancelScopes === null`) never match.
+   */
+  cancelWhere(scopeMatches: (scopeKey: string) => boolean): number {
+    let cancelled = 0
+
+    const cancelMatchingScopes = (task: QueuedRequestTask): boolean => {
+      if (task.cancelScopes === null) return false
+      let matchedScope: string | undefined
+      for (const scope of task.cancelScopes) {
+        if (scopeMatches(scope)) {
+          matchedScope = scope
+          task.cancelScopes.delete(scope)
+        }
+      }
+      if (matchedScope === undefined || task.cancelScopes.size > 0) return false
+      this.rejectDrainedTask(task, new TranslationCancelledError(matchedScope))
+      return true
+    }
+
+    for (const [hash, task] of [...this.waitingTasks]) {
+      if (!cancelMatchingScopes(task)) continue
+      this.waitingTasks.delete(hash)
+      cancelled++
+    }
+    this.waitingQueue.removeWhere((task) => task.drained)
+
+    for (const [hash, task] of [...this.executingTasks]) {
+      if (!cancelMatchingScopes(task)) continue
+      this.executingTasks.delete(hash)
+      cancelled++
+    }
+
+    if (cancelled > 0) {
+      this.schedule()
+    }
+    return cancelled
+  }
+
   private schedule() {
     this.refillTokens()
 
@@ -109,6 +174,13 @@ export class RequestQueue {
       const now = Date.now()
 
       const task = this.waitingQueue.peek()
+      if (task?.drained) {
+        // Safety net: a drained task should have been removed from the heap,
+        // but never dispatch or let one stall the timer computation below.
+        this.waitingQueue.pop()
+        this.waitingTasks.delete(task.hash)
+        continue
+      }
       if (task && task.scheduleAt <= now) {
         this.waitingQueue.pop()
         this.waitingTasks.delete(task.hash)

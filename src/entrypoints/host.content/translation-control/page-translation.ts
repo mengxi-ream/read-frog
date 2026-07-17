@@ -11,15 +11,19 @@ import {
   SPINNER_CLASS,
 } from "@/utils/constants/dom-labels"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
+import {
+  GIANT_PARAGRAPH_MAX_SPLIT_DEPTH,
+  GIANT_PARAGRAPH_SPLIT_MIN_VIEWPORT_PX,
+  GIANT_PARAGRAPH_SPLIT_VIEWPORT_MULTIPLIER,
+} from "@/utils/constants/translate"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import {
   hasNoWalkAncestor,
-  isDontWalkIntoAndDontTranslateAsChildElement,
-  isDontWalkIntoButTranslateAsChildElement,
   isHTMLElement,
+  isWalkBlockedElement as isWalkBlockedElementFilter,
 } from "@/utils/host/dom/filter"
 import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
-import { walkAndLabelElement } from "@/utils/host/dom/traversal"
+import { walkAndLabelElement, walkAndLabelElementChunked } from "@/utils/host/dom/traversal"
 import {
   findStaleBilingualLayoutSource,
   findStaleTranslationOnlyAnchor,
@@ -34,11 +38,18 @@ import {
 } from "@/utils/host/translate/node-manipulation"
 import { validateTranslationConfigAndToast } from "@/utils/host/translate/translate-text"
 import { translateTextForPageTitle } from "@/utils/host/translate/translate-variants"
+import {
+  beginPageTranslationSession,
+  endPageTranslationSession,
+} from "@/utils/host/translate/translation-session"
+import { cancelSpinnerAnimation } from "@/utils/host/translate/ui/spinner"
 import { ensureSiteRuleCSS, removeSiteRuleCSS } from "@/utils/host/translate/ui/style-injector"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
 import { removeReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
+import { isTranslationCancelledError } from "@/utils/request/cancellation"
+import { createWorkPacer } from "@/utils/scheduler"
 import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
 
 type SimpleIntersectionOptions = Omit<IntersectionObserverInit, "threshold"> & {
@@ -112,6 +123,8 @@ export class PageTranslationManager implements IPageTranslationManager {
   // removed when a retry fires, so the set only holds armed timers.
   private pendingRetranslateRetries = new Set<DebouncedRetry>()
   private translationSessionVersion = 0
+  /** Pending initial chunked walk; mutation handling serializes behind it. */
+  private initialWalkDone: Promise<void> | null = null
   private titleObserver: MutationObserver | null = null
   private lastSourceTitle: string | null = null
   private lastAppliedTranslatedTitle: string | null = null
@@ -180,6 +193,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
       this.isPageTranslating = true
       this.translationSessionVersion += 1
+      beginPageTranslationSession()
 
       const siteRule = getEffectiveSiteRule(config, window.location.href)
       if (siteRule.injectedCss) {
@@ -194,30 +208,54 @@ export class PageTranslationManager implements IPageTranslationManager {
       // Listen to existing elements when they enter the viewport
       const walkId = getRandomUUID()
       this.walkId = walkId
-      this.intersectionObserver = new IntersectionObserver(async (entries, observer) => {
+      this.intersectionObserver = new IntersectionObserver((entries, observer) => {
+        const targets: HTMLElement[] = []
         for (const entry of entries) {
-          if (entry.isIntersecting) {
-            if (isHTMLElement(entry.target)) {
-              if (!entry.target.closest(`.${CONTENT_WRAPPER_CLASS}`)) {
-                const currentConfig = await getLocalConfig()
-                if (!currentConfig) {
-                  logger.error("Global config is not initialized")
-                  return
-                }
-                void translateWalkedElement(entry.target, walkId, currentConfig)
-              }
-            }
-            observer.unobserve(entry.target)
+          if (!entry.isIntersecting) continue
+          observer.unobserve(entry.target)
+          if (isHTMLElement(entry.target) && !entry.target.closest(`.${CONTENT_WRAPPER_CLASS}`)) {
+            targets.push(entry.target)
           }
         }
+        if (targets.length === 0) return
+        void (async () => {
+          // One config read per callback batch — a dense first intersection
+          // can deliver hundreds of entries at once (#1881).
+          const currentConfig = await getLocalConfig()
+          if (!currentConfig) {
+            logger.error("Global config is not initialized")
+            return
+          }
+          if (this.walkId !== walkId) return
+          // One shared pacer bounds the batch's synchronous expansion work;
+          // the liveness check stops paced expansion promptly if the user
+          // cancels mid-flight (#1881).
+          const pacer = createWorkPacer()
+          const isWalkCurrent = () => this.walkId === walkId
+          for (const target of targets) {
+            void translateWalkedElement(target, walkId, currentConfig, false, pacer, isWalkCurrent)
+          }
+        })()
       }, this.intersectionOptions)
 
-      // Initialize walkability state for existing elements
-      this.addWalkBlockedElements(document.body, config)
-      await this.observeTopLevelParagraphs(document.body, config)
-
-      // Start observing mutations from document.body and all shadow roots
+      // Observe mutations BEFORE the chunked walk: page JS runs between walk
+      // slices, and records emitted meanwhile must not be lost. The walk only
+      // writes data-read-frog-* attributes, which this observer's
+      // attributeFilter never reports, so this creates no feedback loop.
       this.observeMutations(document.body)
+
+      // Label existing elements in time-sliced chunks (walkability caching is
+      // handled by the walk's onBlockedElement callback).
+      const initialWalk = this.observeTopLevelParagraphs(document.body, config, { chunked: true })
+      this.initialWalkDone = initialWalk
+      try {
+        await initialWalk
+      } finally {
+        // restart() may already have installed a newer walk's promise.
+        if (this.initialWalkDone === initialWalk) {
+          this.initialWalkDone = null
+        }
+      }
 
       if (trackedContext) {
         void trackFeatureUsed({
@@ -261,6 +299,17 @@ export class PageTranslationManager implements IPageTranslationManager {
         enabled: false,
         url: window.location.href,
       })
+    }
+
+    // Drain this session's queued/in-flight requests in the background —
+    // without this, a long page keeps burning network/CPU/quota for minutes
+    // after the user cancels (#1881). Fire-and-forget: the synchronous DOM
+    // cleanup below finishes long before any rejection lands.
+    const endedSessionId = endPageTranslationSession()
+    if (endedSessionId) {
+      void sendMessage("cancelPageTranslationRequests", { sessionId: endedSessionId }).catch(
+        (error) => logger.warn("Failed to cancel pending translation requests", error),
+      )
     }
 
     this.isPageTranslating = false
@@ -462,6 +511,8 @@ export class PageTranslationManager implements IPageTranslationManager {
 
       document.title = nextTitle
     } catch (error) {
+      // A cancelled session's title request rejecting is expected, not noise.
+      if (isTranslationCancelledError(error)) return
       if (requestVersion === this.titleRequestVersion) {
         logger.warn("Failed to translate document title:", error)
       }
@@ -471,30 +522,47 @@ export class PageTranslationManager implements IPageTranslationManager {
   private async observeTopLevelParagraphs(
     container: HTMLElement,
     existingConfig?: Config,
+    options: { chunked?: boolean } = {},
   ): Promise<void> {
     const observer = this.intersectionObserver
-    if (!this.walkId || !observer) return
+    // Capture locals: this method awaits, and `this.walkId` may belong to a
+    // newer session by the time an await resumes.
+    const walkId = this.walkId
+    if (!walkId || !observer) return
 
     const config = existingConfig ?? (await getLocalConfig())
     if (!config) {
       logger.error("Global config is not initialized")
       return
     }
+    if (this.walkId !== walkId) return
 
     // Skip if container has an ancestor that should not be walked into
     if (hasNoWalkAncestor(container, config)) return
 
-    walkAndLabelElement(container, this.walkId, config)
+    const onBlockedElement = (element: HTMLElement) => {
+      this.walkBlockedElementsCache.add(element)
+    }
+    if (options.chunked) {
+      const result = await walkAndLabelElementChunked(container, walkId, config, {
+        onBlockedElement,
+        shouldContinue: () => this.isPageTranslating && this.walkId === walkId,
+      })
+      if (result === null || this.walkId !== walkId) return
+    } else {
+      walkAndLabelElement(container, walkId, config, { onBlockedElement })
+    }
+
     // if container itself has paragraph and the id
     if (
       container.hasAttribute("data-read-frog-paragraph") &&
-      container.getAttribute("data-read-frog-walked") === this.walkId
+      container.getAttribute("data-read-frog-walked") === walkId
     ) {
-      observer.observe(container)
+      this.observeParagraphUnit(container, walkId, 0)
       return
     }
 
-    const paragraphs = this.collectParagraphElementsDeep(container, this.walkId)
+    const paragraphs = this.collectParagraphElementsDeep(container, walkId)
     const topLevelParagraphs = paragraphs.filter((el) => {
       const ancestor = el.parentElement?.closest("[data-read-frog-paragraph]")
       // keep it if either:
@@ -502,7 +570,55 @@ export class PageTranslationManager implements IPageTranslationManager {
       //  • the ancestor is *not* inside container
       return !ancestor || !container.contains(ancestor)
     })
-    topLevelParagraphs.forEach((el) => observer.observe(el))
+    topLevelParagraphs.forEach((el) => this.observeParagraphUnit(el, walkId, 0))
+  }
+
+  /**
+   * Observe a paragraph as one lazy-translation unit — unless it is so tall
+   * that its first intersection would expand into (nearly) the whole page at
+   * once. docs.docker.com labels its entire flat 185k-px <article> as ONE
+   * paragraph (inline <em> dates are direct children), which defeated
+   * viewport gating and enqueued 5k+ paragraphs instantly (#1881). Giant
+   * paragraphs are split: their next-level descendant paragraphs are observed
+   * individually instead.
+   *
+   * Known tradeoff: direct inline children of a split giant (e.g. those date
+   * <em>s) are not covered by any observed unit and stay untranslated. Stray
+   * standalone inlines in a >3-viewport flat container are rare, and
+   * numeric-only text is skipped by the pipeline anyway.
+   */
+  private observeParagraphUnit(element: HTMLElement, walkId: string, depth: number): void {
+    const observer = this.intersectionObserver
+    if (!observer) return
+
+    const maxUnitHeight =
+      Math.max(window.innerHeight, GIANT_PARAGRAPH_SPLIT_MIN_VIEWPORT_PX) *
+      GIANT_PARAGRAPH_SPLIT_VIEWPORT_MULTIPLIER
+    if (
+      depth >= GIANT_PARAGRAPH_MAX_SPLIT_DEPTH ||
+      element.getBoundingClientRect().height <= maxUnitHeight
+    ) {
+      observer.observe(element)
+      return
+    }
+
+    const innerTopLevelParagraphs = this.collectParagraphElementsDeep(element, walkId).filter(
+      (paragraph) => {
+        if (paragraph === element) return false
+        const ancestor = paragraph.parentElement?.closest("[data-read-frog-paragraph]")
+        // Keep only paragraphs whose nearest paragraph ancestor is the giant
+        // itself (or that have none inside it, e.g. across shadow roots).
+        return !ancestor || ancestor === element || !element.contains(ancestor)
+      },
+    )
+    if (innerTopLevelParagraphs.length === 0) {
+      // Unsplittable giant (no nested paragraphs) — observe it whole.
+      observer.observe(element)
+      return
+    }
+    for (const paragraph of innerTopLevelParagraphs) {
+      this.observeParagraphUnit(paragraph, walkId, depth + 1)
+    }
   }
 
   /**
@@ -546,10 +662,7 @@ export class PageTranslationManager implements IPageTranslationManager {
    * panels can be re-walked when the site reveals an existing subtree.
    */
   private isWalkBlockedElement(element: HTMLElement, config: Config): boolean {
-    return (
-      isDontWalkIntoButTranslateAsChildElement(element, config) ||
-      isDontWalkIntoAndDontTranslateAsChildElement(element, config)
-    )
+    return isWalkBlockedElementFilter(element, config)
   }
 
   /**
@@ -665,7 +778,7 @@ export class PageTranslationManager implements IPageTranslationManager {
         .forEach((host) => removeReactShadowHost(host))
       node
         .querySelectorAll<HTMLElement>(`.${SPINNER_CLASS}`)
-        .forEach((spinner) => spinner.getAnimations?.().forEach((animation) => animation.cancel()))
+        .forEach((spinner) => cancelSpinnerAnimation(spinner))
     }
   }
 
@@ -679,6 +792,15 @@ export class PageTranslationManager implements IPageTranslationManager {
       if (!this.isSelfInflictedRecord(record)) hostRecords.push(record)
     }
     if (hostRecords.length === 0) return
+
+    // Serialize traversal-driven handling behind the initial chunked walk so
+    // a mutation-path sync walk never races the sliced startup walk over the
+    // same subtree. Records are static snapshots, so deferring is safe; the
+    // detached-artifact cleanup above already ran promptly.
+    if (this.initialWalkDone) {
+      await this.initialWalkDone
+      if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return
+    }
 
     const staleTranslatedSources = new Set<HTMLElement>()
     for (const record of hostRecords) {
