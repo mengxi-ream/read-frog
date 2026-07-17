@@ -25,6 +25,7 @@ import { onMessage } from "@/utils/message"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { BatchQueue } from "@/utils/request/batch-queue"
+import { CancelledScopeRegistry, TranslationCancelledError } from "@/utils/request/cancellation"
 import { RequestQueue } from "@/utils/request/request-queue"
 import { ensureInitializedConfig } from "./config"
 
@@ -282,6 +283,10 @@ export async function setUpWebPageTranslationQueue() {
     batchQueueConfig,
     promptResolver: getTranslatePrompt,
   })
+  // Scopes whose cancel already drained the queues. An enqueue handler that
+  // was suspended on the cache lookup when the cancel ran must not enqueue
+  // afterwards — nothing would ever drain that task again (#1881).
+  const cancelledScopes = new CancelledScopeRegistry()
 
   onMessage("enqueueTranslateRequest", async (message) => {
     const {
@@ -315,6 +320,14 @@ export async function setUpWebPageTranslationQueue() {
         validateHtmlAttributeMarkers,
       )
       if (cachedTranslation !== undefined) return cachedTranslation
+    }
+
+    // The cache lookup above yielded — the session's cancel may have drained
+    // the queues while this handler was suspended. Enqueueing now would park
+    // an undraininable task on a dead scope, so abort instead (the content
+    // side swallows this error).
+    if (scope && cancelledScopes.has(scope)) {
+      throw new TranslationCancelledError(scope)
     }
 
     let result: string
@@ -377,6 +390,9 @@ export async function setUpWebPageTranslationQueue() {
   onMessage("cancelPageTranslationRequests", (message) => {
     const scope = buildTranslationScopeKey(message.sender, message.data.sessionId)
     if (!scope) return
+    // Remember the scope so enqueue handlers suspended on the cache lookup
+    // refuse to enqueue after this drain.
+    cancelledScopes.markScope(scope)
     // Batch queue first so pending batches cannot flush new request-queue
     // tasks between the two drains.
     const cancelledBatch = batchQueue.cancelByScope(scope)
@@ -392,6 +408,7 @@ export async function setUpWebPageTranslationQueue() {
   // tab ever registered (#1881).
   browser.tabs.onRemoved.addListener((tabId) => {
     const prefix = `${tabId}:`
+    cancelledScopes.markPrefix(prefix)
     batchQueue.cancelWhere((scope) => scope.startsWith(prefix))
     requestQueue.cancelWhere((scope) => scope.startsWith(prefix))
   })
