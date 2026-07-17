@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.41.1
+
+### Patch Changes
+
+- [#1875](https://github.com/mengxi-ream/read-frog/pull/1875) [`40643ec`](https://github.com/mengxi-ream/read-frog/commit/40643ecfd35fe29f00f9d5eca8295022a2c4e962) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(i18n): open Traditional Chinese website links under the zh-TW locale
+
+- [#1777](https://github.com/mengxi-ream/read-frog/pull/1777) [`2040a72`](https://github.com/mengxi-ream/read-frog/commit/2040a72ffd5004651c31c6abce53264defcd7c2b) Thanks [@lovewave02](https://github.com/lovewave02)! - fix(extension): open settings via the runtime options-page API
+
+- [#1860](https://github.com/mengxi-ream/read-frog/pull/1860) [`5b8f549`](https://github.com/mengxi-ream/read-frog/commit/5b8f549106f91394d9e84138857571429ea3bea9) Thanks [@T0MYYY](https://github.com/T0MYYY)! - fix(subtitles): bound AI segmentation to the look-ahead window
+
 ## 1.41.0
 
 ### Minor Changes
