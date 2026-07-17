@@ -15,6 +15,11 @@ export class SubtitlesScheduler {
   private currentIndex = -1
   /** Stable identity for sticky active-cue selection across array rewrites. */
   private currentStart: number | null = null
+  /**
+   * Recut fragments skipped while a same-start baseline cue was protected.
+   * Flushed once playback leaves the protected baseline so seek/replay sees segmented cues.
+   */
+  private deferredSameStartReplacements = new Map<number, SubtitlesFragment>()
   private active = false
   private currentState: StateData = {
     state: "idle",
@@ -114,12 +119,15 @@ export class SubtitlesScheduler {
 
     for (const next of nextFragments) {
       if (protectedCue && next.start === protectedCue.start) {
-        // Keep the protected original text until its natural end.
+        // Keep the protected original text until its natural end, but remember
+        // the recut replacement so we can install it after the protected cue expires.
+        this.deferredSameStartReplacements.set(next.start, next)
         continue
       }
       if (existingStarts.has(next.start)) {
         continue
       }
+      this.deferredSameStartReplacements.delete(next.start)
       this.subtitles.push(next)
       existingStarts.add(next.start)
     }
@@ -178,7 +186,60 @@ export class SubtitlesScheduler {
     this.subtitles = []
     this.currentIndex = -1
     this.currentStart = null
+    this.deferredSameStartReplacements.clear()
     this.updateCurrentSubtitle()
+  }
+
+  /**
+   * When a protected baseline cue is no longer active, swap in the deferred recut
+   * fragment for the same start (if any).
+   */
+  private flushDeferredSameStartReplacements(timeMs: number) {
+    if (this.deferredSameStartReplacements.size === 0) {
+      return
+    }
+
+    let changed = false
+
+    for (const [start, deferred] of [...this.deferredSameStartReplacements]) {
+      const existingIndex = this.subtitles.findIndex((fragment) => fragment.start === start)
+      const existing = existingIndex >= 0 ? this.subtitles[existingIndex] : null
+
+      if (!existing) {
+        this.subtitles.push(deferred)
+        this.deferredSameStartReplacements.delete(start)
+        changed = true
+        continue
+      }
+
+      const stillInsideProtected = existing.start <= timeMs && existing.end > timeMs
+      // Still showing the longer/different protected baseline — wait.
+      if (
+        stillInsideProtected &&
+        (existing.end !== deferred.end || existing.text !== deferred.text)
+      ) {
+        continue
+      }
+
+      this.subtitles[existingIndex] = {
+        ...deferred,
+        // Preserve any translation already painted onto the protected cue only if identity matches.
+        translation:
+          existing.end === deferred.end && existing.text === deferred.text
+            ? existing.translation
+            : deferred.translation,
+      }
+      this.deferredSameStartReplacements.delete(start)
+      changed = true
+
+      if (this.currentStart === start) {
+        this.currentIndex = existingIndex
+      }
+    }
+
+    if (changed) {
+      this.subtitles.sort((a, b) => a.start - b.start)
+    }
   }
 
   private getProtectedActiveCue(timeMs: number): SubtitlesFragment | null {
@@ -237,6 +298,8 @@ export class SubtitlesScheduler {
   private updateSubtitles(currentTime: number) {
     const timeMs = currentTime * 1000
     subtitlesStore.set(currentTimeMsAtom, timeMs)
+
+    this.flushDeferredSameStartReplacements(timeMs)
 
     // Sticky: keep the active cue while playback remains inside its range,
     // even if a re-segmented cue also covers this timestamp.

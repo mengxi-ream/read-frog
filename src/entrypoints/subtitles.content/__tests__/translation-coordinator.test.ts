@@ -62,18 +62,76 @@ describe("translation coordinator loading state", () => {
     expect(onStateChange).toHaveBeenCalledWith("idle")
   })
 
+  it("does not chain another translation tick after stop", async () => {
+    const onTranslated = vi.fn<(...args: any[]) => any>()
+    const onStateChange = vi.fn<(...args: any[]) => any>()
+    let resolveTranslate!: (value: any) => void
+    const translatePromise = new Promise((resolve) => {
+      resolveTranslate = resolve
+    })
+
+    const translator = await import("@/utils/subtitles/processor/translator")
+    const spy = vi
+      .spyOn(translator, "translateSubtitles")
+      .mockImplementation(() => translatePromise as any)
+
+    const coordinator = new TranslationCoordinator({
+      getFragments: () => [
+        { text: "a", start: 0, end: 1000 },
+        { text: "b", start: 1000, end: 2000 },
+        { text: "c", start: 2000, end: 3000 },
+        { text: "d", start: 3000, end: 4000 },
+        { text: "e", start: 4000, end: 5000 },
+        { text: "f", start: 5000, end: 6000 },
+      ],
+      getVideoElement: () =>
+        ({
+          currentTime: 0,
+          addEventListener: vi.fn<(...args: any[]) => any>(),
+          removeEventListener: vi.fn<(...args: any[]) => any>(),
+        }) as unknown as HTMLVideoElement,
+      getCurrentState: () => "idle",
+      segmentationPipeline: null,
+      onTranslated,
+      onStateChange,
+    })
+
+    coordinator.start()
+    await Promise.resolve()
+    expect(spy).toHaveBeenCalledTimes(1)
+
+    coordinator.stop()
+    const batch = spy.mock.calls[0][0] as Array<{ text: string; start: number; end: number }>
+    resolveTranslate(batch.map((f) => ({ ...f, translation: `t:${f.text}` })))
+    await Promise.resolve()
+    await Promise.resolve()
+
+    // In-flight call may finish, but stop must not chain another nearby batch.
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(onTranslated).not.toHaveBeenCalled()
+
+    spy.mockRestore()
+  })
+
   it("invalidates translated bookkeeping when the same start is recut", () => {
     let fragments = [{ text: "hello world", start: 0, end: 2000 }]
     const onStateChange = vi.fn<(...args: any[]) => any>()
     const coordinator = new TranslationCoordinator({
       getFragments: () => fragments,
-      getVideoElement: () => ({ currentTime: 0.2 }) as HTMLVideoElement,
+      getVideoElement: () =>
+        ({
+          currentTime: 0.2,
+          addEventListener: vi.fn<(...args: any[]) => any>(),
+          removeEventListener: vi.fn<(...args: any[]) => any>(),
+        }) as unknown as HTMLVideoElement,
       getCurrentState: () => "idle",
       segmentationPipeline: null,
       onTranslated: vi.fn<(...args: any[]) => any>(),
       onStateChange,
     })
 
+    // noteFragmentListChanged is a no-op when inactive.
+    ;(coordinator as any).active = true
     ;(coordinator as any).translatedStarts.add(0)
     ;(coordinator as any).knownIdentities.set(0, "2000\0hello world")
 

@@ -165,4 +165,29 @@ describe("subtitles scheduler", () => {
       end: 2000,
     })
   })
+
+  it("installs deferred same-start recut cue after the protected baseline expires", () => {
+    const video = createVideo(0.5)
+    const scheduler = new SubtitlesScheduler({ videoElement: video })
+    scheduler.start()
+
+    scheduler.supplementSubtitles([{ text: "hello world foo", start: 0, end: 2000 }])
+    scheduler.replaceTimeWindow(0, 2000, [
+      { text: "hello world", start: 0, end: 1000 },
+      { text: "foo", start: 1000, end: 2000 },
+    ])
+
+    // While protected, still the long baseline.
+    expect(subtitlesStore.get(currentSubtitleAtom)?.text).toBe("hello world foo")
+
+    // Leave the protected range — deferred recut should replace the baseline.
+    video.currentTime = 2.1
+    ;(scheduler as any).updateSubtitles(2.1)
+
+    // Seek back into the first recut segment.
+    video.currentTime = 0.5
+    ;(scheduler as any).updateSubtitles(0.5)
+    expect(subtitlesStore.get(currentSubtitleAtom)?.text).toBe("hello world")
+    expect(subtitlesStore.get(currentSubtitleAtom)?.end).toBe(1000)
+  })
 })

@@ -25,6 +25,8 @@ export class TranslationCoordinator {
   /** Identity of the cue (end+text) associated with a booked start. */
   private knownIdentities = new Map<number, string>()
   private isTranslating = false
+  /** False after stop(); blocks chained ticks and in-flight result application. */
+  private active = false
   private lastEmittedState: SubtitlesState = "idle"
   private videoContext: SubtitlesVideoContext = { videoTitle: "", subtitlesTextContent: "" }
 
@@ -52,6 +54,8 @@ export class TranslationCoordinator {
     const video = this.getVideoElement()
     if (!video) return
 
+    this.active = true
+
     video.addEventListener("timeupdate", this.handleTranslationTick)
     video.addEventListener("seeked", this.handleTranslationTick)
 
@@ -64,6 +68,7 @@ export class TranslationCoordinator {
   }
 
   stop() {
+    this.active = false
     const video = this.getVideoElement()
     if (!video) return
     video.removeEventListener("timeupdate", this.handleTranslationTick)
@@ -73,6 +78,7 @@ export class TranslationCoordinator {
   }
 
   reset() {
+    this.active = false
     this.translatingStarts.clear()
     this.translatedStarts.clear()
     this.failedStarts.clear()
@@ -91,6 +97,8 @@ export class TranslationCoordinator {
    * (end+text) changed after AI re-segmentation — same start can be a recut line.
    */
   noteFragmentListChanged() {
+    if (!this.active) return
+
     const byStart = new Map(this.getFragments().map((fragment) => [fragment.start, fragment]))
 
     this.invalidateStaleStarts(this.translatedStarts, byStart)
@@ -122,6 +130,8 @@ export class TranslationCoordinator {
   }
 
   private handleTranslationTick = () => {
+    if (!this.active) return
+
     const video = this.getVideoElement()
     if (!video) return
 
@@ -145,6 +155,8 @@ export class TranslationCoordinator {
   }
 
   private async translateNearby(currentTimeMs: number) {
+    if (!this.active) return
+
     const fragments = this.getFragments()
 
     const batch = fragments
@@ -170,6 +182,11 @@ export class TranslationCoordinator {
 
     try {
       const translated = await translateSubtitles(batch, this.videoContext)
+      if (!this.active) {
+        batch.forEach((f) => this.translatingStarts.delete(f.start))
+        return
+      }
+
       // Only accept results whose cue identity still matches the current fragment list.
       const byStart = new Map(this.getFragments().map((fragment) => [fragment.start, fragment]))
       const stillValid = translated.filter((fragment) => {
@@ -194,9 +211,15 @@ export class TranslationCoordinator {
     } catch (error) {
       batch.forEach((f) => {
         this.translatingStarts.delete(f.start)
-        this.failedStarts.add(f.start)
-        this.rememberIdentity(f)
+        if (this.active) {
+          this.failedStarts.add(f.start)
+          this.rememberIdentity(f)
+        }
       })
+
+      if (!this.active) {
+        return
+      }
 
       const config = await getLocalConfig()
       const displayMode = config?.videoSubtitles?.style.displayMode
@@ -212,7 +235,10 @@ export class TranslationCoordinator {
     } finally {
       this.isTranslating = false
       // Kick the next nearby batch without waiting for the next timeupdate.
-      this.handleTranslationTick()
+      // Guarded: stop()/reset() must not chain more translation after teardown.
+      if (this.active) {
+        this.handleTranslationTick()
+      }
     }
   }
 
