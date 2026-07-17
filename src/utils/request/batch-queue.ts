@@ -22,6 +22,9 @@ interface BatchTask<T, R> {
   // the task (an unscoped subscriber exists); otherwise the task is cancelled
   // only when its last scope is cancelled.
   cancelScopes: Set<string> | null
+  // Set once the batch has been handed to executeBatch: its scope snapshot is
+  // now frozen downstream, so late dedup subscribers must NOT join it (#1881).
+  flushed: boolean
 }
 
 interface PendingBatch<T, R> {
@@ -98,13 +101,16 @@ export class BatchQueue<T, R> {
     const dedupKey = this.getDedupKey?.(data)
     if (dedupKey) {
       const inFlight = this.inFlightTasks.get(dedupKey)
-      if (inFlight) {
-        // Refcount the duplicate subscriber's scope. Limitation (accepted):
-        // once the batch has flushed into the RequestQueue, the downstream
-        // task's scope set is frozen — a late subscriber from another scope
-        // shares the original scopes' cancellation. Window is one batchDelay
-        // with identical text from two sessions; the retranslation pipeline
-        // heals the dropped paragraph.
+      // Only join a still-pending batch: its cancelScopes set is mutable and
+      // its flush-time union will include this scope. A flushed batch has
+      // already handed a FROZEN scope snapshot to the RequestQueue, so a late
+      // cross-scope subscriber joining it would be cancelled when the original
+      // scope cancels — silently dropping this (still-active) session's
+      // paragraph. Fall through to a fresh task instead; the RequestQueue's own
+      // hash dedup re-coalesces identical batches, so the common case (two tabs
+      // on the same page) stays deduped, and at worst one duplicate request is
+      // issued for a genuinely different batch (#1881).
+      if (inFlight && !inFlight.task.flushed) {
         if (!scope) {
           inFlight.task.cancelScopes = null
         } else if (inFlight.task.cancelScopes !== null) {
@@ -127,6 +133,7 @@ export class BatchQueue<T, R> {
       resolve,
       reject,
       cancelScopes: scope ? new Set([scope]) : null,
+      flushed: false,
     }
 
     if (dedupKey) {
@@ -269,6 +276,9 @@ export class BatchQueue<T, R> {
     this.pendingBatchMap.delete(batchKey)
 
     const { tasks } = pendingBatch
+    // Freeze the batch: from here its downstream scope snapshot is fixed, so
+    // enqueue() must stop letting late subscribers dedup into these tasks.
+    for (const task of tasks) task.flushed = true
 
     // Scope union frozen at flush time: if every member is scoped, cancelling
     // all those scopes downstream aborts the whole batch; one unscoped member

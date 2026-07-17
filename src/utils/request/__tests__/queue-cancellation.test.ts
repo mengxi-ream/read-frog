@@ -411,4 +411,56 @@ describe("batchQueue – cancelByScope", () => {
     await expect(fromA).resolves.toBe("t:alpha")
     await expect(fromB).resolves.toBe("t:beta")
   })
+
+  it("does not drop a later session's paragraph that dedups a same-hash request after flush (#1881)", async () => {
+    vi.useFakeTimers()
+    const requestQueue = new RequestQueue({ ...baseConfig, rate: 100, capacity: 100 })
+    const gate = createDeferred<void>()
+    const signals: Record<string, AbortSignal | undefined> = {}
+    let rqSeq = 0
+
+    const q = createBatchQueue({
+      batchDelay: 10,
+      // Unique downstream hash per flush so the two sessions land on distinct
+      // RequestQueue tasks — this isolates the BatchQueue-level fix (the
+      // request queue's own dedup would otherwise mask it).
+      executeBatch: (dataList, meta) => {
+        const scopeKey = meta.scopes?.[0]
+        return requestQueue.enqueue(
+          (signal) =>
+            new Promise<string[]>((resolve, reject) => {
+              if (scopeKey) signals[scopeKey] = signal
+              signal?.addEventListener("abort", () => reject(signal.reason))
+              void gate.promise.then(() => resolve(dataList.map((d) => `t:${d.text}`)))
+            }),
+          Date.now(),
+          `rq-${rqSeq++}`,
+          meta.scopes,
+        )
+      },
+    })
+
+    // Session A: same text, flushed into the request queue and now in flight.
+    const fromA = q.enqueue({ text: "shared", key: "same", scope: "A" })
+    const settledA = expectCancelled(fromA)
+    await vi.advanceTimersByTimeAsync(20)
+
+    // Session B: identical dedup key, but arriving AFTER A's batch flushed.
+    const fromB = q.enqueue({ text: "shared", key: "same", scope: "B" })
+    await vi.advanceTimersByTimeAsync(20)
+
+    // The fix: B must not share A's frozen downstream task.
+    expect(fromB).not.toBe(fromA)
+
+    // A cancels; B stays active.
+    q.cancelByScope("A")
+    requestQueue.cancelByScope("A")
+    await settledA
+    expect(signals.A?.aborted).toBe(true)
+
+    // B's paragraph completes instead of being silently dropped.
+    gate.resolve()
+    await expect(fromB).resolves.toBe("t:shared")
+    expect(signals.B?.aborted).toBe(false)
+  })
 })
