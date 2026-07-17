@@ -43,9 +43,7 @@ describe("Dictionary Notebase guide tracking", () => {
     expect(isGuideDictionaryNotebaseGuideUrl(GUIDE_URL)).toBe(true)
     expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/guide/step-3/")).toBe(true)
     expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/en/guide/step-3")).toBe(true)
-    expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/zh-Hant/guide/step-3")).toBe(
-      true,
-    )
+    expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/zh-TW/guide/step-3")).toBe(true)
     expect(
       isGuideDictionaryNotebaseGuideUrl(
         "https://readfrog.app/fr-CA/guide/step-3/?from=guide#dictionary",

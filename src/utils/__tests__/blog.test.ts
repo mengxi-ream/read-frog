@@ -184,11 +184,11 @@ describe("resolveBlogLocale", () => {
     expect(resolveBlogLocale("zh_Hans")).toBe("zh")
   })
 
-  it("maps traditional Chinese locales to zh-Hant", () => {
-    expect(resolveBlogLocale("zh-TW")).toBe("zh-Hant")
-    expect(resolveBlogLocale("zh_Hant")).toBe("zh-Hant")
-    expect(resolveBlogLocale("zh-HK")).toBe("zh-Hant")
-    expect(resolveBlogLocale("zh-MO")).toBe("zh-Hant")
+  it("maps traditional Chinese locales to zh-TW", () => {
+    expect(resolveBlogLocale("zh-TW")).toBe("zh-TW")
+    expect(resolveBlogLocale("zh_Hant")).toBe("zh-TW")
+    expect(resolveBlogLocale("zh-HK")).toBe("zh-TW")
+    expect(resolveBlogLocale("zh-MO")).toBe("zh-TW")
   })
 
   it("keeps English as en", () => {

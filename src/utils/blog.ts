@@ -11,7 +11,7 @@ const BILIBILI_HOSTNAME_PATTERN = /(?:^|\.)bilibili\.com$/i
 const BILIBILI_VIDEO_ID_PATTERN = /^BV[0-9A-Z]+$/i
 const DEFAULT_BLOG_LOCALE = "en"
 
-export type BlogLocale = "en" | "zh" | "zh-Hant" | "ko" | "vi" | "ru" | "tr" | "ja" | "es"
+export type BlogLocale = "en" | "zh" | "zh-TW" | "ko" | "vi" | "ru" | "tr" | "ja" | "es"
 
 const BLOG_LOCALE_BY_PRIMARY_LANGUAGE: Partial<Record<string, BlogLocale>> = {
   en: "en",
@@ -128,7 +128,7 @@ export function resolveBlogLocale(uiLocale?: string | null): BlogLocale {
       normalizedLocale === "zh-tw" ||
       normalizedLocale === "zh-hk" ||
       normalizedLocale === "zh-mo"
-      ? "zh-Hant"
+      ? "zh-TW"
       : "zh"
   }
 
