@@ -14,10 +14,16 @@ export interface TranslationCoordinatorOptions {
   onStateChange: (state: SubtitlesState, data?: Record<string, string>) => void
 }
 
+function fragmentIdentity(fragment: Pick<SubtitlesFragment, "end" | "text">): string {
+  return `${fragment.end}\0${fragment.text}`
+}
+
 export class TranslationCoordinator {
   private translatingStarts = new Set<number>()
   private translatedStarts = new Set<number>()
   private failedStarts = new Set<number>()
+  /** Identity of the cue (end+text) associated with a booked start. */
+  private knownIdentities = new Map<number, string>()
   private isTranslating = false
   private lastEmittedState: SubtitlesState = "idle"
   private videoContext: SubtitlesVideoContext = { videoTitle: "", subtitlesTextContent: "" }
@@ -70,6 +76,7 @@ export class TranslationCoordinator {
     this.translatingStarts.clear()
     this.translatedStarts.clear()
     this.failedStarts.clear()
+    this.knownIdentities.clear()
     this.isTranslating = false
     this.lastEmittedState = "idle"
     this.videoContext = { videoTitle: "", subtitlesTextContent: "" }
@@ -80,29 +87,38 @@ export class TranslationCoordinator {
   }
 
   /**
-   * Drop bookkeeping for starts that no longer exist after AI re-segmentation,
-   * then re-evaluate nearby translation.
+   * Drop bookkeeping for starts that no longer exist, or whose cue identity
+   * (end+text) changed after AI re-segmentation — same start can be a recut line.
    */
   noteFragmentListChanged() {
-    const validStarts = new Set(this.getFragments().map((fragment) => fragment.start))
+    const byStart = new Map(this.getFragments().map((fragment) => [fragment.start, fragment]))
 
-    for (const start of [...this.translatedStarts]) {
-      if (!validStarts.has(start)) {
-        this.translatedStarts.delete(start)
-      }
-    }
-    for (const start of [...this.translatingStarts]) {
-      if (!validStarts.has(start)) {
-        this.translatingStarts.delete(start)
-      }
-    }
-    for (const start of [...this.failedStarts]) {
-      if (!validStarts.has(start)) {
-        this.failedStarts.delete(start)
-      }
-    }
+    this.invalidateStaleStarts(this.translatedStarts, byStart)
+    this.invalidateStaleStarts(this.translatingStarts, byStart)
+    this.invalidateStaleStarts(this.failedStarts, byStart)
 
     this.handleTranslationTick()
+  }
+
+  private invalidateStaleStarts(starts: Set<number>, byStart: Map<number, SubtitlesFragment>) {
+    for (const start of [...starts]) {
+      const current = byStart.get(start)
+      if (!current) {
+        starts.delete(start)
+        this.knownIdentities.delete(start)
+        continue
+      }
+
+      const known = this.knownIdentities.get(start)
+      if (known !== undefined && known !== fragmentIdentity(current)) {
+        starts.delete(start)
+        this.knownIdentities.delete(start)
+      }
+    }
+  }
+
+  private rememberIdentity(fragment: SubtitlesFragment) {
+    this.knownIdentities.set(fragment.start, fragmentIdentity(fragment))
   }
 
   private handleTranslationTick = () => {
@@ -147,19 +163,26 @@ export class TranslationCoordinator {
     }
 
     this.isTranslating = true
-    batch.forEach((f) => this.translatingStarts.add(f.start))
+    batch.forEach((f) => {
+      this.translatingStarts.add(f.start)
+      this.rememberIdentity(f)
+    })
 
     try {
       const translated = await translateSubtitles(batch, this.videoContext)
-      // Drop results for starts removed by AI re-segmentation while the request was in flight.
-      const validStarts = new Set(this.getFragments().map((fragment) => fragment.start))
-      const stillValid = translated.filter((fragment) => validStarts.has(fragment.start))
+      // Only accept results whose cue identity still matches the current fragment list.
+      const byStart = new Map(this.getFragments().map((fragment) => [fragment.start, fragment]))
+      const stillValid = translated.filter((fragment) => {
+        const current = byStart.get(fragment.start)
+        return !!current && current.end === fragment.end && current.text === fragment.text
+      })
 
       stillValid.forEach((f) => {
         this.translatingStarts.delete(f.start)
         this.translatedStarts.add(f.start)
+        this.rememberIdentity(f)
       })
-      // Starts that disappeared mid-request should not stay "translating" forever.
+      // Starts that disappeared or were recut mid-request should not stay "translating".
       batch.forEach((f) => {
         this.translatingStarts.delete(f.start)
       })
@@ -172,6 +195,7 @@ export class TranslationCoordinator {
       batch.forEach((f) => {
         this.translatingStarts.delete(f.start)
         this.failedStarts.add(f.start)
+        this.rememberIdentity(f)
       })
 
       const config = await getLocalConfig()

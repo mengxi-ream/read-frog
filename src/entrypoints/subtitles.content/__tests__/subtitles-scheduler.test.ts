@@ -140,4 +140,29 @@ describe("subtitles scheduler", () => {
     ;(scheduler as any).updateSubtitles(2.1)
     expect(subtitlesStore.get(currentSubtitleAtom)?.text).toBe("after")
   })
+
+  it("does not merge a recut same-start translation onto a protected longer cue", () => {
+    const video = createVideo(0.5)
+    const scheduler = new SubtitlesScheduler({ videoElement: video })
+    scheduler.start()
+
+    scheduler.supplementSubtitles([{ text: "hello world foo", start: 0, end: 2000 }])
+    scheduler.replaceTimeWindow(0, 2000, [
+      { text: "hello world", start: 0, end: 1000 },
+      { text: "foo", start: 1000, end: 2000 },
+    ])
+
+    // Translation for the recut shorter cue (same start, different end/text).
+    scheduler.supplementSubtitles(
+      [{ text: "hello world", start: 0, end: 1000, translation: "你好世界" }],
+      { mergeOnly: true },
+    )
+
+    // Protected baseline must not pick up the recut line's translation.
+    expect(subtitlesStore.get(currentSubtitleAtom)).toEqual({
+      text: "hello world foo",
+      start: 0,
+      end: 2000,
+    })
+  })
 })

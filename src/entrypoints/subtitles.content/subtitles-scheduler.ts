@@ -60,6 +60,14 @@ export class SubtitlesScheduler {
 
       // Apply empty-string translations too (error fallback for bilingual).
       if (newSub.translation !== undefined) {
+        // mergeOnly: only paint translations onto cues that still match the
+        // translated identity (start+end+text). Prevents a recut shorter line's
+        // translation from landing on a protected longer baseline cue that
+        // shares the same start time.
+        if (mergeOnly && (existing.end !== newSub.end || existing.text !== newSub.text)) {
+          continue
+        }
+
         const updatedSub = { ...existing, translation: newSub.translation }
         const idx = this.subtitles.findIndex((s) => s.start === existing.start)
         if (idx >= 0) {

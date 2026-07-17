@@ -61,4 +61,32 @@ describe("translation coordinator loading state", () => {
 
     expect(onStateChange).toHaveBeenCalledWith("idle")
   })
+
+  it("invalidates translated bookkeeping when the same start is recut", () => {
+    let fragments = [{ text: "hello world", start: 0, end: 2000 }]
+    const onStateChange = vi.fn<(...args: any[]) => any>()
+    const coordinator = new TranslationCoordinator({
+      getFragments: () => fragments,
+      getVideoElement: () => ({ currentTime: 0.2 }) as HTMLVideoElement,
+      getCurrentState: () => "idle",
+      segmentationPipeline: null,
+      onTranslated: vi.fn<(...args: any[]) => any>(),
+      onStateChange,
+    })
+
+    ;(coordinator as any).translatedStarts.add(0)
+    ;(coordinator as any).knownIdentities.set(0, "2000\0hello world")
+
+    // AI re-segmentation keeps start=0 but shortens the cue.
+    fragments = [
+      { text: "hello", start: 0, end: 1000 },
+      { text: "world", start: 1000, end: 2000 },
+    ]
+    coordinator.noteFragmentListChanged()
+
+    // Old completion must be invalidated so the recut line can be translated again.
+    expect((coordinator as any).translatedStarts.has(0)).toBe(false)
+    // Old baseline identity must not stick around as if still valid.
+    expect((coordinator as any).knownIdentities.get(0)).not.toBe("2000\0hello world")
+  })
 })
