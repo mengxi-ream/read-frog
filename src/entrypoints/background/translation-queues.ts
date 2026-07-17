@@ -206,12 +206,14 @@ interface TranslationQueueSetupConfig<TContext = unknown> {
   requestQueueConfig: RequestQueueConfig
   batchQueueConfig: BatchQueueConfig
   promptResolver: PromptResolver<TContext>
+  // Present only for queues whose requests carry cancellation scopes.
+  isScopeCancelled?: (scopeKey: string) => boolean
 }
 
 async function createTranslationQueues<TContext>(config: TranslationQueueSetupConfig<TContext>) {
   const { rate, capacity } = config.requestQueueConfig
   const { maxCharactersPerBatch, maxItemsPerBatch } = config.batchQueueConfig
-  const { promptResolver } = config
+  const { promptResolver, isScopeCancelled } = config
 
   const requestQueue = new RequestQueue({
     rate,
@@ -236,6 +238,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
     getCharacters: (data) => data.text.length,
     getDedupKey: (data) => data.hash,
     getScope: (data) => data.scope,
+    isScopeCancelled,
     executeBatch: async (dataList, meta) => {
       const { providerConfig } = dataList[0]
       const hash = Sha256Hex(...dataList.map((d) => d.hash))
@@ -278,15 +281,19 @@ export async function setUpWebPageTranslationQueue() {
     translate: { requestQueueConfig, batchQueueConfig },
   } = config ?? DEFAULT_CONFIG
 
+  // Scopes whose cancel already drained the queues. Consulted by (a) the
+  // enqueue handler after its cache-lookup await and (b) the batch queue's
+  // retry/fallback path after its backoff sleep — both are windows where a
+  // request lives in NO cancellable structure, so a cancel arriving there
+  // would otherwise be lost (#1881).
+  const cancelledScopes = new CancelledScopeRegistry()
+
   const { requestQueue, batchQueue } = await createTranslationQueues({
     requestQueueConfig,
     batchQueueConfig,
     promptResolver: getTranslatePrompt,
+    isScopeCancelled: (scopeKey) => cancelledScopes.has(scopeKey),
   })
-  // Scopes whose cancel already drained the queues. An enqueue handler that
-  // was suspended on the cache lookup when the cancel ran must not enqueue
-  // afterwards — nothing would ever drain that task again (#1881).
-  const cancelledScopes = new CancelledScopeRegistry()
 
   onMessage("enqueueTranslateRequest", async (message) => {
     const {

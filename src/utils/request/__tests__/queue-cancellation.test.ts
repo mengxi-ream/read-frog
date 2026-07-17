@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { BatchQueue } from "../batch-queue"
+import { BatchCountMismatchError, BatchQueue } from "../batch-queue"
 import { isTranslationCancelledError, TranslationCancelledError } from "../cancellation"
 import { RequestQueue } from "../request-queue"
 
@@ -258,17 +258,20 @@ function createBatchQueue(options: {
   executeIndividual?: (data: FakeBatchData) => Promise<string>
   batchDelay?: number
   maxItemsPerBatch?: number
+  maxRetries?: number
+  isScopeCancelled?: (scopeKey: string) => boolean
 }) {
   return new BatchQueue<FakeBatchData, string>({
     maxCharactersPerBatch: 1_000,
     maxItemsPerBatch: options.maxItemsPerBatch ?? 10,
     batchDelay: options.batchDelay ?? 100,
-    maxRetries: 0,
+    maxRetries: options.maxRetries ?? 0,
     enableFallbackToIndividual: Boolean(options.executeIndividual),
     getBatchKey: () => "batch",
     getCharacters: (data) => data.text.length,
     getDedupKey: (data) => data.key,
     getScope: (data) => data.scope,
+    isScopeCancelled: options.isScopeCancelled,
     executeBatch: options.executeBatch,
     executeIndividual: options.executeIndividual,
   })
@@ -462,5 +465,77 @@ describe("batchQueue – cancelByScope", () => {
     gate.resolve()
     await expect(fromB).resolves.toBe("t:shared")
     expect(signals.B?.aborted).toBe(false)
+  })
+
+  it("aborts the retry backoff when every scope was cancelled during the sleep (#1881)", async () => {
+    vi.useFakeTimers()
+    const cancelled = new Set<string>()
+    // First attempt: LLM returns the wrong number of results → retry path.
+    const executeBatch = vi.fn<
+      (
+        dataList: FakeBatchData[],
+        meta: { scopes: readonly string[] | undefined },
+      ) => Promise<string[]>
+    >(async () => {
+      throw new BatchCountMismatchError(2, 1, ["only-one"])
+    })
+    const executeIndividual = vi.fn<(data: FakeBatchData) => Promise<string>>(
+      async (item) => `solo:${item.text}`,
+    )
+    const q = createBatchQueue({
+      batchDelay: 10,
+      maxRetries: 3,
+      executeBatch,
+      executeIndividual,
+      isScopeCancelled: (scope) => cancelled.has(scope),
+    })
+
+    const a1 = q.enqueue({ text: "alpha", key: "a1", scope: "A" })
+    const a2 = q.enqueue({ text: "beta", key: "a2", scope: "A" })
+    const settled = Promise.all([expectCancelled(a1), expectCancelled(a2)])
+
+    // Flush → first attempt fails → batch enters its backoff sleep, where it
+    // lives in no cancellable structure.
+    await vi.advanceTimersByTimeAsync(20)
+    expect(executeBatch).toHaveBeenCalledTimes(1)
+
+    // The session cancels during the backoff (registry marks the scope).
+    cancelled.add("A")
+
+    // Past every backoff window: no second attempt, no per-item fallback.
+    await vi.advanceTimersByTimeAsync(60_000)
+    expect(executeBatch).toHaveBeenCalledTimes(1)
+    expect(executeIndividual).not.toHaveBeenCalled()
+    await settled
+  })
+
+  it("keeps retrying when the scopes stay live (control)", async () => {
+    vi.useFakeTimers()
+    const executeBatch = vi.fn<
+      (
+        dataList: FakeBatchData[],
+        meta: { scopes: readonly string[] | undefined },
+      ) => Promise<string[]>
+    >(async (dataList) => {
+      if (executeBatch.mock.calls.length === 1) {
+        throw new BatchCountMismatchError(1, 0, [])
+      }
+      return dataList.map((d) => `t:${d.text}`)
+    })
+    const q = createBatchQueue({
+      batchDelay: 10,
+      maxRetries: 3,
+      executeBatch,
+      isScopeCancelled: () => false,
+    })
+
+    const a1 = q.enqueue({ text: "alpha", key: "a1", scope: "A" })
+
+    await vi.advanceTimersByTimeAsync(20)
+    expect(executeBatch).toHaveBeenCalledTimes(1)
+
+    await vi.advanceTimersByTimeAsync(60_000)
+    expect(executeBatch).toHaveBeenCalledTimes(2)
+    await expect(a1).resolves.toBe("t:alpha")
   })
 })

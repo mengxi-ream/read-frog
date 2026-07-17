@@ -53,6 +53,9 @@ export interface BatchOptions<T, R> {
   getCharacters: (data: T) => number
   getDedupKey?: (data: T) => string | undefined
   getScope?: (data: T) => string | undefined
+  // Liveness check for a scope whose cancel may have run while a flushed
+  // batch was outside every cancellable structure (retry backoff sleep).
+  isScopeCancelled?: (scopeKey: string) => boolean
   executeBatch: (dataList: T[], meta: BatchExecutionMeta) => Promise<R[]>
   executeIndividual?: (data: T) => Promise<R>
   onError?: (
@@ -74,6 +77,7 @@ export class BatchQueue<T, R> {
   private getCharacters: (data: T) => number
   private getDedupKey?: (data: T) => string | undefined
   private getScope?: (data: T) => string | undefined
+  private isScopeCancelled?: (scopeKey: string) => boolean
   private executeBatch: (dataList: T[], meta: BatchExecutionMeta) => Promise<R[]>
   private executeIndividual?: (data: T) => Promise<R>
   private onError?: (
@@ -91,6 +95,7 @@ export class BatchQueue<T, R> {
     this.getCharacters = config.getCharacters
     this.getDedupKey = config.getDedupKey
     this.getScope = config.getScope
+    this.isScopeCancelled = config.isScopeCancelled
     this.executeBatch = config.executeBatch
     this.executeIndividual = config.executeIndividual
     this.onError = config.onError
@@ -326,6 +331,11 @@ export class BatchQueue<T, R> {
       if (retryCount < this.maxRetries && err instanceof BatchCountMismatchError) {
         const delay = this.calculateBackoffDelay(retryCount)
         await this.sleep(delay)
+        // During the backoff this batch lived in NO cancellable structure
+        // (its RequestQueue task already completed, it left pendingBatchMap at
+        // flush) — a cancel that arrived meanwhile drained nothing, so re-check
+        // scope liveness before burning another provider round trip (#1881).
+        if (this.rejectIfAllScopesCancelled(tasks, meta)) return
         return this.executeBatchWithRetry(tasks, batchKey, meta, retryCount + 1)
       }
 
@@ -334,11 +344,28 @@ export class BatchQueue<T, R> {
         this.executeIndividual &&
         err instanceof BatchCountMismatchError
       ) {
+        // Same gate before the per-item fallback: the failed attempt's provider
+        // call may have straddled the cancel.
+        if (this.rejectIfAllScopesCancelled(tasks, meta)) return
         return this.executeFallbackIndividual(tasks, batchKey)
       }
 
       tasks.forEach((task) => task.reject(err))
     }
+  }
+
+  /**
+   * When every scope this batch was flushed with has since been cancelled,
+   * reject all members with the cancellation error and report true. A batch
+   * with an unscoped member (scopes: undefined) or any surviving scope keeps
+   * running — same mixed-batch semantics as cancelByScope.
+   */
+  private rejectIfAllScopesCancelled(tasks: BatchTask<T, R>[], meta: BatchExecutionMeta): boolean {
+    if (!this.isScopeCancelled || !meta.scopes || meta.scopes.length === 0) return false
+    if (!meta.scopes.every((scope) => this.isScopeCancelled!(scope))) return false
+    const error = new TranslationCancelledError(meta.scopes.join(","))
+    tasks.forEach((task) => task.reject(error))
+    return true
   }
 
   private async executeFallbackIndividual(tasks: BatchTask<T, R>[], batchKey: string) {
