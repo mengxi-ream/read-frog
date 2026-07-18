@@ -1,5 +1,22 @@
 # @read-frog/extension
 
+## 1.41.2
+
+### Patch Changes
+
+- [#1887](https://github.com/mengxi-ream/read-frog/pull/1887) [`b14bd0a`](https://github.com/mengxi-ream/read-frog/commit/b14bd0a612909e8cc70932b97b5123a80467faca) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(custom-actions): add a link to open the connected notebase
+
+- [#1888](https://github.com/mengxi-ream/read-frog/pull/1888) [`92a2142`](https://github.com/mengxi-ream/read-frog/commit/92a214221aa1129794deb361b2fde839254ffa16) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection): prevent shadow overlays from covering pages after refresh
+
+- [#1884](https://github.com/mengxi-ream/read-frog/pull/1884) [`18e8901`](https://github.com/mengxi-ream/read-frog/commit/18e8901ff97cc9ef682bbe387014018fd768af8b) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translate): stop long-page freezes and drain cancelled translation queues ([#1881](https://github.com/mengxi-ream/read-frog/issues/1881))
+
+  - Split giant observed paragraphs (e.g. a flat 185k-px article labeled as one paragraph) into their descendant paragraphs so viewport-lazy translation actually applies instead of enqueueing the whole page at once
+  - Cap concurrent spinner animations and cancel them via stored handles — thousands of live WAAPI animations were driving continuous full-page style recalcs
+  - Cancel a page-translation session's queued/in-flight background requests on toggle-off, tab close, or restart (scoped per tab + session, dedup-shared requests are refcounted)
+  - Time-slice the initial DOM labeling walk and pace subtree translation so the main thread stays responsive on huge pages
+
+- [#1889](https://github.com/mengxi-ream/read-frog/pull/1889) [`5b03d64`](https://github.com/mengxi-ream/read-frog/commit/5b03d6476dbe12f56e5651627f4dc869a4ef81cf) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(toast): migrate notifications to Base UI and add contextual anchored feedback
+
 ## 1.41.1
 
 ### Patch Changes
