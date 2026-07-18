@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/base-ui/dropdown-menu"
-import { toastManager } from "@/components/ui/base-ui/toast"
+import { anchoredToastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -29,6 +29,7 @@ const LONG_PRESS_DELAY_MS = 350
 const DRAG_START_DISTANCE_PX = 6
 const MIN_FLOATING_CONTAINER_TOP_PX = 30
 const FLOATING_CONTAINER_BOTTOM_CLEARANCE_PX = 200
+const FIREFOX_SIDEBAR_USER_ACTION_TOAST_ID = "firefox-sidebar-user-action"
 
 interface DragPoint {
   x: number
@@ -175,7 +176,19 @@ export default function FloatingButton() {
 
     void Promise.resolve(sendMessage("toggleSidePanel", undefined)).then((result) => {
       if (result && !result.ok && result.reason === "requires-extension-user-action") {
-        toastManager.add({ type: "info", title: <FirefoxSidebarHelpToast /> })
+        if (!mainButtonRef.current) return
+
+        anchoredToastManager.add({
+          id: FIREFOX_SIDEBAR_USER_ACTION_TOAST_ID,
+          positionerProps: {
+            anchor: mainButtonRef.current,
+            side: floatingButtonSide === "right" ? "left" : "right",
+            sideOffset: 8,
+          },
+          timeout: 8000,
+          type: "info",
+          title: <FirefoxSidebarHelpToast />,
+        })
       }
     })
   }

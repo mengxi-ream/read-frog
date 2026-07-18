@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/base-ui/collapsible"
 import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
 import { Switch } from "@/components/ui/base-ui/switch"
-import { toastManager } from "@/components/ui/base-ui/toast"
+import { anchoredToastManager } from "@/components/ui/base-ui/toast"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { isAPIProviderConfig } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
@@ -142,6 +142,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
   const setProviderConfig = useSetAtom(providerConfigAtom(id))
   const config = useAtomValue(configAtom)
   const sponsor = API_PROVIDER_ITEMS[provider].sponsor
+  const switchRef = useRef<HTMLButtonElement>(null)
 
   const assignedFeatures = FEATURE_KEYS.filter(
     (key) => FEATURE_PROVIDER_DEFS[key].getProviderId(config) === id,
@@ -156,7 +157,15 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
 
   const handleProviderEnabledChange = (checked: boolean) => {
     if (!checked && enabled && totalAssigned > 0) {
-      toastManager.add({
+      if (!switchRef.current) return
+
+      anchoredToastManager.add({
+        id: `provider-disable-${id}`,
+        positionerProps: {
+          anchor: switchRef.current,
+          sideOffset: 6,
+        },
+        timeout: 5000,
         type: "error",
         title: i18n.t("options.apiProviders.form.providerInUseCannotDisable", [
           name,
@@ -178,6 +187,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
       selected={selectedProviderId === id}
       onSelect={() => setSelectedProviderId(id)}
       onCheckedChange={handleProviderEnabledChange}
+      switchRef={switchRef}
       badges={
         <>
           {sponsor?.sponsoring && <SponsorBadge className="absolute -top-2 left-2 text-[10px]" />}
@@ -227,6 +237,7 @@ interface ProviderListCellProps {
   badges?: React.ReactNode
   onSelect: () => void
   onCheckedChange?: (checked: boolean) => void
+  switchRef?: React.Ref<HTMLButtonElement>
 }
 
 function ProviderListCell({
@@ -239,6 +250,7 @@ function ProviderListCell({
   badges,
   onSelect,
   onCheckedChange,
+  switchRef,
 }: ProviderListCellProps) {
   return (
     <div
@@ -253,6 +265,7 @@ function ProviderListCell({
       <div className="flex items-center justify-between gap-2">
         <ProviderIcon logo={logo} name={name} size="base" textClassName="text-sm" />
         <Switch
+          ref={switchRef}
           aria-label={name}
           checked={checked}
           disabled={disabled}

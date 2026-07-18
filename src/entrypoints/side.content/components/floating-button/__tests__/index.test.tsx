@@ -62,7 +62,7 @@ vi.mock("@/utils/message", () => ({
 }))
 
 vi.mock("@/components/ui/base-ui/toast", () => ({
-  toastManager: {
+  anchoredToastManager: {
     add: (...args: unknown[]) => toastAddMock(...args),
   },
 }))
@@ -278,6 +278,18 @@ describe("floatingButton controls", () => {
       await Promise.resolve()
     })
 
+    expect(toastAddMock).toHaveBeenCalledWith({
+      id: "firefox-sidebar-user-action",
+      positionerProps: {
+        anchor: mainButton,
+        side: "left",
+        sideOffset: 8,
+      },
+      timeout: 8000,
+      type: "info",
+      title: expect.anything(),
+    })
+
     const toastContent = toastAddMock.mock.calls[0]?.[0]?.title
     expect(toastContent).toBeDefined()
     render(<>{toastContent}</>)
@@ -287,6 +299,47 @@ describe("floatingButton controls", () => {
     expect(link).toHaveAttribute("href", "sidePanel.firefoxUserActionHelpUrl")
     expect(link).toHaveAttribute("target", "_blank")
     expect(link).toHaveAttribute("rel", "noopener noreferrer")
+  })
+
+  it("places Firefox sidebar help to the right of a left-side floating button", async () => {
+    vi.useFakeTimers()
+    vi.mocked(sendMessage).mockResolvedValue({
+      ok: false,
+      reason: "requires-extension-user-action",
+    })
+    renderFloatingButton({ clickAction: "panel", side: "left" })
+
+    const mainButton = getMainButton()
+
+    fireEvent.pointerDown(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 20,
+      clientY: 500,
+    })
+    vi.advanceTimersByTime(349)
+    fireEvent.pointerUp(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 20,
+      clientY: 500,
+    })
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(toastAddMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        positionerProps: {
+          anchor: mainButton,
+          side: "right",
+          sideOffset: 8,
+        },
+      }),
+    )
   })
 
   it("keeps translate as a normal click action", () => {
