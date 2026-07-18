@@ -119,4 +119,36 @@ describe("segmentation pipeline", () => {
       { text: "hello world", start: 0, end: 1000 },
     ])
   })
+
+  it("does not apply segmentation results after stop", async () => {
+    const rawFragments = [
+      { text: "hello", start: 0, end: 500 },
+      { text: "world", start: 500, end: 1000 },
+    ]
+    const onChunkSegmented = vi.fn<(...args: any[]) => any>()
+    let resolveAi: (value: any) => void
+    const aiPromise = new Promise((resolve) => {
+      resolveAi = resolve
+    })
+
+    const { aiSegmentBlock } = await import("@/utils/subtitles/processor/ai-segmentation")
+    vi.mocked(aiSegmentBlock).mockImplementationOnce(() => aiPromise as any)
+
+    const pipeline = new SegmentationPipeline({
+      baselineFragments: [{ text: "hello world", start: 0, end: 1000 }],
+      rawFragments,
+      getVideoElement: () => ({ currentTime: 0 }) as HTMLVideoElement,
+      getSourceLanguage: () => "en",
+      onChunkSegmented,
+    })
+
+    const pending = (pipeline as any).processNextChunk(0)
+    pipeline.stop()
+    resolveAi!([{ text: "hello world", start: 0, end: 1000 }])
+    await pending
+
+    expect(onChunkSegmented).not.toHaveBeenCalled()
+    // Baseline fragments remain untouched after stop mid-flight.
+    expect(pipeline.processedFragments).toEqual([{ text: "hello world", start: 0, end: 1000 }])
+  })
 })

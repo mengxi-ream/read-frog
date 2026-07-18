@@ -89,24 +89,32 @@ export class SegmentationPipeline {
   }
 
   private async processNextChunk(currentTimeMs: number): Promise<boolean> {
+    if (this.stopped) return false
+
     const chunk = this.findNextChunk(currentTimeMs)
     if (chunk.length === 0) return false
 
     chunk.forEach((f) => this.segmentedRawStarts.add(f.start))
 
     if (this.preSegmented) {
-      this.replaceProcessedChunk(chunk, chunk)
+      if (!this.stopped) {
+        this.replaceProcessedChunk(chunk, chunk)
+      }
       return true
     }
 
     try {
       const config = await getLocalConfig()
+      if (this.stopped) return true
       if (config) {
         const segmented = await aiSegmentBlock(chunk, config)
+        // Session may have been torn down while the AI call was in flight.
+        if (this.stopped) return true
         const optimized = optimizeSubtitles(segmented, this.getSourceLanguage())
         this.replaceProcessedChunk(chunk, optimized)
       }
     } catch {
+      if (this.stopped) return true
       chunk.forEach((f) => this.aiSegmentFailedRawStarts.add(f.start))
       const optimized = optimizeSubtitles(chunk, this.getSourceLanguage())
       this.replaceProcessedChunk(chunk, optimized)
@@ -116,6 +124,9 @@ export class SegmentationPipeline {
   }
 
   private replaceProcessedChunk(chunk: SubtitlesFragment[], nextFragments: SubtitlesFragment[]) {
+    // Do not mutate processed fragments or notify the adapter after stop().
+    if (this.stopped) return
+
     const chunkStart = chunk[0]!.start
     const chunkEnd = chunk.at(-1)!.end
 
