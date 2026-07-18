@@ -225,14 +225,18 @@ export class PageTranslationManager implements IPageTranslationManager {
 
       this.isPageTranslating = true
       this.translationSessionVersion += 1
-      beginPageTranslationSession(
-        window === window.top
+
+      const promptExperimentAction =
+        window === window.top &&
+        trackedContext &&
+        trackedContext.surface !== ANALYTICS_SURFACE.PAGE_AUTO
           ? {
               feature: TRANSLATION_REQUESTED_FEATURE.PAGE_TRANSLATION,
-              surface: trackedContext?.surface ?? ANALYTICS_SURFACE.PAGE_AUTO,
+              surface: trackedContext.surface,
             }
-          : undefined,
-      )
+          : undefined
+
+      beginPageTranslationSession(promptExperimentAction)
 
       const siteRule = getEffectiveSiteRule(config, window.location.href)
       if (siteRule.injectedCss) {
