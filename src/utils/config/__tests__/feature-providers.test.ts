@@ -8,11 +8,9 @@ import {
   getSelectableProvidersForCapability,
 } from "@/utils/providers/provider-registry"
 import {
-  computeLanguageDetectionFallbackAfterDeletion,
   computeProviderFallbacksAfterDeletion,
   computeSelectionToolbarCustomActionFallbacksAfterDeletion,
   findFeatureMissingProvider,
-  resolveLanguageDetectionConfigForModeChange,
 } from "../helpers"
 
 function getProviderById(id: string): ProviderConfig {
@@ -207,19 +205,6 @@ describe("feature providers", () => {
 
       expect(findFeatureMissingProvider(remainingProviders)).toBe("translate")
     })
-
-    it("treats llm language detection as unavailable when no enabled llm provider remains", () => {
-      const config = {
-        ...DEFAULT_CONFIG,
-        languageDetection: {
-          mode: "llm" as const,
-          providerId: "deleted-provider",
-        },
-      }
-      const remainingProviders = [getProviderById("microsoft-translate-default")]
-
-      expect(findFeatureMissingProvider(remainingProviders, config)).toBe("languageDetection")
-    })
   })
 
   describe("computeSelectionToolbarCustomActionFallbacksAfterDeletion", () => {
@@ -320,78 +305,6 @@ describe("feature providers", () => {
           providerId: "read-frog-free-ai",
         }),
       ])
-    })
-  })
-
-  describe("resolveLanguageDetectionConfigForModeChange", () => {
-    it("assigns the first enabled llm provider when switching from basic to llm", () => {
-      const result = resolveLanguageDetectionConfigForModeChange(
-        DEFAULT_CONFIG.languageDetection,
-        "llm",
-        DEFAULT_CONFIG.providersConfig,
-      )
-
-      expect(result).toEqual({
-        mode: "llm",
-        providerId: "openai-default",
-      })
-    })
-
-    it("keeps the current provider when it is already an enabled llm provider", () => {
-      const result = resolveLanguageDetectionConfigForModeChange(
-        {
-          mode: "basic",
-          providerId: "deepseek-default",
-        },
-        "llm",
-        DEFAULT_CONFIG.providersConfig,
-      )
-
-      expect(result).toEqual({
-        mode: "llm",
-        providerId: "deepseek-default",
-      })
-    })
-
-    it("returns null when there is no enabled llm provider", () => {
-      const result = resolveLanguageDetectionConfigForModeChange(
-        DEFAULT_CONFIG.languageDetection,
-        "llm",
-        [
-          {
-            ...getProviderById("openai-default"),
-            enabled: false,
-          },
-          {
-            ...getProviderById("deepseek-default"),
-            enabled: false,
-          },
-        ],
-      )
-
-      expect(result).toBeNull()
-    })
-  })
-
-  describe("computeLanguageDetectionFallbackAfterDeletion", () => {
-    it("reassigns language detection to the first enabled llm provider", () => {
-      const config = {
-        ...DEFAULT_CONFIG,
-        languageDetection: {
-          mode: "llm" as const,
-          providerId: "deleted-provider",
-        },
-      }
-
-      const result = computeLanguageDetectionFallbackAfterDeletion("deleted-provider", config, [
-        {
-          ...getProviderById("openai-default"),
-          enabled: false,
-        },
-        getProviderById("deepseek-default"),
-      ])
-
-      expect(result).toBe("deepseek-default")
     })
   })
 })

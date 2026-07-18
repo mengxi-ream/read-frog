@@ -17,6 +17,6 @@ export async function shouldSkipAsTargetLanguage(text: string, config: Config): 
   if (!config.translate.page.enableTargetLanguageSkip) return false
   const prepared = prepareTranslationText(text)
   if (prepared.length < MIN_LENGTH_FOR_TARGET_LANG_DETECTION) return false
-  const detected = await detectLanguage(prepared, { enableLLM: false })
+  const detected = await detectLanguage(prepared)
   return detected === config.language.targetCode
 }

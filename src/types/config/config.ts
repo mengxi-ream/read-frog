@@ -12,7 +12,7 @@ import {
 } from "@/utils/providers/provider-registry"
 import { floatingButtonSchema } from "./floating-button"
 import { languageDetectionConfigSchema } from "./language-detection"
-import { isLLMProvider, providersConfigSchema } from "./provider"
+import { providersConfigSchema } from "./provider"
 import { selectionToolbarCustomActionsSchema } from "./selection-toolbar"
 import { siteRulesConfigSchema } from "./site-rules"
 import { videoSubtitlesSchema } from "./subtitles"
@@ -141,42 +141,6 @@ export const configSchema = z
           path: [...def.configPath],
         })
         continue
-      }
-    }
-
-    // Validate languageDetection: when mode is "llm", providerId must be a valid enabled LLM provider
-    if (data.languageDetection.mode === "llm") {
-      const ldProviderId = data.languageDetection.providerId
-      if (!ldProviderId) {
-        ctx.addIssue({
-          code: "custom",
-          message: `Language detection mode is "llm" but no providerId is configured.`,
-          path: ["languageDetection", "providerId"],
-        })
-      } else {
-        const ldProvider = data.providersConfig.find((p) => p.id === ldProviderId)
-        if (!ldProvider) {
-          ctx.addIssue({
-            code: "custom",
-            message: `Language detection provider "${ldProviderId}" not found in providersConfig.`,
-            path: ["languageDetection", "providerId"],
-          })
-        } else {
-          if (!isLLMProvider(ldProvider.provider)) {
-            ctx.addIssue({
-              code: "custom",
-              message: `Language detection provider "${ldProviderId}" is not an LLM provider.`,
-              path: ["languageDetection", "providerId"],
-            })
-          }
-          if (!ldProvider.enabled) {
-            ctx.addIssue({
-              code: "custom",
-              message: `Language detection provider "${ldProviderId}" must be enabled.`,
-              path: ["languageDetection", "providerId"],
-            })
-          }
-        }
       }
     }
 

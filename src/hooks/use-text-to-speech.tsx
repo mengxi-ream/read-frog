@@ -1,12 +1,10 @@
 import type { AnalyticsSurface, FeatureUsageContext } from "@/types/analytics"
 import type { TTSConfig } from "@/types/config/tts"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useAtomValue } from "jotai"
 import { useRef, useState } from "react"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { detectLanguage } from "@/utils/content/language"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { i18n } from "@/utils/i18n"
@@ -54,7 +52,6 @@ export function selectTTSVoice(
 async function resolveVoiceForText(
   text: string,
   ttsConfig: TTSConfig,
-  enableLLM: boolean,
   forcedVoice?: string,
 ): Promise<string> {
   if (forcedVoice) {
@@ -67,12 +64,10 @@ async function resolveVoiceForText(
 
   const detectedLanguage = await detectLanguage(text, {
     minLength: 0,
-    enableLLM,
   })
   logger.info("[TextToSpeech] Resolving voice for text", {
     text,
     detectedLanguage,
-    enableLLM,
   })
 
   return selectTTSVoice(ttsConfig, detectedLanguage)
@@ -127,7 +122,6 @@ async function synthesizeEdgeTTSAudioChunk(
 
 export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SELECTION_TOOLBAR) {
   const queryClient = useQueryClient()
-  const languageDetection = useAtomValue(configFieldsAtomMap.languageDetection)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentChunk, setCurrentChunk] = useState(0)
   const [totalChunks, setTotalChunks] = useState(0)
@@ -160,12 +154,7 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
       activeRequestIdRef.current = requestId
       let didStartPlayback = false
 
-      const selectedVoice = await resolveVoiceForText(
-        text,
-        ttsConfig,
-        languageDetection.mode === "llm",
-        forcedVoice,
-      )
+      const selectedVoice = await resolveVoiceForText(text, ttsConfig, forcedVoice)
       if (shouldStopRef.current || activeRequestIdRef.current !== requestId) {
         return
       }

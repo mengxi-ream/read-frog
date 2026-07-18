@@ -8,7 +8,6 @@ import { batchQueueConfigSchema } from "@/types/config/translate"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS } from "@/utils/constants/translate"
 import { i18n } from "@/utils/i18n"
-import { sendMessage } from "@/utils/message"
 import { ConfigCard } from "../../components/config-card"
 
 type KeyOfBatchQueueConfig = keyof BatchQueueConfig
@@ -79,15 +78,14 @@ function SubtitlesBatchNumberSelector({ property }: { property: KeyOfBatchQueueC
             .partial()
             .safeParse({ [property]: newConfigValue })
           if (configParseResult.success) {
+            // Persisting is enough: the background watches the stored config
+            // and applies queue changes itself (no droppable message).
             void setVideoSubtitlesConfig({
               ...videoSubtitlesConfig,
               batchQueueConfig: {
                 ...videoSubtitlesConfig.batchQueueConfig,
                 [property]: newConfigValue,
               },
-            })
-            void sendMessage("setSubtitlesBatchQueueConfig", {
-              [property]: newConfigValue,
             })
           } else {
             toastManager.add({

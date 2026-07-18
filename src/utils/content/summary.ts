@@ -14,6 +14,7 @@ export async function generateArticleSummary(
   title: string,
   textContent: string,
   providerConfig: LLMProviderConfig,
+  options?: { signal?: AbortSignal },
 ): Promise<string | null> {
   const preparedText = cleanText(textContent)
 
@@ -45,12 +46,18 @@ Title: ${title}
 Content:
 ${preparedText}`
 
+    // maxRetries: 0 — retries belong to the RequestQueue, which meters them
+    // against the token bucket; ai-sdk's hidden default (2) would issue extra
+    // HTTP attempts invisible to the rate limiter. The signal lets the queue's
+    // timeout/cancel actually abort the request instead of leaving a zombie.
     const { text: summary } = await generateText({
       model,
       prompt,
       reasoning,
       temperature,
       providerOptions,
+      abortSignal: options?.signal,
+      maxRetries: 0,
     })
 
     const cleanedSummary = summary.trim()

@@ -256,19 +256,6 @@ options:
         confirm: Confirm
         cancel: Cancel
         description: This operation will clear all translation cache. This action cannot be undone.
-    languageDetection:
-      title: Language Detection
-      description: Affects auto-translate language detection, skip-language detection, and Speaking voice selection accuracy.
-      mode:
-        basic: Basic
-        llm: LLM
-      provider:
-        label: Detection Provider
-        placeholder: Select a provider
-      status:
-        noProviders: Configure an LLM provider first
-        basicRecommend: Recommend enabling LLM
-        llmEnabled: LLM detection enabled
   siteControl:
     title: Site Control
     mode:
@@ -1061,8 +1048,6 @@ noAPIKeyConfig:
     firstOnThe: first on the
     optionsPage: options
     page: page
-languageDetection:
-  llmFailed: LLM language detection failed, fell back to basic detection
 translation:
   sameLanguage: Source and target languages must be different
   autoModeSameLanguage: Detected language '$1' is the same as target language

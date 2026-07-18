@@ -166,9 +166,7 @@ describe("translate-text", () => {
       const result = await translateTextForPage(targetLanguageText)
 
       expect(result).toBe("")
-      expect(mockDetectLanguage).toHaveBeenCalledWith(targetLanguageText, {
-        enableLLM: false,
-      })
+      expect(mockDetectLanguage).toHaveBeenCalledWith(targetLanguageText)
       expect(mockSendMessage).not.toHaveBeenCalled()
     })
 
@@ -222,7 +220,6 @@ describe("translate-text", () => {
       expect(result).toBe("")
       expect(mockDetectLanguage).toHaveBeenCalledWith(japaneseText, {
         minLength: 10,
-        enableLLM: false,
       })
       expect(mockSendMessage).not.toHaveBeenCalled()
     })

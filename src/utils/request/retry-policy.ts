@@ -13,11 +13,17 @@ export interface RequestRetryContext {
   maxRetries: number
   baseRetryDelayMs: number
   now: number
+  // 429 retries already spent on THIS task; a separate budget from retryCount
+  // so a rate-limited task is not double-charged for ordinary failures.
+  rateLimitRetryCount: number
+  // Queue-level count of pause windows without an intervening success.
+  consecutiveRateLimits: number
 }
 
 export type RetryDecision =
   | { action: "retry"; delayMs: number }
   | { action: "fail"; failQueue?: boolean }
+  | { action: "pause-and-retry"; pauseMs: number }
 
 export interface RequestRetryPolicy {
   decide: (error: unknown, context: RequestRetryContext) => RetryDecision
@@ -26,6 +32,16 @@ export interface RequestRetryPolicy {
 export const REQUEST_ERROR_META = Symbol("requestErrorMeta")
 
 export const MAX_RETRY_AFTER_MS = 5 * 60_000
+// Base queue pause after a 429 with no Retry-After header. Doubles per
+// consecutive rate-limit window; sized for the slowest common free tier
+// (Gemini free RPM=15 → ≥4s spacing).
+export const RATE_LIMIT_BASE_PAUSE_MS = 5_000
+// Pause windows without an intervening success before the queue gives up and
+// surfaces errors (the pre-pause failQueue behavior, kept as a backstop).
+export const MAX_CONSECUTIVE_RATE_LIMIT_PAUSES = 5
+// Per-task 429 retry cap: guards the pathological case where queue-level
+// counters keep resetting (alternating success) but one task keeps 429ing.
+export const MAX_RATE_LIMIT_RETRIES_PER_TASK = 8
 
 interface RetryAwareError {
   [REQUEST_ERROR_META]?: RequestErrorMeta
@@ -145,8 +161,26 @@ export const defaultRequestRetryPolicy: RequestRetryPolicy = {
   decide(error, context) {
     const meta = getRequestErrorMeta(error)
 
+    // 401/403/404: the config (key/model/endpoint) is wrong — retrying any
+    // queued task is pointless, so drain the backlog immediately.
     if (isQueueFatalRequestErrorMeta(meta)) {
       return { action: "fail", failQueue: true }
+    }
+
+    // 429: pause the whole queue and re-enqueue this task instead of nuking
+    // the backlog — a transient rate limit must not fail hundreds of pending
+    // paragraphs (they'd all paint errors at once and never cache).
+    if (isRateLimitRequestErrorMeta(meta)) {
+      if (
+        context.consecutiveRateLimits >= MAX_CONSECUTIVE_RATE_LIMIT_PAUSES ||
+        context.rateLimitRetryCount >= MAX_RATE_LIMIT_RETRIES_PER_TASK
+      ) {
+        return { action: "fail", failQueue: true }
+      }
+      const retryAfterMs = getRetryAfterMs(meta, context.now)
+      const backoffMs = RATE_LIMIT_BASE_PAUSE_MS * 2 ** context.consecutiveRateLimits
+      const pauseMs = clampRetryDelay(Math.max(retryAfterMs ?? 0, withJitter(backoffMs, false)))
+      return { action: "pause-and-retry", pauseMs }
     }
 
     if (context.retryCount >= context.maxRetries || !isRetryableRequestErrorMeta(meta)) {
@@ -160,11 +194,11 @@ export const defaultRequestRetryPolicy: RequestRetryPolicy = {
   },
 }
 
-function isQueueFatalRequestErrorMeta(meta: RequestErrorMeta): boolean {
-  if (meta.kind === "rate-limit" || meta.statusCode === 429) {
-    return true
-  }
+function isRateLimitRequestErrorMeta(meta: RequestErrorMeta): boolean {
+  return meta.kind === "rate-limit" || meta.statusCode === 429
+}
 
+function isQueueFatalRequestErrorMeta(meta: RequestErrorMeta): boolean {
   return meta.statusCode === 401 || meta.statusCode === 403 || meta.statusCode === 404
 }
 

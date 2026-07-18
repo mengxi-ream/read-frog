@@ -1,17 +1,9 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { GuideDictionaryNotebaseCompletionInput } from "./guide/dictionary-notebase"
 import type { FeatureUsageContext, FeatureUsedEventProperties } from "@/types/analytics"
-import type {
-  BackgroundGenerateTextPayload,
-  BackgroundGenerateTextResponse,
-} from "@/types/background-generate-text"
 import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
-import type {
-  BatchQueueConfig,
-  RequestQueueConfig,
-  TranslationTextFormat,
-} from "@/types/config/translate"
+import type { TranslationTextFormat } from "@/types/config/translate"
 import type {
   EdgeTTSHealthStatus,
   EdgeTTSSynthesizeRequest,
@@ -129,16 +121,8 @@ interface ProtocolMap {
     subtitlesContext: string
     providerConfig: ProviderConfig
   }) => Promise<string | null>
-  backgroundGenerateText: (
-    data: BackgroundGenerateTextPayload,
-  ) => Promise<BackgroundGenerateTextResponse>
   // AI subtitle segmentation
   aiSegmentSubtitles: (data: { jsonContent: string; providerId: string }) => Promise<string>
-  setTranslateRequestQueueConfig: (data: Partial<RequestQueueConfig>) => void
-  setTranslateBatchQueueConfig: (data: Partial<BatchQueueConfig>) => void
-  // Subtitle-specific queue config messages
-  setSubtitlesRequestQueueConfig: (data: Partial<RequestQueueConfig>) => void
-  setSubtitlesBatchQueueConfig: (data: Partial<BatchQueueConfig>) => void
   // microsoft batch translation
   microsoftBatchTranslate: (data: {
     texts: string[]

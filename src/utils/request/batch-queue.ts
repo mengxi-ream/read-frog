@@ -13,6 +13,28 @@ export class BatchCountMismatchError extends Error {
 
 const BASE_BACKOFF_DELAY_MS = 1000
 const MAX_BACKOFF_DELAY_MS = 8000
+// While the dispatch gate reports no free slot, re-poll it at least this often
+// (the ETA shrinks as tokens refill downstream).
+const MAX_GATE_POLL_MS = 1000
+// Absolute cap on holding an under-filled batch: escape hatch if the gate
+// reports large ETAs forever.
+const MAX_BATCH_HOLD_MS = 60_000
+
+/**
+ * Port to the downstream dispatcher (ports & adapters: BatchQueue never learns
+ * about RequestQueue). While the gate reports no free dispatch slot, pending
+ * batches keep absorbing arrivals up to maxItems/maxChars instead of flushing
+ * tiny at batchDelay — flushing earlier would not start the request any
+ * earlier, it would only freeze the batch's composition.
+ */
+export interface DispatchGate {
+  /**
+   * ms until the downstream dispatcher could start ONE MORE request,
+   * accounting for tokens, pauses, and requests already waiting ahead.
+   * 0 = a slot is available now.
+   */
+  nextDispatchEtaMs: () => number
+}
 
 interface BatchTask<T, R> {
   data: T
@@ -49,6 +71,7 @@ export interface BatchOptions<T, R> {
   batchDelay: number
   maxRetries?: number
   enableFallbackToIndividual?: boolean
+  dispatchGate?: DispatchGate
   getBatchKey: (data: T) => string
   getCharacters: (data: T) => number
   getDedupKey?: (data: T) => string | undefined
@@ -73,6 +96,7 @@ export class BatchQueue<T, R> {
   private batchDelay: number
   private maxRetries: number
   private enableFallbackToIndividual: boolean
+  private dispatchGate?: DispatchGate
   private getBatchKey: (data: T) => string
   private getCharacters: (data: T) => number
   private getDedupKey?: (data: T) => string | undefined
@@ -91,6 +115,7 @@ export class BatchQueue<T, R> {
     this.batchDelay = config.batchDelay
     this.maxRetries = config.maxRetries ?? 3
     this.enableFallbackToIndividual = config.enableFallbackToIndividual ?? true
+    this.dispatchGate = config.dispatchGate
     this.getBatchKey = config.getBatchKey
     this.getCharacters = config.getCharacters
     this.getDedupKey = config.getDedupKey
@@ -214,15 +239,35 @@ export class BatchQueue<T, R> {
     }
 
     const now = Date.now()
+    const etaMs = this.dispatchGate?.nextDispatchEtaMs() ?? 0
     const batchesToFlush: string[] = []
+    let nextWakeMs = Infinity
 
     for (const [batchKey, batch] of this.pendingBatchMap.entries()) {
-      const shouldFlushNow = this.shouldFlushBatch(batch)
-      const isTimedOut = now >= batch.createdAt + this.batchDelay
-
-      if (shouldFlushNow || isTimedOut) {
+      // Size-full: always flush — the batch's composition is already maximal.
+      if (this.shouldFlushBatch(batch)) {
         batchesToFlush.push(batchKey)
+        continue
       }
+
+      const ageMs = now - batch.createdAt
+      // A dispatch slot is (nearly) available downstream — flushing now costs
+      // nothing. Without a gate this is always true, preserving the original
+      // flush-at-batchDelay latency.
+      const slotNear = etaMs <= this.batchDelay
+      if (ageMs >= this.batchDelay && (slotNear || ageMs >= MAX_BATCH_HOLD_MS)) {
+        batchesToFlush.push(batchKey)
+        continue
+      }
+
+      // Hold: wake when the min-age elapses, or poll the gate again soon —
+      // whichever is later — so held batches keep absorbing arrivals while
+      // dispatch is blocked.
+      const wakeMs = Math.max(
+        this.batchDelay - ageMs,
+        Math.min(Math.max(etaMs - this.batchDelay, this.batchDelay), MAX_GATE_POLL_MS),
+      )
+      nextWakeMs = Math.min(nextWakeMs, wakeMs)
     }
 
     for (const batchKey of batchesToFlush) {
@@ -230,10 +275,13 @@ export class BatchQueue<T, R> {
     }
 
     if (this.pendingBatchMap.size > 0) {
-      this.nextScheduleTimer = setTimeout(() => {
-        this.nextScheduleTimer = null
-        this.schedule()
-      }, this.batchDelay)
+      this.nextScheduleTimer = setTimeout(
+        () => {
+          this.nextScheduleTimer = null
+          this.schedule()
+        },
+        Number.isFinite(nextWakeMs) ? nextWakeMs : this.batchDelay,
+      )
     }
   }
 

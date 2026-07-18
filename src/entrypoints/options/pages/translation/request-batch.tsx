@@ -12,7 +12,6 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { calculateAverageSavePercentage } from "@/utils/batch-request-record"
 import { MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS } from "@/utils/constants/translate"
 import { i18n } from "@/utils/i18n"
-import { sendMessage } from "@/utils/message"
 import { ConfigCard } from "../../components/config-card"
 
 type KeyOfBatchQueueConfig = keyof BatchQueueConfig
@@ -102,15 +101,14 @@ function BatchNumberSelector({ property }: { property: KeyOfBatchQueueConfig }) 
             .partial()
             .safeParse({ [property]: newConfigValue })
           if (configParseResult.success) {
+            // Persisting is enough: the background watches the stored config
+            // and applies queue changes itself (no droppable message).
             void setTranslateConfig({
               ...translateConfig,
               batchQueueConfig: {
                 ...translateConfig.batchQueueConfig,
                 [property]: newConfigValue,
               },
-            })
-            void sendMessage("setTranslateBatchQueueConfig", {
-              [property]: newConfigValue,
             })
           } else {
             toastManager.add({

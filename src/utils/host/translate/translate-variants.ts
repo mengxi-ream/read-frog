@@ -9,7 +9,7 @@ import { getLocalConfig } from "../../config/storage"
 import { shouldSkipAsTargetLanguage } from "./target-language-skip"
 import { prepareTranslationText } from "./text-preparation"
 import {
-  MIN_LENGTH_FOR_SKIP_LLM_DETECTION,
+  MIN_LENGTH_FOR_SKIP_DETECTION,
   shouldSkipByLanguage,
   translateTextCore,
 } from "./translate-text"
@@ -87,12 +87,8 @@ async function translateTextUsingPageConfig(
 
   // Skip translation if text is in skipLanguages list (page translation only)
   const { skipLanguages } = config.translate.page
-  if (skipLanguages.length > 0 && preparedText.length >= MIN_LENGTH_FOR_SKIP_LLM_DETECTION) {
-    const shouldSkip = await shouldSkipByLanguage(
-      preparedText,
-      skipLanguages,
-      config.languageDetection.mode === "llm",
-    )
+  if (skipLanguages.length > 0 && preparedText.length >= MIN_LENGTH_FOR_SKIP_DETECTION) {
+    const shouldSkip = await shouldSkipByLanguage(preparedText, skipLanguages)
     if (shouldSkip) {
       logger.info(
         `translateTextForPage: skipping translation because text is in skip language list. text: ${preparedText}`,

@@ -25,7 +25,6 @@ import {
 import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { providerConfigAtom } from "@/utils/atoms/provider"
 import {
-  computeLanguageDetectionFallbackAfterDeletion,
   computeProviderFallbacksAfterDeletion,
   computeSelectionToolbarCustomActionFallbacksAfterDeletion,
   findFeatureMissingProvider,
@@ -104,7 +103,7 @@ export function ProviderConfigForm() {
       (provider) => provider.id !== providerConfig.id,
     )
 
-    const unsatisfied = findFeatureMissingProvider(updatedAllProviders, config)
+    const unsatisfied = findFeatureMissingProvider(updatedAllProviders)
     if (unsatisfied) {
       toastManager.add({
         type: "error",
@@ -144,21 +143,6 @@ export function ProviderConfigForm() {
           customActions: updatedCustomActions,
         },
       } as Partial<Config>
-    }
-
-    const ldFallback = computeLanguageDetectionFallbackAfterDeletion(
-      providerConfig.id,
-      config,
-      updatedAllProviders,
-    )
-    if (ldFallback !== null) {
-      patch = {
-        ...patch,
-        languageDetection: {
-          ...config.languageDetection,
-          providerId: ldFallback,
-        },
-      }
     }
 
     if (Object.keys(patch).length > 0) {

@@ -255,19 +255,6 @@ options:
         confirm: 確認
         cancel: キャンセル
         description: この操作により、すべての翻訳キャッシュがクリアされます。この操作は元に戻せません。
-    languageDetection:
-      title: 言語検出
-      description: 自動翻訳の言語検出、スキップ言語検出、読み上げの音声選択精度に影響します。
-      mode:
-        basic: 基本
-        llm: LLM
-      provider:
-        label: 検出プロバイダー
-        placeholder: プロバイダーを選択
-      status:
-        noProviders: LLMプロバイダーを設定してください
-        basicRecommend: LLM有効化を推奨
-        llmEnabled: LLM検出が有効
   siteControl:
     title: サイト制御
     mode:
@@ -946,8 +933,6 @@ noAPIKeyConfig:
     firstOnThe: する必要があります（
     optionsPage: オプションページ
     page: ）
-languageDetection:
-  llmFailed: LLM言語検出に失敗しました。基本検出にフォールバックしました
 translation:
   sameLanguage: ソース言語とターゲット言語は異なる必要があります
   autoModeSameLanguage: 検出された言語 '$1' はターゲット言語と同じです
