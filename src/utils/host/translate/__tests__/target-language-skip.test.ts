@@ -68,7 +68,7 @@ describe("shouldSkipAsTargetLanguage", () => {
   it("returns true when the detected language matches the target", async () => {
     mocks.detectLanguage.mockResolvedValue("cmn")
     await expect(shouldSkipAsTargetLanguage(LONG_CHINESE, createConfig())).resolves.toBe(true)
-    expect(mocks.detectLanguage).toHaveBeenCalledWith(expect.any(String))
+    expect(mocks.detectLanguage).toHaveBeenCalledWith(expect.any(String), { enableLLM: false })
   })
 
   it("returns false when the detected language differs or is unknown", async () => {

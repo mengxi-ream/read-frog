@@ -33,6 +33,7 @@ export const FeatureProviderSection = withForm({
     const compatibleFeatures = FEATURE_KEYS.filter((featureKey) =>
       FEATURE_PROVIDER_DEFS[featureKey].isProvider(providerType),
     )
+    const supportsLanguageDetection = isLLMProvider(providerType)
 
     const customActions = isLLMProvider(providerType) ? config.selectionToolbar.customActions : []
 
@@ -47,7 +48,8 @@ export const FeatureProviderSection = withForm({
       )
     }
 
-    if (compatibleFeatures.length === 0 && customActions.length === 0) return null
+    if (compatibleFeatures.length === 0 && customActions.length === 0 && !supportsLanguageDetection)
+      return null
 
     return (
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -87,6 +89,43 @@ export const FeatureProviderSection = withForm({
                 </div>
               )
             })}
+            {supportsLanguageDetection && (
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={
+                    config.languageDetection.mode === "llm" &&
+                    config.languageDetection.providerId === providerId
+                  }
+                  disabled={
+                    config.languageDetection.mode === "llm" &&
+                    config.languageDetection.providerId === providerId
+                  }
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      const providersConfigPatch = getEnableCurrentProviderPatch()
+                      if (providersConfigPatch) {
+                        void setConfig({
+                          providersConfig: providersConfigPatch,
+                          languageDetection: {
+                            mode: "llm",
+                            providerId,
+                          },
+                        })
+                        return
+                      }
+
+                      void setConfig({
+                        languageDetection: {
+                          mode: "llm",
+                          providerId,
+                        },
+                      })
+                    }
+                  }}
+                />
+                <span className="text-sm">{i18n.t("options.general.languageDetection.title")}</span>
+              </div>
+            )}
             {customActions.map((action) => {
               const isAssigned = action.providerId === providerId
               return (

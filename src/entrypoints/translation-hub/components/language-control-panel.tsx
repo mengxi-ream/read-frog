@@ -3,6 +3,7 @@ import debounce from "debounce"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/base-ui/button"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { detectLanguage } from "@/utils/content/language"
 import { i18n } from "@/utils/i18n"
 import {
@@ -20,17 +21,20 @@ export function LanguageControlPanel() {
   const exchangeLangCodes = useSetAtom(exchangeLangCodesAtom)
   const inputText = useAtomValue(inputTextAtom)
   const [detectedSourceLangCode, setDetectedSourceLangCode] = useAtom(detectedSourceLangCodeAtom)
+  const languageDetection = useAtomValue(configFieldsAtomMap.languageDetection)
 
   // Debounced language detection from input text
+  const enableLLM = languageDetection.mode === "llm"
   const debouncedDetect = useMemo(
     () =>
       debounce(async (text: string) => {
         const detected = await detectLanguage(text, {
           minLength: 1,
+          enableLLM,
         })
         setDetectedSourceLangCode(detected)
       }, 1000),
-    [setDetectedSourceLangCode],
+    [setDetectedSourceLangCode, enableLLM],
   )
 
   useEffect(() => {

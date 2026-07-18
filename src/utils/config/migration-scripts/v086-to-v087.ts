@@ -6,9 +6,6 @@
  *   (to the current default 60/8) — any user-modified value is untouched.
  *   Applied to both `translate` and `videoSubtitles` (v050-to-v051 copied the
  *   pair there).
- * - Removes LLM language detection: `languageDetection.mode` "llm" becomes
- *   "basic" and `providerId` is dropped. The per-paragraph LLM detection path
- *   bypassed the translation rate limiter entirely and was removed.
  *
  * IMPORTANT: All values are hardcoded inline. Migration scripts are frozen
  * snapshots - never import constants or helpers that may change.
@@ -37,6 +34,5 @@ export function migrate(oldConfig: any): any {
     ...oldConfig,
     translate: retireFrozenQueueDefaults(oldConfig.translate),
     videoSubtitles: retireFrozenQueueDefaults(oldConfig.videoSubtitles),
-    languageDetection: { mode: "basic" },
   }
 }

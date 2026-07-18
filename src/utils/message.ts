@@ -8,6 +8,10 @@ import type {
   TranslationConfiguredPrompt,
   TranslationRequestedInput,
 } from "@/types/analytics"
+import type {
+  BackgroundGenerateTextPayload,
+  BackgroundGenerateTextResponse,
+} from "@/types/background-generate-text"
 import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
 import type { TranslationTextFormat } from "@/types/config/translate"
@@ -147,6 +151,9 @@ interface ProtocolMap {
     subtitlesContext: string
     providerConfig: ProviderConfig
   }) => Promise<string | null>
+  backgroundGenerateText: (
+    data: BackgroundGenerateTextPayload,
+  ) => Promise<BackgroundGenerateTextResponse>
   // AI subtitle segmentation
   aiSegmentSubtitles: (data: { jsonContent: string; providerId: string }) => Promise<string>
   // microsoft batch translation

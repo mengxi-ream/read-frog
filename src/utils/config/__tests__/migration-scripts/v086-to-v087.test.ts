@@ -6,7 +6,6 @@ describe("v086-to-v087 migration", () => {
     const migrated = migrate({
       translate: { requestQueueConfig: { capacity: 300, rate: 5 } },
       videoSubtitles: { requestQueueConfig: { capacity: 300, rate: 5 } },
-      languageDetection: { mode: "basic" },
     })
     expect(migrated.translate.requestQueueConfig).toEqual({ capacity: 60, rate: 8 })
     expect(migrated.videoSubtitles.requestQueueConfig).toEqual({ capacity: 60, rate: 8 })
@@ -16,25 +15,15 @@ describe("v086-to-v087 migration", () => {
     const migrated = migrate({
       translate: { requestQueueConfig: { capacity: 300, rate: 2 } },
       videoSubtitles: { requestQueueConfig: { capacity: 1, rate: 0.2 } },
-      languageDetection: { mode: "basic" },
     })
     expect(migrated.translate.requestQueueConfig).toEqual({ capacity: 300, rate: 2 })
     expect(migrated.videoSubtitles.requestQueueConfig).toEqual({ capacity: 1, rate: 0.2 })
-  })
-
-  it("converts languageDetection llm mode to basic and drops providerId", () => {
-    const migrated = migrate({
-      translate: { requestQueueConfig: { capacity: 60, rate: 8 } },
-      languageDetection: { mode: "llm", providerId: "openai-default" },
-    })
-    expect(migrated.languageDetection).toEqual({ mode: "basic" })
   })
 
   it("is idempotent", () => {
     const input = {
       translate: { requestQueueConfig: { capacity: 60, rate: 8 }, providerId: "x" },
       videoSubtitles: { requestQueueConfig: { capacity: 5, rate: 1 } },
-      languageDetection: { mode: "basic" },
     }
     const once = migrate(input)
     const twice = migrate(once)
@@ -49,7 +38,7 @@ describe("v086-to-v087 migration", () => {
         batchQueueConfig: { maxCharactersPerBatch: 4000, maxItemsPerBatch: 150 },
       },
       videoSubtitles: { providerId: "mock2" },
-      languageDetection: { mode: "llm" },
+      languageDetection: { mode: "llm", providerId: "openai-default" },
     })
     expect(migrated.translate.providerId).toBe("mock")
     expect(migrated.translate.batchQueueConfig).toEqual({
@@ -57,6 +46,8 @@ describe("v086-to-v087 migration", () => {
       maxItemsPerBatch: 150,
     })
     expect(migrated.videoSubtitles.providerId).toBe("mock2")
+    // languageDetection is untouched by this migration
+    expect(migrated.languageDetection).toEqual({ mode: "llm", providerId: "openai-default" })
   })
 
   it("returns non-object input unchanged", () => {

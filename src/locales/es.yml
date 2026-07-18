@@ -256,6 +256,19 @@ options:
         confirm: Confirmar
         cancel: Cancelar
         description: Esta operación borrará toda la caché de traducción. Esta acción no se puede deshacer.
+    languageDetection:
+      title: Detección de idioma
+      description: Afecta la detección de idioma para traducción automática, la detección de idiomas omitidos y la precisión de selección de voz.
+      mode:
+        basic: Básica
+        llm: LLM
+      provider:
+        label: Proveedor de detección
+        placeholder: Selecciona un proveedor
+      status:
+        noProviders: Configura primero un proveedor LLM
+        basicRecommend: Se recomienda activar LLM
+        llmEnabled: Detección LLM activada
   siteControl:
     title: Control de sitios
     mode:
@@ -1048,6 +1061,8 @@ noAPIKeyConfig:
     firstOnThe: primero en la
     optionsPage: opciones
     page: página
+languageDetection:
+  llmFailed: Falló la detección de idioma LLM; se recurrió a la detección básica
 translation:
   sameLanguage: Los idiomas de origen y destino deben ser diferentes
   autoModeSameLanguage: El idioma detectado '$1' es el mismo que el idioma de destino

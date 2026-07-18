@@ -28,6 +28,7 @@ import {
 } from "./db-cleanup"
 import { setupEdgeTTSMessageHandlers } from "./edge-tts"
 import { setupIframeInjection } from "./iframe-injection"
+import { setupLLMGenerateTextMessageHandlers } from "./llm-generate-text"
 import { initMockData } from "./mock-data"
 import { newUserGuide } from "./new-user-guide"
 import { setupNotebasePendingSaveProcessor } from "./notebase-pending-save"
@@ -123,6 +124,7 @@ export default defineBackground({
     proxyFetch()
     setupNotebasePendingSaveProcessor()
     setupEdgeTTSMessageHandlers()
+    setupLLMGenerateTextMessageHandlers()
     setupTTSPlaybackMessageHandlers()
     void initMockData()
 

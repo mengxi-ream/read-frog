@@ -74,6 +74,13 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.general.title",
   },
   {
+    sectionId: "language-detection",
+    route: "/",
+    titleKey: "options.general.languageDetection.title",
+    descriptionKey: "options.general.languageDetection.description",
+    pageKey: "options.general.title",
+  },
+  {
     sectionId: "site-control-mode",
     route: "/",
     titleKey: "options.siteControl.mode.title",

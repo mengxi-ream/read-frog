@@ -65,6 +65,7 @@ describe("detectPageLanguageLightweight", () => {
     })
     expect(mockDetectLanguageWithSource).toHaveBeenCalledWith(
       expect.stringContaining("阅读 - 源仓库"),
+      { enableLLM: false },
     )
   })
 
@@ -130,6 +131,7 @@ describe("detectPageLanguageLightweight", () => {
     expect(mockDetectLanguageWithSource).toHaveBeenCalledTimes(1)
     expect(mockDetectLanguageWithSource).toHaveBeenCalledWith(
       expect.stringContaining("A useful article title"),
+      { enableLLM: false },
     )
     const [textForDetection] = mockDetectLanguageWithSource.mock.calls[0]
     expect(textForDetection).not.toContain("hidden")

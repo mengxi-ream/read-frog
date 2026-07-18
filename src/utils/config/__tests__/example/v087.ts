@@ -2,7 +2,7 @@ import type { TestSeriesObject } from "./types"
 
 export const testSeries: TestSeriesObject = {
   "complex-config-from-v020": {
-    description: "Retires frozen queue defaults and removes LLM language detection",
+    description: "Retires the frozen v9 request-queue default (300/5 -> 60/8)",
     config: {
       siteRules: {
         userRules: [],
@@ -459,6 +459,7 @@ export const testSeries: TestSeriesObject = {
       },
       languageDetection: {
         mode: "basic",
+        providerId: "openai-default",
       },
       uiLanguage: "auto",
     },
@@ -867,7 +868,8 @@ export const testSeries: TestSeriesObject = {
         whitelistPatterns: [],
       },
       languageDetection: {
-        mode: "basic",
+        mode: "llm",
+        providerId: "google-default",
       },
       uiLanguage: "auto",
     },
@@ -1280,6 +1282,7 @@ export const testSeries: TestSeriesObject = {
       },
       languageDetection: {
         mode: "basic",
+        providerId: "google-default",
       },
       uiLanguage: "auto",
     },
@@ -1696,6 +1699,7 @@ export const testSeries: TestSeriesObject = {
       },
       languageDetection: {
         mode: "basic",
+        providerId: "google-default",
       },
       uiLanguage: "auto",
     },
