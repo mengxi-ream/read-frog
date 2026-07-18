@@ -1,5 +1,5 @@
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
+import { toastManager } from "@/components/ui/base-ui/toast"
 
 function getErrorDescription(errorDescription: unknown): string {
   return typeof errorDescription === "string" && errorDescription
@@ -13,7 +13,9 @@ export const queryClient = new QueryClient({
       if (query.meta?.suppressToast) return
 
       const errorDescription = getErrorDescription(query.meta?.errorDescription)
-      toast.error(errorDescription, {
+      toastManager.add({
+        type: "error",
+        title: errorDescription,
         description: error.message || undefined,
       })
     },
@@ -23,7 +25,9 @@ export const queryClient = new QueryClient({
       if (mutation.meta?.suppressToast) return
 
       const errorDescription = getErrorDescription(mutation.meta?.errorDescription)
-      toast.error(errorDescription, {
+      toastManager.add({
+        type: "error",
+        title: errorDescription,
         description: error.message || undefined,
       })
     },

@@ -55,8 +55,73 @@
   /* Additional theme variables */
   --color-warning: var(--rf-warning);
   --color-warning-foreground: var(--rf-warning-foreground);
+  --color-toast-info: var(--rf-toast-info);
+  --color-toast-success: var(--rf-toast-success);
+  --color-toast-warning: var(--rf-toast-warning);
   --color-link: var(--rf-link);
   --shadow-floating: var(--rf-elevation-floating);
+  --animate-toast-success-odd: toast-success-odd 0.32s cubic-bezier(0.5, 1, 0.89, 1);
+  --animate-toast-success-even: toast-success-even 0.32s cubic-bezier(0.5, 1, 0.89, 1);
+  --animate-toast-error-odd: toast-error-odd 0.28s cubic-bezier(0.5, 1, 0.89, 1);
+  --animate-toast-error-even: toast-error-even 0.28s cubic-bezier(0.5, 1, 0.89, 1);
+
+  @keyframes toast-success-odd {
+    0% {
+      scale: 1;
+    }
+    30% {
+      scale: 1.025;
+    }
+    60% {
+      scale: 0.99;
+    }
+    100% {
+      scale: 1;
+    }
+  }
+
+  @keyframes toast-success-even {
+    0% {
+      scale: 1;
+    }
+    30% {
+      scale: 1.025;
+    }
+    60% {
+      scale: 0.99;
+    }
+    100% {
+      scale: 1;
+    }
+  }
+
+  @keyframes toast-error-odd {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+    25%,
+    75% {
+      translate: -3px 0;
+    }
+    50% {
+      translate: 3px 0;
+    }
+  }
+
+  @keyframes toast-error-even {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+    25%,
+    75% {
+      translate: -3px 0;
+    }
+    50% {
+      translate: 3px 0;
+    }
+  }
 }
 
 :root {
@@ -109,6 +174,9 @@
   --rf-sidebar-ring: oklch(0.705 0.015 286.067);
   /* Additional theme variables */
   --rf-warning: oklch(97.3% 0.071 103.193);
+  --rf-toast-info: var(--color-blue-500);
+  --rf-toast-success: var(--color-emerald-500);
+  --rf-toast-warning: var(--color-amber-500);
   --rf-link: oklch(54.6% 0.245 262.881);
   --rf-elevation-floating: 0 8px 40px 0 rgb(0 0 0 / 0.08), 0 0 1px 0 rgb(0 0 0 / 0.08);
 }
@@ -149,6 +217,9 @@
   --rf-sidebar-ring: oklch(0.552 0.016 285.938);
   /* Additional theme variables */
   --rf-warning: oklch(42.1% 0.095 57.708);
+  --rf-toast-info: var(--color-blue-500);
+  --rf-toast-success: var(--color-emerald-500);
+  --rf-toast-warning: var(--color-amber-500);
   --rf-link: oklch(70.7% 0.165 254.624);
   --rf-elevation-floating: 0 8px 40px 0 rgb(0 0 0 / 0.28), 0 0 1px 0 rgb(0 0 0 / 0.28);
 }
@@ -169,4 +240,15 @@
    would lose. */
 body {
   font-family: var(--rf-font-sans);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(
+    .animate-toast-success-odd,
+    .animate-toast-success-even,
+    .animate-toast-error-odd,
+    .animate-toast-error-even
+  ) {
+    animation: none;
+  }
 }

@@ -1,7 +1,6 @@
 import { Icon } from "@iconify/react"
 import { useAtomValue, useSetAtom } from "jotai"
 import { Activity, useMemo, useState } from "react"
-import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/base-ui/alert"
 import {
   AlertDialog,
@@ -14,6 +13,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/base-ui/alert-dialog"
 import { Button } from "@/components/ui/base-ui/button"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { useGoogleDriveAuth } from "@/hooks/use-google-drive-auth"
 import {
   resolutionStatusAtom,
@@ -64,7 +64,7 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
       return
     }
     if (!email) {
-      toast.error("Email is not available")
+      toastManager.add({ type: "error", title: "Email is not available" })
       return
     }
     setIsConfirming(true)

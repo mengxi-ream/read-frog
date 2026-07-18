@@ -1,7 +1,6 @@
 import { Icon } from "@iconify/react/dist/iconify.js"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useAtomValue } from "jotai"
-import { toast } from "sonner"
 import { Button } from "@/components/ui/base-ui/button"
 import {
   Empty,
@@ -11,6 +10,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/base-ui/empty"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { ConfigCard } from "@/entrypoints/options/components/config-card"
 import { configAtom } from "@/utils/atoms/config"
 import { addBackup, getAllBackupsWithMetadata } from "@/utils/backup/storage"
@@ -69,7 +69,7 @@ function Toolbar() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["config-backups"] })
-      toast.success(i18n.t("options.config.backup.backupSuccess"))
+      toastManager.add({ type: "success", title: i18n.t("options.config.backup.backupSuccess") })
     },
   })
   return (
@@ -90,7 +90,7 @@ function EmptyState() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["config-backups"] })
-      toast.success(i18n.t("options.config.backup.backupSuccess"))
+      toastManager.add({ type: "success", title: i18n.t("options.config.backup.backupSuccess") })
     },
   })
   return (

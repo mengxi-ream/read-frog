@@ -3,7 +3,7 @@ import type { BackgroundGenerateTextPayload } from "@/types/background-generate-
 import type { LLMProviderConfig } from "@/types/config/provider"
 import { langCodeISO6393Schema } from "@read-frog/definitions"
 import { franc } from "franc"
-import { toast } from "sonner"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { getLocalConfig } from "@/utils/config/storage"
@@ -70,7 +70,9 @@ export async function detectLanguageWithSource(
       }
     } catch (error) {
       logger.warn("LLM detection failed, falling back to franc:", error)
-      toast.warning(i18n.t("languageDetection.llmFailed"), {
+      toastManager.add({
+        type: "warning",
+        title: i18n.t("languageDetection.llmFailed"),
         id: LLM_DETECTION_FALLBACK_TOAST_ID,
       })
     }

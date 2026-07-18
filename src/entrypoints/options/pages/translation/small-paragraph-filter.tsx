@@ -1,8 +1,8 @@
 import { useAtom } from "jotai"
-import { toast } from "sonner"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
   MAX_CHARACTERS_PER_NODE,
@@ -52,12 +52,13 @@ export function SmallParagraphFilter() {
                   },
                 })
               } else {
-                toast.error(
-                  i18n.t("options.translation.smallParagraphFilter.error", [
+                toastManager.add({
+                  type: "error",
+                  title: i18n.t("options.translation.smallParagraphFilter.error", [
                     MIN_CHARACTERS_PER_NODE,
                     MAX_CHARACTERS_PER_NODE,
                   ]),
-                )
+                })
               }
             }}
           />
@@ -90,12 +91,13 @@ export function SmallParagraphFilter() {
                   },
                 })
               } else {
-                toast.error(
-                  i18n.t("options.translation.smallParagraphFilter.error", [
+                toastManager.add({
+                  type: "error",
+                  title: i18n.t("options.translation.smallParagraphFilter.error", [
                     MIN_WORDS_PER_NODE,
                     MAX_WORDS_PER_NODE,
                   ]),
-                )
+                })
               }
             }}
           />

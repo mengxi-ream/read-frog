@@ -15,11 +15,13 @@ const mocks = vi.hoisted(() => ({
   downloadSubtitlesAsSrt: vi.fn<(...args: any[]) => any>(),
   fetchSubtitlesSummary: vi.fn<(...args: any[]) => any>(),
   getLocalConfig: vi.fn<(...args: any[]) => any>(),
-  toastError: vi.fn<(...args: any[]) => any>(),
+  toastAdd: vi.fn<(...args: any[]) => any>(),
   translateSubtitles: vi.fn<(...args: any[]) => any>(),
 }))
 
-vi.mock("sonner", () => ({ toast: { error: mocks.toastError } }))
+vi.mock("@/components/ui/base-ui/toast", () => ({
+  toastManager: { add: mocks.toastAdd },
+}))
 vi.mock("@/utils/config/storage", () => ({ getLocalConfig: mocks.getLocalConfig }))
 vi.mock("@/utils/subtitles/processor/ai-segmentation", () => ({
   aiSegmentBlock: mocks.aiSegmentBlock,
@@ -228,7 +230,7 @@ describe("translatedSubtitlesDownloader", () => {
     await download
 
     expect(mocks.downloadSubtitlesAsSrt).not.toHaveBeenCalled()
-    expect(mocks.toastError).toHaveBeenCalledWith("Batch failed")
+    expect(mocks.toastAdd).toHaveBeenCalledWith({ type: "error", title: "Batch failed" })
     expect(status()).toEqual({ phase: TranslatedDownloadPhase.Idle, progress: null })
 
     finishSlowBatch(translated(fragments.slice(5)))
@@ -251,7 +253,10 @@ describe("translatedSubtitlesDownloader", () => {
     await createDownloader(fragments).downloader.download()
 
     expect(mocks.downloadSubtitlesAsSrt).not.toHaveBeenCalled()
-    expect(mocks.toastError).toHaveBeenCalledWith("subtitles.errors.translatedExportIncomplete")
+    expect(mocks.toastAdd).toHaveBeenCalledWith({
+      type: "error",
+      title: "subtitles.errors.translatedExportIncomplete",
+    })
     expect(status()).toEqual({ phase: TranslatedDownloadPhase.Idle, progress: null })
   })
 
@@ -266,7 +271,10 @@ describe("translatedSubtitlesDownloader", () => {
     unsubscribe()
 
     expect(mocks.translateSubtitles).not.toHaveBeenCalled()
-    expect(mocks.toastError).toHaveBeenCalledWith("subtitles.errors.translatedExportSameLanguage")
+    expect(mocks.toastAdd).toHaveBeenCalledWith({
+      type: "error",
+      title: "subtitles.errors.translatedExportSameLanguage",
+    })
     expect(statuses).toEqual([
       { phase: TranslatedDownloadPhase.Checking, progress: null },
       { phase: TranslatedDownloadPhase.Idle, progress: null },
@@ -318,7 +326,7 @@ describe("translatedSubtitlesDownloader", () => {
 
     expect(fetcher.fetch).toHaveBeenCalledTimes(2)
     expect(mocks.downloadSubtitlesAsSrt).toHaveBeenCalledTimes(1)
-    expect(mocks.toastError).not.toHaveBeenCalled()
+    expect(mocks.toastAdd).not.toHaveBeenCalled()
     expect(status().phase).toBe(TranslatedDownloadPhase.Complete)
   })
 

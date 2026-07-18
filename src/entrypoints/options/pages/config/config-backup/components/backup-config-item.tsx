@@ -3,7 +3,6 @@ import { Icon } from "@iconify/react/dist/iconify.js"
 import { useMutation } from "@tanstack/react-query"
 import { useAtomValue, useSetAtom } from "jotai"
 import { useState } from "react"
-import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +31,7 @@ import {
   ItemTitle,
 } from "@/components/ui/base-ui/item"
 import { Spinner } from "@/components/ui/base-ui/spinner"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { useExportConfig } from "@/hooks/use-export-config"
 import { configAtom, writeConfigAtom } from "@/utils/atoms/config"
 import { addBackup, isSameAsLatestBackup, removeBackup } from "@/utils/backup/storage"
@@ -101,7 +101,10 @@ function RestoreButton({ backup }: { backup: ConfigBackup }) {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["config-backups"] })
-      toast.success(i18n.t("options.config.backup.restoreSuccess"))
+      toastManager.add({
+        type: "success",
+        title: i18n.t("options.config.backup.restoreSuccess"),
+      })
     },
   })
 

@@ -7,7 +7,7 @@ import type { GuideDictionaryNotebaseTracking } from "@/utils/guide/dictionary-n
 import { useMutation } from "@tanstack/react-query"
 import { useAtom, useSetAtom } from "jotai"
 import { useRef, useState } from "react"
-import { toast } from "sonner"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { authClient } from "@/utils/auth/auth-client"
 import {
@@ -91,11 +91,14 @@ export function useSaveToNotebase() {
     if (guideTracking) {
       completeGuideDictionaryNotebase(guideTracking, notebaseId)
     }
-    toast.success(i18n.t("action.saveToNotebaseSuccess"), {
+    const toastId = toastManager.add({
+      type: "success",
+      title: i18n.t("action.saveToNotebaseSuccess"),
       description: savingNotebaseNameRef.current,
-      action: {
-        label: i18n.t("action.openNotebase"),
+      actionProps: {
+        children: i18n.t("action.openNotebase"),
         onClick: () => {
+          toastManager.close(toastId)
           void sendMessage("openPage", {
             url: notebaseUrl,
             active: true,
@@ -106,10 +109,13 @@ export function useSaveToNotebase() {
   }
 
   const buildConnectionInvalidToast = (actionId: string) => {
-    toast.error(i18n.t("action.saveToNotebaseConnectionInvalid"), {
-      action: {
-        label: i18n.t("action.openCustomActions"),
+    const toastId = toastManager.add({
+      type: "error",
+      title: i18n.t("action.saveToNotebaseConnectionInvalid"),
+      actionProps: {
+        children: i18n.t("action.openCustomActions"),
         onClick: () => {
+          toastManager.close(toastId)
           void sendMessage("openOptionsPage", {
             route: `/custom-actions?actionId=${encodeURIComponent(actionId)}`,
           })
@@ -121,7 +127,7 @@ export function useSaveToNotebase() {
   const handleSaveError = (error: unknown) => {
     savingGuideTrackingRef.current = null
     if (isORPCUnauthorizedError(error)) {
-      toast.error(i18n.t("action.saveToNotebaseLoginRequired"))
+      toastManager.add({ type: "error", title: i18n.t("action.saveToNotebaseLoginRequired") })
       return
     }
 
@@ -131,21 +137,29 @@ export function useSaveToNotebase() {
     }
 
     if (isORPCForbiddenError(error)) {
-      toast.error(i18n.t("action.saveToNotebaseAccessDenied"))
+      toastManager.add({ type: "error", title: i18n.t("action.saveToNotebaseAccessDenied") })
       return
     }
 
     if (isORPCNotFoundError(error)) {
-      toast.error(i18n.t("action.saveToNotebaseTableUnavailable"))
+      toastManager.add({
+        type: "error",
+        title: i18n.t("action.saveToNotebaseTableUnavailable"),
+      })
       return
     }
 
     if (isORPCValidationError(error)) {
-      toast.error(i18n.t("action.saveToNotebaseConnectionInvalid"))
+      toastManager.add({
+        type: "error",
+        title: i18n.t("action.saveToNotebaseConnectionInvalid"),
+      })
       return
     }
 
-    toast.error(i18n.t("action.saveToNotebaseFailed"), {
+    toastManager.add({
+      type: "error",
+      title: i18n.t("action.saveToNotebaseFailed"),
       description: error instanceof Error ? error.message : undefined,
     })
   }
@@ -254,7 +268,7 @@ export function useSaveToNotebase() {
     }
 
     if (!currentAccount) {
-      toast.error(i18n.t("action.saveToNotebaseLoginRequired"))
+      toastManager.add({ type: "error", title: i18n.t("action.saveToNotebaseLoginRequired") })
       return "failed"
     }
 
@@ -333,12 +347,15 @@ export function useSaveToNotebase() {
       }
 
       if (isORPCUnauthorizedError(error)) {
-        toast.error(i18n.t("action.saveToNotebaseLoginRequired"))
+        toastManager.add({
+          type: "error",
+          title: i18n.t("action.saveToNotebaseLoginRequired"),
+        })
         return "failed"
       }
 
       if (isORPCForbiddenError(error)) {
-        toast.error(i18n.t("action.saveToNotebaseAccessDenied"))
+        toastManager.add({ type: "error", title: i18n.t("action.saveToNotebaseAccessDenied") })
         return "failed"
       }
 
@@ -347,7 +364,9 @@ export function useSaveToNotebase() {
         return "failed"
       }
 
-      toast.error(i18n.t("action.saveToNotebaseFailed"), {
+      toastManager.add({
+        type: "error",
+        title: i18n.t("action.saveToNotebaseFailed"),
         description: error instanceof Error ? error.message : undefined,
       })
       return "failed"

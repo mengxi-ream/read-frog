@@ -3,7 +3,7 @@ import type { Config } from "@/types/config/config"
 import type { SubtitlesFetcher } from "@/utils/subtitles/fetchers/types"
 import type { SubtitlesVideoContext } from "@/utils/subtitles/processor/translator"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
-import { toast } from "sonner"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
@@ -104,7 +104,10 @@ export class TranslatedSubtitlesDownloader {
       if (!this.isActive(operationId)) {
         return
       }
-      toast.error(error instanceof Error ? error.message : String(error))
+      toastManager.add({
+        type: "error",
+        title: error instanceof Error ? error.message : String(error),
+      })
       this.setStatus(TranslatedDownloadPhase.Idle, null)
     } finally {
       if (this.isActive(operationId)) {

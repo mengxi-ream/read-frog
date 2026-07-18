@@ -2,7 +2,6 @@ import type { APIProviderConfig } from "@/types/config/provider"
 import { Icon } from "@iconify/react"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useRef, useState } from "react"
-import { toast } from "sonner"
 import { SponsorBadge } from "@/components/badges/sponsor-badge"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
@@ -16,6 +15,7 @@ import {
 } from "@/components/ui/base-ui/collapsible"
 import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
 import { Switch } from "@/components/ui/base-ui/switch"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { isAPIProviderConfig } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
@@ -156,9 +156,13 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
 
   const handleProviderEnabledChange = (checked: boolean) => {
     if (!checked && enabled && totalAssigned > 0) {
-      toast.error(
-        i18n.t("options.apiProviders.form.providerInUseCannotDisable", [name, totalAssigned]),
-      )
+      toastManager.add({
+        type: "error",
+        title: i18n.t("options.apiProviders.form.providerInUseCannotDisable", [
+          name,
+          totalAssigned,
+        ]),
+      })
       return
     }
 

@@ -26,7 +26,7 @@ const streamBackgroundStructuredObjectMock = vi.fn<(...args: any[]) => any>()
 const translateTextCoreMock = vi.fn<(...args: any[]) => any>()
 const getOrCreateWebPageContextMock = vi.fn<(...args: any[]) => any>().mockResolvedValue(null)
 const getOrGenerateWebPageSummaryMock = vi.fn<(...args: any[]) => any>()
-const toastErrorMock = vi.fn<(...args: any[]) => any>()
+const toastAddMock = vi.fn<(...args: any[]) => any>()
 const onMessageMock = vi.fn<(...args: any[]) => any>()
 const hotkeyRegisterMock = vi.fn<(...args: any[]) => any>()
 const hotkeyUnregisterMock = vi.fn<(...args: any[]) => any>()
@@ -266,10 +266,9 @@ vi.mock("@/utils/host/translate/webpage-summary", () => ({
   getOrGenerateWebPageSummary: (...args: unknown[]) => getOrGenerateWebPageSummaryMock(...args),
 }))
 
-vi.mock("sonner", () => ({
-  toast: {
-    error: (...args: unknown[]) => toastErrorMock(...args),
-    success: vi.fn<(...args: any[]) => any>(),
+vi.mock("@/components/ui/base-ui/toast", () => ({
+  toastManager: {
+    add: (...args: unknown[]) => toastAddMock(...args),
   },
 }))
 
@@ -801,7 +800,7 @@ describe("selection toolbar requests", () => {
       await Promise.resolve()
     })
 
-    expect(toastErrorMock).not.toHaveBeenCalled()
+    expect(toastAddMock).not.toHaveBeenCalled()
     expect(screen.queryByRole("alert")).toBeNull()
     expect(screen.queryByTestId("translation-content")).toBeNull()
   })
@@ -847,7 +846,7 @@ describe("selection toolbar requests", () => {
     })
 
     expect(streamBackgroundTextMock).not.toHaveBeenCalled()
-    expect(toastErrorMock).not.toHaveBeenCalled()
+    expect(toastAddMock).not.toHaveBeenCalled()
     expect(screen.queryByRole("alert")).toBeNull()
     expect(screen.queryByTestId("translation-content")).toBeNull()
   })
@@ -868,7 +867,7 @@ describe("selection toolbar requests", () => {
     const alert = await screen.findByRole("alert")
     expect(alert).toHaveTextContent("translationHub.translationFailed")
     expect(alert).toHaveTextContent("Standard translation failed")
-    expect(toastErrorMock).not.toHaveBeenCalled()
+    expect(toastAddMock).not.toHaveBeenCalled()
 
     const translationContent = screen.getByTestId("translation-content")
     expect(
@@ -1042,7 +1041,7 @@ describe("selection toolbar requests", () => {
       "As long as you're alive,",
     )
     expect(screen.getByTestId("footer-paragraphs").textContent).toContain("there's no bad ending.")
-    expect(toastErrorMock).not.toHaveBeenCalled()
+    expect(toastAddMock).not.toHaveBeenCalled()
   })
 
   it("shows a toast when the context menu request cannot recover a selection snapshot", async () => {
@@ -1056,9 +1055,10 @@ describe("selection toolbar requests", () => {
       handler({ data: { selectionText: "Missing selection" } })
     })
 
-    expect(toastErrorMock).toHaveBeenCalledWith(
-      "options.floatingButtonAndToolbar.selectionToolbar.errors.missingSelection",
-    )
+    expect(toastAddMock).toHaveBeenCalledWith({
+      type: "error",
+      title: "options.floatingButtonAndToolbar.selectionToolbar.errors.missingSelection",
+    })
     expect(translateTextCoreMock).not.toHaveBeenCalled()
   })
 
@@ -1147,7 +1147,7 @@ describe("selection toolbar requests", () => {
     })
 
     expect(translateTextCoreMock).not.toHaveBeenCalled()
-    expect(toastErrorMock).not.toHaveBeenCalled()
+    expect(toastAddMock).not.toHaveBeenCalled()
   })
 
   it("does not register an empty or invalid selection translation shortcut", () => {
@@ -1313,7 +1313,7 @@ describe("selection toolbar requests", () => {
     expect(screen.getByTestId("footer-paragraphs").textContent).toContain(
       "Selected text inside a paragraph.",
     )
-    expect(toastErrorMock).not.toHaveBeenCalled()
+    expect(toastAddMock).not.toHaveBeenCalled()
 
     const { sendMessage } = await import("@/utils/message")
     expect(vi.mocked(sendMessage)).toHaveBeenCalledWith(
@@ -1413,9 +1413,10 @@ describe("selection toolbar requests", () => {
       })
     })
 
-    expect(toastErrorMock).toHaveBeenCalledWith(
-      "options.floatingButtonAndToolbar.selectionToolbar.errors.missingSelection",
-    )
+    expect(toastAddMock).toHaveBeenCalledWith({
+      type: "error",
+      title: "options.floatingButtonAndToolbar.selectionToolbar.errors.missingSelection",
+    })
     expect(streamBackgroundStructuredObjectMock).not.toHaveBeenCalled()
 
     const { sendMessage } = await import("@/utils/message")

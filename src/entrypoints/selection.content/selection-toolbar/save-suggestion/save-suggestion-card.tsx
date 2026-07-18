@@ -3,8 +3,8 @@ import type { SaveSuggestionNoteRecord } from "@/utils/save-suggestion/types"
 import { IconBookmarkPlus } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
 import { useEffect, useState } from "react"
-import { toast } from "sonner"
 import { Button } from "@/components/ui/base-ui/button"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { getOutputSchemaFingerprint } from "@/utils/notebase/pending-save"
@@ -116,7 +116,7 @@ export function SaveSuggestionCard({
       getOutputSchemaFingerprint(liveAction.outputSchema) !==
         getOutputSchemaFingerprint(actionSnapshot.outputSchema)
     ) {
-      toast.error(i18n.t("saveSuggestion.staleSuggestion"))
+      toastManager.add({ type: "error", title: i18n.t("saveSuggestion.staleSuggestion") })
       setSaveState("stale")
       return
     }

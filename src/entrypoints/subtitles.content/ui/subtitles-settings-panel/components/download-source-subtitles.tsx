@@ -1,7 +1,7 @@
 import { IconDownload, IconLoader2 } from "@tabler/icons-react"
 import { useState } from "react"
-import { toast } from "sonner"
 import { Button } from "@/components/ui/base-ui/button"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { i18n } from "@/utils/i18n"
 import { useSubtitlesUI } from "../../subtitles-ui-context"
 import { SubtitlesSettingsItem } from "./subtitles-settings-item"
@@ -22,7 +22,10 @@ export function DownloadSourceSubtitles() {
     try {
       await downloadSourceSubtitles()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : String(error))
+      toastManager.add({
+        type: "error",
+        title: error instanceof Error ? error.message : String(error),
+      })
     } finally {
       setIsDownloading(false)
     }

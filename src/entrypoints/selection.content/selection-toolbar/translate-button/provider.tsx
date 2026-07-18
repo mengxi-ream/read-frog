@@ -17,7 +17,7 @@ import {
   useRef,
   useState,
 } from "react"
-import { toast } from "sonner"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
@@ -590,7 +590,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
       if (!request) {
         if (options?.showMissingSelectionToast) {
           const nextError = createSelectionToolbarPrecheckError("translate", "missingSelection")
-          toast.error(nextError.description)
+          toastManager.add({ type: "error", title: nextError.description })
         }
         return
       }

@@ -28,9 +28,9 @@ const mockAuthState = vi.hoisted(() => ({
   isPending: false,
 }))
 
-const toastMock = vi.hoisted(() => ({
-  success: vi.fn<(...args: any[]) => any>(),
-  error: vi.fn<(...args: any[]) => any>(),
+const toastManagerMock = vi.hoisted(() => ({
+  add: vi.fn<(...args: any[]) => any>(),
+  close: vi.fn<(...args: any[]) => any>(),
 }))
 
 const notebaseRowCreateMock = vi.hoisted(() => vi.fn<(...args: any[]) => any>())
@@ -64,8 +64,8 @@ vi.mock("@/utils/guide/dictionary-notebase", async (importOriginal) => {
   }
 })
 
-vi.mock("sonner", () => ({
-  toast: toastMock,
+vi.mock("@/components/ui/base-ui/toast", () => ({
+  toastManager: toastManagerMock,
 }))
 
 vi.mock("@/utils/orpc/client", () => ({
@@ -257,8 +257,8 @@ function renderButton(config: Config, action: SelectionToolbarCustomAction) {
 describe("saveToNotebaseButton notebase availability", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    toastMock.success.mockClear()
-    toastMock.error.mockClear()
+    toastManagerMock.add.mockReset().mockReturnValue("toast-id")
+    toastManagerMock.close.mockReset()
     notebaseRowCreateMock.mockReset()
     mockAuthState.session = {
       user: {
@@ -346,22 +346,24 @@ describe("saveToNotebaseButton notebase availability", () => {
     )
 
     await waitFor(() => {
-      expect(toastMock.error).toHaveBeenCalledWith(
-        i18n.t("action.saveToNotebaseLimitExceeded"),
+      expect(toastManagerMock.add).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: expect.objectContaining({
-            label: i18n.t("action.upgrade"),
+          type: "error",
+          title: i18n.t("action.saveToNotebaseLimitExceeded"),
+          actionProps: expect.objectContaining({
+            children: i18n.t("action.upgrade"),
             onClick: expect.any(Function),
           }),
         }),
       )
     })
 
-    const toastOptions = toastMock.error.mock.calls[0]?.[1] as
-      | { action?: { onClick?: () => void } }
+    const toastOptions = toastManagerMock.add.mock.calls[0]?.[0] as
+      | { actionProps?: { onClick?: () => void } }
       | undefined
-    toastOptions?.action?.onClick?.()
+    toastOptions?.actionProps?.onClick?.()
 
+    expect(toastManagerMock.close).toHaveBeenCalledWith("toast-id")
     expect(sendMessage).toHaveBeenCalledWith("openPage", {
       url: new URL("/pricing", env.WXT_WEBSITE_URL).toString(),
       active: true,
@@ -493,23 +495,25 @@ describe("saveToNotebaseButton notebase availability", () => {
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
 
     await waitFor(() => {
-      expect(toastMock.success).toHaveBeenCalledWith(
-        i18n.t("action.saveToNotebaseSuccess"),
+      expect(toastManagerMock.add).toHaveBeenCalledWith(
         expect.objectContaining({
+          type: "success",
+          title: i18n.t("action.saveToNotebaseSuccess"),
           description: "Summarize Notes",
-          action: expect.objectContaining({
-            label: i18n.t("action.openNotebase"),
+          actionProps: expect.objectContaining({
+            children: i18n.t("action.openNotebase"),
             onClick: expect.any(Function),
           }),
         }),
       )
     })
 
-    const toastOptions = toastMock.success.mock.calls[0]?.[1] as
-      | { action?: { onClick?: () => void }; description?: string }
+    const toastOptions = toastManagerMock.add.mock.calls[0]?.[0] as
+      | { actionProps?: { onClick?: () => void }; description?: string }
       | undefined
-    toastOptions?.action?.onClick?.()
+    toastOptions?.actionProps?.onClick?.()
 
+    expect(toastManagerMock.close).toHaveBeenCalledWith("toast-id")
     expect(sendMessage).toHaveBeenCalledWith("openPage", {
       url: expect.stringContaining("/notebase/notebase-1"),
       active: true,
@@ -593,22 +597,24 @@ describe("saveToNotebaseButton notebase availability", () => {
     fireEvent.click(saveButton)
 
     await waitFor(() => {
-      expect(toastMock.error).toHaveBeenCalledWith(
-        i18n.t("action.saveToNotebaseConnectionInvalid"),
+      expect(toastManagerMock.add).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: expect.objectContaining({
-            label: i18n.t("action.openCustomActions"),
+          type: "error",
+          title: i18n.t("action.saveToNotebaseConnectionInvalid"),
+          actionProps: expect.objectContaining({
+            children: i18n.t("action.openCustomActions"),
             onClick: expect.any(Function),
           }),
         }),
       )
     })
 
-    const toastOptions = toastMock.error.mock.calls[0]?.[1] as
-      | { action?: { onClick?: () => void } }
+    const toastOptions = toastManagerMock.add.mock.calls[0]?.[0] as
+      | { actionProps?: { onClick?: () => void } }
       | undefined
-    toastOptions?.action?.onClick?.()
+    toastOptions?.actionProps?.onClick?.()
 
+    expect(toastManagerMock.close).toHaveBeenCalledWith("toast-id")
     expect(sendMessage).toHaveBeenCalledWith("openOptionsPage", {
       route: "/custom-actions?actionId=action-1",
     })
@@ -623,7 +629,10 @@ describe("saveToNotebaseButton notebase availability", () => {
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
 
     await waitFor(() => {
-      expect(toastMock.error).toHaveBeenCalledWith(i18n.t("action.saveToNotebaseAccessDenied"))
+      expect(toastManagerMock.add).toHaveBeenCalledWith({
+        type: "error",
+        title: i18n.t("action.saveToNotebaseAccessDenied"),
+      })
     })
   })
 
@@ -638,22 +647,24 @@ describe("saveToNotebaseButton notebase availability", () => {
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
 
     await waitFor(() => {
-      expect(toastMock.error).toHaveBeenCalledWith(
-        i18n.t("action.saveToNotebaseLimitExceeded"),
+      expect(toastManagerMock.add).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: expect.objectContaining({
-            label: i18n.t("action.upgrade"),
+          type: "error",
+          title: i18n.t("action.saveToNotebaseLimitExceeded"),
+          actionProps: expect.objectContaining({
+            children: i18n.t("action.upgrade"),
             onClick: expect.any(Function),
           }),
         }),
       )
     })
 
-    const toastOptions = toastMock.error.mock.calls[0]?.[1] as
-      | { action?: { onClick?: () => void } }
+    const toastOptions = toastManagerMock.add.mock.calls[0]?.[0] as
+      | { actionProps?: { onClick?: () => void } }
       | undefined
-    toastOptions?.action?.onClick?.()
+    toastOptions?.actionProps?.onClick?.()
 
+    expect(toastManagerMock.close).toHaveBeenCalledWith("toast-id")
     expect(sendMessage).toHaveBeenCalledWith("openPage", {
       url: new URL("/pricing", env.WXT_WEBSITE_URL).toString(),
       active: true,

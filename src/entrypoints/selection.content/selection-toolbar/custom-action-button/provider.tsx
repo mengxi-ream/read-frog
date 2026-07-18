@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import type { SelectionSession } from "../atoms"
 import { useAtomValue, useSetAtom } from "jotai"
 import { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { toast } from "sonner"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
@@ -262,7 +262,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
           ),
           outcome: "failure",
         })
-        toast.error(nextError.description)
+        toastManager.add({ type: "error", title: nextError.description })
         return
       }
 
@@ -281,7 +281,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
           ),
           outcome: "failure",
         })
-        toast.error(nextError.description)
+        toastManager.add({ type: "error", title: nextError.description })
         return
       }
 

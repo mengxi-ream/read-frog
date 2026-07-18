@@ -3,7 +3,6 @@ import type { ProvidersConfig } from "@/types/config/provider"
 import { useSelector } from "@tanstack/react-store"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useState } from "react"
-import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +15,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/base-ui/alert-dialog"
 import { Button } from "@/components/ui/base-ui/button"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import {
   isAPIProviderConfig,
   isLLMProvider,
@@ -106,7 +106,10 @@ export function ProviderConfigForm() {
 
     const unsatisfied = findFeatureMissingProvider(updatedAllProviders, config)
     if (unsatisfied) {
-      toast.error(i18n.t("options.apiProviders.form.atLeastOneLLMProvider")) // TODO: make this word more general
+      toastManager.add({
+        type: "error",
+        title: i18n.t("options.apiProviders.form.atLeastOneLLMProvider"),
+      }) // TODO: make this word more general
       return
     }
 
@@ -120,7 +123,10 @@ export function ProviderConfigForm() {
     )
 
     if (hasAffectedCustomActions && !updatedCustomActions) {
-      toast.error(i18n.t("options.apiProviders.form.atLeastOneLLMProvider"))
+      toastManager.add({
+        type: "error",
+        title: i18n.t("options.apiProviders.form.atLeastOneLLMProvider"),
+      })
       return
     }
 

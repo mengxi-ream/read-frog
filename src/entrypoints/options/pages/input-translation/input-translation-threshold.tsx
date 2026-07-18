@@ -1,8 +1,8 @@
 import { useAtom } from "jotai"
-import { toast } from "sonner"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { Field, FieldContent, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
@@ -42,9 +42,13 @@ export function InputTranslationThreshold() {
                 timeThreshold: newValue,
               })
             } else {
-              toast.error(
-                i18n.t("options.inputTranslation.threshold.error", [MIN_THRESHOLD, MAX_THRESHOLD]),
-              )
+              toastManager.add({
+                type: "error",
+                title: i18n.t("options.inputTranslation.threshold.error", [
+                  MIN_THRESHOLD,
+                  MAX_THRESHOLD,
+                ]),
+              })
             }
           }}
           onBlur={(e) => {

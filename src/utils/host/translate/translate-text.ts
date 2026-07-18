@@ -4,7 +4,7 @@ import type { ProviderConfig } from "@/types/config/provider"
 import type { TranslationTextFormat } from "@/types/config/translate"
 import type { WebPagePromptContext } from "@/types/content"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
-import { toast } from "sonner"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { isNoTranslationSentinel } from "@/utils/constants/prompt"
@@ -219,7 +219,7 @@ export function validateTranslationConfigAndToast(
   }
 
   if (languageConfig.sourceCode === languageConfig.targetCode) {
-    toast.error(i18n.t("translation.sameLanguage"))
+    toastManager.add({ type: "error", title: i18n.t("translation.sameLanguage") })
     logger.info("validateTranslationConfig: returning false (same language)")
     return false
   }
@@ -230,7 +230,7 @@ export function validateTranslationConfigAndToast(
     !providerConfig.apiKey?.trim() &&
     !["deeplx", "ollama"].includes(providerConfig.provider)
   ) {
-    toast.error(i18n.t("noAPIKeyConfig.warning"))
+    toastManager.add({ type: "error", title: i18n.t("noAPIKeyConfig.warning") })
     logger.info("validateTranslationConfig: returning false (no API key)")
     return false
   }

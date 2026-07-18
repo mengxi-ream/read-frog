@@ -1,8 +1,8 @@
 import { Icon } from "@iconify/react"
 import { useAtomValue, useSetAtom } from "jotai"
 import { Activity, useState } from "react"
-import { toast } from "sonner"
 import { Button } from "@/components/ui/base-ui/button"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { useGoogleDriveAuth } from "@/hooks/use-google-drive-auth"
 import { resolutionsAtom, unresolvedConfigsAtom } from "@/utils/atoms/google-drive-sync"
 import { lastSyncTimeAtom } from "@/utils/atoms/last-sync-time"
@@ -39,10 +39,12 @@ export function GoogleDriveSyncCard() {
         "same-changes": i18n.t("options.config.sync.googleDrive.syncSuccess.sameChanges"),
         "no-change": i18n.t("options.config.sync.googleDrive.syncSuccess.noChange"),
       } as const
-      toast.success(messages[result.action])
+      toastManager.add({ type: "success", title: messages[result.action] })
     } else {
       logger.error("Google Drive sync error", result.error)
-      toast.error(i18n.t("options.config.sync.googleDrive.syncError"), {
+      toastManager.add({
+        type: "error",
+        title: i18n.t("options.config.sync.googleDrive.syncError"),
         description: result.error.message,
       })
     }
@@ -53,16 +55,25 @@ export function GoogleDriveSyncCard() {
   const handleLogout = async () => {
     await clearAccessToken()
     void invalidateAuthData()
-    toast.success(i18n.t("options.config.sync.googleDrive.logoutSuccess"))
+    toastManager.add({
+      type: "success",
+      title: i18n.t("options.config.sync.googleDrive.logoutSuccess"),
+    })
   }
 
   const handleDialogClose = (success: boolean) => {
     setIsOpen(false)
     setResolutions({})
     if (success) {
-      toast.success(i18n.t("options.config.sync.googleDrive.syncSuccess.unresolved"))
+      toastManager.add({
+        type: "success",
+        title: i18n.t("options.config.sync.googleDrive.syncSuccess.unresolved"),
+      })
     } else {
-      toast.error(i18n.t("options.config.sync.googleDrive.syncError"))
+      toastManager.add({
+        type: "error",
+        title: i18n.t("options.config.sync.googleDrive.syncError"),
+      })
     }
   }
 

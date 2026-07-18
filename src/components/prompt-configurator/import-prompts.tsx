@@ -2,10 +2,10 @@ import type { PromptConfigList } from "./utils/prompt-file"
 import { Icon } from "@iconify/react/dist/iconify.js"
 import { useAtom } from "jotai"
 import { useId } from "react"
-import { toast } from "sonner"
 import { Button } from "@/components/ui/base-ui/button"
 import { Input } from "@/components/ui/base-ui/input"
 import { Label } from "@/components/ui/base-ui/label"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { i18n } from "@/utils/i18n"
 import { usePromptAtoms } from "./context"
@@ -37,12 +37,15 @@ export function ImportPrompts() {
       if (!files?.[0]) return
       const promptConfig = await analysisJSONFile(files[0])
       injectPrompts(promptConfig)
-      toast.success(`${i18n.t("options.translation.personalizedPrompts.importSuccess")} !`)
+      toastManager.add({
+        type: "success",
+        title: `${i18n.t("options.translation.personalizedPrompts.importSuccess")} !`,
+      })
     } catch (error) {
       if (error instanceof Error) {
-        toast.error(error.message)
+        toastManager.add({ type: "error", title: error.message })
       } else {
-        toast.error("Something went error when importing")
+        toastManager.add({ type: "error", title: "Something went error when importing" })
       }
     } finally {
       e.target.value = ""

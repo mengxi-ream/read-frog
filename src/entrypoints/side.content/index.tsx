@@ -22,7 +22,7 @@ import { insertShadowRootUIWrapperInto } from "@/utils/shadow-root"
 import { isSiteEnabled } from "@/utils/site-control"
 import { queryClient } from "@/utils/tanstack-query"
 import { getLocalThemeMode } from "@/utils/theme"
-import { addStyleToShadow, mirrorDynamicStyles, protectInternalStyles } from "../../utils/styles"
+import { mirrorDynamicStyles, protectInternalStyles } from "../../utils/styles"
 import App from "./app"
 import { store } from "./atoms"
 import "@/assets/styles/theme.css"
@@ -73,7 +73,6 @@ export default defineContentScript({
         const wrapper = insertShadowRootUIWrapperInto(container)
         shadowWrapper = wrapper
 
-        addStyleToShadow(shadow)
         mirrorDynamicStyles("#_goober", shadow)
         // mirrorDynamicStyles(
         //   "style[type='text/css']",
@@ -102,7 +101,7 @@ export default defineContentScript({
                 <ThemeProvider container={wrapper}>
                   <TooltipProvider>
                     <LocaleBoundary>
-                      <App />
+                      <App portalContainer={shadow} />
                     </LocaleBoundary>
                   </TooltipProvider>
                 </ThemeProvider>

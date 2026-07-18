@@ -1,7 +1,6 @@
 import type { APIProviderConfig } from "@/types/config/provider"
 import { useSelector } from "@tanstack/react-store"
 import { useSetAtom } from "jotai"
-import { toast } from "sonner"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import {
   SelectContent,
@@ -10,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/base-ui/select"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import {
   isCustomLLMProviderConfig,
   isLLMProviderConfig,
@@ -128,9 +128,11 @@ export const TranslateModelSelector = withForm({
                         )
                       }
                     } catch (error) {
-                      toast.error(
-                        error instanceof Error ? error.message : "Failed to update configuration",
-                      )
+                      toastManager.add({
+                        type: "error",
+                        title:
+                          error instanceof Error ? error.message : "Failed to update configuration",
+                      })
                     }
                   }}
                 />

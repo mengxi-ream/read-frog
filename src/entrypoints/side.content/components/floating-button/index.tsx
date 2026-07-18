@@ -2,7 +2,6 @@ import type { FloatingButtonSide } from "@/types/config/floating-button"
 import { IconLock, IconLockOpen, IconSettings, IconX } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
 import { useEffect, useRef, useState } from "react"
-import { toast } from "sonner"
 import { browser } from "#imports"
 import readFrogLogo from "@/assets/icons/read-frog.png?url&no-inline"
 import {
@@ -11,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/base-ui/dropdown-menu"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -175,7 +175,7 @@ export default function FloatingButton() {
 
     void Promise.resolve(sendMessage("toggleSidePanel", undefined)).then((result) => {
       if (result && !result.ok && result.reason === "requires-extension-user-action") {
-        toast.info(<FirefoxSidebarHelpToast />)
+        toastManager.add({ type: "info", title: <FirefoxSidebarHelpToast /> })
       }
     })
   }

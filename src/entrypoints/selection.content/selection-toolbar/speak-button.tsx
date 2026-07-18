@@ -1,7 +1,7 @@
 import { IconLoader2, IconPlayerStopFilled, IconVolume } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
 import { useCallback } from "react"
-import { toast } from "sonner"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -28,7 +28,7 @@ export function SpeakButton() {
     }
 
     if (!selectionContent) {
-      toast.error(i18n.t("speak.noTextSelected"))
+      toastManager.add({ type: "error", title: i18n.t("speak.noTextSelected") })
       return
     }
 

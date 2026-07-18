@@ -6,7 +6,6 @@ import type { PendingCreateNotebaseSave, PendingNotebaseSave } from "@/utils/not
 import { useMutation } from "@tanstack/react-query"
 import { useAtom } from "jotai"
 import { useState } from "react"
-import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
 import { Button } from "@/components/ui/base-ui/button"
 import {
@@ -17,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/base-ui/dialog"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { shadowWrapper } from "@/entrypoints/selection.content"
 import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.content/overlay-layers"
 import { env } from "@/env"
@@ -191,7 +191,9 @@ export function SaveToNotebaseDialogHost() {
       })
 
       closeDialog()
-      toast.success(i18n.t("action.saveToNotebaseSuccess"), {
+      toastManager.add({
+        type: "success",
+        title: i18n.t("action.saveToNotebaseSuccess"),
         description: createdPendingSave.actionName,
       })
       recordSuggestionAcceptedIfNeeded(createdPendingSave.actionName)
@@ -208,7 +210,10 @@ export function SaveToNotebaseDialogHost() {
     },
     onError: (error: unknown) => {
       if (isORPCUnauthorizedError(error)) {
-        toast.error(i18n.t("action.saveToNotebaseLoginRequired"))
+        toastManager.add({
+          type: "error",
+          title: i18n.t("action.saveToNotebaseLoginRequired"),
+        })
         return
       }
 
@@ -218,16 +223,21 @@ export function SaveToNotebaseDialogHost() {
       }
 
       if (isORPCForbiddenError(error)) {
-        toast.error(i18n.t("action.saveToNotebaseAccessDenied"))
+        toastManager.add({ type: "error", title: i18n.t("action.saveToNotebaseAccessDenied") })
         return
       }
 
       if (isORPCValidationError(error)) {
-        toast.error(i18n.t("action.saveToNotebaseConnectionInvalid"))
+        toastManager.add({
+          type: "error",
+          title: i18n.t("action.saveToNotebaseConnectionInvalid"),
+        })
         return
       }
 
-      toast.error(i18n.t("action.saveToNotebaseFailed"), {
+      toastManager.add({
+        type: "error",
+        title: i18n.t("action.saveToNotebaseFailed"),
         description: error instanceof Error ? error.message : undefined,
       })
     },
@@ -239,7 +249,7 @@ export function SaveToNotebaseDialogHost() {
     }
 
     if (!currentAccount) {
-      toast.error(i18n.t("action.saveToNotebaseLoginRequired"))
+      toastManager.add({ type: "error", title: i18n.t("action.saveToNotebaseLoginRequired") })
       return
     }
 
@@ -268,7 +278,9 @@ export function SaveToNotebaseDialogHost() {
       })
 
       closeDialog()
-      toast.success(i18n.t("action.saveToNotebasePendingLogin"), {
+      toastManager.add({
+        type: "success",
+        title: i18n.t("action.saveToNotebasePendingLogin"),
         description:
           pendingSave.kind === "save_to_connected_notebase"
             ? i18n.t("action.saveToNotebasePendingConnectedLoginDescription")
@@ -276,7 +288,9 @@ export function SaveToNotebaseDialogHost() {
       })
       recordSuggestionAcceptedIfNeeded(pendingSave.actionName)
     } catch (error) {
-      toast.error(i18n.t("action.saveToNotebaseFailed"), {
+      toastManager.add({
+        type: "error",
+        title: i18n.t("action.saveToNotebaseFailed"),
         description: error instanceof Error ? error.message : undefined,
       })
     } finally {

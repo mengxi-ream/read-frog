@@ -3,7 +3,7 @@ import type { TTSConfig } from "@/types/config/tts"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAtomValue } from "jotai"
 import { useRef, useState } from "react"
-import { toast } from "sonner"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -261,7 +261,9 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
         ...variables.analyticsContext,
         outcome: "failure",
       })
-      toast.error(i18n.t("speak.failedToGenerateSpeech"), {
+      toastManager.add({
+        type: "error",
+        title: i18n.t("speak.failedToGenerateSpeech"),
         id: TTS_ERROR_TOAST_ID,
         description: getTTSFriendlyErrorDescription(error),
       })

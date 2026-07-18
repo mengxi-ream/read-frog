@@ -1,9 +1,9 @@
 import type { PreloadConfig as PreloadConfigType } from "@/types/config/translate"
 import { useAtom } from "jotai"
-import { toast } from "sonner"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { preloadConfigSchema } from "@/types/config/translate"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
@@ -89,7 +89,10 @@ function PreloadNumberSelector({ property }: { property: KeyOfPreloadConfig }) {
               },
             })
           } else {
-            toast.error(configParseResult.error?.issues[0].message)
+            toastManager.add({
+              type: "error",
+              title: configParseResult.error?.issues[0].message,
+            })
           }
         }}
       />

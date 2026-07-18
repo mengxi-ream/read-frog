@@ -22,7 +22,6 @@ import {
   getEffectiveSiteControlUrl,
   isSiteEnabled,
 } from "@/utils/site-control"
-import { addStyleToShadow } from "@/utils/styles"
 import { queryClient } from "@/utils/tanstack-query"
 import { getLocalThemeMode } from "@/utils/theme"
 import App from "./app"
@@ -60,7 +59,6 @@ async function mountSelectionUI(ctx: ContentScriptContext) {
     onMount: (container, shadow, shadowHost) => {
       const wrapper = insertShadowRootUIWrapperInto(container)
       shadowWrapper = wrapper
-      addStyleToShadow(shadow)
       protectSelectAllShadowRoot(shadowHost, wrapper)
 
       const root = ReactDOM.createRoot(wrapper)
@@ -71,7 +69,7 @@ async function mountSelectionUI(ctx: ContentScriptContext) {
               <ThemeProvider container={wrapper}>
                 <TooltipProvider>
                   <LocaleBoundary>
-                    <App uiContainer={container} />
+                    <App uiContainer={container} portalContainer={shadow} />
                   </LocaleBoundary>
                 </TooltipProvider>
               </ThemeProvider>

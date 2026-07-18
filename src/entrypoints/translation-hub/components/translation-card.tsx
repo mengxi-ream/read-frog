@@ -2,10 +2,10 @@ import { Icon } from "@iconify/react"
 import { useMutation } from "@tanstack/react-query"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useEffectEvent, useRef } from "react"
-import { toast } from "sonner"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { Button } from "@/components/ui/base-ui/button"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureAttempt } from "@/utils/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -96,7 +96,10 @@ export function TranslationCard({
   const handleCopy = () => {
     if (mutation.data) {
       void navigator.clipboard.writeText(mutation.data)
-      toast.success(i18n.t("translationHub.copiedToClipboard"))
+      toastManager.add({
+        type: "success",
+        title: i18n.t("translationHub.copiedToClipboard"),
+      })
     }
   }
 

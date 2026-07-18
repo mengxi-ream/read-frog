@@ -3,7 +3,7 @@ import type { FeatureUsageContext } from "@/types/analytics"
 import type { SubtitlesFetcher } from "@/utils/subtitles/fetchers/types"
 import type { SubtitlesVideoContext } from "@/utils/subtitles/processor/translator"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
-import { toast } from "sonner"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { getProviderConfigById } from "@/utils/config/helpers"
@@ -168,7 +168,7 @@ export class UniversalVideoAdapter {
     )) as HTMLVideoElement | null
 
     if (!video) {
-      toast.error(i18n.t("subtitles.errors.videoNotFound"))
+      toastManager.add({ type: "error", title: i18n.t("subtitles.errors.videoNotFound") })
       return
     }
 
@@ -311,7 +311,12 @@ export class UniversalVideoAdapter {
 
     const container = await waitForElement(controlsBar)
     if (!container) {
-      if (!this.config.embedded) toast.error(i18n.t("subtitles.errors.controlsBarNotFound"))
+      if (!this.config.embedded) {
+        toastManager.add({
+          type: "error",
+          title: i18n.t("subtitles.errors.controlsBarNotFound"),
+        })
+      }
       return
     }
 
@@ -493,7 +498,7 @@ export class UniversalVideoAdapter {
       const errorMessage = error instanceof Error ? error.message : String(error)
 
       if (error instanceof ToastSubtitlesError) {
-        toast.error(errorMessage)
+        toastManager.add({ type: "error", title: errorMessage })
       } else {
         this.subtitlesScheduler?.setState("error", {
           message: this.config.silentErrors ? "" : errorMessage,

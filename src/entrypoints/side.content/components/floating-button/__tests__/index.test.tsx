@@ -7,7 +7,7 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { sendMessage } from "@/utils/message"
 import FloatingButton from ".."
 
-const toastInfoMock = vi.fn<(...args: any[]) => any>()
+const toastAddMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("#imports", () => ({
   browser: {
@@ -61,9 +61,9 @@ vi.mock("@/utils/message", () => ({
   sendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
-vi.mock("sonner", () => ({
-  toast: {
-    info: (...args: unknown[]) => toastInfoMock(...args),
+vi.mock("@/components/ui/base-ui/toast", () => ({
+  toastManager: {
+    add: (...args: unknown[]) => toastAddMock(...args),
   },
 }))
 
@@ -81,7 +81,7 @@ afterEach(() => {
   vi.useRealTimers()
   vi.restoreAllMocks()
   vi.mocked(sendMessage).mockReset()
-  toastInfoMock.mockReset()
+  toastAddMock.mockReset()
   setViewport(1024, 768)
 })
 
@@ -278,7 +278,7 @@ describe("floatingButton controls", () => {
       await Promise.resolve()
     })
 
-    const toastContent = toastInfoMock.mock.calls[0]?.[0]
+    const toastContent = toastAddMock.mock.calls[0]?.[0]?.title
     expect(toastContent).toBeDefined()
     render(<>{toastContent}</>)
 

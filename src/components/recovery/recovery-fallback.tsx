@@ -1,7 +1,6 @@
 import { IconAlertCircle } from "@tabler/icons-react"
 import { useAtomValue, useSetAtom } from "jotai"
 import { useState } from "react"
-import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,6 +13,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/base-ui/alert-dialog"
 import { Button } from "@/components/ui/base-ui/button"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { useExportConfig } from "@/hooks/use-export-config"
 import { configAtom, writeConfigAtom } from "@/utils/atoms/config"
 import { buildFreshDefaultConfig, CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
@@ -39,10 +39,10 @@ export function RecoveryFallback({ error, onRecovered }: RecoveryFallbackProps) 
     setIsResetting(true)
     try {
       await setConfig(buildFreshDefaultConfig())
-      toast.success(i18n.t("errorRecovery.resetSuccess"))
+      toastManager.add({ type: "success", title: i18n.t("errorRecovery.resetSuccess") })
       onRecovered()
     } catch {
-      toast.error(i18n.t("errorRecovery.resetFailed"))
+      toastManager.add({ type: "error", title: i18n.t("errorRecovery.resetFailed") })
     } finally {
       setIsResetting(false)
     }
