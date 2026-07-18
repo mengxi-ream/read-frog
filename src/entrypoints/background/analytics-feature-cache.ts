@@ -16,9 +16,11 @@ export interface FeatureUsageCache {
 }
 
 interface FeatureUsageCacheStorage {
-  getItem: (key: string) => Promise<unknown>
-  setItem: (key: string, value: unknown) => Promise<void>
+  getItem: (key: FeatureUsageCacheStorageKey) => Promise<unknown>
+  setItem: (key: FeatureUsageCacheStorageKey, value: unknown) => Promise<void>
 }
+
+type FeatureUsageCacheStorageKey = `local:analyticsFeatureUsedLastReportedDay:${AnalyticsFeature}`
 
 export function getFeatureUsageDay(date: Date): string {
   const parts = featureUsageDayFormatter.formatToParts(date)
@@ -33,7 +35,9 @@ export function getFeatureUsageDay(date: Date): string {
   return `${year}-${month}-${day}`
 }
 
-export function getFeatureUsageCacheStorageKey(feature: AnalyticsFeature): string {
+export function getFeatureUsageCacheStorageKey(
+  feature: AnalyticsFeature,
+): FeatureUsageCacheStorageKey {
   return `local:analyticsFeatureUsedLastReportedDay:${feature}`
 }
 

@@ -2,6 +2,7 @@ import type { Hotkey } from "@tanstack/hotkeys"
 import type { ReactNode } from "react"
 import type { SelectionSession, SelectionToolbarTranslateRequestSlice } from "../atoms"
 import type { SelectionToolbarInlineError } from "../inline-error"
+import type { TranslationActionContext } from "@/types/analytics"
 import type { BackgroundTextStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
 import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
@@ -19,9 +20,18 @@ import {
 } from "react"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { SelectionPopover } from "@/components/ui/selection-popover"
-import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import {
+  ANALYTICS_FEATURE,
+  ANALYTICS_SURFACE,
+  TRANSLATION_REQUESTED_FEATURE,
+} from "@/types/analytics"
 import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
-import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
+import {
+  classifyTranslationRequest,
+  createFeatureUsageContext,
+  trackFeatureUsed,
+  trackTranslationRequested,
+} from "@/utils/analytics"
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
@@ -29,7 +39,7 @@ import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { translateTextCore } from "@/utils/host/translate/translate-text"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { getOrGenerateWebPageSummary } from "@/utils/host/translate/webpage-summary"
-import { onMessage } from "@/utils/message"
+import { onMessage, sendMessage } from "@/utils/message"
 import {
   isPageTranslationShortcutEmpty,
   isValidConfiguredPageTranslationShortcut,
@@ -98,6 +108,7 @@ async function translateWithTextStream({
   translateRequest,
   onChunk,
   registerAbortController,
+  actionContext,
 }: {
   preparedText: string
   providerId: string
@@ -105,6 +116,7 @@ async function translateWithTextStream({
   translateRequest: SelectionToolbarTranslateRequestSlice
   onChunk: (data: BackgroundTextStreamSnapshot) => void
   registerAbortController: (abortController: AbortController) => void
+  actionContext: TranslationActionContext
 }) {
   const targetLangName = LANG_CODE_TO_EN_NAME[translateRequest.language.targetCode]
   const modelName = resolveModelId(providerConfig.model)
@@ -130,21 +142,55 @@ async function translateWithTextStream({
     translateRequest.enableAIContentAware,
   )
   throwIfAborted()
-  const { systemPrompt, prompt } = getTranslatePromptFromConfig(
+  const configuredPrompt =
+    translateRequest.customPromptsConfig.promptId === null ? "default" : "custom"
+  const promptExperimentVariant =
+    (await sendMessage("resolvePromptExperimentVariant", { configuredPrompt })) ?? undefined
+  throwIfAborted()
+
+  let { systemPrompt, prompt } = getTranslatePromptFromConfig(
     { customPromptsConfig: translateRequest.customPromptsConfig },
     targetLangName,
     preparedText,
-    webPageContext
-      ? {
-          context: {
-            webTitle: webPageContext.webTitle,
-            webDescription: webPageContext.webDescription,
-            webContent: webPageContext.webContent,
-            webSummary: webPageContext.webSummary,
-          },
-        }
-      : undefined,
+    {
+      promptExperimentVariant,
+      ...(webPageContext
+        ? {
+            context: {
+              webTitle: webPageContext.webTitle,
+              webDescription: webPageContext.webDescription,
+              webContent: webPageContext.webContent,
+              webSummary: webPageContext.webSummary,
+            },
+          }
+        : {}),
+    },
   )
+
+  if (promptExperimentVariant) {
+    const exposed = await sendMessage("exposePromptExperiment", {
+      actionContext,
+      expectedVariant: promptExperimentVariant,
+    })
+    throwIfAborted()
+    if (!exposed) {
+      ;({ systemPrompt, prompt } = getTranslatePromptFromConfig(
+        { customPromptsConfig: translateRequest.customPromptsConfig },
+        targetLangName,
+        preparedText,
+        webPageContext
+          ? {
+              context: {
+                webTitle: webPageContext.webTitle,
+                webDescription: webPageContext.webDescription,
+                webContent: webPageContext.webContent,
+                webSummary: webPageContext.webSummary,
+              },
+            }
+          : undefined,
+      ))
+    }
+  }
 
   const translatedText = await streamBackgroundText(
     {
@@ -333,6 +379,22 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
         ANALYTICS_FEATURE.SELECTION_TRANSLATION,
         sourceSurface,
       )
+      const actionContext: TranslationActionContext = {
+        actionId: `selection-${activeSession?.id ?? "unknown"}-${runId}`,
+        feature: TRANSLATION_REQUESTED_FEATURE.SELECTION_TRANSLATION,
+        surface: sourceSurface,
+      }
+
+      const requestedProvider =
+        translateRequest.provider?.kind === "local" ? translateRequest.provider.config : null
+      const translationRequestedPromise = trackTranslationRequested({
+        feature: TRANSLATION_REQUESTED_FEATURE.SELECTION_TRANSLATION,
+        surface: sourceSurface,
+        ...classifyTranslationRequest(
+          requestedProvider,
+          translateRequest.customPromptsConfig.promptId,
+        ),
+      })
 
       setIsTranslating(true)
       setTranslatedText(undefined)
@@ -392,6 +454,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
 
         let nextTranslatedText = ""
         if (isLLMProviderConfig(providerConfig)) {
+          await translationRequestedPromise
           setThinking({
             status: "thinking",
             text: "",
@@ -411,6 +474,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
             registerAbortController: (abortController) => {
               abortControllerRef.current = abortController
             },
+            actionContext,
           })
 
           nextTranslatedText = nextSnapshot.output
@@ -447,13 +511,18 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
           })
         }
       } finally {
+        void Promise.resolve(
+          sendMessage("clearPromptExperimentAction", {
+            actionId: actionContext.actionId,
+          }),
+        ).catch(() => undefined)
         if (runIdRef.current === runId) {
           abortControllerRef.current = null
           setIsTranslating(false)
         }
       }
     },
-    [resetTranslationState, selectionText, sourceSurface, translateRequest],
+    [activeSession?.id, resetTranslationState, selectionText, sourceSurface, translateRequest],
   )
 
   const startTranslation = useEffectEvent((runId: number) => {

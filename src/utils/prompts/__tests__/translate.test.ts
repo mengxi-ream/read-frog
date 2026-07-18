@@ -86,6 +86,71 @@ describe("translate prompt tokens", () => {
     expect(result.prompt).toBe("Translate Hola to {{targetLang}}")
   })
 
+  it.each([
+    ["control", "You are a professional Japanese native translator"],
+    ["rewrite-after-understanding", "Cross-Cultural Content Reconstruction Specialist"],
+    ["precision-rewrite", "Elite Translator and Rewriting Expert"],
+    ["expressive-translation-master", "Master of Expressive Translation"],
+  ] as const)("uses the immutable %s default-prompt snapshot", (variant, marker) => {
+    const result = getTranslatePromptFromConfig(defaultTranslatePromptConfig, "Japanese", "Hello", {
+      promptExperimentVariant: variant,
+      context: {
+        webTitle: "Prompt test title",
+        webSummary: "Prompt test summary",
+      },
+    })
+
+    expect(result.systemPrompt).toContain(marker)
+    expect(result.systemPrompt).not.toContain("{{targetLang}}")
+    expect(result.systemPrompt).not.toContain("{{title}}")
+    expect(result.systemPrompt).not.toContain("{{summary}}")
+    expect(result.prompt).toContain("Hello")
+  })
+
+  it.each([
+    "control",
+    "rewrite-after-understanding",
+    "precision-rewrite",
+    "expressive-translation-master",
+  ] as const)("keeps the %s experiment prompt instructions in English", (variant) => {
+    const result = getTranslatePromptFromConfig(defaultTranslatePromptConfig, "French", "Hello", {
+      promptExperimentVariant: variant,
+      context: {
+        webTitle: "English-only prompt test",
+        webSummary: "English-only prompt summary",
+      },
+    })
+
+    expect(result.systemPrompt).not.toMatch(/\p{Script=Han}/u)
+    expect(result.prompt).not.toMatch(/\p{Script=Han}/u)
+  })
+
+  it("never applies an experiment snapshot to a selected custom prompt", () => {
+    const result = getTranslatePromptFromConfig(
+      {
+        customPromptsConfig: {
+          promptId: "mine",
+          patterns: [
+            {
+              id: "mine",
+              name: "Mine",
+              systemPrompt: "My custom system prompt",
+              prompt: "My custom prompt: {{input}}",
+            },
+          ],
+        },
+      },
+      "English",
+      "Hola",
+      { promptExperimentVariant: "expressive-translation-master" },
+    )
+
+    expect(result).toEqual({
+      systemPrompt: "My custom system prompt",
+      prompt: "My custom prompt: Hola",
+    })
+  })
+
   it("appends mandatory marker rules to the default system prompt", () => {
     const input = `<span ${HTML_ATTRIBUTE_MARKER}="0">Hello</span>`
 

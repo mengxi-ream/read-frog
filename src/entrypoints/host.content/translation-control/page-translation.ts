@@ -1,16 +1,28 @@
 import type { FeatureUsageContext } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import debounce from "debounce"
-import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import {
+  ANALYTICS_FEATURE,
+  ANALYTICS_SURFACE,
+  TRANSLATION_REQUESTED_FEATURE,
+} from "@/types/analytics"
 import { isLLMProviderConfig } from "@/types/config/provider"
-import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
+import {
+  classifyTranslationRequest,
+  createFeatureUsageContext,
+  trackFeatureUsed,
+  trackTranslationRequested,
+} from "@/utils/analytics"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
   CONTENT_WRAPPER_CLASS,
   REACT_SHADOW_HOST_CLASS,
   SPINNER_CLASS,
 } from "@/utils/constants/dom-labels"
-import { resolveProviderConfig } from "@/utils/constants/feature-providers"
+import {
+  resolveProviderConfig,
+  resolveProviderConfigOrNull,
+} from "@/utils/constants/feature-providers"
 import {
   GIANT_PARAGRAPH_MAX_SPLIT_DEPTH,
   GIANT_PARAGRAPH_SPLIT_MIN_VIEWPORT_PX,
@@ -159,12 +171,32 @@ export class PageTranslationManager implements IPageTranslationManager {
     if (!config) {
       console.warn("Config is not initialized")
       if (trackedContext) {
+        if (trackedContext.surface !== ANALYTICS_SURFACE.PAGE_AUTO) {
+          await trackTranslationRequested({
+            feature: TRANSLATION_REQUESTED_FEATURE.PAGE_TRANSLATION,
+            surface: trackedContext.surface,
+            backend_kind: "unknown",
+            configured_prompt: "unknown",
+          })
+        }
         void trackFeatureUsed({
           ...trackedContext,
           outcome: "failure",
         })
       }
       return
+    }
+
+    const requestedProviderConfig = resolveProviderConfigOrNull(config, "translate")
+    if (trackedContext && trackedContext.surface !== ANALYTICS_SURFACE.PAGE_AUTO) {
+      await trackTranslationRequested({
+        feature: TRANSLATION_REQUESTED_FEATURE.PAGE_TRANSLATION,
+        surface: trackedContext.surface,
+        ...classifyTranslationRequest(
+          requestedProviderConfig,
+          config.translate.customPromptsConfig.promptId,
+        ),
+      })
     }
 
     if (
@@ -193,7 +225,18 @@ export class PageTranslationManager implements IPageTranslationManager {
 
       this.isPageTranslating = true
       this.translationSessionVersion += 1
-      beginPageTranslationSession()
+
+      const promptExperimentAction =
+        window === window.top &&
+        trackedContext &&
+        trackedContext.surface !== ANALYTICS_SURFACE.PAGE_AUTO
+          ? {
+              feature: TRANSLATION_REQUESTED_FEATURE.PAGE_TRANSLATION,
+              surface: trackedContext.surface,
+            }
+          : undefined
+
+      beginPageTranslationSession(promptExperimentAction)
 
       const siteRule = getEffectiveSiteRule(config, window.location.href)
       if (siteRule.injectedCss) {

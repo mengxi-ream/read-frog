@@ -48,3 +48,69 @@ export interface FeatureUsedEventProperties {
   action_id?: string
   action_name?: string
 }
+
+export const TRANSLATION_REQUESTED_FEATURE = {
+  PAGE_TRANSLATION: "page_translation",
+  HOVER_TRANSLATION: "hover_translation",
+  SELECTION_TRANSLATION: "selection_translation",
+} as const
+
+export type TranslationRequestedFeature =
+  (typeof TRANSLATION_REQUESTED_FEATURE)[keyof typeof TRANSLATION_REQUESTED_FEATURE]
+
+export type TranslationBackendKind = "llm" | "non_llm" | "unknown"
+export type TranslationConfiguredPrompt = "default" | "custom" | "not_applicable" | "unknown"
+export type PromptExposureAge = "not_exposed" | "lt_24h" | "d1_d7" | "gt_7d"
+
+export const PROMPT_EXPERIMENT_COHORT = "new_user_prompt_experiment_v1"
+
+export const PROMPT_EXPERIMENT_VARIANTS = [
+  "control",
+  "rewrite-after-understanding",
+  "precision-rewrite",
+  "expressive-translation-master",
+] as const
+
+export type PromptExperimentVariant = (typeof PROMPT_EXPERIMENT_VARIANTS)[number]
+
+export type PromptExperimentExcludedReason =
+  | "analytics_disabled"
+  | "flag_unavailable"
+  | "invalid_variant"
+  | "custom_prompt_used"
+
+export interface PromptExperimentCohort {
+  cohort: typeof PROMPT_EXPERIMENT_COHORT
+  installedAt: number
+  installVersion: string
+  excludedReason?: PromptExperimentExcludedReason
+  firstPromptExposureAt?: number
+}
+
+export interface TranslationActionContext {
+  actionId: string
+  feature: TranslationRequestedFeature
+  surface: AnalyticsSurface
+}
+
+export interface TranslationRequestedProperties {
+  feature: TranslationRequestedFeature
+  surface: AnalyticsSurface
+  backend_kind: TranslationBackendKind
+  configured_prompt: TranslationConfiguredPrompt
+  cohort: typeof PROMPT_EXPERIMENT_COHORT
+  prompt_exposure_age: PromptExposureAge
+}
+
+export type TranslationRequestedInput = Pick<
+  TranslationRequestedProperties,
+  "feature" | "surface" | "backend_kind" | "configured_prompt"
+>
+
+export interface TranslationPromptUsedProperties {
+  feature: TranslationRequestedFeature
+  surface: AnalyticsSurface
+  action_id: string
+  cohort: typeof PROMPT_EXPERIMENT_COHORT
+  prompt_exposure_age: PromptExposureAge
+}
