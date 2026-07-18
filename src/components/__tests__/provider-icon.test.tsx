@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import ProviderIcon from "../provider-icon"
 
 const {
   resolveContentScriptAssetBlobMock,
@@ -25,7 +26,6 @@ vi.mock("@/utils/content-script/background-asset-url", () => ({
 
 describe("provider icon", () => {
   beforeEach(() => {
-    vi.resetModules()
     vi.clearAllMocks()
     vi.stubGlobal("createImageBitmap", createImageBitmapMock)
     Object.defineProperty(globalThis, "devicePixelRatio", {
@@ -42,9 +42,8 @@ describe("provider icon", () => {
     })
   })
 
-  it("renders a normal image when the logo does not need proxying", async () => {
+  it("renders a normal image when the logo does not need proxying", () => {
     shouldProxyAssetUrlMock.mockReturnValue(false)
-    const { default: ProviderIcon } = await import("../provider-icon")
 
     render(<ProviderIcon logo="https://cdn.example.com/logo.webp" name="OpenAI" size="md" />)
 
@@ -55,9 +54,8 @@ describe("provider icon", () => {
     expect(resolveContentScriptAssetBlobMock).not.toHaveBeenCalled()
   })
 
-  it("normalizes local extension asset paths before rendering", async () => {
+  it("normalizes local extension asset paths before rendering", () => {
     shouldProxyAssetUrlMock.mockReturnValue(false)
-    const { default: ProviderIcon } = await import("../provider-icon")
 
     render(<ProviderIcon logo="/assets/providers/deeplx-light.svg" name="DeepLX" size="md" />)
 
@@ -78,7 +76,6 @@ describe("provider icon", () => {
       new Blob([Uint8Array.from([1, 2, 3])], { type: "image/webp" }),
     )
     createImageBitmapMock.mockResolvedValue(bitmap)
-    const { default: ProviderIcon } = await import("../provider-icon")
 
     const view = render(
       <ProviderIcon logo="https://cdn.example.com/logo.webp" name="OpenAI" size="md" />,
