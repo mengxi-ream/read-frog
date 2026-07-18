@@ -1,2 +1,3 @@
 web-ext.config.ts
 .env.development
+.env.production
