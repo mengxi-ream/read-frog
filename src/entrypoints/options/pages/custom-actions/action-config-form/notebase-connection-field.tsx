@@ -6,7 +6,13 @@ import type {
   SelectionToolbarCustomActionNotebaseMapping,
   SelectionToolbarCustomActionOutputField,
 } from "@/types/config/selection-toolbar"
-import { IconChevronsRight, IconPlus, IconRefresh, IconTrash } from "@tabler/icons-react"
+import {
+  IconChevronsRight,
+  IconExternalLink,
+  IconPlus,
+  IconRefresh,
+  IconTrash,
+} from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import { useSelector } from "@tanstack/react-store"
 import { dequal } from "dequal"
@@ -447,21 +453,42 @@ export const NotebaseConnectionField = withForm({
                 <FieldLabel nativeLabel={false} render={<div />}>
                   {t("tableLabel")}
                 </FieldLabel>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRefresh}
-                  disabled={
-                    !currentAccount ||
-                    !sanitizedConnection?.notebaseId ||
-                    !isOwnedConnection ||
-                    schemaQuery.isFetching
-                  }
-                >
-                  <IconRefresh className={schemaQuery.isFetching ? "animate-spin" : undefined} />
-                  {t("refreshAction")}
-                </Button>
+                <div className="flex items-center gap-2">
+                  {isOwnedConnection && !!sanitizedConnection?.notebaseId && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      render={
+                        <a
+                          href={new URL(
+                            `/notebase/${encodeURIComponent(sanitizedConnection.notebaseId)}`,
+                            env.WXT_WEBSITE_URL,
+                          ).toString()}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        />
+                      }
+                    >
+                      <IconExternalLink />
+                      {t("openNotebaseAction")}
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRefresh}
+                    disabled={
+                      !currentAccount ||
+                      !sanitizedConnection?.notebaseId ||
+                      !isOwnedConnection ||
+                      schemaQuery.isFetching
+                    }
+                  >
+                    <IconRefresh className={schemaQuery.isFetching ? "animate-spin" : undefined} />
+                    {t("refreshAction")}
+                  </Button>
+                </div>
               </div>
 
               <Select<string | null>
