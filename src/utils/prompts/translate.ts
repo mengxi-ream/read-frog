@@ -1,3 +1,4 @@
+import type { PromptExperimentVariant } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import type { WebPagePromptContext } from "@/types/content"
 import { getLocalConfig } from "@/utils/config/storage"
@@ -20,6 +21,7 @@ import {
   WEB_SUMMARY,
   WEB_TITLE,
 } from "../constants/prompt"
+import { getDefaultTranslatePromptForVariant } from "./translate-experiment"
 
 const HTML_ATTRIBUTE_MARKER_SYSTEM_PROMPT = `## Protected HTML Marker Rules
 These mandatory rules override any conflicting instructions above:
@@ -31,6 +33,7 @@ These mandatory rules override any conflicting instructions above:
 export interface TranslatePromptOptions<TContext = unknown> {
   isBatch?: boolean
   context?: TContext
+  promptExperimentVariant?: PromptExperimentVariant
 }
 
 export interface TranslatePromptResult {
@@ -59,9 +62,14 @@ export function getTranslatePromptFromConfig(
   let prompt: string
 
   if (!promptId) {
-    // Use default prompts from constants
-    systemPrompt = DEFAULT_TRANSLATE_SYSTEM_PROMPT
-    prompt = DEFAULT_TRANSLATE_PROMPT
+    const defaults = options?.promptExperimentVariant
+      ? getDefaultTranslatePromptForVariant(options.promptExperimentVariant)
+      : {
+          systemPrompt: DEFAULT_TRANSLATE_SYSTEM_PROMPT,
+          prompt: DEFAULT_TRANSLATE_PROMPT,
+        }
+    systemPrompt = defaults.systemPrompt
+    prompt = defaults.prompt
   } else {
     // Find custom prompt, fallback to default
     const customPrompt = patterns.find((pattern) => pattern.id === promptId)

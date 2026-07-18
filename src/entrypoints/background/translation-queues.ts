@@ -1,3 +1,4 @@
+import type { PromptExperimentVariant, TranslationActionContext } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
 import type { BatchQueueConfig, RequestQueueConfig } from "@/types/config/translate"
@@ -27,6 +28,13 @@ import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { BatchQueue } from "@/utils/request/batch-queue"
 import { CancelledScopeRegistry, TranslationCancelledError } from "@/utils/request/cancellation"
 import { RequestQueue } from "@/utils/request/request-queue"
+import { attachRequestErrorMeta } from "@/utils/request/retry-policy"
+import {
+  clearPromptExperimentAction,
+  clearPromptExperimentActionsByPrefix,
+  exposePromptExperiment,
+  resolvePromptExperimentVariant,
+} from "./analytics"
 import { ensureInitializedConfig } from "./config"
 
 export function parseBatchResult(result: string): string[] {
@@ -38,6 +46,14 @@ export function parseBatchResult(result: string): string[] {
 
 export function shouldUseBatchQueue(providerConfig: ProviderConfig): boolean {
   return isLLMProviderConfig(providerConfig)
+}
+
+class PromptExperimentDispatchChangedError extends Error {
+  constructor(readonly latestVariant: PromptExperimentVariant | null) {
+    super("Prompt experiment variant changed before dispatch")
+    this.name = "PromptExperimentDispatchChangedError"
+    attachRequestErrorMeta(this, { isRetryable: false })
+  }
 }
 
 async function getValidatedCachedTranslation(
@@ -187,6 +203,9 @@ export interface TranslateBatchData<TContext = unknown> {
   context?: TContext
   // Cancellation scope (`${tabId}:${sessionId}`); absent = uncancellable.
   scope?: string
+  promptExperimentVariant?: PromptExperimentVariant
+  translationActionContext?: TranslationActionContext
+  actionDedupeKey?: string
 }
 
 /**
@@ -208,12 +227,13 @@ interface TranslationQueueSetupConfig<TContext = unknown> {
   promptResolver: PromptResolver<TContext>
   // Present only for queues whose requests carry cancellation scopes.
   isScopeCancelled?: (scopeKey: string) => boolean
+  beforeDispatch?: (dataList: TranslateBatchData<TContext>[]) => Promise<void>
 }
 
 async function createTranslationQueues<TContext>(config: TranslationQueueSetupConfig<TContext>) {
   const { rate, capacity } = config.requestQueueConfig
   const { maxCharactersPerBatch, maxItemsPerBatch } = config.batchQueueConfig
-  const { promptResolver, isScopeCancelled } = config
+  const { promptResolver, isScopeCancelled, beforeDispatch } = config
 
   const requestQueue = new RequestQueue({
     rate,
@@ -246,6 +266,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
 
       const batchThunk = async (signal?: AbortSignal): Promise<string[]> => {
         await putBatchRequestRecord({ originalRequestCount: dataList.length, providerConfig })
+        await beforeDispatch?.(dataList)
         return await executeBatchTranslation(dataList, promptResolver, signal)
       }
 
@@ -255,6 +276,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
       const { text, langConfig, providerConfig, hash, scheduleAt, context, scope } = data
       const thunk = async (signal?: AbortSignal) => {
         await putBatchRequestRecord({ originalRequestCount: 1, providerConfig })
+        await beforeDispatch?.([data])
         return executeTranslate(text, langConfig, providerConfig, promptResolver, {
           context,
           signal,
@@ -288,11 +310,47 @@ export async function setUpWebPageTranslationQueue() {
   // would otherwise be lost (#1881).
   const cancelledScopes = new CancelledScopeRegistry()
 
-  const { requestQueue, batchQueue } = await createTranslationQueues({
+  type WebTranslationPromptContext = WebPagePromptContext & {
+    promptExperimentVariant?: PromptExperimentVariant
+  }
+
+  const webPromptResolver: PromptResolver<WebTranslationPromptContext> = (
+    targetLang,
+    input,
+    options,
+  ) =>
+    getTranslatePrompt(targetLang, input, {
+      ...options,
+      promptExperimentVariant: options?.context?.promptExperimentVariant,
+    })
+
+  const { requestQueue, batchQueue } = await createTranslationQueues<WebTranslationPromptContext>({
     requestQueueConfig,
     batchQueueConfig,
-    promptResolver: getTranslatePrompt,
+    promptResolver: webPromptResolver,
     isScopeCancelled: (scopeKey) => cancelledScopes.has(scopeKey),
+    beforeDispatch: async (dataList) => {
+      const uniqueActions = new Map<
+        string,
+        { actionContext: TranslationActionContext; variant: PromptExperimentVariant }
+      >()
+      for (const data of dataList) {
+        if (!data.promptExperimentVariant || !data.translationActionContext) continue
+        const dedupeKey = data.actionDedupeKey ?? data.translationActionContext.actionId
+        uniqueActions.set(dedupeKey, {
+          actionContext: data.translationActionContext,
+          variant: data.promptExperimentVariant,
+        })
+      }
+
+      for (const [dedupeKey, { actionContext, variant }] of uniqueActions) {
+        const exposed = await exposePromptExperiment(actionContext, variant, dedupeKey)
+        if (!exposed) {
+          const latestVariant = await resolvePromptExperimentVariant("default")
+          throw new PromptExperimentDispatchChangedError(latestVariant)
+        }
+      }
+    },
   })
 
   onMessage("enqueueTranslateRequest", async (message) => {
@@ -309,6 +367,8 @@ export async function setUpWebPageTranslationQueue() {
         webContent,
         webSummary,
         sessionId,
+        promptExperimentVariant,
+        translationActionContext,
       },
     } = message
     const scope = buildTranslationScopeKey(message.sender, sessionId)
@@ -337,17 +397,58 @@ export async function setUpWebPageTranslationQueue() {
       throw new TranslationCancelledError(scope)
     }
 
+    let effectivePromptExperimentVariant = promptExperimentVariant
+    let cacheUnderRequestedHash = true
+    if (promptExperimentVariant) {
+      const latestVariant = await resolvePromptExperimentVariant("default")
+      if (latestVariant && latestVariant !== promptExperimentVariant) {
+        return { retryWithPromptExperimentVariant: latestVariant }
+      }
+      if (!latestVariant) {
+        effectivePromptExperimentVariant = undefined
+        cacheUnderRequestedHash = false
+      }
+    }
+
     let result: string
-    const context: WebPagePromptContext = {
+    const context: WebTranslationPromptContext = {
       webTitle: normalizePromptContextValue(webTitle),
       webDescription: normalizePromptContextValue(webDescription),
       webContent: normalizePromptContextValue(webContent),
       webSummary: normalizePromptContextValue(webSummary),
+      promptExperimentVariant: effectivePromptExperimentVariant,
     }
 
     if (shouldUseBatchQueue(providerConfig)) {
-      const data = { text, langConfig, providerConfig, hash, scheduleAt, context, scope }
-      result = await batchQueue.enqueue(data)
+      const data = {
+        text,
+        langConfig,
+        providerConfig,
+        hash,
+        scheduleAt,
+        context,
+        scope,
+        promptExperimentVariant: effectivePromptExperimentVariant,
+        translationActionContext,
+        actionDedupeKey:
+          translationActionContext?.feature === "page_translation"
+            ? (scope ?? translationActionContext.actionId)
+            : translationActionContext?.actionId,
+      }
+      try {
+        result = await batchQueue.enqueue(data)
+      } catch (error) {
+        if (error instanceof PromptExperimentDispatchChangedError) {
+          if (error.latestVariant) {
+            return { retryWithPromptExperimentVariant: error.latestVariant }
+          }
+          const retryResponse: { retryWithoutPromptExperiment: true } = {
+            retryWithoutPromptExperiment: true,
+          }
+          return retryResponse
+        }
+        throw error
+      }
     } else {
       // Create thunk based on type and params
       const thunk = (signal?: AbortSignal) =>
@@ -363,7 +464,7 @@ export async function setUpWebPageTranslationQueue() {
     }
 
     // Cache the translation result if successful
-    if (result && hash) {
+    if (result && hash && cacheUnderRequestedHash) {
       await db.translationCache.put({
         key: hash,
         translation: result,
@@ -400,6 +501,7 @@ export async function setUpWebPageTranslationQueue() {
     // Remember the scope so enqueue handlers suspended on the cache lookup
     // refuse to enqueue after this drain.
     cancelledScopes.markScope(scope)
+    clearPromptExperimentAction(scope)
     // Batch queue first so pending batches cannot flush new request-queue
     // tasks between the two drains.
     const cancelledBatch = batchQueue.cancelByScope(scope)
@@ -416,6 +518,7 @@ export async function setUpWebPageTranslationQueue() {
   browser.tabs.onRemoved.addListener((tabId) => {
     const prefix = `${tabId}:`
     cancelledScopes.markPrefix(prefix)
+    clearPromptExperimentActionsByPrefix(prefix)
     batchQueue.cancelWhere((scope) => scope.startsWith(prefix))
     requestQueue.cancelWhere((scope) => scope.startsWith(prefix))
   })

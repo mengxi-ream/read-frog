@@ -1,31 +1,46 @@
+import type { PostHog } from "posthog-js/dist/module.no-external"
 import type { FeatureUsageCache } from "../analytics-feature-cache"
-import type { FeatureUsedEventProperties } from "@/types/analytics"
+import type {
+  FeatureUsedEventProperties,
+  PromptExperimentCohort,
+  TranslationActionContext,
+  TranslationRequestedInput,
+} from "@/types/analytics"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { PROMPT_EXPERIMENT_FLAG_WAIT_MS } from "@/utils/constants/analytics"
 import {
   createBackgroundAnalytics,
   filterAnalyticsCaptureResult,
   resolveDistinctIdOverride,
 } from "../analytics"
 
-type RegisteredMessageHandler = (message: { data: FeatureUsedEventProperties }) => Promise<void>
+type MessageHandler<TData, TResult = void> = (message: {
+  data: TData
+}) => TResult | Promise<TResult>
+
+type PostHogCaptureMock = (...args: Parameters<PostHog["capture"]>) => void
+type PostHogInitMock = (...args: Parameters<PostHog["init"]>) => void
+type PostHogRegisterMock = (...args: Parameters<PostHog["register"]>) => void
 
 describe("background analytics", () => {
-  let onMessageMock: ReturnType<typeof vi.fn>
-  let storageGetItemMock: ReturnType<typeof vi.fn>
-  let storageSetItemMock: ReturnType<typeof vi.fn>
-  let getTargetLanguageMock: ReturnType<typeof vi.fn>
-  let posthogInitMock: ReturnType<typeof vi.fn>
-  let posthogCaptureMock: ReturnType<typeof vi.fn>
-  let posthogRegisterMock: ReturnType<typeof vi.fn>
-  let loggerWarnMock: ReturnType<typeof vi.fn>
+  let trackFeatureUsedEventHandler: MessageHandler<FeatureUsedEventProperties> | undefined
+  let trackTranslationRequestedEventHandler: MessageHandler<TranslationRequestedInput> | undefined
+  let storageGetItemMock = vi.fn<(key: string) => Promise<unknown>>()
+  let storageSetItemMock = vi.fn<(key: string, value: unknown) => Promise<void>>()
+  let getTargetLanguageMock = vi.fn<() => Promise<"cmn" | undefined>>()
+  let posthogInitMock = vi.fn<PostHogInitMock>()
+  let posthogCaptureMock = vi.fn<PostHogCaptureMock>()
+  let posthogRegisterMock = vi.fn<PostHogRegisterMock>()
+  let posthogGetFeatureFlagMock = vi.fn<PostHog["getFeatureFlag"]>()
+  let posthogOnFeatureFlagsMock = vi.fn<PostHog["onFeatureFlags"]>()
+  let loggerWarnMock = vi.fn<(...args: unknown[]) => void>()
 
-  function getRegisteredMessageHandler(name: string) {
-    const registration = onMessageMock.mock.calls.find((call) => call[0] === name)
-    if (!registration) {
-      throw new Error(`Message handler not registered: ${name}`)
-    }
-
-    return registration[1] as RegisteredMessageHandler
+  function requireMessageHandler<TData>(
+    handler: MessageHandler<TData> | undefined,
+    name: string,
+  ): MessageHandler<TData> {
+    if (!handler) throw new Error(`Message handler not registered: ${name}`)
+    return handler
   }
 
   function createAnalytics(overrides?: {
@@ -49,22 +64,28 @@ describe("background analytics", () => {
       extensionVersion: "1.0.0",
       featureUsageCache: overrides?.featureUsageCache,
       getCurrentDate: overrides?.getCurrentDate ?? (() => new Date("2026-07-14T12:00:00.000Z")),
-      getStorageItem: storageGetItemMock as (key: string) => Promise<unknown>,
-      getTargetLanguage: getTargetLanguageMock as () => Promise<"cmn" | undefined>,
-      onMessage: onMessageMock as (
-        type: "trackFeatureUsedEvent",
-        handler: RegisteredMessageHandler,
-      ) => unknown,
-      posthog: {
-        init: posthogInitMock as (token: string, config: Record<string, unknown>) => void,
-        capture: posthogCaptureMock as (
-          eventName: string,
-          properties: FeatureUsedEventProperties,
-        ) => void,
-        register: posthogRegisterMock as (properties: { extension_version: string }) => void,
+      getStorageItem: storageGetItemMock,
+      getTargetLanguage: getTargetLanguageMock,
+      messageRegistrar: {
+        registerClearPromptExperimentAction() {},
+        registerExposePromptExperiment() {},
+        registerResolvePromptExperimentVariant() {},
+        registerTrackFeatureUsedEvent(handler) {
+          trackFeatureUsedEventHandler = handler
+        },
+        registerTrackTranslationRequestedEvent(handler) {
+          trackTranslationRequestedEventHandler = handler
+        },
       },
-      setStorageItem: storageSetItemMock as (key: string, value: unknown) => Promise<void>,
-      warn: loggerWarnMock as (...args: any[]) => void,
+      posthog: {
+        init: posthogInitMock,
+        capture: posthogCaptureMock,
+        register: posthogRegisterMock,
+        getFeatureFlag: posthogGetFeatureFlagMock,
+        onFeatureFlags: posthogOnFeatureFlagsMock,
+      },
+      setStorageItem: storageSetItemMock,
+      warn: (...args) => loggerWarnMock(...args),
     })
   }
 
@@ -94,15 +115,35 @@ describe("background analytics", () => {
     return { cache, lastReportedDays }
   }
 
+  function useMemoryStorage(initial: Record<string, unknown>) {
+    const values = new Map(Object.entries(initial))
+    storageGetItemMock.mockImplementation(async (key: string) => values.get(key))
+    storageSetItemMock.mockImplementation(async (key: string, value: unknown) => {
+      values.set(key, value)
+    })
+    return values
+  }
+
   beforeEach(() => {
-    onMessageMock = vi.fn<(...args: any[]) => any>()
-    storageGetItemMock = vi.fn<(...args: any[]) => any>()
-    storageSetItemMock = vi.fn<(...args: any[]) => any>()
-    getTargetLanguageMock = vi.fn<(...args: any[]) => any>().mockResolvedValue("cmn")
-    posthogInitMock = vi.fn<(...args: any[]) => any>()
-    posthogCaptureMock = vi.fn<(...args: any[]) => any>()
-    posthogRegisterMock = vi.fn<(...args: any[]) => any>()
-    loggerWarnMock = vi.fn<(...args: any[]) => any>()
+    vi.useRealTimers()
+    trackFeatureUsedEventHandler = undefined
+    trackTranslationRequestedEventHandler = undefined
+    storageGetItemMock = vi.fn<(key: string) => Promise<unknown>>()
+    storageSetItemMock = vi
+      .fn<(key: string, value: unknown) => Promise<void>>()
+      .mockResolvedValue(undefined)
+    getTargetLanguageMock = vi.fn<() => Promise<"cmn" | undefined>>().mockResolvedValue("cmn")
+    posthogInitMock = vi.fn<PostHogInitMock>()
+    posthogCaptureMock = vi.fn<PostHogCaptureMock>()
+    posthogRegisterMock = vi.fn<PostHogRegisterMock>()
+    posthogGetFeatureFlagMock = vi.fn<PostHog["getFeatureFlag"]>()
+    posthogOnFeatureFlagsMock = vi
+      .fn<PostHog["onFeatureFlags"]>()
+      .mockImplementation((callback) => {
+        callback([], {}, {})
+        return vi.fn<() => void>()
+      })
+    loggerWarnMock = vi.fn<(...args: unknown[]) => void>()
   })
 
   it("registers a handler that initializes PostHog with the shared anonymous distinct ID", async () => {
@@ -111,7 +152,7 @@ describe("background analytics", () => {
     const { setupAnalyticsMessageHandlers } = createAnalytics()
     setupAnalyticsMessageHandlers()
 
-    const handler = getRegisteredMessageHandler("trackFeatureUsedEvent")
+    const handler = requireMessageHandler(trackFeatureUsedEventHandler, "trackFeatureUsedEvent")
     await handler({
       data: {
         feature: "page_translation",
@@ -133,7 +174,7 @@ describe("background analytics", () => {
         capture_pageleave: false,
         disable_external_dependency_loading: true,
         disable_session_recording: true,
-        advanced_disable_flags: true,
+        advanced_disable_flags: false,
         person_profiles: "never",
         persistence: "memory",
         respect_dnt: true,
@@ -597,6 +638,13 @@ describe("background analytics", () => {
           $lib_version: "1.360.2",
           $process_person_profile: false,
           extension_version: "1.0.0",
+          backend_kind: "llm",
+          configured_prompt: "default",
+          cohort: "new_user_prompt_experiment_v1",
+          prompt_exposure_age: "d1_d7",
+          $feature_flag: "new-user-default-translate-prompt-v1",
+          $feature_flag_response: "control",
+          $feature_flag_payload: { private: true },
           $current_url: "chrome-extension://abc/background.js",
           $raw_user_agent: "Mozilla/5.0",
           $timezone: "America/Vancouver",
@@ -622,6 +670,271 @@ describe("background analytics", () => {
       $lib_version: "1.360.2",
       $process_person_profile: false,
       extension_version: "1.0.0",
+      backend_kind: "llm",
+      configured_prompt: "default",
+      cohort: "new_user_prompt_experiment_v1",
+      prompt_exposure_age: "d1_d7",
+      $feature_flag: "new-user-default-translate-prompt-v1",
+      $feature_flag_response: "control",
     })
+  })
+
+  it("enrolls only an explicit fresh install marker without initializing PostHog", async () => {
+    const values = useMemoryStorage({})
+    const { enrollPromptExperimentInstall } = createAnalytics()
+
+    await enrollPromptExperimentInstall()
+
+    expect(values.get("local:promptExperimentCohortV1")).toEqual({
+      cohort: "new_user_prompt_experiment_v1",
+      installedAt: new Date("2026-07-14T12:00:00.000Z").getTime(),
+      installVersion: "1.0.0",
+    })
+    expect(posthogInitMock).not.toHaveBeenCalled()
+  })
+
+  it("uses silent fresh lookup before native exposure and dedupes prompt use per action", async () => {
+    const cohort: PromptExperimentCohort = {
+      cohort: "new_user_prompt_experiment_v1",
+      installedAt: new Date("2026-07-14T11:00:00.000Z").getTime(),
+      installVersion: "1.0.0",
+    }
+    const values = useMemoryStorage({
+      "local:analyticsEnabled": true,
+      "local:analyticsInstallId": "install-123",
+      "local:promptExperimentCohortV1": cohort,
+    })
+    posthogGetFeatureFlagMock.mockReturnValue("precision-rewrite")
+    const analytics = createAnalytics()
+
+    await expect(analytics.resolvePromptExperimentVariant("default")).resolves.toBe(
+      "precision-rewrite",
+    )
+    expect(posthogGetFeatureFlagMock).toHaveBeenNthCalledWith(
+      1,
+      "new-user-default-translate-prompt-v1",
+      { send_event: false, fresh: true },
+    )
+
+    const actionContext: TranslationActionContext = {
+      actionId: "action-1",
+      feature: "page_translation",
+      surface: "popup",
+    }
+    await expect(
+      analytics.exposePromptExperiment(actionContext, "precision-rewrite"),
+    ).resolves.toBe(true)
+    await analytics.exposePromptExperiment(actionContext, "precision-rewrite")
+
+    expect(posthogGetFeatureFlagMock).toHaveBeenCalledWith("new-user-default-translate-prompt-v1")
+    expect(
+      posthogCaptureMock.mock.calls.filter(([event]) => event === "translation_prompt_used"),
+    ).toEqual([
+      [
+        "translation_prompt_used",
+        expect.objectContaining({
+          action_id: "action-1",
+          feature: "page_translation",
+          surface: "popup",
+          cohort: "new_user_prompt_experiment_v1",
+        }),
+      ],
+    ])
+    expect(values.get("local:promptExperimentCohortV1")).toEqual(
+      expect.objectContaining({
+        firstPromptExposureAt: new Date("2026-07-14T12:00:00.000Z").getTime(),
+      }),
+    )
+  })
+
+  it("performs one native exposure for a page session across three batches", async () => {
+    useMemoryStorage({
+      "local:analyticsEnabled": true,
+      "local:analyticsInstallId": "install-123",
+      "local:promptExperimentCohortV1": {
+        cohort: "new_user_prompt_experiment_v1",
+        installedAt: new Date("2026-07-14T11:00:00.000Z").getTime(),
+        installVersion: "1.0.0",
+      } satisfies PromptExperimentCohort,
+    })
+    posthogGetFeatureFlagMock.mockReturnValue("precision-rewrite")
+    const analytics = createAnalytics()
+    const actionContext: TranslationActionContext = {
+      actionId: "page-session-1",
+      feature: "page_translation",
+      surface: "popup",
+    }
+    const actionDedupeKey = "42:page-session-1"
+
+    await expect(
+      Promise.all([
+        analytics.exposePromptExperiment(actionContext, "precision-rewrite", actionDedupeKey),
+        analytics.exposePromptExperiment(actionContext, "precision-rewrite", actionDedupeKey),
+        analytics.exposePromptExperiment(actionContext, "precision-rewrite", actionDedupeKey),
+      ]),
+    ).resolves.toEqual([true, true, true])
+
+    const silentLookups = posthogGetFeatureFlagMock.mock.calls.filter(
+      ([, options]) => options?.send_event === false,
+    )
+    const exposingLookups = posthogGetFeatureFlagMock.mock.calls.filter(
+      ([, options]) => options === undefined,
+    )
+
+    expect(silentLookups).toHaveLength(3)
+    expect(exposingLookups).toEqual([["new-user-default-translate-prompt-v1"]])
+    expect(
+      posthogCaptureMock.mock.calls.filter(([event]) => event === "translation_prompt_used"),
+    ).toEqual([
+      [
+        "translation_prompt_used",
+        expect.objectContaining({
+          action_id: actionDedupeKey,
+          feature: "page_translation",
+          surface: "popup",
+        }),
+      ],
+    ])
+  })
+
+  it("does not let background preload consume the action-time flag wait", async () => {
+    vi.useFakeTimers()
+    let featureFlagsCallback: Parameters<PostHog["onFeatureFlags"]>[0] | undefined
+    useMemoryStorage({
+      "local:analyticsEnabled": true,
+      "local:analyticsInstallId": "install-123",
+      "local:promptExperimentCohortV1": {
+        cohort: "new_user_prompt_experiment_v1",
+        installedAt: 1,
+        installVersion: "1.0.0",
+      },
+    })
+    posthogOnFeatureFlagsMock.mockImplementation((callback) => {
+      featureFlagsCallback = callback
+      return vi.fn<() => void>()
+    })
+    posthogGetFeatureFlagMock.mockReturnValue("precision-rewrite")
+    const analytics = createAnalytics()
+
+    await analytics.preloadPromptExperimentFeatureFlags()
+    await vi.advanceTimersByTimeAsync(PROMPT_EXPERIMENT_FLAG_WAIT_MS + 1)
+    featureFlagsCallback?.(
+      ["new-user-default-translate-prompt-v1"],
+      { "new-user-default-translate-prompt-v1": "precision-rewrite" },
+      {},
+    )
+
+    await expect(analytics.resolvePromptExperimentVariant("default")).resolves.toBe(
+      "precision-rewrite",
+    )
+  })
+
+  it("starts the unavailable-flags timeout when an action requests a variant", async () => {
+    vi.useFakeTimers()
+    const values = useMemoryStorage({
+      "local:analyticsEnabled": true,
+      "local:analyticsInstallId": "install-123",
+      "local:promptExperimentCohortV1": {
+        cohort: "new_user_prompt_experiment_v1",
+        installedAt: 1,
+        installVersion: "1.0.0",
+      },
+    })
+    posthogOnFeatureFlagsMock.mockImplementation(() => vi.fn<() => void>())
+    const analytics = createAnalytics()
+
+    await analytics.preloadPromptExperimentFeatureFlags()
+    await vi.advanceTimersByTimeAsync(PROMPT_EXPERIMENT_FLAG_WAIT_MS * 2)
+    const variantPromise = analytics.resolvePromptExperimentVariant("default")
+    await vi.advanceTimersByTimeAsync(PROMPT_EXPERIMENT_FLAG_WAIT_MS)
+
+    await expect(variantPromise).resolves.toBeNull()
+    expect(values.get("local:promptExperimentCohortV1")).toEqual(
+      expect.objectContaining({ excludedReason: "flag_unavailable" }),
+    )
+  })
+
+  it("reports requested actions only for cohort installs and derives D1-D7 exposure age", async () => {
+    useMemoryStorage({
+      "local:analyticsEnabled": true,
+      "local:analyticsInstallId": "install-123",
+      "local:promptExperimentCohortV1": {
+        cohort: "new_user_prompt_experiment_v1",
+        installedAt: new Date("2026-07-10T00:00:00.000Z").getTime(),
+        installVersion: "1.0.0",
+        firstPromptExposureAt: new Date("2026-07-12T12:00:00.000Z").getTime(),
+      },
+    })
+    const analytics = createAnalytics()
+    analytics.setupAnalyticsMessageHandlers()
+
+    await requireMessageHandler(
+      trackTranslationRequestedEventHandler,
+      "trackTranslationRequestedEvent",
+    )({
+      data: {
+        feature: "hover_translation",
+        surface: "shortcut",
+        backend_kind: "non_llm",
+        configured_prompt: "not_applicable",
+      },
+    })
+
+    expect(posthogCaptureMock).toHaveBeenCalledWith("translation_requested", {
+      feature: "hover_translation",
+      surface: "shortcut",
+      backend_kind: "non_llm",
+      configured_prompt: "not_applicable",
+      cohort: "new_user_prompt_experiment_v1",
+      prompt_exposure_age: "d1_d7",
+    })
+  })
+
+  it("permanently excludes a default-LLM action used while analytics is disabled", async () => {
+    const values = useMemoryStorage({
+      "local:analyticsEnabled": false,
+      "local:promptExperimentCohortV1": {
+        cohort: "new_user_prompt_experiment_v1",
+        installedAt: 1,
+        installVersion: "1.0.0",
+      },
+    })
+    const analytics = createAnalytics({ defaultAnalyticsEnabled: false })
+
+    await expect(analytics.resolvePromptExperimentVariant("default")).resolves.toBeNull()
+
+    expect(values.get("local:promptExperimentCohortV1")).toEqual(
+      expect.objectContaining({ excludedReason: "analytics_disabled" }),
+    )
+    expect(posthogInitMock).not.toHaveBeenCalled()
+  })
+
+  it("treats false and unknown flag values as permanent exclusions rather than control", async () => {
+    const baseCohort: PromptExperimentCohort = {
+      cohort: "new_user_prompt_experiment_v1",
+      installedAt: 1,
+      installVersion: "1.0.0",
+    }
+    const falseValues = useMemoryStorage({
+      "local:analyticsEnabled": true,
+      "local:analyticsInstallId": "install-123",
+      "local:promptExperimentCohortV1": baseCohort,
+    })
+    posthogGetFeatureFlagMock.mockReturnValue(false)
+    await createAnalytics().resolvePromptExperimentVariant("default")
+    expect(falseValues.get("local:promptExperimentCohortV1")).toEqual(
+      expect.objectContaining({ excludedReason: "flag_unavailable" }),
+    )
+
+    const unknownValues = useMemoryStorage({
+      "local:analyticsEnabled": true,
+      "local:analyticsInstallId": "install-123",
+      "local:promptExperimentCohortV1": baseCohort,
+    })
+    posthogGetFeatureFlagMock.mockReturnValue("not-a-variant")
+    await createAnalytics().resolvePromptExperimentVariant("default")
+    expect(unknownValues.get("local:promptExperimentCohortV1")).toEqual(
+      expect.objectContaining({ excludedReason: "invalid_variant" }),
+    )
   })
 })

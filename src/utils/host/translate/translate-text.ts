@@ -1,4 +1,9 @@
 import type { LangCodeISO6393, LangLevel } from "@read-frog/definitions"
+import type {
+  PromptExperimentVariant,
+  TranslationActionContext,
+  TranslationConfiguredPrompt,
+} from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
 import type { TranslationTextFormat } from "@/types/config/translate"
@@ -16,7 +21,7 @@ import { TranslationCancelledError } from "@/utils/request/cancellation"
 import { Sha256Hex } from "../../hash"
 import { sendMessage } from "../../message"
 import { prepareTranslationText } from "./text-preparation"
-import { getPageTranslationSessionId } from "./translation-session"
+import { getPageTranslationActionContext, getPageTranslationSessionId } from "./translation-session"
 
 // Minimum text length for skip language detection (shorter than general detection
 // to catch short phrases like "Bonjour!" or "こんにちは")
@@ -78,6 +83,7 @@ async function buildWebPageHashComponents(
   enableAIContentAware: boolean,
   textFormat: TranslationTextFormat,
   webPageContext?: WebPagePromptContext,
+  promptExperimentVariant?: PromptExperimentVariant,
 ): Promise<string[]> {
   const preparedText = prepareTranslationText(text)
   const normalizedWebPageContext = normalizeWebPagePromptContext(webPageContext)
@@ -100,6 +106,7 @@ async function buildWebPageHashComponents(
   const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, preparedText, {
     isBatch: true,
     context: normalizedWebPageContext,
+    promptExperimentVariant,
   })
   hashComponents.push(systemPrompt, prompt)
   hashComponents.push(
@@ -140,6 +147,12 @@ export interface TranslateTextOptions {
   // Page-translation session id used for cancellation scoping. Deliberately
   // NOT part of the cache hash — cache identity must not vary per session.
   sessionId?: string
+  configuredPrompt?: TranslationConfiguredPrompt
+  translationActionContext?: TranslationActionContext
+  /** Internal retry state after the background observes a newer flag value. */
+  promptExperimentVariant?: PromptExperimentVariant
+  promptExperimentRetryCount?: number
+  skipPromptExperimentResolution?: boolean
 }
 
 /**
@@ -156,6 +169,11 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     webPageContext,
     textFormat = "plain",
     sessionId,
+    configuredPrompt,
+    translationActionContext = getPageTranslationActionContext() ?? undefined,
+    promptExperimentVariant: forcedPromptExperimentVariant,
+    promptExperimentRetryCount = 0,
+    skipPromptExperimentResolution = false,
   } = options
 
   const preparedText = prepareTranslationText(text)
@@ -165,6 +183,20 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
 
   const normalizedWebPageContext = normalizeWebPagePromptContext(webPageContext)
 
+  let promptExperimentVariant = forcedPromptExperimentVariant
+  if (
+    isLLMProviderConfig(providerConfig) &&
+    translationActionContext &&
+    configuredPrompt &&
+    !skipPromptExperimentResolution &&
+    promptExperimentVariant === undefined
+  ) {
+    promptExperimentVariant =
+      (await sendMessage("resolvePromptExperimentVariant", {
+        configuredPrompt,
+      })) ?? undefined
+  }
+
   const hashComponents = await buildWebPageHashComponents(
     preparedText,
     providerConfig,
@@ -172,6 +204,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     enableAIContentAware,
     textFormat,
     normalizedWebPageContext,
+    promptExperimentVariant,
   )
 
   // Add extra hash tags for cache differentiation
@@ -200,7 +233,27 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     webContent: normalizedWebPageContext?.webContent,
     webSummary: normalizedWebPageContext?.webSummary,
     sessionId,
+    promptExperimentVariant,
+    translationActionContext,
   })
+  if (typeof result !== "string") {
+    if (promptExperimentRetryCount >= 2) {
+      throw new Error("Prompt experiment variant changed repeatedly during one request")
+    }
+    if ("retryWithoutPromptExperiment" in result) {
+      return translateTextCore({
+        ...options,
+        promptExperimentVariant: undefined,
+        promptExperimentRetryCount: promptExperimentRetryCount + 1,
+        skipPromptExperimentResolution: true,
+      })
+    }
+    return translateTextCore({
+      ...options,
+      promptExperimentVariant: result.retryWithPromptExperimentVariant,
+      promptExperimentRetryCount: promptExperimentRetryCount + 1,
+    })
+  }
   // The sentinel must be mapped here and only here: every batch-pipeline
   // consumer (page paragraphs, document title, input translation, selection
   // toolbar standard path) routes through this function and already handles
