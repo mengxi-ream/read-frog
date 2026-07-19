@@ -104,6 +104,22 @@ function createOpenRouterProviderConfig(headers?: Record<string, unknown>) {
   }
 }
 
+function createAtlasCloudProviderConfig() {
+  return {
+    id: "atlascloud-default",
+    name: "Atlas Cloud",
+    enabled: true,
+    provider: "atlascloud",
+    apiKey: "test-key",
+    baseURL: "https://api.atlascloud.ai/v1",
+    model: {
+      model: "deepseek-ai/deepseek-v4-flash",
+      isCustomModel: false,
+      customModel: null,
+    },
+  }
+}
+
 function createOllamaProviderConfig(providerOptions?: Record<string, unknown>) {
   return {
     id: "ollama-default",
@@ -168,7 +184,47 @@ describe("getModelById", () => {
         supportsStructuredOutputs: true,
       }),
     )
+    expect(createOpenAICompatibleMock.mock.calls[0]?.[0]).not.toHaveProperty("fetch")
     expect(openAICompatibleLanguageModelMock).toHaveBeenCalledWith("x-ai/grok-4-fast:free")
+  })
+
+  it("omits browser credentials only for Atlas Cloud requests", async () => {
+    getStorageItemMock.mockResolvedValue({
+      providersConfig: [createAtlasCloudProviderConfig()],
+    })
+
+    const { getModelById } = await import("../model")
+    const result = await getModelById("atlascloud-default")
+
+    expect(result).toBe("custom-model")
+    expect(createOpenAICompatibleMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "atlascloud",
+        baseURL: "https://api.atlascloud.ai/v1",
+        apiKey: "test-key",
+        fetch: expect.any(Function),
+      }),
+    )
+
+    const atlasFetch = createOpenAICompatibleMock.mock.calls[0]?.[0]?.fetch as typeof fetch
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response())
+
+    await atlasFetch("https://api.atlascloud.ai/v1/chat/completions", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        Authorization: "Bearer test-key",
+      },
+    })
+
+    expect(fetchMock).toHaveBeenCalledWith("https://api.atlascloud.ai/v1/chat/completions", {
+      method: "POST",
+      credentials: "omit",
+      headers: {
+        Authorization: "Bearer test-key",
+      },
+    })
+    fetchMock.mockRestore()
   })
 
   it("passes Ollama root base URL and disables think on the language model", async () => {
