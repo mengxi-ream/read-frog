@@ -1,6 +1,6 @@
 import { db } from "@/utils/db/dexie/db"
 import { logger } from "@/utils/logger"
-import { onMessage, sendMessage } from "@/utils/message"
+import { onMessage } from "@/utils/message"
 import {
   getVocabularyGlossPrompt,
   parseVocabularyGlossResponse,
@@ -65,14 +65,6 @@ export function setupVocabularyMessageHandlers() {
   onMessage("vocabularyGetKnownWords", async () => {
     const entries = await db.knownWords.toArray()
     return entries.map((entry) => entry.word)
-  })
-
-  onMessage("vocabularyMarkKnownWord", async (message) => {
-    await addKnownWord(message.data.word)
-    const tabId = message.sender?.tab?.id
-    if (tabId !== undefined) {
-      void sendMessage("vocabularyKnownWordsChanged", undefined, tabId)
-    }
   })
 }
 

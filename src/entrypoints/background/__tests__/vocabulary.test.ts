@@ -6,7 +6,6 @@ const wordGlossCacheBulkGetMock = vi.fn<(...args: any[]) => any>()
 const wordGlossCacheBulkPutMock = vi.fn<(...args: any[]) => any>()
 const runGenerateTextInBackgroundMock = vi.fn<(...args: any[]) => any>()
 const onMessageMock = vi.fn<(...args: any[]) => any>()
-const sendMessageMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("@/utils/db/dexie/db", () => ({
   db: {
@@ -23,7 +22,6 @@ vi.mock("@/utils/db/dexie/db", () => ({
 
 vi.mock("@/utils/message", () => ({
   onMessage: onMessageMock,
-  sendMessage: sendMessageMock,
 }))
 
 vi.mock("../llm-generate-text", () => ({
@@ -105,21 +103,5 @@ describe("background vocabulary", () => {
 
     expect(result).toEqual({})
     expect(wordGlossCacheBulkPutMock).not.toHaveBeenCalled()
-  })
-
-  it("marks a word known and notifies the sender tab to re-walk", async () => {
-    const handler = getRegisteredMessageHandler("vocabularyMarkKnownWord")
-    await handler({ data: { word: "serendipity" }, sender: { tab: { id: 7 } } })
-
-    expect(knownWordsPutMock).toHaveBeenCalledWith(expect.objectContaining({ word: "serendipity" }))
-    expect(sendMessageMock).toHaveBeenCalledWith("vocabularyKnownWordsChanged", undefined, 7)
-  })
-
-  it("skips notifying when the message has no sender tab", async () => {
-    const handler = getRegisteredMessageHandler("vocabularyMarkKnownWord")
-    await handler({ data: { word: "quixotic" }, sender: {} })
-
-    expect(knownWordsPutMock).toHaveBeenCalledWith(expect.objectContaining({ word: "quixotic" }))
-    expect(sendMessageMock).not.toHaveBeenCalled()
   })
 })
