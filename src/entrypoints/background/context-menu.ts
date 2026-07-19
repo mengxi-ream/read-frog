@@ -11,6 +11,7 @@ import {
 } from "@/utils/constants/storage-keys"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
+import { getLeadingWord } from "@/utils/vocabulary/leading-word"
 import { ensureInitializedConfig } from "./config"
 import { getPageTranslationEnabled, setPageTranslationEnabled } from "./page-translation-state"
 import { addKnownWord } from "./vocabulary"
@@ -288,16 +289,9 @@ async function handleSelectionMarkKnownWordClick(
   info: Browser.contextMenus.OnClickData,
   tabId: number,
 ) {
-  // Take the first word of the selection: users right-click a single annotated
-  // word; a multi-word selection still marks only its leading word.
-  const word = info.selectionText
-    ?.trim()
-    .split(/\s+/)[0]
-    ?.replace(/[^a-z'-]/gi, "")
-    .toLowerCase()
-  if (!word) {
-    return
-  }
+  // A multi-word selection still marks only its leading word.
+  const word = getLeadingWord(info.selectionText)
+  if (!word) return
 
   await addKnownWord(word)
   void sendMessage("vocabularyKnownWordsChanged", undefined, tabId)

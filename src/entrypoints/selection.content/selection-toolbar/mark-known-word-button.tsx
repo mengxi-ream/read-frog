@@ -4,17 +4,9 @@ import { useCallback, useState } from "react"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { i18n } from "@/utils/i18n"
 import { markWordAsKnown } from "@/utils/vocabulary/gloss-service"
+import { getLeadingWord } from "@/utils/vocabulary/leading-word"
 import { SelectionToolbarTooltip, useSelectionTooltipState } from "../components/selection-tooltip"
 import { selectionContentAtom } from "./atoms"
-
-function getLeadingWord(selectionText: string | null): string | null {
-  const word = selectionText
-    ?.trim()
-    .split(/\s+/)[0]
-    ?.replace(/[^a-z'-]/gi, "")
-    .toLowerCase()
-  return word || null
-}
 
 /**
  * Only rendered in vocabulary mode: marks the leading word of the current

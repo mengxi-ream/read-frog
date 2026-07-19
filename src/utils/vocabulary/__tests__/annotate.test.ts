@@ -3,25 +3,20 @@ import { annotateText, collectRareWords, isRareWord } from "../annotate"
 import { getWordRank } from "../word-rank"
 
 describe("isRareWord", () => {
-  it("treats high-frequency words as familiar", () => {
-    expect(isRareWord("the", 5000)).toBe(false)
-    expect(isRareWord("people", 5000)).toBe(false)
+  it.each([
+    ["the", 5000, false, "high-frequency word within threshold"],
+    ["people", 5000, false, "high-frequency word within threshold"],
+    ["people", 10, true, "listed word beyond a tiny threshold"],
+    ["serendipity", 5000, true, "unlisted lowercase word"],
+    ["of", 0, false, "short word always familiar"],
+    ["NASA", 0, false, "acronym skipped"],
+    ["Kowalski", 5000, false, "unlisted capitalized word (likely proper noun)"],
+  ])("%s @ rank<=%i -> rare=%s (%s)", (word, rank, expected) => {
+    expect(isRareWord(word, rank)).toBe(expected)
   })
 
-  it("treats words beyond the rank threshold as rare", () => {
-    // Any listed word with rank > 10 is rare under a tiny threshold.
-    expect(isRareWord("people", 10)).toBe(true)
-  })
-
-  it("treats unlisted lowercase words as rare", () => {
+  it("has no listed rank for words treated as unlisted-rare", () => {
     expect(getWordRank("serendipity")).toBeUndefined()
-    expect(isRareWord("serendipity", 5000)).toBe(true)
-  })
-
-  it("skips short words, acronyms and unlisted capitalized words", () => {
-    expect(isRareWord("of", 0)).toBe(false)
-    expect(isRareWord("NASA", 0)).toBe(false)
-    expect(isRareWord("Kowalski", 5000)).toBe(false)
   })
 })
 

@@ -154,39 +154,28 @@ describe("background context menu", () => {
     )
   })
 
-  describe("mark known word", () => {
-    async function clickMarkKnownWord(selectionText: string) {
-      const { MENU_ID_SELECTION_MARK_KNOWN_WORD, registerContextMenuListeners } =
-        await import("../context-menu")
-      registerContextMenuListeners()
-      const clickHandler = contextMenuClickListeners[0]
-      if (!clickHandler) {
-        throw new Error("Context menu click listener was not registered")
-      }
-      await clickHandler(
-        { menuItemId: MENU_ID_SELECTION_MARK_KNOWN_WORD, selectionText },
-        { id: 5 },
-      )
+  // Word-extraction edge cases (punctuation, casing, empty selection) are
+  // covered by leading-word.test.ts; this only verifies the click wires
+  // through to addKnownWord + the tab notification.
+  it("marks the leading word of a selection as known on click", async () => {
+    const { MENU_ID_SELECTION_MARK_KNOWN_WORD, registerContextMenuListeners } =
+      await import("../context-menu")
+    registerContextMenuListeners()
+    const clickHandler = contextMenuClickListeners[0]
+    if (!clickHandler) {
+      throw new Error("Context menu click listener was not registered")
     }
 
-    it("marks the leading word of a selection as known on click", async () => {
-      await clickMarkKnownWord("serendipity of their meeting")
+    await clickHandler(
+      {
+        menuItemId: MENU_ID_SELECTION_MARK_KNOWN_WORD,
+        selectionText: "serendipity of their meeting",
+      },
+      { id: 5 },
+    )
 
-      expect(addKnownWordMock).toHaveBeenCalledWith("serendipity")
-      expect(sendMessageMock).toHaveBeenCalledWith("vocabularyKnownWordsChanged", undefined, 5)
-    })
-
-    it("strips punctuation and lowercases the word before marking it known", async () => {
-      await clickMarkKnownWord("Quixotic,")
-
-      expect(addKnownWordMock).toHaveBeenCalledWith("quixotic")
-    })
-
-    it("ignores an empty selection", async () => {
-      await clickMarkKnownWord("   ")
-
-      expect(addKnownWordMock).not.toHaveBeenCalled()
-    })
+    expect(addKnownWordMock).toHaveBeenCalledWith("serendipity")
+    expect(sendMessageMock).toHaveBeenCalledWith("vocabularyKnownWordsChanged", undefined, 5)
   })
 
   it("removes menu items without recreating them when the context menu is disabled", async () => {
