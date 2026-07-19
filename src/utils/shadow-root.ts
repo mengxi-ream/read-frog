@@ -1,14 +1,15 @@
 import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
 
 // WXT prepends `:host { all: initial !important }` inside each isolated UI.
-// These declarations must live in the same Shadow DOM cascade (and after that
-// reset) to restore WXT's intended zero-sized overlay geometry.
+// These declarations must live after that reset to restore the zero-sized
+// overlay geometry. Keep the host static so a host appended to the end of the
+// page cannot become the containing block for absolutely positioned portals.
 export const OVERLAY_SHADOW_ROOT_CSS = `
 :host {
   display: block !important;
   height: 0 !important;
   overflow: visible !important;
-  position: relative !important;
+  position: static !important;
   width: 0 !important;
 }
 

@@ -27,17 +27,19 @@ describe("insertShadowRootUIWrapperInto", () => {
     document.body.innerHTML = ""
   })
 
-  it("defines overlay geometry inside the Shadow DOM cascade", () => {
+  it("defines zero-sized overlay geometry without creating a portal containing block", () => {
     for (const declaration of [
       "display: block !important",
       "height: 0 !important",
       "overflow: visible !important",
-      "position: relative !important",
+      "position: static !important",
       "width: 0 !important",
       "background-color: transparent !important",
     ]) {
       expect(OVERLAY_SHADOW_ROOT_CSS).toContain(declaration)
     }
+
+    expect(OVERLAY_SHADOW_ROOT_CSS).not.toContain("position: relative !important")
   })
 
   it("marks the shadow host and wrapper as non-translatable", () => {
