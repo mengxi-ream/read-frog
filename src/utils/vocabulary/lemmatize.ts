@@ -8,53 +8,31 @@
 
 function stripDoubledConsonant(stem: string): string {
   const last = stem.at(-1)
-  const secondLast = stem.at(-2)
-  return last && last === secondLast && !"aeiou".includes(last) ? stem.slice(0, -1) : stem
+  return last && last === stem.at(-2) && !"aeiou".includes(last) ? stem.slice(0, -1) : stem
 }
+
+// [suffix, minLength, buildCandidates]. Order matters: "-ied"/"-iest"/"-ier"
+// must be checked before the shorter "-ed"/"-est"/"-er" so e.g. "tried"
+// yields "try" instead of a bogus "tri"/"tried" stem.
+const RULES: [string, number, (stem: string) => string[]][] = [
+  ["ies", 4, (s) => [`${s}y`]],
+  ["es", 3, (s) => [s]],
+  ["s", 3, (s) => (s.endsWith("s") ? [] : [s])],
+  ["ied", 4, (s) => [`${s}y`]],
+  ["ed", 4, (s) => [s, stripDoubledConsonant(s), `${s}e`]],
+  ["ing", 5, (s) => [s, stripDoubledConsonant(s), `${s}e`]],
+  ["iest", 5, (s) => [`${s}y`]],
+  ["est", 4, (s) => [s, s.slice(0, -1)]],
+  ["ier", 4, (s) => [`${s}y`]],
+  ["er", 3, (s) => [s, s.slice(0, -1)]],
+]
 
 export function generateLemmaCandidates(word: string): string[] {
   const candidates = new Set<string>()
-
-  if (word.endsWith("ies") && word.length > 4) {
-    candidates.add(`${word.slice(0, -3)}y`)
+  for (const [suffix, minLength, build] of RULES) {
+    if (!word.endsWith(suffix) || word.length <= minLength) continue
+    for (const candidate of build(word.slice(0, -suffix.length))) candidates.add(candidate)
   }
-  if (word.endsWith("es") && word.length > 3) {
-    candidates.add(word.slice(0, -2))
-  }
-  if (word.endsWith("s") && !word.endsWith("ss") && word.length > 3) {
-    candidates.add(word.slice(0, -1))
-  }
-
-  if (word.endsWith("ied") && word.length > 4) {
-    candidates.add(`${word.slice(0, -3)}y`)
-  }
-  if (word.endsWith("ed") && word.length > 4) {
-    const stem = word.slice(0, -2)
-    candidates.add(stem)
-    candidates.add(stripDoubledConsonant(stem))
-    candidates.add(`${stem}e`)
-  }
-
-  if (word.endsWith("ing") && word.length > 5) {
-    const stem = word.slice(0, -3)
-    candidates.add(stem)
-    candidates.add(stripDoubledConsonant(stem))
-    candidates.add(`${stem}e`)
-  }
-
-  if (word.endsWith("iest") && word.length > 5) {
-    candidates.add(`${word.slice(0, -4)}y`)
-  } else if (word.endsWith("est") && word.length > 4) {
-    candidates.add(word.slice(0, -3))
-    candidates.add(word.slice(0, -4))
-  }
-  if (word.endsWith("ier") && word.length > 4) {
-    candidates.add(`${word.slice(0, -3)}y`)
-  } else if (word.endsWith("er") && word.length > 3) {
-    candidates.add(word.slice(0, -2))
-    candidates.add(word.slice(0, -3))
-  }
-
   candidates.delete(word)
   return [...candidates]
 }
