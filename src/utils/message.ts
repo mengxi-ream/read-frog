@@ -163,6 +163,7 @@ interface ProtocolMap {
     providerId: string
   }) => Promise<Record<string, string>>
   vocabularyGetKnownWords: () => Promise<string[]>
+  vocabularyMarkKnownWord: (data: { word: string }) => Promise<void>
   vocabularyKnownWordsChanged: () => void
   // microsoft batch translation
   microsoftBatchTranslate: (data: {

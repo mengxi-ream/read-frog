@@ -1083,6 +1083,9 @@ speak:
   failedToGenerateSpeech: 语音生成失败
   noTextSelected: 未选择文本
   openaiNotConfigured: OpenAI 提供商未配置或未启用
+vocabulary:
+  markKnownTooltip: 标为熟词
+  markedKnown: "已将“$1”标为熟词"
   openaiApiKeyNotConfigured: OpenAI API Key 未配置
 action:
   copy: 复制

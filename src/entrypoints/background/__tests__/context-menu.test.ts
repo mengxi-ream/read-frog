@@ -154,64 +154,39 @@ describe("background context menu", () => {
     )
   })
 
-  it("marks the leading word of a selection as known on click", async () => {
-    const { MENU_ID_SELECTION_MARK_KNOWN_WORD, registerContextMenuListeners } =
-      await import("../context-menu")
-
-    registerContextMenuListeners()
-
-    const clickHandler = contextMenuClickListeners[0]
-    if (!clickHandler) {
-      throw new Error("Context menu click listener was not registered")
+  describe("mark known word", () => {
+    async function clickMarkKnownWord(selectionText: string) {
+      const { MENU_ID_SELECTION_MARK_KNOWN_WORD, registerContextMenuListeners } =
+        await import("../context-menu")
+      registerContextMenuListeners()
+      const clickHandler = contextMenuClickListeners[0]
+      if (!clickHandler) {
+        throw new Error("Context menu click listener was not registered")
+      }
+      await clickHandler(
+        { menuItemId: MENU_ID_SELECTION_MARK_KNOWN_WORD, selectionText },
+        { id: 5 },
+      )
     }
 
-    await clickHandler(
-      {
-        menuItemId: MENU_ID_SELECTION_MARK_KNOWN_WORD,
-        selectionText: "serendipity of their meeting",
-      },
-      { id: 5 },
-    )
+    it("marks the leading word of a selection as known on click", async () => {
+      await clickMarkKnownWord("serendipity of their meeting")
 
-    expect(addKnownWordMock).toHaveBeenCalledWith("serendipity")
-  })
+      expect(addKnownWordMock).toHaveBeenCalledWith("serendipity")
+      expect(sendMessageMock).toHaveBeenCalledWith("vocabularyKnownWordsChanged", undefined, 5)
+    })
 
-  it("strips punctuation and lowercases the word before marking it known", async () => {
-    const { MENU_ID_SELECTION_MARK_KNOWN_WORD, registerContextMenuListeners } =
-      await import("../context-menu")
+    it("strips punctuation and lowercases the word before marking it known", async () => {
+      await clickMarkKnownWord("Quixotic,")
 
-    registerContextMenuListeners()
+      expect(addKnownWordMock).toHaveBeenCalledWith("quixotic")
+    })
 
-    const clickHandler = contextMenuClickListeners[0]
-    if (!clickHandler) {
-      throw new Error("Context menu click listener was not registered")
-    }
+    it("ignores an empty selection", async () => {
+      await clickMarkKnownWord("   ")
 
-    await clickHandler(
-      { menuItemId: MENU_ID_SELECTION_MARK_KNOWN_WORD, selectionText: "Quixotic," },
-      { id: 5 },
-    )
-
-    expect(addKnownWordMock).toHaveBeenCalledWith("quixotic")
-  })
-
-  it("ignores an empty selection for mark-known-word", async () => {
-    const { MENU_ID_SELECTION_MARK_KNOWN_WORD, registerContextMenuListeners } =
-      await import("../context-menu")
-
-    registerContextMenuListeners()
-
-    const clickHandler = contextMenuClickListeners[0]
-    if (!clickHandler) {
-      throw new Error("Context menu click listener was not registered")
-    }
-
-    await clickHandler(
-      { menuItemId: MENU_ID_SELECTION_MARK_KNOWN_WORD, selectionText: "   " },
-      { id: 5 },
-    )
-
-    expect(addKnownWordMock).not.toHaveBeenCalled()
+      expect(addKnownWordMock).not.toHaveBeenCalled()
+    })
   })
 
   it("removes menu items without recreating them when the context menu is disabled", async () => {

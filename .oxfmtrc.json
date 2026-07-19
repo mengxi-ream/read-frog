@@ -20,8 +20,7 @@
     ".codex/**",
     ".cursor/**",
     "pnpm-lock.yaml",
-    "**/*.svg",
-    "src/utils/vocabulary/built-in/common-words.json"
+    "**/*.svg"
   ],
   "sortTailwindcss": {
     "stylesheet": "./src/assets/styles/theme.css",

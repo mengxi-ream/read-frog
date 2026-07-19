@@ -1,5 +1,6 @@
 import type { ContentScriptContext } from "#imports"
 import type { Config } from "@/types/config/config"
+import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { detectPageLanguageLightweight } from "@/utils/content/page-language"
 import { ensurePresetStyles } from "@/utils/host/translate/ui/style-injector"
@@ -111,6 +112,19 @@ export async function bootstrapHostContent(
         })
       : () => {}
 
+  // A word was just marked known (context menu / selection toolbar): re-walk
+  // the page so the annotation for that word disappears immediately, but only
+  // when vocabulary mode is actually driving the current translation.
+  const cleanupKnownWordsChangedListener = onMessage("vocabularyKnownWordsChanged", () => {
+    if (!manager.isActive) return
+    void (async () => {
+      const currentConfig = await getLocalConfig()
+      if (currentConfig?.translate.mode === "vocabulary") {
+        await manager.restart()
+      }
+    })()
+  })
+
   ctx.onInvalidated(() => {
     removeHostToast()
     cleanupUrlListener()
@@ -121,6 +135,7 @@ export async function bootstrapHostContent(
     cleanupTranslationStateListener()
     cleanupFrameTranslationStateListener()
     cleanupDetectedLanguageRefreshListener()
+    cleanupKnownWordsChangedListener()
     window.removeEventListener("extension:URLChange", handleExtensionUrlChange)
     window.__READ_FROG_HOST_INJECTED__ = false
     clearEffectiveSiteControlUrl()

@@ -16,6 +16,17 @@ export async function getKnownWords(): Promise<ReadonlySet<string>> {
   return knownWordsCache.words
 }
 
+/** Drop the local known-words cache so the next getKnownWords() re-fetches. */
+export function invalidateKnownWordsCache(): void {
+  knownWordsCache = null
+}
+
+/** Mark a word known and notify background so it can trigger a re-walk. */
+export async function markWordAsKnown(word: string): Promise<void> {
+  invalidateKnownWordsCache()
+  await sendMessage("vocabularyMarkKnownWord", { word })
+}
+
 /**
  * Glosses need an LLM. Use the translate provider when it is one; otherwise
  * prefer an enabled LLM provider the user actually configured (has an API

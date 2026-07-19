@@ -6,6 +6,7 @@ const wordGlossCacheBulkGetMock = vi.fn<(...args: any[]) => any>()
 const wordGlossCacheBulkPutMock = vi.fn<(...args: any[]) => any>()
 const runGenerateTextInBackgroundMock = vi.fn<(...args: any[]) => any>()
 const onMessageMock = vi.fn<(...args: any[]) => any>()
+const sendMessageMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("@/utils/db/dexie/db", () => ({
   db: {
@@ -22,6 +23,7 @@ vi.mock("@/utils/db/dexie/db", () => ({
 
 vi.mock("@/utils/message", () => ({
   onMessage: onMessageMock,
+  sendMessage: sendMessageMock,
 }))
 
 vi.mock("../llm-generate-text", () => ({
@@ -33,18 +35,20 @@ function getRegisteredMessageHandler(name: string) {
   if (!registration) {
     throw new Error(`Message handler not registered: ${name}`)
   }
-  return registration[1] as (message: { data: any }) => Promise<any>
+  return registration[1] as (message: { data: any; sender?: any }) => Promise<any>
 }
 
 describe("background vocabulary", () => {
-  beforeEach(() => {
+  let vocabulary: typeof import("../vocabulary")
+
+  beforeEach(async () => {
     vi.clearAllMocks()
+    vocabulary = await import("../vocabulary")
+    vocabulary.setupVocabularyMessageHandlers()
   })
 
   it("marks a word as known via addKnownWord", async () => {
-    const { addKnownWord } = await import("../vocabulary")
-
-    await addKnownWord("serendipity")
+    await vocabulary.addKnownWord("serendipity")
 
     expect(knownWordsPutMock).toHaveBeenCalledWith(expect.objectContaining({ word: "serendipity" }))
   })
@@ -55,9 +59,6 @@ describe("background vocabulary", () => {
       { word: "quixotic", createdAt: new Date() },
     ])
 
-    const { setupVocabularyMessageHandlers } = await import("../vocabulary")
-    setupVocabularyMessageHandlers()
-
     const handler = getRegisteredMessageHandler("vocabularyGetKnownWords")
     const result = await handler({ data: undefined })
 
@@ -66,9 +67,6 @@ describe("background vocabulary", () => {
 
   it("serves cached glosses without calling the LLM", async () => {
     wordGlossCacheBulkGetMock.mockResolvedValue([{ key: "cmn:serendipity", gloss: "机缘巧合" }])
-
-    const { setupVocabularyMessageHandlers } = await import("../vocabulary")
-    setupVocabularyMessageHandlers()
 
     const handler = getRegisteredMessageHandler("vocabularyGetGlosses")
     const result = await handler({
@@ -85,9 +83,6 @@ describe("background vocabulary", () => {
       text: JSON.stringify({ quixotic: "不切实际的" }),
     })
 
-    const { setupVocabularyMessageHandlers } = await import("../vocabulary")
-    setupVocabularyMessageHandlers()
-
     const handler = getRegisteredMessageHandler("vocabularyGetGlosses")
     const result = await handler({
       data: { words: ["quixotic"], targetLangCode: "cmn", providerId: "test-provider" },
@@ -103,9 +98,6 @@ describe("background vocabulary", () => {
     wordGlossCacheBulkGetMock.mockResolvedValue([undefined])
     runGenerateTextInBackgroundMock.mockRejectedValue(new Error("network error"))
 
-    const { setupVocabularyMessageHandlers } = await import("../vocabulary")
-    setupVocabularyMessageHandlers()
-
     const handler = getRegisteredMessageHandler("vocabularyGetGlosses")
     const result = await handler({
       data: { words: ["quixotic"], targetLangCode: "cmn", providerId: "test-provider" },
@@ -113,5 +105,21 @@ describe("background vocabulary", () => {
 
     expect(result).toEqual({})
     expect(wordGlossCacheBulkPutMock).not.toHaveBeenCalled()
+  })
+
+  it("marks a word known and notifies the sender tab to re-walk", async () => {
+    const handler = getRegisteredMessageHandler("vocabularyMarkKnownWord")
+    await handler({ data: { word: "serendipity" }, sender: { tab: { id: 7 } } })
+
+    expect(knownWordsPutMock).toHaveBeenCalledWith(expect.objectContaining({ word: "serendipity" }))
+    expect(sendMessageMock).toHaveBeenCalledWith("vocabularyKnownWordsChanged", undefined, 7)
+  })
+
+  it("skips notifying when the message has no sender tab", async () => {
+    const handler = getRegisteredMessageHandler("vocabularyMarkKnownWord")
+    await handler({ data: { word: "quixotic" }, sender: {} })
+
+    expect(knownWordsPutMock).toHaveBeenCalledWith(expect.objectContaining({ word: "quixotic" }))
+    expect(sendMessageMock).not.toHaveBeenCalled()
   })
 })

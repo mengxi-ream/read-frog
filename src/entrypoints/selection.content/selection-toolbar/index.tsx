@@ -17,6 +17,7 @@ import {
 } from "./atoms"
 import { CloseButton, DropEvent } from "./close-button"
 import { SelectionToolbarCustomActionButtons } from "./custom-action-button"
+import { MarkKnownWordButton } from "./mark-known-word-button"
 import {
   collectSelectionScrollTargets,
   createSelectionAnchorTracker,
@@ -193,6 +194,7 @@ export function SelectionToolbar() {
   const setSelectionState = useSetAtom(setSelectionStateAtom)
   const clearSelectionState = useSetAtom(clearSelectionStateAtom)
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
+  const translateConfig = useAtomValue(configFieldsAtomMap.translate)
   const dropdownOpenRef = useRef(false)
 
   const updatePosition = useCallback(
@@ -477,6 +479,7 @@ export function SelectionToolbar() {
   const hasAnyEnabledFeature =
     features.translate.enabled ||
     features.speak.enabled ||
+    translateConfig.mode === "vocabulary" ||
     selectionToolbar.customActions.some((a) => a.enabled !== false)
 
   return (
@@ -504,6 +507,7 @@ export function SelectionToolbar() {
             <div className="no-scrollbar flex max-w-105 items-center overflow-x-auto overflow-y-hidden rounded-sm">
               {features.translate.enabled && <TranslateButton />}
               {features.speak.enabled && <SpeakButton />}
+              {translateConfig.mode === "vocabulary" && <MarkKnownWordButton />}
               <SelectionToolbarCustomActionButtons />
             </div>
             <CloseButton />

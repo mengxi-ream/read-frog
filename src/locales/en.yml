@@ -1083,6 +1083,9 @@ speak:
   failedToGenerateSpeech: Failed to generate speech
   noTextSelected: No text selected
   openaiNotConfigured: OpenAI provider is not configured or enabled
+vocabulary:
+  markKnownTooltip: Mark as known word
+  markedKnown: 'Marked "$1" as known'
   openaiApiKeyNotConfigured: OpenAI API key is not configured
 action:
   copy: Copy

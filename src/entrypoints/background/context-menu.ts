@@ -202,7 +202,7 @@ async function handleContextMenuClick(
   }
 
   if (info.menuItemId === MENU_ID_SELECTION_MARK_KNOWN_WORD) {
-    await handleSelectionMarkKnownWordClick(info)
+    await handleSelectionMarkKnownWordClick(info, tab.id)
     return
   }
 
@@ -284,7 +284,10 @@ async function handleSelectionReadAloudClick(
   void sendMessage("readAloudSelectionFromContextMenu", { selectionText }, target)
 }
 
-async function handleSelectionMarkKnownWordClick(info: Browser.contextMenus.OnClickData) {
+async function handleSelectionMarkKnownWordClick(
+  info: Browser.contextMenus.OnClickData,
+  tabId: number,
+) {
   // Take the first word of the selection: users right-click a single annotated
   // word; a multi-word selection still marks only its leading word.
   const word = info.selectionText
@@ -297,6 +300,7 @@ async function handleSelectionMarkKnownWordClick(info: Browser.contextMenus.OnCl
   }
 
   await addKnownWord(word)
+  void sendMessage("vocabularyKnownWordsChanged", undefined, tabId)
 }
 
 async function handleSelectionCustomActionClick(
