@@ -1,4 +1,23 @@
+import { generateLemmaCandidates } from "./lemmatize"
 import { getWordRank } from "./word-rank"
+
+/**
+ * Frequency rank of the word itself, or its best (lowest) inflection
+ * candidate — a word's own inflected-form rank can be well beyond the
+ * threshold even when its base form is common (e.g. "walked" ranks lower
+ * than "walk"), so the more familiar candidate wins.
+ */
+function getEffectiveWordRank(normalized: string): number | undefined {
+  let bestRank = getWordRank(normalized)
+
+  for (const candidate of generateLemmaCandidates(normalized)) {
+    const rank = getWordRank(candidate)
+    if (rank !== undefined && (bestRank === undefined || rank < bestRank)) {
+      bestRank = rank
+    }
+  }
+  return bestRank
+}
 
 // Tokens shorter than this are always treated as familiar — articles,
 // pronouns and short function words are never worth annotating.
@@ -21,7 +40,7 @@ export function isRareWord(token: string, familiarWordRank: number): boolean {
   if (token.length < MIN_WORD_LENGTH) return false
   if (/[A-Z]/.test(token.slice(1))) return false
   const normalized = normalizeWord(token)
-  const rank = getWordRank(normalized)
+  const rank = getEffectiveWordRank(normalized)
   if (rank !== undefined) return rank > familiarWordRank
   return token[0] === token[0].toLowerCase()
 }

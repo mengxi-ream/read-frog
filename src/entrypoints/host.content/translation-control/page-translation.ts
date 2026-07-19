@@ -923,12 +923,12 @@ export class PageTranslationManager implements IPageTranslationManager {
         }
         passes += 1
         handledVersion = mutationVersions.get(source) ?? 0
-        if (config.translate.mode === "translationOnly") {
+        if (config.translate.mode === "translationOnly" || config.translate.mode === "vocabulary") {
           // Swapped-anchor staleness: translateNodes routes to the
-          // translationOnly path, which restores surviving swaps first so the
-          // provider sees current host text, then re-swaps. Keyed on the MODE,
-          // not on anchor-state presence — a scheduled retry must never insert
-          // bilingual wrappers into a translationOnly session.
+          // translationOnly/vocabulary path, which restores surviving swaps
+          // first so the provider sees current host text, then re-swaps. Keyed
+          // on the MODE, not on anchor-state presence — a scheduled retry must
+          // never insert bilingual wrappers into a swap-based session.
           await translateNodes([source], walkId, false, config)
         } else {
           walkAndLabelElement(source, walkId, config)

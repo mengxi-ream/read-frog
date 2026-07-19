@@ -5,6 +5,7 @@ import { i18n } from "@/utils/i18n"
 
 const sendMessageMock = vi.fn<(...args: any[]) => any>()
 const ensureInitializedConfigMock = vi.fn<(...args: any[]) => any>()
+const addKnownWordMock = vi.fn<(...args: any[]) => any>()
 const contextMenuClickListeners: Array<(info: any, tab?: any) => Promise<void> | void> = []
 
 vi.mock("@/utils/message", () => ({
@@ -15,13 +16,20 @@ vi.mock("../config", () => ({
   ensureInitializedConfig: ensureInitializedConfigMock,
 }))
 
-function createConfig(enabled: boolean): Config {
+vi.mock("../vocabulary", () => ({
+  addKnownWord: addKnownWordMock,
+}))
+
+function createConfig(enabled: boolean, mode: string = "bilingual"): Config {
   return {
     contextMenu: {
       enabled,
     },
     selectionToolbar: {
       customActions: [],
+    },
+    translate: {
+      mode,
     },
   } as unknown as Config
 }
@@ -53,6 +61,7 @@ describe("background context menu", () => {
           "contextMenu.translate": "Translate",
           "contextMenu.translateSelection": 'Translate "%s"',
           "contextMenu.readAloudSelection": 'Read aloud "%s"',
+          "contextMenu.markWordAsKnown": 'Mark "%s" as known word',
           "contextMenu.showOriginal": "Show Original",
         })[key] ?? key,
     ) as typeof i18n.t
@@ -115,6 +124,94 @@ describe("background context menu", () => {
       title: "Rewrite",
       contexts: ["selection"],
     })
+  })
+
+  it("creates the mark-known-word item only in vocabulary mode", async () => {
+    ensureInitializedConfigMock.mockResolvedValue(createConfig(true, "vocabulary"))
+
+    const { initializeContextMenu, MENU_ID_SELECTION_MARK_KNOWN_WORD } =
+      await import("../context-menu")
+
+    await initializeContextMenu()
+
+    expect(browser.contextMenus.create).toHaveBeenNthCalledWith(4, {
+      id: MENU_ID_SELECTION_MARK_KNOWN_WORD,
+      title: 'Mark "%s" as known word',
+      contexts: ["selection"],
+    })
+  })
+
+  it("does not create the mark-known-word item outside vocabulary mode", async () => {
+    ensureInitializedConfigMock.mockResolvedValue(createConfig(true, "bilingual"))
+
+    const { initializeContextMenu, MENU_ID_SELECTION_MARK_KNOWN_WORD } =
+      await import("../context-menu")
+
+    await initializeContextMenu()
+
+    expect(browser.contextMenus.create).not.toHaveBeenCalledWith(
+      expect.objectContaining({ id: MENU_ID_SELECTION_MARK_KNOWN_WORD }),
+    )
+  })
+
+  it("marks the leading word of a selection as known on click", async () => {
+    const { MENU_ID_SELECTION_MARK_KNOWN_WORD, registerContextMenuListeners } =
+      await import("../context-menu")
+
+    registerContextMenuListeners()
+
+    const clickHandler = contextMenuClickListeners[0]
+    if (!clickHandler) {
+      throw new Error("Context menu click listener was not registered")
+    }
+
+    await clickHandler(
+      {
+        menuItemId: MENU_ID_SELECTION_MARK_KNOWN_WORD,
+        selectionText: "serendipity of their meeting",
+      },
+      { id: 5 },
+    )
+
+    expect(addKnownWordMock).toHaveBeenCalledWith("serendipity")
+  })
+
+  it("strips punctuation and lowercases the word before marking it known", async () => {
+    const { MENU_ID_SELECTION_MARK_KNOWN_WORD, registerContextMenuListeners } =
+      await import("../context-menu")
+
+    registerContextMenuListeners()
+
+    const clickHandler = contextMenuClickListeners[0]
+    if (!clickHandler) {
+      throw new Error("Context menu click listener was not registered")
+    }
+
+    await clickHandler(
+      { menuItemId: MENU_ID_SELECTION_MARK_KNOWN_WORD, selectionText: "Quixotic," },
+      { id: 5 },
+    )
+
+    expect(addKnownWordMock).toHaveBeenCalledWith("quixotic")
+  })
+
+  it("ignores an empty selection for mark-known-word", async () => {
+    const { MENU_ID_SELECTION_MARK_KNOWN_WORD, registerContextMenuListeners } =
+      await import("../context-menu")
+
+    registerContextMenuListeners()
+
+    const clickHandler = contextMenuClickListeners[0]
+    if (!clickHandler) {
+      throw new Error("Context menu click listener was not registered")
+    }
+
+    await clickHandler(
+      { menuItemId: MENU_ID_SELECTION_MARK_KNOWN_WORD, selectionText: "   " },
+      { id: 5 },
+    )
+
+    expect(addKnownWordMock).not.toHaveBeenCalled()
   })
 
   it("removes menu items without recreating them when the context menu is disabled", async () => {

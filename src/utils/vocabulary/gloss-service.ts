@@ -18,16 +18,20 @@ export async function getKnownWords(): Promise<ReadonlySet<string>> {
 
 /**
  * Glosses need an LLM. Use the translate provider when it is one; otherwise
- * fall back to the first enabled LLM provider.
+ * prefer an enabled LLM provider the user actually configured (has an API
+ * key) — several keyless LLM providers ship enabled by default and would
+ * otherwise be picked first and fail every request.
  */
 export function resolveVocabularyProviderId(config: Config): string | undefined {
   const translateProvider = resolveProviderConfig(config, "translate")
   if (translateProvider.enabled && isLLMProvider(translateProvider.provider)) {
     return translateProvider.id
   }
-  return config.providersConfig.find(
+  const llmProviders = config.providersConfig.filter(
     (provider) => provider.enabled && isLLMProvider(provider.provider),
-  )?.id
+  )
+  const configured = llmProviders.find((provider) => "apiKey" in provider && provider.apiKey)
+  return (configured ?? llmProviders[0])?.id
 }
 
 export async function fetchGlosses(
