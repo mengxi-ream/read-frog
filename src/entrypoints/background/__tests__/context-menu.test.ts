@@ -128,12 +128,9 @@ describe("background context menu", () => {
 
   it("creates the mark-known-word item only in vocabulary mode", async () => {
     ensureInitializedConfigMock.mockResolvedValue(createConfig(true, "vocabulary"))
-
     const { initializeContextMenu, MENU_ID_SELECTION_MARK_KNOWN_WORD } =
       await import("../context-menu")
-
     await initializeContextMenu()
-
     expect(browser.contextMenus.create).toHaveBeenNthCalledWith(4, {
       id: MENU_ID_SELECTION_MARK_KNOWN_WORD,
       title: 'Mark "%s" as known word',
@@ -143,20 +140,14 @@ describe("background context menu", () => {
 
   it("does not create the mark-known-word item outside vocabulary mode", async () => {
     ensureInitializedConfigMock.mockResolvedValue(createConfig(true, "bilingual"))
-
     const { initializeContextMenu, MENU_ID_SELECTION_MARK_KNOWN_WORD } =
       await import("../context-menu")
-
     await initializeContextMenu()
-
     expect(browser.contextMenus.create).not.toHaveBeenCalledWith(
       expect.objectContaining({ id: MENU_ID_SELECTION_MARK_KNOWN_WORD }),
     )
   })
 
-  // Word-extraction edge cases (punctuation, casing, empty selection) are
-  // covered by leading-word.test.ts; this only verifies the click wires
-  // through to addKnownWord + the tab notification.
   it("marks the leading word of a selection as known on click", async () => {
     const { MENU_ID_SELECTION_MARK_KNOWN_WORD, registerContextMenuListeners } =
       await import("../context-menu")
