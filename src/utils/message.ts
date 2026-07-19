@@ -156,6 +156,14 @@ interface ProtocolMap {
   ) => Promise<BackgroundGenerateTextResponse>
   // AI subtitle segmentation
   aiSegmentSubtitles: (data: { jsonContent: string; providerId: string }) => Promise<string>
+  // vocabulary mode
+  vocabularyGetGlosses: (data: {
+    words: string[]
+    targetLangCode: LangCodeISO6393
+    providerId: string
+  }) => Promise<Record<string, string>>
+  vocabularyGetKnownWords: () => Promise<string[]>
+  vocabularyKnownWordsChanged: () => void
   // microsoft batch translation
   microsoftBatchTranslate: (data: {
     texts: string[]

@@ -4,6 +4,12 @@ import type { TranslationMode } from "@/types/config/translate"
 import type { TransNode } from "@/types/dom"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
 import { logger } from "@/utils/logger"
+import { annotateText, collectRareWords } from "@/utils/vocabulary/annotate"
+import {
+  fetchGlosses,
+  getKnownWords,
+  resolveVocabularyProviderId,
+} from "@/utils/vocabulary/gloss-service"
 import {
   CONTENT_WRAPPER_CLASS,
   NOTRANSLATE_CLASS,
@@ -38,6 +44,7 @@ import {
   planInPlaceTextSwap,
   snapshotSourceTextNodes,
   verifySourceSnapshot,
+  type TextSwapPair,
 } from "../dom/translation-text-swap"
 import { findPreviousTranslatedWrapperInside } from "../dom/translation-wrapper"
 import { insertVirtualParagraphWrappers } from "../dom/virtual-paragraph-insertion"
@@ -335,6 +342,8 @@ export async function translateNodes(
   const translationMode = config.translate.mode
   if (translationMode === "translationOnly") {
     await translateNodeTranslationOnlyMode(nodes, walkId, config, toggle, actionContext)
+  } else if (translationMode === "vocabulary") {
+    await translateNodesVocabularyMode(nodes, walkId, config, toggle)
   } else if (translationMode === "bilingual") {
     await translateNodesBilingualMode(
       nodes,
@@ -925,6 +934,152 @@ export async function translateNodeTranslationOnlyMode(
       // retranslation) would reference displaced nodes and read as
       // permanently stale — drop them.
       if (swapAnchor) dropTranslationOnlySwapRecordsForNodes(swapAnchor, transNodes)
+    })
+  } finally {
+    nodes.forEach((node) => translatingNodes.delete(node))
+  }
+}
+
+/**
+ * Vocabulary mode: keep the original text and annotate words beyond the user's
+ * familiar frequency rank with an inline parenthesized gloss, e.g.
+ * "discover(发现)". Rare-word detection is local (frequency list + known-word
+ * list); the LLM only supplies glosses for the detected words. The annotated
+ * text is written through the same in-place swap machinery as translationOnly,
+ * so restore-on-toggle, cleanup and staleness guards behave identically.
+ */
+export async function translateNodesVocabularyMode(
+  nodes: ChildNode[],
+  walkId: string,
+  config: Config,
+  toggle: boolean = false,
+): Promise<void> {
+  const isTransNodeAndNotTranslatedWrapper = (node: Node): node is TransNode => {
+    if (isHTMLElement(node) && node.classList.contains(CONTENT_WRAPPER_CLASS)) return false
+    return isTransNode(node)
+  }
+
+  const outerTransNodes = nodes.filter(isTransNode)
+  if (outerTransNodes.length === 0) {
+    return
+  }
+
+  let transNodes: TransNode[] = []
+  if (outerTransNodes.length === 1 && isHTMLElement(outerTransNodes[0])) {
+    const unwrappedHTMLChild = unwrapDeepestOnlyHTMLChild(outerTransNodes[0], config)
+    transNodes = [...unwrappedHTMLChild.childNodes].filter(isTransNodeAndNotTranslatedWrapper)
+  } else {
+    transNodes = outerTransNodes
+  }
+  if (transNodes.length === 0) return
+
+  try {
+    if (nodes.every((node) => translatingNodes.has(node))) {
+      return
+    }
+    nodes.forEach((node) => translatingNodes.add(node))
+
+    const targetNode = transNodes.at(-1)!
+    const parentNode = targetNode.parentElement
+    if (!parentNode) {
+      return
+    }
+
+    // Restore FIRST so the rare-word scan (and a re-annotation pass) sees the
+    // original text, and so a toggle undoes this run's own swap.
+    const swapAnchor = parentNode.closest<HTMLElement>(`[${TRANSLATION_ONLY_ATTRIBUTE}]`)
+    if (swapAnchor) {
+      restoreTranslationOnlySwapsForAnchor(
+        swapAnchor,
+        transNodes,
+        toggle ? undefined : { keepRecords: true },
+      )
+    }
+    if (toggle) {
+      return
+    }
+
+    const innerTextContent = transNodes.map((node) => extractTextContent(node, config)).join("")
+    if (!innerTextContent.trim() || isNumericContent(innerTextContent)) return
+
+    if (await shouldFilterSmallParagraph(innerTextContent, config)) return
+
+    if (await shouldSkipAsTargetLanguage(innerTextContent, config)) return
+
+    // Taken before the gloss request; compared afterwards so annotations are
+    // never written over content the host has since rewritten.
+    const sourceSnapshot = snapshotSourceTextNodes(transNodes)
+    const knownWords = await getKnownWords()
+    const rareWords = collectRareWords(
+      sourceSnapshot.map((entry) => entry.value),
+      config.translate.vocabulary.familiarWordRank,
+      knownWords,
+    )
+    if (rareWords.length === 0) return
+
+    const providerId = resolveVocabularyProviderId(config)
+    if (!providerId) {
+      logger.warn("[vocabulary] No enabled LLM provider available for glosses")
+      return
+    }
+
+    const ownerDoc = getOwnerDocument(targetNode)
+    const translatedWrapperNode = ownerDoc.createElement("span")
+    translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
+    translatedWrapperNode.setAttribute(
+      TRANSLATION_MODE_ATTRIBUTE,
+      "vocabulary" satisfies TranslationMode,
+    )
+    translatedWrapperNode.setAttribute(WALKED_ATTRIBUTE, walkId)
+    translatedWrapperNode.style.display = "contents"
+    createSpinnerInside(translatedWrapperNode)
+
+    batchDOMOperation(() => {
+      if (isTextNode(targetNode) || transNodes.length > 1) {
+        targetNode.parentNode?.insertBefore(translatedWrapperNode, targetNode.nextSibling)
+      } else {
+        targetNode.appendChild(translatedWrapperNode)
+      }
+    })
+
+    let glosses: Map<string, string>
+    try {
+      glosses = await fetchGlosses(rareWords, config, providerId)
+    } catch (error) {
+      logger.error("[vocabulary] Failed to fetch glosses", error)
+      batchDOMOperation(() => {
+        markExtensionDrivenNodeRemoval(translatedWrapperNode)
+        translatedWrapperNode.remove()
+      })
+      return
+    }
+
+    const annotated = new Set<string>()
+    const pairs: TextSwapPair[] = []
+    for (const entry of sourceSnapshot) {
+      const annotatedValue = annotateText(entry.value, glosses, annotated)
+      if (annotatedValue !== entry.value) {
+        pairs.push({ node: entry.node, translatedValue: annotatedValue })
+      }
+    }
+
+    batchDOMOperation(() => {
+      // Wrapper gone: a global cleanup ran while the gloss request was in
+      // flight, or the host re-rendered the region — leave originals alone.
+      if (!translatedWrapperNode.isConnected) return
+      markExtensionDrivenNodeRemoval(translatedWrapperNode)
+      translatedWrapperNode.remove()
+      if (pairs.length === 0) return
+      // Host mutated the run mid-flight: the annotations are stale, drop them.
+      if (!verifySourceSnapshot(transNodes, sourceSnapshot)) return
+      applyInPlaceTextSwap(
+        { pairs, attributePairs: [], coverage: 1 },
+        transNodes,
+        parentNode,
+        walkId,
+        config,
+        getTranslationOnlyAnchorState,
+      )
     })
   } finally {
     nodes.forEach((node) => translatingNodes.delete(node))

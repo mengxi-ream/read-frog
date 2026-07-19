@@ -38,6 +38,7 @@ import { setUpSubtitlesTranslationQueue, setUpWebPageTranslationQueue } from "./
 import { translationMessage } from "./translation-signal"
 import { setupTTSPlaybackMessageHandlers } from "./tts-playback"
 import { setupUninstallSurvey } from "./uninstall-survey"
+import { setupVocabularyMessageHandlers } from "./vocabulary"
 
 export default defineBackground({
   type: "module",
@@ -125,6 +126,7 @@ export default defineBackground({
     setupNotebasePendingSaveProcessor()
     setupEdgeTTSMessageHandlers()
     setupLLMGenerateTextMessageHandlers()
+    setupVocabularyMessageHandlers()
     setupTTSPlaybackMessageHandlers()
     void initMockData()
 

@@ -14,6 +14,7 @@ contextMenu:
   translate: 翻译
   translateSelection: 翻译”%s”
   readAloudSelection: 朗读”%s”
+  markWordAsKnown: 将“%s”标为熟词
   showOriginal: 显示原文
 sidePanel:
   firefoxUserActionHint: 在 Firefox 中，请从浏览器侧边栏打开陪读蛙。
@@ -45,6 +46,9 @@ popup:
         action: 点击切换为仅译文
       translationOnly:
         current: 当前为仅译文
+        action: 点击切换为生词注释
+      vocabulary:
+        current: 当前为生词注释
         action: 点击切换为双语对照
   hub:
     tooltip: 一次性调用多个翻译模型翻译文本
@@ -725,6 +729,13 @@ options:
       mode:
         bilingual: 双语对照
         translationOnly: 仅显示翻译
+        vocabulary: 生词注释
+    vocabularyConfig:
+      title: 生词注释模式
+      description: 生词注释模式下，超出你熟词范围的单词会在原文后以括号插入释义。右键点击已注释的单词可将其标为熟词。
+      familiarWordRank:
+        title: 熟词词频排名
+      error: 熟词词频排名必须在 $1 到 $2 之间
     translationModeShortcut:
       title: 切换翻译模式快捷键
       description: 自定义在双语对照和仅显示翻译模式之间切换的快捷键

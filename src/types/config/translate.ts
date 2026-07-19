@@ -29,8 +29,16 @@ export const batchQueueConfigSchema = z.object({
   maxItemsPerBatch: z.number().gte(MIN_BATCH_ITEMS),
 })
 
-export const TRANSLATION_MODES = ["bilingual", "translationOnly"] as const
+export const TRANSLATION_MODES = ["bilingual", "translationOnly", "vocabulary"] as const
 export const translationModeSchema = z.enum(TRANSLATION_MODES)
+
+// Vocabulary mode: keep the original text, annotate words beyond the user's
+// familiar-word frequency rank with an inline parenthesized gloss.
+export const MAX_FAMILIAR_WORD_RANK = 10000
+export const vocabularyConfigSchema = z.object({
+  familiarWordRank: z.number().int().min(0).max(MAX_FAMILIAR_WORD_RANK),
+})
+export type VocabularyConfig = z.infer<typeof vocabularyConfigSchema>
 
 export const pageTranslateRangeSchema = z.enum(["main", "all"])
 export type PageTranslateRange = z.infer<typeof pageTranslateRangeSchema>
@@ -101,6 +109,7 @@ export const translateConfigSchema = z.object({
   providerId: z.string().nonempty(),
   mode: translationModeSchema,
   modeShortcut: pageTranslationShortcutSchema,
+  vocabulary: vocabularyConfigSchema,
   node: z.object({
     enabled: z.boolean(),
     hotkey: z.enum(HOTKEYS),

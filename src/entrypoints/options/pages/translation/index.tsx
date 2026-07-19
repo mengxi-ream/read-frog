@@ -17,6 +17,7 @@ import { SmallParagraphFilter } from "./small-paragraph-filter"
 import { TranslateRange } from "./translate-range"
 import { TranslationMode } from "./translation-mode"
 import { TranslationModeShortcut } from "./translation-mode-shortcut"
+import { VocabularyConfig } from "./vocabulary-config"
 
 export function TranslationPage() {
   return (
@@ -25,6 +26,7 @@ export function TranslationPage() {
       innerClassName="*:border-b [&>*:last-child]:border-b-0"
     >
       <TranslationMode />
+      <VocabularyConfig />
       <TranslationModeShortcut />
       <TranslateRange />
       <PageTranslationShortcut />

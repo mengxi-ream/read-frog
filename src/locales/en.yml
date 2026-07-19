@@ -14,6 +14,7 @@ contextMenu:
   translate: Translate
   translateSelection: Translate "%s"
   readAloudSelection: Read aloud "%s"
+  markWordAsKnown: Mark "%s" as known word
   showOriginal: Show Original
 sidePanel:
   firefoxUserActionHint: In Firefox, open Read Frog from the browser sidebar.
@@ -45,6 +46,9 @@ popup:
         action: Click to switch to translation only
       translationOnly:
         current: Currently translation only
+        action: Click to switch to vocabulary
+      vocabulary:
+        current: Currently vocabulary
         action: Click to switch to bilingual
   hub:
     tooltip: Translate text with multiple models simultaneously
@@ -725,6 +729,13 @@ options:
       mode:
         bilingual: Bilingual
         translationOnly: Translation Only
+        vocabulary: Vocabulary
+    vocabularyConfig:
+      title: Vocabulary Mode
+      description: In vocabulary mode, words beyond your familiar frequency rank get an inline gloss in parentheses. Right-click an annotated word to mark it as known.
+      familiarWordRank:
+        title: Familiar word frequency rank
+      error: Familiar word rank must be between $1 and $2
     translationModeShortcut:
       title: Translation Mode Shortcut
       description: Customize the shortcut key for switching between bilingual and translation only modes

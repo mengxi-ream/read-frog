@@ -11,7 +11,8 @@ import {
 
 const NEXT_MODE: Record<TranslationMode, TranslationMode> = {
   bilingual: "translationOnly",
-  translationOnly: "bilingual",
+  translationOnly: "vocabulary",
+  vocabulary: "bilingual",
 }
 
 export async function bindTranslationModeShortcutKey() {

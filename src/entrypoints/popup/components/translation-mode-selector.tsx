@@ -15,11 +15,13 @@ const TABLER_ICON_STROKE_WIDTH_CLASS = "[&_path]:[stroke-width:1.2]"
 const MODE_ICON: Record<TranslationModeType, { icon: string; className?: string }> = {
   bilingual: { icon: "garden:translation-exists-stroke-16" },
   translationOnly: { icon: "tabler:text-resize", className: TABLER_ICON_STROKE_WIDTH_CLASS },
+  vocabulary: { icon: "tabler:vocabulary", className: TABLER_ICON_STROKE_WIDTH_CLASS },
 }
 
 const NEXT_MODE: Record<TranslationModeType, TranslationModeType> = {
   bilingual: "translationOnly",
-  translationOnly: "bilingual",
+  translationOnly: "vocabulary",
+  vocabulary: "bilingual",
 }
 
 const MODE_TOOLTIP_KEY = {
@@ -30,6 +32,10 @@ const MODE_TOOLTIP_KEY = {
   translationOnly: {
     current: "popup.translationModeToggle.tooltip.translationOnly.current",
     action: "popup.translationModeToggle.tooltip.translationOnly.action",
+  },
+  vocabulary: {
+    current: "popup.translationModeToggle.tooltip.vocabulary.current",
+    action: "popup.translationModeToggle.tooltip.vocabulary.action",
   },
 } as const
 

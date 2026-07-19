@@ -13,10 +13,12 @@ import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { ensureInitializedConfig } from "./config"
 import { getPageTranslationEnabled, setPageTranslationEnabled } from "./page-translation-state"
+import { addKnownWord } from "./vocabulary"
 
 export const MENU_ID_TRANSLATE = "read-frog-translate"
 export const MENU_ID_SELECTION_TRANSLATE = "read-frog-selection-translate"
 export const MENU_ID_SELECTION_READ_ALOUD = "read-frog-selection-read-aloud"
+export const MENU_ID_SELECTION_MARK_KNOWN_WORD = "read-frog-selection-mark-known-word"
 export const MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX = "read-frog-selection-custom-action:"
 
 function getSelectionCustomActionMenuId(actionId: string) {
@@ -119,6 +121,14 @@ async function updateContextMenuItems(config: Config) {
       contexts: ["selection"],
     })
 
+    if (config.translate?.mode === "vocabulary") {
+      browser.contextMenus.create({
+        id: MENU_ID_SELECTION_MARK_KNOWN_WORD,
+        title: i18n.t("contextMenu.markWordAsKnown"),
+        contexts: ["selection"],
+      })
+    }
+
     if (enabledCustomActions.length > 0) {
       enabledCustomActions.forEach((action) => {
         browser.contextMenus.create({
@@ -188,6 +198,11 @@ async function handleContextMenuClick(
 
   if (info.menuItemId === MENU_ID_SELECTION_READ_ALOUD) {
     await handleSelectionReadAloudClick(info, tab.id)
+    return
+  }
+
+  if (info.menuItemId === MENU_ID_SELECTION_MARK_KNOWN_WORD) {
+    await handleSelectionMarkKnownWordClick(info)
     return
   }
 
@@ -267,6 +282,21 @@ async function handleSelectionReadAloudClick(
   const target = typeof info.frameId === "number" ? { tabId, frameId: info.frameId } : tabId
 
   void sendMessage("readAloudSelectionFromContextMenu", { selectionText }, target)
+}
+
+async function handleSelectionMarkKnownWordClick(info: Browser.contextMenus.OnClickData) {
+  // Take the first word of the selection: users right-click a single annotated
+  // word; a multi-word selection still marks only its leading word.
+  const word = info.selectionText
+    ?.trim()
+    .split(/\s+/)[0]
+    ?.replace(/[^a-z'-]/gi, "")
+    .toLowerCase()
+  if (!word) {
+    return
+  }
+
+  await addKnownWord(word)
 }
 
 async function handleSelectionCustomActionClick(
