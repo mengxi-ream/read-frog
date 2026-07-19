@@ -1,5 +1,24 @@
 # @read-frog/extension
 
+## 1.42.0
+
+### Minor Changes
+
+- [#1897](https://github.com/mengxi-ream/read-frog/pull/1897) [`04b04ac`](https://github.com/mengxi-ream/read-frog/commit/04b04acadae24b0f4f30c69c756d1b8cbcd1c523) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(translation): add a four-variant new-user default prompt experiment
+
+- [#1900](https://github.com/mengxi-ream/read-frog/pull/1900) [`8dfacda`](https://github.com/mengxi-ream/read-frog/commit/8dfacdac66c742e40c79e078fdfe3f73145f48d2) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translate): stop a single 429 from failing the whole page and make rate limiting actually hold
+
+  - A 429 now pauses the queue (honoring `Retry-After`) and retries in place instead of instantly rejecting every pending paragraph — one transient rate limit no longer paints hundreds of errors or kills the session
+  - Batches now keep filling up to the configured size while the rate limiter has no free slot, so low request rates send few full batches instead of many tiny ones
+  - Queue config is applied reliably: handlers register synchronously at SW startup, `storage.watch` replaces droppable per-field messages, and capacity edits no longer grant a free burst
+  - Batch request timeouts scale with batch size; summary generation is abortable and no longer performs hidden ai-sdk retries
+
+### Patch Changes
+
+- [#1906](https://github.com/mengxi-ream/read-frog/pull/1906) [`5ded459`](https://github.com/mengxi-ream/read-frog/commit/5ded4592cb263d27ad1221d763f10af21f64af6f) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(selection): keep shadow-root popups anchored to the viewport
+
+- [#1908](https://github.com/mengxi-ream/read-frog/pull/1908) [`b9f4a48`](https://github.com/mengxi-ream/read-frog/commit/b9f4a485255f0d93aabea5a44610248c2d925e31) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(providers): omit Atlas Cloud website credentials from API requests
+
 ## 1.41.2
 
 ### Patch Changes
