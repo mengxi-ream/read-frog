@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.42.1
+
+### Patch Changes
+
+- [#1915](https://github.com/mengxi-ream/read-frog/pull/1915) [`e5464f3`](https://github.com/mengxi-ream/read-frog/commit/e5464f35285168193f1bcafd27896a5557ff2e8b) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translate): restore ChatGPT assistant response translation
+
+- [#1913](https://github.com/mengxi-ream/read-frog/pull/1913) [`6a6900a`](https://github.com/mengxi-ream/read-frog/commit/6a6900aa46957725d375335d5e52d28415140a97) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(providers): remove the Atlas Cloud credential workaround after the upstream fix
+
 ## 1.42.0
 
 ### Minor Changes
