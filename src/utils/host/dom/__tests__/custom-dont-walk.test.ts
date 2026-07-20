@@ -7,6 +7,7 @@ import {
   isDontWalkIntoAndDontTranslateAsChildElement,
   isSiteRuleExcludedElement,
 } from "../filter"
+import { extractTextContent } from "../traversal"
 
 function setHost(host: string) {
   // jsdom exposes location as read-only; override via defineProperty
@@ -64,6 +65,38 @@ describe("isSiteRuleExcludedElement", () => {
     expect(isSiteRuleExcludedElement(other, DEFAULT_CONFIG)).toBe(false)
     expect(isDontWalkIntoAndDontTranslateAsChildElement(proseMirror, DEFAULT_CONFIG)).toBe(true)
     expect(isDontWalkIntoAndDontTranslateAsChildElement(other, DEFAULT_CONFIG)).toBe(false)
+  })
+
+  it("walks ChatGPT assistant prose while keeping editors and code blocks protected (#1912)", () => {
+    setHost("chatgpt.com")
+
+    const assistantResponse = document.createElement("div")
+    assistantResponse.className = "markdown prose"
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Readable assistant response"
+
+    const pre = document.createElement("pre")
+    const code = document.createElement("code")
+    code.textContent = "const shouldStayUntranslated = true"
+    pre.appendChild(code)
+
+    const promptEditor = document.createElement("div")
+    promptEditor.className = "ProseMirror"
+    promptEditor.textContent = "User prompt"
+
+    assistantResponse.append(paragraph, pre)
+    document.body.append(assistantResponse, promptEditor)
+
+    expect(isSiteRuleExcludedElement(paragraph, DEFAULT_CONFIG)).toBe(false)
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(paragraph, DEFAULT_CONFIG)).toBe(false)
+    expect(extractTextContent(assistantResponse, DEFAULT_CONFIG)).toBe(
+      "Readable assistant response",
+    )
+
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(pre, DEFAULT_CONFIG)).toBe(true)
+    expect(isSiteRuleExcludedElement(promptEditor, DEFAULT_CONFIG)).toBe(true)
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(promptEditor, DEFAULT_CONFIG)).toBe(true)
   })
 
   it("still matches when the URL includes a port (host !== hostname)", () => {
