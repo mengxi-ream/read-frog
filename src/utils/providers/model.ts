@@ -61,14 +61,6 @@ const CREATE_AI_MAPPER = {
   huggingface: createHuggingFace,
 } as const
 
-// TODO(#1907): Remove this workaround once Atlas Cloud no longer lets website session cookies
-// interfere with API-key authentication.
-const fetchAtlasCloudWithoutCredentials: typeof globalThis.fetch = (input, init) =>
-  globalThis.fetch(input, {
-    ...init,
-    credentials: "omit",
-  })
-
 function getProviderSpecificSettings(providerConfig: LLMProviderConfig) {
   const settings =
     "providerSpecificSettings" in providerConfig
@@ -116,9 +108,6 @@ async function getLanguageModelById(providerId: string) {
         supportsStructuredOutputs: true,
         ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
         ...(headers && { headers }),
-        ...(providerConfig.provider === "atlascloud" && {
-          fetch: fetchAtlasCloudWithoutCredentials,
-        }),
       })
     : CREATE_AI_MAPPER[providerConfig.provider]({
         ...providerSpecificSettings,
