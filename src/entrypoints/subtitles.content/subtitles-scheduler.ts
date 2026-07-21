@@ -30,6 +30,8 @@ export class SubtitlesScheduler {
 
   start() {
     this.active = true
+    // Sync immediately: timeupdate may not fire while paused / mid-video.
+    this.updateSubtitles(this.videoElement.currentTime)
     this.updateVisibility()
   }
 
@@ -120,6 +122,8 @@ export class SubtitlesScheduler {
 
   show() {
     this.active = true
+    // Sync immediately: timeupdate may not fire while paused / mid-video.
+    this.updateSubtitles(this.videoElement.currentTime)
     this.updateVisibility()
   }
 

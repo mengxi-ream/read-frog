@@ -138,8 +138,10 @@ export class SegmentationPipeline {
     const chunkStart = chunk[0]!.start
     const chunkEnd = chunk.at(-1)!.end
 
+    // Drop any cue that overlaps the window (not just cues whose start falls inside it).
+    // Half-open: keep if end <= chunkStart || start >= chunkEnd.
     this.processedFragments = this.processedFragments.filter(
-      (fragment) => fragment.start < chunkStart || fragment.start > chunkEnd,
+      (fragment) => fragment.end <= chunkStart || fragment.start >= chunkEnd,
     )
     this.processedFragments.push(...nextFragments)
     this.processedFragments.sort((a, b) => a.start - b.start)

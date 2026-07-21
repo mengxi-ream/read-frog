@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { SUBTITLES_SOURCE } from "@/utils/constants/subtitles"
-import { sourceTrackAtom, subtitlesStore } from "../atoms"
+import { currentTimeMsAtom, sourceTrackAtom, subtitlesStore } from "../atoms"
 import { TranslationCoordinator } from "../translation-coordinator"
 import { UniversalVideoAdapter } from "../universal-adapter"
 
@@ -52,7 +52,7 @@ function createAdapter(fetchResult: Array<{ text: string; start: number; end: nu
   return { adapter, subtitlesFetcher }
 }
 
-function attachScheduler(adapter: UniversalVideoAdapter, active: boolean) {
+function attachScheduler(adapter: UniversalVideoAdapter, active: boolean, currentTime = 0) {
   const subtitlesScheduler = {
     isActive: vi.fn<(...args: any[]) => any>(() => active),
     reset: vi.fn<(...args: any[]) => any>(),
@@ -60,7 +60,7 @@ function attachScheduler(adapter: UniversalVideoAdapter, active: boolean) {
     setState: vi.fn<(...args: any[]) => any>(),
     supplementSubtitles: vi.fn<(...args: any[]) => any>(),
     removeCuesInTimeWindow: vi.fn<(...args: any[]) => any>(),
-    getVideoElement: vi.fn<(...args: any[]) => any>(() => ({ currentTime: 0 })),
+    getVideoElement: vi.fn<(...args: any[]) => any>(() => ({ currentTime })),
     getState: vi.fn<(...args: any[]) => any>(() => "idle"),
   }
 
@@ -72,6 +72,7 @@ describe("universalVideoAdapter", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     subtitlesStore.set(sourceTrackAtom, [])
+    subtitlesStore.set(currentTimeMsAtom, 0)
     vi.stubGlobal("document", {
       title: "Test video",
       querySelector: vi.fn<(...args: any[]) => any>(() => null),
@@ -277,5 +278,43 @@ describe("universalVideoAdapter", () => {
     expect(startSpy).toHaveBeenCalled()
 
     startSpy.mockRestore()
+  })
+
+  it("syncs currentTimeMsAtom from the video when publishing the source track", async () => {
+    const { adapter } = createAdapter([{ text: "hello", start: 0, end: 1000 }])
+    attachScheduler(adapter, true, 42.5)
+
+    await (adapter as any).getOrLoadSourceSubtitles()
+    ;(adapter as any).sessionSubtitles = (adapter as any).sourceSubtitles
+
+    const startSpy = vi
+      .spyOn(TranslationCoordinator.prototype, "start")
+      .mockImplementation(() => undefined)
+
+    await (adapter as any).processTranslatedSubtitles()
+
+    expect(subtitlesStore.get(currentTimeMsAtom)).toBe(42_500)
+
+    startSpy.mockRestore()
+  })
+
+  it("replaceSourceTrackWindow drops cues that overlap the window by interval", () => {
+    const { adapter } = createAdapter([])
+    attachScheduler(adapter, true)
+
+    // Spans into the replace window even though its start is before windowStart.
+    subtitlesStore.set(sourceTrackAtom, [
+      { text: "overlap", start: 0, end: 1500 },
+      { text: "after", start: 2000, end: 3000 },
+    ])
+
+    ;(adapter as any).replaceSourceTrackWindow(1000, 2000, [
+      { text: "recut", start: 1000, end: 2000 },
+    ])
+
+    expect(subtitlesStore.get(sourceTrackAtom)).toEqual([
+      { text: "recut", start: 1000, end: 2000 },
+      { text: "after", start: 2000, end: 3000 },
+    ])
   })
 })

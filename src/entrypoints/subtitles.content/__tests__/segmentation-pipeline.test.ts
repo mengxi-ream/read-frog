@@ -120,6 +120,34 @@ describe("segmentation pipeline", () => {
     ])
   })
 
+  it("replaceProcessedChunk drops cues that overlap the window by interval", () => {
+    const pipeline = new SegmentationPipeline({
+      baselineFragments: [
+        { text: "spans into window", start: 0, end: 1500 },
+        { text: "after", start: 2000, end: 3000 },
+      ],
+      rawFragments: [
+        { text: "a", start: 1000, end: 1500 },
+        { text: "b", start: 1500, end: 2000 },
+      ],
+      getVideoElement: () => ({ currentTime: 0 }) as HTMLVideoElement,
+      getSourceLanguage: () => "en",
+    })
+
+    ;(pipeline as any).replaceProcessedChunk(
+      [
+        { text: "a", start: 1000, end: 1500 },
+        { text: "b", start: 1500, end: 2000 },
+      ],
+      [{ text: "recut", start: 1000, end: 2000 }],
+    )
+
+    expect(pipeline.processedFragments).toEqual([
+      { text: "recut", start: 1000, end: 2000 },
+      { text: "after", start: 2000, end: 3000 },
+    ])
+  })
+
   it("does not apply segmentation results after stop", async () => {
     const rawFragments = [
       { text: "hello", start: 0, end: 500 },

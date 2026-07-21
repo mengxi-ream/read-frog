@@ -147,4 +147,58 @@ describe("translation coordinator loading state", () => {
     // Old baseline identity must not stick around as if still valid.
     expect((coordinator as any).knownIdentities.get(0)).not.toBe("2000\0hello world")
   })
+
+  it("does not publish stale batch cues on translation failure after a recut", async () => {
+    let fragments = [
+      { text: "hello world", start: 0, end: 2000 },
+      { text: "next", start: 2000, end: 3000 },
+    ]
+    const onTranslated = vi.fn<(...args: any[]) => any>()
+    const onStateChange = vi.fn<(...args: any[]) => any>()
+
+    const translator = await import("@/utils/subtitles/processor/translator")
+    const spy = vi
+      .spyOn(translator, "translateSubtitles")
+      .mockRejectedValue(new Error("translate failed"))
+
+    const config = await import("@/utils/config/storage")
+    const configSpy = vi.spyOn(config, "getLocalConfig").mockResolvedValue({
+      videoSubtitles: { style: { displayMode: "bilingual" } },
+    } as any)
+
+    const coordinator = new TranslationCoordinator({
+      getFragments: () => fragments,
+      getVideoElement: () =>
+        ({
+          currentTime: 0.2,
+          addEventListener: vi.fn<(...args: any[]) => any>(),
+          removeEventListener: vi.fn<(...args: any[]) => any>(),
+        }) as unknown as HTMLVideoElement,
+      getCurrentState: () => "idle",
+      segmentationPipeline: null,
+      onTranslated,
+      onStateChange,
+    })
+
+    coordinator.start()
+    await Promise.resolve()
+    // Recut mid-request: original cue is gone; only identity-valid fallbacks may publish.
+    fragments = [
+      { text: "hello", start: 0, end: 1000 },
+      { text: "world", start: 1000, end: 2000 },
+      { text: "next", start: 2000, end: 3000 },
+    ]
+    await vi.waitFor(() => {
+      expect(onStateChange).toHaveBeenCalledWith("error", { message: "translate failed" })
+    })
+
+    // Stale full-batch fallback would re-introduce the pre-recut cue as a zombie.
+    const published = onTranslated.mock.calls.flatMap((call) => call[0] as any[])
+    expect(published.every((f) => f.text !== "hello world")).toBe(true)
+    // Empty translation fallbacks for still-valid cues are fine; identity-mismatched are not.
+    expect(published.some((f) => f.start === 0 && f.end === 2000)).toBe(false)
+
+    spy.mockRestore()
+    configSpy.mockRestore()
+  })
 })

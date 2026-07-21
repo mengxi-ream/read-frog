@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { currentSubtitleAtom, subtitlesStateAtom, subtitlesStore } from "../atoms"
+import {
+  currentSubtitleAtom,
+  currentTimeMsAtom,
+  subtitlesStateAtom,
+  subtitlesStore,
+} from "../atoms"
 import { SubtitlesScheduler } from "../subtitles-scheduler"
 
 function createVideo(currentTime = 0) {
@@ -15,6 +20,14 @@ describe("subtitles scheduler", () => {
     vi.useRealTimers()
     subtitlesStore.set(currentSubtitleAtom, null)
     subtitlesStore.set(subtitlesStateAtom, null)
+    subtitlesStore.set(currentTimeMsAtom, 0)
+  })
+
+  it("syncs currentTimeMsAtom on start without waiting for timeupdate", () => {
+    subtitlesStore.set(currentTimeMsAtom, 0)
+    const scheduler = new SubtitlesScheduler({ videoElement: createVideo(12.5) })
+    scheduler.start()
+    expect(subtitlesStore.get(currentTimeMsAtom)).toBe(12_500)
   })
 
   it("auto-hides error state after a delay", () => {

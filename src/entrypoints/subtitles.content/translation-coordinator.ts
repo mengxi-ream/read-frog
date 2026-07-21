@@ -188,11 +188,7 @@ export class TranslationCoordinator {
       }
 
       // Only accept results whose cue identity still matches the current fragment list.
-      const byStart = new Map(this.getFragments().map((fragment) => [fragment.start, fragment]))
-      const stillValid = translated.filter((fragment) => {
-        const current = byStart.get(fragment.start)
-        return !!current && current.end === fragment.end && current.text === fragment.text
-      })
+      const stillValid = this.filterIdentityValid(translated)
 
       stillValid.forEach((f) => {
         this.translatingStarts.delete(f.start)
@@ -214,24 +210,33 @@ export class TranslationCoordinator {
         return
       }
 
-      const byStart = new Map(this.getFragments().map((fragment) => [fragment.start, fragment]))
+      // Starts that disappeared or were recut mid-request should not stay "translating".
       batch.forEach((f) => {
         this.translatingStarts.delete(f.start)
-        const current = byStart.get(f.start)
-        // Only mark failed if the cue identity still matches (avoid poisoning a recut start).
-        if (current && current.end === f.end && current.text === f.text) {
-          this.failedStarts.add(f.start)
-          this.rememberIdentity(f)
-        }
+      })
+
+      // Same identity gate as the success path: never bookkeep or publish recut/stale cues.
+      const stillValid = this.filterIdentityValid(batch)
+      stillValid.forEach((f) => {
+        this.failedStarts.add(f.start)
+        this.rememberIdentity(f)
       })
 
       const config = await getLocalConfig()
+      if (!this.active) {
+        return
+      }
+
+      // Re-check after the await: AI recut may have landed while config was loading.
+      const validForFallback = this.filterIdentityValid(stillValid)
       const displayMode = config?.videoSubtitles?.style.displayMode
       const fallback =
         displayMode === "translationOnly"
-          ? batch.map((f) => ({ ...f, translation: f.text }))
-          : batch.map((f) => ({ ...f, translation: "" }))
-      this.onTranslated(fallback)
+          ? validForFallback.map((f) => ({ ...f, translation: f.text }))
+          : validForFallback.map((f) => ({ ...f, translation: "" }))
+      if (fallback.length > 0) {
+        this.onTranslated(fallback)
+      }
 
       const errorMessage = error instanceof Error ? error.message : String(error)
       this.lastEmittedState = "error"
@@ -252,6 +257,15 @@ export class TranslationCoordinator {
       return fallbackTimeMs
     }
     return video.currentTime * 1000
+  }
+
+  /** Keep only cues whose start+end+text still match the live fragment list. */
+  private filterIdentityValid(fragments: SubtitlesFragment[]): SubtitlesFragment[] {
+    const byStart = new Map(this.getFragments().map((fragment) => [fragment.start, fragment]))
+    return fragments.filter((fragment) => {
+      const current = byStart.get(fragment.start)
+      return !!current && current.end === fragment.end && current.text === fragment.text
+    })
   }
 
   private findActiveCue(timeMs: number, fragments: SubtitlesFragment[]): SubtitlesFragment | null {

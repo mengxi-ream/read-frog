@@ -28,6 +28,7 @@ import {
 } from "@/utils/subtitles/processor/translator"
 import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
 import {
+  currentTimeMsAtom,
   sourceTrackAtom,
   subtitlesPositionAtom,
   subtitlesSettingsPanelOpenAtom,
@@ -631,12 +632,17 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       ...fragment,
       translation: fragment.text,
     }))
-    subtitlesStore.set(sourceTrackAtom, [...this.sourceProcessedSubtitles])
+    this.publishSourceTrack(this.sourceProcessedSubtitles)
     this.subtitlesScheduler?.supplementSubtitles(this.sessionProcessedFragments)
     this.subtitlesScheduler?.setState("idle")
   }
 
   private publishSourceTrack(fragments: SubtitlesFragment[]) {
+    // timeupdate may not have fired yet (paused / enable mid-video); keep display time fresh.
+    const video = this.subtitlesScheduler?.getVideoElement()
+    if (video) {
+      subtitlesStore.set(currentTimeMsAtom, video.currentTime * 1000)
+    }
     subtitlesStore.set(sourceTrackAtom, [...fragments])
   }
 
@@ -646,8 +652,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     nextFragments: SubtitlesFragment[],
   ) {
     const previous = subtitlesStore.get(sourceTrackAtom)
+    // Drop any cue that overlaps the window (not just cues whose start falls inside it).
+    // Half-open: keep if end <= windowStart || start >= windowEnd.
     const kept = previous.filter(
-      (fragment) => fragment.start < windowStartMs || fragment.start > windowEndMs,
+      (fragment) => fragment.end <= windowStartMs || fragment.start >= windowEndMs,
     )
     const next = [...kept, ...nextFragments].sort((a, b) => a.start - b.start)
     this.publishSourceTrack(next)
