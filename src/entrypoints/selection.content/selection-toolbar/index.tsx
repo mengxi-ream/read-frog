@@ -244,14 +244,6 @@ export function SelectionToolbar() {
           return
         }
 
-        if (measurement.status === "offscreen") {
-          selectionAnchorTrackerRef.current = null
-          selectionScrollTargetsRef.current = []
-          selectionPositionRef.current = null
-          setIsSelectionToolbarVisible(false)
-          return
-        }
-
         selectionAnchorTrackerRef.current = measurement.tracker
         selectionPositionRef.current = measurement.anchor
       }

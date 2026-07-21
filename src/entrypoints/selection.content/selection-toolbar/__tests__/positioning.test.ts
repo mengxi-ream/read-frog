@@ -175,11 +175,79 @@ describe("selection toolbar positioning", () => {
     })
   })
 
-  it("reports when the selection is completely outside the viewport", () => {
+  it.each([
+    ["above", createRect({ left: 100, top: -100, width: 120, height: 24 }), { x: 210, y: -76 }],
+    ["below", createRect({ left: 100, top: 900, width: 120, height: 24 }), { x: 210, y: 924 }],
+    ["left", createRect({ left: -200, top: 100, width: 120, height: 24 }), { x: -90, y: 124 }],
+    ["right", createRect({ left: 1300, top: 100, width: 120, height: 24 }), { x: 1410, y: 124 }],
+    [
+      "diagonally",
+      createRect({ left: 1300, top: 900, width: 120, height: 24 }),
+      { x: 1410, y: 924 },
+    ],
+  ])("keeps an anchor when the selection moves %s offscreen", (_, rect, expectedAnchor) => {
     const tracker = createSelectionAnchorTracker([rangeSnapshot], { x: 210, y: 124 })
-    rangeRects = [createRect({ left: 100, top: -100, width: 120, height: 24 })]
+    rangeRects = [rect]
 
-    expect(measureSelectionAnchor(tracker!, viewport)).toEqual({ status: "offscreen" })
+    expect(measureSelectionAnchor(tracker!, viewport)).toMatchObject({
+      status: "offscreen",
+      anchor: expectedAnchor,
+      tracker: { lastAnchor: expectedAnchor },
+    })
+  })
+
+  it("tracks an offscreen reference rect while another selection rect remains visible", () => {
+    rangeRects = [
+      createRect({ left: 100, top: 100, width: 120, height: 24 }),
+      createRect({ left: 100, top: 130, width: 80, height: 24 }),
+    ]
+    const tracker = createSelectionAnchorTracker([rangeSnapshot], { x: 175, y: 150 })
+    expect(tracker?.reference.rectIndex).toBe(1)
+
+    rangeRects = [
+      createRect({ left: 100, top: 100, width: 120, height: 24 }),
+      createRect({ left: 100, top: 900, width: 80, height: 24 }),
+    ]
+
+    expect(measureSelectionAnchor(tracker!, viewport)).toMatchObject({
+      status: "visible",
+      anchor: { x: 175, y: 920 },
+      tracker: { reference: { rectIndex: 1 }, lastAnchor: { x: 175, y: 920 } },
+    })
+  })
+
+  it("falls back to the nearest offscreen rect when wrapping changes", () => {
+    rangeRects = [
+      createRect({ left: 100, top: 100, width: 120, height: 24 }),
+      createRect({ left: 100, top: 130, width: 80, height: 24 }),
+    ]
+    const tracker = createSelectionAnchorTracker([rangeSnapshot], { x: 175, y: 150 })
+    expect(tracker?.reference.rectIndex).toBe(1)
+
+    rangeRects = [createRect({ left: 100, top: -100, width: 160, height: 24 })]
+
+    expect(measureSelectionAnchor(tracker!, viewport)).toMatchObject({
+      status: "offscreen",
+      anchor: { x: 175, y: -76 },
+      tracker: {
+        reference: { rectIndex: 0, offsetX: 75, offsetY: 24 },
+        lastAnchor: { x: 175, y: -76 },
+      },
+    })
+  })
+
+  it("preserves the last anchor while a connected range has no geometry", () => {
+    const tracker = createSelectionAnchorTracker([rangeSnapshot], { x: 210, y: 124 })
+    rangeRects = []
+
+    const measurement = measureSelectionAnchor(tracker!, viewport)
+
+    expect(measurement).toEqual({
+      status: "offscreen",
+      anchor: { x: 210, y: 124 },
+      tracker,
+    })
+    expect(measurement.status === "invalid" ? null : measurement.tracker).toBe(tracker)
   })
 
   it("reports invalid detached ranges", () => {
