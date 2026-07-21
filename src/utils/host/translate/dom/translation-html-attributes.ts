@@ -1,5 +1,8 @@
+import type { Config } from "@/types/config/config"
 import type { TransNode } from "@/types/dom"
 import { MARK_ATTRIBUTES, NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
+import { DONT_WALK_BUT_TRANSLATE_TAGS } from "@/utils/constants/dom-rules"
+import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
 import {
   assertHtmlAttributeMarkerIntegrity,
   HTML_ATTRIBUTE_MARKER,
@@ -14,6 +17,10 @@ export const TRANSLATABLE_ATTRIBUTE_NAMES = new Set([
   "aria-placeholder",
   "aria-roledescription",
   "aria-valuetext",
+  // "display" is not a translatable text value, but it MUST be preserved in
+  // requestHtml so display-math elements (mjx-container[display="true"]) are
+  // distinguishable from inline-math after attribute protection.
+  "display",
   "label",
   "placeholder",
   "title",
@@ -47,6 +54,13 @@ export interface ProtectedTranslationHtml {
   restore: (translatedHtml: string) => string
   restoreLegacy: (translatedHtml: string) => string
   sourceHtml: string
+}
+
+export interface ProtectNonTranslatableResult {
+  /** HTML with non-translatable elements replaced by placeholders, ready for translation. */
+  requestHtml: string
+  /** Restore placeholders back to original HTML in a translated HTML string. */
+  restore: (translatedHtml: string) => string
 }
 
 function isTranslatableAttribute(element: Element, attributeName: string): boolean {
@@ -348,6 +362,108 @@ export function protectTranslationHtmlAttributes(
       })
 
       return template.innerHTML
+    },
+  }
+}
+
+const NON_TRANSLATABLE_PLACEHOLDER_PREFIX = "__RF_NT_"
+
+// Tag names that are always non-translatable regardless of class.
+// Needed because protectTranslationHtmlAttributes strips class attributes
+// from requestHtml, so CSS-selector-based detection (.MathJax, .katex) fails
+// on the markerized variant.
+const NON_TRANSLATABLE_TAG_NAMES = new Set(["MJX-CONTAINER"])
+
+function isNonTranslatableElement(
+  element: Element,
+  config: Config,
+  preserveTextSelector: string | null,
+): boolean {
+  // Check NOTRANSLATE class
+  if (element.classList.contains(NOTRANSLATE_CLASS)) return true
+
+  // Check tag-based exclusion (CODE, TIME, etc.)
+  if (DONT_WALK_BUT_TRANSLATE_TAGS.has(element.tagName)) return true
+
+  // Check known non-translatable custom elements (MathJax 3+, work without class attr)
+  if (NON_TRANSLATABLE_TAG_NAMES.has(element.tagName)) return true
+
+  // Check preserveText selectors from site rules
+  if (preserveTextSelector !== null && element.matches(preserveTextSelector)) return true
+
+  // Check translate="no"
+  if (element.getAttribute("translate") === "no") return true
+
+  return false
+}
+
+/**
+ * Protect non-translatable inline elements (KaTeX formulas, MathJax, code blocks,
+ * etc.) by replacing them with unique placeholders before translation.
+ *
+ * These placeholders survive translation intact because they look like opaque
+ * tokens to translation providers. After translation, the placeholders are
+ * replaced with the original element HTML.
+ */
+export function protectNonTranslatableElements(
+  html: string,
+  config: Config,
+  ownerDoc: Document,
+): ProtectNonTranslatableResult {
+  const template = ownerDoc.createElement("template")
+  template.innerHTML = html
+
+  const preserveTextSelector = getEffectiveSiteRule(
+    config,
+    window.location.href,
+  ).preserveTextSelector
+  const placeholders: Array<{ id: string; originalHtml: string }> = []
+
+  if (preserveTextSelector === null && !DONT_WALK_BUT_TRANSLATE_TAGS.size) {
+    // Fast path: no rules to match
+    return {
+      requestHtml: html,
+      restore: (translatedHtml: string) => translatedHtml,
+    }
+  }
+
+  // Walk all elements in template content, collect non-translatable ones
+  const nonTranslatableElements = getAllElements(template.content).filter((element) =>
+    isNonTranslatableElement(element, config, preserveTextSelector),
+  )
+
+  if (nonTranslatableElements.length === 0) {
+    return {
+      requestHtml: html,
+      restore: (translatedHtml: string) => translatedHtml,
+    }
+  }
+
+  // Replace each non-translatable element's outerHTML with a placeholder.
+  // All non-translatable elements (inline and display formulas alike) are
+  // restored after translation so they appear in both the original and the
+  // translated bilingual wrapper — i.e., they behave as "preserved content".
+  for (const element of nonTranslatableElements) {
+    const id = `${NON_TRANSLATABLE_PLACEHOLDER_PREFIX}${placeholders.length}__`
+    placeholders.push({ id, originalHtml: element.outerHTML })
+    element.replaceWith(ownerDoc.createTextNode(id))
+  }
+
+  const requestHtml = template.innerHTML
+
+  return {
+    requestHtml,
+    restore(translatedHtml: string): string {
+      if (placeholders.length === 0) return translatedHtml
+      let result = translatedHtml
+      for (const { id, originalHtml } of placeholders) {
+        // Use a global regex to replace all occurrences of the placeholder.
+        // The placeholder may have been entity-encoded or split by the provider,
+        // so we escape any regex-special characters in the id.
+        const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+        result = result.replace(new RegExp(escapedId, "g"), originalHtml)
+      }
+      return result
     },
   }
 }

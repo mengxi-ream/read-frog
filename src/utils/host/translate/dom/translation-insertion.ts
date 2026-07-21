@@ -93,6 +93,11 @@ export function addBlockTranslation(
   translatedNode.className = `${NOTRANSLATE_CLASS} ${BLOCK_CONTENT_CLASS}`
 }
 
+export interface TranslationInsertionOptions {
+  /** When "html", the translated text is rendered via innerHTML to preserve rich formatting. */
+  format?: "plain" | "html"
+}
+
 export async function insertTranslatedNodeIntoWrapper(
   translatedWrapperNode: HTMLElement,
   { flowSource, layoutSource, sourceText, isCurrent }: TranslationInsertionContext,
@@ -100,6 +105,7 @@ export async function insertTranslatedNodeIntoWrapper(
   translationNodeStyle: TranslationNodeStyleConfig,
   config: Config,
   forceBlockTranslation: boolean = false,
+  options?: TranslationInsertionOptions,
 ): Promise<void> {
   if (isCurrent && !isCurrent()) return
 
@@ -137,7 +143,11 @@ export async function insertTranslatedNodeIntoWrapper(
     return
   }
 
-  translatedNode.textContent = translatedText
+  if (options?.format === "html") {
+    translatedNode.innerHTML = translatedText
+  } else {
+    translatedNode.textContent = translatedText
+  }
   translatedWrapperNode.appendChild(translatedNode)
   await decorateTranslationNode(translatedNode, translationNodeStyle)
 

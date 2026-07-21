@@ -31,7 +31,10 @@ import {
   removeTranslatedWrapperWithRestore,
   restoreTranslationOnlySwapsForAnchor,
 } from "../dom/translation-cleanup"
-import { protectTranslationHtmlAttributes } from "../dom/translation-html-attributes"
+import {
+  protectTranslationHtmlAttributes,
+  protectNonTranslatableElements,
+} from "../dom/translation-html-attributes"
 import { insertTranslatedNodeIntoWrapper } from "../dom/translation-insertion"
 import {
   applyInPlaceTextSwap,
@@ -207,6 +210,8 @@ async function translateVirtualParagraph(
     wrapper,
     isCurrent,
     "plain",
+    // TODO: Switch virtual paragraphs to the HTML pipeline (same as the main
+    // bilingual path) when sourceFragments can be reliably serialized per-unit.
     actionContext ? () => translateTextForPage(unit.text, "plain", actionContext) : undefined,
   )
   if (!isCurrent()) {
@@ -521,6 +526,25 @@ export async function translateNodesBilingualMode(
     }
 
     const ownerDoc = getOwnerDocument(insertionTarget)
+
+    // Serialize to HTML for format-preserving translation. This mirrors the
+    // translationOnly pipeline: clone nodes to HTML, protect non-translatable
+    // attributes with markers, and replace non-translatable inline content
+    // (KaTeX, MathJax, code blocks) with placeholders.
+    const protectedHtml = protectTranslationHtmlAttributes(transNodes, ownerDoc)
+
+    // Protect non-translatable inline content in BOTH the legacy and
+    // marker-aware HTML variants. They share the same element structure,
+    // so placeholder IDs are consistent across both.
+    const nonTranslatableLegacy = protectNonTranslatableElements(
+      protectedHtml.legacyRequestHtml,
+      config,
+      ownerDoc,
+    )
+    const nonTranslatableRequest = protectedHtml.hasPlaceholders
+      ? protectNonTranslatableElements(protectedHtml.requestHtml, config, ownerDoc)
+      : nonTranslatableLegacy
+
     const { spinner, wrapper: translatedWrapperNode } = createBilingualWrapper(
       ownerDoc,
       walkId,
@@ -563,14 +587,57 @@ export async function translateNodesBilingualMode(
         ? isBilingualTranslationStateCurrent(bilingualState)
         : translatedWrapperNode.isConnected
 
+    // Build a translate request that first applies non-translatable content
+    // placeholders, then handles HTML attribute markers (same strategy as
+    // translationOnly mode). The two protection layers are independent:
+    // non-translatable placeholders operate on the full outerHTML, while
+    // attribute markers protect individual element attributes.
+    const translateRequest = async () => {
+      if (!protectedHtml.hasPlaceholders) {
+        const translated = await translateTextForAction(
+          nonTranslatableLegacy.requestHtml,
+          "html",
+          actionContext,
+        )
+        if (!translated) return translated
+        const withRestoredContent = nonTranslatableLegacy.restore(translated)
+        return protectedHtml.restoreLegacy(withRestoredContent)
+      }
+
+      try {
+        const translated = await translateTextForAction(
+          nonTranslatableRequest.requestHtml,
+          "html",
+          actionContext,
+        )
+        if (!translated) return translated
+        const withRestoredContent = nonTranslatableRequest.restore(translated)
+        return protectedHtml.restore(withRestoredContent)
+      } catch (error) {
+        if (!isHtmlAttributeMarkerIntegrityError(error)) throw error
+        logger.warn(
+          "HTML attribute placeholders not preserved in bilingual mode; retrying with legacy",
+          error,
+        )
+        const translated = await translateTextForAction(
+          nonTranslatableLegacy.requestHtml,
+          "html",
+          actionContext,
+        )
+        if (!translated) return translated
+        const withRestoredContent = nonTranslatableLegacy.restore(translated)
+        return protectedHtml.restoreLegacy(withRestoredContent)
+      }
+    }
+
     const realTranslatedText = await getTranslatedTextAndRemoveSpinner(
       nodes,
-      textContent,
+      protectedHtml.sourceHtml,
       spinner,
       translatedWrapperNode,
       isCurrent,
-      "plain",
-      actionContext ? () => translateTextForPage(textContent, "plain", actionContext) : undefined,
+      "html",
+      translateRequest,
     )
 
     if (!isCurrent()) {
@@ -578,7 +645,13 @@ export async function translateNodesBilingualMode(
       return
     }
 
-    const translatedText = getDisplayTranslation(textContent, realTranslatedText)
+    const translatedText = realTranslatedText
+      ? getDisplayTranslation(
+          protectedHtml.comparisonSourceHtml,
+          realTranslatedText,
+          protectedHtml.normalizeForComparison(realTranslatedText),
+        )
+      : realTranslatedText
 
     if (translatedText === "") {
       removeTranslatedWrapperWithRestore(translatedWrapperNode)
@@ -591,13 +664,20 @@ export async function translateNodesBilingualMode(
       return
     }
 
+    // Render translated HTML into the bilingual wrapper, preserving rich formatting.
     await insertTranslatedNodeIntoWrapper(
       translatedWrapperNode,
-      { flowSource: insertionTarget, isCurrent, layoutSource, sourceText: textContent },
+      {
+        flowSource: insertionTarget,
+        isCurrent,
+        layoutSource,
+        sourceText: protectedHtml.sourceHtml,
+      },
       translatedText,
       config.translate.translationNodeStyle,
       config,
       forceBlockTranslation || hasTrailingInlineImageAttachment,
+      { format: "html" },
     )
     if (!isCurrent()) removeTranslatedWrapperWithRestore(translatedWrapperNode)
   } finally {

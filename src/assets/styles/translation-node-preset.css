@@ -6,8 +6,12 @@
   text-decoration-skip-ink: auto;
 }
 
+.read-frog-translated-content-wrapper p {
+  margin: 0 !important;
+}
+
 .read-frog-translated-block-content {
-  display: inline-block;
+  display: block;
   margin: 8px 0 !important;
   color: inherit;
   font-family: inherit;
@@ -24,9 +28,18 @@
   text-decoration: inherit;
 }
 
+/*
+ * Language-specific font stacks target the wrapper and its immediate
+ * block/inline content children — NOT every descendant via `*`.
+ * Non-translatable inline elements (KaTeX, MathJax, code, etc.) keep
+ * their own fonts because they have explicit font-family declarations
+ * and will not inherit from the content span.
+ */
+
 /* Simplified Chinese - macOS > Windows > Cross-platform > Fallback */
 .read-frog-translated-content-wrapper[lang="zh"],
-.read-frog-translated-content-wrapper[lang="zh"] * {
+.read-frog-translated-content-wrapper[lang="zh"] .read-frog-translated-block-content,
+.read-frog-translated-content-wrapper[lang="zh"] .read-frog-translated-inline-content {
   font-family:
     "PingFang SC",
     "Microsoft YaHei",
@@ -44,7 +57,8 @@
 
 /* Traditional Chinese - macOS > Windows > Cross-platform > Fallback */
 .read-frog-translated-content-wrapper[lang="zh-TW"],
-.read-frog-translated-content-wrapper[lang="zh-TW"] * {
+.read-frog-translated-content-wrapper[lang="zh-TW"] .read-frog-translated-block-content,
+.read-frog-translated-content-wrapper[lang="zh-TW"] .read-frog-translated-inline-content {
   font-family:
     "PingFang TC",
     "Microsoft JhengHei",
@@ -65,7 +79,8 @@
 
 /* Japanese - macOS/Windows high-quality > Cross-platform > Legacy > Fallback */
 .read-frog-translated-content-wrapper[lang="ja"],
-.read-frog-translated-content-wrapper[lang="ja"] * {
+.read-frog-translated-content-wrapper[lang="ja"] .read-frog-translated-block-content,
+.read-frog-translated-content-wrapper[lang="ja"] .read-frog-translated-inline-content {
   font-family:
     "Hiragino Kaku Gothic ProN",
     "Yu Gothic",
@@ -86,11 +101,14 @@
 
 /* Arabic script languages - common typography features */
 .read-frog-translated-content-wrapper[lang="ar"],
-.read-frog-translated-content-wrapper[lang="ar"] *,
+.read-frog-translated-content-wrapper[lang="ar"] .read-frog-translated-block-content,
+.read-frog-translated-content-wrapper[lang="ar"] .read-frog-translated-inline-content,
 .read-frog-translated-content-wrapper[lang="fa"],
-.read-frog-translated-content-wrapper[lang="fa"] *,
+.read-frog-translated-content-wrapper[lang="fa"] .read-frog-translated-block-content,
+.read-frog-translated-content-wrapper[lang="fa"] .read-frog-translated-inline-content,
 .read-frog-translated-content-wrapper[lang="ur"],
-.read-frog-translated-content-wrapper[lang="ur"] * {
+.read-frog-translated-content-wrapper[lang="ur"] .read-frog-translated-block-content,
+.read-frog-translated-content-wrapper[lang="ur"] .read-frog-translated-inline-content {
   font-feature-settings:
     "rlig" 1,
     "calt" 1;
@@ -98,7 +116,8 @@
 
 /* Arabic - macOS high-quality > Cross-platform > macOS legacy > Fallback */
 .read-frog-translated-content-wrapper[lang="ar"],
-.read-frog-translated-content-wrapper[lang="ar"] * {
+.read-frog-translated-content-wrapper[lang="ar"] .read-frog-translated-block-content,
+.read-frog-translated-content-wrapper[lang="ar"] .read-frog-translated-inline-content {
   font-family:
     "SF Arabic", "Noto Sans Arabic", "Noto Naskh Arabic", "Geeza Pro", "Traditional Arabic",
     "Segoe UI", Tahoma, Arial, sans-serif;
@@ -106,7 +125,8 @@
 
 /* Persian/Farsi - macOS > Cross-platform > Platform-specific > Fallback */
 .read-frog-translated-content-wrapper[lang="fa"],
-.read-frog-translated-content-wrapper[lang="fa"] * {
+.read-frog-translated-content-wrapper[lang="fa"] .read-frog-translated-block-content,
+.read-frog-translated-content-wrapper[lang="fa"] .read-frog-translated-inline-content {
   font-family:
     "SF Arabic", "Noto Sans Arabic", "Geeza Pro", "Iranian Sans", "Segoe UI", Tahoma, Arial,
     sans-serif !important;
@@ -114,8 +134,25 @@
 
 /* Urdu - Specialized Nastaliq > Cross-platform > Fallback */
 .read-frog-translated-content-wrapper[lang="ur"],
-.read-frog-translated-content-wrapper[lang="ur"] * {
+.read-frog-translated-content-wrapper[lang="ur"] .read-frog-translated-block-content,
+.read-frog-translated-content-wrapper[lang="ur"] .read-frog-translated-inline-content {
   font-family:
     "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "SF Arabic", "Noto Sans Arabic",
     "Alvi Nastaleeq", "Segoe UI", Tahoma, Arial, sans-serif;
+}
+
+/*
+ * Inline non-translatable elements (formulas, code) inside translated content
+ * need visual spacing from adjacent text. Display/block formulas are excluded
+ * — they get their own margins from the math renderer's CSS.
+ */
+.read-frog-translated-block-content .katex:not(.katex-display),
+.read-frog-translated-inline-content .katex:not(.katex-display),
+.read-frog-translated-block-content .MathJax:not(.MathJax_Display):not([display="true"]),
+.read-frog-translated-inline-content .MathJax:not(.MathJax_Display):not([display="true"]),
+.read-frog-translated-block-content .mwe-math-element:not([style*="display: block"]),
+.read-frog-translated-inline-content .mwe-math-element:not([style*="display: block"]),
+.read-frog-translated-block-content code,
+.read-frog-translated-inline-content code {
+  margin: 0 0.2em;
 }

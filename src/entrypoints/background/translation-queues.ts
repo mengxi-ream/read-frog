@@ -1,7 +1,11 @@
 import type { PromptExperimentVariant, TranslationActionContext } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
-import type { BatchQueueConfig, RequestQueueConfig } from "@/types/config/translate"
+import type {
+  BatchQueueConfig,
+  RequestQueueConfig,
+  TranslationTextFormat,
+} from "@/types/config/translate"
 import type { SubtitlePromptContext, WebPagePromptContext } from "@/types/content"
 import type { PromptResolver } from "@/utils/host/translate/api/ai"
 import { browser, storage } from "#imports"
@@ -95,6 +99,7 @@ export async function executeBatchTranslation<TContext>(
     isBatch: true,
     context,
     signal,
+    textFormat: dataList[0].textFormat,
   })
   return parseBatchResult(result)
 }
@@ -208,6 +213,7 @@ export interface TranslateBatchData<TContext = unknown> {
   hash: string
   scheduleAt: number
   context?: TContext
+  textFormat?: TranslationTextFormat
   // Cancellation scope (`${tabId}:${sessionId}`); absent = uncancellable.
   scope?: string
   promptExperimentVariant?: PromptExperimentVariant
@@ -534,6 +540,7 @@ export function setUpWebPageTranslationQueue(): void {
         hash,
         scheduleAt,
         context,
+        textFormat,
         scope,
         promptExperimentVariant: effectivePromptExperimentVariant,
         translationActionContext,
