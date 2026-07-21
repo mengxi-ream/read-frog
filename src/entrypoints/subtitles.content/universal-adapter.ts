@@ -756,8 +756,9 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
           const chunkStart = chunk[0].start
           const chunkEnd = chunk.at(-1)!.end
           this.replaceSourceTrackWindow(chunkStart, chunkEnd, nextFragments)
-          // Drop translated cues in the window so display falls back to the new source cuts.
-          scheduler.removeCuesInTimeWindow(chunkStart, chunkEnd)
+          // Drop identity-changed/spanning translations; keep translations for unchanged cues
+          // so preSegmented (and partial AI recuts) do not wipe work then skip re-translate.
+          scheduler.reconcileTranslatedCuesAfterRecut(chunkStart, chunkEnd, nextFragments)
           this.translationCoordinator?.noteFragmentListChanged()
         },
       })

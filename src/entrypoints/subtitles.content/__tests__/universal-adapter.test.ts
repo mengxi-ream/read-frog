@@ -60,6 +60,7 @@ function attachScheduler(adapter: UniversalVideoAdapter, active: boolean, curren
     setState: vi.fn<(...args: any[]) => any>(),
     supplementSubtitles: vi.fn<(...args: any[]) => any>(),
     removeCuesInTimeWindow: vi.fn<(...args: any[]) => any>(),
+    reconcileTranslatedCuesAfterRecut: vi.fn<(...args: any[]) => any>(),
     getVideoElement: vi.fn<(...args: any[]) => any>(() => ({ currentTime })),
     getState: vi.fn<(...args: any[]) => any>(() => "idle"),
   }

@@ -131,4 +131,32 @@ describe("subtitles scheduler", () => {
     ;(scheduler as any).updateSubtitles(2.1)
     expect(subtitlesStore.get(currentSubtitleAtom)?.text).toBe("after")
   })
+
+  it("reconcileTranslatedCuesAfterRecut keeps translations for unchanged identities", () => {
+    const video = createVideo(0.25)
+    const scheduler = new SubtitlesScheduler({ videoElement: video })
+    scheduler.start()
+
+    scheduler.supplementSubtitles([
+      { text: "keep me", start: 0, end: 1000, translation: "保留" },
+      { text: "old cut", start: 1000, end: 2000, translation: "旧" },
+    ])
+
+    scheduler.reconcileTranslatedCuesAfterRecut(0, 2000, [
+      { text: "keep me", start: 0, end: 1000 },
+      { text: "new cut", start: 1000, end: 2000 },
+    ])
+
+    expect(subtitlesStore.get(currentSubtitleAtom)).toEqual({
+      text: "keep me",
+      start: 0,
+      end: 1000,
+      translation: "保留",
+    })
+
+    video.currentTime = 1.2
+    ;(scheduler as any).updateSubtitles(1.2)
+    // Recut line must not keep the old translation under a changed identity.
+    expect(subtitlesStore.get(currentSubtitleAtom)).toBeNull()
+  })
 })

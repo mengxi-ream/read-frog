@@ -9,6 +9,10 @@ import {
 
 const ERROR_STATE_AUTO_HIDE_MS = 5_000
 
+function cueIdentityKey(fragment: Pick<SubtitlesFragment, "start" | "end" | "text">): string {
+  return `${fragment.start}\0${fragment.end}\0${fragment.text}`
+}
+
 /**
  * Holds only *translated* cues. Originals live on sourceTrackAtom; the UI falls back there.
  */
@@ -89,15 +93,55 @@ export class SubtitlesScheduler {
    * rule as replaceSourceTrackWindow, so spanning cues cannot outlive an AI recut.
    */
   removeCuesInTimeWindow(windowStartMs: number, windowEndMs: number) {
-    const previousLength = this.subtitles.length
-    // Keep if no overlap: end <= windowStart || start >= windowEnd.
-    this.subtitles = this.subtitles.filter(
+    this.reconcileTranslatedCuesAfterRecut(windowStartMs, windowEndMs, [])
+  }
+
+  /**
+   * After AI recut of a window: drop overlapping translated cues, but re-attach translations
+   * whose start+end+text still match a next fragment. Unchanged cues must not be wiped then
+   * skipped forever (coordinator still has them in translatedStarts).
+   */
+  reconcileTranslatedCuesAfterRecut(
+    windowStartMs: number,
+    windowEndMs: number,
+    nextFragments: SubtitlesFragment[],
+  ) {
+    const outside = this.subtitles.filter(
       (fragment) => fragment.end <= windowStartMs || fragment.start >= windowEndMs,
     )
-    if (this.subtitles.length === previousLength) {
+    const overlapping = this.subtitles.filter(
+      (fragment) => fragment.end > windowStartMs && fragment.start < windowEndMs,
+    )
+
+    const byIdentity = new Map(
+      overlapping.map((fragment) => [cueIdentityKey(fragment), fragment] as const),
+    )
+    const preserved = nextFragments.flatMap((fragment) => {
+      const previous = byIdentity.get(cueIdentityKey(fragment))
+      if (previous?.translation === undefined) {
+        return []
+      }
+      return [{ ...fragment, translation: previous.translation }]
+    })
+
+    const next = [...outside, ...preserved].sort((a, b) => a.start - b.start)
+    const unchanged =
+      next.length === this.subtitles.length &&
+      next.every((fragment, index) => {
+        const prev = this.subtitles[index]
+        return (
+          prev.start === fragment.start &&
+          prev.end === fragment.end &&
+          prev.text === fragment.text &&
+          prev.translation === fragment.translation
+        )
+      })
+    if (unchanged) {
       return
     }
-    // Force re-resolve: index alone may stay -1 while the atom still holds a removed cue.
+
+    this.subtitles = next
+    // Force re-resolve: index alone may stay stale while the atom still holds a removed cue.
     this.currentIndex = -1
     this.updateSubtitles(this.videoElement.currentTime)
     this.updateCurrentSubtitle()
