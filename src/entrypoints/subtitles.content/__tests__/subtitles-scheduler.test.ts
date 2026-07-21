@@ -93,4 +93,27 @@ describe("subtitles scheduler", () => {
     ;(scheduler as any).updateSubtitles(2.1)
     expect(subtitlesStore.get(currentSubtitleAtom)?.text).toBe("c")
   })
+
+  it("removeCuesInTimeWindow drops cues that span into the window", () => {
+    const video = createVideo(1.2)
+    const scheduler = new SubtitlesScheduler({ videoElement: video })
+    scheduler.start()
+
+    // start is before the window, but the cue overlaps [1000, 2000).
+    scheduler.supplementSubtitles([
+      { text: "span", start: 0, end: 1500, translation: "跨界" },
+      { text: "after", start: 2000, end: 3000, translation: "后" },
+    ])
+
+    expect(subtitlesStore.get(currentSubtitleAtom)?.text).toBe("span")
+
+    scheduler.removeCuesInTimeWindow(1000, 2000)
+
+    // Spanning translation must not remain preferred over the recut source track.
+    expect(subtitlesStore.get(currentSubtitleAtom)).toBeNull()
+
+    video.currentTime = 2.1
+    ;(scheduler as any).updateSubtitles(2.1)
+    expect(subtitlesStore.get(currentSubtitleAtom)?.text).toBe("after")
+  })
 })

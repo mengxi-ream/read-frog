@@ -85,13 +85,14 @@ export class SubtitlesScheduler {
   }
 
   /**
-   * Drop translated cues whose start falls in [windowStartMs, windowEndMs] (inclusive ends
-   * matching segmentation window semantics: start in range).
+   * Drop translated cues that overlap [windowStartMs, windowEndMs) — same half-open interval
+   * rule as replaceSourceTrackWindow, so spanning cues cannot outlive an AI recut.
    */
   removeCuesInTimeWindow(windowStartMs: number, windowEndMs: number) {
     const previousLength = this.subtitles.length
+    // Keep if no overlap: end <= windowStart || start >= windowEnd.
     this.subtitles = this.subtitles.filter(
-      (fragment) => fragment.start < windowStartMs || fragment.start > windowEndMs,
+      (fragment) => fragment.end <= windowStartMs || fragment.start >= windowEndMs,
     )
     if (this.subtitles.length === previousLength) {
       return
