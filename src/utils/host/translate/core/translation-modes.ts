@@ -52,17 +52,21 @@ import { isNumericContent } from "../ui/translation-utils"
 import {
   attachBilingualTranslationWrapper,
   collectSourceTextExcludingWrappers,
+  countWrapperTamperRepair,
   getBilingualTranslationStateForSource,
   getTranslationOnlyAnchorState,
   getVirtualParagraphGroupForSource,
   isBilingualTranslationStateCurrent,
+  isBilingualWrapperContentTampered,
   isVirtualParagraphGroupCurrent,
   markExtensionDrivenNodeRemoval,
   markVirtualParagraphGroupInserted,
+  MAX_WRAPPER_TAMPER_REPAIRS,
   registerBilingualTranslationState,
   registerTranslationOnlyOriginals,
   registerVirtualParagraphGroup,
   registerVirtualParagraphWrapper,
+  resetWrapperTamperRepairs,
   translatingNodes,
   unregisterBilingualTranslationState,
   type BilingualTranslationState,
@@ -392,6 +396,24 @@ export async function translateNodesBilingualMode(
         isBilingualTranslationStateCurrent(existingBilingualState)
       if (!toggle && isSameActiveWalk) return
 
+      if (!toggle && isBilingualWrapperContentTampered(existingBilingualState)) {
+        // The site rewrote our wrapper content while the host text is intact
+        // (#1918). Repair by retranslating — but a script that rewrites
+        // deterministically would fight forever (the retranslation budget
+        // bounds rate, not duration), so after MAX_WRAPPER_TAMPER_REPAIRS
+        // losses adopt the site's version as the expected content: the
+        // pre-#1918 terminal state, reached after real repair attempts.
+        if (countWrapperTamperRepair(layoutSource) > MAX_WRAPPER_TAMPER_REPAIRS) {
+          existingBilingualState.wrapperTextContent =
+            existingBilingualState.wrapper?.textContent ?? null
+          return
+        }
+      } else {
+        // Genuine host change, toggle, or new session: the fight (if any) is
+        // over — re-arm the capitulation budget.
+        resetWrapperTamperRepairs(layoutSource)
+      }
+
       if (existingBilingualState.wrapper) {
         removeTranslatedWrapperWithRestore(existingBilingualState.wrapper)
       } else {
@@ -481,6 +503,7 @@ export async function translateNodesBilingualMode(
         status: "active",
         walkId,
         wrapper: null,
+        wrapperTextContent: null,
       }
       registerBilingualTranslationState(bilingualState)
     }
@@ -593,7 +616,18 @@ export async function translateNodesBilingualMode(
 
     await insertTranslatedNodeIntoWrapper(
       translatedWrapperNode,
-      { flowSource: insertionTarget, isCurrent, layoutSource, sourceText: textContent },
+      {
+        flowSource: insertionTarget,
+        isCurrent,
+        layoutSource,
+        // Wrapper-content integrity snapshot (#1918): armed synchronously at
+        // append time so a site rewrite landing during the decorate await can
+        // never be canonized as the expected content.
+        onContentInserted: (wrapper) => {
+          if (bilingualState) bilingualState.wrapperTextContent = wrapper.textContent
+        },
+        sourceText: textContent,
+      },
       translatedText,
       config.translate.translationNodeStyle,
       config,

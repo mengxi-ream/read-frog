@@ -24,6 +24,14 @@ interface TranslationInsertionContext {
   layoutSource: TransNode
   sourceText: string
   isCurrent?: () => boolean
+  // Fired synchronously right after the translated node is appended, BEFORE
+  // the decorate await. This is the only sound point to snapshot the wrapper's
+  // expected content (#1918): earlier and the isCurrent() entry guard would
+  // see a mismatch and self-destruct the translation; later (after the await)
+  // and a site rewrite landing in the await window would be canonized as the
+  // expected content. Not fired on the no-append early return, so stray empty
+  // wrappers never enter tamper surveillance.
+  onContentInserted?: (wrapper: HTMLElement) => void
 }
 
 function isFloatedElement(element: HTMLElement): boolean {
@@ -95,7 +103,13 @@ export function addBlockTranslation(
 
 export async function insertTranslatedNodeIntoWrapper(
   translatedWrapperNode: HTMLElement,
-  { flowSource, layoutSource, sourceText, isCurrent }: TranslationInsertionContext,
+  {
+    flowSource,
+    layoutSource,
+    sourceText,
+    isCurrent,
+    onContentInserted,
+  }: TranslationInsertionContext,
   translatedText: string,
   translationNodeStyle: TranslationNodeStyleConfig,
   config: Config,
@@ -139,6 +153,8 @@ export async function insertTranslatedNodeIntoWrapper(
 
   translatedNode.textContent = translatedText
   translatedWrapperNode.appendChild(translatedNode)
+  // Synchronous, pre-await: see TranslationInsertionContext.onContentInserted.
+  onContentInserted?.(translatedWrapperNode)
   await decorateTranslationNode(translatedNode, translationNodeStyle)
 
   if (isCurrent && !isCurrent()) return

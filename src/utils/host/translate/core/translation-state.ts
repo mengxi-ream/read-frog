@@ -40,6 +40,13 @@ export interface BilingualTranslationState {
   status: "active" | "disposed"
   walkId: string
   wrapper: HTMLElement | null
+  // Expected wrapper.textContent right after the translated node is appended.
+  // null during construction and for error-UI wrappers — in-wrapper mutation
+  // records then stay classified self-inflicted (#1831). Set only on the
+  // successful-insertion path; a later divergence means the SITE rewrote our
+  // wrapper content (truncation scripts, normalizers) and the translation must
+  // be repaired instead of silently staying corrupted (#1918).
+  wrapperTextContent: string | null
 }
 
 // State management for translation operations
@@ -348,6 +355,50 @@ export function unregisterBilingualTranslationState(state: BilingualTranslationS
   state.status = "disposed"
 }
 
+// Capitulation counter for wrapper-content fights (#1918): a site script that
+// deterministically rewrites our wrapper content (NBSP normalizers, truncation
+// scripts) would otherwise loop the budgeted retranslation forever — the
+// budget bounds the RATE, never the duration. Keyed by layoutSource so the
+// count survives state replacement across repairs; NOT reset on repair
+// success, only on genuine host-content changes (a reset on repair would
+// re-arm the infinite fight).
+const wrapperTamperRepairCounts = new WeakMap<HTMLElement, number>()
+
+/** Repair attempts before adopting the site's wrapper content as expected. */
+export const MAX_WRAPPER_TAMPER_REPAIRS = 3
+
+export function countWrapperTamperRepair(layoutSource: HTMLElement): number {
+  const next = (wrapperTamperRepairCounts.get(layoutSource) ?? 0) + 1
+  wrapperTamperRepairCounts.set(layoutSource, next)
+  return next
+}
+
+export function resetWrapperTamperRepairs(layoutSource: HTMLElement): void {
+  wrapperTamperRepairCounts.delete(layoutSource)
+}
+
+/**
+ * True when the ONLY defect is that the wrapper's content diverged from the
+ * post-insertion snapshot: registration, connectivity, containment and host
+ * text are all intact. This is the signature of a site-side rewrite of our
+ * wrapper content (#1918) — distinguishable from genuine host-content
+ * changes, which must always retranslate (and reset the capitulation count).
+ */
+export function isBilingualWrapperContentTampered(state: BilingualTranslationState): boolean {
+  return (
+    state.status === "active" &&
+    bilingualTranslationsBySource.get(state.layoutSource) === state &&
+    state.layoutSource.isConnected &&
+    state.wrapper !== null &&
+    bilingualTranslationsByWrapper.get(state.wrapper) === state &&
+    state.wrapper.isConnected &&
+    state.layoutSource.contains(state.wrapper) &&
+    state.wrapperTextContent !== null &&
+    state.wrapper.textContent !== state.wrapperTextContent &&
+    collectHostText(state.layoutSource, new Set([state.wrapper])) === state.sourceTextContent
+  )
+}
+
 export function isBilingualTranslationStateCurrent(state: BilingualTranslationState): boolean {
   if (
     state.status !== "active" ||
@@ -368,7 +419,13 @@ export function isBilingualTranslationStateCurrent(state: BilingualTranslationSt
     bilingualTranslationsByWrapper.get(state.wrapper) === state &&
     state.wrapper.isConnected &&
     state.layoutSource.contains(state.wrapper) &&
-    collectHostText(state.layoutSource, new Set([state.wrapper])) === state.sourceTextContent
+    collectHostText(state.layoutSource, new Set([state.wrapper])) === state.sourceTextContent &&
+    // Wrapper-content integrity: a site rewriting text INSIDE our wrapper
+    // (truncation scripts, normalizers) must read as stale so the budgeted
+    // retranslation pipeline repairs it (#1918). Exact compare, consistent
+    // with collectHostText/expectedRunText. Last conjunct: cheapest exit
+    // paths first.
+    (state.wrapperTextContent === null || state.wrapper.textContent === state.wrapperTextContent)
   )
 }
 

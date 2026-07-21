@@ -39,6 +39,7 @@ import { walkAndLabelElement, walkAndLabelElementChunked } from "@/utils/host/do
 import {
   findStaleBilingualLayoutSource,
   findStaleTranslationOnlyAnchor,
+  getBilingualTranslationStateForWrapper,
   wasCharacterDataChangeExtensionDriven,
   wasNodeRemovedByExtension,
 } from "@/utils/host/translate/core/translation-state"
@@ -790,7 +791,21 @@ export class PageTranslationManager implements IPageTranslationManager {
       return true
     }
     const targetElement = isHTMLElement(record.target) ? record.target : record.target.parentElement
-    if (targetElement?.closest(`.${CONTENT_WRAPPER_CLASS}`)) return true
+    const wrapperElement = targetElement?.closest<HTMLElement>(`.${CONTENT_WRAPPER_CLASS}`)
+    if (wrapperElement) {
+      // In-wrapper churn is normally our own (#1831) — but a divergence from
+      // the post-insertion snapshot means the SITE rewrote our wrapper content
+      // (truncation scripts like CNBC's, #1918). Those records must reach the
+      // staleness walk so the budgeted retranslation repairs the wrapper. The
+      // null snapshot covers the construction window and error-UI wrappers,
+      // keeping their churn classified self-inflicted exactly as before.
+      const state = getBilingualTranslationStateForWrapper(wrapperElement)
+      return !(
+        state &&
+        state.wrapperTextContent !== null &&
+        wrapperElement.textContent !== state.wrapperTextContent
+      )
+    }
     if (record.type !== "childList") return false
     const added = [...record.addedNodes]
     const removed = [...record.removedNodes]
