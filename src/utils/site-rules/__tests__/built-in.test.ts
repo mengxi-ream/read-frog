@@ -142,4 +142,38 @@ describe("built-in site rules", () => {
     expect(resolved.excludeSelector).toContain(".forum-topbar")
     expect(resolved.excludeSelector).toContain(".forum-bottombar")
   })
+
+  it("does not restrict migrated article sites to stale include selectors", () => {
+    const restoredSites = [
+      ["newyorker", "https://www.newyorker.com/news/the-lede/example"],
+      ["scmp", "https://www.scmp.com/news/china/politics/article/example"],
+      ["android", "https://developer.android.com/develop/ui/compose/documentation"],
+      ["thehackernews", "https://thehackernews.com/2026/07/example.html"],
+    ] as const
+
+    for (const [id, url] of restoredSites) {
+      const resolved = resolveSiteRule(url, BUILT_IN_SITE_RULES, [], [])
+      expect(resolved.matchedRuleIds).toContain(id)
+      expect(resolved.includeSelector).toBeNull()
+    }
+  })
+
+  it("retains include scopes that still define intentional content roots", () => {
+    const paulGraham = resolveSiteRule(
+      "https://paulgraham.com/greatwork.html",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+    expect(paulGraham.includeSelector).toBe("font[face=verdana]")
+
+    const construct = resolveSiteRule(
+      "https://www.construct.net/en/make-games/manuals/construct-3",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+    expect(construct.includeSelector).toContain("aside")
+    expect(construct.includeSelector).toContain("div.manualContent")
+  })
 })

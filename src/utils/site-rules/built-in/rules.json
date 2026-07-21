@@ -1234,8 +1234,7 @@
   {
     "id": "newyorker",
     "matches": "www.newyorker.com",
-    "excludeSelectors": ["[data-testid=PersistentTop]", "[data-testid=StackedNavigationHeader]"],
-    "includeSelectors": ["h1", "[data-testid=SummaryItemHed]"]
+    "excludeSelectors": ["[data-testid=PersistentTop]", "[data-testid=StackedNavigationHeader]"]
   },
   {
     "id": "typora",
@@ -1255,7 +1254,6 @@
   {
     "id": "scmp",
     "matches": "www.scmp.com",
-    "includeSelectors": [".info__subHeadline", ".section-content h2"],
     "injectedCss": ".topic__article-list { height: unset; }\n.adverisers__adveriser { height: unset; }\n.advertiser__content { height: unset; }\n.content-title__link { display:unset;overflow:unset;-webkit-line-clamp:unset; }\n.title__text { max-height:unset; -webkit-line-clamp:unset; }\n.news-list-item__news-title { max-height:unset; -webkit-line-clamp:unset; }\na[class*='link'] > .link__headline { max-height:unset; -webkit-line-clamp:unset; }"
   },
   {
@@ -1728,8 +1726,7 @@
   },
   {
     "id": "android",
-    "matches": ["developer.android.google.cn", "developer.android.com"],
-    "includeSelectors": ["aside", "google-codelab-step"]
+    "matches": ["developer.android.google.cn", "developer.android.com"]
   },
   {
     "id": "ft",
@@ -1967,8 +1964,7 @@
   {
     "id": "thehackernews",
     "matches": "thehackernews.com",
-    "excludeSelectors": ["span#blog-pager-older-link", "span.h-datetime"],
-    "includeSelectors": [".pop-title"]
+    "excludeSelectors": ["span#blog-pager-older-link", "span.h-datetime"]
   },
   {
     "id": "brown",
