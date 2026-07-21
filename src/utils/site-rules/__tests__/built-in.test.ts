@@ -78,6 +78,16 @@ describe("built-in site rules", () => {
     expect(invalid).toEqual([])
   })
 
+  // CNBC clamps card titles via an INLINE style (-webkit-line-clamp:3), which
+  // only an !important declaration can override — without it the rule is a
+  // no-op and the injected translation stays clipped.
+  // See https://github.com/mengxi-ream/read-frog/issues/1918
+  it("unclamps CNBC card titles with !important (issue #1918)", () => {
+    const resolved = resolveSiteRule("https://www.cnbc.com/", BUILT_IN_SITE_RULES, [], [])
+    expect(resolved.injectedCss).toContain("-webkit-line-clamp: unset !important")
+    expect(resolved.injectedCss).toContain("max-height: unset !important")
+  })
+
   // Vercel `prose-vercel` docs hide `[data-docs-heading] a span`, which also
   // hides Read Frog's injected wrapper once it lands inside the heading anchor.
   // See https://github.com/mengxi-ream/read-frog/issues/1050

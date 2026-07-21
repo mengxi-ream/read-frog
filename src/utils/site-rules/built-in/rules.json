@@ -1294,7 +1294,7 @@
   {
     "id": "cnbc",
     "matches": "www.cnbc.com",
-    "injectedCss": "div.Card-titleContainer > div { -webkit-line-clamp: unset;max-height: unset; }",
+    "injectedCss": "div.Card-titleContainer > div { -webkit-line-clamp: unset !important;max-height: unset !important; }",
     "excludeSelectors.add": [
       "#GlobalNavigation",
       "#GlobalFooter",

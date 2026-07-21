@@ -300,6 +300,7 @@ describe("virtual paragraph lifecycle", () => {
       status: "active",
       walkId: "pending-legacy",
       wrapper: null,
+      wrapperTextContent: null,
     }
     registerBilingualTranslationState(state)
 
@@ -323,6 +324,7 @@ describe("virtual paragraph lifecycle", () => {
       status: "active",
       walkId: "foreign-wrapper",
       wrapper: ownWrapper,
+      wrapperTextContent: null,
     }
     registerBilingualTranslationState(state)
     expect(isBilingualTranslationStateCurrent(state)).toBe(true)
@@ -375,6 +377,7 @@ describe("virtual paragraph lifecycle", () => {
       status: "active",
       walkId: "snapshot-symmetry",
       wrapper: null,
+      wrapperTextContent: null,
     }
     registerBilingualTranslationState(state)
 
