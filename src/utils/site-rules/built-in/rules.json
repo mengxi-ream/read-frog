@@ -1824,7 +1824,6 @@
       ".ReviewContentCtn .title",
       ".author_counts,.control_block,.vote_info"
     ],
-    "includeSelectors": [".game_page_autocollapse_ctn iframe"],
     "forceInlineSelectors": [".pulldown"],
     "injectedCss": ".game_description_snippet { max-height:unset; overflow: scroll; }\n.game_purchase_area_friends_want { height: auto; padding-bottom: 6px; }\n.div.early_access_banner { height: 84px; }\n.franchise_notice > * { height: 84px; }"
   },

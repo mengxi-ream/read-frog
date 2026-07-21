@@ -7,8 +7,12 @@ import { PARAGRAPH_ATTRIBUTE, WALKED_ATTRIBUTE } from "@/utils/constants/dom-lab
 import { walkAndLabelElement } from "../traversal"
 
 function setHost(host: string) {
+  setUrl(`https://${host}/some/path`)
+}
+
+function setUrl(url: string) {
   Object.defineProperty(window, "location", {
-    value: new URL(`https://${host}/some/path`),
+    value: new URL(url),
     writable: true,
   })
 }
@@ -55,6 +59,20 @@ describe("includeSelectors whitelist", () => {
 
     expect(document.querySelector("#inside")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
     expect(document.querySelector("#outside")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
+  })
+
+  it("labels Steam app descriptions without the obsolete iframe include (issue #1923)", () => {
+    setUrl("https://store.steampowered.com/app/2453660/Hoop_Land/")
+    document.body.innerHTML = `
+      <div class="game_description_snippet">
+        <p id="description">Build a basketball legacy across seasons and leagues.</p>
+      </div>
+    `
+
+    walkAndLabelElement(document.body, "w1", structuredClone(DEFAULT_CONFIG))
+
+    expect(document.querySelector("#description")!.hasAttribute(WALKED_ATTRIBUTE)).toBe(true)
+    expect(document.querySelector("#description")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
   })
 
   it("lets excludeSelectors carve holes inside the whitelisted subtree", () => {

@@ -104,6 +104,18 @@ describe("built-in site rules", () => {
     }
   })
 
+  it("does not restrict Steam app pages to an obsolete iframe include (issue #1923)", () => {
+    const resolved = resolveSiteRule(
+      "https://store.steampowered.com/app/2453660/Hoop_Land/",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+
+    expect(resolved.matchedRuleIds).toContain("steampoweredApp")
+    expect(resolved.includeSelector).toBeNull()
+  })
+
   it("keeps the youtube rule in sync with the subtitle class constants", () => {
     const youtube = BUILT_IN_SITE_RULES.find((rule) => rule.id === "readfrog-youtube")
     expect(youtube).toBeDefined()
