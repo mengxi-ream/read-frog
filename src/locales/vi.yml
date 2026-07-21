@@ -212,6 +212,8 @@ options:
         huggingface: API suy luận Hugging Face cung cấp quyền truy cập hàng nghìn mô hình mã nguồn mở
     apiKey:
       showAPIKey: Hiển thị API Key
+      addKey: Thêm API Key
+      removeKey: Xóa API Key
     howToConfigure: Cấu hình như thế nào?
     testConnection:
       button: Kiểm tra kết nối

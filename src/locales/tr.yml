@@ -212,6 +212,8 @@ options:
         huggingface: Binlerce açık kaynak modele erişim sağlayan Hugging Face Çıkarım API'si
     apiKey:
       showAPIKey: API Anahtarını Göster
+      addKey: API Anahtarı Ekle
+      removeKey: API Anahtarını Kaldır
     howToConfigure: Nasıl yapılandırılır?
     testConnection:
       button: Bağlantıyı Test Et

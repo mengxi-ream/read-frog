@@ -213,6 +213,8 @@ options:
         huggingface: Hugging Face推理API，提供数千种开源模型访问
     apiKey:
       showAPIKey: 显示 API Key
+      addKey: 添加 API Key
+      removeKey: 删除 API Key
     howToConfigure: 如何配置?
     testConnection:
       button: 测试连接

@@ -1,12 +1,40 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { deeplTranslate, getDeepLBaseURL } from "../deepl"
+import {
+  deeplTranslate,
+  getDeepLBaseURL,
+  parseDeepLApiKeys,
+  resetDeepLKeyRoundRobinIndex,
+  serializeDeepLApiKeys,
+} from "../deepl"
 
 const fetchMock = vi.fn<(...args: any[]) => any>()
+
+function mockOkTranslation(text = "ok") {
+  fetchMock.mockResolvedValue({
+    ok: true,
+    status: 200,
+    statusText: "OK",
+    json: vi.fn<(...args: any[]) => any>().mockResolvedValue({
+      translations: [{ text }],
+    }),
+    text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
+  })
+}
+
+const deeplConfig = (apiKey?: string) =>
+  ({
+    id: "deepl-default",
+    enabled: true,
+    name: "DeepL",
+    provider: "deepl" as const,
+    apiKey,
+  }) as const
 
 describe("deepl translate adapter", () => {
   beforeEach(() => {
     fetchMock.mockReset()
     vi.stubGlobal("fetch", fetchMock)
+    resetDeepLKeyRoundRobinIndex()
   })
 
   afterEach(() => {
@@ -18,24 +46,20 @@ describe("deepl translate adapter", () => {
     expect(getDeepLBaseURL("test-key")).toBe("https://api.deepl.com")
   })
 
-  it("sends a single-item request as a one-element text array and omits source_lang for auto", async () => {
-    fetchMock.mockResolvedValue({
-      ok: true,
-      status: 200,
-      statusText: "OK",
-      json: vi.fn<(...args: any[]) => any>().mockResolvedValue({
-        translations: [{ text: "你好" }],
-      }),
-      text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
-    })
+  it("parses and serializes newline-separated keys", () => {
+    expect(parseDeepLApiKeys(undefined)).toEqual([])
+    expect(parseDeepLApiKeys("")).toEqual([])
+    expect(parseDeepLApiKeys("   \n  ")).toEqual([])
+    expect(parseDeepLApiKeys("a")).toEqual(["a"])
+    expect(parseDeepLApiKeys("a\nb")).toEqual(["a", "b"])
+    expect(parseDeepLApiKeys(" a \r\n\n b \n")).toEqual(["a", "b"])
+    expect(serializeDeepLApiKeys([" a ", "", "b "])).toBe("a\nb")
+  })
 
-    const result = await deeplTranslate("Hello", "auto", "zh", {
-      id: "deepl-default",
-      enabled: true,
-      name: "DeepL",
-      provider: "deepl",
-      apiKey: "test-key:fx",
-    })
+  it("sends a single-item request as a one-element text array and omits source_lang for auto", async () => {
+    mockOkTranslation("你好")
+
+    const result = await deeplTranslate("Hello", "auto", "zh", deeplConfig("test-key:fx"))
 
     expect(result).toBe("你好")
     expect(fetchMock).toHaveBeenCalledWith(
@@ -57,23 +81,9 @@ describe("deepl translate adapter", () => {
   })
 
   it("normalizes zh-TW source language to ZH", async () => {
-    fetchMock.mockResolvedValue({
-      ok: true,
-      status: 200,
-      statusText: "OK",
-      json: vi.fn<(...args: any[]) => any>().mockResolvedValue({
-        translations: [{ text: "A" }],
-      }),
-      text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
-    })
+    mockOkTranslation("A")
 
-    await deeplTranslate("甲", "zh-TW", "en", {
-      id: "deepl-default",
-      enabled: true,
-      name: "DeepL",
-      provider: "deepl",
-      apiKey: "test-key",
-    })
+    await deeplTranslate("甲", "zh-TW", "en", deeplConfig("test-key"))
 
     const [, requestInit] = fetchMock.mock.calls[0]
     expect(JSON.parse(requestInit.body)).toEqual({
@@ -86,29 +96,9 @@ describe("deepl translate adapter", () => {
   it.each(["plain", undefined] as const)(
     "omits tag_handling for %s text format",
     async (textFormat) => {
-      fetchMock.mockResolvedValue({
-        ok: true,
-        status: 200,
-        statusText: "OK",
-        json: vi.fn<(...args: any[]) => any>().mockResolvedValue({
-          translations: [{ text: "Hello" }],
-        }),
-        text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
-      })
+      mockOkTranslation("Hello")
 
-      await deeplTranslate(
-        "Hello",
-        "en",
-        "de",
-        {
-          id: "deepl-default",
-          enabled: true,
-          name: "DeepL",
-          provider: "deepl",
-          apiKey: "test-key",
-        },
-        { textFormat },
-      )
+      await deeplTranslate("Hello", "en", "de", deeplConfig("test-key"), { textFormat })
 
       const [, requestInit] = fetchMock.mock.calls[0]
       expect(JSON.parse(requestInit.body)).toEqual({
@@ -120,29 +110,11 @@ describe("deepl translate adapter", () => {
   )
 
   it("sets tag_handling to html for html input", async () => {
-    fetchMock.mockResolvedValue({
-      ok: true,
-      status: 200,
-      statusText: "OK",
-      json: vi.fn<(...args: any[]) => any>().mockResolvedValue({
-        translations: [{ text: "<p>Hallo</p>" }],
-      }),
-      text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
-    })
+    mockOkTranslation("<p>Hallo</p>")
 
-    await deeplTranslate(
-      '<p class="message">Hello</p>',
-      "en",
-      "de",
-      {
-        id: "deepl-default",
-        enabled: true,
-        name: "DeepL",
-        provider: "deepl",
-        apiKey: "test-key",
-      },
-      { textFormat: "html" },
-    )
+    await deeplTranslate('<p class="message">Hello</p>', "en", "de", deeplConfig("test-key"), {
+      textFormat: "html",
+    })
 
     const [, requestInit] = fetchMock.mock.calls[0]
     expect(JSON.parse(requestInit.body)).toEqual({
@@ -164,14 +136,54 @@ describe("deepl translate adapter", () => {
       text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
     })
 
-    await expect(
-      deeplTranslate("A", "en", "de", {
-        id: "deepl-default",
-        enabled: true,
-        name: "DeepL",
-        provider: "deepl",
-        apiKey: "test-key",
-      }),
-    ).rejects.toThrow("DeepL translation response count mismatch")
+    await expect(deeplTranslate("A", "en", "de", deeplConfig("test-key"))).rejects.toThrow(
+      "DeepL translation response count mismatch",
+    )
+  })
+
+  it("throws when no API key is configured", async () => {
+    await expect(deeplTranslate("A", "en", "de", deeplConfig(undefined))).rejects.toThrow(
+      "DeepL API key is not configured",
+    )
+    await expect(deeplTranslate("A", "en", "de", deeplConfig("  \n  "))).rejects.toThrow(
+      "DeepL API key is not configured",
+    )
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it("round-robins multi-keys and derives baseURL from the selected key", async () => {
+    mockOkTranslation("1")
+    mockOkTranslation("2")
+    mockOkTranslation("3")
+
+    const config = deeplConfig("k1:fx\nk2")
+
+    await deeplTranslate("A", "en", "de", config)
+    await deeplTranslate("B", "en", "de", config)
+    await deeplTranslate("C", "en", "de", config)
+
+    expect(fetchMock).toHaveBeenCalledTimes(3)
+    expect(fetchMock.mock.calls[0][0]).toBe("https://api-free.deepl.com/v2/translate")
+    expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe("DeepL-Auth-Key k1:fx")
+    expect(fetchMock.mock.calls[1][0]).toBe("https://api.deepl.com/v2/translate")
+    expect(fetchMock.mock.calls[1][1].headers.Authorization).toBe("DeepL-Auth-Key k2")
+    expect(fetchMock.mock.calls[2][0]).toBe("https://api-free.deepl.com/v2/translate")
+    expect(fetchMock.mock.calls[2][1].headers.Authorization).toBe("DeepL-Auth-Key k1:fx")
+  })
+
+  it("does not failover to the next key within the same request", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 403,
+      statusText: "Forbidden",
+      text: vi.fn<(...args: any[]) => any>().mockResolvedValue("quota"),
+      json: vi.fn<(...args: any[]) => any>(),
+    })
+
+    await expect(deeplTranslate("A", "en", "de", deeplConfig("k1\nk2"))).rejects.toThrow(
+      "DeepL translation request failed: 403",
+    )
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe("DeepL-Auth-Key k1")
   })
 })

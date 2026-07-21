@@ -213,6 +213,8 @@ options:
         huggingface: API de inferencia de Hugging Face que proporciona acceso a miles de modelos de código abierto
     apiKey:
       showAPIKey: Mostrar clave API
+      addKey: Añadir clave API
+      removeKey: Eliminar clave API
     howToConfigure: ¿Cómo configurar?
     testConnection:
       button: Probar conexión

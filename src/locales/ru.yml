@@ -212,6 +212,8 @@ options:
         huggingface: API вывода Hugging Face с доступом к тысячам моделей с открытым кодом
     apiKey:
       showAPIKey: Показать API-ключ
+      addKey: Добавить API-ключ
+      removeKey: Удалить API-ключ
     howToConfigure: Как настроить?
     testConnection:
       button: Проверить соединение

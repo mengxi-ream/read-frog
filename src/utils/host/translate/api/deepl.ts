@@ -9,6 +9,45 @@ interface DeepLLanguagePair {
   target: string
 }
 
+/** Module-level round-robin index for multi-key load balancing. */
+let deeplKeyRoundRobinIndex = 0
+
+/** Parse newline-separated DeepL API keys; empty lines are ignored. */
+export function parseDeepLApiKeys(apiKey?: string): string[] {
+  if (!apiKey) return []
+  return apiKey
+    .split(/\r?\n/)
+    .map((key) => key.trim())
+    .filter(Boolean)
+}
+
+/** Join non-empty keys for storage in the single `apiKey` string field. */
+export function serializeDeepLApiKeys(keys: string[]): string {
+  return keys
+    .map((key) => key.trim())
+    .filter(Boolean)
+    .join("\n")
+}
+
+/** Pick the next key in round-robin order. Throws if the pool is empty. */
+export function pickNextDeepLApiKey(keys: string[]): string {
+  if (keys.length === 0) {
+    throw new Error("DeepL API key is not configured")
+  }
+  const index = deeplKeyRoundRobinIndex % keys.length
+  deeplKeyRoundRobinIndex = (deeplKeyRoundRobinIndex + 1) % keys.length
+  const key = keys[index]
+  if (key === undefined) {
+    throw new Error("DeepL API key is not configured")
+  }
+  return key
+}
+
+/** Test-only helper to keep round-robin order deterministic across cases. */
+export function resetDeepLKeyRoundRobinIndex(): void {
+  deeplKeyRoundRobinIndex = 0
+}
+
 export async function deeplTranslate(
   sourceText: string,
   fromLang: LangCodeISO6391 | "auto",
@@ -38,11 +77,7 @@ async function requestDeepLTranslations(
   providerConfig: DeepLProviderConfig,
   options?: { textFormat?: TranslationTextFormat; signal?: AbortSignal },
 ): Promise<string[]> {
-  const apiKey = providerConfig.apiKey?.trim()
-  if (!apiKey) {
-    throw new Error("DeepL API key is not configured")
-  }
-
+  const apiKey = pickNextDeepLApiKey(parseDeepLApiKeys(providerConfig.apiKey))
   const baseURL = getDeepLBaseURL(apiKey)
   const url = `${baseURL}/v2/translate`
   const normalizedLanguages = normalizeDeepLLanguages(fromLang, toLang)

@@ -212,6 +212,8 @@ options:
         huggingface: Hugging Face推論API、数千のオープンソースモデルへのアクセスを提供
     apiKey:
       showAPIKey: APIキーを表示
+      addKey: APIキーを追加
+      removeKey: APIキーを削除
     howToConfigure: 設定方法は?
     testConnection:
       button: 接続テスト

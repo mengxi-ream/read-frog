@@ -213,6 +213,8 @@ options:
         huggingface: Hugging Face Inference API providing access to thousands of open-source models
     apiKey:
       showAPIKey: Show API Key
+      addKey: Add API Key
+      removeKey: Remove API Key
     howToConfigure: How to configure?
     testConnection:
       button: Test Connection
