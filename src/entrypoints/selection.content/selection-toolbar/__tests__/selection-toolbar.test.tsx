@@ -801,10 +801,15 @@ describe("selectionToolbar - positioning logic", () => {
     })
   })
 
-  it("renders inside a fixed viewport host", () => {
+  it("renders inside the highest fixed viewport layer", () => {
     render(<SelectionToolbar />)
 
-    expect(getToolbarElement().parentElement).toHaveClass("fixed", "inset-0", "pointer-events-none")
+    expect(getToolbarElement().parentElement).toHaveClass(
+      "fixed",
+      "inset-0",
+      "pointer-events-none",
+      "z-2147483647",
+    )
   })
 
   it("should keep the bottom-right toolbar below the cursor to reduce accidental clicks", async () => {

@@ -482,7 +482,7 @@ export function SelectionToolbar() {
   return (
     <div
       ref={tooltipContainerRef}
-      className={`${NOTRANSLATE_CLASS} pointer-events-none fixed inset-0`}
+      className={`${NOTRANSLATE_CLASS} pointer-events-none fixed inset-0 ${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay}`}
       {...{ [SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE]: "" }}
     >
       {selectionToolbar.enabled && !isSiteDisabled && hasAnyEnabledFeature && (
