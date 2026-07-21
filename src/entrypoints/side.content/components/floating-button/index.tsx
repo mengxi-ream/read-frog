@@ -185,7 +185,6 @@ export default function FloatingButton() {
             side: floatingButtonSide === "right" ? "left" : "right",
             sideOffset: 8,
           },
-          timeout: 8000,
           type: "info",
           title: <FirefoxSidebarHelpToast />,
         })

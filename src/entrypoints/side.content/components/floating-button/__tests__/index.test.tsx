@@ -285,7 +285,6 @@ describe("floatingButton controls", () => {
         side: "left",
         sideOffset: 8,
       },
-      timeout: 8000,
       type: "info",
       title: expect.anything(),
     })

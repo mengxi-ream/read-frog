@@ -46,7 +46,6 @@ export function ImportPrompts() {
             anchor: importButtonRef.current,
             sideOffset: 6,
           },
-          timeout: 2000,
           title: `${i18n.t("options.translation.personalizedPrompts.importSuccess")} !`,
         })
       }
@@ -58,7 +57,6 @@ export function ImportPrompts() {
             anchor: importButtonRef.current,
             sideOffset: 6,
           },
-          timeout: 5000,
           type: "error",
           title: error instanceof Error ? error.message : "Something went error when importing",
         })

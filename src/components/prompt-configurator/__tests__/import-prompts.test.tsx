@@ -57,7 +57,6 @@ describe("ImportPrompts", () => {
         data: { tooltipStyle: true },
         id: "prompt-import-feedback",
         positionerProps: { anchor: importButton, sideOffset: 6 },
-        timeout: 2000,
         title: "options.translation.personalizedPrompts.importSuccess !",
       })
     })
@@ -78,7 +77,6 @@ describe("ImportPrompts", () => {
       expect(anchoredToastAddMock).toHaveBeenCalledWith({
         id: "prompt-import-feedback",
         positionerProps: { anchor: importButton, sideOffset: 6 },
-        timeout: 5000,
         title: "Invalid prompt file",
         type: "error",
       })

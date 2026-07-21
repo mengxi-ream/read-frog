@@ -165,7 +165,6 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
           anchor: switchRef.current,
           sideOffset: 6,
         },
-        timeout: 5000,
         type: "error",
         title: i18n.t("options.apiProviders.form.providerInUseCannotDisable", [
           name,
