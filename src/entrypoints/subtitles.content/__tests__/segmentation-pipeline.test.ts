@@ -120,6 +120,31 @@ describe("segmentation pipeline", () => {
     ])
   })
 
+  it("falls back to local optimize when config is missing instead of orphaning the chunk", async () => {
+    const { getLocalConfig } = await import("@/utils/config/storage")
+    vi.mocked(getLocalConfig).mockResolvedValueOnce(null)
+
+    const rawFragments = [
+      { text: "hello", start: 0, end: 500 },
+      { text: "world", start: 500, end: 1000 },
+    ]
+    const onChunkSegmented = vi.fn<(...args: any[]) => any>()
+
+    const pipeline = new SegmentationPipeline({
+      baselineFragments: [{ text: "hello world", start: 0, end: 1000 }],
+      rawFragments,
+      getVideoElement: () => ({ currentTime: 0 }) as HTMLVideoElement,
+      getSourceLanguage: () => "en",
+      onChunkSegmented,
+    })
+
+    await (pipeline as any).processNextChunk(0)
+
+    expect(onChunkSegmented).toHaveBeenCalled()
+    // Starts must not remain "segmented" with no replacement applied.
+    expect(pipeline.processedFragments.length).toBeGreaterThan(0)
+  })
+
   it("replaceProcessedChunk drops cues that overlap the window by interval", () => {
     const pipeline = new SegmentationPipeline({
       baselineFragments: [

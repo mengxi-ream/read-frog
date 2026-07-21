@@ -33,12 +33,13 @@ export const displaySubtitleAtom = atom((get): SubtitlesFragment | null => {
     return null
   }
 
+  const timeMs = get(currentTimeMsAtom)
   const scheduled = get(currentSubtitleAtom)
-  if (scheduled) {
+  // Only prefer the scheduler cue when it still covers now (guards time/atom desync).
+  if (scheduled && scheduled.start <= timeMs && scheduled.end > timeMs) {
     return scheduled
   }
 
-  const timeMs = get(currentTimeMsAtom)
   return get(sourceTrackAtom).find((f) => f.start <= timeMs && f.end > timeMs) ?? null
 })
 

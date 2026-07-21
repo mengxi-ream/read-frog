@@ -28,8 +28,11 @@ export class TranslationCoordinator {
   private isTranslating = false
   /** False after stop(); blocks chained ticks and in-flight result application. */
   private active = false
+  /** Bumped on stop() so in-flight batches cannot apply after stop/start. */
+  private runId = 0
   private lastEmittedState: SubtitlesState = "idle"
   private videoContext: SubtitlesVideoContext = { videoTitle: "", subtitlesTextContent: "" }
+  private listenersAttached = false
 
   private getFragments: () => SubtitlesFragment[]
   private getVideoElement: () => HTMLVideoElement | null
@@ -56,12 +59,9 @@ export class TranslationCoordinator {
     if (!video) return
 
     this.active = true
-
-    video.addEventListener("timeupdate", this.handleTranslationTick)
-    video.addEventListener("seeked", this.handleTranslationTick)
+    this.attachVideoListeners(video)
 
     if (this.segmentationPipeline) {
-      video.addEventListener("seeked", this.handleSeek)
       this.segmentationPipeline.start()
     }
 
@@ -70,16 +70,25 @@ export class TranslationCoordinator {
 
   stop() {
     this.active = false
-    const video = this.getVideoElement()
-    if (!video) return
-    video.removeEventListener("timeupdate", this.handleTranslationTick)
-    video.removeEventListener("seeked", this.handleTranslationTick)
-    video.removeEventListener("seeked", this.handleSeek)
+    this.runId += 1
+    // Allow a subsequent start() to translate immediately; the in-flight batch is
+    // invalidated by runId and must not leave locks stuck.
+    this.isTranslating = false
+    this.translatingStarts.clear()
+    this.detachVideoListeners()
     this.segmentationPipeline?.stop()
+  }
+
+  /** Kick a nearby pass without waiting for the next timeupdate (e.g. after an ad). */
+  requestTick() {
+    if (!this.active) return
+    this.handleTranslationTick()
   }
 
   reset() {
     this.active = false
+    this.runId += 1
+    this.detachVideoListeners()
     this.translatingStarts.clear()
     this.translatedStarts.clear()
     this.failedStarts.clear()
@@ -87,6 +96,27 @@ export class TranslationCoordinator {
     this.isTranslating = false
     this.lastEmittedState = "idle"
     this.videoContext = { videoTitle: "", subtitlesTextContent: "" }
+  }
+
+  private attachVideoListeners(video: HTMLVideoElement) {
+    if (this.listenersAttached) return
+    video.addEventListener("timeupdate", this.handleTranslationTick)
+    video.addEventListener("seeked", this.handleTranslationTick)
+    if (this.segmentationPipeline) {
+      video.addEventListener("seeked", this.handleSeek)
+    }
+    this.listenersAttached = true
+  }
+
+  private detachVideoListeners() {
+    if (!this.listenersAttached) return
+    const video = this.getVideoElement()
+    if (video) {
+      video.removeEventListener("timeupdate", this.handleTranslationTick)
+      video.removeEventListener("seeked", this.handleTranslationTick)
+      video.removeEventListener("seeked", this.handleSeek)
+    }
+    this.listenersAttached = false
   }
 
   clearFailed() {
@@ -177,6 +207,7 @@ export class TranslationCoordinator {
       return
     }
 
+    const runId = this.runId
     this.isTranslating = true
     batch.forEach((f) => {
       this.translatingStarts.add(f.start)
@@ -185,7 +216,7 @@ export class TranslationCoordinator {
 
     try {
       const translated = await translateSubtitles(batch, this.videoContext)
-      if (!this.active) {
+      if (!this.active || runId !== this.runId) {
         batch.forEach((f) => this.translatingStarts.delete(f.start))
         return
       }
@@ -208,7 +239,7 @@ export class TranslationCoordinator {
       const latestFragments = this.getFragments()
       this.updateLoadingStateAt(latestTimeMs, latestFragments)
     } catch (error) {
-      if (!this.active) {
+      if (!this.active || runId !== this.runId) {
         batch.forEach((f) => this.translatingStarts.delete(f.start))
         return
       }
@@ -226,7 +257,7 @@ export class TranslationCoordinator {
       })
 
       const config = await getLocalConfig()
-      if (!this.active) {
+      if (!this.active || runId !== this.runId) {
         return
       }
 
@@ -245,11 +276,12 @@ export class TranslationCoordinator {
       this.lastEmittedState = "error"
       this.onStateChange("error", { message: errorMessage })
     } finally {
-      this.isTranslating = false
-      // Kick the next nearby batch without waiting for the next timeupdate.
-      // Guarded: stop()/reset() must not chain more translation after teardown.
-      if (this.active) {
-        this.handleTranslationTick()
+      // Only the current generation may clear the lock / chain another tick.
+      if (runId === this.runId) {
+        this.isTranslating = false
+        if (this.active) {
+          this.handleTranslationTick()
+        }
       }
     }
   }

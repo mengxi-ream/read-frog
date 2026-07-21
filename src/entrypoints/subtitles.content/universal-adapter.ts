@@ -404,6 +404,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     // Resync content time when the ad ends so the next cue is correct immediately.
     if (!playing) {
       this.subtitlesScheduler?.resyncFromVideo()
+      this.translationCoordinator?.requestTick()
     }
   }
 

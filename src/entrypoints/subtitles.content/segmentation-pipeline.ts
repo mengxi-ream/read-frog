@@ -108,16 +108,21 @@ export class SegmentationPipeline {
         chunk.forEach((f) => this.segmentedRawStarts.delete(f.start))
         return true
       }
-      if (config) {
-        const segmented = await aiSegmentBlock(chunk, config)
-        // Session may have been torn down while the AI call was in flight.
-        if (this.stopped) {
-          chunk.forEach((f) => this.segmentedRawStarts.delete(f.start))
-          return true
-        }
-        const optimized = optimizeSubtitles(segmented, this.getSourceLanguage())
+      if (!config) {
+        // Do not leave starts marked segmented with no replacement (would skip forever).
+        const optimized = optimizeSubtitles(chunk, this.getSourceLanguage())
         this.replaceProcessedChunk(chunk, optimized)
+        return true
       }
+
+      const segmented = await aiSegmentBlock(chunk, config)
+      // Session may have been torn down while the AI call was in flight.
+      if (this.stopped) {
+        chunk.forEach((f) => this.segmentedRawStarts.delete(f.start))
+        return true
+      }
+      const optimized = optimizeSubtitles(segmented, this.getSourceLanguage())
+      this.replaceProcessedChunk(chunk, optimized)
     } catch {
       if (this.stopped) {
         chunk.forEach((f) => this.segmentedRawStarts.delete(f.start))

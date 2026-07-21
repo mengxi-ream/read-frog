@@ -46,6 +46,27 @@ describe("displaySubtitleAtom", () => {
     expect(subtitlesStore.get(displaySubtitleAtom)?.translation).toBe("你好")
   })
 
+  it("ignores a stale scheduled cue that no longer covers the current time", () => {
+    subtitlesStore.set(currentTimeMsAtom, 2500)
+    subtitlesStore.set(sourceTrackAtom, [
+      { text: "hello", start: 0, end: 1000 },
+      { text: "later", start: 2000, end: 3000 },
+    ])
+    // Scheduler atom lagging behind the clock.
+    subtitlesStore.set(currentSubtitleAtom, {
+      text: "hello",
+      start: 0,
+      end: 1000,
+      translation: "你好",
+    })
+
+    expect(subtitlesStore.get(displaySubtitleAtom)).toEqual({
+      text: "later",
+      start: 2000,
+      end: 3000,
+    })
+  })
+
   it("hides main-video captions while an ad is playing", () => {
     subtitlesStore.set(currentTimeMsAtom, 500)
     subtitlesStore.set(subtitlesVisibleAtom, true)

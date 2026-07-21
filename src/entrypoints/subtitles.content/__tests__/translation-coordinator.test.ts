@@ -148,6 +148,56 @@ describe("translation coordinator loading state", () => {
     expect((coordinator as any).knownIdentities.get(0)).not.toBe("2000\0hello world")
   })
 
+  it("does not apply in-flight results after stop then start", async () => {
+    const onTranslated = vi.fn<(...args: any[]) => any>()
+    const resolvers: Array<(value: any) => void> = []
+    const translator = await import("@/utils/subtitles/processor/translator")
+    const spy = vi.spyOn(translator, "translateSubtitles").mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolvers.push(resolve)
+        }) as any,
+    )
+
+    const coordinator = new TranslationCoordinator({
+      getFragments: () => [{ text: "a", start: 0, end: 1000 }],
+      getVideoElement: () =>
+        ({
+          currentTime: 0.2,
+          addEventListener: vi.fn<(...args: any[]) => any>(),
+          removeEventListener: vi.fn<(...args: any[]) => any>(),
+        }) as unknown as HTMLVideoElement,
+      getCurrentState: () => "idle",
+      segmentationPipeline: null,
+      onTranslated,
+      onStateChange: vi.fn<(...args: any[]) => any>(),
+    })
+
+    coordinator.start()
+    await Promise.resolve()
+    expect(spy).toHaveBeenCalledTimes(1)
+
+    coordinator.stop()
+    coordinator.start()
+    await Promise.resolve()
+    // Resume must be able to start a new batch (isTranslating not stuck).
+    expect(spy).toHaveBeenCalledTimes(2)
+
+    // Stale first-run result.
+    resolvers[0]([{ text: "a", start: 0, end: 1000, translation: "STALE" }])
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(onTranslated).not.toHaveBeenCalled()
+
+    // Current-run result.
+    resolvers[1]([{ text: "a", start: 0, end: 1000, translation: "FRESH" }])
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(onTranslated).toHaveBeenCalledWith([expect.objectContaining({ translation: "FRESH" })])
+
+    spy.mockRestore()
+  })
+
   it("does not publish stale batch cues on translation failure after a recut", async () => {
     let fragments = [
       { text: "hello world", start: 0, end: 2000 },
