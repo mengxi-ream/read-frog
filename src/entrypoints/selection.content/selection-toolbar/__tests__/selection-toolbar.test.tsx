@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE } from "@/entrypoints/selection.content/overlay-layers"
 import { selectionSessionAtom } from "../atoms"
 import { SelectionToolbar } from "../index"
+import { MODAL_DIALOG_HOST_SLOT_ATTRIBUTE } from "../modal-dialog-host"
 
 const MOCK_SELECTED_TEXT = "Selected Text"
 
@@ -810,6 +811,44 @@ describe("selectionToolbar - positioning logic", () => {
       "pointer-events-none",
       "z-2147483647",
     )
+  })
+
+  it("moves its shadow host into a selected native modal before showing the toolbar", async () => {
+    const extensionHost = document.createElement("read-frog-selection")
+    const shadowRoot = extensionHost.attachShadow({ mode: "open" })
+    const mount = document.createElement("div")
+    shadowRoot.append(mount)
+    document.body.append(extensionHost)
+
+    const dialog = document.createElement("dialog")
+    const selectedText = document.createTextNode("Selected inside modal")
+    const target = document.createElement("p")
+    target.append(selectedText)
+    dialog.append(target)
+    dialog.open = true
+    document.body.append(dialog)
+    const matches = dialog.matches.bind(dialog)
+    const matchesSpy = vi
+      .spyOn(dialog, "matches")
+      .mockImplementation((selector) => (selector === ":modal" ? true : matches(selector)))
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: () => MOCK_SELECTED_TEXT,
+      getRangeAt: () => ({
+        startContainer: selectedText,
+        startOffset: 0,
+        endContainer: selectedText,
+        endOffset: selectedText.length,
+      }),
+      containsNode: () => true,
+    }))
+
+    render(<SelectionToolbar />, { container: mount })
+    await triggerMouseDownAndUp(target, 100, 100, 200, 200)
+
+    const slot = dialog.querySelector(`[${MODAL_DIALOG_HOST_SLOT_ATTRIBUTE}]`)
+    expect(slot?.contains(extensionHost)).toBe(true)
+    expect(shadowRoot.querySelector(".absolute.z-2147483647")).toHaveClass("opacity-100")
+    matchesSpy.mockRestore()
   })
 
   it("should keep the bottom-right toolbar below the cursor to reduce accidental clicks", async () => {
