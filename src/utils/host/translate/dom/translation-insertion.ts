@@ -1,6 +1,7 @@
 import type { Config } from "@/types/config/config"
 import type { TranslationNodeStyleConfig } from "@/types/config/translate"
 import type { TransNode } from "@/types/dom"
+import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
 import {
   BLOCK_CONTENT_CLASS,
   FLOAT_WRAP_ATTRIBUTE,
@@ -8,13 +9,7 @@ import {
   NOTRANSLATE_CLASS,
   PARAGRAPH_ATTRIBUTE,
 } from "../../../constants/dom-labels"
-import {
-  isBlockTransNode,
-  isHTMLElement,
-  isInlineTransNode,
-  isSiteRuleForceBlockElement,
-  isSiteRuleForceInlineElement,
-} from "../../dom/filter"
+import { isHTMLElement, isNaturalBlockTransNode, isNaturalInlineTransNode } from "../../dom/filter"
 import { getOwnerDocument } from "../../dom/node"
 import { decorateTranslationNode } from "../ui/decorate-translation"
 import { isForceInlineTranslation, isShortInlineTranslationText } from "../ui/translation-utils"
@@ -22,6 +17,8 @@ import { isForceInlineTranslation, isShortInlineTranslationText } from "../ui/tr
 interface TranslationInsertionContext {
   flowSource: TransNode
   layoutSource: TransNode
+  /** Nodes whose source text is represented by this wrapper. */
+  styleSources?: readonly TransNode[]
   sourceText: string
   isCurrent?: () => boolean
   // Fired synchronously right after the translated node is appended, BEFORE
@@ -32,6 +29,15 @@ interface TranslationInsertionContext {
   // expected content. Not fired on the no-append early return, so stray empty
   // wrappers never enter tamper surveillance.
   onContentInserted?: (wrapper: HTMLElement) => void
+}
+
+function sourceRunMatchesSelector(sources: readonly TransNode[], selector: string | null): boolean {
+  if (selector === null) return false
+
+  return sources.some((source) => {
+    const element = isHTMLElement(source) ? source : source.parentElement
+    return element?.matches(selector) ?? false
+  })
 }
 
 function isFloatedElement(element: HTMLElement): boolean {
@@ -106,6 +112,7 @@ export async function insertTranslatedNodeIntoWrapper(
   {
     flowSource,
     layoutSource,
+    styleSources,
     sourceText,
     isCurrent,
     onContentInserted,
@@ -123,28 +130,39 @@ export async function insertTranslatedNodeIntoWrapper(
   const layoutSourceDisplay = isHTMLElement(layoutSource)
     ? window.getComputedStyle(layoutSource).display
     : undefined
-  const siteRuleForceInline =
-    isHTMLElement(layoutSource) && isSiteRuleForceInlineElement(layoutSource, config)
-  const forceInlineTranslation =
-    isForceInlineTranslation(layoutSource, layoutSourceDisplay) || siteRuleForceInline
+  const { forceBlockStyleSelector, forceInlineStyleSelector } = getEffectiveSiteRule(
+    config,
+    window.location.href,
+  )
+  const wrapperStyleSources = styleSources ?? [layoutSource]
+  const siteRuleForceBlockStyle = sourceRunMatchesSelector(
+    wrapperStyleSources,
+    forceBlockStyleSelector,
+  )
+  const siteRuleForceInlineStyle = sourceRunMatchesSelector(
+    wrapperStyleSources,
+    forceInlineStyleSelector,
+  )
+  const forceInlineTranslation = isForceInlineTranslation(layoutSource, layoutSourceDisplay)
   const shortInlineTranslation =
     isShortInlineTranslationText(sourceText) && layoutSourceDisplay !== "contents"
-  const siteRuleForceBlock =
-    isHTMLElement(layoutSource) && isSiteRuleForceBlockElement(layoutSource, config)
 
-  // priority: siteRuleForceBlock > forceInlineTranslation > forceBlockTranslation >
-  // shortInlineTranslation > isInlineTransNode > isBlockTransNode
-  if (siteRuleForceBlock) {
+  // Site style overrides are the explicit outer priority. Existing layout
+  // heuristics and the pre-Node-override classification remain fallbacks
+  // within that boundary, so Node-only rules cannot change wrapper styling.
+  if (siteRuleForceBlockStyle) {
     addBlockTranslation(ownerDoc, translatedWrapperNode, translatedNode)
+  } else if (siteRuleForceInlineStyle) {
+    addInlineTranslation(ownerDoc, translatedWrapperNode, translatedNode)
   } else if (forceInlineTranslation) {
     addInlineTranslation(ownerDoc, translatedWrapperNode, translatedNode)
   } else if (forceBlockTranslation) {
     addBlockTranslation(ownerDoc, translatedWrapperNode, translatedNode)
   } else if (shortInlineTranslation) {
     addInlineTranslation(ownerDoc, translatedWrapperNode, translatedNode)
-  } else if (isInlineTransNode(layoutSource)) {
+  } else if (isNaturalInlineTransNode(layoutSource)) {
     addInlineTranslation(ownerDoc, translatedWrapperNode, translatedNode)
-  } else if (isBlockTransNode(layoutSource)) {
+  } else if (isNaturalBlockTransNode(layoutSource)) {
     addBlockTranslation(ownerDoc, translatedWrapperNode, translatedNode)
   } else {
     // not inline or block, maybe notranslate

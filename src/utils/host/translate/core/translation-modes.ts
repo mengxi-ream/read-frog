@@ -14,7 +14,14 @@ import {
   WALKED_ATTRIBUTE,
 } from "../../../constants/dom-labels"
 import { batchDOMOperation } from "../../dom/batch-dom"
-import { isBlockTransNode, isHTMLElement, isTextNode, isTransNode } from "../../dom/filter"
+import {
+  isBlockTransNode,
+  isHTMLElement,
+  isNaturalBlockTransNode,
+  isSiteRuleForceBlockStyleElement,
+  isTextNode,
+  isTransNode,
+} from "../../dom/filter"
 import { unwrapDeepestOnlyHTMLChild } from "../../dom/find"
 import { getOwnerDocument } from "../../dom/node"
 import { extractTextContent } from "../../dom/traversal"
@@ -443,17 +450,21 @@ export async function translateNodesBilingualMode(
           virtualLayoutSource,
           walkId,
           config,
-          true,
+          forceBlockTranslation || isNaturalBlockTransNode(virtualLayoutSource),
           actionContext,
         )
         return
       }
     }
 
-    const insertionTarget =
-      transNodes.length === 1 && isBlockTransNode(layoutSource) && isHTMLElement(layoutSource)
-        ? unwrapDeepestOnlyHTMLChild(layoutSource, config)
-        : layoutSource
+    const shouldUnwrapSingleBlockSource =
+      transNodes.length === 1 &&
+      isHTMLElement(layoutSource) &&
+      (isNaturalBlockTransNode(layoutSource) ||
+        (isBlockTransNode(layoutSource) && isSiteRuleForceBlockStyleElement(layoutSource, config)))
+    const insertionTarget = shouldUnwrapSingleBlockSource
+      ? unwrapDeepestOnlyHTMLChild(layoutSource, config)
+      : layoutSource
 
     const existedTranslatedWrapper = findPreviousTranslatedWrapperInside(insertionTarget, walkId)
     if (existedTranslatedWrapper) {
@@ -620,6 +631,7 @@ export async function translateNodesBilingualMode(
         flowSource: insertionTarget,
         isCurrent,
         layoutSource,
+        styleSources: transNodes,
         // Wrapper-content integrity snapshot (#1918): armed synchronously at
         // append time so a site rewrite landing during the decorate await can
         // never be canonized as the expected content.

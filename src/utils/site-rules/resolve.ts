@@ -11,8 +11,10 @@ export interface ResolvedSiteRule {
   matchedRuleIds: string[]
   excludeSelector: string | null
   includeSelector: string | null
-  forceBlockSelector: string | null
-  forceInlineSelector: string | null
+  forceBlockNodeSelector: string | null
+  forceBlockStyleSelector: string | null
+  forceInlineNodeSelector: string | null
+  forceInlineStyleSelector: string | null
   preserveTextSelector: string | null
   minCharacters: number | null
   minWords: number | null
@@ -23,8 +25,10 @@ export const EMPTY_RESOLVED_SITE_RULE: ResolvedSiteRule = {
   matchedRuleIds: [],
   excludeSelector: null,
   includeSelector: null,
-  forceBlockSelector: null,
-  forceInlineSelector: null,
+  forceBlockNodeSelector: null,
+  forceBlockStyleSelector: null,
+  forceInlineNodeSelector: null,
+  forceInlineStyleSelector: null,
   preserveTextSelector: null,
   minCharacters: null,
   minWords: null,
@@ -161,17 +165,29 @@ export function resolveSiteRule(
       "includeSelectors.add",
       "includeSelectors.remove",
     ),
-    forceBlockSelector: mergeSelectorDelta(
+    forceBlockNodeSelector: mergeSelectorDelta(
       matched,
-      "forceBlockSelectors",
-      "forceBlockSelectors.add",
-      "forceBlockSelectors.remove",
+      "forceBlockNodeSelectors",
+      "forceBlockNodeSelectors.add",
+      "forceBlockNodeSelectors.remove",
     ),
-    forceInlineSelector: mergeSelectorDelta(
+    forceBlockStyleSelector: mergeSelectorDelta(
       matched,
-      "forceInlineSelectors",
-      "forceInlineSelectors.add",
-      "forceInlineSelectors.remove",
+      "forceBlockStyleSelectors",
+      "forceBlockStyleSelectors.add",
+      "forceBlockStyleSelectors.remove",
+    ),
+    forceInlineNodeSelector: mergeSelectorDelta(
+      matched,
+      "forceInlineNodeSelectors",
+      "forceInlineNodeSelectors.add",
+      "forceInlineNodeSelectors.remove",
+    ),
+    forceInlineStyleSelector: mergeSelectorDelta(
+      matched,
+      "forceInlineStyleSelectors",
+      "forceInlineStyleSelectors.add",
+      "forceInlineStyleSelectors.remove",
     ),
     preserveTextSelector: mergeSelectorDelta(
       matched,

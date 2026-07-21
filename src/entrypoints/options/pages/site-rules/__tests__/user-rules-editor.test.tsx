@@ -121,4 +121,48 @@ describe("userRulesEditor", () => {
       screen.getByRole("button", { name: "options.siteRules.userRules.savedButton" }),
     ).toBeDisabled()
   })
+
+  it("saves pasted legacy selector fields using canonical names", async () => {
+    const store = renderEditor()
+    const legacyRules = [
+      {
+        id: "legacy",
+        matches: "example.com",
+        forceBlockSelectors: [".block"],
+        forceInlineSelectors: [".inline"],
+      },
+    ]
+    const canonicalRules = [
+      {
+        id: "legacy",
+        matches: "example.com",
+        forceBlockNodeSelectors: [".block"],
+        forceBlockStyleSelectors: [".block"],
+        forceInlineStyleSelectors: [".inline"],
+      },
+    ]
+    const editor = screen.getByLabelText("site-rules-user-rules-editor")
+
+    fireEvent.change(editor, {
+      target: { value: JSON.stringify(legacyRules) },
+    })
+
+    await advanceDebounce()
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+    const saveButton = screen.getByRole("button", {
+      name: "options.siteRules.userRules.saveButton",
+    })
+    expect(saveButton).toBeEnabled()
+
+    await act(async () => {
+      fireEvent.click(saveButton)
+      await Promise.resolve()
+    })
+
+    expect(store.get(configAtom).siteRules.userRules).toEqual(canonicalRules)
+    expect(editor).toHaveValue(JSON.stringify(canonicalRules, null, 2))
+    expect(editor).not.toHaveValue(expect.stringContaining("forceBlockSelectors"))
+    expect(editor).not.toHaveValue(expect.stringContaining("forceInlineSelectors"))
+  })
 })

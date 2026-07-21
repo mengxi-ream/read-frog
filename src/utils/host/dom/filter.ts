@@ -131,14 +131,24 @@ export function isSiteRuleExcludedElement(element: HTMLElement, config: Config):
   return true
 }
 
-export function isSiteRuleForceBlockElement(element: HTMLElement, config: Config): boolean {
-  const { forceBlockSelector } = getEffectiveSiteRule(config, window.location.href)
-  return forceBlockSelector !== null && element.matches(forceBlockSelector)
+export function isSiteRuleForceBlockNodeElement(element: HTMLElement, config: Config): boolean {
+  const { forceBlockNodeSelector } = getEffectiveSiteRule(config, window.location.href)
+  return forceBlockNodeSelector !== null && element.matches(forceBlockNodeSelector)
 }
 
-export function isSiteRuleForceInlineElement(element: HTMLElement, config: Config): boolean {
-  const { forceInlineSelector } = getEffectiveSiteRule(config, window.location.href)
-  return forceInlineSelector !== null && element.matches(forceInlineSelector)
+export function isSiteRuleForceBlockStyleElement(element: HTMLElement, config: Config): boolean {
+  const { forceBlockStyleSelector } = getEffectiveSiteRule(config, window.location.href)
+  return forceBlockStyleSelector !== null && element.matches(forceBlockStyleSelector)
+}
+
+export function isSiteRuleForceInlineNodeElement(element: HTMLElement, config: Config): boolean {
+  const { forceInlineNodeSelector } = getEffectiveSiteRule(config, window.location.href)
+  return forceInlineNodeSelector !== null && element.matches(forceInlineNodeSelector)
+}
+
+export function isSiteRuleForceInlineStyleElement(element: HTMLElement, config: Config): boolean {
+  const { forceInlineStyleSelector } = getEffectiveSiteRule(config, window.location.href)
+  return forceInlineStyleSelector !== null && element.matches(forceInlineStyleSelector)
 }
 
 export function isSiteRulePreserveTextElement(element: HTMLElement, config: Config): boolean {
@@ -245,6 +255,36 @@ export function isBlockTransNode(node: TransNode): boolean {
     return false
   }
   return node.hasAttribute(BLOCK_ATTRIBUTE)
+}
+
+type NaturalTransNodeKind = "block" | "inline" | "none"
+
+// Traversal labels are the effective node classification after site-rule
+// overrides. Keep the pre-override classification separately so translation
+// wrapper layout never reads a Node-only override as a Style instruction.
+// WeakMap avoids exposing another marker attribute to host-page CSS and
+// mutation observers. Marker-only fallback covers retry/tests whose labels
+// predate this module state (for example, an extension reload on a live tab).
+const naturalTransNodeKinds = new WeakMap<HTMLElement, NaturalTransNodeKind>()
+
+export function setNaturalTransNodeKind(element: HTMLElement, kind: NaturalTransNodeKind): void {
+  naturalTransNodeKinds.set(element, kind)
+}
+
+export function isNaturalInlineTransNode(node: TransNode): boolean {
+  if (isTextNode(node)) {
+    return true
+  }
+  const kind = naturalTransNodeKinds.get(node)
+  return kind === undefined ? isInlineTransNode(node) : kind === "inline"
+}
+
+export function isNaturalBlockTransNode(node: TransNode): boolean {
+  if (isTextNode(node)) {
+    return false
+  }
+  const kind = naturalTransNodeKinds.get(node)
+  return kind === undefined ? isBlockTransNode(node) : kind === "block"
 }
 
 /**

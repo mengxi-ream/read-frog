@@ -1,7 +1,14 @@
 // @vitest-environment jsdom
+import type { Config } from "@/types/config/config"
 import { afterEach, describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { isSiteRuleExcludedElement, isSiteRuleForceBlockElement } from "../filter"
+import {
+  isSiteRuleExcludedElement,
+  isSiteRuleForceBlockNodeElement,
+  isSiteRuleForceBlockStyleElement,
+  isSiteRuleForceInlineNodeElement,
+  isSiteRuleForceInlineStyleElement,
+} from "../filter"
 
 function setHost(host: string) {
   // jsdom exposes location as read-only; override via defineProperty
@@ -11,7 +18,7 @@ function setHost(host: string) {
   })
 }
 
-describe("isSiteRuleForceBlockElement", () => {
+describe("site-rule force selectors", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -22,7 +29,7 @@ describe("isSiteRuleForceBlockElement", () => {
     const taskLists = document.createElement("task-lists")
     document.body.appendChild(taskLists)
 
-    expect(isSiteRuleForceBlockElement(taskLists, DEFAULT_CONFIG)).toBe(true)
+    expect(isSiteRuleForceBlockNodeElement(taskLists, DEFAULT_CONFIG)).toBe(true)
   })
 
   it("does not match on non-configured host", () => {
@@ -31,7 +38,7 @@ describe("isSiteRuleForceBlockElement", () => {
     const taskLists = document.createElement("task-lists")
     document.body.appendChild(taskLists)
 
-    expect(isSiteRuleForceBlockElement(taskLists, DEFAULT_CONFIG)).toBe(false)
+    expect(isSiteRuleForceBlockNodeElement(taskLists, DEFAULT_CONFIG)).toBe(false)
   })
 
   it("matches shreddit-post-text-body element on www.reddit.com", () => {
@@ -40,7 +47,7 @@ describe("isSiteRuleForceBlockElement", () => {
     const postTextBody = document.createElement("shreddit-post-text-body")
     document.body.appendChild(postTextBody)
 
-    expect(isSiteRuleForceBlockElement(postTextBody, DEFAULT_CONFIG)).toBe(true)
+    expect(isSiteRuleForceBlockNodeElement(postTextBody, DEFAULT_CONFIG)).toBe(true)
   })
 
   it("does not match element outside configured parent on configured host", () => {
@@ -49,7 +56,7 @@ describe("isSiteRuleForceBlockElement", () => {
     const other = document.createElement("div")
     document.body.appendChild(other)
 
-    expect(isSiteRuleForceBlockElement(other, DEFAULT_CONFIG)).toBe(false)
+    expect(isSiteRuleForceBlockNodeElement(other, DEFAULT_CONFIG)).toBe(false)
   })
 
   it("still matches when the URL includes a port", () => {
@@ -61,7 +68,7 @@ describe("isSiteRuleForceBlockElement", () => {
     expect(window.location.host).toContain(":")
     expect(window.location.hostname).toBe("github.com")
 
-    expect(isSiteRuleForceBlockElement(taskLists, DEFAULT_CONFIG)).toBe(true)
+    expect(isSiteRuleForceBlockNodeElement(taskLists, DEFAULT_CONFIG)).toBe(true)
   })
 
   it("does not match on non-configured host when host !== hostname", () => {
@@ -73,7 +80,7 @@ describe("isSiteRuleForceBlockElement", () => {
     expect(window.location.host).toContain(":")
     expect(window.location.hostname).toBe("non-configured-example.org")
 
-    expect(isSiteRuleForceBlockElement(taskLists, DEFAULT_CONFIG)).toBe(false)
+    expect(isSiteRuleForceBlockNodeElement(taskLists, DEFAULT_CONFIG)).toBe(false)
   })
 
   // PubMed search results wrap each item's content in inline-block containers
@@ -87,7 +94,7 @@ describe("isSiteRuleForceBlockElement", () => {
     docsumWrap.className = "docsum-wrap"
     document.body.appendChild(docsumWrap)
 
-    expect(isSiteRuleForceBlockElement(docsumWrap, DEFAULT_CONFIG)).toBe(true)
+    expect(isSiteRuleForceBlockNodeElement(docsumWrap, DEFAULT_CONFIG)).toBe(true)
   })
 
   it("matches a.docsum-title on pubmed.ncbi.nlm.nih.gov", () => {
@@ -97,7 +104,53 @@ describe("isSiteRuleForceBlockElement", () => {
     title.className = "docsum-title"
     document.body.appendChild(title)
 
-    expect(isSiteRuleForceBlockElement(title, DEFAULT_CONFIG)).toBe(true)
+    expect(isSiteRuleForceBlockNodeElement(title, DEFAULT_CONFIG)).toBe(true)
+  })
+
+  it("matches node and style selectors on their own independent axes", () => {
+    setHost("example.com")
+    const config: Config = {
+      ...DEFAULT_CONFIG,
+      siteRules: {
+        disabledBuiltInRules: [],
+        userRules: [
+          {
+            id: "four-axes",
+            matches: "example.com",
+            forceBlockNodeSelectors: [".block-node"],
+            forceBlockStyleSelectors: [".block-style"],
+            forceInlineNodeSelectors: [".inline-node"],
+            forceInlineStyleSelectors: [".inline-style"],
+          },
+        ],
+      },
+    }
+    const element = document.createElement("span")
+    element.className = "block-node"
+    document.body.appendChild(element)
+
+    expect(isSiteRuleForceBlockNodeElement(element, config)).toBe(true)
+    expect(isSiteRuleForceBlockStyleElement(element, config)).toBe(false)
+    expect(isSiteRuleForceInlineNodeElement(element, config)).toBe(false)
+    expect(isSiteRuleForceInlineStyleElement(element, config)).toBe(false)
+
+    element.className = "block-style"
+    expect(isSiteRuleForceBlockNodeElement(element, config)).toBe(false)
+    expect(isSiteRuleForceBlockStyleElement(element, config)).toBe(true)
+    expect(isSiteRuleForceInlineNodeElement(element, config)).toBe(false)
+    expect(isSiteRuleForceInlineStyleElement(element, config)).toBe(false)
+
+    element.className = "inline-node"
+    expect(isSiteRuleForceBlockNodeElement(element, config)).toBe(false)
+    expect(isSiteRuleForceBlockStyleElement(element, config)).toBe(false)
+    expect(isSiteRuleForceInlineNodeElement(element, config)).toBe(true)
+    expect(isSiteRuleForceInlineStyleElement(element, config)).toBe(false)
+
+    element.className = "inline-style"
+    expect(isSiteRuleForceBlockNodeElement(element, config)).toBe(false)
+    expect(isSiteRuleForceBlockStyleElement(element, config)).toBe(false)
+    expect(isSiteRuleForceInlineNodeElement(element, config)).toBe(false)
+    expect(isSiteRuleForceInlineStyleElement(element, config)).toBe(true)
   })
 })
 

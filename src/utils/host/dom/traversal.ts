@@ -13,11 +13,13 @@ import {
   isHTMLElement,
   isShallowBlockHTMLElement,
   isShallowInlineHTMLElement,
-  isSiteRuleForceBlockElement,
+  isSiteRuleForceBlockNodeElement,
+  isSiteRuleForceInlineNodeElement,
   isTextNode,
   isTranslatedWrapperNode,
   isWalkBlockedElement,
   isWithinIncludeScope,
+  setNaturalTransNodeKind,
 } from "./filter"
 
 const NON_NEWLINE_WHITESPACE_RE = /[^\S\n]/
@@ -157,6 +159,7 @@ function* walkNode(
   forceBlock = forceBlock || FORCE_BLOCK_TAGS.has(element.tagName)
 
   if (element.textContent?.trim() === "" && !forceBlock) {
+    setNaturalTransNodeKind(element, "none")
     return {
       forceBlock: false,
       isInlineNode: false,
@@ -166,13 +169,21 @@ function* walkNode(
   // One computed-style resolution feeds both shallow-shape checks (was up to
   // four separate getComputedStyle calls per element, #1881).
   const computedStyle = window.getComputedStyle(element)
-  const isInlineNode = isShallowInlineHTMLElement(element, computedStyle)
+  const naturalBlockNode = forceBlock || isShallowBlockHTMLElement(element, computedStyle)
+  const naturalInlineNode = !naturalBlockNode && isShallowInlineHTMLElement(element, computedStyle)
+  setNaturalTransNodeKind(
+    element,
+    naturalBlockNode ? "block" : naturalInlineNode ? "inline" : "none",
+  )
 
-  if (
-    forceBlock ||
-    isShallowBlockHTMLElement(element, computedStyle) ||
-    isSiteRuleForceBlockElement(element, config)
-  ) {
+  const siteRuleForceBlockNode = isSiteRuleForceBlockNodeElement(element, config)
+  const siteRuleForceInlineNode =
+    !forceBlock && !siteRuleForceBlockNode && isSiteRuleForceInlineNodeElement(element, config)
+  const isBlockNode =
+    forceBlock || siteRuleForceBlockNode || (!siteRuleForceInlineNode && naturalBlockNode)
+  const isInlineNode = !isBlockNode && (siteRuleForceInlineNode || naturalInlineNode)
+
+  if (isBlockNode) {
     element.setAttribute(BLOCK_ATTRIBUTE, "")
   } else if (isInlineNode) {
     element.setAttribute(INLINE_ATTRIBUTE, "")

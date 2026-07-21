@@ -23,7 +23,56 @@ export type UserRulesValidationResult =
   | { ok: true; rules: SiteRule[] }
   | { ok: false; kind: UserRulesValidationErrorKind; issues: UserRulesIssue[] }
 
-const userRulesArraySchema = z.array(siteRuleSchema)
+const selectorListSchema = z.array(z.string()).optional()
+
+const editorSiteRuleInputSchema = siteRuleSchema
+  .extend({
+    forceBlockSelectors: selectorListSchema,
+    "forceBlockSelectors.add": selectorListSchema,
+    "forceBlockSelectors.remove": selectorListSchema,
+    forceInlineSelectors: selectorListSchema,
+    "forceInlineSelectors.add": selectorListSchema,
+    "forceInlineSelectors.remove": selectorListSchema,
+  })
+  .strict()
+
+const LEGACY_FORCE_SELECTOR_MAPPINGS = [
+  ["forceBlockSelectors", ["forceBlockNodeSelectors", "forceBlockStyleSelectors"]],
+  ["forceBlockSelectors.add", ["forceBlockNodeSelectors.add", "forceBlockStyleSelectors.add"]],
+  [
+    "forceBlockSelectors.remove",
+    ["forceBlockNodeSelectors.remove", "forceBlockStyleSelectors.remove"],
+  ],
+  ["forceInlineSelectors", ["forceInlineStyleSelectors"]],
+  ["forceInlineSelectors.add", ["forceInlineStyleSelectors.add"]],
+  ["forceInlineSelectors.remove", ["forceInlineStyleSelectors.remove"]],
+] as const
+
+function hasOwn(value: object, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(value, key)
+}
+
+function migrateLegacyForceSelectors(rule: z.infer<typeof editorSiteRuleInputSchema>): SiteRule {
+  const source = rule as Record<string, unknown>
+  const migrated: Record<string, unknown> = { ...source }
+
+  for (const [legacyKey, canonicalKeys] of LEGACY_FORCE_SELECTOR_MAPPINGS) {
+    if (hasOwn(source, legacyKey)) {
+      for (const canonicalKey of canonicalKeys) {
+        if (!hasOwn(source, canonicalKey)) {
+          migrated[canonicalKey] = source[legacyKey]
+        }
+      }
+    }
+    delete migrated[legacyKey]
+  }
+
+  return migrated as SiteRule
+}
+
+const userRulesArraySchema = z.array(
+  editorSiteRuleInputSchema.transform(migrateLegacyForceSelectors),
+)
 
 /** Render a zod issue path as `rules[2].matches`: numeric segments as `[n]`, string segments as `.name`. */
 function formatIssuePath(path: PropertyKey[]): string {
@@ -90,10 +139,16 @@ export function validateUserRulesDocument(text: string): UserRulesValidationResu
     return {
       ok: false,
       kind: "schema",
-      issues: result.error.issues.map((issue) => ({
-        path: formatIssuePath(issue.path),
-        message: issue.message,
-      })),
+      issues: result.error.issues.flatMap((issue) => {
+        const path = formatIssuePath(issue.path)
+        if (issue.code === "unrecognized_keys") {
+          return issue.keys.map((key) => ({
+            path: `${path}.${key}`,
+            message: `Unrecognized field "${key}"`,
+          }))
+        }
+        return [{ path, message: issue.message }]
+      }),
     }
   }
 

@@ -1,5 +1,6 @@
 import type { Config } from "@/types/config/config"
 // @vitest-environment jsdom
+import type { SiteRule } from "@/types/config/site-rules"
 import type { TranslationMode } from "@/types/config/translate"
 import { act, render, screen, waitFor } from "@testing-library/react"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
@@ -53,6 +54,18 @@ const TRANSLATION_ONLY_CONFIG: Config = {
     ...DEFAULT_CONFIG.translate,
     mode: "translationOnly" as const,
   },
+}
+
+function bilingualConfigWithSiteRule(rule: Omit<SiteRule, "id" | "matches">): Config {
+  const config = structuredClone(BILINGUAL_CONFIG)
+  config.siteRules.userRules = [
+    {
+      id: "translation-style-test",
+      matches: "example.com",
+      ...rule,
+    },
+  ]
+  return config
 }
 
 function setHost(host: string) {
@@ -3138,19 +3151,9 @@ describe("translate", () => {
     })
 
     it("keeps a matching site force-block rule above the short-text heuristic", async () => {
-      const config: Config = {
-        ...BILINGUAL_CONFIG,
-        siteRules: {
-          ...BILINGUAL_CONFIG.siteRules,
-          userRules: [
-            {
-              id: "force-short-label-block",
-              matches: "example.com",
-              forceBlockSelectors: [".force-block"],
-            },
-          ],
-        },
-      }
+      const config = bilingualConfigWithSiteRule({
+        forceBlockStyleSelectors: [".force-block"],
+      })
 
       await withHost("example.com", async () => {
         render(
@@ -3165,6 +3168,344 @@ describe("translate", () => {
         const wrapper = expectTranslationWrapper(node, "bilingual")!
         expect(wrapper.querySelector("br")).toBeTruthy()
         expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS)
+      })
+    })
+
+    it("uses block-style without changing an inline traversal label", async () => {
+      const config = bilingualConfigWithSiteRule({
+        forceBlockStyleSelectors: [".force-block-style"],
+        forceBlockNodeSelectors: [".node-only-splitter"],
+      })
+
+      await withHost("example.com", async () => {
+        render(
+          <div data-testid="style-run-host">
+            <span className="force-block-style" data-testid="test-node">
+              {MOCK_ORIGINAL_TEXT}
+            </span>
+            <span>{MOCK_ORIGINAL_TEXT}</span>
+            <span className="node-only-splitter" style={{ display: "inline" }}>
+              {MOCK_ORIGINAL_TEXT}
+            </span>
+          </div>,
+        )
+
+        const node = screen.getByTestId("test-node")
+        const peer = node.nextElementSibling!
+        const splitter = peer.nextElementSibling!
+        await removeOrShowPageTranslation("bilingual", true, config)
+
+        expectNodeLabels(node, [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        expectNodeLabels(peer, [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        expectNodeLabels(splitter, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        const wrapper = expectTranslationWrapper(screen.getByTestId("style-run-host"), "bilingual")!
+        expect(wrapper.querySelector("br")).toBeTruthy()
+        expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS)
+      })
+    })
+
+    it("applies block-style when a translated text node's parent matches", async () => {
+      const config = bilingualConfigWithSiteRule({
+        forceBlockStyleSelectors: [".force-block-style"],
+      })
+
+      await withHost("example.com", async () => {
+        render(
+          <span className="force-block-style" data-testid="test-node">
+            {MOCK_ORIGINAL_TEXT}
+          </span>,
+        )
+
+        const node = screen.getByTestId("test-node")
+        await translateNodesBilingualMode([node.firstChild!], "text-style-source", config)
+
+        const wrapper = expectTranslationWrapper(node, "bilingual")!
+        expect(wrapper.querySelector("br")).toBeTruthy()
+        expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS)
+      })
+    })
+
+    it("uses inline-style without changing a block traversal label", async () => {
+      const config = bilingualConfigWithSiteRule({
+        forceInlineStyleSelectors: [".force-inline-style"],
+      })
+
+      await withHost("example.com", async () => {
+        render(
+          <div className="force-inline-style" data-testid="test-node">
+            {MOCK_ORIGINAL_TEXT}
+          </div>,
+        )
+
+        const node = screen.getByTestId("test-node")
+        await removeOrShowPageTranslation("bilingual", true, config)
+
+        expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        const wrapper = expectTranslationWrapper(node, "bilingual")!
+        expect(wrapper.querySelector("br")).toBeFalsy()
+        expect(wrapper.firstChild?.textContent).toBe("\u00A0\u00A0")
+        expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS)
+      })
+    })
+
+    it("keeps inline-style above the grouped force-block insertion heuristic", async () => {
+      const config = bilingualConfigWithSiteRule({
+        forceInlineNodeSelectors: [".force-inline-style"],
+        forceInlineStyleSelectors: [".force-inline-style"],
+      })
+
+      await withHost("example.com", async () => {
+        render(
+          <div data-testid="test-node">
+            <div className="force-inline-style">{MOCK_ORIGINAL_TEXT}</div>
+            <div>{MOCK_ORIGINAL_TEXT}</div>
+          </div>,
+        )
+
+        const node = screen.getByTestId("test-node")
+        await removeOrShowPageTranslation("bilingual", true, config)
+
+        const forcedInline = node.children[0]
+        expectNodeLabels(forcedInline, [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        const wrapper = expectTranslationWrapper(forcedInline, "bilingual")!
+        expect(wrapper.querySelector("br")).toBeFalsy()
+        expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS)
+      })
+    })
+
+    it("gives block-style priority when both style selectors match", async () => {
+      const config = bilingualConfigWithSiteRule({
+        forceBlockStyleSelectors: [".style-conflict"],
+        forceInlineStyleSelectors: [".style-conflict"],
+      })
+
+      await withHost("example.com", async () => {
+        render(
+          <div className="style-conflict" data-testid="test-node">
+            {MOCK_ORIGINAL_TEXT}
+          </div>,
+        )
+
+        const node = screen.getByTestId("test-node")
+        await removeOrShowPageTranslation("bilingual", true, config)
+
+        const wrapper = expectTranslationWrapper(node, "bilingual")!
+        expect(wrapper.querySelector("br")).toBeTruthy()
+        expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS)
+      })
+    })
+
+    it("allows block-node classification with an inline-style wrapper override", async () => {
+      const config = bilingualConfigWithSiteRule({
+        forceBlockNodeSelectors: [".cross-axis"],
+        forceInlineStyleSelectors: [".cross-axis"],
+      })
+
+      await withHost("example.com", async () => {
+        render(
+          <div className="cross-axis" data-testid="test-node" style={{ display: "inline" }}>
+            {MOCK_ORIGINAL_TEXT}
+          </div>,
+        )
+
+        const node = screen.getByTestId("test-node")
+        await removeOrShowPageTranslation("bilingual", true, config)
+
+        expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        const wrapper = expectTranslationWrapper(node, "bilingual")!
+        expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS)
+      })
+    })
+
+    it("allows inline-node classification with a block-style wrapper override", async () => {
+      const config = bilingualConfigWithSiteRule({
+        forceInlineNodeSelectors: [".cross-axis"],
+        forceBlockStyleSelectors: [".cross-axis"],
+      })
+
+      await withHost("example.com", async () => {
+        render(
+          <div className="cross-axis" data-testid="test-node">
+            {MOCK_ORIGINAL_TEXT}
+          </div>,
+        )
+
+        const node = screen.getByTestId("test-node")
+        await removeOrShowPageTranslation("bilingual", true, config)
+
+        expectNodeLabels(node, [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        const wrapper = expectTranslationWrapper(node, "bilingual")!
+        expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS)
+      })
+    })
+
+    it("keeps a block-node-only source on its natural inline wrapper style", async () => {
+      const config = bilingualConfigWithSiteRule({
+        forceBlockNodeSelectors: [".node-only"],
+      })
+
+      await withHost("example.com", async () => {
+        render(
+          <div className="node-only" data-testid="test-node" style={{ display: "inline" }}>
+            <span>{MOCK_ORIGINAL_TEXT}</span>
+          </div>,
+        )
+
+        const node = screen.getByTestId("test-node")
+        const sourceChild = node.firstElementChild!
+        await removeOrShowPageTranslation("bilingual", true, config)
+
+        expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        const wrapper = expectTranslationWrapper(node, "bilingual")!
+        expect(wrapper.parentElement).toBe(node)
+        expect(sourceChild.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
+        expect(wrapper.querySelector("br")).toBeFalsy()
+        expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS)
+      })
+    })
+
+    it("keeps an inline-node-only source on its natural block wrapper style", async () => {
+      const config = bilingualConfigWithSiteRule({
+        forceInlineNodeSelectors: [".node-only"],
+      })
+
+      await withHost("example.com", async () => {
+        render(
+          <div className="node-only" data-testid="test-node" style={{ display: "block" }}>
+            {MOCK_ORIGINAL_TEXT}
+          </div>,
+        )
+
+        const node = screen.getByTestId("test-node")
+        await removeOrShowPageTranslation("bilingual", true, config)
+
+        expectNodeLabels(node, [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        const wrapper = expectTranslationWrapper(node, "bilingual")!
+        expect(wrapper.querySelector("br")).toBeTruthy()
+        expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS)
+      })
+    })
+
+    it("lets a block-node-only child split runs without forcing their wrapper styles", async () => {
+      const config = bilingualConfigWithSiteRule({
+        forceBlockNodeSelectors: [".node-only"],
+      })
+
+      await withHost("example.com", async () => {
+        render(
+          <div data-testid="test-node">
+            <div className="node-only" style={{ display: "inline" }}>
+              {MOCK_ORIGINAL_TEXT}
+            </div>
+            <div style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</div>
+          </div>,
+        )
+
+        const node = screen.getByTestId("test-node")
+        const forcedBlock = node.children[0]
+        const remainingInlineRun = node.children[1]
+        await removeOrShowPageTranslation("bilingual", true, config)
+
+        expectNodeLabels(forcedBlock, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        expectNodeLabels(remainingInlineRun, [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        for (const source of [forcedBlock, remainingInlineRun]) {
+          const wrapper = expectTranslationWrapper(source, "bilingual")!
+          expect(wrapper.querySelector("br")).toBeFalsy()
+          expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS)
+        }
+      })
+    })
+
+    it("preserves legacy group layout when block node and style selectors are combined", async () => {
+      const config = bilingualConfigWithSiteRule({
+        forceBlockNodeSelectors: [".legacy-block"],
+        forceBlockStyleSelectors: [".legacy-block"],
+      })
+
+      await withHost("example.com", async () => {
+        render(
+          <div data-testid="test-node">
+            <div className="legacy-block" style={{ display: "inline" }}>
+              {MOCK_ORIGINAL_TEXT}
+            </div>
+            <div style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</div>
+          </div>,
+        )
+
+        const node = screen.getByTestId("test-node")
+        const forcedBlock = node.children[0]
+        const remainingInlineRun = node.children[1]
+        await removeOrShowPageTranslation("bilingual", true, config)
+
+        expectNodeLabels(forcedBlock, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        expectNodeLabels(remainingInlineRun, [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        for (const source of [forcedBlock, remainingInlineRun]) {
+          const wrapper = expectTranslationWrapper(source, "bilingual")!
+          expect(wrapper.querySelector("br")).toBeTruthy()
+          expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS)
+        }
+      })
+    })
+
+    it("preserves legacy nested wrapper placement when block axes are combined", async () => {
+      const config = bilingualConfigWithSiteRule({
+        forceBlockNodeSelectors: [".legacy-block"],
+        forceBlockStyleSelectors: [".legacy-block"],
+      })
+
+      await withHost("example.com", async () => {
+        render(
+          <span className="legacy-block" data-testid="test-node" style={{ display: "inline" }}>
+            <em>{MOCK_ORIGINAL_TEXT}</em>
+          </span>,
+        )
+
+        const node = screen.getByTestId("test-node")
+        const sourceChild = node.firstElementChild!
+        await removeOrShowPageTranslation("bilingual", true, config)
+
+        expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        const wrapper = expectTranslationWrapper(node, "bilingual")!
+        expect(wrapper.parentElement).toBe(sourceChild)
+        expect(wrapper.querySelector("br")).toBeTruthy()
+        expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS)
+      })
+    })
+
+    it("keeps virtual paragraphs inline when only their node classification is forced block", async () => {
+      const config = bilingualConfigWithSiteRule({
+        forceBlockNodeSelectors: [".node-only"],
+      })
+      const paragraphs = [
+        "First deliberately long virtual paragraph source.",
+        "Second deliberately long virtual paragraph source.",
+      ]
+      const translations = ["【第一段译文】", "【第二段译文】"]
+      vi.mocked(translateTextForPage)
+        .mockResolvedValueOnce(translations[0])
+        .mockResolvedValueOnce(translations[1])
+
+      await withHost("example.com", async () => {
+        render(
+          <div
+            className="node-only"
+            data-testid="test-node"
+            style={{ display: "inline", whiteSpace: "pre-wrap" }}
+          >
+            <span>{paragraphs.join("\n\n")}</span>
+          </div>,
+        )
+
+        const node = screen.getByTestId("test-node")
+        await removeOrShowPageTranslation("bilingual", true, config)
+
+        expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        const wrappers = node.querySelectorAll(`.${CONTENT_WRAPPER_CLASS}`)
+        expect(wrappers).toHaveLength(2)
+        wrappers.forEach((wrapper, index) => {
+          expect(wrapper.querySelector("br")).toBeFalsy()
+          expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS, translations[index])
+        })
       })
     })
   })

@@ -8,7 +8,74 @@ import { ConfigVersionTooNewError } from "./errors"
 
 export const LATEST_SCHEMA_VERSION = CONFIG_SCHEMA_VERSION
 
-const MIGRATION_FILENAME_RE = /v\d+-to-v(\d+)\.ts$/
+const MIGRATION_FILENAME_RE = /v(\d+)-to-v(\d+)\.ts$/
+
+interface MigrationStep {
+  fromVersion: number
+  toVersion: number
+  path: string
+  migrate: MigrationFunction
+}
+
+/**
+ * Build a target-version-indexed migration registry while validating that the
+ * auto-discovered files form exactly one contiguous, single-version chain.
+ */
+export function buildMigrationRegistry(
+  discoveredModules: Record<string, MigrationFunction>,
+  firstVersion: number,
+  latestVersion: number,
+): Record<number, MigrationFunction> {
+  const steps: MigrationStep[] = Object.entries(discoveredModules).map(([path, migrate]) => {
+    const match = path.match(MIGRATION_FILENAME_RE)
+    if (!match) {
+      throw new Error(`Invalid migration filename: ${path}`)
+    }
+
+    const fromVersion = Number(match[1])
+    const toVersion = Number(match[2])
+    if (toVersion !== fromVersion + 1) {
+      throw new Error(
+        `Invalid migration step ${path}: expected v${fromVersion} to migrate to v${fromVersion + 1}`,
+      )
+    }
+
+    return { fromVersion, toVersion, path, migrate }
+  })
+
+  if (steps.length === 0) {
+    throw new Error("No config migration scripts found")
+  }
+
+  const targetVersions = new Set<number>()
+  for (const step of steps) {
+    if (targetVersions.has(step.toVersion)) {
+      throw new Error(`Duplicate migration target version: v${step.toVersion}`)
+    }
+    targetVersions.add(step.toVersion)
+  }
+
+  steps.sort((a, b) => a.fromVersion - b.fromVersion)
+
+  if (steps[0].fromVersion !== firstVersion) {
+    throw new Error(`Migration chain starts at v${steps[0].fromVersion}; expected v${firstVersion}`)
+  }
+
+  for (let index = 1; index < steps.length; index += 1) {
+    const previous = steps[index - 1]
+    const current = steps[index]
+    if (current.fromVersion !== previous.toVersion) {
+      throw new Error(`Discontinuous migration chain between ${previous.path} and ${current.path}`)
+    }
+  }
+
+  const finalVersion = steps.at(-1)!.toVersion
+  if (finalVersion !== latestVersion) {
+    throw new Error(`Migration chain ends at v${finalVersion}; expected v${latestVersion}`)
+  }
+
+  return Object.fromEntries(steps.map(({ toVersion, migrate }) => [toVersion, migrate]))
+}
 
 /**
  * Loads migration scripts from the "migration-scripts" directory and runs them sequentially to migrate the configuration
@@ -20,16 +87,7 @@ const modules = import.meta.glob<MigrationFunction>(["./migration-scripts/v*-to-
   eager: true,
   import: "migrate",
 })
-export const migrationScripts: Record<number, MigrationFunction> = Object.fromEntries(
-  Object.entries(modules).map(([path, migrate]) => {
-    const match = path.match(MIGRATION_FILENAME_RE)
-    if (!match) {
-      throw new Error(`Invalid migration filename: ${path}`)
-    }
-    const version = Number(match[1])
-    return [version, migrate]
-  }),
-)
+export const migrationScripts = buildMigrationRegistry(modules, 1, CONFIG_SCHEMA_VERSION)
 
 logger.log("Loaded migration modules:", migrationScripts)
 

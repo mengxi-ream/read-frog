@@ -82,7 +82,7 @@
       "#p-associated-pages",
       ".vector-header"
     ],
-    "forceInlineSelectors": [".chemf", ".mwe-math-element", "[role=math]", ".nowrap"],
+    "forceInlineStyleSelectors": [".chemf", ".mwe-math-element", "[role=math]", ".nowrap"],
     "minCharacters": 4,
     "minWords": 2,
     "injectedCss": ".read-frog-translated-content-wrapper {content-visibility:auto;}\n.no-article-text-sister-projects li { height:unset; }",
@@ -147,7 +147,7 @@
       "[data-testid=primaryColumn] [class='css-175oi2r r-kzbkwu r-3pj75a'] > div > span[class='css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3']",
       ".font-chirp.text-body.font-normal"
     ],
-    "forceInlineSelectors": [
+    "forceInlineStyleSelectors": [
       "[data-testid=\"tweetText\"] div.r-xoduu5",
       "[data-testid=\"tweetText\"] span",
       "[data-testid=\"UserDescription\"] div",
@@ -178,7 +178,8 @@
       ".imt-caption-container *",
       "[data-testid=videoComponent]"
     ],
-    "forceBlockSelectors.add": ["[data-testid=\"tweetText\"] div.r-6koalj"],
+    "forceBlockNodeSelectors.add": ["[data-testid=\"tweetText\"] div.r-6koalj"],
+    "forceBlockStyleSelectors.add": ["[data-testid=\"tweetText\"] div.r-6koalj"],
     "preserveTextSelectors.add": [
       "[data-testid=\"tweetText\"] a",
       "[data-testid='UserDescription'] a",
@@ -205,7 +206,7 @@
     "id": "zoom",
     "matches": "*.zoom.us",
     "excludeSelectors.add": [".live-transcription-subtitle__box"],
-    "forceInlineSelectors.add": [".live-transcription-subtitle__item"]
+    "forceInlineStyleSelectors.add": [".live-transcription-subtitle__item"]
   },
   {
     "id": "team",
@@ -215,14 +216,14 @@
       "[data-tid='author']",
       ".fui-ChatMessageCompact__author"
     ],
-    "forceInlineSelectors.add": ["[data-tid='closed-caption-text']"],
+    "forceInlineStyleSelectors.add": ["[data-tid='closed-caption-text']"],
     "preserveTextSelectors.add": ["span[title][style='min-width: 20px; height: 20px;']"]
   },
   {
     "id": "googleMeet",
     "matches": "meet.google.com",
     "excludeSelectors.add": [".iOzk7[jsname='dsyhDe']", ".ygicle.VbkSUe"],
-    "forceInlineSelectors.add": [".ygicle.VbkSUe"]
+    "forceInlineStyleSelectors.add": [".ygicle.VbkSUe"]
   },
   {
     "id": "openrouter",
@@ -257,7 +258,11 @@
       ".mhy-user-card__name",
       ".mhy-account-title__name"
     ],
-    "forceBlockSelectors.add": [
+    "forceBlockNodeSelectors.add": [
+      ".reply-card__content__detail p:first-child",
+      ".reply-card-inner-reply__content > p:first-child"
+    ],
+    "forceBlockStyleSelectors.add": [
       ".reply-card__content__detail p:first-child",
       ".reply-card-inner-reply__content > p:first-child"
     ]
@@ -265,7 +270,7 @@
   {
     "id": "chatter.hume.ai",
     "matches": "chatter.hume.ai",
-    "forceInlineSelectors.add": ["[class*=' flex-wrap'] > span"]
+    "forceInlineStyleSelectors.add": ["[class*=' flex-wrap'] > span"]
   },
   {
     "id": "threads",
@@ -311,7 +316,8 @@
       ".s-post-summary--stats",
       ".s-post-summary--meta"
     ],
-    "forceBlockSelectors.add": ["span.comment-copy"]
+    "forceBlockNodeSelectors.add": ["span.comment-copy"],
+    "forceBlockStyleSelectors.add": ["span.comment-copy"]
   },
   {
     "id": "appleDeveloper",
@@ -582,7 +588,7 @@
       "[class*='ModelsPlaygroundRoute-module__playgroundContainer']",
       "article [class='f6 color-fg-muted mt-1']"
     ],
-    "forceInlineSelectors": ["g-emoji", "a.anchor"],
+    "forceInlineStyleSelectors": ["g-emoji", "a.anchor"],
     "injectedCss": ".TimelineItem-body .Link--primary { -webkit-line-clamp: unset; }",
     "excludeSelectors.add": [
       "a[data-hovercard-type]",
@@ -615,7 +621,8 @@
       "h1[data-component=PH_Title] span[class*='issueNumberText']",
       "[data-testid=list-row-repo-name-and-number]"
     ],
-    "forceBlockSelectors.add": ["bdi"],
+    "forceBlockNodeSelectors.add": ["bdi"],
+    "forceBlockStyleSelectors.add": ["bdi"],
     "preserveTextSelectors.add": [
       ".issue-link",
       ".markdown-body a[data-hovercard-type='pull_request']",
@@ -721,7 +728,8 @@
       ".imt-caption-container",
       "ytd-live-chat-frame"
     ],
-    "forceBlockSelectors.add": [".caption-visual-line"]
+    "forceBlockNodeSelectors.add": [".caption-visual-line"],
+    "forceBlockStyleSelectors.add": [".caption-visual-line"]
   },
   {
     "id": "twitch",
@@ -775,7 +783,11 @@
       "yt-description-preview-view-model button",
       ".yt-page-header-view-model__page-header-title"
     ],
-    "forceBlockSelectors.add": [
+    "forceBlockNodeSelectors.add": [
+      "yt-formatted-string.ytd-transcript-segment-renderer",
+      ".caption-visual-line"
+    ],
+    "forceBlockStyleSelectors.add": [
       "yt-formatted-string.ytd-transcript-segment-renderer",
       ".caption-visual-line"
     ]
@@ -789,7 +801,8 @@
     "id": "youtube-subtitle",
     "matches": ["www.youtube-nocookie.com", "music.youtube.com"],
     "excludeSelectors.add": [".captions-text", ".ytp-caption-segment"],
-    "forceBlockSelectors.add": [".caption-visual-line"]
+    "forceBlockNodeSelectors.add": [".caption-visual-line"],
+    "forceBlockStyleSelectors.add": [".caption-visual-line"]
   },
   {
     "id": "instagramMessage",
@@ -858,7 +871,13 @@
       ".comment-actions"
     ],
     "injectedCss": ".reader2-clamp-lines { max-height: unset; -webkit-line-clamp: unset; }\n[class*='clamp-'] { max-height: unset; -webkit-line-clamp:unset; }\n.blurb-text { max-height: unset; }\n.comment-body { max-height: unset; }\n[class*='_hideSelectio'] { overflow: scroll; }",
-    "forceBlockSelectors.add": [
+    "forceBlockNodeSelectors.add": [
+      ".reader2-post-title",
+      ".tweet-link-top",
+      ".tweet-link-bottom",
+      ".expanded-link"
+    ],
+    "forceBlockStyleSelectors.add": [
       ".reader2-post-title",
       ".tweet-link-top",
       ".tweet-link-bottom",
@@ -944,7 +963,7 @@
       ".gs_fma_wpr",
       "#gs_as_hp_main"
     ],
-    "forceInlineSelectors": ["br"]
+    "forceInlineStyleSelectors": ["br"]
   },
   {
     "id": "googleMail",
@@ -1026,7 +1045,12 @@
     "minCharacters": 4,
     "minWords": 2,
     "excludeSelectors.add": ["[class*='username']", "[class*='repliedMessage']"],
-    "forceBlockSelectors.add": [
+    "forceBlockNodeSelectors.add": [
+      "[class^='embedFieldValue']",
+      "li[class^='card'] div[class^='message']",
+      "[data-list-item-id^='forum-channel-list'] div[class^='headerText']"
+    ],
+    "forceBlockStyleSelectors.add": [
       "[class^='embedFieldValue']",
       "li[class^='card'] div[class^='message']",
       "[data-list-item-id^='forum-channel-list'] div[class^='headerText']"
@@ -1060,7 +1084,11 @@
       "#auth-qr-form"
     ],
     "excludeSelectors.remove": [".notranslate", "[translate=no]"],
-    "forceBlockSelectors.add": [
+    "forceBlockNodeSelectors.add": [
+      ".message.spoilers-container em",
+      ".message.spoilers-container strong"
+    ],
+    "forceBlockStyleSelectors.add": [
       ".message.spoilers-container em",
       ".message.spoilers-container strong"
     ]
@@ -1160,7 +1188,8 @@
       "span[data-ts]"
     ],
     "excludeSelectors.add": ["[jscontroller='UsftYd']"],
-    "forceBlockSelectors.add": [".MUFPAc", "[role=heading]"],
+    "forceBlockNodeSelectors.add": [".MUFPAc", "[role=heading]"],
+    "forceBlockStyleSelectors.add": [".MUFPAc", "[role=heading]"],
     "injectedCss.add": [
       ".V82bz,.uAKcGb,.F0FGWb,.Hdw6tb,.M1Sizc,.XVPTd,.Yt787.JGD2rd,.ITZIwc {-webkit-line-clamp: unset!important;max-height: unset!important;}",
       ".pe7FNb {-webkit-line-clamp: unset!important;}",
@@ -1266,7 +1295,8 @@
       ".CommentsTableOfContents-commentAuthor",
       ".CommentBottom-bottom"
     ],
-    "forceBlockSelectors.add": ["span.commentOnSelection"]
+    "forceBlockNodeSelectors.add": ["span.commentOnSelection"],
+    "forceBlockStyleSelectors.add": ["span.commentOnSelection"]
   },
   {
     "id": "mastodon",
@@ -1309,7 +1339,8 @@
     "matches": ["*.pornhub.com", "pornhub.com"],
     "excludeMatches": ["*.pornhub.com/insights/*", "pornhub.com/insights/*"],
     "injectedCss": "span.title { height:unset; max-height:unset; }\n.detailedInfo { max-height:unset; }\n.pcVideoListItem { max-height:unset; }\n.wrap { height:unset; }\n.entry-header { height:unset; }\n.entry-title > a { height:unset;-webkit-line-clamp:unset; }",
-    "forceBlockSelectors.add": [".trendingNow", ".searchItem", ".tagcloud > a"]
+    "forceBlockNodeSelectors.add": [".trendingNow", ".searchItem", ".tagcloud > a"],
+    "forceBlockStyleSelectors.add": [".trendingNow", ".searchItem", ".tagcloud > a"]
   },
   {
     "id": "missav",
@@ -1332,7 +1363,8 @@
     "matches": "https://spankbang.com/*",
     "excludeSelectors": [".stats", ".thumb"],
     "injectedCss": ".video-item > a { white-space:unset; }",
-    "forceBlockSelectors.add": [".searches > a", ".tag > a", ".extra > a", ".positions > li"]
+    "forceBlockNodeSelectors.add": [".searches > a", ".tag > a", ".extra > a", ".positions > li"],
+    "forceBlockStyleSelectors.add": [".searches > a", ".tag > a", ".extra > a", ".positions > li"]
   },
   {
     "id": "javdb",
@@ -1349,7 +1381,8 @@
     "id": "netflav",
     "matches": "https://netflav*.com/*",
     "injectedCss": ".grid_title { max-height:unset; }",
-    "forceBlockSelectors.add": [".genre_filter_item", "button"]
+    "forceBlockNodeSelectors.add": [".genre_filter_item", "button"],
+    "forceBlockStyleSelectors.add": [".genre_filter_item", "button"]
   },
   {
     "id": "czechvideo",
@@ -1408,7 +1441,7 @@
     "id": "economist",
     "matches": "www.economist.com",
     "excludeSelectors": ["footer.ds-footer", ".vjs-text-track-display"],
-    "forceInlineSelectors": ["span[data-caps='initial']"],
+    "forceInlineStyleSelectors": ["span[data-caps='initial']"],
     "injectedCss": "a::before {position:relative!important;}\n[class^=button] span font {white-space:pre-wrap;}"
   },
   {
@@ -1461,7 +1494,8 @@
       "#glow-ingress-block,#nav-link-accountList,#nav-orders,#nav-cart",
       ".a-profile-content,[data-hook=product-variation-attributes],[data-hook=helpfulVoteWidget],[data-hook=reportAbuseButton],[data-hook=helpful-vote-statement]"
     ],
-    "forceBlockSelectors.add": [".a-size-small.a-link-normal.page-banner-link.a-nowrap"],
+    "forceBlockNodeSelectors.add": [".a-size-small.a-link-normal.page-banner-link.a-nowrap"],
+    "forceBlockStyleSelectors.add": [".a-size-small.a-link-normal.page-banner-link.a-nowrap"],
     "injectedCss.add": [
       ".a-carousel-viewport {height:unset;}",
       "[class*='clamp'] {max-height: unset!important;-webkit-line-clamp: unset!important;}",
@@ -1516,7 +1550,8 @@
     "excludeMatches": ["www.sciencedirect.com/*/pdf/download/*"],
     "injectedCss": ".read-frog-translated-content-wrapper {content-visibility:auto;}",
     "excludeSelectors.add": [".bibliography", ".author-group"],
-    "forceBlockSelectors.add": ["span.display", "span.captions", "span[id^=cap]"],
+    "forceBlockNodeSelectors.add": ["span.display", "span.captions", "span[id^=cap]"],
+    "forceBlockStyleSelectors.add": ["span.display", "span.captions", "span[id^=cap]"],
     "preserveTextSelectors": ["span.display", "span.math"],
     "injectedCss.add": [
       "h2 {font-size:unset;}",
@@ -1526,13 +1561,15 @@
   {
     "id": "thehighestofthemountains",
     "matches": "www.thehighestofthemountains.com",
-    "forceBlockSelectors.add": ["div"]
+    "forceBlockNodeSelectors.add": ["div"],
+    "forceBlockStyleSelectors.add": ["div"]
   },
   {
     "id": "annasArchive",
     "matches": ["*.annas-archive.org", "annas-archive.org"],
     "injectedCss": "div[id^='link-index-'] { height: unset; max-height: unset; }\nmain div[class*='h-[125]'] { height:auto; }",
-    "forceBlockSelectors.add": ["a.custom-a"]
+    "forceBlockNodeSelectors.add": ["a.custom-a"],
+    "forceBlockStyleSelectors.add": ["a.custom-a"]
   },
   {
     "id": "explainshell",
@@ -1598,7 +1635,7 @@
     "id": "construct",
     "matches": "www.construct.net",
     "excludeMatches": ["preview.construct.net", "editor.construct.net"],
-    "forceInlineSelectors": ["a.forumLink"],
+    "forceInlineStyleSelectors": ["a.forumLink"],
     "injectedCss": "td.location a#LocationLink { padding-top: 4px; }\ndiv.articleMain .tutCourseWrap { align-items: flex-start; }",
     "excludeSelectors.add": [
       "div.topNav",
@@ -1647,7 +1684,8 @@
     "matches": "*.fandom.com",
     "injectedCss": "#mw-content-text > div > div:nth-child(1) { height:100%; }",
     "excludeSelectors.add": ["header.fandom-community-header", "div.ph-registration-buttons"],
-    "forceBlockSelectors.add": [".mp-nav a"]
+    "forceBlockNodeSelectors.add": [".mp-nav a"],
+    "forceBlockStyleSelectors.add": [".mp-nav a"]
   },
   {
     "id": "huggingface",
@@ -1775,7 +1813,8 @@
       ".discussion_search_pagingcontrols",
       ".found_helpful,.vote_header,.date_posted,.early_access_review,.apphub_CardContentAuthorBlock"
     ],
-    "forceBlockSelectors.add": [".apphub_sectionTab"],
+    "forceBlockNodeSelectors.add": [".apphub_sectionTab"],
+    "forceBlockStyleSelectors.add": [".apphub_sectionTab"],
     "injectedCss.add": [
       ".forum_topic,.rightbox_list_option,.appHubShortcut {height: unset;}",
       ".forum_topic_name {white-space:normal;line-height: 1.25rem; padding: 6px 20px 0 0;}",
@@ -1815,7 +1854,7 @@
       ".ReviewContentCtn .title",
       ".author_counts,.control_block,.vote_info"
     ],
-    "forceInlineSelectors": [".pulldown"],
+    "forceInlineStyleSelectors": [".pulldown"],
     "injectedCss": ".game_description_snippet { max-height:unset; overflow: scroll; }\n.game_purchase_area_friends_want { height: auto; padding-bottom: 6px; }\n.div.early_access_banner { height: 84px; }\n.franchise_notice > * { height: 84px; }"
   },
   {
@@ -1860,7 +1899,13 @@
       ".mat-drawer-inner-container",
       "[class*='sidenav-panel']"
     ],
-    "forceBlockSelectors.add": [
+    "forceBlockNodeSelectors.add": [
+      "app-summary-authors + div",
+      "app-full-record-keywords span span",
+      "[data-ta=summary-record-title-link]",
+      "[cdxanalyticscategory=wos-recordCard_ExpandAbstract]"
+    ],
+    "forceBlockStyleSelectors.add": [
       "app-summary-authors + div",
       "app-full-record-keywords span span",
       "[data-ta=summary-record-title-link]",
@@ -1884,13 +1929,15 @@
     "excludeSelectors": [".toolbar__ee8", "[data-test=\"left-sidebar\"]"],
     "injectedCss": ".card p,.card h4 { -webkit-line-clamp:unset; }",
     "excludeSelectors.add": [".comment__info", ".symbol.monospace"],
-    "forceBlockSelectors.add": ["[data-test=prompt]"]
+    "forceBlockNodeSelectors.add": ["[data-test=prompt]"],
+    "forceBlockStyleSelectors.add": ["[data-test=prompt]"]
   },
   {
     "id": "theverge",
     "matches": "www.theverge.com",
     "excludeSelectors.add": [".k8dtcj0", "._2xqpwjf._2xqpwj0"],
-    "forceBlockSelectors.add": ["[role='article'] p"]
+    "forceBlockNodeSelectors.add": ["[role='article'] p"],
+    "forceBlockStyleSelectors.add": ["[role='article'] p"]
   },
   {
     "id": "lookintobitcoin",
@@ -1925,7 +1972,8 @@
   {
     "id": "coinmarketcap",
     "matches": "coinmarketcap.com",
-    "forceBlockSelectors.add": ["div[class='sc-3502f6cd-0 JxHqg']"]
+    "forceBlockNodeSelectors.add": ["div[class='sc-3502f6cd-0 JxHqg']"],
+    "forceBlockStyleSelectors.add": ["div[class='sc-3502f6cd-0 JxHqg']"]
   },
   {
     "id": "wandb",
@@ -1936,7 +1984,8 @@
     "id": "paulgraham",
     "matches": "paulgraham.com",
     "includeSelectors": ["font[face=verdana]"],
-    "forceBlockSelectors.add": ["font[face=verdana]"]
+    "forceBlockNodeSelectors.add": ["font[face=verdana]"],
+    "forceBlockStyleSelectors.add": ["font[face=verdana]"]
   },
   {
     "id": "zendesk",
@@ -2030,12 +2079,14 @@
   {
     "id": "ietf",
     "matches": "*.ietf.org/doc/html/*",
-    "forceBlockSelectors.add": ["[href^='#page']"]
+    "forceBlockNodeSelectors.add": ["[href^='#page']"],
+    "forceBlockStyleSelectors.add": ["[href^='#page']"]
   },
   {
     "id": "newsminimalist",
     "matches": "https://www.newsminimalist.com/",
-    "forceBlockSelectors.add": [".inline-flex"]
+    "forceBlockNodeSelectors.add": [".inline-flex"],
+    "forceBlockStyleSelectors.add": [".inline-flex"]
   },
   {
     "id": "yandexIndex",
@@ -2166,7 +2217,7 @@
   {
     "id": "sentry",
     "matches": "docs.sentry.io",
-    "forceInlineSelectors.add": [".term-wrapper", "span.description"]
+    "forceInlineStyleSelectors.add": [".term-wrapper", "span.description"]
   },
   {
     "id": "feedly",
@@ -2179,12 +2230,12 @@
     "matches": "web.whatsapp.com",
     "includeSelectors": ["._akbu", "[role=list]", ".copyable-text", ".quoted-mention"],
     "excludeSelectors.add": ["[aria-hidden=true]"],
-    "forceInlineSelectors.add": [".x1lliihq"]
+    "forceInlineStyleSelectors.add": [".x1lliihq"]
   },
   {
     "id": "bing",
     "matches": "https://*.bing.com/search*",
-    "forceInlineSelectors": ["a", "i"],
+    "forceInlineStyleSelectors": ["a", "i"],
     "injectedCss": "[class*='lineclamp'],.b_title { -webkit-line-clamp:unset; }\n.b_gwaDl,.b_snipwithnsl { height:unset !important; }",
     "excludeSelectors.add": [".tptxt"]
   },
@@ -2209,7 +2260,8 @@
       ".ticker-list",
       ".footer"
     ],
-    "forceBlockSelectors.add": [".SIPGg", ".sc-kzMCTH.pSZXj"],
+    "forceBlockNodeSelectors.add": [".SIPGg", ".sc-kzMCTH.pSZXj"],
+    "forceBlockStyleSelectors.add": [".SIPGg", ".sc-kzMCTH.pSZXj"],
     "injectedCss.add": [
       "[class*='line-clamp'],h3.clamp {-webkit-line-clamp:unset!important;}",
       "#atomic .Mt\\(20px\\) {margin-top: 100px;}",
@@ -2224,7 +2276,8 @@
     "matches": ["www.wsj.com", "cn.wsj.com"],
     "excludeSelectors": ["header", "footer", "nav", "[aria-label='Markets summary']"],
     "injectedCss": ".read-frog-translated-content-wrapper br {display:none;}",
-    "forceBlockSelectors.add": [".series-nav__link-thumbnail"]
+    "forceBlockNodeSelectors.add": [".series-nav__link-thumbnail"],
+    "forceBlockStyleSelectors.add": [".series-nav__link-thumbnail"]
   },
   {
     "id": "businessinsider",
@@ -2322,7 +2375,8 @@
   {
     "id": "ieee",
     "matches": "spectrum.ieee.org",
-    "forceBlockSelectors.add": ["small"]
+    "forceBlockNodeSelectors.add": ["small"],
+    "forceBlockStyleSelectors.add": ["small"]
   },
   {
     "id": "cnn",
@@ -2383,7 +2437,8 @@
       ".search-result-position"
     ],
     "injectedCss": "#Scholarscope_HighlightOrigin > p font,#Scholarscope_HighlightContent > p font {display: inline!important;}\n#Scholarscope_HighlightOrigin > p font br,#Scholarscope_HighlightContent > p font br {display: none!important;}\n.title-translate {display:block;}\n.read-frog-translated-content-wrapper {content-visibility:auto;}",
-    "forceBlockSelectors.add": [".mixed-citation", ".docsum-wrap", "a.docsum-title"]
+    "forceBlockNodeSelectors.add": [".mixed-citation", ".docsum-wrap", "a.docsum-title"],
+    "forceBlockStyleSelectors.add": [".mixed-citation", ".docsum-wrap", "a.docsum-title"]
   },
   {
     "id": "chosun",
@@ -2428,7 +2483,7 @@
   {
     "id": "maxroll",
     "matches": "maxroll.gg",
-    "forceInlineSelectors": [".d4t-sprite-icon", ".d4t-icon"],
+    "forceInlineStyleSelectors": [".d4t-sprite-icon", ".d4t-icon"],
     "injectedCss": "font {font-family: sans-serif !important;}\n.d4t-sprite-icon {display: unset !important;}",
     "excludeSelectors.add": ["span[class^='text-opac'] + span[class^='text-']"]
   },
@@ -2666,7 +2721,7 @@
     "id": "barrons",
     "matches": "www.barrons.com",
     "injectedCss": "font.read-frog-translated-content-wrapper > br {display:none;}",
-    "forceInlineSelectors.add": ["article p span"]
+    "forceInlineStyleSelectors.add": ["article p span"]
   },
   {
     "id": "scrimba",
@@ -2776,7 +2831,8 @@
   {
     "id": "bank",
     "matches": "xfb.nbcb.com.cn",
-    "forceBlockSelectors.add": [".ibm, .ibt", ".cell-box", "[role=tab]"]
+    "forceBlockNodeSelectors.add": [".ibm, .ibt", ".cell-box", "[role=tab]"],
+    "forceBlockStyleSelectors.add": [".ibm, .ibt", ".cell-box", "[role=tab]"]
   },
   {
     "id": "fmoviesz",
@@ -2913,7 +2969,8 @@
     "matches": ["https://player.vimeo.com/video/*", "www.physeo.com"],
     "excludeSelectors.add": [".vp-captions-line"],
     "excludeSelectors.remove": [".notranslate", "[translate=no]"],
-    "forceBlockSelectors.add": ["span.vp-captions-line", "span[class^=CaptionsRenderer_]"]
+    "forceBlockNodeSelectors.add": ["span.vp-captions-line", "span[class^=CaptionsRenderer_]"],
+    "forceBlockStyleSelectors.add": ["span.vp-captions-line", "span[class^=CaptionsRenderer_]"]
   },
   {
     "id": "tv.adobe",
@@ -3176,7 +3233,7 @@
       "#selected-cat",
       ".GmuOkf,.d8aLif,.JYW4cc"
     ],
-    "forceInlineSelectors.add": [
+    "forceInlineStyleSelectors.add": [
       "ms-cmark-node > strong > ms-cmark-node",
       "p ms-cmark-node",
       "span > button"
@@ -3206,7 +3263,8 @@
       ".ltx_listing.ltx_lstlisting.ltx_listing",
       ".ltx_eqn_table"
     ],
-    "forceBlockSelectors.add": [".ltx_p"],
+    "forceBlockNodeSelectors.add": [".ltx_p"],
+    "forceBlockStyleSelectors.add": [".ltx_p"],
     "preserveTextSelectors.add": [".ltx_note"]
   },
   {
@@ -3220,12 +3278,12 @@
     "id": "tandfonline",
     "matches": "*.tandfonline.com",
     "description": "该站点服务器对pdf资源做了保护，会严格要求host以及cookie才会响应application/pdf的请求 https://www.tandfonline.com/doi/pdf/10.1111/ajpy.12198",
-    "forceInlineSelectors.add": ["span.off-screen"]
+    "forceInlineStyleSelectors.add": ["span.off-screen"]
   },
   {
     "id": "bsky.app",
     "matches": "https://bsky.app",
-    "forceInlineSelectors": [
+    "forceInlineStyleSelectors": [
       "a[role=link][href^='/hashtag/']",
       "[data-testid*=postThread] a[role=link]",
       "[data-feed-context] button",
@@ -3252,7 +3310,7 @@
   {
     "id": "jmir",
     "matches": "*.jmir.org",
-    "forceInlineSelectors": [".tooltiptext"],
+    "forceInlineStyleSelectors": [".tooltiptext"],
     "preserveTextSelectors.add": [".article-content .footers"]
   },
   {
@@ -3291,7 +3349,8 @@
   {
     "id": "notateslaapp",
     "matches": "www.notateslaapp.com",
-    "forceBlockSelectors.add": [".nav > *"]
+    "forceBlockNodeSelectors.add": [".nav > *"],
+    "forceBlockStyleSelectors.add": [".nav > *"]
   },
   {
     "id": "eightfold",
@@ -3318,7 +3377,8 @@
     "matches": "section.blog.naver.com",
     "injectedCss": ".text,.title_post,.text_post,p,strong,div { -webkit-line-clamp:unset;max-height:unset;height:unset; }",
     "excludeSelectors.add": [".comments", ".time"],
-    "forceBlockSelectors.add": [".item", ".heading a", ".info_find a"]
+    "forceBlockNodeSelectors.add": [".item", ".heading a", ".info_find a"],
+    "forceBlockStyleSelectors.add": [".item", ".heading a", ".info_find a"]
   },
   {
     "id": "hadoop.apache.org",
@@ -3362,7 +3422,8 @@
   {
     "id": "yodayo.chat",
     "matches": "https://yodayo.com/*/chat/*",
-    "forceBlockSelectors.add": [".inline-flex span"]
+    "forceBlockNodeSelectors.add": [".inline-flex span"],
+    "forceBlockStyleSelectors.add": [".inline-flex span"]
   },
   {
     "id": "ipinfo",
@@ -3378,7 +3439,7 @@
     "id": "character.ai",
     "matches": "character.ai",
     "injectedCss": ".read-frog-translated-content-wrapper br {display:none;}\n.swiper,.rah-static,[class*=max-h],.line-clamp-1 { overflow:scroll;-webkit-line-clamp:unset; }",
-    "forceInlineSelectors.add": [
+    "forceInlineStyleSelectors.add": [
       ".auto-content",
       ".auto-content *",
       "#chat-messages > .group:first-child .prose *",
@@ -3661,13 +3722,13 @@
   {
     "id": "journals.aps",
     "matches": "journals.aps.*",
-    "forceInlineSelectors": ["[class*='article'] button"],
+    "forceInlineStyleSelectors": ["[class*='article'] button"],
     "preserveTextSelectors.add": ["button"]
   },
   {
     "id": "mobalytics",
     "matches": "mobalytics.gg",
-    "forceInlineSelectors.add": ["p.xlpi6m9.x5qbwci.xw7yly9 span span"]
+    "forceInlineStyleSelectors.add": ["p.xlpi6m9.x5qbwci.xw7yly9 span span"]
   },
   {
     "id": "batchUnlimitHeight",
@@ -3705,7 +3766,8 @@
   {
     "id": "digitaltrends",
     "matches": "www.digitaltrends.com",
-    "forceBlockSelectors.add": [".b-mem-post__title"],
+    "forceBlockNodeSelectors.add": [".b-mem-post__title"],
+    "forceBlockStyleSelectors.add": [".b-mem-post__title"],
     "injectedCss.add": [
       ".b-mem__inner .b-mem-post:first-child h3{-webkit-line-clamp: 2;}",
       ".b-mem__inner .b-mem-post:first-child .b-mem-post__excerpt{display:inline;}"
@@ -3715,7 +3777,8 @@
     "id": "jscires",
     "matches": "jscires.org",
     "excludeSelectors.add": [".jatsa_contrib_info"],
-    "forceBlockSelectors.add": [".jatsauthtab_title"]
+    "forceBlockNodeSelectors.add": [".jatsauthtab_title"],
+    "forceBlockStyleSelectors.add": [".jatsauthtab_title"]
   },
   {
     "id": "vaseven",
@@ -3725,7 +3788,8 @@
   {
     "id": "qidian",
     "matches": "www.qidian.com",
-    "forceBlockSelectors.add": [".type-list a"]
+    "forceBlockNodeSelectors.add": [".type-list a"],
+    "forceBlockStyleSelectors.add": [".type-list a"]
   },
   {
     "id": "alphaxiv",
@@ -3847,7 +3911,7 @@
   {
     "id": "trade",
     "matches": "axiom.trade",
-    "forceInlineSelectors.add": ["[class^=tweet-body_root]"]
+    "forceInlineStyleSelectors.add": ["[class^=tweet-body_root]"]
   },
   {
     "id": "pytorch",
@@ -3899,7 +3963,8 @@
   {
     "id": "dtmstation",
     "matches": "www.dtmstation.com",
-    "forceBlockSelectors.add": [".entry-card-title,.entry-card-snippet"],
+    "forceBlockNodeSelectors.add": [".entry-card-title,.entry-card-snippet"],
+    "forceBlockStyleSelectors.add": [".entry-card-title,.entry-card-snippet"],
     "injectedCss.add": [
       ".entry-card-title,.entry-card-snippet { -webkit-line-clamp: unset!important; max-height: unset!important;}"
     ]
@@ -3907,7 +3972,8 @@
   {
     "id": "docs-tutorials",
     "matches": "docs.pytorch.org",
-    "forceBlockSelectors.add": [".tutorial-filter"]
+    "forceBlockNodeSelectors.add": [".tutorial-filter"],
+    "forceBlockStyleSelectors.add": [".tutorial-filter"]
   },
   {
     "id": "ru-sites",
@@ -4055,12 +4121,12 @@
     "id": "sdk-cooperate",
     "matches": "pandaily.com",
     "excludeSelectors.add": ["[data-discover]", "header"],
-    "forceInlineSelectors.add": ["h3"]
+    "forceInlineStyleSelectors.add": ["h3"]
   },
   {
     "id": "read.amazon",
     "matches": "read.amazon.com",
-    "forceInlineSelectors.add": ["span.kg-a11y-rel[role=text]"],
+    "forceInlineStyleSelectors.add": ["span.kg-a11y-rel[role=text]"],
     "injectedCss.add": [
       "font { color:#333!important; white-space: pre-wrap;}",
       "p > font { position:absolute;left:0;right:0; }",
@@ -4269,7 +4335,8 @@
     "description": "给部分网页开后门翻译 header标签",
     "excludeSelectors.add": [".site-header"],
     "excludeSelectors.remove": [".notranslate", "[translate=no]"],
-    "forceBlockSelectors.add": [".btn"],
+    "forceBlockNodeSelectors.add": [".btn"],
+    "forceBlockStyleSelectors.add": [".btn"],
     "injectedCss.add": [
       "[class*='line-clamp-'] {-webkit-line-clamp: unset!important; max-height: unset!important;}"
     ]
@@ -4296,7 +4363,8 @@
       "shreddit-comment-action-row > *",
       "shreddit-post-flair"
     ],
-    "forceBlockSelectors": ["shreddit-post-text-body"]
+    "forceBlockNodeSelectors": ["shreddit-post-text-body"],
+    "forceBlockStyleSelectors": ["shreddit-post-text-body"]
   },
   {
     "id": "readfrog-youtube",
@@ -4323,7 +4391,8 @@
       ".read-frog-subtitles-state-message",
       ".read-frog-subtitles-translate-button"
     ],
-    "forceBlockSelectors": ["yt-attributed-string > span"]
+    "forceBlockNodeSelectors": ["yt-attributed-string > span"],
+    "forceBlockStyleSelectors": ["yt-attributed-string > span"]
   },
   {
     "id": "readfrog-discord",
@@ -4350,7 +4419,8 @@
       "[class*=\"OverviewContent-module__Box_1--\"] *",
       "table.diff-table"
     ],
-    "forceBlockSelectors": ["task-lists"]
+    "forceBlockNodeSelectors": ["task-lists"],
+    "forceBlockStyleSelectors": ["task-lists"]
   },
   {
     "id": "ieeexplore",

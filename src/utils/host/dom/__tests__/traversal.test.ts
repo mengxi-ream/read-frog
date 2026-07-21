@@ -1,7 +1,34 @@
 // @vitest-environment jsdom
+import type { SiteRule } from "@/types/config/site-rules"
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { extractTextContent } from "../traversal"
+import {
+  BLOCK_ATTRIBUTE,
+  INLINE_ATTRIBUTE,
+  PARAGRAPH_ATTRIBUTE,
+  WALKED_ATTRIBUTE,
+} from "@/utils/constants/dom-labels"
+import { isNaturalBlockTransNode, isNaturalInlineTransNode } from "../filter"
+import { extractTextContent, walkAndLabelElement } from "../traversal"
+
+function configWithSiteRule(rule: Omit<SiteRule, "id" | "matches">) {
+  const config = structuredClone(DEFAULT_CONFIG)
+  config.siteRules.userRules = [
+    {
+      id: "node-selector-test",
+      matches: window.location.hostname,
+      ...rule,
+    },
+  ]
+  return config
+}
+
+function fixture(markup: string): HTMLElement {
+  const host = document.createElement("main")
+  host.innerHTML = markup
+  document.body.append(host)
+  return host
+}
 
 describe("extractTextContent", () => {
   describe("text node whitespace normalization", () => {
@@ -136,5 +163,165 @@ describe("extractTextContent", () => {
         '<span>Outer</span><em>Inner<span class="read-frog-translated-content-wrapper">内层译文</span></em>'
       expect(extractTextContent(div, DEFAULT_CONFIG)).toBe("OuterInner")
     })
+  })
+})
+
+describe("site rule node selectors", () => {
+  it("forces inline and block node classifications independently of computed display", () => {
+    const host = fixture(`
+      <span id="forced-block" style="display:inline">forced block text</span>
+      <div id="forced-inline" style="display:block">forced inline text</div>
+    `)
+    const config = configWithSiteRule({
+      forceBlockNodeSelectors: ["#forced-block"],
+      forceInlineNodeSelectors: ["#forced-inline"],
+    })
+
+    walkAndLabelElement(host, "node-forcing", config)
+
+    const forcedBlock = host.querySelector<HTMLElement>("#forced-block")!
+    expect(forcedBlock).toHaveAttribute(BLOCK_ATTRIBUTE)
+    expect(forcedBlock).not.toHaveAttribute(INLINE_ATTRIBUTE)
+    expect(isNaturalInlineTransNode(forcedBlock)).toBe(true)
+    expect(isNaturalBlockTransNode(forcedBlock)).toBe(false)
+
+    const forcedInline = host.querySelector<HTMLElement>("#forced-inline")!
+    expect(forcedInline).toHaveAttribute(INLINE_ATTRIBUTE)
+    expect(forcedInline).not.toHaveAttribute(BLOCK_ATTRIBUTE)
+    expect(isNaturalBlockTransNode(forcedInline)).toBe(true)
+    expect(isNaturalInlineTransNode(forcedInline)).toBe(false)
+    expect(host).toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+
+    host.remove()
+  })
+
+  it("gives forced block nodes priority over forced inline nodes", () => {
+    const host = fixture('<div id="conflict">conflicting selector text</div>')
+    const config = configWithSiteRule({
+      forceBlockNodeSelectors: ["#conflict"],
+      forceInlineNodeSelectors: ["#conflict"],
+    })
+
+    walkAndLabelElement(host, "node-conflict", config)
+
+    const conflict = host.querySelector<HTMLElement>("#conflict")!
+    expect(conflict).toHaveAttribute(BLOCK_ATTRIBUTE)
+    expect(conflict).not.toHaveAttribute(INLINE_ATTRIBUTE)
+    host.remove()
+  })
+
+  it("keeps a forced block node self-only instead of propagating block state to its parent", () => {
+    const host = fixture(`
+      <span id="parent" style="display:inline">
+        <em id="child" style="display:inline">nested inline text</em>
+      </span>
+    `)
+    const config = configWithSiteRule({ forceBlockNodeSelectors: ["#child"] })
+
+    walkAndLabelElement(host, "self-only-block", config)
+
+    const child = host.querySelector<HTMLElement>("#child")!
+    expect(child).toHaveAttribute(BLOCK_ATTRIBUTE)
+    expect(child).not.toHaveAttribute(INLINE_ATTRIBUTE)
+
+    const parent = host.querySelector<HTMLElement>("#parent")!
+    expect(parent).toHaveAttribute(INLINE_ATTRIBUTE)
+    expect(parent).not.toHaveAttribute(BLOCK_ATTRIBUTE)
+    expect(parent).not.toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    host.remove()
+  })
+
+  it("keeps structural and descendant block priority over a forced inline node", () => {
+    const host = fixture(`
+      <h2 id="structural">Heading text</h2>
+      <span id="descendant" style="display:inline"><h3>Nested heading</h3></span>
+    `)
+    const config = configWithSiteRule({
+      forceInlineNodeSelectors: ["#structural", "#descendant"],
+    })
+
+    walkAndLabelElement(host, "structural-priority", config)
+
+    for (const id of ["structural", "descendant"]) {
+      const element = host.querySelector<HTMLElement>(`#${id}`)!
+      expect(element).toHaveAttribute(BLOCK_ATTRIBUTE)
+      expect(element).not.toHaveAttribute(INLINE_ATTRIBUTE)
+      expect(isNaturalBlockTransNode(element)).toBe(true)
+    }
+    host.remove()
+  })
+
+  it("does not label empty ordinary elements even when a node selector matches", () => {
+    const host = fixture('<div id="empty"></div>')
+    const config = configWithSiteRule({ forceBlockNodeSelectors: ["#empty"] })
+
+    walkAndLabelElement(host, "empty-node", config)
+
+    const empty = host.querySelector<HTMLElement>("#empty")!
+    expect(empty).toHaveAttribute(WALKED_ATTRIBUTE, "empty-node")
+    expect(empty).not.toHaveAttribute(BLOCK_ATTRIBUTE)
+    expect(empty).not.toHaveAttribute(INLINE_ATTRIBUTE)
+    host.remove()
+  })
+
+  it("does not let node selectors reopen excluded, preserved, notranslate, or PRE nodes", () => {
+    const host = fixture(`
+      <div id="excluded">excluded text</div>
+      <div id="preserved">preserved text</div>
+      <div id="notranslate" class="notranslate">host text</div>
+      <pre id="pre">const answer = 42</pre>
+    `)
+    const config = configWithSiteRule({
+      forceBlockNodeSelectors: ["#excluded", "#preserved", "#notranslate", "#pre"],
+      excludeSelectors: ["#excluded"],
+      preserveTextSelectors: ["#preserved"],
+    })
+
+    walkAndLabelElement(host, "blocked-node", config)
+
+    for (const id of ["excluded", "preserved", "notranslate", "pre"]) {
+      const element = host.querySelector<HTMLElement>(`#${id}`)!
+      expect(element).not.toHaveAttribute(WALKED_ATTRIBUTE)
+      expect(element).not.toHaveAttribute(BLOCK_ATTRIBUTE)
+      expect(element).not.toHaveAttribute(INLINE_ATTRIBUTE)
+    }
+    host.remove()
+  })
+
+  it("does not let a node selector enlarge a strict include scope", () => {
+    const host = fixture(`
+      <article><span id="inside">included paragraph text</span></article>
+      <span id="outside">outside paragraph text</span>
+    `)
+    const config = configWithSiteRule({
+      includeSelectors: ["article"],
+      forceBlockNodeSelectors: ["#outside"],
+    })
+
+    walkAndLabelElement(host, "include-boundary", config)
+
+    expect(host.querySelector("#inside")).toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    expect(host.querySelector("#outside")).toHaveAttribute(BLOCK_ATTRIBUTE)
+    expect(host.querySelector("#outside")).not.toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    host.remove()
+  })
+
+  it("ignores style-only selectors while assigning traversal labels", () => {
+    const host = fixture(`
+      <span id="block-style" style="display:inline">inline source text</span>
+      <div id="inline-style" style="display:block">block source text</div>
+    `)
+    const config = configWithSiteRule({
+      forceBlockStyleSelectors: ["#block-style"],
+      forceInlineStyleSelectors: ["#inline-style"],
+    })
+
+    walkAndLabelElement(host, "style-only", config)
+
+    expect(host.querySelector("#block-style")).toHaveAttribute(INLINE_ATTRIBUTE)
+    expect(host.querySelector("#block-style")).not.toHaveAttribute(BLOCK_ATTRIBUTE)
+    expect(host.querySelector("#inline-style")).toHaveAttribute(BLOCK_ATTRIBUTE)
+    expect(host.querySelector("#inline-style")).not.toHaveAttribute(INLINE_ATTRIBUTE)
+    host.remove()
   })
 })

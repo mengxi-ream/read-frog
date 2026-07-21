@@ -15,7 +15,18 @@ const WALK_ATTRIBUTES = [
 ] as const
 
 function config(): Config {
-  return structuredClone(DEFAULT_CONFIG)
+  const value = structuredClone(DEFAULT_CONFIG)
+  value.siteRules.userRules = [
+    {
+      id: "four-axis-parity",
+      matches: window.location.hostname,
+      forceBlockNodeSelectors: [".force-node-block"],
+      forceInlineNodeSelectors: [".force-node-inline"],
+      forceBlockStyleSelectors: [".force-style-block"],
+      forceInlineStyleSelectors: [".force-style-inline"],
+    },
+  ]
+  return value
 }
 
 /**
@@ -28,13 +39,15 @@ function buildFixture(host: HTMLElement): void {
   host.innerHTML = `
     <div id="article">
       Direct text of article
-      <em>2026-07-17</em>
+      <em class="force-node-block">2026-07-17</em>
       <h2>Heading text</h2>
-      <p>Paragraph with <span>inline span</span> and <strong>bold</strong> text.</p>
+      <p class="force-node-inline">Paragraph with <span>inline span</span> and <strong>bold</strong> text.</p>
       <div>
-        <p>Nested paragraph one</p>
+        <p class="force-style-block">Nested paragraph one</p>
         <ul><li>item one</li><li>item <b>two</b></li></ul>
       </div>
+      <em class="force-style-block style-block-only">style-only inline element</em>
+      <div class="force-style-inline style-inline-only">style-only block element</div>
       <div class="empty-container"><div></div></div>
       <script>ignored()</script>
       <section hidden><p>hidden text</p></section>
@@ -97,6 +110,16 @@ describe("walkAndLabelElementChunked parity", () => {
     expect(snapshotLabels(chunkedHost, "chunked-walk")).toEqual(
       snapshotLabels(syncHost, "sync-walk"),
     )
+    for (const host of [syncHost, chunkedHost]) {
+      expect(host.querySelector(".style-block-only")).toHaveAttribute("data-read-frog-inline-node")
+      expect(host.querySelector(".style-block-only")).not.toHaveAttribute(
+        "data-read-frog-block-node",
+      )
+      expect(host.querySelector(".style-inline-only")).toHaveAttribute("data-read-frog-block-node")
+      expect(host.querySelector(".style-inline-only")).not.toHaveAttribute(
+        "data-read-frog-inline-node",
+      )
+    }
 
     syncHost.remove()
     chunkedHost.remove()

@@ -9,7 +9,14 @@ import {
   TRANSLATION_ONLY_ATTRIBUTE,
   WALKED_ATTRIBUTE,
 } from "../../../constants/dom-labels"
-import { isBlockTransNode, isHTMLElement, isTextNode, isTransNode } from "../../dom/filter"
+import {
+  isBlockTransNode,
+  isHTMLElement,
+  isNaturalBlockTransNode,
+  isSiteRuleForceBlockStyleElement,
+  isTextNode,
+  isTransNode,
+} from "../../dom/filter"
 import { translateNodes } from "./translation-modes"
 import { getTranslationOnlyAnchorState } from "./translation-state"
 
@@ -68,11 +75,19 @@ export async function translateWalkedElement(
 
   if (element.hasAttribute(PARAGRAPH_ATTRIBUTE)) {
     let hasBlockNodeChild = false
+    let hasBlockLayoutChild = false
 
     for (const child of element.childNodes) {
-      if (isHTMLElement(child) && child.hasAttribute(BLOCK_ATTRIBUTE)) {
-        hasBlockNodeChild = true
-        break
+      if (isHTMLElement(child)) {
+        if (child.hasAttribute(BLOCK_ATTRIBUTE)) {
+          hasBlockNodeChild = true
+        }
+        if (
+          isNaturalBlockTransNode(child) ||
+          (child.hasAttribute(BLOCK_ATTRIBUTE) && isSiteRuleForceBlockStyleElement(child, config))
+        ) {
+          hasBlockLayoutChild = true
+        }
       }
     }
 
@@ -87,14 +102,17 @@ export async function translateWalkedElement(
       let consecutiveInlineNodes: ChildNode[] = []
       for (const child of children) {
         if (isTransNode(child) && isBlockTransNode(child) && !isTextNode(child)) {
-          // force the children to be block translation style unless the parent is a flex parent
+          // A Node-only forced block may split the translation run without
+          // changing wrapper layout. Natural block children and the combined
+          // Node+Style shape produced by legacy force-block migration retain
+          // the old group-level block wrapper hint.
           promises.push(
             translateNodes(
               consecutiveInlineNodes,
               walkId,
               toggle,
               config,
-              !isFlexParent,
+              !isFlexParent && hasBlockLayoutChild,
               actionContext,
             ),
           )
@@ -122,7 +140,7 @@ export async function translateWalkedElement(
             walkId,
             toggle,
             config,
-            !isFlexParent,
+            !isFlexParent && hasBlockLayoutChild,
             actionContext,
           ),
         )
