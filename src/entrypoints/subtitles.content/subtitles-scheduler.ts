@@ -133,6 +133,12 @@ export class SubtitlesScheduler {
     this.updateVisibility()
   }
 
+  /** Force a cue resolve from the live video clock (e.g. after an ad ends). */
+  resyncFromVideo() {
+    if (!this.active) return
+    this.updateSubtitles(this.videoElement.currentTime)
+  }
+
   setState(state: SubtitlesState, data?: Partial<Omit<StateData, "state">>) {
     this.clearErrorAutoHide()
     this.currentState = {

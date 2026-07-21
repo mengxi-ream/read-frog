@@ -4,6 +4,7 @@ import type { SubtitlesFragment, SubtitlesState } from "@/utils/subtitles/types"
 import { getLocalConfig } from "@/utils/config/storage"
 import { TRANSLATE_LOOK_AHEAD_MS, TRANSLATION_BATCH_SIZE } from "@/utils/constants/subtitles"
 import { translateSubtitles } from "@/utils/subtitles/processor/translator"
+import { adPlayingAtom, subtitlesStore } from "./atoms"
 
 export interface TranslationCoordinatorOptions {
   getFragments: () => SubtitlesFragment[]
@@ -131,6 +132,8 @@ export class TranslationCoordinator {
 
   private handleTranslationTick = () => {
     if (!this.active) return
+    // Ad timeline can freeze or jump; do not translate against main-video cues mid-ad.
+    if (subtitlesStore.get(adPlayingAtom)) return
 
     const video = this.getVideoElement()
     if (!video) return

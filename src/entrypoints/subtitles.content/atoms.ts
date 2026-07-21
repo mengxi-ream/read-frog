@@ -11,6 +11,13 @@ export const subtitlesStore = createStore()
 
 export const currentTimeMsAtom = atom<number>(0)
 
+/**
+ * True while the host player is playing an ad (e.g. YouTube mid-roll).
+ * Suppresses overlay content so main-video captions are not shown over ads.
+ * Does not change user toggle intent (`subtitlesVisibleAtom`).
+ */
+export const adPlayingAtom = atom<boolean>(false)
+
 /** Scheduler’s current *translated* cue only (null when no translated cue covers now). */
 export const currentSubtitleAtom = atom<SubtitlesFragment | null>(null)
 
@@ -22,6 +29,10 @@ export const sourceTrackAtom = atom<SubtitlesFragment[]>([])
  * at the current time (used for original / pending bilingual UI).
  */
 export const displaySubtitleAtom = atom((get): SubtitlesFragment | null => {
+  if (get(adPlayingAtom)) {
+    return null
+  }
+
   const scheduled = get(currentSubtitleAtom)
   if (scheduled) {
     return scheduled
@@ -90,6 +101,8 @@ export const subtitlesDisplayAtom = atom((get) => {
 })
 
 export const subtitlesShowStateAtom = atom((get): Exclude<SubtitlesState, "idle"> | undefined => {
+  if (get(adPlayingAtom)) return undefined
+
   const { subtitle, stateData } = get(subtitlesDisplayAtom)
   const { style } = get(configFieldsAtomMap.videoSubtitles)
   const hasRenderable = hasRenderableSubtitleByMode(subtitle, style.displayMode)
@@ -101,6 +114,8 @@ export const subtitlesShowStateAtom = atom((get): Exclude<SubtitlesState, "idle"
 })
 
 export const subtitlesShowContentAtom = atom((get): boolean => {
+  if (get(adPlayingAtom)) return false
+
   const { subtitle, stateData, isVisible } = get(subtitlesDisplayAtom)
   const { style } = get(configFieldsAtomMap.videoSubtitles)
 

@@ -28,4 +28,10 @@ export interface PlatformConfig {
   getVideoId?: () => string | null
 
   createAiSubtitlesContext?: () => AiSubtitlesContext | null
+
+  /**
+   * When true, the host player is showing an ad. Overlay captions for the main
+   * video should be suppressed until the ad ends.
+   */
+  isAdPlaying?: (playerContainer: HTMLElement) => boolean
 }

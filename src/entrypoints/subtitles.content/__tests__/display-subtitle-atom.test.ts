@@ -1,13 +1,23 @@
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it } from "vitest"
 import {
+  adPlayingAtom,
   currentSubtitleAtom,
   currentTimeMsAtom,
   displaySubtitleAtom,
   sourceTrackAtom,
+  subtitlesShowContentAtom,
   subtitlesStore,
+  subtitlesVisibleAtom,
 } from "../atoms"
 
 describe("displaySubtitleAtom", () => {
+  afterEach(() => {
+    subtitlesStore.set(adPlayingAtom, false)
+    subtitlesStore.set(currentSubtitleAtom, null)
+    subtitlesStore.set(sourceTrackAtom, [])
+    subtitlesStore.set(subtitlesVisibleAtom, false)
+  })
+
   it("falls back to source track when no translated cue is scheduled", () => {
     subtitlesStore.set(currentTimeMsAtom, 500)
     subtitlesStore.set(currentSubtitleAtom, null)
@@ -34,5 +44,23 @@ describe("displaySubtitleAtom", () => {
     })
 
     expect(subtitlesStore.get(displaySubtitleAtom)?.translation).toBe("你好")
+  })
+
+  it("hides main-video captions while an ad is playing", () => {
+    subtitlesStore.set(currentTimeMsAtom, 500)
+    subtitlesStore.set(subtitlesVisibleAtom, true)
+    subtitlesStore.set(sourceTrackAtom, [{ text: "hello", start: 0, end: 1000 }])
+    subtitlesStore.set(currentSubtitleAtom, {
+      text: "hello",
+      start: 0,
+      end: 1000,
+      translation: "你好",
+    })
+    subtitlesStore.set(adPlayingAtom, true)
+
+    expect(subtitlesStore.get(displaySubtitleAtom)).toBeNull()
+    expect(subtitlesStore.get(subtitlesShowContentAtom)).toBe(false)
+    // User toggle intent stays on.
+    expect(subtitlesStore.get(subtitlesVisibleAtom)).toBe(true)
   })
 })

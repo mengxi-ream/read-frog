@@ -28,6 +28,7 @@ import {
 } from "@/utils/subtitles/processor/translator"
 import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
 import {
+  adPlayingAtom,
   currentTimeMsAtom,
   sourceTrackAtom,
   subtitlesPositionAtom,
@@ -90,6 +91,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private translationCoordinator: TranslationCoordinator | null = null
   private translatedSubtitlesDownloader: TranslatedSubtitlesDownloader | null = null
   private subtitlesSummaryContextHash: string | null = null
+  private adObserver: MutationObserver | null = null
+  private observedAdPlayer: HTMLElement | null = null
 
   get embedded() {
     return this.config.embedded
@@ -126,6 +129,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     void this.renderTranslateButton()
 
     await this.initializeScheduler()
+    this.setupAdObserver()
     await this.tryAutoStartSubtitles()
     this.setupNavigationListeners()
   }
@@ -181,6 +185,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private resetForNavigation() {
     this.switchOperationId++
     this.clearNavigationReinitTimeout()
+    this.teardownAdObserver()
     this.destroyScheduler()
     this.clearRuntimeSession()
     this.clearSourceCache()
@@ -272,6 +277,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
   private clearVisibleStateForNavigation() {
     this.clearNavigationReinitTimeout()
+    this.teardownAdObserver()
     this.translatedSubtitlesDownloader?.dispose()
     this.destroyScheduler()
     this.translationCoordinator?.stop()
@@ -342,7 +348,63 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     void this.renderTranslateButton()
 
     await this.initializeScheduler()
+    this.setupAdObserver()
     await this.tryAutoStartSubtitles()
+  }
+
+  private setupAdObserver() {
+    if (!this.config.isAdPlaying) {
+      return
+    }
+
+    this.teardownAdObserver()
+
+    const player = document.querySelector(
+      this.config.selectors.playerContainer,
+    ) as HTMLElement | null
+    if (!player) {
+      subtitlesStore.set(adPlayingAtom, false)
+      return
+    }
+
+    this.observedAdPlayer = player
+    this.syncAdPlayingState()
+
+    this.adObserver = new MutationObserver(() => {
+      this.syncAdPlayingState()
+    })
+    this.adObserver.observe(player, { attributes: true, attributeFilter: ["class"] })
+  }
+
+  private teardownAdObserver() {
+    this.adObserver?.disconnect()
+    this.adObserver = null
+    this.observedAdPlayer = null
+    subtitlesStore.set(adPlayingAtom, false)
+  }
+
+  private syncAdPlayingState() {
+    const isAdPlaying = this.config.isAdPlaying
+    if (!isAdPlaying) {
+      return
+    }
+
+    const player =
+      this.observedAdPlayer ??
+      (document.querySelector(this.config.selectors.playerContainer) as HTMLElement | null)
+
+    const playing = !!player && isAdPlaying(player)
+    const wasPlaying = subtitlesStore.get(adPlayingAtom)
+    if (playing === wasPlaying) {
+      return
+    }
+
+    subtitlesStore.set(adPlayingAtom, playing)
+
+    // Resync content time when the ad ends so the next cue is correct immediately.
+    if (!playing) {
+      this.subtitlesScheduler?.resyncFromVideo()
+    }
   }
 
   private async renderTranslateButton() {
