@@ -209,17 +209,21 @@ export class TranslationCoordinator {
       const latestFragments = this.getFragments()
       this.updateLoadingStateAt(latestTimeMs, latestFragments)
     } catch (error) {
+      if (!this.active) {
+        batch.forEach((f) => this.translatingStarts.delete(f.start))
+        return
+      }
+
+      const byStart = new Map(this.getFragments().map((fragment) => [fragment.start, fragment]))
       batch.forEach((f) => {
         this.translatingStarts.delete(f.start)
-        if (this.active) {
+        const current = byStart.get(f.start)
+        // Only mark failed if the cue identity still matches (avoid poisoning a recut start).
+        if (current && current.end === f.end && current.text === f.text) {
           this.failedStarts.add(f.start)
           this.rememberIdentity(f)
         }
       })
-
-      if (!this.active) {
-        return
-      }
 
       const config = await getLocalConfig()
       const displayMode = config?.videoSubtitles?.style.displayMode

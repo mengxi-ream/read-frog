@@ -11,7 +11,25 @@ export const subtitlesStore = createStore()
 
 export const currentTimeMsAtom = atom<number>(0)
 
+/** Scheduler’s current *translated* cue only (null when no translated cue covers now). */
 export const currentSubtitleAtom = atom<SubtitlesFragment | null>(null)
+
+/** Best original track (baseline or AI-segmented). Read-only for display/coordinator consumers. */
+export const sourceTrackAtom = atom<SubtitlesFragment[]>([])
+
+/**
+ * Display cue: prefer a translated scheduler cue; otherwise fall back to the source track
+ * at the current time (used for original / pending bilingual UI).
+ */
+export const displaySubtitleAtom = atom((get): SubtitlesFragment | null => {
+  const scheduled = get(currentSubtitleAtom)
+  if (scheduled) {
+    return scheduled
+  }
+
+  const timeMs = get(currentTimeMsAtom)
+  return get(sourceTrackAtom).find((f) => f.start <= timeMs && f.end > timeMs) ?? null
+})
 
 export const subtitlesStateAtom = atom<StateData | null>(null)
 
@@ -51,12 +69,21 @@ export interface SubtitlePosition {
 export const subtitlesPositionAtom = atom<SubtitlePosition>({ ...DEFAULT_SUBTITLE_POSITION })
 
 export const subtitlesDisplayAtom = atom((get) => {
-  const subtitle = get(currentSubtitleAtom)
+  const subtitle = get(displaySubtitleAtom)
+  const scheduled = get(currentSubtitleAtom)
   const stateData = get(subtitlesStateAtom)
   const isVisible = get(subtitlesVisibleAtom)
+  const { style } = get(configFieldsAtomMap.videoSubtitles)
+
+  // translationOnly must never fall back to source-only original for "content".
+  const contentSubtitle =
+    style.displayMode === "translationOnly" ? (scheduled?.translation ? scheduled : null) : subtitle
 
   return {
-    subtitle,
+    subtitle: contentSubtitle,
+    /** Raw display lookup including source fallback (for pending UI in bilingual). */
+    displaySubtitle: subtitle,
+    scheduled,
     stateData,
     isVisible,
   }

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { SUBTITLES_SOURCE } from "@/utils/constants/subtitles"
-import { subtitlesSourceAtom, subtitlesStore } from "../atoms"
+import { sourceTrackAtom, subtitlesStore } from "../atoms"
 import { TranslationCoordinator } from "../translation-coordinator"
 import { UniversalVideoAdapter } from "../universal-adapter"
 
@@ -59,7 +59,7 @@ function attachScheduler(adapter: UniversalVideoAdapter, active: boolean) {
     stop: vi.fn<(...args: any[]) => any>(),
     setState: vi.fn<(...args: any[]) => any>(),
     supplementSubtitles: vi.fn<(...args: any[]) => any>(),
-    replaceTimeWindow: vi.fn<(...args: any[]) => any>(),
+    removeCuesInTimeWindow: vi.fn<(...args: any[]) => any>(),
     getVideoElement: vi.fn<(...args: any[]) => any>(() => ({ currentTime: 0 })),
     getState: vi.fn<(...args: any[]) => any>(() => "idle"),
   }
@@ -71,6 +71,7 @@ function attachScheduler(adapter: UniversalVideoAdapter, active: boolean) {
 describe("universalVideoAdapter", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    subtitlesStore.set(sourceTrackAtom, [])
     vi.stubGlobal("document", {
       title: "Test video",
       querySelector: vi.fn<(...args: any[]) => any>(() => null),
@@ -241,7 +242,7 @@ describe("universalVideoAdapter", () => {
     expect(downloader.dispose).toHaveBeenCalledTimes(1)
   })
 
-  it("seeds original subtitles into the scheduler before starting translation", async () => {
+  it("publishes source track without seeding untranslated cues into the scheduler", async () => {
     const subtitles = [
       { text: "I agree.", start: 0, end: 500 },
       { text: "It is true.", start: 500, end: 1000 },
@@ -267,17 +268,13 @@ describe("universalVideoAdapter", () => {
 
     await (adapter as any).processTranslatedSubtitles()
 
-    expect(subtitlesScheduler.supplementSubtitles).toHaveBeenCalled()
-    const seedCall = vi.mocked(subtitlesScheduler.supplementSubtitles).mock.calls[0]
-    const seeded = seedCall[0]
-    expect(seeded.length).toBeGreaterThan(0)
-    expect(seeded.every((fragment: { translation?: string }) => !fragment.translation)).toBe(true)
-    // Seed must upsert (not mergeOnly); translations later use mergeOnly.
-    expect(seedCall[1]?.mergeOnly).toBeFalsy()
+    const sourceTrack = subtitlesStore.get(sourceTrackAtom)
+    expect(sourceTrack.length).toBeGreaterThan(0)
+    expect(sourceTrack.every((f) => f.translation === undefined)).toBe(true)
 
-    const seedOrder = vi.mocked(subtitlesScheduler.supplementSubtitles).mock.invocationCallOrder[0]
-    const startOrder = startSpy.mock.invocationCallOrder[0]
-    expect(seedOrder).toBeLessThan(startOrder)
+    // Scheduler must not receive untranslated seeds; only coordinator will push translations later.
+    expect(subtitlesScheduler.supplementSubtitles).not.toHaveBeenCalled()
+    expect(startSpy).toHaveBeenCalled()
 
     startSpy.mockRestore()
   })

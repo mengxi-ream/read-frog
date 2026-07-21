@@ -28,6 +28,7 @@ import {
 } from "@/utils/subtitles/processor/translator"
 import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
 import {
+  sourceTrackAtom,
   subtitlesPositionAtom,
   subtitlesSettingsPanelOpenAtom,
   subtitlesSettingsPanelViewAtom,
@@ -265,6 +266,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     this.sessionProcessedFragments = []
     this.sessionVideoId = null
     this.subtitlesSummaryContextHash = null
+    subtitlesStore.set(sourceTrackAtom, [])
   }
 
   private clearVisibleStateForNavigation() {
@@ -629,8 +631,26 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       ...fragment,
       translation: fragment.text,
     }))
+    subtitlesStore.set(sourceTrackAtom, [...this.sourceProcessedSubtitles])
     this.subtitlesScheduler?.supplementSubtitles(this.sessionProcessedFragments)
     this.subtitlesScheduler?.setState("idle")
+  }
+
+  private publishSourceTrack(fragments: SubtitlesFragment[]) {
+    subtitlesStore.set(sourceTrackAtom, [...fragments])
+  }
+
+  private replaceSourceTrackWindow(
+    windowStartMs: number,
+    windowEndMs: number,
+    nextFragments: SubtitlesFragment[],
+  ) {
+    const previous = subtitlesStore.get(sourceTrackAtom)
+    const kept = previous.filter(
+      (fragment) => fragment.start < windowStartMs || fragment.start > windowEndMs,
+    )
+    const next = [...kept, ...nextFragments].sort((a, b) => a.start - b.start)
+    this.publishSourceTrack(next)
   }
 
   private async processTranslatedSubtitles() {
@@ -652,8 +672,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
     this.sessionProcessedFragments = [...this.sourceProcessedSubtitles]
 
-    // Seed originals immediately so bilingual/originalOnly can render before translations arrive.
-    scheduler.supplementSubtitles(this.sessionProcessedFragments)
+    // Source track for display fallback; scheduler only receives translated cues later.
+    this.publishSourceTrack(this.sessionProcessedFragments)
 
     if (useAiSegmentation) {
       this.segmentationPipeline = new SegmentationPipeline({
@@ -665,7 +685,9 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
         onChunkSegmented: (chunk, nextFragments) => {
           const chunkStart = chunk[0].start
           const chunkEnd = chunk.at(-1)!.end
-          scheduler.replaceTimeWindow(chunkStart, chunkEnd, nextFragments)
+          this.replaceSourceTrackWindow(chunkStart, chunkEnd, nextFragments)
+          // Drop translated cues in the window so display falls back to the new source cuts.
+          scheduler.removeCuesInTimeWindow(chunkStart, chunkEnd)
           this.translationCoordinator?.noteFragmentListChanged()
         },
       })
@@ -679,7 +701,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       getVideoElement: () => scheduler.getVideoElement(),
       getCurrentState: () => scheduler.getState(),
       segmentationPipeline: this.segmentationPipeline,
-      onTranslated: (fragments) => scheduler.supplementSubtitles(fragments, { mergeOnly: true }),
+      onTranslated: (fragments) => scheduler.supplementSubtitles(fragments),
       onStateChange: (state, data) => scheduler.setState(state, data),
     })
     this.translationCoordinator.start(videoContext)

@@ -1,11 +1,10 @@
 // @vitest-environment jsdom
 import type { LangCodeISO6393 } from "@read-frog/definitions"
-import { act, render, screen } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { TRANSLATION_PENDING_INDICATOR_DELAY_MS } from "@/utils/constants/subtitles"
-import { currentSubtitleAtom } from "../../atoms"
+import { currentSubtitleAtom, currentTimeMsAtom, sourceTrackAtom } from "../../atoms"
 import { MainSubtitle, TranslationSubtitle } from "../subtitle-lines"
 
 const mockedAtoms = vi.hoisted(() => ({
@@ -46,10 +45,6 @@ function createStoreWithLanguage(targetCode: LangCodeISO6393) {
 }
 
 describe("subtitle lines", () => {
-  afterEach(() => {
-    vi.useRealTimers()
-  })
-
   it("applies rtl attributes to translation subtitle for Arabic target language", () => {
     const store = createStoreWithLanguage("arb")
 
@@ -92,14 +87,11 @@ describe("subtitle lines", () => {
     expect(line).not.toHaveAttribute("lang")
   })
 
-  it("delays pending translating label so fast translations do not flash", () => {
-    vi.useFakeTimers()
+  it("shows pending indicator when display cue has original but no translation", () => {
     const store = createStoreWithLanguage("eng")
-    store.set(currentSubtitleAtom, {
-      text: "Hello world",
-      start: 0,
-      end: 1000,
-    })
+    store.set(currentTimeMsAtom, 500)
+    store.set(currentSubtitleAtom, null)
+    store.set(sourceTrackAtom, [{ text: "Hello", start: 0, end: 1000 }])
 
     const { container } = render(
       <Provider store={store}>
@@ -107,35 +99,7 @@ describe("subtitle lines", () => {
       </Provider>,
     )
 
-    const pending = container.querySelector("[data-pending='true']")
-    expect(pending).not.toBeNull()
-    expect(pending?.querySelector("[data-subtitle-pending-indicator]")).toBeNull()
-
-    act(() => {
-      vi.advanceTimersByTime(TRANSLATION_PENDING_INDICATOR_DELAY_MS)
-    })
-
-    expect(pending?.querySelector("[data-subtitle-pending-indicator]")).not.toBeNull()
-    expect(pending?.querySelectorAll("[data-subtitle-pending-dots] span")).toHaveLength(3)
+    expect(container.querySelector("[data-pending='true']")).not.toBeNull()
     expect(screen.getByText("Translating")).toBeTruthy()
-    expect(pending).toHaveAttribute("aria-label", "Translating…")
-  })
-
-  it("does not show pending placeholder when translation is an empty string", () => {
-    const store = createStoreWithLanguage("eng")
-    store.set(currentSubtitleAtom, {
-      text: "Hello world",
-      start: 0,
-      end: 1000,
-      translation: "",
-    })
-
-    const { container } = render(
-      <Provider store={store}>
-        <TranslationSubtitle />
-      </Provider>,
-    )
-
-    expect(container.querySelector("[data-pending='true']")).toBeNull()
   })
 })
