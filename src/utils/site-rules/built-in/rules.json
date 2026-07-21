@@ -4345,6 +4345,7 @@
     "excludeSelectors": [
       "[id^=\"message-username\"]",
       "span[class*=\"-timestamp\"]",
+      "div[id^=\"message-content\"] > span[class*=\"timestamp_\"]",
       "div[class*=\"-repliedMessage\"]",
       "li[class*=\"-containerDefault\"]",
       "[class*=\"-subtitleContainer\"]",
