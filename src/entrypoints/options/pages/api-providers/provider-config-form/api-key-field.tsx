@@ -1,7 +1,7 @@
 import type { APIProviderConfig } from "@/types/config/provider"
 import { Icon } from "@iconify/react"
 import { useSelector } from "@tanstack/react-store"
-import { useEffect, useEffectEvent, useState } from "react"
+import { useEffect, useEffectEvent, useRef, useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
@@ -68,20 +68,32 @@ function DeepLMultiKeyEditor({
   onCommit: (value: string) => void
 }) {
   const [rows, setRows] = useState(() => rowsFromApiKey(apiKey))
+  // Tracks the last apiKey value we applied to rows (local commit or external sync).
+  // Distinguishes storage/visibility reloads from our own handleChange echoes so empty rows stay while typing.
+  const lastSyncedApiKeyRef = useRef(apiKey)
 
-  // Reset row UI when switching providers; keep local empty rows while typing.
-  // useEffectEvent always reads the latest apiKey for the new provider.
+  // useEffectEvent always reads the latest apiKey when rebuilding rows.
   const resetRows = useEffectEvent(() => {
     setRows(rowsFromApiKey(apiKey))
+    lastSyncedApiKeyRef.current = apiKey
   })
 
+  // Reset row UI when switching providers.
   useEffect(() => {
     resetRows()
   }, [providerId])
 
+  // Resync when the same provider receives an external apiKey update (storage sync / visibility reload).
+  useEffect(() => {
+    if (apiKey === lastSyncedApiKeyRef.current) return
+    resetRows()
+  }, [apiKey])
+
   const persistRows = (nextRows: ApiKeyRow[]) => {
     setRows(nextRows)
-    onCommit(serializeDeepLApiKeys(nextRows.map((row) => row.value)))
+    const serialized = serializeDeepLApiKeys(nextRows.map((row) => row.value))
+    lastSyncedApiKeyRef.current = serialized
+    onCommit(serialized)
   }
 
   const updateRow = (id: string, value: string) => {

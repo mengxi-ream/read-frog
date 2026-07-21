@@ -171,6 +171,33 @@ describe("deepl translate adapter", () => {
     expect(fetchMock.mock.calls[2][1].headers.Authorization).toBe("DeepL-Auth-Key k1:fx")
   })
 
+  it("keeps round-robin state per provider so one-key pools do not reset multi-key pools", async () => {
+    mockOkTranslation("1")
+    mockOkTranslation("2")
+    mockOkTranslation("3")
+    mockOkTranslation("4")
+
+    const multi = {
+      ...deeplConfig("k1:fx\nk2"),
+      id: "deepl-multi",
+    } as const
+    const single = {
+      ...deeplConfig("solo"),
+      id: "deepl-single",
+    } as const
+
+    await deeplTranslate("A", "en", "de", multi) // multi -> k1
+    await deeplTranslate("B", "en", "de", single) // single -> solo (must not reset multi)
+    await deeplTranslate("C", "en", "de", multi) // multi -> k2
+    await deeplTranslate("D", "en", "de", multi) // multi -> k1
+
+    expect(fetchMock).toHaveBeenCalledTimes(4)
+    expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe("DeepL-Auth-Key k1:fx")
+    expect(fetchMock.mock.calls[1][1].headers.Authorization).toBe("DeepL-Auth-Key solo")
+    expect(fetchMock.mock.calls[2][1].headers.Authorization).toBe("DeepL-Auth-Key k2")
+    expect(fetchMock.mock.calls[3][1].headers.Authorization).toBe("DeepL-Auth-Key k1:fx")
+  })
+
   it("does not failover to the next key within the same request", async () => {
     fetchMock.mockResolvedValue({
       ok: false,

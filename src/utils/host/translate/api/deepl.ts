@@ -9,8 +9,11 @@ interface DeepLLanguagePair {
   target: string
 }
 
-/** Module-level round-robin index for multi-key load balancing. */
-let deeplKeyRoundRobinIndex = 0
+/**
+ * Per-provider round-robin indices for multi-key load balancing.
+ * A shared counter would let a one-key DeepL provider reset the sequence for a multi-key pool.
+ */
+const deeplKeyRoundRobinIndexByProviderId = new Map<string, number>()
 
 /** Parse newline-separated DeepL API keys; empty lines are ignored. */
 export function parseDeepLApiKeys(apiKey?: string): string[] {
@@ -29,13 +32,14 @@ export function serializeDeepLApiKeys(keys: string[]): string {
     .join("\n")
 }
 
-/** Pick the next key in round-robin order. Throws if the pool is empty. */
-export function pickNextDeepLApiKey(keys: string[]): string {
+/** Pick the next key in round-robin order for the given provider pool. Throws if empty. */
+export function pickNextDeepLApiKey(keys: string[], providerId: string): string {
   if (keys.length === 0) {
     throw new Error("DeepL API key is not configured")
   }
-  const index = deeplKeyRoundRobinIndex % keys.length
-  deeplKeyRoundRobinIndex = (deeplKeyRoundRobinIndex + 1) % keys.length
+  const current = deeplKeyRoundRobinIndexByProviderId.get(providerId) ?? 0
+  const index = current % keys.length
+  deeplKeyRoundRobinIndexByProviderId.set(providerId, (current + 1) % keys.length)
   const key = keys[index]
   if (key === undefined) {
     throw new Error("DeepL API key is not configured")
@@ -45,7 +49,7 @@ export function pickNextDeepLApiKey(keys: string[]): string {
 
 /** Test-only helper to keep round-robin order deterministic across cases. */
 export function resetDeepLKeyRoundRobinIndex(): void {
-  deeplKeyRoundRobinIndex = 0
+  deeplKeyRoundRobinIndexByProviderId.clear()
 }
 
 export async function deeplTranslate(
@@ -77,7 +81,7 @@ async function requestDeepLTranslations(
   providerConfig: DeepLProviderConfig,
   options?: { textFormat?: TranslationTextFormat; signal?: AbortSignal },
 ): Promise<string[]> {
-  const apiKey = pickNextDeepLApiKey(parseDeepLApiKeys(providerConfig.apiKey))
+  const apiKey = pickNextDeepLApiKey(parseDeepLApiKeys(providerConfig.apiKey), providerConfig.id)
   const baseURL = getDeepLBaseURL(apiKey)
   const url = `${baseURL}/v2/translate`
   const normalizedLanguages = normalizeDeepLLanguages(fromLang, toLang)
