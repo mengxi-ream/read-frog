@@ -32,8 +32,9 @@ import {
   restoreTranslationOnlySwapsForAnchor,
 } from "../dom/translation-cleanup"
 import {
-  protectTranslationHtmlAttributes,
   protectNonTranslatableElements,
+  protectNonTranslatableElementsForRequestHtml,
+  protectTranslationHtmlAttributes,
 } from "../dom/translation-html-attributes"
 import { insertTranslatedNodeIntoWrapper } from "../dom/translation-insertion"
 import {
@@ -554,18 +555,41 @@ export async function translateNodesBilingualMode(
     // translationOnly pipeline: clone nodes to HTML, protect non-translatable
     // attributes with markers, and replace non-translatable inline content
     // (KaTeX, MathJax, code blocks) with placeholders.
-    const protectedHtml = protectTranslationHtmlAttributes(transNodes, ownerDoc)
+    //
+    // For single block-element runs (e.g. <li>, <p>), serialize only the
+    // inner content of the insertion target — not the element's outerHTML —
+    // so the translated HTML rendered via innerHTML inside the wrapper does
+    // not include the outer tag and create nested block elements (extra
+    // bullets, invalid layout).
+    const isSingleBlockRun =
+      transNodes.length === 1 && isBlockTransNode(layoutSource) && isHTMLElement(layoutSource)
+    const serializationNodes =
+      isSingleBlockRun && isHTMLElement(insertionTarget)
+        ? [...insertionTarget.childNodes].filter(isTransNode)
+        : transNodes
+    const protectedHtml = protectTranslationHtmlAttributes(
+      serializationNodes.length > 0 ? serializationNodes : transNodes,
+      ownerDoc,
+    )
 
-    // Protect non-translatable inline content in BOTH the legacy and
-    // marker-aware HTML variants. They share the same element structure,
-    // so placeholder IDs are consistent across both.
+    // Protect non-translatable inline content in both legacy and marker-aware
+    // HTML variants.  Detection runs on sourceHtml (all attributes intact) so
+    // CSS selectors like span.katex can match; requestHtml has had its class
+    // attributes stripped by protectTranslationHtmlAttributes so the same
+    // elements are found by position and protected with identical placeholder
+    // IDs.
     const nonTranslatableLegacy = protectNonTranslatableElements(
       protectedHtml.legacyRequestHtml,
       config,
       ownerDoc,
     )
     const nonTranslatableRequest = protectedHtml.hasPlaceholders
-      ? protectNonTranslatableElements(protectedHtml.requestHtml, config, ownerDoc)
+      ? protectNonTranslatableElementsForRequestHtml(
+          protectedHtml.sourceHtml,
+          protectedHtml.requestHtml,
+          config,
+          ownerDoc,
+        )
       : nonTranslatableLegacy
 
     const { spinner, wrapper: translatedWrapperNode } = createBilingualWrapper(
@@ -612,19 +636,30 @@ export async function translateNodesBilingualMode(
 
     // Build a translate request that first applies non-translatable content
     // placeholders, then handles HTML attribute markers (same strategy as
-    // translationOnly mode). The two protection layers are independent:
-    // non-translatable placeholders operate on the full outerHTML, while
-    // attribute markers protect individual element attributes.
+    // translationOnly mode). DeepLX providers that cannot preserve attribute
+    // markers are detected and cached so subsequent paragraphs skip the
+    // markerized request and go straight to the legacy HTML path.
+    const deepLXProviderKey = getDeepLXHtmlAttributeProviderKey(config)
+
+    const translateLegacyHtml = async () => {
+      const translated = await translateTextForAction(
+        nonTranslatableLegacy.requestHtml,
+        "html",
+        actionContext,
+      )
+      if (!translated) return translated
+      const withRestoredContent = nonTranslatableLegacy.restore(translated)
+      return protectedHtml.restoreLegacy(withRestoredContent)
+    }
+
     const translateRequest = async () => {
-      if (!protectedHtml.hasPlaceholders) {
-        const translated = await translateTextForAction(
-          nonTranslatableLegacy.requestHtml,
-          "html",
-          actionContext,
-        )
-        if (!translated) return translated
-        const withRestoredContent = nonTranslatableLegacy.restore(translated)
-        return protectedHtml.restoreLegacy(withRestoredContent)
+      if (!protectedHtml.hasPlaceholders) return translateLegacyHtml()
+
+      let ownedDeepLXProbe: DeepLXHtmlAttributeProbe | undefined
+      if (deepLXProviderKey) {
+        const probeDecision = await acquireDeepLXHtmlAttributeProbe(deepLXProviderKey)
+        if (probeDecision.useLegacy) return translateLegacyHtml()
+        ownedDeepLXProbe = probeDecision.probe
       }
 
       try {
@@ -633,23 +668,36 @@ export async function translateNodesBilingualMode(
           "html",
           actionContext,
         )
-        if (!translated) return translated
+        if (!translated) {
+          if (deepLXProviderKey) {
+            finishDeepLXHtmlAttributeProbe(deepLXProviderKey, ownedDeepLXProbe, "unknown")
+          }
+          return translated
+        }
         const withRestoredContent = nonTranslatableRequest.restore(translated)
-        return protectedHtml.restore(withRestoredContent)
+        const withRestoredAttributes = protectedHtml.restore(withRestoredContent)
+        if (deepLXProviderKey) {
+          supportedDeepLXHtmlAttributeProviders.add(deepLXProviderKey)
+          finishDeepLXHtmlAttributeProbe(deepLXProviderKey, ownedDeepLXProbe, "supported")
+        }
+        return withRestoredAttributes
       } catch (error) {
-        if (!isHtmlAttributeMarkerIntegrityError(error)) throw error
+        if (!isHtmlAttributeMarkerIntegrityError(error)) {
+          if (deepLXProviderKey) {
+            finishDeepLXHtmlAttributeProbe(deepLXProviderKey, ownedDeepLXProbe, "unknown")
+          }
+          throw error
+        }
+        if (deepLXProviderKey) {
+          unsupportedDeepLXHtmlAttributeProviders.add(deepLXProviderKey)
+          supportedDeepLXHtmlAttributeProviders.delete(deepLXProviderKey)
+          finishDeepLXHtmlAttributeProbe(deepLXProviderKey, ownedDeepLXProbe, "unsupported")
+        }
         logger.warn(
           "HTML attribute placeholders not preserved in bilingual mode; retrying with legacy",
           error,
         )
-        const translated = await translateTextForAction(
-          nonTranslatableLegacy.requestHtml,
-          "html",
-          actionContext,
-        )
-        if (!translated) return translated
-        const withRestoredContent = nonTranslatableLegacy.restore(translated)
-        return protectedHtml.restoreLegacy(withRestoredContent)
+        return translateLegacyHtml()
       }
     }
 

@@ -467,3 +467,77 @@ export function protectNonTranslatableElements(
     },
   }
 }
+
+/**
+ * Apply non-translatable-element protection to a requestHtml variant that has
+ * had its class and other CSS-selectable attributes stripped by
+ * {@link protectTranslationHtmlAttributes}.
+ *
+ * Non-translatable detection (KaTeX, MathJax, code blocks) relies on CSS
+ * selectors like `span.katex` from site rules.  In the markerised
+ * `requestHtml` those classes are removed, so detection is run against
+ * `sourceHtml` (where all attributes are intact) and the same element
+ * positions are protected in `requestHtml`.
+ *
+ * The two HTML strings must share the same element structure — only attribute
+ * values may differ.
+ */
+export function protectNonTranslatableElementsForRequestHtml(
+  sourceHtml: string,
+  requestHtml: string,
+  config: Config,
+  ownerDoc: Document,
+): ProtectNonTranslatableResult {
+  const preserveTextSelector = getEffectiveSiteRule(
+    config,
+    window.location.href,
+  ).preserveTextSelector
+
+  if (preserveTextSelector === null && DONT_WALK_BUT_TRANSLATE_TAGS.size === 0) {
+    return { requestHtml, restore: (translatedHtml: string) => translatedHtml }
+  }
+
+  // Detect non-translatable elements in sourceHtml (all original attributes intact).
+  const sourceTemplate = ownerDoc.createElement("template")
+  sourceTemplate.innerHTML = sourceHtml
+  const sourceElements = getAllElements(sourceTemplate.content)
+  const nonTranslatableIndices = new Set<number>()
+  sourceElements.forEach((element, index) => {
+    if (isNonTranslatableElement(element, config, preserveTextSelector)) {
+      nonTranslatableIndices.add(index)
+    }
+  })
+
+  if (nonTranslatableIndices.size === 0) {
+    return { requestHtml, restore: (translatedHtml: string) => translatedHtml }
+  }
+
+  // Apply the same replacements to requestHtml by element position.
+  const requestTemplate = ownerDoc.createElement("template")
+  requestTemplate.innerHTML = requestHtml
+  const requestElements = getAllElements(requestTemplate.content)
+
+  const placeholders: Array<{ id: string; originalHtml: string }> = []
+  for (const index of nonTranslatableIndices) {
+    const element = requestElements[index]
+    if (!element) continue
+    const id = `${NON_TRANSLATABLE_PLACEHOLDER_PREFIX}${placeholders.length}__`
+    placeholders.push({ id, originalHtml: element.outerHTML })
+    element.replaceWith(ownerDoc.createTextNode(id))
+  }
+
+  const protectedRequestHtml = requestTemplate.innerHTML
+
+  return {
+    requestHtml: protectedRequestHtml,
+    restore(translatedHtml: string): string {
+      if (placeholders.length === 0) return translatedHtml
+      let result = translatedHtml
+      for (const { id, originalHtml } of placeholders) {
+        const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+        result = result.replace(new RegExp(escapedId, "g"), originalHtml)
+      }
+      return result
+    },
+  }
+}

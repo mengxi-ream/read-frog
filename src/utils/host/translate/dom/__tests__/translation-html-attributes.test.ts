@@ -2,7 +2,11 @@
 import type { TransNode } from "@/types/dom"
 import { describe, expect, it } from "vitest"
 import { HTML_ATTRIBUTE_MARKER } from "../../html-attribute-markers"
-import { protectTranslationHtmlAttributes } from "../translation-html-attributes"
+import {
+  protectNonTranslatableElementsForRequestHtml,
+  protectTranslationHtmlAttributes,
+} from "../translation-html-attributes"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
 
 function createNodes(html: string): TransNode[] {
   const container = document.createElement("div")
@@ -261,5 +265,114 @@ describe("translation HTML attribute protection", () => {
     expect(() => protectedHtml.restore(translatedHtml)).toThrowError(
       expect.objectContaining({ code: "HTML_ATTR_MARKER_INTEGRITY" }),
     )
+  })
+})
+
+describe("protectNonTranslatableElementsForRequestHtml", () => {
+  it("protects KaTeX elements detected via sourceHtml in the markerised requestHtml", () => {
+    const sourceHtml = `<p>Equation <span class="katex">E=mc^2</span> is famous.</p>`
+    // Simulate requestHtml after protectTranslationHtmlAttributes has stripped
+    // the class attribute and added a marker.
+    const requestHtml = `<p>Equation <span data-rf-attr="0">E=mc^2</span> is famous.</p>`
+
+    const result = protectNonTranslatableElementsForRequestHtml(
+      sourceHtml,
+      requestHtml,
+      DEFAULT_CONFIG,
+      document,
+    )
+
+    // The KaTeX span should be replaced with a placeholder
+    expect(result.requestHtml).not.toContain("katex")
+    expect(result.requestHtml).not.toContain("E=mc^2")
+    expect(result.requestHtml).toContain("__RF_NT_0__")
+
+    // Simulate translation (placeholder survives)
+    const translated = `<p>方程 __RF_NT_0__ 非常著名。</p>`
+    const restored = result.restore(translated)
+
+    // The formula element is restored with its requestHtml attributes (marker,
+    // not the original class). The subsequent protectedHtml.restore() call
+    // in the translation pipeline replaces the marker with the original class.
+    expect(restored).toContain("data-rf-attr")
+    expect(restored).toContain("E=mc^2")
+    expect(restored).not.toContain("__RF_NT_0__")
+
+    // Verify the end-to-end pipeline: non-translatable restore + attribute restore
+    const protectedHtml = protectTranslationHtmlAttributes(
+      createNodes(`<p>Equation <span class="katex">E=mc^2</span> is famous.</p>`),
+      document,
+    )
+    // Apply non-translatable protection to the markerised requestHtml
+    const ntResult = protectNonTranslatableElementsForRequestHtml(
+      protectedHtml.sourceHtml,
+      protectedHtml.requestHtml,
+      DEFAULT_CONFIG,
+      document,
+    )
+    // Simulate: translate → non-translatable restore → attribute restore
+    const afterNtRestore = ntResult.restore(translated)
+    const finalRestored = protectedHtml.restore(afterNtRestore)
+
+    expect(finalRestored).toContain('class="katex"')
+    expect(finalRestored).toContain("E=mc^2")
+    expect(finalRestored).not.toContain("data-rf-attr")
+  })
+
+  it("protects multiple non-translatable elements at different positions", () => {
+    const sourceHtml = `<p>Sum <span class="katex">a+b</span> plus <span class="katex">c+d</span>.</p>`
+    const requestHtml = `<p>Sum <span data-rf-attr="0">a+b</span> plus <span data-rf-attr="1">c+d</span>.</p>`
+
+    const result = protectNonTranslatableElementsForRequestHtml(
+      sourceHtml,
+      requestHtml,
+      DEFAULT_CONFIG,
+      document,
+    )
+
+    expect(result.requestHtml).toContain("__RF_NT_0__")
+    expect(result.requestHtml).toContain("__RF_NT_1__")
+    expect(result.requestHtml).not.toContain("a+b")
+    expect(result.requestHtml).not.toContain("c+d")
+
+    const translated = `<p>求和 __RF_NT_0__ 加 __RF_NT_1__。</p>`
+    const restored = result.restore(translated)
+
+    // Formulas are restored with requestHtml attributes (markers).
+    // protectedHtml.restore() replaces markers with original classes later.
+    expect(restored).toContain("a+b")
+    expect(restored).toContain("c+d")
+    expect(restored).not.toContain("__RF_NT_0__")
+    expect(restored).not.toContain("__RF_NT_1__")
+    expect((restored.match(/data-rf-attr/g) ?? []).length).toBe(2)
+  })
+
+  it("does not protect elements that are not matched by selectors", () => {
+    const sourceHtml = `<p>Hello <strong>world</strong></p>`
+    const requestHtml = `<p>Hello <strong data-rf-attr="0">world</strong></p>`
+
+    const result = protectNonTranslatableElementsForRequestHtml(
+      sourceHtml,
+      requestHtml,
+      DEFAULT_CONFIG,
+      document,
+    )
+
+    // No non-translatable elements — requestHtml should be unchanged
+    expect(result.requestHtml).toBe(requestHtml)
+    expect(result.restore(requestHtml)).toBe(requestHtml)
+  })
+
+  it("returns identity restorer when nothing is protected", () => {
+    const html = `<p>Plain text without formulas.</p>`
+    const result = protectNonTranslatableElementsForRequestHtml(
+      html,
+      html,
+      DEFAULT_CONFIG,
+      document,
+    )
+
+    expect(result.requestHtml).toBe(html)
+    expect(result.restore("translated")).toBe("translated")
   })
 })
