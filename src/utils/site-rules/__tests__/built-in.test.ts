@@ -155,12 +155,22 @@ describe("built-in site rules", () => {
     expect(resolved.excludeSelector).toContain(".forum-bottombar")
   })
 
-  it("does not restrict migrated article sites to stale include selectors", () => {
+  it("does not restrict migrated sites to stale include selectors", () => {
     const restoredSites = [
       ["newyorker", "https://www.newyorker.com/news/the-lede/example"],
       ["scmp", "https://www.scmp.com/news/china/politics/article/example"],
       ["android", "https://developer.android.com/develop/ui/compose/documentation"],
       ["thehackernews", "https://thehackernews.com/2026/07/example.html"],
+      ["artstationLearning", "https://www.artstation.com/learning/courses/example"],
+      ["artstationBlog", "https://www.artstation.com/blogs/example/example"],
+      ["figmaCommunity", "https://www.figma.com/community/file/example"],
+      ["construct", "https://www.construct.net/en/forum"],
+      ["construct", "https://www.construct.net/en/make-games/manuals/construct-3"],
+      ["wandb", "https://wandb.ai/site/reports/"],
+      [
+        "wandb",
+        "https://wandb.ai/stacey/estuary/reports/When-Inception-ResNet-V2-is-too-slow--Vmlldzo3MDcxMA",
+      ],
     ] as const
 
     for (const [id, url] of restoredSites) {
@@ -170,7 +180,46 @@ describe("built-in site rules", () => {
     }
   })
 
-  it("retains include scopes that still define intentional content roots", () => {
+  it("matches current Microsoft Store URLs without a dead PRE-only scope", () => {
+    for (const url of [
+      "https://apps.microsoft.com/store/detail/example/9nksqgp7f2nh",
+      "https://apps.microsoft.com/detail/9nksqgp7f2nh",
+    ]) {
+      const microsoft = resolveSiteRule(url, BUILT_IN_SITE_RULES, [], [])
+
+      expect(microsoft.matchedRuleIds).toContain("microsoft")
+      expect(microsoft.includeSelector).toBeNull()
+    }
+  })
+
+  it("uses class selectors for ArtStation blog card chrome", () => {
+    const rule = BUILT_IN_SITE_RULES.find((candidate) => candidate.id === "artstationBlog")
+    expect(rule?.excludeSelectors).toContain(".blog-card-thumbnail")
+    expect(rule?.excludeSelectors).toContain(".blog-card-header")
+    expect(rule?.excludeSelectors).not.toContain("blog-card-thumbnail")
+    expect(rule?.excludeSelectors).not.toContain("blog-card-header")
+
+    const resolved = resolveSiteRule(
+      "https://www.artstation.com/blogs",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+    expect(resolved.excludeSelector).toContain(".blog-card-thumbnail")
+    expect(resolved.excludeSelector).toContain(".blog-card-header")
+  })
+
+  it("does not ship a strict scope that only targets hard-blocked PRE content", () => {
+    const preOnlyRules = BUILT_IN_SITE_RULES.filter(
+      (rule) =>
+        rule.includeSelectors?.length === 1 &&
+        rule.includeSelectors[0].trim().toLowerCase() === "pre",
+    )
+
+    expect(preOnlyRules).toEqual([])
+  })
+
+  it("retains independently verified content roots that cover their full match scope", () => {
     const paulGraham = resolveSiteRule(
       "https://paulgraham.com/greatwork.html",
       BUILT_IN_SITE_RULES,
@@ -179,13 +228,13 @@ describe("built-in site rules", () => {
     )
     expect(paulGraham.includeSelector).toBe("font[face=verdana]")
 
-    const construct = resolveSiteRule(
-      "https://www.construct.net/en/make-games/manuals/construct-3",
+    const ubuntu = resolveSiteRule(
+      "https://manpages.ubuntu.com/manpages/noble/man1/ls.1.html",
       BUILT_IN_SITE_RULES,
       [],
       [],
     )
-    expect(construct.includeSelector).toContain("aside")
-    expect(construct.includeSelector).toContain("div.manualContent")
+    expect(ubuntu.matchedRuleIds).toContain("ubuntu")
+    expect(ubuntu.includeSelector).toBe("#manpage-content")
   })
 })

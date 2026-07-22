@@ -1096,28 +1096,25 @@
   {
     "id": "artstationLearning",
     "matches": "www.artstation.com/learning/courses/*",
-    "excludeSelectors": [".learning-card-meta", ".vjs-text-track-display"],
-    "includeSelectors": ["footer.learning-course-description.ng-star-inserted > span"]
+    "excludeSelectors": [".learning-card-meta", ".vjs-text-track-display"]
   },
   {
     "id": "artstationBlog",
     "matches": ["https://www.artstation.com/blogs", "https://www.artstation.com/blogs/*"],
     "excludeSelectors": [
-      "blog-card-thumbnail",
-      "blog-card-header",
+      ".blog-card-thumbnail",
+      ".blog-card-header",
       ".blog-card-author",
       ".blog-card-meta",
       ".blog-view-header",
       ".blog-grid-title",
       ".post-meta-header"
-    ],
-    "includeSelectors": [".comment-item-body"]
+    ]
   },
   {
     "id": "figmaCommunity",
     "matches": "www.figma.com/community/*",
     "excludeSelectors": ["div[class*='metadataRight']", "div[class*='commentMetaAndOptions']"],
-    "includeSelectors": ["div[class*='mini_cardBottomRow_Metadata']"],
     "injectedCss": "div[class*='mini_cardBottomRowSizing'] { height: 3em; }",
     "preserveTextSelectors": ["[data-tooltip='tooltip-user-info']"]
   },
@@ -1299,8 +1296,7 @@
       ".LiveBlogHeader-timestampAndShareBarContainer",
       ".LiveBlogHeader-liveUpdatesPill",
       ".QuoteInBody-inlineButton"
-    ],
-    "forceBlockSelectors.remove": ["button"]
+    ]
   },
   {
     "id": "dailyDev",
@@ -1602,7 +1598,6 @@
     "id": "construct",
     "matches": "www.construct.net",
     "excludeMatches": ["preview.construct.net", "editor.construct.net"],
-    "includeSelectors": ["aside", "div.manualContent"],
     "forceInlineSelectors": ["a.forumLink"],
     "injectedCss": "td.location a#LocationLink { padding-top: 4px; }\ndiv.articleMain .tutCourseWrap { align-items: flex-start; }",
     "excludeSelectors.add": [
@@ -1735,8 +1730,7 @@
   },
   {
     "id": "microsoft",
-    "matches": "https://apps.microsoft.com/store/detail/*",
-    "includeSelectors": ["pre"],
+    "matches": ["https://apps.microsoft.com/store/detail/*", "https://apps.microsoft.com/detail/*"],
     "injectedCss": ".line-clamp { -webkit-line-clamp:unset;max-height:unset; }"
   },
   {
@@ -1936,7 +1930,6 @@
   {
     "id": "wandb",
     "matches": "wandb.ai",
-    "includeSelectors": [".report-page-top"],
     "preserveTextSelectors.add": ["span[data-slate-inline=true]"]
   },
   {
@@ -2017,7 +2010,7 @@
   {
     "id": "ubuntu",
     "matches": "manpages.ubuntu.com",
-    "includeSelectors": ["pre"]
+    "includeSelectors": ["#manpage-content"]
   },
   {
     "id": "spiedigitallibrary",
@@ -3246,7 +3239,6 @@
       "[data-testid^=replyBtn]",
       "[aria-label='View profile']"
     ],
-    "forceBlockSelectors.remove": ["button"],
     "injectedCss.add": [
       ".r-xoduu5 {display:inline!important;}",
       "[style*='-webkit-line-clamp'] {-webkit-line-clamp:unset!important;}"
