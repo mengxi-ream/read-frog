@@ -1,5 +1,23 @@
 # @read-frog/extension
 
+## 1.42.3
+
+### Patch Changes
+
+- [#1929](https://github.com/mengxi-ream/read-frog/pull/1929) [`6a5d2b6`](https://github.com/mengxi-ream/read-frog/commit/6a5d2b6b364688410a5ba284916e4d0ddf87c114) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection-toolbar): keep the toolbar visible when selected text moves offscreen
+
+- [#1930](https://github.com/mengxi-ream/read-frog/pull/1930) [`661c9b9`](https://github.com/mengxi-ream/read-frog/commit/661c9b9cd10590e1fa6a9fca0a262d9119b51c33) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translation): translate edited Discord messages without timestamp metadata
+
+- [#1932](https://github.com/mengxi-ream/read-frog/pull/1932) [`f73c57b`](https://github.com/mengxi-ream/read-frog/commit/f73c57b3c0eea0ab722bdb163ffd0d8ee4190454) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(site-rules): restore content hidden by migrated selector scopes
+
+- [#1933](https://github.com/mengxi-ream/read-frog/pull/1933) [`98ac43e`](https://github.com/mengxi-ream/read-frog/commit/98ac43e34555bd16c35271e6bf2d1db308d5b531) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(site-rules): separate node and style selector controls
+
+- [#1935](https://github.com/mengxi-ream/read-frog/pull/1935) [`e15e5b6`](https://github.com/mengxi-ream/read-frog/commit/e15e5b68ee95f5f0f99368252e5d0a24fb14ca32) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(site-rules): refresh stale built-in content scopes
+
+- [#1928](https://github.com/mengxi-ream/read-frog/pull/1928) [`581081d`](https://github.com/mengxi-ream/read-frog/commit/581081d6b45d92d48ff9a91a2435147e7d8e91a6) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(toast): standardize notification dismiss delays
+
+- [#1931](https://github.com/mengxi-ream/read-frog/pull/1931) [`0ac4950`](https://github.com/mengxi-ream/read-frog/commit/0ac49507017650f4bdde9536a1f8f9051fad5a2c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(site-rules): restore Steam store page translation
+
 ## 1.42.2
 
 ### Patch Changes
