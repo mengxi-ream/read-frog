@@ -28,11 +28,10 @@ export interface SelectionAnchorTracker {
 
 export type SelectionAnchorMeasurement =
   | {
-      status: "visible"
+      status: "visible" | "offscreen"
       anchor: ViewportPoint
       tracker: SelectionAnchorTracker
     }
-  | { status: "offscreen" }
   | { status: "invalid" }
 
 export enum SelectionDirection {
@@ -248,12 +247,17 @@ export function measureSelectionAnchor(
     return { status: "invalid" }
   }
 
-  const visibleRects = rects.filter(({ rect }) => isRectVisible(rect, viewport))
-  if (visibleRects.length === 0) {
-    return { status: "offscreen" }
+  const status = rects.some(({ rect }) => isRectVisible(rect, viewport)) ? "visible" : "offscreen"
+
+  if (rects.length === 0) {
+    return {
+      status,
+      anchor: tracker.lastAnchor,
+      tracker,
+    }
   }
 
-  const referenceRect = visibleRects.find(
+  const referenceRect = rects.find(
     ({ rangeIndex, rectIndex }) =>
       rangeIndex === tracker.reference.rangeIndex && rectIndex === tracker.reference.rectIndex,
   )
@@ -265,7 +269,7 @@ export function measureSelectionAnchor(
     }
 
     return {
-      status: "visible",
+      status,
       anchor,
       tracker: {
         ...tracker,
@@ -274,9 +278,13 @@ export function measureSelectionAnchor(
     }
   }
 
-  const fallbackRect = getNearestRect(visibleRects, tracker.lastAnchor)
+  const fallbackRect = getNearestRect(rects, tracker.lastAnchor)
   if (!fallbackRect) {
-    return { status: "offscreen" }
+    return {
+      status,
+      anchor: tracker.lastAnchor,
+      tracker,
+    }
   }
 
   const anchor = {
@@ -285,7 +293,7 @@ export function measureSelectionAnchor(
   }
 
   return {
-    status: "visible",
+    status,
     anchor,
     tracker: {
       ranges: tracker.ranges,

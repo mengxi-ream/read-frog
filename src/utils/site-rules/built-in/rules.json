@@ -1096,28 +1096,25 @@
   {
     "id": "artstationLearning",
     "matches": "www.artstation.com/learning/courses/*",
-    "excludeSelectors": [".learning-card-meta", ".vjs-text-track-display"],
-    "includeSelectors": ["footer.learning-course-description.ng-star-inserted > span"]
+    "excludeSelectors": [".learning-card-meta", ".vjs-text-track-display"]
   },
   {
     "id": "artstationBlog",
     "matches": ["https://www.artstation.com/blogs", "https://www.artstation.com/blogs/*"],
     "excludeSelectors": [
-      "blog-card-thumbnail",
-      "blog-card-header",
+      ".blog-card-thumbnail",
+      ".blog-card-header",
       ".blog-card-author",
       ".blog-card-meta",
       ".blog-view-header",
       ".blog-grid-title",
       ".post-meta-header"
-    ],
-    "includeSelectors": [".comment-item-body"]
+    ]
   },
   {
     "id": "figmaCommunity",
     "matches": "www.figma.com/community/*",
     "excludeSelectors": ["div[class*='metadataRight']", "div[class*='commentMetaAndOptions']"],
-    "includeSelectors": ["div[class*='mini_cardBottomRow_Metadata']"],
     "injectedCss": "div[class*='mini_cardBottomRowSizing'] { height: 3em; }",
     "preserveTextSelectors": ["[data-tooltip='tooltip-user-info']"]
   },
@@ -1234,8 +1231,7 @@
   {
     "id": "newyorker",
     "matches": "www.newyorker.com",
-    "excludeSelectors": ["[data-testid=PersistentTop]", "[data-testid=StackedNavigationHeader]"],
-    "includeSelectors": ["h1", "[data-testid=SummaryItemHed]"]
+    "excludeSelectors": ["[data-testid=PersistentTop]", "[data-testid=StackedNavigationHeader]"]
   },
   {
     "id": "typora",
@@ -1255,7 +1251,6 @@
   {
     "id": "scmp",
     "matches": "www.scmp.com",
-    "includeSelectors": [".info__subHeadline", ".section-content h2"],
     "injectedCss": ".topic__article-list { height: unset; }\n.adverisers__adveriser { height: unset; }\n.advertiser__content { height: unset; }\n.content-title__link { display:unset;overflow:unset;-webkit-line-clamp:unset; }\n.title__text { max-height:unset; -webkit-line-clamp:unset; }\n.news-list-item__news-title { max-height:unset; -webkit-line-clamp:unset; }\na[class*='link'] > .link__headline { max-height:unset; -webkit-line-clamp:unset; }"
   },
   {
@@ -1294,15 +1289,14 @@
   {
     "id": "cnbc",
     "matches": "www.cnbc.com",
-    "injectedCss": "div.Card-titleContainer > div { -webkit-line-clamp: unset;max-height: unset; }",
+    "injectedCss": "div.Card-titleContainer > div { -webkit-line-clamp: unset !important;max-height: unset !important; }",
     "excludeSelectors.add": [
       "#GlobalNavigation",
       "#GlobalFooter",
       ".LiveBlogHeader-timestampAndShareBarContainer",
       ".LiveBlogHeader-liveUpdatesPill",
       ".QuoteInBody-inlineButton"
-    ],
-    "forceBlockSelectors.remove": ["button"]
+    ]
   },
   {
     "id": "dailyDev",
@@ -1604,7 +1598,6 @@
     "id": "construct",
     "matches": "www.construct.net",
     "excludeMatches": ["preview.construct.net", "editor.construct.net"],
-    "includeSelectors": ["aside", "div.manualContent"],
     "forceInlineSelectors": ["a.forumLink"],
     "injectedCss": "td.location a#LocationLink { padding-top: 4px; }\ndiv.articleMain .tutCourseWrap { align-items: flex-start; }",
     "excludeSelectors.add": [
@@ -1728,8 +1721,7 @@
   },
   {
     "id": "android",
-    "matches": ["developer.android.google.cn", "developer.android.com"],
-    "includeSelectors": ["aside", "google-codelab-step"]
+    "matches": ["developer.android.google.cn", "developer.android.com"]
   },
   {
     "id": "ft",
@@ -1738,8 +1730,7 @@
   },
   {
     "id": "microsoft",
-    "matches": "https://apps.microsoft.com/store/detail/*",
-    "includeSelectors": ["pre"],
+    "matches": ["https://apps.microsoft.com/store/detail/*", "https://apps.microsoft.com/detail/*"],
     "injectedCss": ".line-clamp { -webkit-line-clamp:unset;max-height:unset; }"
   },
   {
@@ -1824,7 +1815,6 @@
       ".ReviewContentCtn .title",
       ".author_counts,.control_block,.vote_info"
     ],
-    "includeSelectors": [".game_page_autocollapse_ctn iframe"],
     "forceInlineSelectors": [".pulldown"],
     "injectedCss": ".game_description_snippet { max-height:unset; overflow: scroll; }\n.game_purchase_area_friends_want { height: auto; padding-bottom: 6px; }\n.div.early_access_banner { height: 84px; }\n.franchise_notice > * { height: 84px; }"
   },
@@ -1940,7 +1930,6 @@
   {
     "id": "wandb",
     "matches": "wandb.ai",
-    "includeSelectors": [".report-page-top"],
     "preserveTextSelectors.add": ["span[data-slate-inline=true]"]
   },
   {
@@ -1967,8 +1956,7 @@
   {
     "id": "thehackernews",
     "matches": "thehackernews.com",
-    "excludeSelectors": ["span#blog-pager-older-link", "span.h-datetime"],
-    "includeSelectors": [".pop-title"]
+    "excludeSelectors": ["span#blog-pager-older-link", "span.h-datetime"]
   },
   {
     "id": "brown",
@@ -2022,7 +2010,7 @@
   {
     "id": "ubuntu",
     "matches": "manpages.ubuntu.com",
-    "includeSelectors": ["pre"]
+    "includeSelectors": ["#manpage-content"]
   },
   {
     "id": "spiedigitallibrary",
@@ -3251,7 +3239,6 @@
       "[data-testid^=replyBtn]",
       "[aria-label='View profile']"
     ],
-    "forceBlockSelectors.remove": ["button"],
     "injectedCss.add": [
       ".r-xoduu5 {display:inline!important;}",
       "[style*='-webkit-line-clamp'] {-webkit-line-clamp:unset!important;}"
@@ -4345,6 +4332,7 @@
     "excludeSelectors": [
       "[id^=\"message-username\"]",
       "span[class*=\"-timestamp\"]",
+      "div[id^=\"message-content\"] > span[class*=\"timestamp_\"]",
       "div[class*=\"-repliedMessage\"]",
       "li[class*=\"-containerDefault\"]",
       "[class*=\"-subtitleContainer\"]",

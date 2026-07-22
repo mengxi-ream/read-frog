@@ -1,5 +1,25 @@
 # @read-frog/extension
 
+## 1.42.2
+
+### Patch Changes
+
+- [#1924](https://github.com/mengxi-ream/read-frog/pull/1924) [`54be927`](https://github.com/mengxi-ream/read-frog/commit/54be927e5a7143b88063344ddf850641f089a34a) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(selection-toolbar): keep selection tools above page stacking contexts
+
+- [#1924](https://github.com/mengxi-ream/read-frog/pull/1924) [`54be927`](https://github.com/mengxi-ream/read-frog/commit/54be927e5a7143b88063344ddf850641f089a34a) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(selection-toolbar): keep selection tools interactive in modal dialogs
+
+- [#1920](https://github.com/mengxi-ream/read-frog/pull/1920) [`46b40da`](https://github.com/mengxi-ream/read-frog/commit/46b40da86607e2c27b6573b08a09bd76562b33bf) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translate): recover bilingual translations when sites rewrite wrapper content, and unclamp CNBC card titles
+
+- [#1922](https://github.com/mengxi-ream/read-frog/pull/1922) [`9860788`](https://github.com/mengxi-ream/read-frog/commit/98607883b432931ddd39d33705cff42351ebe1a2) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translate): reduce the default request burst capacity to 20
+
+## 1.42.1
+
+### Patch Changes
+
+- [#1915](https://github.com/mengxi-ream/read-frog/pull/1915) [`e5464f3`](https://github.com/mengxi-ream/read-frog/commit/e5464f35285168193f1bcafd27896a5557ff2e8b) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translate): restore ChatGPT assistant response translation
+
+- [#1913](https://github.com/mengxi-ream/read-frog/pull/1913) [`6a6900a`](https://github.com/mengxi-ream/read-frog/commit/6a6900aa46957725d375335d5e52d28415140a97) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(providers): remove the Atlas Cloud credential workaround after the upstream fix
+
 ## 1.42.0
 
 ### Minor Changes

@@ -100,7 +100,6 @@ describe("TranslationCard copy feedback", () => {
       data: { tooltipStyle: true },
       id: "translation-copy-provider-1",
       positionerProps: { anchor: copyButton, sideOffset: 6 },
-      timeout: 2000,
       title: "translationHub.copiedToClipboard",
     })
   })

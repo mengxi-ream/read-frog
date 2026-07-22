@@ -158,7 +158,6 @@ describe("ProvidersConfig", () => {
     expect(anchoredToastAddMock).toHaveBeenCalledWith({
       id: "provider-disable-provider-1",
       positionerProps: { anchor: providerSwitch, sideOffset: 6 },
-      timeout: 5000,
       title: "options.apiProviders.form.providerInUseCannotDisable:Long Provider Name|1",
       type: "error",
     })

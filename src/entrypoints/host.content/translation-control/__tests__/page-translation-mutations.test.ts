@@ -397,6 +397,7 @@ describe("pageTranslationManager mutation re-walk", () => {
       status: "active",
       walkId: "walk-id",
       wrapper,
+      wrapperTextContent: null,
     }
     registerBilingualTranslationState(state)
     mockTranslateNodesBilingualMode.mockImplementation(async () => {
@@ -436,6 +437,7 @@ describe("pageTranslationManager mutation re-walk", () => {
         status: "active",
         walkId: "walk-id",
         wrapper,
+        wrapperTextContent: null,
       }
       tweet.append(wrapper)
       registerBilingualTranslationState(state)
@@ -496,6 +498,7 @@ describe("pageTranslationManager mutation re-walk", () => {
         status: "active",
         walkId,
         wrapper,
+        wrapperTextContent: null,
       }
       tweet.append(wrapper)
       registerBilingualTranslationState(state)
@@ -590,6 +593,7 @@ describe("pageTranslationManager mutation re-walk", () => {
       status: "active",
       walkId: "walk-id",
       wrapper,
+      wrapperTextContent: null,
     }
     registerBilingualTranslationState(state)
     await flushDomUpdates()
@@ -636,6 +640,7 @@ describe("pageTranslationManager mutation re-walk", () => {
         status: "active",
         walkId: "walk-id",
         wrapper,
+        wrapperTextContent: null,
       }
       registerBilingualTranslationState(state)
       return state
@@ -693,6 +698,7 @@ describe("pageTranslationManager mutation re-walk", () => {
       status: "active",
       walkId: "walk-id",
       wrapper,
+      wrapperTextContent: null,
     }
     registerBilingualTranslationState(state)
     await flushDomUpdates()
@@ -709,6 +715,199 @@ describe("pageTranslationManager mutation re-walk", () => {
     expect(mockTranslateNodesBilingualMode).toHaveBeenCalledWith([tweet], "walk-id", DEFAULT_CONFIG)
 
     manager.stop()
+  })
+
+  it("retranslates when the site rewrites text inside our wrapper (#1918)", async () => {
+    document.body.innerHTML = `
+      <p id="tweet"><span id="source">English title</span></p>
+    `
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const tweet = document.getElementById("tweet") as HTMLElement
+    const wrapper = document.createElement("span")
+    wrapper.className = "notranslate read-frog-translated-content-wrapper"
+    wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+    wrapper.append("中文译文")
+    tweet.append(wrapper)
+    const state: BilingualTranslationState = {
+      layoutSource: tweet,
+      sourceTextContent: "English title",
+      status: "active",
+      walkId: "walk-id",
+      wrapper,
+      wrapperTextContent: wrapper.textContent,
+    }
+    registerBilingualTranslationState(state)
+    await flushDomUpdates()
+    mockTranslateNodesBilingualMode.mockClear()
+    mockTranslateNodesBilingualMode.mockImplementation(async () => {
+      unregisterBilingualTranslationState(state)
+    })
+
+    // CNBC-style truncation script: a characterData write on the text node
+    // INSIDE our wrapper, replacing the translation with clipped English.
+    const translatedTextNode = wrapper.firstChild as Text
+    translatedTextNode.data = "English title…"
+    await flushDomUpdates()
+
+    expect(mockWalkAndLabelElement).toHaveBeenCalledWith(tweet, "walk-id", DEFAULT_CONFIG)
+    expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(1)
+    expect(mockTranslateNodesBilingualMode).toHaveBeenCalledWith([tweet], "walk-id", DEFAULT_CONFIG)
+
+    manager.stop()
+  })
+
+  it("retranslates when the site replaces our translated node inside the wrapper (#1918)", async () => {
+    document.body.innerHTML = `
+      <p id="tweet"><span id="source">English title</span></p>
+    `
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const tweet = document.getElementById("tweet") as HTMLElement
+    const wrapper = document.createElement("span")
+    wrapper.className = "notranslate read-frog-translated-content-wrapper"
+    wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+    wrapper.append("中文译文")
+    tweet.append(wrapper)
+    const state: BilingualTranslationState = {
+      layoutSource: tweet,
+      sourceTextContent: "English title",
+      status: "active",
+      walkId: "walk-id",
+      wrapper,
+      wrapperTextContent: wrapper.textContent,
+    }
+    registerBilingualTranslationState(state)
+    await flushDomUpdates()
+    mockTranslateNodesBilingualMode.mockClear()
+    mockTranslateNodesBilingualMode.mockImplementation(async () => {
+      unregisterBilingualTranslationState(state)
+    })
+
+    // Framework-style childList tamper: our text node swapped for a site span.
+    const siteSpan = document.createElement("span")
+    siteSpan.textContent = "English title…"
+    wrapper.replaceChildren(siteSpan)
+    await flushDomUpdates()
+
+    expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(1)
+    expect(mockTranslateNodesBilingualMode).toHaveBeenCalledWith([tweet], "walk-id", DEFAULT_CONFIG)
+
+    manager.stop()
+  })
+
+  it("ignores in-wrapper mutations that leave the wrapper text unchanged (#1918)", async () => {
+    document.body.innerHTML = `
+      <p id="tweet"><span id="source">English title</span></p>
+    `
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const tweet = document.getElementById("tweet") as HTMLElement
+    const wrapper = document.createElement("span")
+    wrapper.className = "notranslate read-frog-translated-content-wrapper"
+    wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+    wrapper.append("中文译文")
+    tweet.append(wrapper)
+    const state: BilingualTranslationState = {
+      layoutSource: tweet,
+      sourceTextContent: "English title",
+      status: "active",
+      walkId: "walk-id",
+      wrapper,
+      wrapperTextContent: wrapper.textContent,
+    }
+    registerBilingualTranslationState(state)
+    await flushDomUpdates()
+    mockWalkAndLabelElement.mockClear()
+    mockTranslateNodesBilingualMode.mockClear()
+
+    // Node identity churn with identical text (React re-render writing the
+    // same content) must stay classified as self-inflicted noise.
+    wrapper.replaceChildren(document.createTextNode("中文译文"))
+    await flushDomUpdates()
+
+    expect(mockWalkAndLabelElement).not.toHaveBeenCalled()
+    expect(mockTranslateNodesBilingualMode).not.toHaveBeenCalled()
+
+    unregisterBilingualTranslationState(state)
+    manager.stop()
+  })
+
+  it("caps tamper-driven retranslation passes behind the budget (#1918)", async () => {
+    vi.useFakeTimers()
+    const flushWithFakeTimers = async (rounds = 4) => {
+      for (let i = 0; i < rounds; i++) {
+        await Promise.resolve()
+        await vi.advanceTimersByTimeAsync(0)
+        await Promise.resolve()
+      }
+    }
+
+    try {
+      document.body.innerHTML = `
+        <p id="tweet"><span id="source">English title</span></p>
+      `
+
+      const manager = new PageTranslationManager()
+      await manager.start()
+      await flushWithFakeTimers()
+
+      const tweet = document.getElementById("tweet") as HTMLElement
+      const wrapper = document.createElement("span")
+      wrapper.className = "notranslate read-frog-translated-content-wrapper"
+      wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+      wrapper.append("译文 0")
+      tweet.append(wrapper)
+      const translatedTextNode = wrapper.firstChild as Text
+      // Snapshot never matches the wrapper, so every in-wrapper rewrite marks
+      // the source stale — a site truncation script fighting our repairs.
+      const state: BilingualTranslationState = {
+        layoutSource: tweet,
+        sourceTextContent: "English title",
+        status: "active",
+        walkId: "walk-id",
+        wrapper,
+        wrapperTextContent: "expected 译文",
+      }
+      registerBilingualTranslationState(state)
+      await flushWithFakeTimers()
+      mockTranslateNodesBilingualMode.mockClear()
+
+      let churn = 0
+      mockTranslateNodesBilingualMode.mockImplementation(async () => {
+        churn += 1
+        translatedTextNode.data = `译文 ${churn}`
+        await flushWithFakeTimers(2)
+      })
+
+      translatedTextNode.data = "译文 start"
+      await flushWithFakeTimers(8)
+
+      // Same #1831 protections, new record class: per-invocation pass cap…
+      expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(3)
+      expect((manager as any).pendingRetranslateRetries.size).toBe(1)
+
+      // …then the debounced retry burns the rest of the per-window budget.
+      await vi.advanceTimersByTimeAsync(1000)
+      await flushWithFakeTimers()
+      expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(6)
+
+      manager.stop()
+      expect((manager as any).pendingRetranslateRetries.size).toBe(0)
+
+      unregisterBilingualTranslationState(state)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it("caps retranslation passes and defers perpetual churn behind a debounced retry (#1831)", async () => {
@@ -744,6 +943,7 @@ describe("pageTranslationManager mutation re-walk", () => {
         status: "active",
         walkId: "walk-id",
         wrapper,
+        wrapperTextContent: null,
       }
       registerBilingualTranslationState(state)
       await flushWithFakeTimers()

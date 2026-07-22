@@ -4,7 +4,7 @@ export const MIN_BATCH_CHARACTERS = 1
 export const MIN_BATCH_ITEMS = 1
 
 export const DEFAULT_REQUEST_RATE = 8
-export const DEFAULT_REQUEST_CAPACITY = 60
+export const DEFAULT_REQUEST_CAPACITY = 20
 
 export const DEFAULT_MAX_CHARACTER_PER_BATCH = 1000
 export const DEFAULT_MAX_ITEMS_PER_BATCH = 4

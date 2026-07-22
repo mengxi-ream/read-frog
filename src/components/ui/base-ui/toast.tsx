@@ -261,6 +261,9 @@ export const toastManager: ReturnType<typeof Toast.createToastManager> = Toast.c
 export const anchoredToastManager: ReturnType<typeof Toast.createToastManager> =
   Toast.createToastManager()
 
+const DEFAULT_TOAST_TIMEOUT = 5000
+const DEFAULT_ANCHORED_TOAST_TIMEOUT = 3000
+
 export interface ToastProviderProps extends Toast.Provider.Props {
   position?: ToastPosition
   portalProps?: ComponentProps<typeof Toast.Portal>
@@ -271,11 +274,12 @@ export function ToastProvider({
   children,
   position = "bottom-right",
   portalProps,
+  timeout = DEFAULT_TOAST_TIMEOUT,
   viewportProps,
   ...props
 }: ToastProviderProps): ReactElement {
   return (
-    <Toast.Provider toastManager={toastManager} {...props}>
+    <Toast.Provider toastManager={toastManager} timeout={timeout} {...props}>
       {children}
       <Toasts position={position} portalProps={portalProps} viewportProps={viewportProps} />
     </Toast.Provider>
@@ -289,10 +293,11 @@ export interface AnchoredToastProviderProps extends Toast.Provider.Props {
 export function AnchoredToastProvider({
   children,
   portalProps,
+  timeout = DEFAULT_ANCHORED_TOAST_TIMEOUT,
   ...props
 }: AnchoredToastProviderProps): ReactElement {
   return (
-    <Toast.Provider toastManager={anchoredToastManager} {...props}>
+    <Toast.Provider toastManager={anchoredToastManager} timeout={timeout} {...props}>
       {children}
       <AnchoredToasts portalProps={portalProps} />
     </Toast.Provider>

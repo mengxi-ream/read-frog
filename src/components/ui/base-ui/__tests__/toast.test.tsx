@@ -37,6 +37,7 @@ function renderAnchoredToastProvider(
 }
 
 afterEach(() => {
+  vi.useRealTimers()
   act(() => toastManager.close())
   act(() => anchoredToastManager.close())
   shadowHost?.remove()
@@ -44,6 +45,25 @@ afterEach(() => {
 })
 
 describe("ToastProvider", () => {
+  it("auto-dismisses non-anchored toasts after five seconds by default", () => {
+    vi.useFakeTimers()
+    renderToastProvider()
+    const onClose = vi.fn<() => void>()
+
+    act(() => {
+      toastManager.add({ onClose, title: "Default timeout" })
+      vi.advanceTimersByTime(4999)
+    })
+
+    expect(onClose).not.toHaveBeenCalled()
+
+    act(() => {
+      vi.advanceTimersByTime(1)
+    })
+
+    expect(onClose).toHaveBeenCalledOnce()
+  })
+
   it("portals a bottom-right viewport into the requested shadow root", () => {
     const shadowRoot = renderToastProvider({
       className: "custom-viewport",
@@ -129,6 +149,32 @@ describe("ToastProvider", () => {
 })
 
 describe("AnchoredToastProvider", () => {
+  it("auto-dismisses anchored toasts after three seconds by default", () => {
+    vi.useFakeTimers()
+    renderAnchoredToastProvider()
+    const anchor = document.createElement("button")
+    const onClose = vi.fn<() => void>()
+    document.body.append(anchor)
+
+    act(() => {
+      anchoredToastManager.add({
+        onClose,
+        positionerProps: { anchor },
+        title: "Anchored default timeout",
+      })
+      vi.advanceTimersByTime(2999)
+    })
+
+    expect(onClose).not.toHaveBeenCalled()
+
+    act(() => {
+      vi.advanceTimersByTime(1)
+    })
+
+    expect(onClose).toHaveBeenCalledOnce()
+    anchor.remove()
+  })
+
   it("portals a tooltip-style toast into the requested shadow root", async () => {
     const shadowRoot = renderAnchoredToastProvider()
     const anchor = document.createElement("button")

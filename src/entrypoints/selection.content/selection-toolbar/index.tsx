@@ -1,3 +1,4 @@
+import type { ModalDialogHostController } from "./modal-dialog-host"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react"
 import {
@@ -17,6 +18,7 @@ import {
 } from "./atoms"
 import { CloseButton, DropEvent } from "./close-button"
 import { SelectionToolbarCustomActionButtons } from "./custom-action-button"
+import { createModalDialogHostController } from "./modal-dialog-host"
 import {
   collectSelectionScrollTargets,
   createSelectionAnchorTracker,
@@ -185,6 +187,7 @@ export function SelectionToolbar() {
   const selectionDirectionRef = useRef<SelectionDirection>(SelectionDirection.BOTTOM_RIGHT) // store selection direction
   const selectionAnchorTrackerRef = useRef<ReturnType<typeof createSelectionAnchorTracker>>(null)
   const selectionScrollTargetsRef = useRef<Array<Element | ShadowRoot>>([])
+  const modalDialogHostControllerRef = useRef<ModalDialogHostController>(null)
   const isPointerDownInsideOverlayRef = useRef(false)
   const preserveSelectionStateRef = useRef(false)
   const [isSelectionToolbarVisible, setIsSelectionToolbarVisible] = useAtom(
@@ -194,6 +197,27 @@ export function SelectionToolbar() {
   const clearSelectionState = useSetAtom(clearSelectionStateAtom)
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const dropdownOpenRef = useRef(false)
+
+  const placeHostForSelection = useCallback(
+    (ranges: Parameters<ModalDialogHostController["placeForRanges"]>[0]) => {
+      const root = tooltipContainerRef.current?.getRootNode()
+      if (!(root instanceof ShadowRoot) || !(root.host instanceof HTMLElement)) {
+        return
+      }
+
+      modalDialogHostControllerRef.current ??= createModalDialogHostController(root.host)
+      modalDialogHostControllerRef.current.placeForRanges(ranges)
+    },
+    [],
+  )
+
+  useEffect(
+    () => () => {
+      modalDialogHostControllerRef.current?.dispose()
+      modalDialogHostControllerRef.current = null
+    },
+    [],
+  )
 
   const updatePosition = useCallback(
     ({ remeasureSelection = false }: { remeasureSelection?: boolean } = {}) => {
@@ -216,14 +240,6 @@ export function SelectionToolbar() {
           selectionScrollTargetsRef.current = []
           selectionPositionRef.current = null
           clearSelectionState()
-          setIsSelectionToolbarVisible(false)
-          return
-        }
-
-        if (measurement.status === "offscreen") {
-          selectionAnchorTrackerRef.current = null
-          selectionScrollTargetsRef.current = []
-          selectionPositionRef.current = null
           setIsSelectionToolbarVisible(false)
           return
         }
@@ -362,6 +378,8 @@ export function SelectionToolbar() {
 
         if (selectionSnapshot) {
           preserveSelectionStateRef.current = false
+          // Enter a native modal's top layer before React measures or shows the toolbar.
+          placeHostForSelection(selectionSnapshot.ranges)
           setSelectionState({
             selection: selectionSnapshot,
             context: buildContextSnapshot(selectionSnapshot),
@@ -458,7 +476,7 @@ export function SelectionToolbar() {
       document.removeEventListener("mousedown", handleMouseDown)
       document.removeEventListener("selectionchange", handleSelectionChange)
     }
-  }, [clearSelectionState, setIsSelectionToolbarVisible, setSelectionState])
+  }, [clearSelectionState, placeHostForSelection, setIsSelectionToolbarVisible, setSelectionState])
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -482,7 +500,7 @@ export function SelectionToolbar() {
   return (
     <div
       ref={tooltipContainerRef}
-      className={`${NOTRANSLATE_CLASS} pointer-events-none fixed inset-0`}
+      className={`${NOTRANSLATE_CLASS} pointer-events-none fixed inset-0 ${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay}`}
       {...{ [SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE]: "" }}
     >
       {selectionToolbar.enabled && !isSiteDisabled && hasAnyEnabledFeature && (

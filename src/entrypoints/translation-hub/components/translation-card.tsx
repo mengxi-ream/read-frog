@@ -106,7 +106,6 @@ export function TranslationCard({
           anchor: copyButtonRef.current,
           sideOffset: 6,
         },
-        timeout: 2000,
         title: i18n.t("translationHub.copiedToClipboard"),
       })
     }

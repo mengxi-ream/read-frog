@@ -78,6 +78,16 @@ describe("built-in site rules", () => {
     expect(invalid).toEqual([])
   })
 
+  // CNBC clamps card titles via an INLINE style (-webkit-line-clamp:3), which
+  // only an !important declaration can override — without it the rule is a
+  // no-op and the injected translation stays clipped.
+  // See https://github.com/mengxi-ream/read-frog/issues/1918
+  it("unclamps CNBC card titles with !important (issue #1918)", () => {
+    const resolved = resolveSiteRule("https://www.cnbc.com/", BUILT_IN_SITE_RULES, [], [])
+    expect(resolved.injectedCss).toContain("-webkit-line-clamp: unset !important")
+    expect(resolved.injectedCss).toContain("max-height: unset !important")
+  })
+
   // Vercel `prose-vercel` docs hide `[data-docs-heading] a span`, which also
   // hides Read Frog's injected wrapper once it lands inside the heading anchor.
   // See https://github.com/mengxi-ream/read-frog/issues/1050
@@ -92,6 +102,18 @@ describe("built-in site rules", () => {
       )
       expect(resolved.injectedCss).toContain("visibility:visible!important")
     }
+  })
+
+  it("does not restrict Steam app pages to an obsolete iframe include (issue #1923)", () => {
+    const resolved = resolveSiteRule(
+      "https://store.steampowered.com/app/2453660/Hoop_Land/",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+
+    expect(resolved.matchedRuleIds).toContain("steampoweredApp")
+    expect(resolved.includeSelector).toBeNull()
   })
 
   it("keeps the youtube rule in sync with the subtitle class constants", () => {
@@ -131,5 +153,88 @@ describe("built-in site rules", () => {
     // vote button with its login tooltip. Post bodies live outside both bars.
     expect(resolved.excludeSelector).toContain(".forum-topbar")
     expect(resolved.excludeSelector).toContain(".forum-bottombar")
+  })
+
+  it("does not restrict migrated sites to stale include selectors", () => {
+    const restoredSites = [
+      ["newyorker", "https://www.newyorker.com/news/the-lede/example"],
+      ["scmp", "https://www.scmp.com/news/china/politics/article/example"],
+      ["android", "https://developer.android.com/develop/ui/compose/documentation"],
+      ["thehackernews", "https://thehackernews.com/2026/07/example.html"],
+      ["artstationLearning", "https://www.artstation.com/learning/courses/example"],
+      ["artstationBlog", "https://www.artstation.com/blogs/example/example"],
+      ["figmaCommunity", "https://www.figma.com/community/file/example"],
+      ["construct", "https://www.construct.net/en/forum"],
+      ["construct", "https://www.construct.net/en/make-games/manuals/construct-3"],
+      ["wandb", "https://wandb.ai/site/reports/"],
+      [
+        "wandb",
+        "https://wandb.ai/stacey/estuary/reports/When-Inception-ResNet-V2-is-too-slow--Vmlldzo3MDcxMA",
+      ],
+    ] as const
+
+    for (const [id, url] of restoredSites) {
+      const resolved = resolveSiteRule(url, BUILT_IN_SITE_RULES, [], [])
+      expect(resolved.matchedRuleIds).toContain(id)
+      expect(resolved.includeSelector).toBeNull()
+    }
+  })
+
+  it("matches current Microsoft Store URLs without a dead PRE-only scope", () => {
+    for (const url of [
+      "https://apps.microsoft.com/store/detail/example/9nksqgp7f2nh",
+      "https://apps.microsoft.com/detail/9nksqgp7f2nh",
+    ]) {
+      const microsoft = resolveSiteRule(url, BUILT_IN_SITE_RULES, [], [])
+
+      expect(microsoft.matchedRuleIds).toContain("microsoft")
+      expect(microsoft.includeSelector).toBeNull()
+    }
+  })
+
+  it("uses class selectors for ArtStation blog card chrome", () => {
+    const rule = BUILT_IN_SITE_RULES.find((candidate) => candidate.id === "artstationBlog")
+    expect(rule?.excludeSelectors).toContain(".blog-card-thumbnail")
+    expect(rule?.excludeSelectors).toContain(".blog-card-header")
+    expect(rule?.excludeSelectors).not.toContain("blog-card-thumbnail")
+    expect(rule?.excludeSelectors).not.toContain("blog-card-header")
+
+    const resolved = resolveSiteRule(
+      "https://www.artstation.com/blogs",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+    expect(resolved.excludeSelector).toContain(".blog-card-thumbnail")
+    expect(resolved.excludeSelector).toContain(".blog-card-header")
+  })
+
+  it("does not ship a strict scope that only targets hard-blocked PRE content", () => {
+    const preOnlyRules = BUILT_IN_SITE_RULES.filter(
+      (rule) =>
+        rule.includeSelectors?.length === 1 &&
+        rule.includeSelectors[0].trim().toLowerCase() === "pre",
+    )
+
+    expect(preOnlyRules).toEqual([])
+  })
+
+  it("retains independently verified content roots that cover their full match scope", () => {
+    const paulGraham = resolveSiteRule(
+      "https://paulgraham.com/greatwork.html",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+    expect(paulGraham.includeSelector).toBe("font[face=verdana]")
+
+    const ubuntu = resolveSiteRule(
+      "https://manpages.ubuntu.com/manpages/noble/man1/ls.1.html",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+    expect(ubuntu.matchedRuleIds).toContain("ubuntu")
+    expect(ubuntu.includeSelector).toBe("#manpage-content")
   })
 })
