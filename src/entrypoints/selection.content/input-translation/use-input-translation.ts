@@ -2,7 +2,9 @@ import { useAtom } from "jotai"
 import { useCallback, useEffect, useRef } from "react"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureAttempt } from "@/utils/analytics"
+import { classifyProviderConfig } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { getProviderConfigById } from "@/utils/config/helpers"
 import { INPUT_REPLACE_REQUEST_TYPE } from "@/utils/constants/input-injector"
 import { translateTextForInput } from "@/utils/host/translate/translate-variants"
 
@@ -121,6 +123,7 @@ function setTextWithUndo(
 
 export function useInputTranslation() {
   const [inputTranslationConfig] = useAtom(configFieldsAtomMap.inputTranslation)
+  const [providersConfig] = useAtom(configFieldsAtomMap.providersConfig)
   const spaceTimestampsRef = useRef<number[]>([])
   const isTranslatingRef = useRef(false)
 
@@ -183,10 +186,15 @@ export function useInputTranslation() {
 
       try {
         const translatedText = await trackFeatureAttempt(
-          createFeatureUsageContext(
-            ANALYTICS_FEATURE.INPUT_TRANSLATION,
-            ANALYTICS_SURFACE.INPUT_TRANSLATION,
-          ),
+          {
+            ...createFeatureUsageContext(
+              ANALYTICS_FEATURE.INPUT_TRANSLATION,
+              ANALYTICS_SURFACE.INPUT_TRANSLATION,
+            ),
+            ...classifyProviderConfig(
+              getProviderConfigById(providersConfig, inputTranslationConfig.providerId),
+            ),
+          },
           () => translateTextForInput(text, fromLang, toLang),
         )
 
@@ -215,6 +223,8 @@ export function useInputTranslation() {
       inputTranslationConfig.fromLang,
       inputTranslationConfig.toLang,
       inputTranslationConfig.enableCycle,
+      inputTranslationConfig.providerId,
+      providersConfig,
     ],
   )
 

@@ -1,4 +1,4 @@
-import type { PostHog } from "posthog-js/dist/module.no-external"
+import type { CaptureResult, PostHog } from "posthog-js/dist/module.no-external"
 import type { FeatureUsageCache } from "../analytics-feature-cache"
 import type {
   FeatureUsedEventProperties,
@@ -21,6 +21,11 @@ type MessageHandler<TData, TResult = void> = (message: {
 type PostHogCaptureMock = (...args: Parameters<PostHog["capture"]>) => void
 type PostHogInitMock = (...args: Parameters<PostHog["init"]>) => void
 type PostHogRegisterMock = (...args: Parameters<PostHog["register"]>) => void
+
+const DEFAULT_FEATURE_PROVIDER = {
+  provider: "openai",
+  backend_kind: "llm",
+} as const
 
 describe("background analytics", () => {
   let trackFeatureUsedEventHandler: MessageHandler<FeatureUsedEventProperties> | undefined
@@ -159,6 +164,7 @@ describe("background analytics", () => {
         surface: "popup",
         outcome: "success",
         latency_ms: 1_500,
+        ...DEFAULT_FEATURE_PROVIDER,
       },
     })
 
@@ -191,9 +197,34 @@ describe("background analytics", () => {
       surface: "popup",
       outcome: "success",
       latency_ms: 1_500,
+      ...DEFAULT_FEATURE_PROVIDER,
       target_language: "cmn",
     })
     expect(storageSetItemMock).not.toHaveBeenCalled()
+  })
+
+  it("downgrades legacy feature messages without provider fields to unknown/unknown", async () => {
+    storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
+
+    const { setupAnalyticsMessageHandlers } = createAnalytics()
+    setupAnalyticsMessageHandlers()
+
+    const handler = requireMessageHandler(trackFeatureUsedEventHandler, "trackFeatureUsedEvent")
+    const legacyProperties = {
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 250,
+    } as unknown as FeatureUsedEventProperties
+
+    await handler({ data: legacyProperties })
+
+    expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", {
+      ...legacyProperties,
+      provider: "unknown",
+      backend_kind: "unknown",
+      target_language: "cmn",
+    })
   })
 
   it("adds the configured target language to non-translation feature events", async () => {
@@ -205,6 +236,7 @@ describe("background analytics", () => {
       surface: "tts_settings",
       outcome: "success",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
     })
 
     expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", {
@@ -212,6 +244,7 @@ describe("background analytics", () => {
       surface: "tts_settings",
       outcome: "success",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
       target_language: "cmn",
     })
   })
@@ -224,6 +257,7 @@ describe("background analytics", () => {
       surface: "popup",
       outcome: "success",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
     }
 
     await captureFeatureUsedEventInBackground(properties)
@@ -244,6 +278,7 @@ describe("background analytics", () => {
       surface: "context_menu",
       outcome: "failure",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
       action_id: "dictionary",
       action_name: "Dictionary",
     })
@@ -252,6 +287,7 @@ describe("background analytics", () => {
       surface: "selection_toolbar",
       outcome: "success",
       latency_ms: 200,
+      ...DEFAULT_FEATURE_PROVIDER,
       action_id: "explain",
       action_name: "Explain",
     })
@@ -262,6 +298,7 @@ describe("background analytics", () => {
       surface: "context_menu",
       outcome: "failure",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
       action_id: "dictionary",
       action_name: "Dictionary",
       target_language: "cmn",
@@ -281,12 +318,14 @@ describe("background analytics", () => {
       surface: "popup",
       outcome: "success",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
     })
     await captureFeatureUsedEventInBackground({
       feature: "text_to_speech",
       surface: "tts_settings",
       outcome: "success",
       latency_ms: 200,
+      ...DEFAULT_FEATURE_PROVIDER,
     })
 
     expect(posthogCaptureMock).toHaveBeenCalledTimes(2)
@@ -305,6 +344,7 @@ describe("background analytics", () => {
       surface: "selection_toolbar",
       outcome: "success",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
       action_id: "suggestion_shown",
     })
     await captureFeatureUsedEventInBackground({
@@ -312,6 +352,7 @@ describe("background analytics", () => {
       surface: "selection_toolbar",
       outcome: "success",
       latency_ms: 200,
+      ...DEFAULT_FEATURE_PROVIDER,
       action_id: "suggestion_accepted",
     })
 
@@ -334,6 +375,7 @@ describe("background analytics", () => {
       surface: "popup",
       outcome: "success",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
     }
 
     await captureFeatureUsedEventInBackground(properties)
@@ -357,6 +399,7 @@ describe("background analytics", () => {
       surface: "popup",
       outcome: "success",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
     }
 
     await Promise.all([
@@ -377,6 +420,7 @@ describe("background analytics", () => {
       surface: "popup",
       outcome: "success",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
     }
 
     await createAnalytics({ featureUsageCache: cache }).captureFeatureUsedEventInBackground(
@@ -406,6 +450,7 @@ describe("background analytics", () => {
       surface: "popup",
       outcome: "success",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
     })
 
     expect(posthogCaptureMock).toHaveBeenCalledOnce()
@@ -433,6 +478,7 @@ describe("background analytics", () => {
       surface: "popup",
       outcome: "success",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
     })
 
     expect(posthogCaptureMock).toHaveBeenCalledOnce()
@@ -456,6 +502,7 @@ describe("background analytics", () => {
       surface: "popup",
       outcome: "success",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
     }
 
     await captureFeatureUsedEventInBackground(properties)
@@ -474,6 +521,7 @@ describe("background analytics", () => {
       surface: "popup",
       outcome: "success",
       latency_ms: 1_500,
+      ...DEFAULT_FEATURE_PROVIDER,
     })
 
     expect(posthogInitMock).not.toHaveBeenCalled()
@@ -492,6 +540,7 @@ describe("background analytics", () => {
       surface: "popup",
       outcome: "success",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
     })
 
     expect(cache.getLastReportedDay).not.toHaveBeenCalled()
@@ -509,6 +558,7 @@ describe("background analytics", () => {
       surface: "popup",
       outcome: "success",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
     })
 
     expect(posthogInitMock).not.toHaveBeenCalled()
@@ -524,6 +574,7 @@ describe("background analytics", () => {
       surface: "popup",
       outcome: "success",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
     })
 
     expect(storageSetItemMock).toHaveBeenCalledWith(
@@ -557,6 +608,7 @@ describe("background analytics", () => {
       surface: "popup",
       outcome: "success",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
     })
 
     expect(posthogInitMock).toHaveBeenCalledWith(
@@ -581,6 +633,7 @@ describe("background analytics", () => {
       surface: "popup",
       outcome: "success",
       latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
     })
 
     expect(posthogInitMock).toHaveBeenCalledWith(
@@ -608,6 +661,7 @@ describe("background analytics", () => {
       surface: "popup",
       outcome: "failure",
       latency_ms: 42,
+      ...DEFAULT_FEATURE_PROVIDER,
     })
 
     expect(posthogInitMock).not.toHaveBeenCalled()
@@ -616,67 +670,167 @@ describe("background analytics", () => {
     expect(loggerWarnMock).toHaveBeenCalledOnce()
   })
 
-  it("filters PostHog properties down to the allowlist", () => {
-    expect(
-      filterAnalyticsCaptureResult({
-        event: "feature_used",
-        properties: {
-          token: "phc_test",
-          distinct_id: "install-123",
-          feature: "custom_ai_action",
-          surface: "context_menu",
-          outcome: "success",
-          latency_ms: 250,
-          action_id: "dictionary",
-          action_name: "Dictionary",
-          target_language: "cmn",
-          $browser: "Chrome",
-          $browser_version: "145.0.0.0",
-          $insert_id: "insert-123",
-          $time: 1234,
-          $lib: "web",
-          $lib_version: "1.360.2",
-          $process_person_profile: false,
-          extension_version: "1.0.0",
-          backend_kind: "llm",
-          configured_prompt: "default",
-          cohort: "new_user_prompt_experiment_v1",
-          prompt_exposure_age: "d1_d7",
-          $feature_flag: "new-user-default-translate-prompt-v1",
-          $feature_flag_response: "control",
-          $feature_flag_payload: { private: true },
-          $current_url: "chrome-extension://abc/background.js",
-          $raw_user_agent: "Mozilla/5.0",
-          $timezone: "America/Vancouver",
-        },
-        timestamp: new Date("2026-03-16T19:02:43.960Z"),
-        uuid: "test-uuid",
-      }).properties,
-    ).toEqual({
+  it("keeps new safe business properties and coarse runtime information by default", () => {
+    const filtered = filterAnalyticsCaptureResult({
+      event: "feature_used",
+      properties: {
+        token: "phc_test",
+        distinct_id: "install-123",
+        feature: "custom_ai_action",
+        surface: "context_menu",
+        outcome: "success",
+        latency_ms: 250,
+        ...DEFAULT_FEATURE_PROVIDER,
+        new_safe_business_field: "automatically-kept",
+        action_id: "dictionary",
+        action_name: "Dictionary",
+        target_language: "cmn",
+        $browser: "Chrome",
+        $browser_version: "145.0.0.0",
+        $os: "Mac OS X",
+        $os_version: "15.5",
+        $device_type: "Desktop",
+        $timezone: "America/Vancouver",
+        $timezone_offset: 420,
+        $browser_language: "en-US",
+        $insert_id: "insert-123",
+        $time: 1234,
+        $lib: "web",
+        $lib_version: "1.360.2",
+        $process_person_profile: false,
+        extension_version: "1.0.0",
+        configured_prompt: "default",
+        cohort: "new_user_prompt_experiment_v1",
+        prompt_exposure_age: "d1_d7",
+        $feature_flag: "new-user-default-translate-prompt-v1",
+        $feature_flag_response: "control",
+      },
+      timestamp: new Date("2026-03-16T19:02:43.960Z"),
+      uuid: "test-uuid",
+    }).properties
+
+    expect(filtered).toEqual({
       token: "phc_test",
       distinct_id: "install-123",
       feature: "custom_ai_action",
       surface: "context_menu",
       outcome: "success",
       latency_ms: 250,
+      ...DEFAULT_FEATURE_PROVIDER,
+      new_safe_business_field: "automatically-kept",
       action_id: "dictionary",
       action_name: "Dictionary",
       target_language: "cmn",
       $browser: "Chrome",
       $browser_version: "145.0.0.0",
+      $os: "Mac OS X",
+      $os_version: "15.5",
+      $device_type: "Desktop",
+      $timezone: "America/Vancouver",
+      $timezone_offset: 420,
+      $browser_language: "en-US",
       $insert_id: "insert-123",
       $time: 1234,
       $lib: "web",
       $lib_version: "1.360.2",
       $process_person_profile: false,
       extension_version: "1.0.0",
-      backend_kind: "llm",
       configured_prompt: "default",
       cohort: "new_user_prompt_experiment_v1",
       prompt_exposure_age: "d1_d7",
       $feature_flag: "new-user-default-translate-prompt-v1",
       $feature_flag_response: "control",
     })
+  })
+
+  it("recursively removes sensitive, identifying, page, and SDK-internal properties", () => {
+    const captureResult = {
+      event: "feature_used",
+      properties: {
+        token: "phc_root_token_must_survive",
+        distinct_id: "install-123",
+        provider: "openai",
+        backend_kind: "llm",
+        $current_url: "https://private.example/path",
+        page_url: "https://private.example/another-path",
+        href: "https://private.example/link",
+        $host: "private.example",
+        $pathname: "/path",
+        $referrer: "https://referrer.example",
+        title: "Private page title",
+        $raw_user_agent: "full user agent",
+        $device: "Exact hardware model",
+        $screen_width: 3_456,
+        $viewport_height: 1_234,
+        $device_id: "device-id",
+        $session_id: "session-id",
+        $window_id: "window-id",
+        $pageview_id: "pageview-id",
+        $initial_current_url: "https://private.example/initial",
+        $prev_pageview_pathname: "/previous-private-path",
+        $sdk_debug_retry_queue: ["debug"],
+        $config_defaults: "2025-11-30",
+        $lib_custom_api_host: "https://analytics.example",
+        $active_feature_flags: ["flag-a"],
+        $enabled_feature_flags: ["flag-a"],
+        $feature_flag_payload: { private: true },
+        model: "private-model",
+        model_name: "another-private-model",
+        prompt: "private prompt",
+        system_prompt: "private system prompt",
+        provider_options: { private: true },
+        nested: {
+          safe_nested_business_field: true,
+          api_key: "secret-key",
+          access_token: "secret-token",
+          headers: { authorization: "Bearer secret" },
+          rows: [
+            {
+              variant: "control",
+              selection: "private selected text",
+            },
+          ],
+        },
+        $set: {
+          safe_set_property: "kept",
+          content: "private content",
+        },
+        $set_once: {
+          safe_set_once_property: "kept",
+          password: "private password",
+        },
+      },
+      $set: {
+        safe_top_level_set: "kept",
+        base_url: "https://private-provider.example",
+      },
+      $set_once: {
+        safe_top_level_set_once: "kept",
+        instructions: "private instructions",
+      },
+      timestamp: new Date("2026-03-16T19:02:43.960Z"),
+      uuid: "test-uuid",
+    } as unknown as CaptureResult
+
+    const filtered = filterAnalyticsCaptureResult(captureResult) as CaptureResult & {
+      $set?: Record<string, unknown>
+      $set_once?: Record<string, unknown>
+    }
+
+    expect(filtered.properties).toEqual({
+      token: "phc_root_token_must_survive",
+      distinct_id: "install-123",
+      provider: "openai",
+      backend_kind: "llm",
+      nested: {
+        safe_nested_business_field: true,
+        rows: [{ variant: "control" }],
+      },
+      $set: { safe_set_property: "kept" },
+      $set_once: { safe_set_once_property: "kept" },
+    })
+    expect(filtered.$set).toEqual({ safe_top_level_set: "kept" })
+    expect(filtered.$set_once).toEqual({ safe_top_level_set_once: "kept" })
   })
 
   it("enrolls only an explicit fresh install marker without initializing PostHog", async () => {

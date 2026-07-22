@@ -8,10 +8,10 @@ import type {
 } from "@/utils/providers/provider-display"
 import readFrogLogo from "@/assets/providers/read-frog-provider.png?url&no-inline"
 import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
+import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
 import { i18n } from "@/utils/i18n"
 
-// Keep the persisted provider ID stable so existing user configurations continue to work.
-export const BUILT_IN_AI_PROVIDER_ID = "read-frog-free-ai"
+export { BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
 export const BUILT_IN_AI_PROVIDER_LOGO = readFrogLogo
 
 const BUILT_IN_AI_PROVIDER_NAME_KEY = "options.apiProviders.providers.name.builtInAi"

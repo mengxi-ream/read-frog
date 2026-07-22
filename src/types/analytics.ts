@@ -1,3 +1,5 @@
+import type { AllProviderTypes } from "@/types/config/provider"
+
 export const ANALYTICS_FEATURE = {
   PAGE_TRANSLATION: "page_translation",
   SELECTION_TRANSLATION: "selection_translation",
@@ -32,6 +34,23 @@ export type AnalyticsSurface = (typeof ANALYTICS_SURFACE)[keyof typeof ANALYTICS
 
 export type AnalyticsOutcome = "success" | "failure"
 
+export const ANALYTICS_PROVIDER = {
+  BUILT_IN_AI: "read-frog-built-in-ai",
+  EDGE_TTS: "edge-tts",
+  UNKNOWN: "unknown",
+} as const
+
+export type AnalyticsProvider =
+  | AllProviderTypes
+  | (typeof ANALYTICS_PROVIDER)[keyof typeof ANALYTICS_PROVIDER]
+
+export type AnalyticsBackendKind = "llm" | "non_llm" | "unknown"
+
+export interface FeatureProviderAnalytics {
+  provider: AnalyticsProvider
+  backend_kind: AnalyticsBackendKind
+}
+
 export interface FeatureUsageContext {
   feature: AnalyticsFeature
   surface: AnalyticsSurface
@@ -40,7 +59,7 @@ export interface FeatureUsageContext {
   action_name?: string
 }
 
-export interface FeatureUsedEventProperties {
+export interface FeatureUsedEventProperties extends FeatureProviderAnalytics {
   feature: AnalyticsFeature
   surface: AnalyticsSurface
   outcome: AnalyticsOutcome
@@ -58,7 +77,7 @@ export const TRANSLATION_REQUESTED_FEATURE = {
 export type TranslationRequestedFeature =
   (typeof TRANSLATION_REQUESTED_FEATURE)[keyof typeof TRANSLATION_REQUESTED_FEATURE]
 
-export type TranslationBackendKind = "llm" | "non_llm" | "unknown"
+export type TranslationBackendKind = AnalyticsBackendKind
 export type TranslationConfiguredPrompt = "default" | "custom" | "not_applicable" | "unknown"
 export type PromptExposureAge = "not_exposed" | "lt_24h" | "d1_d7" | "gt_7d"
 

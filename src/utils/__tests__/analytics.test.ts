@@ -39,12 +39,16 @@ describe("analytics helpers", () => {
         outcome: "success",
         startedAt: 0,
         finishedAt: 1_500,
+        provider: "openai",
+        backend_kind: "llm",
       }),
     ).toEqual({
       feature: ANALYTICS_FEATURE.PAGE_TRANSLATION,
       surface: ANALYTICS_SURFACE.POPUP,
       outcome: "success",
       latency_ms: 1_500,
+      provider: "openai",
+      backend_kind: "llm",
     })
   })
 
@@ -58,6 +62,8 @@ describe("analytics helpers", () => {
         finishedAt: 600,
         action_id: "dictionary",
         action_name: "Dictionary",
+        provider: "read-frog-built-in-ai",
+        backend_kind: "llm",
       }),
     ).toEqual({
       feature: ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
@@ -66,6 +72,8 @@ describe("analytics helpers", () => {
       latency_ms: 500,
       action_id: "dictionary",
       action_name: "Dictionary",
+      provider: "read-frog-built-in-ai",
+      backend_kind: "llm",
     })
   })
 
@@ -78,6 +86,8 @@ describe("analytics helpers", () => {
       outcome: "success" as const,
       startedAt: 0,
       finishedAt: 1_500,
+      provider: "openai" as const,
+      backend_kind: "llm" as const,
     }
 
     await expect(trackFeatureUsed(input)).resolves.toBeUndefined()
@@ -99,6 +109,8 @@ describe("analytics helpers", () => {
         outcome: "failure",
         startedAt: 0,
         finishedAt: 1_500,
+        provider: "openai",
+        backend_kind: "llm",
       }),
     ).resolves.toBeUndefined()
 

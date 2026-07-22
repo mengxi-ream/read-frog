@@ -1,4 +1,8 @@
-import type { AnalyticsSurface, FeatureUsageContext } from "@/types/analytics"
+import type {
+  AnalyticsSurface,
+  FeatureProviderAnalytics,
+  FeatureUsageContext,
+} from "@/types/analytics"
 import type { TTSConfig } from "@/types/config/tts"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAtomValue } from "jotai"
@@ -6,6 +10,7 @@ import { useRef, useState } from "react"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
+import { EDGE_TTS_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { detectLanguage } from "@/utils/content/language"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
@@ -17,7 +22,7 @@ import { splitTextByUtf8Bytes } from "@/utils/server/edge-tts/chunk"
 interface PlayAudioParams {
   text: string
   ttsConfig: TTSConfig
-  analyticsContext: FeatureUsageContext
+  analyticsContext: FeatureUsageContext & FeatureProviderAnalytics
   forcedVoice?: string
 }
 
@@ -279,7 +284,10 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
       text,
       ttsConfig,
       forcedVoice: options?.forcedVoice,
-      analyticsContext: createFeatureUsageContext(ANALYTICS_FEATURE.TEXT_TO_SPEECH, surface),
+      analyticsContext: {
+        ...createFeatureUsageContext(ANALYTICS_FEATURE.TEXT_TO_SPEECH, surface),
+        ...EDGE_TTS_FEATURE_PROVIDER,
+      },
     })
   }
 

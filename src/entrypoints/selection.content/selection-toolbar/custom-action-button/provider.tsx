@@ -6,6 +6,7 @@ import { toastManager } from "@/components/ui/base-ui/toast"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
+import { classifyResolvedProvider, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { onMessage } from "@/utils/message"
 import {
@@ -260,6 +261,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
               action_id: actionId,
             },
           ),
+          ...UNKNOWN_FEATURE_PROVIDER,
           outcome: "failure",
         })
         toastManager.add({ type: "error", title: nextError.description })
@@ -279,6 +281,13 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
               action_name: action.name,
             },
           ),
+          ...classifyResolvedProvider(
+            resolveProviderRefForCapability(
+              "selectionToolbar.customAction",
+              providersConfig,
+              action.providerId,
+            ),
+          ),
           outcome: "failure",
         })
         toastManager.add({ type: "error", title: nextError.description })
@@ -292,7 +301,12 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
         surface: ANALYTICS_SURFACE.CONTEXT_MENU,
       })
     },
-    [openActionRequest, resolveContextMenuOpenRequest, selectionToolbarConfig.customActions],
+    [
+      openActionRequest,
+      providersConfig,
+      resolveContextMenuOpenRequest,
+      selectionToolbarConfig.customActions,
+    ],
   )
 
   const handleProviderChange = useCallback(
@@ -361,6 +375,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
 
     void trackFeatureUsed({
       ...analyticsContext,
+      ...classifyResolvedProvider(customActionRequest.provider),
       outcome: "failure",
     })
   }, [
@@ -370,6 +385,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
     executionPlan.executionContext,
     isOpen,
     popoverSessionKey,
+    customActionRequest.provider,
     sourceSurface,
   ])
 

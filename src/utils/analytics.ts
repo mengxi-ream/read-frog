@@ -1,6 +1,7 @@
 import type {
   AnalyticsOutcome,
   AnalyticsSurface,
+  FeatureProviderAnalytics,
   FeatureUsageContext,
   FeatureUsedEventProperties,
   TranslationBackendKind,
@@ -14,7 +15,7 @@ import { ANALYTICS_FEATURE_USED_EVENT } from "@/utils/constants/analytics"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
 
-export interface FeatureUsedEventInput extends FeatureUsageContext {
+export interface FeatureUsedEventInput extends FeatureUsageContext, FeatureProviderAnalytics {
   outcome: AnalyticsOutcome
   finishedAt?: number
 }
@@ -45,12 +46,16 @@ export function buildFeatureUsedEventProperties({
   finishedAt = Date.now(),
   action_id,
   action_name,
+  provider,
+  backend_kind,
 }: FeatureUsedEventInput): FeatureUsedEventProperties {
   return {
     feature,
     surface,
     outcome,
     latency_ms: getLatencyMs(startedAt, finishedAt),
+    provider,
+    backend_kind,
     ...(action_id !== undefined ? { action_id } : {}),
     ...(action_name !== undefined ? { action_name } : {}),
   }
@@ -106,7 +111,7 @@ export async function trackTranslationRequested(input: {
 }
 
 export async function trackFeatureAttempt<T>(
-  context: FeatureUsageContext,
+  context: FeatureUsageContext & FeatureProviderAnalytics,
   run: () => Promise<T>,
 ): Promise<T> {
   try {

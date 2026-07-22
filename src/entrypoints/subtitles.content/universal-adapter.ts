@@ -6,6 +6,7 @@ import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
+import { classifyProviderConfig, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
@@ -440,7 +441,18 @@ export class UniversalVideoAdapter {
   }
 
   private async startTranslation(analyticsContext?: FeatureUsageContext) {
+    let providerAnalytics = UNKNOWN_FEATURE_PROVIDER
+
     try {
+      const analyticsConfig = await getLocalConfig()
+      providerAnalytics = classifyProviderConfig(
+        analyticsConfig
+          ? getProviderConfigById(
+              analyticsConfig.providersConfig,
+              analyticsConfig.videoSubtitles.providerId,
+            )
+          : null,
+      )
       const currentVideoId = this.config.getVideoId?.() ?? ""
       const hasCurrentSession =
         this.sessionProcessedFragments.length > 0 && this.sessionVideoId === currentVideoId
@@ -462,6 +474,7 @@ export class UniversalVideoAdapter {
         if (analyticsContext) {
           void trackFeatureUsed({
             ...analyticsContext,
+            ...providerAnalytics,
             outcome: "success",
           })
         }
@@ -485,6 +498,7 @@ export class UniversalVideoAdapter {
       if (analyticsContext) {
         void trackFeatureUsed({
           ...analyticsContext,
+          ...providerAnalytics,
           outcome: "success",
         })
       }
@@ -492,6 +506,7 @@ export class UniversalVideoAdapter {
       if (analyticsContext) {
         void trackFeatureUsed({
           ...analyticsContext,
+          ...providerAnalytics,
           outcome: "failure",
         })
       }

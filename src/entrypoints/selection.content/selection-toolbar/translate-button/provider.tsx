@@ -32,6 +32,7 @@ import {
   trackFeatureUsed,
   trackTranslationRequested,
 } from "@/utils/analytics"
+import { classifyProviderConfig } from "@/utils/analytics-provider"
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
@@ -387,6 +388,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
 
       const requestedProvider =
         translateRequest.provider?.kind === "local" ? translateRequest.provider.config : null
+      const providerAnalytics = classifyProviderConfig(requestedProvider)
       const translationRequestedPromise = trackTranslationRequested({
         feature: TRANSLATION_REQUESTED_FEATURE.SELECTION_TRANSLATION,
         surface: sourceSurface,
@@ -409,6 +411,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
         }
         void trackFeatureUsed({
           ...analyticsContext,
+          ...providerAnalytics,
           outcome: "failure",
         })
         return
@@ -421,6 +424,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
         }
         void trackFeatureUsed({
           ...analyticsContext,
+          ...providerAnalytics,
           outcome: "failure",
         })
         return
@@ -434,6 +438,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
           }
           void trackFeatureUsed({
             ...analyticsContext,
+            ...providerAnalytics,
             outcome: "failure",
           })
           return
@@ -447,6 +452,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
           }
           void trackFeatureUsed({
             ...analyticsContext,
+            ...providerAnalytics,
             outcome: "failure",
           })
           return
@@ -496,6 +502,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
 
         void trackFeatureUsed({
           ...analyticsContext,
+          ...providerAnalytics,
           outcome: "success",
         })
       } catch (caughtError) {
@@ -507,6 +514,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
         if (!isAbortError(caughtError)) {
           void trackFeatureUsed({
             ...analyticsContext,
+            ...providerAnalytics,
             outcome: "failure",
           })
         }

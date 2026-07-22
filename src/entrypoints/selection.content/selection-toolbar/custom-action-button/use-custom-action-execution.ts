@@ -2,7 +2,7 @@ import type { JSONValue } from "ai"
 import type { RefObject } from "react"
 import type { SelectionToolbarCustomActionRequestSlice } from "../atoms"
 import type { SelectionToolbarInlineError } from "../inline-error"
-import type { AnalyticsSurface } from "@/types/analytics"
+import type { AnalyticsSurface, FeatureProviderAnalytics } from "@/types/analytics"
 import type {
   BackgroundStructuredObjectStreamSnapshot,
   ThinkingSnapshot,
@@ -15,6 +15,7 @@ import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
+import { classifyResolvedProvider } from "@/utils/analytics-provider"
 import { streamBackgroundStructuredObject } from "@/utils/content-script/background-stream-client"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { resolveModelId } from "@/utils/providers/model-id"
@@ -54,7 +55,7 @@ interface ResolvedWebPageContext {
 }
 
 interface CustomActionExecutionRequest {
-  analytics: {
+  analytics: FeatureProviderAnalytics & {
     actionId: string
     actionName: string
     surface: AnalyticsSurface
@@ -243,6 +244,7 @@ function buildCustomActionExecutionRequest({
       actionId: action.id,
       actionName: action.name,
       surface: analyticsSurface,
+      ...classifyResolvedProvider(provider),
     },
     key: stringifyExecutionRequestKey({
       actionId: action.id,
@@ -344,6 +346,10 @@ export function useCustomActionExecution({
         action_name: request.analytics.actionName,
       },
     )
+    const providerAnalytics: FeatureProviderAnalytics = {
+      provider: request.analytics.provider,
+      backend_kind: request.analytics.backend_kind,
+    }
 
     const run = async () => {
       setIsRunning(true)
@@ -376,6 +382,7 @@ export function useCustomActionExecution({
         setThinking(finalResult.thinking)
         void trackFeatureUsed({
           ...analyticsContext,
+          ...providerAnalytics,
           outcome: "success",
         })
       } catch (caughtError) {
@@ -391,6 +398,7 @@ export function useCustomActionExecution({
         setError(createSelectionToolbarRuntimeError("customAction", caughtError))
         void trackFeatureUsed({
           ...analyticsContext,
+          ...providerAnalytics,
           outcome: "failure",
         })
       } finally {

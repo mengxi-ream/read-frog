@@ -13,6 +13,7 @@ import {
   trackFeatureUsed,
   trackTranslationRequested,
 } from "@/utils/analytics"
+import { classifyProviderConfig, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
   CONTENT_WRAPPER_CLASS,
@@ -182,6 +183,7 @@ export class PageTranslationManager implements IPageTranslationManager {
         }
         void trackFeatureUsed({
           ...trackedContext,
+          ...UNKNOWN_FEATURE_PROVIDER,
           outcome: "failure",
         })
       }
@@ -189,6 +191,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
 
     const requestedProviderConfig = resolveProviderConfigOrNull(config, "translate")
+    const providerAnalytics = classifyProviderConfig(requestedProviderConfig)
     if (trackedContext && trackedContext.surface !== ANALYTICS_SURFACE.PAGE_AUTO) {
       await trackTranslationRequested({
         feature: TRANSLATION_REQUESTED_FEATURE.PAGE_TRANSLATION,
@@ -210,6 +213,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       if (trackedContext) {
         void trackFeatureUsed({
           ...trackedContext,
+          ...providerAnalytics,
           outcome: "failure",
         })
       }
@@ -304,6 +308,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       if (trackedContext) {
         void trackFeatureUsed({
           ...trackedContext,
+          ...providerAnalytics,
           outcome: "success",
         })
       }
@@ -311,6 +316,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       if (trackedContext) {
         void trackFeatureUsed({
           ...trackedContext,
+          ...providerAnalytics,
           outcome: "failure",
         })
       }

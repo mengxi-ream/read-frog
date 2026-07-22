@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/base-ui/button"
 import { anchoredToastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureAttempt } from "@/utils/analytics"
+import { classifyProviderConfig } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { PROVIDER_ITEMS } from "@/utils/constants/providers"
@@ -51,10 +52,13 @@ export function TranslationCard({
     meta: { suppressToast: true },
     mutationFn: async (req: NonNullable<typeof request>) => {
       return await trackFeatureAttempt(
-        createFeatureUsageContext(
-          ANALYTICS_FEATURE.TRANSLATION_HUB,
-          ANALYTICS_SURFACE.TRANSLATION_HUB,
-        ),
+        {
+          ...createFeatureUsageContext(
+            ANALYTICS_FEATURE.TRANSLATION_HUB,
+            ANALYTICS_SURFACE.TRANSLATION_HUB,
+          ),
+          ...classifyProviderConfig(provider),
+        },
         async () => {
           if (!provider) throw new Error("Provider not found")
 

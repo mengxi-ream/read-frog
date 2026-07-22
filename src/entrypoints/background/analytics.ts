@@ -19,6 +19,7 @@ import {
   PROMPT_EXPERIMENT_COHORT,
   PROMPT_EXPERIMENT_VARIANTS,
 } from "@/types/analytics"
+import { normalizeFeatureProviderAnalytics } from "@/utils/analytics-provider"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
   ANALYTICS_ENABLED_STORAGE_KEY,
@@ -226,14 +227,144 @@ function createDefaultRuntime(): BackgroundAnalyticsRuntime {
 
 type AnalyticsCaptureProperties = Record<string, unknown>
 
-function setPropertyIfDefined(
-  properties: AnalyticsCaptureProperties,
-  key: string,
-  value: unknown,
-): void {
-  if (value !== undefined) {
-    properties[key] = value
+const BLOCKED_ANALYTICS_PROPERTY_KEYS = new Set([
+  "currenturl",
+  "host",
+  "pathname",
+  "referrer",
+  "referringdomain",
+  "url",
+  "href",
+  "title",
+  "rawuseragent",
+  "device",
+  "screenheight",
+  "screenwidth",
+  "viewportheight",
+  "viewportwidth",
+  "deviceid",
+  "sessionid",
+  "windowid",
+  "pageviewid",
+  "configdefaults",
+  "libcustomapihost",
+  "activefeatureflags",
+  "enabledfeatureflags",
+  "featureflagpayload",
+  "featureflagpayloads",
+  "authorization",
+  "credential",
+  "credentials",
+  "secret",
+  "password",
+  "header",
+  "headers",
+  "baseurl",
+  "providerconfig",
+  "provideroptions",
+  "prompt",
+  "instructions",
+  "input",
+  "output",
+  "text",
+  "content",
+  "selection",
+  "html",
+  "model",
+  "modelid",
+])
+
+function normalizeAnalyticsPropertyKey(key: string): string {
+  return key.replaceAll(/[$_\-\s]/g, "").toLowerCase()
+}
+
+function isBlockedAnalyticsProperty(key: string, preserveRootToken: boolean): boolean {
+  const normalizedKey = normalizeAnalyticsPropertyKey(key)
+
+  if (preserveRootToken && key === "token") return false
+  if (BLOCKED_ANALYTICS_PROPERTY_KEYS.has(normalizedKey)) return true
+  if (normalizedKey.startsWith("sdkdebug")) return true
+  if (normalizedKey.startsWith("prevpageview") || normalizedKey.startsWith("previouspageview")) {
+    return true
   }
+  if (normalizedKey.startsWith("screen") || normalizedKey.startsWith("viewport")) return true
+  if (
+    ["url", "href", "host", "hostname", "pathname", "referrer", "title"].some((suffix) =>
+      normalizedKey.endsWith(suffix),
+    )
+  ) {
+    return true
+  }
+  if (
+    normalizedKey.startsWith("initial") &&
+    ["url", "host", "path", "referrer", "domain", "title"].some((part) =>
+      normalizedKey.includes(part),
+    )
+  ) {
+    return true
+  }
+  if (
+    normalizedKey.endsWith("deviceid") ||
+    normalizedKey.endsWith("sessionid") ||
+    normalizedKey.endsWith("windowid") ||
+    normalizedKey.endsWith("pageviewid")
+  ) {
+    return true
+  }
+  if (
+    normalizedKey.endsWith("apikey") ||
+    normalizedKey.endsWith("token") ||
+    normalizedKey.includes("credential") ||
+    normalizedKey.endsWith("secret") ||
+    normalizedKey.endsWith("password") ||
+    normalizedKey.endsWith("authorization") ||
+    normalizedKey.endsWith("header") ||
+    normalizedKey.endsWith("headers") ||
+    normalizedKey.endsWith("providerconfig") ||
+    normalizedKey.endsWith("provideroptions")
+  ) {
+    return true
+  }
+  if (
+    normalizedKey.includes("instructions") ||
+    (normalizedKey.endsWith("prompt") && normalizedKey !== "configuredprompt") ||
+    normalizedKey.endsWith("prompttext") ||
+    normalizedKey.endsWith("inputtext") ||
+    normalizedKey.endsWith("outputtext") ||
+    normalizedKey.endsWith("content") ||
+    normalizedKey.endsWith("selection") ||
+    normalizedKey.endsWith("html") ||
+    normalizedKey.includes("model")
+  ) {
+    return true
+  }
+
+  return false
+}
+
+function sanitizeAnalyticsValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(sanitizeAnalyticsValue)
+  }
+  if (typeof value !== "object" || value === null) {
+    return value
+  }
+
+  return sanitizeAnalyticsProperties(value as AnalyticsCaptureProperties, false)
+}
+
+function sanitizeAnalyticsProperties(
+  properties: AnalyticsCaptureProperties,
+  preserveRootToken: boolean,
+): AnalyticsCaptureProperties {
+  const sanitizedProperties: AnalyticsCaptureProperties = {}
+
+  for (const [key, value] of Object.entries(properties)) {
+    if (isBlockedAnalyticsProperty(key, preserveRootToken)) continue
+    sanitizedProperties[key] = sanitizeAnalyticsValue(value)
+  }
+
+  return sanitizedProperties
 }
 
 export function filterAnalyticsCaptureResult(data: CaptureResult): CaptureResult
@@ -242,45 +373,27 @@ export function filterAnalyticsCaptureResult(data: CaptureResult | null): Captur
 export function filterAnalyticsCaptureResult(data: CaptureResult | null): CaptureResult | null {
   if (data === null) return null
 
-  const properties = data.properties ?? {}
-  const filteredProperties: AnalyticsCaptureProperties = {}
-
-  setPropertyIfDefined(filteredProperties, "token", properties.token)
-  setPropertyIfDefined(filteredProperties, "distinct_id", properties.distinct_id)
-  setPropertyIfDefined(filteredProperties, "feature", properties.feature)
-  setPropertyIfDefined(filteredProperties, "surface", properties.surface)
-  setPropertyIfDefined(filteredProperties, "outcome", properties.outcome)
-  setPropertyIfDefined(filteredProperties, "latency_ms", properties.latency_ms)
-  setPropertyIfDefined(filteredProperties, "action_id", properties.action_id)
-  setPropertyIfDefined(filteredProperties, "action_name", properties.action_name)
-  setPropertyIfDefined(filteredProperties, "target_language", properties.target_language)
-  setPropertyIfDefined(filteredProperties, "backend_kind", properties.backend_kind)
-  setPropertyIfDefined(filteredProperties, "configured_prompt", properties.configured_prompt)
-  setPropertyIfDefined(filteredProperties, "cohort", properties.cohort)
-  setPropertyIfDefined(filteredProperties, "prompt_exposure_age", properties.prompt_exposure_age)
-  setPropertyIfDefined(filteredProperties, "$feature_flag", properties.$feature_flag)
-  setPropertyIfDefined(
-    filteredProperties,
-    "$feature_flag_response",
-    properties.$feature_flag_response,
-  )
-  setPropertyIfDefined(filteredProperties, "$browser", properties.$browser)
-  setPropertyIfDefined(filteredProperties, "$browser_version", properties.$browser_version)
-  setPropertyIfDefined(filteredProperties, "$insert_id", properties.$insert_id)
-  setPropertyIfDefined(filteredProperties, "$time", properties.$time)
-  setPropertyIfDefined(filteredProperties, "$lib", properties.$lib)
-  setPropertyIfDefined(filteredProperties, "$lib_version", properties.$lib_version)
-  setPropertyIfDefined(
-    filteredProperties,
-    "$process_person_profile",
-    properties.$process_person_profile,
-  )
-  setPropertyIfDefined(filteredProperties, "extension_version", properties.extension_version)
-
-  return {
+  const filteredData = {
     ...data,
-    properties: filteredProperties,
+    properties: sanitizeAnalyticsProperties(data.properties ?? {}, true),
   }
+
+  const mutableFilteredData = filteredData as CaptureResult & {
+    $set?: AnalyticsCaptureProperties
+    $set_once?: AnalyticsCaptureProperties
+  }
+  const captureData = data as CaptureResult & {
+    $set?: AnalyticsCaptureProperties
+    $set_once?: AnalyticsCaptureProperties
+  }
+  if (captureData.$set) {
+    mutableFilteredData.$set = sanitizeAnalyticsProperties(captureData.$set, false)
+  }
+  if (captureData.$set_once) {
+    mutableFilteredData.$set_once = sanitizeAnalyticsProperties(captureData.$set_once, false)
+  }
+
+  return mutableFilteredData
 }
 
 export function createBackgroundAnalytics(
@@ -652,6 +765,11 @@ export function createBackgroundAnalytics(
       return
     }
 
+    const normalizedProperties: FeatureUsedEventProperties = {
+      ...properties,
+      ...normalizeFeatureProviderAnalytics(properties.provider, properties.backend_kind),
+    }
+
     // Funnel features must record every step (e.g. save-suggestion shown vs
     // accepted), so they skip the once-per-day-per-feature adoption throttle —
     // the daily cache keys on feature only and would drop the second same-day
@@ -659,13 +777,13 @@ export function createBackgroundAnalytics(
     // cooldown), so bypassing does not inflate volume.
     if (
       !runtime.featureUsageCache ||
-      FEATURES_BYPASSING_DAILY_FEATURE_CACHE.has(properties.feature)
+      FEATURES_BYPASSING_DAILY_FEATURE_CACHE.has(normalizedProperties.feature)
     ) {
-      await captureFeatureUsedEvent(properties)
+      await captureFeatureUsedEvent(normalizedProperties)
       return
     }
 
-    await captureFeatureUsedEventWithCache(properties, runtime.featureUsageCache)
+    await captureFeatureUsedEventWithCache(normalizedProperties, runtime.featureUsageCache)
   }
 
   async function getBackgroundFeatureUsedEventProperties(): Promise<
