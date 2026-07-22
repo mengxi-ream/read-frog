@@ -12,7 +12,7 @@ vi.mock("@/utils/subtitles/ai/request-ai-subtitles", () => ({
 const { AiSubtitlesFetcher } = await import("../index")
 
 function contextFor(videoId: string): AiSubtitlesContext {
-  return { platform: "youtube", videoId, url: `https://youtube.com/watch?v=${videoId}` }
+  return { videoId, url: `https://youtube.com/watch?v=${videoId}` }
 }
 
 describe("aiSubtitlesFetcher", () => {

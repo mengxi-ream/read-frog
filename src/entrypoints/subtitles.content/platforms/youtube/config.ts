@@ -22,7 +22,7 @@ const SHORTS_ACTIVE_PLAYER = "#reel-overlay-container .html5-video-player"
 
 function createYoutubeAiSubtitlesContext() {
   const videoId = getYoutubeVideoId()
-  return videoId ? { platform: "youtube", videoId, url: location.href } : null
+  return videoId ? { videoId, url: location.href } : null
 }
 
 const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {

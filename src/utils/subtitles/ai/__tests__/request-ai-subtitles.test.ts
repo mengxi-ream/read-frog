@@ -17,7 +17,7 @@ vi.mock("@/utils/orpc/client", () => ({
 
 const { requestAiSubtitles } = await import("../request-ai-subtitles")
 
-const ctx = { platform: "youtube", videoId: "abc", url: "https://youtube.com/watch?v=abc" }
+const ctx = { videoId: "abc", url: "https://youtube.com/watch?v=abc" }
 
 describe("requestAiSubtitles", () => {
   beforeEach(() => {
@@ -44,8 +44,6 @@ describe("requestAiSubtitles", () => {
     const result = await requestAiSubtitles(ctx)
 
     expect(create).toHaveBeenCalledWith({
-      platform: "youtube",
-      videoId: "abc",
       url: "https://youtube.com/watch?v=abc",
     })
     expect(get).not.toHaveBeenCalled()

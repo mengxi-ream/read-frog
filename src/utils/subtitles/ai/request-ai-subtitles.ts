@@ -5,7 +5,6 @@ import { orpcClient } from "@/utils/orpc/client"
 import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
 
 export interface AiSubtitlesContext {
-  platform: string
   videoId: string
   url: string
 }
@@ -16,8 +15,7 @@ interface VideoTranscriptJob {
   detectedLanguage: string | null
 }
 
-const POLL_INITIAL_DELAY_MS = 2_000
-const POLL_MAX_DELAY_MS = 5_000
+const POLL_INTERVAL_MS = 1_000
 const POLL_TIMEOUT_MS = 5 * 60 * 1_000
 const MS_PER_SECOND = 1_000
 
@@ -43,11 +41,10 @@ async function pollUntilCompleted(
   }
 
   const deadline = Date.now() + POLL_TIMEOUT_MS
-  let delay = POLL_INITIAL_DELAY_MS
 
   while (Date.now() < deadline) {
     throwIfAborted(signal)
-    await sleep(delay)
+    await sleep(POLL_INTERVAL_MS)
     throwIfAborted(signal)
 
     const job: VideoTranscriptJob = await orpcClient.videoTranscript.get({ id: initial.id })
@@ -57,8 +54,6 @@ async function pollUntilCompleted(
     if (job.status === "failed") {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.aiServiceUnavailable"))
     }
-
-    delay = Math.min(Math.round(delay * 1.5), POLL_MAX_DELAY_MS)
   }
 
   throw new OverlaySubtitlesError(i18n.t("subtitles.errors.fetchSubTimeout"))
@@ -68,12 +63,12 @@ export async function requestAiSubtitles(
   ctx: AiSubtitlesContext,
   opts?: { signal?: AbortSignal },
 ): Promise<{ segments: SubtitlesFragment[]; detectedLanguage: string }> {
-  const { platform, videoId, url } = ctx
+  const { url } = ctx
   const signal = opts?.signal
 
   throwIfAborted(signal)
 
-  const { error, data } = await safe(orpcClient.videoTranscript.create({ platform, videoId, url }))
+  const { error, data } = await safe(orpcClient.videoTranscript.create({ url }))
   if (error) {
     // Login + beta are pre-checked before create is called, so only quota (not pre-checked)
     // and unexpected failures can reach here.
