@@ -551,6 +551,35 @@ export async function translateNodesBilingualMode(
 
     const ownerDoc = getOwnerDocument(insertionTarget)
 
+    // Pre-compute the insertion boundary so trailing inline images (twemoji,
+    // layout-only <img> with alt) can be excluded from the translation
+    // request.  The walker keeps these elements with the source paragraph
+    // for layout purposes — they should not appear in the translated HTML
+    // fragment or their alt text may leak into the translation stream.
+    let computedInsertionBoundary: ReturnType<
+      typeof moveParagraphInsertionBoundaryAfterTrailingInlineImages
+    > | null = null
+    let hasTrailingInlineImageAttachment = false
+
+    if (
+      transNodes.length === 1 &&
+      isBlockTransNode(layoutSource) &&
+      isHTMLElement(layoutSource) &&
+      isHTMLElement(insertionTarget)
+    ) {
+      const originalBoundary = {
+        container: insertionTarget,
+        offset: insertionTarget.childNodes.length,
+      }
+      computedInsertionBoundary = moveParagraphInsertionBoundaryAfterTrailingInlineImages(
+        originalBoundary,
+        layoutSource,
+      )
+      hasTrailingInlineImageAttachment =
+        computedInsertionBoundary.container !== originalBoundary.container ||
+        computedInsertionBoundary.offset !== originalBoundary.offset
+    }
+
     // Serialize to HTML for format-preserving translation. This mirrors the
     // translationOnly pipeline: clone nodes to HTML, protect non-translatable
     // attributes with markers, and replace non-translatable inline content
@@ -561,11 +590,28 @@ export async function translateNodesBilingualMode(
     // so the translated HTML rendered via innerHTML inside the wrapper does
     // not include the outer tag and create nested block elements (extra
     // bullets, invalid layout).
+    //
+    // Trailing inline images that the walker placed outside the translation
+    // boundary are excluded from serialization so they do not appear twice
+    // (once in the original source and once in the translated wrapper).
     const isSingleBlockRun =
       transNodes.length === 1 && isBlockTransNode(layoutSource) && isHTMLElement(layoutSource)
     const serializationNodes =
       isSingleBlockRun && isHTMLElement(insertionTarget)
-        ? [...insertionTarget.childNodes].filter(isTransNode)
+        ? (() => {
+            const nodes = [...insertionTarget.childNodes].filter(isTransNode)
+            if (
+              hasTrailingInlineImageAttachment &&
+              computedInsertionBoundary &&
+              computedInsertionBoundary.container === insertionTarget
+            ) {
+              const keepBefore = new Set(
+                [...insertionTarget.childNodes].slice(0, computedInsertionBoundary.offset),
+              )
+              return nodes.filter((node) => keepBefore.has(node))
+            }
+            return nodes
+          })()
         : transNodes
     const protectedHtml = protectTranslationHtmlAttributes(
       serializationNodes.length > 0 ? serializationNodes : transNodes,
@@ -597,23 +643,11 @@ export async function translateNodesBilingualMode(
       walkId,
       config,
     )
-    let hasTrailingInlineImageAttachment = false
 
-    if (transNodes.length === 1 && isHTMLElement(layoutSource) && isHTMLElement(insertionTarget)) {
-      const originalInsertionBoundary = {
-        container: insertionTarget,
-        offset: insertionTarget.childNodes.length,
-      }
-      const insertionBoundary = moveParagraphInsertionBoundaryAfterTrailingInlineImages(
-        originalInsertionBoundary,
-        layoutSource,
-      )
-      hasTrailingInlineImageAttachment =
-        insertionBoundary.container !== originalInsertionBoundary.container ||
-        insertionBoundary.offset !== originalInsertionBoundary.offset
-      insertionBoundary.container.insertBefore(
+    if (computedInsertionBoundary) {
+      computedInsertionBoundary.container.insertBefore(
         translatedWrapperNode,
-        insertionBoundary.container.childNodes[insertionBoundary.offset] ?? null,
+        computedInsertionBoundary.container.childNodes[computedInsertionBoundary.offset] ?? null,
       )
     } else if (isTextNode(insertionTarget) || transNodes.length > 1) {
       insertionTarget.parentNode?.insertBefore(translatedWrapperNode, insertionTarget.nextSibling)
