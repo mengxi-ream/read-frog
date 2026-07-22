@@ -11,7 +11,7 @@ export const TemperatureField = withForm({
     const providerConfig = useSelector(form.store, (state) => state.values)
     const isLLMProvider = isLLMProviderConfig(providerConfig)
 
-    if (!isLLMProvider) {
+    if (!isLLMProvider || providerConfig.provider === "google") {
       return null
     }
 

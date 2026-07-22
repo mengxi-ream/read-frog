@@ -1,3 +1,4 @@
+import type { LanguageModelMiddleware } from "ai"
 import type { Config } from "@/types/config/config"
 import type { AzureApiMode, LLMProviderConfig } from "@/types/config/provider"
 import { createAlibaba } from "@ai-sdk/alibaba"
@@ -21,6 +22,7 @@ import { createReplicate } from "@ai-sdk/replicate"
 import { createTogetherAI } from "@ai-sdk/togetherai"
 import { createVercel } from "@ai-sdk/vercel"
 import { createXai } from "@ai-sdk/xai"
+import { wrapLanguageModel } from "ai"
 import { createOllama } from "ai-sdk-ollama"
 import { storage } from "#imports"
 import { DEFAULT_AZURE_API_MODE, isCustomLLMProvider } from "@/types/config/provider"
@@ -60,6 +62,15 @@ const CREATE_AI_MAPPER = {
   moonshotai: createMoonshotAI,
   huggingface: createHuggingFace,
 } as const
+
+const googleSamplingCompatibilityMiddleware = {
+  transformParams: async ({ params }) => ({
+    ...params,
+    temperature: undefined,
+    topP: undefined,
+    topK: undefined,
+  }),
+} satisfies LanguageModelMiddleware
 
 function getProviderSpecificSettings(providerConfig: LLMProviderConfig) {
   const settings =
@@ -130,7 +141,11 @@ async function getLanguageModelById(providerId: string) {
     return (provider as ReturnType<typeof createOllama>).languageModel(modelId, { think: false })
   }
 
-  return provider.languageModel(modelId)
+  const model = provider.languageModel(modelId)
+
+  return providerConfig.provider === "google"
+    ? wrapLanguageModel({ model, middleware: googleSamplingCompatibilityMiddleware })
+    : model
 }
 
 export async function getModelById(providerId: string) {

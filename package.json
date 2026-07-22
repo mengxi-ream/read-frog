@@ -40,7 +40,7 @@
     "@ai-sdk/deepinfra": "^3.0.12",
     "@ai-sdk/deepseek": "^3.0.12",
     "@ai-sdk/fireworks": "^3.0.13",
-    "@ai-sdk/google": "^4.0.18",
+    "@ai-sdk/google": "^4.0.21",
     "@ai-sdk/groq": "^4.0.12",
     "@ai-sdk/huggingface": "^2.0.12",
     "@ai-sdk/mistral": "^4.0.13",

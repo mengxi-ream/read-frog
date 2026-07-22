@@ -1,6 +1,8 @@
 import type { APIProviderConfig } from "@/types/config/provider"
+import { useQuery } from "@tanstack/react-query"
 import { useSelector } from "@tanstack/react-store"
 import { useSetAtom } from "jotai"
+import { sha256 } from "js-sha256"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import {
   SelectContent,
@@ -10,27 +12,65 @@ import {
   SelectValue,
 } from "@/components/ui/base-ui/select"
 import { toastManager } from "@/components/ui/base-ui/toast"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import {
   isCustomLLMProviderConfig,
   isLLMProviderConfig,
   LLM_PROVIDER_MODELS,
 } from "@/types/config/provider"
 import { providerConfigAtom, updateLLMProviderConfig } from "@/utils/atoms/provider"
+import { PROVIDER_BASE_URL_PLACEHOLDERS } from "@/utils/constants/providers"
 import { i18n } from "@/utils/i18n"
+import { fetchGoogleModels } from "@/utils/providers/google-models"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { ModelSuggestionButton } from "./components/model-suggestion-button"
 import { ProviderOptionsRecommendationTrigger } from "./components/provider-options-recommendation-trigger"
 import { withForm } from "./form"
+
+function getSecretFingerprint(value: string) {
+  return value ? sha256(value).slice(0, 12) : ""
+}
 
 export const TranslateModelSelector = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
     const providerConfig = useSelector(form.store, (state) => state.values)
     const setProviderConfig = useSetAtom(providerConfigAtom(providerConfig.id))
+    const isGoogleProvider = providerConfig.provider === "google"
+    const googleApiKey = isGoogleProvider ? (providerConfig.apiKey?.trim() ?? "") : ""
+    const debouncedGoogleApiKey = useDebouncedValue(googleApiKey, 500)
+    const googleBaseURL = isGoogleProvider
+      ? providerConfig.baseURL?.trim() || PROVIDER_BASE_URL_PLACEHOLDERS.google || ""
+      : ""
+    const { data: googleModels } = useQuery({
+      queryKey: [
+        "google-models",
+        providerConfig.id,
+        googleBaseURL,
+        getSecretFingerprint(debouncedGoogleApiKey),
+      ],
+      queryFn: ({ signal }) =>
+        fetchGoogleModels({
+          apiKey: debouncedGoogleApiKey,
+          baseURL: googleBaseURL,
+          signal,
+        }),
+      enabled: isGoogleProvider && Boolean(debouncedGoogleApiKey && googleBaseURL),
+      meta: { suppressToast: true },
+      retry: false,
+      staleTime: 60 * 60 * 1000,
+    })
     if (!isLLMProviderConfig(providerConfig)) return null
 
     const modelId = resolveModelId(providerConfig.model)
     const { isCustomModel, customModel, model } = providerConfig.model
+    const availableModelOptions =
+      providerConfig.provider === "google" && googleModels?.length
+        ? googleModels
+        : LLM_PROVIDER_MODELS[providerConfig.provider]
+    const modelOptions = availableModelOptions.includes(model)
+      ? availableModelOptions
+      : [model, ...availableModelOptions]
 
     const applyRecommendedProviderOptions = (options: Record<string, unknown>) => {
       form.setFieldValue("providerOptions", options)
@@ -88,7 +128,7 @@ export const TranslateModelSelector = withForm({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {LLM_PROVIDER_MODELS[providerConfig.provider].map((modelOption) => (
+                    {modelOptions.map((modelOption) => (
                       <SelectItem key={modelOption} value={modelOption}>
                         {modelOption}
                       </SelectItem>

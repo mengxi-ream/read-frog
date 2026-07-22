@@ -61,20 +61,7 @@ export const LLM_PROVIDER_MODELS = {
     "grok-code-fast-1",
   ],
   deepseek: ["deepseek-v4-flash", "deepseek-v4-pro", "deepseek-chat", "deepseek-reasoner"],
-  google: [
-    "gemini-3.5-flash",
-    "gemini-3.1-pro-preview",
-    "gemini-3.1-flash-image-preview",
-    "gemini-3.1-flash-lite-preview",
-    "gemini-3-pro-preview",
-    "gemini-3-pro-image-preview",
-    "gemini-3-flash-preview",
-    "gemini-2.5-pro",
-    "gemini-2.5-flash",
-    "gemini-2.5-flash-lite",
-    "gemini-2.5-flash-lite-preview-06-17",
-    "gemini-2.0-flash",
-  ],
+  google: ["gemini-flash-lite-latest", "gemini-flash-latest", "gemini-pro-latest"],
   anthropic: [
     "claude-fable-5",
     "claude-opus-4-8",
@@ -464,21 +451,6 @@ export const LLM_MODEL_OPTIONS: Array<{
   pattern: RegExp
   options: Record<string, JSONValue>
 }> = [
-  // Gemini - specific patterns first
-  {
-    pattern: /^gemini-3(?:\.\d+)?-.*?(?:-preview(?:-customtools)?)?$/i,
-    options: { thinkingConfig: { thinkingLevel: "minimal", includeThoughts: false } },
-  },
-  {
-    pattern: /^gemini-2\.5-/i,
-    options: { thinkingConfig: { thinkingBudget: 0, includeThoughts: false } },
-  },
-  {
-    // Default for all other Gemini models
-    pattern: /^gemini-/i,
-    options: { thinkingConfig: { thinkingBudget: 0, includeThoughts: false } },
-  },
-
   // Claude - disable thinking
   {
     pattern: /^claude-/i,

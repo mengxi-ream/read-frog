@@ -8,16 +8,20 @@ const {
   anthropicLanguageModelMock,
   azureChatModelMock,
   azureLanguageModelMock,
+  googleLanguageModelMock,
   openAICompatibleLanguageModelMock,
   ollamaLanguageModelMock,
   createAnthropicMock,
   createAzureMock,
+  createGoogleMock,
   createOllamaMock,
   createOpenAICompatibleMock,
+  wrapLanguageModelMock,
 } = vi.hoisted(() => {
   const innerAnthropicLanguageModelMock = vi.fn<(...args: any[]) => any>()
   const innerAzureChatModelMock = vi.fn<(...args: any[]) => any>()
   const innerAzureLanguageModelMock = vi.fn<(...args: any[]) => any>()
+  const innerGoogleLanguageModelMock = vi.fn<(...args: any[]) => any>()
   const innerOpenAICompatibleLanguageModelMock = vi.fn<(...args: any[]) => any>()
   const innerOllamaLanguageModelMock = vi.fn<(...args: any[]) => any>()
   const innerCreateAnthropicMock = vi.fn<(...args: any[]) => any>(
@@ -31,6 +35,11 @@ const {
       languageModel: innerAzureLanguageModelMock,
     }),
   )
+  const innerCreateGoogleMock = vi.fn<(...args: any[]) => any>(
+    (_options?: Record<string, unknown>) => ({
+      languageModel: innerGoogleLanguageModelMock,
+    }),
+  )
   const innerCreateOpenAICompatibleMock = vi.fn<(...args: any[]) => any>(
     (_options?: Record<string, unknown>) => ({
       languageModel: innerOpenAICompatibleLanguageModelMock,
@@ -41,17 +50,21 @@ const {
       languageModel: innerOllamaLanguageModelMock,
     }),
   )
+  const innerWrapLanguageModelMock = vi.fn<(...args: any[]) => any>(() => "wrapped-google-model")
 
   return {
     anthropicLanguageModelMock: innerAnthropicLanguageModelMock,
     azureChatModelMock: innerAzureChatModelMock,
     azureLanguageModelMock: innerAzureLanguageModelMock,
+    googleLanguageModelMock: innerGoogleLanguageModelMock,
     openAICompatibleLanguageModelMock: innerOpenAICompatibleLanguageModelMock,
     ollamaLanguageModelMock: innerOllamaLanguageModelMock,
     createAnthropicMock: innerCreateAnthropicMock,
     createAzureMock: innerCreateAzureMock,
+    createGoogleMock: innerCreateGoogleMock,
     createOllamaMock: innerCreateOllamaMock,
     createOpenAICompatibleMock: innerCreateOpenAICompatibleMock,
+    wrapLanguageModelMock: innerWrapLanguageModelMock,
   }
 })
 
@@ -63,12 +76,20 @@ vi.mock("@ai-sdk/azure", () => ({
   createAzure: createAzureMock,
 }))
 
+vi.mock("@ai-sdk/google", () => ({
+  createGoogleGenerativeAI: createGoogleMock,
+}))
+
 vi.mock("@ai-sdk/openai-compatible", () => ({
   createOpenAICompatible: createOpenAICompatibleMock,
 }))
 
 vi.mock("ai-sdk-ollama", () => ({
   createOllama: createOllamaMock,
+}))
+
+vi.mock("ai", () => ({
+  wrapLanguageModel: wrapLanguageModelMock,
 }))
 
 function createAnthropicProviderConfig(headers?: Record<string, unknown>) {
@@ -120,12 +141,29 @@ function createOllamaProviderConfig(providerOptions?: Record<string, unknown>) {
   }
 }
 
+function createGoogleProviderConfig() {
+  return {
+    id: "google-default",
+    name: "Gemini",
+    enabled: true,
+    provider: "google",
+    apiKey: "test-key",
+    model: {
+      model: "gemini-flash-latest",
+      isCustomModel: false,
+      customModel: null,
+    },
+    reasoning: "provider-default",
+  }
+}
+
 describe("getModelById", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     anthropicLanguageModelMock.mockReturnValue("anthropic-model")
     azureChatModelMock.mockReturnValue("azure-chat-model")
     azureLanguageModelMock.mockReturnValue("azure-model")
+    googleLanguageModelMock.mockReturnValue("google-model")
     openAICompatibleLanguageModelMock.mockReturnValue("custom-model")
     ollamaLanguageModelMock.mockReturnValue("ollama-model")
     getStorageItemMock = vi.fn<(...args: any[]) => any>()
@@ -184,6 +222,31 @@ describe("getModelById", () => {
       baseURL: "http://127.0.0.1:11434/",
     })
     expect(ollamaLanguageModelMock).toHaveBeenCalledWith("gemma3:4b", { think: false })
+  })
+
+  it("removes deprecated sampling settings from every Google model request", async () => {
+    getStorageItemMock.mockResolvedValue({
+      providersConfig: [createGoogleProviderConfig()],
+    })
+
+    const { getModelById } = await import("../model")
+    const result = await getModelById("google-default")
+
+    expect(result).toBe("wrapped-google-model")
+    expect(createGoogleMock).toHaveBeenCalledWith({ apiKey: "test-key" })
+    expect(googleLanguageModelMock).toHaveBeenCalledWith("gemini-flash-latest")
+
+    const middleware = wrapLanguageModelMock.mock.calls[0]?.[0].middleware
+    const transformed = await middleware.transformParams({
+      params: { temperature: 0.7, topP: 0.9, topK: 40, maxOutputTokens: 100 },
+    })
+
+    expect(transformed).toEqual({
+      temperature: undefined,
+      topP: undefined,
+      topK: undefined,
+      maxOutputTokens: 100,
+    })
   })
 
   it("passes Azure settings and resolves the deployment name with languageModel", async () => {

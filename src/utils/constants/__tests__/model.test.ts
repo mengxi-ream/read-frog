@@ -8,60 +8,8 @@ import { LLM_PROVIDER_MODELS } from "../models"
 
 describe("getProviderOptions", () => {
   describe("model pattern matching", () => {
-    it("should return options for gemini models", () => {
-      const options = getProviderOptions("gemini-2.5-pro", "google")
-      expect(options.google).toBeDefined()
-      expect(options.google?.thinkingConfig).toMatchObject({
-        thinkingBudget: 0,
-        includeThoughts: false,
-      })
-
-      const mixedCaseOptions = getProviderOptions("Gemini-2.5-Pro", "google")
-      expect(mixedCaseOptions.google?.thinkingConfig).toMatchObject({
-        thinkingBudget: 0,
-        includeThoughts: false,
-      })
-    })
-
-    it("should handle thinking models correctly", () => {
-      const thinkingOptions = getProviderOptions("gemini-2.5-pro", "google")
-      expect(thinkingOptions.google?.thinkingConfig).toMatchObject({ thinkingBudget: 0 })
-
-      const nonThinkingOptions = getProviderOptions("gemini-2.5-flash", "google")
-      expect(nonThinkingOptions.google?.thinkingConfig).toMatchObject({ thinkingBudget: 0 })
-
-      const thinkingLevelFlashOptions = getProviderOptions("gemini-3-flash-preview", "google")
-      expect(thinkingLevelFlashOptions.google?.thinkingConfig).toMatchObject({
-        thinkingLevel: "minimal",
-        includeThoughts: false,
-      })
-
-      const thinkingLevelProOptions = getProviderOptions("gemini-3-pro-preview", "google")
-      expect(thinkingLevelProOptions.google?.thinkingConfig).toMatchObject({
-        thinkingLevel: "minimal",
-        includeThoughts: false,
-      })
-
-      const thinkingLevel31ProOptions = getProviderOptions("gemini-3.1-pro-preview", "google")
-      expect(thinkingLevel31ProOptions.google?.thinkingConfig).toMatchObject({
-        thinkingLevel: "minimal",
-        includeThoughts: false,
-      })
-
-      const thinkingLevel31FlashLiteOptions = getProviderOptions(
-        "gemini-3.1-flash-lite-preview",
-        "google",
-      )
-      expect(thinkingLevel31FlashLiteOptions.google?.thinkingConfig).toMatchObject({
-        thinkingLevel: "minimal",
-        includeThoughts: false,
-      })
-
-      const thinkingLevel35FlashOptions = getProviderOptions("gemini-3.5-flash", "google")
-      expect(thinkingLevel35FlashOptions.google?.thinkingConfig).toMatchObject({
-        thinkingLevel: "minimal",
-        includeThoughts: false,
-      })
+    it("should leave Gemini reasoning settings to the provider", () => {
+      expect(getProviderOptions("gemini-future-flash", "google")).toEqual({})
     })
 
     it("should return options for claude models", () => {
@@ -98,6 +46,14 @@ describe("getProviderOptions", () => {
           "gpt-5.3-chat-latest",
         ]),
       )
+    })
+
+    it("should keep versionless Gemini aliases as offline fallbacks", () => {
+      expect(LLM_PROVIDER_MODELS.google).toEqual([
+        "gemini-flash-lite-latest",
+        "gemini-flash-latest",
+        "gemini-pro-latest",
+      ])
     })
 
     it("should expose Azure shortcut deployment names for GPT, DeepSeek, and Grok", () => {

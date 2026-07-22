@@ -60,7 +60,7 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   google: {
-    model: "gemini-2.5-flash-lite",
+    model: "gemini-flash-lite-latest",
     isCustomModel: false,
     customModel: null,
   },
@@ -419,7 +419,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
     enabled: true,
     provider: "google",
     model: DEFAULT_LLM_PROVIDER_MODELS.google,
-    reasoning: "none",
+    reasoning: "provider-default",
   },
   anthropic: {
     id: "anthropic-default",

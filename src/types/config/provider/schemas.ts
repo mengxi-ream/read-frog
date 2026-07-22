@@ -35,6 +35,12 @@ function createProviderModelSchema<T extends LLMProviderTypes>(provider: T) {
   })
 }
 
+const googleProviderModelSchema = z.object({
+  model: z.string().nonempty(),
+  isCustomModel: z.boolean(),
+  customModel: z.string().nullable(),
+})
+
 // Base schema without models
 export const baseProviderConfigSchema = z.strictObject({
   id: z.string().nonempty(),
@@ -105,7 +111,7 @@ const llmProviderConfigSchemaList = [
   }),
   baseAPIProviderConfigSchema.extend({
     provider: z.literal("google"),
-    model: createProviderModelSchema<"google">("google"),
+    model: googleProviderModelSchema,
     ...topLevelReasoningConfigSchema,
   }),
   baseAPIProviderConfigSchema.extend({
@@ -287,10 +293,13 @@ function buildProviderModelsSchema<M extends Record<string, ModelTuple>>(models:
   )
 }
 
-const { "openai-compatible": _, ...modelsWithoutOpenaiCompatible } = LLM_PROVIDER_MODELS
-export const llmProviderModelsSchema = buildProviderModelsSchema(
-  modelsWithoutOpenaiCompatible,
-).extend({
+const {
+  google: _googleModels,
+  "openai-compatible": _openaiCompatibleModels,
+  ...modelsWithEnumeratedIds
+} = LLM_PROVIDER_MODELS
+export const llmProviderModelsSchema = buildProviderModelsSchema(modelsWithEnumeratedIds).extend({
+  google: googleProviderModelSchema,
   "openai-compatible": z.object({
     model: z.enum(LLM_PROVIDER_MODELS["openai-compatible"]),
     isCustomModel: z.literal(true),

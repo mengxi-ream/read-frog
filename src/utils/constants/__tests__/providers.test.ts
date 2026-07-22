@@ -97,9 +97,11 @@ describe("provider constants", () => {
     expect(API_PROVIDER_TYPES.indexOf("azure")).toBe(API_PROVIDER_TYPES.indexOf("bedrock") - 1)
   })
 
-  it("defaults top-level reasoning providers to none", () => {
+  it("uses provider-default reasoning for Google and none for other providers", () => {
     for (const provider of TOP_LEVEL_REASONING_PROVIDER_TYPES) {
-      expect(DEFAULT_PROVIDER_CONFIG[provider].reasoning).toBe("none")
+      expect(DEFAULT_PROVIDER_CONFIG[provider].reasoning).toBe(
+        provider === "google" ? "provider-default" : "none",
+      )
       expect(apiProviderConfigItemSchema.parse(DEFAULT_PROVIDER_CONFIG[provider])).toEqual(
         DEFAULT_PROVIDER_CONFIG[provider],
       )

@@ -8,7 +8,7 @@ describe("resolveModelId", () => {
         isCustomModel: false,
         model: " gpt-4.1-mini ",
         customModel: "",
-      } as unknown as Parameters<typeof resolveModelId>[0]),
+      }),
     ).toBe("gpt-4.1-mini")
   })
 
@@ -18,7 +18,7 @@ describe("resolveModelId", () => {
         isCustomModel: true,
         model: "",
         customModel: " custom-model ",
-      } as unknown as Parameters<typeof resolveModelId>[0]),
+      }),
     ).toBe("custom-model")
   })
 

@@ -1,16 +1,28 @@
 // @vitest-environment jsdom
 import type { APIProviderConfig } from "@/types/config/provider"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useSelector } from "@tanstack/react-store"
-import { act, fireEvent, render, screen } from "@testing-library/react"
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { useEffect, useState } from "react"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { formOpts, useAppForm } from "../form"
 import { TranslateModelSelector } from "../translate-model-selector"
+
+const { fetchGoogleModelsMock } = vi.hoisted(() => ({
+  fetchGoogleModelsMock:
+    vi.fn<
+      (options: { apiKey: string; baseURL: string; signal?: AbortSignal }) => Promise<string[]>
+    >(),
+}))
 
 vi.mock("#imports", () => ({
   i18n: {
     t: (key: string) => key,
   },
+}))
+
+vi.mock("@/utils/providers/google-models", () => ({
+  fetchGoogleModels: fetchGoogleModelsMock,
 }))
 
 vi.mock("../components/provider-options-recommendation-trigger", () => ({
@@ -109,9 +121,33 @@ function TranslateModelSelectorHarness({
   )
 }
 
+function renderTranslateModelSelector(initialConfig?: APIProviderConfig) {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        gcTime: 0,
+        retry: false,
+      },
+    },
+  })
+
+  return {
+    queryClient,
+    ...render(
+      <QueryClientProvider client={queryClient}>
+        <TranslateModelSelectorHarness initialConfig={initialConfig} />
+      </QueryClientProvider>,
+    ),
+  }
+}
+
+afterEach(() => {
+  vi.clearAllMocks()
+})
+
 describe("translateModelSelector", () => {
   it("keeps invalid form values while staging recommended provider options", async () => {
-    render(<TranslateModelSelectorHarness />)
+    renderTranslateModelSelector()
 
     fireEvent.change(screen.getByLabelText("provider-name"), {
       target: { value: duplicateProviderName },
@@ -135,7 +171,7 @@ describe("translateModelSelector", () => {
   })
 
   it("persists staged recommendations after the validation error is fixed", async () => {
-    render(<TranslateModelSelectorHarness />)
+    renderTranslateModelSelector()
 
     fireEvent.change(screen.getByLabelText("provider-name"), {
       target: { value: duplicateProviderName },
@@ -158,7 +194,7 @@ describe("translateModelSelector", () => {
   })
 
   it("submits recommendations immediately when the form is valid", async () => {
-    render(<TranslateModelSelectorHarness />)
+    renderTranslateModelSelector()
 
     fireEvent.click(screen.getByRole("button", { name: "apply-recommendation" }))
     await flushUpdates()
@@ -168,5 +204,44 @@ describe("translateModelSelector", () => {
       '{"reasoningEffort":"minimal"}',
     )
     expect(screen.getByLabelText("submit-count")).toHaveTextContent("1")
+  })
+
+  it("loads Google models without putting the API key in the query cache key", async () => {
+    const apiKey = "google-secret-api-key"
+    fetchGoogleModelsMock.mockResolvedValue(["gemini-future-flash"])
+
+    const { queryClient } = renderTranslateModelSelector({
+      id: "google-provider",
+      name: "Google",
+      enabled: true,
+      provider: "google",
+      apiKey,
+      model: {
+        model: "gemini-flash-latest",
+        isCustomModel: false,
+        customModel: null,
+      },
+    })
+
+    await waitFor(() => {
+      expect(fetchGoogleModelsMock).toHaveBeenCalledWith({
+        apiKey,
+        baseURL: "https://generativelanguage.googleapis.com/v1beta",
+        signal: expect.any(AbortSignal),
+      })
+    })
+
+    fireEvent.click(screen.getByRole("combobox"))
+    expect(await screen.findByRole("option", { name: "gemini-future-flash" })).toBeInTheDocument()
+    expect(screen.getByRole("option", { name: "gemini-flash-latest" })).toBeInTheDocument()
+
+    const queryKey = queryClient.getQueryCache().getAll()[0]?.queryKey
+    expect(queryKey).toEqual([
+      "google-models",
+      "google-provider",
+      "https://generativelanguage.googleapis.com/v1beta",
+      expect.any(String),
+    ])
+    expect(JSON.stringify(queryKey)).not.toContain(apiKey)
   })
 })
