@@ -38,13 +38,13 @@ describe("getProviderOptions", () => {
 
       const thinkingLevelProOptions = getProviderOptions("gemini-3-pro-preview", "google")
       expect(thinkingLevelProOptions.google?.thinkingConfig).toMatchObject({
-        thinkingLevel: "minimal",
+        thinkingLevel: "low",
         includeThoughts: false,
       })
 
       const thinkingLevel31ProOptions = getProviderOptions("gemini-3.1-pro-preview", "google")
       expect(thinkingLevel31ProOptions.google?.thinkingConfig).toMatchObject({
-        thinkingLevel: "minimal",
+        thinkingLevel: "low",
         includeThoughts: false,
       })
 

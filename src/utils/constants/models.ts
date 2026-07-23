@@ -465,6 +465,11 @@ export const LLM_MODEL_OPTIONS: Array<{
   options: Record<string, JSONValue>
 }> = [
   // Gemini - specific patterns first
+  // Gemini 3 Pro models only support thinkingLevel low/medium/high; "minimal" is rejected.
+  {
+    pattern: /^gemini-3(?:\.\d+)?-pro(?:-|$)/i,
+    options: { thinkingConfig: { thinkingLevel: "low", includeThoughts: false } },
+  },
   {
     pattern: /^gemini-3(?:\.\d+)?-.*?(?:-preview(?:-customtools)?)?$/i,
     options: { thinkingConfig: { thinkingLevel: "minimal", includeThoughts: false } },

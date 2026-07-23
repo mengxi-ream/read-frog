@@ -1722,9 +1722,7 @@ export const testSeries: TestSeriesObject = {
           enabled: true,
           name: "Gemini",
           provider: "google",
-          providerOptions: {
-            thinkingConfig: { thinkingBudget: 0, includeThoughts: false },
-          },
+          reasoning: "none",
           apiKey: "goog-key",
           model: {
             model: "gemini-2.5-pro",
