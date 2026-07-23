@@ -382,8 +382,10 @@ function isNonTranslatableElement(
   // Check NOTRANSLATE class
   if (element.classList.contains(NOTRANSLATE_CLASS)) return true
 
-  // Check tag-based exclusion (CODE, TIME, etc.)
-  if (DONT_WALK_BUT_TRANSLATE_TAGS.has(element.tagName)) return true
+  // CODE is the only DONT_WALK_BUT_TRANSLATE tag whose text content
+  // must be preserved verbatim (code snippets).  TIME elements carry
+  // human-readable dates that should be translated normally.
+  if (element.tagName === "CODE") return true
 
   // Check known non-translatable custom elements (MathJax 3+, work without class attr)
   if (NON_TRANSLATABLE_TAG_NAMES.has(element.tagName)) return true
