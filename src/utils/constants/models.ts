@@ -62,6 +62,9 @@ export const LLM_PROVIDER_MODELS = {
   ],
   deepseek: ["deepseek-v4-flash", "deepseek-v4-pro", "deepseek-chat", "deepseek-reasoner"],
   google: [
+    "gemini-flash-lite-latest",
+    "gemini-flash-latest",
+    "gemini-pro-latest",
     "gemini-3.6-flash",
     "gemini-3.5-flash",
     "gemini-3.5-flash-lite",
@@ -467,6 +470,16 @@ export const LLM_MODEL_OPTIONS: Array<{
   options: Record<string, JSONValue>
 }> = [
   // Gemini - specific patterns first
+  // The versionless aliases track the newest generation, which uses thinkingLevel;
+  // the pro tier does not accept "minimal".
+  {
+    pattern: /^gemini-pro-latest$/i,
+    options: { thinkingConfig: { thinkingLevel: "low", includeThoughts: false } },
+  },
+  {
+    pattern: /^gemini-flash(?:-lite)?-latest$/i,
+    options: { thinkingConfig: { thinkingLevel: "minimal", includeThoughts: false } },
+  },
   {
     pattern: /^gemini-3(?:\.\d+)?-.*?(?:-preview(?:-customtools)?)?$/i,
     options: { thinkingConfig: { thinkingLevel: "minimal", includeThoughts: false } },
