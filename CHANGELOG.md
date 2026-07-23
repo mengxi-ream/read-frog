@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.43.0
+
+### Minor Changes
+
+- [#1859](https://github.com/mengxi-ream/read-frog/pull/1859) [`fccbd17`](https://github.com/mengxi-ream/read-frog/commit/fccbd1770d32a17d54aafa0860ccd758fd2902db) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): add AI subtitles for videos without captions
+
+### Patch Changes
+
+- [#1942](https://github.com/mengxi-ream/read-frog/pull/1942) [`c06afbd`](https://github.com/mengxi-ream/read-frog/commit/c06afbda71c1a6f0ad13c456458cd7c7fac4f1f9) Thanks [@xuing](https://github.com/xuing)! - feat(model): add gemini-3.6-flash, gemini-3.5-flash-lite, and the versionless gemini-\*-latest aliases
+
 ## 1.42.3
 
 ### Patch Changes
