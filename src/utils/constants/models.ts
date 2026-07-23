@@ -62,7 +62,9 @@ export const LLM_PROVIDER_MODELS = {
   ],
   deepseek: ["deepseek-v4-flash", "deepseek-v4-pro", "deepseek-chat", "deepseek-reasoner"],
   google: [
+    "gemini-3.6-flash",
     "gemini-3.5-flash",
+    "gemini-3.5-flash-lite",
     "gemini-3.1-pro-preview",
     "gemini-3.1-flash-image-preview",
     "gemini-3.1-flash-lite-preview",
