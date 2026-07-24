@@ -163,9 +163,10 @@ export async function fetchDeepInfraModels(
   const models = getModelEntries(data)
     .filter((entry) => {
       const record = asRecord(entry)
-      return (
-        record?.type === "text-generation" && record.deprecated !== true && record.private !== true
-      )
+      if (!record) return false
+      // `deprecated` is a unix timestamp (or null) and `private` is a 0/1 flag.
+      const reportedType = asString(record.reported_type) ?? asString(record.type)
+      return reportedType === "text-generation" && !record.deprecated && !record.private
     })
     .map((entry) => asString(asRecord(entry)?.model_name) ?? "")
 

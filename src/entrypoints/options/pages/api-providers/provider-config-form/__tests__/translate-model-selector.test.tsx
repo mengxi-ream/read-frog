@@ -320,17 +320,17 @@ describe("translateModelSelector", () => {
       jsonResponse([
         {
           model_name: "new-chat-model",
-          type: "text-generation",
-          deprecated: false,
-          private: false,
+          reported_type: "text-generation",
+          deprecated: null,
+          private: 0,
         },
         {
           model_name: "another-chat-model",
-          type: "text-generation",
-          deprecated: false,
-          private: false,
+          reported_type: "text-generation",
+          deprecated: null,
+          private: 0,
         },
-        { model_name: "image-model", type: "text-to-image" },
+        { model_name: "image-model", reported_type: "text-to-image" },
       ]),
     )
     vi.stubGlobal("fetch", fetchMock)
@@ -421,7 +421,9 @@ describe("translateModelSelector", () => {
   it("keeps an existing discovered custom id in the automatic model selector", async () => {
     const fetchMock = vi
       .fn<typeof fetch>()
-      .mockResolvedValue(jsonResponse([{ model_name: "new-chat-model", type: "text-generation" }]))
+      .mockResolvedValue(
+        jsonResponse([{ model_name: "new-chat-model", reported_type: "text-generation" }]),
+      )
     vi.stubGlobal("fetch", fetchMock)
 
     renderSelector({
@@ -444,7 +446,7 @@ describe("translateModelSelector", () => {
       vi
         .fn<typeof fetch>()
         .mockResolvedValue(
-          jsonResponse([{ model_name: "new-chat-model", type: "text-generation" }]),
+          jsonResponse([{ model_name: "new-chat-model", reported_type: "text-generation" }]),
         ),
     )
     renderSelector(deepInfraProviderConfig)
@@ -475,7 +477,7 @@ describe("translateModelSelector", () => {
       vi
         .fn<typeof fetch>()
         .mockResolvedValue(
-          jsonResponse([{ model_name: "new-chat-model", type: "text-generation" }]),
+          jsonResponse([{ model_name: "new-chat-model", reported_type: "text-generation" }]),
         ),
     )
     renderSelector(deepInfraProviderConfig)

@@ -88,19 +88,33 @@ describe("fetchDeepInfraModels", () => {
       jsonResponse([
         {
           model_name: "chat-model",
+          reported_type: "text-generation",
           type: "text-generation",
-          deprecated: false,
-          private: false,
+          deprecated: null,
+          private: 0,
         },
-        { model_name: "image-model", type: "text-to-image" },
-        { model_name: "retired-model", type: "text-generation", deprecated: true },
-        { model_name: "private-model", type: "text-generation", private: true },
+        { model_name: "image-model", reported_type: "text-to-image", type: "text-to-image" },
+        {
+          model_name: "retired-model",
+          reported_type: "text-generation",
+          type: "text-generation",
+          deprecated: 1718830497,
+          private: 0,
+        },
+        {
+          model_name: "private-model",
+          reported_type: "text-generation",
+          type: "text-generation",
+          deprecated: null,
+          private: 1,
+        },
+        { model_name: "legacy-shape-model", type: "text-generation" },
       ]),
     )
 
     const models = await fetchDeepInfraModels("https://api.deepinfra.com/v1", "")
 
-    expect(models).toEqual(["chat-model"])
+    expect(models).toEqual(["chat-model", "legacy-shape-model"])
     expect(fetchMock).toHaveBeenCalledWith("https://api.deepinfra.com/models/list", {
       headers: {},
     })
