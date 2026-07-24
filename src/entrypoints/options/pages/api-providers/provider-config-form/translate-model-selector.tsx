@@ -60,6 +60,9 @@ export const TranslateModelSelector = withForm({
     const modelDiscovery = discoveryProviderConfig
       ? getModelDiscovery(discoveryProviderConfig)
       : undefined
+    // The debounce only paces the automatic query; the explicit fetch button
+    // must use whatever is in the form right now.
+    const manualModelDiscovery = isLLM ? getModelDiscovery(providerConfig) : undefined
     // openai-compatible stays on the manual custom-model path; every other provider
     // with a discovery source gets the automatic dropdown.
     const supportsAutomaticModelDiscovery =
@@ -136,11 +139,11 @@ export const TranslateModelSelector = withForm({
                 labelExtra={
                   <div className="flex items-center gap-2">
                     {recommendationTrigger}
-                    {isCustomLLMProviderConfig(providerConfig) && modelDiscovery && (
+                    {isCustomLLMProviderConfig(providerConfig) && manualModelDiscovery && (
                       <ModelSuggestionButton
                         providerId={providerConfig.id}
-                        endpoint={modelDiscovery.endpoint}
-                        fetchModels={modelDiscovery.fetchModels}
+                        endpoint={manualModelDiscovery.endpoint}
+                        fetchModels={manualModelDiscovery.fetchModels}
                         onSelect={(selectedModel) => {
                           field.handleChange(selectedModel)
                           void form.handleSubmit()

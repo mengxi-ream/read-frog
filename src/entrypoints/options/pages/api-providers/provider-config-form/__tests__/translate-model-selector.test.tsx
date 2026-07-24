@@ -42,8 +42,17 @@ vi.mock("@/components/ui/base-ui/select", () => ({
 }))
 
 vi.mock("../components/model-suggestion-button", () => ({
-  ModelSuggestionButton: ({ onSelect }: { onSelect: (model: string) => void }) => (
+  ModelSuggestionButton: ({
+    onSelect,
+    fetchModels,
+  }: {
+    onSelect: (model: string) => void
+    fetchModels: () => Promise<string[]>
+  }) => (
     <div>
+      <button type="button" onClick={() => void fetchModels()}>
+        manual-fetch
+      </button>
       <button type="button" onClick={() => onSelect("gpt-4o")}>
         suggest-known-model
       </button>
@@ -284,6 +293,21 @@ describe("translateModelSelector", () => {
       '{"reasoningEffort":"minimal"}',
     )
     expect(screen.getByLabelText("submit-count")).toHaveTextContent("1")
+  })
+
+  it("fetches manually with the live form values, not the debounced ones", async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(jsonResponse({ data: [] }))
+    vi.stubGlobal("fetch", fetchMock)
+
+    renderSelector(customProviderConfig)
+
+    fireEvent.change(screen.getByLabelText("api-key"), { target: { value: "sk-fresh" } })
+    fireEvent.click(screen.getByRole("button", { name: "manual-fetch" }))
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1))
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:11434/v1/models", {
+      headers: { Authorization: "Bearer sk-fresh" },
+    })
   })
 
   it("updates the custom model from a discovered suggestion", async () => {
