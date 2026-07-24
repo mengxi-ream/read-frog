@@ -16,6 +16,7 @@ import {
 import { classifyProviderConfig, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
+  BLOCK_ATTRIBUTE,
   CONTENT_WRAPPER_CLASS,
   REACT_SHADOW_HOST_CLASS,
   SPINNER_CLASS,
@@ -629,13 +630,19 @@ export class PageTranslationManager implements IPageTranslationManager {
    * once. docs.docker.com labels its entire flat 185k-px <article> as ONE
    * paragraph (inline <em> dates are direct children), which defeated
    * viewport gating and enqueued 5k+ paragraphs instantly (#1881). Giant
-   * paragraphs are split: their next-level descendant paragraphs are observed
-   * individually instead.
+   * paragraphs are split: their next-level block paragraph descendants in the
+   * same DOM root are observed individually instead. Inline paragraph
+   * descendants stay attached to the parent unit because direct sibling text
+   * may contain most of the translatable content (for example, SillyTavern
+   * narration around <q> tags; #1951). Paragraphs in nested shadow roots are
+   * always independent units because translating a paragraph host does not
+   * traverse its shadow root.
    *
-   * Known tradeoff: direct inline children of a split giant (e.g. those date
-   * <em>s) are not covered by any observed unit and stay untranslated. Stray
-   * standalone inlines in a >3-viewport flat container are rare, and
-   * numeric-only text is skipped by the pipeline anyway.
+   * Known tradeoff: direct inline children of a giant split across real block
+   * paragraphs (e.g. docs.docker.com date <em>s) are not covered by any
+   * observed unit and stay untranslated. Stray standalone inlines in a
+   * >3-viewport flat container are rare, and numeric-only text is skipped by
+   * the pipeline anyway.
    */
   private observeParagraphUnit(element: HTMLElement, walkId: string, depth: number): void {
     const observer = this.intersectionObserver
@@ -652,22 +659,47 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
 
-    const innerTopLevelParagraphs = this.collectParagraphElementsDeep(element, walkId).filter(
-      (paragraph) => {
-        if (paragraph === element) return false
-        const ancestor = paragraph.parentElement?.closest("[data-read-frog-paragraph]")
-        // Keep only paragraphs whose nearest paragraph ancestor is the giant
-        // itself (or that have none inside it, e.g. across shadow roots).
-        return !ancestor || ancestor === element || !element.contains(ancestor)
-      },
-    )
-    if (innerTopLevelParagraphs.length === 0) {
-      // Unsplittable giant (no nested paragraphs) — observe it whole.
+    const paragraphs = this.collectParagraphElementsDeep(element, walkId)
+    const elementRoot = element.getRootNode()
+    const paragraphSelector = `[data-read-frog-paragraph][data-read-frog-walked="${CSS.escape(walkId)}"]`
+    const blockParagraphSelector = `${paragraphSelector}[${BLOCK_ATTRIBUTE}]`
+
+    const innerTopLevelBlockParagraphs = paragraphs.filter((paragraph) => {
+      if (
+        paragraph === element ||
+        paragraph.getRootNode() !== elementRoot ||
+        !paragraph.hasAttribute(BLOCK_ATTRIBUTE)
+      ) {
+        return false
+      }
+      const ancestor = paragraph.parentElement?.closest(blockParagraphSelector)
+      // Keep only block paragraphs whose nearest block-paragraph ancestor in
+      // this DOM root is the giant itself (or that have none).
+      return !ancestor || ancestor === element
+    })
+
+    const nestedRootTopLevelParagraphs = paragraphs.filter((paragraph) => {
+      const paragraphRoot = paragraph.getRootNode()
+      if (paragraph === element || paragraphRoot === elementRoot) return false
+      const ancestor = paragraph.parentElement?.closest(paragraphSelector)
+      // A paragraph translation never crosses a shadow boundary. Observe the
+      // top-level paragraph in every nested root independently; its normal
+      // translation walk will cover paragraph descendants in that same root.
+      return !ancestor || ancestor.getRootNode() !== paragraphRoot
+    })
+
+    if (innerTopLevelBlockParagraphs.length === 0) {
+      // No same-root block split is available — observe the giant whole so its
+      // direct text and inline descendants remain in one translation unit.
       observer.observe(element)
-      return
+    } else {
+      for (const paragraph of innerTopLevelBlockParagraphs) {
+        this.observeParagraphUnit(paragraph, walkId, depth + 1)
+      }
     }
-    for (const paragraph of innerTopLevelParagraphs) {
-      this.observeParagraphUnit(paragraph, walkId, depth + 1)
+
+    for (const paragraph of nestedRootTopLevelParagraphs) {
+      this.observeParagraphUnit(paragraph, walkId, 0)
     }
   }
 

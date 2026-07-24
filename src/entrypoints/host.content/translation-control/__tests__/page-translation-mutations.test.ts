@@ -1059,9 +1059,11 @@ describe("pageTranslationManager mutation re-walk", () => {
     const inner1 = document.createElement("p")
     inner1.id = "inner1"
     inner1.textContent = "Nested paragraph one"
+    inner1.setAttribute("data-read-frog-block-node", "")
     const inner2 = document.createElement("p")
     inner2.id = "inner2"
     inner2.textContent = "Nested paragraph two"
+    inner2.setAttribute("data-read-frog-block-node", "")
     giant.append(inner1, inner2)
 
     const unsplittable = document.createElement("p")
@@ -1087,6 +1089,113 @@ describe("pageTranslationManager mutation re-walk", () => {
     expect(observed).not.toContain(giant)
     // A giant with no nested paragraphs cannot be split — observed whole.
     expect(observed).toContain(unsplittable)
+
+    manager.stop()
+  })
+
+  it("keeps a giant mixed-content paragraph whole when its only nested paragraph is inline (#1951)", async () => {
+    // SillyTavern renders quoted dialogue as an inline <q> inside a long
+    // message. Splitting on that inline paragraph drops the surrounding
+    // narration, which lives in direct text nodes owned by the message.
+    const message = document.createElement("p")
+    message.id = "message"
+    message.append("Narration before the dialogue. ")
+    const dialogue = document.createElement("q")
+    dialogue.id = "dialogue"
+    dialogue.textContent = '"Quoted dialogue"'
+    dialogue.setAttribute("data-read-frog-inline-node", "")
+    message.append(dialogue, " Narration after the dialogue.")
+    document.body.append(message)
+
+    const tall = { height: 200_000 } as DOMRect
+    message.getBoundingClientRect = () => tall
+
+    mockWalkAndLabelElementChunked.mockImplementationOnce(
+      async (
+        element: HTMLElement,
+        walkId: string,
+        _config: unknown,
+        options?: { onBlockedElement?: (blocked: HTMLElement) => void },
+      ) => {
+        const result = walkAndLabelVisibleParagraphs(element, walkId, options?.onBlockedElement)
+        dialogue.setAttribute("data-read-frog-walked", walkId)
+        dialogue.setAttribute("data-read-frog-paragraph", "")
+        return result
+      },
+    )
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const observer = intersectionObservers[0]
+    const observed = observer.observe.mock.calls.map((call) => call[0])
+    expect(observed).toContain(message)
+    expect(observed).not.toContain(dialogue)
+
+    manager.stop()
+  })
+
+  it("observes inline paragraphs in a nested shadow root independently from a giant host (#1951)", async () => {
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const message = document.createElement("p")
+    message.id = "shadow-message"
+    message.append("Light-DOM narration that belongs to the message host.")
+    const shadowRoot = message.attachShadow({ mode: "open" })
+    const dialogue = document.createElement("q")
+    dialogue.id = "shadow-dialogue"
+    dialogue.textContent = '"Dialogue rendered in the shadow root"'
+    dialogue.setAttribute("data-read-frog-inline-node", "")
+    shadowRoot.append(dialogue)
+
+    const tall = { height: 200_000 } as DOMRect
+    message.getBoundingClientRect = () => tall
+
+    mockWalkAndLabelElement.mockImplementationOnce(
+      (
+        element: HTMLElement,
+        walkId: string,
+        _config: unknown,
+        callbacks?: { onBlockedElement?: (blocked: HTMLElement) => void },
+      ) => {
+        const result = walkAndLabelVisibleParagraphs(element, walkId, callbacks?.onBlockedElement)
+        dialogue.setAttribute("data-read-frog-walked", walkId)
+        dialogue.setAttribute("data-read-frog-paragraph", "")
+        return result
+      },
+    )
+
+    document.body.append(message)
+    await flushDomUpdates()
+
+    const observer = intersectionObservers[0]
+    const observed = observer.observe.mock.calls.map((call) => call[0])
+    expect(observed).toContain(message)
+    expect(observed).toContain(dialogue)
+
+    await observer.triggerIntersect(message)
+    await observer.triggerIntersect(dialogue)
+    await flushDomUpdates()
+
+    expect(mockTranslateWalkedElement).toHaveBeenCalledWith(
+      message,
+      "walk-id",
+      DEFAULT_CONFIG,
+      false,
+      expect.anything(),
+      expect.anything(),
+    )
+    expect(mockTranslateWalkedElement).toHaveBeenCalledWith(
+      dialogue,
+      "walk-id",
+      DEFAULT_CONFIG,
+      false,
+      expect.anything(),
+      expect.anything(),
+    )
 
     manager.stop()
   })
