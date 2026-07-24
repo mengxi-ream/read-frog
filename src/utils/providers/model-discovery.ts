@@ -22,6 +22,10 @@ interface ModelDiscoveryDescriptor {
 
 const MAX_PAGES = 10
 const UNSUPPORTED_MODEL_TYPES = new Set(["embedding", "image", "moderation", "rerank"])
+// Catalog entries without capability metadata (plain { id } shapes) are matched by
+// id against the common non-text model families instead.
+const NON_TEXT_MODEL_ID_PATTERN =
+  /\b(?:embed(?:ding)?s?|whisper|tts|dall-e|moderation|audio|realtime|transcribe|rerank(?:er)?|image|sora)\b/i
 
 export const MODEL_DISCOVERY_DESCRIPTORS: Partial<
   Record<NonCustomLLMProviderTypes, ModelDiscoveryDescriptor>
@@ -145,7 +149,12 @@ export async function fetchOpenAICompatibleModels(
     signal,
   )
   // Most providers return { data: [{ id }] }; a few return a bare array or use `name`.
-  return dedupe(getModelEntries(data).filter(supportsTextGeneration).map(getModelId))
+  return dedupe(
+    getModelEntries(data)
+      .filter(supportsTextGeneration)
+      .map(getModelId)
+      .filter((id) => !NON_TEXT_MODEL_ID_PATTERN.test(id)),
+  )
 }
 
 export async function fetchDeepInfraModels(

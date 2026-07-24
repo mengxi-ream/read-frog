@@ -73,6 +73,29 @@ describe("fetchOpenAICompatibleModels", () => {
     })
   })
 
+  it("drops well-known non-text model ids that carry no capability metadata", async () => {
+    mockFetch(
+      jsonResponse({
+        data: [
+          { id: "gpt-test" },
+          { id: "text-embedding-3-large" },
+          { id: "whisper-1" },
+          { id: "tts-1-hd" },
+          { id: "dall-e-3" },
+          { id: "omni-moderation-latest" },
+          { id: "gpt-4o-realtime-preview" },
+          { id: "gpt-4o-audio-preview" },
+          { id: "gpt-4o-transcribe" },
+          { id: "gpt-image-1" },
+        ],
+      }),
+    )
+
+    const models = await fetchOpenAICompatibleModels("https://api.openai.com/v1", "sk-test")
+
+    expect(models).toEqual(["gpt-test"])
+  })
+
   it("surfaces API error messages", async () => {
     mockFetch(jsonResponse({ error: { message: "invalid key" } }, 401))
 

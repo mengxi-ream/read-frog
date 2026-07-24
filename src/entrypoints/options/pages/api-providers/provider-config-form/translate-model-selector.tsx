@@ -2,7 +2,7 @@ import type { APIProviderConfig, LLMProviderConfig } from "@/types/config/provid
 import { useQuery } from "@tanstack/react-query"
 import { useSelector } from "@tanstack/react-store"
 import { useSetAtom } from "jotai"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import {
   SelectContent,
@@ -40,11 +40,21 @@ export const TranslateModelSelector = withForm({
       isLLM && "baseURL" in providerConfig ? providerConfig.baseURL?.trim() : undefined
     const debouncedAPIKey = useDebouncedValue(apiKey, 500)
     const debouncedBaseURL = useDebouncedValue(baseURL, 500)
+    const headersJSON = JSON.stringify(
+      isLLM && "headers" in providerConfig ? (providerConfig.headers ?? null) : null,
+    )
+    const debouncedHeadersJSON = useDebouncedValue(headersJSON, 500)
+    const debouncedHeaders = useMemo(
+      () =>
+        (JSON.parse(debouncedHeadersJSON) ?? undefined) as Record<string, unknown> | undefined,
+      [debouncedHeadersJSON],
+    )
     const discoveryProviderConfig = isLLM
       ? {
           ...providerConfig,
           ...("apiKey" in providerConfig ? { apiKey: debouncedAPIKey } : {}),
           ...("baseURL" in providerConfig ? { baseURL: debouncedBaseURL } : {}),
+          ...("headers" in providerConfig ? { headers: debouncedHeaders } : {}),
         }
       : undefined
     const modelDiscovery = discoveryProviderConfig
@@ -56,10 +66,15 @@ export const TranslateModelSelector = withForm({
       isLLM &&
       providerConfig.provider !== "openai-compatible" &&
       (isCustomProvider || MODEL_DISCOVERY_DESCRIPTORS[providerConfig.provider] !== undefined)
-    const apiKeyHash = debouncedAPIKey ? Sha256Hex(debouncedAPIKey) : ""
+    // Fingerprint of everything that authorizes discovery, so editing the key or
+    // headers refetches without the secrets themselves entering the cache key.
+    const credentialsHash =
+      debouncedAPIKey || debouncedHeadersJSON !== "null"
+        ? Sha256Hex(debouncedAPIKey ?? "", debouncedHeadersJSON)
+        : ""
     const autoDiscoverModels = supportsAutomaticModelDiscovery && modelDiscovery !== undefined
     const { data: discoveredModels = [] } = useQuery({
-      queryKey: ["providerModels", providerConfig.id, modelDiscovery?.endpoint, apiKeyHash],
+      queryKey: ["providerModels", providerConfig.id, modelDiscovery?.endpoint, credentialsHash],
       queryFn: ({ signal }) => modelDiscovery!.fetchModels(signal),
       enabled: autoDiscoverModels,
       retry: false,
