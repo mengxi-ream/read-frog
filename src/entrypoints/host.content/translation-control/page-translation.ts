@@ -78,6 +78,11 @@ interface RetranslationBudget {
   passes: number
 }
 
+interface ParagraphChildRunTask {
+  paragraph: HTMLElement
+  childRuns: ChildNode[][]
+}
+
 interface IPageTranslationManager {
   /**
    * Indicates whether the page translation is currently active
@@ -125,6 +130,8 @@ export class PageTranslationManager implements IPageTranslationManager {
 
   private isPageTranslating: boolean = false
   private intersectionObserver: IntersectionObserver | null = null
+  private fullParagraphTargets = new WeakSet<HTMLElement>()
+  private paragraphChildRunsByAnchor = new WeakMap<HTMLElement, ParagraphChildRunTask[]>()
   private mutationObservers: MutationObserver[] = []
   private observedMutationRoots = new WeakSet<Node>()
   private walkId: string | null = null
@@ -282,7 +289,30 @@ export class PageTranslationManager implements IPageTranslationManager {
           const pacer = createWorkPacer()
           const isWalkCurrent = () => this.walkId === walkId
           for (const target of targets) {
-            void translateWalkedElement(target, walkId, currentConfig, false, pacer, isWalkCurrent)
+            const childRunTasks = this.paragraphChildRunsByAnchor.get(target) ?? []
+            this.paragraphChildRunsByAnchor.delete(target)
+            for (const task of childRunTasks) {
+              void translateWalkedElement(
+                task.paragraph,
+                walkId,
+                currentConfig,
+                false,
+                pacer,
+                isWalkCurrent,
+                undefined,
+                { childRuns: task.childRuns },
+              )
+            }
+            if (this.fullParagraphTargets.has(target)) {
+              void translateWalkedElement(
+                target,
+                walkId,
+                currentConfig,
+                false,
+                pacer,
+                isWalkCurrent,
+              )
+            }
           }
         })()
       }, this.intersectionOptions)
@@ -366,6 +396,8 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.isPageTranslating = false
     this.translationSessionVersion += 1
     this.walkId = null
+    this.fullParagraphTargets = new WeakSet()
+    this.paragraphChildRunsByAnchor = new WeakMap()
     this.walkBlockedElementsCache = new WeakSet()
     this.refreshingTranslatedSources = new WeakSet()
     this.translatedSourceMutationVersions = new WeakMap()
@@ -624,25 +656,114 @@ export class PageTranslationManager implements IPageTranslationManager {
     topLevelParagraphs.forEach((el) => this.observeParagraphUnit(el, walkId, 0))
   }
 
+  /** Register a normal paragraph target for full recursive translation. */
+  private observeFullParagraphUnit(element: HTMLElement): void {
+    const observer = this.intersectionObserver
+    if (!observer) return
+    this.fullParagraphTargets.add(element)
+    observer.observe(element)
+  }
+
+  /**
+   * Register a parent-owned child run against a viewport-local element inside
+   * or beside it. When that anchor enters the viewport, the parent paragraph
+   * translates the complete run without recursing into split block children.
+   */
+  private observeParagraphChildRun(
+    paragraph: HTMLElement,
+    anchor: HTMLElement,
+    childRun: ChildNode[],
+  ): void {
+    const observer = this.intersectionObserver
+    if (!observer) return
+
+    const tasks = this.paragraphChildRunsByAnchor.get(anchor) ?? []
+    let task = tasks.find((candidate) => candidate.paragraph === paragraph)
+    if (!task) {
+      task = { paragraph, childRuns: [] }
+      tasks.push(task)
+    }
+    const isAlreadyRegistered = task.childRuns.some(
+      (registered) =>
+        registered.length === childRun.length &&
+        registered.every((node, index) => node === childRun[index]),
+    )
+    if (!isAlreadyRegistered) task.childRuns.push(childRun)
+
+    this.paragraphChildRunsByAnchor.set(anchor, tasks)
+    observer.observe(anchor)
+  }
+
+  private collectParagraphChildRunTargets(
+    element: HTMLElement,
+    inlineParagraphs: HTMLElement[],
+    fallbackBlockAnchor: HTMLElement,
+  ): Array<{ anchor: HTMLElement; childRun: ChildNode[]; paragraphs: HTMLElement[] }> {
+    const targets: Array<{
+      anchor: HTMLElement
+      childRun: ChildNode[]
+      paragraphs: HTMLElement[]
+    }> = []
+    const inlineParagraphsByDirectChild = new Map<ChildNode, HTMLElement[]>()
+    for (const paragraph of inlineParagraphs) {
+      let directChild: Node = paragraph
+      while (directChild.parentNode && directChild.parentNode !== element) {
+        directChild = directChild.parentNode
+      }
+      if (directChild.parentNode !== element) continue
+      const directChildNode = directChild as ChildNode
+      const paragraphs = inlineParagraphsByDirectChild.get(directChildNode) ?? []
+      paragraphs.push(paragraph)
+      inlineParagraphsByDirectChild.set(directChildNode, paragraphs)
+    }
+
+    let childRun: ChildNode[] = []
+    let childRunParagraphs: HTMLElement[] = []
+    let previousBlockChild: HTMLElement | null = null
+
+    const flush = (nextBlockChild: HTMLElement | null) => {
+      if (childRun.length === 0) return
+      const hasDirectText = childRun.some(
+        (node) => node.nodeType === Node.TEXT_NODE && Boolean(node.textContent?.trim()),
+      )
+      if (childRunParagraphs.length > 0 || hasDirectText) {
+        targets.push({
+          anchor:
+            childRunParagraphs[0] ?? nextBlockChild ?? previousBlockChild ?? fallbackBlockAnchor,
+          childRun,
+          paragraphs: childRunParagraphs,
+        })
+      }
+      childRun = []
+      childRunParagraphs = []
+    }
+
+    for (const child of element.childNodes) {
+      if (isHTMLElement(child) && child.hasAttribute(BLOCK_ATTRIBUTE)) {
+        flush(child)
+        previousBlockChild = child
+      } else {
+        childRun.push(child)
+        childRunParagraphs.push(...(inlineParagraphsByDirectChild.get(child) ?? []))
+      }
+    }
+    flush(null)
+
+    return targets
+  }
+
   /**
    * Observe a paragraph as one lazy-translation unit — unless it is so tall
    * that its first intersection would expand into (nearly) the whole page at
    * once. docs.docker.com labels its entire flat 185k-px <article> as ONE
    * paragraph (inline <em> dates are direct children), which defeated
    * viewport gating and enqueued 5k+ paragraphs instantly (#1881). Giant
-   * paragraphs are split: their next-level block paragraph descendants in the
-   * same DOM root are observed individually instead. Inline paragraph
-   * descendants stay attached to the parent unit because direct sibling text
-   * may contain most of the translatable content (for example, SillyTavern
-   * narration around <q> tags; #1951). Paragraphs in nested shadow roots are
-   * always independent units because translating a paragraph host does not
-   * traverse its shadow root.
-   *
-   * Known tradeoff: direct inline children of a giant split across real block
-   * paragraphs (e.g. docs.docker.com date <em>s) are not covered by any
-   * observed unit and stay untranslated. Stray standalone inlines in a
-   * >3-viewport flat container are rare, and numeric-only text is skipped by
-   * the pipeline anyway.
+   * paragraphs are split at their next-level block paragraphs. Inline
+   * paragraphs become viewport anchors for their complete parent-owned child
+   * runs; text-only runs use an adjacent block boundary as their anchor. This
+   * preserves direct text without recursively translating the split block
+   * paragraphs (#1951). Paragraphs in nested shadow roots remain independent
+   * units because a paragraph translation never crosses a shadow boundary.
    */
   private observeParagraphUnit(element: HTMLElement, walkId: string, depth: number): void {
     const observer = this.intersectionObserver
@@ -655,28 +776,25 @@ export class PageTranslationManager implements IPageTranslationManager {
       depth >= GIANT_PARAGRAPH_MAX_SPLIT_DEPTH ||
       element.getBoundingClientRect().height <= maxUnitHeight
     ) {
-      observer.observe(element)
+      this.observeFullParagraphUnit(element)
       return
     }
 
     const paragraphs = this.collectParagraphElementsDeep(element, walkId)
     const elementRoot = element.getRootNode()
     const paragraphSelector = `[data-read-frog-paragraph][data-read-frog-walked="${CSS.escape(walkId)}"]`
-    const blockParagraphSelector = `${paragraphSelector}[${BLOCK_ATTRIBUTE}]`
 
-    const innerTopLevelBlockParagraphs = paragraphs.filter((paragraph) => {
-      if (
-        paragraph === element ||
-        paragraph.getRootNode() !== elementRoot ||
-        !paragraph.hasAttribute(BLOCK_ATTRIBUTE)
-      ) {
-        return false
-      }
-      const ancestor = paragraph.parentElement?.closest(blockParagraphSelector)
-      // Keep only block paragraphs whose nearest block-paragraph ancestor in
-      // this DOM root is the giant itself (or that have none).
+    const localTopLevelParagraphs = paragraphs.filter((paragraph) => {
+      if (paragraph === element || paragraph.getRootNode() !== elementRoot) return false
+      const ancestor = paragraph.parentElement?.closest(paragraphSelector)
       return !ancestor || ancestor === element
     })
+    const localBlockParagraphs = localTopLevelParagraphs.filter((paragraph) =>
+      paragraph.hasAttribute(BLOCK_ATTRIBUTE),
+    )
+    const localInlineParagraphs = localTopLevelParagraphs.filter(
+      (paragraph) => !paragraph.hasAttribute(BLOCK_ATTRIBUTE),
+    )
 
     const nestedRootTopLevelParagraphs = paragraphs.filter((paragraph) => {
       const paragraphRoot = paragraph.getRootNode()
@@ -688,13 +806,29 @@ export class PageTranslationManager implements IPageTranslationManager {
       return !ancestor || ancestor.getRootNode() !== paragraphRoot
     })
 
-    if (innerTopLevelBlockParagraphs.length === 0) {
+    if (localBlockParagraphs.length === 0) {
       // No same-root block split is available — observe the giant whole so its
       // direct text and inline descendants remain in one translation unit.
-      observer.observe(element)
+      this.observeFullParagraphUnit(element)
     } else {
-      for (const paragraph of innerTopLevelBlockParagraphs) {
+      const coveredInlineParagraphs = new Set<HTMLElement>()
+      for (const target of this.collectParagraphChildRunTargets(
+        element,
+        localInlineParagraphs,
+        localBlockParagraphs[0],
+      )) {
+        target.paragraphs.forEach((paragraph) => coveredInlineParagraphs.add(paragraph))
+        this.observeParagraphChildRun(element, target.anchor, target.childRun)
+      }
+      for (const paragraph of localBlockParagraphs) {
         this.observeParagraphUnit(paragraph, walkId, depth + 1)
+      }
+      // Defensive fallback for unusual invalid markup where a top-level inline
+      // paragraph is not reachable from a direct non-block child run.
+      for (const paragraph of localInlineParagraphs) {
+        if (!coveredInlineParagraphs.has(paragraph)) {
+          this.observeParagraphUnit(paragraph, walkId, depth + 1)
+        }
       }
     }
 

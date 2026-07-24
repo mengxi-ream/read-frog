@@ -3,6 +3,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
+  BLOCK_ATTRIBUTE,
+  INLINE_ATTRIBUTE,
+  PARAGRAPH_ATTRIBUTE,
+  WALKED_ATTRIBUTE,
+} from "@/utils/constants/dom-labels"
+import {
   markExtensionDrivenNodeRemoval,
   registerBilingualTranslationState,
   unregisterBilingualTranslationState,
@@ -200,7 +206,7 @@ function walkAndLabelVisibleParagraphs(
     }
   }
 
-  element.setAttribute("data-read-frog-walked", walkId)
+  element.setAttribute(WALKED_ATTRIBUTE, walkId)
 
   for (const child of element.children) {
     if (child instanceof HTMLElement) {
@@ -209,7 +215,8 @@ function walkAndLabelVisibleParagraphs(
   }
 
   if (element.tagName === "P" && element.textContent?.trim()) {
-    element.setAttribute("data-read-frog-paragraph", "")
+    element.setAttribute(PARAGRAPH_ATTRIBUTE, "")
+    element.setAttribute(BLOCK_ATTRIBUTE, "")
   }
 
   return {
@@ -1055,16 +1062,19 @@ describe("pageTranslationManager mutation re-walk", () => {
     // inside. Built via DOM APIs — the HTML parser refuses nested <p>.
     const giant = document.createElement("p")
     giant.id = "giant"
-    giant.append("direct inline text of the giant")
+    const directText = document.createTextNode("direct inline text of the giant")
+    giant.append(directText)
     const inner1 = document.createElement("p")
     inner1.id = "inner1"
     inner1.textContent = "Nested paragraph one"
-    inner1.setAttribute("data-read-frog-block-node", "")
+    inner1.setAttribute(BLOCK_ATTRIBUTE, "")
     const inner2 = document.createElement("p")
     inner2.id = "inner2"
     inner2.textContent = "Nested paragraph two"
-    inner2.setAttribute("data-read-frog-block-node", "")
-    giant.append(inner1, inner2)
+    inner2.setAttribute(BLOCK_ATTRIBUTE, "")
+    const betweenBlocks = document.createTextNode("direct text between the nested paragraphs")
+    const afterBlocks = document.createTextNode("direct text after the nested paragraphs")
+    giant.append(inner1, betweenBlocks, inner2, afterBlocks)
 
     const unsplittable = document.createElement("p")
     unsplittable.id = "unsplittable"
@@ -1090,6 +1100,52 @@ describe("pageTranslationManager mutation re-walk", () => {
     // A giant with no nested paragraphs cannot be split — observed whole.
     expect(observed).toContain(unsplittable)
 
+    await observer.triggerIntersect(inner1)
+    await flushDomUpdates()
+
+    // Direct text remains owned by the giant, but is lazily triggered by its
+    // adjacent block instead of making the whole giant an eager target.
+    expect(mockTranslateWalkedElement).toHaveBeenCalledWith(
+      giant,
+      "walk-id",
+      DEFAULT_CONFIG,
+      false,
+      expect.anything(),
+      expect.anything(),
+      undefined,
+      { childRuns: [[directText]] },
+    )
+    expect(mockTranslateWalkedElement).toHaveBeenCalledWith(
+      inner1,
+      "walk-id",
+      DEFAULT_CONFIG,
+      false,
+      expect.anything(),
+      expect.anything(),
+    )
+
+    await observer.triggerIntersect(inner2)
+    await flushDomUpdates()
+
+    expect(mockTranslateWalkedElement).toHaveBeenCalledWith(
+      giant,
+      "walk-id",
+      DEFAULT_CONFIG,
+      false,
+      expect.anything(),
+      expect.anything(),
+      undefined,
+      { childRuns: [[betweenBlocks], [afterBlocks]] },
+    )
+    expect(mockTranslateWalkedElement).toHaveBeenCalledWith(
+      inner2,
+      "walk-id",
+      DEFAULT_CONFIG,
+      false,
+      expect.anything(),
+      expect.anything(),
+    )
+
     manager.stop()
   })
 
@@ -1103,7 +1159,7 @@ describe("pageTranslationManager mutation re-walk", () => {
     const dialogue = document.createElement("q")
     dialogue.id = "dialogue"
     dialogue.textContent = '"Quoted dialogue"'
-    dialogue.setAttribute("data-read-frog-inline-node", "")
+    dialogue.setAttribute(INLINE_ATTRIBUTE, "")
     message.append(dialogue, " Narration after the dialogue.")
     document.body.append(message)
 
@@ -1118,8 +1174,8 @@ describe("pageTranslationManager mutation re-walk", () => {
         options?: { onBlockedElement?: (blocked: HTMLElement) => void },
       ) => {
         const result = walkAndLabelVisibleParagraphs(element, walkId, options?.onBlockedElement)
-        dialogue.setAttribute("data-read-frog-walked", walkId)
-        dialogue.setAttribute("data-read-frog-paragraph", "")
+        dialogue.setAttribute(WALKED_ATTRIBUTE, walkId)
+        dialogue.setAttribute(PARAGRAPH_ATTRIBUTE, "")
         return result
       },
     )
@@ -1136,6 +1192,86 @@ describe("pageTranslationManager mutation re-walk", () => {
     manager.stop()
   })
 
+  it("preserves a giant paragraph's inline run when block paragraphs are split (#1951)", async () => {
+    const message = document.createElement("p")
+    message.id = "mixed-message"
+    const before = document.createTextNode("Narration before the dialogue. ")
+    const dialogue = document.createElement("q")
+    dialogue.id = "mixed-dialogue"
+    dialogue.textContent = '"Quoted dialogue"'
+    const after = document.createTextNode(" Narration after the dialogue.")
+    const block = document.createElement("p")
+    block.id = "mixed-block"
+    block.textContent = "A nested block paragraph"
+    message.append(before, dialogue, after, block)
+    document.body.append(message)
+
+    const tall = { height: 200_000 } as DOMRect
+    message.getBoundingClientRect = () => tall
+
+    mockWalkAndLabelElementChunked.mockImplementationOnce(
+      async (
+        element: HTMLElement,
+        walkId: string,
+        _config: unknown,
+        options?: { onBlockedElement?: (blocked: HTMLElement) => void },
+      ) => {
+        const result = walkAndLabelVisibleParagraphs(element, walkId, options?.onBlockedElement)
+        dialogue.setAttribute(WALKED_ATTRIBUTE, walkId)
+        dialogue.setAttribute(PARAGRAPH_ATTRIBUTE, "")
+        dialogue.setAttribute(INLINE_ATTRIBUTE, "")
+        block.setAttribute(BLOCK_ATTRIBUTE, "")
+        return result
+      },
+    )
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const observer = intersectionObservers[0]
+    const observed = observer.observe.mock.calls.map((call) => call[0])
+    expect(observed).toContain(dialogue)
+    expect(observed).toContain(block)
+    expect(observed).not.toContain(message)
+
+    await observer.triggerIntersect(dialogue)
+    await flushDomUpdates()
+
+    expect(mockTranslateWalkedElement).toHaveBeenCalledWith(
+      message,
+      "walk-id",
+      DEFAULT_CONFIG,
+      false,
+      expect.anything(),
+      expect.anything(),
+      undefined,
+      { childRuns: [[before, dialogue, after]] },
+    )
+    expect(mockTranslateWalkedElement).not.toHaveBeenCalledWith(
+      dialogue,
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+    )
+
+    await observer.triggerIntersect(block)
+    await flushDomUpdates()
+
+    expect(mockTranslateWalkedElement).toHaveBeenCalledWith(
+      block,
+      "walk-id",
+      DEFAULT_CONFIG,
+      false,
+      expect.anything(),
+      expect.anything(),
+    )
+
+    manager.stop()
+  })
+
   it("observes inline paragraphs in a nested shadow root independently from a giant host (#1951)", async () => {
     const manager = new PageTranslationManager()
     await manager.start()
@@ -1148,7 +1284,7 @@ describe("pageTranslationManager mutation re-walk", () => {
     const dialogue = document.createElement("q")
     dialogue.id = "shadow-dialogue"
     dialogue.textContent = '"Dialogue rendered in the shadow root"'
-    dialogue.setAttribute("data-read-frog-inline-node", "")
+    dialogue.setAttribute(INLINE_ATTRIBUTE, "")
     shadowRoot.append(dialogue)
 
     const tall = { height: 200_000 } as DOMRect
@@ -1162,8 +1298,8 @@ describe("pageTranslationManager mutation re-walk", () => {
         callbacks?: { onBlockedElement?: (blocked: HTMLElement) => void },
       ) => {
         const result = walkAndLabelVisibleParagraphs(element, walkId, callbacks?.onBlockedElement)
-        dialogue.setAttribute("data-read-frog-walked", walkId)
-        dialogue.setAttribute("data-read-frog-paragraph", "")
+        dialogue.setAttribute(WALKED_ATTRIBUTE, walkId)
+        dialogue.setAttribute(PARAGRAPH_ATTRIBUTE, "")
         return result
       },
     )

@@ -2,7 +2,13 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { WALKED_ATTRIBUTE } from "@/utils/constants/dom-labels"
+import {
+  BLOCK_ATTRIBUTE,
+  CONTENT_WRAPPER_CLASS,
+  INLINE_ATTRIBUTE,
+  PARAGRAPH_ATTRIBUTE,
+  WALKED_ATTRIBUTE,
+} from "@/utils/constants/dom-labels"
 import { createWorkPacer } from "@/utils/scheduler"
 import { translateWalkedElement } from "../translation-walker"
 
@@ -23,13 +29,13 @@ vi.mock("../translation-state", () => ({
 function buildParagraphTree(childCount: number): HTMLElement {
   const container = document.createElement("div")
   container.setAttribute(WALKED_ATTRIBUTE, "walk-1")
-  container.setAttribute("data-read-frog-paragraph", "")
-  container.setAttribute("data-read-frog-block-node", "")
+  container.setAttribute(PARAGRAPH_ATTRIBUTE, "")
+  container.setAttribute(BLOCK_ATTRIBUTE, "")
   for (let i = 0; i < childCount; i++) {
     const p = document.createElement("p")
     p.setAttribute(WALKED_ATTRIBUTE, "walk-1")
-    p.setAttribute("data-read-frog-paragraph", "")
-    p.setAttribute("data-read-frog-block-node", "")
+    p.setAttribute(PARAGRAPH_ATTRIBUTE, "")
+    p.setAttribute(BLOCK_ATTRIBUTE, "")
     p.textContent = `paragraph ${i}`
     container.append(p)
   }
@@ -93,5 +99,51 @@ describe("translateWalkedElement liveness", () => {
     await translateWalkedElement(container, "walk-1", DEFAULT_CONFIG, false, pacer, () => true)
 
     expect(new Set(realTranslationTexts()).size).toBe(4)
+  })
+
+  it("translates only an explicit inline child run when a split block is already translated", async () => {
+    const container = document.createElement("p")
+    container.setAttribute(WALKED_ATTRIBUTE, "walk-1")
+    container.setAttribute(PARAGRAPH_ATTRIBUTE, "")
+    container.setAttribute(BLOCK_ATTRIBUTE, "")
+    const before = document.createTextNode("Narration before. ")
+    const dialogue = document.createElement("q")
+    dialogue.setAttribute(WALKED_ATTRIBUTE, "walk-1")
+    dialogue.setAttribute(PARAGRAPH_ATTRIBUTE, "")
+    dialogue.setAttribute(INLINE_ATTRIBUTE, "")
+    dialogue.textContent = '"Dialogue"'
+    const after = document.createTextNode(" Narration after.")
+    const block = document.createElement("p")
+    block.setAttribute(WALKED_ATTRIBUTE, "walk-1")
+    block.setAttribute(PARAGRAPH_ATTRIBUTE, "")
+    block.setAttribute(BLOCK_ATTRIBUTE, "")
+    block.textContent = "Block paragraph"
+    const existingTranslation = document.createElement("span")
+    existingTranslation.className = CONTENT_WRAPPER_CLASS
+    block.append(existingTranslation)
+    container.append(before, dialogue, after, block)
+    document.body.append(container)
+
+    const childRun = [before, dialogue, after]
+    await translateWalkedElement(
+      container,
+      "walk-1",
+      DEFAULT_CONFIG,
+      false,
+      createWorkPacer(),
+      () => true,
+      undefined,
+      { childRuns: [childRun] },
+    )
+
+    expect(mockTranslateNodes).toHaveBeenCalledTimes(1)
+    expect(mockTranslateNodes).toHaveBeenCalledWith(
+      childRun,
+      "walk-1",
+      false,
+      DEFAULT_CONFIG,
+      true,
+      undefined,
+    )
   })
 })

@@ -20,6 +20,21 @@ import {
 import { translateNodes } from "./translation-modes"
 import { getTranslationOnlyAnchorState } from "./translation-state"
 
+export interface TranslateWalkedElementOptions {
+  /** Translate only these current direct-child runs; never recurse into block children. */
+  childRuns?: ChildNode[][]
+}
+
+function isCurrentChildRun(element: HTMLElement, childRun: ChildNode[]): boolean {
+  if (childRun.length === 0) return false
+  const currentChildren = [...element.childNodes]
+  const startIndex = currentChildren.indexOf(childRun[0])
+  return (
+    startIndex >= 0 &&
+    childRun.every((child, offset) => currentChildren[startIndex + offset] === child)
+  )
+}
+
 /**
  * Marker attributes can outlive their WeakMap state (extension reload on a
  * live tab). A ghost marker must not block walks forever — heal it and treat
@@ -51,6 +66,7 @@ export async function translateWalkedElement(
   // the user just cleared (#1881).
   shouldContinue: () => boolean = () => true,
   actionContext?: TranslationActionContext,
+  options: TranslateWalkedElementOptions = {},
 ): Promise<void> {
   // Self-pacing: a giant observed subtree (a flat article can label as ONE
   // huge paragraph unit, #1881) must not expand into thousands of wrapper
@@ -59,9 +75,11 @@ export async function translateWalkedElement(
   await pauseIfBudgetSpent(pacer)
   if (!shouldContinue()) return
 
-  // Translated regions are skipped on non-toggle walks. In-place-swapped
-  // paragraphs leave no wrapper, so also check the anchor marker attribute.
+  // Translated regions are skipped on ordinary non-toggle walks. Explicit
+  // child runs may coexist with independently translated block descendants,
+  // so descendant wrappers/anchors cannot suppress those parent-owned runs.
   if (
+    options.childRuns === undefined &&
     !toggle &&
     (element.querySelector(`.${CONTENT_WRAPPER_CLASS}`) || hasLiveTranslationOnlyAnchor(element))
   ) {
@@ -94,7 +112,21 @@ export async function translateWalkedElement(
     const computedStyle = window.getComputedStyle(element)
     const isFlexParent = computedStyle.display.includes("flex")
 
-    if (!hasBlockNodeChild) {
+    if (options.childRuns !== undefined) {
+      for (const childRun of options.childRuns) {
+        if (!isCurrentChildRun(element, childRun)) continue
+        promises.push(
+          translateNodes(
+            childRun,
+            walkId,
+            toggle,
+            config,
+            !isFlexParent && hasBlockLayoutChild,
+            actionContext,
+          ),
+        )
+      }
+    } else if (!hasBlockNodeChild) {
       promises.push(translateNodes([element], walkId, toggle, config, false, actionContext))
     } else {
       // prevent children change during iteration
