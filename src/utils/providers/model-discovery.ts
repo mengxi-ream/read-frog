@@ -12,7 +12,7 @@ import { getProviderHeadersWithOverride } from "./headers"
  * the static `LLM_PROVIDER_MODELS` lists remain the source of truth.
  */
 
-type ModelDiscoveryKind = "openai-compatible" | "google" | "anthropic" | "deepinfra"
+type ModelDiscoveryKind = "openai-compatible" | "google" | "anthropic"
 
 interface ModelDiscoveryDescriptor {
   kind: ModelDiscoveryKind
@@ -37,8 +37,8 @@ export const MODEL_DISCOVERY_DESCRIPTORS: Partial<
   xai: { kind: "openai-compatible", baseURL: "https://api.x.ai/v1" },
   groq: { kind: "openai-compatible", baseURL: "https://api.groq.com/openai/v1" },
   deepinfra: {
-    kind: "deepinfra",
-    baseURL: "https://api.deepinfra.com/v1",
+    kind: "openai-compatible",
+    baseURL: "https://api.deepinfra.com/v1/openai",
     requiresAPIKey: false,
   },
   mistral: { kind: "openai-compatible", baseURL: "https://api.mistral.ai/v1" },
@@ -101,6 +101,11 @@ function supportsTextGeneration(entry: unknown): boolean {
     }
   }
 
+  const tags = asRecord(record.metadata)?.tags
+  if (Array.isArray(tags)) {
+    return tags.includes("chat")
+  }
+
   return true
 }
 
@@ -157,30 +162,6 @@ export async function fetchOpenAICompatibleModels(
   )
 }
 
-export async function fetchDeepInfraModels(
-  baseURL: string,
-  _apiKey: string,
-  extraHeaders?: Record<string, string>,
-  signal?: AbortSignal,
-): Promise<string[]> {
-  const url = new URL(baseURL)
-  url.pathname = "/models/list"
-  url.search = ""
-  url.hash = ""
-
-  const data = await fetchJSON(url.toString(), { ...extraHeaders }, signal)
-  const models = getModelEntries(data)
-    .filter((entry) => {
-      const record = asRecord(entry)
-      if (!record) return false
-      // `deprecated` is a unix timestamp (or null) and `private` is a 0/1 flag.
-      const reportedType = asString(record.reported_type) ?? asString(record.type)
-      return reportedType === "text-generation" && !record.deprecated && !record.private
-    })
-    .map((entry) => asString(asRecord(entry)?.model_name) ?? "")
-
-  return dedupe(models)
-}
 
 export async function fetchGoogleModels(
   baseURL: string,
@@ -274,7 +255,6 @@ const MODEL_FETCHERS: Record<
   "openai-compatible": fetchOpenAICompatibleModels,
   google: fetchGoogleModels,
   anthropic: fetchAnthropicModels,
-  deepinfra: fetchDeepInfraModels,
 }
 
 export interface ModelDiscovery {

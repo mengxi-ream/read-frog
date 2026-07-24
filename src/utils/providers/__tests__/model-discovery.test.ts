@@ -2,7 +2,6 @@ import type { LLMProviderConfig } from "@/types/config/provider"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import {
   fetchAnthropicModels,
-  fetchDeepInfraModels,
   fetchGoogleModels,
   fetchOpenAICompatibleModels,
   getModelDiscovery,
@@ -105,40 +104,22 @@ describe("fetchOpenAICompatibleModels", () => {
   })
 })
 
-describe("fetchDeepInfraModels", () => {
-  it("uses the public catalog and keeps only available text-generation models", async () => {
+describe("fetchOpenAICompatibleModels with tagged catalogs", () => {
+  it("keeps only chat-tagged entries when metadata.tags is present", async () => {
     const fetchMock = mockFetch(
-      jsonResponse([
-        {
-          model_name: "chat-model",
-          reported_type: "text-generation",
-          type: "text-generation",
-          deprecated: null,
-          private: 0,
-        },
-        { model_name: "image-model", reported_type: "text-to-image", type: "text-to-image" },
-        {
-          model_name: "retired-model",
-          reported_type: "text-generation",
-          type: "text-generation",
-          deprecated: 1718830497,
-          private: 0,
-        },
-        {
-          model_name: "private-model",
-          reported_type: "text-generation",
-          type: "text-generation",
-          deprecated: null,
-          private: 1,
-        },
-        { model_name: "legacy-shape-model", type: "text-generation" },
-      ]),
+      jsonResponse({
+        data: [
+          { id: "chat-model", metadata: { tags: ["chat", "reasoning"] } },
+          { id: "embed-model", metadata: { tags: ["embed"] } },
+          { id: "speech-model", metadata: { tags: ["tts"] } },
+        ],
+      }),
     )
 
-    const models = await fetchDeepInfraModels("https://api.deepinfra.com/v1", "")
+    const models = await fetchOpenAICompatibleModels("https://api.deepinfra.com/v1/openai")
 
-    expect(models).toEqual(["chat-model", "legacy-shape-model"])
-    expect(fetchMock).toHaveBeenCalledWith("https://api.deepinfra.com/models/list", {
+    expect(models).toEqual(["chat-model"])
+    expect(fetchMock).toHaveBeenCalledWith("https://api.deepinfra.com/v1/openai/models", {
       headers: {},
     })
   })
@@ -260,8 +241,8 @@ describe("getModelDiscovery", () => {
     },
   )
 
-  it("discovers DeepInfra through its unauthenticated text-model catalog", async () => {
-    const fetchMock = mockFetch(jsonResponse([]))
+  it("discovers DeepInfra without an API key under its OpenAI-compatible base", async () => {
+    const fetchMock = mockFetch(jsonResponse({ data: [] }))
     const discovery = getModelDiscovery({
       ...googleConfig,
       id: "deepinfra-default",
@@ -269,12 +250,30 @@ describe("getModelDiscovery", () => {
       apiKey: undefined,
     } as unknown as LLMProviderConfig)
 
-    expect(discovery?.endpoint).toBe("https://api.deepinfra.com/v1")
+    expect(discovery?.endpoint).toBe("https://api.deepinfra.com/v1/openai")
     await discovery!.fetchModels()
 
-    expect(fetchMock).toHaveBeenCalledWith("https://api.deepinfra.com/models/list", {
+    expect(fetchMock).toHaveBeenCalledWith("https://api.deepinfra.com/v1/openai/models", {
       headers: {},
     })
+  })
+
+  it("keeps DeepInfra discovery under a proxied baseURL prefix", async () => {
+    const fetchMock = mockFetch(jsonResponse({ data: [] }))
+    const discovery = getModelDiscovery({
+      ...googleConfig,
+      id: "deepinfra-default",
+      provider: "deepinfra",
+      apiKey: undefined,
+      baseURL: "https://proxy.example.com/deepinfra/v1/openai",
+    } as unknown as LLMProviderConfig)
+
+    await discovery!.fetchModels()
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://proxy.example.com/deepinfra/v1/openai/models",
+      { headers: {} },
+    )
   })
 
   it("discovers Hugging Face without an API key", async () => {

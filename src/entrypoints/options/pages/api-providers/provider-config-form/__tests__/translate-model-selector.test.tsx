@@ -317,28 +317,20 @@ describe("translateModelSelector", () => {
 
   it("loads public models automatically and routes a discovered id through custom model storage", async () => {
     const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
-      jsonResponse([
-        {
-          model_name: "new-chat-model",
-          reported_type: "text-generation",
-          deprecated: null,
-          private: 0,
-        },
-        {
-          model_name: "another-chat-model",
-          reported_type: "text-generation",
-          deprecated: null,
-          private: 0,
-        },
-        { model_name: "image-model", reported_type: "text-to-image" },
-      ]),
+      jsonResponse({
+        data: [
+          { id: "new-chat-model", metadata: { tags: ["chat"] } },
+          { id: "another-chat-model", metadata: { tags: ["chat"] } },
+          { id: "image-model", metadata: { tags: ["image-gen"] } },
+        ],
+      }),
     )
     vi.stubGlobal("fetch", fetchMock)
 
     renderSelector(deepInfraProviderConfig)
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith("https://api.deepinfra.com/models/list", {
+      expect(fetchMock).toHaveBeenCalledWith("https://api.deepinfra.com/v1/openai/models", {
         headers: {},
         signal: expect.any(AbortSignal),
       })
@@ -422,7 +414,7 @@ describe("translateModelSelector", () => {
     const fetchMock = vi
       .fn<typeof fetch>()
       .mockResolvedValue(
-        jsonResponse([{ model_name: "new-chat-model", reported_type: "text-generation" }]),
+        jsonResponse({ data: [{ id: "new-chat-model", metadata: { tags: ["chat"] } }] }),
       )
     vi.stubGlobal("fetch", fetchMock)
 
@@ -446,7 +438,7 @@ describe("translateModelSelector", () => {
       vi
         .fn<typeof fetch>()
         .mockResolvedValue(
-          jsonResponse([{ model_name: "new-chat-model", reported_type: "text-generation" }]),
+          jsonResponse({ data: [{ id: "new-chat-model", metadata: { tags: ["chat"] } }] }),
         ),
     )
     renderSelector(deepInfraProviderConfig)
@@ -477,7 +469,7 @@ describe("translateModelSelector", () => {
       vi
         .fn<typeof fetch>()
         .mockResolvedValue(
-          jsonResponse([{ model_name: "new-chat-model", reported_type: "text-generation" }]),
+          jsonResponse({ data: [{ id: "new-chat-model", metadata: { tags: ["chat"] } }] }),
         ),
     )
     renderSelector(deepInfraProviderConfig)
