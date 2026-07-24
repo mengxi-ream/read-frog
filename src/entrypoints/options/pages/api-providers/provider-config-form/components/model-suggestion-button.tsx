@@ -11,56 +11,39 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/base-ui/combobox"
-import { extractErrorMessage } from "@/utils/error/extract-message"
 import { i18n } from "@/utils/i18n"
 
-interface ModelsResponse {
-  object: string
-  data: Array<{ id: string; object: string; created: number; owned_by: string }>
-}
-
 interface ModelSuggestionButtonProps {
-  baseURL: string
-  apiKey?: string
+  providerId: string
+  endpoint: string
+  fetchModels: () => Promise<string[]>
   onSelect: (model: string) => void
   disabled?: boolean
 }
 
 export function ModelSuggestionButton({
-  baseURL,
-  apiKey,
+  providerId,
+  endpoint,
+  fetchModels,
   onSelect,
   disabled,
 }: ModelSuggestionButtonProps) {
   const mutation = useMutation({
-    mutationKey: ["fetchModels", baseURL],
+    // for safety, we should not include apiKey in the mutationKey; the endpoint
+    // keeps a fetched list from surviving a baseURL change
+    mutationKey: ["fetchModels", providerId, endpoint],
     meta: {
       errorDescription: i18n.t("options.apiProviders.form.models.fetchError"),
     },
-    mutationFn: async () => {
-      if (!apiKey) {
-        throw new Error(i18n.t("options.apiProviders.form.models.apiKeyRequired"))
-      }
-
-      const response = await fetch(`${baseURL}/models`, {
-        headers: { Authorization: `Bearer ${apiKey}` },
-      })
-      if (!response.ok) {
-        throw new Error(await extractErrorMessage(response))
-      }
-
-      const data: ModelsResponse = await response.json()
-      return data.data.map((m) => m.id)
-    },
+    mutationFn: fetchModels,
   })
 
   const handleFetch = () => {
-    if (!baseURL) return
     mutation.reset()
     mutation.mutate()
   }
 
-  const isDisabled = disabled || !baseURL
+  const isDisabled = disabled
 
   // Idle state - show fetch button
   if (mutation.isIdle) {
