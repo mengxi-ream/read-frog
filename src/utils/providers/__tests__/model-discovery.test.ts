@@ -95,6 +95,18 @@ describe("fetchOpenAICompatibleModels", () => {
     expect(models).toEqual(["gpt-test"])
   })
 
+  it("lets a configured Authorization header override the api-key bearer, like the SDK clients", async () => {
+    const fetchMock = mockFetch(jsonResponse({ data: [] }))
+
+    await fetchOpenAICompatibleModels("https://proxy.example.com/v1", "dummy-key", {
+      Authorization: "Bearer proxy-token",
+    })
+
+    expect(fetchMock).toHaveBeenCalledWith("https://proxy.example.com/v1/models", {
+      headers: { Authorization: "Bearer proxy-token" },
+    })
+  })
+
   it("surfaces API error messages", async () => {
     mockFetch(jsonResponse({ error: { message: "invalid key" } }, 401))
 

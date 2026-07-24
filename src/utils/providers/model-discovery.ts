@@ -145,11 +145,13 @@ export async function fetchOpenAICompatibleModels(
   extraHeaders?: Record<string, string>,
   signal?: AbortSignal,
 ): Promise<string[]> {
+  // Auth first, then configured headers, so user headers can override the derived
+  // auth header — the same precedence the AI SDK provider clients use.
   const data = await fetchJSON(
     getModelsURL(baseURL),
     {
-      ...extraHeaders,
       ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+      ...extraHeaders,
     },
     signal,
   )
@@ -181,7 +183,7 @@ export async function fetchGoogleModels(
 
     const data = await fetchJSON(
       url.toString(),
-      { ...extraHeaders, "x-goog-api-key": apiKey },
+      { "x-goog-api-key": apiKey, ...extraHeaders },
       signal,
     )
     const records = asRecord(data)?.models
@@ -225,9 +227,9 @@ export async function fetchAnthropicModels(
     const data = await fetchJSON(
       url.toString(),
       {
-        ...extraHeaders,
         "x-api-key": apiKey,
         "anthropic-version": "2023-06-01",
+        ...extraHeaders,
       },
       signal,
     )
