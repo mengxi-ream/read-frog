@@ -90,6 +90,9 @@ options:
     product: Sản phẩm
   tools:
     translationHub: Trung tâm Dịch thuật
+  product:
+    roadmap: Lộ trình
+    feedback: Phản hồi
   setAPIKeyWarning:
     please: Vui lòng đặt API Key trên trang
     page: cài đặt

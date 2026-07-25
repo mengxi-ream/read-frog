@@ -90,6 +90,9 @@ options:
     product: 產品
   tools:
     translationHub: 翻譯中心
+  product:
+    roadmap: 產品路線圖
+    feedback: 意見回饋
   setAPIKeyWarning:
     please: 請在
     page: 頁面設定 API 金鑰

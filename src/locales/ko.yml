@@ -90,6 +90,9 @@ options:
     product: 제품
   tools:
     translationHub: 번역 허브
+  product:
+    roadmap: 로드맵
+    feedback: 피드백
   setAPIKeyWarning:
     please: API Key를 설정해 주세요
     page: 페이지에서
