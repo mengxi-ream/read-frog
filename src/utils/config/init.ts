@@ -13,11 +13,20 @@ import {
 import { logger } from "../logger"
 import { runMigration } from "./migration"
 
+export interface InitializeConfigResult {
+  /**
+   * The config was built from defaults in this run — a first install, or a rebuild after an
+   * unparseable config. Callers use it to run one-time setup that only makes sense on top of
+   * untouched defaults (see `promoteGoogleTranslateDefaultIfReachable`).
+   */
+  isFreshInstall: boolean
+}
+
 /**
  * Initialize the config, this function should only be called once in the background script
  * @returns The extension config
  */
-export async function initializeConfig() {
+export async function initializeConfig(): Promise<InitializeConfigResult> {
   const [storedConfig, configMeta] = await Promise.all([
     storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`),
     storage.getMeta<ConfigMeta>(`local:${CONFIG_STORAGE_KEY}`),
@@ -26,6 +35,7 @@ export async function initializeConfig() {
   let config: Config
   let currentVersion: number
   let didConfigChange = false
+  let isFreshInstall = false
 
   if (!storedConfig) {
     // Fresh install: resolve the default custom-action strings in the browser locale
@@ -34,6 +44,7 @@ export async function initializeConfig() {
     config = buildFreshDefaultConfig()
     currentVersion = CONFIG_SCHEMA_VERSION
     didConfigChange = true
+    isFreshInstall = true
   } else {
     config = storedConfig
     currentVersion = configMeta?.schemaVersion ?? 1
@@ -57,6 +68,7 @@ export async function initializeConfig() {
     config = buildFreshDefaultConfig()
     currentVersion = CONFIG_SCHEMA_VERSION
     didConfigChange = true
+    isFreshInstall = true
   }
 
   if (import.meta.env.DEV) {
@@ -82,6 +94,8 @@ export async function initializeConfig() {
       lastModifiedAt: configMeta?.lastModifiedAt ?? Date.now(),
     })
   }
+
+  return { isFreshInstall }
 }
 
 function applyAPIKeysFromEnv(config: Config): { config: Config; changed: boolean } {

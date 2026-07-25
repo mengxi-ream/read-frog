@@ -2,9 +2,42 @@ import type { TranslationTextFormat } from "@/types/config/translate"
 import { escapeText } from "entities"
 import { attachRequestErrorMeta } from "@/utils/request/retry-policy"
 
+/**
+ * Upper bound for the install-time reachability probe. Where Google is blocked the request
+ * usually hangs instead of failing fast, so this is the delay users in those networks pay
+ * once; keep it short enough not to stall extension startup.
+ */
+const GOOGLE_TRANSLATE_PROBE_TIMEOUT_MS = 3000
+
 const GOOGLE_TRANSLATE_HTML_URL = "https://translate-pa.googleapis.com/v1/translateHtml"
 const GOOGLE_TRANSLATE_HTML_API_KEY = "AIzaSyATBXajvzQLTDHEQbcpq0Ihe0vWDHmO520"
 const GOOGLE_TRANSLATE_HTML_CLIENT = "wt_lib"
+
+/**
+ * Probe whether this network can actually reach Google Translate, by running the smallest
+ * possible real translation against the same endpoint the provider uses. Any failure —
+ * DNS, TLS, timeout, non-2xx, unexpected payload — answers `false`; the caller is expected
+ * to fall back to a provider that works everywhere.
+ *
+ * To exercise the blocked-network path locally, add one of these to `chromiumArgs` in
+ * `web-ext.config.ts` (`pnpm dev` uses a fresh profile per run, so every start is an install):
+ *   --host-resolver-rules=MAP translate-pa.googleapis.com ^NOTFOUND   → DNS fails fast
+ *   --host-resolver-rules=MAP translate-pa.googleapis.com 203.0.113.1 → dropped, times out
+ */
+export async function isGoogleTranslateReachable(options?: {
+  timeoutMs?: number
+}): Promise<boolean> {
+  const timeoutMs = options?.timeoutMs ?? GOOGLE_TRANSLATE_PROBE_TIMEOUT_MS
+
+  try {
+    const translated = await googleTranslate("hello", "en", "zh", {
+      signal: AbortSignal.timeout(timeoutMs),
+    })
+    return translated.trim().length > 0
+  } catch {
+    return false
+  }
+}
 
 export async function googleTranslate(
   sourceText: string,

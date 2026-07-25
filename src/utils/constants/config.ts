@@ -5,7 +5,11 @@ import type { PageTranslateRange } from "@/types/config/translate"
 import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
 import { CUSTOM_ACTION_TEMPLATES } from "./custom-action-templates"
 import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from "./prompt"
-import { buildDefaultProviderConfigList, DEFAULT_PROVIDER_CONFIG_LIST } from "./providers"
+import {
+  buildDefaultProviderConfigList,
+  DEFAULT_PROVIDER_CONFIG_LIST,
+  MICROSOFT_TRANSLATE_PROVIDER_ID,
+} from "./providers"
 import { DEFAULT_SELECTION_OVERLAY_OPACITY } from "./selection"
 import { DEFAULT_SIDE_CONTENT_WIDTH } from "./side"
 import {
@@ -88,7 +92,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   providersConfig: DEFAULT_PROVIDER_CONFIG_LIST,
   translate: {
-    providerId: "microsoft-translate-default",
+    providerId: MICROSOFT_TRANSLATE_PROVIDER_ID,
     mode: "bilingual",
     modeShortcut: DEFAULT_TRANSLATION_MODE_SHORTCUT_KEY,
     node: {
@@ -145,7 +149,7 @@ export const DEFAULT_CONFIG: Config = {
     features: {
       translate: {
         enabled: true,
-        providerId: "microsoft-translate-default",
+        providerId: MICROSOFT_TRANSLATE_PROVIDER_ID,
         shortcut: DEFAULT_SELECTION_TRANSLATION_SHORTCUT_KEY,
       },
       speak: {
@@ -168,7 +172,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   inputTranslation: {
     enabled: true,
-    providerId: "microsoft-translate-default",
+    providerId: MICROSOFT_TRANSLATE_PROVIDER_ID,
     fromLang: "targetCode",
     toLang: "sourceCode",
     enableCycle: false,
@@ -177,7 +181,7 @@ export const DEFAULT_CONFIG: Config = {
   videoSubtitles: {
     enabled: true,
     autoStart: false,
-    providerId: "microsoft-translate-default",
+    providerId: MICROSOFT_TRANSLATE_PROVIDER_ID,
     style: {
       displayMode: DEFAULT_DISPLAY_MODE,
       translationPosition: DEFAULT_TRANSLATION_POSITION,
@@ -224,6 +228,10 @@ export const DEFAULT_CONFIG: Config = {
 /**
  * Build a default config whose persisted custom-action strings use the initialized UI locale.
  * Callers must initialize i18n before calling this function.
+ *
+ * Translate features start on Microsoft Translate, which is reachable everywhere; a fresh
+ * install is moved onto Google Translate afterwards where that endpoint answers — see
+ * `promoteGoogleTranslateDefaultIfReachable`.
  */
 export function buildFreshDefaultConfig(): Config {
   return {

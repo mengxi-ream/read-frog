@@ -586,6 +586,9 @@ export const DEFAULT_PROVIDER_CONFIG = {
   },
 } as const satisfies Record<AllProviderTypes, ProviderConfig>
 
+export const GOOGLE_TRANSLATE_PROVIDER_ID = DEFAULT_PROVIDER_CONFIG["google-translate"].id
+export const MICROSOFT_TRANSLATE_PROVIDER_ID = DEFAULT_PROVIDER_CONFIG["microsoft-translate"].id
+
 export const PROVIDER_BASE_URL_PLACEHOLDERS: Partial<Record<APIProviderTypes, string>> = {
   atlascloud: DEFAULT_PROVIDER_CONFIG.atlascloud.baseURL,
   siliconflow: DEFAULT_PROVIDER_CONFIG.siliconflow.baseURL,
