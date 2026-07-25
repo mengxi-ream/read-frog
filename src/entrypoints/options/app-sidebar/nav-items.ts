@@ -5,6 +5,7 @@ export const ROUTE_DEFS = [
   { path: "/translation" },
   { path: "/site-rules" },
   { path: "/video-subtitles" },
+  { path: "/vocabulary-hunter" },
   { path: "/floating-button" },
   { path: "/selection-toolbar" },
   { path: "/context-menu" },

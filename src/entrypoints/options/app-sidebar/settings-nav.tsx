@@ -90,6 +90,16 @@ export function SettingsNav() {
 
           <SidebarMenuItem>
             <SidebarMenuButton
+              render={<Link to="/vocabulary-hunter" />}
+              isActive={pathname === "/vocabulary-hunter"}
+            >
+              <Icon icon="tabler:book-2" />
+              <span>生词猎手</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
               render={<Link to="/input-translation" />}
               isActive={pathname === "/input-translation"}
             >

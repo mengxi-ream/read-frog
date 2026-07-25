@@ -21,6 +21,11 @@ const SiteRulesPage = lazy(() =>
 const VideoSubtitlesPage = lazy(() =>
   import("./pages/video-subtitles").then((module) => ({ default: module.VideoSubtitlesPage })),
 )
+const VocabularyHunterPage = lazy(() =>
+  import("./pages/vocabulary-hunter").then((module) => ({
+    default: module.VocabularyHunterPage,
+  })),
+)
 const FloatingButtonPage = lazy(() =>
   import("./pages/floating-button").then((module) => ({ default: module.FloatingButtonPage })),
 )
@@ -50,6 +55,7 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/translation": TranslationPage,
   "/site-rules": SiteRulesPage,
   "/video-subtitles": VideoSubtitlesPage,
+  "/vocabulary-hunter": VocabularyHunterPage,
   "/floating-button": FloatingButtonPage,
   "/selection-toolbar": SelectionToolbarPage,
   "/context-menu": ContextMenuPage,

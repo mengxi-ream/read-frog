@@ -164,6 +164,11 @@ interface ProtocolMap {
   }) => Promise<string[]>
   // network proxy
   backgroundFetch: (data: ProxyRequest) => Promise<ProxyResponse>
+  syncVocabularyGist: (data: {
+    gistId: string
+    token: string
+    words: string[]
+  }) => Promise<{ count: number; words: string[] }>
   // cache management
   clearAllTranslationRelatedCache: () => Promise<void>
   clearAiSegmentationCache: () => Promise<void>

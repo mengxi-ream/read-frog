@@ -9,6 +9,7 @@ import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { openOptionsPage } from "@/utils/navigation"
 import { SessionCacheGroupRegistry } from "@/utils/session-cache/session-cache-group-registry"
+import { syncWordsToWordHunterGist } from "@/utils/vocabulary-hunter/sync"
 import { runAiSegmentSubtitles } from "./ai-segmentation"
 import {
   enrollPromptExperimentInstall,
@@ -38,6 +39,7 @@ import { setUpSubtitlesTranslationQueue, setUpWebPageTranslationQueue } from "./
 import { translationMessage } from "./translation-signal"
 import { setupTTSPlaybackMessageHandlers } from "./tts-playback"
 import { setupUninstallSurvey } from "./uninstall-survey"
+import { setupVocabularyGistAutoSync } from "./vocabulary-gist-sync"
 
 export default defineBackground({
   type: "module",
@@ -72,6 +74,10 @@ export default defineBackground({
       logger.info("openOptionsPage", message.data)
       await openOptionsPage(message.data)
     })
+
+    onMessage("syncVocabularyGist", async (message) =>
+      syncWordsToWordHunterGist(message.data.gistId, message.data.token, message.data.words),
+    )
 
     setupSidePanelMessageHandler({
       extensionBrowser: browser,
@@ -123,6 +129,7 @@ export default defineBackground({
 
     proxyFetch()
     setupNotebasePendingSaveProcessor()
+    setupVocabularyGistAutoSync()
     setupEdgeTTSMessageHandlers()
     setupLLMGenerateTextMessageHandlers()
     setupTTSPlaybackMessageHandlers()

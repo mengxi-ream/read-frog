@@ -16,6 +16,7 @@ import TranslateButton from "./components/translate-button"
 import TranslatePromptSelector from "./components/translate-prompt-selector"
 import { TranslationHubButton } from "./components/translation-hub-button"
 import TranslationModeSelector from "./components/translation-mode-selector"
+import { VocabularyHunterToggle } from "./components/vocabulary-hunter-toggle"
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
         <AlwaysTranslate />
         <Hotkey />
         <AISmartContext />
+        <VocabularyHunterToggle />
       </div>
       <div className="flex items-center justify-between bg-neutral-200 px-2 py-1 dark:bg-neutral-800">
         <button
