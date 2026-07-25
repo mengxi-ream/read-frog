@@ -90,6 +90,9 @@ options:
     product: Product
   tools:
     translationHub: Translation Hub
+  product:
+    roadmap: Roadmap
+    feedback: Feedback
   setAPIKeyWarning:
     please: Please set API Key on
     page: page

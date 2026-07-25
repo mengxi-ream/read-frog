@@ -6,7 +6,6 @@ import { Provider as JotaiProvider } from "jotai"
 import { useHydrateAtoms } from "jotai/utils"
 import * as React from "react"
 import { HashRouter } from "react-router"
-import { HelpButton } from "@/components/help-button"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { RecoveryBoundary } from "@/components/recovery/recovery-boundary"
 import { SidebarProvider } from "@/components/ui/base-ui/sidebar"
@@ -71,7 +70,6 @@ async function initApp() {
                           <RecoveryBoundary>
                             <AppSidebar />
                             <App />
-                            <HelpButton />
                             <SettingsSearch />
                           </RecoveryBoundary>
                         </AnchoredToastProvider>

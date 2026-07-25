@@ -90,6 +90,9 @@ options:
     product: Ürün
   tools:
     translationHub: Çeviri Merkezi
+  product:
+    roadmap: Yol Haritası
+    feedback: Geri Bildirim
   setAPIKeyWarning:
     please: Lütfen API Anahtarını
     page: sayfasında ayarlayın

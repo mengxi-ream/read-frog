@@ -90,6 +90,9 @@ options:
     product: Продукт
   tools:
     translationHub: Центр переводов
+  product:
+    roadmap: Дорожная карта
+    feedback: Обратная связь
   setAPIKeyWarning:
     please: Пожалуйста, установите API-ключ на странице
     page: настроек

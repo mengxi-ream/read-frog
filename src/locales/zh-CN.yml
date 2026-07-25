@@ -90,6 +90,9 @@ options:
     product: 产品
   tools:
     translationHub: 翻译中心
+  product:
+    roadmap: 路线图
+    feedback: 反馈
   setAPIKeyWarning:
     please: 请在
     page: 页设置 API Key

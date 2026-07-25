@@ -90,6 +90,9 @@ options:
     product: Producto
   tools:
     translationHub: Centro de traducción
+  product:
+    roadmap: Hoja de ruta
+    feedback: Comentarios
   setAPIKeyWarning:
     please: Configura la clave API en
     page: página
