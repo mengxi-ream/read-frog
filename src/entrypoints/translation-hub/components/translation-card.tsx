@@ -216,7 +216,7 @@ export function TranslationCard({
                   {i18n.t("translationHub.translationFailed")}
                 </span>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm break-words whitespace-pre-wrap text-muted-foreground">
                 {mutation.error instanceof Error
                   ? mutation.error.message
                   : i18n.t("translationHub.translationFailedFallback")}
