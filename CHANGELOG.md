@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.43.1
+
+### Patch Changes
+
+- [#1958](https://github.com/mengxi-ream/read-frog/pull/1958) [`0314a35`](https://github.com/mengxi-ream/read-frog/commit/0314a3531427dfa241ee019b6b95867b375228b1) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(config): default new installs to Google Translate when it is reachable
+
+- [#1953](https://github.com/mengxi-ream/read-frog/pull/1953) [`1b9f053`](https://github.com/mengxi-ream/read-frog/commit/1b9f053d83420e956f55ca58c521c1da021c0004) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(options): add roadmap and feedback sidebar links
+
+- [#1957](https://github.com/mengxi-ream/read-frog/pull/1957) [`5ec84b3`](https://github.com/mengxi-ream/read-frog/commit/5ec84b317cc59fe65c21958012e1dde030e6db54) Thanks [@JoeJoeflyn](https://github.com/JoeJoeflyn)! - fix(translation-hub): wrap long provider error messages so they stay inside the card
+
 ## 1.43.0
 
 ### Minor Changes
