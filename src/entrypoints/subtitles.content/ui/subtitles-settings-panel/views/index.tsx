@@ -25,8 +25,8 @@ export const SUBPAGES: SubpageConfig[] = [
   },
 ]
 
-export const VISIBLE_SUBPAGES = SUBPAGES.filter(p => !p.hidden)
+export const VISIBLE_SUBPAGES = SUBPAGES.filter((p) => !p.hidden)
 
-export const SUBPAGE_MAP = new Map(SUBPAGES.map(p => [p.id, p]))
+export const SUBPAGE_MAP = new Map(SUBPAGES.map((p) => [p.id, p]))
 
 export { MainMenu } from "./main-menu"

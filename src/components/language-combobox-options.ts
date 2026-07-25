@@ -9,7 +9,7 @@ export interface LanguageItem<T extends LangCodeISO6393 | "auto" = LangCodeISO63
 }
 
 export function getTargetLanguageItems(): LanguageItem<LangCodeISO6393>[] {
-  return langCodeISO6393Schema.options.map(code => ({
+  return langCodeISO6393Schema.options.map((code) => ({
     value: code,
     label: getLanguageLabel(code),
     name: getLanguageName(code),
@@ -32,7 +32,9 @@ export function getLanguageItems(detectedLangCode?: LangCodeISO6393): LanguageIt
 
 export function filterLanguage(item: LanguageItem, query: string): boolean {
   const searchLower = query.toLowerCase()
-  return item.label.toLowerCase().includes(searchLower)
-    || (item.name?.toLowerCase().includes(searchLower) ?? false)
-    || item.value.toLowerCase().includes(searchLower)
+  return (
+    item.label.toLowerCase().includes(searchLower) ||
+    (item.name?.toLowerCase().includes(searchLower) ?? false) ||
+    item.value.toLowerCase().includes(searchLower)
+  )
 }

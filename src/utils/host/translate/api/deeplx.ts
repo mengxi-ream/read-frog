@@ -1,5 +1,6 @@
 import type { LangCodeISO6391 } from "@read-frog/definitions"
 import type { ProviderConfig } from "@/types/config/provider"
+import type { TranslationTextFormat } from "@/types/config/translate"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 
 type DeepLXProviderConfig = Extract<ProviderConfig, { provider: "deeplx" }>
@@ -10,6 +11,7 @@ export async function deeplxTranslate(
   fromLang: LangCodeISO6391 | "auto",
   toLang: LangCodeISO6391,
   providerConfig: DeepLXProviderConfig,
+  options?: { textFormat?: TranslationTextFormat; signal?: AbortSignal },
 ): Promise<string> {
   const baseURL = providerConfig.baseURL || DEFAULT_PROVIDER_CONFIG.deeplx.baseURL
   const apiKey = providerConfig.apiKey
@@ -19,11 +21,9 @@ export async function deeplxTranslate(
   }
 
   const formatLang = (lang: LangCodeISO6391 | "auto") => {
-    if (lang === "auto")
-      return "auto"
+    if (lang === "auto") return "auto"
     let formattedLang = lang.toUpperCase()
-    if (formattedLang === "ZH-TW")
-      formattedLang = "ZH-HANT"
+    if (formattedLang === "ZH-TW") formattedLang = "ZH-HANT"
     return formattedLang
   }
 
@@ -33,18 +33,20 @@ export async function deeplxTranslate(
     text: sourceText,
     source_lang: formatLang(fromLang),
     target_lang: formatLang(toLang),
+    ...(options?.textFormat === "html" ? { tag_handling: "html" } : {}),
   })
 
-  const fetchResponse = await fetchDirect(url, requestBody)
+  const fetchResponse = await fetchDirect(url, requestBody, options?.signal)
 
   return parseDeepLXResponse(fetchResponse)
 }
 
-async function fetchDirect(url: string, body: string) {
+async function fetchDirect(url: string, body: string, signal?: AbortSignal) {
   const resp = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body,
+    signal,
   }).catch((error) => {
     throw new Error(`Network error during DeepLX translation: ${error.message}`)
   })
@@ -52,11 +54,18 @@ async function fetchDirect(url: string, body: string) {
   return resp
 }
 
-async function parseDeepLXResponse(resp: { ok: boolean, status: number, statusText: string, text: () => Promise<string>, json: () => Promise<any> }) {
+async function parseDeepLXResponse(resp: {
+  ok: boolean
+  status: number
+  statusText: string
+  text: () => Promise<string>
+  json: () => Promise<any>
+}) {
   if (!resp.ok) {
     const errorText = await resp.text().catch(() => "Unable to read error response")
     throw new Error(
-      `DeepLX translation request failed: ${resp.status} ${resp.statusText}${errorText ? ` - ${errorText}` : ""
+      `DeepLX translation request failed: ${resp.status} ${resp.statusText}${
+        errorText ? ` - ${errorText}` : ""
       }`,
     )
   }
@@ -67,11 +76,9 @@ async function parseDeepLXResponse(resp: { ok: boolean, status: number, statusTe
       throw new TypeError("Unexpected response format from DeepLX translation API")
     }
     return result.data
-  }
-  catch (error) {
-    throw new Error(
-      `Failed to parse DeepLX translation response: ${(error as Error).message}`,
-    )
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    throw new Error(`Failed to parse DeepLX translation response: ${message}`, { cause: error })
   }
 }
 

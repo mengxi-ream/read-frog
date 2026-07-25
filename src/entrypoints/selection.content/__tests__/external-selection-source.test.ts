@@ -105,7 +105,7 @@ describe("setupExternalSelectionSource", () => {
   it("ignores messages whose source is not this window", () => {
     teardown = setupExternalSelectionSource()
 
-    const openListener = vi.fn()
+    const openListener = vi.fn<(event: Event) => void>()
     window.addEventListener(EXTERNAL_SELECTION_OPEN_EVENT, openListener)
     const postMessageSpy = vi.spyOn(window, "postMessage")
 
@@ -121,8 +121,8 @@ describe("setupExternalSelectionSource", () => {
   it("silently ignores schema-invalid payloads", () => {
     teardown = setupExternalSelectionSource()
 
-    const openListener = vi.fn()
-    const clearListener = vi.fn()
+    const openListener = vi.fn<(event: Event) => void>()
+    const clearListener = vi.fn<(event: Event) => void>()
     window.addEventListener(EXTERNAL_SELECTION_OPEN_EVENT, openListener)
     window.addEventListener(EXTERNAL_SELECTION_CLEAR_EVENT, clearListener)
     const postMessageSpy = vi.spyOn(window, "postMessage")
@@ -151,7 +151,7 @@ describe("setupExternalSelectionSource", () => {
   it("dispatches the external open event with the selection payload", () => {
     teardown = setupExternalSelectionSource()
 
-    const openListener = vi.fn()
+    const openListener = vi.fn<(event: Event) => void>()
     window.addEventListener(EXTERNAL_SELECTION_OPEN_EVENT, openListener)
 
     dispatchPageMessage(SELECTION_CHANGED_MESSAGE)
@@ -166,7 +166,7 @@ describe("setupExternalSelectionSource", () => {
   it("dispatches the external clear event when the selection is cleared", () => {
     teardown = setupExternalSelectionSource()
 
-    const clearListener = vi.fn()
+    const clearListener = vi.fn<(event: Event) => void>()
     window.addEventListener(EXTERNAL_SELECTION_CLEAR_EVENT, clearListener)
 
     dispatchPageMessage(SELECTION_CLEARED_MESSAGE)

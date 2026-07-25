@@ -39,16 +39,6 @@ Domina idiomas con más facilidad y profundidad usando IA directamente en tu nav
 
 </div>
 
-<div align="center">
-  <img src="../assets/promotion/sponsor-title.svg" alt="Sponsor" width="120" />
-  <br />
-  注册<a href="https://readfrog.s.gy/RWqJeX">优云智算</a>：用最少的钱，换最高的编程效率。
-  <br /><br />
-  <a href="https://readfrog.s.gy/RWqJeX">
-    <img src="../assets/promotion/ucloud.jpg" alt="UCloud" />
-  </a>
-</div>
-
 <details>
 <summary><kbd>Tabla de contenidos</kbd></summary>
 
@@ -112,11 +102,11 @@ Tanto si eres usuario como desarrollador, Read Frog puede ser una parte importan
   <kbd>Historial de estrellas</kbd>
 </summary>
 
-<a href="https://www.star-history.com/#mengxi-ream/read-frog&Timeline">
+<a href="https://www.star-history.com/?type=timeline&repos=mengxi-ream%2Fread-frog">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=mengxi-ream/read-frog&type=Timeline&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=mengxi-ream/read-frog&type=Timeline" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=mengxi-ream/read-frog&type=Timeline" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=mengxi-ream/read-frog&type=timeline&theme=dark&legend=top-left&sealed_token=vUW24BwE2sgnq-CzlWEAT6gnzZqNrXl9ai4A05Pc3CQcPGdBqbts3tq5VRWEerfrqVdonsJasb04WcKd5AKSSCjlsdj_TwyI3j9xytMG4FQNw7yXDe9IUA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=mengxi-ream/read-frog&type=timeline&legend=top-left&sealed_token=vUW24BwE2sgnq-CzlWEAT6gnzZqNrXl9ai4A05Pc3CQcPGdBqbts3tq5VRWEerfrqVdonsJasb04WcKd5AKSSCjlsdj_TwyI3j9xytMG4FQNw7yXDe9IUA" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=mengxi-ream/read-frog&type=timeline&legend=top-left&sealed_token=vUW24BwE2sgnq-CzlWEAT6gnzZqNrXl9ai4A05Pc3CQcPGdBqbts3tq5VRWEerfrqVdonsJasb04WcKd5AKSSCjlsdj_TwyI3j9xytMG4FQNw7yXDe9IUA" />
  </picture>
 </a>
 
@@ -125,6 +115,18 @@ Tanto si eres usuario como desarrollador, Read Frog puede ser una parte importan
 ## ✨ Funciones
 
 Convierte tu lectura diaria en la web en una experiencia inmersiva de aprendizaje de idiomas con Read Frog.
+
+### 🪄 [Acciones AI personalizadas][docs-tutorial]
+
+Convierte el texto seleccionado en herramientas de IA reutilizables que se adapten a tu forma de leer y aprender. Define tus propios prompts y campos de salida estructurados, elige proveedor, modelo e icono, y ejecuta la acción desde la barra de selección para consultar palabras, reescribir, resumir, explicar o crear cualquier flujo de trabajo.
+
+Empieza con las plantillas integradas de **Diccionario** y **Mejorar escritura**, o crea una acción desde cero. También puedes asignar y guardar los resultados estructurados en Notebase para estudiarlos después.
+
+### 🧠 [Tarjetas y repetición espaciada][docs-tutorial]
+
+Guarda vocabulario, definiciones, ejemplos, traducciones y notas de lectura en Notebase, y conviértelos en tarjetas con plantillas personalizables. Lo que descubres mientras lees se transforma en material de estudio sin interrumpir tu lectura.
+
+Repasa en línea las tarjetas pendientes y califica cada una como **Otra vez**, **Difícil**, **Bien** o **Fácil**. El planificador de repetición espaciada de Read Frog usa tus respuestas para mostrar cada tarjeta de nuevo justo antes de que la olvides.
 
 ### 🔄 [Bilingüe / Solo traducción][docs-tutorial]
 

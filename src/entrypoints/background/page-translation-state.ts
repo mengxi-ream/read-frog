@@ -4,9 +4,7 @@ import { getTranslationStateKey } from "@/utils/constants/storage-keys"
 import { getPageTranslationOriginScope } from "@/utils/url"
 
 export async function getPageTranslationState(tabId: number): Promise<TranslationState | null> {
-  return await storage.getItem<TranslationState>(
-    getTranslationStateKey(tabId),
-  )
+  return await storage.getItem<TranslationState>(getTranslationStateKey(tabId))
 }
 
 export async function getPageTranslationEnabled(tabId: number): Promise<boolean> {
@@ -14,7 +12,11 @@ export async function getPageTranslationEnabled(tabId: number): Promise<boolean>
   return state?.enabled ?? false
 }
 
-export async function setPageTranslationEnabled(tabId: number, enabled: boolean, url?: string): Promise<void> {
+export async function setPageTranslationEnabled(
+  tabId: number,
+  enabled: boolean,
+  url?: string,
+): Promise<void> {
   const origin = enabled && url ? getPageTranslationOriginScope(url) : null
 
   await storage.setItem<TranslationState>(
@@ -23,9 +25,11 @@ export async function setPageTranslationEnabled(tabId: number, enabled: boolean,
   )
 }
 
-export function isPageTranslationStateInUrlScope(state: TranslationState | null | undefined, url: string | undefined): boolean {
-  if (!state?.enabled || !state.origin || !url)
-    return false
+export function isPageTranslationStateInUrlScope(
+  state: TranslationState | null | undefined,
+  url: string | undefined,
+): boolean {
+  if (!state?.enabled || !state.origin || !url) return false
 
   return state.origin === getPageTranslationOriginScope(url)
 }

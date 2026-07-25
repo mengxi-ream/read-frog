@@ -6,17 +6,21 @@ interface RecoveryBoundaryProps {
   children: ReactNode
 }
 
-export function RecoveryBoundary({ children }: RecoveryBoundaryProps) {
+function renderRecoveryFallback({
+  error,
+  resetErrorBoundary,
+}: {
+  error: unknown
+  resetErrorBoundary: () => void
+}) {
   return (
-    <ErrorBoundary
-      fallbackRender={({ error, resetErrorBoundary }) => (
-        <RecoveryFallback
-          error={error instanceof Error ? error : new Error(String(error))}
-          onRecovered={resetErrorBoundary}
-        />
-      )}
-    >
-      {children}
-    </ErrorBoundary>
+    <RecoveryFallback
+      error={error instanceof Error ? error : new Error(String(error))}
+      onRecovered={resetErrorBoundary}
+    />
   )
+}
+
+export function RecoveryBoundary({ children }: RecoveryBoundaryProps) {
+  return <ErrorBoundary fallbackRender={renderRecoveryFallback}>{children}</ErrorBoundary>
 }

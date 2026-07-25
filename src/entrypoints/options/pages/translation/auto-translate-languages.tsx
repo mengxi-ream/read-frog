@@ -10,7 +10,7 @@ import { ConfigCard } from "../../components/config-card"
 
 export function AutoTranslateLanguages() {
   return (
-    <div className="py-6 flex flex-col gap-y-4">
+    <div className="flex flex-col gap-y-4 py-6">
       <ConfigCard
         id="auto-translate-languages"
         title={i18n.t("options.translation.autoTranslateLanguages.title")}
@@ -29,16 +29,17 @@ function AutoTranslateLanguagesSelector() {
   const selectedLanguages = translateConfig.page.autoTranslateLanguages
 
   return (
-    <div className="w-full flex justify-start md:justify-end">
+    <div className="flex w-full justify-start md:justify-end">
       <MultiLanguageCombobox
         selectedLanguages={selectedLanguages}
-        onLanguagesChange={languages =>
+        onLanguagesChange={(languages) =>
           void setTranslateConfig({
             page: {
               ...translateConfig.page,
               autoTranslateLanguages: languages,
             },
-          })}
+          })
+        }
         buttonLabel={i18n.t("options.translation.autoTranslateLanguages.selectLanguages")}
       />
     </div>
@@ -53,7 +54,7 @@ function SelectedLanguageCells() {
     void setTranslateConfig({
       page: {
         ...translateConfig.page,
-        autoTranslateLanguages: selectedLanguages.filter(lang => lang !== language),
+        autoTranslateLanguages: selectedLanguages.filter((lang) => lang !== language),
       },
     })
   }
@@ -64,7 +65,7 @@ function SelectedLanguageCells() {
 
   return (
     <div className="flex flex-wrap gap-2">
-      {selectedLanguages.map(language => (
+      {selectedLanguages.map((language) => (
         <div
           key={language}
           className="inline-flex items-center gap-1 rounded-md border bg-muted px-2 py-1 text-sm"
@@ -73,7 +74,7 @@ function SelectedLanguageCells() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-4 w-4 p-0 hover:bg-input hover:text-input-foreground"
+            className="hover:text-input-foreground h-4 w-4 p-0 hover:bg-input"
             onClick={() => removeLanguage(language)}
           >
             <Icon icon="tabler:x" className="h-3 w-3" />

@@ -2,17 +2,37 @@ import type { Hotkey } from "@tanstack/hotkeys"
 import type { ReactNode } from "react"
 import type { SelectionSession, SelectionToolbarTranslateRequestSlice } from "../atoms"
 import type { SelectionToolbarInlineError } from "../inline-error"
+import type { TranslationActionContext } from "@/types/analytics"
 import type { BackgroundTextStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
 import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { HotkeyManager } from "@tanstack/hotkeys"
 import { useAtomValue, useSetAtom } from "jotai"
-import { createContext, use, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react"
-import { toast } from "sonner"
+import {
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { SelectionPopover } from "@/components/ui/selection-popover"
-import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import {
+  ANALYTICS_FEATURE,
+  ANALYTICS_SURFACE,
+  TRANSLATION_REQUESTED_FEATURE,
+} from "@/types/analytics"
 import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
-import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
+import {
+  classifyTranslationRequest,
+  createFeatureUsageContext,
+  trackFeatureUsed,
+  trackTranslationRequested,
+} from "@/utils/analytics"
+import { classifyProviderConfig } from "@/utils/analytics-provider"
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
@@ -20,8 +40,11 @@ import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { translateTextCore } from "@/utils/host/translate/translate-text"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { getOrGenerateWebPageSummary } from "@/utils/host/translate/webpage-summary"
-import { onMessage } from "@/utils/message"
-import { isPageTranslationShortcutEmpty, isValidConfiguredPageTranslationShortcut } from "@/utils/page-translation-shortcut"
+import { onMessage, sendMessage } from "@/utils/message"
+import {
+  isPageTranslationShortcutEmpty,
+  isValidConfiguredPageTranslationShortcut,
+} from "@/utils/page-translation-shortcut"
 import { getTranslatePromptFromConfig } from "@/utils/prompts/translate"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
@@ -36,19 +59,25 @@ import {
   selectionSessionAtom,
   selectionToolbarTranslateRequestAtom,
 } from "../atoms"
+import { isSaveToNotebaseDialogOpenAtom } from "../custom-action-button/save-to-notebase-dialog-atom"
 import {
   createSelectionToolbarPrecheckError,
   createSelectionToolbarRuntimeError,
   isAbortError,
 } from "../inline-error"
+import { SaveSuggestionCard } from "../save-suggestion/save-suggestion-card"
+import { useSaveSuggestion } from "../save-suggestion/use-save-suggestion"
 import { useSelectionOpenRequestResolver } from "../use-selection-open-request"
 import { TargetLanguageSelector } from "./target-language-selector"
 import { TranslationContent } from "./translation-content"
 
 interface SelectionTranslatePendingOpenRequest {
-  anchor?: { x: number, y: number }
+  anchor?: { x: number; y: number }
   session: SelectionSession
-  surface: typeof ANALYTICS_SURFACE.SELECTION_TOOLBAR | typeof ANALYTICS_SURFACE.CONTEXT_MENU | typeof ANALYTICS_SURFACE.SHORTCUT
+  surface:
+    | typeof ANALYTICS_SURFACE.SELECTION_TOOLBAR
+    | typeof ANALYTICS_SURFACE.CONTEXT_MENU
+    | typeof ANALYTICS_SURFACE.SHORTCUT
 }
 
 async function getSelectionWebPagePromptContext(
@@ -60,7 +89,11 @@ async function getSelectionWebPagePromptContext(
     return undefined
   }
 
-  const webSummary = await getOrGenerateWebPageSummary(webPageContext, providerConfig, enableAIContentAware)
+  const webSummary = await getOrGenerateWebPageSummary(
+    webPageContext,
+    providerConfig,
+    enableAIContentAware,
+  )
   return {
     webTitle: webPageContext.webTitle,
     webDescription: webPageContext.webDescription,
@@ -76,6 +109,7 @@ async function translateWithTextStream({
   translateRequest,
   onChunk,
   registerAbortController,
+  actionContext,
 }: {
   preparedText: string
   providerId: string
@@ -83,11 +117,17 @@ async function translateWithTextStream({
   translateRequest: SelectionToolbarTranslateRequestSlice
   onChunk: (data: BackgroundTextStreamSnapshot) => void
   registerAbortController: (abortController: AbortController) => void
+  actionContext: TranslationActionContext
 }) {
   const targetLangName = LANG_CODE_TO_EN_NAME[translateRequest.language.targetCode]
   const modelName = resolveModelId(providerConfig.model)
   const reasoning = getTopLevelReasoning(providerConfig)
-  const providerOptions = getProviderOptionsWithOverride(modelName ?? "", providerConfig.provider, providerConfig.providerOptions, reasoning)
+  const providerOptions = getProviderOptionsWithOverride(
+    modelName ?? "",
+    providerConfig.provider,
+    providerConfig.providerOptions,
+    reasoning,
+  )
   const temperature = providerConfig.temperature
   const abortController = new AbortController()
   registerAbortController(abortController)
@@ -98,23 +138,60 @@ async function translateWithTextStream({
     }
   }
 
-  const webPageContext = await getSelectionWebPagePromptContext(providerConfig, translateRequest.enableAIContentAware)
+  const webPageContext = await getSelectionWebPagePromptContext(
+    providerConfig,
+    translateRequest.enableAIContentAware,
+  )
   throwIfAborted()
-  const { systemPrompt, prompt } = getTranslatePromptFromConfig(
+  const configuredPrompt =
+    translateRequest.customPromptsConfig.promptId === null ? "default" : "custom"
+  const promptExperimentVariant =
+    (await sendMessage("resolvePromptExperimentVariant", { configuredPrompt })) ?? undefined
+  throwIfAborted()
+
+  let { systemPrompt, prompt } = getTranslatePromptFromConfig(
     { customPromptsConfig: translateRequest.customPromptsConfig },
     targetLangName,
     preparedText,
-    webPageContext
-      ? {
-          context: {
-            webTitle: webPageContext.webTitle,
-            webDescription: webPageContext.webDescription,
-            webContent: webPageContext.webContent,
-            webSummary: webPageContext.webSummary,
-          },
-        }
-      : undefined,
+    {
+      promptExperimentVariant,
+      ...(webPageContext
+        ? {
+            context: {
+              webTitle: webPageContext.webTitle,
+              webDescription: webPageContext.webDescription,
+              webContent: webPageContext.webContent,
+              webSummary: webPageContext.webSummary,
+            },
+          }
+        : {}),
+    },
   )
+
+  if (promptExperimentVariant) {
+    const exposed = await sendMessage("exposePromptExperiment", {
+      actionContext,
+      expectedVariant: promptExperimentVariant,
+    })
+    throwIfAborted()
+    if (!exposed) {
+      ;({ systemPrompt, prompt } = getTranslatePromptFromConfig(
+        { customPromptsConfig: translateRequest.customPromptsConfig },
+        targetLangName,
+        preparedText,
+        webPageContext
+          ? {
+              context: {
+                webTitle: webPageContext.webTitle,
+                webDescription: webPageContext.webDescription,
+                webContent: webPageContext.webContent,
+                webSummary: webPageContext.webSummary,
+              },
+            }
+          : undefined,
+      ))
+    }
+  }
 
   const translatedText = await streamBackgroundText(
     {
@@ -143,7 +220,10 @@ async function translateWithStandardProvider({
   providerConfig: ProviderConfig
   translateRequest: SelectionToolbarTranslateRequestSlice
 }) {
-  const webPageContext = await getSelectionWebPagePromptContext(providerConfig, translateRequest.enableAIContentAware)
+  const webPageContext = await getSelectionWebPagePromptContext(
+    providerConfig,
+    translateRequest.enableAIContentAware,
+  )
   const translatedText = await translateTextCore({
     text,
     langConfig: translateRequest.language,
@@ -165,7 +245,9 @@ const SelectionTranslationContext = createContext<SelectionTranslationContextVal
 function useSelectionTranslationContext() {
   const context = use(SelectionTranslationContext)
   if (!context) {
-    throw new Error("Selection translation popover must be used within SelectionTranslationProvider.")
+    throw new Error(
+      "Selection translation popover must be used within SelectionTranslationProvider.",
+    )
   }
 
   return context
@@ -175,13 +257,9 @@ export function useSelectionTranslationPopover() {
   return useSelectionTranslationContext()
 }
 
-export function SelectionTranslationProvider({
-  children,
-}: {
-  children: ReactNode
-}) {
+export function SelectionTranslationProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
-  const [anchor, setAnchor] = useState<{ x: number, y: number } | null>(null)
+  const [anchor, setAnchor] = useState<{ x: number; y: number } | null>(null)
   const [popoverSessionKey, setPopoverSessionKey] = useState(0)
   const [translatedText, setTranslatedText] = useState<string | undefined>(undefined)
   const [thinking, setThinking] = useState<ThinkingSnapshot | null>(null)
@@ -189,7 +267,9 @@ export function SelectionTranslationProvider({
   const [isTranslating, setIsTranslating] = useState(false)
   const [rerunNonce, setRerunNonce] = useState(0)
   const [sourceSurface, setSourceSurface] = useState<
-    typeof ANALYTICS_SURFACE.SELECTION_TOOLBAR | typeof ANALYTICS_SURFACE.CONTEXT_MENU | typeof ANALYTICS_SURFACE.SHORTCUT
+    | typeof ANALYTICS_SURFACE.SELECTION_TOOLBAR
+    | typeof ANALYTICS_SURFACE.CONTEXT_MENU
+    | typeof ANALYTICS_SURFACE.SHORTCUT
   >(ANALYTICS_SURFACE.SELECTION_TOOLBAR)
   const [activeSession, setActiveSession] = useState<SelectionSession | null>(null)
   const selectionSession = useAtomValue(selectionSessionAtom)
@@ -203,10 +283,8 @@ export function SelectionTranslationProvider({
   const reopenFrameRef = useRef<number | null>(null)
   const lastTranslationRunKeyRef = useRef<string | null>(null)
   const runIdRef = useRef(0)
-  const {
-    resolveContextMenuOpenRequest,
-    resolveShortcutOpenRequest,
-  } = useSelectionOpenRequestResolver(selectionSession)
+  const { resolveContextMenuOpenRequest, resolveShortcutOpenRequest } =
+    useSelectionOpenRequestResolver(selectionSession)
   const selectionText = activeSession?.selectionSnapshot.text ?? null
   const paragraphsText = activeSession?.contextSnapshot.text ?? selectionText
   const titleText = document.title || null
@@ -214,10 +292,31 @@ export function SelectionTranslationProvider({
     () => getSelectableProvidersForCapability("selectionToolbar.translate", providersConfig),
     [providersConfig],
   )
-  const translateRequestKey = useMemo(
-    () => JSON.stringify(translateRequest),
-    [translateRequest],
-  )
+  const translateRequestKey = useMemo(() => JSON.stringify(translateRequest), [translateRequest])
+  const isSaveToNotebaseDialogOpen = useAtomValue(isSaveToNotebaseDialogOpenAtom)
+  const {
+    suggestion: saveSuggestion,
+    maybeFire: maybeFireSaveSuggestion,
+    cancel: cancelSaveSuggestion,
+    resetSession: resetSaveSuggestionSession,
+    markShownOnce: markSaveSuggestionShownOnce,
+  } = useSaveSuggestion()
+
+  // Suggestion identity must change whenever a translation re-run would produce
+  // different notes (target language / provider change bumps translateRequestKey;
+  // regenerate bumps rerunNonce). Keying only on popoverSessionKey would leave a
+  // stale old-language suggestion rendered after the new translation.
+  const saveSuggestionSessionKey = `${popoverSessionKey}:${translateRequestKey}:${rerunNonce}`
+
+  const fireSaveSuggestion = useEffectEvent((preparedText: string) => {
+    maybeFireSaveSuggestion({
+      sessionKey: saveSuggestionSessionKey,
+      selectionText: preparedText,
+      paragraphsText: paragraphsText ?? preparedText,
+      targetLangName: LANG_CODE_TO_EN_NAME[translateRequest.language.targetCode],
+      webTitle: titleText ?? "",
+    })
+  })
 
   const resetPopoverSession = useCallback((options?: { clearAnchor?: boolean }) => {
     setActiveSession(null)
@@ -233,15 +332,19 @@ export function SelectionTranslationProvider({
     setError(null)
   }, [])
 
-  const cancelCurrentTranslation = useCallback((runId?: number) => {
-    if (runId !== undefined && runIdRef.current !== runId) {
-      return
-    }
+  const cancelCurrentTranslation = useCallback(
+    (runId?: number) => {
+      if (runId !== undefined && runIdRef.current !== runId) {
+        return
+      }
 
-    runIdRef.current += 1
-    abortControllerRef.current?.abort()
-    abortControllerRef.current = null
-  }, [])
+      runIdRef.current += 1
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = null
+      cancelSaveSuggestion()
+    },
+    [cancelSaveSuggestion],
+  )
 
   const commitOpenRequest = useCallback((request: SelectionTranslatePendingOpenRequest) => {
     pendingOpenRequestRef.current = request
@@ -250,160 +353,208 @@ export function SelectionTranslationProvider({
     }
   }, [])
 
-  const handleProviderChange = useCallback((providerId: string) => {
-    void setConfig(buildFeatureProviderPatch({ "selectionToolbar.translate": providerId }))
-  }, [setConfig])
+  const handleProviderChange = useCallback(
+    (providerId: string) => {
+      void setConfig(buildFeatureProviderPatch({ "selectionToolbar.translate": providerId }))
+    },
+    [setConfig],
+  )
 
   const handleRegenerate = useCallback(() => {
     cancelCurrentTranslation()
-    setRerunNonce(prev => prev + 1)
+    setRerunNonce((prev) => prev + 1)
   }, [cancelCurrentTranslation])
 
-  const runTranslation = useCallback(async (runId: number) => {
-    const preparedText = prepareTranslationText(selectionText)
+  const runTranslation = useCallback(
+    async (runId: number) => {
+      const preparedText = prepareTranslationText(selectionText)
 
-    if (preparedText === "") {
-      if (runIdRef.current === runId) {
-        resetTranslationState()
+      if (preparedText === "") {
+        if (runIdRef.current === runId) {
+          resetTranslationState()
+        }
+        return
       }
-      return
-    }
 
-    const analyticsContext = createFeatureUsageContext(
-      ANALYTICS_FEATURE.SELECTION_TRANSLATION,
-      sourceSurface,
-    )
-
-    setIsTranslating(true)
-    setTranslatedText(undefined)
-    setThinking(null)
-    setError(null)
-
-    const provider = translateRequest.provider
-    if (!provider) {
-      if (runIdRef.current === runId) {
-        setIsTranslating(false)
-        setError(createSelectionToolbarPrecheckError("translate", "providerUnavailable"))
+      const analyticsContext = createFeatureUsageContext(
+        ANALYTICS_FEATURE.SELECTION_TRANSLATION,
+        sourceSurface,
+      )
+      const actionContext: TranslationActionContext = {
+        actionId: `selection-${activeSession?.id ?? "unknown"}-${runId}`,
+        feature: TRANSLATION_REQUESTED_FEATURE.SELECTION_TRANSLATION,
+        surface: sourceSurface,
       }
-      void trackFeatureUsed({
-        ...analyticsContext,
-        outcome: "failure",
+
+      const requestedProvider =
+        translateRequest.provider?.kind === "local" ? translateRequest.provider.config : null
+      const providerAnalytics = classifyProviderConfig(requestedProvider)
+      const translationRequestedPromise = trackTranslationRequested({
+        feature: TRANSLATION_REQUESTED_FEATURE.SELECTION_TRANSLATION,
+        surface: sourceSurface,
+        ...classifyTranslationRequest(
+          requestedProvider,
+          translateRequest.customPromptsConfig.promptId,
+        ),
       })
-      return
-    }
 
-    if (provider.kind === "local" && !provider.config.enabled) {
-      if (runIdRef.current === runId) {
-        setIsTranslating(false)
-        setError(createSelectionToolbarPrecheckError("translate", "providerDisabled"))
-      }
-      void trackFeatureUsed({
-        ...analyticsContext,
-        outcome: "failure",
-      })
-      return
-    }
+      setIsTranslating(true)
+      setTranslatedText(undefined)
+      setThinking(null)
+      setError(null)
 
-    try {
-      if (provider.kind !== "local") {
+      const provider = translateRequest.provider
+      if (!provider) {
         if (runIdRef.current === runId) {
           setIsTranslating(false)
           setError(createSelectionToolbarPrecheckError("translate", "providerUnavailable"))
         }
         void trackFeatureUsed({
           ...analyticsContext,
+          ...providerAnalytics,
           outcome: "failure",
         })
         return
       }
 
-      const providerConfig = provider.config
-      if (!isTranslateProviderConfig(providerConfig)) {
+      if (provider.kind === "local" && !provider.config.enabled) {
         if (runIdRef.current === runId) {
           setIsTranslating(false)
-          setError(createSelectionToolbarPrecheckError("translate", "providerUnavailable"))
+          setError(createSelectionToolbarPrecheckError("translate", "providerDisabled"))
         }
         void trackFeatureUsed({
           ...analyticsContext,
+          ...providerAnalytics,
           outcome: "failure",
         })
         return
       }
 
-      let nextTranslatedText = ""
-      if (isLLMProviderConfig(providerConfig)) {
-        setThinking({
-          status: "thinking",
-          text: "",
-        })
-
-        const nextSnapshot = await translateWithTextStream({
-          preparedText,
-          providerId: providerConfig.id,
-          providerConfig,
-          translateRequest,
-          onChunk: (data) => {
-            if (runIdRef.current === runId) {
-              setTranslatedText(data.output)
-              setThinking(data.thinking)
-            }
-          },
-          registerAbortController: (abortController) => {
-            abortControllerRef.current = abortController
-          },
-        })
-
-        nextTranslatedText = nextSnapshot.output
-        if (runIdRef.current === runId) {
-          setThinking(nextSnapshot.thinking)
+      try {
+        if (provider.kind !== "local") {
+          if (runIdRef.current === runId) {
+            setIsTranslating(false)
+            setError(createSelectionToolbarPrecheckError("translate", "providerUnavailable"))
+          }
+          void trackFeatureUsed({
+            ...analyticsContext,
+            ...providerAnalytics,
+            outcome: "failure",
+          })
+          return
         }
-      }
-      else {
-        setThinking(null)
-        nextTranslatedText = await translateWithStandardProvider({
-          text: preparedText,
-          providerConfig,
-          translateRequest,
-        })
-      }
 
-      if (runIdRef.current === runId) {
-        setTranslatedText(nextTranslatedText)
-      }
+        const providerConfig = provider.config
+        if (!isTranslateProviderConfig(providerConfig)) {
+          if (runIdRef.current === runId) {
+            setIsTranslating(false)
+            setError(createSelectionToolbarPrecheckError("translate", "providerUnavailable"))
+          }
+          void trackFeatureUsed({
+            ...analyticsContext,
+            ...providerAnalytics,
+            outcome: "failure",
+          })
+          return
+        }
 
-      void trackFeatureUsed({
-        ...analyticsContext,
-        outcome: "success",
-      })
-    }
-    catch (error) {
-      if (!isAbortError(error) && runIdRef.current === runId) {
-        setThinking(prev => prev?.text ? { ...prev, status: "complete" } : null)
-        setError(createSelectionToolbarRuntimeError("translate", error))
-      }
+        let nextTranslatedText = ""
+        if (isLLMProviderConfig(providerConfig)) {
+          await translationRequestedPromise
+          setThinking({
+            status: "thinking",
+            text: "",
+          })
 
-      if (!isAbortError(error)) {
+          const nextSnapshot = await translateWithTextStream({
+            preparedText,
+            providerId: providerConfig.id,
+            providerConfig,
+            translateRequest,
+            onChunk: (data) => {
+              if (runIdRef.current === runId) {
+                setTranslatedText(data.output)
+                setThinking(data.thinking)
+              }
+            },
+            registerAbortController: (abortController) => {
+              abortControllerRef.current = abortController
+            },
+            actionContext,
+          })
+
+          nextTranslatedText = nextSnapshot.output
+          if (runIdRef.current === runId) {
+            setThinking(nextSnapshot.thinking)
+          }
+        } else {
+          setThinking(null)
+          nextTranslatedText = await translateWithStandardProvider({
+            text: preparedText,
+            providerConfig,
+            translateRequest,
+          })
+        }
+
+        if (runIdRef.current === runId) {
+          setTranslatedText(nextTranslatedText)
+        }
+
         void trackFeatureUsed({
           ...analyticsContext,
-          outcome: "failure",
+          ...providerAnalytics,
+          outcome: "success",
         })
+      } catch (caughtError) {
+        if (!isAbortError(caughtError) && runIdRef.current === runId) {
+          setThinking((prev) => (prev?.text ? { ...prev, status: "complete" } : null))
+          setError(createSelectionToolbarRuntimeError("translate", caughtError))
+        }
+
+        if (!isAbortError(caughtError)) {
+          void trackFeatureUsed({
+            ...analyticsContext,
+            ...providerAnalytics,
+            outcome: "failure",
+          })
+        }
+      } finally {
+        void Promise.resolve(
+          sendMessage("clearPromptExperimentAction", {
+            actionId: actionContext.actionId,
+          }),
+        ).catch(() => undefined)
+        if (runIdRef.current === runId) {
+          abortControllerRef.current = null
+          setIsTranslating(false)
+        }
       }
-    }
-    finally {
-      if (runIdRef.current === runId) {
-        abortControllerRef.current = null
-        setIsTranslating(false)
-      }
-    }
-  }, [resetTranslationState, selectionText, sourceSurface, translateRequest])
+    },
+    [activeSession?.id, resetTranslationState, selectionText, sourceSurface, translateRequest],
+  )
 
   const startTranslation = useEffectEvent((runId: number) => {
+    // Kick off the save suggestion together with a translation run that will
+    // actually start (mirrors runTranslation's prechecks so a run that only
+    // surfaces an error never spends hosted-AI quota). Its card renders only
+    // after the translation stream finishes.
+    const preparedText = prepareTranslationText(selectionText)
+    const provider = translateRequest.provider
+    if (
+      preparedText !== "" &&
+      provider?.kind === "local" &&
+      provider.config.enabled &&
+      isTranslateProviderConfig(provider.config)
+    ) {
+      fireSaveSuggestion(preparedText)
+    }
+
     void runTranslation(runId)
   })
 
   useEffect(() => {
     if (!isOpen) {
-      return
+      return undefined
     }
 
     const nextRunKey = JSON.stringify({
@@ -413,7 +564,7 @@ export function SelectionTranslationProvider({
       translateRequestKey,
     })
     if (lastTranslationRunKeyRef.current === nextRunKey) {
-      return
+      return undefined
     }
     lastTranslationRunKeyRef.current = nextRunKey
 
@@ -425,34 +576,51 @@ export function SelectionTranslationProvider({
     return () => {
       cancelCurrentTranslation(runId)
     }
-  }, [activeSession?.id, cancelCurrentTranslation, isOpen, popoverSessionKey, rerunNonce, translateRequestKey])
+  }, [
+    activeSession?.id,
+    cancelCurrentTranslation,
+    isOpen,
+    popoverSessionKey,
+    rerunNonce,
+    translateRequestKey,
+  ])
 
-  const handleOpenChange = useCallback((nextOpen: boolean) => {
-    cancelCurrentTranslation()
-    resetTranslationState()
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      cancelCurrentTranslation()
+      resetTranslationState()
 
-    if (nextOpen) {
-      const pendingRequest = pendingOpenRequestRef.current
-      const nextSession = pendingRequest?.session ?? selectionSession
+      if (nextOpen) {
+        const pendingRequest = pendingOpenRequestRef.current
+        const nextSession = pendingRequest?.session ?? selectionSession
 
-      setActiveSession(nextSession)
-      setSourceSurface(pendingRequest?.surface ?? ANALYTICS_SURFACE.SELECTION_TOOLBAR)
-      setPopoverSessionKey(prev => prev + 1)
-      if (pendingRequest?.anchor) {
-        setAnchor(pendingRequest.anchor)
+        setActiveSession(nextSession)
+        setSourceSurface(pendingRequest?.surface ?? ANALYTICS_SURFACE.SELECTION_TOOLBAR)
+        setPopoverSessionKey((prev) => prev + 1)
+        if (pendingRequest?.anchor) {
+          setAnchor(pendingRequest.anchor)
+        }
+        setIsSelectionToolbarVisible(false)
+        pendingOpenRequestRef.current = null
+      } else {
+        resetPopoverSession({
+          clearAnchor: pendingOpenRequestRef.current === null,
+        })
+        lastTranslationRunKeyRef.current = null
+        resetSaveSuggestionSession()
       }
-      setIsSelectionToolbarVisible(false)
-      pendingOpenRequestRef.current = null
-    }
-    else {
-      resetPopoverSession({
-        clearAnchor: pendingOpenRequestRef.current === null,
-      })
-      lastTranslationRunKeyRef.current = null
-    }
 
-    setIsOpen(nextOpen)
-  }, [cancelCurrentTranslation, resetPopoverSession, resetTranslationState, selectionSession, setIsSelectionToolbarVisible])
+      setIsOpen(nextOpen)
+    },
+    [
+      cancelCurrentTranslation,
+      resetPopoverSession,
+      resetSaveSuggestionSession,
+      resetTranslationState,
+      selectionSession,
+      setIsSelectionToolbarVisible,
+    ],
+  )
 
   const prepareToolbarOpen = useCallback(() => {
     if (!selectionSession) {
@@ -491,36 +659,39 @@ export function SelectionTranslationProvider({
     }
   }, [resolveShortcutOpenRequest])
 
-  const openSelectionTranslationRequest = useCallback((
-    request: SelectionTranslatePendingOpenRequest | null,
-    options?: { showMissingSelectionToast?: boolean },
-  ) => {
-    if (!request) {
-      if (options?.showMissingSelectionToast) {
-        const nextError = createSelectionToolbarPrecheckError("translate", "missingSelection")
-        toast.error(nextError.description)
+  const openSelectionTranslationRequest = useCallback(
+    (
+      request: SelectionTranslatePendingOpenRequest | null,
+      options?: { showMissingSelectionToast?: boolean },
+    ) => {
+      if (!request) {
+        if (options?.showMissingSelectionToast) {
+          const nextError = createSelectionToolbarPrecheckError("translate", "missingSelection")
+          toastManager.add({ type: "error", title: nextError.description })
+        }
+        return
       }
-      return
-    }
 
-    if (reopenFrameRef.current !== null) {
-      cancelAnimationFrame(reopenFrameRef.current)
-      reopenFrameRef.current = null
-    }
-
-    if (isOpen) {
-      handleOpenChange(false)
-      reopenFrameRef.current = requestAnimationFrame(() => {
+      if (reopenFrameRef.current !== null) {
+        cancelAnimationFrame(reopenFrameRef.current)
         reopenFrameRef.current = null
-        commitOpenRequest(request)
-        handleOpenChange(true)
-      })
-      return
-    }
+      }
 
-    commitOpenRequest(request)
-    handleOpenChange(true)
-  }, [commitOpenRequest, handleOpenChange, isOpen])
+      if (isOpen) {
+        handleOpenChange(false)
+        reopenFrameRef.current = requestAnimationFrame(() => {
+          reopenFrameRef.current = null
+          commitOpenRequest(request)
+          handleOpenChange(true)
+        })
+        return
+      }
+
+      commitOpenRequest(request)
+      handleOpenChange(true)
+    },
+    [commitOpenRequest, handleOpenChange, isOpen],
+  )
 
   const openFromContextMenu = useCallback(() => {
     openSelectionTranslationRequest(resolveContextMenuRequest(), {
@@ -534,8 +705,11 @@ export function SelectionTranslationProvider({
 
   useEffect(() => {
     const shortcut = selectionToolbar.features.translate.shortcut
-    if (isPageTranslationShortcutEmpty(shortcut) || !isValidConfiguredPageTranslationShortcut(shortcut)) {
-      return
+    if (
+      isPageTranslationShortcutEmpty(shortcut) ||
+      !isValidConfiguredPageTranslationShortcut(shortcut)
+    ) {
+      return undefined
     }
 
     const registration = HotkeyManager.getInstance().register(
@@ -569,9 +743,12 @@ export function SelectionTranslationProvider({
     }
   }, [])
 
-  const contextValue = useMemo<SelectionTranslationContextValue>(() => ({
-    prepareToolbarOpen,
-  }), [prepareToolbarOpen])
+  const contextValue = useMemo<SelectionTranslationContextValue>(
+    () => ({
+      prepareToolbarOpen,
+    }),
+    [prepareToolbarOpen],
+  )
 
   return (
     <SelectionTranslationContext value={contextValue}>
@@ -580,6 +757,7 @@ export function SelectionTranslationProvider({
         onOpenChange={handleOpenChange}
         anchor={anchor}
         onAnchorChange={setAnchor}
+        disablePointerDismissal={isSaveToNotebaseDialogOpen}
       >
         {children}
         <SelectionPopover.Content
@@ -588,10 +766,7 @@ export function SelectionTranslationProvider({
           finalFocus={false}
         >
           <SelectionPopover.Header className="border-b">
-            <SelectionToolbarTitleContent
-              title="Translation"
-              icon="ri:translate"
-            />
+            <SelectionToolbarTitleContent title="Translation" icon="ri:translate" />
             <div className="flex items-center gap-1">
               <TargetLanguageSelector />
               <SelectionPopover.Pin />
@@ -606,6 +781,15 @@ export function SelectionTranslationProvider({
               isTranslating={isTranslating}
               thinking={thinking}
             />
+            {!isTranslating &&
+              !!translatedText &&
+              !error &&
+              saveSuggestion?.sessionKey === saveSuggestionSessionKey && (
+                <SaveSuggestionCard
+                  suggestion={saveSuggestion}
+                  markShownOnce={markSaveSuggestionShownOnce}
+                />
+              )}
             <SelectionToolbarErrorAlert error={error} className="-mt-3" />
           </SelectionPopover.Body>
           <SelectionToolbarFooterContent

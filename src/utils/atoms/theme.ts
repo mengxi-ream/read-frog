@@ -10,14 +10,13 @@ export const baseThemeModeAtom = atom<ThemeMode>(DEFAULT_THEME_MODE)
 
 // Public atom with read/write - write always goes through storageAdapter
 export const themeModeAtom = atom(
-  get => get(baseThemeModeAtom),
+  (get) => get(baseThemeModeAtom),
   async (get, set, newValue: ThemeMode) => {
     const prev = get(baseThemeModeAtom)
     set(baseThemeModeAtom, newValue)
     try {
       await storageAdapter.set(THEME_STORAGE_KEY, newValue, themeModeSchema)
-    }
-    catch (error) {
+    } catch (error) {
       console.error("Failed to set themeMode to storage:", newValue, error)
       set(baseThemeModeAtom, prev)
     }
@@ -25,13 +24,17 @@ export const themeModeAtom = atom(
 )
 
 baseThemeModeAtom.onMount = (setAtom: (newValue: ThemeMode) => void) => {
-  void storageAdapter.get<ThemeMode>(THEME_STORAGE_KEY, DEFAULT_THEME_MODE, themeModeSchema).then(setAtom)
+  void storageAdapter
+    .get<ThemeMode>(THEME_STORAGE_KEY, DEFAULT_THEME_MODE, themeModeSchema)
+    .then(setAtom)
   const unwatch = storageAdapter.watch<ThemeMode>(THEME_STORAGE_KEY, setAtom)
 
   const handleVisibilityChange = () => {
     if (document.visibilityState === "visible") {
       logger.info("baseThemeModeAtom onMount handleVisibilityChange when: ", new Date())
-      void storageAdapter.get<ThemeMode>(THEME_STORAGE_KEY, DEFAULT_THEME_MODE, themeModeSchema).then(setAtom)
+      void storageAdapter
+        .get<ThemeMode>(THEME_STORAGE_KEY, DEFAULT_THEME_MODE, themeModeSchema)
+        .then(setAtom)
     }
   }
   document.addEventListener("visibilitychange", handleVisibilityChange)

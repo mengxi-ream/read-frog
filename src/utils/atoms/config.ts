@@ -11,7 +11,7 @@ export const configAtom = atom<Config>(DEFAULT_CONFIG)
 
 export const mergeWithArrayOverwrite = deepmergeCustom({
   // Use the last (source) array
-  mergeArrays: values => values[values.length - 1],
+  mergeArrays: (values) => values[values.length - 1],
 })
 
 /**
@@ -34,65 +34,65 @@ let writeQueue: Promise<void> = Promise.resolve()
  */
 let writeVersion = 0
 
-export const writeConfigAtom = atom(
-  null,
-  async (get, set, patch: Partial<Config>) => {
-    // ─────────────────────────────────────────────────────────────────────────
-    // STEP 1: Optimistic update (immediate UI feedback)
-    // ─────────────────────────────────────────────────────────────────────────
-    const localPrev = get(configAtom)
-    const optimisticNext = mergeWithArrayOverwrite(localPrev, patch)
-    set(configAtom, optimisticNext)
+export const writeConfigAtom = atom(null, async (get, set, patch: Partial<Config>) => {
+  // ─────────────────────────────────────────────────────────────────────────
+  // STEP 1: Optimistic update (immediate UI feedback)
+  // ─────────────────────────────────────────────────────────────────────────
+  const localPrev = get(configAtom)
+  const optimisticNext = mergeWithArrayOverwrite(localPrev, patch)
+  set(configAtom, optimisticNext)
 
-    // Capture version for this write (used for stale-write detection later)
-    const currentWriteVersion = ++writeVersion
+  // Capture version for this write (used for stale-write detection later)
+  const currentWriteVersion = ++writeVersion
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // STEP 2: Queue the actual storage write
-    // ─────────────────────────────────────────────────────────────────────────
-    // Chain onto writeQueue so writes execute in order.
-    // Note: `.then(callback)` schedules callback to microtask queue (async),
-    // but `writeQueue = task` assignment happens synchronously.
-    const task = writeQueue.then(async () => {
-      // Always read fresh from storage to capture any writes that completed before us.
-      // This ensures we don't lose concurrent field updates:
-      //   write({x:1}) then write({y:2}) → storage ends up with {x:1, y:2}
-      const configInStorage = await storageAdapter.get<Config>(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema)
-      const nextToPersist = mergeWithArrayOverwrite(configInStorage, patch)
+  // ─────────────────────────────────────────────────────────────────────────
+  // STEP 2: Queue the actual storage write
+  // ─────────────────────────────────────────────────────────────────────────
+  // Chain onto writeQueue so writes execute in order.
+  // Note: `.then(callback)` schedules callback to microtask queue (async),
+  // but `writeQueue = task` assignment happens synchronously.
+  const task = writeQueue.then(async () => {
+    // Always read fresh from storage to capture any writes that completed before us.
+    // This ensures we don't lose concurrent field updates:
+    //   write({x:1}) then write({y:2}) → storage ends up with {x:1, y:2}
+    const configInStorage = await storageAdapter.get<Config>(
+      CONFIG_STORAGE_KEY,
+      DEFAULT_CONFIG,
+      configSchema,
+    )
+    const nextToPersist = mergeWithArrayOverwrite(configInStorage, patch)
 
-      try {
-        // Storage write always executes (not affected by version check)
-        await storageAdapter.set(CONFIG_STORAGE_KEY, nextToPersist, configSchema)
-        await storageAdapter.setMeta(CONFIG_STORAGE_KEY, { lastModifiedAt: Date.now() })
+    try {
+      // Storage write always executes (not affected by version check)
+      await storageAdapter.set(CONFIG_STORAGE_KEY, nextToPersist, configSchema)
+      await storageAdapter.setMeta(CONFIG_STORAGE_KEY, { lastModifiedAt: Date.now() })
 
-        // ───────────────────────────────────────────────────────────────────
-        // STEP 3: Reconcile atom with persisted value (stale-write check)
-        // ───────────────────────────────────────────────────────────────────
-        // Only update atom if no newer writes happened since we started.
-        // If a newer write exists, its optimistic update already set the correct UI state,
-        // so we skip to avoid "flashing back" to this older value.
-        if (currentWriteVersion === writeVersion) {
-          set(configAtom, nextToPersist)
-        }
+      // ───────────────────────────────────────────────────────────────────
+      // STEP 3: Reconcile atom with persisted value (stale-write check)
+      // ───────────────────────────────────────────────────────────────────
+      // Only update atom if no newer writes happened since we started.
+      // If a newer write exists, its optimistic update already set the correct UI state,
+      // so we skip to avoid "flashing back" to this older value.
+      if (currentWriteVersion === writeVersion) {
+        set(configAtom, nextToPersist)
       }
-      catch (error) {
-        console.error("Failed to set config to storage:", nextToPersist, error)
+    } catch (error) {
+      console.error("Failed to set config to storage:", nextToPersist, error)
 
-        // Roll back to storage value on error, but only if we're still the latest write.
-        if (currentWriteVersion === writeVersion) {
-          set(configAtom, configInStorage)
-        }
-
-        throw error
+      // Roll back to storage value on error, but only if we're still the latest write.
+      if (currentWriteVersion === writeVersion) {
+        set(configAtom, configInStorage)
       }
-    })
 
-    // Update queue head. Use `.catch(() => {})` to ensure queue continues even if this write fails.
-    writeQueue = task.catch(() => {})
+      throw error
+    }
+  })
 
-    return task
-  },
-)
+  // Update queue head. Use `.catch(() => {})` to ensure queue continues even if this write fails.
+  writeQueue = task.catch(() => {})
+
+  return task
+})
 
 /**
  * Initialize atom state from storage and set up cross-context sync.
@@ -108,11 +108,13 @@ configAtom.onMount = (setAtom: (newValue: Config) => void) => {
   let didReceiveStorageUpdate = false
 
   // Initial load from storage
-  void storageAdapter.get<Config>(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema).then((value) => {
-    if (!didReceiveStorageUpdate) {
-      setAtom(value)
-    }
-  })
+  void storageAdapter
+    .get<Config>(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema)
+    .then((value) => {
+      if (!didReceiveStorageUpdate) {
+        setAtom(value)
+      }
+    })
 
   // Watch for changes from other extension contexts (popup, options page, other tabs)
   const unwatch = storageAdapter.watch<Config>(CONFIG_STORAGE_KEY, (value) => {
@@ -126,7 +128,9 @@ configAtom.onMount = (setAtom: (newValue: Config) => void) => {
   const handleVisibilityChange = () => {
     if (document.visibilityState === "visible") {
       logger.info("configAtom onMount handleVisibilityChange when: ", new Date())
-      void storageAdapter.get<Config>(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema).then(setAtom)
+      void storageAdapter
+        .get<Config>(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema)
+        .then(setAtom)
     }
   }
   document.addEventListener("visibilitychange", handleVisibilityChange)
@@ -150,12 +154,11 @@ type Keys = keyof Config
 export function getConfigFieldAtom<K extends Keys>(key: K) {
   // If you don't mind "re-rendering when other fields are changed"
   // you can directly get(configAtom)[key] instead of using selectAtom.
-  const sliceAtom = selectAtom(configAtom, c => c[key])
+  const sliceAtom = selectAtom(configAtom, (c) => c[key])
 
   return atom(
-    get => get(sliceAtom),
-    (_get, set, newVal: Partial<Config[K]>) =>
-      set(writeConfigAtom, { [key]: newVal }),
+    (get) => get(sliceAtom),
+    (_get, set, newVal: Partial<Config[K]>) => set(writeConfigAtom, { [key]: newVal }),
   )
 }
 
@@ -165,11 +168,12 @@ function buildConfigFieldsAtomMap<C extends Config>(cfg: C) {
 
   const res = {} as Map
 
+  // oxlint-disable-next-line typescript/no-unnecessary-type-parameters -- K preserves key-specific atom value inference.
   const add = <K extends ValidKey>(key: K) => {
     res[key] = getConfigFieldAtom(key)
-  };
+  }
 
-  (Object.keys(cfg) as ValidKey[]).forEach(add)
+  ;(Object.keys(cfg) as ValidKey[]).forEach(add)
   return res
 }
 

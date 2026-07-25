@@ -15,7 +15,9 @@ export function CustomTranslationStyleSwitch() {
       <FieldContent className="self-center">
         <FieldLabel htmlFor="custom-style-toggle">
           {i18n.t("options.translation.translationStyle.useCustomStyle")}
-          <HelpTooltip>{i18n.t("options.translation.translationStyle.useCustomStyleDescription")}</HelpTooltip>
+          <HelpTooltip>
+            {i18n.t("options.translation.translationStyle.useCustomStyleDescription")}
+          </HelpTooltip>
         </FieldLabel>
       </FieldContent>
       <Switch

@@ -9,18 +9,22 @@ export function PageTranslationShortcut() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
   const shortcut = translateConfig.page.shortcut ?? DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY
 
-  const updateShortcut = (shortcut: string) => {
+  const updateShortcut = (nextShortcut: string) => {
     void setTranslateConfig({
       ...translateConfig,
       page: {
         ...translateConfig.page,
-        shortcut,
+        shortcut: nextShortcut,
       },
     })
   }
 
   return (
-    <ConfigCard id="page-translation-shortcut" title={i18n.t("options.translation.pageTranslationShortcut.title")} description={i18n.t("options.translation.pageTranslationShortcut.description")}>
+    <ConfigCard
+      id="page-translation-shortcut"
+      title={i18n.t("options.translation.pageTranslationShortcut.title")}
+      description={i18n.t("options.translation.pageTranslationShortcut.description")}
+    >
       <ShortcutKeyRecorder shortcutKey={shortcut} onChange={updateShortcut} />
     </ConfigCard>
   )

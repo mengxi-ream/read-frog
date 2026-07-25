@@ -14,6 +14,7 @@ export async function generateArticleSummary(
   title: string,
   textContent: string,
   providerConfig: LLMProviderConfig,
+  options?: { signal?: AbortSignal },
 ): Promise<string | null> {
   const preparedText = cleanText(textContent)
 
@@ -22,10 +23,20 @@ export async function generateArticleSummary(
   }
 
   try {
-    const { model: providerModel, provider, providerOptions: userProviderOptions, temperature } = providerConfig
+    const {
+      model: providerModel,
+      provider,
+      providerOptions: userProviderOptions,
+      temperature,
+    } = providerConfig
     const reasoning = getTopLevelReasoning(providerConfig)
     const modelName = resolveModelId(providerModel)
-    const providerOptions = getProviderOptionsWithOverride(modelName ?? "", provider, userProviderOptions, reasoning)
+    const providerOptions = getProviderOptionsWithOverride(
+      modelName ?? "",
+      provider,
+      userProviderOptions,
+      reasoning,
+    )
     const model = await getModelById(providerConfig.id)
 
     const prompt = `Summarize the following article in 2-3 sentences. Focus on the main topic and key points. Return ONLY the summary, no explanations or formatting.
@@ -35,20 +46,25 @@ Title: ${title}
 Content:
 ${preparedText}`
 
+    // maxRetries: 0 — retries belong to the RequestQueue, which meters them
+    // against the token bucket; ai-sdk's hidden default (2) would issue extra
+    // HTTP attempts invisible to the rate limiter. The signal lets the queue's
+    // timeout/cancel actually abort the request instead of leaving a zombie.
     const { text: summary } = await generateText({
       model,
       prompt,
       reasoning,
       temperature,
       providerOptions,
+      abortSignal: options?.signal,
+      maxRetries: 0,
     })
 
     const cleanedSummary = summary.trim()
     logger.info("Generated article summary:", `${cleanedSummary.slice(0, 100)}...`)
 
     return cleanedSummary
-  }
-  catch (error) {
+  } catch (error) {
     logger.error("Failed to generate article summary:", error)
     return null
   }

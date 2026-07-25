@@ -10,7 +10,7 @@ const baseDetectedCodeAtom = atom<LangCodeISO6393>(DEFAULT_DETECTED_CODE)
 
 // Public atom with read/write - writes only update the in-memory popup state.
 export const detectedCodeAtom = atom(
-  get => get(baseDetectedCodeAtom),
+  (get) => get(baseDetectedCodeAtom),
   (_get, set, newValue: LangCodeISO6393) => {
     set(baseDetectedCodeAtom, newValue)
   },
@@ -20,7 +20,7 @@ export const detectedCodeAtom = atom(
 baseDetectedCodeAtom.onMount = (setAtom: (newValue: LangCodeISO6393) => void) => {
   const refreshDetectedCode = () => {
     void sendMessage("getDetectedCode", undefined)
-      .then(detectedCode => setAtom(normalizeDetectedCode(detectedCode)))
+      .then((detectedCode) => setAtom(normalizeDetectedCode(detectedCode)))
       .catch((error) => {
         logger.warn("Failed to refresh active tab detected language", error)
         setAtom(DEFAULT_DETECTED_CODE)

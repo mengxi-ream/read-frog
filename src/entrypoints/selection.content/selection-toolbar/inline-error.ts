@@ -7,7 +7,11 @@ export interface SelectionToolbarInlineError {
 }
 
 type SelectionToolbarErrorKind = "translate" | "customAction"
-type SelectionToolbarPrecheckErrorCode = "actionUnavailable" | "missingSelection" | "providerDisabled" | "providerUnavailable"
+type SelectionToolbarPrecheckErrorCode =
+  | "actionUnavailable"
+  | "missingSelection"
+  | "providerDisabled"
+  | "providerUnavailable"
 
 const UNEXPECTED_ERROR_MESSAGE = "Unexpected error occurred"
 

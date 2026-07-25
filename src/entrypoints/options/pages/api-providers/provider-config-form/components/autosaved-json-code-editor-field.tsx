@@ -4,9 +4,9 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/base-ui/field"
 import { JSONCodeEditor } from "@/components/ui/json-code-editor"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 
-export type JsonEditorParseResult<TValue>
-  = | { valid: true, value: TValue | undefined }
-    | { valid: false, error: string }
+export type JsonEditorParseResult<TValue> =
+  | { valid: true; value: TValue | undefined }
+  | { valid: false; error: string }
 
 interface AutosavedJsonCodeEditorFieldProps<TValue extends Record<string, unknown>> {
   value: TValue | undefined
@@ -22,7 +22,7 @@ interface AutosavedJsonCodeEditorFieldProps<TValue extends Record<string, unknow
   height?: string
 }
 
-function defaultSerializeJson<TValue extends Record<string, unknown>>(value: TValue | undefined) {
+function defaultSerializeJson(value: Record<string, unknown> | undefined) {
   return value ? JSON.stringify(value, null, 2) : ""
 }
 
@@ -128,9 +128,7 @@ export function AutosavedJsonCodeEditorField<TValue extends Record<string, unkno
         hasError={!!jsonError}
         height={height}
       />
-      {jsonError && (
-        <FieldError match={!!jsonError}>{jsonError}</FieldError>
-      )}
+      {jsonError && <FieldError match={!!jsonError}>{jsonError}</FieldError>}
     </Field>
   )
 }

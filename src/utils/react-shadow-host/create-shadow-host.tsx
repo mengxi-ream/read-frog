@@ -22,8 +22,7 @@ export function createReactShadowHost(
   const { className, position, inheritStyles, cssContent, style, forcedTheme } = options
 
   const shadowHost = document.createElement("div")
-  if (className)
-    shadowHost.className = className
+  if (className) shadowHost.className = className
 
   shadowHost.classList.add(REACT_SHADOW_HOST_CLASS)
   shadowHost.style.display = position
@@ -41,9 +40,7 @@ export function createReactShadowHost(
   const wrappedComponent = (
     <ShadowWrapperContext value={innerReactContainer}>
       <ThemeProvider container={innerReactContainer} forcedTheme={forcedTheme}>
-        <TooltipProvider>
-          {component}
-        </TooltipProvider>
+        <TooltipProvider>{component}</TooltipProvider>
       </ThemeProvider>
     </ShadowWrapperContext>
   )

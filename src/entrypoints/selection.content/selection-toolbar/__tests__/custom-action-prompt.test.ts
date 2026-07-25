@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest"
-import { buildSelectionToolbarCustomActionSystemPrompt, replaceSelectionToolbarCustomActionPromptTokens } from "../custom-action-prompt"
+import {
+  buildSelectionToolbarCustomActionSystemPrompt,
+  replaceSelectionToolbarCustomActionPromptTokens,
+} from "../custom-action-prompt"
 
 describe("replaceSelectionToolbarCustomActionPromptTokens", () => {
   const baseTokens = {
@@ -29,10 +32,7 @@ describe("replaceSelectionToolbarCustomActionPromptTokens", () => {
   })
 
   it("leaves unrelated text unchanged", () => {
-    const result = replaceSelectionToolbarCustomActionPromptTokens(
-      "plain text",
-      baseTokens,
-    )
+    const result = replaceSelectionToolbarCustomActionPromptTokens("plain text", baseTokens)
 
     expect(result).toBe("plain text")
   })
@@ -59,12 +59,12 @@ describe("buildSelectionToolbarCustomActionSystemPrompt", () => {
 
     expect(result).toContain("system=hello world paragraph")
     expect(result).toContain("## Structured Output Contract")
-    expect(result).toContain("- key: \"Definition\"")
+    expect(result).toContain('- key: "Definition"')
     expect(result).toContain("  type: string")
-    expect(result).toContain("- key: \"Score\"")
+    expect(result).toContain('- key: "Score"')
     expect(result).toContain("  type: number")
     expect(result).toContain("  nullable: true")
-    expect(result).toContain("  description: \"\"")
+    expect(result).toContain('  description: ""')
   })
 
   it("includes description in contract when provided", () => {
@@ -77,10 +77,10 @@ describe("buildSelectionToolbarCustomActionSystemPrompt", () => {
       ],
     )
 
-    expect(result).toContain("- key: \"Term\"")
+    expect(result).toContain('- key: "Term"')
     expect(result).toContain("  description: |-")
     expect(result).toContain("    Base/canonical lemma")
-    expect(result).toContain("- key: \"Score\"")
+    expect(result).toContain('- key: "Score"')
     expect(result).not.toContain("  description: |-\n    \n")
   })
 
@@ -97,7 +97,7 @@ describe("buildSelectionToolbarCustomActionSystemPrompt", () => {
       ],
     )
 
-    expect(result).toContain("- key: \"{{webTitle}}\"")
+    expect(result).toContain('- key: "{{webTitle}}"')
     expect(result).toContain("    Explain in English based on hello world paragraph")
   })
 
@@ -120,11 +120,9 @@ describe("buildSelectionToolbarCustomActionSystemPrompt", () => {
   })
 
   it("returns contract when prompt content is empty", () => {
-    const result = buildSelectionToolbarCustomActionSystemPrompt(
-      "   ",
-      baseTokens,
-      [{ name: "Definition", type: "string", description: "" }],
-    )
+    const result = buildSelectionToolbarCustomActionSystemPrompt("   ", baseTokens, [
+      { name: "Definition", type: "string", description: "" },
+    ])
 
     expect(result).toContain("## Structured Output Contract")
     expect(result).not.toContain("system=")

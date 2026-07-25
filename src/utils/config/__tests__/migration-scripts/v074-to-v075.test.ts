@@ -85,17 +85,19 @@ describe("v074-to-v075 migration", () => {
     expect(migrate({ selectionToolbar: { customActions: null } })).toEqual({
       selectionToolbar: { customActions: null },
     })
-    expect(migrate({
-      selectionToolbar: {
-        customActions: [
-          "bad-action",
-          {
-            id: "action-1",
-            notebaseConnection: "bad-connection",
-          },
-        ],
-      },
-    })).toEqual({
+    expect(
+      migrate({
+        selectionToolbar: {
+          customActions: [
+            "bad-action",
+            {
+              id: "action-1",
+              notebaseConnection: "bad-connection",
+            },
+          ],
+        },
+      }),
+    ).toEqual({
       selectionToolbar: {
         customActions: [
           "bad-action",

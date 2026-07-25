@@ -4,7 +4,11 @@
  */
 
 import type { EdgeTTSRequestParams } from "./types"
-import type { EdgeTTSHealthStatus, EdgeTTSSynthesizeRequest, EdgeTTSSynthesizeResponse } from "@/types/edge-tts"
+import type {
+  EdgeTTSHealthStatus,
+  EdgeTTSSynthesizeRequest,
+  EdgeTTSSynthesizeResponse,
+} from "@/types/edge-tts"
 import { assertEdgeTTSAvailable, isEdgeTTSBrowserSupported } from "./browser"
 import { splitTextByUtf8Bytes } from "./chunk"
 import {
@@ -21,7 +25,7 @@ import { filterEdgeTTSVoicesByLocale, listEdgeTTSVoices as listEdgeTTSVoicesRaw 
 
 function toChunkRequests(params: EdgeTTSRequestParams): EdgeTTSSynthesizeRequest[] {
   const chunks = splitTextByUtf8Bytes(params.text, EDGE_TTS_MAX_CHUNK_BYTES, EDGE_TTS_MAX_CHUNKS)
-  return chunks.map(chunk => ({
+  return chunks.map((chunk) => ({
     text: chunk,
     voice: params.voice,
     rate: params.rate,
@@ -31,12 +35,17 @@ function toChunkRequests(params: EdgeTTSRequestParams): EdgeTTSSynthesizeRequest
   }))
 }
 
-export async function synthesizeEdgeTTS(params: EdgeTTSRequestParams): Promise<EdgeTTSSynthesizeResponse> {
+export async function synthesizeEdgeTTS(
+  params: EdgeTTSRequestParams,
+): Promise<EdgeTTSSynthesizeResponse> {
   try {
     assertEdgeTTSAvailable()
 
     if (isEdgeTTSCircuitOpen()) {
-      throw new EdgeTTSError("CIRCUIT_OPEN", "Edge TTS service is temporarily unavailable due to repeated failures")
+      throw new EdgeTTSError(
+        "CIRCUIT_OPEN",
+        "Edge TTS service is temporarily unavailable due to repeated failures",
+      )
     }
 
     const requests = toChunkRequests(params)
@@ -48,10 +57,17 @@ export async function synthesizeEdgeTTS(params: EdgeTTSRequestParams): Promise<E
       audio: response.audio,
       contentType: response.contentType,
     }
-  }
-  catch (error) {
+  } catch (error) {
     const payload = toEdgeTTSErrorPayload(error)
-    if (!["INVALID_TEXT", "TEXT_TOO_LONG", "UNSUPPORTED_BROWSER", "FEATURE_DISABLED", "CIRCUIT_OPEN"].includes(payload.code)) {
+    if (
+      ![
+        "INVALID_TEXT",
+        "TEXT_TOO_LONG",
+        "UNSUPPORTED_BROWSER",
+        "FEATURE_DISABLED",
+        "CIRCUIT_OPEN",
+      ].includes(payload.code)
+    ) {
       recordEdgeTTSFailure()
     }
     return {
@@ -117,8 +133,7 @@ export async function getEdgeTTSHealthStatus(): Promise<EdgeTTSHealthStatus> {
       available: true,
       reason: "ok",
     }
-  }
-  catch (error) {
+  } catch (error) {
     return {
       ...baseStatus,
       reason: "endpoint-failed",

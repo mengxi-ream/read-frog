@@ -61,9 +61,7 @@ function getMigratedXaiModel(modelConfig: any): string | null {
   }
 
   const customModel = getNormalizedModelId(modelConfig?.customModel)
-  return customModel === null
-    ? null
-    : OLD_XAI_GROK_MODEL_REPLACEMENTS[customModel] ?? null
+  return customModel === null ? null : (OLD_XAI_GROK_MODEL_REPLACEMENTS[customModel] ?? null)
 }
 
 function migrateProviderConfig(providerConfig: any): any {

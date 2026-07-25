@@ -1,4 +1,8 @@
-import type { EbookBridgeSelectionDirection, EbookBridgeSelectionPayload } from "@read-frog/definitions"
+import type {
+  EbookBridgeSelectionDirection,
+  EbookBridgeSelectionPayload,
+} from "@read-frog/definitions"
+import type { ModalDialogHostController } from "./modal-dialog-host"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 import {
@@ -22,26 +26,31 @@ import {
 } from "./atoms"
 import { CloseButton, DropEvent } from "./close-button"
 import { SelectionToolbarCustomActionButtons } from "./custom-action-button"
+import { createModalDialogHostController } from "./modal-dialog-host"
+import {
+  collectSelectionScrollTargets,
+  createSelectionAnchorTracker,
+  getSelectionDirection,
+  getToolbarViewportPosition,
+  getViewportRect,
+  measureSelectionAnchor,
+  SelectionDirection,
+  viewportPointToHostPoint,
+} from "./positioning"
 import { SpeakButton } from "./speak-button"
 import { TranslateButton } from "./translate-button"
 
-enum SelectionDirection {
-  TOP_LEFT = "TOP_LEFT",
-  TOP_RIGHT = "TOP_RIGHT",
-  BOTTOM_LEFT = "BOTTOM_LEFT",
-  BOTTOM_RIGHT = "BOTTOM_RIGHT",
-}
-
-const EXTERNAL_SELECTION_DIRECTION_MAP: Record<EbookBridgeSelectionDirection, SelectionDirection> = {
-  "top-left": SelectionDirection.TOP_LEFT,
-  "top-right": SelectionDirection.TOP_RIGHT,
-  "bottom-left": SelectionDirection.BOTTOM_LEFT,
-  "bottom-right": SelectionDirection.BOTTOM_RIGHT,
-}
+const EXTERNAL_SELECTION_DIRECTION_MAP: Record<EbookBridgeSelectionDirection, SelectionDirection> =
+  {
+    "top-left": SelectionDirection.TOP_LEFT,
+    "top-right": SelectionDirection.TOP_RIGHT,
+    "bottom-left": SelectionDirection.BOTTOM_LEFT,
+    "bottom-right": SelectionDirection.BOTTOM_RIGHT,
+  }
 
 const SELECTION_GUARD_INTERACTIVE_SELECTOR = [
   "button",
-  "[role=\"button\"]",
+  '[role="button"]',
   "a[href]",
   "input",
   "textarea",
@@ -141,8 +150,7 @@ function collectSelectionBoundaryNodes(selection: Selection) {
       const range = selection.getRangeAt(index)
       boundaryNodes.add(range.startContainer)
       boundaryNodes.add(range.endContainer)
-    }
-    catch {
+    } catch {
       break
     }
   }
@@ -159,7 +167,7 @@ function isSelectionInsideSelectionOverlay(
     return false
   }
 
-  return collectSelectionBoundaryNodes(selection).some(node =>
+  return collectSelectionBoundaryNodes(selection).some((node) =>
     isNodeInsideSelectionOverlay(node, overlayContainer, overlayShadowRoot),
   )
 }
@@ -172,7 +180,10 @@ function isMouseEventInsideSelectionOverlay(
   const eventPath = event.composedPath()
 
   for (const node of eventPath) {
-    if (node instanceof Node && isNodeInsideSelectionOverlay(node, overlayContainer, overlayShadowRoot)) {
+    if (
+      node instanceof Node &&
+      isNodeInsideSelectionOverlay(node, overlayContainer, overlayShadowRoot)
+    ) {
       return true
     }
   }
@@ -184,57 +195,20 @@ function isMouseEventInsideSelectionOverlay(
   )
 }
 
-function getSelectionDirection(
-  startX: number,
-  startY: number,
-  endX: number,
-  endY: number,
-): SelectionDirection {
-  const DOWNWARD_TOLERANCE = 8
-
-  const isRightward = startX <= endX
-  const isDownward = startY - DOWNWARD_TOLERANCE <= endY
-
-  if (isRightward && isDownward)
-    return SelectionDirection.BOTTOM_RIGHT
-  if (isRightward && !isDownward)
-    return SelectionDirection.TOP_RIGHT
-  if (!isRightward && isDownward)
-    return SelectionDirection.BOTTOM_LEFT
-  return SelectionDirection.TOP_LEFT
-}
-
-function applyDirectionOffset(
-  direction: SelectionDirection,
-  baseX: number,
-  baseY: number,
-  tooltipWidth: number,
-  tooltipHeight: number,
-): { x: number, y: number } {
-  const CURSOR_CLEARANCE = 20
-  switch (direction) {
-    case SelectionDirection.BOTTOM_RIGHT:
-      return { x: baseX, y: baseY + CURSOR_CLEARANCE }
-    case SelectionDirection.BOTTOM_LEFT:
-      return { x: baseX - tooltipWidth, y: baseY + CURSOR_CLEARANCE }
-    case SelectionDirection.TOP_RIGHT:
-      return { x: baseX, y: baseY - tooltipHeight - CURSOR_CLEARANCE }
-    case SelectionDirection.TOP_LEFT:
-      return { x: baseX - tooltipWidth, y: baseY - tooltipHeight - CURSOR_CLEARANCE }
-    default:
-      return { x: baseX, y: baseY + CURSOR_CLEARANCE }
-  }
-}
-
 export function SelectionToolbar() {
   const tooltipRef = useRef<HTMLDivElement>(null)
   const tooltipContainerRef = useRef<HTMLDivElement>(null)
-  const selectionPositionRef = useRef<{ x: number, y: number } | null>(null) // store selection position (base position without direction offset)
-  const selectionStartRef = useRef<{ x: number, y: number } | null>(null) // store selection start position
+  const selectionPositionRef = useRef<{ x: number; y: number } | null>(null) // store selection position (base position without direction offset)
+  const selectionStartRef = useRef<{ x: number; y: number } | null>(null) // store selection start position
   const selectionDirectionRef = useRef<SelectionDirection>(SelectionDirection.BOTTOM_RIGHT) // store selection direction
+  const selectionAnchorTrackerRef = useRef<ReturnType<typeof createSelectionAnchorTracker>>(null)
+  const selectionScrollTargetsRef = useRef<Array<Element | ShadowRoot>>([])
+  const modalDialogHostControllerRef = useRef<ModalDialogHostController>(null)
   const isPointerDownInsideOverlayRef = useRef(false)
   const preserveSelectionStateRef = useRef(false)
-  const [isSelectionToolbarVisible, setIsSelectionToolbarVisible] = useAtom(isSelectionToolbarVisibleAtom)
+  const [isSelectionToolbarVisible, setIsSelectionToolbarVisible] = useAtom(
+    isSelectionToolbarVisibleAtom,
+  )
   const setSelectionState = useSetAtom(setSelectionStateAtom)
   const clearSelectionState = useSetAtom(clearSelectionStateAtom)
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
@@ -243,47 +217,137 @@ export function SelectionToolbar() {
   // even when the toolbar is already visible (visibility doesn't flip then).
   const [externalSelectionTick, setExternalSelectionTick] = useState(0)
 
-  const updatePosition = useCallback(() => {
-    if (!isSelectionToolbarVisible || !tooltipRef.current || !selectionPositionRef.current)
-      return
+  const placeHostForSelection = useCallback(
+    (ranges: Parameters<ModalDialogHostController["placeForRanges"]>[0]) => {
+      const root = tooltipContainerRef.current?.getRootNode()
+      if (!(root instanceof ShadowRoot) || !(root.host instanceof HTMLElement)) {
+        return
+      }
 
-    const scrollY = window.scrollY
-    const viewportHeight = window.innerHeight
-    const clientWidth = document.documentElement.clientWidth
-    const tooltipWidth = tooltipRef.current.offsetWidth
-    const tooltipHeight = tooltipRef.current.offsetHeight
+      modalDialogHostControllerRef.current ??= createModalDialogHostController(root.host)
+      modalDialogHostControllerRef.current.placeForRanges(ranges)
+    },
+    [],
+  )
 
-    // Apply direction offset based on selection direction and tooltip dimensions
-    const { x: offsetX, y: offsetY } = applyDirectionOffset(
-      selectionDirectionRef.current,
-      selectionPositionRef.current.x,
-      selectionPositionRef.current.y,
-      tooltipWidth,
-      tooltipHeight,
-    )
+  useEffect(
+    () => () => {
+      modalDialogHostControllerRef.current?.dispose()
+      modalDialogHostControllerRef.current = null
+    },
+    [],
+  )
 
-    // calculate strict boundaries
-    const topBoundary = scrollY + MARGIN
-    const bottomBoundary = scrollY + viewportHeight - tooltipHeight - MARGIN
-    const leftBoundary = MARGIN
-    const rightBoundary = clientWidth - tooltipWidth - MARGIN
+  const updatePosition = useCallback(
+    ({ remeasureSelection = false }: { remeasureSelection?: boolean } = {}) => {
+      const tooltip = tooltipRef.current
+      const viewportHost = tooltipContainerRef.current
+      const selectionPosition = selectionPositionRef.current
 
-    // calculate the position of the tooltip, but strictly limit it within the boundaries
-    const clampedX = Math.max(leftBoundary, Math.min(rightBoundary, offsetX))
-    const clampedY = Math.max(topBoundary, Math.min(bottomBoundary, offsetY))
+      if (!isSelectionToolbarVisible || !tooltip || !viewportHost || !selectionPosition) {
+        return
+      }
 
-    // directly operate the DOM, avoid React re-rendering
-    tooltipRef.current.style.top = `${clampedY}px`
-    tooltipRef.current.style.left = `${clampedX}px`
-  }, [isSelectionToolbarVisible])
+      const viewport = getViewportRect()
+      const tracker = selectionAnchorTrackerRef.current
+
+      if (remeasureSelection && tracker) {
+        const measurement = measureSelectionAnchor(tracker, viewport)
+
+        if (measurement.status === "invalid") {
+          selectionAnchorTrackerRef.current = null
+          selectionScrollTargetsRef.current = []
+          selectionPositionRef.current = null
+          clearSelectionState()
+          setIsSelectionToolbarVisible(false)
+          return
+        }
+
+        selectionAnchorTrackerRef.current = measurement.tracker
+        selectionPositionRef.current = measurement.anchor
+      }
+
+      const nextSelectionPosition = selectionPositionRef.current
+      if (!nextSelectionPosition) {
+        return
+      }
+
+      const tooltipRect = tooltip.getBoundingClientRect()
+      const viewportPosition = getToolbarViewportPosition(
+        selectionDirectionRef.current,
+        nextSelectionPosition,
+        {
+          width: tooltipRect.width || tooltip.offsetWidth,
+          height: tooltipRect.height || tooltip.offsetHeight,
+        },
+        viewport,
+        MARGIN,
+      )
+      const hostPosition = viewportPointToHostPoint(viewportPosition, viewportHost)
+
+      tooltip.style.top = `${hostPosition.y}px`
+      tooltip.style.left = `${hostPosition.x}px`
+    },
+    [clearSelectionState, isSelectionToolbarVisible, setIsSelectionToolbarVisible],
+  )
 
   useLayoutEffect(() => {
-    updatePosition()
+    updatePosition({ remeasureSelection: true })
   }, [updatePosition, externalSelectionTick])
 
   useEffect(() => {
-    let animationFrameId: number
+    if (!isSelectionToolbarVisible) {
+      return undefined
+    }
 
+    let animationFrameId: number | null = null
+    const schedulePositionUpdate = () => {
+      if (animationFrameId !== null) {
+        return
+      }
+
+      animationFrameId = requestAnimationFrame(() => {
+        animationFrameId = null
+        updatePosition({ remeasureSelection: true })
+      })
+    }
+
+    const captureScrollOptions: AddEventListenerOptions = { capture: true, passive: true }
+    const passiveOptions: AddEventListenerOptions = { passive: true }
+    const selectionScrollTargets = selectionScrollTargetsRef.current
+    const visualViewport = window.visualViewport
+    const resizeObserver =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(schedulePositionUpdate)
+
+    document.addEventListener("scroll", schedulePositionUpdate, captureScrollOptions)
+    window.addEventListener("scroll", schedulePositionUpdate, passiveOptions)
+    window.addEventListener("resize", schedulePositionUpdate)
+    visualViewport?.addEventListener("scroll", schedulePositionUpdate, passiveOptions)
+    visualViewport?.addEventListener("resize", schedulePositionUpdate)
+    selectionScrollTargets.forEach((target) =>
+      target.addEventListener("scroll", schedulePositionUpdate, captureScrollOptions),
+    )
+    if (tooltipRef.current) {
+      resizeObserver?.observe(tooltipRef.current)
+    }
+
+    return () => {
+      document.removeEventListener("scroll", schedulePositionUpdate, true)
+      window.removeEventListener("scroll", schedulePositionUpdate)
+      window.removeEventListener("resize", schedulePositionUpdate)
+      visualViewport?.removeEventListener("scroll", schedulePositionUpdate)
+      visualViewport?.removeEventListener("resize", schedulePositionUpdate)
+      selectionScrollTargets.forEach((target) =>
+        target.removeEventListener("scroll", schedulePositionUpdate, true),
+      )
+      resizeObserver?.disconnect()
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId)
+      }
+    }
+  }, [isSelectionToolbarVisible, updatePosition])
+
+  useEffect(() => {
     const handleMouseUp = (e: MouseEvent) => {
       if (isPointerDownInsideOverlayRef.current) {
         isPointerDownInsideOverlayRef.current = false
@@ -296,7 +360,9 @@ export function SelectionToolbar() {
       // Use requestAnimationFrame to delay selection check
       // This ensures selectionchange event fires first if text selection was cleared
       requestAnimationFrame(() => {
-        const isInputOrTextarea = document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLTextAreaElement
+        const isInputOrTextarea =
+          document.activeElement instanceof HTMLInputElement ||
+          document.activeElement instanceof HTMLTextAreaElement
 
         if (isInputOrTextarea && e.target !== document.activeElement) {
           return
@@ -306,7 +372,13 @@ export function SelectionToolbar() {
         const selection = window.getSelection()
         const overlayShadowRoot = getSelectionOverlayShadowRoot(tooltipContainerRef.current)
 
-        if (isSelectionInsideSelectionOverlay(selection, tooltipContainerRef.current, overlayShadowRoot)) {
+        if (
+          isSelectionInsideSelectionOverlay(
+            selection,
+            tooltipContainerRef.current,
+            overlayShadowRoot,
+          )
+        ) {
           preserveSelectionStateRef.current = true
           return
         }
@@ -315,20 +387,22 @@ export function SelectionToolbar() {
 
         // https://github.com/mengxi-ream/read-frog/issues/547
         // https://github.com/mengxi-ream/read-frog/pull/790
-        if (!isInputOrTextarea && interactiveTarget && !selection?.containsNode(interactiveTarget, true)) {
+        if (
+          !isInputOrTextarea &&
+          interactiveTarget &&
+          !selection?.containsNode(interactiveTarget, true)
+        ) {
           return
         }
 
         if (selectionSnapshot) {
           preserveSelectionStateRef.current = false
+          // Enter a native modal's top layer before React measures or shows the toolbar.
+          placeHostForSelection(selectionSnapshot.ranges)
           setSelectionState({
             selection: selectionSnapshot,
             context: buildContextSnapshot(selectionSnapshot),
           })
-          // calculate the position relative to the document
-          const scrollY = window.scrollY
-          const scrollX = window.scrollX
-
           if (selectionStartRef.current) {
             // Get selection start and end positions
             const startX = selectionStartRef.current.x
@@ -338,16 +412,19 @@ export function SelectionToolbar() {
 
             // Determine and store selection direction
             selectionDirectionRef.current = getSelectionDirection(startX, startY, endX, endY)
-          }
-          else {
+          } else {
             selectionDirectionRef.current = SelectionDirection.BOTTOM_RIGHT
           }
 
-          const docX = e.clientX + scrollX
-          const docY = e.clientY + scrollY
-
-          // Store pending position for useLayoutEffect to process
-          selectionPositionRef.current = { x: docX, y: docY }
+          const selectionPosition = { x: e.clientX, y: e.clientY }
+          selectionPositionRef.current = selectionPosition
+          selectionAnchorTrackerRef.current = createSelectionAnchorTracker(
+            selectionSnapshot.ranges,
+            selectionPosition,
+          )
+          selectionScrollTargetsRef.current = collectSelectionScrollTargets(
+            selectionSnapshot.ranges,
+          )
           setIsSelectionToolbarVisible(true)
         }
       })
@@ -374,6 +451,9 @@ export function SelectionToolbar() {
 
       // Record selection start position
       selectionStartRef.current = { x: e.clientX, y: e.clientY }
+      selectionPositionRef.current = null
+      selectionAnchorTrackerRef.current = null
+      selectionScrollTargetsRef.current = []
 
       clearSelectionState()
       setIsSelectionToolbarVisible(false)
@@ -383,7 +463,9 @@ export function SelectionToolbar() {
       const selection = window.getSelection()
       const overlayShadowRoot = getSelectionOverlayShadowRoot(tooltipContainerRef.current)
 
-      if (isSelectionInsideSelectionOverlay(selection, tooltipContainerRef.current, overlayShadowRoot)) {
+      if (
+        isSelectionInsideSelectionOverlay(selection, tooltipContainerRef.current, overlayShadowRoot)
+      ) {
         preserveSelectionStateRef.current = true
         return
       }
@@ -395,38 +477,25 @@ export function SelectionToolbar() {
         }
 
         clearSelectionState()
+        selectionPositionRef.current = null
+        selectionAnchorTrackerRef.current = null
+        selectionScrollTargetsRef.current = []
         // Don't hide toolbar when dropdown is open to prevent unwanted dismissal
         // (Firefox clears selection when dropdown gains focus)
-        if (!dropdownOpenRef.current)
-          setIsSelectionToolbarVisible(false)
+        if (!dropdownOpenRef.current) setIsSelectionToolbarVisible(false)
       }
-    }
-
-    const handleScroll = () => {
-      // cancel the previous animation frame
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId)
-      }
-
-      // use requestAnimationFrame to ensure rendering synchronization
-      animationFrameId = requestAnimationFrame(updatePosition)
     }
 
     document.addEventListener("mouseup", handleMouseUp)
     document.addEventListener("mousedown", handleMouseDown)
     document.addEventListener("selectionchange", handleSelectionChange)
-    window.addEventListener("scroll", handleScroll, { passive: true })
 
     return () => {
       document.removeEventListener("mouseup", handleMouseUp)
       document.removeEventListener("mousedown", handleMouseDown)
       document.removeEventListener("selectionchange", handleSelectionChange)
-      window.removeEventListener("scroll", handleScroll)
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId)
-      }
     }
-  }, [clearSelectionState, isSelectionToolbarVisible, setIsSelectionToolbarVisible, setSelectionState, updatePosition])
+  }, [clearSelectionState, placeHostForSelection, setIsSelectionToolbarVisible, setSelectionState])
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -446,9 +515,8 @@ export function SelectionToolbar() {
         return
       }
 
-      const paragraphs = detail.contextParagraphs.length > 0
-        ? detail.contextParagraphs
-        : [detail.text]
+      const paragraphs =
+        detail.contextParagraphs.length > 0 ? detail.contextParagraphs : [detail.text]
 
       preserveSelectionStateRef.current = false
       setSelectionState({
@@ -459,14 +527,13 @@ export function SelectionToolbar() {
         },
       })
       selectionDirectionRef.current = EXTERNAL_SELECTION_DIRECTION_MAP[detail.direction]
-      selectionPositionRef.current = {
-        x: detail.anchor.x + window.scrollX,
-        y: detail.anchor.y + window.scrollY,
-      }
+      selectionPositionRef.current = detail.anchor
+      selectionAnchorTrackerRef.current = null
+      selectionScrollTargetsRef.current = []
       setIsSelectionToolbarVisible(true)
       // Force a reposition: visibility may already be true, in which case the
       // updatePosition layout effect would not re-run on its own.
-      setExternalSelectionTick(tick => tick + 1)
+      setExternalSelectionTick((tick) => tick + 1)
     }
 
     const handleExternalSelectionClear = () => {
@@ -477,9 +544,11 @@ export function SelectionToolbar() {
       preserveSelectionStateRef.current = false
 
       clearSelectionState()
+      selectionPositionRef.current = null
+      selectionAnchorTrackerRef.current = null
+      selectionScrollTargetsRef.current = []
       // Don't hide toolbar when dropdown is open to prevent unwanted dismissal
-      if (!dropdownOpenRef.current)
-        setIsSelectionToolbarVisible(false)
+      if (!dropdownOpenRef.current) setIsSelectionToolbarVisible(false)
     }
 
     window.addEventListener(EXTERNAL_SELECTION_OPEN_EVENT, handleExternalSelectionOpen)
@@ -492,20 +561,20 @@ export function SelectionToolbar() {
   }, [clearSelectionState, setIsSelectionToolbarVisible, setSelectionState])
 
   // Check if current site is disabled
-  const isSiteDisabled = selectionToolbar.disabledSelectionToolbarPatterns?.some(pattern =>
+  const isSiteDisabled = selectionToolbar.disabledSelectionToolbarPatterns?.some((pattern) =>
     matchDomainPattern(window.location.href, pattern),
   )
 
   const { features } = selectionToolbar
-  const hasAnyEnabledFeature
-    = features.translate.enabled
-      || features.speak.enabled
-      || selectionToolbar.customActions.some(a => a.enabled !== false)
+  const hasAnyEnabledFeature =
+    features.translate.enabled ||
+    features.speak.enabled ||
+    selectionToolbar.customActions.some((a) => a.enabled !== false)
 
   return (
     <div
       ref={tooltipContainerRef}
-      className={NOTRANSLATE_CLASS}
+      className={`${NOTRANSLATE_CLASS} pointer-events-none fixed inset-0 ${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay}`}
       {...{ [SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE]: "" }}
     >
       {selectionToolbar.enabled && !isSiteDisabled && hasAnyEnabledFeature && (
@@ -514,15 +583,17 @@ export function SelectionToolbar() {
           inert={!isSelectionToolbarVisible}
           className={cn(
             `group absolute ${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay} overflow-visible transition-opacity`,
-            isSelectionToolbarVisible ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
+            isSelectionToolbarVisible
+              ? "pointer-events-auto opacity-100"
+              : "pointer-events-none opacity-0",
           )}
         >
           <div
             data-slot="selection-toolbar-surface"
-            className="bg-popover rounded-sm shadow-floating border border-border/50 flex items-center"
+            className="flex items-center rounded-sm border border-border/50 bg-popover shadow-floating"
             style={{ opacity: "var(--rf-selection-opacity, 1)" }}
           >
-            <div className="flex items-center overflow-x-auto overflow-y-hidden rounded-sm max-w-105 no-scrollbar">
+            <div className="no-scrollbar flex max-w-105 items-center overflow-x-auto overflow-y-hidden rounded-sm">
               {features.translate.enabled && <TranslateButton />}
               {features.speak.enabled && <SpeakButton />}
               <SelectionToolbarCustomActionButtons />

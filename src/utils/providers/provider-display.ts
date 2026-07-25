@@ -11,7 +11,9 @@ export interface ProviderSelectorItem {
 
 export type ProviderSelectorOption = ProviderConfig | ProviderSelectorItem
 
-export function isProviderSelectorItem(provider: ProviderSelectorOption): provider is ProviderSelectorItem {
+export function isProviderSelectorItem(
+  provider: ProviderSelectorOption,
+): provider is ProviderSelectorItem {
   return "kind" in provider && provider.kind === "system"
 }
 

@@ -17,10 +17,14 @@ function escapeXml(text: string): string {
 }
 
 function sanitizeInputText(text: string): string {
-  const chars = [...text]
+  const chars = Array.from(text)
   for (let index = 0; index < chars.length; index++) {
     const codePoint = chars[index]?.codePointAt(0) ?? 0
-    if ((codePoint >= 0 && codePoint <= 8) || (codePoint >= 11 && codePoint <= 12) || (codePoint >= 14 && codePoint <= 31)) {
+    if (
+      (codePoint >= 0 && codePoint <= 8) ||
+      (codePoint >= 11 && codePoint <= 12) ||
+      (codePoint >= 14 && codePoint <= 31)
+    ) {
       chars[index] = " "
     }
   }

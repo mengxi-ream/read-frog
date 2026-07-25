@@ -16,17 +16,23 @@ export function replaceSelectionToolbarCustomActionPromptTokens(
   return prompt
     .replaceAll(getSelectionToolbarCustomActionTokenCellText("selection"), tokens.selection)
     .replaceAll(getSelectionToolbarCustomActionTokenCellText("paragraphs"), tokens.paragraphs)
-    .replaceAll(getSelectionToolbarCustomActionTokenCellText("targetLanguage"), tokens.targetLanguage)
+    .replaceAll(
+      getSelectionToolbarCustomActionTokenCellText("targetLanguage"),
+      tokens.targetLanguage,
+    )
     .replaceAll(getSelectionToolbarCustomActionTokenCellText("webTitle"), tokens.webTitle)
     .replaceAll(getSelectionToolbarCustomActionTokenCellText("webContent"), tokens.webContent)
 }
 
-type StructuredOutputField = Pick<SelectionToolbarCustomActionOutputField, "name" | "type" | "description">
+export type StructuredOutputField = Pick<
+  SelectionToolbarCustomActionOutputField,
+  "name" | "type" | "description"
+>
 
 function formatYamlMultiline(value: string) {
   return value
     .split("\n")
-    .map(line => `    ${line}`)
+    .map((line) => `    ${line}`)
     .join("\n")
 }
 
@@ -34,10 +40,13 @@ function formatStructuredOutputField(
   field: StructuredOutputField,
   tokens: SelectionToolbarCustomActionPromptTokens,
 ) {
-  const resolvedDescription = replaceSelectionToolbarCustomActionPromptTokens(field.description, tokens).trim()
+  const resolvedDescription = replaceSelectionToolbarCustomActionPromptTokens(
+    field.description,
+    tokens,
+  ).trim()
   const descriptionBlock = resolvedDescription
     ? `  description: |-\n${formatYamlMultiline(resolvedDescription)}`
-    : "  description: \"\""
+    : '  description: ""'
 
   return [
     `- key: ${JSON.stringify(field.name)}`,
@@ -47,13 +56,18 @@ function formatStructuredOutputField(
   ].join("\n")
 }
 
+export function buildStructuredOutputFieldList(
+  outputSchema: StructuredOutputField[],
+  tokens: SelectionToolbarCustomActionPromptTokens,
+) {
+  return outputSchema.map((field) => formatStructuredOutputField(field, tokens)).join("\n")
+}
+
 function buildStructuredOutputContract(
   outputSchema: StructuredOutputField[],
   tokens: SelectionToolbarCustomActionPromptTokens,
 ) {
-  const fieldsAndTypes = outputSchema
-    .map(field => formatStructuredOutputField(field, tokens))
-    .join("\n")
+  const fieldsAndTypes = buildStructuredOutputFieldList(outputSchema, tokens)
 
   return `## Structured Output Contract
 Return exactly one JSON object and nothing else.
@@ -80,7 +94,5 @@ export function buildSelectionToolbarCustomActionSystemPrompt(
   const resolvedPrompt = replaceSelectionToolbarCustomActionPromptTokens(prompt, tokens).trim()
   const contract = buildStructuredOutputContract(outputSchema, tokens)
 
-  return resolvedPrompt
-    ? `${resolvedPrompt}\n\n${contract}`
-    : contract
+  return resolvedPrompt ? `${resolvedPrompt}\n\n${contract}` : contract
 }

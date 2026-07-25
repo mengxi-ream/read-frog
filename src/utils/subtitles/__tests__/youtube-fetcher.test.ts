@@ -14,7 +14,12 @@ describe("youtube subtitles fetcher", () => {
     const fetcher = new YoutubeSubtitlesFetcher()
 
     Object.defineProperty(window, "location", {
-      value: { search: "?v=test123", origin: "https://www.youtube.com", pathname: "/watch", hostname: "www.youtube.com" },
+      value: {
+        search: "?v=test123",
+        origin: "https://www.youtube.com",
+        pathname: "/watch",
+        hostname: "www.youtube.com",
+      },
       writable: true,
     })
 
@@ -22,14 +27,20 @@ describe("youtube subtitles fetcher", () => {
 
     let settled: "resolved" | "rejected" | null = null
     void promise.then(
-      () => { settled = "resolved" },
-      () => { settled = "rejected" },
+      () => {
+        settled = "resolved"
+      },
+      () => {
+        settled = "rejected"
+      },
     )
 
-    window.dispatchEvent(new MessageEvent("message", {
-      data: { foo: "bar" },
-      origin: window.location.origin,
-    }))
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        data: { foo: "bar" },
+        origin: window.location.origin,
+      }),
+    )
 
     await Promise.resolve()
     expect(settled).toBeNull()
@@ -41,7 +52,12 @@ describe("youtube subtitles fetcher", () => {
     const fetcher = new YoutubeSubtitlesFetcher()
 
     Object.defineProperty(window, "location", {
-      value: { search: "?v=test123", origin: "https://www.youtube.com", pathname: "/watch", hostname: "www.youtube.com" },
+      value: {
+        search: "?v=test123",
+        origin: "https://www.youtube.com",
+        pathname: "/watch",
+        hostname: "www.youtube.com",
+      },
       writable: true,
     })
 
@@ -50,25 +66,27 @@ describe("youtube subtitles fetcher", () => {
       originalPostMessage(message, targetOrigin)
       if (message?.type === PLAYER_DATA_REQUEST_TYPE) {
         setTimeout(() => {
-          window.dispatchEvent(new MessageEvent("message", {
-            origin: window.location.origin,
-            data: {
-              type: PLAYER_DATA_RESPONSE_TYPE,
-              requestId: message.requestId,
-              success: true,
+          window.dispatchEvent(
+            new MessageEvent("message", {
+              origin: window.location.origin,
               data: {
-                videoId: "test123",
-                captionTracks: [],
-                audioCaptionTracks: [],
-                device: null,
-                cver: null,
-                playerState: 1,
-                selectedTrackLanguageCode: null,
-                selectedTrackVssId: null,
-                cachedTimedtextUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
+                type: PLAYER_DATA_RESPONSE_TYPE,
+                requestId: message.requestId,
+                success: true,
+                data: {
+                  videoId: "test123",
+                  captionTracks: [],
+                  audioCaptionTracks: [],
+                  device: null,
+                  cver: null,
+                  playerState: 1,
+                  selectedTrackLanguageCode: null,
+                  selectedTrackVssId: null,
+                  cachedTimedtextUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
+                },
               },
-            },
-          }))
+            }),
+          )
         }, 0)
       }
     }
@@ -82,17 +100,24 @@ describe("youtube subtitles fetcher", () => {
     const fetcher = new YoutubeSubtitlesFetcher()
 
     Object.defineProperty(window, "location", {
-      value: { search: "?v=test123", origin: "https://www.youtube.com", pathname: "/watch", hostname: "www.youtube.com" },
+      value: {
+        search: "?v=test123",
+        origin: "https://www.youtube.com",
+        pathname: "/watch",
+        hostname: "www.youtube.com",
+      },
       writable: true,
     })
 
     const playerData = {
       videoId: "test123",
-      captionTracks: [{
-        baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
-        languageCode: "en",
-        vssId: ".en",
-      }],
+      captionTracks: [
+        {
+          baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
+          languageCode: "en",
+          vssId: ".en",
+        },
+      ],
       audioCaptionTracks: [],
       device: null,
       cver: null,
@@ -108,8 +133,12 @@ describe("youtube subtitles fetcher", () => {
     })
     const fetchWithRetrySpy = vi.spyOn(fetcher as any, "fetchWithRetry").mockResolvedValue([])
     const processRawEventsSpy = vi.spyOn(fetcher as any, "processRawEvents").mockResolvedValue([])
-    const waitForPlayerStateSpy = vi.spyOn(fetcher as any, "waitForPlayerState").mockResolvedValue(undefined)
-    const getPlayerDataWithPotSpy = vi.spyOn(fetcher as any, "getPlayerDataWithPot").mockResolvedValue(playerData)
+    const waitForPlayerStateSpy = vi
+      .spyOn(fetcher as any, "waitForPlayerState")
+      .mockResolvedValue(undefined)
+    const getPlayerDataWithPotSpy = vi
+      .spyOn(fetcher as any, "getPlayerDataWithPot")
+      .mockResolvedValue(playerData)
 
     await expect(fetcher.fetch()).resolves.toEqual([])
 
@@ -124,17 +153,24 @@ describe("youtube subtitles fetcher", () => {
     const fetcher = new YoutubeSubtitlesFetcher()
 
     Object.defineProperty(window, "location", {
-      value: { search: "?v=test123", origin: "https://www.youtube.com", pathname: "/watch", hostname: "www.youtube.com" },
+      value: {
+        search: "?v=test123",
+        origin: "https://www.youtube.com",
+        pathname: "/watch",
+        hostname: "www.youtube.com",
+      },
       writable: true,
     })
 
     const playerData = {
       videoId: "test123",
-      captionTracks: [{
-        baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
-        languageCode: "en",
-        vssId: ".en",
-      }],
+      captionTracks: [
+        {
+          baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
+          languageCode: "en",
+          vssId: ".en",
+        },
+      ],
       audioCaptionTracks: [],
       device: null,
       cver: null,
@@ -164,17 +200,24 @@ describe("youtube subtitles fetcher", () => {
     const fetcher = new YoutubeSubtitlesFetcher()
 
     Object.defineProperty(window, "location", {
-      value: { search: "?v=test123", origin: "https://www.youtube.com", pathname: "/watch", hostname: "www.youtube.com" },
+      value: {
+        search: "?v=test123",
+        origin: "https://www.youtube.com",
+        pathname: "/watch",
+        hostname: "www.youtube.com",
+      },
       writable: true,
     })
 
     const playerData = {
       videoId: "test123",
-      captionTracks: [{
-        baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
-        languageCode: "en",
-        vssId: ".en",
-      }],
+      captionTracks: [
+        {
+          baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
+          languageCode: "en",
+          vssId: ".en",
+        },
+      ],
       audioCaptionTracks: [],
       device: null,
       cver: null,
@@ -188,12 +231,17 @@ describe("youtube subtitles fetcher", () => {
       success: true,
       data: playerData,
     })
-    const fetchWithRetrySpy = vi.spyOn(fetcher as any, "fetchWithRetry")
+    const fetchWithRetrySpy = vi
+      .spyOn(fetcher as any, "fetchWithRetry")
       .mockRejectedValueOnce(new Error("network down"))
       .mockResolvedValueOnce([])
     const processRawEventsSpy = vi.spyOn(fetcher as any, "processRawEvents").mockResolvedValue([])
-    const waitForPlayerStateSpy = vi.spyOn(fetcher as any, "waitForPlayerState").mockResolvedValue(undefined)
-    const getPlayerDataWithPotSpy = vi.spyOn(fetcher as any, "getPlayerDataWithPot").mockResolvedValue(playerData)
+    const waitForPlayerStateSpy = vi
+      .spyOn(fetcher as any, "waitForPlayerState")
+      .mockResolvedValue(undefined)
+    const getPlayerDataWithPotSpy = vi
+      .spyOn(fetcher as any, "getPlayerDataWithPot")
+      .mockResolvedValue(playerData)
 
     await expect(fetcher.fetch()).resolves.toEqual([])
 
@@ -207,17 +255,24 @@ describe("youtube subtitles fetcher", () => {
     const fetcher = new YoutubeSubtitlesFetcher()
 
     Object.defineProperty(window, "location", {
-      value: { search: "?v=test123", origin: "https://www.youtube.com", pathname: "/watch", hostname: "www.youtube.com" },
+      value: {
+        search: "?v=test123",
+        origin: "https://www.youtube.com",
+        pathname: "/watch",
+        hostname: "www.youtube.com",
+      },
       writable: true,
     })
 
     const initialPlayerData = {
       videoId: "test123",
-      captionTracks: [{
-        baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
-        languageCode: "en",
-        vssId: ".en",
-      }],
+      captionTracks: [
+        {
+          baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
+          languageCode: "en",
+          vssId: ".en",
+        },
+      ],
       audioCaptionTracks: [],
       device: null,
       cver: null,
@@ -228,11 +283,13 @@ describe("youtube subtitles fetcher", () => {
     }
     const refreshedPlayerData = {
       ...initialPlayerData,
-      captionTracks: [{
-        baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=fr",
-        languageCode: "fr",
-        vssId: ".fr",
-      }],
+      captionTracks: [
+        {
+          baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=fr",
+          languageCode: "fr",
+          vssId: ".fr",
+        },
+      ],
       selectedTrackLanguageCode: "fr",
       selectedTrackVssId: ".fr",
     }
@@ -241,12 +298,17 @@ describe("youtube subtitles fetcher", () => {
       success: true,
       data: initialPlayerData,
     })
-    const fetchWithRetrySpy = vi.spyOn(fetcher as any, "fetchWithRetry")
+    const fetchWithRetrySpy = vi
+      .spyOn(fetcher as any, "fetchWithRetry")
       .mockRejectedValueOnce(new Error("network down"))
       .mockResolvedValueOnce([])
     const processRawEventsSpy = vi.spyOn(fetcher as any, "processRawEvents").mockResolvedValue([])
-    const waitForPlayerStateSpy = vi.spyOn(fetcher as any, "waitForPlayerState").mockResolvedValue(undefined)
-    const getPlayerDataWithPotSpy = vi.spyOn(fetcher as any, "getPlayerDataWithPot").mockResolvedValue(refreshedPlayerData)
+    const waitForPlayerStateSpy = vi
+      .spyOn(fetcher as any, "waitForPlayerState")
+      .mockResolvedValue(undefined)
+    const getPlayerDataWithPotSpy = vi
+      .spyOn(fetcher as any, "getPlayerDataWithPot")
+      .mockResolvedValue(refreshedPlayerData)
 
     await expect(fetcher.fetch()).resolves.toEqual([])
 
@@ -261,7 +323,12 @@ describe("youtube subtitles fetcher", () => {
     const fetcher = new YoutubeSubtitlesFetcher()
 
     Object.defineProperty(window, "location", {
-      value: { search: "?v=test123", origin: "https://www.youtube.com", pathname: "/watch", hostname: "www.youtube.com" },
+      value: {
+        search: "?v=test123",
+        origin: "https://www.youtube.com",
+        pathname: "/watch",
+        hostname: "www.youtube.com",
+      },
       writable: true,
     })
 

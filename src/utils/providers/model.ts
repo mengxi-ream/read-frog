@@ -31,40 +31,41 @@ import { getProviderHeadersWithOverride } from "./headers"
 import { resolveModelId } from "./model-id"
 
 const CREATE_AI_MAPPER = {
-  "atlascloud": createOpenAICompatible,
-  "siliconflow": createOpenAICompatible,
-  "tensdaq": createOpenAICompatible,
-  "volcengine": createOpenAICompatible,
+  atlascloud: createOpenAICompatible,
+  siliconflow: createOpenAICompatible,
+  tensdaq: createOpenAICompatible,
+  volcengine: createOpenAICompatible,
   "openai-compatible": createOpenAICompatible,
-  "openrouter": createOpenAICompatible,
-  "minimax": createOpenAICompatible,
-  "openai": createOpenAI,
-  "azure": createAzure,
-  "deepseek": createDeepSeek,
-  "google": createGoogleGenerativeAI,
-  "anthropic": createAnthropic,
-  "xai": createXai,
-  "bedrock": createAmazonBedrock,
-  "groq": createGroq,
-  "deepinfra": createDeepInfra,
-  "mistral": createMistral,
-  "togetherai": createTogetherAI,
-  "cohere": createCohere,
-  "fireworks": createFireworks,
-  "cerebras": createCerebras,
-  "replicate": createReplicate,
-  "perplexity": createPerplexity,
-  "vercel": createVercel,
-  "ollama": createOllama,
-  "alibaba": createAlibaba,
-  "moonshotai": createMoonshotAI,
-  "huggingface": createHuggingFace,
+  openrouter: createOpenAICompatible,
+  minimax: createOpenAICompatible,
+  openai: createOpenAI,
+  azure: createAzure,
+  deepseek: createDeepSeek,
+  google: createGoogleGenerativeAI,
+  anthropic: createAnthropic,
+  xai: createXai,
+  bedrock: createAmazonBedrock,
+  groq: createGroq,
+  deepinfra: createDeepInfra,
+  mistral: createMistral,
+  togetherai: createTogetherAI,
+  cohere: createCohere,
+  fireworks: createFireworks,
+  cerebras: createCerebras,
+  replicate: createReplicate,
+  perplexity: createPerplexity,
+  vercel: createVercel,
+  ollama: createOllama,
+  alibaba: createAlibaba,
+  moonshotai: createMoonshotAI,
+  huggingface: createHuggingFace,
 } as const
 
 function getProviderSpecificSettings(providerConfig: LLMProviderConfig) {
-  const settings = "providerSpecificSettings" in providerConfig
-    ? compactObject(providerConfig.providerSpecificSettings ?? {})
-    : {}
+  const settings =
+    "providerSpecificSettings" in providerConfig
+      ? compactObject(providerConfig.providerSpecificSettings ?? {})
+      : {}
 
   if (providerConfig.provider !== "azure") {
     return settings
@@ -79,7 +80,8 @@ function getAzureApiMode(providerConfig: LLMProviderConfig): AzureApiMode {
     return DEFAULT_AZURE_API_MODE
   }
 
-  const apiMode = (providerConfig.providerSpecificSettings as { apiMode?: unknown } | undefined)?.apiMode
+  const apiMode = (providerConfig.providerSpecificSettings as { apiMode?: unknown } | undefined)
+    ?.apiMode
   return apiMode === "chat" ? "chat" : DEFAULT_AZURE_API_MODE
 }
 

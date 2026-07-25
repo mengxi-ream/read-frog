@@ -24,11 +24,9 @@ export function ClearAiSegmentationCache() {
     try {
       setIsClearing(true)
       await sendMessage("clearAiSegmentationCache")
-    }
-    catch (error) {
+    } catch (error) {
       console.error("Failed to clear AI segmentation cache:", error)
-    }
-    finally {
+    } finally {
       setIsClearing(false)
       setOpen(false)
     }
@@ -41,23 +39,35 @@ export function ClearAiSegmentationCache() {
       description={i18n.t("options.videoSubtitles.aiSegmentation.clearCacheDialog.description")}
     >
       <AlertDialog open={open} onOpenChange={setOpen}>
-        <div className="w-full flex justify-end">
+        <div className="flex w-full justify-end">
           <AlertDialogTrigger render={<Button variant="destructive" disabled={isClearing} />}>
             <IconTrash className="size-4" />
-            {isClearing ? i18n.t("options.videoSubtitles.aiSegmentation.clearing") : i18n.t("options.videoSubtitles.aiSegmentation.clearCache")}
+            {isClearing
+              ? i18n.t("options.videoSubtitles.aiSegmentation.clearing")
+              : i18n.t("options.videoSubtitles.aiSegmentation.clearCache")}
           </AlertDialogTrigger>
         </div>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{i18n.t("options.videoSubtitles.aiSegmentation.clearCacheDialog.title")}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {i18n.t("options.videoSubtitles.aiSegmentation.clearCacheDialog.title")}
+            </AlertDialogTitle>
             <AlertDialogDescription>
               {i18n.t("options.videoSubtitles.aiSegmentation.clearCacheDialog.description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{i18n.t("options.videoSubtitles.aiSegmentation.clearCacheDialog.cancel")}</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={handleClearCache} disabled={isClearing}>
-              {isClearing ? i18n.t("options.videoSubtitles.aiSegmentation.clearing") : i18n.t("options.videoSubtitles.aiSegmentation.clearCacheDialog.confirm")}
+            <AlertDialogCancel>
+              {i18n.t("options.videoSubtitles.aiSegmentation.clearCacheDialog.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleClearCache}
+              disabled={isClearing}
+            >
+              {isClearing
+                ? i18n.t("options.videoSubtitles.aiSegmentation.clearing")
+                : i18n.t("options.videoSubtitles.aiSegmentation.clearCacheDialog.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

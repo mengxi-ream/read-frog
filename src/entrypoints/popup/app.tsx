@@ -20,7 +20,7 @@ import TranslationModeSelector from "./components/translation-mode-selector"
 function App() {
   return (
     <>
-      <div className="bg-background flex flex-col gap-4 px-6 pt-5 pb-4">
+      <div className="flex flex-col gap-4 bg-background px-6 pt-5 pb-4">
         <div className="flex items-center justify-between">
           <UserAccountMenuPopup />
           <div className="flex items-center">
@@ -50,13 +50,9 @@ function App() {
           }}
         >
           <Icon icon="tabler:settings" className="size-4" strokeWidth={1.6} />
-          <span className="text-[13px] font-medium">
-            {i18n.t("popup.options")}
-          </span>
+          <span className="text-[13px] font-medium">{i18n.t("popup.options")}</span>
         </button>
-        <span className="text-sm text-neutral-500 dark:text-neutral-400">
-          {version}
-        </span>
+        <span className="text-sm text-neutral-500 dark:text-neutral-400">{version}</span>
         <MoreMenu />
       </div>
     </>

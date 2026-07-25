@@ -109,8 +109,8 @@ describe("conflict-merge", () => {
       const result = detectConflicts(base, local, remote)
 
       expect(result.conflicts).toHaveLength(2)
-      expect(result.conflicts.find(c => c.path.join(".") === "primitive")).toBeDefined()
-      expect(result.conflicts.find(c => c.path.join(".") === "number")).toBeDefined()
+      expect(result.conflicts.find((c) => c.path.join(".") === "primitive")).toBeDefined()
+      expect(result.conflicts.find((c) => c.path.join(".") === "number")).toBeDefined()
     })
 
     it("should handle array conflicts (arrays are atomic)", () => {
@@ -187,7 +187,7 @@ describe("conflict-merge", () => {
     let safeParseSpy: ReturnType<typeof vi.spyOn>
 
     beforeEach(() => {
-      safeParseSpy = vi.spyOn(configSchema, "safeParse").mockImplementation(data => ({
+      safeParseSpy = vi.spyOn(configSchema, "safeParse").mockImplementation((data) => ({
         success: true,
         data: data as any,
       }))

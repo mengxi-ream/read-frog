@@ -17,7 +17,7 @@ function toRetryDelay(attempt: number): number {
 }
 
 async function wait(ms: number): Promise<void> {
-  await new Promise(resolve => setTimeout(resolve, ms))
+  await new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 function concatArrayBuffers(chunks: ArrayBuffer[]): ArrayBuffer {
@@ -59,12 +59,14 @@ function assertChunkConcatSupported(chunkRequests: EdgeTTSSynthesizeRequest[]): 
     return
   }
 
-  const requestedFormats = chunkRequests.map(chunkRequest => resolveOutputFormat(chunkRequest.outputFormat))
-  const firstFormat = requestedFormats[0]!
+  const requestedFormats = chunkRequests.map((chunkRequest) =>
+    resolveOutputFormat(chunkRequest.outputFormat),
+  )
+  const firstFormat = requestedFormats[0]
   const firstFormatNormalized = firstFormat.toLowerCase()
 
   for (let index = 0; index < requestedFormats.length; index++) {
-    const requestedFormat = requestedFormats[index]!
+    const requestedFormat = requestedFormats[index]
     const requestedFormatNormalized = requestedFormat.toLowerCase()
 
     if (!isConcatenationSafeOutputFormat(requestedFormat)) {
@@ -90,7 +92,7 @@ async function synthesizeChunk(request: EdgeTTSSynthesizeRequest): Promise<EdgeT
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      "Authorization": endpointInfo.endpoint.t,
+      Authorization: endpointInfo.endpoint.t,
       "Content-Type": "application/ssml+xml",
       "User-Agent": EDGE_TTS_USER_AGENT,
       "X-Microsoft-OutputFormat": resolveOutputFormat(request.outputFormat),
@@ -103,10 +105,14 @@ async function synthesizeChunk(request: EdgeTTSSynthesizeRequest): Promise<EdgeT
 
     if (response.status === 401 || response.status === 403) {
       clearEdgeTTSTokenCache()
-      throw new EdgeTTSError("TOKEN_INVALID", `Edge TTS token invalid: ${response.status} ${errorText}`, {
-        status: response.status,
-        retryable: true,
-      })
+      throw new EdgeTTSError(
+        "TOKEN_INVALID",
+        `Edge TTS token invalid: ${response.status} ${errorText}`,
+        {
+          status: response.status,
+          retryable: true,
+        },
+      )
     }
 
     if (response.status === 429) {
@@ -117,15 +123,23 @@ async function synthesizeChunk(request: EdgeTTSSynthesizeRequest): Promise<EdgeT
     }
 
     if (response.status >= 500) {
-      throw new EdgeTTSError("SYNTH_SERVER_ERROR", `Edge TTS server error: ${response.status} ${errorText}`, {
-        status: response.status,
-        retryable: true,
-      })
+      throw new EdgeTTSError(
+        "SYNTH_SERVER_ERROR",
+        `Edge TTS server error: ${response.status} ${errorText}`,
+        {
+          status: response.status,
+          retryable: true,
+        },
+      )
     }
 
-    throw new EdgeTTSError("SYNTH_REQUEST_FAILED", `Edge TTS request failed: ${response.status} ${errorText}`, {
-      status: response.status,
-    })
+    throw new EdgeTTSError(
+      "SYNTH_REQUEST_FAILED",
+      `Edge TTS request failed: ${response.status} ${errorText}`,
+      {
+        status: response.status,
+      },
+    )
   }
 
   return {
@@ -141,8 +155,7 @@ export async function synthesizeEdgeTTSChunkWithRetry(
   for (let attempt = 0; attempt <= EDGE_TTS_MAX_RETRIES; attempt++) {
     try {
       return await synthesizeChunk(request)
-    }
-    catch (error) {
+    } catch (error) {
       lastError = error
       if (attempt >= EDGE_TTS_MAX_RETRIES || !isRetryableError(error)) {
         break
@@ -152,14 +165,22 @@ export async function synthesizeEdgeTTSChunkWithRetry(
   }
 
   if (lastError instanceof EdgeTTSError) {
-    throw lastError
+    throw new EdgeTTSError(lastError.code, lastError.message, {
+      cause: lastError,
+      retryable: lastError.retryable,
+      status: lastError.status,
+    })
   }
 
   if (lastError instanceof TypeError) {
-    throw new EdgeTTSError("NETWORK_ERROR", `Network error while requesting Edge TTS: ${lastError.message}`, {
-      cause: lastError,
-      retryable: true,
-    })
+    throw new EdgeTTSError(
+      "NETWORK_ERROR",
+      `Network error while requesting Edge TTS: ${lastError.message}`,
+      {
+        cause: lastError,
+        retryable: true,
+      },
+    )
   }
 
   throw new EdgeTTSError("UNKNOWN_ERROR", "Unknown Edge TTS synthesis error", {

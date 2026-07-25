@@ -10,7 +10,11 @@ import { cn } from "@/utils/styles/utils"
 import { SelectionPopoverTooltip, useSelectionTooltipState } from "./selection-tooltip"
 
 export function SpeakButton({ text }: { text: string | undefined }) {
-  const { handlePress, onOpenChange: handleTooltipOpenChange, open: tooltipOpen } = useSelectionTooltipState()
+  const {
+    handlePress,
+    onOpenChange: handleTooltipOpenChange,
+    open: tooltipOpen,
+  } = useSelectionTooltipState()
   const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
   const { play, stop, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.SELECTION_TOOLBAR)
 
@@ -20,8 +24,7 @@ export function SpeakButton({ text }: { text: string | undefined }) {
       stop()
       return
     }
-    if (!text)
-      return
+    if (!text) return
     handlePress()
     void play(text, ttsConfig)
   }, [handlePress, isFetching, isPlaying, play, stop, text, ttsConfig])
@@ -32,24 +35,26 @@ export function SpeakButton({ text }: { text: string | undefined }) {
       ? i18n.t("action.playing")
       : i18n.t("action.speak")
 
-  const icon = isFetching
-    ? <IconLoader2 className="animate-spin" />
-    : isPlaying
-      ? <IconPlayerStopFilled />
-      : <IconVolume />
+  const icon = isFetching ? (
+    <IconLoader2 className="animate-spin" />
+  ) : isPlaying ? (
+    <IconPlayerStopFilled />
+  ) : (
+    <IconVolume />
+  )
 
   return (
     <SelectionPopoverTooltip
       content={tooltipText}
       open={tooltipOpen}
       onOpenChange={handleTooltipOpenChange}
-      render={(
+      render={
         <button
           type="button"
           className={cn(buttonVariants({ variant: "ghost-secondary", size: "icon-sm" }))}
           onClick={handleClick}
         />
-      )}
+      }
     >
       {icon}
     </SelectionPopoverTooltip>

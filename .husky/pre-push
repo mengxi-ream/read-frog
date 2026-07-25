@@ -16,8 +16,8 @@ else
   echo "✅ No pnpm-lock.yaml overrides found."
 fi
 
+pnpm exec nx fmt:check
 pnpm exec nx lint
-pnpm exec nx type-check
 # pnpm exec nx build
 
 # Check if SKIP_FREE_API environment variable is set

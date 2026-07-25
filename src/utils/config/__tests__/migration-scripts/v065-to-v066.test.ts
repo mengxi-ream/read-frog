@@ -52,15 +52,17 @@ describe("v065-to-v066 migration", () => {
   })
 
   it("removes deprecated vocabulary insight config", () => {
-    const migrated = migrate(createConfig(["alt", "e"], {
-      speak: {
-        enabled: true,
-      },
-      vocabularyInsight: {
-        enabled: true,
-        providerId: "google-default",
-      },
-    }))
+    const migrated = migrate(
+      createConfig(["alt", "e"], {
+        speak: {
+          enabled: true,
+        },
+        vocabularyInsight: {
+          enabled: true,
+          providerId: "google-default",
+        },
+      }),
+    )
 
     expect(migrated.selectionToolbar.features).toEqual({
       speak: {

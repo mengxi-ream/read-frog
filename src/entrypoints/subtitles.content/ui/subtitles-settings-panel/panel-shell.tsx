@@ -12,8 +12,8 @@ interface PanelShellProps {
   children: React.ReactNode
   open: boolean
   onClose: () => void
-  header?: { title: string, onBack: () => void }
-  transition?: { key: string, direction: TransitionDirection }
+  header?: { title: string; onBack: () => void }
+  transition?: { key: string; direction: TransitionDirection }
 }
 
 function TransitionContent({
@@ -30,7 +30,7 @@ function TransitionContent({
       key={transitionKey}
       data-direction={direction}
       className={cn(
-        "duration-200 ease-out animate-in fade-in-0",
+        "animate-in duration-200 ease-out fade-in-0",
         direction === "forward" ? "slide-in-from-right-3" : "slide-in-from-left-3",
       )}
     >
@@ -56,11 +56,11 @@ function PanelContent({
     <div
       ref={panelRef}
       data-slot="subtitles-settings-panel"
-      className="bg-popover text-popover-foreground border-border pointer-events-auto relative isolate z-40 flex w-[min(19rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[20px] border shadow-floating backdrop-blur-2xl"
+      className="pointer-events-auto relative isolate z-40 flex w-[min(19rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[20px] border border-border bg-popover text-popover-foreground shadow-floating backdrop-blur-2xl"
       style={{ maxHeight }}
     >
       <Activity mode={header ? "visible" : "hidden"}>
-        <div className="border-border flex items-center gap-3 border-b px-4 pt-3 pb-3">
+        <div className="flex items-center gap-3 border-b border-border px-4 pt-3 pb-3">
           <Button
             type="button"
             variant="ghost-secondary"
@@ -72,32 +72,24 @@ function PanelContent({
             <IconChevronLeft className="size-4" />
           </Button>
 
-          <div className="min-w-0 truncate text-xs font-medium">
-            {header?.title}
-          </div>
+          <div className="min-w-0 truncate text-xs font-medium">{header?.title}</div>
         </div>
       </Activity>
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        {transition
-          ? (
-              <TransitionContent direction={transition.direction} transitionKey={transition.key}>
-                {children}
-              </TransitionContent>
-            )
-          : children}
+        {transition ? (
+          <TransitionContent direction={transition.direction} transitionKey={transition.key}>
+            {children}
+          </TransitionContent>
+        ) : (
+          children
+        )}
       </div>
     </div>
   )
 }
 
-export function PanelShell({
-  children,
-  open,
-  onClose,
-  header,
-  transition,
-}: PanelShellProps) {
+export function PanelShell({ children, open, onClose, header, transition }: PanelShellProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const { controlsConfig, embedded, openBelow } = useSubtitlesUI()
@@ -122,17 +114,17 @@ export function PanelShell({
 
   const positionClassName = cn(
     "absolute z-40 transition-[bottom,top,opacity,transform] duration-200 ease-out",
-    buttonRelative ? "bottom-full right-0" : "right-4",
+    buttonRelative ? "right-0 bottom-full" : "right-4",
     open ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0",
   )
 
   const positionStyle = buttonRelative
     ? { marginBottom: `${bottomOffset}px` }
-    : (openBelow ? { top: `${bottomOffset}px` } : { bottom: `${bottomOffset}px` })
+    : openBelow
+      ? { top: `${bottomOffset}px` }
+      : { bottom: `${bottomOffset}px` }
 
-  const maxHeight = buttonRelative
-    ? "min(24rem, 60vh)"
-    : `calc(100cqh - ${bottomOffset}px - 1rem)`
+  const maxHeight = buttonRelative ? "min(24rem, 60vh)" : `calc(100cqh - ${bottomOffset}px - 1rem)`
 
   return (
     <div ref={rootRef} className={rootClassName}>

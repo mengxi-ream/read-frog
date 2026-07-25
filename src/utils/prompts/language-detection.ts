@@ -22,7 +22,10 @@ const supportedLanguageList = Object.entries(LANG_CODE_TO_EN_NAME)
 
 export const languageDetectionOutputSchema = z.object({
   // Optional for lenient validation
-  reason: z.string().optional().describe("The reason why LLM pick this code. Just for soft reasoning. No need to consume."),
+  reason: z
+    .string()
+    .optional()
+    .describe("The reason why LLM pick this code. Just for soft reasoning. No need to consume."),
   code: z.union([langCodeISO6393Schema, z.literal("und")]),
 })
 
@@ -86,8 +89,7 @@ export function parseDetectedLanguageCode(rawOutput: string): LangCodeISO6393 | 
 
   try {
     data = JSON.parse(cleanedOutput)
-  }
-  catch {
+  } catch {
     logger.warn("Failed to parse language detection output. Fallback to null.", rawOutput)
     return null
   }
@@ -97,8 +99,6 @@ export function parseDetectedLanguageCode(rawOutput: string): LangCodeISO6393 | 
   if (parseResult.success) {
     return parseResult.data.code
   }
-  else {
-    logger.warn("Failed to parse language detection output. Fallback to null.", data)
-    return null
-  }
+  logger.warn("Failed to parse language detection output. Fallback to null.", data)
+  return null
 }

@@ -2,7 +2,11 @@ import "@/utils/zod-config"
 import { defineContentScript } from "#imports"
 import { getLocalConfig } from "@/utils/config/storage"
 import { initI18n } from "@/utils/i18n"
-import { clearEffectiveSiteControlUrl, getEffectiveSiteControlUrl, isSiteEnabled } from "@/utils/site-control"
+import {
+  clearEffectiveSiteControlUrl,
+  getEffectiveSiteControlUrl,
+  isSiteEnabled,
+} from "@/utils/site-control"
 
 declare global {
   interface Window {
@@ -15,8 +19,7 @@ export default defineContentScript({
   cssInjectionMode: "manual",
   async main(ctx) {
     // Prevent double injection (manifest-based + programmatic injection)
-    if (window.__READ_FROG_HOST_INJECTED__)
-      return
+    if (window.__READ_FROG_HOST_INJECTED__) return
     window.__READ_FROG_HOST_INJECTED__ = true
 
     const initialConfig = await getLocalConfig()

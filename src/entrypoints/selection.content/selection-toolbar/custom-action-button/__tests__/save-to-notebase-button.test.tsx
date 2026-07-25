@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { env } from "@/env"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { i18n } from "@/utils/i18n"
@@ -23,16 +24,21 @@ const mockAuthState = vi.hoisted(() => ({
       email: "reader@example.com",
       image: null,
     },
-  } as { user: { id: string, name: string, email: string, image?: string | null } } | null,
+  },
   isPending: false,
 }))
 
-const toastMock = vi.hoisted(() => ({
-  success: vi.fn(),
-  error: vi.fn(),
+const toastManagerMock = vi.hoisted(() => ({
+  add: vi.fn<(...args: any[]) => any>(),
+  close: vi.fn<(...args: any[]) => any>(),
 }))
 
-const notebaseRowCreateMock = vi.hoisted(() => vi.fn())
+const notebaseRowCreateMock = vi.hoisted(() => vi.fn<(...args: any[]) => any>())
+const notebaseRowCreateManyMock = vi.hoisted(() => vi.fn<(...args: any[]) => any>())
+const guideTrackingMocks = vi.hoisted(() => ({
+  canUseGuideDictionaryNotebaseTracking: vi.fn<(...args: any[]) => any>(),
+  getActiveGuideDictionaryNotebaseTrackingForAction: vi.fn<(...args: any[]) => any>(),
+}))
 
 vi.mock("@/utils/auth/auth-client", () => ({
   authClient: {
@@ -44,11 +50,22 @@ vi.mock("@/utils/auth/auth-client", () => ({
 }))
 
 vi.mock("@/utils/message", () => ({
-  sendMessage: vi.fn(),
+  sendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
-vi.mock("sonner", () => ({
-  toast: toastMock,
+vi.mock("@/utils/guide/dictionary-notebase", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/utils/guide/dictionary-notebase")>()
+
+  return {
+    ...actual,
+    canUseGuideDictionaryNotebaseTracking: guideTrackingMocks.canUseGuideDictionaryNotebaseTracking,
+    getActiveGuideDictionaryNotebaseTrackingForAction:
+      guideTrackingMocks.getActiveGuideDictionaryNotebaseTrackingForAction,
+  }
+})
+
+vi.mock("@/components/ui/base-ui/toast", () => ({
+  toastManager: toastManagerMock,
 }))
 
 vi.mock("@/utils/orpc/client", () => ({
@@ -57,7 +74,7 @@ vi.mock("@/utils/orpc/client", () => ({
       getSchema: {
         queryOptions: (options: unknown) => ({
           queryKey: ["notebase", "schema"],
-          queryFn: vi.fn(),
+          queryFn: vi.fn<(...args: any[]) => any>(),
           ...(options as object),
         }),
       },
@@ -69,13 +86,19 @@ vi.mock("@/utils/orpc/client", () => ({
           ...(options as object),
         }),
       },
+      createMany: {
+        mutationOptions: (options: unknown) => ({
+          mutationFn: notebaseRowCreateManyMock,
+          ...(options as object),
+        }),
+      },
     },
   },
   orpcClient: {
     notebase: {
-      create: vi.fn(),
-      getSchema: vi.fn(),
-      list: vi.fn(),
+      create: vi.fn<(...args: any[]) => any>(),
+      getSchema: vi.fn<(...args: any[]) => any>(),
+      list: vi.fn<(...args: any[]) => any>(),
     },
   },
 }))
@@ -128,6 +151,41 @@ function createConnectedAction(): SelectionToolbarCustomAction {
   }
 }
 
+function createDictionaryAction(): SelectionToolbarCustomAction {
+  const action = cloneConfig(DEFAULT_CONFIG).selectionToolbar.customActions.find(
+    (item) => item.id === "default-dictionary",
+  )
+  if (!action) {
+    throw new Error("Default Dictionary action is not configured")
+  }
+
+  return action
+}
+
+function createConnectedDictionaryAction(): SelectionToolbarCustomAction {
+  const action = createDictionaryAction()
+
+  return {
+    ...action,
+    notebaseConnection: {
+      notebaseId: "notebase-1",
+      notebaseNameSnapshot: "Dictionary Notes",
+      connectedAccount: {
+        id: "user-1",
+        name: "Reader",
+        email: "reader@example.com",
+        image: null,
+      },
+      mappings: action.outputSchema.map((field) => ({
+        id: `mapping-${field.id}`,
+        localFieldId: field.id,
+        notebaseColumnId: `column-${field.id}`,
+        notebaseColumnNameSnapshot: field.name,
+      })),
+    },
+  }
+}
+
 function createSchema(columnId = "column-summary"): NotebaseGetSchemaOutput {
   return {
     id: "notebase-1",
@@ -149,10 +207,29 @@ function createSchema(columnId = "column-summary"): NotebaseGetSchemaOutput {
   }
 }
 
-function renderButton(
-  config: Config,
-  action: SelectionToolbarCustomAction,
-) {
+function createSchemaForAction(action: SelectionToolbarCustomAction): NotebaseGetSchemaOutput {
+  return {
+    id: "notebase-1",
+    name: "Dictionary Notes",
+    updatedAt: new Date(),
+    notebaseColumns: action.outputSchema.map((field, index) => ({
+      id: `column-${field.id}`,
+      notebaseId: "notebase-1",
+      name: field.name,
+      config:
+        field.type === "number"
+          ? { type: "number", decimal: 0, format: "number" }
+          : { type: "string" },
+      position: index,
+      isPrimary: index === 0,
+      width: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })),
+  }
+}
+
+function renderButton(config: Config, action: SelectionToolbarCustomAction) {
   const store = createStore()
   store.set(configAtom, config)
   const queryClient = new QueryClient({
@@ -180,8 +257,8 @@ function renderButton(
 describe("saveToNotebaseButton notebase availability", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    toastMock.success.mockClear()
-    toastMock.error.mockClear()
+    toastManagerMock.add.mockReset().mockReturnValue("toast-id")
+    toastManagerMock.close.mockReset()
     notebaseRowCreateMock.mockReset()
     mockAuthState.session = {
       user: {
@@ -193,10 +270,14 @@ describe("saveToNotebaseButton notebase availability", () => {
     }
     mockAuthState.isPending = false
     vi.mocked(orpcClient.notebase.create).mockResolvedValue({ txid: 1 })
-    vi.mocked(orpcClient.notebase.list).mockResolvedValue([{ id: "notebase-1", name: "Summarize Notes" }])
+    vi.mocked(orpcClient.notebase.list).mockResolvedValue([
+      { id: "notebase-1", name: "Summarize Notes" },
+    ])
     vi.mocked(orpcClient.notebase.getSchema).mockResolvedValue(createSchema())
     notebaseRowCreateMock.mockResolvedValue({ txid: 1 })
-    vi.mocked(sendMessage).mockResolvedValue(undefined as never)
+    vi.mocked(sendMessage).mockResolvedValue(undefined)
+    guideTrackingMocks.canUseGuideDictionaryNotebaseTracking.mockReturnValue(false)
+    guideTrackingMocks.getActiveGuideDictionaryNotebaseTrackingForAction.mockResolvedValue(null)
   })
 
   it("renders when beta experience is disabled", () => {
@@ -216,8 +297,12 @@ describe("saveToNotebaseButton notebase availability", () => {
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
 
     expect(screen.getByText(i18n.t("action.saveToNotebaseCreateTitle"))).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseConnectExisting") })).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseConnectExisting") }),
+    ).toBeInTheDocument()
   })
 
   it("opens the created notebase after creating and saving", async () => {
@@ -226,13 +311,17 @@ describe("saveToNotebaseButton notebase availability", () => {
     renderButton(config, createAction())
 
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
-    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }))
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }),
+    )
 
     await waitFor(() => {
       expect(orpcClient.notebase.create).toHaveBeenCalledTimes(1)
     })
 
-    const createInput = vi.mocked(orpcClient.notebase.create).mock.calls[0]?.[0] as { id: string } | undefined
+    const createInput = vi.mocked(orpcClient.notebase.create).mock.calls[0]?.[0] as
+      | { id: string }
+      | undefined
     expect(createInput?.id).toBeTruthy()
 
     await waitFor(() => {
@@ -243,23 +332,102 @@ describe("saveToNotebaseButton notebase availability", () => {
     })
   })
 
+  it("shows an upgrade action when creating a Notebase exceeds the note limit", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    vi.mocked(orpcClient.notebase.create).mockRejectedValueOnce(
+      new ORPCError("NOTE_LIMIT_EXCEEDED", { status: 403 }),
+    )
+    renderButton(config, createAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }),
+    )
+
+    await waitFor(() => {
+      expect(toastManagerMock.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "error",
+          title: i18n.t("action.saveToNotebaseLimitExceeded"),
+          actionProps: expect.objectContaining({
+            children: i18n.t("action.upgrade"),
+            onClick: expect.any(Function),
+          }),
+        }),
+      )
+    })
+
+    const toastOptions = toastManagerMock.add.mock.calls[0]?.[0] as
+      | { actionProps?: { onClick?: () => void } }
+      | undefined
+    toastOptions?.actionProps?.onClick?.()
+
+    expect(toastManagerMock.close).toHaveBeenCalledWith("toast-id")
+    expect(sendMessage).toHaveBeenCalledWith("openPage", {
+      url: new URL("/pricing", env.WXT_WEBSITE_URL).toString(),
+      active: true,
+    })
+  })
+
+  it("marks guide Dictionary Notebase complete after direct create-and-save with guide tracking", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    guideTrackingMocks.canUseGuideDictionaryNotebaseTracking.mockReturnValue(true)
+    guideTrackingMocks.getActiveGuideDictionaryNotebaseTrackingForAction.mockResolvedValue({
+      id: "tracking-1",
+      actionId: "default-dictionary",
+      sourceUrl: "https://readfrog.app/guide/step-3",
+      startedAt: 1_000,
+      expiresAt: 1_801_000,
+    })
+    const action = createDictionaryAction()
+    renderButton(config, action)
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+    await waitFor(() => {
+      expect(screen.getByText(i18n.t("action.saveToNotebaseCreateTitle"))).toBeInTheDocument()
+    })
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }),
+    )
+
+    await waitFor(() => {
+      expect(sendMessage).toHaveBeenCalledWith("completeGuideDictionaryNotebase", {
+        trackingId: "tracking-1",
+        actionId: "default-dictionary",
+        notebaseId: expect.any(String),
+        sourceUrl: "https://readfrog.app/guide/step-3",
+      })
+    })
+  })
+
   it("redirects logged-out users to home while the background save opens the notebase later", async () => {
-    mockAuthState.session = null
+    mockAuthState.session = null as unknown as typeof mockAuthState.session
     const config = cloneConfig(DEFAULT_CONFIG)
     config.betaExperience.enabled = true
     renderButton(config, createAction())
 
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
-    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseLoginAndCreate") }))
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseLoginAndCreate") }),
+    )
 
     await waitFor(() => {
-      expect(sendMessage).toHaveBeenCalledWith("openPage", expect.objectContaining({
-        active: true,
-      }))
+      expect(sendMessage).toHaveBeenCalledWith(
+        "openPage",
+        expect.objectContaining({
+          active: true,
+        }),
+      )
     })
 
-    const openPageCall = vi.mocked(sendMessage).mock.calls.find(([message]) => message === "openPage")
-    const loginUrl = new URL((openPageCall?.[1] as { url: string }).url)
+    const openPageCall = vi
+      .mocked(sendMessage)
+      .mock.calls.find(([message]) => message === "openPage")
+    expect(openPageCall).toBeDefined()
+    const [, openPagePayload] = openPageCall as ["openPage", { url: string }]
+    const loginUrl = new URL(openPagePayload.url)
 
     expect(loginUrl.pathname).toBe("/log-in")
     expect(loginUrl.searchParams.get("redirectTo")).toBe("/home")
@@ -267,7 +435,7 @@ describe("saveToNotebaseButton notebase availability", () => {
   })
 
   it("keeps the connected save button enabled while logged out and opens the login-connected dialog", () => {
-    mockAuthState.session = null
+    mockAuthState.session = null as unknown as typeof mockAuthState.session
     const config = cloneConfig(DEFAULT_CONFIG)
     config.betaExperience.enabled = true
     renderButton(config, createConnectedAction())
@@ -278,8 +446,12 @@ describe("saveToNotebaseButton notebase availability", () => {
     fireEvent.click(saveButton)
 
     expect(screen.getByText(i18n.t("action.saveToNotebaseLoginConnectedTitle"))).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseLoginAndSave") })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseGoConfigure") })).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseLoginAndSave") }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseGoConfigure") }),
+    ).toBeInTheDocument()
   })
 
   it("opens the create/connect dialog when the connected account differs from the logged-in account", async () => {
@@ -299,12 +471,20 @@ describe("saveToNotebaseButton notebase availability", () => {
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
 
     await waitFor(() => {
-      expect(screen.getByText(i18n.t("action.saveToNotebaseConnectionUnavailableTitle"))).toBeInTheDocument()
+      expect(
+        screen.getByText(i18n.t("action.saveToNotebaseConnectionUnavailableTitle")),
+      ).toBeInTheDocument()
     })
-    expect(screen.getByText(i18n.t("action.saveToNotebaseAccountUnavailableDescription"))).toBeInTheDocument()
+    expect(
+      screen.getByText(i18n.t("action.saveToNotebaseAccountUnavailableDescription")),
+    ).toBeInTheDocument()
     expect(screen.getByText("Reader (reader@example.com)")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseConnectExisting") })).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseConnectExisting") }),
+    ).toBeInTheDocument()
   })
 
   it("shows the saved notebase name in the success toast and opens its URL from the toast action", async () => {
@@ -315,25 +495,95 @@ describe("saveToNotebaseButton notebase availability", () => {
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
 
     await waitFor(() => {
-      expect(toastMock.success).toHaveBeenCalledWith(
-        i18n.t("action.saveToNotebaseSuccess"),
+      expect(toastManagerMock.add).toHaveBeenCalledWith(
         expect.objectContaining({
+          type: "success",
+          title: i18n.t("action.saveToNotebaseSuccess"),
           description: "Summarize Notes",
-          action: expect.objectContaining({
-            label: i18n.t("action.openNotebase"),
+          actionProps: expect.objectContaining({
+            children: i18n.t("action.openNotebase"),
             onClick: expect.any(Function),
           }),
         }),
       )
     })
 
-    const toastOptions = toastMock.success.mock.calls[0]?.[1] as { action?: { onClick?: () => void }, description?: string } | undefined
-    toastOptions?.action?.onClick?.()
+    const toastOptions = toastManagerMock.add.mock.calls[0]?.[0] as
+      | { actionProps?: { onClick?: () => void }; description?: string }
+      | undefined
+    toastOptions?.actionProps?.onClick?.()
 
+    expect(toastManagerMock.close).toHaveBeenCalledWith("toast-id")
     expect(sendMessage).toHaveBeenCalledWith("openPage", {
       url: expect.stringContaining("/notebase/notebase-1"),
       active: true,
     })
+  })
+
+  it("marks guide Dictionary Notebase complete after direct connected row save with guide tracking", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    guideTrackingMocks.canUseGuideDictionaryNotebaseTracking.mockReturnValue(true)
+    guideTrackingMocks.getActiveGuideDictionaryNotebaseTrackingForAction.mockResolvedValue({
+      id: "tracking-1",
+      actionId: "default-dictionary",
+      sourceUrl: "https://readfrog.app/guide/step-3",
+      startedAt: 1_000,
+      expiresAt: 1_801_000,
+    })
+    const action = createConnectedDictionaryAction()
+    vi.mocked(orpcClient.notebase.getSchema).mockResolvedValueOnce(createSchemaForAction(action))
+    renderButton(config, action)
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(notebaseRowCreateMock).toHaveBeenCalledTimes(1)
+    })
+    await waitFor(() => {
+      expect(sendMessage).toHaveBeenCalledWith("completeGuideDictionaryNotebase", {
+        trackingId: "tracking-1",
+        actionId: "default-dictionary",
+        notebaseId: "notebase-1",
+        sourceUrl: "https://readfrog.app/guide/step-3",
+      })
+    })
+  })
+
+  it("does not mark guide complete for default Dictionary saves outside guide step 3", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    guideTrackingMocks.canUseGuideDictionaryNotebaseTracking.mockReturnValue(false)
+    const action = createConnectedDictionaryAction()
+    vi.mocked(orpcClient.notebase.getSchema).mockResolvedValueOnce(createSchemaForAction(action))
+    renderButton(config, action)
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(notebaseRowCreateMock).toHaveBeenCalledTimes(1)
+    })
+    expect(sendMessage).not.toHaveBeenCalledWith(
+      "completeGuideDictionaryNotebase",
+      expect.anything(),
+    )
+  })
+
+  it("does not mark guide complete for non-Dictionary custom actions", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    guideTrackingMocks.canUseGuideDictionaryNotebaseTracking.mockReturnValue(false)
+    renderButton(config, createConnectedAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(notebaseRowCreateMock).toHaveBeenCalledTimes(1)
+    })
+    expect(sendMessage).not.toHaveBeenCalledWith(
+      "completeGuideDictionaryNotebase",
+      expect.anything(),
+    )
   })
 
   it("shows a Custom AI Actions toast action instead of disabling invalid mappings", async () => {
@@ -347,20 +597,24 @@ describe("saveToNotebaseButton notebase availability", () => {
     fireEvent.click(saveButton)
 
     await waitFor(() => {
-      expect(toastMock.error).toHaveBeenCalledWith(
-        i18n.t("action.saveToNotebaseConnectionInvalid"),
+      expect(toastManagerMock.add).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: expect.objectContaining({
-            label: i18n.t("action.openCustomActions"),
+          type: "error",
+          title: i18n.t("action.saveToNotebaseConnectionInvalid"),
+          actionProps: expect.objectContaining({
+            children: i18n.t("action.openCustomActions"),
             onClick: expect.any(Function),
           }),
         }),
       )
     })
 
-    const toastOptions = toastMock.error.mock.calls[0]?.[1] as { action?: { onClick?: () => void } } | undefined
-    toastOptions?.action?.onClick?.()
+    const toastOptions = toastManagerMock.add.mock.calls[0]?.[0] as
+      | { actionProps?: { onClick?: () => void } }
+      | undefined
+    toastOptions?.actionProps?.onClick?.()
 
+    expect(toastManagerMock.close).toHaveBeenCalledWith("toast-id")
     expect(sendMessage).toHaveBeenCalledWith("openOptionsPage", {
       route: "/custom-actions?actionId=action-1",
     })
@@ -375,20 +629,45 @@ describe("saveToNotebaseButton notebase availability", () => {
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
 
     await waitFor(() => {
-      expect(toastMock.error).toHaveBeenCalledWith(i18n.t("action.saveToNotebaseAccessDenied"))
+      expect(toastManagerMock.add).toHaveBeenCalledWith({
+        type: "error",
+        title: i18n.t("action.saveToNotebaseAccessDenied"),
+      })
     })
   })
 
-  it("shows a note limit toast when the backend rejects the save for quota", async () => {
+  it("shows an upgrade action when the backend rejects the save for quota", async () => {
     const config = cloneConfig(DEFAULT_CONFIG)
     config.betaExperience.enabled = false
-    notebaseRowCreateMock.mockRejectedValueOnce(new ORPCError("NOTE_LIMIT_EXCEEDED", { status: 403 }))
+    notebaseRowCreateMock.mockRejectedValueOnce(
+      new ORPCError("NOTE_LIMIT_EXCEEDED", { status: 403 }),
+    )
     renderButton(config, createConnectedAction())
 
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
 
     await waitFor(() => {
-      expect(toastMock.error).toHaveBeenCalledWith(i18n.t("action.saveToNotebaseLimitExceeded"))
+      expect(toastManagerMock.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "error",
+          title: i18n.t("action.saveToNotebaseLimitExceeded"),
+          actionProps: expect.objectContaining({
+            children: i18n.t("action.upgrade"),
+            onClick: expect.any(Function),
+          }),
+        }),
+      )
+    })
+
+    const toastOptions = toastManagerMock.add.mock.calls[0]?.[0] as
+      | { actionProps?: { onClick?: () => void } }
+      | undefined
+    toastOptions?.actionProps?.onClick?.()
+
+    expect(toastManagerMock.close).toHaveBeenCalledWith("toast-id")
+    expect(sendMessage).toHaveBeenCalledWith("openPage", {
+      url: new URL("/pricing", env.WXT_WEBSITE_URL).toString(),
+      active: true,
     })
   })
 

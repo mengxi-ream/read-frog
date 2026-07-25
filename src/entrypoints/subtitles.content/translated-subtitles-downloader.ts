@@ -3,17 +3,29 @@ import type { Config } from "@/types/config/config"
 import type { SubtitlesFetcher } from "@/utils/subtitles/fetchers/types"
 import type { SubtitlesVideoContext } from "@/utils/subtitles/processor/translator"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
-import { toast } from "sonner"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { getLocalConfig } from "@/utils/config/storage"
-import { MAX_GAP_MS, PROCESS_LOOK_AHEAD_MS, TRANSLATION_BATCH_SIZE } from "@/utils/constants/subtitles"
+import {
+  MAX_GAP_MS,
+  PROCESS_LOOK_AHEAD_MS,
+  TRANSLATION_BATCH_SIZE,
+} from "@/utils/constants/subtitles"
 import { resolveLanguageCodeFromLocale } from "@/utils/content/page-language"
 import { i18n } from "@/utils/i18n"
 import { aiSegmentBlock } from "@/utils/subtitles/processor/ai-segmentation"
 import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
-import { buildSubtitlesSummaryContextHash, fetchSubtitlesSummary, translateSubtitles } from "@/utils/subtitles/processor/translator"
+import {
+  buildSubtitlesSummaryContextHash,
+  fetchSubtitlesSummary,
+  translateSubtitles,
+} from "@/utils/subtitles/processor/translator"
 import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
-import { subtitlesStore, TranslatedDownloadPhase, translatedSubtitlesDownloadStatusAtom } from "./atoms"
+import {
+  subtitlesStore,
+  TranslatedDownloadPhase,
+  translatedSubtitlesDownloadStatusAtom,
+} from "./atoms"
 
 const SUCCESS_MESSAGE_DURATION_MS = 4000
 const MAX_COLLAPSED_AI_SEGMENT_DURATION_MS = 1
@@ -23,11 +35,16 @@ export class TranslatedSubtitlesDownloader {
   private isDownloading = false
   private operationId = 0
   private successTimeout: ReturnType<typeof setTimeout> | null = null
+  private snapshotFetcher: SubtitlesFetcher | null = null
 
   constructor(
-    private fetcher: SubtitlesFetcher,
+    private getFetcher: () => SubtitlesFetcher,
     private config: PlatformConfig,
   ) {}
+
+  private get fetcher(): SubtitlesFetcher {
+    return this.snapshotFetcher ?? this.getFetcher()
+  }
 
   download = async (): Promise<void> => {
     if (this.isDownloading) {
@@ -36,6 +53,7 @@ export class TranslatedSubtitlesDownloader {
 
     this.clearSuccessTimeout()
     this.isDownloading = true
+    this.snapshotFetcher = this.getFetcher()
     const operationId = ++this.operationId
     const pageTitle = document.title || ""
     const videoId = this.config.getVideoId?.()
@@ -88,17 +106,19 @@ export class TranslatedSubtitlesDownloader {
         this.successTimeout = null
         this.setStatus(TranslatedDownloadPhase.Idle, null)
       }, SUCCESS_MESSAGE_DURATION_MS)
-    }
-    catch (error) {
+    } catch (error) {
       if (!this.isActive(operationId)) {
         return
       }
-      toast.error(error instanceof Error ? error.message : String(error))
+      toastManager.add({
+        type: "error",
+        title: error instanceof Error ? error.message : String(error),
+      })
       this.setStatus(TranslatedDownloadPhase.Idle, null)
-    }
-    finally {
+    } finally {
       if (this.isActive(operationId)) {
         this.isDownloading = false
+        this.snapshotFetcher = null
       }
     }
   }
@@ -106,6 +126,7 @@ export class TranslatedSubtitlesDownloader {
   dispose(): void {
     this.operationId++
     this.isDownloading = false
+    this.snapshotFetcher = null
     this.clearSuccessTimeout()
     this.setStatus(TranslatedDownloadPhase.Idle, null)
   }
@@ -154,7 +175,12 @@ export class TranslatedSubtitlesDownloader {
       operationId,
     )
     this.assertActive(operationId)
-    const videoContext = await this.buildExportVideoContext(sourceSubtitles, config, operationId, pageTitle)
+    const videoContext = await this.buildExportVideoContext(
+      sourceSubtitles,
+      config,
+      operationId,
+      pageTitle,
+    )
     this.assertActive(operationId)
     const translatedFragments: SubtitlesFragment[] = []
     let translatedCount = 0
@@ -167,8 +193,8 @@ export class TranslatedSubtitlesDownloader {
           const translatedBatch = await translateSubtitles(batch, videoContext, config)
           this.assertActive(operationId)
           if (
-            translatedBatch.length !== batch.length
-            || this.hasIncompleteTranslatedFragments(translatedBatch)
+            translatedBatch.length !== batch.length ||
+            this.hasIncompleteTranslatedFragments(translatedBatch)
           ) {
             throw new Error(i18n.t("subtitles.errors.translatedExportIncomplete"))
           }
@@ -188,8 +214,8 @@ export class TranslatedSubtitlesDownloader {
     }
 
     if (
-      translatedFragments.length !== fragments.length
-      || this.hasIncompleteTranslatedFragments(translatedFragments)
+      translatedFragments.length !== fragments.length ||
+      this.hasIncompleteTranslatedFragments(translatedFragments)
     ) {
       throw new Error(i18n.t("subtitles.errors.translatedExportIncomplete"))
     }
@@ -198,7 +224,7 @@ export class TranslatedSubtitlesDownloader {
   }
 
   private hasIncompleteTranslatedFragments(fragments: SubtitlesFragment[]): boolean {
-    return fragments.some(fragment => !fragment.translation?.trim())
+    return fragments.some((fragment) => !fragment.translation?.trim())
   }
 
   private buildTranslationBatches(fragments: SubtitlesFragment[]): SubtitlesFragment[][] {
@@ -224,7 +250,7 @@ export class TranslatedSubtitlesDownloader {
     const result: SubtitlesFragment[] = []
 
     for (const chunk of this.buildSourceSubtitleChunks(sourceSubtitles)) {
-      result.push(...await this.buildExportProcessedChunk(chunk, config, operationId))
+      result.push(...(await this.buildExportProcessedChunk(chunk, config, operationId)))
       this.assertActive(operationId)
     }
 
@@ -242,8 +268,7 @@ export class TranslatedSubtitlesDownloader {
     try {
       segmented = await aiSegmentBlock(chunk, config)
       this.assertActive(operationId)
-    }
-    catch {
+    } catch {
       return optimizeSubtitles(chunk, sourceLanguage)
     }
 
@@ -263,8 +288,7 @@ export class TranslatedSubtitlesDownloader {
         try {
           retrySegmented = await aiSegmentBlock(retryChunk, config)
           this.assertActive(operationId)
-        }
-        catch {
+        } catch {
           return optimizeSubtitles(chunk, sourceLanguage)
         }
 
@@ -283,8 +307,13 @@ export class TranslatedSubtitlesDownloader {
     return optimizeSubtitles(chunk, sourceLanguage)
   }
 
-  private hasUnsafeExportTiming(source: SubtitlesFragment[], candidate: SubtitlesFragment[]): boolean {
-    return this.hasInvalidTimingShape(source, candidate) || this.hasTimingCoverageGap(source, candidate)
+  private hasUnsafeExportTiming(
+    source: SubtitlesFragment[],
+    candidate: SubtitlesFragment[],
+  ): boolean {
+    return (
+      this.hasInvalidTimingShape(source, candidate) || this.hasTimingCoverageGap(source, candidate)
+    )
   }
 
   private hasUnsafeSegmentedExportTiming(
@@ -292,7 +321,9 @@ export class TranslatedSubtitlesDownloader {
     segmented: SubtitlesFragment[],
     optimized: SubtitlesFragment[],
   ): boolean {
-    return this.hasInvalidTimingShape(source, segmented) || this.hasUnsafeExportTiming(source, optimized)
+    return (
+      this.hasInvalidTimingShape(source, segmented) || this.hasUnsafeExportTiming(source, optimized)
+    )
   }
 
   private buildSourceSubtitleChunks(
@@ -318,7 +349,10 @@ export class TranslatedSubtitlesDownloader {
     return chunks
   }
 
-  private hasTimingCoverageGap(source: SubtitlesFragment[], candidate: SubtitlesFragment[]): boolean {
+  private hasTimingCoverageGap(
+    source: SubtitlesFragment[],
+    candidate: SubtitlesFragment[],
+  ): boolean {
     const sourceCoverage = this.mergeCoverageIntervals(source)
     const candidateCoverage = this.mergeCoverageIntervals(candidate)
 
@@ -349,23 +383,26 @@ export class TranslatedSubtitlesDownloader {
     return false
   }
 
-  private hasInvalidTimingShape(source: SubtitlesFragment[], candidate: SubtitlesFragment[]): boolean {
+  private hasInvalidTimingShape(
+    source: SubtitlesFragment[],
+    candidate: SubtitlesFragment[],
+  ): boolean {
     if (source.length === 0 || candidate.length === 0) {
       return true
     }
 
-    const sourceStart = Math.min(...source.map(fragment => fragment.start))
-    const sourceEnd = Math.max(...source.map(fragment => fragment.end))
+    const sourceStart = Math.min(...source.map((fragment) => fragment.start))
+    const sourceEnd = Math.max(...source.map((fragment) => fragment.end))
     const sortedCandidates = [...candidate].sort((a, b) => a.start - b.start || a.end - b.end)
 
     for (let index = 0; index < sortedCandidates.length; index++) {
       const fragment = sortedCandidates[index]
       if (
-        !Number.isFinite(fragment.start)
-        || !Number.isFinite(fragment.end)
-        || fragment.end - fragment.start <= MAX_COLLAPSED_AI_SEGMENT_DURATION_MS
-        || fragment.start < sourceStart
-        || fragment.end > sourceEnd
+        !Number.isFinite(fragment.start) ||
+        !Number.isFinite(fragment.end) ||
+        fragment.end - fragment.start <= MAX_COLLAPSED_AI_SEGMENT_DURATION_MS ||
+        fragment.start < sourceStart ||
+        fragment.end > sourceEnd
       ) {
         return true
       }
@@ -379,20 +416,21 @@ export class TranslatedSubtitlesDownloader {
     return false
   }
 
-  private mergeCoverageIntervals(fragments: SubtitlesFragment[]): Array<{ start: number, end: number }> {
+  private mergeCoverageIntervals(
+    fragments: SubtitlesFragment[],
+  ): Array<{ start: number; end: number }> {
     const intervals = fragments
-      .filter(fragment => fragment.end > fragment.start)
-      .map(fragment => ({ start: fragment.start, end: fragment.end }))
+      .filter((fragment) => fragment.end > fragment.start)
+      .map((fragment) => ({ start: fragment.start, end: fragment.end }))
       .sort((a, b) => a.start - b.start)
 
-    const merged: Array<{ start: number, end: number }> = []
+    const merged: Array<{ start: number; end: number }> = []
 
     for (const interval of intervals) {
       const previous = merged.at(-1)
       if (previous && interval.start - previous.end <= MAX_GAP_MS) {
         previous.end = Math.max(previous.end, interval.end)
-      }
-      else {
+      } else {
         merged.push({ ...interval })
       }
     }
@@ -406,10 +444,13 @@ export class TranslatedSubtitlesDownloader {
     operationId: number,
     pageTitle: string,
   ): Promise<SubtitlesVideoContext> {
-    const providerConfig = getProviderConfigById(config.providersConfig, config.videoSubtitles.providerId)
+    const providerConfig = getProviderConfigById(
+      config.providersConfig,
+      config.videoSubtitles.providerId,
+    )
     const videoContext: SubtitlesVideoContext = {
       videoTitle: pageTitle,
-      subtitlesTextContent: sourceSubtitles.map(fragment => fragment.text).join(""),
+      subtitlesTextContent: sourceSubtitles.map((fragment) => fragment.text).join(""),
     }
     const summaryContextHash = buildSubtitlesSummaryContextHash(videoContext, providerConfig)
 
@@ -417,8 +458,7 @@ export class TranslatedSubtitlesDownloader {
       try {
         videoContext.summary = await fetchSubtitlesSummary(videoContext, config)
         this.assertActive(operationId)
-      }
-      catch {
+      } catch {
         videoContext.summary = null
       }
     }

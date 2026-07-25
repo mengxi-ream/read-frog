@@ -1,13 +1,12 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from "vitest"
-
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
   BLOCK_CONTENT_CLASS,
   CONTENT_WRAPPER_CLASS,
   INLINE_CONTENT_CLASS,
 } from "@/utils/constants/dom-labels"
-
-import { findTranslatedContentWrapper } from "../find"
+import { findTranslatedContentWrapper, unwrapDeepestOnlyHTMLChild } from "../find"
 
 describe("findTranslatedContentWrapper", () => {
   beforeEach(() => {
@@ -81,5 +80,39 @@ describe("findTranslatedContentWrapper", () => {
 
     const result = findTranslatedContentWrapper(translatedContent)
     expect(result).toBe(wrapper)
+  })
+})
+
+describe("unwrapDeepestOnlyHTMLChild", () => {
+  beforeEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  it("unwraps nested single-child elements without mutating truncation styles", () => {
+    const outer = document.createElement("div")
+    outer.style.webkitLineClamp = "2"
+    outer.style.maxHeight = "24px"
+    outer.style.textOverflow = "ellipsis"
+
+    const middle = document.createElement("div")
+    middle.style.webkitLineClamp = "3"
+    middle.style.maxHeight = "32px"
+    middle.style.textOverflow = "ellipsis"
+
+    const leaf = document.createElement("span")
+    leaf.textContent = "Nested text"
+
+    middle.appendChild(leaf)
+    outer.appendChild(middle)
+    document.body.appendChild(outer)
+
+    expect(unwrapDeepestOnlyHTMLChild(outer, DEFAULT_CONFIG)).toBe(leaf)
+
+    expect(outer.style.webkitLineClamp).toBe("2")
+    expect(outer.style.maxHeight).toBe("24px")
+    expect(outer.style.textOverflow).toBe("ellipsis")
+    expect(middle.style.webkitLineClamp).toBe("3")
+    expect(middle.style.maxHeight).toBe("32px")
+    expect(middle.style.textOverflow).toBe("ellipsis")
   })
 })

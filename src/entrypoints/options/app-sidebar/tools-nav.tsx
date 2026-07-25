@@ -17,7 +17,15 @@ export function ToolsNav() {
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton render={<a href={browser.runtime.getURL("/translation-hub.html")} target="_blank" rel="noopener noreferrer" />}>
+            <SidebarMenuButton
+              render={
+                <a
+                  href={browser.runtime.getURL("/translation-hub.html")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />
+              }
+            >
               <Icon icon="tabler:language-hiragana" />
               <span>{i18n.t("options.tools.translationHub")}</span>
             </SidebarMenuButton>

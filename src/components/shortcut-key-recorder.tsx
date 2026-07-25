@@ -2,37 +2,48 @@ import { isModifierKey } from "@tanstack/hotkeys"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Input } from "@/components/ui/base-ui/input"
 import { i18n } from "@/utils/i18n"
-import { formatPageTranslationShortcut, isValidConfiguredPageTranslationShortcut, keyboardEventToPageTranslationShortcut } from "@/utils/page-translation-shortcut"
+import {
+  formatPageTranslationShortcut,
+  isValidConfiguredPageTranslationShortcut,
+  keyboardEventToPageTranslationShortcut,
+} from "@/utils/page-translation-shortcut"
 
 const CLEAR_KEYS = new Set(["Backspace", "Delete"])
 
-export function ShortcutKeyRecorder(
-  { shortcutKey: initialShortcutKey, onChange, className }:
-  { shortcutKey: string, onChange?: (shortcutKey: string) => void, className?: string },
-) {
+export function ShortcutKeyRecorder({
+  shortcutKey: initialShortcutKey,
+  onChange,
+  className,
+}: {
+  shortcutKey: string
+  onChange?: (shortcutKey: string) => void
+  className?: string
+}) {
   const [inRecording, setInRecording] = useState(false)
   const [draftShortcut, setDraftShortcut] = useState("")
   const [optimisticShortcut, setOptimisticShortcut] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const isRecordingRef = useRef(false)
 
-  const endRecording = useCallback((nextShortcut: string | null) => {
-    isRecordingRef.current = false
-    setInRecording(false)
+  const endRecording = useCallback(
+    (nextShortcut: string | null) => {
+      isRecordingRef.current = false
+      setInRecording(false)
 
-    if (nextShortcut !== null) {
-      setDraftShortcut(nextShortcut)
-      setOptimisticShortcut(nextShortcut)
-      onChange?.(nextShortcut)
-    }
-    else {
-      setDraftShortcut("")
-    }
+      if (nextShortcut !== null) {
+        setDraftShortcut(nextShortcut)
+        setOptimisticShortcut(nextShortcut)
+        onChange?.(nextShortcut)
+      } else {
+        setDraftShortcut("")
+      }
 
-    queueMicrotask(() => {
-      inputRef.current?.blur()
-    })
-  }, [onChange])
+      queueMicrotask(() => {
+        inputRef.current?.blur()
+      })
+    },
+    [onChange],
+  )
 
   const cancelRecording = useCallback(() => {
     endRecording(null)
@@ -42,9 +53,12 @@ export function ShortcutKeyRecorder(
     endRecording("")
   }, [endRecording])
 
-  const commitShortcut = useCallback((nextShortcut: string) => {
-    endRecording(nextShortcut)
-  }, [endRecording])
+  const commitShortcut = useCallback(
+    (nextShortcut: string) => {
+      endRecording(nextShortcut)
+    },
+    [endRecording],
+  )
 
   const startRecord = () => {
     if (isRecordingRef.current) {
@@ -66,7 +80,7 @@ export function ShortcutKeyRecorder(
 
   useEffect(() => {
     if (!inRecording) {
-      return
+      return undefined
     }
 
     const handleKeydown = (event: KeyboardEvent) => {
@@ -82,7 +96,13 @@ export function ShortcutKeyRecorder(
         return
       }
 
-      if (CLEAR_KEYS.has(event.key) && !event.ctrlKey && !event.altKey && !event.shiftKey && !event.metaKey) {
+      if (
+        CLEAR_KEYS.has(event.key) &&
+        !event.ctrlKey &&
+        !event.altKey &&
+        !event.shiftKey &&
+        !event.metaKey
+      ) {
         clearShortcut()
         return
       }
@@ -106,9 +126,10 @@ export function ShortcutKeyRecorder(
     }
   }, [cancelRecording, clearShortcut, commitShortcut, inRecording])
 
-  const shortcutKey = optimisticShortcut !== null && optimisticShortcut !== initialShortcutKey
-    ? optimisticShortcut
-    : initialShortcutKey
+  const shortcutKey =
+    optimisticShortcut !== null && optimisticShortcut !== initialShortcutKey
+      ? optimisticShortcut
+      : initialShortcutKey
 
   return (
     <Input

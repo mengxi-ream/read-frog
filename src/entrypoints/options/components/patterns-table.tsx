@@ -49,7 +49,7 @@ export function PatternsTable({
         <Input
           placeholder={placeholderText}
           value={inputValue}
-          onChange={e => setInputValue(e.target.value)}
+          onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyPress}
         />
         <Button size="icon" onClick={handleAddPattern}>
@@ -59,14 +59,12 @@ export function PatternsTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[100px]">
-              {tableHeaderText}
-            </TableHead>
+            <TableHead className="w-[100px]">{tableHeaderText}</TableHead>
             <TableHead className="text-right"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {patterns.map(pattern => (
+          {patterns.map((pattern) => (
             <TableRow key={pattern}>
               <TableCell>{pattern}</TableCell>
               <TableCell className="text-right">

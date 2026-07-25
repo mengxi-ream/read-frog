@@ -4,6 +4,7 @@ extDescription: 陪读蛙是一款开放源代码的浏览器插件，旨在帮�
 uninstallSurveyUrl: https://tally.so/r/3E9XDL
 account:
   login: 登录
+  webApp: 网页应用
   logout: 退出登录
   logoutError: 退出登录失败，请重试
 dataTypes:
@@ -89,6 +90,9 @@ options:
     product: 产品
   tools:
     translationHub: 翻译中心
+  product:
+    roadmap: 路线图
+    feedback: 反馈
   setAPIKeyWarning:
     please: 请在
     page: 页设置 API Key
@@ -176,9 +180,9 @@ options:
       invalidJson: JSON 格式无效
     providers:
       name:
-        freeAi: 免费 AI 服务
+        builtInAi: 内置 AI
       attribution:
-        freeAi: Provided by Atlas Cloud. 目前仅对自定义 AI 指令开放。若要解锁无限制体验，可以前往官网购买超高性价比额度。
+        builtInAi: Provided by Atlas Cloud. 目前仅对自定义 AI 指令开放。若要解锁无限制体验，可以前往官网购买超高性价比额度。
       description:
         openai: 提供 GPT-4o 等模型
         azure: 通过 Azure 部署使用 OpenAI 模型
@@ -346,6 +350,9 @@ options:
         description: 选择在选择工具栏中显示哪些内置功能
         translate: 翻译
         speak: 朗读
+      saveSuggestion:
+        title: 保存建议
+        description: 划词翻译后，推荐可存入笔记库的词条
       shortcut:
         title: 划词翻译快捷键
         description: 自定义翻译选中文本的快捷键
@@ -745,7 +752,7 @@ options:
         description: 触发翻译所需的元素可见度百分比（0-1）。较高的值会延迟翻译，直到更多元素可见。
     smallParagraphFilter:
       title: 小段落过滤
-      description: 跳过翻译少于指定字符数或词数的文本节点（0 = 禁用）
+      description: 这些全局默认值会跳过翻译少于指定字符数或词数的文本节点；匹配的站点规则可以覆盖它们（0 = 禁用）
       minCharacters:
         title: 最小字符数
         description: 少于此字符数的文本节点将不会被翻译。字符计数包含空格。
@@ -784,6 +791,31 @@ options:
       description: 通过向 AI 提供网页上下文来提高翻译质量
       enable: 启用 AI 智能上下文翻译
       enableDescription: AI 使用网页摘要来提高翻译准确性。需要 LLM 翻译提供商。刚开始翻译页面时会有延迟，并增加 API 费用。
+  siteRules:
+    title: 站点规则
+    description: 针对特定网站调整翻译行为的规则。
+    userRules:
+      title: 用户规则
+      description: 以 JSON 数组形式编写自己的站点规则。规则会应用于 URL 匹配的页面；用户规则优先于内置规则。
+      saveButton: 保存
+      savedButton: 已保存
+      validation:
+        validating: 验证中...
+        valid: 规则有效
+        syntaxError: JSON 存在语法错误
+        notArray: JSON 顶层必须是规则数组
+        tooLong: 规则文档过长
+        tooMany: 规则数量过多
+        duplicateIds: 规则 id 重复
+        schemaErrors: 部分规则无效
+        moreErrors: ...还有 $1 个错误
+        saved: 所有更改已保存
+    builtIn:
+      title: 内置规则
+      description: 随扩展提供的站点规则。如果某条规则在网站上引起问题，可用开关将其停用。
+      searchPlaceholder: 按 id、描述或网址模式搜索
+      showMore: 显示更多
+      count: 显示 $1 / $2 条规则
   tts:
     title: 文本转语音
     description: 使用 Edge TTS 语音参数来自定义朗读按钮。
@@ -999,6 +1031,15 @@ options:
           webTitle: 网页标题
           webDescription: 页面元信息中的网页描述
           videoSummary: 视频摘要（需启用 AI 智能上下文）
+    aiQuota:
+      title: AI 字幕额度
+      description: 你账户本月的 AI 字幕转写额度使用情况
+      loginRequired: 登录后查看你的 AI 字幕额度
+      logIn: 登录
+      betaRequired: AI 字幕内测中，你的账号暂未获得使用资格
+      betaApply: 申请资格
+      loadError: 无法加载额度，请稍后重试。
+      summary: 已用 $1 分钟 / 共 $2 分钟，剩余 $3 分钟
   whatsNew:
     title: 最近更新
   rateUs:
@@ -1076,6 +1117,7 @@ action:
   saveToNotebasePendingLogin: 登录后继续保存
   saveToNotebasePendingLoginDescription: 登录完成后，Read Frog 会自动创建笔记库并保存当前结果。
   saveToNotebasePendingConnectedLoginDescription: 登录完成后，Read Frog 会优先保存到已连接的笔记库；如果当前账号无法使用它，会创建新的笔记库并保存当前结果。
+  upgrade: 升级
   openCustomActions: 打开 Custom AI Actions
   openNotebase: 打开笔记库
   contextDetailsTitleLabel: 标题
@@ -1083,6 +1125,12 @@ action:
   translation: 翻译
   speak: 朗读
   playing: 播放中
+saveSuggestion:
+  title: 猜你想存
+  description: 把下列词存入笔记库，将来随时复习
+  save: 保存
+  saved: 已保存
+  staleSuggestion: 该建议已过期
 thinking:
   label: 思考中
   complete: 思考完成
@@ -1091,6 +1139,9 @@ thinking:
 shortcutKeySelector:
   placeholder: 请输入快捷键
 subtitles:
+  loadingAiSubtitles: 正在加载 AI 字幕中
+  requestAiSubtitles: 请求 AI 字幕（Beta）
+  usingAiSubtitles: 正在使用 AI 字幕中
   actions:
     downloadTranslated: 下载翻译字幕
     downloadTranslatedPreparing: 正在准备字幕，长视频可能需要更久
@@ -1116,6 +1167,8 @@ subtitles:
     aiRateLimited: 请求过于频繁，请稍后再试
     aiAuthFailed: API 认证失败，请检查您的 API 密钥
     aiServiceUnavailable: 翻译服务暂时不可用
+    aiQuotaExceeded: 本月 AI 字幕额度已用完
+    aiRequestFailed: AI 字幕请求失败，请稍后重试
     aiNoResponse: AI 服务未响应，使用原文显示
     translatedExportFailed: 生成翻译字幕失败
     translatedExportIncomplete: 未能翻译所有字幕行

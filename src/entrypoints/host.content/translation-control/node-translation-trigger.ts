@@ -14,22 +14,21 @@ export interface NodeTranslationTriggerOptions {
 }
 
 function isEditableTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement))
-    return false
+  if (!(target instanceof HTMLElement)) return false
 
   const tag = target.tagName
-  if (tag === "INPUT" || tag === "TEXTAREA")
-    return true
-  if (target.isContentEditable)
-    return true
+  if (tag === "INPUT" || tag === "TEXTAREA") return true
+  if (target.isContentEditable) return true
   return false
 }
 
 function isDocumentSurfaceTarget(target: EventTarget | null): boolean {
-  return target === document
-    || target === window
-    || target === document.documentElement
-    || target === document.body
+  return (
+    target === document ||
+    target === window ||
+    target === document.documentElement ||
+    target === document.body
+  )
 }
 
 /**
@@ -62,8 +61,7 @@ export function registerNodeTranslationTriggerListeners({
 
   const getElementCenterPoint = (element: Element): Point | null => {
     const rect = element.getBoundingClientRect()
-    if (rect.width <= 0 || rect.height <= 0)
-      return null
+    if (rect.width <= 0 || rect.height <= 0) return null
 
     return {
       x: rect.left + rect.width / 2,
@@ -72,8 +70,7 @@ export function registerNodeTranslationTriggerListeners({
   }
 
   const resolveTriggerPoint = (): Point => {
-    if (hasMousePosition)
-      return { ...mousePosition }
+    if (hasMousePosition) return { ...mousePosition }
 
     const hoveredElement = getDeepestHoveredElement()
     const hoveredPoint = hoveredElement ? getElementCenterPoint(hoveredElement) : null
@@ -106,8 +103,7 @@ export function registerNodeTranslationTriggerListeners({
 
   const getCurrentConfig = async (): Promise<Config | null> => {
     const config = await getConfig()
-    if (signal.aborted)
-      return null
+    if (signal.aborted) return null
     return config
   }
 
@@ -115,45 +111,46 @@ export function registerNodeTranslationTriggerListeners({
     void onTrigger(point, config)
   }
 
-  document.addEventListener("mousemove", (event) => {
-    if (shouldIgnoreEvent())
-      return
+  document.addEventListener(
+    "mousemove",
+    (event) => {
+      if (shouldIgnoreEvent()) return
 
-    // Distance threshold: ignore tiny movements (trackpad tremor, mouse jitter)
-    if (
-      Math.abs(event.clientX - lastMoveX) + Math.abs(event.clientY - lastMoveY)
-      <= MOUSEMOVE_DISTANCE_THRESHOLD
-    ) {
-      return
-    }
-
-    // Click-and-hold move cancellation (always immediate, no throttle)
-    if (isMousePressed && mousePressPosition) {
-      const deltaX = event.clientX - mousePressPosition.x
-      const deltaY = event.clientY - mousePressPosition.y
-      if (Math.hypot(deltaX, deltaY) > CLICK_AND_HOLD_MOVE_TOLERANCE) {
-        isMousePressed = false
-        mousePressPosition = null
-        clearClickAndHoldTimer()
+      // Distance threshold: ignore tiny movements (trackpad tremor, mouse jitter)
+      if (
+        Math.abs(event.clientX - lastMoveX) + Math.abs(event.clientY - lastMoveY) <=
+        MOUSEMOVE_DISTANCE_THRESHOLD
+      ) {
+        return
       }
-    }
 
-    // Throttled position update
-    if (moveThrottleTimer)
-      return
+      // Click-and-hold move cancellation (always immediate, no throttle)
+      if (isMousePressed && mousePressPosition) {
+        const deltaX = event.clientX - mousePressPosition.x
+        const deltaY = event.clientY - mousePressPosition.y
+        if (Math.hypot(deltaX, deltaY) > CLICK_AND_HOLD_MOVE_TOLERANCE) {
+          isMousePressed = false
+          mousePressPosition = null
+          clearClickAndHoldTimer()
+        }
+      }
 
-    moveThrottleTimer = setTimeout(() => {
-      moveThrottleTimer = null
-    }, MOUSEMOVE_THROTTLE_MS)
+      // Throttled position update
+      if (moveThrottleTimer) return
 
-    updateMousePosition({ x: event.clientX, y: event.clientY })
-    lastMoveX = event.clientX
-    lastMoveY = event.clientY
-  }, { signal })
+      moveThrottleTimer = setTimeout(() => {
+        moveThrottleTimer = null
+      }, MOUSEMOVE_THROTTLE_MS)
+
+      updateMousePosition({ x: event.clientX, y: event.clientY })
+      lastMoveX = event.clientX
+      lastMoveY = event.clientY
+    },
+    { signal },
+  )
 
   const updateMousePositionFromEvent = (event: MouseEvent | PointerEvent) => {
-    if (shouldIgnoreEvent())
-      return
+    if (shouldIgnoreEvent()) return
 
     updateMousePosition({ x: event.clientX, y: event.clientY })
     lastMoveX = event.clientX
@@ -180,155 +177,182 @@ export function registerNodeTranslationTriggerListeners({
     activeHotkeyEventKey = null
   }
 
-  document.addEventListener("mousedown", (event) => {
-    void (async () => {
-      if (shouldIgnoreEvent())
-        return
-      if (event.button !== 0)
-        return
-      if (isEditableTarget(event.target))
-        return
-      if (isDocumentSurfaceTarget(event.target)) {
-        resetClickAndHoldState()
+  document.addEventListener(
+    "mousedown",
+    (event) => {
+      void (async () => {
+        if (shouldIgnoreEvent()) return
+        if (event.button !== 0) return
+        if (isEditableTarget(event.target)) return
+        if (isDocumentSurfaceTarget(event.target)) {
+          resetClickAndHoldState()
+          clearClickAndHoldTimer()
+          return
+        }
+
+        const point = { x: event.clientX, y: event.clientY }
+
+        const config = await getCurrentConfig()
+        if (
+          !config ||
+          !config.translate.node.enabled ||
+          config.translate.node.hotkey !== "clickAndHold"
+        )
+          return
+
+        isMousePressed = true
+        clickAndHoldTriggered = false
+        mousePressPosition = point
+
         clearClickAndHoldTimer()
-        return
-      }
+        clickAndHoldTimerId = setTimeout(() => {
+          void (async () => {
+            if (shouldIgnoreEvent()) return
+            if (!isMousePressed || !mousePressPosition || clickAndHoldTriggered) return
 
-      const point = { x: event.clientX, y: event.clientY }
-
-      const config = await getCurrentConfig()
-      if (!config || !config.translate.node.enabled || config.translate.node.hotkey !== "clickAndHold")
-        return
-
-      isMousePressed = true
-      clickAndHoldTriggered = false
-      mousePressPosition = point
-
-      clearClickAndHoldTimer()
-      clickAndHoldTimerId = setTimeout(() => {
-        void (async () => {
-          if (shouldIgnoreEvent())
-            return
-          if (!isMousePressed || !mousePressPosition || clickAndHoldTriggered)
-            return
-
-          const currentConfig = await getCurrentConfig()
-          if (!currentConfig || !currentConfig.translate.node.enabled || currentConfig.translate.node.hotkey !== "clickAndHold")
-            return
-
-          triggerNodeTranslation(mousePressPosition, currentConfig)
-          clickAndHoldTriggered = true
-        })()
-      }, NODE_TRANSLATION_HOLD_TRIGGER_MS)
-    })()
-  }, { signal })
-
-  document.addEventListener("mouseup", (event) => {
-    if (shouldIgnoreEvent())
-      return
-    if (event.button !== 0)
-      return
-    if (!isMousePressed && !clickAndHoldTimerId)
-      return
-
-    resetClickAndHoldState()
-    clearClickAndHoldTimer()
-  }, { signal })
-
-  document.addEventListener("keydown", (event) => {
-    void (async () => {
-      if (shouldIgnoreEvent())
-        return
-      if (isEditableTarget(event.target))
-        return
-
-      const config = await getCurrentConfig()
-      if (!config || !config.translate.node.enabled || config.translate.node.hotkey === "clickAndHold") {
-        resetHotkeySession()
-        return
-      }
-
-      const hotkeyEventKey = HOTKEY_EVENT_KEYS[config.translate.node.hotkey]
-
-      if (event.key === hotkeyEventKey) {
-        if (!isHotkeyPressed) {
-          isHotkeyPressed = true
-          activeHotkeyEventKey = hotkeyEventKey
-          timerId = setTimeout(() => {
-            void (async () => {
-              if (shouldIgnoreEvent())
-                return
-              if (!isHotkeySessionPure || !isHotkeyPressed) {
-                timerId = null
-                return
-              }
-
-              const currentConfig = await getCurrentConfig()
-              if (!currentConfig || !currentConfig.translate.node.enabled || currentConfig.translate.node.hotkey === "clickAndHold") {
-                timerId = null
-                return
-              }
-              if (HOTKEY_EVENT_KEYS[currentConfig.translate.node.hotkey] !== activeHotkeyEventKey) {
-                timerId = null
-                return
-              }
-
-              triggerNodeTranslation(resolveTriggerPoint(), currentConfig)
-              actionTriggered = true
-              timerId = null
-            })()
-          }, NODE_TRANSLATION_HOLD_TRIGGER_MS)
-
-          if (!isHotkeySessionPure && timerId) {
-            clearTimeout(timerId)
-            timerId = null
-          }
-        }
-      }
-      else {
-        isHotkeySessionPure = false
-        if (isHotkeyPressed && timerId) {
-          clearTimeout(timerId)
-          timerId = null
-        }
-      }
-    })()
-  }, { signal })
-
-  document.addEventListener("keyup", (event) => {
-    void (async () => {
-      if (shouldIgnoreEvent())
-        return
-      if (isEditableTarget(event.target))
-        return
-
-      const config = await getCurrentConfig()
-      if (!config || !config.translate.node.enabled || config.translate.node.hotkey === "clickAndHold") {
-        if (event.key === activeHotkeyEventKey)
-          resetHotkeySession()
-        return
-      }
-
-      const hotkeyEventKey = HOTKEY_EVENT_KEYS[config.translate.node.hotkey]
-
-      if (event.key === hotkeyEventKey || event.key === activeHotkeyEventKey) {
-        if (isHotkeyPressed && isHotkeySessionPure) {
-          if (timerId) {
-            clearTimeout(timerId)
-            timerId = null
-          }
-          if (!actionTriggered) {
             const currentConfig = await getCurrentConfig()
-            if (!currentConfig || !currentConfig.translate.node.enabled || currentConfig.translate.node.hotkey === "clickAndHold")
+            if (
+              !currentConfig ||
+              !currentConfig.translate.node.enabled ||
+              currentConfig.translate.node.hotkey !== "clickAndHold"
+            )
               return
 
-            triggerNodeTranslation(resolveTriggerPoint(), currentConfig)
+            triggerNodeTranslation(mousePressPosition, currentConfig)
+            clickAndHoldTriggered = true
+          })()
+        }, NODE_TRANSLATION_HOLD_TRIGGER_MS)
+      })()
+    },
+    { signal },
+  )
+
+  document.addEventListener(
+    "mouseup",
+    (event) => {
+      if (shouldIgnoreEvent()) return
+      if (event.button !== 0) return
+      if (!isMousePressed && !clickAndHoldTimerId) return
+
+      resetClickAndHoldState()
+      clearClickAndHoldTimer()
+    },
+    { signal },
+  )
+
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      void (async () => {
+        if (shouldIgnoreEvent()) return
+        if (isEditableTarget(event.target)) return
+
+        const config = await getCurrentConfig()
+        if (
+          !config ||
+          !config.translate.node.enabled ||
+          config.translate.node.hotkey === "clickAndHold"
+        ) {
+          resetHotkeySession()
+          return
+        }
+
+        const hotkeyEventKey = HOTKEY_EVENT_KEYS[config.translate.node.hotkey]
+
+        if (event.key === hotkeyEventKey) {
+          if (!isHotkeyPressed) {
+            isHotkeyPressed = true
+            activeHotkeyEventKey = hotkeyEventKey
+            timerId = setTimeout(() => {
+              void (async () => {
+                if (shouldIgnoreEvent()) return
+                if (!isHotkeySessionPure || !isHotkeyPressed) {
+                  timerId = null
+                  return
+                }
+
+                const currentConfig = await getCurrentConfig()
+                if (
+                  !currentConfig ||
+                  !currentConfig.translate.node.enabled ||
+                  currentConfig.translate.node.hotkey === "clickAndHold"
+                ) {
+                  timerId = null
+                  return
+                }
+                if (
+                  HOTKEY_EVENT_KEYS[currentConfig.translate.node.hotkey] !== activeHotkeyEventKey
+                ) {
+                  timerId = null
+                  return
+                }
+
+                triggerNodeTranslation(resolveTriggerPoint(), currentConfig)
+                actionTriggered = true
+                timerId = null
+              })()
+            }, NODE_TRANSLATION_HOLD_TRIGGER_MS)
+
+            if (!isHotkeySessionPure && timerId) {
+              clearTimeout(timerId)
+              timerId = null
+            }
+          }
+        } else {
+          isHotkeySessionPure = false
+          if (isHotkeyPressed && timerId) {
+            clearTimeout(timerId)
+            timerId = null
           }
         }
-        resetHotkeySession()
-      }
-    })()
-  }, { signal })
+      })()
+    },
+    { signal },
+  )
+
+  document.addEventListener(
+    "keyup",
+    (event) => {
+      void (async () => {
+        if (shouldIgnoreEvent()) return
+        if (isEditableTarget(event.target)) return
+
+        const config = await getCurrentConfig()
+        if (
+          !config ||
+          !config.translate.node.enabled ||
+          config.translate.node.hotkey === "clickAndHold"
+        ) {
+          if (event.key === activeHotkeyEventKey) resetHotkeySession()
+          return
+        }
+
+        const hotkeyEventKey = HOTKEY_EVENT_KEYS[config.translate.node.hotkey]
+
+        if (event.key === hotkeyEventKey || event.key === activeHotkeyEventKey) {
+          if (isHotkeyPressed && isHotkeySessionPure) {
+            if (timerId) {
+              clearTimeout(timerId)
+              timerId = null
+            }
+            if (!actionTriggered) {
+              const currentConfig = await getCurrentConfig()
+              if (
+                !currentConfig ||
+                !currentConfig.translate.node.enabled ||
+                currentConfig.translate.node.hotkey === "clickAndHold"
+              )
+                return
+
+              triggerNodeTranslation(resolveTriggerPoint(), currentConfig)
+            }
+          }
+          resetHotkeySession()
+        }
+      })()
+    },
+    { signal },
+  )
 
   return () => {
     ac.abort()

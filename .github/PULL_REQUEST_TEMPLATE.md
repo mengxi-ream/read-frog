@@ -1,3 +1,5 @@
+> **AI model(s) used (required):** <!-- List every model used, or write "None" if no AI was used. -->
+
 ## Type of Changes
 
 <!--- Please select one type below -->

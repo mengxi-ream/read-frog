@@ -8,7 +8,9 @@ async function readSource(relativePath: string) {
 
 describe("shared popup animation classes", () => {
   it("exports the shared closed-state contract", () => {
-    expect(SHARED_POPUP_CLOSED_STATE_CLASS).toBe("data-closed:pointer-events-none data-closed:[animation-fill-mode:forwards]")
+    expect(SHARED_POPUP_CLOSED_STATE_CLASS).toBe(
+      "data-closed:pointer-events-none data-closed:[animation-fill-mode:forwards]",
+    )
   })
 
   it("is applied to popup-like base-ui primitives", async () => {

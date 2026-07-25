@@ -1,4 +1,8 @@
-import type { AudioCaptionTrack, CaptionTrack, PlayerData } from "@/utils/subtitles/fetchers/youtube/types"
+import type {
+  AudioCaptionTrack,
+  CaptionTrack,
+  PlayerData,
+} from "@/utils/subtitles/fetchers/youtube/types"
 import { PLAYER_DATA_RESPONSE_TYPE } from "@/utils/constants/subtitles"
 
 export interface PlayerDataResponse {
@@ -19,7 +23,7 @@ export function errorResponse(requestId: string, error: string): PlayerDataRespo
 }
 
 export function normalizeTracks(tracks: CaptionTrack[]): CaptionTrack[] {
-  return tracks.map(t => ({
+  return tracks.map((t) => ({
     ...t,
     baseUrl: t.baseUrl?.includes("://") ? t.baseUrl : `${location.origin}${t.baseUrl}`,
   }))
@@ -28,14 +32,15 @@ export function normalizeTracks(tracks: CaptionTrack[]): CaptionTrack[] {
 export function parseAudioTracks(tracks?: any[]): AudioCaptionTrack[] {
   return (tracks ?? []).flatMap((t) => {
     try {
-      return [{
-        url: t.url,
-        vssId: t.vssId,
-        kind: t.kind,
-        languageCode: new URL(t.url).searchParams.get("lang") ?? undefined,
-      }]
-    }
-    catch {
+      return [
+        {
+          url: t.url,
+          vssId: t.vssId,
+          kind: t.kind,
+          languageCode: new URL(t.url).searchParams.get("lang") ?? undefined,
+        },
+      ]
+    } catch {
       return []
     }
   })

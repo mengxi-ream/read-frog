@@ -8,7 +8,11 @@ import { StylePreview } from "./style-preview"
 
 export function CustomTranslationStyle() {
   return (
-    <ConfigCard id="custom-translation-style" title={i18n.t("options.translation.translationStyle.title")} description={i18n.t("options.translation.translationStyle.description")}>
+    <ConfigCard
+      id="custom-translation-style"
+      title={i18n.t("options.translation.translationStyle.title")}
+      description={i18n.t("options.translation.translationStyle.description")}
+    >
       <FieldGroup>
         <CustomTranslationStyleSwitch />
         <PresetStyleSelector />

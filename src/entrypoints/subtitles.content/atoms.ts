@@ -1,8 +1,9 @@
 import type { ViewId } from "./ui/subtitles-settings-panel/views"
+import type { SubtitlesSource } from "@/utils/constants/subtitles"
 import type { StateData, SubtitlesFragment, SubtitlesState } from "@/utils/subtitles/types"
 import { atom, createStore } from "jotai"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { DEFAULT_SUBTITLE_POSITION } from "@/utils/constants/subtitles"
+import { DEFAULT_SUBTITLE_POSITION, SUBTITLES_SOURCE } from "@/utils/constants/subtitles"
 import { hasRenderableSubtitleByMode, isAwaitingTranslation } from "@/utils/subtitles/display-rules"
 import { ROOT_VIEW } from "./ui/subtitles-settings-panel/views"
 
@@ -15,6 +16,8 @@ export const currentSubtitleAtom = atom<SubtitlesFragment | null>(null)
 export const subtitlesStateAtom = atom<StateData | null>(null)
 
 export const subtitlesVisibleAtom = atom<boolean>(false)
+
+export const subtitlesSourceAtom = atom<SubtitlesSource>(SUBTITLES_SOURCE.NATIVE)
 
 export const subtitlesSettingsPanelOpenAtom = atom<boolean>(false)
 
@@ -29,7 +32,8 @@ export const TranslatedDownloadPhase = {
 } as const
 
 // eslint-disable-next-line ts/no-redeclare
-export type TranslatedDownloadPhase = typeof TranslatedDownloadPhase[keyof typeof TranslatedDownloadPhase]
+export type TranslatedDownloadPhase =
+  (typeof TranslatedDownloadPhase)[keyof typeof TranslatedDownloadPhase]
 
 export const translatedSubtitlesDownloadStatusAtom = atom<{
   phase: TranslatedDownloadPhase
@@ -64,8 +68,7 @@ export const subtitlesShowStateAtom = atom((get): Exclude<SubtitlesState, "idle"
   const hasRenderable = hasRenderableSubtitleByMode(subtitle, style.displayMode)
   const isError = stateData?.state === "error"
 
-  if (isError)
-    return "error"
+  if (isError) return "error"
 
   return isAwaitingTranslation(subtitle, stateData) && !hasRenderable ? "loading" : undefined
 })
@@ -74,11 +77,9 @@ export const subtitlesShowContentAtom = atom((get): boolean => {
   const { subtitle, stateData, isVisible } = get(subtitlesDisplayAtom)
   const { style } = get(configFieldsAtomMap.videoSubtitles)
 
-  if (!isVisible)
-    return false
+  if (!isVisible) return false
 
-  if (stateData?.state === "error")
-    return false
+  if (stateData?.state === "error") return false
 
   return hasRenderableSubtitleByMode(subtitle, style.displayMode)
 })

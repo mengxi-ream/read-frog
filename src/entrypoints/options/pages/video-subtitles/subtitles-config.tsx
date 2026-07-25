@@ -8,7 +8,9 @@ import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function SubtitlesConfig() {
-  const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
+  const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(
+    configFieldsAtomMap.videoSubtitles,
+  )
 
   return (
     <ConfigCard
@@ -61,7 +63,9 @@ export function SubtitlesConfig() {
           <FieldContent className="self-center">
             <FieldLabel htmlFor="video-subtitles-ai-segmentation">
               {i18n.t("options.videoSubtitles.aiSegmentation.enable")}
-              <HelpTooltip>{i18n.t("options.videoSubtitles.aiSegmentation.enableDescription")}</HelpTooltip>
+              <HelpTooltip>
+                {i18n.t("options.videoSubtitles.aiSegmentation.enableDescription")}
+              </HelpTooltip>
             </FieldLabel>
           </FieldContent>
           <Switch

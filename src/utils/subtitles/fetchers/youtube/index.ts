@@ -23,27 +23,30 @@ import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
 import { getYoutubeVideoId } from "@/utils/subtitles/video-id"
 import { detectFormat } from "./format-detector"
 import { filterNoiseFromEvents } from "./noise-filter"
-import { parseAnimatedSubtitles, parseKaraokeSubtitles, parseScrollingAsrSubtitles, parseStandardSubtitles, parseStylizedKaraokeSubtitles } from "./parser"
+import {
+  parseAnimatedSubtitles,
+  parseKaraokeSubtitles,
+  parseScrollingAsrSubtitles,
+  parseStandardSubtitles,
+  parseStylizedKaraokeSubtitles,
+} from "./parser"
 import { extractPotToken } from "./pot-token"
 import { youtubeSubtitlesResponseSchema } from "./types"
 import { buildSubtitleUrl } from "./url-builder"
 
 function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-function postMessageRequest(
-  responseType: string,
-  message: Record<string, unknown>,
-): Promise<any> {
+function postMessageRequest(responseType: string, message: Record<string, unknown>): Promise<any> {
   return new Promise((resolve) => {
     const requestId = getRandomUUID()
 
     const handler = (event: MessageEvent) => {
       if (
-        event.origin !== window.location.origin
-        || event.data?.type !== responseType
-        || event.data?.requestId !== requestId
+        event.origin !== window.location.origin ||
+        event.data?.type !== responseType ||
+        event.data?.requestId !== requestId
       ) {
         return
       }
@@ -123,9 +126,12 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     }
 
     const response = await this.requestPlayerData(videoId)
-    return response.success === true
-      && response.data != null
-      && response.data.captionTracks.length > 0
+    return (
+      response.success &&
+      response.data !== null &&
+      response.data !== undefined &&
+      response.data.captionTracks.length > 0
+    )
   }
 
   async shouldUseSameTrack(): Promise<boolean> {
@@ -136,8 +142,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     try {
       const currentHash = await this.computeTrackHash()
       return currentHash !== null && this.cachedTrackHash === currentHash
-    }
-    catch {
+    } catch {
       return false
     }
   }
@@ -157,10 +162,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     return this.buildTrackHash(videoId, track)
   }
 
-  private buildTrackHash(
-    videoId: string,
-    track: CaptionTrack | null,
-  ): string | null {
+  private buildTrackHash(videoId: string, track: CaptionTrack | null): string | null {
     if (!track) {
       return null
     }
@@ -201,8 +203,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
         track,
         events,
       }
-    }
-    catch {
+    } catch {
       return {
         currentHash,
         track,
@@ -282,7 +283,10 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     return playerData
   }
 
-  private async fetchTrackEvents(track: CaptionTrack, playerData: PlayerData): Promise<YoutubeTimedText[]> {
+  private async fetchTrackEvents(
+    track: CaptionTrack,
+    playerData: PlayerData,
+  ): Promise<YoutubeTimedText[]> {
     const potToken = extractPotToken(track, playerData)
     const url = buildSubtitleUrl(track, playerData, potToken)
     return this.fetchWithRetry(url)
@@ -292,18 +296,17 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     return playerData.audioCaptionTracks.some((t) => {
       try {
         return new URL(t.url).searchParams.has("pot")
-      }
-      catch {
+      } catch {
         return false
       }
     })
   }
 
   private async waitForTimedtextUrl(videoId: string): Promise<string | null> {
-    const resp = await postMessageRequest(
-      WAIT_TIMEDTEXT_RESPONSE_TYPE,
-      { type: WAIT_TIMEDTEXT_REQUEST_TYPE, videoId },
-    )
+    const resp = await postMessageRequest(WAIT_TIMEDTEXT_RESPONSE_TYPE, {
+      type: WAIT_TIMEDTEXT_REQUEST_TYPE,
+      videoId,
+    })
     return resp?.url ?? null
   }
 
@@ -312,20 +315,18 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     error?: string
     data?: PlayerData
   }> {
-    const resp = await postMessageRequest(
-      PLAYER_DATA_RESPONSE_TYPE,
-      { type: PLAYER_DATA_REQUEST_TYPE, expectedVideoId: videoId },
-    )
-    if (!resp)
-      return { success: false, error: "TIMEOUT" }
+    const resp = await postMessageRequest(PLAYER_DATA_RESPONSE_TYPE, {
+      type: PLAYER_DATA_REQUEST_TYPE,
+      expectedVideoId: videoId,
+    })
+    if (!resp) return { success: false, error: "TIMEOUT" }
     return { success: resp.success, error: resp.error, data: resp.data }
   }
 
   private async ensureSubtitlesEnabled(): Promise<void> {
-    await postMessageRequest(
-      ENSURE_SUBTITLES_RESPONSE_TYPE,
-      { type: ENSURE_SUBTITLES_REQUEST_TYPE },
-    )
+    await postMessageRequest(ENSURE_SUBTITLES_RESPONSE_TYPE, {
+      type: ENSURE_SUBTITLES_REQUEST_TYPE,
+    })
   }
 
   /**
@@ -338,46 +339,34 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
    * 4. Auto-generated ASR subtitles (lower quality but better than nothing)
    * 5. First available track as fallback
    */
-  private selectTrack(
-    playerData: PlayerData,
-  ): CaptionTrack | null {
-    const {
-      captionTracks: tracks,
-      selectedTrackLanguageCode,
-      selectedTrackVssId,
-    } = playerData
+  private selectTrack(playerData: PlayerData): CaptionTrack | null {
+    const { captionTracks: tracks, selectedTrackLanguageCode, selectedTrackVssId } = playerData
 
-    if (tracks.length === 0)
-      return null
+    if (tracks.length === 0) return null
 
     // Priority 1: User's selected track in YouTube player
     if (selectedTrackVssId) {
-      const selectedTrack = tracks.find(t => t.vssId === selectedTrackVssId)
-      if (selectedTrack)
-        return selectedTrack
+      const selectedTrack = tracks.find((t) => t.vssId === selectedTrackVssId)
+      if (selectedTrack) return selectedTrack
     }
 
     if (selectedTrackLanguageCode) {
-      const selectedTrack = tracks.find(t => t.languageCode === selectedTrackLanguageCode)
-      if (selectedTrack)
-        return selectedTrack
+      const selectedTrack = tracks.find((t) => t.languageCode === selectedTrackLanguageCode)
+      if (selectedTrack) return selectedTrack
     }
 
     // Priority 2: Human subtitles without name - these are typically the original
     // language subtitles uploaded by the video creator
-    const humanExact = tracks.find(t => t.kind !== "asr" && !t.name)
-    if (humanExact)
-      return humanExact
+    const humanExact = tracks.find((t) => t.kind !== "asr" && !t.name)
+    if (humanExact) return humanExact
 
     // Priority 3: Human subtitles with name - may be translated or have additional metadata
-    const humanWithName = tracks.find(t => t.kind !== "asr")
-    if (humanWithName)
-      return humanWithName
+    const humanWithName = tracks.find((t) => t.kind !== "asr")
+    if (humanWithName) return humanWithName
 
     // Priority 4: Auto-generated speech recognition subtitles
-    const asr = tracks.find(t => t.kind === "asr")
-    if (asr)
-      return asr
+    const asr = tracks.find((t) => t.kind === "asr")
+    if (asr) return asr
 
     return tracks[0]
   }
@@ -401,9 +390,9 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
               throw new OverlaySubtitlesError(i18n.t("subtitles.errors.http429"))
             // Retryable errors - throw and let retry logic handle
             case 500:
-              throw new Error(`${i18n.t("subtitles.errors.http500")}`)
+              throw new Error(i18n.t("subtitles.errors.http500"))
             default:
-              throw new Error(`${i18n.t("subtitles.errors.httpUnknown", [status])}`)
+              throw new Error(i18n.t("subtitles.errors.httpUnknown", [status]))
           }
         }
 
@@ -414,8 +403,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
         }
 
         return parsed.data.events
-      }
-      catch (e) {
+      } catch (e) {
         // Don't retry permanent errors (OverlaySubtitlesError)
         if (e instanceof OverlaySubtitlesError) {
           throw e
@@ -427,7 +415,9 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
       }
     }
 
-    throw new OverlaySubtitlesError(lastError?.message ?? i18n.t("subtitles.errors.fetchSubTimeout"))
+    throw new OverlaySubtitlesError(
+      lastError?.message ?? i18n.t("subtitles.errors.fetchSubTimeout"),
+    )
   }
 
   private async processRawEvents(events: YoutubeTimedText[]): Promise<SubtitlesFragment[]> {
@@ -455,9 +445,10 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
       return parseStandardSubtitles(filteredEvents)
     }
 
-    const fragments = format === "scrolling-asr"
-      ? parseScrollingAsrSubtitles(filteredEvents, this.sourceLanguage)
-      : parseStandardSubtitles(filteredEvents)
+    const fragments =
+      format === "scrolling-asr"
+        ? parseScrollingAsrSubtitles(filteredEvents, this.sourceLanguage)
+        : parseStandardSubtitles(filteredEvents)
 
     return fragments
   }

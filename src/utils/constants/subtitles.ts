@@ -72,8 +72,13 @@ export const SUBTITLES_THEME = "dark" as const
 
 // Font family mapping
 export const SUBTITLE_FONT_FAMILIES = {
-  "system": "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
-  "roboto": "Roboto, sans-serif",
-  "noto-sans": "\"Noto Sans\", \"Noto Sans SC\", \"Noto Sans JP\", \"Noto Sans KR\", sans-serif",
-  "noto-serif": "\"Noto Serif\", \"Noto Serif SC\", \"Noto Serif JP\", \"Noto Serif KR\", serif",
+  system: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  roboto: "Roboto, sans-serif",
+  "noto-sans": '"Noto Sans", "Noto Sans SC", "Noto Sans JP", "Noto Sans KR", sans-serif',
+  "noto-serif": '"Noto Serif", "Noto Serif SC", "Noto Serif JP", "Noto Serif KR", serif',
 }
+
+// Subtitles source
+export const SUBTITLES_SOURCE = { NATIVE: "native", AI: "ai" } as const
+export type SubtitlesSource = (typeof SUBTITLES_SOURCE)[keyof typeof SUBTITLES_SOURCE]
+export const VIDEO_TRANSCRIPTION_APPLY_URL = "https://tally.so/r/7Rzb96"

@@ -1,9 +1,7 @@
 import type { NotebaseRowCreateInput } from "@read-frog/api-contract"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { describe, expect, it } from "vitest"
-import {
-  sanitizeSelectionToolbarCustomAction,
-} from "../notebase/connection"
+import { sanitizeSelectionToolbarCustomAction } from "../notebase/connection"
 import {
   buildNotebaseRowCells,
   createNotebaseMapping,
@@ -112,7 +110,7 @@ describe("notebase utils", () => {
       ],
     })
 
-    expect(mappings.map(mapping => mapping.status)).toEqual(["valid", "incompatible"])
+    expect(mappings.map((mapping) => mapping.status)).toEqual(["valid", "incompatible"])
   })
 
   it("builds row cells from valid mappings only", () => {
@@ -129,38 +127,42 @@ describe("notebase utils", () => {
       },
     }
 
-    const { cells } = buildNotebaseRowCells(action, {
-      id: "table-1",
-      name: "Articles",
-      updatedAt: new Date(),
-      notebaseColumns: [
-        {
-          id: "column-summary",
-          notebaseId: "notebase-1",
-          name: "Summary",
-          config: { type: "string" },
-          position: 0,
-          isPrimary: false,
-          width: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: "column-date",
-          notebaseId: "notebase-1",
-          name: "Date",
-          config: { type: "date" },
-          position: 1,
-          isPrimary: false,
-          width: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ],
-    }, {
-      summary: "A short summary",
-      score: 9,
-    })
+    const { cells } = buildNotebaseRowCells(
+      action,
+      {
+        id: "table-1",
+        name: "Articles",
+        updatedAt: new Date(),
+        notebaseColumns: [
+          {
+            id: "column-summary",
+            notebaseId: "notebase-1",
+            name: "Summary",
+            config: { type: "string" },
+            position: 0,
+            isPrimary: false,
+            width: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          {
+            id: "column-date",
+            notebaseId: "notebase-1",
+            name: "Date",
+            config: { type: "date" },
+            position: 1,
+            isPrimary: false,
+            width: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
+      },
+      {
+        summary: "A short summary",
+        score: 9,
+      },
+    )
 
     const typedCells: NotebaseRowCreateInput["data"]["cells"] = cells
 
@@ -174,7 +176,9 @@ describe("notebase utils", () => {
 
   it("only allows string and number columns", () => {
     expect(isNotebaseMappingCompatible("string", { type: "string" })).toBe(true)
-    expect(isNotebaseMappingCompatible("number", { type: "number", decimal: 0, format: "number" })).toBe(true)
+    expect(
+      isNotebaseMappingCompatible("number", { type: "number", decimal: 0, format: "number" }),
+    ).toBe(true)
     expect(isNotebaseMappingCompatible("string", { type: "date" })).toBe(false)
     expect(isNotebaseMappingCompatible("number", { type: "select", options: [] })).toBe(false)
   })

@@ -20,22 +20,13 @@ export interface DiffConflictsResult {
  * Recursively detect changes between base, local, and remote configs
  * Returns draft config (base + same-changes, conflicts keep base value) and list of conflicts
  */
-export function detectConflicts(
-  base: Config,
-  local: Config,
-  remote: Config,
-): DiffConflictsResult {
+export function detectConflicts(base: Config, local: Config, remote: Config): DiffConflictsResult {
   const conflicts: FieldConflict[] = []
 
   const isAtomicValue = (val: unknown) =>
-    val == null || typeof val !== "object" || Array.isArray(val)
+    val === null || val === undefined || typeof val !== "object" || Array.isArray(val)
 
-  function traverse(
-    basePath: string[],
-    baseVal: any,
-    localVal: any,
-    remoteVal: any,
-  ) {
+  function traverse(basePath: string[], baseVal: any, localVal: any, remoteVal: any) {
     // Handle atomic values (primitives, nulls, arrays)
     if (isAtomicValue(baseVal) || isAtomicValue(localVal) || isAtomicValue(remoteVal)) {
       const localChanged = !dequal(localVal, baseVal)
@@ -46,19 +37,16 @@ export function detectConflicts(
           // Both changed to same value - auto apply
           return localVal
         }
-        else {
-          // Both changed to different values - conflict
-          conflicts.push({
-            path: basePath,
-            baseValue: baseVal,
-            localValue: localVal,
-            remoteValue: remoteVal,
-          })
-          // Keep base value until user resolves
-          return baseVal
-        }
-      }
-      else if (localChanged) {
+        // Both changed to different values - conflict
+        conflicts.push({
+          path: basePath,
+          baseValue: baseVal,
+          localValue: localVal,
+          remoteValue: remoteVal,
+        })
+        // Keep base value until user resolves
+        return baseVal
+      } else if (localChanged) {
         // Only local changed - track as conflict for user to confirm
         conflicts.push({
           path: basePath,
@@ -68,8 +56,7 @@ export function detectConflicts(
         })
         // Keep base value until user resolves
         return baseVal
-      }
-      else if (remoteChanged) {
+      } else if (remoteChanged) {
         // Only remote changed - track as conflict for user to confirm
         conflicts.push({
           path: basePath,
@@ -80,10 +67,8 @@ export function detectConflicts(
         // Keep base value until user resolves
         return baseVal
       }
-      else {
-        // No change
-        return baseVal
-      }
+      // No change
+      return baseVal
     }
 
     // Handle objects - recurse into properties
@@ -95,12 +80,7 @@ export function detectConflicts(
     ])
 
     for (const key of allKeys) {
-      result[key] = traverse(
-        [...basePath, key],
-        baseVal[key],
-        localVal[key],
-        remoteVal[key],
-      )
+      result[key] = traverse([...basePath, key], baseVal[key], localVal[key], remoteVal[key])
     }
 
     return result

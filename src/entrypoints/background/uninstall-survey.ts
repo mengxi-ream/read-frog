@@ -20,16 +20,12 @@ function getBrowserVersion(browserType: string): string {
   const type = browserType.toLowerCase() as BrowserType
 
   if (type === "edge") {
-    return ua.match(EDGE_VERSION_RE)?.[1]
-      ?? ua.match(EDGE_LEGACY_VERSION_RE)?.[1]
-      ?? "unknown"
+    return ua.match(EDGE_VERSION_RE)?.[1] ?? ua.match(EDGE_LEGACY_VERSION_RE)?.[1] ?? "unknown"
   }
 
-  if (type === "firefox")
-    return ua.match(FIREFOX_VERSION_RE)?.[1] ?? "unknown"
+  if (type === "firefox") return ua.match(FIREFOX_VERSION_RE)?.[1] ?? "unknown"
 
-  if (type === "chrome")
-    return ua.match(CHROME_VERSION_RE)?.[1] ?? "unknown"
+  if (type === "chrome") return ua.match(CHROME_VERSION_RE)?.[1] ?? "unknown"
 
   return ua.match(ANY_BROWSER_VERSION_RE)?.[1] ?? "unknown"
 }
@@ -42,16 +38,11 @@ function getOS(): string {
   }
   const platform = `${nav.userAgentData?.platform ?? ""} ${nav.platform ?? ""} ${nav.userAgent ?? ""}`
 
-  if (IOS_PLATFORM_RE.test(platform))
-    return "iOS"
-  if (ANDROID_PLATFORM_RE.test(platform))
-    return "Android"
-  if (WINDOWS_PLATFORM_RE.test(platform))
-    return "Windows"
-  if (MAC_PLATFORM_RE.test(platform))
-    return "MacOS"
-  if (LINUX_PLATFORM_RE.test(platform))
-    return "Linux"
+  if (IOS_PLATFORM_RE.test(platform)) return "iOS"
+  if (ANDROID_PLATFORM_RE.test(platform)) return "Android"
+  if (WINDOWS_PLATFORM_RE.test(platform)) return "Windows"
+  if (MAC_PLATFORM_RE.test(platform)) return "MacOS"
+  if (LINUX_PLATFORM_RE.test(platform)) return "Linux"
   return "Unknown"
 }
 
@@ -61,7 +52,7 @@ function getUILang(): string {
 }
 
 export async function setupUninstallSurvey() {
-  const surveyUrl = i18n.t("uninstallSurveyUrl") as string
+  const surveyUrl = i18n.t("uninstallSurveyUrl")
   const browserType = import.meta.env.BROWSER
 
   const url = new URL(surveyUrl)

@@ -3,7 +3,6 @@ import type { ProvidersConfig } from "@/types/config/provider"
 import { useSelector } from "@tanstack/react-store"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useState } from "react"
-import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,7 +15,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/base-ui/alert-dialog"
 import { Button } from "@/components/ui/base-ui/button"
-import { isAPIProviderConfig, isLLMProvider, isNonAPIProvider, isTranslateProvider } from "@/types/config/provider"
+import { toastManager } from "@/components/ui/base-ui/toast"
+import {
+  isAPIProviderConfig,
+  isLLMProvider,
+  isNonAPIProvider,
+  isTranslateProvider,
+} from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { providerConfigAtom } from "@/utils/atoms/provider"
 import {
@@ -52,7 +57,8 @@ export function ProviderConfigForm() {
 
   const specificFormOpts = {
     ...formOpts,
-    defaultValues: providerConfig && isAPIProviderConfig(providerConfig) ? providerConfig : undefined,
+    defaultValues:
+      providerConfig && isAPIProviderConfig(providerConfig) ? providerConfig : undefined,
   }
 
   const form = useAppForm({
@@ -62,8 +68,8 @@ export function ProviderConfigForm() {
     },
   })
 
-  const providerType = useSelector(form.store, state => state.values.provider)
-  const apiKey = useSelector(form.store, state => state.values.apiKey)
+  const providerType = useSelector(form.store, (state) => state.values.provider)
+  const apiKey = useSelector(form.store, (state) => state.values.apiKey)
   const isTranslateProviderType = isTranslateProvider(providerType)
   const isLLM = isLLMProvider(providerType)
 
@@ -80,20 +86,30 @@ export function ProviderConfigForm() {
   }
 
   const chooseNextProviderConfig = (providersConfig: ProvidersConfig) => {
-    const firstProvider = providersConfig.find(p => !isNonAPIProvider(p.provider))
+    const firstProvider = providersConfig.find((p) => !isNonAPIProvider(p.provider))
     return firstProvider ?? providersConfig[0]
   }
 
   const handleDuplicate = async () => {
-    await duplicateProvider(providerConfig, allProvidersConfig, setAllProvidersConfig, setSelectedProviderId)
+    await duplicateProvider(
+      providerConfig,
+      allProvidersConfig,
+      setAllProvidersConfig,
+      setSelectedProviderId,
+    )
   }
 
   const handleDelete = async () => {
-    const updatedAllProviders = allProvidersConfig.filter(provider => provider.id !== providerConfig.id)
+    const updatedAllProviders = allProvidersConfig.filter(
+      (provider) => provider.id !== providerConfig.id,
+    )
 
     const unsatisfied = findFeatureMissingProvider(updatedAllProviders, config)
     if (unsatisfied) {
-      toast.error(i18n.t("options.apiProviders.form.atLeastOneLLMProvider")) // TODO: make this word more general
+      toastManager.add({
+        type: "error",
+        title: i18n.t("options.apiProviders.form.atLeastOneLLMProvider"),
+      }) // TODO: make this word more general
       return
     }
 
@@ -102,15 +118,23 @@ export function ProviderConfigForm() {
       config,
       updatedAllProviders,
     )
-    const hasAffectedCustomActions = config.selectionToolbar.customActions
-      .some(action => action.providerId === providerConfig.id)
+    const hasAffectedCustomActions = config.selectionToolbar.customActions.some(
+      (action) => action.providerId === providerConfig.id,
+    )
 
     if (hasAffectedCustomActions && !updatedCustomActions) {
-      toast.error(i18n.t("options.apiProviders.form.atLeastOneLLMProvider"))
+      toastManager.add({
+        type: "error",
+        title: i18n.t("options.apiProviders.form.atLeastOneLLMProvider"),
+      })
       return
     }
 
-    const fallbacks = computeProviderFallbacksAfterDeletion(providerConfig.id, config, updatedAllProviders)
+    const fallbacks = computeProviderFallbacksAfterDeletion(
+      providerConfig.id,
+      config,
+      updatedAllProviders,
+    )
     let patch = buildFeatureProviderPatch(fallbacks)
     if (updatedCustomActions) {
       patch = {
@@ -122,7 +146,11 @@ export function ProviderConfigForm() {
       } as Partial<Config>
     }
 
-    const ldFallback = computeLanguageDetectionFallbackAfterDeletion(providerConfig.id, config, updatedAllProviders)
+    const ldFallback = computeLanguageDetectionFallbackAfterDeletion(
+      providerConfig.id,
+      config,
+      updatedAllProviders,
+    )
     if (ldFallback !== null) {
       patch = {
         ...patch,
@@ -130,7 +158,7 @@ export function ProviderConfigForm() {
           ...config.languageDetection,
           providerId: ldFallback,
         },
-      } as Partial<Config>
+      }
     }
 
     if (Object.keys(patch).length > 0) {
@@ -143,27 +171,42 @@ export function ProviderConfigForm() {
 
   return (
     <form.AppForm>
-      <div className={cn("flex-1 bg-card rounded-xl p-4 border flex flex-col justify-between", selectedProviderId !== providerConfig.id && "hidden")}>
+      <div
+        className={cn(
+          "flex flex-1 flex-col justify-between rounded-xl border bg-card p-4",
+          selectedProviderId !== providerConfig.id && "hidden",
+        )}
+      >
         <div className="flex flex-col gap-4">
           <ConfigHeader providerType={providerType} apiKey={apiKey} />
           <form.AppField
             name="name"
             validators={{
               onChange: ({ value }) => {
-                const duplicateProvider = allProvidersConfig.find(provider =>
-                  provider.name === value && provider.id !== providerConfig.id,
+                const providerWithSameName = allProvidersConfig.find(
+                  (provider) => provider.name === value && provider.id !== providerConfig.id,
                 )
-                if (duplicateProvider) {
+                if (providerWithSameName) {
                   return i18n.t("options.apiProviders.form.duplicateProviderName", [value])
                 }
                 return undefined
               },
             }}
           >
-            {field => <field.InputFieldAutoSave formForSubmit={form} label={i18n.t("options.apiProviders.form.fields.name")} />}
+            {(field) => (
+              <field.InputFieldAutoSave
+                formForSubmit={form}
+                label={i18n.t("options.apiProviders.form.fields.name")}
+              />
+            )}
           </form.AppField>
           <form.AppField name="description">
-            {field => <field.InputFieldAutoSave formForSubmit={form} label={i18n.t("options.apiProviders.form.fields.description")} />}
+            {(field) => (
+              <field.InputFieldAutoSave
+                formForSubmit={form}
+                label={i18n.t("options.apiProviders.form.fields.description")}
+              />
+            )}
           </form.AppField>
 
           <APIKeyField form={form} />
@@ -184,7 +227,7 @@ export function ProviderConfigForm() {
             </AdvancedOptionsSection>
           )}
         </div>
-        <div className="flex justify-between mt-8">
+        <div className="mt-8 flex justify-between">
           <Button type="button" variant="outline" onClick={handleDuplicate}>
             {i18n.t("options.apiProviders.form.duplicate")}
           </Button>
@@ -194,12 +237,20 @@ export function ProviderConfigForm() {
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>{i18n.t("options.apiProviders.form.deleteDialog.title")}</AlertDialogTitle>
-                <AlertDialogDescription>{i18n.t("options.apiProviders.form.deleteDialog.description")}</AlertDialogDescription>
+                <AlertDialogTitle>
+                  {i18n.t("options.apiProviders.form.deleteDialog.title")}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {i18n.t("options.apiProviders.form.deleteDialog.description")}
+                </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>{i18n.t("options.apiProviders.form.deleteDialog.cancel")}</AlertDialogCancel>
-                <AlertDialogAction variant="destructive" onClick={handleDelete}>{i18n.t("options.apiProviders.form.deleteDialog.confirm")}</AlertDialogAction>
+                <AlertDialogCancel>
+                  {i18n.t("options.apiProviders.form.deleteDialog.cancel")}
+                </AlertDialogCancel>
+                <AlertDialogAction variant="destructive" onClick={handleDelete}>
+                  {i18n.t("options.apiProviders.form.deleteDialog.confirm")}
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

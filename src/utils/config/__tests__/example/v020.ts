@@ -1,7 +1,7 @@
 import type { TestSeriesObject } from "./types"
 
 export const testSeries: TestSeriesObject = {
-  "default": {
+  default: {
     description: "add empty disabledFloatingButtonPatterns",
     config: {
       language: {
@@ -216,7 +216,8 @@ Translate to {{targetLang}}:
             {
               id: "123e4567-e89b-12d3-a456-426614174000",
               name: "Technical Translation",
-              prompt: "Technical translation from Spanish to {{targetLang}}. Preserve technical terms and accuracy:\n{{input}}",
+              prompt:
+                "Technical translation from Spanish to {{targetLang}}. Preserve technical terms and accuracy:\n{{input}}",
             },
           ],
         },

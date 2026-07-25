@@ -1,33 +1,14 @@
-export function addStyleToShadow(shadow: ShadowRoot) {
-  document.head.querySelectorAll("style").forEach((styleEl) => {
-    if (styleEl.textContent?.includes("[data-sonner-toaster]")) {
-      const shadowHead = shadow.querySelector("head")
-      // Clone the style element instead of moving it to preserve the original
-      // Otherwise, append api will move the style element to the shadow root and cause the bug
-      const clonedStyle = styleEl.cloneNode(true)
-      if (shadowHead) {
-        shadowHead.append(clonedStyle)
-      }
-      else {
-        shadow.append(clonedStyle)
-      }
-    }
-  })
-}
-
 function isInternalStyleElement(node: Node) {
-  if (!node)
-    return false
+  if (!node) return false
 
-  if (node instanceof HTMLStyleElement && node.attributes.getNamedItem("wxt-shadow-root-document-styles")) {
+  if (
+    node instanceof HTMLStyleElement &&
+    node.attributes.getNamedItem("wxt-shadow-root-document-styles")
+  ) {
     return true
   }
 
   if (node instanceof HTMLStyleElement && node.id === "_goober") {
-    return true
-  }
-
-  if (node instanceof HTMLStyleElement && node.textContent?.includes("[data-sonner-toaster]")) {
     return true
   }
 
@@ -40,17 +21,21 @@ function isInternalStyleElement(node: Node) {
  * @param shadowRoot - Target shadow root to mirror styles to
  * @param contentMatch - Optional text content to match within the style element
  */
-export function mirrorDynamicStyles(selector: string, shadowRoot: ShadowRoot, contentMatch?: string): () => void {
+export function mirrorDynamicStyles(
+  selector: string,
+  shadowRoot: ShadowRoot,
+  contentMatch?: string,
+): () => void {
   // TODO: 目前函数只会把找到的第一个 style 放进来，但是可能存在多个 style 匹配，那其实要全部放进来，并且对应不同的 mirrorSheet
 
   // Check if adoptedStyleSheets is supported
   let supportsAdoptedStyleSheets = false
   try {
-    supportsAdoptedStyleSheets = "adoptedStyleSheets" in shadowRoot
-      && shadowRoot.adoptedStyleSheets !== undefined
-      && Array.isArray(shadowRoot.adoptedStyleSheets)
-  }
-  catch {
+    supportsAdoptedStyleSheets =
+      "adoptedStyleSheets" in shadowRoot &&
+      shadowRoot.adoptedStyleSheets !== undefined &&
+      Array.isArray(shadowRoot.adoptedStyleSheets)
+  } catch {
     supportsAdoptedStyleSheets = false
   }
 
@@ -62,8 +47,7 @@ export function mirrorDynamicStyles(selector: string, shadowRoot: ShadowRoot, co
       mirrorSheet = new CSSStyleSheet()
       // Use assignment instead of push for better compatibility
       shadowRoot.adoptedStyleSheets = [...shadowRoot.adoptedStyleSheets, mirrorSheet]
-    }
-    catch {
+    } catch {
       // Fallback if adoptedStyleSheets fails
       supportsAdoptedStyleSheets = false
     }
@@ -81,13 +65,11 @@ export function mirrorDynamicStyles(selector: string, shadowRoot: ShadowRoot, co
     const elements = [...document.querySelectorAll(selector)]
     if (contentMatch) {
       return elements.find(
-        el =>
-          el instanceof HTMLStyleElement
-          && el.textContent?.includes(contentMatch),
+        (el) => el instanceof HTMLStyleElement && el.textContent?.includes(contentMatch),
       )
     }
     // If no contentMatch is provided, return the first matching element
-    return elements.find(el => el instanceof HTMLStyleElement)
+    return elements.find((el) => el instanceof HTMLStyleElement)
   }
 
   let src = findMatchingElement()
@@ -102,8 +84,7 @@ export function mirrorDynamicStyles(selector: string, shadowRoot: ShadowRoot, co
   const updateStyles = (textContent: string) => {
     if (mirrorSheet && supportsAdoptedStyleSheets) {
       mirrorSheet.replaceSync(textContent.trim())
-    }
-    else if (mirrorStyleElement) {
+    } else if (mirrorStyleElement) {
       mirrorStyleElement.textContent = textContent.trim()
     }
   }
@@ -148,9 +129,10 @@ export function mirrorDynamicStyles(selector: string, shadowRoot: ShadowRoot, co
 
     if (mirrorSheet && supportsAdoptedStyleSheets) {
       try {
-        shadowRoot.adoptedStyleSheets = shadowRoot.adoptedStyleSheets.filter(sheet => sheet !== mirrorSheet)
-      }
-      catch {
+        shadowRoot.adoptedStyleSheets = shadowRoot.adoptedStyleSheets.filter(
+          (sheet) => sheet !== mirrorSheet,
+        )
+      } catch {
         // ignore cleanup failures
       }
     }
@@ -173,8 +155,7 @@ export function protectInternalStyles() {
 
   const protectionObserver = new MutationObserver((mutations) => {
     // Skip processing if we're in the middle of re-adding a node
-    if (isReAddingNode)
-      return
+    if (isReAddingNode) return
 
     mutations.forEach((mutation) => {
       // Check removed nodes and re-add internal style elements

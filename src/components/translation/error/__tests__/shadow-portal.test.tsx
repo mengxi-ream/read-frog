@@ -29,9 +29,7 @@ describe("translation error shadow portals", () => {
     const result = render(
       <Provider store={store}>
         <ShadowWrapperContext value={shadowWrapper}>
-          <TooltipProvider>
-            {ui}
-          </TooltipProvider>
+          <TooltipProvider>{ui}</TooltipProvider>
         </ShadowWrapperContext>
       </Provider>,
     )

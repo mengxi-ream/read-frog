@@ -8,11 +8,12 @@ import type {
   TopLevelReasoningProviderTypes,
   TranslateProviderTypes,
 } from "./constants"
-
 import { z } from "zod"
-
 import { AI_SDK_REASONING_VALUES, LLM_PROVIDER_MODELS } from "./constants"
-import { azureProviderSpecificSettingsSchema, bedrockProviderSpecificSettingsSchema } from "./provider-specific-settings"
+import {
+  azureProviderSpecificSettingsSchema,
+  bedrockProviderSpecificSettingsSchema,
+} from "./provider-specific-settings"
 
 export const providerSponsorConfigSchema = z.object({
   sponsoring: z.boolean(),
@@ -203,12 +204,19 @@ export const providerConfigSchemaList = [
   }),
 ] as const
 
-export const llmProviderConfigItemSchema = z.discriminatedUnion("provider", llmProviderConfigSchemaList)
-export const apiProviderConfigItemSchema = z.discriminatedUnion("provider", apiProviderConfigSchemaList)
+export const llmProviderConfigItemSchema = z.discriminatedUnion(
+  "provider",
+  llmProviderConfigSchemaList,
+)
+export const apiProviderConfigItemSchema = z.discriminatedUnion(
+  "provider",
+  apiProviderConfigSchemaList,
+)
 export const providerConfigItemSchema = z.discriminatedUnion("provider", providerConfigSchemaList)
 
-export const providersConfigSchema = z.array(providerConfigItemSchema).superRefine(
-  (providers, ctx) => {
+export const providersConfigSchema = z
+  .array(providerConfigItemSchema)
+  .superRefine((providers, ctx) => {
     const idSet = new Set<string>()
     providers.forEach((provider, index) => {
       if (idSet.has(provider.id)) {
@@ -232,8 +240,7 @@ export const providersConfigSchema = z.array(providerConfigItemSchema).superRefi
       }
       nameSet.add(provider.name)
     })
-  },
-)
+  })
 export type ProvidersConfig = z.infer<typeof providersConfigSchema>
 export type ProviderConfig = ProvidersConfig[number]
 export type NonAPIProviderConfig = Extract<ProviderConfig, { provider: NonAPIProviderTypes }>
@@ -242,15 +249,22 @@ export type APIProviderConfig = Extract<ProviderConfig, { provider: APIProviderT
 export type PureAPIProviderConfig = Extract<ProviderConfig, { provider: PureAPIProviderTypes }>
 export type LLMProviderConfig = Extract<ProviderConfig, { provider: LLMProviderTypes }>
 export type TranslateProviderConfig = Extract<ProviderConfig, { provider: TranslateProviderTypes }>
-export type NonCustomLLMProviderConfig = Extract<ProviderConfig, { provider: NonCustomLLMProviderTypes }>
+export type NonCustomLLMProviderConfig = Extract<
+  ProviderConfig,
+  { provider: NonCustomLLMProviderTypes }
+>
 export type CustomLLMProviderConfig = Extract<ProviderConfig, { provider: CustomLLMProviderTypes }>
-export type TopLevelReasoningProviderConfig = Extract<LLMProviderConfig, { provider: TopLevelReasoningProviderTypes }>
+export type TopLevelReasoningProviderConfig = Extract<
+  LLMProviderConfig,
+  { provider: TopLevelReasoningProviderTypes }
+>
 
 /* ──────────────────────────────
   unified llm model config helpers
   ────────────────────────────── */
 
 type ModelTuple = readonly [string, ...string[]] // 至少一个元素才能给 z.enum
+// oxlint-disable-next-line typescript/no-unnecessary-type-parameters -- T preserves literal model tuple inference for z.enum.
 function providerConfigSchema<T extends ModelTuple>(models: T) {
   return z.object({
     model: z.enum(models),
@@ -259,7 +273,9 @@ function providerConfigSchema<T extends ModelTuple>(models: T) {
   })
 }
 
-type SchemaShape<M extends Record<string, ModelTuple>> = { [K in keyof M]: ReturnType<typeof providerConfigSchema<M[K]>> }
+type SchemaShape<M extends Record<string, ModelTuple>> = {
+  [K in keyof M]: ReturnType<typeof providerConfigSchema<M[K]>>
+}
 
 function buildProviderModelsSchema<M extends Record<string, ModelTuple>>(models: M) {
   return z.object(
@@ -272,7 +288,9 @@ function buildProviderModelsSchema<M extends Record<string, ModelTuple>>(models:
 }
 
 const { "openai-compatible": _, ...modelsWithoutOpenaiCompatible } = LLM_PROVIDER_MODELS
-export const llmProviderModelsSchema = buildProviderModelsSchema(modelsWithoutOpenaiCompatible).extend({
+export const llmProviderModelsSchema = buildProviderModelsSchema(
+  modelsWithoutOpenaiCompatible,
+).extend({
   "openai-compatible": z.object({
     model: z.enum(LLM_PROVIDER_MODELS["openai-compatible"]),
     isCustomModel: z.literal(true),

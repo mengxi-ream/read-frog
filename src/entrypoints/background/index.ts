@@ -10,13 +10,22 @@ import { onMessage } from "@/utils/message"
 import { openOptionsPage } from "@/utils/navigation"
 import { SessionCacheGroupRegistry } from "@/utils/session-cache/session-cache-group-registry"
 import { runAiSegmentSubtitles } from "./ai-segmentation"
-import { setupAnalyticsMessageHandlers } from "./analytics"
+import {
+  enrollPromptExperimentInstall,
+  preloadPromptExperimentFeatureFlags,
+  setupAnalyticsMessageHandlers,
+} from "./analytics"
 import { dispatchBackgroundStreamPort } from "./background-stream"
 import { initializeActionIcons, registerActionIconListeners } from "./browser-action-icon"
 import { ensureInitializedConfig } from "./config"
 import { setUpConfigBackup } from "./config-backup"
 import { initializeContextMenu, registerContextMenuListeners } from "./context-menu"
-import { cleanupAllAiSegmentationCache, cleanupAllSummaryCache, cleanupAllTranslationCache, setUpDatabaseCleanup } from "./db-cleanup"
+import {
+  cleanupAllAiSegmentationCache,
+  cleanupAllSummaryCache,
+  cleanupAllTranslationCache,
+  setUpDatabaseCleanup,
+} from "./db-cleanup"
 import { setupEdgeTTSMessageHandlers } from "./edge-tts"
 import { setupIframeInjection } from "./iframe-injection"
 import { setupLLMGenerateTextMessageHandlers } from "./llm-generate-text"
@@ -40,6 +49,7 @@ export default defineBackground({
 
       // Open tutorial page when extension is installed
       if (details.reason === "install") {
+        await enrollPromptExperimentInstall()
         await browser.tabs.create({
           url: `${env.WXT_WEBSITE_URL}/guide/step-1`,
         })
@@ -72,8 +82,7 @@ export default defineBackground({
     onMessage("aiSegmentSubtitles", async (message) => {
       try {
         return await runAiSegmentSubtitles(message.data)
-      }
-      catch (error) {
+      } catch (error) {
         logger.error("[Background] aiSegmentSubtitles failed", error)
         throw error
       }
@@ -94,6 +103,7 @@ export default defineBackground({
 
     newUserGuide()
     setupAnalyticsMessageHandlers()
+    void preloadPromptExperimentFeatureFlags()
     translationMessage()
     registerActionIconListeners()
 
@@ -104,8 +114,10 @@ export default defineBackground({
     // Initialize action icons asynchronously
     void initializeActionIcons()
 
-    void setUpWebPageTranslationQueue()
-    void setUpSubtitlesTranslationQueue()
+    // Synchronous: all queue message handlers register in the first turn of
+    // the SW so wake-triggering messages are never dropped during init.
+    setUpWebPageTranslationQueue()
+    setUpSubtitlesTranslationQueue()
     void setUpDatabaseCleanup()
     setUpConfigBackup()
 
@@ -137,8 +149,7 @@ export default defineBackground({
     // (registerContextMenuListeners), so here we only drive the i18next singleton and
     // re-set the frozen (localized) uninstall-survey URL.
     storageAdapter.watch<Config>(CONFIG_STORAGE_KEY, (newConfig) => {
-      if (newConfig.uiLanguage === currentUiLanguage)
-        return
+      if (newConfig.uiLanguage === currentUiLanguage) return
       currentUiLanguage = newConfig.uiLanguage
       void (async () => {
         await setUiLanguage(newConfig.uiLanguage)

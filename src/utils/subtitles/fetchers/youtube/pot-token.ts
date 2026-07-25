@@ -5,28 +5,22 @@ export interface PotToken {
   potc: string | null
 }
 
-export function extractPotToken(
-  selectedTrack: CaptionTrack,
-  playerData: PlayerData,
-): PotToken {
+export function extractPotToken(selectedTrack: CaptionTrack, playerData: PlayerData): PotToken {
   const { audioCaptionTracks, cachedTimedtextUrl } = playerData
 
   if (audioCaptionTracks.length > 0) {
     let matchedTrack: AudioCaptionTrack | undefined = audioCaptionTracks.find(
-      t => t.vssId === selectedTrack.vssId,
+      (t) => t.vssId === selectedTrack.vssId,
     )
 
     if (!matchedTrack) {
       matchedTrack = audioCaptionTracks.find(
-        t => t.languageCode === selectedTrack.languageCode
-          && t.kind === selectedTrack.kind,
+        (t) => t.languageCode === selectedTrack.languageCode && t.kind === selectedTrack.kind,
       )
     }
 
     if (!matchedTrack) {
-      matchedTrack = audioCaptionTracks.find(
-        t => t.languageCode === selectedTrack.languageCode,
-      )
+      matchedTrack = audioCaptionTracks.find((t) => t.languageCode === selectedTrack.languageCode)
     }
 
     if (!matchedTrack) {

@@ -59,7 +59,10 @@ function getNonEmptyString(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value : null
 }
 
-function getMigratedCustomModel(modelConfig: { customModel?: unknown, isCustomModel?: unknown }, previousModel: string): string {
+function getMigratedCustomModel(
+  modelConfig: { customModel?: unknown; isCustomModel?: unknown },
+  previousModel: string,
+): string {
   if (modelConfig.isCustomModel === true) {
     return getNonEmptyString(modelConfig.customModel) ?? previousModel
   }

@@ -3,7 +3,13 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/base-ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { env } from "@/env"
-import { getBlogLocaleFromUILanguage, getLastViewedBlogDate, getLatestBlogDate, hasNewBlogPost, saveLastViewedBlogDate } from "@/utils/blog"
+import {
+  getBlogLocaleFromUILanguage,
+  getLastViewedBlogDate,
+  getLatestBlogDate,
+  hasNewBlogPost,
+  saveLastViewedBlogDate,
+} from "@/utils/blog"
 import { i18n } from "@/utils/i18n"
 import { version } from "../../../../package.json"
 
@@ -34,34 +40,22 @@ export default function BlogNotification() {
     window.open(blogUrl, "_blank")
   }
 
-  const showIndicator = hasNewBlogPost(
-    lastViewedDate ?? null,
-    latestBlogPost?.date ?? null,
-  )
+  const showIndicator = hasNewBlogPost(lastViewedDate ?? null, latestBlogPost?.date ?? null)
 
   return (
     <Tooltip>
       <TooltipTrigger
-        render={(
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative"
-            onClick={handleClick}
-          />
-        )}
+        render={<Button variant="ghost" size="icon" className="relative" onClick={handleClick} />}
       >
         <Icon icon="tabler:bell-filled" />
         {showIndicator && (
-          <span className="absolute top-1.5 right-1.5 flex items-center justify-center size-2">
+          <span className="absolute top-1.5 right-1.5 flex size-2 items-center justify-center">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75"></span>
             <span className="relative inline-flex size-1.5 rounded-full bg-brand"></span>
           </span>
         )}
       </TooltipTrigger>
-      <TooltipContent>
-        {i18n.t("popup.blog.notification")}
-      </TooltipContent>
+      <TooltipContent>{i18n.t("popup.blog.notification")}</TooltipContent>
     </Tooltip>
   )
 }

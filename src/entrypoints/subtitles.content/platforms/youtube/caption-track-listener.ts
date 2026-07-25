@@ -84,14 +84,10 @@ class YoutubeCaptionTrackListener {
     const attempt = ++this.bindAttempt
     const button = await waitForElement(
       this.settingsButtonSelector,
-      element => !!element.closest(this.playerContainerSelector),
+      (element) => !!element.closest(this.playerContainerSelector),
     )
 
-    if (
-      !this.started
-      || attempt !== this.bindAttempt
-      || !(button instanceof HTMLElement)
-    ) {
+    if (!this.started || attempt !== this.bindAttempt || !(button instanceof HTMLElement)) {
       return
     }
 
@@ -144,7 +140,14 @@ class YoutubeCaptionTrackListener {
         subtree: true,
         characterData: true,
         attributes: true,
-        attributeFilter: ["aria-checked", "aria-selected", "class", "hidden", "aria-hidden", "style"],
+        attributeFilter: [
+          "aria-checked",
+          "aria-selected",
+          "class",
+          "hidden",
+          "aria-hidden",
+          "style",
+        ],
       })
     }
 
@@ -163,7 +166,7 @@ class YoutubeCaptionTrackListener {
     }
 
     const currentSummaryMap = new Map(
-      currentSummaries.map(summary => [summary.slotKey, summary] as const),
+      currentSummaries.map((summary) => [summary.slotKey, summary] as const),
     )
 
     if (!this.lastMenuSummaryMap) {
@@ -263,8 +266,8 @@ class YoutubeCaptionTrackListener {
     const clickedItem = target.closest<HTMLElement>(MENU_ITEM_SELECTOR)
     const clickedRadio = target.closest<HTMLElement>("[role='menuitemradio']")
     if (
-      (!clickedItem || !menu.contains(clickedItem))
-      && (!clickedRadio || !menu.contains(clickedRadio))
+      (!clickedItem || !menu.contains(clickedItem)) &&
+      (!clickedRadio || !menu.contains(clickedRadio))
     ) {
       return
     }
@@ -295,17 +298,12 @@ function isSettingsMenuOpen(button: HTMLElement): boolean {
 }
 
 function getCurrentSelections(settingsMenu: HTMLElement): YoutubeMenuSummarySnapshot[] {
-  return Array.from(
-    settingsMenu.querySelectorAll<HTMLElement>(MENU_ITEM_WITH_SUBMENU_SELECTOR),
-  )
+  return Array.from(settingsMenu.querySelectorAll<HTMLElement>(MENU_ITEM_WITH_SUBMENU_SELECTOR))
     .map((item, index) => getSummarySelection(item, index))
     .filter((summary): summary is YoutubeMenuSummarySnapshot => summary !== null)
 }
 
-function getSummarySelection(
-  item: HTMLElement,
-  index: number,
-): YoutubeMenuSummarySnapshot | null {
+function getSummarySelection(item: HTMLElement, index: number): YoutubeMenuSummarySnapshot | null {
   const summary = normalizeMenuText(
     item.querySelector<HTMLElement>(MENU_ITEM_CONTENT_SELECTOR)?.textContent ?? "",
   )
@@ -331,8 +329,8 @@ function getMenuItemLabel(item: HTMLElement): string {
   }
 
   const labelParts = Array.from(labelContainer.querySelectorAll<HTMLElement>("span"))
-    .filter(part => !part.classList.contains("ytp-menuitem-label-count"))
-    .map(part => normalizeMenuText(part.textContent ?? ""))
+    .filter((part) => !part.classList.contains("ytp-menuitem-label-count"))
+    .map((part) => normalizeMenuText(part.textContent ?? ""))
     .filter(Boolean)
 
   if (labelParts.length > 0) {

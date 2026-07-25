@@ -1,10 +1,9 @@
 import ReactDOM from "react-dom/client"
-import { Toaster } from "sonner"
 import themeCSS from "@/assets/styles/theme.css?inline"
+import { ToastProvider } from "@/components/ui/base-ui/toast"
 import { NOTRANSLATE_CLASS, REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
 import { SUBTITLES_THEME } from "@/utils/constants/subtitles"
 import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder"
-import { mirrorDynamicStyles } from "@/utils/styles"
 import { applyTheme } from "@/utils/theme"
 
 const SUBTITLES_TOAST_HOST_ID = "read-frog-subtitles-toast-host"
@@ -28,19 +27,17 @@ export function mountSubtitlesToast(): () => void {
   })
   const reactContainer = hostBuilder.build()
   applyTheme(reactContainer, SUBTITLES_THEME)
-  const cleanupMirroredStyles = mirrorDynamicStyles("style", shadowRoot, "[data-sonner-toaster]")
 
   const reactRoot = ReactDOM.createRoot(reactContainer)
   reactRoot.render(
     <div className={NOTRANSLATE_CLASS}>
-      <Toaster richColors />
+      <ToastProvider portalProps={{ container: shadowRoot }} />
     </div>,
   )
 
   target.appendChild(shadowHost)
 
   const cleanup = () => {
-    cleanupMirroredStyles()
     reactRoot.unmount()
     hostBuilder.cleanup()
     shadowHost.remove()

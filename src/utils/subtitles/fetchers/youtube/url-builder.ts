@@ -1,14 +1,7 @@
 import type { PotToken } from "./pot-token"
 import type { CaptionTrack, PlayerData } from "./types"
 
-const DEVICE_PARAM_KEYS = [
-  "cbrand",
-  "cbr",
-  "cbrver",
-  "cos",
-  "cosver",
-  "cplatform",
-] as const
+const DEVICE_PARAM_KEYS = ["cbrand", "cbr", "cbrver", "cos", "cosver", "cplatform"] as const
 
 const FIXED_PARAMS = {
   fmt: "json3",

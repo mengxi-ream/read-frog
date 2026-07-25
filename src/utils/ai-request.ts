@@ -22,7 +22,7 @@ export async function sendInBatchesWithFixedDelay<T>(
 
     // After starting this batch, wait intervalMs before proceeding to the next batch
     if (i + batchSize < promiseFns.length) {
-      await new Promise(resolve => setTimeout(resolve, intervalMs))
+      await new Promise((resolve) => setTimeout(resolve, intervalMs))
     }
   }
 

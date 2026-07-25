@@ -1,10 +1,13 @@
+import type { Config } from "@/types/config/config"
 import type { Point } from "@/types/dom"
-
-import { getLocalConfig } from "@/utils/config/storage"
-import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
-import { isDontWalkIntoAndDontTranslateAsChildElement, isHTMLElement, isShallowInlineHTMLElement, isTranslatedContentNode, isTranslatedWrapperNode } from "./filter"
-import { smashTruncationStyle } from "./style"
+import {
+  isDontWalkIntoAndDontTranslateAsChildElement,
+  isHTMLElement,
+  isShallowInlineHTMLElement,
+  isTranslatedContentNode,
+  isTranslatedWrapperNode,
+} from "./filter"
 
 /**
  * Find the deepest element at the given point, including inside shadow roots
@@ -35,7 +38,8 @@ function findElementAt(root: Document | ShadowRoot, point: Point): Element | nul
     for (const child of element.children) {
       if (isHTMLElement(child)) {
         const rect = child.getBoundingClientRect()
-        const isPointInChild = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+        const isPointInChild =
+          x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
 
         if (isPointInChild) {
           // If child has shadow root, recursively search within it
@@ -48,8 +52,7 @@ function findElementAt(root: Document | ShadowRoot, point: Point): Element | nul
 
           // Continue searching deeper in this child
           deepestElement = findDeepestElement(child)
-          if (deepestElement.textContent?.trim())
-            return deepestElement
+          if (deepestElement.textContent?.trim()) return deepestElement
         }
       }
     }
@@ -63,7 +66,11 @@ function findElementAt(root: Document | ShadowRoot, point: Point): Element | nul
 export function findNearestAncestorBlockNodeFor(element: Element) {
   const startElement = element.closest(`.${CONTENT_WRAPPER_CLASS}`)?.parentElement || element
   let currentNode = startElement
-  while (currentNode && currentNode.parentElement && isHTMLElement(currentNode) && isShallowInlineHTMLElement(currentNode)) {
+  while (
+    currentNode.parentElement &&
+    isHTMLElement(currentNode) &&
+    isShallowInlineHTMLElement(currentNode)
+  ) {
     currentNode = currentNode.parentElement
   }
   return currentNode
@@ -75,13 +82,15 @@ export function findNearestAncestorBlockNodeFor(element: Element) {
  */
 export function findNearestAncestorBlockNodeAt(point: Point) {
   const currentNode = findElementAt(document, point)
-  if (!currentNode)
-    return null
+  if (!currentNode) return null
 
   return findNearestAncestorBlockNodeFor(currentNode)
 }
 
-export function deepQueryTopLevelSelector(element: HTMLElement | ShadowRoot | Document, selectorFn: (element: HTMLElement) => boolean): HTMLElement[] {
+export function deepQueryTopLevelSelector(
+  element: HTMLElement | ShadowRoot | Document,
+  selectorFn: (element: HTMLElement) => boolean,
+): HTMLElement[] {
   if (element instanceof Document) {
     return deepQueryTopLevelSelector(element.body, selectorFn)
   }
@@ -117,30 +126,70 @@ export function deepQueryTopLevelSelector(element: HTMLElement | ShadowRoot | Do
   return result
 }
 
-export async function unwrapDeepestOnlyHTMLChild(element: HTMLElement) {
-  const config = await getLocalConfig() ?? DEFAULT_CONFIG
+/**
+ * Collect EVERY matching element under the root (shadow roots included),
+ * without stopping at the first match the way deepQueryTopLevelSelector does —
+ * nested matches (e.g. in-place-swap anchors inside each other) must all be
+ * returned.
+ */
+export function deepQueryAllSelector(
+  element: HTMLElement | ShadowRoot | Document,
+  selectorFn: (element: HTMLElement) => boolean,
+): HTMLElement[] {
+  if (element instanceof Document) {
+    return element.body ? deepQueryAllSelector(element.body, selectorFn) : []
+  }
+
+  const result: HTMLElement[] = []
+  if (element instanceof ShadowRoot) {
+    for (const child of element.children) {
+      if (isHTMLElement(child)) {
+        result.push(...deepQueryAllSelector(child, selectorFn))
+      }
+    }
+    return result
+  }
+
+  if (selectorFn(element)) {
+    result.push(element)
+  }
+
+  if (element.shadowRoot) {
+    for (const child of element.shadowRoot.children) {
+      if (isHTMLElement(child)) {
+        result.push(...deepQueryAllSelector(child, selectorFn))
+      }
+    }
+  }
+
+  for (const child of element.children) {
+    if (isHTMLElement(child)) {
+      result.push(...deepQueryAllSelector(child, selectorFn))
+    }
+  }
+
+  return result
+}
+
+export function unwrapDeepestOnlyHTMLChild(element: HTMLElement, config: Config) {
   let currentElement = element
   while (currentElement) {
-    smashTruncationStyle(currentElement)
-
     const shouldKeepNode = (child: ChildNode) => {
-      if (!child.textContent?.trim())
-        return false
-      if (child.nodeType === Node.TEXT_NODE)
-        return true
+      if (!child.textContent?.trim()) return false
+      if (child.nodeType === Node.TEXT_NODE) return true
       return isHTMLElement(child) && !isDontWalkIntoAndDontTranslateAsChildElement(child, config)
     }
 
     const effectiveChildNodes = [...currentElement.childNodes].filter(shouldKeepNode)
-    const effectiveChildren = effectiveChildNodes.filter(child => child.nodeType === Node.ELEMENT_NODE)
+    const effectiveChildren = effectiveChildNodes.filter(
+      (child) => child.nodeType === Node.ELEMENT_NODE,
+    )
 
     // Only have one HTML child and no Text Child
-    if (!(effectiveChildren.length === 1 && effectiveChildNodes.length === 1))
-      break
+    if (!(effectiveChildren.length === 1 && effectiveChildNodes.length === 1)) break
 
     const onlyChildElement = effectiveChildren[0]
-    if (!isHTMLElement(onlyChildElement))
-      break
+    if (!isHTMLElement(onlyChildElement)) break
 
     currentElement = onlyChildElement
   }
@@ -153,8 +202,7 @@ export async function unwrapDeepestOnlyHTMLChild(element: HTMLElement) {
  * @param node - The node should be a translated content node
  */
 export function findTranslatedContentWrapper(node: HTMLElement): HTMLElement | null {
-  if (!isTranslatedContentNode(node))
-    return null
+  if (!isTranslatedContentNode(node)) return null
 
   let currentElement = node.parentElement
   while (currentElement) {

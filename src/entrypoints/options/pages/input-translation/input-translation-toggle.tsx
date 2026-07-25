@@ -5,9 +5,7 @@ import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function InputTranslationToggle() {
-  const [inputTranslation, setInputTranslation] = useAtom(
-    configFieldsAtomMap.inputTranslation,
-  )
+  const [inputTranslation, setInputTranslation] = useAtom(configFieldsAtomMap.inputTranslation)
 
   return (
     <ConfigCard
@@ -15,7 +13,7 @@ export function InputTranslationToggle() {
       title={i18n.t("options.inputTranslation.toggle.title")}
       description={i18n.t("options.inputTranslation.toggle.description")}
     >
-      <div className="w-full flex justify-end">
+      <div className="flex w-full justify-end">
         <Switch
           checked={inputTranslation.enabled}
           onCheckedChange={(checked) => {

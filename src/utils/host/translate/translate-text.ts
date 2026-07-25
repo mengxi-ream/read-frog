@@ -1,19 +1,27 @@
 import type { LangCodeISO6393, LangLevel } from "@read-frog/definitions"
+import type {
+  PromptExperimentVariant,
+  TranslationActionContext,
+  TranslationConfiguredPrompt,
+} from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
+import type { TranslationTextFormat } from "@/types/config/translate"
 import type { WebPagePromptContext } from "@/types/content"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
-import { toast } from "sonner"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
 import { getProviderConfigById } from "@/utils/config/helpers"
+import { isNoTranslationSentinel } from "@/utils/constants/prompt"
 import { detectLanguage } from "@/utils/content/language"
-
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { TranslationCancelledError } from "@/utils/request/cancellation"
 import { Sha256Hex } from "../../hash"
 import { sendMessage } from "../../message"
 import { prepareTranslationText } from "./text-preparation"
+import { getPageTranslationActionContext, getPageTranslationSessionId } from "./translation-session"
 
 // Minimum text length for skip language detection (shorter than general detection
 // to catch short phrases like "Bonjour!" or "こんにちは")
@@ -44,14 +52,18 @@ export async function shouldSkipByLanguage(
   return skipLanguages.includes(detectedLang)
 }
 
-export function normalizePromptContextValue(value: string | null | undefined): string | null | undefined {
-  if (value == null) {
+export function normalizePromptContextValue(
+  value: string | null | undefined,
+): string | null | undefined {
+  if (value === null || value === undefined) {
     return value
   }
   return value.trim() === "" ? null : value
 }
 
-function normalizeWebPagePromptContext(webPageContext?: WebPagePromptContext): WebPagePromptContext | undefined {
+function normalizeWebPagePromptContext(
+  webPageContext?: WebPagePromptContext,
+): WebPagePromptContext | undefined {
   if (!webPageContext) {
     return undefined
   }
@@ -67,9 +79,11 @@ function normalizeWebPagePromptContext(webPageContext?: WebPagePromptContext): W
 async function buildWebPageHashComponents(
   text: string,
   providerConfig: ProviderConfig,
-  partialLangConfig: { sourceCode: LangCodeISO6393 | "auto", targetCode: LangCodeISO6393 },
+  partialLangConfig: { sourceCode: LangCodeISO6393 | "auto"; targetCode: LangCodeISO6393 },
   enableAIContentAware: boolean,
+  textFormat: TranslationTextFormat,
   webPageContext?: WebPagePromptContext,
+  promptExperimentVariant?: PromptExperimentVariant,
 ): Promise<string[]> {
   const preparedText = prepareTranslationText(text)
   const normalizedWebPageContext = normalizeWebPagePromptContext(webPageContext)
@@ -81,6 +95,10 @@ async function buildWebPageHashComponents(
   ]
 
   if (!isLLMProviderConfig(providerConfig)) {
+    // The provider request depends on the text format (escaping / textType), so
+    // cache entries must too. This component also orphans entries cached before
+    // the format-aware pipeline existed, which could hold corrupted output.
+    hashComponents.push(`textFormat:${textFormat}`)
     return hashComponents
   }
 
@@ -88,9 +106,12 @@ async function buildWebPageHashComponents(
   const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, preparedText, {
     isBatch: true,
     context: normalizedWebPageContext,
+    promptExperimentVariant,
   })
   hashComponents.push(systemPrompt, prompt)
-  hashComponents.push(enableAIContentAware ? "enableAIContentAware=true" : "enableAIContentAware=false")
+  hashComponents.push(
+    enableAIContentAware ? "enableAIContentAware=true" : "enableAIContentAware=false",
+  )
 
   if (enableAIContentAware && normalizedWebPageContext) {
     if (normalizedWebPageContext.webTitle) {
@@ -113,11 +134,25 @@ async function buildWebPageHashComponents(
 
 export interface TranslateTextOptions {
   text: string
-  langConfig: { sourceCode: LangCodeISO6393 | "auto", targetCode: LangCodeISO6393, level: LangLevel }
+  langConfig: {
+    sourceCode: LangCodeISO6393 | "auto"
+    targetCode: LangCodeISO6393
+    level: LangLevel
+  }
   providerConfig: ProviderConfig
   enableAIContentAware?: boolean
   extraHashTags?: string[]
   webPageContext?: WebPagePromptContext
+  textFormat?: TranslationTextFormat
+  // Page-translation session id used for cancellation scoping. Deliberately
+  // NOT part of the cache hash — cache identity must not vary per session.
+  sessionId?: string
+  configuredPrompt?: TranslationConfiguredPrompt
+  translationActionContext?: TranslationActionContext
+  /** Internal retry state after the background observes a newer flag value. */
+  promptExperimentVariant?: PromptExperimentVariant
+  promptExperimentRetryCount?: number
+  skipPromptExperimentResolution?: boolean
 }
 
 /**
@@ -132,6 +167,13 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     enableAIContentAware = false,
     extraHashTags = [],
     webPageContext,
+    textFormat = "plain",
+    sessionId,
+    configuredPrompt,
+    translationActionContext = getPageTranslationActionContext() ?? undefined,
+    promptExperimentVariant: forcedPromptExperimentVariant,
+    promptExperimentRetryCount = 0,
+    skipPromptExperimentResolution = false,
   } = options
 
   const preparedText = prepareTranslationText(text)
@@ -141,28 +183,83 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
 
   const normalizedWebPageContext = normalizeWebPagePromptContext(webPageContext)
 
+  let promptExperimentVariant = forcedPromptExperimentVariant
+  if (
+    isLLMProviderConfig(providerConfig) &&
+    translationActionContext &&
+    configuredPrompt &&
+    !skipPromptExperimentResolution &&
+    promptExperimentVariant === undefined
+  ) {
+    promptExperimentVariant =
+      (await sendMessage("resolvePromptExperimentVariant", {
+        configuredPrompt,
+      })) ?? undefined
+  }
+
   const hashComponents = await buildWebPageHashComponents(
     preparedText,
     providerConfig,
     { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
     enableAIContentAware,
+    textFormat,
     normalizedWebPageContext,
+    promptExperimentVariant,
   )
 
   // Add extra hash tags for cache differentiation
   hashComponents.push(...extraHashTags)
 
-  return await sendMessage("enqueueTranslateRequest", {
+  // Final gate before dispatch: if the page-translation session that owned
+  // this request has ended (or been replaced) while we were preparing it,
+  // abort instead of enqueueing. Sending now would either be unscoped (if the
+  // id had gone null) or re-populate the queue AFTER the session's cancel
+  // message already drained it — both defeat cancellation (#1881). Callers on
+  // the page path swallow this error; input/selection requests carry no
+  // sessionId and skip the gate entirely.
+  if (sessionId !== undefined && getPageTranslationSessionId() !== sessionId) {
+    throw new TranslationCancelledError(sessionId)
+  }
+
+  const result = await sendMessage("enqueueTranslateRequest", {
     text: preparedText,
     langConfig,
     providerConfig,
     scheduleAt: Date.now(),
     hash: Sha256Hex(...hashComponents),
+    textFormat,
     webTitle: normalizedWebPageContext?.webTitle,
     webDescription: normalizedWebPageContext?.webDescription,
     webContent: normalizedWebPageContext?.webContent,
     webSummary: normalizedWebPageContext?.webSummary,
+    sessionId,
+    promptExperimentVariant,
+    translationActionContext,
   })
+  if (typeof result !== "string") {
+    if (promptExperimentRetryCount >= 2) {
+      throw new Error("Prompt experiment variant changed repeatedly during one request")
+    }
+    if ("retryWithoutPromptExperiment" in result) {
+      return translateTextCore({
+        ...options,
+        promptExperimentVariant: undefined,
+        promptExperimentRetryCount: promptExperimentRetryCount + 1,
+        skipPromptExperimentResolution: true,
+      })
+    }
+    return translateTextCore({
+      ...options,
+      promptExperimentVariant: result.retryWithPromptExperimentVariant,
+      promptExperimentRetryCount: promptExperimentRetryCount + 1,
+    })
+  }
+  // The sentinel must be mapped here and only here: every batch-pipeline
+  // consumer (page paragraphs, document title, input translation, selection
+  // toolbar standard path) routes through this function and already handles
+  // "" gracefully. Mapping earlier — in the background — would fall out of
+  // the truthy-only cache write and re-hit the provider on every request.
+  return isNoTranslationSentinel(result) ? "" : result
 }
 
 export function validateTranslationConfigAndToast(
@@ -175,14 +272,18 @@ export function validateTranslationConfigAndToast(
   }
 
   if (languageConfig.sourceCode === languageConfig.targetCode) {
-    toast.error(i18n.t("translation.sameLanguage"))
+    toastManager.add({ type: "error", title: i18n.t("translation.sameLanguage") })
     logger.info("validateTranslationConfig: returning false (same language)")
     return false
   }
 
   // check if the API key is configured
-  if (isAPIProviderConfig(providerConfig) && !providerConfig.apiKey?.trim() && !["deeplx", "ollama"].includes(providerConfig.provider)) {
-    toast.error(i18n.t("noAPIKeyConfig.warning"))
+  if (
+    isAPIProviderConfig(providerConfig) &&
+    !providerConfig.apiKey?.trim() &&
+    !["deeplx", "ollama"].includes(providerConfig.provider)
+  ) {
+    toastManager.add({ type: "error", title: i18n.t("noAPIKeyConfig.warning") })
     logger.info("validateTranslationConfig: returning false (no API key)")
     return false
   }

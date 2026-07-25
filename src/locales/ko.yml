@@ -4,6 +4,7 @@ extDescription: Read Frog는 모든 웹사이트에서 언어를 깊이 있게 �
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: 로그인
+  webApp: 웹 앱
   logout: 로그아웃
   logoutError: 로그아웃하지 못했습니다. 다시 시도해 주세요.
 dataTypes:
@@ -89,6 +90,9 @@ options:
     product: 제품
   tools:
     translationHub: 번역 허브
+  product:
+    roadmap: 로드맵
+    feedback: 피드백
   setAPIKeyWarning:
     please: API Key를 설정해 주세요
     page: 페이지에서
@@ -175,9 +179,9 @@ options:
       invalidJson: 잘못된 JSON 형식
     providers:
       name:
-        freeAi: 무료 AI 서비스
+        builtInAi: 내장 AI
       attribution:
-        freeAi: Atlas Cloud 제공. 현재는 사용자 지정 AI 작업에서만 사용할 수 있습니다. 제한 없는 경험을 사용하려면 공식 웹사이트에서 가성비 높은 크레딧을 구매하세요.
+        builtInAi: Atlas Cloud 제공. 현재는 사용자 지정 AI 작업에서만 사용할 수 있습니다. 제한 없는 경험을 사용하려면 공식 웹사이트에서 가성비 높은 크레딧을 구매하세요.
       description:
         openai: GPT-4o 같은 모델을 제공합니다
         azure: Azure 배포를 통해 OpenAI 모델 사용
@@ -345,6 +349,9 @@ options:
         description: 선택 툴바에 표시할 기본 제공 기능 선택
         translate: 번역
         speak: 읽기
+      saveSuggestion:
+        title: 저장 제안
+        description: 선택 번역 후 Notebase에 저장할 단어를 추천합니다
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -630,7 +637,7 @@ options:
         description: 번역을 트리거하는 데 필요한 요소 가시성 비율 (0-1). 높은 값은 요소가 더 많이 보일 때까지 번역을 지연시킵니다.
     smallParagraphFilter:
       title: 짧은 텍스트 필터
-      description: 지정한 문자 수 또는 단어 수보다 적은 텍스트 노드의 번역을 건너뜁니다 (0 = 비활성화)
+      description: 이 전역 기본값을 사용하여 지정한 문자 수 또는 단어 수보다 적은 텍스트 노드의 번역을 건너뜁니다. 일치하는 사이트 규칙에서 재정의할 수 있습니다 (0 = 비활성화)
       minCharacters:
         title: 최소 문자 수
         description: 이 값보다 적은 문자 수의 텍스트 노드는 번역되지 않습니다. 문자 수에는 공백이 포함됩니다.
@@ -669,6 +676,31 @@ options:
       description: AI에 웹페이지 컨텍스트를 제공하여 번역 품질을 향상시킵니다
       enable: AI 스마트 컨텍스트 번역 활성화
       enableDescription: AI가 웹페이지 요약을 사용하여 번역 정확도를 향상시킵니다. LLM 제공업체가 필요합니다. 번역 시작 시 지연이 발생하고 API 비용이 증가합니다.
+  siteRules:
+    title: 사이트 규칙
+    description: 특정 웹사이트의 번역 동작을 조정하는 규칙입니다.
+    userRules:
+      title: 사용자 규칙
+      description: JSON 배열로 자신만의 사이트 규칙을 정의합니다. URL이 패턴과 일치하는 페이지에 적용되며, 사용자 규칙이 내장 규칙보다 우선합니다.
+      saveButton: 저장
+      savedButton: 저장됨
+      validation:
+        validating: 검증 중...
+        valid: 규칙이 유효합니다
+        syntaxError: JSON에 구문 오류가 있습니다
+        notArray: JSON 최상위 값은 규칙 배열이어야 합니다
+        tooLong: 규칙 문서가 너무 깁니다
+        tooMany: 규칙이 너무 많습니다
+        duplicateIds: 규칙 id가 중복되었습니다
+        schemaErrors: 유효하지 않은 규칙이 있습니다
+        moreErrors: ...그리고 $1개의 오류가 더 있습니다
+        saved: 모든 변경사항이 저장되었습니다
+    builtIn:
+      title: 내장 규칙
+      description: 확장 프로그램과 함께 제공되는 사이트 규칙입니다. 특정 사이트에서 문제가 생기면 스위치로 개별 비활성화할 수 있습니다.
+      searchPlaceholder: id, 설명 또는 URL 패턴으로 검색
+      showMore: 더 보기
+      count: 규칙 $2개 중 $1개 표시
   tts:
     title: 텍스트 음성 변환
     description: Edge TTS 음성 설정으로 말하기 버튼을 사용자 지정하세요.
@@ -884,6 +916,15 @@ options:
           webTitle: 웹페이지 제목
           webDescription: 페이지 메타데이터의 웹페이지 설명
           videoSummary: 동영상 요약 (AI 스마트 컨텍스트 필요)
+    aiQuota:
+      title: AI 자막 사용량
+      description: 이번 달 AI 자막 전사 사용량 현황
+      loginRequired: 로그인하여 AI 자막 사용량 확인
+      logIn: 로그인
+      betaRequired: AI 자막은 베타 기능이며 아직 계정에 활성화되지 않았습니다
+      betaApply: 사용 신청
+      loadError: 사용량을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.
+      summary: $2분 중 $1분 사용, $3분 남음
   whatsNew:
     title: 새로운 기능
   rateUs:
@@ -961,6 +1002,7 @@ action:
   saveToNotebasePendingLogin: 로그인 후 저장 완료
   saveToNotebasePendingLoginDescription: 로그인 후 Read Frog가 Notebase를 만들고 이 결과를 자동으로 저장합니다.
   saveToNotebasePendingConnectedLoginDescription: 로그인 후 Read Frog는 가능하면 연결된 Notebase에 저장합니다. 이 계정에서 사용할 수 없으면 새 Notebase를 만들고 저장합니다.
+  upgrade: 업그레이드
   openCustomActions: Custom AI Actions 열기
   openNotebase: Notebase 열기
   contextDetailsTitleLabel: 제목
@@ -968,6 +1010,12 @@ action:
   translation: 번역
   speak: 읽기
   playing: 재생 중
+saveSuggestion:
+  title: 저장 추천
+  description: 아래 단어를 Notebase에 저장하고 언제든지 복습하세요.
+  save: 저장
+  saved: 저장됨
+  staleSuggestion: 이 제안은 더 이상 유효하지 않습니다
 thinking:
   label: 사고 중
   complete: 사고 완료
@@ -976,6 +1024,9 @@ thinking:
 shortcutKeySelector:
   placeholder: 단축키를 입력해 주세요
 subtitles:
+  loadingAiSubtitles: AI 자막 불러오는 중…
+  requestAiSubtitles: AI 자막 요청 (Beta)
+  usingAiSubtitles: AI 자막 사용 중
   actions:
     downloadTranslated: 번역 자막 다운로드
     downloadTranslatedPreparing: 자막 준비 중, 긴 동영상은 시간이 더 걸릴 수 있습니다
@@ -1001,6 +1052,8 @@ subtitles:
     aiRateLimited: 요청이 너무 많습니다. 나중에 다시 시도해 주세요
     aiAuthFailed: API 인증에 실패했습니다. API 키를 확인해 주세요
     aiServiceUnavailable: 번역 서비스를 일시적으로 사용할 수 없습니다
+    aiQuotaExceeded: 이번 달 AI 자막 사용량을 모두 사용했습니다
+    aiRequestFailed: AI 자막 요청에 실패했습니다. 잠시 후 다시 시도해 주세요
     aiNoResponse: AI 서비스가 응답하지 않았습니다. 원문을 표시합니다
     translatedExportFailed: 번역 자막 생성에 실패했습니다
     translatedExportIncomplete: 모든 자막 줄을 번역하지 못했습니다

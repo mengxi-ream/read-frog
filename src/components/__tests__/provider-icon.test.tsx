@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import ProviderIcon from "../provider-icon"
 
 const {
   resolveContentScriptAssetBlobMock,
@@ -10,12 +11,12 @@ const {
   drawImageMock,
   setTransformMock,
 } = vi.hoisted(() => ({
-  resolveContentScriptAssetBlobMock: vi.fn(),
-  shouldProxyAssetUrlMock: vi.fn(),
-  createImageBitmapMock: vi.fn(),
-  clearRectMock: vi.fn(),
-  drawImageMock: vi.fn(),
-  setTransformMock: vi.fn(),
+  resolveContentScriptAssetBlobMock: vi.fn<(...args: any[]) => any>(),
+  shouldProxyAssetUrlMock: vi.fn<(...args: any[]) => any>(),
+  createImageBitmapMock: vi.fn<(...args: any[]) => any>(),
+  clearRectMock: vi.fn<(...args: any[]) => any>(),
+  drawImageMock: vi.fn<(...args: any[]) => any>(),
+  setTransformMock: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/content-script/background-asset-url", () => ({
@@ -25,7 +26,6 @@ vi.mock("@/utils/content-script/background-asset-url", () => ({
 
 describe("provider icon", () => {
   beforeEach(() => {
-    vi.resetModules()
     vi.clearAllMocks()
     vi.stubGlobal("createImageBitmap", createImageBitmapMock)
     Object.defineProperty(globalThis, "devicePixelRatio", {
@@ -34,7 +34,7 @@ describe("provider icon", () => {
     })
     Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
       configurable: true,
-      value: vi.fn(() => ({
+      value: vi.fn<(...args: any[]) => any>(() => ({
         clearRect: clearRectMock,
         drawImage: drawImageMock,
         setTransform: setTransformMock,
@@ -42,19 +42,20 @@ describe("provider icon", () => {
     })
   })
 
-  it("renders a normal image when the logo does not need proxying", async () => {
+  it("renders a normal image when the logo does not need proxying", () => {
     shouldProxyAssetUrlMock.mockReturnValue(false)
-    const { default: ProviderIcon } = await import("../provider-icon")
 
     render(<ProviderIcon logo="https://cdn.example.com/logo.webp" name="OpenAI" size="md" />)
 
-    expect(screen.getByRole("img", { name: "OpenAI" })).toHaveAttribute("src", "https://cdn.example.com/logo.webp")
+    expect(screen.getByRole("img", { name: "OpenAI" })).toHaveAttribute(
+      "src",
+      "https://cdn.example.com/logo.webp",
+    )
     expect(resolveContentScriptAssetBlobMock).not.toHaveBeenCalled()
   })
 
-  it("normalizes local extension asset paths before rendering", async () => {
+  it("normalizes local extension asset paths before rendering", () => {
     shouldProxyAssetUrlMock.mockReturnValue(false)
-    const { default: ProviderIcon } = await import("../provider-icon")
 
     render(<ProviderIcon logo="/assets/providers/deeplx-light.svg" name="DeepLX" size="md" />)
 
@@ -67,18 +68,23 @@ describe("provider icon", () => {
     const bitmap = {
       width: 32,
       height: 16,
-      close: vi.fn(),
+      close: vi.fn<(...args: any[]) => any>(),
     }
 
     shouldProxyAssetUrlMock.mockReturnValue(true)
-    resolveContentScriptAssetBlobMock.mockResolvedValue(new Blob([Uint8Array.from([1, 2, 3])], { type: "image/webp" }))
+    resolveContentScriptAssetBlobMock.mockResolvedValue(
+      new Blob([Uint8Array.from([1, 2, 3])], { type: "image/webp" }),
+    )
     createImageBitmapMock.mockResolvedValue(bitmap)
-    const { default: ProviderIcon } = await import("../provider-icon")
 
-    const view = render(<ProviderIcon logo="https://cdn.example.com/logo.webp" name="OpenAI" size="md" />)
+    const view = render(
+      <ProviderIcon logo="https://cdn.example.com/logo.webp" name="OpenAI" size="md" />,
+    )
 
     await waitFor(() => {
-      expect(resolveContentScriptAssetBlobMock).toHaveBeenCalledWith("https://cdn.example.com/logo.webp")
+      expect(resolveContentScriptAssetBlobMock).toHaveBeenCalledWith(
+        "https://cdn.example.com/logo.webp",
+      )
     })
     await waitFor(() => {
       expect(drawImageMock).toHaveBeenCalledWith(bitmap, 0, 5, 20, 10)

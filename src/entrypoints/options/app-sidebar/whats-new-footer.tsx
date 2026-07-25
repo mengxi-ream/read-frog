@@ -9,11 +9,7 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/base-ui/popover"
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/base-ui/sidebar"
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/base-ui/sidebar"
 import { env } from "@/env"
 import {
   buildBilibiliEmbedUrl,
@@ -72,9 +68,10 @@ export function WhatsNewFooter() {
     ? `${latestBlogPost.url}:${latestBlogPost.date.toISOString()}`
     : null
   const lastViewedDateTimestamp = lastViewedDate?.getTime() ?? null
-  const shouldAutoOpenPopover = isLastViewedDateFetched
-    && isLatestBlogPostFetched
-    && hasNewBlogPost(lastViewedDate ?? null, latestBlogPostDate)
+  const shouldAutoOpenPopover =
+    isLastViewedDateFetched &&
+    isLatestBlogPostFetched &&
+    hasNewBlogPost(lastViewedDate ?? null, latestBlogPostDate)
 
   useEffect(() => {
     if (!shouldAutoOpenPopover) {
@@ -97,24 +94,19 @@ export function WhatsNewFooter() {
     return null
   }
 
-  const blogUrl = new URL(latestBlogPost.urlOverride ?? latestBlogPost.url, env.WXT_WEBSITE_URL).toString()
+  const blogUrl = new URL(
+    latestBlogPost.urlOverride ?? latestBlogPost.url,
+    env.WXT_WEBSITE_URL,
+  ).toString()
   const embedUrl = latestBlogPost.videoUrl ? buildBilibiliEmbedUrl(latestBlogPost.videoUrl) : null
   const imageUrl = embedUrl ? null : latestBlogPost.imageUrl
 
   return (
-    <Popover
-      key={latestBlogPostKey}
-      open={open}
-      onOpenChange={handleOpenChange}
-    >
+    <Popover key={latestBlogPostKey} open={open} onOpenChange={handleOpenChange}>
       <SidebarMenu>
         <SidebarMenuItem>
           <PopoverTrigger
-            render={(
-              <SidebarMenuButton
-                aria-label={i18n.t("options.whatsNew.title")}
-              />
-            )}
+            render={<SidebarMenuButton aria-label={i18n.t("options.whatsNew.title")} />}
           >
             <Icon icon="tabler:rss" />
             <span>{i18n.t("options.whatsNew.title")}</span>
@@ -124,7 +116,7 @@ export function WhatsNewFooter() {
 
       <PopoverContent
         align="end"
-        initialFocus={openType => openType === "keyboard"}
+        initialFocus={(openType) => openType === "keyboard"}
         side="top"
         sideOffset={8}
         className="w-[min(24rem,calc(100vw-2rem))] gap-4 p-3"
@@ -139,6 +131,7 @@ export function WhatsNewFooter() {
               allowFullScreen
               loading="eager"
               referrerPolicy="strict-origin-when-cross-origin"
+              sandbox="allow-popups allow-presentation allow-scripts"
             />
           </div>
         )}
@@ -177,9 +170,7 @@ export function WhatsNewFooter() {
               </span>
             </a>
           </PopoverTitle>
-          <PopoverDescription>
-            {latestBlogPost.description}
-          </PopoverDescription>
+          <PopoverDescription>{latestBlogPost.description}</PopoverDescription>
         </PopoverHeader>
       </PopoverContent>
     </Popover>

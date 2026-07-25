@@ -14,20 +14,34 @@ export default function Metrics() {
   const metrics = transformRecordsToMetrics(currentPeriodRecords, previousPeriodRecords)
 
   return (
-    <div className="h-fit w-full grid gap-4 grid-cols-1 @xl:grid-cols-2 @4xl:grid-cols-3 @6xl:grid-cols-4">
-      { Object.entries(metrics).map(([key, metric]) => <MetricCard key={key} {...metric} />) }
+    <div className="grid h-fit w-full grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-3 @6xl:grid-cols-4">
+      {Object.entries(metrics).map(([key, metric]) => (
+        <MetricCard key={key} {...metric} />
+      ))}
     </div>
   )
 }
 
-function transformRecordsToMetrics(currentPeriodRecords: BatchRequestRecord[], previousPeriodRecords: BatchRequestRecord[]) {
-  const originalRequestCount = currentPeriodRecords.reduce((acc, record) => acc + record.originalRequestCount, 0)
+function transformRecordsToMetrics(
+  currentPeriodRecords: BatchRequestRecord[],
+  previousPeriodRecords: BatchRequestRecord[],
+) {
+  const originalRequestCount = currentPeriodRecords.reduce(
+    (acc, record) => acc + record.originalRequestCount,
+    0,
+  )
   const batchRequestCount = currentPeriodRecords.length
 
-  const previousOriginalRequestCount = previousPeriodRecords.reduce((acc, record) => acc + record.originalRequestCount, 0)
+  const previousOriginalRequestCount = previousPeriodRecords.reduce(
+    (acc, record) => acc + record.originalRequestCount,
+    0,
+  )
   const previousBatchRequestCount = previousPeriodRecords.length
 
-  const originalRequestComparison = calculateComparison(originalRequestCount, previousOriginalRequestCount)
+  const originalRequestComparison = calculateComparison(
+    originalRequestCount,
+    previousOriginalRequestCount,
+  )
   const batchRequestComparison = calculateComparison(batchRequestCount, previousBatchRequestCount)
 
   return {

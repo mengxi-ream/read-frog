@@ -8,7 +8,7 @@ export const selectedCustomActionIdAtom = atom(
     const customActions = get(configFieldsAtomMap.selectionToolbar).customActions
     const selected = get(internalSelectedCustomActionIdAtom)
 
-    if (selected && customActions.some(action => action.id === selected)) {
+    if (selected && customActions.some((action) => action.id === selected)) {
       return selected
     }
 

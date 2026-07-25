@@ -2,10 +2,11 @@ import type { ReactNode } from "react"
 import type { SelectionSession } from "../atoms"
 import { useAtomValue, useSetAtom } from "jotai"
 import { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { toast } from "sonner"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
+import { classifyResolvedProvider, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { onMessage } from "@/utils/message"
 import {
@@ -38,7 +39,7 @@ import {
 
 interface SelectionCustomActionPendingOpenRequest {
   actionId: string
-  anchor?: { x: number, y: number }
+  anchor?: { x: number; y: number }
   session: SelectionSession | null
   surface: typeof ANALYTICS_SURFACE.SELECTION_TOOLBAR | typeof ANALYTICS_SURFACE.CONTEXT_MENU
 }
@@ -52,7 +53,9 @@ const SelectionCustomActionContext = createContext<SelectionCustomActionContextV
 function useSelectionCustomActionContext() {
   const context = use(SelectionCustomActionContext)
   if (!context) {
-    throw new Error("Selection custom action triggers must be used within SelectionCustomActionProvider.")
+    throw new Error(
+      "Selection custom action triggers must be used within SelectionCustomActionProvider.",
+    )
   }
 
   return context
@@ -62,13 +65,9 @@ export function useSelectionCustomActionPopover() {
   return useSelectionCustomActionContext()
 }
 
-export function SelectionCustomActionProvider({
-  children,
-}: {
-  children: ReactNode
-}) {
+export function SelectionCustomActionProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
-  const [anchor, setAnchor] = useState<{ x: number, y: number } | null>(null)
+  const [anchor, setAnchor] = useState<{ x: number; y: number } | null>(null)
   const [popoverSessionKey, setPopoverSessionKey] = useState(0)
   const [rerunNonce, setRerunNonce] = useState(0)
   const [activeSession, setActiveSession] = useState<SelectionSession | null>(null)
@@ -92,10 +91,7 @@ export function SelectionCustomActionProvider({
   const trackedPrecheckErrorKeyRef = useRef<string | null>(null)
   const { resolveContextMenuOpenRequest } = useSelectionOpenRequestResolver(selectionSession)
   const selectionText = activeSession?.selectionSnapshot.text ?? null
-  const cleanSelection = useMemo(
-    () => normalizeSelectedText(selectionText),
-    [selectionText],
-  )
+  const cleanSelection = useMemo(() => normalizeSelectedText(selectionText), [selectionText])
   const paragraphsText = useMemo(() => {
     if (!cleanSelection) {
       return ""
@@ -106,33 +102,41 @@ export function SelectionCustomActionProvider({
   const webPageContext = useCustomActionWebPageContext(isOpen, popoverSessionKey)
   const titleText = (webPageContext?.webTitle ?? document.title) || null
   const activeAction = useMemo(
-    () => selectionToolbarConfig.customActions.find(action =>
-      action.enabled !== false && action.id === activeActionId,
-    ) ?? null,
+    () =>
+      selectionToolbarConfig.customActions.find(
+        (action) => action.enabled !== false && action.id === activeActionId,
+      ) ?? null,
     [activeActionId, selectionToolbarConfig.customActions],
   )
-  const customActionRequest = useMemo(() => ({
-    language,
-    action: activeAction,
-    provider: activeAction
-      ? resolveProviderRefForCapability("selectionToolbar.customAction", providersConfig, activeAction.providerId)
-      : null,
-  }), [activeAction, language, providersConfig])
+  const customActionRequest = useMemo(
+    () => ({
+      language,
+      action: activeAction,
+      provider: activeAction
+        ? resolveProviderRefForCapability(
+            "selectionToolbar.customAction",
+            providersConfig,
+            activeAction.providerId,
+          )
+        : null,
+    }),
+    [activeAction, language, providersConfig],
+  )
   const customActionProviders = useMemo(
     () => getSelectableProvidersForCapability("selectionToolbar.customAction", providersConfig),
     [providersConfig],
   )
   const executionPlan = useMemo(
-    () => buildCustomActionExecutionPlan(customActionRequest, cleanSelection, paragraphsText, webPageContext),
+    () =>
+      buildCustomActionExecutionPlan(
+        customActionRequest,
+        cleanSelection,
+        paragraphsText,
+        webPageContext,
+      ),
     [cleanSelection, customActionRequest, paragraphsText, webPageContext],
   )
-  const {
-    error,
-    isRunning,
-    resetSessionState,
-    result,
-    thinking,
-  } = useCustomActionExecution({
+  const { error, isRunning, resetSessionState, result, thinking } = useCustomActionExecution({
     bodyRef,
     analyticsSurface: sourceSurface,
     executionContext: executionPlan.executionContext,
@@ -142,7 +146,8 @@ export function SelectionCustomActionProvider({
   })
   const displayedResult = executionPlan.executionContext ? result : null
   const displayedError = error ?? executionPlan.error
-  const displayedIsRunning = (isOpen && webPageContext === undefined) || (executionPlan.executionContext ? isRunning : false)
+  const displayedIsRunning =
+    (isOpen && webPageContext === undefined) || (executionPlan.executionContext ? isRunning : false)
   const displayedThinking = executionPlan.executionContext ? thinking : null
 
   const resetPopoverSession = useCallback((options?: { clearAnchor?: boolean }) => {
@@ -160,145 +165,172 @@ export function SelectionCustomActionProvider({
     }
   }, [])
 
-  const handleOpenChange = useCallback((nextOpen: boolean) => {
-    resetSessionState()
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      resetSessionState()
 
-    if (nextOpen) {
-      const pendingRequest = pendingOpenRequestRef.current
-      const nextSession = pendingRequest?.session ?? selectionSession
+      if (nextOpen) {
+        const pendingRequest = pendingOpenRequestRef.current
+        const nextSession = pendingRequest?.session ?? selectionSession
 
-      setActiveSession(nextSession)
-      setActiveActionId(pendingRequest?.actionId ?? null)
-      setSourceSurface(pendingRequest?.surface ?? ANALYTICS_SURFACE.SELECTION_TOOLBAR)
-      setPopoverSessionKey(prev => prev + 1)
-      if (pendingRequest?.anchor) {
-        setAnchor(pendingRequest.anchor)
-      }
-      setIsSelectionToolbarVisible(false)
-      pendingOpenRequestRef.current = null
-    }
-    else {
-      resetPopoverSession({
-        clearAnchor: pendingOpenRequestRef.current === null,
-      })
-    }
-
-    setIsOpen(nextOpen)
-  }, [resetPopoverSession, resetSessionState, selectionSession, setIsSelectionToolbarVisible])
-
-  const openActionRequest = useCallback((request: SelectionCustomActionPendingOpenRequest) => {
-    if (isOpen) {
-      handleOpenChange(false)
-
-      if (reopenFrameRef.current !== null) {
-        cancelAnimationFrame(reopenFrameRef.current)
+        setActiveSession(nextSession)
+        setActiveActionId(pendingRequest?.actionId ?? null)
+        setSourceSurface(pendingRequest?.surface ?? ANALYTICS_SURFACE.SELECTION_TOOLBAR)
+        setPopoverSessionKey((prev) => prev + 1)
+        if (pendingRequest?.anchor) {
+          setAnchor(pendingRequest.anchor)
+        }
+        setIsSelectionToolbarVisible(false)
+        pendingOpenRequestRef.current = null
+      } else {
+        resetPopoverSession({
+          clearAnchor: pendingOpenRequestRef.current === null,
+        })
       }
 
-      reopenFrameRef.current = requestAnimationFrame(() => {
-        reopenFrameRef.current = null
-        commitOpenRequest(request)
-        handleOpenChange(true)
+      setIsOpen(nextOpen)
+    },
+    [resetPopoverSession, resetSessionState, selectionSession, setIsSelectionToolbarVisible],
+  )
+
+  const openActionRequest = useCallback(
+    (request: SelectionCustomActionPendingOpenRequest) => {
+      if (isOpen) {
+        handleOpenChange(false)
+
+        if (reopenFrameRef.current !== null) {
+          cancelAnimationFrame(reopenFrameRef.current)
+        }
+
+        reopenFrameRef.current = requestAnimationFrame(() => {
+          reopenFrameRef.current = null
+          commitOpenRequest(request)
+          handleOpenChange(true)
+        })
+        return
+      }
+
+      commitOpenRequest(request)
+      handleOpenChange(true)
+    },
+    [commitOpenRequest, handleOpenChange, isOpen],
+  )
+
+  const openToolbarCustomAction = useCallback(
+    (actionId: string, triggerElement: HTMLElement | null) => {
+      if (!triggerElement) {
+        return
+      }
+
+      const rect = triggerElement.getBoundingClientRect()
+      openActionRequest({
+        actionId,
+        anchor: { x: rect.left, y: rect.top },
+        surface: ANALYTICS_SURFACE.SELECTION_TOOLBAR,
+        session:
+          selectionSession ??
+          (selection
+            ? {
+                id: --nextEphemeralSessionIdRef.current,
+                createdAt: Date.now(),
+                selectionSnapshot: selection,
+                contextSnapshot: context ?? {
+                  text: "",
+                  paragraphs: [],
+                },
+              }
+            : null),
       })
-      return
-    }
+    },
+    [context, openActionRequest, selection, selectionSession],
+  )
 
-    commitOpenRequest(request)
-    handleOpenChange(true)
-  }, [commitOpenRequest, handleOpenChange, isOpen])
-
-  const openToolbarCustomAction = useCallback((actionId: string, triggerElement: HTMLElement | null) => {
-    if (!triggerElement) {
-      return
-    }
-
-    const rect = triggerElement.getBoundingClientRect()
-    openActionRequest({
-      actionId,
-      anchor: { x: rect.left, y: rect.top },
-      surface: ANALYTICS_SURFACE.SELECTION_TOOLBAR,
-      session: selectionSession ?? (selection
-        ? {
-            id: --nextEphemeralSessionIdRef.current,
-            createdAt: Date.now(),
-            selectionSnapshot: selection,
-            contextSnapshot: context ?? {
-              text: "",
-              paragraphs: [],
+  const openContextMenuCustomAction = useCallback(
+    (actionId: string) => {
+      const action = selectionToolbarConfig.customActions.find(
+        (candidate) => candidate.enabled !== false && candidate.id === actionId,
+      )
+      if (!action) {
+        const nextError = createSelectionToolbarPrecheckError("customAction", "actionUnavailable")
+        void trackFeatureUsed({
+          ...createFeatureUsageContext(
+            ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
+            ANALYTICS_SURFACE.CONTEXT_MENU,
+            Date.now(),
+            {
+              action_id: actionId,
             },
-          }
-        : null),
-    })
-  }, [context, openActionRequest, selection, selectionSession])
+          ),
+          ...UNKNOWN_FEATURE_PROVIDER,
+          outcome: "failure",
+        })
+        toastManager.add({ type: "error", title: nextError.description })
+        return
+      }
 
-  const openContextMenuCustomAction = useCallback((actionId: string) => {
-    const action = selectionToolbarConfig.customActions.find(candidate =>
-      candidate.enabled !== false && candidate.id === actionId,
-    )
-    if (!action) {
-      const nextError = createSelectionToolbarPrecheckError("customAction", "actionUnavailable")
-      void trackFeatureUsed({
-        ...createFeatureUsageContext(
-          ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
-          ANALYTICS_SURFACE.CONTEXT_MENU,
-          Date.now(),
-          {
-            action_id: actionId,
-          },
-        ),
-        outcome: "failure",
+      const request = resolveContextMenuOpenRequest()
+      if (!request) {
+        const nextError = createSelectionToolbarPrecheckError("customAction", "missingSelection")
+        void trackFeatureUsed({
+          ...createFeatureUsageContext(
+            ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
+            ANALYTICS_SURFACE.CONTEXT_MENU,
+            Date.now(),
+            {
+              action_id: action.id,
+              action_name: action.name,
+            },
+          ),
+          ...classifyResolvedProvider(
+            resolveProviderRefForCapability(
+              "selectionToolbar.customAction",
+              providersConfig,
+              action.providerId,
+            ),
+          ),
+          outcome: "failure",
+        })
+        toastManager.add({ type: "error", title: nextError.description })
+        return
+      }
+
+      openActionRequest({
+        actionId: action.id,
+        anchor: request.anchor,
+        session: request.session,
+        surface: ANALYTICS_SURFACE.CONTEXT_MENU,
       })
-      toast.error(nextError.description)
-      return
-    }
+    },
+    [
+      openActionRequest,
+      providersConfig,
+      resolveContextMenuOpenRequest,
+      selectionToolbarConfig.customActions,
+    ],
+  )
 
-    const request = resolveContextMenuOpenRequest()
-    if (!request) {
-      const nextError = createSelectionToolbarPrecheckError("customAction", "missingSelection")
-      void trackFeatureUsed({
-        ...createFeatureUsageContext(
-          ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
-          ANALYTICS_SURFACE.CONTEXT_MENU,
-          Date.now(),
-          {
-            action_id: action.id,
-            action_name: action.name,
-          },
-        ),
-        outcome: "failure",
+  const handleProviderChange = useCallback(
+    (providerId: string) => {
+      if (!activeActionId) {
+        return
+      }
+
+      const updatedCustomActions = selectionToolbarConfig.customActions.map((action) =>
+        action.id === activeActionId ? { ...action, providerId } : action,
+      )
+
+      void setConfig({
+        selectionToolbar: {
+          ...selectionToolbarConfig,
+          customActions: updatedCustomActions,
+        },
       })
-      toast.error(nextError.description)
-      return
-    }
-
-    openActionRequest({
-      actionId: action.id,
-      anchor: request.anchor,
-      session: request.session,
-      surface: ANALYTICS_SURFACE.CONTEXT_MENU,
-    })
-  }, [openActionRequest, resolveContextMenuOpenRequest, selectionToolbarConfig.customActions])
-
-  const handleProviderChange = useCallback((providerId: string) => {
-    if (!activeActionId) {
-      return
-    }
-
-    const updatedCustomActions = selectionToolbarConfig.customActions.map(action =>
-      action.id === activeActionId
-        ? { ...action, providerId }
-        : action,
-    )
-
-    void setConfig({
-      selectionToolbar: {
-        ...selectionToolbarConfig,
-        customActions: updatedCustomActions,
-      },
-    })
-  }, [activeActionId, selectionToolbarConfig, setConfig])
+    },
+    [activeActionId, selectionToolbarConfig, setConfig],
+  )
 
   const handleRegenerate = useCallback(() => {
-    setRerunNonce(prev => prev + 1)
+    setRerunNonce((prev) => prev + 1)
   }, [])
 
   useEffect(() => {
@@ -343,6 +375,7 @@ export function SelectionCustomActionProvider({
 
     void trackFeatureUsed({
       ...analyticsContext,
+      ...classifyResolvedProvider(customActionRequest.provider),
       outcome: "failure",
     })
   }, [
@@ -352,12 +385,16 @@ export function SelectionCustomActionProvider({
     executionPlan.executionContext,
     isOpen,
     popoverSessionKey,
+    customActionRequest.provider,
     sourceSurface,
   ])
 
-  const contextValue = useMemo<SelectionCustomActionContextValue>(() => ({
-    openToolbarCustomAction,
-  }), [openToolbarCustomAction])
+  const contextValue = useMemo<SelectionCustomActionContextValue>(
+    () => ({
+      openToolbarCustomAction,
+    }),
+    [openToolbarCustomAction],
+  )
 
   return (
     <SelectionCustomActionContext value={contextValue}>
@@ -369,7 +406,10 @@ export function SelectionCustomActionProvider({
         onAnchorChange={setAnchor}
         disablePointerDismissal={isSaveToNotebaseDialogOpen}
       >
-        <SelectionPopover.Content key={popoverSessionKey} container={shadowWrapper ?? document.body}>
+        <SelectionPopover.Content
+          key={popoverSessionKey}
+          container={shadowWrapper ?? document.body}
+        >
           <SelectionPopover.Header className="border-b">
             <SelectionToolbarTitleContent
               title={activeAction?.name ?? "Custom Action"}

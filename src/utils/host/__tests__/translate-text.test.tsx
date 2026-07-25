@@ -1,48 +1,71 @@
 // @vitest-environment jsdom
 
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
 import { detectLanguage } from "@/utils/content/language"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
-import { translateTextForInput, translateTextForPage, translateTextForPageTitle } from "@/utils/host/translate/translate-variants"
+import { translateTextCore } from "@/utils/host/translate/translate-text"
+import {
+  translateTextForInput,
+  translateTextForPage,
+  translateTextForPageTitle,
+} from "@/utils/host/translate/translate-variants"
+import {
+  beginPageTranslationSession,
+  endPageTranslationSession,
+} from "@/utils/host/translate/translation-session"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { isTranslationCancelledError } from "@/utils/request/cancellation"
+
+type TranslatePromptOptions = NonNullable<Parameters<typeof getTranslatePrompt>[2]>
 
 // Mock dependencies
 vi.mock("@/utils/config/storage", () => ({
-  getLocalConfig: vi.fn(),
+  getLocalConfig: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/message", () => ({
-  sendMessage: vi.fn(),
+  sendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/host/translate/api/microsoft", () => ({
-  microsoftTranslate: vi.fn(),
+  microsoftTranslate: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/host/translate/api/google", () => ({
-  googleTranslate: vi.fn(),
+  googleTranslate: vi.fn<(...args: any[]) => any>(),
+}))
+
+vi.mock("@/utils/host/translate/api/deepl", () => ({
+  deeplTranslate: vi.fn<(...args: any[]) => any>(),
+}))
+
+vi.mock("@/utils/host/translate/api/deeplx", () => ({
+  deeplxTranslate: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/prompts/translate", () => ({
-  getTranslatePrompt: vi.fn(),
+  getTranslatePrompt: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/content/language", () => ({
-  detectLanguage: vi.fn(),
+  detectLanguage: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/host/translate/webpage-context", () => ({
-  getOrCreateWebPageContext: vi.fn(),
+  getOrCreateWebPageContext: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/host/translate/webpage-summary", () => ({
-  getOrGenerateWebPageSummary: vi.fn(),
+  getOrGenerateWebPageSummary: vi.fn<(...args: any[]) => any>(),
 }))
 
 let mockSendMessage: any
 let mockMicrosoftTranslate: any
 let mockGoogleTranslate: any
+let mockDeepLTranslate: any
+let mockDeepLXTranslate: any
 let mockGetConfigFromStorage: any
 let mockGetTranslatePrompt: any
 let mockGetOrCreateWebPageContext: any
@@ -55,20 +78,38 @@ describe("translate-text", () => {
     document.title = "Document Title"
     document.body.innerHTML = "<main>Body content</main>"
     mockSendMessage = vi.mocked((await import("@/utils/message")).sendMessage)
-    mockMicrosoftTranslate = vi.mocked((await import("@/utils/host/translate/api/microsoft")).microsoftTranslate)
-    mockGoogleTranslate = vi.mocked((await import("@/utils/host/translate/api/google")).googleTranslate)
+    mockMicrosoftTranslate = vi.mocked(
+      (await import("@/utils/host/translate/api/microsoft")).microsoftTranslate,
+    )
+    mockGoogleTranslate = vi.mocked(
+      (await import("@/utils/host/translate/api/google")).googleTranslate,
+    )
+    mockDeepLTranslate = vi.mocked(
+      (await import("@/utils/host/translate/api/deepl")).deeplTranslate,
+    )
+    mockDeepLXTranslate = vi.mocked(
+      (await import("@/utils/host/translate/api/deeplx")).deeplxTranslate,
+    )
     mockGetConfigFromStorage = vi.mocked((await import("@/utils/config/storage")).getLocalConfig)
-    mockGetTranslatePrompt = vi.mocked((await import("@/utils/prompts/translate")).getTranslatePrompt)
-    mockGetOrCreateWebPageContext = vi.mocked((await import("@/utils/host/translate/webpage-context")).getOrCreateWebPageContext)
-    mockGetOrGenerateWebPageSummary = vi.mocked((await import("@/utils/host/translate/webpage-summary")).getOrGenerateWebPageSummary)
+    mockGetTranslatePrompt = vi.mocked(
+      (await import("@/utils/prompts/translate")).getTranslatePrompt,
+    )
+    mockGetOrCreateWebPageContext = vi.mocked(
+      (await import("@/utils/host/translate/webpage-context")).getOrCreateWebPageContext,
+    )
+    mockGetOrGenerateWebPageSummary = vi.mocked(
+      (await import("@/utils/host/translate/webpage-summary")).getOrGenerateWebPageSummary,
+    )
     mockDetectLanguage = vi.mocked(detectLanguage)
 
     // Mock getOrCreateWebPageContext to return stable webpage metadata
-    mockGetOrCreateWebPageContext.mockImplementation(() => Promise.resolve({
-      url: window.location.href,
-      webTitle: document.title,
-      webContent: document.body.textContent || "",
-    }))
+    mockGetOrCreateWebPageContext.mockImplementation(() =>
+      Promise.resolve({
+        url: window.location.href,
+        webTitle: document.title,
+        webContent: document.body.textContent || "",
+      }),
+    )
     mockGetOrGenerateWebPageSummary.mockResolvedValue("Generated summary")
 
     // Mock getConfigFromStorage to return DEFAULT_CONFIG
@@ -82,27 +123,141 @@ describe("translate-text", () => {
   })
 
   describe("translateTextForPage", () => {
+    it("rebuilds the variant-specific prompt hash when background flags changed", async () => {
+      const llmProvider = DEFAULT_CONFIG.providersConfig.find(
+        (provider) => provider.provider === "openai",
+      )!
+      mockGetTranslatePrompt.mockImplementation(
+        async (_target: string, _input: string, options: TranslatePromptOptions) => ({
+          systemPrompt: `system:${options.promptExperimentVariant ?? "control"}`,
+          prompt: `prompt:${options.promptExperimentVariant ?? "control"}`,
+        }),
+      )
+      let enqueueCount = 0
+      mockSendMessage.mockImplementation(async (type: string) => {
+        if (type === "resolvePromptExperimentVariant") return "precision-rewrite"
+        enqueueCount += 1
+        return enqueueCount === 1
+          ? { retryWithPromptExperimentVariant: "rewrite-after-understanding" }
+          : "translated text"
+      })
+
+      await expect(
+        translateTextCore({
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          configuredPrompt: "default",
+          translationActionContext: {
+            actionId: "action-1",
+            feature: "page_translation",
+            surface: "popup",
+          },
+        }),
+      ).resolves.toBe("translated text")
+
+      expect(
+        mockSendMessage.mock.calls.filter(
+          ([type]: [string]) => type === "resolvePromptExperimentVariant",
+        ),
+      ).toHaveLength(1)
+      const enqueueCalls = mockSendMessage.mock.calls.filter(
+        ([type]: [string]) => type === "enqueueTranslateRequest",
+      )
+      expect(enqueueCalls).toHaveLength(2)
+      expect(enqueueCalls[0][1].promptExperimentVariant).toBe("precision-rewrite")
+      expect(enqueueCalls[1][1].promptExperimentVariant).toBe("rewrite-after-understanding")
+      expect(enqueueCalls[0][1].hash).not.toBe(enqueueCalls[1][1].hash)
+    })
+
+    it("rebuilds the current default prompt hash when the experiment becomes unavailable", async () => {
+      const llmProvider = DEFAULT_CONFIG.providersConfig.find(
+        (provider) => provider.provider === "openai",
+      )!
+      mockGetTranslatePrompt.mockImplementation(
+        async (_target: string, _input: string, options: TranslatePromptOptions) => ({
+          systemPrompt: `system:${options.promptExperimentVariant ?? "control"}`,
+          prompt: `prompt:${options.promptExperimentVariant ?? "control"}`,
+        }),
+      )
+      let enqueueCount = 0
+      mockSendMessage.mockImplementation(async (type: string) => {
+        if (type === "resolvePromptExperimentVariant") return "precision-rewrite"
+        enqueueCount += 1
+        return enqueueCount === 1 ? { retryWithoutPromptExperiment: true } : "translated text"
+      })
+
+      await expect(
+        translateTextCore({
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          configuredPrompt: "default",
+          translationActionContext: {
+            actionId: "action-1",
+            feature: "page_translation",
+            surface: "popup",
+          },
+        }),
+      ).resolves.toBe("translated text")
+
+      expect(
+        mockSendMessage.mock.calls.filter(
+          ([type]: [string]) => type === "resolvePromptExperimentVariant",
+        ),
+      ).toHaveLength(1)
+      const enqueueCalls = mockSendMessage.mock.calls.filter(
+        ([type]: [string]) => type === "enqueueTranslateRequest",
+      )
+      expect(enqueueCalls).toHaveLength(2)
+      expect(enqueueCalls[0][1].promptExperimentVariant).toBe("precision-rewrite")
+      expect(enqueueCalls[1][1].promptExperimentVariant).toBeUndefined()
+      expect(enqueueCalls[0][1].hash).not.toBe(enqueueCalls[1][1].hash)
+    })
+
     it("should send message with correct parameters", async () => {
       mockSendMessage.mockResolvedValue("translated text")
 
       const result = await translateTextForPage("test text")
 
       expect(result).toBe("translated text")
-      expect(mockSendMessage).toHaveBeenCalledWith("enqueueTranslateRequest", expect.objectContaining({
-        text: "test text",
-        langConfig: DEFAULT_CONFIG.language,
-        providerConfig: expect.any(Object),
-        scheduleAt: expect.any(Number),
-        hash: expect.any(String),
-      }))
+      expect(mockSendMessage).toHaveBeenCalledWith(
+        "enqueueTranslateRequest",
+        expect.objectContaining({
+          text: "test text",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: expect.any(Object),
+          scheduleAt: expect.any(Number),
+          hash: expect.any(String),
+        }),
+      )
       expect(mockGetOrCreateWebPageContext).not.toHaveBeenCalled()
       expect(mockGetOrGenerateWebPageSummary).not.toHaveBeenCalled()
+    })
+
+    it("maps a full no-translation sentinel response to an empty string", async () => {
+      mockSendMessage.mockResolvedValue(NO_TRANSLATION_SENTINEL)
+
+      const result = await translateTextForPage("test text")
+
+      expect(result).toBe("")
+      expect(mockSendMessage).toHaveBeenCalledOnce()
+    })
+
+    it("returns a response containing the sentinel inside longer text verbatim", async () => {
+      const mixed = `some translation ${NO_TRANSLATION_SENTINEL}`
+      mockSendMessage.mockResolvedValue(mixed)
+
+      const result = await translateTextForPage("test text")
+
+      expect(result).toBe(mixed)
     })
 
     it("skips target-language text before sending a translation request by default", async () => {
       mockDetectLanguage.mockResolvedValueOnce(DEFAULT_CONFIG.language.targetCode)
 
-      const targetLanguageText = "这是一个已经使用目标语言写成的较长段落，用于触发翻译前目标语言检测并跳过请求，同时确保文本长度超过检测阈值。"
+      const targetLanguageText =
+        "这是一个已经使用目标语言写成的较长段落，用于触发翻译前目标语言检测并跳过请求，同时确保文本长度超过检测阈值。"
       const result = await translateTextForPage(targetLanguageText)
 
       expect(result).toBe("")
@@ -126,14 +281,18 @@ describe("translate-text", () => {
       mockGetConfigFromStorage.mockResolvedValue(config)
       mockSendMessage.mockResolvedValue("translated text")
 
-      const targetLanguageText = "这是一个已经使用目标语言写成的较长段落，但关闭预检测后仍然应该发送翻译请求，同时确保文本长度超过检测阈值。"
+      const targetLanguageText =
+        "这是一个已经使用目标语言写成的较长段落，但关闭预检测后仍然应该发送翻译请求，同时确保文本长度超过检测阈值。"
       const result = await translateTextForPage(targetLanguageText)
 
       expect(result).toBe("translated text")
       expect(mockDetectLanguage).not.toHaveBeenCalled()
-      expect(mockSendMessage).toHaveBeenCalledWith("enqueueTranslateRequest", expect.objectContaining({
-        text: targetLanguageText,
-      }))
+      expect(mockSendMessage).toHaveBeenCalledWith(
+        "enqueueTranslateRequest",
+        expect.objectContaining({
+          text: targetLanguageText,
+        }),
+      )
     })
 
     it("keeps explicit skipLanguages behavior when target-language precheck is disabled", async () => {
@@ -151,7 +310,8 @@ describe("translate-text", () => {
       mockGetConfigFromStorage.mockResolvedValue(config)
       mockDetectLanguage.mockResolvedValueOnce("jpn")
 
-      const japaneseText = "これは日本語で書かれた十分に長い段落で、明示的なスキップ言語の設定によって翻訳前にスキップされます。"
+      const japaneseText =
+        "これは日本語で書かれた十分に長い段落で、明示的なスキップ言語の設定によって翻訳前にスキップされます。"
       const result = await translateTextForPage(japaneseText)
 
       expect(result).toBe("")
@@ -160,6 +320,81 @@ describe("translate-text", () => {
         enableLLM: false,
       })
       expect(mockSendMessage).not.toHaveBeenCalled()
+    })
+
+    // #1881: the session id is captured at pipeline ENTRY, but requests race
+    // the awaits below (config, summary). If the user cancels mid-request the
+    // request must NOT be dispatched — otherwise it lands unscoped (or after
+    // the session's cancel drain) and becomes permanently uncancellable.
+    describe("session cancellation gate", () => {
+      afterEach(() => {
+        endPageTranslationSession()
+      })
+
+      it("sends with the captured sessionId while the session stays active", async () => {
+        mockSendMessage.mockResolvedValue("translated text")
+        const sessionId = beginPageTranslationSession()
+
+        await translateTextForPage("test text")
+
+        expect(mockSendMessage).toHaveBeenCalledWith(
+          "enqueueTranslateRequest",
+          expect.objectContaining({ sessionId }),
+        )
+      })
+
+      it("aborts without dispatching when the session ends mid-request", async () => {
+        mockSendMessage.mockResolvedValue("translated text")
+        beginPageTranslationSession()
+        // getLocalConfig is awaited after the session id is captured; ending the
+        // session here mimics a user cancel landing mid-request.
+        mockGetConfigFromStorage.mockImplementation(async () => {
+          endPageTranslationSession()
+          return DEFAULT_CONFIG
+        })
+
+        let caught: unknown
+        try {
+          await translateTextForPage("test text")
+        } catch (error) {
+          caught = error
+        }
+
+        expect(isTranslationCancelledError(caught)).toBe(true)
+        expect(mockSendMessage).not.toHaveBeenCalled()
+      })
+
+      it("aborts when a new session replaces the captured one mid-request", async () => {
+        mockSendMessage.mockResolvedValue("translated text")
+        beginPageTranslationSession()
+        mockGetConfigFromStorage.mockImplementation(async () => {
+          // restart(): old session ends, a new one begins.
+          endPageTranslationSession()
+          beginPageTranslationSession()
+          return DEFAULT_CONFIG
+        })
+
+        let caught: unknown
+        try {
+          await translateTextForPage("test text")
+        } catch (error) {
+          caught = error
+        }
+
+        expect(isTranslationCancelledError(caught)).toBe(true)
+        expect(mockSendMessage).not.toHaveBeenCalled()
+      })
+
+      it("does not gate input translation (no session id)", async () => {
+        mockSendMessage.mockResolvedValue("translated text")
+        beginPageTranslationSession()
+        endPageTranslationSession()
+
+        const result = await translateTextForInput("hello", "eng", "cmn")
+
+        expect(result).toBe("translated text")
+        expect(mockSendMessage).toHaveBeenCalled()
+      })
     })
   })
 
@@ -186,11 +421,14 @@ describe("translate-text", () => {
       const result = await translateTextForPageTitle("Source Title To Translate")
 
       expect(result).toBe("translated page title")
-      expect(mockSendMessage).toHaveBeenCalledWith("enqueueTranslateRequest", expect.objectContaining({
-        text: "Source Title To Translate",
-        webTitle: "Source Title To Translate",
-        webContent: undefined,
-      }))
+      expect(mockSendMessage).toHaveBeenCalledWith(
+        "enqueueTranslateRequest",
+        expect.objectContaining({
+          text: "Source Title To Translate",
+          webTitle: "Source Title To Translate",
+          webContent: undefined,
+        }),
+      )
       expect(mockGetOrCreateWebPageContext).not.toHaveBeenCalled()
       expect(mockGetOrGenerateWebPageSummary).not.toHaveBeenCalled()
     })
@@ -218,12 +456,15 @@ describe("translate-text", () => {
       expect(result).toBe("translated page title")
       expect(mockGetOrCreateWebPageContext).toHaveBeenCalledTimes(1)
       expect(mockGetOrGenerateWebPageSummary).not.toHaveBeenCalled()
-      expect(mockSendMessage).toHaveBeenCalledWith("enqueueTranslateRequest", expect.objectContaining({
-        text: "Source Title To Translate",
-        webTitle: "Source Title To Translate",
-        webContent: "Body content",
-        webSummary: undefined,
-      }))
+      expect(mockSendMessage).toHaveBeenCalledWith(
+        "enqueueTranslateRequest",
+        expect.objectContaining({
+          text: "Source Title To Translate",
+          webTitle: "Source Title To Translate",
+          webContent: "Body content",
+          webSummary: undefined,
+        }),
+      )
     })
 
     it("should forward document.title to regular page translations", async () => {
@@ -248,10 +489,13 @@ describe("translate-text", () => {
       const result = await translateTextForPage("Body text")
 
       expect(result).toBe("translated body text")
-      expect(mockSendMessage).toHaveBeenCalledWith("enqueueTranslateRequest", expect.objectContaining({
-        text: "Body text",
-        webTitle: "Translated Browser Title",
-      }))
+      expect(mockSendMessage).toHaveBeenCalledWith(
+        "enqueueTranslateRequest",
+        expect.objectContaining({
+          text: "Body text",
+          webTitle: "Translated Browser Title",
+        }),
+      )
     })
   })
 
@@ -264,12 +508,15 @@ describe("translate-text", () => {
       expect(result).toBe("translated input")
       expect(mockGetOrCreateWebPageContext).not.toHaveBeenCalled()
       expect(mockGetOrGenerateWebPageSummary).not.toHaveBeenCalled()
-      expect(mockSendMessage).toHaveBeenCalledWith("enqueueTranslateRequest", expect.objectContaining({
-        text: "hello",
-        webTitle: undefined,
-        webContent: undefined,
-        webSummary: undefined,
-      }))
+      expect(mockSendMessage).toHaveBeenCalledWith(
+        "enqueueTranslateRequest",
+        expect.objectContaining({
+          text: "hello",
+          webTitle: undefined,
+          webContent: undefined,
+          webSummary: undefined,
+        }),
+      )
     })
 
     it("includes webpage summary for AI-aware llm input translations", async () => {
@@ -300,12 +547,15 @@ describe("translate-text", () => {
 
       expect(result).toBe("translated input")
       expect(mockGetOrGenerateWebPageSummary).toHaveBeenCalledTimes(1)
-      expect(mockSendMessage).toHaveBeenCalledWith("enqueueTranslateRequest", expect.objectContaining({
-        text: "hello",
-        webTitle: "Document Title",
-        webContent: "Body content",
-        webSummary: "Generated summary",
-      }))
+      expect(mockSendMessage).toHaveBeenCalledWith(
+        "enqueueTranslateRequest",
+        expect.objectContaining({
+          text: "hello",
+          webTitle: "Document Title",
+          webContent: "Body content",
+          webSummary: "Generated summary",
+        }),
+      )
     })
   })
 
@@ -328,29 +578,49 @@ describe("translate-text", () => {
       expect(await executeTranslate("", langConfig, providerConfig, getTranslatePrompt)).toBe("")
       expect(await executeTranslate(" ", langConfig, providerConfig, getTranslatePrompt)).toBe("")
       expect(await executeTranslate("\n", langConfig, providerConfig, getTranslatePrompt)).toBe("")
-      expect(await executeTranslate(" \n ", langConfig, providerConfig, getTranslatePrompt)).toBe("")
-      expect(await executeTranslate(" \n \t", langConfig, providerConfig, getTranslatePrompt)).toBe("")
+      expect(await executeTranslate(" \n ", langConfig, providerConfig, getTranslatePrompt)).toBe(
+        "",
+      )
+      expect(await executeTranslate(" \n \t", langConfig, providerConfig, getTranslatePrompt)).toBe(
+        "",
+      )
     })
 
     it("should handle zero-width spaces correctly", async () => {
       // Only zero-width spaces should return empty
-      expect(await executeTranslate("\u200B\u200B", langConfig, providerConfig, getTranslatePrompt)).toBe("")
+      expect(
+        await executeTranslate("\u200B\u200B", langConfig, providerConfig, getTranslatePrompt),
+      ).toBe("")
 
       // Mixed invisible + whitespace should return empty
-      expect(await executeTranslate("\u200B \u200B", langConfig, providerConfig, getTranslatePrompt)).toBe("")
+      expect(
+        await executeTranslate("\u200B \u200B", langConfig, providerConfig, getTranslatePrompt),
+      ).toBe("")
 
       // Should translate valid content after removing zero-width spaces
       mockMicrosoftTranslate.mockResolvedValue("你好")
-      const result = await executeTranslate("\u200B hello \u200B", langConfig, providerConfig, getTranslatePrompt)
+      const result = await executeTranslate(
+        "\u200B hello \u200B",
+        langConfig,
+        providerConfig,
+        getTranslatePrompt,
+      )
       expect(result).toBe("你好")
       // Shared translation core should send minimally prepared text to the provider
-      expect(mockMicrosoftTranslate).toHaveBeenCalledWith("hello", "en", "zh")
+      expect(mockMicrosoftTranslate).toHaveBeenCalledWith("hello", "en", "zh", {
+        textFormat: undefined,
+      })
     })
 
     it("should trim translation result", async () => {
       mockMicrosoftTranslate.mockResolvedValue("  测试结果  ")
 
-      const result = await executeTranslate("test input", langConfig, providerConfig, getTranslatePrompt)
+      const result = await executeTranslate(
+        "test input",
+        langConfig,
+        providerConfig,
+        getTranslatePrompt,
+      )
 
       expect(result).toBe("测试结果")
     })
@@ -362,12 +632,62 @@ describe("translate-text", () => {
         name: "Google Translate",
         provider: "google-translate" as const,
       }
-      mockGoogleTranslate.mockResolvedValue(" L&#39;Iran chiama &quot;Dichiarazione&quot; AT&amp;T &lt;span&gt; ")
+      mockGoogleTranslate.mockResolvedValue(
+        " L&#39;Iran chiama &quot;Dichiarazione&quot; AT&amp;T &lt;span&gt; ",
+      )
 
-      const result = await executeTranslate("test input", langConfig, googleProviderConfig, getTranslatePrompt)
+      const result = await executeTranslate(
+        "test input",
+        langConfig,
+        googleProviderConfig,
+        getTranslatePrompt,
+      )
 
-      expect(result).toBe("L'Iran chiama \"Dichiarazione\" AT&T <span>")
-      expect(mockGoogleTranslate).toHaveBeenCalledWith("test input", "en", "zh")
+      expect(result).toBe('L\'Iran chiama "Dichiarazione" AT&T <span>')
+      expect(mockGoogleTranslate).toHaveBeenCalledWith("test input", "en", "zh", {
+        textFormat: undefined,
+      })
+    })
+
+    it("forwards html text format to DeepL", async () => {
+      const deeplProviderConfig = {
+        id: "deepl-default",
+        enabled: true,
+        name: "DeepL",
+        provider: "deepl" as const,
+        apiKey: "test-key",
+      }
+      const html = '<p class="message">Hello</p>'
+      mockDeepLTranslate.mockResolvedValue("<p>你好</p>")
+
+      await executeTranslate(html, langConfig, deeplProviderConfig, getTranslatePrompt, {
+        textFormat: "html",
+      })
+
+      expect(mockDeepLTranslate).toHaveBeenCalledWith(html, "en", "zh", deeplProviderConfig, {
+        textFormat: "html",
+      })
+    })
+
+    it("forwards html text format to DeepLX", async () => {
+      const deeplxProviderConfig = {
+        id: "deeplx-default",
+        enabled: true,
+        name: "DeepLX",
+        provider: "deeplx" as const,
+        apiKey: "test-key",
+        baseURL: "https://api.deeplx.org/{{apiKey}}/translate",
+      }
+      const html = '<p class="message">Hello</p>'
+      mockDeepLXTranslate.mockResolvedValue("<p>你好</p>")
+
+      await executeTranslate(html, langConfig, deeplxProviderConfig, getTranslatePrompt, {
+        textFormat: "html",
+      })
+
+      expect(mockDeepLXTranslate).toHaveBeenCalledWith(html, "en", "zh", deeplxProviderConfig, {
+        textFormat: "html",
+      })
     })
   })
 })

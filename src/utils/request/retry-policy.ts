@@ -13,11 +13,17 @@ export interface RequestRetryContext {
   maxRetries: number
   baseRetryDelayMs: number
   now: number
+  // 429 retries already spent on THIS task; a separate budget from retryCount
+  // so a rate-limited task is not double-charged for ordinary failures.
+  rateLimitRetryCount: number
+  // Queue-level count of pause windows without an intervening success.
+  consecutiveRateLimits: number
 }
 
-export type RetryDecision
-  = | { action: "retry", delayMs: number }
-    | { action: "fail", failQueue?: boolean }
+export type RetryDecision =
+  | { action: "retry"; delayMs: number }
+  | { action: "fail"; failQueue?: boolean }
+  | { action: "pause-and-retry"; pauseMs: number }
 
 export interface RequestRetryPolicy {
   decide: (error: unknown, context: RequestRetryContext) => RetryDecision
@@ -26,6 +32,16 @@ export interface RequestRetryPolicy {
 export const REQUEST_ERROR_META = Symbol("requestErrorMeta")
 
 export const MAX_RETRY_AFTER_MS = 5 * 60_000
+// Base queue pause after a 429 with no Retry-After header. Doubles per
+// consecutive rate-limit window; sized for the slowest common free tier
+// (Gemini free RPM=15 → ≥4s spacing).
+export const RATE_LIMIT_BASE_PAUSE_MS = 5_000
+// Pause windows without an intervening success before the queue gives up and
+// surfaces errors (the pre-pause failQueue behavior, kept as a backstop).
+export const MAX_CONSECUTIVE_RATE_LIMIT_PAUSES = 5
+// Per-task 429 retry cap: guards the pathological case where queue-level
+// counters keep resetting (alternating success) but one task keeps 429ing.
+export const MAX_RATE_LIMIT_RETRIES_PER_TASK = 8
 
 interface RetryAwareError {
   [REQUEST_ERROR_META]?: RequestErrorMeta
@@ -57,30 +73,32 @@ export function attachRequestErrorMeta<T extends Error>(error: T, meta: RequestE
 }
 
 export function getRequestErrorMeta(error: unknown): RequestErrorMeta {
-  const source = isObject(error) ? error as RetryAwareError : undefined
+  const source = isObject(error) ? (error as RetryAwareError) : undefined
   const attachedMeta = source?.[REQUEST_ERROR_META] ?? source?.requestErrorMeta
-  const response = isObject(source?.response) ? source.response as RetryAwareError : undefined
+  const response = isObject(source?.response) ? (source.response as RetryAwareError) : undefined
 
   const statusCode = normalizeStatusCode(
-    attachedMeta?.statusCode
-    ?? source?.statusCode
-    ?? source?.status
-    ?? response?.statusCode
-    ?? response?.status,
+    attachedMeta?.statusCode ??
+      source?.statusCode ??
+      source?.status ??
+      response?.statusCode ??
+      response?.status,
   )
   const responseHeaders = normalizeHeaders(
-    attachedMeta?.responseHeaders
-    ?? source?.responseHeaders
-    ?? source?.headers
-    ?? response?.responseHeaders
-    ?? response?.headers,
+    attachedMeta?.responseHeaders ??
+      source?.responseHeaders ??
+      source?.headers ??
+      response?.responseHeaders ??
+      response?.headers,
   )
-  const retryAfterMs = normalizeNonNegativeNumber(attachedMeta?.retryAfterMs ?? source?.retryAfterMs)
-    ?? getRetryAfterMsFromHeaders(responseHeaders)
+  const retryAfterMs =
+    normalizeNonNegativeNumber(attachedMeta?.retryAfterMs ?? source?.retryAfterMs) ??
+    getRetryAfterMsFromHeaders(responseHeaders)
   const isRetryable = normalizeBoolean(attachedMeta?.isRetryable ?? source?.isRetryable)
   const message = typeof source?.message === "string" ? source.message : ""
-  const kind = normalizeKind(attachedMeta?.kind ?? source?.kind)
-    ?? inferRequestErrorKind({ statusCode, message })
+  const kind =
+    normalizeKind(attachedMeta?.kind ?? source?.kind) ??
+    inferRequestErrorKind({ statusCode, message })
 
   return removeUndefined({
     statusCode,
@@ -100,7 +118,7 @@ export function getRetryAfterMs(meta: RequestErrorMeta, now = Date.now()): numbe
   return getRetryAfterMsFromHeaders(meta.responseHeaders, now)
 }
 
-export function getHeaderValue(headers: RequestErrorMeta["responseHeaders"] | unknown, key: string): string | undefined {
+export function getHeaderValue(headers: unknown, key: string): string | undefined {
   if (!headers) {
     return undefined
   }
@@ -113,14 +131,20 @@ export function getHeaderValue(headers: RequestErrorMeta["responseHeaders"] | un
 
   if (Array.isArray(headers)) {
     const entry = headers.find((header): header is [unknown, unknown] => {
-      return Array.isArray(header) && header.length >= 2 && String(header[0]).toLowerCase() === normalizedKey
+      return (
+        Array.isArray(header) &&
+        header.length >= 2 &&
+        String(header[0]).toLowerCase() === normalizedKey
+      )
     })
     const value = entry?.[1]
     return typeof value === "string" ? value : undefined
   }
 
   if (isObject(headers)) {
-    const entry = Object.entries(headers).find(([headerKey]) => headerKey.toLowerCase() === normalizedKey)
+    const entry = Object.entries(headers).find(
+      ([headerKey]) => headerKey.toLowerCase() === normalizedKey,
+    )
     const value = entry?.[1]
     return typeof value === "string" ? value : undefined
   }
@@ -137,29 +161,45 @@ export const defaultRequestRetryPolicy: RequestRetryPolicy = {
   decide(error, context) {
     const meta = getRequestErrorMeta(error)
 
+    // 401/403/404: the config (key/model/endpoint) is wrong — retrying any
+    // queued task is pointless, so drain the backlog immediately.
     if (isQueueFatalRequestErrorMeta(meta)) {
       return { action: "fail", failQueue: true }
+    }
+
+    // 429: pause the whole queue and re-enqueue this task instead of nuking
+    // the backlog — a transient rate limit must not fail hundreds of pending
+    // paragraphs (they'd all paint errors at once and never cache).
+    if (isRateLimitRequestErrorMeta(meta)) {
+      if (
+        context.consecutiveRateLimits >= MAX_CONSECUTIVE_RATE_LIMIT_PAUSES ||
+        context.rateLimitRetryCount >= MAX_RATE_LIMIT_RETRIES_PER_TASK
+      ) {
+        return { action: "fail", failQueue: true }
+      }
+      const retryAfterMs = getRetryAfterMs(meta, context.now)
+      const backoffMs = RATE_LIMIT_BASE_PAUSE_MS * 2 ** context.consecutiveRateLimits
+      const pauseMs = clampRetryDelay(Math.max(retryAfterMs ?? 0, withJitter(backoffMs, false)))
+      return { action: "pause-and-retry", pauseMs }
     }
 
     if (context.retryCount >= context.maxRetries || !isRetryableRequestErrorMeta(meta)) {
       return { action: "fail" }
     }
 
-    const baseDelayMs = context.baseRetryDelayMs * (2 ** context.retryCount)
+    const baseDelayMs = context.baseRetryDelayMs * 2 ** context.retryCount
     const delayMs = clampRetryDelay(withJitter(baseDelayMs, false))
 
     return { action: "retry", delayMs }
   },
 }
 
-function isQueueFatalRequestErrorMeta(meta: RequestErrorMeta): boolean {
-  if (meta.kind === "rate-limit" || meta.statusCode === 429) {
-    return true
-  }
+function isRateLimitRequestErrorMeta(meta: RequestErrorMeta): boolean {
+  return meta.kind === "rate-limit" || meta.statusCode === 429
+}
 
-  return meta.statusCode === 401
-    || meta.statusCode === 403
-    || meta.statusCode === 404
+function isQueueFatalRequestErrorMeta(meta: RequestErrorMeta): boolean {
+  return meta.statusCode === 401 || meta.statusCode === 403 || meta.statusCode === 404
 }
 
 function isRetryableRequestErrorMeta(meta: RequestErrorMeta): boolean {
@@ -188,7 +228,10 @@ function isRetryableRequestErrorMeta(meta: RequestErrorMeta): boolean {
   return true
 }
 
-function getRetryAfterMsFromHeaders(headers: RequestErrorMeta["responseHeaders"] | undefined, now = Date.now()): number | undefined {
+function getRetryAfterMsFromHeaders(
+  headers: RequestErrorMeta["responseHeaders"] | undefined,
+  now = Date.now(),
+): number | undefined {
   const retryAfterMs = getHeaderValue(headers, "retry-after-ms")
   if (retryAfterMs) {
     const parsed = Number.parseFloat(retryAfterMs)
@@ -251,7 +294,13 @@ function normalizeHeaders(headers: unknown): RequestErrorMeta["responseHeaders"]
   return undefined
 }
 
-function inferRequestErrorKind({ statusCode, message }: { statusCode?: number, message: string }): RequestErrorKind {
+function inferRequestErrorKind({
+  statusCode,
+  message,
+}: {
+  statusCode?: number
+  message: string
+}): RequestErrorKind {
   if (statusCode === 429 || RATE_LIMIT_ERROR_RE.test(message)) {
     return "rate-limit"
   }
@@ -280,11 +329,11 @@ function inferRequestErrorKind({ statusCode, message }: { statusCode?: number, m
 }
 
 function normalizeKind(value: unknown): RequestErrorKind | undefined {
-  return value === "rate-limit"
-    || value === "timeout"
-    || value === "network"
-    || value === "bad-request"
-    || value === "unknown"
+  return value === "rate-limit" ||
+    value === "timeout" ||
+    value === "network" ||
+    value === "bad-request" ||
+    value === "unknown"
     ? value
     : undefined
 }

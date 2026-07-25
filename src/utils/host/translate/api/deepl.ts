@@ -1,5 +1,6 @@
 import type { LangCodeISO6391 } from "@read-frog/definitions"
 import type { ProviderConfig } from "@/types/config/provider"
+import type { TranslationTextFormat } from "@/types/config/translate"
 
 type DeepLProviderConfig = Extract<ProviderConfig, { provider: "deepl" }>
 
@@ -13,12 +14,14 @@ export async function deeplTranslate(
   fromLang: LangCodeISO6391 | "auto",
   toLang: LangCodeISO6391,
   providerConfig: DeepLProviderConfig,
+  options?: { textFormat?: TranslationTextFormat; signal?: AbortSignal },
 ): Promise<string> {
   const [translatedText] = await requestDeepLTranslations(
     [sourceText],
     fromLang,
     toLang,
     providerConfig,
+    options,
   )
 
   if (translatedText === undefined) {
@@ -33,6 +36,7 @@ async function requestDeepLTranslations(
   fromLang: LangCodeISO6391 | "auto",
   toLang: LangCodeISO6391,
   providerConfig: DeepLProviderConfig,
+  options?: { textFormat?: TranslationTextFormat; signal?: AbortSignal },
 ): Promise<string[]> {
   const apiKey = providerConfig.apiKey?.trim()
   if (!apiKey) {
@@ -47,21 +51,28 @@ async function requestDeepLTranslations(
     text: sourceTexts,
     ...(normalizedLanguages.source ? { source_lang: normalizedLanguages.source } : {}),
     target_lang: normalizedLanguages.target,
+    ...(options?.textFormat === "html" ? { tag_handling: "html" } : {}),
   })
 
-  const fetchResponse = await fetchDirect(url, apiKey, requestBody)
+  const fetchResponse = await fetchDirect(url, apiKey, requestBody, options?.signal)
 
   return await parseDeepLResponse(fetchResponse, sourceTexts.length)
 }
 
-async function fetchDirect(url: string, apiKey: string, body: string): Promise<Response> {
+async function fetchDirect(
+  url: string,
+  apiKey: string,
+  body: string,
+  signal?: AbortSignal,
+): Promise<Response> {
   const resp = await fetch(url, {
     method: "POST",
     headers: {
-      "Authorization": `DeepL-Auth-Key ${apiKey}`,
+      Authorization: `DeepL-Auth-Key ${apiKey}`,
       "Content-Type": "application/json",
     },
     body,
+    signal,
   }).catch((error) => {
     throw new Error(`Network error during DeepL translation: ${error.message}`)
   })
@@ -86,7 +97,9 @@ async function parseDeepLResponse(resp: Response, expectedCount: number): Promis
     }
 
     if (translations.length !== expectedCount) {
-      throw new RangeError(`DeepL translation response count mismatch: expected ${expectedCount}, got ${translations.length}`)
+      throw new RangeError(
+        `DeepL translation response count mismatch: expected ${expectedCount}, got ${translations.length}`,
+      )
     }
 
     return translations.map((translation, index) => {
@@ -95,18 +108,14 @@ async function parseDeepLResponse(resp: Response, expectedCount: number): Promis
       }
       return translation.text
     })
-  }
-  catch (error) {
-    throw new Error(
-      `Failed to parse DeepL translation response: ${(error as Error).message}`,
-    )
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    throw new Error(`Failed to parse DeepL translation response: ${message}`, { cause: error })
   }
 }
 
 export function getDeepLBaseURL(apiKey: string): string {
-  return apiKey.endsWith(":fx")
-    ? "https://api-free.deepl.com"
-    : "https://api.deepl.com"
+  return apiKey.endsWith(":fx") ? "https://api-free.deepl.com" : "https://api.deepl.com"
 }
 
 export function normalizeDeepLLanguages(
@@ -119,10 +128,7 @@ export function normalizeDeepLLanguages(
   }
 }
 
-function formatDeepLLanguageCode(
-  lang: LangCodeISO6391,
-  direction: "source" | "target",
-): string {
+function formatDeepLLanguageCode(lang: LangCodeISO6391, direction: "source" | "target"): string {
   const formattedLang = lang.toUpperCase()
 
   if (formattedLang === "ZH") {

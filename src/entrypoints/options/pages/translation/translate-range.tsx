@@ -1,7 +1,14 @@
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/base-ui/select"
 import { pageTranslateRangeSchema } from "@/types/config/translate"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
@@ -9,7 +16,11 @@ import { ConfigCard } from "../../components/config-card"
 
 export function TranslateRange() {
   return (
-    <ConfigCard id="translate-range" title={i18n.t("options.translation.translateRange.title")} description={i18n.t("options.translation.translateRange.description")}>
+    <ConfigCard
+      id="translate-range"
+      title={i18n.t("options.translation.translateRange.title")}
+      description={i18n.t("options.translation.translateRange.description")}
+    >
       <TranslateRangeSelector />
     </ConfigCard>
   )
@@ -25,27 +36,20 @@ function TranslateRangeSelector() {
       <Select
         value={translateConfig.page.range}
         onValueChange={(value) => {
-          if (!value)
-            return
-          void setTranslateConfig(
-            deepmerge(translateConfig, { page: { range: value } }),
-          )
+          if (!value) return
+          void setTranslateConfig(deepmerge(translateConfig, { page: { range: value } }))
         }}
       >
         <SelectTrigger className="w-full">
           <SelectValue>
-            {i18n.t(
-              `options.translation.translateRange.range.${translateConfig.page.range}`,
-            )}
+            {i18n.t(`options.translation.translateRange.range.${translateConfig.page.range}`)}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {pageTranslateRangeSchema.options.map(range => (
+            {pageTranslateRangeSchema.options.map((range) => (
               <SelectItem key={range} value={range}>
-                {i18n.t(
-                  `options.translation.translateRange.range.${range}`,
-                )}
+                {i18n.t(`options.translation.translateRange.range.${range}`)}
               </SelectItem>
             ))}
           </SelectGroup>

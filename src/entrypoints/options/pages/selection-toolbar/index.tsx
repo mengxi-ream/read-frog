@@ -6,6 +6,7 @@ import { SelectionToolbarDisabledSites } from "./selection-toolbar-disabled-site
 import { SelectionToolbarFeatureToggles } from "./selection-toolbar-feature-toggles"
 import { SelectionToolbarGlobalToggle } from "./selection-toolbar-global-toggle"
 import { SelectionToolbarOpacity } from "./selection-toolbar-opacity"
+import { SelectionToolbarSaveSuggestionToggle } from "./selection-toolbar-save-suggestion-toggle"
 import { SelectionTranslationShortcut } from "./selection-translation-shortcut"
 
 export function SelectionToolbarPage() {
@@ -15,13 +16,14 @@ export function SelectionToolbarPage() {
         <img
           src={selectionToolbarDemoImage}
           alt={i18n.t("options.floatingButtonAndToolbar.selectionToolbarDemoImageAlt")}
-          className="w-100 h-auto"
+          className="h-auto w-100"
         />
       </GradientBackground>
       <div className="*:border-b [&>*:last-child]:border-b-0">
         <SelectionToolbarGlobalToggle />
         <SelectionToolbarOpacity />
         <SelectionToolbarFeatureToggles />
+        <SelectionToolbarSaveSuggestionToggle />
         <SelectionTranslationShortcut />
         <SelectionToolbarDisabledSites />
       </div>

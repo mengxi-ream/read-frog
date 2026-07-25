@@ -65,6 +65,8 @@ describe("provider config updates", () => {
       provider: "openai",
     } as PartialDeep<ProviderConfig>
 
-    expect(() => updateProviderConfig(DEFAULT_PROVIDER_CONFIG["google-translate"], invalidUpdates)).toThrow()
+    expect(() =>
+      updateProviderConfig(DEFAULT_PROVIDER_CONFIG["google-translate"], invalidUpdates),
+    ).toThrow(/Invalid/)
   })
 })

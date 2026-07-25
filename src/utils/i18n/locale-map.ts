@@ -32,8 +32,7 @@ function resolveBrowserLocale(): SupportedUiLocale {
   try {
     // e.g. "en-US", "zh-CN", "ja"
     uiLanguage = browser.i18n.getUILanguage()
-  }
-  catch {
+  } catch {
     return DEFAULT_UI_LOCALE
   }
 
@@ -45,7 +44,7 @@ function resolveBrowserLocale(): SupportedUiLocale {
   }
 
   // Exact match against a supported locale (case-insensitive).
-  const exact = SUPPORTED_UI_LOCALES.find(locale => locale.toLowerCase() === lower)
+  const exact = SUPPORTED_UI_LOCALES.find((locale) => locale.toLowerCase() === lower)
   if (exact) {
     return exact
   }

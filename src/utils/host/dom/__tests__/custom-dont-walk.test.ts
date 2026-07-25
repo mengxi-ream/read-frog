@@ -1,7 +1,13 @@
 // @vitest-environment jsdom
+import type { Config } from "@/types/config/config"
 import { afterEach, describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { hasNoWalkAncestor, isCustomDontWalkIntoElement, isDontWalkIntoAndDontTranslateAsChildElement } from "../filter"
+import {
+  hasNoWalkAncestor,
+  isDontWalkIntoAndDontTranslateAsChildElement,
+  isSiteRuleExcludedElement,
+} from "../filter"
+import { extractTextContent } from "../traversal"
 
 function setHost(host: string) {
   // jsdom exposes location as read-only; override via defineProperty
@@ -11,7 +17,13 @@ function setHost(host: string) {
   })
 }
 
-describe("isCustomDontWalkIntoElement", () => {
+function configWithSiteRules(siteRules: Config["siteRules"]): Config {
+  const config = structuredClone(DEFAULT_CONFIG)
+  config.siteRules = siteRules
+  return config
+}
+
+describe("isSiteRuleExcludedElement", () => {
   afterEach(() => {
     document.body.innerHTML = ""
   })
@@ -23,18 +35,18 @@ describe("isCustomDontWalkIntoElement", () => {
     proseMirror.classList.add("ProseMirror")
     document.body.appendChild(proseMirror)
 
-    expect(isCustomDontWalkIntoElement(proseMirror)).toBe(true)
+    expect(isSiteRuleExcludedElement(proseMirror, DEFAULT_CONFIG)).toBe(true)
     // integration via filter.ts
     expect(isDontWalkIntoAndDontTranslateAsChildElement(proseMirror, DEFAULT_CONFIG)).toBe(true)
   })
 
   it("does not match on non-configured host", () => {
-    setHost("example.com")
+    setHost("non-configured-example.org")
 
     const el = document.createElement("div")
     document.body.appendChild(el)
 
-    expect(isCustomDontWalkIntoElement(el)).toBe(false)
+    expect(isSiteRuleExcludedElement(el, DEFAULT_CONFIG)).toBe(false)
     expect(isDontWalkIntoAndDontTranslateAsChildElement(el, DEFAULT_CONFIG)).toBe(false)
   })
 
@@ -49,13 +61,45 @@ describe("isCustomDontWalkIntoElement", () => {
     document.body.appendChild(proseMirror)
     document.body.appendChild(other)
 
-    expect(isCustomDontWalkIntoElement(proseMirror)).toBe(true)
-    expect(isCustomDontWalkIntoElement(other)).toBe(false)
+    expect(isSiteRuleExcludedElement(proseMirror, DEFAULT_CONFIG)).toBe(true)
+    expect(isSiteRuleExcludedElement(other, DEFAULT_CONFIG)).toBe(false)
     expect(isDontWalkIntoAndDontTranslateAsChildElement(proseMirror, DEFAULT_CONFIG)).toBe(true)
     expect(isDontWalkIntoAndDontTranslateAsChildElement(other, DEFAULT_CONFIG)).toBe(false)
   })
 
-  it("uses hostname when host includes port (host !== hostname)", () => {
+  it("walks ChatGPT assistant prose while keeping editors and code blocks protected (#1912)", () => {
+    setHost("chatgpt.com")
+
+    const assistantResponse = document.createElement("div")
+    assistantResponse.className = "markdown prose"
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Readable assistant response"
+
+    const pre = document.createElement("pre")
+    const code = document.createElement("code")
+    code.textContent = "const shouldStayUntranslated = true"
+    pre.appendChild(code)
+
+    const promptEditor = document.createElement("div")
+    promptEditor.className = "ProseMirror"
+    promptEditor.textContent = "User prompt"
+
+    assistantResponse.append(paragraph, pre)
+    document.body.append(assistantResponse, promptEditor)
+
+    expect(isSiteRuleExcludedElement(paragraph, DEFAULT_CONFIG)).toBe(false)
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(paragraph, DEFAULT_CONFIG)).toBe(false)
+    expect(extractTextContent(assistantResponse, DEFAULT_CONFIG)).toBe(
+      "Readable assistant response",
+    )
+
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(pre, DEFAULT_CONFIG)).toBe(true)
+    expect(isSiteRuleExcludedElement(promptEditor, DEFAULT_CONFIG)).toBe(true)
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(promptEditor, DEFAULT_CONFIG)).toBe(true)
+  })
+
+  it("still matches when the URL includes a port (host !== hostname)", () => {
     setHost("chatgpt.com:3000")
 
     const proseMirror = document.createElement("div")
@@ -69,14 +113,14 @@ describe("isCustomDontWalkIntoElement", () => {
     expect(window.location.host).toContain(":")
     expect(window.location.hostname).toBe("chatgpt.com")
 
-    expect(isCustomDontWalkIntoElement(proseMirror)).toBe(true)
-    expect(isCustomDontWalkIntoElement(other)).toBe(false)
+    expect(isSiteRuleExcludedElement(proseMirror, DEFAULT_CONFIG)).toBe(true)
+    expect(isSiteRuleExcludedElement(other, DEFAULT_CONFIG)).toBe(false)
     expect(isDontWalkIntoAndDontTranslateAsChildElement(proseMirror, DEFAULT_CONFIG)).toBe(true)
     expect(isDontWalkIntoAndDontTranslateAsChildElement(other, DEFAULT_CONFIG)).toBe(false)
   })
 
   it("does not match on non-configured host when host !== hostname", () => {
-    setHost("example.com:8080")
+    setHost("non-configured-example.org:8080")
 
     const proseMirror = document.createElement("div")
     proseMirror.classList.add("ProseMirror")
@@ -87,10 +131,10 @@ describe("isCustomDontWalkIntoElement", () => {
     document.body.appendChild(other)
 
     expect(window.location.host).toContain(":")
-    expect(window.location.hostname).toBe("example.com")
+    expect(window.location.hostname).toBe("non-configured-example.org")
 
-    expect(isCustomDontWalkIntoElement(proseMirror)).toBe(false)
-    expect(isCustomDontWalkIntoElement(other)).toBe(false)
+    expect(isSiteRuleExcludedElement(proseMirror, DEFAULT_CONFIG)).toBe(false)
+    expect(isSiteRuleExcludedElement(other, DEFAULT_CONFIG)).toBe(false)
     expect(isDontWalkIntoAndDontTranslateAsChildElement(proseMirror, DEFAULT_CONFIG)).toBe(false)
     expect(isDontWalkIntoAndDontTranslateAsChildElement(other, DEFAULT_CONFIG)).toBe(false)
   })
@@ -101,7 +145,7 @@ describe("isCustomDontWalkIntoElement", () => {
     const postFlair = document.createElement("shreddit-post-flair")
     document.body.appendChild(postFlair)
 
-    expect(isCustomDontWalkIntoElement(postFlair)).toBe(true)
+    expect(isSiteRuleExcludedElement(postFlair, DEFAULT_CONFIG)).toBe(true)
     expect(isDontWalkIntoAndDontTranslateAsChildElement(postFlair, DEFAULT_CONFIG)).toBe(true)
   })
 
@@ -121,8 +165,41 @@ describe("isCustomDontWalkIntoElement", () => {
     diffTable.appendChild(tbody)
     document.body.appendChild(diffTable)
 
-    expect(isCustomDontWalkIntoElement(diffTable)).toBe(true)
+    expect(isSiteRuleExcludedElement(diffTable, DEFAULT_CONFIG)).toBe(true)
     expect(isDontWalkIntoAndDontTranslateAsChildElement(diffTable, DEFAULT_CONFIG)).toBe(true)
     expect(hasNoWalkAncestor(td, DEFAULT_CONFIG)).toBe(true)
+  })
+
+  it("applies user rules on any site", () => {
+    setHost("my-blog.example.org")
+
+    const config = configWithSiteRules({
+      userRules: [
+        { id: "my-blog", matches: "my-blog.example.org", excludeSelectors: [".comments"] },
+      ],
+      disabledBuiltInRules: [],
+    })
+
+    const comments = document.createElement("div")
+    comments.classList.add("comments")
+    document.body.appendChild(comments)
+
+    expect(isSiteRuleExcludedElement(comments, config)).toBe(true)
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(comments, config)).toBe(true)
+  })
+
+  it("stops matching when the built-in rule is disabled", () => {
+    setHost("chatgpt.com")
+
+    const config = configWithSiteRules({
+      userRules: [],
+      disabledBuiltInRules: ["readfrog-chatgpt", "chatOpenai"],
+    })
+
+    const proseMirror = document.createElement("div")
+    proseMirror.classList.add("ProseMirror")
+    document.body.appendChild(proseMirror)
+
+    expect(isSiteRuleExcludedElement(proseMirror, config)).toBe(false)
   })
 })

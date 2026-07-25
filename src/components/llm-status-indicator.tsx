@@ -7,7 +7,7 @@ interface LLMStatusIndicatorProps {
 
 export function LLMStatusIndicator({ hasLLMProvider, featureName }: LLMStatusIndicatorProps) {
   return (
-    <div className="flex items-center gap-1.5 mt-2">
+    <div className="mt-2 flex items-center gap-1.5">
       <div className={`size-2 rounded-full ${hasLLMProvider ? "bg-green-500" : "bg-orange-400"}`} />
       <span className="text-xs">
         {hasLLMProvider

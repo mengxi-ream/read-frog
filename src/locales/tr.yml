@@ -4,6 +4,7 @@ extDescription: Read Frog, herhangi bir web sitesinden dilleri derinlemesine ö�
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: Giriş yap
+  webApp: Web uygulaması
   logout: Çıkış yap
   logoutError: Çıkış yapılamadı. Lütfen tekrar deneyin.
 dataTypes:
@@ -89,6 +90,9 @@ options:
     product: Ürün
   tools:
     translationHub: Çeviri Merkezi
+  product:
+    roadmap: Yol Haritası
+    feedback: Geri Bildirim
   setAPIKeyWarning:
     please: Lütfen API Anahtarını
     page: sayfasında ayarlayın
@@ -175,9 +179,9 @@ options:
       invalidJson: Geçersiz JSON formatı
     providers:
       name:
-        freeAi: Ücretsiz AI Hizmeti
+        builtInAi: Yerleşik AI
       attribution:
-        freeAi: Atlas Cloud tarafından sağlanır. Şu anda yalnızca özel AI eylemleri için kullanılabilir. Sınırsız deneyimin kilidini açmak için resmi web sitesinden uygun maliyetli kredi satın alabilirsiniz.
+        builtInAi: Atlas Cloud tarafından sağlanır. Şu anda yalnızca özel AI eylemleri için kullanılabilir. Sınırsız deneyimin kilidini açmak için resmi web sitesinden uygun maliyetli kredi satın alabilirsiniz.
       description:
         openai: GPT-4o gibi modeller sağlar
         azure: Azure dağıtımlarınız üzerinden OpenAI modelleri
@@ -345,6 +349,9 @@ options:
         description: Seçim araç çubuğunda hangi yerleşik özelliklerin gösterileceğini seçin
         translate: Çeviri
         speak: Sesli Okuma
+      saveSuggestion:
+        title: Kaydetme Önerileri
+        description: Seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -630,7 +637,7 @@ options:
         description: Çeviriyi tetiklemek için gereken öğe görünürlük yüzdesi (0-1). Daha yüksek değerler, öğenin daha fazlası görünür olana kadar çeviriyi geciktirir.
     smallParagraphFilter:
       title: Kısa Metin Filtresi
-      description: Eşik değerinden az karakterli veya kelimeli metin düğümlerinin çevirisini atla (0 = devre dışı)
+      description: Bu genel varsayılanlar, eşiklerden daha az karakter veya sözcük içeren metin düğümlerinin çevirisini atlar. Eşleşen site kuralları bunları geçersiz kılabilir (0 = devre dışı)
       minCharacters:
         title: Minimum Karakter
         description: Bu değerden az karakterli metin düğümleri çevrilmeyecektir. Karakter sayısı boşlukları içerir.
@@ -669,6 +676,31 @@ options:
       description: AI'ya web sayfası bağlamı sağlayarak çeviri kalitesini artırın
       enable: AI Akıllı Bağlam Çevirisini Etkinleştir
       enableDescription: AI, çeviri doğruluğunu artırmak için web sayfası özetini kullanır. LLM sağlayıcısı gerektirir. Bir sayfayı çevirmeye başlarken gecikme ekler ve API maliyetlerini artırır.
+  siteRules:
+    title: Site Kuralları
+    description: Belirli web sitelerinin nasıl çevrileceğini ayarlayan site bazlı kurallar.
+    userRules:
+      title: Kullanıcı Kuralları
+      description: Kendi site kurallarınızı JSON dizisi olarak tanımlayın. Kurallar, URL'si kalıplarıyla eşleşen sayfalara uygulanır; kullanıcı kuralları yerleşik kurallardan önceliklidir.
+      saveButton: Kaydet
+      savedButton: Kaydedildi
+      validation:
+        validating: Doğrulanıyor...
+        valid: Kurallar geçerli
+        syntaxError: JSON sözdizimi hataları içeriyor
+        notArray: JSON'un en üst düzey değeri bir kural dizisi olmalıdır
+        tooLong: Kural belgesi çok uzun
+        tooMany: Çok fazla kural var
+        duplicateIds: Yinelenen kural id'leri
+        schemaErrors: Bazı kurallar geçersiz
+        moreErrors: ...ve $1 hata daha
+        saved: Tüm değişiklikler kaydedildi
+    builtIn:
+      title: Yerleşik Kurallar
+      description: Eklentiyle birlikte gelen site kuralları. Bir kural bir sitede soruna yol açıyorsa anahtarıyla devre dışı bırakın.
+      searchPlaceholder: id, açıklama veya URL kalıbına göre ara
+      showMore: Daha fazla göster
+      count: $2 kuraldan $1 tanesi gösteriliyor
   tts:
     title: Metinden Konuşmaya
     description: Konuş butonunu Edge TTS ses ayarlarıyla özelleştirin.
@@ -884,6 +916,15 @@ options:
           webTitle: Web sayfası başlığı
           webDescription: Sayfa meta verilerinden web sayfası açıklaması
           videoSummary: Video özeti (AI Akıllı Bağlam gerektirir)
+    aiQuota:
+      title: Yapay Zeka Altyazı Kotası
+      description: Yapay zeka altyazı deşifre kotanızın aylık kullanımı
+      loginRequired: Yapay zeka altyazı kotanızı görmek için giriş yapın
+      logIn: Giriş Yap
+      betaRequired: Yapay zeka altyazıları beta aşamasında ve hesabınız için henüz etkin değil
+      betaApply: Erişim başvurusu yap
+      loadError: Kotanız yüklenemedi. Lütfen daha sonra tekrar deneyin.
+      summary: $2 dakikanın $1 dakikası kullanıldı, $3 kaldı
   whatsNew:
     title: Yenilikler
   rateUs:
@@ -961,6 +1002,7 @@ action:
   saveToNotebasePendingLogin: Kaydetmeyi tamamlamak için giriş yapın
   saveToNotebasePendingLoginDescription: Giriş yaptıktan sonra Read Frog Notebase'i oluşturur ve bu sonucu otomatik olarak kaydeder.
   saveToNotebasePendingConnectedLoginDescription: Girişten sonra Read Frog mümkünse bağlı Notebase'e kaydeder. Bu hesap onu kullanamazsa yeni bir Notebase oluşturup kaydeder.
+  upgrade: Yükselt
   openCustomActions: Custom AI Actions'ı aç
   openNotebase: Notebase'i aç
   contextDetailsTitleLabel: Başlık
@@ -968,6 +1010,12 @@ action:
   translation: Çeviri
   speak: Oku
   playing: Çalınıyor
+saveSuggestion:
+  title: Kaydetmek isteyebilirsiniz
+  description: Bu kelimeleri Notebase'inize kaydedin, istediğiniz zaman tekrar edin.
+  save: Kaydet
+  saved: Kaydedildi
+  staleSuggestion: Bu öneri güncelliğini yitirdi
 thinking:
   label: Düşünüyor
   complete: Düşünme tamamlandı
@@ -976,6 +1024,9 @@ thinking:
 shortcutKeySelector:
   placeholder: Lütfen kısayolu girin
 subtitles:
+  loadingAiSubtitles: Yapay zeka altyazıları yükleniyor…
+  requestAiSubtitles: Yapay zeka altyazısı iste (Beta)
+  usingAiSubtitles: Yapay zeka altyazısı kullanılıyor
   actions:
     downloadTranslated: Çevrilmiş altyazıları indir
     downloadTranslatedPreparing: Altyazılar hazırlanıyor, uzun videolar daha uzun sürebilir
@@ -1001,6 +1052,8 @@ subtitles:
     aiRateLimited: Çok fazla istek, lütfen daha sonra tekrar deneyin
     aiAuthFailed: API kimlik doğrulaması başarısız, lütfen API anahtarınızı kontrol edin
     aiServiceUnavailable: Çeviri hizmeti geçici olarak kullanılamıyor
+    aiQuotaExceeded: Aylık yapay zeka altyazı kotanız doldu
+    aiRequestFailed: Yapay zeka altyazı isteği başarısız oldu, lütfen daha sonra tekrar deneyin
     aiNoResponse: AI hizmeti yanıt vermedi, orijinal metin gösteriliyor
     translatedExportFailed: Çevrilmiş altyazılar oluşturulamadı
     translatedExportIncomplete: Tüm altyazı satırları çevrilemedi

@@ -96,7 +96,10 @@ function migrateProvider(provider: any): any {
 
   if (provider.provider === "minimax") {
     const normalizedBaseUrl = normalizeUrl(provider.baseURL)
-    if (isBlank(provider.baseURL) || (normalizedBaseUrl !== null && OLD_MINIMAX_ANTHROPIC_BASE_URLS.has(normalizedBaseUrl))) {
+    if (
+      isBlank(provider.baseURL) ||
+      (normalizedBaseUrl !== null && OLD_MINIMAX_ANTHROPIC_BASE_URLS.has(normalizedBaseUrl))
+    ) {
       nextProvider = {
         ...nextProvider,
         baseURL: MINIMAX_OPENAI_COMPATIBLE_BASE_URL,

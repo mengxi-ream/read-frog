@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { detectLanguageWithSource } from "../language"
 
 vi.mock("franc", () => ({
-  franc: vi.fn(),
+  franc: vi.fn<(...args: any[]) => any>(),
 }))
 
 const mockFranc = vi.mocked(franc)
@@ -16,7 +16,9 @@ describe("detectLanguageWithSource", () => {
   it("returns franc result when it is a supported language code", async () => {
     mockFranc.mockReturnValue("eng")
 
-    await expect(detectLanguageWithSource("This is enough text to detect language.")).resolves.toEqual({
+    await expect(
+      detectLanguageWithSource("This is enough text to detect language."),
+    ).resolves.toEqual({
       code: "eng",
       source: "franc",
     })
@@ -25,7 +27,9 @@ describe("detectLanguageWithSource", () => {
   it("falls back when franc returns an unsupported language code", async () => {
     mockFranc.mockReturnValue("vmw")
 
-    await expect(detectLanguageWithSource("Eyi je oro ni ede Yoruba fun idanwo wiwa ede.")).resolves.toEqual({
+    await expect(
+      detectLanguageWithSource("Eyi je oro ni ede Yoruba fun idanwo wiwa ede."),
+    ).resolves.toEqual({
       code: "und",
       source: "fallback",
     })

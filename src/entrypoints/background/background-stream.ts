@@ -1,10 +1,11 @@
 import type { Browser } from "#imports"
 import type {
+  BackgroundNoteSuggestionStreamSnapshot,
+  BackgroundStreamNoteSuggestionSerializablePayload,
   BackgroundStreamPortName,
   BackgroundStreamSnapshot,
   BackgroundStreamStructuredObjectSerializablePayload,
   BackgroundStreamTextSerializablePayload,
-  BackgroundStructuredObjectOutputField,
   BackgroundStructuredObjectStreamSnapshot,
   BackgroundTextStreamSnapshot,
   StartMessageParseResult,
@@ -18,18 +19,20 @@ import type {
 import { Output, parsePartialJson, streamText } from "ai"
 import { z } from "zod"
 import { BACKGROUND_STREAM_PORTS } from "@/types/background-stream"
+import { createStructuredObjectSchema } from "@/utils/ai/structured-object-schema"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { backgroundOrpcClient } from "@/utils/orpc/background-client"
 import { getModelById } from "@/utils/providers/model"
-import { isFreeAiProviderId } from "@/utils/providers/provider-registry"
+import { isBuiltInAiProviderId } from "@/utils/providers/provider-registry"
+import { saveSuggestionEnvelopeSchema } from "@/utils/save-suggestion/types"
 
 const invalidStreamStartPayloadMessage = "Invalid stream start payload"
 const aiStreamProtocolErrorMessage = "Invalid AI stream response."
 const aiOutputValidationErrorMessage = "AI output does not match the expected format."
-const aiOutputLengthLimitErrorMessage
-  = "The AI output reached the length limit. Please reduce the requested output length and try again."
+const aiOutputLengthLimitErrorMessage =
+  "The AI output reached the length limit. Please reduce the requested output length and try again."
 
 type AiStreamPart = Record<string, unknown> & { type: string }
 
@@ -38,8 +41,10 @@ function createStreamAbortError(message: string) {
 }
 
 function isAbortLikeError(error: unknown) {
-  return (error instanceof DOMException && error.name === "AbortError")
-    || (error instanceof Error && error.name === "AbortError")
+  return (
+    (error instanceof DOMException && error.name === "AbortError") ||
+    (error instanceof Error && error.name === "AbortError")
+  )
 }
 
 const streamPortStartEnvelopeSchema = z.object({
@@ -48,33 +53,38 @@ const streamPortStartEnvelopeSchema = z.object({
   payload: z.unknown(),
 })
 
-const streamTextPayloadSchema = z.object({
-  providerId: z.string().trim().min(1),
-}).loose()
+const streamTextPayloadSchema = z
+  .object({
+    providerId: z.string().trim().min(1),
+  })
+  .loose()
 
 const structuredObjectFieldSchema = z.object({
   name: z.string().trim().min(1),
   type: z.enum(["string", "number"]),
 })
 
-const structuredObjectPayloadSchema = z.object({
-  providerId: z.string().trim().min(1),
-  outputSchema: z.array(structuredObjectFieldSchema).min(1),
-}).loose().superRefine((payload, ctx) => {
-  const nameSet = new Set<string>()
-
-  payload.outputSchema.forEach((field, index) => {
-    if (nameSet.has(field.name)) {
-      ctx.addIssue({
-        code: "custom",
-        message: `Duplicate output schema name "${field.name}".`,
-        path: ["outputSchema", index, "name"],
-      })
-      return
-    }
-    nameSet.add(field.name)
+const structuredObjectPayloadSchema = z
+  .object({
+    providerId: z.string().trim().min(1),
+    outputSchema: z.array(structuredObjectFieldSchema).min(1),
   })
-})
+  .loose()
+  .superRefine((payload, ctx) => {
+    const nameSet = new Set<string>()
+
+    payload.outputSchema.forEach((field, index) => {
+      if (nameSet.has(field.name)) {
+        ctx.addIssue({
+          code: "custom",
+          message: `Duplicate output schema name "${field.name}".`,
+          path: ["outputSchema", index, "name"],
+        })
+        return
+      }
+      nameSet.add(field.name)
+    })
+  })
 
 function createStartMessageParser<TSerializablePayload>(payloadSchema: z.ZodTypeAny) {
   return (msg: unknown): StartMessageParseResult<TSerializablePayload> => {
@@ -127,8 +137,7 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
           requestId,
         }
         port.postMessage(message)
-      }
-      catch (error) {
+      } catch (error) {
         logger.error("[Background] Stream port post failed", error)
       }
     }
@@ -152,7 +161,9 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
     }
 
     messageListener = async (rawMessage: unknown) => {
-      const requestMessage = rawMessage as StreamPortRequestMessage<TSerializablePayload> | undefined
+      const requestMessage = rawMessage as
+        | StreamPortRequestMessage<TSerializablePayload>
+        | undefined
       if (requestMessage?.type === "ping") {
         return
       }
@@ -174,8 +185,7 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
         cleanup()
         try {
           port.disconnect()
-        }
-        catch {
+        } catch {
           // The port may already be closed due to a race with onDisconnect.
           // This is expected during cleanup and safe to ignore.
         }
@@ -201,14 +211,15 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
         })
 
         if (streamError !== undefined) {
-          throw streamError
+          throw streamError instanceof Error
+            ? new Error(streamError.message, { cause: streamError })
+            : new Error(typeof streamError === "string" ? streamError : "Unknown stream error")
         }
 
         if (!abortController.signal.aborted) {
           safePost({ type: "done", data: result })
         }
-      }
-      catch (error) {
+      } catch (error) {
         const finalError = streamError ?? error
         if (abortController.signal.aborted || isAbortLikeError(finalError)) {
           return
@@ -216,13 +227,11 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
 
         logger.error("[Background] Stream Function failed", finalError)
         safePost({ type: "error", error: { message: extractAISDKErrorMessage(finalError) } })
-      }
-      finally {
+      } finally {
         cleanup()
         try {
           port.disconnect()
-        }
-        catch {
+        } catch {
           // The port may already be closed due to a race with onDisconnect.
           // This is expected during cleanup and safe to ignore.
         }
@@ -239,9 +248,7 @@ function createStreamSnapshot<TOutput>(
   thinking: ThinkingSnapshot,
 ): BackgroundStreamSnapshot<TOutput> {
   return {
-    output: output !== null && typeof output === "object"
-      ? { ...output } as TOutput
-      : output,
+    output: output !== null && typeof output === "object" ? { ...output } : output,
     thinking: { ...thinking },
   }
 }
@@ -254,7 +261,7 @@ class BackgroundStreamError extends Error {
   constructor(
     readonly code: string,
     message: string,
-    options?: { cause?: unknown, retryAfterMs?: number },
+    options?: { cause?: unknown; retryAfterMs?: number },
   ) {
     super(message, { cause: options?.cause })
     this.retryAfterMs = options?.retryAfterMs
@@ -269,22 +276,6 @@ function toAiStreamPart(part: unknown): AiStreamPart {
   }
 
   return part as AiStreamPart
-}
-
-function createStructuredObjectSchema(
-  outputSchema: BackgroundStructuredObjectOutputField[],
-): z.ZodObject<Record<string, z.ZodTypeAny>> {
-  const fieldTypeToZodSchema: Record<string, z.ZodTypeAny> = {
-    string: z.string().nullable(),
-    number: z.number().nullable(),
-  }
-
-  const schemaShape: Record<string, z.ZodTypeAny> = {}
-  for (const field of outputSchema) {
-    schemaShape[field.name] = fieldTypeToZodSchema[field.type] ?? z.string().nullable()
-  }
-
-  return z.strictObject(schemaShape)
 }
 
 function getStringPartField(part: Record<string, unknown>, field: string): string {
@@ -307,7 +298,7 @@ function isOrpcRateLimitError(error: unknown): boolean {
     return false
   }
 
-  const candidate = error as { code?: unknown, status?: unknown }
+  const candidate = error as { code?: unknown; status?: unknown }
   return candidate.status === 429 || candidate.code === "TOO_MANY_REQUESTS"
 }
 
@@ -336,16 +327,16 @@ function getHostedAiRateLimitMessage(error: unknown): string {
 
 function normalizeHostedAiError(error: unknown): unknown {
   if (isOrpcRateLimitError(error)) {
-    return new BackgroundStreamError("rate_limited", getHostedAiRateLimitMessage(error), { cause: error })
+    return new BackgroundStreamError("rate_limited", getHostedAiRateLimitMessage(error), {
+      cause: error,
+    })
   }
 
   return error
 }
 
 function getStreamFinishReason(part: Record<string, unknown>): string | undefined {
-  return typeof part.finishReason === "string"
-    ? part.finishReason
-    : undefined
+  return typeof part.finishReason === "string" ? part.finishReason : undefined
 }
 
 function validateFinishedStream(hasFinish: boolean, finishReason: string | undefined): void {
@@ -436,14 +427,14 @@ async function consumeTextPartStream(
   return createStreamSnapshot(cumulativeText, thinking)
 }
 
-async function consumeStructuredObjectPartStream(
+async function consumeStructuredObjectPartStream<TOutput extends Record<string, unknown>>(
   partStream: AsyncIterable<unknown>,
   options: {
-    objectSchema: z.ZodObject<Record<string, z.ZodTypeAny>>
+    objectSchema: z.ZodType<TOutput>
     onChunk?: StreamRuntimeOptions<BackgroundStructuredObjectStreamSnapshot>["onChunk"]
     signal?: AbortSignal
   },
-): Promise<BackgroundStructuredObjectStreamSnapshot> {
+): Promise<BackgroundStreamSnapshot<TOutput>> {
   const { objectSchema, onChunk, signal } = options
   let cumulativeText = ""
   let cumulativeValue: Record<string, unknown> = {}
@@ -521,9 +512,10 @@ async function consumeStructuredObjectPartStream(
     }
 
     return createStreamSnapshot(finalValue, thinking)
-  }
-  catch (error) {
-    throw new BackgroundStreamError("output_validation_failed", aiOutputValidationErrorMessage, { cause: error })
+  } catch (error) {
+    throw new BackgroundStreamError("output_validation_failed", aiOutputValidationErrorMessage, {
+      cause: error,
+    })
   }
 }
 
@@ -558,13 +550,15 @@ async function createHostedTextPartStream(
   }
 
   try {
-    return await backgroundOrpcClient.hostedAi.translate.streamText({
-      instructions,
-      prompt,
-      temperature,
-    }, { signal })
-  }
-  catch (error) {
+    return await backgroundOrpcClient.hostedAi.translate.streamText(
+      {
+        instructions,
+        prompt,
+        temperature,
+      },
+      { signal },
+    )
+  } catch (error) {
     throw normalizeHostedAiError(error)
   }
 }
@@ -579,7 +573,7 @@ export async function runStreamTextInBackground(
     throw new DOMException("stream aborted", "AbortError")
   }
 
-  const partStream = isFreeAiProviderId(serializablePayload.providerId)
+  const partStream = isBuiltInAiProviderId(serializablePayload.providerId)
     ? await createHostedTextPartStream(serializablePayload, signal)
     : await createLocalTextPartStream(serializablePayload, options)
 
@@ -624,14 +618,16 @@ async function createHostedStructuredObjectPartStream(
   }
 
   try {
-    return await backgroundOrpcClient.hostedAi.customAction.streamStructuredObject({
-      instructions,
-      prompt,
-      outputSchema,
-      temperature,
-    }, { signal })
-  }
-  catch (error) {
+    return await backgroundOrpcClient.hostedAi.customAction.streamStructuredObject(
+      {
+        instructions,
+        prompt,
+        outputSchema,
+        temperature,
+      },
+      { signal },
+    )
+  } catch (error) {
     throw normalizeHostedAiError(error)
   }
 }
@@ -647,7 +643,7 @@ export async function runStructuredObjectStreamInBackground(
   }
 
   const objectSchema = createStructuredObjectSchema(serializablePayload.outputSchema)
-  const partStream = isFreeAiProviderId(serializablePayload.providerId)
+  const partStream = isBuiltInAiProviderId(serializablePayload.providerId)
     ? await createHostedStructuredObjectPartStream(serializablePayload, signal)
     : await createLocalStructuredObjectPartStream(serializablePayload, objectSchema, options)
 
@@ -658,31 +654,76 @@ export async function runStructuredObjectStreamInBackground(
   })
 }
 
-const parseStreamTextStartMessage = createStartMessageParser<BackgroundStreamTextSerializablePayload>(streamTextPayloadSchema)
-const parseStructuredObjectStartMessage
-  = createStartMessageParser<BackgroundStreamStructuredObjectSerializablePayload>(structuredObjectPayloadSchema)
+export async function runNoteSuggestionStreamInBackground(
+  serializablePayload: BackgroundStreamNoteSuggestionSerializablePayload,
+  options: StreamRuntimeOptions<BackgroundNoteSuggestionStreamSnapshot> = {},
+): Promise<BackgroundNoteSuggestionStreamSnapshot> {
+  const { signal } = options
+  const { providerId, prompt, instructions, temperature } = serializablePayload
+
+  if (signal?.aborted) {
+    throw new DOMException("stream aborted", "AbortError")
+  }
+
+  // Note suggestion always runs on the hosted built-in AI: the fixed nested envelope
+  // schema lives server-side, so there is no local-provider path and no
+  // client-sent outputSchema. The shared consume/parse/validate logic is reused.
+  if (!isBuiltInAiProviderId(providerId) || !instructions || !prompt) {
+    throw new BackgroundStreamError(
+      "invalid_request",
+      "Note suggestion requires the hosted built-in AI provider with instructions and prompt",
+    )
+  }
+
+  let partStream: AsyncIterable<unknown>
+  try {
+    partStream = await backgroundOrpcClient.hostedAi.noteSuggestion.streamStructuredObject(
+      { instructions, prompt, temperature },
+      { signal },
+    )
+  } catch (error) {
+    throw normalizeHostedAiError(error)
+  }
+
+  // The card renders only the final result, so no onChunk forwarding.
+  return consumeStructuredObjectPartStream(partStream, {
+    objectSchema: saveSuggestionEnvelopeSchema,
+    signal,
+  })
+}
+
+const parseStreamTextStartMessage =
+  createStartMessageParser<BackgroundStreamTextSerializablePayload>(streamTextPayloadSchema)
+const parseStructuredObjectStartMessage =
+  createStartMessageParser<BackgroundStreamStructuredObjectSerializablePayload>(
+    structuredObjectPayloadSchema,
+  )
+const parseNoteSuggestionStartMessage =
+  createStartMessageParser<BackgroundStreamNoteSuggestionSerializablePayload>(
+    streamTextPayloadSchema,
+  )
 
 export const handleStreamTextPort = createStreamPortHandler<
   BackgroundStreamTextSerializablePayload,
   BackgroundTextStreamSnapshot
->(
-  runStreamTextInBackground,
-  parseStreamTextStartMessage,
-)
+>(runStreamTextInBackground, parseStreamTextStartMessage)
 
 export const handleStreamStructuredObjectPort = createStreamPortHandler<
   BackgroundStreamStructuredObjectSerializablePayload,
   BackgroundStructuredObjectStreamSnapshot
->(
-  runStructuredObjectStreamInBackground,
-  parseStructuredObjectStartMessage,
-)
+>(runStructuredObjectStreamInBackground, parseStructuredObjectStartMessage)
+
+export const handleStreamNoteSuggestionPort = createStreamPortHandler<
+  BackgroundStreamNoteSuggestionSerializablePayload,
+  BackgroundNoteSuggestionStreamSnapshot
+>(runNoteSuggestionStreamInBackground, parseNoteSuggestionStartMessage)
 
 export const BACKGROUND_STREAM_PORT_HANDLERS: Readonly<
   Record<BackgroundStreamPortName, StreamPortHandler>
 > = {
   [BACKGROUND_STREAM_PORTS.streamText]: handleStreamTextPort,
   [BACKGROUND_STREAM_PORTS.streamStructuredObject]: handleStreamStructuredObjectPort,
+  [BACKGROUND_STREAM_PORTS.streamNoteSuggestion]: handleStreamNoteSuggestionPort,
 }
 
 export function dispatchBackgroundStreamPort(port: Browser.runtime.Port): boolean {

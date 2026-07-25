@@ -15,8 +15,7 @@ export function migrate(oldConfig: any): any {
               ...migratedModels.read,
               model: "gemini-2.5-flash",
             }
-          }
-          else if (readModel === "gemini-1.5-pro") {
+          } else if (readModel === "gemini-1.5-pro") {
             migratedModels.read = {
               ...migratedModels.read,
               model: "gemini-2.5-pro",
@@ -32,8 +31,7 @@ export function migrate(oldConfig: any): any {
               ...migratedModels.translate,
               model: "gemini-2.5-flash",
             }
-          }
-          else if (translateModel === "gemini-1.5-pro") {
+          } else if (translateModel === "gemini-1.5-pro") {
             migratedModels.translate = {
               ...migratedModels.translate,
               model: "gemini-2.5-pro",

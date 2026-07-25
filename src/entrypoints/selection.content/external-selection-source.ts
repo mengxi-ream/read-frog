@@ -1,4 +1,7 @@
-import type { EbookBridgeExtensionHandshake, EbookBridgeSelectionPayload } from "@read-frog/definitions"
+import type {
+  EbookBridgeExtensionHandshake,
+  EbookBridgeSelectionPayload,
+} from "@read-frog/definitions"
 import {
   EBOOK_BRIDGE_EXTENSION_SOURCE,
   EBOOK_BRIDGE_HANDSHAKE_TYPE,
@@ -59,12 +62,16 @@ export function setupExternalSelectionSource(): (() => void) | null {
         replyToHandshake()
         break
       case EBOOK_BRIDGE_SELECTION_CHANGED_TYPE:
-        window.dispatchEvent(new CustomEvent<EbookBridgeSelectionPayload>(EXTERNAL_SELECTION_OPEN_EVENT, {
-          detail: parsed.data.data,
-        }))
+        window.dispatchEvent(
+          new CustomEvent<EbookBridgeSelectionPayload>(EXTERNAL_SELECTION_OPEN_EVENT, {
+            detail: parsed.data.data,
+          }),
+        )
         break
       case EBOOK_BRIDGE_SELECTION_CLEARED_TYPE:
         window.dispatchEvent(new CustomEvent(EXTERNAL_SELECTION_CLEAR_EVENT))
+        break
+      default:
         break
     }
   }

@@ -7,9 +7,11 @@ function isElement(value: EventTarget | null): value is Element {
 }
 
 function isTranslateTriggerTarget(path: EventTarget[]) {
-  return path.some(target =>
-    isElement(target)
-    && (target.id === TRANSLATE_BUTTON_CONTAINER_ID || target.classList.contains(TRANSLATE_BUTTON_CLASS)),
+  return path.some(
+    (target) =>
+      isElement(target) &&
+      (target.id === TRANSLATE_BUTTON_CONTAINER_ID ||
+        target.classList.contains(TRANSLATE_BUTTON_CLASS)),
   )
 }
 
@@ -32,8 +34,8 @@ export function useSubtitlesPanelDismiss({
     const path = event.composedPath()
     const clickedInsidePanel = !!panelRef.current && path.includes(panelRef.current)
     const clickedTrigger = isTranslateTriggerTarget(path)
-    const clickedPanelPopup = path.some(target =>
-      isElement(target) && target.matches("[data-slot='select-content']"),
+    const clickedPanelPopup = path.some(
+      (target) => isElement(target) && target.matches("[data-slot='select-content']"),
     )
 
     if (clickedInsidePanel || clickedTrigger || clickedPanelPopup) {

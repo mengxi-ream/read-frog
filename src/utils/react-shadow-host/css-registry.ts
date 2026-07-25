@@ -1,7 +1,7 @@
 import { Sha256Hex } from "../hash"
 
 export class CSSRegistry {
-  private registry = new Map<string, { node: HTMLStyleElement, count: number }>()
+  private registry = new Map<string, { node: HTMLStyleElement; count: number }>()
 
   private static hash(content: string): string {
     return Sha256Hex(content)
@@ -28,8 +28,7 @@ export class CSSRegistry {
   /** Caller must return the key when unloading, and do reference count decrement */
   remove(key: string) {
     const entry = this.registry.get(key)
-    if (!entry)
-      return
+    if (!entry) return
 
     entry.count -= 1
 

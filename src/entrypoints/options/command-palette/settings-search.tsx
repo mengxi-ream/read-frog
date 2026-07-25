@@ -33,7 +33,7 @@ export function SettingsSearch() {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
-        setOpen(prev => !prev)
+        setOpen((prev) => !prev)
       }
     }
     document.addEventListener("keydown", handleKeyDown)
@@ -46,8 +46,7 @@ export function SettingsSearch() {
       const existing = groups.get(item.pageKey)
       if (existing) {
         existing.push(item)
-      }
-      else {
+      } else {
         groups.set(item.pageKey, [item])
       }
     }
@@ -97,7 +96,7 @@ export function SettingsSearch() {
           <CommandEmpty>{i18n.t("options.commandPalette.noResults")}</CommandEmpty>
           {Array.from(groupedItems.entries(), ([pageKey, items]) => (
             <CommandGroup key={pageKey} heading={tSearchKey(pageKey)}>
-              {items.map(item => (
+              {items.map((item) => (
                 <CommandItem
                   key={item.sectionId}
                   value={buildSearchValue(item)}

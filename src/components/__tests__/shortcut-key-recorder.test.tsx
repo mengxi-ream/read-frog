@@ -12,11 +12,14 @@ vi.mock("#imports", () => ({
 
 describe("shortcut key recorder", () => {
   it("records modifier shortcuts as portable strings", async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(...args: any[]) => any>()
 
     render(<ShortcutKeyRecorder shortcutKey="Alt+E" onChange={onChange} />)
 
     const input = screen.getByPlaceholderText("shortcutKeySelector.placeholder")
+    if (!(input instanceof HTMLInputElement)) {
+      throw new TypeError("Shortcut key input is missing")
+    }
     fireEvent.focus(input)
     fireEvent.keyDown(document, { key: "K", ctrlKey: true, shiftKey: true })
 
@@ -26,11 +29,14 @@ describe("shortcut key recorder", () => {
   })
 
   it("uses the physical digit key for mac option combinations", async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(...args: any[]) => any>()
 
     render(<ShortcutKeyRecorder shortcutKey="Alt+E" onChange={onChange} />)
 
     const input = screen.getByPlaceholderText("shortcutKeySelector.placeholder")
+    if (!(input instanceof HTMLInputElement)) {
+      throw new TypeError("Shortcut key input is missing")
+    }
     fireEvent.focus(input)
     fireEvent.keyDown(document, { key: "£", altKey: true, code: "Digit3" })
 
@@ -40,7 +46,7 @@ describe("shortcut key recorder", () => {
   })
 
   it("keeps recording after a single non-modifier key", async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(...args: any[]) => any>()
 
     render(<ShortcutKeyRecorder shortcutKey="Alt+E" onChange={onChange} />)
 
@@ -60,22 +66,26 @@ describe("shortcut key recorder", () => {
   })
 
   it("cancels recording with Escape", async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(...args: any[]) => any>()
 
     render(<ShortcutKeyRecorder shortcutKey="Alt+E" onChange={onChange} />)
 
-    const input = screen.getByPlaceholderText("shortcutKeySelector.placeholder") as HTMLInputElement
-    fireEvent.focus(input)
+    const input = screen.getByPlaceholderText("shortcutKeySelector.placeholder")
+    if (!(input instanceof HTMLInputElement)) {
+      throw new TypeError("Shortcut key input is missing")
+    }
+    const inputElement: HTMLInputElement = input
+    fireEvent.focus(inputElement)
     fireEvent.keyDown(document, { key: "Escape" })
 
     await waitFor(() => {
       expect(onChange).not.toHaveBeenCalled()
-      expect(input.value).toBe("Alt+E")
+      expect(inputElement.value).toBe("Alt+E")
     })
   })
 
   it("clears the shortcut with Backspace and Delete", async () => {
-    const onChange = vi.fn()
+    const onChange = vi.fn<(...args: any[]) => any>()
 
     render(<ShortcutKeyRecorder shortcutKey="Alt+E" onChange={onChange} />)
 

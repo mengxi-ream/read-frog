@@ -4,6 +4,7 @@ extDescription: 読書カエルは、あらゆるウェブサイトから言語�
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: ログイン
+  webApp: ウェブアプリ
   logout: ログアウト
   logoutError: ログアウトに失敗しました。もう一度お試しください。
 dataTypes:
@@ -89,6 +90,9 @@ options:
     product: 製品
   tools:
     translationHub: 翻訳ハブ
+  product:
+    roadmap: ロードマップ
+    feedback: フィードバック
   setAPIKeyWarning:
     please: 設定ページで
     page: APIキーを設定してください
@@ -175,9 +179,9 @@ options:
       invalidJson: 無効なJSON形式
     providers:
       name:
-        freeAi: 無料 AI サービス
+        builtInAi: 組み込み AI
       attribution:
-        freeAi: Atlas Cloud 提供。現在はカスタム AI アクションでのみ利用できます。無制限の体験を利用するには、公式サイトで高コスパのクレジットを購入してください。
+        builtInAi: Atlas Cloud 提供。現在はカスタム AI アクションでのみ利用できます。無制限の体験を利用するには、公式サイトで高コスパのクレジットを購入してください。
       description:
         openai: GPT-4oなどのモデルを提供
         azure: Azure のデプロイ経由で OpenAI モデルを利用
@@ -345,6 +349,9 @@ options:
         description: 選択ツールバーに表示する組み込み機能を選択
         translate: 翻訳
         speak: 読み上げ
+      saveSuggestion:
+        title: 保存の提案
+        description: 選択テキストの翻訳後、Notebase に保存する単語を提案します
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -630,7 +637,7 @@ options:
         description: 翻訳をトリガーするために必要な要素の可視性の割合（0-1）。高い値は、要素がより多く表示されるまで翻訳を遅らせます。
     smallParagraphFilter:
       title: 短いテキストフィルター
-      description: 指定した文字数または単語数より少ないテキストノードの翻訳をスキップします（0 = 無効）
+      description: これらのグローバル既定値を使用して、指定した文字数または単語数より少ないテキストノードの翻訳をスキップします。一致するサイトルールで上書きできます（0 = 無効）
       minCharacters:
         title: 最小文字数
         description: この値より少ない文字数のテキストノードは翻訳されません。文字数には空白が含まれます。
@@ -669,6 +676,31 @@ options:
       description: ウェブページのコンテキストを AI に提供して翻訳品質を向上させます
       enable: AI スマートコンテキスト翻訳を有効にする
       enableDescription: AI はウェブページの要約を使用して翻訳精度を向上させます。LLM プロバイダーが必要です。翻訳開始時に遅延が発生し、API コストが増加します。
+  siteRules:
+    title: サイトルール
+    description: 特定のウェブサイトの翻訳動作を調整するルールです。
+    userRules:
+      title: ユーザールール
+      description: JSON 配列として独自のサイトルールを定義します。URL がパターンに一致するページに適用され、ユーザールールは組み込みルールより優先されます。
+      saveButton: 保存
+      savedButton: 保存済み
+      validation:
+        validating: 検証中...
+        valid: ルールは有効です
+        syntaxError: JSON に構文エラーがあります
+        notArray: JSON のトップレベルはルールの配列である必要があります
+        tooLong: ルールのドキュメントが長すぎます
+        tooMany: ルールが多すぎます
+        duplicateIds: ルール id が重複しています
+        schemaErrors: 無効なルールがあります
+        moreErrors: ...他 $1 件のエラー
+        saved: すべての変更が保存されました
+    builtIn:
+      title: 組み込みルール
+      description: 拡張機能に同梱されているサイトルールです。サイトで問題が発生する場合は、スイッチで個別に無効化できます。
+      searchPlaceholder: id、説明、URL パターンで検索
+      showMore: さらに表示
+      count: $2 件中 $1 件のルールを表示
   tts:
     title: テキスト読み上げ
     description: Edge TTS の音声設定で読み上げボタンをカスタマイズします。
@@ -884,6 +916,15 @@ options:
           webTitle: ウェブページタイトル
           webDescription: ページメタデータのウェブページ説明
           videoSummary: 動画要約（AI スマートコンテキストが必要）
+    aiQuota:
+      title: AI字幕の利用枠
+      description: 今月のAI字幕文字起こし利用枠の使用状況
+      loginRequired: ログインしてAI字幕の利用枠を確認
+      logIn: ログイン
+      betaRequired: AI字幕はベータ版で、まだあなたのアカウントでは利用できません
+      betaApply: 利用を申請
+      loadError: 利用枠を読み込めませんでした。しばらくしてから再試行してください。
+      summary: $2 分中 $1 分を使用、残り $3 分
   whatsNew:
     title: 新機能
   rateUs:
@@ -961,6 +1002,7 @@ action:
   saveToNotebasePendingLogin: ログイン後に保存を完了
   saveToNotebasePendingLoginDescription: ログイン後、Read Frog が Notebase を作成し、この結果を自動で保存します。
   saveToNotebasePendingConnectedLoginDescription: ログイン後、Read Frog は可能であれば接続済み Notebase に保存します。このアカウントで利用できない場合は、新しい Notebase を作成して保存します。
+  upgrade: アップグレード
   openCustomActions: Custom AI Actions を開く
   openNotebase: Notebase を開く
   contextDetailsTitleLabel: タイトル
@@ -968,6 +1010,12 @@ action:
   translation: 翻訳
   speak: 読み上げ
   playing: 再生中
+saveSuggestion:
+  title: 保存におすすめ
+  description: 以下の単語を Notebase に保存して、いつでも復習できます。
+  save: 保存
+  saved: 保存済み
+  staleSuggestion: この提案は古くなっています
 thinking:
   label: 思考中
   complete: 思考完了
@@ -976,6 +1024,9 @@ thinking:
 shortcutKeySelector:
   placeholder: ショートカットを入力してください
 subtitles:
+  loadingAiSubtitles: AI字幕を読み込み中…
+  requestAiSubtitles: AI字幕をリクエスト（Beta）
+  usingAiSubtitles: AI字幕を使用中
   actions:
     downloadTranslated: 翻訳字幕をダウンロード
     downloadTranslatedPreparing: 字幕を準備中。長い動画は時間がかかる場合があります
@@ -1001,6 +1052,8 @@ subtitles:
     aiRateLimited: リクエストが多すぎます。後でもう一度お試しください
     aiAuthFailed: API認証に失敗しました。APIキーを確認してください
     aiServiceUnavailable: 翻訳サービスは一時的に利用できません
+    aiQuotaExceeded: 今月のAI字幕の利用枠を使い切りました
+    aiRequestFailed: AI字幕のリクエストに失敗しました。しばらくしてから再試行してください
     aiNoResponse: AIサービスが応答しませんでした。原文を表示します
     translatedExportFailed: 翻訳字幕の生成に失敗しました
     translatedExportIncomplete: すべての字幕行を翻訳できませんでした

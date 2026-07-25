@@ -22,13 +22,14 @@ function getSelectedProviderOptions(config: Config, providersConfig: ProvidersCo
   const selectedProviders: ProviderSelectorOption[] = []
 
   const addProvider = (capability: ProviderCapability, providerId: string) => {
-    const provider = getSelectableProvidersForCapability(capability, providersConfig)
-      .find(provider => provider.id === providerId)
-    if (!provider) {
+    const selectedProvider = getSelectableProvidersForCapability(capability, providersConfig).find(
+      (providerOption) => providerOption.id === providerId,
+    )
+    if (!selectedProvider) {
       return
     }
 
-    selectedProviders.push(provider)
+    selectedProviders.push(selectedProvider)
   }
 
   for (const featureKey of FEATURE_KEYS) {
@@ -36,15 +37,16 @@ function getSelectedProviderOptions(config: Config, providersConfig: ProvidersCo
   }
 
   for (const action of config.selectionToolbar.customActions) {
+    if (action.enabled === false) {
+      continue
+    }
     addProvider("selectionToolbar.customAction", action.providerId)
   }
 
   return selectedProviders
 }
 
-function ProviderAvatarSummary({ providers }: {
-  providers: ProviderSelectorOption[]
-}) {
+function ProviderAvatarSummary({ providers }: { providers: ProviderSelectorOption[] }) {
   const { theme } = useTheme()
   const visibleProviders = providers.slice(0, VISIBLE_PROVIDER_COUNT)
   const remainingCount = providers.length - visibleProviders.length
@@ -58,16 +60,20 @@ function ProviderAvatarSummary({ providers }: {
         providerKeyCounts.set(provider.id, providerKeyCount + 1)
 
         return (
-          <Avatar key={`${provider.id}-${providerKeyCount}`} size="sm" className="items-center justify-center bg-white dark:bg-muted">
-            <AvatarImage src={getProviderLogo(provider, theme)} alt={name} className="size-3.5 rounded-none object-contain" />
+          <Avatar
+            key={`${provider.id}-${providerKeyCount}`}
+            size="sm"
+            className="items-center justify-center bg-white dark:bg-muted"
+          >
+            <AvatarImage
+              src={getProviderLogo(provider, theme)}
+              alt={name}
+              className="size-3.5 rounded-none object-contain"
+            />
           </Avatar>
         )
       })}
-      {remainingCount > 0 && (
-        <AvatarGroupCount>
-          {`+${remainingCount}`}
-        </AvatarGroupCount>
-      )}
+      {remainingCount > 0 && <AvatarGroupCount>{`+${remainingCount}`}</AvatarGroupCount>}
     </AvatarGroup>
   )
 }
@@ -86,27 +92,18 @@ export default function ProvidersField() {
       <div className="flex items-center justify-between gap-2">
         <span className="flex items-center gap-1.5 text-[13px] font-medium">
           {i18n.t("popup.providers.title")}
-          <HelpTooltip>
-            {i18n.t("popup.providers.description")}
-          </HelpTooltip>
+          <HelpTooltip>{i18n.t("popup.providers.description")}</HelpTooltip>
         </span>
         <DrawerTrigger
-          render={(
-            <Button
-              type="button"
-              variant="ghost"
-              aria-label={i18n.t("popup.providers.open")}
-            />
-          )}
+          render={
+            <Button type="button" variant="ghost" aria-label={i18n.t("popup.providers.open")} />
+          }
         >
           <ProviderAvatarSummary providers={selectedProviders} />
         </DrawerTrigger>
       </div>
       <DrawerContent>
-        <DrawerBody
-          className="p-4"
-          data-base-ui-swipe-ignore=""
-        >
+        <DrawerBody className="p-4" data-base-ui-swipe-ignore="">
           <FeatureProviderSelectorList providerSelectorTriggerSize="sm" />
         </DrawerBody>
       </DrawerContent>

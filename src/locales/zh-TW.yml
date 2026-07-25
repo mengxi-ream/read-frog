@@ -4,6 +4,7 @@ extDescription: 陪讀蛙是一款開放原始碼的瀏覽器擴充功能，能�
 uninstallSurveyUrl: https://tally.so/r/3E9XDL
 account:
   login: 登入
+  webApp: 網頁應用程式
   logout: 退出登入
   logoutError: 退出登入失敗，請重試
 dataTypes:
@@ -89,6 +90,9 @@ options:
     product: 產品
   tools:
     translationHub: 翻譯中心
+  product:
+    roadmap: 產品路線圖
+    feedback: 意見回饋
   setAPIKeyWarning:
     please: 請在
     page: 頁面設定 API 金鑰
@@ -176,9 +180,9 @@ options:
       invalidJson: JSON 格式無效
     providers:
       name:
-        freeAi: 免費 AI 服務
+        builtInAi: 內建 AI
       attribution:
-        freeAi: 由 Atlas Cloud 提供。目前僅對自訂 AI 指令開放。若要解鎖無限制體驗，可以前往官網購買高性價比額度。
+        builtInAi: 由 Atlas Cloud 提供。目前僅對自訂 AI 指令開放。若要解鎖無限制體驗，可以前往官網購買高性價比額度。
       description:
         openai: 提供 GPT-4o 等模型
         azure: 透過 Azure 部署使用 OpenAI 模型
@@ -346,6 +350,9 @@ options:
         description: 選擇在選取工具列中顯示哪些內建功能
         translate: 翻譯
         speak: 朗讀
+      saveSuggestion:
+        title: 儲存建議
+        description: 劃詞翻譯後，推薦可存入筆記庫的詞條
       shortcut:
         title: 選取文字翻譯快速鍵
         description: 自訂翻譯選取文字的快速鍵
@@ -745,7 +752,7 @@ options:
         description: 觸發翻譯所需的元素可見度百分比（0-1）。較高的值會延遲翻譯，直到更多元素可見。
     smallParagraphFilter:
       title: 小段落過濾
-      description: 跳過翻譯少於指定字元數或詞數的文字節點（0 = 停用）
+      description: 這些全域預設值會略過翻譯少於指定字元數或詞數的文字節點；相符的網站規則可以覆寫它們（0 = 停用）
       minCharacters:
         title: 最小字元數
         description: 少於此字元數的文字節點將不會被翻譯。字元計數包含空格。
@@ -784,6 +791,31 @@ options:
       description: 將網頁前後文提供給 AI，以提升翻譯品質
       enable: 啟用 AI 智慧上下文翻譯
       enableDescription: AI 會使用網頁摘要來提高翻譯準確性。需要 LLM 翻譯提供者。剛開始翻譯頁面時會有延遲，並增加 API 費用。
+  siteRules:
+    title: 網站規則
+    description: 針對特定網站調整翻譯行為的規則。
+    userRules:
+      title: 使用者規則
+      description: 以 JSON 陣列形式編寫自己的網站規則。規則會套用於 URL 相符的頁面；使用者規則優先於內建規則。
+      saveButton: 儲存
+      savedButton: 已儲存
+      validation:
+        validating: 驗證中…
+        valid: 規則有效
+        syntaxError: JSON 存在語法錯誤
+        notArray: JSON 頂層必須是規則陣列
+        tooLong: 規則文件過長
+        tooMany: 規則數量過多
+        duplicateIds: 規則 id 重複
+        schemaErrors: 部分規則無效
+        moreErrors: …還有 $1 個錯誤
+        saved: 所有變更已儲存
+    builtIn:
+      title: 內建規則
+      description: 隨擴充功能提供的網站規則。如果某條規則在網站上造成問題，可用開關將其停用。
+      searchPlaceholder: 依 id、描述或網址模式搜尋
+      showMore: 顯示更多
+      count: 顯示 $1 / $2 條規則
   tts:
     title: 文字轉語音
     description: 使用 Edge TTS 語音參數來自訂「朗讀」按鈕。
@@ -999,6 +1031,15 @@ options:
           webTitle: 網頁標題
           webDescription: 頁面中繼資料的網頁描述
           videoSummary: 影片摘要（需啟用 AI 智慧上下文）
+    aiQuota:
+      title: AI 字幕額度
+      description: 你帳號本月的 AI 字幕轉寫額度使用情況
+      loginRequired: 登入後查看你的 AI 字幕額度
+      logIn: 登入
+      betaRequired: AI 字幕測試中，你的帳號尚未取得使用資格
+      betaApply: 申請資格
+      loadError: 無法載入額度，請稍後重試。
+      summary: 已用 $1 分鐘 / 共 $2 分鐘，剩餘 $3 分鐘
   whatsNew:
     title: 最近更新
   rateUs:
@@ -1076,6 +1117,7 @@ action:
   saveToNotebasePendingLogin: 登入後繼續儲存
   saveToNotebasePendingLoginDescription: 登入完成後，陪讀蛙會自動建立筆記庫並儲存目前結果。
   saveToNotebasePendingConnectedLoginDescription: 登入完成後，陪讀蛙會優先儲存到已連線的筆記庫；如果目前帳號無法使用它，會建立新的筆記庫並儲存目前結果。
+  upgrade: 升級
   openCustomActions: 開啟自訂 AI 指令
   openNotebase: 開啟筆記庫
   contextDetailsTitleLabel: 標題
@@ -1083,6 +1125,12 @@ action:
   translation: 翻譯
   speak: 朗讀
   playing: 播放中
+saveSuggestion:
+  title: 猜你想存
+  description: 把下列詞存入筆記庫，將來隨時複習
+  save: 儲存
+  saved: 已儲存
+  staleSuggestion: 該建議已過期
 thinking:
   label: 思考中
   complete: 思考完成
@@ -1091,6 +1139,9 @@ thinking:
 shortcutKeySelector:
   placeholder: 請輸入快速鍵
 subtitles:
+  loadingAiSubtitles: 正在載入 AI 字幕
+  requestAiSubtitles: 請求 AI 字幕（Beta）
+  usingAiSubtitles: 正在使用 AI 字幕
   actions:
     downloadTranslated: 下載翻譯字幕
     downloadTranslatedPreparing: 正在準備字幕，長影片可能需要更久
@@ -1116,6 +1167,8 @@ subtitles:
     aiRateLimited: 請求過於頻繁，請稍後再試
     aiAuthFailed: API 認證失敗，請檢查 API 金鑰
     aiServiceUnavailable: 翻譯服務暫時無法使用
+    aiQuotaExceeded: 本月 AI 字幕額度已用完
+    aiRequestFailed: AI 字幕請求失敗，請稍後重試
     aiNoResponse: AI 服務未回應，使用原文顯示
     translatedExportFailed: 產生翻譯字幕失敗
     translatedExportIncomplete: 未能翻譯所有字幕行

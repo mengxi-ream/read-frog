@@ -5,11 +5,9 @@ export function hasRenderableSubtitleByMode(
   subtitle: SubtitlesFragment | null,
   displayMode: SubtitlesDisplayMode,
 ): boolean {
-  if (!subtitle)
-    return false
+  if (!subtitle) return false
 
-  if (displayMode === "translationOnly")
-    return !!subtitle.translation
+  if (displayMode === "translationOnly") return !!subtitle.translation
 
   return true
 }

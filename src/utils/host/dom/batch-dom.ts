@@ -21,8 +21,7 @@ class DOMBatcher {
    * Schedule a flush using requestAnimationFrame
    */
   private scheduleFlush(): void {
-    if (this.rafId !== null || this.isProcessing)
-      return
+    if (this.rafId !== null || this.isProcessing) return
 
     this.rafId = requestAnimationFrame(() => {
       this.flush()
@@ -34,8 +33,7 @@ class DOMBatcher {
    */
   private flush(): void {
     this.rafId = null
-    if (this.operations.length === 0)
-      return
+    if (this.operations.length === 0) return
 
     this.isProcessing = true
     const ops = this.operations.splice(0)
@@ -44,8 +42,7 @@ class DOMBatcher {
     for (const op of ops) {
       try {
         op()
-      }
-      catch (error) {
+      } catch (error) {
         console.error("Error executing batched DOM operation:", error)
       }
     }

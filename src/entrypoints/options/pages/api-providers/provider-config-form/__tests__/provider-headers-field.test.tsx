@@ -18,29 +18,25 @@ vi.mock("@/components/help-tooltip", () => ({
 }))
 
 vi.mock("@/components/ui/json-code-editor", () => ({
-  JSONCodeEditor: (props: {
-    value?: string
-    onChange?: (value: string) => void
-    onBlur?: () => void
-    onFocus?: () => void
-    placeholder?: string
-  } & {
-    "aria-label"?: string
-  }) => {
-    const {
-      value,
-      onChange,
-      onBlur,
-      onFocus,
-      placeholder,
-    } = props
+  JSONCodeEditor: (
+    props: {
+      value?: string
+      onChange?: (value: string) => void
+      onBlur?: () => void
+      onFocus?: () => void
+      placeholder?: string
+    } & {
+      "aria-label"?: string
+    },
+  ) => {
+    const { value, onChange, onBlur, onFocus, placeholder } = props
     return (
       <textarea
         aria-label={props["aria-label"]}
         value={value}
         placeholder={placeholder}
         onBlur={onBlur}
-        onChange={event => onChange?.(event.target.value)}
+        onChange={(event) => onChange?.(event.target.value)}
         onFocus={onFocus}
       />
     )
@@ -92,7 +88,9 @@ function ProviderHeadersFieldHarness({ initialConfig }: { initialConfig: APIProv
   return (
     <>
       <ProviderHeadersField form={form} />
-      <output aria-label="persisted-headers">{JSON.stringify(providerConfig.headers ?? null)}</output>
+      <output aria-label="persisted-headers">
+        {JSON.stringify(providerConfig.headers ?? null)}
+      </output>
     </>
   )
 }
@@ -118,7 +116,9 @@ function ProviderHeadersFieldSwitchHarness() {
       </button>
       <ProviderHeadersField form={form} />
       <output aria-label="persisted-provider-id">{providerConfig.id}</output>
-      <output aria-label="persisted-headers">{JSON.stringify(providerConfig.headers ?? null)}</output>
+      <output aria-label="persisted-headers">
+        {JSON.stringify(providerConfig.headers ?? null)}
+      </output>
     </>
   )
 }
@@ -236,6 +236,8 @@ describe("providerHeadersField", () => {
     })
 
     expect(screen.getByLabelText("persisted-provider-id")).toHaveTextContent("provider-2")
-    expect(screen.getByLabelText("persisted-headers")).toHaveTextContent(JSON.stringify({ Existing: "1" }))
+    expect(screen.getByLabelText("persisted-headers")).toHaveTextContent(
+      JSON.stringify({ Existing: "1" }),
+    )
   })
 })

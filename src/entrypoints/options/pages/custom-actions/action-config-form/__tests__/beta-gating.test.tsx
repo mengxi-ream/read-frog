@@ -30,7 +30,11 @@ vi.mock("../output-schema-field", () => ({
 
 vi.mock("../notebase-connection-field", () => ({
   NotebaseConnectionField: () => (
-    <div>{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.notebase.title")}</div>
+    <div>
+      {i18n.t(
+        "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.notebase.title",
+      )}
+    </div>
   ),
 }))
 
@@ -49,7 +53,7 @@ describe("customActionConfigForm notebase availability", () => {
         id: "action-1",
         name: "Summarize",
         icon: "tabler:sparkles",
-        providerId: config.providersConfig[0]!.id,
+        providerId: config.providersConfig[0].id,
         systemPrompt: "You are helpful.",
         prompt: "Summarize the selected text.",
         outputSchema: [],
@@ -76,7 +80,11 @@ describe("customActionConfigForm notebase availability", () => {
     )
 
     expect(
-      screen.getByText(i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.notebase.title")),
+      screen.getByText(
+        i18n.t(
+          "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.notebase.title",
+        ),
+      ),
     ).toBeInTheDocument()
   })
 })

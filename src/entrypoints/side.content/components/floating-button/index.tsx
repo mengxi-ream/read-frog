@@ -2,7 +2,6 @@ import type { FloatingButtonSide } from "@/types/config/floating-button"
 import { IconLock, IconLockOpen, IconSettings, IconX } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
 import { useEffect, useRef, useState } from "react"
-import { toast } from "sonner"
 import { browser } from "#imports"
 import readFrogLogo from "@/assets/icons/read-frog.png?url&no-inline"
 import {
@@ -11,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/base-ui/dropdown-menu"
+import { anchoredToastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -29,6 +29,7 @@ const LONG_PRESS_DELAY_MS = 350
 const DRAG_START_DISTANCE_PX = 6
 const MIN_FLOATING_CONTAINER_TOP_PX = 30
 const FLOATING_CONTAINER_BOTTOM_CLEARANCE_PX = 200
+const FIREFOX_SIDEBAR_USER_ACTION_TOAST_ID = "firefox-sidebar-user-action"
 
 interface DragPoint {
   x: number
@@ -51,7 +52,7 @@ interface PendingDragState {
 }
 
 const floatingButtonControlClassName = cn(
-  "absolute invisible cursor-pointer pointer-events-none flex size-6 items-center justify-center",
+  "pointer-events-none invisible absolute flex size-6 cursor-pointer items-center justify-center",
   "text-neutral-300 transition-[color,left,right,transform] duration-300 hover:scale-110 hover:text-neutral-500 active:scale-90 active:text-neutral-500",
   "dark:text-neutral-700 dark:hover:text-neutral-500 dark:active:text-neutral-500",
 )
@@ -64,13 +65,12 @@ const floatingButtonControlOffsetClassNames = {
     collapsed: "right-0",
     expanded: "-right-6",
   },
-} satisfies Record<FloatingButtonSide, { collapsed: string, expanded: string }>
+} satisfies Record<FloatingButtonSide, { collapsed: string; expanded: string }>
 
 function FirefoxSidebarHelpToast() {
   return (
     <span>
-      {i18n.t("sidePanel.firefoxUserActionHint")}
-      {" "}
+      {i18n.t("sidePanel.firefoxUserActionHint")}{" "}
       <a
         href={i18n.t("sidePanel.firefoxUserActionHelpUrl")}
         target="_blank"
@@ -116,18 +116,12 @@ function getNormalizedFloatingContainerTop(mainButtonTop: number, mainOffsetY: n
     MIN_FLOATING_CONTAINER_TOP_PX,
     viewportHeight - FLOATING_CONTAINER_BOTTOM_CLEARANCE_PX,
   )
-  const containerTop = clamp(
-    mainButtonTop - mainOffsetY,
-    MIN_FLOATING_CONTAINER_TOP_PX,
-    maxTop,
-  )
+  const containerTop = clamp(mainButtonTop - mainOffsetY, MIN_FLOATING_CONTAINER_TOP_PX, maxTop)
   return containerTop / viewportHeight
 }
 
 export default function FloatingButton() {
-  const [floatingButton, setFloatingButton] = useAtom(
-    configFieldsAtomMap.floatingButton,
-  )
+  const [floatingButton, setFloatingButton] = useAtom(configFieldsAtomMap.floatingButton)
   const translationState = useAtomValue(enablePageTranslationAtom)
   const [isDraggingButton, setIsDraggingButton] = useAtom(isDraggingButtonAtom)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -143,8 +137,7 @@ export default function FloatingButton() {
   const isMainButtonAttached = isFloatingButtonLocked || isFloatingButtonExpanded
 
   useEffect(() => {
-    if (!isDraggingButton)
-      return
+    if (!isDraggingButton) return undefined
 
     const previousUserSelect = document.body.style.userSelect
     const previousCursor = document.body.style.cursor
@@ -172,23 +165,36 @@ export default function FloatingButton() {
       void sendMessage("tryToSetEnablePageTranslationOnContentScript", {
         enabled: nextEnabled,
         analyticsContext: nextEnabled
-          ? createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.FLOATING_BUTTON)
+          ? createFeatureUsageContext(
+              ANALYTICS_FEATURE.PAGE_TRANSLATION,
+              ANALYTICS_SURFACE.FLOATING_BUTTON,
+            )
           : undefined,
       })
       return
     }
 
     void Promise.resolve(sendMessage("toggleSidePanel", undefined)).then((result) => {
-      if (result?.ok === false && result.reason === "requires-extension-user-action") {
-        toast.info(<FirefoxSidebarHelpToast />)
+      if (result && !result.ok && result.reason === "requires-extension-user-action") {
+        if (!mainButtonRef.current) return
+
+        anchoredToastManager.add({
+          id: FIREFOX_SIDEBAR_USER_ACTION_TOAST_ID,
+          positionerProps: {
+            anchor: mainButtonRef.current,
+            side: floatingButtonSide === "right" ? "left" : "right",
+            sideOffset: 8,
+          },
+          type: "info",
+          title: <FirefoxSidebarHelpToast />,
+        })
       }
     })
   }
 
   const startActiveDrag = () => {
     const pendingDrag = pendingDragRef.current
-    if (!pendingDrag || pendingDrag.hasActiveDrag)
-      return
+    if (!pendingDrag || pendingDrag.hasActiveDrag) return
 
     pendingDrag.hasActiveDrag = true
     const nextPreviewPosition = getDragPreviewPosition(pendingDrag)
@@ -200,15 +206,12 @@ export default function FloatingButton() {
   }
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType === "mouse" && e.button !== 0)
-      return
+    if (e.pointerType === "mouse" && e.button !== 0) return
 
     const mainButton = mainButtonRef.current ?? e.currentTarget
     const mainButtonRect = mainButton.getBoundingClientRect()
     const containerRect = containerRef.current?.getBoundingClientRect()
-    const mainOffsetY = containerRect
-      ? mainButtonRect.top - containerRect.top
-      : 0
+    const mainOffsetY = containerRect ? mainButtonRect.top - containerRect.top : 0
 
     e.preventDefault()
     if (typeof e.currentTarget.setPointerCapture === "function") {
@@ -233,8 +236,7 @@ export default function FloatingButton() {
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const pendingDrag = pendingDragRef.current
-    if (!pendingDrag || pendingDrag.pointerId !== e.pointerId)
-      return
+    if (!pendingDrag || pendingDrag.pointerId !== e.pointerId) return
 
     pendingDrag.currentClientX = e.clientX
     pendingDrag.currentClientY = e.clientY
@@ -263,8 +265,7 @@ export default function FloatingButton() {
     shouldTriggerClick: boolean,
   ) => {
     const pendingDrag = pendingDragRef.current
-    if (!pendingDrag || pendingDrag.pointerId !== e.pointerId)
-      return
+    if (!pendingDrag || pendingDrag.pointerId !== e.pointerId) return
 
     window.clearTimeout(pendingDrag.longPressTimerId)
     pendingDragRef.current = null
@@ -274,12 +275,9 @@ export default function FloatingButton() {
     }
 
     if (pendingDrag.hasActiveDrag) {
-      const finalPreviewPosition = lastDragPreviewRef.current
-        ?? getDragPreviewPosition(pendingDrag)
+      const finalPreviewPosition = lastDragPreviewRef.current ?? getDragPreviewPosition(pendingDrag)
       const finalCenterX = finalPreviewPosition.x + pendingDrag.buttonWidth / 2
-      const nextSide: FloatingButtonSide = finalCenterX < window.innerWidth / 2
-        ? "left"
-        : "right"
+      const nextSide: FloatingButtonSide = finalCenterX < window.innerWidth / 2 ? "left" : "right"
       const nextPosition = getNormalizedFloatingContainerTop(
         finalPreviewPosition.y,
         pendingDrag.mainOffsetY,
@@ -321,23 +319,28 @@ export default function FloatingButton() {
     }
   }
 
-  if (!floatingButton.enabled || floatingButton.disabledFloatingButtonPatterns.some(pattern => matchDomainPattern(window.location.href, pattern))) {
+  if (
+    !floatingButton.enabled ||
+    floatingButton.disabledFloatingButtonPatterns.some((pattern) =>
+      matchDomainPattern(window.location.href, pattern),
+    )
+  ) {
     return null
   }
 
-  const containerStyle: React.CSSProperties = isDraggingButton && dragPreviewPosition
-    ? {
-        left: `${dragPreviewPosition.x}px`,
-        right: "auto",
-        top: `${dragPreviewPosition.y}px`,
-      }
-    : {
-        left: floatingButtonSide === "left" ? "0px" : undefined,
-        right: floatingButtonSide === "right"
-          ? "var(--removed-body-scroll-bar-size, 0px)"
-          : undefined,
-        top: `${floatingButton.position * 100}vh`,
-      }
+  const containerStyle: React.CSSProperties =
+    isDraggingButton && dragPreviewPosition
+      ? {
+          left: `${dragPreviewPosition.x}px`,
+          right: "auto",
+          top: `${dragPreviewPosition.y}px`,
+        }
+      : {
+          left: floatingButtonSide === "left" ? "0px" : undefined,
+          right:
+            floatingButtonSide === "right" ? "var(--removed-body-scroll-bar-size, 0px)" : undefined,
+          top: `${floatingButton.position * 100}vh`,
+        }
 
   return (
     <div
@@ -347,34 +350,36 @@ export default function FloatingButton() {
         "fixed z-2147483647 flex flex-col gap-2 print:hidden",
         isDraggingButton
           ? "items-center"
-          : floatingButtonSide === "right" ? "items-end" : "items-start",
-        !isDraggingButton && isFloatingButtonExpanded && (
-          floatingButtonSide === "right" ? "pl-6" : "pr-6"
-        ),
+          : floatingButtonSide === "right"
+            ? "items-end"
+            : "items-start",
+        !isDraggingButton &&
+          isFloatingButtonExpanded &&
+          (floatingButtonSide === "right" ? "pl-6" : "pr-6"),
       )}
       style={containerStyle}
       onMouseLeave={handleMouseLeave}
     >
       {!isDraggingButton && (
-        <TranslateButton
-          side={floatingButtonSide}
-          expanded={isFloatingButtonExpanded}
-        />
+        <TranslateButton side={floatingButtonSide} expanded={isFloatingButtonExpanded} />
       )}
       <div className="relative">
         <div
           ref={mainButtonRef}
           data-testid="floating-main-button"
           className={cn(
-            "border-border relative flex h-10 items-center bg-white shadow-lg transition-transform duration-300 dark:bg-neutral-900",
+            "relative flex h-10 items-center border-border bg-white shadow-lg transition-transform duration-300 dark:bg-neutral-900",
             isDraggingButton
-              ? "w-10 touch-none justify-center rounded-full border cursor-grabbing opacity-100"
+              ? "w-10 cursor-grabbing touch-none justify-center rounded-full border opacity-100"
               : floatingButtonSide === "right"
                 ? "w-11 justify-start rounded-l-full border border-r-0"
                 : "w-11 justify-end rounded-r-full border border-l-0",
-            !isDraggingButton && (isMainButtonAttached
-              ? "translate-x-0"
-              : floatingButtonSide === "right" ? "translate-x-6" : "-translate-x-6"),
+            !isDraggingButton &&
+              (isMainButtonAttached
+                ? "translate-x-0"
+                : floatingButtonSide === "right"
+                  ? "translate-x-6"
+                  : "-translate-x-6"),
             !isDraggingButton && (isFloatingButtonExpanded ? "opacity-100" : "opacity-60"),
             !isDraggingButton && "cursor-pointer",
           )}
@@ -435,9 +440,10 @@ function FloatingButtonCloseMenu({
 }: FloatingButtonCloseMenuProps) {
   const [floatingButton, setFloatingButton] = useAtom(configFieldsAtomMap.floatingButton)
   const [open, setOpen] = useState(false)
-  const controlOffsetClassName = !floatingButton.locked && !expanded
-    ? floatingButtonControlOffsetClassNames[side].collapsed
-    : floatingButtonControlOffsetClassNames[side].expanded
+  const controlOffsetClassName =
+    !floatingButton.locked && !expanded
+      ? floatingButtonControlOffsetClassNames[side].collapsed
+      : floatingButtonControlOffsetClassNames[side].expanded
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen)
@@ -461,7 +467,7 @@ function FloatingButtonCloseMenu({
   return (
     <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger
-        render={(
+        render={
           <button
             type="button"
             aria-label="Close floating button"
@@ -469,25 +475,24 @@ function FloatingButtonCloseMenu({
               floatingButtonControlClassName,
               "-top-1",
               controlOffsetClassName,
-              expanded && "visible pointer-events-auto",
-              open && "visible pointer-events-auto",
+              expanded && "pointer-events-auto visible",
+              open && "pointer-events-auto visible",
             )}
           />
-        )}
+        }
       >
         <IconX className="h-3 w-3" strokeWidth={3} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent container={shadowWrapper} align="start" side={side === "right" ? "left" : "right"} className="z-2147483647 w-fit! whitespace-nowrap">
-        <DropdownMenuItem
-          onMouseDown={e => e.stopPropagation()}
-          onClick={handleDisableForSite}
-        >
+      <DropdownMenuContent
+        container={shadowWrapper}
+        align="start"
+        side={side === "right" ? "left" : "right"}
+        className="z-2147483647 w-fit! whitespace-nowrap"
+      >
+        <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()} onClick={handleDisableForSite}>
           {i18n.t("options.floatingButtonAndToolbar.floatingButton.closeMenu.disableForSite")}
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onMouseDown={e => e.stopPropagation()}
-          onClick={handleDisableGlobally}
-        >
+        <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()} onClick={handleDisableGlobally}>
           {i18n.t("options.floatingButtonAndToolbar.floatingButton.closeMenu.disableGlobally")}
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -503,9 +508,10 @@ interface FloatingButtonLockControlProps {
 function FloatingButtonLockControl({ expanded, side }: FloatingButtonLockControlProps) {
   const [floatingButton, setFloatingButton] = useAtom(configFieldsAtomMap.floatingButton)
   const locked = floatingButton.locked
-  const controlOffsetClassName = !locked && !expanded
-    ? floatingButtonControlOffsetClassNames[side].collapsed
-    : floatingButtonControlOffsetClassNames[side].expanded
+  const controlOffsetClassName =
+    !locked && !expanded
+      ? floatingButtonControlOffsetClassNames[side].collapsed
+      : floatingButtonControlOffsetClassNames[side].expanded
 
   const handleToggleLocked = () => {
     void setFloatingButton({ ...floatingButton, locked: !locked })
@@ -519,13 +525,15 @@ function FloatingButtonLockControl({ expanded, side }: FloatingButtonLockControl
         floatingButtonControlClassName,
         "-bottom-1",
         controlOffsetClassName,
-        expanded && "visible pointer-events-auto",
+        expanded && "pointer-events-auto visible",
       )}
       onClick={handleToggleLocked}
     >
-      {locked
-        ? <IconLock className="h-3 w-3" strokeWidth={3} />
-        : <IconLockOpen className="h-3 w-3" strokeWidth={3} />}
+      {locked ? (
+        <IconLock className="h-3 w-3" strokeWidth={3} />
+      ) : (
+        <IconLockOpen className="h-3 w-3" strokeWidth={3} />
+      )}
     </button>
   )
 }

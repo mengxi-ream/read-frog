@@ -1,15 +1,18 @@
 import type { SubtitlesFragment } from "../types"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { sendMessage } from "@/utils/message"
 import { microsoftWarmupTranslate } from "../warmup/microsoft-warmup"
 
 vi.mock("@/utils/message", () => ({
-  sendMessage: vi.fn(),
+  sendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/logger", () => ({
-  logger: { warn: vi.fn(), info: vi.fn(), error: vi.fn() },
+  logger: {
+    warn: vi.fn<(...args: any[]) => any>(),
+    info: vi.fn<(...args: any[]) => any>(),
+    error: vi.fn<(...args: any[]) => any>(),
+  },
 }))
 
 const mockSendMessage = vi.mocked(sendMessage)
@@ -65,13 +68,11 @@ describe("microsoftWarmupTranslate", () => {
   })
 
   it("splits fragments into chunks by element count (100 max)", async () => {
-    const fragments = Array.from({ length: 150 }, (_, i) =>
-      makeFragment(`Text ${i}`, i * 1000),
-    )
+    const fragments = Array.from({ length: 150 }, (_, i) => makeFragment(`Text ${i}`, i * 1000))
 
     mockSendMessage
-      .mockResolvedValueOnce(Array.from({ length: 100 }, (_, i) => `翻译 ${i}`) as never)
-      .mockResolvedValueOnce(Array.from({ length: 50 }, (_, i) => `翻译 ${100 + i}`) as never)
+      .mockResolvedValueOnce(Array.from({ length: 100 }, (_, i) => `翻译 ${i}`))
+      .mockResolvedValueOnce(Array.from({ length: 50 }, (_, i) => `翻译 ${100 + i}`))
 
     const result = await microsoftWarmupTranslate(fragments, "en", "zh")
 
@@ -105,14 +106,12 @@ describe("microsoftWarmupTranslate", () => {
   })
 
   it("handles partial chunk failure gracefully", async () => {
-    const fragments = Array.from({ length: 150 }, (_, i) =>
-      makeFragment(`Text ${i}`, i * 1000),
-    )
+    const fragments = Array.from({ length: 150 }, (_, i) => makeFragment(`Text ${i}`, i * 1000))
 
     // chunk1: 100 fragments succeeds, chunk2: 50 fragments fails
     mockSendMessage
-      .mockResolvedValueOnce(Array.from({ length: 100 }, (_, i) => `翻译 ${i}`) as never)
-      .mockRejectedValueOnce(new Error("Network error") as never)
+      .mockResolvedValueOnce(Array.from({ length: 100 }, (_, i) => `翻译 ${i}`))
+      .mockRejectedValueOnce(new Error("Network error"))
 
     const result = await microsoftWarmupTranslate(fragments, "en", "zh")
 

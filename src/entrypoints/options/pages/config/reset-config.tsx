@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/base-ui/alert-dialog"
 import { Button } from "@/components/ui/base-ui/button"
 import { writeConfigAtom } from "@/utils/atoms/config"
-import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { buildFreshDefaultConfig } from "@/utils/constants/config"
 import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
@@ -22,14 +22,18 @@ export function ResetConfig() {
   const [open, setOpen] = useState(false)
   const setConfig = useSetAtom(writeConfigAtom)
   async function resetToDefaultConfig() {
-    await setConfig(DEFAULT_CONFIG)
+    await setConfig(buildFreshDefaultConfig())
     setOpen(false)
   }
 
   return (
-    <ConfigCard id="reset-config" title={i18n.t("options.config.resetConfig.title")} description={i18n.t("options.config.resetConfig.description")}>
+    <ConfigCard
+      id="reset-config"
+      title={i18n.t("options.config.resetConfig.title")}
+      description={i18n.t("options.config.resetConfig.description")}
+    >
       <AlertDialog open={open} onOpenChange={setOpen}>
-        <div className="w-full flex justify-end">
+        <div className="flex w-full justify-end">
           <AlertDialogTrigger render={<Button variant="destructive" />}>
             <IconRefresh className="size-4" />
             {i18n.t("options.config.resetConfig.dialog.trigger")}
@@ -43,7 +47,9 @@ export function ResetConfig() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{i18n.t("options.config.resetConfig.dialog.cancel")}</AlertDialogCancel>
+            <AlertDialogCancel>
+              {i18n.t("options.config.resetConfig.dialog.cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction variant="destructive" onClick={resetToDefaultConfig}>
               {i18n.t("options.config.resetConfig.dialog.confirm")}
             </AlertDialogAction>

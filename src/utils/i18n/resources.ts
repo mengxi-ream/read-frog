@@ -33,7 +33,9 @@ export type SupportedUiLocale = (typeof SUPPORTED_UI_LOCALES)[number]
 
 export const DEFAULT_UI_LOCALE: SupportedUiLocale = "en"
 
-interface LocaleTree { [key: string]: string | LocaleTree }
+interface LocaleTree {
+  [key: string]: string | LocaleTree
+}
 
 /**
  * Convert WXT-style positional substitutions to i18next interpolation, applied to
@@ -47,7 +49,8 @@ interface LocaleTree { [key: string]: string | LocaleTree }
  */
 function convertPlaceholders(value: string): string {
   return value.replace(/\$\$|\$(\d)/g, (_match, digit: string | undefined) =>
-    digit === undefined ? "$" : `{{${Number(digit) - 1}}}`)
+    digit === undefined ? "$" : `{{${Number(digit) - 1}}}`,
+  )
 }
 
 function convertTree(node: LocaleTree): LocaleTree {
@@ -59,13 +62,13 @@ function convertTree(node: LocaleTree): LocaleTree {
 }
 
 const rawResources: Record<SupportedUiLocale, LocaleTree> = {
-  "en": en,
-  "es": es,
-  "ja": ja,
-  "ko": ko,
-  "ru": ru,
-  "tr": tr,
-  "vi": vi,
+  en,
+  es,
+  ja,
+  ko,
+  ru,
+  tr,
+  vi,
   "zh-CN": zhCN,
   "zh-TW": zhTW,
 }
@@ -75,8 +78,5 @@ const rawResources: Record<SupportedUiLocale, LocaleTree> = {
  * Single default namespace ("translation"); keys are traversed with keySeparator ".".
  */
 export const resources: Resource = Object.fromEntries(
-  Object.entries(rawResources).map(([lng, tree]) => [
-    lng,
-    { translation: convertTree(tree) },
-  ]),
+  Object.entries(rawResources).map(([lng, tree]) => [lng, { translation: convertTree(tree) }]),
 )

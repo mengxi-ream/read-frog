@@ -4,14 +4,12 @@ import { RequestQueue } from "../request-queue"
 // Convenience helper: returns a thunk that resolves with <value>
 // after <delayMs> real / fake milliseconds.
 function makeThunk<T>(value: T, delayMs = 0) {
-  return () =>
-    new Promise<T>(res => setTimeout(res, delayMs, value))
+  return () => new Promise<T>((res) => setTimeout(res, delayMs, value))
 }
 
 // rejectThunk – rejects after delayMs
 function rejectThunk(error: any, delayMs = 0) {
-  return () =>
-    new Promise((_, rej) => setTimeout(rej, delayMs, error))
+  return () => new Promise((_, rej) => setTimeout(rej, delayMs, error))
 }
 
 function createDeferred<T>() {
@@ -310,9 +308,7 @@ describe("requestQueue – timeout handling", () => {
     })
 
     // Task that takes 3000ms (longer than 2000ms timeout)
-    const slowThunk = () => new Promise(resolve =>
-      setTimeout(resolve, 3000, "too-slow"),
-    )
+    const slowThunk = () => new Promise((resolve) => setTimeout(resolve, 3000, "too-slow"))
 
     const promise = q.enqueue(slowThunk, Date.now(), "slow")
 
@@ -331,15 +327,137 @@ describe("requestQueue – timeout handling", () => {
     })
 
     // Task that takes 1000ms (less than 2000ms timeout)
-    const fastThunk = () => new Promise(resolve =>
-      setTimeout(resolve, 1000, "fast"),
-    )
+    const fastThunk = () => new Promise((resolve) => setTimeout(resolve, 1000, "fast"))
 
     const promise = q.enqueue(fastThunk, Date.now(), "fast")
 
     vi.advanceTimersByTime(1000)
 
     await expect(promise).resolves.toBe("fast")
+  })
+})
+
+// 8b. Timeout aborts the in-flight attempt
+describe("requestQueue – timeout aborts the in-flight attempt", () => {
+  it("cancels the timed-out attempt so the retry never runs concurrently", async () => {
+    vi.useFakeTimers()
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      timeoutMs: 1000,
+      maxRetries: 2,
+      baseRetryDelayMs: 100,
+    })
+
+    let running = 0
+    let maxConcurrent = 0
+    const attemptSignals: (AbortSignal | undefined)[] = []
+
+    const thunk = (signal?: AbortSignal) => {
+      const attempt = attemptSignals.push(signal)
+      running++
+      maxConcurrent = Math.max(maxConcurrent, running)
+      return new Promise<string>((resolve, reject) => {
+        // first attempt hangs far past the timeout, the retry finishes quickly
+        const timer = setTimeout(
+          () => {
+            running--
+            resolve("done")
+          },
+          attempt === 1 ? 60_000 : 100,
+        )
+        signal?.addEventListener("abort", () => {
+          clearTimeout(timer)
+          running--
+          reject(signal.reason)
+        })
+      })
+    }
+
+    const promise = q.enqueue(thunk, Date.now(), "abort-on-timeout")
+
+    await vi.advanceTimersByTimeAsync(0)
+    expect(running).toBe(1)
+
+    // timeout fires: the attempt must be cancelled before the retry starts
+    await vi.advanceTimersByTimeAsync(1000)
+    expect(attemptSignals).toHaveLength(1)
+    expect(attemptSignals[0]?.aborted).toBe(true)
+    expect(running).toBe(0)
+
+    // retry (100ms base delay + jitter) runs alone and succeeds
+    await vi.advanceTimersByTimeAsync(500)
+    expect(attemptSignals).toHaveLength(2)
+    expect(maxConcurrent).toBe(1)
+    await expect(promise).resolves.toBe("done")
+  })
+
+  it("still rejects with the timeout error when retries are exhausted", async () => {
+    vi.useFakeTimers()
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      timeoutMs: 1000,
+      maxRetries: 0,
+    })
+
+    let sawAbort = false
+    const thunk = (signal?: AbortSignal) =>
+      new Promise<string>((resolve, reject) => {
+        const timer = setTimeout(resolve, 60_000, "too-slow")
+        signal?.addEventListener("abort", () => {
+          clearTimeout(timer)
+          sawAbort = true
+          reject(signal.reason)
+        })
+      })
+
+    const promise = q.enqueue(thunk, Date.now(), "timeout-no-retry")
+    promise.catch(() => {})
+
+    await vi.advanceTimersByTimeAsync(1000)
+
+    expect(sawAbort).toBe(true)
+    await expect(promise).rejects.toThrow("timed out after 1000ms")
+  })
+
+  it("aborts other in-flight attempts when a queue-fatal error drains the backlog", async () => {
+    vi.useFakeTimers()
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      rate: 10,
+      capacity: 2,
+      maxRetries: 2,
+      baseRetryDelayMs: 100,
+    })
+
+    const unauthorizedError = Object.assign(new Error("Unauthorized"), {
+      statusCode: 401,
+    })
+    let aborted = false
+
+    const firstPromise = q.enqueue(() => Promise.reject(unauthorizedError), Date.now(), "first")
+    firstPromise.catch(() => {})
+
+    const secondPromise = q.enqueue(
+      (signal?: AbortSignal) =>
+        new Promise((_, reject) => {
+          signal?.addEventListener("abort", () => {
+            aborted = true
+            reject(signal.reason)
+          })
+        }),
+      Date.now(),
+      "second",
+    )
+    secondPromise.catch(() => {})
+
+    await vi.advanceTimersByTimeAsync(0)
+
+    expect(aborted).toBe(true)
+    await expect(firstPromise).rejects.toBe(unauthorizedError)
+    await expect(secondPromise).rejects.toBe(unauthorizedError)
   })
 })
 
@@ -357,7 +475,8 @@ describe("requestQueue – retry functionality", () => {
 
     const eventuallySucceedsThunk = () => {
       attempts++
-      if (attempts < 2) { // Change to succeed on second attempt
+      if (attempts < 2) {
+        // Change to succeed on second attempt
         return Promise.reject(new Error(`Attempt ${attempts} failed`))
       }
       return Promise.resolve("success!")
@@ -453,7 +572,7 @@ describe("requestQueue – retry with timeout combined", () => {
 
     const timeoutThunk = () => {
       // Task takes 200ms, but timeout is 100ms
-      return new Promise(resolve => setTimeout(resolve, 200, "too slow"))
+      return new Promise((resolve) => setTimeout(resolve, 200, "too slow"))
     }
 
     const promise = q.enqueue(timeoutThunk, Date.now(), "timeout-test")
@@ -493,16 +612,24 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
     const error = createError()
     const completed: string[] = []
 
-    const firstPromise = q.enqueue(() => {
-      attempts++
-      return Promise.reject(error)
-    }, Date.now(), "current-only")
+    const firstPromise = q.enqueue(
+      () => {
+        attempts++
+        return Promise.reject(error)
+      },
+      Date.now(),
+      "current-only",
+    )
     firstPromise.catch(() => {})
 
-    const secondPromise = q.enqueue(() => {
-      completed.push("second")
-      return Promise.resolve("second")
-    }, Date.now(), "second")
+    const secondPromise = q.enqueue(
+      () => {
+        completed.push("second")
+        return Promise.resolve("second")
+      },
+      Date.now(),
+      "second",
+    )
 
     await vi.advanceTimersByTimeAsync(100)
 
@@ -512,8 +639,9 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
     await expect(secondPromise).resolves.toBe("second")
   })
 
-  it("drains waiting tasks immediately after a 429", async () => {
+  it("pauses instead of draining the backlog on a 429", async () => {
     vi.useFakeTimers()
+    vi.spyOn(Math, "random").mockReturnValue(0) // deterministic pause (no jitter)
 
     const q = new RequestQueue({
       ...baseConfig,
@@ -526,17 +654,19 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
     const completed: string[] = []
     const rateLimitedError = Object.assign(new Error("Too Many Requests"), {
       statusCode: 429,
-      responseHeaders: {
-        "retry-after": "2",
-      },
     })
+    let firstAttempts = 0
 
     const firstPromise = q.enqueue(
-      () => Promise.reject(rateLimitedError),
+      () => {
+        firstAttempts++
+        if (firstAttempts === 1) return Promise.reject(rateLimitedError)
+        completed.push("first")
+        return Promise.resolve("first")
+      },
       Date.now(),
       "first",
     )
-    firstPromise.catch(() => {})
 
     const secondPromise = q.enqueue(
       () => {
@@ -546,17 +676,62 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
       Date.now(),
       "second",
     )
-    secondPromise.catch(() => {})
 
-    await vi.advanceTimersByTimeAsync(0)
-
+    // 429 lands: nothing rejects, nothing dispatches during the pause window
+    await vi.advanceTimersByTimeAsync(4_999)
     expect(completed).toEqual([])
-    await expect(firstPromise).rejects.toBe(rateLimitedError)
-    await expect(secondPromise).rejects.toBe(rateLimitedError)
+    expect(firstAttempts).toBe(1)
+
+    // Pause (RATE_LIMIT_BASE_PAUSE_MS = 5s) elapses and both complete with
+    // zero rejections. The retried task re-queues at the pause end, so the
+    // older waiting task dispatches first (FIFO by scheduleAt).
+    await vi.advanceTimersByTimeAsync(5_000)
+    await expect(firstPromise).resolves.toBe("first")
+    await expect(secondPromise).resolves.toBe("second")
+    expect(completed).toEqual(["second", "first"])
   })
 
-  it("drains other executing tasks immediately after a 429", async () => {
+  it("honors a Retry-After header longer than the base pause", async () => {
     vi.useFakeTimers()
+    vi.spyOn(Math, "random").mockReturnValue(0)
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      rate: 10,
+      capacity: 1,
+      maxRetries: 2,
+      baseRetryDelayMs: 100,
+    })
+
+    const rateLimitedError = Object.assign(new Error("Too Many Requests"), {
+      statusCode: 429,
+      responseHeaders: {
+        "retry-after": "30",
+      },
+    })
+    let attempts = 0
+
+    const promise = q.enqueue(
+      () => {
+        attempts++
+        if (attempts === 1) return Promise.reject(rateLimitedError)
+        return Promise.resolve("recovered")
+      },
+      Date.now(),
+      "retry-after",
+    )
+
+    await vi.advanceTimersByTimeAsync(29_999)
+    expect(attempts).toBe(1)
+
+    await vi.advanceTimersByTimeAsync(1_000)
+    await expect(promise).resolves.toBe("recovered")
+    expect(attempts).toBe(2)
+  })
+
+  it("counts one pause window for concurrent 429s and resets on success", async () => {
+    vi.useFakeTimers()
+    vi.spyOn(Math, "random").mockReturnValue(0)
 
     const q = new RequestQueue({
       ...baseConfig,
@@ -569,33 +744,114 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
     const rateLimitedError = Object.assign(new Error("Too Many Requests"), {
       statusCode: 429,
     })
-    const secondDeferred = createDeferred<string>()
+    const attempts = new Map<string, number>()
+    const flaky = (hash: string) => () => {
+      const n = (attempts.get(hash) ?? 0) + 1
+      attempts.set(hash, n)
+      return n === 1 ? Promise.reject(rateLimitedError) : Promise.resolve(hash)
+    }
 
-    const firstPromise = q.enqueue(
-      () => Promise.reject(rateLimitedError),
-      Date.now(),
-      "first",
-    )
-    firstPromise.catch(() => {})
+    // Both in-flight attempts 429 within the same tick: one pause window.
+    const firstPromise = q.enqueue(flaky("first"), Date.now(), "first")
+    const secondPromise = q.enqueue(flaky("second"), Date.now(), "second")
 
-    const secondPromise = q.enqueue(
-      () => secondDeferred.promise,
-      Date.now(),
-      "second",
-    )
-    secondPromise.catch(() => {})
+    // The first 429 opens a 5s window; the sibling extends it via the doubled
+    // backoff (consecutiveRateLimits=1 → 10s) without double-counting.
+    await vi.advanceTimersByTimeAsync(10_100)
+    await expect(firstPromise).resolves.toBe("first")
+    await expect(secondPromise).resolves.toBe("second")
 
-    await vi.advanceTimersByTimeAsync(0)
-
-    await expect(firstPromise).rejects.toBe(rateLimitedError)
-    await expect(secondPromise).rejects.toBe(rateLimitedError)
-
-    secondDeferred.resolve("late success")
-    await vi.advanceTimersByTimeAsync(0)
-    await expect(secondPromise).rejects.toBe(rateLimitedError)
+    // Success reset the consecutive counter: a later 429 pauses for the BASE
+    // 5s again, not the doubled window.
+    const thirdPromise = q.enqueue(flaky("third"), Date.now(), "third")
+    await vi.advanceTimersByTimeAsync(4_999)
+    expect(attempts.get("third")).toBe(1)
+    await vi.advanceTimersByTimeAsync(5_000)
+    await expect(thirdPromise).resolves.toBe("third")
   })
 
-  it("ignores drained in-flight failures and allows new enqueues after a 429", async () => {
+  it("fails the whole backlog only after the consecutive pause cap", async () => {
+    vi.useFakeTimers()
+    vi.spyOn(Math, "random").mockReturnValue(0)
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      rate: 10,
+      capacity: 1,
+      maxRetries: 2,
+      baseRetryDelayMs: 100,
+    })
+
+    const rateLimitedError = Object.assign(new Error("Too Many Requests"), {
+      statusCode: 429,
+    })
+    let attempts = 0
+
+    const stuckPromise = q.enqueue(
+      () => {
+        attempts++
+        return Promise.reject(rateLimitedError)
+      },
+      Date.now(),
+      "stuck",
+    )
+    stuckPromise.catch(() => {})
+
+    // Parked far in the future so it stays in the waiting heap the whole time:
+    // the drain must reject queued-but-never-dispatched tasks too.
+    const waitingPromise = q.enqueue(makeThunk("never"), Date.now() + 999_000, "waiting")
+    waitingPromise.catch(() => {})
+
+    // Pause windows escalate 5s, 10s, 20s, 40s, 80s (155s total); the attempt
+    // after the fifth window sees consecutiveRateLimits at the cap and drains
+    // the whole backlog — the old fail-fast behavior as a backstop.
+    await vi.advanceTimersByTimeAsync(160_000)
+
+    expect(attempts).toBe(6)
+    await expect(stuckPromise).rejects.toBe(rateLimitedError)
+    await expect(waitingPromise).rejects.toBe(rateLimitedError)
+  })
+
+  it("cancels a 429-parked task during the pause via cancelByScope", async () => {
+    vi.useFakeTimers()
+    vi.spyOn(Math, "random").mockReturnValue(0)
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      rate: 10,
+      capacity: 1,
+      maxRetries: 2,
+      baseRetryDelayMs: 100,
+    })
+
+    const rateLimitedError = Object.assign(new Error("Too Many Requests"), {
+      statusCode: 429,
+    })
+    let attempts = 0
+
+    const promise = q.enqueue(
+      () => {
+        attempts++
+        return Promise.reject(rateLimitedError)
+      },
+      Date.now(),
+      "parked",
+      ["tab:session"],
+    )
+    promise.catch(() => {})
+
+    await vi.advanceTimersByTimeAsync(100)
+    expect(attempts).toBe(1)
+
+    // The task sits in the waiting heap until the pause ends — cancelling its
+    // scope must drain it like any waiting task.
+    expect(q.cancelByScope("tab:session")).toBe(1)
+    await vi.advanceTimersByTimeAsync(20_000)
+    expect(attempts).toBe(1)
+    await expect(promise).rejects.toMatchObject({ name: "TranslationCancelledError" })
+  })
+
+  it("ignores drained in-flight failures and allows new enqueues after a queue-fatal error", async () => {
     vi.useFakeTimers()
 
     const q = new RequestQueue({
@@ -606,8 +862,8 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
       baseRetryDelayMs: 100,
     })
 
-    const rateLimitedError = Object.assign(new Error("Too Many Requests"), {
-      statusCode: 429,
+    const queueFatalError = Object.assign(new Error("Forbidden"), {
+      statusCode: 403,
     })
     const laterError = Object.assign(new Error("Unauthorized"), {
       statusCode: 401,
@@ -615,28 +871,16 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
     const oldDeferred = createDeferred<string>()
     const newDeferred = createDeferred<string>()
 
-    const firstPromise = q.enqueue(
-      () => Promise.reject(rateLimitedError),
-      Date.now(),
-      "first",
-    )
+    const firstPromise = q.enqueue(() => Promise.reject(queueFatalError), Date.now(), "first")
     firstPromise.catch(() => {})
 
-    const oldPromise = q.enqueue(
-      () => oldDeferred.promise,
-      Date.now(),
-      "old",
-    )
+    const oldPromise = q.enqueue(() => oldDeferred.promise, Date.now(), "old")
     oldPromise.catch(() => {})
 
     await vi.advanceTimersByTimeAsync(0)
-    await expect(oldPromise).rejects.toBe(rateLimitedError)
+    await expect(oldPromise).rejects.toBe(queueFatalError)
 
-    const newPromise = q.enqueue(
-      () => newDeferred.promise,
-      Date.now(),
-      "new",
-    )
+    const newPromise = q.enqueue(() => newDeferred.promise, Date.now(), "new")
 
     oldDeferred.reject(laterError)
     await vi.advanceTimersByTimeAsync(0)
@@ -644,7 +888,7 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
     newDeferred.resolve("new success")
     await vi.advanceTimersByTimeAsync(0)
 
-    await expect(firstPromise).rejects.toBe(rateLimitedError)
+    await expect(firstPromise).rejects.toBe(queueFatalError)
     await expect(newPromise).resolves.toBe("new success")
   })
 
@@ -659,35 +903,23 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
       baseRetryDelayMs: 100,
     })
 
-    const rateLimitedError = Object.assign(new Error("Too Many Requests"), {
-      statusCode: 429,
+    const queueFatalError = Object.assign(new Error("Forbidden"), {
+      statusCode: 403,
     })
     const oldDeferred = createDeferred<string>()
     const newDeferred = createDeferred<string>()
     let duplicateStarted = false
 
-    const firstPromise = q.enqueue(
-      () => Promise.reject(rateLimitedError),
-      Date.now(),
-      "first",
-    )
+    const firstPromise = q.enqueue(() => Promise.reject(queueFatalError), Date.now(), "first")
     firstPromise.catch(() => {})
 
-    const oldPromise = q.enqueue(
-      () => oldDeferred.promise,
-      Date.now(),
-      "same",
-    )
+    const oldPromise = q.enqueue(() => oldDeferred.promise, Date.now(), "same")
     oldPromise.catch(() => {})
 
     await vi.advanceTimersByTimeAsync(0)
-    await expect(oldPromise).rejects.toBe(rateLimitedError)
+    await expect(oldPromise).rejects.toBe(queueFatalError)
 
-    const newPromise = q.enqueue(
-      () => newDeferred.promise,
-      Date.now(),
-      "same",
-    )
+    const newPromise = q.enqueue(() => newDeferred.promise, Date.now(), "same")
 
     oldDeferred.resolve("old success")
     await vi.advanceTimersByTimeAsync(0)
@@ -707,7 +939,7 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
     newDeferred.resolve("new success")
     await vi.advanceTimersByTimeAsync(0)
 
-    await expect(firstPromise).rejects.toBe(rateLimitedError)
+    await expect(firstPromise).rejects.toBe(queueFatalError)
     await expect(newPromise).resolves.toBe("new success")
   })
 
@@ -727,11 +959,7 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
       statusCode,
     })
 
-    const firstPromise = q.enqueue(
-      () => Promise.reject(error),
-      Date.now(),
-      "first",
-    )
+    const firstPromise = q.enqueue(() => Promise.reject(error), Date.now(), "first")
     firstPromise.catch(() => {})
 
     const secondPromise = q.enqueue(
@@ -767,13 +995,17 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
       statusCode,
     })
 
-    const promise = q.enqueue(() => {
-      attempts++
-      if (attempts === 1) {
-        return Promise.reject(error)
-      }
-      return Promise.resolve("success")
-    }, Date.now(), `transient-${statusCode}`)
+    const promise = q.enqueue(
+      () => {
+        attempts++
+        if (attempts === 1) {
+          return Promise.reject(error)
+        }
+        return Promise.resolve("success")
+      },
+      Date.now(),
+      `transient-${statusCode}`,
+    )
 
     await vi.advanceTimersByTimeAsync(0)
     expect(attempts).toBe(1)
@@ -851,7 +1083,7 @@ describe("requestQueue – reconfigure the request queue", () => {
     expect(completed).toHaveLength(count)
   })
 
-  it("increase the request capacity", async () => {
+  it("increase the request capacity without granting a free burst", async () => {
     vi.useFakeTimers()
     const q = new RequestQueue({
       ...baseConfig,
@@ -861,6 +1093,8 @@ describe("requestQueue – reconfigure the request queue", () => {
     const count = 50
     const completed: number[] = []
 
+    // Raising capacity must NOT refill the bucket: tokens only accrue via the
+    // rate. The bucket still holds the 5 tokens it started with.
     q.setQueueOptions({ capacity: 30 })
 
     const trackingThunk = (id: number) => () => {
@@ -874,12 +1108,12 @@ describe("requestQueue – reconfigure the request queue", () => {
       void q.enqueue(trackingThunk(i), Date.now(), `task-${i}`)
     }
 
+    // 5 immediately, then 5/sec: 2s → 5 + 10 = 15
     vi.advanceTimersByTime(2_000)
-    expect(completed).toHaveLength(40)
+    expect(completed).toHaveLength(15)
 
-    // Advance time enough: 50 tasks, initial 30 tokens, then 5 per sec
-    // First 20 tasks execute immediately, remaining 5 tasks need 20/5 = 4 seconds
-    vi.advanceTimersByTime(2_000)
+    // Remaining 35 tasks need 35/5 = 7 more seconds
+    vi.advanceTimersByTime(7_100)
     expect(completed).toHaveLength(count)
   })
 
@@ -945,15 +1179,15 @@ describe("requestQueue – reconfigure the request queue", () => {
 
     vi.useFakeTimers()
 
+    // The first batch drained the bucket; raising capacity back to 10 does not
+    // refill it, so all 50 new tasks are paid for by accrual at 5/sec.
     q.setQueueOptions({ rate: 5, capacity: 10 })
 
     for (let i = count; i < count * 2; i++) {
       void q.enqueue(trackingThunk(i), Date.now(), `task-${i}`)
     }
 
-    // Advance time enough: 50 tasks, initial 10 tokens, then 5 per sec
-    // First 10 tasks execute immediately, remaining 40 tasks need 40/5 = 8 seconds
-    vi.advanceTimersByTime(8_000)
+    vi.advanceTimersByTime(10_100)
 
     expect(completed).toHaveLength(count * 2)
   })
@@ -1005,21 +1239,20 @@ describe("requestQueue – reconfigure the request queue", () => {
 
     const abortIndex = count / 2
 
-    // immediately run 10 tasks
+    // immediately run 10 tasks (initial bucket)
     for (let i = 0; i < abortIndex; i++) {
       void q.enqueue(trackingThunk(i), Date.now(), `task-${i}`)
     }
 
-    // reset bucket tokens to 20
+    // Raising capacity mid-drain does NOT refill the bucket
     q.setQueueOptions({ capacity: 20 })
 
-    // immediately run 20 tasks
     for (let i = abortIndex; i < count; i++) {
       void q.enqueue(trackingThunk(i), Date.now(), `task-${i}`)
     }
 
-    // immediately 30 tasks , remaining 20 tasks need 20 / 5 = 4 seconds
-    vi.advanceTimersByTime(4_000)
+    // 10 ran immediately; the remaining 40 accrue at 5/sec = 8 seconds
+    vi.advanceTimersByTime(8_100)
 
     expect(completed).toHaveLength(count)
   })
@@ -1027,16 +1260,92 @@ describe("requestQueue – reconfigure the request queue", () => {
   it("should throw error when options are invalid", () => {
     const q = new RequestQueue({ ...baseConfig, rate: 5, capacity: 10 })
 
-    expect(() => q.setQueueOptions({ rate: 0, capacity: 0 })).toThrow()
+    expect(() => q.setQueueOptions({ rate: 0, capacity: 0 })).toThrow(/Too small/)
 
-    expect(() => q.setQueueOptions({ rate: -1, capacity: -1 })).toThrow()
+    expect(() => q.setQueueOptions({ rate: -1, capacity: -1 })).toThrow(/Too small/)
 
-    expect(() => q.setQueueOptions({ rate: 0 })).toThrow()
+    expect(() => q.setQueueOptions({ rate: 0 })).toThrow(/Too small/)
 
-    expect(() => q.setQueueOptions({ capacity: 0 })).toThrow()
+    expect(() => q.setQueueOptions({ capacity: 0 })).toThrow(/Too small/)
 
-    expect(() => q.setQueueOptions({ rate: -1 })).toThrow()
+    expect(() => q.setQueueOptions({ rate: -1 })).toThrow(/Too small/)
 
-    expect(() => q.setQueueOptions({ capacity: -1 })).toThrow()
+    expect(() => q.setQueueOptions({ capacity: -1 })).toThrow(/Too small/)
+  })
+})
+
+describe("requestQueue – dispatch ETA and per-task timeout", () => {
+  it("nextDispatchEtaMs reflects tokens, backlog depth, and pause", async () => {
+    vi.useFakeTimers()
+    vi.spyOn(Math, "random").mockReturnValue(0)
+
+    const q = new RequestQueue({ ...baseConfig, rate: 1, capacity: 1 })
+
+    // Fresh queue: full bucket, empty backlog — a new request could go now.
+    expect(q.nextDispatchEtaMs()).toBe(0)
+
+    // One in-flight task consumed the only token: next slot in ~1s.
+    const hanging = createDeferred<string>()
+    const p1 = q.enqueue(() => hanging.promise, Date.now(), "in-flight")
+    await vi.advanceTimersByTimeAsync(0)
+    expect(q.nextDispatchEtaMs()).toBeGreaterThan(900)
+    expect(q.nextDispatchEtaMs()).toBeLessThanOrEqual(1_000)
+
+    // Two more waiting ahead: a NEW request is 3 token-periods away.
+    const p2 = q.enqueue(makeThunk("b"), Date.now(), "waiting-1")
+    const p3 = q.enqueue(makeThunk("c"), Date.now(), "waiting-2")
+    expect(q.nextDispatchEtaMs()).toBeGreaterThan(2_900)
+    expect(q.nextDispatchEtaMs()).toBeLessThanOrEqual(3_000)
+
+    hanging.resolve("a")
+    await vi.advanceTimersByTimeAsync(3_100)
+    await expect(Promise.all([p1, p2, p3])).resolves.toEqual(["a", "b", "c"])
+  })
+
+  it("includes the rate-limit pause in the ETA", async () => {
+    vi.useFakeTimers()
+    vi.spyOn(Math, "random").mockReturnValue(0)
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      rate: 10,
+      capacity: 1,
+      maxRetries: 2,
+    })
+
+    const rateLimitedError = Object.assign(new Error("Too Many Requests"), {
+      statusCode: 429,
+    })
+    let attempts = 0
+    const promise = q.enqueue(
+      () => {
+        attempts++
+        return attempts === 1 ? Promise.reject(rateLimitedError) : Promise.resolve("ok")
+      },
+      Date.now(),
+      "flaky",
+    )
+
+    await vi.advanceTimersByTimeAsync(0)
+    // Paused for RATE_LIMIT_BASE_PAUSE_MS with the retry parked in the heap.
+    expect(q.nextDispatchEtaMs()).toBeGreaterThan(4_000)
+
+    await vi.advanceTimersByTimeAsync(5_100)
+    await expect(promise).resolves.toBe("ok")
+  })
+
+  it("per-task timeoutMs override wins over the queue default", async () => {
+    vi.useFakeTimers()
+
+    const q = new RequestQueue({ ...baseConfig, timeoutMs: 10_000, maxRetries: 0 })
+
+    const never = createDeferred<string>()
+    const promise = q.enqueue(() => never.promise, Date.now(), "slow", undefined, {
+      timeoutMs: 500,
+    })
+    promise.catch(() => {})
+
+    await vi.advanceTimersByTimeAsync(600)
+    await expect(promise).rejects.toThrow(/timed out after 500ms/)
   })
 })

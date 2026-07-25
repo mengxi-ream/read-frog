@@ -13,7 +13,7 @@ import { ConfigCard } from "../../components/config-card"
 
 export function SkipLanguages() {
   return (
-    <div className="py-6 flex flex-col gap-y-4">
+    <div className="flex flex-col gap-y-4 py-6">
       <ConfigCard
         id="skip-languages"
         title={i18n.t("options.translation.skipLanguages.title")}
@@ -38,7 +38,9 @@ function TargetLanguageSkipToggle() {
       <FieldContent className="self-center">
         <FieldLabel htmlFor="target-language-skip-toggle">
           {i18n.t("options.translation.skipLanguages.targetLanguageSkip")}
-          <HelpTooltip>{i18n.t("options.translation.skipLanguages.targetLanguageSkipDescription")}</HelpTooltip>
+          <HelpTooltip>
+            {i18n.t("options.translation.skipLanguages.targetLanguageSkipDescription")}
+          </HelpTooltip>
         </FieldLabel>
       </FieldContent>
       <Switch
@@ -62,16 +64,17 @@ function SkipLanguagesSelector() {
   const selectedLanguages = translateConfig.page.skipLanguages
 
   return (
-    <div className="w-full flex justify-start md:justify-end">
+    <div className="flex w-full justify-start md:justify-end">
       <MultiLanguageCombobox
         selectedLanguages={selectedLanguages}
-        onLanguagesChange={languages =>
+        onLanguagesChange={(languages) =>
           void setTranslateConfig({
             page: {
               ...translateConfig.page,
               skipLanguages: languages,
             },
-          })}
+          })
+        }
         buttonLabel={i18n.t("options.translation.skipLanguages.selectLanguages")}
       />
     </div>
@@ -86,7 +89,7 @@ function SelectedSkipLanguageCells() {
     void setTranslateConfig({
       page: {
         ...translateConfig.page,
-        skipLanguages: selectedLanguages.filter(lang => lang !== language),
+        skipLanguages: selectedLanguages.filter((lang) => lang !== language),
       },
     })
   }
@@ -97,7 +100,7 @@ function SelectedSkipLanguageCells() {
 
   return (
     <div className="flex flex-wrap gap-2">
-      {selectedLanguages.map(language => (
+      {selectedLanguages.map((language) => (
         <div
           key={language}
           className="inline-flex items-center gap-1 rounded-md border bg-muted px-2 py-1 text-sm"
@@ -106,7 +109,7 @@ function SelectedSkipLanguageCells() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-4 w-4 p-0 hover:bg-input hover:text-input-foreground"
+            className="hover:text-input-foreground h-4 w-4 p-0 hover:bg-input"
             onClick={() => removeLanguage(language)}
           >
             <Icon icon="tabler:x" className="h-3 w-3" />

@@ -4,9 +4,11 @@ import { i18n } from "@/utils/i18n"
 import { promptAtoms } from "./atoms"
 
 export function SubtitlesCustomPrompts() {
-  const insertCells = SUBTITLE_PROMPT_TOKENS.map(token => ({
+  const insertCells = SUBTITLE_PROMPT_TOKENS.map((token) => ({
     text: getTokenCellText(token),
-    description: i18n.t(`options.videoSubtitles.customPrompts.editPrompt.promptCellInput.${token}` as never),
+    description: i18n.t(
+      `options.videoSubtitles.customPrompts.editPrompt.promptCellInput.${token}` as never,
+    ),
   }))
 
   return (

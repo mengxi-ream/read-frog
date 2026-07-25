@@ -8,19 +8,21 @@ const VTT_TIMESTAMP_PATTERN = /^(\d+)\s*-->\s*(\d+)$/
 
 export function cleanFragmentsForAi(fragments: SubtitlesFragment[]): SubtitlesFragment[] {
   return fragments
-    .map(fragment => ({
+    .map((fragment) => ({
       ...fragment,
       text: fragment.text.replace(NEWLINE_PATTERN, " ").replace(WHITESPACE_PATTERN, " ").trim(),
     }))
-    .filter(fragment => fragment.text.length > 0)
+    .filter((fragment) => fragment.text.length > 0)
 }
 
 export function formatFragmentsToJson(fragments: SubtitlesFragment[]): string {
-  return JSON.stringify(fragments.map(f => ({
-    s: f.start,
-    e: f.end,
-    t: f.text,
-  })))
+  return JSON.stringify(
+    fragments.map((f) => ({
+      s: f.start,
+      e: f.end,
+      t: f.text,
+    })),
+  )
 }
 
 /**
@@ -56,7 +58,11 @@ export function parseSimplifiedVttToFragments(vtt: string): SubtitlesFragment[] 
       // Collect text lines
       const textLines: string[] = []
       lineIndex++
-      while (lineIndex < lines.length && lines[lineIndex].trim() !== "" && !lines[lineIndex].includes("-->")) {
+      while (
+        lineIndex < lines.length &&
+        lines[lineIndex].trim() !== "" &&
+        !lines[lineIndex].includes("-->")
+      ) {
         textLines.push(lines[lineIndex].trim())
         lineIndex++
       }
@@ -68,8 +74,7 @@ export function parseSimplifiedVttToFragments(vtt: string): SubtitlesFragment[] 
           end,
         })
       }
-    }
-    else {
+    } else {
       lineIndex++
     }
   }

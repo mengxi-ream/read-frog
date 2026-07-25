@@ -8,7 +8,7 @@ function getIssuePaths(input: unknown) {
     return []
   }
 
-  return result.error.issues.map(issue => issue.path.join("."))
+  return result.error.issues.map((issue) => issue.path.join("."))
 }
 
 describe("config provider enabled validation", () => {
@@ -41,7 +41,7 @@ describe("config provider enabled validation", () => {
       providersConfig,
       selectionToolbar: {
         ...DEFAULT_CONFIG.selectionToolbar,
-        customActions: DEFAULT_CONFIG.selectionToolbar.customActions.map(action => ({
+        customActions: DEFAULT_CONFIG.selectionToolbar.customActions.map((action) => ({
           ...action,
           providerId: "openai-default",
         })),
@@ -51,12 +51,12 @@ describe("config provider enabled validation", () => {
     expect(issuePaths).toContain("selectionToolbar.customActions.0.providerId")
   })
 
-  it("allows free AI for custom actions", () => {
+  it("allows built-in AI for custom actions", () => {
     const result = configSchema.safeParse({
       ...DEFAULT_CONFIG,
       selectionToolbar: {
         ...DEFAULT_CONFIG.selectionToolbar,
-        customActions: DEFAULT_CONFIG.selectionToolbar.customActions.map(action => ({
+        customActions: DEFAULT_CONFIG.selectionToolbar.customActions.map((action) => ({
           ...action,
           providerId: "read-frog-free-ai",
         })),
@@ -66,7 +66,7 @@ describe("config provider enabled validation", () => {
     expect(result.success).toBe(true)
   })
 
-  it("rejects free AI for selection toolbar translation", () => {
+  it("rejects built-in AI for selection toolbar translation", () => {
     const issuePaths = getIssuePaths({
       ...DEFAULT_CONFIG,
       selectionToolbar: {
@@ -84,7 +84,7 @@ describe("config provider enabled validation", () => {
     expect(issuePaths).toContain("selectionToolbar.features.translate.providerId")
   })
 
-  it("rejects free AI for fixed translation features that have not enabled the capability", () => {
+  it("rejects built-in AI for fixed translation features that have not enabled the capability", () => {
     const issuePaths = getIssuePaths({
       ...DEFAULT_CONFIG,
       translate: {

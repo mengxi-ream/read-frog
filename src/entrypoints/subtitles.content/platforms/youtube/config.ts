@@ -20,6 +20,11 @@ const NAVIGATE_EVENTS = {
 
 const SHORTS_ACTIVE_PLAYER = "#reel-overlay-container .html5-video-player"
 
+function createYoutubeAiSubtitlesContext() {
+  const videoId = getYoutubeVideoId()
+  return videoId ? { videoId, url: location.href } : null
+}
+
 const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
   watch: {
     embedded: false,
@@ -43,6 +48,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
       },
     },
     getVideoId: getYoutubeVideoId,
+    createAiSubtitlesContext: createYoutubeAiSubtitlesContext,
   },
 
   embed: {
@@ -60,20 +66,22 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
         const wrapper = document.querySelector(".quick-actions-wrapper")
         const player = document.querySelector("#movie_player")
         const progressBar = player?.querySelector(".ytp-progress-bar-container")
-        if (!wrapper || !progressBar)
-          return DEFAULT_CONTROLS_HEIGHT
+        if (!wrapper || !progressBar) return DEFAULT_CONTROLS_HEIGHT
         return wrapper.getBoundingClientRect().top - progressBar.getBoundingClientRect().top
       },
       checkVisibility: () => true,
     },
     getVideoId: getYoutubeVideoId,
+    createAiSubtitlesContext: createYoutubeAiSubtitlesContext,
   },
 
   shorts: {
     embedded: true,
     silentErrors: true,
     containerShrinkRatio: (container) => {
-      const ratio = Number.parseFloat(getComputedStyle(container).getPropertyValue("--ytd-shorts-player-ratio"))
+      const ratio = Number.parseFloat(
+        getComputedStyle(container).getPropertyValue("--ytd-shorts-player-ratio"),
+      )
       return Number.isFinite(ratio) && ratio > 0 ? ratio : null
     },
     selectors: {
@@ -88,6 +96,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
       checkVisibility: () => true,
     },
     getVideoId: getYoutubeVideoId,
+    createAiSubtitlesContext: createYoutubeAiSubtitlesContext,
   },
 }
 

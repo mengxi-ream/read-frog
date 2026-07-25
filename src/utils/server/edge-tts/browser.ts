@@ -13,8 +13,10 @@ function hasChromeOffscreenApi(): boolean {
 }
 
 export function isEdgeTTSBrowserSupported(): boolean {
-  return hasChromeOffscreenApi()
-    || (EDGE_TTS_SUPPORTED_BROWSERS as readonly string[]).includes(import.meta.env.BROWSER)
+  return (
+    hasChromeOffscreenApi() ||
+    (EDGE_TTS_SUPPORTED_BROWSERS as readonly string[]).includes(import.meta.env.BROWSER)
+  )
 }
 
 export function assertEdgeTTSAvailable(): void {

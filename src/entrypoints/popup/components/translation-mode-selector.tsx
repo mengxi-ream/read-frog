@@ -2,14 +2,17 @@ import type { TranslationMode as TranslationModeType } from "@/types/config/tran
 import { Icon } from "@iconify/react"
 import { useAtom } from "jotai"
 import { Button } from "@/components/ui/base-ui/button"
+import { Kbd, KbdGroup } from "@/components/ui/base-ui/kbd"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
+import { formatHotkeyParts } from "@/utils/os"
+import { isPageTranslationShortcutEmpty } from "@/utils/page-translation-shortcut"
 import { cn } from "@/utils/styles/utils"
 
 const TABLER_ICON_STROKE_WIDTH_CLASS = "[&_path]:[stroke-width:1.2]"
 
-const MODE_ICON: Record<TranslationModeType, { icon: string, className?: string }> = {
+const MODE_ICON: Record<TranslationModeType, { icon: string; className?: string }> = {
   bilingual: { icon: "garden:translation-exists-stroke-16" },
   translationOnly: { icon: "tabler:text-resize", className: TABLER_ICON_STROKE_WIDTH_CLASS },
 }
@@ -37,17 +40,18 @@ export default function TranslationModeSelector() {
   const nextMode = NEXT_MODE[currentMode]
   const tooltipKey = MODE_TOOLTIP_KEY[currentMode]
   const actionLabel = i18n.t(tooltipKey.action)
+  const shortcutParts = isPageTranslationShortcutEmpty(translateConfig.modeShortcut)
+    ? []
+    : formatHotkeyParts(translateConfig.modeShortcut)
 
   const handleModeToggle = () => {
-    void setTranslateConfig(
-      { mode: nextMode },
-    )
+    void setTranslateConfig({ mode: nextMode })
   }
 
   return (
     <Tooltip>
       <TooltipTrigger
-        render={(
+        render={
           <Button
             type="button"
             variant="outline"
@@ -55,20 +59,24 @@ export default function TranslationModeSelector() {
             aria-label={actionLabel}
             onClick={handleModeToggle}
           />
-        )}
+        }
       >
         <Icon
           {...currentModeIcon}
-          className={cn(
-            currentModeIcon.className,
-            currentMode === "translationOnly" && "size-4.5",
-          )}
+          className={cn(currentModeIcon.className, currentMode === "translationOnly" && "size-4.5")}
         />
       </TooltipTrigger>
       <TooltipContent>
         <div className="whitespace-nowrap">
           <p>{i18n.t(tooltipKey.current)}</p>
           <p>{actionLabel}</p>
+          {shortcutParts.length > 0 && (
+            <KbdGroup className="mt-1.5">
+              {shortcutParts.map((part) => (
+                <Kbd key={part}>{part}</Kbd>
+              ))}
+            </KbdGroup>
+          )}
         </div>
       </TooltipContent>
     </Tooltip>

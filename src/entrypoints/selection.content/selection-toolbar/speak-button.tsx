@@ -1,7 +1,7 @@
 import { IconLoader2, IconPlayerStopFilled, IconVolume } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
 import { useCallback } from "react"
-import { toast } from "sonner"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -14,7 +14,11 @@ export function SpeakButton() {
   const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
   const { play, stop, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.SELECTION_TOOLBAR)
   const isBusy = isFetching || isPlaying
-  const { handlePress, onOpenChange: handleTooltipOpenChange, open: tooltipOpen } = useSelectionTooltipState()
+  const {
+    handlePress,
+    onOpenChange: handleTooltipOpenChange,
+    open: tooltipOpen,
+  } = useSelectionTooltipState()
 
   const handleClick = useCallback(async () => {
     if (isBusy) {
@@ -24,7 +28,7 @@ export function SpeakButton() {
     }
 
     if (!selectionContent) {
-      toast.error(i18n.t("speak.noTextSelected"))
+      toastManager.add({ type: "error", title: i18n.t("speak.noTextSelected") })
       return
     }
 
@@ -43,26 +47,22 @@ export function SpeakButton() {
       content={tooltipText}
       open={tooltipOpen}
       onOpenChange={handleTooltipOpenChange}
-      render={(
+      render={
         <button
           type="button"
-          className="px-2 h-7 flex items-center justify-center hover:bg-accent cursor-pointer"
+          className="flex h-7 cursor-pointer items-center justify-center px-2 hover:bg-accent"
           onClick={handleClick}
           aria-label={tooltipText}
         />
-      )}
+      }
     >
-      {isFetching
-        ? (
-            <IconLoader2 className="size-4.5 animate-spin" strokeWidth={1.6} />
-          )
-        : isPlaying
-          ? (
-              <IconPlayerStopFilled className="size-4.5" strokeWidth={1.6} />
-            )
-          : (
-              <IconVolume className="size-4.5" strokeWidth={1.6} />
-            )}
+      {isFetching ? (
+        <IconLoader2 className="size-4.5 animate-spin" strokeWidth={1.6} />
+      ) : isPlaying ? (
+        <IconPlayerStopFilled className="size-4.5" strokeWidth={1.6} />
+      ) : (
+        <IconVolume className="size-4.5" strokeWidth={1.6} />
+      )}
     </SelectionToolbarTooltip>
   )
 }

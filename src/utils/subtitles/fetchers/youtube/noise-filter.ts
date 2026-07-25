@@ -22,15 +22,14 @@ function filterNoiseText(text: string): string {
 
 export function filterNoiseFromEvents(events: YoutubeTimedText[]): YoutubeTimedText[] {
   return events.map((event) => {
-    if (!event.segs)
-      return event
+    if (!event.segs) return event
 
     const filteredSegs = event.segs
-      .map(seg => ({
+      .map((seg) => ({
         ...seg,
         utf8: filterNoiseText(seg.utf8),
       }))
-      .filter(seg => seg.utf8.trim().length > 0)
+      .filter((seg) => seg.utf8.trim().length > 0)
 
     return { ...event, segs: filteredSegs }
   })

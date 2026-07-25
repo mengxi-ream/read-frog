@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import {
   countAuthorCommitsInRepo,
   countReviewsOnOthersPullRequestsInRepo,
@@ -11,38 +10,41 @@ import {
 
 describe("selectOwnedNonForkRepositories", () => {
   it("keeps only repos that the PR author owns and that are not forks", () => {
-    const result = selectOwnedNonForkRepositories([
-      {
-        isFork: true,
-        nameWithOwner: "kilidoc/read-frog",
-        owner: { login: "kilidoc" },
-        stargazerCount: 5040,
-      },
-      {
-        isFork: false,
-        nameWithOwner: "kilidoc/anki-langkit",
-        owner: { login: "kilidoc" },
-        stargazerCount: 42,
-      },
-      {
-        isFork: false,
-        nameWithOwner: "kilidoc/browser-tools",
-        owner: { login: "kilidoc" },
-        stargazerCount: 5,
-      },
-      {
-        isFork: false,
-        nameWithOwner: "mengxi-ream/read-frog",
-        owner: { login: "mengxi-ream" },
-        stargazerCount: 5041,
-      },
-      {
-        isFork: false,
-        nameWithOwner: "better-auth/better-auth",
-        owner: { login: "better-auth" },
-        stargazerCount: 27534,
-      },
-    ], "kilidoc")
+    const result = selectOwnedNonForkRepositories(
+      [
+        {
+          isFork: true,
+          nameWithOwner: "kilidoc/read-frog",
+          owner: { login: "kilidoc" },
+          stargazerCount: 5040,
+        },
+        {
+          isFork: false,
+          nameWithOwner: "kilidoc/anki-langkit",
+          owner: { login: "kilidoc" },
+          stargazerCount: 42,
+        },
+        {
+          isFork: false,
+          nameWithOwner: "kilidoc/browser-tools",
+          owner: { login: "kilidoc" },
+          stargazerCount: 5,
+        },
+        {
+          isFork: false,
+          nameWithOwner: "mengxi-ream/read-frog",
+          owner: { login: "mengxi-ream" },
+          stargazerCount: 5041,
+        },
+        {
+          isFork: false,
+          nameWithOwner: "better-auth/better-auth",
+          owner: { login: "better-auth" },
+          stargazerCount: 27534,
+        },
+      ],
+      "kilidoc",
+    )
 
     expect(result).toEqual([
       {
@@ -59,11 +61,13 @@ describe("selectOwnedNonForkRepositories", () => {
 
 describe("createPullRequestStateList", () => {
   it("reconstructs repo PR states from the aggregated counts", () => {
-    expect(createPullRequestStateList({
-      closedPrs: 1,
-      mergedPrs: 2,
-      openPrs: 3,
-    })).toEqual([
+    expect(
+      createPullRequestStateList({
+        closedPrs: 1,
+        mergedPrs: 2,
+        openPrs: 3,
+      }),
+    ).toEqual([
       { state: "merged" },
       { state: "merged" },
       { state: "closed" },
@@ -76,33 +80,29 @@ describe("createPullRequestStateList", () => {
 
 describe("createContributorMetrics", () => {
   it("keeps the contributor bonus inputs but does not invent commit counts", () => {
-    expect(createContributorMetrics({
-      author: {
-        createdAt: "2020-01-01T00:00:00Z",
-        followers: 12,
-      },
-      permission: "write",
-      repoHistory: {
-        closedPrs: 1,
-        commitsInRepo: 14,
-        mergedPrs: 2,
-        openPrs: 0,
-        reviews: 3,
-        topRepositories: [
-          { nameWithOwner: "kilidoc/browser-tools", stargazerCount: 42 },
-        ],
-      },
-    })).toEqual({
+    expect(
+      createContributorMetrics({
+        author: {
+          createdAt: "2020-01-01T00:00:00Z",
+          followers: 12,
+        },
+        permission: "write",
+        repoHistory: {
+          closedPrs: 1,
+          commitsInRepo: 14,
+          mergedPrs: 2,
+          openPrs: 0,
+          reviews: 3,
+          topRepositories: [{ nameWithOwner: "kilidoc/browser-tools", stargazerCount: 42 }],
+        },
+      }),
+    ).toEqual({
       accountCreated: "2020-01-01T00:00:00Z",
       commitsInRepo: 14,
       contributionCount: 5,
       followers: 12,
       isContributor: true,
-      prsInRepo: [
-        { state: "merged" },
-        { state: "merged" },
-        { state: "closed" },
-      ],
+      prsInRepo: [{ state: "merged" }, { state: "merged" }, { state: "closed" }],
       repoPermission: "write",
       reviewsInRepo: 3,
       topRepoStars: [42],
@@ -113,47 +113,37 @@ describe("createContributorMetrics", () => {
 describe("countAuthorCommitsInRepo", () => {
   it("derives the commit count from the paginated repo commits API", async () => {
     const originalFetch = globalThis.fetch
-    globalThis.fetch = async () => new Response(JSON.stringify([{ sha: "head" }]), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Link": "<https://api.github.com/repositories/1/commits?author=Sufyr&per_page=1&page=2>; rel=\"next\", <https://api.github.com/repositories/1/commits?author=Sufyr&per_page=1&page=37>; rel=\"last\"",
-      },
-    })
+    globalThis.fetch = async () =>
+      new Response(JSON.stringify([{ sha: "head" }]), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          Link: '<https://api.github.com/repositories/1/commits?author=Sufyr&per_page=1&page=2>; rel="next", <https://api.github.com/repositories/1/commits?author=Sufyr&per_page=1&page=37>; rel="last"',
+        },
+      })
 
     try {
-      const count = await countAuthorCommitsInRepo(
-        "token",
-        "mengxi-ream",
-        "read-frog",
-        "Sufyr",
-      )
+      const count = await countAuthorCommitsInRepo("token", "mengxi-ream", "read-frog", "Sufyr")
 
       expect(count).toBe(37)
-    }
-    finally {
+    } finally {
       globalThis.fetch = originalFetch
     }
   })
 
   it("falls back to payload length when the response fits on one page", async () => {
     const originalFetch = globalThis.fetch
-    globalThis.fetch = async () => new Response(JSON.stringify([{ sha: "only" }]), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    })
+    globalThis.fetch = async () =>
+      new Response(JSON.stringify([{ sha: "only" }]), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      })
 
     try {
-      const count = await countAuthorCommitsInRepo(
-        "token",
-        "mengxi-ream",
-        "read-frog",
-        "Sufyr",
-      )
+      const count = await countAuthorCommitsInRepo("token", "mengxi-ream", "read-frog", "Sufyr")
 
       expect(count).toBe(1)
-    }
-    finally {
+    } finally {
       globalThis.fetch = originalFetch
     }
   })
@@ -164,27 +154,27 @@ describe("listPullRequestFiles", () => {
     const originalFetch = globalThis.fetch
     const requests = []
     globalThis.fetch = async (input) => {
-      requests.push(String(input))
+      const requestUrl =
+        typeof input === "string" ? input : input instanceof URL ? input.href : input.url
+      requests.push(requestUrl)
 
-      return new Response(JSON.stringify([
+      return new Response(
+        JSON.stringify([
+          {
+            additions: 20,
+            deletions: 5,
+            filename: "src/index.ts",
+          },
+        ]),
         {
-          additions: 20,
-          deletions: 5,
-          filename: "src/index.ts",
+          status: 200,
+          headers: { "Content-Type": "application/json" },
         },
-      ]), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      })
+      )
     }
 
     try {
-      const files = await listPullRequestFiles(
-        "token",
-        "mengxi-ream",
-        "read-frog",
-        1735,
-      )
+      const files = await listPullRequestFiles("token", "mengxi-ream", "read-frog", 1735)
 
       expect(files).toEqual([
         {
@@ -196,8 +186,7 @@ describe("listPullRequestFiles", () => {
       expect(requests).toEqual([
         "https://api.github.com/repos/mengxi-ream/read-frog/pulls/1735/files?per_page=100&page=1",
       ])
-    }
-    finally {
+    } finally {
       globalThis.fetch = originalFetch
     }
   })
@@ -206,33 +195,37 @@ describe("listPullRequestFiles", () => {
 describe("countReviewsOnOthersPullRequestsInRepo", () => {
   it("counts only reviews left on pull requests authored by someone else", async () => {
     const originalFetch = globalThis.fetch
-    globalThis.fetch = async () => new Response(JSON.stringify({
-      data: {
-        search: {
-          nodes: [
-            {
-              __typename: "PullRequest",
-              author: { login: "someone-else" },
+    globalThis.fetch = async () =>
+      new Response(
+        JSON.stringify({
+          data: {
+            search: {
+              nodes: [
+                {
+                  __typename: "PullRequest",
+                  author: { login: "someone-else" },
+                },
+                {
+                  __typename: "PullRequest",
+                  author: { login: "Sufyr" },
+                },
+                {
+                  __typename: "PullRequest",
+                  author: { login: "another-user" },
+                },
+              ],
+              pageInfo: {
+                endCursor: null,
+                hasNextPage: false,
+              },
             },
-            {
-              __typename: "PullRequest",
-              author: { login: "Sufyr" },
-            },
-            {
-              __typename: "PullRequest",
-              author: { login: "another-user" },
-            },
-          ],
-          pageInfo: {
-            endCursor: null,
-            hasNextPage: false,
           },
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
         },
-      },
-    }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    })
+      )
 
     try {
       const count = await countReviewsOnOthersPullRequestsInRepo(
@@ -244,8 +237,7 @@ describe("countReviewsOnOthersPullRequestsInRepo", () => {
       )
 
       expect(count).toBe(2)
-    }
-    finally {
+    } finally {
       globalThis.fetch = originalFetch
     }
   })

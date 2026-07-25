@@ -2,7 +2,10 @@ import { useAtom } from "jotai"
 import { useEffect, useState } from "react"
 import { Slider } from "@/components/ui/base-ui/slider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { MAX_SELECTION_OVERLAY_OPACITY, MIN_SELECTION_OVERLAY_OPACITY } from "@/utils/constants/selection"
+import {
+  MAX_SELECTION_OVERLAY_OPACITY,
+  MIN_SELECTION_OVERLAY_OPACITY,
+} from "@/utils/constants/selection"
 import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
@@ -21,7 +24,7 @@ export function SelectionToolbarOpacity() {
       title={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.opacity.title")}
       description={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.opacity.description")}
     >
-      <div className="w-full flex items-center gap-2">
+      <div className="flex w-full items-center gap-2">
         <Slider
           min={MIN_SELECTION_OVERLAY_OPACITY}
           max={MAX_SELECTION_OVERLAY_OPACITY}
@@ -35,10 +38,7 @@ export function SelectionToolbarOpacity() {
           }}
           className="flex-1"
         />
-        <span className="w-10 text-sm text-right">
-          {draftOpacity}
-          %
-        </span>
+        <span className="w-10 text-right text-sm">{draftOpacity}%</span>
       </div>
     </ConfigCard>
   )

@@ -4,24 +4,14 @@ import { storage } from "#imports"
 import { configSchema } from "@/types/config/config"
 import { isAPIProviderConfig } from "@/types/config/provider"
 import { initI18n } from "@/utils/i18n"
-import { buildDefaultCustomActions, CONFIG_SCHEMA_VERSION, CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "../constants/config"
+import {
+  buildFreshDefaultConfig,
+  CONFIG_SCHEMA_VERSION,
+  CONFIG_STORAGE_KEY,
+  DEFAULT_CONFIG,
+} from "../constants/config"
 import { logger } from "../logger"
 import { runMigration } from "./migration"
-
-/**
- * DEFAULT_CONFIG whose default custom-action strings are resolved against the current
- * i18next language. Callers MUST `await initI18n(...)` first so the persisted strings
- * match the user's `uiLanguage` rather than the module-import-time singleton language.
- */
-function buildFreshDefaultConfig(): Config {
-  return {
-    ...DEFAULT_CONFIG,
-    selectionToolbar: {
-      ...DEFAULT_CONFIG.selectionToolbar,
-      customActions: buildDefaultCustomActions(),
-    },
-  }
-}
 
 /**
  * Initialize the config, this function should only be called once in the background script
@@ -44,8 +34,7 @@ export async function initializeConfig() {
     config = buildFreshDefaultConfig()
     currentVersion = CONFIG_SCHEMA_VERSION
     didConfigChange = true
-  }
-  else {
+  } else {
     config = storedConfig
     currentVersion = configMeta?.schemaVersion ?? 1
   }
@@ -56,8 +45,7 @@ export async function initializeConfig() {
       config = await runMigration(nextVersion, config)
       didConfigChange = true
       currentVersion = nextVersion
-    }
-    catch (error) {
+    } catch (error) {
       console.error(`Migration to version ${nextVersion} failed:`, error)
       currentVersion = nextVersion
     }
@@ -81,9 +69,8 @@ export async function initializeConfig() {
     didConfigChange = didConfigChange || betaResult.changed
   }
 
-  const didMetaNeedUpdate
-    = configMeta?.schemaVersion !== currentVersion
-      || configMeta?.lastModifiedAt === undefined
+  const didMetaNeedUpdate =
+    configMeta?.schemaVersion !== currentVersion || configMeta?.lastModifiedAt === undefined
 
   if (didConfigChange) {
     await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, config)
@@ -97,7 +84,7 @@ export async function initializeConfig() {
   }
 }
 
-function applyAPIKeysFromEnv(config: Config): { config: Config, changed: boolean } {
+function applyAPIKeysFromEnv(config: Config): { config: Config; changed: boolean } {
   let changed = false
 
   const providersConfig = config.providersConfig.map((providerConfig) => {
@@ -131,7 +118,7 @@ function applyAPIKeysFromEnv(config: Config): { config: Config, changed: boolean
   }
 }
 
-function applyDevBetaExperience(config: Config): { config: Config, changed: boolean } {
+function applyDevBetaExperience(config: Config): { config: Config; changed: boolean } {
   if (config.betaExperience.enabled) {
     return { config, changed: false }
   }

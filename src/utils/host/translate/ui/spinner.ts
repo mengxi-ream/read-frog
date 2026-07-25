@@ -1,13 +1,50 @@
 import type { APICallError } from "ai"
+import type { TranslationTextFormat } from "@/types/config/translate"
 import * as React from "react"
 import textSmallCSS from "@/assets/styles/text-small.css?inline"
 import themeCSS from "@/assets/styles/theme.css?inline"
 import { TranslationError } from "@/components/translation/error"
 import { createReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
-import { TRANSLATION_ERROR_CONTAINER_CLASS } from "../../../constants/dom-labels"
+import { isTranslationCancelledError } from "@/utils/request/cancellation"
+import { SPINNER_CLASS, TRANSLATION_ERROR_CONTAINER_CLASS } from "../../../constants/dom-labels"
 import { getContainingShadowRoot, getOwnerDocument } from "../../dom/node"
 import { translateTextForPage } from "../translate-variants"
 import { ensurePresetStyles } from "./style-injector"
+
+/**
+ * Concurrent spin-animation ceiling. Thousands of live WAAPI animations tick
+ * a full-page style recalc every frame and saturate the main thread on long
+ * pages (#1881: 2400+ concurrent spinners measured). Beyond the cap, pending
+ * paragraphs get the static muted ring instead.
+ */
+export const MAX_ANIMATED_SPINNERS = 60
+
+/**
+ * Animation created for each spinner, kept so teardown can cancel it directly.
+ * Element.getAnimations() gets expensive when the document holds thousands of
+ * live animations (10% of CPU samples in the #1881 trace); the stored handle
+ * makes cancellation O(1).
+ */
+const spinnerAnimations = new WeakMap<HTMLElement, Animation>()
+let activeSpinnerAnimationCount = 0
+
+/**
+ * Cancel the spinner's spin animation. A running animation roots its detached
+ * target in the renderer, leaking one node per translated paragraph (#1831),
+ * so every teardown path must call this before dropping the spinner.
+ */
+export function cancelSpinnerAnimation(spinner: HTMLElement): void {
+  const animation = spinnerAnimations.get(spinner)
+  if (animation) {
+    spinnerAnimations.delete(spinner)
+    activeSpinnerAnimationCount = Math.max(0, activeSpinnerAnimationCount - 1)
+    animation.cancel()
+    return
+  }
+  // Fallback for spinners created before this registry existed (or if the
+  // WeakMap entry was lost). jsdom lacks getAnimations, hence the `?.`.
+  spinner.getAnimations?.().forEach((liveAnimation) => liveAnimation.cancel())
+}
 
 /**
  * Create a lightweight spinner element without React/Shadow DOM overhead
@@ -16,7 +53,7 @@ import { ensurePresetStyles } from "./style-injector"
  */
 export function createLightweightSpinner(ownerDoc: Document): HTMLElement {
   const spinner = ownerDoc.createElement("span")
-  spinner.className = "read-frog-spinner"
+  spinner.className = SPINNER_CLASS
   // Inline styles keep the spinner resilient against host page CSS overrides.
   // Use a thin muted arc with transparent sides so bulk page translation does
   // not paint a dense field of high-contrast rings across the screen.
@@ -46,20 +83,22 @@ export function createLightweightSpinner(ownerDoc: Document): HTMLElement {
   const prefersReducedMotion = ownerDoc.defaultView?.matchMedia
     ? ownerDoc.defaultView.matchMedia("(prefers-reduced-motion: reduce)").matches
     : false
-  if (!prefersReducedMotion && spinner.animate) {
-    spinner.animate(
-      [
-        { transform: "rotate(0deg)" },
-        { transform: "rotate(360deg)" },
-      ],
+  if (
+    !prefersReducedMotion &&
+    spinner.animate &&
+    activeSpinnerAnimationCount < MAX_ANIMATED_SPINNERS
+  ) {
+    const animation = spinner.animate(
+      [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
       {
         duration: 600,
         iterations: Infinity,
         easing: "linear",
       },
     )
-  }
-  else {
+    spinnerAnimations.set(spinner, animation)
+    activeSpinnerAnimationCount++
+  } else {
     // For reduced motion or when Web Animations API isn't available,
     // keep a static muted segment so the loading state stays visible
     // without requiring animation.
@@ -83,34 +122,42 @@ export async function getTranslatedTextAndRemoveSpinner(
   textContent: string,
   spinner: HTMLElement,
   translatedWrapperNode: HTMLElement,
+  isCurrent: () => boolean = () => true,
+  textFormat: TranslationTextFormat = "plain",
+  translateRequest: () => Promise<string> = () => translateTextForPage(textContent, textFormat),
 ): Promise<string | undefined> {
   let translatedText: string | undefined
 
   try {
-    translatedText = await translateTextForPage(textContent)
-  }
-  catch (error) {
+    if (!isCurrent()) return undefined
+    translatedText = await translateRequest()
+    if (!isCurrent()) return undefined
+  } catch (error) {
+    // User-cancelled sessions must fail silently: the wrapper is already
+    // detached by stop(), and translationOnly mode passes isCurrent=()=>true,
+    // so rendering an error here would mount a React root on a detached
+    // wrapper (the #1831 leak class).
+    if (isTranslationCancelledError(error)) return undefined
+    if (!isCurrent()) return undefined
+
     const errorComponent = React.createElement(TranslationError, {
       nodes,
       error: error as APICallError,
     })
 
-    const container = createReactShadowHost(
-      errorComponent,
-      {
-        className: TRANSLATION_ERROR_CONTAINER_CLASS,
-        position: "inline",
-        inheritStyles: false,
-        cssContent: [themeCSS, textSmallCSS],
-        style: {
-          verticalAlign: "middle",
-        },
+    const container = createReactShadowHost(errorComponent, {
+      className: TRANSLATION_ERROR_CONTAINER_CLASS,
+      position: "inline",
+      inheritStyles: false,
+      cssContent: [themeCSS, textSmallCSS],
+      style: {
+        verticalAlign: "middle",
       },
-    )
+    })
 
     translatedWrapperNode.appendChild(container)
-  }
-  finally {
+  } finally {
+    cancelSpinnerAnimation(spinner)
     spinner.remove()
   }
 

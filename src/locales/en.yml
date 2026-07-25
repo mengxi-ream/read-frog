@@ -4,6 +4,7 @@ extDescription: Read Frog is an open source browser extension designed to help y
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: Log in
+  webApp: Web app
   logout: Log out
   logoutError: Failed to log out. Please try again.
 dataTypes:
@@ -89,6 +90,9 @@ options:
     product: Product
   tools:
     translationHub: Translation Hub
+  product:
+    roadmap: Roadmap
+    feedback: Feedback
   setAPIKeyWarning:
     please: Please set API Key on
     page: page
@@ -176,9 +180,9 @@ options:
       invalidJson: Invalid JSON format
     providers:
       name:
-        freeAi: Free AI Service
+        builtInAi: Built-in AI
       attribution:
-        freeAi: Provided by Atlas Cloud. Currently only available for Custom AI Actions. To unlock an unrestricted experience, purchase highly cost-effective credits on the official website.
+        builtInAi: Provided by Atlas Cloud. Currently only available for Custom AI Actions. To unlock an unrestricted experience, purchase highly cost-effective credits on the official website.
       description:
         openai: Provides models like GPT-4o
         azure: Azure-hosted OpenAI models through your deployments
@@ -346,6 +350,9 @@ options:
         description: Choose which built-in features to show in the selection toolbar
         translate: Translate
         speak: Speak
+      saveSuggestion:
+        title: Save Suggestions
+        description: After selection translation, suggest words to save to your Notebase
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -745,7 +752,7 @@ options:
         description: Percentage of element visibility required to trigger translation (0-1). Higher values delay translation until more of the element is visible.
     smallParagraphFilter:
       title: Small Paragraph Filter
-      description: Skip translating text nodes with fewer characters or words than the threshold (0 = disabled)
+      description: These global defaults skip translating text nodes with fewer characters or words than the thresholds. Matching site rules can override them (0 = disabled)
       minCharacters:
         title: Minimum Characters
         description: Text nodes with fewer characters than this value will not be translated. Character count includes whitespace.
@@ -784,6 +791,31 @@ options:
       description: Enhance translation quality by providing webpage context to the AI
       enable: Enable AI Smart Context Translation
       enableDescription: AI uses webpage summary to improve translation accuracy. Requires LLM provider. Adds latency when starting to translate a page and increases API costs.
+  siteRules:
+    title: Site Rules
+    description: Per-site rules that adjust how specific websites are translated.
+    userRules:
+      title: User Rules
+      description: Define your own site rules as a JSON array. Rules apply to pages whose URL matches their patterns; user rules take precedence over built-in rules.
+      saveButton: Save
+      savedButton: Saved
+      validation:
+        validating: Validating...
+        valid: Rules are valid
+        syntaxError: JSON has syntax errors
+        notArray: The top-level JSON value must be an array of rules
+        tooLong: Rules document is too long
+        tooMany: Too many rules
+        duplicateIds: Duplicate rule ids
+        schemaErrors: Some rules are invalid
+        moreErrors: ...and $1 more errors
+        saved: All changes saved
+    builtIn:
+      title: Built-in Rules
+      description: Site rules shipped with the extension. Disable a rule with its switch if it causes problems on a site.
+      searchPlaceholder: Search by id, description, or URL pattern
+      showMore: Show more
+      count: Showing $1 of $2 rules
   tts:
     title: Text to Speech
     description: Use Edge TTS voice settings for the Speak button.
@@ -999,6 +1031,15 @@ options:
           webTitle: Webpage title
           webDescription: Webpage description from page metadata
           videoSummary: Video summary (requires AI Smart Context)
+    aiQuota:
+      title: AI Subtitles Quota
+      description: Monthly usage of your AI subtitle transcription quota
+      loginRequired: Log in to view your AI subtitles quota
+      logIn: Log In
+      betaRequired: AI subtitles are in beta and not yet enabled for your account
+      betaApply: Apply for access
+      loadError: Unable to load your quota. Please try again later.
+      summary: Used $1 of $2 minutes, $3 remaining
   whatsNew:
     title: What's New
   rateUs:
@@ -1076,6 +1117,7 @@ action:
   saveToNotebasePendingLogin: Log in to finish saving
   saveToNotebasePendingLoginDescription: After login, Read Frog will create the Notebase and save this result automatically.
   saveToNotebasePendingConnectedLoginDescription: After login, Read Frog will save to the connected Notebase when possible. If this account cannot use it, Read Frog will create a new Notebase and save this result.
+  upgrade: Upgrade
   openCustomActions: Open Custom AI Actions
   openNotebase: Open Notebase
   contextDetailsTitleLabel: Title
@@ -1083,6 +1125,12 @@ action:
   translation: Translation
   speak: Speak
   playing: Playing
+saveSuggestion:
+  title: You might want to save
+  description: Save these words to your Notebase and review them anytime.
+  save: Save
+  saved: Saved
+  staleSuggestion: This suggestion is out of date
 thinking:
   label: Thinking
   complete: Thinking complete
@@ -1091,6 +1139,9 @@ thinking:
 shortcutKeySelector:
   placeholder: Please enter the shortcut
 subtitles:
+  loadingAiSubtitles: Loading AI subtitles…
+  requestAiSubtitles: Request AI subtitles (Beta)
+  usingAiSubtitles: Using AI subtitles
   actions:
     downloadTranslated: Download translated subtitles
     downloadTranslatedPreparing: Preparing subtitles, longer videos may take a while
@@ -1116,6 +1167,8 @@ subtitles:
     aiRateLimited: Too many requests, please try again later
     aiAuthFailed: API authentication failed, please check your API key
     aiServiceUnavailable: Translation service temporarily unavailable
+    aiQuotaExceeded: Monthly AI subtitle quota used up
+    aiRequestFailed: AI subtitle request failed, please try again later
     aiNoResponse: AI service did not respond, using original text
     translatedExportFailed: Failed to generate translated subtitles
     translatedExportIncomplete: Failed to translate all subtitle lines

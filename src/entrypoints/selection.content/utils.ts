@@ -41,18 +41,8 @@ const PARAGRAPH_LIKE_TAGS = new Set([
   "H6",
   "FIGCAPTION",
 ])
-const SEMANTIC_CONTAINER_TAGS = new Set([
-  "ARTICLE",
-  "ASIDE",
-  "BODY",
-  "MAIN",
-  "NAV",
-  "SECTION",
-])
-const PARAGRAPH_DISPLAY_VALUES = new Set([
-  "block",
-  "list-item",
-])
+const SEMANTIC_CONTAINER_TAGS = new Set(["ARTICLE", "ASIDE", "BODY", "MAIN", "NAV", "SECTION"])
+const PARAGRAPH_DISPLAY_VALUES = new Set(["block", "list-item"])
 
 export const CUSTOM_ACTION_CONTEXT_CHAR_LIMIT = 2000
 
@@ -136,8 +126,7 @@ function collectSelectionBoundaryNodes(selection: Selection) {
       const range = selection.getRangeAt(index)
       boundaryNodes.add(range.startContainer)
       boundaryNodes.add(range.endContainer)
-    }
-    catch {
+    } catch {
       break
     }
   }
@@ -202,8 +191,7 @@ function readSelectionRangeSnapshots(selection: Selection | null) {
     for (let index = 0; index < rangeCount; index += 1) {
       try {
         snapshots.push(createRangeSnapshot(selection.getRangeAt(index)))
-      }
-      catch {
+      } catch {
         return snapshots
       }
     }
@@ -213,8 +201,7 @@ function readSelectionRangeSnapshots(selection: Selection | null) {
 
   try {
     snapshots.push(createRangeSnapshot(selection.getRangeAt(0)))
-  }
-  catch {
+  } catch {
     return snapshots
   }
 
@@ -280,14 +267,13 @@ function doesRangeIntersectNode(range: Range, node: Node) {
   const nodeRange = document.createRange()
   if (node instanceof Text) {
     nodeRange.selectNodeContents(node)
-  }
-  else {
+  } else {
     nodeRange.selectNode(node)
   }
 
   return !(
-    range.compareBoundaryPoints(Range.END_TO_START, nodeRange) <= 0
-    || range.compareBoundaryPoints(Range.START_TO_END, nodeRange) >= 0
+    range.compareBoundaryPoints(Range.END_TO_START, nodeRange) <= 0 ||
+    range.compareBoundaryPoints(Range.START_TO_END, nodeRange) >= 0
   )
 }
 
@@ -310,8 +296,7 @@ function findParagraphOwner(node: Node | null): ParagraphOwner | null {
 
     if (SEMANTIC_CONTAINER_TAGS.has(current.tagName)) {
       semanticFallback ??= current
-    }
-    else if (isParagraphLikeDisplay(current)) {
+    } else if (isParagraphLikeDisplay(current)) {
       return current
     }
 
@@ -373,8 +358,7 @@ function collectParagraphOwners(rangeSnapshots: SelectionRangeSnapshot[]) {
 
     try {
       liveRange = toLiveRange(rangeSnapshot)
-    }
-    catch {
+    } catch {
       continue
     }
 
@@ -416,9 +400,7 @@ export function buildContextSnapshot(selection: SelectionSnapshot | null): Conte
     return null
   }
 
-  const paragraphs = collectParagraphOwners(selection.ranges)
-    .map(extractOwnerText)
-    .filter(Boolean)
+  const paragraphs = collectParagraphOwners(selection.ranges).map(extractOwnerText).filter(Boolean)
 
   if (paragraphs.length === 0) {
     return {

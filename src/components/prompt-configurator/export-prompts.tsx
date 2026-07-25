@@ -14,9 +14,9 @@ export function ExportPrompts() {
   const patterns = config.patterns
 
   const sortOutDownloadPrompts = patterns
-    .filter(pattern => selectedPrompts.includes(pattern.id))
+    .filter((pattern) => selectedPrompts.includes(pattern.id))
     .map((pattern) => {
-      const { id, ...patternWithoutId } = pattern
+      const { id: _id, ...patternWithoutId } = pattern
       return patternWithoutId
     })
 

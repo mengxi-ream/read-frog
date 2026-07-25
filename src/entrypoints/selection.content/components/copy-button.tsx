@@ -7,24 +7,25 @@ import { SelectionPopoverTooltip, useSelectionTooltipState } from "./selection-t
 
 export function CopyButton({ text }: { text: string | undefined }) {
   const [copied, setCopied] = useState(false)
-  const { handlePress, onOpenChange: handleTooltipOpenChange, open: tooltipOpen } = useSelectionTooltipState()
+  const {
+    handlePress,
+    onOpenChange: handleTooltipOpenChange,
+    open: tooltipOpen,
+  } = useSelectionTooltipState()
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   useEffect(() => {
     return () => {
-      if (timerRef.current)
-        clearTimeout(timerRef.current)
+      if (timerRef.current) clearTimeout(timerRef.current)
     }
   }, [])
 
   const handleCopy = useCallback(() => {
-    if (!text)
-      return
+    if (!text) return
     void navigator.clipboard.writeText(text)
     setCopied(true)
     handlePress()
-    if (timerRef.current)
-      clearTimeout(timerRef.current)
+    if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(setCopied, 1500, false)
   }, [handlePress, text])
 
@@ -33,17 +34,15 @@ export function CopyButton({ text }: { text: string | undefined }) {
       content={copied ? i18n.t("action.copied") : i18n.t("action.copy")}
       open={tooltipOpen}
       onOpenChange={handleTooltipOpenChange}
-      render={(
+      render={
         <button
           type="button"
           className={cn(buttonVariants({ variant: "ghost-secondary", size: "icon-sm" }))}
           onClick={handleCopy}
         />
-      )}
+      }
     >
-      {copied
-        ? <IconCheck className="text-green-500" />
-        : <IconCopy />}
+      {copied ? <IconCheck className="text-green-500" /> : <IconCopy />}
     </SelectionPopoverTooltip>
   )
 }

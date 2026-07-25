@@ -3,12 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { isAPIProviderConfig } from "@/types/config/provider"
 import { CONFIG_SCHEMA_VERSION, DEFAULT_CONFIG } from "@/utils/constants/config"
 
-const getItemMock = vi.fn()
-const getMetaMock = vi.fn()
-const setItemMock = vi.fn()
-const setMetaMock = vi.fn()
-const runMigrationMock = vi.fn()
-const loggerWarnMock = vi.fn()
+const getItemMock = vi.fn<(...args: any[]) => any>()
+const getMetaMock = vi.fn<(...args: any[]) => any>()
+const setItemMock = vi.fn<(...args: any[]) => any>()
+const setMetaMock = vi.fn<(...args: any[]) => any>()
+const runMigrationMock = vi.fn<(...args: any[]) => any>()
+const loggerWarnMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("#imports", () => ({
   storage: {
@@ -95,11 +95,20 @@ describe("initializeConfig", () => {
 
     expect(setItemMock).toHaveBeenCalledTimes(1)
     expect(setItemMock).toHaveBeenCalledWith("local:config", expect.any(Object))
+    const freshConfig = setItemMock.mock.calls[0]?.[1] as Config
+    for (const providerId of ["openai-default", "deepseek-default", "atlascloud-default"]) {
+      expect(freshConfig.providersConfig.find((provider) => provider.id === providerId)).toEqual(
+        expect.objectContaining({ description: expect.any(String) }),
+      )
+    }
     expect(setMetaMock).toHaveBeenCalledTimes(1)
-    expect(setMetaMock).toHaveBeenCalledWith("local:config", expect.objectContaining({
-      schemaVersion: CONFIG_SCHEMA_VERSION,
-      lastModifiedAt: expect.any(Number),
-    }))
+    expect(setMetaMock).toHaveBeenCalledWith(
+      "local:config",
+      expect.objectContaining({
+        schemaVersion: CONFIG_SCHEMA_VERSION,
+        lastModifiedAt: expect.any(Number),
+      }),
+    )
   })
 
   it("runs migration and persists migrated config once", async () => {
@@ -144,9 +153,12 @@ describe("initializeConfig", () => {
 
     expect(setItemMock).not.toHaveBeenCalled()
     expect(setMetaMock).toHaveBeenCalledTimes(1)
-    expect(setMetaMock).toHaveBeenCalledWith("local:config", expect.objectContaining({
-      schemaVersion: CONFIG_SCHEMA_VERSION,
-      lastModifiedAt: expect.any(Number),
-    }))
+    expect(setMetaMock).toHaveBeenCalledWith(
+      "local:config",
+      expect.objectContaining({
+        schemaVersion: CONFIG_SCHEMA_VERSION,
+        lastModifiedAt: expect.any(Number),
+      }),
+    )
   })
 })

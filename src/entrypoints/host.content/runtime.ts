@@ -14,7 +14,10 @@ import { bindTranslationShortcutKey } from "./translation-control/bind-translati
 import { registerNodeTranslationTriggers } from "./translation-control/node-translation"
 import { PageTranslationManager } from "./translation-control/page-translation"
 
-export async function bootstrapHostContent(ctx: ContentScriptContext, initialConfig: Config | null) {
+export async function bootstrapHostContent(
+  ctx: ContentScriptContext,
+  initialConfig: Config | null,
+) {
   ensurePresetStyles(document)
 
   const cleanupUrlListener = setupUrlChangeListener()
@@ -23,7 +26,8 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
 
   const teardownNodeTranslation = registerNodeTranslationTriggers()
 
-  const preloadConfig = initialConfig?.translate.page.preload ?? DEFAULT_CONFIG.translate.page.preload
+  const preloadConfig =
+    initialConfig?.translate.page.preload ?? DEFAULT_CONFIG.translate.page.preload
   const manager = new PageTranslationManager({
     root: null,
     rootMargin: `${preloadConfig.margin}px`,
@@ -45,8 +49,7 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
   let translationEnabled = false
   try {
     translationEnabled = await sendMessage("getEnablePageTranslationFromContentScript", undefined)
-  }
-  catch (error) {
+  } catch (error) {
     // Extension context may be invalidated during update, proceed without auto-start
     logger.error("Failed to check translation state:", error)
   }
@@ -60,8 +63,7 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
       if (manager.isActive) {
         if (areSamePageTranslationOrigin(from, to)) {
           await manager.restart()
-        }
-        else {
+        } else {
           manager.stop()
         }
       }
@@ -81,25 +83,33 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
   // Listen for translation state changes from background
   const cleanupTranslationStateListener = onMessage("askManagerToTogglePageTranslation", (msg) => {
     const { enabled, analyticsContext } = msg.data
-    if (enabled === manager.isActive)
-      return
-    enabled ? void manager.start(window === window.top ? analyticsContext : undefined) : manager.stop()
+    if (enabled === manager.isActive) return
+    if (enabled) {
+      void manager.start(window === window.top ? analyticsContext : undefined)
+    } else {
+      manager.stop()
+    }
   })
 
-  const cleanupFrameTranslationStateListener = window === window.top
-    ? () => {}
-    : onMessage("notifyTranslationStateChanged", (msg) => {
-        const { enabled } = msg.data
-        if (enabled === manager.isActive)
-          return
-        enabled ? void manager.start() : manager.stop()
-      })
+  const cleanupFrameTranslationStateListener =
+    window === window.top
+      ? () => {}
+      : onMessage("notifyTranslationStateChanged", (msg) => {
+          const { enabled } = msg.data
+          if (enabled === manager.isActive) return
+          if (enabled) {
+            void manager.start()
+          } else {
+            manager.stop()
+          }
+        })
 
-  const cleanupDetectedLanguageRefreshListener = window === window.top
-    ? onMessage("refreshDetectedPageLanguage", () => {
-        void detectAndReportPageLanguage(window.location.href)
-      })
-    : () => {}
+  const cleanupDetectedLanguageRefreshListener =
+    window === window.top
+      ? onMessage("refreshDetectedPageLanguage", () => {
+          void detectAndReportPageLanguage(window.location.href)
+        })
+      : () => {}
 
   ctx.onInvalidated(() => {
     removeHostToast()

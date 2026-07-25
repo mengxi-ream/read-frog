@@ -8,10 +8,9 @@ export function TranslationPanelActions() {
   const selectedProviderIds = useAtomValue(selectedProviderIdsAtom)
   const [expandedById, setExpandedById] = useAtom(translationCardExpandedStateAtom)
 
-  if (selectedProviderIds.length === 0)
-    return null
+  if (selectedProviderIds.length === 0) return null
 
-  const expandedCount = selectedProviderIds.filter(id => expandedById[id] ?? true).length
+  const expandedCount = selectedProviderIds.filter((id) => expandedById[id] ?? true).length
   const areAllExpanded = expandedCount === selectedProviderIds.length
   const areAllCollapsed = expandedCount === 0
 

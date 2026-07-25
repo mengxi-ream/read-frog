@@ -29,7 +29,7 @@ export function DownloadTranslatedSubtitles() {
   return (
     <SubtitlesSettingsItem
       icon={<IconLanguage className="size-4" />}
-      label={(
+      label={
         <div className="flex min-w-0 flex-col">
           <span className="truncate">{title}</span>
           {message && (
@@ -41,15 +41,14 @@ export function DownloadTranslatedSubtitles() {
               {progress !== null && (
                 <>
                   {" "}
-                  (
-                  {progress}
+                  ({progress}
                   %)
                 </>
               )}
             </span>
           )}
         </div>
-      )}
+      }
       labelFor={buttonId}
     >
       <Button
@@ -60,9 +59,11 @@ export function DownloadTranslatedSubtitles() {
         onClick={download}
         disabled={isRunning}
       >
-        {isRunning
-          ? <IconLoader2 className="size-3.5 animate-spin" />
-          : <IconDownload className="size-3.5" />}
+        {isRunning ? (
+          <IconLoader2 className="size-3.5 animate-spin" />
+        ) : (
+          <IconDownload className="size-3.5" />
+        )}
       </Button>
     </SubtitlesSettingsItem>
   )

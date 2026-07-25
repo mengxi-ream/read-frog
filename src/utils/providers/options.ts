@@ -23,8 +23,10 @@ const REASONING_PROVIDER_OPTION_KEYS = new Set([
 ])
 
 function containsOnlyReasoningProviderOptions(options: Record<string, JSONValue>): boolean {
-  return Object.keys(options).length > 0
-    && Object.keys(options).every(key => REASONING_PROVIDER_OPTION_KEYS.has(key))
+  return (
+    Object.keys(options).length > 0 &&
+    Object.keys(options).every((key) => REASONING_PROVIDER_OPTION_KEYS.has(key))
+  )
 }
 
 function normalizeUserProviderOptions(
@@ -58,18 +60,23 @@ function normalizeUserProviderOptions(
  * Detect the recommended provider options for a given model.
  * First match wins - more specific patterns should be placed first in MODEL_OPTIONS.
  */
-export function getRecommendedProviderOptionsMatch(model: string): RecommendedProviderOptionsMatch | undefined {
+export function getRecommendedProviderOptionsMatch(
+  model: string,
+): RecommendedProviderOptionsMatch | undefined {
   for (const [matchIndex, { pattern, options }] of LLM_MODEL_OPTIONS.entries()) {
     if (pattern.test(model)) {
       return { matchIndex, options }
     }
   }
+  return undefined
 }
 
 /**
  * Get the recommended provider options payload without wrapping it by provider id.
  */
-export function getRecommendedProviderOptions(model: string): Record<string, JSONValue> | undefined {
+export function getRecommendedProviderOptions(
+  model: string,
+): Record<string, JSONValue> | undefined {
   return getRecommendedProviderOptionsMatch(model)?.options
 }
 
@@ -109,9 +116,9 @@ export function getProviderOptionsWithOverride(
   }
 
   if (
-    reasoning !== undefined
-    && supportsTopLevelReasoning(provider)
-    && containsOnlyReasoningProviderOptions(recommendedOptions)
+    reasoning !== undefined &&
+    supportsTopLevelReasoning(provider) &&
+    containsOnlyReasoningProviderOptions(recommendedOptions)
   ) {
     return undefined
   }

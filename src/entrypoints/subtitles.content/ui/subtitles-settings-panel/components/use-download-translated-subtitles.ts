@@ -2,10 +2,7 @@ import type { DownloadTranslatedSubtitlesMessageTone } from "./download-translat
 import { useAtomValue } from "jotai"
 import { useEffect, useState } from "react"
 import { i18n } from "@/utils/i18n"
-import {
-  TranslatedDownloadPhase,
-  translatedSubtitlesDownloadStatusAtom,
-} from "../../../atoms"
+import { TranslatedDownloadPhase, translatedSubtitlesDownloadStatusAtom } from "../../../atoms"
 import { useSubtitlesUI } from "../../subtitles-ui-context"
 import {
   DOWNLOAD_TRANSLATED_SUBTITLES_MESSAGE_TONE,
@@ -27,14 +24,15 @@ export function useDownloadTranslatedSubtitles() {
   const status = useAtomValue(translatedSubtitlesDownloadStatusAtom)
   const { downloadTranslatedSubtitles } = useSubtitlesUI()
   const [showPreparingMessage, setShowPreparingMessage] = useState(false)
-  const shouldShowPreparingMessageAfterDelay = status.phase === TranslatedDownloadPhase.Checking
-    || status.phase === TranslatedDownloadPhase.Preparing
+  const shouldShowPreparingMessageAfterDelay =
+    status.phase === TranslatedDownloadPhase.Checking ||
+    status.phase === TranslatedDownloadPhase.Preparing
 
   useEffect(() => {
     if (!shouldShowPreparingMessageAfterDelay) {
       // eslint-disable-next-line react/set-state-in-effect
       setShowPreparingMessage(false)
-      return
+      return undefined
     }
 
     const timeoutId = setTimeout(
@@ -51,15 +49,18 @@ export function useDownloadTranslatedSubtitles() {
 
   const message = {
     [TranslatedDownloadPhase.Preparing]: preparingMessage,
-    [TranslatedDownloadPhase.Translating]: i18n.t("subtitles.actions.downloadTranslatedTranslating"),
+    [TranslatedDownloadPhase.Translating]: i18n.t(
+      "subtitles.actions.downloadTranslatedTranslating",
+    ),
     [TranslatedDownloadPhase.Complete]: i18n.t("subtitles.actions.downloadTranslatedComplete"),
     [TranslatedDownloadPhase.Idle]: null,
     [TranslatedDownloadPhase.Checking]: preparingMessage,
   }[status.phase]
   const messageTone = getMessageTone(status.phase, message)
-  const isRunning = status.phase === TranslatedDownloadPhase.Preparing
-    || status.phase === TranslatedDownloadPhase.Translating
-    || status.phase === TranslatedDownloadPhase.Checking
+  const isRunning =
+    status.phase === TranslatedDownloadPhase.Preparing ||
+    status.phase === TranslatedDownloadPhase.Translating ||
+    status.phase === TranslatedDownloadPhase.Checking
 
   return {
     message,

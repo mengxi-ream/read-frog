@@ -1,12 +1,8 @@
-import { IconLogout } from "@tabler/icons-react"
+import { IconLogout, IconWorld } from "@tabler/icons-react"
 import { useMutation } from "@tanstack/react-query"
 import guest from "@/assets/icons/avatars/guest.svg"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
-import {
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/base-ui/dropdown-menu"
+import { DropdownMenuItem } from "@/components/ui/base-ui/dropdown-menu"
 import { env } from "@/env"
 import { authClient } from "@/utils/auth/auth-client"
 import { i18n } from "@/utils/i18n"
@@ -23,13 +19,13 @@ type AccountMenu = ReturnType<typeof useUserAccountMenu>
 
 function getUserInitials(name: string | null | undefined) {
   const normalizedName = name?.trim()
-  if (!normalizedName)
-    return "U"
+  if (!normalizedName) return "U"
 
   const parts = normalizedName.split(/\s+/)
-  const initials = parts.length > 1
-    ? `${parts[0]?.[0] ?? ""}${parts[parts.length - 1]?.[0] ?? ""}`
-    : Array.from(normalizedName).slice(0, 2).join("")
+  const initials =
+    parts.length > 1
+      ? `${parts[0]?.[0] ?? ""}${parts[parts.length - 1]?.[0] ?? ""}`
+      : Array.from(normalizedName).slice(0, 2).join("")
 
   return initials.toUpperCase()
 }
@@ -38,14 +34,17 @@ export function openLogIn() {
   window.open(`${env.WXT_WEBSITE_URL}/log-in`, "_blank")
 }
 
+export function openWebApp() {
+  window.open(`${env.WXT_WEBSITE_URL}/home`, "_blank")
+}
+
 export function useUserAccountMenu() {
   const { data, isPending } = authClient.useSession()
   const user = data?.user
   const logout = useMutation({
     mutationFn: async () => {
       const { error } = await authClient.signOut()
-      if (error)
-        throw error
+      if (error) throw error
     },
     meta: { errorDescription: i18n.t("account.logoutError") },
   })
@@ -53,8 +52,8 @@ export function useUserAccountMenu() {
   const state: AccountState = isPending
     ? ACCOUNT_STATE.LOADING
     : !user
-        ? ACCOUNT_STATE.GUEST
-        : ACCOUNT_STATE.AUTHED
+      ? ACCOUNT_STATE.GUEST
+      : ACCOUNT_STATE.AUTHED
 
   return {
     state,
@@ -67,7 +66,13 @@ export function useUserAccountMenu() {
   }
 }
 
-export function AccountAvatar({ account, size = "sm" }: { account: AccountMenu, size?: "default" | "sm" | "lg" }) {
+export function AccountAvatar({
+  account,
+  size = "sm",
+}: {
+  account: AccountMenu
+  size?: "default" | "sm" | "lg"
+}) {
   return (
     <Avatar size={size} className={cn(account.isPending && "animate-pulse")}>
       <AvatarImage src={account.avatarSrc || ""} alt={account.displayName} />
@@ -76,37 +81,42 @@ export function AccountAvatar({ account, size = "sm" }: { account: AccountMenu, 
   )
 }
 
-export function AccountDropdownContent({
-  account,
-  align,
-  side,
-}: {
-  account: AccountMenu
-  align: "start" | "end"
-  side: "top" | "bottom"
-}) {
+export function AccountDetails({ account }: { account: AccountMenu }) {
+  return (
+    <div className="flex items-center gap-2 px-1.5 py-1.5">
+      <AccountAvatar account={account} />
+      <div className="grid flex-1 text-left text-sm leading-tight">
+        <span className="truncate font-medium text-foreground">{account.displayName}</span>
+        {account.user?.email && (
+          <span className="truncate text-xs font-normal text-muted-foreground">
+            {account.user.email}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export function WebAppMenuItem() {
+  return (
+    <DropdownMenuItem onClick={openWebApp} className="cursor-pointer transition-colors">
+      <IconWorld aria-hidden />
+      {i18n.t("account.webApp")}
+    </DropdownMenuItem>
+  )
+}
+
+export function LogoutMenuItem({ account }: { account: AccountMenu }) {
   const { logout } = account
   return (
-    <DropdownMenuContent align={align} side={side} className="min-w-56">
-      <div className="flex items-center gap-2 px-1.5 py-1.5">
-        <AccountAvatar account={account} />
-        <div className="grid flex-1 text-left text-sm leading-tight">
-          <span className="truncate font-medium text-foreground">{account.displayName}</span>
-          {account.user?.email && (
-            <span className="truncate text-xs font-normal text-muted-foreground">{account.user.email}</span>
-          )}
-        </div>
-      </div>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem
-        variant="destructive"
-        disabled={logout.isPending}
-        onClick={() => logout.mutate()}
-        className="cursor-pointer transition-colors"
-      >
-        <IconLogout aria-hidden className={cn(logout.isPending && "animate-pulse")} />
-        {i18n.t("account.logout")}
-      </DropdownMenuItem>
-    </DropdownMenuContent>
+    <DropdownMenuItem
+      variant="destructive"
+      disabled={logout.isPending}
+      onClick={() => logout.mutate()}
+      className="cursor-pointer transition-colors"
+    >
+      <IconLogout aria-hidden className={cn(logout.isPending && "animate-pulse")} />
+      {i18n.t("account.logout")}
+    </DropdownMenuItem>
   )
 }

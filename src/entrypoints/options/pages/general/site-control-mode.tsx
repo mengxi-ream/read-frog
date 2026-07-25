@@ -9,15 +9,15 @@ import { PatternsTable } from "../../components/patterns-table"
 export default function SiteControlMode() {
   const [siteControl, setSiteControl] = useAtom(configFieldsAtomMap.siteControl)
 
-  const patternsKey = siteControl.mode === "blacklist"
-    ? "blacklistPatterns" as const
-    : "whitelistPatterns" as const
+  const patternsKey =
+    siteControl.mode === "blacklist"
+      ? ("blacklistPatterns" as const)
+      : ("whitelistPatterns" as const)
   const patterns = siteControl[patternsKey] ?? []
 
   const addPattern = async (pattern: string) => {
     const cleanedPattern = pattern.trim()
-    if (!cleanedPattern || patterns.includes(cleanedPattern))
-      return
+    if (!cleanedPattern || patterns.includes(cleanedPattern)) return
 
     await setSiteControl({
       ...siteControl,
@@ -28,7 +28,7 @@ export default function SiteControlMode() {
   const removePattern = async (pattern: string) => {
     await setSiteControl({
       ...siteControl,
-      [patternsKey]: patterns.filter(p => p !== pattern),
+      [patternsKey]: patterns.filter((p) => p !== pattern),
     })
   }
 

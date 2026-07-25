@@ -35,7 +35,11 @@ vi.mock("@/utils/atoms/config", async (importOriginal) => {
         disabledSelectionToolbarPatterns: [],
         opacity: 100,
         features: {
-          translate: { enabled: true, providerId: "microsoft-translate-default", shortcut: "Alt+T" },
+          translate: {
+            enabled: true,
+            providerId: "microsoft-translate-default",
+            shortcut: "Alt+T",
+          },
           speak: { enabled: true },
         },
         customActions: [],
@@ -109,6 +113,30 @@ describe("selectionToolbar - external selection source", () => {
     const session = store.get(selectionSessionAtom)
     expect(session?.contextSnapshot.paragraphs).toEqual([EXTERNAL_PAYLOAD.text])
     expect(session?.contextSnapshot.text).toBe(EXTERNAL_PAYLOAD.text)
+  })
+
+  it("repositions repeated selections using top-frame viewport coordinates", async () => {
+    vi.spyOn(window, "scrollX", "get").mockReturnValue(100)
+    vi.spyOn(window, "scrollY", "get").mockReturnValue(200)
+    render(<SelectionToolbar />)
+
+    await dispatchExternalOpen(EXTERNAL_PAYLOAD)
+
+    const toolbar = document.querySelector<HTMLElement>(".absolute.z-2147483647")
+    await waitFor(() => {
+      expect(toolbar).toHaveStyle({ left: "240px", top: "158px" })
+    })
+
+    await dispatchExternalOpen({
+      ...EXTERNAL_PAYLOAD,
+      requestId: "req-2",
+      anchor: { x: 80, y: 90 },
+      direction: "top-left",
+    })
+
+    await waitFor(() => {
+      expect(toolbar).toHaveStyle({ left: "80px", top: "70px" })
+    })
   })
 
   it("hides the toolbar and clears the session on the external clear event", async () => {

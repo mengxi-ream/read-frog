@@ -1,8 +1,15 @@
 import { browser } from "#imports"
 import { translationStateSchema } from "@/types/translation-state"
-import { parseTabIdFromStorageKey, TRANSLATION_STATE_KEY_PREFIX } from "@/utils/constants/storage-keys"
+import {
+  parseTabIdFromStorageKey,
+  TRANSLATION_STATE_KEY_PREFIX,
+} from "@/utils/constants/storage-keys"
 import { logger } from "@/utils/logger"
-import { getPageTranslationEnabled } from "./page-translation-state"
+import {
+  getPageTranslationEnabled,
+  getPageTranslationState,
+  isPageTranslationStateInUrlScope,
+} from "./page-translation-state"
 
 type ActionIconSize = 16 | 32 | 48
 type ActionIconPathMap = Record<ActionIconSize, string>
@@ -45,6 +52,23 @@ export function registerActionIconListeners() {
       }),
     )
   })
+
+  browser.webNavigation.onCommitted.addListener(async (details) => {
+    if (details.frameId !== 0) return
+
+    try {
+      const state = await getPageTranslationState(details.tabId)
+      await updateActionIconForPageTranslation(
+        details.tabId,
+        isPageTranslationStateInUrlScope(state, details.url),
+      )
+    } catch (error) {
+      logger.warn("Failed to restore action icon after navigation", {
+        error,
+        tabId: details.tabId,
+      })
+    }
+  })
 }
 
 export async function initializeActionIcons() {
@@ -58,8 +82,7 @@ export async function initializeActionIcons() {
 
       try {
         await updateActionIconForPageTranslation(tab.id, await getPageTranslationEnabled(tab.id))
-      }
-      catch (error) {
+      } catch (error) {
         logger.warn("Failed to initialize action icon for tab", { error, tabId: tab.id })
       }
     }),

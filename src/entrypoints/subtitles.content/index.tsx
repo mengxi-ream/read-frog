@@ -14,8 +14,7 @@ export default defineContentScript({
   allFrames: true,
   cssInjectionMode: "manifest",
   async main(ctx) {
-    if (window.__READ_FROG_SUBTITLES_INJECTED__)
-      return
+    if (window.__READ_FROG_SUBTITLES_INJECTED__) return
     window.__READ_FROG_SUBTITLES_INJECTED__ = true
 
     const config = await getLocalConfig()
@@ -31,6 +30,6 @@ export default defineContentScript({
     })
 
     const { bootstrapSubtitlesRuntime } = await import("./runtime")
-    await bootstrapSubtitlesRuntime()
+    bootstrapSubtitlesRuntime()
   },
 })

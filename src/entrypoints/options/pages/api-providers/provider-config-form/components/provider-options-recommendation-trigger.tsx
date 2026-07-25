@@ -84,14 +84,14 @@ export function ProviderOptionsRecommendationTrigger({
       hasMountedRef.current = true
       previousProviderIdRef.current = providerId
       previousMatchIndexRef.current = recommendation?.matchIndex
-      return
+      return undefined
     }
 
     if (previousProviderIdRef.current !== providerId) {
       previousProviderIdRef.current = providerId
       previousMatchIndexRef.current = recommendation?.matchIndex
       stopFlashing()
-      return
+      return undefined
     }
 
     if (previousMatchIndexRef.current !== recommendation?.matchIndex) {
@@ -110,6 +110,7 @@ export function ProviderOptionsRecommendationTrigger({
 
       stopFlashing()
     }
+    return undefined
   }, [providerId, recommendation])
 
   if (!recommendation) {
@@ -124,31 +125,31 @@ export function ProviderOptionsRecommendationTrigger({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
-        render={(
+        render={
           <Button
             type="button"
             variant="ghost"
             size="icon-xs"
             aria-label={i18n.t("options.apiProviders.form.providerOptionsRecommendationTrigger")}
             className={cn(
-              "text-muted-foreground hover:text-foreground transition-colors duration-700 ease-in-out",
+              "text-muted-foreground transition-colors duration-700 ease-in-out hover:text-foreground",
               isFlashing && "text-primary",
             )}
           />
-        )}
+        }
       >
         <Icon icon="tabler:sparkles" className="size-3.5" />
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 gap-3">
         <PopoverHeader>
-          <PopoverTitle>{i18n.t("options.apiProviders.form.providerOptionsRecommendationTitle")}</PopoverTitle>
-          <PopoverDescription>{i18n.t("options.apiProviders.form.providerOptionsRecommendationDescription")}</PopoverDescription>
+          <PopoverTitle>
+            {i18n.t("options.apiProviders.form.providerOptionsRecommendationTitle")}
+          </PopoverTitle>
+          <PopoverDescription>
+            {i18n.t("options.apiProviders.form.providerOptionsRecommendationDescription")}
+          </PopoverDescription>
         </PopoverHeader>
-        <JSONCodeEditor
-          value={recommendationJson}
-          editable={false}
-          height="132px"
-        />
+        <JSONCodeEditor value={recommendationJson} editable={false} height="132px" />
         <div className="flex justify-end">
           <Button
             type="button"

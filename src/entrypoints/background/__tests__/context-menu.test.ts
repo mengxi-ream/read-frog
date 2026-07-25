@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { browser, storage } from "#imports"
 import { i18n } from "@/utils/i18n"
 
-const sendMessageMock = vi.fn()
-const ensureInitializedConfigMock = vi.fn()
+const sendMessageMock = vi.fn<(...args: any[]) => any>()
+const ensureInitializedConfigMock = vi.fn<(...args: any[]) => any>()
 const contextMenuClickListeners: Array<(info: any, tab?: any) => Promise<void> | void> = []
 
 vi.mock("@/utils/message", () => ({
@@ -16,14 +16,14 @@ vi.mock("../config", () => ({
 }))
 
 function createConfig(enabled: boolean): Config {
-  return ({
+  return {
     contextMenu: {
       enabled,
     },
     selectionToolbar: {
       customActions: [],
     },
-  } as unknown) as Config
+  } as unknown as Config
 }
 
 describe("background context menu", () => {
@@ -31,34 +31,42 @@ describe("background context menu", () => {
     contextMenuClickListeners.length = 0
     vi.clearAllMocks()
 
-    browser.contextMenus.create = vi.fn()
-    browser.contextMenus.removeAll = vi.fn().mockResolvedValue(undefined)
-    browser.contextMenus.update = vi.fn().mockResolvedValue(undefined)
-    browser.contextMenus.onClicked.addListener = vi.fn((listener) => {
+    browser.contextMenus.create = vi.fn<(...args: any[]) => any>()
+    browser.contextMenus.removeAll = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
+    browser.contextMenus.update = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
+    browser.contextMenus.onClicked.addListener = vi.fn<(...args: any[]) => any>((listener) => {
       contextMenuClickListeners.push(listener as (info: any, tab?: any) => Promise<void> | void)
     })
 
-    browser.tabs.query = vi.fn().mockResolvedValue([{ id: 1 }])
-    browser.tabs.onActivated.addListener = vi.fn()
-    browser.tabs.onUpdated.addListener = vi.fn()
-    browser.storage.session.onChanged.addListener = vi.fn()
+    browser.tabs.query = vi.fn<(...args: any[]) => any>().mockResolvedValue([{ id: 1 }])
+    browser.tabs.onActivated.addListener = vi.fn<(...args: any[]) => any>()
+    browser.tabs.onUpdated.addListener = vi.fn<(...args: any[]) => any>()
+    browser.storage.session.onChanged.addListener = vi.fn<(...args: any[]) => any>()
 
-    storage.watch = vi.fn()
-    storage.getItem = vi.fn().mockResolvedValue({ enabled: true })
-    storage.setItem = vi.fn().mockResolvedValue(undefined)
+    storage.watch = vi.fn<(...args: any[]) => any>()
+    storage.getItem = vi.fn<(...args: any[]) => any>().mockResolvedValue({ enabled: true })
+    storage.setItem = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
 
-    i18n.t = vi.fn((key: string) => ({
-      "contextMenu.translate": "Translate",
-      "contextMenu.translateSelection": "Translate \"%s\"",
-      "contextMenu.readAloudSelection": "Read aloud \"%s\"",
-      "contextMenu.showOriginal": "Show Original",
-    })[key] ?? key) as typeof i18n.t
+    i18n.t = vi.fn<(...args: any[]) => any>(
+      (key: string) =>
+        ({
+          "contextMenu.translate": "Translate",
+          "contextMenu.translateSelection": 'Translate "%s"',
+          "contextMenu.readAloudSelection": 'Read aloud "%s"',
+          "contextMenu.showOriginal": "Show Original",
+        })[key] ?? key,
+    ) as typeof i18n.t
   })
 
   it("creates page and selection menu items when the context menu is enabled", async () => {
     ensureInitializedConfigMock.mockResolvedValue(createConfig(true))
 
-    const { initializeContextMenu, MENU_ID_SELECTION_TRANSLATE, MENU_ID_TRANSLATE, MENU_ID_SELECTION_READ_ALOUD } = await import("../context-menu")
+    const {
+      initializeContextMenu,
+      MENU_ID_SELECTION_TRANSLATE,
+      MENU_ID_TRANSLATE,
+      MENU_ID_SELECTION_READ_ALOUD,
+    } = await import("../context-menu")
 
     await initializeContextMenu()
 
@@ -70,12 +78,12 @@ describe("background context menu", () => {
     })
     expect(browser.contextMenus.create).toHaveBeenNthCalledWith(2, {
       id: MENU_ID_SELECTION_TRANSLATE,
-      title: "Translate \"%s\"",
+      title: 'Translate "%s"',
       contexts: ["selection"],
     })
     expect(browser.contextMenus.create).toHaveBeenNthCalledWith(3, {
       id: MENU_ID_SELECTION_READ_ALOUD,
-      title: "Read aloud \"%s\"",
+      title: 'Read aloud "%s"',
       contexts: ["selection"],
     })
     expect(browser.contextMenus.update).toHaveBeenCalledWith(MENU_ID_TRANSLATE, {
@@ -92,10 +100,8 @@ describe("background context menu", () => {
     ] as Config["selectionToolbar"]["customActions"]
     ensureInitializedConfigMock.mockResolvedValue(config)
 
-    const {
-      initializeContextMenu,
-      MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX,
-    } = await import("../context-menu")
+    const { initializeContextMenu, MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX } =
+      await import("../context-menu")
 
     await initializeContextMenu()
 
@@ -124,7 +130,8 @@ describe("background context menu", () => {
   })
 
   it("routes selection menu clicks to the matching tab and frame", async () => {
-    const { MENU_ID_SELECTION_TRANSLATE, registerContextMenuListeners } = await import("../context-menu")
+    const { MENU_ID_SELECTION_TRANSLATE, registerContextMenuListeners } =
+      await import("../context-menu")
 
     registerContextMenuListeners()
 
@@ -133,13 +140,16 @@ describe("background context menu", () => {
       throw new Error("Context menu click listener was not registered")
     }
 
-    await clickHandler({
-      menuItemId: MENU_ID_SELECTION_TRANSLATE,
-      selectionText: "Selected text",
-      frameId: 7,
-    }, {
-      id: 5,
-    })
+    await clickHandler(
+      {
+        menuItemId: MENU_ID_SELECTION_TRANSLATE,
+        selectionText: "Selected text",
+        frameId: 7,
+      },
+      {
+        id: 5,
+      },
+    )
 
     expect(sendMessageMock).toHaveBeenCalledWith(
       "openSelectionTranslationFromContextMenu",
@@ -149,7 +159,8 @@ describe("background context menu", () => {
   })
 
   it("routes read aloud menu clicks to the matching tab and frame", async () => {
-    const { MENU_ID_SELECTION_READ_ALOUD, registerContextMenuListeners } = await import("../context-menu")
+    const { MENU_ID_SELECTION_READ_ALOUD, registerContextMenuListeners } =
+      await import("../context-menu")
 
     registerContextMenuListeners()
 
@@ -158,13 +169,16 @@ describe("background context menu", () => {
       throw new Error("Context menu click listener was not registered")
     }
 
-    await clickHandler({
-      menuItemId: MENU_ID_SELECTION_READ_ALOUD,
-      selectionText: "Selected text",
-      frameId: 4,
-    }, {
-      id: 2,
-    })
+    await clickHandler(
+      {
+        menuItemId: MENU_ID_SELECTION_READ_ALOUD,
+        selectionText: "Selected text",
+        frameId: 4,
+      },
+      {
+        id: 2,
+      },
+    )
 
     expect(sendMessageMock).toHaveBeenCalledWith(
       "readAloudSelectionFromContextMenu",
@@ -174,10 +188,8 @@ describe("background context menu", () => {
   })
 
   it("routes custom action menu clicks to the matching tab and frame", async () => {
-    const {
-      MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX,
-      registerContextMenuListeners,
-    } = await import("../context-menu")
+    const { MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX, registerContextMenuListeners } =
+      await import("../context-menu")
 
     registerContextMenuListeners()
 
@@ -186,13 +198,16 @@ describe("background context menu", () => {
       throw new Error("Context menu click listener was not registered")
     }
 
-    await clickHandler({
-      menuItemId: `${MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX}dictionary`,
-      selectionText: "Selected text",
-      frameId: 7,
-    }, {
-      id: 5,
-    })
+    await clickHandler(
+      {
+        menuItemId: `${MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX}dictionary`,
+        selectionText: "Selected text",
+        frameId: 7,
+      },
+      {
+        id: 5,
+      },
+    )
 
     expect(sendMessageMock).toHaveBeenCalledWith(
       "openSelectionCustomActionFromContextMenu",

@@ -4,6 +4,7 @@ extDescription: Read Frog es una extensión de navegador de código abierto dise
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: Iniciar sesión
+  webApp: Aplicación web
   logout: Cerrar sesión
   logoutError: No se pudo cerrar sesión. Inténtalo de nuevo.
 dataTypes:
@@ -89,6 +90,9 @@ options:
     product: Producto
   tools:
     translationHub: Centro de traducción
+  product:
+    roadmap: Hoja de ruta
+    feedback: Comentarios
   setAPIKeyWarning:
     please: Configura la clave API en
     page: página
@@ -176,9 +180,9 @@ options:
       invalidJson: Formato JSON no válido
     providers:
       name:
-        freeAi: Servicio AI gratuito
+        builtInAi: IA integrada
       attribution:
-        freeAi: Proporcionado por Atlas Cloud. Actualmente solo está disponible para acciones de IA personalizadas. Para desbloquear una experiencia sin restricciones, compra créditos muy rentables en el sitio web oficial.
+        builtInAi: Proporcionado por Atlas Cloud. Actualmente solo está disponible para acciones de IA personalizadas. Para desbloquear una experiencia sin restricciones, compra créditos muy rentables en el sitio web oficial.
       description:
         openai: Proporciona modelos como GPT-4o
         azure: Modelos OpenAI hospedados en Azure mediante tus implementaciones
@@ -346,6 +350,9 @@ options:
         description: Elige qué funciones integradas mostrar en la barra de selección
         translate: Traducir
         speak: Leer en voz alta
+      saveSuggestion:
+        title: Sugerencias de guardado
+        description: Después de traducir una selección, sugerir palabras para guardar en tu Notebase
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -745,7 +752,7 @@ options:
         description: Porcentaje de visibilidad del elemento requerido para activar la traducción (0-1). Los valores más altos retrasan la traducción hasta que sea visible una mayor parte del elemento.
     smallParagraphFilter:
       title: Filtro de párrafos pequeños
-      description: Omitir la traducción de nodos de texto con menos caracteres o palabras que el umbral (0 = desactivado)
+      description: Estos valores predeterminados globales omiten la traducción de nodos de texto con menos caracteres o palabras que los umbrales. Las reglas de sitio coincidentes pueden anularlos (0 = desactivado)
       minCharacters:
         title: Caracteres mínimos
         description: Los nodos de texto con menos caracteres que este valor no se traducirán. El recuento de caracteres incluye espacios en blanco.
@@ -784,6 +791,31 @@ options:
       description: Mejora la calidad de la traducción proporcionando contexto de la página web a la AI
       enable: Activar traducción con contexto inteligente de IA
       enableDescription: La AI usa el resumen de la página web para mejorar la precisión de traducción. Requiere proveedor LLM. Añade latencia al empezar a traducir una página y aumenta los costes de API.
+  siteRules:
+    title: Reglas de sitio
+    description: Reglas por sitio que ajustan cómo se traducen determinados sitios web.
+    userRules:
+      title: Reglas de usuario
+      description: Define tus propias reglas de sitio como un array JSON. Las reglas se aplican a las páginas cuya URL coincide con sus patrones; las reglas de usuario tienen prioridad sobre las integradas.
+      saveButton: Guardar
+      savedButton: Guardado
+      validation:
+        validating: Validando...
+        valid: Las reglas son válidas
+        syntaxError: El JSON tiene errores de sintaxis
+        notArray: El valor JSON de nivel superior debe ser un array de reglas
+        tooLong: El documento de reglas es demasiado largo
+        tooMany: Demasiadas reglas
+        duplicateIds: Ids de regla duplicados
+        schemaErrors: Algunas reglas no son válidas
+        moreErrors: ...y $1 errores más
+        saved: Todos los cambios guardados
+    builtIn:
+      title: Reglas integradas
+      description: Reglas de sitio incluidas con la extensión. Desactiva una regla con su interruptor si causa problemas en un sitio.
+      searchPlaceholder: Buscar por id, descripción o patrón de URL
+      showMore: Mostrar más
+      count: Mostrando $1 de $2 reglas
   tts:
     title: Texto a voz
     description: Usa la configuración de voz de Edge TTS para el botón Leer en voz alta.
@@ -999,6 +1031,15 @@ options:
           webTitle: Título de la página web
           webDescription: Descripción de la página web desde los metadatos
           videoSummary: Resumen del video (requiere contexto inteligente de IA)
+    aiQuota:
+      title: Cuota de subtítulos con IA
+      description: Uso mensual de tu cuota de transcripción de subtítulos con IA
+      loginRequired: Inicia sesión para ver tu cuota de subtítulos con IA
+      logIn: Iniciar sesión
+      betaRequired: Los subtítulos con IA están en beta y aún no están habilitados para tu cuenta
+      betaApply: Solicitar acceso
+      loadError: No se pudo cargar tu cuota. Inténtalo de nuevo más tarde.
+      summary: Usados $1 de $2 minutos, quedan $3
   whatsNew:
     title: Novedades
   rateUs:
@@ -1076,6 +1117,7 @@ action:
   saveToNotebasePendingLogin: Inicia sesión para terminar de guardar
   saveToNotebasePendingLoginDescription: Después de iniciar sesión, Read Frog creará la Notebase y guardará este resultado automáticamente.
   saveToNotebasePendingConnectedLoginDescription: Después de iniciar sesión, Read Frog guardará en la Notebase conectada si es posible. Si esta cuenta no puede usarla, creará una nueva Notebase y guardará este resultado.
+  upgrade: Mejorar plan
   openCustomActions: Abrir Custom AI Actions
   openNotebase: Abrir Notebase
   contextDetailsTitleLabel: Título
@@ -1083,6 +1125,12 @@ action:
   translation: Traducción
   speak: Leer en voz alta
   playing: Reproduciendo
+saveSuggestion:
+  title: Quizás quieras guardar
+  description: Guarda estas palabras en tu Notebase y repásalas cuando quieras.
+  save: Guardar
+  saved: Guardado
+  staleSuggestion: Esta sugerencia está desactualizada
 thinking:
   label: Pensando
   complete: Razonamiento completo
@@ -1091,6 +1139,9 @@ thinking:
 shortcutKeySelector:
   placeholder: Introduce el atajo
 subtitles:
+  loadingAiSubtitles: Cargando subtítulos con IA…
+  requestAiSubtitles: Solicitar subtítulos con IA (Beta)
+  usingAiSubtitles: Usando subtítulos con IA
   actions:
     downloadTranslated: Descargar subtítulos traducidos
     downloadTranslatedPreparing: Preparando subtítulos, los videos largos pueden tardar más
@@ -1116,6 +1167,8 @@ subtitles:
     aiRateLimited: Demasiadas solicitudes, inténtalo de nuevo más tarde
     aiAuthFailed: Error de autenticación de API; revisa tu clave API
     aiServiceUnavailable: Servicio de traducción temporalmente no disponible
+    aiQuotaExceeded: Cuota mensual de subtítulos con IA agotada
+    aiRequestFailed: Error al solicitar subtítulos con IA, inténtalo de nuevo más tarde
     aiNoResponse: El servicio AI no respondió; se usa el texto original
     translatedExportFailed: No se pudieron generar los subtítulos traducidos
     translatedExportIncomplete: No se pudieron traducir todas las líneas de subtítulos

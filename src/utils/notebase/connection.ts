@@ -30,7 +30,7 @@ export function isConnectedNotebaseInList(
   connection: SelectionToolbarCustomActionNotebaseConnection | undefined,
   notebases: readonly { id: string }[] | undefined,
 ) {
-  return !!connection && !!notebases?.some(notebase => notebase.id === connection.notebaseId)
+  return !!connection && !!notebases?.some((notebase) => notebase.id === connection.notebaseId)
 }
 
 export function classifyConnectedNotebaseOwnership({
@@ -82,7 +82,7 @@ export function sanitizeCustomActionNotebaseConnection(
     return undefined
   }
 
-  const outputFieldIds = new Set(outputSchema.map(field => field.id))
+  const outputFieldIds = new Set(outputSchema.map((field) => field.id))
   const connectedAccount = createNotebaseConnectedAccountSnapshot(connection.connectedAccount)
   if (!connectedAccount) {
     return undefined
@@ -91,27 +91,34 @@ export function sanitizeCustomActionNotebaseConnection(
   const mappingIds = new Set<string>()
   const localFieldIds = new Set<string>()
   const notebaseColumnIds = new Set<string>()
-  const mappings = connection.mappings.filter((mapping) => {
-    if (!outputFieldIds.has(mapping.localFieldId)) {
-      return false
-    }
+  const mappings = connection.mappings
+    .filter((mapping) => {
+      if (!outputFieldIds.has(mapping.localFieldId)) {
+        return false
+      }
 
-    if (!mapping.localFieldId.trim() || !mapping.notebaseColumnId.trim()) {
-      return false
-    }
+      if (!mapping.localFieldId.trim() || !mapping.notebaseColumnId.trim()) {
+        return false
+      }
 
-    if (mappingIds.has(mapping.id) || localFieldIds.has(mapping.localFieldId) || notebaseColumnIds.has(mapping.notebaseColumnId)) {
-      return false
-    }
+      if (
+        mappingIds.has(mapping.id) ||
+        localFieldIds.has(mapping.localFieldId) ||
+        notebaseColumnIds.has(mapping.notebaseColumnId)
+      ) {
+        return false
+      }
 
-    mappingIds.add(mapping.id)
-    localFieldIds.add(mapping.localFieldId)
-    notebaseColumnIds.add(mapping.notebaseColumnId)
-    return true
-  }).map(mapping => ({
-    ...mapping,
-    notebaseColumnNameSnapshot: mapping.notebaseColumnNameSnapshot.trim() || mapping.notebaseColumnId,
-  }))
+      mappingIds.add(mapping.id)
+      localFieldIds.add(mapping.localFieldId)
+      notebaseColumnIds.add(mapping.notebaseColumnId)
+      return true
+    })
+    .map((mapping) => ({
+      ...mapping,
+      notebaseColumnNameSnapshot:
+        mapping.notebaseColumnNameSnapshot.trim() || mapping.notebaseColumnId,
+    }))
 
   return {
     notebaseId,
@@ -121,9 +128,14 @@ export function sanitizeCustomActionNotebaseConnection(
   }
 }
 
-export function sanitizeSelectionToolbarCustomAction(action: SelectionToolbarCustomAction): SelectionToolbarCustomAction {
+export function sanitizeSelectionToolbarCustomAction(
+  action: SelectionToolbarCustomAction,
+): SelectionToolbarCustomAction {
   return {
     ...action,
-    notebaseConnection: sanitizeCustomActionNotebaseConnection(action.notebaseConnection, action.outputSchema),
+    notebaseConnection: sanitizeCustomActionNotebaseConnection(
+      action.notebaseConnection,
+      action.outputSchema,
+    ),
   }
 }

@@ -1,12 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import {
-  ANALYTICS_FEATURE,
-  ANALYTICS_SURFACE,
-} from "@/types/analytics"
+import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 
 const { sendMessageMock, loggerWarnMock } = vi.hoisted(() => ({
-  sendMessageMock: vi.fn(),
-  loggerWarnMock: vi.fn(),
+  sendMessageMock: vi.fn<(...args: any[]) => any>(),
+  loggerWarnMock: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/message", () => ({
@@ -19,11 +16,8 @@ vi.mock("@/utils/logger", () => ({
   },
 }))
 
-const {
-  buildFeatureUsedEventProperties,
-  getLatencyMs,
-  trackFeatureUsed,
-} = await import("@/utils/analytics")
+const { buildFeatureUsedEventProperties, getLatencyMs, trackFeatureUsed } =
+  await import("@/utils/analytics")
 
 describe("analytics helpers", () => {
   beforeEach(() => {
@@ -38,36 +32,48 @@ describe("analytics helpers", () => {
   })
 
   it("builds a feature_used payload with only the expected fields", () => {
-    expect(buildFeatureUsedEventProperties({
-      feature: ANALYTICS_FEATURE.PAGE_TRANSLATION,
-      surface: ANALYTICS_SURFACE.POPUP,
-      outcome: "success",
-      startedAt: 0,
-      finishedAt: 1_500,
-    })).toEqual({
+    expect(
+      buildFeatureUsedEventProperties({
+        feature: ANALYTICS_FEATURE.PAGE_TRANSLATION,
+        surface: ANALYTICS_SURFACE.POPUP,
+        outcome: "success",
+        startedAt: 0,
+        finishedAt: 1_500,
+        provider: "openai",
+        backend_kind: "llm",
+      }),
+    ).toEqual({
       feature: ANALYTICS_FEATURE.PAGE_TRANSLATION,
       surface: ANALYTICS_SURFACE.POPUP,
       outcome: "success",
       latency_ms: 1_500,
+      provider: "openai",
+      backend_kind: "llm",
     })
   })
 
   it("includes optional custom action metadata when provided", () => {
-    expect(buildFeatureUsedEventProperties({
-      feature: ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
-      surface: ANALYTICS_SURFACE.CONTEXT_MENU,
-      outcome: "success",
-      startedAt: 100,
-      finishedAt: 600,
-      action_id: "dictionary",
-      action_name: "Dictionary",
-    })).toEqual({
+    expect(
+      buildFeatureUsedEventProperties({
+        feature: ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
+        surface: ANALYTICS_SURFACE.CONTEXT_MENU,
+        outcome: "success",
+        startedAt: 100,
+        finishedAt: 600,
+        action_id: "dictionary",
+        action_name: "Dictionary",
+        provider: "read-frog-built-in-ai",
+        backend_kind: "llm",
+      }),
+    ).toEqual({
       feature: ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
       surface: ANALYTICS_SURFACE.CONTEXT_MENU,
       outcome: "success",
       latency_ms: 500,
       action_id: "dictionary",
       action_name: "Dictionary",
+      provider: "read-frog-built-in-ai",
+      backend_kind: "llm",
     })
   })
 
@@ -80,6 +86,8 @@ describe("analytics helpers", () => {
       outcome: "success" as const,
       startedAt: 0,
       finishedAt: 1_500,
+      provider: "openai" as const,
+      backend_kind: "llm" as const,
     }
 
     await expect(trackFeatureUsed(input)).resolves.toBeUndefined()
@@ -94,13 +102,17 @@ describe("analytics helpers", () => {
   it("swallows analytics upload failures", async () => {
     sendMessageMock.mockRejectedValueOnce(new Error("upload failed"))
 
-    await expect(trackFeatureUsed({
-      feature: ANALYTICS_FEATURE.PAGE_TRANSLATION,
-      surface: ANALYTICS_SURFACE.POPUP,
-      outcome: "failure",
-      startedAt: 0,
-      finishedAt: 1_500,
-    })).resolves.toBeUndefined()
+    await expect(
+      trackFeatureUsed({
+        feature: ANALYTICS_FEATURE.PAGE_TRANSLATION,
+        surface: ANALYTICS_SURFACE.POPUP,
+        outcome: "failure",
+        startedAt: 0,
+        finishedAt: 1_500,
+        provider: "openai",
+        backend_kind: "llm",
+      }),
+    ).resolves.toBeUndefined()
 
     expect(loggerWarnMock).toHaveBeenCalledOnce()
   })

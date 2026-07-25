@@ -6,11 +6,10 @@ import { Provider as JotaiProvider } from "jotai"
 import { useHydrateAtoms } from "jotai/utils"
 import * as React from "react"
 import { HashRouter } from "react-router"
-import FrogToast from "@/components/frog-toast"
-import { HelpButton } from "@/components/help-button"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { RecoveryBoundary } from "@/components/recovery/recovery-boundary"
 import { SidebarProvider } from "@/components/ui/base-ui/sidebar"
+import { AnchoredToastProvider, ToastProvider } from "@/components/ui/base-ui/toast"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { configAtom } from "@/utils/atoms/config"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
@@ -24,6 +23,7 @@ import { applyTheme, getLocalThemeMode, isDarkMode } from "@/utils/theme"
 import App from "./app"
 import { AppSidebar } from "./app-sidebar"
 import { SettingsSearch } from "./command-palette/settings-search"
+import "@fontsource-variable/onest/index.css"
 import "@/assets/styles/theme.css"
 import "./style.css"
 
@@ -31,10 +31,7 @@ function HydrateAtoms({
   initialValues,
   children,
 }: {
-  initialValues: [
-    [typeof configAtom, Config],
-    [typeof baseThemeModeAtom, ThemeMode],
-  ]
+  initialValues: [[typeof configAtom, Config], [typeof baseThemeModeAtom, ThemeMode]]
   children: React.ReactNode
 }) {
   useHydrateAtoms(initialValues)
@@ -45,33 +42,38 @@ async function initApp() {
   const root = document.getElementById("root")!
   root.className = "antialiased bg-background"
 
-  const [configValue, themeMode] = await Promise.all([
-    getLocalConfig(),
-    getLocalThemeMode(),
-  ])
+  const [configValue, themeMode] = await Promise.all([getLocalConfig(), getLocalThemeMode()])
   const config = configValue ?? DEFAULT_CONFIG
 
   await initI18n(config.uiLanguage)
 
   applyTheme(document.documentElement, isDarkMode(themeMode) ? "dark" : "light")
 
-  renderPersistentReactRoot(root, (
+  renderPersistentReactRoot(
+    root,
     <React.StrictMode>
       <JotaiProvider>
-        <HydrateAtoms initialValues={[[configAtom, config], [baseThemeModeAtom, themeMode]]}>
+        <HydrateAtoms
+          initialValues={[
+            [configAtom, config],
+            [baseThemeModeAtom, themeMode],
+          ]}
+        >
           <QueryClientProvider client={queryClient}>
             <HashRouter>
               <SidebarProvider>
                 <ThemeProvider>
                   <TooltipProvider>
-                    <FrogToast />
                     <LocaleBoundary>
-                      <RecoveryBoundary>
-                        <AppSidebar />
-                        <App />
-                        <HelpButton />
-                        <SettingsSearch />
-                      </RecoveryBoundary>
+                      <ToastProvider>
+                        <AnchoredToastProvider>
+                          <RecoveryBoundary>
+                            <AppSidebar />
+                            <App />
+                            <SettingsSearch />
+                          </RecoveryBoundary>
+                        </AnchoredToastProvider>
+                      </ToastProvider>
                     </LocaleBoundary>
                   </TooltipProvider>
                 </ThemeProvider>
@@ -80,8 +82,8 @@ async function initApp() {
           </QueryClientProvider>
         </HydrateAtoms>
       </JotaiProvider>
-    </React.StrictMode>
-  ))
+    </React.StrictMode>,
+  )
 }
 
 void initApp()

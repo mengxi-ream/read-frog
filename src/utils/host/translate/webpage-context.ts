@@ -26,20 +26,16 @@ async function extractWebpageContent(): Promise<string> {
       useAsync: false,
     }).parse()
 
-    if (result.contentMarkdown)
-      return result.contentMarkdown
-    if (result.content)
-      return createMarkdownContent(result.content, window.location.href)
-  }
-  catch (error) {
+    if (result.contentMarkdown) return result.contentMarkdown
+    if (result.content) return createMarkdownContent(result.content, window.location.href)
+  } catch (error) {
     logger.warn("Defuddle parsing failed, falling back to body text:", error)
   }
   return document.body?.textContent || ""
 }
 
 export async function getOrCreateWebPageContext(): Promise<CachedWebPageContext | null> {
-  if (typeof window === "undefined" || typeof document === "undefined")
-    return null
+  if (typeof window === "undefined" || typeof document === "undefined") return null
 
   const currentUrl = window.location.href
   if (cachedWebPageContext?.url === currentUrl) {

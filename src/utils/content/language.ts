@@ -3,14 +3,17 @@ import type { BackgroundGenerateTextPayload } from "@/types/background-generate-
 import type { LLMProviderConfig } from "@/types/config/provider"
 import { langCodeISO6393Schema } from "@read-frog/definitions"
 import { franc } from "franc"
-import { toast } from "sonner"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { getLocalConfig } from "@/utils/config/storage"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
-import { getLanguageDetectionSystemPrompt, parseDetectedLanguageCode } from "@/utils/prompts/language-detection"
+import {
+  getLanguageDetectionSystemPrompt,
+  parseDetectedLanguageCode,
+} from "@/utils/prompts/language-detection"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { getTopLevelReasoning } from "@/utils/providers/reasoning"
@@ -61,17 +64,15 @@ export async function detectLanguageWithSource(
     try {
       const maxLength = options.maxLengthForLLM ?? DEFAULT_MAX_LENGTH_FOR_LLM
       const textForLLM = cleanText(trimmedText, maxLength)
-      const llmResult = await detectLanguageWithLLM(
-        textForLLM,
-        options?.providerConfig,
-      )
+      const llmResult = await detectLanguageWithLLM(textForLLM, options?.providerConfig)
       if (llmResult && llmResult !== "und") {
         return { code: llmResult, source: "llm" }
       }
-    }
-    catch (error) {
+    } catch (error) {
       logger.warn("LLM detection failed, falling back to franc:", error)
-      toast.warning(i18n.t("languageDetection.llmFailed"), {
+      toastManager.add({
+        type: "warning",
+        title: i18n.t("languageDetection.llmFailed"),
         id: LLM_DETECTION_FALLBACK_TOAST_ID,
       })
     }
@@ -137,27 +138,33 @@ export async function detectLanguageWithLLM(
         logger.info("No LLM provider configured for language detection")
         return null
       }
-      const globalProvider = getProviderConfigById(
-        globalConfig.providersConfig,
-        ldProviderId,
-      )
+      const globalProvider = getProviderConfigById(globalConfig.providersConfig, ldProviderId)
       if (!globalProvider || !isLLMProviderConfig(globalProvider)) {
         logger.info("No LLM provider configured for page translation")
         return null
       }
       config = globalProvider
-    }
-    catch (error) {
+    } catch (error) {
       logger.error("Failed to get global config for language detection:", error)
       return null
     }
   }
 
   try {
-    const { model: providerModel, provider, providerOptions: userProviderOptions, temperature } = config
+    const {
+      model: providerModel,
+      provider,
+      providerOptions: userProviderOptions,
+      temperature,
+    } = config
     const reasoning = getTopLevelReasoning(config)
     const modelName = resolveModelId(providerModel)
-    const providerOptions = getProviderOptionsWithOverride(modelName ?? "", provider, userProviderOptions, reasoning)
+    const providerOptions = getProviderOptionsWithOverride(
+      modelName ?? "",
+      provider,
+      userProviderOptions,
+      reasoning,
+    )
     const payload: BackgroundGenerateTextPayload = {
       providerId: config.id,
       instructions: getLanguageDetectionSystemPrompt(),
@@ -177,11 +184,8 @@ export async function detectLanguageWithLLM(
           logger.info(`LLM language detection succeeded on attempt ${attempt}: ${detectedCode}`)
           return detectedCode
         }
-        else {
-          logger.warn(`LLM returned invalid language code on attempt ${attempt}: "${response.text}"`)
-        }
-      }
-      catch (error) {
+        logger.warn(`LLM returned invalid language code on attempt ${attempt}: "${response.text}"`)
+      } catch (error) {
         logger.error(`LLM language detection attempt ${attempt}/${MAX_ATTEMPTS} failed:`, error)
       }
 
@@ -190,8 +194,7 @@ export async function detectLanguageWithLLM(
         return null
       }
     }
-  }
-  catch (error) {
+  } catch (error) {
     logger.error("Failed to get model for language detection:", error)
     return null
   }

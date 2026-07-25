@@ -18,7 +18,7 @@ vi.mock("@/components/llm-providers/provider-selector", () => ({
     providers: ProviderConfig[]
     value: string
   }) => {
-    const nextProvider = providers.find(provider => provider.id !== value)
+    const nextProvider = providers.find((provider) => provider.id !== value)
 
     return (
       <button
@@ -54,8 +54,8 @@ describe("selectionToolbarFooterContent", () => {
   ]
 
   it("renders the provider selector and forwards footer actions", async () => {
-    const onProviderChange = vi.fn()
-    const onRegenerate = vi.fn()
+    const onProviderChange = vi.fn<(...args: any[]) => any>()
+    const onRegenerate = vi.fn<(...args: any[]) => any>()
 
     render(
       <TooltipProvider>
@@ -84,7 +84,9 @@ describe("selectionToolbarFooterContent", () => {
     expect(screen.getByText("Page Title")).toBeInTheDocument()
     expect(screen.getByText("Context text")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Save to Notebase" })).toBeInTheDocument()
-    const contextPreview = screen.getByText("Context text").closest("[data-slot='selection-toolbar-footer-preview-value']")
+    const contextPreview = screen
+      .getByText("Context text")
+      .closest("[data-slot='selection-toolbar-footer-preview-value']")
 
     expect(contextPreview).toHaveClass("max-h-36", "overflow-y-auto", "break-words")
     expect(contextPreview?.className).toContain("[overflow-wrap:anywhere]")
@@ -105,8 +107,8 @@ describe("selectionToolbarFooterContent", () => {
           providers={providers}
           titleText=""
           value="google-translate-default"
-          onProviderChange={vi.fn()}
-          onRegenerate={vi.fn()}
+          onProviderChange={vi.fn<(...args: any[]) => any>()}
+          onRegenerate={vi.fn<(...args: any[]) => any>()}
         />
       </TooltipProvider>,
     )

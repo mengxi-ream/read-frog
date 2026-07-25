@@ -10,9 +10,9 @@
  */
 
 const HOTKEY_MIGRATION: Record<string, string> = {
-  "Control": "control",
-  "Alt": "alt",
-  "Shift": "shift",
+  Control: "control",
+  Alt: "alt",
+  Shift: "shift",
   "`": "backtick",
 }
 

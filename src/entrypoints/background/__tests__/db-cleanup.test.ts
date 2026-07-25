@@ -1,25 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-const alarmsGetMock = vi.fn()
-const alarmsCreateMock = vi.fn()
-const alarmsAddListenerMock = vi.fn()
+const alarmsGetMock = vi.fn<(...args: any[]) => any>()
+const alarmsCreateMock = vi.fn<(...args: any[]) => any>()
+const alarmsAddListenerMock = vi.fn<(...args: any[]) => any>()
 
-const translationDeleteMock = vi.fn()
-const translationWhereMock = vi.fn()
+const translationDeleteMock = vi.fn<(...args: any[]) => any>()
+const translationWhereMock = vi.fn<(...args: any[]) => any>()
 
-const requestCountMock = vi.fn()
-const requestOrderByToArrayMock = vi.fn()
-const requestOrderByLimitMock = vi.fn()
-const requestOrderByMock = vi.fn()
-const requestBulkDeleteMock = vi.fn()
-const requestDeleteByAgeMock = vi.fn()
-const requestWhereMock = vi.fn()
+const requestCountMock = vi.fn<(...args: any[]) => any>()
+const requestOrderByToArrayMock = vi.fn<(...args: any[]) => any>()
+const requestOrderByLimitMock = vi.fn<(...args: any[]) => any>()
+const requestOrderByMock = vi.fn<(...args: any[]) => any>()
+const requestBulkDeleteMock = vi.fn<(...args: any[]) => any>()
+const requestDeleteByAgeMock = vi.fn<(...args: any[]) => any>()
+const requestWhereMock = vi.fn<(...args: any[]) => any>()
 
-const summaryDeleteMock = vi.fn()
-const summaryWhereMock = vi.fn()
+const summaryDeleteMock = vi.fn<(...args: any[]) => any>()
+const summaryWhereMock = vi.fn<(...args: any[]) => any>()
 
-const loggerInfoMock = vi.fn()
-const loggerErrorMock = vi.fn()
+const loggerInfoMock = vi.fn<(...args: any[]) => any>()
+const loggerErrorMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("#imports", () => ({
   browser: {
@@ -49,21 +49,21 @@ vi.mock("@/utils/db/dexie/db", () => ({
   db: {
     translationCache: {
       where: translationWhereMock,
-      clear: vi.fn(),
+      clear: vi.fn<(...args: any[]) => any>(),
     },
     batchRequestRecord: {
       count: requestCountMock,
       orderBy: requestOrderByMock,
       bulkDelete: requestBulkDeleteMock,
       where: requestWhereMock,
-      clear: vi.fn(),
+      clear: vi.fn<(...args: any[]) => any>(),
     },
     articleSummaryCache: {
       where: summaryWhereMock,
-      clear: vi.fn(),
+      clear: vi.fn<(...args: any[]) => any>(),
     },
     aiSegmentationCache: {
-      clear: vi.fn(),
+      clear: vi.fn<(...args: any[]) => any>(),
     },
   },
 }))
@@ -140,9 +140,11 @@ describe("setUpDatabaseCleanup", () => {
 
   it("runs only the matching cleanup handler for each alarm", async () => {
     let alarmListener: ((alarm: { name: string }) => Promise<void>) | undefined
-    alarmsAddListenerMock.mockImplementation((listener: (alarm: { name: string }) => Promise<void>) => {
-      alarmListener = listener
-    })
+    alarmsAddListenerMock.mockImplementation(
+      (listener: (alarm: { name: string }) => Promise<void>) => {
+        alarmListener = listener
+      },
+    )
 
     const {
       setUpDatabaseCleanup,

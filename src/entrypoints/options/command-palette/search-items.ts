@@ -16,13 +16,15 @@ type SearchItemDefinition = Omit<SearchItem, "titleKey" | "descriptionKey" | "pa
   pageKey: I18nKey
 }
 
-const TTS_SEARCH_ITEMS: SearchItemDefinition[] = [{
-  sectionId: "tts-config",
-  route: "/tts",
-  titleKey: "options.tts.title",
-  descriptionKey: "options.tts.description",
-  pageKey: "options.tts.title",
-}]
+const TTS_SEARCH_ITEMS: SearchItemDefinition[] = [
+  {
+    sectionId: "tts-config",
+    route: "/tts",
+    titleKey: "options.tts.title",
+    descriptionKey: "options.tts.description",
+    pageKey: "options.tts.title",
+  },
+]
 
 const CONFIG_SEARCH_ITEMS = [
   {
@@ -229,6 +231,22 @@ export const SEARCH_ITEMS: SearchItem[] = [
     titleKey: "options.general.clearCache.title",
     descriptionKey: "options.general.clearCache.description",
     pageKey: "options.translation.title",
+  },
+
+  // Site Rules page
+  {
+    sectionId: "site-rules-user-rules",
+    route: "/site-rules",
+    titleKey: "options.siteRules.userRules.title",
+    descriptionKey: "options.siteRules.userRules.description",
+    pageKey: "options.siteRules.title",
+  },
+  {
+    sectionId: "site-rules-built-in",
+    route: "/site-rules",
+    titleKey: "options.siteRules.builtIn.title",
+    descriptionKey: "options.siteRules.builtIn.description",
+    pageKey: "options.siteRules.title",
   },
 
   // Floating Button page

@@ -13,10 +13,17 @@ import {
 } from "@/components/ui/base-ui/select"
 import { isLLMProviderConfig, isPureTranslateProviderConfig } from "@/types/config/provider"
 import { i18n } from "@/utils/i18n"
-import { getProviderLogo, getProviderName, isProviderSelectorItem } from "@/utils/providers/provider-display"
+import {
+  getProviderLogo,
+  getProviderName,
+  isProviderSelectorItem,
+} from "@/utils/providers/provider-display"
 import { useTheme } from "../providers/theme-provider"
 
-type ProviderSelectorLabelKey = "translateService.builtInModels" | "translateService.llmModels" | "translateService.normalTranslator"
+type ProviderSelectorLabelKey =
+  | "translateService.builtInModels"
+  | "translateService.llmModels"
+  | "translateService.normalTranslator"
 type ProviderSelectorTriggerSize = ComponentProps<typeof SelectTrigger>["size"]
 
 export interface ProviderSelectorGroup {
@@ -31,16 +38,21 @@ interface ProviderSelectorProps {
   placeholder?: string
   className?: string
   triggerSize?: ProviderSelectorTriggerSize
-  selectContentProps?: Pick<ComponentProps<typeof SelectContent>, "container" | "positionerClassName">
+  selectContentProps?: Pick<
+    ComponentProps<typeof SelectContent>,
+    "container" | "positionerClassName"
+  >
 }
 
-export function getProviderSelectorGroups(providers: ProviderSelectorOption[]): ProviderSelectorGroup[] {
+export function getProviderSelectorGroups(
+  providers: ProviderSelectorOption[],
+): ProviderSelectorGroup[] {
   const builtInProviders = providers.filter(isProviderSelectorItem)
-  const llmProviders = providers.filter(provider =>
-    !isProviderSelectorItem(provider) && isLLMProviderConfig(provider),
+  const llmProviders = providers.filter(
+    (provider) => !isProviderSelectorItem(provider) && isLLMProviderConfig(provider),
   )
-  const pureTranslateProviders = providers.filter(provider =>
-    !isProviderSelectorItem(provider) && isPureTranslateProviderConfig(provider),
+  const pureTranslateProviders = providers.filter(
+    (provider) => !isProviderSelectorItem(provider) && isPureTranslateProviderConfig(provider),
   )
 
   const groups: ProviderSelectorGroup[] = [
@@ -49,7 +61,7 @@ export function getProviderSelectorGroups(providers: ProviderSelectorOption[]): 
     { labelKey: "translateService.normalTranslator", providers: pureTranslateProviders },
   ]
 
-  return groups.filter(group => group.providers.length > 0)
+  return groups.filter((group) => group.providers.length > 0)
 }
 
 export default function ProviderSelector({
@@ -62,7 +74,7 @@ export default function ProviderSelector({
   selectContentProps,
 }: ProviderSelectorProps) {
   const { theme } = useTheme()
-  const currentProvider = providers.find(p => p.id === value)
+  const currentProvider = providers.find((p) => p.id === value)
   const providerGroups = getProviderSelectorGroups(providers)
 
   if (providerGroups.length > 1) {
@@ -110,33 +122,43 @@ function GroupedSelect({
   placeholder?: string
   className?: string
   triggerSize: ProviderSelectorTriggerSize
-  selectContentProps?: Pick<ComponentProps<typeof SelectContent>, "container" | "positionerClassName">
+  selectContentProps?: Pick<
+    ComponentProps<typeof SelectContent>,
+    "container" | "positionerClassName"
+  >
   theme: Theme
 }) {
   return (
     <Select<ProviderSelectorOption>
       value={currentProvider}
       onValueChange={(provider) => {
-        if (!provider)
-          return
+        if (!provider) return
         onChange(provider.id)
       }}
-      itemToStringValue={p => p.id}
+      itemToStringValue={(p) => p.id}
     >
       <SelectTrigger className={className} size={triggerSize}>
         <SelectValue placeholder={placeholder}>
           {(provider: ProviderSelectorOption) => (
-            <ProviderIcon logo={getProviderLogo(provider, theme)} name={getProviderName(provider)} size="sm" />
+            <ProviderIcon
+              logo={getProviderLogo(provider, theme)}
+              name={getProviderName(provider)}
+              size="sm"
+            />
           )}
         </SelectValue>
       </SelectTrigger>
       <SelectContent className="min-w-fit" {...selectContentProps}>
-        {providerGroups.map(group => (
+        {providerGroups.map((group) => (
           <SelectGroup key={group.labelKey}>
             <SelectLabel>{i18n.t(group.labelKey)}</SelectLabel>
-            {group.providers.map(provider => (
+            {group.providers.map((provider) => (
               <SelectItem key={provider.id} value={provider}>
-                <ProviderIcon logo={getProviderLogo(provider, theme)} name={getProviderName(provider)} size="sm" />
+                <ProviderIcon
+                  logo={getProviderLogo(provider, theme)}
+                  name={getProviderName(provider)}
+                  size="sm"
+                />
               </SelectItem>
             ))}
           </SelectGroup>
@@ -162,32 +184,42 @@ function UngroupedSelect({
   placeholder?: string
   className?: string
   triggerSize: ProviderSelectorTriggerSize
-  selectContentProps?: Pick<ComponentProps<typeof SelectContent>, "container" | "positionerClassName">
+  selectContentProps?: Pick<
+    ComponentProps<typeof SelectContent>,
+    "container" | "positionerClassName"
+  >
   theme: Theme
 }) {
   return (
     <Select<ProviderSelectorOption>
       value={currentProvider}
       onValueChange={(provider) => {
-        if (!provider)
-          return
+        if (!provider) return
         onChange(provider.id)
       }}
-      itemToStringValue={p => p.id}
+      itemToStringValue={(p) => p.id}
       disabled={providers.length === 0}
     >
       <SelectTrigger className={className} size={triggerSize}>
         <SelectValue placeholder={placeholder}>
           {(provider: ProviderSelectorOption) => (
-            <ProviderIcon logo={getProviderLogo(provider, theme)} name={getProviderName(provider)} size="sm" />
+            <ProviderIcon
+              logo={getProviderLogo(provider, theme)}
+              name={getProviderName(provider)}
+              size="sm"
+            />
           )}
         </SelectValue>
       </SelectTrigger>
       <SelectContent className="min-w-fit" {...selectContentProps}>
         <SelectGroup>
-          {providers.map(provider => (
+          {providers.map((provider) => (
             <SelectItem key={provider.id} value={provider}>
-              <ProviderIcon logo={getProviderLogo(provider, theme)} name={getProviderName(provider)} size="sm" />
+              <ProviderIcon
+                logo={getProviderLogo(provider, theme)}
+                name={getProviderName(provider)}
+                size="sm"
+              />
             </SelectItem>
           ))}
         </SelectGroup>

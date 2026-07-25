@@ -4,6 +4,7 @@ extDescription: Read Frog — расширение браузера с откр�
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: Войти
+  webApp: Веб-приложение
   logout: Выйти
   logoutError: Не удалось выйти. Попробуйте ещё раз.
 dataTypes:
@@ -89,6 +90,9 @@ options:
     product: Продукт
   tools:
     translationHub: Центр переводов
+  product:
+    roadmap: Дорожная карта
+    feedback: Обратная связь
   setAPIKeyWarning:
     please: Пожалуйста, установите API-ключ на странице
     page: настроек
@@ -175,9 +179,9 @@ options:
       invalidJson: Неверный формат JSON
     providers:
       name:
-        freeAi: Бесплатный ИИ-сервис
+        builtInAi: Встроенный ИИ
       attribution:
-        freeAi: Предоставлено Atlas Cloud. Сейчас доступно только для пользовательских AI-действий. Чтобы открыть неограниченный опыт, купите выгодные кредиты на официальном сайте.
+        builtInAi: Предоставлено Atlas Cloud. Сейчас доступно только для пользовательских AI-действий. Чтобы открыть неограниченный опыт, купите выгодные кредиты на официальном сайте.
       description:
         openai: Предоставляет модели, такие как GPT-4o
         azure: Модели OpenAI в Azure через ваши развертывания
@@ -345,6 +349,9 @@ options:
         description: Выберите, какие встроенные функции показывать в панели выделения
         translate: Перевод
         speak: Озвучивание
+      saveSuggestion:
+        title: Предложения по сохранению
+        description: После перевода выделенного текста предлагать слова для сохранения в Notebase
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -630,7 +637,7 @@ options:
         description: Процент видимости элемента, необходимый для запуска перевода (0-1). Более высокие значения откладывают перевод до тех пор, пока больше элемента не станет видимым.
     smallParagraphFilter:
       title: Фильтр коротких текстов
-      description: Пропускать перевод текстовых узлов с меньшим количеством символов или слов, чем порог (0 = отключено)
+      description: Эти глобальные значения по умолчанию позволяют пропускать перевод текстовых узлов, в которых меньше символов или слов, чем задано порогами. Подходящие правила сайта могут переопределить их (0 = отключено)
       minCharacters:
         title: Минимальное количество символов
         description: Текстовые узлы с меньшим количеством символов не будут переведены. Количество символов включает пробелы.
@@ -669,6 +676,31 @@ options:
       description: Улучшайте качество перевода, предоставляя ИИ контекст веб-страницы
       enable: Включить умный контекстный перевод ИИ
       enableDescription: ИИ использует резюме веб-страницы для повышения точности перевода. Требуется LLM-провайдер. Добавляет задержку при начале перевода страницы и увеличивает затраты на API.
+  siteRules:
+    title: Правила сайтов
+    description: Правила для отдельных сайтов, настраивающие перевод конкретных веб-сайтов.
+    userRules:
+      title: Пользовательские правила
+      description: Определите собственные правила сайтов в виде JSON-массива. Правила применяются к страницам, URL которых совпадает с шаблонами; пользовательские правила имеют приоритет над встроенными.
+      saveButton: Сохранить
+      savedButton: Сохранено
+      validation:
+        validating: Проверка...
+        valid: Правила корректны
+        syntaxError: JSON содержит синтаксические ошибки
+        notArray: Значение верхнего уровня JSON должно быть массивом правил
+        tooLong: Документ с правилами слишком длинный
+        tooMany: Слишком много правил
+        duplicateIds: Повторяющиеся id правил
+        schemaErrors: Некоторые правила некорректны
+        moreErrors: ...и ещё $1 ошибок
+        saved: Все изменения сохранены
+    builtIn:
+      title: Встроенные правила
+      description: Правила сайтов, поставляемые с расширением. Если правило вызывает проблемы на сайте, отключите его переключателем.
+      searchPlaceholder: Поиск по id, описанию или шаблону URL
+      showMore: Показать ещё
+      count: Показано $1 из $2 правил
   tts:
     title: Синтез речи
     description: Настройте кнопку озвучивания с параметрами голоса Edge TTS.
@@ -884,6 +916,15 @@ options:
           webTitle: Заголовок веб-страницы
           webDescription: Описание веб-страницы из метаданных
           videoSummary: Краткое содержание видео (требуется умный контекст ИИ)
+    aiQuota:
+      title: Лимит ИИ-субтитров
+      description: Использование вашего месячного лимита транскрипции ИИ-субтитров
+      loginRequired: Войдите, чтобы посмотреть лимит ИИ-субтитров
+      logIn: Войти
+      betaRequired: ИИ-субтитры находятся в бете и пока недоступны для вашего аккаунта
+      betaApply: Подать заявку на доступ
+      loadError: Не удалось загрузить лимит. Повторите попытку позже.
+      summary: Использовано $1 из $2 минут, осталось $3
   whatsNew:
     title: Что нового
   rateUs:
@@ -961,6 +1002,7 @@ action:
   saveToNotebasePendingLogin: Войдите, чтобы завершить сохранение
   saveToNotebasePendingLoginDescription: После входа Read Frog автоматически создаст Notebase и сохранит этот результат.
   saveToNotebasePendingConnectedLoginDescription: После входа Read Frog сохранит в подключённую Notebase, если это возможно. Если аккаунт не может её использовать, будет создана новая Notebase.
+  upgrade: Повысить тариф
   openCustomActions: Открыть Custom AI Actions
   openNotebase: Открыть Notebase
   contextDetailsTitleLabel: Заголовок
@@ -968,6 +1010,12 @@ action:
   translation: Перевод
   speak: Озвучить
   playing: Воспроизведение
+saveSuggestion:
+  title: Стоит сохранить
+  description: Сохраните эти слова в Notebase, чтобы повторять их в любое время.
+  save: Сохранить
+  saved: Сохранено
+  staleSuggestion: Это предложение устарело
 thinking:
   label: Размышление
   complete: Размышление завершено
@@ -976,6 +1024,9 @@ thinking:
 shortcutKeySelector:
   placeholder: Пожалуйста, введите горячую клавишу
 subtitles:
+  loadingAiSubtitles: Загрузка ИИ-субтитров…
+  requestAiSubtitles: Запросить ИИ-субтитры (Beta)
+  usingAiSubtitles: Используются ИИ-субтитры
   actions:
     downloadTranslated: Скачать переведённые субтитры
     downloadTranslatedPreparing: Подготовка субтитров, длинные видео могут занять больше времени
@@ -1001,6 +1052,8 @@ subtitles:
     aiRateLimited: Слишком много запросов, пожалуйста, повторите позже
     aiAuthFailed: Ошибка аутентификации API, проверьте ваш API ключ
     aiServiceUnavailable: Служба перевода временно недоступна
+    aiQuotaExceeded: Месячный лимит ИИ-субтитров исчерпан
+    aiRequestFailed: Не удалось запросить ИИ-субтитры, повторите попытку позже
     aiNoResponse: Служба AI не ответила, отображается оригинальный текст
     translatedExportFailed: Не удалось создать переведённые субтитры
     translatedExportIncomplete: Не удалось перевести все строки субтитров

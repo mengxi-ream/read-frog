@@ -4,6 +4,7 @@ extDescription: Read Frog là tiện ích mở rộng trình duyệt mã nguồn
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: Đăng nhập
+  webApp: Ứng dụng web
   logout: Đăng xuất
   logoutError: Đăng xuất thất bại. Vui lòng thử lại.
 dataTypes:
@@ -89,6 +90,9 @@ options:
     product: Sản phẩm
   tools:
     translationHub: Trung tâm Dịch thuật
+  product:
+    roadmap: Lộ trình
+    feedback: Phản hồi
   setAPIKeyWarning:
     please: Vui lòng đặt API Key trên trang
     page: cài đặt
@@ -175,9 +179,9 @@ options:
       invalidJson: Định dạng JSON không hợp lệ
     providers:
       name:
-        freeAi: Dịch vụ AI miễn phí
+        builtInAi: AI tích hợp
       attribution:
-        freeAi: Được cung cấp bởi Atlas Cloud. Hiện chỉ khả dụng cho Hành động AI tùy chỉnh. Để mở khóa trải nghiệm không giới hạn, bạn có thể mua tín dụng có chi phí rất hiệu quả trên trang web chính thức.
+        builtInAi: Được cung cấp bởi Atlas Cloud. Hiện chỉ khả dụng cho Hành động AI tùy chỉnh. Để mở khóa trải nghiệm không giới hạn, bạn có thể mua tín dụng có chi phí rất hiệu quả trên trang web chính thức.
       description:
         openai: Cung cấp các mô hình như GPT-4o
         azure: Mô hình OpenAI lưu trữ trên Azure qua các bản triển khai của bạn
@@ -345,6 +349,9 @@ options:
         description: Chọn các tính năng tích hợp để hiển thị trên thanh công cụ chọn văn bản
         translate: Dịch
         speak: Đọc
+      saveSuggestion:
+        title: Gợi ý lưu
+        description: Sau khi dịch vùng chọn, gợi ý các từ để lưu vào Notebase
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -630,7 +637,7 @@ options:
         description: Tỷ lệ phần trăm hiển thị của phần tử cần thiết để kích hoạt dịch (0-1). Giá trị cao hơn sẽ trì hoãn dịch cho đến khi nhiều phần tử hơn được hiển thị.
     smallParagraphFilter:
       title: Bộ lọc văn bản ngắn
-      description: Bỏ qua dịch các nút văn bản có ít ký tự hoặc từ hơn ngưỡng (0 = tắt)
+      description: Các giá trị mặc định toàn cục này bỏ qua việc dịch các nút văn bản có ít ký tự hoặc từ hơn ngưỡng. Quy tắc trang web phù hợp có thể ghi đè chúng (0 = tắt)
       minCharacters:
         title: Số ký tự tối thiểu
         description: Các nút văn bản có ít ký tự hơn giá trị này sẽ không được dịch. Số ký tự bao gồm khoảng trắng.
@@ -669,6 +676,31 @@ options:
       description: Nâng cao chất lượng dịch bằng cách cung cấp ngữ cảnh trang web cho AI
       enable: Bật dịch ngữ cảnh thông minh AI
       enableDescription: AI sử dụng tóm tắt trang web để cải thiện độ chính xác dịch. Yêu cầu nhà cung cấp LLM. Thêm độ trễ khi bắt đầu dịch trang và tăng chi phí API.
+  siteRules:
+    title: Quy tắc trang web
+    description: Quy tắc theo từng trang web để điều chỉnh cách dịch các trang web cụ thể.
+    userRules:
+      title: Quy tắc của người dùng
+      description: Định nghĩa quy tắc trang web của riêng bạn dưới dạng mảng JSON. Quy tắc áp dụng cho các trang có URL khớp với mẫu; quy tắc của người dùng được ưu tiên hơn quy tắc tích hợp.
+      saveButton: Lưu
+      savedButton: Đã lưu
+      validation:
+        validating: Đang xác thực...
+        valid: Quy tắc hợp lệ
+        syntaxError: JSON có lỗi cú pháp
+        notArray: Giá trị JSON cấp cao nhất phải là một mảng quy tắc
+        tooLong: Tài liệu quy tắc quá dài
+        tooMany: Quá nhiều quy tắc
+        duplicateIds: Trùng lặp id quy tắc
+        schemaErrors: Một số quy tắc không hợp lệ
+        moreErrors: ...và $1 lỗi nữa
+        saved: Tất cả thay đổi đã được lưu
+    builtIn:
+      title: Quy tắc tích hợp
+      description: Quy tắc trang web đi kèm với tiện ích mở rộng. Nếu một quy tắc gây ra sự cố trên trang web, hãy tắt nó bằng công tắc.
+      searchPlaceholder: Tìm theo id, mô tả hoặc mẫu URL
+      showMore: Hiển thị thêm
+      count: Đang hiển thị $1 / $2 quy tắc
   tts:
     title: Chuyển văn bản thành giọng nói
     description: Tùy chỉnh nút Đọc với cài đặt giọng nói Edge TTS.
@@ -884,6 +916,15 @@ options:
           webTitle: Tiêu đề trang web
           webDescription: Mô tả trang web từ siêu dữ liệu trang
           videoSummary: Tóm tắt video (yêu cầu Ngữ cảnh thông minh AI)
+    aiQuota:
+      title: Hạn mức phụ đề AI
+      description: Mức sử dụng hạn mức chuyển lời phụ đề AI trong tháng của bạn
+      loginRequired: Đăng nhập để xem hạn mức phụ đề AI của bạn
+      logIn: Đăng nhập
+      betaRequired: Phụ đề AI đang ở giai đoạn beta và chưa được bật cho tài khoản của bạn
+      betaApply: Đăng ký sử dụng
+      loadError: Không thể tải hạn mức. Vui lòng thử lại sau.
+      summary: Đã dùng $1 trong $2 phút, còn lại $3
   whatsNew:
     title: Có gì mới
   rateUs:
@@ -961,6 +1002,7 @@ action:
   saveToNotebasePendingLogin: Đăng nhập để hoàn tất lưu
   saveToNotebasePendingLoginDescription: Sau khi đăng nhập, Read Frog sẽ tự động tạo Notebase và lưu kết quả này.
   saveToNotebasePendingConnectedLoginDescription: Sau khi đăng nhập, Read Frog sẽ lưu vào Notebase đã kết nối nếu có thể. Nếu tài khoản này không dùng được, Read Frog sẽ tạo Notebase mới và lưu kết quả này.
+  upgrade: Nâng cấp
   openCustomActions: Mở Custom AI Actions
   openNotebase: Mở Notebase
   contextDetailsTitleLabel: Tiêu đề
@@ -968,6 +1010,12 @@ action:
   translation: Dịch
   speak: Đọc
   playing: Đang phát
+saveSuggestion:
+  title: Có thể bạn muốn lưu
+  description: Lưu những từ dưới đây vào Notebase để ôn tập bất cứ lúc nào.
+  save: Lưu
+  saved: Đã lưu
+  staleSuggestion: Gợi ý này đã cũ
 thinking:
   label: Đang suy luận
   complete: Suy luận hoàn tất
@@ -976,6 +1024,9 @@ thinking:
 shortcutKeySelector:
   placeholder: Vui lòng nhập phím tắt
 subtitles:
+  loadingAiSubtitles: Đang tải phụ đề AI…
+  requestAiSubtitles: Yêu cầu phụ đề AI (Beta)
+  usingAiSubtitles: Đang dùng phụ đề AI
   actions:
     downloadTranslated: Tải phụ đề đã dịch
     downloadTranslatedPreparing: Đang chuẩn bị phụ đề, video dài có thể mất nhiều thời gian hơn
@@ -1001,6 +1052,8 @@ subtitles:
     aiRateLimited: Quá nhiều yêu cầu, vui lòng thử lại sau
     aiAuthFailed: Xác thực API thất bại, vui lòng kiểm tra API key của bạn
     aiServiceUnavailable: Dịch vụ dịch thuật tạm thời không khả dụng
+    aiQuotaExceeded: Đã dùng hết hạn mức phụ đề AI trong tháng
+    aiRequestFailed: Yêu cầu phụ đề AI thất bại, vui lòng thử lại sau
     aiNoResponse: Dịch vụ AI không phản hồi, hiển thị văn bản gốc
     translatedExportFailed: Không thể tạo phụ đề đã dịch
     translatedExportIncomplete: Không thể dịch tất cả các dòng phụ đề

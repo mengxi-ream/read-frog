@@ -1,9 +1,11 @@
-import type { SelectionToolbarCustomActionNotebaseAccount } from "@/types/config/selection-toolbar"
+import type {
+  SelectionToolbarCustomAction,
+  SelectionToolbarCustomActionNotebaseAccount,
+} from "@/types/config/selection-toolbar"
 import type { PendingCreateNotebaseSave, PendingNotebaseSave } from "@/utils/notebase/pending-save"
 import { useMutation } from "@tanstack/react-query"
 import { useAtom } from "jotai"
 import { useState } from "react"
-import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
 import { Button } from "@/components/ui/base-ui/button"
 import {
@@ -14,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/base-ui/dialog"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { shadowWrapper } from "@/entrypoints/selection.content"
 import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.content/overlay-layers"
 import { env } from "@/env"
@@ -22,6 +25,7 @@ import { authClient } from "@/utils/auth/auth-client"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
+import { getUniqueName } from "@/utils/name"
 import {
   createNotebaseConnectedAccountSnapshot,
   formatNotebaseConnectedAccountLabel,
@@ -39,14 +43,24 @@ import {
   setPendingNotebaseSave,
 } from "@/utils/notebase/pending-save"
 import { orpcClient } from "@/utils/orpc/client"
+import { trackSaveSuggestionEvent } from "@/utils/save-suggestion/analytics"
+import { recordSaveSuggestionAccepted } from "@/utils/save-suggestion/cooldown"
+import { showNotebaseLimitExceededToast } from "./notebase-limit-toast"
 import { saveToNotebaseDialogAtom } from "./save-to-notebase-dialog-atom"
 
 function getAccountFallback(account: SelectionToolbarCustomActionNotebaseAccount | undefined) {
   const label = formatNotebaseConnectedAccountLabel(account)
-  return Array.from(label ?? "U").slice(0, 2).join("").toUpperCase()
+  return Array.from(label ?? "U")
+    .slice(0, 2)
+    .join("")
+    .toUpperCase()
 }
 
-function ConnectedAccountDisplay({ account }: { account: SelectionToolbarCustomActionNotebaseAccount | undefined }) {
+function ConnectedAccountDisplay({
+  account,
+}: {
+  account: SelectionToolbarCustomActionNotebaseAccount | undefined
+}) {
   const label = formatNotebaseConnectedAccountLabel(account)
   if (!label) {
     return null
@@ -63,105 +77,197 @@ function ConnectedAccountDisplay({ account }: { account: SelectionToolbarCustomA
   )
 }
 
+async function completeGuideDictionaryNotebaseFromPending(pendingSave: PendingCreateNotebaseSave) {
+  const tracking = pendingSave.guideDictionaryNotebaseTracking
+  if (!tracking || tracking.actionId !== pendingSave.actionId) {
+    return
+  }
+
+  try {
+    await sendMessage("completeGuideDictionaryNotebase", {
+      trackingId: tracking.id,
+      actionId: tracking.actionId,
+      notebaseId: pendingSave.notebaseId,
+      sourceUrl: tracking.sourceUrl,
+    })
+  } catch (error) {
+    logger.warn(
+      "[SaveToNotebaseDialogHost] Failed to complete guide Dictionary Notebase flow",
+      error,
+    )
+  }
+}
+
 export function SaveToNotebaseDialogHost() {
   const [dialogState, setDialogState] = useAtom(saveToNotebaseDialogAtom)
-  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(configFieldsAtomMap.selectionToolbar)
+  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(
+    configFieldsAtomMap.selectionToolbar,
+  )
   const { data: session } = authClient.useSession()
   const isAuthenticated = !!session?.user
   const currentAccount = createNotebaseConnectedAccountSnapshot(session?.user)
   const [isPreparingLogin, setIsPreparingLogin] = useState(false)
   const pendingNotebaseSave = dialogState.open ? dialogState.pendingNotebaseSave : null
   const mode = dialogState.open ? dialogState.mode : null
+  const pendingActionDraft =
+    dialogState.open && dialogState.mode === "create_or_connect"
+      ? dialogState.pendingActionDraft
+      : undefined
+  const analyticsSource = dialogState.open ? dialogState.analyticsSource : undefined
 
   const closeDialog = () => {
     setDialogState({ open: false })
+  }
+
+  const recordSuggestionAcceptedIfNeeded = (actionName?: string) => {
+    if (analyticsSource !== "save_suggestion") {
+      return
+    }
+
+    void recordSaveSuggestionAccepted()
+    trackSaveSuggestionEvent("suggestion_accepted", { actionName })
+  }
+
+  const buildCustomActionsWithDraft = (draft: SelectionToolbarCustomAction) => {
+    const existingNames = new Set(selectionToolbarConfig.customActions.map((item) => item.name))
+    const named = existingNames.has(draft.name)
+      ? { ...draft, name: getUniqueName(draft.name, existingNames) }
+      : draft
+    return [...selectionToolbarConfig.customActions, named]
+  }
+
+  /**
+   * Append a draft action (save suggestion flow) to config. Called at the
+   * dialog confirm — the "real action button" moment — before login redirects,
+   * so the background pending-save processor finds the action afterwards.
+   */
+  const ensureDraftActionInConfig = async (draft: SelectionToolbarCustomAction) => {
+    if (selectionToolbarConfig.customActions.some((item) => item.id === draft.id)) {
+      return
+    }
+
+    await setSelectionToolbarConfig({
+      ...selectionToolbarConfig,
+      customActions: buildCustomActionsWithDraft(draft),
+    })
   }
 
   const createAndSaveMutation = useMutation({
     meta: {
       suppressToast: true,
     },
-    mutationFn: async ({ pendingNotebaseSave }: {
+    mutationFn: async ({
+      pendingNotebaseSave: pendingCreateSave,
+    }: {
       pendingNotebaseSave: PendingCreateNotebaseSave
       connectedAccount: SelectionToolbarCustomActionNotebaseAccount
+      pendingActionDraft?: SelectionToolbarCustomAction
     }) => {
-      await orpcClient.notebase.create(buildNotebaseCreateInputFromPending(pendingNotebaseSave))
-      return pendingNotebaseSave
+      await orpcClient.notebase.create(buildNotebaseCreateInputFromPending(pendingCreateSave))
+      return pendingCreateSave
     },
-    onSuccess: async (pendingNotebaseSave, variables) => {
-      const nextConnection = buildNotebaseConnectionFromPending(pendingNotebaseSave, variables.connectedAccount)
+    onSuccess: async (createdPendingSave, variables) => {
+      const nextConnection = buildNotebaseConnectionFromPending(
+        createdPendingSave,
+        variables.connectedAccount,
+      )
+      const draft = variables.pendingActionDraft
+      const hasAction = selectionToolbarConfig.customActions.some(
+        (item) => item.id === createdPendingSave.actionId,
+      )
+      // Draft path appends the action together with its connection in one
+      // config write, so a failed notebase.create never leaves an orphan action.
+      const nextCustomActions =
+        draft && !hasAction
+          ? buildCustomActionsWithDraft({ ...draft, notebaseConnection: nextConnection })
+          : selectionToolbarConfig.customActions.map((item) =>
+              item.id === createdPendingSave.actionId
+                ? { ...item, notebaseConnection: nextConnection }
+                : item,
+            )
       await setSelectionToolbarConfig({
         ...selectionToolbarConfig,
-        customActions: selectionToolbarConfig.customActions.map(item =>
-          item.id === pendingNotebaseSave.actionId
-            ? { ...item, notebaseConnection: nextConnection }
-            : item,
-        ),
+        customActions: nextCustomActions,
       })
 
       closeDialog()
-      toast.success(i18n.t("action.saveToNotebaseSuccess"), {
-        description: pendingNotebaseSave.actionName,
+      toastManager.add({
+        type: "success",
+        title: i18n.t("action.saveToNotebaseSuccess"),
+        description: createdPendingSave.actionName,
       })
+      recordSuggestionAcceptedIfNeeded(createdPendingSave.actionName)
+      await completeGuideDictionaryNotebaseFromPending(createdPendingSave)
 
       try {
         await sendMessage("openPage", {
-          url: getNotebaseDetailUrl(pendingNotebaseSave.notebaseId),
+          url: getNotebaseDetailUrl(createdPendingSave.notebaseId),
           active: true,
         })
-      }
-      catch (error) {
+      } catch (error) {
         logger.warn("[SaveToNotebaseDialogHost] Failed to open Notebase detail page", error)
       }
     },
     onError: (error: unknown) => {
       if (isORPCUnauthorizedError(error)) {
-        toast.error(i18n.t("action.saveToNotebaseLoginRequired"))
+        toastManager.add({
+          type: "error",
+          title: i18n.t("action.saveToNotebaseLoginRequired"),
+        })
         return
       }
 
       if (isORPCNoteLimitExceededError(error)) {
-        toast.error(i18n.t("action.saveToNotebaseLimitExceeded"))
+        showNotebaseLimitExceededToast()
         return
       }
 
       if (isORPCForbiddenError(error)) {
-        toast.error(i18n.t("action.saveToNotebaseAccessDenied"))
+        toastManager.add({ type: "error", title: i18n.t("action.saveToNotebaseAccessDenied") })
         return
       }
 
       if (isORPCValidationError(error)) {
-        toast.error(i18n.t("action.saveToNotebaseConnectionInvalid"))
+        toastManager.add({
+          type: "error",
+          title: i18n.t("action.saveToNotebaseConnectionInvalid"),
+        })
         return
       }
 
-      toast.error(i18n.t("action.saveToNotebaseFailed"), {
+      toastManager.add({
+        type: "error",
+        title: i18n.t("action.saveToNotebaseFailed"),
         description: error instanceof Error ? error.message : undefined,
       })
     },
   })
 
   const handleCreateAndSave = () => {
-    if (!pendingNotebaseSave || pendingNotebaseSave.kind !== "create_notebase") {
+    if (pendingNotebaseSave?.kind !== "create_notebase") {
       return
     }
 
     if (!currentAccount) {
-      toast.error(i18n.t("action.saveToNotebaseLoginRequired"))
+      toastManager.add({ type: "error", title: i18n.t("action.saveToNotebaseLoginRequired") })
       return
     }
 
-    createAndSaveMutation.mutate({ pendingNotebaseSave, connectedAccount: currentAccount })
+    createAndSaveMutation.mutate({
+      pendingNotebaseSave,
+      connectedAccount: currentAccount,
+      pendingActionDraft,
+    })
   }
 
-  const handleLoginWithPending = async (pendingNotebaseSave: PendingNotebaseSave) => {
-    if (!pendingNotebaseSave) {
+  const handleLoginWithPending = async (pendingSave: PendingNotebaseSave) => {
+    if (!pendingSave) {
       return
     }
 
     setIsPreparingLogin(true)
     try {
-      await setPendingNotebaseSave(pendingNotebaseSave)
+      await setPendingNotebaseSave(pendingSave)
 
       const loginUrl = new URL("/log-in", env.WXT_WEBSITE_URL)
       loginUrl.searchParams.set("redirectTo", "/home")
@@ -172,41 +278,53 @@ export function SaveToNotebaseDialogHost() {
       })
 
       closeDialog()
-      toast.success(i18n.t("action.saveToNotebasePendingLogin"), {
-        description: pendingNotebaseSave.kind === "save_to_connected_notebase"
-          ? i18n.t("action.saveToNotebasePendingConnectedLoginDescription")
-          : i18n.t("action.saveToNotebasePendingLoginDescription"),
+      toastManager.add({
+        type: "success",
+        title: i18n.t("action.saveToNotebasePendingLogin"),
+        description:
+          pendingSave.kind === "save_to_connected_notebase"
+            ? i18n.t("action.saveToNotebasePendingConnectedLoginDescription")
+            : i18n.t("action.saveToNotebasePendingLoginDescription"),
       })
-    }
-    catch (error) {
-      toast.error(i18n.t("action.saveToNotebaseFailed"), {
+      recordSuggestionAcceptedIfNeeded(pendingSave.actionName)
+    } catch (error) {
+      toastManager.add({
+        type: "error",
+        title: i18n.t("action.saveToNotebaseFailed"),
         description: error instanceof Error ? error.message : undefined,
       })
-    }
-    finally {
+    } finally {
       setIsPreparingLogin(false)
     }
   }
 
   const handleLoginAndAutoCreate = async () => {
-    if (!pendingNotebaseSave || pendingNotebaseSave.kind !== "create_notebase") {
+    if (pendingNotebaseSave?.kind !== "create_notebase") {
       return
+    }
+
+    if (pendingActionDraft) {
+      await ensureDraftActionInConfig(pendingActionDraft)
     }
 
     await handleLoginWithPending(pendingNotebaseSave)
   }
 
   const handleLoginAndContinueConnectedSave = async () => {
-    if (!pendingNotebaseSave || pendingNotebaseSave.kind !== "save_to_connected_notebase") {
+    if (pendingNotebaseSave?.kind !== "save_to_connected_notebase") {
       return
     }
 
     await handleLoginWithPending(pendingNotebaseSave)
   }
 
-  const handleConnectExisting = () => {
+  const handleConnectExisting = async () => {
     if (!pendingNotebaseSave) {
       return
+    }
+
+    if (pendingActionDraft) {
+      await ensureDraftActionInConfig(pendingActionDraft)
     }
 
     closeDialog()
@@ -216,14 +334,14 @@ export function SaveToNotebaseDialogHost() {
   }
 
   const isCreateFlowBusy = createAndSaveMutation.isPending || isPreparingLogin
-  const connectedAccount = dialogState.open && "connectedAccount" in dialogState
-    ? dialogState.connectedAccount
-    : undefined
-  const dialogTitle = mode === "connected_login_required"
-    ? i18n.t("action.saveToNotebaseLoginConnectedTitle")
-    : mode === "foreign_connection"
-      ? i18n.t("action.saveToNotebaseConnectionUnavailableTitle")
-      : i18n.t("action.saveToNotebaseCreateTitle")
+  const connectedAccount =
+    dialogState.open && "connectedAccount" in dialogState ? dialogState.connectedAccount : undefined
+  const dialogTitle =
+    mode === "connected_login_required"
+      ? i18n.t("action.saveToNotebaseLoginConnectedTitle")
+      : mode === "foreign_connection"
+        ? i18n.t("action.saveToNotebaseConnectionUnavailableTitle")
+        : i18n.t("action.saveToNotebaseCreateTitle")
   const primaryButtonLabel = isCreateFlowBusy
     ? i18n.t("action.saveToNotebaseSaving")
     : mode === "connected_login_required"
@@ -291,7 +409,7 @@ export function SaveToNotebaseDialogHost() {
             type="button"
             variant="outline"
             disabled={isCreateFlowBusy}
-            onClick={handleConnectExisting}
+            onClick={() => void handleConnectExisting()}
           >
             {mode === "connected_login_required"
               ? i18n.t("action.saveToNotebaseGoConfigure")

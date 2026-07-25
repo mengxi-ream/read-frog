@@ -1,16 +1,27 @@
 import type { ProviderConfig } from "@/types/config/provider"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
 
-const onMessageMock = vi.fn()
-const ensureInitializedConfigMock = vi.fn()
-const executeTranslateMock = vi.fn()
-const generateArticleSummaryMock = vi.fn()
-const putBatchRequestRecordMock = vi.fn()
-const articleSummaryCacheGetMock = vi.fn()
-const articleSummaryCachePutMock = vi.fn()
-const translationCacheGetMock = vi.fn()
-const translationCachePutMock = vi.fn()
+type BackgroundAnalyticsModule = typeof import("../analytics")
+
+const onMessageMock = vi.fn<(...args: any[]) => any>()
+const ensureInitializedConfigMock = vi.fn<(...args: any[]) => any>()
+const executeTranslateMock = vi.fn<(...args: any[]) => any>()
+const generateArticleSummaryMock = vi.fn<(...args: any[]) => any>()
+const putBatchRequestRecordMock = vi.fn<(...args: any[]) => any>()
+const articleSummaryCacheGetMock = vi.fn<(...args: any[]) => any>()
+const articleSummaryCachePutMock = vi.fn<(...args: any[]) => any>()
+const translationCacheGetMock = vi.fn<(...args: any[]) => any>()
+const translationCachePutMock = vi.fn<(...args: any[]) => any>()
+const translationCacheDeleteMock = vi.fn<(...args: any[]) => any>()
+const resolvePromptExperimentVariantMock =
+  vi.fn<BackgroundAnalyticsModule["resolvePromptExperimentVariant"]>()
+const exposePromptExperimentMock = vi.fn<BackgroundAnalyticsModule["exposePromptExperiment"]>()
+const clearPromptExperimentActionMock =
+  vi.fn<BackgroundAnalyticsModule["clearPromptExperimentAction"]>()
+const clearPromptExperimentActionsByPrefixMock =
+  vi.fn<BackgroundAnalyticsModule["clearPromptExperimentActionsByPrefix"]>()
 
 vi.mock("@/utils/message", () => ({
   onMessage: onMessageMock,
@@ -39,18 +50,34 @@ vi.mock("@/utils/db/dexie/db", () => ({
       put: articleSummaryCachePutMock,
     },
     translationCache: {
+      delete: translationCacheDeleteMock,
       get: translationCacheGetMock,
       put: translationCachePutMock,
     },
   },
 }))
 
+vi.mock("../analytics", () => ({
+  clearPromptExperimentAction: clearPromptExperimentActionMock,
+  clearPromptExperimentActionsByPrefix: clearPromptExperimentActionsByPrefixMock,
+  exposePromptExperiment: exposePromptExperimentMock,
+  resolvePromptExperimentVariant: resolvePromptExperimentVariantMock,
+}))
+
 function getRegisteredMessageHandler(name: string) {
-  const registration = onMessageMock.mock.calls.find(call => call[0] === name)
+  const registration = onMessageMock.mock.calls.find((call) => call[0] === name)
   if (!registration) {
     throw new Error(`Message handler not registered: ${name}`)
   }
-  return registration[1] as (message: { data: Record<string, unknown> }) => Promise<unknown>
+  const handler: unknown = registration[1]
+  if (typeof handler !== "function") {
+    throw new Error(`Registered message handler is not callable: ${name}`)
+  }
+
+  return async (message: {
+    data: Record<string, unknown>
+    sender?: { tab?: { id?: number } }
+  }): Promise<unknown> => await handler(message)
 }
 
 const llmProvider: ProviderConfig = {
@@ -108,39 +135,300 @@ describe("translation queue helpers", () => {
     articleSummaryCachePutMock.mockResolvedValue(undefined)
     translationCacheGetMock.mockResolvedValue(undefined)
     translationCachePutMock.mockResolvedValue(undefined)
+    translationCacheDeleteMock.mockResolvedValue(undefined)
+    resolvePromptExperimentVariantMock.mockResolvedValue("precision-rewrite")
+    exposePromptExperimentMock.mockResolvedValue(true)
   })
 
-  it(
-    "routes only llm providers through the batch queue",
-    async () => {
-      const { shouldUseBatchQueue } = await import("../translation-queues")
+  it("routes only llm providers through the batch queue", async () => {
+    const { shouldUseBatchQueue } = await import("../translation-queues")
 
-      const deeplProvider: ProviderConfig = {
-        id: "deepl",
-        name: "DeepL",
-        provider: "deepl",
-        enabled: true,
-        apiKey: "key",
-      }
+    const deeplProvider: ProviderConfig = {
+      id: "deepl",
+      name: "DeepL",
+      provider: "deepl",
+      enabled: true,
+      apiKey: "key",
+    }
 
-      const deeplxProvider: ProviderConfig = {
-        id: "deeplx",
-        name: "DeepLX",
-        provider: "deeplx",
-        enabled: true,
-        baseURL: "https://api.deeplx.org",
-      }
+    const deeplxProvider: ProviderConfig = {
+      id: "deeplx",
+      name: "DeepLX",
+      provider: "deeplx",
+      enabled: true,
+      baseURL: "https://api.deeplx.org",
+    }
 
-      expect(shouldUseBatchQueue(deeplProvider)).toBe(false)
-      expect(shouldUseBatchQueue(deeplxProvider)).toBe(false)
-      expect(shouldUseBatchQueue(llmProvider)).toBe(true)
-    },
-    15_000,
-  )
+    expect(shouldUseBatchQueue(deeplProvider)).toBe(false)
+    expect(shouldUseBatchQueue(deeplxProvider)).toBe(false)
+    expect(shouldUseBatchQueue(llmProvider)).toBe(true)
+  }, 15_000)
+
+  it("keeps request-local marker zero isolated across LLM batch items", async () => {
+    ensureInitializedConfigMock.mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      translate: {
+        ...DEFAULT_CONFIG.translate,
+        providerId: llmProvider.id,
+        batchQueueConfig: {
+          maxCharactersPerBatch: 1000,
+          maxItemsPerBatch: 10,
+        },
+      },
+    })
+    executeTranslateMock.mockResolvedValueOnce(
+      `<span data-rf-attr="0">Bonjour</span>\n\n%%\n\n<a data-rf-attr="0">Lire</a>`,
+    )
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+
+    const results = await Promise.all([
+      handler({
+        data: {
+          text: `<span data-rf-attr="0">Hello</span>`,
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          scheduleAt: Date.now(),
+          hash: "marker-batch-one",
+          textFormat: "html",
+        },
+      }),
+      handler({
+        data: {
+          text: `<a data-rf-attr="0">Read</a>`,
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          scheduleAt: Date.now(),
+          hash: "marker-batch-two",
+          textFormat: "html",
+        },
+      }),
+    ])
+
+    expect(results).toEqual([
+      `<span data-rf-attr="0">Bonjour</span>`,
+      `<a data-rf-attr="0">Lire</a>`,
+    ])
+    expect(executeTranslateMock).toHaveBeenCalledTimes(1)
+    expect(executeTranslateMock).toHaveBeenCalledWith(
+      `<span data-rf-attr="0">Hello</span>\n\n%%\n\n<a data-rf-attr="0">Read</a>`,
+      DEFAULT_CONFIG.language,
+      llmProvider,
+      expect.any(Function),
+      expect.objectContaining({ isBatch: true }),
+    )
+  })
+
+  it("coalesces concurrent identical translate requests into one provider call", async () => {
+    executeTranslateMock.mockResolvedValue("translated")
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+
+    const makeRequest = () =>
+      handler({
+        data: {
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          scheduleAt: Date.now(),
+          hash: "same-request-hash",
+        },
+      })
+
+    // both requests arrive before the first result lands in the translation cache
+    const results = await Promise.all([makeRequest(), makeRequest()])
+
+    expect(results).toEqual(["translated", "translated"])
+    expect(executeTranslateMock).toHaveBeenCalledTimes(1)
+    // the shared item is sent once, not as a two-item batch
+    expect(executeTranslateMock.mock.calls[0][0]).toBe("hello")
+  })
+
+  it("does not expose an experiment prompt when the variant-specific cache hits", async () => {
+    translationCacheGetMock.mockResolvedValueOnce({
+      key: "variant-cache-hit",
+      translation: "cached treatment translation",
+    })
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+
+    await expect(
+      handler({
+        data: {
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          scheduleAt: Date.now(),
+          hash: "variant-cache-hit",
+          promptExperimentVariant: "precision-rewrite",
+          translationActionContext: {
+            actionId: "page-action",
+            feature: "page_translation",
+            surface: "popup",
+          },
+          sessionId: "page-action",
+        },
+        sender: { tab: { id: 42 } },
+      }),
+    ).resolves.toBe("cached treatment translation")
+
+    expect(resolvePromptExperimentVariantMock).not.toHaveBeenCalled()
+    expect(exposePromptExperimentMock).not.toHaveBeenCalled()
+    expect(executeTranslateMock).not.toHaveBeenCalled()
+  })
+
+  it("revalidates silently after a miss and exposes each unique action immediately before dispatch", async () => {
+    ensureInitializedConfigMock.mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      translate: {
+        ...DEFAULT_CONFIG.translate,
+        providerId: llmProvider.id,
+        batchQueueConfig: {
+          maxCharactersPerBatch: 1000,
+          maxItemsPerBatch: 10,
+        },
+      },
+    })
+    executeTranslateMock.mockResolvedValueOnce("one\n\n%%\n\ntwo")
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+
+    const makeRequest = (hash: string, actionId: string) =>
+      handler({
+        data: {
+          text: hash,
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          scheduleAt: Date.now(),
+          hash,
+          promptExperimentVariant: "precision-rewrite",
+          translationActionContext: {
+            actionId,
+            feature: "hover_translation",
+            surface: "shortcut",
+          },
+        },
+      })
+
+    await expect(
+      Promise.all([makeRequest("first", "hover-1"), makeRequest("second", "hover-2")]),
+    ).resolves.toEqual(["one", "two"])
+
+    expect(resolvePromptExperimentVariantMock).toHaveBeenCalledTimes(2)
+    expect(exposePromptExperimentMock).toHaveBeenCalledTimes(2)
+    expect(exposePromptExperimentMock).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ actionId: "hover-1" }),
+      "precision-rewrite",
+      "hover-1",
+    )
+    expect(executeTranslateMock).toHaveBeenCalledTimes(1)
+    expect(exposePromptExperimentMock.mock.invocationCallOrder[1]).toBeLessThan(
+      executeTranslateMock.mock.invocationCallOrder[0],
+    )
+  })
+
+  it("asks the content side to rebuild its hash when the post-cache variant changed", async () => {
+    resolvePromptExperimentVariantMock.mockResolvedValueOnce("rewrite-after-understanding")
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+
+    await expect(
+      handler({
+        data: {
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          scheduleAt: Date.now(),
+          hash: "old-variant-hash",
+          promptExperimentVariant: "precision-rewrite",
+          translationActionContext: {
+            actionId: "action-1",
+            feature: "page_translation",
+            surface: "popup",
+          },
+        },
+      }),
+    ).resolves.toEqual({
+      retryWithPromptExperimentVariant: "rewrite-after-understanding",
+    })
+    expect(exposePromptExperimentMock).not.toHaveBeenCalled()
+    expect(executeTranslateMock).not.toHaveBeenCalled()
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
+  it("aborts dispatch and retries with the latest variant when exposure revalidation changes", async () => {
+    resolvePromptExperimentVariantMock
+      .mockResolvedValueOnce("precision-rewrite")
+      .mockResolvedValueOnce("rewrite-after-understanding")
+    exposePromptExperimentMock.mockResolvedValueOnce(false)
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+
+    await expect(
+      handler({
+        data: {
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          scheduleAt: Date.now(),
+          hash: "dispatch-race-hash",
+          promptExperimentVariant: "precision-rewrite",
+          translationActionContext: {
+            actionId: "action-1",
+            feature: "page_translation",
+            surface: "popup",
+          },
+        },
+      }),
+    ).resolves.toEqual({
+      retryWithPromptExperimentVariant: "rewrite-after-understanding",
+    })
+    expect(executeTranslateMock).not.toHaveBeenCalled()
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
+  it("aborts dispatch and retries without the experiment when the flag becomes unavailable", async () => {
+    resolvePromptExperimentVariantMock
+      .mockResolvedValueOnce("precision-rewrite")
+      .mockResolvedValueOnce(null)
+    exposePromptExperimentMock.mockResolvedValueOnce(false)
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+
+    await expect(
+      handler({
+        data: {
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          scheduleAt: Date.now(),
+          hash: "dispatch-unavailable-hash",
+          promptExperimentVariant: "precision-rewrite",
+          translationActionContext: {
+            actionId: "action-1",
+            feature: "page_translation",
+            surface: "popup",
+          },
+        },
+      }),
+    ).resolves.toEqual({ retryWithoutPromptExperiment: true })
+    expect(executeTranslateMock).not.toHaveBeenCalled()
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
 
   it("passes subtitle summary through the translation queue without generating a new summary", async () => {
     const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
-    await setUpSubtitlesTranslationQueue()
+    setUpSubtitlesTranslationQueue()
 
     const handler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
     const result = await handler({
@@ -196,7 +484,7 @@ describe("translation queue helpers", () => {
     })
 
     const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
-    await setUpSubtitlesTranslationQueue()
+    setUpSubtitlesTranslationQueue()
 
     const handler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
     const requests = [
@@ -261,7 +549,7 @@ describe("translation queue helpers", () => {
 
   it("passes webpage context through the translation queue without generating a new summary", async () => {
     const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    await setUpWebPageTranslationQueue()
+    setUpWebPageTranslationQueue()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const result = await handler({
@@ -296,14 +584,18 @@ describe("translation queue helpers", () => {
     )
   })
 
-  it("normalizes cached Google translations before returning them", async () => {
+  // Cached values are already decoded once by executeTranslate; a second decode
+  // would corrupt legitimate entity mentions ("Tom &amp; Jerry" -> "Tom & Jerry").
+  // The fixtures below intentionally contain semicolon-terminated entities so a
+  // re-introduced decode call fails these tests.
+  it("returns cached Google translations verbatim without re-decoding", async () => {
     translationCacheGetMock.mockResolvedValueOnce({
       key: "webpage-hash",
-      translation: "L&#39;Iran chiama &quot;Dichiarazione&quot; &lt;span&gt;",
+      translation: "Tom &amp; Jerry — It's on https://example.com/?page=1&copy=true <span>",
     })
 
     const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    await setUpWebPageTranslationQueue()
+    setUpWebPageTranslationQueue()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const result = await handler({
@@ -316,9 +608,335 @@ describe("translation queue helpers", () => {
       },
     })
 
-    expect(result).toBe("L'Iran chiama \"Dichiarazione\" <span>")
+    expect(result).toBe("Tom &amp; Jerry — It's on https://example.com/?page=1&copy=true <span>")
     expect(executeTranslateMock).not.toHaveBeenCalled()
     expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
+  it("returns and caches fresh Google translations verbatim without re-decoding", async () => {
+    executeTranslateMock.mockResolvedValue("write &amp; for ampersand — It's fine")
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: "hello",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "webpage-hash",
+      },
+    })
+
+    expect(result).toBe("write &amp; for ampersand — It's fine")
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "webpage-hash",
+        translation: "write &amp; for ampersand — It's fine",
+      }),
+    )
+  })
+
+  it("uses cached HTML translations when all attribute markers remain on their tags", async () => {
+    translationCacheGetMock.mockResolvedValueOnce({
+      key: "webpage-hash",
+      translation: `<a data-rf-attr="1">Lire</a><span data-rf-attr="0">Bonjour</span>`,
+    })
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: `<span data-rf-attr="0">Hello</span><a data-rf-attr="1">Read</a>`,
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "webpage-hash",
+        textFormat: "html",
+      },
+    })
+
+    expect(result).toBe(`<a data-rf-attr="1">Lire</a><span data-rf-attr="0">Bonjour</span>`)
+    expect(executeTranslateMock).not.toHaveBeenCalled()
+    expect(translationCacheDeleteMock).not.toHaveBeenCalled()
+  })
+
+  it("deletes an invalid cached HTML translation and replaces it with a valid fresh result", async () => {
+    translationCacheGetMock.mockResolvedValueOnce({
+      key: "webpage-hash",
+      translation: `<span>Bonjour</span>`,
+    })
+    executeTranslateMock.mockResolvedValueOnce(`<span data-rf-attr="0">Bonjour</span>`)
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: `<span data-rf-attr="0">Hello</span>`,
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "webpage-hash",
+        textFormat: "html",
+      },
+    })
+
+    expect(result).toBe(`<span data-rf-attr="0">Bonjour</span>`)
+    expect(translationCacheDeleteMock).toHaveBeenCalledWith("webpage-hash")
+    expect(executeTranslateMock).toHaveBeenCalledTimes(1)
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "webpage-hash",
+        translation: `<span data-rf-attr="0">Bonjour</span>`,
+      }),
+    )
+  })
+
+  it("validates escaped page-marker fallback results before using or caching them", async () => {
+    translationCacheGetMock.mockResolvedValueOnce({
+      key: "legacy-marker-hash",
+      translation: `<span>Cached without the protected page attribute</span>`,
+    })
+    executeTranslateMock.mockResolvedValueOnce(
+      `<span data-rf-attr="rf-page-0">Fresh translation</span>`,
+    )
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: `<span data-rf-attr="rf-page-0">Hello</span>`,
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "legacy-marker-hash",
+        textFormat: "html",
+      },
+    })
+
+    expect(result).toBe(`<span data-rf-attr="rf-page-0">Fresh translation</span>`)
+    expect(translationCacheDeleteMock).toHaveBeenCalledWith("legacy-marker-hash")
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "legacy-marker-hash",
+        translation: `<span data-rf-attr="rf-page-0">Fresh translation</span>`,
+      }),
+    )
+  })
+
+  it("throws and does not cache a fresh translation with invalid HTML markers", async () => {
+    executeTranslateMock.mockResolvedValueOnce(`<div data-rf-attr="0">Bonjour</div>`)
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const request = handler({
+      data: {
+        text: `<span data-rf-attr="0">Hello</span>`,
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "webpage-hash",
+        textFormat: "html",
+      },
+    })
+
+    await expect(request).rejects.toMatchObject({
+      code: "HTML_ATTR_MARKER_INTEGRITY",
+      reason: "wrong-output-tag",
+    })
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
+  it("treats an empty provider result as a missing-marker integrity failure", async () => {
+    executeTranslateMock.mockResolvedValueOnce("")
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const request = handler({
+      data: {
+        text: `<span data-rf-attr="0">Hello</span>`,
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "empty-html-result",
+        textFormat: "html",
+      },
+    })
+
+    await expect(request).rejects.toMatchObject({
+      code: "HTML_ATTR_MARKER_INTEGRITY",
+      reason: "missing-output-marker",
+    })
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
+  it("rejects duplicate input marker IDs before reading the cache or translating", async () => {
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const request = handler({
+      data: {
+        text: `<span data-rf-attr="0">Hello</span><a data-rf-attr="0">Read</a>`,
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "webpage-hash",
+        textFormat: "html",
+      },
+    })
+
+    await expect(request).rejects.toMatchObject({
+      code: "HTML_ATTR_MARKER_INTEGRITY",
+      reason: "duplicate-input-marker",
+    })
+    expect(translationCacheGetMock).not.toHaveBeenCalled()
+    expect(executeTranslateMock).not.toHaveBeenCalled()
+    expect(translationCacheDeleteMock).not.toHaveBeenCalled()
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
+  it("does not treat marker-shaped plain text as the translationOnly HTML protocol", async () => {
+    executeTranslateMock.mockResolvedValueOnce("translated plain text")
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: `Explain <span data-rf-attr="0">this example</span>`,
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "plain-marker-shaped-text",
+        textFormat: "plain",
+      },
+    })
+
+    expect(result).toBe("translated plain text")
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "plain-marker-shaped-text",
+        translation: "translated plain text",
+      }),
+    )
+  })
+
+  it("returns and caches the no-translation sentinel RAW (mapping is content-side)", async () => {
+    executeTranslateMock.mockResolvedValue(NO_TRANSLATION_SENTINEL)
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: "already in target language",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "sentinel-hash",
+      },
+    })
+
+    // Mapping the sentinel to "" here would fall out of the truthy-only cache
+    // write and re-hit the provider on every request; translateTextCore maps it.
+    expect(result).toBe(NO_TRANSLATION_SENTINEL)
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "sentinel-hash",
+        translation: NO_TRANSLATION_SENTINEL,
+      }),
+    )
+  })
+
+  it("forwards the textFormat to executeTranslate for non-batch providers", async () => {
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    await handler({
+      data: {
+        text: "<b>hello</b>",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "webpage-hash",
+        textFormat: "html",
+      },
+    })
+
+    expect(executeTranslateMock).toHaveBeenCalledWith(
+      "<b>hello</b>",
+      DEFAULT_CONFIG.language,
+      googleProvider,
+      expect.any(Function),
+      { textFormat: "html", signal: expect.any(AbortSignal) },
+    )
+  })
+
+  it("returns cached Google subtitle translations verbatim without re-decoding", async () => {
+    translationCacheGetMock.mockResolvedValueOnce({
+      key: "subtitle-hash",
+      translation: "Tom &amp; Jerry — It's a subtitle",
+    })
+
+    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
+    setUpSubtitlesTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
+    const result = await handler({
+      data: {
+        text: "hello",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "subtitle-hash",
+      },
+    })
+
+    expect(result).toBe("Tom &amp; Jerry — It's a subtitle")
+    expect(executeTranslateMock).not.toHaveBeenCalled()
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
+  it("returns and caches fresh Google subtitle translations verbatim without re-decoding", async () => {
+    executeTranslateMock.mockResolvedValue("write &amp; for ampersand — It's a subtitle")
+
+    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
+    setUpSubtitlesTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
+    const result = await handler({
+      data: {
+        text: "hello",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "subtitle-hash",
+      },
+    })
+
+    expect(result).toBe("write &amp; for ampersand — It's a subtitle")
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "subtitle-hash",
+        translation: "write &amp; for ampersand — It's a subtitle",
+      }),
+    )
   })
 
   it("does not normalize cached non-Google translations", async () => {
@@ -328,7 +946,7 @@ describe("translation queue helpers", () => {
     })
 
     const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    await setUpWebPageTranslationQueue()
+    setUpWebPageTranslationQueue()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const result = await handler({
@@ -348,7 +966,7 @@ describe("translation queue helpers", () => {
 
   it("exposes webpage summary generation as a separate background handler", async () => {
     const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    await setUpWebPageTranslationQueue()
+    setUpWebPageTranslationQueue()
 
     const handler = getRegisteredMessageHandler("getOrGenerateWebPageSummary")
     const result = await handler({
@@ -364,12 +982,15 @@ describe("translation queue helpers", () => {
       "Page title",
       "page body",
       llmProvider,
+      {
+        signal: expect.any(AbortSignal),
+      },
     )
   })
 
   it("exposes subtitle summary generation as a separate background handler", async () => {
     const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
-    await setUpSubtitlesTranslationQueue()
+    setUpSubtitlesTranslationQueue()
 
     const handler = getRegisteredMessageHandler("getSubtitlesSummary")
     const result = await handler({
@@ -385,12 +1006,13 @@ describe("translation queue helpers", () => {
       "Video title",
       "subtitle transcript",
       llmProvider,
+      { signal: expect.any(AbortSignal) },
     )
   })
 
   it("returns null for invalid subtitle summary requests", async () => {
     const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
-    await setUpSubtitlesTranslationQueue()
+    setUpSubtitlesTranslationQueue()
 
     const handler = getRegisteredMessageHandler("getSubtitlesSummary")
     const result = await handler({
@@ -409,7 +1031,7 @@ describe("translation queue helpers", () => {
     generateArticleSummaryMock.mockResolvedValue(null)
 
     const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
-    await setUpSubtitlesTranslationQueue()
+    setUpSubtitlesTranslationQueue()
 
     const handler = getRegisteredMessageHandler("getSubtitlesSummary")
     const result = await handler({
@@ -424,15 +1046,16 @@ describe("translation queue helpers", () => {
   })
 
   it("deduplicates concurrent subtitle summary generation requests", async () => {
-    let resolveSummary!: (summary: string) => void
+    let resolveSummary: ((summary: string) => void) | undefined
     generateArticleSummaryMock.mockImplementation(
-      () => new Promise((resolve: (summary: string) => void) => {
-        resolveSummary = resolve
-      }),
+      () =>
+        new Promise((resolve: (summary: string) => void) => {
+          resolveSummary = resolve
+        }),
     )
 
     const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
-    await setUpSubtitlesTranslationQueue()
+    setUpSubtitlesTranslationQueue()
 
     const handler = getRegisteredMessageHandler("getSubtitlesSummary")
     const firstRequest = handler({
@@ -450,9 +1073,13 @@ describe("translation queue helpers", () => {
       },
     })
 
-    await Promise.resolve()
-    await Promise.resolve()
-    resolveSummary("Generated summary")
+    // The handler chain awaits queue init + cache lookups before the summary
+    // thunk runs; poll until the mock's resolver is captured.
+    for (let i = 0; i < 100; i++) {
+      if (resolveSummary) break
+      await Promise.resolve()
+    }
+    resolveSummary!("Generated summary")
 
     await expect(Promise.all([firstRequest, secondRequest])).resolves.toEqual([
       "Generated summary",

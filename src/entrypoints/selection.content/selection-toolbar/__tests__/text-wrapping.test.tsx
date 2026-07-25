@@ -77,13 +77,7 @@ describe("selection toolbar text wrapping", () => {
   it("applies working wrap utilities to thinking content", () => {
     const content = "thinking-without-breaks.example/".repeat(4)
 
-    render(
-      <Thinking
-        status="thinking"
-        content={content}
-        defaultExpanded
-      />,
-    )
+    render(<Thinking status="thinking" content={content} defaultExpanded />)
 
     const contentNode = screen.getByText(content)
 

@@ -5,13 +5,14 @@ import { ConfigCard } from "../../components/config-card"
 import { PatternsTable } from "../../components/patterns-table"
 
 export function SelectionToolbarDisabledSites() {
-  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(configFieldsAtomMap.selectionToolbar)
-  const { disabledSelectionToolbarPatterns = [] } = selectionToolbarConfig
+  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(
+    configFieldsAtomMap.selectionToolbar,
+  )
+  const { disabledSelectionToolbarPatterns } = selectionToolbarConfig
 
   const addPattern = (pattern: string) => {
     const cleanedPattern = pattern.trim()
-    if (!cleanedPattern || disabledSelectionToolbarPatterns.includes(cleanedPattern))
-      return
+    if (!cleanedPattern || disabledSelectionToolbarPatterns.includes(cleanedPattern)) return
 
     void setSelectionToolbarConfig({
       ...selectionToolbarConfig,
@@ -22,7 +23,9 @@ export function SelectionToolbarDisabledSites() {
   const removePattern = (pattern: string) => {
     void setSelectionToolbarConfig({
       ...selectionToolbarConfig,
-      disabledSelectionToolbarPatterns: disabledSelectionToolbarPatterns.filter((p: string) => p !== pattern),
+      disabledSelectionToolbarPatterns: disabledSelectionToolbarPatterns.filter(
+        (p: string) => p !== pattern,
+      ),
     })
   }
 
@@ -30,14 +33,20 @@ export function SelectionToolbarDisabledSites() {
     <ConfigCard
       id="selection-toolbar-disabled-sites"
       title={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.disabledSites.title")}
-      description={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.disabledSites.description")}
+      description={i18n.t(
+        "options.floatingButtonAndToolbar.selectionToolbar.disabledSites.description",
+      )}
     >
       <PatternsTable
         patterns={disabledSelectionToolbarPatterns}
         onAddPattern={addPattern}
         onRemovePattern={removePattern}
-        placeholderText={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.disabledSites.enterUrlPattern")}
-        tableHeaderText={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.disabledSites.urlPattern")}
+        placeholderText={i18n.t(
+          "options.floatingButtonAndToolbar.selectionToolbar.disabledSites.enterUrlPattern",
+        )}
+        tableHeaderText={i18n.t(
+          "options.floatingButtonAndToolbar.selectionToolbar.disabledSites.urlPattern",
+        )}
       />
     </ConfigCard>
   )
