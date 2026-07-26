@@ -14,8 +14,6 @@ export const SENTENCE_END_PATTERN = /[,.。?？！!；;…؟۔\n]$/
 export const TRANSLATION_BATCH_SIZE = 5
 export const TRANSLATE_LOOK_AHEAD_MS = 30_000
 export const PROCESS_LOOK_AHEAD_MS = 60_000
-/** Delay before showing bilingual translation pending dots (avoids flash on fast responses). */
-export const TRANSLATION_PENDING_INDICATOR_DELAY_MS = 250
 
 // DOM IDs
 export const READ_FROG_SUBTITLES_UI_HOST_ID = "read-frog-subtitles-ui-host"

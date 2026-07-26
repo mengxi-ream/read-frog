@@ -359,9 +359,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
     this.teardownAdObserver()
 
-    const player = document.querySelector(
-      this.config.selectors.playerContainer,
-    ) as HTMLElement | null
+    const player = document.querySelector<HTMLElement>(this.config.selectors.playerContainer)
     if (!player) {
       subtitlesStore.set(adPlayingAtom, false)
       return
@@ -391,7 +389,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
     const player =
       this.observedAdPlayer ??
-      (document.querySelector(this.config.selectors.playerContainer) as HTMLElement | null)
+      document.querySelector<HTMLElement>(this.config.selectors.playerContainer)
 
     const playing = !!player && isAdPlaying(player)
     const wasPlaying = subtitlesStore.get(adPlayingAtom)

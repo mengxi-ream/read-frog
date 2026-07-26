@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { SUBTITLES_SOURCE } from "@/utils/constants/subtitles"
-import { currentTimeMsAtom, sourceTrackAtom, subtitlesStore } from "../atoms"
+import { adPlayingAtom, currentTimeMsAtom, sourceTrackAtom, subtitlesStore } from "../atoms"
 import { TranslationCoordinator } from "../translation-coordinator"
 import { UniversalVideoAdapter } from "../universal-adapter"
 
@@ -59,8 +59,8 @@ function attachScheduler(adapter: UniversalVideoAdapter, active: boolean, curren
     stop: vi.fn<(...args: any[]) => any>(),
     setState: vi.fn<(...args: any[]) => any>(),
     supplementSubtitles: vi.fn<(...args: any[]) => any>(),
-    removeCuesInTimeWindow: vi.fn<(...args: any[]) => any>(),
     reconcileTranslatedCuesAfterRecut: vi.fn<(...args: any[]) => any>(),
+    resyncFromVideo: vi.fn<(...args: any[]) => any>(),
     getVideoElement: vi.fn<(...args: any[]) => any>(() => ({ currentTime })),
     getState: vi.fn<(...args: any[]) => any>(() => "idle"),
   }
@@ -86,6 +86,61 @@ describe("universalVideoAdapter", () => {
         providerId: null,
       },
     })
+  })
+
+  afterEach(() => {
+    subtitlesStore.set(adPlayingAtom, false)
+    vi.unstubAllGlobals()
+  })
+
+  it("tracks ad state and resyncs subtitles when an ad ends", () => {
+    const { adapter } = createAdapter([])
+    const scheduler = attachScheduler(adapter, true)
+    const requestTick = vi.fn<(...args: any[]) => any>()
+    ;(adapter as any).translationCoordinator = { requestTick }
+
+    let playing = true
+    const player = {} as HTMLElement
+    vi.stubGlobal("document", {
+      title: "Test video",
+      querySelector: vi.fn<(selector: string) => Element | null>(() => player),
+    })
+    ;(adapter as any).config.isAdPlaying = vi.fn<() => boolean>(() => playing)
+
+    let observerCallback!: MutationCallback
+    const observe = vi.fn<(...args: any[]) => any>()
+    const disconnect = vi.fn<(...args: any[]) => any>()
+    class FakeMutationObserver {
+      constructor(callback: MutationCallback) {
+        observerCallback = callback
+      }
+
+      observe = observe
+      disconnect = disconnect
+    }
+    vi.stubGlobal("MutationObserver", FakeMutationObserver)
+
+    ;(adapter as any).setupAdObserver()
+
+    expect(subtitlesStore.get(adPlayingAtom)).toBe(true)
+    expect(observe).toHaveBeenCalledWith(player, {
+      attributes: true,
+      attributeFilter: ["class"],
+    })
+
+    playing = false
+    observerCallback([], {} as MutationObserver)
+
+    expect(subtitlesStore.get(adPlayingAtom)).toBe(false)
+    expect(scheduler.resyncFromVideo).toHaveBeenCalledTimes(1)
+    expect(requestTick).toHaveBeenCalledTimes(1)
+
+    playing = true
+    observerCallback([], {} as MutationObserver)
+    ;(adapter as any).teardownAdObserver()
+
+    expect(disconnect).toHaveBeenCalledTimes(1)
+    expect(subtitlesStore.get(adPlayingAtom)).toBe(false)
   })
 
   it("keeps raw source subtitles and rebuilds processed source subtitles", async () => {

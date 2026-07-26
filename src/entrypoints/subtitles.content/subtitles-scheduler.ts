@@ -89,14 +89,6 @@ export class SubtitlesScheduler {
   }
 
   /**
-   * Drop translated cues that overlap [windowStartMs, windowEndMs) — same half-open interval
-   * rule as replaceSourceTrackWindow, so spanning cues cannot outlive an AI recut.
-   */
-  removeCuesInTimeWindow(windowStartMs: number, windowEndMs: number) {
-    this.reconcileTranslatedCuesAfterRecut(windowStartMs, windowEndMs, [])
-  }
-
-  /**
    * After AI recut of a window: drop overlapping translated cues, but re-attach translations
    * whose start+end+text still match a next fragment. Unchanged cues must not be wiped then
    * skipped forever (coordinator still has them in translatedStarts).

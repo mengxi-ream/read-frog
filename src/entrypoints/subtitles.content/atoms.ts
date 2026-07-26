@@ -82,20 +82,16 @@ export const subtitlesPositionAtom = atom<SubtitlePosition>({ ...DEFAULT_SUBTITL
 
 export const subtitlesDisplayAtom = atom((get) => {
   const subtitle = get(displaySubtitleAtom)
-  const scheduled = get(currentSubtitleAtom)
   const stateData = get(subtitlesStateAtom)
   const isVisible = get(subtitlesVisibleAtom)
   const { style } = get(configFieldsAtomMap.videoSubtitles)
 
   // translationOnly must never fall back to source-only original for "content".
   const contentSubtitle =
-    style.displayMode === "translationOnly" ? (scheduled?.translation ? scheduled : null) : subtitle
+    style.displayMode === "translationOnly" ? (subtitle?.translation ? subtitle : null) : subtitle
 
   return {
     subtitle: contentSubtitle,
-    /** Raw display lookup including source fallback (for pending UI in bilingual). */
-    displaySubtitle: subtitle,
-    scheduled,
     stateData,
     isVisible,
   }

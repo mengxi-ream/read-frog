@@ -89,27 +89,7 @@ describe("subtitles scheduler", () => {
     expect(subtitlesStore.get(currentSubtitleAtom)?.translation).toBe("你好世界")
   })
 
-  it("removeCuesInTimeWindow drops translated cues in the window", () => {
-    const video = createVideo(0.25)
-    const scheduler = new SubtitlesScheduler({ videoElement: video })
-    scheduler.start()
-
-    scheduler.supplementSubtitles([
-      { text: "a", start: 0, end: 500, translation: "A" },
-      { text: "b", start: 500, end: 1000, translation: "B" },
-      { text: "c", start: 2000, end: 2500, translation: "C" },
-    ])
-
-    scheduler.removeCuesInTimeWindow(0, 1000)
-
-    expect(subtitlesStore.get(currentSubtitleAtom)).toBeNull()
-
-    video.currentTime = 2.1
-    ;(scheduler as any).updateSubtitles(2.1)
-    expect(subtitlesStore.get(currentSubtitleAtom)?.text).toBe("c")
-  })
-
-  it("removeCuesInTimeWindow drops cues that span into the window", () => {
+  it("reconcileTranslatedCuesAfterRecut drops cues that span into the window", () => {
     const video = createVideo(1.2)
     const scheduler = new SubtitlesScheduler({ videoElement: video })
     scheduler.start()
@@ -122,7 +102,9 @@ describe("subtitles scheduler", () => {
 
     expect(subtitlesStore.get(currentSubtitleAtom)?.text).toBe("span")
 
-    scheduler.removeCuesInTimeWindow(1000, 2000)
+    scheduler.reconcileTranslatedCuesAfterRecut(1000, 2000, [
+      { text: "recut", start: 1000, end: 2000 },
+    ])
 
     // Spanning translation must not remain preferred over the recut source track.
     expect(subtitlesStore.get(currentSubtitleAtom)).toBeNull()

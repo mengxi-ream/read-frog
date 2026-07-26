@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest"
+import { configAtom } from "@/utils/atoms/config"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
   adPlayingAtom,
   currentSubtitleAtom,
@@ -6,6 +8,8 @@ import {
   displaySubtitleAtom,
   sourceTrackAtom,
   subtitlesShowContentAtom,
+  subtitlesShowStateAtom,
+  subtitlesStateAtom,
   subtitlesStore,
   subtitlesVisibleAtom,
 } from "../atoms"
@@ -15,7 +19,9 @@ describe("displaySubtitleAtom", () => {
     subtitlesStore.set(adPlayingAtom, false)
     subtitlesStore.set(currentSubtitleAtom, null)
     subtitlesStore.set(sourceTrackAtom, [])
+    subtitlesStore.set(subtitlesStateAtom, null)
     subtitlesStore.set(subtitlesVisibleAtom, false)
+    subtitlesStore.set(configAtom, DEFAULT_CONFIG)
   })
 
   it("falls back to source track when no translated cue is scheduled", () => {
@@ -65,6 +71,37 @@ describe("displaySubtitleAtom", () => {
       start: 2000,
       end: 3000,
     })
+  })
+
+  it("does not render a stale scheduled translation in translation-only mode", () => {
+    subtitlesStore.set(configAtom, {
+      ...DEFAULT_CONFIG,
+      videoSubtitles: {
+        ...DEFAULT_CONFIG.videoSubtitles,
+        style: {
+          ...DEFAULT_CONFIG.videoSubtitles.style,
+          displayMode: "translationOnly",
+        },
+      },
+    })
+    subtitlesStore.set(currentTimeMsAtom, 2500)
+    subtitlesStore.set(subtitlesStateAtom, { state: "loading" })
+    subtitlesStore.set(subtitlesVisibleAtom, true)
+    subtitlesStore.set(sourceTrackAtom, [{ text: "later", start: 2000, end: 3000 }])
+    subtitlesStore.set(currentSubtitleAtom, {
+      text: "hello",
+      start: 0,
+      end: 1000,
+      translation: "你好",
+    })
+
+    expect(subtitlesStore.get(displaySubtitleAtom)).toEqual({
+      text: "later",
+      start: 2000,
+      end: 3000,
+    })
+    expect(subtitlesStore.get(subtitlesShowContentAtom)).toBe(false)
+    expect(subtitlesStore.get(subtitlesShowStateAtom)).toBe("loading")
   })
 
   it("hides main-video captions while an ad is playing", () => {

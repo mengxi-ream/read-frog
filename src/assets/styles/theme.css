@@ -304,7 +304,10 @@ body {
     .animate-toast-success-odd,
     .animate-toast-success-even,
     .animate-toast-error-odd,
-    .animate-toast-error-even
+    .animate-toast-error-even,
+    .animate-subtitle-pending-breath,
+    .animate-subtitle-pending-appear,
+    .animate-subtitle-fade-in
   ) {
     animation: none;
   }
