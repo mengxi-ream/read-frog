@@ -1,5 +1,24 @@
 # @read-frog/extension
 
+## 1.43.3
+
+### Patch Changes
+
+- [#1967](https://github.com/mengxi-ream/read-frog/pull/1967) [`e8c68e7`](https://github.com/mengxi-ream/read-frog/commit/e8c68e7a6013cb2eda0a52bfb4e680216665b1df) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(network): preserve proxied request headers and bodies on Firefox
+
+  Two Firefox-only issues in the extension's shared request path blocked AI
+  subtitle requests and Notebase loading:
+
+  - `normalizeHeaders` spread `Headers.entries()`, whose iterator is not iterable
+    across the Firefox extension realm ("headersInit.entries() is not iterable").
+    Collect entries with `Headers.forEach` instead.
+  - The proxy-fetch dropped the POST body because `Request.body` is null for
+    some extension requests on Firefox. Read the body with `request.text()`
+    directly so the payload is forwarded instead of producing 400 "expected
+    object, received undefined" responses.
+
+- [#1963](https://github.com/mengxi-ream/read-frog/pull/1963) [`0ea8fdb`](https://github.com/mengxi-ream/read-frog/commit/0ea8fdbba66f985616bc1e5e5666ceb9c70107d7) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(save-suggestion): generate save suggestions with the user's own selection-translate AI provider (LLM providers only), add an in-card switch to turn suggestions off, and replace the hosted-quota backoff with a persisted per-provider failure cooldown that doubles from 2 minutes and resets on success or provider config changes
+
 ## 1.43.2
 
 ### Patch Changes
