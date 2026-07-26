@@ -351,7 +351,7 @@ options:
         speak: Озвучивание
       saveSuggestion:
         title: Предложения по сохранению
-        description: После перевода выделенного текста предлагать слова для сохранения в Notebase
+        description: После перевода выделенного текста с помощью ИИ-провайдера предлагать слова для сохранения в Notebase
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -1016,6 +1016,7 @@ saveSuggestion:
   save: Сохранить
   saved: Сохранено
   staleSuggestion: Это предложение устарело
+  toggleLabel: Показывать предложения по сохранению
 thinking:
   label: Размышление
   complete: Размышление завершено

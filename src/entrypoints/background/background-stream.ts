@@ -6,6 +6,7 @@ import type {
   BackgroundStreamSnapshot,
   BackgroundStreamStructuredObjectSerializablePayload,
   BackgroundStreamTextSerializablePayload,
+  BackgroundStructuredObjectOutputField,
   BackgroundStructuredObjectStreamSnapshot,
   BackgroundTextStreamSnapshot,
   StartMessageParseResult,
@@ -583,9 +584,11 @@ export async function runStreamTextInBackground(
   })
 }
 
-async function createLocalStructuredObjectPartStream(
-  serializablePayload: BackgroundStreamStructuredObjectSerializablePayload,
-  objectSchema: z.ZodObject<Record<string, z.ZodTypeAny>>,
+async function createLocalStructuredObjectPartStream<TOutput extends Record<string, unknown>>(
+  serializablePayload: BackgroundStreamTextSerializablePayload & {
+    outputSchema?: BackgroundStructuredObjectOutputField[]
+  },
+  objectSchema: z.ZodType<TOutput>,
   options: StreamRuntimeOptions<BackgroundStructuredObjectStreamSnapshot> = {},
 ): Promise<AsyncIterable<unknown>> {
   const { providerId, outputSchema: _outputSchema, ...streamParams } = serializablePayload
@@ -658,32 +661,28 @@ export async function runNoteSuggestionStreamInBackground(
   serializablePayload: BackgroundStreamNoteSuggestionSerializablePayload,
   options: StreamRuntimeOptions<BackgroundNoteSuggestionStreamSnapshot> = {},
 ): Promise<BackgroundNoteSuggestionStreamSnapshot> {
-  const { signal } = options
-  const { providerId, prompt, instructions, temperature } = serializablePayload
+  const { signal, onError } = options
+  const { providerId, prompt, instructions } = serializablePayload
 
   if (signal?.aborted) {
     throw new DOMException("stream aborted", "AbortError")
   }
 
-  // Note suggestion always runs on the hosted built-in AI: the fixed nested envelope
-  // schema lives server-side, so there is no local-provider path and no
-  // client-sent outputSchema. The shared consume/parse/validate logic is reused.
-  if (!isBuiltInAiProviderId(providerId) || !instructions || !prompt) {
+  // Note suggestion runs on the user's selection-translate LLM provider. The
+  // nested envelope schema is client-owned, so the local structured-object
+  // path is reused with it directly; there is no hosted path.
+  if (isBuiltInAiProviderId(providerId) || !instructions || !prompt) {
     throw new BackgroundStreamError(
       "invalid_request",
-      "Note suggestion requires the hosted built-in AI provider with instructions and prompt",
+      "Note suggestion requires a user-configured LLM provider with instructions and prompt",
     )
   }
 
-  let partStream: AsyncIterable<unknown>
-  try {
-    partStream = await backgroundOrpcClient.hostedAi.noteSuggestion.streamStructuredObject(
-      { instructions, prompt, temperature },
-      { signal },
-    )
-  } catch (error) {
-    throw normalizeHostedAiError(error)
-  }
+  const partStream = await createLocalStructuredObjectPartStream(
+    serializablePayload,
+    saveSuggestionEnvelopeSchema,
+    { signal, onError },
+  )
 
   // The card renders only the final result, so no onChunk forwarding.
   return consumeStructuredObjectPartStream(partStream, {

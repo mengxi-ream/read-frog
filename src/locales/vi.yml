@@ -351,7 +351,7 @@ options:
         speak: Đọc
       saveSuggestion:
         title: Gợi ý lưu
-        description: Sau khi dịch vùng chọn, gợi ý các từ để lưu vào Notebase
+        description: Sau khi dịch vùng chọn bằng nhà cung cấp AI, gợi ý các từ để lưu vào Notebase
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -1016,6 +1016,7 @@ saveSuggestion:
   save: Lưu
   saved: Đã lưu
   staleSuggestion: Gợi ý này đã cũ
+  toggleLabel: Hiện gợi ý lưu
 thinking:
   label: Đang suy luận
   complete: Suy luận hoàn tất

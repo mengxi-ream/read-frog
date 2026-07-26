@@ -352,7 +352,7 @@ options:
         speak: Leer en voz alta
       saveSuggestion:
         title: Sugerencias de guardado
-        description: Después de traducir una selección, sugerir palabras para guardar en tu Notebase
+        description: Después de traducir una selección con un proveedor de IA, sugerir palabras para guardar en tu Notebase
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -1131,6 +1131,7 @@ saveSuggestion:
   save: Guardar
   saved: Guardado
   staleSuggestion: Esta sugerencia está desactualizada
+  toggleLabel: Mostrar sugerencias de guardado
 thinking:
   label: Pensando
   complete: Razonamiento completo

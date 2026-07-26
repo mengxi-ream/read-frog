@@ -351,7 +351,7 @@ options:
         speak: 読み上げ
       saveSuggestion:
         title: 保存の提案
-        description: 選択テキストの翻訳後、Notebase に保存する単語を提案します
+        description: AI プロバイダーで選択テキストを翻訳した後、Notebase に保存する単語を提案します
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -1016,6 +1016,7 @@ saveSuggestion:
   save: 保存
   saved: 保存済み
   staleSuggestion: この提案は古くなっています
+  toggleLabel: 保存の提案を表示
 thinking:
   label: 思考中
   complete: 思考完了

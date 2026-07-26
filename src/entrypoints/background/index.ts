@@ -1,6 +1,6 @@
 import "@/utils/zod-config"
 import type { Config, UiLanguage } from "@/types/config/config"
-import { browser, defineBackground } from "#imports"
+import { browser, defineBackground, storage } from "#imports"
 import { env } from "@/env"
 import { storageAdapter } from "@/utils/atoms/storage-adapter"
 import { promoteGoogleTranslateDefaultIfReachable } from "@/utils/config/default-translate-provider"
@@ -69,6 +69,10 @@ export default defineBackground({
       if (details.reason === "update") {
         logger.info("[Background] Extension updated, clearing blog cache")
         await SessionCacheGroupRegistry.removeCacheGroup("blog-fetch")
+        // Drop the retired rejection-based save-suggestion cooldown state; it
+        // was replaced by the per-provider failure cooldown
+        // (local:saveSuggestionProviderCooldown).
+        await storage.removeItem("local:saveSuggestionCooldown")
       }
     })
 

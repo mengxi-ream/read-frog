@@ -3,14 +3,14 @@ import type { SelectionToolbarCustomAction } from "@/types/config/selection-tool
 import { SAVE_SUGGESTION_MAX_NOTES } from "@/utils/save-suggestion/types"
 import { buildStructuredOutputFieldList } from "../custom-action-prompt"
 
-// The hosted note-suggestion endpoint rejects prompts above 32k characters.
-// Cap the page-derived free text, cap each candidate field description, and
-// keep total headroom below the hard limit so a valid request is always sent.
+// Cap the page-derived free text and each candidate field description so a
+// suggestion request stays a small, bounded spend of the user's own provider
+// quota regardless of page size or candidate-action bloat.
 const SAVE_SUGGESTION_MAX_SELECTION_CHARS = 1500
 const SAVE_SUGGESTION_MAX_PARAGRAPHS_CHARS = 2500
 const SAVE_SUGGESTION_MAX_WEB_TITLE_CHARS = 200
 const SAVE_SUGGESTION_MAX_FIELD_DESCRIPTION_CHARS = 300
-// User-prompt budget, comfortably under the endpoint's 32000-char hard limit.
+// Total user-prompt budget for the suggestion request.
 const SAVE_SUGGESTION_MAX_PROMPT_CHARS = 30000
 
 function truncateForPrompt(text: string, maxChars: number): string {
@@ -144,8 +144,8 @@ ${dictionaryBlock}`
 
   // Drop candidate actions from the end until within budget. A dropped action is
   // simply not offered as a target (the model falls back to createNewDictionaryAction),
-  // which degrades gracefully instead of sending an over-limit request that fails
-  // and suppresses suggestions for the whole page session.
+  // which degrades gracefully instead of sending an oversized request on the
+  // user's provider quota.
   let candidates = cappedCandidates
   let prompt = assemble(candidates)
   while (prompt.length > SAVE_SUGGESTION_MAX_PROMPT_CHARS && candidates.length > 0) {
