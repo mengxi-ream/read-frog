@@ -1024,7 +1024,7 @@ thinking:
 shortcutKeySelector:
   placeholder: 단축키를 입력해 주세요
 subtitles:
-  loadingAiSubtitles: AI 자막 불러오는 중…
+  loadingAiSubtitles: AI 자막 불러오는 중… (예상 3분)
   requestAiSubtitles: AI 자막 요청 (Beta)
   usingAiSubtitles: AI 자막 사용 중
   actions:

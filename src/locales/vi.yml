@@ -1024,7 +1024,7 @@ thinking:
 shortcutKeySelector:
   placeholder: Vui lòng nhập phím tắt
 subtitles:
-  loadingAiSubtitles: Đang tải phụ đề AI…
+  loadingAiSubtitles: Đang tải phụ đề AI… (dự kiến 3 phút)
   requestAiSubtitles: Yêu cầu phụ đề AI (Beta)
   usingAiSubtitles: Đang dùng phụ đề AI
   actions:

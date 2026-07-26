@@ -1139,7 +1139,7 @@ thinking:
 shortcutKeySelector:
   placeholder: Introduce el atajo
 subtitles:
-  loadingAiSubtitles: Cargando subtítulos con IA…
+  loadingAiSubtitles: Cargando subtítulos con IA… (estimado 3 min)
   requestAiSubtitles: Solicitar subtítulos con IA (Beta)
   usingAiSubtitles: Usando subtítulos con IA
   actions:
