@@ -1139,7 +1139,7 @@ thinking:
 shortcutKeySelector:
   placeholder: Please enter the shortcut
 subtitles:
-  loadingAiSubtitles: Loading AI subtitles…
+  loadingAiSubtitles: Loading AI subtitles… (estimated 3 min)
   requestAiSubtitles: Request AI subtitles (Beta)
   usingAiSubtitles: Using AI subtitles
   actions:

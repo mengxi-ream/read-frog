@@ -1139,7 +1139,7 @@ thinking:
 shortcutKeySelector:
   placeholder: 請輸入快速鍵
 subtitles:
-  loadingAiSubtitles: 正在載入 AI 字幕
+  loadingAiSubtitles: 正在載入 AI 字幕（預計 3 分鐘）
   requestAiSubtitles: 請求 AI 字幕（Beta）
   usingAiSubtitles: 正在使用 AI 字幕
   actions:

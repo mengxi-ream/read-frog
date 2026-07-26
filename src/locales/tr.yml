@@ -1024,7 +1024,7 @@ thinking:
 shortcutKeySelector:
   placeholder: Lütfen kısayolu girin
 subtitles:
-  loadingAiSubtitles: Yapay zeka altyazıları yükleniyor…
+  loadingAiSubtitles: Yapay zeka altyazıları yükleniyor… (tahmini 3 dk)
   requestAiSubtitles: Yapay zeka altyazısı iste (Beta)
   usingAiSubtitles: Yapay zeka altyazısı kullanılıyor
   actions:

@@ -1024,7 +1024,7 @@ thinking:
 shortcutKeySelector:
   placeholder: Пожалуйста, введите горячую клавишу
 subtitles:
-  loadingAiSubtitles: Загрузка ИИ-субтитров…
+  loadingAiSubtitles: Загрузка ИИ-субтитров… (ожидается 3 мин)
   requestAiSubtitles: Запросить ИИ-субтитры (Beta)
   usingAiSubtitles: Используются ИИ-субтитры
   actions:
