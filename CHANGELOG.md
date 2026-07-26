@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.43.2
+
+### Patch Changes
+
+- [#1960](https://github.com/mengxi-ream/read-frog/pull/1960) [`098ca41`](https://github.com/mengxi-ream/read-frog/commit/098ca419b5db4f41803520f69a1e04aa7a694b47) Thanks [@taiiiyang](https://github.com/taiiiyang)! - i18n(subtitles): show an estimated time (~3 min) while AI subtitles are loading
+
 ## 1.43.1
 
 ### Patch Changes
