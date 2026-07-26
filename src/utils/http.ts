@@ -1,6 +1,10 @@
 export function normalizeHeaders(headersInit?: HeadersInit): [string, string][] {
   if (!headersInit) return []
-  if (headersInit instanceof Headers) return [...headersInit.entries()]
+  if (headersInit instanceof Headers) {
+    const entries: [string, string][] = []
+    headersInit.forEach((value, key) => entries.push([key, value]))
+    return entries
+  }
   if (Array.isArray(headersInit)) return headersInit.map(([k, v]) => [k, v])
   // plain object shape
   const entries: [string, string][] = []
