@@ -351,7 +351,7 @@ options:
         speak: 읽기
       saveSuggestion:
         title: 저장 제안
-        description: 선택 번역 후 Notebase에 저장할 단어를 추천합니다
+        description: AI 제공자로 선택 번역 후 Notebase에 저장할 단어를 추천합니다
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -1016,6 +1016,7 @@ saveSuggestion:
   save: 저장
   saved: 저장됨
   staleSuggestion: 이 제안은 더 이상 유효하지 않습니다
+  toggleLabel: 저장 제안 표시
 thinking:
   label: 사고 중
   complete: 사고 완료

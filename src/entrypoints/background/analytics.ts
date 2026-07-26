@@ -47,9 +47,10 @@ type BackgroundFeatureUsedEventProperties = FeatureUsedEventProperties & {
 }
 
 /**
- * Features whose events are multi-step funnels (every step must be recorded) and
- * are already rate-limited elsewhere, so they bypass the once-per-day-per-feature
- * adoption throttle instead of losing their second same-day event to it.
+ * Features whose events are multi-step funnels (every step must be recorded)
+ * and whose volume is bounded elsewhere, so they bypass the
+ * once-per-day-per-feature adoption throttle instead of losing their second
+ * same-day event to it.
  */
 const FEATURES_BYPASSING_DAILY_FEATURE_CACHE = new Set<AnalyticsFeature>([
   ANALYTICS_FEATURE.SAVE_SUGGESTION,
@@ -773,8 +774,10 @@ export function createBackgroundAnalytics(
     // Funnel features must record every step (e.g. save-suggestion shown vs
     // accepted), so they skip the once-per-day-per-feature adoption throttle —
     // the daily cache keys on feature only and would drop the second same-day
-    // event. These features are already rate-limited (save suggestions by their
-    // cooldown), so bypassing does not inflate volume.
+    // event. Volume stays bounded: a save-suggestion shown event requires a
+    // manual selection translation that produced a valid suggestion (once per
+    // popover session), and error retries are capped by the per-provider
+    // failure cooldown.
     if (
       !runtime.featureUsageCache ||
       FEATURES_BYPASSING_DAILY_FEATURE_CACHE.has(normalizedProperties.feature)

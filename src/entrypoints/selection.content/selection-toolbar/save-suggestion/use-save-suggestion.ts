@@ -1,21 +1,28 @@
+import type { FeatureProviderAnalytics } from "@/types/analytics"
+import type { LLMProviderConfig } from "@/types/config/provider"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { ValidatedSaveSuggestion } from "@/utils/save-suggestion/types"
 import { useAtomValue } from "jotai"
 import { useCallback, useRef, useState } from "react"
+import { classifyProviderConfig } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { CUSTOM_ACTION_TEMPLATES } from "@/utils/constants/custom-action-templates"
 import { streamBackgroundNoteSuggestion } from "@/utils/content-script/background-stream-client"
+import { STREAM_PORT_DISCONNECTED_MESSAGE } from "@/utils/content-script/port-streaming"
 import { logger } from "@/utils/logger"
-import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
-import { isSaveSuggestionEligible } from "@/utils/save-suggestion/cooldown"
+import { resolveModelId } from "@/utils/providers/model-id"
+import { getProviderOptionsWithOverride } from "@/utils/providers/options"
+import { getTopLevelReasoning } from "@/utils/providers/reasoning"
+import {
+  getSaveSuggestionProviderFingerprint,
+  isSaveSuggestionAttemptAllowed,
+  recordSaveSuggestionFailure,
+  recordSaveSuggestionSuccess,
+} from "@/utils/save-suggestion/provider-cooldown"
 import { saveSuggestionEnvelopeSchema } from "@/utils/save-suggestion/types"
 import { validateSaveSuggestion } from "@/utils/save-suggestion/validate"
 import { isAbortError } from "../inline-error"
 import { buildSaveSuggestionPrompts } from "./prompt"
-import {
-  isSaveSuggestionSuppressedForPageSession,
-  suppressSaveSuggestionForPageSession,
-} from "./session-guard"
 
 export interface SaveSuggestionSessionResult {
   /** Composite key: popoverSessionKey:translateRequestKey:rerunNonce. */
@@ -27,6 +34,8 @@ export interface SaveSuggestionSessionResult {
   dictionaryDraft: SelectionToolbarCustomAction | null
   /** When the request was fired (for latency analytics). */
   firedAt: number
+  /** Analytics classification of the provider that generated this suggestion. */
+  analyticsProvider: FeatureProviderAnalytics
 }
 
 export interface SaveSuggestionFireInput {
@@ -36,20 +45,32 @@ export interface SaveSuggestionFireInput {
   /** English name of the target language. */
   targetLangName: string
   webTitle: string
+  /** The resolved selection-translate provider (guaranteed local + enabled + LLM by the caller). */
+  providerId: string
+  providerConfig: LLMProviderConfig
 }
 
 /**
- * Owns the "guess you want to save" AI request lifecycle. Fired when a
- * translation run starts; the card renders the result only after the
- * translation finishes. An aborted request is "never happened"; an invalid or
- * empty result additionally suppresses the feature for the page session.
+ * Owns the "guess you want to save" AI request lifecycle, running on the
+ * user's selection-translate LLM provider. Fired when a translation run
+ * starts; the card renders the result only after the translation finishes. An
+ * aborted request (or a dropped background port) is "never happened"; a
+ * request error or schema/semantically invalid output records a failure in
+ * the persisted per-provider cooldown, which doubles from 2 minutes without
+ * cap until a success or a provider (config) change resets it. A valid
+ * response with zero notes is a success (nothing worth saving) that renders
+ * no card.
  */
 export function useSaveSuggestion() {
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const [suggestion, setSuggestion] = useState<SaveSuggestionSessionResult | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
-  const completedSessionKeyRef = useRef<string | null>(null)
-  const shownSessionKeyRef = useRef<string | null>(null)
+  // Sets rather than single slots so an A→B→A key round-trip inside one
+  // popover (e.g. peeking at another target language) neither re-fires a
+  // completed request nor double-counts the shown analytics event. Cleared
+  // when the popover closes to keep them bounded.
+  const completedSessionKeysRef = useRef<Set<string>>(new Set())
+  const shownSessionKeysRef = useRef<Set<string>>(new Set())
   const latestRef = useRef(selectionToolbar)
   latestRef.current = selectionToolbar
 
@@ -60,15 +81,17 @@ export function useSaveSuggestion() {
 
   const resetSession = useCallback(() => {
     cancel()
+    completedSessionKeysRef.current.clear()
+    shownSessionKeysRef.current.clear()
     setSuggestion(null)
   }, [cancel])
 
   /** Returns true only the first time it is called for a session. */
   const markShownOnce = useCallback((sessionKey: string) => {
-    if (shownSessionKeyRef.current === sessionKey) {
+    if (shownSessionKeysRef.current.has(sessionKey)) {
       return false
     }
-    shownSessionKeyRef.current = sessionKey
+    shownSessionKeysRef.current.add(sessionKey)
     return true
   }, [])
 
@@ -77,10 +100,7 @@ export function useSaveSuggestion() {
     if (!config.saveSuggestion.enabled) {
       return
     }
-    if (isSaveSuggestionSuppressedForPageSession()) {
-      return
-    }
-    if (completedSessionKeyRef.current === input.sessionKey) {
+    if (completedSessionKeysRef.current.has(input.sessionKey)) {
       return
     }
     if (abortControllerRef.current) {
@@ -101,9 +121,15 @@ export function useSaveSuggestion() {
     abortControllerRef.current = abortController
     const { signal } = abortController
     const firedAt = Date.now()
+    // Snapshotted synchronously at fire time so a mid-flight provider config
+    // change cannot skew which cooldown bucket this attempt records into.
+    const providerKey = {
+      providerId: input.providerId,
+      providerFingerprint: getSaveSuggestionProviderFingerprint(input.providerConfig),
+    }
 
     const run = async () => {
-      if (!(await isSaveSuggestionEligible(firedAt)) || signal.aborted) {
+      if (!(await isSaveSuggestionAttemptAllowed(providerKey, firedAt)) || signal.aborted) {
         return
       }
 
@@ -111,7 +137,7 @@ export function useSaveSuggestion() {
       // prompt, the validation schema, and the action created at dialog
       // confirm all share identical fields.
       const enabledActions = config.customActions.filter((action) => action.enabled !== false)
-      const dictionaryDraft = dictionaryTemplate.createAction(BUILT_IN_AI_PROVIDER_ID)
+      const dictionaryDraft = dictionaryTemplate.createAction(input.providerId)
 
       const { systemPrompt, prompt } = buildSaveSuggestionPrompts({
         selection: input.selectionText,
@@ -122,11 +148,23 @@ export function useSaveSuggestion() {
         dictionaryDraft,
       })
 
+      const modelName = resolveModelId(input.providerConfig.model) ?? ""
+      const reasoning = getTopLevelReasoning(input.providerConfig)
+      const providerOptions = getProviderOptionsWithOverride(
+        modelName,
+        input.providerConfig.provider,
+        input.providerConfig.providerOptions,
+        reasoning,
+      )
+
       const snapshot = await streamBackgroundNoteSuggestion(
         {
-          providerId: BUILT_IN_AI_PROVIDER_ID,
+          providerId: input.providerId,
           instructions: systemPrompt,
           prompt,
+          providerOptions,
+          reasoning,
+          temperature: input.providerConfig.temperature,
         },
         { signal },
       )
@@ -135,6 +173,17 @@ export function useSaveSuggestion() {
       }
 
       const envelope = saveSuggestionEnvelopeSchema.safeParse(snapshot.output)
+
+      completedSessionKeysRef.current.add(input.sessionKey)
+
+      // The prompt sanctions an empty notes array ("truly nothing worth
+      // saving"): the provider worked correctly, so this resets the failure
+      // cooldown but renders no card.
+      if (envelope.success && envelope.data.notes.length === 0) {
+        void recordSaveSuggestionSuccess()
+        return
+      }
+
       const validated = envelope.success
         ? validateSaveSuggestion({
             envelope: envelope.data,
@@ -143,12 +192,12 @@ export function useSaveSuggestion() {
           })
         : null
 
-      completedSessionKeyRef.current = input.sessionKey
-
       if (!validated) {
-        suppressSaveSuggestionForPageSession()
+        void recordSaveSuggestionFailure(providerKey)
         return
       }
+
+      void recordSaveSuggestionSuccess()
 
       const actionSnapshot =
         validated.target.kind === "create_dictionary"
@@ -164,6 +213,7 @@ export function useSaveSuggestion() {
         actionSnapshot,
         dictionaryDraft: validated.target.kind === "create_dictionary" ? dictionaryDraft : null,
         firedAt,
+        analyticsProvider: classifyProviderConfig(input.providerConfig),
       })
     }
 
@@ -173,8 +223,17 @@ export function useSaveSuggestion() {
           return
         }
 
-        completedSessionKeyRef.current = input.sessionKey
-        suppressSaveSuggestionForPageSession()
+        // A dropped background port (service worker restart, extension
+        // reload) is an infrastructure hiccup, not the provider's fault:
+        // treat it like an abort so it neither counts toward the failure
+        // cooldown nor blocks a later attempt for this session.
+        if (error instanceof Error && error.message === STREAM_PORT_DISCONNECTED_MESSAGE) {
+          logger.info("[SaveSuggestion] Suggestion stream port disconnected", error)
+          return
+        }
+
+        completedSessionKeysRef.current.add(input.sessionKey)
+        void recordSaveSuggestionFailure(providerKey)
         logger.info("[SaveSuggestion] Suggestion request failed", error)
       })
       .finally(() => {

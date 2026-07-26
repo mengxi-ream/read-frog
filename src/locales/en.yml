@@ -352,7 +352,7 @@ options:
         speak: Speak
       saveSuggestion:
         title: Save Suggestions
-        description: After selection translation, suggest words to save to your Notebase
+        description: After selection translation with an AI provider, suggest words to save to your Notebase
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -1131,6 +1131,7 @@ saveSuggestion:
   save: Save
   saved: Saved
   staleSuggestion: This suggestion is out of date
+  toggleLabel: Show save suggestions
 thinking:
   label: Thinking
   complete: Thinking complete

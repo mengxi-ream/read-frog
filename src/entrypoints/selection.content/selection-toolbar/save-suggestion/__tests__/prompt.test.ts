@@ -10,7 +10,7 @@ function createAction(
     name: "My Dictionary",
     enabled: true,
     icon: "tabler:book-2",
-    providerId: "read-frog-free-ai",
+    providerId: "openai-default",
     systemPrompt: "system",
     prompt: "prompt",
     outputSchema: [
@@ -127,7 +127,7 @@ describe("buildSaveSuggestionPrompts", () => {
   })
 
   it("drops candidate actions from the end to keep the prompt under budget", () => {
-    // Many candidates, each with a long description, would blow the 32k limit.
+    // Many candidates, each with a long description, would blow the prompt budget.
     const many = Array.from({ length: 60 }, (_unusedA, i) =>
       createAction({
         id: `action-${i}`,
@@ -143,7 +143,7 @@ describe("buildSaveSuggestionPrompts", () => {
     )
     const { prompt } = buildSaveSuggestionPrompts({ ...input, candidates: many })
 
-    // A valid request is always sent (under the 32000 hard limit, with headroom).
+    // The request always stays within the bounded prompt budget.
     expect(prompt.length).toBeLessThanOrEqual(30_000)
     // The first candidate survives; later ones are dropped to fit.
     expect(prompt).toContain('- id: "action-0"')

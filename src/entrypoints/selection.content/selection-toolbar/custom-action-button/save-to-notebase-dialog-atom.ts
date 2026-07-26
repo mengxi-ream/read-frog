@@ -1,3 +1,4 @@
+import type { FeatureProviderAnalytics } from "@/types/analytics"
 import type {
   SelectionToolbarCustomAction,
   SelectionToolbarCustomActionNotebaseAccount,
@@ -23,6 +24,7 @@ export type SaveToNotebaseDialogState =
        */
       pendingActionDraft?: SelectionToolbarCustomAction
       analyticsSource?: SaveToNotebaseAnalyticsSource
+      analyticsProvider?: FeatureProviderAnalytics
     }
   | {
       open: true
@@ -30,6 +32,7 @@ export type SaveToNotebaseDialogState =
       pendingNotebaseSave: PendingConnectedNotebaseSave
       connectedAccount: SelectionToolbarCustomActionNotebaseAccount
       analyticsSource?: SaveToNotebaseAnalyticsSource
+      analyticsProvider?: FeatureProviderAnalytics
     }
   | {
       open: true
@@ -37,6 +40,7 @@ export type SaveToNotebaseDialogState =
       pendingNotebaseSave: PendingCreateNotebaseSave
       connectedAccount: SelectionToolbarCustomActionNotebaseAccount
       analyticsSource?: SaveToNotebaseAnalyticsSource
+      analyticsProvider?: FeatureProviderAnalytics
     }
 
 export const saveToNotebaseDialogAtom = atom<SaveToNotebaseDialogState>({ open: false })

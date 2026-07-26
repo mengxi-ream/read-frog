@@ -708,4 +708,75 @@ describe("background-stream", () => {
     expect(mockPort.postMessage).not.toHaveBeenCalled()
     expect(mockPort.disconnect).not.toHaveBeenCalled()
   })
+
+  it("streams note suggestions from the user's local provider", async () => {
+    const envelope = {
+      action: {
+        createNewDictionaryAction: false,
+        targetActionId: "action-1",
+        summaryFieldName: null,
+      },
+      notes: [{ fields: [{ name: "Word", value: "ephemeral" }] }],
+    }
+    getModelByIdMock.mockResolvedValue("mock-model")
+    streamTextMock.mockReturnValue({
+      stream: (async function* () {
+        yield { type: "text-delta", text: JSON.stringify(envelope) }
+        yield { type: "finish", finishReason: "stop" }
+      })(),
+    })
+
+    const { runNoteSuggestionStreamInBackground } = await import("../background-stream")
+    const { saveSuggestionEnvelopeSchema } = await import("@/utils/save-suggestion/types")
+    const result = await runNoteSuggestionStreamInBackground({
+      providerId: "openai-default",
+      instructions: "Suggest words",
+      prompt: "Selection context",
+    })
+
+    expect(getModelByIdMock).toHaveBeenCalledWith("openai-default")
+    expect(streamTextMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: "mock-model",
+        instructions: "Suggest words",
+        prompt: "Selection context",
+      }),
+    )
+    expect(outputObjectMock).toHaveBeenCalledWith({ schema: saveSuggestionEnvelopeSchema })
+    expect(result).toEqual({
+      output: envelope,
+      thinking: { status: "complete", text: "" },
+    })
+    expect(hostedStreamTextMock).not.toHaveBeenCalled()
+    expect(hostedStreamStructuredObjectMock).not.toHaveBeenCalled()
+  })
+
+  it("rejects note suggestions on the built-in hosted provider", async () => {
+    const { runNoteSuggestionStreamInBackground } = await import("../background-stream")
+
+    await expect(
+      runNoteSuggestionStreamInBackground({
+        providerId: "read-frog-free-ai",
+        instructions: "Suggest words",
+        prompt: "Selection context",
+      }),
+    ).rejects.toThrow("Note suggestion requires a user-configured LLM provider")
+    expect(streamTextMock).not.toHaveBeenCalled()
+    expect(getModelByIdMock).not.toHaveBeenCalled()
+  })
+
+  it("propagates provider resolution failures for note suggestions", async () => {
+    getModelByIdMock.mockRejectedValue(new Error("Provider missing-provider not found"))
+
+    const { runNoteSuggestionStreamInBackground } = await import("../background-stream")
+
+    await expect(
+      runNoteSuggestionStreamInBackground({
+        providerId: "missing-provider",
+        instructions: "Suggest words",
+        prompt: "Selection context",
+      }),
+    ).rejects.toThrow("Provider missing-provider not found")
+    expect(streamTextMock).not.toHaveBeenCalled()
+  })
 })

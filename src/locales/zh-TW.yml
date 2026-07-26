@@ -352,7 +352,7 @@ options:
         speak: 朗讀
       saveSuggestion:
         title: 儲存建議
-        description: 劃詞翻譯後，推薦可存入筆記庫的詞條
+        description: 使用 AI 供應商進行劃詞翻譯後，推薦可存入筆記庫的詞條
       shortcut:
         title: 選取文字翻譯快速鍵
         description: 自訂翻譯選取文字的快速鍵
@@ -1131,6 +1131,7 @@ saveSuggestion:
   save: 儲存
   saved: 已儲存
   staleSuggestion: 該建議已過期
+  toggleLabel: 顯示儲存建議
 thinking:
   label: 思考中
   complete: 思考完成
