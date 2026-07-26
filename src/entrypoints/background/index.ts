@@ -33,6 +33,7 @@ import { setupLLMGenerateTextMessageHandlers } from "./llm-generate-text"
 import { initMockData } from "./mock-data"
 import { newUserGuide } from "./new-user-guide"
 import { setupNotebasePendingSaveProcessor } from "./notebase-pending-save"
+import { setupPdfInterception } from "./pdf-interception"
 import { proxyFetch } from "./proxy-fetch"
 import { setupSidePanelMessageHandler } from "./side-panel"
 import { setUpSubtitlesTranslationQueue, setUpWebPageTranslationQueue } from "./translation-queues"
@@ -140,6 +141,9 @@ export default defineBackground({
 
     // Setup on-demand iframe injection after page translation is enabled.
     setupIframeInjection()
+
+    // Intercept .pdf navigations and redirect to the built-in PDF viewer.
+    setupPdfInterception()
 
     // i18n bootstrap for the non-React background context. Runs after the synchronous
     // listener registration above (MV3 requires listeners before the first await). The

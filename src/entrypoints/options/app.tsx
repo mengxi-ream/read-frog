@@ -42,6 +42,9 @@ const StatisticsPage = lazy(() =>
 const ConfigPage = lazy(() =>
   import("./pages/config").then((module) => ({ default: module.ConfigPage })),
 )
+const PdfTranslationPage = lazy(() =>
+  import("./pages/pdf-translation").then((module) => ({ default: module.PdfTranslationPage })),
+)
 
 const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/": GeneralPage,
@@ -57,6 +60,7 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/tts": TextToSpeechPage,
   "/statistics": StatisticsPage,
   "/config": ConfigPage,
+  "/pdf-translation": PdfTranslationPage,
 }
 
 function RouteLoadingFallback() {

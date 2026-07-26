@@ -162,6 +162,16 @@ export function SettingsNav() {
               <span>{i18n.t("options.config.title")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              render={<Link to="/pdf-translation" />}
+              isActive={pathname === "/pdf-translation"}
+            >
+              <Icon icon="tabler:file-type-pdf" />
+              <span>PDF Translation</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

@@ -51,6 +51,7 @@ export default defineConfig({
       "identity",
       "scripting",
       "webNavigation",
+      "webRequest",
       ...(browser !== "firefox" ? ["offscreen", "sidePanel"] : []),
     ],
     host_permissions: [

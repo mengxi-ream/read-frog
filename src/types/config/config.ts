@@ -92,6 +92,13 @@ const siteControlSchema = z.object({
   whitelistPatterns: z.array(z.string()),
 })
 
+// PDF translation schema — when enabled, navigating to a .pdf URL opens the
+// built-in PDF viewer which renders the document with PDF.js and overlays
+// bilingual translations on each text block.
+const pdfTranslationSchema = z.object({
+  enabled: z.boolean(),
+})
+
 // Interface language for the extension UI, independent of the browser language.
 // "auto" follows the browser UI language; explicit values are the supported locales.
 // MUST stay in sync with SUPPORTED_UI_LOCALES in `@/utils/i18n/resources` and `src/locales/`.
@@ -120,6 +127,7 @@ export const configSchema = z
     videoSubtitles: videoSubtitlesSchema,
     siteControl: siteControlSchema,
     siteRules: siteRulesConfigSchema,
+    pdfTranslation: pdfTranslationSchema,
     uiLanguage: uiLanguageSchema,
   })
   .superRefine((data, ctx) => {

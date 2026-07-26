@@ -12,4 +12,5 @@ export const ROUTE_DEFS = [
   { path: "/tts" },
   { path: "/statistics" },
   { path: "/config" },
+  { path: "/pdf-translation" },
 ] as const
