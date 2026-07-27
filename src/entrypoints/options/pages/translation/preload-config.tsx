@@ -91,7 +91,7 @@ function PreloadNumberSelector({ property }: { property: KeyOfPreloadConfig }) {
           } else {
             toastManager.add({
               type: "error",
-              title: configParseResult.error?.issues[0].message,
+              title: configParseResult.error?.issues[0]!.message,
             })
           }
         }}

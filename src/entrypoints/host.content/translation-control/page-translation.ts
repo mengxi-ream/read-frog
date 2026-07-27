@@ -409,8 +409,8 @@ export class PageTranslationManager implements IPageTranslationManager {
       if (e.touches.length !== 4) return reset()
 
       for (let i = 0; i < 4; i++) {
-        const dx = e.touches[i].clientX - startTouches[i].clientX
-        const dy = e.touches[i].clientY - startTouches[i].clientY
+        const dx = e.touches[i]!.clientX - startTouches[i]!.clientX
+        const dy = e.touches[i]!.clientY - startTouches[i]!.clientY
         if (dx * dx + dy * dy > PageTranslationManager.MOVE_THRESHOLD) return reset()
       }
     }

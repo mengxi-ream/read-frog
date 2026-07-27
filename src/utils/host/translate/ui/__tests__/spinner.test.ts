@@ -158,13 +158,13 @@ describe("spinner animation registry (#1881)", () => {
     spinner.getAnimations = getAnimations
 
     cancelSpinnerAnimation(spinner)
-    expect(createdAnimations[0].cancel).toHaveBeenCalledTimes(1)
+    expect(createdAnimations[0]!.cancel).toHaveBeenCalledTimes(1)
     expect(getAnimations).not.toHaveBeenCalled()
 
     // Second cancel: registry entry is gone — falls back to getAnimations.
     cancelSpinnerAnimation(spinner)
     expect(getAnimations).toHaveBeenCalledTimes(1)
-    expect(createdAnimations[0].cancel).toHaveBeenCalledTimes(1)
+    expect(createdAnimations[0]!.cancel).toHaveBeenCalledTimes(1)
   })
 
   it("caps concurrent animations and reopens slots after cancellation", () => {
@@ -179,7 +179,7 @@ describe("spinner animation registry (#1881)", () => {
     expect(overCap.style.borderTopColor).toBe("var(--read-frog-muted-foreground)")
 
     // Cancelling one frees a slot for the next spinner.
-    cancelSpinnerAnimation(createdSpinners[0])
+    cancelSpinnerAnimation(createdSpinners[0]!)
     makeSpinner()
     expect(animateMock).toHaveBeenCalledTimes(MAX_ANIMATED_SPINNERS + 1)
   })
@@ -203,7 +203,7 @@ describe("spinner animation registry (#1881)", () => {
     expect(result).toBeUndefined()
     expect(wrapper.querySelector(`.${TRANSLATION_ERROR_CONTAINER_CLASS}`)).toBeNull()
     expect(spinner.isConnected).toBe(false)
-    expect(createdAnimations[0].cancel).toHaveBeenCalled()
+    expect(createdAnimations[0]!.cancel).toHaveBeenCalled()
 
     wrapper.remove()
   })

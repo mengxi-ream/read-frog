@@ -64,7 +64,7 @@ function findLeafPath(node: SlateNode, path: number[], first: boolean): number[]
   const children = node.children
   if (!children?.length) return null
   const index = first ? 0 : children.length - 1
-  return findLeafPath(children[index], path.concat(index), first)
+  return findLeafPath(children[index]!, path.concat(index), first)
 }
 
 export function replaceSlate(element: Element, text: string): boolean {
@@ -76,7 +76,8 @@ export function replaceSlate(element: Element, text: string): boolean {
   if (!startPath || !endPath) return false
 
   let endNode: SlateNode = { children: editor.children }
-  for (let i = 0; i < endPath.length; i++) endNode = (endNode as SlateElement).children[endPath[i]]
+  for (let i = 0; i < endPath.length; i++)
+    endNode = (endNode as SlateElement).children[endPath[i]!]!
 
   editor.apply({
     type: "set_selection",

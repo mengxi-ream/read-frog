@@ -322,6 +322,13 @@ options:
       closeMenu:
         disableForSite: このサイトで無効化
         disableGlobally: グローバルで無効化
+      tooltips:
+        togglePageTranslation: ページ翻訳を切り替え
+        floatingButtonOptions: フローティングボタンのオプション
+        lockPosition: 位置を固定
+        unlockPosition: 位置の固定を解除
+        settings: 設定
+        feedback: フィードバックを送信
       disabledSites:
         title: フローティングボタン無効化サイト
         description: フローティングボタンを無効化するウェブサイトを設定します
@@ -351,7 +358,7 @@ options:
         speak: 読み上げ
       saveSuggestion:
         title: 保存の提案
-        description: 選択テキストの翻訳後、Notebase に保存する単語を提案します
+        description: AI プロバイダーで選択テキストを翻訳した後、Notebase に保存する単語を提案します
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -1016,6 +1023,7 @@ saveSuggestion:
   save: 保存
   saved: 保存済み
   staleSuggestion: この提案は古くなっています
+  toggleLabel: 保存の提案を表示
 thinking:
   label: 思考中
   complete: 思考完了
@@ -1024,7 +1032,7 @@ thinking:
 shortcutKeySelector:
   placeholder: ショートカットを入力してください
 subtitles:
-  loadingAiSubtitles: AI字幕を読み込み中…
+  loadingAiSubtitles: AI字幕を読み込み中…（推定3分）
   requestAiSubtitles: AI字幕をリクエスト（Beta）
   usingAiSubtitles: AI字幕を使用中
   actions:

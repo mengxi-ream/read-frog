@@ -19,7 +19,7 @@ describe("translation HTML attribute protection", () => {
       `<a class="notranslate ${longToken}" translate="no" style="color: red" id="profile-link" data-state="${longToken}" href="https://example.com/${longToken}" title="Open profile" aria-label="Profile">Vancouver</a>`,
     )
 
-    const protectedHtml = protectTranslationHtmlAttributes([link], document)
+    const protectedHtml = protectTranslationHtmlAttributes([link!], document)
 
     expect(protectedHtml.requestHtml).toContain(`class="notranslate"`)
     expect(protectedHtml.requestHtml).toContain(`translate="no"`)
@@ -66,7 +66,7 @@ describe("translation HTML attribute protection", () => {
     const [input] = createNodes(
       `<input type="submit" value="Send" class="primary action" disabled data-action="send">`,
     )
-    const protectedHtml = protectTranslationHtmlAttributes([input], document)
+    const protectedHtml = protectTranslationHtmlAttributes([input!], document)
 
     expect(protectedHtml.requestHtml).toBe(`<input value="Send" ${HTML_ATTRIBUTE_MARKER}="0">`)
 
@@ -88,7 +88,7 @@ describe("translation HTML attribute protection", () => {
     const [node] = createNodes(
       `<img class="avatar" src="avatar.png" alt="Profile photo" title="Open profile" aria-label="User avatar">`,
     )
-    const protectedHtml = protectTranslationHtmlAttributes([node], document)
+    const protectedHtml = protectTranslationHtmlAttributes([node!], document)
     const container = document.createElement("div")
     container.innerHTML = protectedHtml.restore(`<img data-rf-attr="0">`)
     const restored = container.querySelector("img")
@@ -104,7 +104,7 @@ describe("translation HTML attribute protection", () => {
     const [node] = createNodes(
       `<span data-rf-attr="page-owned" class="badge" data-read-frog-walked="walk-id">Hello<!-- hidden -->world</span>`,
     )
-    const protectedHtml = protectTranslationHtmlAttributes([node], document)
+    const protectedHtml = protectTranslationHtmlAttributes([node!], document)
 
     expect(protectedHtml.sourceHtml).not.toContain("data-read-frog-walked")
     expect(protectedHtml.sourceHtml).toContain("Hello world")
@@ -137,7 +137,7 @@ describe("translation HTML attribute protection", () => {
     const [node] = createNodes(
       `<button @click="open = true" x-on:keydown="submit" wire:click="save">Open</button>`,
     )
-    const protectedHtml = protectTranslationHtmlAttributes([node], document)
+    const protectedHtml = protectTranslationHtmlAttributes([node!], document)
 
     const container = document.createElement("div")
     container.innerHTML = protectedHtml.restore(`<button data-rf-attr="0">打开</button>`)
@@ -180,9 +180,9 @@ describe("translation HTML attribute protection", () => {
     const image = container.querySelector("img")
 
     expect(spans).toHaveLength(2)
-    expect(spans[0].className).toBe("outer")
-    expect(spans[1].className).toBe("inner")
-    expect(spans[1].getAttribute("data-city")).toBe("yvr")
+    expect(spans[0]!.className).toBe("outer")
+    expect(spans[1]!.className).toBe("inner")
+    expect(spans[1]!.getAttribute("data-city")).toBe("yvr")
     expect(container.textContent).toBe("温哥华的 AT&T 😀")
     expect(image).toBe(container.firstElementChild)
     expect(image?.className).toBe("avatar")
@@ -195,7 +195,7 @@ describe("translation HTML attribute protection", () => {
     const [node] = createNodes(
       `<div class="visible">Visible<template><span class="hidden-template-class" data-rf-attr="0">Hidden<!-- note --></span></template></div>`,
     )
-    const protectedHtml = protectTranslationHtmlAttributes([node], document)
+    const protectedHtml = protectTranslationHtmlAttributes([node!], document)
 
     expect(protectedHtml.requestHtml).toContain(`<div data-rf-attr="0">`)
     expect(protectedHtml.requestHtml).toContain(`<span data-rf-attr="1">Hidden </span>`)
@@ -219,7 +219,7 @@ describe("translation HTML attribute protection", () => {
     const [node] = createNodes(
       `<strong class="place" title="City" data-city="yvr">Vancouver</strong>`,
     )
-    const protectedHtml = protectTranslationHtmlAttributes([node], document)
+    const protectedHtml = protectTranslationHtmlAttributes([node!], document)
     const restored = protectedHtml.restore(
       `<strong title="City" data-rf-attr="0">Vancouver</strong>`,
     )

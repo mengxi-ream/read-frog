@@ -322,6 +322,13 @@ options:
       closeMenu:
         disableForSite: Отключить для этого сайта
         disableGlobally: Отключить глобально
+      tooltips:
+        togglePageTranslation: Переключить перевод страницы
+        floatingButtonOptions: Настройки плавающей кнопки
+        lockPosition: Закрепить положение
+        unlockPosition: Открепить положение
+        settings: Настройки
+        feedback: Отправить отзыв
       disabledSites:
         title: Сайты с отключённой плавающей кнопкой
         description: Настройте веб-сайты, где плавающая кнопка должна быть отключена
@@ -351,7 +358,7 @@ options:
         speak: Озвучивание
       saveSuggestion:
         title: Предложения по сохранению
-        description: После перевода выделенного текста предлагать слова для сохранения в Notebase
+        description: После перевода выделенного текста с помощью ИИ-провайдера предлагать слова для сохранения в Notebase
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -1016,6 +1023,7 @@ saveSuggestion:
   save: Сохранить
   saved: Сохранено
   staleSuggestion: Это предложение устарело
+  toggleLabel: Показывать предложения по сохранению
 thinking:
   label: Размышление
   complete: Размышление завершено
@@ -1024,7 +1032,7 @@ thinking:
 shortcutKeySelector:
   placeholder: Пожалуйста, введите горячую клавишу
 subtitles:
-  loadingAiSubtitles: Загрузка ИИ-субтитров…
+  loadingAiSubtitles: Загрузка ИИ-субтитров… (ожидается 3 мин)
   requestAiSubtitles: Запросить ИИ-субтитры (Beta)
   usingAiSubtitles: Используются ИИ-субтитры
   actions:

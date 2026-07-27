@@ -334,12 +334,12 @@ export class TranslatedSubtitlesDownloader {
     let index = 0
 
     while (index < subtitles.length) {
-      const chunkStart = subtitles[index].start
+      const chunkStart = subtitles[index]!.start
       const chunkEnd = chunkStart + maxDurationMs
       const chunk: SubtitlesFragment[] = []
 
-      while (index < subtitles.length && subtitles[index].start < chunkEnd) {
-        chunk.push(subtitles[index])
+      while (index < subtitles.length && subtitles[index]!.start < chunkEnd) {
+        chunk.push(subtitles[index]!)
         index++
       }
 
@@ -398,17 +398,17 @@ export class TranslatedSubtitlesDownloader {
     for (let index = 0; index < sortedCandidates.length; index++) {
       const fragment = sortedCandidates[index]
       if (
-        !Number.isFinite(fragment.start) ||
-        !Number.isFinite(fragment.end) ||
-        fragment.end - fragment.start <= MAX_COLLAPSED_AI_SEGMENT_DURATION_MS ||
-        fragment.start < sourceStart ||
-        fragment.end > sourceEnd
+        !Number.isFinite(fragment!.start) ||
+        !Number.isFinite(fragment!.end) ||
+        fragment!.end - fragment!.start <= MAX_COLLAPSED_AI_SEGMENT_DURATION_MS ||
+        fragment!.start < sourceStart ||
+        fragment!.end > sourceEnd
       ) {
         return true
       }
 
       const previous = sortedCandidates[index - 1]
-      if (previous && previous.end > fragment.start) {
+      if (previous && previous.end > fragment!.start) {
         return true
       }
     }

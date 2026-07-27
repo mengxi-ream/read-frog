@@ -89,7 +89,7 @@ describe("deeplxTranslate default URL fallback", () => {
       }),
     )
 
-    const [, requestInit] = fetchMock.mock.calls[0]
+    const [, requestInit] = fetchMock.mock.calls[0]!
     expect(JSON.parse(requestInit.body)).toEqual({
       text: "Hi",
       source_lang: "auto",
@@ -114,7 +114,7 @@ describe("deeplxTranslate default URL fallback", () => {
         { textFormat },
       )
 
-      const [, requestInit] = fetchMock.mock.calls[0]
+      const [, requestInit] = fetchMock.mock.calls[0]!
       expect(JSON.parse(requestInit.body)).toEqual({
         text: "Hi",
         source_lang: "EN",
@@ -138,7 +138,7 @@ describe("deeplxTranslate default URL fallback", () => {
       { textFormat: "html" },
     )
 
-    const [, requestInit] = fetchMock.mock.calls[0]
+    const [, requestInit] = fetchMock.mock.calls[0]!
     expect(JSON.parse(requestInit.body)).toEqual({
       text: '<p class="message">Hi</p>',
       source_lang: "EN",

@@ -1474,7 +1474,7 @@ describe("selection toolbar requests", () => {
       throw new Error("No alternate LLM provider available for custom action test")
     }
     updatedConfig.selectionToolbar.customActions[0] = {
-      ...updatedConfig.selectionToolbar.customActions[0],
+      ...updatedConfig.selectionToolbar.customActions[0]!,
       providerId: nextProviderId,
     }
 

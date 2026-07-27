@@ -322,6 +322,13 @@ options:
       closeMenu:
         disableForSite: 이 사이트에서 비활성화
         disableGlobally: 전역 비활성화
+      tooltips:
+        togglePageTranslation: 페이지 번역 전환
+        floatingButtonOptions: 플로팅 버튼 옵션
+        lockPosition: 위치 잠금
+        unlockPosition: 위치 잠금 해제
+        settings: 설정
+        feedback: 피드백 보내기
       disabledSites:
         title: 플로팅 버튼 비활성화 사이트
         description: 플로팅 버튼을 비활성화할 웹사이트를 설정합니다
@@ -351,7 +358,7 @@ options:
         speak: 읽기
       saveSuggestion:
         title: 저장 제안
-        description: 선택 번역 후 Notebase에 저장할 단어를 추천합니다
+        description: AI 제공자로 선택 번역 후 Notebase에 저장할 단어를 추천합니다
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -1016,6 +1023,7 @@ saveSuggestion:
   save: 저장
   saved: 저장됨
   staleSuggestion: 이 제안은 더 이상 유효하지 않습니다
+  toggleLabel: 저장 제안 표시
 thinking:
   label: 사고 중
   complete: 사고 완료
@@ -1024,7 +1032,7 @@ thinking:
 shortcutKeySelector:
   placeholder: 단축키를 입력해 주세요
 subtitles:
-  loadingAiSubtitles: AI 자막 불러오는 중…
+  loadingAiSubtitles: AI 자막 불러오는 중… (예상 3분)
   requestAiSubtitles: AI 자막 요청 (Beta)
   usingAiSubtitles: AI 자막 사용 중
   actions:

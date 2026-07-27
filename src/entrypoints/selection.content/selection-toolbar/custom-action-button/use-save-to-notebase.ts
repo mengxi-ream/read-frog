@@ -1,4 +1,5 @@
 import type { SaveToNotebaseAnalyticsSource } from "./save-to-notebase-dialog-atom"
+import type { FeatureProviderAnalytics } from "@/types/analytics"
 import type {
   SelectionToolbarCustomAction,
   SelectionToolbarCustomActionNotebaseAccount,
@@ -53,6 +54,8 @@ export interface SaveToNotebaseRequest {
    */
   actionDraft?: SelectionToolbarCustomAction
   analyticsSource?: SaveToNotebaseAnalyticsSource
+  /** Provider classification carried into dialog-confirm analytics. */
+  analyticsProvider?: FeatureProviderAnalytics
 }
 
 /**
@@ -200,7 +203,7 @@ export function useSaveToNotebase() {
   }
 
   const save = async (request: SaveToNotebaseRequest): Promise<SaveToNotebaseOutcome> => {
-    const { action, results, actionDraft, analyticsSource } = request
+    const { action, results, actionDraft, analyticsSource, analyticsProvider } = request
     if (results.length === 0) {
       return "failed"
     }
@@ -216,6 +219,7 @@ export function useSaveToNotebase() {
         }),
         ...(actionDraft ? { pendingActionDraft: actionDraft } : {}),
         ...(analyticsSource ? { analyticsSource } : {}),
+        ...(analyticsProvider ? { analyticsProvider } : {}),
       })
       return "dialog_opened" as const
     }
@@ -233,6 +237,7 @@ export function useSaveToNotebase() {
         }),
         connectedAccount,
         ...(analyticsSource ? { analyticsSource } : {}),
+        ...(analyticsProvider ? { analyticsProvider } : {}),
       })
       return "dialog_opened" as const
     }
@@ -263,6 +268,7 @@ export function useSaveToNotebase() {
         pendingNotebaseSave,
         connectedAccount: pendingNotebaseSave.connectionSnapshot.connectedAccount,
         ...(analyticsSource ? { analyticsSource } : {}),
+        ...(analyticsProvider ? { analyticsProvider } : {}),
       })
       return "dialog_opened"
     }

@@ -1,5 +1,40 @@
 # @read-frog/extension
 
+## 1.43.3
+
+### Patch Changes
+
+- [#1967](https://github.com/mengxi-ream/read-frog/pull/1967) [`e8c68e7`](https://github.com/mengxi-ream/read-frog/commit/e8c68e7a6013cb2eda0a52bfb4e680216665b1df) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(network): preserve proxied request headers and bodies on Firefox
+
+  Two Firefox-only issues in the extension's shared request path blocked AI
+  subtitle requests and Notebase loading:
+
+  - `normalizeHeaders` spread `Headers.entries()`, whose iterator is not iterable
+    across the Firefox extension realm ("headersInit.entries() is not iterable").
+    Collect entries with `Headers.forEach` instead.
+  - The proxy-fetch dropped the POST body because `Request.body` is null for
+    some extension requests on Firefox. Read the body with `request.text()`
+    directly so the payload is forwarded instead of producing 400 "expected
+    object, received undefined" responses.
+
+- [#1963](https://github.com/mengxi-ream/read-frog/pull/1963) [`0ea8fdb`](https://github.com/mengxi-ream/read-frog/commit/0ea8fdbba66f985616bc1e5e5666ceb9c70107d7) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(save-suggestion): generate save suggestions with the user's own selection-translate AI provider (LLM providers only), add an in-card switch to turn suggestions off, and replace the hosted-quota backoff with a persisted per-provider failure cooldown that doubles from 2 minutes and resets on success or provider config changes
+
+## 1.43.2
+
+### Patch Changes
+
+- [#1960](https://github.com/mengxi-ream/read-frog/pull/1960) [`098ca41`](https://github.com/mengxi-ream/read-frog/commit/098ca419b5db4f41803520f69a1e04aa7a694b47) Thanks [@taiiiyang](https://github.com/taiiiyang)! - i18n(subtitles): show an estimated time (~3 min) while AI subtitles are loading
+
+## 1.43.1
+
+### Patch Changes
+
+- [#1958](https://github.com/mengxi-ream/read-frog/pull/1958) [`0314a35`](https://github.com/mengxi-ream/read-frog/commit/0314a3531427dfa241ee019b6b95867b375228b1) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(config): default new installs to Google Translate when it is reachable
+
+- [#1953](https://github.com/mengxi-ream/read-frog/pull/1953) [`1b9f053`](https://github.com/mengxi-ream/read-frog/commit/1b9f053d83420e956f55ca58c521c1da021c0004) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(options): add roadmap and feedback sidebar links
+
+- [#1957](https://github.com/mengxi-ream/read-frog/pull/1957) [`5ec84b3`](https://github.com/mengxi-ream/read-frog/commit/5ec84b317cc59fe65c21958012e1dde030e6db54) Thanks [@JoeJoeflyn](https://github.com/JoeJoeflyn)! - fix(translation-hub): wrap long provider error messages so they stay inside the card
+
 ## 1.43.0
 
 ### Minor Changes

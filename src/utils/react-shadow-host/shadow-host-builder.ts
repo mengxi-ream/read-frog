@@ -84,7 +84,7 @@ export class ShadowHostBuilder {
 
     for (const match of matches) {
       documentCss += `${match[1]}\n`
-      shadowCss = shadowCss.replace(match[1], "")
+      shadowCss = shadowCss.replace(match[1]!, "")
     }
 
     return {

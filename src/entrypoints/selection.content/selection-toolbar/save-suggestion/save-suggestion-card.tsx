@@ -1,18 +1,16 @@
 import type { SaveSuggestionSessionResult } from "./use-save-suggestion"
 import type { SaveSuggestionNoteRecord } from "@/utils/save-suggestion/types"
 import { IconBookmarkPlus } from "@tabler/icons-react"
-import { useAtomValue } from "jotai"
+import { useAtom } from "jotai"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
+import { Label } from "@/components/ui/base-ui/label"
+import { Switch } from "@/components/ui/base-ui/switch"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { getOutputSchemaFingerprint } from "@/utils/notebase/pending-save"
 import { trackSaveSuggestionEvent } from "@/utils/save-suggestion/analytics"
-import {
-  recordSaveSuggestionAccepted,
-  recordSaveSuggestionShown,
-} from "@/utils/save-suggestion/cooldown"
 import { useSaveToNotebase } from "../custom-action-button/use-save-to-notebase"
 
 function formatNoteValue(value: string | number | null): string | null {
@@ -55,22 +53,23 @@ export function SaveSuggestionCard({
   suggestion: SaveSuggestionSessionResult
   markShownOnce: (sessionKey: string) => boolean
 }) {
-  const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
+  const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
   const { save, isSaving } = useSaveToNotebase()
   const [saveState, setSaveState] = useState<"idle" | "saved" | "stale">("idle")
 
-  const { sessionKey, validated, actionSnapshot, dictionaryDraft, firedAt } = suggestion
+  const { sessionKey, validated, actionSnapshot, dictionaryDraft, firedAt, analyticsProvider } =
+    suggestion
 
   useEffect(() => {
     if (!markShownOnce(sessionKey)) {
       return
     }
 
-    // Pessimistic cooldown write: the rejection is recorded the moment the
-    // card shows; a successful save rewrites it as an acceptance.
-    void recordSaveSuggestionShown()
-    trackSaveSuggestionEvent("suggestion_shown", { startedAt: firedAt })
-  }, [markShownOnce, sessionKey, firedAt])
+    trackSaveSuggestionEvent("suggestion_shown", {
+      startedAt: firedAt,
+      provider: analyticsProvider,
+    })
+  }, [markShownOnce, sessionKey, firedAt, analyticsProvider])
 
   const primaryFieldName = actionSnapshot.outputSchema[0]?.name
   if (!primaryFieldName) {
@@ -103,6 +102,7 @@ export function SaveSuggestionCard({
         results: validated.notes,
         actionDraft: dictionaryDraft,
         analyticsSource: "save_suggestion",
+        analyticsProvider,
       })
       return
     }
@@ -125,13 +125,14 @@ export function SaveSuggestionCard({
       action: liveAction,
       results: validated.notes,
       analyticsSource: "save_suggestion",
+      analyticsProvider,
     })
     if (outcome === "saved") {
       setSaveState("saved")
-      void recordSaveSuggestionAccepted()
       trackSaveSuggestionEvent("suggestion_accepted", {
         startedAt: firedAt,
         actionName: liveAction.name,
+        provider: analyticsProvider,
       })
     }
   }
@@ -153,15 +154,22 @@ export function SaveSuggestionCard({
           <IconBookmarkPlus className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.8} />
           <span className="truncate">{i18n.t("saveSuggestion.title")}</span>
         </div>
-        <Button
-          type="button"
-          variant="brand"
-          size="sm"
-          disabled={isButtonDisabled}
-          onClick={() => void handleSave()}
-        >
-          {buttonLabel}
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          <Switch
+            id="save-suggestion-toggle"
+            size="sm"
+            checked={selectionToolbar.saveSuggestion.enabled}
+            onCheckedChange={(checked) => {
+              void setSelectionToolbar({ saveSuggestion: { enabled: checked } })
+            }}
+          />
+          <Label
+            htmlFor="save-suggestion-toggle"
+            className="text-xs font-normal text-muted-foreground"
+          >
+            {i18n.t("saveSuggestion.toggleLabel")}
+          </Label>
+        </div>
       </div>
       <p className="text-xs text-muted-foreground">{i18n.t("saveSuggestion.description")}</p>
       <div className="space-y-1.5">
@@ -174,6 +182,17 @@ export function SaveSuggestionCard({
             secondaryFieldNames={secondaryFieldNames}
           />
         ))}
+      </div>
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          variant="brand"
+          size="sm"
+          disabled={isButtonDisabled}
+          onClick={() => void handleSave()}
+        >
+          {buttonLabel}
+        </Button>
       </div>
     </div>
   )

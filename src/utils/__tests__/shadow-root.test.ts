@@ -13,13 +13,12 @@ import { insertShadowRootUIWrapperInto, OVERLAY_SHADOW_ROOT_CSS } from "../shado
 function createOverlayShadowRoot() {
   const shadowHost = document.createElement("read-frog-selection")
   const shadow = shadowHost.attachShadow({ mode: "open" })
-  const shadowHtml = document.createElement("html")
-  const container = document.createElement("body")
-  shadowHtml.append(container)
-  shadow.append(shadowHtml)
+  const shadowStyle = document.createElement("style")
+  const container = document.createElement("div")
+  shadow.append(shadowStyle, container)
   document.body.append(shadowHost)
 
-  return { container, shadowHost, shadowHtml }
+  return { container, shadowHost, shadowStyle }
 }
 
 describe("insertShadowRootUIWrapperInto", () => {
@@ -34,7 +33,6 @@ describe("insertShadowRootUIWrapperInto", () => {
       "overflow: visible !important",
       "position: static !important",
       "width: 0 !important",
-      "background-color: transparent !important",
     ]) {
       expect(OVERLAY_SHADOW_ROOT_CSS).toContain(declaration)
     }
@@ -54,7 +52,7 @@ describe("insertShadowRootUIWrapperInto", () => {
   })
 
   it("prevents page translation from walking the extension shadow tree", () => {
-    const { container, shadowHost, shadowHtml } = createOverlayShadowRoot()
+    const { container, shadowHost, shadowStyle } = createOverlayShadowRoot()
     const extensionText = document.createElement("p")
     extensionText.textContent = "Translate action"
     container.append(extensionText)
@@ -62,7 +60,7 @@ describe("insertShadowRootUIWrapperInto", () => {
 
     walkAndLabelElement(document.body, "walk-id", DEFAULT_CONFIG)
 
-    for (const element of [shadowHost, shadowHtml, container, extensionText]) {
+    for (const element of [shadowHost, shadowStyle, container, extensionText]) {
       expect(element).not.toHaveAttribute(WALKED_ATTRIBUTE)
       expect(element).not.toHaveAttribute(PARAGRAPH_ATTRIBUTE)
       expect(element).not.toHaveAttribute(BLOCK_ATTRIBUTE)

@@ -105,7 +105,7 @@ function applyFieldResolution(
   // Navigate to the parent object
   let current: any = result
   for (let i = 0; i < conflict.path.length - 1; i++) {
-    current = current[conflict.path[i]]
+    current = current[conflict.path[i]!]
   }
 
   // Set the resolved value

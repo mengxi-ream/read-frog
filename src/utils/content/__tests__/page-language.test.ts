@@ -133,7 +133,7 @@ describe("detectPageLanguageLightweight", () => {
       expect.stringContaining("A useful article title"),
       { enableLLM: false },
     )
-    const [textForDetection] = mockDetectLanguageWithSource.mock.calls[0]
+    const [textForDetection] = mockDetectLanguageWithSource.mock.calls[0]!
     expect(textForDetection).not.toContain("hidden")
     expect(textForDetection.length).toBeLessThanOrEqual(
       PAGE_LANGUAGE_TEXT_SAMPLE_LIMIT + document.title.length + 2,

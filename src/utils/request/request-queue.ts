@@ -123,7 +123,7 @@ export class RequestQueue {
     const { retryPolicy, ...queueOptions } = options
     const parseConfigStatus = requestQueueConfigSchema.partial().safeParse(queueOptions)
     if (parseConfigStatus.error) {
-      throw new Error(parseConfigStatus.error.issues[0].message)
+      throw new Error(parseConfigStatus.error.issues[0]!.message)
     }
     // Settle token accrual under the OLD rate before switching.
     this.refillTokens()

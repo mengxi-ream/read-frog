@@ -61,19 +61,19 @@ export async function microsoftWarmupTranslate(
     const result = results[i]
     const chunk = chunks[i]
 
-    if (result.status === "fulfilled") {
-      const translations = result.value
-      for (let j = 0; j < chunk.length; j++) {
+    if (result!.status === "fulfilled") {
+      const translations = result!.value
+      for (let j = 0; j < chunk!.length; j++) {
         translatedFragments[globalIndex + j] = {
-          ...translatedFragments[globalIndex + j],
-          translation: translations[j],
+          ...translatedFragments[globalIndex + j]!,
+          translation: translations[j]!,
         }
       }
     } else {
-      logger.warn(`Microsoft warmup chunk ${i} failed:`, result.reason)
+      logger.warn(`Microsoft warmup chunk ${i} failed:`, result!.reason)
     }
 
-    globalIndex += chunk.length
+    globalIndex += chunk!.length
   }
 
   return translatedFragments

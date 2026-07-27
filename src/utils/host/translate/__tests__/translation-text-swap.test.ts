@@ -17,15 +17,15 @@ describe("planInPlaceTextSwap", () => {
     const plan = planInPlaceTextSwap(run, "你好世界", document)
     expect(plan).not.toBeNull()
     expect(plan!.pairs).toHaveLength(1)
-    expect(plan!.pairs[0].node).toBe(run[0])
-    expect(plan!.pairs[0].translatedValue).toBe("你好世界")
+    expect(plan!.pairs[0]!.node).toBe(run[0])
+    expect(plan!.pairs[0]!.translatedValue).toBe("你好世界")
   })
 
   it("flattens hallucinated tags in the trivial path", () => {
     const { run } = buildRun("Hello world")
     const plan = planInPlaceTextSwap(run, "<div><b>你好</b>世界</div>", document)
     expect(plan).not.toBeNull()
-    expect(plan!.pairs[0].translatedValue).toBe("你好世界")
+    expect(plan!.pairs[0]!.translatedValue).toBe("你好世界")
   })
 
   it("aligns mixed text and inline elements structurally", () => {
@@ -34,9 +34,9 @@ describe("planInPlaceTextSwap", () => {
     expect(plan).not.toBeNull()
     const valueFor = (node: Node) => plan!.pairs.find((pair) => pair.node === node)?.translatedValue
     expect(plan!.pairs).toHaveLength(3)
-    expect(valueFor(container.childNodes[0])).toBe("前缀 ")
-    expect(valueFor(container.childNodes[1].firstChild!)).toBe("链接")
-    expect(valueFor(container.childNodes[2])).toBe(" 后缀")
+    expect(valueFor(container.childNodes[0]!)).toBe("前缀 ")
+    expect(valueFor(container.childNodes[1]!.firstChild!)).toBe("链接")
+    expect(valueFor(container.childNodes[2]!)).toBe(" 后缀")
   })
 
   it("merges provider-split gap text into the first source node and blanks the rest", () => {
@@ -44,7 +44,7 @@ describe("planInPlaceTextSwap", () => {
     const t1 = document.createTextNode("part one ")
     const t2 = document.createTextNode("part two")
     container.append(t1, document.createElement("br"), document.createTextNode("x"))
-    container.insertBefore(t2, container.childNodes[1])
+    container.insertBefore(t2, container.childNodes[1]!)
     // container: [t1, t2, <br>, "x"] — two source text nodes in one gap
     const run = [...container.childNodes] as TransNode[]
     const plan = planInPlaceTextSwap(run, "合并译文<br>甲", document)
@@ -91,8 +91,8 @@ describe("planInPlaceTextSwap", () => {
     const { container, run } = buildRun("<span>苹果</span><span>橙子</span>")
     const plan = planInPlaceTextSwap(run, "<span>Apples</span> <span>Oranges</span>", document)
     expect(plan).not.toBeNull()
-    const first = plan!.pairs.find((pair) => pair.node === container.children[0].firstChild)
-    const second = plan!.pairs.find((pair) => pair.node === container.children[1].firstChild)
+    const first = plan!.pairs.find((pair) => pair.node === container.children[0]!.firstChild)
+    const second = plan!.pairs.find((pair) => pair.node === container.children[1]!.firstChild)
     expect(first!.translatedValue).toBe("Apples ")
     expect(second!.translatedValue).toBe("Oranges")
   })

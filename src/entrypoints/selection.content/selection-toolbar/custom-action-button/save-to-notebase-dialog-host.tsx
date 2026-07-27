@@ -44,7 +44,6 @@ import {
 } from "@/utils/notebase/pending-save"
 import { orpcClient } from "@/utils/orpc/client"
 import { trackSaveSuggestionEvent } from "@/utils/save-suggestion/analytics"
-import { recordSaveSuggestionAccepted } from "@/utils/save-suggestion/cooldown"
 import { showNotebaseLimitExceededToast } from "./notebase-limit-toast"
 import { saveToNotebaseDialogAtom } from "./save-to-notebase-dialog-atom"
 
@@ -114,6 +113,7 @@ export function SaveToNotebaseDialogHost() {
       ? dialogState.pendingActionDraft
       : undefined
   const analyticsSource = dialogState.open ? dialogState.analyticsSource : undefined
+  const analyticsProvider = dialogState.open ? dialogState.analyticsProvider : undefined
 
   const closeDialog = () => {
     setDialogState({ open: false })
@@ -124,8 +124,7 @@ export function SaveToNotebaseDialogHost() {
       return
     }
 
-    void recordSaveSuggestionAccepted()
-    trackSaveSuggestionEvent("suggestion_accepted", { actionName })
+    trackSaveSuggestionEvent("suggestion_accepted", { actionName, provider: analyticsProvider })
   }
 
   const buildCustomActionsWithDraft = (draft: SelectionToolbarCustomAction) => {

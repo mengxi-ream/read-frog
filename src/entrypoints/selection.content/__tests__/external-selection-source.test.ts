@@ -157,7 +157,7 @@ describe("setupExternalSelectionSource", () => {
     dispatchPageMessage(SELECTION_CHANGED_MESSAGE)
 
     expect(openListener).toHaveBeenCalledTimes(1)
-    const event = openListener.mock.calls[0][0] as CustomEvent<EbookBridgeSelectionPayload>
+    const event = openListener.mock.calls[0]![0] as CustomEvent<EbookBridgeSelectionPayload>
     expect(event.detail).toEqual(SELECTION_PAYLOAD)
 
     window.removeEventListener(EXTERNAL_SELECTION_OPEN_EVENT, openListener)

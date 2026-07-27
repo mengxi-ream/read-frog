@@ -74,14 +74,14 @@ describe("dom audio playback controller", () => {
     })
 
     expect(FakeAudio.instances).toHaveLength(1)
-    expect(FakeAudio.instances[0].play).toHaveBeenCalled()
+    expect(FakeAudio.instances[0]!.play).toHaveBeenCalled()
 
-    FakeAudio.instances[0].onended?.()
+    FakeAudio.instances[0]!.onended?.()
 
     await expect(playbackPromise).resolves.toEqual({ ok: true })
-    expect(FakeAudio.instances[0].pause).toHaveBeenCalled()
-    expect(FakeAudio.instances[0].removeAttribute).toHaveBeenCalledWith("src")
-    expect(FakeAudio.instances[0].load).toHaveBeenCalled()
+    expect(FakeAudio.instances[0]!.pause).toHaveBeenCalled()
+    expect(FakeAudio.instances[0]!.removeAttribute).toHaveBeenCalledWith("src")
+    expect(FakeAudio.instances[0]!.load).toHaveBeenCalled()
     expect(revokeObjectURLMock).toHaveBeenCalledWith("blob:tts-test-1")
   })
 
@@ -96,12 +96,12 @@ describe("dom audio playback controller", () => {
     })
 
     expect(controller.stop({ requestId: "req-other" })).toBe(false)
-    expect(FakeAudio.instances[0].pause).not.toHaveBeenCalled()
+    expect(FakeAudio.instances[0]!.pause).not.toHaveBeenCalled()
 
     expect(controller.stop({ requestId: "req-active" })).toBe(true)
 
     await expect(playbackPromise).resolves.toEqual({ ok: false, reason: "stopped" })
-    expect(FakeAudio.instances[0].pause).toHaveBeenCalled()
+    expect(FakeAudio.instances[0]!.pause).toHaveBeenCalled()
   })
 
   it("interrupts the previous playback when a new request starts", async () => {
@@ -120,9 +120,9 @@ describe("dom audio playback controller", () => {
     })
 
     await expect(firstPlayback).resolves.toEqual({ ok: false, reason: "interrupted" })
-    expect(FakeAudio.instances[0].pause).toHaveBeenCalled()
+    expect(FakeAudio.instances[0]!.pause).toHaveBeenCalled()
 
-    FakeAudio.instances[1].onended?.()
+    FakeAudio.instances[1]!.onended?.()
     await expect(secondPlayback).resolves.toEqual({ ok: true })
   })
 
@@ -136,10 +136,10 @@ describe("dom audio playback controller", () => {
       contentType: "audio/mpeg",
     })
 
-    FakeAudio.instances[0].onerror?.()
+    FakeAudio.instances[0]!.onerror?.()
 
     await expect(playbackPromise).rejects.toThrow("playback failed")
-    expect(FakeAudio.instances[0].pause).toHaveBeenCalled()
+    expect(FakeAudio.instances[0]!.pause).toHaveBeenCalled()
     expect(revokeObjectURLMock).toHaveBeenCalledWith("blob:tts-test-1")
   })
 })

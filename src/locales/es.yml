@@ -323,6 +323,13 @@ options:
       closeMenu:
         disableForSite: Desactivar para este sitio
         disableGlobally: Desactivar globalmente
+      tooltips:
+        togglePageTranslation: Alternar traducción de página
+        floatingButtonOptions: Opciones del botón flotante
+        lockPosition: Bloquear posición
+        unlockPosition: Desbloquear posición
+        settings: Ajustes
+        feedback: Enviar comentarios
       disabledSites:
         title: Sitios con botón flotante desactivado
         description: Configura los sitios web donde se debe desactivar el botón flotante
@@ -352,7 +359,7 @@ options:
         speak: Leer en voz alta
       saveSuggestion:
         title: Sugerencias de guardado
-        description: Después de traducir una selección, sugerir palabras para guardar en tu Notebase
+        description: Después de traducir una selección con un proveedor de IA, sugerir palabras para guardar en tu Notebase
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -1131,6 +1138,7 @@ saveSuggestion:
   save: Guardar
   saved: Guardado
   staleSuggestion: Esta sugerencia está desactualizada
+  toggleLabel: Mostrar sugerencias de guardado
 thinking:
   label: Pensando
   complete: Razonamiento completo
@@ -1139,7 +1147,7 @@ thinking:
 shortcutKeySelector:
   placeholder: Introduce el atajo
 subtitles:
-  loadingAiSubtitles: Cargando subtítulos con IA…
+  loadingAiSubtitles: Cargando subtítulos con IA… (estimado 3 min)
   requestAiSubtitles: Solicitar subtítulos con IA (Beta)
   usingAiSubtitles: Usando subtítulos con IA
   actions:

@@ -9,7 +9,7 @@ describe("noise Filter", () => {
         { tStartMs: 0, dDurationMs: 1000, segs: [{ utf8: "[Music]" }] },
       ]
       const result = filterNoiseFromEvents(events)
-      expect(result[0].segs).toHaveLength(0)
+      expect(result[0]!.segs).toHaveLength(0)
     })
 
     it("should filter out (Applause) annotations", () => {
@@ -17,7 +17,7 @@ describe("noise Filter", () => {
         { tStartMs: 0, dDurationMs: 1000, segs: [{ utf8: "(Applause)" }] },
       ]
       const result = filterNoiseFromEvents(events)
-      expect(result[0].segs).toHaveLength(0)
+      expect(result[0]!.segs).toHaveLength(0)
     })
 
     it("should filter out music note annotations", () => {
@@ -27,9 +27,9 @@ describe("noise Filter", () => {
         { tStartMs: 2000, dDurationMs: 1000, segs: [{ utf8: "🎶 Melody 🎶" }] },
       ]
       const result = filterNoiseFromEvents(events)
-      expect(result[0].segs).toHaveLength(0)
-      expect(result[1].segs).toHaveLength(0)
-      expect(result[2].segs).toHaveLength(0)
+      expect(result[0]!.segs).toHaveLength(0)
+      expect(result[1]!.segs).toHaveLength(0)
+      expect(result[2]!.segs).toHaveLength(0)
     })
 
     it("should keep text after removing speaker annotation", () => {
@@ -37,8 +37,8 @@ describe("noise Filter", () => {
         { tStartMs: 0, dDurationMs: 1000, segs: [{ utf8: "[Speaker 1] Hello world" }] },
       ]
       const result = filterNoiseFromEvents(events)
-      expect(result[0].segs).toHaveLength(1)
-      expect(result[0].segs![0].utf8).toBe(" Hello world")
+      expect(result[0]!.segs).toHaveLength(1)
+      expect(result[0]!.segs![0]!.utf8).toBe(" Hello world")
     })
 
     it("should remove noise in the middle of text", () => {
@@ -46,8 +46,8 @@ describe("noise Filter", () => {
         { tStartMs: 0, dDurationMs: 1000, segs: [{ utf8: "Hello [Music] World" }] },
       ]
       const result = filterNoiseFromEvents(events)
-      expect(result[0].segs).toHaveLength(1)
-      expect(result[0].segs![0].utf8).toBe("Hello  World")
+      expect(result[0]!.segs).toHaveLength(1)
+      expect(result[0]!.segs![0]!.utf8).toBe("Hello  World")
     })
 
     it("should handle multiple noise patterns in one segment", () => {
@@ -55,15 +55,15 @@ describe("noise Filter", () => {
         { tStartMs: 0, dDurationMs: 1000, segs: [{ utf8: "[Music] Hello (Applause)" }] },
       ]
       const result = filterNoiseFromEvents(events)
-      expect(result[0].segs).toHaveLength(1)
-      expect(result[0].segs![0].utf8).toBe(" Hello ")
+      expect(result[0]!.segs).toHaveLength(1)
+      expect(result[0]!.segs![0]!.utf8).toBe(" Hello ")
     })
 
     it("should preserve events without segs", () => {
       const events: YoutubeTimedText[] = [{ tStartMs: 0, dDurationMs: 1000 }]
       const result = filterNoiseFromEvents(events)
       expect(result).toHaveLength(1)
-      expect(result[0].segs).toBeUndefined()
+      expect(result[0]!.segs).toBeUndefined()
     })
 
     it("should preserve timing information", () => {
@@ -71,8 +71,8 @@ describe("noise Filter", () => {
         { tStartMs: 1234, dDurationMs: 5678, segs: [{ utf8: "[Music]", tOffsetMs: 100 }] },
       ]
       const result = filterNoiseFromEvents(events)
-      expect(result[0].tStartMs).toBe(1234)
-      expect(result[0].dDurationMs).toBe(5678)
+      expect(result[0]!.tStartMs).toBe(1234)
+      expect(result[0]!.dDurationMs).toBe(5678)
     })
 
     it("should handle empty events array", () => {
@@ -89,8 +89,8 @@ describe("noise Filter", () => {
         },
       ]
       const result = filterNoiseFromEvents(events)
-      expect(result[0].segs).toHaveLength(1)
-      expect(result[0].segs![0].utf8).toBe("Hello")
+      expect(result[0]!.segs).toHaveLength(1)
+      expect(result[0]!.segs![0]!.utf8).toBe("Hello")
     })
 
     it("should preserve tOffsetMs in segs", () => {
@@ -102,7 +102,7 @@ describe("noise Filter", () => {
         },
       ]
       const result = filterNoiseFromEvents(events)
-      expect(result[0].segs![0].tOffsetMs).toBe(500)
+      expect(result[0]!.segs![0]!.tOffsetMs).toBe(500)
     })
   })
 })

@@ -17,7 +17,8 @@ const link = new RPCLink({
     const url = request.url
     const method = request.method
     const headerEntries = normalizeHeaders(request.headers)
-    const body = request.body ? await request.text() : undefined
+    const text = await request.text()
+    const body = text.length > 0 ? text : undefined
 
     const resp = await sendMessage("backgroundFetch", {
       url,

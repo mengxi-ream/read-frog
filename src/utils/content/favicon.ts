@@ -49,7 +49,7 @@ export function getFaviconUrl(): string {
 
   // 如果找到了候选图标，返回最优的那个
   if (candidates.length > 0) {
-    return candidates[0].url
+    return candidates[0]!.url
   }
 
   // 如果依然没找到，就回退到站点根目录的 /favicon.ico

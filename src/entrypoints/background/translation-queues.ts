@@ -87,7 +87,7 @@ export async function executeBatchTranslation<TContext>(
   promptResolver: PromptResolver<TContext>,
   signal?: AbortSignal,
 ): Promise<string[]> {
-  const { langConfig, providerConfig, context } = dataList[0]
+  const { langConfig, providerConfig, context } = dataList[0]!
   const texts = dataList.map((d) => d.text)
 
   const batchText = texts.join(`\n\n${BATCH_SEPARATOR}\n\n`)
@@ -289,7 +289,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
     getScope: (data) => data.scope,
     isScopeCancelled,
     executeBatch: async (dataList, meta) => {
-      const { providerConfig } = dataList[0]
+      const { providerConfig } = dataList[0]!
       const hash = Sha256Hex(...dataList.map((d) => d.hash))
       const earliestScheduleAt = Math.min(...dataList.map((d) => d.scheduleAt))
       const totalCharacters = dataList.reduce((sum, d) => sum + d.text.length, 0)

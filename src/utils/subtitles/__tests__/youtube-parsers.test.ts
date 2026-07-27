@@ -108,7 +108,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseKaraokeSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("漢字")
+      expect(result[0]!.text).toBe("漢字")
     })
 
     it("should use largest wpWinPosId if 3 is not available", () => {
@@ -119,7 +119,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseKaraokeSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("large")
+      expect(result[0]!.text).toBe("large")
     })
 
     it("should merge segs within event", () => {
@@ -134,9 +134,9 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseKaraokeSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("今日は晴れ")
-      expect(result[0].start).toBe(1000)
-      expect(result[0].end).toBe(4000)
+      expect(result[0]!.text).toBe("今日は晴れ")
+      expect(result[0]!.start).toBe(1000)
+      expect(result[0]!.end).toBe(4000)
     })
 
     it("should fix overlap between fragments", () => {
@@ -147,8 +147,8 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseKaraokeSubtitles(events)
 
       expect(result).toHaveLength(2)
-      expect(result[0].end).toBe(2000) // Fixed from 6000 to 2000
-      expect(result[1].start).toBe(2000)
+      expect(result[0]!.end).toBe(2000) // Fixed from 6000 to 2000
+      expect(result[1]!.start).toBe(2000)
     })
 
     it("should deduplicate adjacent identical text", () => {
@@ -160,10 +160,10 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseKaraokeSubtitles(events)
 
       expect(result).toHaveLength(2)
-      expect(result[0].text).toBe("Same")
-      expect(result[0].start).toBe(1000)
-      expect(result[0].end).toBe(3000) // Merged time range
-      expect(result[1].text).toBe("Different")
+      expect(result[0]!.text).toBe("Same")
+      expect(result[0]!.start).toBe(1000)
+      expect(result[0]!.end).toBe(3000) // Merged time range
+      expect(result[1]!.text).toBe("Different")
     })
 
     it("should clean zero-width spaces", () => {
@@ -172,7 +172,7 @@ describe("youTube Subtitle Parsers", () => {
       ]
       const result = parseKaraokeSubtitles(events)
 
-      expect(result[0].text).toBe("HelloWorld")
+      expect(result[0]!.text).toBe("HelloWorld")
     })
 
     it("should skip empty segs", () => {
@@ -183,7 +183,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseKaraokeSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("Valid")
+      expect(result[0]!.text).toBe("Valid")
     })
 
     it("should skip events with only whitespace", () => {
@@ -194,7 +194,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseKaraokeSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("Valid")
+      expect(result[0]!.text).toBe("Valid")
     })
   })
 
@@ -225,7 +225,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseStylizedKaraokeSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("Do you think even the worst person")
+      expect(result[0]!.text).toBe("Do you think even the worst person")
     })
 
     it("should merge slash-shifted variants into one clean sentence", () => {
@@ -253,9 +253,9 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseStylizedKaraokeSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("Can change...?")
-      expect(result[0].start).toBe(1000)
-      expect(result[0].end).toBe(1600)
+      expect(result[0]!.text).toBe("Can change...?")
+      expect(result[0]!.start).toBe(1000)
+      expect(result[0]!.end).toBe(1600)
     })
 
     it("should merge progressive redraws across the same sentence family", () => {
@@ -289,7 +289,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseStylizedKaraokeSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("That everybody can be a good persons...")
+      expect(result[0]!.text).toBe("That everybody can be a good persons...")
     })
 
     it("should split when the sentence really changes", () => {
@@ -323,8 +323,8 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseStylizedKaraokeSubtitles(events)
 
       expect(result).toHaveLength(2)
-      expect(result[0].text).toBe("Do you think even the worst person")
-      expect(result[1].text).toBe("Can change...?")
+      expect(result[0]!.text).toBe("Do you think even the worst person")
+      expect(result[1]!.text).toBe("Can change...?")
     })
 
     it("should keep off-track dialogue that ends before the main track starts", () => {
@@ -338,10 +338,10 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseStylizedKaraokeSubtitles(events)
 
       expect(result).toHaveLength(3)
-      expect(result[0].text).toBe("嘿呀")
-      expect(result[1].text).toBe("你一直很忙,對吧?")
-      expect(result[2].text).toBe("Can change...?")
-      expect(result[0].start).toBeLessThan(result[1].start)
+      expect(result[0]!.text).toBe("嘿呀")
+      expect(result[1]!.text).toBe("你一直很忙,對吧?")
+      expect(result[2]!.text).toBe("Can change...?")
+      expect(result[0]!.start).toBeLessThan(result[1]!.start)
     })
 
     it("should still drop off-track events that overlap the main track", () => {
@@ -364,7 +364,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseStylizedKaraokeSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("Do you think even the worst person")
+      expect(result[0]!.text).toBe("Do you think even the worst person")
     })
 
     it("should recover intro dialogue while still collapsing repeated song frames", () => {
@@ -406,8 +406,8 @@ describe("youTube Subtitle Parsers", () => {
       expect(texts.filter((text) => text === "你知道嗎，我總是在想")).toHaveLength(1)
 
       for (let i = 1; i < result.length; i++) {
-        expect(result[i].start).toBeGreaterThanOrEqual(result[i - 1].start)
-        expect(result[i - 1].end).toBeLessThanOrEqual(result[i].start)
+        expect(result[i]!.start).toBeGreaterThanOrEqual(result[i - 1]!.start)
+        expect(result[i - 1]!.end).toBeLessThanOrEqual(result[i]!.start)
       }
     })
   })
@@ -434,10 +434,10 @@ describe("youTube Subtitle Parsers", () => {
 
       // Split at first sentence boundary when more text follows
       expect(result).toHaveLength(2)
-      expect(result[0].text).toBe("0°を超えた瞬間に氷が溶け始める。")
-      expect(result[0].start).toBe(44840)
-      expect(result[1].text).toBe("今までの温度上昇。")
-      expect(result[1].end).toBe(55320) // separator end time for last fragment
+      expect(result[0]!.text).toBe("0°を超えた瞬間に氷が溶け始める。")
+      expect(result[0]!.start).toBe(44840)
+      expect(result[1]!.text).toBe("今までの温度上昇。")
+      expect(result[1]!.end).toBe(55320) // separator end time for last fragment
     })
 
     it("should merge text across events until separator", () => {
@@ -462,8 +462,8 @@ describe("youTube Subtitle Parsers", () => {
 
       // Text accumulates across events, outputs at separator after sentence end
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("例えば筋トレは1日やっただけでは変化がない。")
-      expect(result[0].start).toBe(60039)
+      expect(result[0]!.text).toBe("例えば筋トレは1日やっただけでは変化がない。")
+      expect(result[0]!.start).toBe(60039)
     })
 
     it("should use separator to update end time without splitting", () => {
@@ -480,10 +480,10 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseScrollingAsrSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("テスト文章。")
-      expect(result[0].start).toBe(1000)
+      expect(result[0]!.text).toBe("テスト文章。")
+      expect(result[0]!.start).toBe(1000)
       // end = last seg start (3000 + 500) + ESTIMATED_WORD_DURATION_MS (200) = 3700
-      expect(result[0].end).toBe(3700)
+      expect(result[0]!.end).toBe(3700)
     })
 
     it("should split on sentence boundary with separator events", () => {
@@ -495,8 +495,8 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseScrollingAsrSubtitles(events)
 
       expect(result).toHaveLength(2)
-      expect(result[0].text).toBe("First.")
-      expect(result[1].text).toBe("Second.")
+      expect(result[0]!.text).toBe("First.")
+      expect(result[1]!.text).toBe("Second.")
     })
 
     it("should add space when merging English text across events", () => {
@@ -508,7 +508,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseScrollingAsrSubtitles(events, "en")
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("being honest.")
+      expect(result[0]!.text).toBe("being honest.")
     })
 
     it("should not add space for non-English languages", () => {
@@ -520,7 +520,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseScrollingAsrSubtitles(events, "ja")
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("ですね。")
+      expect(result[0]!.text).toBe("ですね。")
     })
 
     it("should fix overlap between fragments", () => {
@@ -539,8 +539,8 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseScrollingAsrSubtitles(events)
 
       expect(result).toHaveLength(2)
-      expect(result[0].end).toBe(5000) // Fixed from 5700 to 5000
-      expect(result[1].start).toBe(5000)
+      expect(result[0]!.end).toBe(5000) // Fixed from 5700 to 5000
+      expect(result[1]!.start).toBe(5000)
     })
 
     it("should handle missing dDurationMs", () => {
@@ -551,7 +551,7 @@ describe("youTube Subtitle Parsers", () => {
 
       expect(result).toHaveLength(1)
       // end = tStartMs + ESTIMATED_WORD_DURATION_MS (200)
-      expect(result[0].end).toBe(1200)
+      expect(result[0]!.end).toBe(1200)
     })
 
     it("should merge segs within event", () => {
@@ -565,7 +565,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseScrollingAsrSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("Hello World")
+      expect(result[0]!.text).toBe("Hello World")
     })
 
     it("should skip events with empty segs", () => {
@@ -576,7 +576,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseScrollingAsrSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("Valid")
+      expect(result[0]!.text).toBe("Valid")
     })
 
     it("should skip events with only whitespace", () => {
@@ -587,7 +587,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseScrollingAsrSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("Valid")
+      expect(result[0]!.text).toBe("Valid")
     })
 
     it("should split CJK lyrics at character limit when no punctuation", () => {
@@ -633,7 +633,7 @@ describe("youTube Subtitle Parsers", () => {
 
       // Should split when character count reaches 30
       expect(result.length).toBeGreaterThan(1)
-      expect(result[0].text.length).toBeLessThanOrEqual(30)
+      expect(result[0]!.text.length).toBeLessThanOrEqual(30)
     })
   })
 
@@ -647,9 +647,9 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseAnimatedSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("閃避子彈！")
-      expect(result[0].start).toBe(4688)
-      expect(result[0].end).toBe(4889)
+      expect(result[0]!.text).toBe("閃避子彈！")
+      expect(result[0]!.start).toBe(4688)
+      expect(result[0]!.end).toBe(4889)
     })
 
     it("should split when text changes between frames", () => {
@@ -672,9 +672,9 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseAnimatedSubtitles(events)
 
       expect(result).toHaveLength(2)
-      expect(result[0].text).toBe("現在向你道別吧！")
-      expect(result[0].end).toBeLessThanOrEqual(24200)
-      expect(result[1].text).toBe("沒人會聽到你的哀求！")
+      expect(result[0]!.text).toBe("現在向你道別吧！")
+      expect(result[0]!.end).toBeLessThanOrEqual(24200)
+      expect(result[1]!.text).toBe("沒人會聽到你的哀求！")
     })
 
     it("should skip events with empty text", () => {
@@ -686,7 +686,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseAnimatedSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("Visible text.")
+      expect(result[0]!.text).toBe("Visible text.")
     })
 
     it("should handle single event", () => {
@@ -701,9 +701,9 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseAnimatedSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("Warning: content may be disturbing.")
-      expect(result[0].start).toBe(1)
-      expect(result[0].end).toBe(3854)
+      expect(result[0]!.text).toBe("Warning: content may be disturbing.")
+      expect(result[0]!.start).toBe(1)
+      expect(result[0]!.end).toBe(3854)
     })
 
     it("should clean zero-width spaces from text", () => {
@@ -713,7 +713,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseAnimatedSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("Hello world")
+      expect(result[0]!.text).toBe("Hello world")
     })
 
     it("should fix overlap between fragments", () => {
@@ -724,8 +724,8 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseAnimatedSubtitles(events)
 
       expect(result).toHaveLength(2)
-      expect(result[0].end).toBe(4000)
-      expect(result[1].start).toBe(4000)
+      expect(result[0]!.end).toBe(4000)
+      expect(result[1]!.start).toBe(4000)
     })
 
     it("should merge segments from multiple segs in one event", () => {
@@ -746,7 +746,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = parseAnimatedSubtitles(events)
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("你所有的進步")
+      expect(result[0]!.text).toBe("你所有的進步")
     })
   })
 
@@ -759,7 +759,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = optimizeSubtitles(fragments, "en")
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("Hello world.")
+      expect(result[0]!.text).toBe("Hello world.")
     })
 
     it("should split on sentence boundaries when lines are long enough", () => {
@@ -778,10 +778,10 @@ describe("youTube Subtitle Parsers", () => {
       const result = optimizeSubtitles(fragments, "en")
 
       expect(result).toHaveLength(2)
-      expect(result[0].text).toBe(
+      expect(result[0]!.text).toBe(
         "This is the first complete sentence that really ends right here.",
       )
-      expect(result[1].text).toBe(
+      expect(result[1]!.text).toBe(
         "And this is the second complete sentence that also ends right here.",
       )
     })
@@ -797,7 +797,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = optimizeSubtitles(fragments, "en")
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("I agree. It is true. We can do this. Let's ship now.")
+      expect(result[0]!.text).toBe("I agree. It is true. We can do this. Let's ship now.")
     })
 
     it("should merge short non-English lines into target range", () => {
@@ -810,7 +810,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = optimizeSubtitles(fragments, "zh")
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("我们走吧。现在开始。马上出发。")
+      expect(result[0]!.text).toBe("我们走吧。现在开始。马上出发。")
     })
 
     it("should stop merging when exceeding English upper bound", () => {
@@ -827,8 +827,8 @@ describe("youTube Subtitle Parsers", () => {
       const result = optimizeSubtitles(fragments, "en")
 
       expect(result).toHaveLength(2)
-      expect(result[0].text.split(/\s+/).length).toBe(20)
-      expect(result[1].text).toBe("extra words.")
+      expect(result[0]!.text.split(/\s+/).length).toBe(20)
+      expect(result[1]!.text).toBe("extra words.")
     })
 
     it("should use non-CJK range for French text", () => {
@@ -845,8 +845,8 @@ describe("youTube Subtitle Parsers", () => {
       const result = optimizeSubtitles(fragments, "fr")
 
       expect(result).toHaveLength(2)
-      expect(result[0].text.split(/\s+/).length).toBe(13)
-      expect(result[1].text.split(/\s+/).length).toBe(10)
+      expect(result[0]!.text.split(/\s+/).length).toBe(13)
+      expect(result[1]!.text.split(/\s+/).length).toBe(10)
     })
 
     it("should treat Thai as CJK group and merge short lines", () => {
@@ -859,7 +859,7 @@ describe("youTube Subtitle Parsers", () => {
 
       // Both fragments are short (< 15 CJK min), should merge
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("สวัสดีครับ")
+      expect(result[0]!.text).toBe("สวัสดีครับ")
     })
 
     it("should split on timeout (gap > 1000ms)", () => {
@@ -880,7 +880,7 @@ describe("youTube Subtitle Parsers", () => {
       const result = optimizeSubtitles(fragments, "ja")
 
       expect(result).toHaveLength(1)
-      expect(result[0].text).toBe("今日は晴れです。")
+      expect(result[0]!.text).toBe("今日は晴れです。")
     })
 
     it("should split Chinese on timeout", () => {
@@ -891,8 +891,8 @@ describe("youTube Subtitle Parsers", () => {
       const result = optimizeSubtitles(fragments, "zh")
 
       expect(result).toHaveLength(2)
-      expect(result[0].text).toBe("你好")
-      expect(result[1].text).toBe("很高兴认识你")
+      expect(result[0]!.text).toBe("你好")
+      expect(result[1]!.text).toBe("很高兴认识你")
     })
 
     it("should return empty array for empty input", () => {

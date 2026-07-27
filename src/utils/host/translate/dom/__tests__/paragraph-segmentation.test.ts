@@ -110,8 +110,8 @@ describe("buildVirtualParagraphUnits", () => {
     const units = buildVirtualParagraphUnits(root, DEFAULT_CONFIG)
 
     expect(units.map((unit) => unit.text)).toEqual(["First", "Second"])
-    expect(units[0].insertionBoundary).toEqual({ container: firstText, offset: 5 })
-    expect(units[1].sourceFragments).toEqual([
+    expect(units[0]!.insertionBoundary).toEqual({ container: firstText, offset: 5 })
+    expect(units[1]!.sourceFragments).toEqual([
       { source: secondText, startOffset: 1, endOffset: 7, atomic: false },
     ])
   })
@@ -129,19 +129,19 @@ describe("buildVirtualParagraphUnits", () => {
     root.append(
       source,
       " ",
-      emojiImages[0],
+      emojiImages[0]!,
       "\t",
-      emojiImages[1],
+      emojiImages[1]!,
       "  ",
-      emojiImages[2],
-      emojiImages[3],
+      emojiImages[2]!,
+      emojiImages[3]!,
       " ",
     )
 
     const units = buildVirtualParagraphUnits(root, DEFAULT_CONFIG)
 
     expect(units.map((unit) => unit.text)).toEqual(["First paragraph", "Second paragraph"])
-    expect(units[1].insertionBoundary).toEqual({
+    expect(units[1]!.insertionBoundary).toEqual({
       container: root,
       offset: root.childNodes.length,
     })
@@ -194,7 +194,7 @@ describe("buildVirtualParagraphUnits", () => {
 
     const units = buildVirtualParagraphUnits(root, DEFAULT_CONFIG)
 
-    expect(units[1].insertionBoundary).toEqual({ container: root, offset: 1 })
+    expect(units[1]!.insertionBoundary).toEqual({ container: root, offset: 1 })
   })
 
   it("does not move a paragraph boundary past a trailing control", () => {
@@ -249,7 +249,7 @@ describe("buildVirtualParagraphUnits", () => {
       "Today we welcome @SohunSanka as our new head of GTM.",
       "Next paragraph",
     ])
-    expect(units[0].sourceFragments).toEqual([
+    expect(units[0]!.sourceFragments).toEqual([
       { source: before, startOffset: 0, endOffset: 17, atomic: false },
       { source: mention, startOffset: 0, endOffset: 11, atomic: true },
       { source: after, startOffset: 0, endOffset: 24, atomic: false },
@@ -265,7 +265,7 @@ describe("buildVirtualParagraphUnits", () => {
     const units = buildVirtualParagraphUnits(root, DEFAULT_CONFIG)
 
     expect(units.map((unit) => unit.text)).toEqual(["Before literal\n\nvalue", "After"])
-    expect(units[0].sourceFragments[1]).toEqual({
+    expect(units[0]!.sourceFragments[1]).toEqual({
       source: code,
       startOffset: 0,
       endOffset: 14,
@@ -325,7 +325,7 @@ describe("buildVirtualParagraphUnits", () => {
 
     const units = buildVirtualParagraphUnits(root, config)
 
-    expect(units[1].insertionBoundary).toEqual({ container: root, offset: 2 })
+    expect(units[1]!.insertionBoundary).toEqual({ container: root, offset: 2 })
   })
 
   it("lifts a boundary out of a terminal BUTTON even when excluded children follow its text", () => {

@@ -7,6 +7,13 @@ import { browser } from "#imports"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 
 /**
+ * Rejection message when the background port drops mid-stream (service worker
+ * restart, extension reload). Callers can match it to treat the failure as an
+ * infrastructure hiccup rather than a provider error.
+ */
+export const STREAM_PORT_DISCONNECTED_MESSAGE = "Stream disconnected unexpectedly"
+
+/**
  * Handles cleanup, abort signals, and disconnection automatically
  */
 export function createPortStreamPromise<TResponse = string>(
@@ -84,7 +91,7 @@ export function createPortStreamPromise<TResponse = string>(
     }
 
     disconnectListener = () => {
-      finalize(() => reject(new Error("Stream disconnected unexpectedly")))
+      finalize(() => reject(new Error(STREAM_PORT_DISCONNECTED_MESSAGE)))
     }
 
     abortListener = () => {

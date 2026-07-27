@@ -71,7 +71,7 @@ async function initApp() {
 
   await initI18n(config.uiLanguage)
 
-  const tabId = activeTab[0].id
+  const tabId = activeTab[0]!.id
 
   let isPageTranslated: boolean = false
   if (tabId) {

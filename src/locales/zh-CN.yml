@@ -323,6 +323,13 @@ options:
       closeMenu:
         disableForSite: 当前网站禁用
         disableGlobally: 全局禁用
+      tooltips:
+        togglePageTranslation: 切换页面翻译
+        floatingButtonOptions: 悬浮按钮选项
+        lockPosition: 锁定位置
+        unlockPosition: 解锁位置
+        settings: 设置
+        feedback: 发送反馈
       disabledSites:
         title: 悬浮按钮禁用网站
         description: 配置需要禁用悬浮按钮的网站
@@ -352,7 +359,7 @@ options:
         speak: 朗读
       saveSuggestion:
         title: 保存建议
-        description: 划词翻译后，推荐可存入笔记库的词条
+        description: 使用 AI 提供商进行划词翻译后，推荐可存入笔记库的词条
       shortcut:
         title: 划词翻译快捷键
         description: 自定义翻译选中文本的快捷键
@@ -1131,6 +1138,7 @@ saveSuggestion:
   save: 保存
   saved: 已保存
   staleSuggestion: 该建议已过期
+  toggleLabel: 显示保存建议
 thinking:
   label: 思考中
   complete: 思考完成
@@ -1139,7 +1147,7 @@ thinking:
 shortcutKeySelector:
   placeholder: 请输入快捷键
 subtitles:
-  loadingAiSubtitles: 正在加载 AI 字幕中
+  loadingAiSubtitles: 正在加载 AI 字幕中（预计 3 分钟）
   requestAiSubtitles: 请求 AI 字幕（Beta）
   usingAiSubtitles: 正在使用 AI 字幕中
   actions:

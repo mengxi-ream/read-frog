@@ -26,7 +26,7 @@ export function normalizeUrlPattern(raw: string): string | null {
   let rest = trimmed
   const schemeMatch = trimmed.match(/^([a-z][a-z0-9+.-]*|\*):\/\//i)
   if (schemeMatch) {
-    scheme = schemeMatch[1].toLowerCase()
+    scheme = schemeMatch[1]!.toLowerCase()
     rest = trimmed.slice(schemeMatch[0].length)
   }
   if (scheme !== "*" && scheme !== "http" && scheme !== "https") {
@@ -67,14 +67,14 @@ class WildcardHostPattern implements CompiledPattern {
     if (!match) {
       throw new Error(`Not a normalized pattern: "${normalized}"`)
     }
-    this.scheme = match[1]
+    this.scheme = match[1]!
 
-    let hostSource = escapeForRegex(match[2]).replaceAll("\\*", "[a-z0-9.-]*")
+    let hostSource = escapeForRegex(match[2]!).replaceAll("\\*", "[a-z0-9.-]*")
     if (hostSource.startsWith("[a-z0-9.-]*\\.")) {
       hostSource = `(?:[^.]+\\.)*${hostSource.slice("[a-z0-9.-]*\\.".length)}`
     }
     this.hostRegex = new RegExp(`^${hostSource}$`, "i")
-    this.pathRegex = new RegExp(`^${escapeForRegex(match[3]).replaceAll("\\*", ".*")}$`)
+    this.pathRegex = new RegExp(`^${escapeForRegex(match[3]!).replaceAll("\\*", ".*")}$`)
   }
 
   includes(url: string | URL | Location): boolean {
@@ -101,10 +101,10 @@ function escapeForRegex(value: string): string {
 /** Wildcards MatchPattern cannot express: anything beyond a single leading "*.". */
 function needsWildcardHostPattern(normalized: string): boolean {
   const host = normalized.slice(normalized.indexOf("://") + 3).split("/", 1)[0]
-  if (host === "*" || !host.includes("*")) {
+  if (host === "*" || !host!.includes("*")) {
     return false
   }
-  return !(host.startsWith("*.") && !host.slice(2).includes("*"))
+  return !(host!.startsWith("*.") && !host!.slice(2).includes("*"))
 }
 
 const patternCache = new Map<string, CompiledPattern | null>()

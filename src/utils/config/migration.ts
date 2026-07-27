@@ -57,15 +57,19 @@ export function buildMigrationRegistry(
 
   steps.sort((a, b) => a.fromVersion - b.fromVersion)
 
-  if (steps[0].fromVersion !== firstVersion) {
-    throw new Error(`Migration chain starts at v${steps[0].fromVersion}; expected v${firstVersion}`)
+  if (steps[0]!.fromVersion !== firstVersion) {
+    throw new Error(
+      `Migration chain starts at v${steps[0]!.fromVersion}; expected v${firstVersion}`,
+    )
   }
 
   for (let index = 1; index < steps.length; index += 1) {
     const previous = steps[index - 1]
     const current = steps[index]
-    if (current.fromVersion !== previous.toVersion) {
-      throw new Error(`Discontinuous migration chain between ${previous.path} and ${current.path}`)
+    if (current!.fromVersion !== previous!.toVersion) {
+      throw new Error(
+        `Discontinuous migration chain between ${previous!.path} and ${current!.path}`,
+      )
     }
   }
 

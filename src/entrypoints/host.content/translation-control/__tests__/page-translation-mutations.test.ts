@@ -280,14 +280,14 @@ describe("pageTranslationManager mutation re-walk", () => {
     const accordion = document.getElementById("accordion") as HTMLElement
     const panel = document.getElementById("panel") as HTMLElement
 
-    expect(observer.observe).not.toHaveBeenCalled()
+    expect(observer!.observe).not.toHaveBeenCalled()
 
     accordion.removeAttribute("hidden")
     await flushDomUpdates()
 
-    expect(observer.observe).toHaveBeenCalledWith(panel)
+    expect(observer!.observe).toHaveBeenCalledWith(panel)
 
-    await observer.triggerIntersect(panel)
+    await observer!.triggerIntersect(panel)
     await flushDomUpdates()
 
     expect(mockTranslateWalkedElement).toHaveBeenCalledWith(
@@ -317,14 +317,14 @@ describe("pageTranslationManager mutation re-walk", () => {
     const accordion = document.getElementById("accordion") as HTMLElement
     const panel = document.getElementById("panel") as HTMLElement
 
-    expect(observer.observe).not.toHaveBeenCalled()
+    expect(observer!.observe).not.toHaveBeenCalled()
 
     accordion.setAttribute("aria-hidden", "false")
     await flushDomUpdates()
 
-    expect(observer.observe).toHaveBeenCalledWith(panel)
+    expect(observer!.observe).toHaveBeenCalledWith(panel)
 
-    await observer.triggerIntersect(panel)
+    await observer!.triggerIntersect(panel)
     await flushDomUpdates()
 
     expect(mockTranslateWalkedElement).toHaveBeenCalledWith(
@@ -354,14 +354,14 @@ describe("pageTranslationManager mutation re-walk", () => {
     const accordion = document.getElementById("accordion") as HTMLElement
     const panel = document.getElementById("panel") as HTMLElement
 
-    expect(observer.observe).not.toHaveBeenCalled()
+    expect(observer!.observe).not.toHaveBeenCalled()
 
     accordion.classList.remove("closed")
     await flushDomUpdates()
 
-    expect(observer.observe).toHaveBeenCalledWith(panel)
+    expect(observer!.observe).toHaveBeenCalledWith(panel)
 
-    await observer.triggerIntersect(panel)
+    await observer!.triggerIntersect(panel)
     await flushDomUpdates()
 
     expect(mockTranslateWalkedElement).toHaveBeenCalledWith(
@@ -1080,7 +1080,7 @@ describe("pageTranslationManager mutation re-walk", () => {
     await flushDomUpdates()
 
     const observer = intersectionObservers[0]
-    const observed = observer.observe.mock.calls.map((call) => call[0])
+    const observed = observer!.observe.mock.calls.map((call) => call[0])
     // The giant is split: its nested paragraphs are observed individually.
     expect(observed).toContain(inner1)
     expect(observed).toContain(inner2)

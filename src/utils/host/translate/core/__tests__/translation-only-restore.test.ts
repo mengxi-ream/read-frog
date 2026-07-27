@@ -211,10 +211,10 @@ describe("translationOnly node-identity restore (#1846)", () => {
     const wrapper = getWrappers(p)[0]
     expect(wrapper).toBeDefined()
     // Host (framework re-render) removes the wrapper wholesale
-    wrapper.remove()
+    wrapper!.remove()
     const htmlAfterHostRemoval = document.body.innerHTML
 
-    const restored = removeTranslatedWrapperWithRestore(wrapper)
+    const restored = removeTranslatedWrapperWithRestore(wrapper!)
     flushBatchedOperations()
 
     expect(restored).toEqual([])

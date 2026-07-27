@@ -53,7 +53,7 @@ export function CustomActionCardList() {
   const handleTemplateSelect = (template: CustomActionTemplate) => {
     if (customActionProviders.length === 0) return
 
-    const newAction = template.createAction(customActionProviders[0].id)
+    const newAction = template.createAction(customActionProviders[0]!.id)
 
     const existingNames = new Set(customActions.map((action) => action.name))
     const baseName = template.id === "blank" ? DEFAULT_ACTION_NAME : newAction.name

@@ -25,7 +25,7 @@ describe("yieldToMain", () => {
 
     await yieldToMain()
     expect(postTask).toHaveBeenCalledTimes(1)
-    expect(postTask.mock.calls[0][1]).toEqual({ priority: "user-visible" })
+    expect(postTask.mock.calls[0]![1]).toEqual({ priority: "user-visible" })
   })
 
   it("falls back to MessageChannel when no scheduler exists", async () => {

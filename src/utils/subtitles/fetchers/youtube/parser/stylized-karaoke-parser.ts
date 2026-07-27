@@ -82,7 +82,7 @@ function selectMainTrack(events: YoutubeTimedText[]): number | null {
     return right.trackId - left.trackId
   })
 
-  return tracks[0].trackId
+  return tracks[0]!.trackId
 }
 
 function isSameSentenceFamily(current: SentenceFamily, text: string, start: number): boolean {

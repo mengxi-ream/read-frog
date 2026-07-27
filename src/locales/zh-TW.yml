@@ -323,6 +323,13 @@ options:
       closeMenu:
         disableForSite: 停用此網站
         disableGlobally: 全域停用
+      tooltips:
+        togglePageTranslation: 切換頁面翻譯
+        floatingButtonOptions: 懸浮按鈕選項
+        lockPosition: 鎖定位置
+        unlockPosition: 解鎖位置
+        settings: 設定
+        feedback: 傳送意見回饋
       disabledSites:
         title: 懸浮按鈕停用網站
         description: 設定需要停用懸浮按鈕的網站
@@ -352,7 +359,7 @@ options:
         speak: 朗讀
       saveSuggestion:
         title: 儲存建議
-        description: 劃詞翻譯後，推薦可存入筆記庫的詞條
+        description: 使用 AI 供應商進行劃詞翻譯後，推薦可存入筆記庫的詞條
       shortcut:
         title: 選取文字翻譯快速鍵
         description: 自訂翻譯選取文字的快速鍵
@@ -1131,6 +1138,7 @@ saveSuggestion:
   save: 儲存
   saved: 已儲存
   staleSuggestion: 該建議已過期
+  toggleLabel: 顯示儲存建議
 thinking:
   label: 思考中
   complete: 思考完成
@@ -1139,7 +1147,7 @@ thinking:
 shortcutKeySelector:
   placeholder: 請輸入快速鍵
 subtitles:
-  loadingAiSubtitles: 正在載入 AI 字幕
+  loadingAiSubtitles: 正在載入 AI 字幕（預計 3 分鐘）
   requestAiSubtitles: 請求 AI 字幕（Beta）
   usingAiSubtitles: 正在使用 AI 字幕
   actions:

@@ -12,9 +12,10 @@ export const saveSuggestionNoteSchema = z.strictObject({
 })
 
 /**
- * Mirrors the fixed server-side structured-output schema of
- * `hostedAi.noteSuggestion.streamStructuredObject`
- * (HostedAiNoteSuggestionObjectSchema in @read-frog/api-contract).
+ * Client-owned structured-output schema of the note suggestion, passed to
+ * `Output.object` when streaming from the user's selection-translate LLM
+ * provider (the nested shape cannot go through the flat structured-object
+ * port schema).
  */
 export const saveSuggestionEnvelopeSchema = z.strictObject({
   action: z.strictObject({
@@ -22,8 +23,7 @@ export const saveSuggestionEnvelopeSchema = z.strictObject({
     targetActionId: z.string().nullable(),
     /**
      * Display hint: which schema field's value best explains the term in one
-     * line. Optional client-side so a not-yet-redeployed server (whose fixed
-     * schema predates the field) still parses; required nullable server-side.
+     * line. Optional for tolerance of models that omit the field entirely.
      */
     summaryFieldName: z.string().nullable().optional(),
   }),

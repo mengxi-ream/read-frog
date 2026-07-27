@@ -322,6 +322,13 @@ options:
       closeMenu:
         disableForSite: Bu site için devre dışı bırak
         disableGlobally: Genel olarak devre dışı bırak
+      tooltips:
+        togglePageTranslation: Sayfa çevirisini aç/kapat
+        floatingButtonOptions: Kayan düğme seçenekleri
+        lockPosition: Konumu kilitle
+        unlockPosition: Konum kilidini aç
+        settings: Ayarlar
+        feedback: Geri bildirim gönder
       disabledSites:
         title: Yüzen Buton Devre Dışı Siteler
         description: Yüzen butonun devre dışı bırakılması gereken web sitelerini yapılandırın
@@ -351,7 +358,7 @@ options:
         speak: Sesli Okuma
       saveSuggestion:
         title: Kaydetme Önerileri
-        description: Seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir
+        description: Bir yapay zeka sağlayıcısıyla seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -1016,6 +1023,7 @@ saveSuggestion:
   save: Kaydet
   saved: Kaydedildi
   staleSuggestion: Bu öneri güncelliğini yitirdi
+  toggleLabel: Kaydetme önerilerini göster
 thinking:
   label: Düşünüyor
   complete: Düşünme tamamlandı
@@ -1024,7 +1032,7 @@ thinking:
 shortcutKeySelector:
   placeholder: Lütfen kısayolu girin
 subtitles:
-  loadingAiSubtitles: Yapay zeka altyazıları yükleniyor…
+  loadingAiSubtitles: Yapay zeka altyazıları yükleniyor… (tahmini 3 dk)
   requestAiSubtitles: Yapay zeka altyazısı iste (Beta)
   usingAiSubtitles: Yapay zeka altyazısı kullanılıyor
   actions:

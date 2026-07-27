@@ -160,7 +160,7 @@ export class SubtitlesScheduler {
 
   private updateCurrentSubtitle() {
     const currentSubtitle = this.currentIndex >= 0 ? this.subtitles[this.currentIndex] : null
-    subtitlesStore.set(currentSubtitleAtom, currentSubtitle)
+    subtitlesStore.set(currentSubtitleAtom, currentSubtitle!)
   }
 
   private updateState() {

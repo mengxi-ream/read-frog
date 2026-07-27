@@ -28,10 +28,10 @@ export default function TranslateButton({ className }: { className?: string }) {
       currentWindow: true,
     })
 
-    if (currentTab.id) {
+    if (currentTab!.id) {
       const nextEnabled = !isPageTranslated
       void sendMessage("tryToSetEnablePageTranslationByTabId", {
-        tabId: currentTab.id,
+        tabId: currentTab!.id,
         enabled: nextEnabled,
         analyticsContext: nextEnabled
           ? createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.POPUP)

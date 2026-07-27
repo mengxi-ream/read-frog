@@ -56,7 +56,7 @@ describe("selectionToolbarCustomActionTrigger", () => {
     expect(openToolbarCustomActionMock).toHaveBeenCalledOnce()
     expect(openToolbarCustomActionMock).toHaveBeenCalledWith("summarize", trigger)
     expect(blurSpy.mock.invocationCallOrder[0]).toBeLessThan(
-      openToolbarCustomActionMock.mock.invocationCallOrder[0],
+      openToolbarCustomActionMock.mock.invocationCallOrder[0]!,
     )
     expect(document.activeElement).not.toBe(trigger)
   })

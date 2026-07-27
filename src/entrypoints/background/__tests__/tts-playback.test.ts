@@ -235,10 +235,10 @@ describe("setupTTSPlaybackMessageHandlers", () => {
     await Promise.resolve()
 
     expect(FakeAudio.instances).toHaveLength(1)
-    expect(FakeAudio.instances[0].play).toHaveBeenCalled()
+    expect(FakeAudio.instances[0]!.play).toHaveBeenCalled()
     expect(sendMessageMock).not.toHaveBeenCalled()
 
-    FakeAudio.instances[0].onended?.()
+    FakeAudio.instances[0]!.onended?.()
 
     await expect(playbackPromise).resolves.toEqual({ ok: true })
     expect(revokeObjectURLMock).toHaveBeenCalledWith("blob:tts-test")
@@ -263,11 +263,11 @@ describe("setupTTSPlaybackMessageHandlers", () => {
     await Promise.resolve()
 
     await stopHandler({ data: { requestId: "req-other" } })
-    expect(FakeAudio.instances[0].pause).not.toHaveBeenCalled()
+    expect(FakeAudio.instances[0]!.pause).not.toHaveBeenCalled()
 
     await stopHandler({ data: { requestId: "req-active" } })
 
     await expect(playbackPromise).resolves.toEqual({ ok: false, reason: "stopped" })
-    expect(FakeAudio.instances[0].pause).toHaveBeenCalled()
+    expect(FakeAudio.instances[0]!.pause).toHaveBeenCalled()
   })
 })
