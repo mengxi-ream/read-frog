@@ -84,8 +84,8 @@ export function parseScrollingAsrSubtitles(
     const segs = event.segs
     for (let i = 0; i < segs.length; i++) {
       const seg = segs[i]
-      const text = seg.utf8 || ""
-      const offsetMs = seg.tOffsetMs || 0
+      const text = seg!.utf8 || ""
+      const offsetMs = seg!.tOffsetMs || 0
       const segStart = event.tStartMs + offsetMs
 
       // If pending split and this is a new seg, output current fragment first

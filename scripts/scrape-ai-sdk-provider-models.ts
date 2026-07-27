@@ -118,11 +118,11 @@ function parseArgs(argv: string[]): ScrapeOptions {
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
-    if (!arg.startsWith("--")) {
+    if (!arg!.startsWith("--")) {
       throw new Error(`Unknown argument "${arg}". Expected flags like --out <path>.`)
     }
 
-    const key = arg.slice(2)
+    const key = arg!.slice(2)
     const value = argv[i + 1]
     if (!value || value.startsWith("--")) {
       throw new Error(`Missing value for --${key}`)
@@ -332,16 +332,16 @@ function extractHeadersAndRows(table: HTMLTableElement): ExtractedTableRows {
   }
 
   const firstRow = allRows[0]
-  const headerLike = [...firstRow.cells].every((cell) => cell.tagName === "TH")
+  const headerLike = [...firstRow!.cells].every((cell) => cell.tagName === "TH")
   if (headerLike) {
-    const headers = Array.from(firstRow.cells, (cell) => cleanText(cell.textContent) || "Column")
+    const headers = Array.from(firstRow!.cells, (cell) => cleanText(cell.textContent) || "Column")
     return {
       headers,
       rows: allRows.slice(1),
     }
   }
 
-  const headers = Array.from(firstRow.cells, (_cell, index) => `Column ${index + 1}`)
+  const headers = Array.from(firstRow!.cells, (_cell, index) => `Column ${index + 1}`)
   return { headers, rows: allRows }
 }
 
@@ -405,7 +405,7 @@ function extractModelTables(providerHtml: string): ProviderTable[] {
         if (!header) {
           continue
         }
-        const value = parseCapabilityCell(row.cells[cellIndex])
+        const value = parseCapabilityCell(row.cells[cellIndex]!)
         assignUniqueKey(rawCapabilities, header, value)
       }
 
@@ -450,7 +450,7 @@ function discoverProvidersFromHtml(html: string, baseUrl: string): ProviderLink[
       continue
     }
 
-    const slug = decodeURIComponent(match[1])
+    const slug = decodeURIComponent(match[1]!)
     if (!slug || providers.has(slug)) {
       continue
     }
@@ -550,7 +550,7 @@ async function mapWithConcurrency<T, R>(
       if (index >= values.length) {
         return
       }
-      results[index] = await worker(values[index], index)
+      results[index] = await worker(values[index]!, index)
     }
   })
 

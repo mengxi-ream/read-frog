@@ -90,7 +90,7 @@ function SubtitlesBatchNumberSelector({ property }: { property: KeyOfBatchQueueC
           } else {
             toastManager.add({
               type: "error",
-              title: configParseResult.error?.issues[0].message,
+              title: configParseResult.error?.issues[0]!.message,
             })
           }
         }}

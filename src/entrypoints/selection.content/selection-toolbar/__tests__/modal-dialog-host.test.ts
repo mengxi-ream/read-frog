@@ -157,8 +157,8 @@ describe("modal dialog host placement", () => {
       ["pointer-events", "none"],
       ["z-index", "2147483647"],
     ]) {
-      expect(slot.style.getPropertyValue(property)).toBe(value)
-      expect(slot.style.getPropertyPriority(property)).toBe("important")
+      expect(slot.style.getPropertyValue(property!)).toBe(value)
+      expect(slot.style.getPropertyPriority(property!)).toBe("important")
     }
   })
 

@@ -12,10 +12,6 @@ export const OVERLAY_SHADOW_ROOT_CSS = `
   position: static !important;
   width: 0 !important;
 }
-
-body {
-  background-color: transparent !important;
-}
 `
 
 export function insertShadowRootUIWrapperInto(container: HTMLElement, shadowHost: HTMLElement) {

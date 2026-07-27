@@ -95,10 +95,10 @@ export function buildFeatureProviderPatch(
     let current: Record<string, unknown> = fragment
     for (let i = 0; i < def.configPath.length - 1; i++) {
       const next: Record<string, unknown> = {}
-      current[def.configPath[i]] = next
+      current[def.configPath[i]!] = next
       current = next
     }
-    current[def.configPath[def.configPath.length - 1]] = newId
+    current[def.configPath[def.configPath.length - 1]!] = newId
 
     patch = mergeWithArrayOverwrite(patch, fragment)
   }

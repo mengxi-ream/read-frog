@@ -245,7 +245,7 @@ describe("translation queue helpers", () => {
     expect(results).toEqual(["translated", "translated"])
     expect(executeTranslateMock).toHaveBeenCalledTimes(1)
     // the shared item is sent once, not as a two-item batch
-    expect(executeTranslateMock.mock.calls[0][0]).toBe("hello")
+    expect(executeTranslateMock.mock.calls[0]![0]).toBe("hello")
   })
 
   it("does not expose an experiment prompt when the variant-specific cache hits", async () => {
@@ -330,7 +330,7 @@ describe("translation queue helpers", () => {
     )
     expect(executeTranslateMock).toHaveBeenCalledTimes(1)
     expect(exposePromptExperimentMock.mock.invocationCallOrder[1]).toBeLessThan(
-      executeTranslateMock.mock.invocationCallOrder[0],
+      executeTranslateMock.mock.invocationCallOrder[0]!,
     )
   })
 

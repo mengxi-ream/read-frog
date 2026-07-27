@@ -102,7 +102,7 @@ function createBatchQueue(
       return data.text.length
     },
     executeBatch: async (dataList) => {
-      const { langConfig, providerConfig } = dataList[0]
+      const { langConfig, providerConfig } = dataList[0]!
       const texts = dataList.map((d) => d.text)
       const batchText = texts.join(`\n\n${BATCH_SEPARATOR}\n\n`)
       const hash = Sha256Hex(...dataList.map((d) => d.hash))
@@ -773,7 +773,7 @@ describe("batchQueue – in-flight coalescing", () => {
     await expect(Promise.all([first, second])).resolves.toEqual(["result", "result"])
     expect(mockExecuteTranslate).toHaveBeenCalledTimes(1)
     // the coalesced item appears once in the batch payload, not twice
-    expect(mockExecuteTranslate.mock.calls[0][0]).toBe("Hello")
+    expect(mockExecuteTranslate.mock.calls[0]![0]).toBe("Hello")
   })
 
   it("does not coalesce enqueues with different dedup keys", async () => {
@@ -804,7 +804,7 @@ describe("batchQueue – in-flight coalescing", () => {
     await expect(Promise.all([first, second])).resolves.toEqual(["result1", "result2"])
     // both items are translated as distinct entries of a single batch
     expect(mockExecuteTranslate).toHaveBeenCalledTimes(1)
-    expect(mockExecuteTranslate.mock.calls[0][0]).toBe(`Hello\n\n${BATCH_SEPARATOR}\n\nHello`)
+    expect(mockExecuteTranslate.mock.calls[0]![0]).toBe(`Hello\n\n${BATCH_SEPARATOR}\n\nHello`)
   })
 
   it("issues a fresh request for the same key after the in-flight one resolves", async () => {
@@ -955,7 +955,7 @@ describe("batchQueue – dispatch gate", () => {
     await vi.advanceTimersByTimeAsync(100)
 
     expect(executeBatch).toHaveBeenCalledTimes(1)
-    expect(executeBatch.mock.calls[0][0]).toHaveLength(2)
+    expect(executeBatch.mock.calls[0]![0]).toHaveLength(2)
     await expect(Promise.all([p1, p2])).resolves.toEqual(["a", "b"])
   })
 
@@ -981,7 +981,7 @@ describe("batchQueue – dispatch gate", () => {
     await vi.advanceTimersByTimeAsync(0)
 
     expect(executeBatch).toHaveBeenCalledTimes(1)
-    expect(executeBatch.mock.calls[0][0]).toHaveLength(5)
+    expect(executeBatch.mock.calls[0]![0]).toHaveLength(5)
     await expect(Promise.all(promises)).resolves.toEqual(["t0", "t1", "t2", "t3", "t4"])
   })
 
@@ -1004,7 +1004,7 @@ describe("batchQueue – dispatch gate", () => {
     await vi.advanceTimersByTimeAsync(1_100)
 
     expect(executeBatch).toHaveBeenCalledTimes(1)
-    expect(executeBatch.mock.calls[0][0]).toHaveLength(2)
+    expect(executeBatch.mock.calls[0]![0]).toHaveLength(2)
     await expect(Promise.all([p1, p2])).resolves.toEqual(["a", "b"])
   })
 

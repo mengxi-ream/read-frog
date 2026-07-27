@@ -51,11 +51,11 @@ export async function isSameAsLatestBackup(
   const latestBackupWithMetadata = backupsWithMetadata[0]
 
   // Compare schema version
-  if (latestBackupWithMetadata.schemaVersion !== configSchemaVersion) {
+  if (latestBackupWithMetadata!.schemaVersion !== configSchemaVersion) {
     return false
   }
 
-  return dequal(latestBackupWithMetadata.config, config)
+  return dequal(latestBackupWithMetadata!.config, config)
 }
 
 /**

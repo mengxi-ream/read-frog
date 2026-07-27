@@ -166,7 +166,7 @@ export function ProviderConfigForm() {
     }
 
     await setAllProvidersConfig(updatedAllProviders)
-    setSelectedProviderId(chooseNextProviderConfig(updatedAllProviders).id)
+    setSelectedProviderId(chooseNextProviderConfig(updatedAllProviders)!.id)
   }
 
   return (

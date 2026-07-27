@@ -122,7 +122,7 @@ function SubtitlesNumberSelector({ property }: { property: KeyOfRequestQueueConf
           if (inputValue === "" || !configParseResult.success) {
             toastManager.add({
               type: "error",
-              title: configParseResult.error?.issues[0].message,
+              title: configParseResult.error!.issues[0]!.message,
             })
             setInputValue(String(currentConfigValue))
           }

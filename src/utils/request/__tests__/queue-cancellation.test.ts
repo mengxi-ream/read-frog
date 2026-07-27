@@ -295,7 +295,7 @@ describe("batchQueue – cancelByScope", () => {
 
     await vi.advanceTimersByTimeAsync(200)
     expect(executeBatch).toHaveBeenCalledTimes(1)
-    expect(executeBatch.mock.calls[0][0].map((d: FakeBatchData) => d.text)).toEqual(["gamma"])
+    expect(executeBatch.mock.calls[0]![0].map((d: FakeBatchData) => d.text)).toEqual(["gamma"])
     await expect(b1).resolves.toBe("t:gamma")
   })
 

@@ -41,7 +41,7 @@ function createSplitGroup(
   const wrappers = offsets.map(() => document.createElement("div"))
   const entries = offsets.map((offset, index) => ({
     unit: unit(index, source, offset),
-    wrapper: wrappers[index],
+    wrapper: wrappers[index]!,
   }))
   const { splitRecords } = insertVirtualParagraphWrappers(entries, layoutSource)
   const group: VirtualParagraphGroup = {
@@ -75,8 +75,8 @@ describe("virtual paragraph lifecycle", () => {
     const { group } = createSplitGroup(layoutSource, source, [3, 8, originalValue.length])
 
     expect(group.splitRecords).toHaveLength(1)
-    expect(group.splitRecords[0].source).toBe(source)
-    expect(group.splitRecords[0].createdTails).toHaveLength(2)
+    expect(group.splitRecords[0]!.source).toBe(source)
+    expect(group.splitRecords[0]!.createdTails).toHaveLength(2)
     expect(layoutSource.textContent).toBe(originalValue)
 
     expect(disposeVirtualParagraphGroup(group)).toEqual({ restored: 1, skipped: 0 })
@@ -105,7 +105,7 @@ describe("virtual paragraph lifecycle", () => {
     layoutSource.append(source)
     document.body.append(layoutSource)
     const { group, wrappers } = createSplitGroup(layoutSource, source, [3, 8])
-    const tails = [...group.splitRecords[0].createdTails]
+    const tails = [...group.splitRecords[0]!.createdTails]
 
     source.data = "host update"
 
@@ -124,11 +124,11 @@ describe("virtual paragraph lifecycle", () => {
     layoutSource.append(source)
     document.body.append(layoutSource)
     const { group, wrappers } = createSplitGroup(layoutSource, source, [3, 8])
-    const tails = [...group.splitRecords[0].createdTails]
+    const tails = [...group.splitRecords[0]!.createdTails]
     const siteNode = document.createElement("span")
     siteNode.textContent = "site content"
 
-    layoutSource.insertBefore(siteNode, tails[0])
+    layoutSource.insertBefore(siteNode, tails[0]!)
 
     expect(disposeVirtualParagraphGroup(group)).toEqual({ restored: 0, skipped: 1 })
     expect(source.data).toBe("one")
@@ -147,7 +147,7 @@ describe("virtual paragraph lifecycle", () => {
     layoutSource.append(source)
     document.body.append(layoutSource)
     const { group } = createSplitGroup(layoutSource, source, [3, 8])
-    const tails = [...group.splitRecords[0].createdTails]
+    const tails = [...group.splitRecords[0]!.createdTails]
 
     source.data = expandedValue
 
@@ -165,7 +165,7 @@ describe("virtual paragraph lifecycle", () => {
     layoutSource.append(source)
     document.body.append(layoutSource)
     const { group, wrappers } = createSplitGroup(layoutSource, source, [3, 8])
-    const tails = [...group.splitRecords[0].createdTails]
+    const tails = [...group.splitRecords[0]!.createdTails]
     const replacement = document.createTextNode("replacement")
 
     source.replaceWith(replacement)
@@ -185,17 +185,17 @@ describe("virtual paragraph lifecycle", () => {
     layoutSource.append(source)
     document.body.append(layoutSource)
     const { group } = createSplitGroup(layoutSource, source, [3, 8])
-    const tails = [...group.splitRecords[0].createdTails]
+    const tails = [...group.splitRecords[0]!.createdTails]
     const replacement = document.createTextNode("replacement")
 
-    tails[1].data = "edited by host"
+    tails[1]!.data = "edited by host"
     source.replaceWith(replacement)
 
     expect(disposeVirtualParagraphGroup(group)).toEqual({ restored: 0, skipped: 1 })
     expect(layoutSource.firstChild).toBe(replacement)
-    expect(tails[0].isConnected).toBe(false)
-    expect(tails[1].isConnected).toBe(true)
-    expect(tails[1].data).toBe("edited by host")
+    expect(tails[0]!.isConnected).toBe(false)
+    expect(tails[1]!.isConnected).toBe(true)
+    expect(tails[1]!.data).toBe("edited by host")
   })
 
   it("keeps split state until the last wrapper is dropped", () => {
@@ -205,22 +205,22 @@ describe("virtual paragraph lifecycle", () => {
     layoutSource.append(source)
     document.body.append(layoutSource)
     const { group, wrappers } = createSplitGroup(layoutSource, source, [3, originalValue.length])
-    const tail = group.splitRecords[0].createdTails[0]
+    const tail = group.splitRecords[0]!.createdTails[0]
 
-    dropVirtualParagraphWrapper(group, wrappers[0])
+    dropVirtualParagraphWrapper(group, wrappers[0]!)
 
     expect(group.status).toBe("active")
     expect(group.wrappers).toEqual(new Set([wrappers[1]]))
     expect(source.data).toBe("one")
-    expect(tail.isConnected).toBe(true)
+    expect(tail!.isConnected).toBe(true)
     expect(getVirtualParagraphGroupForSource(layoutSource)).toBe(group)
 
-    dropVirtualParagraphWrapper(group, wrappers[1])
+    dropVirtualParagraphWrapper(group, wrappers[1]!)
 
     expect(group.status).toBe("disposed")
     expect(layoutSource.firstChild).toBe(source)
     expect(source.data).toBe(originalValue)
-    expect(tail.isConnected).toBe(false)
+    expect(tail!.isConnected).toBe(false)
     expect(getVirtualParagraphGroupForSource(layoutSource)).toBeUndefined()
   })
 
@@ -392,7 +392,7 @@ describe("virtual paragraph lifecycle", () => {
     const { group, wrappers } = createSplitGroup(layoutSource, source, [3, source.data.length])
 
     expect(isVirtualParagraphGroupCurrent(group)).toBe(true)
-    wrappers[0].remove()
+    wrappers[0]!.remove()
 
     expect(isVirtualParagraphGroupCurrent(group)).toBe(false)
     disposeVirtualParagraphGroup(group)
@@ -405,7 +405,7 @@ describe("virtual paragraph lifecycle", () => {
     document.body.append(layoutSource)
     const { group, wrappers } = createSplitGroup(layoutSource, source, [3, source.data.length])
 
-    layoutSource.append(wrappers[0])
+    layoutSource.append(wrappers[0]!)
 
     expect(isVirtualParagraphGroupCurrent(group)).toBe(false)
     disposeVirtualParagraphGroup(group)

@@ -266,7 +266,7 @@ describe("binaryHeapPQ", () => {
 
       // Verify sorted order (ascending priorities)
       for (let i = 1; i < results.length; i++) {
-        expect(results[i]).toBeGreaterThanOrEqual(results[i - 1])
+        expect(results[i]).toBeGreaterThanOrEqual(results[i - 1]!)
       }
     })
 
@@ -299,7 +299,7 @@ describe("binaryHeapPQ", () => {
 
       // Add items in random order
       for (let i = 0; i < values.length; i++) {
-        pq.push(values[i], priorities[i])
+        pq.push(values[i]!, priorities[i]!)
       }
 
       // Remove items - should come out in ascending priority order

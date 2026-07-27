@@ -49,7 +49,7 @@ describe("deepl translate adapter", () => {
       }),
     )
 
-    const [, requestInit] = fetchMock.mock.calls[0]
+    const [, requestInit] = fetchMock.mock.calls[0]!
     expect(JSON.parse(requestInit.body)).toEqual({
       text: ["Hello"],
       target_lang: "ZH-HANS",
@@ -75,7 +75,7 @@ describe("deepl translate adapter", () => {
       apiKey: "test-key",
     })
 
-    const [, requestInit] = fetchMock.mock.calls[0]
+    const [, requestInit] = fetchMock.mock.calls[0]!
     expect(JSON.parse(requestInit.body)).toEqual({
       text: ["甲"],
       source_lang: "ZH",
@@ -110,7 +110,7 @@ describe("deepl translate adapter", () => {
         { textFormat },
       )
 
-      const [, requestInit] = fetchMock.mock.calls[0]
+      const [, requestInit] = fetchMock.mock.calls[0]!
       expect(JSON.parse(requestInit.body)).toEqual({
         text: ["Hello"],
         source_lang: "EN",
@@ -144,7 +144,7 @@ describe("deepl translate adapter", () => {
       { textFormat: "html" },
     )
 
-    const [, requestInit] = fetchMock.mock.calls[0]
+    const [, requestInit] = fetchMock.mock.calls[0]!
     expect(JSON.parse(requestInit.body)).toEqual({
       text: ['<p class="message">Hello</p>'],
       source_lang: "EN",

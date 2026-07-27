@@ -45,9 +45,9 @@ describe("microsoftWarmupTranslate", () => {
       toLang: "zh",
     })
     expect(result).toHaveLength(1)
-    expect(result[0].translation).toBe("你好")
-    expect(result[0].text).toBe("Hello")
-    expect(result[0].start).toBe(0)
+    expect(result[0]!.translation).toBe("你好")
+    expect(result[0]!.text).toBe("Hello")
+    expect(result[0]!.start).toBe(0)
   })
 
   it("translates multiple fragments in one chunk", async () => {
@@ -62,9 +62,9 @@ describe("microsoftWarmupTranslate", () => {
 
     expect(mockSendMessage).toHaveBeenCalledTimes(1)
     expect(result).toHaveLength(3)
-    expect(result[0].translation).toBe("你好")
-    expect(result[1].translation).toBe("世界")
-    expect(result[2].translation).toBe("今天")
+    expect(result[0]!.translation).toBe("你好")
+    expect(result[1]!.translation).toBe("世界")
+    expect(result[2]!.translation).toBe("今天")
   })
 
   it("splits fragments into chunks by element count (100 max)", async () => {
@@ -78,10 +78,10 @@ describe("microsoftWarmupTranslate", () => {
 
     expect(mockSendMessage).toHaveBeenCalledTimes(2)
     expect(result).toHaveLength(150)
-    expect(result[0].translation).toBe("翻译 0")
-    expect(result[99].translation).toBe("翻译 99")
-    expect(result[100].translation).toBe("翻译 100")
-    expect(result[149].translation).toBe("翻译 149")
+    expect(result[0]!.translation).toBe("翻译 0")
+    expect(result[99]!.translation).toBe("翻译 99")
+    expect(result[100]!.translation).toBe("翻译 100")
+    expect(result[149]!.translation).toBe("翻译 149")
   })
 
   it("splits fragments into chunks by character count (50000 max)", async () => {
@@ -100,9 +100,9 @@ describe("microsoftWarmupTranslate", () => {
     const result = await microsoftWarmupTranslate(fragments, "en", "zh")
 
     expect(mockSendMessage).toHaveBeenCalledTimes(2)
-    expect(result[0].translation).toBe("翻译1")
-    expect(result[1].translation).toBe("翻译2")
-    expect(result[2].translation).toBe("短")
+    expect(result[0]!.translation).toBe("翻译1")
+    expect(result[1]!.translation).toBe("翻译2")
+    expect(result[2]!.translation).toBe("短")
   })
 
   it("handles partial chunk failure gracefully", async () => {
@@ -116,11 +116,11 @@ describe("microsoftWarmupTranslate", () => {
     const result = await microsoftWarmupTranslate(fragments, "en", "zh")
 
     expect(result).toHaveLength(150)
-    expect(result[0].translation).toBe("翻译 0")
-    expect(result[99].translation).toBe("翻译 99")
+    expect(result[0]!.translation).toBe("翻译 0")
+    expect(result[99]!.translation).toBe("翻译 99")
     // Second chunk failed — translations remain undefined
-    expect(result[100].translation).toBeUndefined()
-    expect(result[149].translation).toBeUndefined()
+    expect(result[100]!.translation).toBeUndefined()
+    expect(result[149]!.translation).toBeUndefined()
   })
 
   it("preserves original fragment properties", async () => {
@@ -145,6 +145,6 @@ describe("microsoftWarmupTranslate", () => {
     const result = await microsoftWarmupTranslate(fragments, "en", "zh")
 
     expect(original.translation).toBeUndefined()
-    expect(result[0].translation).toBe("你好")
+    expect(result[0]!.translation).toBe("你好")
   })
 })

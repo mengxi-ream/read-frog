@@ -226,14 +226,14 @@ export async function translateSubtitles(
   // If all translations failed, throw with friendly error message
   const allRejected = results.every((r): r is PromiseRejectedResult => r.status === "rejected")
   if (allRejected && results.length) {
-    throw new Error(toFriendlyErrorMessage(results[0].reason))
+    throw new Error(toFriendlyErrorMessage(results[0]!.reason))
   }
 
   return fragments.map((fragment, index) => {
     const result = results[index]
     return {
       ...fragment,
-      translation: result.status === "fulfilled" ? result.value : "",
+      translation: result!.status === "fulfilled" ? result!.value : "",
     }
   })
 }

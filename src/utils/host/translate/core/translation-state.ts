@@ -513,8 +513,8 @@ export function isVirtualParagraphGroupCurrent(
   }
 
   for (let index = 1; index < group.sourceSnapshots.length; index += 1) {
-    const previous = group.sourceSnapshots[index - 1].source
-    const current = group.sourceSnapshots[index].source
+    const previous = group.sourceSnapshots[index - 1]!.source
+    const current = group.sourceSnapshots[index]!.source
     if (!(previous.compareDocumentPosition(current) & 4)) return false
   }
 

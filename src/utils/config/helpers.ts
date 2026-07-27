@@ -118,7 +118,7 @@ export function resolveLanguageDetectionConfigForModeChange(
   )
   return {
     mode: "llm",
-    providerId: hasSelectedProvider ? currentConfig.providerId : enabledLLMProviders[0].id,
+    providerId: hasSelectedProvider ? currentConfig.providerId : enabledLLMProviders[0]!.id,
   }
 }
 

@@ -168,9 +168,9 @@ describe("bootstrapHostContent URL changes", () => {
     )
     await flushAsyncWork()
 
-    expect(manager.start).toHaveBeenCalledTimes(1)
-    expect(manager.restart).toHaveBeenCalledTimes(1)
-    expect(manager.stop).not.toHaveBeenCalled()
+    expect(manager!.start).toHaveBeenCalledTimes(1)
+    expect(manager!.restart).toHaveBeenCalledTimes(1)
+    expect(manager!.stop).not.toHaveBeenCalled()
     expect(mockSendMessage).toHaveBeenCalledWith("reportDetectedPageLanguage", {
       url: "https://example.com/articles/2?ref=nav#comments",
       detectedCodeOrUnd: "fra",
@@ -194,9 +194,9 @@ describe("bootstrapHostContent URL changes", () => {
     )
     await flushAsyncWork()
 
-    expect(manager.start).not.toHaveBeenCalled()
-    expect(manager.restart).not.toHaveBeenCalled()
-    expect(manager.stop).not.toHaveBeenCalled()
+    expect(manager!.start).not.toHaveBeenCalled()
+    expect(manager!.restart).not.toHaveBeenCalled()
+    expect(manager!.stop).not.toHaveBeenCalled()
     expect(mockSendMessage).toHaveBeenCalledWith("reportDetectedPageLanguage", {
       url: "https://example.com/articles/2",
       detectedCodeOrUnd: "fra",

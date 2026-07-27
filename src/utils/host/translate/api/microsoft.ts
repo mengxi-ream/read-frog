@@ -77,7 +77,7 @@ export async function microsoftTranslate(
       },
     )
 
-    return isSingle ? translations[0] : translations
+    return isSingle ? translations[0]! : translations
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     throw new Error(`Failed to parse Microsoft translation response: ${message}`, { cause: error })

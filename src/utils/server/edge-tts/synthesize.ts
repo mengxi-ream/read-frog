@@ -63,13 +63,13 @@ function assertChunkConcatSupported(chunkRequests: EdgeTTSSynthesizeRequest[]): 
     resolveOutputFormat(chunkRequest.outputFormat),
   )
   const firstFormat = requestedFormats[0]
-  const firstFormatNormalized = firstFormat.toLowerCase()
+  const firstFormatNormalized = firstFormat!.toLowerCase()
 
   for (let index = 0; index < requestedFormats.length; index++) {
     const requestedFormat = requestedFormats[index]
-    const requestedFormatNormalized = requestedFormat.toLowerCase()
+    const requestedFormatNormalized = requestedFormat!.toLowerCase()
 
-    if (!isConcatenationSafeOutputFormat(requestedFormat)) {
+    if (!isConcatenationSafeOutputFormat(requestedFormat!)) {
       throw new EdgeTTSError(
         "SYNTH_REQUEST_FAILED",
         `Output format "${requestedFormat}" is not safe for multi-chunk concatenation`,

@@ -18,7 +18,7 @@ describe("validateUserRulesDocument", () => {
     }
     expect(result.kind).toBe("syntax")
     expect(result.issues).toHaveLength(1)
-    expect(result.issues[0].message.length).toBeGreaterThan(0)
+    expect(result.issues[0]!.message.length).toBeGreaterThan(0)
   })
 
   it("rejects a non-array top-level value", () => {
@@ -75,8 +75,8 @@ describe("validateUserRulesDocument", () => {
     }
     expect(result.kind).toBe("duplicateIds")
     expect(result.issues).toHaveLength(1)
-    expect(result.issues[0].path).toBe("rules[1].id")
-    expect(result.issues[0].message).toContain("dup")
+    expect(result.issues[0]!.path).toBe("rules[1].id")
+    expect(result.issues[0]!.message).toContain("dup")
   })
 
   it("formats schema issue paths as rules[n].field", () => {
@@ -92,10 +92,10 @@ describe("validateUserRulesDocument", () => {
       return
     }
     expect(result.kind).toBe("schema")
-    expect(result.issues[0].path).toBe("rules[1].matches")
+    expect(result.issues[0]!.path).toBe("rules[1].matches")
     // The editor renders each issue as `${path}: ${message}`.
     expect(
-      `${result.issues[0].path}: ${result.issues[0].message}`.startsWith("rules[1].matches: "),
+      `${result.issues[0]!.path}: ${result.issues[0]!.message}`.startsWith("rules[1].matches: "),
     ).toBe(true)
   })
 
@@ -139,7 +139,7 @@ describe("validateUserRulesDocument", () => {
       return
     }
     expect(result.kind).toBe("schema")
-    expect(result.issues[0].path).toBe("rules[0].forceBlockSelectors")
+    expect(result.issues[0]!.path).toBe("rules[0].forceBlockSelectors")
   })
 
   it("round-trips a valid rules document", () => {

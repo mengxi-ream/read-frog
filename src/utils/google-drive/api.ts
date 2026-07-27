@@ -53,7 +53,7 @@ export async function findFileInAppData(fileName: string): Promise<GoogleDriveFi
       throw new Error(`Invalid response from Google Drive API: ${result.error.message}`)
     }
 
-    return result.data.files.length > 0 ? result.data.files[0] : null
+    return result.data.files.length > 0 ? result.data.files[0]! : null
   } catch (error) {
     logger.error("Failed to find file in appData", error)
     throw error

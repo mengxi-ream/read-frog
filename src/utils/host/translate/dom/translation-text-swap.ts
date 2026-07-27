@@ -170,7 +170,7 @@ function alignGap(sourceGap: Text[], targetGap: Text[], acc: AlignmentAccumulato
   }
   if (!joinedTarget) return // uncovered source text
 
-  const pair: TextSwapPair = { node: relevantSource[0], translatedValue: joinedTarget }
+  const pair: TextSwapPair = { node: relevantSource[0]!, translatedValue: joinedTarget }
   acc.pairs.push(pair)
   // Provider merged several source fragments: the first node carries the whole
   // translation, the rest are blanked (same parent, so visually identical).
@@ -193,9 +193,9 @@ function alignLevel(
   const targetElements = target.sequence.filter((item): item is Element => !Array.isArray(item))
   if (sourceElements.length !== targetElements.length) return false
   for (let i = 0; i < sourceElements.length; i++) {
-    if (sourceElements[i].localName !== targetElements[i].localName) return false
+    if (sourceElements[i]!.localName !== targetElements[i]!.localName) return false
     for (const name of IDENTITY_ATTRIBUTES) {
-      if (sourceElements[i].getAttribute(name) !== targetElements[i].getAttribute(name)) {
+      if (sourceElements[i]!.getAttribute(name) !== targetElements[i]!.getAttribute(name)) {
         return false
       }
     }
@@ -212,8 +212,8 @@ function alignLevel(
       continue
     }
     const targetElement = targetItem as Element
-    collectTranslatedAttributePairs(sourceItem, targetElement, acc)
-    if (!alignLevel([...sourceItem.childNodes], [...targetElement.childNodes], acc)) {
+    collectTranslatedAttributePairs(sourceItem!, targetElement, acc)
+    if (!alignLevel([...sourceItem!.childNodes], [...targetElement.childNodes], acc)) {
       return false
     }
   }
@@ -267,7 +267,7 @@ export function planInPlaceTextSwap(
     const translatedText = template.content.textContent ?? ""
     if (!translatedText.trim()) return null
     return {
-      pairs: [{ node: sourceTextNodes[0], translatedValue: translatedText }],
+      pairs: [{ node: sourceTextNodes[0]!, translatedValue: translatedText }],
       attributePairs: [],
       coverage: 1,
     }

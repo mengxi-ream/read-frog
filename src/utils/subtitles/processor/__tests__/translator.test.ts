@@ -55,8 +55,8 @@ describe("subtitles translator", () => {
     await translateSubtitles(fragments, { ...baseContext, summary: "Ready summary" })
     await translateSubtitles(fragments, baseContext)
 
-    const firstRequest = sendMessageMock.mock.calls[0][1]
-    const secondRequest = sendMessageMock.mock.calls[1][1]
+    const firstRequest = sendMessageMock.mock.calls[0]![1]
+    const secondRequest = sendMessageMock.mock.calls[1]![1]
 
     expect(firstRequest.webTitle).toBe("Video title")
     expect(firstRequest.webDescription).toBe("Video description")
@@ -88,8 +88,8 @@ describe("subtitles translator", () => {
       summary: "summary-b",
     })
 
-    const firstHash = sendMessageMock.mock.calls[0][1].hash
-    const secondHash = sendMessageMock.mock.calls[1][1].hash
+    const firstHash = sendMessageMock.mock.calls[0]![1].hash
+    const secondHash = sendMessageMock.mock.calls[1]![1].hash
 
     expect(firstHash).not.toBe(secondHash)
   })
@@ -154,7 +154,7 @@ describe("subtitles translator", () => {
       summary: null,
     })
 
-    const request = sendMessageMock.mock.calls[0][1]
+    const request = sendMessageMock.mock.calls[0]![1]
     expect(request.webTitle).toBe("Video title")
     expect(request.summary).toBeNull()
   })
@@ -180,7 +180,7 @@ describe("subtitles translator", () => {
       summary: "Ready summary",
     })
 
-    const request = sendMessageMock.mock.calls[0][1]
+    const request = sendMessageMock.mock.calls[0]![1]
     expect(request.webTitle).toBe("Video title")
     expect(request.webDescription).toBe("Video description")
     expect(request.summary).toBeUndefined()

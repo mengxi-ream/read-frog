@@ -172,7 +172,7 @@ class YoutubeCaptionTrackListener {
     if (!this.lastMenuSummaryMap) {
       this.lastMenuSummaryMap = currentSummaryMap
       if (currentSummaries.length === 1) {
-        this.lastTrackedSelection = toPublicSnapshot(currentSummaries[0])
+        this.lastTrackedSelection = toPublicSnapshot(currentSummaries[0]!)
       }
       return
     }

@@ -19,8 +19,8 @@ export function generateUUIDv4(): string {
   const cryptoWithRandomValues = getCryptoWithRandomValues()
   const bytes = new Uint8Array(16)
   cryptoWithRandomValues.getRandomValues(bytes)
-  bytes[6] = (bytes[6] & 0x0f) | 0x40 // Version 4: set bits 12-15 to 0100
-  bytes[8] = (bytes[8] & 0x3f) | 0x80 // Variant 1: set bits 6-7 to 10
+  bytes[6] = (bytes[6]! & 0x0f) | 0x40 // Version 4: set bits 12-15 to 0100
+  bytes[8] = (bytes[8]! & 0x3f) | 0x80 // Variant 1: set bits 6-7 to 10
 
   const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")
 

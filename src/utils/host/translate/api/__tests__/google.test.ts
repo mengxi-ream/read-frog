@@ -14,7 +14,7 @@ function mockTranslateResponse(translation: string) {
 }
 
 function sentSourceText(): string {
-  const [, requestInit] = fetchMock.mock.calls[0]
+  const [, requestInit] = fetchMock.mock.calls[0]!
   return JSON.parse(requestInit.body)[0][0][0]
 }
 

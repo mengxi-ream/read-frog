@@ -419,10 +419,10 @@ describe("getProviderOptions", () => {
   describe("glm model pattern matching", () => {
     it("should match GLM-* models (case-insensitive)", () => {
       const uppercase = getProviderOptions("GLM-4-Plus", "openai-compatible")
-      expect(uppercase["openai-compatible"].thinking).toEqual({ type: "disabled" })
+      expect(uppercase["openai-compatible"]!.thinking).toEqual({ type: "disabled" })
 
       const lowercase = getProviderOptions("glm-4-flash", "openai-compatible")
-      expect(lowercase["openai-compatible"].thinking).toEqual({ type: "disabled" })
+      expect(lowercase["openai-compatible"]!.thinking).toEqual({ type: "disabled" })
 
       const mixed = getProviderOptions("GlM-3-Turbo", "tensdaq")
       expect(mixed.tensdaq?.thinking).toEqual({ type: "disabled" })
