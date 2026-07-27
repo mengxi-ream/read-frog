@@ -25,6 +25,7 @@ import {
 import { queryClient } from "@/utils/tanstack-query"
 import { getLocalThemeMode } from "@/utils/theme"
 import App from "./app"
+import { setupExternalSelectionSource } from "./external-selection-source"
 import "@/assets/styles/theme.css"
 
 function HydrateAtoms({
@@ -109,6 +110,12 @@ export default defineContentScript({
       window.__READ_FROG_SELECTION_INJECTED__ = false
       clearEffectiveSiteControlUrl()
       return
+    }
+
+    // Answer ebook bridge handshakes before the React UI finishes mounting
+    const cleanupExternalSelectionSource = setupExternalSelectionSource()
+    if (cleanupExternalSelectionSource) {
+      ctx.onInvalidated(cleanupExternalSelectionSource)
     }
 
     await initI18n(config?.uiLanguage)

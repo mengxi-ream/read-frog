@@ -6,8 +6,19 @@ function TooltipProvider({ delay = 0, ...props }: TooltipPrimitive.Provider.Prop
   return <TooltipPrimitive.Provider data-slot="tooltip-provider" delay={delay} {...props} />
 }
 
-function Tooltip({ ...props }: TooltipPrimitive.Root.Props) {
-  return <TooltipPrimitive.Root data-slot="tooltip" {...props} />
+function Tooltip({ disableHoverablePopup = true, ...props }: TooltipPrimitive.Root.Props) {
+  // Hoverable popups close via a safe-polygon that tracks the top document's
+  // mousemove; a pointer leaving the popup onto an iframe (e.g. the readfrog
+  // ebook reader, embedded videos) stops those events and the tooltip sticks
+  // open forever. All our tooltips are plain labels, so opt out by default —
+  // closing then only relies on the trigger's own mouseleave.
+  return (
+    <TooltipPrimitive.Root
+      data-slot="tooltip"
+      disableHoverablePopup={disableHoverablePopup}
+      {...props}
+    />
+  )
 }
 
 function TooltipTrigger({ ...props }: TooltipPrimitive.Trigger.Props) {
