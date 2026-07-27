@@ -1,6 +1,6 @@
 import react from "@vitejs/plugin-react"
 import { configDefaults, defineConfig } from "vitest/config"
-import { WxtVitest } from "wxt/testing"
+import { WxtVitest } from "wxt/testing/vitest-plugin"
 
 export default defineConfig({
   // TODO: remove any

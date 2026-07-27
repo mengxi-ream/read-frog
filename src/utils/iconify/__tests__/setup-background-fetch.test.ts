@@ -42,7 +42,7 @@ describe("ensureIconifyBackgroundFetch", () => {
     const { ensureIconifyBackgroundFetch } = await import("../setup-background-fetch")
     ensureIconifyBackgroundFetch()
 
-    const customFetch = setFetchMock.mock.calls[0][0] as typeof fetch
+    const customFetch = setFetchMock.mock.calls[0]![0] as typeof fetch
     const response = await customFetch("https://api.iconify.design/tabler.json?icons=sparkles")
 
     expect(sendMessageMock).toHaveBeenCalledWith("backgroundFetch", {
@@ -72,7 +72,7 @@ describe("ensureIconifyBackgroundFetch", () => {
     const { ensureIconifyBackgroundFetch } = await import("../setup-background-fetch")
     ensureIconifyBackgroundFetch()
 
-    const customFetch = setFetchMock.mock.calls[0][0] as typeof fetch
+    const customFetch = setFetchMock.mock.calls[0]![0] as typeof fetch
 
     await expect(
       customFetch("https://api.iconify.design/tabler.json?icons=sparkles"),

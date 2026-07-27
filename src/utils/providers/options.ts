@@ -46,7 +46,7 @@ function normalizeUserProviderOptions(
     }
 
     if (!(canonicalKey in normalizedOptions)) {
-      normalizedOptions[canonicalKey] = normalizedOptions[rawKey]
+      normalizedOptions[canonicalKey] = normalizedOptions[rawKey]!
     }
 
     delete normalizedOptions[rawKey]

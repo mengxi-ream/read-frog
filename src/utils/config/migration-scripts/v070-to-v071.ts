@@ -176,7 +176,7 @@ function getSingleTokenQueryValue(search: string): {
     return { status: "duplicate" }
   }
 
-  const rawToken = tokenParams[0].value
+  const rawToken = tokenParams[0]!.value
   if (!rawToken) {
     return { status: "empty" }
   }
@@ -229,7 +229,7 @@ function migratePathTokenProvider(
   }
 
   const tokenSegment = segments[segments.length - 1]
-  const decodedToken = decodePathSegment(tokenSegment)
+  const decodedToken = decodePathSegment(tokenSegment!)
   if (!decodedToken || decodedToken.includes("/") || decodedToken === API_KEY_PLACEHOLDER) {
     return null
   }
@@ -247,7 +247,7 @@ function migratePathTokenProvider(
 
   const tokenPathPrefix = pathBeforeTranslate.slice(
     0,
-    pathBeforeTranslate.length - tokenSegment.length,
+    pathBeforeTranslate.length - tokenSegment!.length,
   )
   const placeholderPathname = `${tokenPathPrefix}${API_KEY_PLACEHOLDER}/translate`
 

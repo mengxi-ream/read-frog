@@ -50,7 +50,7 @@ function resolveBrowserLocale(): SupportedUiLocale {
   }
 
   // Prefix match: "en-US" → "en".
-  if (SUPPORTED.has(prefix)) {
+  if (SUPPORTED.has(prefix!)) {
     return prefix as SupportedUiLocale
   }
 

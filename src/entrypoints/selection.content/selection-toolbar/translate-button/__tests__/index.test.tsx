@@ -51,7 +51,7 @@ describe("translateButton", () => {
     expect(blurSpy).toHaveBeenCalledOnce()
     expect(prepareToolbarOpenMock).toHaveBeenCalledOnce()
     expect(blurSpy.mock.invocationCallOrder[0]).toBeLessThan(
-      prepareToolbarOpenMock.mock.invocationCallOrder[0],
+      prepareToolbarOpenMock.mock.invocationCallOrder[0]!,
     )
     expect(document.activeElement).not.toBe(trigger)
   })

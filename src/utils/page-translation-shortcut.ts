@@ -134,7 +134,7 @@ function resolveShortcutEventKey(event: KeyboardEvent): string {
     }
 
     if (event.code in PUNCTUATION_CODE_MAP) {
-      return PUNCTUATION_CODE_MAP[event.code]
+      return PUNCTUATION_CODE_MAP[event.code]!
     }
   }
 

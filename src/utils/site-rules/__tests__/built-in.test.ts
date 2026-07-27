@@ -326,7 +326,7 @@ describe("built-in site rules", () => {
     const preOnlyRules = BUILT_IN_SITE_RULES.filter(
       (rule) =>
         rule.includeSelectors?.length === 1 &&
-        rule.includeSelectors[0].trim().toLowerCase() === "pre",
+        rule.includeSelectors[0]!.trim().toLowerCase() === "pre",
     )
 
     expect(preOnlyRules).toEqual([])

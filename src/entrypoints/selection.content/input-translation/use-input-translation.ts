@@ -256,7 +256,7 @@ export function useInputTranslation() {
 
       // Remove timestamps older than threshold
       const timeThreshold = inputTranslationConfig.timeThreshold
-      while (timestamps.length > 0 && now - timestamps[0] > timeThreshold * (TRIGGER_COUNT - 1)) {
+      while (timestamps.length > 0 && now - timestamps[0]! > timeThreshold * (TRIGGER_COUNT - 1)) {
         timestamps.shift()
       }
 
@@ -268,7 +268,7 @@ export function useInputTranslation() {
         // Check if all presses are within the time threshold
         const allWithinThreshold = timestamps.every((ts, i) => {
           if (i === 0) return true
-          return ts - timestamps[i - 1] <= timeThreshold
+          return ts - timestamps[i - 1]! <= timeThreshold
         })
 
         if (allWithinThreshold) {

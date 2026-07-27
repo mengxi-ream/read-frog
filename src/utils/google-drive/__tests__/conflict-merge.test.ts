@@ -141,7 +141,7 @@ describe("conflict-merge", () => {
       const result = detectConflicts(base, local, remote)
 
       expect(result.conflicts).toHaveLength(1)
-      expect(result.conflicts[0].path).toEqual(["nested", "value"])
+      expect(result.conflicts[0]!.path).toEqual(["nested", "value"])
     })
 
     it("should handle deeply nested object conflicts", () => {
@@ -162,10 +162,10 @@ describe("conflict-merge", () => {
       const result = detectConflicts(base, local, remote)
 
       expect(result.conflicts).toHaveLength(1)
-      expect(result.conflicts[0].path).toEqual(["nested", "deep", "count"])
-      expect(result.conflicts[0].baseValue).toBe(5)
-      expect(result.conflicts[0].localValue).toBe(10)
-      expect(result.conflicts[0].remoteValue).toBe(20)
+      expect(result.conflicts[0]!.path).toEqual(["nested", "deep", "count"])
+      expect(result.conflicts[0]!.baseValue).toBe(5)
+      expect(result.conflicts[0]!.localValue).toBe(10)
+      expect(result.conflicts[0]!.remoteValue).toBe(20)
     })
 
     it("should track one-sided changes from different sources as separate conflicts", () => {

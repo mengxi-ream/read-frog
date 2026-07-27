@@ -368,7 +368,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     const asr = tracks.find((t) => t.kind === "asr")
     if (asr) return asr
 
-    return tracks[0]
+    return tracks[0] ?? null
   }
 
   private async fetchWithRetry(url: string): Promise<YoutubeTimedText[]> {

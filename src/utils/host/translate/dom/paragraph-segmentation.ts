@@ -262,7 +262,7 @@ function boundaryAtStreamOffset(
 
   let precedingChunk: RawSourceChunk | undefined
   for (let index = chunks.length - 1; index >= 0; index -= 1) {
-    if (chunks[index].streamEnd <= streamOffset) {
+    if (chunks[index]!.streamEnd <= streamOffset) {
       precedingChunk = chunks[index]
       break
     }
@@ -408,7 +408,7 @@ export function moveParagraphInsertionBoundaryAfterTrailingInlineImages(
     while (index < children.length) {
       const child = children[index]
 
-      if (isHorizontalWhitespaceText(child)) {
+      if (isHorizontalWhitespaceText(child!)) {
         if (sawInlineImage) {
           committedBoundary = { container, offset: index + 1 }
         }
@@ -416,7 +416,7 @@ export function moveParagraphInsertionBoundaryAfterTrailingInlineImages(
         continue
       }
 
-      if (!isVisibleInlineImageWithAlt(child)) {
+      if (!isVisibleInlineImageWithAlt(child!)) {
         return sawInlineImage ? committedBoundary : originalBoundary
       }
 

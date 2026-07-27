@@ -44,8 +44,8 @@ async function toggleSiteInPatterns(
   }
 
   const [currentTab] = await browser.tabs.query({ active: true, currentWindow: true })
-  if (currentTab.id) {
-    void browser.tabs.reload(currentTab.id)
+  if (currentTab!.id) {
+    void browser.tabs.reload(currentTab!.id)
   }
 }
 

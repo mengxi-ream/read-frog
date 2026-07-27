@@ -191,7 +191,7 @@ describe("background-stream", () => {
       },
     ])
 
-    const schemaArg = outputObjectMock.mock.calls[0][0].schema as {
+    const schemaArg = outputObjectMock.mock.calls[0]![0].schema as {
       safeParse: (value: unknown) => { success: boolean }
     }
     expect(

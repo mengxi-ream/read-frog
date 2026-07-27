@@ -42,28 +42,28 @@ export function parseSimplifiedVttToFragments(vtt: string): SubtitlesFragment[] 
 
   let lineIndex = 0
   // Skip WEBVTT header
-  while (lineIndex < lines.length && !lines[lineIndex].includes("-->")) {
+  while (lineIndex < lines.length && !lines[lineIndex]!.includes("-->")) {
     lineIndex++
   }
 
   while (lineIndex < lines.length) {
-    const line = lines[lineIndex].trim()
+    const line = lines[lineIndex]!.trim()
 
     // Match timestamp line: "1000 --> 1500" (milliseconds format)
     const match = line.match(VTT_TIMESTAMP_PATTERN)
     if (match) {
-      const start = Number.parseInt(match[1], 10)
-      const end = Number.parseInt(match[2], 10)
+      const start = Number.parseInt(match[1]!, 10)
+      const end = Number.parseInt(match[2]!, 10)
 
       // Collect text lines
       const textLines: string[] = []
       lineIndex++
       while (
         lineIndex < lines.length &&
-        lines[lineIndex].trim() !== "" &&
-        !lines[lineIndex].includes("-->")
+        lines[lineIndex]!.trim() !== "" &&
+        !lines[lineIndex]!.includes("-->")
       ) {
-        textLines.push(lines[lineIndex].trim())
+        textLines.push(lines[lineIndex]!.trim())
         lineIndex++
       }
 

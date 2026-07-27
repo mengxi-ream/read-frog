@@ -229,9 +229,9 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
         }
 
         setCurrentChunk(index + 1)
-        const currentAudioPromise = fetchChunkAudio(chunks[index])
+        const currentAudioPromise = fetchChunkAudio(chunks[index]!)
         const nextAudioPromise =
-          index + 1 < chunks.length ? fetchChunkAudio(chunks[index + 1]) : null
+          index + 1 < chunks.length ? fetchChunkAudio(chunks[index + 1]!) : null
         const audioChunk = await currentAudioPromise
 
         if (shouldStopRef.current) {

@@ -84,8 +84,24 @@ export default defineConfig({
     }),
   }),
   zip: {
-    includeSources: [".env.production"],
+    includeSources: ["**/*", ".env.production"],
     excludeSources: ["docs/**/*", "assets/**/*", "repos/**/*", "readmes/**/*"],
+  },
+  hooks: {
+    "vite:build:extendConfig": (entrypoints, viteConfig) => {
+      const entrypoint = entrypoints.length === 1 ? entrypoints[0] : undefined
+      if (entrypoint?.type !== "content-script") return
+
+      const output = viteConfig.build?.rollupOptions?.output
+      if (!output) return
+
+      for (const outputOptions of Array.isArray(output) ? output : [output]) {
+        outputOptions.assetFileNames = (assetInfo) =>
+          assetInfo.names.some((name) => name.endsWith(".css"))
+            ? `content-scripts/${entrypoint.name}.[ext]`
+            : "assets/[name]-[hash].[ext]"
+      }
+    },
   },
   dev: {
     server: {

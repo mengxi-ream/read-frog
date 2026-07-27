@@ -3,7 +3,7 @@
 ## Build Environment
 
 - **Node.js**: >= 22.22.0
-- **pnpm**: 10.30.2 (auto-installed via corepack)
+- **pnpm**: 11.13.1 (auto-installed via corepack)
 
 ## Build Steps
 
@@ -29,5 +29,5 @@ The `.env.production` file is included in this archive. It contains:
 After a successful build, the packaged extension will be at:
 
 ```
-.output/read-frog-<version>-firefox.zip
+.output/read-frogextension-<version>-firefox.zip
 ```

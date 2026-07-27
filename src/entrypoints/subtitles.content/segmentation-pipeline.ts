@@ -108,7 +108,7 @@ export class SegmentationPipeline {
   }
 
   private replaceProcessedChunk(chunk: SubtitlesFragment[], nextFragments: SubtitlesFragment[]) {
-    const chunkStart = chunk[0].start
+    const chunkStart = chunk[0]!.start
     const chunkEnd = chunk.at(-1)!.end
 
     this.processedFragments = this.processedFragments.filter(

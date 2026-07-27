@@ -1,6 +1,9 @@
-@import "tailwindcss";
+@import "tailwindcss" source("../..");
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+
+@source not "../../**/__tests__";
+@source not "../../**/*.test.*";
 
 @custom-variant dark (&:is(.dark *));
 /* Base UI uses data-orientation="horizontal|vertical", map to short variants for Tailwind */

@@ -369,7 +369,7 @@ export class BatchQueue<T, R> {
         throw new BatchCountMismatchError(tasks.length, results.length, results)
       }
 
-      tasks.forEach((task, index) => task.resolve(results[index]))
+      tasks.forEach((task, index) => task.resolve(results[index]!))
     } catch (error) {
       const err = error as Error
 
@@ -447,7 +447,7 @@ export class BatchQueue<T, R> {
   ) {
     const parseConfigStatus = batchQueueConfigSchema.partial().safeParse(config)
     if (parseConfigStatus.error) {
-      throw new Error(parseConfigStatus.error.issues[0].message)
+      throw new Error(parseConfigStatus.error.issues[0]!.message)
     }
 
     this.maxCharactersPerBatch = config.maxCharactersPerBatch ?? this.maxCharactersPerBatch

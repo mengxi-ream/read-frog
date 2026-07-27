@@ -88,31 +88,25 @@ vi.mock("@iconify/react", async () => {
 
 // Mock the fakeBrowser's i18n.getMessage method which is not implemented in fake-browser
 // This is used when WxtVitest plugin replaces browser imports with fake-browser
-vi.mock("wxt/testing", async () => {
-  const actual = await vi.importActual<any>("wxt/testing")
-  return {
-    ...actual,
-    fakeBrowser: {
-      ...actual.fakeBrowser,
-      i18n: {
-        ...actual.fakeBrowser.i18n,
-        getMessage: (key: string) => key.replaceAll("_", "."),
-      },
-      identity: {
-        ...actual.fakeBrowser.identity,
-        getRedirectURL: () => "https://mock-redirect-url.chromiumapp.org/",
-      },
-      runtime: {
-        ...actual.fakeBrowser.runtime,
-        getManifest: () => ({
-          manifest_version: 3,
-          name: "Read Frog",
-          version: "1.0.0",
-          description: "Test manifest",
-        }),
-      },
-    },
-  }
+vi.mock("wxt/testing/fake-browser", async () => {
+  const actual = await vi.importActual<any>("wxt/testing/fake-browser")
+
+  Object.assign(actual.fakeBrowser.i18n, {
+    getMessage: (key: string) => key.replaceAll("_", "."),
+  })
+  Object.assign(actual.fakeBrowser.identity, {
+    getRedirectURL: () => "https://mock-redirect-url.chromiumapp.org/",
+  })
+  Object.assign(actual.fakeBrowser.runtime, {
+    getManifest: () => ({
+      manifest_version: 3,
+      name: "Read Frog",
+      version: "1.0.0",
+      description: "Test manifest",
+    }),
+  })
+
+  return actual
 })
 
 // JSDom + Vitest don't play well with each other. Long story short - default
@@ -120,7 +114,7 @@ vi.mock("wxt/testing", async () => {
 // Uint8Array objects, so some functions that compare their types explode.
 // https://github.com/vitest-dev/vitest/issues/4043#issuecomment-1905172846
 class ESBuildAndJSDOMCompatibleTextEncoder extends TextEncoder {
-  encode(input: string) {
+  override encode(input: string) {
     if (typeof input !== "string") {
       throw new TypeError("`input` must be a string")
     }
@@ -129,7 +123,7 @@ class ESBuildAndJSDOMCompatibleTextEncoder extends TextEncoder {
     const arr = new Uint8Array(decodedURI.length)
     const chars = decodedURI.split("")
     for (let i = 0; i < chars.length; i++) {
-      arr[i] = decodedURI[i].charCodeAt(0)
+      arr[i] = decodedURI[i]!.charCodeAt(0)
     }
     return arr
   }

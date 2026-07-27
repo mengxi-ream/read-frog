@@ -47,8 +47,8 @@ export function useBatchRequestRecords(currentDaysBack: number) {
   const previousPeriodQuery = previousPeriodQueries[currentIndex] ?? previousPeriodQueries[0]
 
   return {
-    currentPeriodRecords: currentPeriodQuery.data ?? [],
-    previousPeriodRecords: previousPeriodQuery.data ?? [],
-    isLoading: currentPeriodQuery.isLoading || previousPeriodQuery.isLoading,
+    currentPeriodRecords: currentPeriodQuery!.data ?? [],
+    previousPeriodRecords: previousPeriodQuery!.data ?? [],
+    isLoading: currentPeriodQuery!.isLoading || previousPeriodQuery!.isLoading,
   }
 }

@@ -84,8 +84,9 @@
     "@tanstack/react-store": "^0.11.0",
     "@uiw/codemirror-extensions-color": "^4.25.11",
     "@uiw/react-codemirror": "^4.25.11",
-    "@webext-core/match-patterns": "1.1.0",
-    "@webext-core/messaging": "^3.0.2",
+    "@webext-core/isolated-element": "^3.0.0",
+    "@webext-core/match-patterns": "2.0.0",
+    "@webext-core/messaging": "^4.0.0",
     "@wxt-dev/i18n": "^0.2.6",
     "ai": "^7.0.35",
     "ai-sdk-ollama": "^4.0.0",
@@ -161,7 +162,8 @@
     "typescript": "^7.0.2",
     "vite": "^8.1.5",
     "vitest": "^4.1.10",
-    "wxt": "0.20.27"
+    "web-ext": "^10.5.0",
+    "wxt": "0.21.1"
   },
   "devEngines": {
     "runtime": {

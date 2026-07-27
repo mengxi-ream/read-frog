@@ -189,7 +189,7 @@ export function unwrapDeepestOnlyHTMLChild(element: HTMLElement, config: Config)
     if (!(effectiveChildren.length === 1 && effectiveChildNodes.length === 1)) break
 
     const onlyChildElement = effectiveChildren[0]
-    if (!isHTMLElement(onlyChildElement)) break
+    if (!isHTMLElement(onlyChildElement!)) break
 
     currentElement = onlyChildElement
   }

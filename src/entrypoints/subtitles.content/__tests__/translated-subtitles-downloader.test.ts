@@ -186,11 +186,11 @@ describe("translatedSubtitlesDownloader", () => {
       expect.any(Object),
     )
 
-    resolvers[1](translated(fragments.slice(5, 10)))
+    resolvers[1]!(translated(fragments.slice(5, 10)))
     await vi.waitFor(() => expect(activeBatches).toBe(1))
     expect(mocks.translateSubtitles).toHaveBeenCalledTimes(2)
 
-    resolvers[0](translated(fragments.slice(0, 5)))
+    resolvers[0]!(translated(fragments.slice(0, 5)))
     await vi.waitFor(() => expect(mocks.translateSubtitles).toHaveBeenCalledTimes(3))
     expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(
       3,
@@ -199,7 +199,7 @@ describe("translatedSubtitlesDownloader", () => {
       expect.any(Object),
     )
 
-    resolvers[2](translated(fragments.slice(10)))
+    resolvers[2]!(translated(fragments.slice(10)))
     await download
 
     expect(mocks.downloadSubtitlesAsSrt).toHaveBeenCalledWith(
@@ -320,8 +320,8 @@ describe("translatedSubtitlesDownloader", () => {
     const newDownload = downloader.download()
     await vi.waitFor(() => expect(mocks.translateSubtitles).toHaveBeenCalledTimes(4))
     await newDownload
-    finishOldTranslations[0](translated(fragments.slice(0, 5)))
-    finishOldTranslations[1](translated(fragments.slice(5)))
+    finishOldTranslations[0]!(translated(fragments.slice(0, 5)))
+    finishOldTranslations[1]!(translated(fragments.slice(5)))
     await oldDownload
 
     expect(fetcher.fetch).toHaveBeenCalledTimes(2)

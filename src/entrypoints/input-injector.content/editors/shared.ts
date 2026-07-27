@@ -16,5 +16,5 @@ export function findReactFiber(element: Element): ReactFiber | null {
   const key = Object.keys(element).find(
     (k) => k.startsWith("__reactFiber$") || k.startsWith("__reactInternalInstance$"),
   )
-  return key ? (element as unknown as Record<string, ReactFiber>)[key] : null
+  return key ? (element as unknown as Record<string, ReactFiber>)[key]! : null
 }

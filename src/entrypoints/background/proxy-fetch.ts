@@ -60,8 +60,8 @@ export function proxyFetch() {
               })
               // If cookie exists, this was an update; if not, this was creation
               beforeValue =
-                existingCookies.length > 0 && existingCookies[0].value !== cookie.value
-                  ? existingCookies[0].value
+                existingCookies.length > 0 && existingCookies[0]!.value !== cookie.value
+                  ? existingCookies[0]!.value
                   : undefined
               afterValue = cookie.value
             } catch (error) {
