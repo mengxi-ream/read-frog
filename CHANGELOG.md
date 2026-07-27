@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.43.4
+
+### Patch Changes
+
+- [#1977](https://github.com/mengxi-ream/read-frog/pull/1977) [`eb47c8a`](https://github.com/mengxi-ream/read-frog/commit/eb47c8a2d6c6c3617247033dd6ee136e731b244b) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(floating-button): add contextual feedback and directional tooltips
+
+- [#1793](https://github.com/mengxi-ream/read-frog/pull/1793) [`686c8ff`](https://github.com/mengxi-ream/read-frog/commit/686c8ffebf73d3f8de534df7f125f37a891a3cec) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(selection): support bridged ebook reader selections
+
 ## 1.43.3
 
 ### Patch Changes
