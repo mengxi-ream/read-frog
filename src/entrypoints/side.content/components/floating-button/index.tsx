@@ -1,5 +1,5 @@
 import type { FloatingButtonSide } from "@/types/config/floating-button"
-import { IconLock, IconLockOpen, IconSettings, IconX } from "@tabler/icons-react"
+import { IconLock, IconLockOpen, IconMessageCircle, IconSettings, IconX } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
 import { useEffect, useRef, useState } from "react"
 import { browser } from "#imports"
@@ -15,7 +15,9 @@ import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { APP_NAME } from "@/utils/constants/app"
+import { buildFeaturebaseFeedbackMetadata, buildFeaturebasePortalUrl } from "@/utils/featurebase"
 import { i18n } from "@/utils/i18n"
+import { resolveUiLocale } from "@/utils/i18n/locale-map"
 import { sendMessage } from "@/utils/message"
 import { cn } from "@/utils/styles/utils"
 import { matchDomainPattern } from "@/utils/url"
@@ -122,6 +124,7 @@ function getNormalizedFloatingContainerTop(mainButtonTop: number, mainOffsetY: n
 
 export default function FloatingButton() {
   const [floatingButton, setFloatingButton] = useAtom(configFieldsAtomMap.floatingButton)
+  const uiLanguage = useAtomValue(configFieldsAtomMap.uiLanguage)
   const translationState = useAtomValue(enablePageTranslationAtom)
   const [isDraggingButton, setIsDraggingButton] = useAtom(isDraggingButtonAtom)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -135,6 +138,7 @@ export default function FloatingButton() {
   const floatingButtonSide = getFloatingButtonSide(floatingButton.side)
   const isFloatingButtonExpanded = isHitAreaExpanded || isDropdownOpen
   const isMainButtonAttached = isFloatingButtonLocked || isFloatingButtonExpanded
+  const locale = resolveUiLocale(uiLanguage)
 
   useEffect(() => {
     if (!isDraggingButton) return undefined
@@ -190,6 +194,20 @@ export default function FloatingButton() {
         })
       }
     })
+  }
+
+  const handleFeedbackClick = () => {
+    const url = buildFeaturebasePortalUrl({
+      destination: "feedback",
+      locale,
+      metadata: buildFeaturebaseFeedbackMetadata({
+        browserName: import.meta.env.BROWSER,
+        extensionVersion: browser.runtime.getManifest().version,
+        pageUrl: window.location.href,
+      }),
+    })
+
+    void sendMessage("openPage", { url, active: true })
   }
 
   const startActiveDrag = () => {
@@ -418,9 +436,19 @@ export default function FloatingButton() {
           side={floatingButtonSide}
           expanded={isFloatingButtonExpanded}
           icon={<IconSettings className="h-5 w-5" />}
+          label={i18n.t("options.floatingButtonAndToolbar.floatingButton.tooltips.settings")}
           onClick={() => {
             void sendMessage("openOptionsPage", undefined)
           }}
+        />
+      )}
+      {!isDraggingButton && (
+        <HiddenButton
+          side={floatingButtonSide}
+          expanded={isFloatingButtonExpanded}
+          icon={<IconMessageCircle className="h-5 w-5" />}
+          label={i18n.t("options.floatingButtonAndToolbar.floatingButton.tooltips.feedback")}
+          onClick={handleFeedbackClick}
         />
       )}
     </div>
@@ -470,7 +498,9 @@ function FloatingButtonCloseMenu({
         render={
           <button
             type="button"
-            aria-label="Close floating button"
+            aria-label={i18n.t(
+              "options.floatingButtonAndToolbar.floatingButton.tooltips.floatingButtonOptions",
+            )}
             className={cn(
               floatingButtonControlClassName,
               "-top-1",
@@ -516,11 +546,14 @@ function FloatingButtonLockControl({ expanded, side }: FloatingButtonLockControl
   const handleToggleLocked = () => {
     void setFloatingButton({ ...floatingButton, locked: !locked })
   }
+  const label = locked
+    ? i18n.t("options.floatingButtonAndToolbar.floatingButton.tooltips.unlockPosition")
+    : i18n.t("options.floatingButtonAndToolbar.floatingButton.tooltips.lockPosition")
 
   return (
     <button
       type="button"
-      aria-label={locked ? "Unlock floating button" : "Lock floating button"}
+      aria-label={label}
       className={cn(
         floatingButtonControlClassName,
         "-bottom-1",

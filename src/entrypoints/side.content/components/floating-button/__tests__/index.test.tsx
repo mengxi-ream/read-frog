@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import type { FloatingButtonConfig } from "@/types/config/floating-button"
-import { act, fireEvent, render, screen } from "@testing-library/react"
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { atom, createStore, Provider } from "jotai"
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -13,6 +13,7 @@ vi.mock("#imports", () => ({
   browser: {
     runtime: {
       getURL: (path = "") => `chrome-extension://test-extension${path}`,
+      getManifest: () => ({ version: "1.43.3" }),
     },
   },
   i18n: {
@@ -43,6 +44,7 @@ vi.mock("@/utils/atoms/config", () => {
     configFieldsAtomMap: {
       floatingButton: floatingButtonAtom,
       sideContent: atom({ width: 360 }),
+      uiLanguage: atom("en"),
     },
   }
 })
@@ -61,6 +63,10 @@ vi.mock("@/utils/message", () => ({
   sendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
+vi.mock("@/utils/i18n/locale-map", () => ({
+  resolveUiLocale: (uiLanguage: string) => (uiLanguage === "auto" ? "en" : uiLanguage),
+}))
+
 vi.mock("@/components/ui/base-ui/toast", () => ({
   anchoredToastManager: {
     add: (...args: unknown[]) => toastAddMock(...args),
@@ -68,6 +74,8 @@ vi.mock("@/components/ui/base-ui/toast", () => ({
 }))
 
 beforeAll(() => {
+  vi.stubEnv("BROWSER", "chrome")
+
   class ResizeObserverMock {
     observe() {}
     unobserve() {}
@@ -82,6 +90,7 @@ afterEach(() => {
   vi.restoreAllMocks()
   vi.mocked(sendMessage).mockReset()
   toastAddMock.mockReset()
+  window.history.replaceState({}, "", "/")
   setViewport(1024, 768)
 })
 
@@ -136,11 +145,37 @@ function mockRect(element: Element, rect: Partial<DOMRect>) {
   })
 }
 
+const TOOLTIP_CONTROL_LABELS = [
+  "options.floatingButtonAndToolbar.floatingButton.tooltips.togglePageTranslation",
+  "options.floatingButtonAndToolbar.floatingButton.tooltips.settings",
+  "options.floatingButtonAndToolbar.floatingButton.tooltips.feedback",
+] as const
+
+async function expectTooltipSide(label: string, side: "left" | "right") {
+  const trigger = screen.getByRole("button", { name: label })
+  fireEvent.focus(trigger)
+
+  await waitFor(() => {
+    const popup = document.querySelector<HTMLElement>('[data-slot="tooltip-content"][data-open]')
+    expect(popup).toHaveTextContent(label)
+    expect(popup).toHaveAttribute("data-side", side)
+    expect(popup).toHaveClass("pointer-events-none")
+    expect(popup?.parentElement).toHaveClass("pointer-events-none")
+  })
+
+  fireEvent.blur(trigger)
+  await waitFor(() => {
+    expect(document.querySelector('[data-slot="tooltip-content"][data-open]')).toBeNull()
+  })
+}
+
 describe("floatingButton controls", () => {
   it("shows the close trigger only after entering the main floating button", () => {
     renderFloatingButton()
 
-    const closeTrigger = screen.getByRole("button", { name: "Close floating button" })
+    const closeTrigger = screen.getByRole("button", {
+      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.floatingButtonOptions",
+    })
     const mainButton = getMainButton()
 
     expect(mainButton).toHaveClass("transition-transform")
@@ -165,7 +200,9 @@ describe("floatingButton controls", () => {
   it("renders a lock trigger at the lower-left corner and keeps controls expanded after entering the main button", () => {
     renderFloatingButton()
 
-    const lockTrigger = screen.getByRole("button", { name: "Lock floating button" })
+    const lockTrigger = screen.getByRole("button", {
+      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.lockPosition",
+    })
     const mainButton = getMainButton()
     const floatingButtonContainer = screen.getByTestId("floating-button-container")
 
@@ -189,7 +226,9 @@ describe("floatingButton controls", () => {
 
     fireEvent.click(lockTrigger)
 
-    const unlockTrigger = screen.getByRole("button", { name: "Unlock floating button" })
+    const unlockTrigger = screen.getByRole("button", {
+      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.unlockPosition",
+    })
 
     expect(unlockTrigger).toHaveClass("text-neutral-300")
     expect(unlockTrigger).toHaveClass("-left-6")
@@ -207,21 +246,54 @@ describe("floatingButton controls", () => {
     expect(mainButton).toHaveClass("opacity-100")
   })
 
-  it("forces the close trigger visible while the dropdown is open", () => {
+  it("does not show a tooltip for options and keeps its trigger visible while the dropdown is open", () => {
     renderFloatingButton()
 
-    const closeTrigger = screen.getByRole("button", { name: "Close floating button" })
+    const closeTrigger = screen.getByRole("button", {
+      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.floatingButtonOptions",
+    })
     const mainButton = getMainButton()
 
     fireEvent.mouseEnter(mainButton)
+    fireEvent.focus(closeTrigger)
+    expect(document.querySelector('[data-slot="tooltip-content"][data-open]')).toBeNull()
     fireEvent.click(closeTrigger)
 
     expect(closeTrigger).toHaveClass("visible")
     expect(closeTrigger).toHaveClass("pointer-events-auto")
+    expect(document.querySelector('[data-slot="tooltip-content"][data-open]')).toBeNull()
     expect(
       screen.getByText("options.floatingButtonAndToolbar.floatingButton.closeMenu.disableForSite"),
     ).toBeInTheDocument()
   })
+
+  it("does not show a tooltip for the lock control", () => {
+    renderFloatingButton()
+    fireEvent.mouseEnter(getMainButton())
+
+    const lockTrigger = screen.getByRole("button", {
+      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.lockPosition",
+    })
+    fireEvent.focus(lockTrigger)
+
+    expect(document.querySelector('[data-slot="tooltip-content"][data-open]')).toBeNull()
+  })
+
+  it.each([
+    { floatingSide: "right", tooltipSide: "left" },
+    { floatingSide: "left", tooltipSide: "right" },
+  ] as const)(
+    "opens each directional tooltip on the $tooltipSide when docked to the $floatingSide",
+    async ({ floatingSide, tooltipSide }) => {
+      renderFloatingButton({ side: floatingSide })
+      fireEvent.mouseEnter(getMainButton())
+      expect(TOOLTIP_CONTROL_LABELS).toHaveLength(3)
+
+      for (const label of TOOLTIP_CONTROL_LABELS) {
+        await expectTooltipSide(label, tooltipSide)
+      }
+    },
+  )
 
   it("toggles the browser side panel on a normal panel click", () => {
     vi.useFakeTimers()
@@ -246,6 +318,43 @@ describe("floatingButton controls", () => {
     })
 
     expect(sendMessage).toHaveBeenCalledWith("toggleSidePanel", undefined)
+  })
+
+  it("places feedback after settings and opens a localized Featurebase URL with safe metadata", () => {
+    window.history.replaceState({}, "", "/private/path?token=secret#section")
+    renderFloatingButton()
+
+    const settingsButton = screen.getByRole("button", {
+      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.settings",
+    })
+    const feedbackButton = screen.getByRole("button", {
+      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.feedback",
+    })
+
+    expect(
+      settingsButton.compareDocumentPosition(feedbackButton) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+
+    fireEvent.click(feedbackButton)
+
+    const openPageCall = vi
+      .mocked(sendMessage)
+      .mock.calls.find(([message]) => message === "openPage")
+    const openPagePayload = openPageCall?.[1] as { active: boolean; url: string } | undefined
+    expect(openPagePayload).toBeDefined()
+    const openedUrl = new URL(openPagePayload!.url)
+
+    expect(openedUrl.origin).toBe("https://feedback.readfrog.app")
+    expect(openedUrl.pathname).toBe("/en")
+    expect(JSON.parse(openedUrl.searchParams.get("metaData")!)).toEqual({
+      browser: "chrome",
+      extension_version: "1.0.0",
+      page_url: "http://localhost:3000/private/path",
+    })
+    expect(openPagePayload).toEqual({
+      url: openedUrl.toString(),
+      active: true,
+    })
   })
 
   it("shows a Firefox sidebar help link when the browser requires an extension user action", async () => {
@@ -374,7 +483,7 @@ describe("floatingButton controls", () => {
     renderFloatingButton()
 
     const mainButton = getMainButton()
-    expect(screen.getAllByRole("button")).toHaveLength(4)
+    expect(screen.getAllByRole("button")).toHaveLength(5)
 
     fireEvent.pointerDown(mainButton, {
       pointerId: 1,
@@ -515,8 +624,12 @@ describe("floatingButton controls", () => {
   it("mirrors the controls when attached to the left edge", () => {
     renderFloatingButton({ side: "left" })
 
-    const closeTrigger = screen.getByRole("button", { name: "Close floating button" })
-    const lockTrigger = screen.getByRole("button", { name: "Lock floating button" })
+    const closeTrigger = screen.getByRole("button", {
+      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.floatingButtonOptions",
+    })
+    const lockTrigger = screen.getByRole("button", {
+      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.lockPosition",
+    })
     const mainButton = getMainButton()
     const hiddenButtons = screen
       .getAllByRole("button")

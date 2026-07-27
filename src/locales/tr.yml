@@ -322,6 +322,13 @@ options:
       closeMenu:
         disableForSite: Bu site için devre dışı bırak
         disableGlobally: Genel olarak devre dışı bırak
+      tooltips:
+        togglePageTranslation: Sayfa çevirisini aç/kapat
+        floatingButtonOptions: Kayan düğme seçenekleri
+        lockPosition: Konumu kilitle
+        unlockPosition: Konum kilidini aç
+        settings: Ayarlar
+        feedback: Geri bildirim gönder
       disabledSites:
         title: Yüzen Buton Devre Dışı Siteler
         description: Yüzen butonun devre dışı bırakılması gereken web sitelerini yapılandırın
