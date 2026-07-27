@@ -323,6 +323,13 @@ options:
       closeMenu:
         disableForSite: Desactivar para este sitio
         disableGlobally: Desactivar globalmente
+      tooltips:
+        togglePageTranslation: Alternar traducción de página
+        floatingButtonOptions: Opciones del botón flotante
+        lockPosition: Bloquear posición
+        unlockPosition: Desbloquear posición
+        settings: Ajustes
+        feedback: Enviar comentarios
       disabledSites:
         title: Sitios con botón flotante desactivado
         description: Configura los sitios web donde se debe desactivar el botón flotante

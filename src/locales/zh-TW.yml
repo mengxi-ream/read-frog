@@ -323,6 +323,13 @@ options:
       closeMenu:
         disableForSite: 停用此網站
         disableGlobally: 全域停用
+      tooltips:
+        togglePageTranslation: 切換頁面翻譯
+        floatingButtonOptions: 懸浮按鈕選項
+        lockPosition: 鎖定位置
+        unlockPosition: 解鎖位置
+        settings: 設定
+        feedback: 傳送意見回饋
       disabledSites:
         title: 懸浮按鈕停用網站
         description: 設定需要停用懸浮按鈕的網站

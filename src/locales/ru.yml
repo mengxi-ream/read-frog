@@ -322,6 +322,13 @@ options:
       closeMenu:
         disableForSite: Отключить для этого сайта
         disableGlobally: Отключить глобально
+      tooltips:
+        togglePageTranslation: Переключить перевод страницы
+        floatingButtonOptions: Настройки плавающей кнопки
+        lockPosition: Закрепить положение
+        unlockPosition: Открепить положение
+        settings: Настройки
+        feedback: Отправить отзыв
       disabledSites:
         title: Сайты с отключённой плавающей кнопкой
         description: Настройте веб-сайты, где плавающая кнопка должна быть отключена

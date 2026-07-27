@@ -322,6 +322,13 @@ options:
       closeMenu:
         disableForSite: Tắt cho trang web này
         disableGlobally: Tắt toàn cục
+      tooltips:
+        togglePageTranslation: Bật/tắt dịch trang
+        floatingButtonOptions: Tùy chọn nút nổi
+        lockPosition: Khóa vị trí
+        unlockPosition: Mở khóa vị trí
+        settings: Cài đặt
+        feedback: Gửi phản hồi
       disabledSites:
         title: Các trang web đã tắt nút nổi
         description: Cấu hình các trang web mà nút nổi nên bị tắt

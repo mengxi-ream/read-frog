@@ -323,6 +323,13 @@ options:
       closeMenu:
         disableForSite: Disable for this site
         disableGlobally: Disable globally
+      tooltips:
+        togglePageTranslation: Toggle page translation
+        floatingButtonOptions: Floating button options
+        lockPosition: Lock position
+        unlockPosition: Unlock position
+        settings: Settings
+        feedback: Send feedback
       disabledSites:
         title: Floating Button Disabled Sites
         description: Configure websites where the floating button should be disabled

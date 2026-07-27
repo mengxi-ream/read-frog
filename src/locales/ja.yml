@@ -322,6 +322,13 @@ options:
       closeMenu:
         disableForSite: このサイトで無効化
         disableGlobally: グローバルで無効化
+      tooltips:
+        togglePageTranslation: ページ翻訳を切り替え
+        floatingButtonOptions: フローティングボタンのオプション
+        lockPosition: 位置を固定
+        unlockPosition: 位置の固定を解除
+        settings: 設定
+        feedback: フィードバックを送信
       disabledSites:
         title: フローティングボタン無効化サイト
         description: フローティングボタンを無効化するウェブサイトを設定します
