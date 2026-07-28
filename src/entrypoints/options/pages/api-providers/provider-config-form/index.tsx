@@ -40,7 +40,7 @@ export function ProviderConfigForm() {
 }
 
 function EditableProviderConfig({ providerConfig }: { providerConfig: APIProviderConfig }) {
-  const [, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
+  const setSelectedProviderId = useSetAtom(selectedProviderIdAtom)
   const [currentProviderConfig, setProviderConfig] = useAtom(providerConfigAtom(providerConfig.id))
   const [allProvidersConfig, setAllProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
   const setConfig = useSetAtom(writeConfigAtom)

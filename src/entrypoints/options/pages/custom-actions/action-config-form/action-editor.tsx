@@ -1,5 +1,5 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
-import { useAtom } from "jotai"
+import { useAtom, useSetAtom } from "jotai"
 import { createContext, use, useEffect, useState } from "react"
 import { QuickInsertableTextareaFieldAutoSave } from "@/components/form/quick-insertable-textarea-field-auto-save"
 import {
@@ -89,7 +89,7 @@ function useActionEditorController(
   deleteAction?: () => Promise<void>,
 ): ActionEditorContextValue {
   const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
-  const [, setSelectedActionId] = useAtom(selectedCustomActionIdAtom)
+  const setSelectedActionId = useSetAtom(selectedCustomActionIdAtom)
 
   const form = useActionForm(action, async (nextAction) => {
     await setSelectionToolbar(replaceSelectionToolbarAction(selectionToolbar, nextAction))
@@ -143,7 +143,7 @@ function CustomProvider({
   children: React.ReactNode
 }) {
   const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
-  const [, setSelectedActionId] = useAtom(selectedCustomActionIdAtom)
+  const setSelectedActionId = useSetAtom(selectedCustomActionIdAtom)
 
   const deleteAction = async () => {
     const currentIndex = selectionToolbar.customActions.findIndex((item) => item.id === action.id)

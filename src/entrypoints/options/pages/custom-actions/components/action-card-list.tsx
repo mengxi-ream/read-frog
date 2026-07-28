@@ -1,7 +1,7 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { CustomActionTemplate } from "@/utils/constants/custom-action-templates"
 import { Icon } from "@iconify/react"
-import { useAtom, useAtomValue } from "jotai"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useMemo, useState } from "react"
 import { useLocation, useNavigate } from "react-router"
 import { SortableList } from "@/components/sortable-list"
@@ -22,7 +22,7 @@ export function CustomActionCardList() {
   const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(
     configFieldsAtomMap.selectionToolbar,
   )
-  const [, setSelectedCustomActionId] = useAtom(selectedCustomActionIdAtom)
+  const setSelectedCustomActionId = useSetAtom(selectedCustomActionIdAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const { search } = useLocation()
   const navigate = useNavigate()
