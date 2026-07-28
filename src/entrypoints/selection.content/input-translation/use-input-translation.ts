@@ -1,4 +1,4 @@
-import { useAtom } from "jotai"
+import { useAtomValue } from "jotai"
 import { useCallback, useEffect, useRef } from "react"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureAttempt } from "@/utils/analytics"
@@ -122,8 +122,8 @@ function setTextWithUndo(
 }
 
 export function useInputTranslation() {
-  const [inputTranslationConfig] = useAtom(configFieldsAtomMap.inputTranslation)
-  const [providersConfig] = useAtom(configFieldsAtomMap.providersConfig)
+  const inputTranslationConfig = useAtomValue(configFieldsAtomMap.inputTranslation)
+  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const spaceTimestampsRef = useRef<number[]>([])
   const isTranslatingRef = useRef(false)
 
