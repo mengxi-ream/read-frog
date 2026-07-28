@@ -47,10 +47,15 @@ export interface SaveSuggestionPromptInput {
   /** Enabled custom actions offered to the model as candidates. */
   candidates: SelectionToolbarCustomAction[]
   /** Dictionary draft whose schema applies when createNewDictionaryAction is true. */
-  dictionaryDraft: SelectionToolbarCustomAction
+  dictionaryDraft: SelectionToolbarCustomAction | null
 }
 
-const SAVE_SUGGESTION_SYSTEM_PROMPT = `You are a vocabulary note assistant for a language-learning browser extension. The user reads foreign-language web pages and translates selections into their own language (the target language). They are learning the language the selected text is written in. Identify the words or phrases from the selected text that are the most valuable for them to save into their vocabulary notebook, and produce notes for them.
+function buildSaveSuggestionSystemPrompt(dictionaryDraftAvailable: boolean) {
+  const dictionaryFallbackInstruction = dictionaryDraftAvailable
+    ? '3. Only when no candidate fits vocabulary notes at all (or no candidates exist), set "createNewDictionaryAction" to true and "targetActionId" to null, and use the Default Dictionary Schema from the user prompt for the notes instead.'
+    : '3. The built-in Dictionary is disabled. You must set "createNewDictionaryAction" to false and must never create or enable a Dictionary action. Set "targetActionId" to an id from Candidate Actions.'
+
+  return `You are a vocabulary note assistant for a language-learning browser extension. The user reads foreign-language web pages and translates selections into their own language (the target language). They are learning the language the selected text is written in. Identify the words or phrases from the selected text that are the most valuable for them to save into their vocabulary notebook, and produce notes for them.
 
 ## Structured Output Contract
 Return exactly one JSON object and nothing else, with this shape:
@@ -68,7 +73,7 @@ Return exactly one JSON object and nothing else, with this shape:
 ### Choosing the action
 1. The user prompt lists candidate note actions, each with an id, a name, and a field schema.
 2. Pick the single candidate that fits dictionary/vocabulary notes best: set "targetActionId" to its id and "createNewDictionaryAction" to false.
-3. Only when no candidate fits vocabulary notes at all (or no candidates exist), set "createNewDictionaryAction" to true and "targetActionId" to null, and use the Default Dictionary Schema from the user prompt for the notes instead.
+${dictionaryFallbackInstruction}
 4. Set "summaryFieldName" to the name of one field from the chosen schema whose value best explains the first field's term in one line (usually a definition or meaning field). Use null if no field fits.
 
 ### Producing notes
@@ -83,6 +88,7 @@ Return exactly one JSON object and nothing else, with this shape:
 1. Output valid JSON only. No markdown, no code fences, no commentary.
 2. Use double quotes for all JSON keys and string values.
 3. Number values must be JSON numbers, never quoted strings.`
+}
 
 function formatCandidateAction(
   action: SelectionToolbarCustomAction,
@@ -114,7 +120,9 @@ export function buildSaveSuggestionPrompts(input: SaveSuggestionPromptInput): {
     webContent: "",
   }
 
-  const dictionaryBlock = buildStructuredOutputFieldList(input.dictionaryDraft.outputSchema, tokens)
+  const dictionaryBlock = input.dictionaryDraft
+    ? buildStructuredOutputFieldList(input.dictionaryDraft.outputSchema, tokens)
+    : null
   const cappedCandidates = input.candidates.map(capActionFieldDescriptions)
 
   const assemble = (candidates: SelectionToolbarCustomAction[]) => {
@@ -122,6 +130,13 @@ export function buildSaveSuggestionPrompts(input: SaveSuggestionPromptInput): {
       candidates.length > 0
         ? candidates.map((action) => formatCandidateAction(action, tokens)).join("\n")
         : "None."
+
+    const dictionarySection = dictionaryBlock
+      ? `
+
+## Default Dictionary Schema (only when "createNewDictionaryAction" is true)
+${dictionaryBlock}`
+      : ""
 
     return `## Web Page Title
 ${webTitle}
@@ -136,22 +151,25 @@ ${paragraphs}
 ${input.targetLanguage}
 
 ## Candidate Actions
-${candidatesBlock}
-
-## Default Dictionary Schema (only when "createNewDictionaryAction" is true)
-${dictionaryBlock}`
+${candidatesBlock}${dictionarySection}`
   }
 
   // Drop candidate actions from the end until within budget. A dropped action is
-  // simply not offered as a target (the model falls back to createNewDictionaryAction),
-  // which degrades gracefully instead of sending an oversized request on the
-  // user's provider quota.
+  // simply not offered as a target. Keep at least one when Dictionary creation
+  // is unavailable, because the model must choose an existing action.
   let candidates = cappedCandidates
   let prompt = assemble(candidates)
-  while (prompt.length > SAVE_SUGGESTION_MAX_PROMPT_CHARS && candidates.length > 0) {
+  const minimumCandidateCount = input.dictionaryDraft ? 0 : Math.min(1, candidates.length)
+  while (
+    prompt.length > SAVE_SUGGESTION_MAX_PROMPT_CHARS &&
+    candidates.length > minimumCandidateCount
+  ) {
     candidates = candidates.slice(0, -1)
     prompt = assemble(candidates)
   }
 
-  return { systemPrompt: SAVE_SUGGESTION_SYSTEM_PROMPT, prompt }
+  return {
+    systemPrompt: buildSaveSuggestionSystemPrompt(input.dictionaryDraft !== null),
+    prompt,
+  }
 }

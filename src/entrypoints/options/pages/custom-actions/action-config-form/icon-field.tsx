@@ -24,6 +24,7 @@ interface IconPickerPopoverProps {
   previewIcon: string
   selectedIcon: string | undefined
   onSelect: (icon: string) => void
+  disabled?: boolean
 }
 
 function IconPickerPopover({
@@ -32,15 +33,22 @@ function IconPickerPopover({
   previewIcon,
   selectedIcon,
   onSelect,
+  disabled,
 }: IconPickerPopoverProps) {
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
+    <Popover
+      open={!disabled && open}
+      onOpenChange={(nextOpen) => {
+        if (!disabled) onOpenChange(nextOpen)
+      }}
+    >
       <PopoverTrigger
         render={
           <Button
             type="button"
             variant="outline"
             size="icon"
+            disabled={disabled}
             aria-label={i18n.t(
               "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.iconField.chooseAriaLabel",
             )}
@@ -140,7 +148,10 @@ function IconHelpPopover() {
 
 export const IconField = withForm({
   ...{ defaultValues: {} as SelectionToolbarCustomAction },
-  render: function Render({ form }) {
+  props: {
+    readOnly: false as boolean,
+  },
+  render: function Render({ form, readOnly }) {
     const iconValue = useSelector(form.store, (state) => state.values.icon)
     const [iconPickerOpen, setIconPickerOpen] = useState(false)
     const hasError = !ICON_PATTERN.test(iconValue?.trim() ?? "")
@@ -171,6 +182,7 @@ export const IconField = withForm({
                 onOpenChange={setIconPickerOpen}
                 previewIcon={previewIcon}
                 selectedIcon={field.state.value}
+                disabled={readOnly}
                 onSelect={(icon) => {
                   field.handleChange(icon)
                   void form.handleSubmit()
@@ -185,6 +197,7 @@ export const IconField = withForm({
                     "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.iconField.inputPlaceholder",
                   )}
                   aria-invalid={hasError}
+                  readOnly={readOnly}
                   onBlur={field.handleBlur}
                   onChange={(e) => {
                     field.handleChange(e.target.value)

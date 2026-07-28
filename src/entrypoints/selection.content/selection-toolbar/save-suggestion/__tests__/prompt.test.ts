@@ -80,6 +80,19 @@ describe("buildSaveSuggestionPrompts", () => {
     expect(systemPrompt).toContain("valid JSON only")
   })
 
+  it("forbids Dictionary creation and omits its schema when no draft is available", () => {
+    const { systemPrompt, prompt } = buildSaveSuggestionPrompts({
+      ...input,
+      dictionaryDraft: null,
+    })
+
+    expect(systemPrompt).toContain('must set "createNewDictionaryAction" to false')
+    expect(systemPrompt).toContain("must never create or enable a Dictionary action")
+    expect(systemPrompt).not.toContain("Default Dictionary Schema")
+    expect(prompt).not.toContain("Default Dictionary Schema")
+    expect(prompt).toContain('- id: "action-1"')
+  })
+
   it("instructs the model to pick a summary field explaining the first field's term", () => {
     const { systemPrompt } = buildSaveSuggestionPrompts(input)
     expect(systemPrompt).toContain('"summaryFieldName": string or null')

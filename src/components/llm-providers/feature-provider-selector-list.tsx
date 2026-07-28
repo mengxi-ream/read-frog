@@ -14,6 +14,7 @@ import {
   FEATURE_PROVIDER_DEFS,
   getFeatureLabelI18nKey,
 } from "@/utils/constants/feature-providers"
+import { getSelectionToolbarActions, patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { cn } from "@/utils/styles/utils"
@@ -95,7 +96,7 @@ function CustomActionProviderFields({
     [providersConfig],
   )
 
-  const customActions = config.selectionToolbar.customActions.filter(
+  const customActions = getSelectionToolbarActions(config.selectionToolbar).filter(
     (action) => action.enabled !== false,
   )
 
@@ -121,15 +122,14 @@ function CustomActionProviderFields({
               providers={customActionProviders}
               value={action.providerId}
               onChange={(id) => {
-                const updatedCustomActions = config.selectionToolbar.customActions.map((item) =>
-                  item.id === action.id ? { ...item, providerId: id } : item,
-                )
-
                 void setConfig({
-                  selectionToolbar: {
-                    ...config.selectionToolbar,
-                    customActions: updatedCustomActions,
-                  },
+                  selectionToolbar: patchSelectionToolbarAction(
+                    config.selectionToolbar,
+                    action.id,
+                    {
+                      providerId: id,
+                    },
+                  ),
                 })
               }}
               className={providerSelectorClassName}

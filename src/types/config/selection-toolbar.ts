@@ -31,6 +31,16 @@ export const selectionToolbarCustomActionNotebaseConnectionSchema = z.object({
   mappings: z.array(selectionToolbarCustomActionNotebaseMappingSchema),
 })
 
+export const selectionToolbarBuiltInActionStateSchema = z.object({
+  enabled: z.boolean(),
+  providerId: z.string().nonempty(),
+  notebaseConnection: selectionToolbarCustomActionNotebaseConnectionSchema.optional(),
+})
+
+export const selectionToolbarBuiltInActionsSchema = z.object({
+  dictionary: selectionToolbarBuiltInActionStateSchema,
+})
+
 export const selectionToolbarCustomActionSchema = z
   .object({
     id: z.string().nonempty(),
@@ -112,6 +122,14 @@ export const selectionToolbarCustomActionsSchema = z
   .superRefine((actions, ctx) => {
     const idSet = new Set<string>()
     actions.forEach((action, index) => {
+      if (action.id === "default-dictionary") {
+        ctx.addIssue({
+          code: "custom",
+          message: 'Action id "default-dictionary" is reserved for the built-in Dictionary.',
+          path: [index, "id"],
+        })
+      }
+
       if (idSet.has(action.id)) {
         ctx.addIssue({
           code: "custom",
@@ -151,4 +169,8 @@ export type SelectionToolbarCustomActionNotebaseAccount = z.infer<
 export type SelectionToolbarCustomActionNotebaseConnection = z.infer<
   typeof selectionToolbarCustomActionNotebaseConnectionSchema
 >
+export type SelectionToolbarBuiltInActionState = z.infer<
+  typeof selectionToolbarBuiltInActionStateSchema
+>
+export type SelectionToolbarBuiltInActions = z.infer<typeof selectionToolbarBuiltInActionsSchema>
 export type SelectionToolbarCustomAction = z.infer<typeof selectionToolbarCustomActionSchema>

@@ -10,6 +10,7 @@ import { atom } from "jotai"
 import { atomFamily } from "jotai-family"
 import { selectAtom } from "jotai/utils"
 import { configAtom } from "@/utils/atoms/config"
+import { findSelectionToolbarAction } from "@/utils/custom-actions"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { buildContextSnapshot } from "../utils"
 
@@ -118,10 +119,8 @@ function createSelectionToolbarCustomActionRequestSliceAtom(actionId: string) {
   return selectAtom(
     configAtom,
     (config): SelectionToolbarCustomActionRequestSlice => {
-      const action =
-        config.selectionToolbar.customActions.find(
-          (candidate) => candidate.enabled !== false && candidate.id === actionId,
-        ) ?? null
+      const candidate = findSelectionToolbarAction(config.selectionToolbar, actionId)
+      const action = candidate && candidate.enabled !== false ? candidate : null
 
       return {
         language: config.language,

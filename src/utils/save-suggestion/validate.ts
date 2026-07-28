@@ -42,8 +42,8 @@ export interface ValidateSaveSuggestionInput {
   }
   /** Enabled custom actions snapshot taken when the request was fired. */
   candidates: SelectionToolbarCustomAction[]
-  /** Dictionary action draft created when the request was fired. */
-  dictionaryDraft: SelectionToolbarCustomAction
+  /** Enabled built-in Dictionary snapshot, or null when the user disabled it. */
+  dictionaryDraft: SelectionToolbarCustomAction | null
 }
 
 /**
@@ -78,7 +78,7 @@ export function validateSaveSuggestion(
 
   const createNew = envelope.action.createNewDictionaryAction
   const action = createNew
-    ? dictionaryDraft
+    ? (dictionaryDraft ?? undefined)
     : envelope.action.targetActionId !== null
       ? candidates.find((candidate) => candidate.id === envelope.action.targetActionId)
       : undefined
@@ -118,7 +118,7 @@ export function validateSaveSuggestion(
   }
 
   return {
-    target: createNew ? { kind: "create_dictionary" } : { kind: "existing", actionId: action.id },
+    target: { kind: "existing", actionId: action.id },
     notes,
     summaryFieldName: sanitizeSummaryFieldName(
       envelope.action.summaryFieldName,

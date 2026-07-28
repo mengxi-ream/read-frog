@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import type { ReactNode } from "react"
 import type { LLMProviderConfig } from "@/types/config/provider"
+import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
@@ -148,6 +149,81 @@ describe("useSaveSuggestion", () => {
     )
     expect(streamBackgroundNoteSuggestionMock).not.toHaveBeenCalled()
     expect(result.current.suggestion).toBeNull()
+  })
+
+  it("does not create or enable a Dictionary when the built-in action is disabled", async () => {
+    const store = createStore()
+    const config = structuredClone(DEFAULT_CONFIG)
+    config.selectionToolbar.builtInActions.dictionary.enabled = false
+    config.selectionToolbar.customActions = []
+    store.set(configAtom, config)
+    const { result } = renderHook(() => useSaveSuggestion(), { wrapper: wrapper(store) })
+
+    act(() => result.current.maybeFire(fireInput("1:lang:0")))
+    await Promise.resolve()
+
+    expect(isAttemptAllowedMock).not.toHaveBeenCalled()
+    expect(streamBackgroundNoteSuggestionMock).not.toHaveBeenCalled()
+    expect(store.get(configAtom).selectionToolbar.customActions).toEqual([])
+    expect(store.get(configAtom).selectionToolbar.builtInActions.dictionary.enabled).toBe(false)
+  })
+
+  it("uses an enabled custom action without offering Dictionary creation when built-in is disabled", async () => {
+    const store = createStore()
+    const config = structuredClone(DEFAULT_CONFIG)
+    const customAction: SelectionToolbarCustomAction = {
+      id: "custom-dictionary",
+      name: "Custom Dictionary",
+      enabled: true,
+      icon: "tabler:book-2",
+      providerId: LLM_PROVIDER_CONFIG.id,
+      systemPrompt: "system",
+      prompt: "prompt",
+      outputSchema: [
+        {
+          id: "custom-term",
+          name: "Word",
+          type: "string",
+          description: "The vocabulary term",
+          speaking: true,
+        },
+      ],
+    }
+    config.selectionToolbar.builtInActions.dictionary.enabled = false
+    config.selectionToolbar.customActions = [customAction]
+    store.set(configAtom, config)
+    streamBackgroundNoteSuggestionMock.mockResolvedValueOnce({
+      ...VALID_ENVELOPE,
+      output: {
+        ...VALID_ENVELOPE.output,
+        action: {
+          createNewDictionaryAction: false,
+          targetActionId: customAction.id,
+        },
+      },
+    })
+    validateSaveSuggestionMock.mockReturnValueOnce({
+      ...VALIDATED_SUGGESTION,
+      target: { kind: "existing", actionId: customAction.id },
+    })
+    const { result } = renderHook(() => useSaveSuggestion(), { wrapper: wrapper(store) })
+
+    act(() => result.current.maybeFire(fireInput("disabled-built-in:lang:0")))
+    await waitFor(() => expect(result.current.suggestion).not.toBeNull())
+
+    const request = streamBackgroundNoteSuggestionMock.mock.calls[0]![0]
+    expect(request.instructions).toContain('must set "createNewDictionaryAction" to false')
+    expect(request.instructions).toContain("must never create or enable a Dictionary action")
+    expect(request.instructions).not.toContain("Default Dictionary Schema")
+    expect(request.prompt).not.toContain("Default Dictionary Schema")
+    expect(request.prompt).toContain(`- id: "${customAction.id}"`)
+    expect(validateSaveSuggestionMock).toHaveBeenCalledWith({
+      envelope: expect.any(Object),
+      candidates: [customAction],
+      dictionaryDraft: null,
+    })
+    expect(result.current.suggestion?.actionSnapshot.id).toBe(customAction.id)
+    expect(result.current.suggestion?.dictionaryDraft).toBeNull()
   })
 
   it("records a failure when the request rejects", async () => {

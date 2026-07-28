@@ -393,6 +393,7 @@ options:
       customActions:
         title: 自訂 AI 指令
         description: 為選取文字新增自訂的結構化 AI 指令
+        builtIn: 內建
         add: 新增 AI 指令
         edit: 編輯 AI 指令
         empty: 目前沒有自訂 AI 指令

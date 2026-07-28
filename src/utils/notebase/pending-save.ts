@@ -11,12 +11,15 @@ import { z as zod } from "zod"
 import { storage } from "#imports"
 import { env } from "@/env"
 import { selectionToolbarCustomActionNotebaseConnectionSchema } from "@/types/config/selection-toolbar"
+import { BUILT_IN_DICTIONARY_ACTION_ID } from "@/utils/constants/custom-action"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
+import { findSelectionToolbarAction, replaceSelectionToolbarAction } from "@/utils/custom-actions"
 import { guideDictionaryNotebaseTrackingSchema } from "@/utils/guide/dictionary-notebase"
 import { buildNotebaseRowCells } from "./mapping"
 
 export const NOTEBASE_PENDING_SAVE_STORAGE_KEY = "notebasePendingSave"
 export const NOTEBASE_PENDING_SAVE_TTL_MS = 10 * 60 * 1000
+const MIGRATED_DICTIONARY_ACTION_ID_PATTERN = /^migrated-default-dictionary(?:-\d+)?$/
 
 const pendingNotebaseSaveColumnSchema = zod.object({
   localFieldId: zod.string().nonempty(),
@@ -115,7 +118,6 @@ export type PendingNotebaseSaveActionStatus =
 interface PendingNotebaseSaveActionValidation {
   status: PendingNotebaseSaveActionStatus
   action?: SelectionToolbarCustomAction
-  actionIndex?: number
 }
 
 export function getOutputSchemaFingerprint(
@@ -254,20 +256,79 @@ export async function clearPendingNotebaseSave() {
   await storage.removeItem(`local:${NOTEBASE_PENDING_SAVE_STORAGE_KEY}`)
 }
 
-function findPendingSaveAction(config: Config, actionId: string) {
-  const actionIndex = config.selectionToolbar.customActions.findIndex(
-    (action) => action.id === actionId,
-  )
-  if (actionIndex < 0) {
-    return null
+export function rebindPendingNotebaseSaveToMigratedDictionary(
+  config: Config,
+  pending: PendingCreateNotebaseSave,
+  migratedActionId?: string,
+): PendingCreateNotebaseSave
+export function rebindPendingNotebaseSaveToMigratedDictionary(
+  config: Config,
+  pending: PendingConnectedNotebaseSave,
+  migratedActionId?: string,
+): PendingConnectedNotebaseSave
+export function rebindPendingNotebaseSaveToMigratedDictionary(
+  config: Config,
+  pending: PendingNotebaseSave,
+  migratedActionId?: string,
+): PendingNotebaseSave
+export function rebindPendingNotebaseSaveToMigratedDictionary(
+  config: Config,
+  pending: PendingNotebaseSave,
+  migratedActionId?: string,
+): PendingNotebaseSave {
+  if (pending.actionId !== BUILT_IN_DICTIONARY_ACTION_ID) {
+    return pending
   }
 
-  const action = config.selectionToolbar.customActions[actionIndex]
-  if (!action) {
-    return null
+  const matchingCustomActions = config.selectionToolbar.customActions.filter((action) => {
+    if (migratedActionId && action.id !== migratedActionId) {
+      return false
+    }
+    return getOutputSchemaFingerprint(action.outputSchema) === pending.outputSchemaFingerprint
+  })
+  if (matchingCustomActions.length !== 1) {
+    return pending
   }
 
-  return { action, actionIndex }
+  return {
+    ...pending,
+    actionId: matchingCustomActions[0]!.id,
+    actionName: matchingCustomActions[0]!.name,
+  }
+}
+
+function findPendingSaveAction(config: Config, pending: PendingNotebaseSave) {
+  if (pending.actionId === BUILT_IN_DICTIONARY_ACTION_ID) {
+    const migratedOwners = config.selectionToolbar.customActions.filter(
+      (candidate) =>
+        MIGRATED_DICTIONARY_ACTION_ID_PATTERN.test(candidate.id) &&
+        candidate.name === pending.actionName &&
+        doesPendingActionSchemaMatch(candidate, pending),
+    )
+    if (migratedOwners.length === 1) {
+      return migratedOwners[0]!
+    }
+  }
+
+  const action = findSelectionToolbarAction(config.selectionToolbar, pending.actionId)
+  if (action && doesPendingActionSchemaMatch(action, pending)) {
+    return action
+  }
+
+  // A v87 Dictionary with a legacy output schema may be re-keyed as a custom
+  // action while the code-owned Dictionary keeps the historical fixed id.
+  // Rebind only when the old id and schema fingerprint identify one custom
+  // action unambiguously.
+  if (pending.actionId === BUILT_IN_DICTIONARY_ACTION_ID) {
+    const matchingCustomActions = config.selectionToolbar.customActions.filter((candidate) =>
+      doesPendingActionSchemaMatch(candidate, pending),
+    )
+    if (matchingCustomActions.length === 1) {
+      return matchingCustomActions[0]!
+    }
+  }
+
+  return action ?? null
 }
 
 function doesPendingActionSchemaMatch(
@@ -281,46 +342,44 @@ export function validateStillCanSavePendingCreateNotebaseSave(
   config: Config,
   pending: PendingCreateNotebaseSave,
 ): PendingNotebaseSaveActionValidation {
-  const pendingAction = findPendingSaveAction(config, pending.actionId)
-  if (!pendingAction) {
+  const action = findPendingSaveAction(config, pending)
+  if (!action) {
     return { status: "missing_action" }
   }
 
-  const { action, actionIndex } = pendingAction
   if (action.notebaseConnection) {
-    return { status: "already_connected", action, actionIndex }
+    return { status: "already_connected", action }
   }
 
   if (!doesPendingActionSchemaMatch(action, pending)) {
-    return { status: "schema_changed", action, actionIndex }
+    return { status: "schema_changed", action }
   }
 
-  return { status: "valid", action, actionIndex }
+  return { status: "valid", action }
 }
 
 export function validateStillCanSavePendingConnectedNotebaseSave(
   config: Config,
   pending: PendingConnectedNotebaseSave,
 ): PendingNotebaseSaveActionValidation {
-  const pendingAction = findPendingSaveAction(config, pending.actionId)
-  if (!pendingAction) {
+  const action = findPendingSaveAction(config, pending)
+  if (!action) {
     return { status: "missing_action" }
   }
 
-  const { action, actionIndex } = pendingAction
   if (!doesPendingActionSchemaMatch(action, pending)) {
-    return { status: "schema_changed", action, actionIndex }
+    return { status: "schema_changed", action }
   }
 
   if (!action.notebaseConnection) {
-    return { status: "missing_connection", action, actionIndex }
+    return { status: "missing_connection", action }
   }
 
   if (!doesConnectionMatchPendingSnapshot(action.notebaseConnection, pending.connectionSnapshot)) {
-    return { status: "connection_changed", action, actionIndex }
+    return { status: "connection_changed", action }
   }
 
-  return { status: "valid", action, actionIndex }
+  return { status: "valid", action }
 }
 
 function doesConnectionMatchPendingSnapshot(
@@ -356,12 +415,11 @@ export function applyCreatedNotebaseConnectionToConfig(
   status: PendingNotebaseSaveActionStatus
   config?: Config
 } {
-  const pendingAction = findPendingSaveAction(config, pending.actionId)
-  if (!pendingAction) {
+  const action = findPendingSaveAction(config, pending)
+  if (!action) {
     return { status: "missing_action" }
   }
 
-  const { action, actionIndex } = pendingAction
   if (!options.replaceExistingConnection && action.notebaseConnection) {
     return { status: "already_connected" }
   }
@@ -374,20 +432,10 @@ export function applyCreatedNotebaseConnectionToConfig(
     status: "valid",
     config: {
       ...config,
-      selectionToolbar: {
-        ...config.selectionToolbar,
-        customActions: config.selectionToolbar.customActions.map((customAction, index) =>
-          index === actionIndex
-            ? {
-                ...customAction,
-                notebaseConnection: buildNotebaseConnectionFromPending(
-                  pending,
-                  options.connectedAccount,
-                ),
-              }
-            : customAction,
-        ),
-      },
+      selectionToolbar: replaceSelectionToolbarAction(config.selectionToolbar, {
+        ...action,
+        notebaseConnection: buildNotebaseConnectionFromPending(pending, options.connectedAccount),
+      }),
     },
   }
 }

@@ -393,6 +393,7 @@ options:
       customActions:
         title: 自定义 AI 指令
         description: 为划词添加你自己的结构化 AI 操作
+        builtIn: 内置
         add: 添加 AI 指令
         edit: 编辑 AI 指令
         empty: 暂无自定义 AI 指令

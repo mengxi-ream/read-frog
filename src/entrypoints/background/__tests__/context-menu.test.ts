@@ -21,6 +21,12 @@ function createConfig(enabled: boolean): Config {
       enabled,
     },
     selectionToolbar: {
+      builtInActions: {
+        dictionary: {
+          enabled: false,
+          providerId: "read-frog-free-ai",
+        },
+      },
       customActions: [],
     },
   } as unknown as Config
@@ -54,6 +60,8 @@ describe("background context menu", () => {
           "contextMenu.translateSelection": 'Translate "%s"',
           "contextMenu.readAloudSelection": 'Read aloud "%s"',
           "contextMenu.showOriginal": "Show Original",
+          "options.floatingButtonAndToolbar.selectionToolbar.customActions.templates.dictionary.name":
+            "Dictionary",
         })[key] ?? key,
     ) as typeof i18n.t
   })
@@ -113,6 +121,23 @@ describe("background context menu", () => {
     expect(browser.contextMenus.create).toHaveBeenNthCalledWith(5, {
       id: `${MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX}rewrite`,
       title: "Rewrite",
+      contexts: ["selection"],
+    })
+  })
+
+  it("creates the built-in Dictionary item when it is enabled", async () => {
+    const config = createConfig(true)
+    config.selectionToolbar.builtInActions.dictionary.enabled = true
+    ensureInitializedConfigMock.mockResolvedValue(config)
+
+    const { initializeContextMenu, MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX } =
+      await import("../context-menu")
+
+    await initializeContextMenu()
+
+    expect(browser.contextMenus.create).toHaveBeenNthCalledWith(4, {
+      id: `${MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX}default-dictionary`,
+      title: "Dictionary",
       contexts: ["selection"],
     })
   })

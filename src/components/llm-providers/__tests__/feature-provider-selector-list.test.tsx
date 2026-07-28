@@ -77,6 +77,7 @@ describe("featureProviderSelectorList custom action filtering", () => {
     config.selectionToolbar.customActions = [
       makeAction({ id: "disabled-action", name: "Disabled Action", providerId, enabled: false }),
     ]
+    config.selectionToolbar.builtInActions.dictionary.enabled = false
 
     renderWithConfig(config)
 

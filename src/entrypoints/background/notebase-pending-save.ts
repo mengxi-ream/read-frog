@@ -19,6 +19,7 @@ import { browser } from "#imports"
 import { env } from "@/env"
 import { backgroundAuthClient } from "@/utils/auth/background-auth-client"
 import { getLocalConfig, setLocalConfig } from "@/utils/config/storage"
+import { patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { logger } from "@/utils/logger"
 import {
   classifyConnectedNotebaseOwnership,
@@ -362,12 +363,9 @@ function applyRefreshedConnectedConnectionToConfig(
 ) {
   return {
     ...config,
-    selectionToolbar: {
-      ...config.selectionToolbar,
-      customActions: config.selectionToolbar.customActions.map((action) =>
-        action.id === actionId ? { ...action, notebaseConnection: refreshedConnection } : action,
-      ),
-    },
+    selectionToolbar: patchSelectionToolbarAction(config.selectionToolbar, actionId, {
+      notebaseConnection: refreshedConnection,
+    }),
   }
 }
 

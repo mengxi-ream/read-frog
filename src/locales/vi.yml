@@ -392,6 +392,7 @@ options:
       customActions:
         title: Hành động AI tùy chỉnh
         description: Thêm các hành động AI có cấu trúc của riêng bạn cho văn bản được chọn
+        builtIn: Tích hợp
         add: Thêm hành động AI
         edit: Chỉnh sửa hành động AI
         empty: Chưa có hành động AI tùy chỉnh

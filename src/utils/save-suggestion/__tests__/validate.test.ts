@@ -140,7 +140,20 @@ describe("validateSaveSuggestion", () => {
     const result = validate({ createNewDictionaryAction: true, targetActionId: "action-1" }, [
       validNote,
     ])
-    expect(result?.target).toEqual({ kind: "create_dictionary" })
+    expect(result?.target).toEqual({ kind: "existing", actionId: "draft-1" })
+  })
+
+  it("rejects dictionary creation when the built-in Dictionary is disabled", () => {
+    expect(
+      validateSaveSuggestion({
+        envelope: {
+          action: { createNewDictionaryAction: true, targetActionId: null },
+          notes: [validNote],
+        },
+        candidates: [candidate],
+        dictionaryDraft: null,
+      }),
+    ).toBeNull()
   })
 
   it("rejects an unknown target action id", () => {

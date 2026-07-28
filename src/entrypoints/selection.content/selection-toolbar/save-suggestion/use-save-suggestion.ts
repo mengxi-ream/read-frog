@@ -6,9 +6,9 @@ import { useAtomValue } from "jotai"
 import { useCallback, useRef, useState } from "react"
 import { classifyProviderConfig } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { CUSTOM_ACTION_TEMPLATES } from "@/utils/constants/custom-action-templates"
 import { streamBackgroundNoteSuggestion } from "@/utils/content-script/background-stream-client"
 import { STREAM_PORT_DISCONNECTED_MESSAGE } from "@/utils/content-script/port-streaming"
+import { getBuiltInDictionaryAction, getSelectionToolbarActions } from "@/utils/custom-actions"
 import { logger } from "@/utils/logger"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
@@ -110,10 +110,12 @@ export function useSaveSuggestion() {
       return
     }
 
-    const dictionaryTemplate = CUSTOM_ACTION_TEMPLATES.find(
-      (template) => template.id === "dictionary",
+    const dictionaryAction = getBuiltInDictionaryAction(config)
+    const dictionaryDraft = dictionaryAction.enabled !== false ? dictionaryAction : null
+    const enabledActions = getSelectionToolbarActions(config).filter(
+      (action) => action.enabled !== false,
     )
-    if (!dictionaryTemplate) {
+    if (enabledActions.length === 0) {
       return
     }
 
@@ -133,12 +135,8 @@ export function useSaveSuggestion() {
         return
       }
 
-      // Snapshot candidates and the dictionary draft at fire time so the
-      // prompt, the validation schema, and the action created at dialog
-      // confirm all share identical fields.
-      const enabledActions = config.customActions.filter((action) => action.enabled !== false)
-      const dictionaryDraft = dictionaryTemplate.createAction(input.providerId)
-
+      // Snapshot the code-owned Dictionary and enabled actions at fire time so
+      // prompt construction, validation, and saving use the same schema.
       const { systemPrompt, prompt } = buildSaveSuggestionPrompts({
         selection: input.selectionText,
         paragraphs: input.paragraphsText,
@@ -200,12 +198,10 @@ export function useSaveSuggestion() {
       void recordSaveSuggestionSuccess()
 
       const actionSnapshot =
-        validated.target.kind === "create_dictionary"
-          ? dictionaryDraft
-          : (enabledActions.find(
-              (action) =>
-                validated.target.kind === "existing" && action.id === validated.target.actionId,
-            ) ?? dictionaryDraft)
+        enabledActions.find(
+          (action) =>
+            validated.target.kind === "existing" && action.id === validated.target.actionId,
+        ) ?? dictionaryAction
 
       setSuggestion({
         sessionKey: input.sessionKey,

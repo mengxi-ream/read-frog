@@ -9,6 +9,13 @@ const getMetaMock = vi.fn<(...args: any[]) => any>()
 const setItemMock = vi.fn<(...args: any[]) => any>()
 const setMetaMock = vi.fn<(...args: any[]) => any>()
 const runMigrationMock = vi.fn<(...args: any[]) => any>()
+const getPendingNotebaseSaveMock = vi.fn<(...args: any[]) => any>()
+const clearPendingNotebaseSaveMock = vi.fn<(...args: any[]) => any>()
+const isPendingNotebaseSaveExpiredMock = vi.fn<(...args: any[]) => any>()
+const rebindPendingNotebaseSaveMock = vi.fn<(...args: any[]) => any>()
+const setPendingNotebaseSaveMock = vi.fn<(...args: any[]) => any>()
+const getPendingDictionaryRekeyedActionIdMock = vi.fn<(...args: any[]) => any>()
+const migrateWithPendingDictionarySaveMock = vi.fn<(...args: any[]) => any>()
 const loggerWarnMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("#imports", () => ({
@@ -31,6 +38,19 @@ vi.mock("wxt/utils/storage", () => ({
 
 vi.mock("../migration", () => ({
   runMigration: runMigrationMock,
+}))
+
+vi.mock("@/utils/notebase/pending-save", () => ({
+  clearPendingNotebaseSave: clearPendingNotebaseSaveMock,
+  getPendingNotebaseSave: getPendingNotebaseSaveMock,
+  isPendingNotebaseSaveExpired: isPendingNotebaseSaveExpiredMock,
+  rebindPendingNotebaseSaveToMigratedDictionary: rebindPendingNotebaseSaveMock,
+  setPendingNotebaseSave: setPendingNotebaseSaveMock,
+}))
+
+vi.mock("../migration-scripts/v087-to-v088", () => ({
+  getPendingDictionaryRekeyedActionId: getPendingDictionaryRekeyedActionIdMock,
+  migrateWithPendingDictionarySave: migrateWithPendingDictionarySaveMock,
 }))
 
 vi.mock("@/utils/logger", () => ({
@@ -69,6 +89,13 @@ describe("initializeConfig", () => {
     setItemMock.mockResolvedValue(undefined)
     setMetaMock.mockResolvedValue(undefined)
     runMigrationMock.mockImplementation(async (_nextVersion: number, config: Config) => config)
+    getPendingNotebaseSaveMock.mockResolvedValue(null)
+    clearPendingNotebaseSaveMock.mockResolvedValue(undefined)
+    isPendingNotebaseSaveExpiredMock.mockReturnValue(false)
+    rebindPendingNotebaseSaveMock.mockImplementation((_config: Config, pending: unknown) => pending)
+    setPendingNotebaseSaveMock.mockResolvedValue(undefined)
+    getPendingDictionaryRekeyedActionIdMock.mockReturnValue(null)
+    migrateWithPendingDictionarySaveMock.mockImplementation((config: Config) => config)
   })
 
   function translateProviderIdsOf(config: Config) {
@@ -174,7 +201,6 @@ describe("initializeConfig", () => {
         enabled: false,
       },
     }
-
     getItemMock.mockResolvedValueOnce(config)
     getMetaMock.mockResolvedValueOnce({
       schemaVersion: CONFIG_SCHEMA_VERSION - 1,
@@ -193,6 +219,77 @@ describe("initializeConfig", () => {
       schemaVersion: CONFIG_SCHEMA_VERSION,
       lastModifiedAt: 888,
     })
+  })
+
+  it("uses the pending-save-aware v088 migration during local startup", async () => {
+    const config = buildStableConfig()
+    const pending = {
+      actionId: "default-dictionary",
+      outputSchemaFingerprint: "legacy-schema",
+    }
+    const migrated = {
+      ...config,
+      contextMenu: {
+        ...config.contextMenu,
+        enabled: false,
+      },
+    }
+    const reboundPending = {
+      ...pending,
+      actionId: "migrated-default-dictionary",
+    }
+
+    getItemMock.mockResolvedValueOnce(config)
+    getMetaMock.mockResolvedValueOnce({
+      schemaVersion: CONFIG_SCHEMA_VERSION - 1,
+      lastModifiedAt: 888,
+    })
+    getPendingNotebaseSaveMock.mockResolvedValueOnce(pending)
+    getPendingDictionaryRekeyedActionIdMock.mockReturnValueOnce("migrated-default-dictionary")
+    migrateWithPendingDictionarySaveMock.mockReturnValueOnce(migrated)
+    rebindPendingNotebaseSaveMock.mockReturnValueOnce(reboundPending)
+
+    const { initializeConfig } = await import("../init")
+    await initializeConfig()
+
+    expect(runMigrationMock).not.toHaveBeenCalled()
+    expect(getPendingDictionaryRekeyedActionIdMock).toHaveBeenCalledWith(config, pending)
+    expect(migrateWithPendingDictionarySaveMock).toHaveBeenCalledWith(config, pending)
+    expect(rebindPendingNotebaseSaveMock).toHaveBeenCalledWith(
+      migrated,
+      pending,
+      "migrated-default-dictionary",
+    )
+    expect(setPendingNotebaseSaveMock).toHaveBeenCalledWith(reboundPending)
+    expect(setItemMock).toHaveBeenCalledWith("local:config", migrated)
+  })
+
+  it("ignores and best-effort clears an expired pending save before migration", async () => {
+    const config = buildStableConfig()
+    const pending = {
+      actionId: "default-dictionary",
+      outputSchemaFingerprint: "legacy-schema",
+    }
+    getItemMock.mockResolvedValueOnce(config)
+    getMetaMock.mockResolvedValueOnce({
+      schemaVersion: CONFIG_SCHEMA_VERSION - 1,
+      lastModifiedAt: 888,
+    })
+    getPendingNotebaseSaveMock.mockResolvedValueOnce(pending)
+    isPendingNotebaseSaveExpiredMock.mockReturnValueOnce(true)
+    clearPendingNotebaseSaveMock.mockRejectedValueOnce(new Error("storage unavailable"))
+
+    const { initializeConfig } = await import("../init")
+    await initializeConfig()
+
+    expect(clearPendingNotebaseSaveMock).toHaveBeenCalledOnce()
+    expect(migrateWithPendingDictionarySaveMock).not.toHaveBeenCalled()
+    expect(getPendingDictionaryRekeyedActionIdMock).not.toHaveBeenCalled()
+    expect(runMigrationMock).toHaveBeenCalledWith(CONFIG_SCHEMA_VERSION, config)
+    expect(loggerWarnMock).toHaveBeenCalledWith(
+      "Failed to clear expired pending Notebase save during config initialization",
+      expect.any(Error),
+    )
   })
 
   it("only updates meta when config is unchanged but lastModifiedAt is missing", async () => {

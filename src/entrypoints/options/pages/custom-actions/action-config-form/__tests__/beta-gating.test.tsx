@@ -1,23 +1,34 @@
 // @vitest-environment jsdom
 import type { Config } from "@/types/config/config"
-import { render, screen } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { describe, expect, it, vi } from "vitest"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { i18n } from "@/utils/i18n"
 import { CustomActionConfigForm } from ".."
+import { selectedCustomActionIdAtom } from "../../atoms"
 
 vi.mock("@/components/form/quick-insertable-textarea-field-auto-save", () => ({
-  QuickInsertableTextareaFieldAutoSave: ({ label }: { label: string }) => <div>{label}</div>,
+  QuickInsertableTextareaFieldAutoSave: ({
+    label,
+    readOnly,
+  }: {
+    label: string
+    readOnly?: boolean
+  }) => <div>{`${label}:${readOnly ? "readOnly" : "editable"}`}</div>,
 }))
 
 vi.mock("../name-field", () => ({
-  NameField: () => <div>NameField</div>,
+  NameField: ({ readOnly }: { readOnly: boolean }) => (
+    <div>{`NameField:${readOnly ? "readOnly" : "editable"}`}</div>
+  ),
 }))
 
 vi.mock("../icon-field", () => ({
-  IconField: () => <div>IconField</div>,
+  IconField: ({ readOnly }: { readOnly: boolean }) => (
+    <div>{`IconField:${readOnly ? "readOnly" : "editable"}`}</div>
+  ),
 }))
 
 vi.mock("../provider-field", () => ({
@@ -26,6 +37,7 @@ vi.mock("../provider-field", () => ({
 
 vi.mock("../output-schema-field", () => ({
   OutputSchemaField: () => <div>OutputSchemaField</div>,
+  ReadOnlyOutputSchemaField: () => <div>ReadOnlyOutputSchemaField</div>,
 }))
 
 vi.mock("../notebase-connection-field", () => ({
@@ -43,6 +55,55 @@ function cloneConfig(config: Config): Config {
 }
 
 describe("customActionConfigForm notebase availability", () => {
+  it("renders built-in fields read-only and duplicates the complete action", async () => {
+    const store = createStore()
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.selectionToolbar.builtInActions.dictionary.notebaseConnection = {
+      notebaseId: "table-1",
+      notebaseNameSnapshot: "Dictionary",
+      connectedAccount: {
+        id: "user-1",
+        name: "Reader",
+        email: "reader@example.com",
+        image: null,
+      },
+      mappings: [],
+    }
+    store.set(configAtom, config)
+
+    render(
+      <Provider store={store}>
+        <CustomActionConfigForm />
+      </Provider>,
+    )
+
+    expect(screen.getByText("NameField:readOnly")).toBeInTheDocument()
+    expect(screen.getByText("IconField:readOnly")).toBeInTheDocument()
+    expect(screen.queryByText("OutputSchemaField")).not.toBeInTheDocument()
+    expect(screen.getByText("ReadOnlyOutputSchemaField")).toBeInTheDocument()
+    expect(screen.getByText("ProviderField")).toBeInTheDocument()
+    expect(
+      screen.queryByText(
+        i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.delete"),
+      ),
+    ).not.toBeInTheDocument()
+
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("options.apiProviders.form.duplicate") }),
+    )
+
+    await waitFor(() => {
+      expect(store.get(configAtom).selectionToolbar.customActions).toHaveLength(1)
+    })
+    const duplicated = store.get(configAtom).selectionToolbar.customActions[0]!
+    expect(duplicated).toMatchObject({
+      enabled: true,
+      providerId: config.selectionToolbar.builtInActions.dictionary.providerId,
+      notebaseConnection: config.selectionToolbar.builtInActions.dictionary.notebaseConnection,
+    })
+    expect(duplicated.id).not.toBe("default-dictionary")
+  })
+
   it("shows the notebase connection field when beta experience is disabled", () => {
     const store = createStore()
     const config = cloneConfig(DEFAULT_CONFIG)
@@ -72,6 +133,7 @@ describe("customActionConfigForm notebase availability", () => {
     ]
 
     store.set(configAtom, config)
+    store.set(selectedCustomActionIdAtom, "action-1")
 
     render(
       <Provider store={store}>
@@ -86,5 +148,72 @@ describe("customActionConfigForm notebase availability", () => {
         ),
       ),
     ).toBeInTheDocument()
+  })
+
+  it("duplicates a custom action with its mutable state and connection", async () => {
+    const store = createStore()
+    const config = cloneConfig(DEFAULT_CONFIG)
+    const action = {
+      id: "action-1",
+      name: "Summarize",
+      icon: "tabler:sparkles",
+      enabled: false,
+      providerId: config.selectionToolbar.builtInActions.dictionary.providerId,
+      systemPrompt: "You are helpful.",
+      prompt: "Summarize the selected text.",
+      outputSchema: [
+        {
+          id: "summary-field",
+          name: "summary",
+          type: "string" as const,
+          description: "Summary",
+          speaking: false,
+        },
+      ],
+      notebaseConnection: {
+        notebaseId: "table-1",
+        notebaseNameSnapshot: "Articles",
+        connectedAccount: {
+          id: "user-1",
+          name: "Reader",
+          email: "reader@example.com",
+          image: null,
+        },
+        mappings: [],
+      },
+    }
+    config.selectionToolbar.customActions = [action]
+    store.set(configAtom, config)
+    store.set(selectedCustomActionIdAtom, action.id)
+
+    render(
+      <Provider store={store}>
+        <CustomActionConfigForm />
+      </Provider>,
+    )
+
+    expect(screen.getByText("NameField:editable")).toBeInTheDocument()
+    expect(screen.getByText("OutputSchemaField")).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", {
+        name: i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.delete"),
+      }),
+    ).toBeInTheDocument()
+
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("options.apiProviders.form.duplicate") }),
+    )
+
+    await waitFor(() => {
+      expect(store.get(configAtom).selectionToolbar.customActions).toHaveLength(2)
+    })
+    const duplicate = store.get(configAtom).selectionToolbar.customActions[1]!
+    expect(duplicate).toEqual({
+      ...action,
+      id: expect.any(String),
+      name: "Summarize 1",
+    })
+    expect(duplicate.id).not.toBe(action.id)
+    expect(duplicate.notebaseConnection).not.toBe(action.notebaseConnection)
   })
 })

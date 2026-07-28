@@ -393,6 +393,7 @@ options:
       customActions:
         title: Acciones AI personalizadas
         description: Añade tus propias acciones AI estructuradas para texto seleccionado
+        builtIn: Integrada
         add: Añadir acción AI
         edit: Editar acción AI
         empty: Aún no hay acciones AI personalizadas

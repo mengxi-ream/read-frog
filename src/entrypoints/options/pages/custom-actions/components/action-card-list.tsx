@@ -7,13 +7,13 @@ import { useLocation, useNavigate } from "react-router"
 import { SortableList } from "@/components/sortable-list"
 import { Button } from "@/components/ui/base-ui/button"
 import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
-import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { DEFAULT_ACTION_NAME } from "@/utils/constants/custom-action"
+import { BUILT_IN_DICTIONARY_ACTION_ID, DEFAULT_ACTION_NAME } from "@/utils/constants/custom-action"
+import { getBuiltInDictionaryAction, patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { getUniqueName } from "@/utils/name"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
-import { cn } from "@/utils/styles/utils"
+import { EntityListItem } from "../../../components/entity-list-item"
 import { EntityListRail } from "../../../components/entity-list-rail"
 import { selectedCustomActionIdAtom } from "../atoms"
 import { AddActionDialog } from "./add-action-dialog"
@@ -28,12 +28,16 @@ export function CustomActionCardList() {
   const navigate = useNavigate()
   const [dialogOpen, setDialogOpen] = useState(() => new URLSearchParams(search).has("addAction"))
   const customActions = selectionToolbarConfig.customActions
+  const builtInDictionary = getBuiltInDictionaryAction(selectionToolbarConfig)
 
   useEffect(() => {
     const params = new URLSearchParams(search)
     const actionId = params.get("actionId")
 
-    if (actionId && customActions.some((action) => action.id === actionId)) {
+    if (
+      actionId === BUILT_IN_DICTIONARY_ACTION_ID ||
+      (actionId && customActions.some((action) => action.id === actionId))
+    ) {
       setSelectedCustomActionId(actionId)
     }
 
@@ -109,12 +113,53 @@ export function CustomActionCardList() {
           <SortableList
             list={customActions}
             setList={handleReorder}
-            className="flex flex-col gap-3 pt-2"
+            className="flex flex-col gap-4 pt-2"
             renderItem={(action) => <CustomActionCard action={action} />}
           />
         </EntityListRail>
       )}
+
+      <section className="flex flex-col gap-2 pt-1">
+        <h3 className="px-1 text-xs font-medium text-muted-foreground">
+          {i18n.t(
+            "options.floatingButtonAndToolbar.selectionToolbar.customActions.builtIn" as never,
+          )}
+        </h3>
+        <BuiltInDictionaryCard action={builtInDictionary} />
+      </section>
     </div>
+  )
+}
+
+function BuiltInDictionaryCard({ action }: { action: SelectionToolbarCustomAction }) {
+  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(
+    configFieldsAtomMap.selectionToolbar,
+  )
+  const [selectedCustomActionId, setSelectedCustomActionId] = useAtom(selectedCustomActionIdAtom)
+
+  return (
+    <EntityListItem.Root
+      data-action-id={BUILT_IN_DICTIONARY_ACTION_ID}
+      selected={selectedCustomActionId === action.id}
+      className={action.enabled === false ? "opacity-70" : undefined}
+      onClick={() => setSelectedCustomActionId(action.id)}
+    >
+      <EntityListItem.Content>
+        <EntityListItem.Identity>
+          <Icon icon={action.icon} className="size-4 shrink-0 text-zinc-600 dark:text-zinc-300" />
+          <span className="truncate text-sm font-medium">{action.name}</span>
+        </EntityListItem.Identity>
+        <EntityListItem.Toggle
+          aria-label={action.name}
+          checked={action.enabled !== false}
+          onCheckedChange={(enabled) => {
+            void setSelectionToolbarConfig(
+              patchSelectionToolbarAction(selectionToolbarConfig, action.id, { enabled }),
+            )
+          }}
+        />
+      </EntityListItem.Content>
+    </EntityListItem.Root>
   )
 }
 
@@ -123,38 +168,30 @@ function CustomActionCard({ action }: { action: SelectionToolbarCustomAction }) 
     configFieldsAtomMap.selectionToolbar,
   )
   const [selectedCustomActionId, setSelectedCustomActionId] = useAtom(selectedCustomActionIdAtom)
-  const customActions = selectionToolbarConfig.customActions ?? []
 
   return (
-    <div
-      className={cn(
-        "cursor-pointer rounded-xl border bg-card p-3 transition-colors",
-        selectedCustomActionId === action.id && "border-primary",
-        action.enabled === false && "opacity-70",
-      )}
+    <EntityListItem.Root
+      selected={selectedCustomActionId === action.id}
+      className={action.enabled === false ? "opacity-70" : undefined}
       onClick={() => setSelectedCustomActionId(action.id)}
     >
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2">
+      <EntityListItem.Content>
+        <EntityListItem.Identity>
           <div className="size-4">
             <Icon icon={action.icon} className="size-4 shrink-0 text-zinc-600 dark:text-zinc-300" />
           </div>
           <span className="truncate text-sm font-medium">{action.name}</span>
-        </div>
-        <Switch
+        </EntityListItem.Identity>
+        <EntityListItem.Toggle
+          aria-label={action.name}
           checked={action.enabled !== false}
-          onCheckedChange={(checked) => {
-            void setSelectionToolbarConfig({
-              ...selectionToolbarConfig,
-              customActions: customActions.map((item) =>
-                item.id === action.id ? { ...item, enabled: checked } : item,
-              ),
-            })
+          onCheckedChange={(enabled) => {
+            void setSelectionToolbarConfig(
+              patchSelectionToolbarAction(selectionToolbarConfig, action.id, { enabled }),
+            )
           }}
-          onPointerDown={(event) => event.stopPropagation()}
-          onClick={(event) => event.stopPropagation()}
         />
-      </div>
-    </div>
+      </EntityListItem.Content>
+    </EntityListItem.Root>
   )
 }

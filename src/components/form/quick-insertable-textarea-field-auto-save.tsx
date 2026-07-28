@@ -9,6 +9,7 @@ interface QuickInsertableTextareaFieldAutoSaveProps {
   label: React.ReactNode
   insertCells?: InsertCell[]
   className?: string
+  readOnly?: boolean
 }
 
 export function QuickInsertableTextareaFieldAutoSave({
@@ -16,6 +17,7 @@ export function QuickInsertableTextareaFieldAutoSave({
   label,
   insertCells,
   className,
+  readOnly,
 }: QuickInsertableTextareaFieldAutoSaveProps) {
   const field = useFieldContext<string>()
   const errors = useSelector(field.store, (state) => state.meta.errors)
@@ -33,6 +35,7 @@ export function QuickInsertableTextareaFieldAutoSave({
         aria-invalid={hasError}
         className={className}
         insertCells={insertCells}
+        readOnly={readOnly}
       />
       <FieldError match={hasError}>
         {errors.map((error) => (typeof error === "string" ? error : error?.message)).join(", ")}

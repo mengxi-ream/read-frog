@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/base-ui/label"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { findSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { getOutputSchemaFingerprint } from "@/utils/notebase/pending-save"
 import { trackSaveSuggestionEvent } from "@/utils/save-suggestion/analytics"
@@ -108,9 +109,8 @@ export function SaveSuggestionCard({
     }
 
     const targetActionId = validated.target.actionId
-    const liveAction = selectionToolbar.customActions.find(
-      (action) => action.id === targetActionId && action.enabled !== false,
-    )
+    const candidate = findSelectionToolbarAction(selectionToolbar, targetActionId)
+    const liveAction = candidate && candidate.enabled !== false ? candidate : undefined
     if (
       !liveAction ||
       getOutputSchemaFingerprint(liveAction.outputSchema) !==

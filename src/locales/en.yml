@@ -393,6 +393,7 @@ options:
       customActions:
         title: Custom AI Actions
         description: Add your own structured AI actions for selected text
+        builtIn: Built-in
         add: Add AI Action
         edit: Edit AI Action
         empty: No custom AI actions yet

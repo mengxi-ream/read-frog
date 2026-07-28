@@ -13,7 +13,10 @@ import {
 import { floatingButtonSchema } from "./floating-button"
 import { languageDetectionConfigSchema } from "./language-detection"
 import { isLLMProvider, providersConfigSchema } from "./provider"
-import { selectionToolbarCustomActionsSchema } from "./selection-toolbar"
+import {
+  selectionToolbarBuiltInActionsSchema,
+  selectionToolbarCustomActionsSchema,
+} from "./selection-toolbar"
 import { siteRulesConfigSchema } from "./site-rules"
 import { videoSubtitlesSchema } from "./subtitles"
 import { pageTranslationShortcutSchema, translateConfigSchema } from "./translate"
@@ -44,6 +47,7 @@ const selectionToolbarSchema = z.object({
     translate: selectionToolbarFeatureSchema,
     speak: selectionToolbarSpeakFeatureSchema,
   }),
+  builtInActions: selectionToolbarBuiltInActionsSchema,
   customActions: selectionToolbarCustomActionsSchema,
   saveSuggestion: z.object({
     enabled: z.boolean(),
@@ -180,8 +184,18 @@ export const configSchema = z
       }
     }
 
-    data.selectionToolbar.customActions.forEach((action, index) => {
-      const providerId = action.providerId
+    const actionProviderEntries = [
+      {
+        providerId: data.selectionToolbar.builtInActions.dictionary.providerId,
+        path: ["selectionToolbar", "builtInActions", "dictionary", "providerId"] as const,
+      },
+      ...data.selectionToolbar.customActions.map((action, index) => ({
+        providerId: action.providerId,
+        path: ["selectionToolbar", "customActions", index, "providerId"] as const,
+      })),
+    ]
+
+    actionProviderEntries.forEach(({ providerId, path }) => {
       if (
         !doesProviderSupportsCapability(
           "selectionToolbar.customAction",
@@ -198,7 +212,7 @@ export const configSchema = z
             { requireEnable: true },
           ),
           message: `Invalid provider id "${providerId}".`,
-          path: ["selectionToolbar", "customActions", index, "providerId"],
+          path: [...path],
         })
       }
     })

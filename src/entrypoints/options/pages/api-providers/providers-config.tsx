@@ -8,17 +8,11 @@ import { useTheme } from "@/components/providers/theme-provider"
 import { SortableList } from "@/components/sortable-list"
 import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/base-ui/collapsible"
 import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
-import { Switch } from "@/components/ui/base-ui/switch"
 import { anchoredToastManager } from "@/components/ui/base-ui/toast"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { isAPIProviderConfig } from "@/types/config/provider"
-import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
+import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { providerConfigAtom } from "@/utils/atoms/provider"
 import { getAPIProvidersConfig } from "@/utils/config/helpers"
 import {
@@ -27,18 +21,21 @@ import {
   getFeatureLabelI18nKey,
 } from "@/utils/constants/feature-providers"
 import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
+import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import {
   BUILT_IN_AI_PROVIDER_ID,
   BUILT_IN_AI_PROVIDER_LOGO,
 } from "@/utils/providers/provider-registry"
-import { cn } from "@/utils/styles/utils"
 import { ConfigCard } from "../../components/config-card"
+import { EntityEditor } from "../../components/entity-editor"
 import { EntityEditorLayout } from "../../components/entity-editor-layout"
+import { EntityListItem } from "../../components/entity-list-item"
 import { EntityListRail } from "../../components/entity-list-rail"
 import AddProviderDialog from "./add-provider-dialog"
 import { selectedProviderIdAtom } from "./atoms"
 import { ProviderConfigForm } from "./provider-config-form"
+import { BuiltInProviderEditor, ProviderEditor } from "./provider-editor"
 
 export function ProvidersConfig() {
   const selectedProviderId = useAtomValue(selectedProviderIdAtom)
@@ -147,7 +144,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
   const assignedFeatures = FEATURE_KEYS.filter(
     (key) => FEATURE_PROVIDER_DEFS[key].getProviderId(config) === id,
   )
-  const assignedCustomActions = config.selectionToolbar.customActions.filter(
+  const assignedCustomActions = getSelectionToolbarActions(config.selectionToolbar).filter(
     (action) => action.providerId === id,
   )
   const isLanguageDetectionProvider =
@@ -178,16 +175,12 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
   }
 
   return (
-    <ProviderListCell
-      providerId={id}
-      logo={API_PROVIDER_ITEMS[provider].logo(theme)}
-      name={name}
-      checked={enabled}
+    <EntityListItem.Root
+      data-provider-id={id}
       selected={selectedProviderId === id}
-      onSelect={() => setSelectedProviderId(id)}
-      onCheckedChange={handleProviderEnabledChange}
-      switchRef={switchRef}
-      badges={
+      onClick={() => setSelectedProviderId(id)}
+    >
+      <EntityListItem.Badges>
         <>
           {sponsor?.sponsoring && <SponsorBadge className="absolute -top-2 left-2 text-[10px]" />}
           <FeatureCountBadge count={totalAssigned}>
@@ -202,8 +195,22 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
             ))}
           </FeatureCountBadge>
         </>
-      }
-    />
+      </EntityListItem.Badges>
+      <EntityListItem.Content>
+        <ProviderIcon
+          logo={API_PROVIDER_ITEMS[provider].logo(theme)}
+          name={name}
+          size="base"
+          textClassName="text-sm"
+        />
+        <EntityListItem.Toggle
+          ref={switchRef}
+          aria-label={name}
+          checked={enabled}
+          onCheckedChange={handleProviderEnabledChange}
+        />
+      </EntityListItem.Content>
+    </EntityListItem.Root>
   )
 }
 
@@ -226,62 +233,11 @@ function FeatureCountBadge({ count, children }: { count: number; children: React
   )
 }
 
-interface ProviderListCellProps {
-  providerId: string
-  logo: string
-  name: string
-  checked: boolean
-  selected: boolean
-  disabled?: boolean
-  badges?: React.ReactNode
-  onSelect: () => void
-  onCheckedChange?: (checked: boolean) => void
-  switchRef?: React.Ref<HTMLButtonElement>
-}
-
-function ProviderListCell({
-  providerId,
-  logo,
-  name,
-  checked,
-  selected,
-  disabled,
-  badges,
-  onSelect,
-  onCheckedChange,
-  switchRef,
-}: ProviderListCellProps) {
-  return (
-    <div
-      data-provider-id={providerId}
-      className={cn(
-        "relative cursor-pointer rounded-xl border bg-card p-3",
-        selected && "border-primary",
-      )}
-      onClick={onSelect}
-    >
-      {badges}
-      <div className="flex items-center justify-between gap-2">
-        <ProviderIcon logo={logo} name={name} size="base" textClassName="text-sm" />
-        <Switch
-          ref={switchRef}
-          aria-label={name}
-          checked={checked}
-          disabled={disabled}
-          onCheckedChange={onCheckedChange}
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => e.stopPropagation()}
-        />
-      </div>
-    </div>
-  )
-}
-
 function BuiltInProviderSection() {
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const config = useAtomValue(configAtom)
   const providerName = i18n.t("options.apiProviders.providers.name.builtInAi")
-  const assignedCustomActions = config.selectionToolbar.customActions.filter(
+  const assignedCustomActions = getSelectionToolbarActions(config.selectionToolbar).filter(
     (action) => action.providerId === BUILT_IN_AI_PROVIDER_ID,
   )
 
@@ -290,113 +246,56 @@ function BuiltInProviderSection() {
       <h3 className="px-1 text-xs font-medium text-muted-foreground">
         {i18n.t("options.apiProviders.builtInProvider" as never)}
       </h3>
-      <ProviderListCell
-        providerId={BUILT_IN_AI_PROVIDER_ID}
-        logo={BUILT_IN_AI_PROVIDER_LOGO}
-        name={providerName}
-        checked
-        disabled
+      <EntityListItem.Root
+        data-provider-id={BUILT_IN_AI_PROVIDER_ID}
         selected={selectedProviderId === BUILT_IN_AI_PROVIDER_ID}
-        onSelect={() => setSelectedProviderId(BUILT_IN_AI_PROVIDER_ID)}
-        badges={
+        onClick={() => setSelectedProviderId(BUILT_IN_AI_PROVIDER_ID)}
+      >
+        <EntityListItem.Badges>
           <FeatureCountBadge count={assignedCustomActions.length}>
             {assignedCustomActions.map((action) => (
               <li key={action.id}>{action.name}</li>
             ))}
           </FeatureCountBadge>
-        }
-      />
+        </EntityListItem.Badges>
+        <EntityListItem.Content>
+          <ProviderIcon
+            logo={BUILT_IN_AI_PROVIDER_LOGO}
+            name={providerName}
+            size="base"
+            textClassName="text-sm"
+          />
+          <EntityListItem.Toggle aria-label={providerName} checked disabled />
+        </EntityListItem.Content>
+      </EntityListItem.Root>
     </section>
   )
 }
 
 function BuiltInProviderPanel() {
-  const providerName = i18n.t("options.apiProviders.providers.name.builtInAi")
   const atlasCloudProvider = API_PROVIDER_ITEMS.atlascloud
   const atlasCloudUrl = atlasCloudProvider.sponsor?.referUrl ?? atlasCloudProvider.website
 
   return (
-    <div className="flex-1 rounded-xl border bg-card p-4">
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-4">
-          <ProviderIcon
-            logo={BUILT_IN_AI_PROVIDER_LOGO}
-            name={providerName}
-            size="base"
-            textClassName="font-medium"
-          />
-          <div className="flex flex-col items-start gap-3">
-            <p className="text-sm leading-6 text-muted-foreground">
-              {i18n.t("options.apiProviders.providers.attribution.builtInAi" as never)}
-            </p>
-            <Button
-              variant="brand"
-              render={<a href={atlasCloudUrl} target="_blank" rel="noreferrer" />}
-            >
-              {i18n.t("options.apiProviders.sponsorCta")}
-            </Button>
+    <BuiltInProviderEditor.Provider>
+      <EntityEditor.Root>
+        <EntityEditor.Body className="gap-6">
+          <div className="flex flex-col gap-4">
+            <ProviderEditor.Identity />
+            <div className="flex flex-col items-start gap-3">
+              <ProviderEditor.Attribution>
+                {i18n.t("options.apiProviders.providers.attribution.builtInAi" as never)}
+              </ProviderEditor.Attribution>
+              <ProviderEditor.SponsorCTA href={atlasCloudUrl}>
+                {i18n.t("options.apiProviders.sponsorCta")}
+              </ProviderEditor.SponsorCTA>
+            </div>
           </div>
-        </div>
-        <BuiltInFeatureProviderSection />
-      </div>
-    </div>
-  )
-}
-
-function BuiltInFeatureProviderSection() {
-  const config = useAtomValue(configAtom)
-  const setConfig = useSetAtom(writeConfigAtom)
-  const [isOpen, setIsOpen] = useState(true)
-  const customActions = config.selectionToolbar.customActions
-
-  if (customActions.length === 0) {
-    return null
-  }
-
-  return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger className="flex cursor-pointer items-center gap-2 py-2 text-sm text-muted-foreground hover:text-foreground">
-        <Icon
-          icon="tabler:chevron-right"
-          className={cn("size-4 transition-transform duration-200", isOpen && "rotate-90")}
-        />
-        <span>{i18n.t("options.apiProviders.form.featureProviders")}</span>
-      </CollapsibleTrigger>
-      <CollapsibleContent>
-        <div className="flex flex-col gap-3">
-          {customActions.map((action) => {
-            const isAssigned = action.providerId === BUILT_IN_AI_PROVIDER_ID
-            return (
-              <div key={action.id} className="flex items-center gap-2">
-                <Switch
-                  checked={isAssigned}
-                  disabled={isAssigned}
-                  onCheckedChange={(checked) => {
-                    if (!checked) {
-                      return
-                    }
-
-                    const updatedCustomActions = config.selectionToolbar.customActions.map(
-                      (currentAction) =>
-                        currentAction.id === action.id
-                          ? { ...currentAction, providerId: BUILT_IN_AI_PROVIDER_ID }
-                          : currentAction,
-                    )
-
-                    void setConfig({
-                      selectionToolbar: {
-                        ...config.selectionToolbar,
-                        customActions: updatedCustomActions,
-                      },
-                    })
-                  }}
-                />
-                <span className="text-sm">{action.name}</span>
-              </div>
-            )
-          })}
-        </div>
-      </CollapsibleContent>
-    </Collapsible>
+          <ProviderEditor.Assignments defaultOpen>
+            <ProviderEditor.CustomActionAssignments />
+          </ProviderEditor.Assignments>
+        </EntityEditor.Body>
+      </EntityEditor.Root>
+    </BuiltInProviderEditor.Provider>
   )
 }

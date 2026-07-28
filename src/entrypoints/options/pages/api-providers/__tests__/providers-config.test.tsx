@@ -4,6 +4,7 @@ import type { ReactNode } from "react"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { ProvidersConfig } from "@/entrypoints/options/pages/api-providers/providers-config"
+import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
 
 const {
   anchoredToastAddMock,
@@ -12,6 +13,7 @@ const {
   providersAtom,
   selectedProviderIdAtom,
   setProviderConfigMock,
+  testState,
   writeConfigAtom,
 } = vi.hoisted(() => ({
   anchoredToastAddMock: vi.fn<(options: unknown) => void>(),
@@ -20,6 +22,7 @@ const {
   providersAtom: {},
   selectedProviderIdAtom: {},
   setProviderConfigMock: vi.fn<(value: unknown) => void>(),
+  testState: { selectedProviderId: "provider-1" },
   writeConfigAtom: {},
 }))
 
@@ -39,11 +42,16 @@ vi.mock("jotai", () => ({
   useAtom: (atom: object) => {
     if (atom === providersAtom) return [[providerConfig], vi.fn<(value: unknown) => void>()]
     if (atom === selectedProviderIdAtom)
-      return [providerConfig.id, vi.fn<(value: unknown) => void>()]
+      return [
+        testState.selectedProviderId,
+        (value: string) => {
+          testState.selectedProviderId = value
+        },
+      ]
     return [undefined, vi.fn<(value: unknown) => void>()]
   },
   useAtomValue: (atom: object) => {
-    if (atom === selectedProviderIdAtom) return providerConfig.id
+    if (atom === selectedProviderIdAtom) return testState.selectedProviderId
     if (atom === configAtom) return config
     return undefined
   },
@@ -146,6 +154,7 @@ describe("ProvidersConfig", () => {
   beforeEach(() => {
     anchoredToastAddMock.mockReset()
     setProviderConfigMock.mockReset()
+    testState.selectedProviderId = providerConfig.id
   })
 
   it("anchors an in-use disable error to the corresponding provider switch", () => {
@@ -161,5 +170,18 @@ describe("ProvidersConfig", () => {
       title: "options.apiProviders.form.providerInUseCannotDisable:Long Provider Name|1",
       type: "error",
     })
+  })
+
+  it("renders the built-in provider composition without CRUD actions", () => {
+    testState.selectedProviderId = BUILT_IN_AI_PROVIDER_ID
+
+    render(<ProvidersConfig />)
+
+    expect(
+      screen.getByText("options.apiProviders.providers.attribution.builtInAi"),
+    ).toBeInTheDocument()
+    expect(screen.getByText("options.apiProviders.sponsorCta")).toBeInTheDocument()
+    expect(screen.queryByText("options.apiProviders.form.duplicate")).not.toBeInTheDocument()
+    expect(screen.queryByText("options.apiProviders.form.delete")).not.toBeInTheDocument()
   })
 })

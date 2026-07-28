@@ -13,6 +13,7 @@ import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import { buildContextSnapshot, createRangeSnapshot, normalizeSelectedText } from "../../utils"
 import { setSelectionStateAtom } from "../atoms"
 import { SelectionToolbarCustomActionButtons } from "../custom-action-button"
@@ -31,6 +32,7 @@ const onMessageMock = vi.fn<(...args: any[]) => any>()
 const hotkeyRegisterMock = vi.fn<(...args: any[]) => any>()
 const hotkeyUnregisterMock = vi.fn<(...args: any[]) => any>()
 const originalGetSelection = window.getSelection
+const DEFAULT_DICTIONARY_ACTION = getBuiltInDictionaryAction(DEFAULT_CONFIG.selectionToolbar)
 
 vi.mock("@tanstack/hotkeys", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/hotkeys")>()
@@ -1274,10 +1276,7 @@ describe("selection toolbar requests", () => {
     setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
     renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
 
-    const action = DEFAULT_CONFIG.selectionToolbar.customActions[0]
-    if (!action) {
-      throw new Error("Default custom action is missing")
-    }
+    const action = DEFAULT_DICTIONARY_ACTION
 
     act(() => {
       paragraph.dispatchEvent(
@@ -1338,10 +1337,7 @@ describe("selection toolbar requests", () => {
     setSelectionState(store, { text: "Selected text" })
     renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
 
-    const action = DEFAULT_CONFIG.selectionToolbar.customActions[0]
-    if (!action) {
-      throw new Error("Default custom action is missing")
-    }
+    const action = DEFAULT_DICTIONARY_ACTION
 
     fireEvent.click(screen.getByRole("button", { name: action.name }))
 
@@ -1368,10 +1364,7 @@ describe("selection toolbar requests", () => {
       createStructuredObjectSnapshot({ summary: "done" }),
     )
 
-    const actionName = DEFAULT_CONFIG.selectionToolbar.customActions[0]?.name
-    if (!actionName) {
-      throw new Error("Default custom action is missing")
-    }
+    const actionName = DEFAULT_DICTIONARY_ACTION.name
 
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
@@ -1397,10 +1390,7 @@ describe("selection toolbar requests", () => {
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
 
-    const action = DEFAULT_CONFIG.selectionToolbar.customActions[0]
-    if (!action) {
-      throw new Error("Default custom action is missing")
-    }
+    const action = DEFAULT_DICTIONARY_ACTION
 
     const handler = getRegisteredMessageHandler("openSelectionCustomActionFromContextMenu")
 
@@ -1446,10 +1436,7 @@ describe("selection toolbar requests", () => {
     setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
     renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
 
-    const actionName = DEFAULT_CONFIG.selectionToolbar.customActions[0]?.name
-    if (!actionName) {
-      throw new Error("Default custom action is missing")
-    }
+    const actionName = DEFAULT_DICTIONARY_ACTION.name
 
     fireEvent.click(screen.getByRole("button", { name: actionName }))
 
@@ -1468,13 +1455,13 @@ describe("selection toolbar requests", () => {
     expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
 
     const updatedConfig = cloneConfig(store.get(configAtom))
-    const currentProviderId = updatedConfig.selectionToolbar.customActions[0]?.providerId ?? ""
+    const currentProviderId = updatedConfig.selectionToolbar.builtInActions.dictionary.providerId
     const nextProviderId = findAlternateLLMProviderId(updatedConfig, currentProviderId)
     if (!nextProviderId) {
       throw new Error("No alternate LLM provider available for custom action test")
     }
-    updatedConfig.selectionToolbar.customActions[0] = {
-      ...updatedConfig.selectionToolbar.customActions[0]!,
+    updatedConfig.selectionToolbar.builtInActions.dictionary = {
+      ...updatedConfig.selectionToolbar.builtInActions.dictionary,
       providerId: nextProviderId,
     }
 
@@ -1507,10 +1494,7 @@ describe("selection toolbar requests", () => {
     setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
     renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
 
-    const actionName = DEFAULT_CONFIG.selectionToolbar.customActions[0]?.name
-    if (!actionName) {
-      throw new Error("Default custom action is missing")
-    }
+    const actionName = DEFAULT_DICTIONARY_ACTION.name
 
     fireEvent.click(screen.getByRole("button", { name: actionName }))
 
@@ -1566,10 +1550,7 @@ describe("selection toolbar requests", () => {
     setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
     renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
 
-    const actionName = DEFAULT_CONFIG.selectionToolbar.customActions[0]?.name
-    if (!actionName) {
-      throw new Error("Default custom action is missing")
-    }
+    const actionName = DEFAULT_DICTIONARY_ACTION.name
 
     fireEvent.click(screen.getByRole("button", { name: actionName }))
 
@@ -1622,10 +1603,7 @@ describe("selection toolbar requests", () => {
     setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
     renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
 
-    const action = DEFAULT_CONFIG.selectionToolbar.customActions[0]
-    if (!action) {
-      throw new Error("Default custom action is missing")
-    }
+    const action = DEFAULT_DICTIONARY_ACTION
     const nextProviderId = findAlternateLLMProviderId(store.get(configAtom), action.providerId)
     if (!nextProviderId) {
       throw new Error("No alternate LLM provider available for custom action provider switch test")
@@ -1665,7 +1643,9 @@ describe("selection toolbar requests", () => {
       expect(screen.getByText('{"summary":"provider switched"}')).toBeInTheDocument()
     })
     expect(screen.queryByRole("alert")).toBeNull()
-    expect(store.get(configAtom).selectionToolbar.customActions[0]?.providerId).toBe(nextProviderId)
+    expect(store.get(configAtom).selectionToolbar.builtInActions.dictionary.providerId).toBe(
+      nextProviderId,
+    )
   })
 
   it("shows a precheck alert when a custom action has no selected text", async () => {
@@ -1678,10 +1658,7 @@ describe("selection toolbar requests", () => {
     setSelectionState(store, { text: "   ", range: createRangeFor(paragraph) })
     renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
 
-    const actionName = DEFAULT_CONFIG.selectionToolbar.customActions[0]?.name
-    if (!actionName) {
-      throw new Error("Default custom action is missing")
-    }
+    const actionName = DEFAULT_DICTIONARY_ACTION.name
 
     fireEvent.click(screen.getByRole("button", { name: actionName }))
 
@@ -1701,8 +1678,8 @@ describe("selection toolbar requests", () => {
         feature: "custom_ai_action",
         surface: "selection_toolbar",
         outcome: "failure",
-        action_id: DEFAULT_CONFIG.selectionToolbar.customActions[0]?.id,
-        action_name: DEFAULT_CONFIG.selectionToolbar.customActions[0]?.name,
+        action_id: DEFAULT_DICTIONARY_ACTION.id,
+        action_name: DEFAULT_DICTIONARY_ACTION.name,
       }),
     )
   })
@@ -1721,10 +1698,7 @@ describe("selection toolbar requests", () => {
     setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
     renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
 
-    const actionName = DEFAULT_CONFIG.selectionToolbar.customActions[0]?.name
-    if (!actionName) {
-      throw new Error("Default custom action is missing")
-    }
+    const actionName = DEFAULT_DICTIONARY_ACTION.name
 
     fireEvent.click(screen.getByRole("button", { name: actionName }))
 

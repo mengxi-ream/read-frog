@@ -9,6 +9,7 @@ import {
   parseTabIdFromStorageKey,
   TRANSLATION_STATE_KEY_PREFIX,
 } from "@/utils/constants/storage-keys"
+import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { ensureInitializedConfig } from "./config"
@@ -96,7 +97,7 @@ async function updateContextMenuItems(config: Config) {
   await browser.contextMenus.removeAll()
 
   const { enabled: translateEnabled } = config.contextMenu
-  const enabledCustomActions = config.selectionToolbar.customActions.filter(
+  const enabledCustomActions = getSelectionToolbarActions(config.selectionToolbar).filter(
     (action) => action.enabled !== false,
   )
 

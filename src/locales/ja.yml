@@ -392,6 +392,7 @@ options:
       customActions:
         title: カスタム AI アクション
         description: 選択テキスト向けに独自の構造化 AI アクションを追加
+        builtIn: 組み込み
         add: AI アクションを追加
         edit: AI アクションを編集
         empty: カスタム AI アクションはまだありません

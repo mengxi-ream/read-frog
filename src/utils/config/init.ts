@@ -11,7 +11,18 @@ import {
   DEFAULT_CONFIG,
 } from "../constants/config"
 import { logger } from "../logger"
+import {
+  clearPendingNotebaseSave,
+  getPendingNotebaseSave,
+  isPendingNotebaseSaveExpired,
+  rebindPendingNotebaseSaveToMigratedDictionary,
+  setPendingNotebaseSave,
+} from "../notebase/pending-save"
 import { runMigration } from "./migration"
+import {
+  getPendingDictionaryRekeyedActionId,
+  migrateWithPendingDictionarySave,
+} from "./migration-scripts/v087-to-v088"
 
 export interface InitializeConfigResult {
   /**
@@ -27,10 +38,26 @@ export interface InitializeConfigResult {
  * @returns The extension config
  */
 export async function initializeConfig(): Promise<InitializeConfigResult> {
-  const [storedConfig, configMeta] = await Promise.all([
+  const [storedConfig, configMeta, storedPendingNotebaseSave] = await Promise.all([
     storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`),
     storage.getMeta<ConfigMeta>(`local:${CONFIG_STORAGE_KEY}`),
+    getPendingNotebaseSave().catch((error) => {
+      logger.warn("Failed to read pending Notebase save during config initialization", error)
+      return null
+    }),
   ])
+  let pendingNotebaseSave = storedPendingNotebaseSave
+  if (pendingNotebaseSave && isPendingNotebaseSaveExpired(pendingNotebaseSave)) {
+    pendingNotebaseSave = null
+    try {
+      await clearPendingNotebaseSave()
+    } catch (error) {
+      logger.warn(
+        "Failed to clear expired pending Notebase save during config initialization",
+        error,
+      )
+    }
+  }
 
   let config: Config
   let currentVersion: number
@@ -38,8 +65,7 @@ export async function initializeConfig(): Promise<InitializeConfigResult> {
   let isFreshInstall = false
 
   if (!storedConfig) {
-    // Fresh install: resolve the default custom-action strings in the browser locale
-    // ("auto") before they are persisted and frozen.
+    // Initialize locale before building defaults used by this browser context.
     await initI18n(DEFAULT_CONFIG.uiLanguage)
     config = buildFreshDefaultConfig()
     currentVersion = CONFIG_SCHEMA_VERSION
@@ -53,7 +79,24 @@ export async function initializeConfig(): Promise<InitializeConfigResult> {
   while (currentVersion < CONFIG_SCHEMA_VERSION) {
     const nextVersion = currentVersion + 1
     try {
-      config = await runMigration(nextVersion, config)
+      if (nextVersion === 88 && pendingNotebaseSave) {
+        const rekeyedActionId = getPendingDictionaryRekeyedActionId(config, pendingNotebaseSave)
+        config = migrateWithPendingDictionarySave(config, pendingNotebaseSave)
+        const reboundPendingSave = rebindPendingNotebaseSaveToMigratedDictionary(
+          config,
+          pendingNotebaseSave,
+          rekeyedActionId ?? undefined,
+        )
+        if (reboundPendingSave !== pendingNotebaseSave) {
+          try {
+            await setPendingNotebaseSave(reboundPendingSave)
+          } catch (error) {
+            logger.warn("Failed to rebind pending Notebase save after config migration", error)
+          }
+        }
+      } else {
+        config = await runMigration(nextVersion, config)
+      }
       didConfigChange = true
       currentVersion = nextVersion
     } catch (error) {

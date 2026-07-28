@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { createDefaultDictionaryAction, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { configSchema } from "../config"
 
 function getIssuePaths(input: unknown) {
@@ -29,6 +29,10 @@ describe("config provider enabled validation", () => {
   })
 
   it("fails when a custom action uses a disabled provider", () => {
+    const action = createDefaultDictionaryAction()
+    if (!action) {
+      throw new Error("Dictionary definition missing")
+    }
     const providersConfig = DEFAULT_CONFIG.providersConfig.map((provider) => {
       if (provider.id === "openai-default") {
         return { ...provider, enabled: false }
@@ -41,25 +45,44 @@ describe("config provider enabled validation", () => {
       providersConfig,
       selectionToolbar: {
         ...DEFAULT_CONFIG.selectionToolbar,
-        customActions: DEFAULT_CONFIG.selectionToolbar.customActions.map((action) => ({
-          ...action,
-          providerId: "openai-default",
-        })),
+        customActions: [{ ...action, id: "custom-action", providerId: "openai-default" }],
       },
     })
 
     expect(issuePaths).toContain("selectionToolbar.customActions.0.providerId")
   })
 
+  it("fails when the built-in Dictionary uses a disabled provider", () => {
+    const providersConfig = DEFAULT_CONFIG.providersConfig.map((provider) =>
+      provider.id === "openai-default" ? { ...provider, enabled: false } : provider,
+    )
+    const issuePaths = getIssuePaths({
+      ...DEFAULT_CONFIG,
+      providersConfig,
+      selectionToolbar: {
+        ...DEFAULT_CONFIG.selectionToolbar,
+        builtInActions: {
+          dictionary: {
+            ...DEFAULT_CONFIG.selectionToolbar.builtInActions.dictionary,
+            providerId: "openai-default",
+          },
+        },
+      },
+    })
+
+    expect(issuePaths).toContain("selectionToolbar.builtInActions.dictionary.providerId")
+  })
+
   it("allows built-in AI for custom actions", () => {
+    const action = createDefaultDictionaryAction()
+    if (!action) {
+      throw new Error("Dictionary definition missing")
+    }
     const result = configSchema.safeParse({
       ...DEFAULT_CONFIG,
       selectionToolbar: {
         ...DEFAULT_CONFIG.selectionToolbar,
-        customActions: DEFAULT_CONFIG.selectionToolbar.customActions.map((action) => ({
-          ...action,
-          providerId: "read-frog-free-ai",
-        })),
+        customActions: [{ ...action, id: "custom-action", providerId: "read-frog-free-ai" }],
       },
     })
 

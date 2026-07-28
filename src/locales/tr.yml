@@ -392,6 +392,7 @@ options:
       customActions:
         title: Özel AI Eylemleri
         description: Seçilen metin için kendi yapılandırılmış AI eylemlerinizi ekleyin
+        builtIn: Yerleşik
         add: AI Eylemi Ekle
         edit: AI Eylemini Düzenle
         empty: Henüz özel AI eylemi yok

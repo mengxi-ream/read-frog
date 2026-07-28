@@ -2,6 +2,7 @@ import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import {
   applyCreatedNotebaseConnectionToConfig,
   buildNotebaseCreateInputFromPending,
@@ -10,6 +11,7 @@ import {
   doesSchemaMatchPendingColumns,
   getNotebaseDetailUrl,
   getOutputSchemaFingerprint,
+  rebindPendingNotebaseSaveToMigratedDictionary,
   validateStillCanSavePendingCreateNotebaseSave,
 } from "../notebase/pending-save"
 
@@ -201,6 +203,104 @@ describe("notebase pending save", () => {
           notebaseColumnNameSnapshot: "score",
         },
       ],
+    })
+  })
+
+  it("writes a notebase connection into built-in Dictionary state", () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    const action = getBuiltInDictionaryAction(config.selectionToolbar)
+    const pending = createPendingNotebaseSave(action, [{ Term: "frog" }], 1_000)
+    const connectedAccount = {
+      id: "user-1",
+      name: "Reader",
+      email: "reader@example.com",
+      image: null,
+    }
+
+    const result = applyCreatedNotebaseConnectionToConfig(config, pending, { connectedAccount })
+
+    expect(result.status).toBe("valid")
+    expect(
+      result.config?.selectionToolbar.builtInActions.dictionary.notebaseConnection,
+    ).toMatchObject({
+      notebaseId: pending.notebaseId,
+      connectedAccount,
+    })
+    expect(result.config?.selectionToolbar.customActions).toEqual([])
+  })
+
+  it("rebinds a legacy Dictionary pending save to its uniquely matching migrated custom action", () => {
+    const legacyAction = {
+      ...createAction(),
+      id: "default-dictionary",
+      outputSchema: [
+        {
+          id: "legacy-term",
+          name: "Term",
+          type: "string" as const,
+          description: "",
+          speaking: true,
+        },
+      ],
+    }
+    const pending = createPendingNotebaseSave(legacyAction, [{ Term: "frog" }], 1_000)
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.selectionToolbar.customActions = [
+      {
+        ...legacyAction,
+        id: "migrated-default-dictionary",
+      },
+    ]
+
+    const rebound = rebindPendingNotebaseSaveToMigratedDictionary(config, pending)
+    const validation = validateStillCanSavePendingCreateNotebaseSave(config, rebound)
+
+    expect(rebound.actionId).toBe("migrated-default-dictionary")
+    expect(validation).toMatchObject({
+      status: "valid",
+      action: { id: "migrated-default-dictionary" },
+    })
+  })
+
+  it("rebinds to the deterministic migrated action when another custom action has the same schema", () => {
+    const legacyAction = {
+      ...createAction(),
+      id: "default-dictionary",
+    }
+    const pending = createPendingNotebaseSave(
+      legacyAction,
+      [{ summary: "A short summary", score: 9 }],
+      1_000,
+    )
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.selectionToolbar.customActions = [
+      {
+        ...legacyAction,
+        id: "dictionary-copy",
+        name: "Dictionary copy",
+      },
+      {
+        ...legacyAction,
+        id: "migrated-default-dictionary",
+      },
+    ]
+
+    const ambiguousRebind = rebindPendingNotebaseSaveToMigratedDictionary(config, pending)
+    const rebound = rebindPendingNotebaseSaveToMigratedDictionary(
+      config,
+      pending,
+      "migrated-default-dictionary",
+    )
+
+    expect(ambiguousRebind).toBe(pending)
+    expect(validateStillCanSavePendingCreateNotebaseSave(config, pending)).toMatchObject({
+      status: "valid",
+      action: { id: "migrated-default-dictionary" },
+    })
+    expect(rebound.actionId).toBe("migrated-default-dictionary")
+    expect(validateStillCanSavePendingCreateNotebaseSave(config, rebound)).toMatchObject({
+      status: "valid",
+      action: { id: "migrated-default-dictionary" },
     })
   })
 
