@@ -62,6 +62,7 @@ export async function bootstrapHostContent(
       logger.info("URL changed from", from, "to", to)
       if (manager.isActive) {
         if (areSamePageTranslationOrigin(from, to)) {
+          // Keep wrappers mounted; MutationObserver handles the new DOM.
           await manager.restart()
         } else {
           manager.stop()

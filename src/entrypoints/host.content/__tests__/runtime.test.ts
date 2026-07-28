@@ -147,7 +147,7 @@ describe("bootstrapHostContent URL changes", () => {
     })
   })
 
-  it("refreshes active page translation on same-origin SPA navigation without disabling the session", async () => {
+  it("soft-refreshes active page translation on same-origin SPA navigation without disabling the session", async () => {
     mockSendMessage.mockImplementation((name: string) => {
       if (name === "getEnablePageTranslationFromContentScript") return Promise.resolve(true)
 

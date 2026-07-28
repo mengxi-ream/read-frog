@@ -96,8 +96,9 @@ interface IPageTranslationManager {
   stop: () => void
 
   /**
-   * Refreshes translation after an in-document route change without disabling
-   * the tab-level page translation session.
+   * Soft-refresh after a same-origin in-document route change: keep the live
+   * translation session and wrappers (MutationObserver picks up new DOM), and
+   * only re-apply path-scoped site CSS for the new URL.
    */
   restart: () => Promise<void>
 
@@ -299,7 +300,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       try {
         await initialWalk
       } finally {
-        // restart() may already have installed a newer walk's promise.
+        // A newer start() may already have installed a newer walk's promise.
         if (this.initialWalkDone === initialWalk) {
           this.initialWalkDone = null
         }
@@ -334,8 +335,18 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
 
-    this.stopInternal({ notify: false })
-    await this.start()
+    // Do not tear down wrappers / observers here. A full stop→start flash is
+    // what users see as "translations disappear then reappear" on SPA clicks.
+    // New route content is walked via the existing MutationObserver; we only
+    // refresh path-scoped injected CSS that may differ by URL.
+    const config = await getLocalConfig()
+    if (!config || !this.isPageTranslating) return
+
+    removeSiteRuleCSS(document)
+    const siteRule = getEffectiveSiteRule(config, window.location.href)
+    if (siteRule.injectedCss) {
+      void ensureSiteRuleCSS(document, siteRule.injectedCss)
+    }
   }
 
   private stopInternal({ notify }: { notify: boolean }): void {
