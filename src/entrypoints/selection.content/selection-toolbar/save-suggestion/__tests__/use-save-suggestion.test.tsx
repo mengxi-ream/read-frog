@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import type { ReactNode } from "react"
 import type { LLMProviderConfig } from "@/types/config/provider"
+import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
@@ -13,6 +14,7 @@ const validateSaveSuggestionMock = vi.fn<(...args: any[]) => any>()
 const isAttemptAllowedMock = vi.fn<(...args: any[]) => any>()
 const recordFailureMock = vi.fn<(...args: any[]) => any>()
 const recordSuccessMock = vi.fn<(...args: any[]) => any>()
+const getOrCreateWebPageContextMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("@/utils/content-script/background-stream-client", () => ({
   streamBackgroundNoteSuggestion: (...args: any[]) => streamBackgroundNoteSuggestionMock(...args),
@@ -25,6 +27,9 @@ vi.mock("@/utils/save-suggestion/provider-cooldown", () => ({
   isSaveSuggestionAttemptAllowed: (...args: any[]) => isAttemptAllowedMock(...args),
   recordSaveSuggestionFailure: (...args: any[]) => recordFailureMock(...args),
   recordSaveSuggestionSuccess: (...args: any[]) => recordSuccessMock(...args),
+}))
+vi.mock("@/utils/host/translate/webpage-context", () => ({
+  getOrCreateWebPageContext: (...args: any[]) => getOrCreateWebPageContextMock(...args),
 }))
 
 const { useSaveSuggestion } = await import("../use-save-suggestion")
@@ -42,7 +47,7 @@ const LLM_PROVIDER_CONFIG = DEFAULT_CONFIG.providersConfig.find(
 
 const VALID_ENVELOPE = {
   output: {
-    action: { createNewDictionaryAction: false, targetActionId: "default-dictionary" },
+    summaryFieldName: null,
     notes: [{ fields: [{ name: "Word", value: "ephemeral" }] }],
   },
   thinking: { status: "complete", text: "" },
@@ -50,14 +55,13 @@ const VALID_ENVELOPE = {
 
 const EMPTY_NOTES_ENVELOPE = {
   output: {
-    action: { createNewDictionaryAction: false, targetActionId: null },
+    summaryFieldName: null,
     notes: [],
   },
   thinking: { status: "complete", text: "" },
 }
 
 const VALIDATED_SUGGESTION = {
-  target: { kind: "existing", actionId: "default-dictionary" },
   notes: [{ term: "ephemeral" }],
   summaryFieldName: null,
 }
@@ -78,6 +82,12 @@ describe("useSaveSuggestion", () => {
     isAttemptAllowedMock.mockResolvedValue(true)
     recordFailureMock.mockResolvedValue(undefined)
     recordSuccessMock.mockResolvedValue(undefined)
+    getOrCreateWebPageContextMock.mockResolvedValue({
+      url: "https://example.com/article",
+      webTitle: "Article",
+      webDescription: "",
+      webContent: "Cached article body",
+    })
     streamBackgroundNoteSuggestionMock.mockResolvedValue(VALID_ENVELOPE)
     validateSaveSuggestionMock.mockReturnValue(VALIDATED_SUGGESTION)
   })
@@ -148,6 +158,69 @@ describe("useSaveSuggestion", () => {
     )
     expect(streamBackgroundNoteSuggestionMock).not.toHaveBeenCalled()
     expect(result.current.suggestion).toBeNull()
+  })
+
+  it("uses the configured action snapshot even when the action is disabled", async () => {
+    const store = createStore()
+    const config = structuredClone(DEFAULT_CONFIG)
+    config.selectionToolbar.builtInActions.dictionary.enabled = false
+    config.selectionToolbar.customActions = []
+    store.set(configAtom, config)
+    const { result } = renderHook(() => useSaveSuggestion(), { wrapper: wrapper(store) })
+
+    act(() => result.current.maybeFire(fireInput("1:lang:0")))
+    await waitFor(() => expect(result.current.suggestion).not.toBeNull())
+
+    expect(isAttemptAllowedMock).toHaveBeenCalledTimes(1)
+    expect(streamBackgroundNoteSuggestionMock).toHaveBeenCalledTimes(1)
+    expect(result.current.suggestion?.actionSnapshot).toMatchObject({
+      id: "default-dictionary",
+      enabled: false,
+    })
+  })
+
+  it("uses only the action configured for Save Suggestion", async () => {
+    const store = createStore()
+    const config = structuredClone(DEFAULT_CONFIG)
+    const customAction: SelectionToolbarCustomAction = {
+      id: "custom-dictionary",
+      name: "Custom Dictionary",
+      enabled: true,
+      icon: "tabler:book-2",
+      providerId: LLM_PROVIDER_CONFIG.id,
+      systemPrompt: "system",
+      prompt: "prompt",
+      outputSchema: [
+        {
+          id: "custom-term",
+          name: "Word",
+          type: "string",
+          description: "The vocabulary term",
+          speaking: true,
+        },
+      ],
+    }
+    config.selectionToolbar.builtInActions.dictionary.enabled = false
+    config.selectionToolbar.customActions = [customAction]
+    config.selectionToolbar.saveSuggestion.actionId = customAction.id
+    store.set(configAtom, config)
+    const { result } = renderHook(() => useSaveSuggestion(), { wrapper: wrapper(store) })
+
+    act(() => result.current.maybeFire(fireInput("disabled-built-in:lang:0")))
+    await waitFor(() => expect(result.current.suggestion).not.toBeNull())
+
+    const request = streamBackgroundNoteSuggestionMock.mock.calls[0]![0]
+    expect(request.instructions).toContain("## Selected Action System Prompt\nsystem")
+    expect(request.instructions).not.toContain("createNewDictionaryAction")
+    expect(request.instructions).not.toContain("targetActionId")
+    expect(request.prompt).toContain("## Selected Action User Prompt\nprompt")
+    expect(request.prompt).toContain('- key: "Word"')
+    expect(request.prompt).toContain("Cached article body")
+    expect(validateSaveSuggestionMock).toHaveBeenCalledWith({
+      envelope: expect.any(Object),
+      action: customAction,
+    })
+    expect(result.current.suggestion?.actionSnapshot.id).toBe(customAction.id)
   })
 
   it("records a failure when the request rejects", async () => {

@@ -19,6 +19,7 @@ import { browser } from "#imports"
 import { env } from "@/env"
 import { backgroundAuthClient } from "@/utils/auth/background-auth-client"
 import { getLocalConfig, setLocalConfig } from "@/utils/config/storage"
+import { patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { logger } from "@/utils/logger"
 import {
   classifyConnectedNotebaseOwnership,
@@ -49,6 +50,7 @@ import { backgroundOrpcClient } from "@/utils/orpc/background-client"
 import { completeGuideDictionaryNotebaseAndNotify } from "./new-user-guide"
 
 interface PendingNotebaseSaveProcessorDeps {
+  waitUntilReady: () => Promise<void>
   getPendingNotebaseSave: () => Promise<PendingNotebaseSave | null>
   clearPendingNotebaseSave: () => Promise<void>
   getConfig: () => Promise<Config | null>
@@ -362,12 +364,9 @@ function applyRefreshedConnectedConnectionToConfig(
 ) {
   return {
     ...config,
-    selectionToolbar: {
-      ...config.selectionToolbar,
-      customActions: config.selectionToolbar.customActions.map((action) =>
-        action.id === actionId ? { ...action, notebaseConnection: refreshedConnection } : action,
-      ),
-    },
+    selectionToolbar: patchSelectionToolbarAction(config.selectionToolbar, actionId, {
+      notebaseConnection: refreshedConnection,
+    }),
   }
 }
 
@@ -686,6 +685,8 @@ export function createNotebasePendingSaveProcessor(deps: PendingNotebaseSaveProc
 
     isProcessing = true
     try {
+      await deps.waitUntilReady()
+
       const pendingNotebaseSave = await deps.getPendingNotebaseSave()
       if (!pendingNotebaseSave) {
         return
@@ -705,8 +706,9 @@ export function createNotebasePendingSaveProcessor(deps: PendingNotebaseSaveProc
   }
 }
 
-export function setupNotebasePendingSaveProcessor() {
+export function setupNotebasePendingSaveProcessor(waitUntilReady: () => Promise<void>) {
   const processPendingNotebaseSave = createNotebasePendingSaveProcessor({
+    waitUntilReady,
     getPendingNotebaseSave,
     clearPendingNotebaseSave,
     getConfig: getLocalConfig,

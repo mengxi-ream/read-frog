@@ -24,8 +24,8 @@ describe("dEFAULT_CONFIG", () => {
     })
     vi.resetModules()
 
-    const { DEFAULT_CONFIG } = await import("../config")
-    const defaultDictionaryAction = DEFAULT_CONFIG.selectionToolbar.customActions[0]
+    const { createDefaultDictionaryAction, DEFAULT_CONFIG } = await import("../config")
+    const defaultDictionaryAction = createDefaultDictionaryAction()
 
     expect(defaultDictionaryAction).toEqual(
       expect.objectContaining({
@@ -40,7 +40,7 @@ describe("dEFAULT_CONFIG", () => {
         (field) => typeof field.id === "string" && field.id.length > 0,
       ),
     ).toBe(true)
-    expect(getRandomValues).toHaveBeenCalled()
+    expect(DEFAULT_CONFIG.selectionToolbar.customActions).toEqual([])
   })
 
   it("seeds default translation providers and the default LLM providers in the default providers config", async () => {
@@ -90,8 +90,9 @@ describe("dEFAULT_CONFIG", () => {
     )
   })
 
-  it("rebuilds schema-valid default custom actions for persistence", async () => {
-    const { buildFreshDefaultConfig, DEFAULT_CONFIG } = await import("../config")
+  it("rebuilds schema-valid built-in action state for persistence", async () => {
+    const { buildFreshDefaultConfig, createDefaultDictionaryAction, DEFAULT_CONFIG } =
+      await import("../config")
     const { configSchema } = await import("@/types/config/config")
 
     const config = buildFreshDefaultConfig()
@@ -100,7 +101,12 @@ describe("dEFAULT_CONFIG", () => {
     expect(config.selectionToolbar.customActions).not.toBe(
       DEFAULT_CONFIG.selectionToolbar.customActions,
     )
-    expect(config.selectionToolbar.customActions[0]).toEqual(
+    expect(config.selectionToolbar.builtInActions.dictionary).toEqual({
+      enabled: true,
+      providerId: "read-frog-free-ai",
+    })
+    expect(config.selectionToolbar.customActions).toEqual([])
+    expect(createDefaultDictionaryAction()).toEqual(
       expect.objectContaining({
         id: "default-dictionary",
         name: expect.any(String),

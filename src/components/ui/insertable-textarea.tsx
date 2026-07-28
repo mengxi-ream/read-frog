@@ -95,7 +95,7 @@ function QuickInsertableTextarea({
                 size="sm"
                 className={cellClassName}
                 onClick={() => handleCellClick(cell.text)}
-                disabled={props.disabled}
+                disabled={props.disabled || props.readOnly}
               >
                 {cell.text}
               </Button>

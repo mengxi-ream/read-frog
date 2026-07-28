@@ -11,6 +11,7 @@ import { useRef, useState } from "react"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { authClient } from "@/utils/auth/auth-client"
+import { patchSelectionToolbarAction } from "@/utils/custom-actions"
 import {
   canUseGuideDictionaryNotebaseTracking,
   getActiveGuideDictionaryNotebaseTrackingForAction,
@@ -302,10 +303,9 @@ export function useSaveToNotebase() {
         schema.name,
       )
       await setSelectionToolbarConfig({
-        ...selectionToolbarConfig,
-        customActions: selectionToolbarConfig.customActions.map((item) =>
-          item.id === action.id ? { ...item, notebaseConnection: refreshedConnection } : item,
-        ),
+        ...patchSelectionToolbarAction(selectionToolbarConfig, action.id, {
+          notebaseConnection: refreshedConnection,
+        }),
       })
 
       const actionWithRefreshedConnection = {

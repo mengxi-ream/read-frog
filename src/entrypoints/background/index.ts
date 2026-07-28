@@ -131,8 +131,18 @@ export default defineBackground({
     void setUpDatabaseCleanup()
     setUpConfigBackup()
 
+    // Start config and i18n initialization without delaying synchronous listener
+    // registration. Consumers that materialize localized config-derived data await
+    // this shared barrier before reading it.
+    let currentUiLanguage: UiLanguage | undefined
+    const backgroundReady = (async () => {
+      const config = await ensureInitializedConfig()
+      currentUiLanguage = config?.uiLanguage ?? "auto"
+      await initI18n(currentUiLanguage)
+    })()
+
     proxyFetch()
-    setupNotebasePendingSaveProcessor()
+    setupNotebasePendingSaveProcessor(() => backgroundReady)
     setupEdgeTTSMessageHandlers()
     setupLLMGenerateTextMessageHandlers()
     setupTTSPlaybackMessageHandlers()
@@ -145,11 +155,8 @@ export default defineBackground({
     // listener registration above (MV3 requires listeners before the first await). The
     // context menu and the uninstall-survey URL both resolve i18n.t at registration time,
     // so they must be created AFTER initI18n or they freeze in the wrong language.
-    let currentUiLanguage: UiLanguage | undefined
     void (async () => {
-      const config = await ensureInitializedConfig()
-      currentUiLanguage = config?.uiLanguage ?? "auto"
-      await initI18n(currentUiLanguage)
+      await backgroundReady
       void initializeContextMenu()
       await setupUninstallSurvey()
     })()
@@ -159,9 +166,10 @@ export default defineBackground({
     // (registerContextMenuListeners), so here we only drive the i18next singleton and
     // re-set the frozen (localized) uninstall-survey URL.
     storageAdapter.watch<Config>(CONFIG_STORAGE_KEY, (newConfig) => {
-      if (newConfig.uiLanguage === currentUiLanguage) return
-      currentUiLanguage = newConfig.uiLanguage
       void (async () => {
+        await backgroundReady
+        if (newConfig.uiLanguage === currentUiLanguage) return
+        currentUiLanguage = newConfig.uiLanguage
         await setUiLanguage(newConfig.uiLanguage)
         await setupUninstallSurvey()
       })()

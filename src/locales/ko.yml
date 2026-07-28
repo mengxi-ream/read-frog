@@ -359,6 +359,7 @@ options:
       saveSuggestion:
         title: 저장 제안
         description: AI 제공자로 선택 번역 후 Notebase에 저장할 단어를 추천합니다
+        action: 작업
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -392,6 +393,7 @@ options:
       customActions:
         title: 커스텀 AI 액션
         description: 선택한 텍스트에 대한 구조화된 AI 작업을 직접 추가하세요
+        builtIn: 기본 제공
         add: AI 액션 추가
         edit: AI 액션 편집
         empty: 아직 커스텀 AI 액션이 없습니다
@@ -403,6 +405,8 @@ options:
           actions: 작업
         form:
           name: 이름
+          customize: 사용자 지정
+          customizeTooltip: 기본 제공 작업의 프롬프트는 변경할 수 없습니다. 이 버튼을 클릭하여 편집 가능한 복사본을 만들고 프롬프트를 수정하세요.
           icon: 아이콘
           iconField:
             chooseAriaLabel: 아이콘 선택

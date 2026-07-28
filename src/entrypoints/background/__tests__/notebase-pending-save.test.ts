@@ -4,6 +4,7 @@ import type { SelectionToolbarCustomAction } from "@/types/config/selection-tool
 import type { PendingCreateNotebaseSave, PendingNotebaseSave } from "@/utils/notebase/pending-save"
 import { describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import {
   buildNotebaseCreateInputFromPending,
   createPendingConnectedNotebaseSave,
@@ -41,6 +42,14 @@ function createConfig(action: SelectionToolbarCustomAction) {
   return config
 }
 
+function createBuiltInDictionaryConfig() {
+  const config = cloneConfig(DEFAULT_CONFIG)
+  return {
+    action: getBuiltInDictionaryAction(config.selectionToolbar),
+    config,
+  }
+}
+
 function createConnectedAction(): SelectionToolbarCustomAction {
   return {
     ...createAction(),
@@ -65,6 +74,35 @@ function createConnectedAction(): SelectionToolbarCustomAction {
   }
 }
 
+function createConnectedBuiltInDictionaryConfig() {
+  const config = cloneConfig(DEFAULT_CONFIG)
+  const dictionary = getBuiltInDictionaryAction(config.selectionToolbar)
+  const field = dictionary.outputSchema[0]!
+  config.selectionToolbar.builtInActions.dictionary.notebaseConnection = {
+    notebaseId: "notebase-1",
+    notebaseNameSnapshot: "Dictionary Notes",
+    connectedAccount: {
+      id: "user-1",
+      name: "Reader",
+      email: "reader@example.com",
+      image: null,
+    },
+    mappings: [
+      {
+        id: "mapping-1",
+        localFieldId: field.id,
+        notebaseColumnId: "column-dictionary",
+        notebaseColumnNameSnapshot: field.name,
+      },
+    ],
+  }
+
+  return {
+    action: getBuiltInDictionaryAction(config.selectionToolbar),
+    config,
+  }
+}
+
 function createDeps({
   pending,
   config,
@@ -75,6 +113,7 @@ function createDeps({
   authenticated: boolean
 }) {
   return {
+    waitUntilReady: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
     getPendingNotebaseSave: vi.fn<(...args: any[]) => any>().mockResolvedValue(pending),
     clearPendingNotebaseSave: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
     getConfig: vi.fn<(...args: any[]) => any>().mockResolvedValue(config),
@@ -148,7 +187,83 @@ function createConnectedSchema(): NotebaseGetSchemaOutput {
   }
 }
 
+function createBuiltInConnectedSchema(
+  action: SelectionToolbarCustomAction,
+): NotebaseGetSchemaOutput {
+  const connection = action.notebaseConnection!
+  const mapping = connection.mappings[0]!
+  const field = action.outputSchema.find((candidate) => candidate.id === mapping.localFieldId)!
+
+  return {
+    id: connection.notebaseId,
+    name: connection.notebaseNameSnapshot,
+    updatedAt: new Date(),
+    notebaseColumns: [
+      {
+        id: mapping.notebaseColumnId,
+        notebaseId: connection.notebaseId,
+        name: mapping.notebaseColumnNameSnapshot,
+        config:
+          field.type === "number"
+            ? { type: "number", decimal: 0, format: "number" }
+            : { type: "string" },
+        position: 0,
+        isPrimary: true,
+        width: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ],
+  }
+}
+
 describe("notebase pending save processor", () => {
+  it("waits for config and i18n readiness before reading pending work", async () => {
+    let resolveReady!: () => void
+    const ready = new Promise<void>((resolve) => {
+      resolveReady = resolve
+    })
+    const action = createAction()
+    const pending = createPendingNotebaseSave(action, [{ summary: "A short summary" }], 1_000)
+    const deps = createDeps({
+      pending,
+      config: createConfig(action),
+      authenticated: false,
+    })
+    deps.waitUntilReady.mockReturnValueOnce(ready)
+    deps.getPendingNotebaseSave.mockResolvedValueOnce(null)
+
+    const processing = createNotebasePendingSaveProcessor(deps)("startup")
+    await Promise.resolve()
+
+    expect(deps.waitUntilReady).toHaveBeenCalledTimes(1)
+    expect(deps.getPendingNotebaseSave).not.toHaveBeenCalled()
+    expect(deps.getConfig).not.toHaveBeenCalled()
+    expect(deps.clearPendingNotebaseSave).not.toHaveBeenCalled()
+
+    resolveReady()
+    await processing
+
+    expect(deps.getPendingNotebaseSave).toHaveBeenCalledTimes(1)
+  })
+
+  it("clears expired pending saves without probing auth or calling create", async () => {
+    const action = createAction()
+    const pending = createPendingNotebaseSave(action, [{ summary: "A short summary" }], 1_000)
+    pending.expiresAt = 999
+    const deps = createDeps({
+      pending,
+      config: createConfig(action),
+      authenticated: true,
+    })
+
+    await createNotebasePendingSaveProcessor(deps)("startup")
+
+    expect(deps.clearPendingNotebaseSave).toHaveBeenCalledTimes(1)
+    expect(deps.getAuthenticatedAccount).not.toHaveBeenCalled()
+    expect(deps.createNotebase).not.toHaveBeenCalled()
+  })
+
   it("clears schema-changed pending saves without probing auth or calling create", async () => {
     const action = createAction()
     const pending = createPendingNotebaseSave(action, [{ summary: "A short summary" }], 1_000)
@@ -215,12 +330,9 @@ describe("notebase pending save processor", () => {
   })
 
   it("completes the guide Dictionary Notebase flow after pending create resume when guide metadata is present", async () => {
-    const action = {
-      ...createAction(),
-      id: "default-dictionary",
-      name: "Dictionary",
-    }
-    const pending = createPendingNotebaseSave(action, [{ summary: "A short summary" }], 1_000, {
+    const { action, config } = createBuiltInDictionaryConfig()
+    const field = action.outputSchema[0]!
+    const pending = createPendingNotebaseSave(action, [{ [field.name]: "frog" }], 1_000, {
       guideDictionaryNotebaseTracking: {
         id: "tracking-1",
         actionId: "default-dictionary",
@@ -231,7 +343,7 @@ describe("notebase pending save processor", () => {
     })
     const deps = createDeps({
       pending,
-      config: createConfig(action),
+      config,
       authenticated: true,
     })
 
@@ -324,15 +436,12 @@ describe("notebase pending save processor", () => {
   })
 
   it("completes the guide Dictionary Notebase flow after connected pending row resume when guide metadata is present", async () => {
-    const action = {
-      ...createConnectedAction(),
-      id: "default-dictionary",
-      name: "Dictionary",
-    }
+    const { action, config } = createConnectedBuiltInDictionaryConfig()
+    const field = action.outputSchema[0]!
     const pending = createPendingConnectedNotebaseSave(
       action,
       action.notebaseConnection!,
-      [{ summary: "A short summary" }],
+      [{ [field.name]: "frog" }],
       1_000,
       {
         guideDictionaryNotebaseTracking: {
@@ -346,10 +455,10 @@ describe("notebase pending save processor", () => {
     )
     const deps = createDeps({
       pending,
-      config: createConfig(action),
+      config,
       authenticated: true,
     })
-    deps.getSchema.mockResolvedValueOnce(createConnectedSchema())
+    deps.getSchema.mockResolvedValueOnce(createBuiltInConnectedSchema(action))
 
     await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
 
@@ -401,15 +510,12 @@ describe("notebase pending save processor", () => {
   })
 
   it("carries guide metadata into connected pending replacement creates", async () => {
-    const action = {
-      ...createConnectedAction(),
-      id: "default-dictionary",
-      name: "Dictionary",
-    }
+    const { action, config } = createConnectedBuiltInDictionaryConfig()
+    const field = action.outputSchema[0]!
     const pending = createPendingConnectedNotebaseSave(
       action,
       action.notebaseConnection!,
-      [{ summary: "A short summary" }],
+      [{ [field.name]: "frog" }],
       1_000,
       {
         guideDictionaryNotebaseTracking: {
@@ -423,7 +529,7 @@ describe("notebase pending save processor", () => {
     )
     const deps = createDeps({
       pending,
-      config: createConfig(action),
+      config,
       authenticated: true,
     })
     deps.getAuthenticatedAccount.mockResolvedValueOnce({

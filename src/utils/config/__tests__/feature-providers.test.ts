@@ -223,6 +223,30 @@ describe("feature providers", () => {
   })
 
   describe("computeSelectionToolbarCustomActionFallbacksAfterDeletion", () => {
+    it("reassigns the built-in Dictionary provider without changing custom actions", () => {
+      const config = {
+        ...DEFAULT_CONFIG,
+        selectionToolbar: {
+          ...DEFAULT_CONFIG.selectionToolbar,
+          builtInActions: {
+            dictionary: {
+              ...DEFAULT_CONFIG.selectionToolbar.builtInActions.dictionary,
+              providerId: "deleted-provider",
+            },
+          },
+        },
+      }
+
+      const result = computeSelectionToolbarCustomActionFallbacksAfterDeletion(
+        "deleted-provider",
+        config,
+        [getProviderById("deepseek-default")],
+      )
+
+      expect(result?.builtInActions.dictionary.providerId).toBe("deepseek-default")
+      expect(result?.customActions).toEqual([])
+    })
+
     it("reassigns affected custom actions to the first enabled llm provider", () => {
       const config = {
         ...DEFAULT_CONFIG,
@@ -265,7 +289,7 @@ describe("feature providers", () => {
         remainingProviders,
       )
 
-      expect(result).toEqual([
+      expect(result?.customActions).toEqual([
         expect.objectContaining({
           id: "action-a",
           providerId: "deepseek-default",
@@ -314,7 +338,7 @@ describe("feature providers", () => {
         remainingProviders,
       )
 
-      expect(result).toEqual([
+      expect(result?.customActions).toEqual([
         expect.objectContaining({
           id: "action-a",
           providerId: "read-frog-free-ai",

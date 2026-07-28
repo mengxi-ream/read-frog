@@ -13,7 +13,10 @@ import {
 import { floatingButtonSchema } from "./floating-button"
 import { languageDetectionConfigSchema } from "./language-detection"
 import { isLLMProvider, providersConfigSchema } from "./provider"
-import { selectionToolbarCustomActionsSchema } from "./selection-toolbar"
+import {
+  selectionToolbarBuiltInActionsSchema,
+  selectionToolbarCustomActionsSchema,
+} from "./selection-toolbar"
 import { siteRulesConfigSchema } from "./site-rules"
 import { videoSubtitlesSchema } from "./subtitles"
 import { pageTranslationShortcutSchema, translateConfigSchema } from "./translate"
@@ -36,19 +39,36 @@ const selectionToolbarSpeakFeatureSchema = z.object({
 })
 
 // Text selection toolbar schema
-const selectionToolbarSchema = z.object({
-  enabled: z.boolean(),
-  disabledSelectionToolbarPatterns: z.array(z.string()),
-  opacity: z.number().min(MIN_SELECTION_OVERLAY_OPACITY).max(MAX_SELECTION_OVERLAY_OPACITY),
-  features: z.object({
-    translate: selectionToolbarFeatureSchema,
-    speak: selectionToolbarSpeakFeatureSchema,
-  }),
-  customActions: selectionToolbarCustomActionsSchema,
-  saveSuggestion: z.object({
+const selectionToolbarSchema = z
+  .object({
     enabled: z.boolean(),
-  }),
-})
+    disabledSelectionToolbarPatterns: z.array(z.string()),
+    opacity: z.number().min(MIN_SELECTION_OVERLAY_OPACITY).max(MAX_SELECTION_OVERLAY_OPACITY),
+    features: z.object({
+      translate: selectionToolbarFeatureSchema,
+      speak: selectionToolbarSpeakFeatureSchema,
+    }),
+    builtInActions: selectionToolbarBuiltInActionsSchema,
+    customActions: selectionToolbarCustomActionsSchema,
+    saveSuggestion: z.object({
+      enabled: z.boolean(),
+      actionId: z.string().nonempty(),
+    }),
+  })
+  .superRefine((selectionToolbar, ctx) => {
+    const actionId = selectionToolbar.saveSuggestion.actionId
+    const actionExists =
+      actionId === "default-dictionary" ||
+      selectionToolbar.customActions.some((action) => action.id === actionId)
+
+    if (!actionExists) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Save Suggestion action "${actionId}" not found.`,
+        path: ["saveSuggestion", "actionId"],
+      })
+    }
+  })
 
 // side content schema
 const sideContentSchema = z.object({
@@ -180,8 +200,18 @@ export const configSchema = z
       }
     }
 
-    data.selectionToolbar.customActions.forEach((action, index) => {
-      const providerId = action.providerId
+    const actionProviderEntries = [
+      {
+        providerId: data.selectionToolbar.builtInActions.dictionary.providerId,
+        path: ["selectionToolbar", "builtInActions", "dictionary", "providerId"] as const,
+      },
+      ...data.selectionToolbar.customActions.map((action, index) => ({
+        providerId: action.providerId,
+        path: ["selectionToolbar", "customActions", index, "providerId"] as const,
+      })),
+    ]
+
+    actionProviderEntries.forEach(({ providerId, path }) => {
       if (
         !doesProviderSupportsCapability(
           "selectionToolbar.customAction",
@@ -198,7 +228,7 @@ export const configSchema = z
             { requireEnable: true },
           ),
           message: `Invalid provider id "${providerId}".`,
-          path: ["selectionToolbar", "customActions", index, "providerId"],
+          path: [...path],
         })
       }
     })

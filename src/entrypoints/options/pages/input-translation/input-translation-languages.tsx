@@ -1,7 +1,7 @@
 import type { InputTranslationLang } from "@/types/config/config"
 import { Icon } from "@iconify/react"
 import { langCodeISO6393Schema } from "@read-frog/definitions"
-import { useAtom } from "jotai"
+import { useAtom, useAtomValue } from "jotai"
 import { Activity } from "react"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import { Label } from "@/components/ui/base-ui/label"
@@ -49,7 +49,7 @@ function LangSelect({ value, onValueChange, getDisplayLabel }: LangSelectProps) 
 
 export function InputTranslationLanguages() {
   const [inputTranslation, setInputTranslation] = useAtom(configFieldsAtomMap.inputTranslation)
-  const [language] = useAtom(configFieldsAtomMap.language)
+  const language = useAtomValue(configFieldsAtomMap.language)
 
   const getDisplayLabel = (value: InputTranslationLang) => {
     if (value === "sourceCode") {

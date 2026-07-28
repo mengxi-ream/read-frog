@@ -360,6 +360,7 @@ options:
       saveSuggestion:
         title: 保存建议
         description: 使用 AI 提供商进行划词翻译后，推荐可存入笔记库的词条
+        action: 指令
       shortcut:
         title: 划词翻译快捷键
         description: 自定义翻译选中文本的快捷键
@@ -393,6 +394,7 @@ options:
       customActions:
         title: 自定义 AI 指令
         description: 为划词添加你自己的结构化 AI 操作
+        builtIn: 内置
         add: 添加 AI 指令
         edit: 编辑 AI 指令
         empty: 暂无自定义 AI 指令
@@ -404,6 +406,8 @@ options:
           actions: 操作
         form:
           name: 名称
+          customize: 定制化
+          customizeTooltip: 内置指令不允许更改提示词，点此按钮来修改指令提示词
           icon: 图标
           iconField:
             chooseAriaLabel: 选择图标

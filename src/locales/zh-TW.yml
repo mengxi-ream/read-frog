@@ -360,6 +360,7 @@ options:
       saveSuggestion:
         title: 儲存建議
         description: 使用 AI 供應商進行劃詞翻譯後，推薦可存入筆記庫的詞條
+        action: 指令
       shortcut:
         title: 選取文字翻譯快速鍵
         description: 自訂翻譯選取文字的快速鍵
@@ -393,6 +394,7 @@ options:
       customActions:
         title: 自訂 AI 指令
         description: 為選取文字新增自訂的結構化 AI 指令
+        builtIn: 內建
         add: 新增 AI 指令
         edit: 編輯 AI 指令
         empty: 目前沒有自訂 AI 指令
@@ -404,6 +406,8 @@ options:
           actions: 操作
         form:
           name: 名稱
+          customize: 自訂
+          customizeTooltip: 內建指令不允許修改提示詞，點此按鈕來修改指令提示詞
           icon: 圖示
           iconField:
             chooseAriaLabel: 選擇圖示

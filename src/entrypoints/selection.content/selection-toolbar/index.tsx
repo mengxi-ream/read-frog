@@ -16,6 +16,7 @@ import {
   EXTERNAL_SELECTION_OPEN_EVENT,
   MARGIN,
 } from "@/utils/constants/selection"
+import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { cn } from "@/utils/styles/utils"
 import { matchDomainPattern } from "@/utils/url"
 import { buildContextSnapshot, readSelectionSnapshot } from "../utils"
@@ -569,7 +570,7 @@ export function SelectionToolbar() {
   const hasAnyEnabledFeature =
     features.translate.enabled ||
     features.speak.enabled ||
-    selectionToolbar.customActions.some((a) => a.enabled !== false)
+    getSelectionToolbarActions(selectionToolbar).some((action) => action.enabled !== false)
 
   return (
     <div

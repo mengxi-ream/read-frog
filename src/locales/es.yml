@@ -360,6 +360,7 @@ options:
       saveSuggestion:
         title: Sugerencias de guardado
         description: Después de traducir una selección con un proveedor de IA, sugerir palabras para guardar en tu Notebase
+        action: Acción
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -393,6 +394,7 @@ options:
       customActions:
         title: Acciones AI personalizadas
         description: Añade tus propias acciones AI estructuradas para texto seleccionado
+        builtIn: Integrada
         add: Añadir acción AI
         edit: Editar acción AI
         empty: Aún no hay acciones AI personalizadas
@@ -404,6 +406,8 @@ options:
           actions: Acciones
         form:
           name: Nombre
+          customize: Personalizar
+          customizeTooltip: Las instrucciones integradas no permiten cambiar los prompts. Haz clic aquí para crear una copia editable y modificar los prompts.
           icon: Icono
           iconField:
             chooseAriaLabel: Elegir icono

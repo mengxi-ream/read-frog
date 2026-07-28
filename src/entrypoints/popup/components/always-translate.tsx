@@ -1,4 +1,4 @@
-import { useAtom, useAtomValue } from "jotai"
+import { useAtomValue, useSetAtom } from "jotai"
 import { Activity } from "react"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -9,7 +9,7 @@ import { isCurrentSiteInBlacklistAtom, isCurrentSiteInWhitelistAtom } from "../a
 
 export function AlwaysTranslate() {
   const isCurrentSiteInPatterns = useAtomValue(isCurrentSiteInPatternsAtom)
-  const [, toggleCurrentSite] = useAtom(toggleCurrentSiteAtom)
+  const toggleCurrentSite = useSetAtom(toggleCurrentSiteAtom)
   const isIgnoreTab = useAtomValue(isIgnoreTabAtom)
   const { mode } = useAtomValue(configFieldsAtomMap.siteControl)
   const isCurrentSiteInWhitelist = useAtomValue(isCurrentSiteInWhitelistAtom)
