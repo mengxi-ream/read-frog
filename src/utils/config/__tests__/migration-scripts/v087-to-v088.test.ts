@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest"
-import {
-  getPendingDictionaryRekeyedActionId,
-  migrate,
-  migrateWithPendingDictionarySave,
-} from "../../migration-scripts/v087-to-v088"
+import { migrate } from "../../migration-scripts/v087-to-v088"
 
 const currentDictionary = {
   id: "default-dictionary",
@@ -309,87 +305,6 @@ describe("v087-to-v088 migration", () => {
       id: "migrated-default-dictionary",
       notebaseConnection: connection,
     })
-
-    const { notebaseConnection: _connection, ...unconnectedLegacy } = legacy
-    const pendingFingerprint = JSON.stringify(
-      unconnectedLegacy.outputSchema.map(({ id, name, type }) => ({ id, name, type })),
-    )
-    const safelyMigrated = migrateWithPendingDictionarySave(config(unconnectedLegacy), {
-      actionId: "default-dictionary",
-      outputSchemaFingerprint: pendingFingerprint,
-    })
-
-    expect(safelyMigrated.selectionToolbar.builtInActions.dictionary.enabled).toBe(false)
-    expect(safelyMigrated.selectionToolbar.customActions[0]).toMatchObject({
-      id: "migrated-default-dictionary",
-      outputSchema: unconnectedLegacy.outputSchema,
-    })
-    expect(
-      migrateWithPendingDictionarySave(safelyMigrated, {
-        actionId: "default-dictionary",
-        outputSchemaFingerprint: pendingFingerprint,
-      }),
-    ).toEqual(safelyMigrated)
-  })
-
-  it("rekeys an explicit Save Suggestion reference on the pending-save safety path", () => {
-    const oldConfig = config(currentDictionary)
-    oldConfig.selectionToolbar.saveSuggestion.actionId = "default-dictionary"
-    const pendingFingerprint = JSON.stringify(
-      currentDictionary.outputSchema.map(({ id, name, type }) => ({ id, name, type })),
-    )
-
-    const migrated = migrateWithPendingDictionarySave(oldConfig, {
-      actionId: "default-dictionary",
-      outputSchemaFingerprint: pendingFingerprint,
-    })
-
-    expect(migrated.selectionToolbar.saveSuggestion.actionId).toBe("migrated-default-dictionary")
-    expect(migrateWithPendingDictionarySave(migrated, null)).toEqual(migrated)
-  })
-
-  it("preserves the exact pending owner even when its output field ids are current", () => {
-    const pending = {
-      actionId: "default-dictionary",
-      outputSchemaFingerprint: JSON.stringify(
-        currentDictionary.outputSchema.map(({ id, name, type }) => ({ id, name, type })),
-      ),
-    }
-    const oldConfig = config(currentDictionary)
-    const rekeyedActionId = getPendingDictionaryRekeyedActionId(oldConfig, pending)
-    const migrated = migrateWithPendingDictionarySave(oldConfig, pending)
-
-    expect(rekeyedActionId).toBe("migrated-default-dictionary")
-    expect(migrated.selectionToolbar.builtInActions.dictionary.enabled).toBe(false)
-    expect(migrated.selectionToolbar.customActions[0]).toMatchObject({
-      id: rekeyedActionId,
-      outputSchema: currentDictionary.outputSchema,
-    })
-  })
-
-  it("preserves the deterministic pending owner when another custom action has the same schema", () => {
-    const pending = {
-      actionId: "default-dictionary",
-      outputSchemaFingerprint: JSON.stringify(
-        currentDictionary.outputSchema.map(({ id, name, type }) => ({ id, name, type })),
-      ),
-    }
-    const sameSchemaCopy = {
-      ...currentDictionary,
-      id: "dictionary-copy",
-      name: "Dictionary copy",
-    }
-    const oldConfig = config({ ...currentDictionary, systemPrompt: "My custom prompt" }, [
-      sameSchemaCopy,
-    ])
-    const rekeyedActionId = getPendingDictionaryRekeyedActionId(oldConfig, pending)
-    const migrated = migrateWithPendingDictionarySave(oldConfig, pending)
-
-    expect(rekeyedActionId).toBe("migrated-default-dictionary")
-    expect(migrated.selectionToolbar.customActions.map((action: any) => action.id)).toEqual([
-      "migrated-default-dictionary",
-      "dictionary-copy",
-    ])
   })
 
   it("keeps an official Dictionary with incompatible connection mappings as custom", () => {

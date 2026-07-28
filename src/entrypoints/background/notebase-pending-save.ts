@@ -50,6 +50,7 @@ import { backgroundOrpcClient } from "@/utils/orpc/background-client"
 import { completeGuideDictionaryNotebaseAndNotify } from "./new-user-guide"
 
 interface PendingNotebaseSaveProcessorDeps {
+  waitUntilReady: () => Promise<void>
   getPendingNotebaseSave: () => Promise<PendingNotebaseSave | null>
   clearPendingNotebaseSave: () => Promise<void>
   getConfig: () => Promise<Config | null>
@@ -684,6 +685,8 @@ export function createNotebasePendingSaveProcessor(deps: PendingNotebaseSaveProc
 
     isProcessing = true
     try {
+      await deps.waitUntilReady()
+
       const pendingNotebaseSave = await deps.getPendingNotebaseSave()
       if (!pendingNotebaseSave) {
         return
@@ -703,8 +706,9 @@ export function createNotebasePendingSaveProcessor(deps: PendingNotebaseSaveProc
   }
 }
 
-export function setupNotebasePendingSaveProcessor() {
+export function setupNotebasePendingSaveProcessor(waitUntilReady: () => Promise<void>) {
   const processPendingNotebaseSave = createNotebasePendingSaveProcessor({
+    waitUntilReady,
     getPendingNotebaseSave,
     clearPendingNotebaseSave,
     getConfig: getLocalConfig,

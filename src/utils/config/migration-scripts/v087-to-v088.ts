@@ -128,19 +128,6 @@ function hasCompatibleCurrentDictionaryConnection(action: any): boolean {
   )
 }
 
-function outputSchemaFingerprint(action: any): string {
-  if (!Array.isArray(action?.outputSchema)) {
-    return ""
-  }
-  return JSON.stringify(
-    action.outputSchema.map((field: any) => ({
-      id: field?.id,
-      name: field?.name,
-      type: field?.type,
-    })),
-  )
-}
-
 function nextMigratedCustomId(actions: any[]): string {
   const ids = new Set(actions.map((action: any) => action?.id))
   if (!ids.has(MIGRATED_CUSTOM_DICTIONARY_ID)) {
@@ -293,95 +280,6 @@ export function migrate(oldConfig: any): any {
       customActions: selectionToolbar.customActions.map((action: any) =>
         action === legacyAction ? rekeyedLegacyAction : action,
       ),
-    },
-  }
-}
-
-export function getPendingDictionaryRekeyedActionId(
-  oldConfig: any,
-  pendingSave: any,
-): string | null {
-  if (
-    pendingSave?.actionId !== BUILT_IN_DICTIONARY_ACTION_ID ||
-    typeof pendingSave?.outputSchemaFingerprint !== "string" ||
-    !oldConfig?.selectionToolbar ||
-    !Array.isArray(oldConfig.selectionToolbar.customActions)
-  ) {
-    return null
-  }
-
-  const legacyAction = oldConfig.selectionToolbar.customActions.find(
-    (action: any) => action?.id === BUILT_IN_DICTIONARY_ACTION_ID,
-  )
-  if (
-    !legacyAction ||
-    outputSchemaFingerprint(legacyAction) !== pendingSave.outputSchemaFingerprint
-  ) {
-    return null
-  }
-
-  return nextMigratedCustomId(oldConfig.selectionToolbar.customActions)
-}
-
-/**
- * Local startup safety path for a v87 Notebase save that was persisted before
- * the config migration. The exact legacy Dictionary that owns the in-flight
- * payload is retained under a deterministic custom id, even when its definition
- * otherwise matches an official historical snapshot.
- */
-export function migrateWithPendingDictionarySave(oldConfig: any, pendingSave: any): any {
-  const migrated = migrate(oldConfig)
-  const rekeyedActionId = getPendingDictionaryRekeyedActionId(oldConfig, pendingSave)
-  if (!rekeyedActionId) {
-    return migrated
-  }
-
-  const legacyActions = oldConfig.selectionToolbar.customActions
-  const legacyActionIndex = legacyActions.findIndex(
-    (action: any) => action?.id === BUILT_IN_DICTIONARY_ACTION_ID,
-  )
-  const legacyAction = legacyActions[legacyActionIndex]
-  if (
-    !legacyAction ||
-    !migrated?.selectionToolbar ||
-    !Array.isArray(migrated.selectionToolbar.customActions)
-  ) {
-    return migrated
-  }
-
-  const alreadyPreserved = migrated.selectionToolbar.customActions.find(
-    (action: any) => action?.id === rekeyedActionId,
-  )
-  if (alreadyPreserved) {
-    return migrated
-  }
-
-  const providerId = getInheritedProviderId(oldConfig, legacyAction)
-  const rekeyedAction = {
-    ...legacyAction,
-    id: rekeyedActionId,
-    providerId,
-  }
-  const shouldRekeySaveSuggestionAction =
-    !oldConfig.selectionToolbar.builtInActions?.dictionary &&
-    oldConfig.selectionToolbar.saveSuggestion?.actionId === BUILT_IN_DICTIONARY_ACTION_ID
-  const customActions = [...migrated.selectionToolbar.customActions]
-  customActions.splice(Math.min(legacyActionIndex, customActions.length), 0, rekeyedAction)
-
-  return {
-    ...migrated,
-    selectionToolbar: {
-      ...migrated.selectionToolbar,
-      saveSuggestion: shouldRekeySaveSuggestionAction
-        ? {
-            ...migrated.selectionToolbar.saveSuggestion,
-            actionId: rekeyedActionId,
-          }
-        : migrated.selectionToolbar.saveSuggestion,
-      builtInActions: {
-        dictionary: createBuiltInState(providerId, legacyAction.enabled === false),
-      },
-      customActions,
     },
   }
 }

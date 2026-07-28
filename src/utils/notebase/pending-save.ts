@@ -11,7 +11,6 @@ import { z as zod } from "zod"
 import { storage } from "#imports"
 import { env } from "@/env"
 import { selectionToolbarCustomActionNotebaseConnectionSchema } from "@/types/config/selection-toolbar"
-import { BUILT_IN_DICTIONARY_ACTION_ID } from "@/utils/constants/custom-action"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { findSelectionToolbarAction, replaceSelectionToolbarAction } from "@/utils/custom-actions"
 import { guideDictionaryNotebaseTrackingSchema } from "@/utils/guide/dictionary-notebase"
@@ -19,7 +18,6 @@ import { buildNotebaseRowCells } from "./mapping"
 
 export const NOTEBASE_PENDING_SAVE_STORAGE_KEY = "notebasePendingSave"
 export const NOTEBASE_PENDING_SAVE_TTL_MS = 10 * 60 * 1000
-const MIGRATED_DICTIONARY_ACTION_ID_PATTERN = /^migrated-default-dictionary(?:-\d+)?$/
 
 const pendingNotebaseSaveColumnSchema = zod.object({
   localFieldId: zod.string().nonempty(),
@@ -256,79 +254,8 @@ export async function clearPendingNotebaseSave() {
   await storage.removeItem(`local:${NOTEBASE_PENDING_SAVE_STORAGE_KEY}`)
 }
 
-export function rebindPendingNotebaseSaveToMigratedDictionary(
-  config: Config,
-  pending: PendingCreateNotebaseSave,
-  migratedActionId?: string,
-): PendingCreateNotebaseSave
-export function rebindPendingNotebaseSaveToMigratedDictionary(
-  config: Config,
-  pending: PendingConnectedNotebaseSave,
-  migratedActionId?: string,
-): PendingConnectedNotebaseSave
-export function rebindPendingNotebaseSaveToMigratedDictionary(
-  config: Config,
-  pending: PendingNotebaseSave,
-  migratedActionId?: string,
-): PendingNotebaseSave
-export function rebindPendingNotebaseSaveToMigratedDictionary(
-  config: Config,
-  pending: PendingNotebaseSave,
-  migratedActionId?: string,
-): PendingNotebaseSave {
-  if (pending.actionId !== BUILT_IN_DICTIONARY_ACTION_ID) {
-    return pending
-  }
-
-  const matchingCustomActions = config.selectionToolbar.customActions.filter((action) => {
-    if (migratedActionId && action.id !== migratedActionId) {
-      return false
-    }
-    return getOutputSchemaFingerprint(action.outputSchema) === pending.outputSchemaFingerprint
-  })
-  if (matchingCustomActions.length !== 1) {
-    return pending
-  }
-
-  return {
-    ...pending,
-    actionId: matchingCustomActions[0]!.id,
-    actionName: matchingCustomActions[0]!.name,
-  }
-}
-
 function findPendingSaveAction(config: Config, pending: PendingNotebaseSave) {
-  if (pending.actionId === BUILT_IN_DICTIONARY_ACTION_ID) {
-    const migratedOwners = config.selectionToolbar.customActions.filter(
-      (candidate) =>
-        MIGRATED_DICTIONARY_ACTION_ID_PATTERN.test(candidate.id) &&
-        candidate.name === pending.actionName &&
-        doesPendingActionSchemaMatch(candidate, pending),
-    )
-    if (migratedOwners.length === 1) {
-      return migratedOwners[0]!
-    }
-  }
-
-  const action = findSelectionToolbarAction(config.selectionToolbar, pending.actionId)
-  if (action && doesPendingActionSchemaMatch(action, pending)) {
-    return action
-  }
-
-  // A v87 Dictionary with a legacy output schema may be re-keyed as a custom
-  // action while the code-owned Dictionary keeps the historical fixed id.
-  // Rebind only when the old id and schema fingerprint identify one custom
-  // action unambiguously.
-  if (pending.actionId === BUILT_IN_DICTIONARY_ACTION_ID) {
-    const matchingCustomActions = config.selectionToolbar.customActions.filter((candidate) =>
-      doesPendingActionSchemaMatch(candidate, pending),
-    )
-    if (matchingCustomActions.length === 1) {
-      return matchingCustomActions[0]!
-    }
-  }
-
-  return action ?? null
+  return findSelectionToolbarAction(config.selectionToolbar, pending.actionId) ?? null
 }
 
 function doesPendingActionSchemaMatch(
