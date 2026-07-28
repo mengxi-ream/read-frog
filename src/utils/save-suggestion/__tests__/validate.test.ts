@@ -35,10 +35,6 @@ function createAction(
   }
 }
 
-function createDraft(): SelectionToolbarCustomAction {
-  return createAction({ id: "draft-1", name: "Dictionary Draft" })
-}
-
 function note(fields: Array<{ name: string; value: string | number | null }>): SaveSuggestionNote {
   return { fields }
 }
@@ -73,21 +69,12 @@ describe("notePairsToRecord", () => {
 })
 
 describe("validateSaveSuggestion", () => {
-  const candidate = createAction()
-  const dictionaryDraft = createDraft()
+  const action = createAction()
 
-  function validate(
-    action: {
-      createNewDictionaryAction: boolean
-      targetActionId: string | null
-      summaryFieldName?: string | null
-    },
-    notes: SaveSuggestionNote[],
-  ) {
+  function validate(notes: SaveSuggestionNote[], summaryFieldName?: string | null) {
     return validateSaveSuggestion({
-      envelope: { action, notes },
-      candidates: [candidate],
-      dictionaryDraft,
+      envelope: { notes, summaryFieldName },
+      action,
     })
   }
 
@@ -97,81 +84,31 @@ describe("validateSaveSuggestion", () => {
     { name: "Difficulty", value: 4 },
   ])
 
-  it("resolves an existing candidate action", () => {
-    const result = validate({ createNewDictionaryAction: false, targetActionId: "action-1" }, [
-      validNote,
-    ])
+  it("validates notes against the fixed action snapshot", () => {
+    const result = validate([validNote])
+
     expect(result).toEqual({
-      target: { kind: "existing", actionId: "action-1" },
       notes: [{ Term: "ephemeral", Definition: "lasting a very short time", Difficulty: 4 }],
       summaryFieldName: null,
     })
   })
 
-  it("keeps a summary hint naming a non-primary field of the chosen action", () => {
-    const result = validate(
-      {
-        createNewDictionaryAction: false,
-        targetActionId: "action-1",
-        summaryFieldName: "Definition",
-      },
-      [validNote],
-    )
-    expect(result?.summaryFieldName).toBe("Definition")
+  it("keeps a summary hint naming a non-primary field of the action", () => {
+    expect(validate([validNote], "Definition")?.summaryFieldName).toBe("Definition")
   })
 
   it("nulls a bad summary hint without discarding the suggestion", () => {
-    const unknownField = validate(
-      { createNewDictionaryAction: false, targetActionId: "action-1", summaryFieldName: "Bogus" },
-      [validNote],
-    )
+    const unknownField = validate([validNote], "Bogus")
     expect(unknownField).not.toBeNull()
     expect(unknownField?.summaryFieldName).toBeNull()
 
-    const primaryField = validate(
-      { createNewDictionaryAction: false, targetActionId: "action-1", summaryFieldName: "Term" },
-      [validNote],
-    )
+    const primaryField = validate([validNote], "Term")
     expect(primaryField).not.toBeNull()
     expect(primaryField?.summaryFieldName).toBeNull()
   })
 
-  it("resolves the dictionary draft when createNewDictionaryAction is true, ignoring a stray id", () => {
-    const result = validate({ createNewDictionaryAction: true, targetActionId: "action-1" }, [
-      validNote,
-    ])
-    expect(result?.target).toEqual({ kind: "existing", actionId: "draft-1" })
-  })
-
-  it("rejects dictionary creation when the built-in Dictionary is disabled", () => {
-    expect(
-      validateSaveSuggestion({
-        envelope: {
-          action: { createNewDictionaryAction: true, targetActionId: null },
-          notes: [validNote],
-        },
-        candidates: [candidate],
-        dictionaryDraft: null,
-      }),
-    ).toBeNull()
-  })
-
-  it("rejects an unknown target action id", () => {
-    expect(
-      validate({ createNewDictionaryAction: false, targetActionId: "missing" }, [validNote]),
-    ).toBeNull()
-  })
-
-  it("rejects when neither createNew nor a target id is provided", () => {
-    expect(
-      validate({ createNewDictionaryAction: false, targetActionId: null }, [validNote]),
-    ).toBeNull()
-  })
-
   it("rejects zero notes", () => {
-    expect(
-      validate({ createNewDictionaryAction: false, targetActionId: "action-1" }, []),
-    ).toBeNull()
+    expect(validate([])).toBeNull()
   })
 
   it("rejects the whole suggestion when any note has a type mismatch", () => {
@@ -179,12 +116,8 @@ describe("validateSaveSuggestion", () => {
       { name: "Term", value: "ok" },
       { name: "Difficulty", value: "not a number" },
     ])
-    expect(
-      validate({ createNewDictionaryAction: false, targetActionId: "action-1" }, [
-        validNote,
-        badNote,
-      ]),
-    ).toBeNull()
+
+    expect(validate([validNote, badNote])).toBeNull()
   })
 
   it("rejects when the primary display field is null or blank", () => {
@@ -193,12 +126,9 @@ describe("validateSaveSuggestion", () => {
       { name: "Term", value: "   " },
       { name: "Definition", value: "def" },
     ])
-    expect(
-      validate({ createNewDictionaryAction: false, targetActionId: "action-1" }, [nullPrimary]),
-    ).toBeNull()
-    expect(
-      validate({ createNewDictionaryAction: false, targetActionId: "action-1" }, [blankPrimary]),
-    ).toBeNull()
+
+    expect(validate([nullPrimary])).toBeNull()
+    expect(validate([blankPrimary])).toBeNull()
   })
 
   it("accepts up to two valid notes", () => {
@@ -207,11 +137,31 @@ describe("validateSaveSuggestion", () => {
       { name: "Definition", value: "found everywhere" },
       { name: "Difficulty", value: 3 },
     ])
-    const result = validate({ createNewDictionaryAction: false, targetActionId: "action-1" }, [
-      validNote,
-      second,
-    ])
+    const result = validate([validNote, second])
+
     expect(result?.notes).toHaveLength(2)
     expect(result?.notes[1]?.Term).toBe("ubiquitous")
+  })
+
+  it("uses the supplied action schema rather than resolving another action", () => {
+    const numericAction = createAction({
+      id: "fixed-action",
+      outputSchema: [
+        {
+          id: "field-score",
+          name: "Score",
+          type: "number",
+          description: "",
+          speaking: false,
+        },
+      ],
+    })
+
+    expect(
+      validateSaveSuggestion({
+        envelope: { notes: [note([{ name: "Score", value: 8 }])] },
+        action: numericAction,
+      }),
+    ).toEqual({ notes: [{ Score: 8 }], summaryFieldName: null })
   })
 })

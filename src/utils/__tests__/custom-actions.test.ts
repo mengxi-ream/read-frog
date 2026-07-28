@@ -5,6 +5,7 @@ import {
   getBuiltInDictionaryAction,
   getSelectionToolbarActions,
   replaceSelectionToolbarAction,
+  resolveSaveSuggestionAction,
 } from "@/utils/custom-actions"
 
 function cloneSelectionToolbar() {
@@ -107,5 +108,30 @@ describe("selection toolbar built-in actions", () => {
     expect(duplicate.id).not.toBe(dictionary.id)
     expect(duplicate.notebaseConnection).not.toBe(dictionary.notebaseConnection)
     expect(duplicate.notebaseConnection?.mappings).not.toBe(dictionary.notebaseConnection?.mappings)
+  })
+
+  it("resolves the configured Save Suggestion action even when it is disabled", () => {
+    const selectionToolbar = cloneSelectionToolbar()
+    const customAction = {
+      ...getBuiltInDictionaryAction(selectionToolbar),
+      id: "custom-save-action",
+      name: "Custom Save",
+      enabled: false,
+    }
+    selectionToolbar.customActions = [customAction]
+    selectionToolbar.saveSuggestion.actionId = customAction.id
+
+    expect(resolveSaveSuggestionAction(selectionToolbar)).toBe(customAction)
+  })
+
+  it("falls back to the built-in Dictionary when the configured action no longer exists", () => {
+    const selectionToolbar = cloneSelectionToolbar()
+    selectionToolbar.builtInActions.dictionary.enabled = false
+    selectionToolbar.saveSuggestion.actionId = "deleted-action"
+
+    expect(resolveSaveSuggestionAction(selectionToolbar)).toEqual(
+      getBuiltInDictionaryAction(selectionToolbar),
+    )
+    expect(resolveSaveSuggestionAction(selectionToolbar).enabled).toBe(false)
   })
 })

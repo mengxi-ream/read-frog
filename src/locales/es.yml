@@ -360,6 +360,7 @@ options:
       saveSuggestion:
         title: Sugerencias de guardado
         description: Después de traducir una selección con un proveedor de IA, sugerir palabras para guardar en tu Notebase
+        action: Acción
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text

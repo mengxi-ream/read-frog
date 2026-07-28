@@ -58,8 +58,7 @@ export function SaveSuggestionCard({
   const { save, isSaving } = useSaveToNotebase()
   const [saveState, setSaveState] = useState<"idle" | "saved" | "stale">("idle")
 
-  const { sessionKey, validated, actionSnapshot, dictionaryDraft, firedAt, analyticsProvider } =
-    suggestion
+  const { sessionKey, validated, actionSnapshot, firedAt, analyticsProvider } = suggestion
 
   useEffect(() => {
     if (!markShownOnce(sessionKey)) {
@@ -93,24 +92,7 @@ export function SaveSuggestionCard({
   ].map((field) => field.name)
 
   const handleSave = async () => {
-    if (validated.target.kind === "create_dictionary") {
-      if (!dictionaryDraft) {
-        return
-      }
-
-      await save({
-        action: dictionaryDraft,
-        results: validated.notes,
-        actionDraft: dictionaryDraft,
-        analyticsSource: "save_suggestion",
-        analyticsProvider,
-      })
-      return
-    }
-
-    const targetActionId = validated.target.actionId
-    const candidate = findSelectionToolbarAction(selectionToolbar, targetActionId)
-    const liveAction = candidate && candidate.enabled !== false ? candidate : undefined
+    const liveAction = findSelectionToolbarAction(selectionToolbar, actionSnapshot.id)
     if (
       !liveAction ||
       getOutputSchemaFingerprint(liveAction.outputSchema) !==
@@ -160,7 +142,9 @@ export function SaveSuggestionCard({
             size="sm"
             checked={selectionToolbar.saveSuggestion.enabled}
             onCheckedChange={(checked) => {
-              void setSelectionToolbar({ saveSuggestion: { enabled: checked } })
+              void setSelectionToolbar({
+                saveSuggestion: { ...selectionToolbar.saveSuggestion, enabled: checked },
+              })
             }}
           />
           <Label

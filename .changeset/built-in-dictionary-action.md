@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-feat(custom-actions): make dictionary a protected built-in action and add action duplication
+feat(custom-actions): protect the built-in dictionary, add action customization, and select the save-suggestion action

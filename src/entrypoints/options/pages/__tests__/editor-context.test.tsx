@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider"
 import { isAPIProviderConfig } from "@/types/config/provider"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { BUILT_IN_DICTIONARY_ACTION_ID } from "@/utils/constants/custom-action"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import {
   BuiltInProviderEditor,
@@ -19,6 +20,7 @@ import {
 import {
   ActionEditor,
   BuiltInActionEditor,
+  CustomActionEditor,
   useActionEditor,
 } from "../custom-actions/action-config-form/action-editor"
 
@@ -30,6 +32,19 @@ function ActionContextProbe() {
 function ProviderContextProbe() {
   useProviderEditor()
   return null
+}
+
+function DeleteActionProbe() {
+  const deleteAction = useActionEditor().actions.delete
+  if (!deleteAction) {
+    throw new Error("Expected custom action delete command")
+  }
+
+  return (
+    <button type="button" onClick={() => void deleteAction()}>
+      Delete action
+    </button>
+  )
 }
 
 function createConfigStore() {
@@ -95,6 +110,48 @@ describe("editor compound component contexts", () => {
         </Provider>,
       ),
     ).toThrow("ProviderEditor.duplicate is unavailable in this composition")
+  })
+
+  it("resets Save Suggestions to Dictionary when deleting its selected custom action", async () => {
+    const store = createConfigStore()
+    const config = structuredClone(store.get(configAtom))
+    const action = {
+      id: "save-suggestion-action",
+      name: "Save Suggestion Action",
+      enabled: false,
+      icon: "tabler:sparkles",
+      providerId: config.selectionToolbar.builtInActions.dictionary.providerId,
+      systemPrompt: "System prompt",
+      prompt: "Prompt",
+      outputSchema: [
+        {
+          id: "result",
+          name: "result",
+          type: "string" as const,
+          description: "Result",
+          speaking: false,
+        },
+      ],
+    }
+    config.selectionToolbar.customActions = [action]
+    config.selectionToolbar.saveSuggestion.actionId = action.id
+    store.set(configAtom, config)
+
+    render(
+      <Provider store={store}>
+        <CustomActionEditor.Provider action={action}>
+          <DeleteActionProbe />
+        </CustomActionEditor.Provider>
+      </Provider>,
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: "Delete action" }))
+
+    await waitFor(() => {
+      const selectionToolbar = store.get(configAtom).selectionToolbar
+      expect(selectionToolbar.customActions).toEqual([])
+      expect(selectionToolbar.saveSuggestion.actionId).toBe(BUILT_IN_DICTIONARY_ACTION_ID)
+    })
   })
 
   it("assigns an action and enables a disabled custom provider through context actions", async () => {

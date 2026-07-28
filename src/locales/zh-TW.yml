@@ -360,6 +360,7 @@ options:
       saveSuggestion:
         title: 儲存建議
         description: 使用 AI 供應商進行劃詞翻譯後，推薦可存入筆記庫的詞條
+        action: 指令
       shortcut:
         title: 選取文字翻譯快速鍵
         description: 自訂翻譯選取文字的快速鍵

@@ -2,6 +2,7 @@
  * Migration script from v087 to v088
  * - Moves the legacy default Dictionary action into code-owned built-in action state.
  * - Preserves customized Dictionary actions under a deterministic custom id.
+ * - Pins Save Suggestion to Dictionary unless an action was already selected.
  *
  * IMPORTANT: All ids, fingerprints, and defaults are hardcoded inline. Migration
  * scripts are frozen snapshots - never import constants, helpers, or shared types.
@@ -173,7 +174,31 @@ export function migrate(oldConfig: any): any {
     return oldConfig
   }
 
-  const selectionToolbar = oldConfig.selectionToolbar
+  const oldSelectionToolbar = oldConfig.selectionToolbar
+  const existingSaveSuggestion = oldSelectionToolbar.saveSuggestion
+  const isSaveSuggestionObject =
+    existingSaveSuggestion &&
+    typeof existingSaveSuggestion === "object" &&
+    !Array.isArray(existingSaveSuggestion)
+  const hasSaveSuggestionEnabled =
+    isSaveSuggestionObject && typeof existingSaveSuggestion.enabled === "boolean"
+  const hasSaveSuggestionActionId =
+    isSaveSuggestionObject &&
+    typeof existingSaveSuggestion.actionId === "string" &&
+    existingSaveSuggestion.actionId.length > 0
+  const selectionToolbar =
+    hasSaveSuggestionEnabled && hasSaveSuggestionActionId
+      ? oldSelectionToolbar
+      : {
+          ...oldSelectionToolbar,
+          saveSuggestion: {
+            ...(isSaveSuggestionObject ? existingSaveSuggestion : {}),
+            enabled: hasSaveSuggestionEnabled ? existingSaveSuggestion.enabled : true,
+            actionId: hasSaveSuggestionActionId
+              ? existingSaveSuggestion.actionId
+              : BUILT_IN_DICTIONARY_ACTION_ID,
+          },
+        }
   const existingBuiltInState = selectionToolbar.builtInActions?.dictionary
   const legacyAction = selectionToolbar.customActions.find(
     (action: any) => action?.id === BUILT_IN_DICTIONARY_ACTION_ID,
@@ -181,7 +206,12 @@ export function migrate(oldConfig: any): any {
 
   if (existingBuiltInState) {
     if (!legacyAction) {
-      return oldConfig
+      return selectionToolbar === oldSelectionToolbar
+        ? oldConfig
+        : {
+            ...oldConfig,
+            selectionToolbar,
+          }
     }
 
     const rekeyedActions = selectionToolbar.customActions.map((action: any) =>

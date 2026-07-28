@@ -33,22 +33,16 @@ export function notePairsToRecord(
 
 export interface ValidateSaveSuggestionInput {
   envelope: {
-    action: {
-      createNewDictionaryAction: boolean
-      targetActionId: string | null
-      summaryFieldName?: string | null
-    }
+    summaryFieldName?: string | null
     notes: SaveSuggestionNote[]
   }
-  /** Enabled custom actions snapshot taken when the request was fired. */
-  candidates: SelectionToolbarCustomAction[]
-  /** Enabled built-in Dictionary snapshot, or null when the user disabled it. */
-  dictionaryDraft: SelectionToolbarCustomAction | null
+  /** Selected action snapshot taken when the request was fired. */
+  action: SelectionToolbarCustomAction
 }
 
 /**
  * Sanitize the AI's display hint: it must name a non-primary field of the
- * chosen action, otherwise fall back to null (schema-order display). A bad
+ * selected action, otherwise fall back to null (schema-order display). A bad
  * hint is cosmetic and never discards the suggestion.
  */
 function sanitizeSummaryFieldName(
@@ -66,25 +60,15 @@ function sanitizeSummaryFieldName(
 }
 
 /**
- * All-or-nothing validation of the AI suggestion: an invalid action choice,
- * zero notes, any note failing the target action's output schema, or an empty
+ * All-or-nothing validation of the AI suggestion: zero notes, any note
+ * failing the selected action's output schema, or an empty
  * primary display field discards the whole suggestion (returns null, meaning
  * "treat it as never happened").
  */
 export function validateSaveSuggestion(
   input: ValidateSaveSuggestionInput,
 ): ValidatedSaveSuggestion | null {
-  const { envelope, candidates, dictionaryDraft } = input
-
-  const createNew = envelope.action.createNewDictionaryAction
-  const action = createNew
-    ? (dictionaryDraft ?? undefined)
-    : envelope.action.targetActionId !== null
-      ? candidates.find((candidate) => candidate.id === envelope.action.targetActionId)
-      : undefined
-  if (!action) {
-    return null
-  }
+  const { envelope, action } = input
 
   if (envelope.notes.length === 0) {
     return null
@@ -118,11 +102,7 @@ export function validateSaveSuggestion(
   }
 
   return {
-    target: { kind: "existing", actionId: action.id },
     notes,
-    summaryFieldName: sanitizeSummaryFieldName(
-      envelope.action.summaryFieldName,
-      action.outputSchema,
-    ),
+    summaryFieldName: sanitizeSummaryFieldName(envelope.summaryFieldName, action.outputSchema),
   }
 }

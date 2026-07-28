@@ -17,6 +17,10 @@ export const testSeries: TestSeriesObject = {
       ...complexConfig.config,
       selectionToolbar: {
         ...complexConfig.config.selectionToolbar,
+        saveSuggestion: {
+          enabled: true,
+          actionId: "default-dictionary",
+        },
         builtInActions: {
           dictionary: {
             enabled: true,
@@ -33,6 +37,10 @@ export const testSeries: TestSeriesObject = {
       ...llmDetectionConfig.config,
       selectionToolbar: {
         ...llmDetectionConfig.config.selectionToolbar,
+        saveSuggestion: {
+          enabled: true,
+          actionId: "default-dictionary",
+        },
         builtInActions: {
           dictionary: {
             enabled: true,
@@ -49,6 +57,10 @@ export const testSeries: TestSeriesObject = {
       ...promptTokenConfig.config,
       selectionToolbar: {
         ...promptTokenConfig.config.selectionToolbar,
+        saveSuggestion: {
+          enabled: true,
+          actionId: "default-dictionary",
+        },
         builtInActions: {
           dictionary: {
             enabled: false,
@@ -65,6 +77,10 @@ export const testSeries: TestSeriesObject = {
       ...defaultDictionaryWordingConfig.config,
       selectionToolbar: {
         ...defaultDictionaryWordingConfig.config.selectionToolbar,
+        saveSuggestion: {
+          enabled: true,
+          actionId: "default-dictionary",
+        },
         builtInActions: {
           dictionary: {
             enabled: true,

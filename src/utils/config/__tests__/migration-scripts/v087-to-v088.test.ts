@@ -88,7 +88,7 @@ const connection = {
   ],
 }
 
-function config(action: any, extraActions: any[] = []) {
+function config(action: any, extraActions: any[] = []): any {
   return {
     providersConfig: [
       {
@@ -100,6 +100,9 @@ function config(action: any, extraActions: any[] = []) {
       },
     ],
     selectionToolbar: {
+      saveSuggestion: {
+        enabled: true,
+      },
       customActions: [...(action ? [action] : []), ...extraActions],
     },
   }
@@ -116,8 +119,58 @@ describe("v087-to-v088 migration", () => {
       providerId: "provider-1",
       notebaseConnection: connection,
     })
+    expect(migrated.selectionToolbar.saveSuggestion).toEqual({
+      enabled: true,
+      actionId: "default-dictionary",
+    })
     expect(migrated.selectionToolbar.customActions).toEqual([])
   })
+
+  it("preserves Save Suggestion state and an existing fixed action selection", () => {
+    const oldConfig = config(currentDictionary, [
+      {
+        ...currentDictionary,
+        id: "custom-save-action",
+        name: "Custom Save",
+      },
+    ])
+    oldConfig.selectionToolbar.saveSuggestion = {
+      enabled: false,
+      actionId: "custom-save-action",
+    }
+    const snapshot = structuredClone(oldConfig)
+
+    const migrated = migrate(oldConfig)
+
+    expect(migrated.selectionToolbar.saveSuggestion).toEqual({
+      enabled: false,
+      actionId: "custom-save-action",
+    })
+    expect(oldConfig).toEqual(snapshot)
+    expect(migrate(migrated)).toEqual(migrated)
+  })
+
+  it.each([undefined, null, [], { enabled: "yes" }])(
+    "repairs a missing or malformed Save Suggestion config without mutating its input",
+    (saveSuggestion) => {
+      const oldConfig = config(currentDictionary)
+      if (saveSuggestion === undefined) {
+        delete oldConfig.selectionToolbar.saveSuggestion
+      } else {
+        oldConfig.selectionToolbar.saveSuggestion = saveSuggestion
+      }
+      const snapshot = structuredClone(oldConfig)
+
+      const migrated = migrate(oldConfig)
+
+      expect(migrated.selectionToolbar.saveSuggestion).toEqual({
+        enabled: true,
+        actionId: "default-dictionary",
+      })
+      expect(oldConfig).toEqual(snapshot)
+      expect(migrate(migrated)).toEqual(migrated)
+    },
+  )
 
   it("preserves a modified enabled Dictionary as custom and disables the built-in", () => {
     const migrated = migrate(

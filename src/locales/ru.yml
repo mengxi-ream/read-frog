@@ -359,6 +359,7 @@ options:
       saveSuggestion:
         title: Предложения по сохранению
         description: После перевода выделенного текста с помощью ИИ-провайдера предлагать слова для сохранения в Notebase
+        action: Действие
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text

@@ -359,6 +359,7 @@ options:
       saveSuggestion:
         title: 保存の提案
         description: AI プロバイダーで選択テキストを翻訳した後、Notebase に保存する単語を提案します
+        action: アクション
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text

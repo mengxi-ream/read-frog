@@ -359,6 +359,7 @@ options:
       saveSuggestion:
         title: Kaydetme Önerileri
         description: Bir yapay zeka sağlayıcısıyla seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir
+        action: Eylem
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text

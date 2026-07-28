@@ -46,6 +46,15 @@ export function findSelectionToolbarAction(
   return selectionToolbar.customActions.find((action) => action.id === actionId)
 }
 
+export function resolveSaveSuggestionAction(
+  selectionToolbar: SelectionToolbarConfig,
+): SelectionToolbarCustomAction {
+  return (
+    findSelectionToolbarAction(selectionToolbar, selectionToolbar.saveSuggestion.actionId) ??
+    getBuiltInDictionaryAction(selectionToolbar)
+  )
+}
+
 function toBuiltInDictionaryState(
   action: SelectionToolbarCustomAction,
 ): SelectionToolbarBuiltInActionState {

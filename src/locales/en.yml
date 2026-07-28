@@ -360,6 +360,7 @@ options:
       saveSuggestion:
         title: Save Suggestions
         description: After selection translation with an AI provider, suggest words to save to your Notebase
+        action: Action
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text

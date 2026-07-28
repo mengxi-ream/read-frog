@@ -359,6 +359,7 @@ options:
       saveSuggestion:
         title: 저장 제안
         description: AI 제공자로 선택 번역 후 Notebase에 저장할 단어를 추천합니다
+        action: 작업
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text

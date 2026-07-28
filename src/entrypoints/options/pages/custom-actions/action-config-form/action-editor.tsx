@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/base-ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
+  BUILT_IN_DICTIONARY_ACTION_ID,
   getSelectionToolbarCustomActionTokenCellText,
   SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS,
 } from "@/utils/constants/custom-action"
@@ -157,6 +158,13 @@ function CustomProvider({
     await setSelectionToolbar({
       ...selectionToolbar,
       customActions: updatedActions,
+      saveSuggestion:
+        selectionToolbar.saveSuggestion.actionId === action.id
+          ? {
+              ...selectionToolbar.saveSuggestion,
+              actionId: BUILT_IN_DICTIONARY_ACTION_ID,
+            }
+          : selectionToolbar.saveSuggestion,
     })
     setSelectedActionId(nextSelectedAction?.id)
   }

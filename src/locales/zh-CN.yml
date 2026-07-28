@@ -360,6 +360,7 @@ options:
       saveSuggestion:
         title: 保存建议
         description: 使用 AI 提供商进行划词翻译后，推荐可存入笔记库的词条
+        action: 指令
       shortcut:
         title: 划词翻译快捷键
         description: 自定义翻译选中文本的快捷键

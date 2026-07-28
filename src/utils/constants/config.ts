@@ -152,6 +152,7 @@ export const DEFAULT_CONFIG: Config = {
     customActions: [],
     saveSuggestion: {
       enabled: true,
+      actionId: BUILT_IN_DICTIONARY_ACTION_ID,
     },
   },
   sideContent: {

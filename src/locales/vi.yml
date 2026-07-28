@@ -359,6 +359,7 @@ options:
       saveSuggestion:
         title: Gợi ý lưu
         description: Sau khi dịch vùng chọn bằng nhà cung cấp AI, gợi ý các từ để lưu vào Notebase
+        action: Hành động
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text

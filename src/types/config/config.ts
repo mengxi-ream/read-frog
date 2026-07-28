@@ -51,6 +51,7 @@ const selectionToolbarSchema = z.object({
   customActions: selectionToolbarCustomActionsSchema,
   saveSuggestion: z.object({
     enabled: z.boolean(),
+    actionId: z.string().nonempty(),
   }),
 })
 
