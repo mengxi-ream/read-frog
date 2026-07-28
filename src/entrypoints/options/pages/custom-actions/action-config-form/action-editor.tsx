@@ -14,6 +14,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/base-ui/alert-dialog"
 import { Button } from "@/components/ui/base-ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
   getSelectionToolbarCustomActionTokenCellText,
@@ -169,9 +170,15 @@ function Form({ children }: { children: React.ReactNode }) {
   return <form.AppForm>{children}</form.AppForm>
 }
 
-function NameField({ readOnly = false }: { readOnly?: boolean }) {
+function NameField({
+  readOnly = false,
+  children,
+}: {
+  readOnly?: boolean
+  children?: React.ReactNode
+}) {
   const { form } = useActionEditor().state
-  return <NameFormField form={form} readOnly={readOnly} />
+  return <NameFormField form={form} readOnly={readOnly} labelExtra={children} />
 }
 
 function IconField({ readOnly = false }: { readOnly?: boolean }) {
@@ -255,6 +262,27 @@ function DuplicateButton() {
   )
 }
 
+function CustomizeButton() {
+  const { duplicate } = useActionEditor().actions
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button type="button" variant="outline" size="xs" onClick={() => void duplicate()} />
+        }
+      >
+        {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.customize")}
+      </TooltipTrigger>
+      <TooltipContent className="max-w-72">
+        {i18n.t(
+          "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.customizeTooltip",
+        )}
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
 function DeleteButton() {
   const deleteAction = useRequiredActionEditorCommand("delete")
   const [open, setOpen] = useState(false)
@@ -306,6 +334,7 @@ export const ActionEditor = {
     ReadOnly: ReadOnlyOutputSchema,
   },
   NotebaseConnectionField,
+  CustomizeButton,
   DuplicateButton,
   DeleteButton,
 }

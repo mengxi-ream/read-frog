@@ -405,6 +405,8 @@ options:
           actions: Acciones
         form:
           name: Nombre
+          customize: Personalizar
+          customizeTooltip: Las instrucciones integradas no permiten cambiar los prompts. Haz clic aquí para crear una copia editable y modificar los prompts.
           icon: Icono
           iconField:
             chooseAriaLabel: Elegir icono

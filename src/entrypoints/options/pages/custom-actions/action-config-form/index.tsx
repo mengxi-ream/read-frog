@@ -39,7 +39,9 @@ function BuiltInDictionaryEditor({ action }: { action: SelectionToolbarCustomAct
       <ActionEditor.Form>
         <EntityEditor.Root>
           <EntityEditor.Body>
-            <ActionEditor.NameField readOnly />
+            <ActionEditor.NameField readOnly>
+              <ActionEditor.CustomizeButton />
+            </ActionEditor.NameField>
             <ActionEditor.IconField readOnly />
             <ActionEditor.ProviderField />
             <ActionEditor.SystemPromptField readOnly />
@@ -47,9 +49,6 @@ function BuiltInDictionaryEditor({ action }: { action: SelectionToolbarCustomAct
             <ActionEditor.OutputSchema.ReadOnly />
             <ActionEditor.NotebaseConnectionField />
           </EntityEditor.Body>
-          <EntityEditor.Footer className="justify-end">
-            <ActionEditor.DuplicateButton />
-          </EntityEditor.Footer>
         </EntityEditor.Root>
       </ActionEditor.Form>
     </BuiltInActionEditor.Provider>

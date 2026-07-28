@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
+import type { ReactNode } from "react"
 import type { Config } from "@/types/config/config"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { describe, expect, it, vi } from "vitest"
+import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { i18n } from "@/utils/i18n"
@@ -20,8 +22,11 @@ vi.mock("@/components/form/quick-insertable-textarea-field-auto-save", () => ({
 }))
 
 vi.mock("../name-field", () => ({
-  NameField: ({ readOnly }: { readOnly: boolean }) => (
-    <div>{`NameField:${readOnly ? "readOnly" : "editable"}`}</div>
+  NameField: ({ readOnly, labelExtra }: { readOnly: boolean; labelExtra?: ReactNode }) => (
+    <div>
+      {`NameField:${readOnly ? "readOnly" : "editable"}`}
+      {labelExtra}
+    </div>
   ),
 }))
 
@@ -73,7 +78,9 @@ describe("customActionConfigForm notebase availability", () => {
 
     render(
       <Provider store={store}>
-        <CustomActionConfigForm />
+        <TooltipProvider>
+          <CustomActionConfigForm />
+        </TooltipProvider>
       </Provider>,
     )
 
@@ -88,9 +95,16 @@ describe("customActionConfigForm notebase availability", () => {
       ),
     ).not.toBeInTheDocument()
 
-    fireEvent.click(
-      screen.getByRole("button", { name: i18n.t("options.apiProviders.form.duplicate") }),
-    )
+    expect(
+      screen.queryByRole("button", { name: i18n.t("options.apiProviders.form.duplicate") }),
+    ).not.toBeInTheDocument()
+
+    const customizeButton = screen.getByRole("button", {
+      name: i18n.t(
+        "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.customize",
+      ),
+    })
+    fireEvent.click(customizeButton)
 
     await waitFor(() => {
       expect(store.get(configAtom).selectionToolbar.customActions).toHaveLength(1)
@@ -102,6 +116,35 @@ describe("customActionConfigForm notebase availability", () => {
       notebaseConnection: config.selectionToolbar.builtInActions.dictionary.notebaseConnection,
     })
     expect(duplicated.id).not.toBe("default-dictionary")
+  })
+
+  it("explains that customizing creates an editable built-in action copy", async () => {
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+
+    render(
+      <Provider store={store}>
+        <TooltipProvider>
+          <CustomActionConfigForm />
+        </TooltipProvider>
+      </Provider>,
+    )
+
+    const customizeButton = screen.getByRole("button", {
+      name: i18n.t(
+        "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.customize",
+      ),
+    })
+    fireEvent.mouseEnter(customizeButton)
+    fireEvent.focus(customizeButton)
+
+    await waitFor(() =>
+      expect(document.querySelector("[data-slot='tooltip-content']")).toHaveTextContent(
+        i18n.t(
+          "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.customizeTooltip",
+        ),
+      ),
+    )
   })
 
   it("shows the notebase connection field when beta experience is disabled", () => {
@@ -194,6 +237,13 @@ describe("customActionConfigForm notebase availability", () => {
 
     expect(screen.getByText("NameField:editable")).toBeInTheDocument()
     expect(screen.getByText("OutputSchemaField")).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", {
+        name: i18n.t(
+          "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.customize",
+        ),
+      }),
+    ).not.toBeInTheDocument()
     expect(
       screen.getByRole("button", {
         name: i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.delete"),

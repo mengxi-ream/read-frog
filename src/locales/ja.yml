@@ -404,6 +404,8 @@ options:
           actions: 操作
         form:
           name: 名前
+          customize: カスタマイズ
+          customizeTooltip: 組み込みアクションのプロンプトは変更できません。このボタンをクリックして編集可能なコピーを作成し、プロンプトを変更します。
           icon: アイコン
           iconField:
             chooseAriaLabel: アイコンを選択

@@ -404,6 +404,8 @@ options:
           actions: İşlemler
         form:
           name: Ad
+          customize: Özelleştir
+          customizeTooltip: Yerleşik eylemin istemleri değiştirilemez. Düzenlenebilir bir kopya oluşturup istemleri değiştirmek için bu düğmeye tıklayın.
           icon: Simge
           iconField:
             chooseAriaLabel: Simge seç

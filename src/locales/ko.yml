@@ -404,6 +404,8 @@ options:
           actions: 작업
         form:
           name: 이름
+          customize: 사용자 지정
+          customizeTooltip: 기본 제공 작업의 프롬프트는 변경할 수 없습니다. 이 버튼을 클릭하여 편집 가능한 복사본을 만들고 프롬프트를 수정하세요.
           icon: 아이콘
           iconField:
             chooseAriaLabel: 아이콘 선택

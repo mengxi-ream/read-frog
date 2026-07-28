@@ -405,6 +405,8 @@ options:
           actions: Actions
         form:
           name: Name
+          customize: Customize
+          customizeTooltip: Built-in instructions do not allow prompt changes. Click here to create an editable copy and modify the prompts.
           icon: Icon
           iconField:
             chooseAriaLabel: Choose icon

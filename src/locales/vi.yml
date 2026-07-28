@@ -404,6 +404,8 @@ options:
           actions: Thao tác
         form:
           name: Tên
+          customize: Tùy chỉnh
+          customizeTooltip: Không thể thay đổi prompt của tác vụ tích hợp. Nhấp vào nút này để tạo bản sao có thể chỉnh sửa và thay đổi prompt.
           icon: Biểu tượng
           iconField:
             chooseAriaLabel: Chọn biểu tượng

@@ -405,6 +405,8 @@ options:
           actions: 操作
         form:
           name: 名稱
+          customize: 自訂
+          customizeTooltip: 內建指令不允許修改提示詞，點此按鈕來修改指令提示詞
           icon: 圖示
           iconField:
             chooseAriaLabel: 選擇圖示
