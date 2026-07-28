@@ -185,7 +185,10 @@ export function migrate(oldConfig: any): any {
   const hasSaveSuggestionActionId =
     isSaveSuggestionObject &&
     typeof existingSaveSuggestion.actionId === "string" &&
-    existingSaveSuggestion.actionId.length > 0
+    (existingSaveSuggestion.actionId === BUILT_IN_DICTIONARY_ACTION_ID ||
+      oldSelectionToolbar.customActions.some(
+        (action: any) => action?.id === existingSaveSuggestion.actionId,
+      ))
   const selectionToolbar =
     hasSaveSuggestionEnabled && hasSaveSuggestionActionId
       ? oldSelectionToolbar
@@ -272,10 +275,18 @@ export function migrate(oldConfig: any): any {
     id: nextMigratedCustomId(selectionToolbar.customActions),
     providerId,
   }
+  const saveSuggestion =
+    hasSaveSuggestionActionId && existingSaveSuggestion.actionId === BUILT_IN_DICTIONARY_ACTION_ID
+      ? {
+          ...selectionToolbar.saveSuggestion,
+          actionId: rekeyedLegacyAction.id,
+        }
+      : selectionToolbar.saveSuggestion
   return {
     ...oldConfig,
     selectionToolbar: {
       ...selectionToolbar,
+      saveSuggestion,
       builtInActions: {
         dictionary: createBuiltInState(providerId, legacyAction.enabled === false),
       },
@@ -351,6 +362,9 @@ export function migrateWithPendingDictionarySave(oldConfig: any, pendingSave: an
     id: rekeyedActionId,
     providerId,
   }
+  const shouldRekeySaveSuggestionAction =
+    !oldConfig.selectionToolbar.builtInActions?.dictionary &&
+    oldConfig.selectionToolbar.saveSuggestion?.actionId === BUILT_IN_DICTIONARY_ACTION_ID
   const customActions = [...migrated.selectionToolbar.customActions]
   customActions.splice(Math.min(legacyActionIndex, customActions.length), 0, rekeyedAction)
 
@@ -358,6 +372,12 @@ export function migrateWithPendingDictionarySave(oldConfig: any, pendingSave: an
     ...migrated,
     selectionToolbar: {
       ...migrated.selectionToolbar,
+      saveSuggestion: shouldRekeySaveSuggestionAction
+        ? {
+            ...migrated.selectionToolbar.saveSuggestion,
+            actionId: rekeyedActionId,
+          }
+        : migrated.selectionToolbar.saveSuggestion,
       builtInActions: {
         dictionary: createBuiltInState(providerId, legacyAction.enabled === false),
       },

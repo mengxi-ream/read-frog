@@ -49,10 +49,14 @@ export function findSelectionToolbarAction(
 export function resolveSaveSuggestionAction(
   selectionToolbar: SelectionToolbarConfig,
 ): SelectionToolbarCustomAction {
-  return (
-    findSelectionToolbarAction(selectionToolbar, selectionToolbar.saveSuggestion.actionId) ??
-    getBuiltInDictionaryAction(selectionToolbar)
-  )
+  const actionId = selectionToolbar.saveSuggestion.actionId
+  const action = findSelectionToolbarAction(selectionToolbar, actionId)
+  if (!action) {
+    throw new Error(
+      `Save Suggestion action "${actionId}" is missing from the validated configuration.`,
+    )
+  }
+  return action
 }
 
 function toBuiltInDictionaryState(

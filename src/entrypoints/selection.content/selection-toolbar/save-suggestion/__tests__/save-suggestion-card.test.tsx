@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
 import type { ReactNode } from "react"
 import type { SaveSuggestionSessionResult } from "../use-save-suggestion"
+import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { storage } from "#imports"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { i18n } from "@/utils/i18n"
@@ -46,7 +48,7 @@ function createAction(
     name: "Dictionary",
     enabled: true,
     icon: "tabler:book-2",
-    providerId: "old-provider",
+    providerId: "read-frog-free-ai",
     systemPrompt: "system",
     prompt: "prompt",
     outputSchema: [
@@ -88,7 +90,7 @@ function createStoreWithAction(action?: SelectionToolbarCustomAction) {
   const store = createStore()
   const config = structuredClone(DEFAULT_CONFIG)
   config.selectionToolbar.customActions = action ? [action] : []
-  config.selectionToolbar.saveSuggestion.actionId = action?.id ?? "missing-action"
+  config.selectionToolbar.saveSuggestion.actionId = action?.id ?? "default-dictionary"
   store.set(configAtom, config)
   return store
 }
@@ -206,16 +208,28 @@ describe("SaveSuggestionCard", () => {
     expect(mocks.toastAdd).not.toHaveBeenCalled()
   })
 
-  it("preserves the selected action when toggling Save Suggestion", () => {
+  it("preserves the selected action when toggling Save Suggestion", async () => {
     const action = createAction()
     const store = createStoreWithAction(action)
+    await storage.setItem("local:config", store.get(configAtom))
     renderCard(store, action)
 
     fireEvent.click(screen.getByRole("switch"))
 
-    expect(store.get(configAtom).selectionToolbar.saveSuggestion).toEqual({
-      enabled: false,
-      actionId: action.id,
+    await waitFor(() => {
+      expect(store.get(configAtom).selectionToolbar.saveSuggestion).toEqual({
+        enabled: false,
+        actionId: action.id,
+      })
     })
+    await waitFor(async () => {
+      expect(
+        (await storage.getItem<Config>("local:config"))?.selectionToolbar.saveSuggestion,
+      ).toEqual({
+        enabled: false,
+        actionId: action.id,
+      })
+    })
+    await storage.removeItem("local:config")
   })
 })

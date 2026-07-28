@@ -150,6 +150,24 @@ describe("v087-to-v088 migration", () => {
     expect(migrate(migrated)).toEqual(migrated)
   })
 
+  it("repairs a dangling Save Suggestion action id without mutating its input", () => {
+    const oldConfig = config(currentDictionary)
+    oldConfig.selectionToolbar.saveSuggestion = {
+      enabled: false,
+      actionId: "missing-action",
+    }
+    const snapshot = structuredClone(oldConfig)
+
+    const migrated = migrate(oldConfig)
+
+    expect(migrated.selectionToolbar.saveSuggestion).toEqual({
+      enabled: false,
+      actionId: "default-dictionary",
+    })
+    expect(oldConfig).toEqual(snapshot)
+    expect(migrate(migrated)).toEqual(migrated)
+  })
+
   it.each([undefined, null, [], { enabled: "yes" }])(
     "repairs a missing or malformed Save Suggestion config without mutating its input",
     (saveSuggestion) => {
@@ -191,6 +209,20 @@ describe("v087-to-v088 migration", () => {
       systemPrompt: "My custom prompt",
       notebaseConnection: connection,
     })
+  })
+
+  it("rekeys an explicit Save Suggestion reference with a modified legacy Dictionary", () => {
+    const oldConfig = config({
+      ...currentDictionary,
+      systemPrompt: "My custom prompt",
+    })
+    oldConfig.selectionToolbar.saveSuggestion.actionId = "default-dictionary"
+
+    const migrated = migrate(oldConfig)
+
+    expect(migrated.selectionToolbar.customActions[0].id).toBe("migrated-default-dictionary")
+    expect(migrated.selectionToolbar.saveSuggestion.actionId).toBe("migrated-default-dictionary")
+    expect(migrate(migrated)).toEqual(migrated)
   })
 
   it("preserves a modified disabled Dictionary and enables the built-in", () => {
@@ -300,6 +332,22 @@ describe("v087-to-v088 migration", () => {
     ).toEqual(safelyMigrated)
   })
 
+  it("rekeys an explicit Save Suggestion reference on the pending-save safety path", () => {
+    const oldConfig = config(currentDictionary)
+    oldConfig.selectionToolbar.saveSuggestion.actionId = "default-dictionary"
+    const pendingFingerprint = JSON.stringify(
+      currentDictionary.outputSchema.map(({ id, name, type }) => ({ id, name, type })),
+    )
+
+    const migrated = migrateWithPendingDictionarySave(oldConfig, {
+      actionId: "default-dictionary",
+      outputSchemaFingerprint: pendingFingerprint,
+    })
+
+    expect(migrated.selectionToolbar.saveSuggestion.actionId).toBe("migrated-default-dictionary")
+    expect(migrateWithPendingDictionarySave(migrated, null)).toEqual(migrated)
+  })
+
   it("preserves the exact pending owner even when its output field ids are current", () => {
     const pending = {
       actionId: "default-dictionary",
@@ -388,12 +436,14 @@ describe("v087-to-v088 migration", () => {
       name: "Existing",
     }
     const original = config({ ...currentDictionary, systemPrompt: "modified" }, [collision])
+    original.selectionToolbar.saveSuggestion.actionId = "default-dictionary"
     const snapshot = structuredClone(original)
     const first = migrate(original)
     const second = migrate(first)
 
     expect(original).toEqual(snapshot)
     expect(first.selectionToolbar.customActions[0].id).toBe("migrated-default-dictionary-2")
+    expect(first.selectionToolbar.saveSuggestion.actionId).toBe("migrated-default-dictionary-2")
     expect(second).toEqual(first)
   })
 

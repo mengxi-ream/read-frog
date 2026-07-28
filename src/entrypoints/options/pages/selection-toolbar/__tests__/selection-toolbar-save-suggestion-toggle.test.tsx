@@ -146,10 +146,10 @@ describe("SelectionToolbarSaveSuggestionToggle", () => {
     })
   })
 
-  it("renders the effective built-in fallback for a stale id without writing during render", () => {
+  it("renders the configured built-in action without writing during render", () => {
     const selectionToolbar = testState.selectionToolbar!
     selectionToolbar.customActions = [createCustomAction("action-1", "Custom Action", true)]
-    selectionToolbar.saveSuggestion.actionId = "missing-action"
+    selectionToolbar.saveSuggestion.actionId = "default-dictionary"
 
     render(<SelectionToolbarSaveSuggestionToggle />)
 

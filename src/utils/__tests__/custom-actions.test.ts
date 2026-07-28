@@ -124,14 +124,12 @@ describe("selection toolbar built-in actions", () => {
     expect(resolveSaveSuggestionAction(selectionToolbar)).toBe(customAction)
   })
 
-  it("falls back to the built-in Dictionary when the configured action no longer exists", () => {
+  it("fails fast when the configured Save Suggestion action violates the config invariant", () => {
     const selectionToolbar = cloneSelectionToolbar()
-    selectionToolbar.builtInActions.dictionary.enabled = false
     selectionToolbar.saveSuggestion.actionId = "deleted-action"
 
-    expect(resolveSaveSuggestionAction(selectionToolbar)).toEqual(
-      getBuiltInDictionaryAction(selectionToolbar),
+    expect(() => resolveSaveSuggestionAction(selectionToolbar)).toThrow(
+      'Save Suggestion action "deleted-action" is missing from the validated configuration.',
     )
-    expect(resolveSaveSuggestionAction(selectionToolbar).enabled).toBe(false)
   })
 })
