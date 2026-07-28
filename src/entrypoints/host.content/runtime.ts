@@ -1,6 +1,7 @@
 import type { ContentScriptContext } from "#imports"
 import type { Config } from "@/types/config/config"
-import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { storageAdapter } from "@/utils/atoms/storage-adapter"
+import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { detectPageLanguageLightweight } from "@/utils/content/page-language"
 import { ensurePresetStyles } from "@/utils/host/translate/ui/style-injector"
 import { logger } from "@/utils/logger"
@@ -11,6 +12,10 @@ import { setupUrlChangeListener } from "./listen"
 import { mountHostToast } from "./mount-host-toast"
 import { bindTranslationModeShortcutKey } from "./translation-control/bind-translation-mode-shortcut"
 import { bindTranslationShortcutKey } from "./translation-control/bind-translation-shortcut"
+import {
+  handleTranslationModeChange,
+  handleTranslationStyleChange,
+} from "./translation-control/handle-config-change"
 import { registerNodeTranslationTriggers } from "./translation-control/node-translation"
 import { PageTranslationManager } from "./translation-control/page-translation"
 
@@ -39,6 +44,17 @@ export async function bootstrapHostContent(
   const cleanupTranslationShortcut = await bindTranslationShortcutKey(manager)
 
   const cleanupTranslationModeShortcut = await bindTranslationModeShortcutKey()
+
+  let currentConfig = initialConfig
+  const cleanupConfigListener = storageAdapter.watch<Config>(CONFIG_STORAGE_KEY, (newConfig) => {
+    const oldConfig = currentConfig
+    currentConfig = newConfig
+
+    const didRestart = handleTranslationModeChange(newConfig, oldConfig, manager)
+    if (!didRestart) {
+      void handleTranslationStyleChange(newConfig, oldConfig)
+    }
+  })
 
   const detectAndReportPageLanguage = async (url: string) => {
     const { detectedCodeOrUnd } = await detectPageLanguageLightweight()
@@ -118,6 +134,7 @@ export async function bootstrapHostContent(
     cleanupPageTranslationTriggers()
     cleanupTranslationShortcut()
     cleanupTranslationModeShortcut()
+    cleanupConfigListener()
     cleanupTranslationStateListener()
     cleanupFrameTranslationStateListener()
     cleanupDetectedLanguageRefreshListener()
