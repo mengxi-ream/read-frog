@@ -519,25 +519,26 @@ options:
               1. Céntrate en el significado que mejor coincida con los párrafos proporcionados.
               2. Normaliza Término a su forma base/canónica.
               3. Mantén Definición precisa y fácil para estudiantes.
-              4. Mantén Párrafos exactamente como se proporcionan en el prompt.
-              5. Fonética debe usar la notación estándar del idioma del término (p. ej., IPA para inglés, pinyin para mandarín, romaji para japonés).
-              6. Categoría gramatical en inglés (noun, verb, adjective, etc.).
-              7. Dificultad debe ser un nivel CEFR (A1, A2, B1, B2, C1 o C2).
-              8. Si un campo es desconocido, devuelve una cadena vacía en lugar de adivinar.
-              9. Responde en {{targetLanguage}} para todos los campos textuales, salvo que se requiera texto en la forma de origen para mayor claridad.
+              4. Para Oración, extrae únicamente la oración completa de los párrafos proporcionados que contenga el término seleccionado. No incluyas las oraciones anteriores ni posteriores.
+              5. Traducción de la oración debe traducir únicamente la Oración extraída.
+              6. Fonética debe usar la notación estándar del idioma del término (p. ej., IPA para inglés, pinyin para mandarín, romaji para japonés).
+              7. Categoría gramatical en inglés (noun, verb, adjective, etc.).
+              8. Dificultad debe ser un nivel CEFR (A1, A2, B1, B2, C1 o C2).
+              9. Si un campo es desconocido, devuelve una cadena vacía en lugar de adivinar.
+              10. Responde en {{targetLanguage}} para todos los campos textuales, salvo que se requiera texto en la forma de origen para mayor claridad.
 
               ## Ejemplos
 
               ### Ejemplo 1
-              Entrada: Selección="blossoms", Párrafos="The ephemeral beauty of cherry blossoms reminds us to cherish each moment.", Idioma de destino=chino
+              Entrada: Selección="blossoms", Párrafos="Spring arrives quietly in the park. The ephemeral beauty of cherry blossoms reminds us to cherish each moment. Families and friends gather beneath the trees.", Idioma de destino=chino
 
               Salida:
               - Término: blossom
               - Fonética: /ˈblɒs.əm/
               - Categoría gramatical: noun
-              - Párrafos: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+              - Oración: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
               - Definición: 花；花朵（尤指果树的花）
-              - Traducción de párrafos: 樱花短暂的美丽提醒我们珍惜每一刻。
+              - Traducción de la oración: 樱花短暂的美丽提醒我们珍惜每一刻。
               - Dificultad: B2
 
               ### Ejemplo 2
@@ -547,9 +548,9 @@ options:
               - Término: 感動
               - Fonética: kandou
               - Categoría gramatical: noun
-              - Párrafos: この映画はつまらないと思ったけど、最後は感動した。
+              - Oración: この映画はつまらないと思ったけど、最後は感動した。
               - Definición: Being deeply moved; emotional touch
-              - Traducción de párrafos: I thought this movie was boring, but the ending was moving.
+              - Traducción de la oración: I thought this movie was boring, but the ending was moving.
               - Dificultad: B1
             prompt: |-
               ## Entrada
@@ -562,12 +563,12 @@ options:
             fieldPhoneticDescription: Transcripción fonética estándar para el idioma del término (p. ej., IPA para inglés, pinyin para mandarín, romaji para japonés).
             fieldPartOfSpeech: Categoría gramatical
             fieldPartOfSpeechDescription: Categoría gramatical (p. ej., noun, verb, adjective).
-            fieldParagraphs: Párrafos
-            fieldParagraphsDescription: Los párrafos del prompt anterior. No los reescribas.
+            fieldSentence: Oración
+            fieldSentenceDescription: La oración completa de los párrafos anteriores que contiene el término seleccionado. No incluyas las oraciones anteriores ni posteriores.
             fieldDefinition: Definición
             fieldDefinitionDescription: Una definición concisa para el sentido contextual.
-            fieldParagraphsTranslation: Traducción de párrafos
-            fieldParagraphsTranslationDescription: La traducción de los párrafos.
+            fieldSentenceTranslation: Traducción de la oración
+            fieldSentenceTranslationDescription: La traducción únicamente de la Oración.
             fieldDifficulty: Dificultad
             fieldDifficultyDescription: Nivel de dificultad CEFR estimado A1, A2, B1, B2, C1 o C2.
           improveWriting:

@@ -1,6 +1,8 @@
 import type { NotebaseRowCreateInput } from "@read-frog/api-contract"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { describe, expect, it } from "vitest"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import { sanitizeSelectionToolbarCustomAction } from "../notebase/connection"
 import {
   buildNotebaseRowCells,
@@ -171,6 +173,77 @@ describe("notebase utils", () => {
     })
     expect(typedCells).toEqual({
       "column-summary": "A short summary",
+    })
+  })
+
+  it("keeps existing Dictionary context ids mapped to the original Notebase columns", () => {
+    const action = getBuiltInDictionaryAction(DEFAULT_CONFIG.selectionToolbar)
+    const connectedAction: SelectionToolbarCustomAction = {
+      ...action,
+      outputSchema: action.outputSchema.map((field) => {
+        if (field.id === "default-dictionary-context") {
+          return { ...field, name: "Sentence" }
+        }
+        if (field.id === "default-dictionary-context-translation") {
+          return { ...field, name: "Sentence Translation" }
+        }
+        return field
+      }),
+      notebaseConnection: {
+        notebaseId: "notebase-1",
+        notebaseNameSnapshot: "Words",
+        connectedAccount,
+        mappings: [
+          createNotebaseMapping("default-dictionary-context", "column-paragraphs", "Paragraphs"),
+          createNotebaseMapping(
+            "default-dictionary-context-translation",
+            "column-paragraphs-translation",
+            "Paragraphs Translation",
+          ),
+        ],
+      },
+    }
+    const schema = {
+      id: "notebase-1",
+      name: "Words",
+      updatedAt: new Date(),
+      notebaseColumns: [
+        {
+          id: "column-paragraphs",
+          notebaseId: "notebase-1",
+          name: "Paragraphs",
+          config: { type: "string" as const },
+          position: 0,
+          isPrimary: false,
+          width: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: "column-paragraphs-translation",
+          notebaseId: "notebase-1",
+          name: "Paragraphs Translation",
+          config: { type: "string" as const },
+          position: 1,
+          isPrimary: false,
+          width: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
+    }
+
+    expect(
+      resolveNotebaseMappings(connectedAction, schema).map((mapping) => mapping.status),
+    ).toEqual(["valid", "valid"])
+    expect(
+      buildNotebaseRowCells(connectedAction, schema, {
+        Sentence: "The selected term appears in this sentence.",
+        "Sentence Translation": "所选词语出现在这个句子中。",
+      }).cells,
+    ).toEqual({
+      "column-paragraphs": "The selected term appears in this sentence.",
+      "column-paragraphs-translation": "所选词语出现在这个句子中。",
     })
   })
 

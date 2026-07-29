@@ -61,16 +61,16 @@ export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
           "dictionary-definition",
         ),
         createOutputSchemaField(
-          i18n.t(`${T_PREFIX}.dictionary.fieldParagraphs`),
+          i18n.t(`${T_PREFIX}.dictionary.fieldSentence`),
           "string",
-          i18n.t(`${T_PREFIX}.dictionary.fieldParagraphsDescription`),
+          i18n.t(`${T_PREFIX}.dictionary.fieldSentenceDescription`),
           "dictionary-context",
           true,
         ),
         createOutputSchemaField(
-          i18n.t(`${T_PREFIX}.dictionary.fieldParagraphsTranslation`),
+          i18n.t(`${T_PREFIX}.dictionary.fieldSentenceTranslation`),
           "string",
-          i18n.t(`${T_PREFIX}.dictionary.fieldParagraphsTranslationDescription`),
+          i18n.t(`${T_PREFIX}.dictionary.fieldSentenceTranslationDescription`),
           "dictionary-context-translation",
         ),
         createOutputSchemaField(

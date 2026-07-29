@@ -519,25 +519,26 @@ options:
               1. 專注於最符合所提供段落的語意。
               2. 將詞條標準化為基本／標準形式。
               3. 定義要精確且適合學習者理解。
-              4. 段落必須與提示詞中提供的內容完全一致。
-              5. 音標必須使用該詞條語言的標準標記（例如英文使用 IPA、中文使用拼音、日文使用羅馬字）。
-              6. 詞性請使用英文（noun、verb、adjective 等）。
-              7. 難度必須是 CEFR 等級（A1、A2、B1、B2、C1 或 C2）。
-              8. 如果某個欄位無法判斷，請回傳空字串，不要猜測。
-              9. 除非必須使用來源形式才能保持清楚，所有文字欄位都請使用 {{targetLanguage}} 回答。
+              4. 「句子」欄位只提取所提供段落中包含所選字詞的完整句子，不要包含前後句。
+              5. 「句子翻譯」欄位只翻譯所提取的句子。
+              6. 音標必須使用該詞條語言的標準標記（例如英文使用 IPA、中文使用拼音、日文使用羅馬字）。
+              7. 詞性請使用英文（noun、verb、adjective 等）。
+              8. 難度必須是 CEFR 等級（A1、A2、B1、B2、C1 或 C2）。
+              9. 如果某個欄位無法判斷，請回傳空字串，不要猜測。
+              10. 除非必須使用來源形式才能保持清楚，所有文字欄位都請使用 {{targetLanguage}} 回答。
 
               ## 範例
 
               ### 範例 1
-              輸入：Selection=blossoms；Paragraphs=The ephemeral beauty of cherry blossoms reminds us to cherish each moment.；Target language=Chinese
+              輸入：Selection=blossoms；Paragraphs=Spring arrives quietly in the park. The ephemeral beauty of cherry blossoms reminds us to cherish each moment. Families and friends gather beneath the trees.；Target language=Chinese
 
               輸出：
               - 詞條：blossom
               - 音標：/ˈblɒs.əm/
               - 詞性：noun
-              - 段落：The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+              - 句子：The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
               - 定義：花；花朵（尤指果樹的花）
-              - 段落翻譯：櫻花短暫的美麗提醒我們珍惜每一刻。
+              - 句子翻譯：櫻花短暫的美麗提醒我們珍惜每一刻。
               - 難度：B2
 
               ### 範例 2
@@ -547,9 +548,9 @@ options:
               - 詞條：感動
               - 音標：kandou
               - 詞性：noun
-              - 段落：この映画はつまらないと思ったけど、最後は感動した。
+              - 句子：この映画はつまらないと思ったけど、最後は感動した。
               - 定義：Being deeply moved; emotional touch
-              - 段落翻譯：I thought this movie was boring, but the ending was moving.
+              - 句子翻譯：I thought this movie was boring, but the ending was moving.
               - 難度：B1
             prompt: |-
               ## 輸入
@@ -562,12 +563,12 @@ options:
             fieldPhoneticDescription: 詞條語言的標準音標標記（例如英文使用 IPA、中文使用拼音、日文使用羅馬字）。
             fieldPartOfSpeech: 詞性
             fieldPartOfSpeechDescription: 文法類別（例如 noun、verb、adjective）。
-            fieldParagraphs: 段落
-            fieldParagraphsDescription: 上方提示詞中的段落。請勿重寫。
+            fieldSentence: 句子
+            fieldSentenceDescription: 提取上方段落中包含所選字詞的完整句子，不要包含前後句。
             fieldDefinition: 定義
             fieldDefinitionDescription: 針對脈絡語意提供一則精簡定義。
-            fieldParagraphsTranslation: 段落翻譯
-            fieldParagraphsTranslationDescription: 段落的翻譯。
+            fieldSentenceTranslation: 句子翻譯
+            fieldSentenceTranslationDescription: 只翻譯提取出的句子。
             fieldDifficulty: 難度
             fieldDifficultyDescription: 預估 CEFR 難度等級 A1、A2、B1、B2、C1 或 C2。
           improveWriting:
