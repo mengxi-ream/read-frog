@@ -57,6 +57,7 @@ const SELECTION_GUARD_INTERACTIVE_SELECTOR = [
   "textarea",
   "select",
   "summary",
+  "video",
 ].join(", ")
 
 const SELECTION_OVERLAY_ROOT_SELECTOR = `[${SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE}]`
