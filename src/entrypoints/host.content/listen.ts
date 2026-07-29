@@ -55,16 +55,32 @@ export function setupUrlChangeListener(signal?: AbortSignal): () => void {
   window.addEventListener("hashchange", onHashChange, { signal })
 
   /* ---------- 3. Modern Navigation API (only Chrome/Edge) ---------- */
+  // Prefer `currententrychange` over `navigate`, for two reasons:
+  //  • `navigate` also fires for CROSS-document navigations (clicking a plain
+  //    link), so we ran a full same-origin URL-change cycle on a page that was
+  //    about to unload. `currententrychange` only fires for committed
+  //    same-document entry changes.
+  //  • `navigate` fires when navigation is *initiated*, so a cancelled or
+  //    redirected navigation desynced `prev` from the real URL.
+  // Note this is NOT a "wait until the DOM is ready" fix: currententrychange
+  // still fires synchronously inside pushState, before SPA routers swap the
+  // DOM. URL-change consumers must not touch route content — that is why the
+  // page-translation handler only swaps site CSS and leaves new-DOM work to
+  // its MutationObserver.
   let removeNavigateListener: (() => void) | null = null
   if ("navigation" in window) {
-    const onNavigate = (e: any) => {
-      const now = e.destination?.url ?? location.href
-      fire(prev, now, "navigate")
+    const onCurrentEntryChange = () => {
+      const navigation = (window as Window & { navigation?: { currentEntry?: { url?: string } } })
+        .navigation
+      const now = navigation?.currentEntry?.url ?? location.href
+      fire(prev, now, "currententrychange")
       prev = now
     }
-    ;(window as any).navigation.addEventListener("navigate", onNavigate, { signal })
+    ;(window as any).navigation.addEventListener("currententrychange", onCurrentEntryChange, {
+      signal,
+    })
     removeNavigateListener = () => {
-      ;(window as any).navigation.removeEventListener("navigate", onNavigate)
+      ;(window as any).navigation.removeEventListener("currententrychange", onCurrentEntryChange)
     }
   }
 

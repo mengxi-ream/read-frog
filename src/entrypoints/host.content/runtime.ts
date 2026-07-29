@@ -62,7 +62,12 @@ export async function bootstrapHostContent(
       logger.info("URL changed from", from, "to", to)
       if (manager.isActive) {
         if (areSamePageTranslationOrigin(from, to)) {
-          await manager.restart()
+          // Same-document route change: keep the session and wrappers
+          // mounted — the MutationObserver walks the new route's DOM as the
+          // router inserts it. Site CSS is swapped for the new path;
+          // persistent DOM keeps its old walk decisions (accepted tradeoff,
+          // see refreshSiteRuleCSS).
+          await manager.refreshSiteRuleCSS()
         } else {
           manager.stop()
         }
