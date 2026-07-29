@@ -519,25 +519,26 @@ options:
               1. 聚焦于最匹配所提供段落内容的含义。
               2. 将词条规范化为其基本/标准形式。
               3. 保持释义精确且适合学习者。
-              4. 保持段落内容与提示词一致，不要改写。
-              5. 音标必须使用该语言的标准标注（如英语用 IPA，中文用拼音，日语用罗马字）。
-              6. 词性使用英文（noun, verb, adjective 等）。
-              7. 难度必须是 CEFR 等级（A1, A2, B1, B2, C1, 或 C2）。
-              8. 如果某个字段未知，返回空字符串而非猜测。
-              9. 除非需要保留原文形式，所有文本字段均使用 {{targetLanguage}} 作答。
+              4. “句子”字段只提取所提供段落中包含选中词语的完整句子，不要包含前后句。
+              5. “句子翻译”字段只翻译所提取的句子。
+              6. 音标必须使用该语言的标准标注（如英语用 IPA，中文用拼音，日语用罗马字）。
+              7. 词性使用英文（noun, verb, adjective 等）。
+              8. 难度必须是 CEFR 等级（A1, A2, B1, B2, C1, 或 C2）。
+              9. 如果某个字段未知，返回空字符串而非猜测。
+              10. 除非需要保留原文形式，所有文本字段均使用 {{targetLanguage}} 作答。
 
               ## 示例
 
               ### 示例 1
-              输入：Selection="blossoms", Paragraphs="The ephemeral beauty of cherry blossoms reminds us to cherish each moment.", 目标语言=中文
+              输入：Selection="blossoms", Paragraphs="Spring arrives quietly in the park. The ephemeral beauty of cherry blossoms reminds us to cherish each moment. Families and friends gather beneath the trees.", 目标语言=中文
 
               输出：
               - 词条：blossom
               - 音标：/ˈblɒs.əm/
               - 词性：noun
-              - 段落内容：The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+              - 句子：The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
               - 释义：花；花朵（尤指果树的花）
-              - 段落翻译：樱花短暂的美丽提醒我们珍惜每一刻。
+              - 句子翻译：樱花短暂的美丽提醒我们珍惜每一刻。
               - 难度：B2
 
               ### 示例 2
@@ -547,9 +548,9 @@ options:
               - 词条：感動
               - 音标：kandou
               - 词性：noun
-              - 段落内容：この映画はつまらないと思ったけど、最後は感動した。
+              - 句子：この映画はつまらないと思ったけど、最後は感動した。
               - 释义：Being deeply moved; emotional touch
-              - 段落翻译：I thought this movie was boring, but the ending was moving.
+              - 句子翻译：I thought this movie was boring, but the ending was moving.
               - 难度：B1
             prompt: |-
               ## 输入
@@ -562,12 +563,12 @@ options:
             fieldPhoneticDescription: 该语言的标准音标（如英语用 IPA，中文用拼音，日语用罗马字）。
             fieldPartOfSpeech: 词性
             fieldPartOfSpeechDescription: 语法类别（如 noun、verb、adjective）。
-            fieldParagraphs: 段落内容
-            fieldParagraphsDescription: 使用上方提示词中的原始段落内容，不要改写。
+            fieldSentence: 句子
+            fieldSentenceDescription: 提取上方段落中包含选中词语的完整句子，不要包含前后句。
             fieldDefinition: 释义
             fieldDefinitionDescription: 针对语境含义的一条简洁释义。
-            fieldParagraphsTranslation: 段落翻译
-            fieldParagraphsTranslationDescription: 段落内容的翻译。
+            fieldSentenceTranslation: 句子翻译
+            fieldSentenceTranslationDescription: 只翻译提取出的句子。
             fieldDifficulty: 难度
             fieldDifficultyDescription: 预估 CEFR 难度等级：A1、A2、B1、B2、C1 或 C2。
           improveWriting:
