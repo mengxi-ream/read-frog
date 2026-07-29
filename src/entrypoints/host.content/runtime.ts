@@ -64,7 +64,9 @@ export async function bootstrapHostContent(
         if (areSamePageTranslationOrigin(from, to)) {
           // Same-document route change: keep the session and wrappers
           // mounted — the MutationObserver walks the new route's DOM as the
-          // router inserts it. Only path-scoped site CSS may need swapping.
+          // router inserts it. Site CSS is swapped for the new path;
+          // persistent DOM keeps its old walk decisions (accepted tradeoff,
+          // see refreshSiteRuleCSS).
           await manager.refreshSiteRuleCSS()
         } else {
           manager.stop()

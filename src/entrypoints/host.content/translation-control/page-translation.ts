@@ -98,8 +98,13 @@ interface IPageTranslationManager {
   /**
    * Re-resolves the site rule for the current URL and swaps injected CSS in
    * place. Called on same-origin in-document route changes, where the live
-   * session and wrappers stay mounted (MutationObserver walks the new route's
-   * DOM) and only path-scoped site CSS may differ.
+   * session and wrappers stay mounted and the MutationObserver walks the new
+   * route's DOM under the new URL's rule.
+   *
+   * Known tradeoff: site rules are path-scoped in more than CSS (selectors,
+   * thresholds), and DOM that persists unchanged across the route keeps the
+   * walk decisions made under the previous URL's rule. Accepted — the
+   * alternative is the tear-down/re-walk flash this method exists to avoid.
    */
   refreshSiteRuleCSS: () => Promise<void>
 
@@ -292,7 +297,15 @@ export class PageTranslationManager implements IPageTranslationManager {
       // slices, and records emitted meanwhile must not be lost. The walk only
       // writes data-read-frog-* attributes, which this observer's
       // attributeFilter never reports, so this creates no feedback loop.
-      this.observeMutations(document.body)
+      //
+      // Root the observer at documentElement, NOT body: routers like Turbo
+      // Drive replace the body NODE itself on every visit, and an observer
+      // bound to the old body goes permanently blind — the soft URL-change
+      // path (refreshSiteRuleCSS) intentionally never re-attaches observers.
+      // On documentElement the swap itself surfaces as a childList record
+      // with addedNodes=[newBody], which walks the new body like any other
+      // inserted subtree.
+      this.observeMutations(document.documentElement)
 
       // Label existing elements in time-sliced chunks (walkability caching is
       // handled by the walk's onBlockedElement callback).
