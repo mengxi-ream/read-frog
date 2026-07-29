@@ -146,6 +146,63 @@ describe("extractTextContent", () => {
     })
   })
 
+  describe("icon font exclusion", () => {
+    it("should exclude Google Symbols ligatures from surrounding page text", () => {
+      const div = document.createElement("div")
+      div.innerHTML = `
+        <span id="icon" style="font-family: 'Google Symbols'">keyboard_return</span>
+        <span>Readable text</span>
+      `
+      document.body.append(div)
+
+      walkAndLabelElement(div, "icon-font", DEFAULT_CONFIG)
+
+      const icon = div.querySelector<HTMLElement>("#icon")!
+      expect(icon).not.toHaveAttribute(WALKED_ATTRIBUTE)
+      expect(extractTextContent(div, DEFAULT_CONFIG)).not.toContain("keyboard_return")
+      expect(extractTextContent(div, DEFAULT_CONFIG)).toContain("Readable text")
+      div.remove()
+    })
+
+    it("should exclude common icon-font ligatures", () => {
+      const iconFonts = [
+        ["Material Icons", "expand_more"],
+        ["Material Icons Outlined", "settings"],
+        ["Material Symbols Rounded", "keyboard_return"],
+        ["FontAwesome", "house"],
+        ["Font Awesome 6 Free", "user"],
+      ]
+
+      for (const [fontFamily, ligature] of iconFonts) {
+        const div = document.createElement("div")
+        div.innerHTML = `<span id="icon">${ligature}</span>`
+        document.body.append(div)
+
+        const icon = div.querySelector<HTMLElement>("#icon")!
+        icon.style.fontFamily = `"${fontFamily}"`
+        walkAndLabelElement(div, "icon-font", DEFAULT_CONFIG)
+
+        expect(icon).not.toHaveAttribute(WALKED_ATTRIBUTE)
+        expect(extractTextContent(div, DEFAULT_CONFIG)).not.toContain(ligature)
+        div.remove()
+      }
+    })
+
+    it("should keep ordinary text when an icon font is only a fallback", () => {
+      const div = document.createElement("div")
+      div.innerHTML = '<span id="text">Readable text</span>'
+      document.body.append(div)
+
+      const text = div.querySelector<HTMLElement>("#text")!
+      text.style.fontFamily = 'Arial, "Google Symbols", sans-serif'
+      walkAndLabelElement(div, "icon-font", DEFAULT_CONFIG)
+
+      expect(text).toHaveAttribute(WALKED_ATTRIBUTE)
+      expect(extractTextContent(div, DEFAULT_CONFIG)).toContain("Readable text")
+      div.remove()
+    })
+  })
+
   describe("extension wrapper exclusion", () => {
     it("should exclude translated wrapper text but keep host notranslate children (issues #1831, #249)", () => {
       const p = document.createElement("p")
