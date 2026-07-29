@@ -16,6 +16,27 @@ import {
 } from "@/utils/constants/dom-rules"
 import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
 
+const ICON_FONT_FAMILY_NAMES = ["material icons", "material symbols", "font awesome"]
+
+// Ligature icon fonts store glyph names such as `keyboard_return` in text nodes.
+// Translating those names breaks the glyph lookup and exposes the translated text.
+function usesIconFont(fontFamily: string): boolean {
+  // Only the primary family indicates how the element is intended to render;
+  // an icon font appearing later as a fallback is not enough to exclude real text.
+  const [primaryFamily = ""] = fontFamily.split(",")
+  const normalizedFamily = primaryFamily
+    .trim()
+    .replace(/^(["'])(.*)\1$/, "$2")
+    .toLowerCase()
+  return (
+    normalizedFamily === "google symbols" ||
+    normalizedFamily === "fontawesome" ||
+    ICON_FONT_FAMILY_NAMES.some(
+      (name) => normalizedFamily === name || normalizedFamily.startsWith(`${name} `),
+    )
+  )
+}
+
 export function isEditable(element: HTMLElement): boolean {
   const tag = element.tagName
   if (tag === "INPUT" || tag === "TEXTAREA") return true
@@ -229,7 +250,11 @@ export function isDontWalkIntoAndDontTranslateAsChildElement(
   if (dontWalkCustomElement) return true
 
   const computedStyle = window.getComputedStyle(element)
-  return computedStyle.display === "none" || computedStyle.visibility === "hidden"
+  return (
+    usesIconFont(computedStyle.fontFamily) ||
+    computedStyle.display === "none" ||
+    computedStyle.visibility === "hidden"
+  )
 }
 
 /**
