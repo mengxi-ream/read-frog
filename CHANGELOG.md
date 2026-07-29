@@ -1,5 +1,31 @@
 # @read-frog/extension
 
+## 1.43.5
+
+### Patch Changes
+
+- [#1980](https://github.com/mengxi-ream/read-frog/pull/1980) [`3d26766`](https://github.com/mengxi-ream/read-frog/commit/3d26766b7aaf94515913f6900f64da870b16bf92) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(custom-actions): protect the built-in dictionary, add action customization, and select the save-suggestion action
+
+- [#1985](https://github.com/mengxi-ream/read-frog/pull/1985) [`41e620f`](https://github.com/mengxi-ream/read-frog/commit/41e620f20da64f49e7bee032b3c07c99191442f7) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(dictionary): return the selected term's sentence from paragraph context
+
+- [#1982](https://github.com/mengxi-ream/read-frog/pull/1982) [`80bd105`](https://github.com/mengxi-ream/read-frog/commit/80bd105d579e6467dde2b853ef27b284cd69b483) Thanks [@YoungLee-coder](https://github.com/YoungLee-coder)! - fix(translate): stop page-translation flicker on same-origin navigation
+
+  Fixes two independent bugs that each caused translations to disappear and
+  reappear around SPA route changes:
+
+  1. The same-origin URL-change handler tore down every translation wrapper and
+     rebuilt the session. Both Navigation API events fire synchronously inside
+     `pushState` — before the router swaps the DOM — so the teardown always hit
+     the still-visible previous page. The handler now keeps the session and
+     wrappers mounted (the live MutationObserver walks the new route's DOM) and
+     only swaps path-scoped site CSS, in place.
+
+  2. URL-change detection listened to the Navigation API `navigate` event, which
+     also fires for cross-document navigations and pre-commit (cancellable)
+     ones — running a full translation restart on pages about to unload and
+     desyncing the tracked URL on cancelled navigations. Detection now uses
+     `currententrychange`, which only fires for committed same-document changes.
+
 ## 1.43.4
 
 ### Patch Changes
