@@ -340,6 +340,17 @@ function getStreamFinishReason(part: Record<string, unknown>): string | undefine
   return typeof part.finishReason === "string" ? part.finishReason : undefined
 }
 
+/**
+ * Reasoning is over once the answer starts coming out, so the first output delta
+ * closes the thinking phase. Models that emit no reasoning at all never send
+ * `reasoning-end`, and without this they would stay "thinking" for the whole
+ * stream while their output is already rendering. Models that interleave need no
+ * special case: a later `reasoning-delta` reopens the phase on its own.
+ */
+function endThinkingOnOutput(thinking: ThinkingSnapshot): ThinkingSnapshot {
+  return thinking.status === "thinking" ? { ...thinking, status: "complete" } : thinking
+}
+
 function validateFinishedStream(hasFinish: boolean, finishReason: string | undefined): void {
   if (!hasFinish) {
     throw new BackgroundStreamError("stream_protocol_error", aiStreamProtocolErrorMessage)
@@ -375,6 +386,7 @@ async function consumeTextPartStream(
     switch (part.type) {
       case "text-delta": {
         cumulativeText += getStringPartField(part, "text")
+        thinking = endThinkingOnOutput(thinking)
         onChunk?.(createStreamSnapshot(cumulativeText, thinking))
         break
       }
@@ -455,6 +467,7 @@ async function consumeStructuredObjectPartStream<TOutput extends Record<string, 
     switch (part.type) {
       case "text-delta": {
         cumulativeText += getStringPartField(part, "text")
+        thinking = endThinkingOnOutput(thinking)
         const partial = await parsePartialJson(cumulativeText)
         if (isRecord(partial.value)) {
           cumulativeValue = { ...cumulativeValue, ...partial.value }

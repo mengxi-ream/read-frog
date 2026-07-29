@@ -178,14 +178,14 @@ describe("background-stream", () => {
       {
         output: { score: 97 },
         thinking: {
-          status: "thinking",
+          status: "complete",
           text: "",
         },
       },
       {
         output: { score: 97, summary: "Strong argument structure" },
         thinking: {
-          status: "thinking",
+          status: "complete",
           text: "",
         },
       },
@@ -413,7 +413,7 @@ describe("background-stream", () => {
       data: {
         output: "Hello",
         thinking: {
-          status: "thinking",
+          status: "complete",
           text: "",
         },
       },
@@ -424,7 +424,7 @@ describe("background-stream", () => {
       data: {
         output: "Hello world",
         thinking: {
-          status: "thinking",
+          status: "complete",
           text: "",
         },
       },
@@ -488,6 +488,66 @@ describe("background-stream", () => {
       },
     })
     expect(chunkSnapshots.at(-1)).toEqual(result)
+  })
+
+  it("ends the thinking phase at the first output delta when no reasoning is emitted", async () => {
+    hostedStreamTextMock.mockResolvedValue(
+      (async function* () {
+        yield { type: "start" }
+        yield { type: "text-delta", id: "text-1", text: "Hola" }
+        yield { type: "text-delta", id: "text-1", text: " mundo" }
+        yield { type: "finish", finishReason: "stop" }
+      })(),
+    )
+
+    const chunkSnapshots: BackgroundTextStreamSnapshot[] = []
+    const { runStreamTextInBackground } = await import("../background-stream")
+    await runStreamTextInBackground(
+      {
+        providerId: "read-frog-free-ai",
+        instructions: "Translate text",
+        prompt: "Hello world",
+      },
+      {
+        onChunk: (snapshot) => {
+          chunkSnapshots.push(snapshot)
+        },
+      },
+    )
+
+    expect(chunkSnapshots[0]).toEqual({
+      output: "Hola",
+      thinking: { status: "complete", text: "" },
+    })
+  })
+
+  it("reopens the thinking phase when reasoning arrives after output", async () => {
+    hostedStreamTextMock.mockResolvedValue(
+      (async function* () {
+        yield { type: "start" }
+        yield { type: "text-delta", id: "text-1", text: "Hola" }
+        yield { type: "reasoning-delta", id: "reasoning-1", text: "second guess" }
+        yield { type: "text-delta", id: "text-1", text: " mundo" }
+        yield { type: "finish", finishReason: "stop" }
+      })(),
+    )
+
+    const chunkSnapshots: BackgroundTextStreamSnapshot[] = []
+    const { runStreamTextInBackground } = await import("../background-stream")
+    await runStreamTextInBackground(
+      { providerId: "read-frog-free-ai", instructions: "Translate text", prompt: "Hello world" },
+      {
+        onChunk: (snapshot) => {
+          chunkSnapshots.push(snapshot)
+        },
+      },
+    )
+
+    expect(chunkSnapshots.map((snapshot) => snapshot.thinking)).toEqual([
+      { status: "complete", text: "" },
+      { status: "thinking", text: "second guess" },
+      { status: "complete", text: "second guess" },
+    ])
   })
 
   it("prefers stream onError root cause and posts error once", async () => {
