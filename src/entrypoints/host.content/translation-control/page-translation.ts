@@ -96,11 +96,12 @@ interface IPageTranslationManager {
   stop: () => void
 
   /**
-   * Soft-refresh after a same-origin in-document route change: keep the live
-   * translation session and wrappers (MutationObserver picks up new DOM), and
-   * only re-apply path-scoped site CSS for the new URL.
+   * Re-resolves the site rule for the current URL and swaps injected CSS in
+   * place. Called on same-origin in-document route changes, where the live
+   * session and wrappers stay mounted (MutationObserver walks the new route's
+   * DOM) and only path-scoped site CSS may differ.
    */
-  restart: () => Promise<void>
+  refreshSiteRuleCSS: () => Promise<void>
 
   /**
    * Registers page translation triggers
@@ -329,23 +330,25 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.stopInternal({ notify: true })
   }
 
-  async restart(): Promise<void> {
-    if (!this.isPageTranslating) {
-      await this.start()
-      return
-    }
-
-    // Do not tear down wrappers / observers here. A full stop→start flash is
-    // what users see as "translations disappear then reappear" on SPA clicks.
-    // New route content is walked via the existing MutationObserver; we only
-    // refresh path-scoped injected CSS that may differ by URL.
+  async refreshSiteRuleCSS(): Promise<void> {
+    // Never tear down wrappers / observers on a route change. A full
+    // stop→start flash is what users see as "translations disappear then
+    // reappear" on SPA clicks — and both Navigation API events fire
+    // synchronously inside pushState, BEFORE the router swaps the DOM, so a
+    // teardown here always hits the still-visible previous page. New route
+    // content is walked via the existing MutationObserver instead.
+    if (!this.isPageTranslating) return
     const config = await getLocalConfig()
     if (!config || !this.isPageTranslating) return
 
-    removeSiteRuleCSS(document)
     const siteRule = getEffectiveSiteRule(config, window.location.href)
     if (siteRule.injectedCss) {
+      // ensureSiteRuleCSS replaces the existing sheet's contents in place —
+      // no remove-first, which would leave a gap with no site CSS applied
+      // and flash layout on rules that exist to pin it (e.g. cnbc.com).
       void ensureSiteRuleCSS(document, siteRule.injectedCss)
+    } else {
+      removeSiteRuleCSS(document)
     }
   }
 

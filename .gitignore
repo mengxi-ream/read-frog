@@ -1,5 +1,5 @@
 # Logs
-logs/
+logs
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,51 +7,43 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Dependencies
-node_modules/
-.pnpm-store/
-
-# Build / tooling outputs
-.output/
-.wxt/
-.turbo/
-.nx/
-coverage/
+node_modules
+.output
 stats.html
 stats-*.html
 stats-*.json
-tsconfig.local.json
+.wxt
 web-ext.config.ts
-web-ext-artifacts/
 
-# Packed extension artifacts
-*.crx
-*.xpi
-*.pem
-
-# Environment
-.env
-.env.*
-!.env.example
-!.env.local.example
-
-# Editor / OS
+# Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
-.idea/
+.idea
 .DS_Store
-Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# Local / scratch directories
+.env
+.env.*
+!.env.example
+!.env.local.example
+
+coverage/
+.turbo/
+.nx/
 .claude/worktrees/
+
+tsconfig.local.json
+
 docs/
+
 /repos
+
 scripts/output/
+
 reference/
 .gstack/

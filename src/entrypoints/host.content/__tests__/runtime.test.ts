@@ -22,7 +22,7 @@ const {
     isActive: boolean
     start: ReturnType<typeof vi.fn>
     stop: ReturnType<typeof vi.fn>
-    restart: ReturnType<typeof vi.fn>
+    refreshSiteRuleCSS: ReturnType<typeof vi.fn>
     registerPageTranslationTriggers: ReturnType<typeof vi.fn>
   }>,
   mockBindTranslationShortcutKey: vi.fn<(...args: any[]) => any>(),
@@ -88,9 +88,7 @@ vi.mock("../translation-control/page-translation", () => ({
       this.isActive = false
     })
 
-    restart = vi.fn<(...args: any[]) => any>(async () => {
-      this.isActive = true
-    })
+    refreshSiteRuleCSS = vi.fn<(...args: any[]) => any>(async () => {})
 
     registerPageTranslationTriggers = vi.fn<(...args: any[]) => any>(() =>
       vi.fn<(...args: any[]) => any>(),
@@ -147,7 +145,7 @@ describe("bootstrapHostContent URL changes", () => {
     })
   })
 
-  it("soft-refreshes active page translation on same-origin SPA navigation without disabling the session", async () => {
+  it("only refreshes site CSS on same-origin SPA navigation, keeping the session active", async () => {
     mockSendMessage.mockImplementation((name: string) => {
       if (name === "getEnablePageTranslationFromContentScript") return Promise.resolve(true)
 
@@ -169,7 +167,7 @@ describe("bootstrapHostContent URL changes", () => {
     await flushAsyncWork()
 
     expect(manager!.start).toHaveBeenCalledTimes(1)
-    expect(manager!.restart).toHaveBeenCalledTimes(1)
+    expect(manager!.refreshSiteRuleCSS).toHaveBeenCalledTimes(1)
     expect(manager!.stop).not.toHaveBeenCalled()
     expect(mockSendMessage).toHaveBeenCalledWith("reportDetectedPageLanguage", {
       url: "https://example.com/articles/2?ref=nav#comments",
@@ -195,7 +193,7 @@ describe("bootstrapHostContent URL changes", () => {
     await flushAsyncWork()
 
     expect(manager!.start).not.toHaveBeenCalled()
-    expect(manager!.restart).not.toHaveBeenCalled()
+    expect(manager!.refreshSiteRuleCSS).not.toHaveBeenCalled()
     expect(manager!.stop).not.toHaveBeenCalled()
     expect(mockSendMessage).toHaveBeenCalledWith("reportDetectedPageLanguage", {
       url: "https://example.com/articles/2",
