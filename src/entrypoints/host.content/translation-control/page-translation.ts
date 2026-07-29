@@ -65,6 +65,7 @@ import { removeReactShadowHost } from "@/utils/react-shadow-host/create-shadow-h
 import { isTranslationCancelledError } from "@/utils/request/cancellation"
 import { createWorkPacer } from "@/utils/scheduler"
 import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
+import { registerTranslationStyleListener } from "./translation-style-listener"
 
 type SimpleIntersectionOptions = Omit<IntersectionObserverInit, "threshold"> & {
   threshold?: number
@@ -150,6 +151,7 @@ export class PageTranslationManager implements IPageTranslationManager {
   private lastSourceTitle: string | null = null
   private lastAppliedTranslatedTitle: string | null = null
   private titleRequestVersion = 0
+  private cleanupTranslationStyleListener: (() => void) | null = null
 
   constructor(intersectionOptions: SimpleIntersectionOptions = {}) {
     if (intersectionOptions.threshold !== undefined) {
@@ -237,6 +239,9 @@ export class PageTranslationManager implements IPageTranslationManager {
 
       this.isPageTranslating = true
       this.translationSessionVersion += 1
+      this.cleanupTranslationStyleListener = registerTranslationStyleListener(
+        config.translate.translationNodeStyle,
+      )
 
       const promptExperimentAction =
         window === window.top &&
@@ -391,6 +396,8 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     this.isPageTranslating = false
     this.translationSessionVersion += 1
+    this.cleanupTranslationStyleListener?.()
+    this.cleanupTranslationStyleListener = null
     this.walkId = null
     this.walkBlockedElementsCache = new WeakSet()
     this.refreshingTranslatedSources = new WeakSet()

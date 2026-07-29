@@ -12,6 +12,7 @@ import {
 import { isHTMLElement, isNaturalBlockTransNode, isNaturalInlineTransNode } from "../../dom/filter"
 import { getOwnerDocument } from "../../dom/node"
 import { decorateTranslationNode } from "../ui/decorate-translation"
+import { resolveLiveTranslationNodeStyle } from "../ui/live-translation-style"
 import { isForceInlineTranslation, isShortInlineTranslationText } from "../ui/translation-utils"
 
 interface TranslationInsertionContext {
@@ -173,7 +174,10 @@ export async function insertTranslatedNodeIntoWrapper(
   translatedWrapperNode.appendChild(translatedNode)
   // Synchronous, pre-await: see TranslationInsertionContext.onContentInserted.
   onContentInserted?.(translatedWrapperNode)
-  await decorateTranslationNode(translatedNode, translationNodeStyle)
+  await decorateTranslationNode(
+    translatedNode,
+    resolveLiveTranslationNodeStyle(translationNodeStyle),
+  )
 
   if (isCurrent && !isCurrent()) return
 

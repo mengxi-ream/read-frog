@@ -59,7 +59,7 @@ describe("handleTranslationModeChange", () => {
 
     expect(stop).toHaveBeenCalled()
     expect(start).toHaveBeenCalled()
-    expect(didRestart).toBe(true)
+    expect(didRestart).toBeUndefined()
   })
 
   it("should not trigger when mode stays the same", () => {
@@ -100,25 +100,39 @@ describe("handleTranslationStyleChange", () => {
     shadow.appendChild(inline)
     document.body.appendChild(host)
 
-    const newConfig = createMockConfig("bilingual", "border")
-    await handleTranslationStyleChange(newConfig, createMockConfig("bilingual", "dashedLine"))
+    const newStyle = createMockConfig("bilingual", "border").translate.translationNodeStyle
+    await handleTranslationStyleChange(newStyle)
 
     expect(mockDecorateTranslationNode).toHaveBeenCalledTimes(2)
-    expect(mockDecorateTranslationNode).toHaveBeenCalledWith(
-      block,
-      newConfig.translate.translationNodeStyle,
-    )
-    expect(mockDecorateTranslationNode).toHaveBeenCalledWith(
-      inline,
-      newConfig.translate.translationNodeStyle,
-    )
+    expect(mockDecorateTranslationNode).toHaveBeenCalledWith(block, newStyle)
+    expect(mockDecorateTranslationNode).toHaveBeenCalledWith(inline, newStyle)
   })
 
-  it("does not touch existing translations when style settings stay the same", async () => {
-    const config = createMockConfig("bilingual", "border")
+  it("serializes decoration so shared stylesheets are not replaced concurrently", async () => {
+    const first = document.createElement("span")
+    first.className = BLOCK_CONTENT_CLASS
+    const second = document.createElement("span")
+    second.className = BLOCK_CONTENT_CLASS
+    document.body.append(first, second)
 
-    await handleTranslationStyleChange(config, createMockConfig("bilingual", "border"))
+    let releaseFirst: (() => void) | undefined
+    mockDecorateTranslationNode
+      .mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            releaseFirst = resolve
+          }),
+      )
+      .mockResolvedValueOnce(undefined)
 
-    expect(mockDecorateTranslationNode).not.toHaveBeenCalled()
+    const style = createMockConfig("bilingual", "border").translate.translationNodeStyle
+    const update = handleTranslationStyleChange(style)
+
+    await vi.waitFor(() => expect(mockDecorateTranslationNode).toHaveBeenCalledTimes(1))
+    releaseFirst?.()
+    await update
+
+    expect(mockDecorateTranslationNode).toHaveBeenNthCalledWith(1, first, style)
+    expect(mockDecorateTranslationNode).toHaveBeenNthCalledWith(2, second, style)
   })
 })
