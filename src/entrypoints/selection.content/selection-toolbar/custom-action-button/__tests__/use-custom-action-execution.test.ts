@@ -4,6 +4,7 @@ import { act, render, screen, waitFor } from "@testing-library/react"
 import { createElement } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { CUSTOM_ACTION_CONTEXT_CHAR_LIMIT } from "../../../utils"
 import {
@@ -54,10 +55,7 @@ function WebPageContextProbe({
 }
 
 function createCustomActionRequest() {
-  const action = DEFAULT_CONFIG.selectionToolbar.customActions[0]
-  if (!action) {
-    throw new Error("Default custom action is missing")
-  }
+  const action = getBuiltInDictionaryAction(DEFAULT_CONFIG.selectionToolbar)
 
   const provider = resolveProviderRefForCapability(
     "selectionToolbar.customAction",

@@ -2,6 +2,7 @@ import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import {
   applyCreatedNotebaseConnectionToConfig,
   buildNotebaseCreateInputFromPending,
@@ -202,6 +203,29 @@ describe("notebase pending save", () => {
         },
       ],
     })
+  })
+
+  it("writes a notebase connection into built-in Dictionary state", () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    const action = getBuiltInDictionaryAction(config.selectionToolbar)
+    const pending = createPendingNotebaseSave(action, [{ Term: "frog" }], 1_000)
+    const connectedAccount = {
+      id: "user-1",
+      name: "Reader",
+      email: "reader@example.com",
+      image: null,
+    }
+
+    const result = applyCreatedNotebaseConnectionToConfig(config, pending, { connectedAccount })
+
+    expect(result.status).toBe("valid")
+    expect(
+      result.config?.selectionToolbar.builtInActions.dictionary.notebaseConnection,
+    ).toMatchObject({
+      notebaseId: pending.notebaseId,
+      connectedAccount,
+    })
+    expect(result.config?.selectionToolbar.customActions).toEqual([])
   })
 
   it("detects changed schemas before applying pending work", () => {

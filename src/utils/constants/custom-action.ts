@@ -7,6 +7,7 @@ import { getUniqueName } from "@/utils/name"
 
 export const ICON_PATTERN = /^[^:\s]+:[^:\s]+$/
 export const DEFAULT_ACTION_NAME = "Custom AI Action"
+export const BUILT_IN_DICTIONARY_ACTION_ID = "default-dictionary"
 export function createOutputSchemaField(
   name: string,
   type: SelectionToolbarCustomActionOutputType = "string",

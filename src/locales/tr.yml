@@ -359,6 +359,7 @@ options:
       saveSuggestion:
         title: Kaydetme Önerileri
         description: Bir yapay zeka sağlayıcısıyla seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir
+        action: Eylem
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -392,6 +393,7 @@ options:
       customActions:
         title: Özel AI Eylemleri
         description: Seçilen metin için kendi yapılandırılmış AI eylemlerinizi ekleyin
+        builtIn: Yerleşik
         add: AI Eylemi Ekle
         edit: AI Eylemini Düzenle
         empty: Henüz özel AI eylemi yok
@@ -403,6 +405,8 @@ options:
           actions: İşlemler
         form:
           name: Ad
+          customize: Özelleştir
+          customizeTooltip: Yerleşik eylemin istemleri değiştirilemez. Düzenlenebilir bir kopya oluşturup istemleri değiştirmek için bu düğmeye tıklayın.
           icon: Simge
           iconField:
             chooseAriaLabel: Simge seç

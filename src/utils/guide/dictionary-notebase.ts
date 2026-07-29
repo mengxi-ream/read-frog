@@ -1,9 +1,10 @@
 import { z } from "zod"
 import { storage } from "#imports"
 import { env } from "@/env"
+import { BUILT_IN_DICTIONARY_ACTION_ID } from "@/utils/constants/custom-action"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 
-export const GUIDE_DICTIONARY_NOTEBASE_ACTION_ID = "default-dictionary"
+export const GUIDE_DICTIONARY_NOTEBASE_ACTION_ID = BUILT_IN_DICTIONARY_ACTION_ID
 export const GUIDE_DICTIONARY_NOTEBASE_COMPLETED_STORAGE_KEY = "guideDictionaryNotebaseCompleted"
 export const GUIDE_DICTIONARY_NOTEBASE_SESSION_STORAGE_KEY = "guideDictionaryNotebaseSession"
 export const GUIDE_DICTIONARY_NOTEBASE_SESSION_TTL_MS = 30 * 60 * 1000

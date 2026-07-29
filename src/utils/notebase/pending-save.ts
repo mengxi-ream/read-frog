@@ -12,6 +12,7 @@ import { storage } from "#imports"
 import { env } from "@/env"
 import { selectionToolbarCustomActionNotebaseConnectionSchema } from "@/types/config/selection-toolbar"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
+import { findSelectionToolbarAction, replaceSelectionToolbarAction } from "@/utils/custom-actions"
 import { guideDictionaryNotebaseTrackingSchema } from "@/utils/guide/dictionary-notebase"
 import { buildNotebaseRowCells } from "./mapping"
 
@@ -115,7 +116,6 @@ export type PendingNotebaseSaveActionStatus =
 interface PendingNotebaseSaveActionValidation {
   status: PendingNotebaseSaveActionStatus
   action?: SelectionToolbarCustomAction
-  actionIndex?: number
 }
 
 export function getOutputSchemaFingerprint(
@@ -254,20 +254,8 @@ export async function clearPendingNotebaseSave() {
   await storage.removeItem(`local:${NOTEBASE_PENDING_SAVE_STORAGE_KEY}`)
 }
 
-function findPendingSaveAction(config: Config, actionId: string) {
-  const actionIndex = config.selectionToolbar.customActions.findIndex(
-    (action) => action.id === actionId,
-  )
-  if (actionIndex < 0) {
-    return null
-  }
-
-  const action = config.selectionToolbar.customActions[actionIndex]
-  if (!action) {
-    return null
-  }
-
-  return { action, actionIndex }
+function findPendingSaveAction(config: Config, pending: PendingNotebaseSave) {
+  return findSelectionToolbarAction(config.selectionToolbar, pending.actionId) ?? null
 }
 
 function doesPendingActionSchemaMatch(
@@ -281,46 +269,44 @@ export function validateStillCanSavePendingCreateNotebaseSave(
   config: Config,
   pending: PendingCreateNotebaseSave,
 ): PendingNotebaseSaveActionValidation {
-  const pendingAction = findPendingSaveAction(config, pending.actionId)
-  if (!pendingAction) {
+  const action = findPendingSaveAction(config, pending)
+  if (!action) {
     return { status: "missing_action" }
   }
 
-  const { action, actionIndex } = pendingAction
   if (action.notebaseConnection) {
-    return { status: "already_connected", action, actionIndex }
+    return { status: "already_connected", action }
   }
 
   if (!doesPendingActionSchemaMatch(action, pending)) {
-    return { status: "schema_changed", action, actionIndex }
+    return { status: "schema_changed", action }
   }
 
-  return { status: "valid", action, actionIndex }
+  return { status: "valid", action }
 }
 
 export function validateStillCanSavePendingConnectedNotebaseSave(
   config: Config,
   pending: PendingConnectedNotebaseSave,
 ): PendingNotebaseSaveActionValidation {
-  const pendingAction = findPendingSaveAction(config, pending.actionId)
-  if (!pendingAction) {
+  const action = findPendingSaveAction(config, pending)
+  if (!action) {
     return { status: "missing_action" }
   }
 
-  const { action, actionIndex } = pendingAction
   if (!doesPendingActionSchemaMatch(action, pending)) {
-    return { status: "schema_changed", action, actionIndex }
+    return { status: "schema_changed", action }
   }
 
   if (!action.notebaseConnection) {
-    return { status: "missing_connection", action, actionIndex }
+    return { status: "missing_connection", action }
   }
 
   if (!doesConnectionMatchPendingSnapshot(action.notebaseConnection, pending.connectionSnapshot)) {
-    return { status: "connection_changed", action, actionIndex }
+    return { status: "connection_changed", action }
   }
 
-  return { status: "valid", action, actionIndex }
+  return { status: "valid", action }
 }
 
 function doesConnectionMatchPendingSnapshot(
@@ -356,12 +342,11 @@ export function applyCreatedNotebaseConnectionToConfig(
   status: PendingNotebaseSaveActionStatus
   config?: Config
 } {
-  const pendingAction = findPendingSaveAction(config, pending.actionId)
-  if (!pendingAction) {
+  const action = findPendingSaveAction(config, pending)
+  if (!action) {
     return { status: "missing_action" }
   }
 
-  const { action, actionIndex } = pendingAction
   if (!options.replaceExistingConnection && action.notebaseConnection) {
     return { status: "already_connected" }
   }
@@ -374,20 +359,10 @@ export function applyCreatedNotebaseConnectionToConfig(
     status: "valid",
     config: {
       ...config,
-      selectionToolbar: {
-        ...config.selectionToolbar,
-        customActions: config.selectionToolbar.customActions.map((customAction, index) =>
-          index === actionIndex
-            ? {
-                ...customAction,
-                notebaseConnection: buildNotebaseConnectionFromPending(
-                  pending,
-                  options.connectedAccount,
-                ),
-              }
-            : customAction,
-        ),
-      },
+      selectionToolbar: replaceSelectionToolbarAction(config.selectionToolbar, {
+        ...action,
+        notebaseConnection: buildNotebaseConnectionFromPending(pending, options.connectedAccount),
+      }),
     },
   }
 }

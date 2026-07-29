@@ -711,11 +711,7 @@ describe("background-stream", () => {
 
   it("streams note suggestions from the user's local provider", async () => {
     const envelope = {
-      action: {
-        createNewDictionaryAction: false,
-        targetActionId: "action-1",
-        summaryFieldName: null,
-      },
+      summaryFieldName: null,
       notes: [{ fields: [{ name: "Word", value: "ephemeral" }] }],
     }
     getModelByIdMock.mockResolvedValue("mock-model")

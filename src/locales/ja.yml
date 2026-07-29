@@ -359,6 +359,7 @@ options:
       saveSuggestion:
         title: 保存の提案
         description: AI プロバイダーで選択テキストを翻訳した後、Notebase に保存する単語を提案します
+        action: アクション
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -392,6 +393,7 @@ options:
       customActions:
         title: カスタム AI アクション
         description: 選択テキスト向けに独自の構造化 AI アクションを追加
+        builtIn: 組み込み
         add: AI アクションを追加
         edit: AI アクションを編集
         empty: カスタム AI アクションはまだありません
@@ -403,6 +405,8 @@ options:
           actions: 操作
         form:
           name: 名前
+          customize: カスタマイズ
+          customizeTooltip: 組み込みアクションのプロンプトは変更できません。このボタンをクリックして編集可能なコピーを作成し、プロンプトを変更します。
           icon: アイコン
           iconField:
             chooseAriaLabel: アイコンを選択

@@ -251,6 +251,47 @@ function DeleteFieldDialog({
   )
 }
 
+function OutputSchemaRow({
+  actions,
+  leading,
+  outputField,
+}: {
+  actions?: React.ReactNode
+  leading?: React.ReactNode
+  outputField: SelectionToolbarCustomActionOutputField
+}) {
+  return (
+    <div className="flex items-center gap-2 rounded-lg border bg-card p-2">
+      {leading}
+      <span className="shrink-0 text-sm font-medium">{outputField.name}</span>
+      <Badge variant="secondary" className="shrink-0">
+        {i18n.t(`dataTypes.${outputField.type}`)}
+      </Badge>
+      <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+        {outputField.description || "—"}
+      </span>
+      {actions}
+    </div>
+  )
+}
+
+export function ReadOnlyOutputSchemaField({
+  outputSchema,
+}: {
+  outputSchema: SelectionToolbarCustomActionOutputField[]
+}) {
+  return (
+    <Field>
+      <FieldLabel>{t("outputSchema")}</FieldLabel>
+      <div className="flex flex-col gap-2">
+        {outputSchema.map((outputField) => (
+          <OutputSchemaRow key={outputField.id} outputField={outputField} />
+        ))}
+      </div>
+    </Field>
+  )
+}
+
 export const OutputSchemaField = withForm({
   ...{ defaultValues: {} as SelectionToolbarCustomAction },
   render: function Render({ form }) {
@@ -324,42 +365,40 @@ export const OutputSchemaField = withForm({
                 }}
                 className="flex flex-col gap-2"
                 renderItem={(outputField) => (
-                  <div className="flex items-center gap-2 rounded-lg border bg-card p-2">
-                    <Icon
-                      icon="tabler:grip-vertical"
-                      className="size-4 shrink-0 text-muted-foreground"
-                    />
-                    <span className="shrink-0 text-sm font-medium">{outputField.name}</span>
-                    <Badge variant="secondary" className="shrink-0">
-                      {i18n.t(`dataTypes.${outputField.type}`)}
-                    </Badge>
-                    <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
-                      {outputField.description || "—"}
-                    </span>
-                    <div className="flex shrink-0 gap-1">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        className="size-7"
-                        onClick={() => setEditingField(outputField)}
-                        onPointerDown={(e) => e.stopPropagation()}
-                      >
-                        <Icon icon="tabler:pencil" className="size-3.5" />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        className="size-7"
-                        onClick={() => setDeletingFieldId(outputField.id)}
-                        onPointerDown={(e) => e.stopPropagation()}
-                        disabled={outputSchema.length === 1}
-                      >
-                        <Icon icon="tabler:trash" className="size-3.5" />
-                      </Button>
-                    </div>
-                  </div>
+                  <OutputSchemaRow
+                    outputField={outputField}
+                    leading={
+                      <Icon
+                        icon="tabler:grip-vertical"
+                        className="size-4 shrink-0 text-muted-foreground"
+                      />
+                    }
+                    actions={
+                      <div className="flex shrink-0 gap-1">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="size-7"
+                          onClick={() => setEditingField(outputField)}
+                          onPointerDown={(e) => e.stopPropagation()}
+                        >
+                          <Icon icon="tabler:pencil" className="size-3.5" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="size-7"
+                          onClick={() => setDeletingFieldId(outputField.id)}
+                          onPointerDown={(e) => e.stopPropagation()}
+                          disabled={outputSchema.length === 1}
+                        >
+                          <Icon icon="tabler:trash" className="size-3.5" />
+                        </Button>
+                      </div>
+                    }
+                  />
                 )}
               />
 

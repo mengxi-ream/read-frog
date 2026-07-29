@@ -1,5 +1,5 @@
 import { deepmerge } from "deepmerge-ts"
-import { useAtom } from "jotai"
+import { useAtom, useAtomValue } from "jotai"
 import { useMemo } from "react"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { Field, FieldContent, FieldLabel } from "@/components/ui/base-ui/field"
@@ -13,7 +13,7 @@ import { ConfigCard } from "../../components/config-card"
 
 export function AIContentAware() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
-  const [providersConfig] = useAtom(configFieldsAtomMap.providersConfig)
+  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
 
   const hasLLMProvider = useMemo(() => {
     const providerConfig = getProviderConfigById(providersConfig, translateConfig.providerId)

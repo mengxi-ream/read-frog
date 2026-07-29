@@ -38,8 +38,7 @@ export async function initializeConfig(): Promise<InitializeConfigResult> {
   let isFreshInstall = false
 
   if (!storedConfig) {
-    // Fresh install: resolve the default custom-action strings in the browser locale
-    // ("auto") before they are persisted and frozen.
+    // Initialize locale before building defaults used by this browser context.
     await initI18n(DEFAULT_CONFIG.uiLanguage)
     config = buildFreshDefaultConfig()
     currentVersion = CONFIG_SCHEMA_VERSION

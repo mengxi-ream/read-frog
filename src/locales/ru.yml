@@ -359,6 +359,7 @@ options:
       saveSuggestion:
         title: Предложения по сохранению
         description: После перевода выделенного текста с помощью ИИ-провайдера предлагать слова для сохранения в Notebase
+        action: Действие
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -392,6 +393,7 @@ options:
       customActions:
         title: Пользовательские AI-действия
         description: Добавляйте собственные структурированные AI-действия для выделенного текста
+        builtIn: Встроенное
         add: Добавить AI-действие
         edit: Редактировать AI-действие
         empty: Пока нет пользовательских AI-действий
@@ -403,6 +405,8 @@ options:
           actions: Действия
         form:
           name: Название
+          customize: Настроить
+          customizeTooltip: Промпты встроенной команды нельзя изменять. Нажмите эту кнопку, чтобы создать редактируемую копию и изменить промпты.
           icon: Иконка
           iconField:
             chooseAriaLabel: Выбрать иконку

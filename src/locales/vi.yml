@@ -359,6 +359,7 @@ options:
       saveSuggestion:
         title: Gợi ý lưu
         description: Sau khi dịch vùng chọn bằng nhà cung cấp AI, gợi ý các từ để lưu vào Notebase
+        action: Hành động
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -392,6 +393,7 @@ options:
       customActions:
         title: Hành động AI tùy chỉnh
         description: Thêm các hành động AI có cấu trúc của riêng bạn cho văn bản được chọn
+        builtIn: Tích hợp
         add: Thêm hành động AI
         edit: Chỉnh sửa hành động AI
         empty: Chưa có hành động AI tùy chỉnh
@@ -403,6 +405,8 @@ options:
           actions: Thao tác
         form:
           name: Tên
+          customize: Tùy chỉnh
+          customizeTooltip: Không thể thay đổi prompt của tác vụ tích hợp. Nhấp vào nút này để tạo bản sao có thể chỉnh sửa và thay đổi prompt.
           icon: Biểu tượng
           iconField:
             chooseAriaLabel: Chọn biểu tượng

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/base-ui/button"
 import { Drawer, DrawerBody, DrawerContent, DrawerTrigger } from "@/components/ui/base-ui/drawer"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
+import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { getProviderLogo, getProviderName } from "@/utils/providers/provider-display"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
@@ -36,7 +37,7 @@ function getSelectedProviderOptions(config: Config, providersConfig: ProvidersCo
     addProvider(featureKey, FEATURE_PROVIDER_DEFS[featureKey].getProviderId(config))
   }
 
-  for (const action of config.selectionToolbar.customActions) {
+  for (const action of getSelectionToolbarActions(config.selectionToolbar)) {
     if (action.enabled === false) {
       continue
     }

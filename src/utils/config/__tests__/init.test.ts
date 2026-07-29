@@ -174,7 +174,6 @@ describe("initializeConfig", () => {
         enabled: false,
       },
     }
-
     getItemMock.mockResolvedValueOnce(config)
     getMetaMock.mockResolvedValueOnce({
       schemaVersion: CONFIG_SCHEMA_VERSION - 1,

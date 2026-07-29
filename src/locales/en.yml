@@ -360,6 +360,7 @@ options:
       saveSuggestion:
         title: Save Suggestions
         description: After selection translation with an AI provider, suggest words to save to your Notebase
+        action: Action
       shortcut:
         title: Selection Translation Shortcut
         description: Customize the shortcut key for translating selected text
@@ -393,6 +394,7 @@ options:
       customActions:
         title: Custom AI Actions
         description: Add your own structured AI actions for selected text
+        builtIn: Built-in
         add: Add AI Action
         edit: Edit AI Action
         empty: No custom AI actions yet
@@ -404,6 +406,8 @@ options:
           actions: Actions
         form:
           name: Name
+          customize: Customize
+          customizeTooltip: Built-in instructions do not allow prompt changes. Click here to create an editable copy and modify the prompts.
           icon: Icon
           iconField:
             chooseAriaLabel: Choose icon

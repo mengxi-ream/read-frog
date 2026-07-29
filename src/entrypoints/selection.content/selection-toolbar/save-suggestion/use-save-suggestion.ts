@@ -6,9 +6,10 @@ import { useAtomValue } from "jotai"
 import { useCallback, useRef, useState } from "react"
 import { classifyProviderConfig } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { CUSTOM_ACTION_TEMPLATES } from "@/utils/constants/custom-action-templates"
 import { streamBackgroundNoteSuggestion } from "@/utils/content-script/background-stream-client"
 import { STREAM_PORT_DISCONNECTED_MESSAGE } from "@/utils/content-script/port-streaming"
+import { resolveSaveSuggestionAction } from "@/utils/custom-actions"
+import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { logger } from "@/utils/logger"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
@@ -28,10 +29,8 @@ export interface SaveSuggestionSessionResult {
   /** Composite key: popoverSessionKey:translateRequestKey:rerunNonce. */
   sessionKey: string
   validated: ValidatedSaveSuggestion
-  /** The chosen action as of fire time (config copy, or the dictionary draft). */
+  /** The configured Save Suggestion action as of fire time. */
   actionSnapshot: SelectionToolbarCustomAction
-  /** Non-null iff the target is `create_dictionary`. */
-  dictionaryDraft: SelectionToolbarCustomAction | null
   /** When the request was fired (for latency analytics). */
   firedAt: number
   /** Analytics classification of the provider that generated this suggestion. */
@@ -110,12 +109,7 @@ export function useSaveSuggestion() {
       return
     }
 
-    const dictionaryTemplate = CUSTOM_ACTION_TEMPLATES.find(
-      (template) => template.id === "dictionary",
-    )
-    if (!dictionaryTemplate) {
-      return
-    }
+    const actionSnapshot = structuredClone(resolveSaveSuggestionAction(config))
 
     const abortController = new AbortController()
     abortControllerRef.current = abortController
@@ -133,19 +127,20 @@ export function useSaveSuggestion() {
         return
       }
 
-      // Snapshot candidates and the dictionary draft at fire time so the
-      // prompt, the validation schema, and the action created at dialog
-      // confirm all share identical fields.
-      const enabledActions = config.customActions.filter((action) => action.enabled !== false)
-      const dictionaryDraft = dictionaryTemplate.createAction(input.providerId)
+      const webPageContext = await getOrCreateWebPageContext().catch(() => null)
+      if (signal.aborted) {
+        return
+      }
 
+      // Prompt construction and semantic validation share the exact action
+      // snapshot captured synchronously when this request fired.
       const { systemPrompt, prompt } = buildSaveSuggestionPrompts({
         selection: input.selectionText,
         paragraphs: input.paragraphsText,
         targetLanguage: input.targetLangName,
         webTitle: input.webTitle,
-        candidates: enabledActions,
-        dictionaryDraft,
+        webContent: webPageContext?.webContent ?? "",
+        action: actionSnapshot,
       })
 
       const modelName = resolveModelId(input.providerConfig.model) ?? ""
@@ -187,8 +182,7 @@ export function useSaveSuggestion() {
       const validated = envelope.success
         ? validateSaveSuggestion({
             envelope: envelope.data,
-            candidates: enabledActions,
-            dictionaryDraft,
+            action: actionSnapshot,
           })
         : null
 
@@ -199,19 +193,10 @@ export function useSaveSuggestion() {
 
       void recordSaveSuggestionSuccess()
 
-      const actionSnapshot =
-        validated.target.kind === "create_dictionary"
-          ? dictionaryDraft
-          : (enabledActions.find(
-              (action) =>
-                validated.target.kind === "existing" && action.id === validated.target.actionId,
-            ) ?? dictionaryDraft)
-
       setSuggestion({
         sessionKey: input.sessionKey,
         validated,
         actionSnapshot,
-        dictionaryDraft: validated.target.kind === "create_dictionary" ? dictionaryDraft : null,
         firedAt,
         analyticsProvider: classifyProviderConfig(input.providerConfig),
       })

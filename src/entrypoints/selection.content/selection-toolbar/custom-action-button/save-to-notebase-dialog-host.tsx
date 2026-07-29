@@ -22,6 +22,11 @@ import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.conten
 import { env } from "@/env"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { authClient } from "@/utils/auth/auth-client"
+import {
+  findSelectionToolbarAction,
+  getSelectionToolbarActions,
+  replaceSelectionToolbarAction,
+} from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
@@ -128,7 +133,9 @@ export function SaveToNotebaseDialogHost() {
   }
 
   const buildCustomActionsWithDraft = (draft: SelectionToolbarCustomAction) => {
-    const existingNames = new Set(selectionToolbarConfig.customActions.map((item) => item.name))
+    const existingNames = new Set(
+      getSelectionToolbarActions(selectionToolbarConfig).map((item) => item.name),
+    )
     const named = existingNames.has(draft.name)
       ? { ...draft, name: getUniqueName(draft.name, existingNames) }
       : draft
@@ -141,7 +148,7 @@ export function SaveToNotebaseDialogHost() {
    * so the background pending-save processor finds the action afterwards.
    */
   const ensureDraftActionInConfig = async (draft: SelectionToolbarCustomAction) => {
-    if (selectionToolbarConfig.customActions.some((item) => item.id === draft.id)) {
+    if (findSelectionToolbarAction(selectionToolbarConfig, draft.id)) {
       return
     }
 
@@ -171,23 +178,28 @@ export function SaveToNotebaseDialogHost() {
         variables.connectedAccount,
       )
       const draft = variables.pendingActionDraft
-      const hasAction = selectionToolbarConfig.customActions.some(
-        (item) => item.id === createdPendingSave.actionId,
+      const existingAction = findSelectionToolbarAction(
+        selectionToolbarConfig,
+        createdPendingSave.actionId,
       )
       // Draft path appends the action together with its connection in one
       // config write, so a failed notebase.create never leaves an orphan action.
-      const nextCustomActions =
-        draft && !hasAction
-          ? buildCustomActionsWithDraft({ ...draft, notebaseConnection: nextConnection })
-          : selectionToolbarConfig.customActions.map((item) =>
-              item.id === createdPendingSave.actionId
-                ? { ...item, notebaseConnection: nextConnection }
-                : item,
-            )
-      await setSelectionToolbarConfig({
-        ...selectionToolbarConfig,
-        customActions: nextCustomActions,
-      })
+      const nextSelectionToolbar =
+        draft && !existingAction
+          ? {
+              ...selectionToolbarConfig,
+              customActions: buildCustomActionsWithDraft({
+                ...draft,
+                notebaseConnection: nextConnection,
+              }),
+            }
+          : existingAction
+            ? replaceSelectionToolbarAction(selectionToolbarConfig, {
+                ...existingAction,
+                notebaseConnection: nextConnection,
+              })
+            : selectionToolbarConfig
+      await setSelectionToolbarConfig(nextSelectionToolbar)
 
       closeDialog()
       toastManager.add({
