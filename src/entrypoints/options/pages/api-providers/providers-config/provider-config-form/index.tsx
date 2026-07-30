@@ -24,9 +24,9 @@ import {
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { EntityEditor } from "../../../../components/entity-editor"
-import { duplicateProvider } from "../../utils"
 import { selectedProviderIdAtom } from "../atoms"
 import { CustomProviderEditor, ProviderEditor, useProviderForm } from "../provider-editor"
+import { duplicateProvider } from "../utils"
 
 export function ProviderConfigForm() {
   const selectedProviderId = useAtomValue(selectedProviderIdAtom)

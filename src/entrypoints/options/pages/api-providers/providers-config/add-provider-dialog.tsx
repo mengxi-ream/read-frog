@@ -7,8 +7,8 @@ import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/base-u
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { API_PROVIDER_ITEMS, PROVIDER_GROUPS } from "@/utils/constants/providers"
 import { i18n } from "@/utils/i18n"
-import { addProvider } from "../utils"
 import { selectedProviderIdAtom } from "./atoms"
+import { addProvider } from "./utils"
 
 export default function AddProviderDialog({ onClose }: { onClose: () => void }) {
   const [providersConfig, setProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
