@@ -87,7 +87,6 @@ export function PatternsTable({
               </TableRow>
             </TableHeader>
           </Table>
-          {/* Caps the list; past that the rows scroll under the header. */}
           <div className="max-h-42 overflow-y-auto">
             <Table>
               <TableBody>
