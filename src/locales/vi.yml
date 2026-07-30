@@ -774,7 +774,7 @@ options:
     analytics:
       title: Giúp cải thiện trải nghiệm người dùng
       tooltip: Khi bật, Read Frog sẽ gửi các tín hiệu sử dụng ẩn danh để phát hiện lỗi, xác minh tính ổn định của tính năng, tối ưu hiệu năng và độ tinh chỉnh UX, đồng thời giúp chúng tôi ưu tiên những gì cần xây tiếp theo.
-      description: Gửi dữ liệu sử dụng ẩn danh để giúp chúng tôi cải thiện Read Frog
+      description: Cải thiện Read Frog bằng cách giúp chúng tôi tìm lỗi, tinh chỉnh giao diện và hơn thế nữa
     sync:
       title: Đồng bộ cấu hình thủ công
       description: Nhập và xuất cài đặt cấu hình thủ công

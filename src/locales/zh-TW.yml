@@ -890,7 +890,7 @@ options:
     analytics:
       title: 幫助改進使用者體驗
       tooltip: 開啟後，陪讀蛙會傳送匿名的產品使用訊號，用於發現 bug、驗證功能是否穩定、最佳化效能與互動細節，並協助決定接下來優先投入的方向。
-      description: 傳送匿名使用資料，協助我們改進 Read Frog
+      description: 透過協助我們定位 bug、最佳化介面配置等改善陪讀蛙
     sync:
       title: 手動設定同步
       description: 手動匯入與匯出設定

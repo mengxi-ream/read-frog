@@ -890,7 +890,7 @@ options:
     analytics:
       title: Ayuda a mejorar la experiencia de usuario
       tooltip: Cuando está activado, Read Frog envía señales anónimas de uso del producto para que podamos detectar errores, verificar la fiabilidad de las funciones, mejorar el rendimiento y el acabado de la UX, y priorizar trabajos futuros.
-      description: Envía datos de uso anónimos para ayudarnos a mejorar Read Frog
+      description: Mejora Read Frog ayudándonos a localizar errores, pulir la interfaz y más
     sync:
       title: Sincronización manual de configuración
       description: Importa y exporta manualmente tus ajustes de configuración

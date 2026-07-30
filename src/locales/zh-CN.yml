@@ -890,7 +890,7 @@ options:
     analytics:
       title: 帮助改进用户体验
       tooltip: 开启后，Read Frog 会发送匿名的产品使用信号，用于发现 bug、验证功能是否稳定、优化性能与交互细节，并帮助我们决定接下来优先投入的方向。
-      description: 发送匿名使用数据，帮助我们改进 Read Frog
+      description: 通过帮助我们定位 bug、优化界面布局等改善 Read Frog
     sync:
       title: 手动配置同步
       description: 手动导入和导出您的配置设置

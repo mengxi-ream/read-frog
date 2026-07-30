@@ -774,7 +774,7 @@ options:
     analytics:
       title: Kullanıcı deneyimini geliştirmemize yardımcı ol
       tooltip: Açık olduğunda Read Frog, hataları yakalamak, özelliklerin güvenilir çalıştığını doğrulamak, performansı ve UX ayrıntılarını iyileştirmek ve sıradaki önceliklerimizi belirlemek için anonim kullanım sinyalleri gönderir.
-      description: Read Frog'u geliştirmemize yardımcı olmak için anonim kullanım verileri gönderin
+      description: Hataları bulmamıza, arayüzü iyileştirmemize ve daha fazlasına yardım ederek Read Frog'u geliştirin
     sync:
       title: Manuel Yapılandırma Senkronizasyonu
       description: Yapılandırma ayarlarınızı manuel olarak içe ve dışa aktarın

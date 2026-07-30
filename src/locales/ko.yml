@@ -774,7 +774,7 @@ options:
     analytics:
       title: 사용자 경험 개선에 기여
       tooltip: 켜면 Read Frog가 익명 사용 신호를 전송하여 버그를 찾아내고, 기능 안정성을 검증하고, 성능과 UX 디테일을 개선하며, 앞으로 무엇을 우선적으로 만들지 결정하는 데 활용합니다.
-      description: 익명 사용 데이터를 보내 Read Frog 개선에 도움을 줍니다
+      description: 버그를 찾고 UI 레이아웃을 다듬는 등 Read Frog 개선에 기여합니다
     sync:
       title: 수동 설정 동기화
       description: 수동으로 설정 가져오기 및 내보내기

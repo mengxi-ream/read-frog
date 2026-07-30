@@ -890,7 +890,7 @@ options:
     analytics:
       title: Help improve user experience
       tooltip: When enabled, Read Frog sends anonymous product usage signals so we can catch bugs, verify feature reliability, improve performance and UX polish, and prioritize future work.
-      description: Send anonymous usage data to help us improve Read Frog
+      description: Improve Read Frog by helping us locate bugs, refine layouts, and more
     sync:
       title: Manual Config Sync
       description: Manually import and export your configuration settings
