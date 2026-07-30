@@ -11,53 +11,57 @@ import {
   EmptyTitle,
 } from "@/components/ui/base-ui/empty"
 import { toastManager } from "@/components/ui/base-ui/toast"
-import { ConfigCard } from "@/entrypoints/options/components/config-card"
+import { ConfigDetailSection } from "@/entrypoints/options/components/config-detail-section"
+import { PageLayout } from "@/entrypoints/options/components/page-layout"
 import { configAtom } from "@/utils/atoms/config"
 import { addBackup, getAllBackupsWithMetadata } from "@/utils/backup/storage"
 import { EXTENSION_VERSION } from "@/utils/constants/app"
-import { MAX_BACKUPS_COUNT } from "@/utils/constants/backup"
 import { i18n } from "@/utils/i18n"
 import { queryClient } from "@/utils/tanstack-query"
 import { BackupConfigItem } from "./components/backup-config-item"
 
-export function ConfigBackup() {
+export function ConfigBackupPage() {
   const { data: backupsWithMetadata, isPending } = useQuery({
     queryKey: ["config-backups"],
     queryFn: () => getAllBackupsWithMetadata(),
   })
 
   return (
-    <ConfigCard
-      id="config-backup"
-      title={i18n.t("options.config.backup.title")}
-      description={i18n.t("options.config.backup.description", [MAX_BACKUPS_COUNT])}
+    <PageLayout
+      title={i18n.t("options.preference.title")}
+      description={i18n.t("options.preference.pageDescription")}
     >
-      <div className="space-y-4">
-        {isPending && (
-          <div className="py-8 text-center text-muted-foreground">
-            {i18n.t("options.config.backup.loading")}
-          </div>
-        )}
+      <ConfigDetailSection
+        backTo="/preference"
+        title={<span id="config-backup">{i18n.t("options.config.backup.title")}</span>}
+      >
+        <div className="space-y-4">
+          {isPending && (
+            <div className="py-8 text-center text-muted-foreground">
+              {i18n.t("options.config.backup.loading")}
+            </div>
+          )}
 
-        {backupsWithMetadata && backupsWithMetadata?.length === 0 && <EmptyState />}
-        {backupsWithMetadata && backupsWithMetadata?.length > 0 && (
-          <>
-            <Toolbar />
-            {backupsWithMetadata.map((backupWithMetadata) => (
-              <BackupConfigItem
-                key={backupWithMetadata.id}
-                backupId={backupWithMetadata.id}
-                backupMetadata={backupWithMetadata.metadata}
-                backup={{
-                  schemaVersion: backupWithMetadata.schemaVersion,
-                  config: backupWithMetadata.config,
-                }}
-              />
-            ))}
-          </>
-        )}
-      </div>
-    </ConfigCard>
+          {backupsWithMetadata && backupsWithMetadata?.length === 0 && <EmptyState />}
+          {backupsWithMetadata && backupsWithMetadata?.length > 0 && (
+            <>
+              <Toolbar />
+              {backupsWithMetadata.map((backupWithMetadata) => (
+                <BackupConfigItem
+                  key={backupWithMetadata.id}
+                  backupId={backupWithMetadata.id}
+                  backupMetadata={backupWithMetadata.metadata}
+                  backup={{
+                    schemaVersion: backupWithMetadata.schemaVersion,
+                    config: backupWithMetadata.config,
+                  }}
+                />
+              ))}
+            </>
+          )}
+        </div>
+      </ConfigDetailSection>
+    </PageLayout>
   )
 }
 
@@ -74,7 +78,7 @@ function Toolbar() {
   })
   return (
     <div className="flex justify-end">
-      <Button disabled={isBackingUp} onClick={() => backupConfig()}>
+      <Button size="sm" disabled={isBackingUp} onClick={() => backupConfig()}>
         <Icon icon="tabler:plus" />
         {i18n.t("options.config.backup.backupNow")}
       </Button>

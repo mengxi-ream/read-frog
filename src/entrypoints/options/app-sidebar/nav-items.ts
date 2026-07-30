@@ -13,4 +13,8 @@ export const ROUTE_DEFS = [
   { path: "/tts" },
   { path: "/statistics" },
   { path: "/config" },
+
+  // Detail pages drilled into from a `ConfigNavItem`. They own no sidebar entry — the
+  // sidebar lists its links itself — but route exactly like any other page.
+  { path: "/preference/config-backup" },
 ] as const

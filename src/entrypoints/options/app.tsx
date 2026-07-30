@@ -46,6 +46,12 @@ const ConfigPage = lazy(() =>
   import("./pages/config").then((module) => ({ default: module.ConfigPage })),
 )
 
+const ConfigBackupPage = lazy(() =>
+  import("./pages/preference/config/config-backup").then((module) => ({
+    default: module.ConfigBackupPage,
+  })),
+)
+
 const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/": GeneralPage,
   "/preference": PreferencePage,
@@ -61,6 +67,7 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/tts": TextToSpeechPage,
   "/statistics": StatisticsPage,
   "/config": ConfigPage,
+  "/preference/config-backup": ConfigBackupPage,
 }
 
 function RouteLoadingFallback() {

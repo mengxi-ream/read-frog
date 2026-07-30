@@ -35,13 +35,6 @@ const CONFIG_SEARCH_ITEMS = [
     pageKey: "options.config.title",
   },
   {
-    sectionId: "config-backup",
-    route: "/config",
-    titleKey: "options.config.backup.title",
-    descriptionKey: "options.config.backup.description",
-    pageKey: "options.config.title",
-  },
-  {
     sectionId: "reset-config",
     route: "/config",
     titleKey: "options.config.resetConfig.title",
@@ -102,6 +95,14 @@ export const SEARCH_ITEMS: SearchItem[] = [
     route: "/preference",
     titleKey: "options.config.sync.title",
     descriptionKey: "options.config.sync.description",
+    pageKey: "options.preference.title",
+  },
+  {
+    // Its own page, drilled into from the Preference page's Config section.
+    sectionId: "config-backup",
+    route: "/preference/config-backup",
+    titleKey: "options.config.backup.title",
+    descriptionKey: "options.config.backup.description",
     pageKey: "options.preference.title",
   },
 

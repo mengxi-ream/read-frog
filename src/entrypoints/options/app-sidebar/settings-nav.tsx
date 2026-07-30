@@ -43,7 +43,7 @@ export function SettingsNav() {
           <SidebarMenuItem>
             <SidebarMenuButton
               render={<Link to="/preference" />}
-              isActive={pathname === "/preference"}
+              isActive={pathname.startsWith("/preference")}
               tooltip={i18n.t("options.preference.title")}
             >
               <Icon icon="tabler:adjustments-horizontal" />

@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/base-ui/item"
 import { Spinner } from "@/components/ui/base-ui/spinner"
 import { toastManager } from "@/components/ui/base-ui/toast"
+import { ViewConfig } from "@/entrypoints/options/components/view-config"
 import { useExportConfig } from "@/hooks/use-export-config"
 import { configAtom, writeConfigAtom } from "@/utils/atoms/config"
 import { addBackup, isSameAsLatestBackup, removeBackup } from "@/utils/backup/storage"
@@ -40,7 +41,6 @@ import { EXTENSION_VERSION } from "@/utils/constants/app"
 import { CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
 import { i18n } from "@/utils/i18n"
 import { queryClient } from "@/utils/tanstack-query"
-import { ViewConfig } from "../../../../components/view-config"
 
 interface BackupConfigItemProps {
   backupId: string
