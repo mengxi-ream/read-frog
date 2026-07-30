@@ -897,8 +897,8 @@ options:
     sync:
       title: 手动配置同步
       description: 手动导入和导出您的配置设置
-      import: 导入配置
-      export: 导出配置
+      import: 导入
+      export: 导出
       importSuccess: 配置导入成功
       exportSuccess: 配置导出成功
       importError: 导入失败
@@ -912,8 +912,9 @@ options:
         excludeAPIKeys: 不包含 API Keys
         cancel: 取消
       viewConfig:
-        expand: 展开配置
-        collapse: 收起配置
+        open: 打开配置
+        title: 配置
+        description: 查看当前配置的原始 JSON
       googleDrive:
         title: Google Drive 云端同步
         description: 远端配置较新时下载，本地配置较新时上传

@@ -781,8 +781,8 @@ options:
     sync:
       title: Đồng bộ cấu hình thủ công
       description: Nhập và xuất cài đặt cấu hình thủ công
-      import: Nhập cấu hình
-      export: Xuất cấu hình
+      import: Nhập
+      export: Xuất
       importSuccess: Nhập cấu hình thành công
       exportSuccess: Xuất cấu hình thành công
       importError: Nhập thất bại
@@ -796,8 +796,9 @@ options:
         excludeAPIKeys: Loại trừ API Keys
         cancel: Hủy
       viewConfig:
-        expand: Mở rộng cấu hình
-        collapse: Thu gọn cấu hình
+        open: Mở cấu hình
+        title: Cấu hình
+        description: Xem JSON thô của cấu hình hiện tại
       googleDrive:
         title: Đồng bộ đám mây Google Drive
         description: Tải xuống khi bản từ xa mới hơn, tải lên khi bản cục bộ mới hơn

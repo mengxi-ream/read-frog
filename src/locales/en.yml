@@ -897,8 +897,8 @@ options:
     sync:
       title: Manual Config Sync
       description: Manually import and export your configuration settings
-      import: Import Config
-      export: Export Config
+      import: Import
+      export: Export
       importSuccess: Config imported successfully
       exportSuccess: Config exported successfully
       importError: Import failed
@@ -912,8 +912,9 @@ options:
         excludeAPIKeys: Exclude API Keys
         cancel: Cancel
       viewConfig:
-        expand: Expand Config
-        collapse: Collapse Config
+        open: Open Config
+        title: Config
+        description: View the raw JSON of your current configuration
       googleDrive:
         title: Google Drive Cloud Sync
         description: Downloads config when remote is newer, uploads config when local is newer

@@ -3,7 +3,6 @@ import { PageLayout } from "../../components/page-layout"
 import { AboutCard } from "./about-card"
 import { BetaExperienceConfig } from "./beta-experience"
 import { ConfigBackup } from "./config-backup"
-import { ManualConfigSync } from "./manual-config-sync"
 import { ResetConfig } from "./reset-config"
 
 export function ConfigPage() {
@@ -14,7 +13,6 @@ export function ConfigPage() {
       innerClassName="*:border-b [&>*:last-child]:border-b-0"
     >
       <BetaExperienceConfig />
-      <ManualConfigSync />
       <ConfigBackup />
       <AboutCard />
       <ResetConfig />

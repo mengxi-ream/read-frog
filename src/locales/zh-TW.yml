@@ -897,8 +897,8 @@ options:
     sync:
       title: 手動設定同步
       description: 手動匯入與匯出設定
-      import: 匯入設定
-      export: 匯出設定
+      import: 匯入
+      export: 匯出
       importSuccess: 設定匯入成功
       exportSuccess: 設定匯出成功
       importError: 匯入失敗
@@ -912,8 +912,9 @@ options:
         excludeAPIKeys: 不包含 API 金鑰
         cancel: 取消
       viewConfig:
-        expand: 展開設定
-        collapse: 收起設定
+        open: 開啟設定
+        title: 設定
+        description: 檢視目前設定的原始 JSON
       googleDrive:
         title: Google Drive 雲端同步
         description: 遠端設定較新時下載，本機設定較新時上傳

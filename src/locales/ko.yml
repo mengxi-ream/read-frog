@@ -781,8 +781,8 @@ options:
     sync:
       title: 수동 설정 동기화
       description: 수동으로 설정 가져오기 및 내보내기
-      import: 설정 가져오기
-      export: 설정 내보내기
+      import: 가져오기
+      export: 내보내기
       importSuccess: 설정 가져오기 완료
       exportSuccess: 설정 내보내기 완료
       importError: 가져오기 실패
@@ -796,8 +796,9 @@ options:
         excludeAPIKeys: API 키 제외
         cancel: 취소
       viewConfig:
-        expand: 설정 펼치기
-        collapse: 설정 접기
+        open: 설정 열기
+        title: 설정
+        description: 현재 설정의 원본 JSON을 확인합니다
       googleDrive:
         title: Google Drive 클라우드 동기화
         description: 원격이 최신이면 다운로드, 로컬이 최신이면 업로드

@@ -35,13 +35,6 @@ const CONFIG_SEARCH_ITEMS = [
     pageKey: "options.config.title",
   },
   {
-    sectionId: "manual-config-sync",
-    route: "/config",
-    titleKey: "options.config.sync.title",
-    descriptionKey: "options.config.sync.description",
-    pageKey: "options.config.title",
-  },
-  {
     sectionId: "config-backup",
     route: "/config",
     titleKey: "options.config.backup.title",
@@ -102,6 +95,13 @@ export const SEARCH_ITEMS: SearchItem[] = [
     route: "/preference",
     titleKey: "options.config.sync.googleDrive.title",
     descriptionKey: "options.config.sync.googleDrive.description",
+    pageKey: "options.preference.title",
+  },
+  {
+    sectionId: "manual-config-sync",
+    route: "/preference",
+    titleKey: "options.config.sync.title",
+    descriptionKey: "options.config.sync.description",
     pageKey: "options.preference.title",
   },
 

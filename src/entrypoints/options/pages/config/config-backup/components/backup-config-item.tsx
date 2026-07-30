@@ -40,7 +40,7 @@ import { EXTENSION_VERSION } from "@/utils/constants/app"
 import { CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
 import { i18n } from "@/utils/i18n"
 import { queryClient } from "@/utils/tanstack-query"
-import { ViewConfig } from "../../components/view-config"
+import { ViewConfig } from "../../../../components/view-config"
 
 interface BackupConfigItemProps {
   backupId: string
@@ -74,7 +74,7 @@ export function BackupConfigItem({ backupId, backupMetadata, backup }: BackupCon
         </ButtonGroup>
       </ItemActions>
       <ItemFooter>
-        <ViewConfig config={backup.config} size="sm" />
+        <ViewConfig config={backup.config} size="sm" className="w-full" />
       </ItemFooter>
     </Item>
   )

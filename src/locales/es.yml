@@ -897,8 +897,8 @@ options:
     sync:
       title: Sincronización manual de configuración
       description: Importa y exporta manualmente tus ajustes de configuración
-      import: Importar configuración
-      export: Exportar configuración
+      import: Importar
+      export: Exportar
       importSuccess: Configuración importada correctamente
       exportSuccess: Configuración exportada correctamente
       importError: Error al importar
@@ -912,8 +912,9 @@ options:
         excludeAPIKeys: Excluir claves API
         cancel: Cancelar
       viewConfig:
-        expand: Expandir configuración
-        collapse: Contraer configuración
+        open: Abrir configuración
+        title: Configuración
+        description: Consulta el JSON sin procesar de tu configuración actual
       googleDrive:
         title: Sincronización cloud con Google Drive
         description: Descarga la configuración cuando la remota es más reciente, sube la configuración cuando la local es más reciente

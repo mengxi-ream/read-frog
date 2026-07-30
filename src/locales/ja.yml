@@ -781,8 +781,8 @@ options:
     sync:
       title: 手動設定同期
       description: 手動で設定をインポート・エクスポート
-      import: 設定をインポート
-      export: 設定をエクスポート
+      import: インポート
+      export: エクスポート
       importSuccess: 設定のインポートが完了しました
       exportSuccess: 設定のエクスポートが完了しました
       importError: インポートに失敗しました
@@ -796,8 +796,9 @@ options:
         excludeAPIKeys: APIキーを含めない
         cancel: キャンセル
       viewConfig:
-        expand: 設定を展開
-        collapse: 設定を折りたたむ
+        open: 設定を開く
+        title: 設定
+        description: 現在の設定の生の JSON を表示します
       googleDrive:
         title: Google Driveクラウド同期
         description: リモートが新しい場合はダウンロード、ローカルが新しい場合はアップロード

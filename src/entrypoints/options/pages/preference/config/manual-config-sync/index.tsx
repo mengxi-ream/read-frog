@@ -25,25 +25,28 @@ import { EXTENSION_VERSION } from "@/utils/constants/app"
 import { CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
 import { i18n } from "@/utils/i18n"
 import { queryClient } from "@/utils/tanstack-query"
-import { ConfigCard } from "../../components/config-card"
-import { ViewConfig } from "./components/view-config"
+import { ConfigItem } from "../../../../components/config-item"
+import { ViewConfig } from "../../../../components/view-config"
 
-export function ManualConfigSync() {
+export function ManualConfigSyncConfigItems() {
   const config = useAtomValue(configAtom)
   return (
-    <ConfigCard
-      id="manual-config-sync"
-      title={i18n.t("options.config.sync.title")}
-      description={i18n.t("options.config.sync.description")}
-    >
-      <div className="w-full space-y-4">
-        <div className="flex justify-end gap-3 text-end">
+    // The two rows read as one block: the second carries no title of its own.
+    <div className="flex flex-col gap-4">
+      <ConfigItem
+        id="manual-config-sync"
+        title={i18n.t("options.config.sync.title")}
+        description={i18n.t("options.config.sync.description")}
+      >
+        <div className="flex gap-2">
           <ImportConfig />
           <ExportConfig />
         </div>
-        <ViewConfig config={config} />
-      </div>
-    </ConfigCard>
+      </ConfigItem>
+      <ConfigItem description={i18n.t("options.config.sync.viewConfig.description")}>
+        <ViewConfig config={config} size="sm" />
+      </ConfigItem>
+    </div>
   )
 }
 
@@ -104,9 +107,11 @@ function ImportConfig() {
   }
 
   return (
-    <Button variant="outline" className="p-0" disabled={isImporting}>
-      <Label htmlFor="import-config-file" className="w-full px-3">
-        <Icon icon="tabler:file-import" className="size-4" />
+    <Button variant="outline" size="sm" className="p-0" disabled={isImporting}>
+      {/* The label fills the button so the whole thing opens the file picker; it inherits the
+          button's own font size instead of `Label`'s fixed `text-sm`. */}
+      <Label htmlFor="import-config-file" className="w-full gap-1 px-2.5 text-[length:inherit]">
+        <Icon icon="tabler:file-import" />
         {i18n.t("options.config.sync.import")}
       </Label>
       <Input
@@ -134,8 +139,8 @@ function ExportConfig() {
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger render={<Button disabled={isExporting} />}>
-        <Icon icon="tabler:file-export" className="size-4" />
+      <AlertDialogTrigger render={<Button variant="outline" size="sm" disabled={isExporting} />}>
+        <Icon icon="tabler:file-export" />
         {i18n.t("options.config.sync.export")}
       </AlertDialogTrigger>
 

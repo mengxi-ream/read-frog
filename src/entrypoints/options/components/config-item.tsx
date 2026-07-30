@@ -3,7 +3,8 @@ import { cn } from "@/utils/styles/utils"
 
 export interface ConfigItemProps {
   id?: string
-  title: ReactNode
+  /** Omit to hang the row off the previous item's title instead of giving it one. */
+  title?: ReactNode
   description: ReactNode
   children: ReactNode
   /** `vertical` stacks the control under the label — for controls too wide to sit beside it. */
@@ -40,7 +41,9 @@ export function ConfigItem({
     <div id={id} className={cn("relative flex w-full", layout.root, className)}>
       <div className={layout.label}>
         <div className="flex flex-col items-start justify-start gap-1">
-          <h3 className={cn("text-sm leading-5 font-medium", titleClassName)}>{title}</h3>
+          {title && (
+            <h3 className={cn("text-sm leading-5 font-medium", titleClassName)}>{title}</h3>
+          )}
           <div className="text-[13px] leading-[18px] text-pretty text-muted-foreground">
             {description}
           </div>

@@ -781,8 +781,8 @@ options:
     sync:
       title: Manuel Yapılandırma Senkronizasyonu
       description: Yapılandırma ayarlarınızı manuel olarak içe ve dışa aktarın
-      import: Yapılandırmayı İçe Aktar
-      export: Yapılandırmayı Dışa Aktar
+      import: İçe Aktar
+      export: Dışa Aktar
       importSuccess: Yapılandırma başarıyla içe aktarıldı
       exportSuccess: Yapılandırma başarıyla dışa aktarıldı
       importError: İçe aktarma başarısız
@@ -796,8 +796,9 @@ options:
         excludeAPIKeys: API Anahtarlarını Hariç Tut
         cancel: İptal
       viewConfig:
-        expand: Yapılandırmayı Genişlet
-        collapse: Yapılandırmayı Daralt
+        open: Yapılandırmayı Aç
+        title: Yapılandırma
+        description: Mevcut yapılandırmanızın ham JSON içeriğini görüntüleyin
       googleDrive:
         title: Google Drive Bulut Senkronizasyonu
         description: Uzak daha yeniyse indirir, yerel daha yeniyse yükler

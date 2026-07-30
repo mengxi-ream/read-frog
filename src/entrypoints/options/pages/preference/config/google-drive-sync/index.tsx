@@ -111,7 +111,7 @@ export function GoogleDriveSyncConfigItem() {
                 {i18n.t("options.config.sync.googleDrive.logout")}
               </Button>
             </Activity>
-            <Button size="sm" onClick={handleSync} disabled={isSyncing}>
+            <Button variant="outline" size="sm" onClick={handleSync} disabled={isSyncing}>
               <Icon icon="logos:google-drive" />
               {isSyncing
                 ? i18n.t("options.config.sync.googleDrive.syncing")

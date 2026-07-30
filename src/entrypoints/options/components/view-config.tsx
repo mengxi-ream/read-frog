@@ -2,8 +2,14 @@ import type { VariantProps } from "class-variance-authority"
 import type { buttonVariants } from "@/components/ui/base-ui/button"
 import type { Config } from "@/types/config/config"
 import { Icon } from "@iconify/react"
-import { useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/base-ui/dialog"
 import { ScrollArea } from "@/components/ui/base-ui/scroll-area"
 import { CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
 import { i18n } from "@/utils/i18n"
@@ -12,24 +18,25 @@ export function ViewConfig({
   config,
   configSchemaVersion,
   size = "default",
+  className,
 }: {
   config: Config
   configSchemaVersion?: number
   size?: VariantProps<typeof buttonVariants>["size"]
+  className?: string
 }) {
-  const [isExpanded, setIsExpanded] = useState(false)
-
   return (
-    <div className="flex w-full flex-col justify-end">
-      <Button variant="outline" size={size} onClick={() => setIsExpanded(!isExpanded)}>
-        <Icon icon={isExpanded ? "tabler:chevron-up" : "tabler:chevron-down"} />
-        {isExpanded
-          ? i18n.t("options.config.sync.viewConfig.collapse")
-          : i18n.t("options.config.sync.viewConfig.expand")}
-      </Button>
+    <Dialog>
+      <DialogTrigger render={<Button variant="outline" size={size} className={className} />}>
+        <Icon icon="tabler:braces" />
+        {i18n.t("options.config.sync.viewConfig.open")}
+      </DialogTrigger>
 
-      {isExpanded && (
-        <ScrollArea className="mt-3 h-96 w-full rounded-lg border bg-muted">
+      <DialogContent className="sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{i18n.t("options.config.sync.viewConfig.title")}</DialogTitle>
+        </DialogHeader>
+        <ScrollArea className="h-96 w-full rounded-lg border bg-muted">
           <pre className="overflow-wrap-anywhere p-4 text-xs break-all whitespace-pre-wrap">
             {JSON.stringify(
               {
@@ -41,7 +48,7 @@ export function ViewConfig({
             )}
           </pre>
         </ScrollArea>
-      )}
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
