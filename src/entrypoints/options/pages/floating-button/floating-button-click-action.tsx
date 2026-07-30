@@ -49,7 +49,7 @@ export function FloatingButtonClickAction() {
           <SelectTrigger className="w-[180px]">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent align="end" className="min-w-fit">
+          <SelectContent align="end">
             <SelectGroup>
               {items.map((item) => (
                 <SelectItem key={item.value} value={item.value}>
