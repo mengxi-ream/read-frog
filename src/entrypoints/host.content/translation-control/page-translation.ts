@@ -308,8 +308,12 @@ export class PageTranslationManager implements IPageTranslationManager {
       this.observeMutations(document.documentElement)
 
       // Label existing elements in time-sliced chunks (walkability caching is
-      // handled by the walk's onBlockedElement callback).
-      const initialWalk = this.observeTopLevelParagraphs(document.body, config, { chunked: true })
+      // handled by the walk's onBlockedElement callback). Start at
+      // documentElement so pre-existing reader roots mounted beside body are
+      // included as well as ordinary body content.
+      const initialWalk = this.observeTopLevelParagraphs(document.documentElement, config, {
+        chunked: true,
+      })
       this.initialWalkDone = initialWalk
       try {
         await initialWalk
