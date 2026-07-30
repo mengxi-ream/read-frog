@@ -271,6 +271,8 @@ options:
         noProviders: Hãy cấu hình nhà cung cấp LLM trước
         basicRecommend: Khuyến nghị bật LLM
         llmEnabled: Phát hiện LLM đã bật
+  patterns:
+    duplicate: Mẫu này đã có trong danh sách
   preference:
     title: Tùy chọn
     appearanceAndLanguage:

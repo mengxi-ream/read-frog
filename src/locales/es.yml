@@ -272,6 +272,8 @@ options:
         noProviders: Configura primero un proveedor LLM
         basicRecommend: Se recomienda activar LLM
         llmEnabled: Detección LLM activada
+  patterns:
+    duplicate: Este patrón ya está en la lista
   preference:
     title: Preferencias
     appearanceAndLanguage:

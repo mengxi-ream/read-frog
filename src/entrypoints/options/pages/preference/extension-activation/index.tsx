@@ -1,6 +1,7 @@
 import { useAtom } from "jotai"
 import { Label } from "@/components/ui/base-ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/base-ui/radio-group"
+import { usePatternList } from "@/hooks/use-pattern-list"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
@@ -16,22 +17,9 @@ export function ExtensionActivationSection() {
       : ("whitelistPatterns" as const)
   const patterns = siteControl[patternsKey] ?? []
 
-  const addPattern = async (pattern: string) => {
-    const cleanedPattern = pattern.trim()
-    if (!cleanedPattern || patterns.includes(cleanedPattern)) return
-
-    await setSiteControl({
-      ...siteControl,
-      [patternsKey]: [...patterns, cleanedPattern],
-    })
-  }
-
-  const removePattern = async (pattern: string) => {
-    await setSiteControl({
-      ...siteControl,
-      [patternsKey]: patterns.filter((p) => p !== pattern),
-    })
-  }
+  const { addPattern, removePattern } = usePatternList(patterns, (nextPatterns) => {
+    void setSiteControl({ ...siteControl, [patternsKey]: nextPatterns })
+  })
 
   return (
     <ConfigSection title={i18n.t("options.preference.extensionActivation.title")}>

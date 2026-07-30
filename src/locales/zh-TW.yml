@@ -272,6 +272,8 @@ options:
         noProviders: 請先設定 LLM 提供者
         basicRecommend: 建議啟用 LLM
         llmEnabled: LLM 偵測已啟用
+  patterns:
+    duplicate: 該模式已在列表中
   preference:
     title: 偏好設定
     appearanceAndLanguage:

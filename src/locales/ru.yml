@@ -271,6 +271,8 @@ options:
         noProviders: Сначала настройте LLM-провайдер
         basicRecommend: Рекомендуется включить LLM
         llmEnabled: LLM-определение включено
+  patterns:
+    duplicate: Этот шаблон уже в списке
   preference:
     title: Предпочтения
     appearanceAndLanguage:

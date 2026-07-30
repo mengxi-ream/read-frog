@@ -1,4 +1,5 @@
 import { useAtom } from "jotai"
+import { usePatternList } from "@/hooks/use-pattern-list"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
@@ -10,24 +11,15 @@ export function SelectionToolbarDisabledSites() {
   )
   const { disabledSelectionToolbarPatterns } = selectionToolbarConfig
 
-  const addPattern = (pattern: string) => {
-    const cleanedPattern = pattern.trim()
-    if (!cleanedPattern || disabledSelectionToolbarPatterns.includes(cleanedPattern)) return
-
-    void setSelectionToolbarConfig({
-      ...selectionToolbarConfig,
-      disabledSelectionToolbarPatterns: [...disabledSelectionToolbarPatterns, cleanedPattern],
-    })
-  }
-
-  const removePattern = (pattern: string) => {
-    void setSelectionToolbarConfig({
-      ...selectionToolbarConfig,
-      disabledSelectionToolbarPatterns: disabledSelectionToolbarPatterns.filter(
-        (p: string) => p !== pattern,
-      ),
-    })
-  }
+  const { addPattern, removePattern } = usePatternList(
+    disabledSelectionToolbarPatterns,
+    (nextPatterns) => {
+      void setSelectionToolbarConfig({
+        ...selectionToolbarConfig,
+        disabledSelectionToolbarPatterns: nextPatterns,
+      })
+    },
+  )
 
   return (
     <ConfigCard

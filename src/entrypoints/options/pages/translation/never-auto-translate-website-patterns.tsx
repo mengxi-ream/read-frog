@@ -1,4 +1,5 @@
 import { useAtom } from "jotai"
+import { usePatternList } from "@/hooks/use-pattern-list"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
@@ -8,26 +9,14 @@ export function NeverAutoTranslateWebsitePatterns() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
   const { neverAutoTranslatePatterns } = translateConfig.page
 
-  const addPattern = (pattern: string) => {
-    const cleanedPattern = pattern.trim()
-    if (!cleanedPattern || neverAutoTranslatePatterns.includes(cleanedPattern)) return
-
-    void setTranslateConfig({
-      page: {
-        ...translateConfig.page,
-        neverAutoTranslatePatterns: [...neverAutoTranslatePatterns, cleanedPattern],
-      },
-    })
-  }
-
-  const removePattern = (pattern: string) => {
-    void setTranslateConfig({
-      page: {
-        ...translateConfig.page,
-        neverAutoTranslatePatterns: neverAutoTranslatePatterns.filter((p) => p !== pattern),
-      },
-    })
-  }
+  const { addPattern, removePattern } = usePatternList(
+    neverAutoTranslatePatterns,
+    (nextPatterns) => {
+      void setTranslateConfig({
+        page: { ...translateConfig.page, neverAutoTranslatePatterns: nextPatterns },
+      })
+    },
+  )
 
   return (
     <ConfigCard

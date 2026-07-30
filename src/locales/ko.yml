@@ -271,6 +271,8 @@ options:
         noProviders: LLM 제공자를 먼저 구성하세요
         basicRecommend: LLM 활성화 권장
         llmEnabled: LLM 감지 활성화됨
+  patterns:
+    duplicate: 이 패턴은 이미 목록에 있습니다
   preference:
     title: 환경 설정
     appearanceAndLanguage:

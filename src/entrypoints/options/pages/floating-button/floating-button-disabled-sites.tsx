@@ -1,4 +1,5 @@
 import { useAtom } from "jotai"
+import { usePatternList } from "@/hooks/use-pattern-list"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
@@ -10,22 +11,15 @@ export function FloatingButtonDisabledSites() {
   )
   const { disabledFloatingButtonPatterns } = floatingButtonConfig
 
-  const addPattern = (pattern: string) => {
-    const cleanedPattern = pattern.trim()
-    if (!cleanedPattern || disabledFloatingButtonPatterns.includes(cleanedPattern)) return
-
-    void setFloatingButtonConfig({
-      ...floatingButtonConfig,
-      disabledFloatingButtonPatterns: [...disabledFloatingButtonPatterns, cleanedPattern],
-    })
-  }
-
-  const removePattern = (pattern: string) => {
-    void setFloatingButtonConfig({
-      ...floatingButtonConfig,
-      disabledFloatingButtonPatterns: disabledFloatingButtonPatterns.filter((p) => p !== pattern),
-    })
-  }
+  const { addPattern, removePattern } = usePatternList(
+    disabledFloatingButtonPatterns,
+    (nextPatterns) => {
+      void setFloatingButtonConfig({
+        ...floatingButtonConfig,
+        disabledFloatingButtonPatterns: nextPatterns,
+      })
+    },
+  )
 
   return (
     <ConfigCard

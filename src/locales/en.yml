@@ -272,6 +272,8 @@ options:
         noProviders: Configure an LLM provider first
         basicRecommend: Recommend enabling LLM
         llmEnabled: LLM detection enabled
+  patterns:
+    duplicate: This pattern is already in the list
   preference:
     title: Preferences
     appearanceAndLanguage:

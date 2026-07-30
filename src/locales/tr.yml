@@ -271,6 +271,8 @@ options:
         noProviders: Önce bir LLM sağlayıcısı yapılandırın
         basicRecommend: LLM etkinleştirmesi önerilir
         llmEnabled: LLM algılama etkin
+  patterns:
+    duplicate: Bu desen zaten listede
   preference:
     title: Tercihler
     appearanceAndLanguage:
