@@ -16,9 +16,7 @@ import {
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
-
-/** The triggers hug their content, so the popup hangs off their right edge to stay in the column. */
-const SELECT_CONTENT_PROPS = { align: "end" } as const
+import { SELECT_CONTENT_PROPS } from "../../../components/select-content-props"
 
 /** How much of a custom action's system prompt stands in for a description before it is cut. */
 const SYSTEM_PROMPT_PREVIEW_LENGTH = 80

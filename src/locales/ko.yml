@@ -221,8 +221,6 @@ options:
       failed: 실패
       slow: 느림(사고 모드 조정 권장)
   general:
-    title: 일반
-    pageDescription: Read Frog가 페이지 언어를 감지하는 방식을 선택하세요.
     featureProviders:
       title: 기능 제공업체
       description: 각 기능에 사용할 제공업체를 선택
@@ -811,9 +809,9 @@ options:
         description: 기본 감지는 빠르고 무료입니다. LLM 감지는 더 정확하지만 지연 시간과 API 비용이 증가합니다.
     aiContentAware:
       title: AI 스마트 컨텍스트 번역
-      description: AI에 웹페이지 컨텍스트를 제공하여 번역 품질을 향상시킵니다
-      enable: AI 스마트 컨텍스트 번역 활성화
-      enableDescription: AI가 웹페이지 요약을 사용하여 번역 정확도를 향상시킵니다. LLM 제공업체가 필요합니다. 번역 시작 시 지연이 발생하고 API 비용이 증가합니다.
+      description: 페이지나 영상의 맥락을 AI에 전달해 번역 정확도를 높입니다
+      enable: 사용
+      enableDescription: AI가 번역 전에 페이지나 영상 요약을 읽어 맥락에 맞는 표현을 고릅니다. LLM 제공업체로 동작하는 모든 번역 기능에 적용됩니다. 첫 요청에 지연이 생기고 API 비용이 늘어납니다.
   siteRules:
     title: 사이트 규칙
     pageDescription: 기본 제공 규칙과 사용자 규칙으로 사이트별 번역 방식을 조정하세요.

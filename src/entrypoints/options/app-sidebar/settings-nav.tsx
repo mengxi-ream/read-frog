@@ -31,12 +31,12 @@ export function SettingsNav() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              render={<Link to="/" />}
-              isActive={pathname === "/"}
-              tooltip={i18n.t("options.general.title")}
+              render={<Link to="/api-providers" />}
+              isActive={pathname === "/api-providers" || pathname === "/"}
+              tooltip={i18n.t("options.apiProviders.title")}
             >
-              <Icon icon="tabler:adjustments-horizontal" />
-              <span>{i18n.t("options.general.title")}</span>
+              <Icon icon="tabler:api" />
+              <span>{i18n.t("options.apiProviders.title")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
 
@@ -48,17 +48,6 @@ export function SettingsNav() {
             >
               <Icon icon="tabler:adjustments-horizontal" />
               <span>{i18n.t("options.preference.title")}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              render={<Link to="/api-providers" />}
-              isActive={pathname === "/api-providers"}
-              tooltip={i18n.t("options.apiProviders.title")}
-            >
-              <Icon icon="tabler:api" />
-              <span>{i18n.t("options.apiProviders.title")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
 

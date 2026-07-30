@@ -222,8 +222,6 @@ options:
       failed: Falló
       slow: Lento (se recomienda ajustar el modo de razonamiento)
   general:
-    title: General
-    pageDescription: Elige cómo Read Frog detecta el idioma de una página.
     featureProviders:
       title: Proveedores de funciones
       description: Elige qué proveedor usar para cada función
@@ -927,9 +925,9 @@ options:
         description: La detección básica es rápida y gratis. La detección LLM es más precisa, pero añade latencia y costes de API.
     aiContentAware:
       title: Traducción con contexto inteligente de IA
-      description: Mejora la calidad de la traducción proporcionando contexto de la página web a la AI
-      enable: Activar traducción con contexto inteligente de IA
-      enableDescription: La AI usa el resumen de la página web para mejorar la precisión de traducción. Requiere proveedor LLM. Añade latencia al empezar a traducir una página y aumenta los costes de API.
+      description: Da a la IA contexto de la página o el video para que traduzca con más precisión
+      enable: Activar
+      enableDescription: La IA lee un resumen de la página o el video antes de traducir, para que el vocabulario encaje con el contexto. Se aplica a todas las funciones de traducción que usan un proveedor LLM. Añade latencia en la primera solicitud y aumenta los costos de API.
   siteRules:
     title: Reglas de sitio
     pageDescription: Ajusta cómo se traduce cada sitio web con reglas integradas y personalizadas.

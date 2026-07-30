@@ -1,6 +1,5 @@
 import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
-import { AIContentAware } from "./ai-content-aware"
 import { AutoTranslateLanguages } from "./auto-translate-languages"
 import { AutoTranslateWebsitePatterns } from "./auto-translate-website-patterns"
 import { ClearCacheConfig } from "./clear-cache-config"
@@ -31,7 +30,6 @@ export function TranslationPage() {
       <PageTranslationShortcut />
       <NodeTranslationHotkey />
       <CustomTranslationStyle />
-      <AIContentAware />
       <PersonalizedPrompts />
       <AutoTranslateWebsitePatterns />
       <NeverAutoTranslateWebsitePatterns />

@@ -221,8 +221,6 @@ options:
       failed: Thất bại
       slow: Chậm (nên điều chỉnh chế độ suy nghĩ)
   general:
-    title: Chung
-    pageDescription: Chọn cách Read Frog nhận diện ngôn ngữ của trang.
     featureProviders:
       title: Nhà cung cấp tính năng
       description: Chọn nhà cung cấp sử dụng cho mỗi tính năng
@@ -811,9 +809,9 @@ options:
         description: Phát hiện cơ bản nhanh và miễn phí. Phát hiện LLM chính xác hơn nhưng thêm độ trễ và chi phí API.
     aiContentAware:
       title: Dịch ngữ cảnh thông minh AI
-      description: Nâng cao chất lượng dịch bằng cách cung cấp ngữ cảnh trang web cho AI
-      enable: Bật dịch ngữ cảnh thông minh AI
-      enableDescription: AI sử dụng tóm tắt trang web để cải thiện độ chính xác dịch. Yêu cầu nhà cung cấp LLM. Thêm độ trễ khi bắt đầu dịch trang và tăng chi phí API.
+      description: Cung cấp cho AI ngữ cảnh của trang hoặc video để dịch chính xác hơn
+      enable: Bật
+      enableDescription: AI đọc bản tóm tắt của trang hoặc video trước khi dịch, để cách dùng từ hợp ngữ cảnh. Áp dụng cho mọi tính năng dịch chạy trên nhà cung cấp LLM. Yêu cầu đầu tiên sẽ chậm hơn và làm tăng chi phí API.
   siteRules:
     title: Quy tắc trang web
     pageDescription: Điều chỉnh cách dịch từng trang web bằng quy tắc có sẵn và quy tắc tự tạo.

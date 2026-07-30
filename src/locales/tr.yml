@@ -221,8 +221,6 @@ options:
       failed: Başarısız
       slow: Yavaş (düşünme modunu ayarlamanız önerilir)
   general:
-    title: Genel
-    pageDescription: Read Frog'un sayfa dilini nasıl algılayacağını seçin.
     featureProviders:
       title: Özellik Sağlayıcıları
       description: Her özellik için kullanılacak sağlayıcıyı seçin
@@ -811,9 +809,9 @@ options:
         description: Temel algılama hızlı ve ücretsizdir. LLM algılama daha doğrudur ancak gecikme ve API maliyetleri ekler.
     aiContentAware:
       title: AI Akıllı Bağlam Çevirisi
-      description: AI'ya web sayfası bağlamı sağlayarak çeviri kalitesini artırın
-      enable: AI Akıllı Bağlam Çevirisini Etkinleştir
-      enableDescription: AI, çeviri doğruluğunu artırmak için web sayfası özetini kullanır. LLM sağlayıcısı gerektirir. Bir sayfayı çevirmeye başlarken gecikme ekler ve API maliyetlerini artırır.
+      description: Sayfanın ya da videonun bağlamını yapay zekâya vererek çeviriyi daha isabetli hale getirin
+      enable: Etkinleştir
+      enableDescription: Yapay zekâ çeviriden önce sayfanın ya da videonun özetini okur, böylece sözcükler bağlama oturur. LLM sağlayıcısıyla çalışan her çeviri özelliğinde geçerlidir. İlk isteğe gecikme ekler ve API maliyetini artırır.
   siteRules:
     title: Site Kuralları
     pageDescription: Yerleşik ve özel kurallarla tek tek web sitelerinin nasıl çevrileceğini ayarlayın.

@@ -2,7 +2,6 @@ import type { ComponentType } from "react"
 import { lazy, Suspense } from "react"
 import { Route, Routes } from "react-router"
 import { ROUTE_DEFS } from "./app-sidebar/nav-items"
-import { GeneralPage } from "./pages/general"
 
 type RoutePath = (typeof ROUTE_DEFS)[number]["path"]
 
@@ -46,7 +45,7 @@ const ConfigBackupPage = lazy(() =>
 )
 
 const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
-  "/": GeneralPage,
+  "/": ApiProvidersPage,
   "/preference": PreferencePage,
   "/api-providers": ApiProvidersPage,
   "/custom-actions": CustomActionsPage,

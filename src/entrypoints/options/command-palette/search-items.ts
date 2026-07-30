@@ -27,15 +27,6 @@ const TTS_SEARCH_ITEMS: SearchItemDefinition[] = [
 ]
 
 export const SEARCH_ITEMS: SearchItem[] = [
-  // General page
-  {
-    sectionId: "language-detection",
-    route: "/",
-    titleKey: "options.general.languageDetection.title",
-    descriptionKey: "options.general.languageDetection.description",
-    pageKey: "options.general.title",
-  },
-
   // Preference page
   {
     // Titled with the section, so "appearance" still finds a row that reads "Theme".
@@ -118,6 +109,20 @@ export const SEARCH_ITEMS: SearchItem[] = [
     descriptionKey: "options.general.featureProviders.description",
     pageKey: "options.apiProviders.title",
   },
+  {
+    sectionId: "language-detection",
+    route: "/api-providers",
+    titleKey: "options.general.languageDetection.title",
+    descriptionKey: "options.general.languageDetection.description",
+    pageKey: "options.apiProviders.title",
+  },
+  {
+    sectionId: "ai-content-aware",
+    route: "/api-providers",
+    titleKey: "options.translation.aiContentAware.title",
+    descriptionKey: "options.translation.aiContentAware.description",
+    pageKey: "options.apiProviders.title",
+  },
 
   // Custom Actions page
   {
@@ -162,13 +167,6 @@ export const SEARCH_ITEMS: SearchItem[] = [
     route: "/translation",
     titleKey: "options.translation.translationStyle.title",
     descriptionKey: "options.translation.translationStyle.description",
-    pageKey: "options.translation.title",
-  },
-  {
-    sectionId: "ai-content-aware",
-    route: "/translation",
-    titleKey: "options.translation.aiContentAware.title",
-    descriptionKey: "options.translation.aiContentAware.description",
     pageKey: "options.translation.title",
   },
   {

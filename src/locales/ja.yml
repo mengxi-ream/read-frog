@@ -221,8 +221,6 @@ options:
       failed: 失敗
       slow: 低速（思考モードの調整を推奨）
   general:
-    title: 一般
-    pageDescription: Read Frog がページの言語を判定する方法を設定します。
     featureProviders:
       title: 機能プロバイダー
       description: 各機能に使用するプロバイダーを選択
@@ -811,9 +809,9 @@ options:
         description: 基本検出は高速で無料です。LLM 検出はより正確ですが、遅延と API コストが増加します。
     aiContentAware:
       title: AI スマートコンテキスト翻訳
-      description: ウェブページのコンテキストを AI に提供して翻訳品質を向上させます
-      enable: AI スマートコンテキスト翻訳を有効にする
-      enableDescription: AI はウェブページの要約を使用して翻訳精度を向上させます。LLM プロバイダーが必要です。翻訳開始時に遅延が発生し、API コストが増加します。
+      description: ページや動画の文脈を AI に渡して、翻訳の精度を上げます
+      enable: 有効にする
+      enableDescription: AI は翻訳の前にページや動画の要約を読み、文脈に合った訳語を選びます。LLM プロバイダーで動作するすべての翻訳機能に適用されます。最初のリクエストに遅延が生じ、API 費用も増えます。
   siteRules:
     title: サイトルール
     pageDescription: 組み込みルールとカスタムルールで、サイトごとの翻訳方法を調整します。

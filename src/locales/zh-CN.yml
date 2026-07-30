@@ -222,8 +222,6 @@ options:
       failed: 失败
       slow: 缓慢（建议调节思考模式）
   general:
-    title: 通用
-    pageDescription: 选择 Read Frog 如何识别页面语言。
     featureProviders:
       title: 功能提供商
       description: 为每个功能选择使用的提供商
@@ -927,9 +925,9 @@ options:
         description: 基础检测快速且免费。LLM 检测更准确，但会增加延迟和 API 费用。
     aiContentAware:
       title: AI 智能上下文翻译
-      description: 通过向 AI 提供网页上下文来提高翻译质量
-      enable: 启用 AI 智能上下文翻译
-      enableDescription: AI 使用网页摘要来提高翻译准确性。需要 LLM 翻译提供商。刚开始翻译页面时会有延迟，并增加 API 费用。
+      description: 把网页或视频的上下文提供给 AI，让翻译更准确
+      enable: 启用
+      enableDescription: AI 翻译前会先读一份网页或视频的摘要，让用词更贴合上下文。对每个使用 LLM 提供商的翻译功能都生效。首次请求会有延迟，并增加 API 费用。
   siteRules:
     title: 站点规则
     pageDescription: 用内置规则和自定义规则调整单个网站的翻译方式。
