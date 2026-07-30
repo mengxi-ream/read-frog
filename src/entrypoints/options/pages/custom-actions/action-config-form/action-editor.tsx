@@ -264,7 +264,7 @@ function NotebaseConnectionField() {
 function DuplicateButton() {
   const { duplicate } = useActionEditor().actions
   return (
-    <Button type="button" variant="outline" onClick={() => void duplicate()}>
+    <Button type="button" variant="outline" size="sm" onClick={() => void duplicate()}>
       {i18n.t("options.apiProviders.form.duplicate")}
     </Button>
   )
@@ -297,7 +297,7 @@ function DeleteButton() {
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger render={<Button type="button" variant="destructive" />}>
+      <AlertDialogTrigger render={<Button type="button" variant="destructive" size="sm" />}>
         {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.delete")}
       </AlertDialogTrigger>
       <AlertDialogContent>
