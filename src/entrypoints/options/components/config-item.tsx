@@ -16,8 +16,10 @@ export interface ConfigItemProps {
 const LAYOUT = {
   horizontal: {
     root: "flex-wrap items-center justify-between gap-3",
+    // The label takes the slack, but only down to a control column wide enough to hold a
+    // select — without the floor, a long description squeezes the control to its own width.
     label: "min-w-[320px] flex-1",
-    control: "items-end",
+    control: "min-w-[110px] items-end",
   },
   vertical: {
     root: "flex-col gap-4",
