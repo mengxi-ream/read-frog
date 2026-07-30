@@ -98,7 +98,7 @@ options:
     page: page
   apiProviders:
     title: API Providers
-    pageDescription: Connect the AI services Read Frog calls, and manage their keys and models.
+    pageDescription: Connect the AI services Read Frog calls, manage their keys and models, and pick which one powers each feature.
     description: Configure API providers for translation and vocabulary insight. We have 20+ built-in providers and support any OpenAI-compatible API provider.
     configTitle: Provider Config
     addProvider: Add Provider
@@ -223,7 +223,7 @@ options:
       slow: Slow (try adjusting thinking mode)
   general:
     title: General
-    pageDescription: Choose which provider powers each feature and how Read Frog detects a page's language.
+    pageDescription: Choose how Read Frog detects the language of a page.
     featureProviders:
       title: Feature Providers
       description: Choose which provider to use for each feature
@@ -234,6 +234,11 @@ options:
         tts: Text to Speech
         inputTranslation: Input Translation
         videoSubtitles: Video Subtitles
+      descriptions:
+        translate: Translates the whole page in bilingual or replace mode.
+        selectionToolbar_translate: Translates the text you select from the selection toolbar.
+        inputTranslation: Translates what you type into an input box before you send it.
+        videoSubtitles: Translates subtitles as they appear in a video player.
     translationConfig:
       model:
         title: Model

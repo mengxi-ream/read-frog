@@ -98,7 +98,7 @@ options:
     page: APIキーを設定してください
   apiProviders:
     title: APIプロバイダー
-    pageDescription: Read Frog が呼び出す AI サービスを接続し、キーとモデルを管理します。
+    pageDescription: Read Frog が呼び出す AI サービスを接続し、キーとモデルを管理して、各機能で使うものを選びます。
     description: 翻訳および語彙分析機能用のAPIプロバイダーを設定。20以上の内蔵プロバイダーに加え、OpenAI互換APIもサポートしています。
     configTitle: プロバイダー設定
     addProvider: プロバイダーを追加
@@ -222,7 +222,7 @@ options:
       slow: 低速（思考モードの調整を推奨）
   general:
     title: 一般
-    pageDescription: 各機能で使うプロバイダーと、Read Frog がページの言語を判定する方法を設定します。
+    pageDescription: Read Frog がページの言語を判定する方法を設定します。
     featureProviders:
       title: 機能プロバイダー
       description: 各機能に使用するプロバイダーを選択
@@ -233,6 +233,11 @@ options:
         tts: テキスト読み上げ
         inputTranslation: 入力翻訳
         videoSubtitles: 動画字幕
+      descriptions:
+        translate: ページ全体を対訳または置き換えで翻訳します。
+        selectionToolbar_translate: 選択ツールバーから、選択したテキストを翻訳します。
+        inputTranslation: 入力欄に書いた文章を、送信する前に翻訳します。
+        videoSubtitles: 動画プレーヤーに表示される字幕を翻訳します。
     translationConfig:
       model:
         title: モデル

@@ -98,7 +98,7 @@ options:
     page: 頁面設定 API 金鑰
   apiProviders:
     title: API 提供者
-    pageDescription: 接入 Read Frog 呼叫的 AI 服務，並管理各自的金鑰和模型。
+    pageDescription: 接入 Read Frog 呼叫的 AI 服務，管理各自的金鑰和模型，並為每項功能指定使用哪一個。
     description: 設定用於翻譯和詞彙解析功能的 API 提供者。內建 20 多個提供者，並支援任何 OpenAI 相容 API 提供者。
     configTitle: 提供者設定
     addProvider: 新增提供者
@@ -223,7 +223,7 @@ options:
       slow: 緩慢（建議調整思考模式）
   general:
     title: 通用
-    pageDescription: 選擇每項功能使用的提供者，以及 Read Frog 如何辨識頁面語言。
+    pageDescription: 選擇 Read Frog 如何辨識頁面語言。
     featureProviders:
       title: 功能提供者
       description: 為每個功能選擇使用的提供者
@@ -234,6 +234,11 @@ options:
         tts: 文字轉語音
         inputTranslation: 輸入翻譯
         videoSubtitles: 影片字幕
+      descriptions:
+        translate: 翻譯整個網頁，雙語對照或直接取代原文。
+        selectionToolbar_translate: 透過劃詞工具列翻譯你選取的文字。
+        inputTranslation: 在送出前翻譯你寫在輸入框裡的內容。
+        videoSubtitles: 翻譯影片播放器中隨播放出現的字幕。
     translationConfig:
       model:
         title: 模型

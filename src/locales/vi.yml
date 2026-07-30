@@ -98,7 +98,7 @@ options:
     page: cài đặt
   apiProviders:
     title: Nhà cung cấp API
-    pageDescription: Kết nối các dịch vụ AI mà Read Frog sử dụng và quản lý khóa cùng mô hình của chúng.
+    pageDescription: Kết nối các dịch vụ AI mà Read Frog sử dụng, quản lý khóa cùng mô hình của chúng và chọn dịch vụ cho từng tính năng.
     description: Cấu hình các nhà cung cấp API cho chức năng dịch và phân tích từ vựng tại đây. Chúng tôi có hơn 20 nhà cung cấp tích hợp sẵn và hỗ trợ mọi API tương thích OpenAI.
     configTitle: Cấu hình nhà cung cấp
     addProvider: Thêm nhà cung cấp
@@ -222,7 +222,7 @@ options:
       slow: Chậm (nên điều chỉnh chế độ suy nghĩ)
   general:
     title: Chung
-    pageDescription: Chọn nhà cung cấp cho từng chức năng và cách Read Frog nhận diện ngôn ngữ của trang.
+    pageDescription: Chọn cách Read Frog nhận diện ngôn ngữ của trang.
     featureProviders:
       title: Nhà cung cấp tính năng
       description: Chọn nhà cung cấp sử dụng cho mỗi tính năng
@@ -233,6 +233,11 @@ options:
         tts: Chuyển văn bản thành giọng nói
         inputTranslation: Dịch đầu vào
         videoSubtitles: Phụ đề video
+      descriptions:
+        translate: Dịch toàn bộ trang ở chế độ song ngữ hoặc thay thế bản gốc.
+        selectionToolbar_translate: Dịch đoạn văn bản bạn chọn từ thanh công cụ bôi đen.
+        inputTranslation: Dịch nội dung bạn gõ trong ô nhập trước khi gửi.
+        videoSubtitles: Dịch phụ đề hiện ra trong trình phát video.
     translationConfig:
       model:
         title: Mô hình

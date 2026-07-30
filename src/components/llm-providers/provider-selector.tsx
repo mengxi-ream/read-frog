@@ -40,7 +40,7 @@ interface ProviderSelectorProps {
   triggerSize?: ProviderSelectorTriggerSize
   selectContentProps?: Pick<
     ComponentProps<typeof SelectContent>,
-    "container" | "positionerClassName"
+    "container" | "positionerClassName" | "align"
   >
 }
 
@@ -124,7 +124,7 @@ function GroupedSelect({
   triggerSize: ProviderSelectorTriggerSize
   selectContentProps?: Pick<
     ComponentProps<typeof SelectContent>,
-    "container" | "positionerClassName"
+    "container" | "positionerClassName" | "align"
   >
   theme: Theme
 }) {
@@ -186,7 +186,7 @@ function UngroupedSelect({
   triggerSize: ProviderSelectorTriggerSize
   selectContentProps?: Pick<
     ComponentProps<typeof SelectContent>,
-    "container" | "positionerClassName"
+    "container" | "positionerClassName" | "align"
   >
   theme: Theme
 }) {

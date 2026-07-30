@@ -1,6 +1,5 @@
 import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
-import FeatureProvidersConfig from "./feature-providers-config"
 import LanguageDetectionConfig from "./language-detection-config"
 
 export function GeneralPage() {
@@ -10,7 +9,6 @@ export function GeneralPage() {
       description={i18n.t("options.general.pageDescription")}
       innerClassName="*:border-b [&>*:last-child]:border-b-0"
     >
-      <FeatureProvidersConfig />
       <LanguageDetectionConfig />
     </PageLayout>
   )

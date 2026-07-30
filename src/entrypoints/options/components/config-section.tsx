@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import { cn } from "@/utils/styles/utils"
 
 export interface ConfigSectionProps {
+  id?: string
   title: ReactNode
   children: ReactNode
   className?: string
@@ -10,6 +11,7 @@ export interface ConfigSectionProps {
 }
 
 export function ConfigSection({
+  id,
   title,
   children,
   className,
@@ -17,7 +19,7 @@ export function ConfigSection({
   titleClassName,
 }: ConfigSectionProps) {
   return (
-    <section className={cn("w-full", className)}>
+    <section id={id} className={cn("w-full", className)}>
       <h2
         className={cn("mb-4 border-b pb-3 text-base font-medium text-foreground", titleClassName)}
       >

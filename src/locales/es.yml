@@ -98,7 +98,7 @@ options:
     page: página
   apiProviders:
     title: Proveedores de API
-    pageDescription: Conecta los servicios de IA que usa Read Frog y gestiona sus claves y modelos.
+    pageDescription: Conecta los servicios de IA que usa Read Frog, gestiona sus claves y modelos, y elige cuál impulsa cada función.
     description: Configura proveedores de API para traducción e información de vocabulario. Tenemos más de 20 proveedores integrados y admitimos cualquier proveedor de API compatible con OpenAI.
     configTitle: Configuración de proveedores
     addProvider: Añadir proveedor
@@ -223,7 +223,7 @@ options:
       slow: Lento (se recomienda ajustar el modo de razonamiento)
   general:
     title: General
-    pageDescription: Elige qué proveedor impulsa cada función y cómo Read Frog detecta el idioma de una página.
+    pageDescription: Elige cómo Read Frog detecta el idioma de una página.
     featureProviders:
       title: Proveedores de funciones
       description: Elige qué proveedor usar para cada función
@@ -234,6 +234,11 @@ options:
         tts: Texto a voz
         inputTranslation: Traducción de entrada
         videoSubtitles: Subtítulos de video
+      descriptions:
+        translate: Traduce la página completa en modo bilingüe o de reemplazo.
+        selectionToolbar_translate: Traduce el texto que seleccionas desde la barra de selección.
+        inputTranslation: Traduce lo que escribes en un campo de texto antes de enviarlo.
+        videoSubtitles: Traduce los subtítulos que aparecen en el reproductor de video.
     translationConfig:
       model:
         title: Modelo

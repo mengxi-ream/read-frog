@@ -29,13 +29,6 @@ const TTS_SEARCH_ITEMS: SearchItemDefinition[] = [
 export const SEARCH_ITEMS: SearchItem[] = [
   // General page
   {
-    sectionId: "feature-providers",
-    route: "/",
-    titleKey: "options.general.featureProviders.title",
-    descriptionKey: "options.general.featureProviders.description",
-    pageKey: "options.general.title",
-  },
-  {
     sectionId: "language-detection",
     route: "/",
     titleKey: "options.general.languageDetection.title",
@@ -116,6 +109,13 @@ export const SEARCH_ITEMS: SearchItem[] = [
     route: "/api-providers",
     titleKey: "options.apiProviders.title",
     descriptionKey: "options.apiProviders.description",
+    pageKey: "options.apiProviders.title",
+  },
+  {
+    sectionId: "feature-providers",
+    route: "/api-providers",
+    titleKey: "options.general.featureProviders.title",
+    descriptionKey: "options.general.featureProviders.description",
     pageKey: "options.apiProviders.title",
   },
 

@@ -98,7 +98,7 @@ options:
     page: 页设置 API Key
   apiProviders:
     title: API 提供商
-    pageDescription: 接入 Read Frog 调用的 AI 服务，并管理各自的密钥和模型。
+    pageDescription: 接入 Read Frog 调用的 AI 服务，管理各自的密钥和模型，并为每项功能指定使用哪一个。
     description: 配置用于翻译和词汇解析功能的 API 提供商。我们内置了 20 多个提供商，并支持任何 OpenAI 兼容 API 提供商。
     configTitle: 提供商配置
     addProvider: 添加提供商
@@ -223,7 +223,7 @@ options:
       slow: 缓慢（建议调节思考模式）
   general:
     title: 通用
-    pageDescription: 选择每项功能使用的提供商，以及 Read Frog 如何识别页面语言。
+    pageDescription: 选择 Read Frog 如何识别页面语言。
     featureProviders:
       title: 功能提供商
       description: 为每个功能选择使用的提供商
@@ -234,6 +234,11 @@ options:
         tts: 文本转语音
         inputTranslation: 输入翻译
         videoSubtitles: 视频字幕
+      descriptions:
+        translate: 翻译整个网页，双语对照或直接替换原文。
+        selectionToolbar_translate: 通过划词工具栏翻译你选中的文本。
+        inputTranslation: 在发送前翻译你写在输入框里的内容。
+        videoSubtitles: 翻译视频播放器中随播放出现的字幕。
     translationConfig:
       model:
         title: 模型

@@ -57,6 +57,13 @@ export function getFeatureLabelI18nKey(featureKey: FeatureKey): FeatureLabelI18n
   return `options.general.featureProviders.features.${FEATURE_KEY_I18N_MAP[featureKey]}`
 }
 
+export type FeatureDescriptionI18nKey =
+  `options.general.featureProviders.descriptions.${(typeof FEATURE_KEY_I18N_MAP)[FeatureKey]}`
+
+export function getFeatureDescriptionI18nKey(featureKey: FeatureKey): FeatureDescriptionI18nKey {
+  return `options.general.featureProviders.descriptions.${FEATURE_KEY_I18N_MAP[featureKey]}`
+}
+
 export function resolveProviderConfig(config: Config, featureKey: FeatureKey) {
   const providerConfig = resolveProviderConfigOrNull(config, featureKey)
   if (!providerConfig) {

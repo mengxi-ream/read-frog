@@ -98,7 +98,7 @@ options:
     page: sayfasında ayarlayın
   apiProviders:
     title: API Sağlayıcıları
-    pageDescription: Read Frog'un çağırdığı yapay zekâ servislerini bağlayın, anahtarlarını ve modellerini yönetin.
+    pageDescription: Read Frog'un çağırdığı yapay zekâ servislerini bağlayın, anahtarlarını ve modellerini yönetin, her özelliğin hangisini kullanacağını seçin.
     description: Çeviri ve kelime analizi işlevleri için API sağlayıcılarını buradan yapılandırın. 20'den fazla yerleşik sağlayıcımız var ve OpenAI uyumlu tüm API sağlayıcılarını destekliyoruz.
     configTitle: Sağlayıcı Yapılandırması
     addProvider: Sağlayıcı Ekle
@@ -222,7 +222,7 @@ options:
       slow: Yavaş (düşünme modunu ayarlamanız önerilir)
   general:
     title: Genel
-    pageDescription: Her özelliğin hangi sağlayıcıyı kullanacağını ve Read Frog'un sayfa dilini nasıl algılayacağını seçin.
+    pageDescription: Read Frog'un sayfa dilini nasıl algılayacağını seçin.
     featureProviders:
       title: Özellik Sağlayıcıları
       description: Her özellik için kullanılacak sağlayıcıyı seçin
@@ -233,6 +233,11 @@ options:
         tts: Metin Okuma
         inputTranslation: Giriş Çevirisi
         videoSubtitles: Video Altyazıları
+      descriptions:
+        translate: Sayfanın tamamını iki dilli ya da değiştirme modunda çevirir.
+        selectionToolbar_translate: Seçim araç çubuğundan, seçtiğiniz metni çevirir.
+        inputTranslation: Bir metin kutusuna yazdıklarınızı göndermeden önce çevirir.
+        videoSubtitles: Video oynatıcıda görünen altyazıları çevirir.
     translationConfig:
       model:
         title: Model
