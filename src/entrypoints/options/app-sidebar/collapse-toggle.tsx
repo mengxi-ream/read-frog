@@ -16,7 +16,7 @@ export function CollapseToggle() {
         size="icon-xs"
         aria-label="Toggle Sidebar"
         onClick={toggleSidebar}
-        className="rounded-full text-muted-foreground hover:text-foreground"
+        className="rounded-full bg-sidebar text-muted-foreground hover:bg-sidebar-accent hover:text-foreground dark:bg-sidebar dark:hover:bg-sidebar-accent"
       >
         <Icon icon={open ? "tabler:chevron-left" : "tabler:chevron-right"} />
       </Button>
