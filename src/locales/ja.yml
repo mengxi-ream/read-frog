@@ -286,6 +286,8 @@ options:
       title: 拡張機能の有効化
       mode:
         title: 有効化モード
+    config:
+      title: 設定
   siteControl:
     title: サイト制御
     mode:

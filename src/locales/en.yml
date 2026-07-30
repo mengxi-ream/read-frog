@@ -287,6 +287,8 @@ options:
       title: Extension Activation
       mode:
         title: Activation mode
+    config:
+      title: Config
   siteControl:
     title: Site Control
     mode:

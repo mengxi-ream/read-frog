@@ -286,6 +286,8 @@ options:
       title: Uzantı Etkinleştirme
       mode:
         title: Etkinleştirme modu
+    config:
+      title: Yapılandırma
   siteControl:
     title: Site Kontrolü
     mode:

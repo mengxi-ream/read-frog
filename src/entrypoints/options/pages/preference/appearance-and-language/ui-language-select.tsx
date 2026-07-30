@@ -1,3 +1,4 @@
+import type { ComponentProps } from "react"
 import type { UiLanguage } from "@/types/config/config"
 import { useAtom } from "jotai"
 import {
@@ -49,12 +50,18 @@ function labelFor(language: UiLanguage): string {
  * Bare interface-language control. Callers own the surrounding label/layout, including
  * width: `SelectTrigger` defaults to `w-fit`, so pass `w-full` to fill the container.
  */
-export function UiLanguageSelect({ className }: { className?: string }) {
+export function UiLanguageSelect({
+  className,
+  size,
+}: {
+  className?: string
+  size?: ComponentProps<typeof SelectTrigger>["size"]
+}) {
   const [uiLanguage, setUiLanguage] = useAtom(configFieldsAtomMap.uiLanguage)
 
   return (
     <Select value={uiLanguage} onValueChange={(value) => void setUiLanguage(value as UiLanguage)}>
-      <SelectTrigger className={className}>
+      <SelectTrigger className={className} size={size}>
         <SelectValue render={<span />}>{labelFor(uiLanguage)}</SelectValue>
       </SelectTrigger>
       <SelectContent align="end">

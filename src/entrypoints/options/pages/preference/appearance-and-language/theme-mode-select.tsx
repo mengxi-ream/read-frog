@@ -1,3 +1,4 @@
+import type { ComponentProps } from "react"
 import type { ThemeMode } from "@/types/config/theme"
 import { Icon } from "@iconify/react"
 import { useTheme } from "@/components/providers/theme-provider"
@@ -28,12 +29,18 @@ const MODE_LABEL_KEY = {
  * Bare theme-mode control. Callers own the surrounding label/layout, including width:
  * `SelectTrigger` defaults to `w-fit`, so pass `w-full` to fill the container instead.
  */
-export function ThemeModeSelect({ className }: { className?: string }) {
+export function ThemeModeSelect({
+  className,
+  size,
+}: {
+  className?: string
+  size?: ComponentProps<typeof SelectTrigger>["size"]
+}) {
   const { themeMode, setThemeMode } = useTheme()
 
   return (
     <Select value={themeMode} onValueChange={(value) => setThemeMode(value as ThemeMode)}>
-      <SelectTrigger className={className}>
+      <SelectTrigger className={className} size={size}>
         <SelectValue render={<span />}>
           <span className="flex items-center gap-2">
             <Icon icon={MODE_ICON[themeMode]} className="size-4" />

@@ -287,6 +287,8 @@ options:
       title: 擴充功能啟動
       mode:
         title: 啟動模式
+    config:
+      title: 設定
   siteControl:
     title: 網站控制
     mode:

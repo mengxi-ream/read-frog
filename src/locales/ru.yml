@@ -286,6 +286,8 @@ options:
       title: Активация расширения
       mode:
         title: Режим активации
+    config:
+      title: Конфигурация
   siteControl:
     title: Управление сайтами
     mode:

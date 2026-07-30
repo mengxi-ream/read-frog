@@ -12,14 +12,14 @@ export function AppearanceAndLanguageSection() {
         title={i18n.t("options.general.appearance.theme")}
         description={i18n.t("options.preference.appearanceAndLanguage.theme.description")}
       >
-        <ThemeModeSelect />
+        <ThemeModeSelect size="sm" />
       </ConfigItem>
       <ConfigItem
         id="interface-language"
         title={i18n.t("options.general.interfaceLanguage.title")}
         description={i18n.t("options.general.interfaceLanguage.description")}
       >
-        <UiLanguageSelect />
+        <UiLanguageSelect size="sm" />
       </ConfigItem>
     </ConfigSection>
   )

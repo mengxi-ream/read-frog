@@ -10,10 +10,10 @@ import { clearAccessToken } from "@/utils/google-drive/auth"
 import { syncConfig } from "@/utils/google-drive/sync"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
-import { ConfigCard } from "../../../components/config-card"
+import { ConfigItem } from "../../../../components/config-item"
 import { UnresolvedDialog } from "./components/unresolved-dialog"
 
-export function GoogleDriveSyncCard() {
+export function GoogleDriveSyncConfigItem() {
   const [isSyncing, setIsSyncing] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const {
@@ -83,51 +83,49 @@ export function GoogleDriveSyncCard() {
 
   return (
     <>
-      <ConfigCard
+      <ConfigItem
         id="google-drive-sync"
         title={i18n.t("options.config.sync.googleDrive.title")}
         description={
           <div className="flex flex-col gap-2">
             {i18n.t("options.config.sync.googleDrive.description")}
             <Activity mode={authData?.isAuthenticated ? "visible" : "hidden"}>
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-1.5">
                 {authData?.userInfo?.picture && (
                   <img
                     src={authData.userInfo.picture}
                     alt="Google Account"
-                    className="size-5 rounded-full border"
+                    className="size-4.5 rounded-full border"
                   />
                 )}
-                <span className="text-sm text-muted-foreground">{authData?.userInfo?.email}</span>
+                <span className="text-xs">{authData?.userInfo?.email}</span>
               </div>
             </Activity>
           </div>
         }
       >
-        <div className="flex w-full flex-col items-end gap-4">
-          <div className="flex flex-col items-end gap-2">
-            <div className="flex gap-2">
-              <Button onClick={handleSync} disabled={isSyncing}>
-                <Icon icon="logos:google-drive" className="size-4" />
-                {isSyncing
-                  ? i18n.t("options.config.sync.googleDrive.syncing")
-                  : i18n.t("options.config.sync.googleDrive.sync")}
+        <div className="flex flex-col items-end gap-1.5">
+          <div className="flex gap-2">
+            <Activity mode={authData?.isAuthenticated ? "visible" : "hidden"}>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                {i18n.t("options.config.sync.googleDrive.logout")}
               </Button>
-            </div>
-            <Activity mode={lastSyncTime ? "visible" : "hidden"}>
-              <span className="text-xs text-muted-foreground">
-                {i18n.t("options.config.sync.googleDrive.lastSyncTime")}:{" "}
-                {lastSyncTime && formatLastSyncTime(lastSyncTime)}
-              </span>
             </Activity>
-          </div>
-          <Activity mode={authData?.isAuthenticated ? "visible" : "hidden"}>
-            <Button variant="outline" onClick={handleLogout}>
-              {i18n.t("options.config.sync.googleDrive.logout")}
+            <Button size="sm" onClick={handleSync} disabled={isSyncing}>
+              <Icon icon="logos:google-drive" />
+              {isSyncing
+                ? i18n.t("options.config.sync.googleDrive.syncing")
+                : i18n.t("options.config.sync.googleDrive.sync")}
             </Button>
+          </div>
+          <Activity mode={lastSyncTime ? "visible" : "hidden"}>
+            <span className="text-xs whitespace-nowrap text-muted-foreground">
+              {i18n.t("options.config.sync.googleDrive.lastSyncTime")}:{" "}
+              {lastSyncTime && formatLastSyncTime(lastSyncTime)}
+            </span>
           </Activity>
         </div>
-      </ConfigCard>
+      </ConfigItem>
 
       <UnresolvedDialog
         open={isOpen}

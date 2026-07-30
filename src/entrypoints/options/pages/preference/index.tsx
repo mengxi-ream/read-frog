@@ -1,6 +1,7 @@
 import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
 import { AppearanceAndLanguageSection } from "./appearance-and-language"
+import { ConfigManagementSection } from "./config"
 import { ExtensionActivationSection } from "./extension-activation"
 
 export function PreferencePage() {
@@ -12,6 +13,7 @@ export function PreferencePage() {
     >
       <AppearanceAndLanguageSection />
       <ExtensionActivationSection />
+      <ConfigManagementSection />
     </PageLayout>
   )
 }

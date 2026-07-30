@@ -15,8 +15,8 @@ export interface ConfigItemProps {
 const LAYOUT = {
   horizontal: {
     root: "flex-wrap items-center justify-between gap-3",
-    label: "min-w-[320px] flex-[3_1_0%]",
-    control: "flex-[1_1_0%] items-end",
+    label: "min-w-[320px] flex-1",
+    control: "items-end",
   },
   vertical: {
     root: "flex-col gap-4",

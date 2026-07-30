@@ -286,6 +286,8 @@ options:
       title: 확장 프로그램 활성화
       mode:
         title: 활성화 모드
+    config:
+      title: 설정
   siteControl:
     title: 사이트 제어
     mode:

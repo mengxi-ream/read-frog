@@ -286,6 +286,8 @@ options:
       title: Kích hoạt tiện ích mở rộng
       mode:
         title: Chế độ kích hoạt
+    config:
+      title: Cấu hình
   siteControl:
     title: Kiểm soát trang web
     mode:
