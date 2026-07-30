@@ -17,6 +17,7 @@ import { detectLanguage } from "@/utils/content/language"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { providerRequiresApiKey } from "@/utils/providers/api-key"
 import { TranslationCancelledError } from "@/utils/request/cancellation"
 import { Sha256Hex } from "../../hash"
 import { sendMessage } from "../../message"
@@ -221,12 +222,13 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     throw new TranslationCancelledError(sessionId)
   }
 
+  const requestHash = Sha256Hex(...hashComponents)
   const result = await sendMessage("enqueueTranslateRequest", {
     text: preparedText,
     langConfig,
     providerConfig,
     scheduleAt: Date.now(),
-    hash: Sha256Hex(...hashComponents),
+    hash: requestHash,
     textFormat,
     webTitle: normalizedWebPageContext?.webTitle,
     webDescription: normalizedWebPageContext?.webDescription,
@@ -281,7 +283,7 @@ export function validateTranslationConfigAndToast(
   if (
     isAPIProviderConfig(providerConfig) &&
     !providerConfig.apiKey?.trim() &&
-    !["deeplx", "ollama"].includes(providerConfig.provider)
+    providerRequiresApiKey(providerConfig.provider)
   ) {
     toastManager.add({ type: "error", title: i18n.t("noAPIKeyConfig.warning") })
     logger.info("validateTranslationConfig: returning false (no API key)")

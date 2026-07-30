@@ -23,6 +23,7 @@ export const TRANSLATE_PROVIDER_TYPES = [
   "microsoft-translate",
   "deeplx",
   "deepl",
+  "openai-codex",
   "openai",
   "deepseek",
   "google",
@@ -60,6 +61,7 @@ export function isTranslateProvider(provider: string): provider is TranslateProv
 }
 
 export const LLM_PROVIDER_TYPES = [
+  "openai-codex",
   "openai",
   "deepseek",
   "google",
@@ -109,6 +111,7 @@ export function isCustomLLMProvider(provider: string): provider is CustomLLMProv
 }
 
 export const NON_CUSTOM_LLM_PROVIDER_TYPES = [
+  "openai-codex",
   "openai",
   "deepseek",
   "google",
@@ -144,6 +147,7 @@ export const API_PROVIDER_TYPES = [
   "siliconflow",
   "tensdaq",
   "volcengine",
+  "openai-codex",
   "openai",
   "deepseek",
   "google",
@@ -199,6 +203,7 @@ export const ALL_PROVIDER_TYPES = [
   "siliconflow",
   "tensdaq",
   "volcengine",
+  "openai-codex",
   "openai",
   "deepseek",
   "google",
@@ -235,6 +240,7 @@ export const AI_SDK_REASONING_VALUES = [
 export type AISDKReasoning = (typeof AI_SDK_REASONING_VALUES)[number]
 
 export const TOP_LEVEL_REASONING_PROVIDER_TYPES = [
+  "openai-codex",
   "openai",
   "anthropic",
   "google",

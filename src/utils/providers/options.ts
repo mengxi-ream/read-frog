@@ -92,7 +92,8 @@ export function getProviderOptions(
     return {}
   }
 
-  return { [provider]: options }
+  const runtimeProvider = provider === "openai-codex" ? "openai" : provider
+  return { [runtimeProvider]: options }
 }
 
 /**
@@ -106,8 +107,10 @@ export function getProviderOptionsWithOverride(
   userOptions?: Record<string, JSONValue>,
   reasoning?: string,
 ): Record<string, Record<string, JSONValue>> | undefined {
+  const runtimeProvider = provider === "openai-codex" ? "openai" : provider
+
   if (userOptions !== undefined) {
-    return { [provider]: normalizeUserProviderOptions(provider, userOptions) }
+    return { [runtimeProvider]: normalizeUserProviderOptions(provider, userOptions) }
   }
 
   const recommendedOptions = getRecommendedProviderOptions(model)
@@ -123,5 +126,5 @@ export function getProviderOptionsWithOverride(
     return undefined
   }
 
-  return { [provider]: recommendedOptions }
+  return { [runtimeProvider]: recommendedOptions }
 }

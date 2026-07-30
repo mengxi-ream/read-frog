@@ -9,6 +9,7 @@ import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { i18n } from "@/utils/i18n"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { providerRequiresApiKey } from "@/utils/providers/api-key"
 
 const SLOW_CONNECTION_THRESHOLD_MS = 3_000
 const CONNECTION_TEST_FEEDBACK_DURATION_MS = 5_000
@@ -190,7 +191,7 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
       variant="outline"
       className="gap-2"
       onClick={handleTestConnection}
-      disabled={mutation.isPending || (!apiKey && provider !== "deeplx" && provider !== "ollama")}
+      disabled={mutation.isPending || (!apiKey && providerRequiresApiKey(provider))}
     >
       {mutation.isPending ? (
         <>

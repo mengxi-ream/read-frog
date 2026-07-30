@@ -89,6 +89,11 @@ const llmProviderConfigSchemaList = [
     model: createProviderModelSchema<"minimax">("minimax"),
   }),
   baseAPIProviderConfigSchema.extend({
+    provider: z.literal("openai-codex"),
+    model: createProviderModelSchema<"openai-codex">("openai-codex"),
+    ...topLevelReasoningConfigSchema,
+  }),
+  baseAPIProviderConfigSchema.extend({
     provider: z.literal("openai"),
     model: createProviderModelSchema<"openai">("openai"),
     ...topLevelReasoningConfigSchema,

@@ -9,16 +9,19 @@ const {
   azureChatModelMock,
   azureLanguageModelMock,
   openAICompatibleLanguageModelMock,
+  openAIResponsesModelMock,
   ollamaLanguageModelMock,
   createAnthropicMock,
   createAzureMock,
   createOllamaMock,
+  createOpenAIMock,
   createOpenAICompatibleMock,
 } = vi.hoisted(() => {
   const innerAnthropicLanguageModelMock = vi.fn<(...args: any[]) => any>()
   const innerAzureChatModelMock = vi.fn<(...args: any[]) => any>()
   const innerAzureLanguageModelMock = vi.fn<(...args: any[]) => any>()
   const innerOpenAICompatibleLanguageModelMock = vi.fn<(...args: any[]) => any>()
+  const innerOpenAIResponsesModelMock = vi.fn<(...args: any[]) => any>()
   const innerOllamaLanguageModelMock = vi.fn<(...args: any[]) => any>()
   const innerCreateAnthropicMock = vi.fn<(...args: any[]) => any>(
     (_options?: Record<string, unknown>) => ({
@@ -41,16 +44,21 @@ const {
       languageModel: innerOllamaLanguageModelMock,
     }),
   )
+  const innerCreateOpenAIMock = vi.fn<(...args: any[]) => any>(() => ({
+    responses: innerOpenAIResponsesModelMock,
+  }))
 
   return {
     anthropicLanguageModelMock: innerAnthropicLanguageModelMock,
     azureChatModelMock: innerAzureChatModelMock,
     azureLanguageModelMock: innerAzureLanguageModelMock,
     openAICompatibleLanguageModelMock: innerOpenAICompatibleLanguageModelMock,
+    openAIResponsesModelMock: innerOpenAIResponsesModelMock,
     ollamaLanguageModelMock: innerOllamaLanguageModelMock,
     createAnthropicMock: innerCreateAnthropicMock,
     createAzureMock: innerCreateAzureMock,
     createOllamaMock: innerCreateOllamaMock,
+    createOpenAIMock: innerCreateOpenAIMock,
     createOpenAICompatibleMock: innerCreateOpenAICompatibleMock,
   }
 })
@@ -65,6 +73,10 @@ vi.mock("@ai-sdk/azure", () => ({
 
 vi.mock("@ai-sdk/openai-compatible", () => ({
   createOpenAICompatible: createOpenAICompatibleMock,
+}))
+
+vi.mock("@ai-sdk/openai", () => ({
+  createOpenAI: createOpenAIMock,
 }))
 
 vi.mock("ai-sdk-ollama", () => ({
@@ -127,6 +139,7 @@ describe("getModelById", () => {
     azureChatModelMock.mockReturnValue("azure-chat-model")
     azureLanguageModelMock.mockReturnValue("azure-model")
     openAICompatibleLanguageModelMock.mockReturnValue("custom-model")
+    openAIResponsesModelMock.mockReturnValue("codex-model")
     ollamaLanguageModelMock.mockReturnValue("ollama-model")
     getStorageItemMock = vi.fn<(...args: any[]) => any>()
     ;(storage.getItem as unknown as ReturnType<typeof vi.fn>) = getStorageItemMock
@@ -148,6 +161,36 @@ describe("getModelById", () => {
       }),
     )
     expect(anthropicLanguageModelMock).toHaveBeenCalledWith("claude-haiku-4-5")
+  })
+
+  it("uses the Responses API with the Codex OAuth transport", async () => {
+    getStorageItemMock.mockResolvedValue({
+      providersConfig: [
+        {
+          id: "openai-codex-default",
+          name: "Codex OAuth",
+          enabled: true,
+          provider: "openai-codex",
+          model: {
+            model: "gpt-5.4-mini",
+            isCustomModel: false,
+            customModel: null,
+          },
+        },
+      ],
+    })
+
+    const { CODEX_API_BASE_URL, codexOAuthFetch } = await import("../../auth/codex-oauth")
+    const { getModelById } = await import("../model")
+    const result = await getModelById("openai-codex-default")
+
+    expect(result).toBe("codex-model")
+    expect(createOpenAIMock).toHaveBeenCalledWith({
+      apiKey: "codex-oauth",
+      baseURL: CODEX_API_BASE_URL,
+      fetch: codexOAuthFetch,
+    })
+    expect(openAIResponsesModelMock).toHaveBeenCalledWith("gpt-5.4-mini")
   })
 
   it("passes attribution headers for OpenRouter when user headers are undefined", async () => {

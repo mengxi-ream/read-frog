@@ -42,6 +42,7 @@ import {
 import { cn } from "@/utils/styles/utils"
 import { APIKeyField } from "./provider-config-form/api-key-field"
 import { BaseURLField } from "./provider-config-form/base-url-field"
+import { CodexOAuthField } from "./provider-config-form/codex-oauth-field"
 import { AdvancedOptionsSection } from "./provider-config-form/components/advanced-options-section"
 import { ConfigHeader as ProviderConfigHeader } from "./provider-config-form/config-header"
 import { formOpts, useAppForm } from "./provider-config-form/form"
@@ -313,6 +314,12 @@ function DescriptionField() {
 
 function ConnectionFields() {
   const form = useApiProviderForm()
+  const providerConfig = useSelector(form.store, (state) => state.values)
+
+  if (providerConfig.provider === "openai-codex") {
+    return <CodexOAuthField providerConfig={providerConfig} />
+  }
+
   return (
     <>
       <APIKeyField form={form} />

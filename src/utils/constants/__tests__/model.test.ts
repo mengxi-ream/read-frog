@@ -7,6 +7,15 @@ import {
 import { LLM_PROVIDER_MODELS } from "../models"
 
 describe("getProviderOptions", () => {
+  it("maps Codex OAuth provider options to the OpenAI SDK namespace", () => {
+    expect(getProviderOptions("gpt-5.4", "openai-codex")).toEqual({
+      openai: expect.any(Object),
+    })
+    expect(
+      getProviderOptionsWithOverride("gpt-5.4", "openai-codex", { reasoningEffort: "high" }),
+    ).toEqual({ openai: { reasoningEffort: "high" } })
+  })
+
   describe("model pattern matching", () => {
     it("should return options for gemini models", () => {
       const options = getProviderOptions("gemini-2.5-pro", "google")

@@ -16,6 +16,7 @@ import {
 } from "@/utils/constants/feature-providers"
 import { getSelectionToolbarActions, patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
+import { providerRequiresApiKey } from "@/utils/providers/api-key"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { cn } from "@/utils/styles/utils"
 
@@ -34,6 +35,7 @@ export function needsApiKeyWarning(providerConfig: ProviderConfig | null): boole
     !!providerConfig &&
     isAPIProviderConfig(providerConfig) &&
     !isPureAPIProvider(providerConfig.provider) &&
+    providerRequiresApiKey(providerConfig.provider) &&
     !providerConfig.apiKey
   )
 }

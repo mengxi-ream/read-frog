@@ -25,6 +25,7 @@ import { createOllama } from "ai-sdk-ollama"
 import { storage } from "#imports"
 import { DEFAULT_AZURE_API_MODE, isCustomLLMProvider } from "@/types/config/provider"
 import { compactObject } from "@/types/utils"
+import { CODEX_API_BASE_URL, codexOAuthFetch } from "../auth/codex-oauth"
 import { getLLMProvidersConfig, getProviderConfigById } from "../config/helpers"
 import { CONFIG_STORAGE_KEY } from "../constants/config"
 import { getProviderHeadersWithOverride } from "./headers"
@@ -99,6 +100,21 @@ async function getLanguageModelById(providerId: string) {
 
   const headers = getProviderHeadersWithOverride(providerConfig.provider, providerConfig.headers)
   const providerSpecificSettings = getProviderSpecificSettings(providerConfig)
+  const modelId = resolveModelId(providerConfig.model)
+
+  if (!modelId) {
+    throw new Error("Model is undefined")
+  }
+
+  if (providerConfig.provider === "openai-codex") {
+    const provider = createOpenAI({
+      apiKey: "codex-oauth",
+      baseURL: CODEX_API_BASE_URL,
+      fetch: codexOAuthFetch,
+      ...(headers && { headers }),
+    })
+    return provider.responses(modelId)
+  }
 
   const provider = isCustomLLMProvider(providerConfig.provider)
     ? CREATE_AI_MAPPER[providerConfig.provider]({
@@ -115,12 +131,6 @@ async function getLanguageModelById(providerId: string) {
         ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
         ...(headers && { headers }),
       })
-
-  const modelId = resolveModelId(providerConfig.model)
-
-  if (!modelId) {
-    throw new Error("Model is undefined")
-  }
 
   if (providerConfig.provider === "azure" && getAzureApiMode(providerConfig) === "chat") {
     return (provider as ReturnType<typeof createAzure>).chat(modelId)

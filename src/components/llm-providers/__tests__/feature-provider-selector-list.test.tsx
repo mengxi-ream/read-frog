@@ -3,7 +3,10 @@ import type { Config } from "@/types/config/config"
 import { render, screen } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { describe, expect, it, vi } from "vitest"
-import { FeatureProviderSelectorList } from "@/components/llm-providers/feature-provider-selector-list"
+import {
+  FeatureProviderSelectorList,
+  needsApiKeyWarning,
+} from "@/components/llm-providers/feature-provider-selector-list"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 
@@ -42,6 +45,22 @@ function renderWithConfig(config: Config) {
 }
 
 describe("featureProviderSelectorList custom action filtering", () => {
+  it("does not show an API key warning for Codex OAuth", () => {
+    expect(
+      needsApiKeyWarning({
+        id: "codex",
+        name: "Codex OAuth",
+        enabled: true,
+        provider: "openai-codex",
+        model: {
+          model: "gpt-5.4-mini",
+          isCustomModel: false,
+          customModel: null,
+        },
+      }),
+    ).toBe(false)
+  })
+
   it("only renders provider rows for enabled custom actions", () => {
     const config = cloneConfig(DEFAULT_CONFIG)
     const providerId = config.providersConfig[0]!.id

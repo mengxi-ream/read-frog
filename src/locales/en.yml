@@ -184,6 +184,7 @@ options:
       attribution:
         builtInAi: Provided by Atlas Cloud. Currently only available for Custom AI Actions. To unlock an unrestricted experience, purchase highly cost-effective credits on the official website.
       description:
+        openaiCodex: Use a ChatGPT subscription through Codex OAuth without an API key
         openai: Provides models like GPT-4o
         azure: Azure-hosted OpenAI models through your deployments
         deepseek: Recommend to use in China
@@ -216,6 +217,13 @@ options:
         huggingface: Hugging Face Inference API providing access to thousands of open-source models
     apiKey:
       showAPIKey: Show API Key
+    codexOAuth:
+      signIn: Sign in with ChatGPT
+      signOut: Sign out
+      waiting: Waiting for authorization...
+      enterCode: "Enter this code on the page that opened:"
+      connected: Connected to ChatGPT
+      connectedAs: Connected as $1
     howToConfigure: How to configure?
     testConnection:
       button: Test Connection

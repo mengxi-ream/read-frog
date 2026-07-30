@@ -29,6 +29,11 @@ import { i18n } from "@/utils/i18n"
 import { getLobeIconsCDNUrlFn } from "../logo"
 
 export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
+  "openai-codex": {
+    model: "gpt-5.4-mini",
+    isCustomModel: false,
+    customModel: null,
+  },
   openrouter: {
     model: "x-ai/grok-4-fast:free",
     isCustomModel: false,
@@ -194,6 +199,11 @@ export const PROVIDER_ITEMS: Record<
     logo: (theme: Theme) => (theme === "light" ? deeplxLogoLight : deeplxLogoDark),
     name: "DeepL",
     website: "https://www.deepl.com/pro-api",
+  },
+  "openai-codex": {
+    logo: getLobeIconsCDNUrlFn("openai"),
+    name: "Codex OAuth",
+    website: "https://chatgpt.com/codex",
   },
   atlascloud: {
     logo: getLobeIconsCDNUrlFn("atlascloud"),
@@ -385,6 +395,14 @@ export const DEFAULT_PROVIDER_CONFIG = {
     provider: "openai-compatible",
     baseURL: "https://api.example.com/v1",
     model: DEFAULT_LLM_PROVIDER_MODELS["openai-compatible"],
+  },
+  "openai-codex": {
+    id: "openai-codex-default",
+    name: PROVIDER_ITEMS["openai-codex"].name,
+    enabled: true,
+    provider: "openai-codex",
+    model: DEFAULT_LLM_PROVIDER_MODELS["openai-codex"],
+    reasoning: "none",
   },
   openai: {
     id: "openai-default",
@@ -594,6 +612,7 @@ export const PROVIDER_BASE_URL_PLACEHOLDERS: Partial<Record<APIProviderTypes, st
   siliconflow: DEFAULT_PROVIDER_CONFIG.siliconflow.baseURL,
   tensdaq: DEFAULT_PROVIDER_CONFIG.tensdaq.baseURL,
   "openai-compatible": DEFAULT_PROVIDER_CONFIG["openai-compatible"].baseURL,
+  "openai-codex": "https://chatgpt.com/backend-api/codex",
   openai: "https://api.openai.com/v1",
   azure: "https://<resource>.services.ai.azure.com/openai",
   deepseek: "https://api.deepseek.com",

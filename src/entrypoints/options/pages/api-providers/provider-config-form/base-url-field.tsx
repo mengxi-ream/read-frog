@@ -12,7 +12,7 @@ export const BaseURLField = withForm({
     const providerConfig = useSelector(form.store, (state) => state.values)
     const providerType = providerConfig.provider
 
-    if (providerType === "deepl") {
+    if (providerType === "deepl" || providerType === "openai-codex") {
       return null
     }
 

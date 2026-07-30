@@ -13,6 +13,26 @@ import {
 } from "../providers"
 
 describe("provider constants", () => {
+  it("defines Codex OAuth as a non-custom provider without an API key", () => {
+    expect(DEFAULT_PROVIDER_CONFIG["openai-codex"]).toEqual(
+      expect.objectContaining({
+        id: "openai-codex-default",
+        provider: "openai-codex",
+        model: {
+          model: "gpt-5.4-mini",
+          isCustomModel: false,
+          customModel: null,
+        },
+        reasoning: "none",
+      }),
+    )
+    expect(DEFAULT_PROVIDER_CONFIG["openai-codex"]).not.toHaveProperty("apiKey")
+    expect(NON_CUSTOM_LLM_PROVIDER_TYPES).toContain("openai-codex")
+    expect(apiProviderConfigItemSchema.parse(DEFAULT_PROVIDER_CONFIG["openai-codex"])).toEqual(
+      DEFAULT_PROVIDER_CONFIG["openai-codex"],
+    )
+  })
+
   it("defines Azure with the LobeHub color icon and GPT shortcut defaults", () => {
     expect(PROVIDER_ITEMS.azure.logo("light")).toContain("/light/azure-color.webp")
     expect(PROVIDER_ITEMS.azure.logo("dark")).toContain("/dark/azure-color.webp")
