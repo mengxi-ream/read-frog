@@ -23,7 +23,7 @@ import { applyTheme, getLocalThemeMode, isDarkMode } from "@/utils/theme"
 import App from "./app"
 import { AppSidebar } from "./app-sidebar"
 import { SettingsSearch } from "./command-palette/settings-search"
-import "@fontsource-variable/onest/index.css"
+import "@fontsource-variable/inter/index.css"
 import "@/assets/styles/theme.css"
 import "./style.css"
 
