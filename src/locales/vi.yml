@@ -279,7 +279,7 @@ options:
     title: Tùy chọn
     pageDescription: Đặt giao diện và ngôn ngữ, đồng thời kiểm soát nơi tiện ích được bật.
     appearanceAndLanguage:
-      title: Giao diện & Ngôn ngữ
+      title: Giao diện & ngôn ngữ
       theme:
         description: Chọn chủ đề cho Read Frog.
     extensionActivation:

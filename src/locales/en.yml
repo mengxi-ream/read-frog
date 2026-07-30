@@ -97,7 +97,7 @@ options:
     please: Please set API Key on
     page: page
   betaExperience:
-    title: Beta Experience
+    title: Beta experience
     description: Turn on experimental features that may still be unstable
     enabled: Enable Beta Experience
   apiProviders:
@@ -228,7 +228,7 @@ options:
     title: General
     pageDescription: Choose which provider powers each feature and how Read Frog detects a page's language.
     interfaceLanguage:
-      title: Interface Language
+      title: Interface language
       description: Choose the language for the extension's interface, independent of your browser language.
       auto: Auto (follow browser)
     appearance:
@@ -280,17 +280,17 @@ options:
     title: Preferences
     pageDescription: Set the interface theme and language, and control where the extension is active.
     appearanceAndLanguage:
-      title: Appearance & Language
+      title: Appearance & language
       theme:
         description: Choose a theme for Read Frog.
     extensionActivation:
-      title: Extension Activation
+      title: Extension activation
       mode:
         title: Activation mode
     config:
       title: Config
     userExperience:
-      title: User Experience
+      title: User experience
   siteControl:
     title: Site Control
     mode:
@@ -892,7 +892,7 @@ options:
       tooltip: When enabled, Read Frog sends anonymous product usage signals so we can catch bugs, verify feature reliability, improve performance and UX polish, and prioritize future work.
       description: Improve Read Frog by helping us locate bugs, refine layouts, and more
     sync:
-      title: Manual Config Sync
+      title: Manual config sync
       description: Manually import and export your configuration settings
       import: Import
       export: Export
@@ -913,7 +913,7 @@ options:
         title: Config
         description: View the raw JSON of your current configuration
       googleDrive:
-        title: Google Drive Cloud Sync
+        title: Google Drive cloud sync
         description: Downloads config when remote is newer, uploads config when local is newer
         sync: Sync to Google Drive
         syncing: Syncing...
@@ -960,7 +960,7 @@ options:
             description: "Adjust the differences below to fix:"
           moreErrors: ...and $1 more errors
     backup:
-      title: Config Backup
+      title: Config backup
       description: Automatic backups are created every hour if the config is changed. You can restore previous configurations here. (Maximum $1 backups)
       loading: Loading backups...
       backupNow: Backup now
@@ -986,7 +986,7 @@ options:
         cancel: Cancel
         confirm: Delete
     resetConfig:
-      title: Reset Config
+      title: Reset config
       description: Reset all config to default value
       dialog:
         title: Reset Config

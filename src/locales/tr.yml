@@ -97,7 +97,7 @@ options:
     please: Lütfen API Anahtarını
     page: sayfasında ayarlayın
   betaExperience:
-    title: Beta Deneyimi
+    title: Beta deneyimi
     description: Henüz kararsız olabilecek deneysel özellikleri açın
     enabled: Beta Deneyimini Etkinleştir
   apiProviders:
@@ -227,7 +227,7 @@ options:
     title: Genel
     pageDescription: Her özelliğin hangi sağlayıcıyı kullanacağını ve Read Frog'un sayfa dilini nasıl algılayacağını seçin.
     interfaceLanguage:
-      title: Arayüz Dili
+      title: Arayüz dili
       description: Uzantı arayüzünün dilini tarayıcı dilinizden bağımsız olarak seçin.
       auto: Otomatik (tarayıcıyı izle)
     appearance:
@@ -279,17 +279,17 @@ options:
     title: Tercihler
     pageDescription: Arayüz temasını ve dilini ayarlayın, uzantının nerede etkin olacağını belirleyin.
     appearanceAndLanguage:
-      title: Görünüm ve Dil
+      title: Görünüm ve dil
       theme:
         description: Read Frog için bir tema seçin.
     extensionActivation:
-      title: Uzantı Etkinleştirme
+      title: Uzantı etkinleştirme
       mode:
         title: Etkinleştirme modu
     config:
       title: Yapılandırma
     userExperience:
-      title: Kullanıcı Deneyimi
+      title: Kullanıcı deneyimi
   siteControl:
     title: Site Kontrolü
     mode:
@@ -776,7 +776,7 @@ options:
       tooltip: Açık olduğunda Read Frog, hataları yakalamak, özelliklerin güvenilir çalıştığını doğrulamak, performansı ve UX ayrıntılarını iyileştirmek ve sıradaki önceliklerimizi belirlemek için anonim kullanım sinyalleri gönderir.
       description: Hataları bulmamıza, arayüzü iyileştirmemize ve daha fazlasına yardım ederek Read Frog'u geliştirin
     sync:
-      title: Manuel Yapılandırma Senkronizasyonu
+      title: Manuel yapılandırma senkronizasyonu
       description: Yapılandırma ayarlarınızı manuel olarak içe ve dışa aktarın
       import: İçe Aktar
       export: Dışa Aktar
@@ -797,7 +797,7 @@ options:
         title: Yapılandırma
         description: Mevcut yapılandırmanızın ham JSON içeriğini görüntüleyin
       googleDrive:
-        title: Google Drive Bulut Senkronizasyonu
+        title: Google Drive bulut senkronizasyonu
         description: Uzak daha yeniyse indirir, yerel daha yeniyse yükler
         sync: Google Drive'a Senkronize Et
         syncing: Senkronize ediliyor...
@@ -844,7 +844,7 @@ options:
             description: "Düzeltmek için aşağıdaki farklılıkları ayarlayın:"
           moreErrors: ...ve $1 hata daha
     backup:
-      title: Yapılandırma Yedekleme
+      title: Yapılandırma yedekleme
       description: Yapılandırma değiştirilirse otomatik yedeklemeler her saat oluşturulur. Önceki yapılandırmaları buradan geri yükleyebilirsiniz. (Maksimum $1 yedekleme)
       loading: Yedeklemeler yükleniyor...
       backupNow: Şimdi yedekle
