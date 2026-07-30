@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.43.6
+
+### Patch Changes
+
+- [#1986](https://github.com/mengxi-ream/read-frog/pull/1986) [`30e984a`](https://github.com/mengxi-ream/read-frog/commit/30e984a902ede61e7f97d42542fa730f8154e8d4) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - fix(translate): skip common icon-font ligatures during page translation
+
+- [#1989](https://github.com/mengxi-ream/read-frog/pull/1989) [`3803de1`](https://github.com/mengxi-ream/read-frog/commit/3803de1ee543a6d22d4f4c71ae817fb2b3f707b5) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - fix(selection-toolbar): ignore clicks on native video players
+
+- [#1988](https://github.com/mengxi-ream/read-frog/pull/1988) [`e4088e3`](https://github.com/mengxi-ream/read-frog/commit/e4088e3f5cb1f8e05d6539679785f95d1ce45345) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(ui): morphing thinking glyph with shimmering label, ending at the first output token
+
 ## 1.43.5
 
 ### Patch Changes
