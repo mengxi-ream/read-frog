@@ -75,6 +75,54 @@ describe("Codex OAuth", () => {
     expect(setItemMock).toHaveBeenCalledWith("local:codexOAuthAuth", auth)
   })
 
+  it("does not store credentials when sign-in is cancelled during token exchange", async () => {
+    const abortController = new AbortController()
+    let resolveExchange!: (response: Response) => void
+    let exchangeStarted!: () => void
+    const exchangeStartedPromise = new Promise<void>((resolve) => {
+      exchangeStarted = resolve
+    })
+    const exchangeResponsePromise = new Promise<Response>((resolve) => {
+      resolveExchange = resolve
+    })
+    const fetchMock = vi
+      .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ authorization_code: "authorization-code", code_verifier: "verifier" }),
+          { status: 200 },
+        ),
+      )
+      .mockImplementationOnce(async (_input, init) => {
+        expect(init?.signal).toBe(abortController.signal)
+        exchangeStarted()
+        return exchangeResponsePromise
+      }) as unknown as typeof fetch
+
+    const authorizationPromise = completeCodexDeviceAuthorization(
+      { deviceAuthId: "device-id", userCode: "ABCD-EFGH", intervalMs: 5000 },
+      { fetchFn: fetchMock, signal: abortController.signal },
+    )
+    await exchangeStartedPromise
+    abortController.abort()
+    resolveExchange(
+      new Response(
+        JSON.stringify({
+          access_token: "access-token",
+          refresh_token: "refresh-token",
+          expires_in: 3600,
+          id_token: createJwt({
+            "https://api.openai.com/auth": { chatgpt_account_id: "account-id" },
+          }),
+        }),
+        { status: 200 },
+      ),
+    )
+
+    await expect(authorizationPromise).rejects.toMatchObject({ name: "AbortError" })
+    expect(setItemMock).not.toHaveBeenCalled()
+  })
+
   it("refreshes an expired token without falling back to the old token", async () => {
     getItemMock.mockResolvedValue({
       accessToken: "expired-access-token",

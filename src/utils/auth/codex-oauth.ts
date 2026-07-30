@@ -114,6 +114,7 @@ function parseInitialTokenResponse(tokens: TokenResponse): CodexOAuthAuth {
 async function exchangeAuthorizationCode(
   authorization: DeviceTokenResponse,
   fetchFn: typeof fetch,
+  signal?: AbortSignal,
 ): Promise<CodexOAuthAuth> {
   const response = await fetchFn(CODEX_TOKEN_ENDPOINT, {
     method: "POST",
@@ -125,6 +126,7 @@ async function exchangeAuthorizationCode(
       client_id: CODEX_OAUTH_CLIENT_ID,
       code_verifier: authorization.code_verifier,
     }).toString(),
+    signal,
   })
 
   if (!response.ok) {
@@ -202,7 +204,11 @@ export async function completeCodexDeviceAuthorization(
       const auth = await exchangeAuthorizationCode(
         (await response.json()) as DeviceTokenResponse,
         fetchFn,
+        options.signal,
       )
+      if (options.signal?.aborted) {
+        throw options.signal.reason ?? new DOMException("Codex sign-in cancelled", "AbortError")
+      }
       await storage.setItem(CODEX_OAUTH_STORAGE_KEY, auth)
       return auth
     }
