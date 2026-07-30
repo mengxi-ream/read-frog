@@ -277,6 +277,10 @@ options:
       title: 外観と言語
       theme:
         description: Read Frog のテーマを選択します。
+    extensionActivation:
+      title: 拡張機能の有効化
+      mode:
+        title: 有効化モード
   siteControl:
     title: サイト制御
     mode:

@@ -1,6 +1,7 @@
 import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
 import { AppearanceAndLanguageSection } from "./appearance-and-language"
+import { ExtensionActivationSection } from "./extension-activation"
 
 export function PreferencePage() {
   return (
@@ -9,6 +10,7 @@ export function PreferencePage() {
       innerClassName="flex flex-col gap-10 pt-6"
     >
       <AppearanceAndLanguageSection />
+      <ExtensionActivationSection />
     </PageLayout>
   )
 }

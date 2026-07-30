@@ -278,6 +278,10 @@ options:
       title: Appearance & Language
       theme:
         description: Choose a theme for Read Frog.
+    extensionActivation:
+      title: Extension Activation
+      mode:
+        title: Activation mode
   siteControl:
     title: Site Control
     mode:

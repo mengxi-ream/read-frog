@@ -277,6 +277,10 @@ options:
       title: Görünüm ve Dil
       theme:
         description: Read Frog için bir tema seçin.
+    extensionActivation:
+      title: Uzantı Etkinleştirme
+      mode:
+        title: Etkinleştirme modu
   siteControl:
     title: Site Kontrolü
     mode:

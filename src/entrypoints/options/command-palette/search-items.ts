@@ -80,26 +80,29 @@ export const SEARCH_ITEMS: SearchItem[] = [
     descriptionKey: "options.general.languageDetection.description",
     pageKey: "options.general.title",
   },
+
+  // Preference page
   {
-    sectionId: "site-control-mode",
-    route: "/",
-    titleKey: "options.siteControl.mode.title",
-    descriptionKey: "options.siteControl.mode.description",
-    pageKey: "options.general.title",
+    // Titled "Appearance" so the term still finds the row, which reads "Theme" on the page.
+    sectionId: "theme",
+    route: "/preference",
+    titleKey: "options.general.appearance.title",
+    descriptionKey: "options.preference.appearanceAndLanguage.theme.description",
+    pageKey: "options.preference.title",
   },
   {
     sectionId: "interface-language",
-    route: "/",
+    route: "/preference",
     titleKey: "options.general.interfaceLanguage.title",
     descriptionKey: "options.general.interfaceLanguage.description",
-    pageKey: "options.general.title",
+    pageKey: "options.preference.title",
   },
   {
-    sectionId: "appearance",
-    route: "/",
-    titleKey: "options.general.appearance.title",
-    descriptionKey: "options.general.appearance.theme",
-    pageKey: "options.general.title",
+    sectionId: "site-control-mode",
+    route: "/preference",
+    titleKey: "options.siteControl.mode.title",
+    descriptionKey: "options.siteControl.mode.description",
+    pageKey: "options.preference.title",
   },
 
   // API Providers page

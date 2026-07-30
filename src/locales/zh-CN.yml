@@ -278,6 +278,10 @@ options:
       title: 外观与语言
       theme:
         description: 为陪读蛙选择主题。
+    extensionActivation:
+      title: 插件激活
+      mode:
+        title: 激活模式
   siteControl:
     title: 站点控制
     mode:

@@ -277,6 +277,10 @@ options:
       title: Giao diện & Ngôn ngữ
       theme:
         description: Chọn chủ đề cho Read Frog.
+    extensionActivation:
+      title: Kích hoạt tiện ích mở rộng
+      mode:
+        title: Chế độ kích hoạt
   siteControl:
     title: Kiểm soát trang web
     mode:

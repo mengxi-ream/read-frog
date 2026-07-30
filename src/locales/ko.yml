@@ -277,6 +277,10 @@ options:
       title: 모양 및 언어
       theme:
         description: Read Frog의 테마를 선택하세요.
+    extensionActivation:
+      title: 확장 프로그램 활성화
+      mode:
+        title: 활성화 모드
   siteControl:
     title: 사이트 제어
     mode:

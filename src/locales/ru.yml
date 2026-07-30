@@ -277,6 +277,10 @@ options:
       title: Оформление и язык
       theme:
         description: Выберите тему для Read Frog.
+    extensionActivation:
+      title: Активация расширения
+      mode:
+        title: Режим активации
   siteControl:
     title: Управление сайтами
     mode:
