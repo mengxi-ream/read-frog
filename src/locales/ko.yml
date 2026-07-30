@@ -271,6 +271,12 @@ options:
         noProviders: LLM 제공자를 먼저 구성하세요
         basicRecommend: LLM 활성화 권장
         llmEnabled: LLM 감지 활성화됨
+  preference:
+    title: 환경 설정
+    appearanceAndLanguage:
+      title: 모양 및 언어
+      theme:
+        description: Read Frog의 테마를 선택하세요.
   siteControl:
     title: 사이트 제어
     mode:

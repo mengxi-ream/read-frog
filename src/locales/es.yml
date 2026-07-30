@@ -272,6 +272,12 @@ options:
         noProviders: Configura primero un proveedor LLM
         basicRecommend: Se recomienda activar LLM
         llmEnabled: Detección LLM activada
+  preference:
+    title: Preferencias
+    appearanceAndLanguage:
+      title: Apariencia e idioma
+      theme:
+        description: Elige un tema para Read Frog.
   siteControl:
     title: Control de sitios
     mode:

@@ -271,6 +271,12 @@ options:
         noProviders: LLMプロバイダーを設定してください
         basicRecommend: LLM有効化を推奨
         llmEnabled: LLM検出が有効
+  preference:
+    title: 環境設定
+    appearanceAndLanguage:
+      title: 外観と言語
+      theme:
+        description: Read Frog のテーマを選択します。
   siteControl:
     title: サイト制御
     mode:

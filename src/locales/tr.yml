@@ -271,6 +271,12 @@ options:
         noProviders: Önce bir LLM sağlayıcısı yapılandırın
         basicRecommend: LLM etkinleştirmesi önerilir
         llmEnabled: LLM algılama etkin
+  preference:
+    title: Tercihler
+    appearanceAndLanguage:
+      title: Görünüm ve Dil
+      theme:
+        description: Read Frog için bir tema seçin.
   siteControl:
     title: Site Kontrolü
     mode:

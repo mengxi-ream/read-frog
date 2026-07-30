@@ -271,6 +271,12 @@ options:
         noProviders: Hãy cấu hình nhà cung cấp LLM trước
         basicRecommend: Khuyến nghị bật LLM
         llmEnabled: Phát hiện LLM đã bật
+  preference:
+    title: Tùy chọn
+    appearanceAndLanguage:
+      title: Giao diện & Ngôn ngữ
+      theme:
+        description: Chọn chủ đề cho Read Frog.
   siteControl:
     title: Kiểm soát trang web
     mode:

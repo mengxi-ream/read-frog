@@ -38,6 +38,16 @@ export function SettingsNav() {
 
           <SidebarMenuItem>
             <SidebarMenuButton
+              render={<Link to="/preference" />}
+              isActive={pathname === "/preference"}
+            >
+              <Icon icon="tabler:user-cog" />
+              <span>{i18n.t("options.preference.title")}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
               render={<Link to="/api-providers" />}
               isActive={pathname === "/api-providers"}
             >

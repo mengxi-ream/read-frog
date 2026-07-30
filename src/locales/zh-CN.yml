@@ -272,6 +272,12 @@ options:
         noProviders: 请先配置 LLM 提供商
         basicRecommend: 建议启用 LLM
         llmEnabled: LLM 检测已启用
+  preference:
+    title: 偏好设置
+    appearanceAndLanguage:
+      title: 外观与语言
+      theme:
+        description: 为陪读蛙选择主题。
   siteControl:
     title: 站点控制
     mode:

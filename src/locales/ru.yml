@@ -271,6 +271,12 @@ options:
         noProviders: Сначала настройте LLM-провайдер
         basicRecommend: Рекомендуется включить LLM
         llmEnabled: LLM-определение включено
+  preference:
+    title: Предпочтения
+    appearanceAndLanguage:
+      title: Оформление и язык
+      theme:
+        description: Выберите тему для Read Frog.
   siteControl:
     title: Управление сайтами
     mode:

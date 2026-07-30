@@ -272,6 +272,12 @@ options:
         noProviders: Configure an LLM provider first
         basicRecommend: Recommend enabling LLM
         llmEnabled: LLM detection enabled
+  preference:
+    title: Preferences
+    appearanceAndLanguage:
+      title: Appearance & Language
+      theme:
+        description: Choose a theme for Read Frog.
   siteControl:
     title: Site Control
     mode:
