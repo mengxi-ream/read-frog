@@ -29,12 +29,12 @@ export function ViewConfig({
     <Dialog>
       <DialogTrigger render={<Button variant="outline" size={size} className={className} />}>
         <Icon icon="tabler:braces" />
-        {i18n.t("options.config.sync.viewConfig.open")}
+        {i18n.t("options.preference.config.viewConfig.open")}
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{i18n.t("options.config.sync.viewConfig.title")}</DialogTitle>
+          <DialogTitle>{i18n.t("options.preference.config.viewConfig.title")}</DialogTitle>
         </DialogHeader>
         <ScrollArea className="h-96 w-full rounded-lg border bg-muted">
           <pre className="overflow-wrap-anywhere p-4 text-xs break-all whitespace-pre-wrap">

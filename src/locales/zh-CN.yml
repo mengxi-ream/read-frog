@@ -96,10 +96,6 @@ options:
   setAPIKeyWarning:
     please: 请在
     page: 页设置 API Key
-  betaExperience:
-    title: Beta 体验
-    description: 开启可能还不稳定的实验性功能
-    enabled: 启用 Beta 体验
   apiProviders:
     title: API 提供商
     pageDescription: 接入 Read Frog 调用的 AI 服务，并管理各自的密钥和模型。
@@ -227,16 +223,6 @@ options:
   general:
     title: 通用
     pageDescription: 选择每项功能使用的提供商，以及 Read Frog 如何识别页面语言。
-    interfaceLanguage:
-      title: 界面语言
-      description: 选择扩展界面的语言，独立于浏览器语言。
-      auto: 自动（跟随浏览器）
-    appearance:
-      title: 外观
-      theme: 主题
-      system: 跟随系统
-      light: 浅色
-      dark: 深色
     featureProviders:
       title: 功能提供商
       description: 为每个功能选择使用的提供商
@@ -282,25 +268,136 @@ options:
     appearanceAndLanguage:
       title: 外观与语言
       theme:
+        title: 主题
         description: 为陪读蛙选择主题。
+        system: 跟随系统
+        light: 浅色
+        dark: 深色
+      interfaceLanguage:
+        title: 界面语言
+        description: 选择扩展界面的语言，独立于浏览器语言。
+        auto: 自动（跟随浏览器）
     extensionActivation:
       title: 扩展激活
       mode:
         title: 激活模式
+        description: 使用黑名单模式可以在特定网站上禁用扩展，或使用白名单模式限制扩展仅在特定网站上运行。
+        blacklist: 仅在列出的站点禁用
+        whitelist: 仅在列出的站点运行
+      patterns:
+        enterUrlPattern: 输入 URL 模式（例如 example.com）
+        urlPattern: URL 模式
     config:
       title: 配置
+      googleDrive:
+        title: Google Drive 云端同步
+        description: 远端配置较新时下载，本地配置较新时上传
+        sync: 同步到 Google Drive
+        syncing: 同步中...
+        syncSuccess:
+          uploaded: 本地配置已上传至云端
+          downloaded: 已应用远程配置
+          sameChanges: 本地和远程修改一致，已同步
+          noChange: 已是最新状态
+          unresolved: 冲突已解决并同步至本地和云端
+        syncError: 同步失败，请重试
+        metadataCorrupted: 同步数据损坏，已自动应用远端配置
+        lastSyncTime: 最后同步时间
+        logout: 登出账号
+        logoutSuccess: 已登出 Google 账号
+        unresolved:
+          title: 配置同步解决
+          description: 本地与云端配置存在差异，请选择每个字段要保留的版本。
+          resolved: 已解决
+          unresolved: 未解决
+          localValue: 本地值
+          remoteValue: 远端值
+          useLocal: 使用本地
+          useRemote: 使用远端
+          useAllLocal: 全选本地
+          useAllRemote: 全选远端
+          reset: 撤销选择
+          progress: 已解决 $1/$2 个更改
+          confirm: 确认同步
+          cancel: 取消
+          hasUnresolvedInChildren: ⚠ 包含待解决项
+          item: 项
+          items: 项
+          unresolvedPrompt: "[待解决 - 请选择]"
+          localLatest: 本地最新
+          remoteLatest: 远端最新
+          bothChanged: 双方已更改
+          localChanged: 本地已更改
+          remoteChanged: 远端已更改
+          configValid: 配置有效
+          configInvalid: 配置无效
+          resolveToContinue: 解决冲突后继续
+          validationAlert:
+            title: 合并后的配置存在验证错误
+            description: 请调整下方差异以修复：
+          moreErrors: ...还有 $1 个错误
+      manualSync:
+        title: 手动配置同步
+        description: 手动导入和导出您的配置设置
+        import: 导入
+        export: 导出
+        importSuccess: 配置导入成功
+        exportSuccess: 配置导出成功
+        importError: 导入失败
+        exportOptions:
+          title: 选择导出选项
+          description: 请选择是否在导出的配置中包含 API Keys。包含 API Keys 可能会泄露敏感信息，建议仅在安全环境下使用。
+          includeAPIKeys: 包含 API Keys
+          excludeAPIKeys: 不包含 API Keys
+          cancel: 取消
+      viewConfig:
+        open: 打开配置
+        title: 配置
+        description: 查看当前配置的原始 JSON
+      backup:
+        title: 配置备份
+        description: 如果配置发生变化，每小时会自动创建备份。您可以在这里恢复之前的配置。（最多 $1 个备份）
+        loading: 正在加载备份...
+        backupNow: 立即备份
+        backupSuccess: 备份创建成功
+        restoreSuccess: 配置恢复成功
+        empty:
+          title: 暂无可用备份
+          description: 如果配置发生变化，每小时会自动创建备份。
+        item:
+          extensionVersion: 扩展版本：
+          schemaVersion: 配置版本：
+          restore: 恢复
+          export: 导出
+          delete: 删除
+        restore:
+          title: 恢复配置备份？
+          description: 如果当前配置与最新备份不同，将自动备份您的当前配置。如果备份数量超过限制，最旧的备份可能会被删除。
+          cancel: 取消
+          confirm: 恢复
+        delete:
+          title: 删除备份？
+          description: 您确定要删除此备份吗？此操作无法撤销。
+          cancel: 取消
+          confirm: 删除
+      reset:
+        title: 恢复默认配置
+        description: 将所有配置重置为默认
+        dialog:
+          title: 恢复默认配置
+          trigger: 重置配置
+          confirm: 确认
+          cancel: 取消
+          description: 该操作将清空您的所有自定义配置，并将其重置为默认值，请确认是否清除。
     userExperience:
       title: 使用体验
-  siteControl:
-    title: 站点控制
-    mode:
-      title: 扩展激活模式
-      description: 使用黑名单模式可以在特定网站上禁用扩展，或使用白名单模式限制扩展仅在特定网站上运行。
-      blacklist: 仅在列出的站点禁用
-      whitelist: 仅在列出的站点运行
-    patterns:
-      enterUrlPattern: 输入 URL 模式（例如 example.com）
-      urlPattern: URL 模式
+      beta:
+        title: Beta 体验
+        description: 开启可能还不稳定的实验性功能
+      analytics:
+        title: 帮助改进用户体验
+        tooltip: 开启后，Read Frog 会发送匿名的产品使用信号，用于发现 bug、验证功能是否稳定、优化性能与交互细节，并帮助我们决定接下来优先投入的方向。
+        description: 通过帮助我们定位 bug、优化界面布局等改善 Read Frog
   overlayTools:
     title: 悬浮工具
     floatingButton:
@@ -886,114 +983,6 @@ options:
       description: 周期内批量翻译节省的请求百分比
       originalRequestCount: 原始请求数量
       batchRequestCount: 批量请求数量
-  config:
-    analytics:
-      title: 帮助改进用户体验
-      tooltip: 开启后，Read Frog 会发送匿名的产品使用信号，用于发现 bug、验证功能是否稳定、优化性能与交互细节，并帮助我们决定接下来优先投入的方向。
-      description: 通过帮助我们定位 bug、优化界面布局等改善 Read Frog
-    sync:
-      title: 手动配置同步
-      description: 手动导入和导出您的配置设置
-      import: 导入
-      export: 导出
-      importSuccess: 配置导入成功
-      exportSuccess: 配置导出成功
-      importError: 导入失败
-      versionTooNew: 导入的配置版本较新，请升级 Read Frog 到最新版本
-      migrationError: 迁移失败
-      validationError: 配置验证失败
-      exportOptions:
-        title: 选择导出选项
-        description: 请选择是否在导出的配置中包含 API Keys。包含 API Keys 可能会泄露敏感信息，建议仅在安全环境下使用。
-        includeAPIKeys: 包含 API Keys
-        excludeAPIKeys: 不包含 API Keys
-        cancel: 取消
-      viewConfig:
-        open: 打开配置
-        title: 配置
-        description: 查看当前配置的原始 JSON
-      googleDrive:
-        title: Google Drive 云端同步
-        description: 远端配置较新时下载，本地配置较新时上传
-        sync: 同步到 Google Drive
-        syncing: 同步中...
-        syncSuccess:
-          uploaded: 本地配置已上传至云端
-          downloaded: 已应用远程配置
-          sameChanges: 本地和远程修改一致，已同步
-          noChange: 已是最新状态
-          unresolved: 冲突已解决并同步至本地和云端
-        syncError: 同步失败，请重试
-        metadataCorrupted: 同步数据损坏，已自动应用远端配置
-        lastSyncTime: 最后同步时间
-        logout: 登出账号
-        logoutSuccess: 已登出 Google 账号
-        unresolved:
-          title: 配置同步解决
-          description: 本地与云端配置存在差异，请选择每个字段要保留的版本。
-          resolved: 已解决
-          unresolved: 未解决
-          localValue: 本地值
-          remoteValue: 远端值
-          useLocal: 使用本地
-          useRemote: 使用远端
-          useAllLocal: 全选本地
-          useAllRemote: 全选远端
-          reset: 撤销选择
-          progress: 已解决 $1/$2 个更改
-          confirm: 确认同步
-          cancel: 取消
-          hasUnresolvedInChildren: ⚠ 包含待解决项
-          item: 项
-          items: 项
-          unresolvedPrompt: "[待解决 - 请选择]"
-          localLatest: 本地最新
-          remoteLatest: 远端最新
-          bothChanged: 双方已更改
-          localChanged: 本地已更改
-          remoteChanged: 远端已更改
-          configValid: 配置有效
-          configInvalid: 配置无效
-          resolveToContinue: 解决冲突后继续
-          validationAlert:
-            title: 合并后的配置存在验证错误
-            description: 请调整下方差异以修复：
-          moreErrors: ...还有 $1 个错误
-    backup:
-      title: 配置备份
-      description: 如果配置发生变化，每小时会自动创建备份。您可以在这里恢复之前的配置。（最多 $1 个备份）
-      loading: 正在加载备份...
-      backupNow: 立即备份
-      backupSuccess: 备份创建成功
-      restoreSuccess: 配置恢复成功
-      empty:
-        title: 暂无可用备份
-        description: 如果配置发生变化，每小时会自动创建备份。
-      item:
-        extensionVersion: 扩展版本：
-        schemaVersion: 配置版本：
-        restore: 恢复
-        export: 导出
-        delete: 删除
-      restore:
-        title: 恢复配置备份？
-        description: 如果当前配置与最新备份不同，将自动备份您的当前配置。如果备份数量超过限制，最旧的备份可能会被删除。
-        cancel: 取消
-        confirm: 恢复
-      delete:
-        title: 删除备份？
-        description: 您确定要删除此备份吗？此操作无法撤销。
-        cancel: 取消
-        confirm: 删除
-    resetConfig:
-      title: 恢复默认配置
-      description: 将所有配置重置为默认
-      dialog:
-        title: 恢复默认配置
-        trigger: 重置配置
-        confirm: 确认
-        cancel: 取消
-        description: 该操作将清空您的所有自定义配置，并将其重置为默认值，请确认是否清除。
   videoSubtitles:
     title: 视频字幕
     pageDescription: 边看边译视频字幕，并单独设置提供商、样式和请求参数。
@@ -1082,6 +1071,9 @@ options:
     title: 最近更新
   rateUs:
     title: 好评支持
+  configMigration:
+    versionTooNew: 导入的配置版本较新，请升级 Read Frog 到最新版本
+    validationError: 配置验证失败
 side:
   sourceLang: 来源语言
   targetLang: 目标语言

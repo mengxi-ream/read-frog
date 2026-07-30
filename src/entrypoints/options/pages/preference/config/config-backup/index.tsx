@@ -33,12 +33,12 @@ export function ConfigBackupPage() {
     >
       <ConfigDetailSection
         backTo="/preference"
-        title={<span id="config-backup">{i18n.t("options.config.backup.title")}</span>}
+        title={<span id="config-backup">{i18n.t("options.preference.config.backup.title")}</span>}
       >
         <div className="space-y-4">
           {isPending && (
             <div className="py-8 text-center text-muted-foreground">
-              {i18n.t("options.config.backup.loading")}
+              {i18n.t("options.preference.config.backup.loading")}
             </div>
           )}
 
@@ -73,14 +73,17 @@ function Toolbar() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["config-backups"] })
-      toastManager.add({ type: "success", title: i18n.t("options.config.backup.backupSuccess") })
+      toastManager.add({
+        type: "success",
+        title: i18n.t("options.preference.config.backup.backupSuccess"),
+      })
     },
   })
   return (
     <div className="flex justify-end">
       <Button size="sm" disabled={isBackingUp} onClick={() => backupConfig()}>
         <Icon icon="tabler:plus" />
-        {i18n.t("options.config.backup.backupNow")}
+        {i18n.t("options.preference.config.backup.backupNow")}
       </Button>
     </div>
   )
@@ -94,7 +97,10 @@ function EmptyState() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["config-backups"] })
-      toastManager.add({ type: "success", title: i18n.t("options.config.backup.backupSuccess") })
+      toastManager.add({
+        type: "success",
+        title: i18n.t("options.preference.config.backup.backupSuccess"),
+      })
     },
   })
   return (
@@ -103,12 +109,14 @@ function EmptyState() {
         <EmptyMedia variant="icon">
           <Icon icon="tabler:file-off" />
         </EmptyMedia>
-        <EmptyTitle>{i18n.t("options.config.backup.empty.title")}</EmptyTitle>
-        <EmptyDescription>{i18n.t("options.config.backup.empty.description")}</EmptyDescription>
+        <EmptyTitle>{i18n.t("options.preference.config.backup.empty.title")}</EmptyTitle>
+        <EmptyDescription>
+          {i18n.t("options.preference.config.backup.empty.description")}
+        </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <Button variant="outline" size="sm" disabled={isBackingUp} onClick={() => backupConfig()}>
-          {i18n.t("options.config.backup.backupNow")}
+          {i18n.t("options.preference.config.backup.backupNow")}
         </Button>
       </EmptyContent>
     </Empty>

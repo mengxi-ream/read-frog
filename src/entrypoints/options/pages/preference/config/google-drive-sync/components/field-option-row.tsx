@@ -13,7 +13,7 @@ export const STYLE_MAP = {
     hover: "hover:bg-green-200/50 dark:hover:bg-green-900/50",
     selected: "bg-green-200/60 dark:bg-green-900/40",
     badge: "bg-green-200/60 dark:bg-green-900/50",
-    label: "options.config.sync.googleDrive.unresolved.localLatest",
+    label: "options.preference.config.googleDrive.unresolved.localLatest",
   },
   remote: {
     bg: "bg-blue-100/50 dark:bg-blue-900/30",
@@ -22,7 +22,7 @@ export const STYLE_MAP = {
     hover: "hover:bg-blue-200/50 dark:hover:bg-blue-900/50",
     selected: "bg-blue-200/60 dark:bg-blue-900/40",
     badge: "bg-blue-200/60 dark:bg-blue-900/50",
-    label: "options.config.sync.googleDrive.unresolved.remoteLatest",
+    label: "options.preference.config.googleDrive.unresolved.remoteLatest",
   },
   unresolved: {
     bg: "bg-orange-100/50 dark:bg-orange-900/30",

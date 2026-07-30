@@ -20,9 +20,9 @@ const MODE_ICON: Record<ThemeMode, string> = {
 }
 
 const MODE_LABEL_KEY = {
-  system: "options.general.appearance.system",
-  light: "options.general.appearance.light",
-  dark: "options.general.appearance.dark",
+  system: "options.preference.appearanceAndLanguage.theme.system",
+  light: "options.preference.appearanceAndLanguage.theme.light",
+  dark: "options.preference.appearanceAndLanguage.theme.dark",
 } as const
 
 /**

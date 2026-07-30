@@ -29,27 +29,29 @@ export function ResetConfigItem() {
   return (
     <ConfigItem
       id="reset-config"
-      title={i18n.t("options.config.resetConfig.title")}
-      description={i18n.t("options.config.resetConfig.description")}
+      title={i18n.t("options.preference.config.reset.title")}
+      description={i18n.t("options.preference.config.reset.description")}
     >
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogTrigger render={<Button variant="destructive" size="sm" />}>
           <IconRefresh />
-          {i18n.t("options.config.resetConfig.dialog.trigger")}
+          {i18n.t("options.preference.config.reset.dialog.trigger")}
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{i18n.t("options.config.resetConfig.dialog.title")}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {i18n.t("options.preference.config.reset.dialog.title")}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              {i18n.t("options.config.resetConfig.dialog.description")}
+              {i18n.t("options.preference.config.reset.dialog.description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>
-              {i18n.t("options.config.resetConfig.dialog.cancel")}
+              {i18n.t("options.preference.config.reset.dialog.cancel")}
             </AlertDialogCancel>
             <AlertDialogAction variant="destructive" onClick={resetToDefaultConfig}>
-              {i18n.t("options.config.resetConfig.dialog.confirm")}
+              {i18n.t("options.preference.config.reset.dialog.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

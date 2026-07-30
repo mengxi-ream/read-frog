@@ -59,11 +59,11 @@ export function BackupConfigItem({ backupId, backupMetadata, backup }: BackupCon
         <ItemTitle>{formatDate(backupMetadata.createdAt)}</ItemTitle>
         <ItemDescription className="flex flex-wrap items-center gap-x-4 text-xs">
           <span>
-            {i18n.t("options.config.backup.item.extensionVersion")}{" "}
+            {i18n.t("options.preference.config.backup.item.extensionVersion")}{" "}
             {backupMetadata.extensionVersion}
           </span>
           <span>
-            {i18n.t("options.config.backup.item.schemaVersion")} {backup.schemaVersion}
+            {i18n.t("options.preference.config.backup.item.schemaVersion")} {backup.schemaVersion}
           </span>
         </ItemDescription>
       </ItemContent>
@@ -103,7 +103,7 @@ function RestoreButton({ backup }: { backup: ConfigBackup }) {
       void queryClient.invalidateQueries({ queryKey: ["config-backups"] })
       toastManager.add({
         type: "success",
-        title: i18n.t("options.config.backup.restoreSuccess"),
+        title: i18n.t("options.preference.config.backup.restoreSuccess"),
       })
     },
   })
@@ -112,22 +112,26 @@ function RestoreButton({ backup }: { backup: ConfigBackup }) {
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger render={<Button variant="outline" size="sm" disabled={isRestoring} />}>
         {isRestoring ? <Spinner /> : <Icon icon="tabler:restore" />}
-        {i18n.t("options.config.backup.item.restore")}
+        {i18n.t("options.preference.config.backup.item.restore")}
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{i18n.t("options.config.backup.restore.title")}</AlertDialogTitle>
+          <AlertDialogTitle>
+            {i18n.t("options.preference.config.backup.restore.title")}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            {i18n.t("options.config.backup.restore.description")}
+            {i18n.t("options.preference.config.backup.restore.description")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{i18n.t("options.config.backup.restore.cancel")}</AlertDialogCancel>
+          <AlertDialogCancel>
+            {i18n.t("options.preference.config.backup.restore.cancel")}
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={() => restoreBackup(backup, { onSettled: () => setOpen(false) })}
             disabled={isRestoring}
           >
-            {i18n.t("options.config.backup.restore.confirm")}
+            {i18n.t("options.preference.config.backup.restore.confirm")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -164,11 +168,11 @@ function MoreOptions({ backupId, backup }: { backupId: string; backup: ConfigBac
         <DropdownMenuContent className="w-40" align="end">
           <DropdownMenuItem onClick={() => setShowExportDialog(true)} disabled={isExporting}>
             <Icon icon="tabler:file-export" />
-            {i18n.t("options.config.backup.item.export")}
+            {i18n.t("options.preference.config.backup.item.export")}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>
             <Icon icon="tabler:trash" />
-            {i18n.t("options.config.backup.item.delete")}
+            {i18n.t("options.preference.config.backup.item.delete")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -176,13 +180,17 @@ function MoreOptions({ backupId, backup }: { backupId: string; backup: ConfigBac
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{i18n.t("options.config.backup.delete.title")}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {i18n.t("options.preference.config.backup.delete.title")}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              {i18n.t("options.config.backup.delete.description")}
+              {i18n.t("options.preference.config.backup.delete.description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{i18n.t("options.config.backup.delete.cancel")}</AlertDialogCancel>
+            <AlertDialogCancel>
+              {i18n.t("options.preference.config.backup.delete.cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               onClick={() =>
@@ -190,7 +198,7 @@ function MoreOptions({ backupId, backup }: { backupId: string; backup: ConfigBac
               }
               disabled={isDeleting}
             >
-              {i18n.t("options.config.backup.delete.confirm")}
+              {i18n.t("options.preference.config.backup.delete.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -199,14 +207,16 @@ function MoreOptions({ backupId, backup }: { backupId: string; backup: ConfigBac
       <AlertDialog open={showExportDialog} onOpenChange={setShowExportDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{i18n.t("options.config.sync.exportOptions.title")}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {i18n.t("options.preference.config.manualSync.exportOptions.title")}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              {i18n.t("options.config.sync.exportOptions.description")}
+              {i18n.t("options.preference.config.manualSync.exportOptions.description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex justify-between!">
             <AlertDialogCancel>
-              {i18n.t("options.config.sync.exportOptions.cancel")}
+              {i18n.t("options.preference.config.manualSync.exportOptions.cancel")}
             </AlertDialogCancel>
             <div className="flex gap-2">
               <AlertDialogAction
@@ -214,13 +224,13 @@ function MoreOptions({ backupId, backup }: { backupId: string; backup: ConfigBac
                 onClick={() => exportConfig(true, { onSettled: () => setShowExportDialog(false) })}
                 disabled={isExporting}
               >
-                {i18n.t("options.config.sync.exportOptions.includeAPIKeys")}
+                {i18n.t("options.preference.config.manualSync.exportOptions.includeAPIKeys")}
               </AlertDialogAction>
               <AlertDialogAction
                 onClick={() => exportConfig(false, { onSettled: () => setShowExportDialog(false) })}
                 disabled={isExporting}
               >
-                {i18n.t("options.config.sync.exportOptions.excludeAPIKeys")}
+                {i18n.t("options.preference.config.manualSync.exportOptions.excludeAPIKeys")}
               </AlertDialogAction>
             </div>
           </AlertDialogFooter>

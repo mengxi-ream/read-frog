@@ -96,10 +96,6 @@ options:
   setAPIKeyWarning:
     please: 設定ページで
     page: APIキーを設定してください
-  betaExperience:
-    title: Beta 体験
-    description: まだ不安定な可能性がある実験的機能を有効にします
-    enabled: Beta 体験を有効にする
   apiProviders:
     title: APIプロバイダー
     pageDescription: Read Frog が呼び出す AI サービスを接続し、キーとモデルを管理します。
@@ -226,16 +222,6 @@ options:
   general:
     title: 一般
     pageDescription: 各機能で使うプロバイダーと、Read Frog がページの言語を判定する方法を設定します。
-    interfaceLanguage:
-      title: インターフェース言語
-      description: ブラウザの言語とは別に、拡張機能のインターフェース言語を選択します。
-      auto: 自動（ブラウザに従う）
-    appearance:
-      title: 外観
-      theme: テーマ
-      system: システム
-      light: ライト
-      dark: ダーク
     featureProviders:
       title: 機能プロバイダー
       description: 各機能に使用するプロバイダーを選択
@@ -281,25 +267,136 @@ options:
     appearanceAndLanguage:
       title: 外観と言語
       theme:
+        title: テーマ
         description: Read Frog のテーマを選択します。
+        system: システム
+        light: ライト
+        dark: ダーク
+      interfaceLanguage:
+        title: インターフェース言語
+        description: ブラウザの言語とは別に、拡張機能のインターフェース言語を選択します。
+        auto: 自動（ブラウザに従う）
     extensionActivation:
       title: 拡張機能の有効化
       mode:
         title: 有効化モード
+        description: ブラックリストモードを使用して特定のサイトで拡張機能を無効にするか、ホワイトリストモードを使用して特定のサイトのみに制限できます。
+        blacklist: リストされたサイトでのみ無効
+        whitelist: リストされたサイトでのみ実行
+      patterns:
+        enterUrlPattern: URLパターンを入力（例：example.com）
+        urlPattern: URLパターン
     config:
       title: 設定
+      googleDrive:
+        title: Google Driveクラウド同期
+        description: リモートが新しい場合はダウンロード、ローカルが新しい場合はアップロード
+        sync: Google Driveに同期
+        syncing: 同期中...
+        syncSuccess:
+          uploaded: ローカル設定をクラウドにアップロードしました
+          downloaded: リモート設定を適用しました
+          sameChanges: ローカルとリモートの変更が一致、同期しました
+          noChange: 既に同期済みです
+          unresolved: 競合を解決し、ローカルとクラウドに同期しました
+        syncError: 同期に失敗しました。もう一度お試しください
+        metadataCorrupted: 同期メタデータが破損しています。リモート設定を適用しました
+        lastSyncTime: 最終同期時間
+        logout: ログアウト
+        logoutSuccess: Googleアカウントからログアウトしました
+        unresolved:
+          title: 設定の同期解決
+          description: ローカルとリモートの設定が異なります。各フィールドについて、保持するバージョンを選択してください。
+          resolved: 解決済み
+          unresolved: 未解決
+          localValue: ローカル値
+          remoteValue: リモート値
+          useLocal: ローカルを使用
+          useRemote: リモートを使用
+          useAllLocal: すべてローカルを使用
+          useAllRemote: すべてリモートを使用
+          reset: 選択をリセット
+          progress: $1/$2 個の変更を解決しました
+          confirm: 同期を確認
+          cancel: キャンセル
+          hasUnresolvedInChildren: ⚠ 未解決の変更を含む
+          item: 項目
+          items: 項目
+          unresolvedPrompt: "[未解決 - 選択してください]"
+          localLatest: ローカル最新
+          remoteLatest: リモート最新
+          bothChanged: 両方が変更されました
+          localChanged: ローカルが変更されました
+          remoteChanged: リモートが変更されました
+          configValid: 設定は有効です
+          configInvalid: 設定は無効です
+          resolveToContinue: 続行するには競合を解決してください
+          validationAlert:
+            title: マージされた設定に検証エラーがあります
+            description: 以下の差異を調整して修正してください：
+          moreErrors: ...他 $1 件のエラー
+      manualSync:
+        title: 手動設定同期
+        description: 手動で設定をインポート・エクスポート
+        import: インポート
+        export: エクスポート
+        importSuccess: 設定のインポートが完了しました
+        exportSuccess: 設定のエクスポートが完了しました
+        importError: インポートに失敗しました
+        exportOptions:
+          title: エクスポートオプションを選択
+          description: エクスポートする設定にAPIキーを含めるかどうかを選択してください。APIキーを含めると機密情報が漏洩する可能性があるため、安全な環境でのみ使用することをお勧めします。
+          includeAPIKeys: APIキーを含める
+          excludeAPIKeys: APIキーを含めない
+          cancel: キャンセル
+      viewConfig:
+        open: 設定を開く
+        title: 設定
+        description: 現在の設定の生の JSON を表示します
+      backup:
+        title: 設定のバックアップ
+        description: 設定が変更された場合、1時間ごとに自動的にバックアップが作成されます。以前の設定をここで復元できます。（最大 $1 個のバックアップ）
+        loading: バックアップを読み込んでいます...
+        backupNow: 今すぐバックアップ
+        backupSuccess: バックアップが作成されました
+        restoreSuccess: 設定が復元されました
+        empty:
+          title: まだバックアップがありません
+          description: 設定が変更された場合、1時間ごとに自動的にバックアップが作成されます。
+        item:
+          extensionVersion: 拡張機能のバージョン：
+          schemaVersion: 設定のバージョン：
+          restore: 復元
+          export: エクスポート
+          delete: 削除
+        restore:
+          title: 設定のバックアップを復元しますか？
+          description: 現在の設定が最新のバックアップと異なる場合、自動的に現在の設定がバックアップされます。バックアップ数が上限を超える場合、最も古いバックアップが削除される可能性があります。
+          cancel: キャンセル
+          confirm: 復元
+        delete:
+          title: バックアップを削除しますか？
+          description: このバックアップを削除してもよろしいですか？この操作は元に戻せません。
+          cancel: キャンセル
+          confirm: 削除
+      reset:
+        title: 設定をリセット
+        description: すべての設定をデフォルト値にリセットします。
+        dialog:
+          title: 設定をリセット
+          trigger: 設定をリセット
+          confirm: 確認
+          cancel: キャンセル
+          description: この操作は、すべての設定をデフォルト値にリセットします。ご確認ください。
     userExperience:
       title: ユーザー体験
-  siteControl:
-    title: サイト制御
-    mode:
-      title: 拡張機能の有効化モード
-      description: ブラックリストモードを使用して特定のサイトで拡張機能を無効にするか、ホワイトリストモードを使用して特定のサイトのみに制限できます。
-      blacklist: リストされたサイトでのみ無効
-      whitelist: リストされたサイトでのみ実行
-    patterns:
-      enterUrlPattern: URLパターンを入力（例：example.com）
-      urlPattern: URLパターン
+      beta:
+        title: Beta 体験
+        description: まだ不安定な可能性がある実験的機能を有効にします
+      analytics:
+        title: ユーザー体験の改善に協力する
+        tooltip: 有効にすると、Read Frog は匿名の利用シグナルを送信し、不具合の発見、機能の安定性確認、性能や UX の改善、今後優先すべき機能の判断に役立てます。
+        description: バグの特定や UI レイアウトの改善などを通じて Read Frog をより良くします
   overlayTools:
     title: オーバーレイツール
     floatingButton:
@@ -770,114 +867,6 @@ options:
       description: 期間内にバッチ翻訳で節約されたリクエストの割合
       originalRequestCount: 元のリクエスト数
       batchRequestCount: バッチリクエスト数
-  config:
-    analytics:
-      title: ユーザー体験の改善に協力する
-      tooltip: 有効にすると、Read Frog は匿名の利用シグナルを送信し、不具合の発見、機能の安定性確認、性能や UX の改善、今後優先すべき機能の判断に役立てます。
-      description: バグの特定や UI レイアウトの改善などを通じて Read Frog をより良くします
-    sync:
-      title: 手動設定同期
-      description: 手動で設定をインポート・エクスポート
-      import: インポート
-      export: エクスポート
-      importSuccess: 設定のインポートが完了しました
-      exportSuccess: 設定のエクスポートが完了しました
-      importError: インポートに失敗しました
-      versionTooNew: インポートされた設定のバージョンが新しいため、Read Frogを最新バージョンにアップグレードしてください
-      migrationError: 移行に失敗しました
-      validationError: 設定の検証に失敗しました
-      exportOptions:
-        title: エクスポートオプションを選択
-        description: エクスポートする設定にAPIキーを含めるかどうかを選択してください。APIキーを含めると機密情報が漏洩する可能性があるため、安全な環境でのみ使用することをお勧めします。
-        includeAPIKeys: APIキーを含める
-        excludeAPIKeys: APIキーを含めない
-        cancel: キャンセル
-      viewConfig:
-        open: 設定を開く
-        title: 設定
-        description: 現在の設定の生の JSON を表示します
-      googleDrive:
-        title: Google Driveクラウド同期
-        description: リモートが新しい場合はダウンロード、ローカルが新しい場合はアップロード
-        sync: Google Driveに同期
-        syncing: 同期中...
-        syncSuccess:
-          uploaded: ローカル設定をクラウドにアップロードしました
-          downloaded: リモート設定を適用しました
-          sameChanges: ローカルとリモートの変更が一致、同期しました
-          noChange: 既に同期済みです
-          unresolved: 競合を解決し、ローカルとクラウドに同期しました
-        syncError: 同期に失敗しました。もう一度お試しください
-        metadataCorrupted: 同期メタデータが破損しています。リモート設定を適用しました
-        lastSyncTime: 最終同期時間
-        logout: ログアウト
-        logoutSuccess: Googleアカウントからログアウトしました
-        unresolved:
-          title: 設定の同期解決
-          description: ローカルとリモートの設定が異なります。各フィールドについて、保持するバージョンを選択してください。
-          resolved: 解決済み
-          unresolved: 未解決
-          localValue: ローカル値
-          remoteValue: リモート値
-          useLocal: ローカルを使用
-          useRemote: リモートを使用
-          useAllLocal: すべてローカルを使用
-          useAllRemote: すべてリモートを使用
-          reset: 選択をリセット
-          progress: $1/$2 個の変更を解決しました
-          confirm: 同期を確認
-          cancel: キャンセル
-          hasUnresolvedInChildren: ⚠ 未解決の変更を含む
-          item: 項目
-          items: 項目
-          unresolvedPrompt: "[未解決 - 選択してください]"
-          localLatest: ローカル最新
-          remoteLatest: リモート最新
-          bothChanged: 両方が変更されました
-          localChanged: ローカルが変更されました
-          remoteChanged: リモートが変更されました
-          configValid: 設定は有効です
-          configInvalid: 設定は無効です
-          resolveToContinue: 続行するには競合を解決してください
-          validationAlert:
-            title: マージされた設定に検証エラーがあります
-            description: 以下の差異を調整して修正してください：
-          moreErrors: ...他 $1 件のエラー
-    backup:
-      title: 設定のバックアップ
-      description: 設定が変更された場合、1時間ごとに自動的にバックアップが作成されます。以前の設定をここで復元できます。（最大 $1 個のバックアップ）
-      loading: バックアップを読み込んでいます...
-      backupNow: 今すぐバックアップ
-      backupSuccess: バックアップが作成されました
-      restoreSuccess: 設定が復元されました
-      empty:
-        title: まだバックアップがありません
-        description: 設定が変更された場合、1時間ごとに自動的にバックアップが作成されます。
-      item:
-        extensionVersion: 拡張機能のバージョン：
-        schemaVersion: 設定のバージョン：
-        restore: 復元
-        export: エクスポート
-        delete: 削除
-      restore:
-        title: 設定のバックアップを復元しますか？
-        description: 現在の設定が最新のバックアップと異なる場合、自動的に現在の設定がバックアップされます。バックアップ数が上限を超える場合、最も古いバックアップが削除される可能性があります。
-        cancel: キャンセル
-        confirm: 復元
-      delete:
-        title: バックアップを削除しますか？
-        description: このバックアップを削除してもよろしいですか？この操作は元に戻せません。
-        cancel: キャンセル
-        confirm: 削除
-    resetConfig:
-      title: 設定をリセット
-      description: すべての設定をデフォルト値にリセットします。
-      dialog:
-        title: 設定をリセット
-        trigger: 設定をリセット
-        confirm: 確認
-        cancel: キャンセル
-        description: この操作は、すべての設定をデフォルト値にリセットします。ご確認ください。
   videoSubtitles:
     title: 動画字幕
     pageDescription: 視聴しながら字幕を翻訳します。プロバイダー・スタイル・リクエスト設定は個別に指定できます。
@@ -966,6 +955,9 @@ options:
     title: 新機能
   rateUs:
     title: レビューを書く
+  configMigration:
+    versionTooNew: インポートされた設定のバージョンが新しいため、Read Frogを最新バージョンにアップグレードしてください
+    validationError: 設定の検証に失敗しました
 side:
   sourceLang: ソース言語
   targetLang: 翻訳言語

@@ -35,15 +35,15 @@ export function ManualConfigSyncConfigItems() {
     <div className="flex flex-col gap-4">
       <ConfigItem
         id="manual-config-sync"
-        title={i18n.t("options.config.sync.title")}
-        description={i18n.t("options.config.sync.description")}
+        title={i18n.t("options.preference.config.manualSync.title")}
+        description={i18n.t("options.preference.config.manualSync.description")}
       >
         <div className="flex gap-2">
           <ImportConfig />
           <ExportConfig />
         </div>
       </ConfigItem>
-      <ConfigItem description={i18n.t("options.config.sync.viewConfig.description")}>
+      <ConfigItem description={i18n.t("options.preference.config.viewConfig.description")}>
         <ViewConfig config={config} size="sm" />
       </ConfigItem>
     </div>
@@ -66,7 +66,8 @@ function ImportConfig() {
             reject(new Error("Invalid file content"))
           }
         }
-        reader.onerror = () => reject(new Error(i18n.t("options.config.sync.importError")))
+        reader.onerror = () =>
+          reject(new Error(i18n.t("options.preference.config.manualSync.importError")))
         reader.readAsText(file)
       })
 
@@ -93,7 +94,10 @@ function ImportConfig() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["config-backups"] })
-      toastManager.add({ type: "success", title: i18n.t("options.config.sync.importSuccess") })
+      toastManager.add({
+        type: "success",
+        title: i18n.t("options.preference.config.manualSync.importSuccess"),
+      })
     },
   })
 
@@ -112,7 +116,7 @@ function ImportConfig() {
           button's own font size instead of `Label`'s fixed `text-sm`. */}
       <Label htmlFor="import-config-file" className="w-full gap-1 px-2.5 text-[length:inherit]">
         <Icon icon="tabler:file-import" />
-        {i18n.t("options.config.sync.import")}
+        {i18n.t("options.preference.config.manualSync.import")}
       </Label>
       <Input
         type="file"
@@ -133,7 +137,10 @@ function ExportConfig() {
     config,
     schemaVersion: CONFIG_SCHEMA_VERSION,
     onSuccess: () => {
-      toastManager.add({ type: "success", title: i18n.t("options.config.sync.exportSuccess") })
+      toastManager.add({
+        type: "success",
+        title: i18n.t("options.preference.config.manualSync.exportSuccess"),
+      })
     },
   })
 
@@ -141,20 +148,22 @@ function ExportConfig() {
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger render={<Button variant="outline" size="sm" disabled={isExporting} />}>
         <Icon icon="tabler:file-export" />
-        {i18n.t("options.config.sync.export")}
+        {i18n.t("options.preference.config.manualSync.export")}
       </AlertDialogTrigger>
 
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{i18n.t("options.config.sync.exportOptions.title")}</AlertDialogTitle>
+          <AlertDialogTitle>
+            {i18n.t("options.preference.config.manualSync.exportOptions.title")}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            {i18n.t("options.config.sync.exportOptions.description")}
+            {i18n.t("options.preference.config.manualSync.exportOptions.description")}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <AlertDialogFooter className="flex justify-between!">
           <AlertDialogCancel>
-            {i18n.t("options.config.sync.exportOptions.cancel")}
+            {i18n.t("options.preference.config.manualSync.exportOptions.cancel")}
           </AlertDialogCancel>
           <div className="flex gap-2">
             <AlertDialogAction
@@ -162,13 +171,13 @@ function ExportConfig() {
               onClick={() => exportConfig(true, { onSettled: () => setOpen(false) })}
               disabled={isExporting}
             >
-              {i18n.t("options.config.sync.exportOptions.includeAPIKeys")}
+              {i18n.t("options.preference.config.manualSync.exportOptions.includeAPIKeys")}
             </AlertDialogAction>
             <AlertDialogAction
               onClick={() => exportConfig(false, { onSettled: () => setOpen(false) })}
               disabled={isExporting}
             >
-              {i18n.t("options.config.sync.exportOptions.excludeAPIKeys")}
+              {i18n.t("options.preference.config.manualSync.exportOptions.excludeAPIKeys")}
             </AlertDialogAction>
           </div>
         </AlertDialogFooter>

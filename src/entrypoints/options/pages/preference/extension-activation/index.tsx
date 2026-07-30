@@ -27,7 +27,7 @@ export function ExtensionActivationSection() {
         id="site-control-mode"
         orientation="vertical"
         title={i18n.t("options.preference.extensionActivation.mode.title")}
-        description={i18n.t("options.siteControl.mode.description")}
+        description={i18n.t("options.preference.extensionActivation.mode.description")}
       >
         <RadioGroup
           value={siteControl.mode}
@@ -42,13 +42,13 @@ export function ExtensionActivationSection() {
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="blacklist" id="mode-blacklist" />
             <Label htmlFor="mode-blacklist" className="cursor-pointer">
-              {i18n.t("options.siteControl.mode.blacklist")}
+              {i18n.t("options.preference.extensionActivation.mode.blacklist")}
             </Label>
           </div>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="whitelist" id="mode-whitelist" />
             <Label htmlFor="mode-whitelist" className="cursor-pointer">
-              {i18n.t("options.siteControl.mode.whitelist")}
+              {i18n.t("options.preference.extensionActivation.mode.whitelist")}
             </Label>
           </div>
         </RadioGroup>
@@ -56,8 +56,10 @@ export function ExtensionActivationSection() {
           patterns={patterns}
           onAddPattern={addPattern}
           onRemovePattern={removePattern}
-          placeholderText={i18n.t("options.siteControl.patterns.enterUrlPattern")}
-          tableHeaderText={i18n.t("options.siteControl.patterns.urlPattern")}
+          placeholderText={i18n.t(
+            "options.preference.extensionActivation.patterns.enterUrlPattern",
+          )}
+          tableHeaderText={i18n.t("options.preference.extensionActivation.patterns.urlPattern")}
           className="mt-6"
         />
       </ConfigItem>

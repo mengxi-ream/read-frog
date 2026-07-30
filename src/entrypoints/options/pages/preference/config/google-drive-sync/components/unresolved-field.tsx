@@ -36,10 +36,10 @@ export function ConflictField({ pathKey, indent }: ConflictFieldProps) {
   // Get the appropriate icon and label
   const getIconAndLabel = () => {
     const label = bothChanged
-      ? i18n.t("options.config.sync.googleDrive.unresolved.bothChanged")
+      ? i18n.t("options.preference.config.googleDrive.unresolved.bothChanged")
       : localChanged
-        ? i18n.t("options.config.sync.googleDrive.unresolved.localChanged")
-        : i18n.t("options.config.sync.googleDrive.unresolved.remoteChanged")
+        ? i18n.t("options.preference.config.googleDrive.unresolved.localChanged")
+        : i18n.t("options.preference.config.googleDrive.unresolved.remoteChanged")
 
     return {
       icon: "tabler:git-merge",
@@ -71,7 +71,7 @@ export function ConflictField({ pathKey, indent }: ConflictFieldProps) {
             onClick={reset}
           >
             <Icon icon="mdi:undo" className="mr-1 size-3" />
-            {i18n.t("options.config.sync.googleDrive.unresolved.reset")}
+            {i18n.t("options.preference.config.googleDrive.unresolved.reset")}
           </Button>
         )}
       </div>

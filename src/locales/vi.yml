@@ -96,10 +96,6 @@ options:
   setAPIKeyWarning:
     please: Vui lòng đặt API Key trên trang
     page: cài đặt
-  betaExperience:
-    title: Trải nghiệm Beta
-    description: Bật các tính năng thử nghiệm có thể chưa ổn định
-    enabled: Bật trải nghiệm Beta
   apiProviders:
     title: Nhà cung cấp API
     pageDescription: Kết nối các dịch vụ AI mà Read Frog sử dụng và quản lý khóa cùng mô hình của chúng.
@@ -226,16 +222,6 @@ options:
   general:
     title: Chung
     pageDescription: Chọn nhà cung cấp cho từng chức năng và cách Read Frog nhận diện ngôn ngữ của trang.
-    interfaceLanguage:
-      title: Ngôn ngữ giao diện
-      description: Chọn ngôn ngữ cho giao diện tiện ích, độc lập với ngôn ngữ trình duyệt.
-      auto: Tự động (theo trình duyệt)
-    appearance:
-      title: Giao diện
-      theme: Chủ đề
-      system: Hệ thống
-      light: Sáng
-      dark: Tối
     featureProviders:
       title: Nhà cung cấp tính năng
       description: Chọn nhà cung cấp sử dụng cho mỗi tính năng
@@ -281,25 +267,136 @@ options:
     appearanceAndLanguage:
       title: Giao diện & ngôn ngữ
       theme:
+        title: Chủ đề
         description: Chọn chủ đề cho Read Frog.
+        system: Hệ thống
+        light: Sáng
+        dark: Tối
+      interfaceLanguage:
+        title: Ngôn ngữ giao diện
+        description: Chọn ngôn ngữ cho giao diện tiện ích, độc lập với ngôn ngữ trình duyệt.
+        auto: Tự động (theo trình duyệt)
     extensionActivation:
       title: Kích hoạt tiện ích mở rộng
       mode:
         title: Chế độ kích hoạt
+        description: Sử dụng chế độ danh sách đen để tắt tiện ích trên các trang web cụ thể, hoặc chế độ danh sách trắng để giới hạn chỉ các trang web cụ thể.
+        blacklist: Chỉ tắt trên các trang web được liệt kê
+        whitelist: Chỉ chạy trên các trang web được liệt kê
+      patterns:
+        enterUrlPattern: "Nhập mẫu URL (ví dụ: example.com)"
+        urlPattern: Mẫu URL
     config:
       title: Cấu hình
+      googleDrive:
+        title: Đồng bộ đám mây Google Drive
+        description: Tải xuống khi bản từ xa mới hơn, tải lên khi bản cục bộ mới hơn
+        sync: Đồng bộ với Google Drive
+        syncing: Đang đồng bộ...
+        syncSuccess:
+          uploaded: Đã tải cấu hình lên đám mây
+          downloaded: Đã áp dụng cấu hình từ xa
+          sameChanges: Thay đổi cục bộ và từ xa giống nhau, đã đồng bộ
+          noChange: Đã đồng bộ
+          unresolved: Đã giải quyết xung đột và đồng bộ
+        syncError: Đồng bộ thất bại, vui lòng thử lại
+        metadataCorrupted: Siêu dữ liệu đồng bộ bị hỏng, đã áp dụng cấu hình từ xa
+        lastSyncTime: Đồng bộ lần cuối lúc
+        logout: Đăng xuất
+        logoutSuccess: Đã đăng xuất khỏi tài khoản Google
+        unresolved:
+          title: Giải quyết đồng bộ cấu hình
+          description: Cấu hình cục bộ và từ xa khác nhau. Vui lòng chọn phiên bản nào để giữ cho mỗi trường.
+          resolved: Đã giải quyết
+          unresolved: Chưa giải quyết
+          localValue: Giá trị cục bộ
+          remoteValue: Giá trị từ xa
+          useLocal: Dùng cục bộ
+          useRemote: Dùng từ xa
+          useAllLocal: Dùng tất cả cục bộ
+          useAllRemote: Dùng tất cả từ xa
+          reset: Đặt lại lựa chọn
+          progress: Đã giải quyết $1/$2 thay đổi
+          confirm: Xác nhận đồng bộ
+          cancel: Hủy
+          hasUnresolvedInChildren: ⚠ Chứa thay đổi chưa giải quyết
+          item: mục
+          items: mục
+          unresolvedPrompt: "[Chưa giải quyết - Vui lòng chọn]"
+          localLatest: Cục bộ mới nhất
+          remoteLatest: Từ xa mới nhất
+          bothChanged: Cả hai đã thay đổi
+          localChanged: Cục bộ đã thay đổi
+          remoteChanged: Từ xa đã thay đổi
+          configValid: Cấu hình hợp lệ
+          configInvalid: Cấu hình không hợp lệ
+          resolveToContinue: Giải quyết xung đột để tiếp tục
+          validationAlert:
+            title: Cấu hình đã hợp nhất có lỗi xác thực
+            description: "Điều chỉnh các khác biệt bên dưới để sửa:"
+          moreErrors: ...và $1 lỗi nữa
+      manualSync:
+        title: Đồng bộ cấu hình thủ công
+        description: Nhập và xuất cài đặt cấu hình thủ công
+        import: Nhập
+        export: Xuất
+        importSuccess: Nhập cấu hình thành công
+        exportSuccess: Xuất cấu hình thành công
+        importError: Nhập thất bại
+        exportOptions:
+          title: Chọn tùy chọn xuất
+          description: Vui lòng chọn có bao gồm API Keys trong cấu hình xuất hay không. Bao gồm API Keys có thể làm rò rỉ thông tin nhạy cảm, vì vậy khuyến nghị chỉ sử dụng trong môi trường an toàn.
+          includeAPIKeys: Bao gồm API Keys
+          excludeAPIKeys: Loại trừ API Keys
+          cancel: Hủy
+      viewConfig:
+        open: Mở cấu hình
+        title: Cấu hình
+        description: Xem JSON thô của cấu hình hiện tại
+      backup:
+        title: Sao lưu cấu hình
+        description: Các bản sao lưu tự động được tạo mỗi giờ nếu cấu hình thay đổi. Bạn có thể khôi phục các cấu hình trước đó tại đây. (Tối đa $1 bản sao lưu)
+        loading: Đang tải bản sao lưu...
+        backupNow: Sao lưu ngay
+        backupSuccess: Tạo bản sao lưu thành công
+        restoreSuccess: Khôi phục cấu hình thành công
+        empty:
+          title: Chưa có bản sao lưu nào
+          description: Các bản sao lưu được tạo tự động mỗi giờ nếu cấu hình thay đổi.
+        item:
+          extensionVersion: "Phiên bản tiện ích:"
+          schemaVersion: "Phiên bản schema:"
+          restore: Khôi phục
+          export: Xuất
+          delete: Xóa
+        restore:
+          title: Khôi phục bản sao lưu cấu hình?
+          description: Cấu hình hiện tại của bạn sẽ được tự động sao lưu nếu nó khác với bản sao lưu mới nhất. Bản sao lưu cũ nhất có thể bị xóa nếu số lượng bản sao lưu vượt quá giới hạn.
+          cancel: Hủy
+          confirm: Khôi phục
+        delete:
+          title: Xóa bản sao lưu?
+          description: Bạn có chắc chắn muốn xóa bản sao lưu này? Hành động này không thể hoàn tác.
+          cancel: Hủy
+          confirm: Xóa
+      reset:
+        title: Đặt lại cấu hình
+        description: Đặt lại tất cả cấu hình về giá trị mặc định
+        dialog:
+          title: Đặt lại cấu hình
+          trigger: Đặt lại cấu hình
+          confirm: Xác nhận
+          cancel: Hủy
+          description: Thao tác này sẽ xóa tất cả cấu hình tùy chỉnh của bạn và đặt lại về giá trị mặc định. Vui lòng xác nhận.
     userExperience:
       title: Trải nghiệm người dùng
-  siteControl:
-    title: Kiểm soát trang web
-    mode:
-      title: Chế độ kích hoạt tiện ích mở rộng
-      description: Sử dụng chế độ danh sách đen để tắt tiện ích trên các trang web cụ thể, hoặc chế độ danh sách trắng để giới hạn chỉ các trang web cụ thể.
-      blacklist: Chỉ tắt trên các trang web được liệt kê
-      whitelist: Chỉ chạy trên các trang web được liệt kê
-    patterns:
-      enterUrlPattern: "Nhập mẫu URL (ví dụ: example.com)"
-      urlPattern: Mẫu URL
+      beta:
+        title: Trải nghiệm Beta
+        description: Bật các tính năng thử nghiệm có thể chưa ổn định
+      analytics:
+        title: Giúp cải thiện trải nghiệm người dùng
+        tooltip: Khi bật, Read Frog sẽ gửi các tín hiệu sử dụng ẩn danh để phát hiện lỗi, xác minh tính ổn định của tính năng, tối ưu hiệu năng và độ tinh chỉnh UX, đồng thời giúp chúng tôi ưu tiên những gì cần xây tiếp theo.
+        description: Cải thiện Read Frog bằng cách giúp chúng tôi tìm lỗi, tinh chỉnh giao diện và hơn thế nữa
   overlayTools:
     title: Công cụ nổi
     floatingButton:
@@ -770,114 +867,6 @@ options:
       description: Tỷ lệ phần trăm yêu cầu đã tiết kiệm bằng dịch theo lô trong khoảng thời gian
       originalRequestCount: Số yêu cầu ban đầu
       batchRequestCount: Số yêu cầu theo lô
-  config:
-    analytics:
-      title: Giúp cải thiện trải nghiệm người dùng
-      tooltip: Khi bật, Read Frog sẽ gửi các tín hiệu sử dụng ẩn danh để phát hiện lỗi, xác minh tính ổn định của tính năng, tối ưu hiệu năng và độ tinh chỉnh UX, đồng thời giúp chúng tôi ưu tiên những gì cần xây tiếp theo.
-      description: Cải thiện Read Frog bằng cách giúp chúng tôi tìm lỗi, tinh chỉnh giao diện và hơn thế nữa
-    sync:
-      title: Đồng bộ cấu hình thủ công
-      description: Nhập và xuất cài đặt cấu hình thủ công
-      import: Nhập
-      export: Xuất
-      importSuccess: Nhập cấu hình thành công
-      exportSuccess: Xuất cấu hình thành công
-      importError: Nhập thất bại
-      versionTooNew: Phiên bản cấu hình đã nhập mới hơn, vui lòng nâng cấp Read Frog lên phiên bản mới nhất
-      migrationError: Di chuyển thất bại
-      validationError: Xác thực cấu hình thất bại
-      exportOptions:
-        title: Chọn tùy chọn xuất
-        description: Vui lòng chọn có bao gồm API Keys trong cấu hình xuất hay không. Bao gồm API Keys có thể làm rò rỉ thông tin nhạy cảm, vì vậy khuyến nghị chỉ sử dụng trong môi trường an toàn.
-        includeAPIKeys: Bao gồm API Keys
-        excludeAPIKeys: Loại trừ API Keys
-        cancel: Hủy
-      viewConfig:
-        open: Mở cấu hình
-        title: Cấu hình
-        description: Xem JSON thô của cấu hình hiện tại
-      googleDrive:
-        title: Đồng bộ đám mây Google Drive
-        description: Tải xuống khi bản từ xa mới hơn, tải lên khi bản cục bộ mới hơn
-        sync: Đồng bộ với Google Drive
-        syncing: Đang đồng bộ...
-        syncSuccess:
-          uploaded: Đã tải cấu hình lên đám mây
-          downloaded: Đã áp dụng cấu hình từ xa
-          sameChanges: Thay đổi cục bộ và từ xa giống nhau, đã đồng bộ
-          noChange: Đã đồng bộ
-          unresolved: Đã giải quyết xung đột và đồng bộ
-        syncError: Đồng bộ thất bại, vui lòng thử lại
-        metadataCorrupted: Siêu dữ liệu đồng bộ bị hỏng, đã áp dụng cấu hình từ xa
-        lastSyncTime: Đồng bộ lần cuối lúc
-        logout: Đăng xuất
-        logoutSuccess: Đã đăng xuất khỏi tài khoản Google
-        unresolved:
-          title: Giải quyết đồng bộ cấu hình
-          description: Cấu hình cục bộ và từ xa khác nhau. Vui lòng chọn phiên bản nào để giữ cho mỗi trường.
-          resolved: Đã giải quyết
-          unresolved: Chưa giải quyết
-          localValue: Giá trị cục bộ
-          remoteValue: Giá trị từ xa
-          useLocal: Dùng cục bộ
-          useRemote: Dùng từ xa
-          useAllLocal: Dùng tất cả cục bộ
-          useAllRemote: Dùng tất cả từ xa
-          reset: Đặt lại lựa chọn
-          progress: Đã giải quyết $1/$2 thay đổi
-          confirm: Xác nhận đồng bộ
-          cancel: Hủy
-          hasUnresolvedInChildren: ⚠ Chứa thay đổi chưa giải quyết
-          item: mục
-          items: mục
-          unresolvedPrompt: "[Chưa giải quyết - Vui lòng chọn]"
-          localLatest: Cục bộ mới nhất
-          remoteLatest: Từ xa mới nhất
-          bothChanged: Cả hai đã thay đổi
-          localChanged: Cục bộ đã thay đổi
-          remoteChanged: Từ xa đã thay đổi
-          configValid: Cấu hình hợp lệ
-          configInvalid: Cấu hình không hợp lệ
-          resolveToContinue: Giải quyết xung đột để tiếp tục
-          validationAlert:
-            title: Cấu hình đã hợp nhất có lỗi xác thực
-            description: "Điều chỉnh các khác biệt bên dưới để sửa:"
-          moreErrors: ...và $1 lỗi nữa
-    backup:
-      title: Sao lưu cấu hình
-      description: Các bản sao lưu tự động được tạo mỗi giờ nếu cấu hình thay đổi. Bạn có thể khôi phục các cấu hình trước đó tại đây. (Tối đa $1 bản sao lưu)
-      loading: Đang tải bản sao lưu...
-      backupNow: Sao lưu ngay
-      backupSuccess: Tạo bản sao lưu thành công
-      restoreSuccess: Khôi phục cấu hình thành công
-      empty:
-        title: Chưa có bản sao lưu nào
-        description: Các bản sao lưu được tạo tự động mỗi giờ nếu cấu hình thay đổi.
-      item:
-        extensionVersion: "Phiên bản tiện ích:"
-        schemaVersion: "Phiên bản schema:"
-        restore: Khôi phục
-        export: Xuất
-        delete: Xóa
-      restore:
-        title: Khôi phục bản sao lưu cấu hình?
-        description: Cấu hình hiện tại của bạn sẽ được tự động sao lưu nếu nó khác với bản sao lưu mới nhất. Bản sao lưu cũ nhất có thể bị xóa nếu số lượng bản sao lưu vượt quá giới hạn.
-        cancel: Hủy
-        confirm: Khôi phục
-      delete:
-        title: Xóa bản sao lưu?
-        description: Bạn có chắc chắn muốn xóa bản sao lưu này? Hành động này không thể hoàn tác.
-        cancel: Hủy
-        confirm: Xóa
-    resetConfig:
-      title: Đặt lại cấu hình
-      description: Đặt lại tất cả cấu hình về giá trị mặc định
-      dialog:
-        title: Đặt lại cấu hình
-        trigger: Đặt lại cấu hình
-        confirm: Xác nhận
-        cancel: Hủy
-        description: Thao tác này sẽ xóa tất cả cấu hình tùy chỉnh của bạn và đặt lại về giá trị mặc định. Vui lòng xác nhận.
   videoSubtitles:
     title: Phụ đề video
     pageDescription: Dịch phụ đề khi đang xem, với nhà cung cấp, kiểu hiển thị và thiết lập yêu cầu riêng.
@@ -966,6 +955,9 @@ options:
     title: Có gì mới
   rateUs:
     title: Đánh giá chúng tôi
+  configMigration:
+    versionTooNew: Phiên bản cấu hình đã nhập mới hơn, vui lòng nâng cấp Read Frog lên phiên bản mới nhất
+    validationError: Xác thực cấu hình thất bại
 side:
   sourceLang: Ngôn ngữ nguồn
   targetLang: Ngôn ngữ đích

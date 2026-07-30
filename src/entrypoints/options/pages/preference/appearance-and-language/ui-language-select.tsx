@@ -42,7 +42,7 @@ const UI_LANGUAGE_ORDER: UiLanguage[] = [
 // Resolved at render so the "auto" label follows a runtime interface-language switch.
 function labelFor(language: UiLanguage): string {
   return language === "auto"
-    ? i18n.t("options.general.interfaceLanguage.auto")
+    ? i18n.t("options.preference.appearanceAndLanguage.interfaceLanguage.auto")
     : LANGUAGE_ENDONYMS[language]
 }
 

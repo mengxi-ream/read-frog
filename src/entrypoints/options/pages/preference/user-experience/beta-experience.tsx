@@ -10,8 +10,8 @@ export function BetaExperienceItem() {
   return (
     <ConfigItem
       id="beta-experience"
-      title={i18n.t("options.betaExperience.title")}
-      description={i18n.t("options.betaExperience.description")}
+      title={i18n.t("options.preference.userExperience.beta.title")}
+      description={i18n.t("options.preference.userExperience.beta.description")}
     >
       <Switch
         checked={betaExperience.enabled}

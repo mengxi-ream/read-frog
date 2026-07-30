@@ -96,10 +96,6 @@ options:
   setAPIKeyWarning:
     please: Please set API Key on
     page: page
-  betaExperience:
-    title: Beta experience
-    description: Turn on experimental features that may still be unstable
-    enabled: Enable Beta Experience
   apiProviders:
     title: API Providers
     pageDescription: Connect the AI services Read Frog calls, and manage their keys and models.
@@ -227,16 +223,6 @@ options:
   general:
     title: General
     pageDescription: Choose which provider powers each feature and how Read Frog detects a page's language.
-    interfaceLanguage:
-      title: Interface language
-      description: Choose the language for the extension's interface, independent of your browser language.
-      auto: Auto (follow browser)
-    appearance:
-      title: Appearance
-      theme: Theme
-      system: System
-      light: Light
-      dark: Dark
     featureProviders:
       title: Feature Providers
       description: Choose which provider to use for each feature
@@ -282,25 +268,136 @@ options:
     appearanceAndLanguage:
       title: Appearance & language
       theme:
+        title: Theme
         description: Choose a theme for Read Frog.
+        system: System
+        light: Light
+        dark: Dark
+      interfaceLanguage:
+        title: Interface language
+        description: Choose the language for the extension's interface, independent of your browser language.
+        auto: Auto (follow browser)
     extensionActivation:
       title: Extension activation
       mode:
         title: Activation mode
+        description: Use blacklist mode to disable the extension on specific sites, or whitelist mode to limit it to specific sites only.
+        blacklist: Only disable on listed sites
+        whitelist: Only run on listed sites
+      patterns:
+        enterUrlPattern: Enter URL pattern (e.g., example.com)
+        urlPattern: URL Pattern
     config:
       title: Config
+      googleDrive:
+        title: Google Drive cloud sync
+        description: Downloads config when remote is newer, uploads config when local is newer
+        sync: Sync to Google Drive
+        syncing: Syncing...
+        syncSuccess:
+          uploaded: Local config uploaded to cloud
+          downloaded: Remote config applied
+          sameChanges: Same changes on both sides, synced
+          noChange: Already in sync
+          unresolved: Conflicts resolved and synced
+        syncError: Sync failed, please try again
+        metadataCorrupted: Sync metadata corrupted, remote config applied
+        lastSyncTime: Last sync at
+        logout: Logout
+        logoutSuccess: Logged out from Google account
+        unresolved:
+          title: Configuration Sync Resolution
+          description: Local and remote configurations differ. Please choose which version to keep for each field.
+          resolved: Resolved
+          unresolved: Unresolved
+          localValue: Local Value
+          remoteValue: Remote Value
+          useLocal: Use Local
+          useRemote: Use Remote
+          useAllLocal: Use All Local
+          useAllRemote: Use All Remote
+          reset: Reset Selection
+          progress: Resolved $1/$2 changes
+          confirm: Confirm Sync
+          cancel: Cancel
+          hasUnresolvedInChildren: ⚠ Contains unresolved changes
+          item: item
+          items: items
+          unresolvedPrompt: "[Unresolved - Please select]"
+          localLatest: Local Latest
+          remoteLatest: Remote Latest
+          bothChanged: Both changed
+          localChanged: Local changed
+          remoteChanged: Remote changed
+          configValid: Config is valid
+          configInvalid: Config is invalid
+          resolveToContinue: Resolve conflicts to continue
+          validationAlert:
+            title: The merged config has validation errors.
+            description: "Adjust the differences below to fix:"
+          moreErrors: ...and $1 more errors
+      manualSync:
+        title: Manual config sync
+        description: Manually import and export your configuration settings
+        import: Import
+        export: Export
+        importSuccess: Config imported successfully
+        exportSuccess: Config exported successfully
+        importError: Import failed
+        exportOptions:
+          title: Select Export Options
+          description: Please choose whether to include API Keys in the exported config. Including API Keys may leak sensitive information, so it's recommended to use only in secure environments.
+          includeAPIKeys: Include API Keys
+          excludeAPIKeys: Exclude API Keys
+          cancel: Cancel
+      viewConfig:
+        open: Open Config
+        title: Config
+        description: View the raw JSON of your current configuration
+      backup:
+        title: Config backup
+        description: Automatic backups are created every hour if the config is changed. You can restore previous configurations here. (Maximum $1 backups)
+        loading: Loading backups...
+        backupNow: Backup now
+        backupSuccess: Backup created successfully
+        restoreSuccess: Config restored successfully
+        empty:
+          title: No backups available yet
+          description: Backups are created automatically every hour if the config is changed.
+        item:
+          extensionVersion: "Extension version:"
+          schemaVersion: "Schema version:"
+          restore: Restore
+          export: Export
+          delete: Delete
+        restore:
+          title: Restore config backup?
+          description: Your current config will be automatically backed up if it is different from the latest backup. The oldest backup may be removed if the number of backups exceeds the limit.
+          cancel: Cancel
+          confirm: Restore
+        delete:
+          title: Delete backup?
+          description: Are you sure you want to delete this backup? This action cannot be undone.
+          cancel: Cancel
+          confirm: Delete
+      reset:
+        title: Reset config
+        description: Reset all config to default value
+        dialog:
+          title: Reset Config
+          trigger: Reset Config
+          confirm: Confirm
+          cancel: Cancel
+          description: This operation will clear all your custom configurations and reset them to default values. Please confirm.
     userExperience:
       title: User experience
-  siteControl:
-    title: Site Control
-    mode:
-      title: Extension activation mode
-      description: Use blacklist mode to disable the extension on specific sites, or whitelist mode to limit it to specific sites only.
-      blacklist: Only disable on listed sites
-      whitelist: Only run on listed sites
-    patterns:
-      enterUrlPattern: Enter URL pattern (e.g., example.com)
-      urlPattern: URL Pattern
+      beta:
+        title: Beta experience
+        description: Turn on experimental features that may still be unstable
+      analytics:
+        title: Help improve user experience
+        tooltip: When enabled, Read Frog sends anonymous product usage signals so we can catch bugs, verify feature reliability, improve performance and UX polish, and prioritize future work.
+        description: Improve Read Frog by helping us locate bugs, refine layouts, and more
   overlayTools:
     title: Overlay Tools
     floatingButton:
@@ -886,114 +983,6 @@ options:
       description: Percentage of requests saved by batch translation in the period
       originalRequestCount: Original Request Count
       batchRequestCount: Batch Request Count
-  config:
-    analytics:
-      title: Help improve user experience
-      tooltip: When enabled, Read Frog sends anonymous product usage signals so we can catch bugs, verify feature reliability, improve performance and UX polish, and prioritize future work.
-      description: Improve Read Frog by helping us locate bugs, refine layouts, and more
-    sync:
-      title: Manual config sync
-      description: Manually import and export your configuration settings
-      import: Import
-      export: Export
-      importSuccess: Config imported successfully
-      exportSuccess: Config exported successfully
-      importError: Import failed
-      versionTooNew: The imported config version is newer, please upgrade Read Frog to the latest version
-      migrationError: Migration failed
-      validationError: Config validation failed
-      exportOptions:
-        title: Select Export Options
-        description: Please choose whether to include API Keys in the exported config. Including API Keys may leak sensitive information, so it's recommended to use only in secure environments.
-        includeAPIKeys: Include API Keys
-        excludeAPIKeys: Exclude API Keys
-        cancel: Cancel
-      viewConfig:
-        open: Open Config
-        title: Config
-        description: View the raw JSON of your current configuration
-      googleDrive:
-        title: Google Drive cloud sync
-        description: Downloads config when remote is newer, uploads config when local is newer
-        sync: Sync to Google Drive
-        syncing: Syncing...
-        syncSuccess:
-          uploaded: Local config uploaded to cloud
-          downloaded: Remote config applied
-          sameChanges: Same changes on both sides, synced
-          noChange: Already in sync
-          unresolved: Conflicts resolved and synced
-        syncError: Sync failed, please try again
-        metadataCorrupted: Sync metadata corrupted, remote config applied
-        lastSyncTime: Last sync at
-        logout: Logout
-        logoutSuccess: Logged out from Google account
-        unresolved:
-          title: Configuration Sync Resolution
-          description: Local and remote configurations differ. Please choose which version to keep for each field.
-          resolved: Resolved
-          unresolved: Unresolved
-          localValue: Local Value
-          remoteValue: Remote Value
-          useLocal: Use Local
-          useRemote: Use Remote
-          useAllLocal: Use All Local
-          useAllRemote: Use All Remote
-          reset: Reset Selection
-          progress: Resolved $1/$2 changes
-          confirm: Confirm Sync
-          cancel: Cancel
-          hasUnresolvedInChildren: ⚠ Contains unresolved changes
-          item: item
-          items: items
-          unresolvedPrompt: "[Unresolved - Please select]"
-          localLatest: Local Latest
-          remoteLatest: Remote Latest
-          bothChanged: Both changed
-          localChanged: Local changed
-          remoteChanged: Remote changed
-          configValid: Config is valid
-          configInvalid: Config is invalid
-          resolveToContinue: Resolve conflicts to continue
-          validationAlert:
-            title: The merged config has validation errors.
-            description: "Adjust the differences below to fix:"
-          moreErrors: ...and $1 more errors
-    backup:
-      title: Config backup
-      description: Automatic backups are created every hour if the config is changed. You can restore previous configurations here. (Maximum $1 backups)
-      loading: Loading backups...
-      backupNow: Backup now
-      backupSuccess: Backup created successfully
-      restoreSuccess: Config restored successfully
-      empty:
-        title: No backups available yet
-        description: Backups are created automatically every hour if the config is changed.
-      item:
-        extensionVersion: "Extension version:"
-        schemaVersion: "Schema version:"
-        restore: Restore
-        export: Export
-        delete: Delete
-      restore:
-        title: Restore config backup?
-        description: Your current config will be automatically backed up if it is different from the latest backup. The oldest backup may be removed if the number of backups exceeds the limit.
-        cancel: Cancel
-        confirm: Restore
-      delete:
-        title: Delete backup?
-        description: Are you sure you want to delete this backup? This action cannot be undone.
-        cancel: Cancel
-        confirm: Delete
-    resetConfig:
-      title: Reset config
-      description: Reset all config to default value
-      dialog:
-        title: Reset Config
-        trigger: Reset Config
-        confirm: Confirm
-        cancel: Cancel
-        description: This operation will clear all your custom configurations and reset them to default values. Please confirm.
   videoSubtitles:
     title: Video Subtitles
     pageDescription: Translate subtitles as you watch, with their own provider, style, and request settings.
@@ -1082,6 +1071,9 @@ options:
     title: What's New
   rateUs:
     title: Rate Us
+  configMigration:
+    versionTooNew: The imported config version is newer, please upgrade Read Frog to the latest version
+    validationError: Config validation failed
 side:
   sourceLang: Source Language
   targetLang: Target Language

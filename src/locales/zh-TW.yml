@@ -96,10 +96,6 @@ options:
   setAPIKeyWarning:
     please: 請在
     page: 頁面設定 API 金鑰
-  betaExperience:
-    title: Beta 體驗
-    description: 開啟可能還不穩定的實驗性功能
-    enabled: 啟用 Beta 體驗
   apiProviders:
     title: API 提供者
     pageDescription: 接入 Read Frog 呼叫的 AI 服務，並管理各自的金鑰和模型。
@@ -227,16 +223,6 @@ options:
   general:
     title: 通用
     pageDescription: 選擇每項功能使用的提供者，以及 Read Frog 如何辨識頁面語言。
-    interfaceLanguage:
-      title: 介面語言
-      description: 選擇擴充功能介面的語言，獨立於瀏覽器語言。
-      auto: 自動（跟隨瀏覽器）
-    appearance:
-      title: 外觀
-      theme: 主題
-      system: 依照系統設定
-      light: 淺色
-      dark: 深色
     featureProviders:
       title: 功能提供者
       description: 為每個功能選擇使用的提供者
@@ -282,25 +268,136 @@ options:
     appearanceAndLanguage:
       title: 外觀與語言
       theme:
+        title: 主題
         description: 為陪讀蛙選擇主題。
+        system: 依照系統設定
+        light: 淺色
+        dark: 深色
+      interfaceLanguage:
+        title: 介面語言
+        description: 選擇擴充功能介面的語言，獨立於瀏覽器語言。
+        auto: 自動（跟隨瀏覽器）
     extensionActivation:
       title: 擴充功能啟動
       mode:
         title: 啟動模式
+        description: 使用封鎖清單模式可在特定網站停用擴充功能；使用允許清單模式則只在指定網站啟用擴充功能。
+        blacklist: 只在列出的網站停用
+        whitelist: 只在列出的網站啟用
+      patterns:
+        enterUrlPattern: 輸入 URL 模式（例如 example.com）
+        urlPattern: URL 模式
     config:
       title: 設定
+      googleDrive:
+        title: Google Drive 雲端同步
+        description: 遠端設定較新時下載，本機設定較新時上傳
+        sync: 同步到 Google Drive
+        syncing: 同步中…
+        syncSuccess:
+          uploaded: 本機設定已上傳至雲端
+          downloaded: 已套用遠端設定
+          sameChanges: 本機和遠端修改一致，已同步
+          noChange: 已是最新狀態
+          unresolved: 衝突已解決並同步至本機和雲端
+        syncError: 同步失敗，請重試
+        metadataCorrupted: 同步資料損壞，已自動套用遠端設定
+        lastSyncTime: 最後同步時間
+        logout: 登出帳號
+        logoutSuccess: 已登出 Google 帳號
+        unresolved:
+          title: 設定同步解決
+          description: 本機與雲端設定存在差異，請選擇每個欄位要保留的版本。
+          resolved: 已解決
+          unresolved: 未解決
+          localValue: 本機值
+          remoteValue: 遠端值
+          useLocal: 使用本機
+          useRemote: 使用遠端
+          useAllLocal: 全選本機
+          useAllRemote: 全選遠端
+          reset: 撤銷選擇
+          progress: 已解決 $1/$2 個變更
+          confirm: 確認同步
+          cancel: 取消
+          hasUnresolvedInChildren: ⚠ 包含待解決項
+          item: 項
+          items: 項
+          unresolvedPrompt: "[待解決 - 請選擇]"
+          localLatest: 本機最新
+          remoteLatest: 遠端最新
+          bothChanged: 雙方已變更
+          localChanged: 本機已變更
+          remoteChanged: 遠端已變更
+          configValid: 設定有效
+          configInvalid: 設定無效
+          resolveToContinue: 解決衝突後繼續
+          validationAlert:
+            title: 合併後的設定存在驗證錯誤
+            description: 請調整下方差異以修復：
+          moreErrors: …還有 $1 個錯誤
+      manualSync:
+        title: 手動設定同步
+        description: 手動匯入與匯出設定
+        import: 匯入
+        export: 匯出
+        importSuccess: 設定匯入成功
+        exportSuccess: 設定匯出成功
+        importError: 匯入失敗
+        exportOptions:
+          title: 選擇匯出選項
+          description: 請選擇是否在匯出的設定中包含 API 金鑰。包含 API 金鑰可能會洩露敏感資訊，建議僅在安全環境下使用。
+          includeAPIKeys: 包含 API 金鑰
+          excludeAPIKeys: 不包含 API 金鑰
+          cancel: 取消
+      viewConfig:
+        open: 開啟設定
+        title: 設定
+        description: 檢視目前設定的原始 JSON
+      backup:
+        title: 設定備份
+        description: 如果設定有變更，每小時會自動建立備份。可在此還原先前的設定。（最多 $1 個備份）
+        loading: 正在載入備份…
+        backupNow: 立即備份
+        backupSuccess: 備份建立成功
+        restoreSuccess: 設定還原成功
+        empty:
+          title: 尚無可用備份
+          description: 如果設定有變更，每小時會自動建立備份。
+        item:
+          extensionVersion: 擴充功能版本：
+          schemaVersion: 設定版本：
+          restore: 還原
+          export: 匯出
+          delete: 刪除
+        restore:
+          title: 還原設定備份？
+          description: 如果目前設定與最新備份不同，系統會自動備份目前的設定。若備份數量超過限制，系統可能會刪除最舊的備份。
+          cancel: 取消
+          confirm: 還原
+        delete:
+          title: 刪除備份？
+          description: 確定要刪除此備份嗎？此操作無法復原。
+          cancel: 取消
+          confirm: 刪除
+      reset:
+        title: 重設設定
+        description: 重設所有設定為預設值
+        dialog:
+          title: 重設設定
+          trigger: 重設設定
+          confirm: 確認
+          cancel: 取消
+          description: 此操作會清空所有自訂設定，並將其重設為預設值，請確認是否清除。
     userExperience:
       title: 使用體驗
-  siteControl:
-    title: 網站控制
-    mode:
-      title: 擴充功能啟動模式
-      description: 使用封鎖清單模式可在特定網站停用擴充功能；使用允許清單模式則只在指定網站啟用擴充功能。
-      blacklist: 只在列出的網站停用
-      whitelist: 只在列出的網站啟用
-    patterns:
-      enterUrlPattern: 輸入 URL 模式（例如 example.com）
-      urlPattern: URL 模式
+      beta:
+        title: Beta 體驗
+        description: 開啟可能還不穩定的實驗性功能
+      analytics:
+        title: 幫助改進使用者體驗
+        tooltip: 開啟後，陪讀蛙會傳送匿名的產品使用訊號，用於發現 bug、驗證功能是否穩定、最佳化效能與互動細節，並協助決定接下來優先投入的方向。
+        description: 透過協助我們定位 bug、最佳化介面配置等改善陪讀蛙
   overlayTools:
     title: 懸浮工具
     floatingButton:
@@ -886,114 +983,6 @@ options:
       description: 統計期間內，批次翻譯節省的請求百分比
       originalRequestCount: 原始請求數量
       batchRequestCount: 批次請求數量
-  config:
-    analytics:
-      title: 幫助改進使用者體驗
-      tooltip: 開啟後，陪讀蛙會傳送匿名的產品使用訊號，用於發現 bug、驗證功能是否穩定、最佳化效能與互動細節，並協助決定接下來優先投入的方向。
-      description: 透過協助我們定位 bug、最佳化介面配置等改善陪讀蛙
-    sync:
-      title: 手動設定同步
-      description: 手動匯入與匯出設定
-      import: 匯入
-      export: 匯出
-      importSuccess: 設定匯入成功
-      exportSuccess: 設定匯出成功
-      importError: 匯入失敗
-      versionTooNew: 匯入的設定版本較新，請將陪讀蛙升級到最新版本
-      migrationError: 遷移失敗
-      validationError: 設定驗證失敗
-      exportOptions:
-        title: 選擇匯出選項
-        description: 請選擇是否在匯出的設定中包含 API 金鑰。包含 API 金鑰可能會洩露敏感資訊，建議僅在安全環境下使用。
-        includeAPIKeys: 包含 API 金鑰
-        excludeAPIKeys: 不包含 API 金鑰
-        cancel: 取消
-      viewConfig:
-        open: 開啟設定
-        title: 設定
-        description: 檢視目前設定的原始 JSON
-      googleDrive:
-        title: Google Drive 雲端同步
-        description: 遠端設定較新時下載，本機設定較新時上傳
-        sync: 同步到 Google Drive
-        syncing: 同步中…
-        syncSuccess:
-          uploaded: 本機設定已上傳至雲端
-          downloaded: 已套用遠端設定
-          sameChanges: 本機和遠端修改一致，已同步
-          noChange: 已是最新狀態
-          unresolved: 衝突已解決並同步至本機和雲端
-        syncError: 同步失敗，請重試
-        metadataCorrupted: 同步資料損壞，已自動套用遠端設定
-        lastSyncTime: 最後同步時間
-        logout: 登出帳號
-        logoutSuccess: 已登出 Google 帳號
-        unresolved:
-          title: 設定同步解決
-          description: 本機與雲端設定存在差異，請選擇每個欄位要保留的版本。
-          resolved: 已解決
-          unresolved: 未解決
-          localValue: 本機值
-          remoteValue: 遠端值
-          useLocal: 使用本機
-          useRemote: 使用遠端
-          useAllLocal: 全選本機
-          useAllRemote: 全選遠端
-          reset: 撤銷選擇
-          progress: 已解決 $1/$2 個變更
-          confirm: 確認同步
-          cancel: 取消
-          hasUnresolvedInChildren: ⚠ 包含待解決項
-          item: 項
-          items: 項
-          unresolvedPrompt: "[待解決 - 請選擇]"
-          localLatest: 本機最新
-          remoteLatest: 遠端最新
-          bothChanged: 雙方已變更
-          localChanged: 本機已變更
-          remoteChanged: 遠端已變更
-          configValid: 設定有效
-          configInvalid: 設定無效
-          resolveToContinue: 解決衝突後繼續
-          validationAlert:
-            title: 合併後的設定存在驗證錯誤
-            description: 請調整下方差異以修復：
-          moreErrors: …還有 $1 個錯誤
-    backup:
-      title: 設定備份
-      description: 如果設定有變更，每小時會自動建立備份。可在此還原先前的設定。（最多 $1 個備份）
-      loading: 正在載入備份…
-      backupNow: 立即備份
-      backupSuccess: 備份建立成功
-      restoreSuccess: 設定還原成功
-      empty:
-        title: 尚無可用備份
-        description: 如果設定有變更，每小時會自動建立備份。
-      item:
-        extensionVersion: 擴充功能版本：
-        schemaVersion: 設定版本：
-        restore: 還原
-        export: 匯出
-        delete: 刪除
-      restore:
-        title: 還原設定備份？
-        description: 如果目前設定與最新備份不同，系統會自動備份目前的設定。若備份數量超過限制，系統可能會刪除最舊的備份。
-        cancel: 取消
-        confirm: 還原
-      delete:
-        title: 刪除備份？
-        description: 確定要刪除此備份嗎？此操作無法復原。
-        cancel: 取消
-        confirm: 刪除
-    resetConfig:
-      title: 重設設定
-      description: 重設所有設定為預設值
-      dialog:
-        title: 重設設定
-        trigger: 重設設定
-        confirm: 確認
-        cancel: 取消
-        description: 此操作會清空所有自訂設定，並將其重設為預設值，請確認是否清除。
   videoSubtitles:
     title: 影片字幕
     pageDescription: 邊看邊譯影片字幕，並單獨設定提供者、樣式和請求參數。
@@ -1082,6 +1071,9 @@ options:
     title: 最近更新
   rateUs:
     title: 給予好評
+  configMigration:
+    versionTooNew: 匯入的設定版本較新，請將陪讀蛙升級到最新版本
+    validationError: 設定驗證失敗
 side:
   sourceLang: 來源語言
   targetLang: 目標語言

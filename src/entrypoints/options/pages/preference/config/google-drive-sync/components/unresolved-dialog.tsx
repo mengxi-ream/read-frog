@@ -91,10 +91,10 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
       <AlertDialogHeader>
         <AlertDialogTitle className="flex items-center gap-2">
           <Icon icon="mdi:alert" className="size-5 text-yellow-500" />
-          {i18n.t("options.config.sync.googleDrive.unresolved.title")}
+          {i18n.t("options.preference.config.googleDrive.unresolved.title")}
         </AlertDialogTitle>
         <AlertDialogDescription>
-          {i18n.t("options.config.sync.googleDrive.unresolved.description")}
+          {i18n.t("options.preference.config.googleDrive.unresolved.description")}
         </AlertDialogDescription>
       </AlertDialogHeader>
 
@@ -105,18 +105,18 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
             !status.isValid ? (
               <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
                 <Icon icon="tabler:alert-circle-filled" className="size-4" />
-                {i18n.t("options.config.sync.googleDrive.unresolved.configInvalid")}
+                {i18n.t("options.preference.config.googleDrive.unresolved.configInvalid")}
               </span>
             ) : (
               <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
                 <Icon icon="tabler:circle-check-filled" className="size-4" />
-                {i18n.t("options.config.sync.googleDrive.unresolved.configValid")}
+                {i18n.t("options.preference.config.googleDrive.unresolved.configValid")}
               </span>
             )
           ) : (
             <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
               <Icon icon="tabler:circle-dashed-check" className="size-4" />
-              {i18n.t("options.config.sync.googleDrive.unresolved.resolveToContinue")}
+              {i18n.t("options.preference.config.googleDrive.unresolved.resolveToContinue")}
             </span>
           )}
         </div>
@@ -128,7 +128,7 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
             disabled={isConfirming}
           >
             <Icon icon="mdi:check-all" className="mr-1 size-4 text-green-600 dark:text-green-400" />
-            {i18n.t("options.config.sync.googleDrive.unresolved.useAllLocal")}
+            {i18n.t("options.preference.config.googleDrive.unresolved.useAllLocal")}
           </Button>
           <Button
             size="sm"
@@ -137,7 +137,7 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
             disabled={isConfirming}
           >
             <Icon icon="mdi:check-all" className="mr-1 size-4 text-blue-600 dark:text-blue-400" />
-            {i18n.t("options.config.sync.googleDrive.unresolved.useAllRemote")}
+            {i18n.t("options.preference.config.googleDrive.unresolved.useAllRemote")}
           </Button>
         </div>
       </div>
@@ -147,11 +147,13 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
         <Alert variant="destructive">
           <Icon icon="tabler:alert-circle-filled" className="size-4" />
           <AlertTitle>
-            {i18n.t("options.config.sync.googleDrive.unresolved.validationAlert.title")}
+            {i18n.t("options.preference.config.googleDrive.unresolved.validationAlert.title")}
           </AlertTitle>
           <AlertDescription>
             <p>
-              {i18n.t("options.config.sync.googleDrive.unresolved.validationAlert.description")}
+              {i18n.t(
+                "options.preference.config.googleDrive.unresolved.validationAlert.description",
+              )}
             </p>
             <ul className="list-inside list-disc text-xs">
               {status.validationError.issues.slice(0, 5).map((issue) => (
@@ -163,7 +165,7 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
               ))}
               {status.validationError.issues.length > 5 && (
                 <li>
-                  {i18n.t("options.config.sync.googleDrive.unresolved.moreErrors", [
+                  {i18n.t("options.preference.config.googleDrive.unresolved.moreErrors", [
                     status.validationError.issues.length - 5,
                   ])}
                 </li>
@@ -181,7 +183,7 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
 
       <AlertDialogFooter>
         <AlertDialogCancel disabled={isConfirming} onClick={handleCancel}>
-          {i18n.t("options.config.sync.googleDrive.unresolved.cancel")}
+          {i18n.t("options.preference.config.googleDrive.unresolved.cancel")}
         </AlertDialogCancel>
         <AlertDialogAction
           disabled={!canConfirm}
@@ -191,8 +193,8 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
           }}
         >
           {isConfirming
-            ? i18n.t("options.config.sync.googleDrive.syncing")
-            : i18n.t("options.config.sync.googleDrive.unresolved.confirm")}
+            ? i18n.t("options.preference.config.googleDrive.syncing")
+            : i18n.t("options.preference.config.googleDrive.unresolved.confirm")}
         </AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>
@@ -210,7 +212,7 @@ function MergeConfigView() {
       <div className="flex items-center gap-4 border-b bg-muted px-4 py-2 text-xs">
         {status.conflictCount > 0 && (
           <span className="text-zinc-700 dark:text-zinc-300">
-            {i18n.t("options.config.sync.googleDrive.unresolved.progress", [
+            {i18n.t("options.preference.config.googleDrive.unresolved.progress", [
               status.allResolved ? status.conflictCount : status.resolvedCount,
               status.conflictCount,
             ])}
@@ -219,11 +221,11 @@ function MergeConfigView() {
         <div className="ml-auto flex items-center gap-4 text-zinc-600 dark:text-zinc-400">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-green-500" />
-            <span>{i18n.t("options.config.sync.googleDrive.unresolved.localValue")}</span>
+            <span>{i18n.t("options.preference.config.googleDrive.unresolved.localValue")}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-blue-500" />
-            <span>{i18n.t("options.config.sync.googleDrive.unresolved.remoteValue")}</span>
+            <span>{i18n.t("options.preference.config.googleDrive.unresolved.remoteValue")}</span>
           </div>
         </div>
       </div>

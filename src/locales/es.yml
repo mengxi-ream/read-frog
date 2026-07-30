@@ -96,10 +96,6 @@ options:
   setAPIKeyWarning:
     please: Configura la clave API en
     page: página
-  betaExperience:
-    title: Experiencia beta
-    description: Activa funciones experimentales que todavía pueden ser inestables
-    enabled: Activar experiencia beta
   apiProviders:
     title: Proveedores de API
     pageDescription: Conecta los servicios de IA que usa Read Frog y gestiona sus claves y modelos.
@@ -227,16 +223,6 @@ options:
   general:
     title: General
     pageDescription: Elige qué proveedor impulsa cada función y cómo Read Frog detecta el idioma de una página.
-    interfaceLanguage:
-      title: Idioma de la interfaz
-      description: Elige el idioma de la interfaz de la extensión, independiente del idioma de tu navegador.
-      auto: Automático (seguir el navegador)
-    appearance:
-      title: Apariencia
-      theme: Tema
-      system: Sistema
-      light: Claro
-      dark: Oscuro
     featureProviders:
       title: Proveedores de funciones
       description: Elige qué proveedor usar para cada función
@@ -282,25 +268,136 @@ options:
     appearanceAndLanguage:
       title: Apariencia e idioma
       theme:
+        title: Tema
         description: Elige un tema para Read Frog.
+        system: Sistema
+        light: Claro
+        dark: Oscuro
+      interfaceLanguage:
+        title: Idioma de la interfaz
+        description: Elige el idioma de la interfaz de la extensión, independiente del idioma de tu navegador.
+        auto: Automático (seguir el navegador)
     extensionActivation:
       title: Activación de la extensión
       mode:
         title: Modo de activación
+        description: Usa el modo de lista negra para desactivar la extensión en sitios específicos, o el modo de lista blanca para limitarla solo a sitios específicos.
+        blacklist: Desactivar solo en sitios listados
+        whitelist: Ejecutar solo en sitios listados
+      patterns:
+        enterUrlPattern: Introduce patrón de URL (p. ej., example.com)
+        urlPattern: Patrón de URL
     config:
       title: Configuración
+      googleDrive:
+        title: Sincronización cloud con Google Drive
+        description: Descarga la configuración cuando la remota es más reciente, sube la configuración cuando la local es más reciente
+        sync: Sincronizar con Google Drive
+        syncing: Sincronizando...
+        syncSuccess:
+          uploaded: Configuración local subida a la nube
+          downloaded: Configuración remota aplicada
+          sameChanges: Mismos cambios en ambos lados, sincronizado
+          noChange: Ya está sincronizado
+          unresolved: Conflictos resueltos y sincronizados
+        syncError: Error de sincronización, inténtalo de nuevo
+        metadataCorrupted: Metadatos de sincronización dañados, configuración remota aplicada
+        lastSyncTime: Última sincronización a las
+        logout: Cerrar sesión
+        logoutSuccess: Sesión de cuenta de Google cerrada
+        unresolved:
+          title: Resolución de sincronización de configuración
+          description: Las configuraciones local y remota difieren. Elige qué versión conservar para cada campo.
+          resolved: Resuelto
+          unresolved: Sin resolver
+          localValue: Valor local
+          remoteValue: Valor remoto
+          useLocal: Usar local
+          useRemote: Usar remoto
+          useAllLocal: Usar todo local
+          useAllRemote: Usar todo remoto
+          reset: Restablecer selección
+          progress: $1/$2 cambios resueltos
+          confirm: Confirmar sincronización
+          cancel: Cancelar
+          hasUnresolvedInChildren: ⚠ Contiene cambios sin resolver
+          item: elemento
+          items: elementos
+          unresolvedPrompt: "[Unresolved - Please select]"
+          localLatest: Local más reciente
+          remoteLatest: Remoto más reciente
+          bothChanged: Ambos cambiaron
+          localChanged: Local cambió
+          remoteChanged: Remoto cambió
+          configValid: La configuración es válida
+          configInvalid: La configuración no es válida
+          resolveToContinue: Resuelve los conflictos para continuar
+          validationAlert:
+            title: La configuración combinada tiene errores de validación.
+            description: "Ajusta las diferencias siguientes para corregir:"
+          moreErrors: ...y $1 errores más
+      manualSync:
+        title: Sincronización manual de configuración
+        description: Importa y exporta manualmente tus ajustes de configuración
+        import: Importar
+        export: Exportar
+        importSuccess: Configuración importada correctamente
+        exportSuccess: Configuración exportada correctamente
+        importError: Error al importar
+        exportOptions:
+          title: Seleccionar opciones de exportación
+          description: Elige si incluir claves API en la configuración exportada. Incluir claves API puede filtrar información sensible, por lo que se recomienda usarlo solo en entornos seguros.
+          includeAPIKeys: Incluir claves API
+          excludeAPIKeys: Excluir claves API
+          cancel: Cancelar
+      viewConfig:
+        open: Abrir configuración
+        title: Configuración
+        description: Consulta el JSON sin procesar de tu configuración actual
+      backup:
+        title: Copia de seguridad de configuración
+        description: Se crean copias de seguridad automáticas cada hora si la configuración cambia. Puedes restaurar configuraciones anteriores aquí. (Máximo $1 copias de seguridad)
+        loading: Cargando copias de seguridad...
+        backupNow: Crear copia ahora
+        backupSuccess: Copia de seguridad creada correctamente
+        restoreSuccess: Configuración restaurada correctamente
+        empty:
+          title: Aún no hay copias de seguridad disponibles
+          description: Las copias de seguridad se crean automáticamente cada hora si la configuración cambia.
+        item:
+          extensionVersion: "Versión de la extensión:"
+          schemaVersion: "Versión del esquema:"
+          restore: Restaurar
+          export: Exportar
+          delete: Eliminar
+        restore:
+          title: ¿Restaurar copia de seguridad de configuración?
+          description: Tu configuración actual se respaldará automáticamente si es diferente de la copia de seguridad más reciente. La copia más antigua puede eliminarse si el número de copias supera el límite.
+          cancel: Cancelar
+          confirm: Restaurar
+        delete:
+          title: ¿Eliminar copia de seguridad?
+          description: ¿Seguro que quieres eliminar esta copia de seguridad? Esta acción no se puede deshacer.
+          cancel: Cancelar
+          confirm: Eliminar
+      reset:
+        title: Restablecer configuración
+        description: Restablecer toda la configuración al valor predeterminado
+        dialog:
+          title: Restablecer configuración
+          trigger: Restablecer configuración
+          confirm: Confirmar
+          cancel: Cancelar
+          description: Esta operación borrará todas tus configuraciones personalizadas y las restablecerá a los valores predeterminados. Confirma para continuar.
     userExperience:
       title: Experiencia de usuario
-  siteControl:
-    title: Control de sitios
-    mode:
-      title: Modo de activación de la extensión
-      description: Usa el modo de lista negra para desactivar la extensión en sitios específicos, o el modo de lista blanca para limitarla solo a sitios específicos.
-      blacklist: Desactivar solo en sitios listados
-      whitelist: Ejecutar solo en sitios listados
-    patterns:
-      enterUrlPattern: Introduce patrón de URL (p. ej., example.com)
-      urlPattern: Patrón de URL
+      beta:
+        title: Experiencia beta
+        description: Activa funciones experimentales que todavía pueden ser inestables
+      analytics:
+        title: Ayuda a mejorar la experiencia de usuario
+        tooltip: Cuando está activado, Read Frog envía señales anónimas de uso del producto para que podamos detectar errores, verificar la fiabilidad de las funciones, mejorar el rendimiento y el acabado de la UX, y priorizar trabajos futuros.
+        description: Mejora Read Frog ayudándonos a localizar errores, pulir la interfaz y más
   overlayTools:
     title: Herramientas superpuestas
     floatingButton:
@@ -886,114 +983,6 @@ options:
       description: Porcentaje de solicitudes ahorradas por traducción por lotes en el periodo
       originalRequestCount: Recuento de solicitudes originales
       batchRequestCount: Recuento de solicitudes por lotes
-  config:
-    analytics:
-      title: Ayuda a mejorar la experiencia de usuario
-      tooltip: Cuando está activado, Read Frog envía señales anónimas de uso del producto para que podamos detectar errores, verificar la fiabilidad de las funciones, mejorar el rendimiento y el acabado de la UX, y priorizar trabajos futuros.
-      description: Mejora Read Frog ayudándonos a localizar errores, pulir la interfaz y más
-    sync:
-      title: Sincronización manual de configuración
-      description: Importa y exporta manualmente tus ajustes de configuración
-      import: Importar
-      export: Exportar
-      importSuccess: Configuración importada correctamente
-      exportSuccess: Configuración exportada correctamente
-      importError: Error al importar
-      versionTooNew: La versión de configuración importada es más reciente; actualiza Read Frog a la última versión
-      migrationError: Error de migración
-      validationError: Error de validación de configuración
-      exportOptions:
-        title: Seleccionar opciones de exportación
-        description: Elige si incluir claves API en la configuración exportada. Incluir claves API puede filtrar información sensible, por lo que se recomienda usarlo solo en entornos seguros.
-        includeAPIKeys: Incluir claves API
-        excludeAPIKeys: Excluir claves API
-        cancel: Cancelar
-      viewConfig:
-        open: Abrir configuración
-        title: Configuración
-        description: Consulta el JSON sin procesar de tu configuración actual
-      googleDrive:
-        title: Sincronización cloud con Google Drive
-        description: Descarga la configuración cuando la remota es más reciente, sube la configuración cuando la local es más reciente
-        sync: Sincronizar con Google Drive
-        syncing: Sincronizando...
-        syncSuccess:
-          uploaded: Configuración local subida a la nube
-          downloaded: Configuración remota aplicada
-          sameChanges: Mismos cambios en ambos lados, sincronizado
-          noChange: Ya está sincronizado
-          unresolved: Conflictos resueltos y sincronizados
-        syncError: Error de sincronización, inténtalo de nuevo
-        metadataCorrupted: Metadatos de sincronización dañados, configuración remota aplicada
-        lastSyncTime: Última sincronización a las
-        logout: Cerrar sesión
-        logoutSuccess: Sesión de cuenta de Google cerrada
-        unresolved:
-          title: Resolución de sincronización de configuración
-          description: Las configuraciones local y remota difieren. Elige qué versión conservar para cada campo.
-          resolved: Resuelto
-          unresolved: Sin resolver
-          localValue: Valor local
-          remoteValue: Valor remoto
-          useLocal: Usar local
-          useRemote: Usar remoto
-          useAllLocal: Usar todo local
-          useAllRemote: Usar todo remoto
-          reset: Restablecer selección
-          progress: $1/$2 cambios resueltos
-          confirm: Confirmar sincronización
-          cancel: Cancelar
-          hasUnresolvedInChildren: ⚠ Contiene cambios sin resolver
-          item: elemento
-          items: elementos
-          unresolvedPrompt: "[Unresolved - Please select]"
-          localLatest: Local más reciente
-          remoteLatest: Remoto más reciente
-          bothChanged: Ambos cambiaron
-          localChanged: Local cambió
-          remoteChanged: Remoto cambió
-          configValid: La configuración es válida
-          configInvalid: La configuración no es válida
-          resolveToContinue: Resuelve los conflictos para continuar
-          validationAlert:
-            title: La configuración combinada tiene errores de validación.
-            description: "Ajusta las diferencias siguientes para corregir:"
-          moreErrors: ...y $1 errores más
-    backup:
-      title: Copia de seguridad de configuración
-      description: Se crean copias de seguridad automáticas cada hora si la configuración cambia. Puedes restaurar configuraciones anteriores aquí. (Máximo $1 copias de seguridad)
-      loading: Cargando copias de seguridad...
-      backupNow: Crear copia ahora
-      backupSuccess: Copia de seguridad creada correctamente
-      restoreSuccess: Configuración restaurada correctamente
-      empty:
-        title: Aún no hay copias de seguridad disponibles
-        description: Las copias de seguridad se crean automáticamente cada hora si la configuración cambia.
-      item:
-        extensionVersion: "Versión de la extensión:"
-        schemaVersion: "Versión del esquema:"
-        restore: Restaurar
-        export: Exportar
-        delete: Eliminar
-      restore:
-        title: ¿Restaurar copia de seguridad de configuración?
-        description: Tu configuración actual se respaldará automáticamente si es diferente de la copia de seguridad más reciente. La copia más antigua puede eliminarse si el número de copias supera el límite.
-        cancel: Cancelar
-        confirm: Restaurar
-      delete:
-        title: ¿Eliminar copia de seguridad?
-        description: ¿Seguro que quieres eliminar esta copia de seguridad? Esta acción no se puede deshacer.
-        cancel: Cancelar
-        confirm: Eliminar
-    resetConfig:
-      title: Restablecer configuración
-      description: Restablecer toda la configuración al valor predeterminado
-      dialog:
-        title: Restablecer configuración
-        trigger: Restablecer configuración
-        confirm: Confirmar
-        cancel: Cancelar
-        description: Esta operación borrará todas tus configuraciones personalizadas y las restablecerá a los valores predeterminados. Confirma para continuar.
   videoSubtitles:
     title: Subtítulos de video
     pageDescription: Traduce los subtítulos mientras ves el video, con proveedor, estilo y ajustes propios.
@@ -1082,6 +1071,9 @@ options:
     title: Novedades
   rateUs:
     title: Calificarnos
+  configMigration:
+    versionTooNew: La versión de configuración importada es más reciente; actualiza Read Frog a la última versión
+    validationError: Error de validación de configuración
 side:
   sourceLang: Idioma de origen
   targetLang: Idioma de destino

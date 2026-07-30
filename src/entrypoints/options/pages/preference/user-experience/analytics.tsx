@@ -13,14 +13,14 @@ export function AnalyticsItem() {
       id="analytics"
       title={
         <span className="flex items-center gap-1.5">
-          {i18n.t("options.config.analytics.title")}
+          {i18n.t("options.preference.userExperience.analytics.title")}
           {/* The description stays short, so the tooltip carries what is actually collected. */}
           <HelpTooltip contentClassName="max-w-80">
-            {i18n.t("options.config.analytics.tooltip")}
+            {i18n.t("options.preference.userExperience.analytics.tooltip")}
           </HelpTooltip>
         </span>
       }
-      description={i18n.t("options.config.analytics.description")}
+      description={i18n.t("options.preference.userExperience.analytics.description")}
     >
       <Switch
         checked={analyticsEnabled}

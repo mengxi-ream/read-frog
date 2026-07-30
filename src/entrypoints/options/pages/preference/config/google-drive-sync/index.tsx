@@ -34,17 +34,17 @@ export function GoogleDriveSyncConfigItem() {
       setIsOpen(true)
     } else if (result.status === "success") {
       const messages = {
-        uploaded: i18n.t("options.config.sync.googleDrive.syncSuccess.uploaded"),
-        downloaded: i18n.t("options.config.sync.googleDrive.syncSuccess.downloaded"),
-        "same-changes": i18n.t("options.config.sync.googleDrive.syncSuccess.sameChanges"),
-        "no-change": i18n.t("options.config.sync.googleDrive.syncSuccess.noChange"),
+        uploaded: i18n.t("options.preference.config.googleDrive.syncSuccess.uploaded"),
+        downloaded: i18n.t("options.preference.config.googleDrive.syncSuccess.downloaded"),
+        "same-changes": i18n.t("options.preference.config.googleDrive.syncSuccess.sameChanges"),
+        "no-change": i18n.t("options.preference.config.googleDrive.syncSuccess.noChange"),
       } as const
       toastManager.add({ type: "success", title: messages[result.action] })
     } else {
       logger.error("Google Drive sync error", result.error)
       toastManager.add({
         type: "error",
-        title: i18n.t("options.config.sync.googleDrive.syncError"),
+        title: i18n.t("options.preference.config.googleDrive.syncError"),
         description: result.error.message,
       })
     }
@@ -57,7 +57,7 @@ export function GoogleDriveSyncConfigItem() {
     void invalidateAuthData()
     toastManager.add({
       type: "success",
-      title: i18n.t("options.config.sync.googleDrive.logoutSuccess"),
+      title: i18n.t("options.preference.config.googleDrive.logoutSuccess"),
     })
   }
 
@@ -67,12 +67,12 @@ export function GoogleDriveSyncConfigItem() {
     if (success) {
       toastManager.add({
         type: "success",
-        title: i18n.t("options.config.sync.googleDrive.syncSuccess.unresolved"),
+        title: i18n.t("options.preference.config.googleDrive.syncSuccess.unresolved"),
       })
     } else {
       toastManager.add({
         type: "error",
-        title: i18n.t("options.config.sync.googleDrive.syncError"),
+        title: i18n.t("options.preference.config.googleDrive.syncError"),
       })
     }
   }
@@ -85,10 +85,10 @@ export function GoogleDriveSyncConfigItem() {
     <>
       <ConfigItem
         id="google-drive-sync"
-        title={i18n.t("options.config.sync.googleDrive.title")}
+        title={i18n.t("options.preference.config.googleDrive.title")}
         description={
           <div className="flex flex-col gap-2">
-            {i18n.t("options.config.sync.googleDrive.description")}
+            {i18n.t("options.preference.config.googleDrive.description")}
             <Activity mode={authData?.isAuthenticated ? "visible" : "hidden"}>
               <div className="flex items-center gap-1.5">
                 {authData?.userInfo?.picture && (
@@ -108,19 +108,19 @@ export function GoogleDriveSyncConfigItem() {
           <div className="flex gap-2">
             <Activity mode={authData?.isAuthenticated ? "visible" : "hidden"}>
               <Button variant="outline" size="sm" onClick={handleLogout}>
-                {i18n.t("options.config.sync.googleDrive.logout")}
+                {i18n.t("options.preference.config.googleDrive.logout")}
               </Button>
             </Activity>
             <Button variant="outline" size="sm" onClick={handleSync} disabled={isSyncing}>
               <Icon icon="logos:google-drive" />
               {isSyncing
-                ? i18n.t("options.config.sync.googleDrive.syncing")
-                : i18n.t("options.config.sync.googleDrive.sync")}
+                ? i18n.t("options.preference.config.googleDrive.syncing")
+                : i18n.t("options.preference.config.googleDrive.sync")}
             </Button>
           </div>
           <Activity mode={lastSyncTime ? "visible" : "hidden"}>
             <span className="text-xs whitespace-nowrap text-muted-foreground">
-              {i18n.t("options.config.sync.googleDrive.lastSyncTime")}:{" "}
+              {i18n.t("options.preference.config.googleDrive.lastSyncTime")}:{" "}
               {lastSyncTime && formatLastSyncTime(lastSyncTime)}
             </span>
           </Activity>

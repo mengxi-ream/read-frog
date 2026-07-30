@@ -96,10 +96,6 @@ options:
   setAPIKeyWarning:
     please: Lütfen API Anahtarını
     page: sayfasında ayarlayın
-  betaExperience:
-    title: Beta deneyimi
-    description: Henüz kararsız olabilecek deneysel özellikleri açın
-    enabled: Beta Deneyimini Etkinleştir
   apiProviders:
     title: API Sağlayıcıları
     pageDescription: Read Frog'un çağırdığı yapay zekâ servislerini bağlayın, anahtarlarını ve modellerini yönetin.
@@ -226,16 +222,6 @@ options:
   general:
     title: Genel
     pageDescription: Her özelliğin hangi sağlayıcıyı kullanacağını ve Read Frog'un sayfa dilini nasıl algılayacağını seçin.
-    interfaceLanguage:
-      title: Arayüz dili
-      description: Uzantı arayüzünün dilini tarayıcı dilinizden bağımsız olarak seçin.
-      auto: Otomatik (tarayıcıyı izle)
-    appearance:
-      title: Görünüm
-      theme: Tema
-      system: Sistem
-      light: Açık
-      dark: Koyu
     featureProviders:
       title: Özellik Sağlayıcıları
       description: Her özellik için kullanılacak sağlayıcıyı seçin
@@ -281,25 +267,136 @@ options:
     appearanceAndLanguage:
       title: Görünüm ve dil
       theme:
+        title: Tema
         description: Read Frog için bir tema seçin.
+        system: Sistem
+        light: Açık
+        dark: Koyu
+      interfaceLanguage:
+        title: Arayüz dili
+        description: Uzantı arayüzünün dilini tarayıcı dilinizden bağımsız olarak seçin.
+        auto: Otomatik (tarayıcıyı izle)
     extensionActivation:
       title: Uzantı etkinleştirme
       mode:
         title: Etkinleştirme modu
+        description: Kara liste modunu kullanarak uzantıyı belirli sitelerde devre dışı bırakabilir veya beyaz liste modunu kullanarak yalnızca belirli sitelerle sınırlayabilirsiniz.
+        blacklist: Yalnızca listelenen sitelerde devre dışı bırak
+        whitelist: Yalnızca listelenen sitelerde çalıştır
+      patterns:
+        enterUrlPattern: URL deseni girin (örn. example.com)
+        urlPattern: URL Deseni
     config:
       title: Yapılandırma
+      googleDrive:
+        title: Google Drive bulut senkronizasyonu
+        description: Uzak daha yeniyse indirir, yerel daha yeniyse yükler
+        sync: Google Drive'a Senkronize Et
+        syncing: Senkronize ediliyor...
+        syncSuccess:
+          uploaded: Yerel ayarlar buluta yüklendi
+          downloaded: Uzak ayarlar uygulandı
+          sameChanges: Yerel ve uzak değişiklikler aynı, senkronize edildi
+          noChange: Zaten güncel
+          unresolved: Çakışmalar çözüldü ve senkronize edildi
+        syncError: Senkronizasyon başarısız, lütfen tekrar deneyin
+        metadataCorrupted: Senkronizasyon meta verileri bozuk, uzak yapılandırma uygulandı
+        lastSyncTime: Son senkronizasyon
+        logout: Çıkış yap
+        logoutSuccess: Google hesabından çıkış yapıldı
+        unresolved:
+          title: Yapılandırma Senkronizasyon Çözümü
+          description: Yerel ve uzak yapılandırmalar farklı. Lütfen her alan için hangi sürümün tutulacağını seçin.
+          resolved: Çözüldü
+          unresolved: Çözülmedi
+          localValue: Yerel Değer
+          remoteValue: Uzak Değer
+          useLocal: Yereli Kullan
+          useRemote: Uzakı Kullan
+          useAllLocal: Tüm Yereli Kullan
+          useAllRemote: Tüm Uzakı Kullan
+          reset: Seçimi Sıfırla
+          progress: $1/$2 değişiklik çözüldü
+          confirm: Senkronizasyonu Onayla
+          cancel: İptal
+          hasUnresolvedInChildren: ⚠ Çözülmemiş değişiklikler içeriyor
+          item: öğe
+          items: öğe
+          unresolvedPrompt: "[Çözülmedi - Lütfen seçin]"
+          localLatest: En Son Yerel
+          remoteLatest: En Son Uzak
+          bothChanged: Her ikisi de değişti
+          localChanged: Yerel değişti
+          remoteChanged: Uzak değişti
+          configValid: Yapılandırma geçerli
+          configInvalid: Yapılandırma geçersiz
+          resolveToContinue: Devam etmek için çakışmaları çözün
+          validationAlert:
+            title: Birleştirilmiş yapılandırmada doğrulama hataları var
+            description: "Düzeltmek için aşağıdaki farklılıkları ayarlayın:"
+          moreErrors: ...ve $1 hata daha
+      manualSync:
+        title: Manuel yapılandırma senkronizasyonu
+        description: Yapılandırma ayarlarınızı manuel olarak içe ve dışa aktarın
+        import: İçe Aktar
+        export: Dışa Aktar
+        importSuccess: Yapılandırma başarıyla içe aktarıldı
+        exportSuccess: Yapılandırma başarıyla dışa aktarıldı
+        importError: İçe aktarma başarısız
+        exportOptions:
+          title: Dışa Aktarma Seçeneklerini Seçin
+          description: Lütfen dışa aktarılan yapılandırmaya API Anahtarlarını dahil edip etmemeyi seçin. API Anahtarlarını dahil etmek hassas bilgileri sızdırabilir, bu nedenle yalnızca güvenli ortamlarda kullanılması önerilir.
+          includeAPIKeys: API Anahtarlarını Dahil Et
+          excludeAPIKeys: API Anahtarlarını Hariç Tut
+          cancel: İptal
+      viewConfig:
+        open: Yapılandırmayı Aç
+        title: Yapılandırma
+        description: Mevcut yapılandırmanızın ham JSON içeriğini görüntüleyin
+      backup:
+        title: Yapılandırma yedekleme
+        description: Yapılandırma değiştirilirse otomatik yedeklemeler her saat oluşturulur. Önceki yapılandırmaları buradan geri yükleyebilirsiniz. (Maksimum $1 yedekleme)
+        loading: Yedeklemeler yükleniyor...
+        backupNow: Şimdi yedekle
+        backupSuccess: Yedekleme başarıyla oluşturuldu
+        restoreSuccess: Yapılandırma başarıyla geri yüklendi
+        empty:
+          title: Henüz yedekleme mevcut değil
+          description: Yapılandırma değiştirilirse yedeklemeler her saat otomatik olarak oluşturulur.
+        item:
+          extensionVersion: "Uzantı sürümü:"
+          schemaVersion: "Şema sürümü:"
+          restore: Geri Yükle
+          export: Dışa Aktar
+          delete: Sil
+        restore:
+          title: Yapılandırma yedeğini geri yükle?
+          description: Mevcut yapılandırmanız en son yedeklemeden farklıysa otomatik olarak yedeklenecektir. Yedekleme sayısı limiti aşarsa en eski yedekleme kaldırılabilir.
+          cancel: İptal
+          confirm: Geri Yükle
+        delete:
+          title: Yedekleme silinsin mi?
+          description: Bu yedeklemeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+          cancel: İptal
+          confirm: Sil
+      reset:
+        title: Yapılandırmayı Sıfırla
+        description: Tüm yapılandırmayı varsayılan değere sıfırla
+        dialog:
+          title: Yapılandırmayı Sıfırla
+          trigger: Yapılandırmayı Sıfırla
+          confirm: Onayla
+          cancel: İptal
+          description: Bu işlem tüm özel yapılandırmalarınızı temizleyecek ve varsayılan değerlere sıfırlayacaktır. Lütfen onaylayın.
     userExperience:
       title: Kullanıcı deneyimi
-  siteControl:
-    title: Site kontrolü
-    mode:
-      title: Uzantı etkinleştirme modu
-      description: Kara liste modunu kullanarak uzantıyı belirli sitelerde devre dışı bırakabilir veya beyaz liste modunu kullanarak yalnızca belirli sitelerle sınırlayabilirsiniz.
-      blacklist: Yalnızca listelenen sitelerde devre dışı bırak
-      whitelist: Yalnızca listelenen sitelerde çalıştır
-    patterns:
-      enterUrlPattern: URL deseni girin (örn. example.com)
-      urlPattern: URL Deseni
+      beta:
+        title: Beta deneyimi
+        description: Henüz kararsız olabilecek deneysel özellikleri açın
+      analytics:
+        title: Kullanıcı deneyimini geliştirmemize yardımcı ol
+        tooltip: Açık olduğunda Read Frog, hataları yakalamak, özelliklerin güvenilir çalıştığını doğrulamak, performansı ve UX ayrıntılarını iyileştirmek ve sıradaki önceliklerimizi belirlemek için anonim kullanım sinyalleri gönderir.
+        description: Hataları bulmamıza, arayüzü iyileştirmemize ve daha fazlasına yardım ederek Read Frog'u geliştirin
   overlayTools:
     title: Kaplama Araçları
     floatingButton:
@@ -770,114 +867,6 @@ options:
       description: Dönem içinde toplu çeviri ile kaydedilen istek yüzdesi
       originalRequestCount: Orijinal İstek Sayısı
       batchRequestCount: Toplu İstek Sayısı
-  config:
-    analytics:
-      title: Kullanıcı deneyimini geliştirmemize yardımcı ol
-      tooltip: Açık olduğunda Read Frog, hataları yakalamak, özelliklerin güvenilir çalıştığını doğrulamak, performansı ve UX ayrıntılarını iyileştirmek ve sıradaki önceliklerimizi belirlemek için anonim kullanım sinyalleri gönderir.
-      description: Hataları bulmamıza, arayüzü iyileştirmemize ve daha fazlasına yardım ederek Read Frog'u geliştirin
-    sync:
-      title: Manuel yapılandırma senkronizasyonu
-      description: Yapılandırma ayarlarınızı manuel olarak içe ve dışa aktarın
-      import: İçe Aktar
-      export: Dışa Aktar
-      importSuccess: Yapılandırma başarıyla içe aktarıldı
-      exportSuccess: Yapılandırma başarıyla dışa aktarıldı
-      importError: İçe aktarma başarısız
-      versionTooNew: İçe aktarılan yapılandırma sürümü daha yeni, lütfen Read Frog'u en son sürüme yükseltin
-      migrationError: Geçiş başarısız
-      validationError: Yapılandırma doğrulaması başarısız
-      exportOptions:
-        title: Dışa Aktarma Seçeneklerini Seçin
-        description: Lütfen dışa aktarılan yapılandırmaya API Anahtarlarını dahil edip etmemeyi seçin. API Anahtarlarını dahil etmek hassas bilgileri sızdırabilir, bu nedenle yalnızca güvenli ortamlarda kullanılması önerilir.
-        includeAPIKeys: API Anahtarlarını Dahil Et
-        excludeAPIKeys: API Anahtarlarını Hariç Tut
-        cancel: İptal
-      viewConfig:
-        open: Yapılandırmayı Aç
-        title: Yapılandırma
-        description: Mevcut yapılandırmanızın ham JSON içeriğini görüntüleyin
-      googleDrive:
-        title: Google Drive bulut senkronizasyonu
-        description: Uzak daha yeniyse indirir, yerel daha yeniyse yükler
-        sync: Google Drive'a Senkronize Et
-        syncing: Senkronize ediliyor...
-        syncSuccess:
-          uploaded: Yerel ayarlar buluta yüklendi
-          downloaded: Uzak ayarlar uygulandı
-          sameChanges: Yerel ve uzak değişiklikler aynı, senkronize edildi
-          noChange: Zaten güncel
-          unresolved: Çakışmalar çözüldü ve senkronize edildi
-        syncError: Senkronizasyon başarısız, lütfen tekrar deneyin
-        metadataCorrupted: Senkronizasyon meta verileri bozuk, uzak yapılandırma uygulandı
-        lastSyncTime: Son senkronizasyon
-        logout: Çıkış yap
-        logoutSuccess: Google hesabından çıkış yapıldı
-        unresolved:
-          title: Yapılandırma Senkronizasyon Çözümü
-          description: Yerel ve uzak yapılandırmalar farklı. Lütfen her alan için hangi sürümün tutulacağını seçin.
-          resolved: Çözüldü
-          unresolved: Çözülmedi
-          localValue: Yerel Değer
-          remoteValue: Uzak Değer
-          useLocal: Yereli Kullan
-          useRemote: Uzakı Kullan
-          useAllLocal: Tüm Yereli Kullan
-          useAllRemote: Tüm Uzakı Kullan
-          reset: Seçimi Sıfırla
-          progress: $1/$2 değişiklik çözüldü
-          confirm: Senkronizasyonu Onayla
-          cancel: İptal
-          hasUnresolvedInChildren: ⚠ Çözülmemiş değişiklikler içeriyor
-          item: öğe
-          items: öğe
-          unresolvedPrompt: "[Çözülmedi - Lütfen seçin]"
-          localLatest: En Son Yerel
-          remoteLatest: En Son Uzak
-          bothChanged: Her ikisi de değişti
-          localChanged: Yerel değişti
-          remoteChanged: Uzak değişti
-          configValid: Yapılandırma geçerli
-          configInvalid: Yapılandırma geçersiz
-          resolveToContinue: Devam etmek için çakışmaları çözün
-          validationAlert:
-            title: Birleştirilmiş yapılandırmada doğrulama hataları var
-            description: "Düzeltmek için aşağıdaki farklılıkları ayarlayın:"
-          moreErrors: ...ve $1 hata daha
-    backup:
-      title: Yapılandırma yedekleme
-      description: Yapılandırma değiştirilirse otomatik yedeklemeler her saat oluşturulur. Önceki yapılandırmaları buradan geri yükleyebilirsiniz. (Maksimum $1 yedekleme)
-      loading: Yedeklemeler yükleniyor...
-      backupNow: Şimdi yedekle
-      backupSuccess: Yedekleme başarıyla oluşturuldu
-      restoreSuccess: Yapılandırma başarıyla geri yüklendi
-      empty:
-        title: Henüz yedekleme mevcut değil
-        description: Yapılandırma değiştirilirse yedeklemeler her saat otomatik olarak oluşturulur.
-      item:
-        extensionVersion: "Uzantı sürümü:"
-        schemaVersion: "Şema sürümü:"
-        restore: Geri Yükle
-        export: Dışa Aktar
-        delete: Sil
-      restore:
-        title: Yapılandırma yedeğini geri yükle?
-        description: Mevcut yapılandırmanız en son yedeklemeden farklıysa otomatik olarak yedeklenecektir. Yedekleme sayısı limiti aşarsa en eski yedekleme kaldırılabilir.
-        cancel: İptal
-        confirm: Geri Yükle
-      delete:
-        title: Yedekleme silinsin mi?
-        description: Bu yedeklemeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
-        cancel: İptal
-        confirm: Sil
-    resetConfig:
-      title: Yapılandırmayı Sıfırla
-      description: Tüm yapılandırmayı varsayılan değere sıfırla
-      dialog:
-        title: Yapılandırmayı Sıfırla
-        trigger: Yapılandırmayı Sıfırla
-        confirm: Onayla
-        cancel: İptal
-        description: Bu işlem tüm özel yapılandırmalarınızı temizleyecek ve varsayılan değerlere sıfırlayacaktır. Lütfen onaylayın.
   videoSubtitles:
     title: Video Altyazıları
     pageDescription: İzlerken altyazıları çevirin; sağlayıcı, stil ve istek ayarları ayrı tutulur.
@@ -966,6 +955,9 @@ options:
     title: Yenilikler
   rateUs:
     title: Bizi Değerlendirin
+  configMigration:
+    versionTooNew: İçe aktarılan yapılandırma sürümü daha yeni, lütfen Read Frog'u en son sürüme yükseltin
+    validationError: Yapılandırma doğrulaması başarısız
 side:
   sourceLang: Kaynak Dil
   targetLang: Hedef Dil

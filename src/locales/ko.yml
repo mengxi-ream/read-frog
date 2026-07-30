@@ -96,10 +96,6 @@ options:
   setAPIKeyWarning:
     please: API Key를 설정해 주세요
     page: 페이지에서
-  betaExperience:
-    title: Beta 체험
-    description: 아직 불안정할 수 있는 실험적 기능을 켭니다
-    enabled: Beta 체험 활성화
   apiProviders:
     title: API 제공업체
     pageDescription: Read Frog가 호출하는 AI 서비스를 연결하고 키와 모델을 관리하세요.
@@ -226,16 +222,6 @@ options:
   general:
     title: 일반
     pageDescription: 각 기능에 사용할 제공업체와 Read Frog가 페이지 언어를 감지하는 방식을 선택하세요.
-    interfaceLanguage:
-      title: 인터페이스 언어
-      description: 브라우저 언어와 별개로 확장 프로그램의 인터페이스 언어를 선택합니다.
-      auto: 자동(브라우저 따름)
-    appearance:
-      title: 외관
-      theme: 테마
-      system: 시스템
-      light: 라이트
-      dark: 다크
     featureProviders:
       title: 기능 제공업체
       description: 각 기능에 사용할 제공업체를 선택
@@ -281,25 +267,136 @@ options:
     appearanceAndLanguage:
       title: 모양 및 언어
       theme:
+        title: 테마
         description: Read Frog의 테마를 선택하세요.
+        system: 시스템
+        light: 라이트
+        dark: 다크
+      interfaceLanguage:
+        title: 인터페이스 언어
+        description: 브라우저 언어와 별개로 확장 프로그램의 인터페이스 언어를 선택합니다.
+        auto: 자동(브라우저 따름)
     extensionActivation:
       title: 확장 프로그램 활성화
       mode:
         title: 활성화 모드
+        description: 블랙리스트 모드를 사용하여 특정 사이트에서 확장 프로그램을 비활성화하거나, 화이트리스트 모드를 사용하여 특정 사이트에서만 실행되도록 제한할 수 있습니다.
+        blacklist: 나열된 사이트에서만 비활성화
+        whitelist: 나열된 사이트에서만 실행
+      patterns:
+        enterUrlPattern: "URL 패턴 입력 (예: example.com)"
+        urlPattern: URL 패턴
     config:
       title: 설정
+      googleDrive:
+        title: Google Drive 클라우드 동기화
+        description: 원격이 최신이면 다운로드, 로컬이 최신이면 업로드
+        sync: Google Drive 동기화
+        syncing: 동기화 중...
+        syncSuccess:
+          uploaded: 로컬 설정이 클라우드에 업로드됨
+          downloaded: 원격 설정이 적용됨
+          sameChanges: 로컬과 원격 변경 사항이 동일하여 동기화됨
+          noChange: 이미 동기화됨
+          unresolved: 충돌이 해결되고 로컬 및 클라우드에 동기화됨
+        syncError: 동기화 실패, 다시 시도해 주세요
+        metadataCorrupted: 동기화 메타데이터가 손상되어 원격 구성을 적용했습니다
+        lastSyncTime: 마지막 동기화 시간
+        logout: 로그아웃
+        logoutSuccess: Google 계정에서 로그아웃되었습니다
+        unresolved:
+          title: 구성 동기화 해결
+          description: 로컬 및 원격 구성이 다릅니다. 각 필드에 대해 유지할 버전을 선택하세요.
+          resolved: 해결됨
+          unresolved: 미해결
+          localValue: 로컬 값
+          remoteValue: 원격 값
+          useLocal: 로컬 사용
+          useRemote: 원격 사용
+          useAllLocal: 모두 로컬 사용
+          useAllRemote: 모두 원격 사용
+          reset: 선택 재설정
+          progress: $1/$2개의 변경 해결됨
+          confirm: 동기화 확인
+          cancel: 취소
+          hasUnresolvedInChildren: ⚠ 미해결 변경 포함
+          item: 항목
+          items: 항목
+          unresolvedPrompt: "[미해결 - 선택하세요]"
+          localLatest: 로컬 최신
+          remoteLatest: 원격 최신
+          bothChanged: 양쪽 모두 변경됨
+          localChanged: 로컬이 변경됨
+          remoteChanged: 원격이 변경됨
+          configValid: 구성이 유효합니다
+          configInvalid: 구성이 유효하지 않습니다
+          resolveToContinue: 계속하려면 충돌을 해결하세요
+          validationAlert:
+            title: 병합된 구성에 유효성 검사 오류가 있습니다
+            description: "아래 차이점을 조정하여 수정하세요:"
+          moreErrors: ...그리고 $1개의 오류가 더 있습니다
+      manualSync:
+        title: 수동 설정 동기화
+        description: 수동으로 설정 가져오기 및 내보내기
+        import: 가져오기
+        export: 내보내기
+        importSuccess: 설정 가져오기 완료
+        exportSuccess: 설정 내보내기 완료
+        importError: 가져오기 실패
+        exportOptions:
+          title: 내보내기 옵션 선택
+          description: 내보내는 설정에 API 키를 포함할지 선택하세요. API 키를 포함하면 민감한 정보가 유출될 수 있으므로 안전한 환경에서만 사용하는 것을 권장합니다.
+          includeAPIKeys: API 키 포함
+          excludeAPIKeys: API 키 제외
+          cancel: 취소
+      viewConfig:
+        open: 설정 열기
+        title: 설정
+        description: 현재 설정의 원본 JSON을 확인합니다
+      backup:
+        title: 설정 백업
+        description: 설정이 변경되면 매시간 자동으로 백업이 생성됩니다. 여기에서 이전 설정을 복원할 수 있습니다. (최대 $1개 백업)
+        loading: 백업을 불러오는 중...
+        backupNow: 지금 백업
+        backupSuccess: 백업이 생성되었습니다
+        restoreSuccess: 설정이 복원되었습니다
+        empty:
+          title: 아직 사용 가능한 백업이 없습니다
+          description: 설정이 변경되면 매시간 자동으로 백업이 생성됩니다.
+        item:
+          extensionVersion: 확장 프로그램 버전：
+          schemaVersion: 설정 버전：
+          restore: 복원
+          export: 내보내기
+          delete: 삭제
+        restore:
+          title: 설정 백업을 복원하시겠습니까?
+          description: 현재 설정이 최신 백업과 다른 경우 자동으로 현재 설정이 백업됩니다. 백업 수가 제한을 초과하면 가장 오래된 백업이 삭제될 수 있습니다.
+          cancel: 취소
+          confirm: 복원
+        delete:
+          title: 백업을 삭제하시겠습니까?
+          description: 이 백업을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.
+          cancel: 취소
+          confirm: 삭제
+      reset:
+        title: 기본 설정 복원
+        description: 모든 설정을 기본값으로 재설정
+        dialog:
+          title: 기본 설정 복원
+          trigger: 설정 초기화
+          confirm: 확인
+          cancel: 취소
+          description: 이 작업은 모든 사용자 지정 설정을 지우고 기본값으로 재설정합니다. 삭제하시겠습니까?
     userExperience:
       title: 사용자 경험
-  siteControl:
-    title: 사이트 제어
-    mode:
-      title: 확장 프로그램 활성화 모드
-      description: 블랙리스트 모드를 사용하여 특정 사이트에서 확장 프로그램을 비활성화하거나, 화이트리스트 모드를 사용하여 특정 사이트에서만 실행되도록 제한할 수 있습니다.
-      blacklist: 나열된 사이트에서만 비활성화
-      whitelist: 나열된 사이트에서만 실행
-    patterns:
-      enterUrlPattern: "URL 패턴 입력 (예: example.com)"
-      urlPattern: URL 패턴
+      beta:
+        title: Beta 체험
+        description: 아직 불안정할 수 있는 실험적 기능을 켭니다
+      analytics:
+        title: 사용자 경험 개선에 기여
+        tooltip: 켜면 Read Frog가 익명 사용 신호를 전송하여 버그를 찾아내고, 기능 안정성을 검증하고, 성능과 UX 디테일을 개선하며, 앞으로 무엇을 우선적으로 만들지 결정하는 데 활용합니다.
+        description: 버그를 찾고 UI 레이아웃을 다듬는 등 Read Frog 개선에 기여합니다
   overlayTools:
     title: 오버레이 도구
     floatingButton:
@@ -770,114 +867,6 @@ options:
       description: 기간 내 일괄 번역으로 절약된 요청 비율
       originalRequestCount: 원래 요청 수
       batchRequestCount: 일괄 요청 수
-  config:
-    analytics:
-      title: 사용자 경험 개선에 기여
-      tooltip: 켜면 Read Frog가 익명 사용 신호를 전송하여 버그를 찾아내고, 기능 안정성을 검증하고, 성능과 UX 디테일을 개선하며, 앞으로 무엇을 우선적으로 만들지 결정하는 데 활용합니다.
-      description: 버그를 찾고 UI 레이아웃을 다듬는 등 Read Frog 개선에 기여합니다
-    sync:
-      title: 수동 설정 동기화
-      description: 수동으로 설정 가져오기 및 내보내기
-      import: 가져오기
-      export: 내보내기
-      importSuccess: 설정 가져오기 완료
-      exportSuccess: 설정 내보내기 완료
-      importError: 가져오기 실패
-      versionTooNew: 가져온 설정 버전이 최신이므로 Read Frog를 최신 버전으로 업그레이드해 주세요
-      migrationError: 마이그레이션 실패
-      validationError: 설정 검증 실패
-      exportOptions:
-        title: 내보내기 옵션 선택
-        description: 내보내는 설정에 API 키를 포함할지 선택하세요. API 키를 포함하면 민감한 정보가 유출될 수 있으므로 안전한 환경에서만 사용하는 것을 권장합니다.
-        includeAPIKeys: API 키 포함
-        excludeAPIKeys: API 키 제외
-        cancel: 취소
-      viewConfig:
-        open: 설정 열기
-        title: 설정
-        description: 현재 설정의 원본 JSON을 확인합니다
-      googleDrive:
-        title: Google Drive 클라우드 동기화
-        description: 원격이 최신이면 다운로드, 로컬이 최신이면 업로드
-        sync: Google Drive 동기화
-        syncing: 동기화 중...
-        syncSuccess:
-          uploaded: 로컬 설정이 클라우드에 업로드됨
-          downloaded: 원격 설정이 적용됨
-          sameChanges: 로컬과 원격 변경 사항이 동일하여 동기화됨
-          noChange: 이미 동기화됨
-          unresolved: 충돌이 해결되고 로컬 및 클라우드에 동기화됨
-        syncError: 동기화 실패, 다시 시도해 주세요
-        metadataCorrupted: 동기화 메타데이터가 손상되어 원격 구성을 적용했습니다
-        lastSyncTime: 마지막 동기화 시간
-        logout: 로그아웃
-        logoutSuccess: Google 계정에서 로그아웃되었습니다
-        unresolved:
-          title: 구성 동기화 해결
-          description: 로컬 및 원격 구성이 다릅니다. 각 필드에 대해 유지할 버전을 선택하세요.
-          resolved: 해결됨
-          unresolved: 미해결
-          localValue: 로컬 값
-          remoteValue: 원격 값
-          useLocal: 로컬 사용
-          useRemote: 원격 사용
-          useAllLocal: 모두 로컬 사용
-          useAllRemote: 모두 원격 사용
-          reset: 선택 재설정
-          progress: $1/$2개의 변경 해결됨
-          confirm: 동기화 확인
-          cancel: 취소
-          hasUnresolvedInChildren: ⚠ 미해결 변경 포함
-          item: 항목
-          items: 항목
-          unresolvedPrompt: "[미해결 - 선택하세요]"
-          localLatest: 로컬 최신
-          remoteLatest: 원격 최신
-          bothChanged: 양쪽 모두 변경됨
-          localChanged: 로컬이 변경됨
-          remoteChanged: 원격이 변경됨
-          configValid: 구성이 유효합니다
-          configInvalid: 구성이 유효하지 않습니다
-          resolveToContinue: 계속하려면 충돌을 해결하세요
-          validationAlert:
-            title: 병합된 구성에 유효성 검사 오류가 있습니다
-            description: "아래 차이점을 조정하여 수정하세요:"
-          moreErrors: ...그리고 $1개의 오류가 더 있습니다
-    backup:
-      title: 설정 백업
-      description: 설정이 변경되면 매시간 자동으로 백업이 생성됩니다. 여기에서 이전 설정을 복원할 수 있습니다. (최대 $1개 백업)
-      loading: 백업을 불러오는 중...
-      backupNow: 지금 백업
-      backupSuccess: 백업이 생성되었습니다
-      restoreSuccess: 설정이 복원되었습니다
-      empty:
-        title: 아직 사용 가능한 백업이 없습니다
-        description: 설정이 변경되면 매시간 자동으로 백업이 생성됩니다.
-      item:
-        extensionVersion: 확장 프로그램 버전：
-        schemaVersion: 설정 버전：
-        restore: 복원
-        export: 내보내기
-        delete: 삭제
-      restore:
-        title: 설정 백업을 복원하시겠습니까?
-        description: 현재 설정이 최신 백업과 다른 경우 자동으로 현재 설정이 백업됩니다. 백업 수가 제한을 초과하면 가장 오래된 백업이 삭제될 수 있습니다.
-        cancel: 취소
-        confirm: 복원
-      delete:
-        title: 백업을 삭제하시겠습니까?
-        description: 이 백업을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.
-        cancel: 취소
-        confirm: 삭제
-    resetConfig:
-      title: 기본 설정 복원
-      description: 모든 설정을 기본값으로 재설정
-      dialog:
-        title: 기본 설정 복원
-        trigger: 설정 초기화
-        confirm: 확인
-        cancel: 취소
-        description: 이 작업은 모든 사용자 지정 설정을 지우고 기본값으로 재설정합니다. 삭제하시겠습니까?
   videoSubtitles:
     title: 비디오 자막
     pageDescription: 영상을 보면서 자막을 번역하고, 제공업체·스타일·요청 설정을 따로 지정하세요.
@@ -966,6 +955,9 @@ options:
     title: 새로운 기능
   rateUs:
     title: 리뷰 남기기
+  configMigration:
+    versionTooNew: 가져온 설정 버전이 최신이므로 Read Frog를 최신 버전으로 업그레이드해 주세요
+    validationError: 설정 검증 실패
 side:
   sourceLang: 원본 언어
   targetLang: 대상 언어

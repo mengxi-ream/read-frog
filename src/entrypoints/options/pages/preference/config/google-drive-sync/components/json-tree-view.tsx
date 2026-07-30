@@ -87,8 +87,8 @@ export function JsonTreeView({ resolvedConfig }: { resolvedConfig: Config }) {
   const formatFolderLabel = (value: unknown, childrenCount: number): string => {
     const countText =
       childrenCount === 1
-        ? `${childrenCount} ${i18n.t("options.config.sync.googleDrive.unresolved.item")}`
-        : `${childrenCount} ${i18n.t("options.config.sync.googleDrive.unresolved.items")}`
+        ? `${childrenCount} ${i18n.t("options.preference.config.googleDrive.unresolved.item")}`
+        : `${childrenCount} ${i18n.t("options.preference.config.googleDrive.unresolved.items")}`
 
     return Array.isArray(value) ? `[${countText}]` : `{${countText}}`
   }

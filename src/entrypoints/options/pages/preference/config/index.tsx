@@ -13,8 +13,8 @@ export function ConfigManagementSection() {
       <ManualConfigSyncConfigItems />
       <ConfigNavItem
         to="/preference/config-backup"
-        title={i18n.t("options.config.backup.title")}
-        description={i18n.t("options.config.backup.description", [MAX_BACKUPS_COUNT])}
+        title={i18n.t("options.preference.config.backup.title")}
+        description={i18n.t("options.preference.config.backup.description", [MAX_BACKUPS_COUNT])}
       />
       <ResetConfigItem />
     </ConfigSection>
