@@ -100,6 +100,7 @@ options:
     title: API Sağlayıcıları
     pageDescription: Read Frog'un çağırdığı yapay zekâ servislerini bağlayın, anahtarlarını ve modellerini yönetin.
     description: Çeviri ve kelime analizi işlevleri için API sağlayıcılarını buradan yapılandırın. 20'den fazla yerleşik sağlayıcımız var ve OpenAI uyumlu tüm API sağlayıcılarını destekliyoruz.
+    configTitle: Sağlayıcı Yapılandırması
     addProvider: Sağlayıcı Ekle
     builtInProvider: Yerleşik Sağlayıcı
     sponsorCta: Hızlı ve uygun maliyetli AI al

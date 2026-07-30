@@ -121,8 +121,8 @@ vi.mock("@/utils/i18n", () => ({
   },
 }))
 
-vi.mock("@/entrypoints/options/components/config-card", () => ({
-  ConfigCard: ({ children }: { children: ReactNode }) => <>{children}</>,
+vi.mock("@/entrypoints/options/components/config-item", () => ({
+  ConfigItem: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
 vi.mock("@/entrypoints/options/components/entity-editor-layout", () => ({

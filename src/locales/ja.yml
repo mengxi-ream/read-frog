@@ -100,6 +100,7 @@ options:
     title: APIプロバイダー
     pageDescription: Read Frog が呼び出す AI サービスを接続し、キーとモデルを管理します。
     description: 翻訳および語彙分析機能用のAPIプロバイダーを設定。20以上の内蔵プロバイダーに加え、OpenAI互換APIもサポートしています。
+    configTitle: プロバイダー設定
     addProvider: プロバイダーを追加
     builtInProvider: 組み込みプロバイダー
     sponsorCta: 高速で高コスパのAIを入手

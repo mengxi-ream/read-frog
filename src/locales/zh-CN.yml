@@ -100,6 +100,7 @@ options:
     title: API 提供商
     pageDescription: 接入 Read Frog 调用的 AI 服务，并管理各自的密钥和模型。
     description: 配置用于翻译和词汇解析功能的 API 提供商。我们内置了 20 多个提供商，并支持任何 OpenAI 兼容 API 提供商。
+    configTitle: 提供商配置
     addProvider: 添加提供商
     builtInProvider: 内置提供商
     sponsorCta: 获取高速性价比 AI

@@ -100,6 +100,7 @@ options:
     title: API Providers
     pageDescription: Connect the AI services Read Frog calls, and manage their keys and models.
     description: Configure API providers for translation and vocabulary insight. We have 20+ built-in providers and support any OpenAI-compatible API provider.
+    configTitle: Provider Config
     addProvider: Add Provider
     builtInProvider: Built-in Provider
     sponsorCta: Get fast, cost-effective AI

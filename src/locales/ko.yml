@@ -100,6 +100,7 @@ options:
     title: API 제공업체
     pageDescription: Read Frog가 호출하는 AI 서비스를 연결하고 키와 모델을 관리하세요.
     description: 번역 및 어휘 분석 기능을 위한 API 제공업체를 구성합니다. 20개 이상의 내장 제공업체와 모든 OpenAI 호환 API를 지원합니다.
+    configTitle: 제공업체 구성
     addProvider: 제공업체 추가
     builtInProvider: 내장 제공업체
     sponsorCta: 빠르고 가성비 좋은 AI 받기

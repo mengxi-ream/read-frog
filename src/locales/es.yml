@@ -100,6 +100,7 @@ options:
     title: Proveedores de API
     pageDescription: Conecta los servicios de IA que usa Read Frog y gestiona sus claves y modelos.
     description: Configura proveedores de API para traducción e información de vocabulario. Tenemos más de 20 proveedores integrados y admitimos cualquier proveedor de API compatible con OpenAI.
+    configTitle: Configuración de proveedores
     addProvider: Añadir proveedor
     builtInProvider: Proveedor integrado
     sponsorCta: Obtén IA rápida y rentable

@@ -27,7 +27,7 @@ import {
   BUILT_IN_AI_PROVIDER_ID,
   BUILT_IN_AI_PROVIDER_LOGO,
 } from "@/utils/providers/provider-registry"
-import { ConfigCard } from "../../components/config-card"
+import { ConfigItem } from "../../components/config-item"
 import { EntityEditor } from "../../components/entity-editor"
 import { EntityEditorLayout } from "../../components/entity-editor-layout"
 import { EntityListItem } from "../../components/entity-list-item"
@@ -47,14 +47,14 @@ export function ProvidersConfig() {
     )
 
   return (
-    <ConfigCard
+    <ConfigItem
       id="api-providers"
-      title={i18n.t("options.apiProviders.title")}
+      orientation="vertical"
+      title={i18n.t("options.apiProviders.configTitle")}
       description={i18n.t("options.apiProviders.description")}
-      className="lg:flex-col"
     >
       <EntityEditorLayout list={<ProviderCardList />} editor={editor} />
-    </ConfigCard>
+    </ConfigItem>
   )
 }
 

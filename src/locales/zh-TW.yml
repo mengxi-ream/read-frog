@@ -100,6 +100,7 @@ options:
     title: API 提供者
     pageDescription: 接入 Read Frog 呼叫的 AI 服務，並管理各自的金鑰和模型。
     description: 設定用於翻譯和詞彙解析功能的 API 提供者。內建 20 多個提供者，並支援任何 OpenAI 相容 API 提供者。
+    configTitle: 提供者設定
     addProvider: 新增提供者
     builtInProvider: 內建提供者
     sponsorCta: 取得高速高性價比 AI
