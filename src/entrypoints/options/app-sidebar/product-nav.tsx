@@ -46,6 +46,7 @@ export function ProductNav() {
               <SidebarMenuItem key={href}>
                 <SidebarMenuButton
                   render={<a href={href} target="_blank" rel="noopener noreferrer" />}
+                  tooltip={i18n.t(labelKey)}
                 >
                   <Icon icon={icon} />
                   <span>{i18n.t(labelKey)}</span>

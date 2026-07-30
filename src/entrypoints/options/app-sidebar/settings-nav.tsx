@@ -30,7 +30,11 @@ export function SettingsNav() {
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton render={<Link to="/" />} isActive={pathname === "/"}>
+            <SidebarMenuButton
+              render={<Link to="/" />}
+              isActive={pathname === "/"}
+              tooltip={i18n.t("options.general.title")}
+            >
               <Icon icon="tabler:adjustments-horizontal" />
               <span>{i18n.t("options.general.title")}</span>
             </SidebarMenuButton>
@@ -40,8 +44,9 @@ export function SettingsNav() {
             <SidebarMenuButton
               render={<Link to="/preference" />}
               isActive={pathname === "/preference"}
+              tooltip={i18n.t("options.preference.title")}
             >
-              <Icon icon="tabler:user-cog" />
+              <Icon icon="tabler:adjustments-horizontal" />
               <span>{i18n.t("options.preference.title")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -50,6 +55,7 @@ export function SettingsNav() {
             <SidebarMenuButton
               render={<Link to="/api-providers" />}
               isActive={pathname === "/api-providers"}
+              tooltip={i18n.t("options.apiProviders.title")}
             >
               <Icon icon="tabler:api" />
               <span>{i18n.t("options.apiProviders.title")}</span>
@@ -60,6 +66,9 @@ export function SettingsNav() {
             <SidebarMenuButton
               render={<Link to="/custom-actions" />}
               isActive={pathname === "/custom-actions"}
+              tooltip={i18n.t(
+                "options.floatingButtonAndToolbar.selectionToolbar.customActions.title",
+              )}
             >
               <Icon icon="tabler:sparkles" />
               <span>
@@ -72,6 +81,7 @@ export function SettingsNav() {
             <SidebarMenuButton
               render={<Link to="/translation" />}
               isActive={pathname === "/translation"}
+              tooltip={i18n.t("options.translation.title")}
             >
               <Icon icon="ri:translate" />
               <span>{i18n.t("options.translation.title")}</span>
@@ -82,6 +92,7 @@ export function SettingsNav() {
             <SidebarMenuButton
               render={<Link to="/site-rules" />}
               isActive={pathname === "/site-rules"}
+              tooltip={i18n.t("options.siteRules.title")}
             >
               <Icon icon="tabler:world-cog" />
               <span>{i18n.t("options.siteRules.title")}</span>
@@ -92,6 +103,7 @@ export function SettingsNav() {
             <SidebarMenuButton
               render={<Link to="/video-subtitles" />}
               isActive={pathname === "/video-subtitles"}
+              tooltip={i18n.t("options.videoSubtitles.title")}
             >
               <Icon icon="tabler:subtitles" />
               <span>{i18n.t("options.videoSubtitles.title")}</span>
@@ -102,6 +114,7 @@ export function SettingsNav() {
             <SidebarMenuButton
               render={<Link to="/input-translation" />}
               isActive={pathname === "/input-translation"}
+              tooltip={i18n.t("options.overlayTools.inputTranslation.title")}
             >
               <Icon icon="tabler:keyboard" />
               <span>{i18n.t("options.overlayTools.inputTranslation.title")}</span>
@@ -110,7 +123,14 @@ export function SettingsNav() {
 
           <Collapsible defaultOpen={isOverlayToolsActive} className="group/collapsible">
             <SidebarMenuItem>
-              <CollapsibleTrigger render={<SidebarMenuButton isActive={isOverlayToolsActive} />}>
+              <CollapsibleTrigger
+                render={
+                  <SidebarMenuButton
+                    isActive={isOverlayToolsActive}
+                    tooltip={i18n.t("options.overlayTools.title")}
+                  />
+                }
+              >
                 <Icon icon="tabler:layers-intersect" />
                 <span>{i18n.t("options.overlayTools.title")}</span>
                 <Icon
@@ -150,7 +170,11 @@ export function SettingsNav() {
           </Collapsible>
 
           <SidebarMenuItem>
-            <SidebarMenuButton render={<Link to="/tts" />} isActive={pathname === "/tts"}>
+            <SidebarMenuButton
+              render={<Link to="/tts" />}
+              isActive={pathname === "/tts"}
+              tooltip={i18n.t("options.tts.title")}
+            >
               <Icon icon="tabler:speakerphone" />
               <span>{i18n.t("options.tts.title")}</span>
             </SidebarMenuButton>
@@ -160,6 +184,7 @@ export function SettingsNav() {
             <SidebarMenuButton
               render={<Link to="/statistics" />}
               isActive={pathname === "/statistics"}
+              tooltip={i18n.t("options.statistics.title")}
             >
               <Icon icon="tabler:chart-dots" />
               <span>{i18n.t("options.statistics.title")}</span>
@@ -167,7 +192,11 @@ export function SettingsNav() {
           </SidebarMenuItem>
 
           <SidebarMenuItem>
-            <SidebarMenuButton render={<Link to="/config" />} isActive={pathname === "/config"}>
+            <SidebarMenuButton
+              render={<Link to="/config" />}
+              isActive={pathname === "/config"}
+              tooltip={i18n.t("options.config.title")}
+            >
               <Icon icon="tabler:settings" />
               <span>{i18n.t("options.config.title")}</span>
             </SidebarMenuButton>

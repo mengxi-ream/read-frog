@@ -25,6 +25,7 @@ export function ToolsNav() {
                   rel="noopener noreferrer"
                 />
               }
+              tooltip={i18n.t("options.tools.translationHub")}
             >
               <Icon icon="tabler:language-hiragana" />
               <span>{i18n.t("options.tools.translationHub")}</span>
