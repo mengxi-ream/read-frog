@@ -277,7 +277,7 @@ options:
     duplicate: このパターンは既にリストにあります
   preference:
     title: 環境設定
-    pageDescription: インターフェースのテーマと言語を設定し、拡張機能を有効にする範囲を指定します。
+    pageDescription: Read Frog の外観、動作する範囲、設定の同期とバックアップ方法を指定します。
     appearanceAndLanguage:
       title: 外観と言語
       theme:

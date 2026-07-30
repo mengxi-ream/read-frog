@@ -278,7 +278,7 @@ options:
     duplicate: 該模式已在列表中
   preference:
     title: 偏好設定
-    pageDescription: 設定介面主題和語言，並控制擴充功能在哪些網站啟用。
+    pageDescription: 設定陪讀蛙的外觀與生效範圍，以及設定檔的同步與備份方式。
     appearanceAndLanguage:
       title: 外觀與語言
       theme:

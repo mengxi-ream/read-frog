@@ -278,7 +278,7 @@ options:
     duplicate: This pattern is already in the list
   preference:
     title: Preferences
-    pageDescription: Set the interface theme and language, and control where the extension is active.
+    pageDescription: Set how Read Frog looks, where it runs, and how your config is synced and backed up.
     appearanceAndLanguage:
       title: Appearance & language
       theme:
@@ -294,7 +294,7 @@ options:
   siteControl:
     title: Site Control
     mode:
-      title: Extension Activation Mode
+      title: Extension activation mode
       description: Use blacklist mode to disable the extension on specific sites, or whitelist mode to limit it to specific sites only.
       blacklist: Only disable on listed sites
       whitelist: Only run on listed sites

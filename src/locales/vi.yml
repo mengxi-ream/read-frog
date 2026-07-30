@@ -277,7 +277,7 @@ options:
     duplicate: Mẫu này đã có trong danh sách
   preference:
     title: Tùy chọn
-    pageDescription: Đặt giao diện và ngôn ngữ, đồng thời kiểm soát nơi tiện ích được bật.
+    pageDescription: Đặt giao diện của Read Frog, nơi tiện ích hoạt động và cách cấu hình được đồng bộ, sao lưu.
     appearanceAndLanguage:
       title: Giao diện & ngôn ngữ
       theme:
@@ -298,7 +298,7 @@ options:
       blacklist: Chỉ tắt trên các trang web được liệt kê
       whitelist: Chỉ chạy trên các trang web được liệt kê
     patterns:
-      enterUrlPattern: Nhập mẫu URL (ví dụ example.com)
+      enterUrlPattern: "Nhập mẫu URL (ví dụ: example.com)"
       urlPattern: Mẫu URL
   overlayTools:
     title: Công cụ nổi

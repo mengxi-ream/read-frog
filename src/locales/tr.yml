@@ -277,7 +277,7 @@ options:
     duplicate: Bu desen zaten listede
   preference:
     title: Tercihler
-    pageDescription: Arayüz temasını ve dilini ayarlayın, uzantının nerede etkin olacağını belirleyin.
+    pageDescription: Read Frog'un görünümünü, nerede çalışacağını ve yapılandırmanızın nasıl eşitlenip yedekleneceğini ayarlayın.
     appearanceAndLanguage:
       title: Görünüm ve dil
       theme:
@@ -291,9 +291,9 @@ options:
     userExperience:
       title: Kullanıcı deneyimi
   siteControl:
-    title: Site Kontrolü
+    title: Site kontrolü
     mode:
-      title: Uzantı Etkinleştirme Modu
+      title: Uzantı etkinleştirme modu
       description: Kara liste modunu kullanarak uzantıyı belirli sitelerde devre dışı bırakabilir veya beyaz liste modunu kullanarak yalnızca belirli sitelerle sınırlayabilirsiniz.
       blacklist: Yalnızca listelenen sitelerde devre dışı bırak
       whitelist: Yalnızca listelenen sitelerde çalıştır

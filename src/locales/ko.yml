@@ -277,7 +277,7 @@ options:
     duplicate: 이 패턴은 이미 목록에 있습니다
   preference:
     title: 환경 설정
-    pageDescription: 인터페이스 테마와 언어를 설정하고 확장 프로그램이 동작할 범위를 지정하세요.
+    pageDescription: Read Frog의 모양과 실행 범위, 설정 동기화 및 백업 방식을 지정하세요.
     appearanceAndLanguage:
       title: 모양 및 언어
       theme:

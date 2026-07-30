@@ -278,13 +278,13 @@ options:
     duplicate: 该模式已在列表中
   preference:
     title: 偏好设置
-    pageDescription: 设置界面主题和语言，并控制扩展在哪些网站启用。
+    pageDescription: 设置陪读蛙的外观与生效范围，以及配置的同步与备份方式。
     appearanceAndLanguage:
       title: 外观与语言
       theme:
         description: 为陪读蛙选择主题。
     extensionActivation:
-      title: 插件激活
+      title: 扩展激活
       mode:
         title: 激活模式
     config:
@@ -296,7 +296,7 @@ options:
     mode:
       title: 扩展激活模式
       description: 使用黑名单模式可以在特定网站上禁用扩展，或使用白名单模式限制扩展仅在特定网站上运行。
-      blacklist: 仅在列出的站点禁止
+      blacklist: 仅在列出的站点禁用
       whitelist: 仅在列出的站点运行
     patterns:
       enterUrlPattern: 输入 URL 模式（例如 example.com）

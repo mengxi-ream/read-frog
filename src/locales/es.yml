@@ -278,7 +278,7 @@ options:
     duplicate: Este patrón ya está en la lista
   preference:
     title: Preferencias
-    pageDescription: Define el tema y el idioma de la interfaz, y controla dónde se activa la extensión.
+    pageDescription: Define la apariencia de Read Frog, dónde se ejecuta y cómo se sincroniza y respalda tu configuración.
     appearanceAndLanguage:
       title: Apariencia e idioma
       theme:

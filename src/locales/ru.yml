@@ -277,7 +277,7 @@ options:
     duplicate: Этот шаблон уже в списке
   preference:
     title: Предпочтения
-    pageDescription: Задайте тему и язык интерфейса и укажите, где расширение активно.
+    pageDescription: Задайте внешний вид Read Frog, места его работы, а также синхронизацию и резервное копирование конфигурации.
     appearanceAndLanguage:
       title: Оформление и язык
       theme:
