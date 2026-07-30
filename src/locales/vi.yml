@@ -102,6 +102,7 @@ options:
     enabled: Bật trải nghiệm Beta
   apiProviders:
     title: Nhà cung cấp API
+    pageDescription: Kết nối các dịch vụ AI mà Read Frog sử dụng và quản lý khóa cùng mô hình của chúng.
     description: Cấu hình các nhà cung cấp API cho chức năng dịch và phân tích từ vựng tại đây. Chúng tôi có hơn 20 nhà cung cấp tích hợp sẵn và hỗ trợ mọi API tương thích OpenAI.
     addProvider: Thêm nhà cung cấp
     builtInProvider: Nhà cung cấp tích hợp
@@ -224,6 +225,7 @@ options:
       slow: Chậm (nên điều chỉnh chế độ suy nghĩ)
   general:
     title: Chung
+    pageDescription: Chọn nhà cung cấp cho từng chức năng và cách Read Frog nhận diện ngôn ngữ của trang.
     interfaceLanguage:
       title: Ngôn ngữ giao diện
       description: Chọn ngôn ngữ cho giao diện tiện ích, độc lập với ngôn ngữ trình duyệt.
@@ -275,6 +277,7 @@ options:
     duplicate: Mẫu này đã có trong danh sách
   preference:
     title: Tùy chọn
+    pageDescription: Đặt giao diện và ngôn ngữ, đồng thời kiểm soát nơi tiện ích được bật.
     appearanceAndLanguage:
       title: Giao diện & Ngôn ngữ
       theme:
@@ -297,12 +300,16 @@ options:
     title: Công cụ nổi
     floatingButton:
       title: Nút nổi
+      pageDescription: Đặt vị trí nút nổi, hành động khi nhấp và những trang web cần ẩn nút.
     selectionToolbar:
       title: Thanh công cụ chọn
+      pageDescription: Đặt các thao tác xuất hiện khi bạn chọn văn bản và nơi hiển thị thanh công cụ.
     contextMenu:
       title: Menu ngữ cảnh
+      pageDescription: Kiểm soát các mục Read Frog trong menu chuột phải của trình duyệt.
     inputTranslation:
       title: Dịch đầu vào
+      pageDescription: Dịch nội dung bạn gõ trong ô nhập trước khi gửi đi.
   inputTranslation:
     provider:
       title: Nhà cung cấp dịch
@@ -404,6 +411,7 @@ options:
           description: Cấu hình nhà cung cấp và model cho tính năng dịch của selection toolbar
       customActions:
         title: Hành động AI tùy chỉnh
+        pageDescription: Viết prompt của riêng bạn và chạy trên văn bản đã chọn từ thanh công cụ chọn văn bản.
         description: Thêm các hành động AI có cấu trúc của riêng bạn cho văn bản được chọn
         builtIn: Tích hợp
         add: Thêm hành động AI
@@ -529,6 +537,7 @@ options:
         description: Thêm các tùy chọn dịch vào menu chuột phải của trình duyệt để dịch nhanh trang hoặc văn bản đã chọn
   translation:
     title: Dịch thuật
+    pageDescription: Kiểm soát cách dịch trang — chế độ, phạm vi, phím tắt, prompt và giới hạn yêu cầu.
     requestQueueConfig:
       title: Tốc độ dịch
       firstOnDescription: Điều chỉnh tốc độ xử lý yêu cầu dịch bằng
@@ -701,6 +710,7 @@ options:
       enableDescription: AI sử dụng tóm tắt trang web để cải thiện độ chính xác dịch. Yêu cầu nhà cung cấp LLM. Thêm độ trễ khi bắt đầu dịch trang và tăng chi phí API.
   siteRules:
     title: Quy tắc trang web
+    pageDescription: Điều chỉnh cách dịch từng trang web bằng quy tắc có sẵn và quy tắc tự tạo.
     description: Quy tắc theo từng trang web để điều chỉnh cách dịch các trang web cụ thể.
     userRules:
       title: Quy tắc của người dùng
@@ -726,6 +736,7 @@ options:
       count: Đang hiển thị $1 / $2 quy tắc
   tts:
     title: Chuyển văn bản thành giọng nói
+    pageDescription: Đọc to đoạn văn bản bạn chọn bằng giọng tự nhiên.
     description: Tùy chỉnh nút Đọc với cài đặt giọng nói Edge TTS.
     voice:
       label: Giọng nói
@@ -749,6 +760,7 @@ options:
     betaDisabled: Bật Trải nghiệm Beta để tùy chỉnh cài đặt chuyển văn bản thành giọng nói.
   statistics:
     title: Thống kê
+    pageDescription: Xem Read Frog đã gửi bao nhiêu yêu cầu dịch theo thời gian.
     batchRequest:
       title: Đã tiết kiệm yêu cầu dịch theo lô
       description: Tỷ lệ phần trăm yêu cầu đã tiết kiệm bằng dịch theo lô trong khoảng thời gian
@@ -756,6 +768,7 @@ options:
       batchRequestCount: Số yêu cầu theo lô
   config:
     title: Cấu hình
+    pageDescription: Đồng bộ, sao lưu và đặt lại cài đặt, đồng thời xem phiên bản hiện tại.
     about:
       title: Giới thiệu
       description: Read Frog ra đời vào tháng 4 năm 2025
@@ -867,6 +880,7 @@ options:
         description: Thao tác này sẽ xóa tất cả cấu hình tùy chỉnh của bạn và đặt lại về giá trị mặc định. Vui lòng xác nhận.
   videoSubtitles:
     title: Phụ đề video
+    pageDescription: Dịch phụ đề khi đang xem, với nhà cung cấp, kiểu hiển thị và thiết lập yêu cầu riêng.
     description: Hiện chỉ hỗ trợ phụ đề video YouTube
     provider:
       title: Nhà cung cấp dịch thuật

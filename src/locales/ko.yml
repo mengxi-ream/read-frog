@@ -102,6 +102,7 @@ options:
     enabled: Beta 체험 활성화
   apiProviders:
     title: API 제공업체
+    pageDescription: Read Frog가 호출하는 AI 서비스를 연결하고 키와 모델을 관리하세요.
     description: 번역 및 어휘 분석 기능을 위한 API 제공업체를 구성합니다. 20개 이상의 내장 제공업체와 모든 OpenAI 호환 API를 지원합니다.
     addProvider: 제공업체 추가
     builtInProvider: 내장 제공업체
@@ -224,6 +225,7 @@ options:
       slow: 느림(사고 모드 조정 권장)
   general:
     title: 일반
+    pageDescription: 각 기능에 사용할 제공업체와 Read Frog가 페이지 언어를 감지하는 방식을 선택하세요.
     interfaceLanguage:
       title: 인터페이스 언어
       description: 브라우저 언어와 별개로 확장 프로그램의 인터페이스 언어를 선택합니다.
@@ -275,6 +277,7 @@ options:
     duplicate: 이 패턴은 이미 목록에 있습니다
   preference:
     title: 환경 설정
+    pageDescription: 인터페이스 테마와 언어를 설정하고 확장 프로그램이 동작할 범위를 지정하세요.
     appearanceAndLanguage:
       title: 모양 및 언어
       theme:
@@ -297,12 +300,16 @@ options:
     title: 오버레이 도구
     floatingButton:
       title: 플로팅 버튼
+      pageDescription: 플로팅 버튼이 놓일 위치와 클릭 동작, 숨길 사이트를 설정하세요.
     selectionToolbar:
       title: 선택 툴바
+      pageDescription: 텍스트를 선택했을 때 나타날 동작과 도구 모음을 표시할 사이트를 설정하세요.
     contextMenu:
       title: 컨텍스트 메뉴
+      pageDescription: 브라우저 우클릭 메뉴에 표시되는 Read Frog 항목을 설정하세요.
     inputTranslation:
       title: 입력 번역
+      pageDescription: 입력창에 쓴 내용을 보내기 전에 번역합니다.
   inputTranslation:
     provider:
       title: 번역 제공자
@@ -404,6 +411,7 @@ options:
           description: 선택 툴바 번역 기능의 제공업체와 모델을 구성합니다
       customActions:
         title: 커스텀 AI 액션
+        pageDescription: 직접 만든 프롬프트를 선택 도구 모음에서 선택한 텍스트에 실행하세요.
         description: 선택한 텍스트에 대한 구조화된 AI 작업을 직접 추가하세요
         builtIn: 기본 제공
         add: AI 액션 추가
@@ -529,6 +537,7 @@ options:
         description: 브라우저 우클릭 메뉴에 번역 옵션을 추가하여 페이지나 선택한 텍스트를 빠르게 번역
   translation:
     title: 번역
+    pageDescription: 페이지 번역 방식을 설정하세요 — 모드, 범위, 단축키, 프롬프트, 요청 제한.
     requestQueueConfig:
       title: 번역 속도
       firstOnDescription: 번역 요청 처리 속도 조정 및
@@ -701,6 +710,7 @@ options:
       enableDescription: AI가 웹페이지 요약을 사용하여 번역 정확도를 향상시킵니다. LLM 제공업체가 필요합니다. 번역 시작 시 지연이 발생하고 API 비용이 증가합니다.
   siteRules:
     title: 사이트 규칙
+    pageDescription: 기본 제공 규칙과 사용자 규칙으로 사이트별 번역 방식을 조정하세요.
     description: 특정 웹사이트의 번역 동작을 조정하는 규칙입니다.
     userRules:
       title: 사용자 규칙
@@ -726,6 +736,7 @@ options:
       count: 규칙 $2개 중 $1개 표시
   tts:
     title: 텍스트 음성 변환
+    pageDescription: 선택한 텍스트를 자연스러운 음성으로 읽어 줍니다.
     description: Edge TTS 음성 설정으로 말하기 버튼을 사용자 지정하세요.
     voice:
       label: 음성
@@ -749,6 +760,7 @@ options:
     betaDisabled: 텍스트 음성 변환 설정을 사용자 지정하려면 Beta 체험을 활성화하세요.
   statistics:
     title: 통계
+    pageDescription: Read Frog가 지금까지 보낸 번역 요청 수를 확인하세요.
     batchRequest:
       title: 일괄 번역으로 절약된 요청
       description: 기간 내 일괄 번역으로 절약된 요청 비율
@@ -756,6 +768,7 @@ options:
       batchRequestCount: 일괄 요청 수
   config:
     title: 설정
+    pageDescription: 설정을 동기화·백업·초기화하고 현재 버전을 확인하세요.
     about:
       title: 소개
       description: Read Frog는 2025년 4월에 태어났습니다
@@ -867,6 +880,7 @@ options:
         description: 이 작업은 모든 사용자 지정 설정을 지우고 기본값으로 재설정합니다. 삭제하시겠습니까?
   videoSubtitles:
     title: 비디오 자막
+    pageDescription: 영상을 보면서 자막을 번역하고, 제공업체·스타일·요청 설정을 따로 지정하세요.
     description: 현재 YouTube 비디오 자막만 지원
     provider:
       title: 번역 제공자

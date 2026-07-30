@@ -4,7 +4,11 @@ import { BatchRequestRecord } from "./charts"
 
 export function StatisticsPage() {
   return (
-    <PageLayout title={i18n.t("options.statistics.title")} innerClassName="flex flex-col p-8 gap-8">
+    <PageLayout
+      title={i18n.t("options.statistics.title")}
+      description={i18n.t("options.statistics.pageDescription")}
+      innerClassName="flex flex-col gap-8"
+    >
       <BatchRequestRecord />
     </PageLayout>
   )

@@ -6,6 +6,7 @@ export function ApiProvidersPage() {
   return (
     <PageLayout
       title={i18n.t("options.apiProviders.title")}
+      description={i18n.t("options.apiProviders.pageDescription")}
       innerClassName="[&>*]:border-b [&>*:last-child]:border-b-0"
     >
       <ProvidersConfig />

@@ -11,7 +11,10 @@ import { SelectionTranslationShortcut } from "./selection-translation-shortcut"
 
 export function SelectionToolbarPage() {
   return (
-    <PageLayout title={i18n.t("options.overlayTools.selectionToolbar.title")}>
+    <PageLayout
+      title={i18n.t("options.overlayTools.selectionToolbar.title")}
+      description={i18n.t("options.overlayTools.selectionToolbar.pageDescription")}
+    >
       <GradientBackground>
         <img
           src={selectionToolbarDemoImage}

@@ -22,6 +22,7 @@ export function TranslationPage() {
   return (
     <PageLayout
       title={i18n.t("options.translation.title")}
+      description={i18n.t("options.translation.pageDescription")}
       innerClassName="*:border-b [&>*:last-child]:border-b-0"
     >
       <TranslationMode />

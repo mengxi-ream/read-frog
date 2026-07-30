@@ -7,7 +7,8 @@ export function PreferencePage() {
   return (
     <PageLayout
       title={i18n.t("options.preference.title")}
-      innerClassName="flex flex-col gap-10 pt-6"
+      description={i18n.t("options.preference.pageDescription")}
+      innerClassName="flex flex-col gap-10"
     >
       <AppearanceAndLanguageSection />
       <ExtensionActivationSection />

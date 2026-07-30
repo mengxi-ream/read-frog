@@ -7,6 +7,7 @@ export function SiteRulesPage() {
   return (
     <PageLayout
       title={i18n.t("options.siteRules.title")}
+      description={i18n.t("options.siteRules.pageDescription")}
       innerClassName="*:border-b [&>*:last-child]:border-b-0"
     >
       <UserRulesEditor />

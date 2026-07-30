@@ -102,6 +102,7 @@ options:
     enabled: 啟用 Beta 體驗
   apiProviders:
     title: API 提供者
+    pageDescription: 接入 Read Frog 呼叫的 AI 服務，並管理各自的金鑰和模型。
     description: 設定用於翻譯和詞彙解析功能的 API 提供者。內建 20 多個提供者，並支援任何 OpenAI 相容 API 提供者。
     addProvider: 新增提供者
     builtInProvider: 內建提供者
@@ -225,6 +226,7 @@ options:
       slow: 緩慢（建議調整思考模式）
   general:
     title: 通用
+    pageDescription: 選擇每項功能使用的提供者，以及 Read Frog 如何辨識頁面語言。
     interfaceLanguage:
       title: 介面語言
       description: 選擇擴充功能介面的語言，獨立於瀏覽器語言。
@@ -276,6 +278,7 @@ options:
     duplicate: 該模式已在列表中
   preference:
     title: 偏好設定
+    pageDescription: 設定介面主題和語言，並控制擴充功能在哪些網站啟用。
     appearanceAndLanguage:
       title: 外觀與語言
       theme:
@@ -298,12 +301,16 @@ options:
     title: 懸浮工具
     floatingButton:
       title: 懸浮按鈕
+      pageDescription: 設定懸浮按鈕停在哪一側、點擊後做什麼，以及在哪些網站不顯示。
     selectionToolbar:
       title: 選取工具列
+      pageDescription: 設定選取文字時出現哪些操作，以及工具列在哪些網站顯示。
     contextMenu:
       title: 右鍵選單
+      pageDescription: 控制瀏覽器右鍵選單裡的 Read Frog 選項。
     inputTranslation:
       title: 輸入翻譯
+      pageDescription: 在送出之前，把你在輸入框裡寫的內容翻譯好。
   inputTranslation:
     provider:
       title: 翻譯服務
@@ -405,6 +412,7 @@ options:
           description: 設定選取工具列翻譯功能使用的提供者與模型
       customActions:
         title: 自訂 AI 指令
+        pageDescription: 撰寫自己的提示詞，從劃詞工具列對選取的文字執行。
         description: 為選取文字新增自訂的結構化 AI 指令
         builtIn: 內建
         add: 新增 AI 指令
@@ -645,6 +653,7 @@ options:
         description: 在瀏覽器右鍵選單中新增翻譯選項，快速翻譯頁面或選取的文字
   translation:
     title: 翻譯
+    pageDescription: 控制頁面翻譯的方式：模式、範圍、快速鍵、提示詞和請求限制。
     requestQueueConfig:
       title: 翻譯速率
       firstOnDescription: 調整翻譯請求的處理速度，使用
@@ -817,6 +826,7 @@ options:
       enableDescription: AI 會使用網頁摘要來提高翻譯準確性。需要 LLM 翻譯提供者。剛開始翻譯頁面時會有延遲，並增加 API 費用。
   siteRules:
     title: 網站規則
+    pageDescription: 用內建規則和自訂規則調整個別網站的翻譯方式。
     description: 針對特定網站調整翻譯行為的規則。
     userRules:
       title: 使用者規則
@@ -842,6 +852,7 @@ options:
       count: 顯示 $1 / $2 條規則
   tts:
     title: 文字轉語音
+    pageDescription: 用自然的語音朗讀任何選取的文字。
     description: 使用 Edge TTS 語音參數來自訂「朗讀」按鈕。
     voice:
       label: 語音
@@ -865,6 +876,7 @@ options:
     betaDisabled: 啟用 Beta 體驗即可自訂文字轉語音設定。
   statistics:
     title: 統計
+    pageDescription: 查看 Read Frog 一段時間內發出的翻譯請求數量。
     batchRequest:
       title: 批次翻譯節省的請求數
       description: 統計期間內，批次翻譯節省的請求百分比
@@ -872,6 +884,7 @@ options:
       batchRequestCount: 批次請求數量
   config:
     title: 設定
+    pageDescription: 同步、備份和重設你的設定，並查看目前版本。
     about:
       title: 關於
       description: 陪讀蛙於 2025 年 4 月誕生
@@ -983,6 +996,7 @@ options:
         description: 此操作會清空所有自訂設定，並將其重設為預設值，請確認是否清除。
   videoSubtitles:
     title: 影片字幕
+    pageDescription: 邊看邊譯影片字幕，並單獨設定提供者、樣式和請求參數。
     description: 目前僅支援 YouTube 影片字幕
     provider:
       title: 翻譯服務提供者

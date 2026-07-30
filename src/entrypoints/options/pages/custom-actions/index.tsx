@@ -6,6 +6,9 @@ export function CustomActionsPage() {
   return (
     <PageLayout
       title={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.title")}
+      description={i18n.t(
+        "options.floatingButtonAndToolbar.selectionToolbar.customActions.pageDescription",
+      )}
     >
       <div className="*:border-b [&>*:last-child]:border-b-0">
         <CustomActionsConfig />

@@ -6,7 +6,10 @@ import { InputTranslationToggle } from "./input-translation-toggle"
 
 export function InputTranslationPage() {
   return (
-    <PageLayout title={i18n.t("options.overlayTools.inputTranslation.title")}>
+    <PageLayout
+      title={i18n.t("options.overlayTools.inputTranslation.title")}
+      description={i18n.t("options.overlayTools.inputTranslation.pageDescription")}
+    >
       <div className="*:border-b [&>*:last-child]:border-b-0">
         <InputTranslationToggle />
         <InputTranslationLanguages />

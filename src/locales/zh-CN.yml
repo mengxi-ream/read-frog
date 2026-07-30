@@ -102,6 +102,7 @@ options:
     enabled: 启用 Beta 体验
   apiProviders:
     title: API 提供商
+    pageDescription: 接入 Read Frog 调用的 AI 服务，并管理各自的密钥和模型。
     description: 配置用于翻译和词汇解析功能的 API 提供商。我们内置了 20 多个提供商，并支持任何 OpenAI 兼容 API 提供商。
     addProvider: 添加提供商
     builtInProvider: 内置提供商
@@ -225,6 +226,7 @@ options:
       slow: 缓慢（建议调节思考模式）
   general:
     title: 通用
+    pageDescription: 选择每项功能使用的提供商，以及 Read Frog 如何识别页面语言。
     interfaceLanguage:
       title: 界面语言
       description: 选择扩展界面的语言，独立于浏览器语言。
@@ -276,6 +278,7 @@ options:
     duplicate: 该模式已在列表中
   preference:
     title: 偏好设置
+    pageDescription: 设置界面主题和语言，并控制扩展在哪些网站启用。
     appearanceAndLanguage:
       title: 外观与语言
       theme:
@@ -298,12 +301,16 @@ options:
     title: 悬浮工具
     floatingButton:
       title: 悬浮按钮
+      pageDescription: 设置悬浮按钮停在哪一侧、点击后做什么，以及在哪些网站不显示。
     selectionToolbar:
       title: 选择工具栏
+      pageDescription: 设置选中文本时出现哪些操作，以及工具栏在哪些网站显示。
     contextMenu:
       title: 右键菜单
+      pageDescription: 控制浏览器右键菜单里的 Read Frog 选项。
     inputTranslation:
       title: 输入翻译
+      pageDescription: 在发送之前，把你在输入框里写的内容翻译好。
   inputTranslation:
     provider:
       title: 翻译服务
@@ -405,6 +412,7 @@ options:
           description: 配置选择工具栏翻译功能使用的提供商与模型
       customActions:
         title: 自定义 AI 指令
+        pageDescription: 编写自己的提示词，从划词工具栏对选中的文本运行。
         description: 为划词添加你自己的结构化 AI 操作
         builtIn: 内置
         add: 添加 AI 指令
@@ -645,6 +653,7 @@ options:
         description: 在浏览器右键菜单中添加翻译选项，快速翻译页面或所选文本
   translation:
     title: 翻译
+    pageDescription: 控制页面翻译的方式：模式、范围、快捷键、提示词和请求限制。
     requestQueueConfig:
       title: 翻译速率
       firstOnDescription: 调整翻译请求的处理速度，使用
@@ -817,6 +826,7 @@ options:
       enableDescription: AI 使用网页摘要来提高翻译准确性。需要 LLM 翻译提供商。刚开始翻译页面时会有延迟，并增加 API 费用。
   siteRules:
     title: 站点规则
+    pageDescription: 用内置规则和自定义规则调整单个网站的翻译方式。
     description: 针对特定网站调整翻译行为的规则。
     userRules:
       title: 用户规则
@@ -842,6 +852,7 @@ options:
       count: 显示 $1 / $2 条规则
   tts:
     title: 文本转语音
+    pageDescription: 用自然的语音朗读任何选中的文本。
     description: 使用 Edge TTS 语音参数来自定义朗读按钮。
     voice:
       label: 声音
@@ -865,6 +876,7 @@ options:
     betaDisabled: 启用测试体验后即可自定义文本转语音设置。
   statistics:
     title: 统计
+    pageDescription: 查看 Read Frog 一段时间内发出的翻译请求数量。
     batchRequest:
       title: 批量翻译已节省请求
       description: 周期内批量翻译节省的请求百分比
@@ -872,6 +884,7 @@ options:
       batchRequestCount: 批量请求数量
   config:
     title: 配置
+    pageDescription: 同步、备份和重置你的设置，并查看当前版本。
     about:
       title: 关于
       description: Read Frog 出生于 2025 年 4 月
@@ -983,6 +996,7 @@ options:
         description: 该操作将清空您的所有自定义配置，并将其重置为默认值，请确认是否清除。
   videoSubtitles:
     title: 视频字幕
+    pageDescription: 边看边译视频字幕，并单独设置提供商、样式和请求参数。
     description: 当前仅支持 YouTube 视频字幕
     provider:
       title: 翻译服务商

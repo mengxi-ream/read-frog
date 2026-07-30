@@ -7,6 +7,7 @@ export function GeneralPage() {
   return (
     <PageLayout
       title={i18n.t("options.general.title")}
+      description={i18n.t("options.general.pageDescription")}
       innerClassName="*:border-b [&>*:last-child]:border-b-0"
     >
       <FeatureProvidersConfig />

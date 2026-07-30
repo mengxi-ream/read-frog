@@ -102,6 +102,7 @@ options:
     enabled: Beta Deneyimini Etkinleştir
   apiProviders:
     title: API Sağlayıcıları
+    pageDescription: Read Frog'un çağırdığı yapay zekâ servislerini bağlayın, anahtarlarını ve modellerini yönetin.
     description: Çeviri ve kelime analizi işlevleri için API sağlayıcılarını buradan yapılandırın. 20'den fazla yerleşik sağlayıcımız var ve OpenAI uyumlu tüm API sağlayıcılarını destekliyoruz.
     addProvider: Sağlayıcı Ekle
     builtInProvider: Yerleşik Sağlayıcı
@@ -224,6 +225,7 @@ options:
       slow: Yavaş (düşünme modunu ayarlamanız önerilir)
   general:
     title: Genel
+    pageDescription: Her özelliğin hangi sağlayıcıyı kullanacağını ve Read Frog'un sayfa dilini nasıl algılayacağını seçin.
     interfaceLanguage:
       title: Arayüz Dili
       description: Uzantı arayüzünün dilini tarayıcı dilinizden bağımsız olarak seçin.
@@ -275,6 +277,7 @@ options:
     duplicate: Bu desen zaten listede
   preference:
     title: Tercihler
+    pageDescription: Arayüz temasını ve dilini ayarlayın, uzantının nerede etkin olacağını belirleyin.
     appearanceAndLanguage:
       title: Görünüm ve Dil
       theme:
@@ -297,12 +300,16 @@ options:
     title: Kaplama Araçları
     floatingButton:
       title: Yüzen Buton
+      pageDescription: Yüzen düğmenin hangi tarafta duracağını, tıklamanın ne yapacağını ve nerede gizleneceğini ayarlayın.
     selectionToolbar:
       title: Seçim Araç Çubuğu
+      pageDescription: Metin seçtiğinizde hangi eylemlerin görüneceğini ve araç çubuğunun nerede çıkacağını belirleyin.
     contextMenu:
       title: Bağlam Menüsü
+      pageDescription: Tarayıcının sağ tık menüsündeki Read Frog seçeneklerini yönetin.
     inputTranslation:
       title: Giriş Çevirisi
+      pageDescription: Giriş kutularına yazdıklarınızı göndermeden önce çevirin.
   inputTranslation:
     provider:
       title: Çeviri Sağlayıcısı
@@ -404,6 +411,7 @@ options:
           description: Seçim araç çubuğu çeviri özelliği için sağlayıcı ve model yapılandırın
       customActions:
         title: Özel AI Eylemleri
+        pageDescription: Kendi istemlerinizi yazın ve seçim araç çubuğundan seçili metin üzerinde çalıştırın.
         description: Seçilen metin için kendi yapılandırılmış AI eylemlerinizi ekleyin
         builtIn: Yerleşik
         add: AI Eylemi Ekle
@@ -529,6 +537,7 @@ options:
         description: Sayfa veya seçili metni hızlıca çevirmek için tarayıcı sağ tıklama menüsüne çeviri seçenekleri ekle
   translation:
     title: Çeviri
+    pageDescription: Sayfaların nasıl çevrileceğini belirleyin — mod, kapsam, kısayollar, istemler ve istek limitleri.
     requestQueueConfig:
       title: Çeviri Hızı
       firstOnDescription: Çeviri isteklerinin işleme hızını
@@ -701,6 +710,7 @@ options:
       enableDescription: AI, çeviri doğruluğunu artırmak için web sayfası özetini kullanır. LLM sağlayıcısı gerektirir. Bir sayfayı çevirmeye başlarken gecikme ekler ve API maliyetlerini artırır.
   siteRules:
     title: Site Kuralları
+    pageDescription: Yerleşik ve özel kurallarla tek tek web sitelerinin nasıl çevrileceğini ayarlayın.
     description: Belirli web sitelerinin nasıl çevrileceğini ayarlayan site bazlı kurallar.
     userRules:
       title: Kullanıcı Kuralları
@@ -726,6 +736,7 @@ options:
       count: $2 kuraldan $1 tanesi gösteriliyor
   tts:
     title: Metinden Konuşmaya
+    pageDescription: Seçtiğiniz metni doğal bir sesle okutun.
     description: Konuş butonunu Edge TTS ses ayarlarıyla özelleştirin.
     voice:
       label: Ses
@@ -749,6 +760,7 @@ options:
     betaDisabled: Metinden konuşmaya ayarlarını özelleştirmek için Beta Deneyimini etkinleştirin.
   statistics:
     title: İstatistikler
+    pageDescription: Read Frog'un zaman içinde kaç çeviri isteği gönderdiğini görün.
     batchRequest:
       title: Kaydedilen Toplu Çeviri İstekleri
       description: Dönem içinde toplu çeviri ile kaydedilen istek yüzdesi
@@ -756,6 +768,7 @@ options:
       batchRequestCount: Toplu İstek Sayısı
   config:
     title: Yapılandırma
+    pageDescription: Ayarlarınızı eşitleyin, yedekleyin, sıfırlayın ve sürümü kontrol edin.
     about:
       title: Hakkında
       description: Read Frog Nisan 2025'te doğdu
@@ -867,6 +880,7 @@ options:
         description: Bu işlem tüm özel yapılandırmalarınızı temizleyecek ve varsayılan değerlere sıfırlayacaktır. Lütfen onaylayın.
   videoSubtitles:
     title: Video Altyazıları
+    pageDescription: İzlerken altyazıları çevirin; sağlayıcı, stil ve istek ayarları ayrı tutulur.
     description: Şu anda yalnızca YouTube video altyazılarını desteklemektedir
     provider:
       title: Çeviri Sağlayıcısı

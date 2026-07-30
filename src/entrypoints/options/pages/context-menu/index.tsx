@@ -6,7 +6,10 @@ import { ContextMenuTranslateToggle } from "./context-menu-translate-toggle"
 
 export function ContextMenuPage() {
   return (
-    <PageLayout title={i18n.t("options.overlayTools.contextMenu.title")}>
+    <PageLayout
+      title={i18n.t("options.overlayTools.contextMenu.title")}
+      description={i18n.t("options.overlayTools.contextMenu.pageDescription")}
+    >
       <GradientBackground>
         <img
           src={contextMenuDemoImage}

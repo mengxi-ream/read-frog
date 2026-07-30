@@ -102,6 +102,7 @@ options:
     enabled: Activar experiencia beta
   apiProviders:
     title: Proveedores de API
+    pageDescription: Conecta los servicios de IA que usa Read Frog y gestiona sus claves y modelos.
     description: Configura proveedores de API para traducción e información de vocabulario. Tenemos más de 20 proveedores integrados y admitimos cualquier proveedor de API compatible con OpenAI.
     addProvider: Añadir proveedor
     builtInProvider: Proveedor integrado
@@ -225,6 +226,7 @@ options:
       slow: Lento (se recomienda ajustar el modo de razonamiento)
   general:
     title: General
+    pageDescription: Elige qué proveedor impulsa cada función y cómo Read Frog detecta el idioma de una página.
     interfaceLanguage:
       title: Idioma de la interfaz
       description: Elige el idioma de la interfaz de la extensión, independiente del idioma de tu navegador.
@@ -276,6 +278,7 @@ options:
     duplicate: Este patrón ya está en la lista
   preference:
     title: Preferencias
+    pageDescription: Define el tema y el idioma de la interfaz, y controla dónde se activa la extensión.
     appearanceAndLanguage:
       title: Apariencia e idioma
       theme:
@@ -298,12 +301,16 @@ options:
     title: Herramientas superpuestas
     floatingButton:
       title: Botón flotante
+      pageDescription: Elige en qué lado se coloca el botón flotante, qué hace al pulsarlo y dónde permanece oculto.
     selectionToolbar:
       title: Barra de selección
+      pageDescription: Define qué acciones aparecen al seleccionar texto y dónde se muestra la barra.
     contextMenu:
       title: Menú contextual
+      pageDescription: Controla las opciones de Read Frog en el menú contextual del navegador.
     inputTranslation:
       title: Traducción de entrada
+      pageDescription: Traduce lo que escribes en los campos de texto antes de enviarlo.
   inputTranslation:
     provider:
       title: Proveedor de traducción
@@ -405,6 +412,7 @@ options:
           description: Configura proveedor y modelo para la función de traducción de la barra de selección
       customActions:
         title: Acciones AI personalizadas
+        pageDescription: Escribe tus propios prompts y ejecútalos sobre el texto seleccionado desde la barra de selección.
         description: Añade tus propias acciones AI estructuradas para texto seleccionado
         builtIn: Integrada
         add: Añadir acción AI
@@ -645,6 +653,7 @@ options:
         description: Añade opciones de traducción al menú contextual del navegador para traducir rápidamente páginas y selecciones
   translation:
     title: Traducción
+    pageDescription: Controla cómo se traducen las páginas — modo, alcance, atajos, prompts y límites de solicitudes.
     requestQueueConfig:
       title: Tasa de traducción
       firstOnDescription: Ajusta la velocidad de procesamiento de las solicitudes de traducción usando el
@@ -817,6 +826,7 @@ options:
       enableDescription: La AI usa el resumen de la página web para mejorar la precisión de traducción. Requiere proveedor LLM. Añade latencia al empezar a traducir una página y aumenta los costes de API.
   siteRules:
     title: Reglas de sitio
+    pageDescription: Ajusta cómo se traduce cada sitio web con reglas integradas y personalizadas.
     description: Reglas por sitio que ajustan cómo se traducen determinados sitios web.
     userRules:
       title: Reglas de usuario
@@ -842,6 +852,7 @@ options:
       count: Mostrando $1 de $2 reglas
   tts:
     title: Texto a voz
+    pageDescription: Lee en voz alta cualquier selección con una voz natural.
     description: Usa la configuración de voz de Edge TTS para el botón Leer en voz alta.
     voice:
       label: Voz
@@ -865,6 +876,7 @@ options:
     betaDisabled: Activa Experiencia beta para personalizar la configuración de texto a voz.
   statistics:
     title: Estadísticas
+    pageDescription: Consulta cuántas solicitudes de traducción ha hecho Read Frog a lo largo del tiempo.
     batchRequest:
       title: Solicitudes de traducción por lotes ahorradas
       description: Porcentaje de solicitudes ahorradas por traducción por lotes en el periodo
@@ -872,6 +884,7 @@ options:
       batchRequestCount: Recuento de solicitudes por lotes
   config:
     title: Configuración
+    pageDescription: Sincroniza, respalda y restablece tu configuración, y consulta la versión instalada.
     about:
       title: Acerca de
       description: Read Frog nació en abril de 2025
@@ -983,6 +996,7 @@ options:
         description: Esta operación borrará todas tus configuraciones personalizadas y las restablecerá a los valores predeterminados. Confirma para continuar.
   videoSubtitles:
     title: Subtítulos de video
+    pageDescription: Traduce los subtítulos mientras ves el video, con proveedor, estilo y ajustes propios.
     description: Actualmente solo admite subtítulos de videos de YouTube
     provider:
       title: Proveedor de traducción

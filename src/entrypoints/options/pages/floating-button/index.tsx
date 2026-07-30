@@ -9,7 +9,10 @@ import { FloatingButtonSide } from "./floating-button-side"
 
 export function FloatingButtonPage() {
   return (
-    <PageLayout title={i18n.t("options.overlayTools.floatingButton.title")}>
+    <PageLayout
+      title={i18n.t("options.overlayTools.floatingButton.title")}
+      description={i18n.t("options.overlayTools.floatingButton.pageDescription")}
+    >
       <GradientBackground>
         <img
           src={floatingButtonDemoImage}

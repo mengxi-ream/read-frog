@@ -102,6 +102,7 @@ options:
     enabled: Enable Beta Experience
   apiProviders:
     title: API Providers
+    pageDescription: Connect the AI services Read Frog calls, and manage their keys and models.
     description: Configure API providers for translation and vocabulary insight. We have 20+ built-in providers and support any OpenAI-compatible API provider.
     addProvider: Add Provider
     builtInProvider: Built-in Provider
@@ -225,6 +226,7 @@ options:
       slow: Slow (try adjusting thinking mode)
   general:
     title: General
+    pageDescription: Choose which provider powers each feature and how Read Frog detects a page's language.
     interfaceLanguage:
       title: Interface Language
       description: Choose the language for the extension's interface, independent of your browser language.
@@ -276,6 +278,7 @@ options:
     duplicate: This pattern is already in the list
   preference:
     title: Preferences
+    pageDescription: Set the interface theme and language, and control where the extension is active.
     appearanceAndLanguage:
       title: Appearance & Language
       theme:
@@ -298,12 +301,16 @@ options:
     title: Overlay Tools
     floatingButton:
       title: Floating Button
+      pageDescription: Set which side the floating button sits on, what a click does, and where it stays hidden.
     selectionToolbar:
       title: Selection Toolbar
+      pageDescription: Set which actions appear when you select text, and where the toolbar shows up.
     contextMenu:
       title: Context Menu
+      pageDescription: Control the Read Frog entries in the browser's right-click menu.
     inputTranslation:
       title: Input Translation
+      pageDescription: Translate what you type in input boxes before you send it.
   inputTranslation:
     provider:
       title: Translation Provider
@@ -405,6 +412,7 @@ options:
           description: Configure provider and model for the selection toolbar translation feature
       customActions:
         title: Custom AI Actions
+        pageDescription: Write your own prompts and run them on selected text from the selection toolbar.
         description: Add your own structured AI actions for selected text
         builtIn: Built-in
         add: Add AI Action
@@ -645,6 +653,7 @@ options:
         description: Add translate options to the browser right-click menu for quick page and selection translation
   translation:
     title: Translation
+    pageDescription: Control how pages get translated — mode, range, shortcuts, prompts, and request limits.
     requestQueueConfig:
       title: Translation Rate
       firstOnDescription: Adjust the processing speed of translation requests using the
@@ -817,6 +826,7 @@ options:
       enableDescription: AI uses webpage summary to improve translation accuracy. Requires LLM provider. Adds latency when starting to translate a page and increases API costs.
   siteRules:
     title: Site Rules
+    pageDescription: Adjust how individual websites are translated with built-in and custom rules.
     description: Per-site rules that adjust how specific websites are translated.
     userRules:
       title: User Rules
@@ -842,6 +852,7 @@ options:
       count: Showing $1 of $2 rules
   tts:
     title: Text to Speech
+    pageDescription: Read any selection aloud with a natural voice.
     description: Use Edge TTS voice settings for the Speak button.
     voice:
       label: Voice
@@ -865,6 +876,7 @@ options:
     betaDisabled: Enable Beta Experience to customize text-to-speech settings.
   statistics:
     title: Statistics
+    pageDescription: See how many translation requests Read Frog has made over time.
     batchRequest:
       title: Batch Translation Requests Saved
       description: Percentage of requests saved by batch translation in the period
@@ -872,6 +884,7 @@ options:
       batchRequestCount: Batch Request Count
   config:
     title: Config
+    pageDescription: Sync, back up, and reset your settings, and check which version you're running.
     about:
       title: About
       description: Read Frog was born in April 2025
@@ -983,6 +996,7 @@ options:
         description: This operation will clear all your custom configurations and reset them to default values. Please confirm.
   videoSubtitles:
     title: Video Subtitles
+    pageDescription: Translate subtitles as you watch, with their own provider, style, and request settings.
     description: Currently only supports YouTube video subtitles
     provider:
       title: Translation Provider

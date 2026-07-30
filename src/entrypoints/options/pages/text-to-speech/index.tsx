@@ -6,6 +6,7 @@ export function TextToSpeechPage() {
   return (
     <PageLayout
       title={i18n.t("options.tts.title")}
+      description={i18n.t("options.tts.pageDescription")}
       innerClassName="*:border-b [&>*:last-child]:border-b-0"
     >
       <TtsConfig />

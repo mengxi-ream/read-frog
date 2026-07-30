@@ -10,7 +10,10 @@ import { SubtitlesStyleSettings } from "./subtitles-style-settings"
 
 export function VideoSubtitlesPage() {
   return (
-    <PageLayout title={i18n.t("options.videoSubtitles.title")}>
+    <PageLayout
+      title={i18n.t("options.videoSubtitles.title")}
+      description={i18n.t("options.videoSubtitles.pageDescription")}
+    >
       <div className="*:border-b [&>*:last-child]:border-b-0">
         <SubtitlesConfig />
         <SubtitlesAiQuota />
