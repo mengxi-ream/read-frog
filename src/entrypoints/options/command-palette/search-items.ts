@@ -26,16 +26,6 @@ const TTS_SEARCH_ITEMS: SearchItemDefinition[] = [
   },
 ]
 
-const CONFIG_SEARCH_ITEMS = [
-  {
-    sectionId: "beta-experience",
-    route: "/config",
-    titleKey: "options.betaExperience.title",
-    descriptionKey: "options.betaExperience.description",
-    pageKey: "options.config.title",
-  },
-] satisfies SearchItemDefinition[]
-
 export const SEARCH_ITEMS: SearchItem[] = [
   // General page
   {
@@ -103,6 +93,20 @@ export const SEARCH_ITEMS: SearchItem[] = [
     route: "/preference",
     titleKey: "options.config.resetConfig.title",
     descriptionKey: "options.config.resetConfig.description",
+    pageKey: "options.preference.title",
+  },
+  {
+    sectionId: "beta-experience",
+    route: "/preference",
+    titleKey: "options.betaExperience.title",
+    descriptionKey: "options.betaExperience.description",
+    pageKey: "options.preference.title",
+  },
+  {
+    sectionId: "analytics",
+    route: "/preference",
+    titleKey: "options.config.analytics.title",
+    descriptionKey: "options.config.analytics.description",
     pageKey: "options.preference.title",
   },
 
@@ -383,7 +387,4 @@ export const SEARCH_ITEMS: SearchItem[] = [
 
   // Text to Speech page
   ...TTS_SEARCH_ITEMS,
-
-  // Config page
-  ...CONFIG_SEARCH_ITEMS,
 ] satisfies SearchItemDefinition[]

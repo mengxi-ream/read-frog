@@ -98,7 +98,7 @@ options:
     page: cài đặt
   betaExperience:
     title: Trải nghiệm Beta
-    description: Bật các tính năng thử nghiệm và truy cập sớm các chức năng mới. Các tính năng này có thể không ổn định hoặc chưa hoàn chỉnh.
+    description: Bật các tính năng thử nghiệm có thể chưa ổn định
     enabled: Bật trải nghiệm Beta
   apiProviders:
     title: Nhà cung cấp API
@@ -288,6 +288,8 @@ options:
         title: Chế độ kích hoạt
     config:
       title: Cấu hình
+    userExperience:
+      title: Trải nghiệm người dùng
   siteControl:
     title: Kiểm soát trang web
     mode:
@@ -769,15 +771,10 @@ options:
       originalRequestCount: Số yêu cầu ban đầu
       batchRequestCount: Số yêu cầu theo lô
   config:
-    title: Cấu hình
-    pageDescription: Đồng bộ, sao lưu và đặt lại cài đặt, đồng thời xem phiên bản hiện tại.
-    about:
-      title: Giới thiệu
-      description: Read Frog ra đời vào tháng 4 năm 2025
-      mission: Read Frog hướng tới việc mở rộng cơ hội tiếp cận bình đẳng với giáo dục chất lượng cao trong thời đại AI bằng cách mang lại trải nghiệm học tập gần với cảm giác được giáo viên thật hướng dẫn, nhưng với chi phí hợp lý hơn trong học ngôn ngữ, y học và các lĩnh vực giàu tri thức khác.
-      analytics:
-        title: Giúp cải thiện trải nghiệm người dùng
-        tooltip: Khi bật, Read Frog sẽ gửi các tín hiệu sử dụng ẩn danh để xác minh tính ổn định của tính năng, tối ưu hiệu năng và độ tinh chỉnh UX, đồng thời giúp chúng tôi ưu tiên những gì cần xây tiếp theo.
+    analytics:
+      title: Giúp cải thiện trải nghiệm người dùng
+      tooltip: Khi bật, Read Frog sẽ gửi các tín hiệu sử dụng ẩn danh để phát hiện lỗi, xác minh tính ổn định của tính năng, tối ưu hiệu năng và độ tinh chỉnh UX, đồng thời giúp chúng tôi ưu tiên những gì cần xây tiếp theo.
+      description: Gửi dữ liệu sử dụng ẩn danh để giúp chúng tôi cải thiện Read Frog
     sync:
       title: Đồng bộ cấu hình thủ công
       description: Nhập và xuất cài đặt cấu hình thủ công

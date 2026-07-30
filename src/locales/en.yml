@@ -98,7 +98,7 @@ options:
     page: page
   betaExperience:
     title: Beta Experience
-    description: Enable experimental features and early access to new functionality. These features may be unstable or incomplete.
+    description: Turn on experimental features that may still be unstable
     enabled: Enable Beta Experience
   apiProviders:
     title: API Providers
@@ -289,6 +289,8 @@ options:
         title: Activation mode
     config:
       title: Config
+    userExperience:
+      title: User Experience
   siteControl:
     title: Site Control
     mode:
@@ -885,15 +887,10 @@ options:
       originalRequestCount: Original Request Count
       batchRequestCount: Batch Request Count
   config:
-    title: Config
-    pageDescription: Sync, back up, and reset your settings, and check which version you're running.
-    about:
-      title: About
-      description: Read Frog was born in April 2025
-      mission: Read Frog aims to expand equal access to high-quality education in the AI era by making learning experiences that feel closer to a real teacher affordable across language learning, medicine, and other knowledge-heavy fields.
-      analytics:
-        title: Help improve user experience
-        tooltip: When enabled, Read Frog sends anonymous product usage signals so we can verify feature reliability, improve performance and UX polish, and prioritize future work.
+    analytics:
+      title: Help improve user experience
+      tooltip: When enabled, Read Frog sends anonymous product usage signals so we can catch bugs, verify feature reliability, improve performance and UX polish, and prioritize future work.
+      description: Send anonymous usage data to help us improve Read Frog
     sync:
       title: Manual Config Sync
       description: Manually import and export your configuration settings

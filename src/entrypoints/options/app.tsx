@@ -42,10 +42,6 @@ const TextToSpeechPage = lazy(() =>
 const StatisticsPage = lazy(() =>
   import("./pages/statistics").then((module) => ({ default: module.StatisticsPage })),
 )
-const ConfigPage = lazy(() =>
-  import("./pages/config").then((module) => ({ default: module.ConfigPage })),
-)
-
 const ConfigBackupPage = lazy(() =>
   import("./pages/preference/config/config-backup").then((module) => ({
     default: module.ConfigBackupPage,
@@ -66,7 +62,6 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/input-translation": InputTranslationPage,
   "/tts": TextToSpeechPage,
   "/statistics": StatisticsPage,
-  "/config": ConfigPage,
   "/preference/config-backup": ConfigBackupPage,
 }
 

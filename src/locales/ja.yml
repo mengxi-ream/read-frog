@@ -98,7 +98,7 @@ options:
     page: APIキーを設定してください
   betaExperience:
     title: Beta 体験
-    description: 実験的機能と新機能への早期アクセスを有効にします。これらの機能は不安定または不完全な場合があります。
+    description: まだ不安定な可能性がある実験的機能を有効にします
     enabled: Beta 体験を有効にする
   apiProviders:
     title: APIプロバイダー
@@ -288,6 +288,8 @@ options:
         title: 有効化モード
     config:
       title: 設定
+    userExperience:
+      title: ユーザー体験
   siteControl:
     title: サイト制御
     mode:
@@ -769,15 +771,10 @@ options:
       originalRequestCount: 元のリクエスト数
       batchRequestCount: バッチリクエスト数
   config:
-    title: 設定
-    pageDescription: 設定の同期・バックアップ・リセットを行い、現在のバージョンを確認します。
-    about:
-      title: Read Frog について
-      description: Read Frog は 2025 年 4 月に生まれました
-      mission: Read Frog は、AI 時代における質の高い教育機会への平等なアクセスを広げるため、語学学習、医学、その他の知識集約型分野で、実際の教師に近い学習体験を手頃な価格で提供することを目指しています。
-      analytics:
-        title: ユーザー体験の改善に協力する
-        tooltip: 有効にすると、Read Frog は匿名の利用シグナルを送信し、機能の安定性確認、性能や UX の改善、今後優先すべき機能の判断に役立てます。
+    analytics:
+      title: ユーザー体験の改善に協力する
+      tooltip: 有効にすると、Read Frog は匿名の利用シグナルを送信し、不具合の発見、機能の安定性確認、性能や UX の改善、今後優先すべき機能の判断に役立てます。
+      description: 匿名の利用データを送信して Read Frog の改善に協力します
     sync:
       title: 手動設定同期
       description: 手動で設定をインポート・エクスポート

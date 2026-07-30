@@ -98,7 +98,7 @@ options:
     page: página
   betaExperience:
     title: Experiencia beta
-    description: Activa funciones experimentales y acceso anticipado a nuevas funcionalidades. Estas funciones pueden ser inestables o estar incompletas.
+    description: Activa funciones experimentales que todavía pueden ser inestables
     enabled: Activar experiencia beta
   apiProviders:
     title: Proveedores de API
@@ -289,6 +289,8 @@ options:
         title: Modo de activación
     config:
       title: Configuración
+    userExperience:
+      title: Experiencia de usuario
   siteControl:
     title: Control de sitios
     mode:
@@ -885,15 +887,10 @@ options:
       originalRequestCount: Recuento de solicitudes originales
       batchRequestCount: Recuento de solicitudes por lotes
   config:
-    title: Configuración
-    pageDescription: Sincroniza, respalda y restablece tu configuración, y consulta la versión instalada.
-    about:
-      title: Acerca de
-      description: Read Frog nació en abril de 2025
-      mission: Read Frog busca ampliar el acceso igualitario a educación de alta calidad en la era de la AI haciendo asequibles experiencias de aprendizaje que se sientan más cercanas a un profesor real, en el aprendizaje de idiomas, medicina y otros campos intensivos en conocimiento.
-      analytics:
-        title: Ayuda a mejorar la experiencia de usuario
-        tooltip: Cuando está activado, Read Frog envía señales anónimas de uso del producto para que podamos verificar la fiabilidad de las funciones, mejorar el rendimiento y el acabado de la UX, y priorizar trabajos futuros.
+    analytics:
+      title: Ayuda a mejorar la experiencia de usuario
+      tooltip: Cuando está activado, Read Frog envía señales anónimas de uso del producto para que podamos detectar errores, verificar la fiabilidad de las funciones, mejorar el rendimiento y el acabado de la UX, y priorizar trabajos futuros.
+      description: Envía datos de uso anónimos para ayudarnos a mejorar Read Frog
     sync:
       title: Sincronización manual de configuración
       description: Importa y exporta manualmente tus ajustes de configuración

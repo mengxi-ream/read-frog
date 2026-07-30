@@ -98,7 +98,7 @@ options:
     page: 頁面設定 API 金鑰
   betaExperience:
     title: Beta 體驗
-    description: 啟用實驗性功能，並搶先體驗新功能。這些功能可能不穩定或不完整。
+    description: 開啟可能還不穩定的實驗性功能
     enabled: 啟用 Beta 體驗
   apiProviders:
     title: API 提供者
@@ -289,6 +289,8 @@ options:
         title: 啟動模式
     config:
       title: 設定
+    userExperience:
+      title: 使用體驗
   siteControl:
     title: 網站控制
     mode:
@@ -885,15 +887,10 @@ options:
       originalRequestCount: 原始請求數量
       batchRequestCount: 批次請求數量
   config:
-    title: 設定
-    pageDescription: 同步、備份和重設你的設定，並查看目前版本。
-    about:
-      title: 關於
-      description: 陪讀蛙於 2025 年 4 月誕生
-      mission: 陪讀蛙致力於在 AI 時代擴大高品質教育機會的平等可及性，藉由以更低成本提供盡可能接近真人教師的學習體驗，涵蓋語言學習、醫學以及其他知識密集型領域。
-      analytics:
-        title: 幫助改進使用者體驗
-        tooltip: 開啟後，陪讀蛙會傳送匿名的產品使用訊號，用於驗證功能是否穩定、最佳化效能與互動細節，並協助決定接下來優先投入的方向。
+    analytics:
+      title: 幫助改進使用者體驗
+      tooltip: 開啟後，陪讀蛙會傳送匿名的產品使用訊號，用於發現 bug、驗證功能是否穩定、最佳化效能與互動細節，並協助決定接下來優先投入的方向。
+      description: 傳送匿名使用資料，協助我們改進 Read Frog
     sync:
       title: 手動設定同步
       description: 手動匯入與匯出設定

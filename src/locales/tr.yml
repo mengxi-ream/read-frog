@@ -98,7 +98,7 @@ options:
     page: sayfasında ayarlayın
   betaExperience:
     title: Beta Deneyimi
-    description: Deneysel özellikleri ve yeni işlevlere erken erişimi etkinleştirin. Bu özellikler kararsız veya eksik olabilir.
+    description: Henüz kararsız olabilecek deneysel özellikleri açın
     enabled: Beta Deneyimini Etkinleştir
   apiProviders:
     title: API Sağlayıcıları
@@ -288,6 +288,8 @@ options:
         title: Etkinleştirme modu
     config:
       title: Yapılandırma
+    userExperience:
+      title: Kullanıcı Deneyimi
   siteControl:
     title: Site Kontrolü
     mode:
@@ -769,15 +771,10 @@ options:
       originalRequestCount: Orijinal İstek Sayısı
       batchRequestCount: Toplu İstek Sayısı
   config:
-    title: Yapılandırma
-    pageDescription: Ayarlarınızı eşitleyin, yedekleyin, sıfırlayın ve sürümü kontrol edin.
-    about:
-      title: Hakkında
-      description: Read Frog Nisan 2025'te doğdu
-      mission: Read Frog, yapay zeka çağında yüksek kaliteli eğitime daha eşit erişimi genişletmek için, dil öğrenimi, tıp ve bilgi yoğun diğer alanlarda gerçek bir öğretmene daha yakın hissettiren öğrenme deneyimlerini daha ulaşılabilir maliyetlerle sunmayı hedefler.
-      analytics:
-        title: Kullanıcı deneyimini geliştirmemize yardımcı ol
-        tooltip: Açık olduğunda Read Frog, özelliklerin güvenilir çalıştığını doğrulamak, performansı ve UX ayrıntılarını iyileştirmek ve sıradaki önceliklerimizi belirlemek için anonim kullanım sinyalleri gönderir.
+    analytics:
+      title: Kullanıcı deneyimini geliştirmemize yardımcı ol
+      tooltip: Açık olduğunda Read Frog, hataları yakalamak, özelliklerin güvenilir çalıştığını doğrulamak, performansı ve UX ayrıntılarını iyileştirmek ve sıradaki önceliklerimizi belirlemek için anonim kullanım sinyalleri gönderir.
+      description: Read Frog'u geliştirmemize yardımcı olmak için anonim kullanım verileri gönderin
     sync:
       title: Manuel Yapılandırma Senkronizasyonu
       description: Yapılandırma ayarlarınızı manuel olarak içe ve dışa aktarın
