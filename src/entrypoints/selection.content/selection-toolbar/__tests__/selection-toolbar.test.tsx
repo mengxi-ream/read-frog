@@ -360,6 +360,33 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expectToolbarHidden()
   })
 
+  it("should not show toolbar when a preserved selection does not contain the clicked video player", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="selected-element">{MOCK_SELECTED_TEXT}</div>
+        <video data-testid="video-player" />
+      </div>,
+    )
+
+    await clearToolbarState()
+
+    const videoPlayer = screen.getByTestId("video-player")
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
+      getRangeAt: () => ({
+        startContainer: document.body,
+        startOffset: 0,
+        endContainer: document.body,
+        endOffset: 1,
+      }),
+      containsNode: vi.fn<(...args: any[]) => any>((node: Node) => node !== videoPlayer),
+    }))
+
+    await triggerMouseUpWithSelection(videoPlayer)
+    expectToolbarHidden()
+  })
+
   it("should not show toolbar when shadow DOM retargets button clicks to the host element", async () => {
     render(
       <div>
