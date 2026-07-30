@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react"
 import { fireEvent, render, screen } from "@testing-library/react"
+import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { ProvidersConfig } from "@/entrypoints/options/pages/api-providers/providers-config"
 import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
@@ -53,10 +54,17 @@ vi.mock("jotai", () => ({
   useAtomValue: (atom: object) => {
     if (atom === selectedProviderIdAtom) return testState.selectedProviderId
     if (atom === configAtom) return config
+    if (atom === providersAtom) return [providerConfig]
     return undefined
   },
-  useSetAtom: (atom: object) =>
-    atom === providerWriteAtom ? setProviderConfigMock : vi.fn<(value: unknown) => void>(),
+  useSetAtom: (atom: object) => {
+    if (atom === providerWriteAtom) return setProviderConfigMock
+    if (atom === selectedProviderIdAtom)
+      return (value: string) => {
+        testState.selectedProviderId = value
+      }
+    return vi.fn<(value: unknown) => void>()
+  },
 }))
 
 vi.mock("@/components/provider-icon", () => ({
@@ -104,6 +112,8 @@ vi.mock("@/utils/atoms/provider", () => ({
 
 vi.mock("@/utils/config/helpers", () => ({
   getAPIProvidersConfig: (providers: unknown[]) => providers,
+  getProviderConfigById: (providers: (typeof providerConfig)[], id: string) =>
+    providers.find((provider) => provider.id === id),
 }))
 
 vi.mock("@/utils/constants/feature-providers", () => ({
@@ -150,6 +160,15 @@ vi.mock("@/entrypoints/options/pages/api-providers/providers-config/provider-con
   ProviderConfigForm: () => null,
 }))
 
+// `ProvidersConfig` reads the location to honour a `?provider=` deep link.
+function renderProvidersConfig(initialEntry = "/api-providers") {
+  return render(
+    <MemoryRouter initialEntries={[initialEntry]}>
+      <ProvidersConfig />
+    </MemoryRouter>,
+  )
+}
+
 describe("ProvidersConfig", () => {
   beforeEach(() => {
     anchoredToastAddMock.mockReset()
@@ -158,7 +177,7 @@ describe("ProvidersConfig", () => {
   })
 
   it("anchors an in-use disable error to the corresponding provider switch", () => {
-    render(<ProvidersConfig />)
+    renderProvidersConfig()
 
     const providerSwitch = screen.getByRole("switch", { name: providerConfig.name })
     fireEvent.click(providerSwitch)
@@ -175,7 +194,7 @@ describe("ProvidersConfig", () => {
   it("renders the built-in provider composition without CRUD actions", () => {
     testState.selectedProviderId = BUILT_IN_AI_PROVIDER_ID
 
-    render(<ProvidersConfig />)
+    renderProvidersConfig()
 
     expect(
       screen.getByText("options.apiProviders.providers.attribution.builtInAi"),
@@ -183,5 +202,21 @@ describe("ProvidersConfig", () => {
     expect(screen.getByText("options.apiProviders.sponsorCta")).toBeInTheDocument()
     expect(screen.queryByText("options.apiProviders.form.duplicate")).not.toBeInTheDocument()
     expect(screen.queryByText("options.apiProviders.form.delete")).not.toBeInTheDocument()
+  })
+
+  it("opens the provider a ?provider= deep link names", () => {
+    testState.selectedProviderId = BUILT_IN_AI_PROVIDER_ID
+
+    renderProvidersConfig(`/api-providers?provider=${providerConfig.id}`)
+
+    expect(testState.selectedProviderId).toBe(providerConfig.id)
+  })
+
+  it("keeps the current selection when the deep link names an unknown provider", () => {
+    testState.selectedProviderId = BUILT_IN_AI_PROVIDER_ID
+
+    renderProvidersConfig("/api-providers?provider=deleted-provider")
+
+    expect(testState.selectedProviderId).toBe(BUILT_IN_AI_PROVIDER_ID)
   })
 })

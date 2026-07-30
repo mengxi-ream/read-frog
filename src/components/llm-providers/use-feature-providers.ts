@@ -4,7 +4,6 @@ import type { FeatureKey } from "@/utils/constants/feature-providers"
 import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
 import { useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useMemo } from "react"
-import { isAPIProviderConfig, isPureAPIProvider } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import {
@@ -13,15 +12,6 @@ import {
 } from "@/utils/constants/feature-providers"
 import { getSelectionToolbarActions, patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
-
-export function needsApiKeyWarning(providerConfig: ProviderConfig | null): boolean {
-  return (
-    !!providerConfig &&
-    isAPIProviderConfig(providerConfig) &&
-    !isPureAPIProvider(providerConfig.provider) &&
-    !providerConfig.apiKey
-  )
-}
 
 export interface FeatureProviderBinding {
   providers: ProviderSelectorOption[]

@@ -1,11 +1,11 @@
-import type { ComponentProps, ReactNode } from "react"
-import type { ProviderConfig } from "@/types/config/provider"
+import type { ComponentProps } from "react"
 import type { FeatureKey } from "@/utils/constants/feature-providers"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { FEATURE_KEYS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
+import { SetApiKeyWarning } from "./set-api-key-warning"
 import { useCustomActionProviders, useFeatureProvider } from "./use-feature-providers"
 
 type ProviderSelectorTriggerSize = ComponentProps<typeof ProviderSelector>["triggerSize"]
@@ -15,29 +15,27 @@ interface FeatureProviderSelectorListProps {
   providerSelectorClassName?: string
   providerSelectorTriggerSize?: ProviderSelectorTriggerSize
   includeCustomActions?: boolean
-  renderApiKeyWarning?: (providerConfig: ProviderConfig | null) => ReactNode
 }
-
-export { needsApiKeyWarning } from "./use-feature-providers"
 
 function FeatureProviderField({
   featureKey,
   providerSelectorClassName,
   providerSelectorTriggerSize,
-  renderApiKeyWarning,
 }: {
   featureKey: FeatureKey
   providerSelectorClassName?: string
   providerSelectorTriggerSize?: ProviderSelectorTriggerSize
-  renderApiKeyWarning?: (providerConfig: ProviderConfig | null) => ReactNode
 }) {
   const { providers, providerId, providerConfig, setProviderId } = useFeatureProvider(featureKey)
 
   return (
     <Field>
-      <FieldLabel nativeLabel={false} render={<div className="flex flex-wrap" />}>
+      <FieldLabel
+        nativeLabel={false}
+        render={<div className="flex flex-wrap items-center gap-2" />}
+      >
         {i18n.t(getFeatureLabelI18nKey(featureKey))}
-        {renderApiKeyWarning?.(providerConfig)}
+        <SetApiKeyWarning providerConfig={providerConfig} />
       </FieldLabel>
       <ProviderSelector
         providers={providers}
@@ -53,11 +51,9 @@ function FeatureProviderField({
 function CustomActionProviderFields({
   providerSelectorClassName,
   providerSelectorTriggerSize,
-  renderApiKeyWarning,
 }: {
   providerSelectorClassName?: string
   providerSelectorTriggerSize?: ProviderSelectorTriggerSize
-  renderApiKeyWarning?: (providerConfig: ProviderConfig | null) => ReactNode
 }) {
   const { actions, providers, getProviderConfig, setActionProviderId } = useCustomActionProviders()
 
@@ -72,9 +68,12 @@ function CustomActionProviderFields({
       </p>
       {actions.map((action) => (
         <Field key={action.id}>
-          <FieldLabel nativeLabel={false} render={<div />}>
+          <FieldLabel
+            nativeLabel={false}
+            render={<div className="flex flex-wrap items-center gap-2" />}
+          >
             {action.name}
-            {renderApiKeyWarning?.(getProviderConfig(action))}
+            <SetApiKeyWarning providerConfig={getProviderConfig(action)} />
           </FieldLabel>
           <ProviderSelector
             providers={providers}
@@ -97,7 +96,6 @@ export function FeatureProviderSelectorList({
   providerSelectorClassName = "w-full",
   providerSelectorTriggerSize,
   includeCustomActions = true,
-  renderApiKeyWarning,
 }: FeatureProviderSelectorListProps) {
   return (
     <FieldGroup className={cn("gap-4", className)}>
@@ -107,14 +105,12 @@ export function FeatureProviderSelectorList({
           featureKey={featureKey}
           providerSelectorClassName={providerSelectorClassName}
           providerSelectorTriggerSize={providerSelectorTriggerSize}
-          renderApiKeyWarning={renderApiKeyWarning}
         />
       ))}
       {includeCustomActions && (
         <CustomActionProviderFields
           providerSelectorClassName={providerSelectorClassName}
           providerSelectorTriggerSize={providerSelectorTriggerSize}
-          renderApiKeyWarning={renderApiKeyWarning}
         />
       )}
     </FieldGroup>

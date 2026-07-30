@@ -105,9 +105,9 @@ export const SEARCH_ITEMS: SearchItem[] = [
 
   // API Providers page
   {
-    sectionId: "api-providers",
+    sectionId: "provider-config",
     route: "/api-providers",
-    titleKey: "options.apiProviders.title",
+    titleKey: "options.apiProviders.configTitle",
     descriptionKey: "options.apiProviders.description",
     pageKey: "options.apiProviders.title",
   },

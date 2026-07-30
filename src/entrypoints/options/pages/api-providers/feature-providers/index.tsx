@@ -3,8 +3,8 @@ import type { ProviderConfig } from "@/types/config/provider"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { FeatureKey } from "@/utils/constants/feature-providers"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
+import { SetApiKeyWarning } from "@/components/llm-providers/set-api-key-warning"
 import {
-  needsApiKeyWarning,
   useCustomActionProviders,
   useFeatureProvider,
 } from "@/components/llm-providers/use-feature-providers"
@@ -16,7 +16,6 @@ import {
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
-import { SetApiKeyWarning } from "../../../components/set-api-key-warning"
 
 /** The triggers hug their content, so the popup hangs off their right edge to stay in the column. */
 const SELECT_CONTENT_PROPS = { align: "end" } as const
@@ -46,7 +45,7 @@ function FeatureProviderTitle({
   return (
     <span className="flex flex-wrap items-center gap-2">
       {children}
-      {needsApiKeyWarning(providerConfig) && <SetApiKeyWarning />}
+      <SetApiKeyWarning providerConfig={providerConfig} />
     </span>
   )
 }

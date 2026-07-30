@@ -2,6 +2,7 @@ import type { APIProviderConfig } from "@/types/config/provider"
 import { Icon } from "@iconify/react"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useRef, useState } from "react"
+import { useLocation } from "react-router"
 import { SponsorBadge } from "@/components/badges/sponsor-badge"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
@@ -14,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui
 import { isAPIProviderConfig } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { providerConfigAtom } from "@/utils/atoms/provider"
-import { getAPIProvidersConfig } from "@/utils/config/helpers"
+import { getAPIProvidersConfig, getProviderConfigById } from "@/utils/config/helpers"
 import {
   FEATURE_KEYS,
   FEATURE_PROVIDER_DEFS,
@@ -23,9 +24,11 @@ import {
 import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
+import { getRequestedProviderId, PROVIDER_CONFIG_SECTION_ID } from "@/utils/navigation"
 import {
   BUILT_IN_AI_PROVIDER_ID,
   BUILT_IN_AI_PROVIDER_LOGO,
+  isBuiltInAiProviderId,
 } from "@/utils/providers/provider-registry"
 import { ConfigItem } from "../../../components/config-item"
 import { EntityEditor } from "../../../components/entity-editor"
@@ -37,8 +40,35 @@ import { selectedProviderIdAtom } from "./atoms"
 import { ProviderConfigForm } from "./provider-config-form"
 import { BuiltInProviderEditor, ProviderEditor } from "./provider-editor"
 
+/**
+ * Opens the provider named by a `?provider=` deep link, the one an API-key prompt elsewhere on
+ * the page points at. Keyed on the history entry so the same link works twice, and held back
+ * until the id resolves so a link followed before the config loads is not dropped.
+ */
+function useRequestedProvider() {
+  const { search, key: locationKey } = useLocation()
+  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const setSelectedProviderId = useSetAtom(selectedProviderIdAtom)
+  const handledLocationRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    const marker = `${locationKey}:${search}`
+    if (handledLocationRef.current === marker) return
+
+    const providerId = getRequestedProviderId(search)
+    if (!providerId) return
+    if (!isBuiltInAiProviderId(providerId) && !getProviderConfigById(providersConfig, providerId)) {
+      return
+    }
+
+    handledLocationRef.current = marker
+    setSelectedProviderId(providerId)
+  }, [locationKey, search, providersConfig, setSelectedProviderId])
+}
+
 export function ProvidersConfig() {
   const selectedProviderId = useAtomValue(selectedProviderIdAtom)
+  useRequestedProvider()
   const editor =
     selectedProviderId === BUILT_IN_AI_PROVIDER_ID ? (
       <BuiltInProviderPanel />
@@ -48,7 +78,7 @@ export function ProvidersConfig() {
 
   return (
     <ConfigItem
-      id="api-providers"
+      id={PROVIDER_CONFIG_SECTION_ID}
       orientation="vertical"
       title={i18n.t("options.apiProviders.configTitle")}
       description={i18n.t("options.apiProviders.description")}
