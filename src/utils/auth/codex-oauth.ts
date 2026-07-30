@@ -13,64 +13,6 @@ const CODEX_DEVICE_REDIRECT_URI = `${CODEX_OAUTH_ISSUER}/deviceauth/callback`
 const CODEX_DEVICE_TIMEOUT_MS = 10 * 60 * 1000
 const CODEX_DEVICE_POLL_MARGIN_MS = 3_000
 const CODEX_TOKEN_REFRESH_MARGIN_MS = 60_000
-const CODEX_MAX_CONCURRENT_REQUESTS = 2
-
-type ReleaseCodexRequestSlot = () => void
-
-interface CodexRequestWaiter {
-  resolve: (release: ReleaseCodexRequestSlot) => void
-  reject: (reason: unknown) => void
-  signal?: AbortSignal
-  handleAbort?: () => void
-}
-
-let activeCodexRequests = 0
-const codexRequestWaiters: CodexRequestWaiter[] = []
-
-function createCodexRequestRelease(): ReleaseCodexRequestSlot {
-  let released = false
-  return () => {
-    if (released) return
-    released = true
-    activeCodexRequests--
-    dispatchNextCodexRequest()
-  }
-}
-
-function dispatchNextCodexRequest(): void {
-  while (activeCodexRequests < CODEX_MAX_CONCURRENT_REQUESTS && codexRequestWaiters.length > 0) {
-    const waiter = codexRequestWaiters.shift()!
-    if (waiter.signal?.aborted) continue
-
-    waiter.signal?.removeEventListener("abort", waiter.handleAbort!)
-    activeCodexRequests++
-    waiter.resolve(createCodexRequestRelease())
-  }
-}
-
-function acquireCodexRequestSlot(signal?: AbortSignal): Promise<ReleaseCodexRequestSlot> {
-  if (signal?.aborted) {
-    return Promise.reject(
-      signal.reason ?? new DOMException("Codex request cancelled", "AbortError"),
-    )
-  }
-
-  if (activeCodexRequests < CODEX_MAX_CONCURRENT_REQUESTS) {
-    activeCodexRequests++
-    return Promise.resolve(createCodexRequestRelease())
-  }
-
-  return new Promise((resolve, reject) => {
-    const waiter: CodexRequestWaiter = { resolve, reject, signal }
-    waiter.handleAbort = () => {
-      const index = codexRequestWaiters.indexOf(waiter)
-      if (index >= 0) codexRequestWaiters.splice(index, 1)
-      reject(signal?.reason ?? new DOMException("Codex request cancelled", "AbortError"))
-    }
-    signal?.addEventListener("abort", waiter.handleAbort, { once: true })
-    codexRequestWaiters.push(waiter)
-  })
-}
 
 export interface CodexOAuthAuth {
   accessToken: string
@@ -322,9 +264,10 @@ async function refreshCodexOAuthAuth(
 
 let refreshPromise: Promise<CodexOAuthAuth> | undefined
 
-interface CodexResponseCompletedEvent {
-  type: "response.completed" | "response.incomplete"
-  response: Record<string, unknown>
+interface CodexOutputItemDoneEvent {
+  type: "response.output_item.done"
+  item: Record<string, unknown>
+  output_index?: number
 }
 
 function getCodexEventData(block: string): string | undefined {
@@ -336,18 +279,27 @@ function getCodexEventData(block: string): string | undefined {
   return data || undefined
 }
 
-function parseCodexCompletedResponseBlock(block: string): Record<string, unknown> | undefined {
+function parseCodexEventBlock(block: string): Record<string, unknown> | undefined {
   const data = getCodexEventData(block)
   if (!data || data === "[DONE]") return undefined
 
-  const event = JSON.parse(data) as Partial<CodexResponseCompletedEvent>
+  const event = JSON.parse(data) as unknown
+  return event && typeof event === "object" && !Array.isArray(event)
+    ? (event as Record<string, unknown>)
+    : undefined
+}
+
+function getCodexCompletedResponse(
+  event: Record<string, unknown> | undefined,
+): Record<string, unknown> | undefined {
   if (
-    (event.type === "response.completed" || event.type === "response.incomplete") &&
+    (event?.type === "response.completed" || event?.type === "response.incomplete") &&
+    "response" in event &&
     event.response &&
     typeof event.response === "object" &&
     !Array.isArray(event.response)
   ) {
-    return event.response
+    return event.response as Record<string, unknown>
   }
 
   return undefined
@@ -375,6 +327,33 @@ async function readCodexCompletedResponse(response: Response): Promise<Record<st
   const reader = response.body.getReader()
   const decoder = new TextDecoder()
   let buffer = ""
+  const outputItems: Array<Record<string, unknown> | undefined> = []
+
+  const collectOutputItem = (event: Record<string, unknown> | undefined) => {
+    if (event?.type !== "response.output_item.done") return
+    const { item, output_index: outputIndex } = event as Partial<CodexOutputItemDoneEvent>
+    if (!item || typeof item !== "object" || Array.isArray(item)) return
+
+    if (Number.isInteger(outputIndex) && outputIndex! >= 0) {
+      outputItems[outputIndex!] = item
+    } else {
+      outputItems.push(item)
+    }
+  }
+
+  const completeResponse = (
+    event: Record<string, unknown> | undefined,
+  ): Record<string, unknown> | undefined => {
+    const completedResponse = getCodexCompletedResponse(event)
+    if (!completedResponse) return undefined
+
+    const streamedOutput = outputItems.filter(
+      (item): item is Record<string, unknown> => item !== undefined,
+    )
+    return streamedOutput.length > 0
+      ? { ...completedResponse, output: streamedOutput }
+      : completedResponse
+  }
 
   try {
     while (true) {
@@ -387,18 +366,26 @@ async function readCodexCompletedResponse(response: Response): Promise<Record<st
 
         const block = buffer.slice(0, separator.index)
         buffer = buffer.slice(separator.index + separator[0].length)
-        const completedResponse = parseCodexCompletedResponseBlock(block)
+        const event = parseCodexEventBlock(block)
+        collectOutputItem(event)
+        const completedResponse = completeResponse(event)
         if (completedResponse) return completedResponse
       }
 
       if (done) {
-        const completedResponse = parseCodexCompletedResponseBlock(buffer)
+        const event = parseCodexEventBlock(buffer)
+        collectOutputItem(event)
+        const completedResponse = completeResponse(event)
         if (completedResponse) return completedResponse
         throw new Error("Codex stream ended without a completed response")
       }
     }
   } finally {
-    await reader.cancel().catch(() => undefined)
+    // The terminal SSE event already contains the complete response. Browser
+    // fetch streams may keep the cancellation promise pending while the
+    // underlying HTTP connection is being torn down, so waiting here can
+    // prevent the completed response from ever reaching the AI SDK.
+    void reader.cancel().catch(() => undefined)
     reader.releaseLock()
   }
 }
@@ -418,45 +405,11 @@ async function convertCodexStreamToJson(response: Response): Promise<Response> {
   })
 }
 
-function releaseCodexSlotWhenBodyEnds(
-  response: Response,
-  release: ReleaseCodexRequestSlot,
-): Response {
-  if (!response.body) {
-    release()
-    return response
-  }
-
-  const reader = response.body.getReader()
+function closeCodexStreamAtTerminalEvent(response: Response): Response {
+  if (!response.body) return response
   const isEventStream = response.headers.get("Content-Type")?.includes("text/event-stream")
-  if (!isEventStream) {
-    const body = new ReadableStream<Uint8Array>({
-      async pull(controller) {
-        try {
-          const result = await reader.read()
-          if (result.done) {
-            release()
-            controller.close()
-          } else {
-            controller.enqueue(result.value)
-          }
-        } catch (error) {
-          release()
-          controller.error(error)
-        }
-      },
-      async cancel(reason) {
-        release()
-        await reader.cancel(reason)
-      },
-    })
-
-    return new Response(body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-    })
-  }
+  if (!isEventStream) return response
+  const reader = response.body.getReader()
 
   const decoder = new TextDecoder()
   const encoder = new TextEncoder()
@@ -474,8 +427,9 @@ function releaseCodexSlotWhenBodyEnds(
             controller.enqueue(eventBytes)
 
             if (isCodexTerminalEventBlock(block)) {
-              await reader.cancel().catch(() => undefined)
-              release()
+              // Close the consumer-facing stream immediately on a terminal
+              // event; do not couple completion to transport teardown.
+              void reader.cancel().catch(() => undefined)
               controller.close()
             }
             return
@@ -485,19 +439,16 @@ function releaseCodexSlotWhenBodyEnds(
           if (result.done) {
             buffer += decoder.decode()
             if (buffer) controller.enqueue(encoder.encode(buffer))
-            release()
             controller.close()
             return
           }
           buffer += decoder.decode(result.value, { stream: true })
         }
       } catch (error) {
-        release()
         controller.error(error)
       }
     },
     async cancel(reason) {
-      release()
       await reader.cancel(reason)
     },
   })
@@ -560,17 +511,8 @@ export async function codexOAuthFetch(
   headers.set("originator", "read-frog")
 
   const authenticatedRequest = new Request(request, { headers })
-  const release = await acquireCodexRequestSlot(authenticatedRequest.signal)
-  try {
-    const response = await fetch(authenticatedRequest)
-    if (convertStreamingResponseToJson && response.ok) {
-      const convertedResponse = await convertCodexStreamToJson(response)
-      release()
-      return convertedResponse
-    }
-    return releaseCodexSlotWhenBodyEnds(response, release)
-  } catch (error) {
-    release()
-    throw error
-  }
+  const response = await fetch(authenticatedRequest)
+  return convertStreamingResponseToJson && response.ok
+    ? convertCodexStreamToJson(response)
+    : closeCodexStreamAtTerminalEvent(response)
 }

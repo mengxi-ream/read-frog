@@ -187,7 +187,104 @@ describe("Codex OAuth", () => {
     expect(networkFetch).toHaveBeenCalledOnce()
   })
 
-  it("limits streaming Codex requests to two active response bodies", async () => {
+  it("returns a completed response without waiting for transport cancellation", async () => {
+    getItemMock.mockResolvedValue({
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      expiresAt: Date.now() + 3_600_000,
+      accountId: "account-id",
+    })
+    const completedResponse = { id: "response-id", output: [], status: "completed" }
+    const encoder = new TextEncoder()
+    let cancellationStarted = false
+    const neverCompletes = new Promise<void>(() => {})
+    const networkFetch = vi.fn<() => Promise<Response>>(
+      async () =>
+        new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller) {
+              controller.enqueue(
+                encoder.encode(
+                  `event: response.completed\ndata: ${JSON.stringify({ type: "response.completed", response: completedResponse })}\n\n`,
+                ),
+              )
+            },
+            cancel() {
+              cancellationStarted = true
+              return neverCompletes
+            },
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "text/event-stream" },
+          },
+        ),
+    )
+    vi.stubGlobal("fetch", networkFetch)
+
+    const response = await Promise.race([
+      codexOAuthFetch(`${CODEX_API_BASE_URL}/responses`, {
+        method: "POST",
+        body: JSON.stringify({ model: "gpt-5.4-mini" }),
+      }),
+      new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error("Timed out waiting for the completed response")), 250)
+      }),
+    ])
+
+    await expect(response.json()).resolves.toEqual(completedResponse)
+    expect(cancellationStarted).toBe(true)
+  })
+
+  it("assembles response output from completed SSE output items", async () => {
+    getItemMock.mockResolvedValue({
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      expiresAt: Date.now() + 3_600_000,
+      accountId: "account-id",
+    })
+    const outputItem = {
+      id: "message-id",
+      type: "message",
+      role: "assistant",
+      status: "completed",
+      content: [{ type: "output_text", text: "Translated text", annotations: [] }],
+    }
+    const completedResponse = { id: "response-id", output: [], status: "completed" }
+    const encoder = new TextEncoder()
+    const networkFetch = vi.fn<() => Promise<Response>>(
+      async () =>
+        new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller) {
+              controller.enqueue(
+                encoder.encode(
+                  `event: response.output_item.done\ndata: ${JSON.stringify({ type: "response.output_item.done", output_index: 0, item: outputItem })}\n\n` +
+                    `event: response.completed\ndata: ${JSON.stringify({ type: "response.completed", response: completedResponse })}\n\n`,
+                ),
+              )
+            },
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "text/event-stream" },
+          },
+        ),
+    )
+    vi.stubGlobal("fetch", networkFetch)
+
+    const response = await codexOAuthFetch(`${CODEX_API_BASE_URL}/responses`, {
+      method: "POST",
+      body: JSON.stringify({ model: "gpt-5.4-mini" }),
+    })
+
+    await expect(response.json()).resolves.toEqual({
+      ...completedResponse,
+      output: [outputItem],
+    })
+  })
+
+  it("does not add provider-specific request concurrency limits", async () => {
     getItemMock.mockResolvedValue({
       accessToken: "access-token",
       refreshToken: "refresh-token",
@@ -213,21 +310,12 @@ describe("Codex OAuth", () => {
         method: "POST",
         body: JSON.stringify({ model: "gpt-5.4-mini", stream: true }),
       })
-    const firstPromise = createRequest()
-    const secondPromise = createRequest()
-    const thirdPromise = createRequest()
-    const [firstResponse, secondResponse] = await Promise.all([firstPromise, secondPromise])
+    const responses = await Promise.all([createRequest(), createRequest(), createRequest()])
 
-    expect(networkFetch).toHaveBeenCalledTimes(2)
-
-    controllers[0]!.close()
-    await firstResponse.text()
-    const thirdResponse = await thirdPromise
     expect(networkFetch).toHaveBeenCalledTimes(3)
 
-    controllers[1]!.close()
-    controllers[2]!.close()
-    await Promise.all([secondResponse.text(), thirdResponse.text()])
+    for (const controller of controllers) controller.close()
+    await Promise.all(responses.map((response) => response.text()))
   })
 
   it("closes streaming responses when Codex sends a terminal event", async () => {
