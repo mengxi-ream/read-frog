@@ -85,6 +85,12 @@ const contextMenuSchema = z.object({
   enabled: z.boolean(),
 })
 
+const translationHubSchema = z
+  .object({
+    selectedProviderIds: z.array(z.string().nonempty()).nullable(),
+  })
+  .default({ selectedProviderIds: null })
+
 // input translation language selector: 'sourceCode', 'targetCode', or fixed language code
 const inputTranslationLangSchema = z.union([
   z.literal("sourceCode"),
@@ -136,6 +142,7 @@ export const configSchema = z
     sideContent: sideContentSchema,
     betaExperience: betaExperienceSchema,
     contextMenu: contextMenuSchema,
+    translationHub: translationHubSchema,
     inputTranslation: inputTranslationSchema,
     videoSubtitles: videoSubtitlesSchema,
     siteControl: siteControlSchema,

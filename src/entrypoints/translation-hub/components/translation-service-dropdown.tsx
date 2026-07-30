@@ -48,7 +48,7 @@ export function TranslationServiceDropdown() {
 
   return (
     <div className="flex items-center gap-2">
-      <Select multiple value={selectedIds} onValueChange={setSelectedIds}>
+      <Select multiple value={selectedIds} onValueChange={(ids) => void setSelectedIds(ids)}>
         <SelectTrigger className="min-w-52">
           <SelectValue placeholder={i18n.t("translateService.selectServices")}>
             {selectedIds.length > 0 ? (

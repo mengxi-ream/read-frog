@@ -116,7 +116,7 @@ export function TranslationCard({
   }
 
   const handleRemove = () => {
-    setSelectedProviderIds(selectedProviderIds.filter((id) => id !== providerId))
+    void setSelectedProviderIds(selectedProviderIds.filter((id) => id !== providerId))
     setExpandedById((prev) => {
       if (!(providerId in prev)) return prev
 

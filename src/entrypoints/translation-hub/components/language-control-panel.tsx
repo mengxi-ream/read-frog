@@ -49,7 +49,7 @@ export function LanguageControlPanel() {
       <SearchableLanguageSelector
         className="min-w-0 flex-1"
         value={sourceLangCode}
-        onValueChange={setSourceLangCode}
+        onValueChange={(value) => void setSourceLangCode(value)}
         detectedLangCode={detectedLangCode}
         label={i18n.t("side.sourceLang")}
       />
@@ -58,7 +58,7 @@ export function LanguageControlPanel() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={exchangeLangCodes}
+          onClick={() => void exchangeLangCodes()}
           disabled={sourceLangCode === "auto"}
           title={i18n.t("translationHub.exchangeLanguages")}
         >
@@ -70,7 +70,7 @@ export function LanguageControlPanel() {
         className="min-w-0 flex-1"
         value={targetLangCode}
         onValueChange={(value) => {
-          if (value !== "auto") setTargetLangCode(value)
+          if (value !== "auto") void setTargetLangCode(value)
         }}
         label={i18n.t("side.targetLang")}
       />
