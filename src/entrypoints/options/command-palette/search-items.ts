@@ -34,13 +34,6 @@ const CONFIG_SEARCH_ITEMS = [
     descriptionKey: "options.betaExperience.description",
     pageKey: "options.config.title",
   },
-  {
-    sectionId: "reset-config",
-    route: "/config",
-    titleKey: "options.config.resetConfig.title",
-    descriptionKey: "options.config.resetConfig.description",
-    pageKey: "options.config.title",
-  },
 ] satisfies SearchItemDefinition[]
 
 export const SEARCH_ITEMS: SearchItem[] = [
@@ -103,6 +96,13 @@ export const SEARCH_ITEMS: SearchItem[] = [
     route: "/preference/config-backup",
     titleKey: "options.config.backup.title",
     descriptionKey: "options.config.backup.description",
+    pageKey: "options.preference.title",
+  },
+  {
+    sectionId: "reset-config",
+    route: "/preference",
+    titleKey: "options.config.resetConfig.title",
+    descriptionKey: "options.config.resetConfig.description",
     pageKey: "options.preference.title",
   },
 

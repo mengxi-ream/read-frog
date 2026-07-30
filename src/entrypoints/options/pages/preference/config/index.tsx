@@ -4,6 +4,7 @@ import { ConfigNavItem } from "../../../components/config-nav-item"
 import { ConfigSection } from "../../../components/config-section"
 import { GoogleDriveSyncConfigItem } from "./google-drive-sync"
 import { ManualConfigSyncConfigItems } from "./manual-config-sync"
+import { ResetConfigItem } from "./reset-config"
 
 export function ConfigManagementSection() {
   return (
@@ -15,6 +16,7 @@ export function ConfigManagementSection() {
         title={i18n.t("options.config.backup.title")}
         description={i18n.t("options.config.backup.description", [MAX_BACKUPS_COUNT])}
       />
+      <ResetConfigItem />
     </ConfigSection>
   )
 }

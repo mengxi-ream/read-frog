@@ -2,7 +2,6 @@ import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
 import { AboutCard } from "./about-card"
 import { BetaExperienceConfig } from "./beta-experience"
-import { ResetConfig } from "./reset-config"
 
 export function ConfigPage() {
   return (
@@ -13,7 +12,6 @@ export function ConfigPage() {
     >
       <BetaExperienceConfig />
       <AboutCard />
-      <ResetConfig />
     </PageLayout>
   )
 }
