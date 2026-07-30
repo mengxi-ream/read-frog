@@ -2,7 +2,7 @@ import type { Config } from "@/types/config/config"
 import type { APIProviderConfig } from "@/types/config/provider"
 import { describe, expect, it, vi } from "vitest"
 import { initI18n } from "@/utils/i18n"
-import { addProvider, duplicateProvider } from "../utils"
+import { addProvider, duplicateProvider } from "../../utils"
 
 type AlibabaProviderConfig = Extract<APIProviderConfig, { provider: "alibaba" }>
 

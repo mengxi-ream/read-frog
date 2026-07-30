@@ -27,11 +27,11 @@ import {
   BUILT_IN_AI_PROVIDER_ID,
   BUILT_IN_AI_PROVIDER_LOGO,
 } from "@/utils/providers/provider-registry"
-import { ConfigItem } from "../../components/config-item"
-import { EntityEditor } from "../../components/entity-editor"
-import { EntityEditorLayout } from "../../components/entity-editor-layout"
-import { EntityListItem } from "../../components/entity-list-item"
-import { EntityListRail } from "../../components/entity-list-rail"
+import { ConfigItem } from "../../../components/config-item"
+import { EntityEditor } from "../../../components/entity-editor"
+import { EntityEditorLayout } from "../../../components/entity-editor-layout"
+import { EntityListItem } from "../../../components/entity-list-item"
+import { EntityListRail } from "../../../components/entity-list-rail"
 import AddProviderDialog from "./add-provider-dialog"
 import { selectedProviderIdAtom } from "./atoms"
 import { ProviderConfigForm } from "./provider-config-form"

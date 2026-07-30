@@ -16,7 +16,7 @@ import {
   ProviderEditor,
   useProviderForm,
   useProviderEditor,
-} from "../api-providers/provider-editor"
+} from "../api-providers/providers-config/provider-editor"
 import {
   ActionEditor,
   BuiltInActionEditor,

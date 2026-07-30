@@ -138,15 +138,15 @@ vi.mock("@/entrypoints/options/components/entity-list-rail", () => ({
   EntityListRail: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
-vi.mock("@/entrypoints/options/pages/api-providers/add-provider-dialog", () => ({
+vi.mock("@/entrypoints/options/pages/api-providers/providers-config/add-provider-dialog", () => ({
   default: () => null,
 }))
 
-vi.mock("@/entrypoints/options/pages/api-providers/atoms", () => ({
+vi.mock("@/entrypoints/options/pages/api-providers/providers-config/atoms", () => ({
   selectedProviderIdAtom,
 }))
 
-vi.mock("@/entrypoints/options/pages/api-providers/provider-config-form", () => ({
+vi.mock("@/entrypoints/options/pages/api-providers/providers-config/provider-config-form", () => ({
   ProviderConfigForm: () => null,
 }))
 
