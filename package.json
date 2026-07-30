@@ -117,7 +117,6 @@
     "react-markdown": "^10.1.0",
     "react-rnd": "^10.5.3",
     "react-router": "^8.3.0",
-    "recharts": "^3.10.1",
     "shadcn": "^4.15.0",
     "tailwind-merge": "^3.6.0",
     "ts-pattern": "^5.9.0",

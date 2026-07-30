@@ -774,7 +774,6 @@ options:
       maxItemsPerBatch:
         title: 最大段落數
         description: 每個批次翻譯的最大段落數，用於控制單次翻譯的內容量
-      statisticsLink: 過去 7 天已節省約 $1 成本
     autoTranslateWebsite:
       title: 依網站自動翻譯
       description: 總是翻譯這個網站
@@ -975,14 +974,6 @@ options:
       label: 音量 (%)
       hint: 支援 -100 到 100 的整數
     betaDisabled: 啟用 Beta 體驗即可自訂文字轉語音設定。
-  statistics:
-    title: 統計
-    pageDescription: 查看 Read Frog 一段時間內發出的翻譯請求數量。
-    batchRequest:
-      title: 批次翻譯節省的請求數
-      description: 統計期間內，批次翻譯節省的請求百分比
-      originalRequestCount: 原始請求數量
-      batchRequestCount: 批次請求數量
   videoSubtitles:
     title: 影片字幕
     pageDescription: 邊看邊譯影片字幕，並單獨設定提供者、樣式和請求參數。

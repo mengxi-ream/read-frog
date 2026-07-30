@@ -774,7 +774,6 @@ options:
       maxItemsPerBatch:
         title: Recuento máximo de párrafos
         description: Número máximo de párrafos para cada traducción por lote para controlar el volumen de contenido de cada traducción
-      statisticsLink: Se ahorraron aproximadamente $1 de coste en los últimos 7 días
     autoTranslateWebsite:
       title: Traducción automática por sitio web
       description: Traducir siempre este sitio web
@@ -975,14 +974,6 @@ options:
       label: Volumen (%)
       hint: Acepta valores enteros entre -100 y 100
     betaDisabled: Activa Experiencia beta para personalizar la configuración de texto a voz.
-  statistics:
-    title: Estadísticas
-    pageDescription: Consulta cuántas solicitudes de traducción ha hecho Read Frog a lo largo del tiempo.
-    batchRequest:
-      title: Solicitudes de traducción por lotes ahorradas
-      description: Porcentaje de solicitudes ahorradas por traducción por lotes en el periodo
-      originalRequestCount: Recuento de solicitudes originales
-      batchRequestCount: Recuento de solicitudes por lotes
   videoSubtitles:
     title: Subtítulos de video
     pageDescription: Traduce los subtítulos mientras ves el video, con proveedor, estilo y ajustes propios.

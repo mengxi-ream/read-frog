@@ -179,17 +179,6 @@ export function SettingsNav() {
               <span>{i18n.t("options.tts.title")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              render={<Link to="/statistics" />}
-              isActive={pathname === "/statistics"}
-              tooltip={i18n.t("options.statistics.title")}
-            >
-              <Icon icon="tabler:chart-dots" />
-              <span>{i18n.t("options.statistics.title")}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

@@ -658,7 +658,6 @@ options:
       maxItemsPerBatch:
         title: Số đoạn văn tối đa
         description: Số đoạn văn tối đa cho mỗi bản dịch lô để kiểm soát khối lượng nội dung của mỗi bản dịch
-      statisticsLink: Đã tiết kiệm khoảng $1 chi phí trong 7 ngày qua
     autoTranslateWebsite:
       title: Tự động dịch theo trang web
       description: Luôn dịch trang web này
@@ -859,14 +858,6 @@ options:
       label: Âm lượng (%)
       hint: Chấp nhận giá trị số nguyên từ -100 đến 100
     betaDisabled: Bật Trải nghiệm Beta để tùy chỉnh cài đặt chuyển văn bản thành giọng nói.
-  statistics:
-    title: Thống kê
-    pageDescription: Xem Read Frog đã gửi bao nhiêu yêu cầu dịch theo thời gian.
-    batchRequest:
-      title: Đã tiết kiệm yêu cầu dịch theo lô
-      description: Tỷ lệ phần trăm yêu cầu đã tiết kiệm bằng dịch theo lô trong khoảng thời gian
-      originalRequestCount: Số yêu cầu ban đầu
-      batchRequestCount: Số yêu cầu theo lô
   videoSubtitles:
     title: Phụ đề video
     pageDescription: Dịch phụ đề khi đang xem, với nhà cung cấp, kiểu hiển thị và thiết lập yêu cầu riêng.

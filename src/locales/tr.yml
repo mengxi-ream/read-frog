@@ -658,7 +658,6 @@ options:
       maxItemsPerBatch:
         title: Maksimum Paragraf Sayısı
         description: Her çevirinin içerik hacmini kontrol etmek için her toplu çeviri için maksimum paragraf sayısı
-      statisticsLink: Son 7 günde yaklaşık $1 maliyet tasarrufu sağlandı
     autoTranslateWebsite:
       title: Web Sitesine Göre Otomatik Çevir
       description: Bu web sitesini her zaman çevir
@@ -859,14 +858,6 @@ options:
       label: Ses Düzeyi (%)
       hint: -100 ile 100 arasında tam sayı değerleri kabul eder
     betaDisabled: Metinden konuşmaya ayarlarını özelleştirmek için Beta Deneyimini etkinleştirin.
-  statistics:
-    title: İstatistikler
-    pageDescription: Read Frog'un zaman içinde kaç çeviri isteği gönderdiğini görün.
-    batchRequest:
-      title: Kaydedilen Toplu Çeviri İstekleri
-      description: Dönem içinde toplu çeviri ile kaydedilen istek yüzdesi
-      originalRequestCount: Orijinal İstek Sayısı
-      batchRequestCount: Toplu İstek Sayısı
   videoSubtitles:
     title: Video Altyazıları
     pageDescription: İzlerken altyazıları çevirin; sağlayıcı, stil ve istek ayarları ayrı tutulur.

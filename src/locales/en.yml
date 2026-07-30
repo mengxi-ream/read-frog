@@ -774,7 +774,6 @@ options:
       maxItemsPerBatch:
         title: Maximum Paragraph Count
         description: Maximum number of paragraphs for each batch translation to control the content volume of each translation
-      statisticsLink: Saved approximately $1 cost in the past 7 days
     autoTranslateWebsite:
       title: Auto Translate Based on Website
       description: Always translate this website
@@ -975,14 +974,6 @@ options:
       label: Volume (%)
       hint: Accepts integer values between -100 and 100
     betaDisabled: Enable Beta Experience to customize text-to-speech settings.
-  statistics:
-    title: Statistics
-    pageDescription: See how many translation requests Read Frog has made over time.
-    batchRequest:
-      title: Batch Translation Requests Saved
-      description: Percentage of requests saved by batch translation in the period
-      originalRequestCount: Original Request Count
-      batchRequestCount: Batch Request Count
   videoSubtitles:
     title: Video Subtitles
     pageDescription: Translate subtitles as you watch, with their own provider, style, and request settings.

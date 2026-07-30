@@ -658,7 +658,6 @@ options:
       maxItemsPerBatch:
         title: 최대 단락 수
         description: 각 배치 번역의 최대 단락 수로 각 번역의 콘텐츠 양을 제어합니다
-      statisticsLink: 지난 7일간 약 $1 의 비용을 절약했습니다
     autoTranslateWebsite:
       title: 웹사이트 기반 자동 번역
       description: 이 사이트를 항상 번역합니다
@@ -859,14 +858,6 @@ options:
       label: 볼륨 (%)
       hint: -100에서 100 사이 정수 값을 입력할 수 있습니다
     betaDisabled: 텍스트 음성 변환 설정을 사용자 지정하려면 Beta 체험을 활성화하세요.
-  statistics:
-    title: 통계
-    pageDescription: Read Frog가 지금까지 보낸 번역 요청 수를 확인하세요.
-    batchRequest:
-      title: 일괄 번역으로 절약된 요청
-      description: 기간 내 일괄 번역으로 절약된 요청 비율
-      originalRequestCount: 원래 요청 수
-      batchRequestCount: 일괄 요청 수
   videoSubtitles:
     title: 비디오 자막
     pageDescription: 영상을 보면서 자막을 번역하고, 제공업체·스타일·요청 설정을 따로 지정하세요.
