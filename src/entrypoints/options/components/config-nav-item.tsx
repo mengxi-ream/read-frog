@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import { Icon } from "@iconify/react"
 import { Link } from "react-router"
 import { cn } from "@/utils/styles/utils"
+import { DRILL_IN_LOCATION_STATE } from "../navigation/drill-in"
 import { ConfigItem } from "./config-item"
 
 export interface ConfigNavItemProps {
@@ -20,6 +21,7 @@ export function ConfigNavItem({ to, title, description, className }: ConfigNavIt
   return (
     <Link
       to={to}
+      state={DRILL_IN_LOCATION_STATE}
       className={cn(
         "-mx-3 block rounded-lg px-3 py-2 transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50",
         className,

@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import { Icon } from "@iconify/react"
 import { Link } from "react-router"
 import { Button } from "@/components/ui/base-ui/button"
+import { useDrillInBack } from "../navigation/drill-in"
 import { ConfigSection } from "./config-section"
 
 export interface ConfigDetailSectionProps {
@@ -24,13 +25,20 @@ export function ConfigDetailSection({
   className,
   contentClassName,
 }: ConfigDetailSectionProps) {
+  const goBack = useDrillInBack()
+
   return (
     <ConfigSection
       className={className}
       contentClassName={contentClassName}
       title={
         <span className="flex items-center gap-1">
-          <Button variant="ghost" size="icon-sm" className="-ml-2" render={<Link to={backTo} />}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="-ml-2"
+            render={<Link to={backTo} onClick={goBack} />}
+          >
             <Icon icon="tabler:chevron-left" />
           </Button>
           {title}
