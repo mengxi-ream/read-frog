@@ -904,11 +904,9 @@ options:
       title: Filtro de párrafos pequeños
       description: Estos valores predeterminados globales omiten la traducción de nodos de texto con menos caracteres o palabras que los umbrales. Las reglas de sitio coincidentes pueden anularlos (0 = desactivado)
       minCharacters:
-        title: Caracteres mínimos
-        description: Los nodos de texto con menos caracteres que este valor no se traducirán. El recuento de caracteres incluye espacios en blanco.
+        description: "Caracteres mínimos: los espacios cuentan"
       minWords:
-        title: Palabras mínimas
-        description: Los nodos de texto con menos palabras que este valor no se traducirán. Usa Intl.Segmenter para un recuento preciso de palabras en todos los idiomas.
+        description: "Palabras mínimas: se cuentan con precisión en cualquier idioma"
       error: El valor debe estar entre $1 y $2
     autoTranslateLanguages:
       title: Traducción automática por idioma

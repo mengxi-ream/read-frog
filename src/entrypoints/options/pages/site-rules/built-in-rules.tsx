@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/base-ui/button"
 import { Input } from "@/components/ui/base-ui/input"
 import { i18n } from "@/utils/i18n"
 import { BUILT_IN_SITE_RULES } from "@/utils/site-rules/built-in"
-import { ConfigCard } from "../../components/config-card"
+import { ConfigItem } from "../../components/config-item"
 import { BuiltInRuleRow } from "./built-in-rule-row"
 
 const PAGE_SIZE = 50
@@ -30,11 +30,11 @@ export function BuiltInRules() {
   const visibleRules = filteredRules.slice(0, visibleCount)
 
   return (
-    <ConfigCard
+    <ConfigItem
       id="site-rules-built-in"
+      orientation="vertical"
       title={i18n.t("options.siteRules.builtIn.title")}
       description={i18n.t("options.siteRules.builtIn.description")}
-      className="lg:flex-col lg:[&>div]:basis-auto"
     >
       <div className="flex flex-col gap-3">
         <Input
@@ -62,6 +62,6 @@ export function BuiltInRules() {
           </Button>
         )}
       </div>
-    </ConfigCard>
+    </ConfigItem>
   )
 }

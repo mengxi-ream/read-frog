@@ -904,11 +904,9 @@ options:
       title: 小段落過濾
       description: 這些全域預設值會略過翻譯少於指定字元數或詞數的文字節點；相符的網站規則可以覆寫它們（0 = 停用）
       minCharacters:
-        title: 最小字元數
-        description: 少於此字元數的文字節點將不會被翻譯。字元計數包含空格。
+        description: 最小字元數：空白也計入
       minWords:
-        title: 最小詞數
-        description: 少於此詞數的文字節點將不會被翻譯。使用 Intl.Segmenter 進行跨語言準確分詞。
+        description: 最小詞數：任何語言都能準確分詞
       error: 數值必須在 $1 到 $2 之間
     autoTranslateLanguages:
       title: 依語言自動翻譯

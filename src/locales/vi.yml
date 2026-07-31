@@ -788,11 +788,9 @@ options:
       title: Bộ lọc văn bản ngắn
       description: Các giá trị mặc định toàn cục này bỏ qua việc dịch các nút văn bản có ít ký tự hoặc từ hơn ngưỡng. Quy tắc trang web phù hợp có thể ghi đè chúng (0 = tắt)
       minCharacters:
-        title: Số ký tự tối thiểu
-        description: Các nút văn bản có ít ký tự hơn giá trị này sẽ không được dịch. Số ký tự bao gồm khoảng trắng.
+        description: "Số ký tự tối thiểu: tính cả khoảng trắng"
       minWords:
-        title: Số từ tối thiểu
-        description: Các nút văn bản có ít từ hơn giá trị này sẽ không được dịch. Sử dụng Intl.Segmenter để đếm từ chính xác trên tất cả các ngôn ngữ.
+        description: "Số từ tối thiểu: đếm chính xác ở mọi ngôn ngữ"
       error: Giá trị phải từ $1 đến $2
     autoTranslateLanguages:
       title: Tự động dịch theo ngôn ngữ

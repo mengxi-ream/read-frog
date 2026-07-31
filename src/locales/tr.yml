@@ -788,11 +788,9 @@ options:
       title: Kısa metin filtresi
       description: Bu genel varsayılanlar, eşiklerden daha az karakter veya sözcük içeren metin düğümlerinin çevirisini atlar. Eşleşen site kuralları bunları geçersiz kılabilir (0 = devre dışı)
       minCharacters:
-        title: Minimum karakter
-        description: Bu değerden az karakterli metin düğümleri çevrilmeyecektir. Karakter sayısı boşlukları içerir.
+        description: "Minimum karakter: boşluklar da sayılır"
       minWords:
-        title: Minimum kelime
-        description: Bu değerden az kelimeli metin düğümleri çevrilmeyecektir. Tüm dillerde doğru kelime sayımı için Intl.Segmenter kullanılır.
+        description: "Minimum kelime: her dilde doğru sayılır"
       error: Değer $1 ile $2 arasında olmalıdır
     autoTranslateLanguages:
       title: Dile göre otomatik çevir

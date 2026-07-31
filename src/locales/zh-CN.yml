@@ -904,11 +904,9 @@ options:
       title: 小段落过滤
       description: 这些全局默认值会跳过翻译少于指定字符数或词数的文本节点；匹配的站点规则可以覆盖它们（0 = 禁用）
       minCharacters:
-        title: 最小字符数
-        description: 少于此字符数的文本节点将不会被翻译。字符计数包含空格。
+        description: 最小字符数：空格也计入
       minWords:
-        title: 最小词数
-        description: 少于此词数的文本节点将不会被翻译。使用 Intl.Segmenter 进行跨语言准确分词。
+        description: 最小词数：任何语言都能准确分词
       error: 数值必须在 $1 到 $2 之间
     autoTranslateLanguages:
       title: 基于语言的自动翻译

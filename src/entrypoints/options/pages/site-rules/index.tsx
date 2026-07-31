@@ -19,10 +19,8 @@ export function SiteRulesPage() {
         backTo="/page-translation"
         title={<span id="site-rules">{i18n.t("options.siteRules.title")}</span>}
       >
-        <div className="*:border-b [&>*:last-child]:border-b-0">
-          <UserRulesEditor />
-          <BuiltInRules />
-        </div>
+        <UserRulesEditor />
+        <BuiltInRules />
       </ConfigDetailSection>
     </PageLayout>
   )

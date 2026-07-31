@@ -788,11 +788,9 @@ options:
       title: 短いテキストフィルター
       description: これらのグローバル既定値を使用して、指定した文字数または単語数より少ないテキストノードの翻訳をスキップします。一致するサイトルールで上書きできます（0 = 無効）
       minCharacters:
-        title: 最小文字数
-        description: この値より少ない文字数のテキストノードは翻訳されません。文字数には空白が含まれます。
+        description: 最小文字数：空白も含めて数えます
       minWords:
-        title: 最小単語数
-        description: この値より少ない単語数のテキストノードは翻訳されません。すべての言語で正確な単語カウントのために Intl.Segmenter を使用します。
+        description: 最小単語数：どの言語でも正確に数えます
       error: 値は $1 から $2 の間である必要があります
     autoTranslateLanguages:
       title: 言語に基づく自動翻訳
