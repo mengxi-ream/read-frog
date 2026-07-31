@@ -773,6 +773,8 @@ options:
       enable:
         title: 啟用
         description: 滑鼠停留或長按段落，只翻譯這一段。
+    translateControl:
+      title: 翻譯控制
     requestQueueConfig:
       title: 翻譯速率
       firstOnDescription: 調整翻譯請求的處理速度，使用

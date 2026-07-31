@@ -657,6 +657,8 @@ options:
       enable:
         title: 有効化
         description: 段落にホバーまたは長押しすると、その段落だけ翻訳します。
+    translateControl:
+      title: 翻訳の制御
     requestQueueConfig:
       title: 翻訳速度
       firstOnDescription: 翻訳リクエストの処理速度を調整し、

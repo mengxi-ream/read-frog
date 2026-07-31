@@ -773,6 +773,8 @@ options:
       enable:
         title: Activar
         description: Pasa el cursor o mantén pulsado un párrafo para traducir solo ese.
+    translateControl:
+      title: Control de traducción
     requestQueueConfig:
       title: Tasa de traducción
       firstOnDescription: Ajusta la velocidad de procesamiento de las solicitudes de traducción usando el

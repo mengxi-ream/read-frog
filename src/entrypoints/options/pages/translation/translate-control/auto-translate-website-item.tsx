@@ -2,10 +2,10 @@ import { useAtom } from "jotai"
 import { usePatternList } from "@/hooks/use-pattern-list"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
-import { ConfigCard } from "../../components/config-card"
-import { PatternsTable } from "../../components/patterns-table"
+import { ConfigItem } from "../../../components/config-item"
+import { PatternsTable } from "../../../components/patterns-table"
 
-export function AutoTranslateWebsitePatterns() {
+export function AutoTranslateWebsiteItem() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
   const { autoTranslatePatterns } = translateConfig.page
 
@@ -16,8 +16,9 @@ export function AutoTranslateWebsitePatterns() {
   })
 
   return (
-    <ConfigCard
+    <ConfigItem
       id="auto-translate-website"
+      orientation="vertical"
       title={i18n.t("options.translation.autoTranslateWebsite.title")}
       description={i18n.t("options.translation.autoTranslateWebsite.description")}
     >
@@ -28,6 +29,6 @@ export function AutoTranslateWebsitePatterns() {
         placeholderText={i18n.t("options.translation.autoTranslateWebsite.enterUrlPattern")}
         tableHeaderText={i18n.t("options.translation.autoTranslateWebsite.urlPattern")}
       />
-    </ConfigCard>
+    </ConfigItem>
   )
 }

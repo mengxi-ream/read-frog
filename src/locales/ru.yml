@@ -657,6 +657,8 @@ options:
       enable:
         title: Включить
         description: Наведите курсор на абзац или нажмите и удерживайте его, чтобы перевести только его.
+    translateControl:
+      title: Управление переводом
     requestQueueConfig:
       title: Скорость перевода
       firstOnDescription: Настройте скорость обработки запросов перевода с помощью

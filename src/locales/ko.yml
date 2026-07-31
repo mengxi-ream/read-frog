@@ -657,6 +657,8 @@ options:
       enable:
         title: 활성화
         description: 단락에 마우스를 올리거나 길게 누르면 그 단락만 번역합니다.
+    translateControl:
+      title: 번역 제어
     requestQueueConfig:
       title: 번역 속도
       firstOnDescription: 번역 요청 처리 속도 조정 및

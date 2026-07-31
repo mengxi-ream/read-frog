@@ -657,6 +657,8 @@ options:
       enable:
         title: Bật
         description: Di chuột hoặc nhấn giữ một đoạn để chỉ dịch đoạn đó.
+    translateControl:
+      title: Kiểm soát dịch
     requestQueueConfig:
       title: Tốc độ dịch
       firstOnDescription: Điều chỉnh tốc độ xử lý yêu cầu dịch bằng
