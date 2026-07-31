@@ -30,6 +30,6 @@ export default defineContentScript({
     })
 
     const { bootstrapSubtitlesRuntime } = await import("./runtime")
-    bootstrapSubtitlesRuntime()
+    bootstrapSubtitlesRuntime(ctx)
   },
 })

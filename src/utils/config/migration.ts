@@ -110,7 +110,7 @@ export async function migrateConfig(
   originalConfigSchemaVersion: number,
 ): Promise<Config> {
   if (originalConfigSchemaVersion > CONFIG_SCHEMA_VERSION) {
-    throw new ConfigVersionTooNewError(i18n.t("options.config.sync.versionTooNew"))
+    throw new ConfigVersionTooNewError(i18n.t("options.configMigration.versionTooNew"))
   }
 
   if (originalConfigSchemaVersion < CONFIG_SCHEMA_VERSION) {
@@ -125,7 +125,7 @@ export async function migrateConfig(
   const parseResult = configSchema.safeParse(originalConfig)
   if (!parseResult.success) {
     throw new Error(
-      `${i18n.t("options.config.sync.validationError")}: ${parseResult.error.message}`,
+      `${i18n.t("options.configMigration.validationError")}: ${parseResult.error.message}`,
     )
   }
 

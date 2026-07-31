@@ -1,31 +1,25 @@
 import Container from "@/components/container"
-import { Separator } from "@/components/ui/base-ui/separator"
-import { SidebarTrigger } from "@/components/ui/base-ui/sidebar"
 import { cn } from "@/utils/styles/utils"
+import { ConfigLayout } from "./config-layout"
 
 export function PageLayout({
   title,
+  description,
   children,
   className,
   innerClassName,
 }: {
   title: React.ReactNode
+  description: React.ReactNode
   children: React.ReactNode
   className?: string
   innerClassName?: string
 }) {
   return (
-    <div className={cn("w-full pb-8", className)}>
-      <div className="border-b">
-        <Container>
-          <header className="-ml-1.5 flex h-14 shrink-0 items-center gap-2">
-            <SidebarTrigger />
-            <Separator orientation="vertical" className="my-auto mr-1.5 h-4!" />
-            <h1>{title}</h1>
-          </header>
-        </Container>
-      </div>
-      <Container className={cn("@container", innerClassName)}>{children}</Container>
-    </div>
+    <Container className={cn("w-full pt-12 pb-16", className)}>
+      <ConfigLayout title={title} description={description}>
+        <div className={cn("@container", innerClassName)}>{children}</div>
+      </ConfigLayout>
+    </Container>
   )
 }

@@ -22,14 +22,10 @@ export function AddActionDialog({
     <DialogContent className="sm:max-w-md">
       <DialogHeader>
         <DialogTitle>
-          {i18n.t(
-            "options.floatingButtonAndToolbar.selectionToolbar.customActions.templates.dialogTitle",
-          )}
+          {i18n.t("options.selectionToolbar.customActions.templates.dialogTitle")}
         </DialogTitle>
         <DialogDescription>
-          {i18n.t(
-            "options.floatingButtonAndToolbar.selectionToolbar.customActions.templates.dialogDescription",
-          )}
+          {i18n.t("options.selectionToolbar.customActions.templates.dialogDescription")}
         </DialogDescription>
       </DialogHeader>
       <div className="grid gap-2">

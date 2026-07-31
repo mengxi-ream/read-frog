@@ -178,7 +178,7 @@ async function handleContextMenuClick(
   }
 
   if (info.menuItemId === MENU_ID_TRANSLATE) {
-    await handleTranslateClick(tab.id)
+    await handleTranslateClick(tab.id, tab.url)
     return
   }
 
@@ -208,12 +208,12 @@ async function handleContextMenuClick(
 /**
  * Handle translate menu click - toggle page translation
  */
-async function handleTranslateClick(tabId: number) {
+async function handleTranslateClick(tabId: number, tabUrl?: string) {
   const isCurrentlyTranslated = await getPageTranslationEnabled(tabId)
   const newState = !isCurrentlyTranslated
 
   if (!newState) {
-    await setPageTranslationEnabled(tabId, false)
+    await setPageTranslationEnabled(tabId, false, tabUrl, true)
     void sendMessage("notifyTranslationStateChanged", { enabled: false }, tabId)
   }
 

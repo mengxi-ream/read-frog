@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import type { SelectionSession } from "../atoms"
+import type { SelectionPopoverActions } from "@/components/ui/selection-popover"
 import { useAtomValue, useSetAtom } from "jotai"
 import { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toastManager } from "@/components/ui/base-ui/toast"
@@ -87,7 +88,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
   const isSaveToNotebaseDialogOpen = useAtomValue(isSaveToNotebaseDialogOpenAtom)
   const bodyRef = useRef<HTMLDivElement>(null)
   const pendingOpenRequestRef = useRef<SelectionCustomActionPendingOpenRequest | null>(null)
-  const reopenFrameRef = useRef<number | null>(null)
+  const popoverActionsRef = useRef<SelectionPopoverActions | null>(null)
   const nextEphemeralSessionIdRef = useRef(0)
   const trackedPrecheckErrorKeyRef = useRef<string | null>(null)
   const { resolveContextMenuOpenRequest } = useSelectionOpenRequestResolver(selectionSession)
@@ -159,30 +160,29 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
     }
   }, [])
 
+  // Anchor application is owned by SelectionPopover.Root (via requestOpen) so
+  // a pinned popover reused in place never moves.
   const commitOpenRequest = useCallback((request: SelectionCustomActionPendingOpenRequest) => {
     pendingOpenRequestRef.current = request
-    if (request.anchor) {
-      setAnchor(request.anchor)
-    }
   }, [])
+
+  const applyPendingSession = useCallback(() => {
+    const pendingRequest = pendingOpenRequestRef.current
+
+    setActiveSession(pendingRequest?.session ?? selectionSession)
+    setActiveActionId(pendingRequest?.actionId ?? null)
+    setSourceSurface(pendingRequest?.surface ?? ANALYTICS_SURFACE.SELECTION_TOOLBAR)
+    setIsSelectionToolbarVisible(false)
+    pendingOpenRequestRef.current = null
+  }, [selectionSession, setIsSelectionToolbarVisible])
 
   const handleOpenChange = useCallback(
     (nextOpen: boolean) => {
       resetSessionState()
 
       if (nextOpen) {
-        const pendingRequest = pendingOpenRequestRef.current
-        const nextSession = pendingRequest?.session ?? selectionSession
-
-        setActiveSession(nextSession)
-        setActiveActionId(pendingRequest?.actionId ?? null)
-        setSourceSurface(pendingRequest?.surface ?? ANALYTICS_SURFACE.SELECTION_TOOLBAR)
         setPopoverSessionKey((prev) => prev + 1)
-        if (pendingRequest?.anchor) {
-          setAnchor(pendingRequest.anchor)
-        }
-        setIsSelectionToolbarVisible(false)
-        pendingOpenRequestRef.current = null
+        applyPendingSession()
       } else {
         resetPopoverSession({
           clearAnchor: pendingOpenRequestRef.current === null,
@@ -191,30 +191,25 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
 
       setIsOpen(nextOpen)
     },
-    [resetPopoverSession, resetSessionState, selectionSession, setIsSelectionToolbarVisible],
+    [applyPendingSession, resetPopoverSession, resetSessionState],
   )
+
+  // Pinned popovers are reused in place for a new selection or action: the
+  // window keeps its position, size, and pin state while the action reruns.
+  const handleReuseRequest = useCallback(() => {
+    resetSessionState()
+    applyPendingSession()
+    // Forces a rerun even when the retriggered request resolves to an
+    // identical execution key.
+    setRerunNonce((prev) => prev + 1)
+  }, [applyPendingSession, resetSessionState])
 
   const openActionRequest = useCallback(
     (request: SelectionCustomActionPendingOpenRequest) => {
-      if (isOpen) {
-        handleOpenChange(false)
-
-        if (reopenFrameRef.current !== null) {
-          cancelAnimationFrame(reopenFrameRef.current)
-        }
-
-        reopenFrameRef.current = requestAnimationFrame(() => {
-          reopenFrameRef.current = null
-          commitOpenRequest(request)
-          handleOpenChange(true)
-        })
-        return
-      }
-
       commitOpenRequest(request)
-      handleOpenChange(true)
+      popoverActionsRef.current?.requestOpen(request.anchor ?? null)
     },
-    [commitOpenRequest, handleOpenChange, isOpen],
+    [commitOpenRequest],
   )
 
   const openToolbarCustomAction = useCallback(
@@ -329,14 +324,6 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
   }, [openContextMenuCustomAction])
 
   useEffect(() => {
-    return () => {
-      if (reopenFrameRef.current !== null) {
-        cancelAnimationFrame(reopenFrameRef.current)
-      }
-    }
-  }, [])
-
-  useEffect(() => {
     if (!isOpen || !executionPlan.error || executionPlan.executionContext) {
       return
     }
@@ -393,6 +380,8 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
         onOpenChange={handleOpenChange}
         anchor={anchor}
         onAnchorChange={setAnchor}
+        actionsRef={popoverActionsRef}
+        onReuseRequest={handleReuseRequest}
         disablePointerDismissal={isSaveToNotebaseDialogOpen}
       >
         <SelectionPopover.Content
@@ -410,7 +399,10 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
             </div>
           </SelectionPopover.Header>
 
-          <SelectionPopover.Body ref={bodyRef}>
+          <SelectionPopover.Body
+            key={`${popoverSessionKey}:${activeSession?.id ?? 0}`}
+            ref={bodyRef}
+          >
             <CustomActionContent
               isRunning={displayedIsRunning}
               outputSchema={activeAction?.outputSchema ?? []}

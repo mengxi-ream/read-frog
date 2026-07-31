@@ -91,9 +91,12 @@ interface IPageTranslationManager {
 
   /**
    * Stops the automatic page translation functionality
-   * Cleans up all observers and removes translated content and set storage
+   * Cleans up all observers and removes translated content and set storage.
+   * Pass `userInitiated` when the stop comes from a user surface (shortcut,
+   * touch gesture, popup/floating-button toggle) so the background records
+   * the refusal and auto-translation stops re-enabling the page (#2011).
    */
-  stop: () => void
+  stop: (options?: { userInitiated?: boolean }) => void
 
   /**
    * Re-resolves the site rule for the current URL and swaps injected CSS in
@@ -343,8 +346,8 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
   }
 
-  stop(): void {
-    this.stopInternal({ notify: true })
+  stop(options?: { userInitiated?: boolean }): void {
+    this.stopInternal({ notify: true, userInitiated: options?.userInitiated })
   }
 
   async refreshSiteRuleCSS(): Promise<void> {
@@ -369,7 +372,13 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
   }
 
-  private stopInternal({ notify }: { notify: boolean }): void {
+  private stopInternal({
+    notify,
+    userInitiated,
+  }: {
+    notify: boolean
+    userInitiated?: boolean
+  }): void {
     if (!this.isPageTranslating) {
       console.warn("PageTranslationManager is already inactive")
       return
@@ -379,6 +388,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       void sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
         enabled: false,
         url: window.location.href,
+        userInitiated,
       })
     }
 
@@ -450,7 +460,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       if (!startTouches) return
       if (performance.now() - startTime < PageTranslationManager.MAX_DURATION) {
         if (this.isPageTranslating) {
-          this.stop()
+          this.stop({ userInitiated: true })
         } else {
           void this.start(
             createFeatureUsageContext(

@@ -81,31 +81,45 @@ errorRecovery:
     confirm: Сбросить
     cancel: Отмена
 options:
+  batchSavings:
+    savedCost: Сэкономлено примерно $1% расходов на API
   commandPalette:
     placeholder: Поиск настроек...
     noResults: Настройки не найдены
   sidebar:
     settings: Настройки
-    tools: Инструменты
+    features: Функции
     product: Продукт
   tools:
     translationHub: Центр переводов
   product:
     roadmap: Дорожная карта
-    feedback: Обратная связь
-  setAPIKeyWarning:
-    please: Пожалуйста, установите API-ключ на странице
-    page: настроек
-  betaExperience:
-    title: Бета-функции
-    description: Включите экспериментальные функции и ранний доступ к новым возможностям. Эти функции могут быть нестабильными или неполными.
-    enabled: Включить бета-функции
+  contactUs:
+    title: Связаться с нами
+    pageDescription: Расскажите, что добавить дальше, сообщите об ошибке или просто напишите нам.
+    featureRequest:
+      title: Предложить функцию
+      description: Предложите идею и голосуйте за то, что команда сделает дальше
+    bugReport:
+      title: Сообщить об ошибке
+      description: Создайте обращение в поддержку и следите за ним до решения
+    email:
+      title: Написать нам
+      description: Свяжитесь с командой напрямую по адресу contact@readfrog.app
+    wechat:
+      title: WeChat
+      description: Отсканируйте QR-код, чтобы вступить в группу обсуждения в WeChat
+      qrCodeAlt: QR-код WeChat
   apiProviders:
     title: API-провайдеры
-    description: Настройте API-провайдеров для функций перевода и анализа слов. У нас более 20 встроенных провайдеров и поддержка любых OpenAI-совместимых API.
+    pageDescription: Подключите ИИ-сервисы, которые вызывает Read Frog, и выберите провайдера для каждой функции.
+    description: Добавьте провайдеров, которых может вызывать Read Frog. Более 20 встроено, и подойдёт любой OpenAI-совместимый API.
+    configTitle: Настройка провайдеров
     addProvider: Добавить провайдера
     builtInProvider: Встроенный провайдер
-    sponsorCta: Получить быстрый и выгодный AI
+    sponsorCta: Получить быстрый и выгодный ИИ
+    setApiKeyWarning:
+      message: Укажите API-ключ на странице $1
     badges:
       featureCount: $1 функций
       sponsor: Спонсор
@@ -152,7 +166,8 @@ options:
         apiKeyRequired: Сначала добавьте API ключ
         searchModels: Поиск моделей...
         noModelsFound: Модели не найдены
-      featureProviders: Поставщики функций
+        label: Модель
+        enterCustomModel: Введите название пользовательской модели
       advancedOptions: Расширенные настройки
       providerSettingLabels:
         region: Регион
@@ -222,42 +237,19 @@ options:
       success: Успешно
       failed: Ошибка
       slow: Медленно (рекомендуется настроить режим рассуждения)
-  general:
-    title: Общие
-    interfaceLanguage:
-      title: Язык интерфейса
-      description: Выберите язык интерфейса расширения независимо от языка браузера.
-      auto: Авто (как в браузере)
-    appearance:
-      title: Внешний вид
-      theme: Тема
-      system: Системная
-      light: Светлая
-      dark: Тёмная
     featureProviders:
       title: Провайдеры функций
       description: Выберите провайдера для каждой функции
-      customActions: Пользовательские AI-действия
       features:
         translate: Перевод страницы
         selectionToolbar_translate: Перевод выделения
-        tts: Озвучивание текста
         inputTranslation: Перевод ввода
         videoSubtitles: Субтитры видео
-    translationConfig:
-      model:
-        title: Модель
-        enterCustomModel: Введите название пользовательской модели
-    clearCache:
-      title: Очистить кэш
-      description: Очистить весь кэш перевода в вашем браузере
-      clearing: Очистка...
-      dialog:
-        title: Очистить кэш
-        trigger: Очистить кэш
-        confirm: Подтвердить
-        cancel: Отмена
-        description: Эта операция очистит весь кэш перевода. Это действие нельзя отменить.
+      descriptions:
+        translate: Переводит страницу целиком — в двуязычном режиме или с заменой оригинала.
+        selectionToolbar_translate: Переводит выделенный текст через панель выделения.
+        inputTranslation: Переводит то, что вы набрали в поле ввода, перед отправкой.
+        videoSubtitles: Переводит субтитры, которые появляются в видеоплеере.
     languageDetection:
       title: Определение языка
       description: Влияет на точность определения языка для автоперевода, пропуска языков и выбора голоса озвучивания.
@@ -271,506 +263,42 @@ options:
         noProviders: Сначала настройте LLM-провайдер
         basicRecommend: Рекомендуется включить LLM
         llmEnabled: LLM-определение включено
-  siteControl:
-    title: Управление сайтами
-    mode:
-      title: Режим активации расширения
-      description: Используйте режим чёрного списка для отключения расширения на определённых сайтах или режим белого списка для ограничения работы только указанными сайтами.
-      blacklist: Отключить только на указанных сайтах
-      whitelist: Работать только на указанных сайтах
-    patterns:
-      enterUrlPattern: Введите шаблон URL (например, example.com)
-      urlPattern: Шаблон URL
-  overlayTools:
-    title: Инструменты наложения
-    floatingButton:
-      title: Плавающая кнопка
-    selectionToolbar:
-      title: Панель выделения
-    contextMenu:
-      title: Контекстное меню
-    inputTranslation:
-      title: Перевод ввода
-  inputTranslation:
-    provider:
-      title: Поставщик перевода
-      description: Выберите поставщика перевода для перевода ввода
-      label: Поставщик
-    toggle:
-      title: Включить тройной пробел для перевода
-      description: Быстро нажмите пробел 3 раза в любом поле ввода для перевода его содержимого
-    languages:
-      title: Языки перевода
-      description: Выберите исходный и целевой языки для перевода ввода
-      sourceCode: Исходный язык страницы
-      targetCode: Целевой язык страницы
-      enableCycle: Менять направление каждый раз
-    threshold:
-      title: Порог срабатывания
-      description: Временной интервал между нажатиями пробела
-      label: Порог (мс)
-      hint: Время в миллисекундах между последовательными нажатиями пробела (100-1000мс)
-      error: Значение должно быть от $1 до $2
-  floatingButtonAndToolbar:
-    title: Плавающая кнопка и панель инструментов
-    floatingButtonDemoImageAlt: Демо плавающей кнопки
-    selectionToolbarDemoImageAlt: Демо панели выделения
-    floatingButton:
-      globalToggle:
-        title: Включить плавающую кнопку
-        description: Отображать плавающую кнопку на веб-страницах для быстрого доступа к функциям Read Frog
-      closeMenu:
-        disableForSite: Отключить для этого сайта
-        disableGlobally: Отключить глобально
-      tooltips:
-        togglePageTranslation: Переключить перевод страницы
-        floatingButtonOptions: Настройки плавающей кнопки
-        lockPosition: Закрепить положение
-        unlockPosition: Открепить положение
-        settings: Настройки
-        feedback: Отправить отзыв
-      disabledSites:
-        title: Сайты с отключённой плавающей кнопкой
-        description: Настройте веб-сайты, где плавающая кнопка должна быть отключена
-        enterUrlPattern: Введите URL-шаблон
-        urlPattern: URL-шаблон
-      clickAction:
-        title: Действие по клику
-        description: Выберите действие при нажатии на плавающую кнопку
-        panel: Открыть боковую панель
-        translate: Переключить перевод страницы
-      side:
-        title: Сторона кнопки
-        description: Выберите, с какой стороны страницы закреплять плавающую кнопку
-        left: Слева
-        right: Справа
-    selectionToolbar:
-      globalToggle:
-        title: Включить панель выделения
-        description: Показывать панель при выделении текста на веб-страницах для быстрого перевода, озвучивания и AI-действий
-      opacity:
-        title: Прозрачность
-        description: Настройте прозрачность панели выделения и раскрытого окна, которое открывается из неё
-      featureToggles:
-        title: Переключатели функций
-        description: Выберите, какие встроенные функции показывать в панели выделения
-        translate: Перевод
-        speak: Озвучивание
-      saveSuggestion:
-        title: Предложения по сохранению
-        description: После перевода выделенного текста с помощью ИИ-провайдера предлагать слова для сохранения в Notebase
-        action: Действие
-      shortcut:
-        title: Selection Translation Shortcut
-        description: Customize the shortcut key for translating selected text
-      closeMenu:
-        disableForSite: Отключить для этого сайта
-        disableGlobally: Отключить глобально
-      disabledSites:
-        title: Сайты с отключённой панелью выделения
-        description: Настройте веб-сайты, где панель выделения должна быть отключена
-        enterUrlPattern: Введите URL-шаблон
-        urlPattern: URL-шаблон
-      errors:
-        customActionFailed: Не удалось выполнить пользовательское действие
-        customActionFailedFallback: Запрос пользовательского действия не удался
-        actionUnavailable: Выбранное действие недоступно
-        missingSelection: Нет выделенного текста
-        providerDisabled: Выбранный провайдер отключен
-        providerUnavailable: Выбранный провайдер недоступен
-      features:
-        provider: Провайдер
-        selectProvider: Выберите провайдера
-        noProviderAvailable: Нет доступных провайдеров
-        useProviderDefaultModel: Использовать модель провайдера по умолчанию
-        useCustomModel: Использовать пользовательскую модель
-        customModel: Пользовательская модель
-        model: Модель
-        modelNotAvailableForNonLLM: Настройки модели доступны только для LLM-провайдеров
-        translate:
-          title: Перевод выделения
-          description: Настройка провайдера и модели для перевода в панели выделения
-      customActions:
-        title: Пользовательские AI-действия
-        description: Добавляйте собственные структурированные AI-действия для выделенного текста
-        builtIn: Встроенное
-        add: Добавить AI-действие
-        edit: Редактировать AI-действие
-        empty: Пока нет пользовательских AI-действий
-        noEnabledLlmProvider: Включите хотя бы одного LLM-провайдера перед созданием пользовательских AI-действий
-        table:
-          name: Название
-          provider: Провайдер
-          fields: Поля
-          actions: Действия
-        form:
-          name: Название
-          customize: Настроить
-          customizeTooltip: Промпты встроенной команды нельзя изменять. Нажмите эту кнопку, чтобы создать редактируемую копию и изменить промпты.
-          icon: Иконка
-          iconField:
-            chooseAriaLabel: Выбрать иконку
-            chooseTitle: Выберите иконку
-            inputPlaceholder: Введите имя иконки
-            helpAriaLabel: Справка по иконкам
-            helpTitle: Не нашли нужную иконку?
-            helpStepBrowsePrefix: Посмотреть иконки на
-            helpStepBrowseSuffix: ""
-            helpStepCopyPrefix: "Скопируйте имя иконки, например "
-            helpStepCopySuffix: ", и вставьте его в поле."
-          provider: Провайдер (требуется поддержка структурированного вывода)
-          selectProvider: Выберите провайдера
-          systemPrompt: Системный промпт
-          prompt: Промпт
-          outputSchema: Схема вывода
-          addField: Добавить поле
-          fieldName: Имя поля
-          fieldType: Тип поля
-          fieldDescription: Описание
-          fieldDescriptionPlaceholder: Опишите, что должно содержать это поле...
-          fieldSpeaking: Включить озвучивание
-          actions: Действия
-          cancel: Отмена
-          save: Сохранить
-          defaultFieldName: результат
-          fieldNamePlaceholder: имя_поля
-          autoFieldPrefix: поле
-          addFieldDialog:
-            title: Добавить поле вывода
-          editFieldDialog:
-            title: Редактировать поле вывода
-            save: Сохранить
-          deleteFieldDialog:
-            title: Удалить поле вывода?
-            description: Это поле вывода будет удалено.
-            confirm: Удалить
-            cancel: Отмена
-          notebase:
-            title: Подключение Notebase
-            description: Сохранить структурированные результаты этого действия в удалённую Notebase.
-            loginRequiredTitle: Войдите, чтобы настроить Notebase
-            loginRequiredDescription: Войдите на readfrog.app, прежде чем выбирать notebase или редактировать сопоставления.
-            loginRequiredConnectedDescription: Это подключение создано аккаунтом ниже. Если войти в тот же аккаунт, сопоставления полей будут восстановлены. Если войти в другой аккаунт, прежние сопоставления будут очищены при создании или подключении Notebase.
-            loginAction: Войти
-            connectedAccountLabel: Подключённый аккаунт
-            currentAccountLabel: Текущий аккаунт
-            unknownConnectedAccount: Неизвестный аккаунт
-            tableLabel: Notebase
-            tablePlaceholder: Выберите notebase
-            tableClearOption: Не подключать notebase
-            clearConnectionAction: Очистить подключение
-            refreshAction: Обновить
-            emptyTitle: Notebase пока нет
-            emptyDescription: Создайте notebase на readfrog.app, затем вернитесь сюда и сопоставьте поля.
-            openNotebaseAction: Открыть Notebase
-            accessDeniedTitle: Нет доступа к Notebase
-            accessDeniedDescription: У этого аккаунта нет разрешения на загрузку данных Notebase.
-            listErrorTitle: Не удалось загрузить список Notebase
-            listErrorDescription: Попробуйте обновить список Notebase чуть позже.
-            accountMismatchTitle: Подключение Notebase принадлежит другому аккаунту
-            accountMismatchDescription: Это подключение связано с аккаунтом ниже. Очистите его или выберите Notebase, доступную текущему аккаунту.
-            tableUnavailableTitle: Выбранная notebase больше недоступна
-            tableUnavailableDescription: Эта Notebase больше не существует или не открывается. Очистите подключение или выберите другую Notebase.
-            tableUnavailableOption: недоступно
-            schemaErrorTitle: Не удалось загрузить схему notebase
-            schemaErrorDescription: Попробуйте обновить схему ещё раз чуть позже.
-            schemaLoading: Загрузка схемы notebase...
-            mappingsLabel: Сопоставления полей
-            mappingsEmpty: Сопоставлений пока нет. Добавьте хотя бы одно, когда будете готовы сохранять поля.
-            addMappingAction: Добавить сопоставление
-            removeMappingAction: Удалить сопоставление
-            localFieldLabel: Поле действия
-            localFieldPlaceholder: Выберите поле действия
-            remoteFieldLabel: Поле Notebase
-            remoteFieldPlaceholder: Выберите поле notebase
-            columnUnavailableOption: удалено
-            invalidMappingsTitle: Некоторые сопоставления требуют внимания
-            invalidMappingsDescription: Некорректные сопоставления сохранены. Исправьте их перед сохранением в Notebase.
-            mappingMissingLocal: Сопоставленное поле действия больше не существует.
-            mappingMissingRemote: Сопоставленное поле notebase больше не существует.
-            mappingMissingSchema: Обновите схему notebase, чтобы проверить это сопоставление.
-            mappingIncompatible: Типы полей больше не совпадают.
-          tokens:
-            selection: Содержимое выделенного текста
-            paragraphs: Текст абзацев, пересекающихся с выделением, объединённый пустыми строками; при отправке в пользовательские AI-действия обрезается до первых 2000 символов
-            targetLanguage: Целевой язык пользователя
-            webTitle: Заголовок веб-страницы
-            webContent: Содержимое веб-страницы, извлечённое с текущей страницы и сокращённое до первых 2000 символов
-          delete: Удалить
-          deleteDialog:
-            title: Удалить пользовательское действие?
-            description: Это действие нельзя отменить.
-            confirm: Удалить
-            cancel: Отмена
-        errors:
-          nameRequired: Название обязательно
-          duplicateName: 'Дублирующееся имя действия "$1"'
-          invalidIcon: Неверная строка иконки Iconify
-          providerRequired: Выберите включённого LLM-провайдера
-          outputSchemaRequired: Добавьте хотя бы одно поле вывода
-          fieldKeyRequired: Имя поля обязательно
-          duplicateFieldKey: Имена полей должны быть уникальными
-    contextMenu:
-      title: Контекстное меню
-      translate:
-        title: Включить перевод в контекстном меню
-        description: Добавить опцию перевода в контекстное меню браузера для быстрого перевода страницы и выделенного текста
-  translation:
-    title: Перевод
-    requestQueueConfig:
-      title: Скорость перевода
-      firstOnDescription: Настройте скорость обработки запросов перевода с помощью
-      lastOnDescription: алгоритма
-      capacity:
-        title: Максимальное количество пакетных запросов
-        description: Допустимое временное количество пакетных запросов определяет максимальное количество запросов, которые могут обрабатываться одновременно в течение короткого периода
-      rate:
-        title: Среднее количество запросов в секунду
-        description: Среднее количество запросов в секунду, но позволяет настроить максимальное количество пакетов для временной отправки избыточных запросов. Поддерживаются дробные значения — например, 0.25 означает один запрос каждые 4 секунды, что удобно для API с низкими лимитами, таких как бесплатный тариф Gemini
-    batchQueueConfig:
-      title: Пакетный перевод
-      description: Настройте лимиты символов и максимальное количество абзацев для пакетного перевода (действует только для LLM-перевода)
-      maxCharactersPerBatch:
-        title: Максимум символов
-        description: Максимальное количество символов, разрешённое на один пакетный запрос, для контроля объёма содержимого каждого перевода
-      maxItemsPerBatch:
-        title: Максимум абзацев
-        description: Максимальное количество абзацев для каждого пакетного перевода для контроля объёма содержимого каждого перевода
-      statisticsLink: Сэкономлено примерно $1 за последние 7 дней
-    autoTranslateWebsite:
-      title: Автоперевод по веб-сайту
-      description: Всегда переводить этот веб-сайт
-      urlPattern: URL-шаблон
-      enterUrlPattern: Введите URL-шаблон
-    neverAutoTranslateWebsite:
-      title: Never Auto Translate Based on Website
-      description: Never automatically translate this website
-      urlPattern: URL Pattern
-      enterUrlPattern: Enter URL Pattern
-    personalizedPrompts:
-      title: Персонализированные промпты
-      description: Настройка различных типов промптов позволяет вам самостоятельно изменять тип промпта во время перевода. Промпт — это текст, который пользователь отправляет LLM.
-      communityPrompts: Получайте или делитесь промптами с сообществом
-      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
-      addPrompt: Добавить промпт
-      default: По умолчанию
-      importSuccess: Импорт успешен
-      import: Импорт
-      export: Экспорт
-      current: используется
-      editPrompt:
-        title: Редактировать промпт
-        name: Название
-        systemPrompt: Системный промпт
-        prompt: Промпт
-        promptCellInput:
-          input: Текстовое содержимое для перевода
-          targetLanguage: Целевой язык
-          webTitle: Заголовок веб-страницы
-          webDescription: Описание веб-страницы из метаданных
-          webContent: Содержимое веб-страницы (обрезается до первых 2000 символов)
-          webSummary: Резюме веб-страницы (требуется умный контекст ИИ)
-        save: Сохранить изменения
-        close: Отмена
-      deletePrompt:
-        title: Удалить промпт
-        description: Подтвердить удаление промпта
-        confirm: Подтвердить
-        cancel: Отмена
-      exportPrompt:
-        exportSelected: Экспортировать выбранные
-        cancel: Отмена
-    translationStyle:
-      title: Стиль отображения перевода
-      description: Установите любой стиль для отличия результатов перевода от оригинального текста
-      useCustomStyle: Использовать пользовательский CSS-стиль
-      useCustomStyleDescription: Поддерживает любой CSS, включая шрифты, анимации и стили для конкретных языков
-      presetStyle: Предустановленный стиль
-      cssEditor: CSS-редактор
-      preview: Предпросмотр
-      stylePreviewLanguage: Язык
-      stylePreviewDirection: Направление
-      stylePreviewTranslatedText: Переведённый текст
-      style:
-        default: Нет
-        blur: Эффект размытия
-        blockquote: Цитата
-        weakened: Ослабленный
-        dashedLine: Пунктирная линия
-        border: Граница
-        textColor: Цвет текста
-        background: Фон
-      customCSS:
-        editor:
-          placeholder: |
-            /* Пример: Пользовательский стиль с цветом и фоном */
-            [data-read-frog-custom-translation-style='custom'] {
-              color: #414535;
-              background-color: light-dark(#F2E3BC, #C19875);
-              padding: 2px 4px;
-              border-radius: 4px;
-            }
-          saveButton: Сохранить
-          savedButton: Сохранено
-          validation:
-            validating: Проверка...
-            valid: CSS корректен
-            syntaxError: CSS содержит синтаксические ошибки
-            tooLong: CSS слишком длинный
-            saved: Все изменения сохранены
-    translationMode:
-      title: Режим перевода
-      description: "Выберите способ отображения переведённого текста: двуязычный или только перевод."
-      mode:
-        bilingual: Двуязычный
-        translationOnly: Только перевод
-    translationModeShortcut:
-      title: Горячая клавиша режима перевода
-      description: Настройте горячую клавишу для переключения между двуязычным режимом и режимом только перевода
-      switched: "Режим перевода: $1"
-    translateRange:
-      title: Диапазон перевода
-      description: Выберите, переводить только основное содержимое или всё содержимое на странице.
-      range:
-        main: Основное содержимое
-        all: Всё содержимое
-    pageTranslationShortcut:
-      title: Горячая клавиша перевода страницы
-      description: Настройте горячую клавишу для перевода всей веб-страницы
-    preloadConfig:
-      title: Диапазон предварительного перевода
-      description: Управляйте количеством контента ниже области просмотра, который будет предварительно переведён для экономии затрат на API
-      margin:
-        title: Расстояние предзагрузки (в пикселях)
-        description: Насколько ниже области просмотра начинать перевод контента. Меньшие значения экономят затраты на API, но могут вызвать задержки при прокрутке.
-      threshold:
-        title: Порог видимости
-        description: Процент видимости элемента, необходимый для запуска перевода (0-1). Более высокие значения откладывают перевод до тех пор, пока больше элемента не станет видимым.
-    smallParagraphFilter:
-      title: Фильтр коротких текстов
-      description: Эти глобальные значения по умолчанию позволяют пропускать перевод текстовых узлов, в которых меньше символов или слов, чем задано порогами. Подходящие правила сайта могут переопределить их (0 = отключено)
-      minCharacters:
-        title: Минимальное количество символов
-        description: Текстовые узлы с меньшим количеством символов не будут переведены. Количество символов включает пробелы.
-      minWords:
-        title: Минимальное количество слов
-        description: Текстовые узлы с меньшим количеством слов не будут переведены. Используется Intl.Segmenter для точного подсчёта слов на всех языках.
-      error: Значение должно быть от $1 до $2
-    nodeTranslationHotkey:
-      title: Горячая клавиша перевода при наведении или долгом нажатии
-      description: Настройте клавишу-модификатор для перевода при наведении или используйте долгое нажатие для перевода абзацев
-      enable: Включить
-    llmProviderConfigured: LLM-провайдер выбран для $1
-    llmProviderNotConfigured: LLM-провайдер не выбран для $1
-    autoTranslateLanguages:
-      title: Автоперевод по языку
-      description: Автоматически переводить содержимое страницы при обнаружении определённых языков
-      selectLanguages: Выберите языки
-      detection:
-        label: Определение языка
-        basic: Базовое
-        llm: LLM
-        description: Базовое определение быстрое и бесплатное. LLM определение точнее, но добавляет задержку и затраты на API. Требуются настроенные языки автоперевода.
-    skipLanguages:
-      title: Автопропуск по языку
-      description: Автоматически пропускать перевод абзацев при обнаружении указанных языков
-      targetLanguageSkip: Пропускать целевой язык
-      targetLanguageSkipDescription: Перед переводом определяет, написан ли абзац уже на целевом языке. Совпадающий текст пропускается без отправки запроса. Отключение этого параметра не меняет последующую защиту, которая скрывает неизменившийся результат перевода.
-      selectLanguages: Выберите языки
-      detection:
-        label: Определение языка
-        basic: Базовое
-        llm: LLM
-        description: Базовое определение быстрое и бесплатное. LLM определение точнее, но добавляет задержку и затраты на API.
     aiContentAware:
       title: Умный контекстный перевод ИИ
-      description: Улучшайте качество перевода, предоставляя ИИ контекст веб-страницы
-      enable: Включить умный контекстный перевод ИИ
-      enableDescription: ИИ использует резюме веб-страницы для повышения точности перевода. Требуется LLM-провайдер. Добавляет задержку при начале перевода страницы и увеличивает затраты на API.
-  siteRules:
-    title: Правила сайтов
-    description: Правила для отдельных сайтов, настраивающие перевод конкретных веб-сайтов.
-    userRules:
-      title: Пользовательские правила
-      description: Определите собственные правила сайтов в виде JSON-массива. Правила применяются к страницам, URL которых совпадает с шаблонами; пользовательские правила имеют приоритет над встроенными.
-      saveButton: Сохранить
-      savedButton: Сохранено
-      validation:
-        validating: Проверка...
-        valid: Правила корректны
-        syntaxError: JSON содержит синтаксические ошибки
-        notArray: Значение верхнего уровня JSON должно быть массивом правил
-        tooLong: Документ с правилами слишком длинный
-        tooMany: Слишком много правил
-        duplicateIds: Повторяющиеся id правил
-        schemaErrors: Некоторые правила некорректны
-        moreErrors: ...и ещё $1 ошибок
-        saved: Все изменения сохранены
-    builtIn:
-      title: Встроенные правила
-      description: Правила сайтов, поставляемые с расширением. Если правило вызывает проблемы на сайте, отключите его переключателем.
-      searchPlaceholder: Поиск по id, описанию или шаблону URL
-      showMore: Показать ещё
-      count: Показано $1 из $2 правил
-  tts:
-    title: Синтез речи
-    description: Настройте кнопку озвучивания с параметрами голоса Edge TTS.
-    voice:
-      label: Голос
-      fallback: Резервный
-      selectPlaceholder: Выберите голос
-      noVoicesFound: Голоса не найдены
-      previewSample: Привет от Read Frog! Так я буду звучать при чтении вслух.
-    languageVoice:
-      label: Голос для языка
-      reset: Сброс
-      description: Выберите язык и назначьте голос, который будет использоваться, когда TTS определит этот язык.
-    rate:
-      label: Скорость (%)
-      hint: Допустимы целые значения от -100 до 100
-    pitch:
-      label: Высота (Hz)
-      hint: Допустимы целые значения от -100 до 100
-    volume:
-      label: Громкость (%)
-      hint: Допустимы целые значения от -100 до 100
-    betaDisabled: Включите бета-функции для настройки синтеза речи.
-  statistics:
-    title: Статистика
-    batchRequest:
-      title: Сэкономлено запросов пакетного перевода
-      description: Процент запросов, сэкономленных пакетным переводом за период
-      originalRequestCount: Исходное количество запросов
-      batchRequestCount: Количество пакетных запросов
-  config:
-    title: Конфигурация
-    about:
-      title: О приложении
-      description: Read Frog появился в апреле 2025 года
-      mission: Read Frog стремится расширить равный доступ к качественному образованию в эпоху ИИ, делая обучение, максимально похожее на занятия с настоящим преподавателем, доступным по цене в языках, медицине и других знанияемких областях.
-      analytics:
-        title: Помочь улучшить пользовательский опыт
-        tooltip: Когда параметр включен, Read Frog отправляет анонимные сигналы об использовании продукта, чтобы мы могли проверять надежность функций, улучшать производительность и UX-детали, а также понимать, что развивать дальше в первую очередь.
-    sync:
-      title: Ручная синхронизация конфигурации
-      description: Ручной импорт и экспорт настроек конфигурации
-      import: Импорт конфигурации
-      export: Экспорт конфигурации
-      importSuccess: Конфигурация успешно импортирована
-      exportSuccess: Конфигурация успешно экспортирована
-      importError: Ошибка импорта
-      versionTooNew: Версия импортированной конфигурации новее, пожалуйста, обновите Read Frog до последней версии
-      migrationError: Ошибка миграции
-      validationError: Ошибка валидации конфигурации
-      exportOptions:
-        title: Выберите параметры экспорта
-        description: Пожалуйста, выберите, включать ли API-ключи в экспортируемую конфигурацию. Включение API-ключей может привести к утечке конфиденциальной информации, поэтому рекомендуется использовать только в безопасных средах.
-        includeAPIKeys: Включить API-ключи
-        excludeAPIKeys: Исключить API-ключи
-        cancel: Отмена
-      viewConfig:
-        expand: Развернуть конфигурацию
-        collapse: Свернуть конфигурацию
+      description: Передавайте ИИ контекст страницы или видео, чтобы перевод был точнее
+      enable: Включить
+      enableDescription: Перед переводом ИИ читает краткое содержание страницы или видео, чтобы подобрать подходящие формулировки. Работает для всех функций перевода на LLM-провайдере. Первый запрос выполняется дольше, а расходы на API растут.
+      llmProviderConfigured: LLM-провайдер выбран для $1
+      llmProviderNotConfigured: LLM-провайдер не выбран для $1
+  patterns:
+    duplicate: Этот шаблон уже в списке
+  preference:
+    title: Предпочтения
+    pageDescription: Задайте внешний вид Read Frog, места его работы, а также синхронизацию и резервное копирование конфигурации.
+    appearanceAndLanguage:
+      title: Оформление и язык
+      theme:
+        title: Тема
+        description: Выберите тему для Read Frog.
+        system: Системная
+        light: Светлая
+        dark: Тёмная
+      interfaceLanguage:
+        title: Язык интерфейса
+        description: Выберите язык интерфейса расширения независимо от языка браузера.
+        auto: Авто (как в браузере)
+    extensionActivation:
+      title: Активация расширения
+      mode:
+        title: Режим активации
+        description: Используйте режим чёрного списка для отключения расширения на определённых сайтах или режим белого списка для ограничения работы только указанными сайтами.
+        blacklist: Отключить только на указанных сайтах
+        whitelist: Работать только на указанных сайтах
+      patterns:
+        enterUrlPattern: Введите шаблон URL (например, example.com)
+        urlPattern: Шаблон URL
+    config:
+      title: Конфигурация
       googleDrive:
         title: Облачная синхронизация Google Drive
         description: Загружает, когда удалённая версия новее, выгружает, когда локальная версия новее
@@ -818,56 +346,548 @@ options:
             title: Объединённая конфигурация содержит ошибки валидации
             description: "Настройте различия ниже для исправления:"
           moreErrors: ...и ещё $1 ошибок
-    backup:
-      title: Резервное копирование конфигурации
-      description: Автоматические резервные копии создаются каждый час при изменении конфигурации. Вы можете восстановить предыдущие конфигурации здесь. (Максимум $1 резервных копий)
-      loading: Загрузка резервных копий...
-      backupNow: Создать резервную копию сейчас
-      backupSuccess: Резервная копия успешно создана
-      restoreSuccess: Конфигурация успешно восстановлена
-      empty:
-        title: Резервные копии пока недоступны
-        description: Резервные копии создаются автоматически каждый час при изменении конфигурации.
-      item:
-        extensionVersion: "Версия расширения:"
-        schemaVersion: "Версия схемы:"
-        restore: Восстановить
+      manualSync:
+        title: Ручная синхронизация конфигурации
+        description: Ручной импорт и экспорт настроек конфигурации
+        import: Импорт
         export: Экспорт
-        delete: Удалить
-      restore:
-        title: Восстановить резервную копию конфигурации?
-        description: Ваша текущая конфигурация будет автоматически сохранена, если она отличается от последней резервной копии. Самая старая резервная копия может быть удалена, если количество резервных копий превысит лимит.
-        cancel: Отмена
-        confirm: Восстановить
-      delete:
-        title: Удалить резервную копию?
-        description: Вы уверены, что хотите удалить эту резервную копию? Это действие нельзя отменить.
-        cancel: Отмена
-        confirm: Удалить
-    resetConfig:
-      title: Сбросить конфигурацию
-      description: Сбросить все настройки до значений по умолчанию
-      dialog:
+        importSuccess: Конфигурация успешно импортирована
+        exportSuccess: Конфигурация успешно экспортирована
+        importError: Ошибка импорта
+        exportOptions:
+          title: Выберите параметры экспорта
+          description: Пожалуйста, выберите, включать ли API-ключи в экспортируемую конфигурацию. Включение API-ключей может привести к утечке конфиденциальной информации, поэтому рекомендуется использовать только в безопасных средах.
+          includeAPIKeys: Включить API-ключи
+          excludeAPIKeys: Исключить API-ключи
+          cancel: Отмена
+      viewConfig:
+        open: Открыть конфигурацию
+        title: Конфигурация
+        description: Посмотреть текущую конфигурацию в виде JSON
+      backup:
+        title: Резервное копирование конфигурации
+        description: Автоматические резервные копии создаются каждый час при изменении конфигурации. Вы можете восстановить предыдущие конфигурации здесь. (Максимум $1 резервных копий)
+        loading: Загрузка резервных копий...
+        backupNow: Создать резервную копию сейчас
+        backupSuccess: Резервная копия успешно создана
+        restoreSuccess: Конфигурация успешно восстановлена
+        empty:
+          title: Резервные копии пока недоступны
+          description: Резервные копии создаются автоматически каждый час при изменении конфигурации.
+        item:
+          extensionVersion: "Версия расширения:"
+          schemaVersion: "Версия схемы:"
+          restore: Восстановить
+          export: Экспорт
+          delete: Удалить
+        restore:
+          title: Восстановить резервную копию конфигурации?
+          description: Ваша текущая конфигурация будет автоматически сохранена, если она отличается от последней резервной копии. Самая старая резервная копия может быть удалена, если количество резервных копий превысит лимит.
+          cancel: Отмена
+          confirm: Восстановить
+        delete:
+          title: Удалить резервную копию?
+          description: Вы уверены, что хотите удалить эту резервную копию? Это действие нельзя отменить.
+          cancel: Отмена
+          confirm: Удалить
+      reset:
         title: Сбросить конфигурацию
-        trigger: Сбросить конфигурацию
+        description: Сбросить все настройки до значений по умолчанию
+        dialog:
+          title: Сбросить конфигурацию
+          trigger: Сбросить конфигурацию
+          confirm: Подтвердить
+          cancel: Отмена
+          description: Эта операция очистит все ваши пользовательские конфигурации и сбросит их до значений по умолчанию. Пожалуйста, подтвердите.
+    userExperience:
+      title: Пользовательский опыт
+      beta:
+        title: Бета-функции
+        description: Включить экспериментальные функции, которые могут быть нестабильны
+      analytics:
+        title: Помочь улучшить пользовательский опыт
+        tooltip: Когда параметр включен, Read Frog отправляет анонимные сигналы об использовании продукта, чтобы мы могли находить ошибки, проверять надежность функций, улучшать производительность и UX-детали, а также понимать, что развивать дальше в первую очередь.
+        description: Улучшайте Read Frog, помогая находить ошибки, дорабатывать интерфейс и не только
+  shortcuts:
+    title: Горячие клавиши
+    pageDescription: Задайте клавиши, которые запускают перевод во время чтения.
+    setShortcut: Настроить горячую клавишу
+    pageTranslation:
+      title: Перевод страницы
+      description: Перевести всю страницу.
+    translationMode:
+      title: Режим перевода
+      description: Переключение между двуязычным режимом и только переводом.
+    selectionTranslation:
+      title: Перевод выделения
+      description: Перевести выделенный текст.
+    subtitlesToggle:
+      title: Перевод субтитров
+      description: Включает или выключает переведённые субтитры видео.
+    nodeTranslation:
+      title: Перевод абзаца
+      description: Наведите курсор на абзац или нажмите и удерживайте его, чтобы перевести только его.
+  overlayTools:
+    title: Инструменты наложения
+  inputTranslation:
+    title: Перевод ввода
+    pageDescription: Переводите текст в полях ввода до того, как отправить его.
+    trigger:
+      title: Срабатывание
+      enable:
+        title: Включить
+        description: Быстро нажмите пробел три раза в любом поле ввода, чтобы перевести набранный текст.
+      threshold:
+        title: Порог срабатывания
+        description: Максимальный интервал между нажатиями в миллисекундах. Увеличьте, если перевод не срабатывает, уменьшите, если он срабатывает во время набора.
+        error: Введите значение от $1 до $2
+    languages:
+      title: Языки перевода
+      pair:
+        title: Пара языков
+        description: С какого языка читается набранный текст и на какой он переводится. Обе стороны могут следовать исходному и целевому языкам, с которыми вы переводите страницы.
+      sourceCode: Исходный язык страницы
+      targetCode: Целевой язык перевода
+      cycle:
+        title: Менять направление каждый раз
+        description: Каждое срабатывание меняет языки местами, поэтому следующее вернёт текст на язык, на котором вы печатали.
+  floatingButton:
+    title: Плавающая кнопка
+    pageDescription: Выберите сторону плавающей кнопки, действие по клику и сайты, где её скрывать.
+    demoImageAlt: Демо плавающей кнопки
+    enable:
+      title: Включить плавающую кнопку
+      description: Отображать плавающую кнопку на веб-страницах для быстрого доступа к функциям Read Frog
+    display:
+      title: Отображение
+      side:
+        title: Сторона кнопки
+        description: Выберите, с какой стороны страницы закреплять плавающую кнопку
+        left: Слева
+        right: Справа
+      disabledSites:
+        title: Отключённые сайты
+        description: Настройте веб-сайты, где плавающая кнопка должна быть отключена
+        enterUrlPattern: Введите URL-шаблон
+        urlPattern: URL-шаблон
+    clickAction:
+      title: Действие по клику
+      description: Выберите действие при нажатии на плавающую кнопку
+      panel: Открыть боковую панель
+      translate: Переключить перевод страницы
+    closeMenu:
+      disableForSite: Отключить для этого сайта
+      disableGlobally: Отключить глобально
+    tooltips:
+      togglePageTranslation: Переключить перевод страницы
+      floatingButtonOptions: Настройки плавающей кнопки
+      lockPosition: Закрепить положение
+      unlockPosition: Открепить положение
+      settings: Настройки
+      feedback: Отправить отзыв
+  selectionToolbar:
+    title: Панель выделения
+    pageDescription: Укажите, какие действия появляются при выделении текста и где показывать панель.
+    demoImageAlt: Демо панели выделения
+    enable:
+      title: Включить панель выделения
+      description: Показывать панель при выделении текста на веб-страницах для быстрого перевода, озвучивания и AI-действий
+    actions:
+      title: Действия
+      translate:
+        title: Перевод
+        description: Показывать кнопку перевода на панели
+      speak:
+        title: Озвучивание
+        description: Показывать кнопку озвучивания, которая читает выделенный текст вслух
+      saveSuggestion:
+        title: Предложения по сохранению
+        description: После перевода выделенного текста с помощью ИИ-провайдера предлагать слова для сохранения в Notebase
+        action: Действие
+        actionDescription: Действие, которое формирует предложение
+    display:
+      title: Отображение
+      opacity:
+        title: Прозрачность
+        description: Настройте прозрачность панели выделения и раскрытого окна, которое открывается из неё
+      disabledSites:
+        title: Отключённые сайты
+        description: Настройте веб-сайты, где панель выделения должна быть отключена
+        enterUrlPattern: Введите URL-шаблон
+        urlPattern: URL-шаблон
+    closeMenu:
+      disableForSite: Отключить для этого сайта
+      disableGlobally: Отключить глобально
+    errors:
+      customActionFailed: Не удалось выполнить пользовательское действие
+      customActionFailedFallback: Запрос пользовательского действия не удался
+      actionUnavailable: Выбранное действие недоступно
+      missingSelection: Нет выделенного текста
+      providerDisabled: Выбранный провайдер отключен
+      providerUnavailable: Выбранный провайдер недоступен
+    customActions:
+      title: Пользовательские AI-действия
+      pageDescription: Создавайте свои промпты и запускайте их для выделенного текста с панели выделения.
+      description: Добавляйте собственные структурированные AI-действия для выделенного текста
+      configTitle: Настройка действий
+      builtIn: Встроенное
+      add: Добавить AI-действие
+      edit: Редактировать AI-действие
+      empty: Пока нет пользовательских AI-действий
+      noEnabledLlmProvider: Включите хотя бы одного LLM-провайдера перед созданием пользовательских AI-действий
+      form:
+        name: Название
+        customize: Настроить
+        customizeTooltip: Промпты встроенной команды нельзя изменять. Нажмите эту кнопку, чтобы создать редактируемую копию и изменить промпты.
+        icon: Иконка
+        iconField:
+          chooseAriaLabel: Выбрать иконку
+          chooseTitle: Выберите иконку
+          inputPlaceholder: Введите имя иконки
+          helpAriaLabel: Справка по иконкам
+          helpTitle: Не нашли нужную иконку?
+          helpStepBrowsePrefix: Посмотреть иконки на
+          helpStepBrowseSuffix: ""
+          helpStepCopyPrefix: "Скопируйте имя иконки, например "
+          helpStepCopySuffix: ", и вставьте его в поле."
+        provider: Провайдер (требуется поддержка структурированного вывода)
+        selectProvider: Выберите провайдера
+        systemPrompt: Системный промпт
+        prompt: Промпт
+        outputSchema: Схема вывода
+        addField: Добавить поле
+        fieldName: Имя поля
+        fieldType: Тип поля
+        fieldDescription: Описание
+        fieldDescriptionPlaceholder: Опишите, что должно содержать это поле...
+        fieldSpeaking: Включить озвучивание
+        actions: Действия
+        cancel: Отмена
+        save: Сохранить
+        defaultFieldName: результат
+        fieldNamePlaceholder: имя_поля
+        autoFieldPrefix: поле
+        addFieldDialog:
+          title: Добавить поле вывода
+        editFieldDialog:
+          title: Редактировать поле вывода
+          save: Сохранить
+        deleteFieldDialog:
+          title: Удалить поле вывода?
+          description: Это поле вывода будет удалено.
+          confirm: Удалить
+          cancel: Отмена
+        notebase:
+          title: Подключение Notebase
+          description: Сохранить структурированные результаты этого действия в удалённую Notebase.
+          loginRequiredTitle: Войдите, чтобы настроить Notebase
+          loginRequiredDescription: Войдите на readfrog.app, прежде чем выбирать notebase или редактировать сопоставления.
+          loginRequiredConnectedDescription: Это подключение создано аккаунтом ниже. Если войти в тот же аккаунт, сопоставления полей будут восстановлены. Если войти в другой аккаунт, прежние сопоставления будут очищены при создании или подключении Notebase.
+          loginAction: Войти
+          connectedAccountLabel: Подключённый аккаунт
+          currentAccountLabel: Текущий аккаунт
+          unknownConnectedAccount: Неизвестный аккаунт
+          tableLabel: Notebase
+          tablePlaceholder: Выберите notebase
+          tableClearOption: Не подключать notebase
+          clearConnectionAction: Очистить подключение
+          refreshAction: Обновить
+          emptyTitle: Notebase пока нет
+          emptyDescription: Создайте notebase на readfrog.app, затем вернитесь сюда и сопоставьте поля.
+          openNotebaseAction: Открыть Notebase
+          accessDeniedTitle: Нет доступа к Notebase
+          accessDeniedDescription: У этого аккаунта нет разрешения на загрузку данных Notebase.
+          listErrorTitle: Не удалось загрузить список Notebase
+          listErrorDescription: Попробуйте обновить список Notebase чуть позже.
+          accountMismatchTitle: Подключение Notebase принадлежит другому аккаунту
+          accountMismatchDescription: Это подключение связано с аккаунтом ниже. Очистите его или выберите Notebase, доступную текущему аккаунту.
+          tableUnavailableTitle: Выбранная notebase больше недоступна
+          tableUnavailableDescription: Эта Notebase больше не существует или не открывается. Очистите подключение или выберите другую Notebase.
+          tableUnavailableOption: недоступно
+          schemaErrorTitle: Не удалось загрузить схему notebase
+          schemaErrorDescription: Попробуйте обновить схему ещё раз чуть позже.
+          schemaLoading: Загрузка схемы notebase...
+          mappingsLabel: Сопоставления полей
+          mappingsEmpty: Сопоставлений пока нет. Добавьте хотя бы одно, когда будете готовы сохранять поля.
+          addMappingAction: Добавить сопоставление
+          removeMappingAction: Удалить сопоставление
+          localFieldLabel: Поле действия
+          localFieldPlaceholder: Выберите поле действия
+          remoteFieldLabel: Поле Notebase
+          remoteFieldPlaceholder: Выберите поле notebase
+          columnUnavailableOption: удалено
+          invalidMappingsTitle: Некоторые сопоставления требуют внимания
+          invalidMappingsDescription: Некорректные сопоставления сохранены. Исправьте их перед сохранением в Notebase.
+          mappingMissingLocal: Сопоставленное поле действия больше не существует.
+          mappingMissingRemote: Сопоставленное поле notebase больше не существует.
+          mappingMissingSchema: Обновите схему notebase, чтобы проверить это сопоставление.
+          mappingIncompatible: Типы полей больше не совпадают.
+        tokens:
+          selection: Содержимое выделенного текста
+          paragraphs: Текст абзацев, пересекающихся с выделением, объединённый пустыми строками; при отправке в пользовательские AI-действия обрезается до первых 2000 символов
+          targetLanguage: Целевой язык пользователя
+          webTitle: Заголовок веб-страницы
+          webContent: Содержимое веб-страницы, извлечённое с текущей страницы и сокращённое до первых 2000 символов
+        delete: Удалить
+        deleteDialog:
+          title: Удалить пользовательское действие?
+          description: Это действие нельзя отменить.
+          confirm: Удалить
+          cancel: Отмена
+      errors:
+        nameRequired: Название обязательно
+        duplicateName: 'Дублирующееся имя действия "$1"'
+        invalidIcon: Неверная строка иконки Iconify
+        providerRequired: Выберите включённого LLM-провайдера
+        outputSchemaRequired: Добавьте хотя бы одно поле вывода
+        fieldKeyRequired: Имя поля обязательно
+        duplicateFieldKey: Имена полей должны быть уникальными
+  contextMenu:
+    title: Контекстное меню
+    pageDescription: Управляйте пунктами Read Frog в контекстном меню браузера.
+    demoImageAlt: Демо контекстного меню
+    enable:
+      title: Включить перевод в контекстном меню
+      description: Добавить опцию перевода в контекстное меню браузера для быстрого перевода страницы и выделенного текста
+  translation:
+    title: Перевод страниц
+    pageDescription: Настройте перевод страниц — режим, охват, промпты и лимиты запросов.
+    preference:
+      title: Основное
+      translationMode:
+        title: Режим перевода
+        description: "Выберите способ отображения переведённого текста: двуязычный или только перевод."
+        mode:
+          bilingual: Двуязычный
+          translationOnly: Только перевод
+        switched: "Режим перевода: $1"
+      translateRange:
+        title: Охват перевода
+        description: Выберите, переводить только основное содержимое или всё содержимое на странице.
+        range:
+          main: Основное содержимое
+          all: Всё содержимое
+    hoverTranslation:
+      title: Перевод при наведении
+      enable:
+        title: Включить
+        description: Наведите курсор на абзац или нажмите и удерживайте его, чтобы перевести только его.
+    translationStyle:
+      title: Стиль отображения перевода
+      description: Установите любой стиль для отличия результатов перевода от оригинального текста
+      useCustomStyle: Использовать пользовательский CSS-стиль
+      useCustomStyleDescription: Поддерживает любой CSS, включая шрифты, анимации и стили для конкретных языков
+      presetStyle: Предустановленный стиль
+      cssEditor: CSS-редактор
+      cssEditorDescription: Напишите собственный CSS и посмотрите, как выглядит переведённый текст.
+      preview: Предпросмотр
+      stylePreviewLanguage: Язык
+      stylePreviewDirection: Направление
+      stylePreviewTranslatedText: Переведённый текст
+      style:
+        default: Нет
+        blur: Эффект размытия
+        blockquote: Цитата
+        weakened: Ослабленный
+        dashedLine: Пунктирная линия
+        border: Граница
+        textColor: Цвет текста
+        background: Фон
+      customCSS:
+        editor:
+          placeholder: |
+            /* Пример: Пользовательский стиль с цветом и фоном */
+            [data-read-frog-custom-translation-style='custom'] {
+              color: #414535;
+              background-color: light-dark(#F2E3BC, #C19875);
+              padding: 2px 4px;
+              border-radius: 4px;
+            }
+          docsLink: Как настроить?
+          saveButton: Сохранить
+          savedButton: Сохранено
+          validation:
+            validating: Проверка...
+            valid: CSS корректен
+            syntaxError: CSS содержит синтаксические ошибки
+            tooLong: CSS слишком длинный
+            saved: Все изменения сохранены
+    personalizedPrompts:
+      title: Персонализированные промпты
+      description: Настройка различных типов промптов позволяет вам самостоятельно изменять тип промпта во время перевода. Промпт — это текст, который пользователь отправляет LLM.
+      managePrompts: Управление промптами
+      communityPrompts: Получайте или делитесь промптами с сообществом
+      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      addPrompt: Добавить промпт
+      default: По умолчанию
+      importSuccess: Импорт успешен
+      import: Импорт
+      export: Экспорт
+      current: используется
+      editPrompt:
+        title: Редактировать промпт
+        name: Название
+        systemPrompt: Системный промпт
+        prompt: Промпт
+        promptCellInput:
+          input: Текстовое содержимое для перевода
+          targetLanguage: Целевой язык
+          webTitle: Заголовок веб-страницы
+          webDescription: Описание веб-страницы из метаданных
+          webContent: Содержимое веб-страницы (обрезается до первых 2000 символов)
+          webSummary: Резюме веб-страницы (требуется умный контекст ИИ)
+        save: Сохранить изменения
+        close: Отмена
+      deletePrompt:
+        title: Удалить промпт
+        description: Подтвердить удаление промпта
         confirm: Подтвердить
         cancel: Отмена
-        description: Эта операция очистит все ваши пользовательские конфигурации и сбросит их до значений по умолчанию. Пожалуйста, подтвердите.
+      exportPrompt:
+        exportSelected: Экспортировать выбранные
+        cancel: Отмена
+    translationControl:
+      title: Управление переводом
+      autoTranslateWebsite:
+        title: Автоперевод по веб-сайту
+        description: Сайты, которые начинают переводиться сразу при открытии
+        urlPattern: URL-шаблон
+        enterUrlPattern: Введите URL-шаблон
+      neverAutoTranslateWebsite:
+        title: Никогда не переводить по веб-сайту
+        description: Сайты, которые никогда не переводятся сами, даже если совпадает языковое правило
+        urlPattern: URL-шаблон
+        enterUrlPattern: Введите URL-шаблон
+      autoTranslateLanguages:
+        title: Автоперевод по языку
+        description: Автоматически переводить содержимое страницы при обнаружении определённых языков
+        selectLanguages: Выберите языки
+      skipLanguages:
+        title: Автопропуск по языку
+        description: Автоматически пропускать перевод абзацев при обнаружении указанных языков
+        targetLanguageSkipDescription: Пропускать абзацы, которые уже на целевом языке, не отправляя запрос
+        selectLanguages: Выберите языки
+      smallParagraphFilter:
+        title: Фильтр коротких текстов
+        description: Эти глобальные значения по умолчанию позволяют пропускать перевод текстовых узлов, в которых меньше символов или слов, чем задано порогами. Подходящие правила сайта могут переопределить их (0 = отключено)
+        minCharacters:
+          description: "Минимум символов: текст короче не переводится. Укажите 0, чтобы переводить всё"
+        minWords:
+          description: "Минимум слов: текст с меньшим числом слов не переводится"
+        error: Значение должно быть от $1 до $2
+    translationQueue:
+      title: Очередь перевода
+      requestQueueConfig:
+        title: Скорость перевода
+        capacity:
+          description: "Максимум запросов в пике: сколько уходит одновременно"
+        rate:
+          description: "Запросов в секунду: ровный темп после пика. Дробные значения работают: 0.25 — один запрос каждые 4 секунды"
+      batchQueueConfig:
+        title: Пакетный перевод
+        description: Настройте лимиты символов и максимальное количество абзацев для пакетного перевода (действует только для LLM-перевода)
+        maxCharactersPerBatch:
+          description: "Максимум символов: сколько текста уходит в один запрос к ИИ"
+        maxItemsPerBatch:
+          description: "Максимум абзацев: сколько абзацев объединяются в один запрос. Сервисы без ИИ не учитывают оба значения"
+      preloadConfig:
+        title: Диапазон предварительного перевода
+        description: Управляйте количеством контента ниже области просмотра, который будет предварительно переведён для экономии затрат на API
+        margin:
+          description: "Расстояние предзагрузки: на сколько пикселей ниже экрана переводить заранее. Меньше — дешевле"
+        threshold:
+          description: "Порог видимости: какая часть абзаца должна быть на экране, от 0 до 1"
+    cache:
+      title: Кэш
+      clearCache:
+        title: Очистить кэш
+        description: Очистить весь кэш перевода в вашем браузере
+        clearing: Очистка...
+        dialog:
+          title: Очистить кэш
+          trigger: Очистить кэш
+          confirm: Подтвердить
+          cancel: Отмена
+          description: Эта операция очистит весь кэш перевода. Это действие нельзя отменить.
+  siteRules:
+    title: Правила сайтов
+    description: Правила для отдельных сайтов, настраивающие перевод конкретных веб-сайтов.
+    userRules:
+      title: Пользовательские правила
+      description: Определите собственные правила сайтов в виде JSON-массива. Правила применяются к страницам, URL которых совпадает с шаблонами; пользовательские правила имеют приоритет над встроенными.
+      saveButton: Сохранить
+      savedButton: Сохранено
+      validation:
+        validating: Проверка...
+        valid: Правила корректны
+        syntaxError: JSON содержит синтаксические ошибки
+        notArray: Значение верхнего уровня JSON должно быть массивом правил
+        tooLong: Документ с правилами слишком длинный
+        tooMany: Слишком много правил
+        duplicateIds: Повторяющиеся id правил
+        schemaErrors: Некоторые правила некорректны
+        moreErrors: ...и ещё $1 ошибок
+        saved: Все изменения сохранены
+    builtIn:
+      title: Встроенные правила
+      description: Правила сайтов, поставляемые с расширением. Если правило вызывает проблемы на сайте, отключите его переключателем.
+      searchPlaceholder: Поиск по id, описанию или шаблону URL
+      showMore: Показать ещё
+      count: Показано $1 из $2 правил
+  tts:
+    title: Синтез речи
+    pageDescription: Озвучивайте выделенный текст естественным голосом.
+    voice:
+      title: Голос
+      selectPlaceholder: Выберите голос
+      noVoicesFound: Голоса не найдены
+      language:
+        title: Голос для языка
+        description: Выберите язык, а затем голос, которым он будет читаться. Сброс вернёт голос, который Read Frog подбирает для этого языка.
+        reset: Сброс
+        previewSample: Привет от Read Frog! Так я буду звучать при чтении вслух.
+      fallback:
+        title: Резервный голос
+        description: Голос для языков, которым вы не назначили собственный.
+    speech:
+      title: Чтение вслух
+      rate:
+        title: Скорость
+        description: Насколько быстрее или медленнее собственного темпа читает голос, от -100 до 100 процентов.
+      pitch:
+        title: Высота
+        description: Насколько выше или ниже собственной высоты звучит голос, от -100 до 100 герц.
+      volume:
+        title: Громкость
+        description: Насколько громче или тише собственного уровня читает голос, от -100 до 100 процентов.
+      error: Введите целое число от $1 до $2
   videoSubtitles:
     title: Видео субтитры
-    description: В настоящее время поддерживаются только субтитры YouTube
-    provider:
-      title: Провайдер перевода
-      description: Выберите провайдера перевода для перевода видеосубтитров
-      label: Провайдер
-    enable: Включить видео субтитры
-    enableDescription: При включении в панели управления YouTube появится кнопка перевода. Нажмите её, чтобы начать перевод субтитров.
-    autoStart: Автовключение субтитров
-    autoStartDescription: Автоматически включать перевод субтитров после загрузки видео.
+    pageDescription: Переводите субтитры во время просмотра — с отдельным провайдером, стилем и настройками запросов.
+    preference:
+      title: Основное
+      enable:
+        title: Включить видеосубтитры
+        description: Добавляет кнопку перевода в панель управления плеера. Пока поддерживается только YouTube.
+      autoStart:
+        title: Переводить сразу при открытии
+        description: Начинать перевод субтитров, как только видео загрузилось, без нажатия кнопки.
+      aiSegmentation:
+        title: Умная сегментация ИИ
+        description: ИИ заново режет субтитры на строки, читающиеся как предложения. Тайминг он задаёт сам, поэтому строки могут расходиться с речью. Нужен LLM-провайдер перевода.
+    aiQuota:
+      title: Лимит ИИ-субтитров
+      description: Использование вашего месячного лимита транскрипции ИИ-субтитров
+      loginRequired: Войдите, чтобы посмотреть лимит ИИ-субтитров
+      logIn: Войти
+      betaRequired: ИИ-субтитры находятся в бете и пока недоступны для вашего аккаунта
+      betaApply: Подать заявку на доступ
+      loadError: Не удалось загрузить лимит. Повторите попытку позже.
+      summary: Использовано $1 из $2 минут, осталось $3
     style:
       title: Стиль субтитров
-      description: Настройка внешнего вида субтитров
-      preview: Предпросмотр
+      description: Режим отображения, положение, шрифты, цвета и фон — всё настраивается по живому предпросмотру
+      customizeStyle: Настроить стиль
       displayMode:
         title: Режим отображения
         bilingual: Двуязычный
@@ -880,46 +900,16 @@ options:
       generalSettings: Общие настройки
       mainSubtitle: Основные субтитры
       translationSubtitle: Перевод субтитров
-      containerStyle: Фон
       fontFamily: Шрифт
       fontScale: Размер шрифта
       color: Цвет
       fontWeight: Толщина шрифта
       backgroundOpacity: Прозрачность фона
       reset: Сбросить по умолчанию
-    aiSegmentation:
-      title: AI Умная сегментация
-      enable: Включить AI умную сегментацию
-      enableDescription: Использовать AI для интеллектуальной сегментации субтитров для лучшей читаемости. Временная шкала определяется AI, что может иногда вызывать смещение тайминга. Требуется LLM провайдер перевода.
-      clearCache: Очистить кэш
-      clearing: Очистка...
-      clearCacheDialog:
-        title: Очистить кэш AI сегментации
-        description: Все кэшированные результаты AI сегментации будут удалены. При следующем воспроизведении видео с включенной AI сегментацией субтитры будут обработаны заново.
-        cancel: Отмена
-        confirm: Подтвердить
-    requestQueueConfig:
-      title: Скорость перевода субтитров
-      firstOnDescription: Регулировка скорости обработки запросов перевода субтитров с помощью алгоритма
-      lastOnDescription: ""
-      capacity:
-        title: Макс. пакетных запросов
-        description: Максимальное количество запросов перевода субтитров, которые могут обрабатываться одновременно за короткий период
-      rate:
-        title: Среднее кол-во запросов/сек
-        description: Среднее количество запросов перевода субтитров в секунду с возможностью настройки максимального пакета для временной отправки избыточных запросов. Поддерживаются дробные значения — например, 0.25 означает один запрос каждые 4 секунды, что удобно для API с низкими лимитами, таких как бесплатный тариф Gemini
-    batchQueueConfig:
-      title: Пакетный перевод субтитров
-      description: Настройте лимиты символов и максимальное количество абзацев для пакетного перевода (действует только для LLM-перевода)
-      maxCharactersPerBatch:
-        title: Максимум символов
-        description: Максимальное количество символов, разрешённое на один пакетный запрос, для контроля объёма содержимого каждого перевода
-      maxItemsPerBatch:
-        title: Максимум абзацев
-        description: Максимальное количество абзацев для каждого пакетного перевода для контроля объёма содержимого каждого перевода
     customPrompts:
       title: Пользовательские промпты субтитров
-      description: Настройте шаблоны промптов для перевода субтитров (отдельно от промптов перевода веб-страниц)
+      description: Шаблоны промптов только для перевода субтитров, отдельно от промптов перевода веб-страниц
+      managePrompts: Управление промптами
       editPrompt:
         promptCellInput:
           input: Текст субтитров для перевода
@@ -927,19 +917,40 @@ options:
           webTitle: Заголовок веб-страницы
           webDescription: Описание веб-страницы из метаданных
           videoSummary: Краткое содержание видео (требуется умный контекст ИИ)
-    aiQuota:
-      title: Лимит ИИ-субтитров
-      description: Использование вашего месячного лимита транскрипции ИИ-субтитров
-      loginRequired: Войдите, чтобы посмотреть лимит ИИ-субтитров
-      logIn: Войти
-      betaRequired: ИИ-субтитры находятся в бете и пока недоступны для вашего аккаунта
-      betaApply: Подать заявку на доступ
-      loadError: Не удалось загрузить лимит. Повторите попытку позже.
-      summary: Использовано $1 из $2 минут, осталось $3
+    subtitlesQueue:
+      title: Очередь субтитров
+      requestQueueConfig:
+        title: Скорость перевода
+        capacity:
+          description: "Максимум запросов в пике: сколько уходит одновременно"
+        rate:
+          description: "Запросов в секунду: ровный темп после пика. Дробные значения работают: 0.25 — один запрос каждые 4 секунды"
+      batchQueueConfig:
+        title: Пакетный перевод
+        description: Настройте лимиты символов и максимальное количество строк субтитров для пакетного перевода (действует только для LLM-перевода)
+        maxCharactersPerBatch:
+          description: "Максимум символов: сколько текста уходит в один запрос к ИИ"
+        maxItemsPerBatch:
+          description: "Максимум строк субтитров: сколько строк объединяются в один запрос. Сервисы без ИИ не учитывают оба значения"
+    cache:
+      title: Кэш
+      clearCache:
+        title: Очистить кэш ИИ-сегментации
+        description: "Сохранённые результаты сегментации: уже просмотренное видео не разбивается заново"
+        clearing: Очистка...
+        dialog:
+          title: Очистить кэш ИИ-сегментации
+          trigger: Очистить кэш
+          confirm: Подтвердить
+          cancel: Отмена
+          description: Все кэшированные результаты AI сегментации будут удалены. При следующем воспроизведении видео с включенной AI сегментацией субтитры будут обработаны заново.
   whatsNew:
     title: Что нового
   rateUs:
     title: Оцените нас
+  configMigration:
+    versionTooNew: Версия импортированной конфигурации новее, пожалуйста, обновите Read Frog до последней версии
+    validationError: Ошибка валидации конфигурации
 side:
   sourceLang: Исходный язык
   targetLang: Целевой язык
@@ -1039,6 +1050,9 @@ subtitles:
   loadingAiSubtitles: Загрузка ИИ-субтитров… (ожидается 3 мин)
   requestAiSubtitles: Запросить ИИ-субтитры (Beta)
   usingAiSubtitles: Используются ИИ-субтитры
+  toggle:
+    enabled: Перевод субтитров включён
+    disabled: Перевод субтитров выключен
   actions:
     downloadTranslated: Скачать переведённые субтитры
     downloadTranslatedPreparing: Подготовка субтитров, длинные видео могут занять больше времени

@@ -69,7 +69,7 @@ type CustomActionFormKey =
   | "editFieldDialog.title"
 
 function t(key: CustomActionFormKey) {
-  return i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customActions.form.${key}`)
+  return i18n.t(`options.selectionToolbar.customActions.form.${key}`)
 }
 
 function FieldDialog({
@@ -101,23 +101,17 @@ function FieldDialog({
   const validateNameField = (value: string) => {
     const errorType = getOutputSchemaFieldNameError(value, existingFields, outputField.id)
     if (errorType === "blank") {
-      return i18n.t(
-        "options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.fieldKeyRequired",
-      )
+      return i18n.t("options.selectionToolbar.customActions.errors.fieldKeyRequired")
     }
     if (errorType === "duplicate") {
-      return i18n.t(
-        "options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.duplicateFieldKey",
-      )
+      return i18n.t("options.selectionToolbar.customActions.errors.duplicateFieldKey")
     }
     return undefined
   }
 
   const customActionInsertCells = SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS.map((token) => ({
     text: getSelectionToolbarCustomActionTokenCellText(token),
-    description: i18n.t(
-      `options.floatingButtonAndToolbar.selectionToolbar.customActions.form.tokens.${token}`,
-    ),
+    description: i18n.t(`options.selectionToolbar.customActions.form.tokens.${token}`),
   }))
 
   useEffect(() => {
@@ -309,9 +303,7 @@ export const OutputSchemaField = withForm({
           onChange: ({ value }) => {
             const outputSchema = Array.isArray(value) ? value : []
             if (outputSchema.length === 0) {
-              return i18n.t(
-                "options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.outputSchemaRequired",
-              )
+              return i18n.t("options.selectionToolbar.customActions.errors.outputSchemaRequired")
             }
 
             for (const outputField of outputSchema) {
@@ -321,14 +313,10 @@ export const OutputSchemaField = withForm({
                 outputField.id,
               )
               if (errorType === "blank") {
-                return i18n.t(
-                  "options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.fieldKeyRequired",
-                )
+                return i18n.t("options.selectionToolbar.customActions.errors.fieldKeyRequired")
               }
               if (errorType === "duplicate") {
-                return i18n.t(
-                  "options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.duplicateFieldKey",
-                )
+                return i18n.t("options.selectionToolbar.customActions.errors.duplicateFieldKey")
               }
             }
 

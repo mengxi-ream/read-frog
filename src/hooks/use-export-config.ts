@@ -36,7 +36,7 @@ export function useExportConfig({ config, schemaVersion, onSuccess }: UseExportC
     onSuccess: () => {
       toastManager.add({
         type: "success",
-        title: i18n.t("options.config.sync.exportSuccess"),
+        title: i18n.t("options.preference.config.manualSync.exportSuccess"),
       })
       onSuccess?.()
     },

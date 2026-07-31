@@ -23,7 +23,8 @@ import { applyTheme, getLocalThemeMode, isDarkMode } from "@/utils/theme"
 import App from "./app"
 import { AppSidebar } from "./app-sidebar"
 import { SettingsSearch } from "./command-palette/settings-search"
-import "@fontsource-variable/onest/index.css"
+import { ScrollRestoration } from "./navigation/scroll-restoration"
+import "@fontsource-variable/inter/index.css"
 import "@/assets/styles/theme.css"
 import "./style.css"
 
@@ -68,6 +69,7 @@ async function initApp() {
                       <ToastProvider>
                         <AnchoredToastProvider>
                           <RecoveryBoundary>
+                            <ScrollRestoration />
                             <AppSidebar />
                             <App />
                             <SettingsSearch />

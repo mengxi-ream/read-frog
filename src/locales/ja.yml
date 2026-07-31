@@ -81,31 +81,45 @@ errorRecovery:
     confirm: リセット
     cancel: キャンセル
 options:
+  batchSavings:
+    savedCost: API コストを約 $1% 削減
   commandPalette:
     placeholder: 設定を検索...
     noResults: 設定が見つかりません
   sidebar:
     settings: 設定
-    tools: ツール
+    features: 機能
     product: 製品
   tools:
     translationHub: 翻訳ハブ
   product:
     roadmap: ロードマップ
-    feedback: フィードバック
-  setAPIKeyWarning:
-    please: 設定ページで
-    page: APIキーを設定してください
-  betaExperience:
-    title: Beta 体験
-    description: 実験的機能と新機能への早期アクセスを有効にします。これらの機能は不安定または不完全な場合があります。
-    enabled: Beta 体験を有効にする
+  contactUs:
+    title: お問い合わせ
+    pageDescription: 次に作るべきものや、うまく動かないことを教えてください。
+    featureRequest:
+      title: 機能リクエスト
+      description: アイデアを提案し、次に開発する機能に投票できます
+    bugReport:
+      title: 不具合を報告
+      description: サポートチケットを作成し、解決までの状況を追えます
+    email:
+      title: メールで問い合わせ
+      description: contact@readfrog.app からチームに直接連絡できます
+    wechat:
+      title: WeChat
+      description: QR コードをスキャンして WeChat のディスカッショングループに参加
+      qrCodeAlt: WeChat QR コード
   apiProviders:
     title: APIプロバイダー
-    description: 翻訳および語彙分析機能用のAPIプロバイダーを設定。20以上の内蔵プロバイダーに加え、OpenAI互換APIもサポートしています。
+    pageDescription: Read Frog が呼び出す AI サービスを接続し、各機能で使うものを選びます。
+    description: Read Frog が呼び出せるプロバイダーを追加します。20 以上を内蔵し、OpenAI 互換の API もすべて使えます。
+    configTitle: プロバイダー設定
     addProvider: プロバイダーを追加
     builtInProvider: 組み込みプロバイダー
     sponsorCta: 高速で高コスパのAIを入手
+    setApiKeyWarning:
+      message: API キーは $1 ページで設定してください
     badges:
       featureCount: $1 件の機能
       sponsor: スポンサー
@@ -152,7 +166,8 @@ options:
         apiKeyRequired: 先にAPIキーを追加してください
         searchModels: モデルを検索...
         noModelsFound: モデルが見つかりません
-      featureProviders: 機能プロバイダー
+        label: モデル
+        enterCustomModel: カスタムモデル名を入力
       advancedOptions: 詳細オプション
       providerSettingLabels:
         region: リージョン
@@ -222,42 +237,19 @@ options:
       success: 成功
       failed: 失敗
       slow: 低速（思考モードの調整を推奨）
-  general:
-    title: 一般
-    interfaceLanguage:
-      title: インターフェース言語
-      description: ブラウザの言語とは別に、拡張機能のインターフェース言語を選択します。
-      auto: 自動（ブラウザに従う）
-    appearance:
-      title: 外観
-      theme: テーマ
-      system: システム
-      light: ライト
-      dark: ダーク
     featureProviders:
       title: 機能プロバイダー
       description: 各機能に使用するプロバイダーを選択
-      customActions: カスタムAIアクション
       features:
         translate: ページ翻訳
         selectionToolbar_translate: 選択ツールバー翻訳
-        tts: テキスト読み上げ
         inputTranslation: 入力翻訳
         videoSubtitles: 動画字幕
-    translationConfig:
-      model:
-        title: モデル
-        enterCustomModel: カスタムモデル名を入力
-    clearCache:
-      title: キャッシュクリア
-      description: ブラウザのすべての翻訳キャッシュをクリアします
-      clearing: クリア中...
-      dialog:
-        title: キャッシュクリア
-        trigger: キャッシュクリア
-        confirm: 確認
-        cancel: キャンセル
-        description: この操作により、すべての翻訳キャッシュがクリアされます。この操作は元に戻せません。
+      descriptions:
+        translate: ページ全体を対訳または置き換えで翻訳します。
+        selectionToolbar_translate: 選択ツールバーから、選択したテキストを翻訳します。
+        inputTranslation: 入力欄に書いた文章を、送信する前に翻訳します。
+        videoSubtitles: 動画プレーヤーに表示される字幕を翻訳します。
     languageDetection:
       title: 言語検出
       description: 自動翻訳の言語検出、スキップ言語検出、読み上げの音声選択精度に影響します。
@@ -271,506 +263,42 @@ options:
         noProviders: LLMプロバイダーを設定してください
         basicRecommend: LLM有効化を推奨
         llmEnabled: LLM検出が有効
-  siteControl:
-    title: サイト制御
-    mode:
-      title: 拡張機能の有効化モード
-      description: ブラックリストモードを使用して特定のサイトで拡張機能を無効にするか、ホワイトリストモードを使用して特定のサイトのみに制限できます。
-      blacklist: リストされたサイトでのみ無効
-      whitelist: リストされたサイトでのみ実行
-    patterns:
-      enterUrlPattern: URLパターンを入力（例：example.com）
-      urlPattern: URLパターン
-  overlayTools:
-    title: オーバーレイツール
-    floatingButton:
-      title: フローティングボタン
-    selectionToolbar:
-      title: 選択ツールバー
-    contextMenu:
-      title: コンテキストメニュー
-    inputTranslation:
-      title: 入力翻訳
-  inputTranslation:
-    provider:
-      title: 翻訳プロバイダー
-      description: 入力翻訳に使用する翻訳プロバイダーを選択
-      label: プロバイダー
-    toggle:
-      title: トリプルスペース翻訳を有効化
-      description: 任意の入力欄でスペースキーを素早く3回押すと内容を翻訳します
-    languages:
-      title: 翻訳言語
-      description: 入力翻訳のソース言語とターゲット言語を選択
-      sourceCode: ページソース言語
-      targetCode: ページターゲット言語
-      enableCycle: 毎回方向を切り替え
-    threshold:
-      title: トリガーしきい値
-      description: スペースキー押下間の時間間隔
-      label: しきい値 (ミリ秒)
-      hint: 連続したスペースキー押下間の時間間隔 (100-1000ミリ秒)
-      error: 値は $1 から $2 の間である必要があります
-  floatingButtonAndToolbar:
-    title: フローティングボタンとツールバー
-    floatingButtonDemoImageAlt: フローティングボタンデモ
-    selectionToolbarDemoImageAlt: 選択ツールバーデモ
-    floatingButton:
-      globalToggle:
-        title: フローティングボタンを有効化
-        description: ウェブページにフローティングボタンを表示し、Read Frog機能に素早くアクセス
-      closeMenu:
-        disableForSite: このサイトで無効化
-        disableGlobally: グローバルで無効化
-      tooltips:
-        togglePageTranslation: ページ翻訳を切り替え
-        floatingButtonOptions: フローティングボタンのオプション
-        lockPosition: 位置を固定
-        unlockPosition: 位置の固定を解除
-        settings: 設定
-        feedback: フィードバックを送信
-      disabledSites:
-        title: フローティングボタン無効化サイト
-        description: フローティングボタンを無効化するウェブサイトを設定します
-        enterUrlPattern: URL パターンを入力
-        urlPattern: URL パターン
-      clickAction:
-        title: クリック動作
-        description: フローティングボタンをクリックしたときの動作を選択
-        panel: サイドパネルを開く
-        translate: ページ翻訳を切り替え
-      side:
-        title: ボタンの位置
-        description: フローティングボタンをページのどちら側に固定するかを選択します
-        left: 左側
-        right: 右側
-    selectionToolbar:
-      globalToggle:
-        title: 選択ツールバーを有効化
-        description: ウェブページでテキストを選択したときにツールバーを表示し、すばやく翻訳・読み上げ・AIアクションを実行します
-      opacity:
-        title: 透明度
-        description: 選択ツールバーとそこから開く展開ウィンドウの透明度を調整します
-      featureToggles:
-        title: 機能トグル
-        description: 選択ツールバーに表示する組み込み機能を選択
-        translate: 翻訳
-        speak: 読み上げ
-      saveSuggestion:
-        title: 保存の提案
-        description: AI プロバイダーで選択テキストを翻訳した後、Notebase に保存する単語を提案します
-        action: アクション
-      shortcut:
-        title: Selection Translation Shortcut
-        description: Customize the shortcut key for translating selected text
-      closeMenu:
-        disableForSite: このサイトで無効化
-        disableGlobally: グローバルで無効化
-      disabledSites:
-        title: 選択ツールバー無効化サイト
-        description: 選択ツールバーを無効化するウェブサイトを設定します
-        enterUrlPattern: URL パターンを入力
-        urlPattern: URL パターン
-      errors:
-        customActionFailed: カスタムアクションに失敗しました
-        customActionFailedFallback: カスタムアクションのリクエストに失敗しました
-        actionUnavailable: 選択したアクションは利用できません
-        missingSelection: 選択されたテキストがありません
-        providerDisabled: 選択したプロバイダーは無効です
-        providerUnavailable: 選択したプロバイダーは利用できません
-      features:
-        provider: プロバイダー
-        selectProvider: プロバイダーを選択
-        noProviderAvailable: 利用可能なプロバイダーがありません
-        useProviderDefaultModel: プロバイダーのデフォルトモデルを使用
-        useCustomModel: カスタムモデルを使用
-        customModel: カスタムモデル
-        model: モデル
-        modelNotAvailableForNonLLM: モデル設定はLLMプロバイダーでのみ利用可能です
-        translate:
-          title: 選択翻訳
-          description: 選択ツールバー翻訳機能のプロバイダーとモデルを設定
-      customActions:
-        title: カスタム AI アクション
-        description: 選択テキスト向けに独自の構造化 AI アクションを追加
-        builtIn: 組み込み
-        add: AI アクションを追加
-        edit: AI アクションを編集
-        empty: カスタム AI アクションはまだありません
-        noEnabledLlmProvider: カスタム AI アクションを作成する前に、少なくとも1つのLLMプロバイダーを有効化してください
-        table:
-          name: 名前
-          provider: プロバイダー
-          fields: フィールド
-          actions: 操作
-        form:
-          name: 名前
-          customize: カスタマイズ
-          customizeTooltip: 組み込みアクションのプロンプトは変更できません。このボタンをクリックして編集可能なコピーを作成し、プロンプトを変更します。
-          icon: アイコン
-          iconField:
-            chooseAriaLabel: アイコンを選択
-            chooseTitle: アイコンを選択
-            inputPlaceholder: アイコン名を入力
-            helpAriaLabel: アイコンのヘルプ
-            helpTitle: 欲しいアイコンが見つかりませんか？
-            helpStepBrowsePrefix: ""
-            helpStepBrowseSuffix: でアイコンを探す
-            helpStepCopyPrefix: "たとえば "
-            helpStepCopySuffix: " のようなアイコン名をコピーして、入力欄に貼り付けてください。"
-          provider: プロバイダー（構造化出力対応が必要）
-          selectProvider: プロバイダーを選択
-          systemPrompt: システムプロンプト
-          prompt: プロンプト
-          outputSchema: 出力スキーマ
-          addField: フィールドを追加
-          fieldName: フィールド名
-          fieldType: フィールド型
-          fieldDescription: 説明
-          fieldDescriptionPlaceholder: このフィールドに含めるべき内容を説明してください...
-          fieldSpeaking: 読み上げを有効にする
-          actions: 操作
-          cancel: キャンセル
-          save: 保存
-          defaultFieldName: 結果
-          fieldNamePlaceholder: フィールド名
-          autoFieldPrefix: フィールド
-          addFieldDialog:
-            title: 出力フィールドを追加
-          editFieldDialog:
-            title: 出力フィールドを編集
-            save: 保存
-          deleteFieldDialog:
-            title: 出力フィールドを削除しますか？
-            description: この出力フィールドは削除されます。
-            confirm: 削除
-            cancel: キャンセル
-          notebase:
-            title: Notebase 接続
-            description: このアクションの構造化された結果をリモート Notebase に保存します。
-            loginRequiredTitle: Notebase を設定するにはログインが必要です
-            loginRequiredDescription: notebase を選択したりマッピングを編集したりする前に、readfrog.app にログインしてください。
-            loginRequiredConnectedDescription: この接続は下のアカウントで作成されました。同じアカウントでログインするとフィールドマッピングが復元されます。別のアカウントでログインした場合、Notebase を作成または接続すると以前のマッピングは消去されます。
-            loginAction: ログイン
-            connectedAccountLabel: 接続済みアカウント
-            currentAccountLabel: 現在のアカウント
-            unknownConnectedAccount: 不明なアカウント
-            tableLabel: Notebase
-            tablePlaceholder: notebase を選択
-            tableClearOption: notebase を接続しない
-            clearConnectionAction: 接続をクリア
-            refreshAction: 更新
-            emptyTitle: Notebase がまだありません
-            emptyDescription: readfrog.app で notebase を作成してから、ここに戻ってフィールドをマッピングしてください。
-            openNotebaseAction: Notebase を開く
-            accessDeniedTitle: Notebase にアクセスできません
-            accessDeniedDescription: このアカウントには Notebase データを読み込む権限がありません。
-            listErrorTitle: Notebase 一覧を読み込めませんでした
-            listErrorDescription: 少し待ってから Notebase 一覧をもう一度更新してください。
-            accountMismatchTitle: Notebase 接続は別のアカウントに属しています
-            accountMismatchDescription: この接続は下の接続済みアカウントに紐づいています。接続をクリアするか、現在のアカウントで利用できる Notebase を選択してください。
-            tableUnavailableTitle: 選択した notebase は利用できなくなりました
-            tableUnavailableDescription: この Notebase は存在しないか開けません。接続をクリアするか、別の Notebase を選択してください。
-            tableUnavailableOption: 利用不可
-            schemaErrorTitle: notebase スキーマの読み込みに失敗しました
-            schemaErrorDescription: 少し待ってからもう一度更新してください。
-            schemaLoading: notebase スキーマを読み込み中...
-            mappingsLabel: フィールドマッピング
-            mappingsEmpty: まだマッピングはありません。フィールドを保存する準備ができたら追加してください。
-            addMappingAction: マッピングを追加
-            removeMappingAction: マッピングを削除
-            localFieldLabel: アクションフィールド
-            localFieldPlaceholder: アクションフィールドを選択
-            remoteFieldLabel: Notebase フィールド
-            remoteFieldPlaceholder: notebase フィールドを選択
-            columnUnavailableOption: 削除済み
-            invalidMappingsTitle: 一部のマッピングに対応が必要です
-            invalidMappingsDescription: 無効なマッピングは保持されます。Notebase に保存する前に修正してください。
-            mappingMissingLocal: マッピングされたアクションフィールドは存在しなくなりました。
-            mappingMissingRemote: マッピングされた notebase フィールドは存在しなくなりました。
-            mappingMissingSchema: このマッピングを検証するには、notebase スキーマを更新してください。
-            mappingIncompatible: フィールドの型が一致しなくなりました。
-          tokens:
-            selection: 選択したテキスト内容
-            paragraphs: 選択範囲と交差する段落内容。空行で連結され、カスタム AI アクションに送信する際は先頭 2000 文字に切り詰められます
-            targetLanguage: ユーザーのターゲット言語
-            webTitle: ウェブページのタイトル
-            webContent: 現在のページから抽出されたウェブページ本文（先頭 2000 文字に切り詰め）
-          delete: 削除
-          deleteDialog:
-            title: カスタムアクションを削除しますか？
-            description: この操作は元に戻せません。
-            confirm: 削除
-            cancel: キャンセル
-        errors:
-          nameRequired: 名前は必須です
-          duplicateName: '重複するアクション名 "$1"'
-          invalidIcon: 無効な Iconify アイコン文字列です
-          providerRequired: 有効な LLM プロバイダーを選択してください
-          outputSchemaRequired: 少なくとも1つの出力フィールドを追加してください
-          fieldKeyRequired: フィールド名は必須です
-          duplicateFieldKey: フィールド名は一意である必要があります
-    contextMenu:
-      title: コンテキストメニュー
-      translate:
-        title: 右クリック翻訳を有効化
-        description: ブラウザの右クリックメニューに翻訳オプションを追加し、ページや選択テキストを素早く翻訳
-  translation:
-    title: 翻訳
-    requestQueueConfig:
-      title: 翻訳速度
-      firstOnDescription: 翻訳リクエストの処理速度を調整し、
-      lastOnDescription: を利用して実装する
-      capacity:
-        title: 最大バーストリクエスト数
-        description: 許容される一時的バーストリクエスト数は、短期間内に同時処理可能な最大リクエスト数を決定する
-      rate:
-        title: 秒間平均リクエスト数
-        description: 平均秒間リクエスト数（ただし、最大バーストリクエスト数を設定し一時的な超過リクエスト送信を許可）。小数も設定可能です（例：0.25 は4秒に1リクエストの意味で、Gemini 無料枠などレート制限の厳しい API に便利です）
-    batchQueueConfig:
-      title: バッチ翻訳
-      description: バッチ翻訳時の文字数制限と最大段落数を設定（大規模言語モデル翻訳でのみ有効）
-      maxCharactersPerBatch:
-        title: 最大文字数
-        description: バッチリクエストあたりの最大文字数で、各翻訳のコンテンツ量を制御します
-      maxItemsPerBatch:
-        title: 最大段落数
-        description: 各バッチ翻訳の最大段落数、各翻訳のコンテンツ量を制御します
-      statisticsLink: 過去 7 日間で約 $1 のコストを節約しました
-    autoTranslateWebsite:
-      title: ウェブサイトに基づく自動翻訳
-      description: このサイトを常に翻訳する
-      urlPattern: URL パターン
-      enterUrlPattern: URL パターンを入力
-    neverAutoTranslateWebsite:
-      title: Never Auto Translate Based on Website
-      description: Never automatically translate this website
-      urlPattern: URL Pattern
-      enterUrlPattern: Enter URL Pattern
-    personalizedPrompts:
-      title: 個人化プロンプト
-      description: 異なるタイプのプロンプトをカスタマイズすることで、翻訳時にプロンプトタイプを自ら調整できます。プロンプトとは、ユーザーがLLMに送信するテキストを指します。
-      communityPrompts: コミュニティからプロンプトを取得・共有
-      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
-      addPrompt: プロンプトを追加
-      default: デフォルト
-      importSuccess: インポート成功
-      import: インポート
-      export: エクスポート
-      current: 使用中
-      editPrompt:
-        title: プロンプトを編集
-        name: 名前
-        systemPrompt: システムプロンプト
-        prompt: プロンプト
-        promptCellInput:
-          input: 翻訳するテキスト内容
-          targetLanguage: 目標言語
-          webTitle: ウェブページタイトル
-          webDescription: ページメタデータのウェブページ説明
-          webContent: ウェブページ本文（先頭 2000 文字に切り詰め）
-          webSummary: ウェブページ要約（AI スマートコンテキストが必要）
-        save: 保存
-        close: キャンセル
-      deletePrompt:
-        title: プロンプトを削除
-        description: このプロンプトを削除しますか
-        confirm: 確認
-        cancel: キャンセル
-      exportPrompt:
-        exportSelected: 選択したものをエクスポート
-        cancel: キャンセル
-    translationStyle:
-      title: 翻訳表示スタイル
-      description: 翻訳結果と原文を区別するために好みのスタイルを設定
-      useCustomStyle: カスタム CSS スタイルを使用
-      useCustomStyleDescription: 任意の CSS に対応、フォント、アニメーション、言語別スタイルなど
-      presetStyle: プリセットスタイル
-      cssEditor: CSSエディター
-      preview: プレビュー
-      stylePreviewLanguage: 言語
-      stylePreviewDirection: 方向
-      stylePreviewTranslatedText: 翻訳済みテキスト
-      style:
-        default: なし
-        blur: ぼかし効果
-        blockquote: 引用
-        weakened: 弱化
-        dashedLine: 破線
-        border: 枠線
-        textColor: テキストカラー
-        background: 背景
-      customCSS:
-        editor:
-          placeholder: |
-            /* 例：カスタムカラーと背景のスタイル */
-            [data-read-frog-custom-translation-style='custom'] {
-              color: #414535;
-              background-color: light-dark(#F2E3BC, #C19875);
-              padding: 2px 4px;
-              border-radius: 4px;
-            }
-          saveButton: 保存
-          savedButton: 保存済み
-          validation:
-            validating: 検証中...
-            valid: CSSは有効です
-            syntaxError: CSSに構文エラーがあります
-            tooLong: CSSが長すぎます
-            saved: すべての変更が保存されました
-    translationMode:
-      title: 翻訳モード
-      description: 翻訳テキストの表示方法を選択：バイリンガルまたは翻訳のみ
-      mode:
-        bilingual: バイリンガル
-        translationOnly: 翻訳のみ
-    translationModeShortcut:
-      title: 翻訳モード切り替えショートカット
-      description: バイリンガルモードと翻訳のみモードを切り替えるショートカットキーをカスタマイズ
-      switched: 翻訳モード：$1
-    translateRange:
-      title: 翻訳範囲
-      description: ページのメインコンテンツのみを翻訳するか、すべてのコンテンツを翻訳するかを選択します。
-      range:
-        main: メインコンテンツ
-        all: すべてのコンテンツ
-    pageTranslationShortcut:
-      title: ページ翻訳ショートカットキー
-      description: ウェブページ全体を翻訳するショートカットキーをカスタマイズします
-    preloadConfig:
-      title: 事前翻訳範囲
-      description: ビューポート下のコンテンツをどれだけ事前翻訳するかを制御し、API コストを節約します
-      margin:
-        title: プリロード距離（ピクセル）
-        description: ビューポートからどれくらい離れた位置でコンテンツの翻訳を開始するか。小さい値は API コストを節約しますが、スクロール時に遅延が発生する可能性があります。
-      threshold:
-        title: 可視性しきい値
-        description: 翻訳をトリガーするために必要な要素の可視性の割合（0-1）。高い値は、要素がより多く表示されるまで翻訳を遅らせます。
-    smallParagraphFilter:
-      title: 短いテキストフィルター
-      description: これらのグローバル既定値を使用して、指定した文字数または単語数より少ないテキストノードの翻訳をスキップします。一致するサイトルールで上書きできます（0 = 無効）
-      minCharacters:
-        title: 最小文字数
-        description: この値より少ない文字数のテキストノードは翻訳されません。文字数には空白が含まれます。
-      minWords:
-        title: 最小単語数
-        description: この値より少ない単語数のテキストノードは翻訳されません。すべての言語で正確な単語カウントのために Intl.Segmenter を使用します。
-      error: 値は $1 から $2 の間である必要があります
-    nodeTranslationHotkey:
-      title: ホバーまたは長押し翻訳ショートカットキー
-      description: ホバー翻訳の修飾キーをカスタマイズするか、長押しで段落を翻訳します
-      enable: 有効化
-    llmProviderConfigured: $1の LLM プロバイダー選択済み
-    llmProviderNotConfigured: $1の LLM プロバイダー未選択
-    autoTranslateLanguages:
-      title: 言語に基づく自動翻訳
-      description: 特定の言語が検出された場合にページコンテンツを自動翻訳します
-      selectLanguages: 言語を選択
-      detection:
-        label: 言語検出
-        basic: 基本
-        llm: LLM
-        description: 基本検出は高速で無料です。LLM 検出はより正確ですが、遅延と API コストが増加します。自動翻訳言語の設定が必要です。
-    skipLanguages:
-      title: 言語に基づく自動スキップ
-      description: 指定された言語が検出されると、段落の翻訳を自動的にスキップします
-      targetLanguageSkip: ターゲット言語をスキップ
-      targetLanguageSkipDescription: 翻訳前に段落がすでにターゲット言語かどうかを事前検出します。一致したテキストはリクエストを送信せずにスキップされます。オフにしても、翻訳結果が原文と同じ場合に非表示にする後段の保護は変わりません。
-      selectLanguages: 言語を選択
-      detection:
-        label: 言語検出
-        basic: 基本
-        llm: LLM
-        description: 基本検出は高速で無料です。LLM 検出はより正確ですが、遅延と API コストが増加します。
     aiContentAware:
       title: AI スマートコンテキスト翻訳
-      description: ウェブページのコンテキストを AI に提供して翻訳品質を向上させます
-      enable: AI スマートコンテキスト翻訳を有効にする
-      enableDescription: AI はウェブページの要約を使用して翻訳精度を向上させます。LLM プロバイダーが必要です。翻訳開始時に遅延が発生し、API コストが増加します。
-  siteRules:
-    title: サイトルール
-    description: 特定のウェブサイトの翻訳動作を調整するルールです。
-    userRules:
-      title: ユーザールール
-      description: JSON 配列として独自のサイトルールを定義します。URL がパターンに一致するページに適用され、ユーザールールは組み込みルールより優先されます。
-      saveButton: 保存
-      savedButton: 保存済み
-      validation:
-        validating: 検証中...
-        valid: ルールは有効です
-        syntaxError: JSON に構文エラーがあります
-        notArray: JSON のトップレベルはルールの配列である必要があります
-        tooLong: ルールのドキュメントが長すぎます
-        tooMany: ルールが多すぎます
-        duplicateIds: ルール id が重複しています
-        schemaErrors: 無効なルールがあります
-        moreErrors: ...他 $1 件のエラー
-        saved: すべての変更が保存されました
-    builtIn:
-      title: 組み込みルール
-      description: 拡張機能に同梱されているサイトルールです。サイトで問題が発生する場合は、スイッチで個別に無効化できます。
-      searchPlaceholder: id、説明、URL パターンで検索
-      showMore: さらに表示
-      count: $2 件中 $1 件のルールを表示
-  tts:
-    title: テキスト読み上げ
-    description: Edge TTS の音声設定で読み上げボタンをカスタマイズします。
-    voice:
-      label: ボイス
-      fallback: フォールバック
-      selectPlaceholder: ボイスを選択
-      noVoicesFound: ボイスが見つかりません
-      previewSample: Read Frog からこんにちは！朗読するときはこのように聞こえます。
-    languageVoice:
-      label: 言語別ボイス
-      reset: リセット
-      description: 言語を選択し、TTS がその言語を検出したときに使用するボイスを割り当てます。
-    rate:
-      label: 速度 (%)
-      hint: -100 から 100 までの整数を入力できます
-    pitch:
-      label: ピッチ (Hz)
-      hint: -100 から 100 までの整数を入力できます
-    volume:
-      label: 音量 (%)
-      hint: -100 から 100 までの整数を入力できます
-    betaDisabled: テキスト読み上げ設定をカスタマイズするには Beta 体験を有効にしてください。
-  statistics:
-    title: 統計
-    batchRequest:
-      title: バッチ翻訳で節約されたリクエスト
-      description: 期間内にバッチ翻訳で節約されたリクエストの割合
-      originalRequestCount: 元のリクエスト数
-      batchRequestCount: バッチリクエスト数
-  config:
-    title: 設定
-    about:
-      title: Read Frog について
-      description: Read Frog は 2025 年 4 月に生まれました
-      mission: Read Frog は、AI 時代における質の高い教育機会への平等なアクセスを広げるため、語学学習、医学、その他の知識集約型分野で、実際の教師に近い学習体験を手頃な価格で提供することを目指しています。
-      analytics:
-        title: ユーザー体験の改善に協力する
-        tooltip: 有効にすると、Read Frog は匿名の利用シグナルを送信し、機能の安定性確認、性能や UX の改善、今後優先すべき機能の判断に役立てます。
-    sync:
-      title: 手動設定同期
-      description: 手動で設定をインポート・エクスポート
-      import: 設定をインポート
-      export: 設定をエクスポート
-      importSuccess: 設定のインポートが完了しました
-      exportSuccess: 設定のエクスポートが完了しました
-      importError: インポートに失敗しました
-      versionTooNew: インポートされた設定のバージョンが新しいため、Read Frogを最新バージョンにアップグレードしてください
-      migrationError: 移行に失敗しました
-      validationError: 設定の検証に失敗しました
-      exportOptions:
-        title: エクスポートオプションを選択
-        description: エクスポートする設定にAPIキーを含めるかどうかを選択してください。APIキーを含めると機密情報が漏洩する可能性があるため、安全な環境でのみ使用することをお勧めします。
-        includeAPIKeys: APIキーを含める
-        excludeAPIKeys: APIキーを含めない
-        cancel: キャンセル
-      viewConfig:
-        expand: 設定を展開
-        collapse: 設定を折りたたむ
+      description: ページや動画の文脈を AI に渡して、翻訳の精度を上げます
+      enable: 有効にする
+      enableDescription: AI は翻訳の前にページや動画の要約を読み、文脈に合った訳語を選びます。LLM プロバイダーで動作するすべての翻訳機能に適用されます。最初のリクエストに遅延が生じ、API 費用も増えます。
+      llmProviderConfigured: $1の LLM プロバイダー選択済み
+      llmProviderNotConfigured: $1の LLM プロバイダー未選択
+  patterns:
+    duplicate: このパターンは既にリストにあります
+  preference:
+    title: 環境設定
+    pageDescription: Read Frog の外観、動作する範囲、設定の同期とバックアップ方法を指定します。
+    appearanceAndLanguage:
+      title: 外観と言語
+      theme:
+        title: テーマ
+        description: Read Frog のテーマを選択します。
+        system: システム
+        light: ライト
+        dark: ダーク
+      interfaceLanguage:
+        title: インターフェース言語
+        description: ブラウザの言語とは別に、拡張機能のインターフェース言語を選択します。
+        auto: 自動（ブラウザに従う）
+    extensionActivation:
+      title: 拡張機能の有効化
+      mode:
+        title: 有効化モード
+        description: ブラックリストモードを使用して特定のサイトで拡張機能を無効にするか、ホワイトリストモードを使用して特定のサイトのみに制限できます。
+        blacklist: リストされたサイトでのみ無効
+        whitelist: リストされたサイトでのみ実行
+      patterns:
+        enterUrlPattern: URLパターンを入力（例：example.com）
+        urlPattern: URLパターン
+    config:
+      title: 設定
       googleDrive:
         title: Google Driveクラウド同期
         description: リモートが新しい場合はダウンロード、ローカルが新しい場合はアップロード
@@ -818,56 +346,548 @@ options:
             title: マージされた設定に検証エラーがあります
             description: 以下の差異を調整して修正してください：
           moreErrors: ...他 $1 件のエラー
-    backup:
-      title: 設定のバックアップ
-      description: 設定が変更された場合、1時間ごとに自動的にバックアップが作成されます。以前の設定をここで復元できます。（最大 $1 個のバックアップ）
-      loading: バックアップを読み込んでいます...
-      backupNow: 今すぐバックアップ
-      backupSuccess: バックアップが作成されました
-      restoreSuccess: 設定が復元されました
-      empty:
-        title: まだバックアップがありません
-        description: 設定が変更された場合、1時間ごとに自動的にバックアップが作成されます。
-      item:
-        extensionVersion: 拡張機能のバージョン：
-        schemaVersion: 設定のバージョン：
-        restore: 復元
+      manualSync:
+        title: 手動設定同期
+        description: 手動で設定をインポート・エクスポート
+        import: インポート
         export: エクスポート
-        delete: 削除
-      restore:
-        title: 設定のバックアップを復元しますか？
-        description: 現在の設定が最新のバックアップと異なる場合、自動的に現在の設定がバックアップされます。バックアップ数が上限を超える場合、最も古いバックアップが削除される可能性があります。
-        cancel: キャンセル
-        confirm: 復元
-      delete:
-        title: バックアップを削除しますか？
-        description: このバックアップを削除してもよろしいですか？この操作は元に戻せません。
-        cancel: キャンセル
-        confirm: 削除
-    resetConfig:
-      title: 設定をリセット
-      description: すべての設定をデフォルト値にリセットします。
-      dialog:
+        importSuccess: 設定のインポートが完了しました
+        exportSuccess: 設定のエクスポートが完了しました
+        importError: インポートに失敗しました
+        exportOptions:
+          title: エクスポートオプションを選択
+          description: エクスポートする設定にAPIキーを含めるかどうかを選択してください。APIキーを含めると機密情報が漏洩する可能性があるため、安全な環境でのみ使用することをお勧めします。
+          includeAPIKeys: APIキーを含める
+          excludeAPIKeys: APIキーを含めない
+          cancel: キャンセル
+      viewConfig:
+        open: 設定を開く
+        title: 設定
+        description: 現在の設定の生の JSON を表示します
+      backup:
+        title: 設定のバックアップ
+        description: 設定が変更された場合、1時間ごとに自動的にバックアップが作成されます。以前の設定をここで復元できます。（最大 $1 個のバックアップ）
+        loading: バックアップを読み込んでいます...
+        backupNow: 今すぐバックアップ
+        backupSuccess: バックアップが作成されました
+        restoreSuccess: 設定が復元されました
+        empty:
+          title: まだバックアップがありません
+          description: 設定が変更された場合、1時間ごとに自動的にバックアップが作成されます。
+        item:
+          extensionVersion: 拡張機能のバージョン：
+          schemaVersion: 設定のバージョン：
+          restore: 復元
+          export: エクスポート
+          delete: 削除
+        restore:
+          title: 設定のバックアップを復元しますか？
+          description: 現在の設定が最新のバックアップと異なる場合、自動的に現在の設定がバックアップされます。バックアップ数が上限を超える場合、最も古いバックアップが削除される可能性があります。
+          cancel: キャンセル
+          confirm: 復元
+        delete:
+          title: バックアップを削除しますか？
+          description: このバックアップを削除してもよろしいですか？この操作は元に戻せません。
+          cancel: キャンセル
+          confirm: 削除
+      reset:
         title: 設定をリセット
-        trigger: 設定をリセット
+        description: すべての設定をデフォルト値にリセットします。
+        dialog:
+          title: 設定をリセット
+          trigger: 設定をリセット
+          confirm: 確認
+          cancel: キャンセル
+          description: この操作は、すべての設定をデフォルト値にリセットします。ご確認ください。
+    userExperience:
+      title: ユーザー体験
+      beta:
+        title: Beta 体験
+        description: まだ不安定な可能性がある実験的機能を有効にします
+      analytics:
+        title: ユーザー体験の改善に協力する
+        tooltip: 有効にすると、Read Frog は匿名の利用シグナルを送信し、不具合の発見、機能の安定性確認、性能や UX の改善、今後優先すべき機能の判断に役立てます。
+        description: バグの特定や UI レイアウトの改善などを通じて Read Frog をより良くします
+  shortcuts:
+    title: ショートカット
+    pageDescription: 読みながら翻訳を実行するキーを設定します。
+    setShortcut: ショートカットを設定
+    pageTranslation:
+      title: ページ翻訳
+      description: ページ全体を翻訳します。
+    translationMode:
+      title: 翻訳モード
+      description: バイリンガルと翻訳のみを切り替えます。
+    selectionTranslation:
+      title: 選択範囲の翻訳
+      description: 選択したテキストを翻訳します。
+    subtitlesToggle:
+      title: 字幕翻訳
+      description: 動画の翻訳字幕をオンまたはオフにします。
+    nodeTranslation:
+      title: 段落翻訳
+      description: 段落にホバーまたは長押しすると、その段落だけ翻訳します。
+  overlayTools:
+    title: オーバーレイツール
+  inputTranslation:
+    title: 入力翻訳
+    pageDescription: 入力欄に書いた内容を、送信する前に翻訳します。
+    trigger:
+      title: トリガー
+      enable:
+        title: 有効化
+        description: 任意の入力欄でスペースキーを素早く3回押すと、入力した内容を翻訳します。
+      threshold:
+        title: トリガーしきい値
+        description: 連続する押下の間隔として許される長さ（ミリ秒）です。反応しないときは大きく、入力中に誤って動くときは小さくします。
+        error: $1 から $2 の間の値を入力してください
+    languages:
+      title: 翻訳言語
+      pair:
+        title: 言語の組み合わせ
+        description: 入力した文章をどの言語として読み取り、どの言語に翻訳するかを決めます。どちらもページ翻訳で使うソース言語・ターゲット言語に合わせられます。
+      sourceCode: ページソース言語
+      targetCode: 翻訳ターゲット言語
+      cycle:
+        title: 毎回方向を切り替え
+        description: トリガーのたびに2つの言語が入れ替わるため、もう一度実行すると入力した言語に戻ります。
+  floatingButton:
+    title: フローティングボタン
+    pageDescription: フローティングボタンを表示する側、クリック時の動作、非表示にするサイトを設定します。
+    demoImageAlt: フローティングボタンデモ
+    enable:
+      title: フローティングボタンを有効化
+      description: ウェブページにフローティングボタンを表示し、Read Frog機能に素早くアクセス
+    display:
+      title: 表示
+      side:
+        title: ボタンの位置
+        description: フローティングボタンをページのどちら側に固定するかを選択します
+        left: 左側
+        right: 右側
+      disabledSites:
+        title: 無効化サイト
+        description: フローティングボタンを無効化するウェブサイトを設定します
+        enterUrlPattern: URL パターンを入力
+        urlPattern: URL パターン
+    clickAction:
+      title: クリック動作
+      description: フローティングボタンをクリックしたときの動作を選択
+      panel: サイドパネルを開く
+      translate: ページ翻訳を切り替え
+    closeMenu:
+      disableForSite: このサイトで無効化
+      disableGlobally: グローバルで無効化
+    tooltips:
+      togglePageTranslation: ページ翻訳を切り替え
+      floatingButtonOptions: フローティングボタンのオプション
+      lockPosition: 位置を固定
+      unlockPosition: 位置の固定を解除
+      settings: 設定
+      feedback: フィードバックを送信
+  selectionToolbar:
+    title: 選択ツールバー
+    pageDescription: テキストを選択したときに表示するアクションと、ツールバーを表示するサイトを設定します。
+    demoImageAlt: 選択ツールバーデモ
+    enable:
+      title: 選択ツールバーを有効化
+      description: ウェブページでテキストを選択したときにツールバーを表示し、すばやく翻訳・読み上げ・AIアクションを実行します
+    actions:
+      title: アクション
+      translate:
+        title: 翻訳
+        description: ツールバーに翻訳ボタンを表示します
+      speak:
+        title: 読み上げ
+        description: 選択したテキストを読み上げる読み上げボタンをツールバーに表示します
+      saveSuggestion:
+        title: 保存の提案
+        description: AI プロバイダーで選択テキストを翻訳した後、Notebase に保存する単語を提案します
+        action: アクション
+        actionDescription: 保存候補を生成するアクション
+    display:
+      title: 表示
+      opacity:
+        title: 透明度
+        description: 選択ツールバーとそこから開く展開ウィンドウの透明度を調整します
+      disabledSites:
+        title: 無効化サイト
+        description: 選択ツールバーを無効化するウェブサイトを設定します
+        enterUrlPattern: URL パターンを入力
+        urlPattern: URL パターン
+    closeMenu:
+      disableForSite: このサイトで無効化
+      disableGlobally: グローバルで無効化
+    errors:
+      customActionFailed: カスタムアクションに失敗しました
+      customActionFailedFallback: カスタムアクションのリクエストに失敗しました
+      actionUnavailable: 選択したアクションは利用できません
+      missingSelection: 選択されたテキストがありません
+      providerDisabled: 選択したプロバイダーは無効です
+      providerUnavailable: 選択したプロバイダーは利用できません
+    customActions:
+      title: カスタム AI アクション
+      pageDescription: 独自のプロンプトを作成し、選択ツールバーから選択したテキストに対して実行します。
+      description: 選択テキスト向けに独自の構造化 AI アクションを追加
+      configTitle: アクション設定
+      builtIn: 組み込み
+      add: AI アクションを追加
+      edit: AI アクションを編集
+      empty: カスタム AI アクションはまだありません
+      noEnabledLlmProvider: カスタム AI アクションを作成する前に、少なくとも1つのLLMプロバイダーを有効化してください
+      form:
+        name: 名前
+        customize: カスタマイズ
+        customizeTooltip: 組み込みアクションのプロンプトは変更できません。このボタンをクリックして編集可能なコピーを作成し、プロンプトを変更します。
+        icon: アイコン
+        iconField:
+          chooseAriaLabel: アイコンを選択
+          chooseTitle: アイコンを選択
+          inputPlaceholder: アイコン名を入力
+          helpAriaLabel: アイコンのヘルプ
+          helpTitle: 欲しいアイコンが見つかりませんか？
+          helpStepBrowsePrefix: ""
+          helpStepBrowseSuffix: でアイコンを探す
+          helpStepCopyPrefix: "たとえば "
+          helpStepCopySuffix: " のようなアイコン名をコピーして、入力欄に貼り付けてください。"
+        provider: プロバイダー（構造化出力対応が必要）
+        selectProvider: プロバイダーを選択
+        systemPrompt: システムプロンプト
+        prompt: プロンプト
+        outputSchema: 出力スキーマ
+        addField: フィールドを追加
+        fieldName: フィールド名
+        fieldType: フィールド型
+        fieldDescription: 説明
+        fieldDescriptionPlaceholder: このフィールドに含めるべき内容を説明してください...
+        fieldSpeaking: 読み上げを有効にする
+        actions: 操作
+        cancel: キャンセル
+        save: 保存
+        defaultFieldName: 結果
+        fieldNamePlaceholder: フィールド名
+        autoFieldPrefix: フィールド
+        addFieldDialog:
+          title: 出力フィールドを追加
+        editFieldDialog:
+          title: 出力フィールドを編集
+          save: 保存
+        deleteFieldDialog:
+          title: 出力フィールドを削除しますか？
+          description: この出力フィールドは削除されます。
+          confirm: 削除
+          cancel: キャンセル
+        notebase:
+          title: Notebase 接続
+          description: このアクションの構造化された結果をリモート Notebase に保存します。
+          loginRequiredTitle: Notebase を設定するにはログインが必要です
+          loginRequiredDescription: notebase を選択したりマッピングを編集したりする前に、readfrog.app にログインしてください。
+          loginRequiredConnectedDescription: この接続は下のアカウントで作成されました。同じアカウントでログインするとフィールドマッピングが復元されます。別のアカウントでログインした場合、Notebase を作成または接続すると以前のマッピングは消去されます。
+          loginAction: ログイン
+          connectedAccountLabel: 接続済みアカウント
+          currentAccountLabel: 現在のアカウント
+          unknownConnectedAccount: 不明なアカウント
+          tableLabel: Notebase
+          tablePlaceholder: notebase を選択
+          tableClearOption: notebase を接続しない
+          clearConnectionAction: 接続をクリア
+          refreshAction: 更新
+          emptyTitle: Notebase がまだありません
+          emptyDescription: readfrog.app で notebase を作成してから、ここに戻ってフィールドをマッピングしてください。
+          openNotebaseAction: Notebase を開く
+          accessDeniedTitle: Notebase にアクセスできません
+          accessDeniedDescription: このアカウントには Notebase データを読み込む権限がありません。
+          listErrorTitle: Notebase 一覧を読み込めませんでした
+          listErrorDescription: 少し待ってから Notebase 一覧をもう一度更新してください。
+          accountMismatchTitle: Notebase 接続は別のアカウントに属しています
+          accountMismatchDescription: この接続は下の接続済みアカウントに紐づいています。接続をクリアするか、現在のアカウントで利用できる Notebase を選択してください。
+          tableUnavailableTitle: 選択した notebase は利用できなくなりました
+          tableUnavailableDescription: この Notebase は存在しないか開けません。接続をクリアするか、別の Notebase を選択してください。
+          tableUnavailableOption: 利用不可
+          schemaErrorTitle: notebase スキーマの読み込みに失敗しました
+          schemaErrorDescription: 少し待ってからもう一度更新してください。
+          schemaLoading: notebase スキーマを読み込み中...
+          mappingsLabel: フィールドマッピング
+          mappingsEmpty: まだマッピングはありません。フィールドを保存する準備ができたら追加してください。
+          addMappingAction: マッピングを追加
+          removeMappingAction: マッピングを削除
+          localFieldLabel: アクションフィールド
+          localFieldPlaceholder: アクションフィールドを選択
+          remoteFieldLabel: Notebase フィールド
+          remoteFieldPlaceholder: notebase フィールドを選択
+          columnUnavailableOption: 削除済み
+          invalidMappingsTitle: 一部のマッピングに対応が必要です
+          invalidMappingsDescription: 無効なマッピングは保持されます。Notebase に保存する前に修正してください。
+          mappingMissingLocal: マッピングされたアクションフィールドは存在しなくなりました。
+          mappingMissingRemote: マッピングされた notebase フィールドは存在しなくなりました。
+          mappingMissingSchema: このマッピングを検証するには、notebase スキーマを更新してください。
+          mappingIncompatible: フィールドの型が一致しなくなりました。
+        tokens:
+          selection: 選択したテキスト内容
+          paragraphs: 選択範囲と交差する段落内容。空行で連結され、カスタム AI アクションに送信する際は先頭 2000 文字に切り詰められます
+          targetLanguage: ユーザーのターゲット言語
+          webTitle: ウェブページのタイトル
+          webContent: 現在のページから抽出されたウェブページ本文（先頭 2000 文字に切り詰め）
+        delete: 削除
+        deleteDialog:
+          title: カスタムアクションを削除しますか？
+          description: この操作は元に戻せません。
+          confirm: 削除
+          cancel: キャンセル
+      errors:
+        nameRequired: 名前は必須です
+        duplicateName: '重複するアクション名 "$1"'
+        invalidIcon: 無効な Iconify アイコン文字列です
+        providerRequired: 有効な LLM プロバイダーを選択してください
+        outputSchemaRequired: 少なくとも1つの出力フィールドを追加してください
+        fieldKeyRequired: フィールド名は必須です
+        duplicateFieldKey: フィールド名は一意である必要があります
+  contextMenu:
+    title: コンテキストメニュー
+    pageDescription: ブラウザーの右クリックメニューに表示される Read Frog の項目を設定します。
+    demoImageAlt: コンテキストメニューデモ
+    enable:
+      title: 右クリック翻訳を有効化
+      description: ブラウザの右クリックメニューに翻訳オプションを追加し、ページや選択テキストを素早く翻訳
+  translation:
+    title: ページ翻訳
+    pageDescription: ページ翻訳の方法を設定します。モード、範囲、プロンプト、リクエスト制限など。
+    preference:
+      title: 基本設定
+      translationMode:
+        title: 翻訳モード
+        description: 翻訳テキストの表示方法を選択：バイリンガルまたは翻訳のみ
+        mode:
+          bilingual: バイリンガル
+          translationOnly: 翻訳のみ
+        switched: 翻訳モード：$1
+      translateRange:
+        title: 翻訳範囲
+        description: ページのメインコンテンツのみを翻訳するか、すべてのコンテンツを翻訳するかを選択します。
+        range:
+          main: メインコンテンツ
+          all: すべてのコンテンツ
+    hoverTranslation:
+      title: ホバー翻訳
+      enable:
+        title: 有効化
+        description: 段落にホバーまたは長押しすると、その段落だけ翻訳します。
+    translationStyle:
+      title: 翻訳表示スタイル
+      description: 翻訳結果と原文を区別するために好みのスタイルを設定
+      useCustomStyle: カスタム CSS スタイルを使用
+      useCustomStyleDescription: 任意の CSS に対応、フォント、アニメーション、言語別スタイルなど
+      presetStyle: プリセットスタイル
+      cssEditor: CSSエディター
+      cssEditorDescription: 独自の CSS を書いて、翻訳テキストの見え方をプレビューします。
+      preview: プレビュー
+      stylePreviewLanguage: 言語
+      stylePreviewDirection: 方向
+      stylePreviewTranslatedText: 翻訳済みテキスト
+      style:
+        default: なし
+        blur: ぼかし効果
+        blockquote: 引用
+        weakened: 弱化
+        dashedLine: 破線
+        border: 枠線
+        textColor: テキストカラー
+        background: 背景
+      customCSS:
+        editor:
+          placeholder: |
+            /* 例：カスタムカラーと背景のスタイル */
+            [data-read-frog-custom-translation-style='custom'] {
+              color: #414535;
+              background-color: light-dark(#F2E3BC, #C19875);
+              padding: 2px 4px;
+              border-radius: 4px;
+            }
+          docsLink: 設定方法は?
+          saveButton: 保存
+          savedButton: 保存済み
+          validation:
+            validating: 検証中...
+            valid: CSSは有効です
+            syntaxError: CSSに構文エラーがあります
+            tooLong: CSSが長すぎます
+            saved: すべての変更が保存されました
+    personalizedPrompts:
+      title: 個人化プロンプト
+      description: 異なるタイプのプロンプトをカスタマイズすることで、翻訳時にプロンプトタイプを自ら調整できます。プロンプトとは、ユーザーがLLMに送信するテキストを指します。
+      managePrompts: プロンプトを管理
+      communityPrompts: コミュニティからプロンプトを取得・共有
+      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      addPrompt: プロンプトを追加
+      default: デフォルト
+      importSuccess: インポート成功
+      import: インポート
+      export: エクスポート
+      current: 使用中
+      editPrompt:
+        title: プロンプトを編集
+        name: 名前
+        systemPrompt: システムプロンプト
+        prompt: プロンプト
+        promptCellInput:
+          input: 翻訳するテキスト内容
+          targetLanguage: 目標言語
+          webTitle: ウェブページタイトル
+          webDescription: ページメタデータのウェブページ説明
+          webContent: ウェブページ本文（先頭 2000 文字に切り詰め）
+          webSummary: ウェブページ要約（AI スマートコンテキストが必要）
+        save: 保存
+        close: キャンセル
+      deletePrompt:
+        title: プロンプトを削除
+        description: このプロンプトを削除しますか
         confirm: 確認
         cancel: キャンセル
-        description: この操作は、すべての設定をデフォルト値にリセットします。ご確認ください。
+      exportPrompt:
+        exportSelected: 選択したものをエクスポート
+        cancel: キャンセル
+    translationControl:
+      title: 翻訳の制御
+      autoTranslateWebsite:
+        title: ウェブサイトに基づく自動翻訳
+        description: 開いた時点で翻訳を始めるサイト
+        urlPattern: URL パターン
+        enterUrlPattern: URL パターンを入力
+      neverAutoTranslateWebsite:
+        title: ウェブサイトに基づく自動翻訳の除外
+        description: 言語のルールに一致しても自動では翻訳しないサイト
+        urlPattern: URL パターン
+        enterUrlPattern: URL パターンを入力
+      autoTranslateLanguages:
+        title: 言語に基づく自動翻訳
+        description: 特定の言語が検出された場合にページコンテンツを自動翻訳します
+        selectLanguages: 言語を選択
+      skipLanguages:
+        title: 言語に基づく自動スキップ
+        description: 指定された言語が検出されると、段落の翻訳を自動的にスキップします
+        targetLanguageSkipDescription: すでに翻訳先の言語になっている段落を、リクエストを送らずにスキップします
+        selectLanguages: 言語を選択
+      smallParagraphFilter:
+        title: 短いテキストフィルター
+        description: これらのグローバル既定値を使用して、指定した文字数または単語数より少ないテキストノードの翻訳をスキップします。一致するサイトルールで上書きできます（0 = 無効）
+        minCharacters:
+          description: 最小文字数：これより短いテキストは翻訳しません。0 にするとすべて翻訳します
+        minWords:
+          description: 最小単語数：これより単語が少ないテキストは翻訳しません
+        error: 値は $1 から $2 の間である必要があります
+    translationQueue:
+      title: 翻訳キュー
+      requestQueueConfig:
+        title: 翻訳速度
+        capacity:
+          description: 最大バーストリクエスト数：一度に送れるリクエストの数
+        rate:
+          description: 1 秒あたりのリクエスト数：バースト後の一定ペース。小数も使え、0.25 なら 4 秒に 1 回送ります
+      batchQueueConfig:
+        title: バッチ翻訳
+        description: バッチ翻訳時の文字数制限と最大段落数を設定（大規模言語モデル翻訳でのみ有効）
+        maxCharactersPerBatch:
+          description: 最大文字数：1 回の AI リクエストで送るテキストの量
+        maxItemsPerBatch:
+          description: 最大段落数：1 回のリクエストにまとめる段落の数。AI 以外の翻訳サービスには効きません
+      preloadConfig:
+        title: 事前翻訳範囲
+        description: ビューポート下のコンテンツをどれだけ事前翻訳するかを制御し、API コストを節約します
+        margin:
+          description: 先読み距離：画面の下どこまで先に翻訳するか（ピクセル）。小さくすると API 費用を抑えられます
+        threshold:
+          description: 表示のしきい値：段落がどれだけ見えたら翻訳するか。0〜1 で指定します
+    cache:
+      title: キャッシュ
+      clearCache:
+        title: キャッシュクリア
+        description: ブラウザのすべての翻訳キャッシュをクリアします
+        clearing: クリア中...
+        dialog:
+          title: キャッシュクリア
+          trigger: キャッシュクリア
+          confirm: 確認
+          cancel: キャンセル
+          description: この操作により、すべての翻訳キャッシュがクリアされます。この操作は元に戻せません。
+  siteRules:
+    title: サイトルール
+    description: 特定のウェブサイトの翻訳動作を調整するルールです。
+    userRules:
+      title: ユーザールール
+      description: JSON 配列として独自のサイトルールを定義します。URL がパターンに一致するページに適用され、ユーザールールは組み込みルールより優先されます。
+      saveButton: 保存
+      savedButton: 保存済み
+      validation:
+        validating: 検証中...
+        valid: ルールは有効です
+        syntaxError: JSON に構文エラーがあります
+        notArray: JSON のトップレベルはルールの配列である必要があります
+        tooLong: ルールのドキュメントが長すぎます
+        tooMany: ルールが多すぎます
+        duplicateIds: ルール id が重複しています
+        schemaErrors: 無効なルールがあります
+        moreErrors: ...他 $1 件のエラー
+        saved: すべての変更が保存されました
+    builtIn:
+      title: 組み込みルール
+      description: 拡張機能に同梱されているサイトルールです。サイトで問題が発生する場合は、スイッチで個別に無効化できます。
+      searchPlaceholder: id、説明、URL パターンで検索
+      showMore: さらに表示
+      count: $2 件中 $1 件のルールを表示
+  tts:
+    title: テキスト読み上げ
+    pageDescription: 選択したテキストを自然な音声で読み上げます。
+    voice:
+      title: ボイス
+      selectPlaceholder: ボイスを選択
+      noVoicesFound: ボイスが見つかりません
+      language:
+        title: 言語別ボイス
+        description: 言語を選び、その言語を読み上げるボイスを指定します。リセットすると Read Frog がその言語に選ぶボイスに戻ります。
+        reset: リセット
+        previewSample: Read Frog からこんにちは！朗読するときはこのように聞こえます。
+      fallback:
+        title: フォールバックボイス
+        description: 個別にボイスを指定していない言語は、このボイスで読み上げます。
+    speech:
+      title: 読み上げ
+      rate:
+        title: 速度
+        description: ボイス本来の速さからどれだけ速く、または遅く読むか。-100 から 100 パーセント。
+      pitch:
+        title: ピッチ
+        description: ボイス本来のピッチからどれだけ高く、または低く話すか。-100 から 100 ヘルツ。
+      volume:
+        title: 音量
+        description: ボイス本来の大きさからどれだけ大きく、または小さく読むか。-100 から 100 パーセント。
+      error: $1 から $2 までの整数を入力してください
   videoSubtitles:
     title: 動画字幕
-    description: 現在 YouTube 動画字幕のみ対応
-    provider:
-      title: 翻訳プロバイダー
-      description: 動画字幕翻訳に使用する翻訳プロバイダーを選択
-      label: プロバイダー
-    enable: 動画字幕を有効にする
-    enableDescription: 有効にすると、YouTube プレーヤーのコントロールバーに翻訳ボタンが表示されます。クリックして字幕の翻訳を開始します。
-    autoStart: 字幕を自動有効化
-    autoStartDescription: 動画の読み込みが完了したら、自動的に字幕翻訳を有効にします。
+    pageDescription: 視聴しながら字幕を翻訳します。プロバイダー・スタイル・リクエスト設定は個別に指定できます。
+    preference:
+      title: 基本設定
+      enable:
+        title: 動画字幕を有効にする
+        description: 動画プレーヤーのコントロールバーに翻訳ボタンを表示します。現在は YouTube のみ対応です。
+      autoStart:
+        title: 動画を開いたら翻訳する
+        description: 動画の読み込みが終わり次第、ボタンを押さなくても字幕の翻訳を始めます。
+      aiSegmentation:
+        title: AI スマート区切り
+        description: AI が字幕を文として読める形に切り直します。タイミングも AI が決めるため、字幕がずれることがあります。LLM 翻訳プロバイダーが必要です。
+    aiQuota:
+      title: AI字幕の利用枠
+      description: 今月のAI字幕文字起こし利用枠の使用状況
+      loginRequired: ログインしてAI字幕の利用枠を確認
+      logIn: ログイン
+      betaRequired: AI字幕はベータ版で、まだあなたのアカウントでは利用できません
+      betaApply: 利用を申請
+      loadError: 利用枠を読み込めませんでした。しばらくしてから再試行してください。
+      summary: $2 分中 $1 分を使用、残り $3 分
     style:
       title: 字幕スタイル
-      description: 字幕の外観をカスタマイズ
-      preview: プレビュー
+      description: 表示モード・位置・フォント・色・背景を、プレビューを見ながら設定します
+      customizeStyle: スタイルを編集
       displayMode:
         title: 表示モード
         bilingual: バイリンガル
@@ -880,46 +900,16 @@ options:
       generalSettings: 一般設定
       mainSubtitle: メイン字幕
       translationSubtitle: 翻訳字幕
-      containerStyle: 背景
       fontFamily: フォント
       fontScale: フォントサイズ
       color: 色
       fontWeight: フォントウェイト
       backgroundOpacity: 背景の透明度
       reset: デフォルトにリセット
-    aiSegmentation:
-      title: AI スマート区切り
-      enable: AI スマート区切りを有効にする
-      enableDescription: AIを使用して字幕を賢く区切り、読みやすさを向上させます。タイムラインはAIが判断するため、タイミングのずれが生じる場合があります。LLM翻訳プロバイダーが必要です。
-      clearCache: キャッシュをクリア
-      clearing: クリア中...
-      clearCacheDialog:
-        title: AI区切りキャッシュをクリア
-        description: すべてのキャッシュされたAI区切り結果が削除されます。次回AI区切りを有効にして動画を再生すると、字幕が再処理されます。
-        cancel: キャンセル
-        confirm: 確認
-    requestQueueConfig:
-      title: 字幕翻訳速度
-      firstOnDescription: 字幕翻訳リクエストの処理速度を
-      lastOnDescription: アルゴリズムで調整
-      capacity:
-        title: 最大バースト数
-        description: 短時間で同時に処理できる字幕翻訳リクエストの最大数
-      rate:
-        title: 平均リクエスト数/秒
-        description: 1秒あたりの平均字幕翻訳リクエスト数。最大バースト数を設定して一時的に超過リクエストを送信できます。小数も設定可能です（例：0.25 は4秒に1リクエストの意味で、Gemini 無料枠などレート制限の厳しい API に便利です）
-    batchQueueConfig:
-      title: 字幕バッチ翻訳
-      description: バッチ翻訳時の文字数制限と最大段落数を設定（大規模言語モデル翻訳でのみ有効）
-      maxCharactersPerBatch:
-        title: 最大文字数
-        description: バッチリクエストあたりの最大文字数で、各翻訳のコンテンツ量を制御します
-      maxItemsPerBatch:
-        title: 最大段落数
-        description: 各バッチ翻訳の最大段落数、各翻訳のコンテンツ量を制御します
     customPrompts:
       title: カスタム字幕プロンプト
-      description: 字幕翻訳用のプロンプトテンプレートをカスタマイズします（ウェブページ翻訳プロンプトとは別です）
+      description: 字幕翻訳専用のプロンプトテンプレート。ウェブページ翻訳のプロンプトとは別に管理します
+      managePrompts: プロンプトを管理
       editPrompt:
         promptCellInput:
           input: 翻訳する字幕テキスト
@@ -927,19 +917,40 @@ options:
           webTitle: ウェブページタイトル
           webDescription: ページメタデータのウェブページ説明
           videoSummary: 動画要約（AI スマートコンテキストが必要）
-    aiQuota:
-      title: AI字幕の利用枠
-      description: 今月のAI字幕文字起こし利用枠の使用状況
-      loginRequired: ログインしてAI字幕の利用枠を確認
-      logIn: ログイン
-      betaRequired: AI字幕はベータ版で、まだあなたのアカウントでは利用できません
-      betaApply: 利用を申請
-      loadError: 利用枠を読み込めませんでした。しばらくしてから再試行してください。
-      summary: $2 分中 $1 分を使用、残り $3 分
+    subtitlesQueue:
+      title: 字幕キュー
+      requestQueueConfig:
+        title: 翻訳速度
+        capacity:
+          description: 最大バーストリクエスト数：一度に送れるリクエストの数
+        rate:
+          description: 1 秒あたりのリクエスト数：バースト後の一定ペース。小数も使え、0.25 なら 4 秒に 1 回送ります
+      batchQueueConfig:
+        title: バッチ翻訳
+        description: バッチ翻訳時の文字数制限と最大字幕行数を設定（大規模言語モデル翻訳でのみ有効）
+        maxCharactersPerBatch:
+          description: 最大文字数：1 回の AI リクエストで送るテキストの量
+        maxItemsPerBatch:
+          description: 最大字幕行数：1 回のリクエストにまとめる字幕の数。AI 以外の翻訳サービスには効きません
+    cache:
+      title: キャッシュ
+      clearCache:
+        title: AI区切りキャッシュをクリア
+        description: 保存された区切り結果。一度見た動画は処理し直しになりません
+        clearing: クリア中...
+        dialog:
+          title: AI区切りキャッシュをクリア
+          trigger: キャッシュをクリア
+          confirm: 確認
+          cancel: キャンセル
+          description: すべてのキャッシュされたAI区切り結果が削除されます。次回AI区切りを有効にして動画を再生すると、字幕が再処理されます。
   whatsNew:
     title: 新機能
   rateUs:
     title: レビューを書く
+  configMigration:
+    versionTooNew: インポートされた設定のバージョンが新しいため、Read Frogを最新バージョンにアップグレードしてください
+    validationError: 設定の検証に失敗しました
 side:
   sourceLang: ソース言語
   targetLang: 翻訳言語
@@ -1039,6 +1050,9 @@ subtitles:
   loadingAiSubtitles: AI字幕を読み込み中…（推定3分）
   requestAiSubtitles: AI字幕をリクエスト（Beta）
   usingAiSubtitles: AI字幕を使用中
+  toggle:
+    enabled: 字幕翻訳をオンにしました
+    disabled: 字幕翻訳をオフにしました
   actions:
     downloadTranslated: 翻訳字幕をダウンロード
     downloadTranslatedPreparing: 字幕を準備中。長い動画は時間がかかる場合があります

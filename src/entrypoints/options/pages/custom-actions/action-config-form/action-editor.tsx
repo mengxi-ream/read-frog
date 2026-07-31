@@ -202,9 +202,7 @@ function ProviderField() {
 function getActionInsertCells() {
   return SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS.map((token) => ({
     text: getSelectionToolbarCustomActionTokenCellText(token),
-    description: i18n.t(
-      `options.floatingButtonAndToolbar.selectionToolbar.customActions.form.tokens.${token}`,
-    ),
+    description: i18n.t(`options.selectionToolbar.customActions.form.tokens.${token}`),
   }))
 }
 
@@ -215,9 +213,7 @@ function SystemPromptField({ readOnly }: { readOnly?: boolean }) {
       {() => (
         <QuickInsertableTextareaFieldAutoSave
           formForSubmit={form}
-          label={i18n.t(
-            "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.systemPrompt",
-          )}
+          label={i18n.t("options.selectionToolbar.customActions.form.systemPrompt")}
           className="max-h-80 min-h-36"
           insertCells={getActionInsertCells()}
           readOnly={readOnly}
@@ -234,9 +230,7 @@ function PromptField({ readOnly }: { readOnly?: boolean }) {
       {() => (
         <QuickInsertableTextareaFieldAutoSave
           formForSubmit={form}
-          label={i18n.t(
-            "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.prompt",
-          )}
+          label={i18n.t("options.selectionToolbar.customActions.form.prompt")}
           className="max-h-80 min-h-28"
           insertCells={getActionInsertCells()}
           readOnly={readOnly}
@@ -264,7 +258,7 @@ function NotebaseConnectionField() {
 function DuplicateButton() {
   const { duplicate } = useActionEditor().actions
   return (
-    <Button type="button" variant="outline" onClick={() => void duplicate()}>
+    <Button type="button" variant="outline" size="sm" onClick={() => void duplicate()}>
       {i18n.t("options.apiProviders.form.duplicate")}
     </Button>
   )
@@ -280,12 +274,10 @@ function CustomizeButton() {
           <Button type="button" variant="outline" size="xs" onClick={() => void duplicate()} />
         }
       >
-        {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.customize")}
+        {i18n.t("options.selectionToolbar.customActions.form.customize")}
       </TooltipTrigger>
       <TooltipContent className="max-w-72">
-        {i18n.t(
-          "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.customizeTooltip",
-        )}
+        {i18n.t("options.selectionToolbar.customActions.form.customizeTooltip")}
       </TooltipContent>
     </Tooltip>
   )
@@ -297,32 +289,24 @@ function DeleteButton() {
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger render={<Button type="button" variant="destructive" />}>
-        {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.delete")}
+      <AlertDialogTrigger render={<Button type="button" variant="destructive" size="sm" />}>
+        {i18n.t("options.selectionToolbar.customActions.form.delete")}
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {i18n.t(
-              "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.deleteDialog.title",
-            )}
+            {i18n.t("options.selectionToolbar.customActions.form.deleteDialog.title")}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            {i18n.t(
-              "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.deleteDialog.description",
-            )}
+            {i18n.t("options.selectionToolbar.customActions.form.deleteDialog.description")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>
-            {i18n.t(
-              "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.deleteDialog.cancel",
-            )}
+            {i18n.t("options.selectionToolbar.customActions.form.deleteDialog.cancel")}
           </AlertDialogCancel>
           <AlertDialogAction variant="destructive" onClick={() => void deleteAction()}>
-            {i18n.t(
-              "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.deleteDialog.confirm",
-            )}
+            {i18n.t("options.selectionToolbar.customActions.form.deleteDialog.confirm")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

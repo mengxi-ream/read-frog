@@ -23,9 +23,7 @@ export default function TranslateButton({
   return (
     <HiddenButton
       icon={<RiTranslate className="h-5 w-5" />}
-      label={i18n.t(
-        "options.floatingButtonAndToolbar.floatingButton.tooltips.togglePageTranslation",
-      )}
+      label={i18n.t("options.floatingButton.tooltips.togglePageTranslation")}
       className={className}
       side={side}
       expanded={expanded}

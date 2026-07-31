@@ -24,7 +24,7 @@ export function GradientBackground({ children, className }: GradientBackgroundPr
 
   return (
     <div
-      className={cn("my-8 flex w-full items-center justify-center rounded-xl py-8", className)}
+      className={cn("flex w-full items-center justify-center rounded-xl py-8", className)}
       style={{
         backgroundImage: [
           "radial-gradient(circle at 70% 10%, rgba(7 240 139 / 0.15), transparent)",

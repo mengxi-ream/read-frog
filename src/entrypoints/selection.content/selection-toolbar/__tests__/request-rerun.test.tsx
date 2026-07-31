@@ -62,6 +62,9 @@ vi.mock("@/components/ui/selection-popover", async () => {
   interface PopoverContextValue {
     anchor?: { x: number; y: number } | null
     open: boolean
+    pinned: boolean
+    setPinned: (value: boolean | ((value: boolean) => boolean)) => void
+    requestOpen: (anchor?: { x: number; y: number } | null) => void
     onOpenChange?: (open: boolean) => void
   }
 
@@ -79,16 +82,71 @@ vi.mock("@/components/ui/selection-popover", async () => {
     anchor,
     children,
     open,
+    actionsRef,
+    onAnchorChange,
     onOpenChange,
+    onReuseRequest,
   }: {
     anchor?: { x: number; y: number } | null
     children: React.ReactNode
     open: boolean
+    actionsRef?: React.RefObject<{
+      requestOpen: (anchor?: { x: number; y: number } | null) => void
+    } | null>
+    onAnchorChange?: (anchor: { x: number; y: number } | null) => void
     onOpenChange?: (open: boolean) => void
+    onReuseRequest?: (details: { anchor: { x: number; y: number } | null }) => void
   }) {
+    const [pinned, setUncontrolledPinned] = React.useState(false)
+
+    const setPinned = React.useCallback((value: boolean | ((value: boolean) => boolean)) => {
+      setUncontrolledPinned(value)
+    }, [])
+
+    // Mirrors the real Root: closing always resets the pin.
+    const handleOpenChange = React.useCallback(
+      (nextOpen: boolean) => {
+        if (!nextOpen) {
+          setUncontrolledPinned(false)
+        }
+        onOpenChange?.(nextOpen)
+      },
+      [onOpenChange],
+    )
+
+    // Mirrors the real Root's requestOpen decision: pinned popovers are
+    // reused in place, open ones restart on the next frame.
+    const requestOpen = React.useCallback(
+      (nextAnchor: { x: number; y: number } | null = null) => {
+        if (open && pinned) {
+          onReuseRequest?.({ anchor: nextAnchor ?? null })
+          return
+        }
+
+        if (open) {
+          handleOpenChange(false)
+          requestAnimationFrame(() => {
+            if (nextAnchor) {
+              onAnchorChange?.(nextAnchor)
+            }
+            handleOpenChange(true)
+          })
+          return
+        }
+
+        if (nextAnchor) {
+          onAnchorChange?.(nextAnchor)
+        }
+        handleOpenChange(true)
+      },
+      [handleOpenChange, onAnchorChange, onReuseRequest, open, pinned],
+    )
+
+    React.useImperativeHandle(actionsRef, () => ({ requestOpen }), [requestOpen])
+
     const contextValue = React.useMemo(
-      () => ({ anchor, open, onOpenChange }),
-      [anchor, open, onOpenChange],
+      () => ({ anchor, open, pinned, setPinned, requestOpen, onOpenChange: handleOpenChange }),
+      [anchor, open, pinned, setPinned, requestOpen, handleOpenChange],
     )
     return <PopoverContext value={contextValue}>{children}</PopoverContext>
   }
@@ -100,14 +158,15 @@ vi.mock("@/components/ui/selection-popover", async () => {
   }: React.ComponentProps<"button"> & {
     children: React.ReactNode
   }) {
-    const { onOpenChange } = usePopoverContext()
+    const { requestOpen } = usePopoverContext()
     return (
       <button
         {...props}
         type="button"
         onClick={(event) => {
           onClick?.(event)
-          onOpenChange?.(true)
+          const rect = event.currentTarget.getBoundingClientRect()
+          requestOpen({ x: rect.left, y: rect.top })
         }}
       >
         {children}
@@ -152,7 +211,18 @@ vi.mock("@/components/ui/selection-popover", async () => {
   }
 
   function Pin() {
-    return <button type="button">Pin</button>
+    const { pinned, setPinned } = usePopoverContext()
+    const label = pinned ? "Unpin popover" : "Pin popover"
+    return (
+      <button
+        type="button"
+        aria-label={label}
+        aria-pressed={pinned}
+        onClick={() => setPinned((prev) => !prev)}
+      >
+        Pin
+      </button>
+    )
   }
 
   function Footer({ children }: { children: React.ReactNode }) {
@@ -365,7 +435,9 @@ function mockWindowSelection(range: Range | null) {
 }
 
 function getRegisteredMessageHandler(name: string): (message: { data: unknown }) => void {
-  const registration = onMessageMock.mock.calls.find((call) => call[0] === name)
+  // The provider re-registers when the selection session changes, so the last
+  // registration is the only live one.
+  const registration = onMessageMock.mock.calls.findLast((call) => call[0] === name)
   if (!registration) {
     throw new Error(`Message handler not registered: ${name}`)
   }
@@ -378,7 +450,7 @@ async function getRegisteredShortcutCallback(shortcut = "Alt+T") {
     expect(hotkeyRegisterMock.mock.calls.some((call) => call[0] === shortcut)).toBe(true)
   })
 
-  const registration = hotkeyRegisterMock.mock.calls.find((call) => call[0] === shortcut)
+  const registration = hotkeyRegisterMock.mock.calls.findLast((call) => call[0] === shortcut)
   if (!registration) {
     throw new Error(`Shortcut not registered: ${shortcut}`)
   }
@@ -905,9 +977,7 @@ describe("selection toolbar requests", () => {
 
     const alert = await screen.findByRole("alert")
     expect(alert).toHaveTextContent("translationHub.translationFailed")
-    expect(alert).toHaveTextContent(
-      "options.floatingButtonAndToolbar.selectionToolbar.errors.providerUnavailable",
-    )
+    expect(alert).toHaveTextContent("options.selectionToolbar.errors.providerUnavailable")
     expect(translateTextCoreMock).not.toHaveBeenCalled()
     expect(streamBackgroundTextMock).not.toHaveBeenCalled()
   })
@@ -1059,7 +1129,7 @@ describe("selection toolbar requests", () => {
 
     expect(toastAddMock).toHaveBeenCalledWith({
       type: "error",
-      title: "options.floatingButtonAndToolbar.selectionToolbar.errors.missingSelection",
+      title: "options.selectionToolbar.errors.missingSelection",
     })
     expect(translateTextCoreMock).not.toHaveBeenCalled()
   })
@@ -1262,6 +1332,365 @@ describe("selection toolbar requests", () => {
     expect(content).toHaveAttribute("data-anchor-y", String(window.innerHeight / 2))
   })
 
+  it("reuses a pinned translation popover in place when translating a new selection from the toolbar", async () => {
+    const firstRun = createDeferredPromise<string>()
+    const secondRun = createDeferredPromise<string>()
+    translateTextCoreMock
+      .mockReturnValueOnce(firstRun.promise)
+      .mockReturnValueOnce(secondRun.promise)
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "First selection" })
+    renderWithProviders(<TranslateButton />, store)
+
+    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    await act(async () => {
+      firstRun.resolve("first translation")
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId("translation-result").textContent).toBe("first translation")
+    })
+
+    fireEvent.click(screen.getByRole("button", { name: "Pin popover" }))
+
+    const content = screen.getByTestId("selection-popover-content")
+
+    act(() => {
+      setSelectionState(store, { text: "Second selection" })
+    })
+
+    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
+
+    expect(screen.getByTestId("selection-popover-content")).toBe(content)
+    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    )
+    expect(screen.getByTestId("translation-selection").textContent).toBe("Second selection")
+    expect(screen.getByTestId("translation-result").textContent).toBe("")
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(2)
+    })
+    expect(translateTextCoreMock.mock.calls[1]?.[0]).toMatchObject({
+      text: "Second selection",
+    })
+
+    await act(async () => {
+      secondRun.resolve("second translation")
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId("translation-result").textContent).toBe("second translation")
+    })
+  })
+
+  it("reuses a pinned translation popover in place from the context menu without moving it", async () => {
+    const firstRun = createDeferredPromise<string>()
+    const secondRun = createDeferredPromise<string>()
+    translateTextCoreMock
+      .mockReturnValueOnce(firstRun.promise)
+      .mockReturnValueOnce(secondRun.promise)
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+    renderWithProviders(<TranslateButton />, store)
+
+    act(() => {
+      paragraph.dispatchEvent(
+        new MouseEvent("contextmenu", {
+          bubbles: true,
+          button: 2,
+          clientX: 140,
+          clientY: 180,
+        }),
+      )
+    })
+
+    await act(async () => {
+      getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")({
+        data: { selectionText: "Selected text" },
+      })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    await act(async () => {
+      firstRun.resolve("first translation")
+      await Promise.resolve()
+    })
+
+    const content = screen.getByTestId("selection-popover-content")
+    const anchorX = content.getAttribute("data-anchor-x")
+    const anchorY = content.getAttribute("data-anchor-y")
+
+    fireEvent.click(screen.getByRole("button", { name: "Pin popover" }))
+
+    act(() => {
+      setSelectionState(store, {
+        text: "inside a paragraph",
+        range: createRangeFor(paragraph),
+      })
+    })
+
+    act(() => {
+      paragraph.dispatchEvent(
+        new MouseEvent("contextmenu", {
+          bubbles: true,
+          button: 2,
+          clientX: 400,
+          clientY: 320,
+        }),
+      )
+    })
+
+    await act(async () => {
+      getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")({
+        data: { selectionText: "inside a paragraph" },
+      })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(2)
+    })
+
+    expect(screen.getByTestId("selection-popover-content")).toBe(content)
+    expect(content.getAttribute("data-anchor-x")).toBe(anchorX)
+    expect(content.getAttribute("data-anchor-y")).toBe(anchorY)
+    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    )
+    expect(screen.getByTestId("translation-selection").textContent).toBe("inside a paragraph")
+
+    await act(async () => {
+      secondRun.resolve("second translation")
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId("translation-result").textContent).toBe("second translation")
+    })
+  })
+
+  it("reuses a pinned translation popover in place from the shortcut", async () => {
+    const firstRun = createDeferredPromise<string>()
+    const secondRun = createDeferredPromise<string>()
+    translateTextCoreMock
+      .mockReturnValueOnce(firstRun.promise)
+      .mockReturnValueOnce(secondRun.promise)
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+    renderWithProviders(<TranslateButton />, store)
+
+    await act(async () => {
+      ;(await getRegisteredShortcutCallback())()
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    await act(async () => {
+      firstRun.resolve("first translation")
+      await Promise.resolve()
+    })
+
+    const content = screen.getByTestId("selection-popover-content")
+
+    fireEvent.click(screen.getByRole("button", { name: "Pin popover" }))
+
+    act(() => {
+      setSelectionState(store, {
+        text: "inside a paragraph",
+        range: createRangeFor(paragraph),
+      })
+    })
+
+    await act(async () => {
+      ;(await getRegisteredShortcutCallback())()
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(2)
+    })
+
+    expect(screen.getByTestId("selection-popover-content")).toBe(content)
+    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    )
+    expect(screen.getByTestId("translation-selection").textContent).toBe("inside a paragraph")
+
+    await act(async () => {
+      secondRun.resolve("second translation")
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId("translation-result").textContent).toBe("second translation")
+    })
+  })
+
+  it("reruns the translation when a pinned popover is retriggered with the same selection", async () => {
+    translateTextCoreMock.mockResolvedValue("same selection translation")
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+    renderWithProviders(<TranslateButton />, store)
+
+    const shortcutCallback = await getRegisteredShortcutCallback()
+
+    await act(async () => {
+      shortcutCallback()
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    fireEvent.click(screen.getByRole("button", { name: "Pin popover" }))
+
+    await act(async () => {
+      shortcutCallback()
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(2)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId("translation-result").textContent).toBe(
+        "same selection translation",
+      )
+    })
+  })
+
+  it("reuses a pinned custom action popover in place for a new selection", async () => {
+    const firstRun = createDeferredPromise<BackgroundStructuredObjectStreamSnapshot>()
+    const secondRun = createDeferredPromise<BackgroundStructuredObjectStreamSnapshot>()
+    streamBackgroundStructuredObjectMock
+      .mockReturnValueOnce(firstRun.promise)
+      .mockReturnValueOnce(secondRun.promise)
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+
+    const action = DEFAULT_DICTIONARY_ACTION
+
+    act(() => {
+      paragraph.dispatchEvent(
+        new MouseEvent("contextmenu", {
+          bubbles: true,
+          button: 2,
+          clientX: 140,
+          clientY: 180,
+        }),
+      )
+    })
+
+    await act(async () => {
+      getRegisteredMessageHandler("openSelectionCustomActionFromContextMenu")({
+        data: { actionId: action.id, selectionText: "Selected text" },
+      })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
+    })
+
+    await act(async () => {
+      firstRun.resolve(createStructuredObjectSnapshot({ summary: "First result" }))
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('{"summary":"First result"}')).toBeInTheDocument()
+    })
+
+    const content = screen.getByTestId("selection-popover-content")
+
+    fireEvent.click(screen.getByRole("button", { name: "Pin popover" }))
+
+    act(() => {
+      setSelectionState(store, {
+        text: "inside a paragraph",
+        range: createRangeFor(paragraph),
+      })
+    })
+
+    await act(async () => {
+      getRegisteredMessageHandler("openSelectionCustomActionFromContextMenu")({
+        data: { actionId: action.id, selectionText: "inside a paragraph" },
+      })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(2)
+    })
+
+    expect(screen.getByTestId("selection-popover-content")).toBe(content)
+    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    )
+    expect(screen.queryByText('{"summary":"First result"}')).not.toBeInTheDocument()
+
+    await act(async () => {
+      secondRun.resolve(createStructuredObjectSnapshot({ summary: "Second result" }))
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('{"summary":"Second result"}')).toBeInTheDocument()
+    })
+  })
+
   it("opens a custom action from the context menu with the captured selection session", async () => {
     streamBackgroundStructuredObjectMock.mockResolvedValue(
       createStructuredObjectSnapshot({ summary: "Context menu result" }),
@@ -1405,7 +1834,7 @@ describe("selection toolbar requests", () => {
 
     expect(toastAddMock).toHaveBeenCalledWith({
       type: "error",
-      title: "options.floatingButtonAndToolbar.selectionToolbar.errors.missingSelection",
+      title: "options.selectionToolbar.errors.missingSelection",
     })
     expect(streamBackgroundStructuredObjectMock).not.toHaveBeenCalled()
 
@@ -1663,12 +2092,8 @@ describe("selection toolbar requests", () => {
     fireEvent.click(screen.getByRole("button", { name: actionName }))
 
     const alert = await screen.findByRole("alert")
-    expect(alert).toHaveTextContent(
-      "options.floatingButtonAndToolbar.selectionToolbar.errors.customActionFailed",
-    )
-    expect(alert).toHaveTextContent(
-      "options.floatingButtonAndToolbar.selectionToolbar.errors.missingSelection",
-    )
+    expect(alert).toHaveTextContent("options.selectionToolbar.errors.customActionFailed")
+    expect(alert).toHaveTextContent("options.selectionToolbar.errors.missingSelection")
     expect(streamBackgroundStructuredObjectMock).not.toHaveBeenCalled()
 
     const { sendMessage } = await import("@/utils/message")
@@ -1703,9 +2128,7 @@ describe("selection toolbar requests", () => {
     fireEvent.click(screen.getByRole("button", { name: actionName }))
 
     const alert = await screen.findByRole("alert")
-    expect(alert).toHaveTextContent(
-      "options.floatingButtonAndToolbar.selectionToolbar.errors.customActionFailed",
-    )
+    expect(alert).toHaveTextContent("options.selectionToolbar.errors.customActionFailed")
     expect(alert).toHaveTextContent("Structured output failed")
 
     fireEvent.click(screen.getByRole("button", { name: "Regenerate" }))

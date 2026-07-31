@@ -146,9 +146,9 @@ function mockRect(element: Element, rect: Partial<DOMRect>) {
 }
 
 const TOOLTIP_CONTROL_LABELS = [
-  "options.floatingButtonAndToolbar.floatingButton.tooltips.togglePageTranslation",
-  "options.floatingButtonAndToolbar.floatingButton.tooltips.settings",
-  "options.floatingButtonAndToolbar.floatingButton.tooltips.feedback",
+  "options.floatingButton.tooltips.togglePageTranslation",
+  "options.floatingButton.tooltips.settings",
+  "options.floatingButton.tooltips.feedback",
 ] as const
 
 async function expectTooltipSide(label: string, side: "left" | "right") {
@@ -174,7 +174,7 @@ describe("floatingButton controls", () => {
     renderFloatingButton()
 
     const closeTrigger = screen.getByRole("button", {
-      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.floatingButtonOptions",
+      name: "options.floatingButton.tooltips.floatingButtonOptions",
     })
     const mainButton = getMainButton()
 
@@ -201,7 +201,7 @@ describe("floatingButton controls", () => {
     renderFloatingButton()
 
     const lockTrigger = screen.getByRole("button", {
-      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.lockPosition",
+      name: "options.floatingButton.tooltips.lockPosition",
     })
     const mainButton = getMainButton()
     const floatingButtonContainer = screen.getByTestId("floating-button-container")
@@ -227,7 +227,7 @@ describe("floatingButton controls", () => {
     fireEvent.click(lockTrigger)
 
     const unlockTrigger = screen.getByRole("button", {
-      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.unlockPosition",
+      name: "options.floatingButton.tooltips.unlockPosition",
     })
 
     expect(unlockTrigger).toHaveClass("text-neutral-300")
@@ -250,7 +250,7 @@ describe("floatingButton controls", () => {
     renderFloatingButton()
 
     const closeTrigger = screen.getByRole("button", {
-      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.floatingButtonOptions",
+      name: "options.floatingButton.tooltips.floatingButtonOptions",
     })
     const mainButton = getMainButton()
 
@@ -262,9 +262,7 @@ describe("floatingButton controls", () => {
     expect(closeTrigger).toHaveClass("visible")
     expect(closeTrigger).toHaveClass("pointer-events-auto")
     expect(document.querySelector('[data-slot="tooltip-content"][data-open]')).toBeNull()
-    expect(
-      screen.getByText("options.floatingButtonAndToolbar.floatingButton.closeMenu.disableForSite"),
-    ).toBeInTheDocument()
+    expect(screen.getByText("options.floatingButton.closeMenu.disableForSite")).toBeInTheDocument()
   })
 
   it("does not show a tooltip for the lock control", () => {
@@ -272,7 +270,7 @@ describe("floatingButton controls", () => {
     fireEvent.mouseEnter(getMainButton())
 
     const lockTrigger = screen.getByRole("button", {
-      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.lockPosition",
+      name: "options.floatingButton.tooltips.lockPosition",
     })
     fireEvent.focus(lockTrigger)
 
@@ -325,10 +323,10 @@ describe("floatingButton controls", () => {
     renderFloatingButton()
 
     const settingsButton = screen.getByRole("button", {
-      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.settings",
+      name: "options.floatingButton.tooltips.settings",
     })
     const feedbackButton = screen.getByRole("button", {
-      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.feedback",
+      name: "options.floatingButton.tooltips.feedback",
     })
 
     expect(
@@ -625,10 +623,10 @@ describe("floatingButton controls", () => {
     renderFloatingButton({ side: "left" })
 
     const closeTrigger = screen.getByRole("button", {
-      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.floatingButtonOptions",
+      name: "options.floatingButton.tooltips.floatingButtonOptions",
     })
     const lockTrigger = screen.getByRole("button", {
-      name: "options.floatingButtonAndToolbar.floatingButton.tooltips.lockPosition",
+      name: "options.floatingButton.tooltips.lockPosition",
     })
     const mainButton = getMainButton()
     const hiddenButtons = screen

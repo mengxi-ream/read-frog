@@ -28,7 +28,7 @@ export async function bindTranslationShortcutKey(pageTranslationManager: PageTra
     shortcut as Hotkey,
     () => {
       if (pageTranslationManager.isActive) {
-        pageTranslationManager.stop()
+        pageTranslationManager.stop({ userInitiated: true })
       } else {
         void pageTranslationManager.start(
           createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.SHORTCUT),

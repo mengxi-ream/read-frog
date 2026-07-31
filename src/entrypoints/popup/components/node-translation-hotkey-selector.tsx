@@ -55,7 +55,7 @@ export default function NodeTranslationHotkeySelector() {
             <HotkeyDisplay hotkey={translateConfig.node.hotkey} />
           </div>
         </SelectTrigger>
-        <SelectContent className="min-w-fit">
+        <SelectContent>
           <SelectGroup>
             {HOTKEYS.map((item) => (
               <SelectItem key={item} value={item}>

@@ -47,11 +47,7 @@ vi.mock("../output-schema-field", () => ({
 
 vi.mock("../notebase-connection-field", () => ({
   NotebaseConnectionField: () => (
-    <div>
-      {i18n.t(
-        "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.notebase.title",
-      )}
-    </div>
+    <div>{i18n.t("options.selectionToolbar.customActions.form.notebase.title")}</div>
   ),
 }))
 
@@ -90,9 +86,7 @@ describe("customActionConfigForm notebase availability", () => {
     expect(screen.getByText("ReadOnlyOutputSchemaField")).toBeInTheDocument()
     expect(screen.getByText("ProviderField")).toBeInTheDocument()
     expect(
-      screen.queryByText(
-        i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.delete"),
-      ),
+      screen.queryByText(i18n.t("options.selectionToolbar.customActions.form.delete")),
     ).not.toBeInTheDocument()
 
     expect(
@@ -100,9 +94,7 @@ describe("customActionConfigForm notebase availability", () => {
     ).not.toBeInTheDocument()
 
     const customizeButton = screen.getByRole("button", {
-      name: i18n.t(
-        "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.customize",
-      ),
+      name: i18n.t("options.selectionToolbar.customActions.form.customize"),
     })
     fireEvent.click(customizeButton)
 
@@ -131,18 +123,14 @@ describe("customActionConfigForm notebase availability", () => {
     )
 
     const customizeButton = screen.getByRole("button", {
-      name: i18n.t(
-        "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.customize",
-      ),
+      name: i18n.t("options.selectionToolbar.customActions.form.customize"),
     })
     fireEvent.mouseEnter(customizeButton)
     fireEvent.focus(customizeButton)
 
     await waitFor(() =>
       expect(document.querySelector("[data-slot='tooltip-content']")).toHaveTextContent(
-        i18n.t(
-          "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.customizeTooltip",
-        ),
+        i18n.t("options.selectionToolbar.customActions.form.customizeTooltip"),
       ),
     )
   })
@@ -185,11 +173,7 @@ describe("customActionConfigForm notebase availability", () => {
     )
 
     expect(
-      screen.getByText(
-        i18n.t(
-          "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.notebase.title",
-        ),
-      ),
+      screen.getByText(i18n.t("options.selectionToolbar.customActions.form.notebase.title")),
     ).toBeInTheDocument()
   })
 
@@ -239,14 +223,12 @@ describe("customActionConfigForm notebase availability", () => {
     expect(screen.getByText("OutputSchemaField")).toBeInTheDocument()
     expect(
       screen.queryByRole("button", {
-        name: i18n.t(
-          "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.customize",
-        ),
+        name: i18n.t("options.selectionToolbar.customActions.form.customize"),
       }),
     ).not.toBeInTheDocument()
     expect(
       screen.getByRole("button", {
-        name: i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.delete"),
+        name: i18n.t("options.selectionToolbar.customActions.form.delete"),
       }),
     ).toBeInTheDocument()
 

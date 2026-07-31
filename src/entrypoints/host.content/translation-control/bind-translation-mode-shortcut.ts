@@ -41,10 +41,10 @@ export async function bindTranslationModeShortcutKey() {
         },
       })
 
-      const modeName = i18n.t(`options.translation.translationMode.mode.${nextMode}`)
+      const modeName = i18n.t(`options.translation.preference.translationMode.mode.${nextMode}`)
       toastManager.add({
         type: "info",
-        title: i18n.t("options.translation.translationModeShortcut.switched", [modeName]),
+        title: i18n.t("options.translation.preference.translationMode.switched", [modeName]),
       })
     },
     {

@@ -60,7 +60,7 @@ export function CloseButton() {
             })
           }}
         >
-          {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.closeMenu.disableForSite")}
+          {i18n.t("options.selectionToolbar.closeMenu.disableForSite")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onMouseDown={handleMouseDown}
@@ -68,7 +68,7 @@ export function CloseButton() {
             void setSelectionToolbar({ ...selectionToolbar, enabled: false })
           }}
         >
-          {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.closeMenu.disableGlobally")}
+          {i18n.t("options.selectionToolbar.closeMenu.disableGlobally")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
