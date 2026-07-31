@@ -25,11 +25,11 @@ export function DisplaySection() {
   const sides = [
     {
       value: "right",
-      label: i18n.t("options.floatingButtonAndToolbar.floatingButton.display.side.right"),
+      label: i18n.t("options.floatingButton.display.side.right"),
     },
     {
       value: "left",
-      label: i18n.t("options.floatingButtonAndToolbar.floatingButton.display.side.left"),
+      label: i18n.t("options.floatingButton.display.side.left"),
     },
   ] satisfies Array<{ value: FloatingButtonSide; label: string }>
 
@@ -46,14 +46,12 @@ export function DisplaySection() {
   return (
     <ConfigSection
       id="floating-button-display"
-      title={i18n.t("options.floatingButtonAndToolbar.floatingButton.display.title")}
+      title={i18n.t("options.floatingButton.display.title")}
     >
       <ConfigItem
         id="floating-button-side"
-        title={i18n.t("options.floatingButtonAndToolbar.floatingButton.display.side.title")}
-        description={i18n.t(
-          "options.floatingButtonAndToolbar.floatingButton.display.side.description",
-        )}
+        title={i18n.t("options.floatingButton.display.side.title")}
+        description={i18n.t("options.floatingButton.display.side.description")}
       >
         <Select
           items={sides}
@@ -81,23 +79,15 @@ export function DisplaySection() {
       <ConfigItem
         id="floating-button-disabled-sites"
         orientation="vertical"
-        title={i18n.t(
-          "options.floatingButtonAndToolbar.floatingButton.display.disabledSites.title",
-        )}
-        description={i18n.t(
-          "options.floatingButtonAndToolbar.floatingButton.display.disabledSites.description",
-        )}
+        title={i18n.t("options.floatingButton.display.disabledSites.title")}
+        description={i18n.t("options.floatingButton.display.disabledSites.description")}
       >
         <PatternsTable
           patterns={disabledFloatingButtonPatterns}
           onAddPattern={addPattern}
           onRemovePattern={removePattern}
-          placeholderText={i18n.t(
-            "options.floatingButtonAndToolbar.floatingButton.display.disabledSites.enterUrlPattern",
-          )}
-          tableHeaderText={i18n.t(
-            "options.floatingButtonAndToolbar.floatingButton.display.disabledSites.urlPattern",
-          )}
+          placeholderText={i18n.t("options.floatingButton.display.disabledSites.enterUrlPattern")}
+          tableHeaderText={i18n.t("options.floatingButton.display.disabledSites.urlPattern")}
         />
       </ConfigItem>
     </ConfigSection>

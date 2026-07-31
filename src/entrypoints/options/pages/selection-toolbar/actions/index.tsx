@@ -24,14 +24,12 @@ export function ActionsSection() {
   return (
     <ConfigSection
       id="selection-toolbar-actions"
-      title={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.actions.title")}
+      title={i18n.t("options.selectionToolbar.actions.title")}
     >
       <ConfigItem
         id="selection-toolbar-translate"
-        title={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.actions.translate.title")}
-        description={i18n.t(
-          "options.floatingButtonAndToolbar.selectionToolbar.actions.translate.description",
-        )}
+        title={i18n.t("options.selectionToolbar.actions.translate.title")}
+        description={i18n.t("options.selectionToolbar.actions.translate.description")}
       >
         <Switch
           checked={features.translate.enabled}
@@ -40,10 +38,8 @@ export function ActionsSection() {
       </ConfigItem>
       <ConfigItem
         id="selection-toolbar-speak"
-        title={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.actions.speak.title")}
-        description={i18n.t(
-          "options.floatingButtonAndToolbar.selectionToolbar.actions.speak.description",
-        )}
+        title={i18n.t("options.selectionToolbar.actions.speak.title")}
+        description={i18n.t("options.selectionToolbar.actions.speak.description")}
       >
         <Switch
           checked={features.speak.enabled}

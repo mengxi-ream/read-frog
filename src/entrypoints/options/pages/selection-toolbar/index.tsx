@@ -9,14 +9,14 @@ import { EnableItem } from "./enable-item"
 export function SelectionToolbarPage() {
   return (
     <PageLayout
-      title={i18n.t("options.overlayTools.selectionToolbar.title")}
-      description={i18n.t("options.overlayTools.selectionToolbar.pageDescription")}
+      title={i18n.t("options.selectionToolbar.title")}
+      description={i18n.t("options.selectionToolbar.pageDescription")}
       innerClassName="flex flex-col gap-10"
     >
       <GradientBackground>
         <img
           src={selectionToolbarDemoImage}
-          alt={i18n.t("options.floatingButtonAndToolbar.selectionToolbarDemoImageAlt")}
+          alt={i18n.t("options.selectionToolbar.demoImageAlt")}
           className="h-auto w-100"
         />
       </GradientBackground>

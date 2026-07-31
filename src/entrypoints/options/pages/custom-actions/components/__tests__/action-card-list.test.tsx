@@ -48,7 +48,7 @@ describe("CustomActionCardList", () => {
     )
 
     const addButton = screen.getByRole("button", {
-      name: i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.add"),
+      name: i18n.t("options.selectionToolbar.customActions.add"),
     })
     const customAction = screen.getByText("Custom action")
     const builtInDictionary = screen.getByText(dictionary.name)

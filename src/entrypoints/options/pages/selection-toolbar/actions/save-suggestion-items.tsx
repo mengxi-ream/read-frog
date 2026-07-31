@@ -38,12 +38,8 @@ export function SaveSuggestionItems() {
     <>
       <ConfigItem
         id="selection-toolbar-save-suggestion"
-        title={i18n.t(
-          "options.floatingButtonAndToolbar.selectionToolbar.actions.saveSuggestion.title",
-        )}
-        description={i18n.t(
-          "options.floatingButtonAndToolbar.selectionToolbar.actions.saveSuggestion.description",
-        )}
+        title={i18n.t("options.selectionToolbar.actions.saveSuggestion.title")}
+        description={i18n.t("options.selectionToolbar.actions.saveSuggestion.description")}
       >
         <Switch
           checked={selectionToolbar.saveSuggestion.enabled}
@@ -56,9 +52,7 @@ export function SaveSuggestionItems() {
         />
       </ConfigItem>
       <ConfigItem
-        description={i18n.t(
-          "options.floatingButtonAndToolbar.selectionToolbar.actions.saveSuggestion.actionDescription",
-        )}
+        description={i18n.t("options.selectionToolbar.actions.saveSuggestion.actionDescription")}
       >
         <Select
           value={selectedAction.id}
@@ -76,9 +70,7 @@ export function SaveSuggestionItems() {
           <SelectTrigger
             size="sm"
             className="max-w-60"
-            aria-label={i18n.t(
-              "options.floatingButtonAndToolbar.selectionToolbar.actions.saveSuggestion.action",
-            )}
+            aria-label={i18n.t("options.selectionToolbar.actions.saveSuggestion.action")}
           >
             <SelectValue render={<span className="min-w-0 flex-1" />}>
               <ActionIdentity action={selectedAction} />

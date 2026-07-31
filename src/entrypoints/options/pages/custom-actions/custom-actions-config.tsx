@@ -9,10 +9,8 @@ export function CustomActionsConfig() {
     <ConfigItem
       id="custom-actions"
       orientation="vertical"
-      title={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.configTitle")}
-      description={i18n.t(
-        "options.floatingButtonAndToolbar.selectionToolbar.customActions.description",
-      )}
+      title={i18n.t("options.selectionToolbar.customActions.configTitle")}
+      description={i18n.t("options.selectionToolbar.customActions.description")}
     >
       <EntityEditorLayout list={<CustomActionCardList />} editor={<CustomActionConfigForm />} />
     </ConfigItem>

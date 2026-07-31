@@ -148,9 +148,9 @@ export const SEARCH_ITEMS: SearchItem[] = [
   {
     sectionId: "custom-actions",
     route: "/custom-actions",
-    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.customActions.title",
-    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.customActions.description",
-    pageKey: "options.floatingButtonAndToolbar.selectionToolbar.customActions.title",
+    titleKey: "options.selectionToolbar.customActions.title",
+    descriptionKey: "options.selectionToolbar.customActions.description",
+    pageKey: "options.selectionToolbar.customActions.title",
   },
 
   // Translation page
@@ -283,82 +283,78 @@ export const SEARCH_ITEMS: SearchItem[] = [
   {
     sectionId: "floating-button-toggle",
     route: "/floating-button",
-    titleKey: "options.floatingButtonAndToolbar.floatingButton.enable.title",
-    descriptionKey: "options.floatingButtonAndToolbar.floatingButton.enable.description",
-    pageKey: "options.overlayTools.floatingButton.title",
+    titleKey: "options.floatingButton.enable.title",
+    descriptionKey: "options.floatingButton.enable.description",
+    pageKey: "options.floatingButton.title",
   },
   {
     sectionId: "floating-button-side",
     route: "/floating-button",
-    titleKey: "options.floatingButtonAndToolbar.floatingButton.display.side.title",
-    descriptionKey: "options.floatingButtonAndToolbar.floatingButton.display.side.description",
-    pageKey: "options.overlayTools.floatingButton.title",
+    titleKey: "options.floatingButton.display.side.title",
+    descriptionKey: "options.floatingButton.display.side.description",
+    pageKey: "options.floatingButton.title",
   },
   {
     sectionId: "floating-button-disabled-sites",
     route: "/floating-button",
-    titleKey: "options.floatingButtonAndToolbar.floatingButton.display.disabledSites.title",
-    descriptionKey:
-      "options.floatingButtonAndToolbar.floatingButton.display.disabledSites.description",
-    pageKey: "options.overlayTools.floatingButton.title",
+    titleKey: "options.floatingButton.display.disabledSites.title",
+    descriptionKey: "options.floatingButton.display.disabledSites.description",
+    pageKey: "options.floatingButton.title",
   },
   {
     sectionId: "floating-button-click-action",
     route: "/floating-button",
-    titleKey: "options.floatingButtonAndToolbar.floatingButton.clickAction.title",
-    descriptionKey: "options.floatingButtonAndToolbar.floatingButton.clickAction.description",
-    pageKey: "options.overlayTools.floatingButton.title",
+    titleKey: "options.floatingButton.clickAction.title",
+    descriptionKey: "options.floatingButton.clickAction.description",
+    pageKey: "options.floatingButton.title",
   },
 
   // Selection Toolbar page
   {
     sectionId: "selection-toolbar-toggle",
     route: "/selection-toolbar",
-    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.enable.title",
-    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.enable.description",
-    pageKey: "options.overlayTools.selectionToolbar.title",
+    titleKey: "options.selectionToolbar.enable.title",
+    descriptionKey: "options.selectionToolbar.enable.description",
+    pageKey: "options.selectionToolbar.title",
   },
   {
     // Titled with the section, so "translate" and "speak" both find the rows that switch
     // them on without either row's one-word title standing alone in the results.
     sectionId: "selection-toolbar-actions",
     route: "/selection-toolbar",
-    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.actions.title",
-    descriptionKey:
-      "options.floatingButtonAndToolbar.selectionToolbar.actions.translate.description",
-    pageKey: "options.overlayTools.selectionToolbar.title",
+    titleKey: "options.selectionToolbar.actions.title",
+    descriptionKey: "options.selectionToolbar.actions.translate.description",
+    pageKey: "options.selectionToolbar.title",
   },
   {
     sectionId: "selection-toolbar-save-suggestion",
     route: "/selection-toolbar",
-    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.actions.saveSuggestion.title",
-    descriptionKey:
-      "options.floatingButtonAndToolbar.selectionToolbar.actions.saveSuggestion.description",
-    pageKey: "options.overlayTools.selectionToolbar.title",
+    titleKey: "options.selectionToolbar.actions.saveSuggestion.title",
+    descriptionKey: "options.selectionToolbar.actions.saveSuggestion.description",
+    pageKey: "options.selectionToolbar.title",
   },
   {
     sectionId: "selection-toolbar-opacity",
     route: "/selection-toolbar",
-    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.display.opacity.title",
-    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.display.opacity.description",
-    pageKey: "options.overlayTools.selectionToolbar.title",
+    titleKey: "options.selectionToolbar.display.opacity.title",
+    descriptionKey: "options.selectionToolbar.display.opacity.description",
+    pageKey: "options.selectionToolbar.title",
   },
   {
     sectionId: "selection-toolbar-disabled-sites",
     route: "/selection-toolbar",
-    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.display.disabledSites.title",
-    descriptionKey:
-      "options.floatingButtonAndToolbar.selectionToolbar.display.disabledSites.description",
-    pageKey: "options.overlayTools.selectionToolbar.title",
+    titleKey: "options.selectionToolbar.display.disabledSites.title",
+    descriptionKey: "options.selectionToolbar.display.disabledSites.description",
+    pageKey: "options.selectionToolbar.title",
   },
 
   // Context Menu page
   {
     sectionId: "context-menu-translate",
     route: "/context-menu",
-    titleKey: "options.floatingButtonAndToolbar.contextMenu.enable.title",
-    descriptionKey: "options.floatingButtonAndToolbar.contextMenu.enable.description",
-    pageKey: "options.overlayTools.contextMenu.title",
+    titleKey: "options.contextMenu.enable.title",
+    descriptionKey: "options.contextMenu.enable.description",
+    pageKey: "options.contextMenu.title",
   },
 
   // Input Translation page

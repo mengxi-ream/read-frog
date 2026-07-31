@@ -88,7 +88,7 @@ options:
     noResults: No settings found
   sidebar:
     settings: Settings
-    tools: Tools
+    features: Features
     product: Product
   tools:
     translationHub: Translation Hub
@@ -412,15 +412,6 @@ options:
       description: Hover or long-press a paragraph to translate just that one.
   overlayTools:
     title: Overlay Tools
-    floatingButton:
-      title: Floating Button
-      pageDescription: Set which side the floating button sits on, what a click does, and where it stays hidden.
-    selectionToolbar:
-      title: Selection Toolbar
-      pageDescription: Set which actions appear when you select text, and where the toolbar shows up.
-    contextMenu:
-      title: Context Menu
-      pageDescription: Control the Read Frog entries in the browser's right-click menu.
   inputTranslation:
     title: Input Translation
     pageDescription: Translate what you type in input boxes before you send it.
@@ -443,333 +434,319 @@ options:
       cycle:
         title: Swap direction each time
         description: Every trigger swaps the two languages, so triggering again brings the text back to the language you typed in.
-  floatingButtonAndToolbar:
-    title: Floating Button & Toolbar
-    floatingButtonDemoImageAlt: Floating Button Demo
-    selectionToolbarDemoImageAlt: Selection Toolbar Demo
-    contextMenuDemoImageAlt: Context Menu Demo
-    floatingButton:
-      enable:
-        title: Enable floating button
-        description: Display the floating button on web pages for quick access to Read Frog features
-      display:
-        title: Display
-        side:
-          title: Button side
-          description: Choose which side of the page the floating button is docked to
-          left: Left
-          right: Right
-        disabledSites:
-          title: Disabled sites
-          description: Configure websites where the floating button should be disabled
-          enterUrlPattern: Enter URL pattern
-          urlPattern: URL pattern
-      clickAction:
-        title: Click action
-        description: Choose the action when clicking the floating button
-        panel: Open side panel
-        translate: Toggle page translation
-      closeMenu:
-        disableForSite: Disable for this site
-        disableGlobally: Disable globally
-      tooltips:
-        togglePageTranslation: Toggle page translation
-        floatingButtonOptions: Floating button options
-        lockPosition: Lock position
-        unlockPosition: Unlock position
-        settings: Settings
-        feedback: Send feedback
-    selectionToolbar:
-      enable:
-        title: Enable selection toolbar
-        description: Display the toolbar when selecting text on web pages for quick translation, speech, and AI actions
-      actions:
-        title: Actions
-        translate:
-          title: Translate
-          description: Show the translate button in the toolbar
-        speak:
-          title: Speak
-          description: Show the speak button, which reads the selected text aloud
-        saveSuggestion:
-          title: Save suggestions
-          description: After selection translation with an AI provider, suggest words to save to your Notebase
-          action: Action
-          actionDescription: The action that produces the suggestion
-      display:
-        title: Display
-        opacity:
-          title: Opacity
-          description: Adjust the opacity of the selection toolbar and the expanded window opened from it
-        disabledSites:
-          title: Disabled sites
-          description: Configure websites where the selection toolbar should be disabled
-          enterUrlPattern: Enter URL pattern
-          urlPattern: URL pattern
-      closeMenu:
-        disableForSite: Disable for this site
-        disableGlobally: Disable globally
-      errors:
-        customActionFailed: Custom Action Failed
-        customActionFailedFallback: Custom action request failed
-        actionUnavailable: Selected action is unavailable
-        missingSelection: No selected text available
-        providerDisabled: Selected provider is disabled
-        providerUnavailable: Selected provider is unavailable
-      features:
-        provider: Provider
+  floatingButton:
+    title: Floating Button
+    pageDescription: Set which side the floating button sits on, what a click does, and where it stays hidden.
+    demoImageAlt: Floating button demo
+    enable:
+      title: Enable floating button
+      description: Display the floating button on web pages for quick access to Read Frog features
+    display:
+      title: Display
+      side:
+        title: Button side
+        description: Choose which side of the page the floating button is docked to
+        left: Left
+        right: Right
+      disabledSites:
+        title: Disabled sites
+        description: Configure websites where the floating button should be disabled
+        enterUrlPattern: Enter URL pattern
+        urlPattern: URL pattern
+    clickAction:
+      title: Click action
+      description: Choose the action when clicking the floating button
+      panel: Open side panel
+      translate: Toggle page translation
+    closeMenu:
+      disableForSite: Disable for this site
+      disableGlobally: Disable globally
+    tooltips:
+      togglePageTranslation: Toggle page translation
+      floatingButtonOptions: Floating button options
+      lockPosition: Lock position
+      unlockPosition: Unlock position
+      settings: Settings
+      feedback: Send feedback
+  selectionToolbar:
+    title: Selection Toolbar
+    pageDescription: Set which actions appear when you select text, and where the toolbar shows up.
+    demoImageAlt: Selection toolbar demo
+    enable:
+      title: Enable selection toolbar
+      description: Display the toolbar when selecting text on web pages for quick translation, speech, and AI actions
+    actions:
+      title: Actions
+      translate:
+        title: Translate
+        description: Show the translate button in the toolbar
+      speak:
+        title: Speak
+        description: Show the speak button, which reads the selected text aloud
+      saveSuggestion:
+        title: Save suggestions
+        description: After selection translation with an AI provider, suggest words to save to your Notebase
+        action: Action
+        actionDescription: The action that produces the suggestion
+    display:
+      title: Display
+      opacity:
+        title: Opacity
+        description: Adjust the opacity of the selection toolbar and the expanded window opened from it
+      disabledSites:
+        title: Disabled sites
+        description: Configure websites where the selection toolbar should be disabled
+        enterUrlPattern: Enter URL pattern
+        urlPattern: URL pattern
+    closeMenu:
+      disableForSite: Disable for this site
+      disableGlobally: Disable globally
+    errors:
+      customActionFailed: Custom action failed
+      customActionFailedFallback: Custom action request failed
+      actionUnavailable: Selected action is unavailable
+      missingSelection: No selected text available
+      providerDisabled: Selected provider is disabled
+      providerUnavailable: Selected provider is unavailable
+    customActions:
+      title: Custom AI Actions
+      pageDescription: Write your own prompts and run them on selected text from the selection toolbar.
+      description: Add your own structured AI actions for selected text
+      configTitle: Action config
+      builtIn: Built-in
+      add: Add AI action
+      edit: Edit AI action
+      empty: No custom AI actions yet
+      noEnabledLlmProvider: Enable at least one LLM provider before creating custom AI actions
+      form:
+        name: Name
+        customize: Customize
+        customizeTooltip: Built-in instructions do not allow prompt changes. Click here to create an editable copy and modify the prompts.
+        icon: Icon
+        iconField:
+          chooseAriaLabel: Choose icon
+          chooseTitle: Choose an icon
+          inputPlaceholder: Enter an icon name
+          helpAriaLabel: More icon help
+          helpTitle: Can't find the icon you want?
+          helpStepBrowsePrefix: "Browse icons on "
+          helpStepBrowseSuffix: ""
+          helpStepCopyPrefix: "Copy the icon name, for example "
+          helpStepCopySuffix: ", then paste it into the field."
+        provider: Provider (requires structured output support)
         selectProvider: Select a provider
-        noProviderAvailable: No available provider
-        useProviderDefaultModel: Use provider default model
-        useCustomModel: Use custom model
-        customModel: Custom model
-        model: Model
-        modelNotAvailableForNonLLM: Model settings are only available for LLM providers
-        translate:
-          title: Selection Translation
-          description: Configure provider and model for the selection toolbar translation feature
-      customActions:
-        title: Custom AI Actions
-        pageDescription: Write your own prompts and run them on selected text from the selection toolbar.
-        description: Add your own structured AI actions for selected text
-        configTitle: Action config
-        builtIn: Built-in
-        add: Add AI action
-        edit: Edit AI action
-        empty: No custom AI actions yet
-        noEnabledLlmProvider: Enable at least one LLM provider before creating custom AI actions
-        table:
-          name: Name
-          provider: Provider
-          fields: Fields
-          actions: Actions
-        form:
-          name: Name
-          customize: Customize
-          customizeTooltip: Built-in instructions do not allow prompt changes. Click here to create an editable copy and modify the prompts.
-          icon: Icon
-          iconField:
-            chooseAriaLabel: Choose icon
-            chooseTitle: Choose an icon
-            inputPlaceholder: Enter an icon name
-            helpAriaLabel: More icon help
-            helpTitle: Can't find the icon you want?
-            helpStepBrowsePrefix: "Browse icons on "
-            helpStepBrowseSuffix: ""
-            helpStepCopyPrefix: "Copy the icon name, for example "
-            helpStepCopySuffix: ", then paste it into the field."
-          provider: Provider (requires structured output support)
-          selectProvider: Select a provider
-          systemPrompt: System prompt
-          prompt: Prompt
-          outputSchema: Output schema
-          addField: Add field
-          fieldName: Field name
-          fieldType: Field type
-          fieldDescription: Description
-          fieldDescriptionPlaceholder: Describe what this field should contain...
-          fieldSpeaking: Enable speaking
-          actions: Actions
-          cancel: Cancel
+        systemPrompt: System prompt
+        prompt: Prompt
+        outputSchema: Output schema
+        addField: Add field
+        fieldName: Field name
+        fieldType: Field type
+        fieldDescription: Description
+        fieldDescriptionPlaceholder: Describe what this field should contain...
+        fieldSpeaking: Enable speaking
+        actions: Actions
+        cancel: Cancel
+        save: Save
+        defaultFieldName: Result
+        fieldNamePlaceholder: Field name
+        autoFieldPrefix: Field
+        addFieldDialog:
+          title: Add output field
+        editFieldDialog:
+          title: Edit output field
           save: Save
-          defaultFieldName: Result
-          fieldNamePlaceholder: Field name
-          autoFieldPrefix: Field
-          addFieldDialog:
-            title: Add output field
-          editFieldDialog:
-            title: Edit output field
-            save: Save
-          deleteFieldDialog:
-            title: Delete output field?
-            description: This output field will be removed.
-            confirm: Delete
-            cancel: Cancel
-          notebase:
-            title: Notebase connection
-            description: Save this action's structured results to a remote notebase.
-            loginRequiredTitle: Log in to configure Notebase
-            loginRequiredDescription: Sign in on readfrog.app before choosing a notebase or editing mappings.
-            loginRequiredConnectedDescription: This connection was created by the account below. If you log in as the same account, field mappings will be restored. If you log in as another account, the previous mappings will be cleared when you create or connect a Notebase.
-            loginAction: Log in
-            connectedAccountLabel: Connected account
-            currentAccountLabel: Current account
-            unknownConnectedAccount: Unknown account
-            tableLabel: Notebase
-            tablePlaceholder: Select a notebase
-            tableClearOption: Disconnect notebase
-            clearConnectionAction: Clear connection
-            refreshAction: Refresh
-            emptyTitle: No notebases yet
-            emptyDescription: Create a notebase on readfrog.app, then come back here to map fields.
-            openNotebaseAction: Open Notebase
-            accessDeniedTitle: Cannot access Notebase
-            accessDeniedDescription: This account does not have permission to load Notebase data.
-            listErrorTitle: Failed to load notebases
-            listErrorDescription: Try refreshing the Notebase list again in a moment.
-            accountMismatchTitle: Notebase connection belongs to another account
-            accountMismatchDescription: This connection is tied to the connected account below. Clear it, or choose a Notebase available to the current account.
-            tableUnavailableTitle: Selected notebase is no longer available
-            tableUnavailableDescription: This Notebase no longer exists or cannot be opened. Clear the connection or choose another Notebase.
-            tableUnavailableOption: unavailable
-            schemaErrorTitle: Failed to load notebase schema
-            schemaErrorDescription: Try refreshing the schema again in a moment.
-            schemaLoading: Loading notebase schema...
-            mappingsLabel: Field mappings
-            mappingsEmpty: No mappings yet. Add one when you are ready to save fields.
-            addMappingAction: Add mapping
-            removeMappingAction: Remove mapping
-            localFieldLabel: Action field
-            localFieldPlaceholder: Select an action field
-            remoteFieldLabel: Notebase field
-            remoteFieldPlaceholder: Select a notebase field
-            columnUnavailableOption: removed
-            invalidMappingsTitle: Some mappings need attention
-            invalidMappingsDescription: Invalid mappings are preserved. Fix them before saving to Notebase.
-            mappingMissingLocal: The mapped action field no longer exists.
-            mappingMissingRemote: The mapped notebase field no longer exists.
-            mappingMissingSchema: Refresh the notebase schema to validate this mapping.
-            mappingIncompatible: The field types no longer match.
-          tokens:
-            selection: Selected text content
-            paragraphs: Intersecting paragraph text joined with blank lines, truncated to the first 2000 characters when sent to custom AI actions
-            targetLanguage: "User's target language"
-            webTitle: Webpage title
-            webContent: Webpage content extracted from the current page, truncated to the first 2000 characters
-          delete: Delete
-          deleteDialog:
-            title: Delete custom action?
-            description: This action cannot be undone.
-            confirm: Delete
-            cancel: Cancel
-        templates:
-          dialogTitle: Choose a template
-          dialogDescription: Select a template to quickly create a new AI action, or start from scratch.
-          dictionary:
-            name: Dictionary
-            description: Look up words with definitions, phonetics, and paragraph translations
-            systemPrompt: |-
-              You are a dictionary assistant for language learners.
+        deleteFieldDialog:
+          title: Delete output field?
+          description: This output field will be removed.
+          confirm: Delete
+          cancel: Cancel
+        notebase:
+          title: Notebase connection
+          description: Save this action's structured results to a remote notebase.
+          loginRequiredTitle: Log in to configure Notebase
+          loginRequiredDescription: Sign in on readfrog.app before choosing a notebase or editing mappings.
+          loginRequiredConnectedDescription: This connection was created by the account below. If you log in as the same account, field mappings will be restored. If you log in as another account, the previous mappings will be cleared when you create or connect a Notebase.
+          loginAction: Log in
+          connectedAccountLabel: Connected account
+          currentAccountLabel: Current account
+          unknownConnectedAccount: Unknown account
+          tableLabel: Notebase
+          tablePlaceholder: Select a notebase
+          tableClearOption: Disconnect notebase
+          clearConnectionAction: Clear connection
+          refreshAction: Refresh
+          emptyTitle: No notebases yet
+          emptyDescription: Create a notebase on readfrog.app, then come back here to map fields.
+          openNotebaseAction: Open Notebase
+          accessDeniedTitle: Cannot access Notebase
+          accessDeniedDescription: This account does not have permission to load Notebase data.
+          listErrorTitle: Failed to load notebases
+          listErrorDescription: Try refreshing the Notebase list again in a moment.
+          accountMismatchTitle: Notebase connection belongs to another account
+          accountMismatchDescription: This connection is tied to the connected account below. Clear it, or choose a Notebase available to the current account.
+          tableUnavailableTitle: Selected notebase is no longer available
+          tableUnavailableDescription: This Notebase no longer exists or cannot be opened. Clear the connection or choose another Notebase.
+          tableUnavailableOption: unavailable
+          schemaErrorTitle: Failed to load notebase schema
+          schemaErrorDescription: Try refreshing the schema again in a moment.
+          schemaLoading: Loading notebase schema...
+          mappingsLabel: Field mappings
+          mappingsEmpty: No mappings yet. Add one when you are ready to save fields.
+          addMappingAction: Add mapping
+          removeMappingAction: Remove mapping
+          localFieldLabel: Action field
+          localFieldPlaceholder: Select an action field
+          remoteFieldLabel: Notebase field
+          remoteFieldPlaceholder: Select a notebase field
+          columnUnavailableOption: removed
+          invalidMappingsTitle: Some mappings need attention
+          invalidMappingsDescription: Invalid mappings are preserved. Fix them before saving to Notebase.
+          mappingMissingLocal: The mapped action field no longer exists.
+          mappingMissingRemote: The mapped notebase field no longer exists.
+          mappingMissingSchema: Refresh the notebase schema to validate this mapping.
+          mappingIncompatible: The field types no longer match.
+        tokens:
+          selection: Selected text content
+          paragraphs: Intersecting paragraph text joined with blank lines, truncated to the first 2000 characters when sent to custom AI actions
+          targetLanguage: "User's target language"
+          webTitle: Webpage title
+          webContent: Webpage content extracted from the current page, truncated to the first 2000 characters
+        delete: Delete
+        deleteDialog:
+          title: Delete custom action?
+          description: This action cannot be undone.
+          confirm: Delete
+          cancel: Cancel
+      templates:
+        dialogTitle: Choose a template
+        dialogDescription: Select a template to quickly create a new AI action, or start from scratch.
+        dictionary:
+          name: Dictionary
+          description: Look up words with definitions, phonetics, and paragraph translations
+          systemPrompt: |-
+            You are a dictionary assistant for language learners.
 
-              ## Goal
-              Given a term and its surrounding paragraphs, produce a concise dictionary entry that matches the required output object.
+            ## Goal
+            Given a term and its surrounding paragraphs, produce a concise dictionary entry that matches the required output object.
 
-              ## Rules
-              1. Focus on the meaning that best matches the provided paragraphs.
-              2. Normalize Term to its base/canonical form.
-              3. Keep Definition precise and learner-friendly.
-              4. For Sentence, extract only the complete sentence from the provided paragraphs that contains the selected term. Do not include surrounding sentences.
-              5. Sentence Translation must translate only the extracted Sentence.
-              6. Phonetic must use the standard notation for the term's language (e.g., IPA for English, pinyin for Mandarin, romaji for Japanese).
-              7. Part of Speech in English (noun, verb, adjective, etc.).
-              8. Difficulty must be a CEFR level (A1, A2, B1, B2, C1, or C2).
-              9. If a field is unknown, return an empty string instead of guessing.
-              10. Respond in {{targetLanguage}} for all textual fields unless source-form text is required for clarity.
+            ## Rules
+            1. Focus on the meaning that best matches the provided paragraphs.
+            2. Normalize Term to its base/canonical form.
+            3. Keep Definition precise and learner-friendly.
+            4. For Sentence, extract only the complete sentence from the provided paragraphs that contains the selected term. Do not include surrounding sentences.
+            5. Sentence Translation must translate only the extracted Sentence.
+            6. Phonetic must use the standard notation for the term's language (e.g., IPA for English, pinyin for Mandarin, romaji for Japanese).
+            7. Part of Speech in English (noun, verb, adjective, etc.).
+            8. Difficulty must be a CEFR level (A1, A2, B1, B2, C1, or C2).
+            9. If a field is unknown, return an empty string instead of guessing.
+            10. Respond in {{targetLanguage}} for all textual fields unless source-form text is required for clarity.
 
-              ## Examples
+            ## Examples
 
-              ### Example 1
-              Input: Selection="blossoms", Paragraphs="Spring arrives quietly in the park. The ephemeral beauty of cherry blossoms reminds us to cherish each moment. Families and friends gather beneath the trees.", Target language=Chinese
+            ### Example 1
+            Input: Selection="blossoms", Paragraphs="Spring arrives quietly in the park. The ephemeral beauty of cherry blossoms reminds us to cherish each moment. Families and friends gather beneath the trees.", Target language=Chinese
 
-              Output:
-              - Term: blossom
-              - Phonetic: /ˈblɒs.əm/
-              - Part of Speech: noun
-              - Sentence: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
-              - Definition: 花；花朵（尤指果树的花）
-              - Sentence Translation: 樱花短暂的美丽提醒我们珍惜每一刻。
-              - Difficulty: B2
+            Output:
+            - Term: blossom
+            - Phonetic: /ˈblɒs.əm/
+            - Part of Speech: noun
+            - Sentence: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+            - Definition: 花；花朵（尤指果树的花）
+            - Sentence Translation: 樱花短暂的美丽提醒我们珍惜每一刻。
+            - Difficulty: B2
 
-              ### Example 2
-              Input: Selection="感動", Paragraphs="この映画はつまらないと思ったけど、最後は感動した。", Target language=English
+            ### Example 2
+            Input: Selection="感動", Paragraphs="この映画はつまらないと思ったけど、最後は感動した。", Target language=English
 
-              Output:
-              - Term: 感動
-              - Phonetic: kandou
-              - Part of Speech: noun
-              - Sentence: この映画はつまらないと思ったけど、最後は感動した。
-              - Definition: Being deeply moved; emotional touch
-              - Sentence Translation: I thought this movie was boring, but the ending was moving.
-              - Difficulty: B1
-            prompt: |-
-              ## Input
-              Selection: {{selection}}
-              Paragraphs: {{paragraphs}}
-              Target language: {{targetLanguage}}
-            fieldTerm: Term
-            fieldTermDescription: Base/canonical lemma of the selected term.
-            fieldPhonetic: Phonetic
-            fieldPhoneticDescription: Standard phonetic transcription for the term's language (e.g., IPA for English, pinyin for Mandarin, romaji for Japanese).
-            fieldPartOfSpeech: Part of Speech
-            fieldPartOfSpeechDescription: Grammatical category (e.g., noun, verb, adjective).
-            fieldSentence: Sentence
-            fieldSentenceDescription: The complete sentence from the paragraphs above that contains the selected term. Do not include surrounding sentences.
-            fieldDefinition: Definition
-            fieldDefinitionDescription: One concise definition for the contextual sense.
-            fieldSentenceTranslation: Sentence Translation
-            fieldSentenceTranslationDescription: The translation of Sentence only.
-            fieldDifficulty: Difficulty
-            fieldDifficultyDescription: Estimated CEFR difficulty level A1, A2, B1, B2, C1, or C2.
-          improveWriting:
-            name: Improve Writing
-            description: Analyze writing errors and suggest improvements
-            systemPrompt: |-
-              You are a writing assistant for language learners.
+            Output:
+            - Term: 感動
+            - Phonetic: kandou
+            - Part of Speech: noun
+            - Sentence: この映画はつまらないと思ったけど、最後は感動した。
+            - Definition: Being deeply moved; emotional touch
+            - Sentence Translation: I thought this movie was boring, but the ending was moving.
+            - Difficulty: B1
+          prompt: |-
+            ## Input
+            Selection: {{selection}}
+            Paragraphs: {{paragraphs}}
+            Target language: {{targetLanguage}}
+          fieldTerm: Term
+          fieldTermDescription: Base/canonical lemma of the selected term.
+          fieldPhonetic: Phonetic
+          fieldPhoneticDescription: Standard phonetic transcription for the term's language (e.g., IPA for English, pinyin for Mandarin, romaji for Japanese).
+          fieldPartOfSpeech: Part of Speech
+          fieldPartOfSpeechDescription: Grammatical category (e.g., noun, verb, adjective).
+          fieldSentence: Sentence
+          fieldSentenceDescription: The complete sentence from the paragraphs above that contains the selected term. Do not include surrounding sentences.
+          fieldDefinition: Definition
+          fieldDefinitionDescription: One concise definition for the contextual sense.
+          fieldSentenceTranslation: Sentence Translation
+          fieldSentenceTranslationDescription: The translation of Sentence only.
+          fieldDifficulty: Difficulty
+          fieldDifficultyDescription: Estimated CEFR difficulty level A1, A2, B1, B2, C1, or C2.
+        improveWriting:
+          name: Improve Writing
+          description: Analyze writing errors and suggest improvements
+          systemPrompt: |-
+            You are a writing assistant for language learners.
 
-              ## Goal
-              Given selected text and its surrounding paragraphs, analyze writing issues and produce an improved version.
+            ## Goal
+            Given selected text and its surrounding paragraphs, analyze writing issues and produce an improved version.
 
-              ## Language Policy (critical)
-              1. Detect the original language of Selection as {{originLanguage}}.
-              2. The "Error Analysis" field must be written in {{targetLanguage}}.
-              3. The "Improved Version" field must stay in {{originLanguage}}.
-              4. Never translate "Improved Version" into {{targetLanguage}} unless {{originLanguage}} is already {{targetLanguage}}.
+            ## Language Policy (critical)
+            1. Detect the original language of Selection as {{originLanguage}}.
+            2. The "Error Analysis" field must be written in {{targetLanguage}}.
+            3. The "Improved Version" field must stay in {{originLanguage}}.
+            4. Never translate "Improved Version" into {{targetLanguage}} unless {{originLanguage}} is already {{targetLanguage}}.
 
-              ## Writing Rules
-              1. Identify grammar, spelling, punctuation, and word choice errors.
-              2. Keep edits natural and preserve the author's intent and tone.
-              3. If there are no major errors, state that clearly in "Error Analysis" and return a lightly polished "Improved Version".
-              4. Keep "Improved Version" concise and directly usable.
+            ## Writing Rules
+            1. Identify grammar, spelling, punctuation, and word choice errors.
+            2. Keep edits natural and preserve the author's intent and tone.
+            3. If there are no major errors, state that clearly in "Error Analysis" and return a lightly polished "Improved Version".
+            4. Keep "Improved Version" concise and directly usable.
 
-              ## Examples
-              Example A:
-              - Selection: "He go to school yesterday, and he don't finish his homework."
-              - Detected {{originLanguage}}: English
-              - {{targetLanguage}}: Chinese
-              - Error Analysis (Chinese — {{targetLanguage}}): 存在主谓一致和时态错误：go 应改为 went，don't 应改为 didn't，finish 应改为 finish 的过去时语境搭配。
-              - Improved Version (English — {{originLanguage}}): He went to school yesterday, and he didn't finish his homework.
+            ## Examples
+            Example A:
+            - Selection: "He go to school yesterday, and he don't finish his homework."
+            - Detected {{originLanguage}}: English
+            - {{targetLanguage}}: Chinese
+            - Error Analysis (Chinese — {{targetLanguage}}): 存在主谓一致和时态错误：go 应改为 went，don't 应改为 didn't，finish 应改为 finish 的过去时语境搭配。
+            - Improved Version (English — {{originLanguage}}): He went to school yesterday, and he didn't finish his homework.
 
-              Example B:
-              - Selection: "昨日私は友達に会いて、一緒に映画を見るました。"
-              - Detected {{originLanguage}}: Japanese
-              - {{targetLanguage}}: English
-              - Error Analysis (English — {{targetLanguage}}): There are verb conjugation errors: "会いて" should be "会って" (te-form of 会う), and "見るました" should be "見ました" (past tense of 見る in masu-form).
-              - Improved Version (Japanese — {{originLanguage}}): 昨日私は友達に会って、一緒に映画を見ました。
-            prompt: |-
-              ## Input
-              Selection: {{selection}}
-              Paragraphs: {{paragraphs}}
-              Target language: {{targetLanguage}}
-            fieldErrorAnalysis: Error Analysis
-            fieldErrorAnalysisDescription: Explain grammar, spelling, punctuation, and word-choice issues in {{targetLanguage}}.
-            fieldImprovedVersion: Improved Version
-            fieldImprovedVersionDescription: Corrected and improved version of the selected text in its original language.
-          blank:
-            name: Blank
-            description: Start from scratch with an empty action
-        errors:
-          nameRequired: Name is required
-          duplicateName: 'Duplicate action name "$1"'
-          invalidIcon: Invalid Iconify icon string
-          providerRequired: Please select an enabled LLM provider
-          outputSchemaRequired: Add at least one output field
-          fieldKeyRequired: Field name is required
-          duplicateFieldKey: Field names must be unique
-    contextMenu:
-      title: Context Menu
-      enable:
-        title: Enable context menu translate
-        description: Add translate options to the browser right-click menu for quick page and selection translation
+            Example B:
+            - Selection: "昨日私は友達に会いて、一緒に映画を見るました。"
+            - Detected {{originLanguage}}: Japanese
+            - {{targetLanguage}}: English
+            - Error Analysis (English — {{targetLanguage}}): There are verb conjugation errors: "会いて" should be "会って" (te-form of 会う), and "見るました" should be "見ました" (past tense of 見る in masu-form).
+            - Improved Version (Japanese — {{originLanguage}}): 昨日私は友達に会って、一緒に映画を見ました。
+          prompt: |-
+            ## Input
+            Selection: {{selection}}
+            Paragraphs: {{paragraphs}}
+            Target language: {{targetLanguage}}
+          fieldErrorAnalysis: Error Analysis
+          fieldErrorAnalysisDescription: Explain grammar, spelling, punctuation, and word-choice issues in {{targetLanguage}}.
+          fieldImprovedVersion: Improved Version
+          fieldImprovedVersionDescription: Corrected and improved version of the selected text in its original language.
+        blank:
+          name: Blank
+          description: Start from scratch with an empty action
+      errors:
+        nameRequired: Name is required
+        duplicateName: 'Duplicate action name "$1"'
+        invalidIcon: Invalid Iconify icon string
+        providerRequired: Please select an enabled LLM provider
+        outputSchemaRequired: Add at least one output field
+        fieldKeyRequired: Field name is required
+        duplicateFieldKey: Field names must be unique
+  contextMenu:
+    title: Context Menu
+    pageDescription: Control the Read Frog entries in the browser's right-click menu.
+    demoImageAlt: Context menu demo
+    enable:
+      title: Enable context menu translate
+      description: Add translate options to the browser right-click menu for quick page and selection translation
   translation:
     title: Page Translation
     pageDescription: Control how pages get translated — mode, range, prompts, and request limits.

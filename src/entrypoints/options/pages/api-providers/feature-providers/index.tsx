@@ -90,9 +90,7 @@ function CustomActionProviderItems() {
         onChange={(id) => setActionProviderId(action.id, id)}
         triggerSize="sm"
         selectContentProps={SELECT_CONTENT_PROPS}
-        placeholder={i18n.t(
-          "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.selectProvider",
-        )}
+        placeholder={i18n.t("options.selectionToolbar.customActions.form.selectProvider")}
       />
     </ConfigItem>
   ))

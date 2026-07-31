@@ -88,7 +88,7 @@ options:
     noResults: 找不到設定
   sidebar:
     settings: 設定
-    tools: 工具
+    features: 功能
     product: 產品
   tools:
     translationHub: 翻譯中心
@@ -412,15 +412,6 @@ options:
       description: 滑鼠停留或長按段落，只翻譯這一段。
   overlayTools:
     title: 懸浮工具
-    floatingButton:
-      title: 懸浮按鈕
-      pageDescription: 設定懸浮按鈕停在哪一側、點擊後做什麼，以及在哪些網站不顯示。
-    selectionToolbar:
-      title: 選取工具列
-      pageDescription: 設定選取文字時出現哪些操作，以及工具列在哪些網站顯示。
-    contextMenu:
-      title: 右鍵選單
-      pageDescription: 控制瀏覽器右鍵選單裡的 Read Frog 選項。
   inputTranslation:
     title: 輸入翻譯
     pageDescription: 在送出之前，把你在輸入框裡寫的內容翻譯好。
@@ -443,333 +434,319 @@ options:
       cycle:
         title: 每次翻譯時交換方向
         description: 每次觸發都會交換這兩種語言，再觸發一次就能把文字換回你輸入時的語言。
-  floatingButtonAndToolbar:
-    title: 懸浮按鈕和工具列
-    floatingButtonDemoImageAlt: 懸浮按鈕示範
-    selectionToolbarDemoImageAlt: 選取工具列示範
-    contextMenuDemoImageAlt: 右鍵選單示範
-    floatingButton:
-      enable:
-        title: 啟用懸浮按鈕
-        description: 在網頁上顯示懸浮按鈕，快速存取陪讀蛙功能
-      display:
-        title: 顯示
-        side:
-          title: 按鈕位置
-          description: 選擇懸浮按鈕停靠在頁面的哪一側
-          left: 左側
-          right: 右側
-        disabledSites:
-          title: 停用網站
-          description: 設定需要停用懸浮按鈕的網站
-          enterUrlPattern: 輸入網址模式
-          urlPattern: URL 模式
-      clickAction:
-        title: 點選行為
-        description: 選擇點選懸浮按鈕時執行的操作
-        panel: 開啟側邊欄
-        translate: 切換頁面翻譯
-      closeMenu:
-        disableForSite: 停用此網站
-        disableGlobally: 全域停用
-      tooltips:
-        togglePageTranslation: 切換頁面翻譯
-        floatingButtonOptions: 懸浮按鈕選項
-        lockPosition: 鎖定位置
-        unlockPosition: 解鎖位置
-        settings: 設定
-        feedback: 傳送意見回饋
-    selectionToolbar:
-      enable:
-        title: 啟用選取工具列
-        description: 在網頁上選取文字時顯示工具列，快速翻譯、朗讀和使用 AI 指令
-      actions:
-        title: 操作
-        translate:
-          title: 翻譯
-          description: 在工具列中顯示翻譯按鈕
-        speak:
-          title: 朗讀
-          description: 在工具列中顯示朗讀按鈕，用於朗讀選取的文字
-        saveSuggestion:
-          title: 儲存建議
-          description: 使用 AI 供應商進行劃詞翻譯後，推薦可存入筆記庫的詞條
-          action: 指令
-          actionDescription: 用於產生儲存建議的指令
-      display:
-        title: 顯示
-        opacity:
-          title: 透明度
-          description: 調整選取工具列及其展開內容視窗的透明度
-        disabledSites:
-          title: 停用網站
-          description: 設定需要停用選取工具列的網站
-          enterUrlPattern: 輸入網址模式
-          urlPattern: URL 模式
-      closeMenu:
-        disableForSite: 停用此網站
-        disableGlobally: 全域停用
-      errors:
-        customActionFailed: 自訂操作失敗
-        customActionFailedFallback: 自訂操作請求失敗
-        actionUnavailable: 所選操作無法使用
-        missingSelection: 沒有可用的選取文字
-        providerDisabled: 所選提供者已被停用
-        providerUnavailable: 所選提供者無法使用
-      features:
-        provider: 提供者
+  floatingButton:
+    title: 懸浮按鈕
+    pageDescription: 設定懸浮按鈕停在哪一側、點擊後做什麼，以及在哪些網站不顯示。
+    demoImageAlt: 懸浮按鈕示範
+    enable:
+      title: 啟用懸浮按鈕
+      description: 在網頁上顯示懸浮按鈕，快速存取陪讀蛙功能
+    display:
+      title: 顯示
+      side:
+        title: 按鈕位置
+        description: 選擇懸浮按鈕停靠在頁面的哪一側
+        left: 左側
+        right: 右側
+      disabledSites:
+        title: 停用網站
+        description: 設定需要停用懸浮按鈕的網站
+        enterUrlPattern: 輸入網址模式
+        urlPattern: URL 模式
+    clickAction:
+      title: 點選行為
+      description: 選擇點選懸浮按鈕時執行的操作
+      panel: 開啟側邊欄
+      translate: 切換頁面翻譯
+    closeMenu:
+      disableForSite: 停用此網站
+      disableGlobally: 全域停用
+    tooltips:
+      togglePageTranslation: 切換頁面翻譯
+      floatingButtonOptions: 懸浮按鈕選項
+      lockPosition: 鎖定位置
+      unlockPosition: 解鎖位置
+      settings: 設定
+      feedback: 傳送意見回饋
+  selectionToolbar:
+    title: 選取工具列
+    pageDescription: 設定選取文字時出現哪些操作，以及工具列在哪些網站顯示。
+    demoImageAlt: 選取工具列示範
+    enable:
+      title: 啟用選取工具列
+      description: 在網頁上選取文字時顯示工具列，快速翻譯、朗讀和使用 AI 指令
+    actions:
+      title: 操作
+      translate:
+        title: 翻譯
+        description: 在工具列中顯示翻譯按鈕
+      speak:
+        title: 朗讀
+        description: 在工具列中顯示朗讀按鈕，用於朗讀選取的文字
+      saveSuggestion:
+        title: 儲存建議
+        description: 使用 AI 供應商進行劃詞翻譯後，推薦可存入筆記庫的詞條
+        action: 指令
+        actionDescription: 用於產生儲存建議的指令
+    display:
+      title: 顯示
+      opacity:
+        title: 透明度
+        description: 調整選取工具列及其展開內容視窗的透明度
+      disabledSites:
+        title: 停用網站
+        description: 設定需要停用選取工具列的網站
+        enterUrlPattern: 輸入網址模式
+        urlPattern: URL 模式
+    closeMenu:
+      disableForSite: 停用此網站
+      disableGlobally: 全域停用
+    errors:
+      customActionFailed: 自訂操作失敗
+      customActionFailedFallback: 自訂操作請求失敗
+      actionUnavailable: 所選操作無法使用
+      missingSelection: 沒有可用的選取文字
+      providerDisabled: 所選提供者已被停用
+      providerUnavailable: 所選提供者無法使用
+    customActions:
+      title: 自訂 AI 指令
+      pageDescription: 撰寫自己的提示詞，從劃詞工具列對選取的文字執行。
+      description: 為選取文字新增自訂的結構化 AI 指令
+      configTitle: 指令設定
+      builtIn: 內建
+      add: 新增 AI 指令
+      edit: 編輯 AI 指令
+      empty: 目前沒有自訂 AI 指令
+      noEnabledLlmProvider: 請先啟用至少一個 LLM 提供者後再建立自訂 AI 指令
+      form:
+        name: 名稱
+        customize: 自訂
+        customizeTooltip: 內建指令不允許修改提示詞，點此按鈕來修改指令提示詞
+        icon: 圖示
+        iconField:
+          chooseAriaLabel: 選擇圖示
+          chooseTitle: 選擇圖示
+          inputPlaceholder: 輸入圖示名稱
+          helpAriaLabel: 更多圖示說明
+          helpTitle: 找不到想要的圖示？
+          helpStepBrowsePrefix: "在 "
+          helpStepBrowseSuffix: " 瀏覽圖示"
+          helpStepCopyPrefix: 複製圖示名稱，例如
+          helpStepCopySuffix: ，然後貼到輸入欄位中。
+        provider: 提供者（需支援結構化輸出）
         selectProvider: 選擇提供者
-        noProviderAvailable: 目前沒有可用的提供者
-        useProviderDefaultModel: 使用提供者預設模型
-        useCustomModel: 使用自訂模型
-        customModel: 自訂模型
-        model: 模型
-        modelNotAvailableForNonLLM: 僅 LLM 提供者支援模型設定
-        translate:
-          title: 選取文字翻譯
-          description: 設定選取工具列翻譯功能使用的提供者與模型
-      customActions:
-        title: 自訂 AI 指令
-        pageDescription: 撰寫自己的提示詞，從劃詞工具列對選取的文字執行。
-        description: 為選取文字新增自訂的結構化 AI 指令
-        configTitle: 指令設定
-        builtIn: 內建
-        add: 新增 AI 指令
-        edit: 編輯 AI 指令
-        empty: 目前沒有自訂 AI 指令
-        noEnabledLlmProvider: 請先啟用至少一個 LLM 提供者後再建立自訂 AI 指令
-        table:
-          name: 名稱
-          provider: 提供者
-          fields: 欄位數
-          actions: 操作
-        form:
-          name: 名稱
-          customize: 自訂
-          customizeTooltip: 內建指令不允許修改提示詞，點此按鈕來修改指令提示詞
-          icon: 圖示
-          iconField:
-            chooseAriaLabel: 選擇圖示
-            chooseTitle: 選擇圖示
-            inputPlaceholder: 輸入圖示名稱
-            helpAriaLabel: 更多圖示說明
-            helpTitle: 找不到想要的圖示？
-            helpStepBrowsePrefix: "在 "
-            helpStepBrowseSuffix: " 瀏覽圖示"
-            helpStepCopyPrefix: 複製圖示名稱，例如
-            helpStepCopySuffix: ，然後貼到輸入欄位中。
-          provider: 提供者（需支援結構化輸出）
-          selectProvider: 選擇提供者
-          systemPrompt: 系統提示詞
-          prompt: 提示詞
-          outputSchema: 輸出 Schema
-          addField: 新增欄位
-          fieldName: 欄位名稱
-          fieldType: 欄位類型
-          fieldDescription: 描述
-          fieldDescriptionPlaceholder: 描述此欄位應包含的內容…
-          fieldSpeaking: 啟用朗讀
-          actions: 操作
-          cancel: 取消
+        systemPrompt: 系統提示詞
+        prompt: 提示詞
+        outputSchema: 輸出 Schema
+        addField: 新增欄位
+        fieldName: 欄位名稱
+        fieldType: 欄位類型
+        fieldDescription: 描述
+        fieldDescriptionPlaceholder: 描述此欄位應包含的內容…
+        fieldSpeaking: 啟用朗讀
+        actions: 操作
+        cancel: 取消
+        save: 儲存
+        defaultFieldName: 結果
+        fieldNamePlaceholder: 欄位名稱
+        autoFieldPrefix: 欄位
+        addFieldDialog:
+          title: 新增輸出欄位
+        editFieldDialog:
+          title: 編輯輸出欄位
           save: 儲存
-          defaultFieldName: 結果
-          fieldNamePlaceholder: 欄位名稱
-          autoFieldPrefix: 欄位
-          addFieldDialog:
-            title: 新增輸出欄位
-          editFieldDialog:
-            title: 編輯輸出欄位
-            save: 儲存
-          deleteFieldDialog:
-            title: 刪除輸出欄位？
-            description: 此輸出欄位將被移除。
-            confirm: 刪除
-            cancel: 取消
-          notebase:
-            title: 筆記庫連線
-            description: 將這個指令的結構化結果儲存到遠端筆記庫。
-            loginRequiredTitle: 登入後才能設定筆記庫
-            loginRequiredDescription: 先到 readfrog.app 登入，再選擇筆記庫與編輯對應。
-            loginRequiredConnectedDescription: 這個連線來自下方帳號。如果登入原帳號，會恢復欄位對應；如果登入其他帳號，建立或連線筆記庫時會清除先前的欄位對應。
-            loginAction: 前往登入
-            connectedAccountLabel: 已連線帳號
-            currentAccountLabel: 目前帳號
-            unknownConnectedAccount: 未知帳號
-            tableLabel: 筆記庫
-            tablePlaceholder: 選擇一個筆記庫
-            tableClearOption: 不連線筆記庫
-            clearConnectionAction: 清空連線
-            refreshAction: 重新整理
-            emptyTitle: 還沒有筆記庫
-            emptyDescription: 先到 readfrog.app 建立一個筆記庫，再回來對應欄位。
-            openNotebaseAction: 開啟筆記庫
-            accessDeniedTitle: 無法存取筆記庫
-            accessDeniedDescription: 目前帳號沒有權限載入筆記庫資料。
-            listErrorTitle: 載入筆記庫失敗
-            listErrorDescription: 請稍後再試一次。
-            accountMismatchTitle: 筆記庫連線屬於其他帳號
-            accountMismatchDescription: 目前連線綁定到下方已連線帳號。可清除連線，或選擇目前帳號可存取的筆記庫。
-            tableUnavailableTitle: 所選筆記庫已無法使用
-            tableUnavailableDescription: 這個筆記庫不存在，或目前帳號無法開啟。可以清空連線，或重新選擇一個筆記庫。
-            tableUnavailableOption: 無法使用
-            schemaErrorTitle: 載入筆記庫 schema 失敗
-            schemaErrorDescription: 請稍後再試一次重新整理。
-            schemaLoading: 正在載入筆記庫 schema…
-            mappingsLabel: 欄位對應
-            mappingsEmpty: 尚未建立對應，準備好後即可新增。
-            addMappingAction: 新增對應
-            removeMappingAction: 移除對應
-            localFieldLabel: 指令欄位
-            localFieldPlaceholder: 選擇一個指令欄位
-            remoteFieldLabel: 筆記庫欄位
-            remoteFieldPlaceholder: 選擇一個筆記庫欄位
-            columnUnavailableOption: 已刪除
-            invalidMappingsTitle: 有些對應需要處理
-            invalidMappingsDescription: 無效對應會被保留。儲存到筆記庫前請先修復它們。
-            mappingMissingLocal: 對應的指令欄位已不存在。
-            mappingMissingRemote: 對應的筆記庫欄位已不存在。
-            mappingMissingSchema: 重新整理筆記庫 schema 後才能驗證這個對應。
-            mappingIncompatible: 欄位類型已不相容。
-          tokens:
-            selection: 選取的文字內容
-            paragraphs: 與選取範圍相交的段落內容，會以空行串接，傳給自訂 AI 指令時會截斷到前 2000 個字元
-            targetLanguage: 使用者的目標語言
-            webTitle: 網頁標題
-            webContent: 從目前頁面擷取的網頁內文（截斷到前 2000 個字元）
-          delete: 刪除
-          deleteDialog:
-            title: 刪除自訂 AI 指令？
-            description: 此操作無法復原。
-            confirm: 刪除
-            cancel: 取消
-        templates:
-          dialogTitle: 選擇範本
-          dialogDescription: 選擇範本以快速建立新的 AI 指令，或從空白開始。
-          dictionary:
-            name: 字典
-            description: 查詢字詞定義、音標和段落翻譯
-            systemPrompt: |-
-              你是協助語言學習者的字典助理。
+        deleteFieldDialog:
+          title: 刪除輸出欄位？
+          description: 此輸出欄位將被移除。
+          confirm: 刪除
+          cancel: 取消
+        notebase:
+          title: 筆記庫連線
+          description: 將這個指令的結構化結果儲存到遠端筆記庫。
+          loginRequiredTitle: 登入後才能設定筆記庫
+          loginRequiredDescription: 先到 readfrog.app 登入，再選擇筆記庫與編輯對應。
+          loginRequiredConnectedDescription: 這個連線來自下方帳號。如果登入原帳號，會恢復欄位對應；如果登入其他帳號，建立或連線筆記庫時會清除先前的欄位對應。
+          loginAction: 前往登入
+          connectedAccountLabel: 已連線帳號
+          currentAccountLabel: 目前帳號
+          unknownConnectedAccount: 未知帳號
+          tableLabel: 筆記庫
+          tablePlaceholder: 選擇一個筆記庫
+          tableClearOption: 不連線筆記庫
+          clearConnectionAction: 清空連線
+          refreshAction: 重新整理
+          emptyTitle: 還沒有筆記庫
+          emptyDescription: 先到 readfrog.app 建立一個筆記庫，再回來對應欄位。
+          openNotebaseAction: 開啟筆記庫
+          accessDeniedTitle: 無法存取筆記庫
+          accessDeniedDescription: 目前帳號沒有權限載入筆記庫資料。
+          listErrorTitle: 載入筆記庫失敗
+          listErrorDescription: 請稍後再試一次。
+          accountMismatchTitle: 筆記庫連線屬於其他帳號
+          accountMismatchDescription: 目前連線綁定到下方已連線帳號。可清除連線，或選擇目前帳號可存取的筆記庫。
+          tableUnavailableTitle: 所選筆記庫已無法使用
+          tableUnavailableDescription: 這個筆記庫不存在，或目前帳號無法開啟。可以清空連線，或重新選擇一個筆記庫。
+          tableUnavailableOption: 無法使用
+          schemaErrorTitle: 載入筆記庫 schema 失敗
+          schemaErrorDescription: 請稍後再試一次重新整理。
+          schemaLoading: 正在載入筆記庫 schema…
+          mappingsLabel: 欄位對應
+          mappingsEmpty: 尚未建立對應，準備好後即可新增。
+          addMappingAction: 新增對應
+          removeMappingAction: 移除對應
+          localFieldLabel: 指令欄位
+          localFieldPlaceholder: 選擇一個指令欄位
+          remoteFieldLabel: 筆記庫欄位
+          remoteFieldPlaceholder: 選擇一個筆記庫欄位
+          columnUnavailableOption: 已刪除
+          invalidMappingsTitle: 有些對應需要處理
+          invalidMappingsDescription: 無效對應會被保留。儲存到筆記庫前請先修復它們。
+          mappingMissingLocal: 對應的指令欄位已不存在。
+          mappingMissingRemote: 對應的筆記庫欄位已不存在。
+          mappingMissingSchema: 重新整理筆記庫 schema 後才能驗證這個對應。
+          mappingIncompatible: 欄位類型已不相容。
+        tokens:
+          selection: 選取的文字內容
+          paragraphs: 與選取範圍相交的段落內容，會以空行串接，傳給自訂 AI 指令時會截斷到前 2000 個字元
+          targetLanguage: 使用者的目標語言
+          webTitle: 網頁標題
+          webContent: 從目前頁面擷取的網頁內文（截斷到前 2000 個字元）
+        delete: 刪除
+        deleteDialog:
+          title: 刪除自訂 AI 指令？
+          description: 此操作無法復原。
+          confirm: 刪除
+          cancel: 取消
+      templates:
+        dialogTitle: 選擇範本
+        dialogDescription: 選擇範本以快速建立新的 AI 指令，或從空白開始。
+        dictionary:
+          name: 字典
+          description: 查詢字詞定義、音標和段落翻譯
+          systemPrompt: |-
+            你是協助語言學習者的字典助理。
 
-              ## 目標
-              根據字詞及其周圍段落，產生符合指定輸出物件的精簡字典條目。
+            ## 目標
+            根據字詞及其周圍段落，產生符合指定輸出物件的精簡字典條目。
 
-              ## 規則
-              1. 專注於最符合所提供段落的語意。
-              2. 將詞條標準化為基本／標準形式。
-              3. 定義要精確且適合學習者理解。
-              4. 「句子」欄位只提取所提供段落中包含所選字詞的完整句子，不要包含前後句。
-              5. 「句子翻譯」欄位只翻譯所提取的句子。
-              6. 音標必須使用該詞條語言的標準標記（例如英文使用 IPA、中文使用拼音、日文使用羅馬字）。
-              7. 詞性請使用英文（noun、verb、adjective 等）。
-              8. 難度必須是 CEFR 等級（A1、A2、B1、B2、C1 或 C2）。
-              9. 如果某個欄位無法判斷，請回傳空字串，不要猜測。
-              10. 除非必須使用來源形式才能保持清楚，所有文字欄位都請使用 {{targetLanguage}} 回答。
+            ## 規則
+            1. 專注於最符合所提供段落的語意。
+            2. 將詞條標準化為基本／標準形式。
+            3. 定義要精確且適合學習者理解。
+            4. 「句子」欄位只提取所提供段落中包含所選字詞的完整句子，不要包含前後句。
+            5. 「句子翻譯」欄位只翻譯所提取的句子。
+            6. 音標必須使用該詞條語言的標準標記（例如英文使用 IPA、中文使用拼音、日文使用羅馬字）。
+            7. 詞性請使用英文（noun、verb、adjective 等）。
+            8. 難度必須是 CEFR 等級（A1、A2、B1、B2、C1 或 C2）。
+            9. 如果某個欄位無法判斷，請回傳空字串，不要猜測。
+            10. 除非必須使用來源形式才能保持清楚，所有文字欄位都請使用 {{targetLanguage}} 回答。
 
-              ## 範例
+            ## 範例
 
-              ### 範例 1
-              輸入：Selection=blossoms；Paragraphs=Spring arrives quietly in the park. The ephemeral beauty of cherry blossoms reminds us to cherish each moment. Families and friends gather beneath the trees.；Target language=Chinese
+            ### 範例 1
+            輸入：Selection=blossoms；Paragraphs=Spring arrives quietly in the park. The ephemeral beauty of cherry blossoms reminds us to cherish each moment. Families and friends gather beneath the trees.；Target language=Chinese
 
-              輸出：
-              - 詞條：blossom
-              - 音標：/ˈblɒs.əm/
-              - 詞性：noun
-              - 句子：The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
-              - 定義：花；花朵（尤指果樹的花）
-              - 句子翻譯：櫻花短暫的美麗提醒我們珍惜每一刻。
-              - 難度：B2
+            輸出：
+            - 詞條：blossom
+            - 音標：/ˈblɒs.əm/
+            - 詞性：noun
+            - 句子：The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+            - 定義：花；花朵（尤指果樹的花）
+            - 句子翻譯：櫻花短暫的美麗提醒我們珍惜每一刻。
+            - 難度：B2
 
-              ### 範例 2
-              輸入：Selection=感動；Paragraphs=この映画はつまらないと思ったけど、最後は感動した。；Target language=English
+            ### 範例 2
+            輸入：Selection=感動；Paragraphs=この映画はつまらないと思ったけど、最後は感動した。；Target language=English
 
-              輸出：
-              - 詞條：感動
-              - 音標：kandou
-              - 詞性：noun
-              - 句子：この映画はつまらないと思ったけど、最後は感動した。
-              - 定義：Being deeply moved; emotional touch
-              - 句子翻譯：I thought this movie was boring, but the ending was moving.
-              - 難度：B1
-            prompt: |-
-              ## 輸入
-              選取文字：{{selection}}
-              段落：{{paragraphs}}
-              目標語言：{{targetLanguage}}
-            fieldTerm: 詞條
-            fieldTermDescription: 所選詞條的基本／標準詞元形式。
-            fieldPhonetic: 音標
-            fieldPhoneticDescription: 詞條語言的標準音標標記（例如英文使用 IPA、中文使用拼音、日文使用羅馬字）。
-            fieldPartOfSpeech: 詞性
-            fieldPartOfSpeechDescription: 文法類別（例如 noun、verb、adjective）。
-            fieldSentence: 句子
-            fieldSentenceDescription: 提取上方段落中包含所選字詞的完整句子，不要包含前後句。
-            fieldDefinition: 定義
-            fieldDefinitionDescription: 針對脈絡語意提供一則精簡定義。
-            fieldSentenceTranslation: 句子翻譯
-            fieldSentenceTranslationDescription: 只翻譯提取出的句子。
-            fieldDifficulty: 難度
-            fieldDifficultyDescription: 預估 CEFR 難度等級 A1、A2、B1、B2、C1 或 C2。
-          improveWriting:
-            name: 改善寫作
-            description: 分析寫作錯誤並提出改善建議
-            systemPrompt: |-
-              你是協助語言學習者的寫作助理。
+            輸出：
+            - 詞條：感動
+            - 音標：kandou
+            - 詞性：noun
+            - 句子：この映画はつまらないと思ったけど、最後は感動した。
+            - 定義：Being deeply moved; emotional touch
+            - 句子翻譯：I thought this movie was boring, but the ending was moving.
+            - 難度：B1
+          prompt: |-
+            ## 輸入
+            選取文字：{{selection}}
+            段落：{{paragraphs}}
+            目標語言：{{targetLanguage}}
+          fieldTerm: 詞條
+          fieldTermDescription: 所選詞條的基本／標準詞元形式。
+          fieldPhonetic: 音標
+          fieldPhoneticDescription: 詞條語言的標準音標標記（例如英文使用 IPA、中文使用拼音、日文使用羅馬字）。
+          fieldPartOfSpeech: 詞性
+          fieldPartOfSpeechDescription: 文法類別（例如 noun、verb、adjective）。
+          fieldSentence: 句子
+          fieldSentenceDescription: 提取上方段落中包含所選字詞的完整句子，不要包含前後句。
+          fieldDefinition: 定義
+          fieldDefinitionDescription: 針對脈絡語意提供一則精簡定義。
+          fieldSentenceTranslation: 句子翻譯
+          fieldSentenceTranslationDescription: 只翻譯提取出的句子。
+          fieldDifficulty: 難度
+          fieldDifficultyDescription: 預估 CEFR 難度等級 A1、A2、B1、B2、C1 或 C2。
+        improveWriting:
+          name: 改善寫作
+          description: 分析寫作錯誤並提出改善建議
+          systemPrompt: |-
+            你是協助語言學習者的寫作助理。
 
-              ## 目標
-              根據選取文字及其周圍段落，分析寫作問題並產生改寫版本。
+            ## 目標
+            根據選取文字及其周圍段落，分析寫作問題並產生改寫版本。
 
-              ## 語言規則（重要）
-              1. 偵測 Selection 的原文語言，記為 {{originLanguage}}。
-              2. 「錯誤分析」欄位必須使用 {{targetLanguage}}。
-              3. 「改寫版本」欄位必須保持 {{originLanguage}}。
-              4. 絕對不要將「改寫版本」翻譯成 {{targetLanguage}}，除非 {{originLanguage}} 本來就是 {{targetLanguage}}。
+            ## 語言規則（重要）
+            1. 偵測 Selection 的原文語言，記為 {{originLanguage}}。
+            2. 「錯誤分析」欄位必須使用 {{targetLanguage}}。
+            3. 「改寫版本」欄位必須保持 {{originLanguage}}。
+            4. 絕對不要將「改寫版本」翻譯成 {{targetLanguage}}，除非 {{originLanguage}} 本來就是 {{targetLanguage}}。
 
-              ## 寫作規則
-              1. 找出文法、拼字、標點和用字錯誤。
-              2. 修改要自然，並保留作者原意與語氣。
-              3. 如果沒有明顯錯誤，請在「錯誤分析」中明確說明，並回傳輕度潤飾後的「改寫版本」。
-              4. 「改寫版本」應簡潔且可直接使用。
+            ## 寫作規則
+            1. 找出文法、拼字、標點和用字錯誤。
+            2. 修改要自然，並保留作者原意與語氣。
+            3. 如果沒有明顯錯誤，請在「錯誤分析」中明確說明，並回傳輕度潤飾後的「改寫版本」。
+            4. 「改寫版本」應簡潔且可直接使用。
 
-              ## 範例
-              範例 A：
-              - Selection: He go to school yesterday, and he don't finish his homework.
-              - 偵測到 {{originLanguage}}：English
-              - {{targetLanguage}}：Chinese
-              - 錯誤分析（中文 — {{targetLanguage}}）：有主詞動詞一致與時態錯誤：go 應改為 went，don't 應改為 didn't，finish 應配合過去時態語境。
-              - 改寫版本（英文 — {{originLanguage}}）：He went to school yesterday, and he didn't finish his homework.
+            ## 範例
+            範例 A：
+            - Selection: He go to school yesterday, and he don't finish his homework.
+            - 偵測到 {{originLanguage}}：English
+            - {{targetLanguage}}：Chinese
+            - 錯誤分析（中文 — {{targetLanguage}}）：有主詞動詞一致與時態錯誤：go 應改為 went，don't 應改為 didn't，finish 應配合過去時態語境。
+            - 改寫版本（英文 — {{originLanguage}}）：He went to school yesterday, and he didn't finish his homework.
 
-              範例 B：
-              - Selection: 昨日私は友達に会いて、一緒に映画を見るました。
-              - 偵測到 {{originLanguage}}：Japanese
-              - {{targetLanguage}}：English
-              - 錯誤分析（English — {{targetLanguage}}）：There are verb conjugation errors: 会いて should be 会って (te-form of 会う), and 見るました should be 見ました (past tense of 見る in masu-form).
-              - 改寫版本（日文 — {{originLanguage}}）：昨日私は友達に会って、一緒に映画を見ました。
-            prompt: |-
-              ## 輸入
-              選取文字：{{selection}}
-              段落：{{paragraphs}}
-              目標語言：{{targetLanguage}}
-            fieldErrorAnalysis: 錯誤分析
-            fieldErrorAnalysisDescription: 使用 {{targetLanguage}} 說明選取文字中的文法、拼字、標點和用字問題。
-            fieldImprovedVersion: 改寫版本
-            fieldImprovedVersionDescription: 以原文語言修正並改善選取文字後的版本。
-          blank:
-            name: 空白
-            description: 從空白指令開始建立
-        errors:
-          nameRequired: 名稱不能為空
-          duplicateName: 重複的指令名稱「$1」
-          invalidIcon: Iconify 圖示字串格式無效
-          providerRequired: 請選擇一個已啟用的 LLM 提供者
-          outputSchemaRequired: 至少需要一個輸出欄位
-          fieldKeyRequired: 欄位名稱不能為空
-          duplicateFieldKey: 欄位名稱不能重複
-    contextMenu:
-      title: 右鍵選單
-      enable:
-        title: 啟用右鍵翻譯
-        description: 在瀏覽器右鍵選單中新增翻譯選項，快速翻譯頁面或選取的文字
+            範例 B：
+            - Selection: 昨日私は友達に会いて、一緒に映画を見るました。
+            - 偵測到 {{originLanguage}}：Japanese
+            - {{targetLanguage}}：English
+            - 錯誤分析（English — {{targetLanguage}}）：There are verb conjugation errors: 会いて should be 会って (te-form of 会う), and 見るました should be 見ました (past tense of 見る in masu-form).
+            - 改寫版本（日文 — {{originLanguage}}）：昨日私は友達に会って、一緒に映画を見ました。
+          prompt: |-
+            ## 輸入
+            選取文字：{{selection}}
+            段落：{{paragraphs}}
+            目標語言：{{targetLanguage}}
+          fieldErrorAnalysis: 錯誤分析
+          fieldErrorAnalysisDescription: 使用 {{targetLanguage}} 說明選取文字中的文法、拼字、標點和用字問題。
+          fieldImprovedVersion: 改寫版本
+          fieldImprovedVersionDescription: 以原文語言修正並改善選取文字後的版本。
+        blank:
+          name: 空白
+          description: 從空白指令開始建立
+      errors:
+        nameRequired: 名稱不能為空
+        duplicateName: 重複的指令名稱「$1」
+        invalidIcon: Iconify 圖示字串格式無效
+        providerRequired: 請選擇一個已啟用的 LLM 提供者
+        outputSchemaRequired: 至少需要一個輸出欄位
+        fieldKeyRequired: 欄位名稱不能為空
+        duplicateFieldKey: 欄位名稱不能重複
+  contextMenu:
+    title: 右鍵選單
+    pageDescription: 控制瀏覽器右鍵選單裡的 Read Frog 選項。
+    demoImageAlt: 右鍵選單示範
+    enable:
+      title: 啟用右鍵翻譯
+      description: 在瀏覽器右鍵選單中新增翻譯選項，快速翻譯頁面或選取的文字
   translation:
     title: 網頁翻譯
     pageDescription: 控制頁面翻譯的方式：模式、範圍、提示詞和請求限制。

@@ -91,7 +91,7 @@ export function CustomActionCardList() {
               <div className="flex w-full items-center justify-center gap-2">
                 <Icon icon="tabler:plus" className="size-4" />
                 <span className="text-sm">
-                  {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.add")}
+                  {i18n.t("options.selectionToolbar.customActions.add")}
                 </span>
               </div>
             </Button>
@@ -102,9 +102,7 @@ export function CustomActionCardList() {
 
       {customActionProviders.length === 0 && (
         <div className="text-sm text-amber-600 dark:text-amber-400">
-          {i18n.t(
-            "options.floatingButtonAndToolbar.selectionToolbar.customActions.noEnabledLlmProvider",
-          )}
+          {i18n.t("options.selectionToolbar.customActions.noEnabledLlmProvider")}
         </div>
       )}
 
@@ -121,9 +119,7 @@ export function CustomActionCardList() {
 
       <section className="flex flex-col gap-2 pt-1">
         <h3 className="px-1 text-xs font-medium text-muted-foreground">
-          {i18n.t(
-            "options.floatingButtonAndToolbar.selectionToolbar.customActions.builtIn" as never,
-          )}
+          {i18n.t("options.selectionToolbar.customActions.builtIn" as never)}
         </h3>
         <BuiltInDictionaryCard action={builtInDictionary} />
       </section>

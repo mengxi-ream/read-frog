@@ -11,8 +11,8 @@ export function EnableItem() {
   return (
     <ConfigItem
       id="context-menu-translate"
-      title={i18n.t("options.floatingButtonAndToolbar.contextMenu.enable.title")}
-      description={i18n.t("options.floatingButtonAndToolbar.contextMenu.enable.description")}
+      title={i18n.t("options.contextMenu.enable.title")}
+      description={i18n.t("options.contextMenu.enable.description")}
     >
       <Switch
         checked={contextMenu.enabled}

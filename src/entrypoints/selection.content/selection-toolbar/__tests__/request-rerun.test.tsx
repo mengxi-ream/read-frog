@@ -905,9 +905,7 @@ describe("selection toolbar requests", () => {
 
     const alert = await screen.findByRole("alert")
     expect(alert).toHaveTextContent("translationHub.translationFailed")
-    expect(alert).toHaveTextContent(
-      "options.floatingButtonAndToolbar.selectionToolbar.errors.providerUnavailable",
-    )
+    expect(alert).toHaveTextContent("options.selectionToolbar.errors.providerUnavailable")
     expect(translateTextCoreMock).not.toHaveBeenCalled()
     expect(streamBackgroundTextMock).not.toHaveBeenCalled()
   })
@@ -1059,7 +1057,7 @@ describe("selection toolbar requests", () => {
 
     expect(toastAddMock).toHaveBeenCalledWith({
       type: "error",
-      title: "options.floatingButtonAndToolbar.selectionToolbar.errors.missingSelection",
+      title: "options.selectionToolbar.errors.missingSelection",
     })
     expect(translateTextCoreMock).not.toHaveBeenCalled()
   })
@@ -1405,7 +1403,7 @@ describe("selection toolbar requests", () => {
 
     expect(toastAddMock).toHaveBeenCalledWith({
       type: "error",
-      title: "options.floatingButtonAndToolbar.selectionToolbar.errors.missingSelection",
+      title: "options.selectionToolbar.errors.missingSelection",
     })
     expect(streamBackgroundStructuredObjectMock).not.toHaveBeenCalled()
 
@@ -1663,12 +1661,8 @@ describe("selection toolbar requests", () => {
     fireEvent.click(screen.getByRole("button", { name: actionName }))
 
     const alert = await screen.findByRole("alert")
-    expect(alert).toHaveTextContent(
-      "options.floatingButtonAndToolbar.selectionToolbar.errors.customActionFailed",
-    )
-    expect(alert).toHaveTextContent(
-      "options.floatingButtonAndToolbar.selectionToolbar.errors.missingSelection",
-    )
+    expect(alert).toHaveTextContent("options.selectionToolbar.errors.customActionFailed")
+    expect(alert).toHaveTextContent("options.selectionToolbar.errors.missingSelection")
     expect(streamBackgroundStructuredObjectMock).not.toHaveBeenCalled()
 
     const { sendMessage } = await import("@/utils/message")
@@ -1703,9 +1697,7 @@ describe("selection toolbar requests", () => {
     fireEvent.click(screen.getByRole("button", { name: actionName }))
 
     const alert = await screen.findByRole("alert")
-    expect(alert).toHaveTextContent(
-      "options.floatingButtonAndToolbar.selectionToolbar.errors.customActionFailed",
-    )
+    expect(alert).toHaveTextContent("options.selectionToolbar.errors.customActionFailed")
     expect(alert).toHaveTextContent("Structured output failed")
 
     fireEvent.click(screen.getByRole("button", { name: "Regenerate" }))

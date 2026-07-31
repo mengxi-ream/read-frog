@@ -64,7 +64,7 @@ function CustomActionProviderFields({
   return (
     <>
       <p className="text-sm font-medium text-muted-foreground">
-        {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.title")}
+        {i18n.t("options.selectionToolbar.customActions.title")}
       </p>
       {actions.map((action) => (
         <Field key={action.id}>
@@ -81,9 +81,7 @@ function CustomActionProviderFields({
             onChange={(id) => setActionProviderId(action.id, id)}
             className={providerSelectorClassName}
             triggerSize={providerSelectorTriggerSize}
-            placeholder={i18n.t(
-              "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.selectProvider",
-            )}
+            placeholder={i18n.t("options.selectionToolbar.customActions.form.selectProvider")}
           />
         </Field>
       ))}

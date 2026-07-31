@@ -88,7 +88,7 @@ options:
     noResults: Không tìm thấy cài đặt
   sidebar:
     settings: Cài đặt
-    tools: Công cụ
+    features: Tính năng
     product: Sản phẩm
   tools:
     translationHub: Trung tâm Dịch thuật
@@ -411,15 +411,6 @@ options:
       description: Di chuột hoặc nhấn giữ một đoạn để chỉ dịch đoạn đó.
   overlayTools:
     title: Công cụ nổi
-    floatingButton:
-      title: Nút nổi
-      pageDescription: Đặt vị trí nút nổi, hành động khi nhấp và những trang web cần ẩn nút.
-    selectionToolbar:
-      title: Thanh công cụ chọn
-      pageDescription: Đặt các thao tác xuất hiện khi bạn chọn văn bản và nơi hiển thị thanh công cụ.
-    contextMenu:
-      title: Menu ngữ cảnh
-      pageDescription: Kiểm soát các mục Read Frog trong menu chuột phải của trình duyệt.
   inputTranslation:
     title: Dịch đầu vào
     pageDescription: Dịch nội dung bạn gõ trong ô nhập trước khi gửi đi.
@@ -442,218 +433,204 @@ options:
       cycle:
         title: Đổi hướng mỗi lần
         description: Mỗi lần kích hoạt sẽ hoán đổi hai ngôn ngữ, nên lần kích hoạt sau sẽ đưa văn bản về ngôn ngữ bạn đã gõ.
-  floatingButtonAndToolbar:
-    title: Nút nổi & Thanh công cụ
-    floatingButtonDemoImageAlt: Demo nút nổi
-    selectionToolbarDemoImageAlt: Demo thanh công cụ chọn văn bản
-    contextMenuDemoImageAlt: Demo menu ngữ cảnh
-    floatingButton:
-      enable:
-        title: Bật nút nổi
-        description: Hiển thị nút nổi trên các trang web để truy cập nhanh các tính năng Read Frog
-      display:
-        title: Hiển thị
-        side:
-          title: Vị trí nút
-          description: Chọn cạnh của trang để ghim nút nổi
-          left: Bên trái
-          right: Bên phải
-        disabledSites:
-          title: Trang web đã tắt
-          description: Cấu hình các trang web mà nút nổi nên bị tắt
-          enterUrlPattern: Nhập mẫu URL
-          urlPattern: Mẫu URL
-      clickAction:
-        title: Hành động khi nhấn
-        description: Chọn hành động khi nhấn vào nút nổi
-        panel: Mở bảng điều khiển bên
-        translate: Bật/tắt dịch trang
-      closeMenu:
-        disableForSite: Tắt cho trang web này
-        disableGlobally: Tắt toàn cục
-      tooltips:
-        togglePageTranslation: Bật/tắt dịch trang
-        floatingButtonOptions: Tùy chọn nút nổi
-        lockPosition: Khóa vị trí
-        unlockPosition: Mở khóa vị trí
-        settings: Cài đặt
-        feedback: Gửi phản hồi
-    selectionToolbar:
-      enable:
-        title: Bật thanh công cụ chọn văn bản
-        description: Hiển thị thanh công cụ khi chọn văn bản trên trang web để dịch nhanh, đọc to và dùng các hành động AI
-      actions:
-        title: Hành động
-        translate:
-          title: Dịch
-          description: Hiển thị nút dịch trên thanh công cụ
-        speak:
-          title: Đọc
-          description: Hiển thị nút đọc, dùng để đọc to văn bản đã chọn
-        saveSuggestion:
-          title: Gợi ý lưu
-          description: Sau khi dịch vùng chọn bằng nhà cung cấp AI, gợi ý các từ để lưu vào Notebase
-          action: Hành động
-          actionDescription: Hành động tạo ra gợi ý
-      display:
-        title: Hiển thị
-        opacity:
-          title: Độ mờ
-          description: Điều chỉnh độ mờ của thanh công cụ chọn văn bản và cửa sổ mở rộng mở từ đó
-        disabledSites:
-          title: Trang web đã tắt
-          description: Cấu hình các trang web mà thanh công cụ chọn văn bản nên bị tắt
-          enterUrlPattern: Nhập mẫu URL
-          urlPattern: Mẫu URL
-      closeMenu:
-        disableForSite: Tắt cho trang web này
-        disableGlobally: Tắt toàn cục
-      errors:
-        customActionFailed: Hành động tuỳ chỉnh thất bại
-        customActionFailedFallback: Yêu cầu hành động tuỳ chỉnh thất bại
-        actionUnavailable: Hành động đã chọn không khả dụng
-        missingSelection: Không có văn bản được chọn
-        providerDisabled: Nhà cung cấp đã chọn bị tắt
-        providerUnavailable: Nhà cung cấp đã chọn không khả dụng
-      features:
-        provider: Nhà cung cấp
+  floatingButton:
+    title: Nút nổi
+    pageDescription: Đặt vị trí nút nổi, hành động khi nhấp và những trang web cần ẩn nút.
+    demoImageAlt: Demo nút nổi
+    enable:
+      title: Bật nút nổi
+      description: Hiển thị nút nổi trên các trang web để truy cập nhanh các tính năng Read Frog
+    display:
+      title: Hiển thị
+      side:
+        title: Vị trí nút
+        description: Chọn cạnh của trang để ghim nút nổi
+        left: Bên trái
+        right: Bên phải
+      disabledSites:
+        title: Trang web đã tắt
+        description: Cấu hình các trang web mà nút nổi nên bị tắt
+        enterUrlPattern: Nhập mẫu URL
+        urlPattern: Mẫu URL
+    clickAction:
+      title: Hành động khi nhấn
+      description: Chọn hành động khi nhấn vào nút nổi
+      panel: Mở bảng điều khiển bên
+      translate: Bật/tắt dịch trang
+    closeMenu:
+      disableForSite: Tắt cho trang web này
+      disableGlobally: Tắt toàn cục
+    tooltips:
+      togglePageTranslation: Bật/tắt dịch trang
+      floatingButtonOptions: Tùy chọn nút nổi
+      lockPosition: Khóa vị trí
+      unlockPosition: Mở khóa vị trí
+      settings: Cài đặt
+      feedback: Gửi phản hồi
+  selectionToolbar:
+    title: Thanh công cụ chọn
+    pageDescription: Đặt các thao tác xuất hiện khi bạn chọn văn bản và nơi hiển thị thanh công cụ.
+    demoImageAlt: Demo thanh công cụ chọn văn bản
+    enable:
+      title: Bật thanh công cụ chọn văn bản
+      description: Hiển thị thanh công cụ khi chọn văn bản trên trang web để dịch nhanh, đọc to và dùng các hành động AI
+    actions:
+      title: Hành động
+      translate:
+        title: Dịch
+        description: Hiển thị nút dịch trên thanh công cụ
+      speak:
+        title: Đọc
+        description: Hiển thị nút đọc, dùng để đọc to văn bản đã chọn
+      saveSuggestion:
+        title: Gợi ý lưu
+        description: Sau khi dịch vùng chọn bằng nhà cung cấp AI, gợi ý các từ để lưu vào Notebase
+        action: Hành động
+        actionDescription: Hành động tạo ra gợi ý
+    display:
+      title: Hiển thị
+      opacity:
+        title: Độ mờ
+        description: Điều chỉnh độ mờ của thanh công cụ chọn văn bản và cửa sổ mở rộng mở từ đó
+      disabledSites:
+        title: Trang web đã tắt
+        description: Cấu hình các trang web mà thanh công cụ chọn văn bản nên bị tắt
+        enterUrlPattern: Nhập mẫu URL
+        urlPattern: Mẫu URL
+    closeMenu:
+      disableForSite: Tắt cho trang web này
+      disableGlobally: Tắt toàn cục
+    errors:
+      customActionFailed: Hành động tuỳ chỉnh thất bại
+      customActionFailedFallback: Yêu cầu hành động tuỳ chỉnh thất bại
+      actionUnavailable: Hành động đã chọn không khả dụng
+      missingSelection: Không có văn bản được chọn
+      providerDisabled: Nhà cung cấp đã chọn bị tắt
+      providerUnavailable: Nhà cung cấp đã chọn không khả dụng
+    customActions:
+      title: Hành động AI tùy chỉnh
+      pageDescription: Viết prompt của riêng bạn và chạy trên văn bản đã chọn từ thanh công cụ chọn văn bản.
+      description: Thêm các hành động AI có cấu trúc của riêng bạn cho văn bản được chọn
+      configTitle: Cấu hình hành động
+      builtIn: Tích hợp
+      add: Thêm hành động AI
+      edit: Chỉnh sửa hành động AI
+      empty: Chưa có hành động AI tùy chỉnh
+      noEnabledLlmProvider: Hãy bật ít nhất một nhà cung cấp LLM trước khi tạo hành động AI tùy chỉnh
+      form:
+        name: Tên
+        customize: Tùy chỉnh
+        customizeTooltip: Không thể thay đổi prompt của tác vụ tích hợp. Nhấp vào nút này để tạo bản sao có thể chỉnh sửa và thay đổi prompt.
+        icon: Biểu tượng
+        iconField:
+          chooseAriaLabel: Chọn biểu tượng
+          chooseTitle: Chọn một biểu tượng
+          inputPlaceholder: Nhập tên biểu tượng
+          helpAriaLabel: Trợ giúp thêm về biểu tượng
+          helpTitle: Không tìm thấy biểu tượng bạn muốn?
+          helpStepBrowsePrefix: Duyệt biểu tượng trên
+          helpStepBrowseSuffix: ""
+          helpStepCopyPrefix: "Sao chép tên biểu tượng, ví dụ "
+          helpStepCopySuffix: ", rồi dán vào ô nhập liệu."
+        provider: Nhà cung cấp (yêu cầu hỗ trợ đầu ra có cấu trúc)
         selectProvider: Chọn nhà cung cấp
-        noProviderAvailable: Không có nhà cung cấp khả dụng
-        useProviderDefaultModel: Dùng model mặc định của nhà cung cấp
-        useCustomModel: Dùng model tùy chỉnh
-        customModel: Model tùy chỉnh
-        model: Model
-        modelNotAvailableForNonLLM: Cài đặt model chỉ khả dụng với nhà cung cấp LLM
-        translate:
-          title: Dịch văn bản chọn
-          description: Cấu hình nhà cung cấp và model cho tính năng dịch của selection toolbar
-      customActions:
-        title: Hành động AI tùy chỉnh
-        pageDescription: Viết prompt của riêng bạn và chạy trên văn bản đã chọn từ thanh công cụ chọn văn bản.
-        description: Thêm các hành động AI có cấu trúc của riêng bạn cho văn bản được chọn
-        configTitle: Cấu hình hành động
-        builtIn: Tích hợp
-        add: Thêm hành động AI
-        edit: Chỉnh sửa hành động AI
-        empty: Chưa có hành động AI tùy chỉnh
-        noEnabledLlmProvider: Hãy bật ít nhất một nhà cung cấp LLM trước khi tạo hành động AI tùy chỉnh
-        table:
-          name: Tên
-          provider: Nhà cung cấp
-          fields: Trường
-          actions: Thao tác
-        form:
-          name: Tên
-          customize: Tùy chỉnh
-          customizeTooltip: Không thể thay đổi prompt của tác vụ tích hợp. Nhấp vào nút này để tạo bản sao có thể chỉnh sửa và thay đổi prompt.
-          icon: Biểu tượng
-          iconField:
-            chooseAriaLabel: Chọn biểu tượng
-            chooseTitle: Chọn một biểu tượng
-            inputPlaceholder: Nhập tên biểu tượng
-            helpAriaLabel: Trợ giúp thêm về biểu tượng
-            helpTitle: Không tìm thấy biểu tượng bạn muốn?
-            helpStepBrowsePrefix: Duyệt biểu tượng trên
-            helpStepBrowseSuffix: ""
-            helpStepCopyPrefix: "Sao chép tên biểu tượng, ví dụ "
-            helpStepCopySuffix: ", rồi dán vào ô nhập liệu."
-          provider: Nhà cung cấp (yêu cầu hỗ trợ đầu ra có cấu trúc)
-          selectProvider: Chọn nhà cung cấp
-          systemPrompt: System Prompt
-          prompt: Prompt
-          outputSchema: Schema đầu ra
-          addField: Thêm trường
-          fieldName: Tên trường
-          fieldType: Loại trường
-          fieldDescription: Mô tả
-          fieldDescriptionPlaceholder: Mô tả nội dung mà trường này nên chứa...
-          fieldSpeaking: Bật đọc thành tiếng
-          actions: Thao tác
-          cancel: Hủy
+        systemPrompt: System Prompt
+        prompt: Prompt
+        outputSchema: Schema đầu ra
+        addField: Thêm trường
+        fieldName: Tên trường
+        fieldType: Loại trường
+        fieldDescription: Mô tả
+        fieldDescriptionPlaceholder: Mô tả nội dung mà trường này nên chứa...
+        fieldSpeaking: Bật đọc thành tiếng
+        actions: Thao tác
+        cancel: Hủy
+        save: Lưu
+        defaultFieldName: kết quả
+        fieldNamePlaceholder: tên_trường
+        autoFieldPrefix: trường
+        addFieldDialog:
+          title: Thêm trường đầu ra
+        editFieldDialog:
+          title: Chỉnh sửa trường đầu ra
           save: Lưu
-          defaultFieldName: kết quả
-          fieldNamePlaceholder: tên_trường
-          autoFieldPrefix: trường
-          addFieldDialog:
-            title: Thêm trường đầu ra
-          editFieldDialog:
-            title: Chỉnh sửa trường đầu ra
-            save: Lưu
-          deleteFieldDialog:
-            title: Xóa trường đầu ra?
-            description: Trường đầu ra này sẽ bị xóa.
-            confirm: Xóa
-            cancel: Hủy
-          notebase:
-            title: Kết nối Notebase
-            description: Lưu kết quả có cấu trúc của hành động này vào Notebase từ xa.
-            loginRequiredTitle: Đăng nhập để cấu hình Notebase
-            loginRequiredDescription: Hãy đăng nhập trên readfrog.app trước khi chọn notebase hoặc chỉnh sửa ánh xạ.
-            loginRequiredConnectedDescription: Kết nối này được tạo bởi tài khoản bên dưới. Nếu đăng nhập bằng cùng tài khoản, ánh xạ trường sẽ được khôi phục. Nếu đăng nhập bằng tài khoản khác, các ánh xạ cũ sẽ bị xóa khi bạn tạo hoặc kết nối Notebase.
-            loginAction: Đăng nhập
-            connectedAccountLabel: Tài khoản đã kết nối
-            currentAccountLabel: Tài khoản hiện tại
-            unknownConnectedAccount: Tài khoản không xác định
-            tableLabel: Notebase
-            tablePlaceholder: Chọn một notebase
-            tableClearOption: Không kết nối notebase
-            clearConnectionAction: Xóa kết nối
-            refreshAction: Làm mới
-            emptyTitle: Chưa có Notebase nào
-            emptyDescription: Hãy tạo một notebase trên readfrog.app rồi quay lại đây để ánh xạ các trường.
-            openNotebaseAction: Mở Notebase
-            accessDeniedTitle: Không thể truy cập Notebase
-            accessDeniedDescription: Tài khoản này không có quyền tải dữ liệu Notebase.
-            listErrorTitle: Không tải được danh sách Notebase
-            listErrorDescription: Hãy thử làm mới danh sách Notebase sau ít phút nữa.
-            accountMismatchTitle: Kết nối Notebase thuộc tài khoản khác
-            accountMismatchDescription: Kết nối này gắn với tài khoản bên dưới. Hãy xóa kết nối hoặc chọn một Notebase mà tài khoản hiện tại có thể truy cập.
-            tableUnavailableTitle: Notebase đã chọn không còn khả dụng
-            tableUnavailableDescription: Notebase này không còn tồn tại hoặc không mở được. Hãy xóa kết nối hoặc chọn một Notebase khác.
-            tableUnavailableOption: không khả dụng
-            schemaErrorTitle: Không tải được schema notebase
-            schemaErrorDescription: Hãy thử làm mới lại sau ít phút nữa.
-            schemaLoading: Đang tải schema notebase...
-            mappingsLabel: Ánh xạ trường
-            mappingsEmpty: Chưa có ánh xạ nào. Hãy thêm một ánh xạ khi bạn sẵn sàng lưu các trường.
-            addMappingAction: Thêm ánh xạ
-            removeMappingAction: Xóa ánh xạ
-            localFieldLabel: Trường của hành động
-            localFieldPlaceholder: Chọn một trường của hành động
-            remoteFieldLabel: Trường Notebase
-            remoteFieldPlaceholder: Chọn một trường notebase
-            columnUnavailableOption: đã xóa
-            invalidMappingsTitle: Một số ánh xạ cần được xử lý
-            invalidMappingsDescription: Các ánh xạ không hợp lệ vẫn được giữ lại. Hãy sửa chúng trước khi lưu vào Notebase.
-            mappingMissingLocal: Trường của hành động đã ánh xạ không còn tồn tại.
-            mappingMissingRemote: Trường notebase đã ánh xạ không còn tồn tại.
-            mappingMissingSchema: Hãy làm mới schema notebase để xác thực ánh xạ này.
-            mappingIncompatible: Kiểu trường không còn khớp nữa.
-          tokens:
-            selection: Nội dung văn bản đã chọn
-            paragraphs: Nội dung các đoạn giao với vùng chọn, được nối bằng dòng trống, sẽ bị cắt còn 2000 ký tự đầu khi gửi vào hành động AI tùy chỉnh
-            targetLanguage: Ngôn ngữ đích của người dùng
-            webTitle: Tiêu đề trang web
-            webContent: Nội dung trang web được trích xuất từ trang hiện tại (bị cắt còn 2000 ký tự đầu)
-          delete: Xóa
-          deleteDialog:
-            title: Xóa hành động tùy chỉnh?
-            description: Hành động này không thể hoàn tác.
-            confirm: Xóa
-            cancel: Hủy
-        errors:
-          nameRequired: Tên là bắt buộc
-          duplicateName: 'Tên hành động trùng lặp "$1"'
-          invalidIcon: Chuỗi biểu tượng Iconify không hợp lệ
-          providerRequired: Vui lòng chọn một nhà cung cấp LLM đã bật
-          outputSchemaRequired: Thêm ít nhất một trường đầu ra
-          fieldKeyRequired: Tên trường là bắt buộc
-          duplicateFieldKey: Tên trường phải là duy nhất
-    contextMenu:
-      title: Menu ngữ cảnh
-      enable:
-        title: Bật dịch menu ngữ cảnh
-        description: Thêm các tùy chọn dịch vào menu chuột phải của trình duyệt để dịch nhanh trang hoặc văn bản đã chọn
+        deleteFieldDialog:
+          title: Xóa trường đầu ra?
+          description: Trường đầu ra này sẽ bị xóa.
+          confirm: Xóa
+          cancel: Hủy
+        notebase:
+          title: Kết nối Notebase
+          description: Lưu kết quả có cấu trúc của hành động này vào Notebase từ xa.
+          loginRequiredTitle: Đăng nhập để cấu hình Notebase
+          loginRequiredDescription: Hãy đăng nhập trên readfrog.app trước khi chọn notebase hoặc chỉnh sửa ánh xạ.
+          loginRequiredConnectedDescription: Kết nối này được tạo bởi tài khoản bên dưới. Nếu đăng nhập bằng cùng tài khoản, ánh xạ trường sẽ được khôi phục. Nếu đăng nhập bằng tài khoản khác, các ánh xạ cũ sẽ bị xóa khi bạn tạo hoặc kết nối Notebase.
+          loginAction: Đăng nhập
+          connectedAccountLabel: Tài khoản đã kết nối
+          currentAccountLabel: Tài khoản hiện tại
+          unknownConnectedAccount: Tài khoản không xác định
+          tableLabel: Notebase
+          tablePlaceholder: Chọn một notebase
+          tableClearOption: Không kết nối notebase
+          clearConnectionAction: Xóa kết nối
+          refreshAction: Làm mới
+          emptyTitle: Chưa có Notebase nào
+          emptyDescription: Hãy tạo một notebase trên readfrog.app rồi quay lại đây để ánh xạ các trường.
+          openNotebaseAction: Mở Notebase
+          accessDeniedTitle: Không thể truy cập Notebase
+          accessDeniedDescription: Tài khoản này không có quyền tải dữ liệu Notebase.
+          listErrorTitle: Không tải được danh sách Notebase
+          listErrorDescription: Hãy thử làm mới danh sách Notebase sau ít phút nữa.
+          accountMismatchTitle: Kết nối Notebase thuộc tài khoản khác
+          accountMismatchDescription: Kết nối này gắn với tài khoản bên dưới. Hãy xóa kết nối hoặc chọn một Notebase mà tài khoản hiện tại có thể truy cập.
+          tableUnavailableTitle: Notebase đã chọn không còn khả dụng
+          tableUnavailableDescription: Notebase này không còn tồn tại hoặc không mở được. Hãy xóa kết nối hoặc chọn một Notebase khác.
+          tableUnavailableOption: không khả dụng
+          schemaErrorTitle: Không tải được schema notebase
+          schemaErrorDescription: Hãy thử làm mới lại sau ít phút nữa.
+          schemaLoading: Đang tải schema notebase...
+          mappingsLabel: Ánh xạ trường
+          mappingsEmpty: Chưa có ánh xạ nào. Hãy thêm một ánh xạ khi bạn sẵn sàng lưu các trường.
+          addMappingAction: Thêm ánh xạ
+          removeMappingAction: Xóa ánh xạ
+          localFieldLabel: Trường của hành động
+          localFieldPlaceholder: Chọn một trường của hành động
+          remoteFieldLabel: Trường Notebase
+          remoteFieldPlaceholder: Chọn một trường notebase
+          columnUnavailableOption: đã xóa
+          invalidMappingsTitle: Một số ánh xạ cần được xử lý
+          invalidMappingsDescription: Các ánh xạ không hợp lệ vẫn được giữ lại. Hãy sửa chúng trước khi lưu vào Notebase.
+          mappingMissingLocal: Trường của hành động đã ánh xạ không còn tồn tại.
+          mappingMissingRemote: Trường notebase đã ánh xạ không còn tồn tại.
+          mappingMissingSchema: Hãy làm mới schema notebase để xác thực ánh xạ này.
+          mappingIncompatible: Kiểu trường không còn khớp nữa.
+        tokens:
+          selection: Nội dung văn bản đã chọn
+          paragraphs: Nội dung các đoạn giao với vùng chọn, được nối bằng dòng trống, sẽ bị cắt còn 2000 ký tự đầu khi gửi vào hành động AI tùy chỉnh
+          targetLanguage: Ngôn ngữ đích của người dùng
+          webTitle: Tiêu đề trang web
+          webContent: Nội dung trang web được trích xuất từ trang hiện tại (bị cắt còn 2000 ký tự đầu)
+        delete: Xóa
+        deleteDialog:
+          title: Xóa hành động tùy chỉnh?
+          description: Hành động này không thể hoàn tác.
+          confirm: Xóa
+          cancel: Hủy
+      errors:
+        nameRequired: Tên là bắt buộc
+        duplicateName: 'Tên hành động trùng lặp "$1"'
+        invalidIcon: Chuỗi biểu tượng Iconify không hợp lệ
+        providerRequired: Vui lòng chọn một nhà cung cấp LLM đã bật
+        outputSchemaRequired: Thêm ít nhất một trường đầu ra
+        fieldKeyRequired: Tên trường là bắt buộc
+        duplicateFieldKey: Tên trường phải là duy nhất
+  contextMenu:
+    title: Menu ngữ cảnh
+    pageDescription: Kiểm soát các mục Read Frog trong menu chuột phải của trình duyệt.
+    demoImageAlt: Demo menu ngữ cảnh
+    enable:
+      title: Bật dịch menu ngữ cảnh
+      description: Thêm các tùy chọn dịch vào menu chuột phải của trình duyệt để dịch nhanh trang hoặc văn bản đã chọn
   translation:
     title: Dịch trang
     pageDescription: Kiểm soát cách dịch trang — chế độ, phạm vi, prompt và giới hạn yêu cầu.

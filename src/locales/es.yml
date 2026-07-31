@@ -88,7 +88,7 @@ options:
     noResults: No se encontró configuración
   sidebar:
     settings: Configuración
-    tools: Herramientas
+    features: Funciones
     product: Producto
   tools:
     translationHub: Centro de traducción
@@ -412,15 +412,6 @@ options:
       description: Pasa el cursor o mantén pulsado un párrafo para traducir solo ese.
   overlayTools:
     title: Herramientas superpuestas
-    floatingButton:
-      title: Botón flotante
-      pageDescription: Elige en qué lado se coloca el botón flotante, qué hace al pulsarlo y dónde permanece oculto.
-    selectionToolbar:
-      title: Barra de selección
-      pageDescription: Define qué acciones aparecen al seleccionar texto y dónde se muestra la barra.
-    contextMenu:
-      title: Menú contextual
-      pageDescription: Controla las opciones de Read Frog en el menú contextual del navegador.
   inputTranslation:
     title: Traducción de entrada
     pageDescription: Traduce lo que escribes en los campos de texto antes de enviarlo.
@@ -443,333 +434,319 @@ options:
       cycle:
         title: Intercambiar dirección cada vez
         description: Cada activación intercambia los dos idiomas, así que la siguiente devuelve el texto al idioma en el que escribiste.
-  floatingButtonAndToolbar:
-    title: Botón flotante y barra de herramientas
-    floatingButtonDemoImageAlt: Demostración del botón flotante
-    selectionToolbarDemoImageAlt: Demostración de la barra de selección
-    contextMenuDemoImageAlt: Demostración del menú contextual
-    floatingButton:
-      enable:
-        title: Activar botón flotante
-        description: Muestra el botón flotante en páginas web para acceder rápidamente a las funciones de Read Frog
-      display:
-        title: Visualización
-        side:
-          title: Lado del botón
-          description: Elige en qué lado de la página se fija el botón flotante
-          left: Izquierda
-          right: Derecha
-        disabledSites:
-          title: Sitios desactivados
-          description: Configura los sitios web donde se debe desactivar el botón flotante
-          enterUrlPattern: Introduce patrón de URL
-          urlPattern: Patrón de URL
-      clickAction:
-        title: Acción al hacer clic
-        description: Elige la acción al hacer clic en el botón flotante
-        panel: Abrir panel lateral
-        translate: Alternar traducción de página
-      closeMenu:
-        disableForSite: Desactivar para este sitio
-        disableGlobally: Desactivar globalmente
-      tooltips:
-        togglePageTranslation: Alternar traducción de página
-        floatingButtonOptions: Opciones del botón flotante
-        lockPosition: Bloquear posición
-        unlockPosition: Desbloquear posición
-        settings: Ajustes
-        feedback: Enviar comentarios
-    selectionToolbar:
-      enable:
-        title: Activar barra de selección
-        description: Muestra la barra de herramientas al seleccionar texto en páginas web para traducción rápida, voz y acciones AI
-      actions:
-        title: Acciones
-        translate:
-          title: Traducir
-          description: Muestra el botón de traducción en la barra de herramientas
-        speak:
-          title: Leer en voz alta
-          description: Muestra el botón de voz, que lee en voz alta el texto seleccionado
-        saveSuggestion:
-          title: Sugerencias de guardado
-          description: Después de traducir una selección con un proveedor de IA, sugerir palabras para guardar en tu Notebase
-          action: Acción
-          actionDescription: La acción que genera la sugerencia
-      display:
-        title: Visualización
-        opacity:
-          title: Opacidad
-          description: Ajusta la opacidad de la barra de selección y de la ventana expandida que se abre desde ella
-        disabledSites:
-          title: Sitios desactivados
-          description: Configura los sitios web donde se debe desactivar la barra de selección
-          enterUrlPattern: Introduce patrón de URL
-          urlPattern: Patrón de URL
-      closeMenu:
-        disableForSite: Desactivar para este sitio
-        disableGlobally: Desactivar globalmente
-      errors:
-        customActionFailed: Falló la acción personalizada
-        customActionFailedFallback: Falló la solicitud de acción personalizada
-        actionUnavailable: La acción seleccionada no está disponible
-        missingSelection: No hay texto seleccionado disponible
-        providerDisabled: El proveedor seleccionado está desactivado
-        providerUnavailable: El proveedor seleccionado no está disponible
-      features:
-        provider: Proveedor
+  floatingButton:
+    title: Botón flotante
+    pageDescription: Elige en qué lado se coloca el botón flotante, qué hace al pulsarlo y dónde permanece oculto.
+    demoImageAlt: Demostración del botón flotante
+    enable:
+      title: Activar botón flotante
+      description: Muestra el botón flotante en páginas web para acceder rápidamente a las funciones de Read Frog
+    display:
+      title: Visualización
+      side:
+        title: Lado del botón
+        description: Elige en qué lado de la página se fija el botón flotante
+        left: Izquierda
+        right: Derecha
+      disabledSites:
+        title: Sitios desactivados
+        description: Configura los sitios web donde se debe desactivar el botón flotante
+        enterUrlPattern: Introduce patrón de URL
+        urlPattern: Patrón de URL
+    clickAction:
+      title: Acción al hacer clic
+      description: Elige la acción al hacer clic en el botón flotante
+      panel: Abrir panel lateral
+      translate: Alternar traducción de página
+    closeMenu:
+      disableForSite: Desactivar para este sitio
+      disableGlobally: Desactivar globalmente
+    tooltips:
+      togglePageTranslation: Alternar traducción de página
+      floatingButtonOptions: Opciones del botón flotante
+      lockPosition: Bloquear posición
+      unlockPosition: Desbloquear posición
+      settings: Ajustes
+      feedback: Enviar comentarios
+  selectionToolbar:
+    title: Barra de selección
+    pageDescription: Define qué acciones aparecen al seleccionar texto y dónde se muestra la barra.
+    demoImageAlt: Demostración de la barra de selección
+    enable:
+      title: Activar barra de selección
+      description: Muestra la barra de herramientas al seleccionar texto en páginas web para traducción rápida, voz y acciones AI
+    actions:
+      title: Acciones
+      translate:
+        title: Traducir
+        description: Muestra el botón de traducción en la barra de herramientas
+      speak:
+        title: Leer en voz alta
+        description: Muestra el botón de voz, que lee en voz alta el texto seleccionado
+      saveSuggestion:
+        title: Sugerencias de guardado
+        description: Después de traducir una selección con un proveedor de IA, sugerir palabras para guardar en tu Notebase
+        action: Acción
+        actionDescription: La acción que genera la sugerencia
+    display:
+      title: Visualización
+      opacity:
+        title: Opacidad
+        description: Ajusta la opacidad de la barra de selección y de la ventana expandida que se abre desde ella
+      disabledSites:
+        title: Sitios desactivados
+        description: Configura los sitios web donde se debe desactivar la barra de selección
+        enterUrlPattern: Introduce patrón de URL
+        urlPattern: Patrón de URL
+    closeMenu:
+      disableForSite: Desactivar para este sitio
+      disableGlobally: Desactivar globalmente
+    errors:
+      customActionFailed: Falló la acción personalizada
+      customActionFailedFallback: Falló la solicitud de acción personalizada
+      actionUnavailable: La acción seleccionada no está disponible
+      missingSelection: No hay texto seleccionado disponible
+      providerDisabled: El proveedor seleccionado está desactivado
+      providerUnavailable: El proveedor seleccionado no está disponible
+    customActions:
+      title: Acciones AI personalizadas
+      pageDescription: Escribe tus propios prompts y ejecútalos sobre el texto seleccionado desde la barra de selección.
+      description: Añade tus propias acciones AI estructuradas para texto seleccionado
+      configTitle: Configuración de acciones
+      builtIn: Integrada
+      add: Añadir acción AI
+      edit: Editar acción AI
+      empty: Aún no hay acciones AI personalizadas
+      noEnabledLlmProvider: Activa al menos un proveedor LLM antes de crear acciones AI personalizadas
+      form:
+        name: Nombre
+        customize: Personalizar
+        customizeTooltip: Las instrucciones integradas no permiten cambiar los prompts. Haz clic aquí para crear una copia editable y modificar los prompts.
+        icon: Icono
+        iconField:
+          chooseAriaLabel: Elegir icono
+          chooseTitle: Elegir un icono
+          inputPlaceholder: Introduce el nombre del icono
+          helpAriaLabel: Más ayuda sobre iconos
+          helpTitle: ¿No encuentras el icono que quieres?
+          helpStepBrowsePrefix: Busca iconos en
+          helpStepBrowseSuffix: ""
+          helpStepCopyPrefix: "Copia el nombre del icono, por ejemplo "
+          helpStepCopySuffix: ", y pégalo en el campo."
+        provider: Proveedor (requiere compatibilidad con salida estructurada)
         selectProvider: Selecciona un proveedor
-        noProviderAvailable: No hay proveedores disponibles
-        useProviderDefaultModel: Usar modelo predeterminado del proveedor
-        useCustomModel: Usar modelo personalizado
-        customModel: Modelo personalizado
-        model: Modelo
-        modelNotAvailableForNonLLM: La configuración de modelo solo está disponible para proveedores LLM
-        translate:
-          title: Traducción de selección
-          description: Configura proveedor y modelo para la función de traducción de la barra de selección
-      customActions:
-        title: Acciones AI personalizadas
-        pageDescription: Escribe tus propios prompts y ejecútalos sobre el texto seleccionado desde la barra de selección.
-        description: Añade tus propias acciones AI estructuradas para texto seleccionado
-        configTitle: Configuración de acciones
-        builtIn: Integrada
-        add: Añadir acción AI
-        edit: Editar acción AI
-        empty: Aún no hay acciones AI personalizadas
-        noEnabledLlmProvider: Activa al menos un proveedor LLM antes de crear acciones AI personalizadas
-        table:
-          name: Nombre
-          provider: Proveedor
-          fields: Campos
-          actions: Acciones
-        form:
-          name: Nombre
-          customize: Personalizar
-          customizeTooltip: Las instrucciones integradas no permiten cambiar los prompts. Haz clic aquí para crear una copia editable y modificar los prompts.
-          icon: Icono
-          iconField:
-            chooseAriaLabel: Elegir icono
-            chooseTitle: Elegir un icono
-            inputPlaceholder: Introduce el nombre del icono
-            helpAriaLabel: Más ayuda sobre iconos
-            helpTitle: ¿No encuentras el icono que quieres?
-            helpStepBrowsePrefix: Busca iconos en
-            helpStepBrowseSuffix: ""
-            helpStepCopyPrefix: "Copia el nombre del icono, por ejemplo "
-            helpStepCopySuffix: ", y pégalo en el campo."
-          provider: Proveedor (requiere compatibilidad con salida estructurada)
-          selectProvider: Selecciona un proveedor
-          systemPrompt: Prompt del sistema
-          prompt: Prompt
-          outputSchema: Esquema de salida
-          addField: Añadir campo
-          fieldName: Nombre del campo
-          fieldType: Tipo de campo
-          fieldDescription: Descripción
-          fieldDescriptionPlaceholder: Describe qué debe contener este campo...
-          fieldSpeaking: Activar lectura en voz alta
-          actions: Acciones
-          cancel: Cancelar
+        systemPrompt: Prompt del sistema
+        prompt: Prompt
+        outputSchema: Esquema de salida
+        addField: Añadir campo
+        fieldName: Nombre del campo
+        fieldType: Tipo de campo
+        fieldDescription: Descripción
+        fieldDescriptionPlaceholder: Describe qué debe contener este campo...
+        fieldSpeaking: Activar lectura en voz alta
+        actions: Acciones
+        cancel: Cancelar
+        save: Guardar
+        defaultFieldName: Resultado
+        fieldNamePlaceholder: Nombre del campo
+        autoFieldPrefix: Campo
+        addFieldDialog:
+          title: Añadir campo de salida
+        editFieldDialog:
+          title: Editar campo de salida
           save: Guardar
-          defaultFieldName: Resultado
-          fieldNamePlaceholder: Nombre del campo
-          autoFieldPrefix: Campo
-          addFieldDialog:
-            title: Añadir campo de salida
-          editFieldDialog:
-            title: Editar campo de salida
-            save: Guardar
-          deleteFieldDialog:
-            title: ¿Eliminar campo de salida?
-            description: Este campo de salida se eliminará.
-            confirm: Eliminar
-            cancel: Cancelar
-          notebase:
-            title: Conexión de Notebase
-            description: Guarda los resultados estructurados de esta acción en una Notebase remota.
-            loginRequiredTitle: Inicia sesión para configurar Notebase
-            loginRequiredDescription: Inicia sesión en readfrog.app antes de elegir una Notebase o editar asignaciones.
-            loginRequiredConnectedDescription: Esta conexión fue creada por la cuenta de abajo. Si inicias sesión con la misma cuenta, se restaurarán las asignaciones de campos. Si inicias sesión con otra cuenta, las asignaciones anteriores se borrarán al crear o conectar una Notebase.
-            loginAction: Iniciar sesión
-            connectedAccountLabel: Cuenta conectada
-            currentAccountLabel: Cuenta actual
-            unknownConnectedAccount: Cuenta desconocida
-            tableLabel: Notebase
-            tablePlaceholder: Selecciona una Notebase
-            tableClearOption: Desconectar Notebase
-            clearConnectionAction: Borrar conexión
-            refreshAction: Actualizar
-            emptyTitle: Aún no hay Notebases
-            emptyDescription: Crea una Notebase en readfrog.app y vuelve aquí para asignar campos.
-            openNotebaseAction: Abrir Notebase
-            accessDeniedTitle: No se puede acceder a Notebase
-            accessDeniedDescription: Esta cuenta no tiene permiso para cargar datos de Notebase.
-            listErrorTitle: No se pudieron cargar las Notebases
-            listErrorDescription: Intenta actualizar la lista de Notebase de nuevo en un momento.
-            accountMismatchTitle: La conexión de Notebase pertenece a otra cuenta
-            accountMismatchDescription: Esta conexión está vinculada a la cuenta conectada de abajo. Bórrala o elige una Notebase disponible para la cuenta actual.
-            tableUnavailableTitle: La Notebase seleccionada ya no está disponible
-            tableUnavailableDescription: Esta Notebase ya no existe o no se puede abrir. Borra la conexión o elige otra Notebase.
-            tableUnavailableOption: no disponible
-            schemaErrorTitle: No se pudo cargar el esquema de la Notebase
-            schemaErrorDescription: Intenta actualizar el esquema de nuevo en un momento.
-            schemaLoading: Cargando esquema de la Notebase...
-            mappingsLabel: Asignaciones de campos
-            mappingsEmpty: Aún no hay asignaciones. Añade una cuando estés listo para guardar campos.
-            addMappingAction: Añadir asignación
-            removeMappingAction: Eliminar asignación
-            localFieldLabel: Campo de acción
-            localFieldPlaceholder: Selecciona un campo de acción
-            remoteFieldLabel: Campo de Notebase
-            remoteFieldPlaceholder: Selecciona un campo de Notebase
-            columnUnavailableOption: eliminado
-            invalidMappingsTitle: Algunas asignaciones requieren atención
-            invalidMappingsDescription: Las asignaciones no válidas se conservan. Corrígelas antes de guardar en Notebase.
-            mappingMissingLocal: El campo de acción asignado ya no existe.
-            mappingMissingRemote: El campo de Notebase asignado ya no existe.
-            mappingMissingSchema: Actualiza el esquema de la Notebase para validar esta asignación.
-            mappingIncompatible: Los tipos de campo ya no coinciden.
-          tokens:
-            selection: Contenido del texto seleccionado
-            paragraphs: Texto de párrafos intersectados unido con líneas en blanco, truncado a los primeros 2000 caracteres cuando se envía a acciones AI personalizadas
-            targetLanguage: Idioma de destino del usuario
-            webTitle: Título de la página web
-            webContent: Contenido de la página web extraído de la página actual, truncado a los primeros 2000 caracteres
-          delete: Eliminar
-          deleteDialog:
-            title: ¿Eliminar acción personalizada?
-            description: Esta acción no se puede deshacer.
-            confirm: Eliminar
-            cancel: Cancelar
-        templates:
-          dialogTitle: Elegir una plantilla
-          dialogDescription: Selecciona una plantilla para crear rápidamente una nueva acción AI, o empieza desde cero.
-          dictionary:
-            name: Diccionario
-            description: Busca palabras con definiciones, fonética y traducciones de párrafos
-            systemPrompt: |-
-              Eres un asistente de diccionario para estudiantes de idiomas.
+        deleteFieldDialog:
+          title: ¿Eliminar campo de salida?
+          description: Este campo de salida se eliminará.
+          confirm: Eliminar
+          cancel: Cancelar
+        notebase:
+          title: Conexión de Notebase
+          description: Guarda los resultados estructurados de esta acción en una Notebase remota.
+          loginRequiredTitle: Inicia sesión para configurar Notebase
+          loginRequiredDescription: Inicia sesión en readfrog.app antes de elegir una Notebase o editar asignaciones.
+          loginRequiredConnectedDescription: Esta conexión fue creada por la cuenta de abajo. Si inicias sesión con la misma cuenta, se restaurarán las asignaciones de campos. Si inicias sesión con otra cuenta, las asignaciones anteriores se borrarán al crear o conectar una Notebase.
+          loginAction: Iniciar sesión
+          connectedAccountLabel: Cuenta conectada
+          currentAccountLabel: Cuenta actual
+          unknownConnectedAccount: Cuenta desconocida
+          tableLabel: Notebase
+          tablePlaceholder: Selecciona una Notebase
+          tableClearOption: Desconectar Notebase
+          clearConnectionAction: Borrar conexión
+          refreshAction: Actualizar
+          emptyTitle: Aún no hay Notebases
+          emptyDescription: Crea una Notebase en readfrog.app y vuelve aquí para asignar campos.
+          openNotebaseAction: Abrir Notebase
+          accessDeniedTitle: No se puede acceder a Notebase
+          accessDeniedDescription: Esta cuenta no tiene permiso para cargar datos de Notebase.
+          listErrorTitle: No se pudieron cargar las Notebases
+          listErrorDescription: Intenta actualizar la lista de Notebase de nuevo en un momento.
+          accountMismatchTitle: La conexión de Notebase pertenece a otra cuenta
+          accountMismatchDescription: Esta conexión está vinculada a la cuenta conectada de abajo. Bórrala o elige una Notebase disponible para la cuenta actual.
+          tableUnavailableTitle: La Notebase seleccionada ya no está disponible
+          tableUnavailableDescription: Esta Notebase ya no existe o no se puede abrir. Borra la conexión o elige otra Notebase.
+          tableUnavailableOption: no disponible
+          schemaErrorTitle: No se pudo cargar el esquema de la Notebase
+          schemaErrorDescription: Intenta actualizar el esquema de nuevo en un momento.
+          schemaLoading: Cargando esquema de la Notebase...
+          mappingsLabel: Asignaciones de campos
+          mappingsEmpty: Aún no hay asignaciones. Añade una cuando estés listo para guardar campos.
+          addMappingAction: Añadir asignación
+          removeMappingAction: Eliminar asignación
+          localFieldLabel: Campo de acción
+          localFieldPlaceholder: Selecciona un campo de acción
+          remoteFieldLabel: Campo de Notebase
+          remoteFieldPlaceholder: Selecciona un campo de Notebase
+          columnUnavailableOption: eliminado
+          invalidMappingsTitle: Algunas asignaciones requieren atención
+          invalidMappingsDescription: Las asignaciones no válidas se conservan. Corrígelas antes de guardar en Notebase.
+          mappingMissingLocal: El campo de acción asignado ya no existe.
+          mappingMissingRemote: El campo de Notebase asignado ya no existe.
+          mappingMissingSchema: Actualiza el esquema de la Notebase para validar esta asignación.
+          mappingIncompatible: Los tipos de campo ya no coinciden.
+        tokens:
+          selection: Contenido del texto seleccionado
+          paragraphs: Texto de párrafos intersectados unido con líneas en blanco, truncado a los primeros 2000 caracteres cuando se envía a acciones AI personalizadas
+          targetLanguage: Idioma de destino del usuario
+          webTitle: Título de la página web
+          webContent: Contenido de la página web extraído de la página actual, truncado a los primeros 2000 caracteres
+        delete: Eliminar
+        deleteDialog:
+          title: ¿Eliminar acción personalizada?
+          description: Esta acción no se puede deshacer.
+          confirm: Eliminar
+          cancel: Cancelar
+      templates:
+        dialogTitle: Elegir una plantilla
+        dialogDescription: Selecciona una plantilla para crear rápidamente una nueva acción AI, o empieza desde cero.
+        dictionary:
+          name: Diccionario
+          description: Busca palabras con definiciones, fonética y traducciones de párrafos
+          systemPrompt: |-
+            Eres un asistente de diccionario para estudiantes de idiomas.
 
-              ## Objetivo
-              Dado un término y sus párrafos circundantes, produce una entrada de diccionario concisa que coincida con el objeto de salida requerido.
+            ## Objetivo
+            Dado un término y sus párrafos circundantes, produce una entrada de diccionario concisa que coincida con el objeto de salida requerido.
 
-              ## Reglas
-              1. Céntrate en el significado que mejor coincida con los párrafos proporcionados.
-              2. Normaliza Término a su forma base/canónica.
-              3. Mantén Definición precisa y fácil para estudiantes.
-              4. Para Oración, extrae únicamente la oración completa de los párrafos proporcionados que contenga el término seleccionado. No incluyas las oraciones anteriores ni posteriores.
-              5. Traducción de la oración debe traducir únicamente la Oración extraída.
-              6. Fonética debe usar la notación estándar del idioma del término (p. ej., IPA para inglés, pinyin para mandarín, romaji para japonés).
-              7. Categoría gramatical en inglés (noun, verb, adjective, etc.).
-              8. Dificultad debe ser un nivel CEFR (A1, A2, B1, B2, C1 o C2).
-              9. Si un campo es desconocido, devuelve una cadena vacía en lugar de adivinar.
-              10. Responde en {{targetLanguage}} para todos los campos textuales, salvo que se requiera texto en la forma de origen para mayor claridad.
+            ## Reglas
+            1. Céntrate en el significado que mejor coincida con los párrafos proporcionados.
+            2. Normaliza Término a su forma base/canónica.
+            3. Mantén Definición precisa y fácil para estudiantes.
+            4. Para Oración, extrae únicamente la oración completa de los párrafos proporcionados que contenga el término seleccionado. No incluyas las oraciones anteriores ni posteriores.
+            5. Traducción de la oración debe traducir únicamente la Oración extraída.
+            6. Fonética debe usar la notación estándar del idioma del término (p. ej., IPA para inglés, pinyin para mandarín, romaji para japonés).
+            7. Categoría gramatical en inglés (noun, verb, adjective, etc.).
+            8. Dificultad debe ser un nivel CEFR (A1, A2, B1, B2, C1 o C2).
+            9. Si un campo es desconocido, devuelve una cadena vacía en lugar de adivinar.
+            10. Responde en {{targetLanguage}} para todos los campos textuales, salvo que se requiera texto en la forma de origen para mayor claridad.
 
-              ## Ejemplos
+            ## Ejemplos
 
-              ### Ejemplo 1
-              Entrada: Selección="blossoms", Párrafos="Spring arrives quietly in the park. The ephemeral beauty of cherry blossoms reminds us to cherish each moment. Families and friends gather beneath the trees.", Idioma de destino=chino
+            ### Ejemplo 1
+            Entrada: Selección="blossoms", Párrafos="Spring arrives quietly in the park. The ephemeral beauty of cherry blossoms reminds us to cherish each moment. Families and friends gather beneath the trees.", Idioma de destino=chino
 
-              Salida:
-              - Término: blossom
-              - Fonética: /ˈblɒs.əm/
-              - Categoría gramatical: noun
-              - Oración: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
-              - Definición: 花；花朵（尤指果树的花）
-              - Traducción de la oración: 樱花短暂的美丽提醒我们珍惜每一刻。
-              - Dificultad: B2
+            Salida:
+            - Término: blossom
+            - Fonética: /ˈblɒs.əm/
+            - Categoría gramatical: noun
+            - Oración: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+            - Definición: 花；花朵（尤指果树的花）
+            - Traducción de la oración: 樱花短暂的美丽提醒我们珍惜每一刻。
+            - Dificultad: B2
 
-              ### Ejemplo 2
-              Entrada: Selección="感動", Párrafos="この映画はつまらないと思ったけど、最後は感動した。", Idioma de destino=inglés
+            ### Ejemplo 2
+            Entrada: Selección="感動", Párrafos="この映画はつまらないと思ったけど、最後は感動した。", Idioma de destino=inglés
 
-              Salida:
-              - Término: 感動
-              - Fonética: kandou
-              - Categoría gramatical: noun
-              - Oración: この映画はつまらないと思ったけど、最後は感動した。
-              - Definición: Being deeply moved; emotional touch
-              - Traducción de la oración: I thought this movie was boring, but the ending was moving.
-              - Dificultad: B1
-            prompt: |-
-              ## Entrada
-              Selección: {{selection}}
-              Párrafos: {{paragraphs}}
-              Idioma de destino: {{targetLanguage}}
-            fieldTerm: Término
-            fieldTermDescription: Lema base/canónico del término seleccionado.
-            fieldPhonetic: Fonética
-            fieldPhoneticDescription: Transcripción fonética estándar para el idioma del término (p. ej., IPA para inglés, pinyin para mandarín, romaji para japonés).
-            fieldPartOfSpeech: Categoría gramatical
-            fieldPartOfSpeechDescription: Categoría gramatical (p. ej., noun, verb, adjective).
-            fieldSentence: Oración
-            fieldSentenceDescription: La oración completa de los párrafos anteriores que contiene el término seleccionado. No incluyas las oraciones anteriores ni posteriores.
-            fieldDefinition: Definición
-            fieldDefinitionDescription: Una definición concisa para el sentido contextual.
-            fieldSentenceTranslation: Traducción de la oración
-            fieldSentenceTranslationDescription: La traducción únicamente de la Oración.
-            fieldDifficulty: Dificultad
-            fieldDifficultyDescription: Nivel de dificultad CEFR estimado A1, A2, B1, B2, C1 o C2.
-          improveWriting:
-            name: Mejorar escritura
-            description: Analiza errores de escritura y sugiere mejoras
-            systemPrompt: |-
-              Eres un asistente de escritura para estudiantes de idiomas.
+            Salida:
+            - Término: 感動
+            - Fonética: kandou
+            - Categoría gramatical: noun
+            - Oración: この映画はつまらないと思ったけど、最後は感動した。
+            - Definición: Being deeply moved; emotional touch
+            - Traducción de la oración: I thought this movie was boring, but the ending was moving.
+            - Dificultad: B1
+          prompt: |-
+            ## Entrada
+            Selección: {{selection}}
+            Párrafos: {{paragraphs}}
+            Idioma de destino: {{targetLanguage}}
+          fieldTerm: Término
+          fieldTermDescription: Lema base/canónico del término seleccionado.
+          fieldPhonetic: Fonética
+          fieldPhoneticDescription: Transcripción fonética estándar para el idioma del término (p. ej., IPA para inglés, pinyin para mandarín, romaji para japonés).
+          fieldPartOfSpeech: Categoría gramatical
+          fieldPartOfSpeechDescription: Categoría gramatical (p. ej., noun, verb, adjective).
+          fieldSentence: Oración
+          fieldSentenceDescription: La oración completa de los párrafos anteriores que contiene el término seleccionado. No incluyas las oraciones anteriores ni posteriores.
+          fieldDefinition: Definición
+          fieldDefinitionDescription: Una definición concisa para el sentido contextual.
+          fieldSentenceTranslation: Traducción de la oración
+          fieldSentenceTranslationDescription: La traducción únicamente de la Oración.
+          fieldDifficulty: Dificultad
+          fieldDifficultyDescription: Nivel de dificultad CEFR estimado A1, A2, B1, B2, C1 o C2.
+        improveWriting:
+          name: Mejorar escritura
+          description: Analiza errores de escritura y sugiere mejoras
+          systemPrompt: |-
+            Eres un asistente de escritura para estudiantes de idiomas.
 
-              ## Objetivo
-              Dado un texto seleccionado y sus párrafos circundantes, analiza problemas de escritura y produce una versión mejorada.
+            ## Objetivo
+            Dado un texto seleccionado y sus párrafos circundantes, analiza problemas de escritura y produce una versión mejorada.
 
-              ## Política de idioma (crítica)
-              1. Detecta el idioma original de Selección como {{originLanguage}}.
-              2. El campo "Análisis de errores" debe escribirse en {{targetLanguage}}.
-              3. El campo "Versión mejorada" debe mantenerse en {{originLanguage}}.
-              4. Nunca traduzcas "Versión mejorada" a {{targetLanguage}} a menos que {{originLanguage}} ya sea {{targetLanguage}}.
+            ## Política de idioma (crítica)
+            1. Detecta el idioma original de Selección como {{originLanguage}}.
+            2. El campo "Análisis de errores" debe escribirse en {{targetLanguage}}.
+            3. El campo "Versión mejorada" debe mantenerse en {{originLanguage}}.
+            4. Nunca traduzcas "Versión mejorada" a {{targetLanguage}} a menos que {{originLanguage}} ya sea {{targetLanguage}}.
 
-              ## Reglas de escritura
-              1. Identifica errores de gramática, ortografía, puntuación y elección de palabras.
-              2. Mantén las ediciones naturales y conserva la intención y el tono del autor.
-              3. Si no hay errores importantes, indícalo claramente en "Análisis de errores" y devuelve una "Versión mejorada" ligeramente pulida.
-              4. Mantén "Versión mejorada" concisa y directamente utilizable.
+            ## Reglas de escritura
+            1. Identifica errores de gramática, ortografía, puntuación y elección de palabras.
+            2. Mantén las ediciones naturales y conserva la intención y el tono del autor.
+            3. Si no hay errores importantes, indícalo claramente en "Análisis de errores" y devuelve una "Versión mejorada" ligeramente pulida.
+            4. Mantén "Versión mejorada" concisa y directamente utilizable.
 
-              ## Ejemplos
-              Ejemplo A:
-              - Selección: "He go to school yesterday, and he don't finish his homework."
-              - {{originLanguage}} detectado: inglés
-              - {{targetLanguage}}: chino
-              - Análisis de errores (chino — {{targetLanguage}}): 存在主谓一致和时态错误：go 应改为 went，don't 应改为 didn't，finish 应改为 finish 的过去时语境搭配。
-              - Versión mejorada (inglés — {{originLanguage}}): He went to school yesterday, and he didn't finish his homework.
+            ## Ejemplos
+            Ejemplo A:
+            - Selección: "He go to school yesterday, and he don't finish his homework."
+            - {{originLanguage}} detectado: inglés
+            - {{targetLanguage}}: chino
+            - Análisis de errores (chino — {{targetLanguage}}): 存在主谓一致和时态错误：go 应改为 went，don't 应改为 didn't，finish 应改为 finish 的过去时语境搭配。
+            - Versión mejorada (inglés — {{originLanguage}}): He went to school yesterday, and he didn't finish his homework.
 
-              Ejemplo B:
-              - Selección: "昨日私は友達に会いて、一緒に映画を見るました。"
-              - {{originLanguage}} detectado: japonés
-              - {{targetLanguage}}: inglés
-              - Análisis de errores (inglés — {{targetLanguage}}): There are verb conjugation errors: "会いて" should be "会って" (te-form of 会う), and "見るました" should be "見ました" (past tense of 見る in masu-form).
-              - Versión mejorada (japonés — {{originLanguage}}): 昨日私は友達に会って、一緒に映画を見ました。
-            prompt: |-
-              ## Entrada
-              Selección: {{selection}}
-              Párrafos: {{paragraphs}}
-              Idioma de destino: {{targetLanguage}}
-            fieldErrorAnalysis: Análisis de errores
-            fieldErrorAnalysisDescription: Explica problemas de gramática, ortografía, puntuación y elección de palabras en {{targetLanguage}}.
-            fieldImprovedVersion: Versión mejorada
-            fieldImprovedVersionDescription: Versión corregida y mejorada del texto seleccionado en su idioma original.
-          blank:
-            name: En blanco
-            description: Empieza desde cero con una acción vacía
-        errors:
-          nameRequired: El nombre es obligatorio
-          duplicateName: 'Nombre de acción duplicado "$1"'
-          invalidIcon: Cadena de icono Iconify no válida
-          providerRequired: Selecciona un proveedor LLM activado
-          outputSchemaRequired: Añade al menos un campo de salida
-          fieldKeyRequired: El nombre del campo es obligatorio
-          duplicateFieldKey: Los nombres de campo deben ser únicos
-    contextMenu:
-      title: Menú contextual
-      enable:
-        title: Activar traducción en menú contextual
-        description: Añade opciones de traducción al menú contextual del navegador para traducir rápidamente páginas y selecciones
+            Ejemplo B:
+            - Selección: "昨日私は友達に会いて、一緒に映画を見るました。"
+            - {{originLanguage}} detectado: japonés
+            - {{targetLanguage}}: inglés
+            - Análisis de errores (inglés — {{targetLanguage}}): There are verb conjugation errors: "会いて" should be "会って" (te-form of 会う), and "見るました" should be "見ました" (past tense of 見る in masu-form).
+            - Versión mejorada (japonés — {{originLanguage}}): 昨日私は友達に会って、一緒に映画を見ました。
+          prompt: |-
+            ## Entrada
+            Selección: {{selection}}
+            Párrafos: {{paragraphs}}
+            Idioma de destino: {{targetLanguage}}
+          fieldErrorAnalysis: Análisis de errores
+          fieldErrorAnalysisDescription: Explica problemas de gramática, ortografía, puntuación y elección de palabras en {{targetLanguage}}.
+          fieldImprovedVersion: Versión mejorada
+          fieldImprovedVersionDescription: Versión corregida y mejorada del texto seleccionado en su idioma original.
+        blank:
+          name: En blanco
+          description: Empieza desde cero con una acción vacía
+      errors:
+        nameRequired: El nombre es obligatorio
+        duplicateName: 'Nombre de acción duplicado "$1"'
+        invalidIcon: Cadena de icono Iconify no válida
+        providerRequired: Selecciona un proveedor LLM activado
+        outputSchemaRequired: Añade al menos un campo de salida
+        fieldKeyRequired: El nombre del campo es obligatorio
+        duplicateFieldKey: Los nombres de campo deben ser únicos
+  contextMenu:
+    title: Menú contextual
+    pageDescription: Controla las opciones de Read Frog en el menú contextual del navegador.
+    demoImageAlt: Demostración del menú contextual
+    enable:
+      title: Activar traducción en menú contextual
+      description: Añade opciones de traducción al menú contextual del navegador para traducir rápidamente páginas y selecciones
   translation:
     title: Traducción de páginas
     pageDescription: Controla cómo se traducen las páginas — modo, alcance, prompts y límites de solicitudes.

@@ -25,24 +25,20 @@ export function ClickActionSection() {
   const actions = [
     {
       value: "panel",
-      label: i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.panel"),
+      label: i18n.t("options.floatingButton.clickAction.panel"),
     },
     {
       value: "translate",
-      label: i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.translate"),
+      label: i18n.t("options.floatingButton.clickAction.translate"),
     },
   ] satisfies Array<{ value: FloatingButtonClickAction; label: string }>
 
   return (
     <ConfigSection
       id="floating-button-click-action"
-      title={i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.title")}
+      title={i18n.t("options.floatingButton.clickAction.title")}
     >
-      <ConfigItem
-        description={i18n.t(
-          "options.floatingButtonAndToolbar.floatingButton.clickAction.description",
-        )}
-      >
+      <ConfigItem description={i18n.t("options.floatingButton.clickAction.description")}>
         <Select
           items={actions}
           value={floatingButton.clickAction}

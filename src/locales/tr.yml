@@ -88,7 +88,7 @@ options:
     noResults: Ayar bulunamadı
   sidebar:
     settings: Ayarlar
-    tools: Araçlar
+    features: Özellikler
     product: Ürün
   tools:
     translationHub: Çeviri Merkezi
@@ -411,15 +411,6 @@ options:
       description: Bir paragrafın üzerine gelin veya uzun basın; yalnızca o paragraf çevrilir.
   overlayTools:
     title: Kaplama Araçları
-    floatingButton:
-      title: Yüzen Buton
-      pageDescription: Yüzen düğmenin hangi tarafta duracağını, tıklamanın ne yapacağını ve nerede gizleneceğini ayarlayın.
-    selectionToolbar:
-      title: Seçim Araç Çubuğu
-      pageDescription: Metin seçtiğinizde hangi eylemlerin görüneceğini ve araç çubuğunun nerede çıkacağını belirleyin.
-    contextMenu:
-      title: Bağlam Menüsü
-      pageDescription: Tarayıcının sağ tık menüsündeki Read Frog seçeneklerini yönetin.
   inputTranslation:
     title: Giriş Çevirisi
     pageDescription: Giriş kutularına yazdıklarınızı göndermeden önce çevirin.
@@ -442,218 +433,204 @@ options:
       cycle:
         title: Her seferinde yönü değiştir
         description: Her tetikleme iki dili yer değiştirir; tekrar tetiklediğinizde metin yazdığınız dile geri döner.
-  floatingButtonAndToolbar:
-    title: Yüzen Buton ve Araç Çubuğu
-    floatingButtonDemoImageAlt: Yüzen Buton Demosu
-    selectionToolbarDemoImageAlt: Seçim Araç Çubuğu Demosu
-    contextMenuDemoImageAlt: Bağlam Menüsü Demosu
-    floatingButton:
-      enable:
-        title: Yüzen butonu etkinleştir
-        description: Read Frog özelliklerine hızlı erişim için web sayfalarında yüzen butonu görüntüle
-      display:
-        title: Görünüm
-        side:
-          title: Düğme tarafı
-          description: Yüzen düğmenin sayfanın hangi kenarına sabitleneceğini seçin
-          left: Sol
-          right: Sağ
-        disabledSites:
-          title: Devre dışı siteler
-          description: Yüzen butonun devre dışı bırakılması gereken web sitelerini yapılandırın
-          enterUrlPattern: URL kalıbı girin
-          urlPattern: URL kalıbı
-      clickAction:
-        title: Tıklama eylemi
-        description: Yüzen butona tıklandığında gerçekleştirilecek eylemi seçin
-        panel: Yan paneli aç
-        translate: Sayfa çevirisini aç/kapat
-      closeMenu:
-        disableForSite: Bu site için devre dışı bırak
-        disableGlobally: Genel olarak devre dışı bırak
-      tooltips:
-        togglePageTranslation: Sayfa çevirisini aç/kapat
-        floatingButtonOptions: Kayan düğme seçenekleri
-        lockPosition: Konumu kilitle
-        unlockPosition: Konum kilidini aç
-        settings: Ayarlar
-        feedback: Geri bildirim gönder
-    selectionToolbar:
-      enable:
-        title: Seçim araç çubuğunu etkinleştir
-        description: Web sayfalarında metin seçtiğinizde araç çubuğunu göstererek hızlı çeviri, seslendirme ve AI eylemleri sunar
-      actions:
-        title: Eylemler
-        translate:
-          title: Çeviri
-          description: Araç çubuğunda çeviri düğmesini göster
-        speak:
-          title: Sesli okuma
-          description: Seçili metni sesli okuyan seslendirme düğmesini araç çubuğunda göster
-        saveSuggestion:
-          title: Kaydetme önerileri
-          description: Bir yapay zeka sağlayıcısıyla seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir
-          action: Eylem
-          actionDescription: Öneriyi üreten eylem
-      display:
-        title: Görünüm
-        opacity:
-          title: Opaklık
-          description: Seçim araç çubuğunun ve buradan açılan genişletilmiş pencerenin opaklığını ayarlayın
-        disabledSites:
-          title: Devre dışı siteler
-          description: Seçim araç çubuğunun devre dışı bırakılması gereken web sitelerini yapılandırın
-          enterUrlPattern: URL kalıbı girin
-          urlPattern: URL kalıbı
-      closeMenu:
-        disableForSite: Bu site için devre dışı bırak
-        disableGlobally: Genel olarak devre dışı bırak
-      errors:
-        customActionFailed: Özel eylem başarısız oldu
-        customActionFailedFallback: Özel eylem isteği başarısız oldu
-        actionUnavailable: Seçilen eylem kullanılamıyor
-        missingSelection: Seçili metin yok
-        providerDisabled: Seçilen sağlayıcı devre dışı
-        providerUnavailable: Seçilen sağlayıcı kullanılamıyor
-      features:
-        provider: Sağlayıcı
+  floatingButton:
+    title: Yüzen Buton
+    pageDescription: Yüzen düğmenin hangi tarafta duracağını, tıklamanın ne yapacağını ve nerede gizleneceğini ayarlayın.
+    demoImageAlt: Yüzen buton demosu
+    enable:
+      title: Yüzen butonu etkinleştir
+      description: Read Frog özelliklerine hızlı erişim için web sayfalarında yüzen butonu görüntüle
+    display:
+      title: Görünüm
+      side:
+        title: Düğme tarafı
+        description: Yüzen düğmenin sayfanın hangi kenarına sabitleneceğini seçin
+        left: Sol
+        right: Sağ
+      disabledSites:
+        title: Devre dışı siteler
+        description: Yüzen butonun devre dışı bırakılması gereken web sitelerini yapılandırın
+        enterUrlPattern: URL kalıbı girin
+        urlPattern: URL kalıbı
+    clickAction:
+      title: Tıklama eylemi
+      description: Yüzen butona tıklandığında gerçekleştirilecek eylemi seçin
+      panel: Yan paneli aç
+      translate: Sayfa çevirisini aç/kapat
+    closeMenu:
+      disableForSite: Bu site için devre dışı bırak
+      disableGlobally: Genel olarak devre dışı bırak
+    tooltips:
+      togglePageTranslation: Sayfa çevirisini aç/kapat
+      floatingButtonOptions: Kayan düğme seçenekleri
+      lockPosition: Konumu kilitle
+      unlockPosition: Konum kilidini aç
+      settings: Ayarlar
+      feedback: Geri bildirim gönder
+  selectionToolbar:
+    title: Seçim Araç Çubuğu
+    pageDescription: Metin seçtiğinizde hangi eylemlerin görüneceğini ve araç çubuğunun nerede çıkacağını belirleyin.
+    demoImageAlt: Seçim araç çubuğu demosu
+    enable:
+      title: Seçim araç çubuğunu etkinleştir
+      description: Web sayfalarında metin seçtiğinizde araç çubuğunu göstererek hızlı çeviri, seslendirme ve AI eylemleri sunar
+    actions:
+      title: Eylemler
+      translate:
+        title: Çeviri
+        description: Araç çubuğunda çeviri düğmesini göster
+      speak:
+        title: Sesli okuma
+        description: Seçili metni sesli okuyan seslendirme düğmesini araç çubuğunda göster
+      saveSuggestion:
+        title: Kaydetme önerileri
+        description: Bir yapay zekâ sağlayıcısıyla seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir
+        action: Eylem
+        actionDescription: Öneriyi üreten eylem
+    display:
+      title: Görünüm
+      opacity:
+        title: Opaklık
+        description: Seçim araç çubuğunun ve buradan açılan genişletilmiş pencerenin opaklığını ayarlayın
+      disabledSites:
+        title: Devre dışı siteler
+        description: Seçim araç çubuğunun devre dışı bırakılması gereken web sitelerini yapılandırın
+        enterUrlPattern: URL kalıbı girin
+        urlPattern: URL kalıbı
+    closeMenu:
+      disableForSite: Bu site için devre dışı bırak
+      disableGlobally: Genel olarak devre dışı bırak
+    errors:
+      customActionFailed: Özel eylem başarısız oldu
+      customActionFailedFallback: Özel eylem isteği başarısız oldu
+      actionUnavailable: Seçilen eylem kullanılamıyor
+      missingSelection: Seçili metin yok
+      providerDisabled: Seçilen sağlayıcı devre dışı
+      providerUnavailable: Seçilen sağlayıcı kullanılamıyor
+    customActions:
+      title: Özel AI Eylemleri
+      pageDescription: Kendi istemlerinizi yazın ve seçim araç çubuğundan seçili metin üzerinde çalıştırın.
+      description: Seçilen metin için kendi yapılandırılmış AI eylemlerinizi ekleyin
+      configTitle: Eylem yapılandırması
+      builtIn: Yerleşik
+      add: AI eylemi ekle
+      edit: AI eylemini düzenle
+      empty: Henüz özel AI eylemi yok
+      noEnabledLlmProvider: Özel AI eylemleri oluşturmadan önce en az bir LLM sağlayıcısını etkinleştirin
+      form:
+        name: Ad
+        customize: Özelleştir
+        customizeTooltip: Yerleşik eylemin istemleri değiştirilemez. Düzenlenebilir bir kopya oluşturup istemleri değiştirmek için bu düğmeye tıklayın.
+        icon: Simge
+        iconField:
+          chooseAriaLabel: Simge seç
+          chooseTitle: Bir simge seçin
+          inputPlaceholder: Simge adını girin
+          helpAriaLabel: Daha fazla simge yardımı
+          helpTitle: Aradığınız simgeyi bulamadınız mı?
+          helpStepBrowsePrefix: ""
+          helpStepBrowseSuffix: üzerinde simgelere göz atın
+          helpStepCopyPrefix: "Örneğin "
+          helpStepCopySuffix: " simge adını kopyalayıp alana yapıştırın."
+        provider: Sağlayıcı (yapılandırılmış çıktı desteği gerekir)
         selectProvider: Sağlayıcı seçin
-        noProviderAvailable: Kullanılabilir sağlayıcı yok
-        useProviderDefaultModel: Sağlayıcının varsayılan modelini kullan
-        useCustomModel: Özel model kullan
-        customModel: Özel model
-        model: Model
-        modelNotAvailableForNonLLM: Model ayarları yalnızca LLM sağlayıcılarında kullanılabilir
-        translate:
-          title: Seçim Çevirisi
-          description: Seçim araç çubuğu çeviri özelliği için sağlayıcı ve model yapılandırın
-      customActions:
-        title: Özel AI Eylemleri
-        pageDescription: Kendi istemlerinizi yazın ve seçim araç çubuğundan seçili metin üzerinde çalıştırın.
-        description: Seçilen metin için kendi yapılandırılmış AI eylemlerinizi ekleyin
-        configTitle: Eylem yapılandırması
-        builtIn: Yerleşik
-        add: AI eylemi ekle
-        edit: AI eylemini düzenle
-        empty: Henüz özel AI eylemi yok
-        noEnabledLlmProvider: Özel AI eylemleri oluşturmadan önce en az bir LLM sağlayıcısını etkinleştirin
-        table:
-          name: Ad
-          provider: Sağlayıcı
-          fields: Alanlar
-          actions: İşlemler
-        form:
-          name: Ad
-          customize: Özelleştir
-          customizeTooltip: Yerleşik eylemin istemleri değiştirilemez. Düzenlenebilir bir kopya oluşturup istemleri değiştirmek için bu düğmeye tıklayın.
-          icon: Simge
-          iconField:
-            chooseAriaLabel: Simge seç
-            chooseTitle: Bir simge seçin
-            inputPlaceholder: Simge adını girin
-            helpAriaLabel: Daha fazla simge yardımı
-            helpTitle: Aradığınız simgeyi bulamadınız mı?
-            helpStepBrowsePrefix: ""
-            helpStepBrowseSuffix: üzerinde simgelere göz atın
-            helpStepCopyPrefix: "Örneğin "
-            helpStepCopySuffix: " simge adını kopyalayıp alana yapıştırın."
-          provider: Sağlayıcı (yapılandırılmış çıktı desteği gerekir)
-          selectProvider: Sağlayıcı seçin
-          systemPrompt: Sistem promptu
-          prompt: Prompt
-          outputSchema: Çıkış şeması
-          addField: Alan ekle
-          fieldName: Alan adı
-          fieldType: Alan türü
-          fieldDescription: Açıklama
-          fieldDescriptionPlaceholder: Bu alanın ne içermesi gerektiğini açıklayın...
-          fieldSpeaking: Sesli okumayı etkinleştir
-          actions: İşlemler
-          cancel: İptal
+        systemPrompt: Sistem promptu
+        prompt: Prompt
+        outputSchema: Çıkış şeması
+        addField: Alan ekle
+        fieldName: Alan adı
+        fieldType: Alan türü
+        fieldDescription: Açıklama
+        fieldDescriptionPlaceholder: Bu alanın ne içermesi gerektiğini açıklayın...
+        fieldSpeaking: Sesli okumayı etkinleştir
+        actions: İşlemler
+        cancel: İptal
+        save: Kaydet
+        defaultFieldName: sonuç
+        fieldNamePlaceholder: alan_adı
+        autoFieldPrefix: alan
+        addFieldDialog:
+          title: Çıktı alanı ekle
+        editFieldDialog:
+          title: Çıktı alanını düzenle
           save: Kaydet
-          defaultFieldName: sonuç
-          fieldNamePlaceholder: alan_adı
-          autoFieldPrefix: alan
-          addFieldDialog:
-            title: Çıktı alanı ekle
-          editFieldDialog:
-            title: Çıktı alanını düzenle
-            save: Kaydet
-          deleteFieldDialog:
-            title: Çıktı alanı silinsin mi?
-            description: Bu çıktı alanı kaldırılacaktır.
-            confirm: Sil
-            cancel: İptal
-          notebase:
-            title: Notebase bağlantısı
-            description: Bu eylemin yapılandırılmış sonuçlarını uzak bir Notebase'e kaydedin.
-            loginRequiredTitle: Notebase yapılandırmak için giriş yapın
-            loginRequiredDescription: notebase seçmeden veya eşlemeleri düzenlemeden önce readfrog.app'te oturum açın.
-            loginRequiredConnectedDescription: Bu bağlantı aşağıdaki hesapla oluşturuldu. Aynı hesapla giriş yaparsanız alan eşlemeleri geri yüklenir. Başka bir hesapla giriş yaparsanız Notebase oluştururken veya bağlarken önceki eşlemeler temizlenir.
-            loginAction: Giriş yap
-            connectedAccountLabel: Bağlı hesap
-            currentAccountLabel: Geçerli hesap
-            unknownConnectedAccount: Bilinmeyen hesap
-            tableLabel: Notebase
-            tablePlaceholder: Bir notebase seçin
-            tableClearOption: Notebase bağlama
-            clearConnectionAction: Bağlantıyı temizle
-            refreshAction: Yenile
-            emptyTitle: Henüz Notebase yok
-            emptyDescription: readfrog.app'te bir notebase oluşturun, sonra alanları eşlemek için buraya dönün.
-            openNotebaseAction: Notebase'i Aç
-            accessDeniedTitle: Notebase'e erişilemiyor
-            accessDeniedDescription: Bu hesabın Notebase verilerini yükleme izni yok.
-            listErrorTitle: Notebase listesi yüklenemedi
-            listErrorDescription: Biraz sonra Notebase listesini yeniden yenilemeyi deneyin.
-            accountMismatchTitle: Notebase bağlantısı başka bir hesaba ait
-            accountMismatchDescription: Bu bağlantı aşağıdaki bağlı hesaba aittir. Bağlantıyı temizleyin veya geçerli hesabın erişebildiği bir Notebase seçin.
-            tableUnavailableTitle: Seçilen notebase artık kullanılamıyor
-            tableUnavailableDescription: Bu Notebase artık yok veya açılamıyor. Bağlantıyı temizleyin veya başka bir Notebase seçin.
-            tableUnavailableOption: kullanılamıyor
-            schemaErrorTitle: notebase şeması yüklenemedi
-            schemaErrorDescription: Kısa süre sonra yeniden yenilemeyi deneyin.
-            schemaLoading: notebase şeması yükleniyor...
-            mappingsLabel: Alan eşlemeleri
-            mappingsEmpty: Henüz eşleme yok. Alanları kaydetmeye hazır olduğunuzda bir tane ekleyin.
-            addMappingAction: Eşleme ekle
-            removeMappingAction: Eşlemeyi Kaldır
-            localFieldLabel: Eylem alanı
-            localFieldPlaceholder: Bir eylem alanı seçin
-            remoteFieldLabel: Notebase alanı
-            remoteFieldPlaceholder: Bir notebase alanı seçin
-            columnUnavailableOption: silinmiş
-            invalidMappingsTitle: Bazı eşlemeler ilgi gerektiriyor
-            invalidMappingsDescription: Geçersiz eşlemeler korunur. Notebase'e kaydetmeden önce düzeltin.
-            mappingMissingLocal: Eşlenen eylem alanı artık yok.
-            mappingMissingRemote: Eşlenen notebase alanı artık yok.
-            mappingMissingSchema: Bu eşlemeyi doğrulamak için notebase şemasını yenileyin.
-            mappingIncompatible: Alan türleri artık eşleşmiyor.
-          tokens:
-            selection: Seçilen metin içeriği
-            paragraphs: Seçimle kesişen paragraf metni; boş satırlarla birleştirilir ve özel AI eylemlerine gönderilirken ilk 2000 karaktere kısaltılır
-            targetLanguage: Kullanıcının hedef dili
-            webTitle: Web sayfası başlığı
-            webContent: Geçerli sayfadan çıkarılan ve ilk 2000 karaktere kısaltılan web sayfası içeriği
-          delete: Sil
-          deleteDialog:
-            title: Özel eylem silinsin mi?
-            description: Bu işlem geri alınamaz.
-            confirm: Sil
-            cancel: İptal
-        errors:
-          nameRequired: Ad gerekli
-          duplicateName: 'Yinelenen eylem adı "$1"'
-          invalidIcon: Geçersiz Iconify simge metni
-          providerRequired: Etkin bir LLM sağlayıcısı seçin
-          outputSchemaRequired: En az bir çıktı alanı ekleyin
-          fieldKeyRequired: Alan adı gerekli
-          duplicateFieldKey: Alan adları benzersiz olmalıdır
-    contextMenu:
-      title: Bağlam Menüsü
-      enable:
-        title: Bağlam menüsü çevirisini etkinleştir
-        description: Sayfa veya seçili metni hızlıca çevirmek için tarayıcı sağ tıklama menüsüne çeviri seçenekleri ekle
+        deleteFieldDialog:
+          title: Çıktı alanı silinsin mi?
+          description: Bu çıktı alanı kaldırılacaktır.
+          confirm: Sil
+          cancel: İptal
+        notebase:
+          title: Notebase bağlantısı
+          description: Bu eylemin yapılandırılmış sonuçlarını uzak bir Notebase'e kaydedin.
+          loginRequiredTitle: Notebase yapılandırmak için giriş yapın
+          loginRequiredDescription: notebase seçmeden veya eşlemeleri düzenlemeden önce readfrog.app'te oturum açın.
+          loginRequiredConnectedDescription: Bu bağlantı aşağıdaki hesapla oluşturuldu. Aynı hesapla giriş yaparsanız alan eşlemeleri geri yüklenir. Başka bir hesapla giriş yaparsanız Notebase oluştururken veya bağlarken önceki eşlemeler temizlenir.
+          loginAction: Giriş yap
+          connectedAccountLabel: Bağlı hesap
+          currentAccountLabel: Geçerli hesap
+          unknownConnectedAccount: Bilinmeyen hesap
+          tableLabel: Notebase
+          tablePlaceholder: Bir notebase seçin
+          tableClearOption: Notebase bağlama
+          clearConnectionAction: Bağlantıyı temizle
+          refreshAction: Yenile
+          emptyTitle: Henüz Notebase yok
+          emptyDescription: readfrog.app'te bir notebase oluşturun, sonra alanları eşlemek için buraya dönün.
+          openNotebaseAction: Notebase'i aç
+          accessDeniedTitle: Notebase'e erişilemiyor
+          accessDeniedDescription: Bu hesabın Notebase verilerini yükleme izni yok.
+          listErrorTitle: Notebase listesi yüklenemedi
+          listErrorDescription: Biraz sonra Notebase listesini yeniden yenilemeyi deneyin.
+          accountMismatchTitle: Notebase bağlantısı başka bir hesaba ait
+          accountMismatchDescription: Bu bağlantı aşağıdaki bağlı hesaba aittir. Bağlantıyı temizleyin veya geçerli hesabın erişebildiği bir Notebase seçin.
+          tableUnavailableTitle: Seçilen notebase artık kullanılamıyor
+          tableUnavailableDescription: Bu Notebase artık yok veya açılamıyor. Bağlantıyı temizleyin veya başka bir Notebase seçin.
+          tableUnavailableOption: kullanılamıyor
+          schemaErrorTitle: notebase şeması yüklenemedi
+          schemaErrorDescription: Kısa süre sonra yeniden yenilemeyi deneyin.
+          schemaLoading: notebase şeması yükleniyor...
+          mappingsLabel: Alan eşlemeleri
+          mappingsEmpty: Henüz eşleme yok. Alanları kaydetmeye hazır olduğunuzda bir tane ekleyin.
+          addMappingAction: Eşleme ekle
+          removeMappingAction: Eşlemeyi kaldır
+          localFieldLabel: Eylem alanı
+          localFieldPlaceholder: Bir eylem alanı seçin
+          remoteFieldLabel: Notebase alanı
+          remoteFieldPlaceholder: Bir notebase alanı seçin
+          columnUnavailableOption: silinmiş
+          invalidMappingsTitle: Bazı eşlemeler ilgi gerektiriyor
+          invalidMappingsDescription: Geçersiz eşlemeler korunur. Notebase'e kaydetmeden önce düzeltin.
+          mappingMissingLocal: Eşlenen eylem alanı artık yok.
+          mappingMissingRemote: Eşlenen notebase alanı artık yok.
+          mappingMissingSchema: Bu eşlemeyi doğrulamak için notebase şemasını yenileyin.
+          mappingIncompatible: Alan türleri artık eşleşmiyor.
+        tokens:
+          selection: Seçilen metin içeriği
+          paragraphs: Seçimle kesişen paragraf metni; boş satırlarla birleştirilir ve özel AI eylemlerine gönderilirken ilk 2000 karaktere kısaltılır
+          targetLanguage: Kullanıcının hedef dili
+          webTitle: Web sayfası başlığı
+          webContent: Geçerli sayfadan çıkarılan ve ilk 2000 karaktere kısaltılan web sayfası içeriği
+        delete: Sil
+        deleteDialog:
+          title: Özel eylem silinsin mi?
+          description: Bu işlem geri alınamaz.
+          confirm: Sil
+          cancel: İptal
+      errors:
+        nameRequired: Ad gerekli
+        duplicateName: 'Yinelenen eylem adı "$1"'
+        invalidIcon: Geçersiz Iconify simge metni
+        providerRequired: Etkin bir LLM sağlayıcısı seçin
+        outputSchemaRequired: En az bir çıktı alanı ekleyin
+        fieldKeyRequired: Alan adı gerekli
+        duplicateFieldKey: Alan adları benzersiz olmalıdır
+  contextMenu:
+    title: Bağlam Menüsü
+    pageDescription: Tarayıcının sağ tık menüsündeki Read Frog seçeneklerini yönetin.
+    demoImageAlt: Bağlam menüsü demosu
+    enable:
+      title: Bağlam menüsü çevirisini etkinleştir
+      description: Sayfa veya seçili metni hızlıca çevirmek için tarayıcı sağ tıklama menüsüne çeviri seçenekleri ekle
   translation:
     title: Sayfa Çevirisi
     pageDescription: Sayfaların nasıl çevrileceğini belirleyin — mod, kapsam, istemler ve istek limitleri.

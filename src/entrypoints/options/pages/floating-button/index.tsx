@@ -9,14 +9,14 @@ import { EnableItem } from "./enable-item"
 export function FloatingButtonPage() {
   return (
     <PageLayout
-      title={i18n.t("options.overlayTools.floatingButton.title")}
-      description={i18n.t("options.overlayTools.floatingButton.pageDescription")}
+      title={i18n.t("options.floatingButton.title")}
+      description={i18n.t("options.floatingButton.pageDescription")}
       innerClassName="flex flex-col gap-10"
     >
       <GradientBackground>
         <img
           src={floatingButtonDemoImage}
-          alt={i18n.t("options.floatingButtonAndToolbar.floatingButtonDemoImageAlt")}
+          alt={i18n.t("options.floatingButton.demoImageAlt")}
           className="h-auto w-100"
         />
       </GradientBackground>

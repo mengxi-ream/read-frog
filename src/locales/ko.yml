@@ -88,7 +88,7 @@ options:
     noResults: 설정을 찾을 수 없습니다
   sidebar:
     settings: 설정
-    tools: 도구
+    features: 기능
     product: 제품
   tools:
     translationHub: 번역 허브
@@ -411,15 +411,6 @@ options:
       description: 단락에 마우스를 올리거나 길게 누르면 그 단락만 번역합니다.
   overlayTools:
     title: 오버레이 도구
-    floatingButton:
-      title: 플로팅 버튼
-      pageDescription: 플로팅 버튼이 놓일 위치와 클릭 동작, 숨길 사이트를 설정하세요.
-    selectionToolbar:
-      title: 선택 툴바
-      pageDescription: 텍스트를 선택했을 때 나타날 동작과 도구 모음을 표시할 사이트를 설정하세요.
-    contextMenu:
-      title: 컨텍스트 메뉴
-      pageDescription: 브라우저 우클릭 메뉴에 표시되는 Read Frog 항목을 설정하세요.
   inputTranslation:
     title: 입력 번역
     pageDescription: 입력창에 쓴 내용을 보내기 전에 번역합니다.
@@ -442,218 +433,204 @@ options:
       cycle:
         title: 매번 방향 전환
         description: 실행할 때마다 두 언어가 서로 바뀌므로, 한 번 더 실행하면 입력한 언어로 되돌아옵니다.
-  floatingButtonAndToolbar:
-    title: 플로팅 버튼 및 툴바
-    floatingButtonDemoImageAlt: 플로팅 버튼 데모
-    selectionToolbarDemoImageAlt: 선택 툴바 데모
-    contextMenuDemoImageAlt: 컨텍스트 메뉴 데모
-    floatingButton:
-      enable:
-        title: 플로팅 버튼 활성화
-        description: 웹 페이지에 플로팅 버튼을 표시하여 Read Frog 기능에 빠르게 액세스
-      display:
-        title: 표시
-        side:
-          title: 버튼 위치
-          description: 플로팅 버튼을 페이지 어느 쪽에 고정할지 선택합니다
-          left: 왼쪽
-          right: 오른쪽
-        disabledSites:
-          title: 비활성화 사이트
-          description: 플로팅 버튼을 비활성화할 웹사이트를 설정합니다
-          enterUrlPattern: URL 패턴 입력
-          urlPattern: URL 패턴
-      clickAction:
-        title: 클릭 동작
-        description: 플로팅 버튼을 클릭할 때 실행할 동작 선택
-        panel: 사이드 패널 열기
-        translate: 페이지 번역 전환
-      closeMenu:
-        disableForSite: 이 사이트에서 비활성화
-        disableGlobally: 전역 비활성화
-      tooltips:
-        togglePageTranslation: 페이지 번역 전환
-        floatingButtonOptions: 플로팅 버튼 옵션
-        lockPosition: 위치 잠금
-        unlockPosition: 위치 잠금 해제
-        settings: 설정
-        feedback: 피드백 보내기
-    selectionToolbar:
-      enable:
-        title: 선택 툴바 활성화
-        description: 웹 페이지에서 텍스트를 선택할 때 도구 모음을 표시하여 빠르게 번역, 읽기, AI 액션을 사용할 수 있습니다
-      actions:
-        title: 작업
-        translate:
-          title: 번역
-          description: 툴바에 번역 버튼을 표시합니다
-        speak:
-          title: 읽기
-          description: 선택한 텍스트를 읽어 주는 읽기 버튼을 툴바에 표시합니다
-        saveSuggestion:
-          title: 저장 제안
-          description: AI 제공자로 선택 번역 후 Notebase에 저장할 단어를 추천합니다
-          action: 작업
-          actionDescription: 저장 제안을 만드는 작업
-      display:
-        title: 표시
-        opacity:
-          title: 투명도
-          description: 선택 툴바와 여기서 열리는 확장 창의 투명도를 조절합니다
-        disabledSites:
-          title: 비활성화 사이트
-          description: 선택 툴바를 비활성화할 웹사이트를 설정합니다
-          enterUrlPattern: URL 패턴 입력
-          urlPattern: URL 패턴
-      closeMenu:
-        disableForSite: 이 사이트에서 비활성화
-        disableGlobally: 전역 비활성화
-      errors:
-        customActionFailed: 사용자 지정 작업 실패
-        customActionFailedFallback: 사용자 지정 작업 요청에 실패했습니다
-        actionUnavailable: 선택한 작업을 사용할 수 없습니다
-        missingSelection: 선택된 텍스트가 없습니다
-        providerDisabled: 선택한 제공업체가 비활성화되었습니다
-        providerUnavailable: 선택한 제공업체를 사용할 수 없습니다
-      features:
-        provider: 제공업체
+  floatingButton:
+    title: 플로팅 버튼
+    pageDescription: 플로팅 버튼이 놓일 위치와 클릭 동작, 숨길 사이트를 설정하세요.
+    demoImageAlt: 플로팅 버튼 데모
+    enable:
+      title: 플로팅 버튼 활성화
+      description: 웹 페이지에 플로팅 버튼을 표시하여 Read Frog 기능에 빠르게 액세스
+    display:
+      title: 표시
+      side:
+        title: 버튼 위치
+        description: 플로팅 버튼을 페이지 어느 쪽에 고정할지 선택합니다
+        left: 왼쪽
+        right: 오른쪽
+      disabledSites:
+        title: 비활성화 사이트
+        description: 플로팅 버튼을 비활성화할 웹사이트를 설정합니다
+        enterUrlPattern: URL 패턴 입력
+        urlPattern: URL 패턴
+    clickAction:
+      title: 클릭 동작
+      description: 플로팅 버튼을 클릭할 때 실행할 동작 선택
+      panel: 사이드 패널 열기
+      translate: 페이지 번역 전환
+    closeMenu:
+      disableForSite: 이 사이트에서 비활성화
+      disableGlobally: 전역 비활성화
+    tooltips:
+      togglePageTranslation: 페이지 번역 전환
+      floatingButtonOptions: 플로팅 버튼 옵션
+      lockPosition: 위치 잠금
+      unlockPosition: 위치 잠금 해제
+      settings: 설정
+      feedback: 피드백 보내기
+  selectionToolbar:
+    title: 선택 툴바
+    pageDescription: 텍스트를 선택했을 때 나타날 동작과 도구 모음을 표시할 사이트를 설정하세요.
+    demoImageAlt: 선택 툴바 데모
+    enable:
+      title: 선택 툴바 활성화
+      description: 웹 페이지에서 텍스트를 선택할 때 도구 모음을 표시하여 빠르게 번역, 읽기, AI 액션을 사용할 수 있습니다
+    actions:
+      title: 작업
+      translate:
+        title: 번역
+        description: 툴바에 번역 버튼을 표시합니다
+      speak:
+        title: 읽기
+        description: 선택한 텍스트를 읽어 주는 읽기 버튼을 툴바에 표시합니다
+      saveSuggestion:
+        title: 저장 제안
+        description: AI 제공자로 선택 번역 후 Notebase에 저장할 단어를 추천합니다
+        action: 작업
+        actionDescription: 저장 제안을 만드는 작업
+    display:
+      title: 표시
+      opacity:
+        title: 투명도
+        description: 선택 툴바와 여기서 열리는 확장 창의 투명도를 조절합니다
+      disabledSites:
+        title: 비활성화 사이트
+        description: 선택 툴바를 비활성화할 웹사이트를 설정합니다
+        enterUrlPattern: URL 패턴 입력
+        urlPattern: URL 패턴
+    closeMenu:
+      disableForSite: 이 사이트에서 비활성화
+      disableGlobally: 전역 비활성화
+    errors:
+      customActionFailed: 사용자 지정 작업 실패
+      customActionFailedFallback: 사용자 지정 작업 요청에 실패했습니다
+      actionUnavailable: 선택한 작업을 사용할 수 없습니다
+      missingSelection: 선택된 텍스트가 없습니다
+      providerDisabled: 선택한 제공업체가 비활성화되었습니다
+      providerUnavailable: 선택한 제공업체를 사용할 수 없습니다
+    customActions:
+      title: 커스텀 AI 액션
+      pageDescription: 직접 만든 프롬프트를 선택 도구 모음에서 선택한 텍스트에 실행하세요.
+      description: 선택한 텍스트에 대한 구조화된 AI 작업을 직접 추가하세요
+      configTitle: 액션 구성
+      builtIn: 기본 제공
+      add: AI 액션 추가
+      edit: AI 액션 편집
+      empty: 아직 커스텀 AI 액션이 없습니다
+      noEnabledLlmProvider: 커스텀 AI 액션을 만들기 전에 최소 하나의 LLM 제공업체를 활성화하세요
+      form:
+        name: 이름
+        customize: 사용자 지정
+        customizeTooltip: 기본 제공 작업의 프롬프트는 변경할 수 없습니다. 이 버튼을 클릭하여 편집 가능한 복사본을 만들고 프롬프트를 수정하세요.
+        icon: 아이콘
+        iconField:
+          chooseAriaLabel: 아이콘 선택
+          chooseTitle: 아이콘 선택
+          inputPlaceholder: 아이콘 이름 입력
+          helpAriaLabel: 아이콘 도움말 더보기
+          helpTitle: 원하는 아이콘을 못 찾았나요?
+          helpStepBrowsePrefix: ""
+          helpStepBrowseSuffix: 에서 아이콘 찾아보기
+          helpStepCopyPrefix: "예를 들어 "
+          helpStepCopySuffix: " 같은 아이콘 이름을 복사해 입력란에 붙여넣으세요."
+        provider: 제공업체(구조화 출력 지원 필요)
         selectProvider: 제공업체 선택
-        noProviderAvailable: 사용 가능한 제공업체가 없습니다
-        useProviderDefaultModel: 제공업체 기본 모델 사용
-        useCustomModel: 사용자 지정 모델 사용
-        customModel: 사용자 지정 모델
-        model: 모델
-        modelNotAvailableForNonLLM: 모델 설정은 LLM 제공업체에서만 사용할 수 있습니다
-        translate:
-          title: 선택 번역
-          description: 선택 툴바 번역 기능의 제공업체와 모델을 구성합니다
-      customActions:
-        title: 커스텀 AI 액션
-        pageDescription: 직접 만든 프롬프트를 선택 도구 모음에서 선택한 텍스트에 실행하세요.
-        description: 선택한 텍스트에 대한 구조화된 AI 작업을 직접 추가하세요
-        configTitle: 액션 구성
-        builtIn: 기본 제공
-        add: AI 액션 추가
-        edit: AI 액션 편집
-        empty: 아직 커스텀 AI 액션이 없습니다
-        noEnabledLlmProvider: 커스텀 AI 액션을 만들기 전에 최소 하나의 LLM 제공업체를 활성화하세요
-        table:
-          name: 이름
-          provider: 제공업체
-          fields: 필드
-          actions: 작업
-        form:
-          name: 이름
-          customize: 사용자 지정
-          customizeTooltip: 기본 제공 작업의 프롬프트는 변경할 수 없습니다. 이 버튼을 클릭하여 편집 가능한 복사본을 만들고 프롬프트를 수정하세요.
-          icon: 아이콘
-          iconField:
-            chooseAriaLabel: 아이콘 선택
-            chooseTitle: 아이콘 선택
-            inputPlaceholder: 아이콘 이름 입력
-            helpAriaLabel: 아이콘 도움말 더보기
-            helpTitle: 원하는 아이콘을 못 찾았나요?
-            helpStepBrowsePrefix: ""
-            helpStepBrowseSuffix: 에서 아이콘 찾아보기
-            helpStepCopyPrefix: "예를 들어 "
-            helpStepCopySuffix: " 같은 아이콘 이름을 복사해 입력란에 붙여넣으세요."
-          provider: 제공업체(구조화 출력 지원 필요)
-          selectProvider: 제공업체 선택
-          systemPrompt: 시스템 프롬프트
-          prompt: 프롬프트
-          outputSchema: 출력 스키마
-          addField: 필드 추가
-          fieldName: 필드 이름
-          fieldType: 필드 유형
-          fieldDescription: 설명
-          fieldDescriptionPlaceholder: 이 필드에 포함할 내용을 설명하세요...
-          fieldSpeaking: 음성 읽기 사용
-          actions: 작업
-          cancel: 취소
+        systemPrompt: 시스템 프롬프트
+        prompt: 프롬프트
+        outputSchema: 출력 스키마
+        addField: 필드 추가
+        fieldName: 필드 이름
+        fieldType: 필드 유형
+        fieldDescription: 설명
+        fieldDescriptionPlaceholder: 이 필드에 포함할 내용을 설명하세요...
+        fieldSpeaking: 음성 읽기 사용
+        actions: 작업
+        cancel: 취소
+        save: 저장
+        defaultFieldName: 결과
+        fieldNamePlaceholder: 필드명
+        autoFieldPrefix: 필드
+        addFieldDialog:
+          title: 출력 필드 추가
+        editFieldDialog:
+          title: 출력 필드 편집
           save: 저장
-          defaultFieldName: 결과
-          fieldNamePlaceholder: 필드명
-          autoFieldPrefix: 필드
-          addFieldDialog:
-            title: 출력 필드 추가
-          editFieldDialog:
-            title: 출력 필드 편집
-            save: 저장
-          deleteFieldDialog:
-            title: 출력 필드를 삭제하시겠습니까?
-            description: 이 출력 필드가 제거됩니다.
-            confirm: 삭제
-            cancel: 취소
-          notebase:
-            title: Notebase 연결
-            description: 이 액션의 구조화된 결과를 원격 Notebase에 저장합니다.
-            loginRequiredTitle: Notebase를 설정하려면 로그인하세요
-            loginRequiredDescription: notebase를 선택하거나 매핑을 편집하기 전에 readfrog.app에 로그인하세요.
-            loginRequiredConnectedDescription: 이 연결은 아래 계정에서 만들어졌습니다. 같은 계정으로 로그인하면 필드 매핑이 복원됩니다. 다른 계정으로 로그인하면 Notebase를 만들거나 연결할 때 이전 매핑이 지워집니다.
-            loginAction: 로그인
-            connectedAccountLabel: 연결된 계정
-            currentAccountLabel: 현재 계정
-            unknownConnectedAccount: 알 수 없는 계정
-            tableLabel: Notebase
-            tablePlaceholder: notebase 선택
-            tableClearOption: notebase 연결 안 함
-            clearConnectionAction: 연결 지우기
-            refreshAction: 새로고침
-            emptyTitle: 아직 Notebase가 없습니다
-            emptyDescription: readfrog.app에서 notebase를 만든 뒤 여기로 돌아와 필드를 매핑하세요.
-            openNotebaseAction: Notebase 열기
-            accessDeniedTitle: Notebase에 접근할 수 없습니다
-            accessDeniedDescription: 이 계정에는 Notebase 데이터를 불러올 권한이 없습니다.
-            listErrorTitle: Notebase 목록을 불러오지 못했습니다
-            listErrorDescription: 잠시 후 Notebase 목록을 다시 새로고침해 보세요.
-            accountMismatchTitle: Notebase 연결이 다른 계정에 속해 있습니다
-            accountMismatchDescription: 이 연결은 아래 연결된 계정에 묶여 있습니다. 연결을 지우거나 현재 계정에서 사용할 수 있는 Notebase를 선택하세요.
-            tableUnavailableTitle: 선택한 notebase를 더 이상 사용할 수 없습니다
-            tableUnavailableDescription: 이 Notebase가 없거나 열 수 없습니다. 연결을 지우거나 다른 Notebase를 선택하세요.
-            tableUnavailableOption: 사용 불가
-            schemaErrorTitle: notebase 스키마를 불러오지 못했습니다
-            schemaErrorDescription: 잠시 후 다시 새로고침해 보세요.
-            schemaLoading: notebase 스키마를 불러오는 중...
-            mappingsLabel: 필드 매핑
-            mappingsEmpty: 아직 매핑이 없습니다. 필드를 저장할 준비가 되면 추가하세요.
-            addMappingAction: 매핑 추가
-            removeMappingAction: 매핑 제거
-            localFieldLabel: 액션 필드
-            localFieldPlaceholder: 액션 필드 선택
-            remoteFieldLabel: Notebase 필드
-            remoteFieldPlaceholder: notebase 필드 선택
-            columnUnavailableOption: 삭제됨
-            invalidMappingsTitle: 일부 매핑을 확인해야 합니다
-            invalidMappingsDescription: 잘못된 매핑은 유지됩니다. Notebase에 저장하기 전에 수정하세요.
-            mappingMissingLocal: 매핑된 액션 필드가 더 이상 존재하지 않습니다.
-            mappingMissingRemote: 매핑된 notebase 필드가 더 이상 존재하지 않습니다.
-            mappingMissingSchema: 이 매핑을 검증하려면 notebase 스키마를 새로고침하세요.
-            mappingIncompatible: 필드 타입이 더 이상 맞지 않습니다.
-          tokens:
-            selection: 선택한 텍스트 내용
-            paragraphs: 선택 영역과 겹치는 문단 내용을 빈 줄로 이어 붙인 값이며, 사용자 정의 AI 액션에 전달될 때는 앞의 2000자로 잘립니다
-            targetLanguage: 사용자의 대상 언어
-            webTitle: 웹페이지 제목
-            webContent: 현재 페이지에서 추출한 웹페이지 본문(앞의 2000자로 잘린 버전)
-          delete: 삭제
-          deleteDialog:
-            title: 사용자 정의 액션을 삭제하시겠습니까?
-            description: 이 작업은 취소할 수 없습니다.
-            confirm: 삭제
-            cancel: 취소
-        errors:
-          nameRequired: 이름은 필수입니다
-          duplicateName: '중복된 액션 이름 "$1"'
-          invalidIcon: 올바르지 않은 Iconify 아이콘 문자열입니다
-          providerRequired: 활성화된 LLM 제공업체를 선택하세요
-          outputSchemaRequired: 최소 하나의 출력 필드를 추가하세요
-          fieldKeyRequired: 필드 이름은 필수입니다
-          duplicateFieldKey: 필드 이름은 고유해야 합니다
-    contextMenu:
-      title: 컨텍스트 메뉴
-      enable:
-        title: 우클릭 번역 활성화
-        description: 브라우저 우클릭 메뉴에 번역 옵션을 추가하여 페이지나 선택한 텍스트를 빠르게 번역
+        deleteFieldDialog:
+          title: 출력 필드를 삭제하시겠습니까?
+          description: 이 출력 필드가 제거됩니다.
+          confirm: 삭제
+          cancel: 취소
+        notebase:
+          title: Notebase 연결
+          description: 이 액션의 구조화된 결과를 원격 Notebase에 저장합니다.
+          loginRequiredTitle: Notebase를 설정하려면 로그인하세요
+          loginRequiredDescription: notebase를 선택하거나 매핑을 편집하기 전에 readfrog.app에 로그인하세요.
+          loginRequiredConnectedDescription: 이 연결은 아래 계정에서 만들어졌습니다. 같은 계정으로 로그인하면 필드 매핑이 복원됩니다. 다른 계정으로 로그인하면 Notebase를 만들거나 연결할 때 이전 매핑이 지워집니다.
+          loginAction: 로그인
+          connectedAccountLabel: 연결된 계정
+          currentAccountLabel: 현재 계정
+          unknownConnectedAccount: 알 수 없는 계정
+          tableLabel: Notebase
+          tablePlaceholder: notebase 선택
+          tableClearOption: notebase 연결 안 함
+          clearConnectionAction: 연결 지우기
+          refreshAction: 새로고침
+          emptyTitle: 아직 Notebase가 없습니다
+          emptyDescription: readfrog.app에서 notebase를 만든 뒤 여기로 돌아와 필드를 매핑하세요.
+          openNotebaseAction: Notebase 열기
+          accessDeniedTitle: Notebase에 접근할 수 없습니다
+          accessDeniedDescription: 이 계정에는 Notebase 데이터를 불러올 권한이 없습니다.
+          listErrorTitle: Notebase 목록을 불러오지 못했습니다
+          listErrorDescription: 잠시 후 Notebase 목록을 다시 새로고침해 보세요.
+          accountMismatchTitle: Notebase 연결이 다른 계정에 속해 있습니다
+          accountMismatchDescription: 이 연결은 아래 연결된 계정에 묶여 있습니다. 연결을 지우거나 현재 계정에서 사용할 수 있는 Notebase를 선택하세요.
+          tableUnavailableTitle: 선택한 notebase를 더 이상 사용할 수 없습니다
+          tableUnavailableDescription: 이 Notebase가 없거나 열 수 없습니다. 연결을 지우거나 다른 Notebase를 선택하세요.
+          tableUnavailableOption: 사용 불가
+          schemaErrorTitle: notebase 스키마를 불러오지 못했습니다
+          schemaErrorDescription: 잠시 후 다시 새로고침해 보세요.
+          schemaLoading: notebase 스키마를 불러오는 중...
+          mappingsLabel: 필드 매핑
+          mappingsEmpty: 아직 매핑이 없습니다. 필드를 저장할 준비가 되면 추가하세요.
+          addMappingAction: 매핑 추가
+          removeMappingAction: 매핑 제거
+          localFieldLabel: 액션 필드
+          localFieldPlaceholder: 액션 필드 선택
+          remoteFieldLabel: Notebase 필드
+          remoteFieldPlaceholder: notebase 필드 선택
+          columnUnavailableOption: 삭제됨
+          invalidMappingsTitle: 일부 매핑을 확인해야 합니다
+          invalidMappingsDescription: 잘못된 매핑은 유지됩니다. Notebase에 저장하기 전에 수정하세요.
+          mappingMissingLocal: 매핑된 액션 필드가 더 이상 존재하지 않습니다.
+          mappingMissingRemote: 매핑된 notebase 필드가 더 이상 존재하지 않습니다.
+          mappingMissingSchema: 이 매핑을 검증하려면 notebase 스키마를 새로고침하세요.
+          mappingIncompatible: 필드 타입이 더 이상 맞지 않습니다.
+        tokens:
+          selection: 선택한 텍스트 내용
+          paragraphs: 선택 영역과 겹치는 문단 내용을 빈 줄로 이어 붙인 값이며, 사용자 정의 AI 액션에 전달될 때는 앞의 2000자로 잘립니다
+          targetLanguage: 사용자의 대상 언어
+          webTitle: 웹페이지 제목
+          webContent: 현재 페이지에서 추출한 웹페이지 본문(앞의 2000자로 잘린 버전)
+        delete: 삭제
+        deleteDialog:
+          title: 사용자 정의 액션을 삭제하시겠습니까?
+          description: 이 작업은 취소할 수 없습니다.
+          confirm: 삭제
+          cancel: 취소
+      errors:
+        nameRequired: 이름은 필수입니다
+        duplicateName: '중복된 액션 이름 "$1"'
+        invalidIcon: 올바르지 않은 Iconify 아이콘 문자열입니다
+        providerRequired: 활성화된 LLM 제공업체를 선택하세요
+        outputSchemaRequired: 최소 하나의 출력 필드를 추가하세요
+        fieldKeyRequired: 필드 이름은 필수입니다
+        duplicateFieldKey: 필드 이름은 고유해야 합니다
+  contextMenu:
+    title: 컨텍스트 메뉴
+    pageDescription: 브라우저 우클릭 메뉴에 표시되는 Read Frog 항목을 설정하세요.
+    demoImageAlt: 컨텍스트 메뉴 데모
+    enable:
+      title: 우클릭 번역 활성화
+      description: 브라우저 우클릭 메뉴에 번역 옵션을 추가하여 페이지나 선택한 텍스트를 빠르게 번역
   translation:
     title: 페이지 번역
     pageDescription: 페이지 번역 방식을 설정하세요 — 모드, 범위, 프롬프트, 요청 제한.

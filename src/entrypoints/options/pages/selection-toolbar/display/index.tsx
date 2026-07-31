@@ -30,14 +30,12 @@ export function DisplaySection() {
   return (
     <ConfigSection
       id="selection-toolbar-display"
-      title={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.display.title")}
+      title={i18n.t("options.selectionToolbar.display.title")}
     >
       <ConfigItem
         id="selection-toolbar-opacity"
-        title={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.display.opacity.title")}
-        description={i18n.t(
-          "options.floatingButtonAndToolbar.selectionToolbar.display.opacity.description",
-        )}
+        title={i18n.t("options.selectionToolbar.display.opacity.title")}
+        description={i18n.t("options.selectionToolbar.display.opacity.description")}
       >
         <OpacitySlider
           value={selectionToolbar.opacity}
@@ -49,23 +47,15 @@ export function DisplaySection() {
       <ConfigItem
         id="selection-toolbar-disabled-sites"
         orientation="vertical"
-        title={i18n.t(
-          "options.floatingButtonAndToolbar.selectionToolbar.display.disabledSites.title",
-        )}
-        description={i18n.t(
-          "options.floatingButtonAndToolbar.selectionToolbar.display.disabledSites.description",
-        )}
+        title={i18n.t("options.selectionToolbar.display.disabledSites.title")}
+        description={i18n.t("options.selectionToolbar.display.disabledSites.description")}
       >
         <PatternsTable
           patterns={disabledSelectionToolbarPatterns}
           onAddPattern={addPattern}
           onRemovePattern={removePattern}
-          placeholderText={i18n.t(
-            "options.floatingButtonAndToolbar.selectionToolbar.display.disabledSites.enterUrlPattern",
-          )}
-          tableHeaderText={i18n.t(
-            "options.floatingButtonAndToolbar.selectionToolbar.display.disabledSites.urlPattern",
-          )}
+          placeholderText={i18n.t("options.selectionToolbar.display.disabledSites.enterUrlPattern")}
+          tableHeaderText={i18n.t("options.selectionToolbar.display.disabledSites.urlPattern")}
         />
       </ConfigItem>
     </ConfigSection>

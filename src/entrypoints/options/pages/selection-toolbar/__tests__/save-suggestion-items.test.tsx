@@ -139,7 +139,7 @@ describe("SaveSuggestionItems", () => {
     ])
 
     const selector = screen.getByRole("combobox", {
-      name: "options.floatingButtonAndToolbar.selectionToolbar.actions.saveSuggestion.action",
+      name: "options.selectionToolbar.actions.saveSuggestion.action",
     })
     expect(selector).toHaveTextContent(disabledAction.name)
     expect(selector).toBeEnabled()
@@ -165,7 +165,7 @@ describe("SaveSuggestionItems", () => {
 
     expect(
       screen.getByRole("combobox", {
-        name: "options.floatingButtonAndToolbar.selectionToolbar.actions.saveSuggestion.action",
+        name: "options.selectionToolbar.actions.saveSuggestion.action",
       }),
     ).toHaveTextContent(getBuiltInDictionaryAction(selectionToolbar).name)
     expect(setSelectionToolbarMock).not.toHaveBeenCalled()

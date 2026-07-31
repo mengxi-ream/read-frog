@@ -14,8 +14,8 @@ export function EnableItem() {
   return (
     <ConfigItem
       id="floating-button-toggle"
-      title={i18n.t("options.floatingButtonAndToolbar.floatingButton.enable.title")}
-      description={i18n.t("options.floatingButtonAndToolbar.floatingButton.enable.description")}
+      title={i18n.t("options.floatingButton.enable.title")}
+      description={i18n.t("options.floatingButton.enable.description")}
     >
       <Switch
         checked={floatingButton.enabled}

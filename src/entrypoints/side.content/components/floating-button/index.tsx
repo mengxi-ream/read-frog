@@ -436,7 +436,7 @@ export default function FloatingButton() {
           side={floatingButtonSide}
           expanded={isFloatingButtonExpanded}
           icon={<IconSettings className="h-5 w-5" />}
-          label={i18n.t("options.floatingButtonAndToolbar.floatingButton.tooltips.settings")}
+          label={i18n.t("options.floatingButton.tooltips.settings")}
           onClick={() => {
             void sendMessage("openOptionsPage", undefined)
           }}
@@ -447,7 +447,7 @@ export default function FloatingButton() {
           side={floatingButtonSide}
           expanded={isFloatingButtonExpanded}
           icon={<IconMessageCircle className="h-5 w-5" />}
-          label={i18n.t("options.floatingButtonAndToolbar.floatingButton.tooltips.feedback")}
+          label={i18n.t("options.floatingButton.tooltips.feedback")}
           onClick={handleFeedbackClick}
         />
       )}
@@ -498,9 +498,7 @@ function FloatingButtonCloseMenu({
         render={
           <button
             type="button"
-            aria-label={i18n.t(
-              "options.floatingButtonAndToolbar.floatingButton.tooltips.floatingButtonOptions",
-            )}
+            aria-label={i18n.t("options.floatingButton.tooltips.floatingButtonOptions")}
             className={cn(
               floatingButtonControlClassName,
               "-top-1",
@@ -520,10 +518,10 @@ function FloatingButtonCloseMenu({
         className="z-2147483647 w-fit! whitespace-nowrap"
       >
         <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()} onClick={handleDisableForSite}>
-          {i18n.t("options.floatingButtonAndToolbar.floatingButton.closeMenu.disableForSite")}
+          {i18n.t("options.floatingButton.closeMenu.disableForSite")}
         </DropdownMenuItem>
         <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()} onClick={handleDisableGlobally}>
-          {i18n.t("options.floatingButtonAndToolbar.floatingButton.closeMenu.disableGlobally")}
+          {i18n.t("options.floatingButton.closeMenu.disableGlobally")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -547,8 +545,8 @@ function FloatingButtonLockControl({ expanded, side }: FloatingButtonLockControl
     void setFloatingButton({ ...floatingButton, locked: !locked })
   }
   const label = locked
-    ? i18n.t("options.floatingButtonAndToolbar.floatingButton.tooltips.unlockPosition")
-    : i18n.t("options.floatingButtonAndToolbar.floatingButton.tooltips.lockPosition")
+    ? i18n.t("options.floatingButton.tooltips.unlockPosition")
+    : i18n.t("options.floatingButton.tooltips.lockPosition")
 
   return (
     <button

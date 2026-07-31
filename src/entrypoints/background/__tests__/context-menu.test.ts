@@ -60,8 +60,7 @@ describe("background context menu", () => {
           "contextMenu.translateSelection": 'Translate "%s"',
           "contextMenu.readAloudSelection": 'Read aloud "%s"',
           "contextMenu.showOriginal": "Show Original",
-          "options.floatingButtonAndToolbar.selectionToolbar.customActions.templates.dictionary.name":
-            "Dictionary",
+          "options.selectionToolbar.customActions.templates.dictionary.name": "Dictionary",
         })[key] ?? key,
     ) as typeof i18n.t
   })

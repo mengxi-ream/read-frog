@@ -14,8 +14,8 @@ export function EnableItem() {
   return (
     <ConfigItem
       id="selection-toolbar-toggle"
-      title={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.enable.title")}
-      description={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.enable.description")}
+      title={i18n.t("options.selectionToolbar.enable.title")}
+      description={i18n.t("options.selectionToolbar.enable.description")}
     >
       <Switch
         checked={selectionToolbar.enabled}
