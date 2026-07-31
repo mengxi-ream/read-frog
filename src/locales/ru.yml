@@ -108,7 +108,7 @@ options:
       description: Свяжитесь с командой напрямую по адресу contact@readfrog.app
     wechat:
       title: WeChat
-      description: Отсканируйте QR-код, чтобы добавить разработчика в WeChat
+      description: Отсканируйте QR-код, чтобы вступить в группу обсуждения в WeChat
       qrCodeAlt: QR-код WeChat
   apiProviders:
     title: API-провайдеры

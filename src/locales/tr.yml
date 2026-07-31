@@ -108,7 +108,7 @@ options:
       description: Ekibe doğrudan contact@readfrog.app adresinden ulaşın
     wechat:
       title: WeChat
-      description: Geliştiriciyi WeChat üzerinde eklemek için QR kodu tarayın
+      description: WeChat tartışma grubuna katılmak için QR kodu tarayın
       qrCodeAlt: WeChat QR kodu
   apiProviders:
     title: API Sağlayıcıları

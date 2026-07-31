@@ -108,7 +108,7 @@ options:
       description: Liên hệ trực tiếp với nhóm qua contact@readfrog.app
     wechat:
       title: WeChat
-      description: Quét mã QR để thêm nhà phát triển trên WeChat
+      description: Quét mã QR để tham gia nhóm thảo luận trên WeChat
       qrCodeAlt: Mã QR WeChat
   apiProviders:
     title: Nhà cung cấp API

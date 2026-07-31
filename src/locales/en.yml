@@ -108,7 +108,7 @@ options:
       description: Reach the team directly at contact@readfrog.app
     wechat:
       title: WeChat
-      description: Scan the QR code to add the maintainer on WeChat
+      description: Scan the QR code to join the WeChat discussion group
       qrCodeAlt: WeChat QR code
   apiProviders:
     title: API Providers

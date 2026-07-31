@@ -108,7 +108,7 @@ options:
       description: contact@readfrog.app からチームに直接連絡できます
     wechat:
       title: WeChat
-      description: QR コードをスキャンして開発者を WeChat に追加
+      description: QR コードをスキャンして WeChat のディスカッショングループに参加
       qrCodeAlt: WeChat QR コード
   apiProviders:
     title: APIプロバイダー

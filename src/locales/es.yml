@@ -108,7 +108,7 @@ options:
       description: Contacta directamente con el equipo en contact@readfrog.app
     wechat:
       title: WeChat
-      description: Escanea el código QR para añadir al desarrollador en WeChat
+      description: Escanea el código QR para unirte al grupo de discusión de WeChat
       qrCodeAlt: Código QR de WeChat
   apiProviders:
     title: Proveedores de API
