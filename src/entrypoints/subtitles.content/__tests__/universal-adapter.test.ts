@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { SUBTITLES_SOURCE } from "@/utils/constants/subtitles"
-import { adPlayingAtom, currentTimeMsAtom, sourceTrackAtom, subtitlesStore } from "../atoms"
+import {
+  adPlayingAtom,
+  currentTimeMsAtom,
+  sourceTrackAtom,
+  subtitlesSourceAtom,
+  subtitlesStore,
+} from "../atoms"
 import { TranslationCoordinator } from "../translation-coordinator"
 import { UniversalVideoAdapter } from "../universal-adapter"
 

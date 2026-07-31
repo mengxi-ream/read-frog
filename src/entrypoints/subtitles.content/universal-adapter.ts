@@ -752,6 +752,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
         getSourceLanguage: () => this.fetcher.getSourceLanguage(),
         preSegmented: this.fetcher.isPreSegmented?.(),
         onChunkSegmented: (chunk, nextFragments) => {
+          if (chunk.length === 0 || !chunk[0]) return
           const chunkStart = chunk[0].start
           const chunkEnd = chunk.at(-1)!.end
           this.replaceSourceTrackWindow(chunkStart, chunkEnd, nextFragments)

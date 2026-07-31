@@ -1,5 +1,6 @@
 import type { SubtitleTextStyle } from "@/types/config/subtitles"
 import { useAtomValue } from "jotai"
+import { useEffect, useRef } from "react"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { SUBTITLE_FONT_FAMILIES } from "@/utils/constants/subtitles"
 import { getLanguageDirectionAndLang } from "@/utils/content/language-direction"
@@ -45,6 +46,19 @@ export function TranslationSubtitle({ content, className }: SubtitleLineProps) {
   const text = content ?? subtitle?.translation ?? ""
   const { dir, lang } = getLanguageDirectionAndLang(language.targetCode)
   const textStyles = getTextStyles(style.translation)
+  const lastFrameRef = useRef<{ start?: number; pending: boolean }>({
+    start: undefined,
+    pending: false,
+  })
+  const justResolved =
+    !pending &&
+    !!text &&
+    lastFrameRef.current.pending &&
+    lastFrameRef.current.start === subtitle?.start
+
+  useEffect(() => {
+    lastFrameRef.current = { start: subtitle?.start, pending }
+  })
 
   if (pending) {
     return (
@@ -70,9 +84,9 @@ export function TranslationSubtitle({ content, className }: SubtitleLineProps) {
 
   return (
     <div
-      key={subtitle?.start}
       className={cn(
-        "subtitles-translation animate-subtitle-fade-in text-xl leading-tight",
+        "subtitles-translation text-xl leading-tight",
+        justResolved && "animate-subtitle-fade-in",
         className,
       )}
       style={textStyles}

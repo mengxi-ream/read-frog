@@ -101,7 +101,8 @@ describe("translation coordinator loading state", () => {
     expect(spy).toHaveBeenCalledTimes(1)
 
     coordinator.stop()
-    const batch = spy.mock.calls[0][0] as Array<{ text: string; start: number; end: number }>
+    const firstCall = spy.mock.calls[0]!
+    const batch = firstCall[0] as Array<{ text: string; start: number; end: number }>
     resolveTranslate(batch.map((f) => ({ ...f, translation: `t:${f.text}` })))
     await Promise.resolve()
     await Promise.resolve()
@@ -184,13 +185,13 @@ describe("translation coordinator loading state", () => {
     expect(spy).toHaveBeenCalledTimes(2)
 
     // Stale first-run result.
-    resolvers[0]([{ text: "a", start: 0, end: 1000, translation: "STALE" }])
+    resolvers[0]!([{ text: "a", start: 0, end: 1000, translation: "STALE" }])
     await Promise.resolve()
     await Promise.resolve()
     expect(onTranslated).not.toHaveBeenCalled()
 
     // Current-run result.
-    resolvers[1]([{ text: "a", start: 0, end: 1000, translation: "FRESH" }])
+    resolvers[1]!([{ text: "a", start: 0, end: 1000, translation: "FRESH" }])
     await Promise.resolve()
     await Promise.resolve()
     expect(onTranslated).toHaveBeenCalledWith([expect.objectContaining({ translation: "FRESH" })])

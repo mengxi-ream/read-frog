@@ -121,6 +121,7 @@ export class SubtitlesScheduler {
       next.length === this.subtitles.length &&
       next.every((fragment, index) => {
         const prev = this.subtitles[index]
+        if (!prev) return false
         return (
           prev.start === fragment.start &&
           prev.end === fragment.end &&
