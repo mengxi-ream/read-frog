@@ -13,6 +13,7 @@ import { AI_SDK_REASONING_VALUES, LLM_PROVIDER_MODELS } from "./constants"
 import {
   azureProviderSpecificSettingsSchema,
   bedrockProviderSpecificSettingsSchema,
+  customProviderSpecificSettingsSchema,
 } from "./provider-specific-settings"
 
 export const providerSponsorConfigSchema = z.object({
@@ -79,6 +80,7 @@ const llmProviderConfigSchemaList = [
   baseCustomLLMProviderConfigSchema.extend({
     provider: z.literal("openai-compatible"),
     model: createProviderModelSchema<"openai-compatible">("openai-compatible"),
+    providerSpecificSettings: customProviderSpecificSettingsSchema.optional(),
   }),
   baseCustomLLMProviderConfigSchema.extend({
     provider: z.literal("openrouter"),

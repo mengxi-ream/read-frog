@@ -1,9 +1,13 @@
 import type { LLMProviderTypes } from "./constants"
 import { z } from "zod"
 
-export const AZURE_API_MODES = ["responses", "chat"] as const
-export type AzureApiMode = (typeof AZURE_API_MODES)[number]
+export const API_MODES = ["responses", "chat"] as const
+export type ApiMode = (typeof API_MODES)[number]
+
+export const AZURE_API_MODES = API_MODES
+export type AzureApiMode = ApiMode
 export const DEFAULT_AZURE_API_MODE: AzureApiMode = "responses"
+export const DEFAULT_CUSTOM_API_MODE: ApiMode = "chat"
 
 interface ProviderSettingBaseUiMeta {
   labelKey: string
@@ -47,6 +51,23 @@ export const bedrockProviderSpecificSettingsSchema = z.strictObject({
         labelKey: "region",
         type: "text",
         placeholder: "us-east-1",
+      },
+    }),
+})
+
+export const customProviderSpecificSettingsSchema = z.strictObject({
+  apiMode: z
+    .enum(API_MODES)
+    .optional()
+    .meta({
+      providerSettingUi: {
+        labelKey: "apiMode",
+        type: "select",
+        defaultValue: DEFAULT_CUSTOM_API_MODE,
+        options: [
+          { value: "responses", labelKey: "responses" },
+          { value: "chat", labelKey: "chatCompletions" },
+        ],
       },
     }),
 })
@@ -95,6 +116,7 @@ export const PROVIDER_SPECIFIC_SETTINGS_SCHEMAS: Partial<
 > = {
   azure: azureProviderSpecificSettingsSchema,
   bedrock: bedrockProviderSpecificSettingsSchema,
+  "openai-compatible": customProviderSpecificSettingsSchema,
 }
 
 export function getProviderSpecificSettingFields(

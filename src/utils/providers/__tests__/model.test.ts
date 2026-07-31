@@ -9,16 +9,19 @@ const {
   azureChatModelMock,
   azureLanguageModelMock,
   openAICompatibleLanguageModelMock,
+  openResponsesLanguageModelMock,
   ollamaLanguageModelMock,
   createAnthropicMock,
   createAzureMock,
   createOllamaMock,
   createOpenAICompatibleMock,
+  createOpenResponsesMock,
 } = vi.hoisted(() => {
   const innerAnthropicLanguageModelMock = vi.fn<(...args: any[]) => any>()
   const innerAzureChatModelMock = vi.fn<(...args: any[]) => any>()
   const innerAzureLanguageModelMock = vi.fn<(...args: any[]) => any>()
   const innerOpenAICompatibleLanguageModelMock = vi.fn<(...args: any[]) => any>()
+  const innerOpenResponsesLanguageModelMock = vi.fn<(...args: any[]) => any>()
   const innerOllamaLanguageModelMock = vi.fn<(...args: any[]) => any>()
   const innerCreateAnthropicMock = vi.fn<(...args: any[]) => any>(
     (_options?: Record<string, unknown>) => ({
@@ -36,6 +39,11 @@ const {
       languageModel: innerOpenAICompatibleLanguageModelMock,
     }),
   )
+  const innerCreateOpenResponsesMock = vi.fn<(...args: any[]) => any>(
+    (_options?: Record<string, unknown>) => ({
+      languageModel: innerOpenResponsesLanguageModelMock,
+    }),
+  )
   const innerCreateOllamaMock = vi.fn<(...args: any[]) => any>(
     (_options?: Record<string, unknown>) => ({
       languageModel: innerOllamaLanguageModelMock,
@@ -47,11 +55,13 @@ const {
     azureChatModelMock: innerAzureChatModelMock,
     azureLanguageModelMock: innerAzureLanguageModelMock,
     openAICompatibleLanguageModelMock: innerOpenAICompatibleLanguageModelMock,
+    openResponsesLanguageModelMock: innerOpenResponsesLanguageModelMock,
     ollamaLanguageModelMock: innerOllamaLanguageModelMock,
     createAnthropicMock: innerCreateAnthropicMock,
     createAzureMock: innerCreateAzureMock,
     createOllamaMock: innerCreateOllamaMock,
     createOpenAICompatibleMock: innerCreateOpenAICompatibleMock,
+    createOpenResponsesMock: innerCreateOpenResponsesMock,
   }
 })
 
@@ -65,6 +75,10 @@ vi.mock("@ai-sdk/azure", () => ({
 
 vi.mock("@ai-sdk/openai-compatible", () => ({
   createOpenAICompatible: createOpenAICompatibleMock,
+}))
+
+vi.mock("@ai-sdk/open-responses", () => ({
+  createOpenResponses: createOpenResponsesMock,
 }))
 
 vi.mock("ai-sdk-ollama", () => ({
@@ -127,6 +141,7 @@ describe("getModelById", () => {
     azureChatModelMock.mockReturnValue("azure-chat-model")
     azureLanguageModelMock.mockReturnValue("azure-model")
     openAICompatibleLanguageModelMock.mockReturnValue("custom-model")
+    openResponsesLanguageModelMock.mockReturnValue("custom-responses-model")
     ollamaLanguageModelMock.mockReturnValue("ollama-model")
     getStorageItemMock = vi.fn<(...args: any[]) => any>()
     ;(storage.getItem as unknown as ReturnType<typeof vi.fn>) = getStorageItemMock
@@ -232,6 +247,7 @@ describe("getModelById", () => {
     expect(createAzureMock.mock.calls[0]?.[0]).not.toHaveProperty("region")
     expect(azureLanguageModelMock).toHaveBeenCalledWith("read-frog-gpt-4o")
     expect(azureChatModelMock).not.toHaveBeenCalled()
+    expect(createOpenResponsesMock).not.toHaveBeenCalled()
   })
 
   it("uses Azure chat completions when API mode is chat", async () => {
@@ -274,6 +290,7 @@ describe("getModelById", () => {
     expect(createAzureMock.mock.calls[0]?.[0]).not.toHaveProperty("region")
     expect(azureChatModelMock).toHaveBeenCalledWith("read-frog-gpt-4o")
     expect(azureLanguageModelMock).not.toHaveBeenCalled()
+    expect(createOpenResponsesMock).not.toHaveBeenCalled()
   })
 
   it("uses user headers as a full override for Anthropic", async () => {
@@ -304,7 +321,119 @@ describe("getModelById", () => {
     expect(createAnthropicMock.mock.calls[0]?.[0]).not.toHaveProperty("headers")
   })
 
-  it("passes custom headers for OpenAI-compatible providers", async () => {
+  it("uses the Responses API for an OpenAI-compatible provider in responses mode", async () => {
+    getStorageItemMock.mockResolvedValue({
+      providersConfig: [
+        {
+          id: "custom-openai",
+          name: "Custom Provider",
+          enabled: true,
+          provider: "openai-compatible",
+          apiKey: "custom-key",
+          baseURL: " https://api.example.com/v1/ ",
+          model: {
+            model: "use-custom-model",
+            isCustomModel: true,
+            customModel: "custom-responses-model-id",
+          },
+          providerSpecificSettings: {
+            apiMode: "responses",
+          },
+          headers: {
+            "HTTP-Referer": "https://example.com",
+            "X-Title": "Read Frog",
+          },
+        },
+      ],
+    })
+
+    const { getModelById } = await import("../model")
+    const result = await getModelById("custom-openai")
+
+    expect(result).toBe("custom-responses-model")
+    expect(createOpenResponsesMock).toHaveBeenCalledWith({
+      name: "openai-compatible",
+      url: "https://api.example.com/v1/responses",
+      apiKey: "custom-key",
+      headers: {
+        "HTTP-Referer": "https://example.com",
+        "X-Title": "Read Frog",
+      },
+    })
+    expect(openResponsesLanguageModelMock).toHaveBeenCalledWith("custom-responses-model-id")
+    expect(createOpenAICompatibleMock).not.toHaveBeenCalled()
+  })
+
+  it("uses Chat Completions for an OpenAI-compatible provider in chat mode", async () => {
+    getStorageItemMock.mockResolvedValue({
+      providersConfig: [
+        {
+          id: "custom-openai",
+          name: "Custom Provider",
+          enabled: true,
+          provider: "openai-compatible",
+          apiKey: "custom-key",
+          baseURL: "https://api.example.com/v1",
+          model: {
+            model: "use-custom-model",
+            isCustomModel: true,
+            customModel: "custom-chat-model-id",
+          },
+          providerSpecificSettings: {
+            apiMode: "chat",
+          },
+        },
+      ],
+    })
+
+    const { getModelById } = await import("../model")
+    const result = await getModelById("custom-openai")
+
+    expect(result).toBe("custom-model")
+    expect(createOpenAICompatibleMock).toHaveBeenCalledWith({
+      name: "openai-compatible",
+      baseURL: "https://api.example.com/v1",
+      supportsStructuredOutputs: true,
+      apiKey: "custom-key",
+    })
+    expect(createOpenAICompatibleMock.mock.calls[0]?.[0]).not.toHaveProperty("apiMode")
+    expect(openAICompatibleLanguageModelMock).toHaveBeenCalledWith("custom-chat-model-id")
+    expect(createOpenResponsesMock).not.toHaveBeenCalled()
+  })
+
+  it("falls back to Chat Completions for an unknown OpenAI-compatible API mode", async () => {
+    getStorageItemMock.mockResolvedValue({
+      providersConfig: [
+        {
+          id: "custom-openai",
+          name: "Custom Provider",
+          enabled: true,
+          provider: "openai-compatible",
+          baseURL: "https://api.example.com/v1",
+          model: {
+            model: "use-custom-model",
+            isCustomModel: true,
+            customModel: "custom-chat-model-id",
+          },
+          providerSpecificSettings: {
+            apiMode: "unknown",
+          },
+        },
+      ],
+    })
+
+    const { getModelById } = await import("../model")
+    await getModelById("custom-openai")
+
+    expect(createOpenAICompatibleMock).toHaveBeenCalledWith({
+      name: "openai-compatible",
+      baseURL: "https://api.example.com/v1",
+      supportsStructuredOutputs: true,
+    })
+    expect(createOpenResponsesMock).not.toHaveBeenCalled()
+  })
+
+  it("keeps legacy OpenAI-compatible configs on Chat Completions", async () => {
     getStorageItemMock.mockResolvedValue({
       providersConfig: [
         {
@@ -331,19 +460,19 @@ describe("getModelById", () => {
     const result = await getModelById("custom-openai")
 
     expect(result).toBe("custom-model")
-    expect(createOpenAICompatibleMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: "openai-compatible",
-        baseURL: "http://127.0.0.1:1234/v1",
-        apiKey: "custom-key",
-        headers: {
-          "HTTP-Referer": "https://example.com",
-          "X-Title": "Read Frog",
-        },
-      }),
-    )
+    expect(createOpenAICompatibleMock).toHaveBeenCalledWith({
+      name: "openai-compatible",
+      baseURL: "http://127.0.0.1:1234/v1",
+      supportsStructuredOutputs: true,
+      apiKey: "custom-key",
+      headers: {
+        "HTTP-Referer": "https://example.com",
+        "X-Title": "Read Frog",
+      },
+    })
     expect(openAICompatibleLanguageModelMock).toHaveBeenCalledWith(
       "huihui-hy-mt1.5-1.8b-abliterated",
     )
+    expect(createOpenResponsesMock).not.toHaveBeenCalled()
   })
 })

@@ -106,6 +106,50 @@ describe("providerSpecificSettingsField", () => {
     )
   })
 
+  it("renders Chat Completions by default for Custom Provider and persists Responses API", async () => {
+    render(
+      <ProviderSpecificSettingsFieldHarness
+        initialConfig={DEFAULT_PROVIDER_CONFIG["openai-compatible"]}
+      />,
+    )
+
+    const apiModeSelect = screen.getByLabelText(
+      "options.apiProviders.form.providerSettingLabels.apiMode",
+    )
+    expect(apiModeSelect).toHaveTextContent(
+      "options.apiProviders.form.providerSettingOptionLabels.chatCompletions",
+    )
+
+    fireEvent.click(apiModeSelect)
+    const responsesOption = screen.getByRole("option", {
+      name: "options.apiProviders.form.providerSettingOptionLabels.responses",
+    })
+    fireEvent.pointerDown(responsesOption, { pointerType: "mouse" })
+    fireEvent.click(responsesOption)
+
+    await act(async () => {
+      vi.advanceTimersByTime(500)
+      await Promise.resolve()
+    })
+
+    expect(screen.getByLabelText("persisted-provider-specific-settings")).toHaveTextContent(
+      '{"apiMode":"responses"}',
+    )
+  })
+
+  it.each(["openrouter", "siliconflow", "atlascloud", "minimax", "tensdaq", "volcengine"] as const)(
+    "does not render API mode for %s",
+    (provider) => {
+      render(
+        <ProviderSpecificSettingsFieldHarness initialConfig={DEFAULT_PROVIDER_CONFIG[provider]} />,
+      )
+
+      expect(
+        screen.queryByLabelText("options.apiProviders.form.providerSettingLabels.apiMode"),
+      ).not.toBeInTheDocument()
+    },
+  )
+
   it("does not render or write settings for providers without provider-specific schemas", async () => {
     render(<ProviderSpecificSettingsFieldHarness initialConfig={DEFAULT_PROVIDER_CONFIG.openai} />)
 

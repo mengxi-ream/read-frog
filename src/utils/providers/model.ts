@@ -1,5 +1,5 @@
 import type { Config } from "@/types/config/config"
-import type { AzureApiMode, LLMProviderConfig } from "@/types/config/provider"
+import type { ApiMode, LLMProviderConfig } from "@/types/config/provider"
 import { createAlibaba } from "@ai-sdk/alibaba"
 import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock"
 import { createAnthropic } from "@ai-sdk/anthropic"
@@ -14,6 +14,7 @@ import { createGroq } from "@ai-sdk/groq"
 import { createHuggingFace } from "@ai-sdk/huggingface"
 import { createMistral } from "@ai-sdk/mistral"
 import { createMoonshotAI } from "@ai-sdk/moonshotai"
+import { createOpenResponses } from "@ai-sdk/open-responses"
 import { createOpenAI } from "@ai-sdk/openai"
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible"
 import { createPerplexity } from "@ai-sdk/perplexity"
@@ -23,12 +24,17 @@ import { createVercel } from "@ai-sdk/vercel"
 import { createXai } from "@ai-sdk/xai"
 import { createOllama } from "ai-sdk-ollama"
 import { storage } from "#imports"
-import { DEFAULT_AZURE_API_MODE, isCustomLLMProvider } from "@/types/config/provider"
+import {
+  DEFAULT_AZURE_API_MODE,
+  DEFAULT_CUSTOM_API_MODE,
+  isCustomLLMProvider,
+} from "@/types/config/provider"
 import { compactObject } from "@/types/utils"
 import { getLLMProvidersConfig, getProviderConfigById } from "../config/helpers"
 import { CONFIG_STORAGE_KEY } from "../constants/config"
 import { getProviderHeadersWithOverride } from "./headers"
 import { resolveModelId } from "./model-id"
+import { resolveResponsesUrl } from "./responses-url"
 
 const CREATE_AI_MAPPER = {
   atlascloud: createOpenAICompatible,
@@ -67,22 +73,22 @@ function getProviderSpecificSettings(providerConfig: LLMProviderConfig) {
       ? compactObject(providerConfig.providerSpecificSettings ?? {})
       : {}
 
-  if (providerConfig.provider !== "azure") {
+  if (providerConfig.provider !== "azure" && providerConfig.provider !== "openai-compatible") {
     return settings
   }
 
-  const { apiMode: _apiMode, ...azureSettings } = settings as Record<string, unknown>
-  return azureSettings
+  const { apiMode: _apiMode, ...providerSettings } = settings as Record<string, unknown>
+  return providerSettings
 }
 
-function getAzureApiMode(providerConfig: LLMProviderConfig): AzureApiMode {
-  if (providerConfig.provider !== "azure") {
-    return DEFAULT_AZURE_API_MODE
-  }
-
+function getApiMode(
+  providerConfig: Extract<LLMProviderConfig, { provider: "azure" | "openai-compatible" }>,
+): ApiMode {
+  const defaultApiMode =
+    providerConfig.provider === "azure" ? DEFAULT_AZURE_API_MODE : DEFAULT_CUSTOM_API_MODE
   const apiMode = (providerConfig.providerSpecificSettings as { apiMode?: unknown } | undefined)
     ?.apiMode
-  return apiMode === "chat" ? "chat" : DEFAULT_AZURE_API_MODE
+  return apiMode === "chat" || apiMode === "responses" ? apiMode : defaultApiMode
 }
 
 async function getLanguageModelById(providerId: string) {
@@ -100,21 +106,29 @@ async function getLanguageModelById(providerId: string) {
   const headers = getProviderHeadersWithOverride(providerConfig.provider, providerConfig.headers)
   const providerSpecificSettings = getProviderSpecificSettings(providerConfig)
 
-  const provider = isCustomLLMProvider(providerConfig.provider)
-    ? CREATE_AI_MAPPER[providerConfig.provider]({
-        ...providerSpecificSettings,
-        name: providerConfig.provider,
-        baseURL: providerConfig.baseURL ?? "",
-        supportsStructuredOutputs: true,
-        ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
-        ...(headers && { headers }),
-      })
-    : CREATE_AI_MAPPER[providerConfig.provider]({
-        ...providerSpecificSettings,
-        ...(providerConfig.baseURL && { baseURL: providerConfig.baseURL }),
-        ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
-        ...(headers && { headers }),
-      })
+  const provider =
+    providerConfig.provider === "openai-compatible" && getApiMode(providerConfig) === "responses"
+      ? createOpenResponses({
+          name: providerConfig.provider,
+          url: resolveResponsesUrl(providerConfig.baseURL),
+          ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
+          ...(headers && { headers }),
+        })
+      : isCustomLLMProvider(providerConfig.provider)
+        ? CREATE_AI_MAPPER[providerConfig.provider]({
+            ...providerSpecificSettings,
+            name: providerConfig.provider,
+            baseURL: providerConfig.baseURL ?? "",
+            supportsStructuredOutputs: true,
+            ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
+            ...(headers && { headers }),
+          })
+        : CREATE_AI_MAPPER[providerConfig.provider]({
+            ...providerSpecificSettings,
+            ...(providerConfig.baseURL && { baseURL: providerConfig.baseURL }),
+            ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
+            ...(headers && { headers }),
+          })
 
   const modelId = resolveModelId(providerConfig.model)
 
@@ -122,7 +136,7 @@ async function getLanguageModelById(providerId: string) {
     throw new Error("Model is undefined")
   }
 
-  if (providerConfig.provider === "azure" && getAzureApiMode(providerConfig) === "chat") {
+  if (providerConfig.provider === "azure" && getApiMode(providerConfig) === "chat") {
     return (provider as ReturnType<typeof createAzure>).chat(modelId)
   }
 
