@@ -53,6 +53,17 @@ export function SettingsNav() {
 
           <SidebarMenuItem>
             <SidebarMenuButton
+              render={<Link to="/shortcuts" />}
+              isActive={pathname === "/shortcuts"}
+              tooltip={i18n.t("options.shortcuts.title")}
+            >
+              <Icon icon="tabler:command" />
+              <span>{i18n.t("options.shortcuts.title")}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
               render={<Link to="/custom-actions" />}
               isActive={pathname === "/custom-actions"}
               tooltip={i18n.t(

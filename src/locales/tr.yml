@@ -391,6 +391,21 @@ options:
         title: Kullanıcı deneyimini geliştirmemize yardımcı ol
         tooltip: Açık olduğunda Read Frog, hataları yakalamak, özelliklerin güvenilir çalıştığını doğrulamak, performansı ve UX ayrıntılarını iyileştirmek ve sıradaki önceliklerimizi belirlemek için anonim kullanım sinyalleri gönderir.
         description: Hataları bulmamıza, arayüzü iyileştirmemize ve daha fazlasına yardım ederek Read Frog'u geliştirin
+  shortcuts:
+    title: Kısayollar
+    pageDescription: Okurken çeviriyi başlatan tuşları belirleyin.
+    pageTranslation:
+      title: Sayfa çevirisi
+      description: Sayfanın tamamını çevirir.
+    translationMode:
+      title: Çeviri modu
+      description: İki dilli ve yalnızca çeviri arasında geçiş yapar.
+    selectionTranslation:
+      title: Seçim çevirisi
+      description: Seçtiğiniz metni çevirir.
+    nodeTranslation:
+      title: Paragraf çevirisi
+      description: Bir paragrafın üzerine gelin veya uzun basın; yalnızca o paragraf çevrilir.
   overlayTools:
     title: Kaplama Araçları
     floatingButton:

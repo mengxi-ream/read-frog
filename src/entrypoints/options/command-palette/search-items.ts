@@ -94,6 +94,36 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.preference.title",
   },
 
+  // Shortcuts page
+  {
+    sectionId: "page-translation-shortcut",
+    route: "/shortcuts",
+    titleKey: "options.shortcuts.pageTranslation.title",
+    descriptionKey: "options.shortcuts.pageTranslation.description",
+    pageKey: "options.shortcuts.title",
+  },
+  {
+    sectionId: "translation-mode-shortcut",
+    route: "/shortcuts",
+    titleKey: "options.shortcuts.translationMode.title",
+    descriptionKey: "options.shortcuts.translationMode.description",
+    pageKey: "options.shortcuts.title",
+  },
+  {
+    sectionId: "selection-translation-shortcut",
+    route: "/shortcuts",
+    titleKey: "options.shortcuts.selectionTranslation.title",
+    descriptionKey: "options.shortcuts.selectionTranslation.description",
+    pageKey: "options.shortcuts.title",
+  },
+  {
+    sectionId: "node-translation-hotkey",
+    route: "/shortcuts",
+    titleKey: "options.shortcuts.nodeTranslation.title",
+    descriptionKey: "options.shortcuts.nodeTranslation.description",
+    pageKey: "options.shortcuts.title",
+  },
+
   // API Providers page
   {
     sectionId: "provider-config",
@@ -146,20 +176,6 @@ export const SEARCH_ITEMS: SearchItem[] = [
     route: "/translation",
     titleKey: "options.translation.translateRange.title",
     descriptionKey: "options.translation.translateRange.description",
-    pageKey: "options.translation.title",
-  },
-  {
-    sectionId: "page-translation-shortcut",
-    route: "/translation",
-    titleKey: "options.translation.pageTranslationShortcut.title",
-    descriptionKey: "options.translation.pageTranslationShortcut.description",
-    pageKey: "options.translation.title",
-  },
-  {
-    sectionId: "node-translation-hotkey",
-    route: "/translation",
-    titleKey: "options.translation.nodeTranslationHotkey.title",
-    descriptionKey: "options.translation.nodeTranslationHotkey.description",
     pageKey: "options.translation.title",
   },
   {
@@ -291,13 +307,6 @@ export const SEARCH_ITEMS: SearchItem[] = [
     route: "/selection-toolbar",
     titleKey: "options.floatingButtonAndToolbar.selectionToolbar.opacity.title",
     descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.opacity.description",
-    pageKey: "options.overlayTools.selectionToolbar.title",
-  },
-  {
-    sectionId: "selection-translation-shortcut",
-    route: "/selection-toolbar",
-    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.shortcut.title",
-    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.shortcut.description",
     pageKey: "options.overlayTools.selectionToolbar.title",
   },
   {

@@ -391,6 +391,21 @@ options:
         title: 사용자 경험 개선에 기여
         tooltip: 켜면 Read Frog가 익명 사용 신호를 전송하여 버그를 찾아내고, 기능 안정성을 검증하고, 성능과 UX 디테일을 개선하며, 앞으로 무엇을 우선적으로 만들지 결정하는 데 활용합니다.
         description: 버그를 찾고 UI 레이아웃을 다듬는 등 Read Frog 개선에 기여합니다
+  shortcuts:
+    title: 단축키
+    pageDescription: 읽는 중에 번역을 실행하는 키를 설정합니다.
+    pageTranslation:
+      title: 페이지 번역
+      description: 페이지 전체를 번역합니다.
+    translationMode:
+      title: 번역 모드
+      description: 이중 언어와 번역만 사이를 전환합니다.
+    selectionTranslation:
+      title: 선택 영역 번역
+      description: 선택한 텍스트를 번역합니다.
+    nodeTranslation:
+      title: 단락 번역
+      description: 단락에 마우스를 올리거나 길게 누르면 그 단락만 번역합니다.
   overlayTools:
     title: 오버레이 도구
     floatingButton:

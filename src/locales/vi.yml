@@ -391,6 +391,21 @@ options:
         title: Giúp cải thiện trải nghiệm người dùng
         tooltip: Khi bật, Read Frog sẽ gửi các tín hiệu sử dụng ẩn danh để phát hiện lỗi, xác minh tính ổn định của tính năng, tối ưu hiệu năng và độ tinh chỉnh UX, đồng thời giúp chúng tôi ưu tiên những gì cần xây tiếp theo.
         description: Cải thiện Read Frog bằng cách giúp chúng tôi tìm lỗi, tinh chỉnh giao diện và hơn thế nữa
+  shortcuts:
+    title: Phím tắt
+    pageDescription: Đặt các phím kích hoạt bản dịch khi bạn đọc.
+    pageTranslation:
+      title: Dịch trang
+      description: Dịch toàn bộ trang.
+    translationMode:
+      title: Chế độ dịch
+      description: Chuyển giữa song ngữ và chỉ bản dịch.
+    selectionTranslation:
+      title: Dịch vùng chọn
+      description: Dịch văn bản bạn đã chọn.
+    nodeTranslation:
+      title: Dịch đoạn văn
+      description: Di chuột hoặc nhấn giữ một đoạn để chỉ dịch đoạn đó.
   overlayTools:
     title: Công cụ nổi
     floatingButton:

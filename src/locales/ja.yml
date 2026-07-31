@@ -391,6 +391,21 @@ options:
         title: ユーザー体験の改善に協力する
         tooltip: 有効にすると、Read Frog は匿名の利用シグナルを送信し、不具合の発見、機能の安定性確認、性能や UX の改善、今後優先すべき機能の判断に役立てます。
         description: バグの特定や UI レイアウトの改善などを通じて Read Frog をより良くします
+  shortcuts:
+    title: ショートカット
+    pageDescription: 読みながら翻訳を実行するキーを設定します。
+    pageTranslation:
+      title: ページ翻訳
+      description: ページ全体を翻訳します。
+    translationMode:
+      title: 翻訳モード
+      description: バイリンガルと翻訳のみを切り替えます。
+    selectionTranslation:
+      title: 選択範囲の翻訳
+      description: 選択したテキストを翻訳します。
+    nodeTranslation:
+      title: 段落翻訳
+      description: 段落にホバーまたは長押しすると、その段落だけ翻訳します。
   overlayTools:
     title: オーバーレイツール
     floatingButton:

@@ -392,6 +392,21 @@ options:
         title: Ayuda a mejorar la experiencia de usuario
         tooltip: Cuando está activado, Read Frog envía señales anónimas de uso del producto para que podamos detectar errores, verificar la fiabilidad de las funciones, mejorar el rendimiento y el acabado de la UX, y priorizar trabajos futuros.
         description: Mejora Read Frog ayudándonos a localizar errores, pulir la interfaz y más
+  shortcuts:
+    title: Atajos
+    pageDescription: Define las teclas que activan la traducción mientras lees.
+    pageTranslation:
+      title: Traducción de la página
+      description: Traduce la página completa.
+    translationMode:
+      title: Modo de traducción
+      description: Alterna entre bilingüe y solo traducción.
+    selectionTranslation:
+      title: Traducción de la selección
+      description: Traduce el texto que seleccionaste.
+    nodeTranslation:
+      title: Traducción de párrafo
+      description: Pasa el cursor o mantén pulsado un párrafo para traducir solo ese.
   overlayTools:
     title: Herramientas superpuestas
     floatingButton:

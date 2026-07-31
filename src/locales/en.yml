@@ -392,6 +392,21 @@ options:
         title: Help improve user experience
         tooltip: When enabled, Read Frog sends anonymous product usage signals so we can catch bugs, verify feature reliability, improve performance and UX polish, and prioritize future work.
         description: Improve Read Frog by helping us locate bugs, refine layouts, and more
+  shortcuts:
+    title: Shortcuts
+    pageDescription: Set the keys that trigger translation while you read.
+    pageTranslation:
+      title: Page translation
+      description: Translate the whole page.
+    translationMode:
+      title: Translation mode
+      description: Switch between bilingual and translation only.
+    selectionTranslation:
+      title: Selection translation
+      description: Translate the text you selected.
+    nodeTranslation:
+      title: Paragraph translation
+      description: Hover or long-press a paragraph to translate just that one.
   overlayTools:
     title: Overlay Tools
     floatingButton:

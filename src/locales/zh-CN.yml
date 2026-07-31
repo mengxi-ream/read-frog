@@ -392,6 +392,21 @@ options:
         title: 帮助改进用户体验
         tooltip: 开启后，Read Frog 会发送匿名的产品使用信号，用于发现 bug、验证功能是否稳定、优化性能与交互细节，并帮助我们决定接下来优先投入的方向。
         description: 通过帮助我们定位 bug、优化界面布局等改善 Read Frog
+  shortcuts:
+    title: 快捷键
+    pageDescription: 设置阅读时触发翻译的按键。
+    pageTranslation:
+      title: 网页翻译
+      description: 翻译整个网页。
+    translationMode:
+      title: 翻译模式
+      description: 在双语对照和仅显示翻译之间切换。
+    selectionTranslation:
+      title: 划词翻译
+      description: 翻译选中的文本。
+    nodeTranslation:
+      title: 段落翻译
+      description: 悬停或长按段落，只翻译这一段。
   overlayTools:
     title: 悬浮工具
     floatingButton:
