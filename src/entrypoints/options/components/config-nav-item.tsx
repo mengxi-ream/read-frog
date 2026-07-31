@@ -13,9 +13,10 @@ export interface ConfigNavItemProps {
 }
 
 /**
- * A `ConfigItem` that drills into a detail page instead of holding a control. The negative
- * inline margin lets the hover background bleed past the surrounding rows while the text
- * stays aligned with them.
+ * A `ConfigItem` that drills into a detail page instead of holding a control. Padding gives the
+ * hover background room to breathe, and a negative margin of the same size takes that room back
+ * out of the layout — so the row lines up with its neighbours and sits the same distance from
+ * them as any two plain rows, with the background bleeding past on hover.
  */
 export function ConfigNavItem({ to, title, description, className }: ConfigNavItemProps) {
   return (
@@ -23,7 +24,7 @@ export function ConfigNavItem({ to, title, description, className }: ConfigNavIt
       to={to}
       state={DRILL_IN_LOCATION_STATE}
       className={cn(
-        "-mx-3 block rounded-lg px-3 py-2 transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50",
+        "-mx-3 -my-2 block rounded-lg px-3 py-2 transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50",
         className,
       )}
     >
