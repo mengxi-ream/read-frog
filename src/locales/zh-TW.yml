@@ -775,25 +775,23 @@ options:
         description: 滑鼠停留或長按段落，只翻譯這一段。
     translateControl:
       title: 翻譯控制
+    translationQueue:
+      title: 翻譯佇列
+    cache:
+      title: 快取
     requestQueueConfig:
       title: 翻譯速率
-      firstOnDescription: 調整翻譯請求的處理速度，使用
-      lastOnDescription: 演算法
       capacity:
-        title: 最大突發請求數
-        description: 允許的暫時突發請求數量，決定了在短時間內最多能同時處理多少個請求
+        description: 最大突發請求數：同一時刻最多能送出多少個請求
       rate:
-        title: 每秒平均請求數量
-        description: 平均每秒的請求數量，但允許設定最大突發請求數來短暫傳送超額請求。支援小數，例如 0.25 表示每 4 秒傳送一次請求，適用於 Gemini 免費版等低限額 API
+        description: 每秒請求數：突發之後的穩定速度。可以填小數，0.25 表示每 4 秒送出一個請求
     batchQueueConfig:
       title: 批次翻譯
       description: 設定批次翻譯時的字元數限制和最大段落數量（僅對大型語言模型翻譯有效）
       maxCharactersPerBatch:
-        title: 最大字元數
-        description: 每個批次請求允許的最大字元數，用於控制單次翻譯的內容量
+        description: 最大字元數：一次 AI 請求最多帶多少文字
       maxItemsPerBatch:
-        title: 最大段落數
-        description: 每個批次翻譯的最大段落數，用於控制單次翻譯的內容量
+        description: 最大段落數：多少個段落合併成一次請求。非 AI 的翻譯服務不受這兩項影響
     autoTranslateWebsite:
       title: 依網站自動翻譯
       description: 開啟後就開始翻譯的網站
@@ -895,11 +893,9 @@ options:
       title: 預翻譯範圍
       description: 控制可視區域下方多少內容會被預先翻譯，以節省 API 費用
       margin:
-        title: 預載距離（像素）
-        description: 距離可視區域多遠時開始翻譯內容。較小的值可節省 API 費用，但捲動時可能會有延遲。
+        description: 預翻譯距離：螢幕下方多少像素內的內容提前翻譯。調小更省 API 費用
       threshold:
-        title: 可見度門檻值
-        description: 觸發翻譯所需的元素可見度百分比（0-1）。較高的值會延遲翻譯，直到更多元素可見。
+        description: 可見比例：段落露出多少才開始翻譯，數值 0 到 1
     smallParagraphFilter:
       title: 小段落過濾
       description: 這些全域預設值會略過翻譯少於指定字元數或詞數的文字節點；相符的網站規則可以覆寫它們（0 = 停用）

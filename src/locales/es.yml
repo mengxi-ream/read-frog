@@ -775,25 +775,23 @@ options:
         description: Pasa el cursor o mantén pulsado un párrafo para traducir solo ese.
     translateControl:
       title: Control de traducción
+    translationQueue:
+      title: Cola de traducción
+    cache:
+      title: Caché
     requestQueueConfig:
       title: Tasa de traducción
-      firstOnDescription: Ajusta la velocidad de procesamiento de las solicitudes de traducción usando el
-      lastOnDescription: algoritmo
       capacity:
-        title: Recuento máximo de solicitudes en ráfaga
-        description: El recuento de solicitudes temporales en ráfaga permitido determina el número máximo de solicitudes que se pueden procesar de forma concurrente durante un periodo corto
+        description: "Solicitudes máximas en ráfaga: cuántas pueden salir a la vez"
       rate:
-        title: Solicitudes promedio por segundo
-        description: Solicitudes promedio por segundo, pero permite configurar un recuento máximo en ráfaga para enviar temporalmente solicitudes excedentes. Se admiten decimales — por ejemplo, 0.25 significa una solicitud cada 4 segundos, útil para APIs con límites bajos como el nivel gratuito de Gemini
+        description: "Solicitudes por segundo: el ritmo estable tras la ráfaga. Admite decimales, así que 0.25 envía una solicitud cada 4 segundos"
     batchQueueConfig:
       title: Traducción por lotes
       description: Configura límites de caracteres y recuento máximo de párrafos para la traducción por lotes (solo efectivo para traducción LLM)
       maxCharactersPerBatch:
-        title: Caracteres máximos
-        description: Número máximo de caracteres permitido por solicitud por lote para controlar el volumen de contenido de cada traducción
+        description: "Caracteres máximos: cuánto texto lleva cada solicitud a la IA"
       maxItemsPerBatch:
-        title: Recuento máximo de párrafos
-        description: Número máximo de párrafos para cada traducción por lote para controlar el volumen de contenido de cada traducción
+        description: "Párrafos máximos: cuántos párrafos comparten una solicitud. Los proveedores que no son de IA ignoran ambos"
     autoTranslateWebsite:
       title: Traducción automática por sitio web
       description: Sitios que empiezan a traducirse en cuanto se abren
@@ -895,11 +893,9 @@ options:
       title: Rango de pretraducción
       description: Controla cuánto contenido por debajo de la ventana visible se pretraduce para ahorrar costes de API
       margin:
-        title: Distancia de precarga (píxeles)
-        description: Qué tan lejos por debajo de la ventana visible empezar a traducir contenido. Los valores más bajos ahorran costes de API, pero pueden causar retrasos al desplazarse.
+        description: "Distancia de precarga: cuántos píxeles por debajo de la pantalla se traducen por adelantado. Menos ahorra costes de API"
       threshold:
-        title: Umbral de visibilidad
-        description: Porcentaje de visibilidad del elemento requerido para activar la traducción (0-1). Los valores más altos retrasan la traducción hasta que sea visible una mayor parte del elemento.
+        description: "Umbral de visibilidad: qué parte del párrafo debe verse antes de traducirlo, de 0 a 1"
     smallParagraphFilter:
       title: Filtro de párrafos pequeños
       description: Estos valores predeterminados globales omiten la traducción de nodos de texto con menos caracteres o palabras que los umbrales. Las reglas de sitio coincidentes pueden anularlos (0 = desactivado)

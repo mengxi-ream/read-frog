@@ -659,25 +659,23 @@ options:
         description: Di chuột hoặc nhấn giữ một đoạn để chỉ dịch đoạn đó.
     translateControl:
       title: Kiểm soát dịch
+    translationQueue:
+      title: Hàng đợi dịch
+    cache:
+      title: Bộ nhớ đệm
     requestQueueConfig:
       title: Tốc độ dịch
-      firstOnDescription: Điều chỉnh tốc độ xử lý yêu cầu dịch bằng
-      lastOnDescription: thuật toán
       capacity:
-        title: Số lượng yêu cầu burst tối đa
-        description: Số lượng yêu cầu burst tạm thời được phép xác định số lượng yêu cầu tối đa có thể được xử lý đồng thời trong một khoảng thời gian ngắn
+        description: "Số yêu cầu tối đa cùng lúc: bao nhiêu yêu cầu được gửi đi một lượt"
       rate:
-        title: Số yêu cầu trung bình mỗi giây
-        description: Số yêu cầu trung bình mỗi giây, nhưng cho phép cấu hình số lượng burst tối đa để gửi tạm thời các yêu cầu vượt quá. Hỗ trợ số thập phân — ví dụ 0.25 nghĩa là một yêu cầu mỗi 4 giây, hữu ích cho các API có giới hạn thấp như gói miễn phí của Gemini
+        description: "Số yêu cầu mỗi giây: tốc độ đều sau đợt gửi dồn. Dùng được số thập phân, 0.25 là 4 giây một yêu cầu"
     batchQueueConfig:
       title: Dịch theo lô
       description: Cấu hình giới hạn ký tự và số đoạn văn tối đa cho dịch theo lô (chỉ có hiệu lực với dịch LLM)
       maxCharactersPerBatch:
-        title: Số ký tự tối đa
-        description: Số ký tự tối đa được phép cho mỗi yêu cầu lô để kiểm soát khối lượng nội dung của mỗi bản dịch
+        description: "Số ký tự tối đa: mỗi yêu cầu tới AI mang bao nhiêu văn bản"
       maxItemsPerBatch:
-        title: Số đoạn văn tối đa
-        description: Số đoạn văn tối đa cho mỗi bản dịch lô để kiểm soát khối lượng nội dung của mỗi bản dịch
+        description: "Số đoạn tối đa: bao nhiêu đoạn gộp chung một yêu cầu. Nhà cung cấp không dùng AI bỏ qua cả hai"
     autoTranslateWebsite:
       title: Tự động dịch theo trang web
       description: Các trang bắt đầu dịch ngay khi mở
@@ -779,11 +777,9 @@ options:
       title: Phạm vi dịch trước
       description: Kiểm soát lượng nội dung bên dưới vùng nhìn được dịch trước để tiết kiệm chi phí API
       margin:
-        title: Khoảng cách tải trước (pixel)
-        description: Khoảng cách bên dưới vùng nhìn để bắt đầu dịch nội dung. Giá trị thấp hơn tiết kiệm chi phí API nhưng có thể gây chậm trễ khi cuộn.
+        description: "Khoảng dịch trước: dịch trước nội dung cách dưới màn hình bao nhiêu pixel. Giảm để tiết kiệm chi phí API"
       threshold:
-        title: Ngưỡng hiển thị
-        description: Tỷ lệ phần trăm hiển thị của phần tử cần thiết để kích hoạt dịch (0-1). Giá trị cao hơn sẽ trì hoãn dịch cho đến khi nhiều phần tử hơn được hiển thị.
+        description: "Ngưỡng hiển thị: đoạn văn phải lộ ra bao nhiêu mới được dịch, từ 0 đến 1"
     smallParagraphFilter:
       title: Bộ lọc văn bản ngắn
       description: Các giá trị mặc định toàn cục này bỏ qua việc dịch các nút văn bản có ít ký tự hoặc từ hơn ngưỡng. Quy tắc trang web phù hợp có thể ghi đè chúng (0 = tắt)

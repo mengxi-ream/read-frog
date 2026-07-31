@@ -775,25 +775,23 @@ options:
         description: Hover or long-press a paragraph to translate just that one.
     translateControl:
       title: Translate control
+    translationQueue:
+      title: Translation queue
+    cache:
+      title: Cache
     requestQueueConfig:
-      title: Translation Rate
-      firstOnDescription: Adjust the processing speed of translation requests using the
-      lastOnDescription: algorithm
+      title: Translation rate
       capacity:
-        title: Maximum Burst Request Count
-        description: The allowed temporary burst request count determines the maximum number of requests that can be processed concurrently within a short period
+        description: "Maximum burst requests: how many can go out at once"
       rate:
-        title: Average Requests Per Second
-        description: Average requests per second, but allows configuring a maximum burst count to temporarily send excess requests. Decimals are supported — e.g. 0.25 means one request every 4 seconds, useful for low-rate-limit APIs like the Gemini free tier
+        description: "Requests per second: the steady pace after a burst. Decimals work, so 0.25 sends one request every 4 seconds"
     batchQueueConfig:
-      title: Batch Translation
+      title: Batch translation
       description: Configure character limits and maximum paragraph count for batch translation (only effective for LLM translation)
       maxCharactersPerBatch:
-        title: Maximum Characters
-        description: Maximum number of characters allowed per batch request to control the content volume of each translation
+        description: "Maximum characters: how much text one AI request carries"
       maxItemsPerBatch:
-        title: Maximum Paragraph Count
-        description: Maximum number of paragraphs for each batch translation to control the content volume of each translation
+        description: "Maximum paragraphs: how many paragraphs share one request. Providers that are not AI ignore both"
     autoTranslateWebsite:
       title: Auto translate based on website
       description: Sites that start translating as soon as they open
@@ -892,14 +890,12 @@ options:
         main: Main Content
         all: All Content
     preloadConfig:
-      title: Pre-translate Range
+      title: Pre-translate range
       description: Control how much content below the viewport gets pre-translated to save API costs
       margin:
-        title: Preload Distance (pixels)
-        description: How far below the viewport to start translating content. Lower values save API costs but may cause delays when scrolling.
+        description: "Preload distance: how far below the screen to translate ahead, in pixels. Less saves API cost"
       threshold:
-        title: Visibility Threshold
-        description: Percentage of element visibility required to trigger translation (0-1). Higher values delay translation until more of the element is visible.
+        description: "Visibility threshold: how much of a paragraph must be on screen before it is translated, from 0 to 1"
     smallParagraphFilter:
       title: Small paragraph filter
       description: These global defaults skip translating text nodes with fewer characters or words than the thresholds. Matching site rules can override them (0 = disabled)
@@ -928,7 +924,7 @@ options:
         llm: LLM
         description: Basic detection is fast and free. LLM detection is more accurate but adds latency and API costs.
     clearCache:
-      title: Clear Cache
+      title: Clear cache
       description: Clear all translation cache in your browser
       clearing: Clearing...
       dialog:

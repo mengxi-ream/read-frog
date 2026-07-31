@@ -659,25 +659,23 @@ options:
         description: Bir paragrafın üzerine gelin veya uzun basın; yalnızca o paragraf çevrilir.
     translateControl:
       title: Çeviri denetimi
+    translationQueue:
+      title: Çeviri kuyruğu
+    cache:
+      title: Önbellek
     requestQueueConfig:
-      title: Çeviri Hızı
-      firstOnDescription: Çeviri isteklerinin işleme hızını
-      lastOnDescription: algoritmasıyla ayarlayın
+      title: Çeviri hızı
       capacity:
-        title: Maksimum Ani İstek Sayısı
-        description: İzin verilen geçici ani istek sayısı, kısa bir süre içinde eşzamanlı olarak işlenebilecek maksimum istek sayısını belirler
+        description: "Maksimum ani istek: aynı anda kaç istek gönderilebilir"
       rate:
-        title: Saniyedeki Ortalama İstek
-        description: Saniyedeki ortalama istek, ancak geçici olarak fazla istek göndermek için maksimum ani sayısını yapılandırmaya izin verir. Ondalık değerler desteklenir — örneğin 0.25, her 4 saniyede bir istek anlamına gelir ve Gemini ücretsiz katmanı gibi düşük limitli API'ler için kullanışlıdır
+        description: "Saniyedeki istek: sonrasındaki sabit hız. Ondalık da olur, 0.25 her 4 saniyede bir istek demek"
     batchQueueConfig:
-      title: Toplu Çeviri
+      title: Toplu çeviri
       description: Toplu çeviri için karakter limitleri ve maksimum paragraf sayısını yapılandırın (yalnızca LLM çevirisi için geçerlidir)
       maxCharactersPerBatch:
-        title: Maksimum Karakter
-        description: Her çevirinin içerik hacmini kontrol etmek için toplu istek başına izin verilen maksimum karakter sayısı
+        description: "Maksimum karakter: tek bir yapay zekâ isteği ne kadar metin taşır"
       maxItemsPerBatch:
-        title: Maksimum Paragraf Sayısı
-        description: Her çevirinin içerik hacmini kontrol etmek için her toplu çeviri için maksimum paragraf sayısı
+        description: "Maksimum paragraf: tek istekte kaç paragraf birleşir. Yapay zekâ olmayan sağlayıcılar ikisini de yok sayar"
     autoTranslateWebsite:
       title: Web sitesine göre otomatik çevir
       description: Açılır açılmaz çevrilmeye başlayan siteler
@@ -776,14 +774,12 @@ options:
         main: Ana İçerik
         all: Tüm İçerik
     preloadConfig:
-      title: Ön Çeviri Aralığı
+      title: Ön çeviri aralığı
       description: API maliyetlerinden tasarruf etmek için görünüm alanının altındaki ne kadar içeriğin önceden çevrileceğini kontrol edin
       margin:
-        title: Ön Yükleme Mesafesi (piksel)
-        description: İçeriği çevirmeye başlamak için görünüm alanının ne kadar altı. Daha düşük değerler API maliyetlerinden tasarruf sağlar ancak kaydırma sırasında gecikmelere neden olabilir.
+        description: "Ön çeviri mesafesi: ekranın altında kaç piksellik içerik önceden çevrilir. Azaltmak API maliyetini düşürür"
       threshold:
-        title: Görünürlük Eşiği
-        description: Çeviriyi tetiklemek için gereken öğe görünürlük yüzdesi (0-1). Daha yüksek değerler, öğenin daha fazlası görünür olana kadar çeviriyi geciktirir.
+        description: "Görünürlük eşiği: paragrafın ne kadarı ekranda olunca çevrilsin, 0 ile 1 arasında"
     smallParagraphFilter:
       title: Kısa metin filtresi
       description: Bu genel varsayılanlar, eşiklerden daha az karakter veya sözcük içeren metin düğümlerinin çevirisini atlar. Eşleşen site kuralları bunları geçersiz kılabilir (0 = devre dışı)
@@ -812,7 +808,7 @@ options:
         llm: LLM
         description: Temel algılama hızlı ve ücretsizdir. LLM algılama daha doğrudur ancak gecikme ve API maliyetleri ekler.
     clearCache:
-      title: Önbelleği Temizle
+      title: Önbelleği temizle
       description: Tarayıcınızdaki tüm çeviri önbelleğini temizleyin
       clearing: Temizleniyor...
       dialog:

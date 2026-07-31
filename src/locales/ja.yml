@@ -659,25 +659,23 @@ options:
         description: 段落にホバーまたは長押しすると、その段落だけ翻訳します。
     translateControl:
       title: 翻訳の制御
+    translationQueue:
+      title: 翻訳キュー
+    cache:
+      title: キャッシュ
     requestQueueConfig:
       title: 翻訳速度
-      firstOnDescription: 翻訳リクエストの処理速度を調整し、
-      lastOnDescription: を利用して実装する
       capacity:
-        title: 最大バーストリクエスト数
-        description: 許容される一時的バーストリクエスト数は、短期間内に同時処理可能な最大リクエスト数を決定する
+        description: 最大バーストリクエスト数：一度に送れるリクエストの数
       rate:
-        title: 秒間平均リクエスト数
-        description: 平均秒間リクエスト数（ただし、最大バーストリクエスト数を設定し一時的な超過リクエスト送信を許可）。小数も設定可能です（例：0.25 は4秒に1リクエストの意味で、Gemini 無料枠などレート制限の厳しい API に便利です）
+        description: 1 秒あたりのリクエスト数：バースト後の一定ペース。小数も使え、0.25 なら 4 秒に 1 回送ります
     batchQueueConfig:
       title: バッチ翻訳
       description: バッチ翻訳時の文字数制限と最大段落数を設定（大規模言語モデル翻訳でのみ有効）
       maxCharactersPerBatch:
-        title: 最大文字数
-        description: バッチリクエストあたりの最大文字数で、各翻訳のコンテンツ量を制御します
+        description: 最大文字数：1 回の AI リクエストで送るテキストの量
       maxItemsPerBatch:
-        title: 最大段落数
-        description: 各バッチ翻訳の最大段落数、各翻訳のコンテンツ量を制御します
+        description: 最大段落数：1 回のリクエストにまとめる段落の数。AI 以外の翻訳サービスには効きません
     autoTranslateWebsite:
       title: ウェブサイトに基づく自動翻訳
       description: 開いた時点で翻訳を始めるサイト
@@ -779,11 +777,9 @@ options:
       title: 事前翻訳範囲
       description: ビューポート下のコンテンツをどれだけ事前翻訳するかを制御し、API コストを節約します
       margin:
-        title: プリロード距離（ピクセル）
-        description: ビューポートからどれくらい離れた位置でコンテンツの翻訳を開始するか。小さい値は API コストを節約しますが、スクロール時に遅延が発生する可能性があります。
+        description: 先読み距離：画面の下どこまで先に翻訳するか（ピクセル）。小さくすると API 費用を抑えられます
       threshold:
-        title: 可視性しきい値
-        description: 翻訳をトリガーするために必要な要素の可視性の割合（0-1）。高い値は、要素がより多く表示されるまで翻訳を遅らせます。
+        description: 表示のしきい値：段落がどれだけ見えたら翻訳するか。0〜1 で指定します
     smallParagraphFilter:
       title: 短いテキストフィルター
       description: これらのグローバル既定値を使用して、指定した文字数または単語数より少ないテキストノードの翻訳をスキップします。一致するサイトルールで上書きできます（0 = 無効）

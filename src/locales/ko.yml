@@ -659,25 +659,23 @@ options:
         description: 단락에 마우스를 올리거나 길게 누르면 그 단락만 번역합니다.
     translateControl:
       title: 번역 제어
+    translationQueue:
+      title: 번역 대기열
+    cache:
+      title: 캐시
     requestQueueConfig:
       title: 번역 속도
-      firstOnDescription: 번역 요청 처리 속도 조정 및
-      lastOnDescription: 구현
       capacity:
-        title: 최대 버스트 요청 수
-        description: 허용되는 임시 버스트 요청 수는 짧은 시간 내 동시 처리 가능한 최대 요청 수를 결정함
+        description: "최대 순간 요청 수: 한 번에 내보낼 수 있는 요청 개수"
       rate:
-        title: 초당 평균 요청 수
-        description: 초당 평균 요청 수 (단, 최대 버스트 요청 수 설정을 통한 일시적 초과 요청 전송 허용). 소수도 지원합니다. 예를 들어 0.25는 4초마다 1회 요청을 의미하며, Gemini 무료 등급 등 낮은 속도 제한 API에 유용합니다
+        description: "초당 요청 수: 그 뒤로 유지되는 속도. 소수도 되며 0.25는 4초에 한 번 보냅니다"
     batchQueueConfig:
       title: 배치 번역
       description: 배치 번역 시 문자 수 제한 및 최대 단락 수 구성 (대규모 언어 모델 번역에서만 유효)
       maxCharactersPerBatch:
-        title: 최대 문자 수
-        description: 배치 요청당 허용되는 최대 문자 수로 각 번역의 콘텐츠 양을 제어합니다
+        description: "최대 문자 수: 한 번의 AI 요청에 담는 텍스트 양"
       maxItemsPerBatch:
-        title: 최대 단락 수
-        description: 각 배치 번역의 최대 단락 수로 각 번역의 콘텐츠 양을 제어합니다
+        description: "최대 단락 수: 한 요청에 묶는 단락 수. AI가 아닌 번역 서비스에는 적용되지 않습니다"
     autoTranslateWebsite:
       title: 웹사이트 기반 자동 번역
       description: 열자마자 번역을 시작하는 사이트
@@ -779,11 +777,9 @@ options:
       title: 사전 번역 범위
       description: API 비용을 절약하기 위해 뷰포트 아래 콘텐츠를 얼마나 사전 번역할지 제어합니다
       margin:
-        title: 미리 로드 거리 (픽셀)
-        description: 뷰포트에서 얼마나 떨어진 곳에서 콘텐츠 번역을 시작할지. 작은 값은 API 비용을 절약하지만 스크롤 시 지연이 발생할 수 있습니다.
+        description: "미리 번역 거리: 화면 아래 몇 픽셀까지 미리 번역할지. 줄이면 API 비용이 절약됩니다"
       threshold:
-        title: 가시성 임계값
-        description: 번역을 트리거하는 데 필요한 요소 가시성 비율 (0-1). 높은 값은 요소가 더 많이 보일 때까지 번역을 지연시킵니다.
+        description: "표시 기준: 단락이 얼마나 보여야 번역할지, 0에서 1 사이"
     smallParagraphFilter:
       title: 짧은 텍스트 필터
       description: 이 전역 기본값을 사용하여 지정한 문자 수 또는 단어 수보다 적은 텍스트 노드의 번역을 건너뜁니다. 일치하는 사이트 규칙에서 재정의할 수 있습니다 (0 = 비활성화)
