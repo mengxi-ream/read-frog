@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.44.0
+
+### Minor Changes
+
+- [#1997](https://github.com/mengxi-ream/read-frog/pull/1997) [`9009c67`](https://github.com/mengxi-ream/read-frog/commit/9009c67ec7070384d998d8acd7a6e1eabc90cf8e) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(options): rebuild the settings UI around sections and drill-in pages
+
+### Patch Changes
+
+- [#2002](https://github.com/mengxi-ream/read-frog/pull/2002) [`bf66245`](https://github.com/mengxi-ream/read-frog/commit/bf6624515a1b012b36754449c45f4b7fadb1dca6) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - Drop the redundant "Preview" heading above the subtitle style preview
+
+- [#2002](https://github.com/mengxi-ream/read-frog/pull/2002) [`bf66245`](https://github.com/mengxi-ream/read-frog/commit/bf6624515a1b012b36754449c45f4b7fadb1dca6) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - Replace the slider with a scrubber that shows its value in the track
+
+- [#2003](https://github.com/mengxi-ream/read-frog/pull/2003) [`d77c0b1`](https://github.com/mengxi-ream/read-frog/commit/d77c0b196c7d443d6222e1e027109d03a6c7efa5) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(subtitles): replace the native colour input with a themed picker
+
 ## 1.43.6
 
 ### Patch Changes
