@@ -28,6 +28,11 @@ export function TranslateControlSection() {
       <AutoTranslateLanguagesItem />
       <SkipLanguagesItem />
       <SmallParagraphFilterItem />
+      <ConfigNavItem
+        to="/page-translation/site-rules"
+        title={i18n.t("options.siteRules.title")}
+        description={i18n.t("options.siteRules.description")}
+      />
     </ConfigSection>
   )
 }

@@ -5,7 +5,6 @@ export const ROUTE_DEFS = [
   { path: "/api-providers" },
   { path: "/custom-actions" },
   { path: "/page-translation" },
-  { path: "/site-rules" },
   { path: "/video-subtitles" },
   { path: "/floating-button" },
   { path: "/selection-toolbar" },
@@ -20,4 +19,5 @@ export const ROUTE_DEFS = [
   { path: "/page-translation/prompts" },
   { path: "/page-translation/auto-translate-websites" },
   { path: "/page-translation/never-auto-translate-websites" },
+  { path: "/page-translation/site-rules" },
 ] as const

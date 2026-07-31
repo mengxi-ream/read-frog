@@ -825,7 +825,6 @@ options:
         description: 이 작업은 모든 번역 캐시를 지웁니다. 이 작업은 되돌릴 수 없습니다.
   siteRules:
     title: 사이트 규칙
-    pageDescription: 기본 제공 규칙과 사용자 규칙으로 사이트별 번역 방식을 조정하세요.
     description: 특정 웹사이트의 번역 동작을 조정하는 규칙입니다.
     userRules:
       title: 사용자 규칙

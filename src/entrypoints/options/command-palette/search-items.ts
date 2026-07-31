@@ -273,21 +273,20 @@ export const SEARCH_ITEMS: SearchItem[] = [
     descriptionKey: "options.translation.clearCache.description",
     pageKey: "options.translation.title",
   },
-
-  // Site Rules page
   {
+    // Its own page, drilled into from the Translate control section.
     sectionId: "site-rules-user-rules",
-    route: "/site-rules",
+    route: "/page-translation/site-rules",
     titleKey: "options.siteRules.userRules.title",
     descriptionKey: "options.siteRules.userRules.description",
-    pageKey: "options.siteRules.title",
+    pageKey: "options.translation.title",
   },
   {
     sectionId: "site-rules-built-in",
-    route: "/site-rules",
+    route: "/page-translation/site-rules",
     titleKey: "options.siteRules.builtIn.title",
     descriptionKey: "options.siteRules.builtIn.description",
-    pageKey: "options.siteRules.title",
+    pageKey: "options.translation.title",
   },
 
   // Floating Button page

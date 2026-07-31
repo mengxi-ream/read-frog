@@ -940,8 +940,7 @@ options:
         cancel: Cancel
         description: This operation will clear all translation cache. This action cannot be undone.
   siteRules:
-    title: Site Rules
-    pageDescription: Adjust how individual websites are translated with built-in and custom rules.
+    title: Site rules
     description: Per-site rules that adjust how specific websites are translated.
     userRules:
       title: User Rules

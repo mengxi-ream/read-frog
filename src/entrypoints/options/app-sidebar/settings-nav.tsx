@@ -90,17 +90,6 @@ export function SettingsNav() {
 
           <SidebarMenuItem>
             <SidebarMenuButton
-              render={<Link to="/site-rules" />}
-              isActive={pathname === "/site-rules"}
-              tooltip={i18n.t("options.siteRules.title")}
-            >
-              <Icon icon="tabler:world-cog" />
-              <span>{i18n.t("options.siteRules.title")}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton
               render={<Link to="/video-subtitles" />}
               isActive={pathname === "/video-subtitles"}
               tooltip={i18n.t("options.videoSubtitles.title")}

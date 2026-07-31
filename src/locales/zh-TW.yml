@@ -941,7 +941,6 @@ options:
         description: 此操作將清理所有翻譯快取。此操作無法復原。
   siteRules:
     title: 網站規則
-    pageDescription: 用內建規則和自訂規則調整個別網站的翻譯方式。
     description: 針對特定網站調整翻譯行為的規則。
     userRules:
       title: 使用者規則

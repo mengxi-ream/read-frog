@@ -824,8 +824,7 @@ options:
         cancel: İptal
         description: Bu işlem tüm çeviri önbelleğini temizleyecektir. Bu işlem geri alınamaz.
   siteRules:
-    title: Site Kuralları
-    pageDescription: Yerleşik ve özel kurallarla tek tek web sitelerinin nasıl çevrileceğini ayarlayın.
+    title: Site kuralları
     description: Belirli web sitelerinin nasıl çevrileceğini ayarlayan site bazlı kurallar.
     userRules:
       title: Kullanıcı Kuralları

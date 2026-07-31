@@ -825,7 +825,6 @@ options:
         description: Thao tác này sẽ xóa tất cả bộ nhớ đệm dịch. Hành động này không thể hoàn tác.
   siteRules:
     title: Quy tắc trang web
-    pageDescription: Điều chỉnh cách dịch từng trang web bằng quy tắc có sẵn và quy tắc tự tạo.
     description: Quy tắc theo từng trang web để điều chỉnh cách dịch các trang web cụ thể.
     userRules:
       title: Quy tắc của người dùng

@@ -941,7 +941,6 @@ options:
         description: Esta operación borrará toda la caché de traducción. Esta acción no se puede deshacer.
   siteRules:
     title: Reglas de sitio
-    pageDescription: Ajusta cómo se traduce cada sitio web con reglas integradas y personalizadas.
     description: Reglas por sitio que ajustan cómo se traducen determinados sitios web.
     userRules:
       title: Reglas de usuario

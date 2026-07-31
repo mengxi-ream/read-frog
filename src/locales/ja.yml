@@ -825,7 +825,6 @@ options:
         description: この操作により、すべての翻訳キャッシュがクリアされます。この操作は元に戻せません。
   siteRules:
     title: サイトルール
-    pageDescription: 組み込みルールとカスタムルールで、サイトごとの翻訳方法を調整します。
     description: 特定のウェブサイトの翻訳動作を調整するルールです。
     userRules:
       title: ユーザールール

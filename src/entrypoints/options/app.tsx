@@ -74,7 +74,6 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/api-providers": ApiProvidersPage,
   "/custom-actions": CustomActionsPage,
   "/page-translation": TranslationPage,
-  "/site-rules": SiteRulesPage,
   "/video-subtitles": VideoSubtitlesPage,
   "/floating-button": FloatingButtonPage,
   "/selection-toolbar": SelectionToolbarPage,
@@ -86,6 +85,7 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/page-translation/prompts": PersonalizedPromptsPage,
   "/page-translation/auto-translate-websites": AutoTranslateWebsitesPage,
   "/page-translation/never-auto-translate-websites": NeverAutoTranslateWebsitesPage,
+  "/page-translation/site-rules": SiteRulesPage,
 }
 
 function RouteLoadingFallback() {
