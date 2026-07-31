@@ -41,6 +41,9 @@ const InputTranslationPage = lazy(() =>
 const TextToSpeechPage = lazy(() =>
   import("./pages/text-to-speech").then((module) => ({ default: module.TextToSpeechPage })),
 )
+const ContactUsPage = lazy(() =>
+  import("./pages/contact-us").then((module) => ({ default: module.ContactUsPage })),
+)
 const CustomCssPage = lazy(() =>
   import("./pages/translation/translation-style/custom-css").then((module) => ({
     default: module.CustomCssPage,
@@ -90,6 +93,7 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/context-menu": ContextMenuPage,
   "/input-translation": InputTranslationPage,
   "/tts": TextToSpeechPage,
+  "/contact-us": ContactUsPage,
   "/preference/config-backup": ConfigBackupPage,
   "/page-translation/custom-css": CustomCssPage,
   "/page-translation/prompts": PersonalizedPromptsPage,

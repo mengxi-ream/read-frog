@@ -94,7 +94,22 @@ options:
     translationHub: Çeviri Merkezi
   product:
     roadmap: Yol Haritası
-    feedback: Geri Bildirim
+  contactUs:
+    title: Bize Ulaşın
+    pageDescription: Sırada ne olmasını istediğinizi söyleyin, bir hata bildirin ya da sadece merhaba deyin.
+    featureRequest:
+      title: Özellik önerisi
+      description: Bir fikir önerin ve ekibin sırada ne geliştireceğini oylayın
+    bugReport:
+      title: Hata bildir
+      description: Destek talebi açın ve çözülene kadar takip edin
+    email:
+      title: Bize e-posta gönderin
+      description: Ekibe doğrudan contact@readfrog.app adresinden ulaşın
+    wechat:
+      title: WeChat
+      description: Geliştiriciyi WeChat üzerinde eklemek için QR kodu tarayın
+      qrCodeAlt: WeChat QR kodu
   apiProviders:
     title: API Sağlayıcıları
     pageDescription: Read Frog'un çağırdığı yapay zekâ servislerini bağlayın ve her özelliğin hangisini kullanacağını seçin.

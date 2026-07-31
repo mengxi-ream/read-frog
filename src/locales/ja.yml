@@ -94,7 +94,22 @@ options:
     translationHub: 翻訳ハブ
   product:
     roadmap: ロードマップ
-    feedback: フィードバック
+  contactUs:
+    title: お問い合わせ
+    pageDescription: 次に作るべきものや、うまく動かないことを教えてください。
+    featureRequest:
+      title: 機能リクエスト
+      description: アイデアを提案し、次に開発する機能に投票できます
+    bugReport:
+      title: 不具合を報告
+      description: サポートチケットを作成し、解決までの状況を追えます
+    email:
+      title: メールで問い合わせ
+      description: contact@readfrog.app からチームに直接連絡できます
+    wechat:
+      title: WeChat
+      description: QR コードをスキャンして開発者を WeChat に追加
+      qrCodeAlt: WeChat QR コード
   apiProviders:
     title: APIプロバイダー
     pageDescription: Read Frog が呼び出す AI サービスを接続し、各機能で使うものを選びます。

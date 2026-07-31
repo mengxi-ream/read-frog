@@ -2,7 +2,7 @@ import type { SupportedUiLocale } from "@/utils/i18n/resources"
 
 const FEATUREBASE_PORTAL_ORIGIN = "https://feedback.readfrog.app"
 
-export type FeaturebasePortalDestination = "feedback" | "roadmap"
+export type FeaturebasePortalDestination = "feedback" | "roadmap" | "tickets"
 
 export interface FeaturebaseFeedbackMetadata {
   [key: string]: string | undefined
@@ -20,7 +20,7 @@ export function buildFeaturebasePortalUrl({
   locale: SupportedUiLocale
   metadata?: Record<string, string | undefined>
 }) {
-  const pathname = destination === "roadmap" ? `/${locale}/roadmap` : `/${locale}`
+  const pathname = destination === "feedback" ? `/${locale}` : `/${locale}/${destination}`
   const url = new URL(pathname, FEATUREBASE_PORTAL_ORIGIN)
 
   const definedMetadata = metadata

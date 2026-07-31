@@ -94,7 +94,22 @@ options:
     translationHub: Translation Hub
   product:
     roadmap: Roadmap
-    feedback: Feedback
+  contactUs:
+    title: Contact Us
+    pageDescription: Tell us what to build next, report something that broke, or just say hello.
+    featureRequest:
+      title: Feature request
+      description: Suggest an idea and vote on what the team builds next
+    bugReport:
+      title: Report a bug
+      description: Open a support ticket and follow it until it is fixed
+    email:
+      title: Email us
+      description: Reach the team directly at contact@readfrog.app
+    wechat:
+      title: WeChat
+      description: Scan the QR code to add the maintainer on WeChat
+      qrCodeAlt: WeChat QR code
   apiProviders:
     title: API Providers
     pageDescription: Connect the AI services Read Frog calls, then choose which one runs each feature.

@@ -94,7 +94,22 @@ options:
     translationHub: Trung tâm Dịch thuật
   product:
     roadmap: Lộ trình
-    feedback: Phản hồi
+  contactUs:
+    title: Liên hệ
+    pageDescription: Cho chúng tôi biết nên làm gì tiếp theo, báo lỗi, hoặc chỉ để chào hỏi.
+    featureRequest:
+      title: Đề xuất tính năng
+      description: Đề xuất ý tưởng và bình chọn cho tính năng nhóm sẽ làm tiếp theo
+    bugReport:
+      title: Báo lỗi
+      description: Mở phiếu hỗ trợ và theo dõi cho đến khi được khắc phục
+    email:
+      title: Gửi email cho chúng tôi
+      description: Liên hệ trực tiếp với nhóm qua contact@readfrog.app
+    wechat:
+      title: WeChat
+      description: Quét mã QR để thêm nhà phát triển trên WeChat
+      qrCodeAlt: Mã QR WeChat
   apiProviders:
     title: Nhà cung cấp API
     pageDescription: Kết nối các dịch vụ AI mà Read Frog sử dụng và chọn dịch vụ cho từng tính năng.

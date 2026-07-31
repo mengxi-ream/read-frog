@@ -94,7 +94,22 @@ options:
     translationHub: Centro de traducción
   product:
     roadmap: Hoja de ruta
-    feedback: Comentarios
+  contactUs:
+    title: Contáctanos
+    pageDescription: Cuéntanos qué construir a continuación, informa de un fallo o simplemente saluda.
+    featureRequest:
+      title: Sugerir una función
+      description: Propón una idea y vota lo que el equipo construirá a continuación
+    bugReport:
+      title: Informar de un fallo
+      description: Abre un ticket de soporte y síguelo hasta que se resuelva
+    email:
+      title: Escríbenos
+      description: Contacta directamente con el equipo en contact@readfrog.app
+    wechat:
+      title: WeChat
+      description: Escanea el código QR para añadir al desarrollador en WeChat
+      qrCodeAlt: Código QR de WeChat
   apiProviders:
     title: Proveedores de API
     pageDescription: Conecta los servicios de IA que usa Read Frog y elige cuál se encarga de cada función.

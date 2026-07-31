@@ -94,7 +94,22 @@ options:
     translationHub: 翻譯中心
   product:
     roadmap: 產品路線圖
-    feedback: 意見回饋
+  contactUs:
+    title: 聯絡我們
+    pageDescription: 告訴我們接下來該做什麼、回報遇到的問題，或只是打聲招呼。
+    featureRequest:
+      title: 功能建議
+      description: 提出想法，並為團隊接下來要做的功能投票
+    bugReport:
+      title: 回報問題
+      description: 建立支援工單，並追蹤到問題解決為止
+    email:
+      title: 電子郵件聯絡
+      description: 透過 contact@readfrog.app 直接聯絡團隊
+    wechat:
+      title: 微信
+      description: 掃描 QR code 加開發者微信
+      qrCodeAlt: 微信 QR code
   apiProviders:
     title: API 提供者
     pageDescription: 接入 Read Frog 呼叫的 AI 服務，並為每項功能指定使用哪一個。

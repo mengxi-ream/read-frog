@@ -94,7 +94,22 @@ options:
     translationHub: Центр переводов
   product:
     roadmap: Дорожная карта
-    feedback: Обратная связь
+  contactUs:
+    title: Связаться с нами
+    pageDescription: Расскажите, что добавить дальше, сообщите об ошибке или просто напишите нам.
+    featureRequest:
+      title: Предложить функцию
+      description: Предложите идею и голосуйте за то, что команда сделает дальше
+    bugReport:
+      title: Сообщить об ошибке
+      description: Создайте обращение в поддержку и следите за ним до решения
+    email:
+      title: Написать нам
+      description: Свяжитесь с командой напрямую по адресу contact@readfrog.app
+    wechat:
+      title: WeChat
+      description: Отсканируйте QR-код, чтобы добавить разработчика в WeChat
+      qrCodeAlt: QR-код WeChat
   apiProviders:
     title: API-провайдеры
     pageDescription: Подключите ИИ-сервисы, которые вызывает Read Frog, и выберите провайдера для каждой функции.
