@@ -315,7 +315,11 @@ function PortalledBoundary() {
   return createPortal(<div data-testid="portalled-boundary">Portalled boundary</div>, document.body)
 }
 
-function ReopenablePopoverHarness() {
+function ReopenablePopoverHarness({
+  onReuseRequestSpy,
+}: {
+  onReuseRequestSpy?: (details: { anchor: { x: number; y: number } | null }) => void
+} = {}) {
   const [open, setOpen] = React.useState(false)
   const [sourceSelection, setSourceSelection] = React.useState("First selection")
   const [snapshotSelection, setSnapshotSelection] = React.useState<string | null>(null)
@@ -336,13 +340,25 @@ function ReopenablePopoverHarness() {
     [sourceSelection],
   )
 
+  const handleReuseRequest = React.useCallback(
+    (details: { anchor: { x: number; y: number } | null }) => {
+      onReuseRequestSpy?.(details)
+      setSnapshotSelection(sourceSelection)
+    },
+    [onReuseRequestSpy, sourceSelection],
+  )
+
   return (
     <div>
       <button type="button" onClick={() => setSourceSelection("Second selection")}>
         Switch selection
       </button>
 
-      <SelectionPopover.Root open={open} onOpenChange={handleOpenChange}>
+      <SelectionPopover.Root
+        open={open}
+        onOpenChange={handleOpenChange}
+        onReuseRequest={handleReuseRequest}
+      >
         <SelectionPopover.Trigger>Open popover</SelectionPopover.Trigger>
         <SelectionPopover.Content key={sessionKey}>
           <SelectionPopover.Header className="border-b">
@@ -358,6 +374,71 @@ function ReopenablePopoverHarness() {
         </SelectionPopover.Content>
       </SelectionPopover.Root>
     </div>
+  )
+}
+
+function ControlledPinHarness({ onPinnedChange }: { onPinnedChange: (pinned: boolean) => void }) {
+  const [pinned, setPinned] = React.useState(false)
+
+  const handlePinnedChange = React.useCallback(
+    (nextPinned: boolean) => {
+      onPinnedChange(nextPinned)
+      setPinned(nextPinned)
+    },
+    [onPinnedChange],
+  )
+
+  return (
+    <SelectionPopover.Root
+      pinned={pinned}
+      onPinnedChange={handlePinnedChange}
+      onOpenChange={onOpenChangeSpy}
+    >
+      <SelectionPopover.Trigger>Open popover</SelectionPopover.Trigger>
+      <SelectionPopover.Content>
+        <SelectionPopover.Header className="border-b">
+          <SelectionPopover.Title>Controlled Pin Popover</SelectionPopover.Title>
+          <div className="flex items-center gap-1">
+            <SelectionPopover.Pin />
+            <SelectionPopover.Close />
+          </div>
+        </SelectionPopover.Header>
+        <SelectionPopover.Body>
+          <div>Popover content</div>
+        </SelectionPopover.Body>
+      </SelectionPopover.Content>
+    </SelectionPopover.Root>
+  )
+}
+
+function ActionsPopoverHarness({
+  actionsRef,
+  onReuseRequest,
+}: {
+  actionsRef: React.RefObject<{
+    requestOpen: (anchor?: { x: number; y: number } | null) => void
+  } | null>
+  onReuseRequest?: (details: { anchor: { x: number; y: number } | null }) => void
+}) {
+  return (
+    <SelectionPopover.Root
+      actionsRef={actionsRef}
+      onReuseRequest={onReuseRequest}
+      onOpenChange={onOpenChangeSpy}
+    >
+      <SelectionPopover.Content>
+        <SelectionPopover.Header className="border-b">
+          <SelectionPopover.Title>Actions Popover</SelectionPopover.Title>
+          <div className="flex items-center gap-1">
+            <SelectionPopover.Pin />
+            <SelectionPopover.Close />
+          </div>
+        </SelectionPopover.Header>
+        <SelectionPopover.Body>
+          <div>Popover content</div>
+        </SelectionPopover.Body>
+      </SelectionPopover.Content>
+    </SelectionPopover.Root>
   )
 }
 
@@ -700,8 +781,29 @@ describe("selectionPopover", () => {
     expect(screen.getByText("Second content")).toBeInTheDocument()
   })
 
-  it("restarts the same popover session when clicking the same trigger again", () => {
+  it("restarts the same popover session when clicking the same trigger again while unpinned", () => {
     render(<ReopenablePopoverHarness />)
+
+    const trigger = screen.getByRole("button", { name: "Open popover" })
+    vi.spyOn(trigger, "getBoundingClientRect").mockReturnValue(buildTriggerRect())
+
+    fireEvent.click(trigger)
+    flushRaf()
+
+    expect(screen.getByText("First selection")).toBeInTheDocument()
+
+    const firstElement = screen.getByTestId("mock-rnd")
+
+    fireEvent.click(trigger)
+    flushRaf()
+
+    expect(screen.getByText("First selection")).toBeInTheDocument()
+    expect(screen.getByTestId("mock-rnd")).not.toBe(firstElement)
+  })
+
+  it("reuses a pinned popover in place when clicking the same trigger again", () => {
+    const onReuseRequestSpy = vi.fn<(...args: any[]) => any>()
+    render(<ReopenablePopoverHarness onReuseRequestSpy={onReuseRequestSpy} />)
 
     const trigger = screen.getByRole("button", { name: "Open popover" })
     vi.spyOn(trigger, "getBoundingClientRect").mockReturnValue(buildTriggerRect())
@@ -718,19 +820,121 @@ describe("selectionPopover", () => {
     )
 
     const firstElement = screen.getByTestId("mock-rnd")
+    const positionBeforeReuse = latestRndProps?.position
+    updatePositionSpy.mockReset()
+    updateSizeSpy.mockReset()
 
     fireEvent.click(screen.getByRole("button", { name: "Switch selection" }))
-    expect(screen.getByText("First selection")).toBeInTheDocument()
-
     fireEvent.click(trigger)
     flushRaf()
 
     expect(screen.getByText("Second selection")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Pin popover" })).toHaveAttribute(
+    expect(onReuseRequestSpy).toHaveBeenCalledWith({ anchor: { x: 120, y: 140 } })
+    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute(
       "aria-pressed",
-      "false",
+      "true",
     )
-    expect(screen.getByTestId("mock-rnd")).not.toBe(firstElement)
+    expect(screen.getByTestId("mock-rnd")).toBe(firstElement)
+    expect(latestRndProps?.position).toEqual(positionBeforeReuse)
+    expect(updatePositionSpy).not.toHaveBeenCalled()
+    expect(updateSizeSpy).not.toHaveBeenCalled()
+  })
+
+  it("notifies pinned-state changes through onPinnedChange", () => {
+    const onPinnedChangeSpy = vi.fn<(...args: any[]) => any>()
+    render(<ControlledPinHarness onPinnedChange={onPinnedChangeSpy} />)
+
+    const trigger = screen.getByRole("button", { name: "Open popover" })
+    vi.spyOn(trigger, "getBoundingClientRect").mockReturnValue(buildTriggerRect())
+
+    fireEvent.click(trigger)
+    flushRaf()
+
+    fireEvent.click(screen.getByRole("button", { name: "Pin popover" }))
+    expect(onPinnedChangeSpy).toHaveBeenLastCalledWith(true)
+    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: "Close" }))
+    expect(onPinnedChangeSpy).toHaveBeenLastCalledWith(false)
+  })
+
+  it("opens at the requested anchor through actionsRef.requestOpen", () => {
+    const actionsRef = React.createRef<{
+      requestOpen: (anchor?: { x: number; y: number } | null) => void
+    }>()
+    render(<ActionsPopoverHarness actionsRef={actionsRef} />)
+
+    expect(screen.queryByTestId("mock-rnd")).not.toBeInTheDocument()
+
+    act(() => {
+      actionsRef.current?.requestOpen({ x: 200, y: 160 })
+    })
+
+    expect(onOpenChangeSpy).toHaveBeenLastCalledWith(true)
+    expect(screen.getByTestId("mock-rnd")).toBeInTheDocument()
+  })
+
+  it("restarts an unpinned popover through actionsRef.requestOpen", () => {
+    const actionsRef = React.createRef<{
+      requestOpen: (anchor?: { x: number; y: number } | null) => void
+    }>()
+    const onReuseRequestSpy = vi.fn<(...args: any[]) => any>()
+    render(<ActionsPopoverHarness actionsRef={actionsRef} onReuseRequest={onReuseRequestSpy} />)
+
+    act(() => {
+      actionsRef.current?.requestOpen({ x: 200, y: 160 })
+    })
+    flushRaf()
+
+    onOpenChangeSpy.mockReset()
+
+    act(() => {
+      actionsRef.current?.requestOpen({ x: 400, y: 320 })
+    })
+
+    expect(onOpenChangeSpy).toHaveBeenLastCalledWith(false)
+
+    flushRaf()
+
+    expect(onOpenChangeSpy).toHaveBeenLastCalledWith(true)
+    expect(onReuseRequestSpy).not.toHaveBeenCalled()
+    expect(screen.getByTestId("mock-rnd")).toBeInTheDocument()
+  })
+
+  it("reuses a pinned popover through actionsRef.requestOpen without moving it", () => {
+    const actionsRef = React.createRef<{
+      requestOpen: (anchor?: { x: number; y: number } | null) => void
+    }>()
+    const onReuseRequestSpy = vi.fn<(...args: any[]) => any>()
+    render(<ActionsPopoverHarness actionsRef={actionsRef} onReuseRequest={onReuseRequestSpy} />)
+
+    act(() => {
+      actionsRef.current?.requestOpen({ x: 200, y: 160 })
+    })
+    flushRaf()
+
+    fireEvent.click(screen.getByRole("button", { name: "Pin popover" }))
+
+    const firstElement = screen.getByTestId("mock-rnd")
+    const positionBeforeReuse = latestRndProps?.position
+    onOpenChangeSpy.mockReset()
+
+    act(() => {
+      actionsRef.current?.requestOpen({ x: 400, y: 320 })
+    })
+    flushRaf()
+
+    expect(onReuseRequestSpy).toHaveBeenCalledWith({ anchor: { x: 400, y: 320 } })
+    expect(onOpenChangeSpy).not.toHaveBeenCalled()
+    expect(screen.getByTestId("mock-rnd")).toBe(firstElement)
+    expect(latestRndProps?.position).toEqual(positionBeforeReuse)
+    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    )
   })
 
   it("keeps growing downward until streamed content reaches the viewport bottom", async () => {
