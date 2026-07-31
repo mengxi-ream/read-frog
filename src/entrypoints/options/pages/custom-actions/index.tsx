@@ -9,10 +9,9 @@ export function CustomActionsPage() {
       description={i18n.t(
         "options.floatingButtonAndToolbar.selectionToolbar.customActions.pageDescription",
       )}
+      innerClassName="flex flex-col gap-10"
     >
-      <div className="*:border-b [&>*:last-child]:border-b-0">
-        <CustomActionsConfig />
-      </div>
+      <CustomActionsConfig />
     </PageLayout>
   )
 }
