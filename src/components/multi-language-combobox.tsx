@@ -53,7 +53,7 @@ export function MultiLanguageCombobox({
       filter={filterLanguage}
     >
       <ComboboxPrimitive.Trigger
-        render={<Button variant="outline" className="w-40 justify-between" />}
+        render={<Button variant="outline" size="sm" className="justify-between" />}
       >
         <span className="truncate">{buttonLabel}</span>
         <Icon icon="tabler:chevron-down" className="text-muted-foreground" />

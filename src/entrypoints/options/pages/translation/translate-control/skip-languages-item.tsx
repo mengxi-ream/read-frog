@@ -25,21 +25,23 @@ export function SkipLanguagesItem() {
       <ConfigItem
         id="skip-languages"
         title={i18n.t("options.translation.skipLanguages.title")}
-        description={i18n.t("options.translation.skipLanguages.description")}
+        description={
+          <>
+            {i18n.t("options.translation.skipLanguages.description")}
+            <LanguageChips
+              languages={selectedLanguages}
+              onRemove={(language) =>
+                setLanguages(selectedLanguages.filter((selected) => selected !== language))
+              }
+            />
+          </>
+        }
       >
-        <div className="flex flex-col items-end gap-3">
-          <MultiLanguageCombobox
-            selectedLanguages={selectedLanguages}
-            onLanguagesChange={setLanguages}
-            buttonLabel={i18n.t("options.translation.skipLanguages.selectLanguages")}
-          />
-          <LanguageChips
-            languages={selectedLanguages}
-            onRemove={(language) =>
-              setLanguages(selectedLanguages.filter((selected) => selected !== language))
-            }
-          />
-        </div>
+        <MultiLanguageCombobox
+          selectedLanguages={selectedLanguages}
+          onLanguagesChange={setLanguages}
+          buttonLabel={i18n.t("options.translation.skipLanguages.selectLanguages")}
+        />
       </ConfigItem>
       <ConfigItem
         description={i18n.t("options.translation.skipLanguages.targetLanguageSkipDescription")}

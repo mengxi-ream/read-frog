@@ -20,21 +20,23 @@ export function AutoTranslateLanguagesItem() {
     <ConfigItem
       id="auto-translate-languages"
       title={i18n.t("options.translation.autoTranslateLanguages.title")}
-      description={i18n.t("options.translation.autoTranslateLanguages.description")}
+      description={
+        <>
+          {i18n.t("options.translation.autoTranslateLanguages.description")}
+          <LanguageChips
+            languages={selectedLanguages}
+            onRemove={(language) =>
+              setLanguages(selectedLanguages.filter((selected) => selected !== language))
+            }
+          />
+        </>
+      }
     >
-      <div className="flex flex-col items-end gap-3">
-        <MultiLanguageCombobox
-          selectedLanguages={selectedLanguages}
-          onLanguagesChange={setLanguages}
-          buttonLabel={i18n.t("options.translation.autoTranslateLanguages.selectLanguages")}
-        />
-        <LanguageChips
-          languages={selectedLanguages}
-          onRemove={(language) =>
-            setLanguages(selectedLanguages.filter((selected) => selected !== language))
-          }
-        />
-      </div>
+      <MultiLanguageCombobox
+        selectedLanguages={selectedLanguages}
+        onLanguagesChange={setLanguages}
+        buttonLabel={i18n.t("options.translation.autoTranslateLanguages.selectLanguages")}
+      />
     </ConfigItem>
   )
 }
