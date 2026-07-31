@@ -79,8 +79,8 @@ export function SettingsNav() {
 
           <SidebarMenuItem>
             <SidebarMenuButton
-              render={<Link to="/translation" />}
-              isActive={pathname === "/translation"}
+              render={<Link to="/page-translation" />}
+              isActive={pathname.startsWith("/page-translation")}
               tooltip={i18n.t("options.translation.title")}
             >
               <Icon icon="ri:translate" />

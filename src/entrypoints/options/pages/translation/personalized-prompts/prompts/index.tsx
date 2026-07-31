@@ -24,7 +24,7 @@ export function PersonalizedPromptsPage() {
       description={i18n.t("options.translation.pageDescription")}
     >
       <ConfigDetailSection
-        backTo="/translation"
+        backTo="/page-translation"
         title={
           <span id="personalized-prompts">
             {i18n.t("options.translation.personalizedPrompts.title")}

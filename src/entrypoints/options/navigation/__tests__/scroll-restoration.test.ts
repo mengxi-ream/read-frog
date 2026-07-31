@@ -52,8 +52,8 @@ describe("resolveScrollTarget", () => {
       resolveScrollTarget({
         navigationType: NavigationType.Push,
         savedOffset: undefined,
-        pathname: "/translation",
-        previousPathname: "/translation",
+        pathname: "/page-translation",
+        previousPathname: "/page-translation",
       }),
     ).toBeNull()
   })

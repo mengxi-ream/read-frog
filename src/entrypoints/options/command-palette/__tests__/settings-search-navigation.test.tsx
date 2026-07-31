@@ -48,7 +48,7 @@ vi.mock("../search-items", () => ({
     },
     {
       sectionId: "translation-mode",
-      route: "/translation",
+      route: "/page-translation",
       titleKey: "translation-mode-title",
       pageKey: "translation-page",
     },
@@ -108,14 +108,14 @@ describe("settings search navigation", () => {
 
     expect(mockedSectionScroll.buildSectionSearch).toHaveBeenCalledWith("translation-mode")
     expect(mockedRouter.navigate).toHaveBeenCalledWith({
-      pathname: "/translation",
+      pathname: "/page-translation",
       search: "?section=translation-mode",
     })
     expect(mockedSectionScroll.scrollToSectionWhenReady).not.toHaveBeenCalled()
   })
 
   it("scrolls directly when current location already matches route and section", () => {
-    mockedRouter.location.pathname = "/translation"
+    mockedRouter.location.pathname = "/page-translation"
     mockedRouter.location.search = "?section=translation-mode"
 
     renderSettingsSearch()
@@ -127,7 +127,7 @@ describe("settings search navigation", () => {
   })
 
   it("updates search params when route matches but section differs", () => {
-    mockedRouter.location.pathname = "/translation"
+    mockedRouter.location.pathname = "/page-translation"
     mockedRouter.location.search = "?section=feature-providers"
 
     renderSettingsSearch()
@@ -135,7 +135,7 @@ describe("settings search navigation", () => {
     fireEvent.click(screen.getByRole("button", { name: "translation-mode-title" }))
 
     expect(mockedRouter.navigate).toHaveBeenCalledWith({
-      pathname: "/translation",
+      pathname: "/page-translation",
       search: "?section=translation-mode",
     })
   })

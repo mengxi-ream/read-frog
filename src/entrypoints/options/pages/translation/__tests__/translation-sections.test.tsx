@@ -103,13 +103,13 @@ describe("translation page sections", () => {
 
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
     expect(container.querySelector("#style-preview")).not.toBeInTheDocument()
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/translation/custom-css")
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/page-translation/custom-css")
   })
 
   it("sends the prompts row to the page that holds the prompt list", () => {
     renderInRouter(<PersonalizedPromptsSection />)
 
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/translation/prompts")
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/page-translation/prompts")
   })
 
   it("toggles hover translation without disturbing the hotkey it listens for", () => {

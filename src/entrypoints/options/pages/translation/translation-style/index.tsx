@@ -35,7 +35,7 @@ export function TranslationStyleSection() {
       </ConfigItem>
       {translationNodeStyle.isCustom ? (
         <ConfigNavItem
-          to="/translation/custom-css"
+          to="/page-translation/custom-css"
           title={i18n.t("options.translation.translationStyle.cssEditor")}
           description={i18n.t("options.translation.translationStyle.cssEditorDescription")}
         />

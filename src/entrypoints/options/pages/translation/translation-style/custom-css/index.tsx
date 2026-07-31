@@ -15,7 +15,7 @@ export function CustomCssPage() {
       description={i18n.t("options.translation.pageDescription")}
     >
       <ConfigDetailSection
-        backTo="/translation"
+        backTo="/page-translation"
         title={
           <span id="custom-css">{i18n.t("options.translation.translationStyle.cssEditor")}</span>
         }
