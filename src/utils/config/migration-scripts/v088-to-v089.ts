@@ -19,41 +19,56 @@ const DEPRECATED_TO_LIVE_COHERE_MODEL: Record<string, string> = {
   "command-light-nightly": "command-r7b-12-2024",
 }
 
-function migrateCohereProvider(provider: any): any {
-  if (!provider || typeof provider !== "object" || provider.provider !== "cohere") {
-    return provider
+function getMigratedCohereModel(modelConfig: any): string | null {
+  const selectedModel = typeof modelConfig?.model === "string" ? modelConfig.model.trim() : null
+  if (selectedModel && DEPRECATED_TO_LIVE_COHERE_MODEL[selectedModel]) {
+    return DEPRECATED_TO_LIVE_COHERE_MODEL[selectedModel]
   }
 
-  const model = provider.model
-  if (!model || typeof model !== "object" || model.isCustomModel !== false) {
-    return provider
+  if (modelConfig?.isCustomModel === true) {
+    const customModel =
+      typeof modelConfig?.customModel === "string" ? modelConfig.customModel.trim() : null
+    if (customModel && DEPRECATED_TO_LIVE_COHERE_MODEL[customModel]) {
+      return DEPRECATED_TO_LIVE_COHERE_MODEL[customModel]
+    }
   }
 
-  const currentModel = model.model
-  if (typeof currentModel !== "string" || !(currentModel in DEPRECATED_TO_LIVE_COHERE_MODEL)) {
-    return provider
+  return null
+}
+
+function migrateProviderConfig(providerConfig: any): any {
+  if (!providerConfig || typeof providerConfig !== "object") {
+    return providerConfig
+  }
+
+  const modelConfig = providerConfig.model
+  if (providerConfig.provider !== "cohere" || !modelConfig || typeof modelConfig !== "object") {
+    return providerConfig
+  }
+
+  const migratedModel = getMigratedCohereModel(modelConfig)
+  if (migratedModel === null) {
+    return providerConfig
   }
 
   return {
-    ...provider,
+    ...providerConfig,
     model: {
-      ...model,
-      model: DEPRECATED_TO_LIVE_COHERE_MODEL[currentModel],
+      ...modelConfig,
+      model: migratedModel,
+      isCustomModel: false,
+      customModel: null,
     },
   }
 }
 
 export function migrate(oldConfig: any): any {
-  if (!oldConfig || typeof oldConfig !== "object") {
+  if (!oldConfig || typeof oldConfig !== "object" || !Array.isArray(oldConfig.providersConfig)) {
     return oldConfig
   }
 
-  const providersConfig = Array.isArray(oldConfig.providersConfig)
-    ? oldConfig.providersConfig.map(migrateCohereProvider)
-    : oldConfig.providersConfig
-
   return {
     ...oldConfig,
-    providersConfig,
+    providersConfig: oldConfig.providersConfig.map(migrateProviderConfig),
   }
 }
