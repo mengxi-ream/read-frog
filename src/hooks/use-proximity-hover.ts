@@ -8,6 +8,17 @@ export interface ItemRect {
   height: number
 }
 
+interface UseProximityHoverOptions {
+  /**
+   * Which direction the nearest item is resolved along.
+   *   "y"  — a vertical stack (default): nearest by top/height alone.
+   *   "xy" — a wrapped grid: nearest by Euclidean distance to each item's centre, so a
+   *          pointer between two columns picks the column it is closest to rather than
+   *          whichever item happens to share its row band.
+   */
+  axis?: "y" | "xy"
+}
+
 interface UseProximityHoverReturn {
   activeIndex: number | null
   itemRects: ItemRect[]
@@ -19,6 +30,12 @@ interface UseProximityHoverReturn {
     onMouseLeave: () => void
   }
   registerItem: (index: number, element: HTMLElement | null) => void
+  /**
+   * Remeasures now. Registration and container resize already schedule one, so this is
+   * only for layout changes neither notices — a prop that reflows items inside a container
+   * whose own box happens to stay the same size.
+   */
+  measureItems: () => void
 }
 
 /**
@@ -29,14 +46,15 @@ interface UseProximityHoverReturn {
 const MEASUREMENT_ATTEMPTS = 3
 
 /**
- * Tracks which item of a vertical stack the pointer is nearest, so one moving highlight
- * can follow it instead of every item lighting up on its own `:hover`. Items register
- * themselves by index; the caller positions its highlight from `itemRects[activeIndex]`.
+ * Tracks which item the pointer is nearest, so one moving highlight can follow it instead
+ * of every item lighting up on its own `:hover`. Items register themselves by index; the
+ * caller positions its highlight from `itemRects[activeIndex]`.
  *
- * Ported from fluidfunctionalism.com/docs/table, narrowed to the vertical axis.
+ * Ported from fluidfunctionalism.com/docs/table.
  */
 export function useProximityHover<T extends HTMLElement>(
   containerRef: RefObject<T | null>,
+  { axis = "y" }: UseProximityHoverOptions = {},
 ): UseProximityHoverReturn {
   const itemsRef = useRef(new Map<number, HTMLElement>())
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
@@ -132,6 +150,7 @@ export function useProximityHover<T extends HTMLElement>(
 
   const onMouseMove = useCallback(
     (event: React.MouseEvent) => {
+      const pointerX = event.clientX
       const pointerY = event.clientY
 
       if (moveRafRef.current !== null) {
@@ -144,11 +163,12 @@ export function useProximityHover<T extends HTMLElement>(
         if (!container) return
 
         const containerRect = container.getBoundingClientRect()
-        const scrollOffset = container.scrollTop
-        const borderOffset = container.clientTop
         // Item rects are layout values while the pointer lives in visual space, so an
-        // ancestor `transform: scale` has to be divided back out before comparing.
-        const scale = container.offsetHeight > 0 ? containerRect.height / container.offsetHeight : 1
+        // ancestor `transform: scale` has to be divided back out before comparing. The two
+        // axes scale independently.
+        const scaleX = container.offsetWidth > 0 ? containerRect.width / container.offsetWidth : 1
+        const scaleY =
+          container.offsetHeight > 0 ? containerRect.height / container.offsetHeight : 1
 
         let closestIndex: number | null = null
         let closestDistance = Infinity
@@ -159,13 +179,38 @@ export function useProximityHover<T extends HTMLElement>(
           const rect = rects[index]
           if (!rect) continue
 
-          const itemTop = containerRect.top + (borderOffset + rect.top - scrollOffset) * scale
-          const itemHeight = rect.height * scale
-          if (pointerY >= itemTop && pointerY <= itemTop + itemHeight) {
+          const itemTop =
+            containerRect.top + (container.clientTop + rect.top - container.scrollTop) * scaleY
+          const itemHeight = rect.height * scaleY
+
+          if (axis === "y") {
+            if (pointerY >= itemTop && pointerY <= itemTop + itemHeight) {
+              containingIndex = index
+            }
+            const distance = Math.abs(pointerY - (itemTop + itemHeight / 2))
+            if (distance < closestDistance) {
+              closestDistance = distance
+              closestIndex = index
+            }
+            continue
+          }
+
+          const itemLeft =
+            containerRect.left + (container.clientLeft + rect.left - container.scrollLeft) * scaleX
+          const itemWidth = rect.width * scaleX
+          if (
+            pointerX >= itemLeft &&
+            pointerX <= itemLeft + itemWidth &&
+            pointerY >= itemTop &&
+            pointerY <= itemTop + itemHeight
+          ) {
             containingIndex = index
           }
 
-          const distance = Math.abs(pointerY - (itemTop + itemHeight / 2))
+          const distance = Math.hypot(
+            pointerX - (itemLeft + itemWidth / 2),
+            pointerY - (itemTop + itemHeight / 2),
+          )
           if (distance < closestDistance) {
             closestDistance = distance
             closestIndex = index
@@ -175,7 +220,7 @@ export function useProximityHover<T extends HTMLElement>(
         setActiveIndex(containingIndex ?? closestIndex)
       })
     },
-    [containerRef],
+    [axis, containerRef],
   )
 
   const onMouseEnter = useCallback(() => {
@@ -207,11 +252,16 @@ export function useProximityHover<T extends HTMLElement>(
     }
   }, [])
 
+  const measureItems = useCallback(() => {
+    scheduleMeasurement(MEASUREMENT_ATTEMPTS)
+  }, [scheduleMeasurement])
+
   return {
     activeIndex,
     itemRects,
     sessionRef,
     handlers: { onMouseEnter, onMouseMove, onMouseLeave },
     registerItem,
+    measureItems,
   }
 }
