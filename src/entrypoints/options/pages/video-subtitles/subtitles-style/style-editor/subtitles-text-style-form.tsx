@@ -2,6 +2,7 @@ import type { SubtitlesFontFamily, SubtitleTextStyle } from "@/types/config/subt
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
 import { useEffect, useState } from "react"
+import { DebouncedColorPicker } from "@/components/debounced-color-picker"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import {
   Select,
@@ -139,11 +140,10 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
             {i18n.t("options.videoSubtitles.style.color")}
           </FieldLabel>
           <div className="flex min-w-0 @xs/field-group:justify-end">
-            <input
-              type="color"
+            <DebouncedColorPicker
               value={textStyle.color}
-              onChange={(e) => handleChange({ color: e.target.value })}
-              className="h-8 !w-8 cursor-pointer rounded border border-input p-0.5"
+              onCommit={(color) => handleChange({ color })}
+              triggerClassName="h-8"
             />
           </div>
         </div>

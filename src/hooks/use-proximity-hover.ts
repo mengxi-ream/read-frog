@@ -1,4 +1,4 @@
-import type { RefObject } from "react"
+import type { Dispatch, RefObject, SetStateAction } from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 export interface ItemRect {
@@ -21,6 +21,12 @@ interface UseProximityHoverOptions {
 
 interface UseProximityHoverReturn {
   activeIndex: number | null
+  /**
+   * Drives the highlight from something other than the pointer. Keyboard-navigable popups
+   * need it so arrowing through items moves the same highlight the mouse does, instead of
+   * leaving it wherever the pointer last was.
+   */
+  setActiveIndex: Dispatch<SetStateAction<number | null>>
   itemRects: ItemRect[]
   /** Bumped on each pointer entry so a consumer can remount its highlight per session. */
   sessionRef: RefObject<number>
@@ -258,6 +264,7 @@ export function useProximityHover<T extends HTMLElement>(
 
   return {
     activeIndex,
+    setActiveIndex,
     itemRects,
     sessionRef,
     handlers: { onMouseEnter, onMouseMove, onMouseLeave },
