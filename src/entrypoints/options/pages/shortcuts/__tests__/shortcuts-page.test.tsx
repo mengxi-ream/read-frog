@@ -25,6 +25,10 @@ vi.mock("../selection-translation-shortcut", () => ({
   SelectionTranslationShortcut: () => <section data-section="selection-translation-shortcut" />,
 }))
 
+vi.mock("../subtitles-toggle-shortcut", () => ({
+  SubtitlesToggleShortcut: () => <section data-section="subtitles-toggle-shortcut" />,
+}))
+
 vi.mock("../node-translation-hotkey", () => ({
   NodeTranslationHotkey: () => <section data-section="node-translation-hotkey" />,
 }))
@@ -41,6 +45,7 @@ describe("shortcuts page", () => {
       "page-translation-shortcut",
       "translation-mode-shortcut",
       "selection-translation-shortcut",
+      "subtitles-toggle-shortcut",
       "node-translation-hotkey",
     ])
   })

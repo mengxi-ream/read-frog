@@ -1,9 +1,11 @@
+import type { ContentScriptContext } from "#imports"
 import {
   YOUTUBE_EMBED_PATH_PATTERN,
   YOUTUBE_NAVIGATE_FINISH_EVENT,
   YOUTUBE_SHORTS_PATH_PATTERN,
   YOUTUBE_WATCH_URL_PATTERN,
 } from "@/utils/constants/subtitles"
+import { bindSubtitlesToggleShortcut } from "./bind-subtitles-toggle-shortcut"
 import { createYoutubeSubtitlesAdapter } from "./platforms/youtube"
 import { createYoutubeCaptionTrackListener } from "./platforms/youtube/caption-track-listener"
 import { getYoutubeConfig } from "./platforms/youtube/config"
@@ -23,7 +25,7 @@ function isYoutubeShorts(): boolean {
   return YOUTUBE_SHORTS_PATH_PATTERN.test(window.location.pathname)
 }
 
-export function initYoutubeSubtitles() {
+export function initYoutubeSubtitles(ctx: ContentScriptContext) {
   let initialized = false
   let adapter: ReturnType<typeof createYoutubeSubtitlesAdapter> | null = null
 
@@ -52,6 +54,9 @@ export function initYoutubeSubtitles() {
     }
 
     initialized = true
+    const unbindToggleShortcut = await bindSubtitlesToggleShortcut(adapter)
+    ctx.onInvalidated(unbindToggleShortcut)
+
     const trackListener = createYoutubeCaptionTrackListener({
       playerContainerSelector: config.selectors.playerContainer,
       onTrackChanged: () => {
