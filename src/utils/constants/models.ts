@@ -261,9 +261,11 @@ export const LLM_PROVIDER_MODELS = {
     "google/gemma-2b-it",
   ],
   cohere: [
+    "command-a-plus-05-2026",
     "command-a-03-2025",
     "command-a-reasoning-08-2025",
     "command-a-vision-07-2025",
+    "command-a-translate-08-2025",
     "command-r7b-12-2024",
     "command-r-plus-04-2024",
     "command-r-plus",
