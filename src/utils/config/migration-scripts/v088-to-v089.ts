@@ -20,17 +20,22 @@ const DEPRECATED_TO_LIVE_COHERE_MODEL: Record<string, string> = {
 }
 
 function getMigratedCohereModel(modelConfig: any): string | null {
-  const selectedModel = typeof modelConfig?.model === "string" ? modelConfig.model.trim() : null
-  if (selectedModel && DEPRECATED_TO_LIVE_COHERE_MODEL[selectedModel]) {
-    return DEPRECATED_TO_LIVE_COHERE_MODEL[selectedModel]
-  }
-
+  // When custom model mode is active, resolveModelId uses customModel.
+  // We must preserve a still-supported active custom model and not overwrite
+  // it just because the dormant built-in selector happens to be deprecated.
   if (modelConfig?.isCustomModel === true) {
     const customModel =
       typeof modelConfig?.customModel === "string" ? modelConfig.customModel.trim() : null
     if (customModel && DEPRECATED_TO_LIVE_COHERE_MODEL[customModel]) {
       return DEPRECATED_TO_LIVE_COHERE_MODEL[customModel]
     }
+
+    return null
+  }
+
+  const selectedModel = typeof modelConfig?.model === "string" ? modelConfig.model.trim() : null
+  if (selectedModel && DEPRECATED_TO_LIVE_COHERE_MODEL[selectedModel]) {
+    return DEPRECATED_TO_LIVE_COHERE_MODEL[selectedModel]
   }
 
   return null
