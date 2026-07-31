@@ -10,6 +10,7 @@ import {
 import {
   batchQueueConfigSchema,
   customPromptsConfigSchema,
+  pageTranslationShortcutSchema,
   requestQueueConfigSchema,
 } from "./translate"
 
@@ -44,6 +45,7 @@ export const subtitlePositionSchema = z.object({
 export const videoSubtitlesSchema = z.object({
   enabled: z.boolean(),
   autoStart: z.boolean(),
+  toggleShortcut: pageTranslationShortcutSchema,
   providerId: z.string().nonempty(),
   style: subtitlesStyleSchema,
   aiSegmentation: z.boolean(),

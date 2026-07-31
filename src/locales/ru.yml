@@ -421,6 +421,9 @@ options:
     selectionTranslation:
       title: Перевод выделения
       description: Перевести выделенный текст.
+    subtitlesToggle:
+      title: Перевод субтитров
+      description: Включает или выключает переведённые субтитры видео.
     nodeTranslation:
       title: Перевод абзаца
       description: Наведите курсор на абзац или нажмите и удерживайте его, чтобы перевести только его.
@@ -1047,6 +1050,9 @@ subtitles:
   loadingAiSubtitles: Загрузка ИИ-субтитров… (ожидается 3 мин)
   requestAiSubtitles: Запросить ИИ-субтитры (Beta)
   usingAiSubtitles: Используются ИИ-субтитры
+  toggle:
+    enabled: Перевод субтитров включён
+    disabled: Перевод субтитров выключен
   actions:
     downloadTranslated: Скачать переведённые субтитры
     downloadTranslatedPreparing: Подготовка субтитров, длинные видео могут занять больше времени

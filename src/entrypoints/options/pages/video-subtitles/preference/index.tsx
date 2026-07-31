@@ -4,6 +4,7 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
+import { ShortcutLink } from "../../../components/shortcut-link"
 
 /**
  * Whether subtitles get translated at all, when that starts, and whether AI re-cuts the lines
@@ -19,7 +20,12 @@ export function PreferenceSection() {
       <ConfigItem
         id="subtitles-enable"
         title={i18n.t("options.videoSubtitles.preference.enable.title")}
-        description={i18n.t("options.videoSubtitles.preference.enable.description")}
+        description={
+          <>
+            {i18n.t("options.videoSubtitles.preference.enable.description")}
+            <ShortcutLink sectionId="subtitles-toggle-shortcut" />
+          </>
+        }
       >
         <Switch
           checked={videoSubtitlesConfig.enabled}

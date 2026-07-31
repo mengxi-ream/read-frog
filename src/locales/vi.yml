@@ -421,6 +421,9 @@ options:
     selectionTranslation:
       title: Dịch vùng chọn
       description: Dịch văn bản bạn đã chọn.
+    subtitlesToggle:
+      title: Dịch phụ đề
+      description: Bật hoặc tắt phụ đề đã dịch của video.
     nodeTranslation:
       title: Dịch đoạn văn
       description: Di chuột hoặc nhấn giữ một đoạn để chỉ dịch đoạn đó.
@@ -1047,6 +1050,9 @@ subtitles:
   loadingAiSubtitles: Đang tải phụ đề AI… (dự kiến 3 phút)
   requestAiSubtitles: Yêu cầu phụ đề AI (Beta)
   usingAiSubtitles: Đang dùng phụ đề AI
+  toggle:
+    enabled: Đã bật dịch phụ đề
+    disabled: Đã tắt dịch phụ đề
   actions:
     downloadTranslated: Tải phụ đề đã dịch
     downloadTranslatedPreparing: Đang chuẩn bị phụ đề, video dài có thể mất nhiều thời gian hơn
