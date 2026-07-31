@@ -421,6 +421,9 @@ options:
     selectionTranslation:
       title: Seçim çevirisi
       description: Seçtiğiniz metni çevirir.
+    subtitlesToggle:
+      title: Altyazı çevirisi
+      description: Videonun çevrilmiş altyazılarını açıp kapatır.
     nodeTranslation:
       title: Paragraf çevirisi
       description: Bir paragrafın üzerine gelin veya uzun basın; yalnızca o paragraf çevrilir.
@@ -1050,6 +1053,9 @@ subtitles:
   loadingAiSubtitles: Yapay zeka altyazıları yükleniyor… (tahmini 3 dk)
   requestAiSubtitles: Yapay zeka altyazısı iste (Beta)
   usingAiSubtitles: Yapay zeka altyazısı kullanılıyor
+  toggle:
+    enabled: Altyazı çevirisi açık
+    disabled: Altyazı çevirisi kapalı
   actions:
     downloadTranslated: Çevrilmiş altyazıları indir
     downloadTranslatedPreparing: Altyazılar hazırlanıyor, uzun videolar daha uzun sürebilir

@@ -107,6 +107,13 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.shortcuts.title",
   },
   {
+    sectionId: "subtitles-toggle-shortcut",
+    route: "/shortcuts",
+    titleKey: "options.shortcuts.subtitlesToggle.title",
+    descriptionKey: "options.shortcuts.subtitlesToggle.description",
+    pageKey: "options.shortcuts.title",
+  },
+  {
     sectionId: "node-translation-hotkey",
     route: "/shortcuts",
     titleKey: "options.shortcuts.nodeTranslation.title",

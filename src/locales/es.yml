@@ -422,6 +422,9 @@ options:
     selectionTranslation:
       title: Traducción de la selección
       description: Traduce el texto que seleccionaste.
+    subtitlesToggle:
+      title: Traducción de subtítulos
+      description: Activa o desactiva los subtítulos traducidos del vídeo.
     nodeTranslation:
       title: Traducción de párrafo
       description: Pasa el cursor o mantén pulsado un párrafo para traducir solo ese.
@@ -1166,6 +1169,9 @@ subtitles:
   loadingAiSubtitles: Cargando subtítulos con IA… (estimado 3 min)
   requestAiSubtitles: Solicitar subtítulos con IA (Beta)
   usingAiSubtitles: Usando subtítulos con IA
+  toggle:
+    enabled: Traducción de subtítulos activada
+    disabled: Traducción de subtítulos desactivada
   actions:
     downloadTranslated: Descargar subtítulos traducidos
     downloadTranslatedPreparing: Preparando subtítulos, los videos largos pueden tardar más

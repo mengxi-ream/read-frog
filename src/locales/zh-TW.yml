@@ -422,6 +422,9 @@ options:
     selectionTranslation:
       title: 選取文字翻譯
       description: 翻譯選取的文字。
+    subtitlesToggle:
+      title: 字幕翻譯
+      description: 開啟或關閉影片的翻譯字幕。
     nodeTranslation:
       title: 段落翻譯
       description: 滑鼠停留或長按段落，只翻譯這一段。
@@ -1166,6 +1169,9 @@ subtitles:
   loadingAiSubtitles: 正在載入 AI 字幕（預計 3 分鐘）
   requestAiSubtitles: 請求 AI 字幕（Beta）
   usingAiSubtitles: 正在使用 AI 字幕
+  toggle:
+    enabled: 字幕翻譯已開啟
+    disabled: 字幕翻譯已關閉
   actions:
     downloadTranslated: 下載翻譯字幕
     downloadTranslatedPreparing: 正在準備字幕，長影片可能需要更久

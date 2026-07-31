@@ -422,6 +422,9 @@ options:
     selectionTranslation:
       title: Selection translation
       description: Translate the text you selected.
+    subtitlesToggle:
+      title: Subtitle translation
+      description: Turn translated video subtitles on or off.
     nodeTranslation:
       title: Paragraph translation
       description: Hover or long-press a paragraph to translate just that one.
@@ -1166,6 +1169,9 @@ subtitles:
   loadingAiSubtitles: Loading AI subtitles… (estimated 3 min)
   requestAiSubtitles: Request AI subtitles (Beta)
   usingAiSubtitles: Using AI subtitles
+  toggle:
+    enabled: Subtitle translation on
+    disabled: Subtitle translation off
   actions:
     downloadTranslated: Download translated subtitles
     downloadTranslatedPreparing: Preparing subtitles, longer videos may take a while
