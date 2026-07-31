@@ -63,21 +63,28 @@ describe("v088-to-v089 migration", () => {
     ["command-nightly", "command-r7b-12-2024"],
     ["command-light", "command-r7b-12-2024"],
     ["command-light-nightly", "command-r7b-12-2024"],
-  ])("migrates custom deprecated Cohere model %s to %s", (deprecated, live) => {
-    const migrated = migrate(
-      cohereConfig({ model: "command-r", isCustomModel: true, customModel: deprecated }),
-    )
+  ])(
+    "remaps dormant deprecated selector %s while preserving active custom model",
+    (deprecated, live) => {
+      const migrated = migrate(
+        cohereConfig({
+          model: deprecated,
+          isCustomModel: true,
+          customModel: "my-private-cohere-model",
+        }),
+      )
 
-    expect(migrated.providersConfig[0].model).toEqual({
-      model: live,
-      isCustomModel: false,
-      customModel: null,
-    })
-  })
+      expect(migrated.providersConfig[0].model).toEqual({
+        model: live,
+        isCustomModel: true,
+        customModel: "my-private-cohere-model",
+      })
+    },
+  )
 
-  it("preserves an active custom Cohere model that is not deprecated", () => {
+  it("preserves an active custom Cohere model when dormant selector is already valid", () => {
     const oldConfig = cohereConfig({
-      model: "command",
+      model: "command-r-08-2024",
       isCustomModel: true,
       customModel: "my-private-cohere-model",
     })
@@ -86,7 +93,7 @@ describe("v088-to-v089 migration", () => {
     const migrated = migrate(oldConfig)
 
     expect(migrated.providersConfig[0].model).toEqual({
-      model: "command",
+      model: "command-r-08-2024",
       isCustomModel: true,
       customModel: "my-private-cohere-model",
     })

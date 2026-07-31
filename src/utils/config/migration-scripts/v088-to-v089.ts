@@ -3,6 +3,9 @@
  * - Removes deprecated Cohere Command models from the hardcoded model list
  *   and remaps any saved provider configs that use them to the closest
  *   currently-live Cohere model.
+ * - When custom model mode is active, remaps only the dormant selector-backed
+ *   `model` field so schema validation still passes, while preserving
+ *   `isCustomModel` and `customModel`.
  *
  * IMPORTANT: All values are hardcoded inline. Migration scripts are frozen
  * snapshots — never import constants or helpers that may change.
@@ -19,26 +22,13 @@ const DEPRECATED_TO_LIVE_COHERE_MODEL: Record<string, string> = {
   "command-light-nightly": "command-r7b-12-2024",
 }
 
-function getMigratedCohereModel(modelConfig: any): string | null {
-  // When custom model mode is active, resolveModelId uses customModel.
-  // We must preserve a still-supported active custom model and not overwrite
-  // it just because the dormant built-in selector happens to be deprecated.
-  if (modelConfig?.isCustomModel === true) {
-    const customModel =
-      typeof modelConfig?.customModel === "string" ? modelConfig.customModel.trim() : null
-    if (customModel && DEPRECATED_TO_LIVE_COHERE_MODEL[customModel]) {
-      return DEPRECATED_TO_LIVE_COHERE_MODEL[customModel]
-    }
-
+function getNormalizedModelId(value: unknown): string | null {
+  if (typeof value !== "string") {
     return null
   }
 
-  const selectedModel = typeof modelConfig?.model === "string" ? modelConfig.model.trim() : null
-  if (selectedModel && DEPRECATED_TO_LIVE_COHERE_MODEL[selectedModel]) {
-    return DEPRECATED_TO_LIVE_COHERE_MODEL[selectedModel]
-  }
-
-  return null
+  const model = value.trim()
+  return model || null
 }
 
 function migrateProviderConfig(providerConfig: any): any {
@@ -51,9 +41,26 @@ function migrateProviderConfig(providerConfig: any): any {
     return providerConfig
   }
 
-  const migratedModel = getMigratedCohereModel(modelConfig)
+  // `model` is always schema-validated against the live enum, even when custom
+  // mode is active. Remap a deprecated dormant selector so validation passes.
+  const selectedModel = getNormalizedModelId(modelConfig.model)
+  const migratedModel =
+    selectedModel === null ? null : (DEPRECATED_TO_LIVE_COHERE_MODEL[selectedModel] ?? null)
+
   if (migratedModel === null) {
     return providerConfig
+  }
+
+  // Preserve an active custom model selection. Only the dormant selector needs
+  // to become a valid enum value for post-migration schema validation.
+  if (modelConfig.isCustomModel === true) {
+    return {
+      ...providerConfig,
+      model: {
+        ...modelConfig,
+        model: migratedModel,
+      },
+    }
   }
 
   return {
