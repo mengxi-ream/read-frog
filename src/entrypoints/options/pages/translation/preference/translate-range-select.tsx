@@ -27,14 +27,14 @@ export function TranslateRangeSelect() {
     >
       <SelectTrigger size="sm">
         <SelectValue render={<span />}>
-          {i18n.t(`options.translation.translateRange.range.${range}`)}
+          {i18n.t(`options.translation.preference.translateRange.range.${range}`)}
         </SelectValue>
       </SelectTrigger>
       <SelectContent {...SELECT_CONTENT_PROPS}>
         <SelectGroup>
           {pageTranslateRangeSchema.options.map((item) => (
             <SelectItem key={item} value={item}>
-              {i18n.t(`options.translation.translateRange.range.${item}`)}
+              {i18n.t(`options.translation.preference.translateRange.range.${item}`)}
             </SelectItem>
           ))}
         </SelectGroup>

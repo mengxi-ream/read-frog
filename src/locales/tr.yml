@@ -651,96 +651,46 @@ options:
     title: Sayfa Çevirisi
     pageDescription: Sayfaların nasıl çevrileceğini belirleyin — mod, kapsam, istemler ve istek limitleri.
     preference:
-      title: Tercihler
+      title: Temel ayarlar
+      translationMode:
+        title: Çeviri modu
+        description: "Çevrilmiş metnin nasıl görüntüleneceğini seçin: iki dilli veya yalnızca çeviri."
+        mode:
+          bilingual: İki dilli
+          translationOnly: Yalnızca çeviri
+        switched: "Çeviri modu: $1"
+      translateRange:
+        title: Çeviri kapsamı
+        description: Sayfadaki yalnızca ana içeriğin mi yoksa tüm içeriğin mi çevrileceğini seçin.
+        range:
+          main: Ana içerik
+          all: Tüm içerik
     hoverTranslation:
-      title: Üzerine Gelme Çevirisi
+      title: Üzerine gelme çevirisi
       enable:
         title: Etkinleştir
         description: Bir paragrafın üzerine gelin veya uzun basın; yalnızca o paragraf çevrilir.
-    translationControl:
-      title: Çeviri denetimi
-    translationQueue:
-      title: Çeviri kuyruğu
-    cache:
-      title: Önbellek
-    requestQueueConfig:
-      title: Çeviri hızı
-      capacity:
-        description: "Maksimum ani istek: aynı anda kaç istek gönderilebilir"
-      rate:
-        description: "Saniyedeki istek: sonrasındaki sabit hız. Ondalık da olur, 0.25 her 4 saniyede bir istek demek"
-    batchQueueConfig:
-      title: Toplu çeviri
-      description: Toplu çeviri için karakter limitleri ve maksimum paragraf sayısını yapılandırın (yalnızca LLM çevirisi için geçerlidir)
-      maxCharactersPerBatch:
-        description: "Maksimum karakter: tek bir yapay zekâ isteği ne kadar metin taşır"
-      maxItemsPerBatch:
-        description: "Maksimum paragraf: tek istekte kaç paragraf birleşir. Yapay zekâ olmayan sağlayıcılar ikisini de yok sayar"
-    autoTranslateWebsite:
-      title: Web sitesine göre otomatik çevir
-      description: Açılır açılmaz çevrilmeye başlayan siteler
-      urlPattern: URL kalıbı
-      enterUrlPattern: URL kalıbı girin
-    neverAutoTranslateWebsite:
-      title: Web sitesine göre asla otomatik çevirme
-      description: Bir dil kuralı eşleşse bile kendiliğinden çevrilmeyen siteler
-      urlPattern: URL kalıbı
-      enterUrlPattern: URL kalıbı girin
-    personalizedPrompts:
-      title: Kişiselleştirilmiş Promptlar
-      description: Farklı türde Promptları özelleştirmek, çeviri sırasında Prompt türünü kendiniz ayarlamanıza olanak tanır. Prompt, kullanıcının LLM'ye gönderdiği metni temsil eder.
-      managePrompts: Promptları yönet
-      communityPrompts: Topluluktan prompt al veya paylaş
-      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
-      addPrompt: Prompt Ekle
-      default: Varsayılan
-      importSuccess: İçe Aktarma Başarılı
-      import: İçe Aktar
-      export: Dışa Aktar
-      current: kullanımda
-      editPrompt:
-        title: Promptu Düzenle
-        name: Ad
-        systemPrompt: Sistem Promptu
-        prompt: Prompt
-        promptCellInput:
-          input: Çevrilecek metin içeriği
-          targetLanguage: Hedef dil
-          webTitle: Web sayfası başlığı
-          webDescription: Sayfa meta verilerinden web sayfası açıklaması
-          webContent: Web sayfası içeriği (ilk 2000 karaktere kısaltılır)
-          webSummary: Web sayfası özeti (AI Akıllı Bağlam gerektirir)
-        save: Değişiklikleri Kaydet
-        close: İptal
-      deletePrompt:
-        title: Promptu Sil
-        description: Promptu silmeyi onayla
-        confirm: Onayla
-        cancel: İptal
-      exportPrompt:
-        exportSelected: Seçilenleri Dışa Aktar
-        cancel: İptal
     translationStyle:
-      title: Çeviri Görüntüleme Stili
+      title: Çeviri görüntüleme stili
       description: Çeviri sonuçlarını orijinal metinden ayırt etmek için istediğiniz herhangi bir stili ayarlayın
-      useCustomStyle: Özel CSS Stili Kullan
+      useCustomStyle: Özel CSS stili kullan
       useCustomStyleDescription: Yazı tipleri, animasyonlar ve dile özgü stiller dahil herhangi bir CSS'yi destekler
-      presetStyle: Hazır Stil
-      cssEditor: CSS Editörü
+      presetStyle: Hazır stil
+      cssEditor: CSS editörü
       cssEditorDescription: Kendi CSS'inizi yazın ve çevrilen metnin nasıl göründüğünü önizleyin.
       preview: Önizleme
       stylePreviewLanguage: Dil
       stylePreviewDirection: Yön
-      stylePreviewTranslatedText: Çevrilmiş Metin
+      stylePreviewTranslatedText: Çevrilmiş metin
       style:
         default: Yok
-        blur: Bulanıklık Efekti
+        blur: Bulanıklık efekti
         blockquote: Alıntı
         weakened: Zayıflatılmış
-        dashedLine: Kesikli Çizgi
+        dashedLine: Kesikli çizgi
         border: Kenarlık
-        textColor: Metin Rengi
-        background: Arka Plan
+        textColor: Metin rengi
+        background: Arka plan
       customCSS:
         editor:
           placeholder: |
@@ -751,6 +701,7 @@ options:
               padding: 2px 4px;
               border-radius: 4px;
             }
+          docsLink: Nasıl yapılandırılır?
           saveButton: Kaydet
           savedButton: Kaydedildi
           validation:
@@ -759,64 +710,103 @@ options:
             syntaxError: CSS sözdizimi hataları içeriyor
             tooLong: CSS çok uzun
             saved: Tüm değişiklikler kaydedildi
-    translationMode:
-      title: Çeviri modu
-      description: "Çevrilmiş metnin nasıl görüntüleneceğini seçin: iki dilli veya yalnızca çeviri."
-      mode:
-        bilingual: İki Dilli
-        translationOnly: Yalnızca Çeviri
-    translationModeShortcut:
-      switched: "Çeviri Modu: $1"
-    translateRange:
-      title: Çeviri kapsamı
-      description: Sayfadaki yalnızca ana içeriğin mi yoksa tüm içeriğin mi çevrileceğini seçin.
-      range:
-        main: Ana İçerik
-        all: Tüm İçerik
-    preloadConfig:
-      title: Ön çeviri aralığı
-      description: API maliyetlerinden tasarruf etmek için görünüm alanının altındaki ne kadar içeriğin önceden çevrileceğini kontrol edin
-      margin:
-        description: "Ön çeviri mesafesi: ekranın altında kaç piksellik içerik önceden çevrilir. Azaltmak API maliyetini düşürür"
-      threshold:
-        description: "Görünürlük eşiği: paragrafın ne kadarı ekranda olunca çevrilsin, 0 ile 1 arasında"
-    smallParagraphFilter:
-      title: Kısa metin filtresi
-      description: Bu genel varsayılanlar, eşiklerden daha az karakter veya sözcük içeren metin düğümlerinin çevirisini atlar. Eşleşen site kuralları bunları geçersiz kılabilir (0 = devre dışı)
-      minCharacters:
-        description: "Minimum karakter: daha kısa metinler çevrilmez. Her şeyi çevirmek için 0 girin"
-      minWords:
-        description: "Minimum kelime: daha az kelimeli metinler çevrilmez"
-      error: Değer $1 ile $2 arasında olmalıdır
-    autoTranslateLanguages:
-      title: Dile göre otomatik çevir
-      description: Belirli diller algılandığında sayfa içeriğini otomatik olarak çevir
-      selectLanguages: Dilleri seçin
-      detection:
-        label: Dil Algılama
-        basic: Temel
-        llm: LLM
-        description: Temel algılama hızlı ve ücretsizdir. LLM algılama daha doğrudur ancak gecikme ve API maliyetleri ekler. Yapılandırılmış otomatik çeviri dilleri gerektirir.
-    skipLanguages:
-      title: Dile göre otomatik atla
-      description: Belirli diller algılandığında paragraf çevirisini otomatik olarak atla
-      targetLanguageSkipDescription: Zaten hedef dilde olan paragrafları istek göndermeden atlar
-      selectLanguages: Dilleri seçin
-      detection:
-        label: Dil Algılama
-        basic: Temel
-        llm: LLM
-        description: Temel algılama hızlı ve ücretsizdir. LLM algılama daha doğrudur ancak gecikme ve API maliyetleri ekler.
-    clearCache:
-      title: Önbelleği temizle
-      description: Tarayıcınızdaki tüm çeviri önbelleğini temizleyin
-      clearing: Temizleniyor...
-      dialog:
-        title: Önbelleği Temizle
-        trigger: Önbelleği Temizle
+    personalizedPrompts:
+      title: Kişiselleştirilmiş promptlar
+      description: Farklı türde Promptları özelleştirmek, çeviri sırasında Prompt türünü kendiniz ayarlamanıza olanak tanır. Prompt, kullanıcının LLM'ye gönderdiği metni temsil eder.
+      managePrompts: Promptları yönet
+      communityPrompts: Topluluktan prompt al veya paylaş
+      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      addPrompt: Prompt ekle
+      default: Varsayılan
+      importSuccess: İçe aktarma başarılı
+      import: İçe aktar
+      export: Dışa aktar
+      current: kullanımda
+      editPrompt:
+        title: Promptu düzenle
+        name: Ad
+        systemPrompt: Sistem promptu
+        prompt: Prompt
+        promptCellInput:
+          input: Çevrilecek metin içeriği
+          targetLanguage: Hedef dil
+          webTitle: Web sayfası başlığı
+          webDescription: Sayfa meta verilerinden web sayfası açıklaması
+          webContent: Web sayfası içeriği (ilk 2000 karaktere kısaltılır)
+          webSummary: Web sayfası özeti (AI Akıllı Bağlam gerektirir)
+        save: Değişiklikleri kaydet
+        close: İptal
+      deletePrompt:
+        title: Promptu sil
+        description: Promptu silmeyi onayla
         confirm: Onayla
         cancel: İptal
-        description: Bu işlem tüm çeviri önbelleğini temizleyecektir. Bu işlem geri alınamaz.
+      exportPrompt:
+        exportSelected: Seçilenleri dışa aktar
+        cancel: İptal
+    translationControl:
+      title: Çeviri denetimi
+      autoTranslateWebsite:
+        title: Web sitesine göre otomatik çevir
+        description: Açılır açılmaz çevrilmeye başlayan siteler
+        urlPattern: URL kalıbı
+        enterUrlPattern: URL kalıbı girin
+      neverAutoTranslateWebsite:
+        title: Web sitesine göre asla otomatik çevirme
+        description: Bir dil kuralı eşleşse bile kendiliğinden çevrilmeyen siteler
+        urlPattern: URL kalıbı
+        enterUrlPattern: URL kalıbı girin
+      autoTranslateLanguages:
+        title: Dile göre otomatik çevir
+        description: Belirli diller algılandığında sayfa içeriğini otomatik olarak çevir
+        selectLanguages: Dilleri seçin
+      skipLanguages:
+        title: Dile göre otomatik atla
+        description: Belirli diller algılandığında paragraf çevirisini otomatik olarak atla
+        targetLanguageSkipDescription: Zaten hedef dilde olan paragrafları istek göndermeden atlar
+        selectLanguages: Dilleri seçin
+      smallParagraphFilter:
+        title: Kısa metin filtresi
+        description: Bu genel varsayılanlar, eşiklerden daha az karakter veya sözcük içeren metin düğümlerinin çevirisini atlar. Eşleşen site kuralları bunları geçersiz kılabilir (0 = devre dışı)
+        minCharacters:
+          description: "Minimum karakter: daha kısa metinler çevrilmez. Her şeyi çevirmek için 0 girin"
+        minWords:
+          description: "Minimum kelime: daha az kelimeli metinler çevrilmez"
+        error: Değer $1 ile $2 arasında olmalıdır
+    translationQueue:
+      title: Çeviri kuyruğu
+      requestQueueConfig:
+        title: Çeviri hızı
+        capacity:
+          description: "Maksimum ani istek: aynı anda kaç istek gönderilebilir"
+        rate:
+          description: "Saniyedeki istek: sonrasındaki sabit hız. Ondalık da olur, 0.25 her 4 saniyede bir istek demek"
+      batchQueueConfig:
+        title: Toplu çeviri
+        description: Toplu çeviri için karakter limitleri ve maksimum paragraf sayısını yapılandırın (yalnızca LLM çevirisi için geçerlidir)
+        maxCharactersPerBatch:
+          description: "Maksimum karakter: tek bir yapay zekâ isteği ne kadar metin taşır"
+        maxItemsPerBatch:
+          description: "Maksimum paragraf: tek istekte kaç paragraf birleşir. Yapay zekâ olmayan sağlayıcılar ikisini de yok sayar"
+      preloadConfig:
+        title: Ön çeviri aralığı
+        description: API maliyetlerinden tasarruf etmek için görünüm alanının altındaki ne kadar içeriğin önceden çevrileceğini kontrol edin
+        margin:
+          description: "Ön çeviri mesafesi: ekranın altında kaç piksellik içerik önceden çevrilir. Azaltmak API maliyetini düşürür"
+        threshold:
+          description: "Görünürlük eşiği: paragrafın ne kadarı ekranda olunca çevrilsin, 0 ile 1 arasında"
+    cache:
+      title: Önbellek
+      clearCache:
+        title: Önbelleği temizle
+        description: Tarayıcınızdaki tüm çeviri önbelleğini temizleyin
+        clearing: Temizleniyor...
+        dialog:
+          title: Önbelleği temizle
+          trigger: Önbelleği temizle
+          confirm: Onayla
+          cancel: İptal
+          description: Bu işlem tüm çeviri önbelleğini temizleyecektir. Bu işlem geri alınamaz.
   siteRules:
     title: Site kuralları
     description: Belirli web sitelerinin nasıl çevrileceğini ayarlayan site bazlı kurallar.

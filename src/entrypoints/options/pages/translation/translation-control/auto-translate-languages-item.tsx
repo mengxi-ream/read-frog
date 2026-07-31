@@ -19,10 +19,10 @@ export function AutoTranslateLanguagesItem() {
   return (
     <ConfigItem
       id="auto-translate-languages"
-      title={i18n.t("options.translation.autoTranslateLanguages.title")}
+      title={i18n.t("options.translation.translationControl.autoTranslateLanguages.title")}
       description={
         <>
-          {i18n.t("options.translation.autoTranslateLanguages.description")}
+          {i18n.t("options.translation.translationControl.autoTranslateLanguages.description")}
           <LanguageChips
             languages={selectedLanguages}
             onRemove={(language) =>
@@ -35,7 +35,9 @@ export function AutoTranslateLanguagesItem() {
       <MultiLanguageCombobox
         selectedLanguages={selectedLanguages}
         onLanguagesChange={setLanguages}
-        buttonLabel={i18n.t("options.translation.autoTranslateLanguages.selectLanguages")}
+        buttonLabel={i18n.t(
+          "options.translation.translationControl.autoTranslateLanguages.selectLanguages",
+        )}
       />
     </ConfigItem>
   )

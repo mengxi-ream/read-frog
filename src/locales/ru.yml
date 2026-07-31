@@ -651,41 +651,65 @@ options:
     title: Перевод страниц
     pageDescription: Настройте перевод страниц — режим, охват, промпты и лимиты запросов.
     preference:
-      title: Предпочтения
+      title: Основное
+      translationMode:
+        title: Режим перевода
+        description: "Выберите способ отображения переведённого текста: двуязычный или только перевод."
+        mode:
+          bilingual: Двуязычный
+          translationOnly: Только перевод
+        switched: "Режим перевода: $1"
+      translateRange:
+        title: Охват перевода
+        description: Выберите, переводить только основное содержимое или всё содержимое на странице.
+        range:
+          main: Основное содержимое
+          all: Всё содержимое
     hoverTranslation:
       title: Перевод при наведении
       enable:
         title: Включить
         description: Наведите курсор на абзац или нажмите и удерживайте его, чтобы перевести только его.
-    translationControl:
-      title: Управление переводом
-    translationQueue:
-      title: Очередь перевода
-    cache:
-      title: Кэш
-    requestQueueConfig:
-      title: Скорость перевода
-      capacity:
-        description: "Максимум запросов в пике: сколько уходит одновременно"
-      rate:
-        description: "Запросов в секунду: ровный темп после пика. Дробные значения работают: 0.25 — один запрос каждые 4 секунды"
-    batchQueueConfig:
-      title: Пакетный перевод
-      description: Настройте лимиты символов и максимальное количество абзацев для пакетного перевода (действует только для LLM-перевода)
-      maxCharactersPerBatch:
-        description: "Максимум символов: сколько текста уходит в один запрос к ИИ"
-      maxItemsPerBatch:
-        description: "Максимум абзацев: сколько абзацев объединяются в один запрос. Сервисы без ИИ не учитывают оба значения"
-    autoTranslateWebsite:
-      title: Автоперевод по веб-сайту
-      description: Сайты, которые начинают переводиться сразу при открытии
-      urlPattern: URL-шаблон
-      enterUrlPattern: Введите URL-шаблон
-    neverAutoTranslateWebsite:
-      title: Никогда не переводить по веб-сайту
-      description: Сайты, которые никогда не переводятся сами, даже если совпадает языковое правило
-      urlPattern: URL-шаблон
-      enterUrlPattern: Введите URL-шаблон
+    translationStyle:
+      title: Стиль отображения перевода
+      description: Установите любой стиль для отличия результатов перевода от оригинального текста
+      useCustomStyle: Использовать пользовательский CSS-стиль
+      useCustomStyleDescription: Поддерживает любой CSS, включая шрифты, анимации и стили для конкретных языков
+      presetStyle: Предустановленный стиль
+      cssEditor: CSS-редактор
+      cssEditorDescription: Напишите собственный CSS и посмотрите, как выглядит переведённый текст.
+      preview: Предпросмотр
+      stylePreviewLanguage: Язык
+      stylePreviewDirection: Направление
+      stylePreviewTranslatedText: Переведённый текст
+      style:
+        default: Нет
+        blur: Эффект размытия
+        blockquote: Цитата
+        weakened: Ослабленный
+        dashedLine: Пунктирная линия
+        border: Граница
+        textColor: Цвет текста
+        background: Фон
+      customCSS:
+        editor:
+          placeholder: |
+            /* Пример: Пользовательский стиль с цветом и фоном */
+            [data-read-frog-custom-translation-style='custom'] {
+              color: #414535;
+              background-color: light-dark(#F2E3BC, #C19875);
+              padding: 2px 4px;
+              border-radius: 4px;
+            }
+          docsLink: Как настроить?
+          saveButton: Сохранить
+          savedButton: Сохранено
+          validation:
+            validating: Проверка...
+            valid: CSS корректен
+            syntaxError: CSS содержит синтаксические ошибки
+            tooLong: CSS слишком длинный
+            saved: Все изменения сохранены
     personalizedPrompts:
       title: Персонализированные промпты
       description: Настройка различных типов промптов позволяет вам самостоятельно изменять тип промпта во время перевода. Промпт — это текст, который пользователь отправляет LLM.
@@ -720,103 +744,69 @@ options:
       exportPrompt:
         exportSelected: Экспортировать выбранные
         cancel: Отмена
-    translationStyle:
-      title: Стиль отображения перевода
-      description: Установите любой стиль для отличия результатов перевода от оригинального текста
-      useCustomStyle: Использовать пользовательский CSS-стиль
-      useCustomStyleDescription: Поддерживает любой CSS, включая шрифты, анимации и стили для конкретных языков
-      presetStyle: Предустановленный стиль
-      cssEditor: CSS-редактор
-      cssEditorDescription: Напишите собственный CSS и посмотрите, как выглядит переведённый текст.
-      preview: Предпросмотр
-      stylePreviewLanguage: Язык
-      stylePreviewDirection: Направление
-      stylePreviewTranslatedText: Переведённый текст
-      style:
-        default: Нет
-        blur: Эффект размытия
-        blockquote: Цитата
-        weakened: Ослабленный
-        dashedLine: Пунктирная линия
-        border: Граница
-        textColor: Цвет текста
-        background: Фон
-      customCSS:
-        editor:
-          placeholder: |
-            /* Пример: Пользовательский стиль с цветом и фоном */
-            [data-read-frog-custom-translation-style='custom'] {
-              color: #414535;
-              background-color: light-dark(#F2E3BC, #C19875);
-              padding: 2px 4px;
-              border-radius: 4px;
-            }
-          saveButton: Сохранить
-          savedButton: Сохранено
-          validation:
-            validating: Проверка...
-            valid: CSS корректен
-            syntaxError: CSS содержит синтаксические ошибки
-            tooLong: CSS слишком длинный
-            saved: Все изменения сохранены
-    translationMode:
-      title: Режим перевода
-      description: "Выберите способ отображения переведённого текста: двуязычный или только перевод."
-      mode:
-        bilingual: Двуязычный
-        translationOnly: Только перевод
-    translationModeShortcut:
-      switched: "Режим перевода: $1"
-    translateRange:
-      title: Охват перевода
-      description: Выберите, переводить только основное содержимое или всё содержимое на странице.
-      range:
-        main: Основное содержимое
-        all: Всё содержимое
-    preloadConfig:
-      title: Диапазон предварительного перевода
-      description: Управляйте количеством контента ниже области просмотра, который будет предварительно переведён для экономии затрат на API
-      margin:
-        description: "Расстояние предзагрузки: на сколько пикселей ниже экрана переводить заранее. Меньше — дешевле"
-      threshold:
-        description: "Порог видимости: какая часть абзаца должна быть на экране, от 0 до 1"
-    smallParagraphFilter:
-      title: Фильтр коротких текстов
-      description: Эти глобальные значения по умолчанию позволяют пропускать перевод текстовых узлов, в которых меньше символов или слов, чем задано порогами. Подходящие правила сайта могут переопределить их (0 = отключено)
-      minCharacters:
-        description: "Минимум символов: текст короче не переводится. Укажите 0, чтобы переводить всё"
-      minWords:
-        description: "Минимум слов: текст с меньшим числом слов не переводится"
-      error: Значение должно быть от $1 до $2
-    autoTranslateLanguages:
-      title: Автоперевод по языку
-      description: Автоматически переводить содержимое страницы при обнаружении определённых языков
-      selectLanguages: Выберите языки
-      detection:
-        label: Определение языка
-        basic: Базовое
-        llm: LLM
-        description: Базовое определение быстрое и бесплатное. LLM определение точнее, но добавляет задержку и затраты на API. Требуются настроенные языки автоперевода.
-    skipLanguages:
-      title: Автопропуск по языку
-      description: Автоматически пропускать перевод абзацев при обнаружении указанных языков
-      targetLanguageSkipDescription: Пропускать абзацы, которые уже на целевом языке, не отправляя запрос
-      selectLanguages: Выберите языки
-      detection:
-        label: Определение языка
-        basic: Базовое
-        llm: LLM
-        description: Базовое определение быстрое и бесплатное. LLM определение точнее, но добавляет задержку и затраты на API.
-    clearCache:
-      title: Очистить кэш
-      description: Очистить весь кэш перевода в вашем браузере
-      clearing: Очистка...
-      dialog:
+    translationControl:
+      title: Управление переводом
+      autoTranslateWebsite:
+        title: Автоперевод по веб-сайту
+        description: Сайты, которые начинают переводиться сразу при открытии
+        urlPattern: URL-шаблон
+        enterUrlPattern: Введите URL-шаблон
+      neverAutoTranslateWebsite:
+        title: Никогда не переводить по веб-сайту
+        description: Сайты, которые никогда не переводятся сами, даже если совпадает языковое правило
+        urlPattern: URL-шаблон
+        enterUrlPattern: Введите URL-шаблон
+      autoTranslateLanguages:
+        title: Автоперевод по языку
+        description: Автоматически переводить содержимое страницы при обнаружении определённых языков
+        selectLanguages: Выберите языки
+      skipLanguages:
+        title: Автопропуск по языку
+        description: Автоматически пропускать перевод абзацев при обнаружении указанных языков
+        targetLanguageSkipDescription: Пропускать абзацы, которые уже на целевом языке, не отправляя запрос
+        selectLanguages: Выберите языки
+      smallParagraphFilter:
+        title: Фильтр коротких текстов
+        description: Эти глобальные значения по умолчанию позволяют пропускать перевод текстовых узлов, в которых меньше символов или слов, чем задано порогами. Подходящие правила сайта могут переопределить их (0 = отключено)
+        minCharacters:
+          description: "Минимум символов: текст короче не переводится. Укажите 0, чтобы переводить всё"
+        minWords:
+          description: "Минимум слов: текст с меньшим числом слов не переводится"
+        error: Значение должно быть от $1 до $2
+    translationQueue:
+      title: Очередь перевода
+      requestQueueConfig:
+        title: Скорость перевода
+        capacity:
+          description: "Максимум запросов в пике: сколько уходит одновременно"
+        rate:
+          description: "Запросов в секунду: ровный темп после пика. Дробные значения работают: 0.25 — один запрос каждые 4 секунды"
+      batchQueueConfig:
+        title: Пакетный перевод
+        description: Настройте лимиты символов и максимальное количество абзацев для пакетного перевода (действует только для LLM-перевода)
+        maxCharactersPerBatch:
+          description: "Максимум символов: сколько текста уходит в один запрос к ИИ"
+        maxItemsPerBatch:
+          description: "Максимум абзацев: сколько абзацев объединяются в один запрос. Сервисы без ИИ не учитывают оба значения"
+      preloadConfig:
+        title: Диапазон предварительного перевода
+        description: Управляйте количеством контента ниже области просмотра, который будет предварительно переведён для экономии затрат на API
+        margin:
+          description: "Расстояние предзагрузки: на сколько пикселей ниже экрана переводить заранее. Меньше — дешевле"
+        threshold:
+          description: "Порог видимости: какая часть абзаца должна быть на экране, от 0 до 1"
+    cache:
+      title: Кэш
+      clearCache:
         title: Очистить кэш
-        trigger: Очистить кэш
-        confirm: Подтвердить
-        cancel: Отмена
-        description: Эта операция очистит весь кэш перевода. Это действие нельзя отменить.
+        description: Очистить весь кэш перевода в вашем браузере
+        clearing: Очистка...
+        dialog:
+          title: Очистить кэш
+          trigger: Очистить кэш
+          confirm: Подтвердить
+          cancel: Отмена
+          description: Эта операция очистит весь кэш перевода. Это действие нельзя отменить.
   siteRules:
     title: Правила сайтов
     description: Правила для отдельных сайтов, настраивающие перевод конкретных веб-сайтов.

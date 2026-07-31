@@ -17,12 +17,18 @@ export function RequestRateItems() {
     <>
       <ConfigItem
         id="request-rate"
-        title={i18n.t("options.translation.requestQueueConfig.title")}
-        description={i18n.t("options.translation.requestQueueConfig.capacity.description")}
+        title={i18n.t("options.translation.translationQueue.requestQueueConfig.title")}
+        description={i18n.t(
+          "options.translation.translationQueue.requestQueueConfig.capacity.description",
+        )}
       >
         <TranslateNumberInput property="capacity" />
       </ConfigItem>
-      <ConfigItem description={i18n.t("options.translation.requestQueueConfig.rate.description")}>
+      <ConfigItem
+        description={i18n.t(
+          "options.translation.translationQueue.requestQueueConfig.rate.description",
+        )}
+      >
         <TranslateNumberInput property="rate" />
       </ConfigItem>
     </>

@@ -11,10 +11,10 @@ export function PreferenceSection() {
     <ConfigSection title={i18n.t("options.translation.preference.title")}>
       <ConfigItem
         id="translation-mode"
-        title={i18n.t("options.translation.translationMode.title")}
+        title={i18n.t("options.translation.preference.translationMode.title")}
         description={
           <>
-            {i18n.t("options.translation.translationMode.description")}
+            {i18n.t("options.translation.preference.translationMode.description")}
             <ShortcutLink sectionId="translation-mode-shortcut" />
           </>
         }
@@ -23,8 +23,8 @@ export function PreferenceSection() {
       </ConfigItem>
       <ConfigItem
         id="translate-range"
-        title={i18n.t("options.translation.translateRange.title")}
-        description={i18n.t("options.translation.translateRange.description")}
+        title={i18n.t("options.translation.preference.translateRange.title")}
+        description={i18n.t("options.translation.preference.translateRange.description")}
       >
         <TranslateRangeSelect />
       </ConfigItem>

@@ -53,13 +53,17 @@ export function AutoTranslateWebsitesPage() {
   return (
     <WebsitePatternsPage
       anchorId="auto-translate-website"
-      title={i18n.t("options.translation.autoTranslateWebsite.title")}
+      title={i18n.t("options.translation.translationControl.autoTranslateWebsite.title")}
       patterns={translateConfig.page.autoTranslatePatterns}
       onPatternsChange={(autoTranslatePatterns) => {
         void setTranslateConfig({ page: { ...translateConfig.page, autoTranslatePatterns } })
       }}
-      placeholderText={i18n.t("options.translation.autoTranslateWebsite.enterUrlPattern")}
-      tableHeaderText={i18n.t("options.translation.autoTranslateWebsite.urlPattern")}
+      placeholderText={i18n.t(
+        "options.translation.translationControl.autoTranslateWebsite.enterUrlPattern",
+      )}
+      tableHeaderText={i18n.t(
+        "options.translation.translationControl.autoTranslateWebsite.urlPattern",
+      )}
     />
   )
 }
@@ -70,13 +74,17 @@ export function NeverAutoTranslateWebsitesPage() {
   return (
     <WebsitePatternsPage
       anchorId="never-auto-translate-website"
-      title={i18n.t("options.translation.neverAutoTranslateWebsite.title")}
+      title={i18n.t("options.translation.translationControl.neverAutoTranslateWebsite.title")}
       patterns={translateConfig.page.neverAutoTranslatePatterns}
       onPatternsChange={(neverAutoTranslatePatterns) => {
         void setTranslateConfig({ page: { ...translateConfig.page, neverAutoTranslatePatterns } })
       }}
-      placeholderText={i18n.t("options.translation.neverAutoTranslateWebsite.enterUrlPattern")}
-      tableHeaderText={i18n.t("options.translation.neverAutoTranslateWebsite.urlPattern")}
+      placeholderText={i18n.t(
+        "options.translation.translationControl.neverAutoTranslateWebsite.enterUrlPattern",
+      )}
+      tableHeaderText={i18n.t(
+        "options.translation.translationControl.neverAutoTranslateWebsite.urlPattern",
+      )}
     />
   )
 }

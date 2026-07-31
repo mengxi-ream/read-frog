@@ -17,13 +17,17 @@ export function TranslationControlSection() {
     >
       <ConfigNavItem
         to="/page-translation/auto-translate-websites"
-        title={i18n.t("options.translation.autoTranslateWebsite.title")}
-        description={i18n.t("options.translation.autoTranslateWebsite.description")}
+        title={i18n.t("options.translation.translationControl.autoTranslateWebsite.title")}
+        description={i18n.t(
+          "options.translation.translationControl.autoTranslateWebsite.description",
+        )}
       />
       <ConfigNavItem
         to="/page-translation/never-auto-translate-websites"
-        title={i18n.t("options.translation.neverAutoTranslateWebsite.title")}
-        description={i18n.t("options.translation.neverAutoTranslateWebsite.description")}
+        title={i18n.t("options.translation.translationControl.neverAutoTranslateWebsite.title")}
+        description={i18n.t(
+          "options.translation.translationControl.neverAutoTranslateWebsite.description",
+        )}
       />
       <AutoTranslateLanguagesItem />
       <SkipLanguagesItem />

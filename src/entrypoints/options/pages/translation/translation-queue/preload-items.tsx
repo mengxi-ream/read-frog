@@ -21,12 +21,18 @@ export function PreloadItems() {
     <>
       <ConfigItem
         id="preload-config"
-        title={i18n.t("options.translation.preloadConfig.title")}
-        description={i18n.t("options.translation.preloadConfig.margin.description")}
+        title={i18n.t("options.translation.translationQueue.preloadConfig.title")}
+        description={i18n.t(
+          "options.translation.translationQueue.preloadConfig.margin.description",
+        )}
       >
         <PreloadNumberInput property="margin" />
       </ConfigItem>
-      <ConfigItem description={i18n.t("options.translation.preloadConfig.threshold.description")}>
+      <ConfigItem
+        description={i18n.t(
+          "options.translation.translationQueue.preloadConfig.threshold.description",
+        )}
+      >
         <PreloadNumberInput property="threshold" />
       </ConfigItem>
     </>

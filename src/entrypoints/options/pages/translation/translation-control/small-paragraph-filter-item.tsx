@@ -24,8 +24,10 @@ export function SmallParagraphFilterItem() {
     <>
       <ConfigItem
         id="small-paragraph-filter"
-        title={i18n.t("options.translation.smallParagraphFilter.title")}
-        description={i18n.t("options.translation.smallParagraphFilter.minCharacters.description")}
+        title={i18n.t("options.translation.translationControl.smallParagraphFilter.title")}
+        description={i18n.t(
+          "options.translation.translationControl.smallParagraphFilter.minCharacters.description",
+        )}
       >
         <ThresholdInput
           value={minCharactersPerNode}
@@ -39,7 +41,9 @@ export function SmallParagraphFilterItem() {
         />
       </ConfigItem>
       <ConfigItem
-        description={i18n.t("options.translation.smallParagraphFilter.minWords.description")}
+        description={i18n.t(
+          "options.translation.translationControl.smallParagraphFilter.minWords.description",
+        )}
       >
         <ThresholdInput
           value={minWordsPerNode}
@@ -84,7 +88,10 @@ function ThresholdInput({
         }
         toastManager.add({
           type: "error",
-          title: i18n.t("options.translation.smallParagraphFilter.error", [min, max]),
+          title: i18n.t("options.translation.translationControl.smallParagraphFilter.error", [
+            min,
+            max,
+          ]),
         })
       }}
     />

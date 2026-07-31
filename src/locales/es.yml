@@ -767,41 +767,65 @@ options:
     title: Traducción de páginas
     pageDescription: Controla cómo se traducen las páginas — modo, alcance, prompts y límites de solicitudes.
     preference:
-      title: Preferencias
+      title: Aspectos básicos
+      translationMode:
+        title: Modo de traducción
+        description: "Elige cómo se muestra el texto traducido: bilingüe o solo traducción."
+        mode:
+          bilingual: Bilingüe
+          translationOnly: Solo traducción
+        switched: "Modo de traducción: $1"
+      translateRange:
+        title: Alcance de la traducción
+        description: Selecciona si traducir solo el contenido principal o todo el contenido de la página.
+        range:
+          main: Contenido principal
+          all: Todo el contenido
     hoverTranslation:
       title: Traducción al pasar el cursor
       enable:
         title: Activar
         description: Pasa el cursor o mantén pulsado un párrafo para traducir solo ese.
-    translationControl:
-      title: Control de traducción
-    translationQueue:
-      title: Cola de traducción
-    cache:
-      title: Caché
-    requestQueueConfig:
-      title: Tasa de traducción
-      capacity:
-        description: "Solicitudes máximas en ráfaga: cuántas pueden salir a la vez"
-      rate:
-        description: "Solicitudes por segundo: el ritmo estable tras la ráfaga. Admite decimales, así que 0.25 envía una solicitud cada 4 segundos"
-    batchQueueConfig:
-      title: Traducción por lotes
-      description: Configura límites de caracteres y recuento máximo de párrafos para la traducción por lotes (solo efectivo para traducción LLM)
-      maxCharactersPerBatch:
-        description: "Caracteres máximos: cuánto texto lleva cada solicitud a la IA"
-      maxItemsPerBatch:
-        description: "Párrafos máximos: cuántos párrafos comparten una solicitud. Los proveedores que no son de IA ignoran ambos"
-    autoTranslateWebsite:
-      title: Traducción automática por sitio web
-      description: Sitios que empiezan a traducirse en cuanto se abren
-      urlPattern: Patrón de URL
-      enterUrlPattern: Introduce patrón de URL
-    neverAutoTranslateWebsite:
-      title: Nunca traducir automáticamente por sitio web
-      description: Sitios que nunca se traducen solos, aunque coincida una regla de idioma
-      urlPattern: Patrón de URL
-      enterUrlPattern: Introduce patrón de URL
+    translationStyle:
+      title: Estilo de visualización de traducción
+      description: Define cualquier estilo que quieras para distinguir los resultados de traducción del texto original
+      useCustomStyle: Usar estilo CSS personalizado
+      useCustomStyleDescription: Admite cualquier CSS, incluidas fuentes, animaciones y estilos específicos de idioma
+      presetStyle: Estilo preestablecido
+      cssEditor: Editor CSS
+      cssEditorDescription: Escribe tu propio CSS y previsualiza cómo se ve el texto traducido.
+      preview: Vista previa
+      stylePreviewLanguage: Idioma
+      stylePreviewDirection: Dirección
+      stylePreviewTranslatedText: Texto traducido
+      style:
+        default: Ninguno
+        blur: Efecto de desenfoque
+        blockquote: Cita en bloque
+        weakened: Atenuado
+        dashedLine: Línea discontinua
+        border: Borde
+        textColor: Color del texto
+        background: Fondo
+      customCSS:
+        editor:
+          placeholder: |
+            /* Example: Custom style with color and background */
+            [data-read-frog-custom-translation-style='custom'] {
+              color: #414535;
+              background-color: light-dark(#F2E3BC, #C19875);
+              padding: 2px 4px;
+              border-radius: 4px;
+            }
+          docsLink: ¿Cómo configurar?
+          saveButton: Guardar
+          savedButton: Guardado
+          validation:
+            validating: Validando...
+            valid: CSS válido
+            syntaxError: CSS tiene errores de sintaxis
+            tooLong: CSS es demasiado largo
+            saved: Todos los cambios guardados
     personalizedPrompts:
       title: Prompts personalizados
       description: Personalizar distintos tipos de Prompts te permite ajustar tú mismo el tipo de Prompt durante la traducción. Un Prompt representa el texto que el usuario envía al LLM.
@@ -836,103 +860,69 @@ options:
       exportPrompt:
         exportSelected: Exportar seleccionados
         cancel: Cancelar
-    translationStyle:
-      title: Estilo de visualización de traducción
-      description: Define cualquier estilo que quieras para distinguir los resultados de traducción del texto original
-      useCustomStyle: Usar estilo CSS personalizado
-      useCustomStyleDescription: Admite cualquier CSS, incluidas fuentes, animaciones y estilos específicos de idioma
-      presetStyle: Estilo preestablecido
-      cssEditor: Editor CSS
-      cssEditorDescription: Escribe tu propio CSS y previsualiza cómo se ve el texto traducido.
-      preview: Vista previa
-      stylePreviewLanguage: Idioma
-      stylePreviewDirection: Dirección
-      stylePreviewTranslatedText: Texto traducido
-      style:
-        default: Ninguno
-        blur: Efecto de desenfoque
-        blockquote: Cita en bloque
-        weakened: Atenuado
-        dashedLine: Línea discontinua
-        border: Borde
-        textColor: Color del texto
-        background: Fondo
-      customCSS:
-        editor:
-          placeholder: |
-            /* Example: Custom style with color and background */
-            [data-read-frog-custom-translation-style='custom'] {
-              color: #414535;
-              background-color: light-dark(#F2E3BC, #C19875);
-              padding: 2px 4px;
-              border-radius: 4px;
-            }
-          saveButton: Guardar
-          savedButton: Guardado
-          validation:
-            validating: Validando...
-            valid: CSS válido
-            syntaxError: CSS tiene errores de sintaxis
-            tooLong: CSS es demasiado largo
-            saved: Todos los cambios guardados
-    translationMode:
-      title: Modo de traducción
-      description: "Elige cómo se muestra el texto traducido: bilingüe o solo traducción."
-      mode:
-        bilingual: Bilingüe
-        translationOnly: Solo traducción
-    translationModeShortcut:
-      switched: "Modo de traducción: $1"
-    translateRange:
-      title: Alcance de la traducción
-      description: Selecciona si traducir solo el contenido principal o todo el contenido de la página.
-      range:
-        main: Contenido principal
-        all: Todo el contenido
-    preloadConfig:
-      title: Rango de pretraducción
-      description: Controla cuánto contenido por debajo de la ventana visible se pretraduce para ahorrar costes de API
-      margin:
-        description: "Distancia de precarga: cuántos píxeles por debajo de la pantalla se traducen por adelantado. Menos ahorra costes de API"
-      threshold:
-        description: "Umbral de visibilidad: qué parte del párrafo debe verse antes de traducirlo, de 0 a 1"
-    smallParagraphFilter:
-      title: Filtro de párrafos pequeños
-      description: Estos valores predeterminados globales omiten la traducción de nodos de texto con menos caracteres o palabras que los umbrales. Las reglas de sitio coincidentes pueden anularlos (0 = desactivado)
-      minCharacters:
-        description: "Caracteres mínimos: el texto más corto no se traduce. Usa 0 para traducirlo todo"
-      minWords:
-        description: "Palabras mínimas: el texto con menos palabras no se traduce"
-      error: El valor debe estar entre $1 y $2
-    autoTranslateLanguages:
-      title: Traducción automática por idioma
-      description: Traduce automáticamente el contenido de la página cuando se detectan idiomas específicos
-      selectLanguages: Seleccionar idiomas
-      detection:
-        label: Detección de idioma
-        basic: Básica
-        llm: LLM
-        description: La detección básica es rápida y gratis. La detección LLM es más precisa, pero añade latencia y costes de API. Requiere idiomas de traducción automática configurados.
-    skipLanguages:
-      title: Omisión automática por idioma
-      description: Omite automáticamente la traducción de párrafos cuando se detectan idiomas específicos
-      targetLanguageSkipDescription: Omite los párrafos que ya están en el idioma de destino, sin enviar ninguna solicitud
-      selectLanguages: Seleccionar idiomas
-      detection:
-        label: Detección de idioma
-        basic: Básica
-        llm: LLM
-        description: La detección básica es rápida y gratis. La detección LLM es más precisa, pero añade latencia y costes de API.
-    clearCache:
-      title: Borrar caché
-      description: Borra toda la caché de traducción en tu navegador
-      clearing: Borrando...
-      dialog:
+    translationControl:
+      title: Control de traducción
+      autoTranslateWebsite:
+        title: Traducción automática por sitio web
+        description: Sitios que empiezan a traducirse en cuanto se abren
+        urlPattern: Patrón de URL
+        enterUrlPattern: Introduce patrón de URL
+      neverAutoTranslateWebsite:
+        title: Nunca traducir automáticamente por sitio web
+        description: Sitios que nunca se traducen solos, aunque coincida una regla de idioma
+        urlPattern: Patrón de URL
+        enterUrlPattern: Introduce patrón de URL
+      autoTranslateLanguages:
+        title: Traducción automática por idioma
+        description: Traduce automáticamente el contenido de la página cuando se detectan idiomas específicos
+        selectLanguages: Seleccionar idiomas
+      skipLanguages:
+        title: Omisión automática por idioma
+        description: Omite automáticamente la traducción de párrafos cuando se detectan idiomas específicos
+        targetLanguageSkipDescription: Omite los párrafos que ya están en el idioma de destino, sin enviar ninguna solicitud
+        selectLanguages: Seleccionar idiomas
+      smallParagraphFilter:
+        title: Filtro de párrafos pequeños
+        description: Estos valores predeterminados globales omiten la traducción de nodos de texto con menos caracteres o palabras que los umbrales. Las reglas de sitio coincidentes pueden anularlos (0 = desactivado)
+        minCharacters:
+          description: "Caracteres mínimos: el texto más corto no se traduce. Usa 0 para traducirlo todo"
+        minWords:
+          description: "Palabras mínimas: el texto con menos palabras no se traduce"
+        error: El valor debe estar entre $1 y $2
+    translationQueue:
+      title: Cola de traducción
+      requestQueueConfig:
+        title: Tasa de traducción
+        capacity:
+          description: "Solicitudes máximas en ráfaga: cuántas pueden salir a la vez"
+        rate:
+          description: "Solicitudes por segundo: el ritmo estable tras la ráfaga. Admite decimales, así que 0.25 envía una solicitud cada 4 segundos"
+      batchQueueConfig:
+        title: Traducción por lotes
+        description: Configura límites de caracteres y recuento máximo de párrafos para la traducción por lotes (solo efectivo para traducción LLM)
+        maxCharactersPerBatch:
+          description: "Caracteres máximos: cuánto texto lleva cada solicitud a la IA"
+        maxItemsPerBatch:
+          description: "Párrafos máximos: cuántos párrafos comparten una solicitud. Los proveedores que no son de IA ignoran ambos"
+      preloadConfig:
+        title: Rango de pretraducción
+        description: Controla cuánto contenido por debajo de la ventana visible se pretraduce para ahorrar costes de API
+        margin:
+          description: "Distancia de precarga: cuántos píxeles por debajo de la pantalla se traducen por adelantado. Menos ahorra costes de API"
+        threshold:
+          description: "Umbral de visibilidad: qué parte del párrafo debe verse antes de traducirlo, de 0 a 1"
+    cache:
+      title: Caché
+      clearCache:
         title: Borrar caché
-        trigger: Borrar caché
-        confirm: Confirmar
-        cancel: Cancelar
-        description: Esta operación borrará toda la caché de traducción. Esta acción no se puede deshacer.
+        description: Borra toda la caché de traducción en tu navegador
+        clearing: Borrando...
+        dialog:
+          title: Borrar caché
+          trigger: Borrar caché
+          confirm: Confirmar
+          cancel: Cancelar
+          description: Esta operación borrará toda la caché de traducción. Esta acción no se puede deshacer.
   siteRules:
     title: Reglas de sitio
     description: Reglas por sitio que ajustan cómo se traducen determinados sitios web.

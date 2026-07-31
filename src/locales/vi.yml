@@ -651,41 +651,65 @@ options:
     title: Dịch trang
     pageDescription: Kiểm soát cách dịch trang — chế độ, phạm vi, prompt và giới hạn yêu cầu.
     preference:
-      title: Tùy chọn
+      title: Cơ bản
+      translationMode:
+        title: Chế độ dịch
+        description: "Chọn cách hiển thị văn bản đã dịch: song ngữ hoặc chỉ bản dịch."
+        mode:
+          bilingual: Song ngữ
+          translationOnly: Chỉ bản dịch
+        switched: "Chế độ dịch: $1"
+      translateRange:
+        title: Phạm vi dịch
+        description: Chọn chỉ dịch nội dung chính hay tất cả nội dung trên trang.
+        range:
+          main: Nội dung chính
+          all: Tất cả nội dung
     hoverTranslation:
       title: Dịch khi di chuột
       enable:
         title: Bật
         description: Di chuột hoặc nhấn giữ một đoạn để chỉ dịch đoạn đó.
-    translationControl:
-      title: Kiểm soát dịch
-    translationQueue:
-      title: Hàng đợi dịch
-    cache:
-      title: Bộ nhớ đệm
-    requestQueueConfig:
-      title: Tốc độ dịch
-      capacity:
-        description: "Số yêu cầu tối đa cùng lúc: bao nhiêu yêu cầu được gửi đi một lượt"
-      rate:
-        description: "Số yêu cầu mỗi giây: tốc độ đều sau đợt gửi dồn. Dùng được số thập phân, 0.25 là 4 giây một yêu cầu"
-    batchQueueConfig:
-      title: Dịch theo lô
-      description: Cấu hình giới hạn ký tự và số đoạn văn tối đa cho dịch theo lô (chỉ có hiệu lực với dịch LLM)
-      maxCharactersPerBatch:
-        description: "Số ký tự tối đa: mỗi yêu cầu tới AI mang bao nhiêu văn bản"
-      maxItemsPerBatch:
-        description: "Số đoạn tối đa: bao nhiêu đoạn gộp chung một yêu cầu. Nhà cung cấp không dùng AI bỏ qua cả hai"
-    autoTranslateWebsite:
-      title: Tự động dịch theo trang web
-      description: Các trang bắt đầu dịch ngay khi mở
-      urlPattern: Mẫu URL
-      enterUrlPattern: Nhập mẫu URL
-    neverAutoTranslateWebsite:
-      title: Không bao giờ tự động dịch theo trang web
-      description: Các trang không bao giờ tự dịch, kể cả khi khớp quy tắc ngôn ngữ
-      urlPattern: Mẫu URL
-      enterUrlPattern: Nhập mẫu URL
+    translationStyle:
+      title: Kiểu hiển thị bản dịch
+      description: Đặt bất kỳ kiểu nào bạn muốn để phân biệt kết quả dịch với văn bản gốc
+      useCustomStyle: Sử dụng kiểu CSS tùy chỉnh
+      useCustomStyleDescription: Hỗ trợ bất kỳ CSS nào, bao gồm phông chữ, hoạt ảnh và kiểu dành riêng cho ngôn ngữ
+      presetStyle: Kiểu có sẵn
+      cssEditor: Trình chỉnh sửa CSS
+      cssEditorDescription: Viết CSS của riêng bạn và xem trước văn bản dịch trông thế nào.
+      preview: Xem trước
+      stylePreviewLanguage: Ngôn ngữ
+      stylePreviewDirection: Hướng
+      stylePreviewTranslatedText: Văn bản đã dịch
+      style:
+        default: Không
+        blur: Hiệu ứng mờ
+        blockquote: Trích dẫn
+        weakened: Làm mờ
+        dashedLine: Đường nét đứt
+        border: Viền
+        textColor: Màu chữ
+        background: Nền
+      customCSS:
+        editor:
+          placeholder: |
+            /* Ví dụ: Kiểu tùy chỉnh với màu sắc và nền */
+            [data-read-frog-custom-translation-style='custom'] {
+              color: #414535;
+              background-color: light-dark(#F2E3BC, #C19875);
+              padding: 2px 4px;
+              border-radius: 4px;
+            }
+          docsLink: Cấu hình như thế nào?
+          saveButton: Lưu
+          savedButton: Đã lưu
+          validation:
+            validating: Đang xác thực...
+            valid: CSS hợp lệ
+            syntaxError: CSS có lỗi cú pháp
+            tooLong: CSS quá dài
+            saved: Tất cả thay đổi đã được lưu
     personalizedPrompts:
       title: Prompt cá nhân hóa
       description: Tùy chỉnh các loại Prompt khác nhau cho phép bạn tự điều chỉnh loại Prompt trong quá trình dịch. Prompt là văn bản mà người dùng gửi cho LLM.
@@ -720,103 +744,69 @@ options:
       exportPrompt:
         exportSelected: Xuất đã chọn
         cancel: Hủy
-    translationStyle:
-      title: Kiểu hiển thị bản dịch
-      description: Đặt bất kỳ kiểu nào bạn muốn để phân biệt kết quả dịch với văn bản gốc
-      useCustomStyle: Sử dụng kiểu CSS tùy chỉnh
-      useCustomStyleDescription: Hỗ trợ bất kỳ CSS nào, bao gồm phông chữ, hoạt ảnh và kiểu dành riêng cho ngôn ngữ
-      presetStyle: Kiểu có sẵn
-      cssEditor: Trình chỉnh sửa CSS
-      cssEditorDescription: Viết CSS của riêng bạn và xem trước văn bản dịch trông thế nào.
-      preview: Xem trước
-      stylePreviewLanguage: Ngôn ngữ
-      stylePreviewDirection: Hướng
-      stylePreviewTranslatedText: Văn bản đã dịch
-      style:
-        default: Không
-        blur: Hiệu ứng mờ
-        blockquote: Trích dẫn
-        weakened: Làm mờ
-        dashedLine: Đường nét đứt
-        border: Viền
-        textColor: Màu chữ
-        background: Nền
-      customCSS:
-        editor:
-          placeholder: |
-            /* Ví dụ: Kiểu tùy chỉnh với màu sắc và nền */
-            [data-read-frog-custom-translation-style='custom'] {
-              color: #414535;
-              background-color: light-dark(#F2E3BC, #C19875);
-              padding: 2px 4px;
-              border-radius: 4px;
-            }
-          saveButton: Lưu
-          savedButton: Đã lưu
-          validation:
-            validating: Đang xác thực...
-            valid: CSS hợp lệ
-            syntaxError: CSS có lỗi cú pháp
-            tooLong: CSS quá dài
-            saved: Tất cả thay đổi đã được lưu
-    translationMode:
-      title: Chế độ dịch
-      description: "Chọn cách hiển thị văn bản đã dịch: song ngữ hoặc chỉ bản dịch."
-      mode:
-        bilingual: Song ngữ
-        translationOnly: Chỉ bản dịch
-    translationModeShortcut:
-      switched: "Chế độ dịch: $1"
-    translateRange:
-      title: Phạm vi dịch
-      description: Chọn chỉ dịch nội dung chính hay tất cả nội dung trên trang.
-      range:
-        main: Nội dung chính
-        all: Tất cả nội dung
-    preloadConfig:
-      title: Phạm vi dịch trước
-      description: Kiểm soát lượng nội dung bên dưới vùng nhìn được dịch trước để tiết kiệm chi phí API
-      margin:
-        description: "Khoảng dịch trước: dịch trước nội dung cách dưới màn hình bao nhiêu pixel. Giảm để tiết kiệm chi phí API"
-      threshold:
-        description: "Ngưỡng hiển thị: đoạn văn phải lộ ra bao nhiêu mới được dịch, từ 0 đến 1"
-    smallParagraphFilter:
-      title: Bộ lọc văn bản ngắn
-      description: Các giá trị mặc định toàn cục này bỏ qua việc dịch các nút văn bản có ít ký tự hoặc từ hơn ngưỡng. Quy tắc trang web phù hợp có thể ghi đè chúng (0 = tắt)
-      minCharacters:
-        description: "Số ký tự tối thiểu: văn bản ngắn hơn sẽ không được dịch. Đặt 0 để dịch tất cả"
-      minWords:
-        description: "Số từ tối thiểu: văn bản có ít từ hơn sẽ không được dịch"
-      error: Giá trị phải từ $1 đến $2
-    autoTranslateLanguages:
-      title: Tự động dịch theo ngôn ngữ
-      description: Tự động dịch nội dung trang khi phát hiện các ngôn ngữ cụ thể
-      selectLanguages: Chọn ngôn ngữ
-      detection:
-        label: Phát hiện ngôn ngữ
-        basic: Cơ bản
-        llm: LLM
-        description: Phát hiện cơ bản nhanh và miễn phí. Phát hiện LLM chính xác hơn nhưng thêm độ trễ và chi phí API. Yêu cầu các ngôn ngữ tự động dịch đã cấu hình.
-    skipLanguages:
-      title: Tự động bỏ qua theo ngôn ngữ
-      description: Tự động bỏ qua dịch đoạn văn khi phát hiện các ngôn ngữ cụ thể
-      targetLanguageSkipDescription: Bỏ qua các đoạn đã ở ngôn ngữ đích mà không gửi yêu cầu
-      selectLanguages: Chọn ngôn ngữ
-      detection:
-        label: Phát hiện ngôn ngữ
-        basic: Cơ bản
-        llm: LLM
-        description: Phát hiện cơ bản nhanh và miễn phí. Phát hiện LLM chính xác hơn nhưng thêm độ trễ và chi phí API.
-    clearCache:
-      title: Xóa bộ nhớ đệm
-      description: Xóa tất cả bộ nhớ đệm dịch trong trình duyệt của bạn
-      clearing: Đang xóa...
-      dialog:
+    translationControl:
+      title: Kiểm soát dịch
+      autoTranslateWebsite:
+        title: Tự động dịch theo trang web
+        description: Các trang bắt đầu dịch ngay khi mở
+        urlPattern: Mẫu URL
+        enterUrlPattern: Nhập mẫu URL
+      neverAutoTranslateWebsite:
+        title: Không bao giờ tự động dịch theo trang web
+        description: Các trang không bao giờ tự dịch, kể cả khi khớp quy tắc ngôn ngữ
+        urlPattern: Mẫu URL
+        enterUrlPattern: Nhập mẫu URL
+      autoTranslateLanguages:
+        title: Tự động dịch theo ngôn ngữ
+        description: Tự động dịch nội dung trang khi phát hiện các ngôn ngữ cụ thể
+        selectLanguages: Chọn ngôn ngữ
+      skipLanguages:
+        title: Tự động bỏ qua theo ngôn ngữ
+        description: Tự động bỏ qua dịch đoạn văn khi phát hiện các ngôn ngữ cụ thể
+        targetLanguageSkipDescription: Bỏ qua các đoạn đã ở ngôn ngữ đích mà không gửi yêu cầu
+        selectLanguages: Chọn ngôn ngữ
+      smallParagraphFilter:
+        title: Bộ lọc văn bản ngắn
+        description: Các giá trị mặc định toàn cục này bỏ qua việc dịch các nút văn bản có ít ký tự hoặc từ hơn ngưỡng. Quy tắc trang web phù hợp có thể ghi đè chúng (0 = tắt)
+        minCharacters:
+          description: "Số ký tự tối thiểu: văn bản ngắn hơn sẽ không được dịch. Đặt 0 để dịch tất cả"
+        minWords:
+          description: "Số từ tối thiểu: văn bản có ít từ hơn sẽ không được dịch"
+        error: Giá trị phải từ $1 đến $2
+    translationQueue:
+      title: Hàng đợi dịch
+      requestQueueConfig:
+        title: Tốc độ dịch
+        capacity:
+          description: "Số yêu cầu tối đa cùng lúc: bao nhiêu yêu cầu được gửi đi một lượt"
+        rate:
+          description: "Số yêu cầu mỗi giây: tốc độ đều sau đợt gửi dồn. Dùng được số thập phân, 0.25 là 4 giây một yêu cầu"
+      batchQueueConfig:
+        title: Dịch theo lô
+        description: Cấu hình giới hạn ký tự và số đoạn văn tối đa cho dịch theo lô (chỉ có hiệu lực với dịch LLM)
+        maxCharactersPerBatch:
+          description: "Số ký tự tối đa: mỗi yêu cầu tới AI mang bao nhiêu văn bản"
+        maxItemsPerBatch:
+          description: "Số đoạn tối đa: bao nhiêu đoạn gộp chung một yêu cầu. Nhà cung cấp không dùng AI bỏ qua cả hai"
+      preloadConfig:
+        title: Phạm vi dịch trước
+        description: Kiểm soát lượng nội dung bên dưới vùng nhìn được dịch trước để tiết kiệm chi phí API
+        margin:
+          description: "Khoảng dịch trước: dịch trước nội dung cách dưới màn hình bao nhiêu pixel. Giảm để tiết kiệm chi phí API"
+        threshold:
+          description: "Ngưỡng hiển thị: đoạn văn phải lộ ra bao nhiêu mới được dịch, từ 0 đến 1"
+    cache:
+      title: Bộ nhớ đệm
+      clearCache:
         title: Xóa bộ nhớ đệm
-        trigger: Xóa bộ nhớ đệm
-        confirm: Xác nhận
-        cancel: Hủy
-        description: Thao tác này sẽ xóa tất cả bộ nhớ đệm dịch. Hành động này không thể hoàn tác.
+        description: Xóa tất cả bộ nhớ đệm dịch trong trình duyệt của bạn
+        clearing: Đang xóa...
+        dialog:
+          title: Xóa bộ nhớ đệm
+          trigger: Xóa bộ nhớ đệm
+          confirm: Xác nhận
+          cancel: Hủy
+          description: Thao tác này sẽ xóa tất cả bộ nhớ đệm dịch. Hành động này không thể hoàn tác.
   siteRules:
     title: Quy tắc trang web
     description: Quy tắc theo từng trang web để điều chỉnh cách dịch các trang web cụ thể.

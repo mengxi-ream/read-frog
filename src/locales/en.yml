@@ -767,95 +767,45 @@ options:
     title: Page Translation
     pageDescription: Control how pages get translated — mode, range, prompts, and request limits.
     preference:
-      title: Preference
+      title: Basics
+      translationMode:
+        title: Translation mode
+        description: "Choose how the translated text is displayed: bilingual or translation only."
+        mode:
+          bilingual: Bilingual
+          translationOnly: Translation only
+        switched: "Translation mode: $1"
+      translateRange:
+        title: Translation range
+        description: Select whether to translate only the main content or all content on the page.
+        range:
+          main: Main content
+          all: All content
     hoverTranslation:
-      title: Hover Translation
+      title: Hover translation
       enable:
         title: Enable
         description: Hover or long-press a paragraph to translate just that one.
-    translationControl:
-      title: Translation control
-    translationQueue:
-      title: Translation queue
-    cache:
-      title: Cache
-    requestQueueConfig:
-      title: Translation rate
-      capacity:
-        description: "Maximum burst requests: how many can go out at once"
-      rate:
-        description: "Requests per second: the steady pace after a burst. Decimals work, so 0.25 sends one request every 4 seconds"
-    batchQueueConfig:
-      title: Batch translation
-      description: Configure character limits and maximum paragraph count for batch translation (only effective for LLM translation)
-      maxCharactersPerBatch:
-        description: "Maximum characters: how much text one AI request carries"
-      maxItemsPerBatch:
-        description: "Maximum paragraphs: how many paragraphs share one request. Providers that are not AI ignore both"
-    autoTranslateWebsite:
-      title: Auto translate based on website
-      description: Sites that start translating as soon as they open
-      urlPattern: URL pattern
-      enterUrlPattern: Enter URL pattern
-    neverAutoTranslateWebsite:
-      title: Never auto translate based on website
-      description: Sites that never translate on their own, even when a language rule matches
-      urlPattern: URL pattern
-      enterUrlPattern: Enter URL pattern
-    personalizedPrompts:
-      title: Personalized Prompts
-      description: Customizing different types of Prompts allows you to adjust the Prompt type yourself during translation. A Prompt represents the text that the user sends to the LLM.
-      managePrompts: Manage prompts
-      communityPrompts: Get or share prompts from community
-      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
-      addPrompt: Add Prompt
-      default: Default
-      importSuccess: Import Success
-      import: Import
-      export: Export
-      current: in use
-      editPrompt:
-        title: Edit Prompt
-        name: Name
-        systemPrompt: System Prompt
-        prompt: Prompt
-        promptCellInput:
-          input: Text content to translate
-          targetLanguage: Target language
-          webTitle: Webpage title
-          webDescription: Webpage description from page metadata
-          webContent: Webpage content (truncated to the first 2000 characters)
-          webSummary: Webpage summary (requires AI Smart Context)
-        save: Save Changes
-        close: Cancel
-      deletePrompt:
-        title: Delete Prompt
-        description: Confirm delete prompt
-        confirm: Confirm
-        cancel: Cancel
-      exportPrompt:
-        exportSelected: Export Selected
-        cancel: Cancel
     translationStyle:
-      title: Translation Display Style
+      title: Translation display style
       description: Set any style you want to distinguish translation results from original text
-      useCustomStyle: Use Custom CSS Style
+      useCustomStyle: Use custom CSS style
       useCustomStyleDescription: Supports any CSS, including fonts, animations, and language-specific styles
-      presetStyle: Preset Style
-      cssEditor: CSS Editor
+      presetStyle: Preset style
+      cssEditor: CSS editor
       cssEditorDescription: Write your own CSS and preview how translated text looks.
       preview: Preview
       stylePreviewLanguage: Language
       stylePreviewDirection: Direction
-      stylePreviewTranslatedText: Translated Text
+      stylePreviewTranslatedText: Translated text
       style:
         default: None
-        blur: Blur Effect
+        blur: Blur effect
         blockquote: Blockquote
         weakened: Weakened
-        dashedLine: Dashed Line
+        dashedLine: Dashed line
         border: Border
-        textColor: Text Color
+        textColor: Text color
         background: Background
       customCSS:
         editor:
@@ -867,6 +817,7 @@ options:
               padding: 2px 4px;
               border-radius: 4px;
             }
+          docsLink: How to configure?
           saveButton: Save
           savedButton: Saved
           validation:
@@ -875,64 +826,103 @@ options:
             syntaxError: CSS has syntax errors
             tooLong: CSS is too long
             saved: All changes saved
-    translationMode:
-      title: Translation mode
-      description: "Choose how the translated text is displayed: bilingual or translation only."
-      mode:
-        bilingual: Bilingual
-        translationOnly: Translation Only
-    translationModeShortcut:
-      switched: "Translation Mode: $1"
-    translateRange:
-      title: Translation range
-      description: Select whether to translate only the main content or all content on the page.
-      range:
-        main: Main Content
-        all: All Content
-    preloadConfig:
-      title: Pre-translate range
-      description: Control how much content below the viewport gets pre-translated to save API costs
-      margin:
-        description: "Preload distance: how far below the screen to translate ahead, in pixels. Less saves API cost"
-      threshold:
-        description: "Visibility threshold: how much of a paragraph must be on screen before it is translated, from 0 to 1"
-    smallParagraphFilter:
-      title: Small paragraph filter
-      description: These global defaults skip translating text nodes with fewer characters or words than the thresholds. Matching site rules can override them (0 = disabled)
-      minCharacters:
-        description: "Minimum characters: shorter text stays untranslated. Use 0 to translate everything"
-      minWords:
-        description: "Minimum words: text with fewer words stays untranslated"
-      error: Value must be between $1 and $2
-    autoTranslateLanguages:
-      title: Auto translate based on language
-      description: Automatically translate page content when specific languages are detected
-      selectLanguages: Select languages
-      detection:
-        label: Language Detection
-        basic: Basic
-        llm: LLM
-        description: Basic detection is fast and free. LLM detection is more accurate but adds latency and API costs. Requires configured auto-translate languages.
-    skipLanguages:
-      title: Auto skip based on language
-      description: Automatically skip paragraph translation when specific languages are detected
-      targetLanguageSkipDescription: Skip paragraphs already in the target language, without sending a request
-      selectLanguages: Select languages
-      detection:
-        label: Language Detection
-        basic: Basic
-        llm: LLM
-        description: Basic detection is fast and free. LLM detection is more accurate but adds latency and API costs.
-    clearCache:
-      title: Clear cache
-      description: Clear all translation cache in your browser
-      clearing: Clearing...
-      dialog:
-        title: Clear Cache
-        trigger: Clear Cache
+    personalizedPrompts:
+      title: Personalized prompts
+      description: Customizing different types of Prompts allows you to adjust the Prompt type yourself during translation. A Prompt represents the text that the user sends to the LLM.
+      managePrompts: Manage prompts
+      communityPrompts: Get or share prompts from community
+      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      addPrompt: Add prompt
+      default: Default
+      importSuccess: Import success
+      import: Import
+      export: Export
+      current: in use
+      editPrompt:
+        title: Edit prompt
+        name: Name
+        systemPrompt: System prompt
+        prompt: Prompt
+        promptCellInput:
+          input: Text content to translate
+          targetLanguage: Target language
+          webTitle: Webpage title
+          webDescription: Webpage description from page metadata
+          webContent: Webpage content (truncated to the first 2000 characters)
+          webSummary: Webpage summary (requires AI smart context)
+        save: Save changes
+        close: Cancel
+      deletePrompt:
+        title: Delete prompt
+        description: Confirm delete prompt
         confirm: Confirm
         cancel: Cancel
-        description: This operation will clear all translation cache. This action cannot be undone.
+      exportPrompt:
+        exportSelected: Export selected
+        cancel: Cancel
+    translationControl:
+      title: Translation control
+      autoTranslateWebsite:
+        title: Auto translate based on website
+        description: Sites that start translating as soon as they open
+        urlPattern: URL pattern
+        enterUrlPattern: Enter URL pattern
+      neverAutoTranslateWebsite:
+        title: Never auto translate based on website
+        description: Sites that never translate on their own, even when a language rule matches
+        urlPattern: URL pattern
+        enterUrlPattern: Enter URL pattern
+      autoTranslateLanguages:
+        title: Auto translate based on language
+        description: Automatically translate page content when specific languages are detected
+        selectLanguages: Select languages
+      skipLanguages:
+        title: Auto skip based on language
+        description: Automatically skip paragraph translation when specific languages are detected
+        targetLanguageSkipDescription: Skip paragraphs already in the target language, without sending a request
+        selectLanguages: Select languages
+      smallParagraphFilter:
+        title: Small paragraph filter
+        description: These global defaults skip translating text nodes with fewer characters or words than the thresholds. Matching site rules can override them (0 = disabled)
+        minCharacters:
+          description: "Minimum characters: shorter text stays untranslated. Use 0 to translate everything"
+        minWords:
+          description: "Minimum words: text with fewer words stays untranslated"
+        error: Value must be between $1 and $2
+    translationQueue:
+      title: Translation queue
+      requestQueueConfig:
+        title: Translation rate
+        capacity:
+          description: "Maximum burst requests: how many can go out at once"
+        rate:
+          description: "Requests per second: the steady pace after a burst. Decimals work, so 0.25 sends one request every 4 seconds"
+      batchQueueConfig:
+        title: Batch translation
+        description: Configure character limits and maximum paragraph count for batch translation (only effective for LLM translation)
+        maxCharactersPerBatch:
+          description: "Maximum characters: how much text one AI request carries"
+        maxItemsPerBatch:
+          description: "Maximum paragraphs: how many paragraphs share one request. Providers that are not AI ignore both"
+      preloadConfig:
+        title: Pre-translate range
+        description: Control how much content below the viewport gets pre-translated to save API costs
+        margin:
+          description: "Preload distance: how far below the screen to translate ahead, in pixels. Less saves API cost"
+        threshold:
+          description: "Visibility threshold: how much of a paragraph must be on screen before it is translated, from 0 to 1"
+    cache:
+      title: Cache
+      clearCache:
+        title: Clear cache
+        description: Clear all translation cache in your browser
+        clearing: Clearing...
+        dialog:
+          title: Clear cache
+          trigger: Clear cache
+          confirm: Confirm
+          cancel: Cancel
+          description: This operation will clear all translation cache. This action cannot be undone.
   siteRules:
     title: Site rules
     description: Per-site rules that adjust how specific websites are translated.

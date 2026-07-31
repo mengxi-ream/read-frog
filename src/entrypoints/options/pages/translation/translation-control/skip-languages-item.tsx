@@ -24,10 +24,10 @@ export function SkipLanguagesItem() {
     <>
       <ConfigItem
         id="skip-languages"
-        title={i18n.t("options.translation.skipLanguages.title")}
+        title={i18n.t("options.translation.translationControl.skipLanguages.title")}
         description={
           <>
-            {i18n.t("options.translation.skipLanguages.description")}
+            {i18n.t("options.translation.translationControl.skipLanguages.description")}
             <LanguageChips
               languages={selectedLanguages}
               onRemove={(language) =>
@@ -40,11 +40,15 @@ export function SkipLanguagesItem() {
         <MultiLanguageCombobox
           selectedLanguages={selectedLanguages}
           onLanguagesChange={setLanguages}
-          buttonLabel={i18n.t("options.translation.skipLanguages.selectLanguages")}
+          buttonLabel={i18n.t(
+            "options.translation.translationControl.skipLanguages.selectLanguages",
+          )}
         />
       </ConfigItem>
       <ConfigItem
-        description={i18n.t("options.translation.skipLanguages.targetLanguageSkipDescription")}
+        description={i18n.t(
+          "options.translation.translationControl.skipLanguages.targetLanguageSkipDescription",
+        )}
       >
         <Switch
           checked={translateConfig.page.enableTargetLanguageSkip}

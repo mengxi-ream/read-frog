@@ -28,14 +28,14 @@ export function TranslationModeSelect() {
     >
       <SelectTrigger size="sm">
         <SelectValue render={<span />}>
-          {i18n.t(`options.translation.translationMode.mode.${mode}`)}
+          {i18n.t(`options.translation.preference.translationMode.mode.${mode}`)}
         </SelectValue>
       </SelectTrigger>
       <SelectContent {...SELECT_CONTENT_PROPS}>
         <SelectGroup>
           {TRANSLATION_MODES.map((item) => (
             <SelectItem key={item} value={item}>
-              {i18n.t(`options.translation.translationMode.mode.${item}`)}
+              {i18n.t(`options.translation.preference.translationMode.mode.${item}`)}
             </SelectItem>
           ))}
         </SelectGroup>

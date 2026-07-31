@@ -767,41 +767,65 @@ options:
     title: 网页翻译
     pageDescription: 控制页面翻译的方式：模式、范围、提示词和请求限制。
     preference:
-      title: 偏好设置
+      title: 基础设置
+      translationMode:
+        title: 翻译模式
+        description: 选择翻译文本的显示方式：双语对照或仅显示翻译
+        mode:
+          bilingual: 双语对照
+          translationOnly: 仅显示翻译
+        switched: 翻译模式：$1
+      translateRange:
+        title: 翻译范围
+        description: 选择是仅翻译主要内容还是翻译页面上的所有内容。
+        range:
+          main: 主要内容
+          all: 全部内容
     hoverTranslation:
       title: 悬停翻译
       enable:
         title: 启用
         description: 悬停或长按段落，只翻译这一段。
-    translationControl:
-      title: 翻译控制
-    translationQueue:
-      title: 翻译队列
-    cache:
-      title: 缓存
-    requestQueueConfig:
-      title: 翻译速率
-      capacity:
-        description: 最大突发请求数：同一时刻最多能发出多少个请求
-      rate:
-        description: 每秒请求数：突发之后的稳定速度。可以填小数，0.25 表示每 4 秒发一个请求
-    batchQueueConfig:
-      title: 批量翻译
-      description: 配置批量翻译时的字符数限制和最大段落数量（仅对大语言模型翻译有效）
-      maxCharactersPerBatch:
-        description: 最大字符数：一次 AI 请求最多带多少文本
-      maxItemsPerBatch:
-        description: 最大段落数：多少个段落合并成一次请求。非 AI 的翻译服务不受这两项影响
-    autoTranslateWebsite:
-      title: 基于网站自动翻译
-      description: 打开后就开始翻译的网站
-      urlPattern: URL 模式
-      enterUrlPattern: 输入 URL 模式
-    neverAutoTranslateWebsite:
-      title: 基于网站永不自动翻译
-      description: 永不自动翻译的网站，即使命中语言规则
-      urlPattern: URL 模式
-      enterUrlPattern: 输入 URL 模式
+    translationStyle:
+      title: 翻译显示样式
+      description: 设置任何你想要的样式以区分翻译结果和原文
+      useCustomStyle: 使用自定义 CSS 样式
+      useCustomStyleDescription: 支持任意 CSS，包括修改字体、动画、多语言差异化样式
+      presetStyle: 预设样式
+      cssEditor: CSS 编辑器
+      cssEditorDescription: 编写自己的 CSS，并预览翻译文本的显示效果。
+      preview: 预览
+      stylePreviewLanguage: 语言
+      stylePreviewDirection: 方向
+      stylePreviewTranslatedText: 翻译的文本
+      style:
+        default: 无
+        blur: 模糊效果
+        blockquote: 引用
+        weakened: 弱化
+        dashedLine: 虚线
+        border: 边框
+        textColor: 文字颜色
+        background: 背景
+      customCSS:
+        editor:
+          placeholder: |
+            /* 示例：自定义颜色和背景样式 */
+            [data-read-frog-custom-translation-style='custom'] {
+              color: #414535;
+              background-color: light-dark(#F2E3BC, #C19875);
+              padding: 2px 4px;
+              border-radius: 4px;
+            }
+          docsLink: 如何配置?
+          saveButton: 保存
+          savedButton: 已保存
+          validation:
+            validating: 验证中...
+            valid: CSS 有效
+            syntaxError: CSS 存在语法错误
+            tooLong: CSS 过长
+            saved: 所有更改已保存
     personalizedPrompts:
       title: 个性化 Prompt
       description: 自定义不同类型的 Prompt，可以在翻译时自行调整 Prompt 类型。Prompt 表示以用户身份发送给 LLM 的文本。
@@ -836,103 +860,69 @@ options:
       exportPrompt:
         exportSelected: 导出所选
         cancel: 取消
-    translationStyle:
-      title: 翻译显示样式
-      description: 设置任何你想要的样式以区分翻译结果和原文
-      useCustomStyle: 使用自定义 CSS 样式
-      useCustomStyleDescription: 支持任意 CSS，包括修改字体、动画、多语言差异化样式
-      presetStyle: 预设样式
-      cssEditor: CSS 编辑器
-      cssEditorDescription: 编写自己的 CSS，并预览翻译文本的显示效果。
-      preview: 预览
-      stylePreviewLanguage: 语言
-      stylePreviewDirection: 方向
-      stylePreviewTranslatedText: 翻译的文本
-      style:
-        default: 无
-        blur: 模糊效果
-        blockquote: 引用
-        weakened: 弱化
-        dashedLine: 虚线
-        border: 边框
-        textColor: 文字颜色
-        background: 背景
-      customCSS:
-        editor:
-          placeholder: |
-            /* 示例：自定义颜色和背景样式 */
-            [data-read-frog-custom-translation-style='custom'] {
-              color: #414535;
-              background-color: light-dark(#F2E3BC, #C19875);
-              padding: 2px 4px;
-              border-radius: 4px;
-            }
-          saveButton: 保存
-          savedButton: 已保存
-          validation:
-            validating: 验证中...
-            valid: CSS 有效
-            syntaxError: CSS 存在语法错误
-            tooLong: CSS 过长
-            saved: 所有更改已保存
-    translationMode:
-      title: 翻译模式
-      description: 选择翻译文本的显示方式：双语对照或仅显示翻译
-      mode:
-        bilingual: 双语对照
-        translationOnly: 仅显示翻译
-    translationModeShortcut:
-      switched: 翻译模式：$1
-    translateRange:
-      title: 翻译范围
-      description: 选择是仅翻译主要内容还是翻译页面上的所有内容。
-      range:
-        main: 主要内容
-        all: 全部内容
-    preloadConfig:
-      title: 预翻译范围
-      description: 控制视口下方多少内容会被预先翻译，以节省 API 费用
-      margin:
-        description: 预翻译距离：屏幕下方多少像素内的内容提前翻译。调小更省 API 费用
-      threshold:
-        description: 可见比例：段落露出多少才开始翻译，取值 0 到 1
-    smallParagraphFilter:
-      title: 小段落过滤
-      description: 这些全局默认值会跳过翻译少于指定字符数或词数的文本节点；匹配的站点规则可以覆盖它们（0 = 禁用）
-      minCharacters:
-        description: 最小字符数：比这更短的文本不翻译，设为 0 则全部翻译
-      minWords:
-        description: 最小词数：词数比这更少的文本不翻译
-      error: 数值必须在 $1 到 $2 之间
-    autoTranslateLanguages:
-      title: 基于语言的自动翻译
-      description: 当检测到指定语言时自动翻译页面内容
-      selectLanguages: 选择语言
-      detection:
-        label: 语言检测
-        basic: 基础
-        llm: LLM
-        description: 基础检测快速且免费。LLM 检测更准确，但会增加延迟和 API 费用。需配置自动翻译语言。
-    skipLanguages:
-      title: 基于语言的自动跳过
-      description: 当检测到指定语言时自动跳过段落翻译
-      targetLanguageSkipDescription: 已经是目标语言的段落直接跳过，不发送请求
-      selectLanguages: 选择语言
-      detection:
-        label: 语言检测
-        basic: 基础
-        llm: LLM
-        description: 基础检测快速且免费。LLM 检测更准确，但会增加延迟和 API 费用。
-    clearCache:
-      title: 清理缓存
-      description: 清理浏览器中的所有翻译缓存
-      clearing: 清理中...
-      dialog:
+    translationControl:
+      title: 翻译控制
+      autoTranslateWebsite:
+        title: 基于网站自动翻译
+        description: 打开后就开始翻译的网站
+        urlPattern: URL 模式
+        enterUrlPattern: 输入 URL 模式
+      neverAutoTranslateWebsite:
+        title: 基于网站永不自动翻译
+        description: 永不自动翻译的网站，即使命中语言规则
+        urlPattern: URL 模式
+        enterUrlPattern: 输入 URL 模式
+      autoTranslateLanguages:
+        title: 基于语言的自动翻译
+        description: 当检测到指定语言时自动翻译页面内容
+        selectLanguages: 选择语言
+      skipLanguages:
+        title: 基于语言的自动跳过
+        description: 当检测到指定语言时自动跳过段落翻译
+        targetLanguageSkipDescription: 已经是目标语言的段落直接跳过，不发送请求
+        selectLanguages: 选择语言
+      smallParagraphFilter:
+        title: 小段落过滤
+        description: 这些全局默认值会跳过翻译少于指定字符数或词数的文本节点；匹配的站点规则可以覆盖它们（0 = 禁用）
+        minCharacters:
+          description: 最小字符数：比这更短的文本不翻译，设为 0 则全部翻译
+        minWords:
+          description: 最小词数：词数比这更少的文本不翻译
+        error: 数值必须在 $1 到 $2 之间
+    translationQueue:
+      title: 翻译队列
+      requestQueueConfig:
+        title: 翻译速率
+        capacity:
+          description: 最大突发请求数：同一时刻最多能发出多少个请求
+        rate:
+          description: 每秒请求数：突发之后的稳定速度。可以填小数，0.25 表示每 4 秒发一个请求
+      batchQueueConfig:
+        title: 批量翻译
+        description: 配置批量翻译时的字符数限制和最大段落数量（仅对大语言模型翻译有效）
+        maxCharactersPerBatch:
+          description: 最大字符数：一次 AI 请求最多带多少文本
+        maxItemsPerBatch:
+          description: 最大段落数：多少个段落合并成一次请求。非 AI 的翻译服务不受这两项影响
+      preloadConfig:
+        title: 预翻译范围
+        description: 控制视口下方多少内容会被预先翻译，以节省 API 费用
+        margin:
+          description: 预翻译距离：屏幕下方多少像素内的内容提前翻译。调小更省 API 费用
+        threshold:
+          description: 可见比例：段落露出多少才开始翻译，取值 0 到 1
+    cache:
+      title: 缓存
+      clearCache:
         title: 清理缓存
-        trigger: 清理缓存
-        confirm: 确认
-        cancel: 取消
-        description: 此操作将清理所有翻译缓存。此操作无法撤销。
+        description: 清理浏览器中的所有翻译缓存
+        clearing: 清理中...
+        dialog:
+          title: 清理缓存
+          trigger: 清理缓存
+          confirm: 确认
+          cancel: 取消
+          description: 此操作将清理所有翻译缓存。此操作无法撤销。
   siteRules:
     title: 站点规则
     description: 针对特定网站调整翻译行为的规则。

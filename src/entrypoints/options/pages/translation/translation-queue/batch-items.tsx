@@ -16,15 +16,17 @@ export function BatchTranslationItems() {
     <>
       <ConfigItem
         id="request-batch"
-        title={i18n.t("options.translation.batchQueueConfig.title")}
+        title={i18n.t("options.translation.translationQueue.batchQueueConfig.title")}
         description={i18n.t(
-          "options.translation.batchQueueConfig.maxCharactersPerBatch.description",
+          "options.translation.translationQueue.batchQueueConfig.maxCharactersPerBatch.description",
         )}
       >
         <BatchNumberInput property="maxCharactersPerBatch" />
       </ConfigItem>
       <ConfigItem
-        description={i18n.t("options.translation.batchQueueConfig.maxItemsPerBatch.description")}
+        description={i18n.t(
+          "options.translation.translationQueue.batchQueueConfig.maxItemsPerBatch.description",
+        )}
       >
         <BatchNumberInput property="maxItemsPerBatch" />
       </ConfigItem>

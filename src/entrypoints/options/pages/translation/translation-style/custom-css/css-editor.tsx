@@ -69,7 +69,7 @@ export function CSSEditor() {
           target="_blank"
           rel="noreferrer"
         >
-          {i18n.t("options.apiProviders.howToConfigure")}
+          {i18n.t("options.translation.translationStyle.customCSS.editor.docsLink")}
         </a>
       </div>
       <CSSCodeEditor
