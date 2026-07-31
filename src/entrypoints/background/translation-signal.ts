@@ -10,6 +10,7 @@ import { getDetectedCodeStateKey, getTranslationStateKey } from "@/utils/constan
 import { shouldEnableAutoTranslation } from "@/utils/host/translate/auto-translation"
 import { logger } from "@/utils/logger"
 import { onMessage, sendMessage } from "@/utils/message"
+import { getPageTranslationOriginScope } from "@/utils/url"
 import {
   injectHostContentIntoCurrentTabIframesAfterNodeTranslation,
   injectHostContentIntoTabIframes,
@@ -17,6 +18,7 @@ import {
 import {
   getPageTranslationEnabled,
   getPageTranslationState,
+  isAutoTranslationSuppressed,
   isPageTranslationStateInUrlScope,
   setPageTranslationEnabled,
 } from "./page-translation-state"
@@ -125,6 +127,12 @@ export function translationMessage() {
 
       const shouldEnable = await shouldEnableAutoTranslation(url, detectedCodeOrUnd, config)
       if (shouldEnable) {
+        // Honor an explicit user refusal for this origin (#2011): language is
+        // re-detected on every tab activation, so without this check a manual
+        // "show original" would be force-overridden on the next tab switch.
+        const state = await getPageTranslationState(tabId)
+        if (isAutoTranslationSuppressed(state, url)) return
+
         requestManagerToTogglePageTranslation(
           tabId,
           true,
@@ -157,7 +165,13 @@ export function translationMessage() {
   onMessage("tryToSetEnablePageTranslationByTabId", async (msg) => {
     const { tabId, enabled, analyticsContext } = msg.data
     if (!enabled) {
-      await setPageTranslationEnabled(tabId, false)
+      // Record the user's refusal before asking the manager to stop, so a
+      // concurrent tab-activation re-detection cannot re-enable in between.
+      const tabUrl = await browser.tabs
+        .get(tabId)
+        .then((tab) => tab.url)
+        .catch(() => undefined)
+      await setPageTranslationEnabled(tabId, false, tabUrl, true)
       notifyPageTranslationStateChanged(tabId, false)
     }
     requestManagerToTogglePageTranslation(tabId, enabled, analyticsContext)
@@ -172,7 +186,7 @@ export function translationMessage() {
         tabId,
       })
       if (!enabled) {
-        await setPageTranslationEnabled(tabId, false)
+        await setPageTranslationEnabled(tabId, false, msg.sender?.tab?.url, true)
         notifyPageTranslationStateChanged(tabId, false)
       }
       requestManagerToTogglePageTranslation(tabId, enabled, analyticsContext)
@@ -183,24 +197,28 @@ export function translationMessage() {
 
   onMessage("setAndNotifyPageTranslationStateChangedByManager", async (msg) => {
     const tabId = msg.sender?.tab?.id
-    const { enabled, url } = msg.data
+    const { enabled, url, userInitiated } = msg.data
     if (typeof tabId === "number") {
       const senderFrameId = msg.sender?.frameId
 
-      if (enabled && isIframe(senderFrameId)) {
-        // Iframe enabled echoes only synchronize UI; they must not write
-        // tab-level state because that state is scoped to the top-frame origin.
-        const currentState = await getPageTranslationState(tabId)
-        if (!currentState?.enabled) return
+      if (isIframe(senderFrameId)) {
+        // Iframe echoes only synchronize UI; they must not write tab-level
+        // state (including the userDisabled marker) because that state is
+        // scoped to the top-frame origin and iframe echoes carry iframe URLs.
+        // Only re-broadcast when the echo agrees with the stored state, so an
+        // iframe-only stop cannot make the UI contradict a still-translating
+        // top frame.
+        const currentEnabled = await getPageTranslationEnabled(tabId)
+        if (enabled !== currentEnabled) return
 
-        notifyPageTranslationStateChanged(tabId, true)
+        notifyPageTranslationStateChanged(tabId, currentEnabled)
         return
       }
 
-      await setPageTranslationEnabled(tabId, enabled, url ?? msg.sender?.tab?.url)
+      await setPageTranslationEnabled(tabId, enabled, url ?? msg.sender?.tab?.url, userInitiated)
       notifyPageTranslationStateChanged(tabId, enabled)
 
-      if (enabled && !isIframe(senderFrameId)) {
+      if (enabled) {
         void injectHostContentIntoTabIframes(tabId)
       }
     } else {
@@ -223,16 +241,29 @@ export function translationMessage() {
     await publishAndRefreshActiveTab(activeInfo.tabId)
   })
 
-  // Clear translation state only when the tab leaves the origin where it was enabled.
+  // Clear translation state only when the tab leaves the origin where it was
+  // enabled (or where the user manually disabled it).
   browser.webNavigation.onCommitted.addListener(async (details) => {
     // Only handle main frame navigations, not iframes
     if (details.frameId !== 0) return
 
     const state = await getPageTranslationState(details.tabId)
-    if (!state?.enabled) return
+    if (!state) return
 
-    if (isPageTranslationStateInUrlScope(state, details.url)) return
+    if (state.enabled) {
+      if (isPageTranslationStateInUrlScope(state, details.url)) return
 
-    await storage.removeItem(getTranslationStateKey(details.tabId))
+      await storage.removeItem(getTranslationStateKey(details.tabId))
+      return
+    }
+
+    // A user's manual-off marker only applies to the origin it was set on;
+    // clear it once the tab commits to a different origin (or an origin-less
+    // URL like chrome://) so other sites keep auto-translating.
+    if (state.userDisabled) {
+      if (state.origin && state.origin === getPageTranslationOriginScope(details.url)) return
+
+      await storage.removeItem(getTranslationStateKey(details.tabId))
+    }
   })
 }
