@@ -885,7 +885,6 @@ options:
       title: 字幕スタイル
       description: 表示モード・位置・フォント・色・背景を、プレビューを見ながら設定します
       customizeStyle: スタイルを編集
-      preview: プレビュー
       displayMode:
         title: 表示モード
         bilingual: バイリンガル

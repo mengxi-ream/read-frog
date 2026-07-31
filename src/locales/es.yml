@@ -1001,7 +1001,6 @@ options:
       title: Estilo de subtítulos
       description: Modo de visualización, posición, fuentes, colores y fondo, ajustados sobre una vista previa en vivo
       customizeStyle: Personalizar estilo
-      preview: Vista previa
       displayMode:
         title: Modo de visualización
         bilingual: Bilingüe

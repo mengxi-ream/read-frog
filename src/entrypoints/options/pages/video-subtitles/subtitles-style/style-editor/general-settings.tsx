@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/base-ui/select"
-import { Slider } from "@/components/ui/base-ui/slider"
+import { SliderComfortable } from "@/components/ui/base-ui/slider"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
@@ -155,19 +155,18 @@ export function GeneralSettings() {
               {i18n.t("options.videoSubtitles.style.backgroundOpacity")}
             </FieldLabel>
             <div className="w-full min-w-0 @xs/field-group:ml-auto @xs/field-group:max-w-[15rem]">
-              <div className="flex min-w-0 items-center gap-2">
-                <Slider
+              <div className="min-w-0">
+                <SliderComfortable
+                  variant="scrubber"
+                  aria-label={i18n.t("options.videoSubtitles.style.backgroundOpacity")}
                   min={MIN_BACKGROUND_OPACITY}
                   max={MAX_BACKGROUND_OPACITY}
                   step={5}
                   value={draftBackgroundOpacity}
-                  onValueChange={(value) => setDraftBackgroundOpacity(value as number)}
-                  onValueCommitted={(value) =>
-                    handleContainerChange({ backgroundOpacity: value as number })
-                  }
-                  className="flex-1"
+                  onChange={setDraftBackgroundOpacity}
+                  onCommit={(value) => handleContainerChange({ backgroundOpacity: value })}
+                  formatValue={(v) => `${v}%`}
                 />
-                <span className="w-10 text-right text-sm">{draftBackgroundOpacity}%</span>
               </div>
             </div>
           </div>

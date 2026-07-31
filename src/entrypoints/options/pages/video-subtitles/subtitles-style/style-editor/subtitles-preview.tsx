@@ -1,13 +1,11 @@
 import { useAtomValue } from "jotai"
 import { Activity } from "react"
 import { GradientBackground } from "@/components/gradient-background"
-import { Label } from "@/components/ui/base-ui/label"
 import {
   MainSubtitle,
   TranslationSubtitle,
 } from "@/entrypoints/subtitles.content/ui/subtitle-lines"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 
 export function SubtitlesPreview() {
@@ -27,32 +25,27 @@ export function SubtitlesPreview() {
   }
 
   return (
-    <div>
-      <Label className="mb-2 block text-sm font-medium">
-        {i18n.t("options.videoSubtitles.style.preview")}
-      </Label>
-      <GradientBackground>
-        <div className="relative flex h-fit min-h-32 w-fit min-w-full items-center justify-center overflow-hidden rounded-lg p-4">
-          <div
-            className="flex max-w-[90%] flex-col gap-2 rounded px-3 py-2 text-center text-white"
-            style={containerStyle}
-          >
-            <Activity mode={showMain ? "visible" : "hidden"}>
-              <MainSubtitle
-                content={sampleOriginal}
-                className={cn("text-sm", translationAbove ? "order-2" : "order-1")}
-              />
-            </Activity>
+    <GradientBackground>
+      <div className="relative flex h-fit min-h-32 w-fit min-w-full items-center justify-center overflow-hidden rounded-lg p-4">
+        <div
+          className="flex max-w-[90%] flex-col gap-2 rounded px-3 py-2 text-center text-white"
+          style={containerStyle}
+        >
+          <Activity mode={showMain ? "visible" : "hidden"}>
+            <MainSubtitle
+              content={sampleOriginal}
+              className={cn("text-sm", translationAbove ? "order-2" : "order-1")}
+            />
+          </Activity>
 
-            <Activity mode={showTranslation ? "visible" : "hidden"}>
-              <TranslationSubtitle
-                content={sampleTranslation}
-                className={cn("text-sm", translationAbove ? "order-1" : "order-2")}
-              />
-            </Activity>
-          </div>
+          <Activity mode={showTranslation ? "visible" : "hidden"}>
+            <TranslationSubtitle
+              content={sampleTranslation}
+              className={cn("text-sm", translationAbove ? "order-1" : "order-2")}
+            />
+          </Activity>
         </div>
-      </GradientBackground>
-    </div>
+      </div>
+    </GradientBackground>
   )
 }

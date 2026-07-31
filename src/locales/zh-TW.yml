@@ -1001,7 +1001,6 @@ options:
       title: 字幕樣式
       description: 顯示模式、位置、字型、顏色和背景，都對著預覽調
       customizeStyle: 自訂樣式
-      preview: 預覽
       displayMode:
         title: 顯示模式
         bilingual: 雙語模式
