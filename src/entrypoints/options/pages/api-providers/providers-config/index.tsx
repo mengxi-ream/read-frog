@@ -137,7 +137,7 @@ function ProviderCardList() {
           render={
             <Button
               variant="outline"
-              className="h-auto rounded-xl border-dashed p-3"
+              className="h-auto rounded-xl border-dashed border-accent-blue bg-accent-blue/8 p-3 hover:bg-accent-blue/14 dark:border-accent-blue dark:bg-accent-blue/12 dark:hover:bg-accent-blue/20"
               onClick={() => setIsAddDialogOpen(true)}
             />
           }
