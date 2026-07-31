@@ -92,7 +92,11 @@ export async function bootstrapHostContent(
     if (enabled) {
       void manager.start(window === window.top ? analyticsContext : undefined)
     } else {
-      manager.stop()
+      // Invariant: every sender of askManagerToTogglePageTranslation with
+      // enabled=false is a user surface (popup button, floating button,
+      // context menu) — the auto-translation path only ever sends
+      // enabled=true — so a disable here is always user-initiated.
+      manager.stop({ userInitiated: true })
     }
   })
 
