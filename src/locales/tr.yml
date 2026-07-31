@@ -885,7 +885,6 @@ options:
       title: Altyazı stili
       description: Görüntüleme modu, konum, yazı tipleri, renkler ve arka plan — canlı önizlemeye bakarak ayarlanır
       customizeStyle: Stili özelleştir
-      preview: Önizleme
       displayMode:
         title: Görüntüleme modu
         bilingual: İki dilli

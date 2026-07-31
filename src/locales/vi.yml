@@ -885,7 +885,6 @@ options:
       title: Kiểu phụ đề
       description: Chế độ hiển thị, vị trí, phông chữ, màu sắc và nền, chỉnh ngay trên bản xem trước
       customizeStyle: Tùy chỉnh kiểu
-      preview: Xem trước
       displayMode:
         title: Chế độ hiển thị
         bilingual: Song ngữ

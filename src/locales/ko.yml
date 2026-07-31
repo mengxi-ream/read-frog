@@ -885,7 +885,6 @@ options:
       title: 자막 스타일
       description: 표시 모드, 위치, 글꼴, 색상, 배경을 미리보기로 확인하며 설정합니다
       customizeStyle: 스타일 편집
-      preview: 미리보기
       displayMode:
         title: 표시 모드
         bilingual: 이중 언어
