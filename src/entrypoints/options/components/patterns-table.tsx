@@ -26,6 +26,12 @@ interface PatternsTableProps {
   placeholderText: string
   tableHeaderText: string
   className?: string
+  /**
+   * The box the rows sit in. Capped and scrolling by default, so a list inside a settings
+   * row can't grow until it pushes the section off screen; pass `max-h-none` where the list
+   * has the room to run its full length.
+   */
+  rowsClassName?: string
 }
 
 export function PatternsTable({
@@ -35,6 +41,7 @@ export function PatternsTable({
   placeholderText,
   tableHeaderText,
   className,
+  rowsClassName,
 }: PatternsTableProps) {
   const [inputValue, setInputValue] = useState("")
 
@@ -87,7 +94,7 @@ export function PatternsTable({
               </TableRow>
             </TableHeader>
           </Table>
-          <div className="max-h-42 overflow-y-auto">
+          <div className={cn("max-h-42 overflow-y-auto", rowsClassName)}>
             <Table>
               <TableBody>
                 {patterns.map((pattern, index) => (
