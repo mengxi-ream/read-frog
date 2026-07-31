@@ -97,9 +97,9 @@ options:
     title: API Providers
     pageDescription: Connect the AI services Read Frog calls, then choose which one runs each feature.
     description: Add the providers Read Frog can call. Over 20 are built in, and any OpenAI-compatible API works.
-    configTitle: Provider Config
-    addProvider: Add Provider
-    builtInProvider: Built-in Provider
+    configTitle: Provider config
+    addProvider: Add provider
+    builtInProvider: Built-in provider
     sponsorCta: Get fast, cost-effective AI
     setApiKeyWarning:
       message: Please set your API key on the $1 page
@@ -107,28 +107,28 @@ options:
       featureCount: $1 features
       sponsor: Sponsor
     dialog:
-      title: Add New Provider
+      title: Add new provider
       groups:
         builtInProviders:
-          title: Built-in LLM Providers
+          title: Built-in LLM providers
           description: Built-in large language model providers, no need to fill in most configurations like Base URL
         openaiCompatibleProviders:
-          title: OpenAI Compatible Custom Providers
+          title: OpenAI compatible custom providers
           description: If you can't find your desired AI provider, select Custom Provider to configure any OpenAI-compatible provider, such as Zhipu AI
         pureTranslationProviders:
-          title: Pure Translation Providers
+          title: Pure translation providers
           description: Providers focused on translation features without large language model capabilities
     form:
       fields:
         name: Name
         description: Description
-        apiKey: API Key
+        apiKey: API key
         baseURL: Base URL
         optional: Optional
       duplicate: Duplicate
       delete: Delete
       deleteDialog:
-        title: Delete Provider?
+        title: Delete provider?
         description: This action cannot be undone. Features using this provider will be automatically reassigned to another available provider.
         confirm: Delete
         cancel: Cancel
@@ -139,8 +139,8 @@ options:
         translate: Set as default translate provider
       models:
         translate:
-          title: Translate Model
-          customTitle: Translate Custom Model
+          title: Translate model
+          customTitle: Translate custom model
           placeholder: Select a model
         fetchModels: Fetch available models
         fetchError: Failed to fetch models
@@ -152,11 +152,11 @@ options:
         noModelsFound: No models found
         label: Model
         enterCustomModel: Enter the name of the custom model
-      advancedOptions: Advanced Options
+      advancedOptions: Advanced options
       providerSettingLabels:
         region: Region
         apiMode: API mode
-        resourceName: Azure resource name (Optional)
+        resourceName: Azure resource name (optional)
         apiVersion: API version
       providerSettingOptionLabels:
         responses: Responses API
@@ -167,9 +167,9 @@ options:
         title: Reasoning
       headers: Headers
       headersHint: Custom HTTP headers sent when creating the AI provider client. Leave empty to use provider defaults; use {} to disable defaults.
-      providerOptions: Provider Options
+      providerOptions: Provider options
       providerOptionsHint: Provider-specific options for non-standard API features like thinking/reasoning mode. See the Vercel AI SDK docs or your provider's official documentation for configuration details.
-      providerOptionsDocsLink: View Provider Docs
+      providerOptionsDocsLink: View provider docs
       providerOptionsRecommendationTrigger: View recommended provider options
       providerOptionsRecommendationTitle: Recommended provider options detected
       providerOptionsRecommendationDescription: Review and manually apply the recommended configuration.
@@ -213,42 +213,42 @@ options:
         moonshotai: Moonshot AI's Kimi model series with strong reasoning and long-context capabilities
         huggingface: Hugging Face Inference API providing access to thousands of open-source models
     apiKey:
-      showAPIKey: Show API Key
+      showAPIKey: Show API key
     howToConfigure: How to configure?
     testConnection:
-      button: Test Connection
+      button: Test connection
       testing: Testing...
       success: Success
       failed: Failed
       slow: Slow (try adjusting thinking mode)
     featureProviders:
-      title: Feature Providers
+      title: Feature providers
       description: Choose which provider to use for each feature
       features:
-        translate: Page Translation
-        selectionToolbar_translate: Selection Toolbar Translation
-        inputTranslation: Input Translation
-        videoSubtitles: Video Subtitles
+        translate: Page translation
+        selectionToolbar_translate: Selection toolbar translation
+        inputTranslation: Input translation
+        videoSubtitles: Video subtitles
       descriptions:
         translate: Translates the whole page in bilingual or replace mode.
         selectionToolbar_translate: Translates the text you select from the selection toolbar.
         inputTranslation: Translates what you type into an input box before you send it.
         videoSubtitles: Translates subtitles as they appear in a video player.
     languageDetection:
-      title: Language Detection
+      title: Language detection
       description: Affects auto-translate language detection, skip-language detection, and Speaking voice selection accuracy.
       mode:
         basic: Basic
         llm: LLM
       provider:
-        label: Detection Provider
+        label: Detection provider
         placeholder: Select a provider
       status:
         noProviders: Configure an LLM provider first
         basicRecommend: Recommend enabling LLM
         llmEnabled: LLM detection enabled
     aiContentAware:
-      title: AI Smart Context Translation
+      title: AI smart context translation
       description: Give the AI context from the page or video so it translates more accurately
       enable: Enable
       enableDescription: The AI reads a summary of the page or video before translating, so wording fits the context. Applies to every translation feature running on an LLM provider. Adds latency on the first request and increases API costs.
@@ -300,26 +300,26 @@ options:
         logout: Logout
         logoutSuccess: Logged out from Google account
         unresolved:
-          title: Configuration Sync Resolution
+          title: Configuration sync resolution
           description: Local and remote configurations differ. Please choose which version to keep for each field.
           resolved: Resolved
           unresolved: Unresolved
-          localValue: Local Value
-          remoteValue: Remote Value
-          useLocal: Use Local
-          useRemote: Use Remote
-          useAllLocal: Use All Local
-          useAllRemote: Use All Remote
-          reset: Reset Selection
+          localValue: Local value
+          remoteValue: Remote value
+          useLocal: Use local
+          useRemote: Use remote
+          useAllLocal: Use all local
+          useAllRemote: Use all remote
+          reset: Reset selection
           progress: Resolved $1/$2 changes
-          confirm: Confirm Sync
+          confirm: Confirm sync
           cancel: Cancel
           hasUnresolvedInChildren: ⚠ Contains unresolved changes
           item: item
           items: items
-          unresolvedPrompt: "[Unresolved - Please select]"
-          localLatest: Local Latest
-          remoteLatest: Remote Latest
+          unresolvedPrompt: "[Unresolved - please select]"
+          localLatest: Local latest
+          remoteLatest: Remote latest
           bothChanged: Both changed
           localChanged: Local changed
           remoteChanged: Remote changed
@@ -339,13 +339,13 @@ options:
         exportSuccess: Config exported successfully
         importError: Import failed
         exportOptions:
-          title: Select Export Options
+          title: Select export options
           description: Please choose whether to include API Keys in the exported config. Including API Keys may leak sensitive information, so it's recommended to use only in secure environments.
-          includeAPIKeys: Include API Keys
-          excludeAPIKeys: Exclude API Keys
+          includeAPIKeys: Include API keys
+          excludeAPIKeys: Exclude API keys
           cancel: Cancel
       viewConfig:
-        open: Open Config
+        open: Open config
         title: Config
         description: View the raw JSON of your current configuration
       backup:
@@ -378,8 +378,8 @@ options:
         title: Reset config
         description: Reset all config to default value
         dialog:
-          title: Reset Config
-          trigger: Reset Config
+          title: Reset config
+          trigger: Reset config
           confirm: Confirm
           cancel: Cancel
           description: This operation will clear all your custom configurations and reset them to default values. Please confirm.
@@ -525,10 +525,10 @@ options:
         title: Custom AI Actions
         pageDescription: Write your own prompts and run them on selected text from the selection toolbar.
         description: Add your own structured AI actions for selected text
-        configTitle: Action Config
+        configTitle: Action config
         builtIn: Built-in
-        add: Add AI Action
-        edit: Edit AI Action
+        add: Add AI action
+        edit: Edit AI action
         empty: No custom AI actions yet
         noEnabledLlmProvider: Enable at least one LLM provider before creating custom AI actions
         table:
@@ -553,12 +553,12 @@ options:
             helpStepCopySuffix: ", then paste it into the field."
           provider: Provider (requires structured output support)
           selectProvider: Select a provider
-          systemPrompt: System Prompt
+          systemPrompt: System prompt
           prompt: Prompt
-          outputSchema: Output Schema
-          addField: Add Field
-          fieldName: Field Name
-          fieldType: Field Type
+          outputSchema: Output schema
+          addField: Add field
+          fieldName: Field name
+          fieldType: Field type
           fieldDescription: Description
           fieldDescriptionPlaceholder: Describe what this field should contain...
           fieldSpeaking: Enable speaking
@@ -566,20 +566,20 @@ options:
           cancel: Cancel
           save: Save
           defaultFieldName: Result
-          fieldNamePlaceholder: Field Name
+          fieldNamePlaceholder: Field name
           autoFieldPrefix: Field
           addFieldDialog:
-            title: Add Output Field
+            title: Add output field
           editFieldDialog:
-            title: Edit Output Field
+            title: Edit output field
             save: Save
           deleteFieldDialog:
-            title: Delete Output Field?
+            title: Delete output field?
             description: This output field will be removed.
             confirm: Delete
             cancel: Cancel
           notebase:
-            title: Notebase Connection
+            title: Notebase connection
             description: Save this action's structured results to a remote notebase.
             loginRequiredTitle: Log in to configure Notebase
             loginRequiredDescription: Sign in on readfrog.app before choosing a notebase or editing mappings.
@@ -608,9 +608,9 @@ options:
             schemaErrorTitle: Failed to load notebase schema
             schemaErrorDescription: Try refreshing the schema again in a moment.
             schemaLoading: Loading notebase schema...
-            mappingsLabel: Field Mappings
+            mappingsLabel: Field mappings
             mappingsEmpty: No mappings yet. Add one when you are ready to save fields.
-            addMappingAction: Add Mapping
+            addMappingAction: Add mapping
             removeMappingAction: Remove mapping
             localFieldLabel: Action field
             localFieldPlaceholder: Select an action field
@@ -631,12 +631,12 @@ options:
             webContent: Webpage content extracted from the current page, truncated to the first 2000 characters
           delete: Delete
           deleteDialog:
-            title: Delete Custom Action?
+            title: Delete custom action?
             description: This action cannot be undone.
             confirm: Delete
             cancel: Cancel
         templates:
-          dialogTitle: Choose a Template
+          dialogTitle: Choose a template
           dialogDescription: Select a template to quickly create a new AI action, or start from scratch.
           dictionary:
             name: Dictionary

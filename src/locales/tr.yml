@@ -97,9 +97,9 @@ options:
     title: API Sağlayıcıları
     pageDescription: Read Frog'un çağırdığı yapay zekâ servislerini bağlayın ve her özelliğin hangisini kullanacağını seçin.
     description: Read Frog'un çağırabileceği sağlayıcıları ekleyin. 20'den fazlası yerleşik gelir ve OpenAI uyumlu her API çalışır.
-    configTitle: Sağlayıcı Yapılandırması
-    addProvider: Sağlayıcı Ekle
-    builtInProvider: Yerleşik Sağlayıcı
+    configTitle: Sağlayıcı yapılandırması
+    addProvider: Sağlayıcı ekle
+    builtInProvider: Yerleşik sağlayıcı
     sponsorCta: Hızlı ve uygun maliyetli yapay zekâ al
     setApiKeyWarning:
       message: API anahtarınızı $1 sayfasında ayarlayın
@@ -107,22 +107,22 @@ options:
       featureCount: $1 özellik
       sponsor: Sponsor
     dialog:
-      title: Yeni Sağlayıcı Ekle
+      title: Yeni sağlayıcı ekle
       groups:
         builtInProviders:
-          title: Yerleşik LLM Sağlayıcıları
+          title: Yerleşik LLM sağlayıcıları
           description: Yerleşik büyük dil modeli sağlayıcıları, Base URL gibi çoğu yapılandırmayı doldurmaya gerek yok
         openaiCompatibleProviders:
-          title: OpenAI Uyumlu Özel Sağlayıcılar
+          title: OpenAI uyumlu özel sağlayıcılar
           description: İstediğiniz AI sağlayıcısını bulamıyorsanız, Zhipu AI gibi herhangi bir OpenAI uyumlu sağlayıcıyı yapılandırmak için Özel Sağlayıcı'yı seçin
         pureTranslationProviders:
-          title: Saf Çeviri Sağlayıcıları
+          title: Saf çeviri sağlayıcıları
           description: Büyük dil modeli yetenekleri olmadan çeviri özelliklerine odaklanan sağlayıcılar
     form:
       fields:
         name: Ad
         description: Açıklama
-        apiKey: API Anahtarı
+        apiKey: API anahtarı
         baseURL: Base URL
         optional: İsteğe Bağlı
       duplicate: Çoğalt
@@ -138,8 +138,8 @@ options:
         translate: Varsayılan çeviri sağlayıcısı olarak ayarla
       models:
         translate:
-          title: Çeviri Modeli
-          customTitle: Özel Çeviri Modeli
+          title: Çeviri modeli
+          customTitle: Özel çeviri modeli
           placeholder: Bir model seçin
         fetchModels: Mevcut modelleri getir
         fetchError: Modeller getirilemedi
@@ -151,7 +151,7 @@ options:
         noModelsFound: Model bulunamadı
         label: Model
         enterCustomModel: Özel model adını girin
-      advancedOptions: Gelişmiş Seçenekler
+      advancedOptions: Gelişmiş seçenekler
       providerSettingLabels:
         region: Bölge
         apiMode: API modu
@@ -166,9 +166,9 @@ options:
         title: Reasoning
       headers: Başlıklar
       headersHint: AI sağlayıcı istemcisi oluşturulurken gönderilecek özel HTTP başlıkları. Sağlayıcı varsayılanlarını kullanmak için boş bırakın; varsayılanları devre dışı bırakmak için {} kullanın.
-      providerOptions: Sağlayıcı Seçenekleri
+      providerOptions: Sağlayıcı seçenekleri
       providerOptionsHint: Düşünme/akıl yürütme modu gibi standart dışı API özellikleri için sağlayıcıya özel seçenekler. Ayrıntılar için Vercel AI SDK belgelerine veya sağlayıcınızın resmi belgelerine bakın.
-      providerOptionsDocsLink: Sağlayıcı Belgelerini Görüntüle
+      providerOptionsDocsLink: Sağlayıcı belgelerini görüntüle
       providerOptionsRecommendationTrigger: Önerilen sağlayıcı seçeneklerini görüntüle
       providerOptionsRecommendationTitle: Önerilen sağlayıcı seçenekleri bulundu
       providerOptionsRecommendationDescription: Önerilen yapılandırmayı gözden geçirip manuel olarak uygulayın.
@@ -212,42 +212,42 @@ options:
         moonshotai: Moonshot AI'ın güçlü muhakeme ve uzun bağlam yeteneklerine sahip Kimi model serisi
         huggingface: Binlerce açık kaynak modele erişim sağlayan Hugging Face Çıkarım API'si
     apiKey:
-      showAPIKey: API Anahtarını Göster
+      showAPIKey: API anahtarını göster
     howToConfigure: Nasıl yapılandırılır?
     testConnection:
-      button: Bağlantıyı Test Et
+      button: Bağlantıyı test et
       testing: Test ediliyor...
       success: Başarılı
       failed: Başarısız
       slow: Yavaş (düşünme modunu ayarlamanız önerilir)
     featureProviders:
-      title: Özellik Sağlayıcıları
+      title: Özellik sağlayıcıları
       description: Her özellik için kullanılacak sağlayıcıyı seçin
       features:
-        translate: Sayfa Çevirisi
-        selectionToolbar_translate: Seçim Araç Çubuğu Çevirisi
-        inputTranslation: Giriş Çevirisi
-        videoSubtitles: Video Altyazıları
+        translate: Sayfa çevirisi
+        selectionToolbar_translate: Seçim araç çubuğu çevirisi
+        inputTranslation: Giriş çevirisi
+        videoSubtitles: Video altyazıları
       descriptions:
         translate: Sayfanın tamamını iki dilli ya da değiştirme modunda çevirir.
         selectionToolbar_translate: Seçim araç çubuğundan, seçtiğiniz metni çevirir.
         inputTranslation: Bir metin kutusuna yazdıklarınızı göndermeden önce çevirir.
         videoSubtitles: Video oynatıcıda görünen altyazıları çevirir.
     languageDetection:
-      title: Dil Algılama
+      title: Dil algılama
       description: Otomatik çeviri dil algılama, atlama dil algılama ve Konuşma ses seçimi doğruluğunu etkiler.
       mode:
         basic: Temel
         llm: LLM
       provider:
-        label: Algılama Sağlayıcısı
+        label: Algılama sağlayıcısı
         placeholder: Bir sağlayıcı seçin
       status:
         noProviders: Önce bir LLM sağlayıcısı yapılandırın
         basicRecommend: LLM etkinleştirmesi önerilir
         llmEnabled: LLM algılama etkin
     aiContentAware:
-      title: AI Akıllı Bağlam Çevirisi
+      title: AI akıllı bağlam çevirisi
       description: Sayfanın ya da videonun bağlamını yapay zekâya vererek çeviriyi daha isabetli hale getirin
       enable: Etkinleştir
       enableDescription: Yapay zekâ çeviriden önce sayfanın ya da videonun özetini okur, böylece sözcükler bağlama oturur. LLM sağlayıcısıyla çalışan her çeviri özelliğinde geçerlidir. İlk isteğe gecikme ekler ve API maliyetini artırır.
@@ -299,26 +299,26 @@ options:
         logout: Çıkış yap
         logoutSuccess: Google hesabından çıkış yapıldı
         unresolved:
-          title: Yapılandırma Senkronizasyon Çözümü
+          title: Yapılandırma senkronizasyon çözümü
           description: Yerel ve uzak yapılandırmalar farklı. Lütfen her alan için hangi sürümün tutulacağını seçin.
           resolved: Çözüldü
           unresolved: Çözülmedi
-          localValue: Yerel Değer
-          remoteValue: Uzak Değer
-          useLocal: Yereli Kullan
-          useRemote: Uzakı Kullan
-          useAllLocal: Tüm Yereli Kullan
-          useAllRemote: Tüm Uzakı Kullan
-          reset: Seçimi Sıfırla
+          localValue: Yerel değer
+          remoteValue: Uzak değer
+          useLocal: Yereli kullan
+          useRemote: Uzakı kullan
+          useAllLocal: Tüm yereli kullan
+          useAllRemote: Tüm uzakı kullan
+          reset: Seçimi sıfırla
           progress: $1/$2 değişiklik çözüldü
-          confirm: Senkronizasyonu Onayla
+          confirm: Senkronizasyonu onayla
           cancel: İptal
           hasUnresolvedInChildren: ⚠ Çözülmemiş değişiklikler içeriyor
           item: öğe
           items: öğe
-          unresolvedPrompt: "[Çözülmedi - Lütfen seçin]"
-          localLatest: En Son Yerel
-          remoteLatest: En Son Uzak
+          unresolvedPrompt: "[Çözülmedi - lütfen seçin]"
+          localLatest: En son yerel
+          remoteLatest: En son uzak
           bothChanged: Her ikisi de değişti
           localChanged: Yerel değişti
           remoteChanged: Uzak değişti
@@ -338,13 +338,13 @@ options:
         exportSuccess: Yapılandırma başarıyla dışa aktarıldı
         importError: İçe aktarma başarısız
         exportOptions:
-          title: Dışa Aktarma Seçeneklerini Seçin
+          title: Dışa aktarma seçeneklerini seçin
           description: Lütfen dışa aktarılan yapılandırmaya API Anahtarlarını dahil edip etmemeyi seçin. API Anahtarlarını dahil etmek hassas bilgileri sızdırabilir, bu nedenle yalnızca güvenli ortamlarda kullanılması önerilir.
-          includeAPIKeys: API Anahtarlarını Dahil Et
-          excludeAPIKeys: API Anahtarlarını Hariç Tut
+          includeAPIKeys: API anahtarlarını dahil et
+          excludeAPIKeys: API anahtarlarını hariç tut
           cancel: İptal
       viewConfig:
-        open: Yapılandırmayı Aç
+        open: Yapılandırmayı aç
         title: Yapılandırma
         description: Mevcut yapılandırmanızın ham JSON içeriğini görüntüleyin
       backup:
@@ -377,8 +377,8 @@ options:
         title: Yapılandırmayı Sıfırla
         description: Tüm yapılandırmayı varsayılan değere sıfırla
         dialog:
-          title: Yapılandırmayı Sıfırla
-          trigger: Yapılandırmayı Sıfırla
+          title: Yapılandırmayı sıfırla
+          trigger: Yapılandırmayı sıfırla
           confirm: Onayla
           cancel: İptal
           description: Bu işlem tüm özel yapılandırmalarınızı temizleyecek ve varsayılan değerlere sıfırlayacaktır. Lütfen onaylayın.
@@ -524,10 +524,10 @@ options:
         title: Özel AI Eylemleri
         pageDescription: Kendi istemlerinizi yazın ve seçim araç çubuğundan seçili metin üzerinde çalıştırın.
         description: Seçilen metin için kendi yapılandırılmış AI eylemlerinizi ekleyin
-        configTitle: Eylem Yapılandırması
+        configTitle: Eylem yapılandırması
         builtIn: Yerleşik
-        add: AI Eylemi Ekle
-        edit: AI Eylemini Düzenle
+        add: AI eylemi ekle
+        edit: AI eylemini düzenle
         empty: Henüz özel AI eylemi yok
         noEnabledLlmProvider: Özel AI eylemleri oluşturmadan önce en az bir LLM sağlayıcısını etkinleştirin
         table:
@@ -552,12 +552,12 @@ options:
             helpStepCopySuffix: " simge adını kopyalayıp alana yapıştırın."
           provider: Sağlayıcı (yapılandırılmış çıktı desteği gerekir)
           selectProvider: Sağlayıcı seçin
-          systemPrompt: Sistem Promptu
+          systemPrompt: Sistem promptu
           prompt: Prompt
-          outputSchema: Çıkış Şeması
-          addField: Alan Ekle
-          fieldName: Alan Adı
-          fieldType: Alan Türü
+          outputSchema: Çıkış şeması
+          addField: Alan ekle
+          fieldName: Alan adı
+          fieldType: Alan türü
           fieldDescription: Açıklama
           fieldDescriptionPlaceholder: Bu alanın ne içermesi gerektiğini açıklayın...
           fieldSpeaking: Sesli okumayı etkinleştir
@@ -568,17 +568,17 @@ options:
           fieldNamePlaceholder: alan_adı
           autoFieldPrefix: alan
           addFieldDialog:
-            title: Çıktı Alanı Ekle
+            title: Çıktı alanı ekle
           editFieldDialog:
-            title: Çıktı Alanını Düzenle
+            title: Çıktı alanını düzenle
             save: Kaydet
           deleteFieldDialog:
-            title: Çıktı Alanı Silinsin mi?
+            title: Çıktı alanı silinsin mi?
             description: Bu çıktı alanı kaldırılacaktır.
             confirm: Sil
             cancel: İptal
           notebase:
-            title: Notebase Bağlantısı
+            title: Notebase bağlantısı
             description: Bu eylemin yapılandırılmış sonuçlarını uzak bir Notebase'e kaydedin.
             loginRequiredTitle: Notebase yapılandırmak için giriş yapın
             loginRequiredDescription: notebase seçmeden veya eşlemeleri düzenlemeden önce readfrog.app'te oturum açın.
@@ -607,9 +607,9 @@ options:
             schemaErrorTitle: notebase şeması yüklenemedi
             schemaErrorDescription: Kısa süre sonra yeniden yenilemeyi deneyin.
             schemaLoading: notebase şeması yükleniyor...
-            mappingsLabel: Alan Eşlemeleri
+            mappingsLabel: Alan eşlemeleri
             mappingsEmpty: Henüz eşleme yok. Alanları kaydetmeye hazır olduğunuzda bir tane ekleyin.
-            addMappingAction: Eşleme Ekle
+            addMappingAction: Eşleme ekle
             removeMappingAction: Eşlemeyi Kaldır
             localFieldLabel: Eylem alanı
             localFieldPlaceholder: Bir eylem alanı seçin

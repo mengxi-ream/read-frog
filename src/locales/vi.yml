@@ -168,7 +168,7 @@ options:
       headersHint: Header HTTP tùy chỉnh được gửi khi tạo client nhà cung cấp AI. Để trống để dùng mặc định của nhà cung cấp; dùng {} để tắt mặc định.
       providerOptions: Tùy chọn nhà cung cấp
       providerOptionsHint: Các tùy chọn dành riêng cho nhà cung cấp cho các tính năng API không chuẩn như chế độ suy nghĩ/lập luận. Xem tài liệu Vercel AI SDK hoặc tài liệu chính thức của nhà cung cấp để biết chi tiết cấu hình.
-      providerOptionsDocsLink: Xem Tài liệu Nhà cung cấp
+      providerOptionsDocsLink: Xem tài liệu nhà cung cấp
       providerOptionsRecommendationTrigger: Xem tùy chọn nhà cung cấp được đề xuất
       providerOptionsRecommendationTitle: Đã phát hiện tùy chọn nhà cung cấp được đề xuất
       providerOptionsRecommendationDescription: Hãy xem lại và tự áp dụng cấu hình được đề xuất.
