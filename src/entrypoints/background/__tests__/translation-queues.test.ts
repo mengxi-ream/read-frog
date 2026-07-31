@@ -613,6 +613,175 @@ describe("translation queue helpers", () => {
     expect(translationCachePutMock).not.toHaveBeenCalled()
   })
 
+  it("bypasses a cached value and replaces the same key after forced translation succeeds", async () => {
+    translationCacheGetMock.mockResolvedValue({
+      key: "webpage-hash",
+      translation: "stale translation",
+    })
+    executeTranslateMock.mockResolvedValue("fresh translation")
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+
+    await expect(
+      handler({
+        data: {
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: googleProvider,
+          scheduleAt: Date.now(),
+          hash: "webpage-hash",
+          forceRetranslation: true,
+        },
+      }),
+    ).resolves.toBe("fresh translation")
+
+    expect(translationCacheGetMock).not.toHaveBeenCalled()
+    expect(executeTranslateMock).toHaveBeenCalledTimes(1)
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "webpage-hash",
+        translation: "fresh translation",
+      }),
+    )
+  })
+
+  it("does not coalesce a forced translation with identical ordinary work in flight", async () => {
+    let resolveOrdinary!: (value: string) => void
+    let resolveForced!: (value: string) => void
+    executeTranslateMock
+      .mockReset()
+      .mockImplementationOnce(
+        () =>
+          new Promise<string>((resolve) => {
+            resolveOrdinary = resolve
+          }),
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise<string>((resolve) => {
+            resolveForced = resolve
+          }),
+      )
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const requestData = {
+      text: "hello",
+      langConfig: DEFAULT_CONFIG.language,
+      providerConfig: googleProvider,
+      scheduleAt: Date.now(),
+      hash: "same-request-hash",
+    }
+
+    const ordinaryRequest = handler({ data: requestData })
+    await vi.waitFor(() => expect(executeTranslateMock).toHaveBeenCalledTimes(1))
+    const forcedRequest = handler({
+      data: { ...requestData, forceRetranslation: true },
+    })
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      expect(executeTranslateMock).toHaveBeenCalledTimes(2)
+    } finally {
+      resolveForced?.("fresh translation")
+      resolveOrdinary?.("ordinary translation")
+      executeTranslateMock.mockReset()
+    }
+
+    await expect(forcedRequest).resolves.toBe("fresh translation")
+    await expect(ordinaryRequest).resolves.toBe("ordinary translation")
+  })
+
+  it("does not coalesce a forced LLM translation with identical ordinary work in flight", async () => {
+    ensureInitializedConfigMock.mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      translate: {
+        ...DEFAULT_CONFIG.translate,
+        providerId: llmProvider.id,
+        batchQueueConfig: {
+          maxCharactersPerBatch: 1000,
+          maxItemsPerBatch: 1,
+        },
+      },
+    })
+    let resolveOrdinary!: (value: string) => void
+    let resolveForced!: (value: string) => void
+    executeTranslateMock
+      .mockReset()
+      .mockImplementationOnce(
+        () =>
+          new Promise<string>((resolve) => {
+            resolveOrdinary = resolve
+          }),
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise<string>((resolve) => {
+            resolveForced = resolve
+          }),
+      )
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const requestData = {
+      text: "hello",
+      langConfig: DEFAULT_CONFIG.language,
+      providerConfig: llmProvider,
+      scheduleAt: Date.now(),
+      hash: "same-llm-request-hash",
+    }
+
+    const ordinaryRequest = handler({ data: requestData })
+    await vi.waitFor(() => expect(executeTranslateMock).toHaveBeenCalledTimes(1))
+    const forcedRequest = handler({
+      data: { ...requestData, forceRetranslation: true },
+    })
+
+    try {
+      await vi.waitFor(() => expect(executeTranslateMock).toHaveBeenCalledTimes(2))
+    } finally {
+      resolveForced?.("fresh LLM translation")
+      resolveOrdinary?.("ordinary LLM translation")
+      executeTranslateMock.mockReset()
+    }
+
+    await expect(forcedRequest).resolves.toBe("fresh LLM translation")
+    await expect(ordinaryRequest).resolves.toBe("ordinary LLM translation")
+  })
+
+  it("preserves the previous cache entry when forced translation fails", async () => {
+    translationCacheGetMock.mockResolvedValue({
+      key: "webpage-hash",
+      translation: "still usable",
+    })
+    executeTranslateMock.mockReset().mockRejectedValue(new Error("provider unavailable"))
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+
+    await expect(
+      handler({
+        data: {
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: googleProvider,
+          scheduleAt: Date.now(),
+          hash: "webpage-hash",
+          forceRetranslation: true,
+        },
+      }),
+    ).rejects.toThrow("provider unavailable")
+
+    expect(translationCacheGetMock).not.toHaveBeenCalled()
+    expect(translationCacheDeleteMock).not.toHaveBeenCalled()
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
   it("returns and caches fresh Google translations verbatim without re-decoding", async () => {
     executeTranslateMock.mockResolvedValue("write &amp; for ampersand — It's fine")
 

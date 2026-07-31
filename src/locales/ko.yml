@@ -669,6 +669,9 @@ options:
       enable:
         title: 활성화
         description: 단락에 마우스를 올리거나 길게 누르면 그 단락만 번역합니다.
+      forceRetranslation:
+        title: 항상 새로 번역
+        description: 캐시되었거나 진행 중인 호버 번역을 무시합니다. 성공하면 새 결과로 캐시를 교체합니다.
     translationStyle:
       title: 번역 표시 스타일
       description: 번역 결과와 원문을 구분하기 위해 원하는 스타일을 설정하세요

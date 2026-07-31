@@ -785,6 +785,9 @@ options:
       enable:
         title: Enable
         description: Hover or long-press a paragraph to translate just that one.
+      forceRetranslation:
+        title: Always request a fresh translation
+        description: Ignore cached and in-progress hover translations. A successful result replaces the cache.
     translationStyle:
       title: Translation display style
       description: Set any style you want to distinguish translation results from original text

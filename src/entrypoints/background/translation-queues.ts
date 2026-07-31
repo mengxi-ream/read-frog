@@ -16,6 +16,7 @@ import {
 } from "@/utils/constants/translate"
 import { generateArticleSummary } from "@/utils/content/summary"
 import { cleanText } from "@/utils/content/utils"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
 import { microsoftTranslate } from "@/utils/host/translate/api/microsoft"
@@ -206,6 +207,7 @@ export interface TranslateBatchData<TContext = unknown> {
   langConfig: Config["language"]
   providerConfig: ProviderConfig
   hash: string
+  dedupKey?: string
   scheduleAt: number
   context?: TContext
   // Cancellation scope (`${tabId}:${sessionId}`); absent = uncancellable.
@@ -285,12 +287,12 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
       )
     },
     getCharacters: (data) => data.text.length,
-    getDedupKey: (data) => data.hash,
+    getDedupKey: (data) => data.dedupKey ?? data.hash,
     getScope: (data) => data.scope,
     isScopeCancelled,
     executeBatch: async (dataList, meta) => {
       const { providerConfig } = dataList[0]!
-      const hash = Sha256Hex(...dataList.map((d) => d.hash))
+      const hash = Sha256Hex(...dataList.map((d) => d.dedupKey ?? d.hash))
       const earliestScheduleAt = Math.min(...dataList.map((d) => d.scheduleAt))
       const totalCharacters = dataList.reduce((sum, d) => sum + d.text.length, 0)
       const timeoutMs = Math.min(
@@ -307,7 +309,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
       return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash, meta.scopes, { timeoutMs })
     },
     executeIndividual: async (data) => {
-      const { text, langConfig, providerConfig, hash, scheduleAt, context, scope } = data
+      const { text, langConfig, providerConfig, hash, dedupKey, scheduleAt, context, scope } = data
       const thunk = async (signal?: AbortSignal) => {
         await putBatchRequestRecord({ originalRequestCount: 1, providerConfig })
         await beforeDispatch?.([data])
@@ -316,7 +318,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
           signal,
         })
       }
-      return requestQueue.enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)
+      return requestQueue.enqueue(thunk, scheduleAt, dedupKey ?? hash, scope ? [scope] : undefined)
     },
     onError: (error, context) => {
       const errorType = context.isFallback ? "Individual request" : "Batch request"
@@ -476,6 +478,7 @@ export function setUpWebPageTranslationQueue(): void {
         sessionId,
         promptExperimentVariant,
         translationActionContext,
+        forceRetranslation = false,
       },
     } = message
     const scope = buildTranslationScopeKey(message.sender, sessionId)
@@ -486,8 +489,10 @@ export function setUpWebPageTranslationQueue(): void {
       assertHtmlAttributeMarkerIntegrity(text, text)
     }
 
-    // Check cache first
-    if (hash) {
+    // A forced hover translation must reach the provider even if the same
+    // cache key already has a value. The existing entry is left untouched
+    // unless the fresh request succeeds below.
+    if (hash && !forceRetranslation) {
       const cachedTranslation = await getValidatedCachedTranslation(
         hash,
         text,
@@ -518,6 +523,9 @@ export function setUpWebPageTranslationQueue(): void {
     }
 
     let result: string
+    // Keep persistent cache identity stable while giving each forced request
+    // its own queue identity, so it cannot join ordinary in-flight work.
+    const dedupKey = forceRetranslation ? `${hash}:force:${getRandomUUID()}` : hash
     const context: WebTranslationPromptContext = {
       webTitle: normalizePromptContextValue(webTitle),
       webDescription: normalizePromptContextValue(webDescription),
@@ -532,6 +540,7 @@ export function setUpWebPageTranslationQueue(): void {
         langConfig,
         providerConfig,
         hash,
+        dedupKey,
         scheduleAt,
         context,
         scope,
@@ -563,7 +572,7 @@ export function setUpWebPageTranslationQueue(): void {
           textFormat,
           signal,
         })
-      result = await requestQueue.enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)
+      result = await requestQueue.enqueue(thunk, scheduleAt, dedupKey, scope ? [scope] : undefined)
     }
 
     if (validateHtmlAttributeMarkers) {

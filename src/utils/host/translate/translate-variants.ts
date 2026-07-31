@@ -70,6 +70,7 @@ async function translateTextUsingPageConfig(
     sessionId?: string
     configuredPrompt?: "default" | "custom"
     translationActionContext?: TranslationActionContext
+    forceRetranslation?: boolean
   } = {},
 ): Promise<string> {
   const preparedText = prepareTranslationText(text)
@@ -115,6 +116,7 @@ async function translateTextUsingPageConfig(
     sessionId: options.sessionId,
     configuredPrompt: options.configuredPrompt,
     translationActionContext: options.translationActionContext,
+    forceRetranslation: options.forceRetranslation,
   })
 }
 
@@ -146,6 +148,9 @@ export async function translateTextForPage(
     sessionId,
     configuredPrompt: config.translate.customPromptsConfig.promptId === null ? "default" : "custom",
     translationActionContext,
+    forceRetranslation:
+      translationActionContext?.feature === "hover_translation" &&
+      config.translate.node.forceRetranslation,
   })
 }
 

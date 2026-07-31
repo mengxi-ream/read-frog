@@ -785,6 +785,9 @@ options:
       enable:
         title: Activar
         description: Pasa el cursor o mantén pulsado un párrafo para traducir solo ese.
+      forceRetranslation:
+        title: Solicitar siempre una traducción nueva
+        description: Ignora las traducciones al pasar el cursor que estén en caché o en curso. Si se completa correctamente, el nuevo resultado sustituye la caché.
     translationStyle:
       title: Estilo de visualización de traducción
       description: Define cualquier estilo que quieras para distinguir los resultados de traducción del texto original

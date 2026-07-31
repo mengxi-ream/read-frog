@@ -85,6 +85,7 @@ export const DEFAULT_CONFIG: Config = {
     node: {
       enabled: false,
       hotkey: "control",
+      forceRetranslation: false,
     },
     page: {
       range: "all",

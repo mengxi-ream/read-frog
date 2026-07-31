@@ -118,10 +118,24 @@ describe("translation page sections", () => {
 
     renderInRouter(<HoverTranslationSection />)
 
-    fireEvent.click(screen.getByRole("switch"))
+    fireEvent.click(screen.getAllByRole("switch")[0]!)
 
     expect(setTranslateMock).toHaveBeenCalledWith({
       node: { ...translate.node, enabled: false },
+    })
+  })
+
+  it("toggles fresh hover translations without disturbing the hover trigger", () => {
+    const translate = testState.translate!
+
+    renderInRouter(<HoverTranslationSection />)
+
+    const switches = screen.getAllByRole("switch")
+    expect(switches).toHaveLength(2)
+    fireEvent.click(switches[1]!)
+
+    expect(setTranslateMock).toHaveBeenCalledWith({
+      node: { ...translate.node, forceRetranslation: true },
     })
   })
 })

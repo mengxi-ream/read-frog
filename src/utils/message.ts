@@ -119,6 +119,7 @@ interface ProtocolMap {
     sessionId?: string
     promptExperimentVariant?: PromptExperimentVariant
     translationActionContext?: TranslationActionContext
+    forceRetranslation?: boolean
   }) => Promise<
     | string
     | {

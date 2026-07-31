@@ -785,6 +785,9 @@ options:
       enable:
         title: 启用
         description: 悬停或长按段落，只翻译这一段。
+      forceRetranslation:
+        title: 始终重新翻译
+        description: 忽略已缓存和正在进行的悬停翻译；成功后用新结果覆盖缓存。
     translationStyle:
       title: 翻译显示样式
       description: 设置任何你想要的样式以区分翻译结果和原文
