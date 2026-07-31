@@ -693,6 +693,62 @@ describe("translation queue helpers", () => {
 
     await expect(forcedRequest).resolves.toBe("fresh translation")
     await expect(ordinaryRequest).resolves.toBe("ordinary translation")
+    expect(translationCachePutMock).toHaveBeenCalledTimes(1)
+    expect(translationCachePutMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        key: "same-request-hash",
+        translation: "fresh translation",
+      }),
+    )
+  })
+
+  it("keeps a forced result newest when an older cache write is already in progress", async () => {
+    let resolveOrdinaryCacheWrite!: () => void
+    let persistedTranslation: string | undefined
+    executeTranslateMock
+      .mockReset()
+      .mockResolvedValueOnce("ordinary translation")
+      .mockResolvedValueOnce("fresh translation")
+    translationCachePutMock
+      .mockReset()
+      .mockImplementation(async (entry: { translation: string }) => {
+        if (entry.translation === "ordinary translation") {
+          await new Promise<void>((resolve) => {
+            resolveOrdinaryCacheWrite = resolve
+          })
+        }
+        persistedTranslation = entry.translation
+      })
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const requestData = {
+      text: "hello",
+      langConfig: DEFAULT_CONFIG.language,
+      providerConfig: googleProvider,
+      scheduleAt: Date.now(),
+      hash: "overlapping-cache-write-hash",
+    }
+
+    const ordinaryRequest = handler({ data: requestData })
+    await vi.waitFor(() => expect(translationCachePutMock).toHaveBeenCalledTimes(1))
+    const forcedRequest = handler({
+      data: { ...requestData, forceRetranslation: true },
+    })
+
+    try {
+      await vi.waitFor(() => expect(executeTranslateMock).toHaveBeenCalledTimes(2))
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      expect(translationCachePutMock).toHaveBeenCalledTimes(1)
+    } finally {
+      resolveOrdinaryCacheWrite?.()
+    }
+
+    await expect(ordinaryRequest).resolves.toBe("ordinary translation")
+    await expect(forcedRequest).resolves.toBe("fresh translation")
+    expect(translationCachePutMock).toHaveBeenCalledTimes(2)
+    expect(persistedTranslation).toBe("fresh translation")
   })
 
   it("does not coalesce a forced LLM translation with identical ordinary work in flight", async () => {
@@ -751,6 +807,13 @@ describe("translation queue helpers", () => {
 
     await expect(forcedRequest).resolves.toBe("fresh LLM translation")
     await expect(ordinaryRequest).resolves.toBe("ordinary LLM translation")
+    expect(translationCachePutMock).toHaveBeenCalledTimes(1)
+    expect(translationCachePutMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        key: "same-llm-request-hash",
+        translation: "fresh LLM translation",
+      }),
+    )
   })
 
   it("preserves the previous cache entry when forced translation fails", async () => {
