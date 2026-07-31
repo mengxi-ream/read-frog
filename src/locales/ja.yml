@@ -648,7 +648,7 @@ options:
         title: 右クリック翻訳を有効化
         description: ブラウザの右クリックメニューに翻訳オプションを追加し、ページや選択テキストを素早く翻訳
   translation:
-    title: 翻訳
+    title: ページ翻訳
     pageDescription: ページ翻訳の方法を設定します。モード、範囲、プロンプト、リクエスト制限など。
     preference:
       title: 環境設定

@@ -648,7 +648,7 @@ options:
         title: Bağlam Menüsü Çevirisini Etkinleştir
         description: Sayfa veya seçili metni hızlıca çevirmek için tarayıcı sağ tıklama menüsüne çeviri seçenekleri ekle
   translation:
-    title: Çeviri
+    title: Sayfa Çevirisi
     pageDescription: Sayfaların nasıl çevrileceğini belirleyin — mod, kapsam, istemler ve istek limitleri.
     preference:
       title: Tercihler

@@ -764,7 +764,7 @@ options:
         title: Enable Context Menu Translate
         description: Add translate options to the browser right-click menu for quick page and selection translation
   translation:
-    title: Translation
+    title: Page Translation
     pageDescription: Control how pages get translated — mode, range, prompts, and request limits.
     preference:
       title: Preference

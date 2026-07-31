@@ -764,7 +764,7 @@ options:
         title: Activar traducción en menú contextual
         description: Añade opciones de traducción al menú contextual del navegador para traducir rápidamente páginas y selecciones
   translation:
-    title: Traducción
+    title: Traducción de páginas
     pageDescription: Controla cómo se traducen las páginas — modo, alcance, prompts y límites de solicitudes.
     preference:
       title: Preferencias

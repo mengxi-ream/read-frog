@@ -764,7 +764,7 @@ options:
         title: 啟用右鍵翻譯
         description: 在瀏覽器右鍵選單中新增翻譯選項，快速翻譯頁面或選取的文字
   translation:
-    title: 翻譯
+    title: 網頁翻譯
     pageDescription: 控制頁面翻譯的方式：模式、範圍、提示詞和請求限制。
     preference:
       title: 偏好設定

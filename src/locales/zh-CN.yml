@@ -764,7 +764,7 @@ options:
         title: 启用右键翻译
         description: 在浏览器右键菜单中添加翻译选项，快速翻译页面或所选文本
   translation:
-    title: 翻译
+    title: 网页翻译
     pageDescription: 控制页面翻译的方式：模式、范围、提示词和请求限制。
     preference:
       title: 偏好设置

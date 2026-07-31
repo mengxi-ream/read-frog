@@ -648,7 +648,7 @@ options:
         title: Bật dịch menu ngữ cảnh
         description: Thêm các tùy chọn dịch vào menu chuột phải của trình duyệt để dịch nhanh trang hoặc văn bản đã chọn
   translation:
-    title: Dịch thuật
+    title: Dịch trang
     pageDescription: Kiểm soát cách dịch trang — chế độ, phạm vi, prompt và giới hạn yêu cầu.
     preference:
       title: Tùy chọn

@@ -648,7 +648,7 @@ options:
         title: 우클릭 번역 활성화
         description: 브라우저 우클릭 메뉴에 번역 옵션을 추가하여 페이지나 선택한 텍스트를 빠르게 번역
   translation:
-    title: 번역
+    title: 페이지 번역
     pageDescription: 페이지 번역 방식을 설정하세요 — 모드, 범위, 프롬프트, 요청 제한.
     preference:
       title: 환경 설정
