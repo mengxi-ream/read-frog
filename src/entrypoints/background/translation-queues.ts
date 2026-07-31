@@ -16,7 +16,6 @@ import {
 } from "@/utils/constants/translate"
 import { generateArticleSummary } from "@/utils/content/summary"
 import { cleanText } from "@/utils/content/utils"
-import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
 import { microsoftTranslate } from "@/utils/host/translate/api/microsoft"
@@ -59,56 +58,6 @@ class PromptExperimentDispatchChangedError extends Error {
     super("Prompt experiment variant changed before dispatch")
     this.name = "PromptExperimentDispatchChangedError"
     attachRequestErrorMeta(this, { isRetryable: false })
-  }
-}
-
-interface CacheWriteGenerationState {
-  activeRequests: number
-  generation: number
-  writeTail: Promise<void>
-}
-
-interface CacheWriteGuard {
-  release: () => void
-  writeIfCurrent: (write: () => Promise<void>) => Promise<void>
-}
-
-const webpageCacheWriteGenerations = new Map<string, CacheWriteGenerationState>()
-
-function beginWebpageCacheWrite(
-  hash: string | undefined,
-  forceRetranslation: boolean,
-): CacheWriteGuard | null {
-  if (!hash) return null
-
-  let state = webpageCacheWriteGenerations.get(hash)
-  if (!state) {
-    state = { activeRequests: 0, generation: 0, writeTail: Promise.resolve() }
-    webpageCacheWriteGenerations.set(hash, state)
-  }
-  if (forceRetranslation) state.generation += 1
-
-  state.activeRequests += 1
-  const requestGeneration = state.generation
-  let released = false
-
-  return {
-    release: () => {
-      if (released) return
-      released = true
-      state.activeRequests -= 1
-      if (state.activeRequests === 0 && webpageCacheWriteGenerations.get(hash) === state) {
-        webpageCacheWriteGenerations.delete(hash)
-      }
-    },
-    writeIfCurrent: async (write) => {
-      const task = state.writeTail.then(async () => {
-        if (state.generation !== requestGeneration) return
-        await write()
-      })
-      state.writeTail = task.catch(() => {})
-      await task
-    },
   }
 }
 
@@ -257,7 +206,6 @@ export interface TranslateBatchData<TContext = unknown> {
   langConfig: Config["language"]
   providerConfig: ProviderConfig
   hash: string
-  dedupKey?: string
   scheduleAt: number
   context?: TContext
   // Cancellation scope (`${tabId}:${sessionId}`); absent = uncancellable.
@@ -337,12 +285,12 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
       )
     },
     getCharacters: (data) => data.text.length,
-    getDedupKey: (data) => data.dedupKey ?? data.hash,
+    getDedupKey: (data) => data.hash,
     getScope: (data) => data.scope,
     isScopeCancelled,
     executeBatch: async (dataList, meta) => {
       const { providerConfig } = dataList[0]!
-      const hash = Sha256Hex(...dataList.map((d) => d.dedupKey ?? d.hash))
+      const hash = Sha256Hex(...dataList.map((d) => d.hash))
       const earliestScheduleAt = Math.min(...dataList.map((d) => d.scheduleAt))
       const totalCharacters = dataList.reduce((sum, d) => sum + d.text.length, 0)
       const timeoutMs = Math.min(
@@ -359,7 +307,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
       return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash, meta.scopes, { timeoutMs })
     },
     executeIndividual: async (data) => {
-      const { text, langConfig, providerConfig, hash, dedupKey, scheduleAt, context, scope } = data
+      const { text, langConfig, providerConfig, hash, scheduleAt, context, scope } = data
       const thunk = async (signal?: AbortSignal) => {
         await putBatchRequestRecord({ originalRequestCount: 1, providerConfig })
         await beforeDispatch?.([data])
@@ -368,7 +316,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
           signal,
         })
       }
-      return requestQueue.enqueue(thunk, scheduleAt, dedupKey ?? hash, scope ? [scope] : undefined)
+      return requestQueue.enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)
     },
     onError: (error, context) => {
       const errorType = context.isFallback ? "Individual request" : "Batch request"
@@ -532,127 +480,108 @@ export function setUpWebPageTranslationQueue(): void {
       },
     } = message
     const scope = buildTranslationScopeKey(message.sender, sessionId)
-    const cacheWriteGuard = beginWebpageCacheWrite(hash, forceRetranslation)
 
-    try {
-      const validateHtmlAttributeMarkers =
-        textFormat === "html" && hasHtmlAttributeMarkerProtocol(text)
-      if (validateHtmlAttributeMarkers) {
-        assertHtmlAttributeMarkerIntegrity(text, text)
-      }
-
-      // A forced hover translation must reach the provider even if the same
-      // cache key already has a value. The existing entry is left untouched
-      // unless the fresh request succeeds below.
-      if (hash && !forceRetranslation) {
-        const cachedTranslation = await getValidatedCachedTranslation(
-          hash,
-          text,
-          validateHtmlAttributeMarkers,
-        )
-        if (cachedTranslation !== undefined) return cachedTranslation
-      }
-
-      // The cache lookup above yielded — the session's cancel may have drained
-      // the queues while this handler was suspended. Enqueueing now would park
-      // an undraininable task on a dead scope, so abort instead (the content
-      // side swallows this error).
-      if (scope && cancelledScopes.has(scope)) {
-        throw new TranslationCancelledError(scope)
-      }
-
-      let effectivePromptExperimentVariant = promptExperimentVariant
-      let cacheUnderRequestedHash = true
-      if (promptExperimentVariant) {
-        const latestVariant = await resolvePromptExperimentVariant("default")
-        if (latestVariant && latestVariant !== promptExperimentVariant) {
-          return { retryWithPromptExperimentVariant: latestVariant }
-        }
-        if (!latestVariant) {
-          effectivePromptExperimentVariant = undefined
-          cacheUnderRequestedHash = false
-        }
-      }
-
-      let result: string
-      // Keep persistent cache identity stable while giving each forced request
-      // its own queue identity, so it cannot join ordinary in-flight work.
-      const dedupKey = forceRetranslation ? `${hash}:force:${getRandomUUID()}` : hash
-      const context: WebTranslationPromptContext = {
-        webTitle: normalizePromptContextValue(webTitle),
-        webDescription: normalizePromptContextValue(webDescription),
-        webContent: normalizePromptContextValue(webContent),
-        webSummary: normalizePromptContextValue(webSummary),
-        promptExperimentVariant: effectivePromptExperimentVariant,
-      }
-
-      if (shouldUseBatchQueue(providerConfig)) {
-        const data = {
-          text,
-          langConfig,
-          providerConfig,
-          hash,
-          dedupKey,
-          scheduleAt,
-          context,
-          scope,
-          promptExperimentVariant: effectivePromptExperimentVariant,
-          translationActionContext,
-          actionDedupeKey:
-            translationActionContext?.feature === "page_translation"
-              ? (scope ?? translationActionContext.actionId)
-              : translationActionContext?.actionId,
-        }
-        try {
-          result = await batchQueue.enqueue(data)
-        } catch (error) {
-          if (error instanceof PromptExperimentDispatchChangedError) {
-            if (error.latestVariant) {
-              return { retryWithPromptExperimentVariant: error.latestVariant }
-            }
-            const retryResponse: { retryWithoutPromptExperiment: true } = {
-              retryWithoutPromptExperiment: true,
-            }
-            return retryResponse
-          }
-          throw error
-        }
-      } else {
-        // Create thunk based on type and params
-        const thunk = (signal?: AbortSignal) =>
-          executeTranslate(text, langConfig, providerConfig, getTranslatePrompt, {
-            textFormat,
-            signal,
-          })
-        result = await requestQueue.enqueue(
-          thunk,
-          scheduleAt,
-          dedupKey,
-          scope ? [scope] : undefined,
-        )
-      }
-
-      if (validateHtmlAttributeMarkers) {
-        assertHtmlAttributeMarkerIntegrity(text, result)
-      }
-
-      // Serialize writes for this hash and recheck the force generation when
-      // this result reaches the front. Older work cannot overwrite a newer
-      // forced result, even if its provider call finishes later.
-      if (result && hash && cacheUnderRequestedHash) {
-        await cacheWriteGuard?.writeIfCurrent(async () => {
-          await db.translationCache.put({
-            key: hash,
-            translation: result,
-            createdAt: new Date(),
-          })
-        })
-      }
-
-      return result
-    } finally {
-      cacheWriteGuard?.release()
+    const validateHtmlAttributeMarkers =
+      textFormat === "html" && hasHtmlAttributeMarkerProtocol(text)
+    if (validateHtmlAttributeMarkers) {
+      assertHtmlAttributeMarkerIntegrity(text, text)
     }
+
+    // Check cache first — unless the user asked for a fresh translation. The
+    // existing entry is left untouched unless the fresh request succeeds below.
+    if (hash && !forceRetranslation) {
+      const cachedTranslation = await getValidatedCachedTranslation(
+        hash,
+        text,
+        validateHtmlAttributeMarkers,
+      )
+      if (cachedTranslation !== undefined) return cachedTranslation
+    }
+
+    // The cache lookup above yielded — the session's cancel may have drained
+    // the queues while this handler was suspended. Enqueueing now would park
+    // an undraininable task on a dead scope, so abort instead (the content
+    // side swallows this error).
+    if (scope && cancelledScopes.has(scope)) {
+      throw new TranslationCancelledError(scope)
+    }
+
+    let effectivePromptExperimentVariant = promptExperimentVariant
+    let cacheUnderRequestedHash = true
+    if (promptExperimentVariant) {
+      const latestVariant = await resolvePromptExperimentVariant("default")
+      if (latestVariant && latestVariant !== promptExperimentVariant) {
+        return { retryWithPromptExperimentVariant: latestVariant }
+      }
+      if (!latestVariant) {
+        effectivePromptExperimentVariant = undefined
+        cacheUnderRequestedHash = false
+      }
+    }
+
+    let result: string
+    const context: WebTranslationPromptContext = {
+      webTitle: normalizePromptContextValue(webTitle),
+      webDescription: normalizePromptContextValue(webDescription),
+      webContent: normalizePromptContextValue(webContent),
+      webSummary: normalizePromptContextValue(webSummary),
+      promptExperimentVariant: effectivePromptExperimentVariant,
+    }
+
+    if (shouldUseBatchQueue(providerConfig)) {
+      const data = {
+        text,
+        langConfig,
+        providerConfig,
+        hash,
+        scheduleAt,
+        context,
+        scope,
+        promptExperimentVariant: effectivePromptExperimentVariant,
+        translationActionContext,
+        actionDedupeKey:
+          translationActionContext?.feature === "page_translation"
+            ? (scope ?? translationActionContext.actionId)
+            : translationActionContext?.actionId,
+      }
+      try {
+        result = await batchQueue.enqueue(data)
+      } catch (error) {
+        if (error instanceof PromptExperimentDispatchChangedError) {
+          if (error.latestVariant) {
+            return { retryWithPromptExperimentVariant: error.latestVariant }
+          }
+          const retryResponse: { retryWithoutPromptExperiment: true } = {
+            retryWithoutPromptExperiment: true,
+          }
+          return retryResponse
+        }
+        throw error
+      }
+    } else {
+      // Create thunk based on type and params
+      const thunk = (signal?: AbortSignal) =>
+        executeTranslate(text, langConfig, providerConfig, getTranslatePrompt, {
+          textFormat,
+          signal,
+        })
+      result = await requestQueue.enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)
+    }
+
+    if (validateHtmlAttributeMarkers) {
+      assertHtmlAttributeMarkerIntegrity(text, result)
+    }
+
+    // Cache the translation result if successful
+    if (result && hash && cacheUnderRequestedHash) {
+      await db.translationCache.put({
+        key: hash,
+        translation: result,
+        createdAt: new Date(),
+      })
+    }
+
+    return result
   })
 
   onMessage("getOrGenerateWebPageSummary", async (message) => {

@@ -674,7 +674,7 @@ options:
         description: Di chuột hoặc nhấn giữ một đoạn để chỉ dịch đoạn đó.
       forceRetranslation:
         title: Luôn yêu cầu bản dịch mới
-        description: Bỏ qua bản dịch khi di chuột đã lưu trong bộ nhớ đệm hoặc đang xử lý. Kết quả thành công sẽ thay thế bộ nhớ đệm.
+        description: Bản dịch khi di chuột bỏ qua bộ nhớ đệm — văn bản đã có trong bộ nhớ đệm vẫn được dịch lại và kết quả mới sẽ ghi đè.
     translationStyle:
       title: Kiểu hiển thị bản dịch
       description: Đặt bất kỳ kiểu nào bạn muốn để phân biệt kết quả dịch với văn bản gốc

@@ -674,7 +674,7 @@ options:
         description: Bir paragrafın üzerine gelin veya uzun basın; yalnızca o paragraf çevrilir.
       forceRetranslation:
         title: Her zaman yeniden çevir
-        description: Önbellekteki ve devam eden üzerine gelme çevirilerini yok sayar. Başarılı sonuç önbellektekinin yerini alır.
+        description: Üzerine gelme çevirisi önbelleği atlar — metin önbellekte olsa bile yeniden çevirir ve önbellekteki sonucun yerini alır.
     translationStyle:
       title: Çeviri görüntüleme stili
       description: Çeviri sonuçlarını orijinal metinden ayırt etmek için istediğiniz herhangi bir stili ayarlayın
