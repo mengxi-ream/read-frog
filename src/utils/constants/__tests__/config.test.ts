@@ -96,6 +96,23 @@ describe("dEFAULT_CONFIG", () => {
     expect(DEFAULT_CONFIG.translate.node.forceRetranslation).toBe(false)
   })
 
+  it("keeps pre-v090 config parseable until the background migration runs", async () => {
+    const { DEFAULT_CONFIG } = await import("../config")
+    const { configSchema } = await import("@/types/config/config")
+    const legacyConfig = structuredClone(DEFAULT_CONFIG)
+    const legacyNode = legacyConfig.translate.node as Partial<typeof legacyConfig.translate.node>
+
+    delete legacyNode.forceRetranslation
+    legacyConfig.language.targetCode = "jpn"
+
+    const result = configSchema.safeParse(legacyConfig)
+
+    expect(result.success).toBe(true)
+    if (!result.success) return
+    expect(result.data.translate.node.forceRetranslation).toBe(false)
+    expect(result.data.language.targetCode).toBe("jpn")
+  })
+
   it("rebuilds schema-valid built-in action state for persistence", async () => {
     const { buildFreshDefaultConfig, createDefaultDictionaryAction, DEFAULT_CONFIG } =
       await import("../config")
