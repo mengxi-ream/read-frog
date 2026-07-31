@@ -151,7 +151,21 @@ function* walkNode(
     }
   }
 
-  if (hasInlineNodeChild && isWithinIncludeScope(element, config)) {
+  // The document root must never become a paragraph unit. Walks now start at
+  // documentElement (#1991), and an inline-level child beside <body> — any
+  // unstyled custom element or stray text node injected under <html> defaults
+  // to display:inline — would otherwise label <html> itself as ONE paragraph.
+  // That collapses the whole document into a single observed unit: viewport
+  // gating dies (<html> always intersects), and the translated-region guard's
+  // querySelector becomes a document-wide match that can silently skip the
+  // entire page. Element-level injections still translate via their own
+  // paragraph labels; only bare text nodes directly under <html> (impossible
+  // to author in HTML, script-only) are left untranslated.
+  if (
+    hasInlineNodeChild &&
+    element !== element.ownerDocument.documentElement &&
+    isWithinIncludeScope(element, config)
+  ) {
     element.setAttribute(PARAGRAPH_ATTRIBUTE, "")
   }
 
