@@ -362,7 +362,7 @@ function Assignments({
           icon="tabler:chevron-right"
           className={cn("size-4 transition-transform duration-200", isOpen && "rotate-90")}
         />
-        <span>{i18n.t("options.apiProviders.form.featureProviders")}</span>
+        <span>{i18n.t("options.apiProviders.featureProviders.title")}</span>
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="flex flex-col gap-3">{children}</div>
@@ -442,7 +442,7 @@ function LanguageDetectionAssignment() {
         if (checked) void actions.assignLanguageDetection()
       }}
     >
-      {i18n.t("options.general.languageDetection.title")}
+      {i18n.t("options.apiProviders.languageDetection.title")}
     </AssignmentRow>
   )
 }

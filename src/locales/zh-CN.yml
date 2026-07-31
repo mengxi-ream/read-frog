@@ -93,17 +93,16 @@ options:
   product:
     roadmap: 路线图
     feedback: 反馈
-  setAPIKeyWarning:
-    please: 请在
-    page: 页设置 API Key
   apiProviders:
     title: API 提供商
-    pageDescription: 接入 Read Frog 调用的 AI 服务，管理各自的密钥和模型，并为每项功能指定使用哪一个。
-    description: 配置用于翻译和词汇解析功能的 API 提供商。我们内置了 20 多个提供商，并支持任何 OpenAI 兼容 API 提供商。
+    pageDescription: 接入 Read Frog 调用的 AI 服务，并为每项功能指定使用哪一个。
+    description: 添加 Read Frog 可以调用的提供商。内置 20 多个，也支持任何 OpenAI 兼容的 API。
     configTitle: 提供商配置
     addProvider: 添加提供商
     builtInProvider: 内置提供商
     sponsorCta: 获取高速性价比 AI
+    setApiKeyWarning:
+      message: 请在 $1 页面设置 API Key
     badges:
       featureCount: $1 个功能
       sponsor: 赞助
@@ -151,7 +150,8 @@ options:
         apiKeyRequired: 请先添加 API 密钥
         searchModels: 搜索模型...
         noModelsFound: 未找到模型
-      featureProviders: 功能提供商
+        label: 模型
+        enterCustomModel: 输入自定义模型名称
       advancedOptions: 高级选项
       providerSettingLabels:
         region: 区域
@@ -221,15 +221,12 @@ options:
       success: 成功
       failed: 失败
       slow: 缓慢（建议调节思考模式）
-  general:
     featureProviders:
       title: 功能提供商
       description: 为每个功能选择使用的提供商
-      customActions: 自定义 AI 指令
       features:
         translate: 网页翻译
         selectionToolbar_translate: 划词翻译
-        tts: 文本转语音
         inputTranslation: 输入翻译
         videoSubtitles: 视频字幕
       descriptions:
@@ -237,20 +234,6 @@ options:
         selectionToolbar_translate: 通过划词工具栏翻译你选中的文本。
         inputTranslation: 在发送前翻译你写在输入框里的内容。
         videoSubtitles: 翻译视频播放器中随播放出现的字幕。
-    translationConfig:
-      model:
-        title: 模型
-        enterCustomModel: 输入自定义模型名称
-    clearCache:
-      title: 清理缓存
-      description: 清理浏览器中的所有翻译缓存
-      clearing: 清理中...
-      dialog:
-        title: 清理缓存
-        trigger: 清理缓存
-        confirm: 确认
-        cancel: 取消
-        description: 此操作将清理所有翻译缓存。此操作无法撤销。
     languageDetection:
       title: 语言检测
       description: 影响自动翻译语言检测、跳过语言检测和朗读语音选择的准确性。
@@ -264,6 +247,13 @@ options:
         noProviders: 请先配置 LLM 提供商
         basicRecommend: 建议启用 LLM
         llmEnabled: LLM 检测已启用
+    aiContentAware:
+      title: AI 智能上下文翻译
+      description: 把网页或视频的上下文提供给 AI，让翻译更准确
+      enable: 启用
+      enableDescription: AI 翻译前会先读一份网页或视频的摘要，让用词更贴合上下文。对每个使用 LLM 提供商的翻译功能都生效。首次请求会有延迟，并增加 API 费用。
+      llmProviderConfigured: 已为$1选择 LLM 提供商
+      llmProviderNotConfigured: 没有为$1选择 LLM 提供商
   patterns:
     duplicate: 该模式已在列表中
   preference:
@@ -519,6 +509,7 @@ options:
         title: 自定义 AI 指令
         pageDescription: 编写自己的提示词，从划词工具栏对选中的文本运行。
         description: 为划词添加你自己的结构化 AI 操作
+        configTitle: 指令配置
         builtIn: 内置
         add: 添加 AI 指令
         edit: 编辑 AI 指令
@@ -901,8 +892,6 @@ options:
       title: 悬停或长按翻译快捷键
       description: 自定义悬停翻译的修饰键，或使用鼠标长按翻译段落
       enable: 启用
-    llmProviderConfigured: 已为$1选择 LLM 提供商
-    llmProviderNotConfigured: 没有为$1选择 LLM 提供商
     autoTranslateLanguages:
       title: 基于语言的自动翻译
       description: 当检测到指定语言时自动翻译页面内容
@@ -923,11 +912,16 @@ options:
         basic: 基础
         llm: LLM
         description: 基础检测快速且免费。LLM 检测更准确，但会增加延迟和 API 费用。
-    aiContentAware:
-      title: AI 智能上下文翻译
-      description: 把网页或视频的上下文提供给 AI，让翻译更准确
-      enable: 启用
-      enableDescription: AI 翻译前会先读一份网页或视频的摘要，让用词更贴合上下文。对每个使用 LLM 提供商的翻译功能都生效。首次请求会有延迟，并增加 API 费用。
+    clearCache:
+      title: 清理缓存
+      description: 清理浏览器中的所有翻译缓存
+      clearing: 清理中...
+      dialog:
+        title: 清理缓存
+        trigger: 清理缓存
+        confirm: 确认
+        cancel: 取消
+        description: 此操作将清理所有翻译缓存。此操作无法撤销。
   siteRules:
     title: 站点规则
     pageDescription: 用内置规则和自定义规则调整单个网站的翻译方式。

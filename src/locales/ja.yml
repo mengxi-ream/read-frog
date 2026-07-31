@@ -93,17 +93,16 @@ options:
   product:
     roadmap: ロードマップ
     feedback: フィードバック
-  setAPIKeyWarning:
-    please: 設定ページで
-    page: APIキーを設定してください
   apiProviders:
     title: APIプロバイダー
-    pageDescription: Read Frog が呼び出す AI サービスを接続し、キーとモデルを管理して、各機能で使うものを選びます。
-    description: 翻訳および語彙分析機能用のAPIプロバイダーを設定。20以上の内蔵プロバイダーに加え、OpenAI互換APIもサポートしています。
+    pageDescription: Read Frog が呼び出す AI サービスを接続し、各機能で使うものを選びます。
+    description: Read Frog が呼び出せるプロバイダーを追加します。20 以上を内蔵し、OpenAI 互換の API もすべて使えます。
     configTitle: プロバイダー設定
     addProvider: プロバイダーを追加
     builtInProvider: 組み込みプロバイダー
     sponsorCta: 高速で高コスパのAIを入手
+    setApiKeyWarning:
+      message: API キーは $1 ページで設定してください
     badges:
       featureCount: $1 件の機能
       sponsor: スポンサー
@@ -150,7 +149,8 @@ options:
         apiKeyRequired: 先にAPIキーを追加してください
         searchModels: モデルを検索...
         noModelsFound: モデルが見つかりません
-      featureProviders: 機能プロバイダー
+        label: モデル
+        enterCustomModel: カスタムモデル名を入力
       advancedOptions: 詳細オプション
       providerSettingLabels:
         region: リージョン
@@ -220,15 +220,12 @@ options:
       success: 成功
       failed: 失敗
       slow: 低速（思考モードの調整を推奨）
-  general:
     featureProviders:
       title: 機能プロバイダー
       description: 各機能に使用するプロバイダーを選択
-      customActions: カスタムAIアクション
       features:
         translate: ページ翻訳
         selectionToolbar_translate: 選択ツールバー翻訳
-        tts: テキスト読み上げ
         inputTranslation: 入力翻訳
         videoSubtitles: 動画字幕
       descriptions:
@@ -236,20 +233,6 @@ options:
         selectionToolbar_translate: 選択ツールバーから、選択したテキストを翻訳します。
         inputTranslation: 入力欄に書いた文章を、送信する前に翻訳します。
         videoSubtitles: 動画プレーヤーに表示される字幕を翻訳します。
-    translationConfig:
-      model:
-        title: モデル
-        enterCustomModel: カスタムモデル名を入力
-    clearCache:
-      title: キャッシュクリア
-      description: ブラウザのすべての翻訳キャッシュをクリアします
-      clearing: クリア中...
-      dialog:
-        title: キャッシュクリア
-        trigger: キャッシュクリア
-        confirm: 確認
-        cancel: キャンセル
-        description: この操作により、すべての翻訳キャッシュがクリアされます。この操作は元に戻せません。
     languageDetection:
       title: 言語検出
       description: 自動翻訳の言語検出、スキップ言語検出、読み上げの音声選択精度に影響します。
@@ -263,6 +246,13 @@ options:
         noProviders: LLMプロバイダーを設定してください
         basicRecommend: LLM有効化を推奨
         llmEnabled: LLM検出が有効
+    aiContentAware:
+      title: AI スマートコンテキスト翻訳
+      description: ページや動画の文脈を AI に渡して、翻訳の精度を上げます
+      enable: 有効にする
+      enableDescription: AI は翻訳の前にページや動画の要約を読み、文脈に合った訳語を選びます。LLM プロバイダーで動作するすべての翻訳機能に適用されます。最初のリクエストに遅延が生じ、API 費用も増えます。
+      llmProviderConfigured: $1の LLM プロバイダー選択済み
+      llmProviderNotConfigured: $1の LLM プロバイダー未選択
   patterns:
     duplicate: このパターンは既にリストにあります
   preference:
@@ -518,6 +508,7 @@ options:
         title: カスタム AI アクション
         pageDescription: 独自のプロンプトを作成し、選択ツールバーから選択したテキストに対して実行します。
         description: 選択テキスト向けに独自の構造化 AI アクションを追加
+        configTitle: アクション設定
         builtIn: 組み込み
         add: AI アクションを追加
         edit: AI アクションを編集
@@ -785,8 +776,6 @@ options:
       title: ホバーまたは長押し翻訳ショートカットキー
       description: ホバー翻訳の修飾キーをカスタマイズするか、長押しで段落を翻訳します
       enable: 有効化
-    llmProviderConfigured: $1の LLM プロバイダー選択済み
-    llmProviderNotConfigured: $1の LLM プロバイダー未選択
     autoTranslateLanguages:
       title: 言語に基づく自動翻訳
       description: 特定の言語が検出された場合にページコンテンツを自動翻訳します
@@ -807,11 +796,16 @@ options:
         basic: 基本
         llm: LLM
         description: 基本検出は高速で無料です。LLM 検出はより正確ですが、遅延と API コストが増加します。
-    aiContentAware:
-      title: AI スマートコンテキスト翻訳
-      description: ページや動画の文脈を AI に渡して、翻訳の精度を上げます
-      enable: 有効にする
-      enableDescription: AI は翻訳の前にページや動画の要約を読み、文脈に合った訳語を選びます。LLM プロバイダーで動作するすべての翻訳機能に適用されます。最初のリクエストに遅延が生じ、API 費用も増えます。
+    clearCache:
+      title: キャッシュクリア
+      description: ブラウザのすべての翻訳キャッシュをクリアします
+      clearing: クリア中...
+      dialog:
+        title: キャッシュクリア
+        trigger: キャッシュクリア
+        confirm: 確認
+        cancel: キャンセル
+        description: この操作により、すべての翻訳キャッシュがクリアされます。この操作は元に戻せません。
   siteRules:
     title: サイトルール
     pageDescription: 組み込みルールとカスタムルールで、サイトごとの翻訳方法を調整します。

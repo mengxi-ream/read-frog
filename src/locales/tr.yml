@@ -93,17 +93,16 @@ options:
   product:
     roadmap: Yol Haritası
     feedback: Geri Bildirim
-  setAPIKeyWarning:
-    please: Lütfen API Anahtarını
-    page: sayfasında ayarlayın
   apiProviders:
     title: API Sağlayıcıları
-    pageDescription: Read Frog'un çağırdığı yapay zekâ servislerini bağlayın, anahtarlarını ve modellerini yönetin, her özelliğin hangisini kullanacağını seçin.
-    description: Çeviri ve kelime analizi işlevleri için API sağlayıcılarını buradan yapılandırın. 20'den fazla yerleşik sağlayıcımız var ve OpenAI uyumlu tüm API sağlayıcılarını destekliyoruz.
+    pageDescription: Read Frog'un çağırdığı yapay zekâ servislerini bağlayın ve her özelliğin hangisini kullanacağını seçin.
+    description: Read Frog'un çağırabileceği sağlayıcıları ekleyin. 20'den fazlası yerleşik gelir ve OpenAI uyumlu her API çalışır.
     configTitle: Sağlayıcı Yapılandırması
     addProvider: Sağlayıcı Ekle
     builtInProvider: Yerleşik Sağlayıcı
-    sponsorCta: Hızlı ve uygun maliyetli AI al
+    sponsorCta: Hızlı ve uygun maliyetli yapay zekâ al
+    setApiKeyWarning:
+      message: API anahtarınızı $1 sayfasında ayarlayın
     badges:
       featureCount: $1 özellik
       sponsor: Sponsor
@@ -150,7 +149,8 @@ options:
         apiKeyRequired: Lütfen önce API anahtarı ekleyin
         searchModels: Model ara...
         noModelsFound: Model bulunamadı
-      featureProviders: Özellik Sağlayıcıları
+        label: Model
+        enterCustomModel: Özel model adını girin
       advancedOptions: Gelişmiş Seçenekler
       providerSettingLabels:
         region: Bölge
@@ -220,15 +220,12 @@ options:
       success: Başarılı
       failed: Başarısız
       slow: Yavaş (düşünme modunu ayarlamanız önerilir)
-  general:
     featureProviders:
       title: Özellik Sağlayıcıları
       description: Her özellik için kullanılacak sağlayıcıyı seçin
-      customActions: Özel AI Eylemleri
       features:
         translate: Sayfa Çevirisi
         selectionToolbar_translate: Seçim Araç Çubuğu Çevirisi
-        tts: Metin Okuma
         inputTranslation: Giriş Çevirisi
         videoSubtitles: Video Altyazıları
       descriptions:
@@ -236,20 +233,6 @@ options:
         selectionToolbar_translate: Seçim araç çubuğundan, seçtiğiniz metni çevirir.
         inputTranslation: Bir metin kutusuna yazdıklarınızı göndermeden önce çevirir.
         videoSubtitles: Video oynatıcıda görünen altyazıları çevirir.
-    translationConfig:
-      model:
-        title: Model
-        enterCustomModel: Özel model adını girin
-    clearCache:
-      title: Önbelleği Temizle
-      description: Tarayıcınızdaki tüm çeviri önbelleğini temizleyin
-      clearing: Temizleniyor...
-      dialog:
-        title: Önbelleği Temizle
-        trigger: Önbelleği Temizle
-        confirm: Onayla
-        cancel: İptal
-        description: Bu işlem tüm çeviri önbelleğini temizleyecektir. Bu işlem geri alınamaz.
     languageDetection:
       title: Dil Algılama
       description: Otomatik çeviri dil algılama, atlama dil algılama ve Konuşma ses seçimi doğruluğunu etkiler.
@@ -263,6 +246,13 @@ options:
         noProviders: Önce bir LLM sağlayıcısı yapılandırın
         basicRecommend: LLM etkinleştirmesi önerilir
         llmEnabled: LLM algılama etkin
+    aiContentAware:
+      title: AI Akıllı Bağlam Çevirisi
+      description: Sayfanın ya da videonun bağlamını yapay zekâya vererek çeviriyi daha isabetli hale getirin
+      enable: Etkinleştir
+      enableDescription: Yapay zekâ çeviriden önce sayfanın ya da videonun özetini okur, böylece sözcükler bağlama oturur. LLM sağlayıcısıyla çalışan her çeviri özelliğinde geçerlidir. İlk isteğe gecikme ekler ve API maliyetini artırır.
+      llmProviderConfigured: $1 için LLM sağlayıcısı seçildi
+      llmProviderNotConfigured: $1 için LLM sağlayıcısı seçilmedi
   patterns:
     duplicate: Bu desen zaten listede
   preference:
@@ -518,6 +508,7 @@ options:
         title: Özel AI Eylemleri
         pageDescription: Kendi istemlerinizi yazın ve seçim araç çubuğundan seçili metin üzerinde çalıştırın.
         description: Seçilen metin için kendi yapılandırılmış AI eylemlerinizi ekleyin
+        configTitle: Eylem Yapılandırması
         builtIn: Yerleşik
         add: AI Eylemi Ekle
         edit: AI Eylemini Düzenle
@@ -785,8 +776,6 @@ options:
       title: Üzerine Gelme veya Uzun Basma Çeviri Kısayolu
       description: Üzerine gelme için değiştirici tuşu özelleştirin veya paragrafları çevirmek için uzun basın
       enable: Etkinleştir
-    llmProviderConfigured: $1 için LLM sağlayıcısı seçildi
-    llmProviderNotConfigured: $1 için LLM sağlayıcısı seçilmedi
     autoTranslateLanguages:
       title: Dile Göre Otomatik Çevir
       description: Belirli diller algılandığında sayfa içeriğini otomatik olarak çevir
@@ -807,11 +796,16 @@ options:
         basic: Temel
         llm: LLM
         description: Temel algılama hızlı ve ücretsizdir. LLM algılama daha doğrudur ancak gecikme ve API maliyetleri ekler.
-    aiContentAware:
-      title: AI Akıllı Bağlam Çevirisi
-      description: Sayfanın ya da videonun bağlamını yapay zekâya vererek çeviriyi daha isabetli hale getirin
-      enable: Etkinleştir
-      enableDescription: Yapay zekâ çeviriden önce sayfanın ya da videonun özetini okur, böylece sözcükler bağlama oturur. LLM sağlayıcısıyla çalışan her çeviri özelliğinde geçerlidir. İlk isteğe gecikme ekler ve API maliyetini artırır.
+    clearCache:
+      title: Önbelleği Temizle
+      description: Tarayıcınızdaki tüm çeviri önbelleğini temizleyin
+      clearing: Temizleniyor...
+      dialog:
+        title: Önbelleği Temizle
+        trigger: Önbelleği Temizle
+        confirm: Onayla
+        cancel: İptal
+        description: Bu işlem tüm çeviri önbelleğini temizleyecektir. Bu işlem geri alınamaz.
   siteRules:
     title: Site Kuralları
     pageDescription: Yerleşik ve özel kurallarla tek tek web sitelerinin nasıl çevrileceğini ayarlayın.

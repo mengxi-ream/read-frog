@@ -93,17 +93,16 @@ options:
   product:
     roadmap: Lộ trình
     feedback: Phản hồi
-  setAPIKeyWarning:
-    please: Vui lòng đặt API Key trên trang
-    page: cài đặt
   apiProviders:
     title: Nhà cung cấp API
-    pageDescription: Kết nối các dịch vụ AI mà Read Frog sử dụng, quản lý khóa cùng mô hình của chúng và chọn dịch vụ cho từng tính năng.
-    description: Cấu hình các nhà cung cấp API cho chức năng dịch và phân tích từ vựng tại đây. Chúng tôi có hơn 20 nhà cung cấp tích hợp sẵn và hỗ trợ mọi API tương thích OpenAI.
+    pageDescription: Kết nối các dịch vụ AI mà Read Frog sử dụng và chọn dịch vụ cho từng tính năng.
+    description: Thêm các nhà cung cấp mà Read Frog có thể gọi. Hơn 20 nhà cung cấp có sẵn, và mọi API tương thích OpenAI đều dùng được.
     configTitle: Cấu hình nhà cung cấp
     addProvider: Thêm nhà cung cấp
     builtInProvider: Nhà cung cấp tích hợp
     sponsorCta: Nhận AI nhanh, tiết kiệm chi phí
+    setApiKeyWarning:
+      message: Hãy đặt API Key ở trang $1
     badges:
       featureCount: $1 tính năng
       sponsor: Tài trợ
@@ -150,7 +149,8 @@ options:
         apiKeyRequired: Vui lòng thêm khóa API trước
         searchModels: Tìm kiếm mô hình...
         noModelsFound: Không tìm thấy mô hình
-      featureProviders: Nhà cung cấp tính năng
+        label: Mô hình
+        enterCustomModel: Nhập tên mô hình tùy chỉnh
       advancedOptions: Tùy chọn nâng cao
       providerSettingLabels:
         region: Khu vực
@@ -220,15 +220,12 @@ options:
       success: Thành công
       failed: Thất bại
       slow: Chậm (nên điều chỉnh chế độ suy nghĩ)
-  general:
     featureProviders:
       title: Nhà cung cấp tính năng
       description: Chọn nhà cung cấp sử dụng cho mỗi tính năng
-      customActions: Hành động AI tùy chỉnh
       features:
         translate: Dịch trang
         selectionToolbar_translate: Dịch thanh công cụ chọn
-        tts: Chuyển văn bản thành giọng nói
         inputTranslation: Dịch đầu vào
         videoSubtitles: Phụ đề video
       descriptions:
@@ -236,20 +233,6 @@ options:
         selectionToolbar_translate: Dịch đoạn văn bản bạn chọn từ thanh công cụ bôi đen.
         inputTranslation: Dịch nội dung bạn gõ trong ô nhập trước khi gửi.
         videoSubtitles: Dịch phụ đề hiện ra trong trình phát video.
-    translationConfig:
-      model:
-        title: Mô hình
-        enterCustomModel: Nhập tên mô hình tùy chỉnh
-    clearCache:
-      title: Xóa bộ nhớ đệm
-      description: Xóa tất cả bộ nhớ đệm dịch trong trình duyệt của bạn
-      clearing: Đang xóa...
-      dialog:
-        title: Xóa bộ nhớ đệm
-        trigger: Xóa bộ nhớ đệm
-        confirm: Xác nhận
-        cancel: Hủy
-        description: Thao tác này sẽ xóa tất cả bộ nhớ đệm dịch. Hành động này không thể hoàn tác.
     languageDetection:
       title: Phát hiện ngôn ngữ
       description: Ảnh hưởng đến phát hiện ngôn ngữ tự động dịch, phát hiện ngôn ngữ bỏ qua và độ chính xác chọn giọng nói.
@@ -263,6 +246,13 @@ options:
         noProviders: Hãy cấu hình nhà cung cấp LLM trước
         basicRecommend: Khuyến nghị bật LLM
         llmEnabled: Phát hiện LLM đã bật
+    aiContentAware:
+      title: Dịch ngữ cảnh thông minh AI
+      description: Cung cấp cho AI ngữ cảnh của trang hoặc video để dịch chính xác hơn
+      enable: Bật
+      enableDescription: AI đọc bản tóm tắt của trang hoặc video trước khi dịch, để cách dùng từ hợp ngữ cảnh. Áp dụng cho mọi tính năng dịch chạy trên nhà cung cấp LLM. Yêu cầu đầu tiên sẽ chậm hơn và làm tăng chi phí API.
+      llmProviderConfigured: Đã chọn nhà cung cấp LLM cho $1
+      llmProviderNotConfigured: Chưa chọn nhà cung cấp LLM cho $1
   patterns:
     duplicate: Mẫu này đã có trong danh sách
   preference:
@@ -518,6 +508,7 @@ options:
         title: Hành động AI tùy chỉnh
         pageDescription: Viết prompt của riêng bạn và chạy trên văn bản đã chọn từ thanh công cụ chọn văn bản.
         description: Thêm các hành động AI có cấu trúc của riêng bạn cho văn bản được chọn
+        configTitle: Cấu hình hành động
         builtIn: Tích hợp
         add: Thêm hành động AI
         edit: Chỉnh sửa hành động AI
@@ -785,8 +776,6 @@ options:
       title: Phím tắt dịch khi di chuột hoặc nhấn giữ
       description: Tùy chỉnh phím bổ trợ khi di chuột hoặc dùng nhấn giữ để dịch đoạn văn
       enable: Bật
-    llmProviderConfigured: Đã chọn nhà cung cấp LLM cho $1
-    llmProviderNotConfigured: Chưa chọn nhà cung cấp LLM cho $1
     autoTranslateLanguages:
       title: Tự động dịch theo ngôn ngữ
       description: Tự động dịch nội dung trang khi phát hiện các ngôn ngữ cụ thể
@@ -807,11 +796,16 @@ options:
         basic: Cơ bản
         llm: LLM
         description: Phát hiện cơ bản nhanh và miễn phí. Phát hiện LLM chính xác hơn nhưng thêm độ trễ và chi phí API.
-    aiContentAware:
-      title: Dịch ngữ cảnh thông minh AI
-      description: Cung cấp cho AI ngữ cảnh của trang hoặc video để dịch chính xác hơn
-      enable: Bật
-      enableDescription: AI đọc bản tóm tắt của trang hoặc video trước khi dịch, để cách dùng từ hợp ngữ cảnh. Áp dụng cho mọi tính năng dịch chạy trên nhà cung cấp LLM. Yêu cầu đầu tiên sẽ chậm hơn và làm tăng chi phí API.
+    clearCache:
+      title: Xóa bộ nhớ đệm
+      description: Xóa tất cả bộ nhớ đệm dịch trong trình duyệt của bạn
+      clearing: Đang xóa...
+      dialog:
+        title: Xóa bộ nhớ đệm
+        trigger: Xóa bộ nhớ đệm
+        confirm: Xác nhận
+        cancel: Hủy
+        description: Thao tác này sẽ xóa tất cả bộ nhớ đệm dịch. Hành động này không thể hoàn tác.
   siteRules:
     title: Quy tắc trang web
     pageDescription: Điều chỉnh cách dịch từng trang web bằng quy tắc có sẵn và quy tắc tự tạo.

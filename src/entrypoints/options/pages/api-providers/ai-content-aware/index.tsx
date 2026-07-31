@@ -33,8 +33,8 @@ function FeatureStatusList() {
           featureKey,
           hasLLMProvider,
           text: hasLLMProvider
-            ? i18n.t("options.translation.llmProviderConfigured", [featureName])
-            : i18n.t("options.translation.llmProviderNotConfigured", [featureName]),
+            ? i18n.t("options.apiProviders.aiContentAware.llmProviderConfigured", [featureName])
+            : i18n.t("options.apiProviders.aiContentAware.llmProviderNotConfigured", [featureName]),
         }
       }),
     [config, providersConfig],
@@ -58,12 +58,15 @@ export function AIContentAwareConfig() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
 
   return (
-    <ConfigSection id="ai-content-aware" title={i18n.t("options.translation.aiContentAware.title")}>
+    <ConfigSection
+      id="ai-content-aware"
+      title={i18n.t("options.apiProviders.aiContentAware.title")}
+    >
       <ConfigItem
-        title={i18n.t("options.translation.aiContentAware.enable")}
+        title={i18n.t("options.apiProviders.aiContentAware.enable")}
         description={
           <>
-            {i18n.t("options.translation.aiContentAware.enableDescription")}
+            {i18n.t("options.apiProviders.aiContentAware.enableDescription")}
             <FeatureStatusList />
           </>
         }

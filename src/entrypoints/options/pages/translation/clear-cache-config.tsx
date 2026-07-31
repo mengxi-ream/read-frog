@@ -35,28 +35,30 @@ export function ClearCacheConfig() {
   return (
     <ConfigCard
       id="clear-cache"
-      title={i18n.t("options.general.clearCache.title")}
-      description={i18n.t("options.general.clearCache.description")}
+      title={i18n.t("options.translation.clearCache.title")}
+      description={i18n.t("options.translation.clearCache.description")}
     >
       <AlertDialog open={open} onOpenChange={setOpen}>
         <div className="flex w-full justify-end">
           <AlertDialogTrigger render={<Button variant="destructive" disabled={isClearing} />}>
             <IconTrash className="size-4" />
             {isClearing
-              ? i18n.t("options.general.clearCache.clearing")
-              : i18n.t("options.general.clearCache.dialog.trigger")}
+              ? i18n.t("options.translation.clearCache.clearing")
+              : i18n.t("options.translation.clearCache.dialog.trigger")}
           </AlertDialogTrigger>
         </div>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{i18n.t("options.general.clearCache.dialog.title")}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {i18n.t("options.translation.clearCache.dialog.title")}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              {i18n.t("options.general.clearCache.dialog.description")}
+              {i18n.t("options.translation.clearCache.dialog.description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>
-              {i18n.t("options.general.clearCache.dialog.cancel")}
+              {i18n.t("options.translation.clearCache.dialog.cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
@@ -64,8 +66,8 @@ export function ClearCacheConfig() {
               disabled={isClearing}
             >
               {isClearing
-                ? i18n.t("options.general.clearCache.clearing")
-                : i18n.t("options.general.clearCache.dialog.confirm")}
+                ? i18n.t("options.translation.clearCache.clearing")
+                : i18n.t("options.translation.clearCache.dialog.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

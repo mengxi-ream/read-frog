@@ -218,7 +218,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
               <li key={key}>{i18n.t(getFeatureLabelI18nKey(key))}</li>
             ))}
             {isLanguageDetectionProvider && (
-              <li>{i18n.t("options.general.languageDetection.title")}</li>
+              <li>{i18n.t("options.apiProviders.languageDetection.title")}</li>
             )}
             {assignedCustomActions.map((action) => (
               <li key={action.id}>{action.name}</li>

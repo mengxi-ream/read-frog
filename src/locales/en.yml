@@ -93,17 +93,16 @@ options:
   product:
     roadmap: Roadmap
     feedback: Feedback
-  setAPIKeyWarning:
-    please: Please set API Key on
-    page: page
   apiProviders:
     title: API Providers
-    pageDescription: Connect the AI services Read Frog calls, manage their keys and models, and pick which one powers each feature.
-    description: Configure API providers for translation and vocabulary insight. We have 20+ built-in providers and support any OpenAI-compatible API provider.
+    pageDescription: Connect the AI services Read Frog calls, then choose which one runs each feature.
+    description: Add the providers Read Frog can call. Over 20 are built in, and any OpenAI-compatible API works.
     configTitle: Provider Config
     addProvider: Add Provider
     builtInProvider: Built-in Provider
     sponsorCta: Get fast, cost-effective AI
+    setApiKeyWarning:
+      message: Please set your API key on the $1 page
     badges:
       featureCount: $1 features
       sponsor: Sponsor
@@ -151,7 +150,8 @@ options:
         apiKeyRequired: Please add API key first
         searchModels: Search models...
         noModelsFound: No models found
-      featureProviders: Feature Providers
+        label: Model
+        enterCustomModel: Enter the name of the custom model
       advancedOptions: Advanced Options
       providerSettingLabels:
         region: Region
@@ -221,15 +221,12 @@ options:
       success: Success
       failed: Failed
       slow: Slow (try adjusting thinking mode)
-  general:
     featureProviders:
       title: Feature Providers
       description: Choose which provider to use for each feature
-      customActions: Custom AI Actions
       features:
         translate: Page Translation
         selectionToolbar_translate: Selection Toolbar Translation
-        tts: Text to Speech
         inputTranslation: Input Translation
         videoSubtitles: Video Subtitles
       descriptions:
@@ -237,20 +234,6 @@ options:
         selectionToolbar_translate: Translates the text you select from the selection toolbar.
         inputTranslation: Translates what you type into an input box before you send it.
         videoSubtitles: Translates subtitles as they appear in a video player.
-    translationConfig:
-      model:
-        title: Model
-        enterCustomModel: Enter the name of the custom model
-    clearCache:
-      title: Clear Cache
-      description: Clear all translation cache in your browser
-      clearing: Clearing...
-      dialog:
-        title: Clear Cache
-        trigger: Clear Cache
-        confirm: Confirm
-        cancel: Cancel
-        description: This operation will clear all translation cache. This action cannot be undone.
     languageDetection:
       title: Language Detection
       description: Affects auto-translate language detection, skip-language detection, and Speaking voice selection accuracy.
@@ -264,6 +247,13 @@ options:
         noProviders: Configure an LLM provider first
         basicRecommend: Recommend enabling LLM
         llmEnabled: LLM detection enabled
+    aiContentAware:
+      title: AI Smart Context Translation
+      description: Give the AI context from the page or video so it translates more accurately
+      enable: Enable
+      enableDescription: The AI reads a summary of the page or video before translating, so wording fits the context. Applies to every translation feature running on an LLM provider. Adds latency on the first request and increases API costs.
+      llmProviderConfigured: LLM provider selected for $1
+      llmProviderNotConfigured: No LLM provider selected for $1
   patterns:
     duplicate: This pattern is already in the list
   preference:
@@ -519,6 +509,7 @@ options:
         title: Custom AI Actions
         pageDescription: Write your own prompts and run them on selected text from the selection toolbar.
         description: Add your own structured AI actions for selected text
+        configTitle: Action Config
         builtIn: Built-in
         add: Add AI Action
         edit: Edit AI Action
@@ -901,8 +892,6 @@ options:
       title: Hover or Long-Press Translation Shortcut
       description: Customize the hover modifier key or use long press to translate paragraphs
       enable: Enable
-    llmProviderConfigured: LLM provider selected for $1
-    llmProviderNotConfigured: No LLM provider selected for $1
     autoTranslateLanguages:
       title: Auto Translate Based on Language
       description: Automatically translate page content when specific languages are detected
@@ -923,11 +912,16 @@ options:
         basic: Basic
         llm: LLM
         description: Basic detection is fast and free. LLM detection is more accurate but adds latency and API costs.
-    aiContentAware:
-      title: AI Smart Context Translation
-      description: Give the AI context from the page or video so it translates more accurately
-      enable: Enable
-      enableDescription: The AI reads a summary of the page or video before translating, so wording fits the context. Applies to every translation feature running on an LLM provider. Adds latency on the first request and increases API costs.
+    clearCache:
+      title: Clear Cache
+      description: Clear all translation cache in your browser
+      clearing: Clearing...
+      dialog:
+        title: Clear Cache
+        trigger: Clear Cache
+        confirm: Confirm
+        cancel: Cancel
+        description: This operation will clear all translation cache. This action cannot be undone.
   siteRules:
     title: Site Rules
     pageDescription: Adjust how individual websites are translated with built-in and custom rules.

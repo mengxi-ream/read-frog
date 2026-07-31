@@ -42,7 +42,7 @@ export const FEATURE_PROVIDER_DEFS = {
   },
 } as const satisfies Record<FeatureKey, FeatureProviderDef>
 
-/** Maps FeatureKey (with dots) to i18n-safe key (with underscores) for `options.general.featureProviders.features.*` */
+/** Maps FeatureKey (with dots) to i18n-safe key (with underscores) for `options.apiProviders.featureProviders.features.*` */
 export const FEATURE_KEY_I18N_MAP = {
   translate: "translate",
   videoSubtitles: "videoSubtitles",
@@ -51,17 +51,17 @@ export const FEATURE_KEY_I18N_MAP = {
 } as const satisfies Record<FeatureKey, string>
 
 export type FeatureLabelI18nKey =
-  `options.general.featureProviders.features.${(typeof FEATURE_KEY_I18N_MAP)[FeatureKey]}`
+  `options.apiProviders.featureProviders.features.${(typeof FEATURE_KEY_I18N_MAP)[FeatureKey]}`
 
 export function getFeatureLabelI18nKey(featureKey: FeatureKey): FeatureLabelI18nKey {
-  return `options.general.featureProviders.features.${FEATURE_KEY_I18N_MAP[featureKey]}`
+  return `options.apiProviders.featureProviders.features.${FEATURE_KEY_I18N_MAP[featureKey]}`
 }
 
 export type FeatureDescriptionI18nKey =
-  `options.general.featureProviders.descriptions.${(typeof FEATURE_KEY_I18N_MAP)[FeatureKey]}`
+  `options.apiProviders.featureProviders.descriptions.${(typeof FEATURE_KEY_I18N_MAP)[FeatureKey]}`
 
 export function getFeatureDescriptionI18nKey(featureKey: FeatureKey): FeatureDescriptionI18nKey {
-  return `options.general.featureProviders.descriptions.${FEATURE_KEY_I18N_MAP[featureKey]}`
+  return `options.apiProviders.featureProviders.descriptions.${FEATURE_KEY_I18N_MAP[featureKey]}`
 }
 
 export function resolveProviderConfig(config: Config, featureKey: FeatureKey) {

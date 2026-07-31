@@ -64,7 +64,7 @@ function CustomActionProviderFields({
   return (
     <>
       <p className="text-sm font-medium text-muted-foreground">
-        {i18n.t("options.general.featureProviders.customActions")}
+        {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.title")}
       </p>
       {actions.map((action) => (
         <Field key={action.id}>

@@ -6,6 +6,9 @@ import { buildProviderConfigRoute, openOptionsPage } from "@/utils/navigation"
 
 const LINK_CLASS = "cursor-pointer text-blue-500 hover:underline"
 
+/** Stands in for the link while the sentence is translated, then marks where to split it. */
+const LINK_SLOT = "\u0000"
+
 /** Only providers that authenticate with a key of the user's own can be missing one. */
 function needsApiKeyWarning(
   providerConfig: ProviderConfig | null,
@@ -35,10 +38,15 @@ export function SetApiKeyWarning({ providerConfig }: { providerConfig: ProviderC
 
   const route = buildProviderConfigRoute(providerConfig.id)
   const label = i18n.t("options.apiProviders.title")
+  // One sentence per locale with the link's position marked, rather than a prefix and a suffix
+  // the link is sandwiched between — word order around it differs too much per language.
+  const [before, after] = i18n
+    .t("options.apiProviders.setApiKeyWarning.message", [LINK_SLOT])
+    .split(LINK_SLOT)
 
   return (
-    <div className="border-warning-border flex flex-wrap items-center gap-x-1 rounded-md border bg-warning px-2 text-xs">
-      {i18n.t("options.setAPIKeyWarning.please")}{" "}
+    <div className="border-warning-border rounded-md border bg-warning px-2 text-xs">
+      {before}
       {inRouterContext ? (
         <Link to={route} className={LINK_CLASS}>
           {label}
@@ -51,8 +59,8 @@ export function SetApiKeyWarning({ providerConfig }: { providerConfig: ProviderC
         >
           {label}
         </button>
-      )}{" "}
-      {i18n.t("options.setAPIKeyWarning.page")}
+      )}
+      {after}
     </div>
   )
 }

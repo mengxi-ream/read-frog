@@ -105,22 +105,22 @@ export const SEARCH_ITEMS: SearchItem[] = [
   {
     sectionId: "feature-providers",
     route: "/api-providers",
-    titleKey: "options.general.featureProviders.title",
-    descriptionKey: "options.general.featureProviders.description",
+    titleKey: "options.apiProviders.featureProviders.title",
+    descriptionKey: "options.apiProviders.featureProviders.description",
     pageKey: "options.apiProviders.title",
   },
   {
     sectionId: "language-detection",
     route: "/api-providers",
-    titleKey: "options.general.languageDetection.title",
-    descriptionKey: "options.general.languageDetection.description",
+    titleKey: "options.apiProviders.languageDetection.title",
+    descriptionKey: "options.apiProviders.languageDetection.description",
     pageKey: "options.apiProviders.title",
   },
   {
     sectionId: "ai-content-aware",
     route: "/api-providers",
-    titleKey: "options.translation.aiContentAware.title",
-    descriptionKey: "options.translation.aiContentAware.description",
+    titleKey: "options.apiProviders.aiContentAware.title",
+    descriptionKey: "options.apiProviders.aiContentAware.description",
     pageKey: "options.apiProviders.title",
   },
 
@@ -234,8 +234,8 @@ export const SEARCH_ITEMS: SearchItem[] = [
   {
     sectionId: "clear-cache",
     route: "/translation",
-    titleKey: "options.general.clearCache.title",
-    descriptionKey: "options.general.clearCache.description",
+    titleKey: "options.translation.clearCache.title",
+    descriptionKey: "options.translation.clearCache.description",
     pageKey: "options.translation.title",
   },
 

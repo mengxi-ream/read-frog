@@ -100,7 +100,10 @@ function CustomActionProviderItems() {
 
 export function FeatureProvidersConfig() {
   return (
-    <ConfigSection id="feature-providers" title={i18n.t("options.general.featureProviders.title")}>
+    <ConfigSection
+      id="feature-providers"
+      title={i18n.t("options.apiProviders.featureProviders.title")}
+    >
       {FEATURE_KEYS.map((featureKey) => (
         <FeatureProviderItem key={featureKey} featureKey={featureKey} />
       ))}

@@ -93,17 +93,16 @@ options:
   product:
     roadmap: Hoja de ruta
     feedback: Comentarios
-  setAPIKeyWarning:
-    please: Configura la clave API en
-    page: página
   apiProviders:
     title: Proveedores de API
-    pageDescription: Conecta los servicios de IA que usa Read Frog, gestiona sus claves y modelos, y elige cuál impulsa cada función.
-    description: Configura proveedores de API para traducción e información de vocabulario. Tenemos más de 20 proveedores integrados y admitimos cualquier proveedor de API compatible con OpenAI.
+    pageDescription: Conecta los servicios de IA que usa Read Frog y elige cuál se encarga de cada función.
+    description: Añade los proveedores que Read Frog puede llamar. Más de 20 vienen integrados y funciona cualquier API compatible con OpenAI.
     configTitle: Configuración de proveedores
     addProvider: Añadir proveedor
     builtInProvider: Proveedor integrado
     sponsorCta: Obtén IA rápida y rentable
+    setApiKeyWarning:
+      message: Configura tu clave de API en la página $1
     badges:
       featureCount: $1 funciones
       sponsor: Patrocinador
@@ -151,7 +150,8 @@ options:
         apiKeyRequired: Añade primero una clave API
         searchModels: Buscar modelos...
         noModelsFound: No se encontraron modelos
-      featureProviders: Proveedores de funciones
+        label: Modelo
+        enterCustomModel: Introduce el nombre del modelo personalizado
       advancedOptions: Opciones avanzadas
       providerSettingLabels:
         region: Región
@@ -221,15 +221,12 @@ options:
       success: Correcto
       failed: Falló
       slow: Lento (se recomienda ajustar el modo de razonamiento)
-  general:
     featureProviders:
       title: Proveedores de funciones
       description: Elige qué proveedor usar para cada función
-      customActions: Acciones AI personalizadas
       features:
         translate: Traducción de página
         selectionToolbar_translate: Traducción de la barra de selección
-        tts: Texto a voz
         inputTranslation: Traducción de entrada
         videoSubtitles: Subtítulos de video
       descriptions:
@@ -237,20 +234,6 @@ options:
         selectionToolbar_translate: Traduce el texto que seleccionas desde la barra de selección.
         inputTranslation: Traduce lo que escribes en un campo de texto antes de enviarlo.
         videoSubtitles: Traduce los subtítulos que aparecen en el reproductor de video.
-    translationConfig:
-      model:
-        title: Modelo
-        enterCustomModel: Introduce el nombre del modelo personalizado
-    clearCache:
-      title: Borrar caché
-      description: Borra toda la caché de traducción en tu navegador
-      clearing: Borrando...
-      dialog:
-        title: Borrar caché
-        trigger: Borrar caché
-        confirm: Confirmar
-        cancel: Cancelar
-        description: Esta operación borrará toda la caché de traducción. Esta acción no se puede deshacer.
     languageDetection:
       title: Detección de idioma
       description: Afecta la detección de idioma para traducción automática, la detección de idiomas omitidos y la precisión de selección de voz.
@@ -264,6 +247,13 @@ options:
         noProviders: Configura primero un proveedor LLM
         basicRecommend: Se recomienda activar LLM
         llmEnabled: Detección LLM activada
+    aiContentAware:
+      title: Traducción con contexto inteligente de IA
+      description: Da a la IA contexto de la página o el video para que traduzca con más precisión
+      enable: Activar
+      enableDescription: La IA lee un resumen de la página o el video antes de traducir, para que el vocabulario encaje con el contexto. Se aplica a todas las funciones de traducción que usan un proveedor LLM. Añade latencia en la primera solicitud y aumenta los costos de API.
+      llmProviderConfigured: Proveedor LLM seleccionado para $1
+      llmProviderNotConfigured: No se seleccionó ningún proveedor LLM para $1
   patterns:
     duplicate: Este patrón ya está en la lista
   preference:
@@ -519,6 +509,7 @@ options:
         title: Acciones AI personalizadas
         pageDescription: Escribe tus propios prompts y ejecútalos sobre el texto seleccionado desde la barra de selección.
         description: Añade tus propias acciones AI estructuradas para texto seleccionado
+        configTitle: Configuración de acciones
         builtIn: Integrada
         add: Añadir acción AI
         edit: Editar acción AI
@@ -901,8 +892,6 @@ options:
       title: Atajo de traducción al pasar el cursor o mantener pulsado
       description: Personaliza la tecla modificadora al pasar el cursor o usa pulsación larga para traducir párrafos
       enable: Activar
-    llmProviderConfigured: Proveedor LLM seleccionado para $1
-    llmProviderNotConfigured: No se seleccionó ningún proveedor LLM para $1
     autoTranslateLanguages:
       title: Traducción automática por idioma
       description: Traduce automáticamente el contenido de la página cuando se detectan idiomas específicos
@@ -923,11 +912,16 @@ options:
         basic: Básica
         llm: LLM
         description: La detección básica es rápida y gratis. La detección LLM es más precisa, pero añade latencia y costes de API.
-    aiContentAware:
-      title: Traducción con contexto inteligente de IA
-      description: Da a la IA contexto de la página o el video para que traduzca con más precisión
-      enable: Activar
-      enableDescription: La IA lee un resumen de la página o el video antes de traducir, para que el vocabulario encaje con el contexto. Se aplica a todas las funciones de traducción que usan un proveedor LLM. Añade latencia en la primera solicitud y aumenta los costos de API.
+    clearCache:
+      title: Borrar caché
+      description: Borra toda la caché de traducción en tu navegador
+      clearing: Borrando...
+      dialog:
+        title: Borrar caché
+        trigger: Borrar caché
+        confirm: Confirmar
+        cancel: Cancelar
+        description: Esta operación borrará toda la caché de traducción. Esta acción no se puede deshacer.
   siteRules:
     title: Reglas de sitio
     pageDescription: Ajusta cómo se traduce cada sitio web con reglas integradas y personalizadas.

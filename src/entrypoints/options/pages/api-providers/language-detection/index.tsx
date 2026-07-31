@@ -29,31 +29,31 @@ export function LanguageDetectionConfig() {
     if (!hasLLMProviders) {
       return {
         color: "bg-orange-400",
-        text: i18n.t("options.general.languageDetection.status.noProviders"),
+        text: i18n.t("options.apiProviders.languageDetection.status.noProviders"),
       }
     }
     if (!isLLMMode) {
       return {
         color: "bg-blue-400",
-        text: i18n.t("options.general.languageDetection.status.basicRecommend"),
+        text: i18n.t("options.apiProviders.languageDetection.status.basicRecommend"),
       }
     }
     return {
       color: "bg-green-500",
-      text: i18n.t("options.general.languageDetection.status.llmEnabled"),
+      text: i18n.t("options.apiProviders.languageDetection.status.llmEnabled"),
     }
   }, [hasLLMProviders, isLLMMode])
 
   return (
     <ConfigSection
       id="language-detection"
-      title={i18n.t("options.general.languageDetection.title")}
+      title={i18n.t("options.apiProviders.languageDetection.title")}
     >
       <ConfigItem
-        title={i18n.t("options.general.languageDetection.provider.label")}
+        title={i18n.t("options.apiProviders.languageDetection.provider.label")}
         description={
           <>
-            {i18n.t("options.general.languageDetection.description")}
+            {i18n.t("options.apiProviders.languageDetection.description")}
             <span className="mt-2 flex items-center gap-1.5">
               <span className={`size-2 rounded-full ${statusIndicator.color}`} />
               <span className="text-xs">{statusIndicator.text}</span>
@@ -82,13 +82,13 @@ export function LanguageDetectionConfig() {
             <div className="flex items-center gap-2">
               <RadioGroupItem value="basic" id="lang-detection-basic" />
               <Label htmlFor="lang-detection-basic">
-                {i18n.t("options.general.languageDetection.mode.basic")}
+                {i18n.t("options.apiProviders.languageDetection.mode.basic")}
               </Label>
             </div>
             <div className="flex items-center gap-2">
               <RadioGroupItem value="llm" id="lang-detection-llm" disabled={!hasLLMProviders} />
               <Label htmlFor="lang-detection-llm">
-                {i18n.t("options.general.languageDetection.mode.llm")}
+                {i18n.t("options.apiProviders.languageDetection.mode.llm")}
               </Label>
             </div>
           </RadioGroup>
@@ -98,7 +98,7 @@ export function LanguageDetectionConfig() {
               providers={enabledLLMProviders}
               value={languageDetection.providerId ?? ""}
               onChange={(providerId) => void setLanguageDetection({ providerId })}
-              placeholder={i18n.t("options.general.languageDetection.provider.placeholder")}
+              placeholder={i18n.t("options.apiProviders.languageDetection.provider.placeholder")}
               triggerSize="sm"
               selectContentProps={SELECT_CONTENT_PROPS}
             />

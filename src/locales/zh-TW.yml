@@ -93,17 +93,16 @@ options:
   product:
     roadmap: 產品路線圖
     feedback: 意見回饋
-  setAPIKeyWarning:
-    please: 請在
-    page: 頁面設定 API 金鑰
   apiProviders:
     title: API 提供者
-    pageDescription: 接入 Read Frog 呼叫的 AI 服務，管理各自的金鑰和模型，並為每項功能指定使用哪一個。
-    description: 設定用於翻譯和詞彙解析功能的 API 提供者。內建 20 多個提供者，並支援任何 OpenAI 相容 API 提供者。
+    pageDescription: 接入 Read Frog 呼叫的 AI 服務，並為每項功能指定使用哪一個。
+    description: 新增 Read Frog 可以呼叫的提供者。內建 20 多個，也支援任何 OpenAI 相容的 API。
     configTitle: 提供者設定
     addProvider: 新增提供者
     builtInProvider: 內建提供者
     sponsorCta: 取得高速高性價比 AI
+    setApiKeyWarning:
+      message: 請在 $1 頁面設定 API 金鑰
     badges:
       featureCount: $1 個功能
       sponsor: 贊助
@@ -151,7 +150,8 @@ options:
         apiKeyRequired: 請先新增 API 金鑰
         searchModels: 搜尋模型…
         noModelsFound: 找不到模型
-      featureProviders: 功能提供者
+        label: 模型
+        enterCustomModel: 輸入自訂模型名稱
       advancedOptions: 進階選項
       providerSettingLabels:
         region: 區域
@@ -221,15 +221,12 @@ options:
       success: 成功
       failed: 失敗
       slow: 緩慢（建議調整思考模式）
-  general:
     featureProviders:
       title: 功能提供者
       description: 為每個功能選擇使用的提供者
-      customActions: 自訂 AI 指令
       features:
         translate: 網頁翻譯
         selectionToolbar_translate: 選取文字翻譯
-        tts: 文字轉語音
         inputTranslation: 輸入翻譯
         videoSubtitles: 影片字幕
       descriptions:
@@ -237,20 +234,6 @@ options:
         selectionToolbar_translate: 透過劃詞工具列翻譯你選取的文字。
         inputTranslation: 在送出前翻譯你寫在輸入框裡的內容。
         videoSubtitles: 翻譯影片播放器中隨播放出現的字幕。
-    translationConfig:
-      model:
-        title: 模型
-        enterCustomModel: 輸入自訂模型名稱
-    clearCache:
-      title: 清除快取
-      description: 清理瀏覽器中的所有翻譯快取
-      clearing: 清除中…
-      dialog:
-        title: 清除快取
-        trigger: 清除快取
-        confirm: 確認
-        cancel: 取消
-        description: 此操作將清理所有翻譯快取。此操作無法復原。
     languageDetection:
       title: 語言偵測
       description: 影響自動翻譯語言偵測、跳過語言偵測和朗讀語音選擇的準確性。
@@ -264,6 +247,13 @@ options:
         noProviders: 請先設定 LLM 提供者
         basicRecommend: 建議啟用 LLM
         llmEnabled: LLM 偵測已啟用
+    aiContentAware:
+      title: AI 智慧上下文翻譯
+      description: 把網頁或影片的上下文提供給 AI，讓翻譯更準確
+      enable: 啟用
+      enableDescription: AI 翻譯前會先讀一份網頁或影片的摘要，讓用詞更貼合上下文。對每個使用 LLM 提供者的翻譯功能都生效。首次請求會有延遲，並增加 API 費用。
+      llmProviderConfigured: 已為 $1 選擇 LLM 提供者
+      llmProviderNotConfigured: 沒有為 $1 選擇 LLM 提供者
   patterns:
     duplicate: 該模式已在列表中
   preference:
@@ -519,6 +509,7 @@ options:
         title: 自訂 AI 指令
         pageDescription: 撰寫自己的提示詞，從劃詞工具列對選取的文字執行。
         description: 為選取文字新增自訂的結構化 AI 指令
+        configTitle: 指令設定
         builtIn: 內建
         add: 新增 AI 指令
         edit: 編輯 AI 指令
@@ -901,8 +892,6 @@ options:
       title: 滑鼠停留或長按翻譯快速鍵
       description: 自訂滑鼠停留翻譯的修飾鍵，或使用滑鼠長按翻譯段落
       enable: 啟用
-    llmProviderConfigured: 已為 $1 選擇 LLM 提供者
-    llmProviderNotConfigured: 沒有為 $1 選擇 LLM 提供者
     autoTranslateLanguages:
       title: 依語言自動翻譯
       description: 當偵測到特定語言時自動翻譯頁面內容
@@ -923,11 +912,16 @@ options:
         basic: 基礎
         llm: LLM
         description: 基礎偵測快速且免費。LLM 偵測更準確，但會增加延遲和 API 費用。
-    aiContentAware:
-      title: AI 智慧上下文翻譯
-      description: 把網頁或影片的上下文提供給 AI，讓翻譯更準確
-      enable: 啟用
-      enableDescription: AI 翻譯前會先讀一份網頁或影片的摘要，讓用詞更貼合上下文。對每個使用 LLM 提供者的翻譯功能都生效。首次請求會有延遲，並增加 API 費用。
+    clearCache:
+      title: 清除快取
+      description: 清理瀏覽器中的所有翻譯快取
+      clearing: 清除中…
+      dialog:
+        title: 清除快取
+        trigger: 清除快取
+        confirm: 確認
+        cancel: 取消
+        description: 此操作將清理所有翻譯快取。此操作無法復原。
   siteRules:
     title: 網站規則
     pageDescription: 用內建規則和自訂規則調整個別網站的翻譯方式。

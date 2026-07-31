@@ -93,17 +93,16 @@ options:
   product:
     roadmap: 로드맵
     feedback: 피드백
-  setAPIKeyWarning:
-    please: API Key를 설정해 주세요
-    page: 페이지에서
   apiProviders:
     title: API 제공업체
-    pageDescription: Read Frog가 호출하는 AI 서비스를 연결해 키와 모델을 관리하고, 각 기능에 사용할 서비스를 선택하세요.
-    description: 번역 및 어휘 분석 기능을 위한 API 제공업체를 구성합니다. 20개 이상의 내장 제공업체와 모든 OpenAI 호환 API를 지원합니다.
+    pageDescription: Read Frog가 호출하는 AI 서비스를 연결하고, 각 기능에 사용할 서비스를 선택하세요.
+    description: Read Frog가 호출할 수 있는 제공업체를 추가합니다. 20개 이상이 내장되어 있고, OpenAI 호환 API도 모두 사용할 수 있습니다.
     configTitle: 제공업체 구성
     addProvider: 제공업체 추가
     builtInProvider: 내장 제공업체
     sponsorCta: 빠르고 가성비 좋은 AI 받기
+    setApiKeyWarning:
+      message: API 키는 $1 페이지에서 설정하세요
     badges:
       featureCount: $1 개 기능
       sponsor: 스폰서
@@ -150,7 +149,8 @@ options:
         apiKeyRequired: 먼저 API 키를 추가하세요
         searchModels: 모델 검색...
         noModelsFound: 모델을 찾을 수 없습니다
-      featureProviders: 기능 제공업체
+        label: 모델
+        enterCustomModel: 사용자 정의 모델 이름 입력
       advancedOptions: 고급 옵션
       providerSettingLabels:
         region: 리전
@@ -220,15 +220,12 @@ options:
       success: 성공
       failed: 실패
       slow: 느림(사고 모드 조정 권장)
-  general:
     featureProviders:
       title: 기능 제공업체
       description: 각 기능에 사용할 제공업체를 선택
-      customActions: 사용자 정의 AI 액션
       features:
         translate: 페이지 번역
         selectionToolbar_translate: 선택 툴바 번역
-        tts: 텍스트 음성 변환
         inputTranslation: 입력 번역
         videoSubtitles: 비디오 자막
       descriptions:
@@ -236,20 +233,6 @@ options:
         selectionToolbar_translate: 선택 도구 모음에서 선택한 텍스트를 번역합니다.
         inputTranslation: 입력창에 쓴 내용을 보내기 전에 번역합니다.
         videoSubtitles: 동영상 플레이어에 표시되는 자막을 번역합니다.
-    translationConfig:
-      model:
-        title: 모델
-        enterCustomModel: 사용자 정의 모델 이름 입력
-    clearCache:
-      title: 캐시 지우기
-      description: 브라우저의 모든 번역 캐시를 지웁니다
-      clearing: 지우는 중...
-      dialog:
-        title: 캐시 지우기
-        trigger: 캐시 지우기
-        confirm: 확인
-        cancel: 취소
-        description: 이 작업은 모든 번역 캐시를 지웁니다. 이 작업은 되돌릴 수 없습니다.
     languageDetection:
       title: 언어 감지
       description: 자동 번역 언어 감지, 건너뛰기 언어 감지 및 읽기 음성 선택 정확도에 영향을 줍니다.
@@ -257,12 +240,19 @@ options:
         basic: 기본
         llm: LLM
       provider:
-        label: 감지 제공자
-        placeholder: 제공자 선택
+        label: 감지 제공업체
+        placeholder: 제공업체 선택
       status:
-        noProviders: LLM 제공자를 먼저 구성하세요
+        noProviders: LLM 제공업체를 먼저 구성하세요
         basicRecommend: LLM 활성화 권장
         llmEnabled: LLM 감지 활성화됨
+    aiContentAware:
+      title: AI 스마트 컨텍스트 번역
+      description: 페이지나 영상의 맥락을 AI에 전달해 번역 정확도를 높입니다
+      enable: 사용
+      enableDescription: AI가 번역 전에 페이지나 영상 요약을 읽어 맥락에 맞는 표현을 고릅니다. LLM 제공업체로 동작하는 모든 번역 기능에 적용됩니다. 첫 요청에 지연이 생기고 API 비용이 늘어납니다.
+      llmProviderConfigured: $1에 LLM 제공업체 선택됨
+      llmProviderNotConfigured: $1에 LLM 제공업체 미선택
   patterns:
     duplicate: 이 패턴은 이미 목록에 있습니다
   preference:
@@ -518,6 +508,7 @@ options:
         title: 커스텀 AI 액션
         pageDescription: 직접 만든 프롬프트를 선택 도구 모음에서 선택한 텍스트에 실행하세요.
         description: 선택한 텍스트에 대한 구조화된 AI 작업을 직접 추가하세요
+        configTitle: 액션 구성
         builtIn: 기본 제공
         add: AI 액션 추가
         edit: AI 액션 편집
@@ -785,8 +776,6 @@ options:
       title: 호버 또는 길게 누르기 번역 단축키
       description: 호버 번역 수정 키를 사용자 지정하거나 마우스 길게 누르기로 단락을 번역합니다
       enable: 활성화
-    llmProviderConfigured: $1에 LLM 제공업체 선택됨
-    llmProviderNotConfigured: $1에 LLM 제공업체 미선택
     autoTranslateLanguages:
       title: 언어에 기반한 자동 번역
       description: 특정 언어가 감지되면 페이지 콘텐츠를 자동으로 번역합니다
@@ -807,11 +796,16 @@ options:
         basic: 기본
         llm: LLM
         description: 기본 감지는 빠르고 무료입니다. LLM 감지는 더 정확하지만 지연 시간과 API 비용이 증가합니다.
-    aiContentAware:
-      title: AI 스마트 컨텍스트 번역
-      description: 페이지나 영상의 맥락을 AI에 전달해 번역 정확도를 높입니다
-      enable: 사용
-      enableDescription: AI가 번역 전에 페이지나 영상 요약을 읽어 맥락에 맞는 표현을 고릅니다. LLM 제공업체로 동작하는 모든 번역 기능에 적용됩니다. 첫 요청에 지연이 생기고 API 비용이 늘어납니다.
+    clearCache:
+      title: 캐시 지우기
+      description: 브라우저의 모든 번역 캐시를 지웁니다
+      clearing: 지우는 중...
+      dialog:
+        title: 캐시 지우기
+        trigger: 캐시 지우기
+        confirm: 확인
+        cancel: 취소
+        description: 이 작업은 모든 번역 캐시를 지웁니다. 이 작업은 되돌릴 수 없습니다.
   siteRules:
     title: 사이트 규칙
     pageDescription: 기본 제공 규칙과 사용자 규칙으로 사이트별 번역 방식을 조정하세요.

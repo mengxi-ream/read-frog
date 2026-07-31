@@ -53,7 +53,7 @@ export const TranslateModelSelector = withForm({
             {(field) => (
               <field.InputFieldAutoSave
                 formForSubmit={form}
-                label={i18n.t("options.general.translationConfig.model.title")}
+                label={i18n.t("options.apiProviders.form.models.label")}
                 labelExtra={
                   <div className="flex items-center gap-2">
                     {recommendationTrigger}
@@ -78,7 +78,7 @@ export const TranslateModelSelector = withForm({
             {(field) => (
               <field.SelectFieldAutoSave
                 formForSubmit={form}
-                label={i18n.t("options.general.translationConfig.model.title")}
+                label={i18n.t("options.apiProviders.form.models.label")}
                 labelExtra={recommendationTrigger}
               >
                 <SelectTrigger className="w-full">
@@ -140,7 +140,7 @@ export const TranslateModelSelector = withForm({
                   htmlFor="isCustomModel-translate"
                   className="cursor-pointer text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                  {i18n.t("options.general.translationConfig.model.enterCustomModel")}
+                  {i18n.t("options.apiProviders.form.models.enterCustomModel")}
                 </label>
               </div>
             )}
