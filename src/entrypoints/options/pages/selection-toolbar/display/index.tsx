@@ -1,6 +1,6 @@
 import { useAtom } from "jotai"
 import { useEffect, useState } from "react"
-import { Slider } from "@/components/ui/base-ui/slider"
+import { SliderComfortable } from "@/components/ui/base-ui/slider"
 import { usePatternList } from "@/hooks/use-pattern-list"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
@@ -82,21 +82,18 @@ function OpacitySlider({
   }, [value])
 
   return (
-    <div className="flex w-56 items-center gap-3">
-      <Slider
+    <div className="w-56">
+      <SliderComfortable
+        variant="scrubber"
+        aria-label={i18n.t("options.selectionToolbar.display.opacity.title")}
         min={MIN_SELECTION_OVERLAY_OPACITY}
         max={MAX_SELECTION_OVERLAY_OPACITY}
         step={1}
         value={draft}
-        onValueChange={(next) => {
-          setDraft(next as number)
-        }}
-        onValueCommitted={(next) => {
-          onValueCommitted(next as number)
-        }}
-        className="flex-1"
+        onChange={setDraft}
+        onCommit={onValueCommitted}
+        formatValue={(v) => `${v}%`}
       />
-      <span className="w-10 shrink-0 text-right text-sm tabular-nums">{draft}%</span>
     </div>
   )
 }

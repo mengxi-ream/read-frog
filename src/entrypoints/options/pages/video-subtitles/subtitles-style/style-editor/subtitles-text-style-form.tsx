@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/base-ui/select"
-import { Slider } from "@/components/ui/base-ui/slider"
+import { SliderComfortable } from "@/components/ui/base-ui/slider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
   MAX_FONT_SCALE,
@@ -97,17 +97,18 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
           <FieldLabel className={FIELD_LABEL_CLASS_NAME}>
             {i18n.t("options.videoSubtitles.style.fontScale")}
           </FieldLabel>
-          <div className="flex min-w-0 items-center gap-2">
-            <Slider
+          <div className="min-w-0">
+            <SliderComfortable
+              variant="scrubber"
+              aria-label={i18n.t("options.videoSubtitles.style.fontScale")}
               min={MIN_FONT_SCALE}
               max={MAX_FONT_SCALE}
               step={10}
               value={draftFontScale}
-              onValueChange={(value) => setDraftFontScale(value as number)}
-              onValueCommitted={(value) => handleChange({ fontScale: value as number })}
-              className="flex-1"
+              onChange={setDraftFontScale}
+              onCommit={(value) => handleChange({ fontScale: value })}
+              formatValue={(v) => `${v}%`}
             />
-            <span className="w-10 text-right text-sm">{draftFontScale}%</span>
           </div>
         </div>
       </Field>
@@ -117,17 +118,17 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
           <FieldLabel className={FIELD_LABEL_CLASS_NAME}>
             {i18n.t("options.videoSubtitles.style.fontWeight")}
           </FieldLabel>
-          <div className="flex min-w-0 items-center gap-2">
-            <Slider
+          <div className="min-w-0">
+            <SliderComfortable
+              variant="scrubber"
+              aria-label={i18n.t("options.videoSubtitles.style.fontWeight")}
               min={MIN_FONT_WEIGHT}
               max={MAX_FONT_WEIGHT}
               step={100}
               value={draftFontWeight}
-              onValueChange={(value) => setDraftFontWeight(value as number)}
-              onValueCommitted={(value) => handleChange({ fontWeight: value as number })}
-              className="flex-1"
+              onChange={setDraftFontWeight}
+              onCommit={(value) => handleChange({ fontWeight: value })}
             />
-            <span className="w-10 text-right text-sm">{draftFontWeight}</span>
           </div>
         </div>
       </Field>

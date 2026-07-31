@@ -8,7 +8,7 @@ import type {
 import { IconLanguage, IconRefresh, IconSettings, IconSubtitles } from "@tabler/icons-react"
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
-import { Activity, use } from "react"
+import { Activity, use, useEffect, useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import {
   Select,
@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/base-ui/select"
-import { Slider } from "@/components/ui/base-ui/slider"
+import { SliderComfortable } from "@/components/ui/base-ui/slider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
   DEFAULT_BACKGROUND_OPACITY,
@@ -43,8 +43,9 @@ import { subtitlesStore } from "../../../atoms"
 const SELECT_TRIGGER_CLASS =
   "min-w-[5.5rem] text-[13px] text-popover-foreground [&_[data-slot=select-value]]:text-popover-foreground [&_[data-slot=select-icon]]:text-muted-foreground"
 const SELECT_CONTENT_CLASS = "[&_[role=option]]:text-[13px]"
-const SLIDER_CLASS =
-  "[&_[role=slider]]:border-0 [&_[role=slider]]:shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
+/* The panel sits on `bg-muted/50` rows, so the scrubber needs the popover surface
+   under it to keep the fill and the label's occluder reading as one control. */
+const SLIDER_CLASS = "bg-popover"
 
 const FONT_FAMILY_OPTIONS = Object.keys(SUBTITLE_FONT_FAMILIES) as SubtitlesFontFamily[]
 
@@ -93,32 +94,44 @@ function SettingRow({ label, children }: { label: string; children: ReactNode })
 function SliderRow({
   label,
   value,
-  display,
   min,
   max,
   step,
+  formatValue,
   onChange,
 }: {
   label: string
   value: number
-  display: string
   min: number
   max: number
   step: number
+  formatValue?: (v: number) => string
   onChange: (v: number) => void
 }) {
+  /* Dragging is continuous, the config write is not. Writing per pointermove queues one
+     storage round-trip per frame, and each completed write re-broadcasts through
+     `storageAdapter.watch` — so stale drag positions echo back into the atom after
+     release and visibly yank the thumb backwards. The thumb follows a local draft and
+     only the released value is stored, matching the options-page sliders. */
+  const [draft, setDraft] = useState(value)
+
+  useEffect(() => {
+    // eslint-disable-next-line react/set-state-in-effect
+    setDraft(value)
+  }, [value])
+
   return (
     <div className="px-3 py-2.5">
-      <div className="mb-3.5 flex items-center justify-between">
-        <span className="text-[13px] text-popover-foreground">{label}</span>
-        <span className="text-[12px] text-muted-foreground">{display}</span>
-      </div>
-      <Slider
+      <SliderComfortable
+        variant="scrubber"
+        label={label}
         min={min}
         max={max}
         step={step}
-        value={value}
-        onValueChange={(v) => onChange(v as number)}
+        value={draft}
+        onChange={setDraft}
+        onCommit={onChange}
+        formatValue={formatValue}
         className={SLIDER_CLASS}
       />
     </div>
@@ -145,7 +158,7 @@ function TextStyleGroup({
       <SliderRow
         label={i18n.t("options.videoSubtitles.style.fontScale")}
         value={textStyle.fontScale}
-        display={`${textStyle.fontScale}%`}
+        formatValue={(v) => `${v}%`}
         min={MIN_FONT_SCALE}
         max={MAX_FONT_SCALE}
         step={10}
@@ -184,7 +197,6 @@ function TextStyleGroup({
       <SliderRow
         label={i18n.t("options.videoSubtitles.style.fontWeight")}
         value={textStyle.fontWeight}
-        display={String(textStyle.fontWeight)}
         min={MIN_FONT_WEIGHT}
         max={MAX_FONT_WEIGHT}
         step={100}
@@ -281,7 +293,7 @@ export function StyleView() {
         <SliderRow
           label={i18n.t("options.videoSubtitles.style.backgroundOpacity")}
           value={container.backgroundOpacity}
-          display={`${container.backgroundOpacity}%`}
+          formatValue={(v) => `${v}%`}
           min={MIN_BACKGROUND_OPACITY}
           max={MAX_BACKGROUND_OPACITY}
           step={5}
