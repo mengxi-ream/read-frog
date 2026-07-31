@@ -788,6 +788,9 @@ options:
       enable:
         title: 啟用
         description: 滑鼠停留或長按段落，只翻譯這一段。
+      forceRetranslation:
+        title: 一律重新翻譯
+        description: 滑鼠停留翻譯會跳過快取：即使該文字已有快取也會重新翻譯，並覆蓋快取結果。
     translationStyle:
       title: 翻譯顯示樣式
       description: 設定自訂樣式以區分翻譯結果與原文

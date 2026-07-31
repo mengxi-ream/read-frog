@@ -788,6 +788,9 @@ options:
       enable:
         title: Enable
         description: Hover or long-press a paragraph to translate just that one.
+      forceRetranslation:
+        title: Always request a fresh translation
+        description: Hover translation skips the cache — it re-translates even if the text is already cached, and overwrites the cached result.
     translationStyle:
       title: Translation display style
       description: Set any style you want to distinguish translation results from original text

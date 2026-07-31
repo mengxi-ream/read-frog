@@ -672,6 +672,9 @@ options:
       enable:
         title: 有効化
         description: 段落にホバーまたは長押しすると、その段落だけ翻訳します。
+      forceRetranslation:
+        title: 常に新しく翻訳
+        description: ホバー翻訳はキャッシュをスキップします。すでにキャッシュがあるテキストでも翻訳し直し、その結果でキャッシュを上書きします。
     translationStyle:
       title: 翻訳表示スタイル
       description: 翻訳結果と原文を区別するために好みのスタイルを設定

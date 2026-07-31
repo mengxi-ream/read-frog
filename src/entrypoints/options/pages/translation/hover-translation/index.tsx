@@ -34,6 +34,19 @@ export function HoverTranslationSection() {
           }}
         />
       </ConfigItem>
+      <ConfigItem
+        title={i18n.t("options.translation.hoverTranslation.forceRetranslation.title")}
+        description={i18n.t("options.translation.hoverTranslation.forceRetranslation.description")}
+      >
+        <Switch
+          checked={translateConfig.node.forceRetranslation}
+          onCheckedChange={(checked) => {
+            void setTranslateConfig({
+              node: { ...translateConfig.node, forceRetranslation: checked },
+            })
+          }}
+        />
+      </ConfigItem>
     </ConfigSection>
   )
 }
