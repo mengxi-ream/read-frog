@@ -726,6 +726,7 @@ options:
       useCustomStyleDescription: Поддерживает любой CSS, включая шрифты, анимации и стили для конкретных языков
       presetStyle: Предустановленный стиль
       cssEditor: CSS-редактор
+      cssEditorDescription: Напишите собственный CSS и посмотрите, как выглядит переведённый текст.
       preview: Предпросмотр
       stylePreviewLanguage: Язык
       stylePreviewDirection: Направление

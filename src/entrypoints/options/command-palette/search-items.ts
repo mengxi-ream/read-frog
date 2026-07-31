@@ -187,10 +187,18 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.translation.title",
   },
   {
-    sectionId: "custom-translation-style",
+    sectionId: "translation-style",
     route: "/translation",
     titleKey: "options.translation.translationStyle.title",
     descriptionKey: "options.translation.translationStyle.description",
+    pageKey: "options.translation.title",
+  },
+  {
+    // Its own page, drilled into from the Translation Display Style section.
+    sectionId: "custom-css",
+    route: "/translation/custom-css",
+    titleKey: "options.translation.translationStyle.cssEditor",
+    descriptionKey: "options.translation.translationStyle.cssEditorDescription",
     pageKey: "options.translation.title",
   },
   {

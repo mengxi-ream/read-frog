@@ -726,6 +726,7 @@ options:
       useCustomStyleDescription: 모든 CSS 지원, 글꼴, 애니메이션, 언어별 스타일 등
       presetStyle: 프리셋 스타일
       cssEditor: CSS 편집기
+      cssEditorDescription: 직접 작성한 CSS로 번역 텍스트가 어떻게 보이는지 미리 봅니다.
       preview: 미리보기
       stylePreviewLanguage: 언어
       stylePreviewDirection: 방향

@@ -842,6 +842,7 @@ options:
       useCustomStyleDescription: 支援任意 CSS，包括修改字型、動畫、多語言差異化樣式
       presetStyle: 預設樣式
       cssEditor: CSS 編輯器
+      cssEditorDescription: 撰寫自己的 CSS，並預覽翻譯文字的顯示效果。
       preview: 預覽
       stylePreviewLanguage: 語言
       stylePreviewDirection: 方向

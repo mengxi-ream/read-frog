@@ -3,7 +3,6 @@ import { PageLayout } from "../../components/page-layout"
 import { AutoTranslateLanguages } from "./auto-translate-languages"
 import { AutoTranslateWebsitePatterns } from "./auto-translate-website-patterns"
 import { ClearCacheConfig } from "./clear-cache-config"
-import { CustomTranslationStyle } from "./custom-translation-style"
 import { HoverTranslationSection } from "./hover-translation"
 import { NeverAutoTranslateWebsitePatterns } from "./never-auto-translate-website-patterns"
 import { PersonalizedPrompts } from "./personalized-prompt"
@@ -13,6 +12,7 @@ import { RequestBatch } from "./request-batch"
 import { RequestRate } from "./request-rate"
 import { SkipLanguages } from "./skip-languages"
 import { SmallParagraphFilter } from "./small-paragraph-filter"
+import { TranslationStyleSection } from "./translation-style"
 
 export function TranslationPage() {
   return (
@@ -23,9 +23,9 @@ export function TranslationPage() {
     >
       <PreferenceSection />
       <HoverTranslationSection />
+      <TranslationStyleSection />
       {/* Everything below still predates sections and keeps the card list it was written for. */}
       <div className="*:border-b [&>*:last-child]:border-b-0">
-        <CustomTranslationStyle />
         <PersonalizedPrompts />
         <AutoTranslateWebsitePatterns />
         <NeverAutoTranslateWebsitePatterns />

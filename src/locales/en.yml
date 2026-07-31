@@ -842,6 +842,7 @@ options:
       useCustomStyleDescription: Supports any CSS, including fonts, animations, and language-specific styles
       presetStyle: Preset Style
       cssEditor: CSS Editor
+      cssEditorDescription: Write your own CSS and preview how translated text looks.
       preview: Preview
       stylePreviewLanguage: Language
       stylePreviewDirection: Direction

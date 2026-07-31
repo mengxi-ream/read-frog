@@ -8,6 +8,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { HoverTranslationSection } from "../hover-translation"
 import { PreferenceSection } from "../preference"
+import { TranslationStyleSection } from "../translation-style"
 
 const { translateAtom, setTranslateMock, testState } = vi.hoisted(() => ({
   translateAtom: {},
@@ -24,6 +25,16 @@ vi.mock("jotai", () => ({
     }
     return [testState.translate, setTranslateMock]
   },
+  useAtomValue: (atom: object) => {
+    if (atom !== translateAtom || !testState.translate) {
+      throw new Error("Unexpected atom")
+    }
+    return testState.translate
+  },
+}))
+
+vi.mock("@/utils/host/translate/ui/decorate-translation", () => ({
+  decorateTranslationNode: vi.fn<() => void>(),
 }))
 
 vi.mock("@/utils/atoms/config", () => ({
@@ -72,6 +83,26 @@ describe("translation page sections", () => {
       "href",
       "/shortcuts?section=node-translation-hotkey",
     )
+  })
+
+  it("shows the preset and its preview while the style is not custom", () => {
+    testState.translate!.translationNodeStyle.isCustom = false
+
+    const { container } = renderInRouter(<TranslationStyleSection />)
+
+    expect(screen.getByRole("combobox")).toBeInTheDocument()
+    expect(container.querySelector("#style-preview")).toBeInTheDocument()
+    expect(screen.queryByRole("link")).not.toBeInTheDocument()
+  })
+
+  it("trades the preset and preview for a way into the CSS editor once the style is custom", () => {
+    testState.translate!.translationNodeStyle.isCustom = true
+
+    const { container } = renderInRouter(<TranslationStyleSection />)
+
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
+    expect(container.querySelector("#style-preview")).not.toBeInTheDocument()
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/translation/custom-css")
   })
 
   it("toggles hover translation without disturbing the hotkey it listens for", () => {

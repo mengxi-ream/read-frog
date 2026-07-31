@@ -726,6 +726,7 @@ options:
       useCustomStyleDescription: 任意の CSS に対応、フォント、アニメーション、言語別スタイルなど
       presetStyle: プリセットスタイル
       cssEditor: CSSエディター
+      cssEditorDescription: 独自の CSS を書いて、翻訳テキストの見え方をプレビューします。
       preview: プレビュー
       stylePreviewLanguage: 言語
       stylePreviewDirection: 方向

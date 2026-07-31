@@ -41,6 +41,11 @@ const InputTranslationPage = lazy(() =>
 const TextToSpeechPage = lazy(() =>
   import("./pages/text-to-speech").then((module) => ({ default: module.TextToSpeechPage })),
 )
+const CustomCssPage = lazy(() =>
+  import("./pages/translation/translation-style/custom-css").then((module) => ({
+    default: module.CustomCssPage,
+  })),
+)
 const ConfigBackupPage = lazy(() =>
   import("./pages/preference/config/config-backup").then((module) => ({
     default: module.ConfigBackupPage,
@@ -62,6 +67,7 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/input-translation": InputTranslationPage,
   "/tts": TextToSpeechPage,
   "/preference/config-backup": ConfigBackupPage,
+  "/translation/custom-css": CustomCssPage,
 }
 
 function RouteLoadingFallback() {

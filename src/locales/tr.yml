@@ -726,6 +726,7 @@ options:
       useCustomStyleDescription: Yazı tipleri, animasyonlar ve dile özgü stiller dahil herhangi bir CSS'yi destekler
       presetStyle: Hazır Stil
       cssEditor: CSS Editörü
+      cssEditorDescription: Kendi CSS'inizi yazın ve çevrilen metnin nasıl göründüğünü önizleyin.
       preview: Önizleme
       stylePreviewLanguage: Dil
       stylePreviewDirection: Yön

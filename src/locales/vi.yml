@@ -726,6 +726,7 @@ options:
       useCustomStyleDescription: Hỗ trợ bất kỳ CSS nào, bao gồm phông chữ, hoạt ảnh và kiểu dành riêng cho ngôn ngữ
       presetStyle: Kiểu có sẵn
       cssEditor: Trình chỉnh sửa CSS
+      cssEditorDescription: Viết CSS của riêng bạn và xem trước văn bản dịch trông thế nào.
       preview: Xem trước
       stylePreviewLanguage: Ngôn ngữ
       stylePreviewDirection: Hướng
