@@ -7,6 +7,7 @@ import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { HoverTranslationSection } from "../hover-translation"
+import { PersonalizedPromptsSection } from "../personalized-prompts"
 import { PreferenceSection } from "../preference"
 import { TranslationStyleSection } from "../translation-style"
 
@@ -103,6 +104,12 @@ describe("translation page sections", () => {
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
     expect(container.querySelector("#style-preview")).not.toBeInTheDocument()
     expect(screen.getByRole("link")).toHaveAttribute("href", "/translation/custom-css")
+  })
+
+  it("sends the prompts row to the page that holds the prompt list", () => {
+    renderInRouter(<PersonalizedPromptsSection />)
+
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/translation/prompts")
   })
 
   it("toggles hover translation without disturbing the hotkey it listens for", () => {

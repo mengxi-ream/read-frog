@@ -805,6 +805,7 @@ options:
     personalizedPrompts:
       title: 個人化提示詞
       description: 自訂不同類型的提示詞，可以在翻譯時自行調整提示詞類型。提示詞表示以使用者身分傳送給 LLM 的文字。
+      managePrompts: 管理提示詞
       communityPrompts: 取得或分享社群提示詞
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/820
       addPrompt: 新增提示詞

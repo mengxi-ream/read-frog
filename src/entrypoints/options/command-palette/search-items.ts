@@ -202,8 +202,9 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.translation.title",
   },
   {
+    // Its own page, drilled into from the Translation page's Personalized Prompts section.
     sectionId: "personalized-prompts",
-    route: "/translation",
+    route: "/translation/prompts",
     titleKey: "options.translation.personalizedPrompts.title",
     descriptionKey: "options.translation.personalizedPrompts.description",
     pageKey: "options.translation.title",

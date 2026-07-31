@@ -805,6 +805,7 @@ options:
     personalizedPrompts:
       title: Prompts personalizados
       description: Personalizar distintos tipos de Prompts te permite ajustar tú mismo el tipo de Prompt durante la traducción. Un Prompt representa el texto que el usuario envía al LLM.
+      managePrompts: Gestionar prompts
       communityPrompts: Obtener o compartir prompts de la comunidad
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: Añadir Prompt

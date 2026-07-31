@@ -689,6 +689,7 @@ options:
     personalizedPrompts:
       title: Prompt cá nhân hóa
       description: Tùy chỉnh các loại Prompt khác nhau cho phép bạn tự điều chỉnh loại Prompt trong quá trình dịch. Prompt là văn bản mà người dùng gửi cho LLM.
+      managePrompts: Quản lý prompt
       communityPrompts: Nhận hoặc chia sẻ prompt từ cộng đồng
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: Thêm Prompt

@@ -689,6 +689,7 @@ options:
     personalizedPrompts:
       title: 個人化プロンプト
       description: 異なるタイプのプロンプトをカスタマイズすることで、翻訳時にプロンプトタイプを自ら調整できます。プロンプトとは、ユーザーがLLMに送信するテキストを指します。
+      managePrompts: プロンプトを管理
       communityPrompts: コミュニティからプロンプトを取得・共有
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: プロンプトを追加

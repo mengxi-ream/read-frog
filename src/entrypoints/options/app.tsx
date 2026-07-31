@@ -46,6 +46,11 @@ const CustomCssPage = lazy(() =>
     default: module.CustomCssPage,
   })),
 )
+const PersonalizedPromptsPage = lazy(() =>
+  import("./pages/translation/personalized-prompts/prompts").then((module) => ({
+    default: module.PersonalizedPromptsPage,
+  })),
+)
 const ConfigBackupPage = lazy(() =>
   import("./pages/preference/config/config-backup").then((module) => ({
     default: module.ConfigBackupPage,
@@ -68,6 +73,7 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/tts": TextToSpeechPage,
   "/preference/config-backup": ConfigBackupPage,
   "/translation/custom-css": CustomCssPage,
+  "/translation/prompts": PersonalizedPromptsPage,
 }
 
 function RouteLoadingFallback() {

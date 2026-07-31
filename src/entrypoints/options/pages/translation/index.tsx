@@ -5,7 +5,7 @@ import { AutoTranslateWebsitePatterns } from "./auto-translate-website-patterns"
 import { ClearCacheConfig } from "./clear-cache-config"
 import { HoverTranslationSection } from "./hover-translation"
 import { NeverAutoTranslateWebsitePatterns } from "./never-auto-translate-website-patterns"
-import { PersonalizedPrompts } from "./personalized-prompt"
+import { PersonalizedPromptsSection } from "./personalized-prompts"
 import { PreferenceSection } from "./preference"
 import { PreloadConfig } from "./preload-config"
 import { RequestBatch } from "./request-batch"
@@ -24,9 +24,9 @@ export function TranslationPage() {
       <PreferenceSection />
       <HoverTranslationSection />
       <TranslationStyleSection />
+      <PersonalizedPromptsSection />
       {/* Everything below still predates sections and keeps the card list it was written for. */}
       <div className="*:border-b [&>*:last-child]:border-b-0">
-        <PersonalizedPrompts />
         <AutoTranslateWebsitePatterns />
         <NeverAutoTranslateWebsitePatterns />
         <AutoTranslateLanguages />

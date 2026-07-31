@@ -689,6 +689,7 @@ options:
     personalizedPrompts:
       title: 개인화된 프롬프트
       description: 다양한 유형의 프롬프트를 사용자 정의하여, 번역 시 프롬프트 유형을 직접 조정할 수 있습니다. 프롬프트는 사용자가 LLM에게 보내는 텍스트를 나타내며.
+      managePrompts: 프롬프트 관리
       communityPrompts: 커뮤니티에서 프롬프트 가져오기 또는 공유
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: 프롬프트 추가

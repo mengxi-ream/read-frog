@@ -689,6 +689,7 @@ options:
     personalizedPrompts:
       title: Kişiselleştirilmiş Promptlar
       description: Farklı türde Promptları özelleştirmek, çeviri sırasında Prompt türünü kendiniz ayarlamanıza olanak tanır. Prompt, kullanıcının LLM'ye gönderdiği metni temsil eder.
+      managePrompts: Promptları yönet
       communityPrompts: Topluluktan prompt al veya paylaş
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: Prompt Ekle
