@@ -382,3 +382,59 @@ describe("site rule node selectors", () => {
     host.remove()
   })
 })
+
+describe("document root labeling guard", () => {
+  it("never labels documentElement as a paragraph even with inline-level children beside body", () => {
+    // Unstyled custom elements default to display:inline, so a reader-mode
+    // root (or any script-injected element) mounted beside <body> would
+    // otherwise make <html> itself a paragraph — collapsing the whole
+    // document into one observed translation unit (#1991 follow-up).
+    document.body.innerHTML = `<div><p>Body paragraph text</p></div>`
+    const readerRoot = document.createElement("sr-read")
+    readerRoot.innerHTML = `<sr-rd-content><p id="reader-p">Reader paragraph text</p></sr-rd-content>`
+    document.documentElement.append(readerRoot)
+
+    try {
+      walkAndLabelElement(document.documentElement, "root-guard", DEFAULT_CONFIG)
+
+      expect(document.documentElement).not.toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+      expect(document.documentElement.getAttribute(WALKED_ATTRIBUTE)).toBe("root-guard")
+      // The injected subtree still labels normally and stays translatable.
+      expect(document.getElementById("reader-p")).toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    } finally {
+      readerRoot.remove()
+      document.body.innerHTML = ""
+      for (const attr of [
+        WALKED_ATTRIBUTE,
+        PARAGRAPH_ATTRIBUTE,
+        BLOCK_ATTRIBUTE,
+        INLINE_ATTRIBUTE,
+      ]) {
+        document.documentElement.removeAttribute(attr)
+      }
+    }
+  })
+
+  it("never labels documentElement as a paragraph for stray text nodes under html", () => {
+    document.body.innerHTML = `<div><p>Body paragraph text</p></div>`
+    const strayText = document.createTextNode("stray text beside body")
+    document.documentElement.append(strayText)
+
+    try {
+      walkAndLabelElement(document.documentElement, "root-guard-text", DEFAULT_CONFIG)
+
+      expect(document.documentElement).not.toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    } finally {
+      strayText.remove()
+      document.body.innerHTML = ""
+      for (const attr of [
+        WALKED_ATTRIBUTE,
+        PARAGRAPH_ATTRIBUTE,
+        BLOCK_ATTRIBUTE,
+        INLINE_ATTRIBUTE,
+      ]) {
+        document.documentElement.removeAttribute(attr)
+      }
+    }
+  })
+})

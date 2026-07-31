@@ -265,6 +265,42 @@ describe("pageTranslationManager mutation re-walk", () => {
     mockSendMessage.mockResolvedValue(undefined)
   })
 
+  it("observes pre-existing reader content mounted beside the body", async () => {
+    const readerRoot = document.createElement("sr-read")
+    readerRoot.innerHTML = `
+      <sr-rd-content>
+        <p id="reader-paragraph">Reader mode content</p>
+      </sr-rd-content>
+    `
+    document.documentElement.append(readerRoot)
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+
+      const observer = intersectionObservers[0]
+      const readerParagraph = document.getElementById("reader-paragraph") as HTMLElement
+
+      expect(observer!.observe).toHaveBeenCalledWith(readerParagraph)
+
+      await observer!.triggerIntersect(readerParagraph)
+      await flushDomUpdates()
+
+      expect(mockTranslateWalkedElement).toHaveBeenCalledWith(
+        readerParagraph,
+        "walk-id",
+        DEFAULT_CONFIG,
+        false,
+        expect.anything(),
+        expect.anything(),
+      )
+    } finally {
+      if (manager.isActive) manager.stop()
+      readerRoot.remove()
+    }
+  })
+
   it("observes and translates hidden accordion content after it becomes visible", async () => {
     document.body.innerHTML = `
       <section id="accordion" hidden>
