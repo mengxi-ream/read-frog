@@ -2,6 +2,7 @@ import type { Hotkey } from "@tanstack/hotkeys"
 import type { ReactNode } from "react"
 import type { SelectionSession, SelectionToolbarTranslateRequestSlice } from "../atoms"
 import type { SelectionToolbarInlineError } from "../inline-error"
+import type { SelectionPopoverActions } from "@/components/ui/selection-popover"
 import type { TranslationActionContext } from "@/types/analytics"
 import type { BackgroundTextStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
 import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
@@ -280,7 +281,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
   const setConfig = useSetAtom(writeConfigAtom)
   const abortControllerRef = useRef<AbortController | null>(null)
   const pendingOpenRequestRef = useRef<SelectionTranslatePendingOpenRequest | null>(null)
-  const reopenFrameRef = useRef<number | null>(null)
+  const popoverActionsRef = useRef<SelectionPopoverActions | null>(null)
   const lastTranslationRunKeyRef = useRef<string | null>(null)
   const runIdRef = useRef(0)
   const { resolveContextMenuOpenRequest, resolveShortcutOpenRequest } =
@@ -350,12 +351,20 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     [cancelSaveSuggestion],
   )
 
+  // Anchor application is owned by SelectionPopover.Root (via requestOpen) so
+  // a pinned popover reused in place never moves.
   const commitOpenRequest = useCallback((request: SelectionTranslatePendingOpenRequest) => {
     pendingOpenRequestRef.current = request
-    if (request.anchor) {
-      setAnchor(request.anchor)
-    }
   }, [])
+
+  const applyPendingSession = useCallback(() => {
+    const pendingRequest = pendingOpenRequestRef.current
+
+    setActiveSession(pendingRequest?.session ?? selectionSession)
+    setSourceSurface(pendingRequest?.surface ?? ANALYTICS_SURFACE.SELECTION_TOOLBAR)
+    setIsSelectionToolbarVisible(false)
+    pendingOpenRequestRef.current = null
+  }, [selectionSession, setIsSelectionToolbarVisible])
 
   const handleProviderChange = useCallback(
     (providerId: string) => {
@@ -597,17 +606,8 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
       resetTranslationState()
 
       if (nextOpen) {
-        const pendingRequest = pendingOpenRequestRef.current
-        const nextSession = pendingRequest?.session ?? selectionSession
-
-        setActiveSession(nextSession)
-        setSourceSurface(pendingRequest?.surface ?? ANALYTICS_SURFACE.SELECTION_TOOLBAR)
         setPopoverSessionKey((prev) => prev + 1)
-        if (pendingRequest?.anchor) {
-          setAnchor(pendingRequest.anchor)
-        }
-        setIsSelectionToolbarVisible(false)
-        pendingOpenRequestRef.current = null
+        applyPendingSession()
       } else {
         resetPopoverSession({
           clearAnchor: pendingOpenRequestRef.current === null,
@@ -619,14 +619,32 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
       setIsOpen(nextOpen)
     },
     [
+      applyPendingSession,
       cancelCurrentTranslation,
       resetPopoverSession,
       resetSaveSuggestionSession,
       resetTranslationState,
-      selectionSession,
-      setIsSelectionToolbarVisible,
     ],
   )
+
+  // Pinned popovers are reused in place for a new selection: the window keeps
+  // its position, size, and pin state while the translation restreams. All
+  // state writes stay in one handler so the translation run-key effect
+  // observes exactly one key change.
+  const handleReuseRequest = useCallback(() => {
+    cancelCurrentTranslation()
+    resetTranslationState()
+    resetSaveSuggestionSession()
+    applyPendingSession()
+    // Forces a rerun even when the same selection session is retriggered, and
+    // rotates the save-suggestion session key (which has no session id).
+    setRerunNonce((prev) => prev + 1)
+  }, [
+    applyPendingSession,
+    cancelCurrentTranslation,
+    resetSaveSuggestionSession,
+    resetTranslationState,
+  ])
 
   const prepareToolbarOpen = useCallback(() => {
     if (!selectionSession) {
@@ -678,25 +696,10 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
         return
       }
 
-      if (reopenFrameRef.current !== null) {
-        cancelAnimationFrame(reopenFrameRef.current)
-        reopenFrameRef.current = null
-      }
-
-      if (isOpen) {
-        handleOpenChange(false)
-        reopenFrameRef.current = requestAnimationFrame(() => {
-          reopenFrameRef.current = null
-          commitOpenRequest(request)
-          handleOpenChange(true)
-        })
-        return
-      }
-
       commitOpenRequest(request)
-      handleOpenChange(true)
+      popoverActionsRef.current?.requestOpen(request.anchor ?? null)
     },
-    [commitOpenRequest, handleOpenChange, isOpen],
+    [commitOpenRequest],
   )
 
   const openFromContextMenu = useCallback(() => {
@@ -741,14 +744,6 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     })
   }, [openFromContextMenu])
 
-  useEffect(() => {
-    return () => {
-      if (reopenFrameRef.current !== null) {
-        cancelAnimationFrame(reopenFrameRef.current)
-      }
-    }
-  }, [])
-
   const contextValue = useMemo<SelectionTranslationContextValue>(
     () => ({
       prepareToolbarOpen,
@@ -763,6 +758,8 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
         onOpenChange={handleOpenChange}
         anchor={anchor}
         onAnchorChange={setAnchor}
+        actionsRef={popoverActionsRef}
+        onReuseRequest={handleReuseRequest}
         disablePointerDismissal={isSaveToNotebaseDialogOpen}
       >
         {children}
@@ -780,7 +777,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
             </div>
           </SelectionPopover.Header>
 
-          <SelectionPopover.Body>
+          <SelectionPopover.Body key={`${popoverSessionKey}:${activeSession?.id ?? 0}`}>
             <TranslationContent
               selectionContent={selectionText}
               translatedText={translatedText}
