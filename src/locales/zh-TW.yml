@@ -108,7 +108,7 @@ options:
       description: 透過 contact@readfrog.app 直接聯絡團隊
     wechat:
       title: 微信
-      description: 掃描 QR code 加開發者微信
+      description: 掃描 QR code 進入微信討論群
       qrCodeAlt: 微信 QR code
   apiProviders:
     title: API 提供者
