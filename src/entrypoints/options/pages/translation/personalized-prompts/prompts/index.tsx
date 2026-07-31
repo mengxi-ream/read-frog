@@ -31,17 +31,20 @@ export function PersonalizedPromptsPage() {
           </span>
         }
       >
-        <div className="flex justify-start">
-          <a
-            href={i18n.t("options.translation.personalizedPrompts.communityPromptsUrl")}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="text-xs text-link hover:opacity-90"
-          >
-            {i18n.t("options.translation.personalizedPrompts.communityPrompts")}
-          </a>
-        </div>
-        <PromptManager promptAtoms={promptAtoms} insertCells={insertCells} />
+        <PromptManager
+          promptAtoms={promptAtoms}
+          insertCells={insertCells}
+          toolbarStart={
+            <a
+              href={i18n.t("options.translation.personalizedPrompts.communityPromptsUrl")}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-sm text-link hover:opacity-90"
+            >
+              {i18n.t("options.translation.personalizedPrompts.communityPrompts")}
+            </a>
+          }
+        />
       </ConfigDetailSection>
     </PageLayout>
   )
