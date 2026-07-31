@@ -90,15 +90,10 @@ describe("dEFAULT_CONFIG", () => {
     )
   })
 
-  it("defaults fresh hover translation off for configs saved before the option existed", async () => {
+  it("defaults fresh hover translation off", async () => {
     const { DEFAULT_CONFIG } = await import("../config")
-    const { configSchema } = await import("@/types/config/config")
-    const legacyConfig = structuredClone(DEFAULT_CONFIG)
-    Reflect.deleteProperty(legacyConfig.translate.node, "forceRetranslation")
 
-    const parsed = configSchema.parse(legacyConfig)
-
-    expect(parsed.translate.node.forceRetranslation).toBe(false)
+    expect(DEFAULT_CONFIG.translate.node.forceRetranslation).toBe(false)
   })
 
   it("rebuilds schema-valid built-in action state for persistence", async () => {
