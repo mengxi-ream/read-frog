@@ -81,6 +81,8 @@ errorRecovery:
     confirm: Đặt lại
     cancel: Hủy
 options:
+  batchSavings:
+    savedCost: Tiết kiệm khoảng $1% chi phí API
   commandPalette:
     placeholder: Tìm kiếm cài đặt...
     noResults: Không tìm thấy cài đặt
@@ -422,25 +424,25 @@ options:
       title: Dịch đầu vào
       pageDescription: Dịch nội dung bạn gõ trong ô nhập trước khi gửi đi.
   inputTranslation:
-    provider:
-      title: Nhà cung cấp dịch
-      description: Chọn nhà cung cấp dịch để sử dụng cho dịch đầu vào
-      label: Nhà cung cấp
-    toggle:
-      title: Bật dịch ba lần nhấn phím cách
-      description: Nhấn phím cách nhanh 3 lần trong bất kỳ trường nhập nào để dịch nội dung
+    trigger:
+      title: Kích hoạt
+      enable:
+        title: Bật
+        description: Nhấn phím cách nhanh ba lần trong bất kỳ ô nhập nào để dịch nội dung bạn vừa gõ.
+      threshold:
+        title: Ngưỡng kích hoạt
+        description: Khoảng cách tối đa giữa các lần nhấn, tính bằng mili giây. Tăng lên nếu không kích hoạt được, giảm xuống nếu bị kích hoạt khi đang gõ.
+        error: Nhập giá trị từ $1 đến $2
     languages:
       title: Ngôn ngữ dịch
-      description: Chọn ngôn ngữ nguồn và đích cho dịch đầu vào
+      pair:
+        title: Cặp ngôn ngữ
+        description: Văn bản bạn gõ được đọc theo ngôn ngữ nào và dịch sang ngôn ngữ nào. Cả hai bên đều có thể theo ngôn ngữ nguồn và đích bạn dùng khi dịch trang.
       sourceCode: Ngôn ngữ nguồn trang
-      targetCode: Ngôn ngữ đích trang
-      enableCycle: Đổi hướng mỗi lần
-    threshold:
-      title: Ngưỡng kích hoạt
-      description: Khoảng thời gian giữa các lần nhấn phím cách
-      label: Ngưỡng (ms)
-      hint: Thời gian tính bằng mili giây giữa các lần nhấn phím cách liên tiếp (100-1000ms)
-      error: Giá trị phải từ $1 đến $2
+      targetCode: Ngôn ngữ đích của bản dịch
+      cycle:
+        title: Đổi hướng mỗi lần
+        description: Mỗi lần kích hoạt sẽ hoán đổi hai ngôn ngữ, nên lần kích hoạt sau sẽ đưa văn bản về ngôn ngữ bạn đã gõ.
   floatingButtonAndToolbar:
     title: Nút nổi & Thanh công cụ
     floatingButtonDemoImageAlt: Demo nút nổi
@@ -835,42 +837,57 @@ options:
   tts:
     title: Chuyển văn bản thành giọng nói
     pageDescription: Đọc to đoạn văn bản bạn chọn bằng giọng tự nhiên.
-    description: Tùy chỉnh nút Đọc với cài đặt giọng nói Edge TTS.
     voice:
-      label: Giọng nói
-      fallback: Dự phòng
+      title: Giọng nói
       selectPlaceholder: Chọn giọng nói
       noVoicesFound: Không tìm thấy giọng nói
-      previewSample: Xin chào từ Read Frog! Đây là cách tôi sẽ phát âm khi đọc to.
-    languageVoice:
-      label: Giọng nói theo ngôn ngữ
-      reset: Đặt lại
-      description: Chọn một ngôn ngữ và gán giọng nói sẽ được dùng khi TTS phát hiện ngôn ngữ đó.
-    rate:
-      label: Tốc độ (%)
-      hint: Chấp nhận giá trị số nguyên từ -100 đến 100
-    pitch:
-      label: Cao độ (Hz)
-      hint: Chấp nhận giá trị số nguyên từ -100 đến 100
-    volume:
-      label: Âm lượng (%)
-      hint: Chấp nhận giá trị số nguyên từ -100 đến 100
-    betaDisabled: Bật Trải nghiệm Beta để tùy chỉnh cài đặt chuyển văn bản thành giọng nói.
+      language:
+        title: Giọng nói theo ngôn ngữ
+        description: Chọn một ngôn ngữ, rồi chọn giọng đọc ngôn ngữ đó. Đặt lại sẽ trả về giọng mà Read Frog chọn cho ngôn ngữ này.
+        reset: Đặt lại
+        previewSample: Xin chào từ Read Frog! Đây là cách tôi sẽ phát âm khi đọc to.
+      fallback:
+        title: Giọng dự phòng
+        description: Ngôn ngữ nào bạn chưa gán giọng riêng sẽ được đọc bằng giọng này.
+    speech:
+      title: Đọc to
+      rate:
+        title: Tốc độ
+        description: Giọng đọc nhanh hay chậm hơn nhịp vốn có của nó bao nhiêu, từ -100 đến 100 phần trăm.
+      pitch:
+        title: Cao độ
+        description: Giọng nói cao hay thấp hơn cao độ vốn có của nó bao nhiêu, từ -100 đến 100 Hz.
+      volume:
+        title: Âm lượng
+        description: Giọng đọc to hay nhỏ hơn mức vốn có của nó bao nhiêu, từ -100 đến 100 phần trăm.
+      error: Hãy nhập một số nguyên từ $1 đến $2
   videoSubtitles:
     title: Phụ đề video
     pageDescription: Dịch phụ đề khi đang xem, với nhà cung cấp, kiểu hiển thị và thiết lập yêu cầu riêng.
-    description: Hiện chỉ hỗ trợ phụ đề video YouTube
-    provider:
-      title: Nhà cung cấp dịch thuật
-      description: Chọn nhà cung cấp dịch thuật để sử dụng cho phụ đề video
-      label: Nhà cung cấp
-    enable: Bật phụ đề video
-    enableDescription: Khi bật, nút dịch sẽ xuất hiện trong thanh điều khiển YouTube. Nhấp để bắt đầu dịch phụ đề.
-    autoStart: Tự động bật phụ đề
-    autoStartDescription: Tự động bật dịch phụ đề khi video được tải xong.
+    preference:
+      title: Cơ bản
+      enable:
+        title: Bật phụ đề video
+        description: Thêm nút dịch vào thanh điều khiển của trình phát. Hiện chỉ hỗ trợ YouTube.
+      autoStart:
+        title: Mở video là dịch
+        description: Bắt đầu dịch ngay khi video tải xong, không cần bấm nút.
+      aiSegmentation:
+        title: AI phân đoạn thông minh
+        description: AI cắt lại phụ đề thành những dòng đọc như câu hoàn chỉnh. AI cũng quyết định thời điểm hiện, nên dòng có thể lệch. Cần nhà cung cấp dịch LLM.
+    aiQuota:
+      title: Hạn mức phụ đề AI
+      description: Mức sử dụng hạn mức chuyển lời phụ đề AI trong tháng của bạn
+      loginRequired: Đăng nhập để xem hạn mức phụ đề AI của bạn
+      logIn: Đăng nhập
+      betaRequired: Phụ đề AI đang ở giai đoạn beta và chưa được bật cho tài khoản của bạn
+      betaApply: Đăng ký sử dụng
+      loadError: Không thể tải hạn mức. Vui lòng thử lại sau.
+      summary: Đã dùng $1 trong $2 phút, còn lại $3
     style:
       title: Kiểu phụ đề
-      description: Tùy chỉnh giao diện phụ đề
+      description: Chế độ hiển thị, vị trí, phông chữ, màu sắc và nền, chỉnh ngay trên bản xem trước
+      customizeStyle: Tùy chỉnh kiểu
       preview: Xem trước
       displayMode:
         title: Chế độ hiển thị
@@ -884,46 +901,16 @@ options:
       generalSettings: Cài đặt chung
       mainSubtitle: Phụ đề chính
       translationSubtitle: Phụ đề dịch
-      containerStyle: Nền
       fontFamily: Phông chữ
       fontScale: Cỡ chữ
       color: Màu sắc
       fontWeight: Độ đậm chữ
       backgroundOpacity: Độ trong suốt nền
       reset: Đặt lại về mặc định
-    aiSegmentation:
-      title: AI Phân đoạn thông minh
-      enable: Bật AI Phân đoạn thông minh
-      enableDescription: Sử dụng AI để phân đoạn phụ đề thông minh nhằm cải thiện khả năng đọc. Dòng thời gian do AI xác định, có thể đôi khi gây lệch thời gian. Yêu cầu nhà cung cấp dịch LLM.
-      clearCache: Xóa bộ nhớ đệm
-      clearing: Đang xóa...
-      clearCacheDialog:
-        title: Xóa bộ nhớ đệm AI phân đoạn
-        description: Tất cả kết quả AI phân đoạn đã lưu trong bộ nhớ đệm sẽ bị xóa. Lần tới khi phát video có bật AI phân đoạn, phụ đề sẽ được xử lý lại.
-        cancel: Hủy
-        confirm: Xác nhận
-    requestQueueConfig:
-      title: Tốc độ dịch phụ đề
-      firstOnDescription: Điều chỉnh tốc độ xử lý yêu cầu dịch phụ đề bằng thuật toán
-      lastOnDescription: ""
-      capacity:
-        title: Số yêu cầu tối đa đồng thời
-        description: Số lượng yêu cầu dịch phụ đề tối đa có thể xử lý đồng thời trong khoảng thời gian ngắn
-      rate:
-        title: Số yêu cầu trung bình/giây
-        description: Số yêu cầu dịch phụ đề trung bình mỗi giây, có thể cấu hình số yêu cầu tối đa để tạm thời gửi yêu cầu vượt quá. Hỗ trợ số thập phân — ví dụ 0.25 nghĩa là một yêu cầu mỗi 4 giây, hữu ích cho các API có giới hạn thấp như gói miễn phí của Gemini
-    batchQueueConfig:
-      title: Dịch phụ đề theo lô
-      description: Cấu hình giới hạn ký tự và số đoạn văn tối đa cho dịch theo lô (chỉ có hiệu lực với dịch LLM)
-      maxCharactersPerBatch:
-        title: Số ký tự tối đa
-        description: Số ký tự tối đa được phép cho mỗi yêu cầu lô để kiểm soát khối lượng nội dung của mỗi bản dịch
-      maxItemsPerBatch:
-        title: Số đoạn văn tối đa
-        description: Số đoạn văn tối đa cho mỗi bản dịch lô để kiểm soát khối lượng nội dung của mỗi bản dịch
     customPrompts:
       title: Lời nhắc phụ đề tùy chỉnh
-      description: Tùy chỉnh mẫu lời nhắc cho dịch phụ đề (tách biệt với lời nhắc dịch trang web)
+      description: Mẫu lời nhắc chỉ dùng cho dịch phụ đề, tách biệt với lời nhắc dịch trang web
+      managePrompts: Quản lý prompt
       editPrompt:
         promptCellInput:
           input: Văn bản phụ đề cần dịch
@@ -931,15 +918,33 @@ options:
           webTitle: Tiêu đề trang web
           webDescription: Mô tả trang web từ siêu dữ liệu trang
           videoSummary: Tóm tắt video (yêu cầu Ngữ cảnh thông minh AI)
-    aiQuota:
-      title: Hạn mức phụ đề AI
-      description: Mức sử dụng hạn mức chuyển lời phụ đề AI trong tháng của bạn
-      loginRequired: Đăng nhập để xem hạn mức phụ đề AI của bạn
-      logIn: Đăng nhập
-      betaRequired: Phụ đề AI đang ở giai đoạn beta và chưa được bật cho tài khoản của bạn
-      betaApply: Đăng ký sử dụng
-      loadError: Không thể tải hạn mức. Vui lòng thử lại sau.
-      summary: Đã dùng $1 trong $2 phút, còn lại $3
+    subtitlesQueue:
+      title: Hàng đợi phụ đề
+      requestQueueConfig:
+        title: Tốc độ dịch
+        capacity:
+          description: "Số yêu cầu tối đa cùng lúc: bao nhiêu yêu cầu được gửi đi một lượt"
+        rate:
+          description: "Số yêu cầu mỗi giây: tốc độ đều sau đợt gửi dồn. Dùng được số thập phân, 0.25 là 4 giây một yêu cầu"
+      batchQueueConfig:
+        title: Dịch theo lô
+        description: Cấu hình giới hạn ký tự và số dòng phụ đề tối đa cho dịch theo lô (chỉ có hiệu lực với dịch LLM)
+        maxCharactersPerBatch:
+          description: "Số ký tự tối đa: mỗi yêu cầu tới AI mang bao nhiêu văn bản"
+        maxItemsPerBatch:
+          description: "Số dòng tối đa: bao nhiêu dòng phụ đề gộp chung một yêu cầu. Nhà cung cấp không dùng AI bỏ qua cả hai"
+    cache:
+      title: Bộ nhớ đệm
+      clearCache:
+        title: Xóa bộ nhớ đệm AI phân đoạn
+        description: Kết quả phân đoạn đã lưu, video đã xem không phải cắt lại
+        clearing: Đang xóa...
+        dialog:
+          title: Xóa bộ nhớ đệm AI phân đoạn
+          trigger: Xóa bộ nhớ đệm
+          confirm: Xác nhận
+          cancel: Hủy
+          description: Tất cả kết quả AI phân đoạn đã lưu trong bộ nhớ đệm sẽ bị xóa. Lần tới khi phát video có bật AI phân đoạn, phụ đề sẽ được xử lý lại.
   whatsNew:
     title: Có gì mới
   rateUs:

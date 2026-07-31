@@ -81,6 +81,8 @@ errorRecovery:
     confirm: Sıfırla
     cancel: İptal
 options:
+  batchSavings:
+    savedCost: API maliyetlerinde yaklaşık %$1 tasarruf
   commandPalette:
     placeholder: Ayarları ara...
     noResults: Ayar bulunamadı
@@ -422,25 +424,25 @@ options:
       title: Giriş Çevirisi
       pageDescription: Giriş kutularına yazdıklarınızı göndermeden önce çevirin.
   inputTranslation:
-    provider:
-      title: Çeviri Sağlayıcısı
-      description: Giriş çevirisi için kullanılacak çeviri sağlayıcısını seçin
-      label: Sağlayıcı
-    toggle:
-      title: Üçlü Boşluk Çevirisini Etkinleştir
-      description: Herhangi bir giriş alanında boşluk tuşuna hızlıca 3 kez basarak içeriği çevirin
+    trigger:
+      title: Tetikleme
+      enable:
+        title: Etkinleştir
+        description: Herhangi bir giriş alanında boşluk tuşuna hızlıca üç kez basarak yazdıklarınızı çevirin.
+      threshold:
+        title: Tetikleme eşiği
+        description: Basışlar arasında izin verilen süre, milisaniye cinsinden. Çeviri tetiklenmiyorsa artırın, yazarken kendiliğinden tetikleniyorsa azaltın.
+        error: $1 ile $2 arasında bir değer girin
     languages:
-      title: Çeviri Dilleri
-      description: Giriş çevirisi için kaynak ve hedef dilleri seçin
-      sourceCode: Sayfa Kaynak Dili
-      targetCode: Sayfa Hedef Dili
-      enableCycle: Her seferinde yönü değiştir
-    threshold:
-      title: Tetikleme Eşiği
-      description: Boşluk tuşuna basışlar arasındaki zaman aralığı
-      label: Eşik (ms)
-      hint: Ardışık boşluk tuşuna basışlar arasındaki milisaniye cinsinden süre (100-1000ms)
-      error: Değer $1 ile $2 arasında olmalıdır
+      title: Çeviri dilleri
+      pair:
+        title: Dil çifti
+        description: Yazdığınız metnin hangi dil olarak okunacağı ve hangi dile çevrileceği. Her iki taraf da sayfaları çevirirken kullandığınız kaynak ve hedef dilleri izleyebilir.
+      sourceCode: Sayfa kaynak dili
+      targetCode: Çeviri hedef dili
+      cycle:
+        title: Her seferinde yönü değiştir
+        description: Her tetikleme iki dili yer değiştirir; tekrar tetiklediğinizde metin yazdığınız dile geri döner.
   floatingButtonAndToolbar:
     title: Yüzen Buton ve Araç Çubuğu
     floatingButtonDemoImageAlt: Yüzen Buton Demosu
@@ -835,95 +837,80 @@ options:
   tts:
     title: Metinden Konuşmaya
     pageDescription: Seçtiğiniz metni doğal bir sesle okutun.
-    description: Konuş butonunu Edge TTS ses ayarlarıyla özelleştirin.
     voice:
-      label: Ses
-      fallback: Yedek
+      title: Ses
       selectPlaceholder: Bir ses seçin
       noVoicesFound: Ses bulunamadı
-      previewSample: Read Frog'dan merhaba! Yüksek sesle okurken böyle ses çıkaracağım.
-    languageVoice:
-      label: Dil Sesi
-      reset: Sıfırla
-      description: Bir dil seçin ve TTS bu dili algıladığında kullanılacak sesi atayın.
-    rate:
-      label: Hız (%)
-      hint: -100 ile 100 arasında tam sayı değerleri kabul eder
-    pitch:
-      label: Perde (Hz)
-      hint: -100 ile 100 arasında tam sayı değerleri kabul eder
-    volume:
-      label: Ses Düzeyi (%)
-      hint: -100 ile 100 arasında tam sayı değerleri kabul eder
-    betaDisabled: Metinden konuşmaya ayarlarını özelleştirmek için Beta Deneyimini etkinleştirin.
+      language:
+        title: Dil sesi
+        description: Bir dil seçin, ardından o dili okuyacak sesi belirleyin. Sıfırlamak, Read Frog'un o dil için seçtiği sesi geri getirir.
+        reset: Sıfırla
+        previewSample: Read Frog'dan merhaba! Yüksek sesle okurken böyle ses çıkaracağım.
+      fallback:
+        title: Yedek ses
+        description: Kendine ait bir ses atamadığınız diller bu sesle okunur.
+    speech:
+      title: Okuma
+      rate:
+        title: Hız
+        description: Sesin kendi hızına göre ne kadar hızlı ya da yavaş okuduğu, -100 ile 100 yüzde arasında.
+      pitch:
+        title: Perde
+        description: Sesin kendi perdesine göre ne kadar tiz ya da pes konuştuğu, -100 ile 100 hertz arasında.
+      volume:
+        title: Ses düzeyi
+        description: Sesin kendi düzeyine göre ne kadar yüksek ya da alçak okuduğu, -100 ile 100 yüzde arasında.
+      error: $1 ile $2 arasında bir tam sayı girin
   videoSubtitles:
     title: Video Altyazıları
     pageDescription: İzlerken altyazıları çevirin; sağlayıcı, stil ve istek ayarları ayrı tutulur.
-    description: Şu anda yalnızca YouTube video altyazılarını desteklemektedir
-    provider:
-      title: Çeviri Sağlayıcısı
-      description: Video altyazı çevirisi için kullanılacak çeviri sağlayıcısını seçin
-      label: Sağlayıcı
-    enable: Video Altyazılarını Etkinleştir
-    enableDescription: Etkinleştirildiğinde, YouTube oynatıcı kontrollerinde bir çeviri düğmesi görünecektir. Altyazıları çevirmeye başlamak için tıklayın.
-    autoStart: Altyazıyı Otomatik Etkinleştir
-    autoStartDescription: Video yüklendiğinde altyazı çevirisini otomatik olarak etkinleştirir.
+    preference:
+      title: Temel ayarlar
+      enable:
+        title: Video altyazılarını aç
+        description: Oynatıcı kontrollerine bir çeviri düğmesi ekler. Şimdilik yalnızca YouTube destekleniyor.
+      autoStart:
+        title: Video açılınca çevir
+        description: Video yüklenir yüklenmez, düğmeye basmadan altyazıları çevirmeye başlar.
+      aiSegmentation:
+        title: AI akıllı bölümlendirme
+        description: Yapay zekâ altyazıları cümle gibi okunan satırlara yeniden böler. Zamanlamayı da kendisi belirlediği için satırlar kayabilir. LLM çeviri sağlayıcısı gerekir.
+    aiQuota:
+      title: Yapay Zeka Altyazı Kotası
+      description: Yapay zeka altyazı deşifre kotanızın aylık kullanımı
+      loginRequired: Yapay zeka altyazı kotanızı görmek için giriş yapın
+      logIn: Giriş yap
+      betaRequired: Yapay zeka altyazıları beta aşamasında ve hesabınız için henüz etkin değil
+      betaApply: Erişim başvurusu yap
+      loadError: Kotanız yüklenemedi. Lütfen daha sonra tekrar deneyin.
+      summary: $2 dakikanın $1 dakikası kullanıldı, $3 kaldı
     style:
-      title: Altyazı Stili
-      description: Altyazı görünümünü özelleştirin
+      title: Altyazı stili
+      description: Görüntüleme modu, konum, yazı tipleri, renkler ve arka plan — canlı önizlemeye bakarak ayarlanır
+      customizeStyle: Stili özelleştir
       preview: Önizleme
       displayMode:
-        title: Görüntüleme Modu
-        bilingual: İki Dilli
-        originalOnly: Sadece Orijinal
-        translationOnly: Sadece Çeviri
+        title: Görüntüleme modu
+        bilingual: İki dilli
+        originalOnly: Sadece orijinal
+        translationOnly: Sadece çeviri
       translationPosition:
-        title: Çeviri Konumu
+        title: Çeviri konumu
         above: Üstte
         below: Altta
-      generalSettings: Genel Ayarlar
-      mainSubtitle: Ana Altyazı
-      translationSubtitle: Çeviri Altyazısı
-      containerStyle: Arka Plan
-      fontFamily: Yazı Tipi
-      fontScale: Yazı Boyutu
+      generalSettings: Genel
+      mainSubtitle: Ana altyazı
+      translationSubtitle: Çeviri altyazısı
+      fontFamily: Yazı tipi
+      fontScale: Yazı boyutu
       color: Renk
-      fontWeight: Yazı Kalınlığı
-      backgroundOpacity: Arka Plan Şeffaflığı
-      reset: Varsayılana Sıfırla
-    aiSegmentation:
-      title: AI Akıllı Bölümlendirme
-      enable: AI Akıllı Bölümlendirmeyi Etkinleştir
-      enableDescription: Daha iyi okunabilirlik için altyazıları akıllıca bölümlemek üzere AI kullanın. Zaman çizelgesi AI tarafından belirlenir ve zaman zaman zamanlama kayması olabilir. LLM çeviri sağlayıcısı gerektirir.
-      clearCache: Önbelleği Temizle
-      clearing: Temizleniyor...
-      clearCacheDialog:
-        title: AI Bölümlendirme Önbelleğini Temizle
-        description: Tüm önbelleğe alınmış AI bölümlendirme sonuçları silinecektir. AI bölümlendirme etkinleştirilmiş bir video oynatıldığında altyazılar yeniden işlenecektir.
-        cancel: İptal
-        confirm: Onayla
-    requestQueueConfig:
-      title: Altyazı Çeviri Hızı
-      firstOnDescription: Altyazı çeviri isteklerinin işlem hızını ayarlamak için
-      lastOnDescription: algoritmasını kullanın
-      capacity:
-        title: Maksimum Patlama İstek Sayısı
-        description: Kısa sürede eşzamanlı olarak işlenebilecek maksimum altyazı çeviri isteği sayısı
-      rate:
-        title: Saniyede Ortalama İstek
-        description: Saniyede ortalama altyazı çeviri isteği sayısı. Geçici olarak fazla istek göndermek için maksimum patlama sayısı yapılandırılabilir. Ondalık değerler desteklenir — örneğin 0.25, her 4 saniyede bir istek anlamına gelir ve Gemini ücretsiz katmanı gibi düşük limitli API'ler için kullanışlıdır
-    batchQueueConfig:
-      title: Altyazı Toplu Çeviri
-      description: Toplu çeviri için karakter limitleri ve maksimum paragraf sayısını yapılandırın (yalnızca LLM çevirisi için geçerlidir)
-      maxCharactersPerBatch:
-        title: Maksimum Karakter
-        description: Her çevirinin içerik hacmini kontrol etmek için toplu istek başına izin verilen maksimum karakter sayısı
-      maxItemsPerBatch:
-        title: Maksimum Paragraf Sayısı
-        description: Her çevirinin içerik hacmini kontrol etmek için her toplu çeviri için maksimum paragraf sayısı
+      fontWeight: Yazı kalınlığı
+      backgroundOpacity: Arka plan şeffaflığı
+      reset: Varsayılana sıfırla
     customPrompts:
-      title: Özel Altyazı İstemleri
-      description: Altyazı çevirisi için istem şablonlarını özelleştirin (web sayfası çeviri istemlerinden ayrı)
+      title: Özel altyazı istemleri
+      description: Yalnızca altyazı çevirisi için istem şablonları; web sayfası çeviri istemlerinden ayrı tutulur
+      managePrompts: Promptları yönet
       editPrompt:
         promptCellInput:
           input: Çevrilecek altyazı metni
@@ -931,15 +918,33 @@ options:
           webTitle: Web sayfası başlığı
           webDescription: Sayfa meta verilerinden web sayfası açıklaması
           videoSummary: Video özeti (AI Akıllı Bağlam gerektirir)
-    aiQuota:
-      title: Yapay Zeka Altyazı Kotası
-      description: Yapay zeka altyazı deşifre kotanızın aylık kullanımı
-      loginRequired: Yapay zeka altyazı kotanızı görmek için giriş yapın
-      logIn: Giriş Yap
-      betaRequired: Yapay zeka altyazıları beta aşamasında ve hesabınız için henüz etkin değil
-      betaApply: Erişim başvurusu yap
-      loadError: Kotanız yüklenemedi. Lütfen daha sonra tekrar deneyin.
-      summary: $2 dakikanın $1 dakikası kullanıldı, $3 kaldı
+    subtitlesQueue:
+      title: Altyazı kuyruğu
+      requestQueueConfig:
+        title: Çeviri hızı
+        capacity:
+          description: "Maksimum ani istek: aynı anda kaç istek gönderilebilir"
+        rate:
+          description: "Saniyedeki istek: sonrasındaki sabit hız. Ondalık da olur, 0.25 her 4 saniyede bir istek demek"
+      batchQueueConfig:
+        title: Toplu çeviri
+        description: Toplu çeviri için karakter limitleri ve maksimum altyazı satırı sayısını yapılandırın (yalnızca LLM çevirisi için geçerlidir)
+        maxCharactersPerBatch:
+          description: "Maksimum karakter: tek bir yapay zekâ isteği ne kadar metin taşır"
+        maxItemsPerBatch:
+          description: "Maksimum altyazı satırı: tek istekte kaç satır birleşir. Yapay zekâ olmayan sağlayıcılar ikisini de yok sayar"
+    cache:
+      title: Önbellek
+      clearCache:
+        title: AI bölümlendirme önbelleğini temizle
+        description: Kaydedilmiş bölümlendirme sonuçları; izlediğiniz bir video yeniden bölünmez
+        clearing: Temizleniyor...
+        dialog:
+          title: AI bölümlendirme önbelleğini temizle
+          trigger: Önbelleği temizle
+          confirm: Onayla
+          cancel: İptal
+          description: Tüm önbelleğe alınmış AI bölümlendirme sonuçları silinecektir. AI bölümlendirme etkinleştirilmiş bir video oynatıldığında altyazılar yeniden işlenecektir.
   whatsNew:
     title: Yenilikler
   rateUs:

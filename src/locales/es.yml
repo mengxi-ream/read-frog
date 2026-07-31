@@ -81,6 +81,8 @@ errorRecovery:
     confirm: Restablecer
     cancel: Cancelar
 options:
+  batchSavings:
+    savedCost: Ahorro aprox. del $1% en costes de API
   commandPalette:
     placeholder: Buscar configuración...
     noResults: No se encontró configuración
@@ -423,25 +425,25 @@ options:
       title: Traducción de entrada
       pageDescription: Traduce lo que escribes en los campos de texto antes de enviarlo.
   inputTranslation:
-    provider:
-      title: Proveedor de traducción
-      description: Elige qué proveedor de traducción usar para la traducción de entrada
-      label: Proveedor
-    toggle:
-      title: Activar traducción con triple espacio
-      description: Pulsa la barra espaciadora 3 veces rápidamente en cualquier campo de entrada para traducir su contenido
+    trigger:
+      title: Activación
+      enable:
+        title: Activar
+        description: Pulsa la barra espaciadora tres veces seguidas en cualquier campo de entrada para traducir lo que has escrito.
+      threshold:
+        title: Umbral de activación
+        description: Cuánto pueden separarse las pulsaciones, en milisegundos. Auméntalo si la traducción no llega a activarse; redúcelo si salta mientras escribes.
+        error: Introduce un valor entre $1 y $2
     languages:
       title: Idiomas de traducción
-      description: Elige los idiomas de origen y destino para la traducción de entrada
+      pair:
+        title: Par de idiomas
+        description: En qué idioma se lee el texto que escribes y a cuál se traduce. Ambos lados pueden seguir los idiomas de origen y destino con los que traduces páginas.
       sourceCode: Idioma de origen de la página
       targetCode: Idioma de destino de la traducción
-      enableCycle: Intercambiar dirección cada vez
-    threshold:
-      title: Umbral de activación
-      description: Intervalo de tiempo entre pulsaciones de espacio para activar la traducción
-      label: Umbral (ms)
-      hint: Tiempo en milisegundos entre pulsaciones consecutivas de espacio (100-1000ms)
-      error: El valor debe estar entre $1 y $2
+      cycle:
+        title: Intercambiar dirección cada vez
+        description: Cada activación intercambia los dos idiomas, así que la siguiente devuelve el texto al idioma en el que escribiste.
   floatingButtonAndToolbar:
     title: Botón flotante y barra de herramientas
     floatingButtonDemoImageAlt: Demostración del botón flotante
@@ -951,42 +953,57 @@ options:
   tts:
     title: Texto a voz
     pageDescription: Lee en voz alta cualquier selección con una voz natural.
-    description: Usa la configuración de voz de Edge TTS para el botón Leer en voz alta.
     voice:
-      label: Voz
-      fallback: Alternativa
+      title: Voz
       selectPlaceholder: Selecciona una voz
       noVoicesFound: No se encontraron voces
-      previewSample: ¡Hola desde Read Frog! Así sonaré al leer en voz alta.
-    languageVoice:
-      label: Voz por idioma
-      reset: Restablecer
-      description: Selecciona un idioma y asigna una voz usada cuando TTS detecte ese idioma.
-    rate:
-      label: Velocidad (%)
-      hint: Acepta valores enteros entre -100 y 100
-    pitch:
-      label: Tono (Hz)
-      hint: Acepta valores enteros entre -100 y 100
-    volume:
-      label: Volumen (%)
-      hint: Acepta valores enteros entre -100 y 100
-    betaDisabled: Activa Experiencia beta para personalizar la configuración de texto a voz.
+      language:
+        title: Voz por idioma
+        description: Elige un idioma y luego la voz que lo lee en voz alta. Restablecer devuelve la voz que Read Frog elige para ese idioma.
+        reset: Restablecer
+        previewSample: ¡Hola desde Read Frog! Así sonaré al leer en voz alta.
+      fallback:
+        title: Voz alternativa
+        description: La voz para cualquier idioma al que no le hayas asignado una propia.
+    speech:
+      title: Habla
+      rate:
+        title: Velocidad
+        description: Cuánto más rápido o más lento lee la voz respecto a su propio ritmo, de -100 a 100 por ciento.
+      pitch:
+        title: Tono
+        description: Cuánto más agudo o más grave habla la voz respecto a su propio tono, de -100 a 100 hercios.
+      volume:
+        title: Volumen
+        description: Cuánto más fuerte o más suave lee la voz respecto a su propio nivel, de -100 a 100 por ciento.
+      error: Introduce un número entero entre $1 y $2
   videoSubtitles:
     title: Subtítulos de video
     pageDescription: Traduce los subtítulos mientras ves el video, con proveedor, estilo y ajustes propios.
-    description: Actualmente solo admite subtítulos de videos de YouTube
-    provider:
-      title: Proveedor de traducción
-      description: Elige qué proveedor de traducción usar para la traducción de subtítulos de video
-      label: Proveedor
-    enable: Activar subtítulos de video
-    enableDescription: Cuando está activado, aparecerá un botón de traducción en los controles del reproductor de YouTube. Haz clic para empezar a traducir subtítulos.
-    autoStart: Activar subtítulos automáticamente
-    autoStartDescription: Activa automáticamente la traducción de subtítulos cuando se carga el video.
+    preference:
+      title: Aspectos básicos
+      enable:
+        title: Activar subtítulos de video
+        description: Añade un botón de traducción a los controles del reproductor. Por ahora solo funciona en YouTube.
+      autoStart:
+        title: Traducir al abrir el video
+        description: Empieza a traducir en cuanto se carga el video, sin pulsar el botón.
+      aiSegmentation:
+        title: Segmentación inteligente de IA
+        description: La IA vuelve a cortar los subtítulos en líneas que se leen como frases. También fija sus tiempos, así que pueden desajustarse. Requiere un proveedor de traducción LLM.
+    aiQuota:
+      title: Cuota de subtítulos con IA
+      description: Uso mensual de tu cuota de transcripción de subtítulos con IA
+      loginRequired: Inicia sesión para ver tu cuota de subtítulos con IA
+      logIn: Iniciar sesión
+      betaRequired: Los subtítulos con IA están en beta y aún no están habilitados para tu cuenta
+      betaApply: Solicitar acceso
+      loadError: No se pudo cargar tu cuota. Inténtalo de nuevo más tarde.
+      summary: Usados $1 de $2 minutos, quedan $3
     style:
       title: Estilo de subtítulos
-      description: Personaliza la apariencia de los subtítulos
+      description: Modo de visualización, posición, fuentes, colores y fondo, ajustados sobre una vista previa en vivo
+      customizeStyle: Personalizar estilo
       preview: Vista previa
       displayMode:
         title: Modo de visualización
@@ -1000,46 +1017,16 @@ options:
       generalSettings: General
       mainSubtitle: Subtítulo principal
       translationSubtitle: Subtítulo de traducción
-      containerStyle: Fondo
       fontFamily: Fuente
       fontScale: Escala de fuente
       color: Color
       fontWeight: Grosor de fuente
       backgroundOpacity: Opacidad del fondo
       reset: Restablecer a predeterminado
-    aiSegmentation:
-      title: Segmentación inteligente de IA
-      enable: Activar segmentación inteligente de IA
-      enableDescription: Usa AI para segmentar subtítulos de forma inteligente y mejorar la legibilidad. La línea de tiempo la determina la AI, lo que ocasionalmente puede causar desajustes de tiempo. Requiere proveedor de traducción LLM.
-      clearCache: Borrar caché
-      clearing: Borrando...
-      clearCacheDialog:
-        title: Borrar caché de segmentación AI
-        description: Esto eliminará todos los resultados de segmentación AI en caché. La próxima vez que reproduzcas un video con segmentación AI activada, se volverán a procesar los subtítulos.
-        cancel: Cancelar
-        confirm: Confirmar
-    requestQueueConfig:
-      title: Tasa de traducción de subtítulos
-      firstOnDescription: Ajusta la velocidad de procesamiento de las solicitudes de traducción de subtítulos usando el
-      lastOnDescription: algoritmo
-      capacity:
-        title: Recuento máximo de solicitudes en ráfaga
-        description: El recuento de solicitudes temporales en ráfaga permitido determina el número máximo de solicitudes de traducción de subtítulos que se pueden procesar de forma concurrente durante un periodo corto
-      rate:
-        title: Solicitudes promedio por segundo
-        description: Solicitudes promedio de traducción de subtítulos por segundo, pero permite configurar un recuento máximo en ráfaga para enviar temporalmente solicitudes excedentes. Se admiten decimales — por ejemplo, 0.25 significa una solicitud cada 4 segundos, útil para APIs con límites bajos como el nivel gratuito de Gemini
-    batchQueueConfig:
-      title: Traducción de subtítulos por lotes
-      description: Configura límites de caracteres y recuento máximo de párrafos para la traducción por lotes (solo efectivo para traducción LLM)
-      maxCharactersPerBatch:
-        title: Caracteres máximos
-        description: Número máximo de caracteres permitido por solicitud por lote, usado para controlar el volumen de contenido por traducción
-      maxItemsPerBatch:
-        title: Recuento máximo de párrafos
-        description: Párrafos máximos por traducción por lote, usado para controlar el volumen de contenido por traducción
     customPrompts:
       title: Prompts personalizados de subtítulos
-      description: Personaliza plantillas de prompts para la traducción de subtítulos (separadas de los prompts de traducción de páginas web)
+      description: Plantillas de prompts solo para la traducción de subtítulos, separadas de las de traducción de páginas web
+      managePrompts: Gestionar prompts
       editPrompt:
         promptCellInput:
           input: Texto de subtítulos a traducir
@@ -1047,15 +1034,33 @@ options:
           webTitle: Título de la página web
           webDescription: Descripción de la página web desde los metadatos
           videoSummary: Resumen del video (requiere contexto inteligente de IA)
-    aiQuota:
-      title: Cuota de subtítulos con IA
-      description: Uso mensual de tu cuota de transcripción de subtítulos con IA
-      loginRequired: Inicia sesión para ver tu cuota de subtítulos con IA
-      logIn: Iniciar sesión
-      betaRequired: Los subtítulos con IA están en beta y aún no están habilitados para tu cuenta
-      betaApply: Solicitar acceso
-      loadError: No se pudo cargar tu cuota. Inténtalo de nuevo más tarde.
-      summary: Usados $1 de $2 minutos, quedan $3
+    subtitlesQueue:
+      title: Cola de subtítulos
+      requestQueueConfig:
+        title: Tasa de traducción
+        capacity:
+          description: "Solicitudes máximas en ráfaga: cuántas pueden salir a la vez"
+        rate:
+          description: "Solicitudes por segundo: el ritmo estable tras la ráfaga. Admite decimales, así que 0.25 envía una solicitud cada 4 segundos"
+      batchQueueConfig:
+        title: Traducción por lotes
+        description: Configura límites de caracteres y recuento máximo de líneas de subtítulos para la traducción por lotes (solo efectivo para traducción LLM)
+        maxCharactersPerBatch:
+          description: "Caracteres máximos: cuánto texto lleva cada solicitud a la IA"
+        maxItemsPerBatch:
+          description: "Líneas máximas: cuántas líneas de subtítulos comparten una solicitud. Los proveedores que no son de IA ignoran ambos"
+    cache:
+      title: Caché
+      clearCache:
+        title: Borrar caché de segmentación de IA
+        description: Resultados de segmentación guardados para no volver a cortar un video que ya has visto
+        clearing: Borrando...
+        dialog:
+          title: Borrar caché de segmentación de IA
+          trigger: Borrar caché
+          confirm: Confirmar
+          cancel: Cancelar
+          description: Esto eliminará todos los resultados de segmentación AI en caché. La próxima vez que reproduzcas un video con segmentación AI activada, se volverán a procesar los subtítulos.
   whatsNew:
     title: Novedades
   rateUs:

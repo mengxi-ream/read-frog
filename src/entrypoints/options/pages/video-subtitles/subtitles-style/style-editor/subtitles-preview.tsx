@@ -27,7 +27,7 @@ export function SubtitlesPreview() {
   }
 
   return (
-    <div className="mb-4">
+    <div>
       <Label className="mb-2 block text-sm font-medium">
         {i18n.t("options.videoSubtitles.style.preview")}
       </Label>

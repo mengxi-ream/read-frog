@@ -91,7 +91,7 @@ export function SettingsNav() {
           <SidebarMenuItem>
             <SidebarMenuButton
               render={<Link to="/video-subtitles" />}
-              isActive={pathname === "/video-subtitles"}
+              isActive={pathname.startsWith("/video-subtitles")}
               tooltip={i18n.t("options.videoSubtitles.title")}
             >
               <Icon icon="tabler:subtitles" />

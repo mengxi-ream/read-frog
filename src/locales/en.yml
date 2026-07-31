@@ -81,6 +81,8 @@ errorRecovery:
     confirm: Reset
     cancel: Cancel
 options:
+  batchSavings:
+    savedCost: Saved approx. $1% on API costs
   commandPalette:
     placeholder: Search settings...
     noResults: No settings found
@@ -423,25 +425,25 @@ options:
       title: Input Translation
       pageDescription: Translate what you type in input boxes before you send it.
   inputTranslation:
-    provider:
-      title: Translation Provider
-      description: Choose which translation provider to use for input translation
-      label: Provider
-    toggle:
-      title: Enable Triple-Space Translation
-      description: Press spacebar 3 times quickly in any input field to translate its content
+    trigger:
+      title: Trigger
+      enable:
+        title: Enable
+        description: Press the space bar three times quickly in any input box to translate what you typed there.
+      threshold:
+        title: Trigger threshold
+        description: How long the presses may be apart, in milliseconds. Raise it if the trigger keeps missing, lower it if it fires while you are still typing.
+        error: Enter a value between $1 and $2
     languages:
-      title: Translation Languages
-      description: Choose source and target languages for input translation
-      sourceCode: Page Source Language
-      targetCode: Translation Target Language
-      enableCycle: Swap direction each time
-    threshold:
-      title: Trigger Threshold
-      description: Time interval between space presses to trigger translation
-      label: Threshold (ms)
-      hint: Time in milliseconds between consecutive space presses (100-1000ms)
-      error: Value must be between $1 and $2
+      title: Translation languages
+      pair:
+        title: Language pair
+        description: What the typed text is read as, and what it is translated into. Either side can follow the source and target languages you translate pages with.
+      sourceCode: Page source language
+      targetCode: Translation target language
+      cycle:
+        title: Swap direction each time
+        description: Every trigger swaps the two languages, so triggering again brings the text back to the language you typed in.
   floatingButtonAndToolbar:
     title: Floating Button & Toolbar
     floatingButtonDemoImageAlt: Floating Button Demo
@@ -951,95 +953,80 @@ options:
   tts:
     title: Text to Speech
     pageDescription: Read any selection aloud with a natural voice.
-    description: Use Edge TTS voice settings for the Speak button.
     voice:
-      label: Voice
-      fallback: Fallback
+      title: Voice
       selectPlaceholder: Select a voice
       noVoicesFound: No voices found
-      previewSample: Hello from Read Frog! This is how I will sound when reading aloud.
-    languageVoice:
-      label: Language Voice
-      reset: Reset
-      description: Select a language and assign a voice used when TTS detects that language.
-    rate:
-      label: Rate (%)
-      hint: Accepts integer values between -100 and 100
-    pitch:
-      label: Pitch (Hz)
-      hint: Accepts integer values between -100 and 100
-    volume:
-      label: Volume (%)
-      hint: Accepts integer values between -100 and 100
-    betaDisabled: Enable Beta Experience to customize text-to-speech settings.
+      language:
+        title: Language voice
+        description: Pick a language, then the voice that reads it aloud. Reset puts back the voice Read Frog picks for that language.
+        reset: Reset
+        previewSample: Hello from Read Frog! This is how I will sound when reading aloud.
+      fallback:
+        title: Fallback voice
+        description: The voice for any language you have not given one of its own.
+    speech:
+      title: Speech
+      rate:
+        title: Rate
+        description: How much faster or slower the voice reads than its own pace, from -100 to 100 percent.
+      pitch:
+        title: Pitch
+        description: How much higher or lower the voice speaks than its own pitch, from -100 to 100 hertz.
+      volume:
+        title: Volume
+        description: How much louder or quieter the voice reads than its own level, from -100 to 100 percent.
+      error: Enter a whole number between $1 and $2
   videoSubtitles:
     title: Video Subtitles
     pageDescription: Translate subtitles as you watch, with their own provider, style, and request settings.
-    description: Currently only supports YouTube video subtitles
-    provider:
-      title: Translation Provider
-      description: Choose which translation provider to use for video subtitle translation
-      label: Provider
-    enable: Enable Video Subtitles
-    enableDescription: When enabled, a translation button will appear in the YouTube player controls. Click it to start translating subtitles.
-    autoStart: Auto-Enable Subtitles
-    autoStartDescription: Automatically enable subtitle translation when the video is loaded.
+    preference:
+      title: Basics
+      enable:
+        title: Enable video subtitles
+        description: Puts a translate button in the video player's controls. YouTube only, for now.
+      autoStart:
+        title: Translate on open
+        description: Start translating as soon as a video loads, without pressing the button.
+      aiSegmentation:
+        title: AI smart segmentation
+        description: Lets AI re-cut the subtitles into lines that read as sentences. It sets their timing too, so lines can drift out of sync. Needs an LLM translation provider.
+    aiQuota:
+      title: AI subtitles quota
+      description: Monthly usage of your AI subtitle transcription quota
+      loginRequired: Log in to view your AI subtitles quota
+      logIn: Log in
+      betaRequired: AI subtitles are in beta and not yet enabled for your account
+      betaApply: Apply for access
+      loadError: Unable to load your quota. Please try again later.
+      summary: Used $1 of $2 minutes, $3 remaining
     style:
-      title: Subtitle Style
-      description: Customize subtitle appearance
+      title: Subtitle style
+      description: Display mode, position, fonts, colors and background, set against a live preview
+      customizeStyle: Customize style
       preview: Preview
       displayMode:
-        title: Display Mode
+        title: Display mode
         bilingual: Bilingual
-        originalOnly: Original Only
-        translationOnly: Translation Only
+        originalOnly: Original only
+        translationOnly: Translation only
       translationPosition:
-        title: Translation Position
+        title: Translation position
         above: Above
         below: Below
       generalSettings: General
-      mainSubtitle: Main Subtitle
-      translationSubtitle: Translation Subtitle
-      containerStyle: Background
+      mainSubtitle: Main subtitle
+      translationSubtitle: Translation subtitle
       fontFamily: Font
-      fontScale: Font Scale
+      fontScale: Font scale
       color: Color
-      fontWeight: Font Weight
-      backgroundOpacity: Background Opacity
-      reset: Reset to Default
-    aiSegmentation:
-      title: AI Smart Segmentation
-      enable: Enable AI Smart Segmentation
-      enableDescription: Use AI to intelligently segment subtitles for better readability. Timeline is determined by AI, which may occasionally cause timing misalignment. Requires LLM translate provider.
-      clearCache: Clear Cache
-      clearing: Clearing...
-      clearCacheDialog:
-        title: Clear AI Segmentation Cache
-        description: This will delete all cached AI segmentation results. The next time you play a video with AI segmentation enabled, it will re-process the subtitles.
-        cancel: Cancel
-        confirm: Confirm
-    requestQueueConfig:
-      title: Subtitle Translation Rate
-      firstOnDescription: Adjust the processing speed of subtitle translation requests using the
-      lastOnDescription: algorithm
-      capacity:
-        title: Maximum Burst Request Count
-        description: The allowed temporary burst request count determines the maximum number of subtitle translation requests that can be processed concurrently within a short period
-      rate:
-        title: Average Requests Per Second
-        description: Average subtitle translation requests per second, but allows configuring a maximum burst count to temporarily send excess requests. Decimals are supported — e.g. 0.25 means one request every 4 seconds, useful for low-rate-limit APIs like the Gemini free tier
-    batchQueueConfig:
-      title: Subtitle Batch Translation
-      description: Configure character limits and maximum paragraph count for batch translation (only effective for LLM translation)
-      maxCharactersPerBatch:
-        title: Maximum Characters
-        description: Maximum number of characters allowed per batch request, used to control the content volume per translation
-      maxItemsPerBatch:
-        title: Maximum Paragraph Count
-        description: Maximum paragraphs per batch translation, used to control the content volume per translation
+      fontWeight: Font weight
+      backgroundOpacity: Background opacity
+      reset: Reset to default
     customPrompts:
-      title: Custom Subtitle Prompts
-      description: Customize prompt templates for subtitle translation (separate from webpage translation prompts)
+      title: Custom subtitle prompts
+      description: Prompt templates for subtitle translation, kept apart from the webpage translation ones
+      managePrompts: Manage prompts
       editPrompt:
         promptCellInput:
           input: Subtitle text to translate
@@ -1047,15 +1034,33 @@ options:
           webTitle: Webpage title
           webDescription: Webpage description from page metadata
           videoSummary: Video summary (requires AI Smart Context)
-    aiQuota:
-      title: AI Subtitles Quota
-      description: Monthly usage of your AI subtitle transcription quota
-      loginRequired: Log in to view your AI subtitles quota
-      logIn: Log In
-      betaRequired: AI subtitles are in beta and not yet enabled for your account
-      betaApply: Apply for access
-      loadError: Unable to load your quota. Please try again later.
-      summary: Used $1 of $2 minutes, $3 remaining
+    subtitlesQueue:
+      title: Subtitle queue
+      requestQueueConfig:
+        title: Translation rate
+        capacity:
+          description: "Maximum burst requests: how many can go out at once"
+        rate:
+          description: "Requests per second: the steady pace after a burst. Decimals work, so 0.25 sends one request every 4 seconds"
+      batchQueueConfig:
+        title: Batch translation
+        description: Configure character limits and maximum subtitle line count for batch translation (only effective for LLM translation)
+        maxCharactersPerBatch:
+          description: "Maximum characters: how much text one AI request carries"
+        maxItemsPerBatch:
+          description: "Maximum subtitle lines: how many lines share one request. Providers that are not AI ignore both"
+    cache:
+      title: Cache
+      clearCache:
+        title: Clear AI segmentation cache
+        description: Segmentation results kept so a video you have already watched is not cut again
+        clearing: Clearing...
+        dialog:
+          title: Clear AI segmentation cache
+          trigger: Clear cache
+          confirm: Confirm
+          cancel: Cancel
+          description: This will delete all cached AI segmentation results. The next time you play a video with AI segmentation enabled, it will re-process the subtitles.
   whatsNew:
     title: What's New
   rateUs:

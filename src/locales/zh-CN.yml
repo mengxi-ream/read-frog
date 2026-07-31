@@ -81,6 +81,8 @@ errorRecovery:
     confirm: 重置
     cancel: 取消
 options:
+  batchSavings:
+    savedCost: 约省 $1% API 费用
   commandPalette:
     placeholder: 搜索设置...
     noResults: 未找到设置
@@ -423,25 +425,25 @@ options:
       title: 输入翻译
       pageDescription: 在发送之前，把你在输入框里写的内容翻译好。
   inputTranslation:
-    provider:
-      title: 翻译服务
-      description: 选择用于输入翻译的翻译服务
-      label: 服务
-    toggle:
-      title: 启用三连空格翻译
-      description: 在任意输入框中快速按3次空格键即可翻译其内容
+    trigger:
+      title: 触发方式
+      enable:
+        title: 启用
+        description: 在任意输入框中快速连按 3 次空格键，即可翻译你输入的内容。
+      threshold:
+        title: 触发阈值
+        description: 相邻两次按键之间最多可以间隔多少毫秒。经常触发不了就调大，打字时误触发就调小。
+        error: 请输入 $1 到 $2 之间的数值
     languages:
       title: 翻译语言
-      description: 选择输入翻译的源语言和目标语言
+      pair:
+        title: 语言方向
+        description: 输入的文字按哪种语言识别，又翻译成哪种语言。两侧都可以跟随你翻译网页时使用的源语言和目标语言。
       sourceCode: 网页源语言
       targetCode: 翻译目标语言
-      enableCycle: 每次翻译时交换方向
-    threshold:
-      title: 触发阈值
-      description: 连续空格按键之间的时间间隔
-      label: 阈值 (毫秒)
-      hint: 连续空格按键之间的时间间隔 (100-1000毫秒)
-      error: 数值必须在 $1 到 $2 之间
+      cycle:
+        title: 每次翻译时交换方向
+        description: 每次触发都会交换这两种语言，再触发一次就能把文字换回你输入时的语言。
   floatingButtonAndToolbar:
     title: 悬浮按钮和工具栏
     floatingButtonDemoImageAlt: 悬浮按钮演示
@@ -951,42 +953,57 @@ options:
   tts:
     title: 文本转语音
     pageDescription: 用自然的语音朗读任何选中的文本。
-    description: 使用 Edge TTS 语音参数来自定义朗读按钮。
     voice:
-      label: 声音
-      fallback: 兜底
+      title: 语音
       selectPlaceholder: 请选择一个声音
       noVoicesFound: 未找到语音
-      previewSample: 来自 Read Frog 的问候！这是我朗读时的声音。
-    languageVoice:
-      label: 语言语音
-      reset: 重置
-      description: 选择一种语言，并指定在 TTS 检测到该语言时使用的语音。
-    rate:
-      label: 语速 (%)
-      hint: 支持 -100 到 100 的整数
-    pitch:
-      label: 音高 (Hz)
-      hint: 支持 -100 到 100 的整数
-    volume:
-      label: 音量 (%)
-      hint: 支持 -100 到 100 的整数
-    betaDisabled: 启用测试体验后即可自定义文本转语音设置。
+      language:
+        title: 语言语音
+        description: 先选择一种语言，再挑选朗读它时使用的语音。重置会换回陪读蛙为该语言选定的语音。
+        reset: 重置
+        previewSample: 来自 Read Frog 的问候！这是我朗读时的声音。
+      fallback:
+        title: 兜底语音
+        description: 你还没有单独指定语音的语言，都用这个语音朗读。
+    speech:
+      title: 朗读
+      rate:
+        title: 语速
+        description: 相对语音本身的语速快多少或慢多少，取值 -100 到 100 个百分点。
+      pitch:
+        title: 音高
+        description: 相对语音本身的音高高多少或低多少，取值 -100 到 100 赫兹。
+      volume:
+        title: 音量
+        description: 相对语音本身的音量大多少或小多少，取值 -100 到 100 个百分点。
+      error: 请输入 $1 到 $2 之间的整数
   videoSubtitles:
     title: 视频字幕
     pageDescription: 边看边译视频字幕，并单独设置提供商、样式和请求参数。
-    description: 当前仅支持 YouTube 视频字幕
-    provider:
-      title: 翻译服务商
-      description: 选择用于视频字幕翻译的翻译服务商
-      label: 服务商
-    enable: 开启视频字幕
-    enableDescription: 启用后，YouTube 播放器控制栏会出现翻译按钮。点击即可开始翻译字幕。
-    autoStart: 自动开启字幕
-    autoStartDescription: 当视频加载完成后，自动开启字幕翻译。
+    preference:
+      title: 基础设置
+      enable:
+        title: 开启视频字幕
+        description: 在视频播放器控制栏加上翻译按钮。目前只支持 YouTube。
+      autoStart:
+        title: 打开视频就翻译
+        description: 视频加载完成后自动开始翻译字幕，不用再点按钮。
+      aiSegmentation:
+        title: AI 智能断句
+        description: 让 AI 把字幕重新切成读起来完整的句子。时间轴也由 AI 判断，可能出现错位。需要配置 LLM 翻译服务。
+    aiQuota:
+      title: AI 字幕额度
+      description: 你账户本月的 AI 字幕转写额度使用情况
+      loginRequired: 登录后查看你的 AI 字幕额度
+      logIn: 登录
+      betaRequired: AI 字幕内测中，你的账号暂未获得使用资格
+      betaApply: 申请资格
+      loadError: 无法加载额度，请稍后重试。
+      summary: 已用 $1 分钟 / 共 $2 分钟，剩余 $3 分钟
     style:
       title: 字幕样式
-      description: 自定义字幕外观
+      description: 显示模式、位置、字体、颜色和背景，都对着预览调
+      customizeStyle: 自定义样式
       preview: 预览
       displayMode:
         title: 显示模式
@@ -1000,46 +1017,16 @@ options:
       generalSettings: 通用设置
       mainSubtitle: 主字幕
       translationSubtitle: 翻译字幕
-      containerStyle: 背景
       fontFamily: 字体
       fontScale: 字体大小
       color: 颜色
       fontWeight: 字体粗细
       backgroundOpacity: 背景透明度
       reset: 重置为默认
-    aiSegmentation:
-      title: AI 智能断句
-      enable: 启用 AI 智能断句
-      enableDescription: 使用 AI 智能断句字幕，提升可读性。启用后时间轴由 AI 判断，可能出现时间轴错位。需要配置 LLM 翻译提供商。
-      clearCache: 清除缓存
-      clearing: 清除中...
-      clearCacheDialog:
-        title: 清除 AI 断句缓存
-        description: 这将删除所有已缓存的 AI 断句结果。下次播放启用 AI 断句的视频时，将重新处理字幕。
-        cancel: 取消
-        confirm: 确认
-    requestQueueConfig:
-      title: 字幕翻译速率
-      firstOnDescription: 使用
-      lastOnDescription: 算法调整字幕翻译请求的处理速度
-      capacity:
-        title: 最大突发请求数
-        description: 允许的临时突发请求数决定了在短时间内可以并发处理的最大字幕翻译请求数量
-      rate:
-        title: 平均每秒请求数
-        description: 平均每秒字幕翻译请求数，但允许配置最大突发数以临时发送超额请求。支持小数，例如 0.25 表示每 4 秒发送一次请求，适用于 Gemini 免费版等低限额 API
-    batchQueueConfig:
-      title: 字幕批量翻译
-      description: 配置批量翻译时的字符数限制和最大段落数量（仅对大语言模型翻译有效）
-      maxCharactersPerBatch:
-        title: 最大字符数
-        description: 每个批量请求允许的最大字符数，用于控制单次翻译的内容量
-      maxItemsPerBatch:
-        title: 最大段落数
-        description: 每个批量翻译的最大段落数，用于控制单次翻译的内容量
     customPrompts:
       title: 自定义字幕提示词
-      description: 自定义字幕翻译的提示词模板（与网页翻译提示词分离）
+      description: 字幕翻译专用的提示词模板，与网页翻译提示词分开
+      managePrompts: 管理 Prompt
       editPrompt:
         promptCellInput:
           input: 要翻译的字幕文本
@@ -1047,15 +1034,33 @@ options:
           webTitle: 网页标题
           webDescription: 页面元信息中的网页描述
           videoSummary: 视频摘要（需启用 AI 智能上下文）
-    aiQuota:
-      title: AI 字幕额度
-      description: 你账户本月的 AI 字幕转写额度使用情况
-      loginRequired: 登录后查看你的 AI 字幕额度
-      logIn: 登录
-      betaRequired: AI 字幕内测中，你的账号暂未获得使用资格
-      betaApply: 申请资格
-      loadError: 无法加载额度，请稍后重试。
-      summary: 已用 $1 分钟 / 共 $2 分钟，剩余 $3 分钟
+    subtitlesQueue:
+      title: 字幕队列
+      requestQueueConfig:
+        title: 翻译速率
+        capacity:
+          description: 最大突发请求数：同一时刻最多能发出多少个请求
+        rate:
+          description: 每秒请求数：突发之后的稳定速度。可以填小数，0.25 表示每 4 秒发一个请求
+      batchQueueConfig:
+        title: 批量翻译
+        description: 配置批量翻译时的字符数限制和最大字幕条数（仅对大语言模型翻译有效）
+        maxCharactersPerBatch:
+          description: 最大字符数：一次 AI 请求最多带多少文本
+        maxItemsPerBatch:
+          description: 最大字幕条数：多少条字幕合并成一次请求。非 AI 的翻译服务不受这两项影响
+    cache:
+      title: 缓存
+      clearCache:
+        title: 清除 AI 断句缓存
+        description: 已保存的断句结果，看过的视频不用重新断句
+        clearing: 清除中...
+        dialog:
+          title: 清除 AI 断句缓存
+          trigger: 清除缓存
+          confirm: 确认
+          cancel: 取消
+          description: 这将删除所有已缓存的 AI 断句结果。下次播放启用 AI 断句的视频时，将重新处理字幕。
   whatsNew:
     title: 最近更新
   rateUs:

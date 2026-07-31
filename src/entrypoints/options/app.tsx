@@ -66,6 +66,16 @@ const ConfigBackupPage = lazy(() =>
     default: module.ConfigBackupPage,
   })),
 )
+const SubtitlesStylePage = lazy(() =>
+  import("./pages/video-subtitles/subtitles-style/style-editor").then((module) => ({
+    default: module.SubtitlesStylePage,
+  })),
+)
+const SubtitlesCustomPromptsPage = lazy(() =>
+  import("./pages/video-subtitles/custom-prompts/prompts").then((module) => ({
+    default: module.SubtitlesCustomPromptsPage,
+  })),
+)
 
 const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/": ApiProvidersPage,
@@ -86,6 +96,8 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/page-translation/auto-translate-websites": AutoTranslateWebsitesPage,
   "/page-translation/never-auto-translate-websites": NeverAutoTranslateWebsitesPage,
   "/page-translation/site-rules": SiteRulesPage,
+  "/video-subtitles/style": SubtitlesStylePage,
+  "/video-subtitles/prompts": SubtitlesCustomPromptsPage,
 }
 
 function RouteLoadingFallback() {

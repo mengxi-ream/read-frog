@@ -9,7 +9,8 @@ import { VIDEO_TRANSCRIPTION_APPLY_URL } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
 import { orpc } from "@/utils/orpc/client"
 import { cn } from "@/utils/styles/utils"
-import { ConfigCard } from "../../components/config-card"
+import { ConfigItem } from "../../../components/config-item"
+import { ConfigSection } from "../../../components/config-section"
 
 const NEAR_LIMIT_RATIO = 0.9
 
@@ -23,7 +24,11 @@ function errorStatus(error: unknown): number | null {
   return error instanceof ORPCError ? error.status : null
 }
 
-export function SubtitlesAiQuota() {
+/**
+ * How much of the month's AI transcription the account has spent. Nothing here is set — the row
+ * stacks instead of splitting, so the bar can run the full width the reading of it needs.
+ */
+export function AiQuotaSection() {
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const isSignedIn = !!session?.user
 
@@ -66,13 +71,14 @@ export function SubtitlesAiQuota() {
   }
 
   return (
-    <ConfigCard
-      id="subtitles-ai-quota"
-      title={i18n.t("options.videoSubtitles.aiQuota.title")}
-      description={i18n.t("options.videoSubtitles.aiQuota.description")}
-    >
-      {renderContent()}
-    </ConfigCard>
+    <ConfigSection id="subtitles-ai-quota" title={i18n.t("options.videoSubtitles.aiQuota.title")}>
+      <ConfigItem
+        orientation="vertical"
+        description={i18n.t("options.videoSubtitles.aiQuota.description")}
+      >
+        {renderContent()}
+      </ConfigItem>
+    </ConfigSection>
   )
 }
 

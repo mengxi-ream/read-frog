@@ -81,6 +81,8 @@ errorRecovery:
     confirm: 重設
     cancel: 取消
 options:
+  batchSavings:
+    savedCost: 約省 $1% API 費用
   commandPalette:
     placeholder: 搜尋設定…
     noResults: 找不到設定
@@ -423,25 +425,25 @@ options:
       title: 輸入翻譯
       pageDescription: 在送出之前，把你在輸入框裡寫的內容翻譯好。
   inputTranslation:
-    provider:
-      title: 翻譯服務
-      description: 選擇用於輸入翻譯的翻譯服務
-      label: 服務
-    toggle:
-      title: 啟用三連空格翻譯
-      description: 在任何輸入欄位中連按 3 次空白鍵，即可翻譯其中的內容
+    trigger:
+      title: 觸發方式
+      enable:
+        title: 啟用
+        description: 在任何輸入欄位中快速連按 3 次空白鍵，即可翻譯你輸入的內容。
+      threshold:
+        title: 觸發門檻值
+        description: 相鄰兩次按鍵之間最多可間隔多少毫秒。經常觸發不了就調大，打字時誤觸發就調小。
+        error: 請輸入 $1 到 $2 之間的數值
     languages:
       title: 翻譯語言
-      description: 選擇輸入翻譯的來源語言與目標語言
+      pair:
+        title: 語言方向
+        description: 輸入的文字要以哪種語言辨識，又要翻譯成哪種語言。兩側都可以跟隨你翻譯網頁時使用的來源語言與目標語言。
       sourceCode: 網頁來源語言
       targetCode: 翻譯目標語言
-      enableCycle: 每次翻譯時交換方向
-    threshold:
-      title: 觸發門檻值
-      description: 連續按下空白鍵之間的時間間隔
-      label: 門檻值（毫秒）
-      hint: 連續按下空白鍵之間的時間間隔（100–1000 毫秒）
-      error: 數值必須在 $1 到 $2 之間
+      cycle:
+        title: 每次翻譯時交換方向
+        description: 每次觸發都會交換這兩種語言，再觸發一次就能把文字換回你輸入時的語言。
   floatingButtonAndToolbar:
     title: 懸浮按鈕和工具列
     floatingButtonDemoImageAlt: 懸浮按鈕示範
@@ -951,42 +953,57 @@ options:
   tts:
     title: 文字轉語音
     pageDescription: 用自然的語音朗讀任何選取的文字。
-    description: 使用 Edge TTS 語音參數來自訂「朗讀」按鈕。
     voice:
-      label: 語音
-      fallback: 備用
+      title: 語音
       selectPlaceholder: 請選擇一個語音
       noVoicesFound: 找不到語音
-      previewSample: 陪讀蛙向你問好！這是朗讀功能的語音。
-    languageVoice:
-      label: 語言語音
-      reset: 重設
-      description: 選擇一種語言，並指定當 TTS 偵測到該語言時要使用的語音。
-    rate:
-      label: 語速 (%)
-      hint: 支援 -100 到 100 的整數
-    pitch:
-      label: 音高 (Hz)
-      hint: 支援 -100 到 100 的整數
-    volume:
-      label: 音量 (%)
-      hint: 支援 -100 到 100 的整數
-    betaDisabled: 啟用 Beta 體驗即可自訂文字轉語音設定。
+      language:
+        title: 語言語音
+        description: 先選擇一種語言，再挑選朗讀它時使用的語音。重設會換回陪讀蛙為該語言選定的語音。
+        reset: 重設
+        previewSample: 陪讀蛙向你問好！這是朗讀功能的語音。
+      fallback:
+        title: 備用語音
+        description: 你還沒有單獨指定語音的語言，都用這個語音朗讀。
+    speech:
+      title: 朗讀
+      rate:
+        title: 語速
+        description: 相對語音本身的語速快多少或慢多少，範圍 -100 到 100 個百分點。
+      pitch:
+        title: 音高
+        description: 相對語音本身的音高高多少或低多少，範圍 -100 到 100 赫茲。
+      volume:
+        title: 音量
+        description: 相對語音本身的音量大多少或小多少，範圍 -100 到 100 個百分點。
+      error: 請輸入 $1 到 $2 之間的整數
   videoSubtitles:
     title: 影片字幕
     pageDescription: 邊看邊譯影片字幕，並單獨設定提供者、樣式和請求參數。
-    description: 目前僅支援 YouTube 影片字幕
-    provider:
-      title: 翻譯服務提供者
-      description: 選擇用於影片字幕翻譯的翻譯服務提供者
-      label: 服務提供者
-    enable: 開啟影片字幕
-    enableDescription: 啟用後，YouTube 播放器控制列會出現翻譯按鈕。點選即可開始翻譯字幕。
-    autoStart: 自動開啟字幕
-    autoStartDescription: 當影片載入完成後，自動開啟字幕翻譯。
+    preference:
+      title: 基礎設定
+      enable:
+        title: 開啟影片字幕
+        description: 在影片播放器控制列加上翻譯按鈕。目前只支援 YouTube。
+      autoStart:
+        title: 打開影片就翻譯
+        description: 影片載入完成後自動開始翻譯字幕，不用再點按鈕。
+      aiSegmentation:
+        title: AI 智慧斷句
+        description: 讓 AI 把字幕重新切成讀起來完整的句子。時間軸也由 AI 判斷，可能出現錯位。需要設定 LLM 翻譯服務。
+    aiQuota:
+      title: AI 字幕額度
+      description: 你帳號本月的 AI 字幕轉寫額度使用情況
+      loginRequired: 登入後查看你的 AI 字幕額度
+      logIn: 登入
+      betaRequired: AI 字幕測試中，你的帳號尚未取得使用資格
+      betaApply: 申請資格
+      loadError: 無法載入額度，請稍後重試。
+      summary: 已用 $1 分鐘 / 共 $2 分鐘，剩餘 $3 分鐘
     style:
       title: 字幕樣式
-      description: 自訂字幕外觀
+      description: 顯示模式、位置、字型、顏色和背景，都對著預覽調
+      customizeStyle: 自訂樣式
       preview: 預覽
       displayMode:
         title: 顯示模式
@@ -1000,46 +1017,16 @@ options:
       generalSettings: 通用設定
       mainSubtitle: 主字幕
       translationSubtitle: 翻譯字幕
-      containerStyle: 背景
       fontFamily: 字型
       fontScale: 字號
       color: 顏色
       fontWeight: 字重
       backgroundOpacity: 背景透明度
       reset: 重設為預設值
-    aiSegmentation:
-      title: AI 智慧斷句
-      enable: 啟用 AI 智慧斷句
-      enableDescription: 使用 AI 智慧斷句字幕，提升可讀性。啟用後時間軸由 AI 判斷，可能出現時間軸錯位。需要設定 LLM 翻譯提供者。
-      clearCache: 清除快取
-      clearing: 清除中…
-      clearCacheDialog:
-        title: 清除 AI 斷句快取
-        description: 這將刪除所有已快取的 AI 斷句結果。下次播放啟用 AI 斷句的影片時，將重新處理字幕。
-        cancel: 取消
-        confirm: 確認
-    requestQueueConfig:
-      title: 字幕翻譯速率
-      firstOnDescription: 使用
-      lastOnDescription: 演算法調整字幕翻譯請求的處理速度
-      capacity:
-        title: 最大突發請求數
-        description: 可暫時突增的請求數，決定短時間內最多能同時處理多少個字幕翻譯請求
-      rate:
-        title: 平均每秒請求數
-        description: 平均每秒字幕翻譯請求數，但允許設定最大突發數以暫時傳送超額請求。支援小數，例如 0.25 表示每 4 秒傳送一次請求，適用於 Gemini 免費版等低限額 API
-    batchQueueConfig:
-      title: 字幕批次翻譯
-      description: 設定批次翻譯時的字元數限制和最大段落數量（僅對大型語言模型翻譯有效）
-      maxCharactersPerBatch:
-        title: 最大字元數
-        description: 每個批次請求允許的最大字元數，用於控制單次翻譯的內容量
-      maxItemsPerBatch:
-        title: 最大段落數
-        description: 每個批次翻譯的最大段落數，用於控制單次翻譯的內容量
     customPrompts:
       title: 自訂字幕提示詞
-      description: 自訂字幕翻譯的提示詞範本（與網頁翻譯提示詞分離）
+      description: 字幕翻譯專用的提示詞範本，與網頁翻譯提示詞分開
+      managePrompts: 管理提示詞
       editPrompt:
         promptCellInput:
           input: 要翻譯的字幕文字
@@ -1047,15 +1034,33 @@ options:
           webTitle: 網頁標題
           webDescription: 頁面中繼資料的網頁描述
           videoSummary: 影片摘要（需啟用 AI 智慧上下文）
-    aiQuota:
-      title: AI 字幕額度
-      description: 你帳號本月的 AI 字幕轉寫額度使用情況
-      loginRequired: 登入後查看你的 AI 字幕額度
-      logIn: 登入
-      betaRequired: AI 字幕測試中，你的帳號尚未取得使用資格
-      betaApply: 申請資格
-      loadError: 無法載入額度，請稍後重試。
-      summary: 已用 $1 分鐘 / 共 $2 分鐘，剩餘 $3 分鐘
+    subtitlesQueue:
+      title: 字幕佇列
+      requestQueueConfig:
+        title: 翻譯速率
+        capacity:
+          description: 最大突發請求數：同一時刻最多能送出多少個請求
+        rate:
+          description: 每秒請求數：突發之後的穩定速度。可以填小數，0.25 表示每 4 秒送出一個請求
+      batchQueueConfig:
+        title: 批次翻譯
+        description: 設定批次翻譯時的字元數限制和最大字幕條數（僅對大型語言模型翻譯有效）
+        maxCharactersPerBatch:
+          description: 最大字元數：一次 AI 請求最多帶多少文字
+        maxItemsPerBatch:
+          description: 最大字幕條數：多少條字幕合併成一次請求。非 AI 的翻譯服務不受這兩項影響
+    cache:
+      title: 快取
+      clearCache:
+        title: 清除 AI 斷句快取
+        description: 已儲存的斷句結果，看過的影片不用重新斷句
+        clearing: 清除中…
+        dialog:
+          title: 清除 AI 斷句快取
+          trigger: 清除快取
+          confirm: 確認
+          cancel: 取消
+          description: 這將刪除所有已快取的 AI 斷句結果。下次播放啟用 AI 斷句的影片時，將重新處理字幕。
   whatsNew:
     title: 最近更新
   rateUs:

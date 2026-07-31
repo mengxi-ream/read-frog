@@ -11,27 +11,27 @@ import { ConfigItem } from "../../../components/config-item"
 
 type KeyOfBatchQueueConfig = keyof BatchQueueConfig
 
-/** How much text rides along in one request — the two limits that cap a batch. */
+/** How many subtitle lines ride along in one request — the two limits that cap a batch. */
 export function BatchTranslationItems() {
   return (
     <>
       <ConfigItem
-        id="request-batch"
+        id="subtitles-request-batch"
         title={
           <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            {i18n.t("options.translation.translationQueue.batchQueueConfig.title")}
+            {i18n.t("options.videoSubtitles.subtitlesQueue.batchQueueConfig.title")}
             <BatchSavingsNote />
           </span>
         }
         description={i18n.t(
-          "options.translation.translationQueue.batchQueueConfig.maxCharactersPerBatch.description",
+          "options.videoSubtitles.subtitlesQueue.batchQueueConfig.maxCharactersPerBatch.description",
         )}
       >
         <BatchNumberInput property="maxCharactersPerBatch" />
       </ConfigItem>
       <ConfigItem
         description={i18n.t(
-          "options.translation.translationQueue.batchQueueConfig.maxItemsPerBatch.description",
+          "options.videoSubtitles.subtitlesQueue.batchQueueConfig.maxItemsPerBatch.description",
         )}
       >
         <BatchNumberInput property="maxItemsPerBatch" />
@@ -46,8 +46,10 @@ const propertyMinValue = {
 }
 
 function BatchNumberInput({ property }: { property: KeyOfBatchQueueConfig }) {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
-  const { batchQueueConfig } = translateConfig
+  const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(
+    configFieldsAtomMap.videoSubtitles,
+  )
+  const { batchQueueConfig } = videoSubtitlesConfig
 
   return (
     <Input
@@ -63,9 +65,9 @@ function BatchNumberInput({ property }: { property: KeyOfBatchQueueConfig }) {
         if (configParseResult.success) {
           // Persisting is enough: the background watches the stored config
           // and applies queue changes itself (no droppable message).
-          void setTranslateConfig({
+          void setVideoSubtitlesConfig({
             batchQueueConfig: {
-              ...translateConfig.batchQueueConfig,
+              ...videoSubtitlesConfig.batchQueueConfig,
               [property]: newConfigValue,
             },
           })

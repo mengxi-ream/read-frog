@@ -20,4 +20,6 @@ export const ROUTE_DEFS = [
   { path: "/page-translation/auto-translate-websites" },
   { path: "/page-translation/never-auto-translate-websites" },
   { path: "/page-translation/site-rules" },
+  { path: "/video-subtitles/style" },
+  { path: "/video-subtitles/prompts" },
 ] as const

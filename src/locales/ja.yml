@@ -81,6 +81,8 @@ errorRecovery:
     confirm: リセット
     cancel: キャンセル
 options:
+  batchSavings:
+    savedCost: API コストを約 $1% 削減
   commandPalette:
     placeholder: 設定を検索...
     noResults: 設定が見つかりません
@@ -422,25 +424,25 @@ options:
       title: 入力翻訳
       pageDescription: 入力欄に書いた内容を、送信する前に翻訳します。
   inputTranslation:
-    provider:
-      title: 翻訳プロバイダー
-      description: 入力翻訳に使用する翻訳プロバイダーを選択
-      label: プロバイダー
-    toggle:
-      title: トリプルスペース翻訳を有効化
-      description: 任意の入力欄でスペースキーを素早く3回押すと内容を翻訳します
+    trigger:
+      title: トリガー
+      enable:
+        title: 有効化
+        description: 任意の入力欄でスペースキーを素早く3回押すと、入力した内容を翻訳します。
+      threshold:
+        title: トリガーしきい値
+        description: 連続する押下の間隔として許される長さ（ミリ秒）です。反応しないときは大きく、入力中に誤って動くときは小さくします。
+        error: $1 から $2 の間の値を入力してください
     languages:
       title: 翻訳言語
-      description: 入力翻訳のソース言語とターゲット言語を選択
+      pair:
+        title: 言語の組み合わせ
+        description: 入力した文章をどの言語として読み取り、どの言語に翻訳するかを決めます。どちらもページ翻訳で使うソース言語・ターゲット言語に合わせられます。
       sourceCode: ページソース言語
-      targetCode: ページターゲット言語
-      enableCycle: 毎回方向を切り替え
-    threshold:
-      title: トリガーしきい値
-      description: スペースキー押下間の時間間隔
-      label: しきい値 (ミリ秒)
-      hint: 連続したスペースキー押下間の時間間隔 (100-1000ミリ秒)
-      error: 値は $1 から $2 の間である必要があります
+      targetCode: 翻訳ターゲット言語
+      cycle:
+        title: 毎回方向を切り替え
+        description: トリガーのたびに2つの言語が入れ替わるため、もう一度実行すると入力した言語に戻ります。
   floatingButtonAndToolbar:
     title: フローティングボタンとツールバー
     floatingButtonDemoImageAlt: フローティングボタンデモ
@@ -835,42 +837,57 @@ options:
   tts:
     title: テキスト読み上げ
     pageDescription: 選択したテキストを自然な音声で読み上げます。
-    description: Edge TTS の音声設定で読み上げボタンをカスタマイズします。
     voice:
-      label: ボイス
-      fallback: フォールバック
+      title: ボイス
       selectPlaceholder: ボイスを選択
       noVoicesFound: ボイスが見つかりません
-      previewSample: Read Frog からこんにちは！朗読するときはこのように聞こえます。
-    languageVoice:
-      label: 言語別ボイス
-      reset: リセット
-      description: 言語を選択し、TTS がその言語を検出したときに使用するボイスを割り当てます。
-    rate:
-      label: 速度 (%)
-      hint: -100 から 100 までの整数を入力できます
-    pitch:
-      label: ピッチ (Hz)
-      hint: -100 から 100 までの整数を入力できます
-    volume:
-      label: 音量 (%)
-      hint: -100 から 100 までの整数を入力できます
-    betaDisabled: テキスト読み上げ設定をカスタマイズするには Beta 体験を有効にしてください。
+      language:
+        title: 言語別ボイス
+        description: 言語を選び、その言語を読み上げるボイスを指定します。リセットすると Read Frog がその言語に選ぶボイスに戻ります。
+        reset: リセット
+        previewSample: Read Frog からこんにちは！朗読するときはこのように聞こえます。
+      fallback:
+        title: フォールバックボイス
+        description: 個別にボイスを指定していない言語は、このボイスで読み上げます。
+    speech:
+      title: 読み上げ
+      rate:
+        title: 速度
+        description: ボイス本来の速さからどれだけ速く、または遅く読むか。-100 から 100 パーセント。
+      pitch:
+        title: ピッチ
+        description: ボイス本来のピッチからどれだけ高く、または低く話すか。-100 から 100 ヘルツ。
+      volume:
+        title: 音量
+        description: ボイス本来の大きさからどれだけ大きく、または小さく読むか。-100 から 100 パーセント。
+      error: $1 から $2 までの整数を入力してください
   videoSubtitles:
     title: 動画字幕
     pageDescription: 視聴しながら字幕を翻訳します。プロバイダー・スタイル・リクエスト設定は個別に指定できます。
-    description: 現在 YouTube 動画字幕のみ対応
-    provider:
-      title: 翻訳プロバイダー
-      description: 動画字幕翻訳に使用する翻訳プロバイダーを選択
-      label: プロバイダー
-    enable: 動画字幕を有効にする
-    enableDescription: 有効にすると、YouTube プレーヤーのコントロールバーに翻訳ボタンが表示されます。クリックして字幕の翻訳を開始します。
-    autoStart: 字幕を自動有効化
-    autoStartDescription: 動画の読み込みが完了したら、自動的に字幕翻訳を有効にします。
+    preference:
+      title: 基本設定
+      enable:
+        title: 動画字幕を有効にする
+        description: 動画プレーヤーのコントロールバーに翻訳ボタンを表示します。現在は YouTube のみ対応です。
+      autoStart:
+        title: 動画を開いたら翻訳する
+        description: 動画の読み込みが終わり次第、ボタンを押さなくても字幕の翻訳を始めます。
+      aiSegmentation:
+        title: AI スマート区切り
+        description: AI が字幕を文として読める形に切り直します。タイミングも AI が決めるため、字幕がずれることがあります。LLM 翻訳プロバイダーが必要です。
+    aiQuota:
+      title: AI字幕の利用枠
+      description: 今月のAI字幕文字起こし利用枠の使用状況
+      loginRequired: ログインしてAI字幕の利用枠を確認
+      logIn: ログイン
+      betaRequired: AI字幕はベータ版で、まだあなたのアカウントでは利用できません
+      betaApply: 利用を申請
+      loadError: 利用枠を読み込めませんでした。しばらくしてから再試行してください。
+      summary: $2 分中 $1 分を使用、残り $3 分
     style:
       title: 字幕スタイル
-      description: 字幕の外観をカスタマイズ
+      description: 表示モード・位置・フォント・色・背景を、プレビューを見ながら設定します
+      customizeStyle: スタイルを編集
       preview: プレビュー
       displayMode:
         title: 表示モード
@@ -884,46 +901,16 @@ options:
       generalSettings: 一般設定
       mainSubtitle: メイン字幕
       translationSubtitle: 翻訳字幕
-      containerStyle: 背景
       fontFamily: フォント
       fontScale: フォントサイズ
       color: 色
       fontWeight: フォントウェイト
       backgroundOpacity: 背景の透明度
       reset: デフォルトにリセット
-    aiSegmentation:
-      title: AI スマート区切り
-      enable: AI スマート区切りを有効にする
-      enableDescription: AIを使用して字幕を賢く区切り、読みやすさを向上させます。タイムラインはAIが判断するため、タイミングのずれが生じる場合があります。LLM翻訳プロバイダーが必要です。
-      clearCache: キャッシュをクリア
-      clearing: クリア中...
-      clearCacheDialog:
-        title: AI区切りキャッシュをクリア
-        description: すべてのキャッシュされたAI区切り結果が削除されます。次回AI区切りを有効にして動画を再生すると、字幕が再処理されます。
-        cancel: キャンセル
-        confirm: 確認
-    requestQueueConfig:
-      title: 字幕翻訳速度
-      firstOnDescription: 字幕翻訳リクエストの処理速度を
-      lastOnDescription: アルゴリズムで調整
-      capacity:
-        title: 最大バースト数
-        description: 短時間で同時に処理できる字幕翻訳リクエストの最大数
-      rate:
-        title: 平均リクエスト数/秒
-        description: 1秒あたりの平均字幕翻訳リクエスト数。最大バースト数を設定して一時的に超過リクエストを送信できます。小数も設定可能です（例：0.25 は4秒に1リクエストの意味で、Gemini 無料枠などレート制限の厳しい API に便利です）
-    batchQueueConfig:
-      title: 字幕バッチ翻訳
-      description: バッチ翻訳時の文字数制限と最大段落数を設定（大規模言語モデル翻訳でのみ有効）
-      maxCharactersPerBatch:
-        title: 最大文字数
-        description: バッチリクエストあたりの最大文字数で、各翻訳のコンテンツ量を制御します
-      maxItemsPerBatch:
-        title: 最大段落数
-        description: 各バッチ翻訳の最大段落数、各翻訳のコンテンツ量を制御します
     customPrompts:
       title: カスタム字幕プロンプト
-      description: 字幕翻訳用のプロンプトテンプレートをカスタマイズします（ウェブページ翻訳プロンプトとは別です）
+      description: 字幕翻訳専用のプロンプトテンプレート。ウェブページ翻訳のプロンプトとは別に管理します
+      managePrompts: プロンプトを管理
       editPrompt:
         promptCellInput:
           input: 翻訳する字幕テキスト
@@ -931,15 +918,33 @@ options:
           webTitle: ウェブページタイトル
           webDescription: ページメタデータのウェブページ説明
           videoSummary: 動画要約（AI スマートコンテキストが必要）
-    aiQuota:
-      title: AI字幕の利用枠
-      description: 今月のAI字幕文字起こし利用枠の使用状況
-      loginRequired: ログインしてAI字幕の利用枠を確認
-      logIn: ログイン
-      betaRequired: AI字幕はベータ版で、まだあなたのアカウントでは利用できません
-      betaApply: 利用を申請
-      loadError: 利用枠を読み込めませんでした。しばらくしてから再試行してください。
-      summary: $2 分中 $1 分を使用、残り $3 分
+    subtitlesQueue:
+      title: 字幕キュー
+      requestQueueConfig:
+        title: 翻訳速度
+        capacity:
+          description: 最大バーストリクエスト数：一度に送れるリクエストの数
+        rate:
+          description: 1 秒あたりのリクエスト数：バースト後の一定ペース。小数も使え、0.25 なら 4 秒に 1 回送ります
+      batchQueueConfig:
+        title: バッチ翻訳
+        description: バッチ翻訳時の文字数制限と最大字幕行数を設定（大規模言語モデル翻訳でのみ有効）
+        maxCharactersPerBatch:
+          description: 最大文字数：1 回の AI リクエストで送るテキストの量
+        maxItemsPerBatch:
+          description: 最大字幕行数：1 回のリクエストにまとめる字幕の数。AI 以外の翻訳サービスには効きません
+    cache:
+      title: キャッシュ
+      clearCache:
+        title: AI区切りキャッシュをクリア
+        description: 保存された区切り結果。一度見た動画は処理し直しになりません
+        clearing: クリア中...
+        dialog:
+          title: AI区切りキャッシュをクリア
+          trigger: キャッシュをクリア
+          confirm: 確認
+          cancel: キャンセル
+          description: すべてのキャッシュされたAI区切り結果が削除されます。次回AI区切りを有効にして動画を再生すると、字幕が再処理されます。
   whatsNew:
     title: 新機能
   rateUs:

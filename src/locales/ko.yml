@@ -81,6 +81,8 @@ errorRecovery:
     confirm: 초기화
     cancel: 취소
 options:
+  batchSavings:
+    savedCost: API 비용 약 $1% 절감
   commandPalette:
     placeholder: 설정 검색...
     noResults: 설정을 찾을 수 없습니다
@@ -422,25 +424,25 @@ options:
       title: 입력 번역
       pageDescription: 입력창에 쓴 내용을 보내기 전에 번역합니다.
   inputTranslation:
-    provider:
-      title: 번역 제공자
-      description: 입력 번역에 사용할 번역 제공자 선택
-      label: 제공자
-    toggle:
-      title: 트리플 스페이스 번역 활성화
-      description: 입력 필드에서 스페이스바를 빠르게 3번 누르면 내용이 번역됩니다
+    trigger:
+      title: 트리거
+      enable:
+        title: 활성화
+        description: 입력 필드에서 스페이스바를 빠르게 3번 누르면 입력한 내용을 번역합니다.
+      threshold:
+        title: 트리거 임계값
+        description: 연속된 누름 사이에 허용되는 간격(밀리초)입니다. 잘 실행되지 않으면 늘리고, 입력하는 중에 실행되면 줄이세요.
+        error: $1에서 $2 사이의 값을 입력하세요
     languages:
       title: 번역 언어
-      description: 입력 번역의 소스 및 타겟 언어 선택
+      pair:
+        title: 언어 방향
+        description: 입력한 텍스트를 어떤 언어로 인식하고 어떤 언어로 번역할지 정합니다. 양쪽 모두 페이지를 번역할 때 사용하는 소스 및 타겟 언어를 따를 수 있습니다.
       sourceCode: 페이지 소스 언어
-      targetCode: 페이지 타겟 언어
-      enableCycle: 매번 방향 전환
-    threshold:
-      title: 트리거 임계값
-      description: 스페이스바 누름 사이의 시간 간격
-      label: 임계값 (밀리초)
-      hint: 연속 스페이스바 누름 사이의 시간 간격 (100-1000밀리초)
-      error: 값은 $1에서 $2 사이여야 합니다
+      targetCode: 번역 타겟 언어
+      cycle:
+        title: 매번 방향 전환
+        description: 실행할 때마다 두 언어가 서로 바뀌므로, 한 번 더 실행하면 입력한 언어로 되돌아옵니다.
   floatingButtonAndToolbar:
     title: 플로팅 버튼 및 툴바
     floatingButtonDemoImageAlt: 플로팅 버튼 데모
@@ -835,42 +837,57 @@ options:
   tts:
     title: 텍스트 음성 변환
     pageDescription: 선택한 텍스트를 자연스러운 음성으로 읽어 줍니다.
-    description: Edge TTS 음성 설정으로 말하기 버튼을 사용자 지정하세요.
     voice:
-      label: 음성
-      fallback: 대체
+      title: 음성
       selectPlaceholder: 음성을 선택하세요
       noVoicesFound: 음성을 찾을 수 없습니다
-      previewSample: Read Frog의 인사입니다! 제가 읽어 드릴 때 이렇게 들립니다.
-    languageVoice:
-      label: 언어별 음성
-      reset: 재설정
-      description: 언어를 선택하고 TTS가 해당 언어를 감지했을 때 사용할 음성을 지정합니다.
-    rate:
-      label: 속도 (%)
-      hint: -100에서 100 사이 정수 값을 입력할 수 있습니다
-    pitch:
-      label: 피치 (Hz)
-      hint: -100에서 100 사이 정수 값을 입력할 수 있습니다
-    volume:
-      label: 볼륨 (%)
-      hint: -100에서 100 사이 정수 값을 입력할 수 있습니다
-    betaDisabled: 텍스트 음성 변환 설정을 사용자 지정하려면 Beta 체험을 활성화하세요.
+      language:
+        title: 언어별 음성
+        description: 언어를 고른 다음 그 언어를 읽어 줄 음성을 지정합니다. 재설정하면 Read Frog가 그 언어에 정해 둔 음성으로 돌아갑니다.
+        reset: 재설정
+        previewSample: Read Frog의 인사입니다! 제가 읽어 드릴 때 이렇게 들립니다.
+      fallback:
+        title: 대체 음성
+        description: 따로 음성을 지정하지 않은 언어는 이 음성으로 읽습니다.
+    speech:
+      title: 읽어 주기
+      rate:
+        title: 속도
+        description: 음성 본래의 속도보다 얼마나 빠르거나 느리게 읽을지, -100에서 100 퍼센트.
+      pitch:
+        title: 피치
+        description: 음성 본래의 피치보다 얼마나 높거나 낮게 말할지, -100에서 100 헤르츠.
+      volume:
+        title: 볼륨
+        description: 음성 본래의 크기보다 얼마나 크거나 작게 읽을지, -100에서 100 퍼센트.
+      error: $1에서 $2 사이의 정수를 입력하세요
   videoSubtitles:
     title: 비디오 자막
     pageDescription: 영상을 보면서 자막을 번역하고, 제공업체·스타일·요청 설정을 따로 지정하세요.
-    description: 현재 YouTube 비디오 자막만 지원
-    provider:
-      title: 번역 제공자
-      description: 비디오 자막 번역에 사용할 번역 제공자를 선택하세요
-      label: 제공자
-    enable: 비디오 자막 활성화
-    enableDescription: 활성화하면 YouTube 플레이어 컨트롤 바에 번역 버튼이 나타납니다. 클릭하여 자막 번역을 시작하세요.
-    autoStart: 자막 자동 활성화
-    autoStartDescription: 비디오가 로드되면 자동으로 자막 번역을 활성화합니다.
+    preference:
+      title: 기본 설정
+      enable:
+        title: 비디오 자막 켜기
+        description: 동영상 플레이어 컨트롤 바에 번역 버튼을 추가합니다. 현재는 YouTube만 지원합니다.
+      autoStart:
+        title: 영상을 열면 바로 번역
+        description: 영상이 로드되면 버튼을 누르지 않아도 자막 번역을 시작합니다.
+      aiSegmentation:
+        title: AI 스마트 분할
+        description: AI가 자막을 문장처럼 읽히도록 다시 나눕니다. 타이밍도 AI가 정하므로 싱크가 어긋날 수 있습니다. LLM 번역 공급자가 필요합니다.
+    aiQuota:
+      title: AI 자막 사용량
+      description: 이번 달 AI 자막 전사 사용량 현황
+      loginRequired: 로그인하여 AI 자막 사용량 확인
+      logIn: 로그인
+      betaRequired: AI 자막은 베타 기능이며 아직 계정에 활성화되지 않았습니다
+      betaApply: 사용 신청
+      loadError: 사용량을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.
+      summary: $2분 중 $1분 사용, $3분 남음
     style:
       title: 자막 스타일
-      description: 자막 외관 사용자 지정
+      description: 표시 모드, 위치, 글꼴, 색상, 배경을 미리보기로 확인하며 설정합니다
+      customizeStyle: 스타일 편집
       preview: 미리보기
       displayMode:
         title: 표시 모드
@@ -884,46 +901,16 @@ options:
       generalSettings: 일반 설정
       mainSubtitle: 메인 자막
       translationSubtitle: 번역 자막
-      containerStyle: 배경
       fontFamily: 글꼴
       fontScale: 글꼴 크기
       color: 색상
       fontWeight: 글꼴 굵기
       backgroundOpacity: 배경 투명도
       reset: 기본값으로 재설정
-    aiSegmentation:
-      title: AI 스마트 분할
-      enable: AI 스마트 분할 활성화
-      enableDescription: AI를 사용하여 자막을 지능적으로 분할하여 가독성을 향상시킵니다. 타임라인은 AI가 결정하므로 타이밍 오차가 발생할 수 있습니다. LLM 번역 공급자가 필요합니다.
-      clearCache: 캐시 삭제
-      clearing: 삭제 중...
-      clearCacheDialog:
-        title: AI 분할 캐시 삭제
-        description: 모든 캐시된 AI 분할 결과가 삭제됩니다. 다음에 AI 분할이 활성화된 비디오를 재생하면 자막이 다시 처리됩니다.
-        cancel: 취소
-        confirm: 확인
-    requestQueueConfig:
-      title: 자막 번역 속도
-      firstOnDescription: 자막 번역 요청 처리 속도를
-      lastOnDescription: 알고리즘으로 조정
-      capacity:
-        title: 최대 버스트 요청 수
-        description: 짧은 시간 내에 동시에 처리할 수 있는 최대 자막 번역 요청 수
-      rate:
-        title: 초당 평균 요청 수
-        description: 초당 평균 자막 번역 요청 수. 최대 버스트 수를 설정하여 일시적으로 초과 요청을 보낼 수 있습니다. 소수도 지원합니다. 예를 들어 0.25는 4초마다 1회 요청을 의미하며, Gemini 무료 등급 등 낮은 속도 제한 API에 유용합니다
-    batchQueueConfig:
-      title: 자막 일괄 번역
-      description: 배치 번역 시 문자 수 제한 및 최대 단락 수 구성 (대규모 언어 모델 번역에서만 유효)
-      maxCharactersPerBatch:
-        title: 최대 문자 수
-        description: 배치 요청당 허용되는 최대 문자 수로 각 번역의 콘텐츠 양을 제어합니다
-      maxItemsPerBatch:
-        title: 최대 단락 수
-        description: 각 배치 번역의 최대 단락 수로 각 번역의 콘텐츠 양을 제어합니다
     customPrompts:
       title: 사용자 정의 자막 프롬프트
-      description: 자막 번역용 프롬프트 템플릿을 사용자 정의합니다 (웹페이지 번역 프롬프트와 별도)
+      description: 자막 번역 전용 프롬프트 템플릿으로, 웹페이지 번역 프롬프트와 별도로 관리합니다
+      managePrompts: 프롬프트 관리
       editPrompt:
         promptCellInput:
           input: 번역할 자막 텍스트
@@ -931,15 +918,33 @@ options:
           webTitle: 웹페이지 제목
           webDescription: 페이지 메타데이터의 웹페이지 설명
           videoSummary: 동영상 요약 (AI 스마트 컨텍스트 필요)
-    aiQuota:
-      title: AI 자막 사용량
-      description: 이번 달 AI 자막 전사 사용량 현황
-      loginRequired: 로그인하여 AI 자막 사용량 확인
-      logIn: 로그인
-      betaRequired: AI 자막은 베타 기능이며 아직 계정에 활성화되지 않았습니다
-      betaApply: 사용 신청
-      loadError: 사용량을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.
-      summary: $2분 중 $1분 사용, $3분 남음
+    subtitlesQueue:
+      title: 자막 대기열
+      requestQueueConfig:
+        title: 번역 속도
+        capacity:
+          description: "최대 순간 요청 수: 한 번에 내보낼 수 있는 요청 개수"
+        rate:
+          description: "초당 요청 수: 그 뒤로 유지되는 속도. 소수도 되며 0.25는 4초에 한 번 보냅니다"
+      batchQueueConfig:
+        title: 배치 번역
+        description: 배치 번역 시 문자 수 제한 및 최대 자막 줄 수 구성 (대규모 언어 모델 번역에서만 유효)
+        maxCharactersPerBatch:
+          description: "최대 문자 수: 한 번의 AI 요청에 담는 텍스트 양"
+        maxItemsPerBatch:
+          description: "최대 자막 줄 수: 한 요청에 묶는 자막 수. AI가 아닌 번역 서비스에는 적용되지 않습니다"
+    cache:
+      title: 캐시
+      clearCache:
+        title: AI 분할 캐시 삭제
+        description: 저장된 분할 결과 — 이미 본 영상은 다시 처리하지 않습니다
+        clearing: 삭제 중...
+        dialog:
+          title: AI 분할 캐시 삭제
+          trigger: 캐시 삭제
+          confirm: 확인
+          cancel: 취소
+          description: 모든 캐시된 AI 분할 결과가 삭제됩니다. 다음에 AI 분할이 활성화된 비디오를 재생하면 자막이 다시 처리됩니다.
   whatsNew:
     title: 새로운 기능
   rateUs:

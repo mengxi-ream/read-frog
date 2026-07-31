@@ -3,7 +3,7 @@ import type BatchRequestRecord from "@/utils/db/dexie/tables/batch-request-recor
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { db } from "@/utils/db/dexie/db"
-import { getDateFromDaysBack, numberToPercentage } from "@/utils/utils"
+import { getDateFromDaysBack } from "@/utils/utils"
 import { logger } from "./logger"
 
 export async function getRangeBatchRequestRecords(startDay: number, endDay?: number) {
@@ -41,8 +41,12 @@ export async function putBatchRequestRecord({
   }
 }
 
-export function calculateAverageSavePercentage(batchRequestRecords: BatchRequestRecord[]): string {
-  if (!batchRequestRecords.length) return "0%"
+/**
+ * The share of requests batching folded away: every record is one request that stood in for
+ * `originalRequestCount` of them. 0 when nothing was recorded, or when nothing was batched.
+ */
+export function calculateRequestSavingRatio(batchRequestRecords: BatchRequestRecord[]): number {
+  if (!batchRequestRecords.length) return 0
 
   const originalRequestCount = batchRequestRecords.reduce(
     (acc, record) => acc + record.originalRequestCount,
@@ -50,6 +54,5 @@ export function calculateAverageSavePercentage(batchRequestRecords: BatchRequest
   )
   const batchRequestCount = batchRequestRecords.length
 
-  const averageSavePercent = (originalRequestCount - batchRequestCount) / originalRequestCount
-  return numberToPercentage(averageSavePercent)
+  return (originalRequestCount - batchRequestCount) / originalRequestCount
 }

@@ -16,16 +16,6 @@ type SearchItemDefinition = Omit<SearchItem, "titleKey" | "descriptionKey" | "pa
   pageKey: I18nKey
 }
 
-const TTS_SEARCH_ITEMS: SearchItemDefinition[] = [
-  {
-    sectionId: "tts-config",
-    route: "/tts",
-    titleKey: "options.tts.title",
-    descriptionKey: "options.tts.description",
-    pageKey: "options.tts.title",
-  },
-]
-
 export const SEARCH_ITEMS: SearchItem[] = [
   // Preference page
   {
@@ -346,45 +336,76 @@ export const SEARCH_ITEMS: SearchItem[] = [
 
   // Input Translation page
   {
-    sectionId: "input-translation-toggle",
+    // Titled with the section, so the row that reads "Enable" is still findable on its own.
+    sectionId: "input-translation-trigger",
     route: "/input-translation",
-    titleKey: "options.inputTranslation.toggle.title",
-    descriptionKey: "options.inputTranslation.toggle.description",
+    titleKey: "options.inputTranslation.trigger.title",
+    descriptionKey: "options.inputTranslation.trigger.enable.description",
     pageKey: "options.overlayTools.inputTranslation.title",
   },
   {
-    sectionId: "input-translation-threshold-section",
+    sectionId: "input-translation-threshold",
     route: "/input-translation",
-    titleKey: "options.inputTranslation.threshold.title",
-    descriptionKey: "options.inputTranslation.threshold.description",
+    titleKey: "options.inputTranslation.trigger.threshold.title",
+    descriptionKey: "options.inputTranslation.trigger.threshold.description",
     pageKey: "options.overlayTools.inputTranslation.title",
   },
   {
     sectionId: "input-translation-languages",
     route: "/input-translation",
     titleKey: "options.inputTranslation.languages.title",
-    descriptionKey: "options.inputTranslation.languages.description",
+    descriptionKey: "options.inputTranslation.languages.pair.description",
+    pageKey: "options.overlayTools.inputTranslation.title",
+  },
+  {
+    sectionId: "input-translation-cycle",
+    route: "/input-translation",
+    titleKey: "options.inputTranslation.languages.cycle.title",
+    descriptionKey: "options.inputTranslation.languages.cycle.description",
     pageKey: "options.overlayTools.inputTranslation.title",
   },
 
   // Video Subtitles page
   {
-    sectionId: "subtitles-config",
+    sectionId: "subtitles-enable",
     route: "/video-subtitles",
-    titleKey: "options.videoSubtitles.title",
-    descriptionKey: "options.videoSubtitles.description",
+    titleKey: "options.videoSubtitles.preference.enable.title",
+    descriptionKey: "options.videoSubtitles.preference.enable.description",
     pageKey: "options.videoSubtitles.title",
   },
   {
-    sectionId: "subtitles-style",
+    sectionId: "subtitles-auto-start",
     route: "/video-subtitles",
+    titleKey: "options.videoSubtitles.preference.autoStart.title",
+    descriptionKey: "options.videoSubtitles.preference.autoStart.description",
+    pageKey: "options.videoSubtitles.title",
+  },
+  {
+    sectionId: "subtitles-ai-segmentation",
+    route: "/video-subtitles",
+    titleKey: "options.videoSubtitles.preference.aiSegmentation.title",
+    descriptionKey: "options.videoSubtitles.preference.aiSegmentation.description",
+    pageKey: "options.videoSubtitles.title",
+  },
+  {
+    sectionId: "subtitles-ai-quota",
+    route: "/video-subtitles",
+    titleKey: "options.videoSubtitles.aiQuota.title",
+    descriptionKey: "options.videoSubtitles.aiQuota.description",
+    pageKey: "options.videoSubtitles.title",
+  },
+  {
+    // Its own page, drilled into from the Video Subtitles page's Subtitle style section.
+    sectionId: "subtitles-style",
+    route: "/video-subtitles/style",
     titleKey: "options.videoSubtitles.style.title",
     descriptionKey: "options.videoSubtitles.style.description",
     pageKey: "options.videoSubtitles.title",
   },
   {
+    // Its own page, drilled into from the Video Subtitles page's Custom prompts section.
     sectionId: "subtitles-custom-prompts",
-    route: "/video-subtitles",
+    route: "/video-subtitles/prompts",
     titleKey: "options.videoSubtitles.customPrompts.title",
     descriptionKey: "options.videoSubtitles.customPrompts.description",
     pageKey: "options.videoSubtitles.title",
@@ -392,24 +413,58 @@ export const SEARCH_ITEMS: SearchItem[] = [
   {
     sectionId: "subtitles-request-rate",
     route: "/video-subtitles",
-    titleKey: "options.videoSubtitles.requestQueueConfig.title",
+    titleKey: "options.videoSubtitles.subtitlesQueue.requestQueueConfig.title",
     pageKey: "options.videoSubtitles.title",
   },
   {
     sectionId: "subtitles-request-batch",
     route: "/video-subtitles",
-    titleKey: "options.videoSubtitles.batchQueueConfig.title",
-    descriptionKey: "options.videoSubtitles.batchQueueConfig.description",
+    titleKey: "options.videoSubtitles.subtitlesQueue.batchQueueConfig.title",
+    descriptionKey: "options.videoSubtitles.subtitlesQueue.batchQueueConfig.description",
     pageKey: "options.videoSubtitles.title",
   },
   {
     sectionId: "clear-ai-segmentation-cache",
     route: "/video-subtitles",
-    titleKey: "options.videoSubtitles.aiSegmentation.clearCacheDialog.title",
-    descriptionKey: "options.videoSubtitles.aiSegmentation.clearCacheDialog.description",
+    titleKey: "options.videoSubtitles.cache.clearCache.title",
+    descriptionKey: "options.videoSubtitles.cache.clearCache.description",
     pageKey: "options.videoSubtitles.title",
   },
 
   // Text to Speech page
-  ...TTS_SEARCH_ITEMS,
+  {
+    sectionId: "language-voice",
+    route: "/tts",
+    titleKey: "options.tts.voice.language.title",
+    descriptionKey: "options.tts.voice.language.description",
+    pageKey: "options.tts.title",
+  },
+  {
+    sectionId: "tts-voice",
+    route: "/tts",
+    titleKey: "options.tts.voice.fallback.title",
+    descriptionKey: "options.tts.voice.fallback.description",
+    pageKey: "options.tts.title",
+  },
+  {
+    sectionId: "tts-rate",
+    route: "/tts",
+    titleKey: "options.tts.speech.rate.title",
+    descriptionKey: "options.tts.speech.rate.description",
+    pageKey: "options.tts.title",
+  },
+  {
+    sectionId: "tts-pitch",
+    route: "/tts",
+    titleKey: "options.tts.speech.pitch.title",
+    descriptionKey: "options.tts.speech.pitch.description",
+    pageKey: "options.tts.title",
+  },
+  {
+    sectionId: "tts-volume",
+    route: "/tts",
+    titleKey: "options.tts.speech.volume.title",
+    descriptionKey: "options.tts.speech.volume.description",
+    pageKey: "options.tts.title",
+  },
 ] satisfies SearchItemDefinition[]
