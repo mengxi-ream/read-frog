@@ -4,7 +4,7 @@ import { CacheSection } from "./cache"
 import { HoverTranslationSection } from "./hover-translation"
 import { PersonalizedPromptsSection } from "./personalized-prompts"
 import { PreferenceSection } from "./preference"
-import { TranslateControlSection } from "./translate-control"
+import { TranslationControlSection } from "./translation-control"
 import { TranslationQueueSection } from "./translation-queue"
 import { TranslationStyleSection } from "./translation-style"
 
@@ -19,7 +19,7 @@ export function TranslationPage() {
       <HoverTranslationSection />
       <TranslationStyleSection />
       <PersonalizedPromptsSection />
-      <TranslateControlSection />
+      <TranslationControlSection />
       <TranslationQueueSection />
       <CacheSection />
     </PageLayout>

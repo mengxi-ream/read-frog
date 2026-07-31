@@ -9,11 +9,11 @@ import { SmallParagraphFilterItem } from "./small-paragraph-filter-item"
  * What gets translated without being asked, and what never does. Every row here answers the
  * same question — by site, by language, or by how little text a paragraph holds.
  */
-export function TranslateControlSection() {
+export function TranslationControlSection() {
   return (
     <ConfigSection
-      id="translate-control"
-      title={i18n.t("options.translation.translateControl.title")}
+      id="translation-control"
+      title={i18n.t("options.translation.translationControl.title")}
     >
       <ConfigNavItem
         to="/page-translation/auto-translate-websites"

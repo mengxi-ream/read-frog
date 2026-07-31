@@ -52,12 +52,12 @@ const PersonalizedPromptsPage = lazy(() =>
   })),
 )
 const AutoTranslateWebsitesPage = lazy(() =>
-  import("./pages/translation/translate-control/website-patterns-page").then((module) => ({
+  import("./pages/translation/translation-control/website-patterns-page").then((module) => ({
     default: module.AutoTranslateWebsitesPage,
   })),
 )
 const NeverAutoTranslateWebsitesPage = lazy(() =>
-  import("./pages/translation/translate-control/website-patterns-page").then((module) => ({
+  import("./pages/translation/translation-control/website-patterns-page").then((module) => ({
     default: module.NeverAutoTranslateWebsitesPage,
   })),
 )

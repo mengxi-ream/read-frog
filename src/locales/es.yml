@@ -773,7 +773,7 @@ options:
       enable:
         title: Activar
         description: Pasa el cursor o mantén pulsado un párrafo para traducir solo ese.
-    translateControl:
+    translationControl:
       title: Control de traducción
     translationQueue:
       title: Cola de traducción

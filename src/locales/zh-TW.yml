@@ -773,7 +773,7 @@ options:
       enable:
         title: 啟用
         description: 滑鼠停留或長按段落，只翻譯這一段。
-    translateControl:
+    translationControl:
       title: 翻譯控制
     translationQueue:
       title: 翻譯佇列

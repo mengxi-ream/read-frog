@@ -210,7 +210,7 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.translation.title",
   },
   {
-    // Its own page, drilled into from the Translate control section.
+    // Its own page, drilled into from the Translation control section.
     sectionId: "auto-translate-website",
     route: "/page-translation/auto-translate-websites",
     titleKey: "options.translation.autoTranslateWebsite.title",
@@ -218,7 +218,7 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.translation.title",
   },
   {
-    // Its own page, drilled into from the Translate control section.
+    // Its own page, drilled into from the Translation control section.
     sectionId: "never-auto-translate-website",
     route: "/page-translation/never-auto-translate-websites",
     titleKey: "options.translation.neverAutoTranslateWebsite.title",
@@ -274,7 +274,7 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.translation.title",
   },
   {
-    // Its own page, drilled into from the Translate control section.
+    // Its own page, drilled into from the Translation control section.
     sectionId: "site-rules-user-rules",
     route: "/page-translation/site-rules",
     titleKey: "options.siteRules.userRules.title",

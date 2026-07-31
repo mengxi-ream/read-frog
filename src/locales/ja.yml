@@ -657,7 +657,7 @@ options:
       enable:
         title: 有効化
         description: 段落にホバーまたは長押しすると、その段落だけ翻訳します。
-    translateControl:
+    translationControl:
       title: 翻訳の制御
     translationQueue:
       title: 翻訳キュー

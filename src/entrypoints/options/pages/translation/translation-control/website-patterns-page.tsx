@@ -8,7 +8,7 @@ import { PageLayout } from "../../../components/page-layout"
 import { PatternsTable } from "../../../components/patterns-table"
 
 /**
- * A list of URL patterns, drilled into from the Translate control section. The list grows
+ * A list of URL patterns, drilled into from the Translation control section. The list grows
  * without limit and each row carries a delete button, which is more than a settings row can
  * hold — so the row only says what the list is for and how many ways in there are.
  */

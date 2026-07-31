@@ -773,7 +773,7 @@ options:
       enable:
         title: 启用
         description: 悬停或长按段落，只翻译这一段。
-    translateControl:
+    translationControl:
       title: 翻译控制
     translationQueue:
       title: 翻译队列

@@ -657,7 +657,7 @@ options:
       enable:
         title: 활성화
         description: 단락에 마우스를 올리거나 길게 누르면 그 단락만 번역합니다.
-    translateControl:
+    translationControl:
       title: 번역 제어
     translationQueue:
       title: 번역 대기열

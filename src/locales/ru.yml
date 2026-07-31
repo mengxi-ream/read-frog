@@ -657,7 +657,7 @@ options:
       enable:
         title: Включить
         description: Наведите курсор на абзац или нажмите и удерживайте его, чтобы перевести только его.
-    translateControl:
+    translationControl:
       title: Управление переводом
     translationQueue:
       title: Очередь перевода

@@ -657,7 +657,7 @@ options:
       enable:
         title: Bật
         description: Di chuột hoặc nhấn giữ một đoạn để chỉ dịch đoạn đó.
-    translateControl:
+    translationControl:
       title: Kiểm soát dịch
     translationQueue:
       title: Hàng đợi dịch

@@ -5,7 +5,7 @@ import { BuiltInRules } from "./built-in-rules"
 import { UserRulesEditor } from "./user-rules-editor"
 
 /**
- * Drilled into from Page Translation's Translate control section: rules are per-site
+ * Drilled into from Page Translation's Translation control section: rules are per-site
  * adjustments to how that page gets translated, and a JSON editor beside a list of every
  * built-in rule is far more than the row that opens it could hold.
  */

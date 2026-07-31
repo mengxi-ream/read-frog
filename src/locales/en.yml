@@ -773,8 +773,8 @@ options:
       enable:
         title: Enable
         description: Hover or long-press a paragraph to translate just that one.
-    translateControl:
-      title: Translate control
+    translationControl:
+      title: Translation control
     translationQueue:
       title: Translation queue
     cache:

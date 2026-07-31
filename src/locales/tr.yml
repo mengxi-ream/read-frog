@@ -657,7 +657,7 @@ options:
       enable:
         title: Etkinleştir
         description: Bir paragrafın üzerine gelin veya uzun basın; yalnızca o paragraf çevrilir.
-    translateControl:
+    translationControl:
       title: Çeviri denetimi
     translationQueue:
       title: Çeviri kuyruğu
