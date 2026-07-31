@@ -394,6 +394,7 @@ options:
   shortcuts:
     title: 단축키
     pageDescription: 읽는 중에 번역을 실행하는 키를 설정합니다.
+    setShortcut: 단축키 설정
     pageTranslation:
       title: 페이지 번역
       description: 페이지 전체를 번역합니다.
@@ -648,7 +649,14 @@ options:
         description: 브라우저 우클릭 메뉴에 번역 옵션을 추가하여 페이지나 선택한 텍스트를 빠르게 번역
   translation:
     title: 번역
-    pageDescription: 페이지 번역 방식을 설정하세요 — 모드, 범위, 단축키, 프롬프트, 요청 제한.
+    pageDescription: 페이지 번역 방식을 설정하세요 — 모드, 범위, 프롬프트, 요청 제한.
+    preference:
+      title: 환경 설정
+    hoverTranslation:
+      title: 호버 번역
+      enable:
+        title: 활성화
+        description: 단락에 마우스를 올리거나 길게 누르면 그 단락만 번역합니다.
     requestQueueConfig:
       title: 번역 속도
       firstOnDescription: 번역 요청 처리 속도 조정 및
@@ -750,24 +758,19 @@ options:
             tooLong: CSS가 너무 깁니다
             saved: 모든 변경사항이 저장되었습니다
     translationMode:
-      title: 번역 모드
+      title: 모드
       description: "번역된 텍스트 표시 방법 선택: 이중 언어 또는 번역만"
       mode:
         bilingual: 이중 언어
         translationOnly: 번역만
     translationModeShortcut:
-      title: 번역 모드 전환 단축키
-      description: 이중 언어 모드와 번역만 모드 간 전환 단축키를 사용자 지정합니다
       switched: "번역 모드: $1"
     translateRange:
-      title: 번역 범위
+      title: 범위
       description: 페이지의 주요 내용만 번역할지 모든 내용을 번역할지 선택합니다.
       range:
         main: 주요 내용
         all: 전체 내용
-    pageTranslationShortcut:
-      title: 페이지 번역 단축키
-      description: 전체 웹페이지를 번역하는 단축키를 사용자 지정합니다
     preloadConfig:
       title: 사전 번역 범위
       description: API 비용을 절약하기 위해 뷰포트 아래 콘텐츠를 얼마나 사전 번역할지 제어합니다
@@ -787,10 +790,6 @@ options:
         title: 최소 단어 수
         description: 이 값보다 적은 단어 수의 텍스트 노드는 번역되지 않습니다. 모든 언어에서 정확한 단어 카운트를 위해 Intl.Segmenter를 사용합니다.
       error: 값은 $1에서 $2 사이여야 합니다
-    nodeTranslationHotkey:
-      title: 호버 또는 길게 누르기 번역 단축키
-      description: 호버 번역 수정 키를 사용자 지정하거나 마우스 길게 누르기로 단락을 번역합니다
-      enable: 활성화
     autoTranslateLanguages:
       title: 언어에 기반한 자동 번역
       description: 특정 언어가 감지되면 페이지 콘텐츠를 자동으로 번역합니다

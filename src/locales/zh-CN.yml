@@ -395,6 +395,7 @@ options:
   shortcuts:
     title: 快捷键
     pageDescription: 设置阅读时触发翻译的按键。
+    setShortcut: 设置快捷键
     pageTranslation:
       title: 网页翻译
       description: 翻译整个网页。
@@ -764,7 +765,14 @@ options:
         description: 在浏览器右键菜单中添加翻译选项，快速翻译页面或所选文本
   translation:
     title: 翻译
-    pageDescription: 控制页面翻译的方式：模式、范围、快捷键、提示词和请求限制。
+    pageDescription: 控制页面翻译的方式：模式、范围、提示词和请求限制。
+    preference:
+      title: 偏好设置
+    hoverTranslation:
+      title: 悬停翻译
+      enable:
+        title: 启用
+        description: 悬停或长按段落，只翻译这一段。
     requestQueueConfig:
       title: 翻译速率
       firstOnDescription: 调整翻译请求的处理速度，使用
@@ -866,24 +874,19 @@ options:
             tooLong: CSS 过长
             saved: 所有更改已保存
     translationMode:
-      title: 翻译模式
+      title: 模式
       description: 选择翻译文本的显示方式：双语对照或仅显示翻译
       mode:
         bilingual: 双语对照
         translationOnly: 仅显示翻译
     translationModeShortcut:
-      title: 切换翻译模式快捷键
-      description: 自定义在双语对照和仅显示翻译模式之间切换的快捷键
       switched: 翻译模式：$1
     translateRange:
-      title: 翻译范围
+      title: 范围
       description: 选择是仅翻译主要内容还是翻译页面上的所有内容。
       range:
         main: 主要内容
         all: 全部内容
-    pageTranslationShortcut:
-      title: 网页翻译快捷键
-      description: 自定义翻译整个网页的快捷键
     preloadConfig:
       title: 预翻译范围
       description: 控制视口下方多少内容会被预先翻译，以节省 API 费用
@@ -903,10 +906,6 @@ options:
         title: 最小词数
         description: 少于此词数的文本节点将不会被翻译。使用 Intl.Segmenter 进行跨语言准确分词。
       error: 数值必须在 $1 到 $2 之间
-    nodeTranslationHotkey:
-      title: 悬停或长按翻译快捷键
-      description: 自定义悬停翻译的修饰键，或使用鼠标长按翻译段落
-      enable: 启用
     autoTranslateLanguages:
       title: 基于语言的自动翻译
       description: 当检测到指定语言时自动翻译页面内容

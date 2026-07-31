@@ -394,6 +394,7 @@ options:
   shortcuts:
     title: Kısayollar
     pageDescription: Okurken çeviriyi başlatan tuşları belirleyin.
+    setShortcut: Kısayolu ayarla
     pageTranslation:
       title: Sayfa çevirisi
       description: Sayfanın tamamını çevirir.
@@ -648,7 +649,14 @@ options:
         description: Sayfa veya seçili metni hızlıca çevirmek için tarayıcı sağ tıklama menüsüne çeviri seçenekleri ekle
   translation:
     title: Çeviri
-    pageDescription: Sayfaların nasıl çevrileceğini belirleyin — mod, kapsam, kısayollar, istemler ve istek limitleri.
+    pageDescription: Sayfaların nasıl çevrileceğini belirleyin — mod, kapsam, istemler ve istek limitleri.
+    preference:
+      title: Tercihler
+    hoverTranslation:
+      title: Üzerine Gelme Çevirisi
+      enable:
+        title: Etkinleştir
+        description: Bir paragrafın üzerine gelin veya uzun basın; yalnızca o paragraf çevrilir.
     requestQueueConfig:
       title: Çeviri Hızı
       firstOnDescription: Çeviri isteklerinin işleme hızını
@@ -750,24 +758,19 @@ options:
             tooLong: CSS çok uzun
             saved: Tüm değişiklikler kaydedildi
     translationMode:
-      title: Çeviri Modu
+      title: Mod
       description: "Çevrilmiş metnin nasıl görüntüleneceğini seçin: iki dilli veya yalnızca çeviri."
       mode:
         bilingual: İki Dilli
         translationOnly: Yalnızca Çeviri
     translationModeShortcut:
-      title: Çeviri Modu Kısayolu
-      description: İki dilli ve yalnızca çeviri modları arasında geçiş yapmak için kısayol tuşunu özelleştirin
       switched: "Çeviri Modu: $1"
     translateRange:
-      title: Çeviri Kapsamı
+      title: Kapsam
       description: Sayfadaki yalnızca ana içeriğin mi yoksa tüm içeriğin mi çevrileceğini seçin.
       range:
         main: Ana İçerik
         all: Tüm İçerik
-    pageTranslationShortcut:
-      title: Sayfa Çeviri Kısayolu
-      description: Tüm web sayfalarını çevirmek için kısayol tuşunu özelleştirin
     preloadConfig:
       title: Ön Çeviri Aralığı
       description: API maliyetlerinden tasarruf etmek için görünüm alanının altındaki ne kadar içeriğin önceden çevrileceğini kontrol edin
@@ -787,10 +790,6 @@ options:
         title: Minimum Kelime
         description: Bu değerden az kelimeli metin düğümleri çevrilmeyecektir. Tüm dillerde doğru kelime sayımı için Intl.Segmenter kullanılır.
       error: Değer $1 ile $2 arasında olmalıdır
-    nodeTranslationHotkey:
-      title: Üzerine Gelme veya Uzun Basma Çeviri Kısayolu
-      description: Üzerine gelme için değiştirici tuşu özelleştirin veya paragrafları çevirmek için uzun basın
-      enable: Etkinleştir
     autoTranslateLanguages:
       title: Dile Göre Otomatik Çevir
       description: Belirli diller algılandığında sayfa içeriğini otomatik olarak çevir

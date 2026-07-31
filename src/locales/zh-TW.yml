@@ -395,6 +395,7 @@ options:
   shortcuts:
     title: 快速鍵
     pageDescription: 設定閱讀時觸發翻譯的按鍵。
+    setShortcut: 設定快速鍵
     pageTranslation:
       title: 網頁翻譯
       description: 翻譯整個網頁。
@@ -764,7 +765,14 @@ options:
         description: 在瀏覽器右鍵選單中新增翻譯選項，快速翻譯頁面或選取的文字
   translation:
     title: 翻譯
-    pageDescription: 控制頁面翻譯的方式：模式、範圍、快速鍵、提示詞和請求限制。
+    pageDescription: 控制頁面翻譯的方式：模式、範圍、提示詞和請求限制。
+    preference:
+      title: 偏好設定
+    hoverTranslation:
+      title: 滑鼠停留翻譯
+      enable:
+        title: 啟用
+        description: 滑鼠停留或長按段落，只翻譯這一段。
     requestQueueConfig:
       title: 翻譯速率
       firstOnDescription: 調整翻譯請求的處理速度，使用
@@ -866,24 +874,19 @@ options:
             tooLong: CSS 過長
             saved: 所有變更已儲存
     translationMode:
-      title: 翻譯模式
+      title: 模式
       description: 選擇翻譯文字的顯示方式：雙語對照或僅顯示翻譯
       mode:
         bilingual: 雙語對照
         translationOnly: 僅顯示翻譯
     translationModeShortcut:
-      title: 切換翻譯模式快捷鍵
-      description: 自訂在雙語對照和僅顯示翻譯模式之間切換的快捷鍵
       switched: 翻譯模式：$1
     translateRange:
-      title: 翻譯範圍
+      title: 範圍
       description: 選擇是僅翻譯主要內容還是翻譯頁面上的所有內容。
       range:
         main: 主要內容
         all: 全部內容
-    pageTranslationShortcut:
-      title: 網頁翻譯快速鍵
-      description: 自訂翻譯整個網頁的快速鍵
     preloadConfig:
       title: 預翻譯範圍
       description: 控制可視區域下方多少內容會被預先翻譯，以節省 API 費用
@@ -903,10 +906,6 @@ options:
         title: 最小詞數
         description: 少於此詞數的文字節點將不會被翻譯。使用 Intl.Segmenter 進行跨語言準確分詞。
       error: 數值必須在 $1 到 $2 之間
-    nodeTranslationHotkey:
-      title: 滑鼠停留或長按翻譯快速鍵
-      description: 自訂滑鼠停留翻譯的修飾鍵，或使用滑鼠長按翻譯段落
-      enable: 啟用
     autoTranslateLanguages:
       title: 依語言自動翻譯
       description: 當偵測到特定語言時自動翻譯頁面內容

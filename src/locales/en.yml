@@ -395,6 +395,7 @@ options:
   shortcuts:
     title: Shortcuts
     pageDescription: Set the keys that trigger translation while you read.
+    setShortcut: Set shortcut
     pageTranslation:
       title: Page translation
       description: Translate the whole page.
@@ -764,7 +765,14 @@ options:
         description: Add translate options to the browser right-click menu for quick page and selection translation
   translation:
     title: Translation
-    pageDescription: Control how pages get translated — mode, range, shortcuts, prompts, and request limits.
+    pageDescription: Control how pages get translated — mode, range, prompts, and request limits.
+    preference:
+      title: Preference
+    hoverTranslation:
+      title: Hover Translation
+      enable:
+        title: Enable
+        description: Hover or long-press a paragraph to translate just that one.
     requestQueueConfig:
       title: Translation Rate
       firstOnDescription: Adjust the processing speed of translation requests using the
@@ -866,24 +874,19 @@ options:
             tooLong: CSS is too long
             saved: All changes saved
     translationMode:
-      title: Translation Mode
+      title: Mode
       description: "Choose how the translated text is displayed: bilingual or translation only."
       mode:
         bilingual: Bilingual
         translationOnly: Translation Only
     translationModeShortcut:
-      title: Translation Mode Shortcut
-      description: Customize the shortcut key for switching between bilingual and translation only modes
       switched: "Translation Mode: $1"
     translateRange:
-      title: Translate Range
+      title: Range
       description: Select whether to translate only the main content or all content on the page.
       range:
         main: Main Content
         all: All Content
-    pageTranslationShortcut:
-      title: Page Translation Shortcut
-      description: Customize the shortcut key for translating entire web pages
     preloadConfig:
       title: Pre-translate Range
       description: Control how much content below the viewport gets pre-translated to save API costs
@@ -903,10 +906,6 @@ options:
         title: Minimum Words
         description: Text nodes with fewer words than this value will not be translated. Uses Intl.Segmenter for accurate word counting across all languages.
       error: Value must be between $1 and $2
-    nodeTranslationHotkey:
-      title: Hover or Long-Press Translation Shortcut
-      description: Customize the hover modifier key or use long press to translate paragraphs
-      enable: Enable
     autoTranslateLanguages:
       title: Auto Translate Based on Language
       description: Automatically translate page content when specific languages are detected

@@ -395,6 +395,7 @@ options:
   shortcuts:
     title: Atajos
     pageDescription: Define las teclas que activan la traducción mientras lees.
+    setShortcut: Configurar atajo
     pageTranslation:
       title: Traducción de la página
       description: Traduce la página completa.
@@ -764,7 +765,14 @@ options:
         description: Añade opciones de traducción al menú contextual del navegador para traducir rápidamente páginas y selecciones
   translation:
     title: Traducción
-    pageDescription: Controla cómo se traducen las páginas — modo, alcance, atajos, prompts y límites de solicitudes.
+    pageDescription: Controla cómo se traducen las páginas — modo, alcance, prompts y límites de solicitudes.
+    preference:
+      title: Preferencias
+    hoverTranslation:
+      title: Traducción al pasar el cursor
+      enable:
+        title: Activar
+        description: Pasa el cursor o mantén pulsado un párrafo para traducir solo ese.
     requestQueueConfig:
       title: Tasa de traducción
       firstOnDescription: Ajusta la velocidad de procesamiento de las solicitudes de traducción usando el
@@ -866,24 +874,19 @@ options:
             tooLong: CSS es demasiado largo
             saved: Todos los cambios guardados
     translationMode:
-      title: Modo de traducción
+      title: Modo
       description: "Elige cómo se muestra el texto traducido: bilingüe o solo traducción."
       mode:
         bilingual: Bilingüe
         translationOnly: Solo traducción
     translationModeShortcut:
-      title: Atajo de modo de traducción
-      description: Personaliza el atajo de teclado para alternar entre los modos bilingüe y solo traducción
       switched: "Modo de traducción: $1"
     translateRange:
-      title: Rango de traducción
+      title: Alcance
       description: Selecciona si traducir solo el contenido principal o todo el contenido de la página.
       range:
         main: Contenido principal
         all: Todo el contenido
-    pageTranslationShortcut:
-      title: Atajo de traducción de página
-      description: Personaliza la tecla de atajo para traducir páginas web completas
     preloadConfig:
       title: Rango de pretraducción
       description: Controla cuánto contenido por debajo de la ventana visible se pretraduce para ahorrar costes de API
@@ -903,10 +906,6 @@ options:
         title: Palabras mínimas
         description: Los nodos de texto con menos palabras que este valor no se traducirán. Usa Intl.Segmenter para un recuento preciso de palabras en todos los idiomas.
       error: El valor debe estar entre $1 y $2
-    nodeTranslationHotkey:
-      title: Atajo de traducción al pasar el cursor o mantener pulsado
-      description: Personaliza la tecla modificadora al pasar el cursor o usa pulsación larga para traducir párrafos
-      enable: Activar
     autoTranslateLanguages:
       title: Traducción automática por idioma
       description: Traduce automáticamente el contenido de la página cuando se detectan idiomas específicos

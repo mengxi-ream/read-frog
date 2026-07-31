@@ -394,6 +394,7 @@ options:
   shortcuts:
     title: ショートカット
     pageDescription: 読みながら翻訳を実行するキーを設定します。
+    setShortcut: ショートカットを設定
     pageTranslation:
       title: ページ翻訳
       description: ページ全体を翻訳します。
@@ -648,7 +649,14 @@ options:
         description: ブラウザの右クリックメニューに翻訳オプションを追加し、ページや選択テキストを素早く翻訳
   translation:
     title: 翻訳
-    pageDescription: ページ翻訳の方法を設定します。モード、範囲、ショートカット、プロンプト、リクエスト制限など。
+    pageDescription: ページ翻訳の方法を設定します。モード、範囲、プロンプト、リクエスト制限など。
+    preference:
+      title: 環境設定
+    hoverTranslation:
+      title: ホバー翻訳
+      enable:
+        title: 有効化
+        description: 段落にホバーまたは長押しすると、その段落だけ翻訳します。
     requestQueueConfig:
       title: 翻訳速度
       firstOnDescription: 翻訳リクエストの処理速度を調整し、
@@ -750,24 +758,19 @@ options:
             tooLong: CSSが長すぎます
             saved: すべての変更が保存されました
     translationMode:
-      title: 翻訳モード
+      title: モード
       description: 翻訳テキストの表示方法を選択：バイリンガルまたは翻訳のみ
       mode:
         bilingual: バイリンガル
         translationOnly: 翻訳のみ
     translationModeShortcut:
-      title: 翻訳モード切り替えショートカット
-      description: バイリンガルモードと翻訳のみモードを切り替えるショートカットキーをカスタマイズ
       switched: 翻訳モード：$1
     translateRange:
-      title: 翻訳範囲
+      title: 範囲
       description: ページのメインコンテンツのみを翻訳するか、すべてのコンテンツを翻訳するかを選択します。
       range:
         main: メインコンテンツ
         all: すべてのコンテンツ
-    pageTranslationShortcut:
-      title: ページ翻訳ショートカットキー
-      description: ウェブページ全体を翻訳するショートカットキーをカスタマイズします
     preloadConfig:
       title: 事前翻訳範囲
       description: ビューポート下のコンテンツをどれだけ事前翻訳するかを制御し、API コストを節約します
@@ -787,10 +790,6 @@ options:
         title: 最小単語数
         description: この値より少ない単語数のテキストノードは翻訳されません。すべての言語で正確な単語カウントのために Intl.Segmenter を使用します。
       error: 値は $1 から $2 の間である必要があります
-    nodeTranslationHotkey:
-      title: ホバーまたは長押し翻訳ショートカットキー
-      description: ホバー翻訳の修飾キーをカスタマイズするか、長押しで段落を翻訳します
-      enable: 有効化
     autoTranslateLanguages:
       title: 言語に基づく自動翻訳
       description: 特定の言語が検出された場合にページコンテンツを自動翻訳します

@@ -179,6 +179,14 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.translation.title",
   },
   {
+    // Titled with the section, so the row that reads "Enable" is still findable on its own.
+    sectionId: "hover-translation",
+    route: "/translation",
+    titleKey: "options.translation.hoverTranslation.title",
+    descriptionKey: "options.translation.hoverTranslation.enable.description",
+    pageKey: "options.translation.title",
+  },
+  {
     sectionId: "custom-translation-style",
     route: "/translation",
     titleKey: "options.translation.translationStyle.title",

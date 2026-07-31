@@ -394,6 +394,7 @@ options:
   shortcuts:
     title: Phím tắt
     pageDescription: Đặt các phím kích hoạt bản dịch khi bạn đọc.
+    setShortcut: Đặt phím tắt
     pageTranslation:
       title: Dịch trang
       description: Dịch toàn bộ trang.
@@ -648,7 +649,14 @@ options:
         description: Thêm các tùy chọn dịch vào menu chuột phải của trình duyệt để dịch nhanh trang hoặc văn bản đã chọn
   translation:
     title: Dịch thuật
-    pageDescription: Kiểm soát cách dịch trang — chế độ, phạm vi, phím tắt, prompt và giới hạn yêu cầu.
+    pageDescription: Kiểm soát cách dịch trang — chế độ, phạm vi, prompt và giới hạn yêu cầu.
+    preference:
+      title: Tùy chọn
+    hoverTranslation:
+      title: Dịch khi di chuột
+      enable:
+        title: Bật
+        description: Di chuột hoặc nhấn giữ một đoạn để chỉ dịch đoạn đó.
     requestQueueConfig:
       title: Tốc độ dịch
       firstOnDescription: Điều chỉnh tốc độ xử lý yêu cầu dịch bằng
@@ -750,24 +758,19 @@ options:
             tooLong: CSS quá dài
             saved: Tất cả thay đổi đã được lưu
     translationMode:
-      title: Chế độ dịch
+      title: Chế độ
       description: "Chọn cách hiển thị văn bản đã dịch: song ngữ hoặc chỉ bản dịch."
       mode:
         bilingual: Song ngữ
         translationOnly: Chỉ bản dịch
     translationModeShortcut:
-      title: Phím tắt chế độ dịch
-      description: Tùy chỉnh phím tắt để chuyển đổi giữa chế độ song ngữ và chỉ bản dịch
       switched: "Chế độ dịch: $1"
     translateRange:
-      title: Phạm vi dịch
+      title: Phạm vi
       description: Chọn chỉ dịch nội dung chính hay tất cả nội dung trên trang.
       range:
         main: Nội dung chính
         all: Tất cả nội dung
-    pageTranslationShortcut:
-      title: Phím tắt dịch trang
-      description: Tùy chỉnh phím tắt để dịch toàn bộ trang web
     preloadConfig:
       title: Phạm vi dịch trước
       description: Kiểm soát lượng nội dung bên dưới vùng nhìn được dịch trước để tiết kiệm chi phí API
@@ -787,10 +790,6 @@ options:
         title: Số từ tối thiểu
         description: Các nút văn bản có ít từ hơn giá trị này sẽ không được dịch. Sử dụng Intl.Segmenter để đếm từ chính xác trên tất cả các ngôn ngữ.
       error: Giá trị phải từ $1 đến $2
-    nodeTranslationHotkey:
-      title: Phím tắt dịch khi di chuột hoặc nhấn giữ
-      description: Tùy chỉnh phím bổ trợ khi di chuột hoặc dùng nhấn giữ để dịch đoạn văn
-      enable: Bật
     autoTranslateLanguages:
       title: Tự động dịch theo ngôn ngữ
       description: Tự động dịch nội dung trang khi phát hiện các ngôn ngữ cụ thể
