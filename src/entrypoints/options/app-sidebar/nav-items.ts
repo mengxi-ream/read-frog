@@ -1,15 +1,26 @@
 export const ROUTE_DEFS = [
   { path: "/" },
+  { path: "/preference" },
+  { path: "/shortcuts" },
   { path: "/api-providers" },
   { path: "/custom-actions" },
-  { path: "/translation" },
-  { path: "/site-rules" },
+  { path: "/page-translation" },
   { path: "/video-subtitles" },
   { path: "/floating-button" },
   { path: "/selection-toolbar" },
   { path: "/context-menu" },
   { path: "/input-translation" },
   { path: "/tts" },
-  { path: "/statistics" },
-  { path: "/config" },
+  { path: "/contact-us" },
+
+  // Detail pages drilled into from a `ConfigNavItem`. They own no sidebar entry — the
+  // sidebar lists its links itself — but route exactly like any other page.
+  { path: "/preference/config-backup" },
+  { path: "/page-translation/custom-css" },
+  { path: "/page-translation/prompts" },
+  { path: "/page-translation/auto-translate-websites" },
+  { path: "/page-translation/never-auto-translate-websites" },
+  { path: "/page-translation/site-rules" },
+  { path: "/video-subtitles/style" },
+  { path: "/video-subtitles/prompts" },
 ] as const

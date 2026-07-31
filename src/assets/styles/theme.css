@@ -62,6 +62,8 @@
   --color-toast-success: var(--rf-toast-success);
   --color-toast-warning: var(--rf-toast-warning);
   --color-link: var(--rf-link);
+  --color-accent-blue: var(--rf-accent-blue);
+  --color-accent-blue-hover: var(--rf-accent-blue-hover);
   --shadow-floating: var(--rf-elevation-floating);
   --animate-toast-success-odd: toast-success-odd 0.32s cubic-bezier(0.5, 1, 0.89, 1);
   --animate-toast-success-even: toast-success-even 0.32s cubic-bezier(0.5, 1, 0.89, 1);
@@ -128,14 +130,14 @@
 }
 
 :root {
-  /* Latin → Onest Variable (bundled via @fontsource-variable/onest, imported
+  /* Latin → Inter Variable (bundled via @fontsource-variable/inter, imported
      only in the extension's own pages — not content scripts). CJK stays on the
      lang-correct native font via system-ui (PingFang / 微软雅黑 on macOS/
      Windows), then falls to 思源黑体 (Source Han Sans / Noto Sans CJK) — the
      default on Android/ChromeOS/Linux — before the generic sans-serif. Emoji
      families stay last. */
   --rf-font-sans:
-    "Onest Variable", ui-sans-serif, system-ui, "Source Han Sans SC", "Noto Sans SC",
+    "Inter Variable", ui-sans-serif, system-ui, "Source Han Sans SC", "Noto Sans SC",
     "Source Han Sans TC", "Noto Sans TC", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol", "Noto Color Emoji";
   --rf-font-mono:
@@ -181,6 +183,20 @@
   --rf-toast-success: var(--color-emerald-500);
   --rf-toast-warning: var(--color-amber-500);
   --rf-link: oklch(54.6% 0.245 262.881);
+  /* The one chromatic colour in an otherwise neutral UI. It marks a control as on
+     (the switch's track, and checkbox / radio whenever they move off the neutral
+     `--rf-primary`) and marks the inviting thing to do in a region (the dashed
+     "add" buttons). Named for what it is rather than for either role, because
+     shadcn already spends `--rf-primary` and `--rf-accent` on neutrals.
+
+     Opacity is fine for tinting a surface with it — `bg-accent-blue/10` behind a
+     dashed border — but not for deriving hover from the solid fill: opacity
+     composites against the page, so `bg-accent-blue/90` would lighten on the white
+     surface and darken on the near-black one. Hence a real second colour, which
+     moves *away* from the surface in both themes — 4.4pp darker on white, 4.5pp
+     lighter on black — so the `.dark` override flips the direction, not the intent. */
+  --rf-accent-blue: oklch(69.256% 0.16062 265.19);
+  --rf-accent-blue-hover: oklch(64.859% 0.16447 264.759);
   --rf-elevation-floating: 0 8px 40px 0 rgb(0 0 0 / 0.08), 0 0 1px 0 rgb(0 0 0 / 0.08);
 }
 
@@ -224,6 +240,13 @@
   --rf-toast-success: var(--color-emerald-500);
   --rf-toast-warning: var(--color-amber-500);
   --rf-link: oklch(70.7% 0.165 254.624);
+  /* Darker and a touch more saturated than the light-theme blue. The light value
+     is 7.1:1 against this near-black surface but only 2.8:1 against the white
+     thumb, which is what makes it glare and washes the thumb into it; dropping to
+     L 58% lands both at ~4.5:1. Hover goes lighter here — see the note in
+     `:root` — because on a dark surface, darker recedes. */
+  --rf-accent-blue: oklch(58% 0.18 265.19);
+  --rf-accent-blue-hover: oklch(62.5% 0.175 264.759);
   --rf-elevation-floating: 0 8px 40px 0 rgb(0 0 0 / 0.28), 0 0 1px 0 rgb(0 0 0 / 0.28);
 }
 

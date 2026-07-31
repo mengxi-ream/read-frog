@@ -4,7 +4,7 @@ import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { i18n } from "@/utils/i18n"
 import { createOutputSchemaField } from "./custom-action"
 
-const T_PREFIX = "options.floatingButtonAndToolbar.selectionToolbar.customActions.templates"
+const T_PREFIX = "options.selectionToolbar.customActions.templates"
 type I18nKey = keyof GeneratedI18nStructure
 
 export interface CustomActionTemplate {
@@ -124,9 +124,7 @@ export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
       prompt: "",
       outputSchema: [
         createOutputSchemaField(
-          i18n.t(
-            "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.defaultFieldName",
-          ),
+          i18n.t("options.selectionToolbar.customActions.form.defaultFieldName"),
         ),
       ],
     }),

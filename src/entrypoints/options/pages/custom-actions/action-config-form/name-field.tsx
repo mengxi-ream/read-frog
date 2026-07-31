@@ -22,18 +22,13 @@ export const NameField = withForm({
         validators={{
           onChange: ({ value }) => {
             if (!value.trim()) {
-              return i18n.t(
-                "options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.nameRequired",
-              )
+              return i18n.t("options.selectionToolbar.customActions.errors.nameRequired")
             }
             const duplicate = customActions.find(
               (action) => action.name === value && action.id !== selectedActionId,
             )
             if (duplicate) {
-              return i18n.t(
-                "options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.duplicateName",
-                [value],
-              )
+              return i18n.t("options.selectionToolbar.customActions.errors.duplicateName", [value])
             }
             return undefined
           },
@@ -42,9 +37,7 @@ export const NameField = withForm({
         {(field) => (
           <field.InputFieldAutoSave
             formForSubmit={form}
-            label={i18n.t(
-              "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.name",
-            )}
+            label={i18n.t("options.selectionToolbar.customActions.form.name")}
             labelExtra={labelExtra}
             readOnly={readOnly}
           />

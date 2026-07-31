@@ -83,7 +83,7 @@ describe("featureProviderSelectorList custom action filtering", () => {
 
     expect(screen.queryByText("Disabled Action")).not.toBeInTheDocument()
     expect(
-      screen.queryByText("options.general.featureProviders.customActions"),
+      screen.queryByText("options.selectionToolbar.customActions.title"),
     ).not.toBeInTheDocument()
   })
 })

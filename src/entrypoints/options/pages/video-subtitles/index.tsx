@@ -1,25 +1,25 @@
 import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
-import { ClearAiSegmentationCache } from "./clear-ai-segmentation-cache"
-import { SubtitlesAiQuota } from "./subtitles-ai-quota"
-import { SubtitlesConfig } from "./subtitles-config"
-import { SubtitlesCustomPrompts } from "./subtitles-custom-prompts"
-import { SubtitlesRequestBatch } from "./subtitles-request-batch"
-import { SubtitlesRequestRate } from "./subtitles-request-rate"
-import { SubtitlesStyleSettings } from "./subtitles-style-settings"
+import { AiQuotaSection } from "./ai-quota"
+import { CacheSection } from "./cache"
+import { CustomPromptsSection } from "./custom-prompts"
+import { PreferenceSection } from "./preference"
+import { SubtitlesQueueSection } from "./subtitles-queue"
+import { SubtitlesStyleSection } from "./subtitles-style"
 
 export function VideoSubtitlesPage() {
   return (
-    <PageLayout title={i18n.t("options.videoSubtitles.title")}>
-      <div className="*:border-b [&>*:last-child]:border-b-0">
-        <SubtitlesConfig />
-        <SubtitlesAiQuota />
-        <SubtitlesStyleSettings />
-        <SubtitlesCustomPrompts />
-        <SubtitlesRequestRate />
-        <SubtitlesRequestBatch />
-        <ClearAiSegmentationCache />
-      </div>
+    <PageLayout
+      title={i18n.t("options.videoSubtitles.title")}
+      description={i18n.t("options.videoSubtitles.pageDescription")}
+      innerClassName="flex flex-col gap-10"
+    >
+      <PreferenceSection />
+      <AiQuotaSection />
+      <SubtitlesStyleSection />
+      <CustomPromptsSection />
+      <SubtitlesQueueSection />
+      <CacheSection />
     </PageLayout>
   )
 }

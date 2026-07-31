@@ -17,7 +17,7 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
-import { ConfigCard } from "../../components/config-card"
+import { ConfigItem } from "../../components/config-item"
 import { validateUserRulesDocument } from "./validate-user-rules"
 
 const MAX_VISIBLE_ISSUES = 5
@@ -75,11 +75,11 @@ export function UserRulesEditor() {
   }
 
   return (
-    <ConfigCard
+    <ConfigItem
       id="site-rules-user-rules"
+      orientation="vertical"
       title={i18n.t("options.siteRules.userRules.title")}
       description={i18n.t("options.siteRules.userRules.description")}
-      className="lg:flex-col lg:[&>div]:basis-auto"
     >
       <div className="flex flex-col gap-3">
         <JSONCodeEditor
@@ -130,7 +130,7 @@ export function UserRulesEditor() {
           </Button>
         </div>
       </div>
-    </ConfigCard>
+    </ConfigItem>
   )
 }
 

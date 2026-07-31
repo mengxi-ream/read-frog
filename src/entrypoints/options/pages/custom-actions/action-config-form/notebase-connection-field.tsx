@@ -60,9 +60,7 @@ interface SelectItemData<T> {
 }
 
 function t(key: string) {
-  return i18n.t(
-    `options.floatingButtonAndToolbar.selectionToolbar.customActions.form.notebase.${key}` as never,
-  )
+  return i18n.t(`options.selectionToolbar.customActions.form.notebase.${key}` as never)
 }
 
 function getAccountFallback(

@@ -106,7 +106,12 @@ export function WhatsNewFooter() {
       <SidebarMenu>
         <SidebarMenuItem>
           <PopoverTrigger
-            render={<SidebarMenuButton aria-label={i18n.t("options.whatsNew.title")} />}
+            render={
+              <SidebarMenuButton
+                aria-label={i18n.t("options.whatsNew.title")}
+                tooltip={i18n.t("options.whatsNew.title")}
+              />
+            }
           >
             <Icon icon="tabler:rss" />
             <span>{i18n.t("options.whatsNew.title")}</span>

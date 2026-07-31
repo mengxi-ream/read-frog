@@ -40,7 +40,7 @@ interface ProviderSelectorProps {
   triggerSize?: ProviderSelectorTriggerSize
   selectContentProps?: Pick<
     ComponentProps<typeof SelectContent>,
-    "container" | "positionerClassName"
+    "container" | "positionerClassName" | "align"
   >
 }
 
@@ -124,7 +124,7 @@ function GroupedSelect({
   triggerSize: ProviderSelectorTriggerSize
   selectContentProps?: Pick<
     ComponentProps<typeof SelectContent>,
-    "container" | "positionerClassName"
+    "container" | "positionerClassName" | "align"
   >
   theme: Theme
 }) {
@@ -148,7 +148,7 @@ function GroupedSelect({
           )}
         </SelectValue>
       </SelectTrigger>
-      <SelectContent className="min-w-fit" {...selectContentProps}>
+      <SelectContent {...selectContentProps}>
         {providerGroups.map((group) => (
           <SelectGroup key={group.labelKey}>
             <SelectLabel>{i18n.t(group.labelKey)}</SelectLabel>
@@ -186,7 +186,7 @@ function UngroupedSelect({
   triggerSize: ProviderSelectorTriggerSize
   selectContentProps?: Pick<
     ComponentProps<typeof SelectContent>,
-    "container" | "positionerClassName"
+    "container" | "positionerClassName" | "align"
   >
   theme: Theme
 }) {
@@ -211,7 +211,7 @@ function UngroupedSelect({
           )}
         </SelectValue>
       </SelectTrigger>
-      <SelectContent className="min-w-fit" {...selectContentProps}>
+      <SelectContent {...selectContentProps}>
         <SelectGroup>
           {providers.map((provider) => (
             <SelectItem key={provider.id} value={provider}>

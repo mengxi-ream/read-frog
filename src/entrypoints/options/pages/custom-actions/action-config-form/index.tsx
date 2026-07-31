@@ -19,8 +19,8 @@ export function CustomActionConfigForm() {
     return (
       <EntityEditor.Empty>
         {selectionToolbarConfig.customActions.length === 0
-          ? i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.empty")
-          : i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.edit")}
+          ? i18n.t("options.selectionToolbar.customActions.empty")
+          : i18n.t("options.selectionToolbar.customActions.edit")}
       </EntityEditor.Empty>
     )
   }

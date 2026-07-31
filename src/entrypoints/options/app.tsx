@@ -2,10 +2,15 @@ import type { ComponentType } from "react"
 import { lazy, Suspense } from "react"
 import { Route, Routes } from "react-router"
 import { ROUTE_DEFS } from "./app-sidebar/nav-items"
-import { GeneralPage } from "./pages/general"
 
 type RoutePath = (typeof ROUTE_DEFS)[number]["path"]
 
+const PreferencePage = lazy(() =>
+  import("./pages/preference").then((module) => ({ default: module.PreferencePage })),
+)
+const ShortcutsPage = lazy(() =>
+  import("./pages/shortcuts").then((module) => ({ default: module.ShortcutsPage })),
+)
 const ApiProvidersPage = lazy(() =>
   import("./pages/api-providers").then((module) => ({ default: module.ApiProvidersPage })),
 )
@@ -36,27 +41,67 @@ const InputTranslationPage = lazy(() =>
 const TextToSpeechPage = lazy(() =>
   import("./pages/text-to-speech").then((module) => ({ default: module.TextToSpeechPage })),
 )
-const StatisticsPage = lazy(() =>
-  import("./pages/statistics").then((module) => ({ default: module.StatisticsPage })),
+const ContactUsPage = lazy(() =>
+  import("./pages/contact-us").then((module) => ({ default: module.ContactUsPage })),
 )
-const ConfigPage = lazy(() =>
-  import("./pages/config").then((module) => ({ default: module.ConfigPage })),
+const CustomCssPage = lazy(() =>
+  import("./pages/translation/translation-style/custom-css").then((module) => ({
+    default: module.CustomCssPage,
+  })),
+)
+const PersonalizedPromptsPage = lazy(() =>
+  import("./pages/translation/personalized-prompts/prompts").then((module) => ({
+    default: module.PersonalizedPromptsPage,
+  })),
+)
+const AutoTranslateWebsitesPage = lazy(() =>
+  import("./pages/translation/translation-control/website-patterns-page").then((module) => ({
+    default: module.AutoTranslateWebsitesPage,
+  })),
+)
+const NeverAutoTranslateWebsitesPage = lazy(() =>
+  import("./pages/translation/translation-control/website-patterns-page").then((module) => ({
+    default: module.NeverAutoTranslateWebsitesPage,
+  })),
+)
+const ConfigBackupPage = lazy(() =>
+  import("./pages/preference/config/config-backup").then((module) => ({
+    default: module.ConfigBackupPage,
+  })),
+)
+const SubtitlesStylePage = lazy(() =>
+  import("./pages/video-subtitles/subtitles-style/style-editor").then((module) => ({
+    default: module.SubtitlesStylePage,
+  })),
+)
+const SubtitlesCustomPromptsPage = lazy(() =>
+  import("./pages/video-subtitles/custom-prompts/prompts").then((module) => ({
+    default: module.SubtitlesCustomPromptsPage,
+  })),
 )
 
 const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
-  "/": GeneralPage,
+  "/": ApiProvidersPage,
+  "/preference": PreferencePage,
+  "/shortcuts": ShortcutsPage,
   "/api-providers": ApiProvidersPage,
   "/custom-actions": CustomActionsPage,
-  "/translation": TranslationPage,
-  "/site-rules": SiteRulesPage,
+  "/page-translation": TranslationPage,
   "/video-subtitles": VideoSubtitlesPage,
   "/floating-button": FloatingButtonPage,
   "/selection-toolbar": SelectionToolbarPage,
   "/context-menu": ContextMenuPage,
   "/input-translation": InputTranslationPage,
   "/tts": TextToSpeechPage,
-  "/statistics": StatisticsPage,
-  "/config": ConfigPage,
+  "/contact-us": ContactUsPage,
+  "/preference/config-backup": ConfigBackupPage,
+  "/page-translation/custom-css": CustomCssPage,
+  "/page-translation/prompts": PersonalizedPromptsPage,
+  "/page-translation/auto-translate-websites": AutoTranslateWebsitesPage,
+  "/page-translation/never-auto-translate-websites": NeverAutoTranslateWebsitesPage,
+  "/page-translation/site-rules": SiteRulesPage,
+  "/video-subtitles/style": SubtitlesStylePage,
+  "/video-subtitles/prompts": SubtitlesCustomPromptsPage,
 }
 
 function RouteLoadingFallback() {

@@ -81,31 +81,45 @@ errorRecovery:
     confirm: 초기화
     cancel: 취소
 options:
+  batchSavings:
+    savedCost: API 비용 약 $1% 절감
   commandPalette:
     placeholder: 설정 검색...
     noResults: 설정을 찾을 수 없습니다
   sidebar:
     settings: 설정
-    tools: 도구
+    features: 기능
     product: 제품
   tools:
     translationHub: 번역 허브
   product:
     roadmap: 로드맵
-    feedback: 피드백
-  setAPIKeyWarning:
-    please: API Key를 설정해 주세요
-    page: 페이지에서
-  betaExperience:
-    title: Beta 체험
-    description: 실험적 기능과 새로운 기능에 대한 조기 액세스를 활성화합니다. 이러한 기능은 불안정하거나 불완전할 수 있습니다.
-    enabled: Beta 체험 활성화
+  contactUs:
+    title: 문의하기
+    pageDescription: 다음에 무엇을 만들면 좋을지, 또는 무엇이 잘못됐는지 알려주세요.
+    featureRequest:
+      title: 기능 제안
+      description: 아이디어를 제안하고 다음에 개발할 기능에 투표하세요
+    bugReport:
+      title: 버그 신고
+      description: 지원 티켓을 열고 해결될 때까지 진행 상황을 확인하세요
+    email:
+      title: 이메일 문의
+      description: contact@readfrog.app 으로 팀에 직접 연락하세요
+    wechat:
+      title: WeChat
+      description: QR 코드를 스캔해 개발자를 WeChat에 추가하세요
+      qrCodeAlt: WeChat QR 코드
   apiProviders:
     title: API 제공업체
-    description: 번역 및 어휘 분석 기능을 위한 API 제공업체를 구성합니다. 20개 이상의 내장 제공업체와 모든 OpenAI 호환 API를 지원합니다.
+    pageDescription: Read Frog가 호출하는 AI 서비스를 연결하고, 각 기능에 사용할 서비스를 선택하세요.
+    description: Read Frog가 호출할 수 있는 제공업체를 추가합니다. 20개 이상이 내장되어 있고, OpenAI 호환 API도 모두 사용할 수 있습니다.
+    configTitle: 제공업체 구성
     addProvider: 제공업체 추가
     builtInProvider: 내장 제공업체
     sponsorCta: 빠르고 가성비 좋은 AI 받기
+    setApiKeyWarning:
+      message: API 키는 $1 페이지에서 설정하세요
     badges:
       featureCount: $1 개 기능
       sponsor: 스폰서
@@ -152,7 +166,8 @@ options:
         apiKeyRequired: 먼저 API 키를 추가하세요
         searchModels: 모델 검색...
         noModelsFound: 모델을 찾을 수 없습니다
-      featureProviders: 기능 제공업체
+        label: 모델
+        enterCustomModel: 사용자 정의 모델 이름 입력
       advancedOptions: 고급 옵션
       providerSettingLabels:
         region: 리전
@@ -222,42 +237,19 @@ options:
       success: 성공
       failed: 실패
       slow: 느림(사고 모드 조정 권장)
-  general:
-    title: 일반
-    interfaceLanguage:
-      title: 인터페이스 언어
-      description: 브라우저 언어와 별개로 확장 프로그램의 인터페이스 언어를 선택합니다.
-      auto: 자동(브라우저 따름)
-    appearance:
-      title: 외관
-      theme: 테마
-      system: 시스템
-      light: 라이트
-      dark: 다크
     featureProviders:
       title: 기능 제공업체
       description: 각 기능에 사용할 제공업체를 선택
-      customActions: 사용자 정의 AI 액션
       features:
         translate: 페이지 번역
         selectionToolbar_translate: 선택 툴바 번역
-        tts: 텍스트 음성 변환
         inputTranslation: 입력 번역
         videoSubtitles: 비디오 자막
-    translationConfig:
-      model:
-        title: 모델
-        enterCustomModel: 사용자 정의 모델 이름 입력
-    clearCache:
-      title: 캐시 지우기
-      description: 브라우저의 모든 번역 캐시를 지웁니다
-      clearing: 지우는 중...
-      dialog:
-        title: 캐시 지우기
-        trigger: 캐시 지우기
-        confirm: 확인
-        cancel: 취소
-        description: 이 작업은 모든 번역 캐시를 지웁니다. 이 작업은 되돌릴 수 없습니다.
+      descriptions:
+        translate: 페이지 전체를 대역 또는 원문 대체 방식으로 번역합니다.
+        selectionToolbar_translate: 선택 도구 모음에서 선택한 텍스트를 번역합니다.
+        inputTranslation: 입력창에 쓴 내용을 보내기 전에 번역합니다.
+        videoSubtitles: 동영상 플레이어에 표시되는 자막을 번역합니다.
     languageDetection:
       title: 언어 감지
       description: 자동 번역 언어 감지, 건너뛰기 언어 감지 및 읽기 음성 선택 정확도에 영향을 줍니다.
@@ -265,512 +257,48 @@ options:
         basic: 기본
         llm: LLM
       provider:
-        label: 감지 제공자
-        placeholder: 제공자 선택
+        label: 감지 제공업체
+        placeholder: 제공업체 선택
       status:
-        noProviders: LLM 제공자를 먼저 구성하세요
+        noProviders: LLM 제공업체를 먼저 구성하세요
         basicRecommend: LLM 활성화 권장
         llmEnabled: LLM 감지 활성화됨
-  siteControl:
-    title: 사이트 제어
-    mode:
-      title: 확장 프로그램 활성화 모드
-      description: 블랙리스트 모드를 사용하여 특정 사이트에서 확장 프로그램을 비활성화하거나, 화이트리스트 모드를 사용하여 특정 사이트에서만 실행되도록 제한할 수 있습니다.
-      blacklist: 나열된 사이트에서만 비활성화
-      whitelist: 나열된 사이트에서만 실행
-    patterns:
-      enterUrlPattern: "URL 패턴 입력 (예: example.com)"
-      urlPattern: URL 패턴
-  overlayTools:
-    title: 오버레이 도구
-    floatingButton:
-      title: 플로팅 버튼
-    selectionToolbar:
-      title: 선택 툴바
-    contextMenu:
-      title: 컨텍스트 메뉴
-    inputTranslation:
-      title: 입력 번역
-  inputTranslation:
-    provider:
-      title: 번역 제공자
-      description: 입력 번역에 사용할 번역 제공자 선택
-      label: 제공자
-    toggle:
-      title: 트리플 스페이스 번역 활성화
-      description: 입력 필드에서 스페이스바를 빠르게 3번 누르면 내용이 번역됩니다
-    languages:
-      title: 번역 언어
-      description: 입력 번역의 소스 및 타겟 언어 선택
-      sourceCode: 페이지 소스 언어
-      targetCode: 페이지 타겟 언어
-      enableCycle: 매번 방향 전환
-    threshold:
-      title: 트리거 임계값
-      description: 스페이스바 누름 사이의 시간 간격
-      label: 임계값 (밀리초)
-      hint: 연속 스페이스바 누름 사이의 시간 간격 (100-1000밀리초)
-      error: 값은 $1에서 $2 사이여야 합니다
-  floatingButtonAndToolbar:
-    title: 플로팅 버튼 및 툴바
-    floatingButtonDemoImageAlt: 플로팅 버튼 데모
-    selectionToolbarDemoImageAlt: 선택 툴바 데모
-    floatingButton:
-      globalToggle:
-        title: 플로팅 버튼 활성화
-        description: 웹 페이지에 플로팅 버튼을 표시하여 Read Frog 기능에 빠르게 액세스
-      closeMenu:
-        disableForSite: 이 사이트에서 비활성화
-        disableGlobally: 전역 비활성화
-      tooltips:
-        togglePageTranslation: 페이지 번역 전환
-        floatingButtonOptions: 플로팅 버튼 옵션
-        lockPosition: 위치 잠금
-        unlockPosition: 위치 잠금 해제
-        settings: 설정
-        feedback: 피드백 보내기
-      disabledSites:
-        title: 플로팅 버튼 비활성화 사이트
-        description: 플로팅 버튼을 비활성화할 웹사이트를 설정합니다
-        enterUrlPattern: URL 패턴 입력
-        urlPattern: URL 패턴
-      clickAction:
-        title: 클릭 동작
-        description: 플로팅 버튼을 클릭할 때 실행할 동작 선택
-        panel: 사이드 패널 열기
-        translate: 페이지 번역 전환
-      side:
-        title: 버튼 위치
-        description: 플로팅 버튼을 페이지 어느 쪽에 고정할지 선택합니다
-        left: 왼쪽
-        right: 오른쪽
-    selectionToolbar:
-      globalToggle:
-        title: 선택 툴바 활성화
-        description: 웹 페이지에서 텍스트를 선택할 때 도구 모음을 표시하여 빠르게 번역, 읽기, AI 액션을 사용할 수 있습니다
-      opacity:
-        title: 투명도
-        description: 선택 툴바와 여기서 열리는 확장 창의 투명도를 조절합니다
-      featureToggles:
-        title: 기능 토글
-        description: 선택 툴바에 표시할 기본 제공 기능 선택
-        translate: 번역
-        speak: 읽기
-      saveSuggestion:
-        title: 저장 제안
-        description: AI 제공자로 선택 번역 후 Notebase에 저장할 단어를 추천합니다
-        action: 작업
-      shortcut:
-        title: Selection Translation Shortcut
-        description: Customize the shortcut key for translating selected text
-      closeMenu:
-        disableForSite: 이 사이트에서 비활성화
-        disableGlobally: 전역 비활성화
-      disabledSites:
-        title: 선택 툴바 비활성화 사이트
-        description: 선택 툴바를 비활성화할 웹사이트를 설정합니다
-        enterUrlPattern: URL 패턴 입력
-        urlPattern: URL 패턴
-      errors:
-        customActionFailed: 사용자 지정 작업 실패
-        customActionFailedFallback: 사용자 지정 작업 요청에 실패했습니다
-        actionUnavailable: 선택한 작업을 사용할 수 없습니다
-        missingSelection: 선택된 텍스트가 없습니다
-        providerDisabled: 선택한 제공업체가 비활성화되었습니다
-        providerUnavailable: 선택한 제공업체를 사용할 수 없습니다
-      features:
-        provider: 제공업체
-        selectProvider: 제공업체 선택
-        noProviderAvailable: 사용 가능한 제공업체가 없습니다
-        useProviderDefaultModel: 제공업체 기본 모델 사용
-        useCustomModel: 사용자 지정 모델 사용
-        customModel: 사용자 지정 모델
-        model: 모델
-        modelNotAvailableForNonLLM: 모델 설정은 LLM 제공업체에서만 사용할 수 있습니다
-        translate:
-          title: 선택 번역
-          description: 선택 툴바 번역 기능의 제공업체와 모델을 구성합니다
-      customActions:
-        title: 커스텀 AI 액션
-        description: 선택한 텍스트에 대한 구조화된 AI 작업을 직접 추가하세요
-        builtIn: 기본 제공
-        add: AI 액션 추가
-        edit: AI 액션 편집
-        empty: 아직 커스텀 AI 액션이 없습니다
-        noEnabledLlmProvider: 커스텀 AI 액션을 만들기 전에 최소 하나의 LLM 제공업체를 활성화하세요
-        table:
-          name: 이름
-          provider: 제공업체
-          fields: 필드
-          actions: 작업
-        form:
-          name: 이름
-          customize: 사용자 지정
-          customizeTooltip: 기본 제공 작업의 프롬프트는 변경할 수 없습니다. 이 버튼을 클릭하여 편집 가능한 복사본을 만들고 프롬프트를 수정하세요.
-          icon: 아이콘
-          iconField:
-            chooseAriaLabel: 아이콘 선택
-            chooseTitle: 아이콘 선택
-            inputPlaceholder: 아이콘 이름 입력
-            helpAriaLabel: 아이콘 도움말 더보기
-            helpTitle: 원하는 아이콘을 못 찾았나요?
-            helpStepBrowsePrefix: ""
-            helpStepBrowseSuffix: 에서 아이콘 찾아보기
-            helpStepCopyPrefix: "예를 들어 "
-            helpStepCopySuffix: " 같은 아이콘 이름을 복사해 입력란에 붙여넣으세요."
-          provider: 제공업체(구조화 출력 지원 필요)
-          selectProvider: 제공업체 선택
-          systemPrompt: 시스템 프롬프트
-          prompt: 프롬프트
-          outputSchema: 출력 스키마
-          addField: 필드 추가
-          fieldName: 필드 이름
-          fieldType: 필드 유형
-          fieldDescription: 설명
-          fieldDescriptionPlaceholder: 이 필드에 포함할 내용을 설명하세요...
-          fieldSpeaking: 음성 읽기 사용
-          actions: 작업
-          cancel: 취소
-          save: 저장
-          defaultFieldName: 결과
-          fieldNamePlaceholder: 필드명
-          autoFieldPrefix: 필드
-          addFieldDialog:
-            title: 출력 필드 추가
-          editFieldDialog:
-            title: 출력 필드 편집
-            save: 저장
-          deleteFieldDialog:
-            title: 출력 필드를 삭제하시겠습니까?
-            description: 이 출력 필드가 제거됩니다.
-            confirm: 삭제
-            cancel: 취소
-          notebase:
-            title: Notebase 연결
-            description: 이 액션의 구조화된 결과를 원격 Notebase에 저장합니다.
-            loginRequiredTitle: Notebase를 설정하려면 로그인하세요
-            loginRequiredDescription: notebase를 선택하거나 매핑을 편집하기 전에 readfrog.app에 로그인하세요.
-            loginRequiredConnectedDescription: 이 연결은 아래 계정에서 만들어졌습니다. 같은 계정으로 로그인하면 필드 매핑이 복원됩니다. 다른 계정으로 로그인하면 Notebase를 만들거나 연결할 때 이전 매핑이 지워집니다.
-            loginAction: 로그인
-            connectedAccountLabel: 연결된 계정
-            currentAccountLabel: 현재 계정
-            unknownConnectedAccount: 알 수 없는 계정
-            tableLabel: Notebase
-            tablePlaceholder: notebase 선택
-            tableClearOption: notebase 연결 안 함
-            clearConnectionAction: 연결 지우기
-            refreshAction: 새로고침
-            emptyTitle: 아직 Notebase가 없습니다
-            emptyDescription: readfrog.app에서 notebase를 만든 뒤 여기로 돌아와 필드를 매핑하세요.
-            openNotebaseAction: Notebase 열기
-            accessDeniedTitle: Notebase에 접근할 수 없습니다
-            accessDeniedDescription: 이 계정에는 Notebase 데이터를 불러올 권한이 없습니다.
-            listErrorTitle: Notebase 목록을 불러오지 못했습니다
-            listErrorDescription: 잠시 후 Notebase 목록을 다시 새로고침해 보세요.
-            accountMismatchTitle: Notebase 연결이 다른 계정에 속해 있습니다
-            accountMismatchDescription: 이 연결은 아래 연결된 계정에 묶여 있습니다. 연결을 지우거나 현재 계정에서 사용할 수 있는 Notebase를 선택하세요.
-            tableUnavailableTitle: 선택한 notebase를 더 이상 사용할 수 없습니다
-            tableUnavailableDescription: 이 Notebase가 없거나 열 수 없습니다. 연결을 지우거나 다른 Notebase를 선택하세요.
-            tableUnavailableOption: 사용 불가
-            schemaErrorTitle: notebase 스키마를 불러오지 못했습니다
-            schemaErrorDescription: 잠시 후 다시 새로고침해 보세요.
-            schemaLoading: notebase 스키마를 불러오는 중...
-            mappingsLabel: 필드 매핑
-            mappingsEmpty: 아직 매핑이 없습니다. 필드를 저장할 준비가 되면 추가하세요.
-            addMappingAction: 매핑 추가
-            removeMappingAction: 매핑 제거
-            localFieldLabel: 액션 필드
-            localFieldPlaceholder: 액션 필드 선택
-            remoteFieldLabel: Notebase 필드
-            remoteFieldPlaceholder: notebase 필드 선택
-            columnUnavailableOption: 삭제됨
-            invalidMappingsTitle: 일부 매핑을 확인해야 합니다
-            invalidMappingsDescription: 잘못된 매핑은 유지됩니다. Notebase에 저장하기 전에 수정하세요.
-            mappingMissingLocal: 매핑된 액션 필드가 더 이상 존재하지 않습니다.
-            mappingMissingRemote: 매핑된 notebase 필드가 더 이상 존재하지 않습니다.
-            mappingMissingSchema: 이 매핑을 검증하려면 notebase 스키마를 새로고침하세요.
-            mappingIncompatible: 필드 타입이 더 이상 맞지 않습니다.
-          tokens:
-            selection: 선택한 텍스트 내용
-            paragraphs: 선택 영역과 겹치는 문단 내용을 빈 줄로 이어 붙인 값이며, 사용자 정의 AI 액션에 전달될 때는 앞의 2000자로 잘립니다
-            targetLanguage: 사용자의 대상 언어
-            webTitle: 웹페이지 제목
-            webContent: 현재 페이지에서 추출한 웹페이지 본문(앞의 2000자로 잘린 버전)
-          delete: 삭제
-          deleteDialog:
-            title: 사용자 정의 액션을 삭제하시겠습니까?
-            description: 이 작업은 취소할 수 없습니다.
-            confirm: 삭제
-            cancel: 취소
-        errors:
-          nameRequired: 이름은 필수입니다
-          duplicateName: '중복된 액션 이름 "$1"'
-          invalidIcon: 올바르지 않은 Iconify 아이콘 문자열입니다
-          providerRequired: 활성화된 LLM 제공업체를 선택하세요
-          outputSchemaRequired: 최소 하나의 출력 필드를 추가하세요
-          fieldKeyRequired: 필드 이름은 필수입니다
-          duplicateFieldKey: 필드 이름은 고유해야 합니다
-    contextMenu:
-      title: 컨텍스트 메뉴
-      translate:
-        title: 우클릭 번역 활성화
-        description: 브라우저 우클릭 메뉴에 번역 옵션을 추가하여 페이지나 선택한 텍스트를 빠르게 번역
-  translation:
-    title: 번역
-    requestQueueConfig:
-      title: 번역 속도
-      firstOnDescription: 번역 요청 처리 속도 조정 및
-      lastOnDescription: 구현
-      capacity:
-        title: 최대 버스트 요청 수
-        description: 허용되는 임시 버스트 요청 수는 짧은 시간 내 동시 처리 가능한 최대 요청 수를 결정함
-      rate:
-        title: 초당 평균 요청 수
-        description: 초당 평균 요청 수 (단, 최대 버스트 요청 수 설정을 통한 일시적 초과 요청 전송 허용). 소수도 지원합니다. 예를 들어 0.25는 4초마다 1회 요청을 의미하며, Gemini 무료 등급 등 낮은 속도 제한 API에 유용합니다
-    batchQueueConfig:
-      title: 배치 번역
-      description: 배치 번역 시 문자 수 제한 및 최대 단락 수 구성 (대규모 언어 모델 번역에서만 유효)
-      maxCharactersPerBatch:
-        title: 최대 문자 수
-        description: 배치 요청당 허용되는 최대 문자 수로 각 번역의 콘텐츠 양을 제어합니다
-      maxItemsPerBatch:
-        title: 최대 단락 수
-        description: 각 배치 번역의 최대 단락 수로 각 번역의 콘텐츠 양을 제어합니다
-      statisticsLink: 지난 7일간 약 $1 의 비용을 절약했습니다
-    autoTranslateWebsite:
-      title: 웹사이트 기반 자동 번역
-      description: 이 사이트를 항상 번역합니다
-      urlPattern: URL 패턴
-      enterUrlPattern: URL 패턴 입력
-    neverAutoTranslateWebsite:
-      title: Never Auto Translate Based on Website
-      description: Never automatically translate this website
-      urlPattern: URL Pattern
-      enterUrlPattern: Enter URL Pattern
-    personalizedPrompts:
-      title: 개인화된 프롬프트
-      description: 다양한 유형의 프롬프트를 사용자 정의하여, 번역 시 프롬프트 유형을 직접 조정할 수 있습니다. 프롬프트는 사용자가 LLM에게 보내는 텍스트를 나타내며.
-      communityPrompts: 커뮤니티에서 프롬프트 가져오기 또는 공유
-      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
-      addPrompt: 프롬프트 추가
-      default: 기본
-      importSuccess: 가져오기 성공
-      import: 가져오기
-      export: 내보내기
-      current: 사용 중
-      editPrompt:
-        title: 프롬프트 편집
-        name: 이름
-        systemPrompt: 시스템 프롬프트
-        prompt: 프롬프트
-        promptCellInput:
-          input: 번역할 텍스트 내용
-          targetLanguage: 목표 언어
-          webTitle: 웹페이지 제목
-          webDescription: 페이지 메타데이터의 웹페이지 설명
-          webContent: 웹페이지 본문(앞의 2000자로 잘림)
-          webSummary: 웹페이지 요약 (AI 스마트 컨텍스트 필요)
-        save: 저장
-        close: 취소
-      deletePrompt:
-        title: 프롬프트 삭제
-        description: 이 프롬프트를 삭제하시겠습니까
-        confirm: 확인
-        cancel: 취소
-      exportPrompt:
-        exportSelected: 선택 항목 내보내기
-        cancel: 취소
-    translationStyle:
-      title: 번역 표시 스타일
-      description: 번역 결과와 원문을 구분하기 위해 원하는 스타일을 설정하세요
-      useCustomStyle: 커스텀 CSS 스타일 사용
-      useCustomStyleDescription: 모든 CSS 지원, 글꼴, 애니메이션, 언어별 스타일 등
-      presetStyle: 프리셋 스타일
-      cssEditor: CSS 편집기
-      preview: 미리보기
-      stylePreviewLanguage: 언어
-      stylePreviewDirection: 방향
-      stylePreviewTranslatedText: 번역된 텍스트
-      style:
-        default: 없음
-        blur: 흐림 효과
-        blockquote: 인용
-        weakened: 약화
-        dashedLine: 점선
-        border: 테두리
-        textColor: 텍스트 색상
-        background: 배경
-      customCSS:
-        editor:
-          placeholder: |
-            /* 예제: 사용자 정의 색상 및 배경 스타일 */
-            [data-read-frog-custom-translation-style='custom'] {
-              color: #414535;
-              background-color: light-dark(#F2E3BC, #C19875);
-              padding: 2px 4px;
-              border-radius: 4px;
-            }
-          saveButton: 저장
-          savedButton: 저장됨
-          validation:
-            validating: 검증 중...
-            valid: CSS가 유효합니다
-            syntaxError: CSS에 구문 오류가 있습니다
-            tooLong: CSS가 너무 깁니다
-            saved: 모든 변경사항이 저장되었습니다
-    translationMode:
-      title: 번역 모드
-      description: "번역된 텍스트 표시 방법 선택: 이중 언어 또는 번역만"
-      mode:
-        bilingual: 이중 언어
-        translationOnly: 번역만
-    translationModeShortcut:
-      title: 번역 모드 전환 단축키
-      description: 이중 언어 모드와 번역만 모드 간 전환 단축키를 사용자 지정합니다
-      switched: "번역 모드: $1"
-    translateRange:
-      title: 번역 범위
-      description: 페이지의 주요 내용만 번역할지 모든 내용을 번역할지 선택합니다.
-      range:
-        main: 주요 내용
-        all: 전체 내용
-    pageTranslationShortcut:
-      title: 페이지 번역 단축키
-      description: 전체 웹페이지를 번역하는 단축키를 사용자 지정합니다
-    preloadConfig:
-      title: 사전 번역 범위
-      description: API 비용을 절약하기 위해 뷰포트 아래 콘텐츠를 얼마나 사전 번역할지 제어합니다
-      margin:
-        title: 미리 로드 거리 (픽셀)
-        description: 뷰포트에서 얼마나 떨어진 곳에서 콘텐츠 번역을 시작할지. 작은 값은 API 비용을 절약하지만 스크롤 시 지연이 발생할 수 있습니다.
-      threshold:
-        title: 가시성 임계값
-        description: 번역을 트리거하는 데 필요한 요소 가시성 비율 (0-1). 높은 값은 요소가 더 많이 보일 때까지 번역을 지연시킵니다.
-    smallParagraphFilter:
-      title: 짧은 텍스트 필터
-      description: 이 전역 기본값을 사용하여 지정한 문자 수 또는 단어 수보다 적은 텍스트 노드의 번역을 건너뜁니다. 일치하는 사이트 규칙에서 재정의할 수 있습니다 (0 = 비활성화)
-      minCharacters:
-        title: 최소 문자 수
-        description: 이 값보다 적은 문자 수의 텍스트 노드는 번역되지 않습니다. 문자 수에는 공백이 포함됩니다.
-      minWords:
-        title: 최소 단어 수
-        description: 이 값보다 적은 단어 수의 텍스트 노드는 번역되지 않습니다. 모든 언어에서 정확한 단어 카운트를 위해 Intl.Segmenter를 사용합니다.
-      error: 값은 $1에서 $2 사이여야 합니다
-    nodeTranslationHotkey:
-      title: 호버 또는 길게 누르기 번역 단축키
-      description: 호버 번역 수정 키를 사용자 지정하거나 마우스 길게 누르기로 단락을 번역합니다
-      enable: 활성화
-    llmProviderConfigured: $1에 LLM 제공업체 선택됨
-    llmProviderNotConfigured: $1에 LLM 제공업체 미선택
-    autoTranslateLanguages:
-      title: 언어에 기반한 자동 번역
-      description: 특정 언어가 감지되면 페이지 콘텐츠를 자동으로 번역합니다
-      selectLanguages: 언어 선택
-      detection:
-        label: 언어 감지
-        basic: 기본
-        llm: LLM
-        description: 기본 감지는 빠르고 무료입니다. LLM 감지는 더 정확하지만 지연 시간과 API 비용이 증가합니다. 자동 번역 언어 설정이 필요합니다.
-    skipLanguages:
-      title: 언어 기반 자동 건너뛰기
-      description: 지정된 언어가 감지되면 단락 번역을 자동으로 건너뜁니다
-      targetLanguageSkip: 대상 언어 건너뛰기
-      targetLanguageSkipDescription: 번역 전에 단락이 이미 대상 언어인지 미리 감지합니다. 일치하는 텍스트는 요청을 보내지 않고 건너뜁니다. 이 옵션을 꺼도 번역 결과가 원문과 같으면 숨기는 후처리 보호는 유지됩니다.
-      selectLanguages: 언어 선택
-      detection:
-        label: 언어 감지
-        basic: 기본
-        llm: LLM
-        description: 기본 감지는 빠르고 무료입니다. LLM 감지는 더 정확하지만 지연 시간과 API 비용이 증가합니다.
     aiContentAware:
       title: AI 스마트 컨텍스트 번역
-      description: AI에 웹페이지 컨텍스트를 제공하여 번역 품질을 향상시킵니다
-      enable: AI 스마트 컨텍스트 번역 활성화
-      enableDescription: AI가 웹페이지 요약을 사용하여 번역 정확도를 향상시킵니다. LLM 제공업체가 필요합니다. 번역 시작 시 지연이 발생하고 API 비용이 증가합니다.
-  siteRules:
-    title: 사이트 규칙
-    description: 특정 웹사이트의 번역 동작을 조정하는 규칙입니다.
-    userRules:
-      title: 사용자 규칙
-      description: JSON 배열로 자신만의 사이트 규칙을 정의합니다. URL이 패턴과 일치하는 페이지에 적용되며, 사용자 규칙이 내장 규칙보다 우선합니다.
-      saveButton: 저장
-      savedButton: 저장됨
-      validation:
-        validating: 검증 중...
-        valid: 규칙이 유효합니다
-        syntaxError: JSON에 구문 오류가 있습니다
-        notArray: JSON 최상위 값은 규칙 배열이어야 합니다
-        tooLong: 규칙 문서가 너무 깁니다
-        tooMany: 규칙이 너무 많습니다
-        duplicateIds: 규칙 id가 중복되었습니다
-        schemaErrors: 유효하지 않은 규칙이 있습니다
-        moreErrors: ...그리고 $1개의 오류가 더 있습니다
-        saved: 모든 변경사항이 저장되었습니다
-    builtIn:
-      title: 내장 규칙
-      description: 확장 프로그램과 함께 제공되는 사이트 규칙입니다. 특정 사이트에서 문제가 생기면 스위치로 개별 비활성화할 수 있습니다.
-      searchPlaceholder: id, 설명 또는 URL 패턴으로 검색
-      showMore: 더 보기
-      count: 규칙 $2개 중 $1개 표시
-  tts:
-    title: 텍스트 음성 변환
-    description: Edge TTS 음성 설정으로 말하기 버튼을 사용자 지정하세요.
-    voice:
-      label: 음성
-      fallback: 대체
-      selectPlaceholder: 음성을 선택하세요
-      noVoicesFound: 음성을 찾을 수 없습니다
-      previewSample: Read Frog의 인사입니다! 제가 읽어 드릴 때 이렇게 들립니다.
-    languageVoice:
-      label: 언어별 음성
-      reset: 재설정
-      description: 언어를 선택하고 TTS가 해당 언어를 감지했을 때 사용할 음성을 지정합니다.
-    rate:
-      label: 속도 (%)
-      hint: -100에서 100 사이 정수 값을 입력할 수 있습니다
-    pitch:
-      label: 피치 (Hz)
-      hint: -100에서 100 사이 정수 값을 입력할 수 있습니다
-    volume:
-      label: 볼륨 (%)
-      hint: -100에서 100 사이 정수 값을 입력할 수 있습니다
-    betaDisabled: 텍스트 음성 변환 설정을 사용자 지정하려면 Beta 체험을 활성화하세요.
-  statistics:
-    title: 통계
-    batchRequest:
-      title: 일괄 번역으로 절약된 요청
-      description: 기간 내 일괄 번역으로 절약된 요청 비율
-      originalRequestCount: 원래 요청 수
-      batchRequestCount: 일괄 요청 수
-  config:
-    title: 설정
-    about:
-      title: 소개
-      description: Read Frog는 2025년 4월에 태어났습니다
-      mission: Read Frog는 언어 학습, 의학 등 지식 집약적 분야에서 AI 시대의 고품질 교육 기회에 더 평등하게 접근할 수 있도록, 실제 교사에 가까운 학습 경험을 더 낮은 비용으로 제공하는 것을 목표로 합니다.
-      analytics:
-        title: 사용자 경험 개선에 기여
-        tooltip: 켜면 Read Frog가 익명 사용 신호를 전송하여 기능 안정성을 검증하고, 성능과 UX 디테일을 개선하며, 앞으로 무엇을 우선적으로 만들지 결정하는 데 활용합니다.
-    sync:
-      title: 수동 설정 동기화
-      description: 수동으로 설정 가져오기 및 내보내기
-      import: 설정 가져오기
-      export: 설정 내보내기
-      importSuccess: 설정 가져오기 완료
-      exportSuccess: 설정 내보내기 완료
-      importError: 가져오기 실패
-      versionTooNew: 가져온 설정 버전이 최신이므로 Read Frog를 최신 버전으로 업그레이드해 주세요
-      migrationError: 마이그레이션 실패
-      validationError: 설정 검증 실패
-      exportOptions:
-        title: 내보내기 옵션 선택
-        description: 내보내는 설정에 API 키를 포함할지 선택하세요. API 키를 포함하면 민감한 정보가 유출될 수 있으므로 안전한 환경에서만 사용하는 것을 권장합니다.
-        includeAPIKeys: API 키 포함
-        excludeAPIKeys: API 키 제외
-        cancel: 취소
-      viewConfig:
-        expand: 설정 펼치기
-        collapse: 설정 접기
+      description: 페이지나 영상의 맥락을 AI에 전달해 번역 정확도를 높입니다
+      enable: 사용
+      enableDescription: AI가 번역 전에 페이지나 영상 요약을 읽어 맥락에 맞는 표현을 고릅니다. LLM 제공업체로 동작하는 모든 번역 기능에 적용됩니다. 첫 요청에 지연이 생기고 API 비용이 늘어납니다.
+      llmProviderConfigured: $1에 LLM 제공업체 선택됨
+      llmProviderNotConfigured: $1에 LLM 제공업체 미선택
+  patterns:
+    duplicate: 이 패턴은 이미 목록에 있습니다
+  preference:
+    title: 환경 설정
+    pageDescription: Read Frog의 모양과 실행 범위, 설정 동기화 및 백업 방식을 지정하세요.
+    appearanceAndLanguage:
+      title: 모양 및 언어
+      theme:
+        title: 테마
+        description: Read Frog의 테마를 선택하세요.
+        system: 시스템
+        light: 라이트
+        dark: 다크
+      interfaceLanguage:
+        title: 인터페이스 언어
+        description: 브라우저 언어와 별개로 확장 프로그램의 인터페이스 언어를 선택합니다.
+        auto: 자동(브라우저 따름)
+    extensionActivation:
+      title: 확장 프로그램 활성화
+      mode:
+        title: 활성화 모드
+        description: 블랙리스트 모드를 사용하여 특정 사이트에서 확장 프로그램을 비활성화하거나, 화이트리스트 모드를 사용하여 특정 사이트에서만 실행되도록 제한할 수 있습니다.
+        blacklist: 나열된 사이트에서만 비활성화
+        whitelist: 나열된 사이트에서만 실행
+      patterns:
+        enterUrlPattern: "URL 패턴 입력 (예: example.com)"
+        urlPattern: URL 패턴
+    config:
+      title: 설정
       googleDrive:
         title: Google Drive 클라우드 동기화
         description: 원격이 최신이면 다운로드, 로컬이 최신이면 업로드
@@ -818,55 +346,545 @@ options:
             title: 병합된 구성에 유효성 검사 오류가 있습니다
             description: "아래 차이점을 조정하여 수정하세요:"
           moreErrors: ...그리고 $1개의 오류가 더 있습니다
-    backup:
-      title: 설정 백업
-      description: 설정이 변경되면 매시간 자동으로 백업이 생성됩니다. 여기에서 이전 설정을 복원할 수 있습니다. (최대 $1개 백업)
-      loading: 백업을 불러오는 중...
-      backupNow: 지금 백업
-      backupSuccess: 백업이 생성되었습니다
-      restoreSuccess: 설정이 복원되었습니다
-      empty:
-        title: 아직 사용 가능한 백업이 없습니다
-        description: 설정이 변경되면 매시간 자동으로 백업이 생성됩니다.
-      item:
-        extensionVersion: 확장 프로그램 버전：
-        schemaVersion: 설정 버전：
-        restore: 복원
+      manualSync:
+        title: 수동 설정 동기화
+        description: 수동으로 설정 가져오기 및 내보내기
+        import: 가져오기
         export: 내보내기
-        delete: 삭제
-      restore:
-        title: 설정 백업을 복원하시겠습니까?
-        description: 현재 설정이 최신 백업과 다른 경우 자동으로 현재 설정이 백업됩니다. 백업 수가 제한을 초과하면 가장 오래된 백업이 삭제될 수 있습니다.
-        cancel: 취소
-        confirm: 복원
-      delete:
-        title: 백업을 삭제하시겠습니까?
-        description: 이 백업을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.
-        cancel: 취소
-        confirm: 삭제
-    resetConfig:
-      title: 기본 설정 복원
-      description: 모든 설정을 기본값으로 재설정
-      dialog:
+        importSuccess: 설정 가져오기 완료
+        exportSuccess: 설정 내보내기 완료
+        importError: 가져오기 실패
+        exportOptions:
+          title: 내보내기 옵션 선택
+          description: 내보내는 설정에 API 키를 포함할지 선택하세요. API 키를 포함하면 민감한 정보가 유출될 수 있으므로 안전한 환경에서만 사용하는 것을 권장합니다.
+          includeAPIKeys: API 키 포함
+          excludeAPIKeys: API 키 제외
+          cancel: 취소
+      viewConfig:
+        open: 설정 열기
+        title: 설정
+        description: 현재 설정의 원본 JSON을 확인합니다
+      backup:
+        title: 설정 백업
+        description: 설정이 변경되면 매시간 자동으로 백업이 생성됩니다. 여기에서 이전 설정을 복원할 수 있습니다. (최대 $1개 백업)
+        loading: 백업을 불러오는 중...
+        backupNow: 지금 백업
+        backupSuccess: 백업이 생성되었습니다
+        restoreSuccess: 설정이 복원되었습니다
+        empty:
+          title: 아직 사용 가능한 백업이 없습니다
+          description: 설정이 변경되면 매시간 자동으로 백업이 생성됩니다.
+        item:
+          extensionVersion: 확장 프로그램 버전：
+          schemaVersion: 설정 버전：
+          restore: 복원
+          export: 내보내기
+          delete: 삭제
+        restore:
+          title: 설정 백업을 복원하시겠습니까?
+          description: 현재 설정이 최신 백업과 다른 경우 자동으로 현재 설정이 백업됩니다. 백업 수가 제한을 초과하면 가장 오래된 백업이 삭제될 수 있습니다.
+          cancel: 취소
+          confirm: 복원
+        delete:
+          title: 백업을 삭제하시겠습니까?
+          description: 이 백업을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.
+          cancel: 취소
+          confirm: 삭제
+      reset:
         title: 기본 설정 복원
-        trigger: 설정 초기화
+        description: 모든 설정을 기본값으로 재설정
+        dialog:
+          title: 기본 설정 복원
+          trigger: 설정 초기화
+          confirm: 확인
+          cancel: 취소
+          description: 이 작업은 모든 사용자 지정 설정을 지우고 기본값으로 재설정합니다. 삭제하시겠습니까?
+    userExperience:
+      title: 사용자 경험
+      beta:
+        title: Beta 체험
+        description: 아직 불안정할 수 있는 실험적 기능을 켭니다
+      analytics:
+        title: 사용자 경험 개선에 기여
+        tooltip: 켜면 Read Frog가 익명 사용 신호를 전송하여 버그를 찾아내고, 기능 안정성을 검증하고, 성능과 UX 디테일을 개선하며, 앞으로 무엇을 우선적으로 만들지 결정하는 데 활용합니다.
+        description: 버그를 찾고 UI 레이아웃을 다듬는 등 Read Frog 개선에 기여합니다
+  shortcuts:
+    title: 단축키
+    pageDescription: 읽는 중에 번역을 실행하는 키를 설정합니다.
+    setShortcut: 단축키 설정
+    pageTranslation:
+      title: 페이지 번역
+      description: 페이지 전체를 번역합니다.
+    translationMode:
+      title: 번역 모드
+      description: 이중 언어와 번역만 사이를 전환합니다.
+    selectionTranslation:
+      title: 선택 영역 번역
+      description: 선택한 텍스트를 번역합니다.
+    nodeTranslation:
+      title: 단락 번역
+      description: 단락에 마우스를 올리거나 길게 누르면 그 단락만 번역합니다.
+  overlayTools:
+    title: 오버레이 도구
+  inputTranslation:
+    title: 입력 번역
+    pageDescription: 입력창에 쓴 내용을 보내기 전에 번역합니다.
+    trigger:
+      title: 트리거
+      enable:
+        title: 활성화
+        description: 입력 필드에서 스페이스바를 빠르게 3번 누르면 입력한 내용을 번역합니다.
+      threshold:
+        title: 트리거 임계값
+        description: 연속된 누름 사이에 허용되는 간격(밀리초)입니다. 잘 실행되지 않으면 늘리고, 입력하는 중에 실행되면 줄이세요.
+        error: $1에서 $2 사이의 값을 입력하세요
+    languages:
+      title: 번역 언어
+      pair:
+        title: 언어 방향
+        description: 입력한 텍스트를 어떤 언어로 인식하고 어떤 언어로 번역할지 정합니다. 양쪽 모두 페이지를 번역할 때 사용하는 소스 및 타겟 언어를 따를 수 있습니다.
+      sourceCode: 페이지 소스 언어
+      targetCode: 번역 타겟 언어
+      cycle:
+        title: 매번 방향 전환
+        description: 실행할 때마다 두 언어가 서로 바뀌므로, 한 번 더 실행하면 입력한 언어로 되돌아옵니다.
+  floatingButton:
+    title: 플로팅 버튼
+    pageDescription: 플로팅 버튼이 놓일 위치와 클릭 동작, 숨길 사이트를 설정하세요.
+    demoImageAlt: 플로팅 버튼 데모
+    enable:
+      title: 플로팅 버튼 활성화
+      description: 웹 페이지에 플로팅 버튼을 표시하여 Read Frog 기능에 빠르게 액세스
+    display:
+      title: 표시
+      side:
+        title: 버튼 위치
+        description: 플로팅 버튼을 페이지 어느 쪽에 고정할지 선택합니다
+        left: 왼쪽
+        right: 오른쪽
+      disabledSites:
+        title: 비활성화 사이트
+        description: 플로팅 버튼을 비활성화할 웹사이트를 설정합니다
+        enterUrlPattern: URL 패턴 입력
+        urlPattern: URL 패턴
+    clickAction:
+      title: 클릭 동작
+      description: 플로팅 버튼을 클릭할 때 실행할 동작 선택
+      panel: 사이드 패널 열기
+      translate: 페이지 번역 전환
+    closeMenu:
+      disableForSite: 이 사이트에서 비활성화
+      disableGlobally: 전역 비활성화
+    tooltips:
+      togglePageTranslation: 페이지 번역 전환
+      floatingButtonOptions: 플로팅 버튼 옵션
+      lockPosition: 위치 잠금
+      unlockPosition: 위치 잠금 해제
+      settings: 설정
+      feedback: 피드백 보내기
+  selectionToolbar:
+    title: 선택 툴바
+    pageDescription: 텍스트를 선택했을 때 나타날 동작과 도구 모음을 표시할 사이트를 설정하세요.
+    demoImageAlt: 선택 툴바 데모
+    enable:
+      title: 선택 툴바 활성화
+      description: 웹 페이지에서 텍스트를 선택할 때 도구 모음을 표시하여 빠르게 번역, 읽기, AI 액션을 사용할 수 있습니다
+    actions:
+      title: 작업
+      translate:
+        title: 번역
+        description: 툴바에 번역 버튼을 표시합니다
+      speak:
+        title: 읽기
+        description: 선택한 텍스트를 읽어 주는 읽기 버튼을 툴바에 표시합니다
+      saveSuggestion:
+        title: 저장 제안
+        description: AI 제공자로 선택 번역 후 Notebase에 저장할 단어를 추천합니다
+        action: 작업
+        actionDescription: 저장 제안을 만드는 작업
+    display:
+      title: 표시
+      opacity:
+        title: 투명도
+        description: 선택 툴바와 여기서 열리는 확장 창의 투명도를 조절합니다
+      disabledSites:
+        title: 비활성화 사이트
+        description: 선택 툴바를 비활성화할 웹사이트를 설정합니다
+        enterUrlPattern: URL 패턴 입력
+        urlPattern: URL 패턴
+    closeMenu:
+      disableForSite: 이 사이트에서 비활성화
+      disableGlobally: 전역 비활성화
+    errors:
+      customActionFailed: 사용자 지정 작업 실패
+      customActionFailedFallback: 사용자 지정 작업 요청에 실패했습니다
+      actionUnavailable: 선택한 작업을 사용할 수 없습니다
+      missingSelection: 선택된 텍스트가 없습니다
+      providerDisabled: 선택한 제공업체가 비활성화되었습니다
+      providerUnavailable: 선택한 제공업체를 사용할 수 없습니다
+    customActions:
+      title: 커스텀 AI 액션
+      pageDescription: 직접 만든 프롬프트를 선택 도구 모음에서 선택한 텍스트에 실행하세요.
+      description: 선택한 텍스트에 대한 구조화된 AI 작업을 직접 추가하세요
+      configTitle: 액션 구성
+      builtIn: 기본 제공
+      add: AI 액션 추가
+      edit: AI 액션 편집
+      empty: 아직 커스텀 AI 액션이 없습니다
+      noEnabledLlmProvider: 커스텀 AI 액션을 만들기 전에 최소 하나의 LLM 제공업체를 활성화하세요
+      form:
+        name: 이름
+        customize: 사용자 지정
+        customizeTooltip: 기본 제공 작업의 프롬프트는 변경할 수 없습니다. 이 버튼을 클릭하여 편집 가능한 복사본을 만들고 프롬프트를 수정하세요.
+        icon: 아이콘
+        iconField:
+          chooseAriaLabel: 아이콘 선택
+          chooseTitle: 아이콘 선택
+          inputPlaceholder: 아이콘 이름 입력
+          helpAriaLabel: 아이콘 도움말 더보기
+          helpTitle: 원하는 아이콘을 못 찾았나요?
+          helpStepBrowsePrefix: ""
+          helpStepBrowseSuffix: 에서 아이콘 찾아보기
+          helpStepCopyPrefix: "예를 들어 "
+          helpStepCopySuffix: " 같은 아이콘 이름을 복사해 입력란에 붙여넣으세요."
+        provider: 제공업체(구조화 출력 지원 필요)
+        selectProvider: 제공업체 선택
+        systemPrompt: 시스템 프롬프트
+        prompt: 프롬프트
+        outputSchema: 출력 스키마
+        addField: 필드 추가
+        fieldName: 필드 이름
+        fieldType: 필드 유형
+        fieldDescription: 설명
+        fieldDescriptionPlaceholder: 이 필드에 포함할 내용을 설명하세요...
+        fieldSpeaking: 음성 읽기 사용
+        actions: 작업
+        cancel: 취소
+        save: 저장
+        defaultFieldName: 결과
+        fieldNamePlaceholder: 필드명
+        autoFieldPrefix: 필드
+        addFieldDialog:
+          title: 출력 필드 추가
+        editFieldDialog:
+          title: 출력 필드 편집
+          save: 저장
+        deleteFieldDialog:
+          title: 출력 필드를 삭제하시겠습니까?
+          description: 이 출력 필드가 제거됩니다.
+          confirm: 삭제
+          cancel: 취소
+        notebase:
+          title: Notebase 연결
+          description: 이 액션의 구조화된 결과를 원격 Notebase에 저장합니다.
+          loginRequiredTitle: Notebase를 설정하려면 로그인하세요
+          loginRequiredDescription: notebase를 선택하거나 매핑을 편집하기 전에 readfrog.app에 로그인하세요.
+          loginRequiredConnectedDescription: 이 연결은 아래 계정에서 만들어졌습니다. 같은 계정으로 로그인하면 필드 매핑이 복원됩니다. 다른 계정으로 로그인하면 Notebase를 만들거나 연결할 때 이전 매핑이 지워집니다.
+          loginAction: 로그인
+          connectedAccountLabel: 연결된 계정
+          currentAccountLabel: 현재 계정
+          unknownConnectedAccount: 알 수 없는 계정
+          tableLabel: Notebase
+          tablePlaceholder: notebase 선택
+          tableClearOption: notebase 연결 안 함
+          clearConnectionAction: 연결 지우기
+          refreshAction: 새로고침
+          emptyTitle: 아직 Notebase가 없습니다
+          emptyDescription: readfrog.app에서 notebase를 만든 뒤 여기로 돌아와 필드를 매핑하세요.
+          openNotebaseAction: Notebase 열기
+          accessDeniedTitle: Notebase에 접근할 수 없습니다
+          accessDeniedDescription: 이 계정에는 Notebase 데이터를 불러올 권한이 없습니다.
+          listErrorTitle: Notebase 목록을 불러오지 못했습니다
+          listErrorDescription: 잠시 후 Notebase 목록을 다시 새로고침해 보세요.
+          accountMismatchTitle: Notebase 연결이 다른 계정에 속해 있습니다
+          accountMismatchDescription: 이 연결은 아래 연결된 계정에 묶여 있습니다. 연결을 지우거나 현재 계정에서 사용할 수 있는 Notebase를 선택하세요.
+          tableUnavailableTitle: 선택한 notebase를 더 이상 사용할 수 없습니다
+          tableUnavailableDescription: 이 Notebase가 없거나 열 수 없습니다. 연결을 지우거나 다른 Notebase를 선택하세요.
+          tableUnavailableOption: 사용 불가
+          schemaErrorTitle: notebase 스키마를 불러오지 못했습니다
+          schemaErrorDescription: 잠시 후 다시 새로고침해 보세요.
+          schemaLoading: notebase 스키마를 불러오는 중...
+          mappingsLabel: 필드 매핑
+          mappingsEmpty: 아직 매핑이 없습니다. 필드를 저장할 준비가 되면 추가하세요.
+          addMappingAction: 매핑 추가
+          removeMappingAction: 매핑 제거
+          localFieldLabel: 액션 필드
+          localFieldPlaceholder: 액션 필드 선택
+          remoteFieldLabel: Notebase 필드
+          remoteFieldPlaceholder: notebase 필드 선택
+          columnUnavailableOption: 삭제됨
+          invalidMappingsTitle: 일부 매핑을 확인해야 합니다
+          invalidMappingsDescription: 잘못된 매핑은 유지됩니다. Notebase에 저장하기 전에 수정하세요.
+          mappingMissingLocal: 매핑된 액션 필드가 더 이상 존재하지 않습니다.
+          mappingMissingRemote: 매핑된 notebase 필드가 더 이상 존재하지 않습니다.
+          mappingMissingSchema: 이 매핑을 검증하려면 notebase 스키마를 새로고침하세요.
+          mappingIncompatible: 필드 타입이 더 이상 맞지 않습니다.
+        tokens:
+          selection: 선택한 텍스트 내용
+          paragraphs: 선택 영역과 겹치는 문단 내용을 빈 줄로 이어 붙인 값이며, 사용자 정의 AI 액션에 전달될 때는 앞의 2000자로 잘립니다
+          targetLanguage: 사용자의 대상 언어
+          webTitle: 웹페이지 제목
+          webContent: 현재 페이지에서 추출한 웹페이지 본문(앞의 2000자로 잘린 버전)
+        delete: 삭제
+        deleteDialog:
+          title: 사용자 정의 액션을 삭제하시겠습니까?
+          description: 이 작업은 취소할 수 없습니다.
+          confirm: 삭제
+          cancel: 취소
+      errors:
+        nameRequired: 이름은 필수입니다
+        duplicateName: '중복된 액션 이름 "$1"'
+        invalidIcon: 올바르지 않은 Iconify 아이콘 문자열입니다
+        providerRequired: 활성화된 LLM 제공업체를 선택하세요
+        outputSchemaRequired: 최소 하나의 출력 필드를 추가하세요
+        fieldKeyRequired: 필드 이름은 필수입니다
+        duplicateFieldKey: 필드 이름은 고유해야 합니다
+  contextMenu:
+    title: 컨텍스트 메뉴
+    pageDescription: 브라우저 우클릭 메뉴에 표시되는 Read Frog 항목을 설정하세요.
+    demoImageAlt: 컨텍스트 메뉴 데모
+    enable:
+      title: 우클릭 번역 활성화
+      description: 브라우저 우클릭 메뉴에 번역 옵션을 추가하여 페이지나 선택한 텍스트를 빠르게 번역
+  translation:
+    title: 페이지 번역
+    pageDescription: 페이지 번역 방식을 설정하세요 — 모드, 범위, 프롬프트, 요청 제한.
+    preference:
+      title: 기본 설정
+      translationMode:
+        title: 번역 모드
+        description: "번역된 텍스트 표시 방법 선택: 이중 언어 또는 번역만"
+        mode:
+          bilingual: 이중 언어
+          translationOnly: 번역만
+        switched: "번역 모드: $1"
+      translateRange:
+        title: 번역 범위
+        description: 페이지의 주요 내용만 번역할지 모든 내용을 번역할지 선택합니다.
+        range:
+          main: 주요 내용
+          all: 전체 내용
+    hoverTranslation:
+      title: 호버 번역
+      enable:
+        title: 활성화
+        description: 단락에 마우스를 올리거나 길게 누르면 그 단락만 번역합니다.
+    translationStyle:
+      title: 번역 표시 스타일
+      description: 번역 결과와 원문을 구분하기 위해 원하는 스타일을 설정하세요
+      useCustomStyle: 커스텀 CSS 스타일 사용
+      useCustomStyleDescription: 모든 CSS 지원, 글꼴, 애니메이션, 언어별 스타일 등
+      presetStyle: 프리셋 스타일
+      cssEditor: CSS 편집기
+      cssEditorDescription: 직접 작성한 CSS로 번역 텍스트가 어떻게 보이는지 미리 봅니다.
+      preview: 미리보기
+      stylePreviewLanguage: 언어
+      stylePreviewDirection: 방향
+      stylePreviewTranslatedText: 번역된 텍스트
+      style:
+        default: 없음
+        blur: 흐림 효과
+        blockquote: 인용
+        weakened: 약화
+        dashedLine: 점선
+        border: 테두리
+        textColor: 텍스트 색상
+        background: 배경
+      customCSS:
+        editor:
+          placeholder: |
+            /* 예제: 사용자 정의 색상 및 배경 스타일 */
+            [data-read-frog-custom-translation-style='custom'] {
+              color: #414535;
+              background-color: light-dark(#F2E3BC, #C19875);
+              padding: 2px 4px;
+              border-radius: 4px;
+            }
+          docsLink: 구성 방법은?
+          saveButton: 저장
+          savedButton: 저장됨
+          validation:
+            validating: 검증 중...
+            valid: CSS가 유효합니다
+            syntaxError: CSS에 구문 오류가 있습니다
+            tooLong: CSS가 너무 깁니다
+            saved: 모든 변경사항이 저장되었습니다
+    personalizedPrompts:
+      title: 개인화된 프롬프트
+      description: 다양한 유형의 프롬프트를 사용자 정의하여, 번역 시 프롬프트 유형을 직접 조정할 수 있습니다. 프롬프트는 사용자가 LLM에게 보내는 텍스트를 말합니다.
+      managePrompts: 프롬프트 관리
+      communityPrompts: 커뮤니티에서 프롬프트 가져오기 또는 공유
+      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      addPrompt: 프롬프트 추가
+      default: 기본
+      importSuccess: 가져오기 성공
+      import: 가져오기
+      export: 내보내기
+      current: 사용 중
+      editPrompt:
+        title: 프롬프트 편집
+        name: 이름
+        systemPrompt: 시스템 프롬프트
+        prompt: 프롬프트
+        promptCellInput:
+          input: 번역할 텍스트 내용
+          targetLanguage: 목표 언어
+          webTitle: 웹페이지 제목
+          webDescription: 페이지 메타데이터의 웹페이지 설명
+          webContent: 웹페이지 본문(앞의 2000자로 잘림)
+          webSummary: 웹페이지 요약 (AI 스마트 컨텍스트 필요)
+        save: 저장
+        close: 취소
+      deletePrompt:
+        title: 프롬프트 삭제
+        description: 이 프롬프트를 삭제하시겠습니까
         confirm: 확인
         cancel: 취소
-        description: 이 작업은 모든 사용자 지정 설정을 지우고 기본값으로 재설정합니다. 삭제하시겠습니까?
+      exportPrompt:
+        exportSelected: 선택 항목 내보내기
+        cancel: 취소
+    translationControl:
+      title: 번역 제어
+      autoTranslateWebsite:
+        title: 웹사이트 기반 자동 번역
+        description: 열자마자 번역을 시작하는 사이트
+        urlPattern: URL 패턴
+        enterUrlPattern: URL 패턴 입력
+      neverAutoTranslateWebsite:
+        title: 웹사이트 기반 자동 번역 제외
+        description: 언어 규칙과 일치해도 자동으로 번역하지 않는 사이트
+        urlPattern: URL 패턴
+        enterUrlPattern: URL 패턴 입력
+      autoTranslateLanguages:
+        title: 언어에 기반한 자동 번역
+        description: 특정 언어가 감지되면 페이지 콘텐츠를 자동으로 번역합니다
+        selectLanguages: 언어 선택
+      skipLanguages:
+        title: 언어 기반 자동 건너뛰기
+        description: 지정된 언어가 감지되면 단락 번역을 자동으로 건너뜁니다
+        targetLanguageSkipDescription: 이미 대상 언어인 단락은 요청을 보내지 않고 건너뜁니다
+        selectLanguages: 언어 선택
+      smallParagraphFilter:
+        title: 짧은 텍스트 필터
+        description: 이 전역 기본값을 사용하여 지정한 문자 수 또는 단어 수보다 적은 텍스트 노드의 번역을 건너뜁니다. 일치하는 사이트 규칙에서 재정의할 수 있습니다 (0 = 비활성화)
+        minCharacters:
+          description: "최소 문자 수: 이보다 짧은 텍스트는 번역하지 않습니다. 0이면 전부 번역합니다"
+        minWords:
+          description: "최소 단어 수: 이보다 단어가 적은 텍스트는 번역하지 않습니다"
+        error: 값은 $1에서 $2 사이여야 합니다
+    translationQueue:
+      title: 번역 대기열
+      requestQueueConfig:
+        title: 번역 속도
+        capacity:
+          description: "최대 순간 요청 수: 한 번에 내보낼 수 있는 요청 개수"
+        rate:
+          description: "초당 요청 수: 그 뒤로 유지되는 속도. 소수도 되며 0.25는 4초에 한 번 보냅니다"
+      batchQueueConfig:
+        title: 배치 번역
+        description: 배치 번역 시 문자 수 제한 및 최대 단락 수 구성 (대규모 언어 모델 번역에서만 유효)
+        maxCharactersPerBatch:
+          description: "최대 문자 수: 한 번의 AI 요청에 담는 텍스트 양"
+        maxItemsPerBatch:
+          description: "최대 단락 수: 한 요청에 묶는 단락 수. AI가 아닌 번역 서비스에는 적용되지 않습니다"
+      preloadConfig:
+        title: 사전 번역 범위
+        description: API 비용을 절약하기 위해 뷰포트 아래 콘텐츠를 얼마나 사전 번역할지 제어합니다
+        margin:
+          description: "미리 번역 거리: 화면 아래 몇 픽셀까지 미리 번역할지. 줄이면 API 비용이 절약됩니다"
+        threshold:
+          description: "표시 기준: 단락이 얼마나 보여야 번역할지, 0에서 1 사이"
+    cache:
+      title: 캐시
+      clearCache:
+        title: 캐시 지우기
+        description: 브라우저의 모든 번역 캐시를 지웁니다
+        clearing: 지우는 중...
+        dialog:
+          title: 캐시 지우기
+          trigger: 캐시 지우기
+          confirm: 확인
+          cancel: 취소
+          description: 이 작업은 모든 번역 캐시를 지웁니다. 이 작업은 되돌릴 수 없습니다.
+  siteRules:
+    title: 사이트 규칙
+    description: 특정 웹사이트의 번역 동작을 조정하는 규칙입니다.
+    userRules:
+      title: 사용자 규칙
+      description: JSON 배열로 자신만의 사이트 규칙을 정의합니다. URL이 패턴과 일치하는 페이지에 적용되며, 사용자 규칙이 내장 규칙보다 우선합니다.
+      saveButton: 저장
+      savedButton: 저장됨
+      validation:
+        validating: 검증 중...
+        valid: 규칙이 유효합니다
+        syntaxError: JSON에 구문 오류가 있습니다
+        notArray: JSON 최상위 값은 규칙 배열이어야 합니다
+        tooLong: 규칙 문서가 너무 깁니다
+        tooMany: 규칙이 너무 많습니다
+        duplicateIds: 규칙 id가 중복되었습니다
+        schemaErrors: 유효하지 않은 규칙이 있습니다
+        moreErrors: ...그리고 $1개의 오류가 더 있습니다
+        saved: 모든 변경사항이 저장되었습니다
+    builtIn:
+      title: 내장 규칙
+      description: 확장 프로그램과 함께 제공되는 사이트 규칙입니다. 특정 사이트에서 문제가 생기면 스위치로 개별 비활성화할 수 있습니다.
+      searchPlaceholder: id, 설명 또는 URL 패턴으로 검색
+      showMore: 더 보기
+      count: 규칙 $2개 중 $1개 표시
+  tts:
+    title: 텍스트 음성 변환
+    pageDescription: 선택한 텍스트를 자연스러운 음성으로 읽어 줍니다.
+    voice:
+      title: 음성
+      selectPlaceholder: 음성을 선택하세요
+      noVoicesFound: 음성을 찾을 수 없습니다
+      language:
+        title: 언어별 음성
+        description: 언어를 고른 다음 그 언어를 읽어 줄 음성을 지정합니다. 재설정하면 Read Frog가 그 언어에 정해 둔 음성으로 돌아갑니다.
+        reset: 재설정
+        previewSample: Read Frog의 인사입니다! 제가 읽어 드릴 때 이렇게 들립니다.
+      fallback:
+        title: 대체 음성
+        description: 따로 음성을 지정하지 않은 언어는 이 음성으로 읽습니다.
+    speech:
+      title: 읽어 주기
+      rate:
+        title: 속도
+        description: 음성 본래의 속도보다 얼마나 빠르거나 느리게 읽을지, -100에서 100 퍼센트.
+      pitch:
+        title: 피치
+        description: 음성 본래의 피치보다 얼마나 높거나 낮게 말할지, -100에서 100 헤르츠.
+      volume:
+        title: 볼륨
+        description: 음성 본래의 크기보다 얼마나 크거나 작게 읽을지, -100에서 100 퍼센트.
+      error: $1에서 $2 사이의 정수를 입력하세요
   videoSubtitles:
     title: 비디오 자막
-    description: 현재 YouTube 비디오 자막만 지원
-    provider:
-      title: 번역 제공자
-      description: 비디오 자막 번역에 사용할 번역 제공자를 선택하세요
-      label: 제공자
-    enable: 비디오 자막 활성화
-    enableDescription: 활성화하면 YouTube 플레이어 컨트롤 바에 번역 버튼이 나타납니다. 클릭하여 자막 번역을 시작하세요.
-    autoStart: 자막 자동 활성화
-    autoStartDescription: 비디오가 로드되면 자동으로 자막 번역을 활성화합니다.
+    pageDescription: 영상을 보면서 자막을 번역하고, 제공업체·스타일·요청 설정을 따로 지정하세요.
+    preference:
+      title: 기본 설정
+      enable:
+        title: 비디오 자막 켜기
+        description: 동영상 플레이어 컨트롤 바에 번역 버튼을 추가합니다. 현재는 YouTube만 지원합니다.
+      autoStart:
+        title: 영상을 열면 바로 번역
+        description: 영상이 로드되면 버튼을 누르지 않아도 자막 번역을 시작합니다.
+      aiSegmentation:
+        title: AI 스마트 분할
+        description: AI가 자막을 문장처럼 읽히도록 다시 나눕니다. 타이밍도 AI가 정하므로 싱크가 어긋날 수 있습니다. LLM 번역 공급자가 필요합니다.
+    aiQuota:
+      title: AI 자막 사용량
+      description: 이번 달 AI 자막 전사 사용량 현황
+      loginRequired: 로그인하여 AI 자막 사용량 확인
+      logIn: 로그인
+      betaRequired: AI 자막은 베타 기능이며 아직 계정에 활성화되지 않았습니다
+      betaApply: 사용 신청
+      loadError: 사용량을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.
+      summary: $2분 중 $1분 사용, $3분 남음
     style:
       title: 자막 스타일
-      description: 자막 외관 사용자 지정
+      description: 표시 모드, 위치, 글꼴, 색상, 배경을 미리보기로 확인하며 설정합니다
+      customizeStyle: 스타일 편집
       preview: 미리보기
       displayMode:
         title: 표시 모드
@@ -880,46 +898,16 @@ options:
       generalSettings: 일반 설정
       mainSubtitle: 메인 자막
       translationSubtitle: 번역 자막
-      containerStyle: 배경
       fontFamily: 글꼴
       fontScale: 글꼴 크기
       color: 색상
       fontWeight: 글꼴 굵기
       backgroundOpacity: 배경 투명도
       reset: 기본값으로 재설정
-    aiSegmentation:
-      title: AI 스마트 분할
-      enable: AI 스마트 분할 활성화
-      enableDescription: AI를 사용하여 자막을 지능적으로 분할하여 가독성을 향상시킵니다. 타임라인은 AI가 결정하므로 타이밍 오차가 발생할 수 있습니다. LLM 번역 공급자가 필요합니다.
-      clearCache: 캐시 삭제
-      clearing: 삭제 중...
-      clearCacheDialog:
-        title: AI 분할 캐시 삭제
-        description: 모든 캐시된 AI 분할 결과가 삭제됩니다. 다음에 AI 분할이 활성화된 비디오를 재생하면 자막이 다시 처리됩니다.
-        cancel: 취소
-        confirm: 확인
-    requestQueueConfig:
-      title: 자막 번역 속도
-      firstOnDescription: 자막 번역 요청 처리 속도를
-      lastOnDescription: 알고리즘으로 조정
-      capacity:
-        title: 최대 버스트 요청 수
-        description: 짧은 시간 내에 동시에 처리할 수 있는 최대 자막 번역 요청 수
-      rate:
-        title: 초당 평균 요청 수
-        description: 초당 평균 자막 번역 요청 수. 최대 버스트 수를 설정하여 일시적으로 초과 요청을 보낼 수 있습니다. 소수도 지원합니다. 예를 들어 0.25는 4초마다 1회 요청을 의미하며, Gemini 무료 등급 등 낮은 속도 제한 API에 유용합니다
-    batchQueueConfig:
-      title: 자막 일괄 번역
-      description: 배치 번역 시 문자 수 제한 및 최대 단락 수 구성 (대규모 언어 모델 번역에서만 유효)
-      maxCharactersPerBatch:
-        title: 최대 문자 수
-        description: 배치 요청당 허용되는 최대 문자 수로 각 번역의 콘텐츠 양을 제어합니다
-      maxItemsPerBatch:
-        title: 최대 단락 수
-        description: 각 배치 번역의 최대 단락 수로 각 번역의 콘텐츠 양을 제어합니다
     customPrompts:
       title: 사용자 정의 자막 프롬프트
-      description: 자막 번역용 프롬프트 템플릿을 사용자 정의합니다 (웹페이지 번역 프롬프트와 별도)
+      description: 자막 번역 전용 프롬프트 템플릿으로, 웹페이지 번역 프롬프트와 별도로 관리합니다
+      managePrompts: 프롬프트 관리
       editPrompt:
         promptCellInput:
           input: 번역할 자막 텍스트
@@ -927,19 +915,40 @@ options:
           webTitle: 웹페이지 제목
           webDescription: 페이지 메타데이터의 웹페이지 설명
           videoSummary: 동영상 요약 (AI 스마트 컨텍스트 필요)
-    aiQuota:
-      title: AI 자막 사용량
-      description: 이번 달 AI 자막 전사 사용량 현황
-      loginRequired: 로그인하여 AI 자막 사용량 확인
-      logIn: 로그인
-      betaRequired: AI 자막은 베타 기능이며 아직 계정에 활성화되지 않았습니다
-      betaApply: 사용 신청
-      loadError: 사용량을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.
-      summary: $2분 중 $1분 사용, $3분 남음
+    subtitlesQueue:
+      title: 자막 대기열
+      requestQueueConfig:
+        title: 번역 속도
+        capacity:
+          description: "최대 순간 요청 수: 한 번에 내보낼 수 있는 요청 개수"
+        rate:
+          description: "초당 요청 수: 그 뒤로 유지되는 속도. 소수도 되며 0.25는 4초에 한 번 보냅니다"
+      batchQueueConfig:
+        title: 배치 번역
+        description: 배치 번역 시 문자 수 제한 및 최대 자막 줄 수 구성 (대규모 언어 모델 번역에서만 유효)
+        maxCharactersPerBatch:
+          description: "최대 문자 수: 한 번의 AI 요청에 담는 텍스트 양"
+        maxItemsPerBatch:
+          description: "최대 자막 줄 수: 한 요청에 묶는 자막 수. AI가 아닌 번역 서비스에는 적용되지 않습니다"
+    cache:
+      title: 캐시
+      clearCache:
+        title: AI 분할 캐시 삭제
+        description: 저장된 분할 결과 — 이미 본 영상은 다시 처리하지 않습니다
+        clearing: 삭제 중...
+        dialog:
+          title: AI 분할 캐시 삭제
+          trigger: 캐시 삭제
+          confirm: 확인
+          cancel: 취소
+          description: 모든 캐시된 AI 분할 결과가 삭제됩니다. 다음에 AI 분할이 활성화된 비디오를 재생하면 자막이 다시 처리됩니다.
   whatsNew:
     title: 새로운 기능
   rateUs:
     title: 리뷰 남기기
+  configMigration:
+    versionTooNew: 가져온 설정 버전이 최신이므로 Read Frog를 최신 버전으로 업그레이드해 주세요
+    validationError: 설정 검증 실패
 side:
   sourceLang: 원본 언어
   targetLang: 대상 언어

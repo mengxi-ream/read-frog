@@ -1,54 +1,24 @@
-import { useQueries } from "@tanstack/react-query"
-import { getRangeBatchRequestRecords } from "@/utils/batch-request-record"
+import { useQuery } from "@tanstack/react-query"
+import {
+  calculateRequestSavingRatio,
+  getRangeBatchRequestRecords,
+} from "@/utils/batch-request-record"
 
-const RECENT_DAYS = [5, 7, 30, 60] as const
+/** The window the saving is read over, in days, today included. */
+export const SAVING_WINDOW_DAYS = 7
 
-function previousPeriodStartDay(daysBack: number) {
-  // For example, the previous period for 4 days ago is from 9 days ago to 5 days ago
-  // i.e., 9 - 5 + 1 = 5 days
-  return daysBack * 2 + 1
-}
-
-function previousPeriodEndDay(daysBack: number) {
-  // The end date of the previous period needs to be earlier than the start date of the current period
-  return daysBack + 1
-}
-
-export function useBatchRequestRecords(currentDaysBack: number) {
-  const currentPeriodQueries = useQueries({
-    queries: RECENT_DAYS.map((dayRange) => {
-      // dayRange is a period that includes today, so after conversion it represents (dayRange - 1) days ago
-      // i.e., a period of 5 days represents 4 days ago
-      // The default end date is 0 days ago
-      const daysBack = dayRange - 1
-      return {
-        queryKey: ["current-period-records", daysBack],
-        queryFn: () => getRangeBatchRequestRecords(daysBack),
-      }
-    }),
+/**
+ * The share of requests batching folded away over the last week, as whole percent. `null` while
+ * the records load and whenever there is nothing to report — no requests yet, or none batched.
+ */
+export function useBatchRequestSavingPercent(): number | null {
+  const { data: records } = useQuery({
+    queryKey: ["batch-request-records", SAVING_WINDOW_DAYS],
+    // The range counts back from today, so a 7-day window ends 6 days ago.
+    queryFn: () => getRangeBatchRequestRecords(SAVING_WINDOW_DAYS - 1),
   })
 
-  const previousPeriodQueries = useQueries({
-    queries: RECENT_DAYS.map((dayRange) => {
-      const daysBack = dayRange - 1
-      return {
-        queryKey: ["previous-period-records", daysBack],
-        queryFn: () =>
-          getRangeBatchRequestRecords(
-            previousPeriodStartDay(daysBack),
-            previousPeriodEndDay(daysBack),
-          ),
-      }
-    }),
-  })
-
-  const currentIndex = RECENT_DAYS.findIndex((days) => days - 1 === currentDaysBack)
-  const currentPeriodQuery = currentPeriodQueries[currentIndex] ?? currentPeriodQueries[0]
-  const previousPeriodQuery = previousPeriodQueries[currentIndex] ?? previousPeriodQueries[0]
-
-  return {
-    currentPeriodRecords: currentPeriodQuery!.data ?? [],
-    previousPeriodRecords: previousPeriodQuery!.data ?? [],
-    isLoading: currentPeriodQuery!.isLoading || previousPeriodQuery!.isLoading,
-  }
+  const ratio = records ? calculateRequestSavingRatio(records) : 0
+  const percent = Math.round(ratio * 100)
+  return percent > 0 ? percent : null
 }

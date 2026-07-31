@@ -500,7 +500,11 @@ function SidebarMenuButton({
       },
       props,
     ),
-    render: !tooltip ? render : TooltipTrigger,
+    // There is one render slot but two things need it, so nest them: the trigger
+    // renders as the caller's element. Handing the slot to TooltipTrigger alone
+    // would drop `render`, and a nav item passing both would fall back to the
+    // trigger's default <button> — losing its href, cmd-click and link role.
+    render: !tooltip ? render : <TooltipTrigger render={render} />,
     state: {
       slot: "sidebar-menu-button",
       sidebar: "menu-button",

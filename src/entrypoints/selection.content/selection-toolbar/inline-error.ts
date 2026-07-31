@@ -22,17 +22,17 @@ export function isAbortError(error: unknown) {
 function getErrorTitle(kind: SelectionToolbarErrorKind) {
   return kind === "translate"
     ? i18n.t("translationHub.translationFailed")
-    : i18n.t("options.floatingButtonAndToolbar.selectionToolbar.errors.customActionFailed")
+    : i18n.t("options.selectionToolbar.errors.customActionFailed")
 }
 
 function getErrorFallbackDescription(kind: SelectionToolbarErrorKind) {
   return kind === "translate"
     ? i18n.t("translationHub.translationFailedFallback")
-    : i18n.t("options.floatingButtonAndToolbar.selectionToolbar.errors.customActionFailedFallback")
+    : i18n.t("options.selectionToolbar.errors.customActionFailedFallback")
 }
 
 function getPrecheckErrorDescription(code: SelectionToolbarPrecheckErrorCode) {
-  return i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.errors.${code}` as never)
+  return i18n.t(`options.selectionToolbar.errors.${code}` as never)
 }
 
 function toErrorDescription(kind: SelectionToolbarErrorKind, error: unknown) {

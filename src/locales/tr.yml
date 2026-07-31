@@ -81,51 +81,65 @@ errorRecovery:
     confirm: Sıfırla
     cancel: İptal
 options:
+  batchSavings:
+    savedCost: API maliyetlerinde yaklaşık %$1 tasarruf
   commandPalette:
     placeholder: Ayarları ara...
     noResults: Ayar bulunamadı
   sidebar:
     settings: Ayarlar
-    tools: Araçlar
+    features: Özellikler
     product: Ürün
   tools:
     translationHub: Çeviri Merkezi
   product:
     roadmap: Yol Haritası
-    feedback: Geri Bildirim
-  setAPIKeyWarning:
-    please: Lütfen API Anahtarını
-    page: sayfasında ayarlayın
-  betaExperience:
-    title: Beta Deneyimi
-    description: Deneysel özellikleri ve yeni işlevlere erken erişimi etkinleştirin. Bu özellikler kararsız veya eksik olabilir.
-    enabled: Beta Deneyimini Etkinleştir
+  contactUs:
+    title: Bize Ulaşın
+    pageDescription: Sırada ne olmasını istediğinizi söyleyin, bir hata bildirin ya da sadece merhaba deyin.
+    featureRequest:
+      title: Özellik önerisi
+      description: Bir fikir önerin ve ekibin sırada ne geliştireceğini oylayın
+    bugReport:
+      title: Hata bildir
+      description: Destek talebi açın ve çözülene kadar takip edin
+    email:
+      title: Bize e-posta gönderin
+      description: Ekibe doğrudan contact@readfrog.app adresinden ulaşın
+    wechat:
+      title: WeChat
+      description: Geliştiriciyi WeChat üzerinde eklemek için QR kodu tarayın
+      qrCodeAlt: WeChat QR kodu
   apiProviders:
     title: API Sağlayıcıları
-    description: Çeviri ve kelime analizi işlevleri için API sağlayıcılarını buradan yapılandırın. 20'den fazla yerleşik sağlayıcımız var ve OpenAI uyumlu tüm API sağlayıcılarını destekliyoruz.
-    addProvider: Sağlayıcı Ekle
-    builtInProvider: Yerleşik Sağlayıcı
-    sponsorCta: Hızlı ve uygun maliyetli AI al
+    pageDescription: Read Frog'un çağırdığı yapay zekâ servislerini bağlayın ve her özelliğin hangisini kullanacağını seçin.
+    description: Read Frog'un çağırabileceği sağlayıcıları ekleyin. 20'den fazlası yerleşik gelir ve OpenAI uyumlu her API çalışır.
+    configTitle: Sağlayıcı yapılandırması
+    addProvider: Sağlayıcı ekle
+    builtInProvider: Yerleşik sağlayıcı
+    sponsorCta: Hızlı ve uygun maliyetli yapay zekâ al
+    setApiKeyWarning:
+      message: API anahtarınızı $1 sayfasında ayarlayın
     badges:
       featureCount: $1 özellik
       sponsor: Sponsor
     dialog:
-      title: Yeni Sağlayıcı Ekle
+      title: Yeni sağlayıcı ekle
       groups:
         builtInProviders:
-          title: Yerleşik LLM Sağlayıcıları
+          title: Yerleşik LLM sağlayıcıları
           description: Yerleşik büyük dil modeli sağlayıcıları, Base URL gibi çoğu yapılandırmayı doldurmaya gerek yok
         openaiCompatibleProviders:
-          title: OpenAI Uyumlu Özel Sağlayıcılar
+          title: OpenAI uyumlu özel sağlayıcılar
           description: İstediğiniz AI sağlayıcısını bulamıyorsanız, Zhipu AI gibi herhangi bir OpenAI uyumlu sağlayıcıyı yapılandırmak için Özel Sağlayıcı'yı seçin
         pureTranslationProviders:
-          title: Saf Çeviri Sağlayıcıları
+          title: Saf çeviri sağlayıcıları
           description: Büyük dil modeli yetenekleri olmadan çeviri özelliklerine odaklanan sağlayıcılar
     form:
       fields:
         name: Ad
         description: Açıklama
-        apiKey: API Anahtarı
+        apiKey: API anahtarı
         baseURL: Base URL
         optional: İsteğe Bağlı
       duplicate: Çoğalt
@@ -141,8 +155,8 @@ options:
         translate: Varsayılan çeviri sağlayıcısı olarak ayarla
       models:
         translate:
-          title: Çeviri Modeli
-          customTitle: Özel Çeviri Modeli
+          title: Çeviri modeli
+          customTitle: Özel çeviri modeli
           placeholder: Bir model seçin
         fetchModels: Mevcut modelleri getir
         fetchError: Modeller getirilemedi
@@ -152,8 +166,9 @@ options:
         apiKeyRequired: Lütfen önce API anahtarı ekleyin
         searchModels: Model ara...
         noModelsFound: Model bulunamadı
-      featureProviders: Özellik Sağlayıcıları
-      advancedOptions: Gelişmiş Seçenekler
+        label: Model
+        enterCustomModel: Özel model adını girin
+      advancedOptions: Gelişmiş seçenekler
       providerSettingLabels:
         region: Bölge
         apiMode: API modu
@@ -168,9 +183,9 @@ options:
         title: Reasoning
       headers: Başlıklar
       headersHint: AI sağlayıcı istemcisi oluşturulurken gönderilecek özel HTTP başlıkları. Sağlayıcı varsayılanlarını kullanmak için boş bırakın; varsayılanları devre dışı bırakmak için {} kullanın.
-      providerOptions: Sağlayıcı Seçenekleri
+      providerOptions: Sağlayıcı seçenekleri
       providerOptionsHint: Düşünme/akıl yürütme modu gibi standart dışı API özellikleri için sağlayıcıya özel seçenekler. Ayrıntılar için Vercel AI SDK belgelerine veya sağlayıcınızın resmi belgelerine bakın.
-      providerOptionsDocsLink: Sağlayıcı Belgelerini Görüntüle
+      providerOptionsDocsLink: Sağlayıcı belgelerini görüntüle
       providerOptionsRecommendationTrigger: Önerilen sağlayıcı seçeneklerini görüntüle
       providerOptionsRecommendationTitle: Önerilen sağlayıcı seçenekleri bulundu
       providerOptionsRecommendationDescription: Önerilen yapılandırmayı gözden geçirip manuel olarak uygulayın.
@@ -214,392 +229,467 @@ options:
         moonshotai: Moonshot AI'ın güçlü muhakeme ve uzun bağlam yeteneklerine sahip Kimi model serisi
         huggingface: Binlerce açık kaynak modele erişim sağlayan Hugging Face Çıkarım API'si
     apiKey:
-      showAPIKey: API Anahtarını Göster
+      showAPIKey: API anahtarını göster
     howToConfigure: Nasıl yapılandırılır?
     testConnection:
-      button: Bağlantıyı Test Et
+      button: Bağlantıyı test et
       testing: Test ediliyor...
       success: Başarılı
       failed: Başarısız
       slow: Yavaş (düşünme modunu ayarlamanız önerilir)
-  general:
-    title: Genel
-    interfaceLanguage:
-      title: Arayüz Dili
-      description: Uzantı arayüzünün dilini tarayıcı dilinizden bağımsız olarak seçin.
-      auto: Otomatik (tarayıcıyı izle)
-    appearance:
-      title: Görünüm
-      theme: Tema
-      system: Sistem
-      light: Açık
-      dark: Koyu
     featureProviders:
-      title: Özellik Sağlayıcıları
+      title: Özellik sağlayıcıları
       description: Her özellik için kullanılacak sağlayıcıyı seçin
-      customActions: Özel AI Eylemleri
       features:
-        translate: Sayfa Çevirisi
-        selectionToolbar_translate: Seçim Araç Çubuğu Çevirisi
-        tts: Metin Okuma
-        inputTranslation: Giriş Çevirisi
-        videoSubtitles: Video Altyazıları
-    translationConfig:
-      model:
-        title: Model
-        enterCustomModel: Özel model adını girin
-    clearCache:
-      title: Önbelleği Temizle
-      description: Tarayıcınızdaki tüm çeviri önbelleğini temizleyin
-      clearing: Temizleniyor...
-      dialog:
-        title: Önbelleği Temizle
-        trigger: Önbelleği Temizle
-        confirm: Onayla
-        cancel: İptal
-        description: Bu işlem tüm çeviri önbelleğini temizleyecektir. Bu işlem geri alınamaz.
+        translate: Sayfa çevirisi
+        selectionToolbar_translate: Seçim araç çubuğu çevirisi
+        inputTranslation: Giriş çevirisi
+        videoSubtitles: Video altyazıları
+      descriptions:
+        translate: Sayfanın tamamını iki dilli ya da değiştirme modunda çevirir.
+        selectionToolbar_translate: Seçim araç çubuğundan, seçtiğiniz metni çevirir.
+        inputTranslation: Bir metin kutusuna yazdıklarınızı göndermeden önce çevirir.
+        videoSubtitles: Video oynatıcıda görünen altyazıları çevirir.
     languageDetection:
-      title: Dil Algılama
+      title: Dil algılama
       description: Otomatik çeviri dil algılama, atlama dil algılama ve Konuşma ses seçimi doğruluğunu etkiler.
       mode:
         basic: Temel
         llm: LLM
       provider:
-        label: Algılama Sağlayıcısı
+        label: Algılama sağlayıcısı
         placeholder: Bir sağlayıcı seçin
       status:
         noProviders: Önce bir LLM sağlayıcısı yapılandırın
         basicRecommend: LLM etkinleştirmesi önerilir
         llmEnabled: LLM algılama etkin
-  siteControl:
-    title: Site Kontrolü
-    mode:
-      title: Uzantı Etkinleştirme Modu
-      description: Kara liste modunu kullanarak uzantıyı belirli sitelerde devre dışı bırakabilir veya beyaz liste modunu kullanarak yalnızca belirli sitelerle sınırlayabilirsiniz.
-      blacklist: Yalnızca listelenen sitelerde devre dışı bırak
-      whitelist: Yalnızca listelenen sitelerde çalıştır
-    patterns:
-      enterUrlPattern: URL deseni girin (örn. example.com)
-      urlPattern: URL Deseni
+    aiContentAware:
+      title: AI akıllı bağlam çevirisi
+      description: Sayfanın ya da videonun bağlamını yapay zekâya vererek çeviriyi daha isabetli hale getirin
+      enable: Etkinleştir
+      enableDescription: Yapay zekâ çeviriden önce sayfanın ya da videonun özetini okur, böylece sözcükler bağlama oturur. LLM sağlayıcısıyla çalışan her çeviri özelliğinde geçerlidir. İlk isteğe gecikme ekler ve API maliyetini artırır.
+      llmProviderConfigured: $1 için LLM sağlayıcısı seçildi
+      llmProviderNotConfigured: $1 için LLM sağlayıcısı seçilmedi
+  patterns:
+    duplicate: Bu desen zaten listede
+  preference:
+    title: Tercihler
+    pageDescription: Read Frog'un görünümünü, nerede çalışacağını ve yapılandırmanızın nasıl eşitlenip yedekleneceğini ayarlayın.
+    appearanceAndLanguage:
+      title: Görünüm ve dil
+      theme:
+        title: Tema
+        description: Read Frog için bir tema seçin.
+        system: Sistem
+        light: Açık
+        dark: Koyu
+      interfaceLanguage:
+        title: Arayüz dili
+        description: Uzantı arayüzünün dilini tarayıcı dilinizden bağımsız olarak seçin.
+        auto: Otomatik (tarayıcıyı izle)
+    extensionActivation:
+      title: Uzantı etkinleştirme
+      mode:
+        title: Etkinleştirme modu
+        description: Kara liste modunu kullanarak uzantıyı belirli sitelerde devre dışı bırakabilir veya beyaz liste modunu kullanarak yalnızca belirli sitelerle sınırlayabilirsiniz.
+        blacklist: Yalnızca listelenen sitelerde devre dışı bırak
+        whitelist: Yalnızca listelenen sitelerde çalıştır
+      patterns:
+        enterUrlPattern: URL deseni girin (örn. example.com)
+        urlPattern: URL Deseni
+    config:
+      title: Yapılandırma
+      googleDrive:
+        title: Google Drive bulut senkronizasyonu
+        description: Uzak daha yeniyse indirir, yerel daha yeniyse yükler
+        sync: Google Drive'a Senkronize Et
+        syncing: Senkronize ediliyor...
+        syncSuccess:
+          uploaded: Yerel ayarlar buluta yüklendi
+          downloaded: Uzak ayarlar uygulandı
+          sameChanges: Yerel ve uzak değişiklikler aynı, senkronize edildi
+          noChange: Zaten güncel
+          unresolved: Çakışmalar çözüldü ve senkronize edildi
+        syncError: Senkronizasyon başarısız, lütfen tekrar deneyin
+        metadataCorrupted: Senkronizasyon meta verileri bozuk, uzak yapılandırma uygulandı
+        lastSyncTime: Son senkronizasyon
+        logout: Çıkış yap
+        logoutSuccess: Google hesabından çıkış yapıldı
+        unresolved:
+          title: Yapılandırma senkronizasyon çözümü
+          description: Yerel ve uzak yapılandırmalar farklı. Lütfen her alan için hangi sürümün tutulacağını seçin.
+          resolved: Çözüldü
+          unresolved: Çözülmedi
+          localValue: Yerel değer
+          remoteValue: Uzak değer
+          useLocal: Yereli kullan
+          useRemote: Uzakı kullan
+          useAllLocal: Tüm yereli kullan
+          useAllRemote: Tüm uzakı kullan
+          reset: Seçimi sıfırla
+          progress: $1/$2 değişiklik çözüldü
+          confirm: Senkronizasyonu onayla
+          cancel: İptal
+          hasUnresolvedInChildren: ⚠ Çözülmemiş değişiklikler içeriyor
+          item: öğe
+          items: öğe
+          unresolvedPrompt: "[Çözülmedi - lütfen seçin]"
+          localLatest: En son yerel
+          remoteLatest: En son uzak
+          bothChanged: Her ikisi de değişti
+          localChanged: Yerel değişti
+          remoteChanged: Uzak değişti
+          configValid: Yapılandırma geçerli
+          configInvalid: Yapılandırma geçersiz
+          resolveToContinue: Devam etmek için çakışmaları çözün
+          validationAlert:
+            title: Birleştirilmiş yapılandırmada doğrulama hataları var
+            description: "Düzeltmek için aşağıdaki farklılıkları ayarlayın:"
+          moreErrors: ...ve $1 hata daha
+      manualSync:
+        title: Manuel yapılandırma senkronizasyonu
+        description: Yapılandırma ayarlarınızı manuel olarak içe ve dışa aktarın
+        import: İçe Aktar
+        export: Dışa Aktar
+        importSuccess: Yapılandırma başarıyla içe aktarıldı
+        exportSuccess: Yapılandırma başarıyla dışa aktarıldı
+        importError: İçe aktarma başarısız
+        exportOptions:
+          title: Dışa aktarma seçeneklerini seçin
+          description: Lütfen dışa aktarılan yapılandırmaya API Anahtarlarını dahil edip etmemeyi seçin. API Anahtarlarını dahil etmek hassas bilgileri sızdırabilir, bu nedenle yalnızca güvenli ortamlarda kullanılması önerilir.
+          includeAPIKeys: API anahtarlarını dahil et
+          excludeAPIKeys: API anahtarlarını hariç tut
+          cancel: İptal
+      viewConfig:
+        open: Yapılandırmayı aç
+        title: Yapılandırma
+        description: Mevcut yapılandırmanızın ham JSON içeriğini görüntüleyin
+      backup:
+        title: Yapılandırma yedekleme
+        description: Yapılandırma değiştirilirse otomatik yedeklemeler her saat oluşturulur. Önceki yapılandırmaları buradan geri yükleyebilirsiniz. (Maksimum $1 yedekleme)
+        loading: Yedeklemeler yükleniyor...
+        backupNow: Şimdi yedekle
+        backupSuccess: Yedekleme başarıyla oluşturuldu
+        restoreSuccess: Yapılandırma başarıyla geri yüklendi
+        empty:
+          title: Henüz yedekleme mevcut değil
+          description: Yapılandırma değiştirilirse yedeklemeler her saat otomatik olarak oluşturulur.
+        item:
+          extensionVersion: "Uzantı sürümü:"
+          schemaVersion: "Şema sürümü:"
+          restore: Geri Yükle
+          export: Dışa Aktar
+          delete: Sil
+        restore:
+          title: Yapılandırma yedeğini geri yükle?
+          description: Mevcut yapılandırmanız en son yedeklemeden farklıysa otomatik olarak yedeklenecektir. Yedekleme sayısı limiti aşarsa en eski yedekleme kaldırılabilir.
+          cancel: İptal
+          confirm: Geri Yükle
+        delete:
+          title: Yedekleme silinsin mi?
+          description: Bu yedeklemeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+          cancel: İptal
+          confirm: Sil
+      reset:
+        title: Yapılandırmayı Sıfırla
+        description: Tüm yapılandırmayı varsayılan değere sıfırla
+        dialog:
+          title: Yapılandırmayı sıfırla
+          trigger: Yapılandırmayı sıfırla
+          confirm: Onayla
+          cancel: İptal
+          description: Bu işlem tüm özel yapılandırmalarınızı temizleyecek ve varsayılan değerlere sıfırlayacaktır. Lütfen onaylayın.
+    userExperience:
+      title: Kullanıcı deneyimi
+      beta:
+        title: Beta deneyimi
+        description: Henüz kararsız olabilecek deneysel özellikleri açın
+      analytics:
+        title: Kullanıcı deneyimini geliştirmemize yardımcı ol
+        tooltip: Açık olduğunda Read Frog, hataları yakalamak, özelliklerin güvenilir çalıştığını doğrulamak, performansı ve UX ayrıntılarını iyileştirmek ve sıradaki önceliklerimizi belirlemek için anonim kullanım sinyalleri gönderir.
+        description: Hataları bulmamıza, arayüzü iyileştirmemize ve daha fazlasına yardım ederek Read Frog'u geliştirin
+  shortcuts:
+    title: Kısayollar
+    pageDescription: Okurken çeviriyi başlatan tuşları belirleyin.
+    setShortcut: Kısayolu ayarla
+    pageTranslation:
+      title: Sayfa çevirisi
+      description: Sayfanın tamamını çevirir.
+    translationMode:
+      title: Çeviri modu
+      description: İki dilli ve yalnızca çeviri arasında geçiş yapar.
+    selectionTranslation:
+      title: Seçim çevirisi
+      description: Seçtiğiniz metni çevirir.
+    nodeTranslation:
+      title: Paragraf çevirisi
+      description: Bir paragrafın üzerine gelin veya uzun basın; yalnızca o paragraf çevrilir.
   overlayTools:
     title: Kaplama Araçları
-    floatingButton:
-      title: Yüzen Buton
-    selectionToolbar:
-      title: Seçim Araç Çubuğu
-    contextMenu:
-      title: Bağlam Menüsü
-    inputTranslation:
-      title: Giriş Çevirisi
   inputTranslation:
-    provider:
-      title: Çeviri Sağlayıcısı
-      description: Giriş çevirisi için kullanılacak çeviri sağlayıcısını seçin
-      label: Sağlayıcı
-    toggle:
-      title: Üçlü Boşluk Çevirisini Etkinleştir
-      description: Herhangi bir giriş alanında boşluk tuşuna hızlıca 3 kez basarak içeriği çevirin
+    title: Giriş Çevirisi
+    pageDescription: Giriş kutularına yazdıklarınızı göndermeden önce çevirin.
+    trigger:
+      title: Tetikleme
+      enable:
+        title: Etkinleştir
+        description: Herhangi bir giriş alanında boşluk tuşuna hızlıca üç kez basarak yazdıklarınızı çevirin.
+      threshold:
+        title: Tetikleme eşiği
+        description: Basışlar arasında izin verilen süre, milisaniye cinsinden. Çeviri tetiklenmiyorsa artırın, yazarken kendiliğinden tetikleniyorsa azaltın.
+        error: $1 ile $2 arasında bir değer girin
     languages:
-      title: Çeviri Dilleri
-      description: Giriş çevirisi için kaynak ve hedef dilleri seçin
-      sourceCode: Sayfa Kaynak Dili
-      targetCode: Sayfa Hedef Dili
-      enableCycle: Her seferinde yönü değiştir
-    threshold:
-      title: Tetikleme Eşiği
-      description: Boşluk tuşuna basışlar arasındaki zaman aralığı
-      label: Eşik (ms)
-      hint: Ardışık boşluk tuşuna basışlar arasındaki milisaniye cinsinden süre (100-1000ms)
-      error: Değer $1 ile $2 arasında olmalıdır
-  floatingButtonAndToolbar:
-    title: Yüzen Buton ve Araç Çubuğu
-    floatingButtonDemoImageAlt: Yüzen Buton Demosu
-    selectionToolbarDemoImageAlt: Seçim Araç Çubuğu Demosu
-    floatingButton:
-      globalToggle:
-        title: Yüzen Butonu Etkinleştir
-        description: Read Frog özelliklerine hızlı erişim için web sayfalarında yüzen butonu görüntüle
-      closeMenu:
-        disableForSite: Bu site için devre dışı bırak
-        disableGlobally: Genel olarak devre dışı bırak
-      tooltips:
-        togglePageTranslation: Sayfa çevirisini aç/kapat
-        floatingButtonOptions: Kayan düğme seçenekleri
-        lockPosition: Konumu kilitle
-        unlockPosition: Konum kilidini aç
-        settings: Ayarlar
-        feedback: Geri bildirim gönder
-      disabledSites:
-        title: Yüzen Buton Devre Dışı Siteler
-        description: Yüzen butonun devre dışı bırakılması gereken web sitelerini yapılandırın
-        enterUrlPattern: URL kalıbı girin
-        urlPattern: URL Kalıbı
-      clickAction:
-        title: Tıklama Eylemi
-        description: Yüzen butona tıklandığında gerçekleştirilecek eylemi seçin
-        panel: Yan Paneli Aç
-        translate: Sayfa Çevirisini Aç/Kapat
+      title: Çeviri dilleri
+      pair:
+        title: Dil çifti
+        description: Yazdığınız metnin hangi dil olarak okunacağı ve hangi dile çevrileceği. Her iki taraf da sayfaları çevirirken kullandığınız kaynak ve hedef dilleri izleyebilir.
+      sourceCode: Sayfa kaynak dili
+      targetCode: Çeviri hedef dili
+      cycle:
+        title: Her seferinde yönü değiştir
+        description: Her tetikleme iki dili yer değiştirir; tekrar tetiklediğinizde metin yazdığınız dile geri döner.
+  floatingButton:
+    title: Yüzen Buton
+    pageDescription: Yüzen düğmenin hangi tarafta duracağını, tıklamanın ne yapacağını ve nerede gizleneceğini ayarlayın.
+    demoImageAlt: Yüzen buton demosu
+    enable:
+      title: Yüzen butonu etkinleştir
+      description: Read Frog özelliklerine hızlı erişim için web sayfalarında yüzen butonu görüntüle
+    display:
+      title: Görünüm
       side:
         title: Düğme tarafı
         description: Yüzen düğmenin sayfanın hangi kenarına sabitleneceğini seçin
         left: Sol
         right: Sağ
-    selectionToolbar:
-      globalToggle:
-        title: Seçim Araç Çubuğunu Etkinleştir
-        description: Web sayfalarında metin seçtiğinizde araç çubuğunu göstererek hızlı çeviri, seslendirme ve AI eylemleri sunar
+      disabledSites:
+        title: Devre dışı siteler
+        description: Yüzen butonun devre dışı bırakılması gereken web sitelerini yapılandırın
+        enterUrlPattern: URL kalıbı girin
+        urlPattern: URL kalıbı
+    clickAction:
+      title: Tıklama eylemi
+      description: Yüzen butona tıklandığında gerçekleştirilecek eylemi seçin
+      panel: Yan paneli aç
+      translate: Sayfa çevirisini aç/kapat
+    closeMenu:
+      disableForSite: Bu site için devre dışı bırak
+      disableGlobally: Genel olarak devre dışı bırak
+    tooltips:
+      togglePageTranslation: Sayfa çevirisini aç/kapat
+      floatingButtonOptions: Kayan düğme seçenekleri
+      lockPosition: Konumu kilitle
+      unlockPosition: Konum kilidini aç
+      settings: Ayarlar
+      feedback: Geri bildirim gönder
+  selectionToolbar:
+    title: Seçim Araç Çubuğu
+    pageDescription: Metin seçtiğinizde hangi eylemlerin görüneceğini ve araç çubuğunun nerede çıkacağını belirleyin.
+    demoImageAlt: Seçim araç çubuğu demosu
+    enable:
+      title: Seçim araç çubuğunu etkinleştir
+      description: Web sayfalarında metin seçtiğinizde araç çubuğunu göstererek hızlı çeviri, seslendirme ve AI eylemleri sunar
+    actions:
+      title: Eylemler
+      translate:
+        title: Çeviri
+        description: Araç çubuğunda çeviri düğmesini göster
+      speak:
+        title: Sesli okuma
+        description: Seçili metni sesli okuyan seslendirme düğmesini araç çubuğunda göster
+      saveSuggestion:
+        title: Kaydetme önerileri
+        description: Bir yapay zekâ sağlayıcısıyla seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir
+        action: Eylem
+        actionDescription: Öneriyi üreten eylem
+    display:
+      title: Görünüm
       opacity:
         title: Opaklık
         description: Seçim araç çubuğunun ve buradan açılan genişletilmiş pencerenin opaklığını ayarlayın
-      featureToggles:
-        title: Özellik Açma/Kapama
-        description: Seçim araç çubuğunda hangi yerleşik özelliklerin gösterileceğini seçin
-        translate: Çeviri
-        speak: Sesli Okuma
-      saveSuggestion:
-        title: Kaydetme Önerileri
-        description: Bir yapay zeka sağlayıcısıyla seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir
-        action: Eylem
-      shortcut:
-        title: Selection Translation Shortcut
-        description: Customize the shortcut key for translating selected text
-      closeMenu:
-        disableForSite: Bu site için devre dışı bırak
-        disableGlobally: Genel olarak devre dışı bırak
       disabledSites:
-        title: Seçim Araç Çubuğu Devre Dışı Siteler
+        title: Devre dışı siteler
         description: Seçim araç çubuğunun devre dışı bırakılması gereken web sitelerini yapılandırın
         enterUrlPattern: URL kalıbı girin
-        urlPattern: URL Kalıbı
-      errors:
-        customActionFailed: Özel eylem başarısız oldu
-        customActionFailedFallback: Özel eylem isteği başarısız oldu
-        actionUnavailable: Seçilen eylem kullanılamıyor
-        missingSelection: Seçili metin yok
-        providerDisabled: Seçilen sağlayıcı devre dışı
-        providerUnavailable: Seçilen sağlayıcı kullanılamıyor
-      features:
-        provider: Sağlayıcı
-        selectProvider: Sağlayıcı seçin
-        noProviderAvailable: Kullanılabilir sağlayıcı yok
-        useProviderDefaultModel: Sağlayıcının varsayılan modelini kullan
-        useCustomModel: Özel model kullan
-        customModel: Özel model
-        model: Model
-        modelNotAvailableForNonLLM: Model ayarları yalnızca LLM sağlayıcılarında kullanılabilir
-        translate:
-          title: Seçim Çevirisi
-          description: Seçim araç çubuğu çeviri özelliği için sağlayıcı ve model yapılandırın
-      customActions:
-        title: Özel AI Eylemleri
-        description: Seçilen metin için kendi yapılandırılmış AI eylemlerinizi ekleyin
-        builtIn: Yerleşik
-        add: AI Eylemi Ekle
-        edit: AI Eylemini Düzenle
-        empty: Henüz özel AI eylemi yok
-        noEnabledLlmProvider: Özel AI eylemleri oluşturmadan önce en az bir LLM sağlayıcısını etkinleştirin
-        table:
-          name: Ad
-          provider: Sağlayıcı
-          fields: Alanlar
-          actions: İşlemler
-        form:
-          name: Ad
-          customize: Özelleştir
-          customizeTooltip: Yerleşik eylemin istemleri değiştirilemez. Düzenlenebilir bir kopya oluşturup istemleri değiştirmek için bu düğmeye tıklayın.
-          icon: Simge
-          iconField:
-            chooseAriaLabel: Simge seç
-            chooseTitle: Bir simge seçin
-            inputPlaceholder: Simge adını girin
-            helpAriaLabel: Daha fazla simge yardımı
-            helpTitle: Aradığınız simgeyi bulamadınız mı?
-            helpStepBrowsePrefix: ""
-            helpStepBrowseSuffix: üzerinde simgelere göz atın
-            helpStepCopyPrefix: "Örneğin "
-            helpStepCopySuffix: " simge adını kopyalayıp alana yapıştırın."
-          provider: Sağlayıcı (yapılandırılmış çıktı desteği gerekir)
-          selectProvider: Sağlayıcı seçin
-          systemPrompt: Sistem Promptu
-          prompt: Prompt
-          outputSchema: Çıkış Şeması
-          addField: Alan Ekle
-          fieldName: Alan Adı
-          fieldType: Alan Türü
-          fieldDescription: Açıklama
-          fieldDescriptionPlaceholder: Bu alanın ne içermesi gerektiğini açıklayın...
-          fieldSpeaking: Sesli okumayı etkinleştir
-          actions: İşlemler
-          cancel: İptal
-          save: Kaydet
-          defaultFieldName: sonuç
-          fieldNamePlaceholder: alan_adı
-          autoFieldPrefix: alan
-          addFieldDialog:
-            title: Çıktı Alanı Ekle
-          editFieldDialog:
-            title: Çıktı Alanını Düzenle
-            save: Kaydet
-          deleteFieldDialog:
-            title: Çıktı Alanı Silinsin mi?
-            description: Bu çıktı alanı kaldırılacaktır.
-            confirm: Sil
-            cancel: İptal
-          notebase:
-            title: Notebase Bağlantısı
-            description: Bu eylemin yapılandırılmış sonuçlarını uzak bir Notebase'e kaydedin.
-            loginRequiredTitle: Notebase yapılandırmak için giriş yapın
-            loginRequiredDescription: notebase seçmeden veya eşlemeleri düzenlemeden önce readfrog.app'te oturum açın.
-            loginRequiredConnectedDescription: Bu bağlantı aşağıdaki hesapla oluşturuldu. Aynı hesapla giriş yaparsanız alan eşlemeleri geri yüklenir. Başka bir hesapla giriş yaparsanız Notebase oluştururken veya bağlarken önceki eşlemeler temizlenir.
-            loginAction: Giriş yap
-            connectedAccountLabel: Bağlı hesap
-            currentAccountLabel: Geçerli hesap
-            unknownConnectedAccount: Bilinmeyen hesap
-            tableLabel: Notebase
-            tablePlaceholder: Bir notebase seçin
-            tableClearOption: Notebase bağlama
-            clearConnectionAction: Bağlantıyı temizle
-            refreshAction: Yenile
-            emptyTitle: Henüz Notebase yok
-            emptyDescription: readfrog.app'te bir notebase oluşturun, sonra alanları eşlemek için buraya dönün.
-            openNotebaseAction: Notebase'i Aç
-            accessDeniedTitle: Notebase'e erişilemiyor
-            accessDeniedDescription: Bu hesabın Notebase verilerini yükleme izni yok.
-            listErrorTitle: Notebase listesi yüklenemedi
-            listErrorDescription: Biraz sonra Notebase listesini yeniden yenilemeyi deneyin.
-            accountMismatchTitle: Notebase bağlantısı başka bir hesaba ait
-            accountMismatchDescription: Bu bağlantı aşağıdaki bağlı hesaba aittir. Bağlantıyı temizleyin veya geçerli hesabın erişebildiği bir Notebase seçin.
-            tableUnavailableTitle: Seçilen notebase artık kullanılamıyor
-            tableUnavailableDescription: Bu Notebase artık yok veya açılamıyor. Bağlantıyı temizleyin veya başka bir Notebase seçin.
-            tableUnavailableOption: kullanılamıyor
-            schemaErrorTitle: notebase şeması yüklenemedi
-            schemaErrorDescription: Kısa süre sonra yeniden yenilemeyi deneyin.
-            schemaLoading: notebase şeması yükleniyor...
-            mappingsLabel: Alan Eşlemeleri
-            mappingsEmpty: Henüz eşleme yok. Alanları kaydetmeye hazır olduğunuzda bir tane ekleyin.
-            addMappingAction: Eşleme Ekle
-            removeMappingAction: Eşlemeyi Kaldır
-            localFieldLabel: Eylem alanı
-            localFieldPlaceholder: Bir eylem alanı seçin
-            remoteFieldLabel: Notebase alanı
-            remoteFieldPlaceholder: Bir notebase alanı seçin
-            columnUnavailableOption: silinmiş
-            invalidMappingsTitle: Bazı eşlemeler ilgi gerektiriyor
-            invalidMappingsDescription: Geçersiz eşlemeler korunur. Notebase'e kaydetmeden önce düzeltin.
-            mappingMissingLocal: Eşlenen eylem alanı artık yok.
-            mappingMissingRemote: Eşlenen notebase alanı artık yok.
-            mappingMissingSchema: Bu eşlemeyi doğrulamak için notebase şemasını yenileyin.
-            mappingIncompatible: Alan türleri artık eşleşmiyor.
-          tokens:
-            selection: Seçilen metin içeriği
-            paragraphs: Seçimle kesişen paragraf metni; boş satırlarla birleştirilir ve özel AI eylemlerine gönderilirken ilk 2000 karaktere kısaltılır
-            targetLanguage: Kullanıcının hedef dili
-            webTitle: Web sayfası başlığı
-            webContent: Geçerli sayfadan çıkarılan ve ilk 2000 karaktere kısaltılan web sayfası içeriği
-          delete: Sil
-          deleteDialog:
-            title: Özel eylem silinsin mi?
-            description: Bu işlem geri alınamaz.
-            confirm: Sil
-            cancel: İptal
-        errors:
-          nameRequired: Ad gerekli
-          duplicateName: 'Yinelenen eylem adı "$1"'
-          invalidIcon: Geçersiz Iconify simge metni
-          providerRequired: Etkin bir LLM sağlayıcısı seçin
-          outputSchemaRequired: En az bir çıktı alanı ekleyin
-          fieldKeyRequired: Alan adı gerekli
-          duplicateFieldKey: Alan adları benzersiz olmalıdır
-    contextMenu:
-      title: Bağlam Menüsü
-      translate:
-        title: Bağlam Menüsü Çevirisini Etkinleştir
-        description: Sayfa veya seçili metni hızlıca çevirmek için tarayıcı sağ tıklama menüsüne çeviri seçenekleri ekle
-  translation:
-    title: Çeviri
-    requestQueueConfig:
-      title: Çeviri Hızı
-      firstOnDescription: Çeviri isteklerinin işleme hızını
-      lastOnDescription: algoritmasıyla ayarlayın
-      capacity:
-        title: Maksimum Ani İstek Sayısı
-        description: İzin verilen geçici ani istek sayısı, kısa bir süre içinde eşzamanlı olarak işlenebilecek maksimum istek sayısını belirler
-      rate:
-        title: Saniyedeki Ortalama İstek
-        description: Saniyedeki ortalama istek, ancak geçici olarak fazla istek göndermek için maksimum ani sayısını yapılandırmaya izin verir. Ondalık değerler desteklenir — örneğin 0.25, her 4 saniyede bir istek anlamına gelir ve Gemini ücretsiz katmanı gibi düşük limitli API'ler için kullanışlıdır
-    batchQueueConfig:
-      title: Toplu Çeviri
-      description: Toplu çeviri için karakter limitleri ve maksimum paragraf sayısını yapılandırın (yalnızca LLM çevirisi için geçerlidir)
-      maxCharactersPerBatch:
-        title: Maksimum Karakter
-        description: Her çevirinin içerik hacmini kontrol etmek için toplu istek başına izin verilen maksimum karakter sayısı
-      maxItemsPerBatch:
-        title: Maksimum Paragraf Sayısı
-        description: Her çevirinin içerik hacmini kontrol etmek için her toplu çeviri için maksimum paragraf sayısı
-      statisticsLink: Son 7 günde yaklaşık $1 maliyet tasarrufu sağlandı
-    autoTranslateWebsite:
-      title: Web Sitesine Göre Otomatik Çevir
-      description: Bu web sitesini her zaman çevir
-      urlPattern: URL Kalıbı
-      enterUrlPattern: URL Kalıbı Girin
-    neverAutoTranslateWebsite:
-      title: Never Auto Translate Based on Website
-      description: Never automatically translate this website
-      urlPattern: URL Pattern
-      enterUrlPattern: Enter URL Pattern
-    personalizedPrompts:
-      title: Kişiselleştirilmiş Promptlar
-      description: Farklı türde Promptları özelleştirmek, çeviri sırasında Prompt türünü kendiniz ayarlamanıza olanak tanır. Prompt, kullanıcının LLM'ye gönderdiği metni temsil eder.
-      communityPrompts: Topluluktan prompt al veya paylaş
-      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
-      addPrompt: Prompt Ekle
-      default: Varsayılan
-      importSuccess: İçe Aktarma Başarılı
-      import: İçe Aktar
-      export: Dışa Aktar
-      current: kullanımda
-      editPrompt:
-        title: Promptu Düzenle
+        urlPattern: URL kalıbı
+    closeMenu:
+      disableForSite: Bu site için devre dışı bırak
+      disableGlobally: Genel olarak devre dışı bırak
+    errors:
+      customActionFailed: Özel eylem başarısız oldu
+      customActionFailedFallback: Özel eylem isteği başarısız oldu
+      actionUnavailable: Seçilen eylem kullanılamıyor
+      missingSelection: Seçili metin yok
+      providerDisabled: Seçilen sağlayıcı devre dışı
+      providerUnavailable: Seçilen sağlayıcı kullanılamıyor
+    customActions:
+      title: Özel AI Eylemleri
+      pageDescription: Kendi istemlerinizi yazın ve seçim araç çubuğundan seçili metin üzerinde çalıştırın.
+      description: Seçilen metin için kendi yapılandırılmış AI eylemlerinizi ekleyin
+      configTitle: Eylem yapılandırması
+      builtIn: Yerleşik
+      add: AI eylemi ekle
+      edit: AI eylemini düzenle
+      empty: Henüz özel AI eylemi yok
+      noEnabledLlmProvider: Özel AI eylemleri oluşturmadan önce en az bir LLM sağlayıcısını etkinleştirin
+      form:
         name: Ad
-        systemPrompt: Sistem Promptu
+        customize: Özelleştir
+        customizeTooltip: Yerleşik eylemin istemleri değiştirilemez. Düzenlenebilir bir kopya oluşturup istemleri değiştirmek için bu düğmeye tıklayın.
+        icon: Simge
+        iconField:
+          chooseAriaLabel: Simge seç
+          chooseTitle: Bir simge seçin
+          inputPlaceholder: Simge adını girin
+          helpAriaLabel: Daha fazla simge yardımı
+          helpTitle: Aradığınız simgeyi bulamadınız mı?
+          helpStepBrowsePrefix: ""
+          helpStepBrowseSuffix: üzerinde simgelere göz atın
+          helpStepCopyPrefix: "Örneğin "
+          helpStepCopySuffix: " simge adını kopyalayıp alana yapıştırın."
+        provider: Sağlayıcı (yapılandırılmış çıktı desteği gerekir)
+        selectProvider: Sağlayıcı seçin
+        systemPrompt: Sistem promptu
         prompt: Prompt
-        promptCellInput:
-          input: Çevrilecek metin içeriği
-          targetLanguage: Hedef dil
+        outputSchema: Çıkış şeması
+        addField: Alan ekle
+        fieldName: Alan adı
+        fieldType: Alan türü
+        fieldDescription: Açıklama
+        fieldDescriptionPlaceholder: Bu alanın ne içermesi gerektiğini açıklayın...
+        fieldSpeaking: Sesli okumayı etkinleştir
+        actions: İşlemler
+        cancel: İptal
+        save: Kaydet
+        defaultFieldName: sonuç
+        fieldNamePlaceholder: alan_adı
+        autoFieldPrefix: alan
+        addFieldDialog:
+          title: Çıktı alanı ekle
+        editFieldDialog:
+          title: Çıktı alanını düzenle
+          save: Kaydet
+        deleteFieldDialog:
+          title: Çıktı alanı silinsin mi?
+          description: Bu çıktı alanı kaldırılacaktır.
+          confirm: Sil
+          cancel: İptal
+        notebase:
+          title: Notebase bağlantısı
+          description: Bu eylemin yapılandırılmış sonuçlarını uzak bir Notebase'e kaydedin.
+          loginRequiredTitle: Notebase yapılandırmak için giriş yapın
+          loginRequiredDescription: notebase seçmeden veya eşlemeleri düzenlemeden önce readfrog.app'te oturum açın.
+          loginRequiredConnectedDescription: Bu bağlantı aşağıdaki hesapla oluşturuldu. Aynı hesapla giriş yaparsanız alan eşlemeleri geri yüklenir. Başka bir hesapla giriş yaparsanız Notebase oluştururken veya bağlarken önceki eşlemeler temizlenir.
+          loginAction: Giriş yap
+          connectedAccountLabel: Bağlı hesap
+          currentAccountLabel: Geçerli hesap
+          unknownConnectedAccount: Bilinmeyen hesap
+          tableLabel: Notebase
+          tablePlaceholder: Bir notebase seçin
+          tableClearOption: Notebase bağlama
+          clearConnectionAction: Bağlantıyı temizle
+          refreshAction: Yenile
+          emptyTitle: Henüz Notebase yok
+          emptyDescription: readfrog.app'te bir notebase oluşturun, sonra alanları eşlemek için buraya dönün.
+          openNotebaseAction: Notebase'i aç
+          accessDeniedTitle: Notebase'e erişilemiyor
+          accessDeniedDescription: Bu hesabın Notebase verilerini yükleme izni yok.
+          listErrorTitle: Notebase listesi yüklenemedi
+          listErrorDescription: Biraz sonra Notebase listesini yeniden yenilemeyi deneyin.
+          accountMismatchTitle: Notebase bağlantısı başka bir hesaba ait
+          accountMismatchDescription: Bu bağlantı aşağıdaki bağlı hesaba aittir. Bağlantıyı temizleyin veya geçerli hesabın erişebildiği bir Notebase seçin.
+          tableUnavailableTitle: Seçilen notebase artık kullanılamıyor
+          tableUnavailableDescription: Bu Notebase artık yok veya açılamıyor. Bağlantıyı temizleyin veya başka bir Notebase seçin.
+          tableUnavailableOption: kullanılamıyor
+          schemaErrorTitle: notebase şeması yüklenemedi
+          schemaErrorDescription: Kısa süre sonra yeniden yenilemeyi deneyin.
+          schemaLoading: notebase şeması yükleniyor...
+          mappingsLabel: Alan eşlemeleri
+          mappingsEmpty: Henüz eşleme yok. Alanları kaydetmeye hazır olduğunuzda bir tane ekleyin.
+          addMappingAction: Eşleme ekle
+          removeMappingAction: Eşlemeyi kaldır
+          localFieldLabel: Eylem alanı
+          localFieldPlaceholder: Bir eylem alanı seçin
+          remoteFieldLabel: Notebase alanı
+          remoteFieldPlaceholder: Bir notebase alanı seçin
+          columnUnavailableOption: silinmiş
+          invalidMappingsTitle: Bazı eşlemeler ilgi gerektiriyor
+          invalidMappingsDescription: Geçersiz eşlemeler korunur. Notebase'e kaydetmeden önce düzeltin.
+          mappingMissingLocal: Eşlenen eylem alanı artık yok.
+          mappingMissingRemote: Eşlenen notebase alanı artık yok.
+          mappingMissingSchema: Bu eşlemeyi doğrulamak için notebase şemasını yenileyin.
+          mappingIncompatible: Alan türleri artık eşleşmiyor.
+        tokens:
+          selection: Seçilen metin içeriği
+          paragraphs: Seçimle kesişen paragraf metni; boş satırlarla birleştirilir ve özel AI eylemlerine gönderilirken ilk 2000 karaktere kısaltılır
+          targetLanguage: Kullanıcının hedef dili
           webTitle: Web sayfası başlığı
-          webDescription: Sayfa meta verilerinden web sayfası açıklaması
-          webContent: Web sayfası içeriği (ilk 2000 karaktere kısaltılır)
-          webSummary: Web sayfası özeti (AI Akıllı Bağlam gerektirir)
-        save: Değişiklikleri Kaydet
-        close: İptal
-      deletePrompt:
-        title: Promptu Sil
-        description: Promptu silmeyi onayla
-        confirm: Onayla
-        cancel: İptal
-      exportPrompt:
-        exportSelected: Seçilenleri Dışa Aktar
-        cancel: İptal
+          webContent: Geçerli sayfadan çıkarılan ve ilk 2000 karaktere kısaltılan web sayfası içeriği
+        delete: Sil
+        deleteDialog:
+          title: Özel eylem silinsin mi?
+          description: Bu işlem geri alınamaz.
+          confirm: Sil
+          cancel: İptal
+      errors:
+        nameRequired: Ad gerekli
+        duplicateName: 'Yinelenen eylem adı "$1"'
+        invalidIcon: Geçersiz Iconify simge metni
+        providerRequired: Etkin bir LLM sağlayıcısı seçin
+        outputSchemaRequired: En az bir çıktı alanı ekleyin
+        fieldKeyRequired: Alan adı gerekli
+        duplicateFieldKey: Alan adları benzersiz olmalıdır
+  contextMenu:
+    title: Bağlam Menüsü
+    pageDescription: Tarayıcının sağ tık menüsündeki Read Frog seçeneklerini yönetin.
+    demoImageAlt: Bağlam menüsü demosu
+    enable:
+      title: Bağlam menüsü çevirisini etkinleştir
+      description: Sayfa veya seçili metni hızlıca çevirmek için tarayıcı sağ tıklama menüsüne çeviri seçenekleri ekle
+  translation:
+    title: Sayfa Çevirisi
+    pageDescription: Sayfaların nasıl çevrileceğini belirleyin — mod, kapsam, istemler ve istek limitleri.
+    preference:
+      title: Temel ayarlar
+      translationMode:
+        title: Çeviri modu
+        description: "Çevrilmiş metnin nasıl görüntüleneceğini seçin: iki dilli veya yalnızca çeviri."
+        mode:
+          bilingual: İki dilli
+          translationOnly: Yalnızca çeviri
+        switched: "Çeviri modu: $1"
+      translateRange:
+        title: Çeviri kapsamı
+        description: Sayfadaki yalnızca ana içeriğin mi yoksa tüm içeriğin mi çevrileceğini seçin.
+        range:
+          main: Ana içerik
+          all: Tüm içerik
+    hoverTranslation:
+      title: Üzerine gelme çevirisi
+      enable:
+        title: Etkinleştir
+        description: Bir paragrafın üzerine gelin veya uzun basın; yalnızca o paragraf çevrilir.
     translationStyle:
-      title: Çeviri Görüntüleme Stili
+      title: Çeviri görüntüleme stili
       description: Çeviri sonuçlarını orijinal metinden ayırt etmek için istediğiniz herhangi bir stili ayarlayın
-      useCustomStyle: Özel CSS Stili Kullan
+      useCustomStyle: Özel CSS stili kullan
       useCustomStyleDescription: Yazı tipleri, animasyonlar ve dile özgü stiller dahil herhangi bir CSS'yi destekler
-      presetStyle: Hazır Stil
-      cssEditor: CSS Editörü
+      presetStyle: Hazır stil
+      cssEditor: CSS editörü
+      cssEditorDescription: Kendi CSS'inizi yazın ve çevrilen metnin nasıl göründüğünü önizleyin.
       preview: Önizleme
       stylePreviewLanguage: Dil
       stylePreviewDirection: Yön
-      stylePreviewTranslatedText: Çevrilmiş Metin
+      stylePreviewTranslatedText: Çevrilmiş metin
       style:
         default: Yok
-        blur: Bulanıklık Efekti
+        blur: Bulanıklık efekti
         blockquote: Alıntı
         weakened: Zayıflatılmış
-        dashedLine: Kesikli Çizgi
+        dashedLine: Kesikli çizgi
         border: Kenarlık
-        textColor: Metin Rengi
-        background: Arka Plan
+        textColor: Metin rengi
+        background: Arka plan
       customCSS:
         editor:
           placeholder: |
@@ -610,6 +700,7 @@ options:
               padding: 2px 4px;
               border-radius: 4px;
             }
+          docsLink: Nasıl yapılandırılır?
           saveButton: Kaydet
           savedButton: Kaydedildi
           validation:
@@ -618,77 +709,105 @@ options:
             syntaxError: CSS sözdizimi hataları içeriyor
             tooLong: CSS çok uzun
             saved: Tüm değişiklikler kaydedildi
-    translationMode:
-      title: Çeviri Modu
-      description: "Çevrilmiş metnin nasıl görüntüleneceğini seçin: iki dilli veya yalnızca çeviri."
-      mode:
-        bilingual: İki Dilli
-        translationOnly: Yalnızca Çeviri
-    translationModeShortcut:
-      title: Çeviri Modu Kısayolu
-      description: İki dilli ve yalnızca çeviri modları arasında geçiş yapmak için kısayol tuşunu özelleştirin
-      switched: "Çeviri Modu: $1"
-    translateRange:
-      title: Çeviri Kapsamı
-      description: Sayfadaki yalnızca ana içeriğin mi yoksa tüm içeriğin mi çevrileceğini seçin.
-      range:
-        main: Ana İçerik
-        all: Tüm İçerik
-    pageTranslationShortcut:
-      title: Sayfa Çeviri Kısayolu
-      description: Tüm web sayfalarını çevirmek için kısayol tuşunu özelleştirin
-    preloadConfig:
-      title: Ön Çeviri Aralığı
-      description: API maliyetlerinden tasarruf etmek için görünüm alanının altındaki ne kadar içeriğin önceden çevrileceğini kontrol edin
-      margin:
-        title: Ön Yükleme Mesafesi (piksel)
-        description: İçeriği çevirmeye başlamak için görünüm alanının ne kadar altı. Daha düşük değerler API maliyetlerinden tasarruf sağlar ancak kaydırma sırasında gecikmelere neden olabilir.
-      threshold:
-        title: Görünürlük Eşiği
-        description: Çeviriyi tetiklemek için gereken öğe görünürlük yüzdesi (0-1). Daha yüksek değerler, öğenin daha fazlası görünür olana kadar çeviriyi geciktirir.
-    smallParagraphFilter:
-      title: Kısa Metin Filtresi
-      description: Bu genel varsayılanlar, eşiklerden daha az karakter veya sözcük içeren metin düğümlerinin çevirisini atlar. Eşleşen site kuralları bunları geçersiz kılabilir (0 = devre dışı)
-      minCharacters:
-        title: Minimum Karakter
-        description: Bu değerden az karakterli metin düğümleri çevrilmeyecektir. Karakter sayısı boşlukları içerir.
-      minWords:
-        title: Minimum Kelime
-        description: Bu değerden az kelimeli metin düğümleri çevrilmeyecektir. Tüm dillerde doğru kelime sayımı için Intl.Segmenter kullanılır.
-      error: Değer $1 ile $2 arasında olmalıdır
-    nodeTranslationHotkey:
-      title: Üzerine Gelme veya Uzun Basma Çeviri Kısayolu
-      description: Üzerine gelme için değiştirici tuşu özelleştirin veya paragrafları çevirmek için uzun basın
-      enable: Etkinleştir
-    llmProviderConfigured: $1 için LLM sağlayıcısı seçildi
-    llmProviderNotConfigured: $1 için LLM sağlayıcısı seçilmedi
-    autoTranslateLanguages:
-      title: Dile Göre Otomatik Çevir
-      description: Belirli diller algılandığında sayfa içeriğini otomatik olarak çevir
-      selectLanguages: Dilleri seçin
-      detection:
-        label: Dil Algılama
-        basic: Temel
-        llm: LLM
-        description: Temel algılama hızlı ve ücretsizdir. LLM algılama daha doğrudur ancak gecikme ve API maliyetleri ekler. Yapılandırılmış otomatik çeviri dilleri gerektirir.
-    skipLanguages:
-      title: Dile Göre Otomatik Atla
-      description: Belirli diller algılandığında paragraf çevirisini otomatik olarak atla
-      targetLanguageSkip: Hedef dili atla
-      targetLanguageSkipDescription: Çeviriden önce paragrafın zaten hedef dilde olup olmadığını algılar. Eşleşen metin istek göndermeden atlanır. Bunu kapatmak, değişmeyen çeviri çıktısını gizleyen sonraki korumayı değiştirmez.
-      selectLanguages: Dilleri seçin
-      detection:
-        label: Dil Algılama
-        basic: Temel
-        llm: LLM
-        description: Temel algılama hızlı ve ücretsizdir. LLM algılama daha doğrudur ancak gecikme ve API maliyetleri ekler.
-    aiContentAware:
-      title: AI Akıllı Bağlam Çevirisi
-      description: AI'ya web sayfası bağlamı sağlayarak çeviri kalitesini artırın
-      enable: AI Akıllı Bağlam Çevirisini Etkinleştir
-      enableDescription: AI, çeviri doğruluğunu artırmak için web sayfası özetini kullanır. LLM sağlayıcısı gerektirir. Bir sayfayı çevirmeye başlarken gecikme ekler ve API maliyetlerini artırır.
+    personalizedPrompts:
+      title: Kişiselleştirilmiş promptlar
+      description: Farklı türde Promptları özelleştirmek, çeviri sırasında Prompt türünü kendiniz ayarlamanıza olanak tanır. Prompt, kullanıcının LLM'ye gönderdiği metni temsil eder.
+      managePrompts: Promptları yönet
+      communityPrompts: Topluluktan prompt al veya paylaş
+      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      addPrompt: Prompt ekle
+      default: Varsayılan
+      importSuccess: İçe aktarma başarılı
+      import: İçe aktar
+      export: Dışa aktar
+      current: kullanımda
+      editPrompt:
+        title: Promptu düzenle
+        name: Ad
+        systemPrompt: Sistem promptu
+        prompt: Prompt
+        promptCellInput:
+          input: Çevrilecek metin içeriği
+          targetLanguage: Hedef dil
+          webTitle: Web sayfası başlığı
+          webDescription: Sayfa meta verilerinden web sayfası açıklaması
+          webContent: Web sayfası içeriği (ilk 2000 karaktere kısaltılır)
+          webSummary: Web sayfası özeti (AI akıllı bağlam gerektirir)
+        save: Değişiklikleri kaydet
+        close: İptal
+      deletePrompt:
+        title: Promptu sil
+        description: Promptu silmeyi onayla
+        confirm: Onayla
+        cancel: İptal
+      exportPrompt:
+        exportSelected: Seçilenleri dışa aktar
+        cancel: İptal
+    translationControl:
+      title: Çeviri denetimi
+      autoTranslateWebsite:
+        title: Web sitesine göre otomatik çevir
+        description: Açılır açılmaz çevrilmeye başlayan siteler
+        urlPattern: URL kalıbı
+        enterUrlPattern: URL kalıbı girin
+      neverAutoTranslateWebsite:
+        title: Web sitesine göre asla otomatik çevirme
+        description: Bir dil kuralı eşleşse bile kendiliğinden çevrilmeyen siteler
+        urlPattern: URL kalıbı
+        enterUrlPattern: URL kalıbı girin
+      autoTranslateLanguages:
+        title: Dile göre otomatik çevir
+        description: Belirli diller algılandığında sayfa içeriğini otomatik olarak çevir
+        selectLanguages: Dilleri seçin
+      skipLanguages:
+        title: Dile göre otomatik atla
+        description: Belirli diller algılandığında paragraf çevirisini otomatik olarak atla
+        targetLanguageSkipDescription: Zaten hedef dilde olan paragrafları istek göndermeden atlar
+        selectLanguages: Dilleri seçin
+      smallParagraphFilter:
+        title: Kısa metin filtresi
+        description: Bu genel varsayılanlar, eşiklerden daha az karakter veya sözcük içeren metin düğümlerinin çevirisini atlar. Eşleşen site kuralları bunları geçersiz kılabilir (0 = devre dışı)
+        minCharacters:
+          description: "Minimum karakter: daha kısa metinler çevrilmez. Her şeyi çevirmek için 0 girin"
+        minWords:
+          description: "Minimum kelime: daha az kelimeli metinler çevrilmez"
+        error: Değer $1 ile $2 arasında olmalıdır
+    translationQueue:
+      title: Çeviri kuyruğu
+      requestQueueConfig:
+        title: Çeviri hızı
+        capacity:
+          description: "Maksimum ani istek: aynı anda kaç istek gönderilebilir"
+        rate:
+          description: "Saniyedeki istek: sonrasındaki sabit hız. Ondalık da olur, 0.25 her 4 saniyede bir istek demek"
+      batchQueueConfig:
+        title: Toplu çeviri
+        description: Toplu çeviri için karakter limitleri ve maksimum paragraf sayısını yapılandırın (yalnızca LLM çevirisi için geçerlidir)
+        maxCharactersPerBatch:
+          description: "Maksimum karakter: tek bir yapay zekâ isteği ne kadar metin taşır"
+        maxItemsPerBatch:
+          description: "Maksimum paragraf: tek istekte kaç paragraf birleşir. Yapay zekâ olmayan sağlayıcılar ikisini de yok sayar"
+      preloadConfig:
+        title: Ön çeviri aralığı
+        description: API maliyetlerinden tasarruf etmek için görünüm alanının altındaki ne kadar içeriğin önceden çevrileceğini kontrol edin
+        margin:
+          description: "Ön çeviri mesafesi: ekranın altında kaç piksellik içerik önceden çevrilir. Azaltmak API maliyetini düşürür"
+        threshold:
+          description: "Görünürlük eşiği: paragrafın ne kadarı ekranda olunca çevrilsin, 0 ile 1 arasında"
+    cache:
+      title: Önbellek
+      clearCache:
+        title: Önbelleği temizle
+        description: Tarayıcınızdaki tüm çeviri önbelleğini temizleyin
+        clearing: Temizleniyor...
+        dialog:
+          title: Önbelleği temizle
+          trigger: Önbelleği temizle
+          confirm: Onayla
+          cancel: İptal
+          description: Bu işlem tüm çeviri önbelleğini temizleyecektir. Bu işlem geri alınamaz.
   siteRules:
-    title: Site Kuralları
+    title: Site kuralları
     description: Belirli web sitelerinin nasıl çevrileceğini ayarlayan site bazlı kurallar.
     userRules:
       title: Kullanıcı Kuralları
@@ -714,232 +833,122 @@ options:
       count: $2 kuraldan $1 tanesi gösteriliyor
   tts:
     title: Metinden Konuşmaya
-    description: Konuş butonunu Edge TTS ses ayarlarıyla özelleştirin.
+    pageDescription: Seçtiğiniz metni doğal bir sesle okutun.
     voice:
-      label: Ses
-      fallback: Yedek
+      title: Ses
       selectPlaceholder: Bir ses seçin
       noVoicesFound: Ses bulunamadı
-      previewSample: Read Frog'dan merhaba! Yüksek sesle okurken böyle ses çıkaracağım.
-    languageVoice:
-      label: Dil Sesi
-      reset: Sıfırla
-      description: Bir dil seçin ve TTS bu dili algıladığında kullanılacak sesi atayın.
-    rate:
-      label: Hız (%)
-      hint: -100 ile 100 arasında tam sayı değerleri kabul eder
-    pitch:
-      label: Perde (Hz)
-      hint: -100 ile 100 arasında tam sayı değerleri kabul eder
-    volume:
-      label: Ses Düzeyi (%)
-      hint: -100 ile 100 arasında tam sayı değerleri kabul eder
-    betaDisabled: Metinden konuşmaya ayarlarını özelleştirmek için Beta Deneyimini etkinleştirin.
-  statistics:
-    title: İstatistikler
-    batchRequest:
-      title: Kaydedilen Toplu Çeviri İstekleri
-      description: Dönem içinde toplu çeviri ile kaydedilen istek yüzdesi
-      originalRequestCount: Orijinal İstek Sayısı
-      batchRequestCount: Toplu İstek Sayısı
-  config:
-    title: Yapılandırma
-    about:
-      title: Hakkında
-      description: Read Frog Nisan 2025'te doğdu
-      mission: Read Frog, yapay zeka çağında yüksek kaliteli eğitime daha eşit erişimi genişletmek için, dil öğrenimi, tıp ve bilgi yoğun diğer alanlarda gerçek bir öğretmene daha yakın hissettiren öğrenme deneyimlerini daha ulaşılabilir maliyetlerle sunmayı hedefler.
-      analytics:
-        title: Kullanıcı deneyimini geliştirmemize yardımcı ol
-        tooltip: Açık olduğunda Read Frog, özelliklerin güvenilir çalıştığını doğrulamak, performansı ve UX ayrıntılarını iyileştirmek ve sıradaki önceliklerimizi belirlemek için anonim kullanım sinyalleri gönderir.
-    sync:
-      title: Manuel Yapılandırma Senkronizasyonu
-      description: Yapılandırma ayarlarınızı manuel olarak içe ve dışa aktarın
-      import: Yapılandırmayı İçe Aktar
-      export: Yapılandırmayı Dışa Aktar
-      importSuccess: Yapılandırma başarıyla içe aktarıldı
-      exportSuccess: Yapılandırma başarıyla dışa aktarıldı
-      importError: İçe aktarma başarısız
-      versionTooNew: İçe aktarılan yapılandırma sürümü daha yeni, lütfen Read Frog'u en son sürüme yükseltin
-      migrationError: Geçiş başarısız
-      validationError: Yapılandırma doğrulaması başarısız
-      exportOptions:
-        title: Dışa Aktarma Seçeneklerini Seçin
-        description: Lütfen dışa aktarılan yapılandırmaya API Anahtarlarını dahil edip etmemeyi seçin. API Anahtarlarını dahil etmek hassas bilgileri sızdırabilir, bu nedenle yalnızca güvenli ortamlarda kullanılması önerilir.
-        includeAPIKeys: API Anahtarlarını Dahil Et
-        excludeAPIKeys: API Anahtarlarını Hariç Tut
-        cancel: İptal
-      viewConfig:
-        expand: Yapılandırmayı Genişlet
-        collapse: Yapılandırmayı Daralt
-      googleDrive:
-        title: Google Drive Bulut Senkronizasyonu
-        description: Uzak daha yeniyse indirir, yerel daha yeniyse yükler
-        sync: Google Drive'a Senkronize Et
-        syncing: Senkronize ediliyor...
-        syncSuccess:
-          uploaded: Yerel ayarlar buluta yüklendi
-          downloaded: Uzak ayarlar uygulandı
-          sameChanges: Yerel ve uzak değişiklikler aynı, senkronize edildi
-          noChange: Zaten güncel
-          unresolved: Çakışmalar çözüldü ve senkronize edildi
-        syncError: Senkronizasyon başarısız, lütfen tekrar deneyin
-        metadataCorrupted: Senkronizasyon meta verileri bozuk, uzak yapılandırma uygulandı
-        lastSyncTime: Son senkronizasyon
-        logout: Çıkış yap
-        logoutSuccess: Google hesabından çıkış yapıldı
-        unresolved:
-          title: Yapılandırma Senkronizasyon Çözümü
-          description: Yerel ve uzak yapılandırmalar farklı. Lütfen her alan için hangi sürümün tutulacağını seçin.
-          resolved: Çözüldü
-          unresolved: Çözülmedi
-          localValue: Yerel Değer
-          remoteValue: Uzak Değer
-          useLocal: Yereli Kullan
-          useRemote: Uzakı Kullan
-          useAllLocal: Tüm Yereli Kullan
-          useAllRemote: Tüm Uzakı Kullan
-          reset: Seçimi Sıfırla
-          progress: $1/$2 değişiklik çözüldü
-          confirm: Senkronizasyonu Onayla
-          cancel: İptal
-          hasUnresolvedInChildren: ⚠ Çözülmemiş değişiklikler içeriyor
-          item: öğe
-          items: öğe
-          unresolvedPrompt: "[Çözülmedi - Lütfen seçin]"
-          localLatest: En Son Yerel
-          remoteLatest: En Son Uzak
-          bothChanged: Her ikisi de değişti
-          localChanged: Yerel değişti
-          remoteChanged: Uzak değişti
-          configValid: Yapılandırma geçerli
-          configInvalid: Yapılandırma geçersiz
-          resolveToContinue: Devam etmek için çakışmaları çözün
-          validationAlert:
-            title: Birleştirilmiş yapılandırmada doğrulama hataları var
-            description: "Düzeltmek için aşağıdaki farklılıkları ayarlayın:"
-          moreErrors: ...ve $1 hata daha
-    backup:
-      title: Yapılandırma Yedekleme
-      description: Yapılandırma değiştirilirse otomatik yedeklemeler her saat oluşturulur. Önceki yapılandırmaları buradan geri yükleyebilirsiniz. (Maksimum $1 yedekleme)
-      loading: Yedeklemeler yükleniyor...
-      backupNow: Şimdi yedekle
-      backupSuccess: Yedekleme başarıyla oluşturuldu
-      restoreSuccess: Yapılandırma başarıyla geri yüklendi
-      empty:
-        title: Henüz yedekleme mevcut değil
-        description: Yapılandırma değiştirilirse yedeklemeler her saat otomatik olarak oluşturulur.
-      item:
-        extensionVersion: "Uzantı sürümü:"
-        schemaVersion: "Şema sürümü:"
-        restore: Geri Yükle
-        export: Dışa Aktar
-        delete: Sil
-      restore:
-        title: Yapılandırma yedeğini geri yükle?
-        description: Mevcut yapılandırmanız en son yedeklemeden farklıysa otomatik olarak yedeklenecektir. Yedekleme sayısı limiti aşarsa en eski yedekleme kaldırılabilir.
-        cancel: İptal
-        confirm: Geri Yükle
-      delete:
-        title: Yedekleme silinsin mi?
-        description: Bu yedeklemeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
-        cancel: İptal
-        confirm: Sil
-    resetConfig:
-      title: Yapılandırmayı Sıfırla
-      description: Tüm yapılandırmayı varsayılan değere sıfırla
-      dialog:
-        title: Yapılandırmayı Sıfırla
-        trigger: Yapılandırmayı Sıfırla
-        confirm: Onayla
-        cancel: İptal
-        description: Bu işlem tüm özel yapılandırmalarınızı temizleyecek ve varsayılan değerlere sıfırlayacaktır. Lütfen onaylayın.
+      language:
+        title: Dil sesi
+        description: Bir dil seçin, ardından o dili okuyacak sesi belirleyin. Sıfırlamak, Read Frog'un o dil için seçtiği sesi geri getirir.
+        reset: Sıfırla
+        previewSample: Read Frog'dan merhaba! Yüksek sesle okurken böyle ses çıkaracağım.
+      fallback:
+        title: Yedek ses
+        description: Kendine ait bir ses atamadığınız diller bu sesle okunur.
+    speech:
+      title: Okuma
+      rate:
+        title: Hız
+        description: Sesin kendi hızına göre ne kadar hızlı ya da yavaş okuduğu, -100 ile 100 yüzde arasında.
+      pitch:
+        title: Perde
+        description: Sesin kendi perdesine göre ne kadar tiz ya da pes konuştuğu, -100 ile 100 hertz arasında.
+      volume:
+        title: Ses düzeyi
+        description: Sesin kendi düzeyine göre ne kadar yüksek ya da alçak okuduğu, -100 ile 100 yüzde arasında.
+      error: $1 ile $2 arasında bir tam sayı girin
   videoSubtitles:
     title: Video Altyazıları
-    description: Şu anda yalnızca YouTube video altyazılarını desteklemektedir
-    provider:
-      title: Çeviri Sağlayıcısı
-      description: Video altyazı çevirisi için kullanılacak çeviri sağlayıcısını seçin
-      label: Sağlayıcı
-    enable: Video Altyazılarını Etkinleştir
-    enableDescription: Etkinleştirildiğinde, YouTube oynatıcı kontrollerinde bir çeviri düğmesi görünecektir. Altyazıları çevirmeye başlamak için tıklayın.
-    autoStart: Altyazıyı Otomatik Etkinleştir
-    autoStartDescription: Video yüklendiğinde altyazı çevirisini otomatik olarak etkinleştirir.
+    pageDescription: İzlerken altyazıları çevirin; sağlayıcı, stil ve istek ayarları ayrı tutulur.
+    preference:
+      title: Temel ayarlar
+      enable:
+        title: Video altyazılarını aç
+        description: Oynatıcı kontrollerine bir çeviri düğmesi ekler. Şimdilik yalnızca YouTube destekleniyor.
+      autoStart:
+        title: Video açılınca çevir
+        description: Video yüklenir yüklenmez, düğmeye basmadan altyazıları çevirmeye başlar.
+      aiSegmentation:
+        title: AI akıllı bölümlendirme
+        description: Yapay zekâ altyazıları cümle gibi okunan satırlara yeniden böler. Zamanlamayı da kendisi belirlediği için satırlar kayabilir. LLM çeviri sağlayıcısı gerekir.
+    aiQuota:
+      title: Yapay zekâ altyazı kotası
+      description: Yapay zeka altyazı deşifre kotanızın aylık kullanımı
+      loginRequired: Yapay zeka altyazı kotanızı görmek için giriş yapın
+      logIn: Giriş yap
+      betaRequired: Yapay zeka altyazıları beta aşamasında ve hesabınız için henüz etkin değil
+      betaApply: Erişim başvurusu yap
+      loadError: Kotanız yüklenemedi. Lütfen daha sonra tekrar deneyin.
+      summary: $2 dakikanın $1 dakikası kullanıldı, $3 kaldı
     style:
-      title: Altyazı Stili
-      description: Altyazı görünümünü özelleştirin
+      title: Altyazı stili
+      description: Görüntüleme modu, konum, yazı tipleri, renkler ve arka plan — canlı önizlemeye bakarak ayarlanır
+      customizeStyle: Stili özelleştir
       preview: Önizleme
       displayMode:
-        title: Görüntüleme Modu
-        bilingual: İki Dilli
-        originalOnly: Sadece Orijinal
-        translationOnly: Sadece Çeviri
+        title: Görüntüleme modu
+        bilingual: İki dilli
+        originalOnly: Sadece orijinal
+        translationOnly: Sadece çeviri
       translationPosition:
-        title: Çeviri Konumu
+        title: Çeviri konumu
         above: Üstte
         below: Altta
-      generalSettings: Genel Ayarlar
-      mainSubtitle: Ana Altyazı
-      translationSubtitle: Çeviri Altyazısı
-      containerStyle: Arka Plan
-      fontFamily: Yazı Tipi
-      fontScale: Yazı Boyutu
+      generalSettings: Genel
+      mainSubtitle: Ana altyazı
+      translationSubtitle: Çeviri altyazısı
+      fontFamily: Yazı tipi
+      fontScale: Yazı boyutu
       color: Renk
-      fontWeight: Yazı Kalınlığı
-      backgroundOpacity: Arka Plan Şeffaflığı
-      reset: Varsayılana Sıfırla
-    aiSegmentation:
-      title: AI Akıllı Bölümlendirme
-      enable: AI Akıllı Bölümlendirmeyi Etkinleştir
-      enableDescription: Daha iyi okunabilirlik için altyazıları akıllıca bölümlemek üzere AI kullanın. Zaman çizelgesi AI tarafından belirlenir ve zaman zaman zamanlama kayması olabilir. LLM çeviri sağlayıcısı gerektirir.
-      clearCache: Önbelleği Temizle
-      clearing: Temizleniyor...
-      clearCacheDialog:
-        title: AI Bölümlendirme Önbelleğini Temizle
-        description: Tüm önbelleğe alınmış AI bölümlendirme sonuçları silinecektir. AI bölümlendirme etkinleştirilmiş bir video oynatıldığında altyazılar yeniden işlenecektir.
-        cancel: İptal
-        confirm: Onayla
-    requestQueueConfig:
-      title: Altyazı Çeviri Hızı
-      firstOnDescription: Altyazı çeviri isteklerinin işlem hızını ayarlamak için
-      lastOnDescription: algoritmasını kullanın
-      capacity:
-        title: Maksimum Patlama İstek Sayısı
-        description: Kısa sürede eşzamanlı olarak işlenebilecek maksimum altyazı çeviri isteği sayısı
-      rate:
-        title: Saniyede Ortalama İstek
-        description: Saniyede ortalama altyazı çeviri isteği sayısı. Geçici olarak fazla istek göndermek için maksimum patlama sayısı yapılandırılabilir. Ondalık değerler desteklenir — örneğin 0.25, her 4 saniyede bir istek anlamına gelir ve Gemini ücretsiz katmanı gibi düşük limitli API'ler için kullanışlıdır
-    batchQueueConfig:
-      title: Altyazı Toplu Çeviri
-      description: Toplu çeviri için karakter limitleri ve maksimum paragraf sayısını yapılandırın (yalnızca LLM çevirisi için geçerlidir)
-      maxCharactersPerBatch:
-        title: Maksimum Karakter
-        description: Her çevirinin içerik hacmini kontrol etmek için toplu istek başına izin verilen maksimum karakter sayısı
-      maxItemsPerBatch:
-        title: Maksimum Paragraf Sayısı
-        description: Her çevirinin içerik hacmini kontrol etmek için her toplu çeviri için maksimum paragraf sayısı
+      fontWeight: Yazı kalınlığı
+      backgroundOpacity: Arka plan şeffaflığı
+      reset: Varsayılana sıfırla
     customPrompts:
-      title: Özel Altyazı İstemleri
-      description: Altyazı çevirisi için istem şablonlarını özelleştirin (web sayfası çeviri istemlerinden ayrı)
+      title: Özel altyazı istemleri
+      description: Yalnızca altyazı çevirisi için istem şablonları; web sayfası çeviri istemlerinden ayrı tutulur
+      managePrompts: Promptları yönet
       editPrompt:
         promptCellInput:
           input: Çevrilecek altyazı metni
           targetLanguage: Hedef dil
           webTitle: Web sayfası başlığı
           webDescription: Sayfa meta verilerinden web sayfası açıklaması
-          videoSummary: Video özeti (AI Akıllı Bağlam gerektirir)
-    aiQuota:
-      title: Yapay Zeka Altyazı Kotası
-      description: Yapay zeka altyazı deşifre kotanızın aylık kullanımı
-      loginRequired: Yapay zeka altyazı kotanızı görmek için giriş yapın
-      logIn: Giriş Yap
-      betaRequired: Yapay zeka altyazıları beta aşamasında ve hesabınız için henüz etkin değil
-      betaApply: Erişim başvurusu yap
-      loadError: Kotanız yüklenemedi. Lütfen daha sonra tekrar deneyin.
-      summary: $2 dakikanın $1 dakikası kullanıldı, $3 kaldı
+          videoSummary: Video özeti (AI akıllı bağlam gerektirir)
+    subtitlesQueue:
+      title: Altyazı kuyruğu
+      requestQueueConfig:
+        title: Çeviri hızı
+        capacity:
+          description: "Maksimum ani istek: aynı anda kaç istek gönderilebilir"
+        rate:
+          description: "Saniyedeki istek: sonrasındaki sabit hız. Ondalık da olur, 0.25 her 4 saniyede bir istek demek"
+      batchQueueConfig:
+        title: Toplu çeviri
+        description: Toplu çeviri için karakter limitleri ve maksimum altyazı satırı sayısını yapılandırın (yalnızca LLM çevirisi için geçerlidir)
+        maxCharactersPerBatch:
+          description: "Maksimum karakter: tek bir yapay zekâ isteği ne kadar metin taşır"
+        maxItemsPerBatch:
+          description: "Maksimum altyazı satırı: tek istekte kaç satır birleşir. Yapay zekâ olmayan sağlayıcılar ikisini de yok sayar"
+    cache:
+      title: Önbellek
+      clearCache:
+        title: AI bölümlendirme önbelleğini temizle
+        description: Kaydedilmiş bölümlendirme sonuçları; izlediğiniz bir video yeniden bölünmez
+        clearing: Temizleniyor...
+        dialog:
+          title: AI bölümlendirme önbelleğini temizle
+          trigger: Önbelleği temizle
+          confirm: Onayla
+          cancel: İptal
+          description: Tüm önbelleğe alınmış AI bölümlendirme sonuçları silinecektir. AI bölümlendirme etkinleştirilmiş bir video oynatıldığında altyazılar yeniden işlenecektir.
   whatsNew:
     title: Yenilikler
   rateUs:
     title: Bizi Değerlendirin
+  configMigration:
+    versionTooNew: İçe aktarılan yapılandırma sürümü daha yeni, lütfen Read Frog'u en son sürüme yükseltin
+    validationError: Yapılandırma doğrulaması başarısız
 side:
   sourceLang: Kaynak Dil
   targetLang: Hedef Dil

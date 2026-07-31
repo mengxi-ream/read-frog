@@ -1,6 +1,5 @@
 import { waitForElement } from "@/utils/dom/wait-for-element"
-
-export const SECTION_QUERY_PARAM = "section"
+import { SECTION_QUERY_PARAM } from "@/utils/navigation"
 
 export function buildSectionSearch(sectionId: string): string {
   const params = new URLSearchParams()
