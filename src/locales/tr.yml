@@ -679,15 +679,15 @@ options:
         title: Maksimum Paragraf Sayısı
         description: Her çevirinin içerik hacmini kontrol etmek için her toplu çeviri için maksimum paragraf sayısı
     autoTranslateWebsite:
-      title: Web Sitesine Göre Otomatik Çevir
+      title: Web sitesine göre otomatik çevir
       description: Bu web sitesini her zaman çevir
-      urlPattern: URL Kalıbı
-      enterUrlPattern: URL Kalıbı Girin
+      urlPattern: URL kalıbı
+      enterUrlPattern: URL kalıbı girin
     neverAutoTranslateWebsite:
-      title: Never Auto Translate Based on Website
-      description: Never automatically translate this website
-      urlPattern: URL Pattern
-      enterUrlPattern: Enter URL Pattern
+      title: Web sitesine göre asla otomatik çevirme
+      description: Bu web sitesini asla otomatik çevirme
+      urlPattern: URL kalıbı
+      enterUrlPattern: URL kalıbı girin
     personalizedPrompts:
       title: Kişiselleştirilmiş Promptlar
       description: Farklı türde Promptları özelleştirmek, çeviri sırasında Prompt türünü kendiniz ayarlamanıza olanak tanır. Prompt, kullanıcının LLM'ye gönderdiği metni temsil eder.
@@ -785,17 +785,17 @@ options:
         title: Görünürlük Eşiği
         description: Çeviriyi tetiklemek için gereken öğe görünürlük yüzdesi (0-1). Daha yüksek değerler, öğenin daha fazlası görünür olana kadar çeviriyi geciktirir.
     smallParagraphFilter:
-      title: Kısa Metin Filtresi
+      title: Kısa metin filtresi
       description: Bu genel varsayılanlar, eşiklerden daha az karakter veya sözcük içeren metin düğümlerinin çevirisini atlar. Eşleşen site kuralları bunları geçersiz kılabilir (0 = devre dışı)
       minCharacters:
-        title: Minimum Karakter
+        title: Minimum karakter
         description: Bu değerden az karakterli metin düğümleri çevrilmeyecektir. Karakter sayısı boşlukları içerir.
       minWords:
-        title: Minimum Kelime
+        title: Minimum kelime
         description: Bu değerden az kelimeli metin düğümleri çevrilmeyecektir. Tüm dillerde doğru kelime sayımı için Intl.Segmenter kullanılır.
       error: Değer $1 ile $2 arasında olmalıdır
     autoTranslateLanguages:
-      title: Dile Göre Otomatik Çevir
+      title: Dile göre otomatik çevir
       description: Belirli diller algılandığında sayfa içeriğini otomatik olarak çevir
       selectLanguages: Dilleri seçin
       detection:
@@ -804,7 +804,7 @@ options:
         llm: LLM
         description: Temel algılama hızlı ve ücretsizdir. LLM algılama daha doğrudur ancak gecikme ve API maliyetleri ekler. Yapılandırılmış otomatik çeviri dilleri gerektirir.
     skipLanguages:
-      title: Dile Göre Otomatik Atla
+      title: Dile göre otomatik atla
       description: Belirli diller algılandığında paragraf çevirisini otomatik olarak atla
       targetLanguageSkip: Hedef dili atla
       targetLanguageSkipDescription: Çeviriden önce paragrafın zaten hedef dilde olup olmadığını algılar. Eşleşen metin istek göndermeden atlanır. Bunu kapatmak, değişmeyen çeviri çıktısını gizleyen sonraki korumayı değiştirmez.

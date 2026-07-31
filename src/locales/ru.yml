@@ -684,10 +684,10 @@ options:
       urlPattern: URL-шаблон
       enterUrlPattern: Введите URL-шаблон
     neverAutoTranslateWebsite:
-      title: Never Auto Translate Based on Website
-      description: Never automatically translate this website
-      urlPattern: URL Pattern
-      enterUrlPattern: Enter URL Pattern
+      title: Никогда не переводить по веб-сайту
+      description: Никогда не переводить этот веб-сайт автоматически
+      urlPattern: URL-шаблон
+      enterUrlPattern: Введите URL-шаблон
     personalizedPrompts:
       title: Персонализированные промпты
       description: Настройка различных типов промптов позволяет вам самостоятельно изменять тип промпта во время перевода. Промпт — это текст, который пользователь отправляет LLM.

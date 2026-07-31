@@ -684,10 +684,10 @@ options:
       urlPattern: Mẫu URL
       enterUrlPattern: Nhập mẫu URL
     neverAutoTranslateWebsite:
-      title: Never Auto Translate Based on Website
-      description: Never automatically translate this website
-      urlPattern: URL Pattern
-      enterUrlPattern: Enter URL Pattern
+      title: Không bao giờ tự động dịch theo trang web
+      description: Không bao giờ tự động dịch trang web này
+      urlPattern: Mẫu URL
+      enterUrlPattern: Nhập mẫu URL
     personalizedPrompts:
       title: Prompt cá nhân hóa
       description: Tùy chỉnh các loại Prompt khác nhau cho phép bạn tự điều chỉnh loại Prompt trong quá trình dịch. Prompt là văn bản mà người dùng gửi cho LLM.

@@ -684,10 +684,10 @@ options:
       urlPattern: URL パターン
       enterUrlPattern: URL パターンを入力
     neverAutoTranslateWebsite:
-      title: Never Auto Translate Based on Website
-      description: Never automatically translate this website
-      urlPattern: URL Pattern
-      enterUrlPattern: Enter URL Pattern
+      title: ウェブサイトに基づく自動翻訳の除外
+      description: このサイトを自動翻訳しない
+      urlPattern: URL パターン
+      enterUrlPattern: URL パターンを入力
     personalizedPrompts:
       title: 個人化プロンプト
       description: 異なるタイプのプロンプトをカスタマイズすることで、翻訳時にプロンプトタイプを自ら調整できます。プロンプトとは、ユーザーがLLMに送信するテキストを指します。

@@ -795,15 +795,15 @@ options:
         title: Maximum Paragraph Count
         description: Maximum number of paragraphs for each batch translation to control the content volume of each translation
     autoTranslateWebsite:
-      title: Auto Translate Based on Website
+      title: Auto translate based on website
       description: Always translate this website
-      urlPattern: URL Pattern
-      enterUrlPattern: Enter URL Pattern
+      urlPattern: URL pattern
+      enterUrlPattern: Enter URL pattern
     neverAutoTranslateWebsite:
-      title: Never Auto Translate Based on Website
+      title: Never auto translate based on website
       description: Never automatically translate this website
-      urlPattern: URL Pattern
-      enterUrlPattern: Enter URL Pattern
+      urlPattern: URL pattern
+      enterUrlPattern: Enter URL pattern
     personalizedPrompts:
       title: Personalized Prompts
       description: Customizing different types of Prompts allows you to adjust the Prompt type yourself during translation. A Prompt represents the text that the user sends to the LLM.
@@ -901,17 +901,17 @@ options:
         title: Visibility Threshold
         description: Percentage of element visibility required to trigger translation (0-1). Higher values delay translation until more of the element is visible.
     smallParagraphFilter:
-      title: Small Paragraph Filter
+      title: Small paragraph filter
       description: These global defaults skip translating text nodes with fewer characters or words than the thresholds. Matching site rules can override them (0 = disabled)
       minCharacters:
-        title: Minimum Characters
+        title: Minimum characters
         description: Text nodes with fewer characters than this value will not be translated. Character count includes whitespace.
       minWords:
-        title: Minimum Words
+        title: Minimum words
         description: Text nodes with fewer words than this value will not be translated. Uses Intl.Segmenter for accurate word counting across all languages.
       error: Value must be between $1 and $2
     autoTranslateLanguages:
-      title: Auto Translate Based on Language
+      title: Auto translate based on language
       description: Automatically translate page content when specific languages are detected
       selectLanguages: Select languages
       detection:
@@ -920,7 +920,7 @@ options:
         llm: LLM
         description: Basic detection is fast and free. LLM detection is more accurate but adds latency and API costs. Requires configured auto-translate languages.
     skipLanguages:
-      title: Auto Skip Based on Language
+      title: Auto skip based on language
       description: Automatically skip paragraph translation when specific languages are detected
       targetLanguageSkip: Skip target language
       targetLanguageSkipDescription: Before translating, detect whether the paragraph is already in the target language. Matching text is skipped without sending a request. Turning this off does not change the later safeguard that hides unchanged translation output.
