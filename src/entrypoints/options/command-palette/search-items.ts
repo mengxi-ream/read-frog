@@ -341,28 +341,28 @@ export const SEARCH_ITEMS: SearchItem[] = [
     route: "/input-translation",
     titleKey: "options.inputTranslation.trigger.title",
     descriptionKey: "options.inputTranslation.trigger.enable.description",
-    pageKey: "options.overlayTools.inputTranslation.title",
+    pageKey: "options.inputTranslation.title",
   },
   {
     sectionId: "input-translation-threshold",
     route: "/input-translation",
     titleKey: "options.inputTranslation.trigger.threshold.title",
     descriptionKey: "options.inputTranslation.trigger.threshold.description",
-    pageKey: "options.overlayTools.inputTranslation.title",
+    pageKey: "options.inputTranslation.title",
   },
   {
     sectionId: "input-translation-languages",
     route: "/input-translation",
     titleKey: "options.inputTranslation.languages.title",
     descriptionKey: "options.inputTranslation.languages.pair.description",
-    pageKey: "options.overlayTools.inputTranslation.title",
+    pageKey: "options.inputTranslation.title",
   },
   {
     sectionId: "input-translation-cycle",
     route: "/input-translation",
     titleKey: "options.inputTranslation.languages.cycle.title",
     descriptionKey: "options.inputTranslation.languages.cycle.description",
-    pageKey: "options.overlayTools.inputTranslation.title",
+    pageKey: "options.inputTranslation.title",
   },
 
   // Video Subtitles page

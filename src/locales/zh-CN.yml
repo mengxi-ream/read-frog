@@ -421,10 +421,9 @@ options:
     contextMenu:
       title: 右键菜单
       pageDescription: 控制浏览器右键菜单里的 Read Frog 选项。
-    inputTranslation:
-      title: 输入翻译
-      pageDescription: 在发送之前，把你在输入框里写的内容翻译好。
   inputTranslation:
+    title: 输入翻译
+    pageDescription: 在发送之前，把你在输入框里写的内容翻译好。
     trigger:
       title: 触发方式
       enable:

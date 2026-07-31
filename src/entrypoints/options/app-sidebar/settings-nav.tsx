@@ -103,10 +103,10 @@ export function SettingsNav() {
             <SidebarMenuButton
               render={<Link to="/input-translation" />}
               isActive={pathname === "/input-translation"}
-              tooltip={i18n.t("options.overlayTools.inputTranslation.title")}
+              tooltip={i18n.t("options.inputTranslation.title")}
             >
               <Icon icon="tabler:keyboard" />
-              <span>{i18n.t("options.overlayTools.inputTranslation.title")}</span>
+              <span>{i18n.t("options.inputTranslation.title")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
 

@@ -420,10 +420,9 @@ options:
     contextMenu:
       title: 컨텍스트 메뉴
       pageDescription: 브라우저 우클릭 메뉴에 표시되는 Read Frog 항목을 설정하세요.
-    inputTranslation:
-      title: 입력 번역
-      pageDescription: 입력창에 쓴 내용을 보내기 전에 번역합니다.
   inputTranslation:
+    title: 입력 번역
+    pageDescription: 입력창에 쓴 내용을 보내기 전에 번역합니다.
     trigger:
       title: 트리거
       enable:

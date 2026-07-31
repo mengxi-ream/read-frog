@@ -420,10 +420,9 @@ options:
     contextMenu:
       title: コンテキストメニュー
       pageDescription: ブラウザーの右クリックメニューに表示される Read Frog の項目を設定します。
-    inputTranslation:
-      title: 入力翻訳
-      pageDescription: 入力欄に書いた内容を、送信する前に翻訳します。
   inputTranslation:
+    title: 入力翻訳
+    pageDescription: 入力欄に書いた内容を、送信する前に翻訳します。
     trigger:
       title: トリガー
       enable:

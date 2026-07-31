@@ -420,10 +420,9 @@ options:
     contextMenu:
       title: Bağlam Menüsü
       pageDescription: Tarayıcının sağ tık menüsündeki Read Frog seçeneklerini yönetin.
-    inputTranslation:
-      title: Giriş Çevirisi
-      pageDescription: Giriş kutularına yazdıklarınızı göndermeden önce çevirin.
   inputTranslation:
+    title: Giriş Çevirisi
+    pageDescription: Giriş kutularına yazdıklarınızı göndermeden önce çevirin.
     trigger:
       title: Tetikleme
       enable:
@@ -735,7 +734,7 @@ options:
           webTitle: Web sayfası başlığı
           webDescription: Sayfa meta verilerinden web sayfası açıklaması
           webContent: Web sayfası içeriği (ilk 2000 karaktere kısaltılır)
-          webSummary: Web sayfası özeti (AI Akıllı Bağlam gerektirir)
+          webSummary: Web sayfası özeti (AI akıllı bağlam gerektirir)
         save: Değişiklikleri kaydet
         close: İptal
       deletePrompt:
@@ -876,7 +875,7 @@ options:
         title: AI akıllı bölümlendirme
         description: Yapay zekâ altyazıları cümle gibi okunan satırlara yeniden böler. Zamanlamayı da kendisi belirlediği için satırlar kayabilir. LLM çeviri sağlayıcısı gerekir.
     aiQuota:
-      title: Yapay Zeka Altyazı Kotası
+      title: Yapay zekâ altyazı kotası
       description: Yapay zeka altyazı deşifre kotanızın aylık kullanımı
       loginRequired: Yapay zeka altyazı kotanızı görmek için giriş yapın
       logIn: Giriş yap
@@ -917,7 +916,7 @@ options:
           targetLanguage: Hedef dil
           webTitle: Web sayfası başlığı
           webDescription: Sayfa meta verilerinden web sayfası açıklaması
-          videoSummary: Video özeti (AI Akıllı Bağlam gerektirir)
+          videoSummary: Video özeti (AI akıllı bağlam gerektirir)
     subtitlesQueue:
       title: Altyazı kuyruğu
       requestQueueConfig:

@@ -420,10 +420,9 @@ options:
     contextMenu:
       title: Контекстное меню
       pageDescription: Управляйте пунктами Read Frog в контекстном меню браузера.
-    inputTranslation:
-      title: Перевод ввода
-      pageDescription: Переводите текст в полях ввода до того, как отправить его.
   inputTranslation:
+    title: Перевод ввода
+    pageDescription: Переводите текст в полях ввода до того, как отправить его.
     trigger:
       title: Срабатывание
       enable:

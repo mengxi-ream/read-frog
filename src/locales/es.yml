@@ -421,10 +421,9 @@ options:
     contextMenu:
       title: Menú contextual
       pageDescription: Controla las opciones de Read Frog en el menú contextual del navegador.
-    inputTranslation:
-      title: Traducción de entrada
-      pageDescription: Traduce lo que escribes en los campos de texto antes de enviarlo.
   inputTranslation:
+    title: Traducción de entrada
+    pageDescription: Traduce lo que escribes en los campos de texto antes de enviarlo.
     trigger:
       title: Activación
       enable:

@@ -421,10 +421,9 @@ options:
     contextMenu:
       title: Context Menu
       pageDescription: Control the Read Frog entries in the browser's right-click menu.
-    inputTranslation:
-      title: Input Translation
-      pageDescription: Translate what you type in input boxes before you send it.
   inputTranslation:
+    title: Input Translation
+    pageDescription: Translate what you type in input boxes before you send it.
     trigger:
       title: Trigger
       enable:
@@ -1033,7 +1032,7 @@ options:
           targetLanguage: Target language
           webTitle: Webpage title
           webDescription: Webpage description from page metadata
-          videoSummary: Video summary (requires AI Smart Context)
+          videoSummary: Video summary (requires AI smart context)
     subtitlesQueue:
       title: Subtitle queue
       requestQueueConfig:

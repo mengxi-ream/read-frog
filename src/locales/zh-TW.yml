@@ -421,10 +421,9 @@ options:
     contextMenu:
       title: 右鍵選單
       pageDescription: 控制瀏覽器右鍵選單裡的 Read Frog 選項。
-    inputTranslation:
-      title: 輸入翻譯
-      pageDescription: 在送出之前，把你在輸入框裡寫的內容翻譯好。
   inputTranslation:
+    title: 輸入翻譯
+    pageDescription: 在送出之前，把你在輸入框裡寫的內容翻譯好。
     trigger:
       title: 觸發方式
       enable:

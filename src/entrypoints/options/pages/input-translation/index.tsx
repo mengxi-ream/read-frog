@@ -6,8 +6,8 @@ import { TriggerSection } from "./trigger"
 export function InputTranslationPage() {
   return (
     <PageLayout
-      title={i18n.t("options.overlayTools.inputTranslation.title")}
-      description={i18n.t("options.overlayTools.inputTranslation.pageDescription")}
+      title={i18n.t("options.inputTranslation.title")}
+      description={i18n.t("options.inputTranslation.pageDescription")}
       innerClassName="flex flex-col gap-10"
     >
       <TriggerSection />

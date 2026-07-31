@@ -420,10 +420,9 @@ options:
     contextMenu:
       title: Menu ngữ cảnh
       pageDescription: Kiểm soát các mục Read Frog trong menu chuột phải của trình duyệt.
-    inputTranslation:
-      title: Dịch đầu vào
-      pageDescription: Dịch nội dung bạn gõ trong ô nhập trước khi gửi đi.
   inputTranslation:
+    title: Dịch đầu vào
+    pageDescription: Dịch nội dung bạn gõ trong ô nhập trước khi gửi đi.
     trigger:
       title: Kích hoạt
       enable:
@@ -735,7 +734,7 @@ options:
           webTitle: Tiêu đề trang web
           webDescription: Mô tả trang web từ siêu dữ liệu trang
           webContent: Nội dung trang web (bị cắt còn 2000 ký tự đầu)
-          webSummary: Tóm tắt trang web (yêu cầu Ngữ cảnh thông minh AI)
+          webSummary: Tóm tắt trang web (yêu cầu ngữ cảnh thông minh AI)
         save: Lưu thay đổi
         close: Hủy
       deletePrompt:
@@ -917,7 +916,7 @@ options:
           targetLanguage: Ngôn ngữ đích
           webTitle: Tiêu đề trang web
           webDescription: Mô tả trang web từ siêu dữ liệu trang
-          videoSummary: Tóm tắt video (yêu cầu Ngữ cảnh thông minh AI)
+          videoSummary: Tóm tắt video (yêu cầu ngữ cảnh thông minh AI)
     subtitlesQueue:
       title: Hàng đợi phụ đề
       requestQueueConfig:
