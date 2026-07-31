@@ -51,6 +51,16 @@ const PersonalizedPromptsPage = lazy(() =>
     default: module.PersonalizedPromptsPage,
   })),
 )
+const AutoTranslateWebsitesPage = lazy(() =>
+  import("./pages/translation/translate-control/website-patterns-page").then((module) => ({
+    default: module.AutoTranslateWebsitesPage,
+  })),
+)
+const NeverAutoTranslateWebsitesPage = lazy(() =>
+  import("./pages/translation/translate-control/website-patterns-page").then((module) => ({
+    default: module.NeverAutoTranslateWebsitesPage,
+  })),
+)
 const ConfigBackupPage = lazy(() =>
   import("./pages/preference/config/config-backup").then((module) => ({
     default: module.ConfigBackupPage,
@@ -74,6 +84,8 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/preference/config-backup": ConfigBackupPage,
   "/page-translation/custom-css": CustomCssPage,
   "/page-translation/prompts": PersonalizedPromptsPage,
+  "/page-translation/auto-translate-websites": AutoTranslateWebsitesPage,
+  "/page-translation/never-auto-translate-websites": NeverAutoTranslateWebsitesPage,
 }
 
 function RouteLoadingFallback() {

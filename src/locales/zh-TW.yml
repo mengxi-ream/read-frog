@@ -796,12 +796,12 @@ options:
         description: 每個批次翻譯的最大段落數，用於控制單次翻譯的內容量
     autoTranslateWebsite:
       title: 依網站自動翻譯
-      description: 總是翻譯這個網站
+      description: 開啟後就開始翻譯的網站
       urlPattern: URL 模式
       enterUrlPattern: 輸入 URL 模式
     neverAutoTranslateWebsite:
       title: 依網站永不自動翻譯
-      description: 永不自動翻譯這個網站
+      description: 永不自動翻譯的網站，即使符合語言規則
       urlPattern: URL 模式
       enterUrlPattern: 輸入 URL 模式
     personalizedPrompts:
@@ -922,8 +922,7 @@ options:
     skipLanguages:
       title: 依語言自動跳過
       description: 當偵測到指定語言時自動跳過段落翻譯
-      targetLanguageSkip: 跳過目標語言
-      targetLanguageSkipDescription: 翻譯前預先偵測段落是否已是目標語言；命中時不傳送翻譯請求。關閉後，若譯文與原文相同，系統仍會保留不顯示譯文的後續保護。
+      targetLanguageSkipDescription: 已經是目標語言的段落直接跳過，不送出請求
       selectLanguages: 選擇語言
       detection:
         label: 語言偵測

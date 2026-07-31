@@ -18,4 +18,6 @@ export const ROUTE_DEFS = [
   { path: "/preference/config-backup" },
   { path: "/page-translation/custom-css" },
   { path: "/page-translation/prompts" },
+  { path: "/page-translation/auto-translate-websites" },
+  { path: "/page-translation/never-auto-translate-websites" },
 ] as const

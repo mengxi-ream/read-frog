@@ -210,15 +210,17 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.translation.title",
   },
   {
+    // Its own page, drilled into from the Translate control section.
     sectionId: "auto-translate-website",
-    route: "/page-translation",
+    route: "/page-translation/auto-translate-websites",
     titleKey: "options.translation.autoTranslateWebsite.title",
     descriptionKey: "options.translation.autoTranslateWebsite.description",
     pageKey: "options.translation.title",
   },
   {
+    // Its own page, drilled into from the Translate control section.
     sectionId: "never-auto-translate-website",
-    route: "/page-translation",
+    route: "/page-translation/never-auto-translate-websites",
     titleKey: "options.translation.neverAutoTranslateWebsite.title",
     descriptionKey: "options.translation.neverAutoTranslateWebsite.description",
     pageKey: "options.translation.title",

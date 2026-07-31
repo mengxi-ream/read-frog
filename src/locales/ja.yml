@@ -680,12 +680,12 @@ options:
         description: 各バッチ翻訳の最大段落数、各翻訳のコンテンツ量を制御します
     autoTranslateWebsite:
       title: ウェブサイトに基づく自動翻訳
-      description: このサイトを常に翻訳する
+      description: 開いた時点で翻訳を始めるサイト
       urlPattern: URL パターン
       enterUrlPattern: URL パターンを入力
     neverAutoTranslateWebsite:
       title: ウェブサイトに基づく自動翻訳の除外
-      description: このサイトを自動翻訳しない
+      description: 言語のルールに一致しても自動では翻訳しないサイト
       urlPattern: URL パターン
       enterUrlPattern: URL パターンを入力
     personalizedPrompts:
@@ -806,8 +806,7 @@ options:
     skipLanguages:
       title: 言語に基づく自動スキップ
       description: 指定された言語が検出されると、段落の翻訳を自動的にスキップします
-      targetLanguageSkip: ターゲット言語をスキップ
-      targetLanguageSkipDescription: 翻訳前に段落がすでにターゲット言語かどうかを事前検出します。一致したテキストはリクエストを送信せずにスキップされます。オフにしても、翻訳結果が原文と同じ場合に非表示にする後段の保護は変わりません。
+      targetLanguageSkipDescription: すでに翻訳先の言語になっている段落を、リクエストを送らずにスキップします
       selectLanguages: 言語を選択
       detection:
         label: 言語検出

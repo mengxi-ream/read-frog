@@ -680,12 +680,12 @@ options:
         description: Số đoạn văn tối đa cho mỗi bản dịch lô để kiểm soát khối lượng nội dung của mỗi bản dịch
     autoTranslateWebsite:
       title: Tự động dịch theo trang web
-      description: Luôn dịch trang web này
+      description: Các trang bắt đầu dịch ngay khi mở
       urlPattern: Mẫu URL
       enterUrlPattern: Nhập mẫu URL
     neverAutoTranslateWebsite:
       title: Không bao giờ tự động dịch theo trang web
-      description: Không bao giờ tự động dịch trang web này
+      description: Các trang không bao giờ tự dịch, kể cả khi khớp quy tắc ngôn ngữ
       urlPattern: Mẫu URL
       enterUrlPattern: Nhập mẫu URL
     personalizedPrompts:
@@ -806,8 +806,7 @@ options:
     skipLanguages:
       title: Tự động bỏ qua theo ngôn ngữ
       description: Tự động bỏ qua dịch đoạn văn khi phát hiện các ngôn ngữ cụ thể
-      targetLanguageSkip: Bỏ qua ngôn ngữ đích
-      targetLanguageSkipDescription: Trước khi dịch, phát hiện đoạn văn đã ở ngôn ngữ đích hay chưa. Văn bản khớp sẽ bị bỏ qua mà không gửi yêu cầu. Tắt tùy chọn này không thay đổi lớp bảo vệ sau đó, nơi kết quả dịch không thay đổi vẫn bị ẩn.
+      targetLanguageSkipDescription: Bỏ qua các đoạn đã ở ngôn ngữ đích mà không gửi yêu cầu
       selectLanguages: Chọn ngôn ngữ
       detection:
         label: Phát hiện ngôn ngữ

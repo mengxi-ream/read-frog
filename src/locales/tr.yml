@@ -680,12 +680,12 @@ options:
         description: Her çevirinin içerik hacmini kontrol etmek için her toplu çeviri için maksimum paragraf sayısı
     autoTranslateWebsite:
       title: Web sitesine göre otomatik çevir
-      description: Bu web sitesini her zaman çevir
+      description: Açılır açılmaz çevrilmeye başlayan siteler
       urlPattern: URL kalıbı
       enterUrlPattern: URL kalıbı girin
     neverAutoTranslateWebsite:
       title: Web sitesine göre asla otomatik çevirme
-      description: Bu web sitesini asla otomatik çevirme
+      description: Bir dil kuralı eşleşse bile kendiliğinden çevrilmeyen siteler
       urlPattern: URL kalıbı
       enterUrlPattern: URL kalıbı girin
     personalizedPrompts:
@@ -806,8 +806,7 @@ options:
     skipLanguages:
       title: Dile göre otomatik atla
       description: Belirli diller algılandığında paragraf çevirisini otomatik olarak atla
-      targetLanguageSkip: Hedef dili atla
-      targetLanguageSkipDescription: Çeviriden önce paragrafın zaten hedef dilde olup olmadığını algılar. Eşleşen metin istek göndermeden atlanır. Bunu kapatmak, değişmeyen çeviri çıktısını gizleyen sonraki korumayı değiştirmez.
+      targetLanguageSkipDescription: Zaten hedef dilde olan paragrafları istek göndermeden atlar
       selectLanguages: Dilleri seçin
       detection:
         label: Dil Algılama

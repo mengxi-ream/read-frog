@@ -1,8 +1,7 @@
 import { i18n } from "@/utils/i18n"
+import { ConfigNavItem } from "../../../components/config-nav-item"
 import { ConfigSection } from "../../../components/config-section"
 import { AutoTranslateLanguagesItem } from "./auto-translate-languages-item"
-import { AutoTranslateWebsiteItem } from "./auto-translate-website-item"
-import { NeverAutoTranslateWebsiteItem } from "./never-auto-translate-website-item"
 import { SkipLanguagesItem } from "./skip-languages-item"
 import { SmallParagraphFilterItem } from "./small-paragraph-filter-item"
 
@@ -16,8 +15,16 @@ export function TranslateControlSection() {
       id="translate-control"
       title={i18n.t("options.translation.translateControl.title")}
     >
-      <AutoTranslateWebsiteItem />
-      <NeverAutoTranslateWebsiteItem />
+      <ConfigNavItem
+        to="/page-translation/auto-translate-websites"
+        title={i18n.t("options.translation.autoTranslateWebsite.title")}
+        description={i18n.t("options.translation.autoTranslateWebsite.description")}
+      />
+      <ConfigNavItem
+        to="/page-translation/never-auto-translate-websites"
+        title={i18n.t("options.translation.neverAutoTranslateWebsite.title")}
+        description={i18n.t("options.translation.neverAutoTranslateWebsite.description")}
+      />
       <AutoTranslateLanguagesItem />
       <SkipLanguagesItem />
       <SmallParagraphFilterItem />

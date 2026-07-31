@@ -796,12 +796,12 @@ options:
         description: 每个批量翻译的最大段落数，用于控制单次翻译的内容量
     autoTranslateWebsite:
       title: 基于网站自动翻译
-      description: 总是翻译这个网站
+      description: 打开后就开始翻译的网站
       urlPattern: URL 模式
       enterUrlPattern: 输入 URL 模式
     neverAutoTranslateWebsite:
       title: 基于网站永不自动翻译
-      description: 永不自动翻译这个网站
+      description: 永不自动翻译的网站，即使命中语言规则
       urlPattern: URL 模式
       enterUrlPattern: 输入 URL 模式
     personalizedPrompts:
@@ -922,8 +922,7 @@ options:
     skipLanguages:
       title: 基于语言的自动跳过
       description: 当检测到指定语言时自动跳过段落翻译
-      targetLanguageSkip: 跳过目标语言
-      targetLanguageSkipDescription: 翻译前预检测段落是否已是目标语言；命中时不发送翻译请求。关闭后仍保留译文与原文相同则不显示的后置保护。
+      targetLanguageSkipDescription: 已经是目标语言的段落直接跳过，不发送请求
       selectLanguages: 选择语言
       detection:
         label: 语言检测

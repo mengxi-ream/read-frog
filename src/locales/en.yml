@@ -796,12 +796,12 @@ options:
         description: Maximum number of paragraphs for each batch translation to control the content volume of each translation
     autoTranslateWebsite:
       title: Auto translate based on website
-      description: Always translate this website
+      description: Sites that start translating as soon as they open
       urlPattern: URL pattern
       enterUrlPattern: Enter URL pattern
     neverAutoTranslateWebsite:
       title: Never auto translate based on website
-      description: Never automatically translate this website
+      description: Sites that never translate on their own, even when a language rule matches
       urlPattern: URL pattern
       enterUrlPattern: Enter URL pattern
     personalizedPrompts:
@@ -922,8 +922,7 @@ options:
     skipLanguages:
       title: Auto skip based on language
       description: Automatically skip paragraph translation when specific languages are detected
-      targetLanguageSkip: Skip target language
-      targetLanguageSkipDescription: Before translating, detect whether the paragraph is already in the target language. Matching text is skipped without sending a request. Turning this off does not change the later safeguard that hides unchanged translation output.
+      targetLanguageSkipDescription: Skip paragraphs already in the target language, without sending a request
       selectLanguages: Select languages
       detection:
         label: Language Detection
