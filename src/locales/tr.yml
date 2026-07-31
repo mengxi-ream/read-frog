@@ -759,7 +759,7 @@ options:
             tooLong: CSS çok uzun
             saved: Tüm değişiklikler kaydedildi
     translationMode:
-      title: Mod
+      title: Çeviri modu
       description: "Çevrilmiş metnin nasıl görüntüleneceğini seçin: iki dilli veya yalnızca çeviri."
       mode:
         bilingual: İki Dilli
@@ -767,7 +767,7 @@ options:
     translationModeShortcut:
       switched: "Çeviri Modu: $1"
     translateRange:
-      title: Kapsam
+      title: Çeviri kapsamı
       description: Sayfadaki yalnızca ana içeriğin mi yoksa tüm içeriğin mi çevrileceğini seçin.
       range:
         main: Ana İçerik

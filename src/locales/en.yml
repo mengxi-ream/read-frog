@@ -875,7 +875,7 @@ options:
             tooLong: CSS is too long
             saved: All changes saved
     translationMode:
-      title: Mode
+      title: Translation mode
       description: "Choose how the translated text is displayed: bilingual or translation only."
       mode:
         bilingual: Bilingual
@@ -883,7 +883,7 @@ options:
     translationModeShortcut:
       switched: "Translation Mode: $1"
     translateRange:
-      title: Range
+      title: Translation range
       description: Select whether to translate only the main content or all content on the page.
       range:
         main: Main Content

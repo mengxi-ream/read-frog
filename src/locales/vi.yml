@@ -759,7 +759,7 @@ options:
             tooLong: CSS quá dài
             saved: Tất cả thay đổi đã được lưu
     translationMode:
-      title: Chế độ
+      title: Chế độ dịch
       description: "Chọn cách hiển thị văn bản đã dịch: song ngữ hoặc chỉ bản dịch."
       mode:
         bilingual: Song ngữ
@@ -767,7 +767,7 @@ options:
     translationModeShortcut:
       switched: "Chế độ dịch: $1"
     translateRange:
-      title: Phạm vi
+      title: Phạm vi dịch
       description: Chọn chỉ dịch nội dung chính hay tất cả nội dung trên trang.
       range:
         main: Nội dung chính

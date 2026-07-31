@@ -875,7 +875,7 @@ options:
             tooLong: CSS 过长
             saved: 所有更改已保存
     translationMode:
-      title: 模式
+      title: 翻译模式
       description: 选择翻译文本的显示方式：双语对照或仅显示翻译
       mode:
         bilingual: 双语对照
@@ -883,7 +883,7 @@ options:
     translationModeShortcut:
       switched: 翻译模式：$1
     translateRange:
-      title: 范围
+      title: 翻译范围
       description: 选择是仅翻译主要内容还是翻译页面上的所有内容。
       range:
         main: 主要内容

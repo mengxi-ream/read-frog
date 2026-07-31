@@ -759,7 +759,7 @@ options:
             tooLong: CSS слишком длинный
             saved: Все изменения сохранены
     translationMode:
-      title: Режим
+      title: Режим перевода
       description: "Выберите способ отображения переведённого текста: двуязычный или только перевод."
       mode:
         bilingual: Двуязычный
@@ -767,7 +767,7 @@ options:
     translationModeShortcut:
       switched: "Режим перевода: $1"
     translateRange:
-      title: Охват
+      title: Охват перевода
       description: Выберите, переводить только основное содержимое или всё содержимое на странице.
       range:
         main: Основное содержимое
