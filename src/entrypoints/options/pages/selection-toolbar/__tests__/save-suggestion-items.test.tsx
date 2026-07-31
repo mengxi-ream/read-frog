@@ -7,7 +7,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
-import { SelectionToolbarSaveSuggestionToggle } from "../selection-toolbar-save-suggestion-toggle"
+import { SaveSuggestionItems } from "../actions/save-suggestion-items"
 
 const { selectionToolbarAtom, setSelectionToolbarMock, testState } = vi.hoisted(() => ({
   selectionToolbarAtom: {},
@@ -49,7 +49,17 @@ vi.mock("@/components/ui/base-ui/select", async () => {
         <div>{children}</div>
       </SelectContext.Provider>
     ),
-    SelectTrigger: ({ children, ...props }: { children: ReactNode; id?: string }) => (
+    // `size` is the trigger's own prop, not an attribute a button understands.
+    SelectTrigger: ({
+      children,
+      size: _size,
+      ...props
+    }: {
+      children: ReactNode
+      size?: string
+      className?: string
+      "aria-label"?: string
+    }) => (
       <button type="button" role="combobox" {...props}>
         {children}
       </button>
@@ -101,7 +111,7 @@ function createCustomAction(
   }
 }
 
-describe("SelectionToolbarSaveSuggestionToggle", () => {
+describe("SaveSuggestionItems", () => {
   beforeEach(() => {
     testState.selectionToolbar = structuredClone(DEFAULT_CONFIG.selectionToolbar)
     setSelectionToolbarMock.mockReset()
@@ -118,7 +128,7 @@ describe("SelectionToolbarSaveSuggestionToggle", () => {
       actionId: disabledAction.id,
     }
 
-    render(<SelectionToolbarSaveSuggestionToggle />)
+    render(<SaveSuggestionItems />)
 
     const builtInAction = getBuiltInDictionaryAction(selectionToolbar)
     const options = screen.getAllByRole("option")
@@ -129,7 +139,7 @@ describe("SelectionToolbarSaveSuggestionToggle", () => {
     ])
 
     const selector = screen.getByRole("combobox", {
-      name: "options.floatingButtonAndToolbar.selectionToolbar.saveSuggestion.action",
+      name: "options.floatingButtonAndToolbar.selectionToolbar.actions.saveSuggestion.action",
     })
     expect(selector).toHaveTextContent(disabledAction.name)
     expect(selector).toBeEnabled()
@@ -151,11 +161,11 @@ describe("SelectionToolbarSaveSuggestionToggle", () => {
     selectionToolbar.customActions = [createCustomAction("action-1", "Custom Action", true)]
     selectionToolbar.saveSuggestion.actionId = "default-dictionary"
 
-    render(<SelectionToolbarSaveSuggestionToggle />)
+    render(<SaveSuggestionItems />)
 
     expect(
       screen.getByRole("combobox", {
-        name: "options.floatingButtonAndToolbar.selectionToolbar.saveSuggestion.action",
+        name: "options.floatingButtonAndToolbar.selectionToolbar.actions.saveSuggestion.action",
       }),
     ).toHaveTextContent(getBuiltInDictionaryAction(selectionToolbar).name)
     expect(setSelectionToolbarMock).not.toHaveBeenCalled()
@@ -167,7 +177,7 @@ describe("SelectionToolbarSaveSuggestionToggle", () => {
     selectionToolbar.customActions = [action]
     selectionToolbar.saveSuggestion.actionId = action.id
 
-    render(<SelectionToolbarSaveSuggestionToggle />)
+    render(<SaveSuggestionItems />)
 
     fireEvent.click(screen.getByRole("switch"))
 

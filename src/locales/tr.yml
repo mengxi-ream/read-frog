@@ -446,10 +446,28 @@ options:
     title: Yüzen Buton ve Araç Çubuğu
     floatingButtonDemoImageAlt: Yüzen Buton Demosu
     selectionToolbarDemoImageAlt: Seçim Araç Çubuğu Demosu
+    contextMenuDemoImageAlt: Bağlam Menüsü Demosu
     floatingButton:
-      globalToggle:
-        title: Yüzen Butonu Etkinleştir
+      enable:
+        title: Yüzen butonu etkinleştir
         description: Read Frog özelliklerine hızlı erişim için web sayfalarında yüzen butonu görüntüle
+      display:
+        title: Görünüm
+        side:
+          title: Düğme tarafı
+          description: Yüzen düğmenin sayfanın hangi kenarına sabitleneceğini seçin
+          left: Sol
+          right: Sağ
+        disabledSites:
+          title: Devre dışı siteler
+          description: Yüzen butonun devre dışı bırakılması gereken web sitelerini yapılandırın
+          enterUrlPattern: URL kalıbı girin
+          urlPattern: URL kalıbı
+      clickAction:
+        title: Tıklama eylemi
+        description: Yüzen butona tıklandığında gerçekleştirilecek eylemi seçin
+        panel: Yan paneli aç
+        translate: Sayfa çevirisini aç/kapat
       closeMenu:
         disableForSite: Bu site için devre dışı bırak
         disableGlobally: Genel olarak devre dışı bırak
@@ -460,48 +478,36 @@ options:
         unlockPosition: Konum kilidini aç
         settings: Ayarlar
         feedback: Geri bildirim gönder
-      disabledSites:
-        title: Yüzen Buton Devre Dışı Siteler
-        description: Yüzen butonun devre dışı bırakılması gereken web sitelerini yapılandırın
-        enterUrlPattern: URL kalıbı girin
-        urlPattern: URL Kalıbı
-      clickAction:
-        title: Tıklama Eylemi
-        description: Yüzen butona tıklandığında gerçekleştirilecek eylemi seçin
-        panel: Yan Paneli Aç
-        translate: Sayfa Çevirisini Aç/Kapat
-      side:
-        title: Düğme tarafı
-        description: Yüzen düğmenin sayfanın hangi kenarına sabitleneceğini seçin
-        left: Sol
-        right: Sağ
     selectionToolbar:
-      globalToggle:
-        title: Seçim Araç Çubuğunu Etkinleştir
+      enable:
+        title: Seçim araç çubuğunu etkinleştir
         description: Web sayfalarında metin seçtiğinizde araç çubuğunu göstererek hızlı çeviri, seslendirme ve AI eylemleri sunar
-      opacity:
-        title: Opaklık
-        description: Seçim araç çubuğunun ve buradan açılan genişletilmiş pencerenin opaklığını ayarlayın
-      featureToggles:
-        title: Özellik Açma/Kapama
-        description: Seçim araç çubuğunda hangi yerleşik özelliklerin gösterileceğini seçin
-        translate: Çeviri
-        speak: Sesli Okuma
-      saveSuggestion:
-        title: Kaydetme Önerileri
-        description: Bir yapay zeka sağlayıcısıyla seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir
-        action: Eylem
-      shortcut:
-        title: Selection Translation Shortcut
-        description: Customize the shortcut key for translating selected text
+      actions:
+        title: Eylemler
+        translate:
+          title: Çeviri
+          description: Araç çubuğunda çeviri düğmesini göster
+        speak:
+          title: Sesli okuma
+          description: Seçili metni sesli okuyan seslendirme düğmesini araç çubuğunda göster
+        saveSuggestion:
+          title: Kaydetme önerileri
+          description: Bir yapay zeka sağlayıcısıyla seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir
+          action: Eylem
+          actionDescription: Öneriyi üreten eylem
+      display:
+        title: Görünüm
+        opacity:
+          title: Opaklık
+          description: Seçim araç çubuğunun ve buradan açılan genişletilmiş pencerenin opaklığını ayarlayın
+        disabledSites:
+          title: Devre dışı siteler
+          description: Seçim araç çubuğunun devre dışı bırakılması gereken web sitelerini yapılandırın
+          enterUrlPattern: URL kalıbı girin
+          urlPattern: URL kalıbı
       closeMenu:
         disableForSite: Bu site için devre dışı bırak
         disableGlobally: Genel olarak devre dışı bırak
-      disabledSites:
-        title: Seçim Araç Çubuğu Devre Dışı Siteler
-        description: Seçim araç çubuğunun devre dışı bırakılması gereken web sitelerini yapılandırın
-        enterUrlPattern: URL kalıbı girin
-        urlPattern: URL Kalıbı
       errors:
         customActionFailed: Özel eylem başarısız oldu
         customActionFailedFallback: Özel eylem isteği başarısız oldu
@@ -645,8 +651,8 @@ options:
           duplicateFieldKey: Alan adları benzersiz olmalıdır
     contextMenu:
       title: Bağlam Menüsü
-      translate:
-        title: Bağlam Menüsü Çevirisini Etkinleştir
+      enable:
+        title: Bağlam menüsü çevirisini etkinleştir
         description: Sayfa veya seçili metni hızlıca çevirmek için tarayıcı sağ tıklama menüsüne çeviri seçenekleri ekle
   translation:
     title: Sayfa Çevirisi

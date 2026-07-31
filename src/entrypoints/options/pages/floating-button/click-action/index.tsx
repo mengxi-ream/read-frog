@@ -1,4 +1,4 @@
-import type { FloatingButtonClickAction as FloatingButtonClickActionValue } from "@/types/config/floating-button"
+import type { FloatingButtonClickAction } from "@/types/config/floating-button"
 import { useAtom } from "jotai"
 import {
   Select,
@@ -11,13 +11,18 @@ import {
 import { floatingButtonClickActionSchema } from "@/types/config/floating-button"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
-import { ConfigCard } from "../../components/config-card"
+import { ConfigItem } from "../../../components/config-item"
+import { ConfigSection } from "../../../components/config-section"
 
-export function FloatingButtonClickAction() {
+/**
+ * What a click on the button does. The section holds the one row it needs, so the row goes
+ * untitled — the heading above it already says what is being set.
+ */
+export function ClickActionSection() {
   const [floatingButton, setFloatingButton] = useAtom(configFieldsAtomMap.floatingButton)
 
   // Resolved at render (not module scope) so labels follow a runtime UI-language switch.
-  const items = [
+  const actions = [
     {
       value: "panel",
       label: i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.panel"),
@@ -26,19 +31,20 @@ export function FloatingButtonClickAction() {
       value: "translate",
       label: i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.translate"),
     },
-  ] satisfies Array<{ value: FloatingButtonClickActionValue; label: string }>
+  ] satisfies Array<{ value: FloatingButtonClickAction; label: string }>
 
   return (
-    <ConfigCard
+    <ConfigSection
       id="floating-button-click-action"
       title={i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.title")}
-      description={i18n.t(
-        "options.floatingButtonAndToolbar.floatingButton.clickAction.description",
-      )}
     >
-      <div className="flex w-full justify-end">
+      <ConfigItem
+        description={i18n.t(
+          "options.floatingButtonAndToolbar.floatingButton.clickAction.description",
+        )}
+      >
         <Select
-          items={items}
+          items={actions}
           value={floatingButton.clickAction}
           onValueChange={(value) => {
             const parsedValue = floatingButtonClickActionSchema.safeParse(value)
@@ -46,20 +52,20 @@ export function FloatingButtonClickAction() {
             void setFloatingButton({ ...floatingButton, clickAction: parsedValue.data })
           }}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger size="sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent align="end">
             <SelectGroup>
-              {items.map((item) => (
-                <SelectItem key={item.value} value={item.value}>
-                  {item.label}
+              {actions.map((action) => (
+                <SelectItem key={action.value} value={action.value}>
+                  {action.label}
                 </SelectItem>
               ))}
             </SelectGroup>
           </SelectContent>
         </Select>
-      </div>
-    </ConfigCard>
+      </ConfigItem>
+    </ConfigSection>
   )
 }

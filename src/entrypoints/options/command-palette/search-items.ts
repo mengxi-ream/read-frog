@@ -283,8 +283,23 @@ export const SEARCH_ITEMS: SearchItem[] = [
   {
     sectionId: "floating-button-toggle",
     route: "/floating-button",
-    titleKey: "options.floatingButtonAndToolbar.floatingButton.globalToggle.title",
-    descriptionKey: "options.floatingButtonAndToolbar.floatingButton.globalToggle.description",
+    titleKey: "options.floatingButtonAndToolbar.floatingButton.enable.title",
+    descriptionKey: "options.floatingButtonAndToolbar.floatingButton.enable.description",
+    pageKey: "options.overlayTools.floatingButton.title",
+  },
+  {
+    sectionId: "floating-button-side",
+    route: "/floating-button",
+    titleKey: "options.floatingButtonAndToolbar.floatingButton.display.side.title",
+    descriptionKey: "options.floatingButtonAndToolbar.floatingButton.display.side.description",
+    pageKey: "options.overlayTools.floatingButton.title",
+  },
+  {
+    sectionId: "floating-button-disabled-sites",
+    route: "/floating-button",
+    titleKey: "options.floatingButtonAndToolbar.floatingButton.display.disabledSites.title",
+    descriptionKey:
+      "options.floatingButtonAndToolbar.floatingButton.display.disabledSites.description",
     pageKey: "options.overlayTools.floatingButton.title",
   },
   {
@@ -294,34 +309,46 @@ export const SEARCH_ITEMS: SearchItem[] = [
     descriptionKey: "options.floatingButtonAndToolbar.floatingButton.clickAction.description",
     pageKey: "options.overlayTools.floatingButton.title",
   },
-  {
-    sectionId: "floating-button-disabled-sites",
-    route: "/floating-button",
-    titleKey: "options.floatingButtonAndToolbar.floatingButton.disabledSites.title",
-    descriptionKey: "options.floatingButtonAndToolbar.floatingButton.disabledSites.description",
-    pageKey: "options.overlayTools.floatingButton.title",
-  },
 
   // Selection Toolbar page
   {
     sectionId: "selection-toolbar-toggle",
     route: "/selection-toolbar",
-    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.globalToggle.title",
-    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.globalToggle.description",
+    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.enable.title",
+    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.enable.description",
+    pageKey: "options.overlayTools.selectionToolbar.title",
+  },
+  {
+    // Titled with the section, so "translate" and "speak" both find the rows that switch
+    // them on without either row's one-word title standing alone in the results.
+    sectionId: "selection-toolbar-actions",
+    route: "/selection-toolbar",
+    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.actions.title",
+    descriptionKey:
+      "options.floatingButtonAndToolbar.selectionToolbar.actions.translate.description",
+    pageKey: "options.overlayTools.selectionToolbar.title",
+  },
+  {
+    sectionId: "selection-toolbar-save-suggestion",
+    route: "/selection-toolbar",
+    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.actions.saveSuggestion.title",
+    descriptionKey:
+      "options.floatingButtonAndToolbar.selectionToolbar.actions.saveSuggestion.description",
     pageKey: "options.overlayTools.selectionToolbar.title",
   },
   {
     sectionId: "selection-toolbar-opacity",
     route: "/selection-toolbar",
-    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.opacity.title",
-    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.opacity.description",
+    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.display.opacity.title",
+    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.display.opacity.description",
     pageKey: "options.overlayTools.selectionToolbar.title",
   },
   {
     sectionId: "selection-toolbar-disabled-sites",
     route: "/selection-toolbar",
-    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.disabledSites.title",
-    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.disabledSites.description",
+    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.display.disabledSites.title",
+    descriptionKey:
+      "options.floatingButtonAndToolbar.selectionToolbar.display.disabledSites.description",
     pageKey: "options.overlayTools.selectionToolbar.title",
   },
 
@@ -329,8 +356,8 @@ export const SEARCH_ITEMS: SearchItem[] = [
   {
     sectionId: "context-menu-translate",
     route: "/context-menu",
-    titleKey: "options.floatingButtonAndToolbar.contextMenu.translate.title",
-    descriptionKey: "options.floatingButtonAndToolbar.contextMenu.translate.description",
+    titleKey: "options.floatingButtonAndToolbar.contextMenu.enable.title",
+    descriptionKey: "options.floatingButtonAndToolbar.contextMenu.enable.description",
     pageKey: "options.overlayTools.contextMenu.title",
   },
 

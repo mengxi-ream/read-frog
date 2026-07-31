@@ -446,10 +446,28 @@ options:
     title: フローティングボタンとツールバー
     floatingButtonDemoImageAlt: フローティングボタンデモ
     selectionToolbarDemoImageAlt: 選択ツールバーデモ
+    contextMenuDemoImageAlt: コンテキストメニューデモ
     floatingButton:
-      globalToggle:
+      enable:
         title: フローティングボタンを有効化
         description: ウェブページにフローティングボタンを表示し、Read Frog機能に素早くアクセス
+      display:
+        title: 表示
+        side:
+          title: ボタンの位置
+          description: フローティングボタンをページのどちら側に固定するかを選択します
+          left: 左側
+          right: 右側
+        disabledSites:
+          title: 無効化サイト
+          description: フローティングボタンを無効化するウェブサイトを設定します
+          enterUrlPattern: URL パターンを入力
+          urlPattern: URL パターン
+      clickAction:
+        title: クリック動作
+        description: フローティングボタンをクリックしたときの動作を選択
+        panel: サイドパネルを開く
+        translate: ページ翻訳を切り替え
       closeMenu:
         disableForSite: このサイトで無効化
         disableGlobally: グローバルで無効化
@@ -460,48 +478,36 @@ options:
         unlockPosition: 位置の固定を解除
         settings: 設定
         feedback: フィードバックを送信
-      disabledSites:
-        title: フローティングボタン無効化サイト
-        description: フローティングボタンを無効化するウェブサイトを設定します
-        enterUrlPattern: URL パターンを入力
-        urlPattern: URL パターン
-      clickAction:
-        title: クリック動作
-        description: フローティングボタンをクリックしたときの動作を選択
-        panel: サイドパネルを開く
-        translate: ページ翻訳を切り替え
-      side:
-        title: ボタンの位置
-        description: フローティングボタンをページのどちら側に固定するかを選択します
-        left: 左側
-        right: 右側
     selectionToolbar:
-      globalToggle:
+      enable:
         title: 選択ツールバーを有効化
         description: ウェブページでテキストを選択したときにツールバーを表示し、すばやく翻訳・読み上げ・AIアクションを実行します
-      opacity:
-        title: 透明度
-        description: 選択ツールバーとそこから開く展開ウィンドウの透明度を調整します
-      featureToggles:
-        title: 機能トグル
-        description: 選択ツールバーに表示する組み込み機能を選択
-        translate: 翻訳
-        speak: 読み上げ
-      saveSuggestion:
-        title: 保存の提案
-        description: AI プロバイダーで選択テキストを翻訳した後、Notebase に保存する単語を提案します
-        action: アクション
-      shortcut:
-        title: Selection Translation Shortcut
-        description: Customize the shortcut key for translating selected text
+      actions:
+        title: アクション
+        translate:
+          title: 翻訳
+          description: ツールバーに翻訳ボタンを表示します
+        speak:
+          title: 読み上げ
+          description: 選択したテキストを読み上げる読み上げボタンをツールバーに表示します
+        saveSuggestion:
+          title: 保存の提案
+          description: AI プロバイダーで選択テキストを翻訳した後、Notebase に保存する単語を提案します
+          action: アクション
+          actionDescription: 保存候補を生成するアクション
+      display:
+        title: 表示
+        opacity:
+          title: 透明度
+          description: 選択ツールバーとそこから開く展開ウィンドウの透明度を調整します
+        disabledSites:
+          title: 無効化サイト
+          description: 選択ツールバーを無効化するウェブサイトを設定します
+          enterUrlPattern: URL パターンを入力
+          urlPattern: URL パターン
       closeMenu:
         disableForSite: このサイトで無効化
         disableGlobally: グローバルで無効化
-      disabledSites:
-        title: 選択ツールバー無効化サイト
-        description: 選択ツールバーを無効化するウェブサイトを設定します
-        enterUrlPattern: URL パターンを入力
-        urlPattern: URL パターン
       errors:
         customActionFailed: カスタムアクションに失敗しました
         customActionFailedFallback: カスタムアクションのリクエストに失敗しました
@@ -645,7 +651,7 @@ options:
           duplicateFieldKey: フィールド名は一意である必要があります
     contextMenu:
       title: コンテキストメニュー
-      translate:
+      enable:
         title: 右クリック翻訳を有効化
         description: ブラウザの右クリックメニューに翻訳オプションを追加し、ページや選択テキストを素早く翻訳
   translation:

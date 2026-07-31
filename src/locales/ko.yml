@@ -446,10 +446,28 @@ options:
     title: 플로팅 버튼 및 툴바
     floatingButtonDemoImageAlt: 플로팅 버튼 데모
     selectionToolbarDemoImageAlt: 선택 툴바 데모
+    contextMenuDemoImageAlt: 컨텍스트 메뉴 데모
     floatingButton:
-      globalToggle:
+      enable:
         title: 플로팅 버튼 활성화
         description: 웹 페이지에 플로팅 버튼을 표시하여 Read Frog 기능에 빠르게 액세스
+      display:
+        title: 표시
+        side:
+          title: 버튼 위치
+          description: 플로팅 버튼을 페이지 어느 쪽에 고정할지 선택합니다
+          left: 왼쪽
+          right: 오른쪽
+        disabledSites:
+          title: 비활성화 사이트
+          description: 플로팅 버튼을 비활성화할 웹사이트를 설정합니다
+          enterUrlPattern: URL 패턴 입력
+          urlPattern: URL 패턴
+      clickAction:
+        title: 클릭 동작
+        description: 플로팅 버튼을 클릭할 때 실행할 동작 선택
+        panel: 사이드 패널 열기
+        translate: 페이지 번역 전환
       closeMenu:
         disableForSite: 이 사이트에서 비활성화
         disableGlobally: 전역 비활성화
@@ -460,48 +478,36 @@ options:
         unlockPosition: 위치 잠금 해제
         settings: 설정
         feedback: 피드백 보내기
-      disabledSites:
-        title: 플로팅 버튼 비활성화 사이트
-        description: 플로팅 버튼을 비활성화할 웹사이트를 설정합니다
-        enterUrlPattern: URL 패턴 입력
-        urlPattern: URL 패턴
-      clickAction:
-        title: 클릭 동작
-        description: 플로팅 버튼을 클릭할 때 실행할 동작 선택
-        panel: 사이드 패널 열기
-        translate: 페이지 번역 전환
-      side:
-        title: 버튼 위치
-        description: 플로팅 버튼을 페이지 어느 쪽에 고정할지 선택합니다
-        left: 왼쪽
-        right: 오른쪽
     selectionToolbar:
-      globalToggle:
+      enable:
         title: 선택 툴바 활성화
         description: 웹 페이지에서 텍스트를 선택할 때 도구 모음을 표시하여 빠르게 번역, 읽기, AI 액션을 사용할 수 있습니다
-      opacity:
-        title: 투명도
-        description: 선택 툴바와 여기서 열리는 확장 창의 투명도를 조절합니다
-      featureToggles:
-        title: 기능 토글
-        description: 선택 툴바에 표시할 기본 제공 기능 선택
-        translate: 번역
-        speak: 읽기
-      saveSuggestion:
-        title: 저장 제안
-        description: AI 제공자로 선택 번역 후 Notebase에 저장할 단어를 추천합니다
-        action: 작업
-      shortcut:
-        title: Selection Translation Shortcut
-        description: Customize the shortcut key for translating selected text
+      actions:
+        title: 작업
+        translate:
+          title: 번역
+          description: 툴바에 번역 버튼을 표시합니다
+        speak:
+          title: 읽기
+          description: 선택한 텍스트를 읽어 주는 읽기 버튼을 툴바에 표시합니다
+        saveSuggestion:
+          title: 저장 제안
+          description: AI 제공자로 선택 번역 후 Notebase에 저장할 단어를 추천합니다
+          action: 작업
+          actionDescription: 저장 제안을 만드는 작업
+      display:
+        title: 표시
+        opacity:
+          title: 투명도
+          description: 선택 툴바와 여기서 열리는 확장 창의 투명도를 조절합니다
+        disabledSites:
+          title: 비활성화 사이트
+          description: 선택 툴바를 비활성화할 웹사이트를 설정합니다
+          enterUrlPattern: URL 패턴 입력
+          urlPattern: URL 패턴
       closeMenu:
         disableForSite: 이 사이트에서 비활성화
         disableGlobally: 전역 비활성화
-      disabledSites:
-        title: 선택 툴바 비활성화 사이트
-        description: 선택 툴바를 비활성화할 웹사이트를 설정합니다
-        enterUrlPattern: URL 패턴 입력
-        urlPattern: URL 패턴
       errors:
         customActionFailed: 사용자 지정 작업 실패
         customActionFailedFallback: 사용자 지정 작업 요청에 실패했습니다
@@ -645,7 +651,7 @@ options:
           duplicateFieldKey: 필드 이름은 고유해야 합니다
     contextMenu:
       title: 컨텍스트 메뉴
-      translate:
+      enable:
         title: 우클릭 번역 활성화
         description: 브라우저 우클릭 메뉴에 번역 옵션을 추가하여 페이지나 선택한 텍스트를 빠르게 번역
   translation:

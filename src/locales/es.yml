@@ -447,10 +447,28 @@ options:
     title: Botón flotante y barra de herramientas
     floatingButtonDemoImageAlt: Demostración del botón flotante
     selectionToolbarDemoImageAlt: Demostración de la barra de selección
+    contextMenuDemoImageAlt: Demostración del menú contextual
     floatingButton:
-      globalToggle:
+      enable:
         title: Activar botón flotante
         description: Muestra el botón flotante en páginas web para acceder rápidamente a las funciones de Read Frog
+      display:
+        title: Visualización
+        side:
+          title: Lado del botón
+          description: Elige en qué lado de la página se fija el botón flotante
+          left: Izquierda
+          right: Derecha
+        disabledSites:
+          title: Sitios desactivados
+          description: Configura los sitios web donde se debe desactivar el botón flotante
+          enterUrlPattern: Introduce patrón de URL
+          urlPattern: Patrón de URL
+      clickAction:
+        title: Acción al hacer clic
+        description: Elige la acción al hacer clic en el botón flotante
+        panel: Abrir panel lateral
+        translate: Alternar traducción de página
       closeMenu:
         disableForSite: Desactivar para este sitio
         disableGlobally: Desactivar globalmente
@@ -461,48 +479,36 @@ options:
         unlockPosition: Desbloquear posición
         settings: Ajustes
         feedback: Enviar comentarios
-      disabledSites:
-        title: Sitios con botón flotante desactivado
-        description: Configura los sitios web donde se debe desactivar el botón flotante
-        enterUrlPattern: Introduce patrón de URL
-        urlPattern: Patrón de URL
-      clickAction:
-        title: Acción al hacer clic
-        description: Elige la acción al hacer clic en el botón flotante
-        panel: Abrir panel lateral
-        translate: Alternar traducción de página
-      side:
-        title: Lado del botón
-        description: Elige en qué lado de la página se fija el botón flotante
-        left: Izquierda
-        right: Derecha
     selectionToolbar:
-      globalToggle:
+      enable:
         title: Activar barra de selección
         description: Muestra la barra de herramientas al seleccionar texto en páginas web para traducción rápida, voz y acciones AI
-      opacity:
-        title: Opacidad
-        description: Ajusta la opacidad de la barra de selección y de la ventana expandida que se abre desde ella
-      featureToggles:
-        title: Alternadores de funciones
-        description: Elige qué funciones integradas mostrar en la barra de selección
-        translate: Traducir
-        speak: Leer en voz alta
-      saveSuggestion:
-        title: Sugerencias de guardado
-        description: Después de traducir una selección con un proveedor de IA, sugerir palabras para guardar en tu Notebase
-        action: Acción
-      shortcut:
-        title: Selection Translation Shortcut
-        description: Customize the shortcut key for translating selected text
+      actions:
+        title: Acciones
+        translate:
+          title: Traducir
+          description: Muestra el botón de traducción en la barra de herramientas
+        speak:
+          title: Leer en voz alta
+          description: Muestra el botón de voz, que lee en voz alta el texto seleccionado
+        saveSuggestion:
+          title: Sugerencias de guardado
+          description: Después de traducir una selección con un proveedor de IA, sugerir palabras para guardar en tu Notebase
+          action: Acción
+          actionDescription: La acción que genera la sugerencia
+      display:
+        title: Visualización
+        opacity:
+          title: Opacidad
+          description: Ajusta la opacidad de la barra de selección y de la ventana expandida que se abre desde ella
+        disabledSites:
+          title: Sitios desactivados
+          description: Configura los sitios web donde se debe desactivar la barra de selección
+          enterUrlPattern: Introduce patrón de URL
+          urlPattern: Patrón de URL
       closeMenu:
         disableForSite: Desactivar para este sitio
         disableGlobally: Desactivar globalmente
-      disabledSites:
-        title: Sitios con barra de selección desactivada
-        description: Configura los sitios web donde se debe desactivar la barra de selección
-        enterUrlPattern: Introduce patrón de URL
-        urlPattern: Patrón de URL
       errors:
         customActionFailed: Falló la acción personalizada
         customActionFailedFallback: Falló la solicitud de acción personalizada
@@ -761,7 +767,7 @@ options:
           duplicateFieldKey: Los nombres de campo deben ser únicos
     contextMenu:
       title: Menú contextual
-      translate:
+      enable:
         title: Activar traducción en menú contextual
         description: Añade opciones de traducción al menú contextual del navegador para traducir rápidamente páginas y selecciones
   translation:

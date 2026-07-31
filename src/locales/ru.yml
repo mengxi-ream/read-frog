@@ -446,10 +446,28 @@ options:
     title: Плавающая кнопка и панель инструментов
     floatingButtonDemoImageAlt: Демо плавающей кнопки
     selectionToolbarDemoImageAlt: Демо панели выделения
+    contextMenuDemoImageAlt: Демо контекстного меню
     floatingButton:
-      globalToggle:
+      enable:
         title: Включить плавающую кнопку
         description: Отображать плавающую кнопку на веб-страницах для быстрого доступа к функциям Read Frog
+      display:
+        title: Отображение
+        side:
+          title: Сторона кнопки
+          description: Выберите, с какой стороны страницы закреплять плавающую кнопку
+          left: Слева
+          right: Справа
+        disabledSites:
+          title: Отключённые сайты
+          description: Настройте веб-сайты, где плавающая кнопка должна быть отключена
+          enterUrlPattern: Введите URL-шаблон
+          urlPattern: URL-шаблон
+      clickAction:
+        title: Действие по клику
+        description: Выберите действие при нажатии на плавающую кнопку
+        panel: Открыть боковую панель
+        translate: Переключить перевод страницы
       closeMenu:
         disableForSite: Отключить для этого сайта
         disableGlobally: Отключить глобально
@@ -460,48 +478,36 @@ options:
         unlockPosition: Открепить положение
         settings: Настройки
         feedback: Отправить отзыв
-      disabledSites:
-        title: Сайты с отключённой плавающей кнопкой
-        description: Настройте веб-сайты, где плавающая кнопка должна быть отключена
-        enterUrlPattern: Введите URL-шаблон
-        urlPattern: URL-шаблон
-      clickAction:
-        title: Действие по клику
-        description: Выберите действие при нажатии на плавающую кнопку
-        panel: Открыть боковую панель
-        translate: Переключить перевод страницы
-      side:
-        title: Сторона кнопки
-        description: Выберите, с какой стороны страницы закреплять плавающую кнопку
-        left: Слева
-        right: Справа
     selectionToolbar:
-      globalToggle:
+      enable:
         title: Включить панель выделения
         description: Показывать панель при выделении текста на веб-страницах для быстрого перевода, озвучивания и AI-действий
-      opacity:
-        title: Прозрачность
-        description: Настройте прозрачность панели выделения и раскрытого окна, которое открывается из неё
-      featureToggles:
-        title: Переключатели функций
-        description: Выберите, какие встроенные функции показывать в панели выделения
-        translate: Перевод
-        speak: Озвучивание
-      saveSuggestion:
-        title: Предложения по сохранению
-        description: После перевода выделенного текста с помощью ИИ-провайдера предлагать слова для сохранения в Notebase
-        action: Действие
-      shortcut:
-        title: Selection Translation Shortcut
-        description: Customize the shortcut key for translating selected text
+      actions:
+        title: Действия
+        translate:
+          title: Перевод
+          description: Показывать кнопку перевода на панели
+        speak:
+          title: Озвучивание
+          description: Показывать кнопку озвучивания, которая читает выделенный текст вслух
+        saveSuggestion:
+          title: Предложения по сохранению
+          description: После перевода выделенного текста с помощью ИИ-провайдера предлагать слова для сохранения в Notebase
+          action: Действие
+          actionDescription: Действие, которое формирует предложение
+      display:
+        title: Отображение
+        opacity:
+          title: Прозрачность
+          description: Настройте прозрачность панели выделения и раскрытого окна, которое открывается из неё
+        disabledSites:
+          title: Отключённые сайты
+          description: Настройте веб-сайты, где панель выделения должна быть отключена
+          enterUrlPattern: Введите URL-шаблон
+          urlPattern: URL-шаблон
       closeMenu:
         disableForSite: Отключить для этого сайта
         disableGlobally: Отключить глобально
-      disabledSites:
-        title: Сайты с отключённой панелью выделения
-        description: Настройте веб-сайты, где панель выделения должна быть отключена
-        enterUrlPattern: Введите URL-шаблон
-        urlPattern: URL-шаблон
       errors:
         customActionFailed: Не удалось выполнить пользовательское действие
         customActionFailedFallback: Запрос пользовательского действия не удался
@@ -645,7 +651,7 @@ options:
           duplicateFieldKey: Имена полей должны быть уникальными
     contextMenu:
       title: Контекстное меню
-      translate:
+      enable:
         title: Включить перевод в контекстном меню
         description: Добавить опцию перевода в контекстное меню браузера для быстрого перевода страницы и выделенного текста
   translation:

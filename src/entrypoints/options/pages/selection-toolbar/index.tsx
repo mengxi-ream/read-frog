@@ -2,18 +2,16 @@ import selectionToolbarDemoImage from "@/assets/demo/selection-toolbar.png"
 import { GradientBackground } from "@/components/gradient-background"
 import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
-import { SelectionToolbarDisabledSites } from "./selection-toolbar-disabled-sites"
-import { SelectionToolbarFeatureToggles } from "./selection-toolbar-feature-toggles"
-import { SelectionToolbarGlobalToggle } from "./selection-toolbar-global-toggle"
-import { SelectionToolbarOpacity } from "./selection-toolbar-opacity"
-import { SelectionToolbarSaveSuggestionToggle } from "./selection-toolbar-save-suggestion-toggle"
-import { SelectionTranslationShortcut } from "./selection-translation-shortcut"
+import { ActionsSection } from "./actions"
+import { DisplaySection } from "./display"
+import { EnableItem } from "./enable-item"
 
 export function SelectionToolbarPage() {
   return (
     <PageLayout
       title={i18n.t("options.overlayTools.selectionToolbar.title")}
       description={i18n.t("options.overlayTools.selectionToolbar.pageDescription")}
+      innerClassName="flex flex-col gap-10"
     >
       <GradientBackground>
         <img
@@ -22,14 +20,9 @@ export function SelectionToolbarPage() {
           className="h-auto w-100"
         />
       </GradientBackground>
-      <div className="*:border-b [&>*:last-child]:border-b-0">
-        <SelectionToolbarGlobalToggle />
-        <SelectionToolbarOpacity />
-        <SelectionToolbarFeatureToggles />
-        <SelectionToolbarSaveSuggestionToggle />
-        <SelectionTranslationShortcut />
-        <SelectionToolbarDisabledSites />
-      </div>
+      <EnableItem />
+      <ActionsSection />
+      <DisplaySection />
     </PageLayout>
   )
 }

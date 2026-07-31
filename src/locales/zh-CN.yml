@@ -447,10 +447,28 @@ options:
     title: 悬浮按钮和工具栏
     floatingButtonDemoImageAlt: 悬浮按钮演示
     selectionToolbarDemoImageAlt: 选择工具栏演示
+    contextMenuDemoImageAlt: 右键菜单演示
     floatingButton:
-      globalToggle:
+      enable:
         title: 启用悬浮按钮
         description: 在网页上显示悬浮按钮，快速访问陪读蛙功能
+      display:
+        title: 显示
+        side:
+          title: 按钮位置
+          description: 选择悬浮按钮停靠在页面的哪一侧
+          left: 左侧
+          right: 右侧
+        disabledSites:
+          title: 禁用网站
+          description: 配置需要禁用悬浮按钮的网站
+          enterUrlPattern: 输入网址模式
+          urlPattern: 网址模式
+      clickAction:
+        title: 点击行为
+        description: 选择点击悬浮按钮时执行的操作
+        panel: 打开侧边栏
+        translate: 切换页面翻译
       closeMenu:
         disableForSite: 当前网站禁用
         disableGlobally: 全局禁用
@@ -461,48 +479,36 @@ options:
         unlockPosition: 解锁位置
         settings: 设置
         feedback: 发送反馈
-      disabledSites:
-        title: 悬浮按钮禁用网站
-        description: 配置需要禁用悬浮按钮的网站
-        enterUrlPattern: 输入网址模式
-        urlPattern: 网址模式
-      clickAction:
-        title: 点击行为
-        description: 选择点击悬浮按钮时执行的操作
-        panel: 打开侧边栏
-        translate: 切换页面翻译
-      side:
-        title: 按钮位置
-        description: 选择悬浮按钮停靠在页面的哪一侧
-        left: 左侧
-        right: 右侧
     selectionToolbar:
-      globalToggle:
+      enable:
         title: 启用选择工具栏
         description: 在网页上选择文本时显示工具栏，快速翻译、朗读和使用 AI 指令
-      opacity:
-        title: 透明度
-        description: 调整选择工具栏及其展开内容窗的透明度
-      featureToggles:
-        title: 功能开关
-        description: 选择在选择工具栏中显示哪些内置功能
-        translate: 翻译
-        speak: 朗读
-      saveSuggestion:
-        title: 保存建议
-        description: 使用 AI 提供商进行划词翻译后，推荐可存入笔记库的词条
-        action: 指令
-      shortcut:
-        title: 划词翻译快捷键
-        description: 自定义翻译选中文本的快捷键
+      actions:
+        title: 操作
+        translate:
+          title: 翻译
+          description: 在工具栏中显示翻译按钮
+        speak:
+          title: 朗读
+          description: 在工具栏中显示朗读按钮，用于朗读选中的文本
+        saveSuggestion:
+          title: 保存建议
+          description: 使用 AI 提供商进行划词翻译后，推荐可存入笔记库的词条
+          action: 指令
+          actionDescription: 用于生成保存建议的指令
+      display:
+        title: 显示
+        opacity:
+          title: 透明度
+          description: 调整选择工具栏及其展开内容窗的透明度
+        disabledSites:
+          title: 禁用网站
+          description: 配置需要禁用选择工具栏的网站
+          enterUrlPattern: 输入网址模式
+          urlPattern: 网址模式
       closeMenu:
         disableForSite: 当前网站禁用
         disableGlobally: 全局禁用
-      disabledSites:
-        title: 选择工具栏禁用网站
-        description: 配置需要禁用选择工具栏的网站
-        enterUrlPattern: 输入网址模式
-        urlPattern: 网址模式
       errors:
         customActionFailed: 自定义操作失败
         customActionFailedFallback: 自定义操作请求失败
@@ -761,7 +767,7 @@ options:
           duplicateFieldKey: 字段名不能重复
     contextMenu:
       title: 右键菜单
-      translate:
+      enable:
         title: 启用右键翻译
         description: 在浏览器右键菜单中添加翻译选项，快速翻译页面或所选文本
   translation:

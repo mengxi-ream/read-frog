@@ -447,10 +447,28 @@ options:
     title: 懸浮按鈕和工具列
     floatingButtonDemoImageAlt: 懸浮按鈕示範
     selectionToolbarDemoImageAlt: 選取工具列示範
+    contextMenuDemoImageAlt: 右鍵選單示範
     floatingButton:
-      globalToggle:
+      enable:
         title: 啟用懸浮按鈕
         description: 在網頁上顯示懸浮按鈕，快速存取陪讀蛙功能
+      display:
+        title: 顯示
+        side:
+          title: 按鈕位置
+          description: 選擇懸浮按鈕停靠在頁面的哪一側
+          left: 左側
+          right: 右側
+        disabledSites:
+          title: 停用網站
+          description: 設定需要停用懸浮按鈕的網站
+          enterUrlPattern: 輸入網址模式
+          urlPattern: URL 模式
+      clickAction:
+        title: 點選行為
+        description: 選擇點選懸浮按鈕時執行的操作
+        panel: 開啟側邊欄
+        translate: 切換頁面翻譯
       closeMenu:
         disableForSite: 停用此網站
         disableGlobally: 全域停用
@@ -461,48 +479,36 @@ options:
         unlockPosition: 解鎖位置
         settings: 設定
         feedback: 傳送意見回饋
-      disabledSites:
-        title: 懸浮按鈕停用網站
-        description: 設定需要停用懸浮按鈕的網站
-        enterUrlPattern: 輸入網址模式
-        urlPattern: URL 模式
-      clickAction:
-        title: 點選行為
-        description: 選擇點選懸浮按鈕時執行的操作
-        panel: 開啟側邊欄
-        translate: 切換頁面翻譯
-      side:
-        title: 按鈕位置
-        description: 選擇懸浮按鈕停靠在頁面的哪一側
-        left: 左側
-        right: 右側
     selectionToolbar:
-      globalToggle:
+      enable:
         title: 啟用選取工具列
         description: 在網頁上選取文字時顯示工具列，快速翻譯、朗讀和使用 AI 指令
-      opacity:
-        title: 透明度
-        description: 調整選取工具列及其展開內容視窗的透明度
-      featureToggles:
-        title: 功能開關
-        description: 選擇在選取工具列中顯示哪些內建功能
-        translate: 翻譯
-        speak: 朗讀
-      saveSuggestion:
-        title: 儲存建議
-        description: 使用 AI 供應商進行劃詞翻譯後，推薦可存入筆記庫的詞條
-        action: 指令
-      shortcut:
-        title: 選取文字翻譯快速鍵
-        description: 自訂翻譯選取文字的快速鍵
+      actions:
+        title: 操作
+        translate:
+          title: 翻譯
+          description: 在工具列中顯示翻譯按鈕
+        speak:
+          title: 朗讀
+          description: 在工具列中顯示朗讀按鈕，用於朗讀選取的文字
+        saveSuggestion:
+          title: 儲存建議
+          description: 使用 AI 供應商進行劃詞翻譯後，推薦可存入筆記庫的詞條
+          action: 指令
+          actionDescription: 用於產生儲存建議的指令
+      display:
+        title: 顯示
+        opacity:
+          title: 透明度
+          description: 調整選取工具列及其展開內容視窗的透明度
+        disabledSites:
+          title: 停用網站
+          description: 設定需要停用選取工具列的網站
+          enterUrlPattern: 輸入網址模式
+          urlPattern: URL 模式
       closeMenu:
         disableForSite: 停用此網站
         disableGlobally: 全域停用
-      disabledSites:
-        title: 選取工具列停用網站
-        description: 設定需要停用選取工具列的網站
-        enterUrlPattern: 輸入網址模式
-        urlPattern: URL 模式
       errors:
         customActionFailed: 自訂操作失敗
         customActionFailedFallback: 自訂操作請求失敗
@@ -761,7 +767,7 @@ options:
           duplicateFieldKey: 欄位名稱不能重複
     contextMenu:
       title: 右鍵選單
-      translate:
+      enable:
         title: 啟用右鍵翻譯
         description: 在瀏覽器右鍵選單中新增翻譯選項，快速翻譯頁面或選取的文字
   translation:

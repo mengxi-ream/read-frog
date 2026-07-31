@@ -447,10 +447,28 @@ options:
     title: Floating Button & Toolbar
     floatingButtonDemoImageAlt: Floating Button Demo
     selectionToolbarDemoImageAlt: Selection Toolbar Demo
+    contextMenuDemoImageAlt: Context Menu Demo
     floatingButton:
-      globalToggle:
-        title: Enable Floating Button
+      enable:
+        title: Enable floating button
         description: Display the floating button on web pages for quick access to Read Frog features
+      display:
+        title: Display
+        side:
+          title: Button side
+          description: Choose which side of the page the floating button is docked to
+          left: Left
+          right: Right
+        disabledSites:
+          title: Disabled sites
+          description: Configure websites where the floating button should be disabled
+          enterUrlPattern: Enter URL pattern
+          urlPattern: URL pattern
+      clickAction:
+        title: Click action
+        description: Choose the action when clicking the floating button
+        panel: Open side panel
+        translate: Toggle page translation
       closeMenu:
         disableForSite: Disable for this site
         disableGlobally: Disable globally
@@ -461,48 +479,36 @@ options:
         unlockPosition: Unlock position
         settings: Settings
         feedback: Send feedback
-      disabledSites:
-        title: Floating Button Disabled Sites
-        description: Configure websites where the floating button should be disabled
-        enterUrlPattern: Enter URL pattern
-        urlPattern: URL Pattern
-      clickAction:
-        title: Click Action
-        description: Choose the action when clicking the floating button
-        panel: Open Side Panel
-        translate: Toggle Page Translation
-      side:
-        title: Button Side
-        description: Choose which side of the page the floating button is docked to
-        left: Left
-        right: Right
     selectionToolbar:
-      globalToggle:
-        title: Enable Selection Toolbar
+      enable:
+        title: Enable selection toolbar
         description: Display the toolbar when selecting text on web pages for quick translation, speech, and AI actions
-      opacity:
-        title: Opacity
-        description: Adjust the opacity of the selection toolbar and the expanded window opened from it
-      featureToggles:
-        title: Feature Toggles
-        description: Choose which built-in features to show in the selection toolbar
-        translate: Translate
-        speak: Speak
-      saveSuggestion:
-        title: Save Suggestions
-        description: After selection translation with an AI provider, suggest words to save to your Notebase
-        action: Action
-      shortcut:
-        title: Selection Translation Shortcut
-        description: Customize the shortcut key for translating selected text
+      actions:
+        title: Actions
+        translate:
+          title: Translate
+          description: Show the translate button in the toolbar
+        speak:
+          title: Speak
+          description: Show the speak button, which reads the selected text aloud
+        saveSuggestion:
+          title: Save suggestions
+          description: After selection translation with an AI provider, suggest words to save to your Notebase
+          action: Action
+          actionDescription: The action that produces the suggestion
+      display:
+        title: Display
+        opacity:
+          title: Opacity
+          description: Adjust the opacity of the selection toolbar and the expanded window opened from it
+        disabledSites:
+          title: Disabled sites
+          description: Configure websites where the selection toolbar should be disabled
+          enterUrlPattern: Enter URL pattern
+          urlPattern: URL pattern
       closeMenu:
         disableForSite: Disable for this site
         disableGlobally: Disable globally
-      disabledSites:
-        title: Selection Toolbar Disabled Sites
-        description: Configure websites where the selection toolbar should be disabled
-        enterUrlPattern: Enter URL pattern
-        urlPattern: URL Pattern
       errors:
         customActionFailed: Custom Action Failed
         customActionFailedFallback: Custom action request failed
@@ -761,8 +767,8 @@ options:
           duplicateFieldKey: Field names must be unique
     contextMenu:
       title: Context Menu
-      translate:
-        title: Enable Context Menu Translate
+      enable:
+        title: Enable context menu translate
         description: Add translate options to the browser right-click menu for quick page and selection translation
   translation:
     title: Page Translation
