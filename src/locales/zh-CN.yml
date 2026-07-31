@@ -904,9 +904,9 @@ options:
       title: 小段落过滤
       description: 这些全局默认值会跳过翻译少于指定字符数或词数的文本节点；匹配的站点规则可以覆盖它们（0 = 禁用）
       minCharacters:
-        description: 最小字符数：空格也计入
+        description: 最小字符数：比这更短的文本不翻译，设为 0 则全部翻译
       minWords:
-        description: 最小词数：任何语言都能准确分词
+        description: 最小词数：词数比这更少的文本不翻译
       error: 数值必须在 $1 到 $2 之间
     autoTranslateLanguages:
       title: 基于语言的自动翻译

@@ -904,9 +904,9 @@ options:
       title: Filtro de párrafos pequeños
       description: Estos valores predeterminados globales omiten la traducción de nodos de texto con menos caracteres o palabras que los umbrales. Las reglas de sitio coincidentes pueden anularlos (0 = desactivado)
       minCharacters:
-        description: "Caracteres mínimos: los espacios cuentan"
+        description: "Caracteres mínimos: el texto más corto no se traduce. Usa 0 para traducirlo todo"
       minWords:
-        description: "Palabras mínimas: se cuentan con precisión en cualquier idioma"
+        description: "Palabras mínimas: el texto con menos palabras no se traduce"
       error: El valor debe estar entre $1 y $2
     autoTranslateLanguages:
       title: Traducción automática por idioma

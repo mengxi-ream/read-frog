@@ -904,9 +904,9 @@ options:
       title: Small paragraph filter
       description: These global defaults skip translating text nodes with fewer characters or words than the thresholds. Matching site rules can override them (0 = disabled)
       minCharacters:
-        description: "Minimum characters: whitespace included in the count"
+        description: "Minimum characters: shorter text stays untranslated. Use 0 to translate everything"
       minWords:
-        description: "Minimum words: counted accurately in any language"
+        description: "Minimum words: text with fewer words stays untranslated"
       error: Value must be between $1 and $2
     autoTranslateLanguages:
       title: Auto translate based on language

@@ -904,9 +904,9 @@ options:
       title: 小段落過濾
       description: 這些全域預設值會略過翻譯少於指定字元數或詞數的文字節點；相符的網站規則可以覆寫它們（0 = 停用）
       minCharacters:
-        description: 最小字元數：空白也計入
+        description: 最小字元數：比這更短的文字不翻譯，設為 0 則全部翻譯
       minWords:
-        description: 最小詞數：任何語言都能準確分詞
+        description: 最小詞數：詞數比這更少的文字不翻譯
       error: 數值必須在 $1 到 $2 之間
     autoTranslateLanguages:
       title: 依語言自動翻譯

@@ -788,9 +788,9 @@ options:
       title: 짧은 텍스트 필터
       description: 이 전역 기본값을 사용하여 지정한 문자 수 또는 단어 수보다 적은 텍스트 노드의 번역을 건너뜁니다. 일치하는 사이트 규칙에서 재정의할 수 있습니다 (0 = 비활성화)
       minCharacters:
-        description: "최소 문자 수: 공백도 포함해 셉니다"
+        description: "최소 문자 수: 이보다 짧은 텍스트는 번역하지 않습니다. 0이면 전부 번역합니다"
       minWords:
-        description: "최소 단어 수: 모든 언어에서 정확하게 셉니다"
+        description: "최소 단어 수: 이보다 단어가 적은 텍스트는 번역하지 않습니다"
       error: 값은 $1에서 $2 사이여야 합니다
     autoTranslateLanguages:
       title: 언어에 기반한 자동 번역

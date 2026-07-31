@@ -788,9 +788,9 @@ options:
       title: Bộ lọc văn bản ngắn
       description: Các giá trị mặc định toàn cục này bỏ qua việc dịch các nút văn bản có ít ký tự hoặc từ hơn ngưỡng. Quy tắc trang web phù hợp có thể ghi đè chúng (0 = tắt)
       minCharacters:
-        description: "Số ký tự tối thiểu: tính cả khoảng trắng"
+        description: "Số ký tự tối thiểu: văn bản ngắn hơn sẽ không được dịch. Đặt 0 để dịch tất cả"
       minWords:
-        description: "Số từ tối thiểu: đếm chính xác ở mọi ngôn ngữ"
+        description: "Số từ tối thiểu: văn bản có ít từ hơn sẽ không được dịch"
       error: Giá trị phải từ $1 đến $2
     autoTranslateLanguages:
       title: Tự động dịch theo ngôn ngữ
