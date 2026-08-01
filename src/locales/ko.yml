@@ -113,7 +113,7 @@ options:
   apiProviders:
     title: API 제공업체
     pageDescription: Read Frog가 호출하는 AI 서비스를 연결하고, 각 기능에 사용할 서비스를 선택하세요.
-    description: Read Frog가 호출할 수 있는 제공업체를 추가합니다. 20개 이상이 내장되어 있고, OpenAI 호환 API도 모두 사용할 수 있습니다.
+    description: Read Frog가 호출할 수 있는 제공업체를 추가합니다. 20개 이상이 내장되어 있으며, Chat Completions 호환 API와 Open Responses API를 사용자 정의로 추가할 수 있습니다.
     configTitle: 제공업체 구성
     addProvider: 제공업체 추가
     builtInProvider: 내장 제공업체
@@ -129,9 +129,9 @@ options:
         builtInProviders:
           title: 내장 LLM 제공업체
           description: 내장된 대규모 언어 모델 제공업체, Base URL과 같은 대부분의 설정이 필요 없음
-        openaiCompatibleProviders:
-          title: OpenAI 호환 사용자 정의 제공업체
-          description: 원하는 AI 제공업체를 찾을 수 없는 경우 Custom Provider를 선택하여 Zhipu AI와 같은 OpenAI 호환 제공업체를 구성할 수 있습니다
+        compatibleProviders:
+          title: 호환 API 제공업체
+          description: Chat Completions 호환 API에는 사용자 정의 Chat Complete를, Open Responses API에는 사용자 정의 Responses를 사용합니다.
         pureTranslationProviders:
           title: 순수 번역 제공업체
           description: 대규모 언어 모델 기능이 없는 번역 전문 제공업체
@@ -141,6 +141,7 @@ options:
         description: 설명
         apiKey: API Key
         baseURL: Base URL
+        url: URL
         optional: 선택사항
       duplicate: 복제
       delete: 삭제
@@ -195,6 +196,8 @@ options:
     providers:
       name:
         builtInAi: 내장 AI
+        customChatComplete: 사용자 정의 Chat Complete
+        customResponses: 사용자 정의 Responses
       attribution:
         builtInAi: Atlas Cloud 제공. 현재는 사용자 지정 AI 작업에서만 사용할 수 있습니다. 제한 없는 경험을 사용하려면 공식 웹사이트에서 가성비 높은 크레딧을 구매하세요.
       description:
@@ -209,7 +212,8 @@ options:
         atlascloud: DeepSeek, Kimi, Qwen, Doubao, GLM 등 최신 모델에 OpenAI 호환 방식으로 접근하는 통합 플랫폼
         siliconflow: 중국 및 국제 모델을 위한 고성능 추론 플랫폼
         tensdaq: 혁신적인 경매 AI MaaS 플랫폼으로 시장 수요와 공급에 따라 가격이 결정되어 고비용 고정 요금제를 없앰
-        openaiCompatible: OpenAI API 호환 서드파티
+        openaiCompatible: OpenAI Chat Completions API와 호환되는 사용자 지정 엔드포인트에 연결
+        openResponses: Open Responses API와 호환되는 사용자 지정 엔드포인트에 연결
         deeplx: 비공식 DeepL API
         deepl: 공식 DeepL API
         bedrock: 엔터프라이즈급 파운데이션 모델을 위한 AWS 관리 서비스

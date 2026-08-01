@@ -29,6 +29,7 @@ export const TRANSLATE_PROVIDER_TYPES = [
   "anthropic",
   "xai",
   "openai-compatible",
+  "open-responses",
   "atlascloud",
   "openrouter",
   "minimax",
@@ -66,6 +67,7 @@ export const LLM_PROVIDER_TYPES = [
   "anthropic",
   "xai",
   "openai-compatible",
+  "open-responses",
   "atlascloud",
   "openrouter",
   "minimax",
@@ -94,21 +96,64 @@ export function isLLMProvider(provider: string): provider is LLMProviderTypes {
   return LLM_PROVIDER_TYPES.includes(provider)
 }
 
-export const CUSTOM_LLM_PROVIDER_TYPES = [
-  "openai-compatible",
+const OPENAI_COMPATIBLE_CUSTOM_LLM_PROVIDER_TYPE = "openai-compatible"
+const OPEN_RESPONSES_CUSTOM_LLM_PROVIDER_TYPE = "open-responses"
+
+const HOSTED_OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES = [
   "atlascloud",
   "openrouter",
   "minimax",
   "siliconflow",
   "tensdaq",
   "volcengine",
-] as const satisfies Readonly<(keyof typeof LLM_PROVIDER_MODELS)[]>
-export type CustomLLMProviderTypes = (typeof CUSTOM_LLM_PROVIDER_TYPES)[number]
-export function isCustomLLMProvider(provider: string): provider is CustomLLMProviderTypes {
-  return CUSTOM_LLM_PROVIDER_TYPES.includes(provider)
+] as const satisfies Readonly<LLMProviderTypes[]>
+
+export const OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES = [
+  OPENAI_COMPATIBLE_CUSTOM_LLM_PROVIDER_TYPE,
+  ...HOSTED_OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES,
+] as const satisfies Readonly<LLMProviderTypes[]>
+export type OpenAICompatibleLLMProviderTypes = (typeof OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES)[number]
+export function isOpenAICompatibleLLMProvider(
+  provider: string,
+): provider is OpenAICompatibleLLMProviderTypes {
+  return OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES.includes(provider)
 }
 
-export const NON_CUSTOM_LLM_PROVIDER_TYPES = [
+export const OPEN_RESPONSES_LLM_PROVIDER_TYPES = [
+  OPEN_RESPONSES_CUSTOM_LLM_PROVIDER_TYPE,
+] as const satisfies Readonly<LLMProviderTypes[]>
+export type OpenResponsesLLMProviderTypes = (typeof OPEN_RESPONSES_LLM_PROVIDER_TYPES)[number]
+export function isOpenResponsesLLMProvider(
+  provider: string,
+): provider is OpenResponsesLLMProviderTypes {
+  return OPEN_RESPONSES_LLM_PROVIDER_TYPES.includes(provider)
+}
+
+export const PROTOCOL_COMPATIBLE_LLM_PROVIDER_TYPES = [
+  OPENAI_COMPATIBLE_CUSTOM_LLM_PROVIDER_TYPE,
+  OPEN_RESPONSES_CUSTOM_LLM_PROVIDER_TYPE,
+  ...HOSTED_OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES,
+] as const satisfies Readonly<(OpenAICompatibleLLMProviderTypes | OpenResponsesLLMProviderTypes)[]>
+export type ProtocolCompatibleLLMProviderTypes =
+  (typeof PROTOCOL_COMPATIBLE_LLM_PROVIDER_TYPES)[number]
+export function isProtocolCompatibleLLMProvider(
+  provider: string,
+): provider is ProtocolCompatibleLLMProviderTypes {
+  return PROTOCOL_COMPATIBLE_LLM_PROVIDER_TYPES.includes(provider)
+}
+
+export const CUSTOM_MODEL_ONLY_PROVIDER_TYPES = [
+  OPENAI_COMPATIBLE_CUSTOM_LLM_PROVIDER_TYPE,
+  OPEN_RESPONSES_CUSTOM_LLM_PROVIDER_TYPE,
+] as const satisfies Readonly<ProtocolCompatibleLLMProviderTypes[]>
+export type CustomModelOnlyProviderTypes = (typeof CUSTOM_MODEL_ONLY_PROVIDER_TYPES)[number]
+export function isCustomModelOnlyProvider(
+  provider: string,
+): provider is CustomModelOnlyProviderTypes {
+  return CUSTOM_MODEL_ONLY_PROVIDER_TYPES.includes(provider)
+}
+
+export const DEDICATED_LLM_PROVIDER_TYPES = [
   "openai",
   "deepseek",
   "google",
@@ -130,14 +175,15 @@ export const NON_CUSTOM_LLM_PROVIDER_TYPES = [
   "alibaba",
   "moonshotai",
   "huggingface",
-] as const satisfies Readonly<Exclude<keyof typeof LLM_PROVIDER_MODELS, CustomLLMProviderTypes>[]>
-export type NonCustomLLMProviderTypes = (typeof NON_CUSTOM_LLM_PROVIDER_TYPES)[number]
-export function isNonCustomLLMProvider(provider: string): provider is NonCustomLLMProviderTypes {
-  return NON_CUSTOM_LLM_PROVIDER_TYPES.includes(provider)
+] as const satisfies Readonly<Exclude<LLMProviderTypes, ProtocolCompatibleLLMProviderTypes>[]>
+export type DedicatedLLMProviderTypes = (typeof DEDICATED_LLM_PROVIDER_TYPES)[number]
+export function isDedicatedLLMProvider(provider: string): provider is DedicatedLLMProviderTypes {
+  return DEDICATED_LLM_PROVIDER_TYPES.includes(provider)
 }
 
 export const API_PROVIDER_TYPES = [
   "openai-compatible",
+  "open-responses",
   "atlascloud",
   "openrouter",
   "minimax",
@@ -193,6 +239,7 @@ export const ALL_PROVIDER_TYPES = [
   "deeplx",
   "deepl",
   "openai-compatible",
+  "open-responses",
   "atlascloud",
   "openrouter",
   "minimax",

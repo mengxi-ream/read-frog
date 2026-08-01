@@ -113,7 +113,7 @@ options:
   apiProviders:
     title: Proveedores de API
     pageDescription: Conecta los servicios de IA que usa Read Frog y elige cuál se encarga de cada función.
-    description: Añade los proveedores que Read Frog puede llamar. Más de 20 vienen integrados y funciona cualquier API compatible con OpenAI.
+    description: Añade los proveedores que Read Frog puede llamar. Más de 20 vienen integrados y puedes añadir API personalizadas compatibles con Chat Completions u Open Responses.
     configTitle: Configuración de proveedores
     addProvider: Añadir proveedor
     builtInProvider: Proveedor integrado
@@ -129,9 +129,9 @@ options:
         builtInProviders:
           title: Proveedores LLM integrados
           description: Proveedores integrados de modelos de lenguaje grandes; no hace falta completar la mayoría de configuraciones, como Base URL
-        openaiCompatibleProviders:
-          title: Proveedores personalizados compatibles con OpenAI
-          description: Si no encuentras el proveedor de AI que deseas, selecciona Proveedor personalizado para configurar cualquier proveedor compatible con OpenAI, como Zhipu AI
+        compatibleProviders:
+          title: Proveedores de API compatibles
+          description: Usa Personalizado Chat Complete para API compatibles con Chat Completions o Personalizado Responses para API Open Responses.
         pureTranslationProviders:
           title: Proveedores de traducción pura
           description: Proveedores centrados en funciones de traducción sin capacidades de modelos de lenguaje grandes
@@ -141,6 +141,7 @@ options:
         description: Descripción
         apiKey: Clave API
         baseURL: Base URL
+        url: URL
         optional: Opcional
       duplicate: Duplicar
       delete: Eliminar
@@ -196,6 +197,8 @@ options:
     providers:
       name:
         builtInAi: IA integrada
+        customChatComplete: Personalizado Chat Complete
+        customResponses: Personalizado Responses
       attribution:
         builtInAi: Proporcionado por Atlas Cloud. Actualmente solo está disponible para acciones de IA personalizadas. Para desbloquear una experiencia sin restricciones, compra créditos muy rentables en el sitio web oficial.
       description:
@@ -210,7 +213,8 @@ options:
         atlascloud: Plataforma unificada compatible con OpenAI para modelos recientes como DeepSeek, Kimi, Qwen, Doubao y GLM
         siliconflow: Plataforma de inferencia de alto rendimiento para modelos chinos e internacionales
         tensdaq: Plataforma revolucionaria de pujas AI MaaS con precios impulsados por el mercado, que elimina los altos precios fijos
-        openaiCompatible: Compatible con API de terceros y OpenAI
+        openaiCompatible: Conecta un endpoint personalizado compatible con la API Chat Completions de OpenAI
+        openResponses: Conecta un endpoint personalizado compatible con la API Open Responses
         deeplx: API de DeepL no oficial
         deepl: API oficial de DeepL
         bedrock: Servicio administrado de AWS para modelos fundacionales de nivel empresarial

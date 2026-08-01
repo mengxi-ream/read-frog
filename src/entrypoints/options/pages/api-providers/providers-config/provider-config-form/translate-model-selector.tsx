@@ -11,8 +11,9 @@ import {
 } from "@/components/ui/base-ui/select"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import {
-  isCustomLLMProviderConfig,
+  isCustomModelOnlyProvider,
   isLLMProviderConfig,
+  isProtocolCompatibleLLMProviderConfig,
   LLM_PROVIDER_MODELS,
 } from "@/types/config/provider"
 import { providerConfigAtom, updateLLMProviderConfig } from "@/utils/atoms/provider"
@@ -57,10 +58,9 @@ export const TranslateModelSelector = withForm({
                 labelExtra={
                   <div className="flex items-center gap-2">
                     {recommendationTrigger}
-                    {isCustomLLMProviderConfig(providerConfig) && (
+                    {isProtocolCompatibleLLMProviderConfig(providerConfig) && (
                       <ModelSuggestionButton
-                        baseURL={providerConfig.baseURL}
-                        apiKey={providerConfig.apiKey}
+                        providerConfig={providerConfig}
                         onSelect={(selectedModel) => {
                           field.handleChange(selectedModel)
                           void form.handleSubmit()
@@ -99,7 +99,7 @@ export const TranslateModelSelector = withForm({
             )}
           </form.AppField>
         )}
-        {providerConfig.provider !== "openai-compatible" && (
+        {!isCustomModelOnlyProvider(providerConfig.provider) && (
           <form.Field name="model.isCustomModel">
             {(field) => (
               <div className="mt-2.5 flex items-center space-x-2">

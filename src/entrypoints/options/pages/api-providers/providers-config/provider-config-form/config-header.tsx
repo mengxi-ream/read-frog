@@ -7,6 +7,7 @@ import {
   PROVIDER_GROUPS,
   PROVIDER_ITEMS,
   SPECIFIC_TUTORIAL_PROVIDER_TYPES,
+  getProviderItemName,
 } from "@/utils/constants/providers"
 import { i18n } from "@/utils/i18n"
 
@@ -37,7 +38,7 @@ export function ConfigHeader({
       >
         <ProviderIcon
           logo={providerItem.logo(theme)}
-          name={providerItem.name}
+          name={getProviderItemName(providerType)}
           size="base"
           className="group hover:cursor-pointer"
           textClassName="font-medium group-hover:text-link"

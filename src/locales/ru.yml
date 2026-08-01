@@ -113,7 +113,7 @@ options:
   apiProviders:
     title: API-провайдеры
     pageDescription: Подключите ИИ-сервисы, которые вызывает Read Frog, и выберите провайдера для каждой функции.
-    description: Добавьте провайдеров, которых может вызывать Read Frog. Более 20 встроено, и подойдёт любой OpenAI-совместимый API.
+    description: Добавьте провайдеров, которых может вызывать Read Frog. Более 20 встроено; также можно добавить пользовательские API, совместимые с Chat Completions, и API Open Responses.
     configTitle: Настройка провайдеров
     addProvider: Добавить провайдера
     builtInProvider: Встроенный провайдер
@@ -129,9 +129,9 @@ options:
         builtInProviders:
           title: Встроенные LLM-провайдеры
           description: Встроенные провайдеры больших языковых моделей, не требуют заполнения большинства настроек, таких как Base URL
-        openaiCompatibleProviders:
-          title: OpenAI-совместимые провайдеры
-          description: Если вы не нашли нужного ИИ-провайдера, выберите Custom Provider для настройки любого OpenAI-совместимого провайдера, например Zhipu AI
+        compatibleProviders:
+          title: Совместимые API-провайдеры
+          description: Для API, совместимых с Chat Completions, используйте Пользовательский Chat Complete, а для API Open Responses — Пользовательский Responses.
         pureTranslationProviders:
           title: Чистые провайдеры перевода
           description: Провайдеры, ориентированные на функции перевода без возможностей больших языковых моделей
@@ -141,6 +141,7 @@ options:
         description: Описание
         apiKey: API-ключ
         baseURL: Base URL
+        url: URL
         optional: Необязательно
       duplicate: Дублировать
       delete: Удалить
@@ -195,6 +196,8 @@ options:
     providers:
       name:
         builtInAi: Встроенный ИИ
+        customChatComplete: Пользовательский Chat Complete
+        customResponses: Пользовательский Responses
       attribution:
         builtInAi: Предоставлено Atlas Cloud. Сейчас доступно только для пользовательских AI-действий. Чтобы открыть неограниченный опыт, купите выгодные кредиты на официальном сайте.
       description:
@@ -209,7 +212,8 @@ options:
         atlascloud: Единая OpenAI-совместимая платформа для новых моделей DeepSeek, Kimi, Qwen, Doubao, GLM и других
         siliconflow: Высокопроизводительная платформа вывода для китайских и международных моделей
         tensdaq: Революционная MaaS-платформа с рыночным ценообразованием, устраняющая высокие фиксированные цены
-        openaiCompatible: Сторонние и OpenAI API-совместимые
+        openaiCompatible: Подключение к пользовательской конечной точке, совместимой с OpenAI Chat Completions API
+        openResponses: Подключение к пользовательской конечной точке, совместимой с Open Responses API
         deeplx: Неофициальный DeepL API
         deepl: Официальный DeepL API
         bedrock: Управляемый AWS сервис для корпоративных базовых моделей

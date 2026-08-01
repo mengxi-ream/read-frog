@@ -1,6 +1,7 @@
 import type {
   AllProviderTypes,
   APIProviderTypes,
+  CustomModelOnlyProviderTypes,
   LLMProviderModels,
   ProviderConfig,
   ProvidersConfig,
@@ -9,20 +10,22 @@ import type {
 import type { Theme } from "@/types/config/theme"
 import { camelCase } from "case-anything"
 import customProviderLogo from "@/assets/providers/custom-provider.svg?url&no-inline"
+import customResponsesLogo from "@/assets/providers/custom-responses.svg?url&no-inline"
 import deeplxLogoDark from "@/assets/providers/deeplx-dark.svg?url&no-inline"
 import deeplxLogoLight from "@/assets/providers/deeplx-light.svg?url&no-inline"
 import tensdaqLogoColor from "@/assets/providers/tensdaq-color.svg?url&no-inline"
 import { env } from "@/env"
 import {
   API_PROVIDER_TYPES,
-  CUSTOM_LLM_PROVIDER_TYPES,
+  DEDICATED_LLM_PROVIDER_TYPES,
   NON_API_TRANSLATE_PROVIDERS,
   NON_API_TRANSLATE_PROVIDERS_MAP,
-  NON_CUSTOM_LLM_PROVIDER_TYPES,
+  PROTOCOL_COMPATIBLE_LLM_PROVIDER_TYPES,
   PURE_API_PROVIDER_TYPES,
   PURE_TRANSLATE_PROVIDERS,
   TRANSLATE_PROVIDER_TYPES,
   isAPIProviderConfig,
+  isCustomModelOnlyProvider,
 } from "@/types/config/provider"
 import { omit, pick } from "@/types/utils"
 import { i18n } from "@/utils/i18n"
@@ -40,6 +43,11 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   "openai-compatible": {
+    model: "use-custom-model",
+    isCustomModel: true,
+    customModel: null,
+  },
+  "open-responses": {
     model: "use-custom-model",
     isCustomModel: true,
     customModel: null,
@@ -206,7 +214,12 @@ export const PROVIDER_ITEMS: Record<
   },
   "openai-compatible": {
     logo: () => customProviderLogo,
-    name: "Custom Provider",
+    name: "Custom Chat Complete",
+    website: `${env.WXT_WEBSITE_URL}/docs/providers/openai-compatible-providers`,
+  },
+  "open-responses": {
+    logo: () => customResponsesLogo,
+    name: "Custom Responses",
     website: `${env.WXT_WEBSITE_URL}/docs/providers/openai-compatible-providers`,
   },
   openrouter: {
@@ -385,6 +398,14 @@ export const DEFAULT_PROVIDER_CONFIG = {
     provider: "openai-compatible",
     baseURL: "https://api.example.com/v1",
     model: DEFAULT_LLM_PROVIDER_MODELS["openai-compatible"],
+  },
+  "open-responses": {
+    id: "open-responses-default",
+    name: PROVIDER_ITEMS["open-responses"].name,
+    enabled: true,
+    provider: "open-responses",
+    url: "https://api.example.com/v1/responses",
+    model: DEFAULT_LLM_PROVIDER_MODELS["open-responses"],
   },
   openai: {
     id: "openai-default",
@@ -589,11 +610,12 @@ export const DEFAULT_PROVIDER_CONFIG = {
 export const GOOGLE_TRANSLATE_PROVIDER_ID = DEFAULT_PROVIDER_CONFIG["google-translate"].id
 export const MICROSOFT_TRANSLATE_PROVIDER_ID = DEFAULT_PROVIDER_CONFIG["microsoft-translate"].id
 
-export const PROVIDER_BASE_URL_PLACEHOLDERS: Partial<Record<APIProviderTypes, string>> = {
+export const PROVIDER_URL_PLACEHOLDERS: Partial<Record<APIProviderTypes, string>> = {
   atlascloud: DEFAULT_PROVIDER_CONFIG.atlascloud.baseURL,
   siliconflow: DEFAULT_PROVIDER_CONFIG.siliconflow.baseURL,
   tensdaq: DEFAULT_PROVIDER_CONFIG.tensdaq.baseURL,
   "openai-compatible": DEFAULT_PROVIDER_CONFIG["openai-compatible"].baseURL,
+  "open-responses": DEFAULT_PROVIDER_CONFIG["open-responses"].url,
   openai: "https://api.openai.com/v1",
   azure: "https://<resource>.services.ai.azure.com/openai",
   deepseek: "https://api.deepseek.com",
@@ -666,13 +688,26 @@ export const LLM_PROVIDER_ITEMS = omit(TRANSLATE_PROVIDER_ITEMS, PURE_TRANSLATE_
 
 export const API_PROVIDER_ITEMS = pick(PROVIDER_ITEMS, API_PROVIDER_TYPES)
 
+const PROVIDER_NAME_I18N_KEYS = {
+  "openai-compatible": "options.apiProviders.providers.name.customChatComplete",
+  "open-responses": "options.apiProviders.providers.name.customResponses",
+} as const satisfies Record<CustomModelOnlyProviderTypes, string>
+
+export function getProviderItemName(providerType: APIProviderTypes): string {
+  if (!isCustomModelOnlyProvider(providerType)) {
+    return PROVIDER_ITEMS[providerType].name
+  }
+
+  return i18n.t(PROVIDER_NAME_I18N_KEYS[providerType]) || PROVIDER_ITEMS[providerType].name
+}
+
 export const PROVIDER_GROUPS = {
   builtInProviders: {
-    types: NON_CUSTOM_LLM_PROVIDER_TYPES,
+    types: DEDICATED_LLM_PROVIDER_TYPES,
     tutorialSlug: "built-in-providers",
   },
-  openaiCompatibleProviders: {
-    types: CUSTOM_LLM_PROVIDER_TYPES,
+  compatibleProviders: {
+    types: PROTOCOL_COMPATIBLE_LLM_PROVIDER_TYPES,
     tutorialSlug: "openai-compatible-providers",
   },
   pureTranslationProviders: {

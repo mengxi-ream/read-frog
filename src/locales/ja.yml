@@ -113,7 +113,7 @@ options:
   apiProviders:
     title: APIプロバイダー
     pageDescription: Read Frog が呼び出す AI サービスを接続し、各機能で使うものを選びます。
-    description: Read Frog が呼び出せるプロバイダーを追加します。20 以上を内蔵し、OpenAI 互換の API もすべて使えます。
+    description: Read Frog が呼び出せるプロバイダーを追加します。20 以上を内蔵し、Chat Completions 互換 API と Open Responses API をカスタム追加できます。
     configTitle: プロバイダー設定
     addProvider: プロバイダーを追加
     builtInProvider: 組み込みプロバイダー
@@ -129,9 +129,9 @@ options:
         builtInProviders:
           title: 組み込みLLMプロバイダー
           description: 組み込みの大規模言語モデルプロバイダー、Base URLなどの設定が不要
-        openaiCompatibleProviders:
-          title: OpenAI互換カスタムプロバイダー
-          description: 希望するAIプロバイダーが見つからない場合は、Custom Providerを選択してZhipu AIなどのOpenAI互換プロバイダーを設定できます
+        compatibleProviders:
+          title: 互換 API プロバイダー
+          description: Chat Completions 互換 API にはカスタム Chat Complete、Open Responses API にはカスタム Responses を使用します。
         pureTranslationProviders:
           title: 純粋翻訳プロバイダー
           description: 大規模言語モデル機能を持たない翻訳専門のプロバイダー
@@ -141,6 +141,7 @@ options:
         description: 説明
         apiKey: APIキー
         baseURL: ベースURL
+        url: URL
         optional: オプション
       duplicate: 複製
       delete: 削除
@@ -195,6 +196,8 @@ options:
     providers:
       name:
         builtInAi: 組み込み AI
+        customChatComplete: カスタム Chat Complete
+        customResponses: カスタム Responses
       attribution:
         builtInAi: Atlas Cloud 提供。現在はカスタム AI アクションでのみ利用できます。無制限の体験を利用するには、公式サイトで高コスパのクレジットを購入してください。
       description:
@@ -209,7 +212,8 @@ options:
         atlascloud: DeepSeek、Kimi、Qwen、Doubao、GLMなどの新しめのモデルにOpenAI互換でアクセスできる統合プラットフォーム
         siliconflow: 中国および国際モデル向けの高性能推論プラットフォーム
         tensdaq: 革命的入札型AI MaaSプラットフォーム、市場の需給で価格が決まり高コスト固定料金を排除
-        openaiCompatible: OpenAI API互換のサードパーティー
+        openaiCompatible: OpenAI Chat Completions API 互換のカスタムエンドポイントに接続
+        openResponses: Open Responses API 互換のカスタムエンドポイントに接続
         deeplx: 非公式 DeepL API
         deepl: 公式 DeepL API
         bedrock: エンタープライズグレードの基盤モデル向けAWSマネージドサービス

@@ -515,6 +515,28 @@ describe("getProviderOptions", () => {
         },
       })
     })
+
+    it("should preserve Open Responses option names exactly as entered", () => {
+      const options = getProviderOptionsWithOverride("gpt-5-mini", "open-responses", {
+        reasoning_effort: "minimal",
+        verbosity: "low",
+      })
+
+      expect(options).toEqual({
+        "open-responses": {
+          reasoning_effort: "minimal",
+          verbosity: "low",
+        },
+      })
+    })
+
+    it("should continue recommending provider options for Open Responses", () => {
+      const options = getProviderOptionsWithOverride("qwen3-max", "open-responses")
+
+      expect(options).toEqual({
+        "open-responses": { enableThinking: false },
+      })
+    })
   })
 
   describe("recommendation metadata", () => {

@@ -1,3 +1,4 @@
+import type { ProtocolCompatibleLLMProviderConfig } from "@/types/config/provider"
 import { Combobox as ComboboxPrimitive } from "@base-ui/react"
 import { Icon } from "@iconify/react"
 import { useMutation } from "@tanstack/react-query"
@@ -13,6 +14,8 @@ import {
 } from "@/components/ui/base-ui/combobox"
 import { extractErrorMessage } from "@/utils/error/extract-message"
 import { i18n } from "@/utils/i18n"
+import { getProviderConnectionURL } from "@/utils/providers/connection-url"
+import { getProviderModelsURL } from "@/utils/providers/models-url"
 
 interface ModelsResponse {
   object: string
@@ -20,20 +23,20 @@ interface ModelsResponse {
 }
 
 interface ModelSuggestionButtonProps {
-  baseURL: string
-  apiKey?: string
+  providerConfig: ProtocolCompatibleLLMProviderConfig
   onSelect: (model: string) => void
   disabled?: boolean
 }
 
 export function ModelSuggestionButton({
-  baseURL,
-  apiKey,
+  providerConfig,
   onSelect,
   disabled,
 }: ModelSuggestionButtonProps) {
+  const { apiKey } = providerConfig
+  const connectionURL = getProviderConnectionURL(providerConfig)
   const mutation = useMutation({
-    mutationKey: ["fetchModels", baseURL],
+    mutationKey: ["fetchModels", providerConfig.provider, connectionURL],
     meta: {
       errorDescription: i18n.t("options.apiProviders.form.models.fetchError"),
     },
@@ -42,7 +45,7 @@ export function ModelSuggestionButton({
         throw new Error(i18n.t("options.apiProviders.form.models.apiKeyRequired"))
       }
 
-      const response = await fetch(`${baseURL}/models`, {
+      const response = await fetch(getProviderModelsURL(providerConfig), {
         headers: { Authorization: `Bearer ${apiKey}` },
       })
       if (!response.ok) {
@@ -55,12 +58,12 @@ export function ModelSuggestionButton({
   })
 
   const handleFetch = () => {
-    if (!baseURL) return
+    if (!connectionURL) return
     mutation.reset()
     mutation.mutate()
   }
 
-  const isDisabled = disabled || !baseURL
+  const isDisabled = disabled || !connectionURL
 
   // Idle state - show fetch button
   if (mutation.isIdle) {

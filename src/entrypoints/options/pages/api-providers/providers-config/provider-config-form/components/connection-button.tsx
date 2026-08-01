@@ -9,6 +9,7 @@ import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { i18n } from "@/utils/i18n"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { getProviderConnectionURL } from "@/utils/providers/connection-url"
 
 const SLOW_CONNECTION_THRESHOLD_MS = 3_000
 const CONNECTION_TEST_FEEDBACK_DURATION_MS = 5_000
@@ -20,7 +21,7 @@ interface ConnectionTestFeedbackState {
   requestId: number
   provider: APIProviderConfig["provider"]
   apiKey: string | undefined
-  baseURL: string | undefined
+  connectionURL: string | undefined
   providerSpecificSettings: unknown
 }
 
@@ -83,7 +84,7 @@ function ConnectionFeedbackIcon({ feedback }: { feedback: ConnectionTestFeedback
 
 export function ConnectionTestButton({ providerConfig }: { providerConfig: APIProviderConfig }) {
   const { apiKey, provider } = providerConfig
-  const baseURL = "baseURL" in providerConfig ? providerConfig.baseURL : undefined
+  const connectionURL = getProviderConnectionURL(providerConfig)
   const providerSpecificSettings =
     "providerSpecificSettings" in providerConfig
       ? providerConfig.providerSpecificSettings
@@ -124,7 +125,7 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
         requestId,
         provider,
         apiKey,
-        baseURL,
+        connectionURL,
         providerSpecificSettings,
       })
       feedbackTimeoutRef.current = setTimeout(() => {
@@ -136,7 +137,7 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
         feedbackTimeoutRef.current = null
       }, CONNECTION_TEST_FEEDBACK_DURATION_MS)
     },
-    [apiKey, baseURL, clearFeedbackTimeout, provider, providerSpecificSettings],
+    [apiKey, clearFeedbackTimeout, connectionURL, provider, providerSpecificSettings],
   )
 
   const handleTestConnection = () => {
@@ -165,7 +166,7 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
     clearFeedbackTimeout()
     mutation.reset()
     // eslint-disable-next-line react/exhaustive-deps
-  }, [provider, apiKey, baseURL, providerSpecificSettings, clearFeedbackTimeout])
+  }, [provider, apiKey, connectionURL, providerSpecificSettings, clearFeedbackTimeout])
 
   useEffect(() => {
     return () => {
@@ -179,7 +180,7 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
     feedback.requestId === latestRequestIdRef.current &&
     feedback.provider === provider &&
     feedback.apiKey === apiKey &&
-    feedback.baseURL === baseURL &&
+    feedback.connectionURL === connectionURL &&
     feedback.providerSpecificSettings === providerSpecificSettings
       ? feedback.status
       : null

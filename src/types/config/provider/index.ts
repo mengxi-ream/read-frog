@@ -1,9 +1,11 @@
 import type {
   APIProviderConfig,
-  CustomLLMProviderConfig,
+  DedicatedLLMProviderConfig,
   LLMProviderConfig,
   NonAPIProviderConfig,
-  NonCustomLLMProviderConfig,
+  OpenAICompatibleLLMProviderConfig,
+  OpenResponsesLLMProviderConfig,
+  ProtocolCompatibleLLMProviderConfig,
   ProviderConfig,
   PureAPIProviderConfig,
   TopLevelReasoningProviderConfig,
@@ -11,10 +13,12 @@ import type {
 } from "./schemas"
 import {
   isAPIProvider,
-  isCustomLLMProvider,
+  isDedicatedLLMProvider,
   isLLMProvider,
   isNonAPIProvider,
-  isNonCustomLLMProvider,
+  isOpenAICompatibleLLMProvider,
+  isOpenResponsesLLMProvider,
+  isProtocolCompatibleLLMProvider,
   isPureAPIProvider,
   isPureTranslateProvider,
   isTranslateProvider,
@@ -41,16 +45,28 @@ export function isTopLevelReasoningProviderConfig(
   return supportsTopLevelReasoning(config.provider)
 }
 
-export function isCustomLLMProviderConfig(
+export function isOpenAICompatibleLLMProviderConfig(
   config: ProviderConfig,
-): config is CustomLLMProviderConfig {
-  return isCustomLLMProvider(config.provider)
+): config is OpenAICompatibleLLMProviderConfig {
+  return isOpenAICompatibleLLMProvider(config.provider)
 }
 
-export function isNonCustomLLMProviderConfig(
+export function isOpenResponsesLLMProviderConfig(
   config: ProviderConfig,
-): config is NonCustomLLMProviderConfig {
-  return isNonCustomLLMProvider(config.provider)
+): config is OpenResponsesLLMProviderConfig {
+  return isOpenResponsesLLMProvider(config.provider)
+}
+
+export function isProtocolCompatibleLLMProviderConfig(
+  config: ProviderConfig,
+): config is ProtocolCompatibleLLMProviderConfig {
+  return isProtocolCompatibleLLMProvider(config.provider)
+}
+
+export function isDedicatedLLMProviderConfig(
+  config: ProviderConfig,
+): config is DedicatedLLMProviderConfig {
+  return isDedicatedLLMProvider(config.provider)
 }
 
 export function isAPIProviderConfig(config: ProviderConfig): config is APIProviderConfig {

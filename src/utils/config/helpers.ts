@@ -89,17 +89,6 @@ export function getProviderApiKey(
   return undefined
 }
 
-export function getProviderBaseURL(
-  providersConfig: ProvidersConfig,
-  providerId: string,
-): string | undefined {
-  const providerConfig = getProviderConfigById(providersConfig, providerId)
-  if (providerConfig && isAPIProviderConfig(providerConfig) && "baseURL" in providerConfig) {
-    return providerConfig.baseURL
-  }
-  return undefined
-}
-
 export function resolveLanguageDetectionConfigForModeChange(
   currentConfig: Config["languageDetection"],
   nextMode: LanguageDetectionMode,

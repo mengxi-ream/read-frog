@@ -5,6 +5,7 @@ import { initI18n } from "@/utils/i18n"
 import { addProvider, duplicateProvider } from "../utils"
 
 type AlibabaProviderConfig = Extract<APIProviderConfig, { provider: "alibaba" }>
+type OpenAICompatibleProviderConfig = Extract<APIProviderConfig, { provider: "openai-compatible" }>
 
 describe("api provider utils", () => {
   it("adds the OpenAI-compatible provider with its localized default description", async () => {
@@ -19,7 +20,39 @@ describe("api provider utils", () => {
     expect(updatedProviders?.[0]).toEqual(
       expect.objectContaining({
         provider: "openai-compatible",
+        name: "options.apiProviders.providers.name.customChatComplete",
         description: "options.apiProviders.providers.description.openaiCompatible",
+      }),
+    )
+  })
+
+  it("adds Custom Responses without changing an existing custom provider name", async () => {
+    await initI18n("en")
+    const existingProvider: OpenAICompatibleProviderConfig = {
+      id: "legacy-custom-provider",
+      name: "My Custom Provider",
+      enabled: true,
+      provider: "openai-compatible",
+      baseURL: "https://example.com/v1",
+      model: {
+        model: "use-custom-model",
+        isCustomModel: true,
+        customModel: "legacy-model",
+      },
+    }
+    let updatedProviders: Config["providersConfig"] | undefined
+    const setProvidersConfig = vi.fn<(...args: any[]) => any>(async (config) => {
+      updatedProviders = config as Config["providersConfig"]
+    })
+
+    await addProvider("open-responses", [existingProvider], setProvidersConfig)
+
+    expect(updatedProviders?.[0]?.name).toBe("My Custom Provider")
+    expect(updatedProviders?.[1]).toEqual(
+      expect.objectContaining({
+        provider: "open-responses",
+        name: "options.apiProviders.providers.name.customResponses",
+        url: "https://api.example.com/v1/responses",
       }),
     )
   })

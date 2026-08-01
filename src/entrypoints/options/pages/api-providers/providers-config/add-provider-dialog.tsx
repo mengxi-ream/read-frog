@@ -5,7 +5,11 @@ import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/base-ui/dialog"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { API_PROVIDER_ITEMS, PROVIDER_GROUPS } from "@/utils/constants/providers"
+import {
+  API_PROVIDER_ITEMS,
+  PROVIDER_GROUPS,
+  getProviderItemName,
+} from "@/utils/constants/providers"
 import { i18n } from "@/utils/i18n"
 import { selectedProviderIdAtom } from "./atoms"
 import { addProvider } from "./utils"
@@ -94,7 +98,7 @@ function ProviderButton({
       )}
       <ProviderIcon logo={API_PROVIDER_ITEMS[providerType].logo(theme)} size="md" />
       <span className="line-clamp-2 flex w-full flex-1 items-center justify-center text-xs font-light">
-        {API_PROVIDER_ITEMS[providerType].name}
+        {getProviderItemName(providerType)}
       </span>
     </button>
   )
