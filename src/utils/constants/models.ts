@@ -115,6 +115,7 @@ export const LLM_PROVIDER_MODELS = {
     "google/gemini-3.1-flash-lite",
   ],
   "openai-compatible": ["use-custom-model"],
+  "open-responses": ["use-custom-model"],
   xai: ["grok-4.20-0309-non-reasoning", "grok-4.20-0309-reasoning", "grok-4.3"],
   bedrock: [
     "amazon.titan-tg1-large",

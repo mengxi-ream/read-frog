@@ -1,9 +1,9 @@
 import type { Config } from "@/types/config/config"
 import type { APIProviderConfig, APIProviderTypes } from "@/types/config/provider"
 import {
-  API_PROVIDER_ITEMS,
   DEFAULT_PROVIDER_CONFIG,
   getDefaultProviderDescription,
+  getProviderItemName,
 } from "@/utils/constants/providers"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { getUniqueName } from "@/utils/name"
@@ -15,7 +15,7 @@ export async function addProvider(
   setSelectedProviderId?: (id: string) => void,
 ): Promise<string> {
   const existingNames = new Set(providersConfig.map((p) => p.name))
-  const providerName = getUniqueName(API_PROVIDER_ITEMS[providerType].name, existingNames)
+  const providerName = getUniqueName(getProviderItemName(providerType), existingNames)
 
   const description = getDefaultProviderDescription(providerType)
   const newProvider: APIProviderConfig = {

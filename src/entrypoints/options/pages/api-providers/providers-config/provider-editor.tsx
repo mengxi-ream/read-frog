@@ -41,13 +41,13 @@ import {
 } from "@/utils/providers/provider-registry"
 import { cn } from "@/utils/styles/utils"
 import { APIKeyField } from "./provider-config-form/api-key-field"
-import { BaseURLField } from "./provider-config-form/base-url-field"
 import { AdvancedOptionsSection } from "./provider-config-form/components/advanced-options-section"
 import { ConfigHeader as ProviderConfigHeader } from "./provider-config-form/config-header"
 import { formOpts, useAppForm } from "./provider-config-form/form"
 import { ProviderHeadersField } from "./provider-config-form/provider-headers-field"
 import { ProviderOptionsField } from "./provider-config-form/provider-options-field"
 import { ProviderSpecificSettingsField } from "./provider-config-form/provider-specific-settings-field"
+import { ProviderURLField } from "./provider-config-form/provider-url-field"
 import { ReasoningField } from "./provider-config-form/reasoning-field"
 import { TemperatureField } from "./provider-config-form/temperature-field"
 import { TranslateModelSelector } from "./provider-config-form/translate-model-selector"
@@ -316,7 +316,7 @@ function ConnectionFields() {
   return (
     <>
       <APIKeyField form={form} />
-      <BaseURLField form={form} />
+      <ProviderURLField form={form} />
     </>
   )
 }

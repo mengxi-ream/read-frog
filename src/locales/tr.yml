@@ -113,7 +113,7 @@ options:
   apiProviders:
     title: API Sağlayıcıları
     pageDescription: Read Frog'un çağırdığı yapay zekâ servislerini bağlayın ve her özelliğin hangisini kullanacağını seçin.
-    description: Read Frog'un çağırabileceği sağlayıcıları ekleyin. 20'den fazlası yerleşik gelir ve OpenAI uyumlu her API çalışır.
+    description: Read Frog'un çağırabileceği sağlayıcıları ekleyin. 20'den fazlası yerleşik gelir; ayrıca Chat Completions uyumlu ve Open Responses API'lerini özel olarak ekleyebilirsiniz.
     configTitle: Sağlayıcı yapılandırması
     addProvider: Sağlayıcı ekle
     builtInProvider: Yerleşik sağlayıcı
@@ -129,9 +129,9 @@ options:
         builtInProviders:
           title: Yerleşik LLM sağlayıcıları
           description: Yerleşik büyük dil modeli sağlayıcıları, Base URL gibi çoğu yapılandırmayı doldurmaya gerek yok
-        openaiCompatibleProviders:
-          title: OpenAI uyumlu özel sağlayıcılar
-          description: İstediğiniz AI sağlayıcısını bulamıyorsanız, Zhipu AI gibi herhangi bir OpenAI uyumlu sağlayıcıyı yapılandırmak için Özel Sağlayıcı'yı seçin
+        compatibleProviders:
+          title: Uyumlu API sağlayıcıları
+          description: Chat Completions uyumlu API'ler için Özel Chat Complete, Open Responses API'leri için Özel Responses kullanın.
         pureTranslationProviders:
           title: Saf çeviri sağlayıcıları
           description: Büyük dil modeli yetenekleri olmadan çeviri özelliklerine odaklanan sağlayıcılar
@@ -141,6 +141,7 @@ options:
         description: Açıklama
         apiKey: API anahtarı
         baseURL: Base URL
+        url: URL
         optional: İsteğe Bağlı
       duplicate: Çoğalt
       delete: Sil
@@ -195,6 +196,8 @@ options:
     providers:
       name:
         builtInAi: Yerleşik AI
+        customChatComplete: Özel Chat Complete
+        customResponses: Özel Responses
       attribution:
         builtInAi: Atlas Cloud tarafından sağlanır. Şu anda yalnızca özel AI eylemleri için kullanılabilir. Sınırsız deneyimin kilidini açmak için resmi web sitesinden uygun maliyetli kredi satın alabilirsiniz.
       description:
@@ -209,7 +212,8 @@ options:
         atlascloud: DeepSeek, Kimi, Qwen, Doubao ve GLM gibi yeni modellere OpenAI uyumlu birleşik erişim platformu
         siliconflow: Çin ve uluslararası modeller için yüksek performanslı çıkarım platformu
         tensdaq: Yüksek maliyetli sabit fiyatlandırmayı ortadan kaldıran pazar odaklı fiyatlandırma ile devrimci açık artırma AI MaaS platformu
-        openaiCompatible: Üçüncü taraf ve OpenAI API uyumlu
+        openaiCompatible: OpenAI Chat Completions API ile uyumlu özel bir uç noktaya bağlanın
+        openResponses: Open Responses API ile uyumlu özel bir uç noktaya bağlanın
         deeplx: Resmi olmayan DeepL API
         deepl: Resmi DeepL API
         bedrock: Kurumsal düzeyde temel modeller için AWS yönetilen hizmeti

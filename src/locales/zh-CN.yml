@@ -113,7 +113,7 @@ options:
   apiProviders:
     title: API 提供商
     pageDescription: 接入 Read Frog 调用的 AI 服务，并为每项功能指定使用哪一个。
-    description: 添加 Read Frog 可以调用的提供商。内置 20 多个，也支持任何 OpenAI 兼容的 API。
+    description: 添加 Read Frog 可以调用的提供商。内置 20 多个，也可以添加兼容 Chat Completions 的自定义 API 和 Open Responses 自定义 API。
     configTitle: 提供商配置
     addProvider: 添加提供商
     builtInProvider: 内置提供商
@@ -129,9 +129,9 @@ options:
         builtInProviders:
           title: 内置 LLM 提供商
           description: 内置的大语言模型提供商，无需填写大部分配置比如 Base URL
-        openaiCompatibleProviders:
-          title: OpenAI 兼容自定义提供商
-          description: 如果找不到你想要的 AI 提供商，请选择 Custom Provider 来配置任何 OpenAI 接口兼容的提供商，比如智谱
+        compatibleProviders:
+          title: 兼容 API 提供商
+          description: 兼容 Chat Completions 的 API 使用自定义 Chat Complete，Open Responses API 使用自定义 Responses。
         pureTranslationProviders:
           title: 纯翻译提供商
           description: 专注于翻译功能的提供商，没有大语言模型能力
@@ -141,6 +141,7 @@ options:
         description: 描述
         apiKey: API Key
         baseURL: Base URL
+        url: URL
         optional: 可选
       duplicate: 复制
       delete: 删除
@@ -196,6 +197,8 @@ options:
     providers:
       name:
         builtInAi: 内置 AI
+        customChatComplete: 自定义 Chat Complete
+        customResponses: 自定义 Responses
       attribution:
         builtInAi: Provided by Atlas Cloud. 目前仅对自定义 AI 指令开放。若要解锁无限制体验，可以前往官网购买超高性价比额度。
       description:
@@ -210,7 +213,8 @@ options:
         atlascloud: 统一的 OpenAI 兼容模型平台，提供 DeepSeek、Kimi、Qwen、豆包、GLM 等较新模型
         siliconflow: 面向中国和国际模型的高性能推理平台
         tensdaq: 革命性竞价 AI MaaS 平台，价格由市场供需决定，告别高成本固定定价
-        openaiCompatible: OpenAI API 兼容的第三方
+        openaiCompatible: 连接兼容 OpenAI Chat Completions API 的自定义端点
+        openResponses: 连接兼容 Open Responses API 的自定义端点
         deeplx: 非官方 DeepL API
         deepl: 官方 DeepL API
         bedrock: 面向企业级基础模型的 AWS 托管服务

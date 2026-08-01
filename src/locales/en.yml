@@ -113,7 +113,7 @@ options:
   apiProviders:
     title: API Providers
     pageDescription: Connect the AI services Read Frog calls, then choose which one runs each feature.
-    description: Add the providers Read Frog can call. Over 20 are built in, and any OpenAI-compatible API works.
+    description: Add the providers Read Frog can call. Over 20 are built in, with custom support for Chat Completions-compatible and Open Responses APIs.
     configTitle: Provider config
     addProvider: Add provider
     builtInProvider: Built-in provider
@@ -129,9 +129,9 @@ options:
         builtInProviders:
           title: Built-in LLM providers
           description: Built-in large language model providers, no need to fill in most configurations like Base URL
-        openaiCompatibleProviders:
-          title: OpenAI compatible custom providers
-          description: If you can't find your desired AI provider, select Custom Provider to configure any OpenAI-compatible provider, such as Zhipu AI
+        compatibleProviders:
+          title: Compatible API providers
+          description: Use Custom Chat Complete for Chat Completions-compatible APIs, or Custom Responses for Open Responses APIs.
         pureTranslationProviders:
           title: Pure translation providers
           description: Providers focused on translation features without large language model capabilities
@@ -141,6 +141,7 @@ options:
         description: Description
         apiKey: API key
         baseURL: Base URL
+        url: URL
         optional: Optional
       duplicate: Duplicate
       delete: Delete
@@ -196,6 +197,8 @@ options:
     providers:
       name:
         builtInAi: Built-in AI
+        customChatComplete: Custom Chat Complete
+        customResponses: Custom Responses
       attribution:
         builtInAi: Provided by Atlas Cloud. Currently only available for Custom AI Actions. To unlock an unrestricted experience, purchase highly cost-effective credits on the official website.
       description:
@@ -210,7 +213,8 @@ options:
         atlascloud: Unified OpenAI-compatible access to newer DeepSeek, Kimi, Qwen, Doubao, GLM, and other models
         siliconflow: High-performance inference platform for Chinese and international models
         tensdaq: Revolutionary bidding AI MaaS platform with market-driven pricing, eliminating high-cost fixed pricing
-        openaiCompatible: Third-party and OpenAI API compatible
+        openaiCompatible: Connect to a custom endpoint compatible with the OpenAI Chat Completions API
+        openResponses: Connect to a custom endpoint compatible with the Open Responses API
         deeplx: Unofficial DeepL API
         deepl: Official DeepL API
         bedrock: AWS managed service for enterprise-grade foundation models

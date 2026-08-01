@@ -1,13 +1,11 @@
 import type { JSONValue } from "ai"
-import { CUSTOM_LLM_PROVIDER_TYPES, supportsTopLevelReasoning } from "@/types/config/provider"
+import { isOpenAICompatibleLLMProvider, supportsTopLevelReasoning } from "@/types/config/provider"
 import { LLM_MODEL_OPTIONS } from "../constants/models"
 
 export interface RecommendedProviderOptionsMatch {
   matchIndex: number
   options: Record<string, JSONValue>
 }
-
-const OPENAI_COMPATIBLE_PROVIDER_TYPES = new Set<string>(CUSTOM_LLM_PROVIDER_TYPES)
 
 const OPENAI_COMPATIBLE_OPTION_ALIASES = {
   reasoning_effort: "reasoningEffort",
@@ -33,7 +31,7 @@ function normalizeUserProviderOptions(
   provider: string,
   userOptions: Record<string, JSONValue>,
 ): Record<string, JSONValue> {
-  if (!OPENAI_COMPATIBLE_PROVIDER_TYPES.has(provider)) {
+  if (!isOpenAICompatibleLLMProvider(provider)) {
     return userOptions
   }
 

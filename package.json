@@ -45,6 +45,7 @@
     "@ai-sdk/huggingface": "^2.0.19",
     "@ai-sdk/mistral": "^4.0.19",
     "@ai-sdk/moonshotai": "^3.0.22",
+    "@ai-sdk/open-responses": "^2.0.18",
     "@ai-sdk/openai": "^4.0.26",
     "@ai-sdk/openai-compatible": "^3.0.19",
     "@ai-sdk/perplexity": "^4.0.19",

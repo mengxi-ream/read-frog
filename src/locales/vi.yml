@@ -113,7 +113,7 @@ options:
   apiProviders:
     title: Nhà cung cấp API
     pageDescription: Kết nối các dịch vụ AI mà Read Frog sử dụng và chọn dịch vụ cho từng tính năng.
-    description: Thêm các nhà cung cấp mà Read Frog có thể gọi. Hơn 20 nhà cung cấp có sẵn, và mọi API tương thích OpenAI đều dùng được.
+    description: Thêm các nhà cung cấp mà Read Frog có thể gọi. Hơn 20 nhà cung cấp được tích hợp sẵn; bạn cũng có thể thêm API tùy chỉnh tương thích Chat Completions và API Open Responses.
     configTitle: Cấu hình nhà cung cấp
     addProvider: Thêm nhà cung cấp
     builtInProvider: Nhà cung cấp tích hợp
@@ -129,9 +129,9 @@ options:
         builtInProviders:
           title: Nhà cung cấp LLM tích hợp sẵn
           description: Các nhà cung cấp mô hình ngôn ngữ lớn tích hợp sẵn, không cần điền hầu hết các cấu hình như Base URL
-        openaiCompatibleProviders:
-          title: Nhà cung cấp tùy chỉnh tương thích OpenAI
-          description: Nếu bạn không tìm thấy nhà cung cấp AI mong muốn, chọn Nhà cung cấp tùy chỉnh để cấu hình bất kỳ nhà cung cấp tương thích OpenAI nào, như Zhipu AI
+        compatibleProviders:
+          title: Nhà cung cấp API tương thích
+          description: Dùng Tùy chỉnh Chat Complete cho API tương thích Chat Completions hoặc Tùy chỉnh Responses cho API Open Responses.
         pureTranslationProviders:
           title: Nhà cung cấp dịch thuật thuần túy
           description: Các nhà cung cấp tập trung vào tính năng dịch thuật mà không có khả năng mô hình ngôn ngữ lớn
@@ -141,6 +141,7 @@ options:
         description: Mô tả
         apiKey: API Key
         baseURL: Base URL
+        url: URL
         optional: Tùy chọn
       duplicate: Sao chép
       delete: Xóa
@@ -195,6 +196,8 @@ options:
     providers:
       name:
         builtInAi: AI tích hợp
+        customChatComplete: Tùy chỉnh Chat Complete
+        customResponses: Tùy chỉnh Responses
       attribution:
         builtInAi: Được cung cấp bởi Atlas Cloud. Hiện chỉ khả dụng cho Hành động AI tùy chỉnh. Để mở khóa trải nghiệm không giới hạn, bạn có thể mua tín dụng có chi phí rất hiệu quả trên trang web chính thức.
       description:
@@ -209,7 +212,8 @@ options:
         atlascloud: Nền tảng hợp nhất tương thích OpenAI cho các mô hình mới như DeepSeek, Kimi, Qwen, Doubao và GLM
         siliconflow: Nền tảng suy luận hiệu suất cao cho các mô hình Trung Quốc và quốc tế
         tensdaq: Nền tảng MaaS đấu giá AI cách mạng với giá thị trường, loại bỏ giá cố định cao
-        openaiCompatible: Bên thứ ba và tương thích API OpenAI
+        openaiCompatible: Kết nối với endpoint tùy chỉnh tương thích với OpenAI Chat Completions API
+        openResponses: Kết nối với endpoint tùy chỉnh tương thích với Open Responses API
         deeplx: API DeepL không chính thức
         deepl: API DeepL chính thức
         bedrock: Dịch vụ được quản lý bởi AWS cho các mô hình nền tảng cấp doanh nghiệp
