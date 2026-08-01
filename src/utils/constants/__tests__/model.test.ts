@@ -169,6 +169,19 @@ describe("getProviderOptions", () => {
       expect(LLM_PROVIDER_MODELS.bedrock).toContain("us.anthropic.claude-fable-5")
     })
 
+    it("should expose the live Cohere Command model ids and none of the retired ones", () => {
+      expect(LLM_PROVIDER_MODELS.cohere).toEqual([
+        "command-a-plus-05-2026",
+        "command-a-03-2025",
+        "command-a-reasoning-08-2025",
+        "command-a-vision-07-2025",
+        "command-a-translate-08-2025",
+        "command-r-plus-08-2024",
+        "command-r-08-2024",
+        "command-r7b-12-2024",
+      ])
+    })
+
     it("should return the documented floor for GPT-5 model-specific reasoning", () => {
       const gpt55Options = getProviderOptions("gpt-5.5", "openai")
       expect(gpt55Options.openai?.reasoningEffort).toBe("none")
