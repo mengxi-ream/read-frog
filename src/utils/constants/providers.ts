@@ -100,7 +100,7 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   cohere: {
-    model: "command-r7b-12-2024",
+    model: "command-a-translate-08-2025",
     isCustomModel: false,
     customModel: null,
   },
