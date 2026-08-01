@@ -1,5 +1,21 @@
 # @read-frog/extension
 
+## 1.45.0
+
+### Minor Changes
+
+- [#2022](https://github.com/mengxi-ream/read-frog/pull/2022) [`eb24056`](https://github.com/mengxi-ream/read-frog/commit/eb24056218dcff1f0da198043282dec61c61389e) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(providers): add Custom Responses alongside Custom Chat Complete
+
+### Patch Changes
+
+- [#2006](https://github.com/mengxi-ream/read-frog/pull/2006) [`075994b`](https://github.com/mengxi-ream/read-frog/commit/075994b97a797030421fdd45e96a0d607e223f9f) Thanks [@thedavidweng](https://github.com/thedavidweng)! - fix(model): drop the Cohere Command models retired on 2025-09-15 and move saved configs onto live ones
+
+  `command`, `command-nightly`, `command-light`, `command-light-nightly`, `command-r`, `command-r-03-2024`, `command-r-plus` and `command-r-plus-04-2024` are gone from the model picker, and `command-r-plus-08-2024` joins the `command-a-*` line. A v090 → v091 migration moves any saved Cohere provider off a retired id: the `command-r*` families keep their generation and the original `command`/`command-light` line lands on `command-a-03-2025`. That includes a retired id sitting in the custom-model field, which passes validation and would otherwise keep calling a dead endpoint with no visible error. New Cohere providers now default to `command-a-translate-08-2025`.
+
+- [#2020](https://github.com/mengxi-ream/read-frog/pull/2020) [`5defc32`](https://github.com/mengxi-ream/read-frog/commit/5defc32865bea19f769fb2551886f760e372c89c) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(site-rules): stop LinkedIn from clipping and merging translations
+
+  Replaces the dead `linkedinFeed` rule with a working `linkedin` one. Post and comment bodies no longer get cut off (their collapse container is `max-height:100px`, which only an `!important` override beats), actor headlines wrap instead of ellipsizing, and the post actor block stops collapsing into one oversized paragraph — its wrapper anchor is `display:inline` where the comment equivalent is `block`, so it is forced to a block node. Page chrome (nav, footer, sidebar, ads), author names and the "Visit my website" link are excluded from translation.
+
 ## 1.44.1
 
 ### Patch Changes
