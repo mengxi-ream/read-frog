@@ -108,7 +108,7 @@ options:
       description: Свяжитесь с командой напрямую по адресу contact@readfrog.app
     wechat:
       title: WeChat
-      description: Отсканируйте QR-код, чтобы добавить разработчика в WeChat
+      description: Отсканируйте QR-код, чтобы вступить в группу обсуждения в WeChat
       qrCodeAlt: QR-код WeChat
   apiProviders:
     title: API-провайдеры
@@ -421,6 +421,9 @@ options:
     selectionTranslation:
       title: Перевод выделения
       description: Перевести выделенный текст.
+    subtitlesToggle:
+      title: Перевод субтитров
+      description: Включает или выключает переведённые субтитры видео.
     nodeTranslation:
       title: Перевод абзаца
       description: Наведите курсор на абзац или нажмите и удерживайте его, чтобы перевести только его.
@@ -669,6 +672,9 @@ options:
       enable:
         title: Включить
         description: Наведите курсор на абзац или нажмите и удерживайте его, чтобы перевести только его.
+      forceRetranslation:
+        title: Всегда переводить заново
+        description: Перевод при наведении пропускает кэш — он переводит заново, даже если текст уже есть в кэше, и заменяет сохранённый результат.
     translationStyle:
       title: Стиль отображения перевода
       description: Установите любой стиль для отличия результатов перевода от оригинального текста
@@ -1047,6 +1053,9 @@ subtitles:
   loadingAiSubtitles: Загрузка ИИ-субтитров… (ожидается 3 мин)
   requestAiSubtitles: Запросить ИИ-субтитры (Beta)
   usingAiSubtitles: Используются ИИ-субтитры
+  toggle:
+    enabled: Перевод субтитров включён
+    disabled: Перевод субтитров выключен
   actions:
     downloadTranslated: Скачать переведённые субтитры
     downloadTranslatedPreparing: Подготовка субтитров, длинные видео могут занять больше времени

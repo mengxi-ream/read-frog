@@ -235,6 +235,38 @@ describe("translate-text", () => {
       expect(mockGetOrGenerateWebPageSummary).not.toHaveBeenCalled()
     })
 
+    it("forces a fresh request only for hover translation when the option is enabled", async () => {
+      mockGetConfigFromStorage.mockResolvedValue({
+        ...DEFAULT_CONFIG,
+        translate: {
+          ...DEFAULT_CONFIG.translate,
+          node: {
+            ...DEFAULT_CONFIG.translate.node,
+            forceRetranslation: true,
+          },
+        },
+      })
+      mockSendMessage.mockResolvedValue("translated text")
+
+      await translateTextForPage("hover text", "plain", {
+        actionId: "hover-action",
+        feature: "hover_translation",
+        surface: "shortcut",
+      })
+      await translateTextForPage("page text", "plain", {
+        actionId: "page-action",
+        feature: "page_translation",
+        surface: "popup",
+      })
+
+      const enqueueCalls = mockSendMessage.mock.calls.filter(
+        ([type]: [string]) => type === "enqueueTranslateRequest",
+      )
+      expect(enqueueCalls).toHaveLength(2)
+      expect(enqueueCalls[0][1]).toEqual(expect.objectContaining({ forceRetranslation: true }))
+      expect(enqueueCalls[1][1].forceRetranslation).not.toBe(true)
+    })
+
     it("maps a full no-translation sentinel response to an empty string", async () => {
       mockSendMessage.mockResolvedValue(NO_TRANSLATION_SENTINEL)
 

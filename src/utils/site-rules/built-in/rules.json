@@ -1214,9 +1214,20 @@
     ]
   },
   {
-    "id": "linkedinFeed",
-    "matches": "https://linkedin.com/feed/*",
-    "includeSelectors": ["h1", ".feed-shared-update-v2__description-wrapper"]
+    "id": "linkedin",
+    "description": "Replaces linkedinFeed, whose host was missing www so it never matched; its include whitelist is dropped because both selectors went stale. Keeps that rule's intent (skip page chrome) as excludes. Post/comment bodies collapse at max-height:100px and actor headlines are nowrap+ellipsis, so translations get clipped",
+    "matches": "*.linkedin.com",
+    "excludeSelectors.add": [
+      "#global-nav",
+      ".global-footer-compact",
+      ".ad-banner-container",
+      ".scaffold-layout__sidebar",
+      ".update-components-actor__meta > a:not(.update-components-actor__meta-link)",
+      ".update-components-actor__title"
+    ],
+    "forceBlockNodeSelectors": [".update-components-actor__meta-link"],
+    "forceBlockStyleSelectors": [".update-components-actor__meta-link"],
+    "injectedCss": ".feed-shared-inline-show-more-text,.comments-comment-item__inline-show-more-text { max-height: none !important; }\n.update-components-actor__description,.comments-comment-meta__description-subtitle { white-space: normal !important;text-overflow: clip !important;overflow: visible !important;height: auto !important; }"
   },
   {
     "id": "indiehackers",

@@ -1,14 +1,12 @@
-import type { RefObject } from "react"
 import { useEffect, useEffectEvent } from "react"
 
 interface UsePreventScrollThroughOptions {
   isEnabled: boolean
-  elementRef: RefObject<HTMLElement | null>
+  element: HTMLElement | null
 }
 
-export function usePreventScrollThrough({ isEnabled, elementRef }: UsePreventScrollThroughOptions) {
+export function usePreventScrollThrough({ isEnabled, element }: UsePreventScrollThroughOptions) {
   const handleWheel = useEffectEvent((event: WheelEvent) => {
-    const element = elementRef.current
     if (!element) {
       return
     }
@@ -24,12 +22,7 @@ export function usePreventScrollThrough({ isEnabled, elementRef }: UsePreventScr
   })
 
   useEffect(() => {
-    if (!isEnabled) {
-      return undefined
-    }
-
-    const element = elementRef.current
-    if (!element) {
+    if (!isEnabled || !element) {
       return undefined
     }
 
@@ -37,5 +30,5 @@ export function usePreventScrollThrough({ isEnabled, elementRef }: UsePreventScr
     return () => {
       element.removeEventListener("wheel", handleWheel)
     }
-  }, [elementRef, isEnabled])
+  }, [element, isEnabled])
 }

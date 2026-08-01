@@ -61,6 +61,7 @@ interface ProtocolMap {
   setAndNotifyPageTranslationStateChangedByManager: (data: {
     enabled: boolean
     url?: string
+    userInitiated?: boolean
   }) => void
   notifyTranslationStateChanged: (data: { enabled: boolean }) => void
   ensureIframeHostContentInjected: (data: { tabId?: number }) => void
@@ -118,6 +119,7 @@ interface ProtocolMap {
     sessionId?: string
     promptExperimentVariant?: PromptExperimentVariant
     translationActionContext?: TranslationActionContext
+    forceRetranslation?: boolean
   }) => Promise<
     | string
     | {

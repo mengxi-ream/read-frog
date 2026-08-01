@@ -108,7 +108,7 @@ options:
       description: Reach the team directly at contact@readfrog.app
     wechat:
       title: WeChat
-      description: Scan the QR code to add the maintainer on WeChat
+      description: Scan the QR code to join the WeChat discussion group
       qrCodeAlt: WeChat QR code
   apiProviders:
     title: API Providers
@@ -422,6 +422,9 @@ options:
     selectionTranslation:
       title: Selection translation
       description: Translate the text you selected.
+    subtitlesToggle:
+      title: Subtitle translation
+      description: Turn translated video subtitles on or off.
     nodeTranslation:
       title: Paragraph translation
       description: Hover or long-press a paragraph to translate just that one.
@@ -785,6 +788,9 @@ options:
       enable:
         title: Enable
         description: Hover or long-press a paragraph to translate just that one.
+      forceRetranslation:
+        title: Always request a fresh translation
+        description: Hover translation skips the cache — it re-translates even if the text is already cached, and overwrites the cached result.
     translationStyle:
       title: Translation display style
       description: Set any style you want to distinguish translation results from original text
@@ -1163,6 +1169,9 @@ subtitles:
   loadingAiSubtitles: Loading AI subtitles… (estimated 3 min)
   requestAiSubtitles: Request AI subtitles (Beta)
   usingAiSubtitles: Using AI subtitles
+  toggle:
+    enabled: Subtitle translation on
+    disabled: Subtitle translation off
   actions:
     downloadTranslated: Download translated subtitles
     downloadTranslatedPreparing: Preparing subtitles, longer videos may take a while

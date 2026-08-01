@@ -41,6 +41,7 @@ function WebsitePatternsPage({
           onRemovePattern={removePattern}
           placeholderText={placeholderText}
           tableHeaderText={tableHeaderText}
+          rowsClassName="max-h-none"
         />
       </ConfigDetailSection>
     </PageLayout>

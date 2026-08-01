@@ -1,7 +1,8 @@
 /* Puppeteer harness template for driving the built read-frog extension.
- * Proven working 2026-07-13 (issue #1846 E2E). Adapt EXT_PATH, PORT, fixture
- * dir, and the assertions; the extension-control plumbing below is the part
- * that is easy to get wrong — keep it.
+ * Proven working 2026-07-13 (issue #1846 E2E), re-proven 2026-07-31 (issue
+ * #2011 repro). Adapt EXT_PATH, PORT, fixture dir, and the assertions; the
+ * extension-control plumbing below is the part that is easy to get wrong —
+ * keep it.
  *
  * Setup: npm i puppeteer   (Chrome comes from ~/.cache/puppeteer)
  * Run:   node harness.js   (headed on purpose — watch it while it runs)
@@ -23,8 +24,12 @@ function serve() {
     const server = http.createServer((req, res) => {
       const file = path.join(PAGE_DIR, req.url === '/' ? 'index.html' : req.url)
       try {
+        // Read BEFORE writeHead: if the read throws after writeHead(200)
+        // (e.g. /favicon.ico), the catch's writeHead(404) double-writes
+        // headers -> ERR_HTTP_HEADERS_SENT crashes the whole harness.
+        const body = fs.readFileSync(file)
         res.writeHead(200, { 'content-type': MIME[path.extname(file)] || 'text/plain' })
-        res.end(fs.readFileSync(file))
+        res.end(body)
       } catch {
         res.writeHead(404)
         res.end()
@@ -46,22 +51,25 @@ async function getServiceWorker(browser) {
 }
 
 /* Patch the extension config. TRAPS this encodes:
+ * - the MV3 service worker CSP (script-src 'self' 'wasm-unsafe-eval' ...)
+ *   blocks eval, so `new Function(mutateSrc)` inside worker.evaluate throws
+ *   EvalError -> inline your mutations in the evaluated function below;
+ *   pass only plain data as evaluate args, never code strings
  * - background init/migration clobbers early writes -> patch, wait, re-patch
  * - onboarding overwrites targetCode with the browser UI language -> force cmn
  *   or the same-language skip silently translates nothing on English fixtures */
-async function patchConfig(browser, mutate) {
+async function patchConfig(browser) {
   const worker = await getServiceWorker(browser)
   const patch = () =>
-    worker.evaluate(async (mutateSrc) => {
+    worker.evaluate(async () => {
       const { config } = await chrome.storage.local.get('config')
       if (!config) return 'no-config-yet'
       config.language.targetCode = 'cmn'
       config.language.sourceCode = 'auto'
-      // eslint-disable-next-line no-new-func
-      new Function('config', mutateSrc)(config)
+      config.translate.mode = 'translationOnly' // <-- inline YOUR mutations here
       await chrome.storage.local.set({ config })
       return `ok mode=${config.translate.mode} target=${config.language.targetCode}`
-    }, mutate)
+    })
   let result = await patch()
   for (let i = 0; i < 20 && result === 'no-config-yet'; i++) {
     await sleep(500)
@@ -104,7 +112,7 @@ async function main() {
 
   try {
     await browser.installExtension(EXT_PATH)
-    await patchConfig(browser, `config.translate.mode = 'translationOnly'`)
+    await patchConfig(browser)
 
     const page = await browser.newPage()
     const errors = []

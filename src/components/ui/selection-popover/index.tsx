@@ -27,6 +27,10 @@ interface SelectionPopoverPosition {
   y: number
 }
 
+interface SelectionPopoverActions {
+  requestOpen: (anchor?: SelectionPopoverPosition | null) => void
+}
+
 type SelectionPopoverPortalContainer =
   | HTMLElement
   | ShadowRoot
@@ -39,7 +43,8 @@ interface SelectionPopoverRootContextValue {
   anchor: SelectionPopoverPosition | null
   setAnchor: (value: SelectionPopoverPosition | null) => void
   pinned: boolean
-  setPinned: React.Dispatch<React.SetStateAction<boolean>>
+  setPinned: (value: boolean | ((value: boolean) => boolean)) => void
+  requestOpen: (anchor?: SelectionPopoverPosition | null) => void
   triggerElement: HTMLElement | null
   setTriggerElement: React.Dispatch<React.SetStateAction<HTMLElement | null>>
 }
@@ -89,33 +94,58 @@ function SelectionPopoverRoot({
   anchor: anchorProp,
   children,
   defaultOpen = false,
+  defaultPinned = false,
   disablePointerDismissal = false,
   open: openProp,
+  pinned: pinnedProp,
+  actionsRef,
   onAnchorChange,
   onOpenChange,
+  onPinnedChange,
+  onReuseRequest,
 }: {
   anchor?: SelectionPopoverPosition | null
   children: React.ReactNode
   defaultOpen?: boolean
+  defaultPinned?: boolean
   disablePointerDismissal?: boolean
   open?: boolean
+  pinned?: boolean
+  actionsRef?: React.RefObject<SelectionPopoverActions | null>
   onAnchorChange?: (anchor: SelectionPopoverPosition | null) => void
   onOpenChange?: (open: boolean) => void
+  onPinnedChange?: (pinned: boolean) => void
+  onReuseRequest?: (details: { anchor: SelectionPopoverPosition | null }) => void
 }) {
   const instanceId = React.useId()
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen)
   const [uncontrolledAnchor, setUncontrolledAnchor] =
     React.useState<SelectionPopoverPosition | null>(null)
-  const [pinned, setPinned] = React.useState(false)
+  const [uncontrolledPinned, setUncontrolledPinned] = React.useState(defaultPinned)
   const [triggerElement, setTriggerElement] = React.useState<HTMLElement | null>(null)
+  const reopenFrameRef = React.useRef<number | null>(null)
   const open = openProp ?? uncontrolledOpen
   const anchor = anchorProp ?? uncontrolledAnchor
+  const pinned = pinnedProp ?? uncontrolledPinned
+
+  const setPinned = React.useCallback(
+    (value: boolean | ((value: boolean) => boolean)) => {
+      const nextPinned = typeof value === "function" ? value(pinned) : value
+
+      if (pinnedProp === undefined) {
+        setUncontrolledPinned(nextPinned)
+      }
+
+      onPinnedChange?.(nextPinned)
+    },
+    [onPinnedChange, pinned, pinnedProp],
+  )
 
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
       const nextOpen = typeof value === "function" ? value(open) : value
 
-      if (!nextOpen) {
+      if (!nextOpen && pinned) {
         setPinned(false)
       }
 
@@ -125,7 +155,7 @@ function SelectionPopoverRoot({
 
       onOpenChange?.(nextOpen)
     },
-    [onOpenChange, open, openProp],
+    [onOpenChange, open, openProp, pinned, setPinned],
   )
 
   const setAnchor = React.useCallback(
@@ -138,6 +168,57 @@ function SelectionPopoverRoot({
     },
     [anchorProp, onAnchorChange],
   )
+
+  const requestOpen = React.useCallback(
+    (nextAnchor: SelectionPopoverPosition | null = null) => {
+      if (open && pinned) {
+        // A pinned popover is reused in place: keep its anchor, layout, and
+        // pin state, and let the consumer swap session-scoped content via
+        // onReuseRequest. Re-dispatch the open event to re-assert exclusivity.
+        window.dispatchEvent(
+          new CustomEvent(SELECTION_POPOVER_OPEN_EVENT, {
+            detail: { instanceId },
+          }),
+        )
+        onReuseRequest?.({ anchor: nextAnchor })
+        return
+      }
+
+      if (open) {
+        // Reopen on the next frame so controlled consumers observe a full
+        // close/open cycle and can refresh session-scoped state from the
+        // current selection.
+        if (reopenFrameRef.current !== null) {
+          cancelAnimationFrame(reopenFrameRef.current)
+        }
+        setOpen(false)
+        reopenFrameRef.current = requestAnimationFrame(() => {
+          reopenFrameRef.current = null
+          if (nextAnchor) {
+            setAnchor(nextAnchor)
+          }
+          setOpen(true)
+        })
+        return
+      }
+
+      if (nextAnchor) {
+        setAnchor(nextAnchor)
+      }
+      setOpen(true)
+    },
+    [instanceId, onReuseRequest, open, pinned, setAnchor, setOpen],
+  )
+
+  React.useImperativeHandle(actionsRef, () => ({ requestOpen }), [requestOpen])
+
+  React.useEffect(() => {
+    return () => {
+      if (reopenFrameRef.current !== null) {
+        cancelAnimationFrame(reopenFrameRef.current)
+      }
+    }
+  }, [])
 
   React.useEffect(() => {
     if (!open) {
@@ -171,10 +252,11 @@ function SelectionPopoverRoot({
       setAnchor,
       pinned,
       setPinned,
+      requestOpen,
       triggerElement,
       setTriggerElement,
     }),
-    [anchor, open, pinned, setAnchor, setOpen, triggerElement],
+    [anchor, open, pinned, requestOpen, setAnchor, setOpen, setPinned, triggerElement],
   )
 
   return (
@@ -199,33 +281,15 @@ function SelectionPopoverTrigger({
   render,
   ...props
 }: useRender.ComponentProps<"button"> & React.ComponentProps<"button">) {
-  const { open, setAnchor, setOpen, setPinned, setTriggerElement } =
-    useSelectionPopoverRootContext()
-
-  const restartPopoverSession = React.useCallback(() => {
-    // Reopen on the next frame so controlled consumers observe a full close/open
-    // cycle and can refresh session-scoped state from the current selection.
-    // Example: a pinned popover keeps showing the original selection until the
-    // user clicks the same trigger again after selecting different text.
-    setOpen(false)
-    requestAnimationFrame(() => {
-      setOpen(true)
-    })
-  }, [setOpen])
+  const { open, requestOpen, setTriggerElement } = useSelectionPopoverRootContext()
 
   const handleClick = React.useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       const rect = event.currentTarget.getBoundingClientRect()
-      setPinned(false)
       setTriggerElement(event.currentTarget)
-      setAnchor({ x: rect.left, y: rect.top })
-      if (open) {
-        restartPopoverSession()
-      } else {
-        setOpen(true)
-      }
+      requestOpen({ x: rect.left, y: rect.top })
     },
-    [open, restartPopoverSession, setAnchor, setOpen, setPinned, setTriggerElement],
+    [requestOpen, setTriggerElement],
   )
 
   return useRender({
@@ -362,10 +426,10 @@ function SelectionPopoverContent({
     finalFocus?: DialogPrimitive.Popup.Props["finalFocus"]
   }) {
   const { open, setOpen, anchor, triggerElement } = useSelectionPopoverRootContext()
-  const bodyElementRef = React.useRef<HTMLDivElement | null>(null)
-  const setBodyElement = React.useCallback((node: HTMLDivElement | null) => {
-    bodyElementRef.current = node
-  }, [])
+  // Tracked as state (not a ref) so listeners re-attach when Body remounts
+  // while the popover stays open, e.g. a pinned popover reused for a new
+  // selection session.
+  const [bodyElement, setBodyElement] = React.useState<HTMLDivElement | null>(null)
 
   const {
     rndRef,
@@ -390,7 +454,7 @@ function SelectionPopoverContent({
 
   usePreventScrollThrough({
     isEnabled: open,
-    elementRef: bodyElementRef,
+    element: bodyElement,
   })
 
   const contentContextValue = React.useMemo(
@@ -610,6 +674,8 @@ const SelectionPopover = {
   Pin: SelectionPopoverPin,
   Close: SelectionPopoverClose,
 } as const
+
+export type { SelectionPopoverActions, SelectionPopoverPosition }
 
 export {
   SelectionPopover,

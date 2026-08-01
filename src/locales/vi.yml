@@ -108,7 +108,7 @@ options:
       description: Liên hệ trực tiếp với nhóm qua contact@readfrog.app
     wechat:
       title: WeChat
-      description: Quét mã QR để thêm nhà phát triển trên WeChat
+      description: Quét mã QR để tham gia nhóm thảo luận trên WeChat
       qrCodeAlt: Mã QR WeChat
   apiProviders:
     title: Nhà cung cấp API
@@ -421,6 +421,9 @@ options:
     selectionTranslation:
       title: Dịch vùng chọn
       description: Dịch văn bản bạn đã chọn.
+    subtitlesToggle:
+      title: Dịch phụ đề
+      description: Bật hoặc tắt phụ đề đã dịch của video.
     nodeTranslation:
       title: Dịch đoạn văn
       description: Di chuột hoặc nhấn giữ một đoạn để chỉ dịch đoạn đó.
@@ -669,6 +672,9 @@ options:
       enable:
         title: Bật
         description: Di chuột hoặc nhấn giữ một đoạn để chỉ dịch đoạn đó.
+      forceRetranslation:
+        title: Luôn yêu cầu bản dịch mới
+        description: Bản dịch khi di chuột bỏ qua bộ nhớ đệm — văn bản đã có trong bộ nhớ đệm vẫn được dịch lại và kết quả mới sẽ ghi đè.
     translationStyle:
       title: Kiểu hiển thị bản dịch
       description: Đặt bất kỳ kiểu nào bạn muốn để phân biệt kết quả dịch với văn bản gốc
@@ -1047,6 +1053,9 @@ subtitles:
   loadingAiSubtitles: Đang tải phụ đề AI… (dự kiến 3 phút)
   requestAiSubtitles: Yêu cầu phụ đề AI (Beta)
   usingAiSubtitles: Đang dùng phụ đề AI
+  toggle:
+    enabled: Đã bật dịch phụ đề
+    disabled: Đã tắt dịch phụ đề
   actions:
     downloadTranslated: Tải phụ đề đã dịch
     downloadTranslatedPreparing: Đang chuẩn bị phụ đề, video dài có thể mất nhiều thời gian hơn

@@ -108,7 +108,7 @@ options:
       description: contact@readfrog.app からチームに直接連絡できます
     wechat:
       title: WeChat
-      description: QR コードをスキャンして開発者を WeChat に追加
+      description: QR コードをスキャンして WeChat のディスカッショングループに参加
       qrCodeAlt: WeChat QR コード
   apiProviders:
     title: APIプロバイダー
@@ -421,6 +421,9 @@ options:
     selectionTranslation:
       title: 選択範囲の翻訳
       description: 選択したテキストを翻訳します。
+    subtitlesToggle:
+      title: 字幕翻訳
+      description: 動画の翻訳字幕をオンまたはオフにします。
     nodeTranslation:
       title: 段落翻訳
       description: 段落にホバーまたは長押しすると、その段落だけ翻訳します。
@@ -669,6 +672,9 @@ options:
       enable:
         title: 有効化
         description: 段落にホバーまたは長押しすると、その段落だけ翻訳します。
+      forceRetranslation:
+        title: 常に新しく翻訳
+        description: ホバー翻訳はキャッシュをスキップします。すでにキャッシュがあるテキストでも翻訳し直し、その結果でキャッシュを上書きします。
     translationStyle:
       title: 翻訳表示スタイル
       description: 翻訳結果と原文を区別するために好みのスタイルを設定
@@ -1047,6 +1053,9 @@ subtitles:
   loadingAiSubtitles: AI字幕を読み込み中…（推定3分）
   requestAiSubtitles: AI字幕をリクエスト（Beta）
   usingAiSubtitles: AI字幕を使用中
+  toggle:
+    enabled: 字幕翻訳をオンにしました
+    disabled: 字幕翻訳をオフにしました
   actions:
     downloadTranslated: 翻訳字幕をダウンロード
     downloadTranslatedPreparing: 字幕を準備中。長い動画は時間がかかる場合があります

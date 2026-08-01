@@ -1,127 +1,98 @@
 import { describe, expect, it } from "vitest"
 import { migrate } from "../../migration-scripts/v088-to-v089"
 
-function cohereConfig(modelState: {
-  model?: string
-  isCustomModel?: boolean
-  customModel?: string | null
-}) {
+function configWith({
+  pageShortcut = "Alt+E",
+  modeShortcut = "Alt+Shift+M",
+  selectionShortcut = "Alt+T",
+  videoSubtitles = { enabled: true, autoStart: false } as any,
+}: {
+  pageShortcut?: string
+  modeShortcut?: string
+  selectionShortcut?: string
+  videoSubtitles?: any
+} = {}) {
   return {
-    configSchemaVersion: 88,
-    providersConfig: [
-      {
-        id: "cohere-default",
-        name: "Cohere",
-        enabled: true,
-        provider: "cohere",
-        model: {
-          model: null,
-          isCustomModel: false,
-          customModel: null,
-          ...modelState,
-        },
+    translate: {
+      modeShortcut,
+      page: { shortcut: pageShortcut },
+    },
+    selectionToolbar: {
+      features: {
+        translate: { shortcut: selectionShortcut },
       },
-      {
-        id: "openai-default",
-        name: "OpenAI",
-        enabled: true,
-        provider: "openai",
-        model: { model: "gpt-5.4-mini", isCustomModel: false, customModel: null },
-      },
-    ],
+    },
+    videoSubtitles,
   }
 }
 
-describe("v088-to-v089 migration", () => {
-  it.each([
-    ["command-r-03-2024", "command-r-08-2024"],
-    ["command-r", "command-r-08-2024"],
-    ["command-r-plus-04-2024", "command-r-plus-08-2024"],
-    ["command-r-plus", "command-r-plus-08-2024"],
-    ["command", "command-r7b-12-2024"],
-    ["command-nightly", "command-r7b-12-2024"],
-    ["command-light", "command-r7b-12-2024"],
-    ["command-light-nightly", "command-r7b-12-2024"],
-  ])("migrates built-in deprecated Cohere model %s to %s", (deprecated, live) => {
-    const migrated = migrate(
-      cohereConfig({ model: deprecated, isCustomModel: false, customModel: null }),
+describe("v088 to v089 migration", () => {
+  it("adds the primary toggle shortcut when nothing else claims it", () => {
+    const result = migrate(configWith())
+
+    expect(result.videoSubtitles.toggleShortcut).toBe("Alt+C")
+  })
+
+  it("keeps the rest of the video subtitles config untouched", () => {
+    const result = migrate(
+      configWith({
+        videoSubtitles: { enabled: false, autoStart: true, providerId: "microsoft" },
+      }),
     )
 
-    expect(migrated.providersConfig[0].model).toEqual({
-      model: live,
-      isCustomModel: false,
-      customModel: null,
+    expect(result.videoSubtitles).toEqual({
+      enabled: false,
+      autoStart: true,
+      providerId: "microsoft",
+      toggleShortcut: "Alt+C",
     })
   })
 
   it.each([
-    ["command-r-03-2024", "command-r-08-2024"],
-    ["command-r", "command-r-08-2024"],
-    ["command-r-plus-04-2024", "command-r-plus-08-2024"],
-    ["command-r-plus", "command-r-plus-08-2024"],
-    ["command", "command-r7b-12-2024"],
-    ["command-nightly", "command-r7b-12-2024"],
-    ["command-light", "command-r7b-12-2024"],
-    ["command-light-nightly", "command-r7b-12-2024"],
-  ])(
-    "remaps dormant deprecated selector %s while preserving active custom model",
-    (deprecated, live) => {
-      const migrated = migrate(
-        cohereConfig({
-          model: deprecated,
-          isCustomModel: true,
-          customModel: "my-private-cohere-model",
-        }),
-      )
+    ["page translation", { pageShortcut: "Alt+C" }],
+    ["translation mode", { modeShortcut: "Alt+C" }],
+    ["selection translation", { selectionShortcut: "Alt+C" }],
+  ])("falls back when %s already uses the primary key", (_label, overrides) => {
+    const result = migrate(configWith(overrides))
 
-      expect(migrated.providersConfig[0].model).toEqual({
-        model: live,
-        isCustomModel: true,
-        customModel: "my-private-cohere-model",
-      })
-    },
-  )
-
-  it("preserves an active custom Cohere model when dormant selector is already valid", () => {
-    const oldConfig = cohereConfig({
-      model: "command-r-08-2024",
-      isCustomModel: true,
-      customModel: "my-private-cohere-model",
-    })
-    const snapshot = structuredClone(oldConfig)
-
-    const migrated = migrate(oldConfig)
-
-    expect(migrated.providersConfig[0].model).toEqual({
-      model: "command-r-08-2024",
-      isCustomModel: true,
-      customModel: "my-private-cohere-model",
-    })
-    expect(oldConfig).toEqual(snapshot)
-    expect(migrate(migrated)).toEqual(migrated)
+    expect(result.videoSubtitles.toggleShortcut).toBe("Alt+Shift+C")
   })
 
-  it("does not mutate other providers", () => {
-    const oldConfig = cohereConfig({ model: "command", isCustomModel: false, customModel: null })
-    const snapshot = structuredClone(oldConfig)
+  it("ignores case and surrounding whitespace when detecting a collision", () => {
+    const result = migrate(configWith({ modeShortcut: "  alt+c  " }))
 
-    const migrated = migrate(oldConfig)
-
-    expect(migrated.providersConfig[1]).toEqual({
-      id: "openai-default",
-      name: "OpenAI",
-      enabled: true,
-      provider: "openai",
-      model: { model: "gpt-5.4-mini", isCustomModel: false, customModel: null },
-    })
-    expect(oldConfig).toEqual(snapshot)
+    expect(result.videoSubtitles.toggleShortcut).toBe("Alt+Shift+C")
   })
 
-  it("leaves malformed shapes unchanged", () => {
-    expect(migrate(null)).toBeNull()
-    expect(migrate([])).toEqual([])
-    expect(migrate({})).toEqual({})
-    expect(migrate({ providersConfig: null })).toEqual({ providersConfig: null })
-    expect(migrate({ providersConfig: [null] })).toEqual({ providersConfig: [null] })
+  it("leaves the shortcut unbound when both candidates are taken", () => {
+    const result = migrate(configWith({ pageShortcut: "Alt+C", modeShortcut: "Alt+Shift+C" }))
+
+    expect(result.videoSubtitles.toggleShortcut).toBe("")
+  })
+
+  it("is idempotent", () => {
+    const once = migrate(configWith({ pageShortcut: "Alt+C" }))
+    const twice = migrate(once)
+
+    expect(twice).toEqual(once)
+  })
+
+  it("does not overwrite an existing toggle shortcut", () => {
+    const result = migrate(configWith({ videoSubtitles: { enabled: true, toggleShortcut: "" } }))
+
+    expect(result.videoSubtitles.toggleShortcut).toBe("")
+  })
+
+  it.each([
+    ["null", null],
+    ["a non-object", "config"],
+  ])("returns %s configs unchanged", (_label, oldConfig) => {
+    expect(migrate(oldConfig)).toBe(oldConfig)
+  })
+
+  it("returns the config unchanged when videoSubtitles is missing", () => {
+    const oldConfig = { translate: { page: {} } }
+
+    expect(migrate(oldConfig)).toBe(oldConfig)
   })
 })

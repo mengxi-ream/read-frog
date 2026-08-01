@@ -1,5 +1,27 @@
 # @read-frog/extension
 
+## 1.44.1
+
+### Patch Changes
+
+- [#2019](https://github.com/mengxi-ream/read-frog/pull/2019) [`72ce7c2`](https://github.com/mengxi-ream/read-frog/commit/72ce7c24476df61379923eb9966811a77cd8a68b) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - chore(deps): bump dependencies, including the `js-sha256` 1.0 and `jsdom` 30 majors — `js-sha256` 1.0 splits into a native-crypto path for Node and a pure-JS path for the browser bundle (hash output is unchanged, so persisted cache keys stay valid), `jsdom` 30 raises its Node floor and only affects the test environment, and `wxt` 0.21.3 swaps its zip implementation. Also pins the pnpm-managed Node runtime to `^26.5.1` and aligns the CI `node-version` with it, so the declared version matches the one that actually runs the build and tests.
+
+- [#2004](https://github.com/mengxi-ream/read-frog/pull/2004) [`7ead566`](https://github.com/mengxi-ream/read-frog/commit/7ead566b2b4f81ba70a01ec355c5b4080e5a9925) Thanks [@thedavidweng](https://github.com/thedavidweng)! - feat(model): add command-a-plus-05-2026 and command-a-translate-08-2025 to Cohere provider
+
+- [#2017](https://github.com/mengxi-ream/read-frog/pull/2017) [`46e0dd5`](https://github.com/mengxi-ream/read-frog/commit/46e0dd5276c438b6823f1471651b839bb1bfe1cb) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - feat(translation): add a fresh hover translation option
+
+- [#2013](https://github.com/mengxi-ream/read-frog/pull/2013) [`cbc19de`](https://github.com/mengxi-ream/read-frog/commit/cbc19de988c763ab38d439cd63cea6b1d4d538f9) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(selection): reuse a pinned selection popover in place — translating or running a custom action on a new selection keeps the pinned window's position, size, and pin state and streams the new result into it instead of reopening at a new anchor
+
+- [#2015](https://github.com/mengxi-ream/read-frog/pull/2015) [`a5b4f2d`](https://github.com/mengxi-ream/read-frog/commit/a5b4f2d2b13c5e09e510dbc4c2ba1445a7e1f534) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translate): stop auto-translation from re-enabling a page the user manually turned off ([#2011](https://github.com/mengxi-ream/read-frog/issues/2011)) — a manual "show original" (popup, floating button, shortcut, touch gesture, context menu) now records a per-tab, per-origin refusal that the tab-activation language re-detection respects until the tab leaves that origin
+
+- [#2018](https://github.com/mengxi-ream/read-frog/pull/2018) [`854d68d`](https://github.com/mengxi-ream/read-frog/commit/854d68dc1594b5dde31b58895342a4d36e7b6d88) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(subtitles): add a configurable shortcut to toggle subtitle translation
+
+- [#1992](https://github.com/mengxi-ream/read-frog/pull/1992) [`b1fa3dc`](https://github.com/mengxi-ream/read-frog/commit/b1fa3dcad44843b04505e8b493e1dbadf491d74e) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - fix(translation): translate reader-mode content mounted outside the page body
+
+- [#2010](https://github.com/mengxi-ream/read-frog/pull/2010) [`4605883`](https://github.com/mengxi-ream/read-frog/commit/460588390cc77cb400d92cf480302a7d2259f6a8) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - style(options): let the website pattern lists run full height on their own pages
+
+- [#2010](https://github.com/mengxi-ream/read-frog/pull/2010) [`4605883`](https://github.com/mengxi-ream/read-frog/commit/460588390cc77cb400d92cf480302a7d2259f6a8) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - i18n(contact-us): point the WeChat card at the discussion group
+
 ## 1.44.0
 
 ### Minor Changes

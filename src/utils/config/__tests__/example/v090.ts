@@ -1,13 +1,13 @@
 import type { TestSeriesObject } from "./types"
 
 /**
- * Frozen v089 fixtures. Written out in full on purpose: an example file that
- * spreads the previous version is not a snapshot, because editing v088 would
- * silently change what v089 asserts.
+ * Frozen v090 fixtures. Written out in full on purpose: an example file that
+ * spreads the previous version is not a snapshot, because editing v089 would
+ * silently change what v090 asserts.
  *
- * Delta from v088: `videoSubtitles.toggleShortcut` is added. None of these
- * series bind "Alt+C" elsewhere, so each gets the primary key; the fallback and
- * both-taken branches are covered by `migration-scripts/v088-to-v089.test.ts`.
+ * Delta from v089: `translate.node.forceRetranslation` is added with the
+ * existing default disabled. Explicit preservation and malformed-shape branches
+ * are covered by `migration-scripts/v089-to-v090.test.ts`.
  */
 export const testSeries: TestSeriesObject = {
   "complex-config-from-v020": {
@@ -91,6 +91,7 @@ export const testSeries: TestSeriesObject = {
         node: {
           enabled: true,
           hotkey: "alt",
+          forceRetranslation: false,
         },
         page: {
           range: "all",
@@ -461,6 +462,7 @@ export const testSeries: TestSeriesObject = {
         node: {
           enabled: true,
           hotkey: "alt",
+          forceRetranslation: false,
         },
         page: {
           range: "all",
@@ -823,6 +825,7 @@ export const testSeries: TestSeriesObject = {
         node: {
           enabled: true,
           hotkey: "alt",
+          forceRetranslation: false,
         },
         page: {
           range: "all",
@@ -1243,6 +1246,7 @@ export const testSeries: TestSeriesObject = {
         node: {
           enabled: true,
           hotkey: "alt",
+          forceRetranslation: false,
         },
         page: {
           range: "all",

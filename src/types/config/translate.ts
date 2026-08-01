@@ -104,6 +104,11 @@ export const translateConfigSchema = z.object({
   node: z.object({
     enabled: z.boolean(),
     hotkey: z.enum(HOTKEYS),
+    // Keep the migration as the durable upgrade path, but also accept pre-v090
+    // config in UI contexts that can load before the background migration runs.
+    // Otherwise storageAdapter falls back to the full DEFAULT_CONFIG and a UI
+    // write can persist that fallback over the user's settings.
+    forceRetranslation: z.boolean().default(false),
   }),
   page: z.object({
     range: pageTranslateRangeSchema,

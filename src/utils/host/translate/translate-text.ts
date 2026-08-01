@@ -149,6 +149,7 @@ export interface TranslateTextOptions {
   sessionId?: string
   configuredPrompt?: TranslationConfiguredPrompt
   translationActionContext?: TranslationActionContext
+  forceRetranslation?: boolean
   /** Internal retry state after the background observes a newer flag value. */
   promptExperimentVariant?: PromptExperimentVariant
   promptExperimentRetryCount?: number
@@ -171,6 +172,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     sessionId,
     configuredPrompt,
     translationActionContext = getPageTranslationActionContext() ?? undefined,
+    forceRetranslation = false,
     promptExperimentVariant: forcedPromptExperimentVariant,
     promptExperimentRetryCount = 0,
     skipPromptExperimentResolution = false,
@@ -235,6 +237,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     sessionId,
     promptExperimentVariant,
     translationActionContext,
+    forceRetranslation,
   })
   if (typeof result !== "string") {
     if (promptExperimentRetryCount >= 2) {

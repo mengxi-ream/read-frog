@@ -67,6 +67,8 @@ export const DEFAULT_DISPLAY_MODE = "bilingual" as const
 export const DEFAULT_TRANSLATION_POSITION = "above" as const
 export const DEFAULT_CONTROLS_HEIGHT = 60
 export const DEFAULT_SUBTITLE_POSITION = { percent: 10, anchor: "bottom" } as const
+// Mnemonic for "captions", and it echoes YouTube's own `C` key without taking it over.
+export const DEFAULT_SUBTITLES_TOGGLE_SHORTCUT_KEY = "Alt+C"
 // Subtitle controls sit on top of arbitrary host pages, so keep their theme fixed for readability.
 export const SUBTITLES_THEME = "dark" as const
 

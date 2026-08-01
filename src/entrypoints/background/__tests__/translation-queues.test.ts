@@ -613,6 +613,69 @@ describe("translation queue helpers", () => {
     expect(translationCachePutMock).not.toHaveBeenCalled()
   })
 
+  it("bypasses a cached value and replaces the same key after forced translation succeeds", async () => {
+    translationCacheGetMock.mockResolvedValue({
+      key: "webpage-hash",
+      translation: "stale translation",
+    })
+    executeTranslateMock.mockResolvedValue("fresh translation")
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+
+    await expect(
+      handler({
+        data: {
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: googleProvider,
+          scheduleAt: Date.now(),
+          hash: "webpage-hash",
+          forceRetranslation: true,
+        },
+      }),
+    ).resolves.toBe("fresh translation")
+
+    expect(translationCacheGetMock).not.toHaveBeenCalled()
+    expect(executeTranslateMock).toHaveBeenCalledTimes(1)
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "webpage-hash",
+        translation: "fresh translation",
+      }),
+    )
+  })
+
+  it("preserves the previous cache entry when forced translation fails", async () => {
+    translationCacheGetMock.mockResolvedValue({
+      key: "webpage-hash",
+      translation: "still usable",
+    })
+    executeTranslateMock.mockReset().mockRejectedValue(new Error("provider unavailable"))
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+
+    await expect(
+      handler({
+        data: {
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: googleProvider,
+          scheduleAt: Date.now(),
+          hash: "webpage-hash",
+          forceRetranslation: true,
+        },
+      }),
+    ).rejects.toThrow("provider unavailable")
+
+    expect(translationCacheGetMock).not.toHaveBeenCalled()
+    expect(translationCacheDeleteMock).not.toHaveBeenCalled()
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
   it("returns and caches fresh Google translations verbatim without re-decoding", async () => {
     executeTranslateMock.mockResolvedValue("write &amp; for ampersand — It's fine")
 

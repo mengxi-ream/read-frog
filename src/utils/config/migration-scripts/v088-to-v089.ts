@@ -1,86 +1,70 @@
 /**
  * Migration script from v088 to v089
- * - Removes deprecated Cohere Command models from the hardcoded model list
- *   and remaps any saved provider configs that use them to the closest
- *   currently-live Cohere model.
- * - When custom model mode is active, remaps only the dormant selector-backed
- *   `model` field so schema validation still passes, while preserving
- *   `isCustomModel` and `customModel`.
+ * - Adds `toggleShortcut` to the video subtitles config, defaulting to "Alt+C".
+ * - Falls back to "Alt+Shift+C" when the user already bound "Alt+C" to another
+ *   shortcut, and leaves it unbound when both candidates are taken. The fallback
+ *   key deliberately exists nowhere else in the codebase: it only ever applies to
+ *   configs that predate this field.
  *
  * IMPORTANT: All values are hardcoded inline. Migration scripts are frozen
- * snapshots — never import constants or helpers that may change.
+ * snapshots - never import constants or helpers that may change.
  */
 
-const DEPRECATED_TO_LIVE_COHERE_MODEL: Record<string, string> = {
-  "command-r-03-2024": "command-r-08-2024",
-  "command-r": "command-r-08-2024",
-  "command-r-plus-04-2024": "command-r-plus-08-2024",
-  "command-r-plus": "command-r-plus-08-2024",
-  command: "command-r7b-12-2024",
-  "command-nightly": "command-r7b-12-2024",
-  "command-light": "command-r7b-12-2024",
-  "command-light-nightly": "command-r7b-12-2024",
-}
+const PRIMARY_SHORTCUT = "Alt+C"
+const FALLBACK_SHORTCUT = "Alt+Shift+C"
 
-function getNormalizedModelId(value: unknown): string | null {
-  if (typeof value !== "string") {
-    return null
-  }
+/**
+ * Shortcuts are stored already normalized (fixed modifier order, canonical key
+ * name), so comparing the lowercased strings is enough to spot a collision.
+ */
+function collectBoundShortcuts(oldConfig: any): Set<string> {
+  const bound = new Set<string>()
+  const candidates = [
+    oldConfig?.translate?.page?.shortcut,
+    oldConfig?.translate?.modeShortcut,
+    oldConfig?.selectionToolbar?.features?.translate?.shortcut,
+  ]
 
-  const model = value.trim()
-  return model || null
-}
+  for (const candidate of candidates) {
+    if (typeof candidate !== "string") {
+      continue
+    }
 
-function migrateProviderConfig(providerConfig: any): any {
-  if (!providerConfig || typeof providerConfig !== "object") {
-    return providerConfig
-  }
-
-  const modelConfig = providerConfig.model
-  if (providerConfig.provider !== "cohere" || !modelConfig || typeof modelConfig !== "object") {
-    return providerConfig
-  }
-
-  // `model` is always schema-validated against the live enum, even when custom
-  // mode is active. Remap a deprecated dormant selector so validation passes.
-  const selectedModel = getNormalizedModelId(modelConfig.model)
-  const migratedModel =
-    selectedModel === null ? null : (DEPRECATED_TO_LIVE_COHERE_MODEL[selectedModel] ?? null)
-
-  if (migratedModel === null) {
-    return providerConfig
-  }
-
-  // Preserve an active custom model selection. Only the dormant selector needs
-  // to become a valid enum value for post-migration schema validation.
-  if (modelConfig.isCustomModel === true) {
-    return {
-      ...providerConfig,
-      model: {
-        ...modelConfig,
-        model: migratedModel,
-      },
+    const trimmed = candidate.trim()
+    if (trimmed) {
+      bound.add(trimmed.toLowerCase())
     }
   }
 
-  return {
-    ...providerConfig,
-    model: {
-      ...modelConfig,
-      model: migratedModel,
-      isCustomModel: false,
-      customModel: null,
-    },
-  }
+  return bound
 }
 
 export function migrate(oldConfig: any): any {
-  if (!oldConfig || typeof oldConfig !== "object" || !Array.isArray(oldConfig.providersConfig)) {
+  if (!oldConfig || typeof oldConfig !== "object") {
     return oldConfig
   }
 
+  const videoSubtitles = oldConfig.videoSubtitles
+  if (!videoSubtitles || typeof videoSubtitles !== "object" || Array.isArray(videoSubtitles)) {
+    return oldConfig
+  }
+
+  if ("toggleShortcut" in videoSubtitles) {
+    return oldConfig
+  }
+
+  const boundShortcuts = collectBoundShortcuts(oldConfig)
+  const toggleShortcut = !boundShortcuts.has(PRIMARY_SHORTCUT.toLowerCase())
+    ? PRIMARY_SHORTCUT
+    : !boundShortcuts.has(FALLBACK_SHORTCUT.toLowerCase())
+      ? FALLBACK_SHORTCUT
+      : ""
+
   return {
     ...oldConfig,
-    providersConfig: oldConfig.providersConfig.map(migrateProviderConfig),
+    videoSubtitles: {
+      ...videoSubtitles,
+      toggleShortcut,
+    },
   }
 }

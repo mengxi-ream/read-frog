@@ -1,5 +1,5 @@
 import type { ControlsConfig, PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
-import type { FeatureUsageContext } from "@/types/analytics"
+import type { AnalyticsSurface, FeatureUsageContext } from "@/types/analytics"
 import type { SubtitlesSource } from "@/utils/constants/subtitles"
 import type { SubtitlesFetcher } from "@/utils/subtitles/fetchers/types"
 import type { SubtitlesVideoContext } from "@/utils/subtitles/processor/translator"
@@ -41,7 +41,13 @@ import { TranslatedSubtitlesDownloader } from "./translated-subtitles-downloader
 import { TranslationCoordinator } from "./translation-coordinator"
 import { ROOT_VIEW } from "./ui/subtitles-settings-panel/views"
 
-type SubtitlesToggleSource = "manual" | "auto"
+type SubtitlesToggleSource = "manual" | "auto" | "shortcut"
+
+const TOGGLE_SOURCE_SURFACE: Record<SubtitlesToggleSource, AnalyticsSurface> = {
+  manual: ANALYTICS_SURFACE.VIDEO_SUBTITLES,
+  auto: ANALYTICS_SURFACE.VIDEO_SUBTITLES_AUTO,
+  shortcut: ANALYTICS_SURFACE.SHORTCUT,
+}
 
 type SubtitlesFetcherFactories = {
   native: () => SubtitlesFetcher
@@ -59,6 +65,7 @@ export interface SubtitlesProvidersAdapter {
   readonly supportsAiSubtitles: boolean
   getControlsConfig: () => ControlsConfig | undefined
   toggleSubtitlesManually: (enabled: boolean) => void
+  toggleSubtitlesByShortcut: (enabled: boolean) => void
   requestAiSubtitles: () => Promise<void>
   downloadSourceSubtitles: () => Promise<void>
   downloadTranslatedSubtitles: () => Promise<void>
@@ -134,6 +141,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
   toggleSubtitlesManually = (enabled: boolean) => {
     this.toggleSubtitlesWithSource(enabled, "manual")
+  }
+
+  toggleSubtitlesByShortcut = (enabled: boolean) => {
+    this.toggleSubtitlesWithSource(enabled, "shortcut")
   }
 
   async handleSourceTrackChanged(): Promise<void> {
@@ -403,9 +414,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       enabled
         ? createFeatureUsageContext(
             ANALYTICS_FEATURE.VIDEO_SUBTITLES,
-            source === "auto"
-              ? ANALYTICS_SURFACE.VIDEO_SUBTITLES_AUTO
-              : ANALYTICS_SURFACE.VIDEO_SUBTITLES,
+            TOGGLE_SOURCE_SURFACE[source],
           )
         : undefined,
     )

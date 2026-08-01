@@ -1,13 +1,15 @@
 import type { TestSeriesObject } from "./types"
 
 /**
- * Frozen v089 fixtures. Written out in full on purpose: an example file that
- * spreads the previous version is not a snapshot, because editing v088 would
- * silently change what v089 asserts.
+ * Frozen v091 fixtures. Written out in full on purpose: an example file that
+ * spreads the previous version is not a snapshot, because editing v090 would
+ * silently change what v091 asserts.
  *
- * Delta from v088: `videoSubtitles.toggleShortcut` is added. None of these
- * series bind "Alt+C" elsewhere, so each gets the primary key; the fallback and
- * both-taken branches are covered by `migration-scripts/v088-to-v089.test.ts`.
+ * Delta from v090: none. The v090 -> v091 migration only rewrites retired Cohere
+ * model ids and no series here configures a Cohere provider, so every fixture
+ * passes through unchanged. The remapping itself - custom-model shapes included,
+ * plus a full config re-parsed against `configSchema` - is covered by
+ * `migration-scripts/v090-to-v091.test.ts`.
  */
 export const testSeries: TestSeriesObject = {
   "complex-config-from-v020": {
@@ -91,6 +93,7 @@ export const testSeries: TestSeriesObject = {
         node: {
           enabled: true,
           hotkey: "alt",
+          forceRetranslation: false,
         },
         page: {
           range: "all",
@@ -461,6 +464,7 @@ export const testSeries: TestSeriesObject = {
         node: {
           enabled: true,
           hotkey: "alt",
+          forceRetranslation: false,
         },
         page: {
           range: "all",
@@ -823,6 +827,7 @@ export const testSeries: TestSeriesObject = {
         node: {
           enabled: true,
           hotkey: "alt",
+          forceRetranslation: false,
         },
         page: {
           range: "all",
@@ -1243,6 +1248,7 @@ export const testSeries: TestSeriesObject = {
         node: {
           enabled: true,
           hotkey: "alt",
+          forceRetranslation: false,
         },
         page: {
           range: "all",

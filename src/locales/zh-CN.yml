@@ -108,7 +108,7 @@ options:
       description: 通过 contact@readfrog.app 直接联系团队
     wechat:
       title: 微信
-      description: 扫描二维码添加开发者微信
+      description: 扫描二维码进入微信讨论群
       qrCodeAlt: 微信二维码
   apiProviders:
     title: API 提供商
@@ -422,6 +422,9 @@ options:
     selectionTranslation:
       title: 划词翻译
       description: 翻译选中的文本。
+    subtitlesToggle:
+      title: 字幕翻译
+      description: 打开或关闭视频的翻译字幕。
     nodeTranslation:
       title: 段落翻译
       description: 悬停或长按段落，只翻译这一段。
@@ -785,6 +788,9 @@ options:
       enable:
         title: 启用
         description: 悬停或长按段落，只翻译这一段。
+      forceRetranslation:
+        title: 始终重新翻译
+        description: 悬停翻译跳过缓存：即使该文本已有缓存也会重新翻译，并覆盖缓存结果。
     translationStyle:
       title: 翻译显示样式
       description: 设置任何你想要的样式以区分翻译结果和原文
@@ -1163,6 +1169,9 @@ subtitles:
   loadingAiSubtitles: 正在加载 AI 字幕中（预计 3 分钟）
   requestAiSubtitles: 请求 AI 字幕（Beta）
   usingAiSubtitles: 正在使用 AI 字幕中
+  toggle:
+    enabled: 字幕翻译已开启
+    disabled: 字幕翻译已关闭
   actions:
     downloadTranslated: 下载翻译字幕
     downloadTranslatedPreparing: 正在准备字幕，长视频可能需要更久
