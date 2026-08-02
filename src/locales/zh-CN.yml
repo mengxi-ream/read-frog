@@ -56,13 +56,16 @@ popup:
   aiSmartContextDescription: 结合网页上下文提升翻译效果。需要配置 LLM 翻译服务商。
   more:
     title: 更多
-    translationHub: 翻译中心
+    help: 帮助
+    tutorial: 使用教程
+    emailUs: 邮件联系
+    featureRequest: 功能建议
+    bugReport: 报告问题
+    community: 社区
     joinDiscord: 加入 Discord
     joinWechat: 加入微信群
     starGithub: Github 加星
     rateUs: 好评支持
-    ebook: 第三方电子书阅读器
-    tutorial: 使用教程
 errorRecovery:
   title: 应用发生异常
   description: 已进入恢复模式。你可以先导出当前设置作为备份，再重置设置后重试。
@@ -94,20 +97,30 @@ options:
     translationHub: 翻译中心
   product:
     roadmap: 路线图
-  contactUs:
-    title: 联系我们
-    pageDescription: 告诉我们接下来该做什么、反馈遇到的问题，或者只是打个招呼。
+  helpAndCommunity:
+    title: 帮助与社区
+    pageDescription: 了解怎么使用陪读蛙、向团队寻求帮助，或者加入社区和其他用户交流。
+    help:
+      title: 帮助
+    tutorial:
+      title: 使用教程
+      description: 阅读文档，了解怎么使用陪读蛙
+    email:
+      title: 邮件联系
+      description: 通过 contact@readfrog.app 直接联系团队
     featureRequest:
       title: 功能建议
       description: 提出想法，并为团队接下来要做的功能投票
     bugReport:
       title: 报告问题
       description: 提交工单，并跟进直到问题解决
-    email:
-      title: 邮件联系
-      description: 通过 contact@readfrog.app 直接联系团队
+    community:
+      title: 社区
+    discord:
+      title: Discord
+      description: 与团队和其他用户实时交流
     wechat:
-      title: 微信
+      title: 微信群
       description: 扫描二维码进入微信讨论群
       qrCodeAlt: 微信二维码
   apiProviders:

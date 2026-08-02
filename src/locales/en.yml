@@ -56,13 +56,16 @@ popup:
   aiSmartContextDescription: Uses webpage context to improve translation quality. Requires LLM translation provider.
   more:
     title: More
-    translationHub: Translation Hub
+    help: Help
+    tutorial: Tutorial
+    emailUs: Email us
+    featureRequest: Feature request
+    bugReport: Report a bug
+    community: Community
     joinDiscord: Join Discord
     joinWechat: Join WeChat Group
     starGithub: Star on Github
     rateUs: Rate Us
-    ebook: Third-party E-book Reader
-    tutorial: Tutorial
 errorRecovery:
   title: Something went wrong
   description: Recovery mode is active. You can export your current settings as a backup, then reset settings and try again.
@@ -94,20 +97,30 @@ options:
     translationHub: Translation Hub
   product:
     roadmap: Roadmap
-  contactUs:
-    title: Contact Us
-    pageDescription: Tell us what to build next, report something that broke, or just say hello.
+  helpAndCommunity:
+    title: Help & Community
+    pageDescription: Learn how to use Read Frog, get help from the team, or join other users in the community.
+    help:
+      title: Help
+    tutorial:
+      title: Tutorial
+      description: Read the docs and learn how to use Read Frog
+    email:
+      title: Email us
+      description: Reach the team directly at contact@readfrog.app
     featureRequest:
       title: Feature request
       description: Suggest an idea and vote on what the team builds next
     bugReport:
       title: Report a bug
       description: Open a support ticket and follow it until it is fixed
-    email:
-      title: Email us
-      description: Reach the team directly at contact@readfrog.app
+    community:
+      title: Community
+    discord:
+      title: Discord
+      description: Chat with the team and other users in real time
     wechat:
-      title: WeChat
+      title: WeChat group
       description: Scan the QR code to join the WeChat discussion group
       qrCodeAlt: WeChat QR code
   apiProviders:

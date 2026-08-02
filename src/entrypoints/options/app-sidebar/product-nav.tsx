@@ -40,12 +40,12 @@ export function ProductNav() {
               of the ways to reach us listed on it. */}
           <SidebarMenuItem>
             <SidebarMenuButton
-              render={<Link to="/contact-us" />}
-              isActive={pathname === "/contact-us"}
-              tooltip={i18n.t("options.contactUs.title")}
+              render={<Link to="/help-and-community" />}
+              isActive={pathname === "/help-and-community"}
+              tooltip={i18n.t("options.helpAndCommunity.title")}
             >
               <Icon icon="tabler:message-circle" />
-              <span>{i18n.t("options.contactUs.title")}</span>
+              <span>{i18n.t("options.helpAndCommunity.title")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

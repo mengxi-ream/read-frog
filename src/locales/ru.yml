@@ -56,13 +56,16 @@ popup:
   aiSmartContextDescription: Использует контекст веб-страницы для улучшения качества перевода. Требуется LLM-провайдер перевода.
   more:
     title: Ещё
-    translationHub: Центр переводов
+    help: Помощь
+    tutorial: Руководство
+    emailUs: Написать нам
+    featureRequest: Предложить функцию
+    bugReport: Сообщить об ошибке
+    community: Сообщество
     joinDiscord: Присоединиться к Discord
     joinWechat: Присоединиться к группе WeChat
     starGithub: Поставить звезду на Github
     rateUs: Оценить нас
-    ebook: Сторонняя читалка электронных книг
-    tutorial: Руководство
 errorRecovery:
   title: Что-то пошло не так
   description: Активирован режим восстановления. Вы можете экспортировать текущие настройки как резервную копию, затем сбросить настройки и попробовать снова.
@@ -94,20 +97,30 @@ options:
     translationHub: Центр переводов
   product:
     roadmap: Дорожная карта
-  contactUs:
-    title: Связаться с нами
-    pageDescription: Расскажите, что добавить дальше, сообщите об ошибке или просто напишите нам.
+  helpAndCommunity:
+    title: Помощь и сообщество
+    pageDescription: Узнайте, как пользоваться Read Frog, обратитесь за помощью к команде или присоединяйтесь к сообществу.
+    help:
+      title: Помощь
+    tutorial:
+      title: Руководство
+      description: Прочитайте документацию и узнайте, как пользоваться Read Frog
+    email:
+      title: Написать нам
+      description: Свяжитесь с командой напрямую по адресу contact@readfrog.app
     featureRequest:
       title: Предложить функцию
       description: Предложите идею и голосуйте за то, что команда сделает дальше
     bugReport:
       title: Сообщить об ошибке
       description: Создайте обращение в поддержку и следите за ним до решения
-    email:
-      title: Написать нам
-      description: Свяжитесь с командой напрямую по адресу contact@readfrog.app
+    community:
+      title: Сообщество
+    discord:
+      title: Discord
+      description: Общайтесь с командой и другими пользователями в реальном времени
     wechat:
-      title: WeChat
+      title: Группа в WeChat
       description: Отсканируйте QR-код, чтобы вступить в группу обсуждения в WeChat
       qrCodeAlt: QR-код WeChat
   apiProviders:

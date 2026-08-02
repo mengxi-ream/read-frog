@@ -56,13 +56,16 @@ popup:
   aiSmartContextDescription: ウェブページのコンテキストを使用して翻訳品質を向上させます。LLM翻訳プロバイダーが必要です。
   more:
     title: その他
-    translationHub: 翻訳ハブ
+    help: ヘルプ
+    tutorial: 使い方ガイド
+    emailUs: メールで問い合わせ
+    featureRequest: 機能リクエスト
+    bugReport: 不具合を報告
+    community: コミュニティ
     joinDiscord: Discordに参加
     joinWechat: WeChatグループに参加
     starGithub: Githubでスター
     rateUs: レビューを書く
-    ebook: サードパーティ電子書籍リーダー
-    tutorial: 使い方ガイド
 errorRecovery:
   title: 問題が発生しました
   description: 復旧モードが有効です。現在の設定をバックアップとしてエクスポートし、設定をリセットして再試行してください。
@@ -94,20 +97,30 @@ options:
     translationHub: 翻訳ハブ
   product:
     roadmap: ロードマップ
-  contactUs:
-    title: お問い合わせ
-    pageDescription: 次に作るべきものや、うまく動かないことを教えてください。
+  helpAndCommunity:
+    title: ヘルプとコミュニティ
+    pageDescription: Read Frog の使い方を学び、チームに相談したり、コミュニティで他のユーザーと交流したりできます。
+    help:
+      title: ヘルプ
+    tutorial:
+      title: 使い方ガイド
+      description: ドキュメントを読んで Read Frog の使い方を学べます
+    email:
+      title: メールで問い合わせ
+      description: contact@readfrog.app からチームに直接連絡できます
     featureRequest:
       title: 機能リクエスト
       description: アイデアを提案し、次に開発する機能に投票できます
     bugReport:
       title: 不具合を報告
       description: サポートチケットを作成し、解決までの状況を追えます
-    email:
-      title: メールで問い合わせ
-      description: contact@readfrog.app からチームに直接連絡できます
+    community:
+      title: コミュニティ
+    discord:
+      title: Discord
+      description: チームや他のユーザーとリアルタイムで交流できます
     wechat:
-      title: WeChat
+      title: WeChat グループ
       description: QR コードをスキャンして WeChat のディスカッショングループに参加
       qrCodeAlt: WeChat QR コード
   apiProviders:
