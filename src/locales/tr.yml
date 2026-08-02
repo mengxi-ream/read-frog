@@ -56,13 +56,16 @@ popup:
   aiSmartContextDescription: Çeviri kalitesini artırmak için web sayfası bağlamını kullanır. LLM çeviri sağlayıcısı gerektirir.
   more:
     title: Daha Fazla
-    translationHub: Çeviri Merkezi
+    help: Yardım
+    tutorial: Rehber
+    emailUs: Bize e-posta gönderin
+    featureRequest: Özellik önerisi
+    bugReport: Hata bildir
+    community: Topluluk
     joinDiscord: Discord'a Katıl
     joinWechat: WeChat Grubuna Katıl
     starGithub: Github'da Yıldız Ver
     rateUs: Bizi Değerlendirin
-    ebook: Üçüncü Taraf E-kitap Okuyucu
-    tutorial: Rehber
 errorRecovery:
   title: Bir sorun oluştu
   description: Kurtarma modu etkin. Geçerli ayarlarınızı yedek olarak dışa aktarabilir, ardından ayarları sıfırlayıp tekrar deneyebilirsiniz.
@@ -94,20 +97,30 @@ options:
     translationHub: Çeviri Merkezi
   product:
     roadmap: Yol Haritası
-  contactUs:
-    title: Bize Ulaşın
-    pageDescription: Sırada ne olmasını istediğinizi söyleyin, bir hata bildirin ya da sadece merhaba deyin.
+  helpAndCommunity:
+    title: Yardım ve topluluk
+    pageDescription: Read Frog'u nasıl kullanacağınızı öğrenin, ekipten yardım alın ya da toplulukta diğer kullanıcılara katılın.
+    help:
+      title: Yardım
+    tutorial:
+      title: Rehber
+      description: Belgeleri okuyun ve Read Frog'u nasıl kullanacağınızı öğrenin
+    email:
+      title: Bize e-posta gönderin
+      description: Ekibe doğrudan contact@readfrog.app adresinden ulaşın
     featureRequest:
       title: Özellik önerisi
       description: Bir fikir önerin ve ekibin sırada ne geliştireceğini oylayın
     bugReport:
       title: Hata bildir
       description: Destek talebi açın ve çözülene kadar takip edin
-    email:
-      title: Bize e-posta gönderin
-      description: Ekibe doğrudan contact@readfrog.app adresinden ulaşın
+    community:
+      title: Topluluk
+    discord:
+      title: Discord
+      description: Ekiple ve diğer kullanıcılarla anlık olarak sohbet edin
     wechat:
-      title: WeChat
+      title: WeChat grubu
       description: WeChat tartışma grubuna katılmak için QR kodu tarayın
       qrCodeAlt: WeChat QR kodu
   apiProviders:

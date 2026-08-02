@@ -56,13 +56,16 @@ popup:
   aiSmartContextDescription: Usa el contexto de la página web para mejorar la calidad de la traducción. Requiere un proveedor de traducción LLM.
   more:
     title: Más
-    translationHub: Centro de traducción
+    help: Ayuda
+    tutorial: Tutorial
+    emailUs: Escríbenos
+    featureRequest: Sugerir una función
+    bugReport: Informar de un fallo
+    community: Comunidad
     joinDiscord: Unirse a Discord
     joinWechat: Unirse al grupo de WeChat
     starGithub: Marcar con estrella en GitHub
     rateUs: Calificarnos
-    ebook: Lector de libros electrónicos de terceros
-    tutorial: Tutorial
 errorRecovery:
   title: Algo salió mal
   description: El modo de recuperación está activo. Puedes exportar tu configuración actual como copia de seguridad y luego restablecer la configuración e intentarlo de nuevo.
@@ -94,20 +97,30 @@ options:
     translationHub: Centro de traducción
   product:
     roadmap: Hoja de ruta
-  contactUs:
-    title: Contáctanos
-    pageDescription: Cuéntanos qué construir a continuación, informa de un fallo o simplemente saluda.
+  helpAndCommunity:
+    title: Ayuda y comunidad
+    pageDescription: Aprende a usar Read Frog, pide ayuda al equipo o únete a otros usuarios en la comunidad.
+    help:
+      title: Ayuda
+    tutorial:
+      title: Tutorial
+      description: Lee la documentación y aprende a usar Read Frog
+    email:
+      title: Escríbenos
+      description: Contacta directamente con el equipo en contact@readfrog.app
     featureRequest:
       title: Sugerir una función
       description: Propón una idea y vota lo que el equipo construirá a continuación
     bugReport:
       title: Informar de un fallo
       description: Abre un ticket de soporte y síguelo hasta que se resuelva
-    email:
-      title: Escríbenos
-      description: Contacta directamente con el equipo en contact@readfrog.app
+    community:
+      title: Comunidad
+    discord:
+      title: Discord
+      description: Habla en tiempo real con el equipo y con otros usuarios
     wechat:
-      title: WeChat
+      title: Grupo de WeChat
       description: Escanea el código QR para unirte al grupo de discusión de WeChat
       qrCodeAlt: Código QR de WeChat
   apiProviders:

@@ -11,7 +11,7 @@ export const ROUTE_DEFS = [
   { path: "/context-menu" },
   { path: "/input-translation" },
   { path: "/tts" },
-  { path: "/contact-us" },
+  { path: "/help-and-community" },
 
   // Detail pages drilled into from a `ConfigNavItem`. They own no sidebar entry — the
   // sidebar lists its links itself — but route exactly like any other page.

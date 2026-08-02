@@ -56,13 +56,16 @@ popup:
   aiSmartContextDescription: 웹페이지 컨텍스트를 사용하여 번역 품질을 향상시킵니다. LLM 번역 제공자가 필요합니다.
   more:
     title: 더보기
-    translationHub: 번역 허브
+    help: 도움말
+    tutorial: 사용 가이드
+    emailUs: 이메일 문의
+    featureRequest: 기능 제안
+    bugReport: 버그 신고
+    community: 커뮤니티
     joinDiscord: Discord 참여
     joinWechat: WeChat 그룹 참여
     starGithub: Github에서 스타
     rateUs: 리뷰 남기기
-    ebook: 서드파티 전자책 리더
-    tutorial: 사용 가이드
 errorRecovery:
   title: 문제가 발생했습니다
   description: 복구 모드가 활성화되었습니다. 현재 설정을 백업으로 내보낸 뒤 설정을 초기화하고 다시 시도하세요.
@@ -94,20 +97,30 @@ options:
     translationHub: 번역 허브
   product:
     roadmap: 로드맵
-  contactUs:
-    title: 문의하기
-    pageDescription: 다음에 무엇을 만들면 좋을지, 또는 무엇이 잘못됐는지 알려주세요.
+  helpAndCommunity:
+    title: 도움말 및 커뮤니티
+    pageDescription: Read Frog 사용법을 익히고, 팀에 도움을 요청하거나, 커뮤니티에서 다른 사용자와 교류하세요.
+    help:
+      title: 도움말
+    tutorial:
+      title: 사용 가이드
+      description: 문서를 읽고 Read Frog 사용법을 알아보세요
+    email:
+      title: 이메일 문의
+      description: contact@readfrog.app 으로 팀에 직접 연락하세요
     featureRequest:
       title: 기능 제안
       description: 아이디어를 제안하고 다음에 개발할 기능에 투표하세요
     bugReport:
       title: 버그 신고
       description: 지원 티켓을 열고 해결될 때까지 진행 상황을 확인하세요
-    email:
-      title: 이메일 문의
-      description: contact@readfrog.app 으로 팀에 직접 연락하세요
+    community:
+      title: 커뮤니티
+    discord:
+      title: Discord
+      description: 팀 및 다른 사용자와 실시간으로 이야기하세요
     wechat:
-      title: WeChat
+      title: WeChat 그룹
       description: QR 코드를 스캔해 WeChat 토론 그룹에 참여하세요
       qrCodeAlt: WeChat QR 코드
   apiProviders:

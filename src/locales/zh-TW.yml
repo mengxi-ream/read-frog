@@ -56,13 +56,16 @@ popup:
   aiSmartContextDescription: 結合網頁前後文提升翻譯品質。需要設定 LLM 翻譯服務提供者。
   more:
     title: 更多
-    translationHub: 翻譯中心
+    help: 說明
+    tutorial: 使用教學
+    emailUs: 電子郵件聯絡
+    featureRequest: 功能建議
+    bugReport: 回報問題
+    community: 社群
     joinDiscord: 加入 Discord
     joinWechat: 加入微信群
     starGithub: 在 GitHub 加星
     rateUs: 給予好評
-    ebook: 第三方電子書閱讀器
-    tutorial: 使用教學
 errorRecovery:
   title: 應用程式發生異常
   description: 已進入復原模式。可先匯出目前設定作為備份，重設設定後再重試。
@@ -94,20 +97,30 @@ options:
     translationHub: 翻譯中心
   product:
     roadmap: 產品路線圖
-  contactUs:
-    title: 聯絡我們
-    pageDescription: 告訴我們接下來該做什麼、回報遇到的問題，或只是打聲招呼。
+  helpAndCommunity:
+    title: 說明與社群
+    pageDescription: 了解怎麼使用陪讀蛙、向團隊尋求協助，或加入社群和其他使用者交流。
+    help:
+      title: 說明
+    tutorial:
+      title: 使用教學
+      description: 閱讀文件，了解怎麼使用陪讀蛙
+    email:
+      title: 電子郵件聯絡
+      description: 透過 contact@readfrog.app 直接聯絡團隊
     featureRequest:
       title: 功能建議
       description: 提出想法，並為團隊接下來要做的功能投票
     bugReport:
       title: 回報問題
       description: 建立支援工單，並追蹤到問題解決為止
-    email:
-      title: 電子郵件聯絡
-      description: 透過 contact@readfrog.app 直接聯絡團隊
+    community:
+      title: 社群
+    discord:
+      title: Discord
+      description: 與團隊和其他使用者即時交流
     wechat:
-      title: 微信
+      title: 微信群
       description: 掃描 QR code 進入微信討論群
       qrCodeAlt: 微信 QR code
   apiProviders:
