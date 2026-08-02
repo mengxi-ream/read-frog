@@ -6,9 +6,9 @@ import {
   PARAGRAPH_ATTRIBUTE,
   WALKED_ATTRIBUTE,
 } from "@/utils/constants/dom-labels"
-import { FORCE_BLOCK_TAGS } from "@/utils/constants/dom-rules"
 import { DEFAULT_WALK_BUDGET_MS, yieldToMain } from "@/utils/scheduler"
 import {
+  getEffectiveTagSet,
   isDontWalkIntoAndDontTranslateAsChildElement,
   isHTMLElement,
   isShallowBlockHTMLElement,
@@ -170,7 +170,7 @@ function* walkNode(
   }
 
   // force block will force the current and ancestor elements to be block node
-  forceBlock = forceBlock || FORCE_BLOCK_TAGS.has(element.tagName)
+  forceBlock = forceBlock || getEffectiveTagSet(config, "forceBlockTags").has(element.tagName)
 
   if (element.textContent?.trim() === "" && !forceBlock) {
     setNaturalTransNodeKind(element, "none")
@@ -183,8 +183,9 @@ function* walkNode(
   // One computed-style resolution feeds both shallow-shape checks (was up to
   // four separate getComputedStyle calls per element, #1881).
   const computedStyle = window.getComputedStyle(element)
-  const naturalBlockNode = forceBlock || isShallowBlockHTMLElement(element, computedStyle)
-  const naturalInlineNode = !naturalBlockNode && isShallowInlineHTMLElement(element, computedStyle)
+  const naturalBlockNode = forceBlock || isShallowBlockHTMLElement(element, computedStyle, config)
+  const naturalInlineNode =
+    !naturalBlockNode && isShallowInlineHTMLElement(element, computedStyle, config)
   setNaturalTransNodeKind(
     element,
     naturalBlockNode ? "block" : naturalInlineNode ? "inline" : "none",

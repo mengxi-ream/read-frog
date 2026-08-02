@@ -1,5 +1,6 @@
 import type { Config } from "@/types/config/config"
 import type { TransNode } from "@/types/dom"
+import type { TagSetFamily } from "@/utils/constants/dom-rules"
 import {
   BLOCK_ATTRIBUTE,
   BLOCK_CONTENT_CLASS,
@@ -8,12 +9,7 @@ import {
   INLINE_CONTENT_CLASS,
   NOTRANSLATE_CLASS,
 } from "@/utils/constants/dom-labels"
-import {
-  DONT_WALK_AND_TRANSLATE_TAGS,
-  DONT_WALK_BUT_TRANSLATE_TAGS,
-  FORCE_BLOCK_TAGS,
-  MAIN_CONTENT_IGNORE_TAGS,
-} from "@/utils/constants/dom-rules"
+import { DEFAULT_TAG_SETS } from "@/utils/constants/dom-rules"
 import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
 
 const ICON_FONT_FAMILY_NAMES = ["material icons", "material symbols", "font awesome"]
@@ -46,11 +42,11 @@ export function isEditable(element: HTMLElement): boolean {
 
 // shallow means only check the node itself, not the children
 // if a shallow inline node has children are block node, then it's block node rather than inline node
-export function isShallowInlineTransNode(node: Node): boolean {
+export function isShallowInlineTransNode(node: Node, config?: Config): boolean {
   if (isTextNode(node) && node.textContent?.trim()) {
     return true
   } else if (isHTMLElement(node)) {
-    return isShallowInlineHTMLElement(node)
+    return isShallowInlineHTMLElement(node, undefined, config)
   }
   return false
 }
@@ -60,11 +56,12 @@ export function isShallowInlineTransNode(node: Node): boolean {
 function isLargeInitialFloatingLetter(
   element: HTMLElement,
   computedStyle: CSSStyleDeclaration = window.getComputedStyle(element),
+  config?: Config,
 ): boolean {
   return (
     computedStyle.float === "left" &&
     !!element.nextSibling &&
-    isShallowInlineTransNode(element.nextSibling)
+    isShallowInlineTransNode(element.nextSibling, config)
   )
 }
 
@@ -87,19 +84,20 @@ function isInlineDisplay(display: string): boolean {
 export function isShallowInlineHTMLElement(
   element: HTMLElement,
   computedStyle?: CSSStyleDeclaration,
+  config?: Config,
 ): boolean {
   // to prevent too many inline nodes that make <body> as a paragraph node
   if (!element.textContent?.trim()) {
     return false
   }
 
-  if (FORCE_BLOCK_TAGS.has(element.tagName)) {
+  if (getEffectiveTagSet(config, "forceBlockTags").has(element.tagName)) {
     return false
   }
 
   const style = computedStyle ?? window.getComputedStyle(element)
 
-  if (isLargeInitialFloatingLetter(element, style)) {
+  if (isLargeInitialFloatingLetter(element, style, config)) {
     return true
   }
 
@@ -107,11 +105,11 @@ export function isShallowInlineHTMLElement(
 }
 
 // Note: !(inline node) != block node because of `notranslate` class and all cases not in the if else block
-export function isShallowBlockTransNode(node: Node): boolean {
+export function isShallowBlockTransNode(node: Node, config?: Config): boolean {
   if (isTextNode(node)) {
     return false
   } else if (isHTMLElement(node)) {
-    return isShallowBlockHTMLElement(node)
+    return isShallowBlockHTMLElement(node, undefined, config)
   }
   return false
 }
@@ -119,18 +117,35 @@ export function isShallowBlockTransNode(node: Node): boolean {
 export function isShallowBlockHTMLElement(
   element: HTMLElement,
   computedStyle?: CSSStyleDeclaration,
+  config?: Config,
 ): boolean {
-  if (FORCE_BLOCK_TAGS.has(element.tagName)) {
+  if (getEffectiveTagSet(config, "forceBlockTags").has(element.tagName)) {
     return true
   }
 
   const style = computedStyle ?? window.getComputedStyle(element)
 
-  if (isLargeInitialFloatingLetter(element, style)) {
+  if (isLargeInitialFloatingLetter(element, style, config)) {
     return false
   }
 
   return !isInlineDisplay(style.display)
+}
+
+/**
+ * The effective tag set for one family: the site-rule override when a matched
+ * rule touched it, the shipped constant otherwise. `config` is optional so
+ * callers without one (tests, defensive paths) degrade to the defaults instead
+ * of crashing — all production callers pass it.
+ */
+export function getEffectiveTagSet(
+  config: Config | undefined,
+  family: TagSetFamily,
+): ReadonlySet<string> {
+  if (config === undefined) {
+    return DEFAULT_TAG_SETS[family]
+  }
+  return getEffectiveSiteRule(config, window.location.href)[family] ?? DEFAULT_TAG_SETS[family]
 }
 
 export function isSiteRuleExcludedElement(element: HTMLElement, config: Config): boolean {
@@ -197,7 +212,7 @@ export function isDontWalkIntoButTranslateAsChildElement(
 ): boolean {
   const dontWalkClass = element.classList.contains(NOTRANSLATE_CLASS)
 
-  const dontWalkTag = DONT_WALK_BUT_TRANSLATE_TAGS.has(element.tagName)
+  const dontWalkTag = getEffectiveTagSet(config, "dontWalkButTranslateTags").has(element.tagName)
 
   const dontWalkPreserveText =
     config !== undefined && isSiteRulePreserveTextElement(element, config)
@@ -227,7 +242,7 @@ export function isDontWalkIntoAndDontTranslateAsChildElement(
   // Cheap structural predicates first; the getComputedStyle check runs last
   // because it can force a style recalculation, and the full-page walk
   // evaluates this predicate for every element (#1881).
-  const dontWalkInvalidTag = DONT_WALK_AND_TRANSLATE_TAGS.has(element.tagName)
+  const dontWalkInvalidTag = getEffectiveTagSet(config, "dontWalkTags").has(element.tagName)
   if (dontWalkInvalidTag) return true
 
   const dontWalkHidden = element.hidden
@@ -240,7 +255,7 @@ export function isDontWalkIntoAndDontTranslateAsChildElement(
 
   const dontWalkContent =
     config.translate.page.range !== "all" &&
-    MAIN_CONTENT_IGNORE_TAGS.has(element.tagName) &&
+    getEffectiveTagSet(config, "mainContentIgnoreTags").has(element.tagName) &&
     !isInsideContentContainer(element)
   if (dontWalkContent) return true
 

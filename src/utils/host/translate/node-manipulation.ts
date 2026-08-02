@@ -27,7 +27,7 @@ export async function removeOrShowNodeTranslation(
   config: Config,
   surface?: AnalyticsSurface,
 ): Promise<boolean> {
-  const node = findNearestAncestorBlockNodeAt(point)
+  const node = findNearestAncestorBlockNodeAt(point, config)
 
   if (!node || !isHTMLElement(node)) return false
 

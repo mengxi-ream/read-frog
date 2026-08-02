@@ -86,6 +86,20 @@ describe("built-in site rules", () => {
     expect(new Set(ids).size).toBe(ids.length)
   })
 
+  // siteRuleSchema is deliberately non-strict (unknown keys are stripped so a
+  // stored config never fails to parse), which means a typo'd delta key in a
+  // built-in rule — e.g. "dontWalkButTranslateTags.removee" — would pass the
+  // schema sweep above and silently no-op at resolve time. Catch it here.
+  it("ships no keys outside the canonical schema", () => {
+    const knownKeys = new Set(Object.keys(siteRuleSchema.shape))
+    const unknown = RAW_BUILT_IN_SITE_RULES.flatMap((rule) =>
+      Object.keys(rule)
+        .filter((key) => !knownKeys.has(key))
+        .map((key) => `${String(rule.id)}: ${key}`),
+    )
+    expect(unknown).toEqual([])
+  })
+
   it("does not ship legacy force selector keys", () => {
     const legacyOccurrences = RAW_BUILT_IN_SITE_RULES.flatMap((rule) =>
       LEGACY_FORCE_SELECTOR_KEYS.filter((key) => Object.hasOwn(rule, key)).map(
@@ -407,6 +421,34 @@ describe("built-in site rules", () => {
     )
 
     expect(preOnlyRules).toEqual([])
+  })
+
+  // SillyTavern renders backtick narration as <p><code>…</code></p>. CODE sits
+  // in DONT_WALK_BUT_TRANSLATE_TAGS, so a code-only paragraph never became a
+  // translation unit while its text was already included whenever any sibling
+  // text existed. SillyTavern is self-hosted, so the rule keys on localhost;
+  // LAN-IP/reverse-proxy users add a user rule with the same field.
+  // See https://github.com/mengxi-ream/read-frog/issues/1951
+  it("un-blocks CODE on localhost for SillyTavern narration (issue #1951)", () => {
+    for (const url of ["http://localhost:8000/", "http://127.0.0.1:8000/chat"]) {
+      const resolved = resolveSiteRule(url, BUILT_IN_SITE_RULES, [], [])
+
+      expect(resolved.matchedRuleIds).toContain("sillytavern")
+      expect(resolved.dontWalkButTranslateTags).not.toBeNull()
+      expect(resolved.dontWalkButTranslateTags!.has("CODE")).toBe(false)
+      expect(resolved.dontWalkButTranslateTags!.has("TIME")).toBe(true)
+    }
+
+    const elsewhere = resolveSiteRule("https://example.com/", BUILT_IN_SITE_RULES, [], [])
+    expect(elsewhere.dontWalkButTranslateTags).toBeNull()
+
+    const disabled = resolveSiteRule(
+      "http://localhost:8000/",
+      BUILT_IN_SITE_RULES,
+      [],
+      ["sillytavern"],
+    )
+    expect(disabled.dontWalkButTranslateTags).toBeNull()
   })
 
   it("retains independently verified content roots that cover their full match scope", () => {

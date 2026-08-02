@@ -103,6 +103,13 @@ describe("urlMatchesPattern", () => {
     expect(urlMatchesPattern("https://www.amazon.de/dp/1?ref=nav", "www.amazon.*/dp/*")).toBe(true)
   })
 
+  it("matches localhost and loopback IPs regardless of port", () => {
+    expect(urlMatchesPattern("http://localhost:8000/", "localhost")).toBe(true)
+    expect(urlMatchesPattern("http://localhost/chat", "localhost")).toBe(true)
+    expect(urlMatchesPattern("http://127.0.0.1:8000/chat", "127.0.0.1")).toBe(true)
+    expect(urlMatchesPattern("http://localhost.evil.com/", "localhost")).toBe(false)
+  })
+
   it("returns false for URLs it cannot handle instead of throwing", () => {
     expect(urlMatchesPattern("not a url", "github.com")).toBe(false)
     expect(urlMatchesPattern("not a url", "www.amazon.*")).toBe(false)

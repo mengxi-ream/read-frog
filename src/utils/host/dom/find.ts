@@ -63,13 +63,13 @@ function findElementAt(root: Document | ShadowRoot, point: Point): Element | nul
   return findDeepestElement(initialElement)
 }
 
-export function findNearestAncestorBlockNodeFor(element: Element) {
+export function findNearestAncestorBlockNodeFor(element: Element, config?: Config) {
   const startElement = element.closest(`.${CONTENT_WRAPPER_CLASS}`)?.parentElement || element
   let currentNode = startElement
   while (
     currentNode.parentElement &&
     isHTMLElement(currentNode) &&
-    isShallowInlineHTMLElement(currentNode)
+    isShallowInlineHTMLElement(currentNode, undefined, config)
   ) {
     currentNode = currentNode.parentElement
   }
@@ -80,11 +80,11 @@ export function findNearestAncestorBlockNodeFor(element: Element) {
  * Find the nearest block node from the point
  * @param point - The point to find the nearest block node
  */
-export function findNearestAncestorBlockNodeAt(point: Point) {
+export function findNearestAncestorBlockNodeAt(point: Point, config?: Config) {
   const currentNode = findElementAt(document, point)
   if (!currentNode) return null
 
-  return findNearestAncestorBlockNodeFor(currentNode)
+  return findNearestAncestorBlockNodeFor(currentNode, config)
 }
 
 export function deepQueryTopLevelSelector(

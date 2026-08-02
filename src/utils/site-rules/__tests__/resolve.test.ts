@@ -303,6 +303,131 @@ describe("resolveSiteRule", () => {
     expect(resolved.preserveTextSelector).toBe(".token")
   })
 
+  describe("tag-set families", () => {
+    it("leaves every family null when no matched rule touches it", () => {
+      const resolved = resolveSiteRule(
+        URL_ON_SITE,
+        [rule({ id: "built-in", excludeSelectors: ["nav"] })],
+        [],
+        [],
+      )
+      expect(resolved.dontWalkTags).toBeNull()
+      expect(resolved.dontWalkButTranslateTags).toBeNull()
+      expect(resolved.mainContentIgnoreTags).toBeNull()
+      expect(resolved.forceBlockTags).toBeNull()
+      expect(resolved.forceInlineTranslationTags).toBeNull()
+    })
+
+    it("seeds removals from the shipped defaults", () => {
+      const resolved = resolveSiteRule(
+        URL_ON_SITE,
+        [rule({ id: "built-in", "dontWalkButTranslateTags.remove": ["CODE"] })],
+        [],
+        [],
+      )
+      expect(resolved.dontWalkButTranslateTags).not.toBeNull()
+      expect(resolved.dontWalkButTranslateTags!.has("CODE")).toBe(false)
+      expect(resolved.dontWalkButTranslateTags!.has("TIME")).toBe(true)
+    })
+
+    it("lets a later rule re-add a tag removed by an earlier rule", () => {
+      const resolved = resolveSiteRule(
+        URL_ON_SITE,
+        [rule({ id: "built-in", "dontWalkButTranslateTags.remove": ["CODE"] })],
+        [rule({ id: "user", "dontWalkButTranslateTags.add": ["CODE"] })],
+        [],
+      )
+      expect(resolved.dontWalkButTranslateTags!.has("CODE")).toBe(true)
+    })
+
+    it("adds tags in raw, uppercase, and lowercase forms", () => {
+      const resolved = resolveSiteRule(
+        URL_ON_SITE,
+        [],
+        [rule({ id: "user", "dontWalkTags.add": ["foo-bar"] })],
+        [],
+      )
+      expect(resolved.dontWalkTags!.has("foo-bar")).toBe(true)
+      expect(resolved.dontWalkTags!.has("FOO-BAR")).toBe(true)
+    })
+
+    it("removes tags case-insensitively", () => {
+      const resolved = resolveSiteRule(
+        URL_ON_SITE,
+        [],
+        [rule({ id: "user", "dontWalkTags.remove": ["Svg", "pre"] })],
+        [],
+      )
+      expect(resolved.dontWalkTags!.has("svg")).toBe(false)
+      expect(resolved.dontWalkTags!.has("PRE")).toBe(false)
+    })
+
+    it("refuses to remove protected tags in any casing", () => {
+      const resolved = resolveSiteRule(
+        URL_ON_SITE,
+        [],
+        [rule({ id: "user", "dontWalkTags.remove": ["SCRIPT", "style", "Head"] })],
+        [],
+      )
+      expect(resolved.dontWalkTags!.has("SCRIPT")).toBe(true)
+      expect(resolved.dontWalkTags!.has("STYLE")).toBe(true)
+      expect(resolved.dontWalkTags!.has("HEAD")).toBe(true)
+    })
+
+    it("drops invalid tag names without killing valid siblings", () => {
+      const resolved = resolveSiteRule(
+        URL_ON_SITE,
+        [],
+        [
+          rule({
+            id: "user",
+            "dontWalkButTranslateTags.add": [".code", "div code", "1bad", "", "KBD"],
+          }),
+        ],
+        [],
+      )
+      expect(resolved.dontWalkButTranslateTags!.has("KBD")).toBe(true)
+      expect(resolved.dontWalkButTranslateTags!.has(".code")).toBe(false)
+      expect(resolved.dontWalkButTranslateTags!.has("div code")).toBe(false)
+    })
+
+    it("materializes the default set even for an empty delta", () => {
+      const resolved = resolveSiteRule(
+        URL_ON_SITE,
+        [],
+        [rule({ id: "user", "dontWalkButTranslateTags.add": [] })],
+        [],
+      )
+      expect(resolved.dontWalkButTranslateTags).not.toBeNull()
+      expect(resolved.dontWalkButTranslateTags!.has("CODE")).toBe(true)
+      expect(resolved.dontWalkButTranslateTags!.has("TIME")).toBe(true)
+    })
+
+    it("merges each family independently", () => {
+      const resolved = resolveSiteRule(
+        URL_ON_SITE,
+        [],
+        [
+          rule({
+            id: "user",
+            "mainContentIgnoreTags.remove": ["NAV"],
+            "forceBlockTags.add": ["X-CARD"],
+            "forceInlineTranslationTags.remove": ["SPAN"],
+          }),
+        ],
+        [],
+      )
+      expect(resolved.mainContentIgnoreTags!.has("NAV")).toBe(false)
+      expect(resolved.mainContentIgnoreTags!.has("HEADER")).toBe(true)
+      expect(resolved.forceBlockTags!.has("X-CARD")).toBe(true)
+      expect(resolved.forceBlockTags!.has("H1")).toBe(true)
+      expect(resolved.forceInlineTranslationTags!.has("SPAN")).toBe(false)
+      expect(resolved.forceInlineTranslationTags!.has("A")).toBe(true)
+      expect(resolved.dontWalkTags).toBeNull()
+      expect(resolved.dontWalkButTranslateTags).toBeNull()
+    })
+  })
+
   it("merges include and force selectors independently", () => {
     const resolved = resolveSiteRule(
       URL_ON_SITE,

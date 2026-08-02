@@ -1,4 +1,5 @@
 import type { SiteRule } from "@/types/config/site-rules"
+import { DEFAULT_TAG_SETS } from "@/utils/constants/dom-rules"
 import { logger } from "@/utils/logger"
 import { urlMatchesRule } from "./match"
 
@@ -16,6 +17,17 @@ export interface ResolvedSiteRule {
   forceInlineNodeSelector: string | null
   forceInlineStyleSelector: string | null
   preserveTextSelector: string | null
+  /**
+   * Tag-set families: `null` means no matched rule touched the family, so
+   * consumers fall back to the shipped constant Set (hot path unchanged).
+   * Non-null is the fully materialized effective set — defaults seeded in
+   * code, rule `.add`/`.remove` deltas applied.
+   */
+  dontWalkTags: ReadonlySet<string> | null
+  dontWalkButTranslateTags: ReadonlySet<string> | null
+  mainContentIgnoreTags: ReadonlySet<string> | null
+  forceBlockTags: ReadonlySet<string> | null
+  forceInlineTranslationTags: ReadonlySet<string> | null
   minCharacters: number | null
   minWords: number | null
   injectedCss: string | null
@@ -30,10 +42,31 @@ export const EMPTY_RESOLVED_SITE_RULE: ResolvedSiteRule = {
   forceInlineNodeSelector: null,
   forceInlineStyleSelector: null,
   preserveTextSelector: null,
+  dontWalkTags: null,
+  dontWalkButTranslateTags: null,
+  mainContentIgnoreTags: null,
+  forceBlockTags: null,
+  forceInlineTranslationTags: null,
   minCharacters: null,
   minWords: null,
   injectedCss: null,
 }
+
+/**
+ * Tags whose removal from `dontWalkTags` would be catastrophic (script/style
+ * text injected into translations, head metadata walked). Removal attempts are
+ * skipped with a warning. PRE is deliberately absent — un-blocking it is a
+ * legitimate per-site choice.
+ */
+export const PROTECTED_DONT_WALK_TAGS: ReadonlySet<string> = new Set([
+  "HEAD",
+  "TITLE",
+  "META",
+  "SCRIPT",
+  "NOSCRIPT",
+  "STYLE",
+  "LINK",
+])
 
 const selectorValidity = new Map<string, boolean>()
 
@@ -105,6 +138,67 @@ function mergeSelectorDelta(
   }
 
   return joinSelectors(merged)
+}
+
+const TAG_NAME_RE = /^[a-z][a-z0-9-]*$/i
+
+/**
+ * Tag-set families are seeded from the shipped default Set and patched with
+ * `.add`/`.remove` tag-name entries. Not routed through `mergeSelectorDelta`:
+ * its `querySelector` probe would happily accept class/descendant selectors
+ * that a `Set.has(tagName)` consumer can never match, silencing the mistake.
+ * Returns `null` when no matched rule references the family, so hot-path
+ * consumers keep using the constant Set untouched.
+ *
+ * Case handling: `tagName` is uppercase for HTML elements but case-preserving
+ * for SVG/MathML (e.g. "svg", "foreignObject"), so adds insert the raw,
+ * uppercase, and lowercase forms while removes delete all three. camelCase
+ * foreign tags therefore need the same casing in `.add` and `.remove`.
+ */
+function mergeTagSetDelta(
+  matched: SiteRule[],
+  addKey: keyof SiteRule,
+  removeKey: keyof SiteRule,
+  defaults: ReadonlySet<string>,
+  protectedTags?: ReadonlySet<string>,
+): ReadonlySet<string> | null {
+  if (!matched.some((rule) => rule[addKey] !== undefined || rule[removeKey] !== undefined)) {
+    return null
+  }
+
+  const merged = new Set(defaults)
+
+  const validTagNames = (entries: unknown): string[] => {
+    const tagNames: string[] = []
+    for (const entry of Array.isArray(entries) ? entries : []) {
+      const trimmed = typeof entry === "string" ? entry.trim() : ""
+      if (TAG_NAME_RE.test(trimmed)) {
+        tagNames.push(trimmed)
+      } else {
+        logger.warn(`[site-rules] Invalid tag name dropped: "${String(entry)}"`)
+      }
+    }
+    return tagNames
+  }
+
+  for (const rule of matched) {
+    for (const tagName of validTagNames(rule[addKey])) {
+      merged.add(tagName)
+      merged.add(tagName.toUpperCase())
+      merged.add(tagName.toLowerCase())
+    }
+    for (const tagName of validTagNames(rule[removeKey])) {
+      if (protectedTags?.has(tagName.toUpperCase())) {
+        logger.warn(`[site-rules] Protected tag cannot be removed: "${tagName}"`)
+        continue
+      }
+      merged.delete(tagName)
+      merged.delete(tagName.toUpperCase())
+      merged.delete(tagName.toLowerCase())
+    }
+  }
+
+  return merged
 }
 
 /**
@@ -194,6 +288,37 @@ export function resolveSiteRule(
       "preserveTextSelectors",
       "preserveTextSelectors.add",
       "preserveTextSelectors.remove",
+    ),
+    dontWalkTags: mergeTagSetDelta(
+      matched,
+      "dontWalkTags.add",
+      "dontWalkTags.remove",
+      DEFAULT_TAG_SETS.dontWalkTags,
+      PROTECTED_DONT_WALK_TAGS,
+    ),
+    dontWalkButTranslateTags: mergeTagSetDelta(
+      matched,
+      "dontWalkButTranslateTags.add",
+      "dontWalkButTranslateTags.remove",
+      DEFAULT_TAG_SETS.dontWalkButTranslateTags,
+    ),
+    mainContentIgnoreTags: mergeTagSetDelta(
+      matched,
+      "mainContentIgnoreTags.add",
+      "mainContentIgnoreTags.remove",
+      DEFAULT_TAG_SETS.mainContentIgnoreTags,
+    ),
+    forceBlockTags: mergeTagSetDelta(
+      matched,
+      "forceBlockTags.add",
+      "forceBlockTags.remove",
+      DEFAULT_TAG_SETS.forceBlockTags,
+    ),
+    forceInlineTranslationTags: mergeTagSetDelta(
+      matched,
+      "forceInlineTranslationTags.add",
+      "forceInlineTranslationTags.remove",
+      DEFAULT_TAG_SETS.forceInlineTranslationTags,
     ),
     minCharacters,
     minWords,
