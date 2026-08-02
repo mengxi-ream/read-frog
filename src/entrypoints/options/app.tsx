@@ -20,9 +20,6 @@ const CustomActionsPage = lazy(() =>
 const TranslationPage = lazy(() =>
   import("./pages/translation").then((module) => ({ default: module.TranslationPage })),
 )
-const SiteRulesPage = lazy(() =>
-  import("./pages/site-rules").then((module) => ({ default: module.SiteRulesPage })),
-)
 const VideoSubtitlesPage = lazy(() =>
   import("./pages/video-subtitles").then((module) => ({ default: module.VideoSubtitlesPage })),
 )
@@ -67,6 +64,11 @@ const NeverAutoTranslateWebsitesPage = lazy(() =>
 const TranslationControlPage = lazy(() =>
   import("./pages/translation/translation-control/control-page").then((module) => ({
     default: module.TranslationControlPage,
+  })),
+)
+const SiteRulesPage = lazy(() =>
+  import("./pages/translation/translation-control/site-rules").then((module) => ({
+    default: module.SiteRulesPage,
   })),
 )
 const TranslationQueuePage = lazy(() =>

@@ -1,6 +1,6 @@
 import { i18n } from "@/utils/i18n"
-import { ConfigDetailSection } from "../../components/config-detail-section"
-import { PageLayout } from "../../components/page-layout"
+import { ConfigDetailSection } from "../../../../components/config-detail-section"
+import { PageLayout } from "../../../../components/page-layout"
 import { BuiltInRules } from "./built-in-rules"
 import { UserRulesEditor } from "./user-rules-editor"
 

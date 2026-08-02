@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/base-ui/button"
 import { Input } from "@/components/ui/base-ui/input"
 import { i18n } from "@/utils/i18n"
 import { BUILT_IN_SITE_RULES } from "@/utils/site-rules/built-in"
-import { ConfigItem } from "../../components/config-item"
+import { ConfigItem } from "../../../../components/config-item"
 import { BuiltInRuleRow } from "./built-in-rule-row"
 
 const PAGE_SIZE = 50

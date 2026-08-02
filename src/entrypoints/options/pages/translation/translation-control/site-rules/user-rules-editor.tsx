@@ -17,7 +17,7 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
-import { ConfigItem } from "../../components/config-item"
+import { ConfigItem } from "../../../../components/config-item"
 import { validateUserRulesDocument } from "./validate-user-rules"
 
 const MAX_VISIBLE_ISSUES = 5
