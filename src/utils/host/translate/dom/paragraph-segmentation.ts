@@ -1,6 +1,7 @@
 import type { VirtualParagraphSourceSnapshot } from "../core/translation-state"
 import type { Config } from "@/types/config/config"
 import {
+  isBlockTransNode,
   isDontWalkIntoAndDontTranslateAsChildElement,
   isDontWalkIntoButTranslateAsChildElement,
   isHTMLElement,
@@ -10,6 +11,43 @@ import {
 } from "../../dom/filter"
 
 const PRESERVED_NEWLINE_WHITE_SPACE = new Set(["pre", "pre-wrap", "pre-line", "break-spaces"])
+
+/**
+ * True when the element's computed white-space renders literal newlines, i.e.
+ * blank lines in its text are real paragraph boundaries (the precondition for
+ * buildVirtualParagraphPlan).
+ */
+export function isNewlinePreservingElement(element: HTMLElement): boolean {
+  const whiteSpace = window.getComputedStyle(element).whiteSpace.trim().toLowerCase()
+  return PRESERVED_NEWLINE_WHITE_SPACE.has(whiteSpace)
+}
+
+/**
+ * Giant-paragraph split guard (#1881): splitting a giant paragraph into its
+ * descendant paragraph units is only sound when those units are block
+ * elements. In a newline-preserving flow container — an X note tweet is a
+ * pre-wrap div whose rich-text runs are sibling inline <span>s, each labeled
+ * a paragraph — the inline descendants are segments of ONE text flow.
+ * Observing them individually translates each segment as a single blob whose
+ * wrapper lands at the segment's end, destroying the blank-line paragraph
+ * structure. Such containers must be observed whole so the virtual-paragraph
+ * plan provides the split instead.
+ *
+ * The refusal is deliberately limited to the ALL-inline shape, judged by the
+ * same effective (post-site-rule) block marker the translation walker splits
+ * on: only then does observing the container whole guarantee the walker takes
+ * the single-node path where the virtual-paragraph plan runs. With any block
+ * descendant present the walker would take the per-child branch instead —
+ * refusing the split there would lose viewport gating without gaining the
+ * container-level plan.
+ */
+export function canSplitParagraphIntoDescendants(
+  element: HTMLElement,
+  descendantParagraphs: readonly HTMLElement[],
+): boolean {
+  if (!isNewlinePreservingElement(element)) return true
+  return descendantParagraphs.some((paragraph) => isBlockTransNode(paragraph))
+}
 
 const BLANK_LINE_DELIMITER_RE = /(?:\r\n?|\n)[^\S\r\n]*(?:\r\n?|\n)(?:[^\S\r\n]*(?:\r\n?|\n))*/g
 
@@ -447,8 +485,7 @@ export function buildVirtualParagraphPlan(
   layoutSource: HTMLElement,
   config: Config,
 ): VirtualParagraphPlan {
-  const whiteSpace = window.getComputedStyle(layoutSource).whiteSpace.trim().toLowerCase()
-  if (!PRESERVED_NEWLINE_WHITE_SPACE.has(whiteSpace)) {
+  if (!isNewlinePreservingElement(layoutSource)) {
     return { units: [], sourceSnapshots: [] }
   }
 

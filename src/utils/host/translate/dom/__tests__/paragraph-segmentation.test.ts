@@ -3,8 +3,10 @@ import type { Config } from "@/types/config/config"
 import { beforeEach, describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
+import { walkAndLabelElement } from "@/utils/host/dom/traversal"
 import {
   buildVirtualParagraphUnits,
+  canSplitParagraphIntoDescendants,
   liftParagraphInsertionBoundary,
   moveParagraphInsertionBoundaryAfterTrailingInlineImages,
   type DOMBoundary,
@@ -370,5 +372,58 @@ describe("buildVirtualParagraphUnits", () => {
       "1",
       "2",
     ])
+  })
+})
+
+describe("canSplitParagraphIntoDescendants", () => {
+  function walkedFixture(markup: string, whiteSpace: string): HTMLElement {
+    const root = createRoot(whiteSpace)
+    root.innerHTML = markup
+    document.body.appendChild(root)
+    walkAndLabelElement(root, "walk-split", DEFAULT_CONFIG)
+    return root
+  }
+
+  it("refuses to split a pre-wrap flow into inline span paragraphs (X note tweet)", () => {
+    const root = walkedFixture(
+      "<span>First paragraph\n\nSecond paragraph</span><span>Bold heading</span>",
+      "pre-wrap",
+    )
+    const spans = [...root.querySelectorAll("span")]
+
+    expect(canSplitParagraphIntoDescendants(root, spans)).toBe(false)
+  })
+
+  it("allows splitting a pre-wrap container into block paragraphs", () => {
+    const root = walkedFixture(
+      "<div>First message paragraph</div><div>Second message paragraph</div>",
+      "pre-wrap",
+    )
+    const divs = [...root.querySelectorAll("div")]
+
+    expect(canSplitParagraphIntoDescendants(root, divs)).toBe(true)
+  })
+
+  it("allows splitting a normal white-space container into inline paragraphs (#1881)", () => {
+    const root = walkedFixture(
+      "<span>First flat segment</span><span>Second flat segment</span>",
+      "normal",
+    )
+    const spans = [...root.querySelectorAll("span")]
+
+    expect(canSplitParagraphIntoDescendants(root, spans)).toBe(true)
+  })
+
+  it("allows splitting a pre-wrap flow with mixed block and inline paragraphs", () => {
+    // With a block descendant present the translation walker takes the
+    // per-child branch, so refusing the split would not reach the
+    // container-level virtual-paragraph plan — it would only lose gating.
+    const root = walkedFixture(
+      "<div>Block paragraph</div><span>Inline segment\n\nwith blank line</span>",
+      "pre-wrap",
+    )
+    const children = [...root.children] as HTMLElement[]
+
+    expect(canSplitParagraphIntoDescendants(root, children)).toBe(true)
   })
 })

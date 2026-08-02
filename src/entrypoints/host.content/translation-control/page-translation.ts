@@ -44,6 +44,7 @@ import {
   wasCharacterDataChangeExtensionDriven,
   wasNodeRemovedByExtension,
 } from "@/utils/host/translate/core/translation-state"
+import { canSplitParagraphIntoDescendants } from "@/utils/host/translate/dom/paragraph-segmentation"
 import {
   removeAllTranslatedWrapperNodes,
   translateNodes,
@@ -677,6 +678,9 @@ export class PageTranslationManager implements IPageTranslationManager {
    * <em>s) are not covered by any observed unit and stay untranslated. Stray
    * standalone inlines in a >3-viewport flat container are rare, and
    * numeric-only text is skipped by the pipeline anyway.
+   *
+   * Exception: a newline-preserving flow container is never split into
+   * inline descendants — see canSplitParagraphIntoDescendants.
    */
   private observeParagraphUnit(element: HTMLElement, walkId: string, depth: number): void {
     const observer = this.intersectionObserver
@@ -704,6 +708,15 @@ export class PageTranslationManager implements IPageTranslationManager {
     )
     if (innerTopLevelParagraphs.length === 0) {
       // Unsplittable giant (no nested paragraphs) — observe it whole.
+      observer.observe(element)
+      return
+    }
+    if (!canSplitParagraphIntoDescendants(element, innerTopLevelParagraphs)) {
+      // A newline-preserving flow (X note tweet: pre-wrap div of inline
+      // rich-text <span> paragraphs) must not be split — per-span observation
+      // translates each span as one blob at the span's end instead of
+      // interleaving per blank-line paragraph. Observed whole, the div-level
+      // virtual-paragraph plan segments it correctly.
       observer.observe(element)
       return
     }
