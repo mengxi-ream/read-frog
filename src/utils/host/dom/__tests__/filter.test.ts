@@ -273,3 +273,71 @@ describe("isDontWalkIntoAndDontTranslateAsChildElement", () => {
     document.body.removeChild(nav)
   })
 })
+
+describe("site-rule tag-set overrides", () => {
+  it("unblocks CODE via dontWalkButTranslateTags.remove while config-less calls keep the default", () => {
+    setHost("tagset-example.org")
+    const config = configWithSiteRule({
+      id: "tagset",
+      matches: "tagset-example.org",
+      "dontWalkButTranslateTags.remove": ["CODE"],
+    })
+    const code = document.createElement("code")
+
+    expect(isDontWalkIntoButTranslateAsChildElement(code, config)).toBe(false)
+    expect(isDontWalkIntoButTranslateAsChildElement(code)).toBe(true)
+  })
+
+  it("keeps notranslate blocking even when CODE is removed", () => {
+    setHost("tagset-example.org")
+    const config = configWithSiteRule({
+      id: "tagset",
+      matches: "tagset-example.org",
+      "dontWalkButTranslateTags.remove": ["CODE"],
+    })
+    const code = document.createElement("code")
+    code.classList.add(NOTRANSLATE_CLASS)
+
+    expect(isDontWalkIntoButTranslateAsChildElement(code, config)).toBe(true)
+  })
+
+  it("blocks extra tags via dontWalkTags.add", () => {
+    setHost("tagset-example.org")
+    const config = configWithSiteRule({
+      id: "tagset",
+      matches: "tagset-example.org",
+      "dontWalkTags.add": ["ASIDE"],
+    })
+    const aside = document.createElement("aside")
+
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(aside, config)).toBe(true)
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(aside, DEFAULT_CONFIG)).toBe(false)
+  })
+
+  it("keeps SCRIPT blocked despite a protected removal attempt", () => {
+    setHost("tagset-example.org")
+    const config = configWithSiteRule({
+      id: "tagset",
+      matches: "tagset-example.org",
+      "dontWalkTags.remove": ["SCRIPT"],
+    })
+    const script = document.createElement("script")
+
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(script, config)).toBe(true)
+  })
+
+  it("forces SPAN to block classification via forceBlockTags.add", () => {
+    setHost("tagset-example.org")
+    const config = configWithSiteRule({
+      id: "tagset",
+      matches: "tagset-example.org",
+      "forceBlockTags.add": ["SPAN"],
+    })
+    const span = document.createElement("span")
+    span.textContent = "text"
+
+    expect(isShallowBlockHTMLElement(span, undefined, config)).toBe(true)
+    expect(isShallowInlineHTMLElement(span, undefined, config)).toBe(false)
+    expect(isShallowBlockHTMLElement(span)).toBe(false)
+  })
+})

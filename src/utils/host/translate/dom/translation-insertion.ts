@@ -143,7 +143,7 @@ export async function insertTranslatedNodeIntoWrapper(
     wrapperStyleSources,
     forceInlineStyleSelector,
   )
-  const forceInlineTranslation = isForceInlineTranslation(layoutSource, layoutSourceDisplay)
+  const forceInlineTranslation = isForceInlineTranslation(layoutSource, layoutSourceDisplay, config)
   const shortInlineTranslation =
     isShortInlineTranslationText(sourceText) && layoutSourceDisplay !== "contents"
 

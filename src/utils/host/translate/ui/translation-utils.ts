@@ -1,6 +1,6 @@
+import type { Config } from "@/types/config/config"
 import type { TransNode } from "@/types/dom"
-import { FORCE_INLINE_TRANSLATION_TAGS } from "../../../constants/dom-rules"
-import { isHTMLElement } from "../../dom/filter"
+import { getEffectiveTagSet, isHTMLElement } from "../../dom/filter"
 
 // Pattern matches numbers with optional thousand separators and decimal points
 // Examples: "123", "1,234", "1,234.56", "1 234", "1.234,56" (European format)
@@ -33,10 +33,14 @@ export function isShortInlineTranslationText(text: string): boolean {
   return cleanedText.length <= SHORT_INLINE_MAX_CHARACTERS && wordCount <= SHORT_INLINE_MAX_WORDS
 }
 
-export function isForceInlineTranslation(targetNode: TransNode, display?: string): boolean {
+export function isForceInlineTranslation(
+  targetNode: TransNode,
+  display?: string,
+  config?: Config,
+): boolean {
   if (isHTMLElement(targetNode)) {
     return (
-      FORCE_INLINE_TRANSLATION_TAGS.has(targetNode.tagName) ||
+      getEffectiveTagSet(config, "forceInlineTranslationTags").has(targetNode.tagName) ||
       (display ?? window.getComputedStyle(targetNode).display).includes("flex")
     )
   }
