@@ -32,11 +32,24 @@ describe("toSystemPromptPreview", () => {
     expect(preview).toBe("You are helpful. ## Goal Be concise.")
   })
 
-  it("cuts a long prompt to a fixed length and marks it with an ellipsis", () => {
-    const preview = toSystemPromptPreview(makeAction({ systemPrompt: "a".repeat(200) }))
+  it("cuts a long prompt to a fixed word count and marks it with an ellipsis", () => {
+    const preview = toSystemPromptPreview(makeAction({ systemPrompt: "word ".repeat(100) }))
 
-    // 80 characters of prompt, then the ellipsis that shows it was cut.
-    expect(preview).toBe(`${"a".repeat(80)}…`)
+    expect(preview).toBe(`${"word ".repeat(8).trimEnd()}…`)
+  })
+
+  it("gives a Chinese prompt a preview of the same word count, not the same length", () => {
+    // 你好 and 世界 are a word each, so 8 words is 4 of these sentences — 19 characters, where
+    // the character budget this replaced would have run to 160 and carried far more content.
+    const preview = toSystemPromptPreview(makeAction({ systemPrompt: "你好世界。".repeat(40) }))
+
+    expect(preview).toBe(`${"你好世界。".repeat(3)}你好世界…`)
+  })
+
+  it("falls back to a character cut for text the segmenter finds no word breaks in", () => {
+    const preview = toSystemPromptPreview(makeAction({ systemPrompt: "a".repeat(400) }))
+
+    expect(preview).toBe(`${"a".repeat(160)}…`)
   })
 
   it("does not leave a dangling space in front of the ellipsis", () => {
