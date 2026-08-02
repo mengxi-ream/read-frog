@@ -347,7 +347,8 @@ describe("floatingButton controls", () => {
     expect(JSON.parse(openedUrl.searchParams.get("metaData")!)).toEqual({
       browser: "chrome",
       extension_version: "1.0.0",
-      page_url: "http://localhost:3000/private/path",
+      // The intent is query/hash stripping, not the origin itself.
+      page_url: `${window.location.origin}/private/path`,
     })
     expect(openPagePayload).toEqual({
       url: openedUrl.toString(),

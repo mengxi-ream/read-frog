@@ -326,6 +326,22 @@ describe("site-rule tag-set overrides", () => {
     expect(isDontWalkIntoAndDontTranslateAsChildElement(script, config)).toBe(true)
   })
 
+  it("honors mainContentIgnoreTags.remove in main-content mode", () => {
+    setHost("tagset-example.org")
+    const config = configWithSiteRule({
+      id: "tagset",
+      matches: "tagset-example.org",
+      "mainContentIgnoreTags.remove": ["NAV"],
+    })
+    config.translate.page.range = "main"
+    const nav = document.createElement("nav")
+    document.body.appendChild(nav)
+
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(nav, config)).toBe(false)
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(nav, createConfig("main"))).toBe(true)
+    document.body.removeChild(nav)
+  })
+
   it("forces SPAN to block classification via forceBlockTags.add", () => {
     setHost("tagset-example.org")
     const config = configWithSiteRule({

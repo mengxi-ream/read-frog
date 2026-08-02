@@ -86,6 +86,20 @@ describe("built-in site rules", () => {
     expect(new Set(ids).size).toBe(ids.length)
   })
 
+  // siteRuleSchema is deliberately non-strict (unknown keys are stripped so a
+  // stored config never fails to parse), which means a typo'd delta key in a
+  // built-in rule — e.g. "dontWalkButTranslateTags.removee" — would pass the
+  // schema sweep above and silently no-op at resolve time. Catch it here.
+  it("ships no keys outside the canonical schema", () => {
+    const knownKeys = new Set(Object.keys(siteRuleSchema.shape))
+    const unknown = RAW_BUILT_IN_SITE_RULES.flatMap((rule) =>
+      Object.keys(rule)
+        .filter((key) => !knownKeys.has(key))
+        .map((key) => `${String(rule.id)}: ${key}`),
+    )
+    expect(unknown).toEqual([])
+  })
+
   it("does not ship legacy force selector keys", () => {
     const legacyOccurrences = RAW_BUILT_IN_SITE_RULES.flatMap((rule) =>
       LEGACY_FORCE_SELECTOR_KEYS.filter((key) => Object.hasOwn(rule, key)).map(
