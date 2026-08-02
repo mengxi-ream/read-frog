@@ -27,6 +27,7 @@ import { getOwnerDocument } from "../../dom/node"
 import { extractTextContent } from "../../dom/traversal"
 import {
   buildVirtualParagraphPlan,
+  isNewlinePreservingElement,
   moveParagraphInsertionBoundaryAfterTrailingInlineImages,
   type VirtualParagraphUnit,
 } from "../dom/paragraph-segmentation"
@@ -218,7 +219,9 @@ async function translateVirtualParagraph(
     wrapper,
     isCurrent,
     "plain",
-    actionContext ? () => translateTextForPage(unit.text, "plain", actionContext) : undefined,
+    // Virtual units exist only inside newline-preserving containers, so their
+    // interior single newlines (bullet lists) are always semantic.
+    () => translateTextForPage(unit.text, "plain", actionContext, { preserveLineBreaks: true }),
   )
   if (!isCurrent()) {
     disposeVirtualParagraphGroup(group)
@@ -597,6 +600,17 @@ export async function translateNodesBilingualMode(
         ? isBilingualTranslationStateCurrent(bilingualState)
         : translatedWrapperNode.isConnected
 
+    // Newline-preserving containers render single "\n" as real line breaks
+    // (an X tweet whose lines have no blank-line separators is ONE unit here),
+    // so the provider must not collapse them. white-space inherits, so a text
+    // node's parent reports the effective value.
+    const layoutSourceElement = isHTMLElement(layoutSource)
+      ? layoutSource
+      : layoutSource.parentElement
+    const preserveLineBreaks = layoutSourceElement
+      ? isNewlinePreservingElement(layoutSourceElement)
+      : false
+
     const realTranslatedText = await getTranslatedTextAndRemoveSpinner(
       nodes,
       textContent,
@@ -604,7 +618,7 @@ export async function translateNodesBilingualMode(
       translatedWrapperNode,
       isCurrent,
       "plain",
-      actionContext ? () => translateTextForPage(textContent, "plain", actionContext) : undefined,
+      () => translateTextForPage(textContent, "plain", actionContext, { preserveLineBreaks }),
     )
 
     if (!isCurrent()) {

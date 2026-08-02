@@ -66,8 +66,10 @@ async function translateTextUsingPageConfig(
       webSummary?: string | null
     }
     textFormat?: TranslationTextFormat
+    preserveLineBreaks?: boolean
     // Session captured at pipeline entry by the caller; see translateTextForPage.
     sessionId?: string
+    detectedSourceCode?: LangCodeISO6393
     configuredPrompt?: "default" | "custom"
     translationActionContext?: TranslationActionContext
     forceRetranslation?: boolean
@@ -79,6 +81,15 @@ async function translateTextUsingPageConfig(
   }
 
   const providerConfig = resolveProviderConfig(config, "translate")
+
+  // Per-line requests (preserveLineBreaks) make the provider's own per-item
+  // auto-detection unreliable — a 3-letter acronym line detects as the wrong
+  // language ("SEO" → "这"). The page-level detection is the reliable signal,
+  // so resolve it here where storage is reachable and pass it as a hint.
+  const detectedSourceCode =
+    options.preserveLineBreaks && config.language.sourceCode === "auto"
+      ? ((await getDetectedCodeFromStorage()) ?? undefined)
+      : undefined
 
   // Backstop only: the page modes hoist this check before DOM insertion, but
   // other callers (e.g. the page title) still rely on it here.
@@ -113,6 +124,8 @@ async function translateTextUsingPageConfig(
     extraHashTags: options.extraHashTags,
     webPageContext: options.webPageContext,
     textFormat: options.textFormat,
+    preserveLineBreaks: options.preserveLineBreaks,
+    detectedSourceCode,
     sessionId: options.sessionId,
     configuredPrompt: options.configuredPrompt,
     translationActionContext: options.translationActionContext,
@@ -128,6 +141,7 @@ export async function translateTextForPage(
   text: string,
   textFormat: TranslationTextFormat = "plain",
   translationActionContext?: TranslationActionContext,
+  options?: { preserveLineBreaks?: boolean },
 ): Promise<string> {
   // Capture the session id synchronously at pipeline entry. Reading it later
   // (after the awaits below, e.g. the network-backed page summary) could see
@@ -145,6 +159,7 @@ export async function translateTextForPage(
   return translateTextUsingPageConfig(config, text, {
     webPageContext,
     textFormat,
+    preserveLineBreaks: options?.preserveLineBreaks,
     sessionId,
     configuredPrompt: config.translate.customPromptsConfig.promptId === null ? "default" : "custom",
     translationActionContext,
@@ -228,5 +243,7 @@ export async function translateTextForInput(
     providerConfig,
     enableAIContentAware: config.translate.enableAIContentAware,
     webPageContext,
+    // User-typed newlines are always meaningful.
+    preserveLineBreaks: true,
   })
 }

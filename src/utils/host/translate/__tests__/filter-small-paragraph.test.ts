@@ -120,9 +120,11 @@ describe.each(["bilingual", "translationOnly"] as const)("%s translation", (mode
     await translateNodes([textNode], "walk-id", false, createConfig({ mode }))
 
     expect(mocks.translateTextForPage).toHaveBeenCalledOnce()
-    expect(mocks.translateTextForPage).toHaveBeenCalledWith(
-      "Hello @openai",
-      mode === "translationOnly" ? "html" : "plain",
-    )
+    // Bilingual passes a trailing actionContext/options pair; the
+    // translationOnly html path calls with (text, format) only — assert on
+    // the leading args shared by both shapes.
+    const callArgs = mocks.translateTextForPage.mock.calls.at(-1)!
+    expect(callArgs[0]).toBe("Hello @openai")
+    expect(callArgs[1]).toBe(mode === "translationOnly" ? "html" : "plain")
   })
 })
