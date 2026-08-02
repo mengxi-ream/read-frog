@@ -4520,5 +4520,11 @@
       ".forum-topbar",
       ".forum-bottombar"
     ]
+  },
+  {
+    "id": "sillytavern",
+    "description": "SillyTavern renders backtick narration as <p><code>; translate CODE as part of its paragraph (fenced code blocks stay protected by PRE)",
+    "matches": ["localhost", "127.0.0.1"],
+    "dontWalkButTranslateTags.remove": ["CODE"]
   }
 ]
