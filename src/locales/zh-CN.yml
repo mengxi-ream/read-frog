@@ -1184,6 +1184,7 @@ subtitles:
     downloadSource: 下载原字幕
   state:
     loading: Read Frog 字幕加载中
+    translating: 翻译中…
     error: 发生错误
   errors:
     http429: 429 youtube 字幕接口请求次数过多，请稍后再试

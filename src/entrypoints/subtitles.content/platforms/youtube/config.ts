@@ -25,6 +25,14 @@ function createYoutubeAiSubtitlesContext() {
   return videoId ? { videoId, url: location.href } : null
 }
 
+/** YouTube marks mid-rolls / pre-rolls on the html5 player with these classes. */
+function isYoutubeAdPlaying(playerContainer: HTMLElement): boolean {
+  return (
+    playerContainer.classList.contains("ad-showing") ||
+    playerContainer.classList.contains("ad-interrupting")
+  )
+}
+
 const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
   watch: {
     embedded: false,
@@ -49,6 +57,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
     },
     getVideoId: getYoutubeVideoId,
     createAiSubtitlesContext: createYoutubeAiSubtitlesContext,
+    isAdPlaying: isYoutubeAdPlaying,
   },
 
   embed: {
@@ -73,6 +82,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
     },
     getVideoId: getYoutubeVideoId,
     createAiSubtitlesContext: createYoutubeAiSubtitlesContext,
+    isAdPlaying: isYoutubeAdPlaying,
   },
 
   shorts: {
@@ -97,6 +107,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
     },
     getVideoId: getYoutubeVideoId,
     createAiSubtitlesContext: createYoutubeAiSubtitlesContext,
+    isAdPlaying: isYoutubeAdPlaying,
   },
 }
 

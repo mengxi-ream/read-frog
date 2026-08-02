@@ -96,4 +96,112 @@ describe("segmentation pipeline", () => {
     expect(afterAdvance).toBeGreaterThan(afterStart)
     expect(afterAdvance).toBeLessThan(150_000 + 2 * PROCESS_LOOK_AHEAD_MS)
   })
+
+  it("notifies onChunkSegmented after replacing a processed chunk", async () => {
+    const rawFragments = [
+      { text: "hello", start: 0, end: 500 },
+      { text: "world", start: 500, end: 1000 },
+    ]
+    const onChunkSegmented = vi.fn<(...args: any[]) => any>()
+
+    const pipeline = new SegmentationPipeline({
+      baselineFragments: [{ text: "hello world", start: 0, end: 1000 }],
+      rawFragments,
+      getVideoElement: () => ({ currentTime: 0 }) as HTMLVideoElement,
+      getSourceLanguage: () => "en",
+      onChunkSegmented,
+    })
+
+    await (pipeline as any).processNextChunk(0)
+
+    expect(onChunkSegmented).toHaveBeenCalledTimes(1)
+    expect(onChunkSegmented).toHaveBeenCalledWith(rawFragments, [
+      { text: "hello world", start: 0, end: 1000 },
+    ])
+  })
+
+  it("falls back to local optimize when config is missing instead of orphaning the chunk", async () => {
+    const { getLocalConfig } = await import("@/utils/config/storage")
+    vi.mocked(getLocalConfig).mockResolvedValueOnce(null)
+
+    const rawFragments = [
+      { text: "hello", start: 0, end: 500 },
+      { text: "world", start: 500, end: 1000 },
+    ]
+    const onChunkSegmented = vi.fn<(...args: any[]) => any>()
+
+    const pipeline = new SegmentationPipeline({
+      baselineFragments: [{ text: "hello world", start: 0, end: 1000 }],
+      rawFragments,
+      getVideoElement: () => ({ currentTime: 0 }) as HTMLVideoElement,
+      getSourceLanguage: () => "en",
+      onChunkSegmented,
+    })
+
+    await (pipeline as any).processNextChunk(0)
+
+    expect(onChunkSegmented).toHaveBeenCalled()
+    // Starts must not remain "segmented" with no replacement applied.
+    expect(pipeline.processedFragments.length).toBeGreaterThan(0)
+  })
+
+  it("replaceProcessedChunk drops cues that overlap the window by interval", () => {
+    const pipeline = new SegmentationPipeline({
+      baselineFragments: [
+        { text: "spans into window", start: 0, end: 1500 },
+        { text: "after", start: 2000, end: 3000 },
+      ],
+      rawFragments: [
+        { text: "a", start: 1000, end: 1500 },
+        { text: "b", start: 1500, end: 2000 },
+      ],
+      getVideoElement: () => ({ currentTime: 0 }) as HTMLVideoElement,
+      getSourceLanguage: () => "en",
+    })
+
+    ;(pipeline as any).replaceProcessedChunk(
+      [
+        { text: "a", start: 1000, end: 1500 },
+        { text: "b", start: 1500, end: 2000 },
+      ],
+      [{ text: "recut", start: 1000, end: 2000 }],
+    )
+
+    expect(pipeline.processedFragments).toEqual([
+      { text: "recut", start: 1000, end: 2000 },
+      { text: "after", start: 2000, end: 3000 },
+    ])
+  })
+
+  it("does not apply segmentation results after stop", async () => {
+    const rawFragments = [
+      { text: "hello", start: 0, end: 500 },
+      { text: "world", start: 500, end: 1000 },
+    ]
+    const onChunkSegmented = vi.fn<(...args: any[]) => any>()
+    let resolveAi: (value: any) => void
+    const aiPromise = new Promise((resolve) => {
+      resolveAi = resolve
+    })
+
+    const { aiSegmentBlock } = await import("@/utils/subtitles/processor/ai-segmentation")
+    vi.mocked(aiSegmentBlock).mockImplementationOnce(() => aiPromise as any)
+
+    const pipeline = new SegmentationPipeline({
+      baselineFragments: [{ text: "hello world", start: 0, end: 1000 }],
+      rawFragments,
+      getVideoElement: () => ({ currentTime: 0 }) as HTMLVideoElement,
+      getSourceLanguage: () => "en",
+      onChunkSegmented,
+    })
+
+    const pending = (pipeline as any).processNextChunk(0)
+    pipeline.stop()
+    resolveAi!([{ text: "hello world", start: 0, end: 1000 }])
+    await pending
+
+    expect(onChunkSegmented).not.toHaveBeenCalled()
+    // Baseline fragments remain untouched after stop mid-flight.
+    expect(pipeline.processedFragments).toEqual([{ text: "hello world", start: 0, end: 1000 }])
+  })
 })

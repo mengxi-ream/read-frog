@@ -1,6 +1,10 @@
 import type { StateData, SubtitlesFragment } from "../types"
 import { describe, expect, it } from "vitest"
-import { hasRenderableSubtitleByMode, isAwaitingTranslation } from "../display-rules"
+import {
+  hasRenderableSubtitleByMode,
+  isAwaitingTranslation,
+  isTranslationPending,
+} from "../display-rules"
 
 function makeSubtitle(overrides?: Partial<SubtitlesFragment>): SubtitlesFragment {
   return {
@@ -63,5 +67,23 @@ describe("isAwaitingTranslation", () => {
     const idleState: StateData = { state: "idle" }
     // subtitle without translation → awaiting, regardless of stateData
     expect(isAwaitingTranslation(sub, idleState)).toBe(true)
+  })
+})
+
+describe("isTranslationPending", () => {
+  it("returns true when translation is missing", () => {
+    expect(isTranslationPending(makeSubtitle())).toBe(true)
+  })
+
+  it("returns false when translation is present", () => {
+    expect(isTranslationPending(makeSubtitle({ translation: "你好" }))).toBe(false)
+  })
+
+  it("returns false for empty-string translation (resolved but blank)", () => {
+    expect(isTranslationPending(makeSubtitle({ translation: "" }))).toBe(false)
+  })
+
+  it("returns false when subtitle is null", () => {
+    expect(isTranslationPending(null)).toBe(false)
   })
 })

@@ -1184,6 +1184,7 @@ subtitles:
     downloadSource: Descargar subtítulos de origen
   state:
     loading: Read Frog está cargando subtítulos
+    translating: Traduciendo…
     error: Se produjo un error
   errors:
     http429: 429 Demasiadas solicitudes a la API de subtítulos de youtube; inténtalo de nuevo más tarde

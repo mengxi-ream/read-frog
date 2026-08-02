@@ -1184,6 +1184,7 @@ subtitles:
     downloadSource: Download source subtitles
   state:
     loading: Read Frog loading captions
+    translating: Translating…
     error: Error occurred
   errors:
     http429: 429 Too many requests to youtube subtitle API, please try again later

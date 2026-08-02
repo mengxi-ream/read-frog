@@ -28,6 +28,9 @@ import {
 } from "@/utils/subtitles/processor/translator"
 import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
 import {
+  adPlayingAtom,
+  currentTimeMsAtom,
+  sourceTrackAtom,
   subtitlesPositionAtom,
   subtitlesSettingsPanelOpenAtom,
   subtitlesSettingsPanelViewAtom,
@@ -95,6 +98,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private translationCoordinator: TranslationCoordinator | null = null
   private translatedSubtitlesDownloader: TranslatedSubtitlesDownloader | null = null
   private subtitlesSummaryContextHash: string | null = null
+  private adObserver: MutationObserver | null = null
+  private observedAdPlayer: HTMLElement | null = null
 
   get embedded() {
     return this.config.embedded
@@ -131,6 +136,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     void this.renderTranslateButton()
 
     await this.initializeScheduler()
+    this.setupAdObserver()
     await this.tryAutoStartSubtitles()
     this.setupNavigationListeners()
   }
@@ -190,6 +196,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private resetForNavigation() {
     this.switchOperationId++
     this.clearNavigationReinitTimeout()
+    this.teardownAdObserver()
     this.destroyScheduler()
     this.clearRuntimeSession()
     this.clearSourceCache()
@@ -276,10 +283,12 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     this.sessionProcessedFragments = []
     this.sessionVideoId = null
     this.subtitlesSummaryContextHash = null
+    subtitlesStore.set(sourceTrackAtom, [])
   }
 
   private clearVisibleStateForNavigation() {
     this.clearNavigationReinitTimeout()
+    this.teardownAdObserver()
     this.translatedSubtitlesDownloader?.dispose()
     this.destroyScheduler()
     this.translationCoordinator?.stop()
@@ -350,7 +359,62 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     void this.renderTranslateButton()
 
     await this.initializeScheduler()
+    this.setupAdObserver()
     await this.tryAutoStartSubtitles()
+  }
+
+  private setupAdObserver() {
+    if (!this.config.isAdPlaying) {
+      return
+    }
+
+    this.teardownAdObserver()
+
+    const player = document.querySelector<HTMLElement>(this.config.selectors.playerContainer)
+    if (!player) {
+      subtitlesStore.set(adPlayingAtom, false)
+      return
+    }
+
+    this.observedAdPlayer = player
+    this.syncAdPlayingState()
+
+    this.adObserver = new MutationObserver(() => {
+      this.syncAdPlayingState()
+    })
+    this.adObserver.observe(player, { attributes: true, attributeFilter: ["class"] })
+  }
+
+  private teardownAdObserver() {
+    this.adObserver?.disconnect()
+    this.adObserver = null
+    this.observedAdPlayer = null
+    subtitlesStore.set(adPlayingAtom, false)
+  }
+
+  private syncAdPlayingState() {
+    const isAdPlaying = this.config.isAdPlaying
+    if (!isAdPlaying) {
+      return
+    }
+
+    const player =
+      this.observedAdPlayer ??
+      document.querySelector<HTMLElement>(this.config.selectors.playerContainer)
+
+    const playing = !!player && isAdPlaying(player)
+    const wasPlaying = subtitlesStore.get(adPlayingAtom)
+    if (playing === wasPlaying) {
+      return
+    }
+
+    subtitlesStore.set(adPlayingAtom, playing)
+
+    // Resync content time when the ad ends so the next cue is correct immediately.
+    if (!playing) {
+      this.subtitlesScheduler?.resyncFromVideo()
+      this.translationCoordinator?.requestTick()
+    }
   }
 
   private async renderTranslateButton() {
@@ -638,8 +702,33 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       ...fragment,
       translation: fragment.text,
     }))
+    this.publishSourceTrack(this.sourceProcessedSubtitles)
     this.subtitlesScheduler?.supplementSubtitles(this.sessionProcessedFragments)
     this.subtitlesScheduler?.setState("idle")
+  }
+
+  private publishSourceTrack(fragments: SubtitlesFragment[]) {
+    // timeupdate may not have fired yet (paused / enable mid-video); keep display time fresh.
+    const video = this.subtitlesScheduler?.getVideoElement()
+    if (video) {
+      subtitlesStore.set(currentTimeMsAtom, video.currentTime * 1000)
+    }
+    subtitlesStore.set(sourceTrackAtom, [...fragments])
+  }
+
+  private replaceSourceTrackWindow(
+    windowStartMs: number,
+    windowEndMs: number,
+    nextFragments: SubtitlesFragment[],
+  ) {
+    const previous = subtitlesStore.get(sourceTrackAtom)
+    // Drop any cue that overlaps the window (not just cues whose start falls inside it).
+    // Half-open: keep if end <= windowStart || start >= windowEnd.
+    const kept = previous.filter(
+      (fragment) => fragment.end <= windowStartMs || fragment.start >= windowEndMs,
+    )
+    const next = [...kept, ...nextFragments].sort((a, b) => a.start - b.start)
+    this.publishSourceTrack(next)
   }
 
   private async processTranslatedSubtitles() {
@@ -659,17 +748,29 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       subtitlesTextContent: this.sessionSubtitles.map((f) => f.text).join(""),
     }
 
+    this.sessionProcessedFragments = [...this.sourceProcessedSubtitles]
+
+    // Source track for display fallback; scheduler only receives translated cues later.
+    this.publishSourceTrack(this.sessionProcessedFragments)
+
     if (useAiSegmentation) {
-      this.sessionProcessedFragments = [...this.sourceProcessedSubtitles]
       this.segmentationPipeline = new SegmentationPipeline({
         baselineFragments: this.sourceProcessedSubtitles,
         rawFragments: this.sessionSubtitles,
         getVideoElement: () => this.subtitlesScheduler?.getVideoElement() ?? null,
         getSourceLanguage: () => this.fetcher.getSourceLanguage(),
         preSegmented: this.fetcher.isPreSegmented?.(),
+        onChunkSegmented: (chunk, nextFragments) => {
+          if (chunk.length === 0 || !chunk[0]) return
+          const chunkStart = chunk[0].start
+          const chunkEnd = chunk.at(-1)!.end
+          this.replaceSourceTrackWindow(chunkStart, chunkEnd, nextFragments)
+          // Drop identity-changed/spanning translations; keep translations for unchanged cues
+          // so preSegmented (and partial AI recuts) do not wipe work then skip re-translate.
+          scheduler.reconcileTranslatedCuesAfterRecut(chunkStart, chunkEnd, nextFragments)
+          this.translationCoordinator?.noteFragmentListChanged()
+        },
       })
-    } else {
-      this.sessionProcessedFragments = [...this.sourceProcessedSubtitles]
     }
 
     this.translationCoordinator = new TranslationCoordinator({

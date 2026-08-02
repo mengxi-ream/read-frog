@@ -1184,6 +1184,7 @@ subtitles:
     downloadSource: 下載原始字幕
   state:
     loading: 陪讀蛙字幕載入中
+    translating: 翻譯中…
     error: 發生錯誤
   errors:
     http429: 429 YouTube 字幕 API 請求次數過多，請稍後再試

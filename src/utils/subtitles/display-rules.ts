@@ -18,3 +18,8 @@ export function isAwaitingTranslation(
 ): boolean {
   return subtitle ? !subtitle.translation : stateData?.state === "loading"
 }
+
+/** True when a cue exists but translation has not been filled in yet (undefined/null). */
+export function isTranslationPending(subtitle: SubtitlesFragment | null): boolean {
+  return !!subtitle && (subtitle.translation === undefined || subtitle.translation === null)
+}

@@ -1068,6 +1068,7 @@ subtitles:
     downloadSource: Kaynak altyazıları indir
   state:
     loading: Read Frog altyazılar yükleniyor
+    translating: Çevriliyor…
     error: Bir hata oluştu
   errors:
     http429: 429 YouTube altyazı API'sine çok fazla istek gönderildi. Lütfen biraz bekleyip tekrar deneyin.

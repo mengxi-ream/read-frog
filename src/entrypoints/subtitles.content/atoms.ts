@@ -11,7 +11,37 @@ export const subtitlesStore = createStore()
 
 export const currentTimeMsAtom = atom<number>(0)
 
+/**
+ * True while the host player is playing an ad (e.g. YouTube mid-roll).
+ * Suppresses overlay content so main-video captions are not shown over ads.
+ * Does not change user toggle intent (`subtitlesVisibleAtom`).
+ */
+export const adPlayingAtom = atom<boolean>(false)
+
+/** Scheduler’s current *translated* cue only (null when no translated cue covers now). */
 export const currentSubtitleAtom = atom<SubtitlesFragment | null>(null)
+
+/** Best original track (baseline or AI-segmented). Read-only for display/coordinator consumers. */
+export const sourceTrackAtom = atom<SubtitlesFragment[]>([])
+
+/**
+ * Display cue: prefer a translated scheduler cue; otherwise fall back to the source track
+ * at the current time (used for original / pending bilingual UI).
+ */
+export const displaySubtitleAtom = atom((get): SubtitlesFragment | null => {
+  if (get(adPlayingAtom)) {
+    return null
+  }
+
+  const timeMs = get(currentTimeMsAtom)
+  const scheduled = get(currentSubtitleAtom)
+  // Only prefer the scheduler cue when it still covers now (guards time/atom desync).
+  if (scheduled && scheduled.start <= timeMs && scheduled.end > timeMs) {
+    return scheduled
+  }
+
+  return get(sourceTrackAtom).find((f) => f.start <= timeMs && f.end > timeMs) ?? null
+})
 
 export const subtitlesStateAtom = atom<StateData | null>(null)
 
@@ -51,18 +81,25 @@ export interface SubtitlePosition {
 export const subtitlesPositionAtom = atom<SubtitlePosition>({ ...DEFAULT_SUBTITLE_POSITION })
 
 export const subtitlesDisplayAtom = atom((get) => {
-  const subtitle = get(currentSubtitleAtom)
+  const subtitle = get(displaySubtitleAtom)
   const stateData = get(subtitlesStateAtom)
   const isVisible = get(subtitlesVisibleAtom)
+  const { style } = get(configFieldsAtomMap.videoSubtitles)
+
+  // translationOnly must never fall back to source-only original for "content".
+  const contentSubtitle =
+    style.displayMode === "translationOnly" ? (subtitle?.translation ? subtitle : null) : subtitle
 
   return {
-    subtitle,
+    subtitle: contentSubtitle,
     stateData,
     isVisible,
   }
 })
 
 export const subtitlesShowStateAtom = atom((get): Exclude<SubtitlesState, "idle"> | undefined => {
+  if (get(adPlayingAtom)) return undefined
+
   const { subtitle, stateData } = get(subtitlesDisplayAtom)
   const { style } = get(configFieldsAtomMap.videoSubtitles)
   const hasRenderable = hasRenderableSubtitleByMode(subtitle, style.displayMode)
@@ -74,6 +111,8 @@ export const subtitlesShowStateAtom = atom((get): Exclude<SubtitlesState, "idle"
 })
 
 export const subtitlesShowContentAtom = atom((get): boolean => {
+  if (get(adPlayingAtom)) return false
+
   const { subtitle, stateData, isVisible } = get(subtitlesDisplayAtom)
   const { style } = get(configFieldsAtomMap.videoSubtitles)
 
