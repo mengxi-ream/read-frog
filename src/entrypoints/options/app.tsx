@@ -64,9 +64,24 @@ const NeverAutoTranslateWebsitesPage = lazy(() =>
     default: module.NeverAutoTranslateWebsitesPage,
   })),
 )
+const TranslationControlPage = lazy(() =>
+  import("./pages/translation/translation-control/control-page").then((module) => ({
+    default: module.TranslationControlPage,
+  })),
+)
+const TranslationQueuePage = lazy(() =>
+  import("./pages/translation/translation-queue/queue-page").then((module) => ({
+    default: module.TranslationQueuePage,
+  })),
+)
 const ConfigBackupPage = lazy(() =>
   import("./pages/preference/config/config-backup").then((module) => ({
     default: module.ConfigBackupPage,
+  })),
+)
+const ExtensionActivationPage = lazy(() =>
+  import("./pages/preference/extension-activation/activation-page").then((module) => ({
+    default: module.ExtensionActivationPage,
   })),
 )
 const SubtitlesStylePage = lazy(() =>
@@ -77,6 +92,11 @@ const SubtitlesStylePage = lazy(() =>
 const SubtitlesCustomPromptsPage = lazy(() =>
   import("./pages/video-subtitles/custom-prompts/prompts").then((module) => ({
     default: module.SubtitlesCustomPromptsPage,
+  })),
+)
+const SubtitlesQueuePage = lazy(() =>
+  import("./pages/video-subtitles/subtitles-queue/queue-page").then((module) => ({
+    default: module.SubtitlesQueuePage,
   })),
 )
 
@@ -95,13 +115,18 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/tts": TextToSpeechPage,
   "/contact-us": ContactUsPage,
   "/preference/config-backup": ConfigBackupPage,
+  "/preference/extension-activation": ExtensionActivationPage,
   "/page-translation/custom-css": CustomCssPage,
   "/page-translation/prompts": PersonalizedPromptsPage,
-  "/page-translation/auto-translate-websites": AutoTranslateWebsitesPage,
-  "/page-translation/never-auto-translate-websites": NeverAutoTranslateWebsitesPage,
-  "/page-translation/site-rules": SiteRulesPage,
+  "/page-translation/translation-control": TranslationControlPage,
+  "/page-translation/translation-control/auto-translate-websites": AutoTranslateWebsitesPage,
+  "/page-translation/translation-control/never-auto-translate-websites":
+    NeverAutoTranslateWebsitesPage,
+  "/page-translation/translation-control/site-rules": SiteRulesPage,
+  "/page-translation/translation-queue": TranslationQueuePage,
   "/video-subtitles/style": SubtitlesStylePage,
   "/video-subtitles/prompts": SubtitlesCustomPromptsPage,
+  "/video-subtitles/subtitles-queue": SubtitlesQueuePage,
 }
 
 function RouteLoadingFallback() {

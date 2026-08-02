@@ -34,8 +34,9 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.preference.title",
   },
   {
+    // Its own page, drilled into from the Preference page's Extension activation section.
     sectionId: "site-control-mode",
-    route: "/preference",
+    route: "/preference/extension-activation",
     titleKey: "options.preference.extensionActivation.mode.title",
     descriptionKey: "options.preference.extensionActivation.mode.description",
     pageKey: "options.preference.title",
@@ -209,7 +210,7 @@ export const SEARCH_ITEMS: SearchItem[] = [
   {
     // Its own page, drilled into from the Translation control section.
     sectionId: "auto-translate-website",
-    route: "/page-translation/auto-translate-websites",
+    route: "/page-translation/translation-control/auto-translate-websites",
     titleKey: "options.translation.translationControl.autoTranslateWebsite.title",
     descriptionKey: "options.translation.translationControl.autoTranslateWebsite.description",
     pageKey: "options.translation.title",
@@ -217,48 +218,50 @@ export const SEARCH_ITEMS: SearchItem[] = [
   {
     // Its own page, drilled into from the Translation control section.
     sectionId: "never-auto-translate-website",
-    route: "/page-translation/never-auto-translate-websites",
+    route: "/page-translation/translation-control/never-auto-translate-websites",
     titleKey: "options.translation.translationControl.neverAutoTranslateWebsite.title",
     descriptionKey: "options.translation.translationControl.neverAutoTranslateWebsite.description",
     pageKey: "options.translation.title",
   },
   {
+    // On the Translation control page, drilled into from the Translation page.
     sectionId: "auto-translate-languages",
-    route: "/page-translation",
+    route: "/page-translation/translation-control",
     titleKey: "options.translation.translationControl.autoTranslateLanguages.title",
     descriptionKey: "options.translation.translationControl.autoTranslateLanguages.description",
     pageKey: "options.translation.title",
   },
   {
     sectionId: "skip-languages",
-    route: "/page-translation",
+    route: "/page-translation/translation-control",
     titleKey: "options.translation.translationControl.skipLanguages.title",
     descriptionKey: "options.translation.translationControl.skipLanguages.description",
     pageKey: "options.translation.title",
   },
   {
+    // On the Translation queue page, drilled into from the Translation page.
     sectionId: "request-rate",
-    route: "/page-translation",
+    route: "/page-translation/translation-queue",
     titleKey: "options.translation.translationQueue.requestQueueConfig.title",
     pageKey: "options.translation.title",
   },
   {
     sectionId: "request-batch",
-    route: "/page-translation",
+    route: "/page-translation/translation-queue",
     titleKey: "options.translation.translationQueue.batchQueueConfig.title",
     descriptionKey: "options.translation.translationQueue.batchQueueConfig.description",
     pageKey: "options.translation.title",
   },
   {
     sectionId: "preload-config",
-    route: "/page-translation",
+    route: "/page-translation/translation-queue",
     titleKey: "options.translation.translationQueue.preloadConfig.title",
     descriptionKey: "options.translation.translationQueue.preloadConfig.description",
     pageKey: "options.translation.title",
   },
   {
     sectionId: "small-paragraph-filter",
-    route: "/page-translation",
+    route: "/page-translation/translation-control",
     titleKey: "options.translation.translationControl.smallParagraphFilter.title",
     descriptionKey: "options.translation.translationControl.smallParagraphFilter.description",
     pageKey: "options.translation.title",
@@ -273,14 +276,14 @@ export const SEARCH_ITEMS: SearchItem[] = [
   {
     // Its own page, drilled into from the Translation control section.
     sectionId: "site-rules-user-rules",
-    route: "/page-translation/site-rules",
+    route: "/page-translation/translation-control/site-rules",
     titleKey: "options.siteRules.userRules.title",
     descriptionKey: "options.siteRules.userRules.description",
     pageKey: "options.translation.title",
   },
   {
     sectionId: "site-rules-built-in",
-    route: "/page-translation/site-rules",
+    route: "/page-translation/translation-control/site-rules",
     titleKey: "options.siteRules.builtIn.title",
     descriptionKey: "options.siteRules.builtIn.description",
     pageKey: "options.translation.title",
@@ -441,14 +444,15 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.videoSubtitles.title",
   },
   {
+    // On the Subtitle queue page, drilled into from the Video Subtitles page.
     sectionId: "subtitles-request-rate",
-    route: "/video-subtitles",
+    route: "/video-subtitles/subtitles-queue",
     titleKey: "options.videoSubtitles.subtitlesQueue.requestQueueConfig.title",
     pageKey: "options.videoSubtitles.title",
   },
   {
     sectionId: "subtitles-request-batch",
-    route: "/video-subtitles",
+    route: "/video-subtitles/subtitles-queue",
     titleKey: "options.videoSubtitles.subtitlesQueue.batchQueueConfig.title",
     descriptionKey: "options.videoSubtitles.subtitlesQueue.batchQueueConfig.description",
     pageKey: "options.videoSubtitles.title",

@@ -293,6 +293,8 @@ options:
         auto: Otomatik (tarayıcıyı izle)
     extensionActivation:
       title: Uzantı etkinleştirme
+      description: Read Frog listelediğiniz siteler dışında her yerde mi, yoksa yalnızca listelediğiniz sitelerde mi çalışsın
+      manageSites: Siteleri yönet
       mode:
         title: Etkinleştirme modu
         description: Kara liste modunu kullanarak uzantıyı belirli sitelerde devre dışı bırakabilir veya beyaz liste modunu kullanarak yalnızca belirli sitelerle sınırlayabilirsiniz.
@@ -720,7 +722,7 @@ options:
             tooLong: CSS çok uzun
             saved: Tüm değişiklikler kaydedildi
     personalizedPrompts:
-      title: Kişiselleştirilmiş promptlar
+      title: Özel sayfa istemleri
       description: Farklı türde Promptları özelleştirmek, çeviri sırasında Prompt türünü kendiniz ayarlamanıza olanak tanır. Prompt, kullanıcının LLM'ye gönderdiği metni temsil eder.
       managePrompts: Promptları yönet
       communityPrompts: Topluluktan prompt al veya paylaş
@@ -755,6 +757,8 @@ options:
         cancel: İptal
     translationControl:
       title: Çeviri denetimi
+      description: Kendiliğinden nelerin çevrildiği, nelerin hiç çevrilmediği ve nelerin atlandığı
+      manageControls: Denetimleri yönet
       autoTranslateWebsite:
         title: Web sitesine göre otomatik çevir
         description: Açılır açılmaz çevrilmeye başlayan siteler
@@ -784,6 +788,8 @@ options:
         error: Değer $1 ile $2 arasında olmalıdır
     translationQueue:
       title: Çeviri kuyruğu
+      description: İsteklerin ne kadar hızlı gittiği, her birinin ne kadar metin taşıdığı ve okuyucunun ne kadar önünden gittikleri
+      manageQueue: Kuyruğu yönet
       requestQueueConfig:
         title: Çeviri hızı
         capacity:
@@ -926,6 +932,8 @@ options:
           videoSummary: Video özeti (AI akıllı bağlam gerektirir)
     subtitlesQueue:
       title: Altyazı kuyruğu
+      description: Altyazı isteklerinin ne kadar hızlı gittiği ve her birinin kaç satır taşıdığı
+      manageQueue: Kuyruğu yönet
       requestQueueConfig:
         title: Çeviri hızı
         capacity:

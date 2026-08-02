@@ -9,6 +9,8 @@ import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { HoverTranslationSection } from "../hover-translation"
 import { PersonalizedPromptsSection } from "../personalized-prompts"
 import { PreferenceSection } from "../preference"
+import { TranslationControlSection } from "../translation-control"
+import { TranslationQueueSection } from "../translation-queue"
 import { TranslationStyleSection } from "../translation-style"
 
 const { translateAtom, setTranslateMock, testState } = vi.hoisted(() => ({
@@ -110,6 +112,21 @@ describe("translation page sections", () => {
     renderInRouter(<PersonalizedPromptsSection />)
 
     expect(screen.getByRole("link")).toHaveAttribute("href", "/page-translation/prompts")
+  })
+
+  it("sends the control row to the page that holds every auto translate rule", () => {
+    renderInRouter(<TranslationControlSection />)
+
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "href",
+      "/page-translation/translation-control",
+    )
+  })
+
+  it("sends the queue row to the page that holds the request dials", () => {
+    renderInRouter(<TranslationQueueSection />)
+
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/page-translation/translation-queue")
   })
 
   it("toggles hover translation without disturbing the hotkey it listens for", () => {

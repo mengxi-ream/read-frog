@@ -293,6 +293,8 @@ options:
         auto: Tự động (theo trình duyệt)
     extensionActivation:
       title: Kích hoạt tiện ích mở rộng
+      description: Chạy ở mọi nơi trừ các trang bạn liệt kê, hoặc chỉ chạy trên các trang bạn liệt kê
+      manageSites: Quản lý trang web
       mode:
         title: Chế độ kích hoạt
         description: Sử dụng chế độ danh sách đen để tắt tiện ích trên các trang web cụ thể, hoặc chế độ danh sách trắng để giới hạn chỉ các trang web cụ thể.
@@ -720,7 +722,7 @@ options:
             tooLong: CSS quá dài
             saved: Tất cả thay đổi đã được lưu
     personalizedPrompts:
-      title: Prompt cá nhân hóa
+      title: Lời nhắc trang tùy chỉnh
       description: Tùy chỉnh các loại Prompt khác nhau cho phép bạn tự điều chỉnh loại Prompt trong quá trình dịch. Prompt là văn bản mà người dùng gửi cho LLM.
       managePrompts: Quản lý prompt
       communityPrompts: Nhận hoặc chia sẻ prompt từ cộng đồng
@@ -755,6 +757,8 @@ options:
         cancel: Hủy
     translationControl:
       title: Kiểm soát dịch
+      description: Những gì tự động dịch, những gì không bao giờ dịch và những gì bị bỏ qua
+      manageControls: Quản lý kiểm soát
       autoTranslateWebsite:
         title: Tự động dịch theo trang web
         description: Các trang bắt đầu dịch ngay khi mở
@@ -784,6 +788,8 @@ options:
         error: Giá trị phải từ $1 đến $2
     translationQueue:
       title: Hàng đợi dịch
+      description: Yêu cầu gửi đi nhanh đến mức nào, mỗi yêu cầu mang bao nhiêu văn bản và dịch trước người đọc bao xa
+      manageQueue: Quản lý hàng đợi
       requestQueueConfig:
         title: Tốc độ dịch
         capacity:
@@ -926,6 +932,8 @@ options:
           videoSummary: Tóm tắt video (yêu cầu ngữ cảnh thông minh AI)
     subtitlesQueue:
       title: Hàng đợi phụ đề
+      description: Yêu cầu phụ đề gửi đi nhanh đến mức nào và mỗi yêu cầu mang bao nhiêu dòng
+      manageQueue: Quản lý hàng đợi
       requestQueueConfig:
         title: Tốc độ dịch
         capacity:

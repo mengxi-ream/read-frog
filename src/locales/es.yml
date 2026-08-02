@@ -294,6 +294,8 @@ options:
         auto: Automático (seguir el navegador)
     extensionActivation:
       title: Activación de la extensión
+      description: Si Read Frog se ejecuta en todas partes salvo en los sitios que indiques, o solo en los sitios que indiques
+      manageSites: Gestionar sitios
       mode:
         title: Modo de activación
         description: Usa el modo de lista negra para desactivar la extensión en sitios específicos, o el modo de lista blanca para limitarla solo a sitios específicos.
@@ -836,7 +838,7 @@ options:
             tooLong: CSS es demasiado largo
             saved: Todos los cambios guardados
     personalizedPrompts:
-      title: Prompts personalizados
+      title: Prompts personalizados de página
       description: Personalizar distintos tipos de Prompts te permite ajustar tú mismo el tipo de Prompt durante la traducción. Un Prompt representa el texto que el usuario envía al LLM.
       managePrompts: Gestionar prompts
       communityPrompts: Obtener o compartir prompts de la comunidad
@@ -871,6 +873,8 @@ options:
         cancel: Cancelar
     translationControl:
       title: Control de traducción
+      description: Qué empieza a traducirse por sí solo, qué nunca lo hace y qué se omite
+      manageControls: Gestionar controles
       autoTranslateWebsite:
         title: Traducción automática por sitio web
         description: Sitios que empiezan a traducirse en cuanto se abren
@@ -900,6 +904,8 @@ options:
         error: El valor debe estar entre $1 y $2
     translationQueue:
       title: Cola de traducción
+      description: Con qué rapidez salen las solicitudes, cuánto texto lleva cada una y cuánto se adelantan al lector
+      manageQueue: Gestionar cola
       requestQueueConfig:
         title: Tasa de traducción
         capacity:
@@ -1042,6 +1048,8 @@ options:
           videoSummary: Resumen del video (requiere contexto inteligente de IA)
     subtitlesQueue:
       title: Cola de subtítulos
+      description: Con qué rapidez salen las solicitudes de subtítulos y cuántas líneas lleva cada una
+      manageQueue: Gestionar cola
       requestQueueConfig:
         title: Tasa de traducción
         capacity:

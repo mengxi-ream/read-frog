@@ -16,7 +16,7 @@ export function SiteRulesPage() {
       description={i18n.t("options.translation.pageDescription")}
     >
       <ConfigDetailSection
-        backTo="/page-translation"
+        backTo="/page-translation/translation-control"
         title={<span id="site-rules">{i18n.t("options.siteRules.title")}</span>}
       >
         <UserRulesEditor />

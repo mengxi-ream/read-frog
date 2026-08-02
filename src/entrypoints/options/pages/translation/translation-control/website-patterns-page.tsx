@@ -34,7 +34,10 @@ function WebsitePatternsPage({
       title={i18n.t("options.translation.title")}
       description={i18n.t("options.translation.pageDescription")}
     >
-      <ConfigDetailSection backTo="/page-translation" title={<span id={anchorId}>{title}</span>}>
+      <ConfigDetailSection
+        backTo="/page-translation/translation-control"
+        title={<span id={anchorId}>{title}</span>}
+      >
         <PatternsTable
           patterns={patterns}
           onAddPattern={addPattern}

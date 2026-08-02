@@ -1,41 +1,19 @@
 import { i18n } from "@/utils/i18n"
 import { ConfigNavItem } from "../../../components/config-nav-item"
 import { ConfigSection } from "../../../components/config-section"
-import { AutoTranslateLanguagesItem } from "./auto-translate-languages-item"
-import { SkipLanguagesItem } from "./skip-languages-item"
-import { SmallParagraphFilterItem } from "./small-paragraph-filter-item"
 
 /**
- * What gets translated without being asked, and what never does. Every row here answers the
- * same question — by site, by language, or by how little text a paragraph holds.
+ * What gets translated without being asked, and what never does. Six rows answering that one
+ * question — three of which open pages of their own — is a page's worth, not a section's, so
+ * the section only points at it.
  */
 export function TranslationControlSection() {
   return (
-    <ConfigSection
-      id="translation-control"
-      title={i18n.t("options.translation.translationControl.title")}
-    >
+    <ConfigSection title={i18n.t("options.translation.translationControl.title")}>
       <ConfigNavItem
-        to="/page-translation/auto-translate-websites"
-        title={i18n.t("options.translation.translationControl.autoTranslateWebsite.title")}
-        description={i18n.t(
-          "options.translation.translationControl.autoTranslateWebsite.description",
-        )}
-      />
-      <ConfigNavItem
-        to="/page-translation/never-auto-translate-websites"
-        title={i18n.t("options.translation.translationControl.neverAutoTranslateWebsite.title")}
-        description={i18n.t(
-          "options.translation.translationControl.neverAutoTranslateWebsite.description",
-        )}
-      />
-      <AutoTranslateLanguagesItem />
-      <SkipLanguagesItem />
-      <SmallParagraphFilterItem />
-      <ConfigNavItem
-        to="/page-translation/site-rules"
-        title={i18n.t("options.siteRules.title")}
-        description={i18n.t("options.siteRules.description")}
+        to="/page-translation/translation-control"
+        title={i18n.t("options.translation.translationControl.manageControls")}
+        description={i18n.t("options.translation.translationControl.description")}
       />
     </ConfigSection>
   )
