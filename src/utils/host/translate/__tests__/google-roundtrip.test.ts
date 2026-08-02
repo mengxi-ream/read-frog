@@ -7,22 +7,32 @@ import { executeTranslate } from "../execute-translate"
 // input is parsed as HTML — an unescaped tag-open swallows the rest of the
 // string (live behavior for "<b then stop"), entities (including legacy
 // semicolon-less ones such as "&copy") are resolved, literal newlines collapse
-// as HTML whitespace, leading indentation collapses too, and the model strips
-// leading dash-family list bullets (worst case: from EVERY item) — then the
-// resulting plain text is re-serialized as escaped HTML. executeTranslate must
-// therefore return the original text byte-for-byte only when the request was
-// escaped and, for multi-line text, split into per-line items with indentation
-// and bullet prefixes extracted client-side.
+// as HTML whitespace, line-break marker tags survive as tags, and within each
+// marker-delimited segment leading indentation collapses and the model strips
+// a leading dash-family list bullet (worst case: from EVERY segment) — then
+// the resulting plain text is re-serialized as escaped HTML. executeTranslate
+// must therefore return the original text byte-for-byte only when the request
+// was escaped and, for multi-line text, marker-joined with indentation and
+// bullet prefixes captured client-side.
+const LINE_BREAK_MARKER = '<br data-read-frog-lb="1">'
+
 function simulateTranslateHtmlEndpoint(requestText: string): string {
-  const withoutBogusTag = requestText.replace(/<[a-z][\s\S]*$/i, "")
-  return (
-    escapeText(decodeHTML(withoutBogusTag))
-      // Newlines and leading indentation are HTML whitespace to the parser.
-      .replace(/[^\S\r\n]*[\r\n]\s*/g, " ")
-      .replace(/^[ \t]+/, "")
-      // The model eats leading list dashes (live-observed on x.com bullets).
-      .replace(/^[-–—•·▪◦‣⁃*][ \t]+/, "")
-  )
+  return requestText
+    .split(LINE_BREAK_MARKER)
+    .map((segment) => {
+      const withoutBogusTag = segment.replace(/<[a-z][\s\S]*$/i, "")
+      return (
+        escapeText(decodeHTML(withoutBogusTag))
+          // Newlines and leading indentation are HTML whitespace to the parser.
+          .replace(/[^\S\r\n]*[\r\n]\s*/g, " ")
+          .replace(/^[ \t]+/, "")
+          // The model eats leading list dashes (live-observed on x.com bullets;
+          // a bullet-only segment "- " comes back as a bare "-").
+          .replace(/^[-–—•·▪◦‣⁃*][ \t]+(?=[^ \t])/, "")
+          .replace(/^[-–—•·▪◦‣⁃*][ \t]+$/, "-")
+      )
+    })
+    .join(LINE_BREAK_MARKER)
 }
 
 const fetchMock = vi.fn<(...args: any[]) => any>()
@@ -46,21 +56,22 @@ describe("google translate escape/decode round trip", () => {
     fetchMock.mockReset()
     fetchMock.mockImplementation((_url: string, init: { body: string }) => {
       const requestTexts: string[] = JSON.parse(init.body)[0][0]
-      // The endpoint rejects empty batch items.
-      if (requestTexts.some((text) => text === "")) {
+      // The endpoint rejects empty batch items; the marker transport must
+      // always send exactly one non-empty item.
+      if (requestTexts.length !== 1 || requestTexts[0] === "") {
         return Promise.resolve({
           ok: false,
           status: 400,
           statusText: "Bad Request",
           json: async () => ({}),
-          text: async () => "empty batch item",
+          text: async () => "invalid batch",
         })
       }
       return Promise.resolve({
         ok: true,
         status: 200,
         statusText: "OK",
-        json: async () => [requestTexts.map((text) => simulateTranslateHtmlEndpoint(text))],
+        json: async () => [[simulateTranslateHtmlEndpoint(requestTexts[0]!)]],
         text: async () => "",
       })
     })
@@ -119,26 +130,31 @@ describe("google translate escape/decode round trip", () => {
     expect(result).toBe(text.replace(/\r\n?/g, "\n"))
   })
 
-  it("sends each non-empty line as its own item, bullet kept for context", async () => {
-    await executeTranslate("- alpha\n\n  • beta", langConfig, googleProviderConfig, vi.fn(), {
+  it("sends ONE marker-joined item so the endpoint detects the whole unit", async () => {
+    // Whole-unit transport is a correctness invariant: per-line items are
+    // language-detected independently and short lines misread ("- SEO" alone
+    // with sl=auto -> "- 这"). The source language must stay untouched.
+    await executeTranslate(
+      "- alpha\n\n  • beta",
+      { ...langConfig, sourceCode: "auto" as const },
+      googleProviderConfig,
+      vi.fn(),
+      { preserveLineBreaks: true },
+    )
+
+    const [payload] = JSON.parse(fetchMock.mock.calls.at(-1)![1].body)
+    expect(payload[0]).toEqual([
+      `- alpha${LINE_BREAK_MARKER}${LINE_BREAK_MARKER}${LINE_BREAK_MARKER}${LINE_BREAK_MARKER}• beta`,
+    ])
+    expect(payload[1]).toBe("auto")
+  })
+
+  it("keeps a bullet-only line without doubling its dash", async () => {
+    const result = await executeTranslate("- \nhello", langConfig, googleProviderConfig, vi.fn(), {
       preserveLineBreaks: true,
     })
 
-    const requestTexts = JSON.parse(fetchMock.mock.calls.at(-1)![1].body)[0][0]
-    expect(requestTexts).toEqual(["- alpha", "• beta"])
-  })
-
-  it("uses the page-level detected language instead of per-item auto", async () => {
-    await executeTranslate(
-      "- SEO\n- Paid Ads",
-      { ...langConfig, sourceCode: "auto" },
-      googleProviderConfig,
-      vi.fn(),
-      { preserveLineBreaks: true, detectedSourceCode: "eng" },
-    )
-
-    const sourceLang = JSON.parse(fetchMock.mock.calls.at(-1)![1].body)[0][1]
-    expect(sourceLang).toBe("en")
+    expect(result).toBe("- \nhello")
   })
 
   it("normalizes a model-restyled bullet back to the source prefix", async () => {

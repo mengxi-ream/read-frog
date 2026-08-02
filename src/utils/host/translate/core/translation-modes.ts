@@ -604,14 +604,15 @@ export async function translateNodesBilingualMode(
     // (an X tweet whose lines have no blank-line separators is ONE unit here,
     // e.g. https://x.com/EpsteinJeffrey0/status/2083709421386080579 — five
     // lines split by single "\n" that Google merged into one run-on line),
-    // so the provider must not collapse them. white-space inherits, so a text
-    // node's parent reports the effective value.
-    const layoutSourceElement = isHTMLElement(layoutSource)
-      ? layoutSource
-      : layoutSource.parentElement
-    const preserveLineBreaks = layoutSourceElement
-      ? isNewlinePreservingElement(layoutSourceElement)
-      : false
+    // so the provider must not collapse them. The FLOW CONTAINER's white-space
+    // governs how the run's newlines render: for an inline layout source
+    // (e.g. a GitHub inline <code> with its own break-spaces inside a normal
+    // paragraph) the parent's value is authoritative, not the element's own.
+    const flowContainer =
+      isHTMLElement(layoutSource) && isBlockTransNode(layoutSource)
+        ? layoutSource
+        : layoutSource.parentElement
+    const preserveLineBreaks = flowContainer ? isNewlinePreservingElement(flowContainer) : false
 
     const realTranslatedText = await getTranslatedTextAndRemoveSpinner(
       nodes,

@@ -470,7 +470,6 @@ export function setUpWebPageTranslationQueue(): void {
         hash,
         textFormat,
         preserveLineBreaks,
-        detectedSourceCode,
         webTitle,
         webDescription,
         webContent,
@@ -566,7 +565,6 @@ export function setUpWebPageTranslationQueue(): void {
         executeTranslate(text, langConfig, providerConfig, getTranslatePrompt, {
           textFormat,
           preserveLineBreaks,
-          detectedSourceCode,
           signal,
         })
       result = await requestQueue.enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)

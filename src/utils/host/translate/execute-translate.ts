@@ -1,4 +1,3 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { PromptResolver } from "./api/ai"
 import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
@@ -26,9 +25,6 @@ export async function executeTranslate<TContext>(
     // "\n" as HTML whitespace. Microsoft preserves newlines in both textTypes
     // (live-verified); LLM prompts already mandate format preservation.
     preserveLineBreaks?: boolean
-    // Page-level detection for per-line requests: the endpoint auto-detects
-    // each batch item independently, and a short line ("- SEO") misdetects.
-    detectedSourceCode?: LangCodeISO6393
     signal?: AbortSignal
   },
 ) {
@@ -48,14 +44,7 @@ export async function executeTranslate<TContext>(
       throw new Error(`Invalid target language code: ${langConfig.targetCode}`)
     }
     if (provider === "google-translate") {
-      const detectedSourceLang = options?.detectedSourceCode
-        ? ISO6393_TO_6391[options.detectedSourceCode]
-        : undefined
-      const googleSourceLang =
-        sourceLang === "auto" && options?.preserveLineBreaks && detectedSourceLang
-          ? detectedSourceLang
-          : sourceLang
-      translatedText = await googleTranslate(preparedText, googleSourceLang, targetLang, {
+      translatedText = await googleTranslate(preparedText, sourceLang, targetLang, {
         textFormat: options?.textFormat,
         preserveLineBreaks: options?.preserveLineBreaks,
         signal: options?.signal,

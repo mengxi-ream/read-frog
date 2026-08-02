@@ -47,20 +47,39 @@ export async function isGoogleTranslateReachable(options?: {
 //   squashed onto one line) and
 //   https://x.com/EpsteinJeffrey0/status/2083709421386080579 (five
 //   single-"\n" lines merged into one run-on translation).
-// Three further live-verified behaviors shape the preserveLineBreaks
-// strategy:
-//   - the endpoint natively accepts multiple texts per request
-//     ([[[t1, t2, …], sl, tl], client]) and returns them in order;
+// Live-verified behaviors that shape the preserveLineBreaks strategy:
+//   - <br> marker tags survive translation; a lone <br> can be merged away
+//     by the sentence segmenter, but a marker PAIR never is, and the data
+//     attribute keeps decoding unambiguous (escaped source text mentioning
+//     "<br>" travels as entities and can never collide);
 //   - the model strips leading dash-family list bullets from translated
-//     lines (even when each line is its own batch item);
-//   - leading indentation collapses like any HTML whitespace.
-// So when the caller signals semantic line breaks, each line becomes its own
-// batch item, and per-line indentation plus bullet prefix are extracted
-// before the request and reattached verbatim afterwards. The gating matters:
-// only the content layer knows whether the source's white-space CSS (or an
-// input box) makes newlines meaningful — ordinary pages wrap sentences
-// across pretty-printed source lines and RELY on the collapsing (a forced
-// per-line split would translate sentence fragments separately).
+//     lines, and leading indentation collapses like any HTML whitespace —
+//     both are restored client-side from the source lines;
+//   - CRITICALLY, the text must stay ONE request item: the endpoint
+//     language-detects each item independently, and a short line misreads
+//     ("- SEO" alone with sl=auto → "- 这"), while inside the whole unit the
+//     same line translates correctly. Whole-unit transport keeps sl=auto
+//     working on mixed-language pages with zero language forcing.
+// The gating matters: only the content layer knows whether the source's
+// white-space CSS (or an input box) makes newlines meaningful — ordinary
+// pages wrap sentences across pretty-printed source lines and RELY on the
+// collapsing.
+const GOOGLE_LINE_BREAK_MARKER = '<br data-read-frog-lb="1">'
+const GOOGLE_LINE_BREAK_MARKER_PAIR = GOOGLE_LINE_BREAK_MARKER.repeat(2)
+// Tolerates self-closing serialization and translation-inserted horizontal
+// whitespace around markers (the sentence joiner adds spaces; they are
+// artifacts, not content, so they fold into the restored line boundary).
+const GOOGLE_LINE_BREAK_MARKER_UNIT = String.raw`<br data-read-frog-lb="1"\s*/?>`
+const GOOGLE_LINE_BREAK_MARKER_PAIR_PATTERN = String.raw`[^\S\r\n]*(?:${GOOGLE_LINE_BREAK_MARKER_UNIT}[^\S\r\n]*){2}`
+const GOOGLE_LINE_BREAK_MARKER_PAIR_SPLIT_REGEX = new RegExp(GOOGLE_LINE_BREAK_MARKER_PAIR_PATTERN)
+const GOOGLE_LINE_BREAK_MARKER_PAIR_GLOBAL_REGEX = new RegExp(
+  GOOGLE_LINE_BREAK_MARKER_PAIR_PATTERN,
+  "g",
+)
+const GOOGLE_LINE_BREAK_MARKER_SINGLE_REGEX = new RegExp(
+  String.raw`[^\S\r\n]*${GOOGLE_LINE_BREAK_MARKER_UNIT}[^\S\r\n]*`,
+  "g",
+)
 const LINE_SPLIT_REGEX = /\r\n?|\n/
 const LINE_INDENT_REGEX = /^[ \t]*/
 // A dash-family bullet must be followed by horizontal whitespace so negative
@@ -68,17 +87,18 @@ const LINE_INDENT_REGEX = /^[ \t]*/
 const LINE_BULLET_REGEX = /^[-–—•·▪◦‣⁃*][ \t]+/
 // Output-side normalization: whatever bullet/indentation the model emitted is
 // replaced by the source line's own prefix, so the prefix survives verbatim
-// whether the model kept, dropped, or restyled it.
-const TRANSLATED_LINE_PREFIX_REGEX = /^[ \t]*(?:[-–—•·▪◦‣⁃*][ \t]+)?[ \t]*/
+// whether the model kept, dropped, or restyled it. End-of-string counts as a
+// bullet terminator so a bullet-only line ("- " → model returns "-") is
+// normalized instead of doubling its dash.
+const TRANSLATED_LINE_PREFIX_REGEX = /^[ \t]*(?:[-–—•·▪◦‣⁃*](?:[ \t]+|$))?[ \t]*/
 
 export interface PreservedLine {
   /** Indentation + bullet exactly as written; reattached verbatim. */
   prefix: string
   /**
-   * The line minus indentation, bullet INCLUDED: an isolated bare token
-   * translates measurably worse (live-observed: item "SEO" → "这", while
-   * "- SEO" → "搜索引擎优化"), so the bullet stays in the request for
-   * context and is normalized away from the response instead.
+   * The line minus indentation, bullet INCLUDED: the bullet stays in the
+   * request for context and is normalized away from the response instead
+   * (the model may keep, drop, or restyle it).
    */
   content: string
 }
@@ -120,21 +140,19 @@ export async function googleTranslate(
   // concatenates response items with plain prefixes, so it cannot interfere.
   const preserveLineBreaks = options?.preserveLineBreaks === true && options?.textFormat !== "html"
   let preservedLines: PreservedLine[] | undefined
-  let requestTexts: string[]
+  let requestText: string
   if (options?.textFormat === "html") {
-    requestTexts = [sourceText]
+    requestText = sourceText
   } else if (!preserveLineBreaks) {
-    requestTexts = [escapeText(sourceText)]
+    requestText = escapeText(sourceText)
   } else {
+    // ONE item joined by marker pairs — never per-line items, so the
+    // endpoint detects the language of the whole unit (see notes above).
+    // Blank lines become adjacent pairs and survive verbatim.
     preservedLines = splitPreservedLines(sourceText)
-    // The endpoint rejects empty batch items (400), so blank lines stay out
-    // of the request and are restored positionally during reassembly.
-    requestTexts = preservedLines
-      .filter((line) => line.content !== "")
+    requestText = preservedLines
       .map((line) => escapeText(line.content))
-    if (requestTexts.length === 0) {
-      return sourceText
-    }
+      .join(GOOGLE_LINE_BREAK_MARKER_PAIR)
   }
   const resp = await fetch(GOOGLE_TRANSLATE_HTML_URL, {
     method: "POST",
@@ -142,7 +160,7 @@ export async function googleTranslate(
       "Content-Type": "application/json+protobuf",
       "X-Goog-API-Key": GOOGLE_TRANSLATE_HTML_API_KEY,
     },
-    body: JSON.stringify([[requestTexts, fromLang, toLang], GOOGLE_TRANSLATE_HTML_CLIENT]),
+    body: JSON.stringify([[[requestText], fromLang, toLang], GOOGLE_TRANSLATE_HTML_CLIENT]),
     signal: options?.signal,
   }).catch((error) => {
     throw attachRequestErrorMeta(new Error(`Network error during translation: ${error.message}`), {
@@ -169,28 +187,37 @@ export async function googleTranslate(
   try {
     const result = await resp.json()
 
-    if (
-      !Array.isArray(result) ||
-      !Array.isArray(result[0]) ||
-      result[0].length !== requestTexts.length ||
-      !result[0].every((item: unknown) => typeof item === "string")
-    ) {
+    if (!Array.isArray(result) || !Array.isArray(result[0]) || typeof result[0][0] !== "string") {
       throw new TypeError("Unexpected response format from translation API")
     }
-    const translations: string[] = result[0]
+    const translatedText: string = result[0][0]
 
     if (!preservedLines) {
-      return translations[0]!
+      return translatedText
     }
 
-    let translationIndex = 0
-    return preservedLines
-      .map((line) =>
-        line.content === ""
-          ? line.prefix
-          : reassemblePreservedLine(line, translations[translationIndex++]!),
-      )
-      .join("\n")
+    const segments = translatedText.split(GOOGLE_LINE_BREAK_MARKER_PAIR_SPLIT_REGEX)
+    if (segments.length === preservedLines.length) {
+      return preservedLines
+        .map((line, index) =>
+          line.content === ""
+            ? line.prefix
+            : reassemblePreservedLine(
+                line,
+                // A stray unpaired marker inside a segment must never leak
+                // markup into the rendered translation.
+                segments[index]!.replace(GOOGLE_LINE_BREAK_MARKER_SINGLE_REGEX, " "),
+              ),
+        )
+        .join("\n")
+    }
+
+    // Segment drift (a pair merged or duplicated by the model — never seen in
+    // sampling, but the failure must degrade gracefully): keep the line
+    // structure by folding markers into newlines and skip prefix restoration.
+    return translatedText
+      .replace(GOOGLE_LINE_BREAK_MARKER_PAIR_GLOBAL_REGEX, "\n")
+      .replace(GOOGLE_LINE_BREAK_MARKER_SINGLE_REGEX, "\n")
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     throw new Error(`Failed to parse translation response: ${message}`, { cause: error })
