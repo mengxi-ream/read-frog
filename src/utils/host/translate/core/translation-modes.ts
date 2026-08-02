@@ -601,7 +601,9 @@ export async function translateNodesBilingualMode(
         : translatedWrapperNode.isConnected
 
     // Newline-preserving containers render single "\n" as real line breaks
-    // (an X tweet whose lines have no blank-line separators is ONE unit here),
+    // (an X tweet whose lines have no blank-line separators is ONE unit here,
+    // e.g. https://x.com/EpsteinJeffrey0/status/2083709421386080579 — five
+    // lines split by single "\n" that Google merged into one run-on line),
     // so the provider must not collapse them. white-space inherits, so a text
     // node's parent reports the effective value.
     const layoutSourceElement = isHTMLElement(layoutSource)

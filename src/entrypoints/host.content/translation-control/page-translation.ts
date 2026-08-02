@@ -713,10 +713,11 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
     if (!canSplitParagraphIntoDescendants(element, innerTopLevelParagraphs)) {
       // A newline-preserving flow (X note tweet: pre-wrap div of inline
-      // rich-text <span> paragraphs) must not be split — per-span observation
-      // translates each span as one blob at the span's end instead of
-      // interleaving per blank-line paragraph. Observed whole, the div-level
-      // virtual-paragraph plan segments it correctly.
+      // rich-text <span> paragraphs,
+      // https://x.com/davidjpark96/status/1789773192435060737) must not be
+      // split — per-span observation translates each span as one blob at the
+      // span's end instead of interleaving per blank-line paragraph. Observed
+      // whole, the div-level virtual-paragraph plan segments it correctly.
       observer.observe(element)
       return
     }

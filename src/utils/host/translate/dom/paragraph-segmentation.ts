@@ -27,7 +27,10 @@ export function isNewlinePreservingElement(element: HTMLElement): boolean {
  * descendant paragraph units is only sound when those units are block
  * elements. In a newline-preserving flow container — an X note tweet is a
  * pre-wrap div whose rich-text runs are sibling inline <span>s, each labeled
- * a paragraph — the inline descendants are segments of ONE text flow.
+ * a paragraph (reported on
+ * https://x.com/davidjpark96/status/1789773192435060737, a 22k-char note
+ * whose bold headings are their own spans) — the inline descendants are
+ * segments of ONE text flow.
  * Observing them individually translates each segment as a single blob whose
  * wrapper lands at the segment's end, destroying the blank-line paragraph
  * structure. Such containers must be observed whole so the virtual-paragraph

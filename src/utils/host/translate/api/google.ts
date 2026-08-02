@@ -41,8 +41,14 @@ export async function isGoogleTranslateReachable(options?: {
 
 // The endpoint treats literal newlines as collapsible HTML whitespace, so
 // multi-line plain text loses its line structure — no escape survives
-// ("&#10;" collapses too). Three further live-verified behaviors shape the
-// preserveLineBreaks strategy:
+// ("&#10;" collapses too). Reported on X tweets rendered under
+// white-space: pre-wrap, where "\n" is the only line structure:
+//   https://x.com/davidjpark96/status/1789773192435060737 (bullet lists
+//   squashed onto one line) and
+//   https://x.com/EpsteinJeffrey0/status/2083709421386080579 (five
+//   single-"\n" lines merged into one run-on translation).
+// Three further live-verified behaviors shape the preserveLineBreaks
+// strategy:
 //   - the endpoint natively accepts multiple texts per request
 //     ([[[t1, t2, …], sl, tl], client]) and returns them in order;
 //   - the model strips leading dash-family list bullets from translated

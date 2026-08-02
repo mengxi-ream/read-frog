@@ -96,6 +96,7 @@ describe("google translate escape/decode round trip", () => {
   })
 
   it.each([
+    // Bullet shape from https://x.com/davidjpark96/status/1789773192435060737
     ["single newlines (bullet lists)", "- Organic\n- SEO\n- Paid Ads"],
     ["blank-line paragraphs", "First paragraph\n\nSecond paragraph"],
     ["CRLF line endings", "First\r\nSecond"],
@@ -104,6 +105,12 @@ describe("google translate escape/decode round trip", () => {
     ["numbered list lines", "1. Find a face\n2. Craft a series\n3. Multiply accounts"],
     ["negative numbers keep their sign", "-5°C outside\n-3 points"],
     ["tag-like text on its own line", "if x <b then stop\nsecond line"],
+    // Plain-line shape from https://x.com/EpsteinJeffrey0/status/2083709421386080579
+    // — a tweet of consecutive single-"\n" lines with no blank-line separators.
+    [
+      "plain single-newline tweet lines",
+      "The first statement stands alone\nThe second makes a related point\nWhy? Because this line asks a question",
+    ],
   ])("preserves %s with preserveLineBreaks", async (_name, text) => {
     const result = await executeTranslate(text, langConfig, googleProviderConfig, vi.fn(), {
       preserveLineBreaks: true,

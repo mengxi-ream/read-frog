@@ -384,6 +384,10 @@ describe("canSplitParagraphIntoDescendants", () => {
     return root
   }
 
+  // Regression shape: https://x.com/davidjpark96/status/1789773192435060737 —
+  // a 22k-char note tweet whose pre-wrap tweetText div holds sibling inline
+  // spans (bold headings as their own spans); splitting observed each span as
+  // an independent unit and destroyed the blank-line paragraph interleaving.
   it("refuses to split a pre-wrap flow into inline span paragraphs (X note tweet)", () => {
     const root = walkedFixture(
       "<span>First paragraph\n\nSecond paragraph</span><span>Bold heading</span>",
