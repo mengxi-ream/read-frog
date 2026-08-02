@@ -1,22 +1,20 @@
 import { i18n } from "@/utils/i18n"
+import { ConfigNavItem } from "../../../components/config-nav-item"
 import { ConfigSection } from "../../../components/config-section"
-import { BatchTranslationItems } from "./batch-items"
-import { PreloadItems } from "./preload-items"
-import { RequestRateItems } from "./request-rate-items"
 
 /**
  * The dials on the requests themselves — how fast they go out, how much text each carries, and
- * how far ahead of the reader they run. Every one of them trades speed against API cost.
+ * how far ahead of the reader they run. Six number fields nobody touches on the way to anything
+ * else, so the section points at the page holding them rather than spending the room here.
  */
 export function TranslationQueueSection() {
   return (
-    <ConfigSection
-      id="translation-queue"
-      title={i18n.t("options.translation.translationQueue.title")}
-    >
-      <RequestRateItems />
-      <BatchTranslationItems />
-      <PreloadItems />
+    <ConfigSection title={i18n.t("options.translation.translationQueue.title")}>
+      <ConfigNavItem
+        to="/page-translation/translation-queue"
+        title={i18n.t("options.translation.translationQueue.manageQueue")}
+        description={i18n.t("options.translation.translationQueue.description")}
+      />
     </ConfigSection>
   )
 }

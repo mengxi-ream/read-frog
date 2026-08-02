@@ -294,6 +294,8 @@ options:
         auto: Auto (follow browser)
     extensionActivation:
       title: Extension activation
+      description: Whether Read Frog runs everywhere except the sites you list, or only on the sites you list
+      manageSites: Manage sites
       mode:
         title: Activation mode
         description: Use blacklist mode to disable the extension on specific sites, or whitelist mode to limit it to specific sites only.
@@ -836,7 +838,7 @@ options:
             tooLong: CSS is too long
             saved: All changes saved
     personalizedPrompts:
-      title: Personalized prompts
+      title: Customize page prompts
       description: Customizing different types of Prompts allows you to adjust the Prompt type yourself during translation. A Prompt represents the text that the user sends to the LLM.
       managePrompts: Manage prompts
       communityPrompts: Get or share prompts from community
@@ -871,6 +873,8 @@ options:
         cancel: Cancel
     translationControl:
       title: Translation control
+      description: What starts translating on its own, what never does, and what gets skipped
+      manageControls: Manage controls
       autoTranslateWebsite:
         title: Auto translate based on website
         description: Sites that start translating as soon as they open
@@ -900,6 +904,8 @@ options:
         error: Value must be between $1 and $2
     translationQueue:
       title: Translation queue
+      description: How fast requests go out, how much text each carries, and how far ahead of the reader they run
+      manageQueue: Manage queue
       requestQueueConfig:
         title: Translation rate
         capacity:
@@ -1042,6 +1048,8 @@ options:
           videoSummary: Video summary (requires AI smart context)
     subtitlesQueue:
       title: Subtitle queue
+      description: How fast subtitle requests go out and how many lines each carries
+      manageQueue: Manage queue
       requestQueueConfig:
         title: Translation rate
         capacity:

@@ -294,6 +294,8 @@ options:
         auto: 自动（跟随浏览器）
     extensionActivation:
       title: 扩展激活
+      description: 在列表之外的所有网站运行，还是只在列表内的网站运行
+      manageSites: 管理网站
       mode:
         title: 激活模式
         description: 使用黑名单模式可以在特定网站上禁用扩展，或使用白名单模式限制扩展仅在特定网站上运行。
@@ -836,7 +838,7 @@ options:
             tooLong: CSS 过长
             saved: 所有更改已保存
     personalizedPrompts:
-      title: 个性化 Prompt
+      title: 自定义网页提示词
       description: 自定义不同类型的 Prompt，可以在翻译时自行调整 Prompt 类型。Prompt 表示以用户身份发送给 LLM 的文本。
       managePrompts: 管理 Prompt
       communityPrompts: 获取或分享社区 Prompt
@@ -871,6 +873,8 @@ options:
         cancel: 取消
     translationControl:
       title: 翻译控制
+      description: 哪些网页会自动翻译、哪些永不翻译、哪些内容会被跳过
+      manageControls: 管理控制规则
       autoTranslateWebsite:
         title: 基于网站自动翻译
         description: 打开后就开始翻译的网站
@@ -900,6 +904,8 @@ options:
         error: 数值必须在 $1 到 $2 之间
     translationQueue:
       title: 翻译队列
+      description: 请求发出的速度、每个请求承载的文本量，以及提前于阅读位置多远开始翻译
+      manageQueue: 管理队列
       requestQueueConfig:
         title: 翻译速率
         capacity:
@@ -1042,6 +1048,8 @@ options:
           videoSummary: 视频摘要（需启用 AI 智能上下文）
     subtitlesQueue:
       title: 字幕队列
+      description: 字幕请求发出的速度，以及每个请求承载的字幕行数
+      manageQueue: 管理队列
       requestQueueConfig:
         title: 翻译速率
         capacity:

@@ -293,6 +293,8 @@ options:
         auto: 自動（ブラウザに従う）
     extensionActivation:
       title: 拡張機能の有効化
+      description: リストに登録したサイト以外のすべてで動作させるか、登録したサイトでのみ動作させるか
+      manageSites: サイトを管理
       mode:
         title: 有効化モード
         description: ブラックリストモードを使用して特定のサイトで拡張機能を無効にするか、ホワイトリストモードを使用して特定のサイトのみに制限できます。
@@ -720,7 +722,7 @@ options:
             tooLong: CSSが長すぎます
             saved: すべての変更が保存されました
     personalizedPrompts:
-      title: 個人化プロンプト
+      title: カスタムページプロンプト
       description: 異なるタイプのプロンプトをカスタマイズすることで、翻訳時にプロンプトタイプを自ら調整できます。プロンプトとは、ユーザーがLLMに送信するテキストを指します。
       managePrompts: プロンプトを管理
       communityPrompts: コミュニティからプロンプトを取得・共有
@@ -755,6 +757,8 @@ options:
         cancel: キャンセル
     translationControl:
       title: 翻訳の制御
+      description: 自動的に翻訳されるもの、決して翻訳されないもの、スキップされるもの
+      manageControls: 制御を管理
       autoTranslateWebsite:
         title: ウェブサイトに基づく自動翻訳
         description: 開いた時点で翻訳を始めるサイト
@@ -784,6 +788,8 @@ options:
         error: 値は $1 から $2 の間である必要があります
     translationQueue:
       title: 翻訳キュー
+      description: リクエストを送る速さ、1回あたりのテキスト量、読者よりどれだけ先を翻訳するか
+      manageQueue: キューを管理
       requestQueueConfig:
         title: 翻訳速度
         capacity:
@@ -926,6 +932,8 @@ options:
           videoSummary: 動画要約（AI スマートコンテキストが必要）
     subtitlesQueue:
       title: 字幕キュー
+      description: 字幕リクエストを送る速さと、1回あたりの行数
+      manageQueue: キューを管理
       requestQueueConfig:
         title: 翻訳速度
         capacity:

@@ -1,6 +1,6 @@
 import { i18n } from "@/utils/i18n"
-import { ConfigDetailSection } from "../../components/config-detail-section"
-import { PageLayout } from "../../components/page-layout"
+import { ConfigDetailSection } from "../../../../components/config-detail-section"
+import { PageLayout } from "../../../../components/page-layout"
 import { BuiltInRules } from "./built-in-rules"
 import { UserRulesEditor } from "./user-rules-editor"
 
@@ -16,7 +16,7 @@ export function SiteRulesPage() {
       description={i18n.t("options.translation.pageDescription")}
     >
       <ConfigDetailSection
-        backTo="/page-translation"
+        backTo="/page-translation/translation-control"
         title={<span id="site-rules">{i18n.t("options.siteRules.title")}</span>}
       >
         <UserRulesEditor />

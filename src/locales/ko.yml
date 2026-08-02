@@ -293,6 +293,8 @@ options:
         auto: 자동(브라우저 따름)
     extensionActivation:
       title: 확장 프로그램 활성화
+      description: 목록에 없는 모든 사이트에서 실행할지, 목록에 있는 사이트에서만 실행할지
+      manageSites: 사이트 관리
       mode:
         title: 활성화 모드
         description: 블랙리스트 모드를 사용하여 특정 사이트에서 확장 프로그램을 비활성화하거나, 화이트리스트 모드를 사용하여 특정 사이트에서만 실행되도록 제한할 수 있습니다.
@@ -720,7 +722,7 @@ options:
             tooLong: CSS가 너무 깁니다
             saved: 모든 변경사항이 저장되었습니다
     personalizedPrompts:
-      title: 개인화된 프롬프트
+      title: 사용자 정의 페이지 프롬프트
       description: 다양한 유형의 프롬프트를 사용자 정의하여, 번역 시 프롬프트 유형을 직접 조정할 수 있습니다. 프롬프트는 사용자가 LLM에게 보내는 텍스트를 말합니다.
       managePrompts: 프롬프트 관리
       communityPrompts: 커뮤니티에서 프롬프트 가져오기 또는 공유
@@ -755,6 +757,8 @@ options:
         cancel: 취소
     translationControl:
       title: 번역 제어
+      description: 자동으로 번역되는 것, 절대 번역되지 않는 것, 건너뛰는 것
+      manageControls: 제어 관리
       autoTranslateWebsite:
         title: 웹사이트 기반 자동 번역
         description: 열자마자 번역을 시작하는 사이트
@@ -784,6 +788,8 @@ options:
         error: 값은 $1에서 $2 사이여야 합니다
     translationQueue:
       title: 번역 대기열
+      description: 요청을 보내는 속도, 요청당 텍스트 양, 독자보다 얼마나 앞서 번역할지
+      manageQueue: 대기열 관리
       requestQueueConfig:
         title: 번역 속도
         capacity:
@@ -926,6 +932,8 @@ options:
           videoSummary: 동영상 요약 (AI 스마트 컨텍스트 필요)
     subtitlesQueue:
       title: 자막 대기열
+      description: 자막 요청을 보내는 속도와 요청당 자막 줄 수
+      manageQueue: 대기열 관리
       requestQueueConfig:
         title: 번역 속도
         capacity:
