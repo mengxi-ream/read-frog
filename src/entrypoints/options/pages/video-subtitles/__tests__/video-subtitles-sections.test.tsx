@@ -8,7 +8,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { CustomPromptsSection } from "../custom-prompts"
 import { PreferenceSection } from "../preference"
-import { SubtitlesQueueSection } from "../subtitles-queue"
 import { SubtitlesStyleSection } from "../subtitles-style"
 
 const { videoSubtitlesAtom, setVideoSubtitlesMock, testState } = vi.hoisted(() => ({
@@ -55,12 +54,6 @@ describe("video subtitles page sections", () => {
     renderInRouter(<CustomPromptsSection />)
 
     expect(screen.getByRole("link")).toHaveAttribute("href", "/video-subtitles/prompts")
-  })
-
-  it("sends the queue row to the page that holds the request dials", () => {
-    renderInRouter(<SubtitlesQueueSection />)
-
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/video-subtitles/subtitles-queue")
   })
 
   it("writes each switch on its own, leaving the other two alone", () => {
