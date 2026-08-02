@@ -395,7 +395,7 @@ describe("canSplitParagraphIntoDescendants", () => {
     )
     const spans = [...root.querySelectorAll("span")]
 
-    expect(canSplitParagraphIntoDescendants(root, spans)).toBe(false)
+    expect(canSplitParagraphIntoDescendants(root, spans, DEFAULT_CONFIG)).toBe(false)
   })
 
   it("allows splitting a pre-wrap container into block paragraphs", () => {
@@ -405,7 +405,7 @@ describe("canSplitParagraphIntoDescendants", () => {
     )
     const divs = [...root.querySelectorAll("div")]
 
-    expect(canSplitParagraphIntoDescendants(root, divs)).toBe(true)
+    expect(canSplitParagraphIntoDescendants(root, divs, DEFAULT_CONFIG)).toBe(true)
   })
 
   it("allows splitting a normal white-space container into inline paragraphs (#1881)", () => {
@@ -415,7 +415,7 @@ describe("canSplitParagraphIntoDescendants", () => {
     )
     const spans = [...root.querySelectorAll("span")]
 
-    expect(canSplitParagraphIntoDescendants(root, spans)).toBe(true)
+    expect(canSplitParagraphIntoDescendants(root, spans, DEFAULT_CONFIG)).toBe(true)
   })
 
   it("allows splitting a pre-wrap flow with mixed block and inline paragraphs", () => {
@@ -428,6 +428,19 @@ describe("canSplitParagraphIntoDescendants", () => {
     )
     const children = [...root.children] as HTMLElement[]
 
-    expect(canSplitParagraphIntoDescendants(root, children)).toBe(true)
+    expect(canSplitParagraphIntoDescendants(root, children, DEFAULT_CONFIG)).toBe(true)
+  })
+
+  it("allows splitting a pre-wrap flow whose text has no blank-line delimiters", () => {
+    // A single-newline-only giant (log/code views) yields an EMPTY virtual
+    // plan; refusing the split would translate the whole giant as ONE
+    // request and forfeit viewport gating.
+    const root = walkedFixture(
+      "<span>line one\nline two</span><span>line three\nline four</span>",
+      "pre-wrap",
+    )
+    const spans = [...root.querySelectorAll("span")]
+
+    expect(canSplitParagraphIntoDescendants(root, spans, DEFAULT_CONFIG)).toBe(true)
   })
 })

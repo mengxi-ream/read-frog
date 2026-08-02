@@ -718,7 +718,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
     if (
       config.translate.mode === "bilingual" &&
-      !canSplitParagraphIntoDescendants(element, innerTopLevelParagraphs)
+      !canSplitParagraphIntoDescendants(element, innerTopLevelParagraphs, config)
     ) {
       // A newline-preserving flow (X note tweet: pre-wrap div of inline
       // rich-text <span> paragraphs,

@@ -43,13 +43,23 @@ export function isNewlinePreservingElement(element: HTMLElement): boolean {
  * descendant present the walker would take the per-child branch instead —
  * refusing the split there would lose viewport gating without gaining the
  * container-level plan.
+ *
+ * The refusal is also conditioned on the plan actually segmenting the
+ * container: a newline-preserving giant with only single-newline lines and
+ * no blank-line delimiters (long pre-wrapped log/code views) yields an EMPTY
+ * plan, and observing it whole would translate the entire giant as ONE
+ * request — losing viewport gating and risking provider length limits.
+ * The same plan builder the translate path uses makes the decision, so the
+ * observation-time judgment cannot drift from translate-time behavior.
  */
 export function canSplitParagraphIntoDescendants(
   element: HTMLElement,
   descendantParagraphs: readonly HTMLElement[],
+  config: Config,
 ): boolean {
   if (!isNewlinePreservingElement(element)) return true
-  return descendantParagraphs.some((paragraph) => isBlockTransNode(paragraph))
+  if (descendantParagraphs.some((paragraph) => isBlockTransNode(paragraph))) return true
+  return buildVirtualParagraphPlan(element, config).units.length < 2
 }
 
 const BLANK_LINE_DELIMITER_RE = /(?:\r\n?|\n)[^\S\r\n]*(?:\r\n?|\n)(?:[^\S\r\n]*(?:\r\n?|\n))*/g
