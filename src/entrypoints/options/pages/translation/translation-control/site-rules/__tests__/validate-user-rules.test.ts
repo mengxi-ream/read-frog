@@ -123,6 +123,34 @@ describe("validateUserRulesDocument", () => {
     ])
   })
 
+  it("accepts the tag-set delta fields", () => {
+    const rules = [
+      {
+        id: "tag-sets",
+        matches: "example.com",
+        "dontWalkButTranslateTags.remove": ["CODE"],
+        "dontWalkTags.add": ["X-WIDGET"],
+      },
+    ]
+
+    expect(validateUserRulesDocument(JSON.stringify(rules))).toEqual({ ok: true, rules })
+  })
+
+  it("rejects a bare tag-set key to keep the fields delta-only", () => {
+    const result = validateUserRulesDocument(
+      JSON.stringify([{ id: "bare", matches: "example.com", dontWalkTags: ["CODE"] }]),
+    )
+
+    expect(result.ok).toBe(false)
+    if (result.ok) {
+      return
+    }
+    expect(result.kind).toBe("schema")
+    expect(result.issues).toEqual([
+      { path: "rules[0].dontWalkTags", message: 'Unrecognized field "dontWalkTags"' },
+    ])
+  })
+
   it("reports invalid legacy selector values at their legacy field paths", () => {
     const result = validateUserRulesDocument(
       JSON.stringify([

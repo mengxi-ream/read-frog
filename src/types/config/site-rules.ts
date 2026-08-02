@@ -44,6 +44,21 @@ export const siteRuleSchema = z.object({
   preserveTextSelectors: z.array(z.string()).optional(),
   "preserveTextSelectors.add": z.array(z.string()).optional(),
   "preserveTextSelectors.remove": z.array(z.string()).optional(),
+  // Tag-NAME lists (not CSS selectors) that patch the built-in DOM tag sets
+  // (see DEFAULT_TAG_SETS in utils/constants/dom-rules). Delta-only by design:
+  // there is deliberately no bare base key, so a rule can never be misread as
+  // replacing the defaults. Entries are validated at resolve time; invalid tag
+  // names are dropped with a warning.
+  "dontWalkTags.add": z.array(z.string()).optional(),
+  "dontWalkTags.remove": z.array(z.string()).optional(),
+  "dontWalkButTranslateTags.add": z.array(z.string()).optional(),
+  "dontWalkButTranslateTags.remove": z.array(z.string()).optional(),
+  "mainContentIgnoreTags.add": z.array(z.string()).optional(),
+  "mainContentIgnoreTags.remove": z.array(z.string()).optional(),
+  "forceBlockTags.add": z.array(z.string()).optional(),
+  "forceBlockTags.remove": z.array(z.string()).optional(),
+  "forceInlineTranslationTags.add": z.array(z.string()).optional(),
+  "forceInlineTranslationTags.remove": z.array(z.string()).optional(),
   minCharacters: z.number().int().min(0).optional(),
   minWords: z.number().int().min(0).optional(),
   injectedCss: z.string().max(MAX_CUSTOM_CSS_LENGTH).optional(),

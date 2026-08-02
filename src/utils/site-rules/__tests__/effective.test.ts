@@ -56,6 +56,17 @@ describe("getEffectiveSiteRule", () => {
     expect(disabled.matchedRuleIds).not.toContain("readfrog-github")
   })
 
+  it("returns the same materialized tag set across memoized calls", () => {
+    const config = configWithUserRules([
+      { id: "user", matches: "example.com", "dontWalkButTranslateTags.remove": ["CODE"] },
+    ])
+    const first = getEffectiveSiteRule(config, "https://example.com/")
+    const second = getEffectiveSiteRule(config, "https://example.com/")
+    expect(first.dontWalkButTranslateTags).not.toBeNull()
+    expect(first.dontWalkButTranslateTags!.has("CODE")).toBe(false)
+    expect(second.dontWalkButTranslateTags).toBe(first.dontWalkButTranslateTags)
+  })
+
   it("resolves the migrated Steam inline selector as style-only", () => {
     const resolved = getEffectiveSiteRule(
       configWithUserRules([]),

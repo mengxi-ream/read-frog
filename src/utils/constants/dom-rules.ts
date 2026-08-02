@@ -92,3 +92,25 @@ export const DONT_WALK_BUT_TRANSLATE_TAGS = new Set(["CODE", "TIME"])
 export const FORCE_INLINE_TRANSLATION_TAGS = new Set(["A", "BUTTON", "SELECT", "OPTION", "SPAN"])
 
 export const MAIN_CONTENT_IGNORE_TAGS = new Set(["HEADER", "FOOTER", "NAV", "NOSCRIPT"])
+
+/**
+ * Site-rule override families for the tag sets above. Each family name is
+ * simultaneously the schema key prefix (`<family>.add` / `<family>.remove`),
+ * the `ResolvedSiteRule` field name, and the consumer lookup key, so
+ * `resolved[family] ?? DEFAULT_TAG_SETS[family]` typechecks without a mapping
+ * table.
+ */
+export type TagSetFamily =
+  | "dontWalkTags"
+  | "dontWalkButTranslateTags"
+  | "mainContentIgnoreTags"
+  | "forceBlockTags"
+  | "forceInlineTranslationTags"
+
+export const DEFAULT_TAG_SETS: Record<TagSetFamily, ReadonlySet<string>> = {
+  dontWalkTags: DONT_WALK_AND_TRANSLATE_TAGS,
+  dontWalkButTranslateTags: DONT_WALK_BUT_TRANSLATE_TAGS,
+  mainContentIgnoreTags: MAIN_CONTENT_IGNORE_TAGS,
+  forceBlockTags: FORCE_BLOCK_TAGS,
+  forceInlineTranslationTags: FORCE_INLINE_TRANSLATION_TAGS,
+}
