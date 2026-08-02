@@ -82,6 +82,7 @@ async function buildWebPageHashComponents(
   partialLangConfig: { sourceCode: LangCodeISO6393 | "auto"; targetCode: LangCodeISO6393 },
   enableAIContentAware: boolean,
   textFormat: TranslationTextFormat,
+  preserveLineBreaks: boolean,
   webPageContext?: WebPagePromptContext,
   promptExperimentVariant?: PromptExperimentVariant,
 ): Promise<string[]> {
@@ -99,6 +100,15 @@ async function buildWebPageHashComponents(
     // cache entries must too. This component also orphans entries cached before
     // the format-aware pipeline existed, which could hold corrupted output.
     hashComponents.push(`textFormat:${textFormat}`)
+    // Pushed only when the flag actually changes the provider request —
+    // today that is Google alone — so cache entries written before the flag
+    // existed stay valid and identical Microsoft/DeepL requests are not
+    // fragmented. Flagged Google requests get fresh entries (any old
+    // collapsed-line output for the same text is orphaned rather than
+    // reused).
+    if (preserveLineBreaks && providerConfig.provider === "google-translate") {
+      hashComponents.push("preserveLineBreaks:true")
+    }
     return hashComponents
   }
 
@@ -144,6 +154,8 @@ export interface TranslateTextOptions {
   extraHashTags?: string[]
   webPageContext?: WebPagePromptContext
   textFormat?: TranslationTextFormat
+  // Source line breaks are semantic — see the enqueueTranslateRequest field.
+  preserveLineBreaks?: boolean
   // Page-translation session id used for cancellation scoping. Deliberately
   // NOT part of the cache hash — cache identity must not vary per session.
   sessionId?: string
@@ -169,6 +181,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     extraHashTags = [],
     webPageContext,
     textFormat = "plain",
+    preserveLineBreaks = false,
     sessionId,
     configuredPrompt,
     translationActionContext = getPageTranslationActionContext() ?? undefined,
@@ -205,6 +218,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
     enableAIContentAware,
     textFormat,
+    preserveLineBreaks,
     normalizedWebPageContext,
     promptExperimentVariant,
   )
@@ -230,6 +244,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     scheduleAt: Date.now(),
     hash: Sha256Hex(...hashComponents),
     textFormat,
+    preserveLineBreaks,
     webTitle: normalizedWebPageContext?.webTitle,
     webDescription: normalizedWebPageContext?.webDescription,
     webContent: normalizedWebPageContext?.webContent,

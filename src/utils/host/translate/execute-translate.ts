@@ -21,6 +21,10 @@ export async function executeTranslate<TContext>(
     isBatch?: boolean
     context?: TContext
     textFormat?: TranslationTextFormat
+    // Only Google needs protection: its translateHtml transport collapses
+    // "\n" as HTML whitespace. Microsoft preserves newlines in both textTypes
+    // (live-verified); LLM prompts already mandate format preservation.
+    preserveLineBreaks?: boolean
     signal?: AbortSignal
   },
 ) {
@@ -42,6 +46,7 @@ export async function executeTranslate<TContext>(
     if (provider === "google-translate") {
       translatedText = await googleTranslate(preparedText, sourceLang, targetLang, {
         textFormat: options?.textFormat,
+        preserveLineBreaks: options?.preserveLineBreaks,
         signal: options?.signal,
       })
     } else if (provider === "microsoft-translate") {

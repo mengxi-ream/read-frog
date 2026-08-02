@@ -469,6 +469,7 @@ export function setUpWebPageTranslationQueue(): void {
         scheduleAt,
         hash,
         textFormat,
+        preserveLineBreaks,
         webTitle,
         webDescription,
         webContent,
@@ -563,6 +564,7 @@ export function setUpWebPageTranslationQueue(): void {
       const thunk = (signal?: AbortSignal) =>
         executeTranslate(text, langConfig, providerConfig, getTranslatePrompt, {
           textFormat,
+          preserveLineBreaks,
           signal,
         })
       result = await requestQueue.enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)

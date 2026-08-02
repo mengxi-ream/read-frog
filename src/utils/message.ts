@@ -109,6 +109,9 @@ interface ProtocolMap {
     scheduleAt: number
     hash: string
     textFormat?: TranslationTextFormat
+    // Source line breaks are semantic (newline-preserving container or typed
+    // input); providers whose transport collapses "\n" must protect them.
+    preserveLineBreaks?: boolean
     webTitle?: string | null
     webDescription?: string | null
     webContent?: string | null

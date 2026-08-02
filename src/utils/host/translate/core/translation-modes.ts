@@ -27,6 +27,7 @@ import { getOwnerDocument } from "../../dom/node"
 import { extractTextContent } from "../../dom/traversal"
 import {
   buildVirtualParagraphPlan,
+  isNewlinePreservingElement,
   moveParagraphInsertionBoundaryAfterTrailingInlineImages,
   type VirtualParagraphUnit,
 } from "../dom/paragraph-segmentation"
@@ -218,7 +219,9 @@ async function translateVirtualParagraph(
     wrapper,
     isCurrent,
     "plain",
-    actionContext ? () => translateTextForPage(unit.text, "plain", actionContext) : undefined,
+    // Virtual units exist only inside newline-preserving containers, so their
+    // interior single newlines (bullet lists) are always semantic.
+    () => translateTextForPage(unit.text, "plain", actionContext, { preserveLineBreaks: true }),
   )
   if (!isCurrent()) {
     disposeVirtualParagraphGroup(group)
@@ -597,6 +600,20 @@ export async function translateNodesBilingualMode(
         ? isBilingualTranslationStateCurrent(bilingualState)
         : translatedWrapperNode.isConnected
 
+    // Newline-preserving containers render single "\n" as real line breaks
+    // (an X tweet whose lines have no blank-line separators is ONE unit here,
+    // e.g. https://x.com/EpsteinJeffrey0/status/2083709421386080579 — five
+    // lines split by single "\n" that Google merged into one run-on line),
+    // so the provider must not collapse them. The FLOW CONTAINER's white-space
+    // governs how the run's newlines render: for an inline layout source
+    // (e.g. a GitHub inline <code> with its own break-spaces inside a normal
+    // paragraph) the parent's value is authoritative, not the element's own.
+    const flowContainer =
+      isHTMLElement(layoutSource) && isBlockTransNode(layoutSource)
+        ? layoutSource
+        : layoutSource.parentElement
+    const preserveLineBreaks = flowContainer ? isNewlinePreservingElement(flowContainer) : false
+
     const realTranslatedText = await getTranslatedTextAndRemoveSpinner(
       nodes,
       textContent,
@@ -604,7 +621,7 @@ export async function translateNodesBilingualMode(
       translatedWrapperNode,
       isCurrent,
       "plain",
-      actionContext ? () => translateTextForPage(textContent, "plain", actionContext) : undefined,
+      () => translateTextForPage(textContent, "plain", actionContext, { preserveLineBreaks }),
     )
 
     if (!isCurrent()) {
