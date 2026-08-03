@@ -103,7 +103,7 @@ export const DEFAULT_CONFIG: Config = {
       enableTargetLanguageSkip: true,
       skipLanguages: [],
     },
-    enableAIContentAware: true,
+    enableAIContentAware: false,
     customPromptsConfig: DEFAULT_TRANSLATE_PROMPTS_CONFIG,
     requestQueueConfig: {
       capacity: DEFAULT_REQUEST_CAPACITY,
