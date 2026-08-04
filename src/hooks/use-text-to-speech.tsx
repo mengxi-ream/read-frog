@@ -17,6 +17,7 @@ import {
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { detectLanguage } from "@/utils/content/language"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
+import { Sha256Hex } from "@/utils/hash"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
@@ -35,6 +36,7 @@ interface SynthesizedAudioChunk {
 }
 
 const TTS_ERROR_TOAST_ID = "tts-synthesize-error"
+const TTS_CREDENTIAL_FINGERPRINT_SALT = getRandomUUID()
 
 function toSignedValue(value: number, unit: "%" | "Hz"): string {
   return `${value >= 0 ? "+" : ""}${value}${unit}`
@@ -90,7 +92,15 @@ async function resolveVoiceForText(
   return selectTTSVoice(ttsConfig, detectedLanguage)
 }
 
-function getTTSFriendlyErrorDescription(error: Error): string | undefined {
+export function getTTSCredentialFingerprint(apiKey: string): string | undefined {
+  const normalizedApiKey = apiKey.trim()
+  return normalizedApiKey ? Sha256Hex(TTS_CREDENTIAL_FINGERPRINT_SALT, normalizedApiKey) : undefined
+}
+
+export function getTTSFriendlyErrorDescription(
+  error: Error,
+  backend: TTSConfig["backend"],
+): string | undefined {
   if (error.message.includes("Edge TTS returned empty audio data")) {
     return "The current voice may not support this language. Try switching to a matching voice."
   }
@@ -111,11 +121,13 @@ function getTTSFriendlyErrorDescription(error: Error): string | undefined {
     return "Too many TTS requests. Please try again in a moment."
   }
 
-  if (
-    error.message.includes("[NETWORK_ERROR]") ||
-    error.message.includes("[TOKEN_FETCH_FAILED]") ||
-    error.message.includes("[TOKEN_INVALID]")
-  ) {
+  if (error.message.includes("[NETWORK_ERROR]")) {
+    return backend === "openai-compatible"
+      ? "The external TTS API is unreachable. Check its Base URL, network, and availability."
+      : "Edge TTS is temporarily unavailable. Please check your network and retry."
+  }
+
+  if (error.message.includes("[TOKEN_FETCH_FAILED]") || error.message.includes("[TOKEN_INVALID]")) {
     return "Edge TTS is temporarily unavailable. Please check your network and retry."
   }
 
@@ -213,6 +225,10 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
         return
       }
       const chunks = splitTextByUtf8Bytes(text)
+      const credentialFingerprint =
+        ttsConfig.backend === "openai-compatible"
+          ? getTTSCredentialFingerprint(ttsConfig.openAICompatible.apiKey)
+          : undefined
       setTotalChunks(chunks.length)
       await sendMessage("ttsPlaybackPrepare")
 
@@ -252,6 +268,7 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
                 ttsConfig.backend === "openai-compatible"
                   ? ttsConfig.openAICompatible.instructions
                   : undefined,
+              credentialFingerprint,
               rate: ttsConfig.rate,
               pitch: ttsConfig.pitch,
               volume: ttsConfig.volume,
@@ -333,7 +350,7 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
         type: "error",
         title: i18n.t("speak.failedToGenerateSpeech"),
         id: TTS_ERROR_TOAST_ID,
-        description: getTTSFriendlyErrorDescription(error),
+        description: getTTSFriendlyErrorDescription(error, variables.ttsConfig.backend),
       })
       activeRequestIdRef.current = null
       setIsPlaying(false)

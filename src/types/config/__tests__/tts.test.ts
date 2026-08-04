@@ -9,6 +9,8 @@ import {
   getDefaultTTSVoiceForLanguage,
   getEdgeTTSVoiceItem,
   isKnownEdgeTTSVoice,
+  OPENAI_COMPATIBLE_TTS_RESPONSE_FORMATS,
+  openAICompatibleTTSResponseFormatSchema,
 } from "../tts"
 
 describe("tts config defaults", () => {
@@ -21,6 +23,11 @@ describe("tts config defaults", () => {
       responseFormat: "mp3",
       speed: 1,
     })
+  })
+
+  it("only offers response formats that browser audio playback can decode", () => {
+    expect(OPENAI_COMPATIBLE_TTS_RESPONSE_FORMATS).not.toContain("pcm")
+    expect(openAICompatibleTTSResponseFormatSchema.safeParse("pcm").success).toBe(false)
   })
 
   it("uses Andrew Multilingual as the fallback/default US English voice", () => {

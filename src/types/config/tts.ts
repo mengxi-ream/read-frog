@@ -3232,14 +3232,7 @@ export const ttsVoiceSchema = z.string().trim().min(1)
 export const TTS_BACKENDS = ["edge", "openai-compatible"] as const
 export const ttsBackendSchema = z.enum(TTS_BACKENDS)
 
-export const OPENAI_COMPATIBLE_TTS_RESPONSE_FORMATS = [
-  "mp3",
-  "opus",
-  "aac",
-  "flac",
-  "wav",
-  "pcm",
-] as const
+export const OPENAI_COMPATIBLE_TTS_RESPONSE_FORMATS = ["mp3", "opus", "aac", "flac", "wav"] as const
 export const openAICompatibleTTSResponseFormatSchema = z.enum(
   OPENAI_COMPATIBLE_TTS_RESPONSE_FORMATS,
 )

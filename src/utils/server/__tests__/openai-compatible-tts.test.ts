@@ -33,6 +33,14 @@ describe("buildOpenAICompatibleTTSEndpoint", () => {
     ).toBe("https://speech.example.com/custom/v1/audio/speech")
   })
 
+  it("preserves query parameters on a complete speech endpoint", () => {
+    expect(
+      buildOpenAICompatibleTTSEndpoint(
+        "https://speech.example.com/v1/audio/speech?api-version=2026-01-01&route=signed",
+      ).toString(),
+    ).toBe("https://speech.example.com/v1/audio/speech?api-version=2026-01-01&route=signed")
+  })
+
   it("rejects unsupported protocols and embedded credentials", () => {
     expect(() => buildOpenAICompatibleTTSEndpoint("file:///tmp/speech")).toThrow(
       "must use http or https",

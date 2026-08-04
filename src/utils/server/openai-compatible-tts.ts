@@ -9,7 +9,6 @@ const CONTENT_TYPE_BY_FORMAT: Record<OpenAICompatibleTTSRequestConfig["responseF
   aac: "audio/aac",
   flac: "audio/flac",
   wav: "audio/wav",
-  pcm: "audio/pcm",
 }
 
 export function buildOpenAICompatibleTTSEndpoint(baseURL: string): URL {
@@ -23,7 +22,6 @@ export function buildOpenAICompatibleTTSEndpoint(baseURL: string): URL {
 
   const pathname = endpoint.pathname.replace(/\/+$/, "")
   endpoint.pathname = pathname.endsWith("/audio/speech") ? pathname : `${pathname}/audio/speech`
-  endpoint.search = ""
   endpoint.hash = ""
   return endpoint
 }
