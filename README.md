@@ -205,9 +205,11 @@ Translate YouTube subtitles directly in the video player. Watch foreign language
 
 ### 🔊 [Text-to-Speech (TTS)][docs-tutorial]
 
-Listen to any selected text with high-quality AI voices. Powered by **Edge TTS** — completely free, with 150+ voices across 80+ languages including Chinese, English, Japanese, Korean, and many more. Adjust rate, pitch, and volume to your preference.
+Listen to any selected text with high-quality AI voices. **Edge TTS** remains the default and is completely free, with 150+ voices across 80+ languages including Chinese, English, Japanese, Korean, and many more. Adjust rate, pitch, and volume to your preference.
 
 Automatic language detection (basic or LLM-powered) with per-language voice mapping ensures the right voice for every language. Smart sentence-aware chunking handles long text by splitting at natural boundaries and prefetching the next chunk for seamless playback. Perfect for pronunciation practice and auditory learning.
+
+You can also connect a self-hosted or cloud **OpenAI-compatible speech API** from **Settings → Text to Speech → Speech provider**. The provider must implement `POST /audio/speech` and return audio bytes. Configure its base URL, optional API key, model, voice, audio format, and speed in the extension. For example, a local Kokoro-compatible server can use `http://127.0.0.1:8880/v1` as its base URL; Read Frog appends `/audio/speech` automatically when needed. API keys are sent as Bearer tokens.
 
 <div align="right">
 

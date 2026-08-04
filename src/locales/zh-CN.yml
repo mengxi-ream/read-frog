@@ -979,6 +979,32 @@ options:
   tts:
     title: 文本转语音
     pageDescription: 用自然的语音朗读任何选中的文本。
+    backend:
+      label: 语音服务
+      edge: Edge TTS
+      openAICompatible: OpenAI 兼容接口
+      description: 外部接口需实现 POST /audio/speech，并直接返回音频数据。
+    external:
+      required: 此项不能为空
+      baseURL:
+        label: Base URL
+        hint: 例如 http://127.0.0.1:8880/v1；也可以填写完整的 /audio/speech 地址。
+      apiKey:
+        label: API Key
+        hint: 本地服务可留空；填写后会作为 Bearer Token 发送。
+      model:
+        label: 模型
+      voice:
+        label: 声音
+      responseFormat:
+        label: 音频格式
+      speed:
+        label: 语速
+        hint: 支持 0.25 到 4
+      instructions:
+        label: 声音指令
+        hint: 可选；仅支持 instructions 的接口和模型会使用此项。
+      preview: 测试声音
     voice:
       title: 语音
       selectPlaceholder: 请选择一个声音

@@ -979,6 +979,32 @@ options:
   tts:
     title: Text to Speech
     pageDescription: Read any selection aloud with a natural voice.
+    backend:
+      label: Speech provider
+      edge: Edge TTS
+      openAICompatible: OpenAI-compatible API
+      description: External APIs must implement POST /audio/speech and return audio bytes.
+    external:
+      required: This field is required
+      baseURL:
+        label: Base URL
+        hint: For example, http://127.0.0.1:8880/v1. You may also enter the full /audio/speech endpoint.
+      apiKey:
+        label: API Key
+        hint: Optional for local services. It is sent as a Bearer token.
+      model:
+        label: Model
+      voice:
+        label: Voice
+      responseFormat:
+        label: Audio format
+      speed:
+        label: Speed
+        hint: Accepts values between 0.25 and 4
+      instructions:
+        label: Voice instructions
+        hint: Optional. Only APIs and models that support instructions will use this field.
+      preview: Test voice
     voice:
       title: Voice
       selectPlaceholder: Select a voice
