@@ -36,6 +36,31 @@ describe("v091-to-v092 migration", () => {
     }
   })
 
+  it("preserves existing TTS fields when the migration is rerun", () => {
+    const oldConfig = {
+      tts: {
+        defaultVoice: "en-US-DavisNeural",
+        backend: "openai-compatible",
+        openAICompatible: {
+          baseURL: "https://speech.example.com/v1",
+          apiKey: "existing-key",
+          model: "custom-model",
+          voice: "custom-voice",
+          responseFormat: "wav",
+          speed: 1.25,
+          instructions: "Speak clearly",
+        },
+      },
+    }
+    const snapshot = structuredClone(oldConfig)
+
+    const migrated = migrate(oldConfig)
+
+    expect(migrated).toEqual(oldConfig)
+    expect(migrate(migrated)).toEqual(migrated)
+    expect(oldConfig).toEqual(snapshot)
+  })
+
   it("leaves invalid top-level values unchanged", () => {
     expect(migrate(null)).toBeNull()
     expect(migrate([])).toEqual([])

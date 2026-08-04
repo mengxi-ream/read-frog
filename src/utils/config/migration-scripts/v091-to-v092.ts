@@ -20,7 +20,6 @@ export function migrate(oldConfig: any): any {
   return {
     ...oldConfig,
     tts: {
-      ...oldTts,
       backend: "edge",
       openAICompatible: {
         baseURL: "http://127.0.0.1:8880/v1",
@@ -31,6 +30,7 @@ export function migrate(oldConfig: any): any {
         speed: 1,
         instructions: "",
       },
+      ...oldTts,
     },
   }
 }
