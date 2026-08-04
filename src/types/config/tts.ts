@@ -3229,6 +3229,38 @@ export function isKnownEdgeTTSVoice(voice: string): boolean {
 
 export const ttsVoiceSchema = z.string().trim().min(1)
 
+export const TTS_BACKENDS = ["edge", "openai-compatible"] as const
+export const ttsBackendSchema = z.enum(TTS_BACKENDS)
+
+export const OPENAI_COMPATIBLE_TTS_RESPONSE_FORMATS = [
+  "mp3",
+  "opus",
+  "aac",
+  "flac",
+  "wav",
+  "pcm",
+] as const
+export const openAICompatibleTTSResponseFormatSchema = z.enum(
+  OPENAI_COMPATIBLE_TTS_RESPONSE_FORMATS,
+)
+
+export const MIN_OPENAI_COMPATIBLE_TTS_SPEED = 0.25
+export const MAX_OPENAI_COMPATIBLE_TTS_SPEED = 4
+export const openAICompatibleTTSSpeedSchema = z.coerce
+  .number()
+  .min(MIN_OPENAI_COMPATIBLE_TTS_SPEED)
+  .max(MAX_OPENAI_COMPATIBLE_TTS_SPEED)
+
+export const openAICompatibleTTSConfigSchema = z.object({
+  baseURL: z.string().trim().min(1),
+  apiKey: z.string(),
+  model: z.string().trim().min(1),
+  voice: z.string().trim().min(1),
+  responseFormat: openAICompatibleTTSResponseFormatSchema,
+  speed: openAICompatibleTTSSpeedSchema,
+  instructions: z.string(),
+})
+
 export const MIN_TTS_RATE = -100
 export const MAX_TTS_RATE = 100
 export const MIN_TTS_PITCH = -100
@@ -3241,6 +3273,8 @@ export const ttsPitchSchema = z.coerce.number().int().min(MIN_TTS_PITCH).max(MAX
 export const ttsVolumeSchema = z.coerce.number().int().min(MIN_TTS_VOLUME).max(MAX_TTS_VOLUME)
 
 export const ttsConfigSchema = z.object({
+  backend: ttsBackendSchema,
+  openAICompatible: openAICompatibleTTSConfigSchema,
   defaultVoice: ttsVoiceSchema,
   languageVoices: z.record(langCodeISO6393Schema, ttsVoiceSchema),
   rate: ttsRateSchema,

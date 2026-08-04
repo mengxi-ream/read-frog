@@ -3,6 +3,16 @@ import { describe, expect, it } from "vitest"
 import { selectTTSVoice } from "../use-text-to-speech"
 
 const baseTtsConfig = {
+  backend: "edge",
+  openAICompatible: {
+    baseURL: "http://127.0.0.1:8880/v1",
+    apiKey: "",
+    model: "kokoro",
+    voice: "af_heart",
+    responseFormat: "mp3",
+    speed: 1,
+    instructions: "",
+  },
   defaultVoice: "en-US-DavisNeural",
   languageVoices: {
     eng: "en-US-DavisNeural",

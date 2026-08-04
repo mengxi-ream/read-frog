@@ -27,6 +27,11 @@ export const EDGE_TTS_FEATURE_PROVIDER: FeatureProviderAnalytics = {
   backend_kind: "non_llm",
 }
 
+export const OPENAI_COMPATIBLE_TTS_FEATURE_PROVIDER: FeatureProviderAnalytics = {
+  provider: ANALYTICS_PROVIDER.OPENAI_COMPATIBLE_TTS,
+  backend_kind: "non_llm",
+}
+
 export function classifyProviderConfig(
   providerConfig: ProviderConfig | null | undefined,
 ): FeatureProviderAnalytics {
@@ -66,6 +71,9 @@ export function normalizeFeatureProviderAnalytics(
   }
   if (provider === ANALYTICS_PROVIDER.EDGE_TTS && backendKind === "non_llm") {
     return EDGE_TTS_FEATURE_PROVIDER
+  }
+  if (provider === ANALYTICS_PROVIDER.OPENAI_COMPATIBLE_TTS && backendKind === "non_llm") {
+    return OPENAI_COMPATIBLE_TTS_FEATURE_PROVIDER
   }
   if (
     VALID_CANONICAL_PROVIDERS.has(provider) &&

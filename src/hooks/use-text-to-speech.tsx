@@ -10,7 +10,10 @@ import { useRef, useState } from "react"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
-import { EDGE_TTS_FEATURE_PROVIDER } from "@/utils/analytics-provider"
+import {
+  EDGE_TTS_FEATURE_PROVIDER,
+  OPENAI_COMPATIBLE_TTS_FEATURE_PROVIDER,
+} from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { detectLanguage } from "@/utils/content/language"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
@@ -62,6 +65,10 @@ async function resolveVoiceForText(
   enableLLM: boolean,
   forcedVoice?: string,
 ): Promise<string> {
+  if (ttsConfig.backend === "openai-compatible") {
+    return ttsConfig.openAICompatible.voice
+  }
+
   if (forcedVoice) {
     logger.info("[TextToSpeech] Using forced voice for text", {
       text,
@@ -88,6 +95,18 @@ function getTTSFriendlyErrorDescription(error: Error): string | undefined {
     return "The current voice may not support this language. Try switching to a matching voice."
   }
 
+  if (error.message.includes("[REQUEST_FAILED]")) {
+    return error.message.replace("[REQUEST_FAILED] ", "")
+  }
+
+  if (error.message.includes("[INVALID_CONFIG]")) {
+    return "Check the external TTS Base URL, model, and voice settings."
+  }
+
+  if (error.message.includes("[EMPTY_AUDIO]")) {
+    return "The external TTS API returned no audio data."
+  }
+
   if (error.message.includes("[SYNTH_RATE_LIMITED]")) {
     return "Too many TTS requests. Please try again in a moment."
   }
@@ -101,6 +120,25 @@ function getTTSFriendlyErrorDescription(error: Error): string | undefined {
   }
 
   return error.message || undefined
+}
+
+async function synthesizeOpenAICompatibleTTSAudioChunk(
+  chunk: string,
+  ttsConfig: TTSConfig,
+): Promise<SynthesizedAudioChunk> {
+  const response = await sendMessage("openAICompatibleTtsSynthesize", {
+    text: chunk,
+    config: ttsConfig.openAICompatible,
+  })
+
+  if (!response.ok) {
+    throw new Error(`[${response.error.code}] ${response.error.message}`)
+  }
+
+  return {
+    audioBase64: response.audioBase64,
+    contentType: response.contentType,
+  }
 }
 
 async function synthesizeEdgeTTSAudioChunk(
@@ -181,6 +219,7 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
       const fetchChunkAudio = async (chunk: string) => {
         logger.info("[TextToSpeech] Fetching chunk audio", {
           text: chunk,
+          backend: ttsConfig.backend,
           voice: selectedVoice,
           rate: ttsConfig.rate,
           pitch: ttsConfig.pitch,
@@ -191,13 +230,37 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
             "tts-audio",
             {
               text: chunk,
+              backend: ttsConfig.backend,
+              baseURL:
+                ttsConfig.backend === "openai-compatible"
+                  ? ttsConfig.openAICompatible.baseURL
+                  : undefined,
+              model:
+                ttsConfig.backend === "openai-compatible"
+                  ? ttsConfig.openAICompatible.model
+                  : undefined,
               voice: selectedVoice,
+              responseFormat:
+                ttsConfig.backend === "openai-compatible"
+                  ? ttsConfig.openAICompatible.responseFormat
+                  : undefined,
+              speed:
+                ttsConfig.backend === "openai-compatible"
+                  ? ttsConfig.openAICompatible.speed
+                  : undefined,
+              instructions:
+                ttsConfig.backend === "openai-compatible"
+                  ? ttsConfig.openAICompatible.instructions
+                  : undefined,
               rate: ttsConfig.rate,
               pitch: ttsConfig.pitch,
               volume: ttsConfig.volume,
             },
           ],
-          queryFn: () => synthesizeEdgeTTSAudioChunk(chunk, selectedVoice, ttsConfig),
+          queryFn: () =>
+            ttsConfig.backend === "openai-compatible"
+              ? synthesizeOpenAICompatibleTTSAudioChunk(chunk, ttsConfig)
+              : synthesizeEdgeTTSAudioChunk(chunk, selectedVoice, ttsConfig),
           staleTime: Number.POSITIVE_INFINITY,
           gcTime: 1000 * 60 * 10,
           meta: {
@@ -280,13 +343,18 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
   })
 
   const play = (text: string, ttsConfig: TTSConfig, options?: { forcedVoice?: string }) => {
+    const providerAnalytics =
+      ttsConfig.backend === "openai-compatible"
+        ? OPENAI_COMPATIBLE_TTS_FEATURE_PROVIDER
+        : EDGE_TTS_FEATURE_PROVIDER
+
     return playMutation.mutateAsync({
       text,
       ttsConfig,
       forcedVoice: options?.forcedVoice,
       analyticsContext: {
         ...createFeatureUsageContext(ANALYTICS_FEATURE.TEXT_TO_SPEECH, surface),
-        ...EDGE_TTS_FEATURE_PROVIDER,
+        ...providerAnalytics,
       },
     })
   }

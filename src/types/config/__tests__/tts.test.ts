@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { DEFAULT_TTS_CONFIG } from "@/utils/constants/tts"
 import {
   createDefaultTTSLanguageVoices,
   EDGE_TTS_FALLBACK_VOICE,
@@ -11,6 +12,17 @@ import {
 } from "../tts"
 
 describe("tts config defaults", () => {
+  it("keeps Edge TTS as the default while seeding a local-compatible endpoint", () => {
+    expect(DEFAULT_TTS_CONFIG.backend).toBe("edge")
+    expect(DEFAULT_TTS_CONFIG.openAICompatible).toMatchObject({
+      baseURL: "http://127.0.0.1:8880/v1",
+      model: "kokoro",
+      voice: "af_heart",
+      responseFormat: "mp3",
+      speed: 1,
+    })
+  })
+
   it("uses Andrew Multilingual as the fallback/default US English voice", () => {
     expect(EDGE_TTS_FALLBACK_VOICE).toBe("en-US-AndrewMultilingualNeural")
     expect(getDefaultTTSVoiceForLanguage("eng")).toBe("en-US-AndrewMultilingualNeural")

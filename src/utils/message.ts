@@ -20,6 +20,10 @@ import type {
   EdgeTTSSynthesizeRequest,
   EdgeTTSSynthesizeWireResponse,
 } from "@/types/edge-tts"
+import type {
+  OpenAICompatibleTTSSynthesizeRequest,
+  OpenAICompatibleTTSSynthesizeResponse,
+} from "@/types/openai-compatible-tts"
 import type { ProxyRequest, ProxyResponse } from "@/types/proxy-fetch"
 import type {
   TTSPlaybackStartRequest,
@@ -176,6 +180,10 @@ interface ProtocolMap {
   edgeTtsSynthesize: (data: EdgeTTSSynthesizeRequest) => Promise<EdgeTTSSynthesizeWireResponse>
   edgeTtsListVoices: () => Promise<EdgeTTSVoice[]>
   edgeTtsHealthCheck: () => Promise<EdgeTTSHealthStatus>
+  // OpenAI-compatible tts
+  openAICompatibleTtsSynthesize: (
+    data: OpenAICompatibleTTSSynthesizeRequest,
+  ) => Promise<OpenAICompatibleTTSSynthesizeResponse>
   // tts playback
   ttsPlaybackPrepare: () => Promise<{ ok: true }>
   ttsPlaybackStart: (data: TTSPlaybackStartRequest) => Promise<TTSPlaybackStartResponse>

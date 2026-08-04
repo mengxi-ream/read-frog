@@ -37,6 +37,7 @@ export type AnalyticsOutcome = "success" | "failure"
 export const ANALYTICS_PROVIDER = {
   BUILT_IN_AI: "read-frog-built-in-ai",
   EDGE_TTS: "edge-tts",
+  OPENAI_COMPATIBLE_TTS: "openai-compatible-tts",
   UNKNOWN: "unknown",
 } as const
 

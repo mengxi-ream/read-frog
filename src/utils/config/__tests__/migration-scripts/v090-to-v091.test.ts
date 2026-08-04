@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { configSchema } from "@/types/config/config"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { migrate } from "../../migration-scripts/v090-to-v091"
+import { migrate as migrateToV092 } from "../../migration-scripts/v091-to-v092"
 import { testSeries as v090TestSeries } from "../example/v090"
 
 const RETIRED_TO_LIVE: Array<[string, string]> = [
@@ -178,7 +179,9 @@ describe("v090-to-v091 migration", () => {
         ],
       })
 
-      const parseResult = configSchema.safeParse(migrated)
+      // The current schema is v092, so finish the remaining migration step before
+      // validating this v091 output against it.
+      const parseResult = configSchema.safeParse(migrateToV092(migrated))
       expect(parseResult.success).toBe(true)
     },
   )
