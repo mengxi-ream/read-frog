@@ -29,5 +29,5 @@ Common provider patterns:
 Example models to suggest:
 
 - OpenRouter: read="deepseek/deepseek-chat-v3.1:free", translate="x-ai/grok-4-fast:free"
-- Anthropic: read="claude-3-5-sonnet-20241022", translate="claude-3-5-haiku-20241022"
+- Anthropic: read="claude-sonnet-4-6", translate="claude-haiku-4-5"
 - Mistral: read="mistral-large-latest", translate="mistral-small-latest"
