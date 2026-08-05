@@ -89,7 +89,9 @@ options:
   commandPalette:
     placeholder: Ayarları ara...
     noResults: Ayar bulunamadı
+    open: Ayarları ara
   sidebar:
+    toggle: Kenar çubuğunu aç/kapat
     settings: Ayarlar
     features: Özellikler
     product: Ürün

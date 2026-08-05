@@ -89,7 +89,9 @@ options:
   commandPalette:
     placeholder: Поиск настроек...
     noResults: Настройки не найдены
+    open: Поиск настроек
   sidebar:
+    toggle: Переключить боковую панель
     settings: Настройки
     features: Функции
     product: Продукт

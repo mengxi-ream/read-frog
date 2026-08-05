@@ -89,7 +89,9 @@ options:
   commandPalette:
     placeholder: 설정 검색...
     noResults: 설정을 찾을 수 없습니다
+    open: 설정 검색
   sidebar:
+    toggle: 사이드바 전환
     settings: 설정
     features: 기능
     product: 제품

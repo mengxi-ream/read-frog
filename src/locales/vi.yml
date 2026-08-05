@@ -89,7 +89,9 @@ options:
   commandPalette:
     placeholder: Tìm kiếm cài đặt...
     noResults: Không tìm thấy cài đặt
+    open: Tìm kiếm cài đặt
   sidebar:
+    toggle: Bật/tắt thanh bên
     settings: Cài đặt
     features: Tính năng
     product: Sản phẩm
