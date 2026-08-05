@@ -308,6 +308,28 @@ describe("built-in site rules", () => {
     }
   })
 
+  it("keeps visible Ubiquiti Community release virtual-list items walkable", () => {
+    const resolved = resolveSiteRule(
+      "https://community.ui.com/releases/Community-Update-2026-08-04/a1179dd3-e973-4495-97de-bb992962b49d",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+
+    expect(resolved.matchedRuleIds).toContain("ui-community-releases")
+    expect(resolved.injectedCss).toContain("[style*='visibility: hidden']")
+    expect(resolved.injectedCss).toContain(":has(> div[style*='position: absolute']")
+    expect(resolved.injectedCss).toContain("visibility: visible !important")
+
+    const outsideReleases = resolveSiteRule(
+      "https://community.ui.com/questions/example",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+    expect(outsideReleases.matchedRuleIds).not.toContain("ui-community-releases")
+  })
+
   it("does not restrict Steam app pages to an obsolete iframe include (issue #1923)", () => {
     const resolved = resolveSiteRule(
       "https://store.steampowered.com/app/2453660/Hoop_Land/",

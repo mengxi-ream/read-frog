@@ -4509,6 +4509,12 @@
     "preserveTextSelectors.add": ["em"]
   },
   {
+    "id": "ui-community-releases",
+    "description": "Keep Ubiquiti Community's visible virtual-list items walkable while translating release posts and comments",
+    "matches": "https://community.ui.com/releases/*",
+    "injectedCss": "div[style*='flex: 0 0 auto'][style*='position: relative'][style*='visibility: hidden']:has(> div[style*='position: absolute'][style*='visibility: visible']) { visibility: visible !important; }"
+  },
+  {
     "id": "hltv",
     "matches": ["hltv.org", "*.hltv.org"],
     "excludeSelectors": [
