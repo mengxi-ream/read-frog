@@ -304,6 +304,15 @@ options:
         title: 인터페이스 언어
         description: 브라우저 언어와 별개로 확장 프로그램의 인터페이스 언어를 선택합니다.
         auto: 자동(브라우저 따름)
+    translationLanguage:
+      title: 번역 언어
+      sourceCode:
+        title: 원본 언어
+        description: 웹페이지 원문의 언어입니다. '자동 감지'를 선택하면 페이지 자체에서 판별합니다.
+        auto: 자동 감지
+      targetCode:
+        title: 대상 언어
+        description: 웹페이지 번역문에 사용할 언어입니다.
     extensionActivation:
       title: 확장 프로그램 활성화
       description: 목록에 없는 모든 사이트에서 실행할지, 목록에 있는 사이트에서만 실행할지

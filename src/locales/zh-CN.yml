@@ -305,6 +305,15 @@ options:
         title: 界面语言
         description: 选择扩展界面的语言，独立于浏览器语言。
         auto: 自动（跟随浏览器）
+    translationLanguage:
+      title: 翻译语言
+      sourceCode:
+        title: 源语言
+        description: 网页原文的语言。选择“自动检测”则由陪读蛙从页面本身判断。
+        auto: 自动检测
+      targetCode:
+        title: 目标语言
+        description: 网页译文使用的语言。
     extensionActivation:
       title: 扩展激活
       description: 在列表之外的所有网站运行，还是只在列表内的网站运行

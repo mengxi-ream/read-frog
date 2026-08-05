@@ -304,6 +304,15 @@ options:
         title: インターフェース言語
         description: ブラウザの言語とは別に、拡張機能のインターフェース言語を選択します。
         auto: 自動（ブラウザに従う）
+    translationLanguage:
+      title: 翻訳言語
+      sourceCode:
+        title: 翻訳元の言語
+        description: ウェブページの原文の言語です。「自動検出」を選ぶとページ自体から判定します。
+        auto: 自動検出
+      targetCode:
+        title: 翻訳先の言語
+        description: ウェブページの訳文に使う言語です。
     extensionActivation:
       title: 拡張機能の有効化
       description: リストに登録したサイト以外のすべてで動作させるか、登録したサイトでのみ動作させるか

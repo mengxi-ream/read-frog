@@ -52,11 +52,7 @@ export function MultiLanguageCombobox({
       items={languageItems}
       filter={filterLanguage}
     >
-      {/* Button's sm shrinks its text and icon; a select's sm only shortens it. Match the
-          select, so a trigger reads the same whichever control it opens. */}
-      <ComboboxPrimitive.Trigger
-        render={<Button variant="outline" size="sm" className="justify-between gap-1.5 text-sm" />}
-      >
+      <ComboboxPrimitive.Trigger render={<Button variant="outline" size="sm" />}>
         <span className="truncate">{buttonLabel}</span>
         <Icon icon="tabler:chevron-down" className="size-4 text-muted-foreground" />
       </ComboboxPrimitive.Trigger>
