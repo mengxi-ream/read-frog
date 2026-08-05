@@ -2,6 +2,10 @@ import { langCodeISO6393Schema } from "@read-frog/definitions"
 import { z } from "zod"
 import { HOTKEYS } from "@/utils/constants/hotkeys"
 import {
+  BUILT_IN_PAGE_TRANSLATE_PROMPT_IDS,
+  DEFAULT_TRANSLATE_PROMPT_ID,
+} from "@/utils/constants/prompt"
+import {
   MAX_PRELOAD_MARGIN,
   MAX_PRELOAD_THRESHOLD,
   MIN_BATCH_CHARACTERS,
@@ -64,24 +68,111 @@ export const translatePromptObjSchema = z.object({
 })
 export type TranslatePromptObj = z.infer<typeof translatePromptObjSchema>
 
-export const customPromptsConfigSchema = z
-  .object({
-    promptId: z.string().nullable(),
-    patterns: z.array(translatePromptObjSchema),
+const storedPromptIdSchema = z.preprocess(
+  (promptId) => (promptId === null ? DEFAULT_TRANSLATE_PROMPT_ID : promptId),
+  z.string(),
+)
+
+function normalizeLegacyReservedPromptIds(value: unknown, builtInPromptIds: readonly string[]) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value
+
+  const promptConfig = value as Record<string, unknown>
+  if (!Array.isArray(promptConfig.patterns)) return value
+
+  const reservedIds = new Set(builtInPromptIds)
+  const usedIds = new Set(builtInPromptIds)
+  for (const pattern of promptConfig.patterns) {
+    if (
+      pattern &&
+      typeof pattern === "object" &&
+      !Array.isArray(pattern) &&
+      typeof (pattern as Record<string, unknown>).id === "string" &&
+      !reservedIds.has((pattern as Record<string, unknown>).id as string)
+    ) {
+      usedIds.add((pattern as Record<string, unknown>).id as string)
+    }
+  }
+
+  let selectedCustomId: string | undefined
+  let changed = false
+  const patterns = promptConfig.patterns.map((pattern) => {
+    if (!pattern || typeof pattern !== "object" || Array.isArray(pattern)) return pattern
+
+    const id = (pattern as Record<string, unknown>).id
+    if (typeof id !== "string" || !reservedIds.has(id)) return pattern
+
+    const baseId = `${id}-custom`
+    let renamedId = baseId
+    let suffix = 2
+    while (usedIds.has(renamedId)) {
+      renamedId = `${baseId}-${suffix}`
+      suffix += 1
+    }
+    usedIds.add(renamedId)
+    changed = true
+
+    // Before v092, a selected reserved-looking id could only identify the
+    // custom prompt. Preserve the first match, exactly like the migration.
+    if (selectedCustomId === undefined && promptConfig.promptId === id) {
+      selectedCustomId = renamedId
+    }
+
+    return { ...pattern, id: renamedId }
   })
-  .superRefine((data, ctx) => {
-    if (data.promptId !== null) {
-      const patternIds = data.patterns.map((p) => p.id)
-      if (!patternIds.includes(data.promptId)) {
+
+  if (!changed) return value
+  return {
+    ...promptConfig,
+    promptId: selectedCustomId ?? promptConfig.promptId,
+    patterns,
+  }
+}
+
+export function createCustomPromptsConfigSchema(builtInPromptIds: readonly string[]) {
+  const builtInPromptIdSet = new Set(builtInPromptIds)
+
+  const normalizedPromptConfigSchema = z
+    .object({
+      // `null` was the persisted default through v091. Keep accepting it at
+      // read boundaries so an options page opened before background migration
+      // cannot replace the user's config with the full product defaults.
+      promptId: storedPromptIdSchema,
+      patterns: z.array(translatePromptObjSchema),
+    })
+    .superRefine((data, ctx) => {
+      data.patterns.forEach((pattern, index) => {
+        if (builtInPromptIdSet.has(pattern.id)) {
+          ctx.addIssue({
+            code: "custom",
+            message: `Custom prompt id "${pattern.id}" is reserved for a built-in prompt`,
+            path: ["patterns", index, "id"],
+          })
+        }
+      })
+
+      const customPromptIds = data.patterns.map((pattern) => pattern.id)
+      if (!builtInPromptIdSet.has(data.promptId) && !customPromptIds.includes(data.promptId)) {
         ctx.addIssue({
-          code: "invalid_value",
-          values: patternIds,
-          message: `promptId "${data.promptId}" must be null or match a pattern id`,
+          code: "custom",
+          message: `promptId "${data.promptId}" must match a built-in or custom prompt id`,
           path: ["promptId"],
         })
       }
-    }
-  })
+    })
+
+  return z.preprocess(
+    (value) => normalizeLegacyReservedPromptIds(value, builtInPromptIds),
+    normalizedPromptConfigSchema,
+  )
+}
+
+export const pageCustomPromptsConfigSchema = createCustomPromptsConfigSchema(
+  BUILT_IN_PAGE_TRANSLATE_PROMPT_IDS,
+)
+
+// Backwards-compatible export for the shared prompt configurator. Page
+// translation is the only surface with more than one built-in prompt.
+export const customPromptsConfigSchema = pageCustomPromptsConfigSchema
 
 export const pageTranslationShortcutSchema = z.string().superRefine((shortcut, ctx) => {
   if (isPageTranslationShortcutEmpty(shortcut)) {

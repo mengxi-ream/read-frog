@@ -1,4 +1,3 @@
-import type { TranslationActionContext } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import type { TranslationMode } from "@/types/config/translate"
 import type { TransNode } from "@/types/dom"
@@ -95,11 +94,9 @@ const deepLXHtmlAttributeProbes = new Map<string, DeepLXHtmlAttributeProbe>()
 function translateTextForAction(
   text: string,
   textFormat: "plain" | "html",
-  actionContext?: TranslationActionContext,
+  forceRetranslation: boolean = false,
 ): Promise<string> {
-  return actionContext
-    ? translateTextForPage(text, textFormat, actionContext)
-    : translateTextForPage(text, textFormat)
+  return translateTextForPage(text, textFormat, { forceRetranslation })
 }
 
 function createDeepLXHtmlAttributeProbe(): DeepLXHtmlAttributeProbe {
@@ -206,7 +203,7 @@ async function translateVirtualParagraph(
   nodes: ChildNode[],
   config: Config,
   forceBlockTranslation: boolean,
-  actionContext?: TranslationActionContext,
+  forceRetranslation: boolean = false,
 ): Promise<void> {
   const { flowSource, unit, wrapper } = entry
   const isCurrent = () => isVirtualParagraphGroupCurrent(group, wrapper)
@@ -221,7 +218,11 @@ async function translateVirtualParagraph(
     "plain",
     // Virtual units exist only inside newline-preserving containers, so their
     // interior single newlines (bullet lists) are always semantic.
-    () => translateTextForPage(unit.text, "plain", actionContext, { preserveLineBreaks: true }),
+    () =>
+      translateTextForPage(unit.text, "plain", {
+        preserveLineBreaks: true,
+        forceRetranslation,
+      }),
   )
   if (!isCurrent()) {
     disposeVirtualParagraphGroup(group)
@@ -259,7 +260,7 @@ async function translateVirtualParagraphs(
   walkId: string,
   config: Config,
   forceBlockTranslation: boolean,
-  actionContext?: TranslationActionContext,
+  forceRetranslation: boolean = false,
 ): Promise<void> {
   const group: VirtualParagraphGroup = {
     id: `${walkId}:${virtualParagraphGroupSequence++}`,
@@ -332,7 +333,7 @@ async function translateVirtualParagraphs(
         nodes,
         config,
         forceBlockTranslation,
-        actionContext,
+        forceRetranslation,
       ),
     ),
   )
@@ -344,11 +345,11 @@ export async function translateNodes(
   toggle: boolean = false,
   config: Config,
   forceBlockTranslation: boolean = false,
-  actionContext?: TranslationActionContext,
+  forceRetranslation: boolean = false,
 ): Promise<void> {
   const translationMode = config.translate.mode
   if (translationMode === "translationOnly") {
-    await translateNodeTranslationOnlyMode(nodes, walkId, config, toggle, actionContext)
+    await translateNodeTranslationOnlyMode(nodes, walkId, config, toggle, forceRetranslation)
   } else if (translationMode === "bilingual") {
     await translateNodesBilingualMode(
       nodes,
@@ -356,7 +357,7 @@ export async function translateNodes(
       config,
       toggle,
       forceBlockTranslation,
-      actionContext,
+      forceRetranslation,
     )
   }
 }
@@ -367,7 +368,7 @@ export async function translateNodesBilingualMode(
   config: Config,
   toggle: boolean = false,
   forceBlockTranslation: boolean = false,
-  actionContext?: TranslationActionContext,
+  forceRetranslation: boolean = false,
 ): Promise<void> {
   const transNodes = nodes.filter((node) => isTransNode(node))
   if (transNodes.length === 0) {
@@ -454,7 +455,7 @@ export async function translateNodesBilingualMode(
           walkId,
           config,
           forceBlockTranslation || isNaturalBlockTransNode(virtualLayoutSource),
-          actionContext,
+          forceRetranslation,
         )
         return
       }
@@ -482,7 +483,7 @@ export async function translateNodesBilingualMode(
         config,
         toggle,
         forceBlockTranslation,
-        actionContext,
+        forceRetranslation,
       )
     }
 
@@ -547,7 +548,7 @@ export async function translateNodesBilingualMode(
           config,
           toggle,
           forceBlockTranslation,
-          actionContext,
+          forceRetranslation,
         )
       }
       return
@@ -621,7 +622,11 @@ export async function translateNodesBilingualMode(
       translatedWrapperNode,
       isCurrent,
       "plain",
-      () => translateTextForPage(textContent, "plain", actionContext, { preserveLineBreaks }),
+      () =>
+        translateTextForPage(textContent, "plain", {
+          preserveLineBreaks,
+          forceRetranslation,
+        }),
     )
 
     if (!isCurrent()) {
@@ -700,7 +705,7 @@ export async function translateNodeTranslationOnlyMode(
   walkId: string,
   config: Config,
   toggle: boolean = false,
-  actionContext?: TranslationActionContext,
+  forceRetranslation: boolean = false,
 ): Promise<void> {
   const isTransNodeAndNotTranslatedWrapper = (node: Node): node is TransNode => {
     if (isHTMLElement(node) && node.classList.contains(CONTENT_WRAPPER_CLASS)) return false
@@ -743,7 +748,13 @@ export async function translateNodeTranslationOnlyMode(
     if (!toggle) {
       const retryNodes = restored.filter((node) => node.isConnected)
       if (retryNodes.length > 0) {
-        void translateNodeTranslationOnlyMode(retryNodes, walkId, config, toggle, actionContext)
+        void translateNodeTranslationOnlyMode(
+          retryNodes,
+          walkId,
+          config,
+          toggle,
+          forceRetranslation,
+        )
       }
     }
     return
@@ -804,7 +815,13 @@ export async function translateNodeTranslationOnlyMode(
         ? nodes
         : restoredNodes.filter((node) => node.isConnected)
       if (retryNodes.length > 0) {
-        void translateNodeTranslationOnlyMode(retryNodes, walkId, config, toggle, actionContext)
+        void translateNodeTranslationOnlyMode(
+          retryNodes,
+          walkId,
+          config,
+          toggle,
+          forceRetranslation,
+        )
       }
       return
     }
@@ -861,7 +878,7 @@ export async function translateNodeTranslationOnlyMode(
       const translatedHtml = await translateTextForAction(
         protectedHtml.legacyRequestHtml,
         "html",
-        actionContext,
+        forceRetranslation,
       )
       return translatedHtml ? protectedHtml.restoreLegacy(translatedHtml) : translatedHtml
     }
@@ -879,7 +896,7 @@ export async function translateNodeTranslationOnlyMode(
         const translatedHtml = await translateTextForAction(
           protectedHtml.requestHtml,
           "html",
-          actionContext,
+          forceRetranslation,
         )
         if (!translatedHtml) {
           if (deepLXProviderKey) {

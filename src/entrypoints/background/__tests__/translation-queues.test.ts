@@ -3,8 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
 
-type BackgroundAnalyticsModule = typeof import("../analytics")
-
 const onMessageMock = vi.fn<(...args: any[]) => any>()
 const ensureInitializedConfigMock = vi.fn<(...args: any[]) => any>()
 const executeTranslateMock = vi.fn<(...args: any[]) => any>()
@@ -15,13 +13,6 @@ const articleSummaryCachePutMock = vi.fn<(...args: any[]) => any>()
 const translationCacheGetMock = vi.fn<(...args: any[]) => any>()
 const translationCachePutMock = vi.fn<(...args: any[]) => any>()
 const translationCacheDeleteMock = vi.fn<(...args: any[]) => any>()
-const resolvePromptExperimentVariantMock =
-  vi.fn<BackgroundAnalyticsModule["resolvePromptExperimentVariant"]>()
-const exposePromptExperimentMock = vi.fn<BackgroundAnalyticsModule["exposePromptExperiment"]>()
-const clearPromptExperimentActionMock =
-  vi.fn<BackgroundAnalyticsModule["clearPromptExperimentAction"]>()
-const clearPromptExperimentActionsByPrefixMock =
-  vi.fn<BackgroundAnalyticsModule["clearPromptExperimentActionsByPrefix"]>()
 
 vi.mock("@/utils/message", () => ({
   onMessage: onMessageMock,
@@ -55,13 +46,6 @@ vi.mock("@/utils/db/dexie/db", () => ({
       put: translationCachePutMock,
     },
   },
-}))
-
-vi.mock("../analytics", () => ({
-  clearPromptExperimentAction: clearPromptExperimentActionMock,
-  clearPromptExperimentActionsByPrefix: clearPromptExperimentActionsByPrefixMock,
-  exposePromptExperiment: exposePromptExperimentMock,
-  resolvePromptExperimentVariant: resolvePromptExperimentVariantMock,
 }))
 
 function getRegisteredMessageHandler(name: string) {
@@ -136,8 +120,6 @@ describe("translation queue helpers", () => {
     translationCacheGetMock.mockResolvedValue(undefined)
     translationCachePutMock.mockResolvedValue(undefined)
     translationCacheDeleteMock.mockResolvedValue(undefined)
-    resolvePromptExperimentVariantMock.mockResolvedValue("precision-rewrite")
-    exposePromptExperimentMock.mockResolvedValue(true)
   })
 
   it("routes only llm providers through the batch queue", async () => {
@@ -248,10 +230,10 @@ describe("translation queue helpers", () => {
     expect(executeTranslateMock.mock.calls[0]![0]).toBe("hello")
   })
 
-  it("does not expose an experiment prompt when the variant-specific cache hits", async () => {
+  it("returns a cached LLM translation without calling the provider", async () => {
     translationCacheGetMock.mockResolvedValueOnce({
-      key: "variant-cache-hit",
-      translation: "cached treatment translation",
+      key: "llm-cache-hit",
+      translation: "cached translation",
     })
     const { setUpWebPageTranslationQueue } = await import("../translation-queues")
     setUpWebPageTranslationQueue()
@@ -264,164 +246,11 @@ describe("translation queue helpers", () => {
           langConfig: DEFAULT_CONFIG.language,
           providerConfig: llmProvider,
           scheduleAt: Date.now(),
-          hash: "variant-cache-hit",
-          promptExperimentVariant: "precision-rewrite",
-          translationActionContext: {
-            actionId: "page-action",
-            feature: "page_translation",
-            surface: "popup",
-          },
-          sessionId: "page-action",
-        },
-        sender: { tab: { id: 42 } },
-      }),
-    ).resolves.toBe("cached treatment translation")
-
-    expect(resolvePromptExperimentVariantMock).not.toHaveBeenCalled()
-    expect(exposePromptExperimentMock).not.toHaveBeenCalled()
-    expect(executeTranslateMock).not.toHaveBeenCalled()
-  })
-
-  it("revalidates silently after a miss and exposes each unique action immediately before dispatch", async () => {
-    ensureInitializedConfigMock.mockResolvedValue({
-      ...DEFAULT_CONFIG,
-      translate: {
-        ...DEFAULT_CONFIG.translate,
-        providerId: llmProvider.id,
-        batchQueueConfig: {
-          maxCharactersPerBatch: 1000,
-          maxItemsPerBatch: 10,
-        },
-      },
-    })
-    executeTranslateMock.mockResolvedValueOnce("one\n\n%%\n\ntwo")
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
-    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
-
-    const makeRequest = (hash: string, actionId: string) =>
-      handler({
-        data: {
-          text: hash,
-          langConfig: DEFAULT_CONFIG.language,
-          providerConfig: llmProvider,
-          scheduleAt: Date.now(),
-          hash,
-          promptExperimentVariant: "precision-rewrite",
-          translationActionContext: {
-            actionId,
-            feature: "hover_translation",
-            surface: "shortcut",
-          },
-        },
-      })
-
-    await expect(
-      Promise.all([makeRequest("first", "hover-1"), makeRequest("second", "hover-2")]),
-    ).resolves.toEqual(["one", "two"])
-
-    expect(resolvePromptExperimentVariantMock).toHaveBeenCalledTimes(2)
-    expect(exposePromptExperimentMock).toHaveBeenCalledTimes(2)
-    expect(exposePromptExperimentMock).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({ actionId: "hover-1" }),
-      "precision-rewrite",
-      "hover-1",
-    )
-    expect(executeTranslateMock).toHaveBeenCalledTimes(1)
-    expect(exposePromptExperimentMock.mock.invocationCallOrder[1]).toBeLessThan(
-      executeTranslateMock.mock.invocationCallOrder[0]!,
-    )
-  })
-
-  it("asks the content side to rebuild its hash when the post-cache variant changed", async () => {
-    resolvePromptExperimentVariantMock.mockResolvedValueOnce("rewrite-after-understanding")
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
-    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
-
-    await expect(
-      handler({
-        data: {
-          text: "hello",
-          langConfig: DEFAULT_CONFIG.language,
-          providerConfig: llmProvider,
-          scheduleAt: Date.now(),
-          hash: "old-variant-hash",
-          promptExperimentVariant: "precision-rewrite",
-          translationActionContext: {
-            actionId: "action-1",
-            feature: "page_translation",
-            surface: "popup",
-          },
+          hash: "llm-cache-hit",
         },
       }),
-    ).resolves.toEqual({
-      retryWithPromptExperimentVariant: "rewrite-after-understanding",
-    })
-    expect(exposePromptExperimentMock).not.toHaveBeenCalled()
-    expect(executeTranslateMock).not.toHaveBeenCalled()
-    expect(translationCachePutMock).not.toHaveBeenCalled()
-  })
+    ).resolves.toBe("cached translation")
 
-  it("aborts dispatch and retries with the latest variant when exposure revalidation changes", async () => {
-    resolvePromptExperimentVariantMock
-      .mockResolvedValueOnce("precision-rewrite")
-      .mockResolvedValueOnce("rewrite-after-understanding")
-    exposePromptExperimentMock.mockResolvedValueOnce(false)
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
-    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
-
-    await expect(
-      handler({
-        data: {
-          text: "hello",
-          langConfig: DEFAULT_CONFIG.language,
-          providerConfig: llmProvider,
-          scheduleAt: Date.now(),
-          hash: "dispatch-race-hash",
-          promptExperimentVariant: "precision-rewrite",
-          translationActionContext: {
-            actionId: "action-1",
-            feature: "page_translation",
-            surface: "popup",
-          },
-        },
-      }),
-    ).resolves.toEqual({
-      retryWithPromptExperimentVariant: "rewrite-after-understanding",
-    })
-    expect(executeTranslateMock).not.toHaveBeenCalled()
-    expect(translationCachePutMock).not.toHaveBeenCalled()
-  })
-
-  it("aborts dispatch and retries without the experiment when the flag becomes unavailable", async () => {
-    resolvePromptExperimentVariantMock
-      .mockResolvedValueOnce("precision-rewrite")
-      .mockResolvedValueOnce(null)
-    exposePromptExperimentMock.mockResolvedValueOnce(false)
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
-    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
-
-    await expect(
-      handler({
-        data: {
-          text: "hello",
-          langConfig: DEFAULT_CONFIG.language,
-          providerConfig: llmProvider,
-          scheduleAt: Date.now(),
-          hash: "dispatch-unavailable-hash",
-          promptExperimentVariant: "precision-rewrite",
-          translationActionContext: {
-            actionId: "action-1",
-            feature: "page_translation",
-            surface: "popup",
-          },
-        },
-      }),
-    ).resolves.toEqual({ retryWithoutPromptExperiment: true })
     expect(executeTranslateMock).not.toHaveBeenCalled()
     expect(translationCachePutMock).not.toHaveBeenCalled()
   })

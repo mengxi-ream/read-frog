@@ -742,6 +742,15 @@ options:
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: プロンプトを追加
       default: デフォルト
+      builtIn: 組み込み
+      copyAndCustomize: コピーしてカスタマイズ
+      copyName: "$1 のコピー"
+      builtInPrompts:
+        default:
+          description: 日常的なコンテンツに適した、バランスのよい安定した翻訳
+        precisionRewrite:
+          name: 精訳リライト
+          description: より自然で、口語やスラングに強い翻訳。トークン消費が少し増えます
       importSuccess: インポート成功
       import: インポート
       export: エクスポート

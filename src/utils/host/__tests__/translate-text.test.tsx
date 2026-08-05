@@ -5,7 +5,6 @@ import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
 import { detectLanguage } from "@/utils/content/language"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
-import { translateTextCore } from "@/utils/host/translate/translate-text"
 import {
   translateTextForInput,
   translateTextForPage,
@@ -17,8 +16,6 @@ import {
 } from "@/utils/host/translate/translation-session"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { isTranslationCancelledError } from "@/utils/request/cancellation"
-
-type TranslatePromptOptions = NonNullable<Parameters<typeof getTranslatePrompt>[2]>
 
 // Mock dependencies
 vi.mock("@/utils/config/storage", () => ({
@@ -123,98 +120,6 @@ describe("translate-text", () => {
   })
 
   describe("translateTextForPage", () => {
-    it("rebuilds the variant-specific prompt hash when background flags changed", async () => {
-      const llmProvider = DEFAULT_CONFIG.providersConfig.find(
-        (provider) => provider.provider === "openai",
-      )!
-      mockGetTranslatePrompt.mockImplementation(
-        async (_target: string, _input: string, options: TranslatePromptOptions) => ({
-          systemPrompt: `system:${options.promptExperimentVariant ?? "control"}`,
-          prompt: `prompt:${options.promptExperimentVariant ?? "control"}`,
-        }),
-      )
-      let enqueueCount = 0
-      mockSendMessage.mockImplementation(async (type: string) => {
-        if (type === "resolvePromptExperimentVariant") return "precision-rewrite"
-        enqueueCount += 1
-        return enqueueCount === 1
-          ? { retryWithPromptExperimentVariant: "rewrite-after-understanding" }
-          : "translated text"
-      })
-
-      await expect(
-        translateTextCore({
-          text: "hello",
-          langConfig: DEFAULT_CONFIG.language,
-          providerConfig: llmProvider,
-          configuredPrompt: "default",
-          translationActionContext: {
-            actionId: "action-1",
-            feature: "page_translation",
-            surface: "popup",
-          },
-        }),
-      ).resolves.toBe("translated text")
-
-      expect(
-        mockSendMessage.mock.calls.filter(
-          ([type]: [string]) => type === "resolvePromptExperimentVariant",
-        ),
-      ).toHaveLength(1)
-      const enqueueCalls = mockSendMessage.mock.calls.filter(
-        ([type]: [string]) => type === "enqueueTranslateRequest",
-      )
-      expect(enqueueCalls).toHaveLength(2)
-      expect(enqueueCalls[0][1].promptExperimentVariant).toBe("precision-rewrite")
-      expect(enqueueCalls[1][1].promptExperimentVariant).toBe("rewrite-after-understanding")
-      expect(enqueueCalls[0][1].hash).not.toBe(enqueueCalls[1][1].hash)
-    })
-
-    it("rebuilds the current default prompt hash when the experiment becomes unavailable", async () => {
-      const llmProvider = DEFAULT_CONFIG.providersConfig.find(
-        (provider) => provider.provider === "openai",
-      )!
-      mockGetTranslatePrompt.mockImplementation(
-        async (_target: string, _input: string, options: TranslatePromptOptions) => ({
-          systemPrompt: `system:${options.promptExperimentVariant ?? "control"}`,
-          prompt: `prompt:${options.promptExperimentVariant ?? "control"}`,
-        }),
-      )
-      let enqueueCount = 0
-      mockSendMessage.mockImplementation(async (type: string) => {
-        if (type === "resolvePromptExperimentVariant") return "precision-rewrite"
-        enqueueCount += 1
-        return enqueueCount === 1 ? { retryWithoutPromptExperiment: true } : "translated text"
-      })
-
-      await expect(
-        translateTextCore({
-          text: "hello",
-          langConfig: DEFAULT_CONFIG.language,
-          providerConfig: llmProvider,
-          configuredPrompt: "default",
-          translationActionContext: {
-            actionId: "action-1",
-            feature: "page_translation",
-            surface: "popup",
-          },
-        }),
-      ).resolves.toBe("translated text")
-
-      expect(
-        mockSendMessage.mock.calls.filter(
-          ([type]: [string]) => type === "resolvePromptExperimentVariant",
-        ),
-      ).toHaveLength(1)
-      const enqueueCalls = mockSendMessage.mock.calls.filter(
-        ([type]: [string]) => type === "enqueueTranslateRequest",
-      )
-      expect(enqueueCalls).toHaveLength(2)
-      expect(enqueueCalls[0][1].promptExperimentVariant).toBe("precision-rewrite")
-      expect(enqueueCalls[1][1].promptExperimentVariant).toBeUndefined()
-      expect(enqueueCalls[0][1].hash).not.toBe(enqueueCalls[1][1].hash)
-    })
-
     it("should send message with correct parameters", async () => {
       mockSendMessage.mockResolvedValue("translated text")
 
@@ -235,29 +140,13 @@ describe("translate-text", () => {
       expect(mockGetOrGenerateWebPageSummary).not.toHaveBeenCalled()
     })
 
-    it("forces a fresh request only for hover translation when the option is enabled", async () => {
-      mockGetConfigFromStorage.mockResolvedValue({
-        ...DEFAULT_CONFIG,
-        translate: {
-          ...DEFAULT_CONFIG.translate,
-          node: {
-            ...DEFAULT_CONFIG.translate.node,
-            forceRetranslation: true,
-          },
-        },
-      })
+    it("forwards an explicit force-retranslation request without changing normal requests", async () => {
       mockSendMessage.mockResolvedValue("translated text")
 
       await translateTextForPage("hover text", "plain", {
-        actionId: "hover-action",
-        feature: "hover_translation",
-        surface: "shortcut",
+        forceRetranslation: true,
       })
-      await translateTextForPage("page text", "plain", {
-        actionId: "page-action",
-        feature: "page_translation",
-        surface: "popup",
-      })
+      await translateTextForPage("page text")
 
       const enqueueCalls = mockSendMessage.mock.calls.filter(
         ([type]: [string]) => type === "enqueueTranslateRequest",

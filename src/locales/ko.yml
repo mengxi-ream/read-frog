@@ -742,6 +742,15 @@ options:
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: 프롬프트 추가
       default: 기본
+      builtIn: 기본 제공
+      copyAndCustomize: 복사하여 사용자 지정
+      copyName: "$1 사본"
+      builtInPrompts:
+        default:
+          description: 일상적인 콘텐츠에 적합한 균형 잡히고 안정적인 번역
+        precisionRewrite:
+          name: 번역 다듬기
+          description: 더 자연스럽게 번역하고 구어체·속어를 살립니다. 토큰 사용량이 조금 늘어납니다
       importSuccess: 가져오기 성공
       import: 가져오기
       export: 내보내기

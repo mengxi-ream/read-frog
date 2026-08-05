@@ -742,6 +742,15 @@ options:
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: Prompt ekle
       default: Varsayılan
+      builtIn: Yerleşik
+      copyAndCustomize: Kopyala ve özelleştir
+      copyName: "$1 kopyası"
+      builtInPrompts:
+        default:
+          description: Günlük içerikler için dengeli ve güvenilir çeviri
+        precisionRewrite:
+          name: Çeviri düzenleme
+          description: Daha doğal ve konuşma diline yakın çeviri; token kullanımı biraz artar
       importSuccess: İçe aktarma başarılı
       import: İçe aktar
       export: Dışa aktar

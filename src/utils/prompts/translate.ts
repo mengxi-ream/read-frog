@@ -1,4 +1,3 @@
-import type { PromptExperimentVariant } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import type { WebPagePromptContext } from "@/types/content"
 import { getLocalConfig } from "@/utils/config/storage"
@@ -9,10 +8,10 @@ import {
 import { DEFAULT_CONFIG } from "../constants/config"
 import {
   BATCH_SEPARATOR,
+  BUILT_IN_PAGE_TRANSLATE_PROMPTS,
   DEFAULT_BATCH_TRANSLATE_PROMPT_WITH_SENTINEL,
   DEFAULT_SENTINEL_TRANSLATE_PROMPT,
-  DEFAULT_TRANSLATE_PROMPT,
-  DEFAULT_TRANSLATE_SYSTEM_PROMPT,
+  DEFAULT_TRANSLATE_PROMPT_ID,
   getTokenCellText,
   INPUT,
   TARGET_LANGUAGE,
@@ -21,7 +20,6 @@ import {
   WEB_SUMMARY,
   WEB_TITLE,
 } from "../constants/prompt"
-import { getDefaultTranslatePromptForVariant } from "./translate-experiment"
 
 const HTML_ATTRIBUTE_MARKER_SYSTEM_PROMPT = `## Protected HTML Marker Rules
 These mandatory rules override any conflicting instructions above:
@@ -33,7 +31,6 @@ These mandatory rules override any conflicting instructions above:
 export interface TranslatePromptOptions<TContext = unknown> {
   isBatch?: boolean
   context?: TContext
-  promptExperimentVariant?: PromptExperimentVariant
 }
 
 export interface TranslatePromptResult {
@@ -57,25 +54,17 @@ export function getTranslatePromptFromConfig(
   const customPromptsConfig = translateConfig.customPromptsConfig
   const { patterns, promptId } = customPromptsConfig
 
-  // Resolve system prompt and user prompt
-  let systemPrompt: string
-  let prompt: string
+  const resolvedPromptId = promptId || DEFAULT_TRANSLATE_PROMPT_ID
+  const builtInPrompt = Object.hasOwn(BUILT_IN_PAGE_TRANSLATE_PROMPTS, resolvedPromptId)
+    ? BUILT_IN_PAGE_TRANSLATE_PROMPTS[
+        resolvedPromptId as keyof typeof BUILT_IN_PAGE_TRANSLATE_PROMPTS
+      ]
+    : undefined
+  const customPrompt = patterns.find((pattern) => pattern.id === resolvedPromptId)
+  const selectedPrompt =
+    builtInPrompt ?? customPrompt ?? BUILT_IN_PAGE_TRANSLATE_PROMPTS[DEFAULT_TRANSLATE_PROMPT_ID]
 
-  if (!promptId) {
-    const defaults = options?.promptExperimentVariant
-      ? getDefaultTranslatePromptForVariant(options.promptExperimentVariant)
-      : {
-          systemPrompt: DEFAULT_TRANSLATE_SYSTEM_PROMPT,
-          prompt: DEFAULT_TRANSLATE_PROMPT,
-        }
-    systemPrompt = defaults.systemPrompt
-    prompt = defaults.prompt
-  } else {
-    // Find custom prompt, fallback to default
-    const customPrompt = patterns.find((pattern) => pattern.id === promptId)
-    systemPrompt = customPrompt?.systemPrompt ?? DEFAULT_TRANSLATE_SYSTEM_PROMPT
-    prompt = customPrompt?.prompt ?? DEFAULT_TRANSLATE_PROMPT
-  }
+  let { systemPrompt, prompt } = selectedPrompt
 
   // For batch mode, append batch rules to system prompt. The sentinel rule and
   // the sentinel-bearing format example are appended ONLY here: batch prompts

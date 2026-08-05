@@ -1,18 +1,9 @@
 import type { FeatureUsageContext } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import debounce from "debounce"
-import {
-  ANALYTICS_FEATURE,
-  ANALYTICS_SURFACE,
-  TRANSLATION_REQUESTED_FEATURE,
-} from "@/types/analytics"
+import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { isLLMProviderConfig } from "@/types/config/provider"
-import {
-  classifyTranslationRequest,
-  createFeatureUsageContext,
-  trackFeatureUsed,
-  trackTranslationRequested,
-} from "@/utils/analytics"
+import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { classifyProviderConfig, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
@@ -184,14 +175,6 @@ export class PageTranslationManager implements IPageTranslationManager {
     if (!config) {
       console.warn("Config is not initialized")
       if (trackedContext) {
-        if (trackedContext.surface !== ANALYTICS_SURFACE.PAGE_AUTO) {
-          await trackTranslationRequested({
-            feature: TRANSLATION_REQUESTED_FEATURE.PAGE_TRANSLATION,
-            surface: trackedContext.surface,
-            backend_kind: "unknown",
-            configured_prompt: "unknown",
-          })
-        }
         void trackFeatureUsed({
           ...trackedContext,
           ...UNKNOWN_FEATURE_PROVIDER,
@@ -203,16 +186,6 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     const requestedProviderConfig = resolveProviderConfigOrNull(config, "translate")
     const providerAnalytics = classifyProviderConfig(requestedProviderConfig)
-    if (trackedContext && trackedContext.surface !== ANALYTICS_SURFACE.PAGE_AUTO) {
-      await trackTranslationRequested({
-        feature: TRANSLATION_REQUESTED_FEATURE.PAGE_TRANSLATION,
-        surface: trackedContext.surface,
-        ...classifyTranslationRequest(
-          requestedProviderConfig,
-          config.translate.customPromptsConfig.promptId,
-        ),
-      })
-    }
 
     if (
       !validateTranslationConfigAndToast({
@@ -242,17 +215,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       this.isPageTranslating = true
       this.translationSessionVersion += 1
 
-      const promptExperimentAction =
-        window === window.top &&
-        trackedContext &&
-        trackedContext.surface !== ANALYTICS_SURFACE.PAGE_AUTO
-          ? {
-              feature: TRANSLATION_REQUESTED_FEATURE.PAGE_TRANSLATION,
-              surface: trackedContext.surface,
-            }
-          : undefined
-
-      beginPageTranslationSession(promptExperimentAction)
+      beginPageTranslationSession()
 
       const siteRule = getEffectiveSiteRule(config, window.location.href)
       if (siteRule.injectedCss) {

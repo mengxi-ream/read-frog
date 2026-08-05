@@ -40,6 +40,15 @@ vi.mock("@/utils/host/translate/translate-variants", () => ({
   translateTextForPage: vi.fn<(...args: any[]) => any>(() => Promise.resolve(MOCK_TRANSLATION)),
 }))
 
+const DEFAULT_PAGE_TRANSLATION_OPTIONS = {
+  preserveLineBreaks: false,
+  forceRetranslation: false,
+}
+const PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS = {
+  preserveLineBreaks: true,
+  forceRetranslation: false,
+}
+
 const BILINGUAL_CONFIG: Config = {
   ...DEFAULT_CONFIG,
   translate: {
@@ -626,8 +635,7 @@ describe("translate", () => {
           expect(translateTextForPage).toHaveBeenCalledWith(
             sourceText,
             "plain",
-            undefined,
-            expect.any(Object),
+            DEFAULT_PAGE_TRANSLATION_OPTIONS,
           )
           const wrapper = expectTranslationWrapper(deepestSpan, "bilingual")
           expect(wrapper).toBe(deepestSpan.lastChild)
@@ -664,8 +672,7 @@ describe("translate", () => {
           expect(translateTextForPage).toHaveBeenCalledWith(
             sourceText,
             "plain",
-            undefined,
-            expect.any(Object),
+            DEFAULT_PAGE_TRANSLATION_OPTIONS,
           )
           const [wrapper] = expectBlockTranslations(tweet, [translatedText])
           expect(sourceSpan.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
@@ -704,7 +711,9 @@ describe("translate", () => {
           await removeOrShowPageTranslation("translationOnly", true)
 
           expect(translateTextForPage).toHaveBeenCalledTimes(1)
-          expect(translateTextForPage).toHaveBeenCalledWith(sourceText, "html")
+          expect(translateTextForPage).toHaveBeenCalledWith(sourceText, "html", {
+            forceRetranslation: false,
+          })
           expectInPlaceTranslation(sourceSpan, translatedText)
           expect(sourceSpan.firstChild).toBe(sourceTextNode)
           expect([...tweet.children]).toEqual([sourceSpan, ...emojiImages])
@@ -762,8 +771,7 @@ describe("translate", () => {
               index + 1,
               paragraph,
               "plain",
-              undefined,
-              expect.any(Object),
+              PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS,
             )
           })
           const wrappers = expectBlockTranslations(tweet, translations)
@@ -864,22 +872,19 @@ describe("translate", () => {
             1,
             truncatedRequestText,
             "plain",
-            undefined,
-            expect.any(Object),
+            PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS,
           )
           expect(translateTextForPage).toHaveBeenNthCalledWith(
             2,
             expandedFirstParagraph,
             "plain",
-            undefined,
-            expect.any(Object),
+            PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS,
           )
           expect(translateTextForPage).toHaveBeenNthCalledWith(
             3,
             hashtagParagraph,
             "plain",
-            undefined,
-            expect.any(Object),
+            PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS,
           )
           expectBlockTranslations(tweet, [translations.expanded, translations.hashtags])
           expect(tweet).not.toHaveTextContent(translations.truncated)
@@ -996,15 +1001,13 @@ describe("translate", () => {
             1,
             paragraphs[0],
             "plain",
-            undefined,
-            expect.any(Object),
+            PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS,
           )
           expect(translateTextForPage).toHaveBeenNthCalledWith(
             2,
             paragraphs[1],
             "plain",
-            undefined,
-            expect.any(Object),
+            PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS,
           )
           expectBlockTranslations(tweet, translations)
           expectTextInDocumentOrder(tweet, [
@@ -1223,8 +1226,7 @@ describe("translate", () => {
               index + 1,
               paragraph,
               "plain",
-              undefined,
-              expect.any(Object),
+              PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS,
             )
           })
           expectBlockTranslations(tweet, translations)
@@ -1287,8 +1289,7 @@ describe("translate", () => {
               index + 1,
               paragraph,
               "plain",
-              undefined,
-              expect.any(Object),
+              PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS,
             )
           })
           expectBlockTranslations(tweet, translations)
@@ -1323,8 +1324,7 @@ describe("translate", () => {
             expect(translateTextForPage).toHaveBeenCalledWith(
               sourceText,
               "plain",
-              undefined,
-              expect.any(Object),
+              DEFAULT_PAGE_TRANSLATION_OPTIONS,
             )
             expectBlockTranslations(tweet, ["【整段译文】"])
           })
@@ -1348,8 +1348,7 @@ describe("translate", () => {
           expect(translateTextForPage).toHaveBeenCalledWith(
             sourceText,
             "plain",
-            undefined,
-            expect.any(Object),
+            PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS,
           )
           expectBlockTranslations(tweet, ["【标签整段译文】"])
         })
@@ -1374,8 +1373,7 @@ describe("translate", () => {
           expect(translateTextForPage).toHaveBeenCalledWith(
             "Translate this paragraph.",
             "plain",
-            undefined,
-            expect.any(Object),
+            PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS,
           )
           expectBlockTranslations(tweet, ["【唯一译文】"])
           expectTextInDocumentOrder(tweet, [
@@ -1471,14 +1469,12 @@ describe("translate", () => {
         expect(translateTextForPage).toHaveBeenCalledWith(
           nestedText,
           "plain",
-          undefined,
-          expect.any(Object),
+          DEFAULT_PAGE_TRANSLATION_OPTIONS,
         )
         expect(translateTextForPage).toHaveBeenCalledWith(
           mixedText,
           "plain",
-          undefined,
-          expect.any(Object),
+          DEFAULT_PAGE_TRANSLATION_OPTIONS,
         )
 
         const nestedWrapper = expectTranslationWrapper(deepestSpan, "bilingual")
@@ -2909,8 +2905,7 @@ describe("translate", () => {
           expect(translateTextForPage).toHaveBeenCalledWith(
             "perf(main): drop localhost label routes when a worktree is removed by @taiiiyang in #7557",
             "plain",
-            undefined,
-            expect.any(Object),
+            DEFAULT_PAGE_TRANSLATION_OPTIONS,
           )
           expect(document.querySelector(".user-mention")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(
             false,
@@ -2960,8 +2955,7 @@ describe("translate", () => {
           expect(translateTextForPage).toHaveBeenCalledWith(
             "#1837 feat(translate): return a NO_TRANSLATION_NEEDED sentinel",
             "plain",
-            undefined,
-            expect.any(Object),
+            DEFAULT_PAGE_TRANSLATION_OPTIONS,
           )
           // Preserved as source text, not promoted to its own paragraph/walked node.
           const prLink = document.querySelector("a[data-hovercard-type='pull_request']")!
@@ -3701,8 +3695,7 @@ describe("translate", () => {
         expect(translateTextForPage).toHaveBeenCalledWith(
           `${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`,
           "plain",
-          undefined,
-          expect.any(Object),
+          DEFAULT_PAGE_TRANSLATION_OPTIONS,
         )
       })
     })
@@ -3721,8 +3714,7 @@ describe("translate", () => {
         expect(translateTextForPage).toHaveBeenCalledWith(
           `${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`,
           "plain",
-          undefined,
-          expect.any(Object),
+          DEFAULT_PAGE_TRANSLATION_OPTIONS,
         )
       })
     })
@@ -3738,8 +3730,7 @@ describe("translate", () => {
         expect(translateTextForPage).toHaveBeenCalledWith(
           MOCK_ORIGINAL_TEXT,
           "plain",
-          undefined,
-          expect.any(Object),
+          DEFAULT_PAGE_TRANSLATION_OPTIONS,
         )
       })
 
@@ -3753,8 +3744,7 @@ describe("translate", () => {
         expect(translateTextForPage).toHaveBeenCalledWith(
           MOCK_ORIGINAL_TEXT,
           "plain",
-          undefined,
-          expect.any(Object),
+          DEFAULT_PAGE_TRANSLATION_OPTIONS,
         )
       })
     })
@@ -3775,8 +3765,7 @@ describe("translate", () => {
         expect(translateTextForPage).toHaveBeenCalledWith(
           `${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`,
           "plain",
-          undefined,
-          expect.any(Object),
+          DEFAULT_PAGE_TRANSLATION_OPTIONS,
         )
       })
 
@@ -3793,8 +3782,7 @@ describe("translate", () => {
         expect(translateTextForPage).toHaveBeenCalledWith(
           `${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`,
           "plain",
-          undefined,
-          expect.any(Object),
+          DEFAULT_PAGE_TRANSLATION_OPTIONS,
         )
       })
     })
@@ -3817,15 +3805,13 @@ describe("translate", () => {
           1,
           MOCK_ORIGINAL_TEXT,
           "plain",
-          undefined,
-          expect.any(Object),
+          DEFAULT_PAGE_TRANSLATION_OPTIONS,
         )
         expect(translateTextForPage).toHaveBeenNthCalledWith(
           2,
           MOCK_ORIGINAL_TEXT,
           "plain",
-          undefined,
-          expect.any(Object),
+          DEFAULT_PAGE_TRANSLATION_OPTIONS,
         )
       })
 
@@ -3841,8 +3827,12 @@ describe("translate", () => {
         await removeOrShowPageTranslation("translationOnly", true)
 
         expect(translateTextForPage).toHaveBeenCalledTimes(2)
-        expect(translateTextForPage).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT, "html")
-        expect(translateTextForPage).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT, "html")
+        expect(translateTextForPage).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT, "html", {
+          forceRetranslation: false,
+        })
+        expect(translateTextForPage).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT, "html", {
+          forceRetranslation: false,
+        })
       })
     })
   })

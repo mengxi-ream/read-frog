@@ -20,7 +20,7 @@ export function PromptList({ toolbarStart }: { toolbarStart?: ReactNode }) {
   const patterns = config.patterns
   const currentPromptId = config.promptId
 
-  const setCurrentPromptId = (value: string | null) => {
+  const setCurrentPromptId = (value: string) => {
     setConfig({
       ...config,
       promptId: value,

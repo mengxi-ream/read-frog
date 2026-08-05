@@ -14,6 +14,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/base-ui/alert-dialog"
 import { Button } from "@/components/ui/base-ui/button"
+import { DEFAULT_TRANSLATE_PROMPT_ID } from "@/utils/constants/prompt"
 import { i18n } from "@/utils/i18n"
 import { usePromptAtoms } from "./context"
 
@@ -37,7 +38,7 @@ export function DeletePrompt({
     setConfig({
       ...config,
       patterns: patterns.filter((p) => p.id !== originPrompt.id),
-      promptId: promptId !== originPrompt.id ? promptId : null,
+      promptId: promptId !== originPrompt.id ? promptId : DEFAULT_TRANSLATE_PROMPT_ID,
     })
     setOpen(false)
   }

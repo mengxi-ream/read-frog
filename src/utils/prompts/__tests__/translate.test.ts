@@ -1,7 +1,12 @@
 import type { Config } from "@/types/config/config"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { isNoTranslationSentinel, NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
+import {
+  DEFAULT_TRANSLATE_PROMPT_ID,
+  isNoTranslationSentinel,
+  NO_TRANSLATION_SENTINEL,
+  PRECISION_REWRITE_TRANSLATE_PROMPT_ID,
+} from "@/utils/constants/prompt"
 import { HTML_ATTRIBUTE_MARKER } from "@/utils/host/translate/html-attribute-markers"
 import { getSubtitlesTranslatePrompt } from "../subtitles"
 import { getTranslatePromptFromConfig } from "../translate"
@@ -14,7 +19,7 @@ let mockGetLocalConfig: any
 
 const defaultTranslatePromptConfig: Pick<Config["translate"], "customPromptsConfig"> = {
   customPromptsConfig: {
-    promptId: null,
+    promptId: DEFAULT_TRANSLATE_PROMPT_ID,
     patterns: [],
   },
 }
@@ -86,46 +91,47 @@ describe("translate prompt tokens", () => {
     expect(result.prompt).toBe("Translate Hola to {{targetLang}}")
   })
 
-  it.each([
-    ["control", "You are a professional Japanese native translator"],
-    ["rewrite-after-understanding", "Cross-Cultural Content Reconstruction Specialist"],
-    ["precision-rewrite", "Elite Translator and Rewriting Expert"],
-    ["expressive-translation-master", "Master of Expressive Translation"],
-  ] as const)("uses the immutable %s default-prompt snapshot", (variant, marker) => {
+  it("uses the product default built-in prompt", () => {
     const result = getTranslatePromptFromConfig(defaultTranslatePromptConfig, "Japanese", "Hello", {
-      promptExperimentVariant: variant,
       context: {
         webTitle: "Prompt test title",
         webSummary: "Prompt test summary",
       },
     })
 
-    expect(result.systemPrompt).toContain(marker)
+    expect(result.systemPrompt).toContain("You are a professional Japanese native translator")
     expect(result.systemPrompt).not.toContain("{{targetLang}}")
     expect(result.systemPrompt).not.toContain("{{title}}")
     expect(result.systemPrompt).not.toContain("{{summary}}")
     expect(result.prompt).toContain("Hello")
   })
 
-  it.each([
-    "control",
-    "rewrite-after-understanding",
-    "precision-rewrite",
-    "expressive-translation-master",
-  ] as const)("keeps the %s experiment prompt instructions in English", (variant) => {
-    const result = getTranslatePromptFromConfig(defaultTranslatePromptConfig, "French", "Hello", {
-      promptExperimentVariant: variant,
-      context: {
-        webTitle: "English-only prompt test",
-        webSummary: "English-only prompt summary",
+  it("uses precision-rewrite when that built-in prompt is selected", () => {
+    const result = getTranslatePromptFromConfig(
+      {
+        customPromptsConfig: {
+          promptId: PRECISION_REWRITE_TRANSLATE_PROMPT_ID,
+          patterns: [],
+        },
       },
-    })
+      "French",
+      "Hello",
+      {
+        context: {
+          webTitle: "English-only prompt test",
+          webSummary: "English-only prompt summary",
+        },
+      },
+    )
 
+    expect(result.systemPrompt).toContain("Elite Translator and Rewriting Expert")
+    expect(result.systemPrompt).toContain("Perform these steps internally without revealing them")
+    expect(result.systemPrompt).toContain("Output only the final translation")
     expect(result.systemPrompt).not.toMatch(/\p{Script=Han}/u)
     expect(result.prompt).not.toMatch(/\p{Script=Han}/u)
   })
 
-  it("never applies an experiment snapshot to a selected custom prompt", () => {
+  it("uses a selected custom prompt", () => {
     const result = getTranslatePromptFromConfig(
       {
         customPromptsConfig: {
@@ -142,13 +148,28 @@ describe("translate prompt tokens", () => {
       },
       "English",
       "Hola",
-      { promptExperimentVariant: "expressive-translation-master" },
     )
 
     expect(result).toEqual({
       systemPrompt: "My custom system prompt",
       prompt: "My custom prompt: Hola",
     })
+  })
+
+  it("falls back to the product default for an unknown prompt id", () => {
+    const result = getTranslatePromptFromConfig(
+      {
+        customPromptsConfig: {
+          promptId: "missing-prompt",
+          patterns: [],
+        },
+      },
+      "Japanese",
+      "Hello",
+    )
+
+    expect(result.systemPrompt).toContain("You are a professional Japanese native translator")
+    expect(result.prompt).toContain("Hello")
   })
 
   it("appends mandatory marker rules to the default system prompt", () => {
@@ -275,7 +296,7 @@ describe("translate prompt tokens", () => {
 
 describe("no-translation sentinel", () => {
   const defaultPromptsConfig: Pick<Config["translate"], "customPromptsConfig"> = {
-    customPromptsConfig: { promptId: null, patterns: [] },
+    customPromptsConfig: { promptId: DEFAULT_TRANSLATE_PROMPT_ID, patterns: [] },
   }
 
   it("appends the sentinel rule to batch prompts with the target language substituted", () => {

@@ -15,11 +15,14 @@ import {
   SheetTrigger,
 } from "@/components/ui/base-ui/sheet"
 import { QuickInsertableTextarea } from "@/components/ui/insertable-textarea"
-import { DEFAULT_TRANSLATE_PROMPT_ID } from "@/utils/constants/prompt"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
-import { usePromptAtoms, usePromptInsertCells } from "./context"
+import { useBuiltInPrompts, usePromptAtoms, usePromptInsertCells } from "./context"
+
+function createBlankPrompt(): TranslatePromptObj {
+  return { id: getRandomUUID(), name: "", systemPrompt: "", prompt: "" }
+}
 
 export function ConfigurePrompt({
   originPrompt,
@@ -31,47 +34,55 @@ export function ConfigurePrompt({
 } & React.ComponentProps<"button">) {
   const promptAtoms = usePromptAtoms()
   const insertCells = usePromptInsertCells()
+  const builtInPrompts = useBuiltInPrompts()
   const [config, setConfig] = useAtom(promptAtoms.config)
   const isExportMode = useAtomValue(promptAtoms.exportMode)
 
-  const inEdit = !!originPrompt
-  const isDefault = originPrompt?.id === DEFAULT_TRANSLATE_PROMPT_ID
+  const isBuiltIn =
+    originPrompt !== undefined && builtInPrompts.some(({ id }) => id === originPrompt.id)
+  const isEditingCustomPrompt = originPrompt !== undefined && !isBuiltIn
+  const [isCopyingBuiltIn, setIsCopyingBuiltIn] = useState(false)
+  const isReadOnly = isBuiltIn && !isCopyingBuiltIn
 
-  const defaultPrompt = { id: getRandomUUID(), name: "", systemPrompt: "", prompt: "" }
-  const initialPrompt = originPrompt ?? defaultPrompt
-
-  const [prompt, setPrompt] = useState<TranslatePromptObj>(initialPrompt)
+  const [prompt, setPrompt] = useState<TranslatePromptObj>(
+    () => originPrompt ?? createBlankPrompt(),
+  )
 
   const resetPrompt = () => {
-    setPrompt(originPrompt ?? defaultPrompt)
+    setIsCopyingBuiltIn(false)
+    setPrompt(originPrompt ?? createBlankPrompt())
   }
 
-  const sheetTitle = isDefault
-    ? i18n.t("options.translation.personalizedPrompts.default")
-    : inEdit
-      ? i18n.t("options.translation.personalizedPrompts.editPrompt.title")
-      : i18n.t("options.translation.personalizedPrompts.addPrompt")
-
-  const clearCachePrompt = () => {
-    setPrompt({
-      id: getRandomUUID(),
-      name: "",
-      systemPrompt: "",
-      prompt: "",
-    })
-  }
+  const sheetTitle = isReadOnly
+    ? (originPrompt?.name ?? "")
+    : isCopyingBuiltIn
+      ? i18n.t("options.translation.personalizedPrompts.copyAndCustomize")
+      : isEditingCustomPrompt
+        ? i18n.t("options.translation.personalizedPrompts.editPrompt.title")
+        : i18n.t("options.translation.personalizedPrompts.addPrompt")
 
   const configurePrompt = () => {
     const _patterns = config.patterns
 
     setConfig({
       ...config,
-      patterns: inEdit
+      patterns: isEditingCustomPrompt
         ? _patterns.map((p) => (p.id === prompt.id ? prompt : p))
         : [..._patterns, prompt],
+      promptId: isCopyingBuiltIn ? prompt.id : config.promptId,
     })
+  }
 
-    clearCachePrompt()
+  const copyBuiltInPrompt = () => {
+    if (!originPrompt) return
+
+    setPrompt({
+      id: getRandomUUID(),
+      name: i18n.t("options.translation.personalizedPrompts.copyName", [originPrompt.name]),
+      systemPrompt: originPrompt.systemPrompt,
+      prompt: originPrompt.prompt,
+    })
+    setIsCopyingBuiltIn(true)
   }
 
   return (
@@ -82,7 +93,7 @@ export function ConfigurePrompt({
         }
       }}
     >
-      {inEdit ? (
+      {originPrompt ? (
         <SheetTrigger
           render={
             <Button
@@ -93,7 +104,7 @@ export function ConfigurePrompt({
             />
           }
         >
-          <Icon icon={isDefault ? "tabler:eye" : "tabler:pencil"} className="size-4" />
+          <Icon icon={isBuiltIn ? "tabler:eye" : "tabler:pencil"} className="size-4" />
         </SheetTrigger>
       ) : (
         <SheetTrigger render={<Button className={className} {...props} />}>
@@ -113,7 +124,7 @@ export function ConfigurePrompt({
             <Input
               id="prompt-name"
               value={prompt.name}
-              disabled={isDefault}
+              disabled={isReadOnly}
               onChange={(e) => {
                 setPrompt({
                   ...prompt,
@@ -129,7 +140,7 @@ export function ConfigurePrompt({
             <QuickInsertableTextarea
               value={prompt.systemPrompt}
               className="max-h-80 min-h-40"
-              disabled={isDefault}
+              disabled={isReadOnly}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 setPrompt({ ...prompt, systemPrompt: e.target.value })
               }
@@ -143,7 +154,7 @@ export function ConfigurePrompt({
             <QuickInsertableTextarea
               value={prompt.prompt}
               className="max-h-60"
-              disabled={isDefault}
+              disabled={isReadOnly}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 setPrompt({ ...prompt, prompt: e.target.value })
               }
@@ -151,7 +162,17 @@ export function ConfigurePrompt({
             />
           </Field>
         </FieldGroup>
-        {!isDefault && (
+        {isReadOnly ? (
+          <SheetFooter>
+            <Button onClick={copyBuiltInPrompt}>
+              <Icon icon="tabler:copy" className="size-4" />
+              {i18n.t("options.translation.personalizedPrompts.copyAndCustomize")}
+            </Button>
+            <SheetClose render={<Button variant="outline" />}>
+              {i18n.t("options.translation.personalizedPrompts.editPrompt.close")}
+            </SheetClose>
+          </SheetFooter>
+        ) : (
           <SheetFooter>
             <SheetClose render={<Button onClick={configurePrompt} />}>
               {i18n.t("options.translation.personalizedPrompts.editPrompt.save")}

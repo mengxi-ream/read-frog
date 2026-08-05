@@ -742,6 +742,15 @@ options:
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: Thêm Prompt
       default: Mặc định
+      builtIn: Tích hợp sẵn
+      copyAndCustomize: Sao chép và tùy chỉnh
+      copyName: "Bản sao của $1"
+      builtInPrompts:
+        default:
+          description: Bản dịch cân bằng, đáng tin cậy cho nội dung hằng ngày
+        precisionRewrite:
+          name: Dịch trau chuốt
+          description: Bản dịch tự nhiên, gần khẩu ngữ hơn; mức dùng token tăng nhẹ
       importSuccess: Nhập thành công
       import: Nhập
       export: Xuất

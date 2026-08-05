@@ -858,6 +858,15 @@ options:
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: Add prompt
       default: Default
+      builtIn: Built-in
+      copyAndCustomize: Copy and customize
+      copyName: "$1 copy"
+      builtInPrompts:
+        default:
+          description: Balanced, reliable translation for everyday content
+        precisionRewrite:
+          name: Polished rewrite
+          description: More idiomatic, colloquial translations; slightly higher token usage
       importSuccess: Import success
       import: Import
       export: Export

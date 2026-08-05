@@ -1,5 +1,6 @@
 import { useAtom, useAtomValue } from "jotai"
 import { HelpTooltip } from "@/components/help-tooltip"
+import { getPageTranslatePromptSelectItems } from "@/components/prompt-configurator/built-in-prompts"
 import {
   Select,
   SelectContent,
@@ -24,13 +25,7 @@ export default function TranslatePromptSelector() {
   const customPromptsConfig = translateConfig.customPromptsConfig
   const { patterns, promptId } = customPromptsConfig
 
-  const items = [
-    {
-      value: DEFAULT_TRANSLATE_PROMPT_ID,
-      label: i18n.t("options.translation.personalizedPrompts.default"),
-    },
-    ...patterns.map((prompt) => ({ value: prompt.id, label: prompt.name })),
-  ]
+  const items = getPageTranslatePromptSelectItems(patterns)
 
   return (
     <div className="flex items-center justify-between gap-2">
@@ -45,7 +40,7 @@ export default function TranslatePromptSelector() {
           void setTranslateConfig({
             customPromptsConfig: {
               ...customPromptsConfig,
-              promptId: value === DEFAULT_TRANSLATE_PROMPT_ID ? null : value,
+              promptId: value ?? DEFAULT_TRANSLATE_PROMPT_ID,
             },
           })
         }}

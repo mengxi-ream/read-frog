@@ -1,4 +1,5 @@
 import { PromptManager } from "@/components/prompt-configurator"
+import { getBuiltInSubtitleTranslatePrompts } from "@/components/prompt-configurator/built-in-prompts"
 import { getTokenCellText, SUBTITLE_PROMPT_TOKENS } from "@/utils/constants/prompt"
 import { i18n } from "@/utils/i18n"
 import { ConfigDetailSection } from "../../../../components/config-detail-section"
@@ -30,7 +31,11 @@ export function SubtitlesCustomPromptsPage() {
           </span>
         }
       >
-        <PromptManager promptAtoms={promptAtoms} insertCells={insertCells} />
+        <PromptManager
+          promptAtoms={promptAtoms}
+          insertCells={insertCells}
+          builtInPrompts={getBuiltInSubtitleTranslatePrompts()}
+        />
       </ConfigDetailSection>
     </PageLayout>
   )

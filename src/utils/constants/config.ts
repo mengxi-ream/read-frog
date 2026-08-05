@@ -5,7 +5,10 @@ import type { PageTranslateRange } from "@/types/config/translate"
 import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
 import { BUILT_IN_DICTIONARY_ACTION_ID } from "./custom-action"
 import { CUSTOM_ACTION_TEMPLATES } from "./custom-action-templates"
-import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from "./prompt"
+import {
+  DEFAULT_SUBTITLE_TRANSLATE_PROMPTS_CONFIG,
+  DEFAULT_TRANSLATE_PROMPTS_CONFIG,
+} from "./prompt"
 import {
   buildDefaultProviderConfigList,
   DEFAULT_PROVIDER_CONFIG_LIST,
@@ -45,7 +48,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 91
+export const CONFIG_SCHEMA_VERSION = 92
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
@@ -207,7 +210,7 @@ export const DEFAULT_CONFIG: Config = {
       maxCharactersPerBatch: DEFAULT_BATCH_CONFIG.maxCharactersPerBatch,
       maxItemsPerBatch: DEFAULT_BATCH_CONFIG.maxItemsPerBatch,
     },
-    customPromptsConfig: DEFAULT_TRANSLATE_PROMPTS_CONFIG,
+    customPromptsConfig: DEFAULT_SUBTITLE_TRANSLATE_PROMPTS_CONFIG,
     position: DEFAULT_SUBTITLE_POSITION,
   },
   siteControl: {
