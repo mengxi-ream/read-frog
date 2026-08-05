@@ -89,7 +89,9 @@ options:
   commandPalette:
     placeholder: Buscar configuración...
     noResults: No se encontró configuración
+    open: Buscar configuración
   sidebar:
+    toggle: Alternar barra lateral
     settings: Configuración
     features: Funciones
     product: Producto

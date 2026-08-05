@@ -89,7 +89,9 @@ options:
   commandPalette:
     placeholder: 設定を検索...
     noResults: 設定が見つかりません
+    open: 設定を検索
   sidebar:
+    toggle: サイドバーを切り替え
     settings: 設定
     features: 機能
     product: 製品

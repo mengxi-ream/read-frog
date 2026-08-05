@@ -21,7 +21,7 @@ import { renderPersistentReactRoot } from "@/utils/react-root"
 import { queryClient } from "@/utils/tanstack-query"
 import { applyTheme, getLocalThemeMode, isDarkMode } from "@/utils/theme"
 import App from "./app"
-import { AppSidebar } from "./app-sidebar"
+import { AppShell } from "./app-shell"
 import { SettingsSearch } from "./command-palette/settings-search"
 import { ScrollRestoration } from "./navigation/scroll-restoration"
 import "@fontsource-variable/inter/index.css"
@@ -70,8 +70,9 @@ async function initApp() {
                         <AnchoredToastProvider>
                           <RecoveryBoundary>
                             <ScrollRestoration />
-                            <AppSidebar />
-                            <App />
+                            <AppShell>
+                              <App />
+                            </AppShell>
                             <SettingsSearch />
                           </RecoveryBoundary>
                         </AnchoredToastProvider>

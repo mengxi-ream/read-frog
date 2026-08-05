@@ -89,7 +89,9 @@ options:
   commandPalette:
     placeholder: 搜尋設定…
     noResults: 找不到設定
+    open: 搜尋設定
   sidebar:
+    toggle: 切換側邊欄
     settings: 設定
     features: 功能
     product: 產品

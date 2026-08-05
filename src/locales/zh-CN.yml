@@ -89,7 +89,9 @@ options:
   commandPalette:
     placeholder: 搜索设置...
     noResults: 未找到设置
+    open: 搜索设置
   sidebar:
+    toggle: 切换侧边栏
     settings: 设置
     features: 功能
     product: 产品

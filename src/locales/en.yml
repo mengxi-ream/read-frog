@@ -89,7 +89,9 @@ options:
   commandPalette:
     placeholder: Search settings...
     noResults: No settings found
+    open: Search settings
   sidebar:
+    toggle: Toggle sidebar
     settings: Settings
     features: Features
     product: Product
