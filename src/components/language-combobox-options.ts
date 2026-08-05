@@ -16,7 +16,15 @@ export function getTargetLanguageItems(): LanguageItem<LangCodeISO6393>[] {
   }))
 }
 
-export function getLanguageItems(detectedLangCode?: LangCodeISO6393): LanguageItem[] {
+/**
+ * `detectedLangCode` names the auto row after what the page turned out to be — for surfaces
+ * that sit beside a page. `autoLabel` is for surfaces that have no page to resolve against
+ * (the settings page), where auto can only be described.
+ */
+export function getLanguageItems(
+  detectedLangCode?: LangCodeISO6393,
+  autoLabel?: string,
+): LanguageItem[] {
   const items: LanguageItem[] = getTargetLanguageItems()
 
   if (detectedLangCode) {
@@ -25,6 +33,8 @@ export function getLanguageItems(detectedLangCode?: LangCodeISO6393): LanguageIt
       label: getLanguageLabel(detectedLangCode),
       name: getLanguageName(detectedLangCode),
     })
+  } else if (autoLabel) {
+    items.unshift({ value: "auto", label: autoLabel })
   }
 
   return items

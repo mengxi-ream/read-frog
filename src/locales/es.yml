@@ -305,6 +305,15 @@ options:
         title: Idioma de la interfaz
         description: Elige el idioma de la interfaz de la extensión, independiente del idioma de tu navegador.
         auto: Automático (seguir el navegador)
+    translationLanguage:
+      title: Idiomas de traducción
+      sourceCode:
+        title: Idioma de origen
+        description: El idioma desde el que se traducen las páginas. La detección automática lo deduce de la propia página.
+        auto: Detección automática
+      targetCode:
+        title: Idioma de destino
+        description: El idioma al que se traducen las páginas.
     extensionActivation:
       title: Activación de la extensión
       description: Si Read Frog se ejecuta en todas partes salvo en los sitios que indiques, o solo en los sitios que indiques
