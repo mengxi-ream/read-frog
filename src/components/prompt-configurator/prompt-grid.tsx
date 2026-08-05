@@ -109,7 +109,7 @@ export function PromptGrid({
                     </Badge>
                   )}
                   {isActive && (
-                    <Badge className="bg-primary">
+                    <Badge className="bg-primary" size="sm">
                       {i18n.t("options.translation.personalizedPrompts.current")}
                     </Badge>
                   )}
