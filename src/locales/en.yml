@@ -307,6 +307,15 @@ options:
         title: Interface language
         description: Choose the language for the extension's interface, independent of your browser language.
         auto: Auto (follow browser)
+    translationLanguage:
+      title: Translation languages
+      sourceCode:
+        title: Source language
+        description: The language pages are translated from. Auto-detect reads it from the page itself.
+        auto: Auto-detect
+      targetCode:
+        title: Target language
+        description: The language pages are translated into.
     extensionActivation:
       title: Extension activation
       description: Whether Read Frog runs everywhere except the sites you list, or only on the sites you list

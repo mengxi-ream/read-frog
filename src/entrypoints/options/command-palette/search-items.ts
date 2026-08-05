@@ -34,6 +34,20 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.preference.title",
   },
   {
+    sectionId: "translation-source-language",
+    route: "/preference",
+    titleKey: "options.preference.translationLanguage.sourceCode.title",
+    descriptionKey: "options.preference.translationLanguage.sourceCode.description",
+    pageKey: "options.preference.title",
+  },
+  {
+    sectionId: "translation-target-language",
+    route: "/preference",
+    titleKey: "options.preference.translationLanguage.targetCode.title",
+    descriptionKey: "options.preference.translationLanguage.targetCode.description",
+    pageKey: "options.preference.title",
+  },
+  {
     // Its own page, drilled into from the Preference page's Extension activation section.
     sectionId: "site-control-mode",
     route: "/preference/extension-activation",

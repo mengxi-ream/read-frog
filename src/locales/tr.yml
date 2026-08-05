@@ -306,6 +306,15 @@ options:
         title: Arayüz dili
         description: Uzantı arayüzünün dilini tarayıcı dilinizden bağımsız olarak seçin.
         auto: Otomatik (tarayıcıyı izle)
+    translationLanguage:
+      title: Çeviri dilleri
+      sourceCode:
+        title: Kaynak dil
+        description: Sayfaların çevrildiği kaynak dil. Otomatik algılama bunu sayfanın kendisinden okur.
+        auto: Otomatik algıla
+      targetCode:
+        title: Hedef dil
+        description: Sayfaların çevrileceği dil.
     extensionActivation:
       title: Uzantı etkinleştirme
       description: Read Frog listelediğiniz siteler dışında her yerde mi, yoksa yalnızca listelediğiniz sitelerde mi çalışsın

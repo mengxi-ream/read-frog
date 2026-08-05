@@ -306,6 +306,15 @@ options:
         title: Ngôn ngữ giao diện
         description: Chọn ngôn ngữ cho giao diện tiện ích, độc lập với ngôn ngữ trình duyệt.
         auto: Tự động (theo trình duyệt)
+    translationLanguage:
+      title: Ngôn ngữ dịch
+      sourceCode:
+        title: Ngôn ngữ nguồn
+        description: Ngôn ngữ gốc của trang web. Tự động phát hiện sẽ nhận diện từ chính trang đó.
+        auto: Tự động phát hiện
+      targetCode:
+        title: Ngôn ngữ đích
+        description: Ngôn ngữ mà trang web được dịch sang.
     extensionActivation:
       title: Kích hoạt tiện ích mở rộng
       description: Chạy ở mọi nơi trừ các trang bạn liệt kê, hoặc chỉ chạy trên các trang bạn liệt kê
