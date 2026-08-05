@@ -865,8 +865,8 @@ options:
         default:
           description: Balanced, reliable translation for everyday content
         precisionRewrite:
-          name: Deep polish
-          description: Prioritizes wording, logic, and terminology. Works best with stronger models and uses more tokens
+          name: Polished rewrite
+          description: More idiomatic, colloquial translations; slightly higher token usage
       importSuccess: Import success
       import: Import
       export: Export

@@ -749,8 +749,8 @@ options:
         default:
           description: 日常的なコンテンツに適した、バランスのよい安定した翻訳
         precisionRewrite:
-          name: 高度な推敲
-          description: 表現、論理、用語をより重視します。高性能なモデルに適しており、トークン消費量が増えます
+          name: 精訳リライト
+          description: より自然で、口語やスラングに強い翻訳。トークン消費が少し増えます
       importSuccess: インポート成功
       import: インポート
       export: エクスポート

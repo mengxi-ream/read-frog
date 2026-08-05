@@ -865,8 +865,8 @@ options:
         default:
           description: Traducción equilibrada y fiable para contenido cotidiano
         precisionRewrite:
-          name: Pulido avanzado
-          description: Prioriza la redacción, la lógica y la terminología. Funciona mejor con modelos más potentes y usa más tokens
+          name: Reescritura pulida
+          description: Traducción más natural y coloquial; aumenta ligeramente el uso de tokens
       importSuccess: Importación correcta
       import: Importar
       export: Exportar

@@ -749,8 +749,8 @@ options:
         default:
           description: Günlük içerikler için dengeli ve güvenilir çeviri
         precisionRewrite:
-          name: Derin düzenleme
-          description: İfade, mantık ve terminolojiye daha fazla önem verir. Daha güçlü modellerle daha iyi çalışır ve daha fazla token kullanır
+          name: Çeviri düzenleme
+          description: Daha doğal ve konuşma diline yakın çeviri; token kullanımı biraz artar
       importSuccess: İçe aktarma başarılı
       import: İçe aktar
       export: Dışa aktar

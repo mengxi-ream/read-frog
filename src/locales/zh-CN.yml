@@ -865,8 +865,8 @@ options:
         default:
           description: 适合日常内容的均衡、可靠翻译
         precisionRewrite:
-          name: 深度润色
-          description: 更重视措辞、逻辑和术语；建议搭配较强模型，会消耗更多 Token
+          name: 精翻重写
+          description: 翻译更地道，俚语化；略微增加 token 消耗
       importSuccess: 导入成功
       import: 导入
       export: 导出

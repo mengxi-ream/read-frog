@@ -749,8 +749,8 @@ options:
         default:
           description: Bản dịch cân bằng, đáng tin cậy cho nội dung hằng ngày
         precisionRewrite:
-          name: Tinh chỉnh chuyên sâu
-          description: Chú trọng hơn vào cách diễn đạt, logic và thuật ngữ. Phù hợp với mô hình mạnh hơn và sử dụng nhiều token hơn
+          name: Dịch trau chuốt
+          description: Bản dịch tự nhiên, gần khẩu ngữ hơn; mức dùng token tăng nhẹ
       importSuccess: Nhập thành công
       import: Nhập
       export: Xuất
