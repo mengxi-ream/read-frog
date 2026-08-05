@@ -858,6 +858,15 @@ options:
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/820
       addPrompt: 添加 Prompt
       default: 通用
+      builtIn: 内置
+      copyAndCustomize: 复制并自定义
+      copyName: "$1 副本"
+      builtInPrompts:
+        default:
+          description: 适合日常内容的均衡、可靠翻译
+        precisionRewrite:
+          name: 深度润色
+          description: 更重视措辞、逻辑和术语；建议搭配较强模型，会消耗更多 Token
       importSuccess: 导入成功
       import: 导入
       export: 导出

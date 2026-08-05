@@ -1,5 +1,4 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
-import type { TranslationActionContext } from "@/types/analytics"
 import type { Config, InputTranslationLang } from "@/types/config/config"
 import type { TranslationTextFormat } from "@/types/config/translate"
 import { isLLMProviderConfig } from "@/types/config/provider"
@@ -69,8 +68,6 @@ async function translateTextUsingPageConfig(
     preserveLineBreaks?: boolean
     // Session captured at pipeline entry by the caller; see translateTextForPage.
     sessionId?: string
-    configuredPrompt?: "default" | "custom"
-    translationActionContext?: TranslationActionContext
     forceRetranslation?: boolean
   } = {},
 ): Promise<string> {
@@ -116,10 +113,13 @@ async function translateTextUsingPageConfig(
     textFormat: options.textFormat,
     preserveLineBreaks: options.preserveLineBreaks,
     sessionId: options.sessionId,
-    configuredPrompt: options.configuredPrompt,
-    translationActionContext: options.translationActionContext,
     forceRetranslation: options.forceRetranslation,
   })
+}
+
+export interface PageTranslationRequestOptions {
+  preserveLineBreaks?: boolean
+  forceRetranslation?: boolean
 }
 
 /**
@@ -129,8 +129,7 @@ async function translateTextUsingPageConfig(
 export async function translateTextForPage(
   text: string,
   textFormat: TranslationTextFormat = "plain",
-  translationActionContext?: TranslationActionContext,
-  options?: { preserveLineBreaks?: boolean },
+  options?: PageTranslationRequestOptions,
 ): Promise<string> {
   // Capture the session id synchronously at pipeline entry. Reading it later
   // (after the awaits below, e.g. the network-backed page summary) could see
@@ -150,11 +149,7 @@ export async function translateTextForPage(
     textFormat,
     preserveLineBreaks: options?.preserveLineBreaks,
     sessionId,
-    configuredPrompt: config.translate.customPromptsConfig.promptId === null ? "default" : "custom",
-    translationActionContext,
-    forceRetranslation:
-      translationActionContext?.feature === "hover_translation" &&
-      config.translate.node.forceRetranslation,
+    forceRetranslation: options?.forceRetranslation,
   })
 }
 
@@ -179,7 +174,6 @@ export async function translateTextForPageTitle(text: string): Promise<string> {
       webSummary: webPageContext?.webSummary,
     },
     sessionId,
-    configuredPrompt: config.translate.customPromptsConfig.promptId === null ? "default" : "custom",
   })
 }
 

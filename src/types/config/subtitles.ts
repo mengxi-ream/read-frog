@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { BUILT_IN_SUBTITLE_TRANSLATE_PROMPT_IDS } from "@/utils/constants/prompt"
 import {
   MAX_BACKGROUND_OPACITY,
   MAX_FONT_SCALE,
@@ -9,10 +10,14 @@ import {
 } from "@/utils/constants/subtitles"
 import {
   batchQueueConfigSchema,
-  customPromptsConfigSchema,
+  createCustomPromptsConfigSchema,
   pageTranslationShortcutSchema,
   requestQueueConfigSchema,
 } from "./translate"
+
+export const subtitleCustomPromptsConfigSchema = createCustomPromptsConfigSchema(
+  BUILT_IN_SUBTITLE_TRANSLATE_PROMPT_IDS,
+)
 
 export const subtitlesDisplayModeSchema = z.enum(["bilingual", "originalOnly", "translationOnly"])
 export const subtitlesTranslationPositionSchema = z.enum(["above", "below"])
@@ -51,7 +56,7 @@ export const videoSubtitlesSchema = z.object({
   aiSegmentation: z.boolean(),
   requestQueueConfig: requestQueueConfigSchema,
   batchQueueConfig: batchQueueConfigSchema,
-  customPromptsConfig: customPromptsConfigSchema,
+  customPromptsConfig: subtitleCustomPromptsConfigSchema,
   position: subtitlePositionSchema,
 })
 

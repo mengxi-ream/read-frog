@@ -1,13 +1,6 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { GuideDictionaryNotebaseCompletionInput } from "./guide/dictionary-notebase"
-import type {
-  FeatureUsageContext,
-  FeatureUsedEventProperties,
-  PromptExperimentVariant,
-  TranslationActionContext,
-  TranslationConfiguredPrompt,
-  TranslationRequestedInput,
-} from "@/types/analytics"
+import type { FeatureUsageContext, FeatureUsedEventProperties } from "@/types/analytics"
 import type {
   BackgroundGenerateTextPayload,
   BackgroundGenerateTextResponse,
@@ -86,15 +79,6 @@ interface ProtocolMap {
   readAloudSelectionFromContextMenu: (data: { selectionText: string }) => void
   // analytics
   trackFeatureUsedEvent: (data: FeatureUsedEventProperties) => void
-  trackTranslationRequestedEvent: (data: TranslationRequestedInput) => void
-  resolvePromptExperimentVariant: (data: {
-    configuredPrompt: TranslationConfiguredPrompt
-  }) => PromptExperimentVariant | null
-  exposePromptExperiment: (data: {
-    actionContext: TranslationActionContext
-    expectedVariant: PromptExperimentVariant
-  }) => boolean
-  clearPromptExperimentAction: (data: { actionId: string }) => void
   // user guide
   pinStateChanged: (data: { isPinned: boolean }) => void
   getPinState: () => boolean
@@ -120,18 +104,8 @@ interface ProtocolMap {
     // for cancelPageTranslationRequests. Absent for non-page requests
     // (input/selection translation), which are never cancellable.
     sessionId?: string
-    promptExperimentVariant?: PromptExperimentVariant
-    translationActionContext?: TranslationActionContext
     forceRetranslation?: boolean
-  }) => Promise<
-    | string
-    | {
-        retryWithPromptExperimentVariant: PromptExperimentVariant
-      }
-    | {
-        retryWithoutPromptExperiment: true
-      }
-  >
+  }) => Promise<string>
   // Drain queued/in-flight page-translation requests of one session (#1881).
   // The background composes the scope as `${sender.tab.id}:${sessionId}`, so a
   // tab can only ever cancel its own requests.

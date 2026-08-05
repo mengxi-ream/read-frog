@@ -1,4 +1,5 @@
 import { PromptManager } from "@/components/prompt-configurator"
+import { getBuiltInPageTranslatePrompts } from "@/components/prompt-configurator/built-in-prompts"
 import { getTokenCellText, WEB_PAGE_PROMPT_TOKENS } from "@/utils/constants/prompt"
 import { i18n } from "@/utils/i18n"
 import { ConfigDetailSection } from "../../../../components/config-detail-section"
@@ -34,6 +35,7 @@ export function PersonalizedPromptsPage() {
         <PromptManager
           promptAtoms={promptAtoms}
           insertCells={insertCells}
+          builtInPrompts={getBuiltInPageTranslatePrompts()}
           toolbarStart={
             <a
               href={i18n.t("options.translation.personalizedPrompts.communityPromptsUrl")}

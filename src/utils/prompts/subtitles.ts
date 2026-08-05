@@ -3,9 +3,9 @@ import type { SubtitlePromptContext } from "@/types/content"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "../constants/config"
 import {
+  BUILT_IN_SUBTITLE_TRANSLATE_PROMPTS,
   DEFAULT_BATCH_TRANSLATE_PROMPT,
-  DEFAULT_SUBTITLE_TRANSLATE_PROMPT,
-  DEFAULT_SUBTITLE_TRANSLATE_SYSTEM_PROMPT,
+  DEFAULT_TRANSLATE_PROMPT_ID,
   getTokenCellText,
   SUBTITLE_INPUT,
   SUBTITLE_TARGET_LANGUAGE,
@@ -24,20 +24,19 @@ export async function getSubtitlesTranslatePrompt(
   const customPromptsConfig = config.videoSubtitles.customPromptsConfig
   const { patterns, promptId } = customPromptsConfig
 
-  // Resolve system prompt and user prompt
-  let systemPrompt: string
-  let prompt: string
+  const resolvedPromptId = promptId || DEFAULT_TRANSLATE_PROMPT_ID
+  const builtInPrompt = Object.hasOwn(BUILT_IN_SUBTITLE_TRANSLATE_PROMPTS, resolvedPromptId)
+    ? BUILT_IN_SUBTITLE_TRANSLATE_PROMPTS[
+        resolvedPromptId as keyof typeof BUILT_IN_SUBTITLE_TRANSLATE_PROMPTS
+      ]
+    : undefined
+  const customPrompt = patterns.find((pattern) => pattern.id === resolvedPromptId)
+  const selectedPrompt =
+    builtInPrompt ??
+    customPrompt ??
+    BUILT_IN_SUBTITLE_TRANSLATE_PROMPTS[DEFAULT_TRANSLATE_PROMPT_ID]
 
-  if (!promptId) {
-    // Use default prompts from constants
-    systemPrompt = DEFAULT_SUBTITLE_TRANSLATE_SYSTEM_PROMPT
-    prompt = DEFAULT_SUBTITLE_TRANSLATE_PROMPT
-  } else {
-    // Find custom prompt, fallback to default
-    const customPrompt = patterns.find((pattern) => pattern.id === promptId)
-    systemPrompt = customPrompt?.systemPrompt ?? DEFAULT_SUBTITLE_TRANSLATE_SYSTEM_PROMPT
-    prompt = customPrompt?.prompt ?? DEFAULT_SUBTITLE_TRANSLATE_PROMPT
-  }
+  let { systemPrompt, prompt } = selectedPrompt
 
   // For batch mode, append batch rules to system prompt
   if (options?.isBatch) {

@@ -1,6 +1,6 @@
 import type { TranslatePromptObj } from "@/types/config/translate"
 import { useAtom, useAtomValue } from "jotai"
-import { Activity, useId } from "react"
+import { useId } from "react"
 import { Badge } from "@/components/ui/base-ui/badge"
 import {
   Card,
@@ -13,50 +13,37 @@ import {
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import { Label } from "@/components/ui/base-ui/label"
 import { Separator } from "@/components/ui/base-ui/separator"
-import {
-  DEFAULT_TRANSLATE_PROMPT,
-  DEFAULT_TRANSLATE_PROMPT_ID,
-  DEFAULT_TRANSLATE_SYSTEM_PROMPT,
-} from "@/utils/constants/prompt"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 import { ConfigurePrompt } from "./configure-prompt"
-import { usePromptAtoms } from "./context"
+import { useBuiltInPrompts, usePromptAtoms } from "./context"
 import { DeletePrompt } from "./delete-prompt"
 
 export function PromptGrid({
   currentPromptId,
   setCurrentPromptId,
 }: {
-  currentPromptId: string | null
-  setCurrentPromptId: (value: string | null) => void
+  currentPromptId: string
+  setCurrentPromptId: (value: string) => void
 }) {
   const promptAtoms = usePromptAtoms()
   const config = useAtomValue(promptAtoms.config)
   const [selectedPrompts, setSelectedPrompts] = useAtom(promptAtoms.selectedPrompts)
   const isExportMode = useAtomValue(promptAtoms.exportMode)
+  const builtInPrompts = useBuiltInPrompts()
 
   const patterns = config.patterns
   const checkboxBaseId = useId()
-
-  // Construct virtual default prompt object from code constant
-  const defaultPrompt: TranslatePromptObj = {
-    id: DEFAULT_TRANSLATE_PROMPT_ID,
-    name: i18n.t("options.translation.personalizedPrompts.default"),
-    systemPrompt: DEFAULT_TRANSLATE_SYSTEM_PROMPT,
-    prompt: DEFAULT_TRANSLATE_PROMPT,
-  }
-
-  // Prepend default to patterns list
-  const allPrompts = [defaultPrompt, ...patterns]
+  const builtInPromptIds = new Set(builtInPrompts.map(({ id }) => id))
+  const allPrompts: TranslatePromptObj[] = [...builtInPrompts, ...patterns]
 
   async function handleCardClick(pattern: (typeof allPrompts)[number]) {
-    const isDefault = pattern.id === DEFAULT_TRANSLATE_PROMPT_ID
+    const isBuiltIn = builtInPromptIds.has(pattern.id)
 
     if (!isExportMode) {
-      setCurrentPromptId(isDefault ? null : pattern.id)
-    } else if (!isDefault) {
-      // In export mode, only allow selecting custom prompts (not default)
+      setCurrentPromptId(pattern.id)
+    } else if (!isBuiltIn) {
+      // Code-owned prompts are never exportable.
       setSelectedPrompts((prev) => {
         return prev.includes(pattern.id)
           ? prev.filter((id) => id !== pattern.id)
@@ -71,8 +58,12 @@ export function PromptGrid({
       className="grid max-h-96 grid-cols-1 gap-4 overflow-auto p-2 select-none md:grid-cols-2 lg:grid-cols-4"
     >
       {allPrompts.map((pattern) => {
-        const isDefault = pattern.id === DEFAULT_TRANSLATE_PROMPT_ID
-        const isActive = isDefault ? currentPromptId === null : currentPromptId === pattern.id
+        const isBuiltIn = builtInPromptIds.has(pattern.id)
+        const isActive = currentPromptId === pattern.id
+        const description =
+          "description" in pattern && typeof pattern.description === "string"
+            ? pattern.description
+            : undefined
 
         return (
           <Card
@@ -91,8 +82,7 @@ export function PromptGrid({
             >
               <CardTitle className="w-full min-w-0">
                 <div className="flex h-5 w-full items-center gap-3 leading-relaxed">
-                  {/* Checkbox: only show in export mode for custom prompts (not default) */}
-                  <Activity mode={isExportMode && !isDefault ? "visible" : "hidden"}>
+                  {isExportMode && !isBuiltIn && (
                     <Checkbox
                       id={`${checkboxBaseId}-check-${pattern.id}`}
                       checked={selectedPrompts.includes(pattern.id)}
@@ -105,7 +95,7 @@ export function PromptGrid({
                         })
                       }}
                     />
-                  </Activity>
+                  )}
                   <Label
                     htmlFor={`${checkboxBaseId}-check-${pattern.id}`}
                     className="block min-w-0 flex-1 cursor-pointer truncate"
@@ -113,11 +103,16 @@ export function PromptGrid({
                   >
                     {pattern.name}
                   </Label>
-                  <Activity mode={isActive ? "visible" : "hidden"}>
+                  {isBuiltIn && (
+                    <Badge variant="secondary" size="sm">
+                      {i18n.t("options.translation.personalizedPrompts.builtIn")}
+                    </Badge>
+                  )}
+                  {isActive && (
                     <Badge className="bg-primary">
                       {i18n.t("options.translation.personalizedPrompts.current")}
                     </Badge>
-                  </Activity>
+                  )}
                 </div>
               </CardTitle>
             </CardHeader>
@@ -126,26 +121,33 @@ export function PromptGrid({
               onClick={() => handleCardClick(pattern)}
             >
               <p className="line-clamp-3 text-sm text-ellipsis whitespace-pre-wrap">
-                {pattern.systemPrompt && pattern.prompt
-                  ? `${pattern.systemPrompt}\n---\n${pattern.prompt}`
-                  : pattern.systemPrompt || pattern.prompt}
+                {description ??
+                  (pattern.systemPrompt && pattern.prompt
+                    ? `${pattern.systemPrompt}\n---\n${pattern.prompt}`
+                    : pattern.systemPrompt || pattern.prompt)}
               </p>
             </CardContent>
             <Separator className="my-0" />
-            <CardFooter className="flex w-full cursor-default items-center justify-between px-4 py-2">
-              <Activity mode={isDefault ? "visible" : "hidden"}>
+            <CardFooter
+              className={cn(
+                "flex w-full cursor-default items-center px-4 py-2",
+                isBuiltIn ? "justify-end" : "justify-between",
+              )}
+            >
+              {isBuiltIn ? (
                 <CardAction>
                   <ConfigurePrompt originPrompt={pattern} />
                 </CardAction>
-              </Activity>
-              <Activity mode={isDefault ? "hidden" : "visible"}>
-                <CardAction>
-                  <DeletePrompt originPrompt={pattern} />
-                </CardAction>
-                <CardAction>
-                  <ConfigurePrompt originPrompt={pattern} />
-                </CardAction>
-              </Activity>
+              ) : (
+                <>
+                  <CardAction>
+                    <DeletePrompt originPrompt={pattern} />
+                  </CardAction>
+                  <CardAction>
+                    <ConfigurePrompt originPrompt={pattern} />
+                  </CardAction>
+                </>
+              )}
             </CardFooter>
           </Card>
         )
