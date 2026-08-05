@@ -32,6 +32,17 @@ export const inputTextAtom = atom("")
 // === Detected Source LangCode (from input text) ===
 export const detectedSourceLangCodeAtom = atom<LangCodeISO6393 | null>(null)
 
+/** Named after the empty input, which detects as nothing but still has to name the auto row. */
+const FALLBACK_DETECTED_LANG_CODE: LangCodeISO6393 = "eng"
+
+/**
+ * The language the auto row stands for: what the source selector reads while `auto` is
+ * selected, and so also what `auto` hands over when the two languages swap.
+ */
+export const detectedLangCodeAtom = atom(
+  (get) => get(detectedSourceLangCodeAtom) ?? FALLBACK_DETECTED_LANG_CODE,
+)
+
 // === Selected Provider IDs (only store IDs, get config from configFieldsAtomMap) ===
 const selectedProviderIdsOverrideAtom = atom<string[] | null>(null)
 
@@ -62,10 +73,11 @@ export const selectedProvidersAtom = atom((get) => {
 // === Write-Only Action Atom (only for operations that touch multiple atoms) ===
 export const exchangeLangCodesAtom = atom(null, (get, set) => {
   const source = get(sourceLangCodeAtom)
-  if (source === "auto") return // Cannot exchange when source is auto
   const target = get(targetLangCodeAtom)
   set(sourceLangCodeAtom, target)
-  set(targetLangCodeAtom, source)
+  // `auto` is no language to hand to the target side, so it hands over the one the source
+  // selector was reading — the detected one — and the swap stays what the eye saw.
+  set(targetLangCodeAtom, source === "auto" ? get(detectedLangCodeAtom) : source)
 })
 
 // === Translation Request (Command Pattern) ===

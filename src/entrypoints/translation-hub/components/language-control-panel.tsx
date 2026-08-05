@@ -7,6 +7,7 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { detectLanguage } from "@/utils/content/language"
 import { i18n } from "@/utils/i18n"
 import {
+  detectedLangCodeAtom,
   detectedSourceLangCodeAtom,
   exchangeLangCodesAtom,
   inputTextAtom,
@@ -20,7 +21,8 @@ export function LanguageControlPanel() {
   const [targetLangCode, setTargetLangCode] = useAtom(targetLangCodeAtom)
   const exchangeLangCodes = useSetAtom(exchangeLangCodesAtom)
   const inputText = useAtomValue(inputTextAtom)
-  const [detectedSourceLangCode, setDetectedSourceLangCode] = useAtom(detectedSourceLangCodeAtom)
+  const setDetectedSourceLangCode = useSetAtom(detectedSourceLangCodeAtom)
+  const detectedLangCode = useAtomValue(detectedLangCodeAtom)
   const languageDetection = useAtomValue(configFieldsAtomMap.languageDetection)
 
   // Debounced language detection from input text
@@ -42,8 +44,6 @@ export function LanguageControlPanel() {
     return () => debouncedDetect.clear()
   }, [inputText, debouncedDetect])
 
-  const detectedLangCode = detectedSourceLangCode ?? "eng"
-
   return (
     <div className="flex w-full items-center gap-3">
       <SearchableLanguageSelector
@@ -59,7 +59,6 @@ export function LanguageControlPanel() {
           variant="ghost"
           size="icon"
           onClick={exchangeLangCodes}
-          disabled={sourceLangCode === "auto"}
           title={i18n.t("translationHub.exchangeLanguages")}
         >
           <Icon icon="tabler:arrows-exchange" className="h-4 w-4" />
