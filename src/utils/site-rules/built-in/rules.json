@@ -4532,5 +4532,11 @@
     "description": "SillyTavern renders backtick narration as <p><code>; translate CODE as part of its paragraph (fenced code blocks stay protected by PRE)",
     "matches": ["localhost", "127.0.0.1"],
     "dontWalkButTranslateTags.remove": ["CODE"]
+  },
+  {
+    "id": "readfrog-x-chat",
+    "description": "Skip the X Chat message footer (send time + delivery receipt). It renders twice inside the bubble — once as an aria-hidden opacity-0 spacer in the text flow, once in the absolutely positioned overlay — so both copies otherwise land in the message's translation unit. Target the footer root only: excluding its `.absolute.bottom-0.inset-e-0` wrapper too would hide that wrapper from unwrapDeepestOnlyHTMLChild, turning the bubble row into an only-child chain and moving the translation wrapper down into the pre-wrap text block",
+    "matches": ["chat.x.com"],
+    "excludeSelectors": ["div.flex.items-center.ml-auto.shrink-0.gap-1"]
   }
 ]
