@@ -135,12 +135,6 @@ interface ProtocolMap {
   ) => Promise<BackgroundGenerateTextResponse>
   // AI subtitle segmentation
   aiSegmentSubtitles: (data: { jsonContent: string; providerId: string }) => Promise<string>
-  // microsoft batch translation
-  microsoftBatchTranslate: (data: {
-    texts: string[]
-    fromLang: string
-    toLang: string
-  }) => Promise<string[]>
   // network proxy
   backgroundFetch: (data: ProxyRequest) => Promise<ProxyResponse>
   // cache management

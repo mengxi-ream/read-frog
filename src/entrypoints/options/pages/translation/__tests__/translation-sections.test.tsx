@@ -11,11 +11,13 @@ import { PersonalizedPromptsSection } from "../personalized-prompts"
 import { PreferenceSection } from "../preference"
 import { TranslationStyleSection } from "../translation-style"
 
-const { translateAtom, setTranslateMock, testState } = vi.hoisted(() => ({
+const { translateAtom, configAtom, setTranslateMock, testState } = vi.hoisted(() => ({
   translateAtom: {},
+  configAtom: {},
   setTranslateMock: vi.fn<(value: Partial<Config["translate"]>) => Promise<void>>(),
   testState: {
     translate: null as Config["translate"] | null,
+    config: null as Config | null,
   },
 }))
 
@@ -27,6 +29,9 @@ vi.mock("jotai", () => ({
     return [testState.translate, setTranslateMock]
   },
   useAtomValue: (atom: object) => {
+    if (atom === configAtom && testState.config) {
+      return testState.config
+    }
     if (atom !== translateAtom || !testState.translate) {
       throw new Error("Unexpected atom")
     }
@@ -39,6 +44,7 @@ vi.mock("@/utils/host/translate/ui/decorate-translation", () => ({
 }))
 
 vi.mock("@/utils/atoms/config", () => ({
+  configAtom,
   configFieldsAtomMap: {
     translate: translateAtom,
   },
@@ -64,6 +70,9 @@ function renderInRouter(ui: ReactNode) {
 describe("translation page sections", () => {
   beforeEach(() => {
     testState.translate = structuredClone(DEFAULT_CONFIG.translate)
+    // Shares the same translate object, so per-test mutations stay visible
+    // to components reading the whole config (e.g. the mode gate).
+    testState.config = { ...structuredClone(DEFAULT_CONFIG), translate: testState.translate }
     setTranslateMock.mockReset()
     setTranslateMock.mockResolvedValue()
   })

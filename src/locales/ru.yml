@@ -691,6 +691,7 @@ options:
           bilingual: Двуязычный
           translationOnly: Только перевод
         switched: "Режим перевода: $1"
+        microsoftNotSupported: Microsoft Translator не поддерживает режим «только перевод». Чтобы включить его, переключитесь на другого провайдера.
       translateRange:
         title: Охват перевода
         description: Выберите, переводить только основное содержимое или всё содержимое на странице.
