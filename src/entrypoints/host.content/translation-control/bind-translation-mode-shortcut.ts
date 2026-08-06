@@ -8,6 +8,7 @@ import {
   isPageTranslationShortcutEmpty,
   isValidConfiguredPageTranslationShortcut,
 } from "@/utils/page-translation-shortcut"
+import { canEnterTranslationOnlyMode } from "@/utils/providers/translation-only-gate"
 
 const NEXT_MODE: Record<TranslationMode, TranslationMode> = {
   bilingual: "translationOnly",
@@ -33,6 +34,18 @@ export async function bindTranslationModeShortcutKey() {
 
       const currentMode = currentConfig.translate.mode
       const nextMode = NEXT_MODE[currentMode]
+
+      // Entering translationOnly is blocked while the page-translate provider
+      // has no markup support (translation-only-gate.ts) — keep the mode and
+      // surface the reason instead.
+      if (nextMode === "translationOnly" && !canEnterTranslationOnlyMode(currentConfig)) {
+        toastManager.add({
+          type: "info",
+          title: i18n.t("options.translation.preference.translationMode.microsoftNotSupported"),
+        })
+        return
+      }
+
       await setLocalConfig({
         ...currentConfig,
         translate: {
