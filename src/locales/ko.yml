@@ -691,6 +691,7 @@ options:
           bilingual: 이중 언어
           translationOnly: 번역만
         switched: "번역 모드: $1"
+        microsoftNotSupported: Microsoft 번역기는 번역만 모드를 지원하지 않습니다. 사용하려면 다른 제공업체로 전환하세요.
       translateRange:
         title: 번역 범위
         description: 페이지의 주요 내용만 번역할지 모든 내용을 번역할지 선택합니다.

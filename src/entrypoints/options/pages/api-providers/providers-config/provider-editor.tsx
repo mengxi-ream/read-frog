@@ -39,6 +39,7 @@ import {
   BUILT_IN_AI_PROVIDER_ID,
   BUILT_IN_AI_PROVIDER_LOGO,
 } from "@/utils/providers/provider-registry"
+import { providerSupportsTranslationOnlyMode } from "@/utils/providers/translation-only-gate"
 import { cn } from "@/utils/styles/utils"
 import { APIKeyField } from "./provider-config-form/api-key-field"
 import { AdvancedOptionsSection } from "./provider-config-form/components/advanced-options-section"
@@ -401,8 +402,16 @@ function CompatibleFeatureAssignments() {
     return null
   }
 
-  return FEATURE_KEYS.filter((featureKey) =>
-    FEATURE_PROVIDER_DEFS[featureKey].isProvider(providerType),
+  return FEATURE_KEYS.filter(
+    (featureKey) =>
+      FEATURE_PROVIDER_DEFS[featureKey].isProvider(providerType) &&
+      // While translationOnly page mode is active, providers without markup
+      // support cannot take the page-translate assignment (translation-only-gate.ts).
+      !(
+        featureKey === "translate" &&
+        config.translate.mode === "translationOnly" &&
+        !providerSupportsTranslationOnlyMode(providerType)
+      ),
   ).map((featureKey) => {
     const isAssigned = FEATURE_PROVIDER_DEFS[featureKey].getProviderId(config) === providerId
     return (

@@ -17,7 +17,6 @@ import { generateArticleSummary } from "@/utils/content/summary"
 import { cleanText } from "@/utils/content/utils"
 import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
-import { microsoftTranslate } from "@/utils/host/translate/api/microsoft"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import {
   assertHtmlAttributeMarkerIntegrity,
@@ -623,13 +622,5 @@ export function setUpSubtitlesTranslationQueue(): void {
       providerConfig,
       requestQueue,
     )
-  })
-
-  onMessage("microsoftBatchTranslate", async (message) => {
-    const { requestQueue } = await queuesPromise
-    const { texts, fromLang, toLang } = message.data
-    const hash = Sha256Hex("ms-batch", fromLang, toLang, ...texts)
-    const thunk = (signal?: AbortSignal) => microsoftTranslate(texts, fromLang, toLang, { signal })
-    return requestQueue.enqueue(thunk, Date.now(), hash)
   })
 }

@@ -691,6 +691,7 @@ options:
           bilingual: バイリンガル
           translationOnly: 翻訳のみ
         switched: 翻訳モード：$1
+        microsoftNotSupported: Microsoft 翻訳は「翻訳のみ」モードに対応していません。有効にするには他のプロバイダーに切り替えてください。
       translateRange:
         title: 翻訳範囲
         description: ページのメインコンテンツのみを翻訳するか、すべてのコンテンツを翻訳するかを選択します。

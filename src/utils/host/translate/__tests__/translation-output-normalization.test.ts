@@ -27,8 +27,13 @@ describe("normalizeTranslationOutput", () => {
     )
   })
 
-  it("does not normalize non-Google providers", () => {
-    expect(normalizeTranslationOutput(microsoftProvider, "A&amp;B")).toBe("A&amp;B")
+  it("decodes entities for Microsoft Translator (its adapter escapes plain input)", () => {
+    expect(normalizeTranslationOutput(microsoftProvider, "A&amp;B")).toBe("A&B")
+    expect(normalizeTranslationOutput(microsoftProvider, "&lt;B和C&gt; d")).toBe("<B和C> d")
+  })
+
+  it("does not normalize providers that return plain text", () => {
+    expect(normalizeTranslationOutput({ provider: "deepl" as const }, "A&amp;B")).toBe("A&amp;B")
   })
 
   it("decodes apostrophes in input-translation results (issue #1517)", () => {

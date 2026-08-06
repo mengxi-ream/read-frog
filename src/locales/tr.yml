@@ -691,6 +691,7 @@ options:
           bilingual: İki dilli
           translationOnly: Yalnızca çeviri
         switched: "Çeviri modu: $1"
+        microsoftNotSupported: Microsoft Çevirmen yalnızca çeviri modunu desteklemez. Etkinleştirmek için başka bir sağlayıcıya geçin.
       translateRange:
         title: Çeviri kapsamı
         description: Sayfadaki yalnızca ana içeriğin mi yoksa tüm içeriğin mi çevrileceğini seçin.
