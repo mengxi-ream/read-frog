@@ -1834,8 +1834,38 @@ describe("translate", () => {
           expectNodeLabels(node.children[1]!, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
         })
       })
-      describe("block translations beside floated siblings", () => {
-        it("bilingual mode: marks block translation for float wrap when inline-block would drop below the float", async () => {
+      describe("block translations displaced below a float", () => {
+        // The translation is an inline-block: a float can push the whole box
+        // below itself instead of wrapping text beside it. Detection is by
+        // measurement, so these tests drive the two rects it reads — the source
+        // text preceding the wrapper (a Range) and the translated node.
+        function mockLayout({
+          sourceBottom,
+          translatedTop,
+        }: {
+          sourceBottom: number
+          translatedTop: number
+        }) {
+          const rangeSpy = vi
+            .spyOn(Range.prototype, "getBoundingClientRect")
+            .mockImplementation(() =>
+              createRect({ top: sourceBottom - 20, left: 0, width: 600, height: 20 }),
+            )
+          const rectSpy = vi
+            .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+            .mockImplementation(function (this: HTMLElement) {
+              if (this.classList.contains(BLOCK_CONTENT_CLASS)) {
+                return createRect({ top: translatedTop, left: 0, width: 500, height: 40 })
+              }
+              return createRect({ top: 0, left: 0, width: 200, height: 20 })
+            })
+          return () => {
+            rangeSpy.mockRestore()
+            rectSpy.mockRestore()
+          }
+        }
+
+        it("bilingual mode: marks block translation for float wrap when it drops below the float", async () => {
           render(
             <div data-testid="test-node">
               <figure data-testid="float-node" style={{ float: "right" }}>
@@ -1846,27 +1876,14 @@ describe("translate", () => {
           )
           const node = screen.getByTestId("test-node")
           const paragraph = screen.getByTestId("paragraph")
-          const floatNode = screen.getByTestId("float-node")
 
-          const rectSpy = vi
-            .spyOn(HTMLElement.prototype, "getBoundingClientRect")
-            .mockImplementation(function (this: HTMLElement) {
-              if (this === floatNode) {
-                return createRect({ top: 80, left: 600, width: 200, height: 320 })
-              }
-              if (this === paragraph) {
-                return createRect({ top: 100, left: 0, width: 600, height: 60 })
-              }
-              if (this.classList.contains(BLOCK_CONTENT_CLASS)) {
-                return createRect({ top: 420, left: 0, width: 500, height: 40 })
-              }
-              return createRect({ top: 0, left: 0, width: 200, height: 20 })
-            })
-
+          // Source text ends at 160, translation lands at 420 — far past the
+          // float, well beyond one line of normal spacing.
+          const restore = mockLayout({ sourceBottom: 160, translatedTop: 420 })
           try {
             await removeOrShowPageTranslation("bilingual", true)
           } finally {
-            rectSpy.mockRestore()
+            restore()
           }
 
           expectNodeLabels(node, [BLOCK_ATTRIBUTE])
@@ -1876,7 +1893,7 @@ describe("translate", () => {
           expect(translatedContent).toHaveAttribute(FLOAT_WRAP_ATTRIBUTE, "true")
         })
 
-        it("bilingual mode: leaves block translation unchanged when the translated node stays beside the float", async () => {
+        it("bilingual mode: leaves block translation unchanged when it stays on the next line", async () => {
           render(
             <div data-testid="test-node">
               <figure data-testid="float-node" style={{ float: "right" }}>
@@ -1886,27 +1903,14 @@ describe("translate", () => {
             </div>,
           )
           const paragraph = screen.getByTestId("paragraph")
-          const floatNode = screen.getByTestId("float-node")
 
-          const rectSpy = vi
-            .spyOn(HTMLElement.prototype, "getBoundingClientRect")
-            .mockImplementation(function (this: HTMLElement) {
-              if (this === floatNode) {
-                return createRect({ top: 80, left: 600, width: 200, height: 320 })
-              }
-              if (this === paragraph) {
-                return createRect({ top: 420, left: 0, width: 600, height: 60 })
-              }
-              if (this.classList.contains(BLOCK_CONTENT_CLASS)) {
-                return createRect({ top: 500, left: 0, width: 500, height: 40 })
-              }
-              return createRect({ top: 0, left: 0, width: 200, height: 20 })
-            })
-
+          // Translation opens the line right after the source text: an
+          // ordinary top-margin gap, not a float drop.
+          const restore = mockLayout({ sourceBottom: 160, translatedTop: 168 })
           try {
             await removeOrShowPageTranslation("bilingual", true)
           } finally {
-            rectSpy.mockRestore()
+            restore()
           }
 
           const wrapper = expectTranslationWrapper(paragraph, "bilingual")

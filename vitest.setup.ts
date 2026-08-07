@@ -109,6 +109,27 @@ vi.mock("wxt/testing/fake-browser", async () => {
   return actual
 })
 
+// jsdom implements no layout, so it omits Range.getBoundingClientRect entirely
+// (Element.getBoundingClientRect it does stub, returning zeros). Every browser
+// ships it. Match jsdom's own convention with a zero rect so layout probes
+// short-circuit instead of throwing; tests that exercise them spy on this.
+// (Guarded: this setup file also runs for node-environment test files.)
+if (typeof Range !== "undefined" && typeof Range.prototype.getBoundingClientRect !== "function") {
+  Range.prototype.getBoundingClientRect = function () {
+    return {
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      width: 0,
+      height: 0,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    }
+  }
+}
+
 // JSDom + Vitest don't play well with each other. Long story short - default
 // TextEncoder produces Uint8Array objects that are _different_ from the global
 // Uint8Array objects, so some functions that compare their types explode.
