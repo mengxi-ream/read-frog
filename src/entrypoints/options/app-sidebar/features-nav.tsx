@@ -17,6 +17,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/base-ui/sidebar"
+import { TRANSLATION_HUB_PAGE_PATH } from "@/utils/constants/translation-hub"
 import { i18n } from "@/utils/i18n"
 
 const OVERLAY_TOOLS_PATHS = ["/floating-button", "/selection-toolbar", "/context-menu"] as const
@@ -137,7 +138,7 @@ export function FeaturesNav() {
             <SidebarMenuButton
               render={
                 <a
-                  href={browser.runtime.getURL("/translation-hub.html")}
+                  href={browser.runtime.getURL(TRANSLATION_HUB_PAGE_PATH)}
                   target="_blank"
                   rel="noopener noreferrer"
                 />

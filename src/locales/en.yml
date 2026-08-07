@@ -458,6 +458,9 @@ options:
     nodeTranslation:
       title: Paragraph translation
       description: Hover or long-press a paragraph to translate just that one.
+    translationHub:
+      title: Translation Hub
+      description: Open the Translation Hub in a new tab.
   overlayTools:
     title: Overlay Tools
   inputTranslation:

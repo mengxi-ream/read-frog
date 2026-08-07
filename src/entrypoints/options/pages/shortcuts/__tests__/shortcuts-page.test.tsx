@@ -33,6 +33,10 @@ vi.mock("../node-translation-hotkey", () => ({
   NodeTranslationHotkey: () => <section data-section="node-translation-hotkey" />,
 }))
 
+vi.mock("../translation-hub-shortcut", () => ({
+  TranslationHubShortcut: () => <section data-section="translation-hub-shortcut" />,
+}))
+
 describe("shortcuts page", () => {
   it("lists every shortcut, widest scope first", () => {
     const { container } = render(<ShortcutsPage />)
@@ -47,6 +51,7 @@ describe("shortcuts page", () => {
       "selection-translation-shortcut",
       "subtitles-toggle-shortcut",
       "node-translation-hotkey",
+      "translation-hub-shortcut",
     ])
   })
 })

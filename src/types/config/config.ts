@@ -6,6 +6,7 @@ import {
   MIN_SELECTION_OVERLAY_OPACITY,
 } from "@/utils/constants/selection"
 import { MIN_SIDE_CONTENT_WIDTH } from "@/utils/constants/side"
+import { DEFAULT_TRANSLATION_HUB_SHORTCUT_KEY } from "@/utils/constants/translation-hub"
 import {
   doesProviderSupportsCapability,
   getProviderIdsForCapability,
@@ -75,6 +76,16 @@ const sideContentSchema = z.object({
   width: z.number().min(MIN_SIDE_CONTENT_WIDTH),
 })
 
+// Translation Hub schema. `.default()` mirrors `uiLanguageSchema`: it lets a
+// config stored before this field existed still parse in UI contexts that load
+// ahead of the background migration, instead of falling back to DEFAULT_CONFIG
+// and writing that over the user's settings.
+const translationHubSchema = z
+  .object({
+    shortcut: pageTranslationShortcutSchema,
+  })
+  .default({ shortcut: DEFAULT_TRANSLATION_HUB_SHORTCUT_KEY })
+
 // beta experience schema
 const betaExperienceSchema = z.object({
   enabled: z.boolean(),
@@ -141,6 +152,7 @@ export const configSchema = z
     siteControl: siteControlSchema,
     siteRules: siteRulesConfigSchema,
     uiLanguage: uiLanguageSchema,
+    translationHub: translationHubSchema,
   })
   .superRefine((data, ctx) => {
     for (const featureKey of FEATURE_KEYS) {

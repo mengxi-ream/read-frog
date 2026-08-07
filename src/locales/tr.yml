@@ -457,6 +457,9 @@ options:
     nodeTranslation:
       title: Paragraf çevirisi
       description: Bir paragrafın üzerine gelin veya uzun basın; yalnızca o paragraf çevrilir.
+    translationHub:
+      title: Çeviri Merkezi
+      description: Çeviri Merkezini yeni bir sekmede açar.
   overlayTools:
     title: Kaplama Araçları
   inputTranslation:

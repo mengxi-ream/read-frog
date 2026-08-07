@@ -457,6 +457,9 @@ options:
     nodeTranslation:
       title: Перевод абзаца
       description: Наведите курсор на абзац или нажмите и удерживайте его, чтобы перевести только его.
+    translationHub:
+      title: Центр переводов
+      description: Открывает Центр переводов в новой вкладке.
   overlayTools:
     title: Инструменты наложения
   inputTranslation:
