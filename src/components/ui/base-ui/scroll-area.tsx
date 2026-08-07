@@ -4,7 +4,16 @@ import { ScrollArea as ScrollAreaPrimitive } from "@base-ui/react/scroll-area"
 import * as React from "react"
 import { cn } from "@/utils/styles/utils"
 
-function ScrollArea({ className, children, ...props }: ScrollAreaPrimitive.Root.Props) {
+interface ScrollAreaProps extends ScrollAreaPrimitive.Root.Props {
+  /**
+   * Classes for the scrollable viewport. Put height constraints here (e.g.
+   * `max-h-*`) so the area can shrink to its content instead of the root
+   * reserving a fixed box.
+   */
+  viewportClassName?: string
+}
+
+function ScrollArea({ className, viewportClassName, children, ...props }: ScrollAreaProps) {
   return (
     <ScrollAreaPrimitive.Root
       data-slot="scroll-area"
@@ -13,7 +22,10 @@ function ScrollArea({ className, children, ...props }: ScrollAreaPrimitive.Root.
     >
       <ScrollAreaPrimitive.Viewport
         data-slot="scroll-area-viewport"
-        className="size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1"
+        className={cn(
+          "size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1",
+          viewportClassName,
+        )}
       >
         {children}
       </ScrollAreaPrimitive.Viewport>

@@ -75,7 +75,23 @@ interface CustomActionExecutionRequest {
   }
 }
 
+const FOLLOW_STREAM_BOTTOM_THRESHOLD = 8
+
 function scrollSelectionPopoverBodyToBottom(ref: RefObject<HTMLDivElement | null>) {
+  const node = ref.current
+  if (!node) {
+    return
+  }
+
+  // Measured before the chunk renders: a reader who scrolled up to reread
+  // earlier output must not be yanked back down, and measuring after the
+  // append would misread "was at the bottom" as "far from it" whenever a
+  // chunk adds more height than the threshold.
+  const distanceToBottom = node.scrollHeight - node.scrollTop - node.clientHeight
+  if (distanceToBottom > FOLLOW_STREAM_BOTTOM_THRESHOLD) {
+    return
+  }
+
   requestAnimationFrame(() => {
     if (ref.current) {
       ref.current.scrollTop = ref.current.scrollHeight

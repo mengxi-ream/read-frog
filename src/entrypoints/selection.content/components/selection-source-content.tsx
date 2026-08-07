@@ -27,7 +27,10 @@ export function SelectionSourceContent({
     <>
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-2">
-          <ScrollArea className={cn("min-w-0 flex-1", actionsExpanded && "h-18 overflow-hidden")}>
+          <ScrollArea
+            className="min-w-0 flex-1"
+            viewportClassName={cn(actionsExpanded && "max-h-18")}
+          >
             <p
               className={cn(
                 "text-sm [overflow-wrap:anywhere] break-words whitespace-pre-wrap text-zinc-600 dark:text-zinc-400",
