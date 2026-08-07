@@ -458,6 +458,9 @@ options:
     nodeTranslation:
       title: 段落翻译
       description: 悬停或长按段落，只翻译这一段。
+    translationHub:
+      title: 翻译中心
+      description: 在新标签页中打开翻译中心。
   overlayTools:
     title: 悬浮工具
   inputTranslation:

@@ -457,6 +457,9 @@ options:
     nodeTranslation:
       title: Dịch đoạn văn
       description: Di chuột hoặc nhấn giữ một đoạn để chỉ dịch đoạn đó.
+    translationHub:
+      title: Trung tâm Dịch thuật
+      description: Mở Trung tâm Dịch thuật trong tab mới.
   overlayTools:
     title: Công cụ nổi
   inputTranslation:

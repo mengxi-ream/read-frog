@@ -457,6 +457,9 @@ options:
     nodeTranslation:
       title: 段落翻訳
       description: 段落にホバーまたは長押しすると、その段落だけ翻訳します。
+    translationHub:
+      title: 翻訳ハブ
+      description: 翻訳ハブを新しいタブで開きます。
   overlayTools:
     title: オーバーレイツール
   inputTranslation:

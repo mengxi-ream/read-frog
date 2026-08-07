@@ -457,6 +457,9 @@ options:
     nodeTranslation:
       title: 단락 번역
       description: 단락에 마우스를 올리거나 길게 누르면 그 단락만 번역합니다.
+    translationHub:
+      title: 번역 허브
+      description: 번역 허브를 새 탭에서 엽니다.
   overlayTools:
     title: 오버레이 도구
   inputTranslation:

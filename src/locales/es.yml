@@ -458,6 +458,9 @@ options:
     nodeTranslation:
       title: Traducción de párrafo
       description: Pasa el cursor o mantén pulsado un párrafo para traducir solo ese.
+    translationHub:
+      title: Centro de traducción
+      description: Abre el Centro de traducción en una pestaña nueva.
   overlayTools:
     title: Herramientas superpuestas
   inputTranslation:
