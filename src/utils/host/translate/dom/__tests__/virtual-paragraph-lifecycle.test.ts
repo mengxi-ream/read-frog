@@ -43,7 +43,7 @@ function createSplitGroup(
     unit: unit(index, source, offset),
     wrapper: wrappers[index]!,
   }))
-  const { splitRecords } = insertVirtualParagraphWrappers(entries, layoutSource)
+  const { splitRecords } = insertVirtualParagraphWrappers(entries)
   const group: VirtualParagraphGroup = {
     id,
     walkId: id,

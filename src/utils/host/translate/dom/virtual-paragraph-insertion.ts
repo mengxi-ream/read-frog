@@ -1,15 +1,10 @@
 import type { TextSplitRecord } from "../core/translation-state"
 import type { VirtualParagraphUnit } from "./paragraph-segmentation"
-import type { TransNode } from "@/types/dom"
-import { isTextNode, isTransNode } from "../../dom/filter"
+import { isTextNode } from "../../dom/filter"
 
 export interface VirtualParagraphWrapperEntry {
   unit: VirtualParagraphUnit
   wrapper: HTMLElement
-}
-
-export interface InsertedVirtualParagraph extends VirtualParagraphWrapperEntry {
-  flowSource: TransNode
 }
 
 function insertWrapperAtBoundary(
@@ -69,9 +64,8 @@ function insertWrapperAtBoundary(
  */
 export function insertVirtualParagraphWrappers(
   entries: VirtualParagraphWrapperEntry[],
-  layoutSource: HTMLElement,
   splitRecordTarget: TextSplitRecord[] = [],
-): { inserted: InsertedVirtualParagraph[]; splitRecords: TextSplitRecord[] } {
+): { inserted: VirtualParagraphWrapperEntry[]; splitRecords: TextSplitRecord[] } {
   const splitRecords = new Map(splitRecordTarget.map((record) => [record.source, record] as const))
 
   for (const entry of [...entries].reverse()) {
@@ -88,13 +82,5 @@ export function insertVirtualParagraphWrappers(
     record.tailValuesAfterSplit = record.createdTails.map((tail) => tail.data)
   }
 
-  const inserted = entries.map((entry): InsertedVirtualParagraph => {
-    const previousSibling = entry.wrapper.previousSibling
-    return {
-      ...entry,
-      flowSource: previousSibling && isTransNode(previousSibling) ? previousSibling : layoutSource,
-    }
-  })
-
-  return { inserted, splitRecords: splitRecordTarget }
+  return { inserted: entries, splitRecords: splitRecordTarget }
 }

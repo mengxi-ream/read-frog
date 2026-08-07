@@ -205,7 +205,7 @@ async function translateVirtualParagraph(
   forceBlockTranslation: boolean,
   forceRetranslation: boolean = false,
 ): Promise<void> {
-  const { flowSource, unit, wrapper } = entry
+  const { unit, wrapper } = entry
   const isCurrent = () => isVirtualParagraphGroupCurrent(group, wrapper)
   if (!isCurrent()) return
 
@@ -243,7 +243,7 @@ async function translateVirtualParagraph(
 
   await insertTranslatedNodeIntoWrapper(
     wrapper,
-    { flowSource, isCurrent, layoutSource: group.layoutSource, sourceText: unit.text },
+    { isCurrent, layoutSource: group.layoutSource, sourceText: unit.text },
     translatedText,
     config.translate.translationNodeStyle,
     config,
@@ -312,7 +312,7 @@ async function translateVirtualParagraphs(
 
   let inserted: ReturnType<typeof insertVirtualParagraphWrappers>["inserted"]
   try {
-    ;({ inserted } = insertVirtualParagraphWrappers(entries, layoutSource, group.splitRecords))
+    ;({ inserted } = insertVirtualParagraphWrappers(entries, group.splitRecords))
   } catch (error) {
     disposeVirtualParagraphGroup(group)
     throw error
@@ -650,7 +650,6 @@ export async function translateNodesBilingualMode(
     await insertTranslatedNodeIntoWrapper(
       translatedWrapperNode,
       {
-        flowSource: insertionTarget,
         isCurrent,
         layoutSource,
         styleSources: transNodes,
