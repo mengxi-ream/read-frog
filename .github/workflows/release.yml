@@ -52,7 +52,7 @@ jobs:
       - name: Create Release Pull Request or Tag
         if: github.event_name != 'workflow_dispatch'
         id: changesets
-        uses: changesets/action@v1
+        uses: changesets/action@v1.9.0
         with:
           commit: "chore(release): version packages"
           title: "chore(release): version packages"
@@ -125,11 +125,13 @@ jobs:
           fi
 
       - name: Build and Zip Extension
-        if: steps.changesets.outputs.published == 'true' || github.event_name == 'workflow_dispatch'
+        if: steps.changesets.outputs.published == 'true' || github.event_name ==
+          'workflow_dispatch'
         run: pnpm zip:all
 
       - name: Upload Extension Zip to Release
-        if: steps.changesets.outputs.published == 'true' || github.event_name == 'workflow_dispatch'
+        if: steps.changesets.outputs.published == 'true' || github.event_name ==
+          'workflow_dispatch'
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             TAG="${{ github.event.inputs.tag }}"
@@ -141,7 +143,6 @@ jobs:
           gh release upload "$TAG" .output/*-chrome.zip .output/*-edge.zip .output/*-firefox.zip .output/*-sources.zip --clobber
         env:
           GH_TOKEN: ${{ github.token }}
-
       # - name: Submit to Chrome & Edge Stores
       #   if: steps.changesets.outputs.published == 'true'
       #   run: |
