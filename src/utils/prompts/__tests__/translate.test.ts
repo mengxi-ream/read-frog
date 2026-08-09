@@ -2,6 +2,8 @@ import type { Config } from "@/types/config/config"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
+  DEFAULT_BATCH_TRANSLATE_PROMPT,
+  DEFAULT_SENTINEL_TRANSLATE_PROMPT,
   DEFAULT_TRANSLATE_PROMPT_ID,
   isNoTranslationSentinel,
   NO_TRANSLATION_SENTINEL,
@@ -306,31 +308,60 @@ describe("no-translation sentinel", () => {
 
     expect(result.systemPrompt).toContain("Already-translated Input Rule")
     expect(result.systemPrompt).toContain(NO_TRANSLATION_SENTINEL)
-    expect(result.systemPrompt).toContain("already entirely written in Simplified Chinese")
+    expect(result.systemPrompt).toContain(
+      "only when every word of it is already Simplified Chinese",
+    )
     expect(result.systemPrompt).not.toContain("{{targetLanguage}}")
   })
 
-  it("demonstrates the sentinel inside the batch format example (both anchors replaced)", () => {
+  it("keeps the marker out of the batch format example", () => {
     const result = getTranslatePromptFromConfig(defaultPromptsConfig, "Simplified Chinese", "Hi", {
       isBatch: true,
     })
 
-    // Input example: Paragraph B is annotated as already in the target language.
-    expect(result.systemPrompt).toContain(
-      "Paragraph B (this one is already written in Simplified Chinese)",
-    )
-    // Output example: Paragraph B's slot is the sentinel, not "Translation B".
-    expect(result.systemPrompt).toContain(`${NO_TRANSLATION_SENTINEL}\n\n%%`)
-    expect(result.systemPrompt).not.toContain("Translation B")
+    // A marked slot in the worked example taught models a ~1-in-3 marker base
+    // rate that dominated the rule and silently dropped paragraphs. Every
+    // example segment must show a real translation.
+    expect(result.systemPrompt).toContain("Translation B")
+    expect(result.systemPrompt).not.toContain(`${NO_TRANSLATION_SENTINEL}\n\n%%`)
+    expect(result.systemPrompt).not.toContain("this one is already written in")
+    // The page batch block is byte-identical to the one subtitles use.
+    expect(result.systemPrompt).toContain(DEFAULT_BATCH_TRANSLATE_PROMPT)
+  })
+
+  it("keeps the marker rule small and free of the wordings that misfired", () => {
+    // Three wordings this block has already been burned by, none of them
+    // visible to a behavioural test, so pin the shape instead:
+    //   - "and needs no translation" let models treat "untranslatable" as a
+    //     trigger — the wording that caused the missing-paragraph bug;
+    //   - enumerating the misfiring shapes (headings, API names, bibliography
+    //     entries, error messages) primes small models to skip them;
+    //   - "instead of repeating the paragraph" pushed models to render
+    //     already-target-language paragraphs back into the source language.
+    // The body is deliberately ONE line: a list would be appended as further
+    // lines, which a sentence count split on ". " cannot see.
+    const lines = DEFAULT_SENTINEL_TRANSLATE_PROMPT.split("\n")
+    expect(lines).toHaveLength(2)
+    expect(lines[1]!.length).toBeLessThan(240)
+    expect(DEFAULT_SENTINEL_TRANSLATE_PROMPT).not.toContain("needs no translation")
+    expect(DEFAULT_SENTINEL_TRANSLATE_PROMPT).not.toContain("instead of repeating the paragraph")
+    // The one clause in here that is not part of the language test. Without it
+    // a model can mix the marker into otherwise translated output, which
+    // isNoTranslationSentinel (exact match only) would then render verbatim.
+    expect(DEFAULT_SENTINEL_TRANSLATE_PROMPT).toContain("Never mix the marker with translated text")
   })
 
   it("never leaks the sentinel into subtitle prompts, which share the batch rules", async () => {
     mockGetLocalConfig.mockResolvedValue(DEFAULT_CONFIG)
 
     const result = await getSubtitlesTranslatePrompt("Japanese", "Hello world", {
+      isBatch: true,
       context: { webTitle: "Video", webDescription: "Desc", videoSummary: "Sum" },
     })
 
+    // isBatch is what appends the shared batch block — assert it actually
+    // arrived, or the marker check below passes vacuously.
+    expect(result.systemPrompt).toContain(DEFAULT_BATCH_TRANSLATE_PROMPT)
     // The subtitle pipeline has no sentinel mapping; the marker must never
     // appear in its prompts (rule or example).
     expect(result.systemPrompt).not.toContain(NO_TRANSLATION_SENTINEL)
