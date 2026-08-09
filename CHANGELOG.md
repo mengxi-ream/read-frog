@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.45.3
+
+### Patch Changes
+
+- [#2047](https://github.com/mengxi-ream/read-frog/pull/2047) [`19df7c2`](https://github.com/mengxi-ream/read-frog/commit/19df7c2389ea7e08b9b11432493479ed42c4bfad) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: keep bilingual translations beside tall floats instead of stranding them below
+
+- [#2053](https://github.com/mengxi-ream/read-frog/pull/2053) [`8fa9f26`](https://github.com/mengxi-ream/read-frog/commit/8fa9f26eb4777dbdb38a3970223ecf9873670509) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translate): stop the no-translation marker from dropping translatable paragraphs
+
+- [#2052](https://github.com/mengxi-ream/read-frog/pull/2052) [`6ce4f13`](https://github.com/mengxi-ream/read-frog/commit/6ce4f1331e190fa9f4e8ad206cf8345974e2c11a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection): remove blank gap under short source text and restore wheel scrolling
+
+- [#2052](https://github.com/mengxi-ream/read-frog/pull/2052) [`6ce4f13`](https://github.com/mengxi-ream/read-frog/commit/6ce4f1331e190fa9f4e8ad206cf8345974e2c11a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection): stop streamed custom-action output from yanking the popover scroll back to the bottom while the user is reading earlier content
+
+- [#2050](https://github.com/mengxi-ream/read-frog/pull/2050) [`c9d9822`](https://github.com/mengxi-ream/read-frog/commit/c9d98221bd18f60b82db333da36e52230f25e08b) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(translation-hub): open the Translation Hub with a keyboard shortcut (Alt+Shift+H)
+
 ## 1.45.2
 
 ### Patch Changes
