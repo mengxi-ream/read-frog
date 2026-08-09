@@ -64,6 +64,33 @@ describe("segmentation pipeline", () => {
     expect(pipeline.hasUnprocessedChunks()).toBe(true)
   })
 
+  it("widens the segmentation look-ahead window with playback rate", async () => {
+    // 10 minutes of word-level fragments, one per second.
+    const rawFragments = Array.from({ length: 600 }, (_, i) => ({
+      text: `w${i}`,
+      start: i * 1000,
+      end: i * 1000 + 1000,
+    }))
+
+    const pipeline = new SegmentationPipeline({
+      rawFragments,
+      getVideoElement: () => ({ currentTime: 0, playbackRate: 3 }) as HTMLVideoElement,
+      getSourceLanguage: () => "en",
+      preSegmented: true,
+    })
+
+    await (pipeline as any).runLoop()
+
+    const segmentedStarts = (pipeline as any).segmentedRawStarts as Set<number>
+    const furthestSegmented = Math.max(...segmentedStarts)
+
+    // At 3x the window is 3x wider, so the buffer reaches past the 1x bound...
+    expect(furthestSegmented).toBeGreaterThan(2 * PROCESS_LOOK_AHEAD_MS)
+    // ...but still stays within two 3x-wide windows, not the rest of the video.
+    expect(furthestSegmented).toBeLessThan(2 * 3 * PROCESS_LOOK_AHEAD_MS)
+    expect(pipeline.hasUnprocessedChunks()).toBe(true)
+  })
+
   it("segments the next window once playback advances into it", async () => {
     const rawFragments = Array.from({ length: 600 }, (_, i) => ({
       text: `w${i}`,

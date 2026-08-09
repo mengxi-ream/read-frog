@@ -1,6 +1,7 @@
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { getLocalConfig } from "@/utils/config/storage"
 import { PROCESS_LOOK_AHEAD_MS } from "@/utils/constants/subtitles"
+import { effectiveLookAheadMs } from "@/utils/subtitles/lookahead"
 import { aiSegmentBlock } from "@/utils/subtitles/processor/ai-segmentation"
 import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
 
@@ -167,9 +168,13 @@ export class SegmentationPipeline {
     // eagerly sends the entire remaining video to the AI segmentation model.
     // Chunks further ahead are picked up later, once playback advances and the
     // translation coordinator restarts the pipeline.
-    if (firstUnprocessed.start > currentTimeMs + PROCESS_LOOK_AHEAD_MS) return []
+    const lookAheadMs = effectiveLookAheadMs(
+      PROCESS_LOOK_AHEAD_MS,
+      this.getVideoElement()?.playbackRate,
+    )
+    if (firstUnprocessed.start > currentTimeMs + lookAheadMs) return []
 
-    const windowEnd = firstUnprocessed.start + PROCESS_LOOK_AHEAD_MS
+    const windowEnd = firstUnprocessed.start + lookAheadMs
     return this.rawFragments.filter(
       (f) =>
         f.start >= firstUnprocessed.start &&
