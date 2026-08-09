@@ -9,7 +9,7 @@ import { DEFAULT_CONFIG } from "../constants/config"
 import {
   BATCH_SEPARATOR,
   BUILT_IN_PAGE_TRANSLATE_PROMPTS,
-  DEFAULT_BATCH_TRANSLATE_PROMPT_WITH_SENTINEL,
+  DEFAULT_BATCH_TRANSLATE_PROMPT,
   DEFAULT_SENTINEL_TRANSLATE_PROMPT,
   DEFAULT_TRANSLATE_PROMPT_ID,
   getTokenCellText,
@@ -66,16 +66,17 @@ export function getTranslatePromptFromConfig(
 
   let { systemPrompt, prompt } = selectedPrompt
 
-  // For batch mode, append batch rules to system prompt. The sentinel rule and
-  // the sentinel-bearing format example are appended ONLY here: batch prompts
-  // are built exclusively for the background translation pipeline, whose
-  // results all return through translateTextCore where the sentinel is mapped
-  // — the selection-toolbar streaming path never sees this instruction and can
-  // never render the marker raw.
+  // For batch mode, append batch rules to system prompt. The batch block is the
+  // same one subtitles use — the marker appears only in the sentinel rule that
+  // follows, never inside the format example (see DEFAULT_SENTINEL_TRANSLATE_PROMPT).
+  // The sentinel rule is appended ONLY here: batch prompts are built exclusively
+  // for the background translation pipeline, whose results all return through
+  // translateTextCore where the sentinel is mapped — the selection-toolbar
+  // streaming path never sees this instruction and can never render the marker raw.
   if (options?.isBatch) {
     systemPrompt = `${systemPrompt}
 
-${DEFAULT_BATCH_TRANSLATE_PROMPT_WITH_SENTINEL}
+${DEFAULT_BATCH_TRANSLATE_PROMPT}
 
 ${DEFAULT_SENTINEL_TRANSLATE_PROMPT}`
   }
