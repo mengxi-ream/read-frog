@@ -9,10 +9,16 @@ import { logger } from "@/utils/logger"
 const CONFIG_BACKUP_ALARM = "config-backup"
 
 export function setUpConfigBackup() {
-  // Set up periodic alarm for config backup
-  void browser.alarms.create(CONFIG_BACKUP_ALARM, {
-    delayInMinutes: 1,
-    periodInMinutes: BACKUP_INTERVAL_MINUTES,
+  // Set up periodic alarm for config backup (only if it doesn't exist yet —
+  // re-creating it on every service-worker start resets the timer, which
+  // would wake the worker `delayInMinutes` later in a perpetual loop)
+  void browser.alarms.get(CONFIG_BACKUP_ALARM).then((existingAlarm) => {
+    if (!existingAlarm) {
+      void browser.alarms.create(CONFIG_BACKUP_ALARM, {
+        delayInMinutes: BACKUP_INTERVAL_MINUTES,
+        periodInMinutes: BACKUP_INTERVAL_MINUTES,
+      })
+    }
   })
 
   // Listen for alarm events

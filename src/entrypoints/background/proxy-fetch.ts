@@ -1,11 +1,15 @@
 import type { ProxyResponse } from "@/types/proxy-fetch"
 import { AUTH_COOKIE_PATTERNS } from "@read-frog/definitions"
-import { browser } from "#imports"
+import { browser, storage } from "#imports"
 import { env } from "@/env"
-import { DEFAULT_PROXY_CACHE_TTL_MS } from "@/utils/constants/proxy-fetch"
+import { AUTH_CACHE_GROUP_KEY, DEFAULT_PROXY_CACHE_TTL_MS } from "@/utils/constants/proxy-fetch"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { SessionCacheGroupRegistry } from "../../utils/session-cache/session-cache-group-registry"
+
+// Last-seen auth cookie values, kept in session storage so the comparison
+// survives service-worker restarts (cleared with the browser session)
+const AUTH_COOKIE_LAST_SEEN_KEY = "session:proxyFetchAuthCookieLastSeen"
 
 function encodeArrayBufferToBase64(buffer: ArrayBuffer) {
   const bytes = new Uint8Array(buffer)
@@ -32,57 +36,67 @@ export function proxyFetch() {
     await SessionCacheGroupRegistry.clearAllCacheGroup()
   }
 
+  // Auth-scoped cache invalidation: session cookie changes only affect the auth group
+  async function invalidateAuthCache() {
+    const sessionCache = await getSessionCache(AUTH_CACHE_GROUP_KEY)
+    await sessionCache.clear()
+  }
+
   // Listen for cookie changes to invalidate auth-related cache
   if (browser.cookies?.onChanged) {
     browser.cookies.onChanged.addListener(async (changeInfo) => {
-      const { cookie, removed } = changeInfo
+      const { cookie, removed, cause } = changeInfo
       // Check if it's an auth-related cookie for monitored domains
       if (
-        cookie.domain &&
-        env.WXT_AUTH_COOKIE_DOMAINS.some((domain: string) => cookie.domain.includes(domain))
+        !cookie.domain ||
+        !env.WXT_AUTH_COOKIE_DOMAINS.some((domain: string) => cookie.domain.includes(domain))
       ) {
-        // Check against defined auth cookie patterns
-        if (AUTH_COOKIE_PATTERNS.some((name) => cookie.name.includes(name))) {
-          // Get current cookie value for before/after comparison
-          let beforeValue: string | undefined
-          let afterValue: string | undefined
-
-          if (removed) {
-            // Cookie was removed - before value was the cookie value, after is undefined
-            beforeValue = cookie.value
-            afterValue = undefined
-          } else {
-            // Cookie was added/updated - get the previous value by querying all cookies
-            try {
-              const existingCookies = await browser.cookies.getAll({
-                domain: cookie.domain,
-                name: cookie.name,
-              })
-              // If cookie exists, this was an update; if not, this was creation
-              beforeValue =
-                existingCookies.length > 0 && existingCookies[0]!.value !== cookie.value
-                  ? existingCookies[0]!.value
-                  : undefined
-              afterValue = cookie.value
-            } catch (error) {
-              logger.warn("[ProxyFetch] Could not retrieve previous cookie value:", error)
-              beforeValue = "unknown"
-              afterValue = cookie.value
-            }
-          }
-
-          logger.info("[ProxyFetch] Auth cookie changed, invalidating cache:", {
-            cookieName: cookie.name,
-            domain: cookie.domain,
-            removed,
-            beforeValue,
-            afterValue,
-          })
-          invalidateAllCache().catch((error) =>
-            logger.error("[ProxyFetch] Failed to invalidate cache:", error),
-          )
-        }
+        return
       }
+      // Check against defined auth cookie patterns
+      if (!AUTH_COOKIE_PATTERNS.some((name) => cookie.name.includes(name))) {
+        return
+      }
+
+      // A cookie re-set fires two events: an "overwrite" removal followed by an
+      // add. Only the add carries the new value, so skip the overwrite half —
+      // otherwise every server-side cookie refresh double-invalidates the cache.
+      if (removed && cause === "overwrite") {
+        return
+      }
+
+      const lastSeenKey = `${cookie.domain}|${cookie.name}`
+      const newValue = removed ? undefined : cookie.value
+
+      try {
+        const lastSeen =
+          (await storage.getItem<Record<string, string>>(AUTH_COOKIE_LAST_SEEN_KEY)) ?? {}
+        // Same token re-issued (e.g. expiry extended): session identity didn't
+        // change, so the cached session is still valid — don't invalidate, or
+        // every get-session response would evict the cache it just filled.
+        if (!removed && lastSeen[lastSeenKey] === newValue) {
+          return
+        }
+        if (newValue === undefined) {
+          delete lastSeen[lastSeenKey]
+        } else {
+          lastSeen[lastSeenKey] = newValue
+        }
+        await storage.setItem(AUTH_COOKIE_LAST_SEEN_KEY, lastSeen)
+      } catch (error) {
+        // Can't tell whether the token changed — invalidate to stay correct
+        logger.warn("[ProxyFetch] Could not read last-seen auth cookie state:", error)
+      }
+
+      logger.info("[ProxyFetch] Auth cookie changed, invalidating auth cache:", {
+        cookieName: cookie.name,
+        domain: cookie.domain,
+        removed,
+        cause,
+      })
+      invalidateAuthCache().catch((error) =>
+        logger.error("[ProxyFetch] Failed to invalidate auth cache:", error),
+      )
     })
   }
 

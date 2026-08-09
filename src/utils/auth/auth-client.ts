@@ -2,6 +2,7 @@ import type { CacheConfig } from "@/types/proxy-fetch"
 import { AUTH_BASE_PATH } from "@read-frog/definitions"
 import { createAuthClient } from "better-auth/react"
 import { env } from "@/env"
+import { AUTH_CACHE_GROUP_KEY } from "@/utils/constants/proxy-fetch"
 import { sendMessage } from "@/utils/message"
 import { normalizeHeaders } from "../http"
 
@@ -45,7 +46,7 @@ export const authClient = createAuthClient({
     credentials: "include",
     customFetchImpl: createCustomFetch({
       enabled: true,
-      groupKey: "auth",
+      groupKey: AUTH_CACHE_GROUP_KEY,
     }),
   },
 })
