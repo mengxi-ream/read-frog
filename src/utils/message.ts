@@ -19,6 +19,7 @@ import type {
   TTSPlaybackStartResponse,
   TTSPlaybackStopRequest,
 } from "@/types/tts-playback"
+import type { SerializablePageTranslationProvider } from "@/utils/providers/translation-provider"
 import type { EdgeTTSVoice } from "@/utils/server/edge-tts/types"
 import { defineExtensionMessaging } from "@webext-core/messaging"
 
@@ -89,7 +90,7 @@ interface ProtocolMap {
   enqueueTranslateRequest: (data: {
     text: string
     langConfig: Config["language"]
-    providerConfig: ProviderConfig
+    providerRef: SerializablePageTranslationProvider
     scheduleAt: number
     hash: string
     textFormat?: TranslationTextFormat

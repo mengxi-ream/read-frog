@@ -24,7 +24,7 @@ export function StylePreview({
   dir?: "ltr" | "rtl"
   className?: string
 }) {
-  const { translationNodeStyle } = useAtomValue(configFieldsAtomMap.translate)
+  const { translationNodeStyle } = useAtomValue(configFieldsAtomMap.pageTranslation)
   const blockContentRef = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {

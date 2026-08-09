@@ -3,9 +3,24 @@ import { assert, describe, expect, it } from "vitest"
 import { configSchema } from "@/types/config/config"
 import { CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
 import { logger } from "@/utils/logger"
-import { LATEST_SCHEMA_VERSION, migrationScripts, runMigration } from "../../migration"
+import {
+  LATEST_SCHEMA_VERSION,
+  migrateConfig,
+  migrationScripts,
+  runMigration,
+} from "../../migration"
+import { testSeries as v001TestSeries } from "../example/v001"
 
 describe("all Config Migrations", () => {
+  it("migrates a complete v001 config through the full chain to the latest schema", async () => {
+    const migrated = await migrateConfig(structuredClone(v001TestSeries.default!.config), 1)
+
+    expect(configSchema.safeParse(migrated).success).toBe(true)
+    // v095 moved the page-translation surface to its hosted-AI feature name.
+    expect("translate" in migrated).toBe(false)
+    expect(typeof migrated.pageTranslation.providerId).toBe("string")
+  })
+
   it("should have the valid latest schema version", async () => {
     expect(LATEST_SCHEMA_VERSION).toBeDefined()
     expect(typeof LATEST_SCHEMA_VERSION).toBe("number")

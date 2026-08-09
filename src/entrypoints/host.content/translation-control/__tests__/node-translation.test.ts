@@ -23,7 +23,7 @@ vi.mock("@/utils/message", () => ({
 
 function createConfig(): Config {
   return {
-    translate: {
+    pageTranslation: {
       node: {
         enabled: true,
         hotkey: "backtick",
@@ -68,7 +68,7 @@ describe("registerNodeTranslationTriggers", () => {
       expect(mocks.removeOrShowNodeTranslation).toHaveBeenCalledWith(
         { x: 15, y: 25 },
         expect.objectContaining({
-          translate: expect.objectContaining({
+          pageTranslation: expect.objectContaining({
             node: expect.objectContaining({ enabled: true }),
           }),
         }),

@@ -2,6 +2,7 @@ import type { SelectionToolbarCustomAction } from "@/types/config/selection-tool
 import { useAtomValue } from "jotai"
 import { useMemo } from "react"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
+import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
@@ -16,13 +17,17 @@ export const ProviderField = withForm({
   render: function Render({ form }) {
     const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
 
-    const customActionProviders = useMemo(
-      () => getSelectableProvidersForCapability("selectionToolbar.customAction", providersConfig),
+    const baseCustomActionProviders = useMemo(
+      () => getSelectableProvidersForCapability("customAction", providersConfig),
       [providersConfig],
+    )
+    const customActionProviders = useHostedAiProviderOptions(
+      "customAction",
+      baseCustomActionProviders,
     )
     const customActionProviderIds = useMemo(
       () =>
-        getProviderIdsForCapability("selectionToolbar.customAction", providersConfig, {
+        getProviderIdsForCapability("customAction", providersConfig, {
           requireEnable: true,
         }),
       [providersConfig],

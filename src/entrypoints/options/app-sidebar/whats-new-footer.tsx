@@ -175,7 +175,9 @@ export function WhatsNewFooter() {
               </span>
             </a>
           </PopoverTitle>
-          <PopoverDescription>{latestBlogPost.description}</PopoverDescription>
+          {latestBlogPost.description && (
+            <PopoverDescription>{latestBlogPost.description}</PopoverDescription>
+          )}
         </PopoverHeader>
       </PopoverContent>
     </Popover>

@@ -28,7 +28,7 @@ export async function bootstrapHostContent(
   const teardownNodeTranslation = registerNodeTranslationTriggers()
 
   const preloadConfig =
-    initialConfig?.translate.page.preload ?? DEFAULT_CONFIG.translate.page.preload
+    initialConfig?.pageTranslation.page.preload ?? DEFAULT_CONFIG.pageTranslation.page.preload
   const manager = new PageTranslationManager({
     root: null,
     rootMargin: `${preloadConfig.margin}px`,

@@ -41,7 +41,7 @@ function getSelectedProviderOptions(config: Config, providersConfig: ProvidersCo
     if (action.enabled === false) {
       continue
     }
-    addProvider("selectionToolbar.customAction", action.providerId)
+    addProvider("customAction", action.providerId)
   }
 
   return selectedProviders

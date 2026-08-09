@@ -17,7 +17,7 @@ import { isCurrentSiteInBlacklistAtom, isCurrentSiteInWhitelistAtom } from "../a
 export default function TranslateButton({ className }: { className?: string }) {
   const [isPageTranslated, setIsPageTranslated] = useAtom(isPageTranslatedAtom)
   const isIgnoreTab = useAtomValue(isIgnoreTabAtom)
-  const translateConfig = useAtomValue(configFieldsAtomMap.translate)
+  const translateConfig = useAtomValue(configFieldsAtomMap.pageTranslation)
   const { mode } = useAtomValue(configFieldsAtomMap.siteControl)
   const isCurrentSiteInWhitelist = useAtomValue(isCurrentSiteInWhitelistAtom)
   const isCurrentSiteInBlacklist = useAtomValue(isCurrentSiteInBlacklistAtom)

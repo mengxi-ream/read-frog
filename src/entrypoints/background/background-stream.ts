@@ -1,3 +1,4 @@
+import type { HostedAiRateLimitErrorData, PublicAppErrorCode } from "@read-frog/api-contract"
 import type { Browser } from "#imports"
 import type {
   BackgroundNoteSuggestionStreamSnapshot,
@@ -17,6 +18,12 @@ import type {
   StreamRuntimeOptions,
   ThinkingSnapshot,
 } from "@/types/background-stream"
+import {
+  HostedAiOutputFieldTypeSchema,
+  HostedAiRateLimitErrorDataSchema,
+  HostedAiStreamStructuredObjectInputSchema,
+  HostedAiStreamTextInputSchema,
+} from "@read-frog/api-contract"
 import { Output, parsePartialJson, streamText } from "ai"
 import { z } from "zod"
 import { BACKGROUND_STREAM_PORTS } from "@/types/background-stream"
@@ -27,6 +34,7 @@ import { logger } from "@/utils/logger"
 import { backgroundOrpcClient } from "@/utils/orpc/background-client"
 import { getModelById } from "@/utils/providers/model"
 import { isBuiltInAiProviderId } from "@/utils/providers/provider-registry"
+import { attachRequestErrorMeta } from "@/utils/request/retry-policy"
 import { saveSuggestionEnvelopeSchema } from "@/utils/save-suggestion/types"
 
 const invalidStreamStartPayloadMessage = "Invalid stream start payload"
@@ -36,6 +44,11 @@ const aiOutputLengthLimitErrorMessage =
   "The AI output reached the length limit. Please reduce the requested output length and try again."
 
 type AiStreamPart = Record<string, unknown> & { type: string }
+
+type HostedStreamFn = (
+  input: Record<string, unknown>,
+  options?: { signal?: AbortSignal },
+) => Promise<AsyncIterable<unknown>>
 
 function createStreamAbortError(message: string) {
   return new DOMException(message, "AbortError")
@@ -60,9 +73,12 @@ const streamTextPayloadSchema = z
   })
   .loose()
 
+// Transport-level check for BOTH provider kinds, so only the enum comes from
+// the contract; hosted-only constraints (name length, field count) are applied
+// by the contract input schema right before the hosted call.
 const structuredObjectFieldSchema = z.object({
   name: z.string().trim().min(1),
-  type: z.enum(["string", "number"]),
+  type: HostedAiOutputFieldTypeSchema,
 })
 
 const structuredObjectPayloadSchema = z
@@ -271,6 +287,21 @@ class BackgroundStreamError extends Error {
   readonly retryAfterMs?: number
 }
 
+function withRequestErrorMeta<T extends Error>(
+  error: T,
+  meta: {
+    statusCode?: number
+    isRetryable: boolean
+    kind: "rate-limit" | "bad-request" | "access-denied"
+  },
+): T {
+  // Keep enumerable top-level fields as well as the symbol metadata. This is
+  // robust across isolated extension/test realms where Symbol identities may
+  // differ, and RequestQueue reads both representations.
+  Object.assign(error, meta)
+  return attachRequestErrorMeta(error, meta)
+}
+
 function toAiStreamPart(part: unknown): AiStreamPart {
   if (!isRecord(part) || typeof part.type !== "string" || part.type.trim().length === 0) {
     throw new BackgroundStreamError("stream_protocol_error", aiStreamProtocolErrorMessage)
@@ -299,24 +330,29 @@ function isOrpcRateLimitError(error: unknown): boolean {
     return false
   }
 
-  const candidate = error as { code?: unknown; status?: unknown }
-  return candidate.status === 429 || candidate.code === "TOO_MANY_REQUESTS"
+  const candidate = error as { code?: unknown }
+  return candidate.code === "TOO_MANY_REQUESTS"
 }
 
-function getHostedAiRateLimitQuotaScope(error: unknown): "guest" | "user" | undefined {
-  if (!isRecord(error) || !isRecord(error.data)) {
+function getOrpcErrorCode(error: unknown): string | undefined {
+  return isRecord(error) && typeof error.code === "string" ? error.code : undefined
+}
+
+/**
+ * The server builds this payload `satisfies HostedAiRateLimitErrorData`; the
+ * same contract schema parses it back here, so the two ends cannot drift.
+ */
+function getHostedAiRateLimitData(error: unknown): HostedAiRateLimitErrorData | undefined {
+  if (!isRecord(error)) {
     return undefined
   }
 
-  if (error.data.quotaScope === "guest" || error.data.quotaScope === "user") {
-    return error.data.quotaScope
-  }
-
-  return undefined
+  const parsed = HostedAiRateLimitErrorDataSchema.safeParse(error.data)
+  return parsed.success ? parsed.data : undefined
 }
 
 function getHostedAiRateLimitMessage(error: unknown): string {
-  switch (getHostedAiRateLimitQuotaScope(error)) {
+  switch (getHostedAiRateLimitData(error)?.quotaScope) {
     case "guest":
       return i18n.t("hostedAi.errors.guestRateLimited")
     case "user":
@@ -326,14 +362,69 @@ function getHostedAiRateLimitMessage(error: unknown): string {
   }
 }
 
+// Pinned with `satisfies` so a code renamed in the contract fails this build
+// instead of silently falling through to the generic error path.
+const HOSTED_AI_TIER_RESTRICTED = "HOSTED_AI_TIER_RESTRICTED" satisfies PublicAppErrorCode
+const HOSTED_AI_QUOTA_EXHAUSTED = "HOSTED_AI_QUOTA_EXHAUSTED" satisfies PublicAppErrorCode
+
 function normalizeHostedAiError(error: unknown): unknown {
+  switch (getOrpcErrorCode(error)) {
+    case HOSTED_AI_TIER_RESTRICTED:
+      return withRequestErrorMeta(
+        new BackgroundStreamError(
+          "HOSTED_AI_TIER_RESTRICTED",
+          i18n.t("hostedAi.availability.ultraRequired"),
+          { cause: error },
+        ),
+        { isRetryable: false, kind: "access-denied" },
+      )
+    case HOSTED_AI_QUOTA_EXHAUSTED:
+      // Quota exhaustion may also use HTTP 429, but it is a billing-period hard limit:
+      // never normalize it into the short-term pause-and-retry path. Kind
+      // "access-denied" (never a statusCode) drains the queue backlog without
+      // ever entering rate-limit classification.
+      return withRequestErrorMeta(
+        new BackgroundStreamError(
+          "HOSTED_AI_QUOTA_EXHAUSTED",
+          i18n.t("hostedAi.availability.quotaExhausted"),
+          { cause: error },
+        ),
+        { isRetryable: false, kind: "access-denied" },
+      )
+    case "UNAUTHORIZED":
+      return withRequestErrorMeta(
+        new BackgroundStreamError(
+          "UNAUTHORIZED",
+          i18n.t("hostedAi.availability.authenticationRequired"),
+          { cause: error },
+        ),
+        { isRetryable: false, kind: "access-denied" },
+      )
+    default:
+      break
+  }
+
   if (isOrpcRateLimitError(error)) {
-    return new BackgroundStreamError("rate_limited", getHostedAiRateLimitMessage(error), {
-      cause: error,
-    })
+    return withRequestErrorMeta(
+      new BackgroundStreamError("rate_limited", getHostedAiRateLimitMessage(error), {
+        cause: error,
+        retryAfterMs: getHostedAiRateLimitData(error)?.retryAfterMs,
+      }),
+      { statusCode: 429, isRetryable: true, kind: "rate-limit" },
+    )
   }
 
   return error
+}
+
+async function* normalizeHostedPartStreamErrors(stream: AsyncIterable<unknown>): AsyncGenerator {
+  try {
+    for await (const part of stream) {
+      yield part
+    }
+  } catch (error) {
+    throw normalizeHostedAiError(error)
+  }
 }
 
 function getStreamFinishReason(part: Record<string, unknown>): string | undefined {
@@ -557,21 +648,26 @@ async function createHostedTextPartStream(
   serializablePayload: BackgroundStreamTextSerializablePayload,
   signal?: AbortSignal,
 ): Promise<AsyncIterable<unknown>> {
-  const { prompt, instructions, temperature } = serializablePayload
+  const { prompt, instructions, temperature, modelTier, requestId } = serializablePayload
 
-  if (!instructions || !prompt) {
+  // The contract schema is the same one the server parses with, so a payload
+  // it rejects fails here as invalid_request instead of a round trip to a 400.
+  const input = HostedAiStreamTextInputSchema.safeParse({
+    instructions,
+    prompt,
+    temperature,
+    modelTier,
+    requestId,
+  })
+  if (!input.success) {
     throw new BackgroundStreamError("invalid_request", "Invalid hosted AI request")
   }
 
   try {
-    return await backgroundOrpcClient.hostedAi.translate.streamText(
-      {
-        instructions,
-        prompt,
-        temperature,
-      },
-      { signal },
-    )
+    const stream = await (
+      backgroundOrpcClient.hostedAi.translate.streamText as unknown as HostedStreamFn
+    )(input.data, { signal })
+    return normalizeHostedPartStreamErrors(stream)
   } catch (error) {
     throw normalizeHostedAiError(error)
   }
@@ -627,22 +723,29 @@ async function createHostedStructuredObjectPartStream(
   serializablePayload: BackgroundStreamStructuredObjectSerializablePayload,
   signal?: AbortSignal,
 ): Promise<AsyncIterable<unknown>> {
-  const { outputSchema, prompt, instructions, temperature } = serializablePayload
+  const { outputSchema, prompt, instructions, temperature, modelTier, requestId } =
+    serializablePayload
 
-  if (!instructions || !prompt) {
+  // Contract-schema parse converges the hosted-only constraints (field-name
+  // length, field count) the transport check deliberately leaves loose for
+  // BYOK, and fails locally instead of as a server 400.
+  const input = HostedAiStreamStructuredObjectInputSchema.safeParse({
+    instructions,
+    prompt,
+    outputSchema,
+    temperature,
+    modelTier,
+    requestId,
+  })
+  if (!input.success) {
     throw new BackgroundStreamError("invalid_request", "Invalid hosted AI request")
   }
 
   try {
-    return await backgroundOrpcClient.hostedAi.customAction.streamStructuredObject(
-      {
-        instructions,
-        prompt,
-        outputSchema,
-        temperature,
-      },
-      { signal },
-    )
+    const stream = await (
+      backgroundOrpcClient.hostedAi.customAction.streamStructuredObject as unknown as HostedStreamFn
+    )(input.data, { signal })
+    return normalizeHostedPartStreamErrors(stream)
   } catch (error) {
     throw normalizeHostedAiError(error)
   }

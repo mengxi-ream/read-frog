@@ -8,23 +8,35 @@ import type {
 } from "@/utils/providers/provider-display"
 import readFrogLogo from "@/assets/providers/read-frog-provider.png?url&no-inline"
 import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
-import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
+import {
+  BUILT_IN_AI_PROVIDER_ID,
+  BUILT_IN_AI_PROVIDER_IDS,
+  BUILT_IN_AI_ULTRA_PROVIDER_ID,
+  type BuiltInAiProviderId,
+  type HostedAiModelTier,
+} from "@/utils/constants/provider-ids"
 import { i18n } from "@/utils/i18n"
 
-export { BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
+export {
+  BUILT_IN_AI_PROVIDER_ID,
+  BUILT_IN_AI_ULTRA_PROVIDER_ID,
+} from "@/utils/constants/provider-ids"
 export const BUILT_IN_AI_PROVIDER_LOGO = readFrogLogo
 
 const BUILT_IN_AI_PROVIDER_NAME_KEY = "options.apiProviders.providers.name.builtInAi"
 const BUILT_IN_AI_PROVIDER_FALLBACK_NAME = "Built-in AI"
+const BUILT_IN_AI_ULTRA_PROVIDER_NAME_KEY = "options.apiProviders.providers.name.builtInAiUltra"
+const BUILT_IN_AI_ULTRA_PROVIDER_FALLBACK_NAME = "Advanced Built-in AI"
 
-export type ProviderCapability = FeatureKey | "selectionToolbar.customAction"
+export type ProviderCapability = FeatureKey | "customAction"
 type SystemProviderNameKey = keyof GeneratedI18nStructure
 type ProviderConfigPredicate<T extends ProviderConfig = ProviderConfig> = (
   provider: ProviderConfig,
 ) => provider is T
 
 interface SystemProviderDef {
-  id: string
+  id: BuiltInAiProviderId
+  modelTier: HostedAiModelTier
   nameKey: SystemProviderNameKey
   fallbackName: string
   capabilities: readonly ProviderCapability[]
@@ -40,8 +52,9 @@ export interface LocalProviderRef<T extends ProviderConfig = ProviderConfig> {
 
 export interface SystemProviderRef {
   kind: "system"
-  id: string
+  id: BuiltInAiProviderId
   name: string
+  modelTier: HostedAiModelTier
 }
 
 export type ResolvedProviderRef<T extends ProviderConfig = ProviderConfig> =
@@ -51,19 +64,32 @@ export type ResolvedProviderRef<T extends ProviderConfig = ProviderConfig> =
 const SYSTEM_PROVIDER_DEFS = {
   [BUILT_IN_AI_PROVIDER_ID]: {
     id: BUILT_IN_AI_PROVIDER_ID,
+    modelTier: "normal",
     nameKey: BUILT_IN_AI_PROVIDER_NAME_KEY,
     fallbackName: BUILT_IN_AI_PROVIDER_FALLBACK_NAME,
-    capabilities: ["selectionToolbar.customAction"],
+    capabilities: ["pageTranslation", "customAction"],
+    logo: () => BUILT_IN_AI_PROVIDER_LOGO,
+  },
+  [BUILT_IN_AI_ULTRA_PROVIDER_ID]: {
+    id: BUILT_IN_AI_ULTRA_PROVIDER_ID,
+    modelTier: "ultra",
+    nameKey: BUILT_IN_AI_ULTRA_PROVIDER_NAME_KEY,
+    fallbackName: BUILT_IN_AI_ULTRA_PROVIDER_FALLBACK_NAME,
+    capabilities: ["pageTranslation", "customAction"],
     logo: () => BUILT_IN_AI_PROVIDER_LOGO,
   },
 } as const satisfies Record<string, SystemProviderDef>
 
+function getSystemProviderDefs(): SystemProviderDef[] {
+  return Object.values(SYSTEM_PROVIDER_DEFS)
+}
+
 const LOCAL_PROVIDER_CAPABILITY_PREDICATES = {
-  translate: isTranslateProviderConfig,
+  pageTranslation: isTranslateProviderConfig,
   videoSubtitles: isTranslateProviderConfig,
   "selectionToolbar.translate": isTranslateProviderConfig,
   inputTranslation: isTranslateProviderConfig,
-  "selectionToolbar.customAction": isLLMProviderConfig,
+  customAction: isLLMProviderConfig,
 } as const satisfies Record<ProviderCapability, ProviderConfigPredicate>
 
 export type ProviderConfigForCapability<C extends ProviderCapability> =
@@ -75,7 +101,7 @@ export type ProviderRefForCapability<C extends ProviderCapability> = ResolvedPro
   ProviderConfigForCapability<C>
 >
 
-export type CustomActionProviderRef = ProviderRefForCapability<"selectionToolbar.customAction">
+export type CustomActionProviderRef = ProviderRefForCapability<"customAction">
 export type SelectionToolbarTranslateProviderRef =
   ProviderRefForCapability<"selectionToolbar.translate">
 
@@ -97,17 +123,24 @@ function createSystemProviderRef(def: SystemProviderDef): SystemProviderRef {
     kind: "system",
     id: def.id,
     name: getSystemProviderName(def),
+    modelTier: def.modelTier,
   }
 }
 
 function getSystemProviderDef(providerId: string): SystemProviderDef | undefined {
-  return Object.values(SYSTEM_PROVIDER_DEFS).find((def) => def.id === providerId)
+  return getSystemProviderDefs().find((def) => def.id === providerId)
 }
 
-export function isBuiltInAiProviderId(
-  providerId: string,
-): providerId is typeof BUILT_IN_AI_PROVIDER_ID {
-  return providerId === BUILT_IN_AI_PROVIDER_ID
+export function isBuiltInAiProviderId(providerId: string): providerId is BuiltInAiProviderId {
+  return BUILT_IN_AI_PROVIDER_IDS.includes(providerId as BuiltInAiProviderId)
+}
+
+export function getBuiltInAiProviderName(providerId: BuiltInAiProviderId): string {
+  return getSystemProviderName(SYSTEM_PROVIDER_DEFS[providerId])
+}
+
+export function getHostedAiModelTier(providerId: BuiltInAiProviderId): HostedAiModelTier {
+  return providerId === BUILT_IN_AI_ULTRA_PROVIDER_ID ? "ultra" : "normal"
 }
 
 export function isSystemProviderId(providerId: string): boolean {
@@ -130,7 +163,7 @@ export function isLocalProviderConfigCompatibleWithCapability<C extends Provider
 }
 
 export function getSystemProviderIdsForCapability(capability: ProviderCapability): string[] {
-  return Object.values(SYSTEM_PROVIDER_DEFS)
+  return getSystemProviderDefs()
     .filter((def) => def.capabilities.includes(capability))
     .map((def) => def.id)
 }
@@ -173,7 +206,7 @@ export function getSelectableProvidersForCapability(
   capability: ProviderCapability,
   providersConfig: ProvidersConfig,
 ): ProviderSelectorOption[] {
-  const systemProviders = Object.values(SYSTEM_PROVIDER_DEFS)
+  const systemProviders = getSystemProviderDefs()
     .filter((def) => def.capabilities.includes(capability))
     .map(createSystemProviderSelectorItem)
 

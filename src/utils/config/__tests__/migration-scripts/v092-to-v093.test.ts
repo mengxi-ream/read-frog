@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { configSchema } from "@/types/config/config"
+import { migrateConfig } from "../../migration"
 import { migrate } from "../../migration-scripts/v092-to-v093"
 import { testSeries as v092TestSeries } from "../example/v092"
 
@@ -96,15 +97,17 @@ describe("v092-to-v093 migration", () => {
 
   it.each(Object.entries(v092TestSeries))(
     "keeps the full %s fixture schema-valid",
-    (_seriesId, series) => {
+    async (_seriesId, series) => {
       const migrated = migrate(series.config)
-      const parseResult = configSchema.safeParse(migrated)
+      // Run the real chain so every later migration is covered without this
+      // frozen test having to name them one by one.
+      const parseResult = configSchema.safeParse(await migrateConfig(migrated, 93))
 
       expect(parseResult.success).toBe(true)
     },
   )
 
-  it("rewrites a full fixture config that pairs translationOnly with Microsoft", () => {
+  it("rewrites a full fixture config that pairs translationOnly with Microsoft", async () => {
     const baseConfig: any = structuredClone(v092TestSeries["complex-config-from-v020"]!.config)
     baseConfig.translate.mode = "translationOnly"
     baseConfig.translate.providerId = "microsoft-translate-default"
@@ -113,6 +116,6 @@ describe("v092-to-v093 migration", () => {
 
     expect(migrated.translate.mode).toBe("translationOnly")
     expect(migrated.translate.providerId).toBe("google-translate-default")
-    expect(configSchema.safeParse(migrated).success).toBe(true)
+    expect(configSchema.safeParse(await migrateConfig(migrated, 93)).success).toBe(true)
   })
 })

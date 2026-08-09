@@ -171,11 +171,9 @@ export function computeSelectionToolbarCustomActionFallbacksAfterDeletion(
     return null
   }
 
-  const fallbackProviderId = getProviderIdsForCapability(
-    "selectionToolbar.customAction",
-    remainingProviders,
-    { requireEnable: true },
-  )[0]
+  const fallbackProviderId = getProviderIdsForCapability("customAction", remainingProviders, {
+    requireEnable: true,
+  })[0]
   if (!fallbackProviderId) {
     return null
   }

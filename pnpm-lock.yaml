@@ -135,11 +135,11 @@ importers:
         specifier: ^1.3.3
         version: 1.3.3(@types/react@19.2.18)(react@19.2.8)
       '@read-frog/api-contract':
-        specifier: 0.12.1
-        version: 0.12.1(@opentelemetry/api@1.9.1)
+        specifier: 0.12.3
+        version: 0.12.3(@opentelemetry/api@1.9.1)
       '@read-frog/definitions':
-        specifier: 0.4.1
-        version: 0.4.1
+        specifier: 0.4.3
+        version: 0.4.3
       '@remixicon/react':
         specifier: ^4.9.0
         version: 4.9.0(react@19.2.8)
@@ -948,9 +948,6 @@ packages:
 
   '@codemirror/theme-one-dark@6.1.3':
     resolution: {integrity: sha512-NzBdIvEJmx6fjeremiGp3t/okrLPYT0d9orIc7AFun8oZcRk58aejkqhv6spnz4MLAevrKNPMQYXEWMg4s+sKA==}
-
-  '@codemirror/view@6.43.7':
-    resolution: {integrity: sha512-FZsExxkoxnAN+d9TgqXLg5g4A1oQwzX9WlkOT5i2PKkcW7xx3Bmu0vs90g6fo9Mpdsb/l96dnAraQ8932aO4/g==}
 
   '@codemirror/view@6.43.8':
     resolution: {integrity: sha512-qtItTDssZ/5GFfi94hrILu9j/VUeFPDPkhovEfmWFj2ipTxnzPB8DdHgfbb8HYTzLTYhrndKmyQxXUz/PDLenw==}
@@ -2259,11 +2256,11 @@ packages:
       '@types/react':
         optional: true
 
-  '@read-frog/api-contract@0.12.1':
-    resolution: {integrity: sha512-GBmOZRFLvVRffK6BHZaz09RiCysC97cWClfgRnst9hFuqC0ynnU6gKDx+TXjWNHG705TtbOm49OF15VrXgs9AA==}
+  '@read-frog/api-contract@0.12.3':
+    resolution: {integrity: sha512-yRN7P/TmjTxJfqzd93hT6zUqLmkYQvAIDz597DT1JszXzSdQP92sshcwxSFLRD0oybI8wH8ZcPti1VbmHeYYqw==}
 
-  '@read-frog/definitions@0.4.1':
-    resolution: {integrity: sha512-nVoezrNTbuwUkD/Y96AufnREOb6fdrM0RwI0ylPlnUYv9pUvVlUSlfcWaEo2xKVIqyqrTjHRtpUFsXH+TSLhhw==}
+  '@read-frog/definitions@0.4.3':
+    resolution: {integrity: sha512-hnyGZme4SkQjJ7ykE7SEHDRKLyt/Ultr15IlS+7m/rJ95UI49gXj3BdBoDqY2s15eVN63EttfZuoqPY/Hmt4sg==}
 
   '@remixicon/react@4.9.0':
     resolution: {integrity: sha512-5/jLDD4DtKxH2B4QVXTobvV1C2uL8ab9D5yAYNtFt+w80O0Ys1xFOrspqROL3fjrZi+7ElFUWE37hBfaAl6U+Q==}
@@ -7741,7 +7738,7 @@ snapshots:
     dependencies:
       '@codemirror/language': 6.12.3
       '@codemirror/state': 6.7.1
-      '@codemirror/view': 6.43.7
+      '@codemirror/view': 6.43.8
       '@lezer/common': 1.5.2
 
   '@codemirror/commands@6.10.4':
@@ -7767,7 +7764,7 @@ snapshots:
   '@codemirror/language@6.12.3':
     dependencies:
       '@codemirror/state': 6.7.1
-      '@codemirror/view': 6.43.7
+      '@codemirror/view': 6.43.8
       '@lezer/common': 1.5.2
       '@lezer/highlight': 1.2.3
       '@lezer/lr': 1.4.10
@@ -7782,7 +7779,7 @@ snapshots:
   '@codemirror/search@6.5.11':
     dependencies:
       '@codemirror/state': 6.7.1
-      '@codemirror/view': 6.43.7
+      '@codemirror/view': 6.43.8
       crelt: 1.0.7
 
   '@codemirror/state@6.7.1':
@@ -7793,15 +7790,8 @@ snapshots:
     dependencies:
       '@codemirror/language': 6.12.3
       '@codemirror/state': 6.7.1
-      '@codemirror/view': 6.43.7
+      '@codemirror/view': 6.43.8
       '@lezer/highlight': 1.2.3
-
-  '@codemirror/view@6.43.7':
-    dependencies:
-      '@codemirror/state': 6.7.1
-      crelt: 1.0.7
-      style-mod: 4.1.3
-      w3c-keyname: 2.2.8
 
   '@codemirror/view@6.43.8':
     dependencies:
@@ -8930,15 +8920,15 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
-  '@read-frog/api-contract@0.12.1(@opentelemetry/api@1.9.1)':
+  '@read-frog/api-contract@0.12.3(@opentelemetry/api@1.9.1)':
     dependencies:
       '@orpc/contract': 1.14.6(@opentelemetry/api@1.9.1)
-      '@read-frog/definitions': 0.4.1
+      '@read-frog/definitions': 0.4.3
       zod: 4.4.3
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@read-frog/definitions@0.4.1':
+  '@read-frog/definitions@0.4.3':
     dependencies:
       '@date-fns/tz': 1.5.0
       date-fns: 4.4.0
@@ -10096,7 +10086,7 @@ snapshots:
       '@codemirror/lint': 6.9.7
       '@codemirror/search': 6.5.11
       '@codemirror/state': 6.7.1
-      '@codemirror/view': 6.43.7
+      '@codemirror/view': 6.43.8
 
   collapse-white-space@2.1.0: {}
 

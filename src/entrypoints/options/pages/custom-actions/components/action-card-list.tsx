@@ -50,7 +50,7 @@ export function CustomActionCardList() {
   }, [search, navigate, customActions, setSelectedCustomActionId])
 
   const customActionProviders = useMemo(
-    () => getSelectableProvidersForCapability("selectionToolbar.customAction", providersConfig),
+    () => getSelectableProvidersForCapability("customAction", providersConfig),
     [providersConfig],
   )
 

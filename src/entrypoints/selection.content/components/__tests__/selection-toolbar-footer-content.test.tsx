@@ -46,10 +46,11 @@ describe("selectionToolbarFooterContent", () => {
       provider: "google-translate",
     },
     {
-      id: "microsoft-translate-default",
-      name: "Microsoft Translate",
+      id: "deepl-default",
+      name: "DeepL",
       enabled: true,
-      provider: "microsoft-translate",
+      provider: "deepl",
+      apiKey: "test-key",
     },
   ]
 
@@ -78,7 +79,7 @@ describe("selectionToolbarFooterContent", () => {
       await Promise.resolve()
     })
 
-    expect(onProviderChange).toHaveBeenCalledWith("microsoft-translate-default")
+    expect(onProviderChange).toHaveBeenCalledWith("deepl-default")
     expect(screen.getByText(i18n.t("action.contextDetailsTitleLabel"))).toBeInTheDocument()
     expect(screen.getByText(i18n.t("action.contextDetailsParagraphsLabel"))).toBeInTheDocument()
     expect(screen.getByText("Page Title")).toBeInTheDocument()

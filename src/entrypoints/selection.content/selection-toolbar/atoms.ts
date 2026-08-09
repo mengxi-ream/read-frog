@@ -88,7 +88,7 @@ export const clearSelectionStateAtom = atom(null, (_get, set) => {
 export interface SelectionToolbarTranslateRequestSlice {
   language: Config["language"]
   enableAIContentAware: boolean
-  customPromptsConfig: Config["translate"]["customPromptsConfig"]
+  customPromptsConfig: Config["pageTranslation"]["customPromptsConfig"]
   provider: SelectionToolbarTranslateProviderRef | null
 }
 
@@ -103,8 +103,8 @@ function createSelectionToolbarTranslateRequestSliceAtom() {
     configAtom,
     (config): SelectionToolbarTranslateRequestSlice => ({
       language: config.language,
-      enableAIContentAware: config.translate.enableAIContentAware,
-      customPromptsConfig: config.translate.customPromptsConfig,
+      enableAIContentAware: config.pageTranslation.enableAIContentAware,
+      customPromptsConfig: config.pageTranslation.customPromptsConfig,
       provider: resolveProviderRefForCapability(
         "selectionToolbar.translate",
         config.providersConfig,
@@ -127,7 +127,7 @@ function createSelectionToolbarCustomActionRequestSliceAtom(actionId: string) {
         action,
         provider: action
           ? resolveProviderRefForCapability(
-              "selectionToolbar.customAction",
+              "customAction",
               config.providersConfig,
               action.providerId,
             )

@@ -52,7 +52,7 @@ function WebsitePatternsPage({
 }
 
 export function AutoTranslateWebsitesPage() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
 
   return (
     <WebsitePatternsPage
@@ -73,7 +73,7 @@ export function AutoTranslateWebsitesPage() {
 }
 
 export function NeverAutoTranslateWebsitesPage() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
 
   return (
     <WebsitePatternsPage

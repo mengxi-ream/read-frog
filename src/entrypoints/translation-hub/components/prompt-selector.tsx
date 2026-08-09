@@ -16,7 +16,7 @@ import { selectedProvidersAtom } from "../atoms"
 
 export function PromptSelector() {
   const selectedProviders = useAtomValue(selectedProvidersAtom)
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
 
   // Only show when at least one LLM provider is selected
   const hasLLMProvider = selectedProviders.some((p) => isLLMProvider(p.provider))

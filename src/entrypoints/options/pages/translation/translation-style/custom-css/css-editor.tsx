@@ -21,7 +21,7 @@ import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 
 export function CSSEditor() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
   const [cssInput, setCssInput] = useState(translateConfig.translationNodeStyle.customCSS ?? "")
 
   // Debounce CSS input for validation

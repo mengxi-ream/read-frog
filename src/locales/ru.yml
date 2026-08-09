@@ -132,6 +132,17 @@ options:
     configTitle: Настройка провайдеров
     addProvider: Добавить провайдера
     builtInProvider: Встроенный провайдер
+    builtInAiUsage:
+      title: Квота встроенного ИИ
+      remaining: "Осталось $1%"
+      supportedFeatures: "Поддерживает функций: $1"
+      resetsAt: "Сброс: $1"
+      daily: Дневная квота
+      weekly: Недельная квота
+      features:
+        pageTranslation: Перевод страницы
+        customAction: Пользовательские AI-действия
+        noteSuggestion: Подсказки для сохранения
     sponsorCta: Получить быстрый и выгодный ИИ
     setApiKeyWarning:
       message: Укажите API-ключ на странице $1
@@ -211,10 +222,12 @@ options:
     providers:
       name:
         builtInAi: Встроенный ИИ
+        builtInAiUltra: Продвинутый встроенный ИИ
         customChatComplete: Пользовательский Chat Complete
         customResponses: Пользовательский Responses
       attribution:
-        builtInAi: Предоставлено Atlas Cloud. Сейчас доступно только для пользовательских AI-действий. Чтобы открыть неограниченный опыт, купите выгодные кредиты на официальном сайте.
+        builtInAi: Стандартная модель, размещённая Read Frog. Пользователи без Ultra могут использовать её только в пользовательских AI-действиях; пользователям Ultra доступно больше функций.
+        builtInAiUltra: Более мощная модель, размещённая Read Frog, — только для подписчиков Ultra. Работает во всех функциях встроенного ИИ — переводе страниц, пользовательских AI-действиях и других — с общей недельной квотой.
       description:
         openai: Предоставляет модели, такие как GPT-4o
         azure: Модели OpenAI в Azure через ваши развертывания
@@ -260,12 +273,12 @@ options:
       title: Провайдеры функций
       description: Выберите провайдера для каждой функции
       features:
-        translate: Перевод страницы
+        pageTranslation: Перевод страницы
         selectionToolbar_translate: Перевод выделения
         inputTranslation: Перевод ввода
         videoSubtitles: Субтитры видео
       descriptions:
-        translate: Переводит страницу целиком — в двуязычном режиме или с заменой оригинала.
+        pageTranslation: Переводит страницу целиком — в двуязычном режиме или с заменой оригинала.
         selectionToolbar_translate: Переводит выделенный текст через панель выделения.
         inputTranslation: Переводит то, что вы набрали в поле ввода, перед отправкой.
         videoSubtitles: Переводит субтитры, которые появляются в видеоплеере.
@@ -1138,10 +1151,17 @@ subtitles:
     translatedExportIncomplete: Не удалось перевести все строки субтитров
     translatedExportSameLanguage: Исходный и целевой языки совпадают
 hostedAi:
+  availability:
+    authenticationRequired: Войдите, чтобы использовать этого провайдера
+    ultraRequired: Требуется план Ultra
+    quotaExhausted: Квота исчерпана
+    serviceUnavailable: Временно недоступно
+    usedPercent: "Использовано квоты: $1%"
+    resetsAtUtc: "Сброс в $1 UTC"
   errors:
     rateLimited: Слишком много запросов, пожалуйста, повторите позже.
-    guestRateLimited: Лимит гостя достигнут. Войдите, чтобы получить больше бесплатных AI-запросов.
-    userRateLimited: Слишком много запросов. Вы превысили бесплатный лимит, пожалуйста, повторите позже.
+    guestRateLimited: Слишком много гостевых запросов. Повторите позже.
+    userRateLimited: Слишком много запросов. Повторите позже.
 hotkey:
   control: Ctrl
   alt: Option

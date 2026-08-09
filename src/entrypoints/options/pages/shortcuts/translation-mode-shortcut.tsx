@@ -4,7 +4,7 @@ import { i18n } from "@/utils/i18n"
 import { ShortcutConfigItem } from "./shortcut-config-item"
 
 export function TranslationModeShortcut() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
 
   return (
     <ShortcutConfigItem

@@ -81,7 +81,7 @@ async function initApp() {
       })) ?? false
   }
 
-  const isInPatterns = tabId ? await getIsInPatterns(config.translate) : false
+  const isInPatterns = tabId ? await getIsInPatterns(config.pageTranslation) : false
 
   const activeTabUrl = activeTab[0]?.url || ""
   const isIgnoreTab = isIgnoreUrl(activeTabUrl)

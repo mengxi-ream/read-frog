@@ -132,6 +132,17 @@ options:
     configTitle: Sağlayıcı yapılandırması
     addProvider: Sağlayıcı ekle
     builtInProvider: Yerleşik sağlayıcı
+    builtInAiUsage:
+      title: Yerleşik AI kotası
+      remaining: "%$1 kaldı"
+      supportedFeatures: "$1 özelliği destekler"
+      resetsAt: "$1 tarihinde sıfırlanır"
+      daily: Günlük kota
+      weekly: Haftalık kota
+      features:
+        pageTranslation: Sayfa çevirisi
+        customAction: Özel AI eylemleri
+        noteSuggestion: Kaydetme önerileri
     sponsorCta: Hızlı ve uygun maliyetli yapay zekâ al
     setApiKeyWarning:
       message: API anahtarınızı $1 sayfasında ayarlayın
@@ -211,10 +222,12 @@ options:
     providers:
       name:
         builtInAi: Yerleşik AI
+        builtInAiUltra: Gelişmiş yerleşik AI
         customChatComplete: Özel Chat Complete
         customResponses: Özel Responses
       attribution:
-        builtInAi: Atlas Cloud tarafından sağlanır. Şu anda yalnızca özel AI eylemleri için kullanılabilir. Sınırsız deneyimin kilidini açmak için resmi web sitesinden uygun maliyetli kredi satın alabilirsiniz.
+        builtInAi: Read Frog tarafından barındırılan standart model. Ultra olmayan kullanıcılar yalnızca özel AI eylemlerinde kullanabilir; Ultra kullanıcıları daha fazla özellikte kullanabilir.
+        builtInAiUltra: Read Frog tarafından barındırılan daha güçlü model, yalnızca Ultra üyelerine özeldir. Sayfa çevirisi, özel AI eylemleri ve diğer tüm yerleşik AI özelliklerinde çalışır; haftalık kota ortaktır.
       description:
         openai: GPT-4o gibi modeller sağlar
         azure: Azure dağıtımlarınız üzerinden OpenAI modelleri
@@ -260,12 +273,12 @@ options:
       title: Özellik sağlayıcıları
       description: Her özellik için kullanılacak sağlayıcıyı seçin
       features:
-        translate: Sayfa çevirisi
+        pageTranslation: Sayfa çevirisi
         selectionToolbar_translate: Seçim araç çubuğu çevirisi
         inputTranslation: Giriş çevirisi
         videoSubtitles: Video altyazıları
       descriptions:
-        translate: Sayfanın tamamını iki dilli ya da değiştirme modunda çevirir.
+        pageTranslation: Sayfanın tamamını iki dilli ya da değiştirme modunda çevirir.
         selectionToolbar_translate: Seçim araç çubuğundan, seçtiğiniz metni çevirir.
         inputTranslation: Bir metin kutusuna yazdıklarınızı göndermeden önce çevirir.
         videoSubtitles: Video oynatıcıda görünen altyazıları çevirir.
@@ -1138,10 +1151,17 @@ subtitles:
     translatedExportIncomplete: Tüm altyazı satırları çevrilemedi
     translatedExportSameLanguage: Kaynak ve hedef diller aynı
 hostedAi:
+  availability:
+    authenticationRequired: Bu sağlayıcıyı kullanmak için giriş yapın
+    ultraRequired: Ultra plan gerekli
+    quotaExhausted: Kota tükendi
+    serviceUnavailable: Geçici olarak kullanılamıyor
+    usedPercent: "Kota kullanımı: %$1"
+    resetsAtUtc: "$1 UTC'de sıfırlanır"
   errors:
     rateLimited: Çok fazla istek, lütfen daha sonra tekrar deneyin.
-    guestRateLimited: Misafir sınırına ulaşıldı. Daha fazla ücretsiz AI isteği için giriş yapın.
-    userRateLimited: Çok fazla istek. Ücretsiz kullanım sınırını aştınız, lütfen daha sonra tekrar deneyin.
+    guestRateLimited: Çok fazla misafir isteği. Lütfen daha sonra tekrar deneyin.
+    userRateLimited: Çok fazla istek. Lütfen daha sonra tekrar deneyin.
 hotkey:
   control: Ctrl
   alt: Option

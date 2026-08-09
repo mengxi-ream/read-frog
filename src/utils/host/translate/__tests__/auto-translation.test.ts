@@ -4,7 +4,7 @@ import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { shouldEnableAutoTranslation } from "../auto-translation"
 
 function createConfig(
-  pageOverrides: Partial<Config["translate"]["page"]> = {},
+  pageOverrides: Partial<Config["pageTranslation"]["page"]> = {},
   languageOverrides: Partial<Config["language"]> = {},
 ): Config {
   return {
@@ -13,10 +13,10 @@ function createConfig(
       ...DEFAULT_CONFIG.language,
       ...languageOverrides,
     },
-    translate: {
-      ...DEFAULT_CONFIG.translate,
+    pageTranslation: {
+      ...DEFAULT_CONFIG.pageTranslation,
       page: {
-        ...DEFAULT_CONFIG.translate.page,
+        ...DEFAULT_CONFIG.pageTranslation.page,
         autoTranslatePatterns: [],
         neverAutoTranslatePatterns: [],
         autoTranslateLanguages: [],

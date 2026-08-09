@@ -50,6 +50,7 @@ describe("feature provider analytics", () => {
         kind: "system",
         id: BUILT_IN_AI_PROVIDER_ID,
         name: "Built-in AI",
+        modelTier: "normal",
       }),
     ).toEqual(BUILT_IN_AI_FEATURE_PROVIDER)
     expect(BUILT_IN_AI_FEATURE_PROVIDER).toEqual({

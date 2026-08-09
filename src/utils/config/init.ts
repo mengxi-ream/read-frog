@@ -15,9 +15,9 @@ import { runMigration } from "./migration"
 
 export interface InitializeConfigResult {
   /**
-   * The config was built from defaults in this run — a first install, or a rebuild after an
-   * unparseable config. Callers use it to run one-time setup that only makes sense on top of
-   * untouched defaults (see `promoteGoogleTranslateDefaultIfReachable`).
+   * The config was created because no stored value existed. Recovery from an invalid stored
+   * value is deliberately excluded. Callers use it to run one-time setup that only makes sense on
+   * untouched defaults (see `selectFreshTranslateProviders`).
    */
   isFreshInstall: boolean
 }
@@ -67,7 +67,6 @@ export async function initializeConfig(): Promise<InitializeConfigResult> {
     config = buildFreshDefaultConfig()
     currentVersion = CONFIG_SCHEMA_VERSION
     didConfigChange = true
-    isFreshInstall = true
   }
 
   if (import.meta.env.DEV) {

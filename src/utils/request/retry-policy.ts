@@ -1,4 +1,10 @@
-export type RequestErrorKind = "rate-limit" | "timeout" | "network" | "bad-request" | "unknown"
+export type RequestErrorKind =
+  | "rate-limit"
+  | "timeout"
+  | "network"
+  | "bad-request"
+  | "access-denied"
+  | "unknown"
 
 export interface RequestErrorMeta {
   statusCode?: number
@@ -161,8 +167,9 @@ export const defaultRequestRetryPolicy: RequestRetryPolicy = {
   decide(error, context) {
     const meta = getRequestErrorMeta(error)
 
-    // 401/403/404: the config (key/model/endpoint) is wrong — retrying any
-    // queued task is pointless, so drain the backlog immediately.
+    // 401/403/404 or an access denial: the config (key/model/endpoint) is
+    // wrong or the account cannot use this service — retrying any queued task
+    // is pointless, so drain the backlog immediately.
     if (isQueueFatalRequestErrorMeta(meta)) {
       return { action: "fail", failQueue: true }
     }
@@ -199,7 +206,17 @@ function isRateLimitRequestErrorMeta(meta: RequestErrorMeta): boolean {
 }
 
 function isQueueFatalRequestErrorMeta(meta: RequestErrorMeta): boolean {
-  return meta.statusCode === 401 || meta.statusCode === 403 || meta.statusCode === 404
+  // "access-denied" marks hosted hard denials (quota exhausted / tier
+  // restricted / unauthenticated): every queued sibling would fail
+  // identically, so drain like 401/403/404. Draining also fails unrelated
+  // tasks sharing the queue (e.g. a queued summary) — rare, and consistent
+  // with the status-code drains below.
+  return (
+    meta.kind === "access-denied" ||
+    meta.statusCode === 401 ||
+    meta.statusCode === 403 ||
+    meta.statusCode === 404
+  )
 }
 
 function isRetryableRequestErrorMeta(meta: RequestErrorMeta): boolean {
@@ -207,7 +224,7 @@ function isRetryableRequestErrorMeta(meta: RequestErrorMeta): boolean {
     return meta.isRetryable
   }
 
-  if (meta.kind === "bad-request") {
+  if (meta.kind === "bad-request" || meta.kind === "access-denied") {
     return false
   }
 
@@ -333,6 +350,7 @@ function normalizeKind(value: unknown): RequestErrorKind | undefined {
     value === "timeout" ||
     value === "network" ||
     value === "bad-request" ||
+    value === "access-denied" ||
     value === "unknown"
     ? value
     : undefined

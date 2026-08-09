@@ -15,11 +15,11 @@ import {
  */
 export async function bindTranslationShortcutKey(pageTranslationManager: PageTranslationManager) {
   const config = await getLocalConfig()
-  if (!config || isPageTranslationShortcutEmpty(config.translate.page.shortcut)) {
+  if (!config || isPageTranslationShortcutEmpty(config.pageTranslation.page.shortcut)) {
     return () => {}
   }
 
-  const shortcut = config.translate.page.shortcut
+  const shortcut = config.pageTranslation.page.shortcut
   if (!isValidConfiguredPageTranslationShortcut(shortcut)) {
     return () => {}
   }

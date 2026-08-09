@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import type { Config } from "@/types/config/config"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { describe, expect, it, vi } from "vitest"
@@ -33,11 +34,16 @@ function makeAction(
 
 function renderWithConfig(config: Config) {
   const store = createStore()
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  })
   store.set(configAtom, config)
   render(
-    <Provider store={store}>
-      <FeatureProviderSelectorList />
-    </Provider>,
+    <QueryClientProvider client={queryClient}>
+      <Provider store={store}>
+        <FeatureProviderSelectorList />
+      </Provider>
+    </QueryClientProvider>,
   )
 }
 

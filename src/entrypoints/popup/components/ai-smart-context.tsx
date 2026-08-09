@@ -6,7 +6,7 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 
 export function AISmartContext() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
 
   return (
     <div className="flex items-center justify-between gap-2">

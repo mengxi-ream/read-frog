@@ -25,8 +25,8 @@ describe("subtitles translator", () => {
 
     getLocalConfigMock.mockResolvedValue({
       ...DEFAULT_CONFIG,
-      translate: {
-        ...DEFAULT_CONFIG.translate,
+      pageTranslation: {
+        ...DEFAULT_CONFIG.pageTranslation,
         enableAIContentAware: true,
       },
       videoSubtitles: {
@@ -127,8 +127,8 @@ describe("subtitles translator", () => {
 
     getLocalConfigMock.mockResolvedValueOnce({
       ...DEFAULT_CONFIG,
-      translate: {
-        ...DEFAULT_CONFIG.translate,
+      pageTranslation: {
+        ...DEFAULT_CONFIG.pageTranslation,
         enableAIContentAware: false,
       },
       videoSubtitles: {
@@ -162,8 +162,8 @@ describe("subtitles translator", () => {
   it("passes title and description when AI content awareness is disabled", async () => {
     getLocalConfigMock.mockResolvedValueOnce({
       ...DEFAULT_CONFIG,
-      translate: {
-        ...DEFAULT_CONFIG.translate,
+      pageTranslation: {
+        ...DEFAULT_CONFIG.pageTranslation,
         enableAIContentAware: false,
       },
       videoSubtitles: {
@@ -201,7 +201,7 @@ describe("subtitles translator", () => {
     const { fetchSubtitlesSummary, translateSubtitles } = await import("../translator")
     const configSnapshot = {
       ...DEFAULT_CONFIG,
-      translate: { ...DEFAULT_CONFIG.translate, enableAIContentAware: true },
+      translate: { ...DEFAULT_CONFIG.pageTranslation, enableAIContentAware: true },
       videoSubtitles: { ...DEFAULT_CONFIG.videoSubtitles, providerId: "openai-default" },
     }
     const videoContext = { videoTitle: "Video title", subtitlesTextContent: "subtitle transcript" }

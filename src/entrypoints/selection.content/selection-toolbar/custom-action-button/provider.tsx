@@ -3,6 +3,7 @@ import type { SelectionSession } from "../atoms"
 import type { SelectionPopoverActions } from "@/components/ui/selection-popover"
 import { useAtomValue, useSetAtom } from "jotai"
 import { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
@@ -115,18 +116,18 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
       language,
       action: activeAction,
       provider: activeAction
-        ? resolveProviderRefForCapability(
-            "selectionToolbar.customAction",
-            providersConfig,
-            activeAction.providerId,
-          )
+        ? resolveProviderRefForCapability("customAction", providersConfig, activeAction.providerId)
         : null,
     }),
     [activeAction, language, providersConfig],
   )
-  const customActionProviders = useMemo(
-    () => getSelectableProvidersForCapability("selectionToolbar.customAction", providersConfig),
+  const baseCustomActionProviders = useMemo(
+    () => getSelectableProvidersForCapability("customAction", providersConfig),
     [providersConfig],
+  )
+  const customActionProviders = useHostedAiProviderOptions(
+    "customAction",
+    baseCustomActionProviders,
   )
   const executionPlan = useMemo(
     () =>
@@ -276,11 +277,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
             },
           ),
           ...classifyResolvedProvider(
-            resolveProviderRefForCapability(
-              "selectionToolbar.customAction",
-              providersConfig,
-              action.providerId,
-            ),
+            resolveProviderRefForCapability("customAction", providersConfig, action.providerId),
           ),
           outcome: "failure",
         })

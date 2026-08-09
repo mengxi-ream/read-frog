@@ -3,7 +3,7 @@ import type { Config, UiLanguage } from "@/types/config/config"
 import { browser, defineBackground } from "#imports"
 import { env } from "@/env"
 import { storageAdapter } from "@/utils/atoms/storage-adapter"
-import { promoteGoogleTranslateDefaultIfReachable } from "@/utils/config/default-translate-provider"
+import { selectFreshTranslateProviders } from "@/utils/config/default-translate-provider"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 import { initI18n, setUiLanguage } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
@@ -56,7 +56,7 @@ export default defineBackground({
         // actually being new, because reloading an unpacked extension also reports
         // "install" while the developer's own provider choice is still in storage.
         if (await isFreshInstalledConfig()) {
-          await promoteGoogleTranslateDefaultIfReachable()
+          await selectFreshTranslateProviders()
         }
       }
 

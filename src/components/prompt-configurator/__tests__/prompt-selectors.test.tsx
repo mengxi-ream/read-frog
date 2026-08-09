@@ -12,17 +12,17 @@ const { providerAtom, selectedProvidersAtom, setTranslateMock, testState, transl
   vi.hoisted(() => ({
     providerAtom: {},
     selectedProvidersAtom: {},
-    setTranslateMock: vi.fn<(value: Partial<Config["translate"]>) => Promise<void>>(),
+    setTranslateMock: vi.fn<(value: Partial<Config["pageTranslation"]>) => Promise<void>>(),
     testState: {
-      translate: null as Config["translate"] | null,
+      pageTranslation: null as Config["pageTranslation"] | null,
     },
     translateAtom: {},
   }))
 
 vi.mock("jotai", () => ({
   useAtom: (atom: object) => {
-    if (atom !== translateAtom || !testState.translate) throw new Error("Unexpected atom")
-    return [testState.translate, setTranslateMock]
+    if (atom !== translateAtom || !testState.pageTranslation) throw new Error("Unexpected atom")
+    return [testState.pageTranslation, setTranslateMock]
   },
   useAtomValue: (atom: object) => {
     if (atom === providerAtom) return { provider: "mock-llm" }
@@ -32,7 +32,7 @@ vi.mock("jotai", () => ({
 }))
 
 vi.mock("@/utils/atoms/config", () => ({
-  configFieldsAtomMap: { translate: translateAtom },
+  configFieldsAtomMap: { pageTranslation: translateAtom },
 }))
 
 vi.mock("@/utils/atoms/provider", () => ({
@@ -102,8 +102,8 @@ vi.mock("@/components/ui/base-ui/select", async () => {
   }
 })
 
-function createTranslateConfig(): Config["translate"] {
-  const translate = structuredClone(DEFAULT_CONFIG.translate)
+function createTranslateConfig(): Config["pageTranslation"] {
+  const translate = structuredClone(DEFAULT_CONFIG.pageTranslation)
   translate.customPromptsConfig = {
     promptId: "default",
     patterns: [
@@ -115,7 +115,7 @@ function createTranslateConfig(): Config["translate"] {
 
 describe("translation prompt selectors", () => {
   beforeEach(() => {
-    testState.translate = createTranslateConfig()
+    testState.pageTranslation = createTranslateConfig()
     setTranslateMock.mockReset()
     setTranslateMock.mockResolvedValue()
   })
@@ -132,14 +132,14 @@ describe("translation prompt selectors", () => {
     fireEvent.click(screen.getByRole("option", { name: "Deep polish" }))
     expect(setTranslateMock).toHaveBeenCalledWith({
       customPromptsConfig: {
-        ...testState.translate!.customPromptsConfig,
+        ...testState.pageTranslation!.customPromptsConfig,
         promptId: "precision-rewrite",
       },
     })
   })
 
   it("shows the selected built-in and uses the same order in Translation Hub", () => {
-    testState.translate!.customPromptsConfig.promptId = "precision-rewrite"
+    testState.pageTranslation!.customPromptsConfig.promptId = "precision-rewrite"
     render(<TranslationHubPromptSelector />)
 
     expect(screen.getByRole("combobox")).toHaveTextContent("Deep polish")

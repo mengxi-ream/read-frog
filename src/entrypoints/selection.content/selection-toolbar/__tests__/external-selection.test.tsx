@@ -37,7 +37,7 @@ vi.mock("@/utils/atoms/config", async (importOriginal) => {
         features: {
           translate: {
             enabled: true,
-            providerId: "microsoft-translate-default",
+            providerId: "google-translate-default",
             shortcut: "Alt+T",
           },
           speak: { enabled: true },

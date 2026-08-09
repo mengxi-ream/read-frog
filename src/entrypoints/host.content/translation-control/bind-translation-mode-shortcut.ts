@@ -17,11 +17,11 @@ const NEXT_MODE: Record<TranslationMode, TranslationMode> = {
 
 export async function bindTranslationModeShortcutKey() {
   const config = await getLocalConfig()
-  if (!config || isPageTranslationShortcutEmpty(config.translate.modeShortcut)) {
+  if (!config || isPageTranslationShortcutEmpty(config.pageTranslation.modeShortcut)) {
     return () => {}
   }
 
-  const shortcut = config.translate.modeShortcut
+  const shortcut = config.pageTranslation.modeShortcut
   if (!isValidConfiguredPageTranslationShortcut(shortcut)) {
     return () => {}
   }
@@ -32,7 +32,7 @@ export async function bindTranslationModeShortcutKey() {
       const currentConfig = await getLocalConfig()
       if (!currentConfig) return
 
-      const currentMode = currentConfig.translate.mode
+      const currentMode = currentConfig.pageTranslation.mode
       const nextMode = NEXT_MODE[currentMode]
 
       // Entering translationOnly is blocked while the page-translate provider
@@ -48,8 +48,8 @@ export async function bindTranslationModeShortcutKey() {
 
       await setLocalConfig({
         ...currentConfig,
-        translate: {
-          ...currentConfig.translate,
+        pageTranslation: {
+          ...currentConfig.pageTranslation,
           mode: nextMode,
         },
       })

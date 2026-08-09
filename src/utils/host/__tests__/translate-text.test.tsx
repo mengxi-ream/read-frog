@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
 import { detectLanguage } from "@/utils/content/language"
+import { Sha256Hex } from "@/utils/hash"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import {
   translateTextForInput,
@@ -24,10 +25,6 @@ vi.mock("@/utils/config/storage", () => ({
 
 vi.mock("@/utils/message", () => ({
   sendMessage: vi.fn<(...args: any[]) => any>(),
-}))
-
-vi.mock("@/utils/host/translate/api/microsoft", () => ({
-  microsoftTranslate: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/host/translate/api/google", () => ({
@@ -59,7 +56,6 @@ vi.mock("@/utils/host/translate/webpage-summary", () => ({
 }))
 
 let mockSendMessage: any
-let mockMicrosoftTranslate: any
 let mockGoogleTranslate: any
 let mockDeepLTranslate: any
 let mockDeepLXTranslate: any
@@ -75,9 +71,6 @@ describe("translate-text", () => {
     document.title = "Document Title"
     document.body.innerHTML = "<main>Body content</main>"
     mockSendMessage = vi.mocked((await import("@/utils/message")).sendMessage)
-    mockMicrosoftTranslate = vi.mocked(
-      (await import("@/utils/host/translate/api/microsoft")).microsoftTranslate,
-    )
     mockGoogleTranslate = vi.mocked(
       (await import("@/utils/host/translate/api/google")).googleTranslate,
     )
@@ -126,14 +119,24 @@ describe("translate-text", () => {
       const result = await translateTextForPage("test text")
 
       expect(result).toBe("translated text")
+      const googleProvider = DEFAULT_CONFIG.providersConfig.find(
+        (provider) => provider.id === DEFAULT_CONFIG.pageTranslation.providerId,
+      )!
       expect(mockSendMessage).toHaveBeenCalledWith(
         "enqueueTranslateRequest",
         expect.objectContaining({
           text: "test text",
           langConfig: DEFAULT_CONFIG.language,
-          providerConfig: expect.any(Object),
+          providerRef: { kind: "local", config: googleProvider },
           scheduleAt: expect.any(Number),
-          hash: expect.any(String),
+          // Preserve the pre-system-provider local cache identity exactly.
+          hash: Sha256Hex(
+            "test text",
+            JSON.stringify(googleProvider),
+            DEFAULT_CONFIG.language.sourceCode,
+            DEFAULT_CONFIG.language.targetCode,
+            "textFormat:plain",
+          ),
         }),
       )
       expect(mockGetOrCreateWebPageContext).not.toHaveBeenCalled()
@@ -191,10 +194,10 @@ describe("translate-text", () => {
     it("sends the translation request when target-language precheck is disabled", async () => {
       const config = {
         ...DEFAULT_CONFIG,
-        translate: {
-          ...DEFAULT_CONFIG.translate,
+        pageTranslation: {
+          ...DEFAULT_CONFIG.pageTranslation,
           page: {
-            ...DEFAULT_CONFIG.translate.page,
+            ...DEFAULT_CONFIG.pageTranslation.page,
             enableTargetLanguageSkip: false,
           },
         },
@@ -219,10 +222,10 @@ describe("translate-text", () => {
     it("keeps explicit skipLanguages behavior when target-language precheck is disabled", async () => {
       const config = {
         ...DEFAULT_CONFIG,
-        translate: {
-          ...DEFAULT_CONFIG.translate,
+        pageTranslation: {
+          ...DEFAULT_CONFIG.pageTranslation,
           page: {
-            ...DEFAULT_CONFIG.translate.page,
+            ...DEFAULT_CONFIG.pageTranslation.page,
             enableTargetLanguageSkip: false,
             skipLanguages: ["jpn"],
           },
@@ -323,8 +326,8 @@ describe("translate-text", () => {
     it("should use the latest original title instead of document.title when building webpage context", async () => {
       const llmConfig = {
         ...DEFAULT_CONFIG,
-        translate: {
-          ...DEFAULT_CONFIG.translate,
+        pageTranslation: {
+          ...DEFAULT_CONFIG.pageTranslation,
           providerId: "openai-default",
           enableAIContentAware: false,
         },
@@ -357,8 +360,8 @@ describe("translate-text", () => {
     it("should include webpage content for AI-aware title translation", async () => {
       const llmConfig = {
         ...DEFAULT_CONFIG,
-        translate: {
-          ...DEFAULT_CONFIG.translate,
+        pageTranslation: {
+          ...DEFAULT_CONFIG.pageTranslation,
           providerId: "openai-default",
           enableAIContentAware: true,
         },
@@ -391,8 +394,8 @@ describe("translate-text", () => {
     it("should forward document.title to regular page translations", async () => {
       const llmConfig = {
         ...DEFAULT_CONFIG,
-        translate: {
-          ...DEFAULT_CONFIG.translate,
+        pageTranslation: {
+          ...DEFAULT_CONFIG.pageTranslation,
           providerId: "openai-default",
           enableAIContentAware: false,
         },
@@ -443,8 +446,8 @@ describe("translate-text", () => {
     it("includes webpage summary for AI-aware llm input translations", async () => {
       const llmConfig = {
         ...DEFAULT_CONFIG,
-        translate: {
-          ...DEFAULT_CONFIG.translate,
+        pageTranslation: {
+          ...DEFAULT_CONFIG.pageTranslation,
           enableAIContentAware: true,
         },
         inputTranslation: {
@@ -489,10 +492,10 @@ describe("translate-text", () => {
     }
 
     const providerConfig = {
-      id: "microsoft-default",
+      id: "google-default",
       enabled: true,
-      name: "Microsoft Translator",
-      provider: "microsoft-translate" as const,
+      name: "Google Translate",
+      provider: "google-translate" as const,
     }
 
     it("should return empty string for empty/whitespace input", async () => {
@@ -519,7 +522,7 @@ describe("translate-text", () => {
       ).toBe("")
 
       // Should translate valid content after removing zero-width spaces
-      mockMicrosoftTranslate.mockResolvedValue("你好")
+      mockGoogleTranslate.mockResolvedValue("你好")
       const result = await executeTranslate(
         "\u200B hello \u200B",
         langConfig,
@@ -528,13 +531,15 @@ describe("translate-text", () => {
       )
       expect(result).toBe("你好")
       // Shared translation core should send minimally prepared text to the provider
-      expect(mockMicrosoftTranslate).toHaveBeenCalledWith("hello", "en", "zh", {
+      expect(mockGoogleTranslate).toHaveBeenCalledWith("hello", "en", "zh", {
         textFormat: undefined,
+        preserveLineBreaks: undefined,
+        signal: undefined,
       })
     })
 
     it("should trim translation result", async () => {
-      mockMicrosoftTranslate.mockResolvedValue("  测试结果  ")
+      mockGoogleTranslate.mockResolvedValue("  测试结果  ")
 
       const result = await executeTranslate(
         "test input",

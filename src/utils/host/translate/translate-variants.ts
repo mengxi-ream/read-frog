@@ -5,6 +5,11 @@ import { isLLMProviderConfig } from "@/types/config/provider"
 import { getDetectedCodeFromStorage, getFinalSourceCode } from "@/utils/config/languages"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
 import { logger } from "@/utils/logger"
+import {
+  isSystemTranslationProvider,
+  resolvePageTranslationProvider,
+  type PageTranslationProvider,
+} from "@/utils/providers/translation-provider"
 import { getLocalConfig } from "../../config/storage"
 import { shouldSkipAsTargetLanguage } from "./target-language-skip"
 import { prepareTranslationText } from "./text-preparation"
@@ -26,13 +31,13 @@ async function getConfigOrThrow(): Promise<Config> {
 }
 
 async function getWebPagePromptContext(
-  providerConfig: ReturnType<typeof resolveProviderConfig>,
+  providerConfig: PageTranslationProvider,
   enableAIContentAware: boolean,
   includeSummary: boolean,
 ): Promise<
   { webTitle: string; webDescription?: string; webContent: string; webSummary?: string } | undefined
 > {
-  if (!isLLMProviderConfig(providerConfig)) {
+  if (isSystemTranslationProvider(providerConfig) || !isLLMProviderConfig(providerConfig)) {
     return undefined
   }
 
@@ -76,7 +81,7 @@ async function translateTextUsingPageConfig(
     return ""
   }
 
-  const providerConfig = resolveProviderConfig(config, "translate")
+  const providerConfig = resolvePageTranslationProvider(config)
 
   // Backstop only: the page modes hoist this check before DOM insertion, but
   // other callers (e.g. the page title) still rely on it here.
@@ -88,7 +93,7 @@ async function translateTextUsingPageConfig(
   }
 
   // Skip translation if text is in skipLanguages list (page translation only)
-  const { skipLanguages } = config.translate.page
+  const { skipLanguages } = config.pageTranslation.page
   if (skipLanguages.length > 0 && preparedText.length >= MIN_LENGTH_FOR_SKIP_LLM_DETECTION) {
     const shouldSkip = await shouldSkipByLanguage(
       preparedText,
@@ -107,7 +112,7 @@ async function translateTextUsingPageConfig(
     text: preparedText,
     langConfig: config.language,
     providerConfig,
-    enableAIContentAware: config.translate.enableAIContentAware,
+    enableAIContentAware: config.pageTranslation.enableAIContentAware,
     extraHashTags: options.extraHashTags,
     webPageContext: options.webPageContext,
     textFormat: options.textFormat,
@@ -137,10 +142,10 @@ export async function translateTextForPage(
   // unscoped and stay permanently uncancellable, re-creating #1881.
   const sessionId = getPageTranslationSessionId() ?? undefined
   const config = await getConfigOrThrow()
-  const providerConfig = resolveProviderConfig(config, "translate")
+  const providerConfig = resolvePageTranslationProvider(config)
   const webPageContext = await getWebPagePromptContext(
     providerConfig,
-    config.translate.enableAIContentAware,
+    config.pageTranslation.enableAIContentAware,
     true,
   )
 
@@ -160,8 +165,8 @@ export async function translateTextForPage(
 export async function translateTextForPageTitle(text: string): Promise<string> {
   const sessionId = getPageTranslationSessionId() ?? undefined
   const config = await getConfigOrThrow()
-  const providerConfig = resolveProviderConfig(config, "translate")
-  const webPageContext = config.translate.enableAIContentAware
+  const providerConfig = resolvePageTranslationProvider(config)
+  const webPageContext = config.pageTranslation.enableAIContentAware
     ? await getWebPagePromptContext(providerConfig, true, false)
     : undefined
 
@@ -211,7 +216,7 @@ export async function translateTextForInput(
 
   const webPageContext = await getWebPagePromptContext(
     providerConfig,
-    config.translate.enableAIContentAware,
+    config.pageTranslation.enableAIContentAware,
     true,
   )
 
@@ -224,7 +229,7 @@ export async function translateTextForInput(
     },
     extraHashTags: [`inputTranslation:${fromLang}->${toLang}`],
     providerConfig,
-    enableAIContentAware: config.translate.enableAIContentAware,
+    enableAIContentAware: config.pageTranslation.enableAIContentAware,
     webPageContext,
     // User-typed newlines are always meaningful.
     preserveLineBreaks: true,

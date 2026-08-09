@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { configSchema } from "@/types/config/config"
 import { resolveModelId } from "@/utils/providers/model-id"
+import { migrateConfig } from "../../migration"
 import { migrate } from "../../migration-scripts/v090-to-v091"
 import { testSeries as v090TestSeries } from "../example/v090"
 
@@ -161,7 +162,7 @@ describe("v090-to-v091 migration", () => {
   // to prove the output still parses.
   it.each(RETIRED_TO_LIVE)(
     "keeps a full config schema-valid after migrating retired %s",
-    (retired) => {
+    async (retired) => {
       const baseConfig = v090TestSeries["complex-config-from-v020"]!.config
 
       const migrated = migrate({
@@ -178,7 +179,9 @@ describe("v090-to-v091 migration", () => {
         ],
       })
 
-      const parseResult = configSchema.safeParse(migrated)
+      // Run the real chain so every later migration is covered without this
+      // frozen test having to name them one by one.
+      const parseResult = configSchema.safeParse(await migrateConfig(migrated, 91))
       expect(parseResult.success).toBe(true)
     },
   )

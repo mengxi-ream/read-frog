@@ -46,7 +46,7 @@ export function resolvePromptReplacementValue(
 }
 
 export function getTranslatePromptFromConfig(
-  translateConfig: Pick<Config["translate"], "customPromptsConfig">,
+  translateConfig: Pick<Config["pageTranslation"], "customPromptsConfig">,
   targetLang: string,
   input: string,
   options?: TranslatePromptOptions<WebPagePromptContext>,
@@ -124,5 +124,5 @@ export async function getTranslatePrompt(
   options?: TranslatePromptOptions<WebPagePromptContext>,
 ): Promise<TranslatePromptResult> {
   const config = (await getLocalConfig()) ?? DEFAULT_CONFIG
-  return getTranslatePromptFromConfig(config.translate, targetLang, input, options)
+  return getTranslatePromptFromConfig(config.pageTranslation, targetLang, input, options)
 }

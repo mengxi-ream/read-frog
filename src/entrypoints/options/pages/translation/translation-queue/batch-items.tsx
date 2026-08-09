@@ -46,7 +46,7 @@ const propertyMinValue = {
 }
 
 function BatchNumberInput({ property }: { property: KeyOfBatchQueueConfig }) {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
   const { batchQueueConfig } = translateConfig
 
   return (

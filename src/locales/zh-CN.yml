@@ -132,6 +132,17 @@ options:
     configTitle: 提供商配置
     addProvider: 添加提供商
     builtInProvider: 内置提供商
+    builtInAiUsage:
+      title: 内置 AI 额度
+      remaining: "剩余 $1%"
+      supportedFeatures: "支持 $1 项功能"
+      resetsAt: "$1 重置"
+      daily: 每日额度
+      weekly: 每周额度
+      features:
+        pageTranslation: 网页翻译
+        customAction: 自定义 AI 指令
+        noteSuggestion: 猜你想存
     sponsorCta: 获取高速性价比 AI
     setApiKeyWarning:
       message: 请在 $1 页面设置 API Key
@@ -212,10 +223,12 @@ options:
     providers:
       name:
         builtInAi: 内置 AI
+        builtInAiUltra: 高级内置 AI
         customChatComplete: 自定义 Chat Complete
         customResponses: 自定义 Responses
       attribution:
-        builtInAi: Provided by Atlas Cloud. 目前仅对自定义 AI 指令开放。若要解锁无限制体验，可以前往官网购买超高性价比额度。
+        builtInAi: 由 Read Frog 托管的普通模型。非 Ultra 用户仅支持在自定义 AI 指令使用，Ultra 用户支持在更多功能上使用。
+        builtInAiUltra: 由 Read Frog 托管的更强模型，Ultra 会员专属。网页翻译、自定义 AI 指令等全部内置 AI 功能均可使用，共享每周额度。
       description:
         openai: 提供 GPT-4o 等模型
         azure: 通过 Azure 部署使用 OpenAI 模型
@@ -261,12 +274,12 @@ options:
       title: 功能提供商
       description: 为每个功能选择使用的提供商
       features:
-        translate: 网页翻译
+        pageTranslation: 网页翻译
         selectionToolbar_translate: 划词翻译
         inputTranslation: 输入翻译
         videoSubtitles: 视频字幕
       descriptions:
-        translate: 翻译整个网页，双语对照或直接替换原文。
+        pageTranslation: 翻译整个网页，双语对照或直接替换原文。
         selectionToolbar_translate: 通过划词工具栏翻译你选中的文本。
         inputTranslation: 在发送前翻译你写在输入框里的内容。
         videoSubtitles: 翻译视频播放器中随播放出现的字幕。
@@ -1254,10 +1267,17 @@ subtitles:
     translatedExportIncomplete: 未能翻译所有字幕行
     translatedExportSameLanguage: 源语言和目标语言相同
 hostedAi:
+  availability:
+    authenticationRequired: 登录后可使用
+    ultraRequired: 需要 Ultra 套餐
+    quotaExhausted: 额度已用完
+    serviceUnavailable: 暂时不可用
+    usedPercent: "额度已使用 $1%"
+    resetsAtUtc: "$1 UTC 重置"
   errors:
     rateLimited: 请求过于频繁，请稍后再试
-    guestRateLimited: 请求过于频繁，请登录以获取更多免费额度
-    userRateLimited: 请求过于频繁，超过免费额度限制，请稍后再试
+    guestRateLimited: 游客请求过于频繁，请稍后再试
+    userRateLimited: 请求过于频繁，请稍后再试
 hotkey:
   control: Ctrl
   alt: Option

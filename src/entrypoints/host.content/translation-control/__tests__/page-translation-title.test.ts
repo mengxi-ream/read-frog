@@ -144,8 +144,8 @@ describe("pageTranslationManager title handling", () => {
   it("primes webpage context on start for AI-aware llm translation", async () => {
     mockGetLocalConfig.mockResolvedValue({
       ...DEFAULT_CONFIG,
-      translate: {
-        ...DEFAULT_CONFIG.translate,
+      pageTranslation: {
+        ...DEFAULT_CONFIG.pageTranslation,
         providerId: "openai-default",
         enableAIContentAware: true,
       },

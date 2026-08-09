@@ -4,7 +4,7 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { matchDomainPattern } from "@/utils/url"
 import { getActiveTabUrl } from "@/utils/utils"
 
-type TranslateConfig = Config["translate"]
+type TranslateConfig = Config["pageTranslation"]
 
 // Sync atom to store the checked state
 export const isCurrentSiteInPatternsAtom = atom<boolean>(false)
@@ -19,13 +19,13 @@ export async function getIsInPatterns(translateConfig: TranslateConfig) {
 
 // Async atom to initialize the checked state
 export const initIsCurrentSiteInPatternsAtom = atom(null, async (get, set) => {
-  const translateConfig = get(configFieldsAtomMap.translate)
+  const translateConfig = get(configFieldsAtomMap.pageTranslation)
   set(isCurrentSiteInPatternsAtom, await getIsInPatterns(translateConfig))
 })
 
 // Atom to toggle current site in auto-translate patterns
 export const toggleCurrentSiteAtom = atom(null, async (get, set, checked: boolean) => {
-  const translateConfig = get(configFieldsAtomMap.translate)
+  const translateConfig = get(configFieldsAtomMap.pageTranslation)
   const activeTabUrl = await getActiveTabUrl()
 
   if (!activeTabUrl) return
@@ -36,7 +36,7 @@ export const toggleCurrentSiteAtom = atom(null, async (get, set, checked: boolea
   if (checked) {
     // Add hostname to patterns if not already present
     if (!currentPatterns.some((pattern) => matchDomainPattern(activeTabUrl, pattern))) {
-      void set(configFieldsAtomMap.translate, {
+      void set(configFieldsAtomMap.pageTranslation, {
         page: {
           ...translateConfig.page,
           autoTranslatePatterns: [...currentPatterns, hostname],
@@ -48,7 +48,7 @@ export const toggleCurrentSiteAtom = atom(null, async (get, set, checked: boolea
     const filteredPatterns = currentPatterns.filter(
       (pattern) => !matchDomainPattern(activeTabUrl, pattern),
     )
-    void set(configFieldsAtomMap.translate, {
+    void set(configFieldsAtomMap.pageTranslation, {
       page: {
         ...translateConfig.page,
         autoTranslatePatterns: filteredPatterns,

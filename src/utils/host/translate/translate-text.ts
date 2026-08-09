@@ -1,17 +1,21 @@
 import type { LangCodeISO6393, LangLevel } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
-import type { ProviderConfig } from "@/types/config/provider"
 import type { TranslationTextFormat } from "@/types/config/translate"
 import type { WebPagePromptContext } from "@/types/content"
+import type {
+  PageTranslationProvider,
+  SerializablePageTranslationProvider,
+} from "@/utils/providers/translation-provider"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
-import { getProviderConfigById } from "@/utils/config/helpers"
 import { isNoTranslationSentinel } from "@/utils/constants/prompt"
 import { detectLanguage } from "@/utils/content/language"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
+import { serializePageTranslationProvider } from "@/utils/providers/translation-provider"
 import { TranslationCancelledError } from "@/utils/request/cancellation"
 import { Sha256Hex } from "../../hash"
 import { sendMessage } from "../../message"
@@ -73,7 +77,7 @@ function normalizeWebPagePromptContext(
 
 async function buildWebPageHashComponents(
   text: string,
-  providerConfig: ProviderConfig,
+  providerRef: SerializablePageTranslationProvider,
   partialLangConfig: { sourceCode: LangCodeISO6393 | "auto"; targetCode: LangCodeISO6393 },
   enableAIContentAware: boolean,
   textFormat: TranslationTextFormat,
@@ -82,14 +86,22 @@ async function buildWebPageHashComponents(
 ): Promise<string[]> {
   const preparedText = prepareTranslationText(text)
   const normalizedWebPageContext = normalizeWebPagePromptContext(webPageContext)
+  const providerConfig = providerRef.kind === "local" ? providerRef.config : null
+  const providerHashIdentity =
+    providerRef.kind === "local"
+      ? providerRef.config
+      : {
+          providerId: providerRef.providerId,
+          modelRevision: providerRef.modelRevision,
+        }
   const hashComponents = [
     preparedText,
-    JSON.stringify(providerConfig),
+    JSON.stringify(providerHashIdentity),
     partialLangConfig.sourceCode,
     partialLangConfig.targetCode,
   ]
 
-  if (!isLLMProviderConfig(providerConfig)) {
+  if (providerConfig && !isLLMProviderConfig(providerConfig)) {
     // The provider request depends on the text format (escaping / textType), so
     // cache entries must too. This component also orphans entries cached before
     // the format-aware pipeline existed, which could hold corrupted output.
@@ -142,7 +154,7 @@ export interface TranslateTextOptions {
     targetCode: LangCodeISO6393
     level: LangLevel
   }
-  providerConfig: ProviderConfig
+  providerConfig: PageTranslationProvider
   enableAIContentAware?: boolean
   extraHashTags?: string[]
   webPageContext?: WebPagePromptContext
@@ -179,10 +191,11 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
   }
 
   const normalizedWebPageContext = normalizeWebPagePromptContext(webPageContext)
+  const providerRef = await serializePageTranslationProvider(providerConfig)
 
   const hashComponents = await buildWebPageHashComponents(
     preparedText,
-    providerConfig,
+    providerRef,
     { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
     enableAIContentAware,
     textFormat,
@@ -207,7 +220,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
   const result = await sendMessage("enqueueTranslateRequest", {
     text: preparedText,
     langConfig,
-    providerConfig,
+    providerRef,
     scheduleAt: Date.now(),
     hash: Sha256Hex(...hashComponents),
     textFormat,
@@ -228,11 +241,15 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
 }
 
 export function validateTranslationConfigAndToast(
-  config: Pick<Config, "providersConfig" | "translate" | "language">,
+  config: Pick<Config, "providersConfig" | "pageTranslation" | "language">,
 ): boolean {
-  const { providersConfig, translate: translateConfig, language: languageConfig } = config
-  const providerConfig = getProviderConfigById(providersConfig, translateConfig.providerId)
-  if (!providerConfig) {
+  const { providersConfig, pageTranslation: translateConfig, language: languageConfig } = config
+  const provider = resolveProviderRefForCapability(
+    "pageTranslation",
+    providersConfig,
+    translateConfig.providerId,
+  )
+  if (!provider) {
     return false
   }
 
@@ -244,9 +261,10 @@ export function validateTranslationConfigAndToast(
 
   // check if the API key is configured
   if (
-    isAPIProviderConfig(providerConfig) &&
-    !providerConfig.apiKey?.trim() &&
-    !["deeplx", "ollama"].includes(providerConfig.provider)
+    provider.kind === "local" &&
+    isAPIProviderConfig(provider.config) &&
+    !provider.config.apiKey?.trim() &&
+    !["deeplx", "ollama"].includes(provider.config.provider)
   ) {
     toastManager.add({ type: "error", title: i18n.t("noAPIKeyConfig.warning") })
     logger.info("validateTranslationConfig: returning false (no API key)")

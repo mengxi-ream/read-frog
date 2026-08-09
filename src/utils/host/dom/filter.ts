@@ -254,7 +254,7 @@ export function isDontWalkIntoAndDontTranslateAsChildElement(
   if (dontWalkVisuallyHidden) return true
 
   const dontWalkContent =
-    config.translate.page.range !== "all" &&
+    config.pageTranslation.page.range !== "all" &&
     getEffectiveTagSet(config, "mainContentIgnoreTags").has(element.tagName) &&
     !isInsideContentContainer(element)
   if (dontWalkContent) return true

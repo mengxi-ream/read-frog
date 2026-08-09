@@ -5,7 +5,10 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { ProvidersConfig } from "@/entrypoints/options/pages/api-providers/providers-config"
-import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
+import {
+  BUILT_IN_AI_PROVIDER_ID,
+  BUILT_IN_AI_ULTRA_PROVIDER_ID,
+} from "@/utils/providers/provider-registry"
 
 const {
   anchoredToastAddMock,
@@ -96,7 +99,9 @@ vi.mock("@/components/ui/base-ui/toast", () => ({
 
 vi.mock("@/components/ui/base-ui/tooltip", () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
-  TooltipContent: ({ children }: { children: ReactNode }) => <>{children}</>,
+  // Keep hover-only content out of the tree so editor-panel assertions do not
+  // collide with the assignment names repeated inside card badges.
+  TooltipContent: () => null,
   TooltipTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
@@ -117,12 +122,36 @@ vi.mock("@/utils/config/helpers", () => ({
 }))
 
 vi.mock("@/utils/constants/feature-providers", () => ({
-  FEATURE_KEYS: ["translation"],
+  FEATURE_KEYS: ["pageTranslation"],
   FEATURE_PROVIDER_DEFS: {
-    translation: { getProviderId: () => providerConfig.id },
+    pageTranslation: { getProviderId: () => providerConfig.id },
   },
-  getFeatureLabelI18nKey: () => "feature.translation",
+  buildFeatureProviderPatch: () => ({}),
+  getFeatureLabelI18nKey: (key: string) => `feature.${key}`,
 }))
+
+// The built-in panel gates Ultra assignment rows on the live plan; tests set
+// hostedAiState.value per case (default: settled error, i.e. status unknown).
+const { hostedAiState } = vi.hoisted(() => {
+  const state: { value: { status: unknown; isPending: boolean; isError: boolean } } = {
+    value: { status: undefined, isPending: false, isError: true },
+  }
+  return { hostedAiState: state }
+})
+
+vi.mock("@/components/llm-providers/use-hosted-ai-status", () => ({
+  useHostedAiStatus: () => hostedAiState.value,
+}))
+
+function makeUltraAccessStatus(accessAllowed: boolean) {
+  return {
+    credits: [],
+    features: {
+      pageTranslation: { ultra: { accessAllowed } },
+      customAction: { ultra: { accessAllowed } },
+    },
+  }
+}
 
 vi.mock("@/utils/i18n", () => ({
   i18n: {
@@ -174,6 +203,7 @@ describe("ProvidersConfig", () => {
     anchoredToastAddMock.mockReset()
     setProviderConfigMock.mockReset()
     testState.selectedProviderId = providerConfig.id
+    hostedAiState.value = { status: undefined, isPending: false, isError: true }
   })
 
   it("anchors an in-use disable error to the corresponding provider switch", () => {
@@ -191,7 +221,7 @@ describe("ProvidersConfig", () => {
     })
   })
 
-  it("renders the built-in provider composition without CRUD actions", () => {
+  it("renders the built-in provider composition without CRUD actions or a sponsor CTA", () => {
     testState.selectedProviderId = BUILT_IN_AI_PROVIDER_ID
 
     renderProvidersConfig()
@@ -199,9 +229,74 @@ describe("ProvidersConfig", () => {
     expect(
       screen.getByText("options.apiProviders.providers.attribution.builtInAi"),
     ).toBeInTheDocument()
-    expect(screen.getByText("options.apiProviders.sponsorCta")).toBeInTheDocument()
+    expect(screen.queryByText("options.apiProviders.sponsorCta")).not.toBeInTheDocument()
     expect(screen.queryByText("options.apiProviders.form.duplicate")).not.toBeInTheDocument()
     expect(screen.queryByText("options.apiProviders.form.delete")).not.toBeInTheDocument()
+    // The normal tier never offers the page-translation assignment.
+    expect(screen.queryByText("feature.pageTranslation")).not.toBeInTheDocument()
+  })
+
+  it("lists both built-in provider cards", () => {
+    renderProvidersConfig()
+
+    expect(screen.getByText("options.apiProviders.providers.name.builtInAi")).toBeInTheDocument()
+    expect(
+      screen.getByText("options.apiProviders.providers.name.builtInAiUltra"),
+    ).toBeInTheDocument()
+  })
+
+  it("renders the Ultra editor with its own attribution and a page-translation assignment", () => {
+    testState.selectedProviderId = BUILT_IN_AI_ULTRA_PROVIDER_ID
+
+    renderProvidersConfig()
+
+    expect(
+      screen.getByText("options.apiProviders.providers.attribution.builtInAiUltra"),
+    ).toBeInTheDocument()
+    expect(screen.getByText("feature.pageTranslation")).toBeInTheDocument()
+    expect(screen.queryByText("options.apiProviders.sponsorCta")).not.toBeInTheDocument()
+  })
+
+  it("keeps Ultra assignment rows interactive while the plan status is unknown", () => {
+    testState.selectedProviderId = BUILT_IN_AI_ULTRA_PROVIDER_ID
+    // Default hostedAiState: settled error → status undefined → no verdict.
+
+    renderProvidersConfig()
+
+    expect(screen.getByRole("switch", { name: "feature.pageTranslation" })).not.toHaveAttribute(
+      "aria-disabled",
+      "true",
+    )
+  })
+
+  it("locks Ultra assignment rows when the server denies ultra access", () => {
+    testState.selectedProviderId = BUILT_IN_AI_ULTRA_PROVIDER_ID
+    hostedAiState.value = {
+      status: makeUltraAccessStatus(false),
+      isPending: false,
+      isError: false,
+    }
+
+    renderProvidersConfig()
+
+    // base-ui renders a span[role=switch]; disabled surfaces as aria-disabled.
+    expect(screen.getByRole("switch", { name: "feature.pageTranslation" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    )
+  })
+
+  it("unlocks Ultra assignment rows for an ultra-entitled account", () => {
+    testState.selectedProviderId = BUILT_IN_AI_ULTRA_PROVIDER_ID
+    hostedAiState.value = {
+      status: makeUltraAccessStatus(true),
+      isPending: false,
+      isError: false,
+    }
+
+    renderProvidersConfig()
+
+    expect(screen.getByRole("switch", { name: "feature.pageTranslation" })).not.toBeDisabled()
   })
 
   it("opens the provider a ?provider= deep link names", () => {

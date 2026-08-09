@@ -1,20 +1,21 @@
 import type { FeatureUsageContext } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import debounce from "debounce"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
-import { classifyProviderConfig, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
+import {
+  BUILT_IN_AI_FEATURE_PROVIDER,
+  classifyProviderConfig,
+  UNKNOWN_FEATURE_PROVIDER,
+} from "@/utils/analytics-provider"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
   CONTENT_WRAPPER_CLASS,
   REACT_SHADOW_HOST_CLASS,
   SPINNER_CLASS,
 } from "@/utils/constants/dom-labels"
-import {
-  resolveProviderConfig,
-  resolveProviderConfigOrNull,
-} from "@/utils/constants/feature-providers"
 import {
   GIANT_PARAGRAPH_MAX_SPLIT_DEPTH,
   GIANT_PARAGRAPH_SPLIT_MIN_VIEWPORT_PX,
@@ -53,6 +54,12 @@ import { ensureSiteRuleCSS, removeSiteRuleCSS } from "@/utils/host/translate/ui/
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
+import {
+  checkPageTranslationProviderAvailability,
+  isSystemTranslationProvider,
+  resolvePageTranslationProvider,
+  resolvePageTranslationProviderOrNull,
+} from "@/utils/providers/translation-provider"
 import { removeReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
 import { isTranslationCancelledError } from "@/utils/request/cancellation"
 import { createWorkPacer } from "@/utils/scheduler"
@@ -184,13 +191,16 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
 
-    const requestedProviderConfig = resolveProviderConfigOrNull(config, "translate")
-    const providerAnalytics = classifyProviderConfig(requestedProviderConfig)
+    const requestedProviderConfig = resolvePageTranslationProviderOrNull(config)
+    const providerAnalytics =
+      requestedProviderConfig && isSystemTranslationProvider(requestedProviderConfig)
+        ? BUILT_IN_AI_FEATURE_PROVIDER
+        : classifyProviderConfig(requestedProviderConfig)
 
     if (
       !validateTranslationConfigAndToast({
         providersConfig: config.providersConfig,
-        translate: config.translate,
+        pageTranslation: config.pageTranslation,
         language: config.language,
       })
     ) {
@@ -204,8 +214,25 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
 
+    // The config validator above already rejects an unresolved provider. Keep the
+    // explicit guard for type-safety and for malformed storage snapshots.
+    if (!requestedProviderConfig) return
+
+    const availability = await checkPageTranslationProviderAvailability(requestedProviderConfig)
+    if (!availability.available) {
+      toastManager.add({ type: "error", title: availability.message })
+      if (trackedContext) {
+        void trackFeatureUsed({
+          ...trackedContext,
+          ...providerAnalytics,
+          outcome: "failure",
+        })
+      }
+      return
+    }
+
     try {
-      const providerConfig = resolveProviderConfig(config, "translate")
+      const providerConfig = resolvePageTranslationProvider(config)
 
       await sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
         enabled: true,
@@ -223,7 +250,9 @@ export class PageTranslationManager implements IPageTranslationManager {
       }
 
       await this.primeDocumentTitleContext(
-        config.translate.enableAIContentAware && isLLMProviderConfig(providerConfig),
+        config.pageTranslation.enableAIContentAware &&
+          !isSystemTranslationProvider(providerConfig) &&
+          isLLMProviderConfig(providerConfig),
       )
       this.startDocumentTitleTracking()
 
@@ -680,7 +709,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
     if (
-      config.translate.mode === "bilingual" &&
+      config.pageTranslation.mode === "bilingual" &&
       !canSplitParagraphIntoDescendants(element, innerTopLevelParagraphs, config)
     ) {
       // A newline-preserving flow (X note tweet: pre-wrap div of inline
@@ -973,7 +1002,7 @@ export class PageTranslationManager implements IPageTranslationManager {
         }
         passes += 1
         handledVersion = mutationVersions.get(source) ?? 0
-        if (config.translate.mode === "translationOnly") {
+        if (config.pageTranslation.mode === "translationOnly") {
           // Swapped-anchor staleness: translateNodes routes to the
           // translationOnly path, which restores surviving swaps first so the
           // provider sees current host text, then re-swaps. Keyed on the MODE,

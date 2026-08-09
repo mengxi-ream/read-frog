@@ -1,5 +1,5 @@
 import { browser } from "#imports"
 
-export const APP_NAME = "Read Frog"
+export { APP_NAME } from "@read-frog/definitions"
 const manifest = browser.runtime.getManifest()
 export const EXTENSION_VERSION = manifest.version

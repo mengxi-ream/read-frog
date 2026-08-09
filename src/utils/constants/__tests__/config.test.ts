@@ -60,7 +60,7 @@ describe("dEFAULT_CONFIG", () => {
       "deepseek-default",
       "atlascloud-default",
     ])
-    expect(DEFAULT_CONFIG.translate.providerId).toBe("microsoft-translate-default")
+    expect(DEFAULT_CONFIG.pageTranslation.providerId).toBe("microsoft-translate-default")
     expect(DEFAULT_CONFIG.selectionToolbar.features.translate.providerId).toBe(
       "microsoft-translate-default",
     )
@@ -93,14 +93,16 @@ describe("dEFAULT_CONFIG", () => {
   it("defaults fresh hover translation off", async () => {
     const { DEFAULT_CONFIG } = await import("../config")
 
-    expect(DEFAULT_CONFIG.translate.node.forceRetranslation).toBe(false)
+    expect(DEFAULT_CONFIG.pageTranslation.node.forceRetranslation).toBe(false)
   })
 
   it("keeps pre-v090 config parseable until the background migration runs", async () => {
     const { DEFAULT_CONFIG } = await import("../config")
     const { configSchema } = await import("@/types/config/config")
     const legacyConfig = structuredClone(DEFAULT_CONFIG)
-    const legacyNode = legacyConfig.translate.node as Partial<typeof legacyConfig.translate.node>
+    const legacyNode = legacyConfig.pageTranslation.node as Partial<
+      typeof legacyConfig.pageTranslation.node
+    >
 
     delete legacyNode.forceRetranslation
     legacyConfig.language.targetCode = "jpn"
@@ -109,7 +111,7 @@ describe("dEFAULT_CONFIG", () => {
 
     expect(result.success).toBe(true)
     if (!result.success) return
-    expect(result.data.translate.node.forceRetranslation).toBe(false)
+    expect(result.data.pageTranslation.node.forceRetranslation).toBe(false)
     expect(result.data.language.targetCode).toBe("jpn")
   })
 

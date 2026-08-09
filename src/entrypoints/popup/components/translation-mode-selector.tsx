@@ -35,7 +35,7 @@ const MODE_TOOLTIP_KEY = {
 } as const
 
 export default function TranslationModeSelector() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
   const config = useAtomValue(configAtom)
   const currentMode = translateConfig.mode
   const currentModeIcon = MODE_ICON[currentMode]

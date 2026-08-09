@@ -14,6 +14,7 @@ import { getSelectionToolbarActions, patchSelectionToolbarAction } from "@/utils
 import { isProviderSelectorItem } from "@/utils/providers/provider-display"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { providerSupportsTranslationOnlyMode } from "@/utils/providers/translation-only-gate"
+import { useHostedAiProviderOptions } from "./use-hosted-ai-provider-options"
 
 export interface FeatureProviderBinding {
   providers: ProviderSelectorOption[]
@@ -27,7 +28,7 @@ export function useFeatureProvider(featureKey: FeatureKey): FeatureProviderBindi
   const config = useAtomValue(configAtom)
   const setConfig = useSetAtom(writeConfigAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
-  const translationMode = useAtomValue(configFieldsAtomMap.translate).mode
+  const translationMode = useAtomValue(configFieldsAtomMap.pageTranslation).mode
   const providerId = FEATURE_PROVIDER_DEFS[featureKey].getProviderId(config)
 
   // Page translate in translationOnly mode cannot run on providers without
@@ -35,8 +36,8 @@ export function useFeatureProvider(featureKey: FeatureKey): FeatureProviderBindi
   // combination cannot be formed from a provider picker. Other features keep
   // the full list.
   const hideTranslationOnlyUnsupported =
-    featureKey === "translate" && translationMode === "translationOnly"
-  const providers = useMemo(() => {
+    featureKey === "pageTranslation" && translationMode === "translationOnly"
+  const baseProviders = useMemo(() => {
     const candidates = getSelectableProvidersForCapability(featureKey, providersConfig)
     if (!hideTranslationOnlyUnsupported) {
       return candidates
@@ -46,6 +47,7 @@ export function useFeatureProvider(featureKey: FeatureKey): FeatureProviderBindi
         isProviderSelectorItem(option) || providerSupportsTranslationOnlyMode(option.provider),
     )
   }, [featureKey, providersConfig, hideTranslationOnlyUnsupported])
+  const providers = useHostedAiProviderOptions(featureKey, baseProviders)
 
   const setProviderId = useCallback(
     (id: string) => void setConfig(buildFeatureProviderPatch({ [featureKey]: id })),
@@ -74,10 +76,11 @@ export function useCustomActionProviders(): CustomActionProvidersBinding {
   const setConfig = useSetAtom(writeConfigAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
 
-  const providers = useMemo(
-    () => getSelectableProvidersForCapability("selectionToolbar.customAction", providersConfig),
+  const baseProviders = useMemo(
+    () => getSelectableProvidersForCapability("customAction", providersConfig),
     [providersConfig],
   )
+  const providers = useHostedAiProviderOptions("customAction", baseProviders)
 
   const actions = useMemo(
     () =>

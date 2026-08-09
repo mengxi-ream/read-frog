@@ -21,8 +21,8 @@ import {
 // Test config with fixed bilingual mode - won't change with DEFAULT_CONFIG
 const TEST_CONFIG: Config = {
   ...DEFAULT_CONFIG,
-  translate: {
-    ...DEFAULT_CONFIG.translate,
+  pageTranslation: {
+    ...DEFAULT_CONFIG.pageTranslation,
     mode: "bilingual" as const,
   },
 }

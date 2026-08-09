@@ -15,6 +15,7 @@ describe("youtube subtitles fetcher", () => {
 
     Object.defineProperty(window, "location", {
       value: {
+        href: "https://www.youtube.com/watch?v=test123",
         search: "?v=test123",
         origin: "https://www.youtube.com",
         pathname: "/watch",
@@ -53,6 +54,7 @@ describe("youtube subtitles fetcher", () => {
 
     Object.defineProperty(window, "location", {
       value: {
+        href: "https://www.youtube.com/watch?v=test123",
         search: "?v=test123",
         origin: "https://www.youtube.com",
         pathname: "/watch",
@@ -101,6 +103,7 @@ describe("youtube subtitles fetcher", () => {
 
     Object.defineProperty(window, "location", {
       value: {
+        href: "https://www.youtube.com/watch?v=test123",
         search: "?v=test123",
         origin: "https://www.youtube.com",
         pathname: "/watch",
@@ -154,6 +157,7 @@ describe("youtube subtitles fetcher", () => {
 
     Object.defineProperty(window, "location", {
       value: {
+        href: "https://www.youtube.com/watch?v=test123",
         search: "?v=test123",
         origin: "https://www.youtube.com",
         pathname: "/watch",
@@ -201,6 +205,7 @@ describe("youtube subtitles fetcher", () => {
 
     Object.defineProperty(window, "location", {
       value: {
+        href: "https://www.youtube.com/watch?v=test123",
         search: "?v=test123",
         origin: "https://www.youtube.com",
         pathname: "/watch",
@@ -256,6 +261,7 @@ describe("youtube subtitles fetcher", () => {
 
     Object.defineProperty(window, "location", {
       value: {
+        href: "https://www.youtube.com/watch?v=test123",
         search: "?v=test123",
         origin: "https://www.youtube.com",
         pathname: "/watch",
@@ -324,6 +330,7 @@ describe("youtube subtitles fetcher", () => {
 
     Object.defineProperty(window, "location", {
       value: {
+        href: "https://www.youtube.com/watch?v=test123",
         search: "?v=test123",
         origin: "https://www.youtube.com",
         pathname: "/watch",

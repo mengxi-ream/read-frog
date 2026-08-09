@@ -14,7 +14,7 @@ import { StylePreview } from "./style-preview"
  * CSS editor — a page of its own, since an editor is far too tall to sit in a row.
  */
 export function TranslationStyleSection() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
   const { translationNodeStyle } = translateConfig
 
   return (

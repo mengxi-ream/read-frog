@@ -5,7 +5,7 @@ import { i18n } from "@/utils/i18n"
 import { ShortcutConfigItem } from "./shortcut-config-item"
 
 export function PageTranslationShortcut() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
   const shortcut = translateConfig.page.shortcut ?? DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY
 
   return (

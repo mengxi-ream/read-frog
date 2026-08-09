@@ -25,7 +25,7 @@ describe("config provider enabled validation", () => {
       providersConfig,
     })
 
-    expect(issuePaths).toContain("translate.providerId")
+    expect(issuePaths).toContain("pageTranslation.providerId")
   })
 
   it("fails when a custom action uses a disabled provider", () => {
@@ -107,15 +107,27 @@ describe("config provider enabled validation", () => {
     expect(issuePaths).toContain("selectionToolbar.features.translate.providerId")
   })
 
-  it("rejects built-in AI for fixed translation features that have not enabled the capability", () => {
+  it("allows built-in AI for page translation", () => {
     const issuePaths = getIssuePaths({
       ...DEFAULT_CONFIG,
-      translate: {
-        ...DEFAULT_CONFIG.translate,
+      pageTranslation: {
+        ...DEFAULT_CONFIG.pageTranslation,
         providerId: "read-frog-free-ai",
       },
     })
 
-    expect(issuePaths).toContain("translate.providerId")
+    expect(issuePaths).not.toContain("pageTranslation.providerId")
+  })
+
+  it("rejects built-in AI for fixed translation features that have not enabled the capability", () => {
+    const issuePaths = getIssuePaths({
+      ...DEFAULT_CONFIG,
+      inputTranslation: {
+        ...DEFAULT_CONFIG.inputTranslation,
+        providerId: "read-frog-free-ai",
+      },
+    })
+
+    expect(issuePaths).toContain("inputTranslation.providerId")
   })
 })

@@ -45,7 +45,7 @@ const propertyConstraints = {
 }
 
 function PreloadNumberInput({ property }: { property: KeyOfPreloadConfig }) {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
   const { preload } = translateConfig.page
   const constraints = propertyConstraints[property]
 

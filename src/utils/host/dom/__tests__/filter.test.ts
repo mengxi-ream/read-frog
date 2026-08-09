@@ -107,7 +107,7 @@ describe("inline/block display detection", () => {
 })
 
 function createConfig(range: "main" | "all"): Config {
-  return { translate: { page: { range } } } as unknown as Config
+  return { pageTranslation: { page: { range } } } as unknown as Config
 }
 
 function setHost(host: string) {
@@ -333,7 +333,7 @@ describe("site-rule tag-set overrides", () => {
       matches: "tagset-example.org",
       "mainContentIgnoreTags.remove": ["NAV"],
     })
-    config.translate.page.range = "main"
+    config.pageTranslation.page.range = "main"
     const nav = document.createElement("nav")
     document.body.appendChild(nav)
 

@@ -165,7 +165,7 @@ export async function fetchSubtitlesSummary(
   configOverride?: Config,
 ): Promise<string | null> {
   const config = configOverride ?? (await getLocalConfig())
-  if (!config?.translate.enableAIContentAware) {
+  if (!config?.pageTranslation.enableAIContentAware) {
     return null
   }
 
@@ -209,7 +209,7 @@ export async function translateSubtitles(
   }
 
   const langConfig = config.language
-  const enableAIContentAware = config.translate.enableAIContentAware
+  const enableAIContentAware = config.pageTranslation.enableAIContentAware
 
   const translationPromises = fragments.map((fragment) =>
     translateSingleSubtitle(

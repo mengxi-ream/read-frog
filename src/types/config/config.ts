@@ -139,7 +139,7 @@ export const configSchema = z
   .object({
     language: languageSchema,
     providersConfig: providersConfigSchema,
-    translate: translateConfigSchema,
+    pageTranslation: translateConfigSchema,
     languageDetection: languageDetectionConfigSchema,
     tts: ttsConfigSchema,
     floatingButton: floatingButtonSchema,
@@ -225,20 +225,15 @@ export const configSchema = z
 
     actionProviderEntries.forEach(({ providerId, path }) => {
       if (
-        !doesProviderSupportsCapability(
-          "selectionToolbar.customAction",
-          data.providersConfig,
-          providerId,
-          { requireEnable: true },
-        )
+        !doesProviderSupportsCapability("customAction", data.providersConfig, providerId, {
+          requireEnable: true,
+        })
       ) {
         ctx.addIssue({
           code: "invalid_value",
-          values: getProviderIdsForCapability(
-            "selectionToolbar.customAction",
-            data.providersConfig,
-            { requireEnable: true },
-          ),
+          values: getProviderIdsForCapability("customAction", data.providersConfig, {
+            requireEnable: true,
+          }),
           message: `Invalid provider id "${providerId}".`,
           path: [...path],
         })
