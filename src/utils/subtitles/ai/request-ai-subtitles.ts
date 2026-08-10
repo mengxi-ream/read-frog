@@ -70,8 +70,8 @@ export async function requestAiSubtitles(
 
   const { error, data } = await safe(orpcClient.videoTranscript.create({ url }))
   if (error) {
-    // Login + beta are pre-checked before create is called, so only quota (not pre-checked)
-    // and unexpected failures can reach here.
+    // Login + entitlement are pre-checked before create is called, so only quota
+    // (not pre-checked) and unexpected failures can reach here.
     if (error instanceof ORPCError && error.code === "VIDEO_TRANSCRIPTION_QUOTA_EXCEEDED") {
       throw new ToastSubtitlesError(i18n.t("subtitles.errors.aiQuotaExceeded"))
     }
