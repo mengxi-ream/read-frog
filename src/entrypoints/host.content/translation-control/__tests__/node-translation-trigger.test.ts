@@ -3,9 +3,9 @@ import type { Config } from "@/types/config/config"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { registerNodeTranslationTriggerListeners } from "../node-translation-trigger"
 
-function createConfig(hotkey: Config["translate"]["node"]["hotkey"]): Config {
+function createConfig(hotkey: Config["pageTranslation"]["node"]["hotkey"]): Config {
   return {
-    translate: {
+    pageTranslation: {
       node: {
         enabled: true,
         hotkey,
@@ -59,7 +59,7 @@ describe("registerNodeTranslationTriggerListeners", () => {
       expect(onTrigger).toHaveBeenCalledWith(
         { x: 50, y: 60 },
         expect.objectContaining({
-          translate: expect.objectContaining({
+          pageTranslation: expect.objectContaining({
             node: expect.objectContaining({ hotkey: "backtick" }),
           }),
         }),
@@ -84,7 +84,7 @@ describe("registerNodeTranslationTriggerListeners", () => {
       expect(onTrigger).toHaveBeenCalledWith(
         { x: 70, y: 80 },
         expect.objectContaining({
-          translate: expect.objectContaining({
+          pageTranslation: expect.objectContaining({
             node: expect.objectContaining({ hotkey: "control" }),
           }),
         }),
@@ -132,7 +132,7 @@ describe("registerNodeTranslationTriggerListeners", () => {
       expect(onTrigger).toHaveBeenCalledWith(
         { x: 70, y: 50 },
         expect.objectContaining({
-          translate: expect.objectContaining({
+          pageTranslation: expect.objectContaining({
             node: expect.objectContaining({ hotkey: "backtick" }),
           }),
         }),
@@ -158,7 +158,7 @@ describe("registerNodeTranslationTriggerListeners", () => {
     expect(onTrigger).toHaveBeenCalledWith(
       { x: 30, y: 40 },
       expect.objectContaining({
-        translate: expect.objectContaining({
+        pageTranslation: expect.objectContaining({
           node: expect.objectContaining({ hotkey: "clickAndHold" }),
         }),
       }),
@@ -193,7 +193,7 @@ describe("registerNodeTranslationTriggerListeners", () => {
     expect(onTrigger).toHaveBeenCalledWith(
       { x: 70, y: 80 },
       expect.objectContaining({
-        translate: expect.objectContaining({
+        pageTranslation: expect.objectContaining({
           node: expect.objectContaining({ hotkey: "control" }),
         }),
       }),

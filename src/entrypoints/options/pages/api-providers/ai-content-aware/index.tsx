@@ -55,7 +55,7 @@ function FeatureStatusList() {
 }
 
 export function AIContentAwareConfig() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
 
   return (
     <ConfigSection

@@ -5,7 +5,7 @@ import { mergeWithArrayOverwrite } from "../atoms/config"
 import { getProviderConfigById } from "../config/helpers"
 
 export const FEATURE_KEYS = [
-  "translate",
+  "pageTranslation",
   "videoSubtitles",
   "selectionToolbar.translate",
   "inputTranslation",
@@ -20,10 +20,10 @@ export interface FeatureProviderDef {
 }
 
 export const FEATURE_PROVIDER_DEFS = {
-  translate: {
+  pageTranslation: {
     isProvider: isTranslateProvider,
-    getProviderId: (c: Config) => c.translate.providerId,
-    configPath: ["translate", "providerId"],
+    getProviderId: (c: Config) => c.pageTranslation.providerId,
+    configPath: ["pageTranslation", "providerId"],
   },
   videoSubtitles: {
     isProvider: isTranslateProvider,
@@ -44,7 +44,7 @@ export const FEATURE_PROVIDER_DEFS = {
 
 /** Maps FeatureKey (with dots) to i18n-safe key (with underscores) for `options.apiProviders.featureProviders.features.*` */
 export const FEATURE_KEY_I18N_MAP = {
-  translate: "translate",
+  pageTranslation: "pageTranslation",
   videoSubtitles: "videoSubtitles",
   "selectionToolbar.translate": "selectionToolbar_translate",
   inputTranslation: "inputTranslation",

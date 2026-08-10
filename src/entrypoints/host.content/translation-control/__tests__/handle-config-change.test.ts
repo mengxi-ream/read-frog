@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest"
 import { handleTranslationModeChange } from "../handle-config-change"
 
 function createMockConfig(mode: "bilingual" | "translationOnly"): Config {
-  return { translate: { mode } } as Config
+  return { pageTranslation: { mode } } as Config
 }
 
 function createMockManager(isActive: boolean) {

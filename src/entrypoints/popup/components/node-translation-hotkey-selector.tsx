@@ -32,7 +32,7 @@ function HotkeyDisplay({ hotkey }: { hotkey: (typeof HOTKEYS)[number] }) {
 }
 
 export default function NodeTranslationHotkeySelector() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
 
   const handleNodeTranslationEnabledChange = async (checked: boolean) => {
     await setTranslateConfig(deepmerge(translateConfig, { node: { enabled: checked } }))

@@ -1,22 +1,33 @@
 import type { LangCodeISO6393, LangLevel } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
-import type { ProviderConfig } from "@/types/config/provider"
 import type { TranslationTextFormat } from "@/types/config/translate"
 import type { WebPagePromptContext } from "@/types/content"
+import type {
+  PageTranslationProvider,
+  SerializablePageTranslationProvider,
+} from "@/utils/providers/translation-provider"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
-import { getProviderConfigById } from "@/utils/config/helpers"
 import { isNoTranslationSentinel } from "@/utils/constants/prompt"
 import { detectLanguage } from "@/utils/content/language"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
+import {
+  isSystemTranslationProvider,
+  serializePageTranslationProvider,
+} from "@/utils/providers/translation-provider"
 import { TranslationCancelledError } from "@/utils/request/cancellation"
 import { Sha256Hex } from "../../hash"
 import { sendMessage } from "../../message"
 import { prepareTranslationText } from "./text-preparation"
-import { getPageTranslationSessionId } from "./translation-session"
+import {
+  getPageTranslationSessionId,
+  getPageTranslationSessionProviderRef,
+  setPageTranslationSessionProviderRef,
+} from "./translation-session"
 
 // Minimum text length for skip language detection (shorter than general detection
 // to catch short phrases like "Bonjour!" or "こんにちは")
@@ -73,7 +84,7 @@ function normalizeWebPagePromptContext(
 
 async function buildWebPageHashComponents(
   text: string,
-  providerConfig: ProviderConfig,
+  providerRef: SerializablePageTranslationProvider,
   partialLangConfig: { sourceCode: LangCodeISO6393 | "auto"; targetCode: LangCodeISO6393 },
   enableAIContentAware: boolean,
   textFormat: TranslationTextFormat,
@@ -82,14 +93,22 @@ async function buildWebPageHashComponents(
 ): Promise<string[]> {
   const preparedText = prepareTranslationText(text)
   const normalizedWebPageContext = normalizeWebPagePromptContext(webPageContext)
+  const providerConfig = providerRef.kind === "local" ? providerRef.config : null
+  const providerHashIdentity =
+    providerRef.kind === "local"
+      ? providerRef.config
+      : {
+          providerId: providerRef.providerId,
+          modelRevision: providerRef.modelRevision,
+        }
   const hashComponents = [
     preparedText,
-    JSON.stringify(providerConfig),
+    JSON.stringify(providerHashIdentity),
     partialLangConfig.sourceCode,
     partialLangConfig.targetCode,
   ]
 
-  if (!isLLMProviderConfig(providerConfig)) {
+  if (providerConfig && !isLLMProviderConfig(providerConfig)) {
     // The provider request depends on the text format (escaping / textType), so
     // cache entries must too. This component also orphans entries cached before
     // the format-aware pipeline existed, which could hold corrupted output.
@@ -135,6 +154,90 @@ async function buildWebPageHashComponents(
   return hashComponents
 }
 
+/**
+ * Reuse the session's resolved system-provider ref when it matches the
+ * requested provider, so every paragraph of a page-translation session runs
+ * on one status snapshot: no per-paragraph status fetches, and a mid-session
+ * status blip cannot fail in-flight paragraphs.
+ */
+function getSessionProviderRefFor(
+  provider: PageTranslationProvider,
+): SerializablePageTranslationProvider | null {
+  if (!isSystemTranslationProvider(provider)) {
+    return null
+  }
+  const sessionRef = getPageTranslationSessionProviderRef()
+  if (
+    sessionRef?.kind !== "system" ||
+    sessionRef.providerId !== provider.id ||
+    sessionRef.modelTier !== provider.modelTier
+  ) {
+    return null
+  }
+  return sessionRef
+}
+
+const pendingSystemSerializes = new Map<string, Promise<SerializablePageTranslationProvider>>()
+/**
+ * Most recently requested system-provider key. Stale stragglers — paragraphs
+ * that captured the previous provider from config before a mid-session switch
+ * and resolve late — must not adopt their ref back over the snapshot the
+ * newer paragraphs converged on, which would evict it and force refetch
+ * ping-pong.
+ */
+let lastRequestedSystemKey: string | null = null
+
+/**
+ * Resolve the transport ref for the requested provider. Snapshot misses do
+ * happen off the happy path — a mid-session provider/tier switch, node
+ * translation without an active session — and each translation unit resolves
+ * independently, so without coalescing a dense batch would fan out one
+ * hosted-status fetch per paragraph. Concurrent misses for the same system
+ * provider share one serialization (per-key, so interleaved keys cannot evict
+ * each other's in-flight fetch), and an active session adopts the result so
+ * later paragraphs skip the network entirely.
+ */
+async function resolvePageProviderRef(
+  provider: PageTranslationProvider,
+  sessionId: string | undefined,
+): Promise<SerializablePageTranslationProvider> {
+  if (!isSystemTranslationProvider(provider)) {
+    return serializePageTranslationProvider(provider)
+  }
+
+  const key = `${provider.id}:${provider.modelTier}`
+  lastRequestedSystemKey = key
+
+  const sessionRef = getSessionProviderRefFor(provider)
+  if (sessionRef) {
+    return sessionRef
+  }
+
+  let promise = pendingSystemSerializes.get(key)
+  if (!promise) {
+    const created = serializePageTranslationProvider(provider)
+    promise = created
+    pendingSystemSerializes.set(key, created)
+    void created
+      .catch(() => undefined)
+      .finally(() => {
+        if (pendingSystemSerializes.get(key) === created) {
+          pendingSystemSerializes.delete(key)
+        }
+      })
+  }
+
+  const providerRef = await promise
+  if (
+    sessionId !== undefined &&
+    getPageTranslationSessionId() === sessionId &&
+    key === lastRequestedSystemKey
+  ) {
+    setPageTranslationSessionProviderRef(providerRef)
+  }
+  return providerRef
+}
+
 export interface TranslateTextOptions {
   text: string
   langConfig: {
@@ -142,7 +245,7 @@ export interface TranslateTextOptions {
     targetCode: LangCodeISO6393
     level: LangLevel
   }
-  providerConfig: ProviderConfig
+  providerConfig: PageTranslationProvider
   enableAIContentAware?: boolean
   extraHashTags?: string[]
   webPageContext?: WebPagePromptContext
@@ -178,11 +281,19 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     return ""
   }
 
+  // Early cancellation gate: a session stopped while this paragraph was still
+  // preparing must not fire a post-cancel hosted-status fetch below just to
+  // throw at the final gate.
+  if (sessionId !== undefined && getPageTranslationSessionId() !== sessionId) {
+    throw new TranslationCancelledError(sessionId)
+  }
+
   const normalizedWebPageContext = normalizeWebPagePromptContext(webPageContext)
+  const providerRef = await resolvePageProviderRef(providerConfig, sessionId)
 
   const hashComponents = await buildWebPageHashComponents(
     preparedText,
-    providerConfig,
+    providerRef,
     { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
     enableAIContentAware,
     textFormat,
@@ -207,7 +318,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
   const result = await sendMessage("enqueueTranslateRequest", {
     text: preparedText,
     langConfig,
-    providerConfig,
+    providerRef,
     scheduleAt: Date.now(),
     hash: Sha256Hex(...hashComponents),
     textFormat,
@@ -228,11 +339,15 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
 }
 
 export function validateTranslationConfigAndToast(
-  config: Pick<Config, "providersConfig" | "translate" | "language">,
+  config: Pick<Config, "providersConfig" | "pageTranslation" | "language">,
 ): boolean {
-  const { providersConfig, translate: translateConfig, language: languageConfig } = config
-  const providerConfig = getProviderConfigById(providersConfig, translateConfig.providerId)
-  if (!providerConfig) {
+  const { providersConfig, pageTranslation: translateConfig, language: languageConfig } = config
+  const provider = resolveProviderRefForCapability(
+    "pageTranslation",
+    providersConfig,
+    translateConfig.providerId,
+  )
+  if (!provider) {
     return false
   }
 
@@ -244,9 +359,10 @@ export function validateTranslationConfigAndToast(
 
   // check if the API key is configured
   if (
-    isAPIProviderConfig(providerConfig) &&
-    !providerConfig.apiKey?.trim() &&
-    !["deeplx", "ollama"].includes(providerConfig.provider)
+    provider.kind === "local" &&
+    isAPIProviderConfig(provider.config) &&
+    !provider.config.apiKey?.trim() &&
+    !["deeplx", "ollama"].includes(provider.config.provider)
   ) {
     toastManager.add({ type: "error", title: i18n.t("noAPIKeyConfig.warning") })
     logger.info("validateTranslationConfig: returning false (no API key)")

@@ -132,6 +132,17 @@ options:
     configTitle: Cấu hình nhà cung cấp
     addProvider: Thêm nhà cung cấp
     builtInProvider: Nhà cung cấp tích hợp
+    builtInAiUsage:
+      title: Hạn mức AI tích hợp
+      remaining: "Còn lại $1%"
+      supportedFeatures: "Hỗ trợ $1 tính năng"
+      resetsAt: "Đặt lại lúc $1"
+      daily: Hạn mức mỗi ngày
+      weekly: Hạn mức mỗi tuần
+      features:
+        pageTranslation: Dịch trang
+        customAction: Hành động AI tùy chỉnh
+        noteSuggestion: Gợi ý lưu
     sponsorCta: Nhận AI nhanh, tiết kiệm chi phí
     setApiKeyWarning:
       message: Hãy đặt API Key ở trang $1
@@ -211,10 +222,12 @@ options:
     providers:
       name:
         builtInAi: AI tích hợp
+        builtInAiUltra: AI tích hợp nâng cao
         customChatComplete: Tùy chỉnh Chat Complete
         customResponses: Tùy chỉnh Responses
       attribution:
-        builtInAi: Được cung cấp bởi Atlas Cloud. Hiện chỉ khả dụng cho Hành động AI tùy chỉnh. Để mở khóa trải nghiệm không giới hạn, bạn có thể mua tín dụng có chi phí rất hiệu quả trên trang web chính thức.
+        builtInAi: Mô hình tiêu chuẩn do Read Frog lưu trữ. Người dùng không có Ultra chỉ dùng được trong hành động AI tùy chỉnh; người dùng Ultra dùng được ở nhiều tính năng hơn.
+        builtInAiUltra: Mô hình nâng cao do Read Frog lưu trữ, dành riêng cho thành viên Ultra. Dùng được ở mọi tính năng AI tích hợp — dịch trang, hành động AI tùy chỉnh và hơn nữa — với hạn mức tuần dùng chung. Tiêu hao hạn mức nhanh hơn mô hình tiêu chuẩn.
       description:
         openai: Cung cấp các mô hình như GPT-4o
         azure: Mô hình OpenAI lưu trữ trên Azure qua các bản triển khai của bạn
@@ -260,12 +273,12 @@ options:
       title: Nhà cung cấp tính năng
       description: Chọn nhà cung cấp sử dụng cho mỗi tính năng
       features:
-        translate: Dịch trang
+        pageTranslation: Dịch trang
         selectionToolbar_translate: Dịch thanh công cụ chọn
         inputTranslation: Dịch đầu vào
         videoSubtitles: Phụ đề video
       descriptions:
-        translate: Dịch toàn bộ trang ở chế độ song ngữ hoặc thay thế bản gốc.
+        pageTranslation: Dịch toàn bộ trang ở chế độ song ngữ hoặc thay thế bản gốc.
         selectionToolbar_translate: Dịch đoạn văn bản bạn chọn từ thanh công cụ bôi đen.
         inputTranslation: Dịch nội dung bạn gõ trong ô nhập trước khi gửi.
         videoSubtitles: Dịch phụ đề hiện ra trong trình phát video.
@@ -1138,10 +1151,17 @@ subtitles:
     translatedExportIncomplete: Không thể dịch tất cả các dòng phụ đề
     translatedExportSameLanguage: Ngôn ngữ nguồn và ngôn ngữ đích giống nhau
 hostedAi:
+  availability:
+    authenticationRequired: Đăng nhập để sử dụng nhà cung cấp này
+    ultraRequired: Yêu cầu gói Ultra
+    quotaExhausted: Đã hết hạn mức
+    serviceUnavailable: Tạm thời không khả dụng
+    usedPercent: "Đã dùng hạn mức: $1%"
+    resetsAt: "Đặt lại lúc $1"
   errors:
     rateLimited: Quá nhiều yêu cầu, vui lòng thử lại sau.
-    guestRateLimited: Đã đạt giới hạn khách. Đăng nhập để nhận thêm lượt dùng AI miễn phí.
-    userRateLimited: Quá nhiều yêu cầu. Bạn đã vượt quá giới hạn miễn phí, vui lòng thử lại sau.
+    guestRateLimited: Quá nhiều yêu cầu từ khách. Vui lòng thử lại sau.
+    userRateLimited: Quá nhiều yêu cầu. Vui lòng thử lại sau.
 hotkey:
   control: Ctrl
   alt: Option

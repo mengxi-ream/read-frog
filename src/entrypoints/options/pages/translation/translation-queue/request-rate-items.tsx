@@ -41,7 +41,7 @@ const propertyMinAllowedValue = {
 }
 
 function TranslateNumberInput({ property }: { property: KeyOfRequestQueueConfig }) {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
   const { requestQueueConfig } = translateConfig
 
   const currentConfigValue = requestQueueConfig[property]

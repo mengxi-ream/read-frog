@@ -3,7 +3,7 @@ import type { Config, UiLanguage } from "@/types/config/config"
 import { browser, defineBackground } from "#imports"
 import { env } from "@/env"
 import { storageAdapter } from "@/utils/atoms/storage-adapter"
-import { promoteGoogleTranslateDefaultIfReachable } from "@/utils/config/default-translate-provider"
+import { selectFreshTranslateProviders } from "@/utils/config/default-translate-provider"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 import { initI18n, setUiLanguage } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
@@ -49,15 +49,17 @@ export default defineBackground({
         await browser.tabs.create({
           url: `${env.WXT_WEBSITE_URL}/guide/step-1`,
         })
+      }
 
-        // Deliberately last: probing Google Translate can hang for seconds on networks that
-        // block it, and nothing above should wait for that. Awaiting inside the listener
-        // keeps the service worker alive until the probe settles. Guarded by the config
-        // actually being new, because reloading an unpacked extension also reports
-        // "install" while the developer's own provider choice is still in storage.
-        if (await isFreshInstalledConfig()) {
-          await promoteGoogleTranslateDefaultIfReachable()
-        }
+      // Deliberately last: probing Google Translate can hang for seconds on networks that
+      // block it, and nothing above should wait for that. Awaiting inside the listener
+      // keeps the service worker alive until the probe settles. Guarded by the config
+      // actually being new rather than by the install reason: reloading an unpacked
+      // extension reports "install" while the developer's provider choice is still in
+      // storage, and a config rebuilt from defaults after failing validation during an
+      // update deserves the same provider selection a fresh install gets.
+      if (await isFreshInstalledConfig()) {
+        await selectFreshTranslateProviders()
       }
 
       // Clear blog cache on extension update to fetch latest blog posts

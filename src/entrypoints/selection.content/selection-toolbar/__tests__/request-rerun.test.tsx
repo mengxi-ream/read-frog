@@ -265,11 +265,16 @@ vi.mock("../../components/selection-toolbar-footer-content", () => ({
     paragraphsText: string | null | undefined
     onProviderChange: (id: string) => void
     onRegenerate: () => void
-    providers: Array<{ id: string }>
+    providers: Array<{ id: string; disabled?: boolean; kind?: string }>
     titleText: string | null | undefined
     value: string
   }) => {
-    const nextProvider = providers.find((provider) => provider.id !== value)
+    // Skip the hosted system entries so the pick stays aligned with
+    // findAlternateLLMProviderId, which predicts from local providers only.
+    const nextProvider = providers.find(
+      (provider) =>
+        provider.id !== value && provider.disabled !== true && provider.kind !== "system",
+    )
 
     return (
       <div>
@@ -1642,6 +1647,11 @@ describe("selection toolbar requests", () => {
     await waitFor(() => {
       expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
     })
+    expect(streamBackgroundStructuredObjectMock.mock.calls[0]?.[0]).toMatchObject({
+      providerId: "read-frog-free-ai",
+      modelTier: "normal",
+      requestId: expect.stringMatching(/^[0-9a-f-]{36}$/i),
+    })
 
     await act(async () => {
       firstRun.resolve(createStructuredObjectSnapshot({ summary: "First result" }))
@@ -1673,6 +1683,9 @@ describe("selection toolbar requests", () => {
     await waitFor(() => {
       expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(2)
     })
+    expect(streamBackgroundStructuredObjectMock.mock.calls[1]?.[0].requestId).not.toBe(
+      streamBackgroundStructuredObjectMock.mock.calls[0]?.[0].requestId,
+    )
 
     expect(screen.getByTestId("selection-popover-content")).toBe(content)
     expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute(

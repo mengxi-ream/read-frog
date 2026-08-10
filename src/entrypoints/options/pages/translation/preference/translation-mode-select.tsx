@@ -16,7 +16,7 @@ import { SELECT_CONTENT_PROPS } from "../../../components/select-content-props"
 
 /** Bare translation-mode control. Callers own the surrounding label and layout. */
 export function TranslationModeSelect() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
   const config = useAtomValue(configAtom)
   const { mode } = translateConfig
   // translationOnly is unavailable while the page-translate provider has no

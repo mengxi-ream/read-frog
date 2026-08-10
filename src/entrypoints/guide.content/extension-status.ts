@@ -1,21 +1,23 @@
-export const EXTENSION_STATUS_REQUEST_SOURCE = "read-frog-page"
-export const EXTENSION_STATUS_RESPONSE_SOURCE = "read-frog-ext"
-export const EXTENSION_STATUS_REQUEST_TYPE = "getExtensionStatus"
-export const EXTENSION_STATUS_RESPONSE_TYPE = "extensionStatus"
+import type { ExtensionStatusResponse } from "@read-frog/definitions"
+import {
+  EXTENSION_STATUS_REQUEST_SOURCE,
+  EXTENSION_STATUS_REQUEST_TYPE,
+  EXTENSION_STATUS_RESPONSE_SOURCE,
+  EXTENSION_STATUS_RESPONSE_TYPE,
+} from "@read-frog/definitions"
 
 interface ExtensionStatusMessageEvent {
   data: unknown
   source: unknown
 }
 
-export interface ExtensionStatusResponse {
-  source: typeof EXTENSION_STATUS_RESPONSE_SOURCE
-  type: typeof EXTENSION_STATUS_RESPONSE_TYPE
-  requestId: string
-  data: {
-    version: string
-  }
+export {
+  EXTENSION_STATUS_REQUEST_SOURCE,
+  EXTENSION_STATUS_REQUEST_TYPE,
+  EXTENSION_STATUS_RESPONSE_SOURCE,
+  EXTENSION_STATUS_RESPONSE_TYPE,
 }
+export type { ExtensionStatusResponse }
 
 export function createExtensionStatusResponse(
   event: ExtensionStatusMessageEvent,

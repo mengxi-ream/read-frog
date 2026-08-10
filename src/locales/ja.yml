@@ -132,6 +132,17 @@ options:
     configTitle: プロバイダー設定
     addProvider: プロバイダーを追加
     builtInProvider: 組み込みプロバイダー
+    builtInAiUsage:
+      title: 組み込み AI クォータ
+      remaining: "残り $1%"
+      supportedFeatures: "$1 つの機能に対応"
+      resetsAt: "$1 にリセット"
+      daily: 日次クォータ
+      weekly: 週間クォータ
+      features:
+        pageTranslation: ページ翻訳
+        customAction: カスタム AI アクション
+        noteSuggestion: 保存の提案
     sponsorCta: 高速で高コスパのAIを入手
     setApiKeyWarning:
       message: API キーは $1 ページで設定してください
@@ -211,10 +222,12 @@ options:
     providers:
       name:
         builtInAi: 組み込み AI
+        builtInAiUltra: 高度な組み込み AI
         customChatComplete: カスタム Chat Complete
         customResponses: カスタム Responses
       attribution:
-        builtInAi: Atlas Cloud 提供。現在はカスタム AI アクションでのみ利用できます。無制限の体験を利用するには、公式サイトで高コスパのクレジットを購入してください。
+        builtInAi: Read Frog がホストする標準モデル。Ultra 以外のユーザーはカスタム AI アクションでのみ利用でき、Ultra ユーザーはより多くの機能で利用できます。
+        builtInAiUltra: Read Frog がホストする高性能モデルで、Ultra メンバー専用です。ページ翻訳やカスタム AI アクションなど、すべての組み込み AI 機能で利用でき、週間クォータを共有します。標準モデルよりクォータの消費が速くなります。
       description:
         openai: GPT-4oなどのモデルを提供
         azure: Azure のデプロイ経由で OpenAI モデルを利用
@@ -260,12 +273,12 @@ options:
       title: 機能プロバイダー
       description: 各機能に使用するプロバイダーを選択
       features:
-        translate: ページ翻訳
+        pageTranslation: ページ翻訳
         selectionToolbar_translate: 選択ツールバー翻訳
         inputTranslation: 入力翻訳
         videoSubtitles: 動画字幕
       descriptions:
-        translate: ページ全体を対訳または置き換えで翻訳します。
+        pageTranslation: ページ全体を対訳または置き換えで翻訳します。
         selectionToolbar_translate: 選択ツールバーから、選択したテキストを翻訳します。
         inputTranslation: 入力欄に書いた文章を、送信する前に翻訳します。
         videoSubtitles: 動画プレーヤーに表示される字幕を翻訳します。
@@ -1138,10 +1151,17 @@ subtitles:
     translatedExportIncomplete: すべての字幕行を翻訳できませんでした
     translatedExportSameLanguage: 元の言語と翻訳先の言語が同じです
 hostedAi:
+  availability:
+    authenticationRequired: ログインすると利用できます
+    ultraRequired: Ultra プランが必要です
+    quotaExhausted: 利用枠を使い切りました
+    serviceUnavailable: 一時的に利用できません
+    usedPercent: "利用枠: $1% 使用済み"
+    resetsAt: "$1 にリセット"
   errors:
     rateLimited: リクエストが多すぎます。後でもう一度お試しください。
-    guestRateLimited: ゲストの上限に達しました。ログインすると無料 AI リクエストをさらに利用できます。
-    userRateLimited: リクエストが多すぎます。無料利用枠の上限を超えました。後でもう一度お試しください。
+    guestRateLimited: ゲストからのリクエストが多すぎます。後でもう一度お試しください。
+    userRateLimited: リクエストが多すぎます。後でもう一度お試しください。
 hotkey:
   control: Ctrl
   alt: Option

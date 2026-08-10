@@ -51,16 +51,16 @@ const PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS = {
 
 const BILINGUAL_CONFIG: Config = {
   ...DEFAULT_CONFIG,
-  translate: {
-    ...DEFAULT_CONFIG.translate,
+  pageTranslation: {
+    ...DEFAULT_CONFIG.pageTranslation,
     mode: "bilingual" as const,
   },
 }
 
 const TRANSLATION_ONLY_CONFIG: Config = {
   ...DEFAULT_CONFIG,
-  translate: {
-    ...DEFAULT_CONFIG.translate,
+  pageTranslation: {
+    ...DEFAULT_CONFIG.pageTranslation,
     mode: "translationOnly" as const,
   },
 }
@@ -2657,8 +2657,8 @@ describe("translate", () => {
             baseURL: "https://deeplx.example/translate",
           },
         ],
-        translate: {
-          ...TRANSLATION_ONLY_CONFIG.translate,
+        pageTranslation: {
+          ...TRANSLATION_ONLY_CONFIG.pageTranslation,
           providerId: "deeplx-default",
         },
       }
@@ -2702,8 +2702,8 @@ describe("translate", () => {
             baseURL: "https://deeplx-concurrent.example/translate",
           },
         ],
-        translate: {
-          ...TRANSLATION_ONLY_CONFIG.translate,
+        pageTranslation: {
+          ...TRANSLATION_ONLY_CONFIG.pageTranslation,
           providerId: "deeplx-concurrent",
         },
       }
@@ -2773,8 +2773,8 @@ describe("translate", () => {
             baseURL: "https://deeplx-empty-probe.example/translate",
           },
         ],
-        translate: {
-          ...TRANSLATION_ONLY_CONFIG.translate,
+        pageTranslation: {
+          ...TRANSLATION_ONLY_CONFIG.pageTranslation,
           providerId: "deeplx-empty-probe",
         },
       }
@@ -3847,11 +3847,11 @@ describe("translate", () => {
 
     const MIN_CHARS_CONFIG: Config = {
       ...DEFAULT_CONFIG,
-      translate: {
-        ...DEFAULT_CONFIG.translate,
+      pageTranslation: {
+        ...DEFAULT_CONFIG.pageTranslation,
         mode: "bilingual" as const,
         page: {
-          ...DEFAULT_CONFIG.translate.page,
+          ...DEFAULT_CONFIG.pageTranslation.page,
           minCharactersPerNode: 10,
           minWordsPerNode: 0,
         },
@@ -3860,11 +3860,11 @@ describe("translate", () => {
 
     const MIN_WORDS_CONFIG: Config = {
       ...DEFAULT_CONFIG,
-      translate: {
-        ...DEFAULT_CONFIG.translate,
+      pageTranslation: {
+        ...DEFAULT_CONFIG.pageTranslation,
         mode: "bilingual" as const,
         page: {
-          ...DEFAULT_CONFIG.translate.page,
+          ...DEFAULT_CONFIG.pageTranslation.page,
           minCharactersPerNode: 0,
           minWordsPerNode: 5,
         },

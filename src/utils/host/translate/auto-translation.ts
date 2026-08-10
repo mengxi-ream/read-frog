@@ -8,9 +8,9 @@ export async function shouldEnableAutoTranslation(
   detectedCodeOrUnd: LangCodeISO6393 | "und",
   config: Config,
 ): Promise<boolean> {
-  const autoTranslatePatterns = config?.translate.page.autoTranslatePatterns
-  const neverAutoTranslatePatterns = config?.translate.page.neverAutoTranslatePatterns
-  const autoTranslateLanguages = config?.translate.page.autoTranslateLanguages
+  const autoTranslatePatterns = config?.pageTranslation.page.autoTranslatePatterns
+  const neverAutoTranslatePatterns = config?.pageTranslation.page.neverAutoTranslatePatterns
+  const autoTranslateLanguages = config?.pageTranslation.page.autoTranslateLanguages
   const { sourceCode } = config?.language || {}
 
   const doesMatchNeverTranslatePattern =

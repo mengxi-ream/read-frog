@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { configSchema } from "@/types/config/config"
+import { migrateConfig } from "../../migration"
 import { migrate } from "../../migration-scripts/v091-to-v092"
 import { testSeries as v091TestSeries } from "../example/v091"
 
@@ -125,15 +126,17 @@ describe("v091-to-v092 migration", () => {
 
   it.each(Object.entries(v091TestSeries))(
     "keeps the full %s fixture schema-valid",
-    (_seriesId, series) => {
+    async (_seriesId, series) => {
       const migrated = migrate(series.config)
-      const parseResult = configSchema.safeParse(migrated)
+      // Run the real chain so every later migration is covered without this
+      // frozen test having to name them one by one.
+      const parseResult = configSchema.safeParse(await migrateConfig(migrated, 92))
 
       expect(parseResult.success).toBe(true)
     },
   )
 
-  it("keeps a full config schema-valid while protecting selected reserved custom ids", () => {
+  it("keeps a full config schema-valid while protecting selected reserved custom ids", async () => {
     const baseConfig = structuredClone(v091TestSeries["complex-config-from-v020"]!.config)
     baseConfig.translate.customPromptsConfig = {
       promptId: "precision-rewrite",
@@ -148,6 +151,6 @@ describe("v091-to-v092 migration", () => {
 
     expect(migrated.translate.customPromptsConfig.promptId).toBe("precision-rewrite-custom")
     expect(migrated.videoSubtitles.customPromptsConfig.promptId).toBe("default-custom")
-    expect(configSchema.safeParse(migrated).success).toBe(true)
+    expect(configSchema.safeParse(await migrateConfig(migrated, 92)).success).toBe(true)
   })
 })

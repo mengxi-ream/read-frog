@@ -1,6 +1,10 @@
+import { HOSTED_AI_NOTE_SUGGESTION_MAX_NOTES } from "@read-frog/api-contract"
 import { z } from "zod"
 
-export const SAVE_SUGGESTION_MAX_NOTES = 2
+// The BYOK envelope diverged from the hosted noteSuggestion contract on
+// purpose (flat summaryFieldName, no action object), but the note budget is a
+// product decision shared with the hosted endpoint.
+export const SAVE_SUGGESTION_MAX_NOTES = HOSTED_AI_NOTE_SUGGESTION_MAX_NOTES
 
 export const saveSuggestionNoteFieldSchema = z.strictObject({
   name: z.string(),

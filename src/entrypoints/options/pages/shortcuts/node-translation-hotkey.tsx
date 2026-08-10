@@ -20,7 +20,7 @@ import { SELECT_CONTENT_PROPS } from "../../components/select-content-props"
  * this page only sets keys.
  */
 export function NodeTranslationHotkey() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
   const { hotkey } = translateConfig.node
 
   return (

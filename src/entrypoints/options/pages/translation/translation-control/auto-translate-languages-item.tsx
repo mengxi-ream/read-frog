@@ -7,7 +7,7 @@ import { ConfigItem } from "../../../components/config-item"
 import { LanguageChips } from "./language-chips"
 
 export function AutoTranslateLanguagesItem() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
   const selectedLanguages = translateConfig.page.autoTranslateLanguages
 
   const setLanguages = (languages: LangCodeISO6393[]) => {

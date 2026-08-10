@@ -132,6 +132,17 @@ options:
     configTitle: 提供者設定
     addProvider: 新增提供者
     builtInProvider: 內建提供者
+    builtInAiUsage:
+      title: 內建 AI 額度
+      remaining: "剩餘 $1%"
+      supportedFeatures: "支援 $1 項功能"
+      resetsAt: "$1 重置"
+      daily: 每日額度
+      weekly: 每週額度
+      features:
+        pageTranslation: 網頁翻譯
+        customAction: 自訂 AI 指令
+        noteSuggestion: 猜你想存
     sponsorCta: 取得高速高性價比 AI
     setApiKeyWarning:
       message: 請在 $1 頁面設定 API 金鑰
@@ -212,10 +223,12 @@ options:
     providers:
       name:
         builtInAi: 內建 AI
+        builtInAiUltra: 高級內建 AI
         customChatComplete: 自訂 Chat Complete
         customResponses: 自訂 Responses
       attribution:
-        builtInAi: 由 Atlas Cloud 提供。目前僅對自訂 AI 指令開放。若要解鎖無限制體驗，可以前往官網購買高性價比額度。
+        builtInAi: 由 Read Frog 託管的普通模型。非 Ultra 使用者僅支援在自訂 AI 指令使用，Ultra 使用者支援在更多功能上使用。
+        builtInAiUltra: 由 Read Frog 託管的進階模型，Ultra 會員專屬。網頁翻譯、自訂 AI 指令等全部內建 AI 功能均可使用，共享每週額度，額度消耗比標準模型更快。
       description:
         openai: 提供 GPT-4o 等模型
         azure: 透過 Azure 部署使用 OpenAI 模型
@@ -261,12 +274,12 @@ options:
       title: 功能提供者
       description: 為每個功能選擇使用的提供者
       features:
-        translate: 網頁翻譯
+        pageTranslation: 網頁翻譯
         selectionToolbar_translate: 選取文字翻譯
         inputTranslation: 輸入翻譯
         videoSubtitles: 影片字幕
       descriptions:
-        translate: 翻譯整個網頁，雙語對照或直接取代原文。
+        pageTranslation: 翻譯整個網頁，雙語對照或直接取代原文。
         selectionToolbar_translate: 透過劃詞工具列翻譯你選取的文字。
         inputTranslation: 在送出前翻譯你寫在輸入框裡的內容。
         videoSubtitles: 翻譯影片播放器中隨播放出現的字幕。
@@ -1254,10 +1267,17 @@ subtitles:
     translatedExportIncomplete: 未能翻譯所有字幕行
     translatedExportSameLanguage: 來源語言和目標語言相同
 hostedAi:
+  availability:
+    authenticationRequired: 登入後可使用
+    ultraRequired: 需要 Ultra 方案
+    quotaExhausted: 額度已用完
+    serviceUnavailable: 暫時無法使用
+    usedPercent: "額度已使用 $1%"
+    resetsAt: "$1 重置"
   errors:
     rateLimited: 請求過於頻繁，請稍後再試
-    guestRateLimited: 請求過於頻繁，請登入以取得更多免費額度
-    userRateLimited: 請求過於頻繁，已超過免費額度限制，請稍後再試
+    guestRateLimited: 訪客請求過於頻繁，請稍後再試
+    userRateLimited: 請求過於頻繁，請稍後再試
 hotkey:
   control: Ctrl
   alt: Option

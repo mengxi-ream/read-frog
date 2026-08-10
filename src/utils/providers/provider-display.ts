@@ -7,6 +7,9 @@ export interface ProviderSelectorItem {
   id: string
   logo: (theme: Theme) => string
   name: string
+  disabled?: boolean
+  /** Marks an option no non-Ultra account can run, shown as an "Ultra" badge. */
+  requiresUltra?: boolean
 }
 
 export type ProviderSelectorOption = ProviderConfig | ProviderSelectorItem
@@ -25,4 +28,8 @@ export function getProviderLogo(provider: ProviderSelectorOption, theme: Theme):
 
 export function getProviderName(provider: ProviderSelectorOption): string {
   return provider.name
+}
+
+export function isProviderSelectorOptionDisabled(provider: ProviderSelectorOption): boolean {
+  return isProviderSelectorItem(provider) && provider.disabled === true
 }

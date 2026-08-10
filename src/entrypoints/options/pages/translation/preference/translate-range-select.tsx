@@ -14,7 +14,7 @@ import { SELECT_CONTENT_PROPS } from "../../../components/select-content-props"
 
 /** Bare translate-range control. Callers own the surrounding label and layout. */
 export function TranslateRangeSelect() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
   const { range } = translateConfig.page
 
   return (

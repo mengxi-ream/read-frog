@@ -19,7 +19,7 @@ vi.mock("@/utils/config/storage", () => ({
 
 let mockGetLocalConfig: any
 
-const defaultTranslatePromptConfig: Pick<Config["translate"], "customPromptsConfig"> = {
+const defaultTranslatePromptConfig: Pick<Config["pageTranslation"], "customPromptsConfig"> = {
   customPromptsConfig: {
     promptId: DEFAULT_TRANSLATE_PROMPT_ID,
     patterns: [],
@@ -33,7 +33,7 @@ describe("translate prompt tokens", () => {
   })
 
   it("replaces new translate prompt tokens from config", () => {
-    const config: Pick<Config["translate"], "customPromptsConfig"> = {
+    const config: Pick<Config["pageTranslation"], "customPromptsConfig"> = {
       customPromptsConfig: {
         promptId: "custom-prompt",
         patterns: [
@@ -67,7 +67,7 @@ describe("translate prompt tokens", () => {
   })
 
   it("does not replace legacy translate prompt tokens at runtime", () => {
-    const config: Pick<Config["translate"], "customPromptsConfig"> = {
+    const config: Pick<Config["pageTranslation"], "customPromptsConfig"> = {
       customPromptsConfig: {
         promptId: "legacy-prompt",
         patterns: [
@@ -188,7 +188,7 @@ describe("translate prompt tokens", () => {
   })
 
   it("appends mandatory marker rules after a custom system prompt", () => {
-    const config: Pick<Config["translate"], "customPromptsConfig"> = {
+    const config: Pick<Config["pageTranslation"], "customPromptsConfig"> = {
       customPromptsConfig: {
         promptId: "custom-prompt",
         patterns: [
@@ -297,7 +297,7 @@ describe("translate prompt tokens", () => {
 })
 
 describe("no-translation sentinel", () => {
-  const defaultPromptsConfig: Pick<Config["translate"], "customPromptsConfig"> = {
+  const defaultPromptsConfig: Pick<Config["pageTranslation"], "customPromptsConfig"> = {
     customPromptsConfig: { promptId: DEFAULT_TRANSLATE_PROMPT_ID, patterns: [] },
   }
 
@@ -369,7 +369,7 @@ describe("no-translation sentinel", () => {
   })
 
   it("appends the sentinel rule after a custom system prompt in batch mode", () => {
-    const config: Pick<Config["translate"], "customPromptsConfig"> = {
+    const config: Pick<Config["pageTranslation"], "customPromptsConfig"> = {
       customPromptsConfig: {
         promptId: "custom",
         patterns: [

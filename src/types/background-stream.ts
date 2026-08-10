@@ -2,10 +2,14 @@ import type { JSONValue, StreamTextOnErrorCallback } from "ai"
 import type { Browser } from "#imports"
 import type { AISDKReasoning } from "@/types/config/provider"
 import type { SelectionToolbarCustomActionOutputType } from "@/types/config/selection-toolbar"
+import type { HostedAiModelTier } from "@/utils/constants/provider-ids"
 import type { SaveSuggestionEnvelope } from "@/utils/save-suggestion/types"
 
 interface BaseBackgroundStreamSerializablePayload {
   providerId: string
+  modelTier?: HostedAiModelTier
+  /** Hosted billing idempotency key. Ignored by local/BYOK providers. */
+  requestId?: string
   instructions?: string
   prompt?: string
   messages?: JSONValue[]

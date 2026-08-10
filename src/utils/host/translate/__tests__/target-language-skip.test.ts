@@ -29,15 +29,15 @@ function createConfig({
   enableSkip = true,
   targetCode = "cmn",
 }: {
-  mode?: Config["translate"]["mode"]
+  mode?: Config["pageTranslation"]["mode"]
   enableSkip?: boolean
   targetCode?: Config["language"]["targetCode"]
 } = {}): Config {
   const config = structuredClone(DEFAULT_CONFIG)
-  config.translate.mode = mode
-  config.translate.page.enableTargetLanguageSkip = enableSkip
-  config.translate.page.minCharactersPerNode = 0
-  config.translate.page.minWordsPerNode = 0
+  config.pageTranslation.mode = mode
+  config.pageTranslation.page.enableTargetLanguageSkip = enableSkip
+  config.pageTranslation.page.minCharactersPerNode = 0
+  config.pageTranslation.page.minWordsPerNode = 0
   config.language.targetCode = targetCode
   return config
 }

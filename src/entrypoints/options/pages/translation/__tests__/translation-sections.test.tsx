@@ -14,28 +14,28 @@ import { TranslationStyleSection } from "../translation-style"
 const { translateAtom, configAtom, setTranslateMock, testState } = vi.hoisted(() => ({
   translateAtom: {},
   configAtom: {},
-  setTranslateMock: vi.fn<(value: Partial<Config["translate"]>) => Promise<void>>(),
+  setTranslateMock: vi.fn<(value: Partial<Config["pageTranslation"]>) => Promise<void>>(),
   testState: {
-    translate: null as Config["translate"] | null,
+    pageTranslation: null as Config["pageTranslation"] | null,
     config: null as Config | null,
   },
 }))
 
 vi.mock("jotai", () => ({
   useAtom: (atom: object) => {
-    if (atom !== translateAtom || !testState.translate) {
+    if (atom !== translateAtom || !testState.pageTranslation) {
       throw new Error("Unexpected atom")
     }
-    return [testState.translate, setTranslateMock]
+    return [testState.pageTranslation, setTranslateMock]
   },
   useAtomValue: (atom: object) => {
     if (atom === configAtom && testState.config) {
       return testState.config
     }
-    if (atom !== translateAtom || !testState.translate) {
+    if (atom !== translateAtom || !testState.pageTranslation) {
       throw new Error("Unexpected atom")
     }
-    return testState.translate
+    return testState.pageTranslation
   },
 }))
 
@@ -46,7 +46,7 @@ vi.mock("@/utils/host/translate/ui/decorate-translation", () => ({
 vi.mock("@/utils/atoms/config", () => ({
   configAtom,
   configFieldsAtomMap: {
-    translate: translateAtom,
+    pageTranslation: translateAtom,
   },
 }))
 
@@ -69,10 +69,13 @@ function renderInRouter(ui: ReactNode) {
 
 describe("translation page sections", () => {
   beforeEach(() => {
-    testState.translate = structuredClone(DEFAULT_CONFIG.translate)
-    // Shares the same translate object, so per-test mutations stay visible
-    // to components reading the whole config (e.g. the mode gate).
-    testState.config = { ...structuredClone(DEFAULT_CONFIG), translate: testState.translate }
+    testState.pageTranslation = structuredClone(DEFAULT_CONFIG.pageTranslation)
+    // Shares the same pageTranslation object, so per-test mutations stay
+    // visible to components reading the whole config (e.g. the mode gate).
+    testState.config = {
+      ...structuredClone(DEFAULT_CONFIG),
+      pageTranslation: testState.pageTranslation,
+    }
     setTranslateMock.mockReset()
     setTranslateMock.mockResolvedValue()
   })
@@ -96,7 +99,7 @@ describe("translation page sections", () => {
   })
 
   it("shows the preset and its preview while the style is not custom", () => {
-    testState.translate!.translationNodeStyle.isCustom = false
+    testState.pageTranslation!.translationNodeStyle.isCustom = false
 
     const { container } = renderInRouter(<TranslationStyleSection />)
 
@@ -106,7 +109,7 @@ describe("translation page sections", () => {
   })
 
   it("trades the preset and preview for a way into the CSS editor once the style is custom", () => {
-    testState.translate!.translationNodeStyle.isCustom = true
+    testState.pageTranslation!.translationNodeStyle.isCustom = true
 
     const { container } = renderInRouter(<TranslationStyleSection />)
 
@@ -122,7 +125,7 @@ describe("translation page sections", () => {
   })
 
   it("toggles hover translation without disturbing the hotkey it listens for", () => {
-    const translate = testState.translate!
+    const translate = testState.pageTranslation!
     translate.node.enabled = true
 
     renderInRouter(<HoverTranslationSection />)
@@ -135,7 +138,7 @@ describe("translation page sections", () => {
   })
 
   it("toggles fresh hover translations without disturbing the hover trigger", () => {
-    const translate = testState.translate!
+    const translate = testState.pageTranslation!
 
     renderInRouter(<HoverTranslationSection />)
 

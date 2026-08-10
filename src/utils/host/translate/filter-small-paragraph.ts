@@ -22,8 +22,9 @@ export async function shouldFilterSmallParagraph(text: string, config: Config): 
   if (PURE_HANDLE_RE.test(text.trim())) return true
 
   const siteRule = getEffectiveSiteRule(config, window.location.href)
-  const minCharactersPerNode = siteRule.minCharacters ?? config.translate.page.minCharactersPerNode
-  const minWordsPerNode = siteRule.minWords ?? config.translate.page.minWordsPerNode
+  const minCharactersPerNode =
+    siteRule.minCharacters ?? config.pageTranslation.page.minCharactersPerNode
+  const minWordsPerNode = siteRule.minWords ?? config.pageTranslation.page.minWordsPerNode
   const { sourceCode } = config.language
 
   if (minCharactersPerNode > 0 && text.length < minCharactersPerNode) return true

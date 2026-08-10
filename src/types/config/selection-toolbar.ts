@@ -1,6 +1,10 @@
+import { HostedAiOutputFieldTypeSchema } from "@read-frog/api-contract"
 import { z } from "zod"
 
-export const selectionToolbarCustomActionOutputTypeSchema = z.enum(["string", "number"])
+// The contract's field-type enum is the source of truth: these values ride the
+// wire to hostedAi.customAction unchanged. Only the enum is shared — length
+// caps and strictness stay hosted-only so BYOK actions are not constrained.
+export const selectionToolbarCustomActionOutputTypeSchema = HostedAiOutputFieldTypeSchema
 
 export const selectionToolbarCustomActionOutputFieldSchema = z.object({
   id: z.string().nonempty(),

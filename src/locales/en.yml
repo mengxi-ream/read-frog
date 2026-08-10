@@ -132,6 +132,17 @@ options:
     configTitle: Provider config
     addProvider: Add provider
     builtInProvider: Built-in provider
+    builtInAiUsage:
+      title: Built-in AI quota
+      remaining: "$1% left"
+      supportedFeatures: "Supports $1 features"
+      resetsAt: "Resets at $1"
+      daily: Daily quota
+      weekly: Weekly quota
+      features:
+        pageTranslation: Page translation
+        customAction: Custom AI Actions
+        noteSuggestion: Save suggestions
     sponsorCta: Get fast, cost-effective AI
     setApiKeyWarning:
       message: Please set your API key on the $1 page
@@ -212,10 +223,12 @@ options:
     providers:
       name:
         builtInAi: Built-in AI
+        builtInAiUltra: Advanced Built-in AI
         customChatComplete: Custom Chat Complete
         customResponses: Custom Responses
       attribution:
-        builtInAi: Provided by Atlas Cloud. Currently only available for Custom AI Actions. To unlock an unrestricted experience, purchase highly cost-effective credits on the official website.
+        builtInAi: Read Frog's hosted standard model. Non-Ultra users can use it only for Custom AI Actions; Ultra members can use it on more features.
+        builtInAiUltra: Read Frog's hosted advanced model, exclusive to Ultra members. Runs page translation, Custom AI Actions, and every other Built-in AI feature on a shared weekly quota. Uses up the quota faster than the standard model.
       description:
         openai: Provides models like GPT-4o
         azure: Azure-hosted OpenAI models through your deployments
@@ -261,12 +274,12 @@ options:
       title: Feature providers
       description: Choose which provider to use for each feature
       features:
-        translate: Page translation
+        pageTranslation: Page translation
         selectionToolbar_translate: Selection toolbar translation
         inputTranslation: Input translation
         videoSubtitles: Video subtitles
       descriptions:
-        translate: Translates the whole page in bilingual or replace mode.
+        pageTranslation: Translates the whole page in bilingual or replace mode.
         selectionToolbar_translate: Translates the text you select from the selection toolbar.
         inputTranslation: Translates what you type into an input box before you send it.
         videoSubtitles: Translates subtitles as they appear in a video player.
@@ -1254,10 +1267,17 @@ subtitles:
     translatedExportIncomplete: Failed to translate all subtitle lines
     translatedExportSameLanguage: Source and target languages are the same
 hostedAi:
+  availability:
+    authenticationRequired: Log in to use this provider
+    ultraRequired: Ultra plan required
+    quotaExhausted: Quota used up
+    serviceUnavailable: Temporarily unavailable
+    usedPercent: "Quota used: $1%"
+    resetsAt: "Resets at $1"
   errors:
     rateLimited: Too many requests, please try again later.
-    guestRateLimited: Guest limit reached. Sign in to get more free AI requests.
-    userRateLimited: Too many requests. You have exceeded the free usage limit. Please try again later.
+    guestRateLimited: Too many guest requests. Please try again later.
+    userRateLimited: Too many requests. Please try again later.
 hotkey:
   control: Ctrl
   alt: Option

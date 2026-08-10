@@ -17,7 +17,7 @@ import { ConfigItem } from "../../../components/config-item"
  * rows can say in full what they measure instead of hiding it behind a tooltip.
  */
 export function SmallParagraphFilterItem() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
   const { minCharactersPerNode, minWordsPerNode } = translateConfig.page
 
   return (

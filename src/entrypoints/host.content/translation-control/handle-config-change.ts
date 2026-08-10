@@ -11,7 +11,7 @@ export function handleTranslationModeChange(
   manager: PageTranslationManager,
 ): void {
   const modeChanged =
-    newConfig && oldConfig && newConfig.translate.mode !== oldConfig.translate.mode
+    newConfig && oldConfig && newConfig.pageTranslation.mode !== oldConfig.pageTranslation.mode
 
   if (modeChanged && manager.isActive) {
     manager.stop()

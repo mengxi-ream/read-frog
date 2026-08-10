@@ -1,5 +1,6 @@
 import type { APIProviderConfig } from "@/types/config/provider"
 import type { FeatureKey } from "@/utils/constants/feature-providers"
+import type { BuiltInAiProviderId } from "@/utils/constants/provider-ids"
 import { Icon } from "@iconify/react"
 import { useSelector } from "@tanstack/react-store"
 import { useAtomValue, useSetAtom } from "jotai"
@@ -36,8 +37,8 @@ import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { getSelectionToolbarActions, patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import {
-  BUILT_IN_AI_PROVIDER_ID,
   BUILT_IN_AI_PROVIDER_LOGO,
+  getBuiltInAiProviderName,
 } from "@/utils/providers/provider-registry"
 import { providerSupportsTranslationOnlyMode } from "@/utils/providers/translation-only-gate"
 import { cn } from "@/utils/styles/utils"
@@ -163,12 +164,18 @@ function useProviderEditorValue({
   }
 }
 
-function BuiltInProvider({ children }: { children: React.ReactNode }) {
+function BuiltInProvider({
+  providerId,
+  children,
+}: {
+  providerId: BuiltInAiProviderId
+  children: React.ReactNode
+}) {
   const value = useProviderEditorValue({
     identity: {
-      id: BUILT_IN_AI_PROVIDER_ID,
+      id: providerId,
       logo: BUILT_IN_AI_PROVIDER_LOGO,
-      name: i18n.t("options.apiProviders.providers.name.builtInAi"),
+      name: getBuiltInAiProviderName(providerId),
     },
   })
 
@@ -252,14 +259,6 @@ function Identity() {
 
 function Attribution({ children }: { children: React.ReactNode }) {
   return <p className="text-sm leading-6 text-muted-foreground">{children}</p>
-}
-
-function SponsorCTA({ children, href }: { children: React.ReactNode; href: string }) {
-  return (
-    <Button variant="brand" render={<a href={href} target="_blank" rel="noreferrer" />}>
-      {children}
-    </Button>
-  )
 }
 
 function ConfigHeader() {
@@ -375,17 +374,21 @@ function Assignments({
 function AssignmentRow({
   checked,
   children,
+  disabled = false,
   onCheckedChange,
 }: {
   checked: boolean
   children: React.ReactNode
+  disabled?: boolean
   onCheckedChange: (checked: boolean) => void
 }) {
   return (
-    <div className="flex items-center gap-2">
-      <Switch checked={checked} disabled={checked} onCheckedChange={onCheckedChange} />
+    // A wrapping label gives the switch its accessible name and makes the text
+    // itself a click target.
+    <label className="flex w-fit items-center gap-2">
+      <Switch checked={checked} disabled={checked || disabled} onCheckedChange={onCheckedChange} />
       <span className="text-sm">{children}</span>
-    </div>
+    </label>
   )
 }
 
@@ -408,8 +411,8 @@ function CompatibleFeatureAssignments() {
       // While translationOnly page mode is active, providers without markup
       // support cannot take the page-translate assignment (translation-only-gate.ts).
       !(
-        featureKey === "translate" &&
-        config.translate.mode === "translationOnly" &&
+        featureKey === "pageTranslation" &&
+        config.pageTranslation.mode === "translationOnly" &&
         !providerSupportsTranslationOnlyMode(providerType)
       ),
   ).map((featureKey) => {
@@ -456,7 +459,35 @@ function LanguageDetectionAssignment() {
   )
 }
 
-function CustomActionAssignments() {
+/**
+ * The one feature (from FEATURE_KEYS) the built-in providers can run. Local API
+ * providers keep using CompatibleFeatureAssignments; this row exists so the Ultra
+ * editor can offer page translation without pretending to a providerType.
+ */
+function PageTranslationAssignment({ disabled = false }: { disabled?: boolean }) {
+  const {
+    state: {
+      assignmentTarget: { providerId },
+    },
+    actions,
+  } = useProviderEditor()
+  const config = useAtomValue(configAtom)
+  const isAssigned = FEATURE_PROVIDER_DEFS.pageTranslation.getProviderId(config) === providerId
+
+  return (
+    <AssignmentRow
+      checked={isAssigned}
+      disabled={disabled}
+      onCheckedChange={(checked) => {
+        if (checked) void actions.assignFeature("pageTranslation")
+      }}
+    >
+      {i18n.t(getFeatureLabelI18nKey("pageTranslation"))}
+    </AssignmentRow>
+  )
+}
+
+function CustomActionAssignments({ disabled = false }: { disabled?: boolean }) {
   const {
     state: {
       assignmentTarget: { providerId, providerType },
@@ -475,6 +506,7 @@ function CustomActionAssignments() {
       <AssignmentRow
         key={action.id}
         checked={isAssigned}
+        disabled={disabled}
         onCheckedChange={(checked) => {
           if (checked) void actions.assignCustomAction(action.id)
         }}
@@ -529,7 +561,6 @@ export const ProviderEditor = {
   Form,
   Identity,
   Attribution,
-  SponsorCTA,
   ConfigHeader,
   NameField,
   DescriptionField,
@@ -540,6 +571,7 @@ export const ProviderEditor = {
   Assignments,
   AssignmentRow,
   CompatibleFeatureAssignments,
+  PageTranslationAssignment,
   LanguageDetectionAssignment,
   CustomActionAssignments,
   DuplicateButton,

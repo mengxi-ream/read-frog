@@ -15,7 +15,7 @@ import { SELECT_CONTENT_PROPS } from "../../../components/select-content-props"
 
 /** Bare preset-style control. Callers own the surrounding label and layout. */
 export function PresetStyleSelect() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
   const { translationNodeStyle } = translateConfig
 
   return (

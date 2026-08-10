@@ -1,8 +1,11 @@
 import type { Config } from "@/types/config/config"
 import type { TranslationMode } from "@/types/config/translate"
 import type { TransNode } from "@/types/dom"
-import { resolveProviderConfig } from "@/utils/constants/feature-providers"
 import { logger } from "@/utils/logger"
+import {
+  isSystemTranslationProvider,
+  resolvePageTranslationProvider,
+} from "@/utils/providers/translation-provider"
 import {
   CONTENT_WRAPPER_CLASS,
   NOTRANSLATE_CLASS,
@@ -143,8 +146,10 @@ async function acquireDeepLXHtmlAttributeProbe(providerKey: string): Promise<{
 }
 
 function getDeepLXHtmlAttributeProviderKey(config: Config): string | undefined {
-  const providerConfig = resolveProviderConfig(config, "translate")
-  if (providerConfig.provider !== "deeplx") return undefined
+  const providerConfig = resolvePageTranslationProvider(config)
+  if (isSystemTranslationProvider(providerConfig) || providerConfig.provider !== "deeplx") {
+    return undefined
+  }
   return `${providerConfig.id}:${providerConfig.baseURL ?? ""}`
 }
 
@@ -245,7 +250,7 @@ async function translateVirtualParagraph(
     wrapper,
     { isCurrent, layoutSource: group.layoutSource, sourceText: unit.text },
     translatedText,
-    config.translate.translationNodeStyle,
+    config.pageTranslation.translationNodeStyle,
     config,
     forceBlockTranslation,
   )
@@ -347,7 +352,7 @@ export async function translateNodes(
   forceBlockTranslation: boolean = false,
   forceRetranslation: boolean = false,
 ): Promise<void> {
-  const translationMode = config.translate.mode
+  const translationMode = config.pageTranslation.mode
   if (translationMode === "translationOnly") {
     await translateNodeTranslationOnlyMode(nodes, walkId, config, toggle, forceRetranslation)
   } else if (translationMode === "bilingual") {
@@ -662,7 +667,7 @@ export async function translateNodesBilingualMode(
         sourceText: textContent,
       },
       translatedText,
-      config.translate.translationNodeStyle,
+      config.pageTranslation.translationNodeStyle,
       config,
       forceBlockTranslation || hasTrailingInlineImageAttachment,
     )

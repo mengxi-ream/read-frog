@@ -9,6 +9,7 @@ import type {
 } from "@/types/background-stream"
 import type { AISDKReasoning } from "@/types/config/provider"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
+import type { HostedAiModelTier } from "@/utils/constants/provider-ids"
 import type { CachedWebPageContext } from "@/utils/host/translate/webpage-context"
 import type { CustomActionProviderRef } from "@/utils/providers/provider-registry"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
@@ -17,6 +18,7 @@ import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { classifyResolvedProvider } from "@/utils/analytics-provider"
 import { streamBackgroundStructuredObject } from "@/utils/content-script/background-stream-client"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
@@ -68,6 +70,7 @@ interface CustomActionExecutionRequest {
     }>
     prompt: string
     providerId: string
+    modelTier?: HostedAiModelTier
     providerOptions?: Record<string, Record<string, JSONValue>>
     reasoning?: AISDKReasoning
     instructions: string
@@ -284,6 +287,7 @@ function buildCustomActionExecutionRequest({
     }),
     payload: {
       providerId: provider.id,
+      modelTier: provider.kind === "system" ? provider.modelTier : undefined,
       instructions: systemPrompt,
       prompt,
       outputSchema,
@@ -377,18 +381,24 @@ export function useCustomActionExecution({
       })
 
       try {
-        const finalResult = await streamBackgroundStructuredObject(request.payload, {
-          signal: abortController.signal,
-          onChunk: (partial: BackgroundStructuredObjectStreamSnapshot) => {
-            if (isCancelled) {
-              return
-            }
-
-            setResult(partial.output)
-            setThinking(partial.thinking)
-            scrollSelectionPopoverBodyToBottom(bodyRefRef.current)
+        const finalResult = await streamBackgroundStructuredObject(
+          {
+            ...request.payload,
+            requestId: getRandomUUID(),
           },
-        })
+          {
+            signal: abortController.signal,
+            onChunk: (partial: BackgroundStructuredObjectStreamSnapshot) => {
+              if (isCancelled) {
+                return
+              }
+
+              setResult(partial.output)
+              setThinking(partial.thinking)
+              scrollSelectionPopoverBodyToBottom(bodyRefRef.current)
+            },
+          },
+        )
 
         if (isCancelled) {
           return

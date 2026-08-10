@@ -14,7 +14,7 @@ export const MIN_LENGTH_FOR_TARGET_LANG_DETECTION = 50
  * is unreliable on short input.
  */
 export async function shouldSkipAsTargetLanguage(text: string, config: Config): Promise<boolean> {
-  if (!config.translate.page.enableTargetLanguageSkip) return false
+  if (!config.pageTranslation.page.enableTargetLanguageSkip) return false
   const prepared = prepareTranslationText(text)
   if (prepared.length < MIN_LENGTH_FOR_TARGET_LANG_DETECTION) return false
   const detected = await detectLanguage(prepared, { enableLLM: false })

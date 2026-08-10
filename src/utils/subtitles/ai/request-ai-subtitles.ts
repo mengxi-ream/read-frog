@@ -1,3 +1,4 @@
+import type { VideoTranscriptStatus } from "@read-frog/api-contract"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { ORPCError, safe } from "@orpc/client"
 import { i18n } from "@/utils/i18n"
@@ -11,7 +12,9 @@ export interface AiSubtitlesContext {
 
 interface VideoTranscriptJob {
   id: string
-  status: string
+  // The contract's status union, so a renamed job state fails the build here
+  // instead of silently never matching "completed"/"failed" below.
+  status: VideoTranscriptStatus
   detectedLanguage: string | null
 }
 

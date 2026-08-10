@@ -3,6 +3,7 @@ import type {
   BackgroundTextStreamSnapshot,
 } from "@/types/background-stream"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { defaultRequestRetryPolicy } from "@/utils/request/retry-policy"
 
 const streamTextMock = vi.fn<(...args: any[]) => any>()
 const outputObjectMock = vi.fn<(...args: any[]) => any>((params: Record<string, unknown>) => params)
@@ -232,7 +233,9 @@ describe("background-stream", () => {
     const { runStructuredObjectStreamInBackground } = await import("../background-stream")
     const result = await runStructuredObjectStreamInBackground(
       {
-        providerId: "read-frog-free-ai",
+        providerId: "read-frog-ultra-ai",
+        modelTier: "ultra",
+        requestId: "123e4567-e89b-42d3-a456-426614174000",
         instructions: "Return structured data",
         prompt: "Analyze selection",
         outputSchema: [
@@ -257,6 +260,8 @@ describe("background-stream", () => {
           { name: "summary", type: "string" },
         ],
         temperature: undefined,
+        modelTier: "ultra",
+        requestId: "123e4567-e89b-42d3-a456-426614174000",
       },
       { signal: undefined },
     )
@@ -274,25 +279,140 @@ describe("background-stream", () => {
   })
 
   it("surfaces guest hosted rate limit errors with the sign-in message", async () => {
-    hostedStreamStructuredObjectMock.mockRejectedValue(
-      Object.assign(new Error("Too Many Requests"), {
-        code: "TOO_MANY_REQUESTS",
-        status: 429,
-        data: { quotaScope: "guest" },
-      }),
+    hostedStreamStructuredObjectMock.mockResolvedValue(
+      (async function* () {
+        yield { type: "start" }
+        throw Object.assign(new Error("Too Many Requests"), {
+          code: "TOO_MANY_REQUESTS",
+          status: 429,
+          data: { quotaScope: "guest", retryAfterMs: 42_000 },
+        })
+      })(),
     )
 
     const { runStructuredObjectStreamInBackground } = await import("../background-stream")
 
-    await expect(
-      runStructuredObjectStreamInBackground({
+    let caught: unknown
+    try {
+      await runStructuredObjectStreamInBackground({
         providerId: "read-frog-free-ai",
         instructions: "Return structured data",
         prompt: "Analyze selection",
         outputSchema: [{ name: "score", type: "number" }],
+      })
+    } catch (error) {
+      caught = error
+    }
+
+    expect(caught).toBeInstanceOf(Error)
+    expect((caught as Error).message).toContain("hostedAi.errors.guestRateLimited")
+    expect(
+      defaultRequestRetryPolicy.decide(caught, {
+        retryCount: 0,
+        maxRetries: 2,
+        baseRetryDelayMs: 1_000,
+        now: Date.now(),
+        rateLimitRetryCount: 0,
+        consecutiveRateLimits: 0,
       }),
-    ).rejects.toThrow("hostedAi.errors.guestRateLimited")
+    ).toEqual({ action: "pause-and-retry", pauseMs: 42_000 })
   })
+
+  it("does not normalize billing-period quota exhaustion into short-term traffic limiting", async () => {
+    hostedStreamStructuredObjectMock.mockResolvedValue(
+      (async function* () {
+        yield { type: "start" }
+        throw Object.assign(new Error("Quota exhausted"), {
+          code: "HOSTED_AI_QUOTA_EXHAUSTED",
+          status: 429,
+          data: { quotaScope: "guest", retryAfterMs: 42_000 },
+        })
+      })(),
+    )
+
+    const { runStructuredObjectStreamInBackground } = await import("../background-stream")
+
+    let caught: unknown
+    try {
+      await runStructuredObjectStreamInBackground({
+        providerId: "read-frog-free-ai",
+        modelTier: "normal",
+        requestId: "123e4567-e89b-42d3-a456-426614174001",
+        instructions: "Return structured data",
+        prompt: "Analyze selection",
+        outputSchema: [{ name: "score", type: "number" }],
+      })
+    } catch (error) {
+      caught = error
+    }
+
+    expect(caught).toBeInstanceOf(Error)
+    expect((caught as Error).message).toContain("hostedAi.availability.quotaExhausted")
+    expect((caught as Error & { retryAfterMs?: number }).retryAfterMs).toBeUndefined()
+    expect(
+      defaultRequestRetryPolicy.decide(caught, {
+        retryCount: 0,
+        maxRetries: 2,
+        baseRetryDelayMs: 1_000,
+        now: Date.now(),
+        rateLimitRetryCount: 0,
+        consecutiveRateLimits: 0,
+      }),
+    ).toEqual({ action: "fail", failQueue: true })
+  })
+
+  it.each([
+    {
+      code: "HOSTED_AI_TIER_RESTRICTED",
+      status: 403,
+      messageKey: "hostedAi.availability.ultraRequired",
+    },
+    {
+      code: "UNAUTHORIZED",
+      status: 401,
+      messageKey: "hostedAi.availability.authenticationRequired",
+    },
+  ])(
+    "drains the backlog on $code without leaking the transport status",
+    async ({ code, status, messageKey }) => {
+      hostedStreamStructuredObjectMock.mockResolvedValue(
+        (async function* () {
+          yield { type: "start" }
+          throw Object.assign(new Error("denied"), { code, status, data: {} })
+        })(),
+      )
+
+      const { runStructuredObjectStreamInBackground } = await import("../background-stream")
+
+      let caught: unknown
+      try {
+        await runStructuredObjectStreamInBackground({
+          providerId: "read-frog-free-ai",
+          modelTier: "normal",
+          requestId: "123e4567-e89b-42d3-a456-426614174002",
+          instructions: "Return structured data",
+          prompt: "Analyze selection",
+          outputSchema: [{ name: "score", type: "number" }],
+        })
+      } catch (error) {
+        caught = error
+      }
+
+      expect(caught).toBeInstanceOf(Error)
+      expect((caught as Error).message).toContain(messageKey)
+      expect((caught as Error & { retryAfterMs?: number }).retryAfterMs).toBeUndefined()
+      expect(
+        defaultRequestRetryPolicy.decide(caught, {
+          retryCount: 0,
+          maxRetries: 2,
+          baseRetryDelayMs: 1_000,
+          now: Date.now(),
+          rateLimitRetryCount: 0,
+          consecutiveRateLimits: 0,
+        }),
+      ).toEqual({ action: "fail", failQueue: true })
+    },
+  )
 
   it("treats structured object streams without finish as protocol errors", async () => {
     getModelByIdMock.mockResolvedValue("mock-model")
@@ -461,6 +581,8 @@ describe("background-stream", () => {
     const result = await runStreamTextInBackground(
       {
         providerId: "read-frog-free-ai",
+        modelTier: "normal",
+        requestId: "123e4567-e89b-42d3-a456-426614174002",
         instructions: "Translate text",
         prompt: "Hello world",
       },
@@ -477,6 +599,8 @@ describe("background-stream", () => {
         instructions: "Translate text",
         prompt: "Hello world",
         temperature: undefined,
+        modelTier: "normal",
+        requestId: "123e4567-e89b-42d3-a456-426614174002",
       },
       { signal: undefined },
     )

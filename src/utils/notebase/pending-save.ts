@@ -7,6 +7,7 @@ import type {
   SelectionToolbarCustomActionNotebaseConnection,
   SelectionToolbarCustomActionOutputField,
 } from "@/types/config/selection-toolbar"
+import { NOTEBASE_COLUMN_TYPE_INFO } from "@read-frog/definitions"
 import { z as zod } from "zod"
 import { storage } from "#imports"
 import { env } from "@/env"
@@ -203,8 +204,8 @@ export function buildNotebaseCreateInputFromPending(
         name: column.notebaseColumnName,
         config:
           column.localFieldType === "number"
-            ? { type: "number", decimal: 0, format: "number" }
-            : { type: "string" },
+            ? NOTEBASE_COLUMN_TYPE_INFO.number.defaultConfig
+            : NOTEBASE_COLUMN_TYPE_INFO.string.defaultConfig,
       })),
       // Keep the single-row shape while only one row is saved so the request
       // stays compatible with backends that predate `initialRows`.

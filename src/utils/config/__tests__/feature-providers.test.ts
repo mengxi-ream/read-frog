@@ -25,11 +25,11 @@ describe("feature providers", () => {
   describe("buildFeatureProviderPatch", () => {
     it("builds patch for a single feature assignment", () => {
       const patch = buildFeatureProviderPatch({
-        translate: "openai-default",
+        pageTranslation: "openai-default",
       })
 
       expect(patch).toEqual({
-        translate: {
+        pageTranslation: {
           providerId: "openai-default",
         },
       })
@@ -37,13 +37,13 @@ describe("feature providers", () => {
 
     it("builds patch for multiple feature assignments", () => {
       const patch = buildFeatureProviderPatch({
-        translate: "microsoft-translate-default",
+        pageTranslation: "google-translate-default",
         "selectionToolbar.translate": "openai-default",
       })
 
       expect(patch).toEqual({
-        translate: {
-          providerId: "microsoft-translate-default",
+        pageTranslation: {
+          providerId: "google-translate-default",
         },
         selectionToolbar: {
           features: {
@@ -58,12 +58,17 @@ describe("feature providers", () => {
 
   describe("getSelectableProvidersForCapability", () => {
     it("marks registry-backed system providers for selector grouping", () => {
-      const providers = getSelectableProvidersForCapability("selectionToolbar.customAction", [])
+      const providers = getSelectableProvidersForCapability("customAction", [])
 
       expect(providers).toEqual([
         expect.objectContaining({
           kind: "system",
           id: "read-frog-free-ai",
+          logo: expect.any(Function),
+        }),
+        expect.objectContaining({
+          kind: "system",
+          id: "read-frog-ultra-ai",
           logo: expect.any(Function),
         }),
       ])
@@ -81,8 +86,8 @@ describe("feature providers", () => {
     it("returns fallback assignments for every affected feature when candidates exist", () => {
       const config = {
         ...DEFAULT_CONFIG,
-        translate: {
-          ...DEFAULT_CONFIG.translate,
+        pageTranslation: {
+          ...DEFAULT_CONFIG.pageTranslation,
           providerId: "deleted-provider",
         },
         videoSubtitles: {
@@ -103,7 +108,7 @@ describe("feature providers", () => {
       }
 
       const remainingProviders = [
-        getProviderById("microsoft-translate-default"),
+        getProviderById("google-translate-default"),
         getProviderById("openai-default"),
       ]
 
@@ -114,18 +119,18 @@ describe("feature providers", () => {
       )
 
       expect(fallbacks).toEqual({
-        translate: "microsoft-translate-default",
-        videoSubtitles: "microsoft-translate-default",
-        "selectionToolbar.translate": "microsoft-translate-default",
-        inputTranslation: "microsoft-translate-default",
+        pageTranslation: "google-translate-default",
+        videoSubtitles: "google-translate-default",
+        "selectionToolbar.translate": "google-translate-default",
+        inputTranslation: "google-translate-default",
       })
     })
 
-    it("skips features that have no compatible remaining provider", () => {
+    it("uses the system Normal tier when page translation has no local fallback", () => {
       const config = {
         ...DEFAULT_CONFIG,
-        translate: {
-          ...DEFAULT_CONFIG.translate,
+        pageTranslation: {
+          ...DEFAULT_CONFIG.pageTranslation,
           providerId: "deleted-provider",
         },
       }
@@ -138,14 +143,14 @@ describe("feature providers", () => {
         remainingProviders,
       )
 
-      expect(fallbacks.translate).toBeUndefined()
+      expect(fallbacks.pageTranslation).toBe("read-frog-free-ai")
     })
 
-    it("skips disabled providers when selecting fallbacks", () => {
+    it("skips disabled local providers before using the system Normal tier", () => {
       const config = {
         ...DEFAULT_CONFIG,
-        translate: {
-          ...DEFAULT_CONFIG.translate,
+        pageTranslation: {
+          ...DEFAULT_CONFIG.pageTranslation,
           providerId: "deleted-provider",
         },
       }
@@ -163,7 +168,7 @@ describe("feature providers", () => {
         remainingProviders,
       )
 
-      expect(fallbacks.translate).toBeUndefined()
+      expect(fallbacks.pageTranslation).toBe("read-frog-free-ai")
     })
 
     it("skips selection toolbar translation when no local provider is available", () => {
@@ -188,11 +193,11 @@ describe("feature providers", () => {
     it("returns the first missing feature key when providers are insufficient", () => {
       const remainingProviders: ProviderConfig[] = []
 
-      expect(findFeatureMissingProvider(remainingProviders)).toBe("translate")
+      expect(findFeatureMissingProvider(remainingProviders)).toBe("videoSubtitles")
     })
 
     it("returns null when all features have at least one compatible provider", () => {
-      const remainingProviders = [getProviderById("microsoft-translate-default")]
+      const remainingProviders = [getProviderById("google-translate-default")]
 
       expect(findFeatureMissingProvider(remainingProviders)).toBeNull()
     })
@@ -205,7 +210,7 @@ describe("feature providers", () => {
         },
       ]
 
-      expect(findFeatureMissingProvider(remainingProviders)).toBe("translate")
+      expect(findFeatureMissingProvider(remainingProviders)).toBe("videoSubtitles")
     })
 
     it("treats llm language detection as unavailable when no enabled llm provider remains", () => {
@@ -216,7 +221,7 @@ describe("feature providers", () => {
           providerId: "deleted-provider",
         },
       }
-      const remainingProviders = [getProviderById("microsoft-translate-default")]
+      const remainingProviders = [getProviderById("google-translate-default")]
 
       expect(findFeatureMissingProvider(remainingProviders, config)).toBe("languageDetection")
     })

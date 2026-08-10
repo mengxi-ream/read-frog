@@ -73,7 +73,7 @@ describe("initializeConfig", () => {
 
   function translateProviderIdsOf(config: Config) {
     return [
-      config.translate.providerId,
+      config.pageTranslation.providerId,
       config.selectionToolbar.features.translate.providerId,
       config.inputTranslation.providerId,
       config.videoSubtitles.providerId,
@@ -152,7 +152,7 @@ describe("initializeConfig", () => {
     expect(isFreshInstall).toBe(false)
   })
 
-  it("reports a fresh install when an unparseable config is rebuilt", async () => {
+  it("reports recovery from an unparseable config as a fresh install so the provider probe reruns", async () => {
     getItemMock.mockResolvedValueOnce({ not: "a config" })
     getMetaMock.mockResolvedValueOnce({
       schemaVersion: CONFIG_SCHEMA_VERSION,

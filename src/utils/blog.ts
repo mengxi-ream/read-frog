@@ -1,5 +1,9 @@
-import { semanticVersionSchema } from "@read-frog/definitions"
-import { z } from "zod"
+import type { LatestBlogPost } from "@read-frog/definitions"
+import {
+  bilibiliVideoUrlSchema,
+  getBilibiliVideoIdFromUrl,
+  latestBlogResponseSchema,
+} from "@read-frog/definitions"
 import { browser, storage } from "#imports"
 import { logger } from "./logger"
 import { sendMessage } from "./message"
@@ -7,8 +11,6 @@ import { sendMessage } from "./message"
 const LAST_VIEWED_BLOG_DATE_KEY = "lastViewedBlogDate"
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
 const BILIBILI_EMBED_HOSTNAME = "player.bilibili.com"
-const BILIBILI_HOSTNAME_PATTERN = /(?:^|\.)bilibili\.com$/i
-const BILIBILI_VIDEO_ID_PATTERN = /^BV[0-9A-Z]+$/i
 const DEFAULT_BLOG_LOCALE = "en"
 
 export type BlogLocale = "en" | "zh" | "zh-TW" | "ko" | "vi" | "ru" | "tr" | "ja" | "es"
@@ -23,49 +25,9 @@ const BLOG_LOCALE_BY_PRIMARY_LANGUAGE: Partial<Record<string, BlogLocale>> = {
   vi: "vi",
 }
 
-function getBilibiliVideoIdFromParsedUrl(parsedUrl: URL): string | null {
-  if (!BILIBILI_HOSTNAME_PATTERN.test(parsedUrl.hostname)) {
-    return null
-  }
-
-  const bvid = parsedUrl.searchParams.get("bvid")
-  if (BILIBILI_VIDEO_ID_PATTERN.test(bvid ?? "")) {
-    return bvid
-  }
-
-  const [, maybeVideoSegment, maybeVideoId] = parsedUrl.pathname.split("/")
-  if (maybeVideoSegment !== "video") {
-    return null
-  }
-
-  return BILIBILI_VIDEO_ID_PATTERN.test(maybeVideoId ?? "") ? (maybeVideoId ?? null) : null
-}
-
-const bilibiliVideoUrlSchema = z.url().superRefine((url, ctx) => {
-  if (getBilibiliVideoIdFromParsedUrl(new URL(url))) {
-    return
-  }
-
-  ctx.addIssue({
-    code: z.ZodIssueCode.custom,
-    message: "Must be a bilibili video URL with a valid BVID",
-  })
-})
-
-const latestBlogPostSchema = z.object({
-  date: z.string().pipe(z.coerce.date()),
-  title: z.string(),
-  description: z.string(),
-  url: z.string(),
-  urlOverride: z.url().optional(),
-  imageUrl: z.url().optional(),
-  videoUrl: bilibiliVideoUrlSchema.optional(),
-  extensionVersion: semanticVersionSchema.optional(),
-})
-
-export type LatestBlogPost = z.output<typeof latestBlogPostSchema>
-
-const blogApiResponseSchema = latestBlogPostSchema.nullable()
+// Wire schema and bilibili helpers live in @read-frog/definitions, shared with
+// the www route that serves /api/blog/latest.
+export type { LatestBlogPost } from "@read-frog/definitions"
 
 /**
  * Saves the last viewed blog date to Chrome storage
@@ -100,7 +62,7 @@ export function extractBilibiliVideoId(url: string): string | null {
     return null
   }
 
-  return getBilibiliVideoIdFromParsedUrl(new URL(result.data))
+  return getBilibiliVideoIdFromUrl(result.data)
 }
 
 export function buildBilibiliEmbedUrl(url: string): string | null {
@@ -205,7 +167,7 @@ export async function getLatestBlogDate(
       throw new Error(`Failed to fetch blog: ${response.status}`)
     }
 
-    return blogApiResponseSchema.parse(JSON.parse(response.body))
+    return latestBlogResponseSchema.parse(JSON.parse(response.body))
   } catch (error) {
     logger.error("Error fetching latest blog post:", error)
     return null

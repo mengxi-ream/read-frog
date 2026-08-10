@@ -418,7 +418,7 @@ describe("translationOnly node-identity restore (#1846)", () => {
     // Mode switched to bilingual without a full cleanup; node-level toggle
     const bilingualConfig = {
       ...DEFAULT_CONFIG,
-      translate: { ...DEFAULT_CONFIG.translate, mode: "bilingual" as const },
+      translate: { ...DEFAULT_CONFIG.pageTranslation, mode: "bilingual" as const },
     }
     await translateNodesBilingualMode([p], "walk-2", bilingualConfig, true)
     flushBatchedOperations()

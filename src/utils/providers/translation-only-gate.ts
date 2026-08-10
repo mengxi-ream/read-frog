@@ -16,6 +16,6 @@ export function providerSupportsTranslationOnlyMode(provider: string): boolean {
 
 /** Whether the page-translate feature's current provider allows entering translationOnly mode. */
 export function canEnterTranslationOnlyMode(config: Config): boolean {
-  const providerConfig = resolveProviderConfigOrNull(config, "translate")
+  const providerConfig = resolveProviderConfigOrNull(config, "pageTranslation")
   return providerConfig === null || providerSupportsTranslationOnlyMode(providerConfig.provider)
 }

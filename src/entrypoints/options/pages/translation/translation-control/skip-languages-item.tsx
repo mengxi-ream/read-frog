@@ -13,7 +13,7 @@ import { LanguageChips } from "./language-chips"
  * title, which is what lets its own explanation be the row instead of a tooltip beside a label.
  */
 export function SkipLanguagesItem() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
   const selectedLanguages = translateConfig.page.skipLanguages
 
   const setLanguages = (languages: LangCodeISO6393[]) => {

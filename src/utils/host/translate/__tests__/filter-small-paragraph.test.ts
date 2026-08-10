@@ -22,16 +22,16 @@ function createConfig({
   minWords = 0,
   userRules = [],
 }: {
-  mode?: Config["translate"]["mode"]
+  mode?: Config["pageTranslation"]["mode"]
   minCharacters?: number
   minWords?: number
   userRules?: SiteRule[]
 } = {}): Config {
   const config = structuredClone(DEFAULT_CONFIG)
   config.language.sourceCode = "eng"
-  config.translate.mode = mode
-  config.translate.page.minCharactersPerNode = minCharacters
-  config.translate.page.minWordsPerNode = minWords
+  config.pageTranslation.mode = mode
+  config.pageTranslation.page.minCharactersPerNode = minCharacters
+  config.pageTranslation.page.minWordsPerNode = minWords
   config.siteRules.userRules = userRules
   return config
 }

@@ -13,7 +13,7 @@ import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-ho
 export function RetryButton({ nodes }: { nodes: ChildNode[] }) {
   const shadowWrapper = use(ShadowWrapperContext)
   const config = useAtomValue(configAtom)
-  const translationMode = config.translate.mode
+  const translationMode = config.pageTranslation.mode
 
   const handleRetry = async () => {
     const walkId = getRandomUUID()

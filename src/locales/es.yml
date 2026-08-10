@@ -132,6 +132,17 @@ options:
     configTitle: Configuración de proveedores
     addProvider: Añadir proveedor
     builtInProvider: Proveedor integrado
+    builtInAiUsage:
+      title: Cuota de IA integrada
+      remaining: "$1% restante"
+      supportedFeatures: "Compatible con $1 funciones"
+      resetsAt: "Se restablece el $1"
+      daily: Cuota diaria
+      weekly: Cuota semanal
+      features:
+        pageTranslation: Traducción de página
+        customAction: Acciones de IA personalizadas
+        noteSuggestion: Sugerencias de guardado
     sponsorCta: Obtén IA rápida y rentable
     setApiKeyWarning:
       message: Configura tu clave de API en la página $1
@@ -212,10 +223,12 @@ options:
     providers:
       name:
         builtInAi: IA integrada
+        builtInAiUltra: IA integrada avanzada
         customChatComplete: Personalizado Chat Complete
         customResponses: Personalizado Responses
       attribution:
-        builtInAi: Proporcionado por Atlas Cloud. Actualmente solo está disponible para acciones de IA personalizadas. Para desbloquear una experiencia sin restricciones, compra créditos muy rentables en el sitio web oficial.
+        builtInAi: Modelo estándar alojado por Read Frog. Los usuarios sin Ultra solo pueden usarlo en las acciones de IA personalizadas; los usuarios Ultra pueden usarlo en más funciones.
+        builtInAiUltra: Modelo avanzado alojado por Read Frog, exclusivo para miembros Ultra. Funciona en todas las funciones de IA integrada — traducción de página, acciones de IA personalizadas y más — con una cuota semanal compartida. Consume la cuota más rápido que el modelo estándar.
       description:
         openai: Proporciona modelos como GPT-4o
         azure: Modelos OpenAI hospedados en Azure mediante tus implementaciones
@@ -261,12 +274,12 @@ options:
       title: Proveedores de funciones
       description: Elige qué proveedor usar para cada función
       features:
-        translate: Traducción de página
+        pageTranslation: Traducción de página
         selectionToolbar_translate: Traducción de la barra de selección
         inputTranslation: Traducción de entrada
         videoSubtitles: Subtítulos de video
       descriptions:
-        translate: Traduce la página completa en modo bilingüe o de reemplazo.
+        pageTranslation: Traduce la página completa en modo bilingüe o de reemplazo.
         selectionToolbar_translate: Traduce el texto que seleccionas desde la barra de selección.
         inputTranslation: Traduce lo que escribes en un campo de texto antes de enviarlo.
         videoSubtitles: Traduce los subtítulos que aparecen en el reproductor de video.
@@ -1254,10 +1267,17 @@ subtitles:
     translatedExportIncomplete: No se pudieron traducir todas las líneas de subtítulos
     translatedExportSameLanguage: El idioma de origen y el de destino son iguales
 hostedAi:
+  availability:
+    authenticationRequired: Inicia sesión para usar este proveedor
+    ultraRequired: Se requiere el plan Ultra
+    quotaExhausted: Cuota agotada
+    serviceUnavailable: No disponible temporalmente
+    usedPercent: "Cuota utilizada: $1%"
+    resetsAt: "Se restablece a las $1"
   errors:
     rateLimited: Demasiadas solicitudes, inténtalo de nuevo más tarde.
-    guestRateLimited: Límite de invitado alcanzado. Inicia sesión para obtener más solicitudes gratuitas de AI.
-    userRateLimited: Demasiadas solicitudes. Has superado el límite de uso gratuito, inténtalo de nuevo más tarde.
+    guestRateLimited: Demasiadas solicitudes de invitado. Inténtalo de nuevo más tarde.
+    userRateLimited: Demasiadas solicitudes. Inténtalo de nuevo más tarde.
 hotkey:
   control: Ctrl
   alt: Opción

@@ -4,6 +4,7 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useRef, useState } from "react"
 import { useLocation } from "react-router"
 import { SponsorBadge } from "@/components/badges/sponsor-badge"
+import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-status"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { SortableList } from "@/components/sortable-list"
@@ -21,13 +22,16 @@ import {
   FEATURE_PROVIDER_DEFS,
   getFeatureLabelI18nKey,
 } from "@/utils/constants/feature-providers"
+import { BUILT_IN_AI_PROVIDER_IDS, type BuiltInAiProviderId } from "@/utils/constants/provider-ids"
 import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
+import { getHostedAiTierStatus } from "@/utils/hosted-ai/status"
 import { i18n } from "@/utils/i18n"
 import { getRequestedProviderId, PROVIDER_CONFIG_SECTION_ID } from "@/utils/navigation"
 import {
-  BUILT_IN_AI_PROVIDER_ID,
   BUILT_IN_AI_PROVIDER_LOGO,
+  BUILT_IN_AI_ULTRA_PROVIDER_ID,
+  getBuiltInAiProviderName,
   isBuiltInAiProviderId,
 } from "@/utils/providers/provider-registry"
 import { ConfigItem } from "../../../components/config-item"
@@ -69,12 +73,11 @@ function useRequestedProvider() {
 export function ProvidersConfig() {
   const selectedProviderId = useAtomValue(selectedProviderIdAtom)
   useRequestedProvider()
-  const editor =
-    selectedProviderId === BUILT_IN_AI_PROVIDER_ID ? (
-      <BuiltInProviderPanel />
-    ) : (
-      <ProviderConfigForm key={selectedProviderId} />
-    )
+  const editor = isBuiltInAiProviderId(selectedProviderId) ? (
+    <BuiltInProviderPanel key={selectedProviderId} providerId={selectedProviderId} />
+  ) : (
+    <ProviderConfigForm key={selectedProviderId} />
+  )
 
   return (
     <ConfigItem
@@ -264,65 +267,96 @@ function FeatureCountBadge({ count, children }: { count: number; children: React
 }
 
 function BuiltInProviderSection() {
-  const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
-  const config = useAtomValue(configAtom)
-  const providerName = i18n.t("options.apiProviders.providers.name.builtInAi")
-  const assignedCustomActions = getSelectionToolbarActions(config.selectionToolbar).filter(
-    (action) => action.providerId === BUILT_IN_AI_PROVIDER_ID,
-  )
-
   return (
     <section className="flex flex-col gap-2 pt-1">
       <h3 className="px-1 text-xs font-medium text-muted-foreground">
         {i18n.t("options.apiProviders.builtInProvider" as never)}
       </h3>
-      <EntityListItem.Root
-        data-provider-id={BUILT_IN_AI_PROVIDER_ID}
-        selected={selectedProviderId === BUILT_IN_AI_PROVIDER_ID}
-        onClick={() => setSelectedProviderId(BUILT_IN_AI_PROVIDER_ID)}
-      >
-        <EntityListItem.Badges>
-          <FeatureCountBadge count={assignedCustomActions.length}>
-            {assignedCustomActions.map((action) => (
-              <li key={action.id}>{action.name}</li>
-            ))}
-          </FeatureCountBadge>
-        </EntityListItem.Badges>
-        <EntityListItem.Content>
-          <ProviderIcon
-            logo={BUILT_IN_AI_PROVIDER_LOGO}
-            name={providerName}
-            size="base"
-            textClassName="text-sm"
-          />
-          <EntityListItem.Toggle aria-label={providerName} checked disabled />
-        </EntityListItem.Content>
-      </EntityListItem.Root>
+      <div className="flex flex-col gap-4 pt-2">
+        {BUILT_IN_AI_PROVIDER_IDS.map((providerId) => (
+          <BuiltInProviderCard key={providerId} providerId={providerId} />
+        ))}
+      </div>
     </section>
   )
 }
 
-function BuiltInProviderPanel() {
-  const atlasCloudProvider = API_PROVIDER_ITEMS.atlascloud
-  const atlasCloudUrl = atlasCloudProvider.sponsor?.referUrl ?? atlasCloudProvider.website
+function BuiltInProviderCard({ providerId }: { providerId: BuiltInAiProviderId }) {
+  const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
+  const config = useAtomValue(configAtom)
+  const providerName = getBuiltInAiProviderName(providerId)
+  const assignedFeatures = FEATURE_KEYS.filter(
+    (key) => FEATURE_PROVIDER_DEFS[key].getProviderId(config) === providerId,
+  )
+  const assignedCustomActions = getSelectionToolbarActions(config.selectionToolbar).filter(
+    (action) => action.providerId === providerId,
+  )
 
   return (
-    <BuiltInProviderEditor.Provider>
+    <EntityListItem.Root
+      data-provider-id={providerId}
+      selected={selectedProviderId === providerId}
+      onClick={() => setSelectedProviderId(providerId)}
+    >
+      <EntityListItem.Badges>
+        <FeatureCountBadge count={assignedFeatures.length + assignedCustomActions.length}>
+          {assignedFeatures.map((key) => (
+            <li key={key}>{i18n.t(getFeatureLabelI18nKey(key))}</li>
+          ))}
+          {assignedCustomActions.map((action) => (
+            <li key={action.id}>{action.name}</li>
+          ))}
+        </FeatureCountBadge>
+      </EntityListItem.Badges>
+      <EntityListItem.Content>
+        <ProviderIcon
+          logo={BUILT_IN_AI_PROVIDER_LOGO}
+          name={providerName}
+          size="base"
+          textClassName="text-sm"
+        />
+        <EntityListItem.Toggle aria-label={providerName} checked disabled />
+      </EntityListItem.Content>
+    </EntityListItem.Root>
+  )
+}
+
+function BuiltInProviderPanel({ providerId }: { providerId: BuiltInAiProviderId }) {
+  const isUltra = providerId === BUILT_IN_AI_ULTRA_PROVIDER_ID
+  // Rows lock only on a definitive server verdict (`accessAllowed === false`,
+  // an identity/plan fact rather than service health). While the status is
+  // unknown — loading, or the status endpoint failing — the rows stay
+  // interactive, so an outage never locks the configuration UI.
+  const { status } = useHostedAiStatus({ enabled: isUltra })
+
+  return (
+    <BuiltInProviderEditor.Provider providerId={providerId}>
       <EntityEditor.Root>
         <EntityEditor.Body className="gap-6">
           <div className="flex flex-col gap-4">
             <ProviderEditor.Identity />
-            <div className="flex flex-col items-start gap-3">
-              <ProviderEditor.Attribution>
-                {i18n.t("options.apiProviders.providers.attribution.builtInAi" as never)}
-              </ProviderEditor.Attribution>
-              <ProviderEditor.SponsorCTA href={atlasCloudUrl}>
-                {i18n.t("options.apiProviders.sponsorCta")}
-              </ProviderEditor.SponsorCTA>
-            </div>
+            <ProviderEditor.Attribution>
+              {i18n.t(
+                isUltra
+                  ? "options.apiProviders.providers.attribution.builtInAiUltra"
+                  : "options.apiProviders.providers.attribution.builtInAi",
+              )}
+            </ProviderEditor.Attribution>
           </div>
           <ProviderEditor.Assignments defaultOpen>
-            <ProviderEditor.CustomActionAssignments />
+            {isUltra && (
+              <ProviderEditor.PageTranslationAssignment
+                disabled={
+                  getHostedAiTierStatus(status, "pageTranslation", "ultra")?.accessAllowed === false
+                }
+              />
+            )}
+            <ProviderEditor.CustomActionAssignments
+              disabled={
+                isUltra &&
+                getHostedAiTierStatus(status, "customAction", "ultra")?.accessAllowed === false
+              }
+            />
           </ProviderEditor.Assignments>
         </EntityEditor.Body>
       </EntityEditor.Root>

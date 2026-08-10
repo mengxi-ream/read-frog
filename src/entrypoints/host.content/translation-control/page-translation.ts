@@ -1,20 +1,21 @@
 import type { FeatureUsageContext } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import debounce from "debounce"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
-import { classifyProviderConfig, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
+import {
+  BUILT_IN_AI_FEATURE_PROVIDER,
+  classifyProviderConfig,
+  UNKNOWN_FEATURE_PROVIDER,
+} from "@/utils/analytics-provider"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
   CONTENT_WRAPPER_CLASS,
   REACT_SHADOW_HOST_CLASS,
   SPINNER_CLASS,
 } from "@/utils/constants/dom-labels"
-import {
-  resolveProviderConfig,
-  resolveProviderConfigOrNull,
-} from "@/utils/constants/feature-providers"
 import {
   GIANT_PARAGRAPH_MAX_SPLIT_DEPTH,
   GIANT_PARAGRAPH_SPLIT_MIN_VIEWPORT_PX,
@@ -47,12 +48,19 @@ import { translateTextForPageTitle } from "@/utils/host/translate/translate-vari
 import {
   beginPageTranslationSession,
   endPageTranslationSession,
+  setPageTranslationSessionProviderRef,
 } from "@/utils/host/translate/translation-session"
 import { cancelSpinnerAnimation } from "@/utils/host/translate/ui/spinner"
 import { ensureSiteRuleCSS, removeSiteRuleCSS } from "@/utils/host/translate/ui/style-injector"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
+import {
+  checkPageTranslationProviderAvailability,
+  isSystemTranslationProvider,
+  resolvePageTranslationProvider,
+  resolvePageTranslationProviderOrNull,
+} from "@/utils/providers/translation-provider"
 import { removeReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
 import { isTranslationCancelledError } from "@/utils/request/cancellation"
 import { createWorkPacer } from "@/utils/scheduler"
@@ -125,6 +133,8 @@ export class PageTranslationManager implements IPageTranslationManager {
   }
 
   private isPageTranslating: boolean = false
+  /** Non-null while a start() is between its guard and activation; see start(). */
+  private pendingStart: symbol | null = null
   private intersectionObserver: IntersectionObserver | null = null
   private mutationObservers: MutationObserver[] = []
   private observedMutationRoots = new WeakSet<Node>()
@@ -168,10 +178,36 @@ export class PageTranslationManager implements IPageTranslationManager {
       console.warn("PageTranslationManager is already active")
       return
     }
+    if (this.pendingStart) {
+      console.warn("PageTranslationManager start is already pending")
+      return
+    }
 
+    // Claim the start slot for the whole pre-activation span: its awaits
+    // (config read, availability gate) would otherwise let a second trigger
+    // pass the isPageTranslating guard above and run a duplicate initial
+    // walk. stop() clears the slot to cancel a still-pending start.
+    const startToken = Symbol("page-translation-start")
+    this.pendingStart = startToken
+    try {
+      await this.runStart(startToken, analyticsContext)
+    } finally {
+      if (this.pendingStart === startToken) {
+        this.pendingStart = null
+      }
+    }
+  }
+
+  private async runStart(
+    startToken: symbol,
+    analyticsContext?: FeatureUsageContext,
+  ): Promise<void> {
     const trackedContext = window === window.top ? analyticsContext : undefined
 
     const config = await getLocalConfig()
+    if (this.pendingStart !== startToken) {
+      return
+    }
     if (!config) {
       console.warn("Config is not initialized")
       if (trackedContext) {
@@ -184,13 +220,16 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
 
-    const requestedProviderConfig = resolveProviderConfigOrNull(config, "translate")
-    const providerAnalytics = classifyProviderConfig(requestedProviderConfig)
+    const requestedProviderConfig = resolvePageTranslationProviderOrNull(config)
+    const providerAnalytics =
+      requestedProviderConfig && isSystemTranslationProvider(requestedProviderConfig)
+        ? BUILT_IN_AI_FEATURE_PROVIDER
+        : classifyProviderConfig(requestedProviderConfig)
 
     if (
       !validateTranslationConfigAndToast({
         providersConfig: config.providersConfig,
-        translate: config.translate,
+        pageTranslation: config.pageTranslation,
         language: config.language,
       })
     ) {
@@ -204,18 +243,58 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
 
+    // The config validator above already rejects an unresolved provider. Keep the
+    // explicit guard for type-safety and for malformed storage snapshots.
+    if (!requestedProviderConfig) return
+
+    const availability = await checkPageTranslationProviderAvailability(requestedProviderConfig)
+    if (this.pendingStart !== startToken) {
+      return
+    }
+    if (!availability.available) {
+      toastManager.add({ type: "error", title: availability.message })
+      if (trackedContext) {
+        void trackFeatureUsed({
+          ...trackedContext,
+          ...providerAnalytics,
+          outcome: "failure",
+        })
+      }
+      return
+    }
+
     try {
-      const providerConfig = resolveProviderConfig(config, "translate")
+      const providerConfig = resolvePageTranslationProvider(config)
 
-      await sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
-        enabled: true,
-        url: window.location.href,
-      })
-
+      // Activate before the notify round trip: once the flag is set, stop()
+      // is authoritative for teardown, so a cancel arriving during any await
+      // below tears the session down instead of racing a pending start. The
+      // session-version checks after each await abort the rest of the setup
+      // once such a teardown (or a newer session) has happened.
       this.isPageTranslating = true
       this.translationSessionVersion += 1
+      const sessionVersion = this.translationSessionVersion
 
       beginPageTranslationSession()
+      setPageTranslationSessionProviderRef(availability.providerRef)
+
+      try {
+        await sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
+          enabled: true,
+          url: window.location.href,
+        })
+      } catch (error) {
+        // Roll back the not-yet-visible activation locally (the notify
+        // channel just failed, so there is no background state to correct);
+        // without this the manager would stay "active" with no observers.
+        if (this.translationSessionVersion === sessionVersion) {
+          this.stopInternal({ notify: false })
+        }
+        throw error
+      }
+      if (this.translationSessionVersion !== sessionVersion) {
+        return
+      }
 
       const siteRule = getEffectiveSiteRule(config, window.location.href)
       if (siteRule.injectedCss) {
@@ -223,8 +302,13 @@ export class PageTranslationManager implements IPageTranslationManager {
       }
 
       await this.primeDocumentTitleContext(
-        config.translate.enableAIContentAware && isLLMProviderConfig(providerConfig),
+        config.pageTranslation.enableAIContentAware &&
+          !isSystemTranslationProvider(providerConfig) &&
+          isLLMProviderConfig(providerConfig),
       )
+      if (this.translationSessionVersion !== sessionVersion) {
+        return
+      }
       this.startDocumentTitleTracking()
 
       // Listen to existing elements when they enter the viewport
@@ -343,6 +427,11 @@ export class PageTranslationManager implements IPageTranslationManager {
     notify: boolean
     userInitiated?: boolean
   }): void {
+    // Cancel a start() still awaiting its pre-activation gates: the manager
+    // is not active yet, so the guard below would no-op this stop and the
+    // pending start would activate translation after the user cancelled.
+    this.pendingStart = null
+
     if (!this.isPageTranslating) {
       console.warn("PageTranslationManager is already inactive")
       return
@@ -680,7 +769,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
     if (
-      config.translate.mode === "bilingual" &&
+      config.pageTranslation.mode === "bilingual" &&
       !canSplitParagraphIntoDescendants(element, innerTopLevelParagraphs, config)
     ) {
       // A newline-preserving flow (X note tweet: pre-wrap div of inline
@@ -973,7 +1062,7 @@ export class PageTranslationManager implements IPageTranslationManager {
         }
         passes += 1
         handledVersion = mutationVersions.get(source) ?? 0
-        if (config.translate.mode === "translationOnly") {
+        if (config.pageTranslation.mode === "translationOnly") {
           // Swapped-anchor staleness: translateNodes routes to the
           // translationOnly path, which restores surviving swaps first so the
           // provider sees current host text, then re-swaps. Keyed on the MODE,

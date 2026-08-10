@@ -195,8 +195,8 @@ export function registerNodeTranslationTriggerListeners({
         const config = await getCurrentConfig()
         if (
           !config ||
-          !config.translate.node.enabled ||
-          config.translate.node.hotkey !== "clickAndHold"
+          !config.pageTranslation.node.enabled ||
+          config.pageTranslation.node.hotkey !== "clickAndHold"
         )
           return
 
@@ -213,8 +213,8 @@ export function registerNodeTranslationTriggerListeners({
             const currentConfig = await getCurrentConfig()
             if (
               !currentConfig ||
-              !currentConfig.translate.node.enabled ||
-              currentConfig.translate.node.hotkey !== "clickAndHold"
+              !currentConfig.pageTranslation.node.enabled ||
+              currentConfig.pageTranslation.node.hotkey !== "clickAndHold"
             )
               return
 
@@ -250,14 +250,14 @@ export function registerNodeTranslationTriggerListeners({
         const config = await getCurrentConfig()
         if (
           !config ||
-          !config.translate.node.enabled ||
-          config.translate.node.hotkey === "clickAndHold"
+          !config.pageTranslation.node.enabled ||
+          config.pageTranslation.node.hotkey === "clickAndHold"
         ) {
           resetHotkeySession()
           return
         }
 
-        const hotkeyEventKey = HOTKEY_EVENT_KEYS[config.translate.node.hotkey]
+        const hotkeyEventKey = HOTKEY_EVENT_KEYS[config.pageTranslation.node.hotkey]
 
         if (event.key === hotkeyEventKey) {
           if (!isHotkeyPressed) {
@@ -274,14 +274,15 @@ export function registerNodeTranslationTriggerListeners({
                 const currentConfig = await getCurrentConfig()
                 if (
                   !currentConfig ||
-                  !currentConfig.translate.node.enabled ||
-                  currentConfig.translate.node.hotkey === "clickAndHold"
+                  !currentConfig.pageTranslation.node.enabled ||
+                  currentConfig.pageTranslation.node.hotkey === "clickAndHold"
                 ) {
                   timerId = null
                   return
                 }
                 if (
-                  HOTKEY_EVENT_KEYS[currentConfig.translate.node.hotkey] !== activeHotkeyEventKey
+                  HOTKEY_EVENT_KEYS[currentConfig.pageTranslation.node.hotkey] !==
+                  activeHotkeyEventKey
                 ) {
                   timerId = null
                   return
@@ -320,14 +321,14 @@ export function registerNodeTranslationTriggerListeners({
         const config = await getCurrentConfig()
         if (
           !config ||
-          !config.translate.node.enabled ||
-          config.translate.node.hotkey === "clickAndHold"
+          !config.pageTranslation.node.enabled ||
+          config.pageTranslation.node.hotkey === "clickAndHold"
         ) {
           if (event.key === activeHotkeyEventKey) resetHotkeySession()
           return
         }
 
-        const hotkeyEventKey = HOTKEY_EVENT_KEYS[config.translate.node.hotkey]
+        const hotkeyEventKey = HOTKEY_EVENT_KEYS[config.pageTranslation.node.hotkey]
 
         if (event.key === hotkeyEventKey || event.key === activeHotkeyEventKey) {
           if (isHotkeyPressed && isHotkeySessionPure) {
@@ -339,8 +340,8 @@ export function registerNodeTranslationTriggerListeners({
               const currentConfig = await getCurrentConfig()
               if (
                 !currentConfig ||
-                !currentConfig.translate.node.enabled ||
-                currentConfig.translate.node.hotkey === "clickAndHold"
+                !currentConfig.pageTranslation.node.enabled ||
+                currentConfig.pageTranslation.node.hotkey === "clickAndHold"
               )
                 return
 

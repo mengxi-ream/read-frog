@@ -282,6 +282,7 @@ describe("notebase pending save", () => {
                 : { type: "string" },
             position: index,
             isPrimary: index === 0,
+            wrap: false,
             width: null,
             createdAt: new Date(),
             updatedAt: new Date(),

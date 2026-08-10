@@ -58,7 +58,7 @@ function createCustomActionRequest() {
   const action = getBuiltInDictionaryAction(DEFAULT_CONFIG.selectionToolbar)
 
   const provider = resolveProviderRefForCapability(
-    "selectionToolbar.customAction",
+    "customAction",
     DEFAULT_CONFIG.providersConfig,
     action.providerId,
   )
