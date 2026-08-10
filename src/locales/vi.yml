@@ -227,7 +227,7 @@ options:
         customResponses: Tùy chỉnh Responses
       attribution:
         builtInAi: Mô hình tiêu chuẩn do Read Frog lưu trữ. Người dùng không có Ultra chỉ dùng được trong hành động AI tùy chỉnh; người dùng Ultra dùng được ở nhiều tính năng hơn.
-        builtInAiUltra: Mô hình mạnh hơn do Read Frog lưu trữ, dành riêng cho thành viên Ultra. Dùng được ở mọi tính năng AI tích hợp — dịch trang, hành động AI tùy chỉnh và hơn nữa — với hạn mức tuần dùng chung.
+        builtInAiUltra: Mô hình nâng cao do Read Frog lưu trữ, dành riêng cho thành viên Ultra. Dùng được ở mọi tính năng AI tích hợp — dịch trang, hành động AI tùy chỉnh và hơn nữa — với hạn mức tuần dùng chung. Tiêu hao hạn mức nhanh hơn mô hình tiêu chuẩn.
       description:
         openai: Cung cấp các mô hình như GPT-4o
         azure: Mô hình OpenAI lưu trữ trên Azure qua các bản triển khai của bạn

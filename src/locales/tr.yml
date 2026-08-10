@@ -227,7 +227,7 @@ options:
         customResponses: Özel Responses
       attribution:
         builtInAi: Read Frog tarafından barındırılan standart model. Ultra olmayan kullanıcılar yalnızca özel AI eylemlerinde kullanabilir; Ultra kullanıcıları daha fazla özellikte kullanabilir.
-        builtInAiUltra: Read Frog tarafından barındırılan daha güçlü model, yalnızca Ultra üyelerine özeldir. Sayfa çevirisi, özel AI eylemleri ve diğer tüm yerleşik AI özelliklerinde çalışır; haftalık kota ortaktır.
+        builtInAiUltra: Read Frog tarafından barındırılan gelişmiş model, yalnızca Ultra üyelerine özeldir. Sayfa çevirisi, özel AI eylemleri ve diğer tüm yerleşik AI özelliklerinde çalışır; haftalık kota ortaktır. Kotayı standart modelden daha hızlı tüketir.
       description:
         openai: GPT-4o gibi modeller sağlar
         azure: Azure dağıtımlarınız üzerinden OpenAI modelleri

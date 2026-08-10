@@ -227,7 +227,7 @@ options:
         customResponses: カスタム Responses
       attribution:
         builtInAi: Read Frog がホストする標準モデル。Ultra 以外のユーザーはカスタム AI アクションでのみ利用でき、Ultra ユーザーはより多くの機能で利用できます。
-        builtInAiUltra: Read Frog がホストする上位モデルで、Ultra メンバー専用です。ページ翻訳やカスタム AI アクションなど、すべての組み込み AI 機能で利用でき、週間クォータを共有します。
+        builtInAiUltra: Read Frog がホストする高性能モデルで、Ultra メンバー専用です。ページ翻訳やカスタム AI アクションなど、すべての組み込み AI 機能で利用でき、週間クォータを共有します。標準モデルよりクォータの消費が速くなります。
       description:
         openai: GPT-4oなどのモデルを提供
         azure: Azure のデプロイ経由で OpenAI モデルを利用

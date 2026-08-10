@@ -228,7 +228,7 @@ options:
         customResponses: 自訂 Responses
       attribution:
         builtInAi: 由 Read Frog 託管的普通模型。非 Ultra 使用者僅支援在自訂 AI 指令使用，Ultra 使用者支援在更多功能上使用。
-        builtInAiUltra: 由 Read Frog 託管的更強模型，Ultra 會員專屬。網頁翻譯、自訂 AI 指令等全部內建 AI 功能均可使用，共享每週額度。
+        builtInAiUltra: 由 Read Frog 託管的進階模型，Ultra 會員專屬。網頁翻譯、自訂 AI 指令等全部內建 AI 功能均可使用，共享每週額度，額度消耗比標準模型更快。
       description:
         openai: 提供 GPT-4o 等模型
         azure: 透過 Azure 部署使用 OpenAI 模型

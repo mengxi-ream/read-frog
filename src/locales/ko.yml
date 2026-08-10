@@ -227,7 +227,7 @@ options:
         customResponses: 사용자 정의 Responses
       attribution:
         builtInAi: Read Frog가 호스팅하는 일반 모델입니다. Ultra가 아닌 사용자는 사용자 지정 AI 작업에서만 사용할 수 있으며, Ultra 사용자는 더 많은 기능에서 사용할 수 있습니다.
-        builtInAiUltra: Read Frog가 호스팅하는 상위 모델로, Ultra 멤버 전용입니다. 페이지 번역, 사용자 지정 AI 작업 등 모든 내장 AI 기능에서 사용할 수 있으며 주간 할당량을 공유합니다.
+        builtInAiUltra: Read Frog가 호스팅하는 고급 모델로, Ultra 멤버 전용입니다. 페이지 번역, 사용자 지정 AI 작업 등 모든 내장 AI 기능에서 사용할 수 있으며 주간 할당량을 공유합니다. 표준 모델보다 할당량이 더 빨리 소모됩니다.
       description:
         openai: GPT-4o 같은 모델을 제공합니다
         azure: Azure 배포를 통해 OpenAI 모델 사용
