@@ -3,6 +3,7 @@ import type { SubtitlesVideoContext } from "@/utils/subtitles/processor/translat
 import type { SubtitlesFragment, SubtitlesState } from "@/utils/subtitles/types"
 import { getLocalConfig } from "@/utils/config/storage"
 import { TRANSLATE_LOOK_AHEAD_MS, TRANSLATION_BATCH_SIZE } from "@/utils/constants/subtitles"
+import { effectiveLookAheadMs } from "@/utils/subtitles/lookahead"
 import { translateSubtitles } from "@/utils/subtitles/processor/translator"
 import { adPlayingAtom, subtitlesStore } from "./atoms"
 
@@ -192,6 +193,11 @@ export class TranslationCoordinator {
 
     const fragments = this.getFragments()
 
+    const lookAheadMs = effectiveLookAheadMs(
+      TRANSLATE_LOOK_AHEAD_MS,
+      this.getVideoElement()?.playbackRate,
+    )
+
     const batch = fragments
       .filter(
         (f) =>
@@ -199,7 +205,7 @@ export class TranslationCoordinator {
           !this.translatingStarts.has(f.start) &&
           !this.failedStarts.has(f.start) &&
           f.start >= currentTimeMs - 5000 &&
-          f.start <= currentTimeMs + TRANSLATE_LOOK_AHEAD_MS,
+          f.start <= currentTimeMs + lookAheadMs,
       )
       .slice(0, TRANSLATION_BATCH_SIZE)
 

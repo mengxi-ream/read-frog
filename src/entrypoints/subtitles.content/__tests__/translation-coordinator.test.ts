@@ -199,6 +199,48 @@ describe("translation coordinator loading state", () => {
     spy.mockRestore()
   })
 
+  it("widens the translation look-ahead window with playback rate", async () => {
+    const translator = await import("@/utils/subtitles/processor/translator")
+
+    async function firstBatchStartsAtRate(playbackRate: number): Promise<number[]> {
+      const spy = vi
+        .spyOn(translator, "translateSubtitles")
+        .mockImplementation((batch: any) => Promise.resolve(batch) as any)
+
+      const coordinator = new TranslationCoordinator({
+        // near cue (in the 1x window) + far cue (only reachable at higher rates)
+        getFragments: () => [
+          { text: "near", start: 1000, end: 2000 },
+          { text: "far", start: 60_000, end: 61_000 },
+        ],
+        getVideoElement: () =>
+          ({
+            currentTime: 0,
+            playbackRate,
+            addEventListener: vi.fn<(...args: any[]) => any>(),
+            removeEventListener: vi.fn<(...args: any[]) => any>(),
+          }) as unknown as HTMLVideoElement,
+        getCurrentState: () => "idle",
+        segmentationPipeline: null,
+        onTranslated: vi.fn<(...args: any[]) => any>(),
+        onStateChange: vi.fn<(...args: any[]) => any>(),
+      })
+
+      coordinator.start()
+      await Promise.resolve()
+      coordinator.stop()
+
+      const batch = (spy.mock.calls[0]?.[0] ?? []) as Array<{ start: number }>
+      spy.mockRestore()
+      return batch.map((f) => f.start)
+    }
+
+    // 1x: 30s window excludes the 60s cue.
+    expect(await firstBatchStartsAtRate(1)).toEqual([1000])
+    // 3x: 90s window now reaches the 60s cue.
+    expect(await firstBatchStartsAtRate(3)).toEqual([1000, 60_000])
+  })
+
   it("does not publish stale batch cues on translation failure after a recut", async () => {
     let fragments = [
       { text: "hello world", start: 0, end: 2000 },
