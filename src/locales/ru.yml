@@ -1157,7 +1157,7 @@ hostedAi:
     quotaExhausted: Квота исчерпана
     serviceUnavailable: Временно недоступно
     usedPercent: "Использовано квоты: $1%"
-    resetsAtUtc: "Сброс в $1 UTC"
+    resetsAt: "Сброс в $1"
   errors:
     rateLimited: Слишком много запросов, пожалуйста, повторите позже.
     guestRateLimited: Слишком много гостевых запросов. Повторите позже.

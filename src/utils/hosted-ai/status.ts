@@ -1,4 +1,3 @@
-import type { ORPCRouterClient } from "@read-frog/api-contract"
 import type {
   HostedAiCreditStatus,
   HostedAiFeature,
@@ -8,47 +7,6 @@ import type {
 } from "./types"
 import type { HostedAiModelTier } from "@/utils/constants/provider-ids"
 import { i18n } from "@/utils/i18n"
-
-/** The one slice of the orpc client this module needs; both proxied clients satisfy it. */
-type HostedAiStatusClient = Pick<ORPCRouterClient, "hostedAi">
-
-const STATUS_TTL_MS = 60_000
-
-interface StatusCacheEntry {
-  expiresAt: number
-  promise: Promise<HostedAiStatus>
-}
-
-// Status covers every feature in one response, so a single cache entry serves
-// all callers rather than one per feature.
-let statusCache: StatusCacheEntry | undefined
-
-export async function getHostedAiStatus(
-  client: HostedAiStatusClient,
-  options: { force?: boolean } = {},
-): Promise<HostedAiStatus> {
-  const now = Date.now()
-  if (!options.force && statusCache && statusCache.expiresAt > now) {
-    return statusCache.promise
-  }
-
-  const promise = client.hostedAi.status({})
-  const entry: StatusCacheEntry = { expiresAt: now + STATUS_TTL_MS, promise }
-  statusCache = entry
-
-  try {
-    return await promise
-  } catch (error) {
-    if (statusCache === entry) {
-      statusCache = undefined
-    }
-    throw error
-  }
-}
-
-export function clearHostedAiStatusCache(): void {
-  statusCache = undefined
-}
 
 const REASON_I18N_KEYS = {
   authentication_required: "hostedAi.availability.authenticationRequired",
@@ -65,13 +23,25 @@ export function getHostedAiCreditForFeature(
   return status?.credits.find((credit) => credit.features.includes(feature))
 }
 
-/** `resetAt` as "YYYY-MM-DD HH:mm" in UTC, or null when the timestamp is unparsable. */
-export function formatHostedAiResetAtUtc(resetAt: string): string | null {
+/**
+ * The server reports resets in UTC; render the moment in the user's own
+ * timezone and locale conventions — "when do I get quota back" is a
+ * wall-clock question, not a protocol one. Null when unparsable. The single
+ * formatter for every surface (usage bars, dropdown/toast descriptions), so
+ * the same reset instant never shows in two different timezones.
+ */
+export function formatHostedAiResetAtLocal(resetAt: string): string | null {
   const resetDate = new Date(resetAt)
   if (Number.isNaN(resetDate.getTime())) {
     return null
   }
-  return resetDate.toISOString().replace("T", " ").slice(0, 16)
+  return resetDate.toLocaleString(undefined, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
 }
 
 export function getHostedAiTierDescription(
@@ -84,7 +54,12 @@ export function getHostedAiTierDescription(
   const details: string[] = []
   if (!status.available) {
     const reason = status.unavailableReason ?? "service_unavailable"
-    details.push(i18n.t(REASON_I18N_KEYS[reason] as never))
+    // The response body is not runtime-validated, so a reason minted by a
+    // newer server must fall back instead of rendering "undefined".
+    const reasonKey =
+      (REASON_I18N_KEYS as Partial<Record<string, string>>)[reason] ??
+      REASON_I18N_KEYS.service_unavailable
+    details.push(i18n.t(reasonKey as never))
   }
   const credit = options.credit
   if (credit) {
@@ -95,9 +70,9 @@ export function getHostedAiTierDescription(
     )
   }
   if (credit?.resetAt) {
-    const formattedResetAt = formatHostedAiResetAtUtc(credit.resetAt)
+    const formattedResetAt = formatHostedAiResetAtLocal(credit.resetAt)
     if (formattedResetAt) {
-      details.push(i18n.t("hostedAi.availability.resetsAtUtc", [formattedResetAt]))
+      details.push(i18n.t("hostedAi.availability.resetsAt", [formattedResetAt]))
     }
   }
   return details.length > 0 ? details.join(" · ") : undefined

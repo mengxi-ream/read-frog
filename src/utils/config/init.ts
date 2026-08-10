@@ -15,9 +15,9 @@ import { runMigration } from "./migration"
 
 export interface InitializeConfigResult {
   /**
-   * The config was created because no stored value existed. Recovery from an invalid stored
-   * value is deliberately excluded. Callers use it to run one-time setup that only makes sense on
-   * untouched defaults (see `selectFreshTranslateProviders`).
+   * The config was created from defaults in this run — either no stored value existed, or the
+   * stored value failed validation and was rebuilt. Callers use it to run one-time setup that
+   * only makes sense on untouched defaults (see `selectFreshTranslateProviders`).
    */
   isFreshInstall: boolean
 }
@@ -67,6 +67,9 @@ export async function initializeConfig(): Promise<InitializeConfigResult> {
     config = buildFreshDefaultConfig()
     currentVersion = CONFIG_SCHEMA_VERSION
     didConfigChange = true
+    // The rebuilt config is untouched defaults, so recovered users get the
+    // same one-time provider selection a genuine fresh install does.
+    isFreshInstall = true
   }
 
   if (import.meta.env.DEV) {

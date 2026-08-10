@@ -3,10 +3,8 @@ import type { ReactNode } from "react"
 import type { HostedAiStatusResult } from "@/components/llm-providers/use-hosted-ai-status"
 import { render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import {
-  BuiltInAiUsageConfig,
-  formatResetAtLocal,
-} from "@/entrypoints/options/pages/api-providers/built-in-ai-usage"
+import { BuiltInAiUsageConfig } from "@/entrypoints/options/pages/api-providers/built-in-ai-usage"
+import { formatHostedAiResetAtLocal } from "@/utils/hosted-ai/status"
 
 const { hostedAiState } = vi.hoisted(() => {
   const state: { value: HostedAiStatusResult } = {
@@ -76,7 +74,7 @@ describe("BuiltInAiUsageConfig", () => {
     ).toBeInTheDocument()
     expect(screen.getByText("options.apiProviders.builtInAiUsage.weekly")).toBeInTheDocument()
     // Rendered in the viewer's own timezone, not UTC.
-    const expectedLocalResetAt = formatResetAtLocal("2026-08-16T03:36:00.000Z")
+    const expectedLocalResetAt = formatHostedAiResetAtLocal("2026-08-16T03:36:00.000Z")
     expect(
       screen.getByText(`options.apiProviders.builtInAiUsage.resetsAt:${expectedLocalResetAt}`),
     ).toBeInTheDocument()

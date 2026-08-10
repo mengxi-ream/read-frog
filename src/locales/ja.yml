@@ -1157,7 +1157,7 @@ hostedAi:
     quotaExhausted: 利用枠を使い切りました
     serviceUnavailable: 一時的に利用できません
     usedPercent: "利用枠: $1% 使用済み"
-    resetsAtUtc: "$1 UTC にリセット"
+    resetsAt: "$1 にリセット"
   errors:
     rateLimited: リクエストが多すぎます。後でもう一度お試しください。
     guestRateLimited: ゲストからのリクエストが多すぎます。後でもう一度お試しください。

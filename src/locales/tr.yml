@@ -1157,7 +1157,7 @@ hostedAi:
     quotaExhausted: Kota tükendi
     serviceUnavailable: Geçici olarak kullanılamıyor
     usedPercent: "Kota kullanımı: %$1"
-    resetsAtUtc: "$1 UTC'de sıfırlanır"
+    resetsAt: "$1'de sıfırlanır"
   errors:
     rateLimited: Çok fazla istek, lütfen daha sonra tekrar deneyin.
     guestRateLimited: Çok fazla misafir isteği. Lütfen daha sonra tekrar deneyin.

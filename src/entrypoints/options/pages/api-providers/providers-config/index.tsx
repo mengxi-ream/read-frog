@@ -25,6 +25,7 @@ import {
 import { BUILT_IN_AI_PROVIDER_IDS, type BuiltInAiProviderId } from "@/utils/constants/provider-ids"
 import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
+import { getHostedAiTierStatus } from "@/utils/hosted-ai/status"
 import { i18n } from "@/utils/i18n"
 import { getRequestedProviderId, PROVIDER_CONFIG_SECTION_ID } from "@/utils/navigation"
 import {
@@ -345,11 +346,16 @@ function BuiltInProviderPanel({ providerId }: { providerId: BuiltInAiProviderId 
           <ProviderEditor.Assignments defaultOpen>
             {isUltra && (
               <ProviderEditor.PageTranslationAssignment
-                disabled={status?.features.pageTranslation.ultra.accessAllowed === false}
+                disabled={
+                  getHostedAiTierStatus(status, "pageTranslation", "ultra")?.accessAllowed === false
+                }
               />
             )}
             <ProviderEditor.CustomActionAssignments
-              disabled={isUltra && status?.features.customAction.ultra.accessAllowed === false}
+              disabled={
+                isUltra &&
+                getHostedAiTierStatus(status, "customAction", "ultra")?.accessAllowed === false
+              }
             />
           </ProviderEditor.Assignments>
         </EntityEditor.Body>

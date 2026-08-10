@@ -15,12 +15,19 @@ import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
-import { serializePageTranslationProvider } from "@/utils/providers/translation-provider"
+import {
+  isSystemTranslationProvider,
+  serializePageTranslationProvider,
+} from "@/utils/providers/translation-provider"
 import { TranslationCancelledError } from "@/utils/request/cancellation"
 import { Sha256Hex } from "../../hash"
 import { sendMessage } from "../../message"
 import { prepareTranslationText } from "./text-preparation"
-import { getPageTranslationSessionId } from "./translation-session"
+import {
+  getPageTranslationSessionId,
+  getPageTranslationSessionProviderRef,
+  setPageTranslationSessionProviderRef,
+} from "./translation-session"
 
 // Minimum text length for skip language detection (shorter than general detection
 // to catch short phrases like "Bonjour!" or "こんにちは")
@@ -147,6 +154,90 @@ async function buildWebPageHashComponents(
   return hashComponents
 }
 
+/**
+ * Reuse the session's resolved system-provider ref when it matches the
+ * requested provider, so every paragraph of a page-translation session runs
+ * on one status snapshot: no per-paragraph status fetches, and a mid-session
+ * status blip cannot fail in-flight paragraphs.
+ */
+function getSessionProviderRefFor(
+  provider: PageTranslationProvider,
+): SerializablePageTranslationProvider | null {
+  if (!isSystemTranslationProvider(provider)) {
+    return null
+  }
+  const sessionRef = getPageTranslationSessionProviderRef()
+  if (
+    sessionRef?.kind !== "system" ||
+    sessionRef.providerId !== provider.id ||
+    sessionRef.modelTier !== provider.modelTier
+  ) {
+    return null
+  }
+  return sessionRef
+}
+
+const pendingSystemSerializes = new Map<string, Promise<SerializablePageTranslationProvider>>()
+/**
+ * Most recently requested system-provider key. Stale stragglers — paragraphs
+ * that captured the previous provider from config before a mid-session switch
+ * and resolve late — must not adopt their ref back over the snapshot the
+ * newer paragraphs converged on, which would evict it and force refetch
+ * ping-pong.
+ */
+let lastRequestedSystemKey: string | null = null
+
+/**
+ * Resolve the transport ref for the requested provider. Snapshot misses do
+ * happen off the happy path — a mid-session provider/tier switch, node
+ * translation without an active session — and each translation unit resolves
+ * independently, so without coalescing a dense batch would fan out one
+ * hosted-status fetch per paragraph. Concurrent misses for the same system
+ * provider share one serialization (per-key, so interleaved keys cannot evict
+ * each other's in-flight fetch), and an active session adopts the result so
+ * later paragraphs skip the network entirely.
+ */
+async function resolvePageProviderRef(
+  provider: PageTranslationProvider,
+  sessionId: string | undefined,
+): Promise<SerializablePageTranslationProvider> {
+  if (!isSystemTranslationProvider(provider)) {
+    return serializePageTranslationProvider(provider)
+  }
+
+  const key = `${provider.id}:${provider.modelTier}`
+  lastRequestedSystemKey = key
+
+  const sessionRef = getSessionProviderRefFor(provider)
+  if (sessionRef) {
+    return sessionRef
+  }
+
+  let promise = pendingSystemSerializes.get(key)
+  if (!promise) {
+    const created = serializePageTranslationProvider(provider)
+    promise = created
+    pendingSystemSerializes.set(key, created)
+    void created
+      .catch(() => undefined)
+      .finally(() => {
+        if (pendingSystemSerializes.get(key) === created) {
+          pendingSystemSerializes.delete(key)
+        }
+      })
+  }
+
+  const providerRef = await promise
+  if (
+    sessionId !== undefined &&
+    getPageTranslationSessionId() === sessionId &&
+    key === lastRequestedSystemKey
+  ) {
+    setPageTranslationSessionProviderRef(providerRef)
+  }
+  return providerRef
+}
+
 export interface TranslateTextOptions {
   text: string
   langConfig: {
@@ -190,8 +281,15 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     return ""
   }
 
+  // Early cancellation gate: a session stopped while this paragraph was still
+  // preparing must not fire a post-cancel hosted-status fetch below just to
+  // throw at the final gate.
+  if (sessionId !== undefined && getPageTranslationSessionId() !== sessionId) {
+    throw new TranslationCancelledError(sessionId)
+  }
+
   const normalizedWebPageContext = normalizeWebPagePromptContext(webPageContext)
-  const providerRef = await serializePageTranslationProvider(providerConfig)
+  const providerRef = await resolvePageProviderRef(providerConfig, sessionId)
 
   const hashComponents = await buildWebPageHashComponents(
     preparedText,

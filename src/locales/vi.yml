@@ -1157,7 +1157,7 @@ hostedAi:
     quotaExhausted: Đã hết hạn mức
     serviceUnavailable: Tạm thời không khả dụng
     usedPercent: "Đã dùng hạn mức: $1%"
-    resetsAtUtc: "Đặt lại lúc $1 UTC"
+    resetsAt: "Đặt lại lúc $1"
   errors:
     rateLimited: Quá nhiều yêu cầu, vui lòng thử lại sau.
     guestRateLimited: Quá nhiều yêu cầu từ khách. Vui lòng thử lại sau.

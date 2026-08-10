@@ -9,6 +9,7 @@ vi.mock("@/utils/i18n", () => ({
 }))
 
 import {
+  formatHostedAiResetAtLocal,
   getHostedAiCreditForFeature,
   getHostedAiTierDescription,
   getHostedAiTierStatus,
@@ -63,8 +64,12 @@ describe("hosted AI status presentation", () => {
     )
 
     // No dollar figure: the response carries a percentage and a reset time only.
+    // The reset moment renders in the runner's local timezone, so the expected
+    // string is computed with the same formatter rather than hardcoded.
     expect(normalDescription).toBe(
-      "hostedAi.availability.usedPercent:38 · hostedAi.availability.resetsAtUtc:2026-08-10 00:00",
+      `hostedAi.availability.usedPercent:38 · hostedAi.availability.resetsAt:${formatHostedAiResetAtLocal(
+        "2026-08-10T00:00:00.000Z",
+      )}`,
     )
     expect(ultraDescription).toBe(normalDescription)
     // One pool shared by every feature resolves to the same entry each time.

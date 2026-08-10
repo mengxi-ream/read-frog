@@ -1273,7 +1273,7 @@ hostedAi:
     quotaExhausted: 额度已用完
     serviceUnavailable: 暂时不可用
     usedPercent: "额度已使用 $1%"
-    resetsAtUtc: "$1 UTC 重置"
+    resetsAt: "$1 重置"
   errors:
     rateLimited: 请求过于频繁，请稍后再试
     guestRateLimited: 游客请求过于频繁，请稍后再试

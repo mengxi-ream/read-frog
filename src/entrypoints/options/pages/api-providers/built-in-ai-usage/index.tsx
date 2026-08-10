@@ -4,6 +4,7 @@ import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-stat
 import { Progress, ProgressLabel } from "@/components/ui/base-ui/progress"
 import { Skeleton } from "@/components/ui/base-ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
+import { formatHostedAiResetAtLocal } from "@/utils/hosted-ai/status"
 import { i18n } from "@/utils/i18n"
 import { ConfigSection } from "../../../components/config-section"
 
@@ -23,31 +24,12 @@ function getRemainingPercent(credit: HostedAiCreditStatus): number {
 }
 
 /**
- * The server reports resets in UTC; here the moment is rendered in the user's
- * own timezone and locale conventions, because "when do I get quota back" is a
- * wall-clock question, not a protocol one.
- */
-export function formatResetAtLocal(resetAt: string): string | null {
-  const resetDate = new Date(resetAt)
-  if (Number.isNaN(resetDate.getTime())) {
-    return null
-  }
-  return resetDate.toLocaleString(undefined, {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  })
-}
-
-/**
  * One bar per credit pool. The track is the whole quota and the fill is what is
  * left, growing from the left — so a fresh pool reads as a full bar.
  */
 function CreditPoolUsage({ credit }: { credit: HostedAiCreditStatus }) {
   const remainingPercent = getRemainingPercent(credit)
-  const formattedResetAt = credit.resetAt ? formatResetAtLocal(credit.resetAt) : null
+  const formattedResetAt = credit.resetAt ? formatHostedAiResetAtLocal(credit.resetAt) : null
 
   return (
     <div className="flex flex-col gap-1.5">

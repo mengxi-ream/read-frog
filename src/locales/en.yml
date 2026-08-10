@@ -1273,7 +1273,7 @@ hostedAi:
     quotaExhausted: Quota used up
     serviceUnavailable: Temporarily unavailable
     usedPercent: "Quota used: $1%"
-    resetsAtUtc: "Resets at $1 UTC"
+    resetsAt: "Resets at $1"
   errors:
     rateLimited: Too many requests, please try again later.
     guestRateLimited: Too many guest requests. Please try again later.

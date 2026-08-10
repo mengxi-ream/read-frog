@@ -152,7 +152,7 @@ describe("initializeConfig", () => {
     expect(isFreshInstall).toBe(false)
   })
 
-  it("does not report recovery from an unparseable config as a fresh install", async () => {
+  it("reports recovery from an unparseable config as a fresh install so the provider probe reruns", async () => {
     getItemMock.mockResolvedValueOnce({ not: "a config" })
     getMetaMock.mockResolvedValueOnce({
       schemaVersion: CONFIG_SCHEMA_VERSION,
@@ -162,7 +162,7 @@ describe("initializeConfig", () => {
     const { initializeConfig } = await import("../init")
     const { isFreshInstall } = await initializeConfig()
 
-    expect(isFreshInstall).toBe(false)
+    expect(isFreshInstall).toBe(true)
   })
 
   it("runs migration and persists migrated config once", async () => {

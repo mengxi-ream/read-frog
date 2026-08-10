@@ -1,9 +1,10 @@
 import type { ProviderConfigForCapability, SystemProviderRef } from "./provider-registry"
 import type { Config } from "@/types/config/config"
+import type { HostedAiStatus } from "@/utils/hosted-ai/types"
 import {
   getHostedAiCreditForFeature,
-  getHostedAiStatus,
   getHostedAiTierDescription,
+  getHostedAiTierStatus,
 } from "@/utils/hosted-ai/status"
 import { orpcClient } from "@/utils/orpc/client"
 import { resolveProviderRefForCapability } from "./provider-registry"
@@ -62,6 +63,14 @@ export function getPageTranslationProviderId(provider: PageTranslationProvider):
   return isSystemTranslationProvider(provider) ? provider.id : provider.id
 }
 
+/**
+ * Cache-identity fallback for a status-fetch failure. The translate endpoint
+ * never sees this value. Entries cached under it during one outage can be
+ * served during a later outage even across a real revision bump — accepted:
+ * the overlap is rare and the alternative is failing the translation.
+ */
+const UNKNOWN_MODEL_REVISION = "unknown"
+
 export async function serializePageTranslationProvider(
   provider: PageTranslationProvider,
 ): Promise<SerializablePageTranslationProvider> {
@@ -69,9 +78,18 @@ export async function serializePageTranslationProvider(
     return { kind: "local", config: provider }
   }
 
-  const status = await getHostedAiStatus(orpcClient)
-  const tierStatus = status.features.pageTranslation[provider.modelTier]
-  if (!tierStatus.available) {
+  // Fail open when the status endpoint itself is unreachable: the translate
+  // endpoint enforces access on its own, so a status-only outage must not
+  // block translation. Only an explicit server verdict blocks, below.
+  let status: HostedAiStatus | undefined
+  try {
+    status = await orpcClient.hostedAi.status({})
+  } catch {
+    status = undefined
+  }
+
+  const tierStatus = getHostedAiTierStatus(status, "pageTranslation", provider.modelTier)
+  if (tierStatus && !tierStatus.available) {
     throw new HostedAiProviderUnavailableError(
       provider,
       getHostedAiTierDescription(tierStatus, {
@@ -84,30 +102,23 @@ export async function serializePageTranslationProvider(
     kind: "system",
     providerId: provider.id,
     modelTier: provider.modelTier,
-    modelRevision: tierStatus.modelRevision,
+    modelRevision: tierStatus?.modelRevision ?? UNKNOWN_MODEL_REVISION,
   }
 }
 
+export type PageTranslationProviderAvailability =
+  | { available: true; providerRef: SerializablePageTranslationProvider }
+  | { available: false; message: string }
+
 export async function checkPageTranslationProviderAvailability(
   provider: PageTranslationProvider,
-): Promise<{ available: true } | { available: false; message: string }> {
-  if (!isSystemTranslationProvider(provider)) return { available: true }
-
+): Promise<PageTranslationProviderAvailability> {
   try {
-    const status = await getHostedAiStatus(orpcClient, { force: true })
-    const tierStatus = status.features.pageTranslation[provider.modelTier]
-    if (tierStatus.available) return { available: true }
-    return {
-      available: false,
-      message:
-        getHostedAiTierDescription(tierStatus, {
-          credit: getHostedAiCreditForFeature(status, "pageTranslation"),
-        }) ?? "Built-in AI is unavailable",
+    return { available: true, providerRef: await serializePageTranslationProvider(provider) }
+  } catch (error) {
+    if (error instanceof HostedAiProviderUnavailableError) {
+      return { available: false, message: error.message }
     }
-  } catch {
-    return {
-      available: false,
-      message: getHostedAiTierDescription(undefined) ?? "Built-in AI is unavailable",
-    }
+    throw error
   }
 }
