@@ -142,7 +142,8 @@ options:
       features:
         pageTranslation: Dịch trang
         customAction: Hành động AI tùy chỉnh
-        noteSuggestion: Gợi ý lưu
+        noteSuggestion: Gợi ý ghi chú
+        selectionTranslation: Dịch vùng chọn
     sponsorCta: Nhận AI nhanh, tiết kiệm chi phí
     setApiKeyWarning:
       message: Hãy đặt API Key ở trang $1
@@ -274,14 +275,16 @@ options:
       description: Chọn nhà cung cấp sử dụng cho mỗi tính năng
       features:
         pageTranslation: Dịch trang
-        selectionToolbar_translate: Dịch thanh công cụ chọn
+        selectionTranslation: Dịch thanh công cụ chọn
         inputTranslation: Dịch đầu vào
         videoSubtitles: Phụ đề video
+        noteSuggestion: Gợi ý ghi chú
       descriptions:
         pageTranslation: Dịch toàn bộ trang ở chế độ song ngữ hoặc thay thế bản gốc.
-        selectionToolbar_translate: Dịch đoạn văn bản bạn chọn từ thanh công cụ bôi đen.
+        selectionTranslation: Dịch đoạn văn bản bạn chọn từ thanh công cụ bôi đen.
         inputTranslation: Dịch nội dung bạn gõ trong ô nhập trước khi gửi.
         videoSubtitles: Dịch phụ đề hiện ra trong trình phát video.
+        noteSuggestion: Gợi ý các từ đáng lưu vào Notebase sau khi dịch vùng chọn.
     languageDetection:
       title: Phát hiện ngôn ngữ
       description: Ảnh hưởng đến phát hiện ngôn ngữ tự động dịch, phát hiện ngôn ngữ bỏ qua và độ chính xác chọn giọng nói.
@@ -546,11 +549,13 @@ options:
       speak:
         title: Đọc
         description: Hiển thị nút đọc, dùng để đọc to văn bản đã chọn
-      saveSuggestion:
-        title: Gợi ý lưu
+      noteSuggestion:
+        title: Gợi ý ghi chú
         description: Sau khi dịch vùng chọn bằng nhà cung cấp AI, gợi ý các từ để lưu vào Notebase
         action: Hành động
         actionDescription: Hành động tạo ra gợi ý
+        provider: Nhà cung cấp
+        providerDescription: Nhà cung cấp AI tạo ra gợi ý
     display:
       title: Hiển thị
       opacity:
@@ -1097,13 +1102,13 @@ action:
   translation: Dịch
   speak: Đọc
   playing: Đang phát
-saveSuggestion:
+noteSuggestion:
   title: Có thể bạn muốn lưu
   description: Lưu những từ dưới đây vào Notebase để ôn tập bất cứ lúc nào.
   save: Lưu
   saved: Đã lưu
   staleSuggestion: Gợi ý này đã cũ
-  toggleLabel: Hiện gợi ý lưu
+  toggleLabel: Hiện gợi ý ghi chú
 thinking:
   label: Đang suy luận
   complete: Suy luận hoàn tất
@@ -1151,6 +1156,8 @@ subtitles:
     translatedExportIncomplete: Không thể dịch tất cả các dòng phụ đề
     translatedExportSameLanguage: Ngôn ngữ nguồn và ngôn ngữ đích giống nhau
 hostedAi:
+  ultraBadge:
+    tooltip: Yêu cầu gói Ultra
   availability:
     authenticationRequired: Đăng nhập để sử dụng nhà cung cấp này
     ultraRequired: Yêu cầu gói Ultra

@@ -358,10 +358,10 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.selectionToolbar.title",
   },
   {
-    sectionId: "selection-toolbar-save-suggestion",
+    sectionId: "selection-toolbar-note-suggestion",
     route: "/selection-toolbar",
-    titleKey: "options.selectionToolbar.actions.saveSuggestion.title",
-    descriptionKey: "options.selectionToolbar.actions.saveSuggestion.description",
+    titleKey: "options.selectionToolbar.actions.noteSuggestion.title",
+    descriptionKey: "options.selectionToolbar.actions.noteSuggestion.description",
     pageKey: "options.selectionToolbar.title",
   },
   {

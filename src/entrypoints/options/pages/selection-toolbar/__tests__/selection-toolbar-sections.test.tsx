@@ -31,6 +31,22 @@ vi.mock("@/utils/atoms/config", () => ({
   },
 }))
 
+// The note-suggestion provider row pulls in the full provider stack (jotai
+// atoms, hosted-AI status queries); this suite only cares about the section
+// wiring, so keep that row shallow.
+vi.mock("@/components/llm-providers/use-feature-providers", () => ({
+  useFeatureProvider: () => ({
+    providers: [],
+    providerId: "read-frog-free-ai",
+    providerConfig: null,
+    setProviderId: vi.fn<(id: string) => void>(),
+  }),
+}))
+
+vi.mock("@/components/llm-providers/provider-selector", () => ({
+  default: () => <div>ProviderSelector</div>,
+}))
+
 describe("selection toolbar page sections", () => {
   beforeEach(() => {
     testState.selectionToolbar = structuredClone(DEFAULT_CONFIG.selectionToolbar)

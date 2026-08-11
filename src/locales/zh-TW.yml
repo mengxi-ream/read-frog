@@ -143,6 +143,7 @@ options:
         pageTranslation: 網頁翻譯
         customAction: 自訂 AI 指令
         noteSuggestion: 猜你想存
+        selectionTranslation: 選取文字翻譯
     sponsorCta: 取得高速高性價比 AI
     setApiKeyWarning:
       message: 請在 $1 頁面設定 API 金鑰
@@ -275,14 +276,16 @@ options:
       description: 為每個功能選擇使用的提供者
       features:
         pageTranslation: 網頁翻譯
-        selectionToolbar_translate: 選取文字翻譯
+        selectionTranslation: 選取文字翻譯
         inputTranslation: 輸入翻譯
         videoSubtitles: 影片字幕
+        noteSuggestion: 猜你想存
       descriptions:
         pageTranslation: 翻譯整個網頁，雙語對照或直接取代原文。
-        selectionToolbar_translate: 透過劃詞工具列翻譯你選取的文字。
+        selectionTranslation: 透過劃詞工具列翻譯你選取的文字。
         inputTranslation: 在送出前翻譯你寫在輸入框裡的內容。
         videoSubtitles: 翻譯影片播放器中隨播放出現的字幕。
+        noteSuggestion: 選取文字翻譯後，推薦值得存入筆記庫的詞條。
     languageDetection:
       title: 語言偵測
       description: 影響自動翻譯語言偵測、跳過語言偵測和朗讀語音選擇的準確性。
@@ -547,11 +550,13 @@ options:
       speak:
         title: 朗讀
         description: 在工具列中顯示朗讀按鈕，用於朗讀選取的文字
-      saveSuggestion:
+      noteSuggestion:
         title: 儲存建議
         description: 使用 AI 供應商進行劃詞翻譯後，推薦可存入筆記庫的詞條
         action: 指令
         actionDescription: 用於產生儲存建議的指令
+        provider: 提供者
+        providerDescription: 用於產生儲存建議的 AI 提供者
     display:
       title: 顯示
       opacity:
@@ -1213,7 +1218,7 @@ action:
   translation: 翻譯
   speak: 朗讀
   playing: 播放中
-saveSuggestion:
+noteSuggestion:
   title: 猜你想存
   description: 把下列詞存入筆記庫，將來隨時複習
   save: 儲存
@@ -1267,6 +1272,8 @@ subtitles:
     translatedExportIncomplete: 未能翻譯所有字幕行
     translatedExportSameLanguage: 來源語言和目標語言相同
 hostedAi:
+  ultraBadge:
+    tooltip: 需開通 Ultra 方案
   availability:
     authenticationRequired: 登入後可使用
     ultraRequired: 需要 Ultra 方案

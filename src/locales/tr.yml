@@ -142,7 +142,8 @@ options:
       features:
         pageTranslation: Sayfa çevirisi
         customAction: Özel AI eylemleri
-        noteSuggestion: Kaydetme önerileri
+        noteSuggestion: Not önerileri
+        selectionTranslation: Seçim çevirisi
     sponsorCta: Hızlı ve uygun maliyetli yapay zekâ al
     setApiKeyWarning:
       message: API anahtarınızı $1 sayfasında ayarlayın
@@ -274,14 +275,16 @@ options:
       description: Her özellik için kullanılacak sağlayıcıyı seçin
       features:
         pageTranslation: Sayfa çevirisi
-        selectionToolbar_translate: Seçim araç çubuğu çevirisi
+        selectionTranslation: Seçim araç çubuğu çevirisi
         inputTranslation: Giriş çevirisi
         videoSubtitles: Video altyazıları
+        noteSuggestion: Not önerileri
       descriptions:
         pageTranslation: Sayfanın tamamını iki dilli ya da değiştirme modunda çevirir.
-        selectionToolbar_translate: Seçim araç çubuğundan, seçtiğiniz metni çevirir.
+        selectionTranslation: Seçim araç çubuğundan, seçtiğiniz metni çevirir.
         inputTranslation: Bir metin kutusuna yazdıklarınızı göndermeden önce çevirir.
         videoSubtitles: Video oynatıcıda görünen altyazıları çevirir.
+        noteSuggestion: Seçim çevirisinden sonra Notebase'inize kaydetmeye değer kelimeler önerir.
     languageDetection:
       title: Dil algılama
       description: Otomatik çeviri dil algılama, atlama dil algılama ve Konuşma ses seçimi doğruluğunu etkiler.
@@ -546,11 +549,13 @@ options:
       speak:
         title: Sesli okuma
         description: Seçili metni sesli okuyan seslendirme düğmesini araç çubuğunda göster
-      saveSuggestion:
-        title: Kaydetme önerileri
+      noteSuggestion:
+        title: Not önerileri
         description: Bir yapay zekâ sağlayıcısıyla seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir
         action: Eylem
         actionDescription: Öneriyi üreten eylem
+        provider: Sağlayıcı
+        providerDescription: Öneriyi üreten yapay zekâ sağlayıcısı
     display:
       title: Görünüm
       opacity:
@@ -1097,13 +1102,13 @@ action:
   translation: Çeviri
   speak: Oku
   playing: Çalınıyor
-saveSuggestion:
+noteSuggestion:
   title: Kaydetmek isteyebilirsiniz
   description: Bu kelimeleri Notebase'inize kaydedin, istediğiniz zaman tekrar edin.
   save: Kaydet
   saved: Kaydedildi
   staleSuggestion: Bu öneri güncelliğini yitirdi
-  toggleLabel: Kaydetme önerilerini göster
+  toggleLabel: Not önerilerini göster
 thinking:
   label: Düşünüyor
   complete: Düşünme tamamlandı
@@ -1151,6 +1156,8 @@ subtitles:
     translatedExportIncomplete: Tüm altyazı satırları çevrilemedi
     translatedExportSameLanguage: Kaynak ve hedef diller aynı
 hostedAi:
+  ultraBadge:
+    tooltip: Ultra plan gerektirir
   availability:
     authenticationRequired: Bu sağlayıcıyı kullanmak için giriş yapın
     ultraRequired: Ultra plan gerekli

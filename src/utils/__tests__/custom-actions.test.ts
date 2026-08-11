@@ -5,7 +5,7 @@ import {
   getBuiltInDictionaryAction,
   getSelectionToolbarActions,
   replaceSelectionToolbarAction,
-  resolveSaveSuggestionAction,
+  resolveNoteSuggestionAction,
 } from "@/utils/custom-actions"
 
 function cloneSelectionToolbar() {
@@ -110,7 +110,7 @@ describe("selection toolbar built-in actions", () => {
     expect(duplicate.notebaseConnection?.mappings).not.toBe(dictionary.notebaseConnection?.mappings)
   })
 
-  it("resolves the configured Save Suggestion action even when it is disabled", () => {
+  it("resolves the configured Note suggestion action even when it is disabled", () => {
     const selectionToolbar = cloneSelectionToolbar()
     const customAction = {
       ...getBuiltInDictionaryAction(selectionToolbar),
@@ -119,17 +119,17 @@ describe("selection toolbar built-in actions", () => {
       enabled: false,
     }
     selectionToolbar.customActions = [customAction]
-    selectionToolbar.saveSuggestion.actionId = customAction.id
+    selectionToolbar.noteSuggestion.actionId = customAction.id
 
-    expect(resolveSaveSuggestionAction(selectionToolbar)).toBe(customAction)
+    expect(resolveNoteSuggestionAction(selectionToolbar)).toBe(customAction)
   })
 
-  it("fails fast when the configured Save Suggestion action violates the config invariant", () => {
+  it("fails fast when the configured Note suggestion action violates the config invariant", () => {
     const selectionToolbar = cloneSelectionToolbar()
-    selectionToolbar.saveSuggestion.actionId = "deleted-action"
+    selectionToolbar.noteSuggestion.actionId = "deleted-action"
 
-    expect(() => resolveSaveSuggestionAction(selectionToolbar)).toThrow(
-      'Save Suggestion action "deleted-action" is missing from the validated configuration.',
+    expect(() => resolveNoteSuggestionAction(selectionToolbar)).toThrow(
+      'Note suggestion action "deleted-action" is missing from the validated configuration.',
     )
   })
 })

@@ -143,6 +143,7 @@ options:
         pageTranslation: 网页翻译
         customAction: 自定义 AI 指令
         noteSuggestion: 猜你想存
+        selectionTranslation: 划词翻译
     sponsorCta: 获取高速性价比 AI
     setApiKeyWarning:
       message: 请在 $1 页面设置 API Key
@@ -275,14 +276,16 @@ options:
       description: 为每个功能选择使用的提供商
       features:
         pageTranslation: 网页翻译
-        selectionToolbar_translate: 划词翻译
+        selectionTranslation: 划词翻译
         inputTranslation: 输入翻译
         videoSubtitles: 视频字幕
+        noteSuggestion: 猜你想存
       descriptions:
         pageTranslation: 翻译整个网页，双语对照或直接替换原文。
-        selectionToolbar_translate: 通过划词工具栏翻译你选中的文本。
+        selectionTranslation: 通过划词工具栏翻译你选中的文本。
         inputTranslation: 在发送前翻译你写在输入框里的内容。
         videoSubtitles: 翻译视频播放器中随播放出现的字幕。
+        noteSuggestion: 划词翻译后，推荐值得存入笔记库的词条。
     languageDetection:
       title: 语言检测
       description: 影响自动翻译语言检测、跳过语言检测和朗读语音选择的准确性。
@@ -547,11 +550,13 @@ options:
       speak:
         title: 朗读
         description: 在工具栏中显示朗读按钮，用于朗读选中的文本
-      saveSuggestion:
+      noteSuggestion:
         title: 保存建议
         description: 使用 AI 提供商进行划词翻译后，推荐可存入笔记库的词条
         action: 指令
         actionDescription: 用于生成保存建议的指令
+        provider: 提供商
+        providerDescription: 用于生成保存建议的 AI 提供商
     display:
       title: 显示
       opacity:
@@ -1213,7 +1218,7 @@ action:
   translation: 翻译
   speak: 朗读
   playing: 播放中
-saveSuggestion:
+noteSuggestion:
   title: 猜你想存
   description: 把下列词存入笔记库，将来随时复习
   save: 保存
@@ -1267,6 +1272,8 @@ subtitles:
     translatedExportIncomplete: 未能翻译所有字幕行
     translatedExportSameLanguage: 源语言和目标语言相同
 hostedAi:
+  ultraBadge:
+    tooltip: 需开通 Ultra 套餐
   availability:
     authenticationRequired: 登录后可使用
     ultraRequired: 需要 Ultra 套餐

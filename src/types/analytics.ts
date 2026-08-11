@@ -8,7 +8,7 @@ export const ANALYTICS_FEATURE = {
   TRANSLATION_HUB: "translation_hub",
   VIDEO_SUBTITLES: "video_subtitles",
   TEXT_TO_SPEECH: "text_to_speech",
-  SAVE_SUGGESTION: "save_suggestion",
+  NOTE_SUGGESTION: "note_suggestion",
 } as const
 
 export type AnalyticsFeature = (typeof ANALYTICS_FEATURE)[keyof typeof ANALYTICS_FEATURE]

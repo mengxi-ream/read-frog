@@ -21,8 +21,8 @@ function createConfigWithCustomSaveAction(enabled: boolean) {
       selectionToolbar: {
         ...DEFAULT_CONFIG.selectionToolbar,
         customActions: [customAction],
-        saveSuggestion: {
-          ...DEFAULT_CONFIG.selectionToolbar.saveSuggestion,
+        noteSuggestion: {
+          ...DEFAULT_CONFIG.selectionToolbar.noteSuggestion,
           actionId: customAction.id,
         },
       },
@@ -31,7 +31,7 @@ function createConfigWithCustomSaveAction(enabled: boolean) {
   }
 }
 
-describe("Save Suggestion action config", () => {
+describe("Note suggestion action config", () => {
   it("accepts the built-in Dictionary even when it is disabled", () => {
     const result = configSchema.safeParse({
       ...DEFAULT_CONFIG,
@@ -56,13 +56,13 @@ describe("Save Suggestion action config", () => {
     expect(configSchema.safeParse(createConfigWithCustomSaveAction(true).config).success).toBe(true)
   })
 
-  it("rejects a Save Suggestion action id that does not exist", () => {
+  it("rejects a Note suggestion action id that does not exist", () => {
     const result = configSchema.safeParse({
       ...DEFAULT_CONFIG,
       selectionToolbar: {
         ...DEFAULT_CONFIG.selectionToolbar,
-        saveSuggestion: {
-          ...DEFAULT_CONFIG.selectionToolbar.saveSuggestion,
+        noteSuggestion: {
+          ...DEFAULT_CONFIG.selectionToolbar.noteSuggestion,
           actionId: "missing-action",
         },
       },
@@ -70,12 +70,12 @@ describe("Save Suggestion action config", () => {
 
     expect(result.success).toBe(false)
     if (result.success) {
-      throw new Error("Expected a missing Save Suggestion action to be rejected")
+      throw new Error("Expected a missing Note suggestion action to be rejected")
     }
     expect(result.error.issues).toContainEqual(
       expect.objectContaining({
-        message: 'Save Suggestion action "missing-action" not found.',
-        path: ["selectionToolbar", "saveSuggestion", "actionId"],
+        message: 'Note suggestion action "missing-action" not found.',
+        path: ["selectionToolbar", "noteSuggestion", "actionId"],
       }),
     )
   })

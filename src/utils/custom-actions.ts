@@ -46,14 +46,14 @@ export function findSelectionToolbarAction(
   return selectionToolbar.customActions.find((action) => action.id === actionId)
 }
 
-export function resolveSaveSuggestionAction(
+export function resolveNoteSuggestionAction(
   selectionToolbar: SelectionToolbarConfig,
 ): SelectionToolbarCustomAction {
-  const actionId = selectionToolbar.saveSuggestion.actionId
+  const actionId = selectionToolbar.noteSuggestion.actionId
   const action = findSelectionToolbarAction(selectionToolbar, actionId)
   if (!action) {
     throw new Error(
-      `Save Suggestion action "${actionId}" is missing from the validated configuration.`,
+      `Note suggestion action "${actionId}" is missing from the validated configuration.`,
     )
   }
   return action

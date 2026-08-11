@@ -35,10 +35,24 @@ describe("feature providers", () => {
       })
     })
 
+    it("builds patch for the note suggestion feature", () => {
+      const patch = buildFeatureProviderPatch({
+        noteSuggestion: "read-frog-free-ai",
+      })
+
+      expect(patch).toEqual({
+        selectionToolbar: {
+          noteSuggestion: {
+            providerId: "read-frog-free-ai",
+          },
+        },
+      })
+    })
+
     it("builds patch for multiple feature assignments", () => {
       const patch = buildFeatureProviderPatch({
         pageTranslation: "google-translate-default",
-        "selectionToolbar.translate": "openai-default",
+        selectionTranslation: "openai-default",
       })
 
       expect(patch).toEqual({
@@ -121,7 +135,7 @@ describe("feature providers", () => {
       expect(fallbacks).toEqual({
         pageTranslation: "google-translate-default",
         videoSubtitles: "google-translate-default",
-        "selectionToolbar.translate": "google-translate-default",
+        selectionTranslation: "google-translate-default",
         inputTranslation: "google-translate-default",
       })
     })
@@ -171,7 +185,7 @@ describe("feature providers", () => {
       expect(fallbacks.pageTranslation).toBe("read-frog-free-ai")
     })
 
-    it("skips selection toolbar translation when no local provider is available", () => {
+    it("falls back to the system Normal tier for selection toolbar translation when no local provider is available", () => {
       const config = {
         ...DEFAULT_CONFIG,
         selectionToolbar: {
@@ -185,7 +199,26 @@ describe("feature providers", () => {
 
       const fallbacks = computeProviderFallbacksAfterDeletion("deleted-provider", config, [])
 
-      expect(fallbacks).toEqual({})
+      expect(fallbacks).toEqual({ selectionTranslation: "read-frog-free-ai" })
+    })
+
+    it("falls back to the system Normal tier for note suggestion when no local llm provider remains", () => {
+      const config = {
+        ...DEFAULT_CONFIG,
+        selectionToolbar: {
+          ...DEFAULT_CONFIG.selectionToolbar,
+          noteSuggestion: {
+            ...DEFAULT_CONFIG.selectionToolbar.noteSuggestion,
+            providerId: "deleted-provider",
+          },
+        },
+      }
+
+      const fallbacks = computeProviderFallbacksAfterDeletion("deleted-provider", config, [
+        getProviderById("google-translate-default"),
+      ])
+
+      expect(fallbacks).toEqual({ noteSuggestion: "read-frog-free-ai" })
     })
   })
 

@@ -10,6 +10,7 @@ import type {
   BackgroundStructuredObjectOutputField,
   BackgroundStructuredObjectStreamSnapshot,
   BackgroundTextStreamSnapshot,
+  HostedAiTextStreamFeature,
   StartMessageParseResult,
   StreamPortHandler,
   StreamPortRequestMessage,
@@ -19,6 +20,8 @@ import type {
   ThinkingSnapshot,
 } from "@/types/background-stream"
 import {
+  HostedAiNoteSuggestionObjectSchema,
+  HostedAiNoteSuggestionStreamInputSchema,
   HostedAiOutputFieldTypeSchema,
   HostedAiRateLimitErrorDataSchema,
   HostedAiStreamStructuredObjectInputSchema,
@@ -31,11 +34,11 @@ import { createStructuredObjectSchema } from "@/utils/ai/structured-object-schem
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
+import { noteSuggestionEnvelopeSchema } from "@/utils/note-suggestion/types"
 import { backgroundOrpcClient } from "@/utils/orpc/background-client"
 import { getModelById } from "@/utils/providers/model"
 import { isBuiltInAiProviderId } from "@/utils/providers/provider-registry"
 import { attachRequestErrorMeta } from "@/utils/request/retry-policy"
-import { saveSuggestionEnvelopeSchema } from "@/utils/save-suggestion/types"
 
 const invalidStreamStartPayloadMessage = "Invalid stream start payload"
 const aiStreamProtocolErrorMessage = "Invalid AI stream response."
@@ -644,11 +647,26 @@ async function createLocalTextPartStream(
   return result.stream
 }
 
+/**
+ * One oRPC procedure per hosted text feature: the server derives the billing
+ * feature from the route path, so the payload's `hostedFeature` never rides
+ * the wire — it only selects which procedure to call. Absent means page
+ * translation, the sole caller before the field existed. Resolved lazily so
+ * importing this module never touches the client proxy.
+ */
+const HOSTED_TEXT_STREAM_PROCEDURES: Record<HostedAiTextStreamFeature, () => HostedStreamFn> = {
+  pageTranslation: () =>
+    backgroundOrpcClient.hostedAi.translate.streamText as unknown as HostedStreamFn,
+  selectionTranslation: () =>
+    backgroundOrpcClient.hostedAi.selectionTranslation.streamText as unknown as HostedStreamFn,
+}
+
 async function createHostedTextPartStream(
   serializablePayload: BackgroundStreamTextSerializablePayload,
   signal?: AbortSignal,
 ): Promise<AsyncIterable<unknown>> {
-  const { prompt, instructions, temperature, modelTier, requestId } = serializablePayload
+  const { prompt, instructions, temperature, modelTier, requestId, hostedFeature } =
+    serializablePayload
 
   // The contract schema is the same one the server parses with, so a payload
   // it rejects fails here as invalid_request instead of a round trip to a 400.
@@ -663,10 +681,9 @@ async function createHostedTextPartStream(
     throw new BackgroundStreamError("invalid_request", "Invalid hosted AI request")
   }
 
+  const procedure = HOSTED_TEXT_STREAM_PROCEDURES[hostedFeature ?? "pageTranslation"]()
   try {
-    const stream = await (
-      backgroundOrpcClient.hostedAi.translate.streamText as unknown as HostedStreamFn
-    )(input.data, { signal })
+    const stream = await procedure(input.data, { signal })
     return normalizeHostedPartStreamErrors(stream)
   } catch (error) {
     throw normalizeHostedAiError(error)
@@ -773,6 +790,34 @@ export async function runStructuredObjectStreamInBackground(
   })
 }
 
+async function createHostedNoteSuggestionPartStream(
+  serializablePayload: BackgroundStreamNoteSuggestionSerializablePayload,
+  signal?: AbortSignal,
+): Promise<AsyncIterable<unknown>> {
+  const { prompt, instructions, temperature, modelTier, requestId } = serializablePayload
+
+  const input = HostedAiNoteSuggestionStreamInputSchema.safeParse({
+    instructions,
+    prompt,
+    temperature,
+    modelTier,
+    requestId,
+  })
+  if (!input.success) {
+    throw new BackgroundStreamError("invalid_request", "Invalid hosted AI request")
+  }
+
+  try {
+    const stream = await (
+      backgroundOrpcClient.hostedAi.noteSuggestion
+        .streamStructuredObject as unknown as HostedStreamFn
+    )(input.data, { signal })
+    return normalizeHostedPartStreamErrors(stream)
+  } catch (error) {
+    throw normalizeHostedAiError(error)
+  }
+}
+
 export async function runNoteSuggestionStreamInBackground(
   serializablePayload: BackgroundStreamNoteSuggestionSerializablePayload,
   options: StreamRuntimeOptions<BackgroundNoteSuggestionStreamSnapshot> = {},
@@ -784,25 +829,45 @@ export async function runNoteSuggestionStreamInBackground(
     throw new DOMException("stream aborted", "AbortError")
   }
 
-  // Note suggestion runs on the user's selection-translate LLM provider. The
-  // nested envelope schema is client-owned, so the local structured-object
-  // path is reused with it directly; there is no hosted path.
-  if (isBuiltInAiProviderId(providerId) || !instructions || !prompt) {
+  if (!instructions || !prompt) {
     throw new BackgroundStreamError(
       "invalid_request",
-      "Note suggestion requires a user-configured LLM provider with instructions and prompt",
+      "Note suggestion requires instructions and prompt",
     )
+  }
+
+  // The card renders only the final result, so neither branch forwards onChunk.
+  if (isBuiltInAiProviderId(providerId)) {
+    // Hosted note suggestions stream the fixed contract object (the server
+    // enforces it via Output.object). Its `action.createNewDictionaryAction`
+    // and `action.targetActionId` fields belong to a richer server-driven flow
+    // this client does not implement yet, so they are dropped in the envelope
+    // adaptation below.
+    const partStream = await createHostedNoteSuggestionPartStream(serializablePayload, signal)
+    const hostedSnapshot = await consumeStructuredObjectPartStream(partStream, {
+      objectSchema: HostedAiNoteSuggestionObjectSchema,
+      signal,
+    })
+    const envelope = noteSuggestionEnvelopeSchema.safeParse({
+      summaryFieldName: hostedSnapshot.output.action.summaryFieldName,
+      notes: hostedSnapshot.output.notes,
+    })
+    if (!envelope.success) {
+      throw new BackgroundStreamError("output_validation_failed", aiOutputValidationErrorMessage, {
+        cause: envelope.error,
+      })
+    }
+    return createStreamSnapshot(envelope.data, hostedSnapshot.thinking)
   }
 
   const partStream = await createLocalStructuredObjectPartStream(
     serializablePayload,
-    saveSuggestionEnvelopeSchema,
+    noteSuggestionEnvelopeSchema,
     { signal, onError },
   )
 
-  // The card renders only the final result, so no onChunk forwarding.
   return consumeStructuredObjectPartStream(partStream, {
-    objectSchema: saveSuggestionEnvelopeSchema,
+    objectSchema: noteSuggestionEnvelopeSchema,
     signal,
   })
 }

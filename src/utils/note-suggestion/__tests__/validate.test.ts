@@ -1,7 +1,7 @@
-import type { SaveSuggestionNote } from "../types"
+import type { NoteSuggestionNote } from "../types"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { describe, expect, it } from "vitest"
-import { notePairsToRecord, validateSaveSuggestion } from "../validate"
+import { notePairsToRecord, validateNoteSuggestion } from "../validate"
 
 function createAction(
   overrides: Partial<SelectionToolbarCustomAction> = {},
@@ -35,7 +35,7 @@ function createAction(
   }
 }
 
-function note(fields: Array<{ name: string; value: string | number | null }>): SaveSuggestionNote {
+function note(fields: Array<{ name: string; value: string | number | null }>): NoteSuggestionNote {
   return { fields }
 }
 
@@ -68,11 +68,11 @@ describe("notePairsToRecord", () => {
   })
 })
 
-describe("validateSaveSuggestion", () => {
+describe("validateNoteSuggestion", () => {
   const action = createAction()
 
-  function validate(notes: SaveSuggestionNote[], summaryFieldName?: string | null) {
-    return validateSaveSuggestion({
+  function validate(notes: NoteSuggestionNote[], summaryFieldName?: string | null) {
+    return validateNoteSuggestion({
       envelope: { notes, summaryFieldName },
       action,
     })
@@ -158,7 +158,7 @@ describe("validateSaveSuggestion", () => {
     })
 
     expect(
-      validateSaveSuggestion({
+      validateNoteSuggestion({
         envelope: { notes: [note([{ name: "Score", value: 8 }])] },
         action: numericAction,
       }),

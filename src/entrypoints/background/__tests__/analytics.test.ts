@@ -297,7 +297,7 @@ describe("background analytics", () => {
     expect(cache.setLastReportedDay).toHaveBeenCalledTimes(2)
   })
 
-  it("records every save-suggestion funnel step on the same day, bypassing the daily cache", async () => {
+  it("records every note-suggestion funnel step on the same day, bypassing the daily cache", async () => {
     mockEnabledAnalyticsStorage()
     const { cache } = createMemoryFeatureUsageCache()
     const { captureFeatureUsedEventInBackground } = createAnalytics({
@@ -305,7 +305,7 @@ describe("background analytics", () => {
     })
 
     await captureFeatureUsedEventInBackground({
-      feature: "save_suggestion",
+      feature: "note_suggestion",
       surface: "selection_toolbar",
       outcome: "success",
       latency_ms: 100,
@@ -313,7 +313,7 @@ describe("background analytics", () => {
       action_id: "suggestion_shown",
     })
     await captureFeatureUsedEventInBackground({
-      feature: "save_suggestion",
+      feature: "note_suggestion",
       surface: "selection_toolbar",
       outcome: "success",
       latency_ms: 200,

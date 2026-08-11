@@ -51,13 +51,14 @@ const selectionToolbarSchema = z
     }),
     builtInActions: selectionToolbarBuiltInActionsSchema,
     customActions: selectionToolbarCustomActionsSchema,
-    saveSuggestion: z.object({
+    noteSuggestion: z.object({
       enabled: z.boolean(),
       actionId: z.string().nonempty(),
+      providerId: z.string().nonempty(),
     }),
   })
   .superRefine((selectionToolbar, ctx) => {
-    const actionId = selectionToolbar.saveSuggestion.actionId
+    const actionId = selectionToolbar.noteSuggestion.actionId
     const actionExists =
       actionId === "default-dictionary" ||
       selectionToolbar.customActions.some((action) => action.id === actionId)
@@ -65,8 +66,8 @@ const selectionToolbarSchema = z
     if (!actionExists) {
       ctx.addIssue({
         code: "custom",
-        message: `Save Suggestion action "${actionId}" not found.`,
-        path: ["saveSuggestion", "actionId"],
+        message: `Note suggestion action "${actionId}" not found.`,
+        path: ["noteSuggestion", "actionId"],
       })
     }
   })

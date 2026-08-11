@@ -142,7 +142,8 @@ options:
       features:
         pageTranslation: 페이지 번역
         customAction: 사용자 지정 AI 작업
-        noteSuggestion: 저장 제안
+        noteSuggestion: 노트 제안
+        selectionTranslation: 선택 영역 번역
     sponsorCta: 빠르고 가성비 좋은 AI 받기
     setApiKeyWarning:
       message: API 키는 $1 페이지에서 설정하세요
@@ -274,14 +275,16 @@ options:
       description: 각 기능에 사용할 제공업체를 선택
       features:
         pageTranslation: 페이지 번역
-        selectionToolbar_translate: 선택 툴바 번역
+        selectionTranslation: 선택 툴바 번역
         inputTranslation: 입력 번역
         videoSubtitles: 비디오 자막
+        noteSuggestion: 노트 제안
       descriptions:
         pageTranslation: 페이지 전체를 대역 또는 원문 대체 방식으로 번역합니다.
-        selectionToolbar_translate: 선택 도구 모음에서 선택한 텍스트를 번역합니다.
+        selectionTranslation: 선택 도구 모음에서 선택한 텍스트를 번역합니다.
         inputTranslation: 입력창에 쓴 내용을 보내기 전에 번역합니다.
         videoSubtitles: 동영상 플레이어에 표시되는 자막을 번역합니다.
+        noteSuggestion: 선택 번역 후 Notebase에 저장할 만한 단어를 제안합니다.
     languageDetection:
       title: 언어 감지
       description: 자동 번역 언어 감지, 건너뛰기 언어 감지 및 읽기 음성 선택 정확도에 영향을 줍니다.
@@ -546,11 +549,13 @@ options:
       speak:
         title: 읽기
         description: 선택한 텍스트를 읽어 주는 읽기 버튼을 툴바에 표시합니다
-      saveSuggestion:
-        title: 저장 제안
+      noteSuggestion:
+        title: 노트 제안
         description: AI 제공자로 선택 번역 후 Notebase에 저장할 단어를 추천합니다
         action: 작업
         actionDescription: 저장 제안을 만드는 작업
+        provider: 제공업체
+        providerDescription: 저장 제안을 만드는 AI 제공업체
     display:
       title: 표시
       opacity:
@@ -1097,13 +1102,13 @@ action:
   translation: 번역
   speak: 읽기
   playing: 재생 중
-saveSuggestion:
+noteSuggestion:
   title: 저장 추천
   description: 아래 단어를 Notebase에 저장하고 언제든지 복습하세요.
   save: 저장
   saved: 저장됨
   staleSuggestion: 이 제안은 더 이상 유효하지 않습니다
-  toggleLabel: 저장 제안 표시
+  toggleLabel: 노트 제안 표시
 thinking:
   label: 사고 중
   complete: 사고 완료
@@ -1151,6 +1156,8 @@ subtitles:
     translatedExportIncomplete: 모든 자막 줄을 번역하지 못했습니다
     translatedExportSameLanguage: 원본 언어와 대상 언어가 같습니다
 hostedAi:
+  ultraBadge:
+    tooltip: Ultra 요금제 가입이 필요합니다
   availability:
     authenticationRequired: 로그인 후 사용할 수 있습니다
     ultraRequired: Ultra 요금제가 필요합니다

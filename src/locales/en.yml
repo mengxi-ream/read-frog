@@ -142,7 +142,8 @@ options:
       features:
         pageTranslation: Page translation
         customAction: Custom AI Actions
-        noteSuggestion: Save suggestions
+        noteSuggestion: Note suggestions
+        selectionTranslation: Selection translation
     sponsorCta: Get fast, cost-effective AI
     setApiKeyWarning:
       message: Please set your API key on the $1 page
@@ -275,14 +276,16 @@ options:
       description: Choose which provider to use for each feature
       features:
         pageTranslation: Page translation
-        selectionToolbar_translate: Selection toolbar translation
+        selectionTranslation: Selection toolbar translation
         inputTranslation: Input translation
         videoSubtitles: Video subtitles
+        noteSuggestion: Note suggestions
       descriptions:
         pageTranslation: Translates the whole page in bilingual or replace mode.
-        selectionToolbar_translate: Translates the text you select from the selection toolbar.
+        selectionTranslation: Translates the text you select from the selection toolbar.
         inputTranslation: Translates what you type into an input box before you send it.
         videoSubtitles: Translates subtitles as they appear in a video player.
+        noteSuggestion: Suggests words worth saving to your Notebase after a selection translation.
     languageDetection:
       title: Language detection
       description: Affects auto-translate language detection, skip-language detection, and Speaking voice selection accuracy.
@@ -547,11 +550,13 @@ options:
       speak:
         title: Speak
         description: Show the speak button, which reads the selected text aloud
-      saveSuggestion:
-        title: Save suggestions
+      noteSuggestion:
+        title: Note suggestions
         description: After selection translation with an AI provider, suggest words to save to your Notebase
         action: Action
         actionDescription: The action that produces the suggestion
+        provider: Provider
+        providerDescription: The AI provider that generates the suggestion
     display:
       title: Display
       opacity:
@@ -1213,13 +1218,13 @@ action:
   translation: Translation
   speak: Speak
   playing: Playing
-saveSuggestion:
+noteSuggestion:
   title: You might want to save
   description: Save these words to your Notebase and review them anytime.
   save: Save
   saved: Saved
   staleSuggestion: This suggestion is out of date
-  toggleLabel: Show save suggestions
+  toggleLabel: Show note suggestions
 thinking:
   label: Thinking
   complete: Thinking complete
@@ -1267,6 +1272,8 @@ subtitles:
     translatedExportIncomplete: Failed to translate all subtitle lines
     translatedExportSameLanguage: Source and target languages are the same
 hostedAi:
+  ultraBadge:
+    tooltip: Requires the Ultra plan
   availability:
     authenticationRequired: Log in to use this provider
     ultraRequired: Ultra plan required

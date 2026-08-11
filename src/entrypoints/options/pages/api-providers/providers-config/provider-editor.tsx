@@ -5,6 +5,7 @@ import { Icon } from "@iconify/react"
 import { useSelector } from "@tanstack/react-store"
 import { useAtomValue, useSetAtom } from "jotai"
 import { createContext, use, useState } from "react"
+import { UltraBadge } from "@/components/llm-providers/ultra-badge"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import {
@@ -375,19 +376,23 @@ function AssignmentRow({
   checked,
   children,
   disabled = false,
+  requiresUltra = false,
   onCheckedChange,
 }: {
   checked: boolean
   children: React.ReactNode
   disabled?: boolean
+  requiresUltra?: boolean
   onCheckedChange: (checked: boolean) => void
 }) {
   return (
     // A wrapping label gives the switch its accessible name and makes the text
-    // itself a click target.
+    // itself a click target. The badge is a sibling of the label text rather
+    // than part of it, so the row's text node stays exactly the feature name.
     <label className="flex w-fit items-center gap-2">
       <Switch checked={checked} disabled={checked || disabled} onCheckedChange={onCheckedChange} />
       <span className="text-sm">{children}</span>
+      {requiresUltra && <UltraBadge />}
     </label>
   )
 }
@@ -460,11 +465,21 @@ function LanguageDetectionAssignment() {
 }
 
 /**
- * The one feature (from FEATURE_KEYS) the built-in providers can run. Local API
- * providers keep using CompatibleFeatureAssignments; this row exists so the Ultra
- * editor can offer page translation without pretending to a providerType.
+ * A single feature row (from FEATURE_KEYS) for the built-in provider editors.
+ * Local API providers keep using CompatibleFeatureAssignments; this row exists
+ * so the built-in editors can offer their hosted-capable features without
+ * pretending to a providerType. `requiresUltra` marks the plan requirement (a
+ * viewer-independent product fact), `disabled` the viewer's actual access.
  */
-function PageTranslationAssignment({ disabled = false }: { disabled?: boolean }) {
+function FeatureAssignment({
+  featureKey,
+  disabled = false,
+  requiresUltra = false,
+}: {
+  featureKey: FeatureKey
+  disabled?: boolean
+  requiresUltra?: boolean
+}) {
   const {
     state: {
       assignmentTarget: { providerId },
@@ -472,22 +487,29 @@ function PageTranslationAssignment({ disabled = false }: { disabled?: boolean })
     actions,
   } = useProviderEditor()
   const config = useAtomValue(configAtom)
-  const isAssigned = FEATURE_PROVIDER_DEFS.pageTranslation.getProviderId(config) === providerId
+  const isAssigned = FEATURE_PROVIDER_DEFS[featureKey].getProviderId(config) === providerId
 
   return (
     <AssignmentRow
       checked={isAssigned}
       disabled={disabled}
+      requiresUltra={requiresUltra}
       onCheckedChange={(checked) => {
-        if (checked) void actions.assignFeature("pageTranslation")
+        if (checked) void actions.assignFeature(featureKey)
       }}
     >
-      {i18n.t(getFeatureLabelI18nKey("pageTranslation"))}
+      {i18n.t(getFeatureLabelI18nKey(featureKey))}
     </AssignmentRow>
   )
 }
 
-function CustomActionAssignments({ disabled = false }: { disabled?: boolean }) {
+function CustomActionAssignments({
+  disabled = false,
+  requiresUltra = false,
+}: {
+  disabled?: boolean
+  requiresUltra?: boolean
+}) {
   const {
     state: {
       assignmentTarget: { providerId, providerType },
@@ -507,6 +529,7 @@ function CustomActionAssignments({ disabled = false }: { disabled?: boolean }) {
         key={action.id}
         checked={isAssigned}
         disabled={disabled}
+        requiresUltra={requiresUltra}
         onCheckedChange={(checked) => {
           if (checked) void actions.assignCustomAction(action.id)
         }}
@@ -571,7 +594,7 @@ export const ProviderEditor = {
   Assignments,
   AssignmentRow,
   CompatibleFeatureAssignments,
-  PageTranslationAssignment,
+  FeatureAssignment,
   LanguageDetectionAssignment,
   CustomActionAssignments,
   DuplicateButton,

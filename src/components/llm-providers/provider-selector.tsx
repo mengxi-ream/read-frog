@@ -1,8 +1,8 @@
 import type { ComponentProps } from "react"
 import type { Theme } from "@/types/config/theme"
 import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
+import { UltraBadge } from "@/components/llm-providers/ultra-badge"
 import ProviderIcon from "@/components/provider-icon"
-import { Badge } from "@/components/ui/base-ui/badge"
 import {
   Select,
   SelectContent,
@@ -71,9 +71,11 @@ export function getProviderSelectorGroups(
 function ProviderOptionContent({
   provider,
   theme,
+  tooltipContainer,
 }: {
   provider: ProviderSelectorOption
   theme: Theme
+  tooltipContainer?: ComponentProps<typeof UltraBadge>["tooltipContainer"]
 }) {
   const requiresUltra = isProviderSelectorItem(provider) && provider.requiresUltra === true
 
@@ -84,12 +86,7 @@ function ProviderOptionContent({
         name={getProviderName(provider)}
         size="sm"
       />
-      {requiresUltra && (
-        // "Ultra" is the plan's brand name, identical in every locale.
-        <Badge size="sm" className="bg-amber-500/15 text-amber-600 dark:text-amber-400">
-          Ultra
-        </Badge>
-      )}
+      {requiresUltra && <UltraBadge tooltipContainer={tooltipContainer} />}
     </div>
   )
 }
@@ -188,7 +185,11 @@ function GroupedSelect({
                 value={provider}
                 disabled={isProviderSelectorOptionDisabled(provider)}
               >
-                <ProviderOptionContent provider={provider} theme={theme} />
+                <ProviderOptionContent
+                  provider={provider}
+                  theme={theme}
+                  tooltipContainer={selectContentProps?.container}
+                />
               </SelectItem>
             ))}
           </SelectGroup>
@@ -249,7 +250,11 @@ function UngroupedSelect({
               value={provider}
               disabled={isProviderSelectorOptionDisabled(provider)}
             >
-              <ProviderOptionContent provider={provider} theme={theme} />
+              <ProviderOptionContent
+                provider={provider}
+                theme={theme}
+                tooltipContainer={selectContentProps?.container}
+              />
             </SelectItem>
           ))}
         </SelectGroup>

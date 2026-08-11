@@ -12,6 +12,7 @@ const FEATURE_LABEL_I18N_KEYS = {
   pageTranslation: "options.apiProviders.builtInAiUsage.features.pageTranslation",
   customAction: "options.apiProviders.builtInAiUsage.features.customAction",
   noteSuggestion: "options.apiProviders.builtInAiUsage.features.noteSuggestion",
+  selectionTranslation: "options.apiProviders.builtInAiUsage.features.selectionTranslation",
 } as const satisfies Record<HostedAiFeature, string>
 
 const PERIOD_LABEL_I18N_KEYS = {

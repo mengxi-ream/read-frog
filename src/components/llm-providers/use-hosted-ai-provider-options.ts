@@ -8,6 +8,8 @@ import { useHostedAiStatus } from "./use-hosted-ai-status"
 function getFeatureForCapability(capability: ProviderCapability) {
   if (capability === "pageTranslation") return "pageTranslation" as const
   if (capability === "customAction") return "customAction" as const
+  if (capability === "selectionTranslation") return "selectionTranslation" as const
+  if (capability === "noteSuggestion") return "noteSuggestion" as const
   return null
 }
 
