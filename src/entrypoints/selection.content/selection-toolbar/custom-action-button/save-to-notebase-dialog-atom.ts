@@ -9,7 +9,7 @@ import type {
 } from "@/utils/notebase/pending-save"
 import { atom } from "jotai"
 
-export type SaveToNotebaseAnalyticsSource = "save_suggestion"
+export type SaveToNotebaseAnalyticsSource = "note_suggestion"
 
 export type SaveToNotebaseDialogState =
   | { open: false }

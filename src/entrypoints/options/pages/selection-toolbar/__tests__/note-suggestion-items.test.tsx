@@ -7,11 +7,19 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
-import { SaveSuggestionItems } from "../actions/save-suggestion-items"
+import { NoteSuggestionItems } from "../actions/note-suggestion-items"
 
-const { selectionToolbarAtom, setSelectionToolbarMock, testState } = vi.hoisted(() => ({
+const {
+  selectionToolbarAtom,
+  setSelectionToolbarMock,
+  setProviderIdMock,
+  useFeatureProviderMock,
+  testState,
+} = vi.hoisted(() => ({
   selectionToolbarAtom: {},
   setSelectionToolbarMock: vi.fn<(value: Config["selectionToolbar"]) => Promise<void>>(),
+  setProviderIdMock: vi.fn<(providerId: string) => void>(),
+  useFeatureProviderMock: vi.fn<(featureKey: string) => unknown>(),
   testState: {
     selectionToolbar: null as Config["selectionToolbar"] | null,
   },
@@ -30,6 +38,24 @@ vi.mock("@/utils/atoms/config", () => ({
   configFieldsAtomMap: {
     selectionToolbar: selectionToolbarAtom,
   },
+}))
+
+// Keep the render shallow: the suggestion provider row only needs to prove it
+// is wired to the noteSuggestion feature binding, not the dropdown internals.
+vi.mock("@/components/llm-providers/use-feature-providers", () => ({
+  useFeatureProvider: (featureKey: string) => useFeatureProviderMock(featureKey),
+}))
+
+vi.mock("@/components/llm-providers/provider-selector", () => ({
+  default: ({ value, onChange }: { value: string; onChange: (id: string) => void }) => (
+    <button
+      type="button"
+      data-testid="note-suggestion-provider-selector"
+      onClick={() => onChange("picked-provider")}
+    >
+      {value}
+    </button>
+  ),
 }))
 
 vi.mock("@/components/ui/base-ui/select", async () => {
@@ -111,11 +137,19 @@ function createCustomAction(
   }
 }
 
-describe("SaveSuggestionItems", () => {
+describe("NoteSuggestionItems", () => {
   beforeEach(() => {
     testState.selectionToolbar = structuredClone(DEFAULT_CONFIG.selectionToolbar)
     setSelectionToolbarMock.mockReset()
     setSelectionToolbarMock.mockResolvedValue()
+    setProviderIdMock.mockReset()
+    useFeatureProviderMock.mockReset()
+    useFeatureProviderMock.mockReturnValue({
+      providers: [],
+      providerId: DEFAULT_CONFIG.selectionToolbar.noteSuggestion.providerId,
+      providerConfig: null,
+      setProviderId: setProviderIdMock,
+    })
   })
 
   it("lists the built-in action first and keeps disabled custom actions selectable", () => {
@@ -123,12 +157,13 @@ describe("SaveSuggestionItems", () => {
     const disabledAction = createCustomAction("disabled-action", "Disabled Action", false)
     const enabledAction = createCustomAction("enabled-action", "Enabled Action", true)
     selectionToolbar.customActions = [disabledAction, enabledAction]
-    selectionToolbar.saveSuggestion = {
+    selectionToolbar.noteSuggestion = {
+      ...selectionToolbar.noteSuggestion,
       enabled: false,
       actionId: disabledAction.id,
     }
 
-    render(<SaveSuggestionItems />)
+    render(<NoteSuggestionItems />)
 
     const builtInAction = getBuiltInDictionaryAction(selectionToolbar)
     const options = screen.getAllByRole("option")
@@ -139,7 +174,7 @@ describe("SaveSuggestionItems", () => {
     ])
 
     const selector = screen.getByRole("combobox", {
-      name: "options.selectionToolbar.actions.saveSuggestion.action",
+      name: "options.selectionToolbar.actions.noteSuggestion.action",
     })
     expect(selector).toHaveTextContent(disabledAction.name)
     expect(selector).toBeEnabled()
@@ -149,8 +184,8 @@ describe("SaveSuggestionItems", () => {
 
     expect(setSelectionToolbarMock).toHaveBeenCalledWith({
       ...selectionToolbar,
-      saveSuggestion: {
-        ...selectionToolbar.saveSuggestion,
+      noteSuggestion: {
+        ...selectionToolbar.noteSuggestion,
         actionId: enabledAction.id,
       },
     })
@@ -159,13 +194,13 @@ describe("SaveSuggestionItems", () => {
   it("renders the configured built-in action without writing during render", () => {
     const selectionToolbar = testState.selectionToolbar!
     selectionToolbar.customActions = [createCustomAction("action-1", "Custom Action", true)]
-    selectionToolbar.saveSuggestion.actionId = "default-dictionary"
+    selectionToolbar.noteSuggestion.actionId = "default-dictionary"
 
-    render(<SaveSuggestionItems />)
+    render(<NoteSuggestionItems />)
 
     expect(
       screen.getByRole("combobox", {
-        name: "options.selectionToolbar.actions.saveSuggestion.action",
+        name: "options.selectionToolbar.actions.noteSuggestion.action",
       }),
     ).toHaveTextContent(getBuiltInDictionaryAction(selectionToolbar).name)
     expect(setSelectionToolbarMock).not.toHaveBeenCalled()
@@ -175,18 +210,35 @@ describe("SaveSuggestionItems", () => {
     const selectionToolbar = testState.selectionToolbar!
     const action = createCustomAction("action-1", "Custom Action", true)
     selectionToolbar.customActions = [action]
-    selectionToolbar.saveSuggestion.actionId = action.id
+    selectionToolbar.noteSuggestion.actionId = action.id
 
-    render(<SaveSuggestionItems />)
+    render(<NoteSuggestionItems />)
 
     fireEvent.click(screen.getByRole("switch"))
 
     expect(setSelectionToolbarMock).toHaveBeenCalledWith({
       ...selectionToolbar,
-      saveSuggestion: {
-        ...selectionToolbar.saveSuggestion,
+      noteSuggestion: {
+        ...selectionToolbar.noteSuggestion,
         enabled: false,
       },
     })
+  })
+
+  it("renders a provider row bound to the noteSuggestion feature", () => {
+    render(<NoteSuggestionItems />)
+
+    expect(useFeatureProviderMock).toHaveBeenCalledWith("noteSuggestion")
+
+    const providerSelector = screen.getByTestId("note-suggestion-provider-selector")
+    expect(providerSelector).toHaveTextContent(
+      DEFAULT_CONFIG.selectionToolbar.noteSuggestion.providerId,
+    )
+
+    fireEvent.click(providerSelector)
+    expect(setProviderIdMock).toHaveBeenCalledWith("picked-provider")
+    // The provider write goes through the feature binding, not the raw
+    // selectionToolbar atom.
+    expect(setSelectionToolbarMock).not.toHaveBeenCalled()
   })
 })

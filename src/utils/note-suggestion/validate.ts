@@ -1,4 +1,4 @@
-import type { SaveSuggestionNote, SaveSuggestionNoteRecord, ValidatedSaveSuggestion } from "./types"
+import type { NoteSuggestionNote, NoteSuggestionNoteRecord, ValidatedNoteSuggestion } from "./types"
 import type {
   SelectionToolbarCustomAction,
   SelectionToolbarCustomActionOutputField,
@@ -11,7 +11,7 @@ import { createStructuredObjectSchema } from "@/utils/ai/structured-object-schem
  * occurrence wins for duplicated names.
  */
 export function notePairsToRecord(
-  note: SaveSuggestionNote,
+  note: NoteSuggestionNote,
   outputSchema: SelectionToolbarCustomActionOutputField[],
 ): Record<string, unknown> {
   const record: Record<string, unknown> = {}
@@ -31,10 +31,10 @@ export function notePairsToRecord(
   return record
 }
 
-export interface ValidateSaveSuggestionInput {
+export interface ValidateNoteSuggestionInput {
   envelope: {
     summaryFieldName?: string | null
-    notes: SaveSuggestionNote[]
+    notes: NoteSuggestionNote[]
   }
   /** Selected action snapshot taken when the request was fired. */
   action: SelectionToolbarCustomAction
@@ -65,9 +65,9 @@ function sanitizeSummaryFieldName(
  * primary display field discards the whole suggestion (returns null, meaning
  * "treat it as never happened").
  */
-export function validateSaveSuggestion(
-  input: ValidateSaveSuggestionInput,
-): ValidatedSaveSuggestion | null {
+export function validateNoteSuggestion(
+  input: ValidateNoteSuggestionInput,
+): ValidatedNoteSuggestion | null {
   const { envelope, action } = input
 
   if (envelope.notes.length === 0) {
@@ -83,14 +83,14 @@ export function validateSaveSuggestion(
     action.outputSchema.map(({ name, type }) => ({ name, type })),
   )
 
-  const notes: SaveSuggestionNoteRecord[] = []
+  const notes: NoteSuggestionNoteRecord[] = []
   for (const note of envelope.notes) {
     const parsed = noteSchema.safeParse(notePairsToRecord(note, action.outputSchema))
     if (!parsed.success) {
       return null
     }
 
-    const record = parsed.data as SaveSuggestionNoteRecord
+    const record = parsed.data as NoteSuggestionNoteRecord
     const primaryValue = record[primaryFieldName]
     const hasPrimaryValue =
       typeof primaryValue === "string" ? primaryValue.trim().length > 0 : primaryValue !== null

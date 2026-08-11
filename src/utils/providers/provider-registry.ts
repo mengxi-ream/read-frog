@@ -67,7 +67,7 @@ const SYSTEM_PROVIDER_DEFS = {
     modelTier: "normal",
     nameKey: BUILT_IN_AI_PROVIDER_NAME_KEY,
     fallbackName: BUILT_IN_AI_PROVIDER_FALLBACK_NAME,
-    capabilities: ["pageTranslation", "customAction"],
+    capabilities: ["pageTranslation", "selectionTranslation", "noteSuggestion", "customAction"],
     logo: () => BUILT_IN_AI_PROVIDER_LOGO,
   },
   [BUILT_IN_AI_ULTRA_PROVIDER_ID]: {
@@ -75,7 +75,7 @@ const SYSTEM_PROVIDER_DEFS = {
     modelTier: "ultra",
     nameKey: BUILT_IN_AI_ULTRA_PROVIDER_NAME_KEY,
     fallbackName: BUILT_IN_AI_ULTRA_PROVIDER_FALLBACK_NAME,
-    capabilities: ["pageTranslation", "customAction"],
+    capabilities: ["pageTranslation", "selectionTranslation", "noteSuggestion", "customAction"],
     logo: () => BUILT_IN_AI_PROVIDER_LOGO,
   },
 } as const satisfies Record<string, SystemProviderDef>
@@ -87,8 +87,9 @@ function getSystemProviderDefs(): SystemProviderDef[] {
 const LOCAL_PROVIDER_CAPABILITY_PREDICATES = {
   pageTranslation: isTranslateProviderConfig,
   videoSubtitles: isTranslateProviderConfig,
-  "selectionToolbar.translate": isTranslateProviderConfig,
+  selectionTranslation: isTranslateProviderConfig,
   inputTranslation: isTranslateProviderConfig,
+  noteSuggestion: isLLMProviderConfig,
   customAction: isLLMProviderConfig,
 } as const satisfies Record<ProviderCapability, ProviderConfigPredicate>
 
@@ -102,8 +103,7 @@ export type ProviderRefForCapability<C extends ProviderCapability> = ResolvedPro
 >
 
 export type CustomActionProviderRef = ProviderRefForCapability<"customAction">
-export type SelectionToolbarTranslateProviderRef =
-  ProviderRefForCapability<"selectionToolbar.translate">
+export type SelectionTranslationProviderRef = ProviderRefForCapability<"selectionTranslation">
 
 function getSystemProviderName(def: SystemProviderDef): string {
   return i18n.t(def.nameKey as never) || def.fallbackName

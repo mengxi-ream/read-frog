@@ -31,6 +31,7 @@ import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
 import { getUniqueName } from "@/utils/name"
+import { trackNoteSuggestionEvent } from "@/utils/note-suggestion/analytics"
 import {
   createNotebaseConnectedAccountSnapshot,
   formatNotebaseConnectedAccountLabel,
@@ -48,7 +49,6 @@ import {
   setPendingNotebaseSave,
 } from "@/utils/notebase/pending-save"
 import { orpcClient } from "@/utils/orpc/client"
-import { trackSaveSuggestionEvent } from "@/utils/save-suggestion/analytics"
 import { showNotebaseLimitExceededToast } from "./notebase-limit-toast"
 import { saveToNotebaseDialogAtom } from "./save-to-notebase-dialog-atom"
 
@@ -125,11 +125,11 @@ export function SaveToNotebaseDialogHost() {
   }
 
   const recordSuggestionAcceptedIfNeeded = (actionName?: string) => {
-    if (analyticsSource !== "save_suggestion") {
+    if (analyticsSource !== "note_suggestion") {
       return
     }
 
-    trackSaveSuggestionEvent("suggestion_accepted", { actionName, provider: analyticsProvider })
+    trackNoteSuggestionEvent("suggestion_accepted", { actionName, provider: analyticsProvider })
   }
 
   const buildCustomActionsWithDraft = (draft: SelectionToolbarCustomAction) => {
@@ -143,7 +143,7 @@ export function SaveToNotebaseDialogHost() {
   }
 
   /**
-   * Append a draft action (save suggestion flow) to config. Called at the
+   * Append a draft action (note suggestion flow) to config. Called at the
    * dialog confirm — the "real action button" moment — before login redirects,
    * so the background pending-save processor finds the action afterwards.
    */

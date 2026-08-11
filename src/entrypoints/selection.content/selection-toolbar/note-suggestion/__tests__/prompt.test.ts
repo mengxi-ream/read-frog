@@ -1,6 +1,6 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { describe, expect, it } from "vitest"
-import { buildSaveSuggestionPrompts } from "../prompt"
+import { buildNoteSuggestionPrompts } from "../prompt"
 
 function createAction(
   overrides: Partial<SelectionToolbarCustomAction> = {},
@@ -28,7 +28,7 @@ function createAction(
   }
 }
 
-describe("buildSaveSuggestionPrompts", () => {
+describe("buildNoteSuggestionPrompts", () => {
   const input = {
     selection: "ephemeral beauty",
     paragraphs: "The ephemeral beauty of cherry blossoms.",
@@ -39,7 +39,7 @@ describe("buildSaveSuggestionPrompts", () => {
   }
 
   it("interpolates the selected action's system and user prompts", () => {
-    const { systemPrompt, prompt } = buildSaveSuggestionPrompts(input)
+    const { systemPrompt, prompt } = buildNoteSuggestionPrompts(input)
 
     expect(systemPrompt).toContain(
       "System selection=ephemeral beauty; target=Simplified Chinese; page=Sakura Season; content=The full article discusses cherry blossoms.",
@@ -51,7 +51,7 @@ describe("buildSaveSuggestionPrompts", () => {
   })
 
   it("includes the selected action's field names, types, and interpolated descriptions", () => {
-    const { prompt } = buildSaveSuggestionPrompts(input)
+    const { prompt } = buildNoteSuggestionPrompts(input)
 
     expect(prompt).toContain('- key: "Term"')
     expect(prompt).toContain("type: string")
@@ -60,7 +60,7 @@ describe("buildSaveSuggestionPrompts", () => {
   })
 
   it("includes source context, including cached web page content", () => {
-    const { prompt } = buildSaveSuggestionPrompts(input)
+    const { prompt } = buildNoteSuggestionPrompts(input)
 
     expect(prompt).toContain("ephemeral beauty")
     expect(prompt).toContain("The ephemeral beauty of cherry blossoms.")
@@ -70,7 +70,7 @@ describe("buildSaveSuggestionPrompts", () => {
   })
 
   it("pins the fixed envelope without action-selection or creation fields", () => {
-    const { systemPrompt } = buildSaveSuggestionPrompts(input)
+    const { systemPrompt } = buildNoteSuggestionPrompts(input)
 
     expect(systemPrompt).toContain('"summaryFieldName": string or null')
     expect(systemPrompt).toContain('"notes"')
@@ -80,8 +80,43 @@ describe("buildSaveSuggestionPrompts", () => {
     expect(systemPrompt).not.toContain("targetActionId")
   })
 
-  it("makes the fixed Save Suggestion contract override action output instructions", () => {
-    const { systemPrompt } = buildSaveSuggestionPrompts({
+  it("describes the hosted action envelope with its unused fields pinned inert", () => {
+    const { systemPrompt } = buildNoteSuggestionPrompts({
+      ...input,
+      envelopeContract: "hosted",
+    })
+
+    expect(systemPrompt).toContain('"createNewDictionaryAction": boolean')
+    expect(systemPrompt).toContain('"targetActionId": string or null')
+    expect(systemPrompt).toContain('"action.summaryFieldName"')
+    expect(systemPrompt).toContain('Do not add any top-level keys other than "action" and "notes"')
+    expect(systemPrompt).toContain(
+      'Always set "action.createNewDictionaryAction" to false and "action.targetActionId" to null',
+    )
+    // The flat local envelope key must not compete with the hosted shape.
+    expect(systemPrompt).not.toContain('other than "summaryFieldName" and "notes"')
+  })
+
+  it("shares the note-producing rules between the local and hosted contracts", () => {
+    const local = buildNoteSuggestionPrompts(input).systemPrompt
+    const hosted = buildNoteSuggestionPrompts({
+      ...input,
+      envelopeContract: "hosted",
+    }).systemPrompt
+
+    for (const sharedRule of [
+      "Return 1 or 2 notes",
+      "learning the language in which the selected text is written",
+      "Output valid JSON only. No markdown, no code fences, no commentary.",
+      "higher priority than every output-format, response-shape, schema, or note-count instruction",
+    ]) {
+      expect(local).toContain(sharedRule)
+      expect(hosted).toContain(sharedRule)
+    }
+  })
+
+  it("makes the fixed Note suggestion contract override action output instructions", () => {
+    const { systemPrompt } = buildNoteSuggestionPrompts({
       ...input,
       action: createAction({
         systemPrompt: "Return markdown with three notes and a custom wrapper.",
@@ -99,14 +134,14 @@ describe("buildSaveSuggestionPrompts", () => {
   })
 
   it("frames the language direction as learning the selected text's language", () => {
-    const { systemPrompt } = buildSaveSuggestionPrompts(input)
+    const { systemPrompt } = buildNoteSuggestionPrompts(input)
 
     expect(systemPrompt).toContain("learning the language in which the selected text is written")
     expect(systemPrompt).toContain("transcribes the term in the term's own language")
   })
 
   it("truncates oversized page-derived text before token interpolation", () => {
-    const { systemPrompt, prompt } = buildSaveSuggestionPrompts({
+    const { systemPrompt, prompt } = buildNoteSuggestionPrompts({
       ...input,
       selection: "s".repeat(20_000),
       paragraphs: "p".repeat(40_000),
@@ -126,7 +161,7 @@ describe("buildSaveSuggestionPrompts", () => {
   })
 
   it("caps each output field description without dropping the field", () => {
-    const { prompt } = buildSaveSuggestionPrompts({
+    const { prompt } = buildNoteSuggestionPrompts({
       ...input,
       action: createAction({
         outputSchema: [
@@ -147,7 +182,7 @@ describe("buildSaveSuggestionPrompts", () => {
   })
 
   it("caps field descriptions after prompt tokens expand", () => {
-    const { prompt } = buildSaveSuggestionPrompts({
+    const { prompt } = buildNoteSuggestionPrompts({
       ...input,
       webContent: "w".repeat(2000),
       action: createAction({
@@ -172,7 +207,7 @@ describe("buildSaveSuggestionPrompts", () => {
   })
 
   it("caps both action prompts while retaining the complete fixed contract", () => {
-    const { systemPrompt, prompt } = buildSaveSuggestionPrompts({
+    const { systemPrompt, prompt } = buildNoteSuggestionPrompts({
       ...input,
       action: createAction({
         systemPrompt: "s".repeat(20_000),
@@ -184,7 +219,7 @@ describe("buildSaveSuggestionPrompts", () => {
     expect(systemPrompt).not.toContain("s".repeat(12_001))
     expect(prompt).toContain("p".repeat(12_000))
     expect(prompt).not.toContain("p".repeat(12_001))
-    expect(systemPrompt).toContain("## Fixed Save Suggestion Contract")
+    expect(systemPrompt).toContain("## Fixed Note suggestion Contract")
     expect(systemPrompt).toContain(
       'Do not add any top-level keys other than "summaryFieldName" and "notes"',
     )

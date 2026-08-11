@@ -47,6 +47,26 @@ function renderWithConfig(config: Config) {
   )
 }
 
+describe("featureProviderSelectorList feature rows", () => {
+  it("renders one provider row per feature key, including note suggestion", () => {
+    renderWithConfig(cloneConfig(DEFAULT_CONFIG))
+
+    // The test i18n facade resolves keys to themselves, so the row labels are
+    // the raw feature label keys.
+    for (const featureKey of [
+      "pageTranslation",
+      "videoSubtitles",
+      "selectionTranslation",
+      "inputTranslation",
+      "noteSuggestion",
+    ]) {
+      expect(
+        screen.getByText(`options.apiProviders.featureProviders.features.${featureKey}`),
+      ).toBeInTheDocument()
+    }
+  })
+})
+
 describe("featureProviderSelectorList custom action filtering", () => {
   it("only renders provider rows for enabled custom actions", () => {
     const config = cloneConfig(DEFAULT_CONFIG)

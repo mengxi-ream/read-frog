@@ -142,7 +142,8 @@ options:
       features:
         pageTranslation: Перевод страницы
         customAction: Пользовательские AI-действия
-        noteSuggestion: Подсказки для сохранения
+        noteSuggestion: Подсказки для заметок
+        selectionTranslation: Перевод выделения
     sponsorCta: Получить быстрый и выгодный ИИ
     setApiKeyWarning:
       message: Укажите API-ключ на странице $1
@@ -274,14 +275,16 @@ options:
       description: Выберите провайдера для каждой функции
       features:
         pageTranslation: Перевод страницы
-        selectionToolbar_translate: Перевод выделения
+        selectionTranslation: Перевод выделения
         inputTranslation: Перевод ввода
         videoSubtitles: Субтитры видео
+        noteSuggestion: Подсказки для заметок
       descriptions:
         pageTranslation: Переводит страницу целиком — в двуязычном режиме или с заменой оригинала.
-        selectionToolbar_translate: Переводит выделенный текст через панель выделения.
+        selectionTranslation: Переводит выделенный текст через панель выделения.
         inputTranslation: Переводит то, что вы набрали в поле ввода, перед отправкой.
         videoSubtitles: Переводит субтитры, которые появляются в видеоплеере.
+        noteSuggestion: Предлагает слова, которые стоит сохранить в Notebase, после перевода выделенного текста.
     languageDetection:
       title: Определение языка
       description: Влияет на точность определения языка для автоперевода, пропуска языков и выбора голоса озвучивания.
@@ -546,11 +549,13 @@ options:
       speak:
         title: Озвучивание
         description: Показывать кнопку озвучивания, которая читает выделенный текст вслух
-      saveSuggestion:
-        title: Предложения по сохранению
+      noteSuggestion:
+        title: Подсказки для заметок
         description: После перевода выделенного текста с помощью ИИ-провайдера предлагать слова для сохранения в Notebase
         action: Действие
         actionDescription: Действие, которое формирует предложение
+        provider: Провайдер
+        providerDescription: ИИ-провайдер, который формирует предложение
     display:
       title: Отображение
       opacity:
@@ -1097,13 +1102,13 @@ action:
   translation: Перевод
   speak: Озвучить
   playing: Воспроизведение
-saveSuggestion:
+noteSuggestion:
   title: Стоит сохранить
   description: Сохраните эти слова в Notebase, чтобы повторять их в любое время.
   save: Сохранить
   saved: Сохранено
   staleSuggestion: Это предложение устарело
-  toggleLabel: Показывать предложения по сохранению
+  toggleLabel: Показывать подсказки для заметок
 thinking:
   label: Размышление
   complete: Размышление завершено
@@ -1151,6 +1156,8 @@ subtitles:
     translatedExportIncomplete: Не удалось перевести все строки субтитров
     translatedExportSameLanguage: Исходный и целевой языки совпадают
 hostedAi:
+  ultraBadge:
+    tooltip: Требуется план Ultra
   availability:
     authenticationRequired: Войдите, чтобы использовать этого провайдера
     ultraRequired: Требуется план Ultra

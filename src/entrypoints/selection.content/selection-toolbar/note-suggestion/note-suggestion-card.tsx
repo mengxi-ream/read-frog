@@ -1,5 +1,5 @@
-import type { SaveSuggestionSessionResult } from "./use-save-suggestion"
-import type { SaveSuggestionNoteRecord } from "@/utils/save-suggestion/types"
+import type { NoteSuggestionSessionResult } from "./use-note-suggestion"
+import type { NoteSuggestionNoteRecord } from "@/utils/note-suggestion/types"
 import { IconBookmarkPlus } from "@tabler/icons-react"
 import { useAtom } from "jotai"
 import { useEffect, useState } from "react"
@@ -10,8 +10,8 @@ import { toastManager } from "@/components/ui/base-ui/toast"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { findSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
+import { trackNoteSuggestionEvent } from "@/utils/note-suggestion/analytics"
 import { getOutputSchemaFingerprint } from "@/utils/notebase/pending-save"
-import { trackSaveSuggestionEvent } from "@/utils/save-suggestion/analytics"
 import { useSaveToNotebase } from "../custom-action-button/use-save-to-notebase"
 
 function formatNoteValue(value: string | number | null): string | null {
@@ -28,7 +28,7 @@ function NoteRow({
   primaryFieldName,
   secondaryFieldNames,
 }: {
-  note: SaveSuggestionNoteRecord
+  note: NoteSuggestionNoteRecord
   primaryFieldName: string
   secondaryFieldNames: string[]
 }) {
@@ -47,11 +47,11 @@ function NoteRow({
   )
 }
 
-export function SaveSuggestionCard({
+export function NoteSuggestionCard({
   suggestion,
   markShownOnce,
 }: {
-  suggestion: SaveSuggestionSessionResult
+  suggestion: NoteSuggestionSessionResult
   markShownOnce: (sessionKey: string) => boolean
 }) {
   const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
@@ -65,7 +65,7 @@ export function SaveSuggestionCard({
       return
     }
 
-    trackSaveSuggestionEvent("suggestion_shown", {
+    trackNoteSuggestionEvent("suggestion_shown", {
       startedAt: firedAt,
       provider: analyticsProvider,
     })
@@ -98,7 +98,7 @@ export function SaveSuggestionCard({
       getOutputSchemaFingerprint(liveAction.outputSchema) !==
         getOutputSchemaFingerprint(actionSnapshot.outputSchema)
     ) {
-      toastManager.add({ type: "error", title: i18n.t("saveSuggestion.staleSuggestion") })
+      toastManager.add({ type: "error", title: i18n.t("noteSuggestion.staleSuggestion") })
       setSaveState("stale")
       return
     }
@@ -106,12 +106,12 @@ export function SaveSuggestionCard({
     const outcome = await save({
       action: liveAction,
       results: validated.notes,
-      analyticsSource: "save_suggestion",
+      analyticsSource: "note_suggestion",
       analyticsProvider,
     })
     if (outcome === "saved") {
       setSaveState("saved")
-      trackSaveSuggestionEvent("suggestion_accepted", {
+      trackNoteSuggestionEvent("suggestion_accepted", {
         startedAt: firedAt,
         actionName: liveAction.name,
         provider: analyticsProvider,
@@ -123,39 +123,39 @@ export function SaveSuggestionCard({
   const buttonLabel = isSaving
     ? i18n.t("action.saveToNotebaseSaving")
     : saveState === "saved"
-      ? i18n.t("saveSuggestion.saved")
-      : i18n.t("saveSuggestion.save")
+      ? i18n.t("noteSuggestion.saved")
+      : i18n.t("noteSuggestion.save")
 
   return (
     <div
-      data-slot="save-suggestion-card"
+      data-slot="note-suggestion-card"
       className="notranslate mx-4 mb-4 space-y-2 rounded-lg border bg-muted/40 p-3"
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-1.5 text-sm font-medium">
           <IconBookmarkPlus className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.8} />
-          <span className="truncate">{i18n.t("saveSuggestion.title")}</span>
+          <span className="truncate">{i18n.t("noteSuggestion.title")}</span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <Switch
-            id="save-suggestion-toggle"
+            id="note-suggestion-toggle"
             size="sm"
-            checked={selectionToolbar.saveSuggestion.enabled}
+            checked={selectionToolbar.noteSuggestion.enabled}
             onCheckedChange={(checked) => {
               void setSelectionToolbar({
-                saveSuggestion: { ...selectionToolbar.saveSuggestion, enabled: checked },
+                noteSuggestion: { ...selectionToolbar.noteSuggestion, enabled: checked },
               })
             }}
           />
           <Label
-            htmlFor="save-suggestion-toggle"
+            htmlFor="note-suggestion-toggle"
             className="text-xs font-normal text-muted-foreground"
           >
-            {i18n.t("saveSuggestion.toggleLabel")}
+            {i18n.t("noteSuggestion.toggleLabel")}
           </Label>
         </div>
       </div>
-      <p className="text-xs text-muted-foreground">{i18n.t("saveSuggestion.description")}</p>
+      <p className="text-xs text-muted-foreground">{i18n.t("noteSuggestion.description")}</p>
       <div className="space-y-1.5">
         {validated.notes.map((note, index) => (
           <NoteRow

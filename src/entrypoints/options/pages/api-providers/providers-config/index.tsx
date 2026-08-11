@@ -1,4 +1,5 @@
 import type { APIProviderConfig } from "@/types/config/provider"
+import type { HostedAiFeature } from "@/utils/hosted-ai/types"
 import { Icon } from "@iconify/react"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useRef, useState } from "react"
@@ -25,7 +26,7 @@ import {
 import { BUILT_IN_AI_PROVIDER_IDS, type BuiltInAiProviderId } from "@/utils/constants/provider-ids"
 import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
-import { getHostedAiTierStatus } from "@/utils/hosted-ai/status"
+import { getHostedAiCreditForFeature, getHostedAiTierStatus } from "@/utils/hosted-ai/status"
 import { i18n } from "@/utils/i18n"
 import { getRequestedProviderId, PROVIDER_CONFIG_SECTION_ID } from "@/utils/navigation"
 import {
@@ -321,13 +322,29 @@ function BuiltInProviderCard({ providerId }: { providerId: BuiltInAiProviderId }
   )
 }
 
+/** Every hosted-capable feature key, in FEATURE_KEYS order. Grows as more features gain a hosted route. */
+const BUILT_IN_FEATURE_KEYS = ["pageTranslation", "selectionTranslation", "noteSuggestion"] as const
+
 function BuiltInProviderPanel({ providerId }: { providerId: BuiltInAiProviderId }) {
   const isUltra = providerId === BUILT_IN_AI_ULTRA_PROVIDER_ID
-  // Rows lock only on a definitive server verdict (`accessAllowed === false`,
-  // an identity/plan fact rather than service health). While the status is
-  // unknown — loading, or the status endpoint failing — the rows stay
-  // interactive, so an outage never locks the configuration UI.
-  const { status } = useHostedAiStatus({ enabled: isUltra })
+  const modelTier = isUltra ? ("ultra" as const) : ("normal" as const)
+  const { status } = useHostedAiStatus()
+
+  // Both cards list every hosted-capable feature. Same policy as the provider
+  // dropdowns (use-hosted-ai-provider-options): the Ultra badge is the
+  // viewer-independent `requiresUltra` product fact; rows lock only on durable
+  // account facts (missing access or a plan without a funding pool), never on
+  // transient service state (exhausted quota, open circuit, unconfigured
+  // model) — those surface at run time. Fail open while status is unknown so
+  // one failed fetch never locks the configuration UI.
+  const getAssignmentStatus = (feature: HostedAiFeature) => {
+    const tierStatus = getHostedAiTierStatus(status, feature, modelTier)
+    const hasFunding = getHostedAiCreditForFeature(status, feature) !== undefined
+    return {
+      disabled: tierStatus ? !tierStatus.accessAllowed || !hasFunding : false,
+      requiresUltra: tierStatus?.requiresUltra === true,
+    }
+  }
 
   return (
     <BuiltInProviderEditor.Provider providerId={providerId}>
@@ -344,19 +361,14 @@ function BuiltInProviderPanel({ providerId }: { providerId: BuiltInAiProviderId 
             </ProviderEditor.Attribution>
           </div>
           <ProviderEditor.Assignments defaultOpen>
-            {isUltra && (
-              <ProviderEditor.PageTranslationAssignment
-                disabled={
-                  getHostedAiTierStatus(status, "pageTranslation", "ultra")?.accessAllowed === false
-                }
+            {BUILT_IN_FEATURE_KEYS.map((featureKey) => (
+              <ProviderEditor.FeatureAssignment
+                key={featureKey}
+                featureKey={featureKey}
+                {...getAssignmentStatus(featureKey)}
               />
-            )}
-            <ProviderEditor.CustomActionAssignments
-              disabled={
-                isUltra &&
-                getHostedAiTierStatus(status, "customAction", "ultra")?.accessAllowed === false
-              }
-            />
+            ))}
+            <ProviderEditor.CustomActionAssignments {...getAssignmentStatus("customAction")} />
           </ProviderEditor.Assignments>
         </EntityEditor.Body>
       </EntityEditor.Root>

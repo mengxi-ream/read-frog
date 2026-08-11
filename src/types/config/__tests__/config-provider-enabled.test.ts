@@ -89,7 +89,7 @@ describe("config provider enabled validation", () => {
     expect(result.success).toBe(true)
   })
 
-  it("rejects built-in AI for selection toolbar translation", () => {
+  it("allows built-in AI for selection toolbar translation", () => {
     const issuePaths = getIssuePaths({
       ...DEFAULT_CONFIG,
       selectionToolbar: {
@@ -99,6 +99,46 @@ describe("config provider enabled validation", () => {
           translate: {
             ...DEFAULT_CONFIG.selectionToolbar.features.translate,
             providerId: "read-frog-free-ai",
+          },
+        },
+      },
+    })
+
+    expect(issuePaths).not.toContain("selectionToolbar.features.translate.providerId")
+  })
+
+  it("rejects an unknown provider for selection toolbar translation", () => {
+    const issuePaths = getIssuePaths({
+      ...DEFAULT_CONFIG,
+      selectionToolbar: {
+        ...DEFAULT_CONFIG.selectionToolbar,
+        features: {
+          ...DEFAULT_CONFIG.selectionToolbar.features,
+          translate: {
+            ...DEFAULT_CONFIG.selectionToolbar.features.translate,
+            providerId: "nonexistent-provider",
+          },
+        },
+      },
+    })
+
+    expect(issuePaths).toContain("selectionToolbar.features.translate.providerId")
+  })
+
+  it("rejects a disabled local provider for selection toolbar translation", () => {
+    const providersConfig = DEFAULT_CONFIG.providersConfig.map((provider) =>
+      provider.id === "google-translate-default" ? { ...provider, enabled: false } : provider,
+    )
+    const issuePaths = getIssuePaths({
+      ...DEFAULT_CONFIG,
+      providersConfig,
+      selectionToolbar: {
+        ...DEFAULT_CONFIG.selectionToolbar,
+        features: {
+          ...DEFAULT_CONFIG.selectionToolbar.features,
+          translate: {
+            ...DEFAULT_CONFIG.selectionToolbar.features.translate,
+            providerId: "google-translate-default",
           },
         },
       },

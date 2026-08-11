@@ -4,7 +4,7 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
-import { SaveSuggestionItems } from "./save-suggestion-items"
+import { NoteSuggestionItems } from "./note-suggestion-items"
 
 /** What the toolbar can do with a selection: the two built-in buttons, and the save prompt. */
 export function ActionsSection() {
@@ -46,7 +46,7 @@ export function ActionsSection() {
           onCheckedChange={(checked) => setFeatureEnabled("speak", checked)}
         />
       </ConfigItem>
-      <SaveSuggestionItems />
+      <NoteSuggestionItems />
     </ConfigSection>
   )
 }

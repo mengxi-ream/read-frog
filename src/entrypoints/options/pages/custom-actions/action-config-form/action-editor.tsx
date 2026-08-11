@@ -158,13 +158,13 @@ function CustomProvider({
     await setSelectionToolbar({
       ...selectionToolbar,
       customActions: updatedActions,
-      saveSuggestion:
-        selectionToolbar.saveSuggestion.actionId === action.id
+      noteSuggestion:
+        selectionToolbar.noteSuggestion.actionId === action.id
           ? {
-              ...selectionToolbar.saveSuggestion,
+              ...selectionToolbar.noteSuggestion,
               actionId: BUILT_IN_DICTIONARY_ACTION_ID,
             }
-          : selectionToolbar.saveSuggestion,
+          : selectionToolbar.noteSuggestion,
     })
     setSelectedActionId(nextSelectedAction?.id)
   }

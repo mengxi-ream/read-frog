@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import type { ReactNode } from "react"
-import type { SaveSuggestionSessionResult } from "../use-save-suggestion"
+import type { NoteSuggestionSessionResult } from "../use-note-suggestion"
 import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
@@ -28,11 +28,11 @@ vi.mock("@/components/ui/base-ui/toast", () => ({
   toastManager: { add: mocks.toastAdd },
 }))
 
-vi.mock("@/utils/save-suggestion/analytics", () => ({
-  trackSaveSuggestionEvent: (...args: any[]) => mocks.track(...args),
+vi.mock("@/utils/note-suggestion/analytics", () => ({
+  trackNoteSuggestionEvent: (...args: any[]) => mocks.track(...args),
 }))
 
-const { SaveSuggestionCard } = await import("../save-suggestion-card")
+const { NoteSuggestionCard } = await import("../note-suggestion-card")
 
 function wrapper(store: ReturnType<typeof createStore>) {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -73,7 +73,7 @@ function createAction(
 
 function createSuggestion(
   actionSnapshot: SelectionToolbarCustomAction,
-): SaveSuggestionSessionResult {
+): NoteSuggestionSessionResult {
   return {
     sessionKey: "session-1",
     validated: {
@@ -90,7 +90,7 @@ function createStoreWithAction(action?: SelectionToolbarCustomAction) {
   const store = createStore()
   const config = structuredClone(DEFAULT_CONFIG)
   config.selectionToolbar.customActions = action ? [action] : []
-  config.selectionToolbar.saveSuggestion.actionId = action?.id ?? "default-dictionary"
+  config.selectionToolbar.noteSuggestion.actionId = action?.id ?? "default-dictionary"
   store.set(configAtom, config)
   return store
 }
@@ -100,7 +100,7 @@ function renderCard(
   actionSnapshot: SelectionToolbarCustomAction,
 ) {
   return render(
-    <SaveSuggestionCard
+    <NoteSuggestionCard
       suggestion={createSuggestion(actionSnapshot)}
       markShownOnce={() => false}
     />,
@@ -109,10 +109,10 @@ function renderCard(
 }
 
 function clickSave() {
-  fireEvent.click(screen.getByRole("button", { name: i18n.t("saveSuggestion.save") }))
+  fireEvent.click(screen.getByRole("button", { name: i18n.t("noteSuggestion.save") }))
 }
 
-describe("SaveSuggestionCard", () => {
+describe("NoteSuggestionCard", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.save.mockResolvedValue("saved")
@@ -130,7 +130,7 @@ describe("SaveSuggestionCard", () => {
     expect(mocks.save).toHaveBeenCalledWith({
       action: liveAction,
       results: [{ Term: "ephemeral", Definition: "lasting a very short time" }],
-      analyticsSource: "save_suggestion",
+      analyticsSource: "note_suggestion",
       analyticsProvider: { provider: "openai", backend_kind: "llm" },
     })
     expect(mocks.toastAdd).not.toHaveBeenCalled()
@@ -146,7 +146,7 @@ describe("SaveSuggestionCard", () => {
     await waitFor(() =>
       expect(mocks.toastAdd).toHaveBeenCalledWith({
         type: "error",
-        title: i18n.t("saveSuggestion.staleSuggestion"),
+        title: i18n.t("noteSuggestion.staleSuggestion"),
       }),
     )
     expect(mocks.save).not.toHaveBeenCalled()
@@ -208,7 +208,7 @@ describe("SaveSuggestionCard", () => {
     expect(mocks.toastAdd).not.toHaveBeenCalled()
   })
 
-  it("preserves the selected action when toggling Save Suggestion", async () => {
+  it("preserves the selected action when toggling Note suggestion", async () => {
     const action = createAction()
     const store = createStoreWithAction(action)
     await storage.setItem("local:config", store.get(configAtom))
@@ -216,19 +216,18 @@ describe("SaveSuggestionCard", () => {
 
     fireEvent.click(screen.getByRole("switch"))
 
+    const expectedNoteSuggestion = {
+      enabled: false,
+      actionId: action.id,
+      providerId: DEFAULT_CONFIG.selectionToolbar.noteSuggestion.providerId,
+    }
     await waitFor(() => {
-      expect(store.get(configAtom).selectionToolbar.saveSuggestion).toEqual({
-        enabled: false,
-        actionId: action.id,
-      })
+      expect(store.get(configAtom).selectionToolbar.noteSuggestion).toEqual(expectedNoteSuggestion)
     })
     await waitFor(async () => {
       expect(
-        (await storage.getItem<Config>("local:config"))?.selectionToolbar.saveSuggestion,
-      ).toEqual({
-        enabled: false,
-        actionId: action.id,
-      })
+        (await storage.getItem<Config>("local:config"))?.selectionToolbar.noteSuggestion,
+      ).toEqual(expectedNoteSuggestion)
     })
     await storage.removeItem("local:config")
   })

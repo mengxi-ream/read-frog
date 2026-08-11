@@ -142,7 +142,8 @@ options:
       features:
         pageTranslation: Traducción de página
         customAction: Acciones de IA personalizadas
-        noteSuggestion: Sugerencias de guardado
+        noteSuggestion: Sugerencias de notas
+        selectionTranslation: Traducción de la selección
     sponsorCta: Obtén IA rápida y rentable
     setApiKeyWarning:
       message: Configura tu clave de API en la página $1
@@ -275,14 +276,16 @@ options:
       description: Elige qué proveedor usar para cada función
       features:
         pageTranslation: Traducción de página
-        selectionToolbar_translate: Traducción de la barra de selección
+        selectionTranslation: Traducción de la barra de selección
         inputTranslation: Traducción de entrada
         videoSubtitles: Subtítulos de video
+        noteSuggestion: Sugerencias de notas
       descriptions:
         pageTranslation: Traduce la página completa en modo bilingüe o de reemplazo.
-        selectionToolbar_translate: Traduce el texto que seleccionas desde la barra de selección.
+        selectionTranslation: Traduce el texto que seleccionas desde la barra de selección.
         inputTranslation: Traduce lo que escribes en un campo de texto antes de enviarlo.
         videoSubtitles: Traduce los subtítulos que aparecen en el reproductor de video.
+        noteSuggestion: Sugiere palabras que vale la pena guardar en tu Notebase después de traducir una selección.
     languageDetection:
       title: Detección de idioma
       description: Afecta la detección de idioma para traducción automática, la detección de idiomas omitidos y la precisión de selección de voz.
@@ -547,11 +550,13 @@ options:
       speak:
         title: Leer en voz alta
         description: Muestra el botón de voz, que lee en voz alta el texto seleccionado
-      saveSuggestion:
-        title: Sugerencias de guardado
+      noteSuggestion:
+        title: Sugerencias de notas
         description: Después de traducir una selección con un proveedor de IA, sugerir palabras para guardar en tu Notebase
         action: Acción
         actionDescription: La acción que genera la sugerencia
+        provider: Proveedor
+        providerDescription: El proveedor de IA que genera la sugerencia
     display:
       title: Visualización
       opacity:
@@ -1213,13 +1218,13 @@ action:
   translation: Traducción
   speak: Leer en voz alta
   playing: Reproduciendo
-saveSuggestion:
+noteSuggestion:
   title: Quizás quieras guardar
   description: Guarda estas palabras en tu Notebase y repásalas cuando quieras.
   save: Guardar
   saved: Guardado
   staleSuggestion: Esta sugerencia está desactualizada
-  toggleLabel: Mostrar sugerencias de guardado
+  toggleLabel: Mostrar sugerencias de notas
 thinking:
   label: Pensando
   complete: Razonamiento completo
@@ -1267,6 +1272,8 @@ subtitles:
     translatedExportIncomplete: No se pudieron traducir todas las líneas de subtítulos
     translatedExportSameLanguage: El idioma de origen y el de destino son iguales
 hostedAi:
+  ultraBadge:
+    tooltip: Requiere el plan Ultra
   availability:
     authenticationRequired: Inicia sesión para usar este proveedor
     ultraRequired: Se requiere el plan Ultra

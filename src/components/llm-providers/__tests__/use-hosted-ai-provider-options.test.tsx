@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import type { HostedAiStatusResult } from "@/components/llm-providers/use-hosted-ai-status"
-import type { HostedAiTierStatus } from "@/utils/hosted-ai/types"
+import type { HostedAiFeature, HostedAiStatus, HostedAiTierStatus } from "@/utils/hosted-ai/types"
 import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
 import { renderHook } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -36,13 +36,30 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
   }
 }
 
-function customActionDailyCredit(usedPercent = 0) {
+/** Every hosted feature at fully-available tiers; override per case. */
+function allFeatures(
+  overrides: Partial<HostedAiStatus["features"]> = {},
+): HostedAiStatus["features"] {
+  return {
+    pageTranslation: { normal: tier(), ultra: tier() },
+    customAction: { normal: tier(), ultra: tier() },
+    noteSuggestion: { normal: tier(), ultra: tier() },
+    selectionTranslation: { normal: tier(), ultra: tier() },
+    ...overrides,
+  }
+}
+
+function dailyCredit(features: HostedAiFeature[], usedPercent = 0) {
   return {
     periodKind: "daily" as const,
     usedPercent,
     resetAt: null,
-    features: ["customAction" as const],
+    features,
   }
+}
+
+function customActionDailyCredit(usedPercent = 0) {
+  return dailyCredit(["customAction"], usedPercent)
 }
 
 const PROVIDERS: ProviderSelectorOption[] = [
@@ -66,8 +83,7 @@ describe("useHostedAiProviderOptions", () => {
       isError: false,
       status: {
         credits: [customActionDailyCredit()],
-        features: {
-          pageTranslation: { normal: tier(), ultra: tier() },
+        features: allFeatures({
           customAction: {
             normal: tier(),
             ultra: tier({
@@ -76,8 +92,7 @@ describe("useHostedAiProviderOptions", () => {
               unavailableReason: "ultra_required",
             }),
           },
-          noteSuggestion: { normal: tier(), ultra: tier() },
-        },
+        }),
       },
     }
 
@@ -93,7 +108,7 @@ describe("useHostedAiProviderOptions", () => {
       isError: false,
       status: {
         credits: [customActionDailyCredit()],
-        features: {
+        features: allFeatures({
           pageTranslation: {
             normal: tier({ requiresUltra: true }),
             ultra: tier({ requiresUltra: true }),
@@ -103,7 +118,7 @@ describe("useHostedAiProviderOptions", () => {
             normal: tier({ requiresUltra: true }),
             ultra: tier({ requiresUltra: true }),
           },
-        },
+        }),
       },
     }
 
@@ -121,7 +136,7 @@ describe("useHostedAiProviderOptions", () => {
       status: {
         // A free plan funds customAction only — pageTranslation has no pool.
         credits: [customActionDailyCredit()],
-        features: {
+        features: allFeatures({
           pageTranslation: {
             normal: tier({ available: false, unavailableReason: "service_unavailable" }),
             ultra: tier({
@@ -130,13 +145,100 @@ describe("useHostedAiProviderOptions", () => {
               unavailableReason: "ultra_required",
             }),
           },
-          customAction: { normal: tier(), ultra: tier() },
-          noteSuggestion: { normal: tier(), ultra: tier() },
-        },
+        }),
       },
     }
 
     const { result } = renderHook(() => useHostedAiProviderOptions("pageTranslation", PROVIDERS))
+
+    expect(getDisabled(result.current)).toEqual([true, true])
+  })
+
+  it("gates selection translation options on the tier's access verdict", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        credits: [dailyCredit(["selectionTranslation"])],
+        features: allFeatures({
+          selectionTranslation: {
+            normal: tier(),
+            ultra: tier({
+              accessAllowed: false,
+              available: false,
+              unavailableReason: "ultra_required",
+            }),
+          },
+        }),
+      },
+    }
+
+    const { result } = renderHook(() =>
+      useHostedAiProviderOptions("selectionTranslation", PROVIDERS),
+    )
+
+    expect(getDisabled(result.current)).toEqual([false, true])
+  })
+
+  it("grays out selection translation when no pool funds it for this plan", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        credits: [customActionDailyCredit()],
+        features: allFeatures(),
+      },
+    }
+
+    const { result } = renderHook(() =>
+      useHostedAiProviderOptions("selectionTranslation", PROVIDERS),
+    )
+
+    expect(getDisabled(result.current)).toEqual([true, true])
+  })
+
+  it("gates note suggestion options on access and surfaces the requiresUltra flag", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        credits: [dailyCredit(["noteSuggestion"])],
+        features: allFeatures({
+          noteSuggestion: {
+            normal: tier(),
+            ultra: tier({
+              accessAllowed: false,
+              available: false,
+              unavailableReason: "ultra_required",
+              requiresUltra: true,
+            }),
+          },
+        }),
+      },
+    }
+
+    const { result } = renderHook(() => useHostedAiProviderOptions("noteSuggestion", PROVIDERS))
+
+    expect(getDisabled(result.current)).toEqual([false, true])
+    const badges = result.current.map((p) => ("requiresUltra" in p ? p.requiresUltra : undefined))
+    expect(badges).toEqual([false, true])
+  })
+
+  it("grays out note suggestion when no pool funds it for this plan", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        credits: [customActionDailyCredit()],
+        features: allFeatures(),
+      },
+    }
+
+    const { result } = renderHook(() => useHostedAiProviderOptions("noteSuggestion", PROVIDERS))
 
     expect(getDisabled(result.current)).toEqual([true, true])
   })
@@ -148,14 +250,12 @@ describe("useHostedAiProviderOptions", () => {
       isError: false,
       status: {
         credits: [customActionDailyCredit(100)],
-        features: {
-          pageTranslation: { normal: tier(), ultra: tier() },
+        features: allFeatures({
           customAction: {
             normal: tier({ available: false, unavailableReason: "quota_exhausted" }),
             ultra: tier({ available: false, unavailableReason: "service_unavailable" }),
           },
-          noteSuggestion: { normal: tier(), ultra: tier() },
-        },
+        }),
       },
     }
 

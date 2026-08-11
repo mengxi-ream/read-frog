@@ -113,12 +113,12 @@ describe("editor compound component contexts", () => {
     ).toThrow("ProviderEditor.duplicate is unavailable in this composition")
   })
 
-  it("resets Save Suggestions to Dictionary when deleting its selected custom action", async () => {
+  it("resets Note suggestions to Dictionary when deleting its selected custom action", async () => {
     const store = createConfigStore()
     const config = structuredClone(store.get(configAtom))
     const action = {
-      id: "save-suggestion-action",
-      name: "Save Suggestion Action",
+      id: "note-suggestion-action",
+      name: "Note suggestion Action",
       enabled: false,
       icon: "tabler:sparkles",
       providerId: config.selectionToolbar.builtInActions.dictionary.providerId,
@@ -135,7 +135,7 @@ describe("editor compound component contexts", () => {
       ],
     }
     config.selectionToolbar.customActions = [action]
-    config.selectionToolbar.saveSuggestion.actionId = action.id
+    config.selectionToolbar.noteSuggestion.actionId = action.id
     store.set(configAtom, config)
 
     render(
@@ -151,7 +151,7 @@ describe("editor compound component contexts", () => {
     await waitFor(() => {
       const selectionToolbar = store.get(configAtom).selectionToolbar
       expect(selectionToolbar.customActions).toEqual([])
-      expect(selectionToolbar.saveSuggestion.actionId).toBe(BUILT_IN_DICTIONARY_ACTION_ID)
+      expect(selectionToolbar.noteSuggestion.actionId).toBe(BUILT_IN_DICTIONARY_ACTION_ID)
     })
   })
 

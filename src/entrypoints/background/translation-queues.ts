@@ -91,6 +91,7 @@ async function executeQueuedTranslation<TContext>(
       providerId: system.providerId,
       modelTier: system.modelTier,
       requestId: options.hostedRequestId,
+      hostedFeature: "pageTranslation",
       instructions: systemPrompt,
       prompt,
     },

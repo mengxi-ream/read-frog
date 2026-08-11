@@ -3,10 +3,10 @@ import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 
-export type SaveSuggestionAnalyticsAction = "suggestion_shown" | "suggestion_accepted"
+export type NoteSuggestionAnalyticsAction = "suggestion_shown" | "suggestion_accepted"
 
-export function trackSaveSuggestionEvent(
-  actionId: SaveSuggestionAnalyticsAction,
+export function trackNoteSuggestionEvent(
+  actionId: NoteSuggestionAnalyticsAction,
   options: {
     startedAt?: number
     actionName?: string
@@ -15,7 +15,7 @@ export function trackSaveSuggestionEvent(
 ) {
   void trackFeatureUsed({
     ...createFeatureUsageContext(
-      ANALYTICS_FEATURE.SAVE_SUGGESTION,
+      ANALYTICS_FEATURE.NOTE_SUGGESTION,
       ANALYTICS_SURFACE.SELECTION_TOOLBAR,
       options.startedAt ?? Date.now(),
       {

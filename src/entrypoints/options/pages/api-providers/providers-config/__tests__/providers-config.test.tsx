@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import type { ReactNode } from "react"
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, render, screen, within } from "@testing-library/react"
 import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { ProvidersConfig } from "@/entrypoints/options/pages/api-providers/providers-config"
@@ -122,9 +122,13 @@ vi.mock("@/utils/config/helpers", () => ({
 }))
 
 vi.mock("@/utils/constants/feature-providers", () => ({
-  FEATURE_KEYS: ["pageTranslation"],
+  FEATURE_KEYS: ["pageTranslation", "selectionTranslation", "noteSuggestion"],
   FEATURE_PROVIDER_DEFS: {
     pageTranslation: { getProviderId: () => providerConfig.id },
+    selectionTranslation: { getProviderId: () => "unassigned-provider" },
+    // Mirrors the shipped default: note suggestion runs on the OpenAI default
+    // provider, so no built-in card starts with a feature assignment.
+    noteSuggestion: { getProviderId: () => "openai-default" },
   },
   buildFeatureProviderPatch: () => ({}),
   getFeatureLabelI18nKey: (key: string) => `feature.${key}`,
@@ -148,10 +152,18 @@ function makeUltraAccessStatus(accessAllowed: boolean) {
     credits: [],
     features: {
       pageTranslation: { ultra: { accessAllowed } },
+      selectionTranslation: { ultra: { accessAllowed } },
+      noteSuggestion: { ultra: { accessAllowed } },
       customAction: { ultra: { accessAllowed } },
     },
   }
 }
+
+const ULTRA_FEATURE_LABELS = [
+  "feature.pageTranslation",
+  "feature.selectionTranslation",
+  "feature.noteSuggestion",
+] as const
 
 vi.mock("@/utils/i18n", () => ({
   i18n: {
@@ -232,8 +244,11 @@ describe("ProvidersConfig", () => {
     expect(screen.queryByText("options.apiProviders.sponsorCta")).not.toBeInTheDocument()
     expect(screen.queryByText("options.apiProviders.form.duplicate")).not.toBeInTheDocument()
     expect(screen.queryByText("options.apiProviders.form.delete")).not.toBeInTheDocument()
-    // The normal tier never offers the page-translation assignment.
-    expect(screen.queryByText("feature.pageTranslation")).not.toBeInTheDocument()
+    // Both tiers list every hosted-capable feature row; the normal tier marks
+    // the Ultra-gated ones with the badge instead of hiding them.
+    for (const label of ULTRA_FEATURE_LABELS) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
   })
 
   it("lists both built-in provider cards", () => {
@@ -245,7 +260,7 @@ describe("ProvidersConfig", () => {
     ).toBeInTheDocument()
   })
 
-  it("renders the Ultra editor with its own attribution and a page-translation assignment", () => {
+  it("renders the Ultra editor with its own attribution and all three feature assignments", () => {
     testState.selectedProviderId = BUILT_IN_AI_ULTRA_PROVIDER_ID
 
     renderProvidersConfig()
@@ -253,7 +268,9 @@ describe("ProvidersConfig", () => {
     expect(
       screen.getByText("options.apiProviders.providers.attribution.builtInAiUltra"),
     ).toBeInTheDocument()
-    expect(screen.getByText("feature.pageTranslation")).toBeInTheDocument()
+    for (const label of ULTRA_FEATURE_LABELS) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
     expect(screen.queryByText("options.apiProviders.sponsorCta")).not.toBeInTheDocument()
   })
 
@@ -263,10 +280,12 @@ describe("ProvidersConfig", () => {
 
     renderProvidersConfig()
 
-    expect(screen.getByRole("switch", { name: "feature.pageTranslation" })).not.toHaveAttribute(
-      "aria-disabled",
-      "true",
-    )
+    for (const label of ULTRA_FEATURE_LABELS) {
+      expect(screen.getByRole("switch", { name: label })).not.toHaveAttribute(
+        "aria-disabled",
+        "true",
+      )
+    }
   })
 
   it("locks Ultra assignment rows when the server denies ultra access", () => {
@@ -280,10 +299,9 @@ describe("ProvidersConfig", () => {
     renderProvidersConfig()
 
     // base-ui renders a span[role=switch]; disabled surfaces as aria-disabled.
-    expect(screen.getByRole("switch", { name: "feature.pageTranslation" })).toHaveAttribute(
-      "aria-disabled",
-      "true",
-    )
+    for (const label of ULTRA_FEATURE_LABELS) {
+      expect(screen.getByRole("switch", { name: label })).toHaveAttribute("aria-disabled", "true")
+    }
   })
 
   it("unlocks Ultra assignment rows for an ultra-entitled account", () => {
@@ -296,7 +314,31 @@ describe("ProvidersConfig", () => {
 
     renderProvidersConfig()
 
-    expect(screen.getByRole("switch", { name: "feature.pageTranslation" })).not.toBeDisabled()
+    for (const label of ULTRA_FEATURE_LABELS) {
+      expect(screen.getByRole("switch", { name: label })).not.toBeDisabled()
+    }
+  })
+
+  it("counts default assignments on the free Built-in AI card badge", () => {
+    // Note suggestion defaults to the OpenAI provider, so only the built-in
+    // Dictionary action counts on the free card; the Ultra card has nothing
+    // assigned and shows no badge.
+    const { container } = renderProvidersConfig()
+
+    const freeCard = container.querySelector(`[data-provider-id="${BUILT_IN_AI_PROVIDER_ID}"]`)
+    const ultraCard = container.querySelector(
+      `[data-provider-id="${BUILT_IN_AI_ULTRA_PROVIDER_ID}"]`,
+    )
+    if (!(freeCard instanceof HTMLElement) || !(ultraCard instanceof HTMLElement)) {
+      throw new Error("Built-in provider cards not rendered")
+    }
+
+    expect(
+      within(freeCard).getByText("options.apiProviders.badges.featureCount:1"),
+    ).toBeInTheDocument()
+    expect(
+      within(ultraCard).queryByText(/options\.apiProviders\.badges\.featureCount/),
+    ).not.toBeInTheDocument()
   })
 
   it("opens the provider a ?provider= deep link names", () => {

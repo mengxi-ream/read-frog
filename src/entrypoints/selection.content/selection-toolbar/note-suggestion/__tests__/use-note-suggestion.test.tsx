@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import type { ReactNode } from "react"
+import type { NoteSuggestionFireInput } from "../use-note-suggestion"
 import type { LLMProviderConfig } from "@/types/config/provider"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react"
@@ -10,29 +11,28 @@ import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 
 const streamBackgroundNoteSuggestionMock = vi.fn<(...args: any[]) => any>()
-const validateSaveSuggestionMock = vi.fn<(...args: any[]) => any>()
-const isAttemptAllowedMock = vi.fn<(...args: any[]) => any>()
-const recordFailureMock = vi.fn<(...args: any[]) => any>()
-const recordSuccessMock = vi.fn<(...args: any[]) => any>()
+const validateNoteSuggestionMock = vi.fn<(...args: any[]) => any>()
 const getOrCreateWebPageContextMock = vi.fn<(...args: any[]) => any>()
+const hostedStatusMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("@/utils/content-script/background-stream-client", () => ({
   streamBackgroundNoteSuggestion: (...args: any[]) => streamBackgroundNoteSuggestionMock(...args),
 }))
-vi.mock("@/utils/save-suggestion/validate", () => ({
-  validateSaveSuggestion: (...args: any[]) => validateSaveSuggestionMock(...args),
-}))
-vi.mock("@/utils/save-suggestion/provider-cooldown", () => ({
-  getSaveSuggestionProviderFingerprint: (config: unknown) => JSON.stringify(config),
-  isSaveSuggestionAttemptAllowed: (...args: any[]) => isAttemptAllowedMock(...args),
-  recordSaveSuggestionFailure: (...args: any[]) => recordFailureMock(...args),
-  recordSaveSuggestionSuccess: (...args: any[]) => recordSuccessMock(...args),
+vi.mock("@/utils/note-suggestion/validate", () => ({
+  validateNoteSuggestion: (...args: any[]) => validateNoteSuggestionMock(...args),
 }))
 vi.mock("@/utils/host/translate/webpage-context", () => ({
   getOrCreateWebPageContext: (...args: any[]) => getOrCreateWebPageContextMock(...args),
 }))
+vi.mock("@/utils/orpc/client", () => ({
+  orpcClient: {
+    hostedAi: {
+      status: (...args: any[]) => hostedStatusMock(...args),
+    },
+  },
+}))
 
-const { useSaveSuggestion } = await import("../use-save-suggestion")
+const { useNoteSuggestion } = await import("../use-note-suggestion")
 
 function wrapper(store: ReturnType<typeof createStore>) {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -44,6 +44,20 @@ const LLM_PROVIDER_CONFIG = DEFAULT_CONFIG.providersConfig.find(
   (providerConfig): providerConfig is LLMProviderConfig =>
     isLLMProviderConfig(providerConfig) && providerConfig.provider === "openai",
 )!
+
+const LOCAL_PROVIDER_REF = {
+  kind: "local",
+  id: LLM_PROVIDER_CONFIG.id,
+  name: LLM_PROVIDER_CONFIG.name,
+  config: LLM_PROVIDER_CONFIG,
+} satisfies NoteSuggestionFireInput["provider"]
+
+const SYSTEM_PROVIDER_REF = {
+  kind: "system",
+  id: "read-frog-free-ai",
+  name: "Built-in AI",
+  modelTier: "normal",
+} satisfies NoteSuggestionFireInput["provider"]
 
 const VALID_ENVELOPE = {
   output: {
@@ -66,22 +80,41 @@ const VALIDATED_SUGGESTION = {
   summaryFieldName: null,
 }
 
-const fireInput = (sessionKey: string) => ({
+function createHostedStatus(available: boolean) {
+  return {
+    features: {
+      noteSuggestion: {
+        normal: available
+          ? { available: true }
+          : { available: false, unavailableReason: "quota_exhausted" },
+      },
+    },
+    credits: [],
+  }
+}
+
+const fireInput = (
+  sessionKey: string,
+  provider: NoteSuggestionFireInput["provider"] = LOCAL_PROVIDER_REF,
+): NoteSuggestionFireInput => ({
   sessionKey,
   selectionText: "ephemeral",
   paragraphsText: "The ephemeral beauty of cherry blossoms.",
   targetLangName: "Simplified Chinese",
   webTitle: "Sakura",
-  providerId: LLM_PROVIDER_CONFIG.id,
-  providerConfig: LLM_PROVIDER_CONFIG,
+  provider,
 })
 
-describe("useSaveSuggestion", () => {
+/** Flushes the hook's async run chain (status gate, stream). */
+async function flushRun() {
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0))
+  })
+}
+
+describe("useNoteSuggestion", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    isAttemptAllowedMock.mockResolvedValue(true)
-    recordFailureMock.mockResolvedValue(undefined)
-    recordSuccessMock.mockResolvedValue(undefined)
     getOrCreateWebPageContextMock.mockResolvedValue({
       url: "https://example.com/article",
       webTitle: "Article",
@@ -89,7 +122,8 @@ describe("useSaveSuggestion", () => {
       webContent: "Cached article body",
     })
     streamBackgroundNoteSuggestionMock.mockResolvedValue(VALID_ENVELOPE)
-    validateSaveSuggestionMock.mockReturnValue(VALIDATED_SUGGESTION)
+    validateNoteSuggestionMock.mockReturnValue(VALIDATED_SUGGESTION)
+    hostedStatusMock.mockResolvedValue(undefined)
   })
 
   afterEach(() => {
@@ -99,7 +133,7 @@ describe("useSaveSuggestion", () => {
   it("re-fires and replaces the suggestion when the composite key changes, but not for the same key", async () => {
     const store = createStore()
     store.set(configAtom, DEFAULT_CONFIG)
-    const { result } = renderHook(() => useSaveSuggestion(), { wrapper: wrapper(store) })
+    const { result } = renderHook(() => useNoteSuggestion(), { wrapper: wrapper(store) })
 
     // First fire for key A → one request, suggestion tagged with A.
     act(() => result.current.maybeFire(fireInput("5:langZH:0")))
@@ -112,7 +146,7 @@ describe("useSaveSuggestion", () => {
     expect(streamBackgroundNoteSuggestionMock).toHaveBeenCalledTimes(1)
 
     // Different key (target language changed) → new request, suggestion replaced.
-    validateSaveSuggestionMock.mockReturnValueOnce({
+    validateNoteSuggestionMock.mockReturnValueOnce({
       ...VALIDATED_SUGGESTION,
       notes: [{ term: "ephemeral-ja" }],
     })
@@ -124,7 +158,7 @@ describe("useSaveSuggestion", () => {
   it("uses the user's provider for the request and classifies it in the result", async () => {
     const store = createStore()
     store.set(configAtom, DEFAULT_CONFIG)
-    const { result } = renderHook(() => useSaveSuggestion(), { wrapper: wrapper(store) })
+    const { result } = renderHook(() => useNoteSuggestion(), { wrapper: wrapper(store) })
 
     act(() => result.current.maybeFire(fireInput("1:lang:0")))
     await waitFor(() => expect(result.current.suggestion).not.toBeNull())
@@ -133,31 +167,88 @@ describe("useSaveSuggestion", () => {
       expect.objectContaining({ providerId: LLM_PROVIDER_CONFIG.id }),
       expect.anything(),
     )
+    // A local provider never consults the hosted availability gate.
+    expect(hostedStatusMock).not.toHaveBeenCalled()
     expect(result.current.suggestion?.analyticsProvider).toEqual({
       provider: "openai",
       backend_kind: "llm",
     })
-    expect(recordSuccessMock).toHaveBeenCalledTimes(1)
-    expect(recordFailureMock).not.toHaveBeenCalled()
   })
 
-  it("does not fire while the provider cooldown blocks the attempt", async () => {
-    isAttemptAllowedMock.mockResolvedValue(false)
+  it("sends the hosted payload for a system provider without local provider knobs", async () => {
+    hostedStatusMock.mockResolvedValue(createHostedStatus(true))
     const store = createStore()
     store.set(configAtom, DEFAULT_CONFIG)
-    const { result } = renderHook(() => useSaveSuggestion(), { wrapper: wrapper(store) })
+    const { result } = renderHook(() => useNoteSuggestion(), { wrapper: wrapper(store) })
 
-    act(() => result.current.maybeFire(fireInput("1:lang:0")))
-    await waitFor(() => expect(isAttemptAllowedMock).toHaveBeenCalledTimes(1))
-    expect(isAttemptAllowedMock).toHaveBeenCalledWith(
-      {
-        providerId: LLM_PROVIDER_CONFIG.id,
-        providerFingerprint: JSON.stringify(LLM_PROVIDER_CONFIG),
-      },
-      expect.any(Number),
-    )
+    act(() => result.current.maybeFire(fireInput("1:lang:0", SYSTEM_PROVIDER_REF)))
+    await waitFor(() => expect(result.current.suggestion).not.toBeNull())
+
+    expect(hostedStatusMock).toHaveBeenCalledTimes(1)
+
+    const request = streamBackgroundNoteSuggestionMock.mock.calls[0]![0]
+    // Exact shape: no providerOptions, reasoning, or temperature leak into the
+    // hosted payload — the server owns those knobs.
+    expect(request).toEqual({
+      providerId: SYSTEM_PROVIDER_REF.id,
+      modelTier: SYSTEM_PROVIDER_REF.modelTier,
+      requestId: expect.any(String),
+      instructions: expect.any(String),
+      prompt: expect.any(String),
+    })
+    // Hosted envelope contract: the prompts describe the contract's
+    // action+notes shape (with the pinned inert action fields).
+    expect(request.instructions).toContain('"action"')
+    expect(request.instructions).toContain("createNewDictionaryAction")
+    expect(request.instructions).toContain("targetActionId")
+  })
+
+  it("classifies a system provider suggestion as Built-in AI", async () => {
+    hostedStatusMock.mockResolvedValue(createHostedStatus(true))
+    const store = createStore()
+    store.set(configAtom, DEFAULT_CONFIG)
+    const { result } = renderHook(() => useNoteSuggestion(), { wrapper: wrapper(store) })
+
+    act(() => result.current.maybeFire(fireInput("1:lang:0", SYSTEM_PROVIDER_REF)))
+    await waitFor(() => expect(result.current.suggestion).not.toBeNull())
+
+    expect(result.current.suggestion?.analyticsProvider).toEqual({
+      provider: "read-frog-built-in-ai",
+      backend_kind: "llm",
+    })
+  })
+
+  it("skips silently and completes the session when the hosted tier is unavailable", async () => {
+    hostedStatusMock.mockResolvedValue(createHostedStatus(false))
+    const store = createStore()
+    store.set(configAtom, DEFAULT_CONFIG)
+    const { result } = renderHook(() => useNoteSuggestion(), { wrapper: wrapper(store) })
+
+    act(() => result.current.maybeFire(fireInput("1:lang:0", SYSTEM_PROVIDER_REF)))
+    await waitFor(() => expect(hostedStatusMock).toHaveBeenCalledTimes(1))
+    await flushRun()
+
     expect(streamBackgroundNoteSuggestionMock).not.toHaveBeenCalled()
     expect(result.current.suggestion).toBeNull()
+
+    // The session is marked complete: the same key neither re-checks the
+    // status nor fires a request.
+    act(() => result.current.maybeFire(fireInput("1:lang:0", SYSTEM_PROVIDER_REF)))
+    await flushRun()
+    expect(hostedStatusMock).toHaveBeenCalledTimes(1)
+    expect(streamBackgroundNoteSuggestionMock).not.toHaveBeenCalled()
+  })
+
+  it("fails open and fires when the hosted status check itself fails", async () => {
+    hostedStatusMock.mockRejectedValue(new Error("status endpoint down"))
+    const store = createStore()
+    store.set(configAtom, DEFAULT_CONFIG)
+    const { result } = renderHook(() => useNoteSuggestion(), { wrapper: wrapper(store) })
+
+    act(() => result.current.maybeFire(fireInput("1:lang:0", SYSTEM_PROVIDER_REF)))
+    await waitFor(() => expect(result.current.suggestion).not.toBeNull())
+
+    expect(streamBackgroundNoteSuggestionMock).toHaveBeenCalledTimes(1)
   })
 
   it("uses the configured action snapshot even when the action is disabled", async () => {
@@ -166,12 +257,11 @@ describe("useSaveSuggestion", () => {
     config.selectionToolbar.builtInActions.dictionary.enabled = false
     config.selectionToolbar.customActions = []
     store.set(configAtom, config)
-    const { result } = renderHook(() => useSaveSuggestion(), { wrapper: wrapper(store) })
+    const { result } = renderHook(() => useNoteSuggestion(), { wrapper: wrapper(store) })
 
     act(() => result.current.maybeFire(fireInput("1:lang:0")))
     await waitFor(() => expect(result.current.suggestion).not.toBeNull())
 
-    expect(isAttemptAllowedMock).toHaveBeenCalledTimes(1)
     expect(streamBackgroundNoteSuggestionMock).toHaveBeenCalledTimes(1)
     expect(result.current.suggestion?.actionSnapshot).toMatchObject({
       id: "default-dictionary",
@@ -179,7 +269,7 @@ describe("useSaveSuggestion", () => {
     })
   })
 
-  it("uses only the action configured for Save Suggestion", async () => {
+  it("uses only the action configured for Note suggestion", async () => {
     const store = createStore()
     const config = structuredClone(DEFAULT_CONFIG)
     const customAction: SelectionToolbarCustomAction = {
@@ -202,9 +292,9 @@ describe("useSaveSuggestion", () => {
     }
     config.selectionToolbar.builtInActions.dictionary.enabled = false
     config.selectionToolbar.customActions = [customAction]
-    config.selectionToolbar.saveSuggestion.actionId = customAction.id
+    config.selectionToolbar.noteSuggestion.actionId = customAction.id
     store.set(configAtom, config)
-    const { result } = renderHook(() => useSaveSuggestion(), { wrapper: wrapper(store) })
+    const { result } = renderHook(() => useNoteSuggestion(), { wrapper: wrapper(store) })
 
     act(() => result.current.maybeFire(fireInput("disabled-built-in:lang:0")))
     await waitFor(() => expect(result.current.suggestion).not.toBeNull())
@@ -216,38 +306,42 @@ describe("useSaveSuggestion", () => {
     expect(request.prompt).toContain("## Selected Action User Prompt\nprompt")
     expect(request.prompt).toContain('- key: "Word"')
     expect(request.prompt).toContain("Cached article body")
-    expect(validateSaveSuggestionMock).toHaveBeenCalledWith({
+    expect(validateNoteSuggestionMock).toHaveBeenCalledWith({
       envelope: expect.any(Object),
       action: customAction,
     })
     expect(result.current.suggestion?.actionSnapshot.id).toBe(customAction.id)
   })
 
-  it("records a failure when the request rejects", async () => {
+  it("stays silent and completes the session when the request rejects", async () => {
     streamBackgroundNoteSuggestionMock.mockRejectedValue(new Error("provider exploded"))
     const store = createStore()
     store.set(configAtom, DEFAULT_CONFIG)
-    const { result } = renderHook(() => useSaveSuggestion(), { wrapper: wrapper(store) })
+    const { result } = renderHook(() => useNoteSuggestion(), { wrapper: wrapper(store) })
 
     act(() => result.current.maybeFire(fireInput("1:lang:0")))
-    await waitFor(() => expect(recordFailureMock).toHaveBeenCalledTimes(1))
-    expect(recordFailureMock).toHaveBeenCalledWith({
-      providerId: LLM_PROVIDER_CONFIG.id,
-      providerFingerprint: JSON.stringify(LLM_PROVIDER_CONFIG),
-    })
-    expect(recordSuccessMock).not.toHaveBeenCalled()
+    await waitFor(() => expect(streamBackgroundNoteSuggestionMock).toHaveBeenCalledTimes(1))
+    await flushRun()
     expect(result.current.suggestion).toBeNull()
+
+    // Failure completes the session: the same key does not retry, but a new
+    // key (next popover session) fires again — no persistent backoff.
+    act(() => result.current.maybeFire(fireInput("1:lang:0")))
+    await flushRun()
+    expect(streamBackgroundNoteSuggestionMock).toHaveBeenCalledTimes(1)
+    act(() => result.current.maybeFire(fireInput("2:lang:0")))
+    await waitFor(() => expect(streamBackgroundNoteSuggestionMock).toHaveBeenCalledTimes(2))
   })
 
-  it("records a failure when the envelope is invalid", async () => {
-    validateSaveSuggestionMock.mockReturnValue(null)
+  it("discards a schema/semantically invalid envelope without a card", async () => {
+    validateNoteSuggestionMock.mockReturnValue(null)
     const store = createStore()
     store.set(configAtom, DEFAULT_CONFIG)
-    const { result } = renderHook(() => useSaveSuggestion(), { wrapper: wrapper(store) })
+    const { result } = renderHook(() => useNoteSuggestion(), { wrapper: wrapper(store) })
 
     act(() => result.current.maybeFire(fireInput("1:lang:0")))
-    await waitFor(() => expect(recordFailureMock).toHaveBeenCalledTimes(1))
-    expect(recordSuccessMock).not.toHaveBeenCalled()
+    await waitFor(() => expect(validateNoteSuggestionMock).toHaveBeenCalledTimes(1))
+    await flushRun()
     expect(result.current.suggestion).toBeNull()
   })
 
@@ -255,12 +349,12 @@ describe("useSaveSuggestion", () => {
     streamBackgroundNoteSuggestionMock.mockResolvedValue(EMPTY_NOTES_ENVELOPE)
     const store = createStore()
     store.set(configAtom, DEFAULT_CONFIG)
-    const { result } = renderHook(() => useSaveSuggestion(), { wrapper: wrapper(store) })
+    const { result } = renderHook(() => useNoteSuggestion(), { wrapper: wrapper(store) })
 
     act(() => result.current.maybeFire(fireInput("1:lang:0")))
-    await waitFor(() => expect(recordSuccessMock).toHaveBeenCalledTimes(1))
-    expect(recordFailureMock).not.toHaveBeenCalled()
-    expect(validateSaveSuggestionMock).not.toHaveBeenCalled()
+    await waitFor(() => expect(streamBackgroundNoteSuggestionMock).toHaveBeenCalledTimes(1))
+    await flushRun()
+    expect(validateNoteSuggestionMock).not.toHaveBeenCalled()
     expect(result.current.suggestion).toBeNull()
 
     // The session is completed: no re-fire for the same key.
@@ -275,15 +369,13 @@ describe("useSaveSuggestion", () => {
     )
     const store = createStore()
     store.set(configAtom, DEFAULT_CONFIG)
-    const { result } = renderHook(() => useSaveSuggestion(), { wrapper: wrapper(store) })
+    const { result } = renderHook(() => useNoteSuggestion(), { wrapper: wrapper(store) })
 
     act(() => result.current.maybeFire(fireInput("1:lang:0")))
     await waitFor(() => expect(streamBackgroundNoteSuggestionMock).toHaveBeenCalledTimes(1))
     await act(async () => {
       await Promise.resolve()
     })
-    expect(recordFailureMock).not.toHaveBeenCalled()
-    expect(recordSuccessMock).not.toHaveBeenCalled()
 
     // The session was not marked completed, so the same key may retry.
     act(() => result.current.maybeFire(fireInput("1:lang:0")))
@@ -291,13 +383,13 @@ describe("useSaveSuggestion", () => {
     expect(streamBackgroundNoteSuggestionMock).toHaveBeenCalledTimes(2)
   })
 
-  it("records neither success nor failure when the request aborts", async () => {
+  it("renders no card and keeps the session retryable when the request aborts", async () => {
     streamBackgroundNoteSuggestionMock.mockRejectedValue(
       new DOMException("stream aborted", "AbortError"),
     )
     const store = createStore()
     store.set(configAtom, DEFAULT_CONFIG)
-    const { result } = renderHook(() => useSaveSuggestion(), { wrapper: wrapper(store) })
+    const { result } = renderHook(() => useNoteSuggestion(), { wrapper: wrapper(store) })
 
     act(() => result.current.maybeFire(fireInput("1:lang:0")))
     await waitFor(() => expect(streamBackgroundNoteSuggestionMock).toHaveBeenCalledTimes(1))
@@ -305,8 +397,6 @@ describe("useSaveSuggestion", () => {
     await act(async () => {
       await Promise.resolve()
     })
-    expect(recordFailureMock).not.toHaveBeenCalled()
-    expect(recordSuccessMock).not.toHaveBeenCalled()
     expect(result.current.suggestion).toBeNull()
   })
 })

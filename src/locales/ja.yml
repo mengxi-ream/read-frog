@@ -142,7 +142,8 @@ options:
       features:
         pageTranslation: ページ翻訳
         customAction: カスタム AI アクション
-        noteSuggestion: 保存の提案
+        noteSuggestion: ノートの提案
+        selectionTranslation: 選択範囲の翻訳
     sponsorCta: 高速で高コスパのAIを入手
     setApiKeyWarning:
       message: API キーは $1 ページで設定してください
@@ -274,14 +275,16 @@ options:
       description: 各機能に使用するプロバイダーを選択
       features:
         pageTranslation: ページ翻訳
-        selectionToolbar_translate: 選択ツールバー翻訳
+        selectionTranslation: 選択ツールバー翻訳
         inputTranslation: 入力翻訳
         videoSubtitles: 動画字幕
+        noteSuggestion: ノートの提案
       descriptions:
         pageTranslation: ページ全体を対訳または置き換えで翻訳します。
-        selectionToolbar_translate: 選択ツールバーから、選択したテキストを翻訳します。
+        selectionTranslation: 選択ツールバーから、選択したテキストを翻訳します。
         inputTranslation: 入力欄に書いた文章を、送信する前に翻訳します。
         videoSubtitles: 動画プレーヤーに表示される字幕を翻訳します。
+        noteSuggestion: 選択テキストを翻訳した後、Notebase に保存する価値のある単語を提案します。
     languageDetection:
       title: 言語検出
       description: 自動翻訳の言語検出、スキップ言語検出、読み上げの音声選択精度に影響します。
@@ -546,11 +549,13 @@ options:
       speak:
         title: 読み上げ
         description: 選択したテキストを読み上げる読み上げボタンをツールバーに表示します
-      saveSuggestion:
-        title: 保存の提案
+      noteSuggestion:
+        title: ノートの提案
         description: AI プロバイダーで選択テキストを翻訳した後、Notebase に保存する単語を提案します
         action: アクション
         actionDescription: 保存候補を生成するアクション
+        provider: プロバイダー
+        providerDescription: 保存候補を生成する AI プロバイダー
     display:
       title: 表示
       opacity:
@@ -1097,13 +1102,13 @@ action:
   translation: 翻訳
   speak: 読み上げ
   playing: 再生中
-saveSuggestion:
+noteSuggestion:
   title: 保存におすすめ
   description: 以下の単語を Notebase に保存して、いつでも復習できます。
   save: 保存
   saved: 保存済み
   staleSuggestion: この提案は古くなっています
-  toggleLabel: 保存の提案を表示
+  toggleLabel: ノートの提案を表示
 thinking:
   label: 思考中
   complete: 思考完了
@@ -1151,6 +1156,8 @@ subtitles:
     translatedExportIncomplete: すべての字幕行を翻訳できませんでした
     translatedExportSameLanguage: 元の言語と翻訳先の言語が同じです
 hostedAi:
+  ultraBadge:
+    tooltip: Ultra プランへの加入が必要です
   availability:
     authenticationRequired: ログインすると利用できます
     ultraRequired: Ultra プランが必要です

@@ -1,9 +1,10 @@
+import type { HostedAiFeature } from "@read-frog/api-contract"
 import type { JSONValue, StreamTextOnErrorCallback } from "ai"
 import type { Browser } from "#imports"
 import type { AISDKReasoning } from "@/types/config/provider"
 import type { SelectionToolbarCustomActionOutputType } from "@/types/config/selection-toolbar"
 import type { HostedAiModelTier } from "@/utils/constants/provider-ids"
-import type { SaveSuggestionEnvelope } from "@/utils/save-suggestion/types"
+import type { NoteSuggestionEnvelope } from "@/utils/note-suggestion/types"
 
 interface BaseBackgroundStreamSerializablePayload {
   providerId: string
@@ -24,7 +25,21 @@ interface BaseBackgroundStreamSerializablePayload {
   providerOptions?: Record<string, Record<string, JSONValue>>
 }
 
-export type BackgroundStreamTextSerializablePayload = BaseBackgroundStreamSerializablePayload
+/** The hosted features that stream plain text through the `stream-text` port. */
+export type HostedAiTextStreamFeature = Extract<
+  HostedAiFeature,
+  "pageTranslation" | "selectionTranslation"
+>
+
+export type BackgroundStreamTextSerializablePayload = BaseBackgroundStreamSerializablePayload & {
+  /**
+   * Which hosted route (and so which quota feature) a Built-in AI run bills
+   * against. Ignored by local/BYOK providers. Optional so a content script
+   * from before this field existed keeps working against an updated service
+   * worker mid-extension-update; absent means "pageTranslation".
+   */
+  hostedFeature?: HostedAiTextStreamFeature
+}
 
 export interface BackgroundStructuredObjectOutputField {
   name: string
@@ -56,7 +71,7 @@ export type BackgroundStreamNoteSuggestionSerializablePayload =
   BaseBackgroundStreamSerializablePayload
 
 export type BackgroundNoteSuggestionStreamSnapshot =
-  BackgroundStreamSnapshot<SaveSuggestionEnvelope>
+  BackgroundStreamSnapshot<NoteSuggestionEnvelope>
 
 export const BACKGROUND_STREAM_PORTS = {
   streamText: "stream-text",

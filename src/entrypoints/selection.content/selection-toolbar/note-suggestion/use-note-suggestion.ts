@@ -1,35 +1,32 @@
+import type { NoteSuggestionProviderRef } from "../atoms"
 import type { FeatureProviderAnalytics } from "@/types/analytics"
-import type { LLMProviderConfig } from "@/types/config/provider"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
-import type { ValidatedSaveSuggestion } from "@/utils/save-suggestion/types"
+import type { ValidatedNoteSuggestion } from "@/utils/note-suggestion/types"
 import { useAtomValue } from "jotai"
 import { useCallback, useRef, useState } from "react"
-import { classifyProviderConfig } from "@/utils/analytics-provider"
+import { classifyResolvedProvider } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { streamBackgroundNoteSuggestion } from "@/utils/content-script/background-stream-client"
 import { STREAM_PORT_DISCONNECTED_MESSAGE } from "@/utils/content-script/port-streaming"
-import { resolveSaveSuggestionAction } from "@/utils/custom-actions"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
+import { resolveNoteSuggestionAction } from "@/utils/custom-actions"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
+import { getHostedAiTierStatus } from "@/utils/hosted-ai/status"
 import { logger } from "@/utils/logger"
+import { noteSuggestionEnvelopeSchema } from "@/utils/note-suggestion/types"
+import { validateNoteSuggestion } from "@/utils/note-suggestion/validate"
+import { orpcClient } from "@/utils/orpc/client"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { getTopLevelReasoning } from "@/utils/providers/reasoning"
-import {
-  getSaveSuggestionProviderFingerprint,
-  isSaveSuggestionAttemptAllowed,
-  recordSaveSuggestionFailure,
-  recordSaveSuggestionSuccess,
-} from "@/utils/save-suggestion/provider-cooldown"
-import { saveSuggestionEnvelopeSchema } from "@/utils/save-suggestion/types"
-import { validateSaveSuggestion } from "@/utils/save-suggestion/validate"
 import { isAbortError } from "../inline-error"
-import { buildSaveSuggestionPrompts } from "./prompt"
+import { buildNoteSuggestionPrompts } from "./prompt"
 
-export interface SaveSuggestionSessionResult {
+export interface NoteSuggestionSessionResult {
   /** Composite key: popoverSessionKey:translateRequestKey:rerunNonce. */
   sessionKey: string
-  validated: ValidatedSaveSuggestion
-  /** The configured Save Suggestion action as of fire time. */
+  validated: ValidatedNoteSuggestion
+  /** The configured Note suggestion action as of fire time. */
   actionSnapshot: SelectionToolbarCustomAction
   /** When the request was fired (for latency analytics). */
   firedAt: number
@@ -37,32 +34,37 @@ export interface SaveSuggestionSessionResult {
   analyticsProvider: FeatureProviderAnalytics
 }
 
-export interface SaveSuggestionFireInput {
+export interface NoteSuggestionFireInput {
   sessionKey: string
   selectionText: string
   paragraphsText: string
   /** English name of the target language. */
   targetLangName: string
   webTitle: string
-  /** The resolved selection-translate provider (guaranteed local + enabled + LLM by the caller). */
-  providerId: string
-  providerConfig: LLMProviderConfig
+  /**
+   * The suggestion's own resolved provider (config.selectionToolbar
+   * .noteSuggestion.providerId) — local guaranteed enabled + LLM by the
+   * caller; system refs are availability-gated inside via hosted status.
+   */
+  provider: NoteSuggestionProviderRef
 }
 
 /**
- * Owns the "guess you want to save" AI request lifecycle, running on the
- * user's selection-translate LLM provider. Fired when a translation run
- * starts; the card renders the result only after the translation finishes. An
- * aborted request (or a dropped background port) is "never happened"; a
- * request error or schema/semantically invalid output records a failure in
- * the persisted per-provider cooldown, which doubles from 2 minutes without
- * cap until a success or a provider (config) change resets it. A valid
+ * Owns the "guess you want to save" AI request lifecycle, running on the save
+ * suggestion's own provider — a local LLM or hosted Built-in AI. Fired when a
+ * translation run starts; the card renders the result only after the
+ * translation finishes. Every eligible fire attempts a request (no failure
+ * backoff — selection translation is human-paced, and a failed LLM call is
+ * near-free): failures are silent, at most once per popover session. The one
+ * pre-request gate is hosted status: a Built-in provider whose tier is
+ * explicitly unavailable (not signed in, needs Ultra, quota exhausted,
+ * service down) skips without issuing the doomed stream call. A valid
  * response with zero notes is a success (nothing worth saving) that renders
  * no card.
  */
-export function useSaveSuggestion() {
+export function useNoteSuggestion() {
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
-  const [suggestion, setSuggestion] = useState<SaveSuggestionSessionResult | null>(null)
+  const [suggestion, setSuggestion] = useState<NoteSuggestionSessionResult | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
   // Sets rather than single slots so an A→B→A key round-trip inside one
   // popover (e.g. peeking at another target language) neither re-fires a
@@ -94,9 +96,9 @@ export function useSaveSuggestion() {
     return true
   }, [])
 
-  const maybeFire = useCallback((input: SaveSuggestionFireInput) => {
+  const maybeFire = useCallback((input: NoteSuggestionFireInput) => {
     const config = latestRef.current
-    if (!config.saveSuggestion.enabled) {
+    if (!config.noteSuggestion.enabled) {
       return
     }
     if (completedSessionKeysRef.current.has(input.sessionKey)) {
@@ -109,22 +111,41 @@ export function useSaveSuggestion() {
       return
     }
 
-    const actionSnapshot = structuredClone(resolveSaveSuggestionAction(config))
+    const actionSnapshot = structuredClone(resolveNoteSuggestionAction(config))
 
     const abortController = new AbortController()
     abortControllerRef.current = abortController
     const { signal } = abortController
     const firedAt = Date.now()
-    // Snapshotted synchronously at fire time so a mid-flight provider config
-    // change cannot skew which cooldown bucket this attempt records into.
-    const providerKey = {
-      providerId: input.providerId,
-      providerFingerprint: getSaveSuggestionProviderFingerprint(input.providerConfig),
-    }
+    const provider = input.provider
 
     const run = async () => {
-      if (!(await isSaveSuggestionAttemptAllowed(providerKey, firedAt)) || signal.aborted) {
+      if (signal.aborted) {
         return
+      }
+
+      if (provider.kind === "system") {
+        // A background auto-fire feature must not hammer a hosted tier the
+        // account cannot use: skip silently on any explicit unavailable
+        // verdict — durable facts (sign-in, Ultra plan) and reported runtime
+        // state (quota exhausted, service down) alike, since nobody is
+        // watching to act on the error and status is far cheaper than a
+        // doomed stream call. Fail open when status itself is unreachable —
+        // the run surfaces any real error (mirrors
+        // serializePageTranslationProvider's fail-open convention).
+        const status = await orpcClient.hostedAi.status({}).catch(() => undefined)
+        if (signal.aborted) {
+          return
+        }
+        const tierStatus = getHostedAiTierStatus(status, "noteSuggestion", provider.modelTier)
+        if (tierStatus && !tierStatus.available) {
+          logger.info(
+            "[NoteSuggestion] Skipped: hosted tier unavailable",
+            tierStatus.unavailableReason,
+          )
+          completedSessionKeysRef.current.add(input.sessionKey)
+          return
+        }
       }
 
       const webPageContext = await getOrCreateWebPageContext().catch(() => null)
@@ -134,71 +155,72 @@ export function useSaveSuggestion() {
 
       // Prompt construction and semantic validation share the exact action
       // snapshot captured synchronously when this request fired.
-      const { systemPrompt, prompt } = buildSaveSuggestionPrompts({
+      const { systemPrompt, prompt } = buildNoteSuggestionPrompts({
         selection: input.selectionText,
         paragraphs: input.paragraphsText,
         targetLanguage: input.targetLangName,
         webTitle: input.webTitle,
         webContent: webPageContext?.webContent ?? "",
         action: actionSnapshot,
+        envelopeContract: provider.kind === "system" ? "hosted" : "local",
       })
 
-      const modelName = resolveModelId(input.providerConfig.model) ?? ""
-      const reasoning = getTopLevelReasoning(input.providerConfig)
-      const providerOptions = getProviderOptionsWithOverride(
-        modelName,
-        input.providerConfig.provider,
-        input.providerConfig.providerOptions,
-        reasoning,
-      )
+      const payload =
+        provider.kind === "system"
+          ? {
+              providerId: provider.id,
+              modelTier: provider.modelTier,
+              requestId: getRandomUUID(),
+              instructions: systemPrompt,
+              prompt,
+            }
+          : {
+              providerId: provider.id,
+              instructions: systemPrompt,
+              prompt,
+              providerOptions: getProviderOptionsWithOverride(
+                resolveModelId(provider.config.model) ?? "",
+                provider.config.provider,
+                provider.config.providerOptions,
+                getTopLevelReasoning(provider.config),
+              ),
+              reasoning: getTopLevelReasoning(provider.config),
+              temperature: provider.config.temperature,
+            }
 
-      const snapshot = await streamBackgroundNoteSuggestion(
-        {
-          providerId: input.providerId,
-          instructions: systemPrompt,
-          prompt,
-          providerOptions,
-          reasoning,
-          temperature: input.providerConfig.temperature,
-        },
-        { signal },
-      )
+      const snapshot = await streamBackgroundNoteSuggestion(payload, { signal })
       if (signal.aborted) {
         return
       }
 
-      const envelope = saveSuggestionEnvelopeSchema.safeParse(snapshot.output)
+      const envelope = noteSuggestionEnvelopeSchema.safeParse(snapshot.output)
 
       completedSessionKeysRef.current.add(input.sessionKey)
 
       // The prompt sanctions an empty notes array ("truly nothing worth
-      // saving"): the provider worked correctly, so this resets the failure
-      // cooldown but renders no card.
+      // saving"): the provider worked correctly, it just renders no card.
       if (envelope.success && envelope.data.notes.length === 0) {
-        void recordSaveSuggestionSuccess()
         return
       }
 
       const validated = envelope.success
-        ? validateSaveSuggestion({
+        ? validateNoteSuggestion({
             envelope: envelope.data,
             action: actionSnapshot,
           })
         : null
 
       if (!validated) {
-        void recordSaveSuggestionFailure(providerKey)
+        logger.info("[NoteSuggestion] Discarded schema/semantically invalid suggestion output")
         return
       }
-
-      void recordSaveSuggestionSuccess()
 
       setSuggestion({
         sessionKey: input.sessionKey,
         validated,
         actionSnapshot,
         firedAt,
-        analyticsProvider: classifyProviderConfig(input.providerConfig),
+        analyticsProvider: classifyResolvedProvider(provider),
       })
     }
 
@@ -210,16 +232,15 @@ export function useSaveSuggestion() {
 
         // A dropped background port (service worker restart, extension
         // reload) is an infrastructure hiccup, not the provider's fault:
-        // treat it like an abort so it neither counts toward the failure
-        // cooldown nor blocks a later attempt for this session.
+        // treat it like an abort so it does not block a later attempt for
+        // this session.
         if (error instanceof Error && error.message === STREAM_PORT_DISCONNECTED_MESSAGE) {
-          logger.info("[SaveSuggestion] Suggestion stream port disconnected", error)
+          logger.info("[NoteSuggestion] Suggestion stream port disconnected", error)
           return
         }
 
         completedSessionKeysRef.current.add(input.sessionKey)
-        void recordSaveSuggestionFailure(providerKey)
-        logger.info("[SaveSuggestion] Suggestion request failed", error)
+        logger.info("[NoteSuggestion] Suggestion request failed", error)
       })
       .finally(() => {
         if (abortControllerRef.current === abortController) {

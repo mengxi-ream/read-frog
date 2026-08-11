@@ -1,6 +1,8 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { Icon } from "@iconify/react"
 import { useAtom } from "jotai"
+import ProviderSelector from "@/components/llm-providers/provider-selector"
+import { useFeatureProvider } from "@/components/llm-providers/use-feature-providers"
 import {
   Select,
   SelectContent,
@@ -11,7 +13,7 @@ import {
 } from "@/components/ui/base-ui/select"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { getSelectionToolbarActions, resolveSaveSuggestionAction } from "@/utils/custom-actions"
+import { getSelectionToolbarActions, resolveNoteSuggestionAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
 
@@ -29,30 +31,31 @@ function ActionIdentity({ action }: { action: SelectionToolbarCustomAction }) {
  * finding. The second row goes untitled: it only exists for the switch above it, and reads as
  * a continuation of it rather than a setting of its own.
  */
-export function SaveSuggestionItems() {
+export function NoteSuggestionItems() {
   const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
   const actions = getSelectionToolbarActions(selectionToolbar)
-  const selectedAction = resolveSaveSuggestionAction(selectionToolbar)
+  const selectedAction = resolveNoteSuggestionAction(selectionToolbar)
+  const suggestionProvider = useFeatureProvider("noteSuggestion")
 
   return (
     <>
       <ConfigItem
-        id="selection-toolbar-save-suggestion"
-        title={i18n.t("options.selectionToolbar.actions.saveSuggestion.title")}
-        description={i18n.t("options.selectionToolbar.actions.saveSuggestion.description")}
+        id="selection-toolbar-note-suggestion"
+        title={i18n.t("options.selectionToolbar.actions.noteSuggestion.title")}
+        description={i18n.t("options.selectionToolbar.actions.noteSuggestion.description")}
       >
         <Switch
-          checked={selectionToolbar.saveSuggestion.enabled}
+          checked={selectionToolbar.noteSuggestion.enabled}
           onCheckedChange={(checked) =>
             void setSelectionToolbar({
               ...selectionToolbar,
-              saveSuggestion: { ...selectionToolbar.saveSuggestion, enabled: checked },
+              noteSuggestion: { ...selectionToolbar.noteSuggestion, enabled: checked },
             })
           }
         />
       </ConfigItem>
       <ConfigItem
-        description={i18n.t("options.selectionToolbar.actions.saveSuggestion.actionDescription")}
+        description={i18n.t("options.selectionToolbar.actions.noteSuggestion.actionDescription")}
       >
         <Select
           value={selectedAction.id}
@@ -60,7 +63,7 @@ export function SaveSuggestionItems() {
             if (!actionId) return
             void setSelectionToolbar({
               ...selectionToolbar,
-              saveSuggestion: { ...selectionToolbar.saveSuggestion, actionId },
+              noteSuggestion: { ...selectionToolbar.noteSuggestion, actionId },
             })
           }}
         >
@@ -70,7 +73,7 @@ export function SaveSuggestionItems() {
           <SelectTrigger
             size="sm"
             className="max-w-60"
-            aria-label={i18n.t("options.selectionToolbar.actions.saveSuggestion.action")}
+            aria-label={i18n.t("options.selectionToolbar.actions.noteSuggestion.action")}
           >
             <SelectValue render={<span className="min-w-0 flex-1" />}>
               <ActionIdentity action={selectedAction} />
@@ -86,6 +89,16 @@ export function SaveSuggestionItems() {
             </SelectGroup>
           </SelectContent>
         </Select>
+      </ConfigItem>
+      <ConfigItem
+        description={i18n.t("options.selectionToolbar.actions.noteSuggestion.providerDescription")}
+      >
+        <ProviderSelector
+          providers={suggestionProvider.providers}
+          value={suggestionProvider.providerId}
+          onChange={suggestionProvider.setProviderId}
+          triggerSize="sm"
+        />
       </ConfigItem>
     </>
   )
