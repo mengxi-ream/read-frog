@@ -1,7 +1,7 @@
 import type * as React from "react"
 import { useSelector } from "@tanstack/react-store"
 import { useCallback } from "react"
-import { Field, FieldError, FieldLabel } from "@/components/ui/base-ui/field"
+import { Field, FieldError, FieldTitle } from "@/components/ui/base-ui/field"
 import { Select } from "@/components/ui/base-ui/select"
 import { useFieldContext } from "./form-context"
 
@@ -31,17 +31,15 @@ export function SelectFieldAutoSave({
   )
 
   return (
-    <Field invalid={hasError}>
+    <Field data-invalid={hasError}>
       <div className="flex w-full items-end justify-between">
-        <FieldLabel nativeLabel={false} render={<div />}>
-          {label}
-        </FieldLabel>
+        <FieldTitle>{label}</FieldTitle>
         {labelExtra}
       </div>
       <Select value={field.state.value} onValueChange={handleValueChange} {...props}>
         {props.children}
       </Select>
-      <FieldError match={hasError}>
+      <FieldError>
         {errors.map((error) => (typeof error === "string" ? error : error?.message)).join(", ")}
       </FieldError>
     </Field>

@@ -24,9 +24,10 @@ export function QuickInsertableTextareaFieldAutoSave({
   const hasError = errors.length > 0
 
   return (
-    <Field invalid={hasError}>
-      <FieldLabel>{label}</FieldLabel>
+    <Field data-invalid={hasError}>
+      <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
       <QuickInsertableTextarea
+        id={field.name}
         value={field.state.value}
         onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => {
           field.handleChange(event.target.value)
@@ -37,7 +38,7 @@ export function QuickInsertableTextareaFieldAutoSave({
         insertCells={insertCells}
         readOnly={readOnly}
       />
-      <FieldError match={hasError}>
+      <FieldError>
         {errors.map((error) => (typeof error === "string" ? error : error?.message)).join(", ")}
       </FieldError>
     </Field>

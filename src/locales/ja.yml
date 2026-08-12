@@ -1108,7 +1108,7 @@ action:
   playing: 再生中
 noteSuggestion:
   title: 保存におすすめ
-  description: 以下の単語を Notebase に保存して、いつでも復習できます。
+  description: Notebase に保存したい単語を選んで、いつでも復習できます。
   save: 保存
   saved: 保存済み
   staleSuggestion: この提案は古くなっています

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react"
-import { Field, FieldError, FieldLabel } from "@/components/ui/base-ui/field"
+import { Field, FieldError, FieldTitle } from "@/components/ui/base-ui/field"
 import { JSONCodeEditor } from "@/components/ui/json-code-editor"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 
@@ -116,8 +116,8 @@ export function AutosavedJsonCodeEditorField<TValue extends Record<string, unkno
   const jsonError = !parseResult.valid ? parseResult.error : null
 
   return (
-    <Field invalid={!!jsonError}>
-      <FieldLabel>{label}</FieldLabel>
+    <Field data-invalid={!!jsonError}>
+      <FieldTitle>{label}</FieldTitle>
       <JSONCodeEditor
         aria-label={editorAriaLabel}
         value={jsonInput}
@@ -128,7 +128,7 @@ export function AutosavedJsonCodeEditorField<TValue extends Record<string, unkno
         hasError={!!jsonError}
         height={height}
       />
-      {jsonError && <FieldError match={!!jsonError}>{jsonError}</FieldError>}
+      {jsonError && <FieldError>{jsonError}</FieldError>}
     </Field>
   )
 }

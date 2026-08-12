@@ -20,7 +20,7 @@ import { useCallback, useEffect, useMemo } from "react"
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/base-ui/alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
 import { Button } from "@/components/ui/base-ui/button"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
+import { Field, FieldGroup, FieldTitle } from "@/components/ui/base-ui/field"
 import {
   Select,
   SelectContent,
@@ -409,9 +409,7 @@ export const NotebaseConnectionField = withForm({
     return (
       <Field className="gap-4 rounded-xl border border-dashed bg-muted/10 p-4">
         <div className="space-y-1">
-          <FieldLabel nativeLabel={false} render={<div />}>
-            {t("title")}
-          </FieldLabel>
+          <FieldTitle>{t("title")}</FieldTitle>
           <p className="text-sm text-muted-foreground">{t("description")}</p>
         </div>
 
@@ -448,9 +446,7 @@ export const NotebaseConnectionField = withForm({
           <FieldGroup className="gap-4">
             <Field>
               <div className="flex items-center justify-between gap-3">
-                <FieldLabel nativeLabel={false} render={<div />}>
-                  {t("tableLabel")}
-                </FieldLabel>
+                <FieldTitle>{t("tableLabel")}</FieldTitle>
                 <div className="flex items-center gap-2">
                   {isOwnedConnection && !!sanitizedConnection?.notebaseId && (
                     <Button
@@ -624,9 +620,7 @@ export const NotebaseConnectionField = withForm({
 
                 <Field className="gap-3">
                   <div className="flex items-center justify-between gap-3">
-                    <FieldLabel nativeLabel={false} render={<div />}>
-                      {t("mappingsLabel")}
-                    </FieldLabel>
+                    <FieldTitle>{t("mappingsLabel")}</FieldTitle>
                     <Button
                       type="button"
                       size="sm"

@@ -1108,7 +1108,7 @@ action:
   playing: Đang phát
 noteSuggestion:
   title: Có thể bạn muốn lưu
-  description: Lưu những từ dưới đây vào Notebase để ôn tập bất cứ lúc nào.
+  description: Chọn những từ bạn muốn lưu vào Notebase để ôn tập bất cứ lúc nào.
   save: Lưu
   saved: Đã lưu
   staleSuggestion: Gợi ý này đã cũ

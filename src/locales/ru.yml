@@ -1108,7 +1108,7 @@ action:
   playing: Воспроизведение
 noteSuggestion:
   title: Стоит сохранить
-  description: Сохраните эти слова в Notebase, чтобы повторять их в любое время.
+  description: Выберите слова для сохранения в Notebase и повторяйте их в любое время.
   save: Сохранить
   saved: Сохранено
   staleSuggestion: Это предложение устарело

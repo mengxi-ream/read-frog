@@ -1224,7 +1224,7 @@ action:
   playing: Playing
 noteSuggestion:
   title: You might want to save
-  description: Save these words to your Notebase and review them anytime.
+  description: Choose which words to save to your Notebase and review anytime.
   save: Save
   saved: Saved
   staleSuggestion: This suggestion is out of date

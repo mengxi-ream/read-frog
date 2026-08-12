@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react"
 import type { FeatureKey } from "@/utils/constants/feature-providers"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
+import { Field, FieldGroup, FieldTitle } from "@/components/ui/base-ui/field"
 import { FEATURE_KEYS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
@@ -30,13 +30,10 @@ function FeatureProviderField({
 
   return (
     <Field>
-      <FieldLabel
-        nativeLabel={false}
-        render={<div className="flex flex-wrap items-center gap-2" />}
-      >
+      <FieldTitle className="flex flex-wrap items-center gap-2">
         {i18n.t(getFeatureLabelI18nKey(featureKey))}
         <SetApiKeyWarning providerConfig={providerConfig} />
-      </FieldLabel>
+      </FieldTitle>
       <ProviderSelector
         providers={providers}
         value={providerId}
@@ -68,13 +65,10 @@ function CustomActionProviderFields({
       </p>
       {actions.map((action) => (
         <Field key={action.id}>
-          <FieldLabel
-            nativeLabel={false}
-            render={<div className="flex flex-wrap items-center gap-2" />}
-          >
+          <FieldTitle className="flex flex-wrap items-center gap-2">
             {action.name}
             <SetApiKeyWarning providerConfig={getProviderConfig(action)} />
-          </FieldLabel>
+          </FieldTitle>
           <ProviderSelector
             providers={providers}
             value={action.providerId}

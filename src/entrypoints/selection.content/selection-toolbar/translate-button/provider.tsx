@@ -840,6 +840,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
               !error &&
               noteSuggestion?.sessionKey === noteSuggestionSessionKey && (
                 <NoteSuggestionCard
+                  key={noteSuggestion.sessionKey}
                   suggestion={noteSuggestion}
                   markShownOnce={markNoteSuggestionShownOnce}
                 />

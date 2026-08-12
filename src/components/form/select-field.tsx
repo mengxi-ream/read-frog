@@ -1,7 +1,7 @@
 import type * as React from "react"
 import { useSelector } from "@tanstack/react-store"
 import { useCallback } from "react"
-import { Field, FieldError, FieldLabel } from "@/components/ui/base-ui/field"
+import { Field, FieldError, FieldTitle } from "@/components/ui/base-ui/field"
 import { Select } from "@/components/ui/base-ui/select"
 import { useFieldContext } from "./form-context"
 
@@ -23,14 +23,12 @@ export function SelectField({ label, ...props }: SelectFieldProps) {
   )
 
   return (
-    <Field invalid={hasError}>
-      <FieldLabel nativeLabel={false} render={<div />}>
-        {label}
-      </FieldLabel>
+    <Field data-invalid={hasError}>
+      <FieldTitle>{label}</FieldTitle>
       <Select value={field.state.value} onValueChange={handleValueChange} {...props}>
         {props.children}
       </Select>
-      <FieldError match={hasError}>
+      <FieldError>
         {errors.map((error) => (typeof error === "string" ? error : error?.message)).join(", ")}
       </FieldError>
     </Field>

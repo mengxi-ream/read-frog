@@ -1224,7 +1224,7 @@ action:
   playing: Reproduciendo
 noteSuggestion:
   title: Quizás quieras guardar
-  description: Guarda estas palabras en tu Notebase y repásalas cuando quieras.
+  description: Elige qué palabras guardar en tu Notebase y repásalas cuando quieras.
   save: Guardar
   saved: Guardado
   staleSuggestion: Esta sugerencia está desactualizada

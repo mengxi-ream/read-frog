@@ -1,6 +1,6 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import { LanguageCombobox } from "@/components/language-combobox"
-import { FieldLabel, FieldRoot } from "@/components/ui/base-ui/field"
+import { Field, FieldTitle } from "@/components/ui/base-ui/field"
 
 interface SearchableLanguageSelectorProps {
   value: LangCodeISO6393 | "auto"
@@ -18,14 +18,14 @@ export function SearchableLanguageSelector({
   className,
 }: SearchableLanguageSelectorProps) {
   return (
-    <FieldRoot className={className}>
-      <FieldLabel>{label}</FieldLabel>
+    <Field className={className}>
+      <FieldTitle>{label}</FieldTitle>
       <LanguageCombobox
         value={value}
         onValueChange={onValueChange}
         detectedLangCode={detectedLangCode}
         className="w-full"
       />
-    </FieldRoot>
+    </Field>
   )
 }
