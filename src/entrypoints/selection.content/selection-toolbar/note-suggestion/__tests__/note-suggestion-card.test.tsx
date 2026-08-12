@@ -73,11 +73,14 @@ function createAction(
 
 function createSuggestion(
   actionSnapshot: SelectionToolbarCustomAction,
+  notes: Array<Record<string, string | number | null>> = [
+    { Term: "ephemeral", Definition: "lasting a very short time" },
+  ],
 ): NoteSuggestionSessionResult {
   return {
     sessionKey: "session-1",
     validated: {
-      notes: [{ Term: "ephemeral", Definition: "lasting a very short time" }],
+      notes,
       summaryFieldName: "Definition",
     },
     actionSnapshot,
@@ -98,10 +101,11 @@ function createStoreWithAction(action?: SelectionToolbarCustomAction) {
 function renderCard(
   store: ReturnType<typeof createStore>,
   actionSnapshot: SelectionToolbarCustomAction,
+  notes?: Array<Record<string, string | number | null>>,
 ) {
   return render(
     <NoteSuggestionCard
-      suggestion={createSuggestion(actionSnapshot)}
+      suggestion={createSuggestion(actionSnapshot, notes)}
       markShownOnce={() => false}
     />,
     { wrapper: wrapper(store) },
@@ -134,6 +138,45 @@ describe("NoteSuggestionCard", () => {
       analyticsProvider: { provider: "openai", backend_kind: "llm" },
     })
     expect(mocks.toastAdd).not.toHaveBeenCalled()
+  })
+
+  it("selects every suggested note by default and saves only the checked notes", async () => {
+    const action = createAction()
+    const store = createStoreWithAction(action)
+    renderCard(store, action, [
+      { Term: "ephemeral", Definition: "lasting a very short time" },
+      { Term: "transient", Definition: "not permanent" },
+    ])
+
+    const checkboxes = screen.getAllByRole("checkbox")
+    expect(checkboxes).toHaveLength(2)
+    expect(checkboxes[0]).toBeChecked()
+    expect(checkboxes[1]).toBeChecked()
+    expect(checkboxes[0]?.closest('[data-slot="field-label"]')?.firstElementChild).toHaveAttribute(
+      "data-slot",
+      "field",
+    )
+
+    fireEvent.click(screen.getByRole("checkbox", { name: /transient/ }))
+    clickSave()
+
+    await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(1))
+    expect(mocks.save.mock.calls[0]?.[0]?.results).toEqual([
+      { Term: "ephemeral", Definition: "lasting a very short time" },
+    ])
+  })
+
+  it("disables saving when every suggested note is unchecked", () => {
+    const action = createAction()
+    const store = createStoreWithAction(action)
+    renderCard(store, action)
+
+    fireEvent.click(screen.getByRole("checkbox", { name: /ephemeral/ }))
+
+    const saveButton = screen.getByRole("button", { name: i18n.t("noteSuggestion.save") })
+    expect(saveButton).toBeDisabled()
+    fireEvent.click(saveButton)
+    expect(mocks.save).not.toHaveBeenCalled()
   })
 
   it("marks the suggestion stale when its action was deleted", async () => {

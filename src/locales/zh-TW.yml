@@ -1224,7 +1224,7 @@ action:
   playing: 播放中
 noteSuggestion:
   title: 猜你想存
-  description: 把下列詞存入筆記庫，將來隨時複習
+  description: 選擇要存入筆記庫的詞，將來隨時複習
   save: 儲存
   saved: 已儲存
   staleSuggestion: 該建議已過期

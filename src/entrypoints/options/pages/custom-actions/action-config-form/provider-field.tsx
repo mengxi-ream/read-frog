@@ -3,7 +3,7 @@ import { useAtomValue } from "jotai"
 import { useMemo } from "react"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
-import { Field, FieldLabel } from "@/components/ui/base-ui/field"
+import { Field, FieldTitle } from "@/components/ui/base-ui/field"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import {
@@ -47,9 +47,9 @@ export const ProviderField = withForm({
       >
         {(field) => (
           <Field>
-            <FieldLabel nativeLabel={false} render={<div />}>
+            <FieldTitle>
               {i18n.t("options.selectionToolbar.customActions.form.provider")}
-            </FieldLabel>
+            </FieldTitle>
             <ProviderSelector
               providers={customActionProviders}
               value={field.state.value}

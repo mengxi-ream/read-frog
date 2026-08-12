@@ -34,11 +34,9 @@ export function InputField({
   }
 
   return (
-    <Field invalid={hasError}>
+    <Field data-invalid={hasError}>
       <div className="flex w-full items-end justify-between">
-        <FieldLabel nativeLabel={false} render={<div />}>
-          {label}
-        </FieldLabel>
+        <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
         {labelExtra}
       </div>
       <Input
@@ -50,7 +48,7 @@ export function InputField({
         aria-invalid={hasError}
         {...props}
       />
-      <FieldError match={hasError}>
+      <FieldError>
         {errors.map((error) => (typeof error === "string" ? error : error?.message)).join(", ")}
       </FieldError>
     </Field>

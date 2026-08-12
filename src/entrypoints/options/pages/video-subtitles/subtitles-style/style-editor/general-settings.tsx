@@ -5,7 +5,7 @@ import { useAtom } from "jotai"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import { Card } from "@/components/ui/base-ui/card"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
+import { Field, FieldGroup, FieldLabel, FieldTitle } from "@/components/ui/base-ui/field"
 import { Label } from "@/components/ui/base-ui/label"
 import {
   Select,
@@ -27,16 +27,13 @@ import {
 } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
 
-const SLIDER_ROW_CLASS_NAME = "gap-0"
-const SLIDER_ROW_CONTENT_CLASS_NAME =
-  "flex flex-col gap-2 @xs/field-group:grid @xs/field-group:grid-cols-[12rem_minmax(0,1fr)] @xs/field-group:items-center @xs/field-group:gap-x-4"
-const SLIDER_LABEL_CLASS_NAME = "text-sm whitespace-nowrap @xs/field-group:min-w-0"
-
 export function GeneralSettings() {
   const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(
     configFieldsAtomMap.videoSubtitles,
   )
   const { displayMode, translationPosition, container } = videoSubtitlesConfig.style
+  const displayModeId = "video-subtitles-display-mode"
+  const translationPositionId = "video-subtitles-translation-position"
   const [draftBackgroundOpacity, setDraftBackgroundOpacity] = useState(container.backgroundOpacity)
 
   useEffect(() => {
@@ -96,12 +93,12 @@ export function GeneralSettings() {
       </div>
 
       <FieldGroup>
-        <Field orientation="responsive-compact">
-          <FieldLabel className="text-sm whitespace-nowrap">
+        <Field orientation="responsive">
+          <FieldLabel htmlFor={displayModeId}>
             {i18n.t("options.videoSubtitles.style.displayMode.title")}
           </FieldLabel>
           <Select value={displayMode} onValueChange={handleDisplayModeChange}>
-            <SelectTrigger className="h-8">
+            <SelectTrigger id={displayModeId}>
               <SelectValue>
                 {i18n.t(`options.videoSubtitles.style.displayMode.${displayMode}`)}
               </SelectValue>
@@ -123,12 +120,12 @@ export function GeneralSettings() {
         </Field>
 
         {displayMode === "bilingual" && (
-          <Field orientation="responsive-compact">
-            <FieldLabel className="text-sm whitespace-nowrap">
+          <Field orientation="responsive">
+            <FieldLabel htmlFor={translationPositionId}>
               {i18n.t("options.videoSubtitles.style.translationPosition.title")}
             </FieldLabel>
             <Select value={translationPosition} onValueChange={handleTranslationPositionChange}>
-              <SelectTrigger className="h-8">
+              <SelectTrigger id={translationPositionId}>
                 <SelectValue>
                   {i18n.t(
                     `options.videoSubtitles.style.translationPosition.${translationPosition}`,
@@ -149,27 +146,19 @@ export function GeneralSettings() {
           </Field>
         )}
 
-        <Field className={SLIDER_ROW_CLASS_NAME}>
-          <div className={SLIDER_ROW_CONTENT_CLASS_NAME}>
-            <FieldLabel className={SLIDER_LABEL_CLASS_NAME}>
-              {i18n.t("options.videoSubtitles.style.backgroundOpacity")}
-            </FieldLabel>
-            <div className="w-full min-w-0 @xs/field-group:ml-auto @xs/field-group:max-w-[15rem]">
-              <div className="min-w-0">
-                <SliderComfortable
-                  variant="scrubber"
-                  aria-label={i18n.t("options.videoSubtitles.style.backgroundOpacity")}
-                  min={MIN_BACKGROUND_OPACITY}
-                  max={MAX_BACKGROUND_OPACITY}
-                  step={5}
-                  value={draftBackgroundOpacity}
-                  onChange={setDraftBackgroundOpacity}
-                  onCommit={(value) => handleContainerChange({ backgroundOpacity: value })}
-                  formatValue={(v) => `${v}%`}
-                />
-              </div>
-            </div>
-          </div>
+        <Field orientation="responsive">
+          <FieldTitle>{i18n.t("options.videoSubtitles.style.backgroundOpacity")}</FieldTitle>
+          <SliderComfortable
+            variant="scrubber"
+            aria-label={i18n.t("options.videoSubtitles.style.backgroundOpacity")}
+            min={MIN_BACKGROUND_OPACITY}
+            max={MAX_BACKGROUND_OPACITY}
+            step={5}
+            value={draftBackgroundOpacity}
+            onChange={setDraftBackgroundOpacity}
+            onCommit={(value) => handleContainerChange({ backgroundOpacity: value })}
+            formatValue={(v) => `${v}%`}
+          />
         </Field>
       </FieldGroup>
     </Card>

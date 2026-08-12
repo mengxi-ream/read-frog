@@ -1108,7 +1108,7 @@ action:
   playing: 재생 중
 noteSuggestion:
   title: 저장 추천
-  description: 아래 단어를 Notebase에 저장하고 언제든지 복습하세요.
+  description: Notebase에 저장할 단어를 선택하고 언제든지 복습하세요.
   save: 저장
   saved: 저장됨
   staleSuggestion: 이 제안은 더 이상 유효하지 않습니다

@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react"
 import { useSelector } from "@tanstack/react-store"
 import { useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
-import { Field, FieldLabel } from "@/components/ui/base-ui/field"
+import { Field, FieldTitle } from "@/components/ui/base-ui/field"
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/base-ui/input-group"
 import {
   Popover,
@@ -159,9 +159,7 @@ export const IconField = withForm({
       >
         {(field) => (
           <Field>
-            <FieldLabel nativeLabel={false} render={<div />}>
-              {i18n.t("options.selectionToolbar.customActions.form.icon")}
-            </FieldLabel>
+            <FieldTitle>{i18n.t("options.selectionToolbar.customActions.form.icon")}</FieldTitle>
             <div className="flex items-center gap-2">
               <IconPickerPopover
                 open={iconPickerOpen}

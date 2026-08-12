@@ -2,8 +2,16 @@ import type { NoteSuggestionSessionResult } from "./use-note-suggestion"
 import type { NoteSuggestionNoteRecord } from "@/utils/note-suggestion/types"
 import { IconBookmarkPlus } from "@tabler/icons-react"
 import { useAtom } from "jotai"
-import { useEffect, useState } from "react"
+import { useEffect, useId, useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
+import { Checkbox } from "@/components/ui/base-ui/checkbox"
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  FieldTitle,
+} from "@/components/ui/base-ui/field"
 import { Label } from "@/components/ui/base-ui/label"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { toastManager } from "@/components/ui/base-ui/toast"
@@ -25,12 +33,20 @@ function formatNoteValue(value: string | number | null): string | null {
 
 function NoteRow({
   note,
+  checkboxId,
+  checked,
+  disabled,
   primaryFieldName,
   secondaryFieldNames,
+  onCheckedChange,
 }: {
   note: NoteSuggestionNoteRecord
+  checkboxId: string
+  checked: boolean
+  disabled: boolean
   primaryFieldName: string
   secondaryFieldNames: string[]
+  onCheckedChange: (checked: boolean) => void
 }) {
   const primaryValue = formatNoteValue(note[primaryFieldName] ?? null)
   const secondaryValue = secondaryFieldNames
@@ -38,12 +54,22 @@ function NoteRow({
     .find((value) => value !== null)
 
   return (
-    <div className="rounded-md border bg-background/60 px-2.5 py-1.5">
-      <div className="text-sm font-medium [overflow-wrap:anywhere] break-words">{primaryValue}</div>
-      {secondaryValue && (
-        <div className="truncate text-xs text-muted-foreground">{secondaryValue}</div>
-      )}
-    </div>
+    <FieldLabel htmlFor={checkboxId}>
+      <Field orientation="horizontal" data-disabled={disabled || undefined} className="gap-2 p-2!">
+        <Checkbox
+          id={checkboxId}
+          checked={checked}
+          disabled={disabled}
+          onCheckedChange={onCheckedChange}
+        />
+        <FieldContent className="min-w-0 gap-0.5">
+          <FieldTitle>{primaryValue}</FieldTitle>
+          {secondaryValue && (
+            <FieldDescription className="text-xs">{secondaryValue}</FieldDescription>
+          )}
+        </FieldContent>
+      </Field>
+    </FieldLabel>
   )
 }
 
@@ -54,11 +80,14 @@ export function NoteSuggestionCard({
   suggestion: NoteSuggestionSessionResult
   markShownOnce: (sessionKey: string) => boolean
 }) {
+  const { sessionKey, validated, actionSnapshot, firedAt, analyticsProvider } = suggestion
   const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
   const { save, isSaving } = useSaveToNotebase()
   const [saveState, setSaveState] = useState<"idle" | "saved" | "stale">("idle")
-
-  const { sessionKey, validated, actionSnapshot, firedAt, analyticsProvider } = suggestion
+  const checkboxBaseId = useId()
+  const [selectedNoteIndexes, setSelectedNoteIndexes] = useState(
+    () => new Set(validated.notes.map((_note, index) => index)),
+  )
 
   useEffect(() => {
     if (!markShownOnce(sessionKey)) {
@@ -90,6 +119,7 @@ export function NoteSuggestionCard({
       (field) => field.name !== aiSummaryFieldName && !field.id.includes("definition"),
     ),
   ].map((field) => field.name)
+  const selectedNotes = validated.notes.filter((_note, index) => selectedNoteIndexes.has(index))
 
   const handleSave = async () => {
     const liveAction = findSelectionToolbarAction(selectionToolbar, actionSnapshot.id)
@@ -105,7 +135,7 @@ export function NoteSuggestionCard({
 
     const outcome = await save({
       action: liveAction,
-      results: validated.notes,
+      results: selectedNotes,
       analyticsSource: "note_suggestion",
       analyticsProvider,
     })
@@ -119,7 +149,8 @@ export function NoteSuggestionCard({
     }
   }
 
-  const isButtonDisabled = isSaving || saveState !== "idle"
+  const isInteractionDisabled = isSaving || saveState !== "idle"
+  const isButtonDisabled = isInteractionDisabled || selectedNotes.length === 0
   const buttonLabel = isSaving
     ? i18n.t("action.saveToNotebaseSaving")
     : saveState === "saved"
@@ -156,14 +187,28 @@ export function NoteSuggestionCard({
         </div>
       </div>
       <p className="text-xs text-muted-foreground">{i18n.t("noteSuggestion.description")}</p>
-      <div className="space-y-1.5">
+      <div className="space-y-1">
         {validated.notes.map((note, index) => (
           <NoteRow
             // oxlint-disable-next-line react/no-array-index-key -- notes are a stable per-session snapshot
             key={index}
             note={note}
+            checkboxId={`${checkboxBaseId}-${index}`}
+            checked={selectedNoteIndexes.has(index)}
+            disabled={isInteractionDisabled}
             primaryFieldName={primaryFieldName}
             secondaryFieldNames={secondaryFieldNames}
+            onCheckedChange={(checked) => {
+              setSelectedNoteIndexes((currentIndexes) => {
+                const nextIndexes = new Set(currentIndexes)
+                if (checked) {
+                  nextIndexes.add(index)
+                } else {
+                  nextIndexes.delete(index)
+                }
+                return nextIndexes
+              })
+            }}
           />
         ))}
       </div>

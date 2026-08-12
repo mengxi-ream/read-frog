@@ -24,9 +24,10 @@ export const noteSuggestionNoteSchema = z.strictObject({
 export const noteSuggestionEnvelopeSchema = z.strictObject({
   /**
    * Display hint: which schema field's value best explains the term in one
-   * line. Optional for tolerance of models that omit the field entirely.
+   * line. The key is required and its value is nullable because OpenAI strict
+   * structured outputs do not support optional object properties.
    */
-  summaryFieldName: z.string().nullable().optional(),
+  summaryFieldName: z.string().nullable(),
   notes: z.array(noteSuggestionNoteSchema).max(NOTE_SUGGESTION_MAX_NOTES),
 })
 

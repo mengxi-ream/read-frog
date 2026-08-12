@@ -1224,7 +1224,7 @@ action:
   playing: 播放中
 noteSuggestion:
   title: 猜你想存
-  description: 把下列词存入笔记库，将来随时复习
+  description: 选择要存入笔记库的词，将来随时复习
   save: 保存
   saved: 已保存
   staleSuggestion: 该建议已过期
