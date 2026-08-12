@@ -1,11 +1,9 @@
 import type { LangCodeISO6393, LangLevel } from "@read-frog/definitions"
+import type { HostedAiTextStreamRoute } from "@/types/background-stream"
 import type { Config } from "@/types/config/config"
 import type { TranslationTextFormat } from "@/types/config/translate"
 import type { WebPagePromptContext } from "@/types/content"
-import type {
-  PageTranslationProvider,
-  SerializablePageTranslationProvider,
-} from "@/utils/providers/translation-provider"
+import type { SerializableProviderRef, UnwrappedProviderRef } from "@/utils/providers/provider-ref"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
@@ -14,11 +12,8 @@ import { detectLanguage } from "@/utils/content/language"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { isSystemProviderRef, serializeProviderRef } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
-import {
-  isSystemTranslationProvider,
-  serializePageTranslationProvider,
-} from "@/utils/providers/translation-provider"
 import { TranslationCancelledError } from "@/utils/request/cancellation"
 import { Sha256Hex } from "../../hash"
 import { sendMessage } from "../../message"
@@ -29,26 +24,41 @@ import {
   setPageTranslationSessionProviderRef,
 } from "./translation-session"
 
-// Minimum text length for skip language detection (shorter than general detection
-// to catch short phrases like "Bonjour!" or "こんにちは")
-export const MIN_LENGTH_FOR_SKIP_LLM_DETECTION = 10
+/**
+ * Minimum text length before a skip decision is attempted at all. Deliberately
+ * below the general threshold, to catch short phrases like "Bonjour!" or
+ * "こんにちは".
+ *
+ * Left at 10 even though detection is now franc-only. Raising it looks right
+ * for Latin script — franc on ten characters is close to a coin flip there —
+ * but this counts characters, and ten characters of Han, kana or Hangul is
+ * plenty for franc precisely because the script alone is near-decisive. A flat
+ * character count cannot express that difference, so tuning it needs a
+ * script-aware rule rather than a bigger number.
+ */
+export const MIN_LENGTH_FOR_SKIP_LANGUAGE_DETECTION = 10
 
 /**
  * Check if text should be skipped based on language detection.
- * Uses LLM detection if enabled, falls back to franc library.
- * @param text - Text to detect language for
- * @param skipLanguages - List of languages to skip translation for
- * @param enableLLM - Whether to use LLM for language detection
- * @returns true if text language is in skipLanguages list (should skip translation)
+ *
+ * Deliberately franc-only. This runs once per paragraph, so routing it through
+ * an LLM cost one hosted call per paragraph — hundreds per article, against the
+ * same weekly pool that funds page translation and subtitles, and against a
+ * BYOK user's own budget. The whole-page source language is detected once and
+ * cached; this second, uncached, per-paragraph pass existed only for pages that
+ * mix languages, and the value of a right answer here (avoid one redundant
+ * translation) never justified the per-paragraph price of getting it.
+ *
+ * `languageDetection.mode` still governs the once-per-page source detection,
+ * where a wrong answer corrupts the prompt for every paragraph.
  */
 export async function shouldSkipByLanguage(
   text: string,
   skipLanguages: LangCodeISO6393[],
-  enableLLM: boolean,
 ): Promise<boolean> {
   const detectedLang = await detectLanguage(text, {
-    minLength: MIN_LENGTH_FOR_SKIP_LLM_DETECTION,
-    enableLLM,
+    minLength: MIN_LENGTH_FOR_SKIP_LANGUAGE_DETECTION,
+    enableLLM: false,
   })
 
   if (!detectedLang) {
@@ -84,7 +94,7 @@ function normalizeWebPagePromptContext(
 
 async function buildWebPageHashComponents(
   text: string,
-  providerRef: SerializablePageTranslationProvider,
+  providerRef: SerializableProviderRef,
   partialLangConfig: { sourceCode: LangCodeISO6393 | "auto"; targetCode: LangCodeISO6393 },
   enableAIContentAware: boolean,
   textFormat: TranslationTextFormat,
@@ -160,10 +170,8 @@ async function buildWebPageHashComponents(
  * on one status snapshot: no per-paragraph status fetches, and a mid-session
  * status blip cannot fail in-flight paragraphs.
  */
-function getSessionProviderRefFor(
-  provider: PageTranslationProvider,
-): SerializablePageTranslationProvider | null {
-  if (!isSystemTranslationProvider(provider)) {
+function getSessionProviderRefFor(provider: UnwrappedProviderRef): SerializableProviderRef | null {
+  if (!isSystemProviderRef(provider)) {
     return null
   }
   const sessionRef = getPageTranslationSessionProviderRef()
@@ -177,7 +185,7 @@ function getSessionProviderRefFor(
   return sessionRef
 }
 
-const pendingSystemSerializes = new Map<string, Promise<SerializablePageTranslationProvider>>()
+const pendingSystemSerializes = new Map<string, Promise<SerializableProviderRef>>()
 /**
  * Most recently requested system-provider key. Stale stragglers — paragraphs
  * that captured the previous provider from config before a mid-session switch
@@ -197,25 +205,30 @@ let lastRequestedSystemKey: string | null = null
  * each other's in-flight fetch), and an active session adopts the result so
  * later paragraphs skip the network entirely.
  */
-async function resolvePageProviderRef(
-  provider: PageTranslationProvider,
+export async function resolvePageProviderRef(
+  provider: UnwrappedProviderRef,
   sessionId: string | undefined,
-): Promise<SerializablePageTranslationProvider> {
-  if (!isSystemTranslationProvider(provider)) {
-    return serializePageTranslationProvider(provider)
+  feature: HostedAiTextStreamRoute,
+): Promise<SerializableProviderRef> {
+  if (!isSystemProviderRef(provider)) {
+    return serializeProviderRef(provider, feature)
   }
 
-  const key = `${provider.id}:${provider.modelTier}`
+  // The feature is part of the key: two features on the same provider and tier
+  // gate on different tier statuses, so they must not share an in-flight fetch.
+  const key = `${provider.id}:${provider.modelTier}:${feature}`
   lastRequestedSystemKey = key
 
-  const sessionRef = getSessionProviderRefFor(provider)
+  // The session snapshot belongs to the page-translation run; other features
+  // must not adopt it, and must not overwrite it below.
+  const sessionRef = feature === "pageTranslation" ? getSessionProviderRefFor(provider) : null
   if (sessionRef) {
     return sessionRef
   }
 
   let promise = pendingSystemSerializes.get(key)
   if (!promise) {
-    const created = serializePageTranslationProvider(provider)
+    const created = serializeProviderRef(provider, feature)
     promise = created
     pendingSystemSerializes.set(key, created)
     void created
@@ -229,6 +242,7 @@ async function resolvePageProviderRef(
 
   const providerRef = await promise
   if (
+    feature === "pageTranslation" &&
     sessionId !== undefined &&
     getPageTranslationSessionId() === sessionId &&
     key === lastRequestedSystemKey
@@ -245,7 +259,7 @@ export interface TranslateTextOptions {
     targetCode: LangCodeISO6393
     level: LangLevel
   }
-  providerConfig: PageTranslationProvider
+  providerConfig: UnwrappedProviderRef
   enableAIContentAware?: boolean
   extraHashTags?: string[]
   webPageContext?: WebPagePromptContext
@@ -256,6 +270,13 @@ export interface TranslateTextOptions {
   // NOT part of the cache hash — cache identity must not vary per session.
   sessionId?: string
   forceRetranslation?: boolean
+  /**
+   * Which hosted route a system provider bills against; local providers
+   * ignore it. Required so every entry point states its route where the
+   * function is named — a defaulted route once let page translation gate on
+   * and bill against the wrong quota.
+   */
+  hostedFeature: HostedAiTextStreamRoute
 }
 
 /**
@@ -274,6 +295,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     preserveLineBreaks = false,
     sessionId,
     forceRetranslation = false,
+    hostedFeature,
   } = options
 
   const preparedText = prepareTranslationText(text)
@@ -289,7 +311,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
   }
 
   const normalizedWebPageContext = normalizeWebPagePromptContext(webPageContext)
-  const providerRef = await resolvePageProviderRef(providerConfig, sessionId)
+  const providerRef = await resolvePageProviderRef(providerConfig, sessionId, hostedFeature)
 
   const hashComponents = await buildWebPageHashComponents(
     preparedText,
@@ -329,6 +351,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     webSummary: normalizedWebPageContext?.webSummary,
     sessionId,
     forceRetranslation,
+    hostedFeature,
   })
   // The sentinel must be mapped here and only here: every batch-pipeline
   // consumer (page paragraphs, document title, input translation, selection

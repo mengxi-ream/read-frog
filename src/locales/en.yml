@@ -144,6 +144,9 @@ options:
         customAction: Custom AI Actions
         noteSuggestion: Note suggestions
         selectionTranslation: Selection translation
+        videoSubtitles: Video subtitles
+        inputTranslation: Input translation
+        languageDetection: Language detection
     sponsorCta: Get fast, cost-effective AI
     setApiKeyWarning:
       message: Please set your API key on the $1 page
@@ -178,6 +181,7 @@ options:
         confirm: Delete
         cancel: Cancel
       atLeastOneLLMProvider: At least one LLM translation provider is required.
+      featureWouldLoseProvider: 'Cannot delete: "$1" would be left with no provider that can run it.'
       providerInUseCannotDisable: 'Cannot disable "$1" because it is currently used by $2 feature(s).'
       duplicateProviderName: 'Duplicate provider name "$1"'
       defaultProvider:
@@ -224,12 +228,12 @@ options:
     providers:
       name:
         builtInAi: Built-in AI
-        builtInAiUltra: Advanced Built-in AI
+        builtInAiAdvance: Advanced Built-in AI
         customChatComplete: Custom Chat Complete
         customResponses: Custom Responses
       attribution:
         builtInAi: Read Frog's hosted standard model. Non-Ultra users can use it only for Custom AI Actions; Ultra members can use it on more features.
-        builtInAiUltra: Read Frog's hosted advanced model, exclusive to Ultra members. Runs page translation, Custom AI Actions, and every other Built-in AI feature on a shared weekly quota. Uses up the quota faster than the standard model.
+        builtInAiAdvance: Read Frog's hosted advanced model, exclusive to Ultra members. Runs page translation, Custom AI Actions, and every other Built-in AI feature on a shared weekly quota. Uses up the quota faster than the standard model.
       description:
         openai: Provides models like GPT-4o
         azure: Azure-hosted OpenAI models through your deployments
@@ -288,7 +292,7 @@ options:
         noteSuggestion: Suggests words worth saving to your Notebase after a selection translation.
     languageDetection:
       title: Language detection
-      description: Affects auto-translate language detection, skip-language detection, and Speaking voice selection accuracy.
+      description: Affects auto-translate language detection and Speaking voice selection accuracy.
       mode:
         basic: Basic
         llm: LLM
@@ -1273,7 +1277,7 @@ subtitles:
     translatedExportSameLanguage: Source and target languages are the same
 hostedAi:
   ultraBadge:
-    tooltip: Requires the Ultra plan
+    tooltip: Requires the Ultra plan · Click the badge to get it
   availability:
     authenticationRequired: Log in to use this provider
     ultraRequired: Ultra plan required

@@ -11,7 +11,7 @@ import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/p
 import {
   BUILT_IN_AI_PROVIDER_ID,
   BUILT_IN_AI_PROVIDER_IDS,
-  BUILT_IN_AI_ULTRA_PROVIDER_ID,
+  BUILT_IN_AI_ADVANCE_PROVIDER_ID,
   type BuiltInAiProviderId,
   type HostedAiModelTier,
 } from "@/utils/constants/provider-ids"
@@ -19,16 +19,16 @@ import { i18n } from "@/utils/i18n"
 
 export {
   BUILT_IN_AI_PROVIDER_ID,
-  BUILT_IN_AI_ULTRA_PROVIDER_ID,
+  BUILT_IN_AI_ADVANCE_PROVIDER_ID,
 } from "@/utils/constants/provider-ids"
 export const BUILT_IN_AI_PROVIDER_LOGO = readFrogLogo
 
 const BUILT_IN_AI_PROVIDER_NAME_KEY = "options.apiProviders.providers.name.builtInAi"
 const BUILT_IN_AI_PROVIDER_FALLBACK_NAME = "Built-in AI"
-const BUILT_IN_AI_ULTRA_PROVIDER_NAME_KEY = "options.apiProviders.providers.name.builtInAiUltra"
-const BUILT_IN_AI_ULTRA_PROVIDER_FALLBACK_NAME = "Advanced Built-in AI"
+const BUILT_IN_AI_ADVANCE_PROVIDER_NAME_KEY = "options.apiProviders.providers.name.builtInAiAdvance"
+const BUILT_IN_AI_ADVANCE_PROVIDER_FALLBACK_NAME = "Advanced Built-in AI"
 
-export type ProviderCapability = FeatureKey | "customAction"
+export type ProviderCapability = FeatureKey | "customAction" | "languageDetection"
 type SystemProviderNameKey = keyof GeneratedI18nStructure
 type ProviderConfigPredicate<T extends ProviderConfig = ProviderConfig> = (
   provider: ProviderConfig,
@@ -67,15 +67,31 @@ const SYSTEM_PROVIDER_DEFS = {
     modelTier: "normal",
     nameKey: BUILT_IN_AI_PROVIDER_NAME_KEY,
     fallbackName: BUILT_IN_AI_PROVIDER_FALLBACK_NAME,
-    capabilities: ["pageTranslation", "selectionTranslation", "noteSuggestion", "customAction"],
+    capabilities: [
+      "pageTranslation",
+      "selectionTranslation",
+      "videoSubtitles",
+      "inputTranslation",
+      "noteSuggestion",
+      "customAction",
+      "languageDetection",
+    ],
     logo: () => BUILT_IN_AI_PROVIDER_LOGO,
   },
-  [BUILT_IN_AI_ULTRA_PROVIDER_ID]: {
-    id: BUILT_IN_AI_ULTRA_PROVIDER_ID,
-    modelTier: "ultra",
-    nameKey: BUILT_IN_AI_ULTRA_PROVIDER_NAME_KEY,
-    fallbackName: BUILT_IN_AI_ULTRA_PROVIDER_FALLBACK_NAME,
-    capabilities: ["pageTranslation", "selectionTranslation", "noteSuggestion", "customAction"],
+  [BUILT_IN_AI_ADVANCE_PROVIDER_ID]: {
+    id: BUILT_IN_AI_ADVANCE_PROVIDER_ID,
+    modelTier: "advance",
+    nameKey: BUILT_IN_AI_ADVANCE_PROVIDER_NAME_KEY,
+    fallbackName: BUILT_IN_AI_ADVANCE_PROVIDER_FALLBACK_NAME,
+    capabilities: [
+      "pageTranslation",
+      "selectionTranslation",
+      "videoSubtitles",
+      "inputTranslation",
+      "noteSuggestion",
+      "customAction",
+      "languageDetection",
+    ],
     logo: () => BUILT_IN_AI_PROVIDER_LOGO,
   },
 } as const satisfies Record<string, SystemProviderDef>
@@ -91,6 +107,7 @@ const LOCAL_PROVIDER_CAPABILITY_PREDICATES = {
   inputTranslation: isTranslateProviderConfig,
   noteSuggestion: isLLMProviderConfig,
   customAction: isLLMProviderConfig,
+  languageDetection: isLLMProviderConfig,
 } as const satisfies Record<ProviderCapability, ProviderConfigPredicate>
 
 export type ProviderConfigForCapability<C extends ProviderCapability> =
@@ -140,7 +157,7 @@ export function getBuiltInAiProviderName(providerId: BuiltInAiProviderId): strin
 }
 
 export function getHostedAiModelTier(providerId: BuiltInAiProviderId): HostedAiModelTier {
-  return providerId === BUILT_IN_AI_ULTRA_PROVIDER_ID ? "ultra" : "normal"
+  return providerId === BUILT_IN_AI_ADVANCE_PROVIDER_ID ? "advance" : "normal"
 }
 
 export function isSystemProviderId(providerId: string): boolean {

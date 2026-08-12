@@ -144,6 +144,9 @@ options:
         customAction: 自訂 AI 指令
         noteSuggestion: 猜你想存
         selectionTranslation: 選取文字翻譯
+        videoSubtitles: 影片字幕
+        inputTranslation: 輸入翻譯
+        languageDetection: 語言偵測
     sponsorCta: 取得高速高性價比 AI
     setApiKeyWarning:
       message: 請在 $1 頁面設定 API 金鑰
@@ -178,6 +181,7 @@ options:
         confirm: 刪除
         cancel: 取消
       atLeastOneLLMProvider: 至少需要一個 LLM 翻譯提供者。
+      featureWouldLoseProvider: "無法刪除：「$1」將沒有任何可以執行它的提供者。"
       providerInUseCannotDisable: 無法停用「$1」，因為 $2 個功能正在使用它。
       duplicateProviderName: 重複的提供者名稱「$1」
       defaultProvider:
@@ -224,12 +228,12 @@ options:
     providers:
       name:
         builtInAi: 內建 AI
-        builtInAiUltra: 高級內建 AI
+        builtInAiAdvance: 高級內建 AI
         customChatComplete: 自訂 Chat Complete
         customResponses: 自訂 Responses
       attribution:
         builtInAi: 由 Read Frog 託管的普通模型。非 Ultra 使用者僅支援在自訂 AI 指令使用，Ultra 使用者支援在更多功能上使用。
-        builtInAiUltra: 由 Read Frog 託管的進階模型，Ultra 會員專屬。網頁翻譯、自訂 AI 指令等全部內建 AI 功能均可使用，共享每週額度，額度消耗比標準模型更快。
+        builtInAiAdvance: 由 Read Frog 託管的進階模型，Ultra 會員專屬。網頁翻譯、自訂 AI 指令等全部內建 AI 功能均可使用，共享每週額度，額度消耗比標準模型更快。
       description:
         openai: 提供 GPT-4o 等模型
         azure: 透過 Azure 部署使用 OpenAI 模型
@@ -288,7 +292,7 @@ options:
         noteSuggestion: 選取文字翻譯後，推薦值得存入筆記庫的詞條。
     languageDetection:
       title: 語言偵測
-      description: 影響自動翻譯語言偵測、跳過語言偵測和朗讀語音選擇的準確性。
+      description: 影響自動翻譯語言偵測和朗讀語音選擇的準確性。
       mode:
         basic: 基礎
         llm: LLM
@@ -1273,7 +1277,7 @@ subtitles:
     translatedExportSameLanguage: 來源語言和目標語言相同
 hostedAi:
   ultraBadge:
-    tooltip: 需開通 Ultra 方案
+    tooltip: 需開通 Ultra 方案 · 點擊徽章獲取方案
   availability:
     authenticationRequired: 登入後可使用
     ultraRequired: 需要 Ultra 方案

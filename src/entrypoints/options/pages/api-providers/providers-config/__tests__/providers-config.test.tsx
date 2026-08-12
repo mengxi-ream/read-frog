@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { ProvidersConfig } from "@/entrypoints/options/pages/api-providers/providers-config"
 import {
   BUILT_IN_AI_PROVIDER_ID,
-  BUILT_IN_AI_ULTRA_PROVIDER_ID,
+  BUILT_IN_AI_ADVANCE_PROVIDER_ID,
 } from "@/utils/providers/provider-registry"
 
 const {
@@ -122,13 +122,22 @@ vi.mock("@/utils/config/helpers", () => ({
 }))
 
 vi.mock("@/utils/constants/feature-providers", () => ({
-  FEATURE_KEYS: ["pageTranslation", "selectionTranslation", "noteSuggestion"],
+  FEATURE_KEYS: [
+    "pageTranslation",
+    "videoSubtitles",
+    "selectionTranslation",
+    "inputTranslation",
+    "noteSuggestion",
+  ],
   FEATURE_PROVIDER_DEFS: {
     pageTranslation: { getProviderId: () => providerConfig.id },
     selectionTranslation: { getProviderId: () => "unassigned-provider" },
     // Mirrors the shipped default: note suggestion runs on the OpenAI default
     // provider, so no built-in card starts with a feature assignment.
     noteSuggestion: { getProviderId: () => "openai-default" },
+    // Both default to Microsoft, so neither starts assigned to a built-in.
+    videoSubtitles: { getProviderId: () => "microsoft-translate-default" },
+    inputTranslation: { getProviderId: () => "microsoft-translate-default" },
   },
   buildFeatureProviderPatch: () => ({}),
   getFeatureLabelI18nKey: (key: string) => `feature.${key}`,
@@ -148,20 +157,39 @@ vi.mock("@/components/llm-providers/use-hosted-ai-status", () => ({
 }))
 
 function makeUltraAccessStatus(accessAllowed: boolean) {
+  // A denial carries its reason: the server answers the advance tier of a
+  // non-Ultra account with `ultra_required`, never with a bare accessAllowed
+  // flag. The panel locks on the reason, so a fixture without one models a
+  // state the wire cannot produce.
+  //
+  // `requiresUltra` is left off deliberately. The real wire sets it on every
+  // advance tier, but it renders the Ultra badge inside the row's <label>,
+  // which then becomes part of the switch's accessible name and breaks the
+  // `getByRole("switch", { name })` queries below. These cases are about
+  // locking, not badging — the badge has its own test above.
+  const advance = accessAllowed
+    ? { accessAllowed: true, available: true, unavailableReason: null }
+    : { accessAllowed: false, available: false, unavailableReason: "ultra_required" as const }
   return {
     credits: [],
     features: {
-      pageTranslation: { ultra: { accessAllowed } },
-      selectionTranslation: { ultra: { accessAllowed } },
-      noteSuggestion: { ultra: { accessAllowed } },
-      customAction: { ultra: { accessAllowed } },
+      pageTranslation: { advance },
+      selectionTranslation: { advance },
+      noteSuggestion: { advance },
+      customAction: { advance },
+      videoSubtitles: { advance },
+      inputTranslation: { advance },
+      languageDetection: { advance },
     },
   }
 }
 
+/** Must mirror BUILT_IN_FEATURE_KEYS, or new rows go unasserted. */
 const ULTRA_FEATURE_LABELS = [
   "feature.pageTranslation",
+  "feature.videoSubtitles",
   "feature.selectionTranslation",
+  "feature.inputTranslation",
   "feature.noteSuggestion",
 ] as const
 
@@ -256,17 +284,17 @@ describe("ProvidersConfig", () => {
 
     expect(screen.getByText("options.apiProviders.providers.name.builtInAi")).toBeInTheDocument()
     expect(
-      screen.getByText("options.apiProviders.providers.name.builtInAiUltra"),
+      screen.getByText("options.apiProviders.providers.name.builtInAiAdvance"),
     ).toBeInTheDocument()
   })
 
   it("renders the Ultra editor with its own attribution and all three feature assignments", () => {
-    testState.selectedProviderId = BUILT_IN_AI_ULTRA_PROVIDER_ID
+    testState.selectedProviderId = BUILT_IN_AI_ADVANCE_PROVIDER_ID
 
     renderProvidersConfig()
 
     expect(
-      screen.getByText("options.apiProviders.providers.attribution.builtInAiUltra"),
+      screen.getByText("options.apiProviders.providers.attribution.builtInAiAdvance"),
     ).toBeInTheDocument()
     for (const label of ULTRA_FEATURE_LABELS) {
       expect(screen.getByText(label)).toBeInTheDocument()
@@ -275,7 +303,7 @@ describe("ProvidersConfig", () => {
   })
 
   it("keeps Ultra assignment rows interactive while the plan status is unknown", () => {
-    testState.selectedProviderId = BUILT_IN_AI_ULTRA_PROVIDER_ID
+    testState.selectedProviderId = BUILT_IN_AI_ADVANCE_PROVIDER_ID
     // Default hostedAiState: settled error → status undefined → no verdict.
 
     renderProvidersConfig()
@@ -289,7 +317,7 @@ describe("ProvidersConfig", () => {
   })
 
   it("locks Ultra assignment rows when the server denies ultra access", () => {
-    testState.selectedProviderId = BUILT_IN_AI_ULTRA_PROVIDER_ID
+    testState.selectedProviderId = BUILT_IN_AI_ADVANCE_PROVIDER_ID
     hostedAiState.value = {
       status: makeUltraAccessStatus(false),
       isPending: false,
@@ -305,7 +333,7 @@ describe("ProvidersConfig", () => {
   })
 
   it("unlocks Ultra assignment rows for an ultra-entitled account", () => {
-    testState.selectedProviderId = BUILT_IN_AI_ULTRA_PROVIDER_ID
+    testState.selectedProviderId = BUILT_IN_AI_ADVANCE_PROVIDER_ID
     hostedAiState.value = {
       status: makeUltraAccessStatus(true),
       isPending: false,
@@ -327,7 +355,7 @@ describe("ProvidersConfig", () => {
 
     const freeCard = container.querySelector(`[data-provider-id="${BUILT_IN_AI_PROVIDER_ID}"]`)
     const ultraCard = container.querySelector(
-      `[data-provider-id="${BUILT_IN_AI_ULTRA_PROVIDER_ID}"]`,
+      `[data-provider-id="${BUILT_IN_AI_ADVANCE_PROVIDER_ID}"]`,
     )
     if (!(freeCard instanceof HTMLElement) || !(ultraCard instanceof HTMLElement)) {
       throw new Error("Built-in provider cards not rendered")

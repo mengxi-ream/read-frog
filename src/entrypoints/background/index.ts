@@ -24,6 +24,7 @@ import {
   setUpDatabaseCleanup,
 } from "./db-cleanup"
 import { setupEdgeTTSMessageHandlers } from "./edge-tts"
+import { setupHostedAiStatusHandler } from "./hosted-ai-status"
 import { setupIframeInjection } from "./iframe-injection"
 import { setupLLMGenerateTextMessageHandlers } from "./llm-generate-text"
 import { initMockData } from "./mock-data"
@@ -138,6 +139,7 @@ export default defineBackground({
     })()
 
     proxyFetch()
+    setupHostedAiStatusHandler()
     setupNotebasePendingSaveProcessor(() => backgroundReady)
     setupEdgeTTSMessageHandlers()
     setupLLMGenerateTextMessageHandlers()

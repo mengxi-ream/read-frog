@@ -15,9 +15,9 @@ import { getHostedAiTierStatus } from "@/utils/hosted-ai/status"
 import { logger } from "@/utils/logger"
 import { noteSuggestionEnvelopeSchema } from "@/utils/note-suggestion/types"
 import { validateNoteSuggestion } from "@/utils/note-suggestion/validate"
-import { orpcClient } from "@/utils/orpc/client"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
+import { fetchHostedAiStatus } from "@/utils/providers/provider-ref"
 import { getTopLevelReasoning } from "@/utils/providers/reasoning"
 import { isAbortError } from "../inline-error"
 import { buildNoteSuggestionPrompts } from "./prompt"
@@ -131,9 +131,11 @@ export function useNoteSuggestion() {
         // state (quota exhausted, service down) alike, since nobody is
         // watching to act on the error and status is far cheaper than a
         // doomed stream call. Fail open when status itself is unreachable —
-        // the run surfaces any real error (mirrors
-        // serializePageTranslationProvider's fail-open convention).
-        const status = await orpcClient.hostedAi.status({}).catch(() => undefined)
+        // the run surfaces any real error, which `fetchHostedAiStatus` already
+        // does; going through it also shares the request with whatever else
+        // resolves a hosted ref at the same moment, since one status response
+        // covers every feature.
+        const status = await fetchHostedAiStatus()
         if (signal.aborted) {
           return
         }

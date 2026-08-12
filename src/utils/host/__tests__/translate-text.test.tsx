@@ -6,6 +6,7 @@ import { NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
 import { detectLanguage } from "@/utils/content/language"
 import { Sha256Hex } from "@/utils/hash"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
+import { MIN_LENGTH_FOR_SKIP_LANGUAGE_DETECTION } from "@/utils/host/translate/translate-text"
 import {
   translateTextForInput,
   translateTextForPage,
@@ -16,6 +17,7 @@ import {
   endPageTranslationSession,
 } from "@/utils/host/translate/translation-session"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { HostedAiProviderUnavailableError } from "@/utils/providers/provider-ref"
 import { isTranslationCancelledError } from "@/utils/request/cancellation"
 
 // Mock dependencies
@@ -240,7 +242,7 @@ describe("translate-text", () => {
 
       expect(result).toBe("")
       expect(mockDetectLanguage).toHaveBeenCalledWith(japaneseText, {
-        minLength: 10,
+        minLength: MIN_LENGTH_FOR_SKIP_LANGUAGE_DETECTION,
         enableLLM: false,
       })
       expect(mockSendMessage).not.toHaveBeenCalled()
@@ -479,6 +481,93 @@ describe("translate-text", () => {
           webContent: "Body content",
           webSummary: "Generated summary",
         }),
+      )
+    })
+
+    it("degrades to no summary when the optional summary hits a hosted denial", async () => {
+      mockGetConfigFromStorage.mockResolvedValue({
+        ...DEFAULT_CONFIG,
+        pageTranslation: {
+          ...DEFAULT_CONFIG.pageTranslation,
+          enableAIContentAware: true,
+        },
+        inputTranslation: {
+          ...DEFAULT_CONFIG.inputTranslation,
+          providerId: "openai-default",
+        },
+      })
+      mockGetOrGenerateWebPageSummary.mockRejectedValue(
+        new HostedAiProviderUnavailableError(
+          { kind: "system", id: "read-frog-free-ai", name: "Built-in AI", modelTier: "normal" },
+          "Weekly credit used up",
+        ),
+      )
+      mockSendMessage.mockResolvedValue("translated input")
+
+      // Input translation has no page-translation session to reuse, so it always
+      // resolves a ref inside this optional step. Aborting here would kill the
+      // request before the translation — which resolves the same ref and is the
+      // thing the user actually invoked — could surface the denial itself.
+      const result = await translateTextForInput("hello", "eng", "cmn")
+
+      expect(result).toBe("translated input")
+      expect(mockSendMessage).toHaveBeenCalledWith(
+        "enqueueTranslateRequest",
+        expect.objectContaining({ webSummary: undefined }),
+      )
+    })
+  })
+
+  describe("hosted route mapping", () => {
+    // Every entry point must name its own route: the route decides which
+    // hosted quota gates and bills a system-provider run, and a copy-pasted
+    // wrong route once made page translation gate on the input-translation
+    // quota (and bypass the session's provider-ref snapshot).
+    const llmAiAwareConfig = {
+      ...DEFAULT_CONFIG,
+      pageTranslation: {
+        ...DEFAULT_CONFIG.pageTranslation,
+        providerId: "openai-default",
+        enableAIContentAware: true,
+      },
+      inputTranslation: {
+        ...DEFAULT_CONFIG.inputTranslation,
+        providerId: "openai-default",
+      },
+    }
+
+    beforeEach(() => {
+      mockGetConfigFromStorage.mockResolvedValue(llmAiAwareConfig)
+      mockSendMessage.mockResolvedValue("translated")
+    })
+
+    it("bills page translation and its summary against pageTranslation", async () => {
+      await translateTextForPage("Body text")
+
+      expect(mockSendMessage).toHaveBeenCalledWith(
+        "enqueueTranslateRequest",
+        expect.objectContaining({ hostedFeature: "pageTranslation" }),
+      )
+      // (webPageContext, providerRef, enableAIContentAware, hostedFeature)
+      expect(mockGetOrGenerateWebPageSummary.mock.calls[0]?.[3]).toBe("pageTranslation")
+    })
+
+    it("bills input translation and its summary against inputTranslation", async () => {
+      await translateTextForInput("hello", "eng", "cmn")
+
+      expect(mockSendMessage).toHaveBeenCalledWith(
+        "enqueueTranslateRequest",
+        expect.objectContaining({ hostedFeature: "inputTranslation" }),
+      )
+      expect(mockGetOrGenerateWebPageSummary.mock.calls[0]?.[3]).toBe("inputTranslation")
+    })
+
+    it("bills the page title against pageTranslation", async () => {
+      await translateTextForPageTitle("Source Title")
+
+      expect(mockSendMessage).toHaveBeenCalledWith(
+        "enqueueTranslateRequest",
+        expect.objectContaining({ hostedFeature: "pageTranslation" }),
       )
     })
   })

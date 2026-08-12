@@ -144,6 +144,9 @@ options:
         customAction: Пользовательские AI-действия
         noteSuggestion: Подсказки для заметок
         selectionTranslation: Перевод выделения
+        videoSubtitles: Субтитры видео
+        inputTranslation: Перевод ввода
+        languageDetection: Определение языка
     sponsorCta: Получить быстрый и выгодный ИИ
     setApiKeyWarning:
       message: Укажите API-ключ на странице $1
@@ -178,6 +181,7 @@ options:
         confirm: Удалить
         cancel: Отмена
       atLeastOneLLMProvider: Требуется как минимум один LLM-провайдер перевода.
+      featureWouldLoseProvider: "Невозможно удалить: у функции «$1» не останется ни одного работающего провайдера."
       duplicateProviderName: 'Дублирующееся имя провайдера "$1"'
       defaultProvider:
         translate: Установить как провайдер перевода по умолчанию
@@ -223,12 +227,12 @@ options:
     providers:
       name:
         builtInAi: Встроенный ИИ
-        builtInAiUltra: Продвинутый встроенный ИИ
+        builtInAiAdvance: Продвинутый встроенный ИИ
         customChatComplete: Пользовательский Chat Complete
         customResponses: Пользовательский Responses
       attribution:
         builtInAi: Стандартная модель, размещённая Read Frog. Пользователи без Ultra могут использовать её только в пользовательских AI-действиях; пользователям Ultra доступно больше функций.
-        builtInAiUltra: Продвинутая модель, размещённая Read Frog, — только для подписчиков Ultra. Работает во всех функциях встроенного ИИ — переводе страниц, пользовательских AI-действиях и других — с общей недельной квотой. Расходует квоту быстрее, чем стандартная модель.
+        builtInAiAdvance: Продвинутая модель, размещённая Read Frog, — только для подписчиков Ultra. Работает во всех функциях встроенного ИИ — переводе страниц, пользовательских AI-действиях и других — с общей недельной квотой. Расходует квоту быстрее, чем стандартная модель.
       description:
         openai: Предоставляет модели, такие как GPT-4o
         azure: Модели OpenAI в Azure через ваши развертывания
@@ -287,7 +291,7 @@ options:
         noteSuggestion: Предлагает слова, которые стоит сохранить в Notebase, после перевода выделенного текста.
     languageDetection:
       title: Определение языка
-      description: Влияет на точность определения языка для автоперевода, пропуска языков и выбора голоса озвучивания.
+      description: Влияет на точность определения языка для автоперевода и выбора голоса озвучивания.
       mode:
         basic: Базовый
         llm: LLM
@@ -1157,7 +1161,7 @@ subtitles:
     translatedExportSameLanguage: Исходный и целевой языки совпадают
 hostedAi:
   ultraBadge:
-    tooltip: Требуется план Ultra
+    tooltip: Требуется план Ultra · Нажмите на значок, чтобы получить его
   availability:
     authenticationRequired: Войдите, чтобы использовать этого провайдера
     ultraRequired: Требуется план Ultra

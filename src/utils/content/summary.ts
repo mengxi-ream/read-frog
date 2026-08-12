@@ -1,64 +1,60 @@
-import type { LLMProviderConfig } from "@/types/config/provider"
-import { generateText } from "ai"
+import type { HostedAiTextStreamRoute } from "@/types/background-stream"
+import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
 import { logger } from "@/utils/logger"
-import { getModelById } from "@/utils/providers/model"
-import { resolveModelId } from "@/utils/providers/model-id"
-import { getProviderOptionsWithOverride } from "@/utils/providers/options"
-import { getTopLevelReasoning } from "@/utils/providers/reasoning"
+import { getArticleSummaryPrompt } from "@/utils/prompts/summary"
+import { MAX_TEXT_LENGTH } from "./utils"
 import { cleanText } from "./utils"
 
+/** The article title is untrusted page text; bound it like the body. */
+const MAX_TITLE_LENGTH = 200
+
 /**
- * Generate a brief summary of article content for translation context
+ * Generate a brief summary of article content for translation context.
+ *
+ * Runs on either provider kind: `generateTextForProviderRef` picks the local
+ * `generateText` call or the hosted stream. The same function serves the page
+ * summary and the video summary, which is why the hosted feature is a
+ * parameter rather than a constant.
  */
 export async function generateArticleSummary(
   title: string,
   textContent: string,
-  providerConfig: LLMProviderConfig,
-  options?: { signal?: AbortSignal },
+  providerRef: SerializableProviderRef,
+  options: {
+    hostedFeature: HostedAiTextStreamRoute
+    signal?: AbortSignal
+    generate: (
+      payload: {
+        providerRef: SerializableProviderRef
+        hostedFeature: HostedAiTextStreamRoute
+        instructions: string
+        prompt: string
+      },
+      runOptions: { signal?: AbortSignal },
+    ) => Promise<string>
+  },
 ): Promise<string | null> {
-  const preparedText = cleanText(textContent)
+  const preparedText = cleanText(textContent, MAX_TEXT_LENGTH)
 
   if (!preparedText) {
     return null
   }
 
   try {
-    const {
-      model: providerModel,
-      provider,
-      providerOptions: userProviderOptions,
-      temperature,
-    } = providerConfig
-    const reasoning = getTopLevelReasoning(providerConfig)
-    const modelName = resolveModelId(providerModel)
-    const providerOptions = getProviderOptionsWithOverride(
-      modelName ?? "",
-      provider,
-      userProviderOptions,
-      reasoning,
+    const { systemPrompt, prompt } = getArticleSummaryPrompt(
+      cleanText(title, MAX_TITLE_LENGTH),
+      preparedText,
     )
-    const model = await getModelById(providerConfig.id)
 
-    const prompt = `Summarize the following article in 2-3 sentences. Focus on the main topic and key points. Return ONLY the summary, no explanations or formatting.
-
-Title: ${title}
-
-Content:
-${preparedText}`
-
-    // maxRetries: 0 — retries belong to the RequestQueue, which meters them
-    // against the token bucket; ai-sdk's hidden default (2) would issue extra
-    // HTTP attempts invisible to the rate limiter. The signal lets the queue's
-    // timeout/cancel actually abort the request instead of leaving a zombie.
-    const { text: summary } = await generateText({
-      model,
-      prompt,
-      reasoning,
-      temperature,
-      providerOptions,
-      abortSignal: options?.signal,
-      maxRetries: 0,
-    })
+    const summary = await options.generate(
+      {
+        providerRef,
+        hostedFeature: options.hostedFeature,
+        instructions: systemPrompt,
+        prompt,
+      },
+      { signal: options.signal },
+    )
 
     const cleanedSummary = summary.trim()
     logger.info("Generated article summary:", `${cleanedSummary.slice(0, 100)}...`)

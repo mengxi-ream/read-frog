@@ -144,6 +144,9 @@ options:
         customAction: Özel AI eylemleri
         noteSuggestion: Not önerileri
         selectionTranslation: Seçim çevirisi
+        videoSubtitles: Video altyazıları
+        inputTranslation: Giriş çevirisi
+        languageDetection: Dil algılama
     sponsorCta: Hızlı ve uygun maliyetli yapay zekâ al
     setApiKeyWarning:
       message: API anahtarınızı $1 sayfasında ayarlayın
@@ -178,6 +181,7 @@ options:
         confirm: Sil
         cancel: İptal
       atLeastOneLLMProvider: En az bir LLM çeviri sağlayıcısı gereklidir.
+      featureWouldLoseProvider: 'Silinemiyor: "$1" özelliğini çalıştırabilecek hiçbir sağlayıcı kalmayacak.'
       duplicateProviderName: 'Yinelenen sağlayıcı adı "$1"'
       defaultProvider:
         translate: Varsayılan çeviri sağlayıcısı olarak ayarla
@@ -223,12 +227,12 @@ options:
     providers:
       name:
         builtInAi: Yerleşik AI
-        builtInAiUltra: Gelişmiş yerleşik AI
+        builtInAiAdvance: Gelişmiş yerleşik AI
         customChatComplete: Özel Chat Complete
         customResponses: Özel Responses
       attribution:
         builtInAi: Read Frog tarafından barındırılan standart model. Ultra olmayan kullanıcılar yalnızca özel AI eylemlerinde kullanabilir; Ultra kullanıcıları daha fazla özellikte kullanabilir.
-        builtInAiUltra: Read Frog tarafından barındırılan gelişmiş model, yalnızca Ultra üyelerine özeldir. Sayfa çevirisi, özel AI eylemleri ve diğer tüm yerleşik AI özelliklerinde çalışır; haftalık kota ortaktır. Kotayı standart modelden daha hızlı tüketir.
+        builtInAiAdvance: Read Frog tarafından barındırılan gelişmiş model, yalnızca Ultra üyelerine özeldir. Sayfa çevirisi, özel AI eylemleri ve diğer tüm yerleşik AI özelliklerinde çalışır; haftalık kota ortaktır. Kotayı standart modelden daha hızlı tüketir.
       description:
         openai: GPT-4o gibi modeller sağlar
         azure: Azure dağıtımlarınız üzerinden OpenAI modelleri
@@ -287,7 +291,7 @@ options:
         noteSuggestion: Seçim çevirisinden sonra Notebase'inize kaydetmeye değer kelimeler önerir.
     languageDetection:
       title: Dil algılama
-      description: Otomatik çeviri dil algılama, atlama dil algılama ve Konuşma ses seçimi doğruluğunu etkiler.
+      description: Otomatik çeviri dil algılama ve Konuşma ses seçimi doğruluğunu etkiler.
       mode:
         basic: Temel
         llm: LLM
@@ -1157,7 +1161,7 @@ subtitles:
     translatedExportSameLanguage: Kaynak ve hedef diller aynı
 hostedAi:
   ultraBadge:
-    tooltip: Ultra plan gerektirir
+    tooltip: Ultra plan gerektirir · Planı almak için rozete tıklayın
   availability:
     authenticationRequired: Bu sağlayıcıyı kullanmak için giriş yapın
     ultraRequired: Ultra plan gerekli

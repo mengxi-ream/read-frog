@@ -2,10 +2,7 @@ import type { Config } from "@/types/config/config"
 import type { TranslationMode } from "@/types/config/translate"
 import type { TransNode } from "@/types/dom"
 import { logger } from "@/utils/logger"
-import {
-  isSystemTranslationProvider,
-  resolvePageTranslationProvider,
-} from "@/utils/providers/translation-provider"
+import { isSystemProviderRef, resolvePageTranslationProvider } from "@/utils/providers/provider-ref"
 import {
   CONTENT_WRAPPER_CLASS,
   NOTRANSLATE_CLASS,
@@ -147,7 +144,7 @@ async function acquireDeepLXHtmlAttributeProbe(providerKey: string): Promise<{
 
 function getDeepLXHtmlAttributeProviderKey(config: Config): string | undefined {
   const providerConfig = resolvePageTranslationProvider(config)
-  if (isSystemTranslationProvider(providerConfig) || providerConfig.provider !== "deeplx") {
+  if (isSystemProviderRef(providerConfig) || providerConfig.provider !== "deeplx") {
     return undefined
   }
   return `${providerConfig.id}:${providerConfig.baseURL ?? ""}`

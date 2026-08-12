@@ -13,7 +13,7 @@ import {
 } from "@/utils/providers/provider-registry"
 import { floatingButtonSchema } from "./floating-button"
 import { languageDetectionConfigSchema } from "./language-detection"
-import { isLLMProvider, providersConfigSchema } from "./provider"
+import { providersConfigSchema } from "./provider"
 import {
   selectionToolbarBuiltInActionsSchema,
   selectionToolbarCustomActionsSchema,
@@ -186,30 +186,23 @@ export const configSchema = z
           message: `Language detection mode is "llm" but no providerId is configured.`,
           path: ["languageDetection", "providerId"],
         })
-      } else {
-        const ldProvider = data.providersConfig.find((p) => p.id === ldProviderId)
-        if (!ldProvider) {
-          ctx.addIssue({
-            code: "custom",
-            message: `Language detection provider "${ldProviderId}" not found in providersConfig.`,
-            path: ["languageDetection", "providerId"],
-          })
-        } else {
-          if (!isLLMProvider(ldProvider.provider)) {
-            ctx.addIssue({
-              code: "custom",
-              message: `Language detection provider "${ldProviderId}" is not an LLM provider.`,
-              path: ["languageDetection", "providerId"],
-            })
-          }
-          if (!ldProvider.enabled) {
-            ctx.addIssue({
-              code: "custom",
-              message: `Language detection provider "${ldProviderId}" must be enabled.`,
-              path: ["languageDetection", "providerId"],
-            })
-          }
-        }
+      } else if (
+        // Capability-based, like the FEATURE_KEYS loop above, rather than a
+        // providersConfig lookup: Built-in AI is never a row in
+        // providersConfig, so requiring one there is what used to make a
+        // hosted provider fail validation and reset the whole config.
+        !doesProviderSupportsCapability("languageDetection", data.providersConfig, ldProviderId, {
+          requireEnable: true,
+        })
+      ) {
+        ctx.addIssue({
+          code: "invalid_value",
+          values: getProviderIdsForCapability("languageDetection", data.providersConfig, {
+            requireEnable: true,
+          }),
+          message: `Invalid provider id "${ldProviderId}".`,
+          path: ["languageDetection", "providerId"],
+        })
       }
     }
 

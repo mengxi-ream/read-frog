@@ -10,6 +10,7 @@ import type {
   TranslateProviderConfig,
 } from "@/types/config/provider"
 import type { FeatureKey } from "@/utils/constants/feature-providers"
+import type { HostedAiStatus } from "@/utils/hosted-ai/types"
 import {
   isAPIProviderConfig,
   isLLMProviderConfig,
@@ -19,7 +20,7 @@ import {
 } from "@/types/config/provider"
 import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
 import { getSelectionToolbarActions, patchSelectionToolbarAction } from "@/utils/custom-actions"
-import { getProviderIdsForCapability } from "@/utils/providers/provider-registry"
+import { getUsableProviderIdsForCapability } from "@/utils/providers/provider-availability"
 
 export function getProviderConfigById<T extends ProviderConfig>(
   providersConfig: T[],
@@ -93,59 +94,92 @@ export function resolveLanguageDetectionConfigForModeChange(
   currentConfig: Config["languageDetection"],
   nextMode: LanguageDetectionMode,
   providersConfig: ProvidersConfig,
+  status?: HostedAiStatus,
 ): Partial<Config["languageDetection"]> | null {
   if (nextMode === "basic") {
     return { mode: "basic" }
   }
 
-  const enabledLLMProviders = getEnabledLLMProvidersConfig(providersConfig)
-  if (enabledLLMProviders.length === 0) {
+  // Capability-based, not providersConfig-based: Built-in AI is synthesized by
+  // the registry and never a row in providersConfig, so a plain filter there
+  // would report "no LLM available" on a fresh profile that can in fact run
+  // hosted detection. Filtered by usability, because the built-ins are in that
+  // list for every account — arming LLM mode against a tier the plan does not
+  // fund produces a green "enabled" indicator over a path that never runs.
+  const availableIds = getUsableProviderIdsForCapability(
+    "languageDetection",
+    providersConfig,
+    status,
+  )
+  if (availableIds.length === 0) {
     return null
   }
 
-  const hasSelectedProvider = enabledLLMProviders.some(
-    (provider) => provider.id === currentConfig.providerId,
-  )
+  const hasSelectedProvider =
+    currentConfig.providerId !== undefined && availableIds.includes(currentConfig.providerId)
   return {
     mode: "llm",
-    providerId: hasSelectedProvider ? currentConfig.providerId : enabledLLMProviders[0]!.id,
+    providerId: hasSelectedProvider ? currentConfig.providerId : availableIds[0]!,
   }
 }
 
 /**
  * Compute fallback provider assignments when a provider is deleted.
- * For each feature using the deleted provider, picks the first compatible remaining provider.
+ * For each feature using the deleted provider, picks the first remaining
+ * provider that can actually run it — reassigning to one the account cannot use
+ * is what turns a delete into a silently broken feature.
  */
 export function computeProviderFallbacksAfterDeletion(
   deletedProviderId: string,
   config: Config,
   remainingProviders: ProvidersConfig,
+  status?: HostedAiStatus,
 ): Partial<Record<FeatureKey, string>> {
   const updates: Partial<Record<FeatureKey, string>> = {}
   for (const key of FEATURE_KEYS) {
     const def = FEATURE_PROVIDER_DEFS[key]
     const currentId = def.getProviderId(config)
     if (currentId !== deletedProviderId) continue
-    const fallbackProviderId = getProviderIdsForCapability(key, remainingProviders, {
-      requireEnable: true,
-    })[0]
+    const fallbackProviderId = getUsableProviderIdsForCapability(key, remainingProviders, status)[0]
     if (fallbackProviderId) updates[key] = fallbackProviderId
   }
   return updates
 }
 
+/**
+ * The first feature that would be left with no provider that can actually run
+ * it, or null when every feature keeps a working one.
+ *
+ * Gated on usable providers, not merely present ones. `getProviderIdsForCapability`
+ * appends the built-ins unconditionally, so the old presence check was
+ * satisfied for every feature and this guard never fired — a user could delete
+ * their last BYOK provider and have half the extension silently reassigned to a
+ * tier their plan does not fund.
+ *
+ * `status` decides which built-ins count. Omitting it (or passing a status that
+ * has not loaded) treats them as usable, so an unreachable status endpoint
+ * cannot block someone from deleting their own credentials.
+ *
+ * Features the user has switched off count too. Their `providerId` is stored
+ * either way, and `computeProviderFallbacksAfterDeletion` can only reassign it
+ * when a replacement exists — so letting the delete through leaves the slot
+ * pointing at a provider that no longer exists at all, which resolves to null
+ * the moment the feature is switched back on.
+ */
 export function findFeatureMissingProvider(
   remainingProviders: ProvidersConfig,
   config?: Config,
+  status?: HostedAiStatus,
 ): FeatureKey | "languageDetection" | null {
   for (const key of FEATURE_KEYS) {
-    if (!getProviderIdsForCapability(key, remainingProviders, { requireEnable: true })[0])
+    if (!getUsableProviderIdsForCapability(key, remainingProviders, status)[0]) {
       return key
+    }
   }
 
   if (
     config?.languageDetection.mode === "llm" &&
-    getEnabledLLMProvidersConfig(remainingProviders).length === 0
+    getUsableProviderIdsForCapability("languageDetection", remainingProviders, status).length === 0
   ) {
     return "languageDetection"
   }
@@ -162,6 +196,7 @@ export function computeSelectionToolbarCustomActionFallbacksAfterDeletion(
   deletedProviderId: string,
   config: Config,
   remainingProviders: ProvidersConfig,
+  status?: HostedAiStatus,
 ): Config["selectionToolbar"] | null {
   const affectedActions = getSelectionToolbarActions(config.selectionToolbar).filter(
     (action) => action.providerId === deletedProviderId,
@@ -171,9 +206,11 @@ export function computeSelectionToolbarCustomActionFallbacksAfterDeletion(
     return null
   }
 
-  const fallbackProviderId = getProviderIdsForCapability("customAction", remainingProviders, {
-    requireEnable: true,
-  })[0]
+  const fallbackProviderId = getUsableProviderIdsForCapability(
+    "customAction",
+    remainingProviders,
+    status,
+  )[0]
   if (!fallbackProviderId) {
     return null
   }
@@ -197,10 +234,13 @@ export function computeLanguageDetectionFallbackAfterDeletion(
   deletedProviderId: string,
   config: Config,
   remainingProviders: ProvidersConfig,
+  status?: HostedAiStatus,
 ): string | undefined | null {
   if (config.languageDetection.mode !== "llm") return null
   if (config.languageDetection.providerId !== deletedProviderId) return null
 
-  const fallback = getEnabledLLMProvidersConfig(remainingProviders)[0]
-  return fallback?.id
+  // Built-in AI is always in the capability list, but only counts here when the
+  // account can actually run it: handing detection to a walled-off tier is what
+  // produced a green "LLM detection enabled" card over a path that never ran.
+  return getUsableProviderIdsForCapability("languageDetection", remainingProviders, status)[0]
 }

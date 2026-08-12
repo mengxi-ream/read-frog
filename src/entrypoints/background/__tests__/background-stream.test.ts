@@ -241,8 +241,8 @@ describe("background-stream", () => {
     const { runStructuredObjectStreamInBackground } = await import("../background-stream")
     const result = await runStructuredObjectStreamInBackground(
       {
-        providerId: "read-frog-ultra-ai",
-        modelTier: "ultra",
+        providerId: "read-frog-advance-ai",
+        modelTier: "advance",
         requestId: "123e4567-e89b-42d3-a456-426614174000",
         instructions: "Return structured data",
         prompt: "Analyze selection",
@@ -268,7 +268,7 @@ describe("background-stream", () => {
           { name: "summary", type: "string" },
         ],
         temperature: undefined,
-        modelTier: "ultra",
+        modelTier: "advance",
         requestId: "123e4567-e89b-42d3-a456-426614174000",
       },
       { signal: undefined },
@@ -419,6 +419,80 @@ describe("background-stream", () => {
           consecutiveRateLimits: 0,
         }),
       ).toEqual({ action: "fail", failQueue: true })
+    },
+  )
+
+  // Denials arrive two ways and they are normalized by different code. Failing
+  // to open the stream lands in each path's own `catch` around
+  // `normalizeHostedAiError` — four independent call sites, so covering one
+  // says nothing about the others. Failing mid-stream lands in the shared
+  // `normalizeHostedPartStreamErrors`. The case above only exercises the
+  // second; this covers both for the text path, which is what page
+  // translation, selection translation, subtitles and input translation run
+  // on. Either one coming back retryable makes the queue burn its whole
+  // backoff budget on a pricing wall that never moves.
+  it.each([
+    {
+      code: "HOSTED_AI_TIER_RESTRICTED",
+      status: 403,
+      messageKey: "hostedAi.availability.ultraRequired",
+    },
+    {
+      code: "UNAUTHORIZED",
+      status: 401,
+      messageKey: "hostedAi.availability.authenticationRequired",
+    },
+  ])(
+    "drains the backlog on $code from a hosted text stream",
+    async ({ code, status, messageKey }) => {
+      const denial = () => Object.assign(new Error("denied"), { code, status, data: {} })
+      const { runStreamTextInBackground } = await import("../background-stream")
+
+      const runAndCatch = async () => {
+        let caught: unknown
+        try {
+          await runStreamTextInBackground({
+            providerId: "read-frog-free-ai",
+            modelTier: "normal",
+            requestId: "123e4567-e89b-42d3-a456-426614174003",
+            instructions: "Translate text",
+            prompt: "Hello world",
+          })
+        } catch (error) {
+          caught = error
+        }
+        return caught
+      }
+
+      const expectQueueFatal = (caught: unknown) => {
+        expect(caught).toBeInstanceOf(Error)
+        expect((caught as Error).message).toContain(messageKey)
+        // A retryAfterMs would route this into the rate-limit pause path instead.
+        expect((caught as Error & { retryAfterMs?: number }).retryAfterMs).toBeUndefined()
+        expect(
+          defaultRequestRetryPolicy.decide(caught, {
+            retryCount: 0,
+            maxRetries: 2,
+            baseRetryDelayMs: 1_000,
+            now: Date.now(),
+            rateLimitRetryCount: 0,
+            consecutiveRateLimits: 0,
+          }),
+        ).toEqual({ action: "fail", failQueue: true })
+      }
+
+      // Refused before the stream opens — the text path's own catch.
+      hostedStreamTextMock.mockRejectedValueOnce(denial())
+      expectQueueFatal(await runAndCatch())
+
+      // Refused after the first part — the shared mid-stream normalizer.
+      hostedStreamTextMock.mockResolvedValueOnce(
+        (async function* () {
+          yield { type: "start" }
+          throw denial()
+        })(),
+      )
+      expectQueueFatal(await runAndCatch())
     },
   )
 
@@ -1032,8 +1106,8 @@ describe("background-stream", () => {
 
     const { runNoteSuggestionStreamInBackground } = await import("../background-stream")
     const result = await runNoteSuggestionStreamInBackground({
-      providerId: "read-frog-ultra-ai",
-      modelTier: "ultra",
+      providerId: "read-frog-advance-ai",
+      modelTier: "advance",
       requestId: "123e4567-e89b-42d3-a456-426614174010",
       instructions: "Suggest words",
       prompt: "Selection context",
@@ -1047,7 +1121,7 @@ describe("background-stream", () => {
         instructions: "Suggest words",
         prompt: "Selection context",
         temperature: undefined,
-        modelTier: "ultra",
+        modelTier: "advance",
         requestId: "123e4567-e89b-42d3-a456-426614174010",
       },
       { signal: undefined },

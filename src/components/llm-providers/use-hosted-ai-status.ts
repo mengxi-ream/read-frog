@@ -14,10 +14,14 @@ export interface HostedAiStatusResult {
 /**
  * One query per identity, shared by every hosted-AI surface (provider dropdowns,
  * the built-in provider editor, the quota section), so the options page issues a
- * single status request instead of one per widget. This TanStack cache is the
- * only status cache on UI surfaces — content scripts reuse via the
- * page-translation session snapshot instead, and there is deliberately no
- * module-level cache underneath either.
+ * single status request instead of one per widget.
+ *
+ * Deliberately separate from the background's cache (`getHostedAiStatus`), which
+ * gates generation: that one is shared by all tabs and keyed on nothing, while
+ * these surfaces render live usage figures and must refetch the moment the
+ * identity changes. Routing them through the shared entry would show a user
+ * their own spend up to a TTL late. The two may briefly disagree; only the
+ * background's answer decides whether a hosted call is attempted.
  */
 export function useHostedAiStatus(options: { enabled?: boolean } = {}): HostedAiStatusResult {
   const { data: session, isPending: isSessionPending } = authClient.useSession()

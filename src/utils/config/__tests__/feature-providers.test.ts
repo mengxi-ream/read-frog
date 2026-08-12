@@ -1,4 +1,5 @@
 import type { ProviderConfig } from "@/types/config/provider"
+import type { HostedAiStatus, HostedAiTierStatus } from "@/utils/hosted-ai/types"
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
@@ -19,6 +20,23 @@ function getProviderById(id: string): ProviderConfig {
   const provider = DEFAULT_CONFIG.providersConfig.find((item) => item.id === id)
   if (!provider) throw new Error(`Provider "${id}" not found in DEFAULT_CONFIG.providersConfig`)
   return provider
+}
+
+/** Every hosted feature reporting the same verdict on both tiers. */
+function statusWithAllTiers(tier: HostedAiTierStatus): HostedAiStatus {
+  const entry = { normal: tier, advance: tier }
+  return {
+    credits: [],
+    features: {
+      pageTranslation: entry,
+      customAction: entry,
+      noteSuggestion: entry,
+      selectionTranslation: entry,
+      videoSubtitles: entry,
+      inputTranslation: entry,
+      languageDetection: entry,
+    },
+  }
 }
 
 describe("feature providers", () => {
@@ -82,7 +100,7 @@ describe("feature providers", () => {
         }),
         expect.objectContaining({
           kind: "system",
-          id: "read-frog-ultra-ai",
+          id: "read-frog-advance-ai",
           logo: expect.any(Function),
         }),
       ])
@@ -223,10 +241,16 @@ describe("feature providers", () => {
   })
 
   describe("findFeatureMissingProvider", () => {
-    it("returns the first missing feature key when providers are insufficient", () => {
+    // Built-in AI declares every FEATURE_KEYS capability and is synthesized by
+    // the registry rather than stored in providersConfig. With no status to
+    // judge them by, they count as usable — so deleting local providers cannot
+    // report a feature missing. These cases used to report videoSubtitles
+    // missing; that was only true while the built-ins lacked the capability.
+    // The status-aware cases below cover when they do not count.
+    it("returns null even with no local providers left", () => {
       const remainingProviders: ProviderConfig[] = []
 
-      expect(findFeatureMissingProvider(remainingProviders)).toBe("videoSubtitles")
+      expect(findFeatureMissingProvider(remainingProviders)).toBeNull()
     })
 
     it("returns null when all features have at least one compatible provider", () => {
@@ -235,7 +259,7 @@ describe("feature providers", () => {
       expect(findFeatureMissingProvider(remainingProviders)).toBeNull()
     })
 
-    it("treats disabled providers as unavailable", () => {
+    it("does not report a feature missing just because every local provider is disabled", () => {
       const remainingProviders = [
         {
           ...getProviderById("openai-default"),
@@ -243,10 +267,13 @@ describe("feature providers", () => {
         },
       ]
 
-      expect(findFeatureMissingProvider(remainingProviders)).toBe("videoSubtitles")
+      expect(findFeatureMissingProvider(remainingProviders)).toBeNull()
     })
 
-    it("treats llm language detection as unavailable when no enabled llm provider remains", () => {
+    it("keeps llm language detection available on Built-in AI alone", () => {
+      // Deleting the last BYOK LLM used to force detection back to basic. It
+      // no longer does: the built-ins declare the languageDetection capability,
+      // so a hosted provider is always a legal target.
       const config = {
         ...DEFAULT_CONFIG,
         languageDetection: {
@@ -256,7 +283,109 @@ describe("feature providers", () => {
       }
       const remainingProviders = [getProviderById("google-translate-default")]
 
-      expect(findFeatureMissingProvider(remainingProviders, config)).toBe("languageDetection")
+      expect(findFeatureMissingProvider(remainingProviders, config)).toBeNull()
+    })
+
+    // The built-ins are in every capability list, so "a provider exists" is
+    // always true and cannot gate anything. Judged against a status that walls
+    // them off, the guard becomes able to fire again.
+    describe("when the account cannot run Built-in AI", () => {
+      const walledOffTier: HostedAiTierStatus = {
+        accessAllowed: true,
+        available: false,
+        unavailableReason: "ultra_required",
+        requiresUltra: true,
+        modelRevision: "r1",
+      }
+      const walledOff = statusWithAllTiers(walledOffTier)
+
+      it("reports the first feature left with nothing that can run it", () => {
+        expect(findFeatureMissingProvider([], DEFAULT_CONFIG, walledOff)).toBe("pageTranslation")
+      })
+
+      it("stays null while a local provider still covers every feature", () => {
+        // Keyless translate providers cover the translation features, so a free
+        // account deleting its last LLM key is not left with nothing.
+        const remainingProviders = [
+          getProviderById("google-translate-default"),
+          getProviderById("openai-default"),
+        ]
+
+        expect(findFeatureMissingProvider(remainingProviders, DEFAULT_CONFIG, walledOff)).toBeNull()
+      })
+
+      it("reports the LLM-only feature when only keyless translate providers remain", () => {
+        // Google/Microsoft cover the four translate features; note suggestion
+        // needs an LLM, so it is what the guard trips on.
+        const remainingProviders = [
+          getProviderById("google-translate-default"),
+          getProviderById("microsoft-translate-default"),
+        ]
+
+        expect(findFeatureMissingProvider(remainingProviders, DEFAULT_CONFIG, walledOff)).toBe(
+          "noteSuggestion",
+        )
+      })
+
+      it("guards a feature the user has switched off, because its providerId is still stored", () => {
+        // computeProviderFallbacksAfterDeletion can only reassign a slot when a
+        // replacement exists. Letting this through would leave
+        // noteSuggestion.providerId pointing at a provider that no longer
+        // exists, which resolves to null the moment it is switched back on.
+        const config = {
+          ...DEFAULT_CONFIG,
+          selectionToolbar: {
+            ...DEFAULT_CONFIG.selectionToolbar,
+            noteSuggestion: { ...DEFAULT_CONFIG.selectionToolbar.noteSuggestion, enabled: false },
+          },
+        }
+        const remainingProviders = [
+          getProviderById("google-translate-default"),
+          getProviderById("microsoft-translate-default"),
+        ]
+
+        expect(findFeatureMissingProvider(remainingProviders, config, walledOff)).toBe(
+          "noteSuggestion",
+        )
+      })
+
+      it("reports languageDetection when only its own tier is walled off", () => {
+        // Reachable only because funding is per feature: an LLM provider covers
+        // note suggestion, and the built-ins cover it too, while hosted
+        // languageDetection is the one tier this account cannot run.
+        const languageDetectionWalledOff = statusWithAllTiers({
+          accessAllowed: true,
+          available: true,
+          unavailableReason: null,
+          requiresUltra: false,
+          modelRevision: "r1",
+        })
+        languageDetectionWalledOff.features.languageDetection = {
+          normal: walledOffTier,
+          advance: walledOffTier,
+        }
+        const config = {
+          ...DEFAULT_CONFIG,
+          languageDetection: { mode: "llm" as const, providerId: "deleted-provider" },
+        }
+
+        expect(findFeatureMissingProvider([], config, languageDetectionWalledOff)).toBe(
+          "languageDetection",
+        )
+      })
+
+      it("does not fire on a merely exhausted quota", () => {
+        // Transient: the account can run Built-in AI, just not this minute.
+        const exhausted = statusWithAllTiers({
+          accessAllowed: true,
+          available: false,
+          unavailableReason: "quota_exhausted",
+          requiresUltra: false,
+          modelRevision: "r1",
+        })
+
+        expect(findFeatureMissingProvider([], DEFAULT_CONFIG, exhausted)).toBeNull()
+      })
     })
   })
 
@@ -415,7 +544,7 @@ describe("feature providers", () => {
       })
     })
 
-    it("returns null when there is no enabled llm provider", () => {
+    it("falls back to Built-in AI when no enabled local llm provider remains", () => {
       const result = resolveLanguageDetectionConfigForModeChange(
         DEFAULT_CONFIG.languageDetection,
         "llm",
@@ -431,7 +560,10 @@ describe("feature providers", () => {
         ],
       )
 
-      expect(result).toBeNull()
+      // Switching to llm mode used to be impossible without a BYOK LLM. Built-in
+      // AI is always capability-compatible, so the mode is now always reachable
+      // and seeds itself with the hosted provider.
+      expect(result).toEqual({ mode: "llm", providerId: "read-frog-free-ai" })
     })
   })
 

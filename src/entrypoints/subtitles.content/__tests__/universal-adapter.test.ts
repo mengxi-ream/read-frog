@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   buildSubtitlesSummaryContextHash: vi.fn<(...args: any[]) => any>(() => null),
   fetchSubtitlesSummary: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
   translateSubtitles: vi.fn<(...args: any[]) => any>(),
+  resolveSubtitlesProviderRef: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/config/storage", async (importOriginal) => {
@@ -27,6 +28,7 @@ vi.mock("@/utils/config/storage", async (importOriginal) => {
 
 vi.mock("@/utils/subtitles/processor/translator", () => ({
   buildSubtitlesSummaryContextHash: mocks.buildSubtitlesSummaryContextHash,
+  resolveSubtitlesProviderRef: mocks.resolveSubtitlesProviderRef,
   fetchSubtitlesSummary: mocks.fetchSubtitlesSummary,
   translateSubtitles: mocks.translateSubtitles,
 }))
@@ -338,6 +340,36 @@ describe("universalVideoAdapter", () => {
     // Scheduler must not receive untranslated seeds; only coordinator will push translations later.
     expect(subtitlesScheduler.supplementSubtitles).not.toHaveBeenCalled()
     expect(startSpy).toHaveBeenCalled()
+
+    startSpy.mockRestore()
+  })
+
+  it("publishes the source track without waiting on the provider resolve", async () => {
+    const { adapter } = createAdapter([{ text: "hello", start: 0, end: 1000 }])
+    attachScheduler(adapter, true)
+
+    await (adapter as any).getOrLoadSourceSubtitles()
+    ;(adapter as any).sessionSubtitles = (adapter as any).sourceSubtitles
+
+    const startSpy = vi
+      .spyOn(TranslationCoordinator.prototype, "start")
+      .mockImplementation(() => undefined)
+
+    // A hosted resolve reaches the network, and backgroundFetch carries no
+    // timeout — so a dead connection never settles this. The original captions
+    // need nothing from it, and this is the only path that puts captions on
+    // screen for the translated flow: ordering it after the resolve left the
+    // player in "loading" showing nothing at all.
+    // Once, not permanently: clearAllMocks between tests drops calls but keeps
+    // implementations, so a never-settling mockReturnValue would hang the next
+    // test instead of this one.
+    mocks.resolveSubtitlesProviderRef.mockReturnValueOnce(new Promise(() => {}))
+
+    void (adapter as any).processTranslatedSubtitles()
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(subtitlesStore.get(sourceTrackAtom).length).toBeGreaterThan(0)
 
     startSpy.mockRestore()
   })

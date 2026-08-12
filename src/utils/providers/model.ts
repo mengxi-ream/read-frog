@@ -101,6 +101,18 @@ async function getLanguageModelById(providerId: string) {
     throw new Error(`Provider ${providerId} not found`)
   }
 
+  return getLanguageModelForConfig(providerConfig)
+}
+
+/**
+ * Build a model from a config the caller already holds.
+ *
+ * Callers that were handed a provider config — a transported `providerRef`, say
+ * — must use this rather than looking the id up again: re-reading storage picks
+ * up edits made after the ref was captured, so the model would come from the
+ * new row while the params derived from the ref came from the old one.
+ */
+export function getLanguageModelForConfig(providerConfig: LLMProviderConfig) {
   const headers = getProviderHeadersWithOverride(providerConfig.provider, providerConfig.headers)
   const providerSpecificSettings = getProviderSpecificSettings(providerConfig)
 

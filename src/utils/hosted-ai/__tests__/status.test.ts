@@ -29,7 +29,7 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
 }
 
 function featureMap(
-  entry: (feature: HostedAiFeature) => Record<"normal" | "ultra", HostedAiTierStatus>,
+  entry: (feature: HostedAiFeature) => Record<"normal" | "advance", HostedAiTierStatus>,
 ): HostedAiStatus["features"] {
   return Object.fromEntries(
     ALL_FEATURES.map((feature) => [feature, entry(feature)]),
@@ -49,7 +49,7 @@ describe("hosted AI status presentation", () => {
       ],
       features: featureMap(() => ({
         normal: tier(),
-        ultra: tier({ modelRevision: "ultra-r4" }),
+        advance: tier({ modelRevision: "advance-r4" }),
       })),
     }
 
@@ -59,7 +59,7 @@ describe("hosted AI status presentation", () => {
       { credit },
     )
     const ultraDescription = getHostedAiTierDescription(
-      getHostedAiTierStatus(status, "pageTranslation", "ultra"),
+      getHostedAiTierStatus(status, "pageTranslation", "advance"),
       { credit },
     )
 
@@ -90,20 +90,20 @@ describe("hosted AI status presentation", () => {
         feature === "customAction"
           ? {
               normal: tier(),
-              ultra: tier({
+              advance: tier({
                 accessAllowed: false,
                 available: false,
                 unavailableReason: "ultra_required",
-                modelRevision: "ultra-r4",
+                modelRevision: "advance-r4",
               }),
             }
           : {
               normal: tier({ available: false, unavailableReason: "service_unavailable" }),
-              ultra: tier({
+              advance: tier({
                 accessAllowed: false,
                 available: false,
                 unavailableReason: "ultra_required",
-                modelRevision: "ultra-r4",
+                modelRevision: "advance-r4",
               }),
             },
       ),
@@ -119,7 +119,7 @@ describe("hosted AI status presentation", () => {
       }),
     ).toBe("hostedAi.availability.serviceUnavailable")
     expect(
-      getHostedAiTierDescription(getHostedAiTierStatus(status, "pageTranslation", "ultra"), {
+      getHostedAiTierDescription(getHostedAiTierStatus(status, "pageTranslation", "advance"), {
         credit,
       }),
     ).toBe("hostedAi.availability.ultraRequired")
