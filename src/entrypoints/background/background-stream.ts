@@ -1,5 +1,6 @@
 import type { HostedAiRateLimitErrorData, PublicAppErrorCode } from "@read-frog/api-contract"
 import type { Browser } from "#imports"
+import type { BackgroundGenerateTextPayload } from "@/types/background-generate-text"
 import type {
   BackgroundNoteSuggestionStreamSnapshot,
   BackgroundStreamNoteSuggestionSerializablePayload,
@@ -10,7 +11,7 @@ import type {
   BackgroundStructuredObjectOutputField,
   BackgroundStructuredObjectStreamSnapshot,
   BackgroundTextStreamSnapshot,
-  HostedAiTextStreamFeature,
+  HostedAiTextStreamRoute,
   StartMessageParseResult,
   StreamPortHandler,
   StreamPortRequestMessage,
@@ -27,16 +28,18 @@ import {
   HostedAiStreamStructuredObjectInputSchema,
   HostedAiStreamTextInputSchema,
 } from "@read-frog/api-contract"
-import { Output, parsePartialJson, streamText } from "ai"
+import { generateText, Output, parsePartialJson, streamText } from "ai"
 import { z } from "zod"
 import { BACKGROUND_STREAM_PORTS } from "@/types/background-stream"
+import { isLLMProviderConfig } from "@/types/config/provider"
 import { createStructuredObjectSchema } from "@/utils/ai/structured-object-schema"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { noteSuggestionEnvelopeSchema } from "@/utils/note-suggestion/types"
 import { backgroundOrpcClient } from "@/utils/orpc/background-client"
-import { getModelById } from "@/utils/providers/model"
+import { buildLocalGenerateTextParams } from "@/utils/providers/generate-params"
+import { getLanguageModelForConfig, getModelById } from "@/utils/providers/model"
 import { isBuiltInAiProviderId } from "@/utils/providers/provider-registry"
 import { attachRequestErrorMeta } from "@/utils/request/retry-policy"
 
@@ -654,11 +657,21 @@ async function createLocalTextPartStream(
  * translation, the sole caller before the field existed. Resolved lazily so
  * importing this module never touches the client proxy.
  */
-const HOSTED_TEXT_STREAM_PROCEDURES: Record<HostedAiTextStreamFeature, () => HostedStreamFn> = {
+const HOSTED_TEXT_STREAM_PROCEDURES: Record<HostedAiTextStreamRoute, () => HostedStreamFn> = {
   pageTranslation: () =>
     backgroundOrpcClient.hostedAi.translate.streamText as unknown as HostedStreamFn,
   selectionTranslation: () =>
     backgroundOrpcClient.hostedAi.selectionTranslation.streamText as unknown as HostedStreamFn,
+  // Subtitle lines and the video summary share one route; both bill as
+  // videoSubtitles. Segmentation is the same feature on a wider-budget route.
+  videoSubtitles: () =>
+    backgroundOrpcClient.hostedAi.videoSubtitles.streamText as unknown as HostedStreamFn,
+  videoSubtitlesSegmentation: () =>
+    backgroundOrpcClient.hostedAi.videoSubtitles.streamSegmentation as unknown as HostedStreamFn,
+  inputTranslation: () =>
+    backgroundOrpcClient.hostedAi.inputTranslation.streamText as unknown as HostedStreamFn,
+  languageDetection: () =>
+    backgroundOrpcClient.hostedAi.languageDetection.streamText as unknown as HostedStreamFn,
 }
 
 async function createHostedTextPartStream(
@@ -688,6 +701,78 @@ async function createHostedTextPartStream(
   } catch (error) {
     throw normalizeHostedAiError(error)
   }
+}
+
+/**
+ * One text generation against either provider kind, collected into a string.
+ *
+ * Four callers are non-streaming `generateText` calls — the page summary, the
+ * video summary, subtitle segmentation, and language detection — and the
+ * hosted side has no non-streaming route, because quota reserve/settle, the
+ * circuit breaker, and the ledger are stream-shaped end to end. Rather than
+ * give each caller its own hosted branch, they all collapse onto this: the
+ * hosted path reuses the same part stream and reader as page translation and
+ * hands back the accumulated text.
+ *
+ * Lives here rather than beside its callers because it needs the
+ * module-private `createHostedTextPartStream` (contract pre-validation, error
+ * normalization, procedure lookup) and `consumeTextPartStream`.
+ */
+export async function generateTextForProviderRef(
+  payload: BackgroundGenerateTextPayload,
+  options: { signal?: AbortSignal } = {},
+): Promise<string> {
+  const { providerRef, hostedFeature, instructions, prompt, requestId, maxRetries } = payload
+  const { signal } = options
+
+  if (signal?.aborted) {
+    throw new DOMException("stream aborted", "AbortError")
+  }
+
+  if (providerRef.kind === "system") {
+    const partStream = await createHostedTextPartStream(
+      {
+        providerId: providerRef.providerId,
+        modelTier: providerRef.modelTier,
+        requestId,
+        hostedFeature,
+        instructions,
+        prompt,
+      },
+      signal,
+    )
+    const snapshot = await consumeTextPartStream(partStream, { signal })
+    return snapshot.output.trim()
+  }
+
+  // Local text generation needs a real LLM: pure translate providers (DeepLX,
+  // Google, Microsoft) have no model to prompt. Callers already pick an
+  // LLM-capable provider, so this is a guard, not a branch.
+  if (!isLLMProviderConfig(providerRef.config)) {
+    throw new BackgroundStreamError(
+      "invalid_request",
+      `Provider "${providerRef.config.id}" cannot generate text`,
+    )
+  }
+
+  // Built from the config the ref carries, not looked up by id: every other
+  // parameter below already comes from the ref, so re-reading storage would
+  // pair a model from the current row with reasoning/temperature/providerOptions
+  // computed from the snapshot the caller captured — and would fail outright
+  // for a row deleted from another tab while the config was already in hand.
+  const model = getLanguageModelForConfig(providerRef.config)
+  const { text } = await generateText({
+    model,
+    instructions,
+    prompt,
+    // maxRetries: 0 — retries belong to the RequestQueue, which meters them
+    // against the token bucket; ai-sdk's hidden default (2) would issue extra
+    // HTTP attempts invisible to the rate limiter.
+    maxRetries: maxRetries ?? 0,
+    abortSignal: signal,
+    ...buildLocalGenerateTextParams(providerRef.config),
+  })
+  return text.trim()
 }
 
 export async function runStreamTextInBackground(

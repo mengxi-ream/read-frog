@@ -28,8 +28,23 @@ interface BaseBackgroundStreamSerializablePayload {
 /** The hosted features that stream plain text through the `stream-text` port. */
 export type HostedAiTextStreamFeature = Extract<
   HostedAiFeature,
-  "pageTranslation" | "selectionTranslation"
+  | "pageTranslation"
+  | "selectionTranslation"
+  | "videoSubtitles"
+  | "inputTranslation"
+  | "languageDetection"
 >
+
+/**
+ * Which hosted text route to call — normally one per feature, but video
+ * subtitles has two: line/summary translation and segmentation, which is a
+ * separate route because it carries a much larger output budget (and so a
+ * larger credit reservation) than a subtitle line should ever reserve.
+ *
+ * So this is a superset of `HostedAiTextStreamFeature`: the server still bills
+ * both subtitle routes against the single `videoSubtitles` feature.
+ */
+export type HostedAiTextStreamRoute = HostedAiTextStreamFeature | "videoSubtitlesSegmentation"
 
 export type BackgroundStreamTextSerializablePayload = BaseBackgroundStreamSerializablePayload & {
   /**
@@ -38,7 +53,7 @@ export type BackgroundStreamTextSerializablePayload = BaseBackgroundStreamSerial
    * from before this field existed keeps working against an updated service
    * worker mid-extension-update; absent means "pageTranslation".
    */
-  hostedFeature?: HostedAiTextStreamFeature
+  hostedFeature?: HostedAiTextStreamRoute
 }
 
 export interface BackgroundStructuredObjectOutputField {

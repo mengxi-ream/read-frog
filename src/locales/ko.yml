@@ -144,6 +144,9 @@ options:
         customAction: 사용자 지정 AI 작업
         noteSuggestion: 노트 제안
         selectionTranslation: 선택 영역 번역
+        videoSubtitles: 비디오 자막
+        inputTranslation: 입력 번역
+        languageDetection: 언어 감지
     sponsorCta: 빠르고 가성비 좋은 AI 받기
     setApiKeyWarning:
       message: API 키는 $1 페이지에서 설정하세요
@@ -178,6 +181,7 @@ options:
         confirm: 삭제
         cancel: 취소
       atLeastOneLLMProvider: 최소 하나의 LLM 번역 제공업체가 필요합니다.
+      featureWouldLoseProvider: '삭제할 수 없습니다: "$1"을(를) 실행할 수 있는 제공업체가 없어집니다.'
       duplicateProviderName: '중복된 제공업체 이름 "$1"'
       defaultProvider:
         translate: 기본 번역 제공업체로 설정
@@ -223,12 +227,12 @@ options:
     providers:
       name:
         builtInAi: 내장 AI
-        builtInAiUltra: 고급 내장 AI
+        builtInAiAdvance: 고급 내장 AI
         customChatComplete: 사용자 정의 Chat Complete
         customResponses: 사용자 정의 Responses
       attribution:
         builtInAi: Read Frog가 호스팅하는 일반 모델입니다. Ultra가 아닌 사용자는 사용자 지정 AI 작업에서만 사용할 수 있으며, Ultra 사용자는 더 많은 기능에서 사용할 수 있습니다.
-        builtInAiUltra: Read Frog가 호스팅하는 고급 모델로, Ultra 멤버 전용입니다. 페이지 번역, 사용자 지정 AI 작업 등 모든 내장 AI 기능에서 사용할 수 있으며 주간 할당량을 공유합니다. 표준 모델보다 할당량이 더 빨리 소모됩니다.
+        builtInAiAdvance: Read Frog가 호스팅하는 고급 모델로, Ultra 멤버 전용입니다. 페이지 번역, 사용자 지정 AI 작업 등 모든 내장 AI 기능에서 사용할 수 있으며 주간 할당량을 공유합니다. 표준 모델보다 할당량이 더 빨리 소모됩니다.
       description:
         openai: GPT-4o 같은 모델을 제공합니다
         azure: Azure 배포를 통해 OpenAI 모델 사용
@@ -287,7 +291,7 @@ options:
         noteSuggestion: 선택 번역 후 Notebase에 저장할 만한 단어를 제안합니다.
     languageDetection:
       title: 언어 감지
-      description: 자동 번역 언어 감지, 건너뛰기 언어 감지 및 읽기 음성 선택 정확도에 영향을 줍니다.
+      description: 자동 번역 언어 감지 및 읽기 음성 선택 정확도에 영향을 줍니다.
       mode:
         basic: 기본
         llm: LLM
@@ -1157,7 +1161,7 @@ subtitles:
     translatedExportSameLanguage: 원본 언어와 대상 언어가 같습니다
 hostedAi:
   ultraBadge:
-    tooltip: Ultra 요금제 가입이 필요합니다
+    tooltip: Ultra 요금제 가입이 필요합니다 · 배지를 클릭해 요금제 받기
   availability:
     authenticationRequired: 로그인 후 사용할 수 있습니다
     ultraRequired: Ultra 요금제가 필요합니다

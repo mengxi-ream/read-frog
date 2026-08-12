@@ -144,6 +144,9 @@ options:
         customAction: Acciones de IA personalizadas
         noteSuggestion: Sugerencias de notas
         selectionTranslation: Traducción de la selección
+        videoSubtitles: Subtítulos de video
+        inputTranslation: Traducción de entrada
+        languageDetection: Detección de idioma
     sponsorCta: Obtén IA rápida y rentable
     setApiKeyWarning:
       message: Configura tu clave de API en la página $1
@@ -178,6 +181,7 @@ options:
         confirm: Eliminar
         cancel: Cancelar
       atLeastOneLLMProvider: Se requiere al menos un proveedor de traducción LLM.
+      featureWouldLoseProvider: 'No se puede eliminar: "$1" se quedaría sin ningún proveedor que pueda ejecutarla.'
       providerInUseCannotDisable: 'No se puede desactivar "$1" porque actualmente lo usan $2 función(es).'
       duplicateProviderName: 'Nombre de proveedor duplicado "$1"'
       defaultProvider:
@@ -224,12 +228,12 @@ options:
     providers:
       name:
         builtInAi: IA integrada
-        builtInAiUltra: IA integrada avanzada
+        builtInAiAdvance: IA integrada avanzada
         customChatComplete: Personalizado Chat Complete
         customResponses: Personalizado Responses
       attribution:
         builtInAi: Modelo estándar alojado por Read Frog. Los usuarios sin Ultra solo pueden usarlo en las acciones de IA personalizadas; los usuarios Ultra pueden usarlo en más funciones.
-        builtInAiUltra: Modelo avanzado alojado por Read Frog, exclusivo para miembros Ultra. Funciona en todas las funciones de IA integrada — traducción de página, acciones de IA personalizadas y más — con una cuota semanal compartida. Consume la cuota más rápido que el modelo estándar.
+        builtInAiAdvance: Modelo avanzado alojado por Read Frog, exclusivo para miembros Ultra. Funciona en todas las funciones de IA integrada — traducción de página, acciones de IA personalizadas y más — con una cuota semanal compartida. Consume la cuota más rápido que el modelo estándar.
       description:
         openai: Proporciona modelos como GPT-4o
         azure: Modelos OpenAI hospedados en Azure mediante tus implementaciones
@@ -288,7 +292,7 @@ options:
         noteSuggestion: Sugiere palabras que vale la pena guardar en tu Notebase después de traducir una selección.
     languageDetection:
       title: Detección de idioma
-      description: Afecta la detección de idioma para traducción automática, la detección de idiomas omitidos y la precisión de selección de voz.
+      description: Afecta la detección de idioma para traducción automática y la precisión de selección de voz.
       mode:
         basic: Básica
         llm: LLM
@@ -1273,7 +1277,7 @@ subtitles:
     translatedExportSameLanguage: El idioma de origen y el de destino son iguales
 hostedAi:
   ultraBadge:
-    tooltip: Requiere el plan Ultra
+    tooltip: Requiere el plan Ultra · Haz clic en la insignia para obtenerlo
   availability:
     authenticationRequired: Inicia sesión para usar este proveedor
     ultraRequired: Se requiere el plan Ultra

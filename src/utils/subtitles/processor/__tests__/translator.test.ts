@@ -1,4 +1,4 @@
-import type { ProviderConfig } from "@/types/config/provider"
+import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 
@@ -109,7 +109,10 @@ describe("subtitles translator", () => {
       expect.objectContaining({
         videoTitle: "Video title",
         subtitlesContext: "subtitle transcript",
-        providerConfig: expect.objectContaining({ id: "openai-default" }),
+        providerRef: expect.objectContaining({
+          kind: "local",
+          config: expect.objectContaining({ id: "openai-default" }),
+        }),
       }),
     )
   })
@@ -230,38 +233,41 @@ describe("subtitles translator", () => {
   it("builds subtitle summary context hashes from subtitles text and provider config", async () => {
     const { buildSubtitlesSummaryContextHash } = await import("../translator")
 
-    const baseProviderConfig: ProviderConfig = {
-      id: "openai-default",
-      name: "OpenAI",
-      provider: "openai",
-      enabled: true,
-      apiKey: "sk-test",
-      model: { model: "gpt-5-mini", isCustomModel: false, customModel: null },
+    const baseProviderRef: SerializableProviderRef = {
+      kind: "local",
+      config: {
+        id: "openai-default",
+        name: "OpenAI",
+        provider: "openai",
+        enabled: true,
+        apiKey: "sk-test",
+        model: { model: "gpt-5-mini", isCustomModel: false, customModel: null },
+      } as never,
     }
 
     const first = buildSubtitlesSummaryContextHash(
       {
         subtitlesTextContent: "same transcript",
       },
-      baseProviderConfig,
+      baseProviderRef,
     )
     const sameTextDifferentTitle = buildSubtitlesSummaryContextHash(
       {
         subtitlesTextContent: "same transcript",
       },
-      baseProviderConfig,
+      baseProviderRef,
     )
     const differentText = buildSubtitlesSummaryContextHash(
       {
         subtitlesTextContent: "different transcript",
       },
-      baseProviderConfig,
+      baseProviderRef,
     )
     const differentProvider = buildSubtitlesSummaryContextHash(
       {
         subtitlesTextContent: "same transcript",
       },
-      { ...baseProviderConfig, id: "other-provider" },
+      { kind: "local", config: { ...baseProviderRef.config, id: "other-provider" } } as never,
     )
 
     expect(first).toBe(sameTextDifferentTitle)
@@ -272,13 +278,16 @@ describe("subtitles translator", () => {
   it("builds subtitle summary context hashes from cleaned text capped by cleanText's default limit", async () => {
     const { buildSubtitlesSummaryContextHash } = await import("../translator")
 
-    const baseProviderConfig: ProviderConfig = {
-      id: "openai-default",
-      name: "OpenAI",
-      provider: "openai",
-      enabled: true,
-      apiKey: "sk-test",
-      model: { model: "gpt-5-mini", isCustomModel: false, customModel: null },
+    const baseProviderRef: SerializableProviderRef = {
+      kind: "local",
+      config: {
+        id: "openai-default",
+        name: "OpenAI",
+        provider: "openai",
+        enabled: true,
+        apiKey: "sk-test",
+        model: { model: "gpt-5-mini", isCustomModel: false, customModel: null },
+      } as never,
     }
 
     const prefix = "a".repeat(3000)
@@ -286,19 +295,19 @@ describe("subtitles translator", () => {
       {
         subtitlesTextContent: `${prefix}tail-a`,
       },
-      baseProviderConfig,
+      baseProviderRef,
     )
     const second = buildSubtitlesSummaryContextHash(
       {
         subtitlesTextContent: `${prefix}tail-b`,
       },
-      baseProviderConfig,
+      baseProviderRef,
     )
     const differentWithinLimit = buildSubtitlesSummaryContextHash(
       {
         subtitlesTextContent: `${"b".repeat(3000)}tail-a`,
       },
-      baseProviderConfig,
+      baseProviderRef,
     )
 
     expect(first).toBe(second)

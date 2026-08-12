@@ -1,15 +1,12 @@
-import { generateText } from "ai"
-import { isLLMProviderConfig } from "@/types/config/provider"
-import { getProviderConfigById } from "@/utils/config/helpers"
+import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
 import { logger } from "@/utils/logger"
 import { getSubtitlesSegmentationPrompt } from "@/utils/prompts/subtitles-segmentation"
-import { getModelById } from "@/utils/providers/model"
-import { resolveModelId } from "@/utils/providers/model-id"
-import { getProviderOptionsWithOverride } from "@/utils/providers/options"
-import { getTopLevelReasoning } from "@/utils/providers/reasoning"
-import { ensureInitializedConfig } from "./config"
+import { getProviderCacheIdentity } from "@/utils/providers/provider-ref"
+import { parseSimplifiedVttToFragments } from "@/utils/subtitles/processor/ai-segmentation"
+import { generateTextForProviderRef } from "./background-stream"
 
 const VTT_CODE_BLOCK_RE = /```vtt\n?/g
 const CODE_BLOCK_RE = /```\n?/g
@@ -17,7 +14,7 @@ const THINK_TAG_RE = /<\/think>([\s\S]*)/
 
 interface AiSegmentSubtitlesData {
   jsonContent: string
-  providerId: string
+  providerRef: SerializableProviderRef
 }
 
 /**
@@ -45,67 +42,48 @@ function cleanVttResponse(text: string): string {
  * Run AI segmentation on JSON subtitle content
  */
 export async function runAiSegmentSubtitles(data: AiSegmentSubtitlesData): Promise<string> {
-  const { jsonContent, providerId } = data
+  const { jsonContent, providerRef } = data
 
   if (!jsonContent) {
     throw new Error("jsonContent is required for AI segmentation")
   }
 
-  const config = await ensureInitializedConfig()
-  if (!config) {
-    throw new Error("Config not found")
-  }
-
-  const providerConfig = getProviderConfigById(config.providersConfig, providerId)
-  if (!providerConfig) {
-    throw new Error(`Provider config not found for id: ${providerId}`)
-  }
-
-  if (!isLLMProviderConfig(providerConfig)) {
-    throw new Error("AI segmentation requires an LLM translate provider")
-  }
-
-  // Check cache
-  const jsonContentHash = Sha256Hex(jsonContent)
-  const cacheKey = Sha256Hex(jsonContentHash, JSON.stringify(providerConfig))
+  // The ref is resolved on the content side, where a session already holds one:
+  // resolving here would cost a hostedAi.status round trip per block.
+  const cacheKey = Sha256Hex(Sha256Hex(jsonContent), getProviderCacheIdentity(providerRef))
   const cached = await db.aiSegmentationCache.get(cacheKey)
   if (cached) {
-    logger.info("[Background] AI subtitle segmentation cache hit")
-    return cached.result
+    if (parseSimplifiedVttToFragments(cached.result).length > 0) {
+      logger.info("[Background] AI subtitle segmentation cache hit")
+      return cached.result
+    }
+    // Entry written before results were parse-checked; drop it and regenerate
+    // instead of serving the same unusable VTT on every attempt.
+    await db.aiSegmentationCache.delete(cacheKey)
   }
-
-  const {
-    model: providerModel,
-    provider,
-    providerOptions: userProviderOptions,
-    temperature,
-  } = providerConfig
-  const reasoning = getTopLevelReasoning(providerConfig)
-  const modelName = resolveModelId(providerModel)
-  const providerOptions = getProviderOptionsWithOverride(
-    modelName ?? "",
-    provider,
-    userProviderOptions,
-    reasoning,
-  )
-  const model = await getModelById(providerId)
 
   const { systemPrompt, prompt } = getSubtitlesSegmentationPrompt(jsonContent)
 
   try {
-    const { text: segmentedVtt } = await generateText({
-      model,
+    const segmentedVtt = await generateTextForProviderRef({
+      providerRef,
+      // Its own route, not videoSubtitles: segmentation emits a whole WebVTT
+      // block and needs the wider output budget that route reserves.
+      hostedFeature: "videoSubtitlesSegmentation",
       instructions: systemPrompt,
       prompt,
-      reasoning,
-      temperature,
-      providerOptions,
-      maxRetries: 0,
+      requestId: getRandomUUID(),
     })
 
     const result = cleanVttResponse(segmentedVtt)
 
-    // Write to cache
+    // Parse-check before caching: a cached result that yields no cues would be
+    // served on every later attempt for this chunk, pinning the failure until
+    // the provider's cache identity changes.
+    if (parseSimplifiedVttToFragments(result).length === 0) {
+      throw new Error("AI segmentation returned an unparseable result")
+    }
+
     await db.aiSegmentationCache.put({
       key: cacheKey,
       result,

@@ -24,12 +24,10 @@ vi.mock("@/utils/note-suggestion/validate", () => ({
 vi.mock("@/utils/host/translate/webpage-context", () => ({
   getOrCreateWebPageContext: (...args: any[]) => getOrCreateWebPageContextMock(...args),
 }))
-vi.mock("@/utils/orpc/client", () => ({
-  orpcClient: {
-    hostedAi: {
-      status: (...args: any[]) => hostedStatusMock(...args),
-    },
-  },
+// The status request is owned by the background (it holds the shared cache), so
+// the hook reaches it through the message channel rather than the oRPC client.
+vi.mock("@/utils/message", () => ({
+  sendMessage: (...args: any[]) => hostedStatusMock(...args),
 }))
 
 const { useNoteSuggestion } = await import("../use-note-suggestion")

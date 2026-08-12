@@ -12,7 +12,7 @@
  * ids. The random component keeps ids unique across frames of the same tab
  * (the background scopes by tab id + session id only).
  */
-import type { SerializablePageTranslationProvider } from "@/utils/providers/translation-provider"
+import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
 
 let currentPageTranslationSessionId: string | null = null
 let sessionCounter = 0
@@ -23,7 +23,7 @@ let sessionCounter = 0
  * hosted status mid-page (a status blip would fail in-flight paragraphs, and
  * the model revision used for cache identity must stay stable per session).
  */
-let currentSessionProviderRef: SerializablePageTranslationProvider | null = null
+let currentSessionProviderRef: SerializableProviderRef | null = null
 
 export function beginPageTranslationSession(): string {
   sessionCounter += 1
@@ -45,12 +45,10 @@ export function getPageTranslationSessionId(): string | null {
   return currentPageTranslationSessionId
 }
 
-export function setPageTranslationSessionProviderRef(
-  providerRef: SerializablePageTranslationProvider,
-): void {
+export function setPageTranslationSessionProviderRef(providerRef: SerializableProviderRef): void {
   currentSessionProviderRef = providerRef
 }
 
-export function getPageTranslationSessionProviderRef(): SerializablePageTranslationProvider | null {
+export function getPageTranslationSessionProviderRef(): SerializableProviderRef | null {
   return currentSessionProviderRef
 }

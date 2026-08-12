@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   downloadSubtitlesAsSrt: vi.fn<(...args: any[]) => any>(),
   fetchSubtitlesSummary: vi.fn<(...args: any[]) => any>(),
   getLocalConfig: vi.fn<(...args: any[]) => any>(),
+  resolveSubtitlesProviderRef: vi.fn<(...args: any[]) => any>(),
   toastAdd: vi.fn<(...args: any[]) => any>(),
   translateSubtitles: vi.fn<(...args: any[]) => any>(),
 }))
@@ -28,6 +29,7 @@ vi.mock("@/utils/subtitles/processor/ai-segmentation", () => ({
 }))
 vi.mock("@/utils/subtitles/processor/translator", () => ({
   buildSubtitlesSummaryContextHash: () => "summary-hash",
+  resolveSubtitlesProviderRef: mocks.resolveSubtitlesProviderRef,
   fetchSubtitlesSummary: mocks.fetchSubtitlesSummary,
   translateSubtitles: mocks.translateSubtitles,
 }))
@@ -99,6 +101,12 @@ describe("translatedSubtitlesDownloader", () => {
       progress: null,
     })
     mocks.getLocalConfig.mockResolvedValue(createConfig())
+    // The export resolves one ref up front and threads it into segmentation;
+    // a null here would skip the AI path entirely.
+    mocks.resolveSubtitlesProviderRef.mockResolvedValue({
+      kind: "local",
+      config: DEFAULT_PROVIDER_CONFIG.openai,
+    })
     mocks.fetchSubtitlesSummary.mockResolvedValue(null)
     mocks.translateSubtitles.mockImplementation(async (fragments: SubtitlesFragment[]) =>
       translated(fragments),

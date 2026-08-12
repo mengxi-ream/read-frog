@@ -144,6 +144,9 @@ options:
         customAction: Hành động AI tùy chỉnh
         noteSuggestion: Gợi ý ghi chú
         selectionTranslation: Dịch vùng chọn
+        videoSubtitles: Phụ đề video
+        inputTranslation: Dịch đầu vào
+        languageDetection: Phát hiện ngôn ngữ
     sponsorCta: Nhận AI nhanh, tiết kiệm chi phí
     setApiKeyWarning:
       message: Hãy đặt API Key ở trang $1
@@ -178,6 +181,7 @@ options:
         confirm: Xóa
         cancel: Hủy
       atLeastOneLLMProvider: Cần ít nhất một nhà cung cấp dịch LLM.
+      featureWouldLoseProvider: 'Không thể xóa: "$1" sẽ không còn nhà cung cấp nào có thể chạy được.'
       duplicateProviderName: 'Tên nhà cung cấp trùng lặp "$1"'
       defaultProvider:
         translate: Đặt làm nhà cung cấp dịch mặc định
@@ -223,12 +227,12 @@ options:
     providers:
       name:
         builtInAi: AI tích hợp
-        builtInAiUltra: AI tích hợp nâng cao
+        builtInAiAdvance: AI tích hợp nâng cao
         customChatComplete: Tùy chỉnh Chat Complete
         customResponses: Tùy chỉnh Responses
       attribution:
         builtInAi: Mô hình tiêu chuẩn do Read Frog lưu trữ. Người dùng không có Ultra chỉ dùng được trong hành động AI tùy chỉnh; người dùng Ultra dùng được ở nhiều tính năng hơn.
-        builtInAiUltra: Mô hình nâng cao do Read Frog lưu trữ, dành riêng cho thành viên Ultra. Dùng được ở mọi tính năng AI tích hợp — dịch trang, hành động AI tùy chỉnh và hơn nữa — với hạn mức tuần dùng chung. Tiêu hao hạn mức nhanh hơn mô hình tiêu chuẩn.
+        builtInAiAdvance: Mô hình nâng cao do Read Frog lưu trữ, dành riêng cho thành viên Ultra. Dùng được ở mọi tính năng AI tích hợp — dịch trang, hành động AI tùy chỉnh và hơn nữa — với hạn mức tuần dùng chung. Tiêu hao hạn mức nhanh hơn mô hình tiêu chuẩn.
       description:
         openai: Cung cấp các mô hình như GPT-4o
         azure: Mô hình OpenAI lưu trữ trên Azure qua các bản triển khai của bạn
@@ -287,7 +291,7 @@ options:
         noteSuggestion: Gợi ý các từ đáng lưu vào Notebase sau khi dịch vùng chọn.
     languageDetection:
       title: Phát hiện ngôn ngữ
-      description: Ảnh hưởng đến phát hiện ngôn ngữ tự động dịch, phát hiện ngôn ngữ bỏ qua và độ chính xác chọn giọng nói.
+      description: Ảnh hưởng đến phát hiện ngôn ngữ tự động dịch và độ chính xác chọn giọng nói.
       mode:
         basic: Cơ bản
         llm: LLM
@@ -1157,7 +1161,7 @@ subtitles:
     translatedExportSameLanguage: Ngôn ngữ nguồn và ngôn ngữ đích giống nhau
 hostedAi:
   ultraBadge:
-    tooltip: Yêu cầu gói Ultra
+    tooltip: Yêu cầu gói Ultra · Nhấp vào huy hiệu để nhận gói
   availability:
     authenticationRequired: Đăng nhập để sử dụng nhà cung cấp này
     ultraRequired: Yêu cầu gói Ultra

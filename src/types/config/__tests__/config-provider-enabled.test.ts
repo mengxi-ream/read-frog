@@ -159,15 +159,48 @@ describe("config provider enabled validation", () => {
     expect(issuePaths).not.toContain("pageTranslation.providerId")
   })
 
-  it("rejects built-in AI for fixed translation features that have not enabled the capability", () => {
-    const issuePaths = getIssuePaths({
-      ...DEFAULT_CONFIG,
-      inputTranslation: {
-        ...DEFAULT_CONFIG.inputTranslation,
-        providerId: "read-frog-free-ai",
-      },
-    })
+  it("allows built-in AI for every feature that declares the capability", () => {
+    // Subtitles and input translation gained hosted routes, so the built-in
+    // providers now declare those capabilities and the schema must accept them.
+    for (const providerId of ["read-frog-free-ai", "read-frog-advance-ai"]) {
+      expect(
+        getIssuePaths({
+          ...DEFAULT_CONFIG,
+          inputTranslation: { ...DEFAULT_CONFIG.inputTranslation, providerId },
+        }),
+      ).not.toContain("inputTranslation.providerId")
 
-    expect(issuePaths).toContain("inputTranslation.providerId")
+      expect(
+        getIssuePaths({
+          ...DEFAULT_CONFIG,
+          videoSubtitles: { ...DEFAULT_CONFIG.videoSubtitles, providerId },
+        }),
+      ).not.toContain("videoSubtitles.providerId")
+
+      expect(
+        getIssuePaths({
+          ...DEFAULT_CONFIG,
+          languageDetection: { mode: "llm" as const, providerId },
+        }),
+      ).not.toContain("languageDetection.providerId")
+    }
+  })
+
+  it("still rejects a provider id no capability covers", () => {
+    // The capability gate is what keeps this honest — not a hardcoded list.
+    expect(
+      getIssuePaths({
+        ...DEFAULT_CONFIG,
+        inputTranslation: { ...DEFAULT_CONFIG.inputTranslation, providerId: "does-not-exist" },
+      }),
+    ).toContain("inputTranslation.providerId")
+
+    // Pure translate providers cannot run language detection: it needs an LLM.
+    expect(
+      getIssuePaths({
+        ...DEFAULT_CONFIG,
+        languageDetection: { mode: "llm" as const, providerId: "google-translate-default" },
+      }),
+    ).toContain("languageDetection.providerId")
   })
 })

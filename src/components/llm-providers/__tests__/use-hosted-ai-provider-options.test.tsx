@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
 import {
   BUILT_IN_AI_PROVIDER_ID,
-  BUILT_IN_AI_ULTRA_PROVIDER_ID,
+  BUILT_IN_AI_ADVANCE_PROVIDER_ID,
 } from "@/utils/constants/provider-ids"
 
 const { hostedAiState } = vi.hoisted(() => {
@@ -36,15 +36,40 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
   }
 }
 
+/**
+ * The tier pair the server sends for a feature this plan does not fund.
+ *
+ * `unavailableReason` carries it, not the absence of a `credits` pool:
+ * `createTierStatus` maps an unfunded Ultra-gated tier to `ultra_required`
+ * ("an upgrade wall, not an outage"), and `tierRequiresUltra` is true for the
+ * normal tier of every feature outside `customAction`. An unfunded feature
+ * whose tiers still report `unavailableReason: null` is not a state the server
+ * can produce.
+ */
+function unfundedTiers(): { normal: HostedAiTierStatus; advance: HostedAiTierStatus } {
+  return {
+    normal: tier({ available: false, unavailableReason: "ultra_required", requiresUltra: true }),
+    advance: tier({
+      accessAllowed: false,
+      available: false,
+      unavailableReason: "ultra_required",
+      requiresUltra: true,
+    }),
+  }
+}
+
 /** Every hosted feature at fully-available tiers; override per case. */
 function allFeatures(
   overrides: Partial<HostedAiStatus["features"]> = {},
 ): HostedAiStatus["features"] {
   return {
-    pageTranslation: { normal: tier(), ultra: tier() },
-    customAction: { normal: tier(), ultra: tier() },
-    noteSuggestion: { normal: tier(), ultra: tier() },
-    selectionTranslation: { normal: tier(), ultra: tier() },
+    pageTranslation: { normal: tier(), advance: tier() },
+    customAction: { normal: tier(), advance: tier() },
+    noteSuggestion: { normal: tier(), advance: tier() },
+    selectionTranslation: { normal: tier(), advance: tier() },
+    videoSubtitles: { normal: tier(), advance: tier() },
+    inputTranslation: { normal: tier(), advance: tier() },
+    languageDetection: { normal: tier(), advance: tier() },
     ...overrides,
   }
 }
@@ -64,7 +89,7 @@ function customActionDailyCredit(usedPercent = 0) {
 
 const PROVIDERS: ProviderSelectorOption[] = [
   systemOption(BUILT_IN_AI_PROVIDER_ID),
-  systemOption(BUILT_IN_AI_ULTRA_PROVIDER_ID),
+  systemOption(BUILT_IN_AI_ADVANCE_PROVIDER_ID),
 ]
 
 function getDisabled(providers: ProviderSelectorOption[]): Array<boolean | undefined> {
@@ -86,7 +111,7 @@ describe("useHostedAiProviderOptions", () => {
         features: allFeatures({
           customAction: {
             normal: tier(),
-            ultra: tier({
+            advance: tier({
               accessAllowed: false,
               available: false,
               unavailableReason: "ultra_required",
@@ -111,12 +136,12 @@ describe("useHostedAiProviderOptions", () => {
         features: allFeatures({
           pageTranslation: {
             normal: tier({ requiresUltra: true }),
-            ultra: tier({ requiresUltra: true }),
+            advance: tier({ requiresUltra: true }),
           },
-          customAction: { normal: tier(), ultra: tier({ requiresUltra: true }) },
+          customAction: { normal: tier(), advance: tier({ requiresUltra: true }) },
           noteSuggestion: {
             normal: tier({ requiresUltra: true }),
-            ultra: tier({ requiresUltra: true }),
+            advance: tier({ requiresUltra: true }),
           },
         }),
       },
@@ -136,16 +161,7 @@ describe("useHostedAiProviderOptions", () => {
       status: {
         // A free plan funds customAction only — pageTranslation has no pool.
         credits: [customActionDailyCredit()],
-        features: allFeatures({
-          pageTranslation: {
-            normal: tier({ available: false, unavailableReason: "service_unavailable" }),
-            ultra: tier({
-              accessAllowed: false,
-              available: false,
-              unavailableReason: "ultra_required",
-            }),
-          },
-        }),
+        features: allFeatures({ pageTranslation: unfundedTiers() }),
       },
     }
 
@@ -164,7 +180,7 @@ describe("useHostedAiProviderOptions", () => {
         features: allFeatures({
           selectionTranslation: {
             normal: tier(),
-            ultra: tier({
+            advance: tier({
               accessAllowed: false,
               available: false,
               unavailableReason: "ultra_required",
@@ -188,7 +204,7 @@ describe("useHostedAiProviderOptions", () => {
       isError: false,
       status: {
         credits: [customActionDailyCredit()],
-        features: allFeatures(),
+        features: allFeatures({ selectionTranslation: unfundedTiers() }),
       },
     }
 
@@ -209,7 +225,7 @@ describe("useHostedAiProviderOptions", () => {
         features: allFeatures({
           noteSuggestion: {
             normal: tier(),
-            ultra: tier({
+            advance: tier({
               accessAllowed: false,
               available: false,
               unavailableReason: "ultra_required",
@@ -234,7 +250,7 @@ describe("useHostedAiProviderOptions", () => {
       isError: false,
       status: {
         credits: [customActionDailyCredit()],
-        features: allFeatures(),
+        features: allFeatures({ noteSuggestion: unfundedTiers() }),
       },
     }
 
@@ -253,7 +269,7 @@ describe("useHostedAiProviderOptions", () => {
         features: allFeatures({
           customAction: {
             normal: tier({ available: false, unavailableReason: "quota_exhausted" }),
-            ultra: tier({ available: false, unavailableReason: "service_unavailable" }),
+            advance: tier({ available: false, unavailableReason: "service_unavailable" }),
           },
         }),
       },
@@ -272,10 +288,22 @@ describe("useHostedAiProviderOptions", () => {
     expect(getDisabled(result.current)).toEqual([false, false])
   })
 
-  it("returns providers untouched for capabilities without a hosted feature", () => {
-    const { result } = renderHook(() => useHostedAiProviderOptions("videoSubtitles", PROVIDERS))
+  it("gates every capability, including the ones that only just gained a route", () => {
+    // videoSubtitles used to be the "no hosted feature" case and was returned
+    // untouched. It now has a route, so it must be gated like the rest — the
+    // point of the CAPABILITY_HOSTED_FEATURES map is that adding a capability
+    // without a feature is a compile error rather than a silently ungated
+    // dropdown.
+    for (const capability of ["videoSubtitles", "inputTranslation", "languageDetection"] as const) {
+      const { result } = renderHook(() => useHostedAiProviderOptions(capability, PROVIDERS))
 
-    expect(result.current).toBe(PROVIDERS)
+      expect(result.current).not.toBe(PROVIDERS)
+      expect(result.current[0]).toMatchObject({
+        id: BUILT_IN_AI_PROVIDER_ID,
+        disabled: expect.any(Boolean),
+        requiresUltra: expect.any(Boolean),
+      })
+    }
   })
 
   it("passes local provider configs through unchanged", () => {

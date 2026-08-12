@@ -26,12 +26,13 @@ import {
 import { BUILT_IN_AI_PROVIDER_IDS, type BuiltInAiProviderId } from "@/utils/constants/provider-ids"
 import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
-import { getHostedAiCreditForFeature, getHostedAiTierStatus } from "@/utils/hosted-ai/status"
+import { getHostedAiTierStatus } from "@/utils/hosted-ai/status"
 import { i18n } from "@/utils/i18n"
 import { getRequestedProviderId, PROVIDER_CONFIG_SECTION_ID } from "@/utils/navigation"
+import { isDurablyUnusableTier } from "@/utils/providers/provider-availability"
 import {
   BUILT_IN_AI_PROVIDER_LOGO,
-  BUILT_IN_AI_ULTRA_PROVIDER_ID,
+  BUILT_IN_AI_ADVANCE_PROVIDER_ID,
   getBuiltInAiProviderName,
   isBuiltInAiProviderId,
 } from "@/utils/providers/provider-registry"
@@ -322,26 +323,36 @@ function BuiltInProviderCard({ providerId }: { providerId: BuiltInAiProviderId }
   )
 }
 
-/** Every hosted-capable feature key, in FEATURE_KEYS order. Grows as more features gain a hosted route. */
-const BUILT_IN_FEATURE_KEYS = ["pageTranslation", "selectionTranslation", "noteSuggestion"] as const
+/**
+ * Every hosted-capable FEATURE_KEYS entry, in FEATURE_KEYS order. Language
+ * detection is deliberately absent: it is a ProviderCapability but not a
+ * FeatureKey (its providerId is optional and only meaningful in "llm" mode),
+ * so it cannot use ProviderEditor.FeatureAssignment and stays owned by the
+ * Language detection section.
+ */
+const BUILT_IN_FEATURE_KEYS = [
+  "pageTranslation",
+  "videoSubtitles",
+  "selectionTranslation",
+  "inputTranslation",
+  "noteSuggestion",
+] as const
 
 function BuiltInProviderPanel({ providerId }: { providerId: BuiltInAiProviderId }) {
-  const isUltra = providerId === BUILT_IN_AI_ULTRA_PROVIDER_ID
-  const modelTier = isUltra ? ("ultra" as const) : ("normal" as const)
+  const isAdvance = providerId === BUILT_IN_AI_ADVANCE_PROVIDER_ID
+  const modelTier = isAdvance ? ("advance" as const) : ("normal" as const)
   const { status } = useHostedAiStatus()
 
   // Both cards list every hosted-capable feature. Same policy as the provider
-  // dropdowns (use-hosted-ai-provider-options): the Ultra badge is the
+  // dropdowns, and now literally the same predicate: the Ultra badge is the
   // viewer-independent `requiresUltra` product fact; rows lock only on durable
-  // account facts (missing access or a plan without a funding pool), never on
-  // transient service state (exhausted quota, open circuit, unconfigured
-  // model) — those surface at run time. Fail open while status is unknown so
-  // one failed fetch never locks the configuration UI.
+  // account facts (sign-in, plan), never on transient service state (exhausted
+  // quota, open circuit, unconfigured model) — those surface at run time. Fail
+  // open while status is unknown so one failed fetch never locks the UI.
   const getAssignmentStatus = (feature: HostedAiFeature) => {
     const tierStatus = getHostedAiTierStatus(status, feature, modelTier)
-    const hasFunding = getHostedAiCreditForFeature(status, feature) !== undefined
     return {
-      disabled: tierStatus ? !tierStatus.accessAllowed || !hasFunding : false,
+      disabled: isDurablyUnusableTier(tierStatus),
       requiresUltra: tierStatus?.requiresUltra === true,
     }
   }
@@ -354,8 +365,8 @@ function BuiltInProviderPanel({ providerId }: { providerId: BuiltInAiProviderId 
             <ProviderEditor.Identity />
             <ProviderEditor.Attribution>
               {i18n.t(
-                isUltra
-                  ? "options.apiProviders.providers.attribution.builtInAiUltra"
+                isAdvance
+                  ? "options.apiProviders.providers.attribution.builtInAiAdvance"
                   : "options.apiProviders.providers.attribution.builtInAi",
               )}
             </ProviderEditor.Attribution>

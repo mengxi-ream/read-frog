@@ -7,8 +7,7 @@ import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
-import { classifyProviderConfig, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
-import { getProviderConfigById } from "@/utils/config/helpers"
+import { classifyResolvedProvider, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
   HIDE_NATIVE_CAPTIONS_STYLE_ID,
@@ -20,10 +19,12 @@ import { getDocumentDescription } from "@/utils/content/metadata"
 import { resolveLanguageCodeFromLocale } from "@/utils/content/page-language"
 import { waitForElement } from "@/utils/dom/wait-for-element"
 import { i18n } from "@/utils/i18n"
+import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
 import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
 import {
   buildSubtitlesSummaryContextHash,
+  resolveSubtitlesProviderRef,
   fetchSubtitlesSummary,
 } from "@/utils/subtitles/processor/translator"
 import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
@@ -605,9 +606,14 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
     try {
       const analyticsConfig = await getLocalConfig()
-      providerAnalytics = classifyProviderConfig(
+      // Resolve through the capability registry, not providersConfig: Built-in
+      // AI is synthesized by the registry and is never a row there, so the
+      // lookup returned undefined and every hosted subtitle run was reported as
+      // provider "unknown" — the one metric that would size hosted adoption.
+      providerAnalytics = classifyResolvedProvider(
         analyticsConfig
-          ? getProviderConfigById(
+          ? resolveProviderRefForCapability(
+              "videoSubtitles",
               analyticsConfig.providersConfig,
               analyticsConfig.videoSubtitles.providerId,
             )
@@ -738,9 +744,22 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     const config = await getLocalConfig()
 
     const useAiSegmentation = !!config?.videoSubtitles?.aiSegmentation
-    const providerConfig = config
-      ? getProviderConfigById(config.providersConfig, config.videoSubtitles.providerId)
-      : undefined
+
+    this.sessionProcessedFragments = [...this.sourceProcessedSubtitles]
+
+    // Source track for display fallback; scheduler only receives translated cues
+    // later. Published before the provider resolve below, which none of this
+    // depends on: for a hosted provider that resolve can reach the network, and
+    // this is the only path that puts captions on screen for the translated
+    // flow — so sequencing it second made the original captions wait on a round
+    // trip they never needed, and a hung request (backgroundFetch carries no
+    // timeout) left the player in "loading" showing nothing at all.
+    this.publishSourceTrack(this.sessionProcessedFragments)
+
+    // Resolved once per session; the cache key needs the same identity the
+    // background will use, and a hosted ref costs one status fetch here rather
+    // than one per fragment.
+    const providerRef = config ? await resolveSubtitlesProviderRef(config, "videoSubtitles") : null
 
     const videoContext: SubtitlesVideoContext = {
       videoTitle: document.title || "",
@@ -748,17 +767,16 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       subtitlesTextContent: this.sessionSubtitles.map((f) => f.text).join(""),
     }
 
-    this.sessionProcessedFragments = [...this.sourceProcessedSubtitles]
-
-    // Source track for display fallback; scheduler only receives translated cues later.
-    this.publishSourceTrack(this.sessionProcessedFragments)
-
     if (useAiSegmentation) {
       this.segmentationPipeline = new SegmentationPipeline({
         baselineFragments: this.sourceProcessedSubtitles,
         rawFragments: this.sessionSubtitles,
         getVideoElement: () => this.subtitlesScheduler?.getVideoElement() ?? null,
         getSourceLanguage: () => this.fetcher.getSourceLanguage(),
+        // The session ref covers segmentation too: both subtitle routes gate on
+        // the same hosted feature, and per-block re-resolution would cost a
+        // hostedAi.status round trip per look-ahead window.
+        providerRef,
         preSegmented: this.fetcher.isPreSegmented?.(),
         onChunkSegmented: (chunk, nextFragments) => {
           if (chunk.length === 0 || !chunk[0]) return
@@ -785,7 +803,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       onStateChange: (state, data) => scheduler.setState(state, data),
     })
     this.translationCoordinator.start(videoContext)
-    const summaryContextHash = buildSubtitlesSummaryContextHash(videoContext, providerConfig)
+    const summaryContextHash = buildSubtitlesSummaryContextHash(
+      videoContext,
+      providerRef ?? undefined,
+    )
     this.subtitlesSummaryContextHash = summaryContextHash ?? null
 
     void fetchSubtitlesSummary(videoContext).then((summary) => {

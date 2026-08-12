@@ -1,10 +1,10 @@
 // Keep the persisted provider ID stable so existing user configurations continue to work.
 export const BUILT_IN_AI_PROVIDER_ID = "read-frog-free-ai"
-export const BUILT_IN_AI_ULTRA_PROVIDER_ID = "read-frog-ultra-ai"
+export const BUILT_IN_AI_ADVANCE_PROVIDER_ID = "read-frog-advance-ai"
 
 export const BUILT_IN_AI_PROVIDER_IDS = [
   BUILT_IN_AI_PROVIDER_ID,
-  BUILT_IN_AI_ULTRA_PROVIDER_ID,
+  BUILT_IN_AI_ADVANCE_PROVIDER_ID,
 ] as const
 
 export type BuiltInAiProviderId = (typeof BUILT_IN_AI_PROVIDER_IDS)[number]

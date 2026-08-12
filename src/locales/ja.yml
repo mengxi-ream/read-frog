@@ -144,6 +144,9 @@ options:
         customAction: カスタム AI アクション
         noteSuggestion: ノートの提案
         selectionTranslation: 選択範囲の翻訳
+        videoSubtitles: 動画字幕
+        inputTranslation: 入力翻訳
+        languageDetection: 言語検出
     sponsorCta: 高速で高コスパのAIを入手
     setApiKeyWarning:
       message: API キーは $1 ページで設定してください
@@ -178,6 +181,7 @@ options:
         confirm: 削除
         cancel: キャンセル
       atLeastOneLLMProvider: 最低1つのLLM翻訳プロバイダーが必要です。
+      featureWouldLoseProvider: "削除できません:「$1」を実行できるプロバイダーがなくなります。"
       duplicateProviderName: '重複するプロバイダー名 "$1"'
       defaultProvider:
         translate: デフォルト翻訳プロバイダーに設定
@@ -223,12 +227,12 @@ options:
     providers:
       name:
         builtInAi: 組み込み AI
-        builtInAiUltra: 高度な組み込み AI
+        builtInAiAdvance: 高度な組み込み AI
         customChatComplete: カスタム Chat Complete
         customResponses: カスタム Responses
       attribution:
         builtInAi: Read Frog がホストする標準モデル。Ultra 以外のユーザーはカスタム AI アクションでのみ利用でき、Ultra ユーザーはより多くの機能で利用できます。
-        builtInAiUltra: Read Frog がホストする高性能モデルで、Ultra メンバー専用です。ページ翻訳やカスタム AI アクションなど、すべての組み込み AI 機能で利用でき、週間クォータを共有します。標準モデルよりクォータの消費が速くなります。
+        builtInAiAdvance: Read Frog がホストする高性能モデルで、Ultra メンバー専用です。ページ翻訳やカスタム AI アクションなど、すべての組み込み AI 機能で利用でき、週間クォータを共有します。標準モデルよりクォータの消費が速くなります。
       description:
         openai: GPT-4oなどのモデルを提供
         azure: Azure のデプロイ経由で OpenAI モデルを利用
@@ -287,7 +291,7 @@ options:
         noteSuggestion: 選択テキストを翻訳した後、Notebase に保存する価値のある単語を提案します。
     languageDetection:
       title: 言語検出
-      description: 自動翻訳の言語検出、スキップ言語検出、読み上げの音声選択精度に影響します。
+      description: 自動翻訳の言語検出と読み上げの音声選択精度に影響します。
       mode:
         basic: 基本
         llm: LLM
@@ -1157,7 +1161,7 @@ subtitles:
     translatedExportSameLanguage: 元の言語と翻訳先の言語が同じです
 hostedAi:
   ultraBadge:
-    tooltip: Ultra プランへの加入が必要です
+    tooltip: Ultra プランへの加入が必要です · バッジをクリックしてプランを取得
   availability:
     authenticationRequired: ログインすると利用できます
     ultraRequired: Ultra プランが必要です

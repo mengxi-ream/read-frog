@@ -56,11 +56,11 @@ import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-contex
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
 import {
-  checkPageTranslationProviderAvailability,
-  isSystemTranslationProvider,
+  checkProviderAvailability,
+  isSystemProviderRef,
   resolvePageTranslationProvider,
   resolvePageTranslationProviderOrNull,
-} from "@/utils/providers/translation-provider"
+} from "@/utils/providers/provider-ref"
 import { removeReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
 import { isTranslationCancelledError } from "@/utils/request/cancellation"
 import { createWorkPacer } from "@/utils/scheduler"
@@ -222,7 +222,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     const requestedProviderConfig = resolvePageTranslationProviderOrNull(config)
     const providerAnalytics =
-      requestedProviderConfig && isSystemTranslationProvider(requestedProviderConfig)
+      requestedProviderConfig && isSystemProviderRef(requestedProviderConfig)
         ? BUILT_IN_AI_FEATURE_PROVIDER
         : classifyProviderConfig(requestedProviderConfig)
 
@@ -247,7 +247,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     // explicit guard for type-safety and for malformed storage snapshots.
     if (!requestedProviderConfig) return
 
-    const availability = await checkPageTranslationProviderAvailability(requestedProviderConfig)
+    const availability = await checkProviderAvailability(requestedProviderConfig, "pageTranslation")
     if (this.pendingStart !== startToken) {
       return
     }
@@ -301,10 +301,15 @@ export class PageTranslationManager implements IPageTranslationManager {
         void ensureSiteRuleCSS(document, siteRule.injectedCss)
       }
 
+      // Must match the predicate `getWebPagePromptContext` uses to decide
+      // whether it needs the context at all. Excluding system providers was
+      // right while hosted runs sent no context; now that they do, skipping the
+      // warm-up only moves the Defuddle full-document parse out of setup and
+      // into the first translation call, where it blocks the first visible
+      // paragraph and janks the main thread on a long page.
       await this.primeDocumentTitleContext(
         config.pageTranslation.enableAIContentAware &&
-          !isSystemTranslationProvider(providerConfig) &&
-          isLLMProviderConfig(providerConfig),
+          (isSystemProviderRef(providerConfig) || isLLMProviderConfig(providerConfig)),
       )
       if (this.translationSessionVersion !== sessionVersion) {
         return

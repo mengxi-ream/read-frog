@@ -1,17 +1,28 @@
+import type { FeatureKey } from "@/utils/constants/feature-providers"
 import { useAtom, useAtomValue } from "jotai"
 import { useMemo } from "react"
+import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-status"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
-import { getProviderConfigById } from "@/utils/config/helpers"
-import {
-  FEATURE_KEYS,
-  FEATURE_PROVIDER_DEFS,
-  getFeatureLabelI18nKey,
-} from "@/utils/constants/feature-providers"
+import { FEATURE_PROVIDER_DEFS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
 import { i18n } from "@/utils/i18n"
+import { isProviderIdDurablyUnusable } from "@/utils/providers/provider-availability"
+import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
+
+/**
+ * Only the features whose prompts change with the smart-context flag. Note
+ * suggestion always sends raw page context regardless of the flag, so it has
+ * no status to report here.
+ */
+const CONTEXT_AWARE_FEATURE_KEYS = [
+  "pageTranslation",
+  "videoSubtitles",
+  "selectionTranslation",
+  "inputTranslation",
+] as const satisfies readonly FeatureKey[]
 
 /**
  * Context only reaches a feature whose provider can read it, so each feature reports on its own
@@ -20,14 +31,26 @@ import { ConfigSection } from "../../../components/config-section"
 function FeatureStatusList() {
   const config = useAtomValue(configAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const { status } = useHostedAiStatus()
 
   const statuses = useMemo(
     () =>
-      FEATURE_KEYS.map((featureKey) => {
+      CONTEXT_AWARE_FEATURE_KEYS.map((featureKey) => {
         const providerId = FEATURE_PROVIDER_DEFS[featureKey].getProviderId(config)
-        const providerConfig = getProviderConfigById(providersConfig, providerId)
+        // Capability-based: Built-in AI is synthesized by the registry and is
+        // never a row in providersConfig, so a direct providersConfig lookup
+        // would report it as unconfigured forever.
+        const providerRef = resolveProviderRefForCapability(featureKey, providersConfig, providerId)
         const featureName = i18n.t(getFeatureLabelI18nKey(featureKey))
-        const hasLLMProvider = providerConfig ? isLLMProviderConfig(providerConfig) : false
+        // Context reaches the prompt only on prompt-driven providers: hosted
+        // Built-in AI or a local LLM — never pure translate (Google, DeepL…).
+        // A `kind === "system"` check alone answers "is it prompt-driven", not
+        // "does it run", so it reported every feature configured for accounts
+        // whose plan funds none of them — signed-out guests included.
+        const hasLLMProvider = providerRef
+          ? (providerRef.kind === "system" || isLLMProviderConfig(providerRef.config)) &&
+            !isProviderIdDurablyUnusable(providerId, featureKey, status)
+          : false
 
         return {
           featureKey,
@@ -37,7 +60,7 @@ function FeatureStatusList() {
             : i18n.t("options.apiProviders.aiContentAware.llmProviderNotConfigured", [featureName]),
         }
       }),
-    [config, providersConfig],
+    [config, providersConfig, status],
   )
 
   return (

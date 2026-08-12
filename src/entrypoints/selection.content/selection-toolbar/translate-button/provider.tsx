@@ -9,6 +9,7 @@ import type { SelectionToolbarInlineError } from "../inline-error"
 import type { SelectionPopoverActions } from "@/components/ui/selection-popover"
 import type { BackgroundTextStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
 import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
+import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
 import type { SystemProviderRef } from "@/utils/providers/provider-registry"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { HotkeyManager } from "@tanstack/hotkeys"
@@ -46,6 +47,7 @@ import {
 import { getTranslatePromptFromConfig } from "@/utils/prompts/translate"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
+import { checkProviderAvailability } from "@/utils/providers/provider-ref"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { getTopLevelReasoning } from "@/utils/providers/reasoning"
 import { shadowWrapper } from "../.."
@@ -79,8 +81,14 @@ interface SelectionTranslatePendingOpenRequest {
     | typeof ANALYTICS_SURFACE.SHORTCUT
 }
 
+/**
+ * Page context for the selection prompt. `summaryProviderRef` is the provider
+ * the (cached, smart-context-gated) page summary runs on — hosted and local
+ * LLM refs both work; pass null to skip the summary while keeping the raw
+ * context (pure translate providers, hosted tier unavailable).
+ */
 async function getSelectionWebPagePromptContext(
-  providerConfig: ProviderConfig,
+  summaryProviderRef: SerializableProviderRef | null,
   enableAIContentAware: boolean,
 ) {
   const webPageContext = await getOrCreateWebPageContext()
@@ -88,11 +96,14 @@ async function getSelectionWebPagePromptContext(
     return undefined
   }
 
-  const webSummary = await getOrGenerateWebPageSummary(
-    webPageContext,
-    providerConfig,
-    enableAIContentAware,
-  )
+  const webSummary = summaryProviderRef
+    ? await getOrGenerateWebPageSummary(
+        webPageContext,
+        summaryProviderRef,
+        enableAIContentAware,
+        "selectionTranslation",
+      )
+    : null
   return {
     webTitle: webPageContext.webTitle,
     webDescription: webPageContext.webDescription,
@@ -136,7 +147,7 @@ async function translateWithTextStream({
   }
 
   const webPageContext = await getSelectionWebPagePromptContext(
-    providerConfig,
+    { kind: "local", config: providerConfig },
     translateRequest.enableAIContentAware,
   )
   throwIfAborted()
@@ -194,10 +205,20 @@ async function translateWithHostedTextStream({
   const abortController = new AbortController()
   registerAbortController(abortController)
 
-  // No web summary for hosted runs: summary generation needs a local LLM
-  // provider config, and a system ref has none. Raw page context still rides
-  // along for prompt quality.
-  const webPageContext = await getOrCreateWebPageContext()
+  // Smart context on hosted runs mirrors the BYOK LLM path: the summary is
+  // generated (and cached per page + provider) on the same Built-in AI
+  // provider. Fail soft — a summary the tier cannot fund degrades to raw
+  // context instead of blocking the translation, whose own stream surfaces
+  // the real error.
+  let summaryProviderRef: SerializableProviderRef | null = null
+  if (translateRequest.enableAIContentAware) {
+    const availability = await checkProviderAvailability(provider, "selectionTranslation")
+    summaryProviderRef = availability.available ? availability.providerRef : null
+  }
+  const webPageContext = await getSelectionWebPagePromptContext(
+    summaryProviderRef,
+    translateRequest.enableAIContentAware,
+  )
   if (abortController.signal.aborted) {
     throw new DOMException("aborted", "AbortError")
   }
@@ -213,7 +234,7 @@ async function translateWithHostedTextStream({
               webTitle: webPageContext.webTitle,
               webDescription: webPageContext.webDescription,
               webContent: webPageContext.webContent,
-              webSummary: undefined,
+              webSummary: webPageContext.webSummary,
             },
           }
         : {}),
@@ -245,14 +266,19 @@ async function translateWithStandardProvider({
   providerConfig: ProviderConfig
   translateRequest: SelectionToolbarTranslateRequestSlice
 }) {
+  // This path is reached only for pure translate providers (the dispatch sends
+  // system refs to the hosted stream and local LLMs to the text stream), and
+  // those take no prompt — requesting a summary for them was a doomed queue
+  // task that could never generate text.
   const webPageContext = await getSelectionWebPagePromptContext(
-    providerConfig,
+    null,
     translateRequest.enableAIContentAware,
   )
   const translatedText = await translateTextCore({
     text,
     langConfig: translateRequest.language,
     providerConfig,
+    hostedFeature: "selectionTranslation",
     enableAIContentAware: translateRequest.enableAIContentAware,
     extraHashTags: ["selectionTranslation"],
     webPageContext,
