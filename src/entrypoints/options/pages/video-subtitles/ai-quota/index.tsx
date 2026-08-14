@@ -2,7 +2,7 @@ import type { VideoTranscriptUsage, VideoTranscriptUsagePool } from "@read-frog/
 import { ORPCError } from "@orpc/client"
 import { useQuery } from "@tanstack/react-query"
 import { Button } from "@/components/ui/base-ui/button"
-import { Progress } from "@/components/ui/base-ui/progress"
+import { Progress, ProgressLabel } from "@/components/ui/base-ui/progress"
 import { Skeleton } from "@/components/ui/base-ui/skeleton"
 import { openLogIn } from "@/components/user-account-menu/shared"
 import { env } from "@/env"
@@ -154,7 +154,7 @@ function QuotaUsage({ usage }: { usage: VideoTranscriptUsage }) {
       ]
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       {pools.map((pool) => (
         <QuotaPoolUsage key={pool.id} pool={pool} />
       ))}
@@ -162,16 +162,26 @@ function QuotaUsage({ usage }: { usage: VideoTranscriptUsage }) {
   )
 }
 
+/**
+ * Typography and rhythm mirror the Built-in AI usage panel: the pool name and
+ * the remaining count share the Progress header row, the track fill is what is
+ * LEFT (a fresh pool reads as a full bar), and the metadata line below carries
+ * the spent minutes and the pool's one meaningful date at text-xs.
+ */
 function QuotaPoolUsage({ pool }: { pool: VideoTranscriptUsagePool }) {
   const { usedMinutes, limitMinutes, remainingMinutes } = pool
-  const ratio = limitMinutes > 0 ? usedMinutes / limitMinutes : 0
-  const percent = Math.min(100, Math.max(0, ratio * 100))
-  const isNearLimit = ratio >= NEAR_LIMIT_RATIO
+  const remainingRatio = limitMinutes > 0 ? remainingMinutes / limitMinutes : 0
+  const remainingPercent = Math.min(100, Math.max(0, remainingRatio * 100))
+  const isNearLimit = remainingRatio <= 1 - NEAR_LIMIT_RATIO
 
   const label =
     pool.id === "launchBonus"
       ? i18n.t("options.videoSubtitles.aiQuota.pools.launchBonus")
       : i18n.t("options.videoSubtitles.aiQuota.pools.subscription")
+  const remainingText = i18n.t("options.videoSubtitles.aiQuota.remainingOf", [
+    remainingMinutes,
+    limitMinutes,
+  ])
   // The monthly pool resets; the one-time gift only expires. Show whichever
   // date the pool actually has.
   const resetAt = pool.resetAt ? formatLocalDate(pool.resetAt) : null
@@ -183,22 +193,25 @@ function QuotaPoolUsage({ pool }: { pool: VideoTranscriptUsagePool }) {
       : null
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-baseline justify-between gap-2">
-        <span className="text-sm font-medium">{label}</span>
-        {dateNote && <span className="text-xs text-muted-foreground">{dateNote}</span>}
-      </div>
+    <div className="flex flex-col gap-1.5">
       <Progress
-        value={percent}
-        className={cn(isNearLimit && "[&_[data-slot=progress-indicator]]:bg-destructive")}
-      />
-      <p className="text-sm text-muted-foreground tabular-nums">
-        {i18n.t("options.videoSubtitles.aiQuota.summary", [
-          usedMinutes,
-          limitMinutes,
-          remainingMinutes,
-        ])}
-      </p>
+        value={remainingPercent}
+        className={cn(
+          "gap-x-3 gap-y-1.5",
+          isNearLimit && "[&_[data-slot=progress-indicator]]:bg-destructive",
+        )}
+        // Announce "X of Y min left", not a bare percentage that reads as consumption.
+        getAriaValueText={() => remainingText}
+      >
+        <ProgressLabel>{label}</ProgressLabel>
+        <span className="ml-auto text-xs text-muted-foreground tabular-nums">{remainingText}</span>
+      </Progress>
+      <div className="flex flex-wrap items-center justify-between gap-x-3 text-xs text-muted-foreground">
+        <span className="tabular-nums">
+          {i18n.t("options.videoSubtitles.aiQuota.used", [usedMinutes])}
+        </span>
+        {dateNote && <span>{dateNote}</span>}
+      </div>
     </div>
   )
 }

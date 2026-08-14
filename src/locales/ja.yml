@@ -960,7 +960,8 @@ options:
       resetsOn: $1 にリセット
       expiresOn: $1 に失効
       loadError: 利用枠を読み込めませんでした。しばらくしてから再試行してください。
-      summary: $2 分中 $1 分を使用、残り $3 分
+      remainingOf: 残り $1 / $2 分
+      used: 使用済み $1 分
     style:
       title: 字幕スタイル
       description: 表示モード・位置・フォント・色・背景を、プレビューを見ながら設定します

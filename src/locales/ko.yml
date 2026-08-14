@@ -960,7 +960,8 @@ options:
       resetsOn: $1에 초기화
       expiresOn: $1에 만료
       loadError: 사용량을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.
-      summary: $2분 중 $1분 사용, $3분 남음
+      remainingOf: 남은 시간 $1 / $2분
+      used: $1분 사용됨
     style:
       title: 자막 스타일
       description: 표시 모드, 위치, 글꼴, 색상, 배경을 미리보기로 확인하며 설정합니다

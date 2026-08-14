@@ -960,7 +960,8 @@ options:
       resetsOn: $1 tarihinde sıfırlanır
       expiresOn: $1 tarihinde sona erer
       loadError: Kotanız yüklenemedi. Lütfen daha sonra tekrar deneyin.
-      summary: $2 dakikanın $1 dakikası kullanıldı, $3 kaldı
+      remainingOf: $1 / $2 dk kaldı
+      used: $1 dk kullanıldı
     style:
       title: Altyazı stili
       description: Görüntüleme modu, konum, yazı tipleri, renkler ve arka plan — canlı önizlemeye bakarak ayarlanır

@@ -1076,7 +1076,8 @@ options:
       resetsOn: $1 重置
       expiresOn: $1 过期
       loadError: 无法加载额度，请稍后重试。
-      summary: 已用 $1 分钟 / 共 $2 分钟，剩余 $3 分钟
+      remainingOf: 剩余 $1 / $2 分钟
+      used: 已用 $1 分钟
     style:
       title: 字幕样式
       description: 显示模式、位置、字体、颜色和背景，都对着预览调

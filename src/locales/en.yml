@@ -1076,7 +1076,8 @@ options:
       resetsOn: Resets on $1
       expiresOn: Expires on $1
       loadError: Unable to load your quota. Please try again later.
-      summary: Used $1 of $2 minutes, $3 remaining
+      remainingOf: $1 / $2 min left
+      used: Used $1 min
     style:
       title: Subtitle style
       description: Display mode, position, fonts, colors and background, set against a live preview

@@ -1076,7 +1076,8 @@ options:
       resetsOn: Se restablece el $1
       expiresOn: Caduca el $1
       loadError: No se pudo cargar tu cuota. Inténtalo de nuevo más tarde.
-      summary: Usados $1 de $2 minutos, quedan $3
+      remainingOf: Quedan $1 / $2 min
+      used: Usados $1 min
     style:
       title: Estilo de subtítulos
       description: Modo de visualización, posición, fuentes, colores y fondo, ajustados sobre una vista previa en vivo

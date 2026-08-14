@@ -960,7 +960,8 @@ options:
       resetsOn: Đặt lại vào $1
       expiresOn: Hết hạn vào $1
       loadError: Không thể tải hạn mức. Vui lòng thử lại sau.
-      summary: Đã dùng $1 trong $2 phút, còn lại $3
+      remainingOf: Còn $1 / $2 phút
+      used: Đã dùng $1 phút
     style:
       title: Kiểu phụ đề
       description: Chế độ hiển thị, vị trí, phông chữ, màu sắc và nền, chỉnh ngay trên bản xem trước
