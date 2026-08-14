@@ -749,6 +749,7 @@
       "yt-formatted-string.ytd-video-renderer",
       "yt-formatted-string#content-text",
       "h1",
+      "yt-formatted-string.ytd-watch-metadata",
       "yt-formatted-string#video-title",
       ".ytLockupMetadataViewModelTitle,.shortsLockupViewModelHostOutsideMetadataTitle",
       "yt-formatted-string.span",
