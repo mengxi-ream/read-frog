@@ -1065,11 +1065,10 @@ options:
         description: Lets AI re-cut the subtitles into lines that read as sentences. It sets their timing too, so lines can drift out of sync. Needs an LLM translation provider.
     aiQuota:
       title: AI subtitles quota
-      description: Monthly usage of your AI subtitle transcription quota
+      description: AI speech recognition gets you accurate subtitles for any video
+      launchBonusPromo: Subscribe before $1 for an extra 300 transcription minutes
       loginRequired: Log in to view your AI subtitles quota
-      logIn: Log in
       upgradeRequired: AI subtitles require a Pro or Ultra subscription
-      upgrade: Upgrade
       pools:
         subscription: Monthly quota
         launchBonus: Launch gift
@@ -1221,6 +1220,7 @@ action:
   saveToNotebasePendingLoginDescription: After login, Read Frog will create the Notebase and save this result automatically.
   saveToNotebasePendingConnectedLoginDescription: After login, Read Frog will save to the connected Notebase when possible. If this account cannot use it, Read Frog will create a new Notebase and save this result.
   upgrade: Upgrade
+  updatePayment: Update payment
   openCustomActions: Open Custom AI Actions
   openNotebase: Open Notebase
   contextDetailsTitleLabel: Title
@@ -1276,6 +1276,8 @@ subtitles:
     aiAuthFailed: API authentication failed, please check your API key
     aiServiceUnavailable: Translation service temporarily unavailable
     aiQuotaExceeded: Monthly AI subtitle quota used up
+    aiQuotaExceededWithReset: Monthly AI subtitle quota used up · resets on $1
+    aiLoginRequired: Log in to generate AI subtitles
     aiSubscriptionRequired: AI subtitles require a Pro or Ultra subscription
     aiPaymentRequired: Update your payment method to keep generating AI subtitles
     aiVideoTooLong: This video is too long for AI subtitles

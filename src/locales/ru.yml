@@ -949,11 +949,10 @@ options:
         description: ИИ заново режет субтитры на строки, читающиеся как предложения. Тайминг он задаёт сам, поэтому строки могут расходиться с речью. Нужен LLM-провайдер перевода.
     aiQuota:
       title: Лимит ИИ-субтитров
-      description: Использование вашего месячного лимита транскрипции ИИ-субтитров
+      description: ИИ распознаёт речь и создаёт точные субтитры для любого видео
+      launchBonusPromo: Оформите подписку до $1 и получите дополнительно 300 минут расшифровки
       loginRequired: Войдите, чтобы посмотреть лимит ИИ-субтитров
-      logIn: Войти
       upgradeRequired: Для ИИ-субтитров нужна подписка Pro или Ultra
-      upgrade: Улучшить план
       pools:
         subscription: Месячная квота
         launchBonus: Подарок к запуску
@@ -1105,6 +1104,7 @@ action:
   saveToNotebasePendingLoginDescription: После входа Read Frog автоматически создаст Notebase и сохранит этот результат.
   saveToNotebasePendingConnectedLoginDescription: После входа Read Frog сохранит в подключённую Notebase, если это возможно. Если аккаунт не может её использовать, будет создана новая Notebase.
   upgrade: Повысить тариф
+  updatePayment: Обновить оплату
   openCustomActions: Открыть Custom AI Actions
   openNotebase: Открыть Notebase
   contextDetailsTitleLabel: Заголовок
@@ -1160,6 +1160,8 @@ subtitles:
     aiAuthFailed: Ошибка аутентификации API, проверьте ваш API ключ
     aiServiceUnavailable: Служба перевода временно недоступна
     aiQuotaExceeded: Месячный лимит ИИ-субтитров исчерпан
+    aiQuotaExceededWithReset: Месячный лимит ИИ-субтитров исчерпан · сброс $1
+    aiLoginRequired: Войдите, чтобы создавать ИИ-субтитры
     aiSubscriptionRequired: Для ИИ-субтитров нужна подписка Pro или Ultra
     aiPaymentRequired: Обновите способ оплаты, чтобы продолжить создание ИИ-субтитров
     aiVideoTooLong: Это видео слишком длинное для ИИ-субтитров

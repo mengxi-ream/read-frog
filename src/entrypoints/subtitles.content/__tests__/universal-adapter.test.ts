@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { SUBTITLES_SOURCE } from "@/utils/constants/subtitles"
+import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
 import {
   adPlayingAtom,
   currentTimeMsAtom,
@@ -16,6 +17,11 @@ const mocks = vi.hoisted(() => ({
   fetchSubtitlesSummary: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
   translateSubtitles: vi.fn<(...args: any[]) => any>(),
   resolveSubtitlesProviderRef: vi.fn<(...args: any[]) => any>(),
+  showSubtitlesErrorToast: vi.fn<(...args: any[]) => any>(),
+}))
+
+vi.mock("@/utils/subtitles/toast", () => ({
+  showSubtitlesErrorToast: mocks.showSubtitlesErrorToast,
 }))
 
 vi.mock("@/utils/config/storage", async (importOriginal) => {
@@ -246,6 +252,70 @@ describe("universalVideoAdapter", () => {
     attachScheduler(adapter, true)
 
     await expect((adapter as any).startTranslation()).resolves.toBe(false)
+  })
+
+  // The loading state has no auto-hide of its own, so a wall that only raises a
+  // toast used to leave "Loading AI subtitles" pinned to the player forever.
+  it("clears the loading state and forwards the action when a toast error is raised", async () => {
+    const { adapter, subtitlesFetcher } = createAdapter([])
+    const action = { label: "action.upgrade", url: "https://readfrog.app/pricing" }
+    subtitlesFetcher.fetch.mockRejectedValue(
+      new ToastSubtitlesError("subtitles.errors.aiSubscriptionRequired", action),
+    )
+    const scheduler = attachScheduler(adapter, true)
+
+    await expect((adapter as any).startTranslation()).resolves.toBe(false)
+
+    expect(scheduler.setState).toHaveBeenLastCalledWith("idle")
+    expect(mocks.showSubtitlesErrorToast).toHaveBeenCalledWith(
+      "subtitles.errors.aiSubscriptionRequired",
+      action,
+    )
+  })
+
+  it("raises a toast without an action when the error carries none", async () => {
+    const { adapter, subtitlesFetcher } = createAdapter([])
+    subtitlesFetcher.fetch.mockRejectedValue(
+      new ToastSubtitlesError("subtitles.errors.aiVideoTooLong"),
+    )
+    attachScheduler(adapter, true)
+
+    await expect((adapter as any).startTranslation()).resolves.toBe(false)
+
+    expect(mocks.showSubtitlesErrorToast).toHaveBeenCalledWith(
+      "subtitles.errors.aiVideoTooLong",
+      undefined,
+    )
+  })
+
+  // A superseded switch or a navigation rejects with DOMException("Aborted"),
+  // whose message is not user copy and must never be painted on the player.
+  it("stays silent when the run was aborted", async () => {
+    const { adapter, subtitlesFetcher } = createAdapter([])
+    subtitlesFetcher.fetch.mockRejectedValue(new DOMException("Aborted", "AbortError"))
+    const scheduler = attachScheduler(adapter, true)
+
+    await expect((adapter as any).startTranslation()).resolves.toBe(false)
+
+    expect(mocks.showSubtitlesErrorToast).not.toHaveBeenCalled()
+    expect(scheduler.setState).not.toHaveBeenCalledWith("error", expect.anything())
+  })
+
+  // The overlay path already replaces the loading state and auto-hides itself;
+  // resetting it here would wipe the message the user needs to read.
+  it("keeps rendering overlay errors on the player instead of toasting them", async () => {
+    const { adapter, subtitlesFetcher } = createAdapter([])
+    subtitlesFetcher.fetch.mockRejectedValue(
+      new OverlaySubtitlesError("subtitles.errors.aiRequestFailed"),
+    )
+    const scheduler = attachScheduler(adapter, true)
+
+    await expect((adapter as any).startTranslation()).resolves.toBe(false)
+
+    expect(scheduler.setState).toHaveBeenLastCalledWith("error", {
+      message: "subtitles.errors.aiRequestFailed",
+    })
+    expect(mocks.showSubtitlesErrorToast).not.toHaveBeenCalled()
   })
 
   it("reverts the source back to native so a failed AI switch can be retried", () => {

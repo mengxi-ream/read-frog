@@ -949,11 +949,10 @@ options:
         description: AI が字幕を文として読める形に切り直します。タイミングも AI が決めるため、字幕がずれることがあります。LLM 翻訳プロバイダーが必要です。
     aiQuota:
       title: AI字幕の利用枠
-      description: 今月のAI字幕文字起こし利用枠の使用状況
+      description: AIの音声認識で、どんな動画にも正確な字幕を生成します
+      launchBonusPromo: $1 までに加入すると、文字起こし 300 分を追加でプレゼント
       loginRequired: ログインしてAI字幕の利用枠を確認
-      logIn: ログイン
       upgradeRequired: AI字幕には Pro または Ultra プランが必要です
-      upgrade: アップグレード
       pools:
         subscription: 月間クォータ
         launchBonus: リリース記念ギフト
@@ -1105,6 +1104,7 @@ action:
   saveToNotebasePendingLoginDescription: ログイン後、Read Frog が Notebase を作成し、この結果を自動で保存します。
   saveToNotebasePendingConnectedLoginDescription: ログイン後、Read Frog は可能であれば接続済み Notebase に保存します。このアカウントで利用できない場合は、新しい Notebase を作成して保存します。
   upgrade: アップグレード
+  updatePayment: 支払いを更新
   openCustomActions: Custom AI Actions を開く
   openNotebase: Notebase を開く
   contextDetailsTitleLabel: タイトル
@@ -1160,6 +1160,8 @@ subtitles:
     aiAuthFailed: API認証に失敗しました。APIキーを確認してください
     aiServiceUnavailable: 翻訳サービスは一時的に利用できません
     aiQuotaExceeded: 今月のAI字幕の利用枠を使い切りました
+    aiQuotaExceededWithReset: 今月のAI字幕の利用枠を使い切りました・$1 にリセット
+    aiLoginRequired: AI字幕を生成するにはログインしてください
     aiSubscriptionRequired: AI字幕には Pro または Ultra プランが必要です
     aiPaymentRequired: AI字幕の生成を続けるにはお支払い方法を更新してください
     aiVideoTooLong: この動画は長すぎるためAI字幕を生成できません

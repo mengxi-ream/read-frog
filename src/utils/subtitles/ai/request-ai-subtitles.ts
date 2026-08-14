@@ -1,11 +1,12 @@
 import type { VideoTranscriptStatus } from "@read-frog/api-contract"
+import type { SubtitlesError } from "@/utils/subtitles/errors"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
-import { ORPCError, safe } from "@orpc/client"
-import { env } from "@/env"
+import { safe } from "@orpc/client"
 import { i18n } from "@/utils/i18n"
-import { sendMessage } from "@/utils/message"
+import { isORPCPublicAppError } from "@/utils/notebase/errors"
 import { orpcClient } from "@/utils/orpc/client"
 import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
+import { billingAction, upgradeAction } from "./entitlement"
 
 export interface AiSubtitlesContext {
   videoId: string
@@ -41,6 +42,44 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+/**
+ * Turns a transcription endpoint's refusal into something the player can say.
+ * Shared by `create`, the poll's `get` and `getSubtitles` — all three are
+ * behind the same entitlement middleware, so any of them can answer with the
+ * plan wall once a subscription lapses mid-flight.
+ *
+ * Walls the user can act on become toasts carrying a button; everything else
+ * is an overlay. Nothing here navigates on its own.
+ */
+function mapTranscriptError(error: unknown): SubtitlesError {
+  if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPTION_SUBSCRIPTION_REQUIRED")) {
+    return new ToastSubtitlesError(
+      i18n.t("subtitles.errors.aiSubscriptionRequired"),
+      upgradeAction(),
+    )
+  }
+  if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPTION_PAYMENT_REQUIRED")) {
+    return new ToastSubtitlesError(i18n.t("subtitles.errors.aiPaymentRequired"), billingAction())
+  }
+  if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPTION_QUOTA_EXCEEDED")) {
+    // The pre-flight normally catches this and can name the reset date; by the
+    // time the server refuses, only it knows the remainder and we do not.
+    return new ToastSubtitlesError(i18n.t("subtitles.errors.aiQuotaExceeded"), upgradeAction())
+  }
+  if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPTION_UNSUPPORTED_LENGTH")) {
+    // A property of the video, not of the account — no upgrade and no waiting
+    // for the quota to reset makes this one work, so offer neither.
+    return new ToastSubtitlesError(i18n.t("subtitles.errors.aiVideoTooLong"))
+  }
+  if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPT_NOT_READY")) {
+    // The job is fine, the file just is not written yet.
+    return new ToastSubtitlesError(i18n.t("subtitles.errors.aiStillProcessing"))
+  }
+  // NOT_FOUND and everything else: a real failure — and never the server's
+  // untranslated English, which is what an unmapped ORPCError would render.
+  return new OverlaySubtitlesError(i18n.t("subtitles.errors.aiRequestFailed"))
+}
+
 function throwIfAborted(signal: AbortSignal | undefined): void {
   if (signal?.aborted) {
     throw new DOMException("Aborted", "AbortError")
@@ -67,7 +106,10 @@ async function pollUntilCompleted(
     await sleep(POLL_INTERVAL_MS)
     throwIfAborted(signal)
 
-    const job: VideoTranscriptJob = await orpcClient.videoTranscript.get({ id: initial.id })
+    const { error, data: job } = await safe(orpcClient.videoTranscript.get({ id: initial.id }))
+    if (error) {
+      throw mapTranscriptError(error)
+    }
     if (job.status === "completed") {
       return job
     }
@@ -93,42 +135,23 @@ export async function requestAiSubtitles(
 
   const { error, data } = await safe(orpcClient.videoTranscript.create({ url, durationSec }))
   if (error) {
-    // Only sign-in is pre-checked before create; the plan wall and the quota
-    // wall are server decisions surfaced here by error code.
-    if (error instanceof ORPCError && error.code === "VIDEO_TRANSCRIPTION_QUOTA_EXCEEDED") {
-      throw new ToastSubtitlesError(i18n.t("subtitles.errors.aiQuotaExceeded"))
-    }
-    if (error instanceof ORPCError && error.code === "VIDEO_TRANSCRIPTION_SUBSCRIPTION_REQUIRED") {
-      // Content scripts cannot use chrome.tabs — route through the background.
-      void sendMessage("openPage", {
-        url: new URL("/pricing", env.WXT_WEBSITE_URL).toString(),
-        active: true,
-      })
-      throw new ToastSubtitlesError(i18n.t("subtitles.errors.aiSubscriptionRequired"))
-    }
-    if (error instanceof ORPCError && error.code === "VIDEO_TRANSCRIPTION_PAYMENT_REQUIRED") {
-      // Dunning, not cancellation: they already pay, the card just failed. Send
-      // them to the app (billing lives in its settings dialog) rather than to
-      // pricing, which would invite an existing subscriber to subscribe again.
-      void sendMessage("openPage", {
-        url: new URL("/home", env.WXT_WEBSITE_URL).toString(),
-        active: true,
-      })
-      throw new ToastSubtitlesError(i18n.t("subtitles.errors.aiPaymentRequired"))
-    }
-    if (error instanceof ORPCError && error.code === "VIDEO_TRANSCRIPTION_UNSUPPORTED_LENGTH") {
-      // A property of the video, not of the account — no upgrade and no waiting
-      // for the quota to reset makes this one work, so offer neither.
-      throw new ToastSubtitlesError(i18n.t("subtitles.errors.aiVideoTooLong"))
-    }
-    throw new OverlaySubtitlesError(i18n.t("subtitles.errors.aiRequestFailed"))
+    // Sign-in, plan and quota are pre-checked before create is called, so the
+    // walls reaching here are races (a subscription that lapsed since the
+    // pre-flight) and the codes the pre-flight cannot see, like an unsupported
+    // video length.
+    throw mapTranscriptError(error)
   }
 
   const completed = await pollUntilCompleted(data, durationSec, signal)
 
   throwIfAborted(signal)
 
-  const subtitles = await orpcClient.videoTranscript.getSubtitles({ id: completed.id })
+  const { error: subtitlesError, data: subtitles } = await safe(
+    orpcClient.videoTranscript.getSubtitles({ id: completed.id }),
+  )
+  if (subtitlesError) {
+    throw mapTranscriptError(subtitlesError)
+  }
 
   const segments: SubtitlesFragment[] = subtitles.segments.map(
     (segment: { start: number; end: number; text: string }) => ({

@@ -1065,11 +1065,10 @@ options:
         description: 讓 AI 把字幕重新切成讀起來完整的句子。時間軸也由 AI 判斷，可能出現錯位。需要設定 LLM 翻譯服務。
     aiQuota:
       title: AI 字幕額度
-      description: 你帳號本月的 AI 字幕轉寫額度使用情況
+      description: AI 利用語音轉文字技術取得任何影片的準確字幕
+      launchBonusPromo: $1 之前購買會員額外贈送 300 分鐘轉錄額度
       loginRequired: 登入後查看你的 AI 字幕額度
-      logIn: 登入
       upgradeRequired: AI 字幕需要 Pro 或 Ultra 訂閱
-      upgrade: 升級
       pools:
         subscription: 每月額度
         launchBonus: 上線贈送
@@ -1221,6 +1220,7 @@ action:
   saveToNotebasePendingLoginDescription: 登入完成後，陪讀蛙會自動建立筆記庫並儲存目前結果。
   saveToNotebasePendingConnectedLoginDescription: 登入完成後，陪讀蛙會優先儲存到已連線的筆記庫；如果目前帳號無法使用它，會建立新的筆記庫並儲存目前結果。
   upgrade: 升級
+  updatePayment: 更新付款方式
   openCustomActions: 開啟自訂 AI 指令
   openNotebase: 開啟筆記庫
   contextDetailsTitleLabel: 標題
@@ -1276,6 +1276,8 @@ subtitles:
     aiAuthFailed: API 認證失敗，請檢查 API 金鑰
     aiServiceUnavailable: 翻譯服務暫時無法使用
     aiQuotaExceeded: 本月 AI 字幕額度已用完
+    aiQuotaExceededWithReset: 本月 AI 字幕額度已用完，$1 重置
+    aiLoginRequired: 登入後即可生成 AI 字幕
     aiSubscriptionRequired: AI 字幕需要 Pro 或 Ultra 訂閱
     aiPaymentRequired: 請更新付款方式後繼續產生 AI 字幕
     aiVideoTooLong: 影片過長，暫不支援產生 AI 字幕

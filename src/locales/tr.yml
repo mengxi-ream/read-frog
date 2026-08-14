@@ -949,11 +949,10 @@ options:
         description: Yapay zekâ altyazıları cümle gibi okunan satırlara yeniden böler. Zamanlamayı da kendisi belirlediği için satırlar kayabilir. LLM çeviri sağlayıcısı gerekir.
     aiQuota:
       title: Yapay zekâ altyazı kotası
-      description: Yapay zeka altyazı deşifre kotanızın aylık kullanımı
+      description: Yapay zeka konuşma tanıma ile her video için doğru altyazı üretir
+      launchBonusPromo: $1 tarihinden önce abone olun, 300 dakika ek deşifre hediyesi kazanın
       loginRequired: Yapay zeka altyazı kotanızı görmek için giriş yapın
-      logIn: Giriş yap
       upgradeRequired: Yapay zeka altyazıları için Pro veya Ultra aboneliği gerekir
-      upgrade: Yükselt
       pools:
         subscription: Aylık kota
         launchBonus: Lansman hediyesi
@@ -1105,6 +1104,7 @@ action:
   saveToNotebasePendingLoginDescription: Giriş yaptıktan sonra Read Frog Notebase'i oluşturur ve bu sonucu otomatik olarak kaydeder.
   saveToNotebasePendingConnectedLoginDescription: Girişten sonra Read Frog mümkünse bağlı Notebase'e kaydeder. Bu hesap onu kullanamazsa yeni bir Notebase oluşturup kaydeder.
   upgrade: Yükselt
+  updatePayment: Ödemeyi güncelle
   openCustomActions: Custom AI Actions'ı aç
   openNotebase: Notebase'i aç
   contextDetailsTitleLabel: Başlık
@@ -1160,6 +1160,8 @@ subtitles:
     aiAuthFailed: API kimlik doğrulaması başarısız, lütfen API anahtarınızı kontrol edin
     aiServiceUnavailable: Çeviri hizmeti geçici olarak kullanılamıyor
     aiQuotaExceeded: Aylık yapay zeka altyazı kotanız doldu
+    aiQuotaExceededWithReset: Aylık yapay zeka altyazı kotanız doldu · $1 tarihinde sıfırlanır
+    aiLoginRequired: Yapay zeka altyazıları oluşturmak için giriş yapın
     aiSubscriptionRequired: Yapay zeka altyazıları için Pro veya Ultra aboneliği gerekir
     aiPaymentRequired: Yapay zeka altyazıları oluşturmaya devam etmek için ödeme yönteminizi güncelleyin
     aiVideoTooLong: Bu video yapay zeka altyazıları için çok uzun

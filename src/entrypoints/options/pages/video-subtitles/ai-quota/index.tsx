@@ -1,15 +1,20 @@
 import type { VideoTranscriptUsage, VideoTranscriptUsagePool } from "@read-frog/api-contract"
+import type { ReactNode } from "react"
 import { ORPCError } from "@orpc/client"
 import { useQuery } from "@tanstack/react-query"
 import { Button } from "@/components/ui/base-ui/button"
 import { Progress, ProgressLabel } from "@/components/ui/base-ui/progress"
 import { Skeleton } from "@/components/ui/base-ui/skeleton"
 import { openLogIn } from "@/components/user-account-menu/shared"
-import { env } from "@/env"
 import { authClient } from "@/utils/auth/auth-client"
 import { i18n } from "@/utils/i18n"
 import { orpc } from "@/utils/orpc/client"
 import { cn } from "@/utils/styles/utils"
+import {
+  formatQuotaDate,
+  launchBonusCutoffLabel,
+  pricingUrl,
+} from "@/utils/subtitles/ai/entitlement"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
 
@@ -17,18 +22,6 @@ const NEAR_LIMIT_RATIO = 0.9
 
 function errorStatus(error: unknown): number | null {
   return error instanceof ORPCError ? error.status : null
-}
-
-function formatLocalDate(iso: string): string | null {
-  const date = new Date(iso)
-  if (Number.isNaN(date.getTime())) {
-    return null
-  }
-  return date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  })
 }
 
 /**
@@ -67,17 +60,14 @@ export function AiQuotaSection() {
 
     // A pre-launch server still gates getUsage behind the beta 403; the new
     // server answers free accounts with plan "free" instead. Both mean the
-    // same thing now: this account needs a subscription.
+    // same thing now: this account needs a subscription. Drop this branch once
+    // the server retires VIDEO_TRANSCRIPTION_BETA_RESTRICTED for good.
     if (status === 403) {
       return <QuotaUpgradeGuide />
     }
 
     if (usageQuery.isError || !usageQuery.data) {
-      return (
-        <p className="text-sm text-muted-foreground">
-          {i18n.t("options.videoSubtitles.aiQuota.loadError")}
-        </p>
-      )
+      return <QuotaNotice>{i18n.t("options.videoSubtitles.aiQuota.loadError")}</QuotaNotice>
     }
 
     if (usageQuery.data.plan === "free") {
@@ -108,32 +98,55 @@ function QuotaSkeleton() {
   )
 }
 
+/**
+ * Secondary copy in this slot sits directly under the ConfigItem description
+ * and must not out-size it, so it shares that 13px scale rather than the
+ * text-sm the Built-in AI panel can afford — that panel hangs straight off its
+ * ConfigSection, with no description above it to be measured against.
+ */
+function QuotaNotice({ children }: { children: ReactNode }) {
+  return <p className="text-[13px] leading-[18px] text-muted-foreground">{children}</p>
+}
+
+/**
+ * The launch offer, sitting under the wall it is trying to overturn. Renders
+ * nothing once the window closes: the server stops issuing the grant at the
+ * cutoff, so an ungated banner would age into a promise we no longer keep.
+ */
+function LaunchBonusPromo() {
+  const cutoff = launchBonusCutoffLabel()
+  if (!cutoff) {
+    return null
+  }
+  return (
+    <p className="text-[13px] leading-[18px] text-blue-600 dark:text-blue-400">
+      {i18n.t("options.videoSubtitles.aiQuota.launchBonusPromo", [cutoff])}
+    </p>
+  )
+}
+
 function QuotaLoginGuide() {
   return (
-    <div className="flex flex-col items-start gap-3">
-      <p className="text-sm text-muted-foreground">
-        {i18n.t("options.videoSubtitles.aiQuota.loginRequired")}
-      </p>
+    <div className="flex flex-col items-start gap-2.5">
+      <QuotaNotice>{i18n.t("options.videoSubtitles.aiQuota.loginRequired")}</QuotaNotice>
       <Button variant="outline" size="sm" onClick={openLogIn}>
-        {i18n.t("options.videoSubtitles.aiQuota.logIn")}
+        {i18n.t("account.login")}
       </Button>
+      <LaunchBonusPromo />
     </div>
   )
 }
 
 function QuotaUpgradeGuide() {
   return (
-    <div className="flex flex-col items-start gap-3">
-      <p className="text-sm text-muted-foreground">
-        {i18n.t("options.videoSubtitles.aiQuota.upgradeRequired")}
-      </p>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => window.open(new URL("/pricing", env.WXT_WEBSITE_URL).toString(), "_blank")}
-      >
-        {i18n.t("options.videoSubtitles.aiQuota.upgrade")}
+    <div className="flex flex-col items-start gap-2.5">
+      <QuotaNotice>{i18n.t("options.videoSubtitles.aiQuota.upgradeRequired")}</QuotaNotice>
+      {/* Unlike the player, this surface never navigates on its own — opening a
+          tab just for landing on the settings page would be hostile. */}
+      <Button variant="outline" size="sm" onClick={() => window.open(pricingUrl(), "_blank")}>
+        {i18n.t("action.upgrade")}
       </Button>
+      <LaunchBonusPromo />
     </div>
   )
 }
@@ -184,8 +197,8 @@ function QuotaPoolUsage({ pool }: { pool: VideoTranscriptUsagePool }) {
   ])
   // The monthly pool resets; the one-time gift only expires. Show whichever
   // date the pool actually has.
-  const resetAt = pool.resetAt ? formatLocalDate(pool.resetAt) : null
-  const expiresAt = pool.expiresAt ? formatLocalDate(pool.expiresAt) : null
+  const resetAt = formatQuotaDate(pool.resetAt)
+  const expiresAt = formatQuotaDate(pool.expiresAt)
   const dateNote = resetAt
     ? i18n.t("options.videoSubtitles.aiQuota.resetsOn", [resetAt])
     : expiresAt

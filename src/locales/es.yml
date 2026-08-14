@@ -1065,11 +1065,10 @@ options:
         description: La IA vuelve a cortar los subtítulos en líneas que se leen como frases. También fija sus tiempos, así que pueden desajustarse. Requiere un proveedor de traducción LLM.
     aiQuota:
       title: Cuota de subtítulos con IA
-      description: Uso mensual de tu cuota de transcripción de subtítulos con IA
+      description: El reconocimiento de voz con IA te da subtítulos precisos para cualquier vídeo
+      launchBonusPromo: Suscríbete antes del $1 y obtén 300 minutos de transcripción adicionales
       loginRequired: Inicia sesión para ver tu cuota de subtítulos con IA
-      logIn: Iniciar sesión
       upgradeRequired: Los subtítulos con IA requieren una suscripción Pro o Ultra
-      upgrade: Mejorar plan
       pools:
         subscription: Cuota mensual
         launchBonus: Regalo de lanzamiento
@@ -1221,6 +1220,7 @@ action:
   saveToNotebasePendingLoginDescription: Después de iniciar sesión, Read Frog creará la Notebase y guardará este resultado automáticamente.
   saveToNotebasePendingConnectedLoginDescription: Después de iniciar sesión, Read Frog guardará en la Notebase conectada si es posible. Si esta cuenta no puede usarla, creará una nueva Notebase y guardará este resultado.
   upgrade: Mejorar plan
+  updatePayment: Actualizar pago
   openCustomActions: Abrir Custom AI Actions
   openNotebase: Abrir Notebase
   contextDetailsTitleLabel: Título
@@ -1276,6 +1276,8 @@ subtitles:
     aiAuthFailed: Error de autenticación de API; revisa tu clave API
     aiServiceUnavailable: Servicio de traducción temporalmente no disponible
     aiQuotaExceeded: Cuota mensual de subtítulos con IA agotada
+    aiQuotaExceededWithReset: Cuota mensual de subtítulos con IA agotada · se restablece el $1
+    aiLoginRequired: Inicia sesión para generar subtítulos con IA
     aiSubscriptionRequired: Los subtítulos con IA requieren una suscripción Pro o Ultra
     aiPaymentRequired: Actualiza tu método de pago para seguir generando subtítulos con IA
     aiVideoTooLong: Este video es demasiado largo para los subtítulos con IA
