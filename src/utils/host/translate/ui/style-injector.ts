@@ -130,8 +130,9 @@ const siteRuleCSSMap = new WeakMap<StyleRoot, CSSStyleSheet>()
 
 /**
  * Inject per-site rule CSS into the given root. Unlike the custom-style slot
- * below, this one is removable: it only applies while a translation session
- * is active on a matched site (see PageTranslationManager).
+ * below, this one is removable: it only applies while a page or node
+ * translation is visible on a matched site (see PageTranslationManager and
+ * removeOrShowNodeTranslation).
  */
 export async function ensureSiteRuleCSS(root: StyleRoot, cssText: string): Promise<void> {
   if (supportsConstructableStyleSheets(root)) {
