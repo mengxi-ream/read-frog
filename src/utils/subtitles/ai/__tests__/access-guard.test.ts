@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 import { ORPCError } from "@orpc/client"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { VIDEO_TRANSCRIPTION_APPLY_URL } from "@/utils/constants/subtitles"
 
 const getSession = vi.fn<(...args: unknown[]) => Promise<unknown>>()
-const getUsage = vi.fn<(...args: unknown[]) => Promise<unknown>>()
+const betaAccessStatus = vi.fn<(...args: unknown[]) => Promise<unknown>>()
 const openLogIn = vi.fn<(...args: unknown[]) => void>()
-const sendMessage = vi.fn<(...args: unknown[]) => Promise<unknown>>()
+const windowOpen = vi.fn<(...args: unknown[]) => void>()
 
 vi.mock("@/utils/auth/auth-client", () => ({
   authClient: {
@@ -19,30 +20,26 @@ vi.mock("@/components/user-account-menu/shared", () => ({
 
 vi.mock("@/utils/orpc/client", () => ({
   orpcClient: {
-    videoTranscript: {
-      getUsage: (...args: unknown[]) => getUsage(...args),
+    betaAccess: {
+      status: (...args: unknown[]) => betaAccessStatus(...args),
     },
   },
 }))
 
-vi.mock("@/utils/message", () => ({
-  sendMessage: (...args: unknown[]) => sendMessage(...args),
+vi.mock("@read-frog/definitions", () => ({
+  VIDEO_TRANSCRIPTION_BETA_FEATURE_KEY: "videoTranscription",
 }))
 
-vi.mock("@/env", () => ({
-  env: { WXT_WEBSITE_URL: "https://www.readfrog.app" },
-}))
-
-const { ensureAiSubtitlesAccess, ensureAiSubtitlesEntitled, ensureSignedIn } =
+const { ensureAiSubtitlesAccess, ensureBetaAllowed, ensureSignedIn } =
   await import("../access-guard")
 
 describe("ai subtitles access guard", () => {
   beforeEach(() => {
     getSession.mockReset()
-    getUsage.mockReset()
+    betaAccessStatus.mockReset()
     openLogIn.mockReset()
-    sendMessage.mockReset()
-    sendMessage.mockResolvedValue(undefined)
+    windowOpen.mockReset()
+    vi.stubGlobal("open", windowOpen)
   })
 
   it("opens the log-in page and short-circuits when signed out", async () => {
@@ -50,44 +47,38 @@ describe("ai subtitles access guard", () => {
 
     await expect(ensureAiSubtitlesAccess()).resolves.toBe(false)
     expect(openLogIn).toHaveBeenCalledOnce()
-    expect(getUsage).not.toHaveBeenCalled()
+    expect(betaAccessStatus).not.toHaveBeenCalled()
   })
 
-  it("opens the pricing page when the plan does not cover AI subtitles", async () => {
+  it("opens the application page when beta access is not allowed", async () => {
     getSession.mockResolvedValue({ data: { user: { id: "u1" } } })
-    getUsage.mockRejectedValue(
-      new ORPCError("VIDEO_TRANSCRIPTION_BETA_RESTRICTED", { status: 403 }),
-    )
+    betaAccessStatus.mockResolvedValue({ featureKey: "videoTranscription", allowed: false })
 
     await expect(ensureAiSubtitlesAccess()).resolves.toBe(false)
-    expect(sendMessage).toHaveBeenCalledWith("openPage", {
-      url: "https://www.readfrog.app/pricing",
-      active: true,
-    })
-    expect(openLogIn).not.toHaveBeenCalled()
+    expect(windowOpen).toHaveBeenCalledWith(VIDEO_TRANSCRIPTION_APPLY_URL, "_blank")
   })
 
-  it("allows access when signed in and the quota call succeeds", async () => {
+  it("allows access when signed in and beta is granted", async () => {
     getSession.mockResolvedValue({ data: { user: { id: "u1" } } })
-    getUsage.mockResolvedValue({ usedMinutes: 0, limitMinutes: 250, remainingMinutes: 250 })
+    betaAccessStatus.mockResolvedValue({ featureKey: "videoTranscription", allowed: true })
 
     await expect(ensureAiSubtitlesAccess()).resolves.toBe(true)
-    expect(sendMessage).not.toHaveBeenCalled()
+    expect(windowOpen).not.toHaveBeenCalled()
   })
 
-  it("falls through to allow when the quota check errors (network)", async () => {
-    getUsage.mockRejectedValue(new Error("network down"))
+  it("falls through to allow when the beta status check errors (network)", async () => {
+    betaAccessStatus.mockRejectedValue(new Error("network down"))
 
-    await expect(ensureAiSubtitlesEntitled()).resolves.toBe(true)
-    expect(sendMessage).not.toHaveBeenCalled()
+    await expect(ensureBetaAllowed()).resolves.toBe(true)
+    expect(windowOpen).not.toHaveBeenCalled()
   })
 
-  it("treats a 401 from the quota check as unauthenticated (stale session) and opens login", async () => {
-    getUsage.mockRejectedValue(new ORPCError("UNAUTHORIZED", { status: 401 }))
+  it("treats a 401 from the beta check as unauthenticated (stale session) and opens login", async () => {
+    betaAccessStatus.mockRejectedValue(new ORPCError("UNAUTHORIZED", { status: 401 }))
 
-    await expect(ensureAiSubtitlesEntitled()).resolves.toBe(false)
+    await expect(ensureBetaAllowed()).resolves.toBe(false)
     expect(openLogIn).toHaveBeenCalledOnce()
-    expect(sendMessage).not.toHaveBeenCalled()
+    expect(windowOpen).not.toHaveBeenCalled()
   })
 
   it("returns true from ensureSignedIn when a user session exists", async () => {

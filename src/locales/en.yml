@@ -1068,7 +1068,8 @@ options:
       description: Monthly usage of your AI subtitle transcription quota
       loginRequired: Log in to view your AI subtitles quota
       logIn: Log in
-      planRequired: AI transcription is available on the Pro and Ultra plans.
+      betaRequired: AI subtitles are in beta and not yet enabled for your account
+      betaApply: Apply for access
       loadError: Unable to load your quota. Please try again later.
       summary: Used $1 of $2 minutes, $3 remaining
     style:

@@ -84,3 +84,4 @@ export const SUBTITLE_FONT_FAMILIES = {
 // Subtitles source
 export const SUBTITLES_SOURCE = { NATIVE: "native", AI: "ai" } as const
 export type SubtitlesSource = (typeof SUBTITLES_SOURCE)[keyof typeof SUBTITLES_SOURCE]
+export const VIDEO_TRANSCRIPTION_APPLY_URL = "https://tally.so/r/7Rzb96"
