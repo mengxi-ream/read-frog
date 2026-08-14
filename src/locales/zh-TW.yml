@@ -1068,7 +1068,8 @@ options:
       description: 你帳號本月的 AI 字幕轉寫額度使用情況
       loginRequired: 登入後查看你的 AI 字幕額度
       logIn: 登入
-      planRequired: AI 轉錄僅面向 Pro 與 Ultra 使用者開放。
+      betaRequired: AI 字幕測試中，你的帳號尚未取得使用資格
+      betaApply: 申請資格
       loadError: 無法載入額度，請稍後重試。
       summary: 已用 $1 分鐘 / 共 $2 分鐘，剩餘 $3 分鐘
     style:

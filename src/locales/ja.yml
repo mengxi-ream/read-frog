@@ -952,7 +952,8 @@ options:
       description: 今月のAI字幕文字起こし利用枠の使用状況
       loginRequired: ログインしてAI字幕の利用枠を確認
       logIn: ログイン
-      planRequired: AI文字起こしはProプランとUltraプランでご利用いただけます。
+      betaRequired: AI字幕はベータ版で、まだあなたのアカウントでは利用できません
+      betaApply: 利用を申請
       loadError: 利用枠を読み込めませんでした。しばらくしてから再試行してください。
       summary: $2 分中 $1 分を使用、残り $3 分
     style:

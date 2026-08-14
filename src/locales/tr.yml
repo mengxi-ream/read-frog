@@ -952,7 +952,8 @@ options:
       description: Yapay zeka altyazı deşifre kotanızın aylık kullanımı
       loginRequired: Yapay zeka altyazı kotanızı görmek için giriş yapın
       logIn: Giriş yap
-      planRequired: Yapay zeka transkripsiyonu Pro ve Ultra planlarında kullanılabilir.
+      betaRequired: Yapay zeka altyazıları beta aşamasında ve hesabınız için henüz etkin değil
+      betaApply: Erişim başvurusu yap
       loadError: Kotanız yüklenemedi. Lütfen daha sonra tekrar deneyin.
       summary: $2 dakikanın $1 dakikası kullanıldı, $3 kaldı
     style:

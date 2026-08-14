@@ -118,7 +118,7 @@ describe("requestAiSubtitles", () => {
     expect(get).not.toHaveBeenCalled()
   })
 
-  it("shows a localized generic error for other create failures (login/entitlement are pre-checked)", async () => {
+  it("shows a localized generic error for other create failures (login/beta are pre-checked)", async () => {
     create.mockRejectedValue(new ORPCError("VIDEO_TRANSCRIPT_NOT_FOUND", { defined: true }))
     await expect(requestAiSubtitles(ctx)).rejects.toThrow("subtitles.errors.aiRequestFailed")
     expect(get).not.toHaveBeenCalled()

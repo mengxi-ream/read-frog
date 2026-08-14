@@ -5,13 +5,10 @@ import { Progress } from "@/components/ui/base-ui/progress"
 import { Skeleton } from "@/components/ui/base-ui/skeleton"
 import { openLogIn } from "@/components/user-account-menu/shared"
 import { authClient } from "@/utils/auth/auth-client"
+import { VIDEO_TRANSCRIPTION_APPLY_URL } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
 import { orpc } from "@/utils/orpc/client"
 import { cn } from "@/utils/styles/utils"
-import {
-  isAiSubtitlesUpgradeRequiredError,
-  openPricingPage,
-} from "@/utils/subtitles/ai/entitlement"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
 
@@ -57,10 +54,9 @@ export function AiQuotaSection() {
       return <QuotaLoginGuide />
     }
 
-    // Unlike the video page, this one never navigates on its own — opening a tab
-    // just for landing on the settings page would be hostile.
-    if (isAiSubtitlesUpgradeRequiredError(usageQuery.error)) {
-      return <QuotaUpgradeGuide />
+    // Signed in but without beta access (403) -> prompt to apply, not to log in.
+    if (status === 403) {
+      return <QuotaBetaGuide />
     }
 
     if (usageQuery.isError || !usageQuery.data) {
@@ -108,14 +104,18 @@ function QuotaLoginGuide() {
   )
 }
 
-function QuotaUpgradeGuide() {
+function QuotaBetaGuide() {
   return (
     <div className="flex flex-col items-start gap-3">
       <p className="text-sm text-muted-foreground">
-        {i18n.t("options.videoSubtitles.aiQuota.planRequired")}
+        {i18n.t("options.videoSubtitles.aiQuota.betaRequired")}
       </p>
-      <Button variant="outline" size="sm" onClick={openPricingPage}>
-        {i18n.t("action.upgrade")}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => window.open(VIDEO_TRANSCRIPTION_APPLY_URL, "_blank")}
+      >
+        {i18n.t("options.videoSubtitles.aiQuota.betaApply")}
       </Button>
     </div>
   )
