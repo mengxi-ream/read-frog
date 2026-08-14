@@ -22,7 +22,20 @@ const SHORTS_ACTIVE_PLAYER = "#reel-overlay-container .html5-video-player"
 
 function createYoutubeAiSubtitlesContext() {
   const videoId = getYoutubeVideoId()
-  return videoId ? { videoId, url: location.href } : null
+  if (!videoId) {
+    return null
+  }
+  // The player's own duration, sent as `durationSec` with the create request.
+  // An untrusted admission hint only — the server measures the real duration
+  // in its worker before billing — so the ad-playback edge (where `duration`
+  // briefly reports the ad's length) is harmless. NaN until metadata loads,
+  // which cannot happen behind an open settings panel.
+  const video = document.querySelector<HTMLVideoElement>("video.html5-main-video")
+  const duration = video?.duration
+  if (!duration || !Number.isFinite(duration) || duration <= 0) {
+    return null
+  }
+  return { videoId, url: location.href, durationSec: Math.ceil(duration) }
 }
 
 /** YouTube marks mid-rolls / pre-rolls on the html5 player with these classes. */

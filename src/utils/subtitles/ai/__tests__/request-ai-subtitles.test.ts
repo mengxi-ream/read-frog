@@ -5,6 +5,16 @@ const create = vi.fn<(...args: unknown[]) => Promise<unknown>>()
 const get = vi.fn<(...args: unknown[]) => Promise<unknown>>()
 const getSubtitles = vi.fn<(...args: unknown[]) => Promise<unknown>>()
 
+const sendMessage = vi.fn<(...args: unknown[]) => Promise<unknown>>()
+
+vi.mock("@/env", () => ({
+  env: { WXT_WEBSITE_URL: "https://readfrog.app" },
+}))
+
+vi.mock("@/utils/message", () => ({
+  sendMessage: (...args: unknown[]) => sendMessage(...args),
+}))
+
 vi.mock("@/utils/orpc/client", () => ({
   orpcClient: {
     videoTranscript: {
@@ -17,13 +27,14 @@ vi.mock("@/utils/orpc/client", () => ({
 
 const { requestAiSubtitles } = await import("../request-ai-subtitles")
 
-const ctx = { videoId: "abc", url: "https://youtube.com/watch?v=abc" }
+const ctx = { videoId: "abc", url: "https://youtube.com/watch?v=abc", durationSec: 600 }
 
 describe("requestAiSubtitles", () => {
   beforeEach(() => {
     create.mockReset()
     get.mockReset()
     getSubtitles.mockReset()
+    sendMessage.mockReset()
   })
 
   afterEach(() => {
@@ -45,6 +56,7 @@ describe("requestAiSubtitles", () => {
 
     expect(create).toHaveBeenCalledWith({
       url: "https://youtube.com/watch?v=abc",
+      durationSec: 600,
     })
     expect(get).not.toHaveBeenCalled()
     expect(result).toEqual({
@@ -118,7 +130,43 @@ describe("requestAiSubtitles", () => {
     expect(get).not.toHaveBeenCalled()
   })
 
-  it("shows a localized generic error for other create failures (login/beta are pre-checked)", async () => {
+  it("opens pricing and shows a localized toast when a subscription is required", async () => {
+    const error = new ORPCError("VIDEO_TRANSCRIPTION_SUBSCRIPTION_REQUIRED", { defined: true })
+    create.mockRejectedValue(error)
+
+    await expect(requestAiSubtitles(ctx)).rejects.toThrow("subtitles.errors.aiSubscriptionRequired")
+    expect(sendMessage).toHaveBeenCalledWith("openPage", {
+      url: "https://readfrog.app/pricing",
+      active: true,
+    })
+    expect(get).not.toHaveBeenCalled()
+  })
+
+  it("sends a dunning account to the app, not to pricing", async () => {
+    // They already subscribe; the card just failed. Pricing would invite them
+    // to subscribe a second time.
+    const error = new ORPCError("VIDEO_TRANSCRIPTION_PAYMENT_REQUIRED", { defined: true })
+    create.mockRejectedValue(error)
+
+    await expect(requestAiSubtitles(ctx)).rejects.toThrow("subtitles.errors.aiPaymentRequired")
+    expect(sendMessage).toHaveBeenCalledWith("openPage", {
+      url: "https://readfrog.app/home",
+      active: true,
+    })
+    expect(get).not.toHaveBeenCalled()
+  })
+
+  it("offers no upsell when the video itself is too long", async () => {
+    const error = new ORPCError("VIDEO_TRANSCRIPTION_UNSUPPORTED_LENGTH", { defined: true })
+    create.mockRejectedValue(error)
+
+    await expect(requestAiSubtitles(ctx)).rejects.toThrow("subtitles.errors.aiVideoTooLong")
+    // No plan and no reset makes this video work, so neither is suggested.
+    expect(sendMessage).not.toHaveBeenCalled()
+    expect(get).not.toHaveBeenCalled()
+  })
+
+  it("shows a localized generic error for other create failures", async () => {
     create.mockRejectedValue(new ORPCError("VIDEO_TRANSCRIPT_NOT_FOUND", { defined: true }))
     await expect(requestAiSubtitles(ctx)).rejects.toThrow("subtitles.errors.aiRequestFailed")
     expect(get).not.toHaveBeenCalled()

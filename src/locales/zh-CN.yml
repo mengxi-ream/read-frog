@@ -1068,8 +1068,13 @@ options:
       description: 你账户本月的 AI 字幕转写额度使用情况
       loginRequired: 登录后查看你的 AI 字幕额度
       logIn: 登录
-      betaRequired: AI 字幕内测中，你的账号暂未获得使用资格
-      betaApply: 申请资格
+      upgradeRequired: AI 字幕需要 Pro 或 Ultra 订阅
+      upgrade: 升级
+      pools:
+        subscription: 每月额度
+        launchBonus: 上线赠送
+      resetsOn: $1 重置
+      expiresOn: $1 过期
       loadError: 无法加载额度，请稍后重试。
       summary: 已用 $1 分钟 / 共 $2 分钟，剩余 $3 分钟
     style:
@@ -1238,7 +1243,7 @@ shortcutKeySelector:
   placeholder: 请输入快捷键
 subtitles:
   loadingAiSubtitles: 正在加载 AI 字幕中（预计 3 分钟）
-  requestAiSubtitles: 请求 AI 字幕（Beta）
+  requestAiSubtitles: 请求 AI 字幕
   usingAiSubtitles: 正在使用 AI 字幕中
   toggle:
     enabled: 字幕翻译已开启
@@ -1270,6 +1275,9 @@ subtitles:
     aiAuthFailed: API 认证失败，请检查您的 API 密钥
     aiServiceUnavailable: 翻译服务暂时不可用
     aiQuotaExceeded: 本月 AI 字幕额度已用完
+    aiSubscriptionRequired: AI 字幕需要 Pro 或 Ultra 订阅
+    aiPaymentRequired: 请更新支付方式后继续生成 AI 字幕
+    aiVideoTooLong: 视频过长，暂不支持生成 AI 字幕
     aiRequestFailed: AI 字幕请求失败，请稍后重试
     aiNoResponse: AI 服务未响应，使用原文显示
     translatedExportFailed: 生成翻译字幕失败

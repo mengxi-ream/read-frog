@@ -1068,8 +1068,13 @@ options:
       description: Monthly usage of your AI subtitle transcription quota
       loginRequired: Log in to view your AI subtitles quota
       logIn: Log in
-      betaRequired: AI subtitles are in beta and not yet enabled for your account
-      betaApply: Apply for access
+      upgradeRequired: AI subtitles require a Pro or Ultra subscription
+      upgrade: Upgrade
+      pools:
+        subscription: Monthly quota
+        launchBonus: Launch gift
+      resetsOn: Resets on $1
+      expiresOn: Expires on $1
       loadError: Unable to load your quota. Please try again later.
       summary: Used $1 of $2 minutes, $3 remaining
     style:
@@ -1238,7 +1243,7 @@ shortcutKeySelector:
   placeholder: Please enter the shortcut
 subtitles:
   loadingAiSubtitles: Loading AI subtitles… (estimated 3 min)
-  requestAiSubtitles: Request AI subtitles (Beta)
+  requestAiSubtitles: Request AI subtitles
   usingAiSubtitles: Using AI subtitles
   toggle:
     enabled: Subtitle translation on
@@ -1270,6 +1275,9 @@ subtitles:
     aiAuthFailed: API authentication failed, please check your API key
     aiServiceUnavailable: Translation service temporarily unavailable
     aiQuotaExceeded: Monthly AI subtitle quota used up
+    aiSubscriptionRequired: AI subtitles require a Pro or Ultra subscription
+    aiPaymentRequired: Update your payment method to keep generating AI subtitles
+    aiVideoTooLong: This video is too long for AI subtitles
     aiRequestFailed: AI subtitle request failed, please try again later
     aiNoResponse: AI service did not respond, using original text
     translatedExportFailed: Failed to generate translated subtitles

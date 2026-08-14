@@ -952,8 +952,13 @@ options:
       description: Использование вашего месячного лимита транскрипции ИИ-субтитров
       loginRequired: Войдите, чтобы посмотреть лимит ИИ-субтитров
       logIn: Войти
-      betaRequired: ИИ-субтитры находятся в бете и пока недоступны для вашего аккаунта
-      betaApply: Подать заявку на доступ
+      upgradeRequired: Для ИИ-субтитров нужна подписка Pro или Ultra
+      upgrade: Улучшить план
+      pools:
+        subscription: Месячная квота
+        launchBonus: Подарок к запуску
+      resetsOn: Сброс $1
+      expiresOn: Истекает $1
       loadError: Не удалось загрузить лимит. Повторите попытку позже.
       summary: Использовано $1 из $2 минут, осталось $3
     style:
@@ -1122,7 +1127,7 @@ shortcutKeySelector:
   placeholder: Пожалуйста, введите горячую клавишу
 subtitles:
   loadingAiSubtitles: Загрузка ИИ-субтитров… (ожидается 3 мин)
-  requestAiSubtitles: Запросить ИИ-субтитры (Beta)
+  requestAiSubtitles: Запросить ИИ-субтитры
   usingAiSubtitles: Используются ИИ-субтитры
   toggle:
     enabled: Перевод субтитров включён
@@ -1154,6 +1159,9 @@ subtitles:
     aiAuthFailed: Ошибка аутентификации API, проверьте ваш API ключ
     aiServiceUnavailable: Служба перевода временно недоступна
     aiQuotaExceeded: Месячный лимит ИИ-субтитров исчерпан
+    aiSubscriptionRequired: Для ИИ-субтитров нужна подписка Pro или Ultra
+    aiPaymentRequired: Обновите способ оплаты, чтобы продолжить создание ИИ-субтитров
+    aiVideoTooLong: Это видео слишком длинное для ИИ-субтитров
     aiRequestFailed: Не удалось запросить ИИ-субтитры, повторите попытку позже
     aiNoResponse: Служба AI не ответила, отображается оригинальный текст
     translatedExportFailed: Не удалось создать переведённые субтитры

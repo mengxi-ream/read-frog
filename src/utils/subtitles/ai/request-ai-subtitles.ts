@@ -1,13 +1,17 @@
 import type { VideoTranscriptStatus } from "@read-frog/api-contract"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { ORPCError, safe } from "@orpc/client"
+import { env } from "@/env"
 import { i18n } from "@/utils/i18n"
+import { sendMessage } from "@/utils/message"
 import { orpcClient } from "@/utils/orpc/client"
 import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
 
 export interface AiSubtitlesContext {
   videoId: string
   url: string
+  /** Player-reported duration; an untrusted admission pre-check, never the billing basis. */
+  durationSec: number
 }
 
 interface VideoTranscriptJob {
@@ -66,17 +70,40 @@ export async function requestAiSubtitles(
   ctx: AiSubtitlesContext,
   opts?: { signal?: AbortSignal },
 ): Promise<{ segments: SubtitlesFragment[]; detectedLanguage: string }> {
-  const { url } = ctx
+  const { url, durationSec } = ctx
   const signal = opts?.signal
 
   throwIfAborted(signal)
 
-  const { error, data } = await safe(orpcClient.videoTranscript.create({ url }))
+  const { error, data } = await safe(orpcClient.videoTranscript.create({ url, durationSec }))
   if (error) {
-    // Login + beta are pre-checked before create is called, so only quota (not pre-checked)
-    // and unexpected failures can reach here.
+    // Only sign-in is pre-checked before create; the plan wall and the quota
+    // wall are server decisions surfaced here by error code.
     if (error instanceof ORPCError && error.code === "VIDEO_TRANSCRIPTION_QUOTA_EXCEEDED") {
       throw new ToastSubtitlesError(i18n.t("subtitles.errors.aiQuotaExceeded"))
+    }
+    if (error instanceof ORPCError && error.code === "VIDEO_TRANSCRIPTION_SUBSCRIPTION_REQUIRED") {
+      // Content scripts cannot use chrome.tabs — route through the background.
+      void sendMessage("openPage", {
+        url: new URL("/pricing", env.WXT_WEBSITE_URL).toString(),
+        active: true,
+      })
+      throw new ToastSubtitlesError(i18n.t("subtitles.errors.aiSubscriptionRequired"))
+    }
+    if (error instanceof ORPCError && error.code === "VIDEO_TRANSCRIPTION_PAYMENT_REQUIRED") {
+      // Dunning, not cancellation: they already pay, the card just failed. Send
+      // them to the app (billing lives in its settings dialog) rather than to
+      // pricing, which would invite an existing subscriber to subscribe again.
+      void sendMessage("openPage", {
+        url: new URL("/home", env.WXT_WEBSITE_URL).toString(),
+        active: true,
+      })
+      throw new ToastSubtitlesError(i18n.t("subtitles.errors.aiPaymentRequired"))
+    }
+    if (error instanceof ORPCError && error.code === "VIDEO_TRANSCRIPTION_UNSUPPORTED_LENGTH") {
+      // A property of the video, not of the account — no upgrade and no waiting
+      // for the quota to reset makes this one work, so offer neither.
+      throw new ToastSubtitlesError(i18n.t("subtitles.errors.aiVideoTooLong"))
     }
     throw new OverlaySubtitlesError(i18n.t("subtitles.errors.aiRequestFailed"))
   }
