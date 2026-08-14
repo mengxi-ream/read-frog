@@ -1068,8 +1068,7 @@ options:
       description: Uso mensual de tu cuota de transcripción de subtítulos con IA
       loginRequired: Inicia sesión para ver tu cuota de subtítulos con IA
       logIn: Iniciar sesión
-      betaRequired: Los subtítulos con IA están en beta y aún no están habilitados para tu cuenta
-      betaApply: Solicitar acceso
+      planRequired: La transcripción con IA está disponible en los planes Pro y Ultra.
       loadError: No se pudo cargar tu cuota. Inténtalo de nuevo más tarde.
       summary: Usados $1 de $2 minutos, quedan $3
     style:

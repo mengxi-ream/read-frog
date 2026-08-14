@@ -952,8 +952,7 @@ options:
       description: 이번 달 AI 자막 전사 사용량 현황
       loginRequired: 로그인하여 AI 자막 사용량 확인
       logIn: 로그인
-      betaRequired: AI 자막은 베타 기능이며 아직 계정에 활성화되지 않았습니다
-      betaApply: 사용 신청
+      planRequired: AI 전사는 Pro 및 Ultra 플랜에서 사용할 수 있습니다.
       loadError: 사용량을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.
       summary: $2분 중 $1분 사용, $3분 남음
     style:

@@ -952,8 +952,7 @@ options:
       description: Mức sử dụng hạn mức chuyển lời phụ đề AI trong tháng của bạn
       loginRequired: Đăng nhập để xem hạn mức phụ đề AI của bạn
       logIn: Đăng nhập
-      betaRequired: Phụ đề AI đang ở giai đoạn beta và chưa được bật cho tài khoản của bạn
-      betaApply: Đăng ký sử dụng
+      planRequired: Phiên âm bằng AI có sẵn trong các gói Pro và Ultra.
       loadError: Không thể tải hạn mức. Vui lòng thử lại sau.
       summary: Đã dùng $1 trong $2 phút, còn lại $3
     style:
