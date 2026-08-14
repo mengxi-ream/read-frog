@@ -23,8 +23,19 @@ interface VideoTranscriptJob {
 }
 
 const POLL_INTERVAL_MS = 1_000
-const POLL_TIMEOUT_MS = 5 * 60 * 1_000
+const POLL_BASE_TIMEOUT_MS = 8 * 60 * 1_000
+const POLL_MAX_TIMEOUT_MS = 20 * 60 * 1_000
 const MS_PER_SECOND = 1_000
+
+/**
+ * Transcription wall time barely tracks video length (chunks run on Azure in
+ * parallel; a 20-minute video typically settles in ~1 minute) — the dominant
+ * variance is audio-download flakiness plus the worker's retry chain, which is
+ * why the base term is the big one and the per-length term is small.
+ */
+function pollTimeoutMs(durationSec: number): number {
+  return Math.min(POLL_MAX_TIMEOUT_MS, POLL_BASE_TIMEOUT_MS + durationSec * 100)
+}
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -38,6 +49,7 @@ function throwIfAborted(signal: AbortSignal | undefined): void {
 
 async function pollUntilCompleted(
   initial: VideoTranscriptJob,
+  durationSec: number,
   signal: AbortSignal | undefined,
 ): Promise<VideoTranscriptJob> {
   if (initial.status === "completed") {
@@ -47,7 +59,8 @@ async function pollUntilCompleted(
     throw new OverlaySubtitlesError(i18n.t("subtitles.errors.aiServiceUnavailable"))
   }
 
-  const deadline = Date.now() + POLL_TIMEOUT_MS
+  const startedAt = Date.now()
+  const deadline = startedAt + pollTimeoutMs(durationSec)
 
   while (Date.now() < deadline) {
     throwIfAborted(signal)
@@ -63,7 +76,10 @@ async function pollUntilCompleted(
     }
   }
 
-  throw new OverlaySubtitlesError(i18n.t("subtitles.errors.fetchSubTimeout"))
+  // The deadline bounds this wait, not the job: the server keeps transcribing
+  // and caches the result, and a later click resumes the same row. So report
+  // "still working" as a toast — never a failure overlay.
+  throw new ToastSubtitlesError(i18n.t("subtitles.errors.aiStillProcessing"))
 }
 
 export async function requestAiSubtitles(
@@ -108,7 +124,7 @@ export async function requestAiSubtitles(
     throw new OverlaySubtitlesError(i18n.t("subtitles.errors.aiRequestFailed"))
   }
 
-  const completed = await pollUntilCompleted(data, signal)
+  const completed = await pollUntilCompleted(data, durationSec, signal)
 
   throwIfAborted(signal)
 

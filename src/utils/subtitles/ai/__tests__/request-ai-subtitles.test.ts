@@ -99,7 +99,10 @@ describe("requestAiSubtitles", () => {
     expect(getSubtitles).not.toHaveBeenCalled()
   })
 
-  it("throws a timeout error when the job never completes", async () => {
+  // The deadline bounds the wait, not the job: the server keeps transcribing and
+  // caches the result, so expiry is a "still working" toast, never a failure
+  // overlay. For a 600s video the deadline is 8min + 60s = 9 minutes.
+  it("reports still-processing (not failure) when the deadline expires", async () => {
     vi.useFakeTimers()
     create.mockResolvedValue({ id: "job-4", status: "pending", detectedLanguage: null })
     get.mockResolvedValue({ id: "job-4", status: "processing", detectedLanguage: null })
@@ -108,9 +111,15 @@ describe("requestAiSubtitles", () => {
       () => null,
       (settledError: unknown) => settledError,
     )
-    await vi.advanceTimersByTimeAsync(6 * 60 * 1_000)
+    await vi.advanceTimersByTimeAsync(8 * 60 * 1_000)
+    expect(await Promise.race([captured, Promise.resolve("waiting")])).toBe("waiting")
 
-    expect(await captured).toMatchObject({ message: "subtitles.errors.fetchSubTimeout" })
+    await vi.advanceTimersByTimeAsync(2 * 60 * 1_000)
+
+    expect(await captured).toMatchObject({
+      name: "ToastSubtitlesError",
+      message: "subtitles.errors.aiStillProcessing",
+    })
     expect(getSubtitles).not.toHaveBeenCalled()
   })
 

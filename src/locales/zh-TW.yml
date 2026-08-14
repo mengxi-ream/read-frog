@@ -1276,6 +1276,9 @@ subtitles:
     aiServiceUnavailable: 翻譯服務暫時無法使用
     aiQuotaExceeded: 本月 AI 字幕額度已用完
     aiSubscriptionRequired: AI 字幕需要 Pro 或 Ultra 訂閱
+    aiPaymentRequired: 請更新付款方式後繼續產生 AI 字幕
+    aiVideoTooLong: 影片過長，暫不支援產生 AI 字幕
+    aiStillProcessing: 轉錄仍在進行中，幾分鐘後再點一次即可繼續取得
     aiRequestFailed: AI 字幕請求失敗，請稍後重試
     aiNoResponse: AI 服務未回應，使用原文顯示
     translatedExportFailed: 產生翻譯字幕失敗
