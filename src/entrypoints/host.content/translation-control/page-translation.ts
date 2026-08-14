@@ -50,6 +50,7 @@ import {
   endPageTranslationSession,
   setPageTranslationSessionProviderRef,
 } from "@/utils/host/translate/translation-session"
+import { cleanupNodeSiteRuleCSSIfUnused } from "@/utils/host/translate/ui/node-site-rule-css"
 import { cancelSpinnerAnimation } from "@/utils/host/translate/ui/spinner"
 import { ensureSiteRuleCSS, removeSiteRuleCSS } from "@/utils/host/translate/ui/style-injector"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
@@ -483,6 +484,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     removeSiteRuleCSS(document)
     removeAllTranslatedWrapperNodes()
+    cleanupNodeSiteRuleCSSIfUnused(document)
   }
 
   registerPageTranslationTriggers(): () => void {

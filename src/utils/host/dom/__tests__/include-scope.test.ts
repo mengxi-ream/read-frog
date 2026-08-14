@@ -75,6 +75,23 @@ describe("includeSelectors whitelist", () => {
     expect(document.querySelector("#description")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
   })
 
+  it("labels a YouTube watch title when the A/B layout has no h1 ancestor", () => {
+    setUrl("https://www.youtube.com/watch?v=video-id")
+    document.body.innerHTML = `
+      <div id="title-row">
+        <yt-formatted-string class="ytd-watch-metadata" id="watch-title">
+          A visible video title rendered without a heading wrapper
+        </yt-formatted-string>
+      </div>
+    `
+
+    const title = document.querySelector("#watch-title") as HTMLElement
+    walkAndLabelElement(title, "hover-walk", structuredClone(DEFAULT_CONFIG))
+
+    expect(title.hasAttribute(WALKED_ATTRIBUTE)).toBe(true)
+    expect(title.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
+  })
+
   it("lets excludeSelectors carve holes inside the whitelisted subtree", () => {
     setHost("include-example.org")
     document.body.innerHTML = `

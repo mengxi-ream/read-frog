@@ -380,6 +380,18 @@ describe("built-in site rules", () => {
     )
   })
 
+  it("unclamps YouTube watch titles with or without an h1 wrapper", () => {
+    const resolved = resolveSiteRule(
+      "https://www.youtube.com/watch?v=video-id",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+
+    expect(resolved.injectedCss).toContain("h1.ytd-watch-metadata")
+    expect(resolved.injectedCss).toContain("yt-formatted-string.ytd-watch-metadata")
+  })
+
   it("excludes the hltv.org navigation whose overflow handler loops on width changes (#1831)", () => {
     const resolved = resolveSiteRule(
       "https://www.hltv.org/matches/2395002/furia-vs-falcons-iem-cologne-major-2026",
