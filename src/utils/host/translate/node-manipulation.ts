@@ -61,7 +61,7 @@ export async function removeOrShowNodeTranslation(point: Point, config: Config):
     const hasVisibleTranslation = styleRoot.querySelector(
       `.${CONTENT_WRAPPER_CLASS},[${TRANSLATION_ONLY_ATTRIBUTE}]`,
     )
-    if (siteRule.injectedCss && !getPageTranslationSessionId() && !hasVisibleTranslation) {
+    if (!getPageTranslationSessionId() && !hasVisibleTranslation) {
       removeSiteRuleCSS(styleRoot)
     }
   }
