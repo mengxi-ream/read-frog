@@ -245,7 +245,17 @@ function finalizeTranslationOnlyAnchorIfEmpty(state: TranslationOnlyAnchorState)
   if (state.virtualGeneration !== undefined) return
   // Swaps are restored by now, so the cuts can be rejoined: restoreTextSplit
   // only rejoins when the fragments still add up to the original value.
-  state.splitRecords?.forEach(restoreTextSplit)
+  //
+  // A cut whose source is no longer in the document is skipped rather than
+  // rejoined. restoreTextSplit reads a detached source as "the host replaced
+  // it" and deletes every tail that still holds its post-split value — right
+  // for a framework rewrite, catastrophic here, because a fallback wrapper
+  // parks the displaced original while its tails are the container's remaining
+  // paragraphs. Leaving adjacent Text nodes behind is invisible; deleting the
+  // rest of the page is not.
+  state.splitRecords?.forEach((record) => {
+    if (record.source.isConnected) restoreTextSplit(record)
+  })
   state.splitRecords = undefined
   for (const { name, previousValue } of state.attributeAdjustments) {
     if (previousValue === null) state.anchor.removeAttribute(name)
@@ -298,6 +308,13 @@ export function restoreTranslationOnlySwapsForAnchor(
     // so the marker is the only thing left to clean up.
     anchor.removeAttribute(TRANSLATION_ONLY_ATTRIBUTE)
     return false
+  }
+
+  // A full restore that keeps nothing is the end of a virtual generation, so
+  // release it here rather than at each call site: the anchor may only finalize
+  // once no unit can still be waiting on it.
+  if (!filterNodes && !options?.keepRecords) {
+    state.virtualGeneration = undefined
   }
 
   // Records whose every node the host disconnected are unrestorable debris;
@@ -353,8 +370,8 @@ export function teardownVirtualTranslationOnlyGeneration(layoutSource: HTMLEleme
     restoreTranslationOnlySwapsForAnchor(anchor)
   }
 
-  const state = getTranslationOnlyAnchorState(layoutSource)
-  if (state) state.virtualGeneration = undefined
+  // A full restore ends the generation and finalizes: cuts rejoined, marker and
+  // dir/lang handed back.
   restoreTranslationOnlySwapsForAnchor(layoutSource)
 }
 

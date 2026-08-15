@@ -117,11 +117,15 @@ export interface TranslationOnlyAnchorState {
   // the rejoined value against the original, so translated text still in place
   // would make it refuse.
   splitRecords?: TextSplitRecord[]
-  // Present while a virtual-paragraph generation is live, and bumped for each
-  // new one. Two jobs: the anchor must not finalize mid-generation (units
-  // anchor their own records on descendants, so `swaps` is legitimately empty
-  // in between), and a unit's late provider response can tell whether the
-  // generation it belongs to is still the current one.
+  // Present from the moment a virtual-paragraph generation starts until a full
+  // restore ends it, and bumped for each new one. Three jobs: the anchor must
+  // not finalize mid-generation (units anchor their own records on descendants,
+  // so `swaps` is legitimately empty in between); a unit's late provider
+  // response can tell whether its generation is still the current one; and,
+  // once the units have settled, this is the only durable sign that the
+  // container is segmented at all — a generation whose units are whole
+  // elements registers every record on a descendant and may cut nothing, so
+  // neither `swaps` nor `splitRecords` can answer that question.
   virtualGeneration?: number
 }
 

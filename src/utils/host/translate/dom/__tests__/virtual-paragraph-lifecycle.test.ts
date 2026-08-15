@@ -26,6 +26,7 @@ import {
 import { buildVirtualParagraphPlan } from "../paragraph-segmentation"
 import {
   disposeVirtualParagraphGroup,
+  dropTranslationOnlySwapRecordsForNodes,
   dropVirtualParagraphWrapper,
   removeAllTranslatedWrapperNodes,
   restoreTranslationOnlySwapsForAnchor,
@@ -545,12 +546,13 @@ describe("virtual paragraph lifecycle", () => {
       expect(firstSpan!.textContent).toBe("First paragraph.")
     })
 
-    it("keeps the anchor alive while the generation still has units in flight", () => {
-      // Between units the container's own swap list is legitimately empty, and
-      // finalizing there would rejoin the cuts under the pending units' feet.
-      const { layoutSource, state } = createSwappedGeneration("First.\n\nSecond.")
+    it("keeps the anchor alive when a sibling run empties it mid-generation", () => {
+      // Between units the container's own swap list is legitimately empty. A
+      // unit that falls back to a wrapper drops its records through here, and
+      // finalizing on that would rejoin the cuts under the pending units' feet.
+      const { layoutSource, runs, state } = createSwappedGeneration("First.\n\nSecond.")
 
-      restoreTranslationOnlySwapsForAnchor(layoutSource)
+      dropTranslationOnlySwapRecordsForNodes(layoutSource, runs[0]!.nodes)
 
       expect(getTranslationOnlyAnchorState(layoutSource)).toBe(state)
       expect(layoutSource).toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
@@ -560,6 +562,47 @@ describe("virtual paragraph lifecycle", () => {
 
       expect(getTranslationOnlyAnchorState(layoutSource)).toBeUndefined()
       expect(layoutSource.childNodes).toHaveLength(1)
+    })
+
+    it("ends the generation when the whole anchor is restored", () => {
+      // A restore with nothing held back is the deliberate end of a generation
+      // (a toggle, or a page-wide cleanup), so it must release the anchor even
+      // though the generation is still marked as live.
+      const { layoutSource } = createSwappedGeneration("First.\n\nSecond.")
+
+      restoreTranslationOnlySwapsForAnchor(layoutSource)
+
+      expect(getTranslationOnlyAnchorState(layoutSource)).toBeUndefined()
+      expect(layoutSource).not.toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+      expect(layoutSource.childNodes).toHaveLength(1)
+    })
+
+    it("never deletes the remaining paragraphs when a cut source was displaced", () => {
+      // The fallback strategy parks a unit's original nodes inside its wrapper,
+      // and the first unit's node is the source every later unit was cut from.
+      // Reading that detached source as a host rewrite would delete every tail
+      // still holding its post-split value — which here is the rest of the file.
+      const storyText = "First paragraph.\n\nSecond paragraph.\n\nThird paragraph."
+      const { layoutSource, runs, state } = createSwappedGeneration(storyText)
+      const displacedSource = runs[0]!.nodes[0] as Text
+      const survivingText = "Second paragraph.\n\nThird paragraph."
+
+      // Unit 1 could not be aligned: the wrapper takes its place and the
+      // original node is detached, held only by the restore registry.
+      const fallbackWrapper = document.createElement("span")
+      fallbackWrapper.className = CONTENT_WRAPPER_CLASS
+      fallbackWrapper.setAttribute(TRANSLATION_MODE_ATTRIBUTE, "translationOnly")
+      layoutSource.insertBefore(fallbackWrapper, displacedSource)
+      displacedSource.remove()
+      // Units 2 and 3 failed at the provider, so the container holds no swaps.
+      expect(state.swaps).toHaveLength(0)
+      state.virtualGeneration = undefined
+
+      restoreTranslationOnlySwapsForAnchor(layoutSource)
+
+      expect(layoutSource.textContent).toContain(survivingText)
+      expect(layoutSource.textContent).toContain("Second paragraph.")
+      expect(layoutSource.textContent).toContain("Third paragraph.")
     })
 
     it("is covered by a page-wide cleanup", () => {

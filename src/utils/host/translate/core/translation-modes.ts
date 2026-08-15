@@ -900,7 +900,6 @@ async function maybeTranslateVirtualUnitRuns(
 function endVirtualTranslationOnlyGeneration(layoutSource: HTMLElement): void {
   const state = getTranslationOnlyAnchorState(layoutSource)
   if (!state) return
-  state.virtualGeneration = undefined
 
   const leftNoTrace =
     state.swaps.length === 0 &&
@@ -909,8 +908,18 @@ function endVirtualTranslationOnlyGeneration(layoutSource: HTMLElement): void {
     // the user yet; rejoining its cuts would pull the message out from under it.
     layoutSource.querySelector(`.${CONTENT_WRAPPER_CLASS}`) === null
   if (leftNoTrace) {
+    // Nothing landed. A full restore clears the generation, rejoins whatever
+    // was cut and hands the marker back, leaving the container as found.
     restoreTranslationOnlySwapsForAnchor(layoutSource)
+    return
   }
+
+  // Something landed, so the generation stays recorded. It is the only durable
+  // sign that this container is segmented: a unit that is a whole element
+  // registers its record on that element, and such a generation may not have
+  // cut anything at all, so neither the container's own swaps nor its split
+  // records can tell a later toggle what this is. Cleared by the full restore
+  // that ends the generation.
 }
 
 /**
@@ -1011,9 +1020,10 @@ async function translateTranslationOnlyRun(
     // wrapper is always inserted as a sibling within the run or appended into
     // a single-element run — a deep subtree query would steal a NESTED run's
     // wrapper (e.g. a li's) and leave this run's state untouched (#1846 review).
-    const existedTranslatedWrapperOutside = targetNode.parentElement.closest(
-      `.${CONTENT_WRAPPER_CLASS}`,
-    )
+    // Reuse the parent captured above: the restore-first pass may have taken
+    // targetNode out of the document, and re-reading its parentElement would
+    // throw on the null.
+    const existedTranslatedWrapperOutside = parentNode.closest(`.${CONTENT_WRAPPER_CLASS}`)
     const finalTranslatedWrapper =
       existedTranslatedWrapperOutside ?? findRunTranslationOnlyWrapper(allChildNodes, walkId)
     if (finalTranslatedWrapper && isHTMLElement(finalTranslatedWrapper)) {

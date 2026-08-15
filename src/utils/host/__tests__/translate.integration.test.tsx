@@ -2998,6 +2998,50 @@ describe("translate", () => {
         expect(viewer).not.toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
       })
 
+      it("translation only mode: toggles off a generation that needed no text cuts", async () => {
+        // Both paragraphs are whole elements, so the units are carved out
+        // without a single splitText. Nothing about the container's own swaps
+        // or split records then records that it was segmented at all — and a
+        // toggle that cannot tell would translate its own output.
+        const elementParagraphs = ["First paragraph.", "Second paragraph."]
+        const elementTranslations = ["【第一段】", "【第二段】"]
+        vi.mocked(translateTextForPage).mockImplementation(async (text) => {
+          const index = elementParagraphs.indexOf(text)
+          if (index === -1) throw new Error(`Unexpected paragraph: ${JSON.stringify(text)}`)
+          return elementTranslations[index]!
+        })
+
+        Object.defineProperty(document, "contentType", {
+          value: "text/plain",
+          configurable: true,
+        })
+        render(
+          <pre data-testid="element-units" style={{ whiteSpace: "pre-wrap" }}>
+            <span>{elementParagraphs[0]}</span>
+            {"\n\n"}
+            <span>{elementParagraphs[1]}</span>
+          </pre>,
+        )
+        const viewer = screen.getByTestId("element-units")
+        const spans = [...viewer.querySelectorAll("span")]
+
+        await removeOrShowPageTranslation("translationOnly", true)
+
+        expect(translateTextForPage).toHaveBeenCalledTimes(2)
+        expect(viewer.textContent).toBe(elementTranslations.join("\n\n"))
+
+        await removeOrShowPageTranslation("translationOnly", true)
+
+        // Back to the source text, with no extra request spent on translating
+        // the translation, and every marker gone.
+        expect(translateTextForPage).toHaveBeenCalledTimes(2)
+        expect(viewer.textContent).toBe(elementParagraphs.join("\n\n"))
+        expect(viewer.querySelectorAll(`[${TRANSLATION_ONLY_ATTRIBUTE}]`)).toHaveLength(0)
+        expect(viewer).not.toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+        expect(viewer.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
+        expect([...viewer.querySelectorAll("span")]).toEqual(spans)
+      })
+
       it("translation only mode: leaves no trace when every paragraph echoes its source", async () => {
         vi.mocked(translateTextForPage).mockImplementation(async (text) => text)
         const viewer = renderPlainTextViewer()
