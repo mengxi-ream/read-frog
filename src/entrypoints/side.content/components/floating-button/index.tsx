@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/base-ui/dropdown-menu"
 import { anchoredToastManager } from "@/components/ui/base-ui/toast"
+import { useIsFullscreen } from "@/hooks/use-is-fullscreen"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -130,6 +131,7 @@ export default function FloatingButton() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isHitAreaExpanded, setIsHitAreaExpanded] = useState(false)
   const [dragPreviewPosition, setDragPreviewPosition] = useState<DragPoint | null>(null)
+  const isFullscreen = useIsFullscreen()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mainButtonRef = useRef<HTMLDivElement | null>(null)
   const pendingDragRef = useRef<PendingDragState | null>(null)
@@ -162,6 +164,24 @@ export default function FloatingButton() {
       }
     }
   }, [])
+
+  // Going fullscreen removes the button from the DOM, so an in-flight drag can
+  // never receive its pointerup: cancel it here, or the body keeps the grabbing
+  // cursor and the text-selection lock after fullscreen exits.
+  useEffect(() => {
+    if (!isFullscreen) return
+
+    const pendingDrag = pendingDragRef.current
+    if (pendingDrag) {
+      window.clearTimeout(pendingDrag.longPressTimerId)
+      pendingDragRef.current = null
+    }
+    lastDragPreviewRef.current = null
+    setDragPreviewPosition(null)
+    setIsDraggingButton(false)
+    setIsHitAreaExpanded(false)
+    setIsDropdownOpen(false)
+  }, [isFullscreen, setIsDraggingButton])
 
   const handleFloatingButtonClick = () => {
     if (floatingButton.clickAction === "translate") {
@@ -338,6 +358,7 @@ export default function FloatingButton() {
   }
 
   if (
+    isFullscreen ||
     !floatingButton.enabled ||
     floatingButton.disabledFloatingButtonPatterns.some((pattern) =>
       matchDomainPattern(window.location.href, pattern),
