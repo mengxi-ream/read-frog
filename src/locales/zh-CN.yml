@@ -148,7 +148,7 @@ options:
         inputTranslation: 输入翻译
         languageDetection: 语言检测
     sponsorCta: 获取高速性价比 AI
-    sponsorCtaJalapenoCloud: GLM 5.2 五折优惠
+    sponsorCtaJalapenoCloud: 获取 GLM 5.2 五折优惠
     setApiKeyWarning:
       message: 请在 $1 页面设置 API Key
     badges:
@@ -271,6 +271,7 @@ options:
         huggingface: Hugging Face推理API，提供数千种开源模型访问
     apiKey:
       showAPIKey: 显示 API Key
+      getAPIKey: 获取 API Key
     howToConfigure: 如何配置?
     testConnection:
       button: 测试连接

@@ -148,7 +148,7 @@ options:
         inputTranslation: Перевод ввода
         languageDetection: Определение языка
     sponsorCta: Получить быстрый и выгодный ИИ
-    sponsorCtaJalapenoCloud: GLM 5.2 со скидкой 50 %
+    sponsorCtaJalapenoCloud: Получить GLM 5.2 со скидкой 50 %
     setApiKeyWarning:
       message: Укажите API-ключ на странице $1
     badges:
@@ -270,6 +270,7 @@ options:
         huggingface: API вывода Hugging Face с доступом к тысячам моделей с открытым кодом
     apiKey:
       showAPIKey: Показать API-ключ
+      getAPIKey: Получить API-ключ
     howToConfigure: Как настроить?
     testConnection:
       button: Проверить соединение

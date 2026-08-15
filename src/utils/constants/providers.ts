@@ -189,7 +189,18 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
 
 export const PROVIDER_ITEMS: Record<
   AllProviderTypes,
-  { logo: (theme: Theme) => string; name: string; website: string; sponsor?: ProviderSponsorConfig }
+  {
+    logo: (theme: Theme) => string
+    name: string
+    website: string
+    sponsor?: ProviderSponsorConfig
+    /**
+     * Where someone signs up for or copies this provider's key. Only providers that set it get
+     * the "Get API key" button next to the API key field — absent means no button, because most
+     * providers' key pages sit behind a console we cannot link straight into.
+     */
+    apiKeyUrl?: string
+  }
 > = {
   "microsoft-translate": {
     logo: getLobeIconsCDNUrlFn("microsoft-color"),
@@ -215,6 +226,7 @@ export const PROVIDER_ITEMS: Record<
     logo: () => jalapenoCloudLogo,
     name: "Jalapeno Cloud",
     website: "https://www.jalapeno-cloud.ai/readfrog",
+    apiKeyUrl: "https://www.jalapeno-cloud.ai/readfrog",
     sponsor: {
       sponsoring: true,
       referUrl: "https://www.jalapeno-cloud.ai/readfrog",
@@ -227,6 +239,7 @@ export const PROVIDER_ITEMS: Record<
     logo: getLobeIconsCDNUrlFn("atlascloud"),
     name: "Atlas Cloud",
     website: "https://readfrog.s.gy/altas",
+    apiKeyUrl: "https://readfrog.s.gy/altas",
     sponsor: {
       sponsoring: true,
       referUrl: "https://readfrog.s.gy/altas",

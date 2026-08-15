@@ -148,7 +148,7 @@ options:
         inputTranslation: Traducción de entrada
         languageDetection: Detección de idioma
     sponsorCta: Obtén IA rápida y rentable
-    sponsorCtaJalapenoCloud: 50 % de descuento en GLM 5.2
+    sponsorCtaJalapenoCloud: Obtén un 50 % de descuento en GLM 5.2
     setApiKeyWarning:
       message: Configura tu clave de API en la página $1
     badges:
@@ -271,6 +271,7 @@ options:
         huggingface: API de inferencia de Hugging Face que proporciona acceso a miles de modelos de código abierto
     apiKey:
       showAPIKey: Mostrar clave API
+      getAPIKey: Obtener clave API
     howToConfigure: ¿Cómo configurar?
     testConnection:
       button: Probar conexión

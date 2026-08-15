@@ -148,7 +148,7 @@ options:
         inputTranslation: 入力翻訳
         languageDetection: 言語検出
     sponsorCta: 高速で高コスパのAIを入手
-    sponsorCtaJalapenoCloud: GLM 5.2 が 50% オフ
+    sponsorCtaJalapenoCloud: GLM 5.2 を 50% オフで入手
     setApiKeyWarning:
       message: API キーは $1 ページで設定してください
     badges:
@@ -270,6 +270,7 @@ options:
         huggingface: Hugging Face推論API、数千のオープンソースモデルへのアクセスを提供
     apiKey:
       showAPIKey: APIキーを表示
+      getAPIKey: APIキーを取得
     howToConfigure: 設定方法は?
     testConnection:
       button: 接続テスト

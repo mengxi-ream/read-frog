@@ -148,7 +148,7 @@ options:
         inputTranslation: Dịch đầu vào
         languageDetection: Phát hiện ngôn ngữ
     sponsorCta: Nhận AI nhanh, tiết kiệm chi phí
-    sponsorCtaJalapenoCloud: Giảm 50% GLM 5.2
+    sponsorCtaJalapenoCloud: Nhận ưu đãi giảm 50% GLM 5.2
     setApiKeyWarning:
       message: Hãy đặt API Key ở trang $1
     badges:
@@ -270,6 +270,7 @@ options:
         huggingface: API suy luận Hugging Face cung cấp quyền truy cập hàng nghìn mô hình mã nguồn mở
     apiKey:
       showAPIKey: Hiển thị API Key
+      getAPIKey: Lấy API Key
     howToConfigure: Cấu hình như thế nào?
     testConnection:
       button: Kiểm tra kết nối
