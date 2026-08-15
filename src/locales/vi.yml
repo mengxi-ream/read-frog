@@ -949,13 +949,18 @@ options:
         description: AI cắt lại phụ đề thành những dòng đọc như câu hoàn chỉnh. AI cũng quyết định thời điểm hiện, nên dòng có thể lệch. Cần nhà cung cấp dịch LLM.
     aiQuota:
       title: Hạn mức phụ đề AI
-      description: Mức sử dụng hạn mức chuyển lời phụ đề AI trong tháng của bạn
+      description: AI dùng công nghệ nhận dạng giọng nói để tạo phụ đề chính xác cho mọi video
+      launchBonusPromo: Đăng ký trước $1 để nhận thêm 300 phút chuyển lời nói thành văn bản
       loginRequired: Đăng nhập để xem hạn mức phụ đề AI của bạn
-      logIn: Đăng nhập
-      betaRequired: Phụ đề AI đang ở giai đoạn beta và chưa được bật cho tài khoản của bạn
-      betaApply: Đăng ký sử dụng
+      upgradeRequired: Phụ đề AI cần gói Pro hoặc Ultra
+      pools:
+        subscription: Hạn mức hằng tháng
+        launchBonus: Quà ra mắt
+      resetsOn: Đặt lại vào $1
+      expiresOn: Hết hạn vào $1
       loadError: Không thể tải hạn mức. Vui lòng thử lại sau.
-      summary: Đã dùng $1 trong $2 phút, còn lại $3
+      remainingOf: Còn $1 / $2 phút
+      used: Đã dùng $1 phút
     style:
       title: Kiểu phụ đề
       description: Chế độ hiển thị, vị trí, phông chữ, màu sắc và nền, chỉnh ngay trên bản xem trước
@@ -1099,6 +1104,7 @@ action:
   saveToNotebasePendingLoginDescription: Sau khi đăng nhập, Read Frog sẽ tự động tạo Notebase và lưu kết quả này.
   saveToNotebasePendingConnectedLoginDescription: Sau khi đăng nhập, Read Frog sẽ lưu vào Notebase đã kết nối nếu có thể. Nếu tài khoản này không dùng được, Read Frog sẽ tạo Notebase mới và lưu kết quả này.
   upgrade: Nâng cấp
+  updatePayment: Cập nhật thanh toán
   openCustomActions: Mở Custom AI Actions
   openNotebase: Mở Notebase
   contextDetailsTitleLabel: Tiêu đề
@@ -1122,7 +1128,7 @@ shortcutKeySelector:
   placeholder: Vui lòng nhập phím tắt
 subtitles:
   loadingAiSubtitles: Đang tải phụ đề AI… (dự kiến 3 phút)
-  requestAiSubtitles: Yêu cầu phụ đề AI (Beta)
+  requestAiSubtitles: Yêu cầu phụ đề AI
   usingAiSubtitles: Đang dùng phụ đề AI
   toggle:
     enabled: Đã bật dịch phụ đề
@@ -1154,6 +1160,12 @@ subtitles:
     aiAuthFailed: Xác thực API thất bại, vui lòng kiểm tra API key của bạn
     aiServiceUnavailable: Dịch vụ dịch thuật tạm thời không khả dụng
     aiQuotaExceeded: Đã dùng hết hạn mức phụ đề AI trong tháng
+    aiQuotaExceededWithReset: Đã dùng hết hạn mức phụ đề AI trong tháng · đặt lại vào $1
+    aiLoginRequired: Đăng nhập để xem hạn mức phụ đề AI của bạn
+    aiSubscriptionRequired: Phụ đề AI cần gói Pro hoặc Ultra
+    aiPaymentRequired: Cập nhật phương thức thanh toán để tiếp tục tạo phụ đề AI
+    aiVideoTooLong: Video này quá dài để tạo phụ đề AI
+    aiStillProcessing: Quá trình phiên âm vẫn đang chạy — hãy bấm lại sau vài phút
     aiRequestFailed: Yêu cầu phụ đề AI thất bại, vui lòng thử lại sau
     aiNoResponse: Dịch vụ AI không phản hồi, hiển thị văn bản gốc
     translatedExportFailed: Không thể tạo phụ đề đã dịch

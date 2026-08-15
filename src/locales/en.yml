@@ -1065,13 +1065,18 @@ options:
         description: Lets AI re-cut the subtitles into lines that read as sentences. It sets their timing too, so lines can drift out of sync. Needs an LLM translation provider.
     aiQuota:
       title: AI subtitles quota
-      description: Monthly usage of your AI subtitle transcription quota
+      description: AI speech recognition gets you accurate subtitles for any video
+      launchBonusPromo: Subscribe before $1 for an extra 300 transcription minutes
       loginRequired: Log in to view your AI subtitles quota
-      logIn: Log in
-      betaRequired: AI subtitles are in beta and not yet enabled for your account
-      betaApply: Apply for access
+      upgradeRequired: AI subtitles require a Pro or Ultra subscription
+      pools:
+        subscription: Monthly quota
+        launchBonus: Launch gift
+      resetsOn: Resets on $1
+      expiresOn: Expires on $1
       loadError: Unable to load your quota. Please try again later.
-      summary: Used $1 of $2 minutes, $3 remaining
+      remainingOf: $1 / $2 min left
+      used: Used $1 min
     style:
       title: Subtitle style
       description: Display mode, position, fonts, colors and background, set against a live preview
@@ -1215,6 +1220,7 @@ action:
   saveToNotebasePendingLoginDescription: After login, Read Frog will create the Notebase and save this result automatically.
   saveToNotebasePendingConnectedLoginDescription: After login, Read Frog will save to the connected Notebase when possible. If this account cannot use it, Read Frog will create a new Notebase and save this result.
   upgrade: Upgrade
+  updatePayment: Update payment
   openCustomActions: Open Custom AI Actions
   openNotebase: Open Notebase
   contextDetailsTitleLabel: Title
@@ -1238,7 +1244,7 @@ shortcutKeySelector:
   placeholder: Please enter the shortcut
 subtitles:
   loadingAiSubtitles: Loading AI subtitles… (estimated 3 min)
-  requestAiSubtitles: Request AI subtitles (Beta)
+  requestAiSubtitles: Request AI subtitles
   usingAiSubtitles: Using AI subtitles
   toggle:
     enabled: Subtitle translation on
@@ -1270,6 +1276,12 @@ subtitles:
     aiAuthFailed: API authentication failed, please check your API key
     aiServiceUnavailable: Translation service temporarily unavailable
     aiQuotaExceeded: Monthly AI subtitle quota used up
+    aiQuotaExceededWithReset: Monthly AI subtitle quota used up · resets on $1
+    aiLoginRequired: Log in to view your AI subtitles quota
+    aiSubscriptionRequired: AI subtitles require a Pro or Ultra subscription
+    aiPaymentRequired: Update your payment method to keep generating AI subtitles
+    aiVideoTooLong: This video is too long for AI subtitles
+    aiStillProcessing: Transcription is still running — click again in a few minutes to pick it up
     aiRequestFailed: AI subtitle request failed, please try again later
     aiNoResponse: AI service did not respond, using original text
     translatedExportFailed: Failed to generate translated subtitles

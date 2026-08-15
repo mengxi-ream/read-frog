@@ -949,13 +949,18 @@ options:
         description: ИИ заново режет субтитры на строки, читающиеся как предложения. Тайминг он задаёт сам, поэтому строки могут расходиться с речью. Нужен LLM-провайдер перевода.
     aiQuota:
       title: Лимит ИИ-субтитров
-      description: Использование вашего месячного лимита транскрипции ИИ-субтитров
+      description: ИИ распознаёт речь и создаёт точные субтитры для любого видео
+      launchBonusPromo: Оформите подписку до $1 и получите дополнительно 300 минут расшифровки
       loginRequired: Войдите, чтобы посмотреть лимит ИИ-субтитров
-      logIn: Войти
-      betaRequired: ИИ-субтитры находятся в бете и пока недоступны для вашего аккаунта
-      betaApply: Подать заявку на доступ
+      upgradeRequired: Для ИИ-субтитров нужна подписка Pro или Ultra
+      pools:
+        subscription: Месячная квота
+        launchBonus: Подарок к запуску
+      resetsOn: Сброс $1
+      expiresOn: Истекает $1
       loadError: Не удалось загрузить лимит. Повторите попытку позже.
-      summary: Использовано $1 из $2 минут, осталось $3
+      remainingOf: Осталось $1 / $2 мин
+      used: Использовано $1 мин
     style:
       title: Стиль субтитров
       description: Режим отображения, положение, шрифты, цвета и фон — всё настраивается по живому предпросмотру
@@ -1099,6 +1104,7 @@ action:
   saveToNotebasePendingLoginDescription: После входа Read Frog автоматически создаст Notebase и сохранит этот результат.
   saveToNotebasePendingConnectedLoginDescription: После входа Read Frog сохранит в подключённую Notebase, если это возможно. Если аккаунт не может её использовать, будет создана новая Notebase.
   upgrade: Повысить тариф
+  updatePayment: Обновить оплату
   openCustomActions: Открыть Custom AI Actions
   openNotebase: Открыть Notebase
   contextDetailsTitleLabel: Заголовок
@@ -1122,7 +1128,7 @@ shortcutKeySelector:
   placeholder: Пожалуйста, введите горячую клавишу
 subtitles:
   loadingAiSubtitles: Загрузка ИИ-субтитров… (ожидается 3 мин)
-  requestAiSubtitles: Запросить ИИ-субтитры (Beta)
+  requestAiSubtitles: Запросить ИИ-субтитры
   usingAiSubtitles: Используются ИИ-субтитры
   toggle:
     enabled: Перевод субтитров включён
@@ -1154,6 +1160,12 @@ subtitles:
     aiAuthFailed: Ошибка аутентификации API, проверьте ваш API ключ
     aiServiceUnavailable: Служба перевода временно недоступна
     aiQuotaExceeded: Месячный лимит ИИ-субтитров исчерпан
+    aiQuotaExceededWithReset: Месячный лимит ИИ-субтитров исчерпан · сброс $1
+    aiLoginRequired: Войдите, чтобы посмотреть лимит ИИ-субтитров
+    aiSubscriptionRequired: Для ИИ-субтитров нужна подписка Pro или Ultra
+    aiPaymentRequired: Обновите способ оплаты, чтобы продолжить создание ИИ-субтитров
+    aiVideoTooLong: Это видео слишком длинное для ИИ-субтитров
+    aiStillProcessing: Транскрипция ещё идёт — нажмите ещё раз через несколько минут
     aiRequestFailed: Не удалось запросить ИИ-субтитры, повторите попытку позже
     aiNoResponse: Служба AI не ответила, отображается оригинальный текст
     translatedExportFailed: Не удалось создать переведённые субтитры

@@ -1,5 +1,7 @@
 import { useAtomValue } from "jotai"
 import { use } from "react"
+import { AnchoredToastProvider } from "@/components/ui/base-ui/toast"
+import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { subtitlesDisplayAtom, subtitlesShowContentAtom, subtitlesShowStateAtom } from "../atoms"
 import { StateMessage } from "./state-message"
 import { SubtitlesSettingsPanel } from "./subtitles-settings-panel"
@@ -11,6 +13,10 @@ export function SubtitlesContainer() {
   const showState = useAtomValue(subtitlesShowStateAtom)
   const showContent = useAtomValue(subtitlesShowContentAtom)
   const ui = use(SubtitlesUIContext)
+  // Portals into this host rather than the docked toast host, which hangs off
+  // document.body: this one lives inside the player, so an anchored toast can
+  // reach its trigger and survives the player going fullscreen.
+  const shadowWrapper = use(ShadowWrapperContext)
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-visible">
@@ -28,6 +34,8 @@ export function SubtitlesContainer() {
           <SubtitlesSettingsPanel />
         </div>
       )}
+
+      <AnchoredToastProvider portalProps={{ container: shadowWrapper }} />
     </div>
   )
 }

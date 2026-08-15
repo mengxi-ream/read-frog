@@ -949,13 +949,18 @@ options:
         description: Yapay zekâ altyazıları cümle gibi okunan satırlara yeniden böler. Zamanlamayı da kendisi belirlediği için satırlar kayabilir. LLM çeviri sağlayıcısı gerekir.
     aiQuota:
       title: Yapay zekâ altyazı kotası
-      description: Yapay zeka altyazı deşifre kotanızın aylık kullanımı
+      description: Yapay zeka konuşma tanıma ile her video için doğru altyazı üretir
+      launchBonusPromo: $1 tarihinden önce abone olun, 300 dakika ek deşifre hediyesi kazanın
       loginRequired: Yapay zeka altyazı kotanızı görmek için giriş yapın
-      logIn: Giriş yap
-      betaRequired: Yapay zeka altyazıları beta aşamasında ve hesabınız için henüz etkin değil
-      betaApply: Erişim başvurusu yap
+      upgradeRequired: Yapay zeka altyazıları için Pro veya Ultra aboneliği gerekir
+      pools:
+        subscription: Aylık kota
+        launchBonus: Lansman hediyesi
+      resetsOn: $1 tarihinde sıfırlanır
+      expiresOn: $1 tarihinde sona erer
       loadError: Kotanız yüklenemedi. Lütfen daha sonra tekrar deneyin.
-      summary: $2 dakikanın $1 dakikası kullanıldı, $3 kaldı
+      remainingOf: $1 / $2 dk kaldı
+      used: $1 dk kullanıldı
     style:
       title: Altyazı stili
       description: Görüntüleme modu, konum, yazı tipleri, renkler ve arka plan — canlı önizlemeye bakarak ayarlanır
@@ -1099,6 +1104,7 @@ action:
   saveToNotebasePendingLoginDescription: Giriş yaptıktan sonra Read Frog Notebase'i oluşturur ve bu sonucu otomatik olarak kaydeder.
   saveToNotebasePendingConnectedLoginDescription: Girişten sonra Read Frog mümkünse bağlı Notebase'e kaydeder. Bu hesap onu kullanamazsa yeni bir Notebase oluşturup kaydeder.
   upgrade: Yükselt
+  updatePayment: Ödemeyi güncelle
   openCustomActions: Custom AI Actions'ı aç
   openNotebase: Notebase'i aç
   contextDetailsTitleLabel: Başlık
@@ -1122,7 +1128,7 @@ shortcutKeySelector:
   placeholder: Lütfen kısayolu girin
 subtitles:
   loadingAiSubtitles: Yapay zeka altyazıları yükleniyor… (tahmini 3 dk)
-  requestAiSubtitles: Yapay zeka altyazısı iste (Beta)
+  requestAiSubtitles: Yapay zeka altyazısı iste
   usingAiSubtitles: Yapay zeka altyazısı kullanılıyor
   toggle:
     enabled: Altyazı çevirisi açık
@@ -1154,6 +1160,12 @@ subtitles:
     aiAuthFailed: API kimlik doğrulaması başarısız, lütfen API anahtarınızı kontrol edin
     aiServiceUnavailable: Çeviri hizmeti geçici olarak kullanılamıyor
     aiQuotaExceeded: Aylık yapay zeka altyazı kotanız doldu
+    aiQuotaExceededWithReset: Aylık yapay zeka altyazı kotanız doldu · $1 tarihinde sıfırlanır
+    aiLoginRequired: Yapay zeka altyazı kotanızı görmek için giriş yapın
+    aiSubscriptionRequired: Yapay zeka altyazıları için Pro veya Ultra aboneliği gerekir
+    aiPaymentRequired: Yapay zeka altyazıları oluşturmaya devam etmek için ödeme yönteminizi güncelleyin
+    aiVideoTooLong: Bu video yapay zeka altyazıları için çok uzun
+    aiStillProcessing: Yazıya dökme hâlâ sürüyor — birkaç dakika sonra tekrar tıklayın
     aiRequestFailed: Yapay zeka altyazı isteği başarısız oldu, lütfen daha sonra tekrar deneyin
     aiNoResponse: AI hizmeti yanıt vermedi, orijinal metin gösteriliyor
     translatedExportFailed: Çevrilmiş altyazılar oluşturulamadı

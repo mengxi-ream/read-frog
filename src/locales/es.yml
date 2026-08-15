@@ -1065,13 +1065,18 @@ options:
         description: La IA vuelve a cortar los subtítulos en líneas que se leen como frases. También fija sus tiempos, así que pueden desajustarse. Requiere un proveedor de traducción LLM.
     aiQuota:
       title: Cuota de subtítulos con IA
-      description: Uso mensual de tu cuota de transcripción de subtítulos con IA
+      description: El reconocimiento de voz con IA te da subtítulos precisos para cualquier vídeo
+      launchBonusPromo: Suscríbete antes del $1 y obtén 300 minutos de transcripción adicionales
       loginRequired: Inicia sesión para ver tu cuota de subtítulos con IA
-      logIn: Iniciar sesión
-      betaRequired: Los subtítulos con IA están en beta y aún no están habilitados para tu cuenta
-      betaApply: Solicitar acceso
+      upgradeRequired: Los subtítulos con IA requieren una suscripción Pro o Ultra
+      pools:
+        subscription: Cuota mensual
+        launchBonus: Regalo de lanzamiento
+      resetsOn: Se restablece el $1
+      expiresOn: Caduca el $1
       loadError: No se pudo cargar tu cuota. Inténtalo de nuevo más tarde.
-      summary: Usados $1 de $2 minutos, quedan $3
+      remainingOf: Quedan $1 / $2 min
+      used: Usados $1 min
     style:
       title: Estilo de subtítulos
       description: Modo de visualización, posición, fuentes, colores y fondo, ajustados sobre una vista previa en vivo
@@ -1215,6 +1220,7 @@ action:
   saveToNotebasePendingLoginDescription: Después de iniciar sesión, Read Frog creará la Notebase y guardará este resultado automáticamente.
   saveToNotebasePendingConnectedLoginDescription: Después de iniciar sesión, Read Frog guardará en la Notebase conectada si es posible. Si esta cuenta no puede usarla, creará una nueva Notebase y guardará este resultado.
   upgrade: Mejorar plan
+  updatePayment: Actualizar pago
   openCustomActions: Abrir Custom AI Actions
   openNotebase: Abrir Notebase
   contextDetailsTitleLabel: Título
@@ -1238,7 +1244,7 @@ shortcutKeySelector:
   placeholder: Introduce el atajo
 subtitles:
   loadingAiSubtitles: Cargando subtítulos con IA… (estimado 3 min)
-  requestAiSubtitles: Solicitar subtítulos con IA (Beta)
+  requestAiSubtitles: Solicitar subtítulos con IA
   usingAiSubtitles: Usando subtítulos con IA
   toggle:
     enabled: Traducción de subtítulos activada
@@ -1270,6 +1276,12 @@ subtitles:
     aiAuthFailed: Error de autenticación de API; revisa tu clave API
     aiServiceUnavailable: Servicio de traducción temporalmente no disponible
     aiQuotaExceeded: Cuota mensual de subtítulos con IA agotada
+    aiQuotaExceededWithReset: Cuota mensual de subtítulos con IA agotada · se restablece el $1
+    aiLoginRequired: Inicia sesión para ver tu cuota de subtítulos con IA
+    aiSubscriptionRequired: Los subtítulos con IA requieren una suscripción Pro o Ultra
+    aiPaymentRequired: Actualiza tu método de pago para seguir generando subtítulos con IA
+    aiVideoTooLong: Este video es demasiado largo para los subtítulos con IA
+    aiStillProcessing: La transcripción sigue en curso — vuelve a hacer clic en unos minutos para retomarla
     aiRequestFailed: Error al solicitar subtítulos con IA, inténtalo de nuevo más tarde
     aiNoResponse: El servicio AI no respondió; se usa el texto original
     translatedExportFailed: No se pudieron generar los subtítulos traducidos

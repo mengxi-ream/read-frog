@@ -949,13 +949,18 @@ options:
         description: AI가 자막을 문장처럼 읽히도록 다시 나눕니다. 타이밍도 AI가 정하므로 싱크가 어긋날 수 있습니다. LLM 번역 공급자가 필요합니다.
     aiQuota:
       title: AI 자막 사용량
-      description: 이번 달 AI 자막 전사 사용량 현황
+      description: AI 음성 인식으로 모든 동영상에 정확한 자막을 만들어 줍니다
+      launchBonusPromo: $1 이전에 구독하면 전사 300분을 추가로 드립니다
       loginRequired: 로그인하여 AI 자막 사용량 확인
-      logIn: 로그인
-      betaRequired: AI 자막은 베타 기능이며 아직 계정에 활성화되지 않았습니다
-      betaApply: 사용 신청
+      upgradeRequired: AI 자막은 Pro 또는 Ultra 구독이 필요합니다
+      pools:
+        subscription: 월간 할당량
+        launchBonus: 출시 기념 보너스
+      resetsOn: $1에 초기화
+      expiresOn: $1에 만료
       loadError: 사용량을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.
-      summary: $2분 중 $1분 사용, $3분 남음
+      remainingOf: 남은 시간 $1 / $2분
+      used: $1분 사용됨
     style:
       title: 자막 스타일
       description: 표시 모드, 위치, 글꼴, 색상, 배경을 미리보기로 확인하며 설정합니다
@@ -1099,6 +1104,7 @@ action:
   saveToNotebasePendingLoginDescription: 로그인 후 Read Frog가 Notebase를 만들고 이 결과를 자동으로 저장합니다.
   saveToNotebasePendingConnectedLoginDescription: 로그인 후 Read Frog는 가능하면 연결된 Notebase에 저장합니다. 이 계정에서 사용할 수 없으면 새 Notebase를 만들고 저장합니다.
   upgrade: 업그레이드
+  updatePayment: 결제 수단 업데이트
   openCustomActions: Custom AI Actions 열기
   openNotebase: Notebase 열기
   contextDetailsTitleLabel: 제목
@@ -1122,7 +1128,7 @@ shortcutKeySelector:
   placeholder: 단축키를 입력해 주세요
 subtitles:
   loadingAiSubtitles: AI 자막 불러오는 중… (예상 3분)
-  requestAiSubtitles: AI 자막 요청 (Beta)
+  requestAiSubtitles: AI 자막 요청
   usingAiSubtitles: AI 자막 사용 중
   toggle:
     enabled: 자막 번역을 켰습니다
@@ -1154,6 +1160,12 @@ subtitles:
     aiAuthFailed: API 인증에 실패했습니다. API 키를 확인해 주세요
     aiServiceUnavailable: 번역 서비스를 일시적으로 사용할 수 없습니다
     aiQuotaExceeded: 이번 달 AI 자막 사용량을 모두 사용했습니다
+    aiQuotaExceededWithReset: 이번 달 AI 자막 사용량을 모두 사용했습니다 · $1에 초기화
+    aiLoginRequired: 로그인하여 AI 자막 사용량 확인
+    aiSubscriptionRequired: AI 자막은 Pro 또는 Ultra 구독이 필요합니다
+    aiPaymentRequired: AI 자막을 계속 생성하려면 결제 수단을 업데이트하세요
+    aiVideoTooLong: 이 영상은 너무 길어 AI 자막을 만들 수 없습니다
+    aiStillProcessing: 아직 전사가 진행 중입니다. 몇 분 후 다시 클릭해 주세요
     aiRequestFailed: AI 자막 요청에 실패했습니다. 잠시 후 다시 시도해 주세요
     aiNoResponse: AI 서비스가 응답하지 않았습니다. 원문을 표시합니다
     translatedExportFailed: 번역 자막 생성에 실패했습니다

@@ -28,6 +28,7 @@ import {
   fetchSubtitlesSummary,
 } from "@/utils/subtitles/processor/translator"
 import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
+import { showAiSubtitlesWallToast, showSubtitlesErrorToast } from "@/utils/subtitles/toast"
 import {
   adPlayingAtom,
   currentTimeMsAtom,
@@ -678,10 +679,27 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
         })
       }
 
+      // A deliberate teardown — a superseded switch or a navigation — not a
+      // failure the user should read about. Its message is the literal string
+      // "Aborted", which would otherwise be painted onto the player untranslated.
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return false
+      }
+
       const errorMessage = error instanceof Error ? error.message : String(error)
 
       if (error instanceof ToastSubtitlesError) {
-        toastManager.add({ type: "error", title: errorMessage })
+        // The loading state has no auto-hide of its own (unlike "error"), so
+        // the toast branch has to clear it — otherwise the "Loading AI
+        // subtitles" pill stays on the player forever after a wall.
+        this.subtitlesScheduler?.setState("idle")
+        // Only the AI request has a control on screen to point at; the source
+        // is still AI here because reverting to native happens after this.
+        if (this.source === SUBTITLES_SOURCE.AI) {
+          showAiSubtitlesWallToast(errorMessage, error.action)
+        } else {
+          showSubtitlesErrorToast(errorMessage, error.action)
+        }
       } else {
         this.subtitlesScheduler?.setState("error", {
           message: this.config.silentErrors ? "" : errorMessage,
