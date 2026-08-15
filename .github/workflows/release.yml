@@ -37,14 +37,11 @@ jobs:
         with:
           ref: ${{ github.event.inputs.tag }}
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
+      - name: Setup pnpm and Node.js
+        uses: pnpm/setup@v2
         with:
-          node-version: "26"
-          cache: pnpm
+          cache: true
+          install: false
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile

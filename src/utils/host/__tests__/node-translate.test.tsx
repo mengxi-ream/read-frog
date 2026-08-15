@@ -87,6 +87,86 @@ describe("node translation", () => {
 
       document.elementFromPoint = originalElementFromPoint
     })
+
+    it("applies site-rule CSS while a node translation is visible", async () => {
+      const config = structuredClone(TEST_CONFIG)
+      config.siteRules = {
+        disabledBuiltInRules: [],
+        userRules: [
+          {
+            id: "node-translation-layout",
+            matches: window.location.hostname,
+            injectedCss: ".clamped-title { max-height: none !important; }",
+          },
+        ],
+      }
+
+      render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
+      const node = screen.getByTestId("test-node")
+      const originalElementFromPoint = Reflect.get(document, "elementFromPoint")
+      document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => node)
+
+      await act(async () => {
+        await removeOrShowNodeTranslation({ x: 150, y: 125 }, config)
+        flushBatchedOperations()
+      })
+
+      const siteRuleStyle = document.head.querySelector<HTMLStyleElement>(
+        "#read-frog-site-rule-styles",
+      )
+      expect(siteRuleStyle?.textContent).toContain(".clamped-title")
+
+      const wrapper = node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)
+      document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => wrapper as Element)
+      await act(async () => {
+        await removeOrShowNodeTranslation({ x: 150, y: 125 }, config)
+        flushBatchedOperations()
+      })
+
+      expect(document.head.querySelector("#read-frog-site-rule-styles")).toBeNull()
+      document.elementFromPoint = originalElementFromPoint
+    })
+
+    it("removes stale site-rule CSS when the current rule has no CSS", async () => {
+      const configWithCSS = structuredClone(TEST_CONFIG)
+      configWithCSS.siteRules = {
+        disabledBuiltInRules: [],
+        userRules: [
+          {
+            id: "node-translation-layout",
+            matches: window.location.hostname,
+            injectedCss: ".clamped-title { max-height: none !important; }",
+          },
+        ],
+      }
+      const configWithoutCSS = structuredClone(TEST_CONFIG)
+      configWithoutCSS.siteRules = {
+        disabledBuiltInRules: [],
+        userRules: [],
+      }
+
+      render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
+      const node = screen.getByTestId("test-node")
+      const originalElementFromPoint = Reflect.get(document, "elementFromPoint")
+      document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => node)
+
+      await act(async () => {
+        await removeOrShowNodeTranslation({ x: 150, y: 125 }, configWithCSS)
+        flushBatchedOperations()
+      })
+
+      expect(document.head.querySelector("#read-frog-site-rule-styles")).not.toBeNull()
+
+      const wrapper = node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)
+      document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => wrapper as Element)
+      await act(async () => {
+        await removeOrShowNodeTranslation({ x: 150, y: 125 }, configWithoutCSS)
+        flushBatchedOperations()
+      })
+
+      expect(document.head.querySelector("#read-frog-site-rule-styles")).toBeNull()
+      document.elementFromPoint = originalElementFromPoint
+    })
   })
   describe("hide translation", () => {
     it("should hide the translation when point is over the translation content node", async () => {
