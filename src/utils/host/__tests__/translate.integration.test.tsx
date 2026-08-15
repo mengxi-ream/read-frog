@@ -2872,6 +2872,94 @@ describe("translate", () => {
       })
     })
 
+    describe("plain-text document viewer", () => {
+      // A text/plain URL (nifty.org stories, RFC mirrors, raw logs) reaches the
+      // page as one browser-generated <pre> holding the whole file, with
+      // Chrome's own `white-space: pre-wrap` inline style. It is the only
+      // content such a page has, so the blanket PRE block left it untranslated.
+      const paragraphs = [
+        "Archive header lines describe the collection, the author\ncontact address and the posting date of the chapter.",
+        "The first paragraph of the story is hard wrapped across\nseveral short lines the way a usenet posting would be.",
+        "The closing paragraph of the fixture ends the story here.",
+      ]
+      const storyText = paragraphs.join("\n\n")
+      const translations = ["【存档头译文】", "【第一段译文】", "【结尾段译文】"]
+
+      function renderPlainTextViewer() {
+        Object.defineProperty(document, "contentType", {
+          value: "text/plain",
+          configurable: true,
+        })
+        render(
+          <pre data-testid="viewer" style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+            {storyText}
+          </pre>,
+        )
+        return screen.getByTestId("viewer")
+      }
+
+      afterEach(() => {
+        Reflect.deleteProperty(document, "contentType")
+        vi.mocked(translateTextForPage).mockReset().mockResolvedValue(MOCK_TRANSLATION)
+      })
+
+      it("bilingual mode: translates a text/plain page one blank-line paragraph at a time", async () => {
+        const translationByParagraph = new Map(
+          paragraphs.map((paragraph, index) => [paragraph, translations[index]!]),
+        )
+        vi.mocked(translateTextForPage).mockImplementation(async (text) => {
+          const translated = translationByParagraph.get(text)
+          if (!translated) throw new Error(`Unexpected paragraph: ${JSON.stringify(text)}`)
+          return translated
+        })
+
+        const viewer = renderPlainTextViewer()
+        await removeOrShowPageTranslation("bilingual", true)
+
+        // One request per blank-line paragraph, never one request for the file.
+        expect(translateTextForPage).toHaveBeenCalledTimes(paragraphs.length)
+        paragraphs.forEach((paragraph) => {
+          expect(translateTextForPage).toHaveBeenCalledWith(
+            paragraph,
+            "plain",
+            PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS,
+          )
+        })
+
+        const wrappers = [...viewer.querySelectorAll(`.${CONTENT_WRAPPER_CLASS}`)]
+        expect(wrappers).toHaveLength(paragraphs.length)
+
+        // Each translation lands directly after its own paragraph, and the
+        // host text is never rewritten.
+        const renderedText = viewer.textContent ?? ""
+        let cursor = -1
+        paragraphs.forEach((paragraph, index) => {
+          const sourceIndex = renderedText.indexOf(paragraph, cursor + 1)
+          expect(sourceIndex, `paragraph ${index + 1} kept intact`).toBeGreaterThan(cursor)
+          const translationIndex = renderedText.indexOf(translations[index]!, sourceIndex)
+          expect(translationIndex, `translation ${index + 1} follows it`).toBeGreaterThan(
+            sourceIndex,
+          )
+          cursor = translationIndex
+        })
+      })
+
+      it("keeps the same page untranslated when it is served as html", async () => {
+        render(
+          <pre data-testid="html-viewer" style={{ whiteSpace: "pre-wrap" }}>
+            {storyText}
+          </pre>,
+        )
+        const viewer = screen.getByTestId("html-viewer")
+
+        await removeOrShowPageTranslation("bilingual", true)
+
+        expect(translateTextForPage).not.toHaveBeenCalled()
+        expect(viewer.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
+        expect(viewer.textContent).toBe(storyText)
+      })
+    })
+
     describe("github diff table - should not translate review code snippets", () => {
       it("bilingual mode: should keep github release attribution in translation source", async () => {
         const originalLocation = window.location

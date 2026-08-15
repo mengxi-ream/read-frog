@@ -24,6 +24,14 @@ export interface ResolvedSiteRule {
    * code, rule `.add`/`.remove` deltas applied.
    */
   dontWalkTags: ReadonlySet<string> | null
+  /**
+   * The tag names a matched rule named in `dontWalkTags.add` (minus any a later
+   * rule removed), kept apart from the merged set so consumers can tell an
+   * explicit authoring choice from a shipped default. Read by the plain-text
+   * `<pre>` exemption in `utils/host/dom/filter`: the exemption un-blocks a tag
+   * the defaults block, so a rule that names it explicitly must still win.
+   */
+  dontWalkTagsExplicitAdds: ReadonlySet<string> | null
   dontWalkButTranslateTags: ReadonlySet<string> | null
   mainContentIgnoreTags: ReadonlySet<string> | null
   forceBlockTags: ReadonlySet<string> | null
@@ -43,6 +51,7 @@ export const EMPTY_RESOLVED_SITE_RULE: ResolvedSiteRule = {
   forceInlineStyleSelector: null,
   preserveTextSelector: null,
   dontWalkTags: null,
+  dontWalkTagsExplicitAdds: null,
   dontWalkButTranslateTags: null,
   mainContentIgnoreTags: null,
   forceBlockTags: null,
@@ -161,6 +170,8 @@ function mergeTagSetDelta(
   removeKey: keyof SiteRule,
   defaults: ReadonlySet<string>,
   protectedTags?: ReadonlySet<string>,
+  /** Filled with the tag names `addKey` named, in the same three casings. */
+  explicitAddsTarget?: Set<string>,
 ): ReadonlySet<string> | null {
   if (!matched.some((rule) => rule[addKey] !== undefined || rule[removeKey] !== undefined)) {
     return null
@@ -186,6 +197,9 @@ function mergeTagSetDelta(
       merged.add(tagName)
       merged.add(tagName.toUpperCase())
       merged.add(tagName.toLowerCase())
+      explicitAddsTarget?.add(tagName)
+      explicitAddsTarget?.add(tagName.toUpperCase())
+      explicitAddsTarget?.add(tagName.toLowerCase())
     }
     for (const tagName of validTagNames(rule[removeKey])) {
       if (protectedTags?.has(tagName.toUpperCase())) {
@@ -195,6 +209,11 @@ function mergeTagSetDelta(
       merged.delete(tagName)
       merged.delete(tagName.toUpperCase())
       merged.delete(tagName.toLowerCase())
+      // A later rule removing what an earlier one added cancels the explicit
+      // choice too, so the last word decides.
+      explicitAddsTarget?.delete(tagName)
+      explicitAddsTarget?.delete(tagName.toUpperCase())
+      explicitAddsTarget?.delete(tagName.toLowerCase())
     }
   }
 
@@ -229,6 +248,7 @@ export function resolveSiteRule(
 
   let minCharacters: number | null = null
   let minWords: number | null = null
+  const dontWalkTagsExplicitAdds = new Set<string>()
   const cssParts: string[] = []
   for (const rule of matched) {
     if (rule.minCharacters !== undefined) {
@@ -295,7 +315,9 @@ export function resolveSiteRule(
       "dontWalkTags.remove",
       DEFAULT_TAG_SETS.dontWalkTags,
       PROTECTED_DONT_WALK_TAGS,
+      dontWalkTagsExplicitAdds,
     ),
+    dontWalkTagsExplicitAdds: dontWalkTagsExplicitAdds.size > 0 ? dontWalkTagsExplicitAdds : null,
     dontWalkButTranslateTags: mergeTagSetDelta(
       matched,
       "dontWalkButTranslateTags.add",
