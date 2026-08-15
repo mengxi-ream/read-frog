@@ -1161,7 +1161,7 @@ subtitles:
     aiServiceUnavailable: Служба перевода временно недоступна
     aiQuotaExceeded: Месячный лимит ИИ-субтитров исчерпан
     aiQuotaExceededWithReset: Месячный лимит ИИ-субтитров исчерпан · сброс $1
-    aiLoginRequired: Войдите, чтобы создавать ИИ-субтитры
+    aiLoginRequired: Войдите, чтобы посмотреть лимит ИИ-субтитров
     aiSubscriptionRequired: Для ИИ-субтитров нужна подписка Pro или Ultra
     aiPaymentRequired: Обновите способ оплаты, чтобы продолжить создание ИИ-субтитров
     aiVideoTooLong: Это видео слишком длинное для ИИ-субтитров

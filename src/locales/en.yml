@@ -1277,7 +1277,7 @@ subtitles:
     aiServiceUnavailable: Translation service temporarily unavailable
     aiQuotaExceeded: Monthly AI subtitle quota used up
     aiQuotaExceededWithReset: Monthly AI subtitle quota used up · resets on $1
-    aiLoginRequired: Log in to generate AI subtitles
+    aiLoginRequired: Log in to view your AI subtitles quota
     aiSubscriptionRequired: AI subtitles require a Pro or Ultra subscription
     aiPaymentRequired: Update your payment method to keep generating AI subtitles
     aiVideoTooLong: This video is too long for AI subtitles

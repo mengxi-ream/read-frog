@@ -20,6 +20,11 @@ const PORTALLED_PANEL_POPUP_SELECTOR = [
   "[data-slot='select-content']",
   "[data-slot='color-picker-content']",
   "[data-slot='color-picker-format-content']",
+  // The anchored toast, which hangs off a control inside the panel. Dismissing
+  // on a press here is worse than the usual symptom: closing the panel hides
+  // its anchor, base-ui marks the toast anchor-hidden, and the button the press
+  // was aimed at goes `visibility: hidden` before the click can land on it.
+  "[data-slot='toast-positioner']",
 ].join(",")
 
 function isTranslateTriggerTarget(path: EventTarget[]) {

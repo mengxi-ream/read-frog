@@ -1277,7 +1277,7 @@ subtitles:
     aiServiceUnavailable: Servicio de traducción temporalmente no disponible
     aiQuotaExceeded: Cuota mensual de subtítulos con IA agotada
     aiQuotaExceededWithReset: Cuota mensual de subtítulos con IA agotada · se restablece el $1
-    aiLoginRequired: Inicia sesión para generar subtítulos con IA
+    aiLoginRequired: Inicia sesión para ver tu cuota de subtítulos con IA
     aiSubscriptionRequired: Los subtítulos con IA requieren una suscripción Pro o Ultra
     aiPaymentRequired: Actualiza tu método de pago para seguir generando subtítulos con IA
     aiVideoTooLong: Este video es demasiado largo para los subtítulos con IA

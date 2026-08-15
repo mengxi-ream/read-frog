@@ -1161,7 +1161,7 @@ subtitles:
     aiServiceUnavailable: 翻訳サービスは一時的に利用できません
     aiQuotaExceeded: 今月のAI字幕の利用枠を使い切りました
     aiQuotaExceededWithReset: 今月のAI字幕の利用枠を使い切りました・$1 にリセット
-    aiLoginRequired: AI字幕を生成するにはログインしてください
+    aiLoginRequired: ログインしてAI字幕の利用枠を確認
     aiSubscriptionRequired: AI字幕には Pro または Ultra プランが必要です
     aiPaymentRequired: AI字幕の生成を続けるにはお支払い方法を更新してください
     aiVideoTooLong: この動画は長すぎるためAI字幕を生成できません

@@ -6,6 +6,7 @@ import { SUBTITLES_SOURCE } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 import { ensureAiSubtitlesAccess } from "@/utils/subtitles/ai/access-guard"
+import { setAiSubtitlesToastAnchor } from "@/utils/subtitles/toast"
 import { subtitlesSourceAtom, subtitlesStore, subtitlesVisibleAtom } from "../../../atoms"
 import { useSubtitlesUI } from "../../subtitles-ui-context"
 import { SubtitlesSettingsItem } from "./subtitles-settings-item"
@@ -47,6 +48,9 @@ export function RequestAiSubtitlesItem() {
     >
       <Button
         id={buttonId}
+        // Anchors the refusal toast, so "you need a plan" lands on the control
+        // that was pressed instead of in the far corner of the page.
+        ref={setAiSubtitlesToastAnchor}
         type="button"
         variant="ghost-secondary"
         size="icon-sm"

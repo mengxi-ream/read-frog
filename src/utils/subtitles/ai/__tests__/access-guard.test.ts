@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const getSession = vi.fn<(...args: unknown[]) => Promise<unknown>>()
 const getUsage = vi.fn<(...args: unknown[]) => Promise<unknown>>()
-const showSubtitlesErrorToast = vi.fn<(...args: unknown[]) => void>()
+const showAiSubtitlesWallToast = vi.fn<(...args: unknown[]) => void>()
 
 vi.mock("@/env", () => ({
   env: { WXT_WEBSITE_URL: "https://readfrog.app" },
@@ -25,7 +25,7 @@ vi.mock("@/utils/orpc/client", () => ({
 }))
 
 vi.mock("@/utils/subtitles/toast", () => ({
-  showSubtitlesErrorToast: (...args: unknown[]) => showSubtitlesErrorToast(...args),
+  showAiSubtitlesWallToast: (...args: unknown[]) => showAiSubtitlesWallToast(...args),
 }))
 
 const { ensureAiSubtitlesAccess, ensureAiSubtitlesEntitled, ensureSignedIn } =
@@ -55,7 +55,7 @@ function usage(overrides: Record<string, unknown> = {}) {
 
 /** The (title, action) pair the guard handed the toast. */
 function lastToast() {
-  const call = showSubtitlesErrorToast.mock.calls.at(-1)
+  const call = showAiSubtitlesWallToast.mock.calls.at(-1)
   return { title: call?.[0] as string, action: call?.[1] as { label: string; url: string } }
 }
 
@@ -63,7 +63,7 @@ describe("ai subtitles access guard", () => {
   beforeEach(() => {
     getSession.mockReset()
     getUsage.mockReset()
-    showSubtitlesErrorToast.mockReset()
+    showAiSubtitlesWallToast.mockReset()
   })
 
   it("prompts to log in and short-circuits when signed out", async () => {
@@ -157,7 +157,7 @@ describe("ai subtitles access guard", () => {
     getUsage.mockResolvedValue({ usedMinutes: 0, limitMinutes: 250, remainingMinutes: 250 })
 
     await expect(ensureAiSubtitlesEntitled()).resolves.toBe(true)
-    expect(showSubtitlesErrorToast).not.toHaveBeenCalled()
+    expect(showAiSubtitlesWallToast).not.toHaveBeenCalled()
   })
 
   it("lets a subscriber with quota left through without a toast", async () => {
@@ -165,7 +165,7 @@ describe("ai subtitles access guard", () => {
     getUsage.mockResolvedValue(usage())
 
     await expect(ensureAiSubtitlesAccess()).resolves.toBe(true)
-    expect(showSubtitlesErrorToast).not.toHaveBeenCalled()
+    expect(showAiSubtitlesWallToast).not.toHaveBeenCalled()
   })
 
   // A network blip must not wall off a paying subscriber; `create` stays the authority.
@@ -173,7 +173,7 @@ describe("ai subtitles access guard", () => {
     getUsage.mockRejectedValue(new Error("network down"))
 
     await expect(ensureAiSubtitlesEntitled()).resolves.toBe(true)
-    expect(showSubtitlesErrorToast).not.toHaveBeenCalled()
+    expect(showAiSubtitlesWallToast).not.toHaveBeenCalled()
   })
 
   it("treats a 401 from the usage check as a stale session and prompts to log in", async () => {
@@ -187,6 +187,6 @@ describe("ai subtitles access guard", () => {
     getSession.mockResolvedValue(SIGNED_IN)
 
     await expect(ensureSignedIn()).resolves.toBe(true)
-    expect(showSubtitlesErrorToast).not.toHaveBeenCalled()
+    expect(showAiSubtitlesWallToast).not.toHaveBeenCalled()
   })
 })

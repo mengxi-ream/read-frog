@@ -28,7 +28,7 @@ import {
   fetchSubtitlesSummary,
 } from "@/utils/subtitles/processor/translator"
 import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
-import { showSubtitlesErrorToast } from "@/utils/subtitles/toast"
+import { showAiSubtitlesWallToast, showSubtitlesErrorToast } from "@/utils/subtitles/toast"
 import {
   adPlayingAtom,
   currentTimeMsAtom,
@@ -693,7 +693,13 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
         // the toast branch has to clear it — otherwise the "Loading AI
         // subtitles" pill stays on the player forever after a wall.
         this.subtitlesScheduler?.setState("idle")
-        showSubtitlesErrorToast(errorMessage, error.action)
+        // Only the AI request has a control on screen to point at; the source
+        // is still AI here because reverting to native happens after this.
+        if (this.source === SUBTITLES_SOURCE.AI) {
+          showAiSubtitlesWallToast(errorMessage, error.action)
+        } else {
+          showSubtitlesErrorToast(errorMessage, error.action)
+        }
       } else {
         this.subtitlesScheduler?.setState("error", {
           message: this.config.silentErrors ? "" : errorMessage,

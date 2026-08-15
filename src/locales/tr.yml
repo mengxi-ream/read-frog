@@ -1161,7 +1161,7 @@ subtitles:
     aiServiceUnavailable: Çeviri hizmeti geçici olarak kullanılamıyor
     aiQuotaExceeded: Aylık yapay zeka altyazı kotanız doldu
     aiQuotaExceededWithReset: Aylık yapay zeka altyazı kotanız doldu · $1 tarihinde sıfırlanır
-    aiLoginRequired: Yapay zeka altyazıları oluşturmak için giriş yapın
+    aiLoginRequired: Yapay zeka altyazı kotanızı görmek için giriş yapın
     aiSubscriptionRequired: Yapay zeka altyazıları için Pro veya Ultra aboneliği gerekir
     aiPaymentRequired: Yapay zeka altyazıları oluşturmaya devam etmek için ödeme yönteminizi güncelleyin
     aiVideoTooLong: Bu video yapay zeka altyazıları için çok uzun

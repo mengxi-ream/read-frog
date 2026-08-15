@@ -1161,7 +1161,7 @@ subtitles:
     aiServiceUnavailable: Dịch vụ dịch thuật tạm thời không khả dụng
     aiQuotaExceeded: Đã dùng hết hạn mức phụ đề AI trong tháng
     aiQuotaExceededWithReset: Đã dùng hết hạn mức phụ đề AI trong tháng · đặt lại vào $1
-    aiLoginRequired: Đăng nhập để tạo phụ đề AI
+    aiLoginRequired: Đăng nhập để xem hạn mức phụ đề AI của bạn
     aiSubscriptionRequired: Phụ đề AI cần gói Pro hoặc Ultra
     aiPaymentRequired: Cập nhật phương thức thanh toán để tiếp tục tạo phụ đề AI
     aiVideoTooLong: Video này quá dài để tạo phụ đề AI

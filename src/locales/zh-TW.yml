@@ -1277,7 +1277,7 @@ subtitles:
     aiServiceUnavailable: 翻譯服務暫時無法使用
     aiQuotaExceeded: 本月 AI 字幕額度已用完
     aiQuotaExceededWithReset: 本月 AI 字幕額度已用完，$1 重置
-    aiLoginRequired: 登入後即可生成 AI 字幕
+    aiLoginRequired: 登入後查看你的 AI 字幕額度
     aiSubscriptionRequired: AI 字幕需要 Pro 或 Ultra 訂閱
     aiPaymentRequired: 請更新付款方式後繼續產生 AI 字幕
     aiVideoTooLong: 影片過長，暫不支援產生 AI 字幕

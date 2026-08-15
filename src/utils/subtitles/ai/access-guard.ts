@@ -2,15 +2,15 @@ import { authClient } from "@/utils/auth/auth-client"
 import { i18n } from "@/utils/i18n"
 import { isORPCForbiddenError, isORPCUnauthorizedError } from "@/utils/notebase/errors"
 import { orpcClient } from "@/utils/orpc/client"
-import { showSubtitlesErrorToast } from "@/utils/subtitles/toast"
+import { showAiSubtitlesWallToast } from "@/utils/subtitles/toast"
 import { formatQuotaDate, logInAction, quotaResetAt, upgradeAction } from "./entitlement"
 
 function promptLogIn(): void {
-  showSubtitlesErrorToast(i18n.t("subtitles.errors.aiLoginRequired"), logInAction())
+  showAiSubtitlesWallToast(i18n.t("subtitles.errors.aiLoginRequired"), logInAction())
 }
 
 function promptUpgrade(): void {
-  showSubtitlesErrorToast(i18n.t("subtitles.errors.aiSubscriptionRequired"), upgradeAction())
+  showAiSubtitlesWallToast(i18n.t("subtitles.errors.aiSubscriptionRequired"), upgradeAction())
 }
 
 export async function ensureSignedIn(): Promise<boolean> {
@@ -68,7 +68,7 @@ export async function ensureAiSubtitlesEntitled(): Promise<boolean> {
     // is already in hand here — cheaper than asking again once `create` has
     // refused.
     const resetAt = formatQuotaDate(quotaResetAt(usage.pools))
-    showSubtitlesErrorToast(
+    showAiSubtitlesWallToast(
       resetAt
         ? i18n.t("subtitles.errors.aiQuotaExceededWithReset", [resetAt])
         : i18n.t("subtitles.errors.aiQuotaExceeded"),
