@@ -2958,6 +2958,73 @@ describe("translate", () => {
         expect(viewer.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
         expect(viewer.textContent).toBe(storyText)
       })
+
+      function mockPerParagraphTranslations() {
+        const translationByParagraph = new Map(
+          paragraphs.map((paragraph, index) => [paragraph, translations[index]!]),
+        )
+        vi.mocked(translateTextForPage).mockImplementation(async (text) => {
+          const translated = translationByParagraph.get(text)
+          if (!translated) throw new Error(`Unexpected paragraph: ${JSON.stringify(text)}`)
+          return translated
+        })
+      }
+
+      it("translation only mode: swaps one blank-line paragraph at a time", async () => {
+        mockPerParagraphTranslations()
+        const viewer = renderPlainTextViewer()
+
+        await removeOrShowPageTranslation("translationOnly", true)
+
+        // One request per paragraph — never the whole file in one payload.
+        expect(translateTextForPage).toHaveBeenCalledTimes(paragraphs.length)
+        expect(viewer.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
+        expect(viewer.textContent).toBe(translations.join("\n\n"))
+        expect(viewer).toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+      })
+
+      it("translation only mode: restores the original single text node on toggle", async () => {
+        mockPerParagraphTranslations()
+        const viewer = renderPlainTextViewer()
+
+        await removeOrShowPageTranslation("translationOnly", true)
+        expect(viewer.childNodes.length).toBeGreaterThan(1)
+
+        await removeOrShowPageTranslation("translationOnly", true)
+
+        // Cuts rejoined: the viewer is one Text node holding the file again.
+        expect(viewer.textContent).toBe(storyText)
+        expect(viewer.childNodes).toHaveLength(1)
+        expect(viewer).not.toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+      })
+
+      it("translation only mode: leaves no trace when every paragraph echoes its source", async () => {
+        vi.mocked(translateTextForPage).mockImplementation(async (text) => text)
+        const viewer = renderPlainTextViewer()
+
+        await removeOrShowPageTranslation("translationOnly", true)
+
+        expect(viewer.textContent).toBe(storyText)
+        expect(viewer.childNodes).toHaveLength(1)
+        expect(viewer).not.toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+      })
+
+      it("translation only mode: keeps a failing paragraph from taking the others down", async () => {
+        vi.mocked(translateTextForPage).mockImplementation(async (text) => {
+          if (text === paragraphs[1]) throw new Error("provider exploded")
+          const index = paragraphs.indexOf(text)
+          return translations[index]!
+        })
+        const viewer = renderPlainTextViewer()
+
+        await removeOrShowPageTranslation("translationOnly", true)
+
+        expect(viewer.textContent).toContain(translations[0])
+        expect(viewer.textContent).toContain(translations[2])
+        // The failed unit keeps its own source text and its error UI.
+        expect(viewer.textContent).toContain(paragraphs[1])
+        await waitForTranslationError(viewer)
+      })
     })
 
     describe("github diff table - should not translate review code snippets", () => {
