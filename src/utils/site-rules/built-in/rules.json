@@ -1077,13 +1077,15 @@
       ".time",
       ".peer-title",
       ".document-wrapper",
-      ".message.spoilers-container custom-emoji-element"
+      ".message.spoilers-container custom-emoji-element",
+      ".MessageMeta"
     ],
     "includeSelectors": [
       ".text-content",
       ".message",
       ".reply-markup-button-text",
       ".bot-commands-list-element-description",
+      ".message-content-wrapper .Button",
       "[class*='tabs-tab page-password active']",
       "#auth-qr-form"
     ],

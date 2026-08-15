@@ -5,6 +5,7 @@ import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
   BLOCK_ATTRIBUTE,
   INLINE_ATTRIBUTE,
+  NOTRANSLATE_CLASS,
   PARAGRAPH_ATTRIBUTE,
   WALKED_ATTRIBUTE,
 } from "@/utils/constants/dom-labels"
@@ -435,6 +436,54 @@ describe("document root labeling guard", () => {
       ]) {
         document.documentElement.removeAttribute(attr)
       }
+    }
+  })
+})
+
+describe("document root notranslate exemption", () => {
+  function cleanUpRoot() {
+    document.documentElement.classList.remove(NOTRANSLATE_CLASS)
+    document.body.innerHTML = ""
+    for (const attr of [WALKED_ATTRIBUTE, PARAGRAPH_ATTRIBUTE, BLOCK_ATTRIBUTE, INLINE_ATTRIBUTE]) {
+      document.documentElement.removeAttribute(attr)
+    }
+  }
+
+  it("walks the page when the document root carries the notranslate class", () => {
+    // Telegram Web A ships `<html translate="no" class="notranslate">` while
+    // Telegram Web K ships a bare `<html>`. Once #1992 moved the walk root from
+    // <body> to documentElement, that one class aborted the walk on its first
+    // blocked-element check and page translation labeled nothing at all.
+    document.documentElement.classList.add(NOTRANSLATE_CLASS)
+    document.body.innerHTML = `<div><p id="msg">Message body text</p></div>`
+
+    try {
+      walkAndLabelElement(document.documentElement, "root-notranslate", DEFAULT_CONFIG)
+
+      expect(document.getElementById("msg")).toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    } finally {
+      cleanUpRoot()
+    }
+  })
+
+  it("still blocks notranslate elements nested below the document root", () => {
+    // The exemption is root-only: nested opt-outs (and read frog's own injected
+    // UI, which carries the same class) must keep blocking descent.
+    document.documentElement.classList.add(NOTRANSLATE_CLASS)
+    document.body.innerHTML = `
+      <div>
+        <p id="msg">Message body text</p>
+        <div class="${NOTRANSLATE_CLASS}"><p id="opted-out">Opted out text</p></div>
+      </div>
+    `
+
+    try {
+      walkAndLabelElement(document.documentElement, "nested-notranslate", DEFAULT_CONFIG)
+
+      expect(document.getElementById("msg")).toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+      expect(document.getElementById("opted-out")).not.toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    } finally {
+      cleanUpRoot()
     }
   })
 })
