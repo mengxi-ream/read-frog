@@ -407,10 +407,10 @@ describe("feature providers", () => {
       const result = computeSelectionToolbarCustomActionFallbacksAfterDeletion(
         "deleted-provider",
         config,
-        [getProviderById("deepseek-default")],
+        [getProviderById("jalapenocloud-default")],
       )
 
-      expect(result?.builtInActions.dictionary.providerId).toBe("deepseek-default")
+      expect(result?.builtInActions.dictionary.providerId).toBe("jalapenocloud-default")
       expect(result?.customActions).toEqual([])
     })
 
@@ -447,7 +447,7 @@ describe("feature providers", () => {
           ...getProviderById("openai-default"),
           enabled: false,
         },
-        getProviderById("deepseek-default"),
+        getProviderById("jalapenocloud-default"),
       ]
 
       const result = computeSelectionToolbarCustomActionFallbacksAfterDeletion(
@@ -459,7 +459,7 @@ describe("feature providers", () => {
       expect(result?.customActions).toEqual([
         expect.objectContaining({
           id: "action-a",
-          providerId: "deepseek-default",
+          providerId: "jalapenocloud-default",
         }),
       ])
     })
@@ -532,7 +532,7 @@ describe("feature providers", () => {
       const result = resolveLanguageDetectionConfigForModeChange(
         {
           mode: "basic",
-          providerId: "deepseek-default",
+          providerId: "jalapenocloud-default",
         },
         "llm",
         DEFAULT_CONFIG.providersConfig,
@@ -540,7 +540,7 @@ describe("feature providers", () => {
 
       expect(result).toEqual({
         mode: "llm",
-        providerId: "deepseek-default",
+        providerId: "jalapenocloud-default",
       })
     })
 
@@ -554,7 +554,7 @@ describe("feature providers", () => {
             enabled: false,
           },
           {
-            ...getProviderById("deepseek-default"),
+            ...getProviderById("jalapenocloud-default"),
             enabled: false,
           },
         ],
@@ -582,10 +582,10 @@ describe("feature providers", () => {
           ...getProviderById("openai-default"),
           enabled: false,
         },
-        getProviderById("deepseek-default"),
+        getProviderById("jalapenocloud-default"),
       ])
 
-      expect(result).toBe("deepseek-default")
+      expect(result).toBe("jalapenocloud-default")
     })
   })
 })

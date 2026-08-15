@@ -72,6 +72,21 @@
   --animate-subtitle-pending-breath: subtitle-pending-breath 2s ease-in-out infinite;
   --animate-subtitle-pending-appear: subtitle-pending-appear 250ms ease-out both;
   --animate-subtitle-fade-in: subtitle-fade-in 200ms ease-out both;
+  /* Three pulses, 2.7s end to end — kept in sync with
+     PROVIDER_FIELD_HIGHLIGHT_DURATION_MS, which clears the class afterwards. */
+  --animate-ring-flash: ring-flash 0.9s ease-out 3;
+
+  /* Pulses a field into the look `Input` already gives `aria-invalid` — destructive border,
+     3px destructive ring — without claiming the field is actually invalid.
+     Deliberately has no 0%/100% frame: the browser fills those in from whatever the element
+     computes to, so the field flashes out of and back into its own resting border and shadow
+     instead of a hardcoded copy of them. */
+  @keyframes ring-flash {
+    40% {
+      border-color: var(--rf-ring-flash-border);
+      box-shadow: 0 0 0 3px var(--rf-ring-flash-ring);
+    }
+  }
 
   @keyframes subtitle-pending-breath {
     0%,
@@ -229,6 +244,11 @@
   --rf-accent-blue: oklch(69.256% 0.16062 265.19);
   --rf-accent-blue-hover: oklch(64.859% 0.16447 264.759);
   --rf-elevation-floating: 0 8px 40px 0 rgb(0 0 0 / 0.08), 0 0 1px 0 rgb(0 0 0 / 0.08);
+  /* The colours `--animate-ring-flash` pulses to. Kept in step with the `aria-invalid` rules
+     on `Input`, whose destructive tint differs per theme, since a keyframe cannot carry a
+     `.dark` variant of its own. */
+  --rf-ring-flash-border: var(--rf-destructive);
+  --rf-ring-flash-ring: color-mix(in oklab, var(--rf-destructive) 20%, transparent);
 }
 
 .dark {
@@ -279,6 +299,10 @@
   --rf-accent-blue: oklch(58% 0.18 265.19);
   --rf-accent-blue-hover: oklch(62.5% 0.175 264.759);
   --rf-elevation-floating: 0 8px 40px 0 rgb(0 0 0 / 0.28), 0 0 1px 0 rgb(0 0 0 / 0.28);
+  /* Mirrors `dark:aria-invalid:*` on `Input`: a softened border and a stronger ring, because
+     the light-theme pair is too hot against a near-black surface. */
+  --rf-ring-flash-border: color-mix(in oklab, var(--rf-destructive) 50%, transparent);
+  --rf-ring-flash-ring: color-mix(in oklab, var(--rf-destructive) 40%, transparent);
 }
 
 @layer base {
@@ -307,7 +331,8 @@ body {
     .animate-toast-error-even,
     .animate-subtitle-pending-breath,
     .animate-subtitle-pending-appear,
-    .animate-subtitle-fade-in
+    .animate-subtitle-fade-in,
+    .animate-ring-flash
   ) {
     animation: none;
   }

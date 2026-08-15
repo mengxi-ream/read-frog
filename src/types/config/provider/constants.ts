@@ -30,6 +30,7 @@ export const TRANSLATE_PROVIDER_TYPES = [
   "xai",
   "openai-compatible",
   "open-responses",
+  "jalapenocloud",
   "atlascloud",
   "openrouter",
   "minimax",
@@ -68,6 +69,7 @@ export const LLM_PROVIDER_TYPES = [
   "xai",
   "openai-compatible",
   "open-responses",
+  "jalapenocloud",
   "atlascloud",
   "openrouter",
   "minimax",
@@ -100,6 +102,7 @@ const OPENAI_COMPATIBLE_CUSTOM_LLM_PROVIDER_TYPE = "openai-compatible"
 const OPEN_RESPONSES_CUSTOM_LLM_PROVIDER_TYPE = "open-responses"
 
 const HOSTED_OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES = [
+  "jalapenocloud",
   "atlascloud",
   "openrouter",
   "minimax",
@@ -184,6 +187,7 @@ export function isDedicatedLLMProvider(provider: string): provider is DedicatedL
 export const API_PROVIDER_TYPES = [
   "openai-compatible",
   "open-responses",
+  "jalapenocloud",
   "atlascloud",
   "openrouter",
   "minimax",
@@ -240,6 +244,7 @@ export const ALL_PROVIDER_TYPES = [
   "deepl",
   "openai-compatible",
   "open-responses",
+  "jalapenocloud",
   "atlascloud",
   "openrouter",
   "minimax",

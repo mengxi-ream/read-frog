@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/base-ui/button"
 import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
 import { anchoredToastManager } from "@/components/ui/base-ui/toast"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
-import { isAPIProviderConfig } from "@/types/config/provider"
+import { isAPIProvider, isAPIProviderConfig } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { providerConfigAtom } from "@/utils/atoms/provider"
 import { getAPIProvidersConfig, getProviderConfigById } from "@/utils/config/helpers"
@@ -28,7 +28,12 @@ import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { getHostedAiTierStatus } from "@/utils/hosted-ai/status"
 import { i18n } from "@/utils/i18n"
-import { getRequestedProviderId, PROVIDER_CONFIG_SECTION_ID } from "@/utils/navigation"
+import {
+  getRequestedProviderId,
+  getRequestedProviderType,
+  PROVIDER_CONFIG_SECTION_ID,
+  shouldHighlightApiKey,
+} from "@/utils/navigation"
 import { isDurablyUnusableTier } from "@/utils/providers/provider-availability"
 import {
   BUILT_IN_AI_PROVIDER_LOGO,
@@ -42,34 +47,81 @@ import { EntityEditorLayout } from "../../../components/entity-editor-layout"
 import { EntityListItem } from "../../../components/entity-list-item"
 import { EntityListRail } from "../../../components/entity-list-rail"
 import AddProviderDialog from "./add-provider-dialog"
-import { selectedProviderIdAtom } from "./atoms"
+import { highlightedProviderFieldAtom, selectedProviderIdAtom } from "./atoms"
 import { ProviderConfigForm } from "./provider-config-form"
 import { BuiltInProviderEditor, ProviderEditor } from "./provider-editor"
+import { addProvider } from "./utils"
 
 /**
- * Opens the provider named by a `?provider=` deep link, the one an API-key prompt elsewhere on
- * the page points at. Keyed on the history entry so the same link works twice, and held back
- * until the id resolves so a link followed before the config loads is not dropped.
+ * Opens the provider a deep link points at — by `?provider=` id, the one an API-key prompt
+ * elsewhere on the page uses, or by `?providerType=` for links written by someone who cannot know
+ * the id, such as a provider's own site. A type with no provider behind it gets one created.
+ *
+ * Keyed on the history entry so the same link works twice, and an id is held back until it
+ * resolves so a link followed before the config loads is not dropped.
  */
 function useRequestedProvider() {
   const { search, key: locationKey } = useLocation()
-  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const [providersConfig, setProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
   const setSelectedProviderId = useSetAtom(selectedProviderIdAtom)
+  const setHighlightedField = useSetAtom(highlightedProviderFieldAtom)
   const handledLocationRef = useRef<string | null>(null)
 
   useEffect(() => {
     const marker = `${locationKey}:${search}`
     if (handledLocationRef.current === marker) return
 
+    const highlightRequestedField = () => {
+      if (shouldHighlightApiKey(search)) {
+        setHighlightedField("apiKey")
+      }
+    }
+
     const providerId = getRequestedProviderId(search)
-    if (!providerId) return
-    if (!isBuiltInAiProviderId(providerId) && !getProviderConfigById(providersConfig, providerId)) {
+    if (providerId) {
+      if (
+        !isBuiltInAiProviderId(providerId) &&
+        !getProviderConfigById(providersConfig, providerId)
+      ) {
+        return
+      }
+
+      handledLocationRef.current = marker
+      setSelectedProviderId(providerId)
+      highlightRequestedField()
       return
     }
 
+    const requestedType = getRequestedProviderType(search)
+    if (!requestedType || !isAPIProvider(requestedType)) return
+
+    // Claimed before anything awaits: adding a provider rewrites the config this effect reads,
+    // and React's development double-invoke runs it a second time. Either would add a duplicate.
     handledLocationRef.current = marker
-    setSelectedProviderId(providerId)
-  }, [locationKey, search, providersConfig, setSelectedProviderId])
+
+    const existingProvider = getAPIProvidersConfig(providersConfig).find(
+      (provider) => provider.provider === requestedType,
+    )
+    if (existingProvider) {
+      setSelectedProviderId(existingProvider.id)
+      highlightRequestedField()
+      return
+    }
+
+    void addProvider(
+      requestedType,
+      providersConfig,
+      setProvidersConfig,
+      setSelectedProviderId,
+    ).then(highlightRequestedField)
+  }, [
+    locationKey,
+    search,
+    providersConfig,
+    setProvidersConfig,
+    setSelectedProviderId,
+    setHighlightedField,
+  ])
 }
 
 export function ProvidersConfig() {
@@ -217,7 +269,12 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
     >
       <EntityListItem.Badges>
         <>
-          {sponsor?.sponsoring && <SponsorBadge className="absolute -top-2 left-2 text-[10px]" />}
+          {sponsor?.sponsoring && (
+            <SponsorBadge
+              labelI18nKey={sponsor.badgeI18nKey}
+              className="absolute -top-2 left-2 text-[10px]"
+            />
+          )}
           <FeatureCountBadge count={totalAssigned}>
             {assignedFeatures.map((key) => (
               <li key={key}>{i18n.t(getFeatureLabelI18nKey(key))}</li>

@@ -148,11 +148,13 @@ options:
         inputTranslation: 입력 번역
         languageDetection: 언어 감지
     sponsorCta: 빠르고 가성비 좋은 AI 받기
+    sponsorCtaJalapenoCloud: GLM 5.2 50% 할인
     setApiKeyWarning:
       message: API 키는 $1 페이지에서 설정하세요
     badges:
       featureCount: $1 개 기능
       sponsor: 스폰서
+      sponsorJalapenoCloud: $$2 무료
     dialog:
       title: 새 제공업체 추가
       groups:
@@ -243,6 +245,7 @@ options:
         anthropic: 안전성과 추론 능력이 뛰어난 Claude 모델
         xai: 실시간 데이터 접근이 가능한 Grok 모델을 제공하는 일론 머스크의 AI 회사
         atlascloud: DeepSeek, Kimi, Qwen, Doubao, GLM 등 최신 모델에 OpenAI 호환 방식으로 접근하는 통합 플랫폼
+        jalapenocloud: 최고의 LLM 개발팀이 신뢰하는 엔터프라이즈급 AI, 이제 당신도
         siliconflow: 중국 및 국제 모델을 위한 고성능 추론 플랫폼
         tensdaq: 혁신적인 경매 AI MaaS 플랫폼으로 시장 수요와 공급에 따라 가격이 결정되어 고비용 고정 요금제를 없앰
         openaiCompatible: OpenAI Chat Completions API와 호환되는 사용자 지정 엔드포인트에 연결

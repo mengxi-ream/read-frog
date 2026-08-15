@@ -1,8 +1,11 @@
 import type { APIProviderConfig } from "@/types/config/provider"
 import { useSelector } from "@tanstack/react-store"
-import { useState } from "react"
+import { useAtom } from "jotai"
+import { useEffect, useState } from "react"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import { i18n } from "@/utils/i18n"
+import { cn } from "@/utils/styles/utils"
+import { highlightedProviderFieldAtom, PROVIDER_FIELD_HIGHLIGHT_DURATION_MS } from "../atoms"
 import { ConnectionTestButton } from "./components/connection-button"
 import { withForm } from "./form"
 
@@ -12,6 +15,19 @@ export const APIKeyField = withForm({
     // const providerConfig = form.state.values
     const [showAPIKey, setShowAPIKey] = useState(false)
     const providerConfig = useSelector(form.store, (state) => state.values)
+    const [highlightedField, setHighlightedField] = useAtom(highlightedProviderFieldAtom)
+    const isHighlighted = highlightedField === "apiKey"
+
+    // Clears itself so switching providers afterwards does not flash their key field too.
+    useEffect(() => {
+      if (!isHighlighted) return undefined
+
+      const timeout = setTimeout(
+        () => setHighlightedField(null),
+        PROVIDER_FIELD_HIGHLIGHT_DURATION_MS,
+      )
+      return () => clearTimeout(timeout)
+    }, [isHighlighted, setHighlightedField])
 
     const providerType = providerConfig.provider
     if (providerType === "ollama") {
@@ -27,6 +43,7 @@ export const APIKeyField = withForm({
               label="API Key"
               labelExtra={<ConnectionTestButton providerConfig={providerConfig} />}
               type={showAPIKey ? "text" : "password"}
+              className={cn(isHighlighted && "animate-ring-flash")}
             />
             <div className="mt-0.5 flex items-center space-x-2">
               <Checkbox

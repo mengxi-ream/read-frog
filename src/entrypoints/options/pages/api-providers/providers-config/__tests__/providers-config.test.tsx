@@ -13,6 +13,7 @@ import {
 const {
   anchoredToastAddMock,
   configAtom,
+  highlightedProviderFieldAtom,
   providerWriteAtom,
   providersAtom,
   selectedProviderIdAtom,
@@ -22,6 +23,7 @@ const {
 } = vi.hoisted(() => ({
   anchoredToastAddMock: vi.fn<(options: unknown) => void>(),
   configAtom: {},
+  highlightedProviderFieldAtom: {},
   providerWriteAtom: {},
   providersAtom: {},
   selectedProviderIdAtom: {},
@@ -222,6 +224,8 @@ vi.mock("@/entrypoints/options/pages/api-providers/providers-config/add-provider
 }))
 
 vi.mock("@/entrypoints/options/pages/api-providers/providers-config/atoms", () => ({
+  highlightedProviderFieldAtom,
+  PROVIDER_FIELD_HIGHLIGHT_DURATION_MS: 2700,
   selectedProviderIdAtom,
 }))
 

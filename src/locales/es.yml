@@ -148,11 +148,13 @@ options:
         inputTranslation: Traducción de entrada
         languageDetection: Detección de idioma
     sponsorCta: Obtén IA rápida y rentable
+    sponsorCtaJalapenoCloud: 50 % de descuento en GLM 5.2
     setApiKeyWarning:
       message: Configura tu clave de API en la página $1
     badges:
       featureCount: $1 funciones
       sponsor: Patrocinador
+      sponsorJalapenoCloud: $$2 gratis
     dialog:
       title: Añadir nuevo proveedor
       groups:
@@ -244,6 +246,7 @@ options:
         anthropic: Modelos Claude conocidos por su seguridad y excelente razonamiento
         xai: Empresa de AI de Elon Musk que ofrece modelos Grok con acceso a datos en tiempo real
         atlascloud: Plataforma unificada compatible con OpenAI para modelos recientes como DeepSeek, Kimi, Qwen, Doubao y GLM
+        jalapenocloud: IA de nivel empresarial en la que confían los mejores creadores de LLM, ahora a tu alcance
         siliconflow: Plataforma de inferencia de alto rendimiento para modelos chinos e internacionales
         tensdaq: Plataforma revolucionaria de pujas AI MaaS con precios impulsados por el mercado, que elimina los altos precios fijos
         openaiCompatible: Conecta un endpoint personalizado compatible con la API Chat Completions de OpenAI
