@@ -111,6 +111,18 @@ export interface TranslationOnlyAnchorState {
   // guardedly when the last swap is undone.
   attributeAdjustments: { name: string; previousValue: string | null }[]
   swaps: TranslationOnlySwapRecord[]
+  // Set only on a virtual-paragraph anchor: the Text cuts that turned the
+  // container's blank-line paragraphs into per-unit runs. Rejoined when the
+  // generation ends, AFTER its swaps are restored — restoreTextSplit compares
+  // the rejoined value against the original, so translated text still in place
+  // would make it refuse.
+  splitRecords?: TextSplitRecord[]
+  // Present while a virtual-paragraph generation is live, and bumped for each
+  // new one. Two jobs: the anchor must not finalize mid-generation (units
+  // anchor their own records on descendants, so `swaps` is legitimately empty
+  // in between), and a unit's late provider response can tell whether the
+  // generation it belongs to is still the current one.
+  virtualGeneration?: number
 }
 
 const translationOnlyAnchorStates = new WeakMap<HTMLElement, TranslationOnlyAnchorState>()

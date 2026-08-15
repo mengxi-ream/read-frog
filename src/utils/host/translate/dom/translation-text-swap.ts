@@ -330,18 +330,32 @@ export function applyInPlaceTextSwap(
   }
   refreshTranslationOnlySwapRecordExpectedText(record)
 
+  const state = ensureTranslationOnlyAnchorState(anchor, config, getAnchorState)
+  // A retranslation pass replaces its run's previous record — appending would
+  // leave a dead record whose stale references keep flagging the anchor as
+  // host-changed.
+  dropTranslationOnlySwapRecords(
+    state,
+    state.swaps.filter((existing) => swapRecordIntersectsNodes(existing, runNodes)),
+  )
+  state.swaps.push(record)
+}
+
+/**
+ * The anchor state for `anchor`, marking and registering it on first use.
+ *
+ * Separate from `applyInPlaceTextSwap` so the virtual-paragraph path can claim
+ * the anchor up front, when it cuts the container's Text nodes — the marker
+ * has to exist from that moment for a page-wide cleanup to find the anchor,
+ * even if every unit then fails before it ever swaps anything.
+ */
+export function ensureTranslationOnlyAnchorState(
+  anchor: HTMLElement,
+  config: Config,
+  getAnchorState: (anchor: HTMLElement) => TranslationOnlyAnchorState | undefined,
+): TranslationOnlyAnchorState {
   const existingState = getAnchorState(anchor)
-  if (existingState) {
-    // A retranslation pass replaces its run's previous record — appending
-    // would leave a dead record whose stale references keep flagging the
-    // anchor as host-changed.
-    dropTranslationOnlySwapRecords(
-      existingState,
-      existingState.swaps.filter((existing) => swapRecordIntersectsNodes(existing, runNodes)),
-    )
-    existingState.swaps.push(record)
-    return
-  }
+  if (existingState) return existingState
 
   const attributeAdjustments = [
     {
@@ -353,9 +367,7 @@ export function applyInPlaceTextSwap(
   ]
   anchor.setAttribute(TRANSLATION_ONLY_ATTRIBUTE, "")
   setTranslationDirAndLang(anchor, config)
-  registerTranslationOnlyAnchorState({
-    anchor,
-    attributeAdjustments,
-    swaps: [record],
-  })
+  const state: TranslationOnlyAnchorState = { anchor, attributeAdjustments, swaps: [] }
+  registerTranslationOnlyAnchorState(state)
+  return state
 }
