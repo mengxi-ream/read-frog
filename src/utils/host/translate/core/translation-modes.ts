@@ -701,12 +701,37 @@ function findRunTranslationOnlyWrapper(
   return null
 }
 
+/**
+ * Entry point for translationOnly mode. Picks the granularity — one run for
+ * the whole request, or one run per blank-line paragraph — and leaves the
+ * translating to `translateTranslationOnlyRun`.
+ */
 export async function translateNodeTranslationOnlyMode(
   nodes: ChildNode[],
   walkId: string,
   config: Config,
   toggle: boolean = false,
   forceRetranslation: boolean = false,
+): Promise<void> {
+  return translateTranslationOnlyRun(nodes, walkId, config, toggle, forceRetranslation)
+}
+
+/**
+ * Translate one run of sibling nodes: protect attributes, send the run's HTML
+ * as a single request, then swap the translation into the site's own text
+ * nodes (falling back to a wrapper when the response cannot be aligned).
+ *
+ * `isCurrent` lets a caller that owns several runs invalidate the ones still
+ * in flight — the virtual-paragraph path uses it so a unit whose generation
+ * was torn down mid-request cannot write its response into restored text.
+ */
+async function translateTranslationOnlyRun(
+  nodes: ChildNode[],
+  walkId: string,
+  config: Config,
+  toggle: boolean = false,
+  forceRetranslation: boolean = false,
+  isCurrent: () => boolean = () => true,
 ): Promise<void> {
   const isTransNodeAndNotTranslatedWrapper = (node: Node): node is TransNode => {
     if (isHTMLElement(node) && node.classList.contains(CONTENT_WRAPPER_CLASS)) return false
@@ -749,13 +774,7 @@ export async function translateNodeTranslationOnlyMode(
     if (!toggle) {
       const retryNodes = restored.filter((node) => node.isConnected)
       if (retryNodes.length > 0) {
-        void translateNodeTranslationOnlyMode(
-          retryNodes,
-          walkId,
-          config,
-          toggle,
-          forceRetranslation,
-        )
+        void translateTranslationOnlyRun(retryNodes, walkId, config, toggle, forceRetranslation)
       }
     }
     return
@@ -816,13 +835,7 @@ export async function translateNodeTranslationOnlyMode(
         ? nodes
         : restoredNodes.filter((node) => node.isConnected)
       if (retryNodes.length > 0) {
-        void translateNodeTranslationOnlyMode(
-          retryNodes,
-          walkId,
-          config,
-          toggle,
-          forceRetranslation,
-        )
+        void translateTranslationOnlyRun(retryNodes, walkId, config, toggle, forceRetranslation)
       }
       return
     }
@@ -935,7 +948,7 @@ export async function translateNodeTranslationOnlyMode(
       textContent,
       spinner,
       translatedWrapperNode,
-      () => true,
+      isCurrent,
       "html",
       translateRequest,
     )
@@ -966,7 +979,9 @@ export async function translateNodeTranslationOnlyMode(
       batchDOMOperation(() => {
         // Wrapper gone: a global cleanup ran while the provider call was in
         // flight, or the host re-rendered the region — leave originals alone.
-        if (!translatedWrapperNode.isConnected) return
+        // A superseded run (its generation torn down) is stale for the same
+        // reason even when its wrapper survived the round trip.
+        if (!translatedWrapperNode.isConnected || !isCurrent()) return
         markExtensionDrivenNodeRemoval(translatedWrapperNode)
         translatedWrapperNode.remove()
         // Host mutated the run mid-flight: the translation is stale, drop it.
@@ -994,7 +1009,7 @@ export async function translateNodeTranslationOnlyMode(
       // Wrapper gone from the document: a global cleanup ran while the provider
       // call was in flight, or the host re-rendered the region. The originals
       // are the live content — don't remove them to apply a stale translation.
-      if (!translatedWrapperNode.isConnected) return
+      if (!translatedWrapperNode.isConnected || !isCurrent()) return
 
       // Insert translated content after the last node
       const lastChildNode = allChildNodes.at(-1)!
