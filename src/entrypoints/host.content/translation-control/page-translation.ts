@@ -775,19 +775,18 @@ export class PageTranslationManager implements IPageTranslationManager {
       observer.observe(element)
       return
     }
-    if (
-      config.pageTranslation.mode === "bilingual" &&
-      !canSplitParagraphIntoDescendants(element, innerTopLevelParagraphs, config)
-    ) {
+    if (!canSplitParagraphIntoDescendants(element, innerTopLevelParagraphs, config)) {
       // A newline-preserving flow (X note tweet: pre-wrap div of inline
       // rich-text <span> paragraphs,
       // https://x.com/davidjpark96/status/1789773192435060737) must not be
-      // split — per-span observation translates each span as one blob at the
-      // span's end instead of interleaving per blank-line paragraph. Observed
-      // whole, the div-level virtual-paragraph plan segments it correctly.
-      // Bilingual only: translationOnly has no virtual-paragraph plan, swaps
-      // text in place (no blob-at-span-end problem), and would lose viewport
-      // gating plus batch one giant request if observed whole.
+      // split when the container-level virtual-paragraph plan can segment it
+      // instead — per-span observation translates each span as one blob,
+      // destroying the blank-line paragraph structure.
+      // Both modes now have such a plan, but they need different things from
+      // it, which is why the decision lives in canSplitParagraphIntoDescendants
+      // rather than here: bilingual can interleave a wrapper at any boundary,
+      // while translationOnly has to cut the units apart into whole nodes and
+      // therefore keeps per-span observation for the plans it cannot express.
       observer.observe(element)
       return
     }

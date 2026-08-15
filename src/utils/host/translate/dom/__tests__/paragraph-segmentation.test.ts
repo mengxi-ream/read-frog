@@ -447,6 +447,41 @@ describe("canSplitParagraphIntoDescendants", () => {
 
     expect(canSplitParagraphIntoDescendants(root, spans, DEFAULT_CONFIG)).toBe(true)
   })
+
+  describe("translation only mode", () => {
+    const TRANSLATION_ONLY_CONFIG: Config = {
+      ...DEFAULT_CONFIG,
+      pageTranslation: { ...DEFAULT_CONFIG.pageTranslation, mode: "translationOnly" },
+    }
+
+    it("refuses the split when the units can be cut into whole nodes", () => {
+      // Observed whole, the container-level plan gives one request per
+      // paragraph; split per span, the blank-line structure is lost.
+      const root = walkedFixture(
+        "<span>First paragraph</span>\n\n<span>Second paragraph</span>",
+        "pre-wrap",
+      )
+      const spans = [...root.querySelectorAll("span")]
+
+      expect(canSplitParagraphIntoDescendants(root, spans, TRANSLATION_ONLY_CONFIG)).toBe(false)
+    })
+
+    it("keeps per-span observation when the blank lines sit inside a span", () => {
+      // The X note tweet: translationOnly cannot cut a unit out of a span, so
+      // observing the container whole would only cost it the granularity and
+      // the viewport gating it has today.
+      const root = walkedFixture(
+        "<span>First paragraph\n\nSecond paragraph</span><span>Bold heading</span>",
+        "pre-wrap",
+      )
+      const spans = [...root.querySelectorAll("span")]
+
+      expect(canSplitParagraphIntoDescendants(root, spans, TRANSLATION_ONLY_CONFIG)).toBe(true)
+      // Bilingual can interleave a wrapper at any boundary, so it still
+      // refuses the split for the very same container.
+      expect(canSplitParagraphIntoDescendants(root, spans, DEFAULT_CONFIG)).toBe(false)
+    })
+  })
 })
 
 describe("virtual paragraph unit runs", () => {

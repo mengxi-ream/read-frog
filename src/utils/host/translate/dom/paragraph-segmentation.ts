@@ -51,6 +51,13 @@ export function isNewlinePreservingElement(element: HTMLElement): boolean {
  * request — losing viewport gating and risking provider length limits.
  * The same plan builder the translate path uses makes the decision, so the
  * observation-time judgment cannot drift from translate-time behavior.
+ *
+ * translationOnly asks for one thing more. It segments by cutting the units
+ * apart into whole child nodes, which a plan whose blank lines sit inside an
+ * inline element cannot express — precisely the X note tweet above. Observing
+ * such a container whole would gain it nothing and cost it the per-span
+ * granularity it has today, so the refusal additionally requires the units to
+ * be materializable, decided by the same predicate the translate path uses.
  */
 export function canSplitParagraphIntoDescendants(
   element: HTMLElement,
@@ -59,7 +66,13 @@ export function canSplitParagraphIntoDescendants(
 ): boolean {
   if (!isNewlinePreservingElement(element)) return true
   if (descendantParagraphs.some((paragraph) => isBlockTransNode(paragraph))) return true
-  return buildVirtualParagraphPlan(element, config).units.length < 2
+
+  const plan = buildVirtualParagraphPlan(element, config)
+  if (plan.units.length < 2) return true
+  if (config.pageTranslation.mode === "translationOnly") {
+    return !canMaterializeVirtualParagraphUnits(element, plan, config)
+  }
+  return false
 }
 
 const BLANK_LINE_DELIMITER_RE = /(?:\r\n?|\n)[^\S\r\n]*(?:\r\n?|\n)(?:[^\S\r\n]*(?:\r\n?|\n))*/g
