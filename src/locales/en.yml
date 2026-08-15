@@ -148,7 +148,7 @@ options:
         inputTranslation: Input translation
         languageDetection: Language detection
     sponsorCta: Get fast, cost-effective AI
-    sponsorCtaJalapenoCloud: 50% Off GLM 5.2
+    sponsorCtaJalapenoCloud: Get 50% Off GLM 5.2
     setApiKeyWarning:
       message: Please set your API key on the $1 page
     badges:
@@ -271,6 +271,7 @@ options:
         huggingface: Hugging Face Inference API providing access to thousands of open-source models
     apiKey:
       showAPIKey: Show API key
+      getAPIKey: Get API key
     howToConfigure: How to configure?
     testConnection:
       button: Test connection

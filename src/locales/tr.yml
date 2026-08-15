@@ -148,7 +148,7 @@ options:
         inputTranslation: Giriş çevirisi
         languageDetection: Dil algılama
     sponsorCta: Hızlı ve uygun maliyetli yapay zekâ al
-    sponsorCtaJalapenoCloud: GLM 5.2ʼde %50 indirim
+    sponsorCtaJalapenoCloud: GLM 5.2ʼde %50 indirim al
     setApiKeyWarning:
       message: API anahtarınızı $1 sayfasında ayarlayın
     badges:
@@ -270,6 +270,7 @@ options:
         huggingface: Binlerce açık kaynak modele erişim sağlayan Hugging Face Çıkarım API'si
     apiKey:
       showAPIKey: API anahtarını göster
+      getAPIKey: API anahtarı al
     howToConfigure: Nasıl yapılandırılır?
     testConnection:
       button: Bağlantıyı test et

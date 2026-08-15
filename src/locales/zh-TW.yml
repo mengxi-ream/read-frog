@@ -148,7 +148,7 @@ options:
         inputTranslation: 輸入翻譯
         languageDetection: 語言偵測
     sponsorCta: 取得高速高性價比 AI
-    sponsorCtaJalapenoCloud: GLM 5.2 五折優惠
+    sponsorCtaJalapenoCloud: 取得 GLM 5.2 五折優惠
     setApiKeyWarning:
       message: 請在 $1 頁面設定 API 金鑰
     badges:
@@ -271,6 +271,7 @@ options:
         huggingface: Hugging Face 推理 API，提供數千種開源模型存取
     apiKey:
       showAPIKey: 顯示 API 金鑰
+      getAPIKey: 取得 API 金鑰
     howToConfigure: 如何設定？
     testConnection:
       button: 測試連線
