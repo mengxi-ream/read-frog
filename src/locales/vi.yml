@@ -148,11 +148,13 @@ options:
         inputTranslation: Dịch đầu vào
         languageDetection: Phát hiện ngôn ngữ
     sponsorCta: Nhận AI nhanh, tiết kiệm chi phí
+    sponsorCtaJalapenoCloud: Giảm 50% GLM 5.2
     setApiKeyWarning:
       message: Hãy đặt API Key ở trang $1
     badges:
       featureCount: $1 tính năng
       sponsor: Tài trợ
+      sponsorJalapenoCloud: Miễn phí $$2
     dialog:
       title: Thêm nhà cung cấp mới
       groups:
@@ -243,6 +245,7 @@ options:
         anthropic: Các mô hình Claude nổi tiếng về độ an toàn và khả năng suy luận xuất sắc
         xai: Công ty AI của Elon Musk cung cấp các mô hình Grok với truy cập dữ liệu thời gian thực
         atlascloud: Nền tảng hợp nhất tương thích OpenAI cho các mô hình mới như DeepSeek, Kimi, Qwen, Doubao và GLM
+        jalapenocloud: AI cấp doanh nghiệp được các nhà phát triển LLM hàng đầu tin dùng, giờ đây dành cho bạn
         siliconflow: Nền tảng suy luận hiệu suất cao cho các mô hình Trung Quốc và quốc tế
         tensdaq: Nền tảng MaaS đấu giá AI cách mạng với giá thị trường, loại bỏ giá cố định cao
         openaiCompatible: Kết nối với endpoint tùy chỉnh tương thích với OpenAI Chat Completions API

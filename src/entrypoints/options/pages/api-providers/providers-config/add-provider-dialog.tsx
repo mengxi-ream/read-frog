@@ -94,7 +94,10 @@ function ProviderButton({
       onClick={() => handleAddProvider(providerType)}
     >
       {sponsor?.sponsoring && (
-        <SponsorBadge className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-[65%]" />
+        <SponsorBadge
+          labelI18nKey={sponsor.badgeI18nKey}
+          className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-[65%]"
+        />
       )}
       <ProviderIcon logo={API_PROVIDER_ITEMS[providerType].logo(theme)} size="md" />
       <span className="line-clamp-2 flex w-full flex-1 items-center justify-center text-xs font-light">

@@ -3,16 +3,19 @@ import type {
   APIProviderTypes,
   CustomModelOnlyProviderTypes,
   LLMProviderModels,
+  LLMProviderTypes,
   ProviderConfig,
   ProvidersConfig,
   ProviderSponsorConfig,
 } from "@/types/config/provider"
 import type { Theme } from "@/types/config/theme"
+import { APP_NAME } from "@read-frog/definitions"
 import { camelCase } from "case-anything"
 import customProviderLogo from "@/assets/providers/custom-provider.svg?url&no-inline"
 import customResponsesLogo from "@/assets/providers/custom-responses.svg?url&no-inline"
 import deeplxLogoDark from "@/assets/providers/deeplx-dark.svg?url&no-inline"
 import deeplxLogoLight from "@/assets/providers/deeplx-light.svg?url&no-inline"
+import jalapenoCloudLogo from "@/assets/providers/jalapeno-cloud.png?url&no-inline"
 import tensdaqLogoColor from "@/assets/providers/tensdaq-color.svg?url&no-inline"
 import { env } from "@/env"
 import {
@@ -34,6 +37,11 @@ import { getLobeIconsCDNUrlFn } from "../logo"
 export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
   openrouter: {
     model: "x-ai/grok-4-fast:free",
+    isCustomModel: false,
+    customModel: null,
+  },
+  jalapenocloud: {
+    model: "DeepSeek-V4-Flash",
     isCustomModel: false,
     customModel: null,
   },
@@ -203,6 +211,18 @@ export const PROVIDER_ITEMS: Record<
     name: "DeepL",
     website: "https://www.deepl.com/pro-api",
   },
+  jalapenocloud: {
+    logo: () => jalapenoCloudLogo,
+    name: "Jalapeno Cloud",
+    website: "https://www.jalapeno-cloud.ai/readfrog",
+    sponsor: {
+      sponsoring: true,
+      referUrl: "https://www.jalapeno-cloud.ai/readfrog",
+      // Both default to the generic sponsor wording; Jalapeno names its actual offer instead.
+      badgeI18nKey: "options.apiProviders.badges.sponsorJalapenoCloud",
+      ctaI18nKey: "options.apiProviders.sponsorCtaJalapenoCloud",
+    },
+  },
   atlascloud: {
     logo: getLobeIconsCDNUrlFn("atlascloud"),
     name: "Atlas Cloud",
@@ -366,6 +386,24 @@ export const DEFAULT_PROVIDER_CONFIG = {
     name: PROVIDER_ITEMS["microsoft-translate"].name,
     enabled: true,
     provider: "microsoft-translate",
+  },
+  jalapenocloud: {
+    id: "jalapenocloud-default",
+    name: PROVIDER_ITEMS.jalapenocloud.name,
+    enabled: true,
+    provider: "jalapenocloud",
+    baseURL: "https://api.jalapeno-cloud.ai/v1",
+    model: DEFAULT_LLM_PROVIDER_MODELS.jalapenocloud,
+    // Attribution headers are not here on purpose: they are ours to send, not the user's to
+    // configure, so they live in FORCED_PROVIDER_HEADERS and never enter stored config.
+    // Every Jalapeno model is a thinking model. Translation gains nothing from the reasoning
+    // pass and pays for it in latency and output tokens, so it starts off — and unlike the
+    // headers this is a preference, so it is written in where the user can change it.
+    providerOptions: {
+      chat_template_kwargs: {
+        thinking: false,
+      },
+    },
   },
   atlascloud: {
     id: "atlascloud-default",
@@ -610,7 +648,32 @@ export const DEFAULT_PROVIDER_CONFIG = {
 export const GOOGLE_TRANSLATE_PROVIDER_ID = DEFAULT_PROVIDER_CONFIG["google-translate"].id
 export const MICROSOFT_TRANSLATE_PROVIDER_ID = DEFAULT_PROVIDER_CONFIG["microsoft-translate"].id
 
+/**
+ * Headers a provider is always called with, merged over whatever the user set. The user may add
+ * headers alongside these but cannot drop or rewrite them, and they never enter stored config —
+ * which is also what makes them ours to change in a later release. A header a provider merely
+ * starts out with belongs in `DEFAULT_PROVIDER_CONFIG[provider].headers` instead, where the user
+ * owns it.
+ */
+export const FORCED_PROVIDER_HEADERS: Partial<Record<LLMProviderTypes, Record<string, string>>> = {
+  jalapenocloud: {
+    "HTTP-Referer": env.WXT_WEBSITE_URL,
+    "X-Jalapeno-Title": APP_NAME,
+  },
+  openrouter: {
+    "HTTP-Referer": env.WXT_WEBSITE_URL,
+    "X-OpenRouter-Title": APP_NAME,
+  },
+  // Anthropic's API refuses direct browser calls without this, so it is not a default the user
+  // can outgrow — it used to sit with the editable ones, where adding any header of your own
+  // dropped it and broke every request.
+  anthropic: {
+    "anthropic-dangerous-direct-browser-access": "true",
+  },
+}
+
 export const PROVIDER_URL_PLACEHOLDERS: Partial<Record<APIProviderTypes, string>> = {
+  jalapenocloud: DEFAULT_PROVIDER_CONFIG.jalapenocloud.baseURL,
   atlascloud: DEFAULT_PROVIDER_CONFIG.atlascloud.baseURL,
   siliconflow: DEFAULT_PROVIDER_CONFIG.siliconflow.baseURL,
   tensdaq: DEFAULT_PROVIDER_CONFIG.tensdaq.baseURL,
@@ -647,7 +710,7 @@ export const DEFAULT_PROVIDER_CONFIG_LIST: ProvidersConfig = [
   DEFAULT_PROVIDER_CONFIG["microsoft-translate"],
   DEFAULT_PROVIDER_CONFIG["google-translate"],
   DEFAULT_PROVIDER_CONFIG.openai,
-  DEFAULT_PROVIDER_CONFIG.deepseek,
+  DEFAULT_PROVIDER_CONFIG.jalapenocloud,
   DEFAULT_PROVIDER_CONFIG.atlascloud,
 ]
 

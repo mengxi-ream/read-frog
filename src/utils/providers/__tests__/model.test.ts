@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { storage } from "#imports"
-import { DEFAULT_PROVIDER_HEADERS } from "../headers"
+import { FORCED_PROVIDER_HEADERS } from "@/utils/constants/providers"
 
 let getStorageItemMock: ReturnType<typeof vi.fn>
 
@@ -159,7 +159,7 @@ describe("getModelById", () => {
     expect(createAnthropicMock).toHaveBeenCalledWith(
       expect.objectContaining({
         apiKey: "test-key",
-        headers: DEFAULT_PROVIDER_HEADERS.anthropic,
+        headers: FORCED_PROVIDER_HEADERS.anthropic,
       }),
     )
     expect(anthropicLanguageModelMock).toHaveBeenCalledWith("claude-haiku-4-5")
@@ -179,7 +179,7 @@ describe("getModelById", () => {
         name: "openrouter",
         baseURL: "https://openrouter.ai/api/v1",
         apiKey: "test-key",
-        headers: DEFAULT_PROVIDER_HEADERS.openrouter,
+        headers: FORCED_PROVIDER_HEADERS.openrouter,
         supportsStructuredOutputs: true,
       }),
     )
@@ -292,7 +292,7 @@ describe("getModelById", () => {
     expect(azureLanguageModelMock).not.toHaveBeenCalled()
   })
 
-  it("uses user headers as a full override for Anthropic", async () => {
+  it("merges user headers over Anthropic's forced browser-access header", async () => {
     getStorageItemMock.mockResolvedValue({
       providersConfig: [createAnthropicProviderConfig({ "X-Test": "1" })],
     })
@@ -304,12 +304,13 @@ describe("getModelById", () => {
       expect.objectContaining({
         headers: {
           "X-Test": "1",
+          ...FORCED_PROVIDER_HEADERS.anthropic,
         },
       }),
     )
   })
 
-  it("omits headers for Anthropic when user headers are an explicit empty object", async () => {
+  it("still sends Anthropic's forced header when user headers are an explicit empty object", async () => {
     getStorageItemMock.mockResolvedValue({
       providersConfig: [createAnthropicProviderConfig({})],
     })
@@ -317,7 +318,11 @@ describe("getModelById", () => {
     const { getModelById } = await import("../model")
     await getModelById("anthropic-default")
 
-    expect(createAnthropicMock.mock.calls[0]?.[0]).not.toHaveProperty("headers")
+    expect(createAnthropicMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: FORCED_PROVIDER_HEADERS.anthropic,
+      }),
+    )
   })
 
   it("passes custom headers for OpenAI-compatible providers", async () => {

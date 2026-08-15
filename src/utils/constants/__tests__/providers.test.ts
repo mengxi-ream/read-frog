@@ -82,6 +82,7 @@ describe("provider constants", () => {
   it("defines disjoint and exhaustive protocol-adapter taxonomies", () => {
     expect(OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES).toEqual([
       "openai-compatible",
+      "jalapenocloud",
       "atlascloud",
       "openrouter",
       "minimax",
@@ -93,9 +94,9 @@ describe("provider constants", () => {
     expect(PROTOCOL_COMPATIBLE_LLM_PROVIDER_TYPES.slice(0, 5)).toEqual([
       "openai-compatible",
       "open-responses",
+      "jalapenocloud",
       "atlascloud",
       "openrouter",
-      "minimax",
     ])
     expect(CUSTOM_MODEL_ONLY_PROVIDER_TYPES).toEqual(["openai-compatible", "open-responses"])
 

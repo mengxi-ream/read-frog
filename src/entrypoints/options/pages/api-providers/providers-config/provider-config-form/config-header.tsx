@@ -21,9 +21,8 @@ export function ConfigHeader({
   const tutorialUrl = getHowToConfigureURL(providerType)
   const { theme } = useTheme()
   const providerItem = PROVIDER_ITEMS[providerType]
-  const sponsorReferUrl = providerItem.sponsor?.sponsoring
-    ? providerItem.sponsor.referUrl
-    : undefined
+  const sponsor = providerItem.sponsor?.sponsoring ? providerItem.sponsor : undefined
+  const sponsorReferUrl = sponsor?.referUrl
   const providerWebsiteUrl = sponsorReferUrl ?? providerItem.website
   const hasAPIKey = typeof apiKey === "string" && apiKey.length > 0
   const shouldShowSponsorCTA = sponsorReferUrl && !hasAPIKey
@@ -50,7 +49,7 @@ export function ConfigHeader({
           size="sm"
           render={<a href={sponsorReferUrl} target="_blank" rel="noreferrer" />}
         >
-          {i18n.t("options.apiProviders.sponsorCta")}
+          {i18n.t((sponsor?.ctaI18nKey ?? "options.apiProviders.sponsorCta") as never)}
         </Button>
       ) : (
         tutorialUrl && (

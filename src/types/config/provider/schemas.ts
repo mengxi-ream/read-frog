@@ -24,6 +24,12 @@ import {
 export const providerSponsorConfigSchema = z.object({
   sponsoring: z.boolean(),
   referUrl: z.url(),
+  /**
+   * i18n keys overriding the generic "Sponsor" badge and its call to action, for a sponsor
+   * whose offer is worth naming outright. Absent means the shared wording.
+   */
+  badgeI18nKey: z.string().optional(),
+  ctaI18nKey: z.string().optional(),
 })
 export type ProviderSponsorConfig = z.infer<typeof providerSponsorConfigSchema>
 
@@ -75,6 +81,10 @@ const llmProviderConfigSchemaList = [
   baseOpenAICompatibleLLMProviderConfigSchema.extend({
     provider: z.literal("atlascloud"),
     model: createProviderModelSchema<"atlascloud">("atlascloud"),
+  }),
+  baseOpenAICompatibleLLMProviderConfigSchema.extend({
+    provider: z.literal("jalapenocloud"),
+    model: createProviderModelSchema<"jalapenocloud">("jalapenocloud"),
   }),
   baseOpenAICompatibleLLMProviderConfigSchema.extend({
     provider: z.literal("siliconflow"),

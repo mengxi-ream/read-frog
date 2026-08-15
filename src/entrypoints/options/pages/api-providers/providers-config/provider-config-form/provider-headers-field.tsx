@@ -4,7 +4,6 @@ import { useCallback } from "react"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { i18n } from "@/utils/i18n"
-import { getDefaultProviderHeaders } from "@/utils/providers/headers"
 import { AutosavedJsonCodeEditorField } from "./components/autosaved-json-code-editor-field"
 import { withForm } from "./form"
 
@@ -62,8 +61,11 @@ export const ProviderHeadersField = withForm({
       return null
     }
 
-    const defaultHeaders = getDefaultProviderHeaders(providerConfig.provider)
-    const placeholderText = JSON.stringify(defaultHeaders ?? EXAMPLE_HEADERS_PLACEHOLDER, null, 2)
+    // Only ever an example now: headers a provider starts with are seeded into its config, so
+    // they show up as real editable values rather than as a hint the user has to retype. Forced
+    // headers are deliberately absent — they are sent regardless, and offering them here would
+    // invite edits that go nowhere.
+    const placeholderText = JSON.stringify(EXAMPLE_HEADERS_PLACEHOLDER, null, 2)
 
     return (
       <AutosavedJsonCodeEditorField

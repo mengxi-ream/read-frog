@@ -269,7 +269,12 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
     >
       <EntityListItem.Badges>
         <>
-          {sponsor?.sponsoring && <SponsorBadge className="absolute -top-2 left-2 text-[10px]" />}
+          {sponsor?.sponsoring && (
+            <SponsorBadge
+              labelI18nKey={sponsor.badgeI18nKey}
+              className="absolute -top-2 left-2 text-[10px]"
+            />
+          )}
           <FeatureCountBadge count={totalAssigned}>
             {assignedFeatures.map((key) => (
               <li key={key}>{i18n.t(getFeatureLabelI18nKey(key))}</li>

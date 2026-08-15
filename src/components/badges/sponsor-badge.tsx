@@ -5,9 +5,13 @@ import { Badge } from "@/components/ui/base-ui/badge"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 
-type SponsorBadgeProps = Pick<VariantProps<typeof badgeVariants>, "size"> & { className?: string }
+type SponsorBadgeProps = Pick<VariantProps<typeof badgeVariants>, "size"> & {
+  className?: string
+  /** Names the sponsor's own offer in place of the generic "Sponsor" wording. */
+  labelI18nKey?: string
+}
 
-export function SponsorBadge({ size = "sm", className }: SponsorBadgeProps) {
+export function SponsorBadge({ size = "sm", className, labelI18nKey }: SponsorBadgeProps) {
   return (
     <Badge
       variant="secondary"
@@ -18,7 +22,7 @@ export function SponsorBadge({ size = "sm", className }: SponsorBadgeProps) {
       )}
     >
       <Icon icon="tabler:star" className="size-2.5 text-current" />
-      {i18n.t("options.apiProviders.badges.sponsor")}
+      {i18n.t((labelI18nKey ?? "options.apiProviders.badges.sponsor") as never)}
     </Badge>
   )
 }

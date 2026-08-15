@@ -114,6 +114,25 @@ export const LLM_PROVIDER_MODELS = {
     "minimaxai/minimax-m3",
     "google/gemini-3.1-flash-lite",
   ],
+  // Jalapeno Cloud addresses models by their catalog name verbatim — the id in an API
+  // call is the same string shown on the models page. Narrowed to what suits translation:
+  // the code-specialised (Kimi-K2.7-Code), vision-first (Qwen3-VL-*) and thinking-only
+  // variants are left out, since neither buys anything here and both cost more per call.
+  jalapenocloud: [
+    "DeepSeek-V4-Flash",
+    "DeepSeek-V4-Pro",
+    "GLM-5.2",
+    "GLM-5.1",
+    "Hy3",
+    "Kimi-K3",
+    "Kimi-K2.5",
+    "MiniMax-M3",
+    "Qwen3.5-27B",
+    "Qwen3.5-35B-A3B",
+    "Qwen3.5-122B-A10B",
+    "Qwen3.5-397B-A17B",
+    "Qwen3-Next-80B-A3B-Instruct",
+  ],
   "openai-compatible": ["use-custom-model"],
   "open-responses": ["use-custom-model"],
   xai: ["grok-4.20-0309-non-reasoning", "grok-4.20-0309-reasoning", "grok-4.3"],
