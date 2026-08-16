@@ -1,10 +1,18 @@
 import type { VirtualParagraphUnit } from "../paragraph-segmentation"
 // @vitest-environment jsdom
+import type { TransNode } from "@/types/dom"
 import { beforeEach, describe, expect, it } from "vitest"
-import { CONTENT_WRAPPER_CLASS, NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import {
+  CONTENT_WRAPPER_CLASS,
+  NOTRANSLATE_CLASS,
+  TRANSLATION_MODE_ATTRIBUTE,
+  TRANSLATION_ONLY_ATTRIBUTE,
+} from "@/utils/constants/dom-labels"
 import {
   collectSourceTextExcludingWrappers,
   getBilingualTranslationStateForSource,
+  getTranslationOnlyAnchorState,
   getVirtualParagraphGroupForSource,
   getVirtualParagraphGroupForWrapper,
   isBilingualTranslationStateCurrent,
@@ -15,12 +23,20 @@ import {
   type BilingualTranslationState,
   type VirtualParagraphGroup,
 } from "../../core/translation-state"
+import { buildVirtualParagraphPlan } from "../paragraph-segmentation"
 import {
   disposeVirtualParagraphGroup,
+  dropTranslationOnlySwapRecordsForNodes,
   dropVirtualParagraphWrapper,
   removeAllTranslatedWrapperNodes,
+  restoreTranslationOnlySwapsForAnchor,
+  teardownVirtualTranslationOnlyGeneration,
 } from "../translation-cleanup"
-import { insertVirtualParagraphWrappers } from "../virtual-paragraph-insertion"
+import { applyInPlaceTextSwap, ensureTranslationOnlyAnchorState } from "../translation-text-swap"
+import {
+  insertVirtualParagraphWrappers,
+  materializeVirtualParagraphUnitRuns,
+} from "../virtual-paragraph-insertion"
 
 function unit(id: number, source: Text, offset: number): VirtualParagraphUnit {
   return {
@@ -409,6 +425,221 @@ describe("virtual paragraph lifecycle", () => {
 
     expect(isVirtualParagraphGroupCurrent(group)).toBe(false)
     disposeVirtualParagraphGroup(group)
+  })
+
+  describe("translationOnly virtual generation teardown", () => {
+    // A translationOnly generation has no wrapper of its own: each unit is a
+    // run of whole child nodes whose text was swapped in place, with the Text
+    // cuts that made them whole nodes owned by the container's anchor state.
+    function createSwappedGeneration(storyText: string) {
+      const layoutSource = document.createElement("div")
+      layoutSource.style.whiteSpace = "pre-wrap"
+      layoutSource.textContent = storyText
+      document.body.append(layoutSource)
+
+      const plan = buildVirtualParagraphPlan(layoutSource, DEFAULT_CONFIG)
+      const state = ensureTranslationOnlyAnchorState(
+        layoutSource,
+        DEFAULT_CONFIG,
+        getTranslationOnlyAnchorState,
+      )
+      state.splitRecords = []
+      state.virtualGeneration = 1
+      const runs = materializeVirtualParagraphUnitRuns(
+        layoutSource,
+        plan,
+        DEFAULT_CONFIG,
+        state.splitRecords,
+      )!
+
+      return { layoutSource, runs, state }
+    }
+
+    function swapRun(
+      layoutSource: HTMLElement,
+      run: { nodes: ChildNode[] },
+      translation: string,
+      walkId: string = "generation-1",
+    ) {
+      const node = run.nodes[0] as Text
+      applyInPlaceTextSwap(
+        { pairs: [{ node, translatedValue: translation }], attributePairs: [], coverage: 1 },
+        run.nodes as TransNode[],
+        layoutSource,
+        walkId,
+        DEFAULT_CONFIG,
+        getTranslationOnlyAnchorState,
+      )
+    }
+
+    it("restores swapped text and rejoins the cuts", () => {
+      const storyText = "First paragraph.\n\nSecond paragraph."
+      const { layoutSource, runs } = createSwappedGeneration(storyText)
+      swapRun(layoutSource, runs[0]!, "【第一段】")
+      swapRun(layoutSource, runs[1]!, "【第二段】")
+      expect(layoutSource.textContent).toBe("【第一段】\n\n【第二段】")
+
+      teardownVirtualTranslationOnlyGeneration(layoutSource)
+
+      expect(layoutSource.textContent).toBe(storyText)
+      // The cuts are rejoined, so the container is back to a single Text node.
+      expect(layoutSource.childNodes).toHaveLength(1)
+      expect(layoutSource).not.toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+      expect(getTranslationOnlyAnchorState(layoutSource)).toBeUndefined()
+    })
+
+    it("clears a unit wrapper that would otherwise block the rejoin", () => {
+      // A unit still awaiting its provider holds a spinner wrapper sitting
+      // between a cut source and its tail; leaving it there would make
+      // restoreTextSplit refuse and strand the split nodes forever.
+      const storyText = "First paragraph.\n\nSecond paragraph."
+      const { layoutSource, runs } = createSwappedGeneration(storyText)
+      swapRun(layoutSource, runs[0]!, "【第一段】")
+
+      const pendingWrapper = document.createElement("span")
+      pendingWrapper.className = CONTENT_WRAPPER_CLASS
+      pendingWrapper.setAttribute(TRANSLATION_MODE_ATTRIBUTE, "translationOnly")
+      runs[1]!.nodes[0]!.after(pendingWrapper)
+
+      teardownVirtualTranslationOnlyGeneration(layoutSource)
+
+      expect(pendingWrapper.isConnected).toBe(false)
+      expect(layoutSource.textContent).toBe(storyText)
+      expect(layoutSource.childNodes).toHaveLength(1)
+    })
+
+    it("restores a unit whose record lives on a descendant anchor", () => {
+      // A unit that is a single element unwraps into that element, so its swap
+      // record anchors there — an ancestor-only lookup would never find it.
+      const layoutSource = document.createElement("div")
+      layoutSource.style.whiteSpace = "pre-wrap"
+      layoutSource.innerHTML = "<span>First paragraph.</span>\n\n<span>Second paragraph.</span>"
+      document.body.append(layoutSource)
+      const [firstSpan, secondSpan] = [...layoutSource.querySelectorAll("span")]
+      const state = ensureTranslationOnlyAnchorState(
+        layoutSource,
+        DEFAULT_CONFIG,
+        getTranslationOnlyAnchorState,
+      )
+      state.virtualGeneration = 1
+
+      const secondText = secondSpan!.firstChild as Text
+      applyInPlaceTextSwap(
+        {
+          pairs: [{ node: secondText, translatedValue: "【第二段】" }],
+          attributePairs: [],
+          coverage: 1,
+        },
+        [secondText],
+        secondSpan!,
+        "generation-1",
+        DEFAULT_CONFIG,
+        getTranslationOnlyAnchorState,
+      )
+      expect(secondSpan).toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+
+      teardownVirtualTranslationOnlyGeneration(layoutSource)
+
+      expect(secondSpan!.textContent).toBe("Second paragraph.")
+      expect(secondSpan).not.toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+      expect(layoutSource).not.toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+      expect(firstSpan!.textContent).toBe("First paragraph.")
+    })
+
+    it("keeps the anchor alive when a sibling run empties it mid-generation", () => {
+      // Between units the container's own swap list is legitimately empty. A
+      // unit that falls back to a wrapper drops its records through here, and
+      // finalizing on that would rejoin the cuts under the pending units' feet.
+      const { layoutSource, runs, state } = createSwappedGeneration("First.\n\nSecond.")
+
+      dropTranslationOnlySwapRecordsForNodes(layoutSource, runs[0]!.nodes)
+
+      expect(getTranslationOnlyAnchorState(layoutSource)).toBe(state)
+      expect(layoutSource).toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+      expect(layoutSource.childNodes.length).toBeGreaterThan(1)
+
+      teardownVirtualTranslationOnlyGeneration(layoutSource)
+
+      expect(getTranslationOnlyAnchorState(layoutSource)).toBeUndefined()
+      expect(layoutSource.childNodes).toHaveLength(1)
+    })
+
+    it("ends the generation when the whole anchor is restored", () => {
+      // A restore with nothing held back is the deliberate end of a generation
+      // (a toggle, or a page-wide cleanup), so it must release the anchor even
+      // though the generation is still marked as live.
+      const { layoutSource } = createSwappedGeneration("First.\n\nSecond.")
+
+      restoreTranslationOnlySwapsForAnchor(layoutSource)
+
+      expect(getTranslationOnlyAnchorState(layoutSource)).toBeUndefined()
+      expect(layoutSource).not.toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+      expect(layoutSource.childNodes).toHaveLength(1)
+    })
+
+    it("never deletes the remaining paragraphs when a cut source was displaced", () => {
+      // The fallback strategy parks a unit's original nodes inside its wrapper,
+      // and the first unit's node is the source every later unit was cut from.
+      // Reading that detached source as a host rewrite would delete every tail
+      // still holding its post-split value — which here is the rest of the file.
+      const storyText = "First paragraph.\n\nSecond paragraph.\n\nThird paragraph."
+      const { layoutSource, runs, state } = createSwappedGeneration(storyText)
+      const displacedSource = runs[0]!.nodes[0] as Text
+      const survivingText = "Second paragraph.\n\nThird paragraph."
+
+      // Unit 1 could not be aligned: the wrapper takes its place and the
+      // original node is detached, held only by the restore registry.
+      const fallbackWrapper = document.createElement("span")
+      fallbackWrapper.className = CONTENT_WRAPPER_CLASS
+      fallbackWrapper.setAttribute(TRANSLATION_MODE_ATTRIBUTE, "translationOnly")
+      layoutSource.insertBefore(fallbackWrapper, displacedSource)
+      displacedSource.remove()
+      // Units 2 and 3 failed at the provider, so the container holds no swaps.
+      expect(state.swaps).toHaveLength(0)
+      state.virtualGeneration = undefined
+
+      restoreTranslationOnlySwapsForAnchor(layoutSource)
+
+      expect(layoutSource.textContent).toContain(survivingText)
+      expect(layoutSource.textContent).toContain("Second paragraph.")
+      expect(layoutSource.textContent).toContain("Third paragraph.")
+    })
+
+    it("is covered by a page-wide cleanup", () => {
+      const storyText = "First paragraph.\n\nSecond paragraph."
+      const { layoutSource, runs, state } = createSwappedGeneration(storyText)
+      swapRun(layoutSource, runs[0]!, "【第一段】")
+      swapRun(layoutSource, runs[1]!, "【第二段】")
+      // The generation is deliberately left LIVE: stopping the page (or
+      // switching modes) while a unit is still awaiting its provider must
+      // release the container anyway, or the marker, the dir/lang and the cuts
+      // outlive the session and the next walk skips the region for good.
+      expect(state.virtualGeneration).toBeDefined()
+
+      removeAllTranslatedWrapperNodes(document)
+
+      expect(layoutSource.textContent).toBe(storyText)
+      expect(layoutSource.childNodes).toHaveLength(1)
+      expect(layoutSource).not.toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+      expect(getTranslationOnlyAnchorState(layoutSource)).toBeUndefined()
+    })
+
+    it("releases a live generation whose units never resolved", () => {
+      // The harshest version of the same stop: no unit ever swapped, so the
+      // container holds only the marker and the cuts, and a hung provider
+      // request means nothing will ever come back to release them.
+      const storyText = "First paragraph.\n\nSecond paragraph."
+      const { layoutSource, state } = createSwappedGeneration(storyText)
+      expect(state.virtualGeneration).toBeDefined()
+      expect(layoutSource.childNodes.length).toBeGreaterThan(1)
+
+      removeAllTranslatedWrapperNodes(document)
+
+      expect(layoutSource.textContent).toBe(storyText)
+      expect(layoutSource.childNodes).toHaveLength(1)
+      expect(layoutSource).not.toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+      expect(getTranslationOnlyAnchorState(layoutSource)).toBeUndefined()
+    })
   })
 
   it("cancels pending groups inside an attached shadow root during document cleanup", () => {

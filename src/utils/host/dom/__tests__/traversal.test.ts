@@ -487,3 +487,93 @@ describe("document root notranslate exemption", () => {
     }
   })
 })
+
+describe("plain-text document <pre> exemption", () => {
+  // A .txt URL renders as one browser-generated <pre> holding the entire file
+  // (Chrome also gives it `white-space: pre-wrap`), so the blanket PRE block
+  // leaves such a page with nothing to translate at all.
+  const STORY_TEXT = "First hard wrapped paragraph.\n\nSecond hard wrapped paragraph."
+
+  function withContentType(contentType: string, callback: () => void) {
+    Object.defineProperty(document, "contentType", { value: contentType, configurable: true })
+    try {
+      callback()
+    } finally {
+      // Restore the prototype getter jsdom installs (text/html in tests).
+      Reflect.deleteProperty(document, "contentType")
+      document.body.innerHTML = ""
+    }
+  }
+
+  function renderPlainTextViewer(): HTMLElement {
+    document.body.innerHTML = `<pre id="viewer">${STORY_TEXT}</pre>`
+    return document.getElementById("viewer")!
+  }
+
+  it("walks and labels the generated <pre> of a text/plain document", () => {
+    withContentType("text/plain", () => {
+      const viewer = renderPlainTextViewer()
+
+      walkAndLabelElement(document.body, "plain-text-pre", DEFAULT_CONFIG)
+
+      expect(viewer).toHaveAttribute(WALKED_ATTRIBUTE)
+      expect(viewer).toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+      // PRE is in FORCE_BLOCK_TAGS, so the exempted viewer is a block unit.
+      expect(viewer).toHaveAttribute(BLOCK_ATTRIBUTE)
+      expect(extractTextContent(viewer, DEFAULT_CONFIG)).toContain("Second hard wrapped paragraph.")
+    })
+  })
+
+  it("keeps blocking an authored <pre> in an html document", () => {
+    const viewer = renderPlainTextViewer()
+
+    try {
+      walkAndLabelElement(document.body, "html-pre", DEFAULT_CONFIG)
+
+      expect(document.contentType).toBe("text/html")
+      expect(viewer).not.toHaveAttribute(WALKED_ATTRIBUTE)
+      expect(viewer).not.toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+      expect(extractTextContent(viewer, DEFAULT_CONFIG)).toBe("")
+    } finally {
+      document.body.innerHTML = ""
+    }
+  })
+
+  it("lets a site rule that names PRE explicitly win over the exemption", () => {
+    // The exemption un-blocks what the defaults block, so an author who wants
+    // PRE blocked on a plain-text host must be able to say so.
+    withContentType("text/plain", () => {
+      const viewer = renderPlainTextViewer()
+      const config = configWithSiteRule({ "dontWalkTags.add": ["PRE"] })
+
+      walkAndLabelElement(document.body, "explicit-add", config)
+
+      expect(viewer).not.toHaveAttribute(WALKED_ATTRIBUTE)
+      expect(viewer).not.toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    })
+  })
+
+  it("still honors excludeSelectors on a plain-text document", () => {
+    withContentType("text/plain", () => {
+      const viewer = renderPlainTextViewer()
+      const config = configWithSiteRule({ excludeSelectors: ["pre"] })
+
+      walkAndLabelElement(document.body, "exclude-selector", config)
+
+      expect(viewer).not.toHaveAttribute(WALKED_ATTRIBUTE)
+      expect(viewer).not.toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    })
+  })
+
+  it("keeps other plain-text-ish document types blocked", () => {
+    for (const contentType of ["application/json", "text/markdown", "text/xml"]) {
+      withContentType(contentType, () => {
+        const viewer = renderPlainTextViewer()
+
+        walkAndLabelElement(document.body, `blocked-${contentType}`, DEFAULT_CONFIG)
+
+        expect(viewer).not.toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+      })
+    }
+  })
+})

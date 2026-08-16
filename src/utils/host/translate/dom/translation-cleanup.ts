@@ -239,6 +239,24 @@ function restoreSwapRecord(record: TranslationOnlySwapRecord): void {
 
 function finalizeTranslationOnlyAnchorIfEmpty(state: TranslationOnlyAnchorState): void {
   if (state.swaps.length > 0) return
+  // A live virtual generation owns the anchor even with no swaps of its own:
+  // single-element units register their records on descendant anchors, and
+  // units still awaiting a provider need the marker and the Text cuts to stay.
+  if (state.virtualGeneration !== undefined) return
+  // Swaps are restored by now, so the cuts can be rejoined: restoreTextSplit
+  // only rejoins when the fragments still add up to the original value.
+  //
+  // A cut whose source is no longer in the document is skipped rather than
+  // rejoined. restoreTextSplit reads a detached source as "the host replaced
+  // it" and deletes every tail that still holds its post-split value — right
+  // for a framework rewrite, catastrophic here, because a fallback wrapper
+  // parks the displaced original while its tails are the container's remaining
+  // paragraphs. Leaving adjacent Text nodes behind is invisible; deleting the
+  // rest of the page is not.
+  state.splitRecords?.forEach((record) => {
+    if (record.source.isConnected) restoreTextSplit(record)
+  })
+  state.splitRecords = undefined
   for (const { name, previousValue } of state.attributeAdjustments) {
     if (previousValue === null) state.anchor.removeAttribute(name)
     else state.anchor.setAttribute(name, previousValue)
@@ -292,6 +310,13 @@ export function restoreTranslationOnlySwapsForAnchor(
     return false
   }
 
+  // A full restore that keeps nothing is the end of a virtual generation, so
+  // release it here rather than at each call site: the anchor may only finalize
+  // once no unit can still be waiting on it.
+  if (!filterNodes && !options?.keepRecords) {
+    state.virtualGeneration = undefined
+  }
+
   // Records whose every node the host disconnected are unrestorable debris;
   // letting them linger would pin detached subtrees and hold the marker (and
   // the walker skip) forever.
@@ -317,6 +342,37 @@ export function restoreTranslationOnlySwapsForAnchor(
     finalizeTranslationOnlyAnchorIfEmpty(state)
   }
   return true
+}
+
+/**
+ * Undo a whole virtual-paragraph generation on a translationOnly container:
+ * the per-unit swaps, the wrappers still holding a spinner or an error, and
+ * the Text cuts that made the units whole nodes.
+ *
+ * Order is load-bearing. Wrappers go first, because a wrapper sitting between
+ * a cut source and its tail would block the rejoin, and because the fallback
+ * strategy parks a unit's original nodes inside its wrapper. Descendant
+ * anchors go next: a unit that is a single element registers its record on
+ * that element, where an ancestor-only lookup would never find it. The
+ * container itself goes last, ending the generation so the final restore can
+ * rejoin the cuts and hand the marker and dir/lang back.
+ */
+export function teardownVirtualTranslationOnlyGeneration(layoutSource: HTMLElement): void {
+  for (const wrapper of [
+    ...layoutSource.querySelectorAll<HTMLElement>(`.${CONTENT_WRAPPER_CLASS}`),
+  ]) {
+    if (wrapper.isConnected) removeTranslatedWrapperWithRestore(wrapper)
+  }
+
+  for (const anchor of [
+    ...layoutSource.querySelectorAll<HTMLElement>(`[${TRANSLATION_ONLY_ATTRIBUTE}]`),
+  ]) {
+    restoreTranslationOnlySwapsForAnchor(anchor)
+  }
+
+  // A full restore ends the generation and finalizes: cuts rejoined, marker and
+  // dir/lang handed back.
+  restoreTranslationOnlySwapsForAnchor(layoutSource)
 }
 
 /**

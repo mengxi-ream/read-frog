@@ -51,6 +51,13 @@ export function isNewlinePreservingElement(element: HTMLElement): boolean {
  * request — losing viewport gating and risking provider length limits.
  * The same plan builder the translate path uses makes the decision, so the
  * observation-time judgment cannot drift from translate-time behavior.
+ *
+ * translationOnly asks for one thing more. It segments by cutting the units
+ * apart into whole child nodes, which a plan whose blank lines sit inside an
+ * inline element cannot express — precisely the X note tweet above. Observing
+ * such a container whole would gain it nothing and cost it the per-span
+ * granularity it has today, so the refusal additionally requires the units to
+ * be materializable, decided by the same predicate the translate path uses.
  */
 export function canSplitParagraphIntoDescendants(
   element: HTMLElement,
@@ -59,7 +66,13 @@ export function canSplitParagraphIntoDescendants(
 ): boolean {
   if (!isNewlinePreservingElement(element)) return true
   if (descendantParagraphs.some((paragraph) => isBlockTransNode(paragraph))) return true
-  return buildVirtualParagraphPlan(element, config).units.length < 2
+
+  const plan = buildVirtualParagraphPlan(element, config)
+  if (plan.units.length < 2) return true
+  if (config.pageTranslation.mode === "translationOnly") {
+    return !canMaterializeVirtualParagraphUnits(element, plan, config)
+  }
+  return false
 }
 
 const BLANK_LINE_DELIMITER_RE = /(?:\r\n?|\n)[^\S\r\n]*(?:\r\n?|\n)(?:[^\S\r\n]*(?:\r\n?|\n))*/g
@@ -546,4 +559,156 @@ export function buildVirtualParagraphUnits(
   config: Config,
 ): VirtualParagraphUnit[] {
   return buildVirtualParagraphPlan(layoutSource, config).units
+}
+
+/**
+ * Where one unit's text starts and ends among the layout source's own children.
+ * `startOffset` / `endOffset` are non-null only when the edge falls strictly
+ * inside a top-level Text node, i.e. exactly where a `splitText` is needed to
+ * turn the unit into whole nodes.
+ */
+export interface VirtualParagraphUnitEdges {
+  unit: VirtualParagraphUnit
+  startNode: ChildNode
+  startOffset: number | null
+  endNode: ChildNode
+  endOffset: number | null
+}
+
+function boundaryBeforeNode(node: Node): DOMBoundary | undefined {
+  const parent = node.parentNode
+  if (!parent) return undefined
+  const index = [...parent.childNodes].indexOf(node as ChildNode)
+  if (index === -1) return undefined
+  return { container: parent, offset: index }
+}
+
+function fragmentEdgeBoundaries(
+  fragment: VirtualParagraphSourceFragment,
+): { start: DOMBoundary; end: DOMBoundary } | undefined {
+  if (isTextNode(fragment.source)) {
+    return {
+      start: { container: fragment.source, offset: fragment.startOffset },
+      end: { container: fragment.source, offset: fragment.endOffset },
+    }
+  }
+  // An atomic element (a preserve-text mention, <code>, <time>) contributes its
+  // whole text, so the unit's edge sits beside the element rather than inside it.
+  const start = boundaryBeforeNode(fragment.source)
+  const end = boundaryAfterElement(fragment.source)
+  return start && end ? { start, end } : undefined
+}
+
+/**
+ * An element the raw-source collector treats as a barrier contributes no text,
+ * so a unit whose node range contains one would ship that element's markup to
+ * the provider and depend on it echoing the tag back for alignment. Refusing
+ * such units keeps them on the pre-existing whole-run path.
+ */
+function contributesNoText(node: ChildNode, config: Config): boolean {
+  return (
+    isHTMLElement(node) &&
+    (isTranslatedWrapperNode(node) ||
+      isTranslatedContentNode(node) ||
+      isDontWalkIntoAndDontTranslateAsChildElement(node, config))
+  )
+}
+
+function unitRangeNodes(
+  startNode: ChildNode,
+  endNode: ChildNode,
+  config: Config,
+): ChildNode[] | null {
+  const nodes: ChildNode[] = []
+  let current: ChildNode | null = startNode
+  while (current) {
+    if (contributesNoText(current, config)) return null
+    nodes.push(current)
+    if (current === endNode) return nodes
+    current = current.nextSibling
+  }
+  // endNode is not a following sibling of startNode: the unit does not map onto
+  // one contiguous run of children.
+  return null
+}
+
+/**
+ * Resolve every unit of `plan` onto whole children of `layoutSource`, or return
+ * `null` when even one unit cannot be expressed that way.
+ *
+ * A unit is resolvable when both of its content edges, after the usual edge
+ * lifting, land either between two children or strictly inside a top-level Text
+ * node (which a `splitText` can cut). An edge stuck inside a nested element is
+ * not: X puts tweet text in inline `<span>`s, so a note tweet's blank lines sit
+ * *inside* a span, and cutting the unit out would mean splitting that element
+ * and its styling apart. Those containers keep the pre-existing behavior.
+ *
+ * This is the single decision both the observation gate and the translate path
+ * consult, so what the observer refuses to split is exactly what the translate
+ * path can segment — the invariant `canSplitParagraphIntoDescendants` documents.
+ */
+export function resolveVirtualParagraphUnitEdges(
+  layoutSource: HTMLElement,
+  plan: VirtualParagraphPlan,
+  config: Config,
+): VirtualParagraphUnitEdges[] | null {
+  if (plan.units.length < 2) return null
+
+  const resolved: VirtualParagraphUnitEdges[] = []
+  for (const unit of plan.units) {
+    const firstFragment = unit.sourceFragments[0]
+    const lastFragment = unit.sourceFragments.at(-1)
+    if (!firstFragment || !lastFragment) return null
+
+    const startBoundaries = fragmentEdgeBoundaries(firstFragment)
+    const endBoundaries = fragmentEdgeBoundaries(lastFragment)
+    if (!startBoundaries || !endBoundaries) return null
+
+    const start = liftEdgeBoundary(startBoundaries.start, layoutSource)
+    const end = liftEdgeBoundary(endBoundaries.end, layoutSource)
+
+    // Concrete node references, captured before any split: a later split only
+    // inserts siblings, so a captured node stays valid while a child index
+    // would silently shift.
+    const startNode =
+      start.container === layoutSource
+        ? (layoutSource.childNodes[start.offset] ?? null)
+        : isTextNode(start.container) && start.container.parentNode === layoutSource
+          ? start.container
+          : null
+    const endNode =
+      end.container === layoutSource
+        ? (layoutSource.childNodes[end.offset - 1] ?? null)
+        : isTextNode(end.container) && end.container.parentNode === layoutSource
+          ? end.container
+          : null
+    if (!startNode || !endNode) return null
+
+    const nodes = unitRangeNodes(startNode, endNode, config)
+    if (!nodes || nodes.length === 0) return null
+
+    resolved.push({
+      unit,
+      startNode,
+      // Edge lifting already pulled offset 0 and end-of-node offsets out to the
+      // parent, so a surviving Text container always needs a real cut.
+      startOffset: start.container === startNode ? start.offset : null,
+      endNode,
+      endOffset: end.container === endNode ? end.offset : null,
+    })
+  }
+
+  return resolved
+}
+
+/**
+ * True when every unit of `plan` maps onto whole children of `layoutSource`.
+ * See `resolveVirtualParagraphUnitEdges` for what that requires.
+ */
+export function canMaterializeVirtualParagraphUnits(
+  layoutSource: HTMLElement,
+  plan: VirtualParagraphPlan,
+  config: Config,
+): boolean {
+  return resolveVirtualParagraphUnitEdges(layoutSource, plan, config) !== null
 }
