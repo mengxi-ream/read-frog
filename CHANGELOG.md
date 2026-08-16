@@ -1,5 +1,27 @@
 # @read-frog/extension
 
+## 1.46.1
+
+### Patch Changes
+
+- [#2081](https://github.com/mengxi-ream/read-frog/pull/2081) [`b0b87dc`](https://github.com/mengxi-ream/read-frog/commit/b0b87dc30e135714e47775505e7cc8cea4897f5a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(providers): keep required provider headers when custom headers are set
+
+- [#2083](https://github.com/mengxi-ream/read-frog/pull/2083) [`77e02ed`](https://github.com/mengxi-ream/read-frog/commit/77e02edaf3f8c6dcf78e1e04f4c7fd26e06027eb) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(providers): add a Get API key button for Atlas Cloud and Jalapeno Cloud
+
+- [#2084](https://github.com/mengxi-ream/read-frog/pull/2084) [`eb04c6d`](https://github.com/mengxi-ream/read-frog/commit/eb04c6da2124d51bdb6fe91261fafcff7ec16ef5) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(floating-button): hide the floating button while the page is fullscreen (YouTube fullscreens the whole document, so it used to stay on top of the video)
+
+- [#2081](https://github.com/mengxi-ream/read-frog/pull/2081) [`b0b87dc`](https://github.com/mengxi-ream/read-frog/commit/b0b87dc30e135714e47775505e7cc8cea4897f5a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(providers): add Jalapeno Cloud, seeded for new and existing users
+
+- [#2081](https://github.com/mengxi-ream/read-frog/pull/2081) [`b0b87dc`](https://github.com/mengxi-ream/read-frog/commit/b0b87dc30e135714e47775505e7cc8cea4897f5a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(options): let allowlisted partner sites open a provider's config with its API key highlighted
+
+- [#2087](https://github.com/mengxi-ream/read-frog/pull/2087) [`c2b528b`](https://github.com/mengxi-ream/read-frog/commit/c2b528b176e9fe8df4dc578d7a49b647aaa13c66) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translation): translate plain-text pages, one paragraph at a time
+
+  Pages served as `text/plain` reach the browser as a single generated `<pre>` holding the whole file, which the walker skipped entirely — nifty.org story pages translated as nothing at all. Such a `<pre>` is now translated, while an authored `<pre>` in an HTML document still keeps its code and logs untouched.
+
+  Translation-only mode also gains the per-paragraph granularity bilingual mode has had, so a long page goes out one blank-line paragraph at a time instead of as one oversized request: paragraphs appear as they arrive, and a failed one costs only itself.
+
+- [#2085](https://github.com/mengxi-ream/read-frog/pull/2085) [`550ea75`](https://github.com/mengxi-ream/read-frog/commit/550ea7588b7d8bf16df8627f6663b41cd23557dd) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translation): translate pages whose document root opts out with `notranslate`
+
 ## 1.46.0
 
 ### Minor Changes
