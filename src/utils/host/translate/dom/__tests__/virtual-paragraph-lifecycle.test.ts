@@ -607,19 +607,38 @@ describe("virtual paragraph lifecycle", () => {
 
     it("is covered by a page-wide cleanup", () => {
       const storyText = "First paragraph.\n\nSecond paragraph."
-      const { layoutSource, runs } = createSwappedGeneration(storyText)
+      const { layoutSource, runs, state } = createSwappedGeneration(storyText)
       swapRun(layoutSource, runs[0]!, "【第一段】")
       swapRun(layoutSource, runs[1]!, "【第二段】")
-      // A page-wide stop does not know about generations; it finds the anchor
-      // by the marker the materialization claimed up front.
-      const state = getTranslationOnlyAnchorState(layoutSource)!
-      state.virtualGeneration = undefined
+      // The generation is deliberately left LIVE: stopping the page (or
+      // switching modes) while a unit is still awaiting its provider must
+      // release the container anyway, or the marker, the dir/lang and the cuts
+      // outlive the session and the next walk skips the region for good.
+      expect(state.virtualGeneration).toBeDefined()
 
       removeAllTranslatedWrapperNodes(document)
 
       expect(layoutSource.textContent).toBe(storyText)
       expect(layoutSource.childNodes).toHaveLength(1)
       expect(layoutSource).not.toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+      expect(getTranslationOnlyAnchorState(layoutSource)).toBeUndefined()
+    })
+
+    it("releases a live generation whose units never resolved", () => {
+      // The harshest version of the same stop: no unit ever swapped, so the
+      // container holds only the marker and the cuts, and a hung provider
+      // request means nothing will ever come back to release them.
+      const storyText = "First paragraph.\n\nSecond paragraph."
+      const { layoutSource, state } = createSwappedGeneration(storyText)
+      expect(state.virtualGeneration).toBeDefined()
+      expect(layoutSource.childNodes.length).toBeGreaterThan(1)
+
+      removeAllTranslatedWrapperNodes(document)
+
+      expect(layoutSource.textContent).toBe(storyText)
+      expect(layoutSource.childNodes).toHaveLength(1)
+      expect(layoutSource).not.toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
+      expect(getTranslationOnlyAnchorState(layoutSource)).toBeUndefined()
     })
   })
 
