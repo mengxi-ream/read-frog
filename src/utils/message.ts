@@ -13,6 +13,10 @@ import type {
   EdgeTTSSynthesizeRequest,
   EdgeTTSSynthesizeWireResponse,
 } from "@/types/edge-tts"
+import type {
+  MiniMaxTTSSynthesizeRequest,
+  MiniMaxTTSSynthesizeWireResponse,
+} from "@/types/minimax-tts"
 import type { ProxyRequest, ProxyResponse } from "@/types/proxy-fetch"
 import type {
   TTSPlaybackStartRequest,
@@ -164,6 +168,10 @@ interface ProtocolMap {
   edgeTtsSynthesize: (data: EdgeTTSSynthesizeRequest) => Promise<EdgeTTSSynthesizeWireResponse>
   edgeTtsListVoices: () => Promise<EdgeTTSVoice[]>
   edgeTtsHealthCheck: () => Promise<EdgeTTSHealthStatus>
+  // minimax tts
+  minimaxTtsSynthesize: (
+    data: MiniMaxTTSSynthesizeRequest,
+  ) => Promise<MiniMaxTTSSynthesizeWireResponse>
   // tts playback
   ttsPlaybackPrepare: () => Promise<{ ok: true }>
   ttsPlaybackStart: (data: TTSPlaybackStartRequest) => Promise<TTSPlaybackStartResponse>

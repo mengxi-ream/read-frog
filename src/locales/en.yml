@@ -1029,6 +1029,26 @@ options:
   tts:
     title: Text to Speech
     pageDescription: Read any selection aloud with a natural voice.
+    backend:
+      title: Speech provider
+      provider:
+        title: Provider
+        description: Choose the service that generates speech. MiniMax uses the API key from the enabled MiniMax provider in API Providers.
+      region:
+        title: API region
+        description: Choose the regional speech endpoint associated with your account.
+        global: Global
+        china: China
+      model:
+        title: Speech model
+        description: Choose the model used to synthesize speech.
+      voice:
+        title: Voice ID
+        description: Enter a system or cloned voice ID available to your account.
+        placeholder: Enter a voice ID
+      format:
+        title: Audio format
+        description: Choose the audio format returned for playback.
     voice:
       title: Voice
       selectPlaceholder: Select a voice

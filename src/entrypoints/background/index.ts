@@ -27,6 +27,7 @@ import { setupEdgeTTSMessageHandlers } from "./edge-tts"
 import { setupHostedAiStatusHandler } from "./hosted-ai-status"
 import { setupIframeInjection } from "./iframe-injection"
 import { setupLLMGenerateTextMessageHandlers } from "./llm-generate-text"
+import { setupMiniMaxTTSMessageHandlers } from "./minimax-tts"
 import { initMockData } from "./mock-data"
 import { newUserGuide } from "./new-user-guide"
 import { setupNotebasePendingSaveProcessor } from "./notebase-pending-save"
@@ -142,6 +143,7 @@ export default defineBackground({
     setupHostedAiStatusHandler()
     setupNotebasePendingSaveProcessor(() => backgroundReady)
     setupEdgeTTSMessageHandlers()
+    setupMiniMaxTTSMessageHandlers()
     setupLLMGenerateTextMessageHandlers()
     setupTTSPlaybackMessageHandlers()
     void initMockData()

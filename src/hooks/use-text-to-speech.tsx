@@ -3,7 +3,9 @@ import type {
   FeatureProviderAnalytics,
   FeatureUsageContext,
 } from "@/types/analytics"
+import type { Config } from "@/types/config/config"
 import type { TTSConfig } from "@/types/config/tts"
+import type { MiniMaxTTSConfig } from "@/types/minimax-tts"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAtomValue } from "jotai"
 import { useRef, useState } from "react"
@@ -12,6 +14,7 @@ import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { EDGE_TTS_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { DEFAULT_MINIMAX_TTS_CONFIG } from "@/utils/constants/tts"
 import { detectLanguage } from "@/utils/content/language"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { i18n } from "@/utils/i18n"
@@ -30,6 +33,8 @@ interface SynthesizedAudioChunk {
   audioBase64: string
   contentType: string
 }
+
+type MiniMaxProviderConfig = Extract<Config["providersConfig"][number], { provider: "minimax" }>
 
 const TTS_ERROR_TOAST_ID = "tts-synthesize-error"
 
@@ -97,7 +102,7 @@ function getTTSFriendlyErrorDescription(error: Error): string | undefined {
     error.message.includes("[TOKEN_FETCH_FAILED]") ||
     error.message.includes("[TOKEN_INVALID]")
   ) {
-    return "Edge TTS is temporarily unavailable. Please check your network and retry."
+    return "The speech service is temporarily unavailable. Please check your network and retry."
   }
 
   return error.message || undefined
@@ -130,9 +135,44 @@ async function synthesizeEdgeTTSAudioChunk(
   }
 }
 
+async function synthesizeMiniMaxAudioChunk(
+  chunk: string,
+  config: MiniMaxTTSConfig,
+  apiKey: string,
+): Promise<SynthesizedAudioChunk> {
+  const response = await sendMessage("minimaxTtsSynthesize", {
+    ...config,
+    apiKey,
+    text: chunk,
+  })
+
+  if (!response.ok) {
+    throw new Error(`[${response.error.code}] ${response.error.message}`)
+  }
+
+  if (!response.audioBase64) {
+    throw new Error("The speech API returned empty audio data")
+  }
+
+  return {
+    audioBase64: response.audioBase64,
+    contentType: response.contentType,
+  }
+}
+
+function findMiniMaxProvider(
+  providersConfig: Config["providersConfig"],
+): MiniMaxProviderConfig | undefined {
+  return providersConfig.find(
+    (provider): provider is MiniMaxProviderConfig =>
+      provider.provider === "minimax" && provider.enabled && Boolean(provider.apiKey?.trim()),
+  )
+}
+
 export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SELECTION_TOOLBAR) {
   const queryClient = useQueryClient()
   const languageDetection = useAtomValue(configFieldsAtomMap.languageDetection)
+  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentChunk, setCurrentChunk] = useState(0)
   const [totalChunks, setTotalChunks] = useState(0)
@@ -161,16 +201,32 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
       stop()
       shouldStopRef.current = false
 
+      const backend = ttsConfig.backend ?? "edge"
+      const minimaxConfig = ttsConfig.minimax ?? DEFAULT_MINIMAX_TTS_CONFIG
+      const minimaxProvider = backend === "minimax" ? findMiniMaxProvider(providersConfig) : null
+      const minimaxApiKey = minimaxProvider?.apiKey?.trim()
+      if (backend === "minimax" && !minimaxApiKey) {
+        throw new Error(
+          "Configure an enabled MiniMax provider with an API key before using MiniMax speech.",
+        )
+      }
+      if (backend === "minimax" && !minimaxConfig.voiceId.trim()) {
+        throw new Error("Enter a MiniMax voice ID before generating speech.")
+      }
+
       const requestId = getRandomUUID()
       activeRequestIdRef.current = requestId
       let didStartPlayback = false
 
-      const selectedVoice = await resolveVoiceForText(
-        text,
-        ttsConfig,
-        languageDetection.mode === "llm",
-        forcedVoice,
-      )
+      const selectedVoice =
+        backend === "edge"
+          ? await resolveVoiceForText(
+              text,
+              ttsConfig,
+              languageDetection.mode === "llm",
+              forcedVoice,
+            )
+          : minimaxConfig.voiceId.trim()
       if (shouldStopRef.current || activeRequestIdRef.current !== requestId) {
         return
       }
@@ -181,23 +237,29 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
       const fetchChunkAudio = async (chunk: string) => {
         logger.info("[TextToSpeech] Fetching chunk audio", {
           text: chunk,
+          backend,
           voice: selectedVoice,
-          rate: ttsConfig.rate,
-          pitch: ttsConfig.pitch,
-          volume: ttsConfig.volume,
+          model: backend === "minimax" ? minimaxConfig.model : undefined,
         })
         return queryClient.fetchQuery({
           queryKey: [
             "tts-audio",
             {
               text: chunk,
+              backend,
               voice: selectedVoice,
-              rate: ttsConfig.rate,
-              pitch: ttsConfig.pitch,
-              volume: ttsConfig.volume,
+              rate: backend === "edge" ? ttsConfig.rate : undefined,
+              pitch: backend === "edge" ? ttsConfig.pitch : undefined,
+              volume: backend === "edge" ? ttsConfig.volume : undefined,
+              region: backend === "minimax" ? minimaxConfig.region : undefined,
+              model: backend === "minimax" ? minimaxConfig.model : undefined,
+              audioFormat: backend === "minimax" ? minimaxConfig.audioFormat : undefined,
             },
           ],
-          queryFn: () => synthesizeEdgeTTSAudioChunk(chunk, selectedVoice, ttsConfig),
+          queryFn: () =>
+            backend === "edge"
+              ? synthesizeEdgeTTSAudioChunk(chunk, selectedVoice, ttsConfig)
+              : synthesizeMiniMaxAudioChunk(chunk, minimaxConfig, minimaxApiKey ?? ""),
           staleTime: Number.POSITIVE_INFINITY,
           gcTime: 1000 * 60 * 10,
           meta: {
@@ -280,13 +342,18 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
   })
 
   const play = (text: string, ttsConfig: TTSConfig, options?: { forcedVoice?: string }) => {
+    const providerAnalytics: FeatureProviderAnalytics =
+      (ttsConfig.backend ?? "edge") === "minimax"
+        ? { provider: "minimax", backend_kind: "llm" }
+        : EDGE_TTS_FEATURE_PROVIDER
+
     return playMutation.mutateAsync({
       text,
       ttsConfig,
       forcedVoice: options?.forcedVoice,
       analyticsContext: {
         ...createFeatureUsageContext(ANALYTICS_FEATURE.TEXT_TO_SPEECH, surface),
-        ...EDGE_TTS_FEATURE_PROVIDER,
+        ...providerAnalytics,
       },
     })
   }

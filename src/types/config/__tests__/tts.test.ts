@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { DEFAULT_TTS_CONFIG } from "@/utils/constants/tts"
 import {
   createDefaultTTSLanguageVoices,
   EDGE_TTS_FALLBACK_VOICE,
@@ -8,9 +9,27 @@ import {
   getDefaultTTSVoiceForLanguage,
   getEdgeTTSVoiceItem,
   isKnownEdgeTTSVoice,
+  ttsConfigSchema,
 } from "../tts"
 
 describe("tts config defaults", () => {
+  it("includes the current MiniMax speech defaults without invalidating legacy TTS config", () => {
+    expect(DEFAULT_TTS_CONFIG.minimax).toMatchObject({
+      region: "global",
+      model: "speech-2.8-hd",
+      audioFormat: "mp3",
+    })
+    expect(
+      ttsConfigSchema.safeParse({
+        defaultVoice: DEFAULT_TTS_CONFIG.defaultVoice,
+        languageVoices: DEFAULT_TTS_CONFIG.languageVoices,
+        rate: 0,
+        pitch: 0,
+        volume: 0,
+      }).success,
+    ).toBe(true)
+  })
+
   it("uses Andrew Multilingual as the fallback/default US English voice", () => {
     expect(EDGE_TTS_FALLBACK_VOICE).toBe("en-US-AndrewMultilingualNeural")
     expect(getDefaultTTSVoiceForLanguage("eng")).toBe("en-US-AndrewMultilingualNeural")

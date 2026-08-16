@@ -1,6 +1,11 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import { LANG_CODE_ISO6393_OPTIONS, langCodeISO6393Schema } from "@read-frog/definitions"
 import { z } from "zod"
+import {
+  MINIMAX_SPEECH_MODELS,
+  MINIMAX_TTS_AUDIO_FORMATS,
+  MINIMAX_TTS_REGIONS,
+} from "@/types/minimax-tts"
 
 export type TTSVoice = string
 
@@ -3240,12 +3245,21 @@ export const ttsRateSchema = z.coerce.number().int().min(MIN_TTS_RATE).max(MAX_T
 export const ttsPitchSchema = z.coerce.number().int().min(MIN_TTS_PITCH).max(MAX_TTS_PITCH)
 export const ttsVolumeSchema = z.coerce.number().int().min(MIN_TTS_VOLUME).max(MAX_TTS_VOLUME)
 
+export const minimaxTTSConfigSchema = z.object({
+  region: z.enum(MINIMAX_TTS_REGIONS),
+  model: z.enum(MINIMAX_SPEECH_MODELS),
+  voiceId: z.string().trim(),
+  audioFormat: z.enum(MINIMAX_TTS_AUDIO_FORMATS),
+})
+
 export const ttsConfigSchema = z.object({
   defaultVoice: ttsVoiceSchema,
   languageVoices: z.record(langCodeISO6393Schema, ttsVoiceSchema),
   rate: ttsRateSchema,
   pitch: ttsPitchSchema,
   volume: ttsVolumeSchema,
+  backend: z.enum(["edge", "minimax"]).optional(),
+  minimax: minimaxTTSConfigSchema.optional(),
 })
 
 export type TTSConfig = z.infer<typeof ttsConfigSchema>
