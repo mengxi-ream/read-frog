@@ -19,6 +19,7 @@ const {
   selectedProviderIdAtom,
   setProviderConfigMock,
   testState,
+  writeConfigMock,
   writeConfigAtom,
 } = vi.hoisted(() => ({
   anchoredToastAddMock: vi.fn<(options: unknown) => void>(),
@@ -29,6 +30,7 @@ const {
   selectedProviderIdAtom: {},
   setProviderConfigMock: vi.fn<(value: unknown) => void>(),
   testState: { selectedProviderId: "provider-1" },
+  writeConfigMock: vi.fn<(value: unknown) => void>(),
   writeConfigAtom: {},
 }))
 
@@ -40,7 +42,8 @@ const providerConfig = {
 }
 
 const config = {
-  languageDetection: { mode: "local" },
+  languageDetection: { mode: "basic", providerId: undefined as string | undefined },
+  providersConfig: [providerConfig],
   selectionToolbar: { customActions: [] },
 }
 
@@ -64,6 +67,7 @@ vi.mock("jotai", () => ({
   },
   useSetAtom: (atom: object) => {
     if (atom === providerWriteAtom) return setProviderConfigMock
+    if (atom === writeConfigAtom) return writeConfigMock
     if (atom === selectedProviderIdAtom)
       return (value: string) => {
         testState.selectedProviderId = value
@@ -186,13 +190,14 @@ function makeUltraAccessStatus(accessAllowed: boolean) {
   }
 }
 
-/** Must mirror BUILT_IN_FEATURE_KEYS, or new rows go unasserted. */
-const ULTRA_FEATURE_LABELS = [
+/** Must mirror the built-in hosted assignment rows, except dynamic custom actions. */
+const BUILT_IN_ASSIGNMENT_LABELS = [
   "feature.pageTranslation",
   "feature.videoSubtitles",
   "feature.selectionTranslation",
   "feature.inputTranslation",
   "feature.noteSuggestion",
+  "options.apiProviders.languageDetection.title",
 ] as const
 
 vi.mock("@/utils/i18n", () => ({
@@ -246,7 +251,9 @@ describe("ProvidersConfig", () => {
   beforeEach(() => {
     anchoredToastAddMock.mockReset()
     setProviderConfigMock.mockReset()
+    writeConfigMock.mockReset()
     testState.selectedProviderId = providerConfig.id
+    config.languageDetection = { mode: "basic", providerId: undefined }
     hostedAiState.value = { status: undefined, isPending: false, isError: true }
   })
 
@@ -278,7 +285,7 @@ describe("ProvidersConfig", () => {
     expect(screen.queryByText("options.apiProviders.form.delete")).not.toBeInTheDocument()
     // Both tiers list every hosted-capable feature row; the normal tier marks
     // the Ultra-gated ones with the badge instead of hiding them.
-    for (const label of ULTRA_FEATURE_LABELS) {
+    for (const label of BUILT_IN_ASSIGNMENT_LABELS) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
   })
@@ -300,7 +307,7 @@ describe("ProvidersConfig", () => {
     expect(
       screen.getByText("options.apiProviders.providers.attribution.builtInAiAdvance"),
     ).toBeInTheDocument()
-    for (const label of ULTRA_FEATURE_LABELS) {
+    for (const label of BUILT_IN_ASSIGNMENT_LABELS) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
     expect(screen.queryByText("options.apiProviders.sponsorCta")).not.toBeInTheDocument()
@@ -312,7 +319,7 @@ describe("ProvidersConfig", () => {
 
     renderProvidersConfig()
 
-    for (const label of ULTRA_FEATURE_LABELS) {
+    for (const label of BUILT_IN_ASSIGNMENT_LABELS) {
       expect(screen.getByRole("switch", { name: label })).not.toHaveAttribute(
         "aria-disabled",
         "true",
@@ -331,7 +338,7 @@ describe("ProvidersConfig", () => {
     renderProvidersConfig()
 
     // base-ui renders a span[role=switch]; disabled surfaces as aria-disabled.
-    for (const label of ULTRA_FEATURE_LABELS) {
+    for (const label of BUILT_IN_ASSIGNMENT_LABELS) {
       expect(screen.getByRole("switch", { name: label })).toHaveAttribute("aria-disabled", "true")
     }
   })
@@ -346,9 +353,27 @@ describe("ProvidersConfig", () => {
 
     renderProvidersConfig()
 
-    for (const label of ULTRA_FEATURE_LABELS) {
+    for (const label of BUILT_IN_ASSIGNMENT_LABELS) {
       expect(screen.getByRole("switch", { name: label })).not.toBeDisabled()
     }
+  })
+
+  it("assigns language detection from a Built-in AI editor", () => {
+    testState.selectedProviderId = BUILT_IN_AI_PROVIDER_ID
+
+    renderProvidersConfig()
+    fireEvent.click(
+      screen.getByRole("switch", {
+        name: "options.apiProviders.languageDetection.title",
+      }),
+    )
+
+    expect(writeConfigMock).toHaveBeenCalledWith({
+      languageDetection: {
+        mode: "llm",
+        providerId: BUILT_IN_AI_PROVIDER_ID,
+      },
+    })
   })
 
   it("counts default assignments on the free Built-in AI card badge", () => {
@@ -371,6 +396,23 @@ describe("ProvidersConfig", () => {
     expect(
       within(ultraCard).queryByText(/options\.apiProviders\.badges\.featureCount/),
     ).not.toBeInTheDocument()
+  })
+
+  it("counts language detection on the assigned Built-in AI card badge", () => {
+    config.languageDetection = {
+      mode: "llm",
+      providerId: BUILT_IN_AI_PROVIDER_ID,
+    }
+
+    const { container } = renderProvidersConfig()
+    const freeCard = container.querySelector(`[data-provider-id="${BUILT_IN_AI_PROVIDER_ID}"]`)
+    if (!(freeCard instanceof HTMLElement)) {
+      throw new Error("Built-in provider card not rendered")
+    }
+
+    expect(
+      within(freeCard).getByText("options.apiProviders.badges.featureCount:2"),
+    ).toBeInTheDocument()
   })
 
   it("opens the provider a ?provider= deep link names", () => {

@@ -350,6 +350,10 @@ function BuiltInProviderCard({ providerId }: { providerId: BuiltInAiProviderId }
   const assignedCustomActions = getSelectionToolbarActions(config.selectionToolbar).filter(
     (action) => action.providerId === providerId,
   )
+  const isLanguageDetectionProvider =
+    config.languageDetection.mode === "llm" && config.languageDetection.providerId === providerId
+  const totalAssigned =
+    assignedFeatures.length + assignedCustomActions.length + (isLanguageDetectionProvider ? 1 : 0)
 
   return (
     <EntityListItem.Root
@@ -358,10 +362,13 @@ function BuiltInProviderCard({ providerId }: { providerId: BuiltInAiProviderId }
       onClick={() => setSelectedProviderId(providerId)}
     >
       <EntityListItem.Badges>
-        <FeatureCountBadge count={assignedFeatures.length + assignedCustomActions.length}>
+        <FeatureCountBadge count={totalAssigned}>
           {assignedFeatures.map((key) => (
             <li key={key}>{i18n.t(getFeatureLabelI18nKey(key))}</li>
           ))}
+          {isLanguageDetectionProvider && (
+            <li>{i18n.t("options.apiProviders.languageDetection.title")}</li>
+          )}
           {assignedCustomActions.map((action) => (
             <li key={action.id}>{action.name}</li>
           ))}
@@ -382,10 +389,8 @@ function BuiltInProviderCard({ providerId }: { providerId: BuiltInAiProviderId }
 
 /**
  * Every hosted-capable FEATURE_KEYS entry, in FEATURE_KEYS order. Language
- * detection is deliberately absent: it is a ProviderCapability but not a
- * FeatureKey (its providerId is optional and only meaningful in "llm" mode),
- * so it cannot use ProviderEditor.FeatureAssignment and stays owned by the
- * Language detection section.
+ * detection is a separate ProviderCapability rather than a FeatureKey, so the
+ * built-in editor renders it with LanguageDetectionAssignment below.
  */
 const BUILT_IN_FEATURE_KEYS = [
   "pageTranslation",
@@ -436,6 +441,9 @@ function BuiltInProviderPanel({ providerId }: { providerId: BuiltInAiProviderId 
                 {...getAssignmentStatus(featureKey)}
               />
             ))}
+            <ProviderEditor.LanguageDetectionAssignment
+              {...getAssignmentStatus("languageDetection")}
+            />
             <ProviderEditor.CustomActionAssignments {...getAssignmentStatus("customAction")} />
           </ProviderEditor.Assignments>
         </EntityEditor.Body>
