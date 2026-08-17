@@ -53,7 +53,10 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
   }, [textStyle.fontWeight])
 
   const handleChange = (style: Partial<SubtitleTextStyle>) => {
-    void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { [type]: style } }))
+    // Keyed explicitly rather than via a computed `[type]` key: a computed union
+    // key widens the patch to an index signature, which poisons the merged type.
+    const stylePatch = type === "main" ? { main: style } : { translation: style }
+    void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: stylePatch }))
   }
 
   return (
