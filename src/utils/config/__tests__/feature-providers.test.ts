@@ -3,7 +3,7 @@ import type { HostedAiStatus, HostedAiTierStatus } from "@/utils/hosted-ai/types
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
-import { isProviderSelectorItem } from "@/utils/providers/provider-display"
+import { isSystemProviderSelectorItem } from "@/utils/providers/provider-display"
 import {
   BUILT_IN_AI_PROVIDER_LOGO,
   getSelectableProvidersForCapability,
@@ -106,8 +106,8 @@ describe("feature providers", () => {
       ])
 
       const builtInAiProvider = providers[0]
-      expect(builtInAiProvider && isProviderSelectorItem(builtInAiProvider)).toBe(true)
-      if (!builtInAiProvider || !isProviderSelectorItem(builtInAiProvider)) {
+      expect(builtInAiProvider && isSystemProviderSelectorItem(builtInAiProvider)).toBe(true)
+      if (!builtInAiProvider || !isSystemProviderSelectorItem(builtInAiProvider)) {
         throw new Error("Built-in AI provider selector item was not returned")
       }
       expect(builtInAiProvider.logo("light")).toBe(BUILT_IN_AI_PROVIDER_LOGO)

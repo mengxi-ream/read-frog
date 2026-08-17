@@ -3,8 +3,8 @@ import type { ProviderConfig, ProvidersConfig } from "@/types/config/provider"
 import type { Theme } from "@/types/config/theme"
 import type { FeatureKey } from "@/utils/constants/feature-providers"
 import type {
-  ProviderSelectorItem,
   ProviderSelectorOption,
+  SystemProviderSelectorItem,
 } from "@/utils/providers/provider-display"
 import readFrogLogo from "@/assets/providers/read-frog-provider.png?url&no-inline"
 import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
@@ -126,7 +126,7 @@ function getSystemProviderName(def: SystemProviderDef): string {
   return i18n.t(def.nameKey as never) || def.fallbackName
 }
 
-function createSystemProviderSelectorItem(def: SystemProviderDef): ProviderSelectorItem {
+function createSystemProviderSelectorItem(def: SystemProviderDef): SystemProviderSelectorItem {
   return {
     kind: "system",
     id: def.id,

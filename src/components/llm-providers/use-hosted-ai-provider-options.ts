@@ -5,7 +5,7 @@ import {
   getHostedFeatureForCapability,
   isDurablyUnusableTier,
 } from "@/utils/providers/provider-availability"
-import { isProviderSelectorItem } from "@/utils/providers/provider-display"
+import { isSystemProviderSelectorItem } from "@/utils/providers/provider-display"
 import { getHostedAiModelTier, isBuiltInAiProviderId } from "@/utils/providers/provider-registry"
 import { useHostedAiStatus } from "./use-hosted-ai-status"
 
@@ -21,7 +21,7 @@ export function useHostedAiProviderOptions(
   }
 
   return providers.map((provider) => {
-    if (!isProviderSelectorItem(provider) || !isBuiltInAiProviderId(provider.id)) {
+    if (!isSystemProviderSelectorItem(provider) || !isBuiltInAiProviderId(provider.id)) {
       return provider
     }
 

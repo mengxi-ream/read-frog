@@ -2,7 +2,7 @@ import type { ProviderConfig } from "@/types/config/provider"
 import type { Theme } from "@/types/config/theme"
 import { PROVIDER_ITEMS } from "@/utils/constants/providers"
 
-export interface ProviderSelectorItem {
+export interface SystemProviderSelectorItem {
   kind: "system"
   id: string
   logo: (theme: Theme) => string
@@ -12,16 +12,16 @@ export interface ProviderSelectorItem {
   requiresUltra?: boolean
 }
 
-export type ProviderSelectorOption = ProviderConfig | ProviderSelectorItem
+export type ProviderSelectorOption = ProviderConfig | SystemProviderSelectorItem
 
-export function isProviderSelectorItem(
+export function isSystemProviderSelectorItem(
   provider: ProviderSelectorOption,
-): provider is ProviderSelectorItem {
+): provider is SystemProviderSelectorItem {
   return "kind" in provider && provider.kind === "system"
 }
 
 export function getProviderLogo(provider: ProviderSelectorOption, theme: Theme): string {
-  return isProviderSelectorItem(provider)
+  return isSystemProviderSelectorItem(provider)
     ? provider.logo(theme)
     : PROVIDER_ITEMS[provider.provider].logo(theme)
 }
@@ -31,5 +31,5 @@ export function getProviderName(provider: ProviderSelectorOption): string {
 }
 
 export function isProviderSelectorOptionDisabled(provider: ProviderSelectorOption): boolean {
-  return isProviderSelectorItem(provider) && provider.disabled === true
+  return isSystemProviderSelectorItem(provider) && provider.disabled === true
 }
