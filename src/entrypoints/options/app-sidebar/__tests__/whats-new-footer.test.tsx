@@ -6,6 +6,7 @@ import * as React from "react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { WhatsNewFooter } from "../whats-new-footer"
 
+const getBlogLocaleFromUILanguageMock = vi.fn<(...args: any[]) => any>(() => "zh")
 const getLastViewedBlogDateMock = vi.fn<(...args: any[]) => any>()
 const getLatestBlogDateMock = vi.fn<(...args: any[]) => any>()
 const saveLastViewedBlogDateMock = vi.fn<(...args: any[]) => any>()
@@ -14,6 +15,11 @@ vi.mock("#imports", () => ({
   i18n: {
     t: (key: string) => key,
   },
+}))
+
+vi.mock("jotai", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("jotai")>()),
+  useAtomValue: () => "zh-CN",
 }))
 
 vi.mock("@iconify/react", () => ({
@@ -115,7 +121,7 @@ vi.mock("@/components/ui/base-ui/popover", async () => {
 vi.mock("@/utils/blog", async () => {
   return {
     buildBilibiliEmbedUrl: vi.fn<(...args: any[]) => any>(() => null),
-    getBlogLocaleFromUILanguage: vi.fn<(...args: any[]) => any>(() => "zh"),
+    getBlogLocaleFromUILanguage: (...args: unknown[]) => getBlogLocaleFromUILanguageMock(...args),
     getLastViewedBlogDate: (...args: unknown[]) => getLastViewedBlogDateMock(...args),
     getLatestBlogDate: (...args: unknown[]) => getLatestBlogDateMock(...args),
     hasNewBlogPost: (latestViewedDate: Date | null, latestDate: Date | null) => {
@@ -195,6 +201,7 @@ describe("whatsNewFooter", () => {
     renderWhatsNewFooter()
 
     await waitFor(() => {
+      expect(getBlogLocaleFromUILanguageMock).toHaveBeenCalledWith("zh-CN")
       expect(getLatestBlogDateMock).toHaveBeenCalledWith(
         "https://www.readfrog.app/api/blog/latest",
         "zh",

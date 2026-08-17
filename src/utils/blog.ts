@@ -1,4 +1,5 @@
 import type { LatestBlogPost } from "@read-frog/definitions"
+import type { UiLanguage } from "@/types/config/config"
 import {
   bilibiliVideoUrlSchema,
   getBilibiliVideoIdFromUrl,
@@ -99,14 +100,18 @@ export function resolveBlogLocale(uiLocale?: string | null): BlogLocale {
   )
 }
 
-export function getBlogLocaleFromUILanguage(): BlogLocale {
-  const uiLocale =
+export function getBlogLocaleFromUILanguage(uiLanguage: UiLanguage): BlogLocale {
+  if (uiLanguage !== "auto") {
+    return resolveBlogLocale(uiLanguage)
+  }
+
+  const browserLocale =
     browser.i18n.getUILanguage?.() ||
     browser.i18n.getMessage?.("@@ui_locale") ||
     globalThis.navigator?.language ||
     DEFAULT_BLOG_LOCALE
 
-  return resolveBlogLocale(uiLocale)
+  return resolveBlogLocale(browserLocale)
 }
 
 /**

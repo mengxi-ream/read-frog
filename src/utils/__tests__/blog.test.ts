@@ -4,6 +4,7 @@ import { z } from "zod"
 import {
   buildBilibiliEmbedUrl,
   extractBilibiliVideoId,
+  getBlogLocaleFromUILanguage,
   hasNewBlogPost,
   resolveBlogLocale,
 } from "../blog"
@@ -178,6 +179,11 @@ describe("bilibili helpers", () => {
 })
 
 describe("resolveBlogLocale", () => {
+  it("uses an explicit configured UI language instead of the browser language", () => {
+    expect(getBlogLocaleFromUILanguage("zh-CN")).toBe("zh")
+    expect(getBlogLocaleFromUILanguage("zh-TW")).toBe("zh-TW")
+  })
+
   it("maps simplified Chinese locales to zh", () => {
     expect(resolveBlogLocale("zh")).toBe("zh")
     expect(resolveBlogLocale("zh-CN")).toBe("zh")

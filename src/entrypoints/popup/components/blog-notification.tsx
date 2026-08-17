@@ -1,8 +1,10 @@
 import { Icon } from "@iconify/react/dist/iconify.js"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useAtomValue } from "jotai"
 import { Button } from "@/components/ui/base-ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { env } from "@/env"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
   getBlogLocaleFromUILanguage,
   getLastViewedBlogDate,
@@ -15,7 +17,8 @@ import { version } from "../../../../package.json"
 
 export default function BlogNotification() {
   const queryClient = useQueryClient()
-  const blogLocale = getBlogLocaleFromUILanguage()
+  const uiLanguage = useAtomValue(configFieldsAtomMap.uiLanguage)
+  const blogLocale = getBlogLocaleFromUILanguage(uiLanguage)
 
   const { data: lastViewedDate } = useQuery({
     queryKey: ["last-viewed-blog-date"],
