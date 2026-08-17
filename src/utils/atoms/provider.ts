@@ -5,16 +5,17 @@ import { deepmerge } from "deepmerge-ts"
 import { atom } from "jotai"
 import { atomFamily } from "jotai-family"
 import { llmProviderConfigItemSchema, providerConfigItemSchema } from "@/types/config/provider"
+import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { getProviderConfigById } from "../config/helpers"
 import { FEATURE_PROVIDER_DEFS } from "../constants/feature-providers"
 import { configAtom, configFieldsAtomMap } from "./config"
 
-export const featureProviderConfigAtom = atomFamily((featureKey: FeatureKey) =>
+export const featureProviderRefAtom = atomFamily((featureKey: FeatureKey) =>
   atom((get) => {
     const config = get(configAtom)
     const def = FEATURE_PROVIDER_DEFS[featureKey]
     const providerId = def.getProviderId(config)
-    return getProviderConfigById(config.providersConfig, providerId) ?? null
+    return resolveProviderRefForCapability(featureKey, config.providersConfig, providerId)
   }),
 )
 
