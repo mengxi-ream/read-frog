@@ -436,7 +436,13 @@ function CompatibleFeatureAssignments() {
   })
 }
 
-function LanguageDetectionAssignment() {
+function LanguageDetectionAssignment({
+  disabled = false,
+  requiresUltra = false,
+}: {
+  disabled?: boolean
+  requiresUltra?: boolean
+} = {}) {
   const {
     state: {
       assignmentTarget: { providerId, providerType },
@@ -445,7 +451,9 @@ function LanguageDetectionAssignment() {
   } = useProviderEditor()
   const config = useAtomValue(configAtom)
 
-  if (!providerType || !isLLMProvider(providerType)) {
+  // Built-in providers have no local providerType, but declare this capability
+  // in the provider registry. Local non-LLM providers still cannot take it.
+  if (providerType && !isLLMProvider(providerType)) {
     return null
   }
 
@@ -455,6 +463,8 @@ function LanguageDetectionAssignment() {
   return (
     <AssignmentRow
       checked={isAssigned}
+      disabled={disabled}
+      requiresUltra={requiresUltra}
       onCheckedChange={(checked) => {
         if (checked) void actions.assignLanguageDetection()
       }}
