@@ -11,7 +11,7 @@ import {
   FEATURE_PROVIDER_DEFS,
 } from "@/utils/constants/feature-providers"
 import { getSelectionToolbarActions, patchSelectionToolbarAction } from "@/utils/custom-actions"
-import { isProviderSelectorItem } from "@/utils/providers/provider-display"
+import { isSystemProviderSelectorItem } from "@/utils/providers/provider-display"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { providerSupportsTranslationOnlyMode } from "@/utils/providers/translation-only-gate"
 import { useHostedAiProviderOptions } from "./use-hosted-ai-provider-options"
@@ -44,7 +44,8 @@ export function useFeatureProvider(featureKey: FeatureKey): FeatureProviderBindi
     }
     return candidates.filter(
       (option) =>
-        isProviderSelectorItem(option) || providerSupportsTranslationOnlyMode(option.provider),
+        isSystemProviderSelectorItem(option) ||
+        providerSupportsTranslationOnlyMode(option.provider),
     )
   }, [featureKey, providersConfig, hideTranslationOnlyUnsupported])
   const providers = useHostedAiProviderOptions(featureKey, baseProviders)
