@@ -98,7 +98,7 @@
     "cmdk": "^1.1.1",
     "css-tree": "^3.2.1",
     "debounce": "^3.0.0",
-    "deepmerge-ts": "^7.1.5",
+    "deepmerge-ts": "^8.0.0",
     "defuddle": "^0.19.2",
     "dequal": "^2.0.3",
     "dexie": "^4.4.4",
