@@ -10,10 +10,9 @@ import { i18n } from "@/utils/i18n"
 interface UseExportConfigOptions {
   config: Config
   schemaVersion: number
-  onSuccess?: () => void
 }
 
-export function useExportConfig({ config, schemaVersion, onSuccess }: UseExportConfigOptions) {
+export function useExportConfig({ config, schemaVersion }: UseExportConfigOptions) {
   return useMutation({
     mutationFn: async (includeApiKeys: boolean) => {
       let exportConfig = config
@@ -38,7 +37,6 @@ export function useExportConfig({ config, schemaVersion, onSuccess }: UseExportC
         type: "success",
         title: i18n.t("options.preference.config.manualSync.exportSuccess"),
       })
-      onSuccess?.()
     },
   })
 }

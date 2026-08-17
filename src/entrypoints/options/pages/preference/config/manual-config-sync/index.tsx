@@ -136,12 +136,6 @@ function ExportConfig() {
   const { mutate: exportConfig, isPending: isExporting } = useExportConfig({
     config,
     schemaVersion: CONFIG_SCHEMA_VERSION,
-    onSuccess: () => {
-      toastManager.add({
-        type: "success",
-        title: i18n.t("options.preference.config.manualSync.exportSuccess"),
-      })
-    },
   })
 
   return (
