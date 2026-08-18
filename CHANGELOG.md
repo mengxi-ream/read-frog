@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.46.3
+
+### Patch Changes
+
+- [#2104](https://github.com/mengxi-ream/read-frog/pull/2104) [`34349b8`](https://github.com/mengxi-ream/read-frog/commit/34349b892bd62a33b47acea808d67934d48efcab) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(providers): prioritize GLM 5.2 for Jalapeno Cloud
+
 ## 1.46.2
 
 ### Patch Changes
