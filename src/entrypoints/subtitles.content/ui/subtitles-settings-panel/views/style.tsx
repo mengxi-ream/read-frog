@@ -1,7 +1,9 @@
 import type { ReactNode } from "react"
+import type { PartialDeep } from "type-fest"
 import type {
   SubtitlesDisplayMode,
   SubtitlesFontFamily,
+  SubtitlesStyle,
   SubtitlesTranslationPosition,
   SubtitleTextStyle,
 } from "@/types/config/subtitles"
@@ -224,7 +226,7 @@ export function StyleView() {
   const portalContainer = use(ShadowWrapperContext)
   const { displayMode, translationPosition, container } = config.style
 
-  const updateStyle = (patch: Record<string, unknown>) => {
+  const updateStyle = (patch: PartialDeep<SubtitlesStyle>) => {
     void setConfig(deepmerge(config, { style: patch }))
   }
 
