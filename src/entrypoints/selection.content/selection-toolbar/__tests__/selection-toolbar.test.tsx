@@ -152,6 +152,31 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expect(getToolbarSurface()?.style.opacity).toBe("var(--rf-selection-opacity, 1)")
   })
 
+  it("collapses the overlay root to 0x0 while idle so touch gestures are not stolen", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">{MOCK_SELECTED_TEXT}</div>
+      </div>,
+    )
+
+    const getOverlayRoot = () =>
+      document.querySelector<HTMLElement>(`[${SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE}]`)
+
+    // Idle: no full-viewport fixed layer. A persistent inset-0 layer makes
+    // Chrome claim horizontal touch pans on `touch-action: manipulation`
+    // pages and fires pointercancel at page drag gestures (e.g. carousels).
+    expect(getOverlayRoot()).toHaveClass("h-0")
+    expect(getOverlayRoot()).toHaveClass("w-0")
+    expect(getOverlayRoot()).not.toHaveClass("inset-0")
+
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+    await waitFor(() => {
+      expect(getOverlayRoot()).toHaveClass("inset-0")
+      expect(getOverlayRoot()).not.toHaveClass("h-0")
+    })
+  })
+
   it("should show toolbar when selecting text in a normal div element", async () => {
     render(
       <div>

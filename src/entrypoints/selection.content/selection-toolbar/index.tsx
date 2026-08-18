@@ -576,7 +576,16 @@ export function SelectionToolbar() {
   return (
     <div
       ref={tooltipContainerRef}
-      className={`${NOTRANSLATE_CLASS} pointer-events-none fixed inset-0 ${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay}`}
+      className={cn(
+        NOTRANSLATE_CLASS,
+        // Collapse to 0x0 while idle: a persistent full-viewport fixed layer
+        // makes Chrome claim horizontal touch pans on pages using
+        // `touch-action: manipulation`, firing pointercancel and breaking
+        // touch drag gestures (e.g. carousels) outside the toolbar.
+        isSelectionToolbarVisible
+          ? `pointer-events-none fixed inset-0 ${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay}`
+          : "pointer-events-none fixed h-0 w-0",
+      )}
       {...{ [SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE]: "" }}
     >
       {selectionToolbar.enabled && !isSiteDisabled && hasAnyEnabledFeature && (
