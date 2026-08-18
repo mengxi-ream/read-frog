@@ -31,8 +31,6 @@
    Set `--glass-tint`, `--glass-glow` and `--glass-rim` per plan; see the
    `glass-badge-{free,pro,ultra}` utilities below. */
 @utility glass-badge {
-  position: relative;
-  isolation: isolate;
   -webkit-backdrop-filter: blur(5px) saturate(180%);
   backdrop-filter: blur(5px) saturate(180%);
   background:
@@ -49,43 +47,11 @@
     inset 0 -1px 1px -1px rgb(0 0 0 / 0.06),
     0 1px 1.5px -1px rgb(0 0 0 / 0.1);
 
-  /* The sheen sweep. `overflow-hidden` on the badge base keeps it inside the
-     pill, and the badge's own content sits above it via `isolation: isolate`
-     plus this z-index pair. */
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    border-radius: inherit;
-    background: linear-gradient(
-      102deg,
-      transparent 34%,
-      rgb(255 255 255 / 0.55) 49%,
-      transparent 63%
-    );
-    background-size: 280% 100%;
-    background-position: 135% 0;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.18s ease;
-  }
-
-  & > * {
-    position: relative;
-    z-index: 2;
-  }
-
   &:hover {
     box-shadow:
       inset 0 -1px 1px -1px rgb(0 0 0 / 0.06),
       0 1px 1.5px -1px rgb(0 0 0 / 0.12),
       0 3px 10px -6px var(--glass-glow);
-  }
-
-  &:hover::after {
-    opacity: 1;
-    animation: glass-badge-sheen 0.7s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* Dark surfaces need a much thinner white film — the same 0.42 top stop that
@@ -208,23 +174,5 @@
       rgb(255 172 178 / 0.5) 100%
     );
     color: #ffe0b5;
-  }
-}
-
-@keyframes glass-badge-sheen {
-  from {
-    background-position: 135% 0;
-  }
-  to {
-    background-position: -35% 0;
-  }
-}
-
-/* Travels with the sheen rather than joining theme.css's shared
-   reduced-motion group, so moving this file can never leave the guard
-   behind. */
-@media (prefers-reduced-motion: reduce) {
-  .glass-badge:hover::after {
-    animation: none;
   }
 }
