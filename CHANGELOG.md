@@ -1,5 +1,21 @@
 # @read-frog/extension
 
+## 1.46.2
+
+### Patch Changes
+
+- [#2095](https://github.com/mengxi-ream/read-frog/pull/2095) [`208397b`](https://github.com/mengxi-ream/read-frog/commit/208397b79717b612875bec3bf4109ce0d84e4c97) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(hosted-ai): expose language detection in Built-in AI feature assignments
+
+- [#2092](https://github.com/mengxi-ream/read-frog/pull/2092) [`f4efced`](https://github.com/mengxi-ream/read-frog/commit/f4efced764007a9a20ca1c4b6af63251fd13e50d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(i18n): follow the configured UI language for What's New content
+
+- [#2102](https://github.com/mengxi-ream/read-frog/pull/2102) [`fac49a1`](https://github.com/mengxi-ream/read-frog/commit/fac49a135aeea96b92dd1c99217f10dd8b2dca47) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(account): show the account's plan beside its name
+
+- [#2094](https://github.com/mengxi-ream/read-frog/pull/2094) [`aea6f60`](https://github.com/mengxi-ream/read-frog/commit/aea6f604ed6bce139d312849bddb34e1f8bfb97b) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(popup): allow Prompt selection with Built-in AI
+
+- [#2097](https://github.com/mengxi-ream/read-frog/pull/2097) [`3c32b98`](https://github.com/mengxi-ream/read-frog/commit/3c32b98ae623c1d5fd8977c3bef1769631a88035) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(options): recognize configured LLM providers for language detection
+
+- [#2096](https://github.com/mengxi-ream/read-frog/pull/2096) [`73ac569`](https://github.com/mengxi-ream/read-frog/commit/73ac569add98096306601d051ac1f3a6ee3359b5) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(options): show one success notification after exporting config
+
 ## 1.46.1
 
 ### Patch Changes
