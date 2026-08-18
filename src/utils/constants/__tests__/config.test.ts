@@ -71,7 +71,7 @@ describe("dEFAULT_CONFIG", () => {
     ).toEqual(
       expect.objectContaining({
         model: {
-          model: "DeepSeek-V4-Flash",
+          model: "GLM-5.2",
           isCustomModel: false,
           customModel: null,
         },

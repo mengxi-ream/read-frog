@@ -119,10 +119,10 @@ export const LLM_PROVIDER_MODELS = {
   // the code-specialised (Kimi-K2.7-Code), vision-first (Qwen3-VL-*) and thinking-only
   // variants are left out, since neither buys anything here and both cost more per call.
   jalapenocloud: [
-    "DeepSeek-V4-Flash",
-    "DeepSeek-V4-Pro",
     "GLM-5.2",
     "GLM-5.1",
+    "DeepSeek-V4-Flash",
+    "DeepSeek-V4-Pro",
     "Hy3",
     "Kimi-K3",
     "Kimi-K2.5",

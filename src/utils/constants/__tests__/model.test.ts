@@ -155,6 +155,10 @@ describe("getProviderOptions", () => {
       ])
     })
 
+    it("should prioritize the Jalapeno Cloud GLM models", () => {
+      expect(LLM_PROVIDER_MODELS.jalapenocloud.slice(0, 2)).toEqual(["GLM-5.2", "GLM-5.1"])
+    })
+
     it("should expose current Ollama recommended model ids", () => {
       expect(LLM_PROVIDER_MODELS.ollama).toEqual([
         "gemma4:e2b",

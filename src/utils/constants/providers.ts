@@ -41,7 +41,7 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   jalapenocloud: {
-    model: "DeepSeek-V4-Flash",
+    model: "GLM-5.2",
     isCustomModel: false,
     customModel: null,
   },
