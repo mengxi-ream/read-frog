@@ -5,7 +5,7 @@ import { Icon } from "@iconify/react"
 import { useSelector } from "@tanstack/react-store"
 import { useAtomValue, useSetAtom } from "jotai"
 import { createContext, use, useState } from "react"
-import { UltraBadge } from "@/components/llm-providers/ultra-badge"
+import { PlanBadge } from "@/components/badges/plan-badge"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import {
@@ -392,7 +392,9 @@ function AssignmentRow({
     <label className="flex w-fit items-center gap-2">
       <Switch checked={checked} disabled={checked || disabled} onCheckedChange={onCheckedChange} />
       <span className="text-sm">{children}</span>
-      {requiresUltra && <UltraBadge />}
+      {requiresUltra && (
+        <PlanBadge plan="ultra" upgradeTooltip={i18n.t("hostedAi.ultraBadge.tooltip")} />
+      )}
     </label>
   )
 }

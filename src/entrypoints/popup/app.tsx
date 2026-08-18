@@ -21,9 +21,12 @@ function App() {
   return (
     <>
       <div className="flex flex-col gap-4 bg-background px-6 pt-5 pb-4">
-        <div className="flex items-center justify-between">
+        {/* gap-2 + a non-shrinking icon rail is what bounds the account menu:
+            whatever is left of the 320px popup is its width, and a long display
+            name ellipses inside that instead of pushing the icons off. */}
+        <div className="flex items-center justify-between gap-2">
           <UserAccountMenuPopup />
-          <div className="flex items-center">
+          <div className="flex shrink-0 items-center">
             <TranslationHubButton />
             <DiscordButton />
             <BlogNotification />

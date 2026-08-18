@@ -1,6 +1,7 @@
 @import "tailwindcss" source("../..");
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./glass-badge.css";
 
 @source not "../../**/__tests__";
 @source not "../../**/*.test.*";

@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react"
 import type { Theme } from "@/types/config/theme"
 import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
-import { UltraBadge } from "@/components/llm-providers/ultra-badge"
+import { PlanBadge } from "@/components/badges/plan-badge"
 import ProviderIcon from "@/components/provider-icon"
 import {
   Select,
@@ -76,7 +76,7 @@ function ProviderOptionContent({
 }: {
   provider: ProviderSelectorOption
   theme: Theme
-  tooltipContainer?: ComponentProps<typeof UltraBadge>["tooltipContainer"]
+  tooltipContainer?: ComponentProps<typeof PlanBadge>["tooltipContainer"]
 }) {
   const requiresUltra = isSystemProviderSelectorItem(provider) && provider.requiresUltra === true
 
@@ -87,7 +87,13 @@ function ProviderOptionContent({
         name={getProviderName(provider)}
         size="sm"
       />
-      {requiresUltra && <UltraBadge tooltipContainer={tooltipContainer} />}
+      {requiresUltra && (
+        <PlanBadge
+          plan="ultra"
+          upgradeTooltip={i18n.t("hostedAi.ultraBadge.tooltip")}
+          tooltipContainer={tooltipContainer}
+        />
+      )}
     </div>
   )
 }
