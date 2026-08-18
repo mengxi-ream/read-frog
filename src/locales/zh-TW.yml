@@ -246,7 +246,7 @@ options:
         anthropic: 以安全性和推理能力著稱的 Claude 模型
         xai: 馬斯克的 AI 公司，提供具有即時資料存取能力的 Grok 模型
         atlascloud: 統一的 OpenAI 相容模型平台，提供 DeepSeek、Kimi、Qwen、豆包、GLM 等較新模型
-        jalapenocloud: 頂尖大模型團隊都在用的企業級 AI，現在你也能用
+        jalapenocloud: 頂尖團隊都在用的企業級 AI，現在為你而來！
         siliconflow: 針對中國和國際模型的高效能推理平台
         tensdaq: 革命性競價 AI MaaS 平台，價格由市場供需決定，告別高成本固定定價
         openaiCompatible: 連接與 OpenAI Chat Completions API 相容的自訂端點
