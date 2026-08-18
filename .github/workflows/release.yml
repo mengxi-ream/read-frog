@@ -49,20 +49,20 @@ jobs:
       - name: Create Release Pull Request or Tag
         if: github.event_name != 'workflow_dispatch'
         id: changesets
-        uses: changesets/action@v1.9.0
+        uses: changesets/action@v2.1.0
         with:
-          commit: "chore(release): version packages"
-          title: "chore(release): version packages"
-          publish: pnpm run release
-          createGithubReleases: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(release): version packages"
+          pr-title: "chore(release): version packages"
+          publish-script: pnpm run release
+          create-github-releases: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SKIP_FREE_API: true
 
       - name: Send Discord Notification
         if: steps.changesets.outputs.published == 'true'
         run: |
-          VERSION=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[0].version')
+          VERSION=$(echo '${{ steps.changesets.outputs.published-packages }}' | jq -r '.[0].version')
           TAG="v$VERSION"
           RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/$TAG"
 
@@ -133,7 +133,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             TAG="${{ github.event.inputs.tag }}"
           else
-            VERSION=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[0].version')
+            VERSION=$(echo '${{ steps.changesets.outputs.published-packages }}' | jq -r '.[0].version')
             TAG="v$VERSION"
           fi
 
