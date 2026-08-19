@@ -1132,6 +1132,7 @@ shortcutKeySelector:
   placeholder: Пожалуйста, введите горячую клавишу
 subtitles:
   loadingAiSubtitles: Загрузка ИИ-субтитров… (ожидается 3 мин)
+  aiSubtitlesHint: Субтитры ИИ создаются с помощью ИИ-транскрипции аудио, поэтому возможны небольшие неточности.
   requestAiSubtitles: Запросить ИИ-субтитры
   usingAiSubtitles: Используются ИИ-субтитры
   toggle:

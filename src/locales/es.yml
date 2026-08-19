@@ -1248,6 +1248,7 @@ shortcutKeySelector:
   placeholder: Introduce el atajo
 subtitles:
   loadingAiSubtitles: Cargando subtítulos con IA… (estimado 3 min)
+  aiSubtitlesHint: Los subtítulos de IA se generan mediante transcripción por IA a partir del audio, por lo que pueden contener pequeñas imprecisiones.
   requestAiSubtitles: Solicitar subtítulos con IA
   usingAiSubtitles: Usando subtítulos con IA
   toggle:

@@ -1248,6 +1248,7 @@ shortcutKeySelector:
   placeholder: Please enter the shortcut
 subtitles:
   loadingAiSubtitles: Loading AI subtitles… (estimated 3 min)
+  aiSubtitlesHint: AI subtitles are produced with AI transcription — the audio is recognized and transcribed by AI, so occasional inaccuracies may occur.
   requestAiSubtitles: Request AI subtitles
   usingAiSubtitles: Using AI subtitles
   toggle:

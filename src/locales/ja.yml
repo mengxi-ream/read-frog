@@ -1132,6 +1132,7 @@ shortcutKeySelector:
   placeholder: ショートカットを入力してください
 subtitles:
   loadingAiSubtitles: AI字幕を読み込み中…（推定3分）
+  aiSubtitlesHint: AI字幕はAI文字起こし技術で音声を認識して生成されるため、多少の誤りが含まれる場合があります。
   requestAiSubtitles: AI字幕をリクエスト
   usingAiSubtitles: AI字幕を使用中
   toggle:

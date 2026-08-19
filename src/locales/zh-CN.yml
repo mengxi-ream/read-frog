@@ -1248,6 +1248,7 @@ shortcutKeySelector:
   placeholder: 请输入快捷键
 subtitles:
   loadingAiSubtitles: 正在加载 AI 字幕中（预计 3 分钟）
+  aiSubtitlesHint: AI 字幕采用 AI 转录技术，通过 AI 识别音频生成，可能存在少量误差。
   requestAiSubtitles: 请求 AI 字幕
   usingAiSubtitles: 正在使用 AI 字幕中
   toggle:

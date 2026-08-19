@@ -1132,6 +1132,7 @@ shortcutKeySelector:
   placeholder: Lütfen kısayolu girin
 subtitles:
   loadingAiSubtitles: Yapay zeka altyazıları yükleniyor… (tahmini 3 dk)
+  aiSubtitlesHint: Yapay zeka altyazıları, sesin yapay zeka ile tanınıp yazıya dökülmesiyle oluşturulur; küçük hatalar olabilir.
   requestAiSubtitles: Yapay zeka altyazısı iste
   usingAiSubtitles: Yapay zeka altyazısı kullanılıyor
   toggle:
