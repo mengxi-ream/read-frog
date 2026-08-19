@@ -1132,7 +1132,7 @@ shortcutKeySelector:
   placeholder: Vui lòng nhập phím tắt
 subtitles:
   loadingAiSubtitles: Đang tải phụ đề AI… (dự kiến 3 phút)
-  aiSubtitlesHint: Phụ đề AI được tạo bằng công nghệ phiên âm AI nhận dạng âm thanh, nên có thể có sai sót nhỏ.
+  aiSubtitlesHint: Phụ đề chính xác được tạo bằng công nghệ nhận dạng giọng nói AI tiên tiến, dùng được ngay cả khi không có phụ đề chính thức.
   requestAiSubtitles: Yêu cầu phụ đề AI
   usingAiSubtitles: Đang dùng phụ đề AI
   toggle:
