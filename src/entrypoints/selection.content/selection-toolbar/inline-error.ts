@@ -1,3 +1,4 @@
+import { isExtensionContextInvalidatedError } from "@/utils/error/extension-context"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { i18n } from "@/utils/i18n"
 
@@ -36,6 +37,12 @@ function getPrecheckErrorDescription(code: SelectionToolbarPrecheckErrorCode) {
 }
 
 function toErrorDescription(kind: SelectionToolbarErrorKind, error: unknown) {
+  // Raw "Extension context invalidated." tells the user nothing actionable, and
+  // the popover's retry button can never recover from it — only a reload can.
+  if (isExtensionContextInvalidatedError(error)) {
+    return i18n.t("translation.extensionContextInvalidated")
+  }
+
   const message = extractAISDKErrorMessage(error)
   if (!message || message === UNEXPECTED_ERROR_MESSAGE) {
     return getErrorFallbackDescription(kind)

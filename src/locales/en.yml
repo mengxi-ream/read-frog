@@ -1184,6 +1184,7 @@ languageDetection:
 translation:
   sameLanguage: Source and target languages must be different
   autoModeSameLanguage: Detected language '$1' is the same as target language
+  extensionContextInvalidated: The extension was updated. Refresh this page and try again.
 speak:
   fetchingAudio: Generating audio...
   playingAudio: Playing audio...

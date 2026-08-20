@@ -3,10 +3,15 @@ import { IconAlertCircle } from "@tabler/icons-react"
 import { use } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/base-ui/alert"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/base-ui/hover-card"
+import { isExtensionContextInvalidatedError } from "@/utils/error/extension-context"
+import { i18n } from "@/utils/i18n"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 
 export function ErrorButton({ error }: { error: APICallError }) {
   const shadowWrapper = use(ShadowWrapperContext)
+  // A stale content script left behind by an extension update has no HTTP
+  // exchange to report, so the status-code row would be a fabricated 500.
+  const isContextInvalidated = isExtensionContextInvalidatedError(error)
 
   return (
     <HoverCard>
@@ -21,9 +26,11 @@ export function ErrorButton({ error }: { error: APICallError }) {
         <IconAlertCircle className="size-4 text-red-500!" />
         <AlertTitle>Translation Error</AlertTitle>
         <AlertDescription className="break-all">
-          <StatusCode statusCode={error.statusCode ?? 500} />
+          {!isContextInvalidated && <StatusCode statusCode={error.statusCode ?? 500} />}
           <p className="text-zinc-900 dark:text-zinc-100">
-            {error.message || "Something went wrong"}
+            {isContextInvalidated
+              ? i18n.t("translation.extensionContextInvalidated")
+              : error.message || "Something went wrong"}
           </p>
         </AlertDescription>
       </HoverCardContent>

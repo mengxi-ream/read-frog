@@ -1184,6 +1184,7 @@ languageDetection:
 translation:
   sameLanguage: 來源語言和目標語言必須不同
   autoModeSameLanguage: 偵測到的語言「$1」與目標語言相同
+  extensionContextInvalidated: 擴充功能已更新，請重新整理此頁面後再試一次。
 speak:
   fetchingAudio: 正在取得音訊…
   playingAudio: 正在播放音訊…

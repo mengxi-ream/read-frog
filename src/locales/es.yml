@@ -1184,6 +1184,7 @@ languageDetection:
 translation:
   sameLanguage: Los idiomas de origen y destino deben ser diferentes
   autoModeSameLanguage: El idioma detectado '$1' es el mismo que el idioma de destino
+  extensionContextInvalidated: La extensión se actualizó. Actualiza esta página e inténtalo de nuevo.
 speak:
   fetchingAudio: Generando audio...
   playingAudio: Reproduciendo audio...

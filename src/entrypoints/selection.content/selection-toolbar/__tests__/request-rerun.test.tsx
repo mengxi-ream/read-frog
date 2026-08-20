@@ -969,6 +969,22 @@ describe("selection toolbar requests", () => {
     expect(screen.queryByRole("alert")).toBeNull()
   })
 
+  it("replaces the raw stale-context error with a reload hint", async () => {
+    translateTextCoreMock.mockRejectedValueOnce(new Error("Extension context invalidated."))
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text" })
+    renderWithProviders(<TranslateButton />, store)
+
+    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
+
+    const alert = await screen.findByRole("alert")
+    expect(alert).toHaveTextContent("translation.extensionContextInvalidated")
+    expect(alert).not.toHaveTextContent("Extension context invalidated.")
+  })
+
   it("shows a precheck alert when the translate provider is unavailable", async () => {
     const store = createStore()
     const updatedConfig = cloneConfig(DEFAULT_CONFIG)
