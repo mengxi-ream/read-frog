@@ -2,6 +2,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { GIANT_SPLIT_STRANDED_TEXT_MAX_UNITS } from "@/utils/constants/translate"
 import {
   markExtensionDrivenNodeRemoval,
   registerBilingualTranslationState,
@@ -74,7 +75,10 @@ vi.mock("@/utils/host/dom/find", () => ({
   deepQueryTopLevelSelector: mockDeepQueryTopLevelSelector,
 }))
 
-vi.mock("@/utils/host/dom/traversal", () => ({
+// The labeling walk is mocked, but canSplitGiantWithoutStrandingOwnText is
+// kept real: it is the behavior under test in the giant-split cases below.
+vi.mock("@/utils/host/dom/traversal", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/utils/host/dom/traversal")>()),
   walkAndLabelElement: mockWalkAndLabelElement,
   walkAndLabelElementChunked: mockWalkAndLabelElementChunked,
 }))
@@ -179,6 +183,8 @@ function deepQueryTopLevelSelectorImpl(
   return result
 }
 
+const MOCK_BLOCK_TAGS = new Set(["P", "DIV", "BR", "UL", "LI", "SECTION", "ARTICLE", "BODY"])
+
 function isBlockedForTraversal(element: HTMLElement): boolean {
   return (
     Boolean(element.hidden) ||
@@ -210,6 +216,14 @@ function walkAndLabelVisibleParagraphs(
 
   if (element.tagName === "P" && element.textContent?.trim()) {
     element.setAttribute("data-read-frog-paragraph", "")
+  }
+
+  // The real walker labels block-level elements too, and the stranded-text
+  // guard reads that label to tell a re-segmentable container from one that
+  // would collapse into a single request. Without this the guard could never
+  // fire under the mock.
+  if (MOCK_BLOCK_TAGS.has(element.tagName)) {
+    element.setAttribute("data-read-frog-block-node", "")
   }
 
   return {
@@ -1085,13 +1099,16 @@ describe("pageTranslationManager mutation re-walk", () => {
     manager.stop()
   })
 
-  it("splits a giant paragraph into its descendant paragraphs for observation (#1881)", async () => {
+  it("splits a pure-container giant into its descendant paragraphs (#1881)", async () => {
     // docs.docker.com regression shape: one flat container labeled as a
     // paragraph spanning the whole document, with real paragraphs nested
     // inside. Built via DOM APIs — the HTML parser refuses nested <p>.
+    // The container owns NO direct text, which is what makes the split
+    // lossless — measured on the real page, its <article>'s own text is 0
+    // chars. (An earlier version of this fixture appended a direct text node,
+    // which the real page does not have and which the split would strand.)
     const giant = document.createElement("p")
     giant.id = "giant"
-    giant.append("direct inline text of the giant")
     const inner1 = document.createElement("p")
     inner1.id = "inner1"
     inner1.textContent = "Nested paragraph one"
@@ -1125,5 +1142,110 @@ describe("pageTranslationManager mutation re-walk", () => {
     expect(observed).toContain(unsplittable)
 
     manager.stop()
+  })
+
+  it("refuses to split a giant that owns prose beside block children", async () => {
+    // Blogger / paulgraham.com shape: the container's own bare text IS the
+    // article and the labeled descendants are incidental fragments. Splitting
+    // here observed only the fragments and stranded 92% of the post.
+    const flow = document.createElement("p")
+    flow.id = "flow"
+    const strayInner = document.createElement("p")
+    strayInner.id = "strayInner"
+    strayInner.textContent = "an incidental fragment"
+    flow.append("bare sentence one, which is the actual article", strayInner)
+    flow.append("bare sentence two, also the actual article")
+    document.body.append(flow)
+    flow.getBoundingClientRect = () => ({ height: 200_000 }) as DOMRect
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const observed = intersectionObservers[0]!.observe.mock.calls.map((call) => call[0])
+    // Observed whole, so the translate path re-segments it into runs and the
+    // bare sentences are translated instead of dropped.
+    expect(observed).toContain(flow)
+    expect(observed).not.toContain(strayInner)
+
+    manager.stop()
+  })
+
+  it("still splits a giant that owns prose but has no block child", async () => {
+    // Without a block-labeled child the translate path takes its single-node
+    // branch, so observing whole would ship the entire container as ONE
+    // request. Lossy-but-gated beats one doomed payload.
+    const flow = document.createElement("p")
+    flow.id = "flow"
+    const inlinePara = document.createElement("span")
+    inlinePara.id = "inlinePara"
+    inlinePara.textContent = "an inline fragment"
+    inlinePara.setAttribute("data-read-frog-paragraph", "")
+    inlinePara.setAttribute("data-read-frog-inline-node", "")
+    flow.append("bare sentence one", inlinePara, "bare sentence two")
+    document.body.append(flow)
+    flow.getBoundingClientRect = () => ({ height: 200_000 }) as DOMRect
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const observed = intersectionObservers[0]!.observe.mock.calls.map((call) => call[0])
+    expect(observed).toContain(inlinePara)
+    expect(observed).not.toContain(flow)
+
+    manager.stop()
+  })
+
+  it("still splits a giant whose split already yields many units", async () => {
+    // Safety valve: above the unit cap, keeping viewport gating beats
+    // rescuing the container's own text — refusing would enqueue the whole
+    // page at once, which is #1881 verbatim.
+    const giant = document.createElement("p")
+    giant.id = "giant"
+    giant.append("a stray sentence the split will strand")
+    const inners: HTMLElement[] = []
+    for (let i = 0; i < GIANT_SPLIT_STRANDED_TEXT_MAX_UNITS + 1; i++) {
+      const inner = document.createElement("p")
+      inner.textContent = `Nested paragraph ${i}`
+      inners.push(inner)
+      giant.append(inner)
+    }
+    document.body.append(giant)
+    giant.getBoundingClientRect = () => ({ height: 200_000 }) as DOMRect
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const observed = intersectionObservers[0]!.observe.mock.calls.map((call) => call[0])
+    expect(observed).not.toContain(giant)
+    expect(observed).toContain(inners[0])
+
+    manager.stop()
+  })
+
+  it("never refuses to split <body>", async () => {
+    // <body> is force-block and picks up a paragraph label from any stray
+    // direct text node. Refusing there would collapse the whole document into
+    // one observed unit. The mock walk only labels <p>, so label body the way
+    // the real walker would.
+    const real = document.createElement("p")
+    real.id = "real"
+    real.textContent = "Real paragraph"
+    document.body.append("Loading…", real)
+    document.body.setAttribute("data-read-frog-paragraph", "")
+    document.body.getBoundingClientRect = () => ({ height: 200_000 }) as DOMRect
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const observed = intersectionObservers[0]!.observe.mock.calls.map((call) => call[0])
+    expect(observed).not.toContain(document.body)
+    expect(observed).toContain(real)
+
+    manager.stop()
+    document.body.removeAttribute("data-read-frog-paragraph")
   })
 })
