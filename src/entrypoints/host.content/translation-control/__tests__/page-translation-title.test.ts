@@ -50,7 +50,8 @@ vi.mock("@/utils/host/dom/find", () => ({
   deepQueryTopLevelSelector: mockDeepQueryTopLevelSelector,
 }))
 
-vi.mock("@/utils/host/dom/traversal", () => ({
+vi.mock("@/utils/host/dom/traversal", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/utils/host/dom/traversal")>()),
   walkAndLabelElement: mockWalkAndLabelElement,
   walkAndLabelElementChunked: vi
     .fn<(...args: any[]) => any>()

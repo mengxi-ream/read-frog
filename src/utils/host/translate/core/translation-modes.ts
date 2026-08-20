@@ -28,7 +28,7 @@ import {
 } from "../../dom/filter"
 import { unwrapDeepestOnlyHTMLChild } from "../../dom/find"
 import { getOwnerDocument } from "../../dom/node"
-import { extractTextContent } from "../../dom/traversal"
+import { canSplitGiantWithoutStrandingOwnText, extractTextContent } from "../../dom/traversal"
 import {
   buildVirtualParagraphPlan,
   canMaterializeVirtualParagraphUnits,
@@ -780,6 +780,11 @@ async function translateNonMaterializableGiant(
   forceRetranslation: boolean,
 ): Promise<boolean> {
   if (!isGiantParagraphUnit(layoutSource)) return false
+  // Same content guard the observation gate applies: splitting into descendant
+  // paragraphs drops the container's own direct text. Falling back to the
+  // single run keeps that text rather than silently losing it here, after the
+  // observer already refused to lose it.
+  if (!canSplitGiantWithoutStrandingOwnText(layoutSource)) return false
 
   const paragraphs = collectTopLevelParagraphDescendants(layoutSource)
   if (paragraphs.length === 0) return false

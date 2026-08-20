@@ -264,3 +264,63 @@ export async function walkAndLabelElementChunked(
   }
   return step.value
 }
+
+/**
+ * Text counts as prose only when it contains a letter. Deliberately NARROWER
+ * than the `.trim()` test walkNode itself uses above: a stray "·", "|", "—" or
+ * a bare "2026-08-17" sitting between two block children is not text a reader
+ * would miss, and treating it as prose would forfeit viewport gating on
+ * exactly the flat containers #1881 was about. `\p{L}` covers Han/Hiragana/
+ * Hangul and subsumes isNumericContent, whose /^[\d\s,.-]+$/ admits no letter.
+ */
+const OWN_PROSE_RE = /\p{L}/u
+
+/**
+ * Giant-paragraph split guard — the CONTENT counterpart to
+ * `canSplitParagraphIntoDescendants`, which guards paragraph STRUCTURE.
+ *
+ * Splitting a giant observes its descendant paragraphs INSIDE what is really
+ * one translation unit. That is free on docs.docker.com (a 203k-px <article>
+ * whose own direct text is ZERO chars) and catastrophic on a Blogger post body
+ * or paulgraham.com (a flat <br>-delimited container whose only labeled
+ * descendants are inline <i>/<span>/<a> fragments — 8% and 1.1% of the article
+ * respectively; the rest is bare text nodes that belong to no observed unit
+ * and are never enqueued, while the <i> gets its own translation inserted
+ * mid-sentence).
+ *
+ * Only DIRECT text children can be stranded. By the labeling rule above, any
+ * element with a non-whitespace direct text child is itself labeled a
+ * paragraph, so every deeper text node already lies inside one of the chosen
+ * units. One loop over childNodes is therefore complete — and structurally
+ * blind to <script>, <style>, <pre>, hidden subtrees and our own translation
+ * wrappers, none of which can be a bare Text child.
+ *
+ * The refusal additionally requires a block-labeled child, i.e. that
+ * translateWalkedElement will really take its run path and re-segment the
+ * container. Without one it takes the single-node path and the whole giant
+ * ships as ONE request — a single node is never split by length. Note this is
+ * the MIRROR-OPPOSITE precondition to the pre-wrap clause in
+ * `canSplitParagraphIntoDescendants`, which refuses only in the all-inline
+ * shape; the two refusal domains are disjoint by construction.
+ */
+export function canSplitGiantWithoutStrandingOwnText(element: HTMLElement): boolean {
+  let hasOwnProse = false
+  let hasBlockChild = false
+
+  for (const child of element.childNodes) {
+    // nodeType directly, matching walkNode above — this predicate runs inside
+    // the observation gate, where the filter module may be stubbed out.
+    if (child.nodeType === Node.TEXT_NODE) {
+      if (!hasOwnProse && OWN_PROSE_RE.test(child.textContent ?? "")) {
+        hasOwnProse = true
+      }
+      continue
+    }
+    if (!hasBlockChild && isHTMLElement(child) && child.hasAttribute(BLOCK_ATTRIBUTE)) {
+      hasBlockChild = true
+    }
+    if (hasOwnProse && hasBlockChild) return false
+  }
+
+  return !(hasOwnProse && hasBlockChild)
+}

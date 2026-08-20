@@ -20,6 +20,7 @@ import {
   GIANT_PARAGRAPH_MAX_SPLIT_DEPTH,
   GIANT_PARAGRAPH_SPLIT_MIN_VIEWPORT_PX,
   GIANT_PARAGRAPH_SPLIT_VIEWPORT_MULTIPLIER,
+  GIANT_SPLIT_STRANDED_TEXT_MAX_UNITS,
 } from "@/utils/constants/translate"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import {
@@ -28,7 +29,11 @@ import {
   isWalkBlockedElement as isWalkBlockedElementFilter,
 } from "@/utils/host/dom/filter"
 import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
-import { walkAndLabelElement, walkAndLabelElementChunked } from "@/utils/host/dom/traversal"
+import {
+  canSplitGiantWithoutStrandingOwnText,
+  walkAndLabelElement,
+  walkAndLabelElementChunked,
+} from "@/utils/host/dom/traversal"
 import {
   findStaleBilingualLayoutSource,
   findStaleTranslationOnlyAnchor,
@@ -733,10 +738,14 @@ export class PageTranslationManager implements IPageTranslationManager {
    * paragraphs are split: their next-level descendant paragraphs are observed
    * individually instead.
    *
-   * Known tradeoff: direct inline children of a split giant (e.g. those date
-   * <em>s) are not covered by any observed unit and stay untranslated. Stray
-   * standalone inlines in a >3-viewport flat container are rare, and
-   * numeric-only text is skipped by the pipeline anyway.
+   * The split is only sound when the giant owns no prose of its own: by the
+   * labeling rule every other character inside it already sits in one of the
+   * chosen units. That holds on docs.docker.com (its <article>'s own direct
+   * text is zero chars) but inverts on <br>-delimited article bodies, where
+   * the bare text IS the article and the inline <i>/<span> fragments are the
+   * strays — splitting there stranded 92% of a Blogger post and 98.9% of
+   * paulgraham.com/greatwork.html, and gave the stray <i> its own
+   * mid-sentence translation. See canSplitGiantWithoutStrandingOwnText.
    *
    * Exception: a newline-preserving flow container is never split into
    * inline descendants — see canSplitParagraphIntoDescendants.
@@ -772,6 +781,22 @@ export class PageTranslationManager implements IPageTranslationManager {
     )
     if (innerTopLevelParagraphs.length === 0) {
       // Unsplittable giant (no nested paragraphs) — observe it whole.
+      observer.observe(element)
+      return
+    }
+    if (
+      // Bounded by the very thing #1881 measures as harm: how many units one
+      // intersection enqueues. Above the cap, keeping viewport gating beats
+      // rescuing the giant's own text.
+      innerTopLevelParagraphs.length <= GIANT_SPLIT_STRANDED_TEXT_MAX_UNITS &&
+      // <body> is force-block and picks up a paragraph label from any stray
+      // direct text node, so refusing there would collapse the whole document
+      // into ONE observed unit — the outcome the traversal's document-root
+      // guard exists to prevent (gating dies, and the translated-region
+      // querySelector becomes a document-wide silent skip).
+      element !== element.ownerDocument.body &&
+      !canSplitGiantWithoutStrandingOwnText(element)
+    ) {
       observer.observe(element)
       return
     }
