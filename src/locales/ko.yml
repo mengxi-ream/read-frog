@@ -1133,6 +1133,7 @@ shortcutKeySelector:
   placeholder: 단축키를 입력해 주세요
 subtitles:
   loadingAiSubtitles: AI 자막 불러오는 중… (예상 3분)
+  aiSubtitlesHint: 첨단 AI 음성 인식으로 정확한 자막을 생성하며, 공식 자막이 없어도 사용할 수 있습니다.
   requestAiSubtitles: AI 자막 요청
   usingAiSubtitles: AI 자막 사용 중
   toggle:

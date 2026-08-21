@@ -1,9 +1,11 @@
-import { IconLoader2, IconSparkles } from "@tabler/icons-react"
+import { IconExclamationCircle, IconLoader2, IconSubtitlesAi } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
-import { useState } from "react"
+import { use, useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { SUBTITLES_SOURCE } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
+import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { cn } from "@/utils/styles/utils"
 import { ensureAiSubtitlesAccess } from "@/utils/subtitles/ai/access-guard"
 import { setAiSubtitlesToastAnchor } from "@/utils/subtitles/toast"
@@ -14,6 +16,7 @@ import { SubtitlesSettingsItem } from "./subtitles-settings-item"
 export function RequestAiSubtitlesItem() {
   const [pending, setPending] = useState(false)
   const { requestAiSubtitles, supportsAiSubtitles } = useSubtitlesUI()
+  const shadowWrapper = use(ShadowWrapperContext)
   const source = useAtomValue(subtitlesSourceAtom, { store: subtitlesStore })
   const isVisible = useAtomValue(subtitlesVisibleAtom, { store: subtitlesStore })
   const buttonId = "read-frog-request-ai-subtitles"
@@ -42,8 +45,23 @@ export function RequestAiSubtitlesItem() {
 
   return (
     <SubtitlesSettingsItem
-      icon={<IconSparkles className={cn("size-4", usingAi && "text-primary")} />}
-      label={label}
+      icon={<IconSubtitlesAi className={cn("size-4", usingAi && "text-primary")} />}
+      label={
+        <span className="inline-flex items-center gap-1.5">
+          <span className="truncate">{label}</span>
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex shrink-0 items-center" />}>
+              <IconExclamationCircle className="size-3.5 text-muted-foreground" />
+            </TooltipTrigger>
+            <TooltipContent
+              container={shadowWrapper}
+              className="max-w-64 border border-border bg-popover text-popover-foreground"
+            >
+              {i18n.t("subtitles.aiSubtitlesHint")}
+            </TooltipContent>
+          </Tooltip>
+        </span>
+      }
       labelFor={buttonId}
     >
       <Button
@@ -57,11 +75,7 @@ export function RequestAiSubtitlesItem() {
         onClick={handleRequest}
         disabled={pending || usingAi || !supportsAiSubtitles}
       >
-        {pending ? (
-          <IconLoader2 className="size-3.5 animate-spin" />
-        ) : (
-          <IconSparkles className={cn("size-3.5", usingAi && "text-primary")} />
-        )}
+        {pending && <IconLoader2 className="size-3.5 animate-spin" />}
       </Button>
     </SubtitlesSettingsItem>
   )

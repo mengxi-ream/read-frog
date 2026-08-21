@@ -2,6 +2,7 @@ import type { ControlsConfig } from "@/entrypoints/subtitles.content/platforms"
 import type { SubtitlesProvidersAdapter } from "@/entrypoints/subtitles.content/universal-adapter"
 import { Provider as JotaiProvider } from "jotai"
 import { createContext, use, useMemo } from "react"
+import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { subtitlesStore } from "../atoms"
 
 interface SubtitlesUIContextValue {
@@ -52,7 +53,9 @@ export function SubtitlesProviders({
 
   return (
     <JotaiProvider store={subtitlesStore}>
-      <SubtitlesUIContext value={contextValue}>{children}</SubtitlesUIContext>
+      <SubtitlesUIContext value={contextValue}>
+        <TooltipProvider>{children}</TooltipProvider>
+      </SubtitlesUIContext>
     </JotaiProvider>
   )
 }

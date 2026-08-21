@@ -1249,6 +1249,7 @@ shortcutKeySelector:
   placeholder: Introduce el atajo
 subtitles:
   loadingAiSubtitles: Cargando subtítulos con IA… (estimado 3 min)
+  aiSubtitlesHint: Subtítulos precisos generados por reconocimiento de voz con IA avanzada, disponibles incluso sin subtítulos oficiales.
   requestAiSubtitles: Solicitar subtítulos con IA
   usingAiSubtitles: Usando subtítulos con IA
   toggle:
