@@ -1,5 +1,21 @@
 # @read-frog/extension
 
+## 1.46.4
+
+### Patch Changes
+
+- [#2106](https://github.com/mengxi-ream/read-frog/pull/2106) [`df8f243`](https://github.com/mengxi-ream/read-frog/commit/df8f243763e8edac6cc183e3f79f01edffdf5981) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): use the subtitles-AI icon and explain AI transcription in a tooltip
+
+- [#2107](https://github.com/mengxi-ream/read-frog/pull/2107) [`b022eff`](https://github.com/mengxi-ream/read-frog/commit/b022eff7dde3e1981d1fa5931b3bd5f8539ba392) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translation): tell users to reload the page when the extension was updated, instead of showing the raw "Extension context invalidated." error
+
+- [#2109](https://github.com/mengxi-ream/read-frog/pull/2109) [`59e155e`](https://github.com/mengxi-ream/read-frog/commit/59e155ed973f68f062cf427c63e418de408d84dd) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translate): stop the giant-paragraph split from stranding a container's own text
+
+  Tall containers are split into their descendant paragraphs so viewport-lazy translation still applies ([#1881](https://github.com/mengxi-ream/read-frog/issues/1881)). That split silently drops any text the container holds directly, which is harmless on a nested `<article>` but catastrophic on `<br>`-delimited article bodies, where the bare text _is_ the article — a Blogger post kept 8% of its text and paulgraham.com/greatwork.html kept 1.1%, while the incidental inline `<i>` got its own translation inserted mid-sentence.
+
+  - Refuse the split when the container owns prose of its own and has a block-level child, so the translate path re-segments it into per-line runs instead
+  - Keep splitting when the container owns no prose (unchanged for docs.docker.com), when its own text carries no letters (separators, dates), when it has no block child to re-segment on, when it is `<body>`, or when the split already yields more units than the gating cap
+  - Apply the same guard on the translate side's giant fallback, so both paths make one decision
+
 ## 1.46.3
 
 ### Patch Changes
