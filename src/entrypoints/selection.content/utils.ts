@@ -1,3 +1,9 @@
+import {
+  BLOCK_CONTENT_CLASS,
+  CONTENT_WRAPPER_CLASS,
+  INLINE_CONTENT_CLASS,
+  TRANSLATION_ONLY_ATTRIBUTE,
+} from "@/utils/constants/dom-labels"
 import { READ_FROG_SUBTITLES_UI_HOST_ID } from "@/utils/constants/subtitles"
 
 export interface SelectionRangeSnapshot {
@@ -314,10 +320,36 @@ function findParagraphOwner(node: Node | null): ParagraphOwner | null {
   return semanticFallback
 }
 
+const TRANSLATED_CONTENT_SELECTOR = [
+  `.${CONTENT_WRAPPER_CLASS}`,
+  `.${INLINE_CONTENT_CLASS}`,
+  `.${BLOCK_CONTENT_CLASS}`,
+  `[${TRANSLATION_ONLY_ATTRIBUTE}]`,
+].join(", ")
+
+/**
+ * Text nodes inside read-frog's own translation output (bilingual wrappers or
+ * in-place swapped text) must not leak into the dictionary / custom-action
+ * context: the surrounding context should describe the original page text,
+ * not our own translation of it.
+ */
+function isTranslatedTextNode(node: Node) {
+  const element = node.parentElement
+  if (!element) {
+    return false
+  }
+
+  return element.closest(TRANSLATED_CONTENT_SELECTOR) !== null
+}
+
 function extractOwnerText(owner: ParagraphOwner) {
   const textParts: string[] = []
   const walker = document.createTreeWalker(owner, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
+      if (isTranslatedTextNode(node)) {
+        return NodeFilter.FILTER_REJECT
+      }
+
       return normalizeParagraphText(node.textContent ?? "") === ""
         ? NodeFilter.FILTER_REJECT
         : NodeFilter.FILTER_ACCEPT
@@ -365,6 +397,10 @@ function collectParagraphOwners(rangeSnapshots: SelectionRangeSnapshot[]) {
     const traversalRoot = getTraversalRoot(rangeSnapshot)
     const walker = document.createTreeWalker(traversalRoot, NodeFilter.SHOW_TEXT, {
       acceptNode(node) {
+        if (isTranslatedTextNode(node)) {
+          return NodeFilter.FILTER_REJECT
+        }
+
         return normalizeParagraphText(node.textContent ?? "") === ""
           ? NodeFilter.FILTER_REJECT
           : NodeFilter.FILTER_ACCEPT

@@ -375,6 +375,59 @@ describe("readSelectionSnapshot", () => {
   })
 })
 
+describe("buildContextSnapshot with translated content", () => {
+  it("excludes bilingual wrapper translations from the context", () => {
+    document.body.innerHTML = `
+      <article>
+        <p id="paragraph">
+          Alpha text
+          <span class="read-frog-translated-content-wrapper">
+            <span>Alpha text</span>
+            <span class="read-frog-translated-block-content">阿尔法文本</span>
+          </span>
+          beta <strong id="selection">gamma</strong> delta.
+        </p>
+      </article>
+    `
+
+    const selectionNode = document.getElementById("selection")?.firstChild
+    if (!selectionNode) {
+      throw new Error("Selection node not found")
+    }
+
+    const range = document.createRange()
+    range.setStart(selectionNode, 0)
+    range.setEnd(selectionNode, selectionNode.textContent?.length ?? 0)
+
+    const snapshot = buildContextSnapshot(createSelectionSnapshot(range, "gamma"))
+    expect(snapshot?.text).toBe("Alpha text beta gamma delta.")
+    expect(snapshot?.paragraphs).toEqual(["Alpha text beta gamma delta."])
+  })
+
+  it("excludes in-place swapped (translation-only) text from the context", () => {
+    document.body.innerHTML = `
+      <article>
+        <p id="paragraph">
+          <span data-read-frog-translation-only="true">已经原地替换的译文</span>
+          remaining original <strong id="selection">gamma</strong> text.
+        </p>
+      </article>
+    `
+
+    const selectionNode = document.getElementById("selection")?.firstChild
+    if (!selectionNode) {
+      throw new Error("Selection node not found")
+    }
+
+    const range = document.createRange()
+    range.setStart(selectionNode, 0)
+    range.setEnd(selectionNode, selectionNode.textContent?.length ?? 0)
+
+    const snapshot = buildContextSnapshot(createSelectionSnapshot(range, "gamma"))
+    expect(snapshot?.text).toBe("remaining original gamma text.")
+  })
+})
+
 describe("truncateContextTextForCustomAction", () => {
   it("keeps only the leading characters for custom action context tokens", () => {
     expect(truncateContextTextForCustomAction("abcdefghij", 4)).toBe("abcd")
