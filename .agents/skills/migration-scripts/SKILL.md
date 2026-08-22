@@ -40,5 +40,6 @@ Prefer to isolate migration-aware reads/writes into dedicated modules for import
 - [ ] No calls to factory functions or helpers
 - [ ] Default values are literal objects, not references to constants
 - [ ] Migration is idempotent (safe to re-run)
+- [ ] Any record the migration seeds carries every field the app resolves at creation time — a migration runs before i18n is initialized and may not import the facade, so a localized field it omits stays blank forever (see `v098-to-v099.ts`, which had to repair exactly that)
 - [ ] Auto-discovered registries validate `from -> to` continuity and duplicate targets
 - [ ] Migration-aware storage logic is isolated from generic read paths
