@@ -6,5 +6,7 @@ export interface SubtitlesFetcher {
   shouldUseSameTrack: () => Promise<boolean>
   getSourceLanguage: () => string
   hasAvailableSubtitles: () => Promise<boolean>
+  hideNativeSubtitles?: () => void
+  showNativeSubtitles?: () => void
   isPreSegmented?: () => boolean
 }
