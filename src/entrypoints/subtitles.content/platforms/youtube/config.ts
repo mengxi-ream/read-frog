@@ -20,6 +20,7 @@ const NAVIGATE_EVENTS = {
 }
 
 const SHORTS_ACTIVE_PLAYER = "#reel-overlay-container .html5-video-player"
+const WATCH_PLAYER = "#movie_player.html5-video-player"
 
 function createYoutubeAiSubtitlesContext() {
   const videoId = getYoutubeVideoId()
@@ -61,7 +62,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
     embedded: false,
     selectors: {
       video: "video.html5-main-video",
-      playerContainer: "#movie_player.html5-video-player",
+      playerContainer: WATCH_PLAYER,
       controlsBar: "#movie_player .ytp-right-controls",
       nativeSubtitles: YOUTUBE_NATIVE_SUBTITLES_CLASS,
     },
@@ -78,6 +79,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
         return !!player && !player.classList.contains("ytp-autohide")
       },
     },
+    supportsSidebar: true,
     getVideoId: getYoutubeVideoId,
     createAiSubtitlesContext: createYoutubeAiSubtitlesContext,
     isAdPlaying: isYoutubeAdPlaying,

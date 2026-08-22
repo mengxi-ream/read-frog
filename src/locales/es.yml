@@ -1288,6 +1288,14 @@ thinking:
 shortcutKeySelector:
   placeholder: Introduce el atajo
 subtitles:
+  sidebar:
+    close: Cerrar el resumen de IA
+    menu:
+      label: Resumen de IA
+    placeholder:
+      tab: Resumen de IA
+      title: Aún no hay nada aquí
+      description: El resumen de este video aparecerá en este panel.
   loadingAiSubtitles: Cargando subtítulos con IA… (estimado 3 min)
   aiSubtitlesHint: Subtítulos precisos generados por reconocimiento de voz con IA avanzada, disponibles incluso sin subtítulos oficiales.
   requestAiSubtitles: Solicitar subtítulos con IA

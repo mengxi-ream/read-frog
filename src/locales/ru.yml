@@ -1172,6 +1172,14 @@ thinking:
 shortcutKeySelector:
   placeholder: Пожалуйста, введите горячую клавишу
 subtitles:
+  sidebar:
+    close: Закрыть сводку ИИ
+    menu:
+      label: Сводка ИИ
+    placeholder:
+      tab: Сводка ИИ
+      title: Пока ничего нет
+      description: Сводка по этому видео появится на этой панели.
   loadingAiSubtitles: Загрузка ИИ-субтитров… (ожидается 3 мин)
   aiSubtitlesHint: Точные субтитры создаются с помощью передового ИИ-распознавания речи и доступны даже без официальных субтитров.
   requestAiSubtitles: Запросить ИИ-субтитры
