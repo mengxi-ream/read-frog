@@ -1178,12 +1178,11 @@ subtitles:
       label: AI özeti
     summary:
       generating: Özet oluşturuluyor…
-      idleTitle: Henüz özet yok
-      idleDescription: Bu videonun özetini ve atlayabileceğin önemli anları oluştur.
-      generate: Oluştur
       failedTitle: Oluşturulamadı
-      failedDescription: Altyazı sağlayıcısının metin üretebildiğini kontrol edip tekrar deneyin.
       retry: Tekrar dene
+      needsModel: Bu videoyu özetlemek için altyazılara bir AI modeli seçin.
+      openSettings: Ayarları aç
+      needsSubtitles: Bu videoda altyazı yok — önce AI ile altyazı oluşturmayı deneyin.
   loadingAiSubtitles: Yapay zeka altyazıları yükleniyor… (tahmini 3 dk)
   aiSubtitlesHint: Gelişmiş yapay zeka ses tanıma ile doğru altyazılar oluşturulur; resmi altyazı olmadığında da kullanılabilir.
   requestAiSubtitles: Yapay zeka altyazısı iste

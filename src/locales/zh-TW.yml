@@ -1294,12 +1294,11 @@ subtitles:
       label: AI 總結
     summary:
       generating: 正在產生總結…
-      idleTitle: 尚未有總結
-      idleDescription: 為這部影片產生總結，並提供可跳轉的重點。
-      generate: 產生
       failedTitle: 產生失敗
-      failedDescription: 請確認字幕使用的服務商支援產生文字，然後重試。
       retry: 重試
+      needsModel: 請先為影片字幕選擇一個 AI 模型，才能總結這部影片。
+      openSettings: 前往設定
+      needsSubtitles: 這部影片沒有字幕，建議先使用 AI 產生字幕。
   loadingAiSubtitles: 正在載入 AI 字幕（預計 3 分鐘）
   aiSubtitlesHint: 透過先進 AI 辨識語音生成準確字幕，無官方字幕時依然可用。
   requestAiSubtitles: 請求 AI 字幕

@@ -1294,12 +1294,11 @@ subtitles:
       label: AI 总结
     summary:
       generating: 正在生成总结…
-      idleTitle: 还没有总结
-      idleDescription: 为这个视频生成总结，并给出可跳转的要点。
-      generate: 生成
       failedTitle: 生成失败
-      failedDescription: 请确认字幕使用的服务商支持生成文本，然后重试。
       retry: 重试
+      needsModel: 请先为视频字幕选择一个 AI 模型，才能总结这个视频。
+      openSettings: 去设置
+      needsSubtitles: 当前视频没有字幕，推荐先使用 AI 生成字幕。
   loadingAiSubtitles: 正在加载 AI 字幕中（预计 3 分钟）
   aiSubtitlesHint: 通过先进 AI 识别语音生成准确字幕，无官方字幕时依然可用。
   requestAiSubtitles: 请求 AI 字幕
