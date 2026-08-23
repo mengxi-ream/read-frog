@@ -1,6 +1,6 @@
 import type { SubtitlesFragment } from "../types"
 import { describe, expect, it } from "vitest"
-import { buildTranscript, stripLeadingHeading } from "../video-summary"
+import { buildTranscript, stripLeadingHeading, videoSummaryQueryKey } from "../video-summary"
 
 function fragment(text: string): SubtitlesFragment {
   return { text, start: 0, end: 1000 }
@@ -37,5 +37,15 @@ describe("stripLeadingHeading", () => {
 
   it("leaves an answer that opens with prose alone", () => {
     expect(stripLeadingHeading("Just prose.")).toBe("Just prose.")
+  })
+})
+
+describe("videoSummaryQueryKey", () => {
+  it("separates the cache per language and per provider", () => {
+    const base = videoSummaryQueryKey("cmn", "deepseek")
+
+    expect(base).not.toEqual(videoSummaryQueryKey("eng", "deepseek"))
+    expect(base).not.toEqual(videoSummaryQueryKey("cmn", "openai"))
+    expect(base).toEqual(videoSummaryQueryKey("cmn", "deepseek"))
   })
 })

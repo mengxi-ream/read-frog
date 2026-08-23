@@ -16,6 +16,7 @@ import {
   isNoTranslationSentinel,
 } from "@/utils/constants/prompt"
 import {
+  VIDEO_SUMMARY_TIMEOUT_MS,
   BATCH_TIMEOUT_BASE_MS,
   BATCH_TIMEOUT_PER_CHAR_MS,
   MAX_BATCH_TIMEOUT_MS,
@@ -294,7 +295,9 @@ async function getOrGenerateVideoSummary(args: {
   }
 
   try {
-    const summary = await requestQueue.enqueue(thunk, Date.now(), cacheKey)
+    const summary = await requestQueue.enqueue(thunk, Date.now(), cacheKey, undefined, {
+      timeoutMs: VIDEO_SUMMARY_TIMEOUT_MS,
+    })
     return summary || null
   } catch (error) {
     logger.warn("Failed to get/generate video summary:", error)

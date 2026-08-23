@@ -5,8 +5,14 @@ import { sendMessage } from "@/utils/message"
 import { canProviderRefGenerateText } from "@/utils/providers/provider-ref"
 import { resolveSubtitlesProviderRef } from "./processor/translator"
 
-/** Shared so the panel, the menu entry and the adapter all name one cache. */
-export const VIDEO_SUMMARY_QUERY_KEY = ["subtitles", "video-summary"] as const
+const VIDEO_SUMMARY_QUERY_SCOPE = ["subtitles", "video-summary"] as const
+
+export function videoSummaryQueryKey(targetCode: string, providerId: string) {
+  return [...VIDEO_SUMMARY_QUERY_SCOPE, targetCode, providerId] as const
+}
+
+/** Matches every language/provider pair, for dropping the lot at once. */
+export const VIDEO_SUMMARY_QUERY_SCOPE_KEY = VIDEO_SUMMARY_QUERY_SCOPE
 
 const ZERO_WIDTH_CHARS_RE = /[\u200B-\u200D\uFEFF]/g
 

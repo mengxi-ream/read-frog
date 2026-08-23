@@ -1,11 +1,12 @@
 import { IconFileTextAi, IconLoader2 } from "@tabler/icons-react"
 import { useQueryClient } from "@tanstack/react-query"
-import { useAtom } from "jotai"
+import { useAtom, useAtomValue } from "jotai"
 import { useRef, useState } from "react"
 import { browser } from "#imports"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { showAnchoredSubtitlesToast } from "@/utils/subtitles/toast"
-import { canGenerateVideoSummary, VIDEO_SUMMARY_QUERY_KEY } from "@/utils/subtitles/video-summary"
+import { canGenerateVideoSummary, videoSummaryQueryKey } from "@/utils/subtitles/video-summary"
 import { subtitlesSidebarOpenAtom, subtitlesStore } from "../../../atoms"
 import { useSubtitlesUI } from "../../subtitles-ui-context"
 import { SubpageMenuEntry } from "./subpage-menu-entry"
@@ -14,6 +15,8 @@ export function SubtitlesSidebarItem() {
   const { supportsSidebar, hasSubtitlesAvailable } = useSubtitlesUI()
   const [isOpen, setOpen] = useAtom(subtitlesSidebarOpenAtom, { store: subtitlesStore })
   const queryClient = useQueryClient()
+  const language = useAtomValue(configFieldsAtomMap.language)
+  const videoSubtitles = useAtomValue(configFieldsAtomMap.videoSubtitles)
   const [checking, setChecking] = useState(false)
   const anchor = useRef<HTMLButtonElement>(null)
 
@@ -24,7 +27,9 @@ export function SubtitlesSidebarItem() {
   const open = async () => {
     // A cached summary means both checks passed once already; re-running them
     // would make reopening wait on a round trip for an answer we have.
-    if (queryClient.getQueryData(VIDEO_SUMMARY_QUERY_KEY)) {
+    if (
+      queryClient.getQueryData(videoSummaryQueryKey(language.targetCode, videoSubtitles.providerId))
+    ) {
       setOpen(true)
       return
     }

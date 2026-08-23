@@ -29,7 +29,7 @@ import {
 } from "@/utils/subtitles/processor/translator"
 import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
 import { showAiSubtitlesWallToast, showSubtitlesErrorToast } from "@/utils/subtitles/toast"
-import { requestVideoSummary, VIDEO_SUMMARY_QUERY_KEY } from "@/utils/subtitles/video-summary"
+import { requestVideoSummary, VIDEO_SUMMARY_QUERY_SCOPE_KEY } from "@/utils/subtitles/video-summary"
 import { queryClient } from "@/utils/tanstack-query"
 import {
   adPlayingAtom,
@@ -288,7 +288,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
   private clearSourceCache() {
     // The summary is derived from the source track, so it dies with it.
-    queryClient.removeQueries({ queryKey: VIDEO_SUMMARY_QUERY_KEY })
+    queryClient.removeQueries({ queryKey: VIDEO_SUMMARY_QUERY_SCOPE_KEY })
     this.sourceSubtitles = []
     this.clearSourceProcessedSubtitles()
     this.sourceVideoId = null

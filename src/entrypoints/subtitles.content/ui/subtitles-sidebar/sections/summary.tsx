@@ -1,12 +1,14 @@
 import { IconFileTextAi } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
+import { useAtomValue } from "jotai"
 import { match } from "ts-pattern"
 import { MarkdownRenderer } from "@/components/markdown-renderer"
 import { Button } from "@/components/ui/base-ui/button"
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/base-ui/empty"
 import { Spinner } from "@/components/ui/base-ui/spinner"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
-import { VIDEO_SUMMARY_QUERY_KEY } from "@/utils/subtitles/video-summary"
+import { videoSummaryQueryKey } from "@/utils/subtitles/video-summary"
 import { useSubtitlesUI } from "../../subtitles-ui-context"
 
 function StatusCard({
@@ -31,9 +33,11 @@ function StatusCard({
 
 export function SummarySection() {
   const { generateVideoSummary } = useSubtitlesUI()
+  const language = useAtomValue(configFieldsAtomMap.language)
+  const videoSubtitles = useAtomValue(configFieldsAtomMap.videoSubtitles)
 
   const query = useQuery({
-    queryKey: VIDEO_SUMMARY_QUERY_KEY,
+    queryKey: videoSummaryQueryKey(language.targetCode, videoSubtitles.providerId),
     queryFn: async () => {
       const summary = await generateVideoSummary()
       if (!summary) {

@@ -23,15 +23,16 @@ export function setAiSubtitlesToastAnchor(element: HTMLElement | null): void {
   aiRequestAnchor = element
 }
 
-function usableAnchor(): HTMLElement | null {
-  if (!aiRequestAnchor?.isConnected) {
-    return null
+function isAnchorVisible(element: HTMLElement | null): boolean {
+  if (!element?.isConnected) {
+    return false
   }
-  // The panel keeps its DOM mounted while closed (React `Activity` only hides
-  // it), so being connected is not enough — a display:none anchor measures 0×0
-  // and base-ui would mark the toast anchor-hidden, silently showing nothing.
-  const { width, height } = aiRequestAnchor.getBoundingClientRect()
-  return width > 0 && height > 0 ? aiRequestAnchor : null
+  const { width, height } = element.getBoundingClientRect()
+  return width > 0 && height > 0
+}
+
+function usableAnchor(): HTMLElement | null {
+  return isAnchorVisible(aiRequestAnchor) ? aiRequestAnchor : null
 }
 
 function show(title: string, action: SubtitlesErrorAction | undefined, anchor: HTMLElement | null) {
@@ -89,5 +90,5 @@ export function showAnchoredSubtitlesToast(
   anchor: HTMLElement | null,
   action?: SubtitlesErrorAction,
 ): void {
-  show(title, action, anchor?.isConnected ? anchor : null)
+  show(title, action, isAnchorVisible(anchor) ? anchor : null)
 }
