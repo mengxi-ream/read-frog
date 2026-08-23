@@ -1292,10 +1292,14 @@ subtitles:
     close: Cerrar el resumen de IA
     menu:
       label: Resumen de IA
-    placeholder:
-      tab: Resumen de IA
-      title: Aún no hay nada aquí
-      description: El resumen de este video aparecerá en este panel.
+    summary:
+      generating: Generando el resumen…
+      idleTitle: Aún no hay resumen
+      idleDescription: Genera un resumen de este video con momentos a los que puedes saltar.
+      generate: Generar
+      failedTitle: No se pudo generar
+      failedDescription: Comprueba que el proveedor de subtítulos pueda generar texto e inténtalo de nuevo.
+      retry: Reintentar
   loadingAiSubtitles: Cargando subtítulos con IA… (estimado 3 min)
   aiSubtitlesHint: Subtítulos precisos generados por reconocimiento de voz con IA avanzada, disponibles incluso sin subtítulos oficiales.
   requestAiSubtitles: Solicitar subtítulos con IA

@@ -39,6 +39,7 @@ import { normalizePromptContextValue } from "@/utils/host/translate/translate-te
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
+import { getVideoSummaryPrompt } from "@/utils/prompts/summary"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import {
   canProviderRefGenerateText,
@@ -233,6 +234,70 @@ async function getOrGenerateSummary(args: {
     return summary || null
   } catch (error) {
     logger.warn("Failed to get/generate summary:", error)
+    return null
+  }
+}
+
+/**
+ * Bumped whenever the summary prompt changes: the cache key has to move with
+ * it or every user keeps being served answers from the old wording.
+ */
+const VIDEO_SUMMARY_PROMPT_VERSION = "1"
+
+async function getOrGenerateVideoSummary(args: {
+  transcript: string
+  targetLanguage: string
+  providerRef: SerializableProviderRef
+  requestQueue: RequestQueue
+}): Promise<string | null> {
+  const { transcript, targetLanguage, providerRef, requestQueue } = args
+
+  const cacheKey = Sha256Hex(
+    Sha256Hex(transcript),
+    targetLanguage,
+    VIDEO_SUMMARY_PROMPT_VERSION,
+    getProviderCacheIdentity(providerRef),
+  )
+
+  const cached = await db.articleSummaryCache.get(cacheKey)
+  if (cached) {
+    return cached.summary
+  }
+
+  const hostedRequestId = providerRef.kind === "system" ? getRandomUUID() : undefined
+
+  const thunk = async (signal?: AbortSignal) => {
+    const cachedAgain = await db.articleSummaryCache.get(cacheKey)
+    if (cachedAgain) {
+      return cachedAgain.summary
+    }
+
+    const { systemPrompt, prompt } = getVideoSummaryPrompt(targetLanguage, transcript)
+    const summary = await generateTextForProviderRef(
+      {
+        providerRef,
+        hostedFeature: "videoSubtitles",
+        instructions: systemPrompt,
+        prompt,
+        requestId: hostedRequestId,
+      },
+      { signal },
+    )
+
+    const trimmed = summary.trim()
+    if (!trimmed) {
+      return ""
+    }
+
+    await db.articleSummaryCache.put({ key: cacheKey, summary: trimmed, createdAt: new Date() })
+    return trimmed
+  }
+
+  try {
+    const summary = await requestQueue.enqueue(thunk, Date.now(), cacheKey)
+    return summary || null
+  } catch (error) {
+    logger.warn("Failed to get/generate video summary:", error)
     return null
   }
 }
@@ -758,6 +823,22 @@ export function setUpSubtitlesTranslationQueue(): void {
       // transcript identifies it, and including a title that players mutate
       // would miss the cache on every re-render.
       cacheKeyParts: [Sha256Hex(cleanText(subtitlesContext))],
+      requestQueue,
+    })
+  })
+
+  onMessage("getVideoSummary", async (message) => {
+    const { requestQueue } = await queuesPromise
+    const { transcript, targetLanguage, providerRef } = message.data
+
+    if (!transcript || !canProviderRefGenerateText(providerRef)) {
+      return null
+    }
+
+    return await getOrGenerateVideoSummary({
+      transcript,
+      targetLanguage,
+      providerRef,
       requestQueue,
     })
   })

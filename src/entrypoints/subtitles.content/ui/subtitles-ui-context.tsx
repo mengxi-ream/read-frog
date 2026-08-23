@@ -1,8 +1,10 @@
 import type { ControlsConfig } from "@/entrypoints/subtitles.content/platforms"
 import type { SubtitlesProvidersAdapter } from "@/entrypoints/subtitles.content/universal-adapter"
+import { QueryClientProvider } from "@tanstack/react-query"
 import { Provider as JotaiProvider } from "jotai"
 import { createContext, use, useMemo } from "react"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
+import { queryClient } from "@/utils/tanstack-query"
 import { subtitlesStore } from "../atoms"
 
 interface SubtitlesUIContextValue {
@@ -10,6 +12,8 @@ interface SubtitlesUIContextValue {
   requestAiSubtitles: () => Promise<void>
   supportsAiSubtitles: boolean
   supportsSidebar: boolean
+  generateVideoSummary: () => Promise<string | null>
+  hasSubtitlesAvailable: () => Promise<boolean>
   downloadSourceSubtitles: () => Promise<void>
   downloadTranslatedSubtitles: () => Promise<void>
   controlsConfig?: ControlsConfig
@@ -43,6 +47,8 @@ export function SubtitlesProviders({
       requestAiSubtitles: adapter.requestAiSubtitles,
       supportsAiSubtitles: adapter.supportsAiSubtitles,
       supportsSidebar: adapter.supportsSidebar,
+      generateVideoSummary: adapter.generateVideoSummary,
+      hasSubtitlesAvailable: adapter.hasSubtitlesAvailable,
       downloadSourceSubtitles: adapter.downloadSourceSubtitles,
       downloadTranslatedSubtitles: adapter.downloadTranslatedSubtitles,
       controlsConfig: adapter.getControlsConfig(),
@@ -55,9 +61,11 @@ export function SubtitlesProviders({
 
   return (
     <JotaiProvider store={subtitlesStore}>
-      <SubtitlesUIContext value={contextValue}>
-        <TooltipProvider>{children}</TooltipProvider>
-      </SubtitlesUIContext>
+      <QueryClientProvider client={queryClient}>
+        <SubtitlesUIContext value={contextValue}>
+          <TooltipProvider>{children}</TooltipProvider>
+        </SubtitlesUIContext>
+      </QueryClientProvider>
     </JotaiProvider>
   )
 }

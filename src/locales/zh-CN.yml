@@ -1292,10 +1292,14 @@ subtitles:
     close: 关闭 AI 总结
     menu:
       label: AI 总结
-    placeholder:
-      tab: AI 总结
-      title: 暂无内容
-      description: 这个视频的总结会显示在此面板中。
+    summary:
+      generating: 正在生成总结…
+      idleTitle: 还没有总结
+      idleDescription: 为这个视频生成总结，并给出可跳转的要点。
+      generate: 生成
+      failedTitle: 生成失败
+      failedDescription: 请确认字幕使用的服务商支持生成文本，然后重试。
+      retry: 重试
   loadingAiSubtitles: 正在加载 AI 字幕中（预计 3 分钟）
   aiSubtitlesHint: 通过先进 AI 识别语音生成准确字幕，无官方字幕时依然可用。
   requestAiSubtitles: 请求 AI 字幕

@@ -1176,10 +1176,14 @@ subtitles:
     close: AI 要約を閉じる
     menu:
       label: AI 要約
-    placeholder:
-      tab: AI 要約
-      title: まだ何もありません
-      description: この動画の要約はこのパネルに表示されます。
+    summary:
+      generating: 要約を生成しています…
+      idleTitle: まだ要約はありません
+      idleDescription: この動画の要約と、移動できるハイライトを生成します。
+      generate: 生成
+      failedTitle: 生成できませんでした
+      failedDescription: 字幕のプロバイダーがテキスト生成に対応しているか確認して、もう一度お試しください。
+      retry: 再試行
   loadingAiSubtitles: AI字幕を読み込み中…（推定3分）
   aiSubtitlesHint: 先進的なAI音声認識により正確な字幕を生成。公式字幕がない動画でも利用できます。
   requestAiSubtitles: AI字幕をリクエスト

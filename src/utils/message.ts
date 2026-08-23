@@ -142,6 +142,11 @@ interface ProtocolMap {
     subtitlesContext: string
     providerRef: SerializableProviderRef
   }) => Promise<string | null>
+  getVideoSummary: (data: {
+    transcript: string
+    targetLanguage: string
+    providerRef: SerializableProviderRef
+  }) => Promise<string | null>
   backgroundGenerateText: (
     data: BackgroundGenerateTextPayload,
   ) => Promise<BackgroundGenerateTextResponse>

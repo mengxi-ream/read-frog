@@ -1176,10 +1176,14 @@ subtitles:
     close: AI 요약 닫기
     menu:
       label: AI 요약
-    placeholder:
-      tab: AI 요약
-      title: 아직 내용이 없습니다
-      description: 이 동영상의 요약이 이 패널에 표시됩니다.
+    summary:
+      generating: 요약을 생성하는 중…
+      idleTitle: 아직 요약이 없습니다
+      idleDescription: 이 동영상의 요약과 이동할 수 있는 하이라이트를 생성합니다.
+      generate: 생성
+      failedTitle: 생성하지 못했습니다
+      failedDescription: 자막 제공자가 텍스트 생성을 지원하는지 확인한 뒤 다시 시도하세요.
+      retry: 다시 시도
   loadingAiSubtitles: AI 자막 불러오는 중… (예상 3분)
   aiSubtitlesHint: 첨단 AI 음성 인식으로 정확한 자막을 생성하며, 공식 자막이 없어도 사용할 수 있습니다.
   requestAiSubtitles: AI 자막 요청

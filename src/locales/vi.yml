@@ -1176,10 +1176,14 @@ subtitles:
     close: Đóng tóm tắt AI
     menu:
       label: Tóm tắt AI
-    placeholder:
-      tab: Tóm tắt AI
-      title: Chưa có gì ở đây
-      description: Bản tóm tắt của video này sẽ xuất hiện trong bảng điều khiển.
+    summary:
+      generating: Đang tạo bản tóm tắt…
+      idleTitle: Chưa có bản tóm tắt
+      idleDescription: Tạo bản tóm tắt cho video này cùng các điểm nhấn có thể nhảy tới.
+      generate: Tạo
+      failedTitle: Không tạo được
+      failedDescription: Hãy kiểm tra nhà cung cấp phụ đề có tạo được văn bản không, rồi thử lại.
+      retry: Thử lại
   loadingAiSubtitles: Đang tải phụ đề AI… (dự kiến 3 phút)
   aiSubtitlesHint: Phụ đề chính xác được tạo bằng công nghệ nhận dạng giọng nói AI tiên tiến, dùng được ngay cả khi không có phụ đề chính thức.
   requestAiSubtitles: Yêu cầu phụ đề AI

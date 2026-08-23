@@ -78,3 +78,16 @@ export function showSubtitlesErrorToast(title: string, action?: SubtitlesErrorAc
 export function showAiSubtitlesWallToast(title: string, action?: SubtitlesErrorAction): void {
   show(title, action, usableAnchor())
 }
+
+/**
+ * Same again for callers that own their anchor rather than registering it. The
+ * registered anchor is a single slot owned by the AI subtitles button, so a
+ * second control sharing it would just overwrite the first.
+ */
+export function showAnchoredSubtitlesToast(
+  title: string,
+  anchor: HTMLElement | null,
+  action?: SubtitlesErrorAction,
+): void {
+  show(title, action, anchor?.isConnected ? anchor : null)
+}

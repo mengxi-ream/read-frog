@@ -29,6 +29,8 @@ import {
 } from "@/utils/subtitles/processor/translator"
 import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
 import { showAiSubtitlesWallToast, showSubtitlesErrorToast } from "@/utils/subtitles/toast"
+import { requestVideoSummary, VIDEO_SUMMARY_QUERY_KEY } from "@/utils/subtitles/video-summary"
+import { queryClient } from "@/utils/tanstack-query"
 import {
   adPlayingAtom,
   currentTimeMsAtom,
@@ -70,6 +72,8 @@ export interface SubtitlesProvidersAdapter {
   readonly supportsAiSubtitles: boolean
   getControlsConfig: () => ControlsConfig | undefined
   readonly supportsSidebar: boolean
+  generateVideoSummary: () => Promise<string | null>
+  hasSubtitlesAvailable: () => Promise<boolean>
   toggleSubtitlesManually: (enabled: boolean) => void
   toggleSubtitlesByShortcut: (enabled: boolean) => void
   requestAiSubtitles: () => Promise<void>
@@ -169,6 +173,13 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
     await this.trackChangeRefreshPromise
   }
+
+  generateVideoSummary = async () => {
+    await this.getOrLoadSourceSubtitles()
+    return await requestVideoSummary(this.sourceProcessedSubtitles)
+  }
+
+  hasSubtitlesAvailable = () => this.fetcher.hasAvailableSubtitles()
 
   downloadSourceSubtitles = async () => {
     await this.getOrLoadSourceSubtitles()
@@ -276,6 +287,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private clearSourceCache() {
+    // The summary is derived from the source track, so it dies with it.
+    queryClient.removeQueries({ queryKey: VIDEO_SUMMARY_QUERY_KEY })
     this.sourceSubtitles = []
     this.clearSourceProcessedSubtitles()
     this.sourceVideoId = null

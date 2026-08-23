@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import type { ReactNode, Ref } from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import { Label } from "@/components/ui/base-ui/label"
 import { cn } from "@/utils/styles/utils"
@@ -9,11 +9,13 @@ interface SubpageMenuEntryProps {
   onClick: () => void
   /** Set only for rows that toggle something rather than navigate. */
   pressed?: boolean
+  ref?: Ref<HTMLButtonElement>
 }
 
-export function SubpageMenuEntry({ icon, label, onClick, pressed }: SubpageMenuEntryProps) {
+export function SubpageMenuEntry({ icon, label, onClick, pressed, ref }: SubpageMenuEntryProps) {
   return (
     <Button
+      ref={ref}
       type="button"
       variant="ghost"
       onClick={onClick}
