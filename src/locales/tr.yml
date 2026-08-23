@@ -1173,16 +1173,24 @@ shortcutKeySelector:
   placeholder: Lütfen kısayolu girin
 subtitles:
   sidebar:
-    close: AI özetini kapat
+    close: Öğrenme panelini kapat
+    needsSubtitles: Bu videoda altyazı yok — önce AI ile altyazı oluşturmayı deneyin.
     menu:
-      label: AI özeti
+      label: Öğrenme
     summary:
+      tab: AI özeti
       generating: Özet oluşturuluyor…
       failedTitle: Oluşturulamadı
       retry: Tekrar dene
       needsModel: Bu videoyu özetlemek için altyazılara bir LLM modeli seçin.
       openSettings: Ayarları aç
-      needsSubtitles: Bu videoda altyazı yok — önce AI ile altyazı oluşturmayı deneyin.
+    transcript:
+      tab: Altyazılar
+      loading: Altyazılar yükleniyor…
+      failedTitle: Altyazılar yüklenemedi
+      retry: Tekrar dene
+      emptyTitle: Gösterilecek altyazı yok
+      backToCurrent: Şu ana dön
   loadingAiSubtitles: Yapay zeka altyazıları yükleniyor… (tahmini 3 dk)
   aiSubtitlesHint: Gelişmiş yapay zeka ses tanıma ile doğru altyazılar oluşturulur; resmi altyazı olmadığında da kullanılabilir.
   requestAiSubtitles: Yapay zeka altyazısı iste

@@ -4,6 +4,7 @@ import {
   currentTimeMsAtom,
   subtitlesStateAtom,
   subtitlesStore,
+  translatedTrackAtom,
   subtitlesVisibleAtom,
 } from "./atoms"
 
@@ -81,6 +82,7 @@ export class SubtitlesScheduler {
     }
 
     this.subtitles.sort((a, b) => a.start - b.start)
+    this.publishTranslatedTrack()
     this.updateSubtitles(this.videoElement.currentTime)
 
     if (currentSubtitleUpdated) {
@@ -134,6 +136,7 @@ export class SubtitlesScheduler {
     }
 
     this.subtitles = next
+    this.publishTranslatedTrack()
     // Force re-resolve: index alone may stay stale while the atom still holds a removed cue.
     this.currentIndex = -1
     this.updateSubtitles(this.videoElement.currentTime)
@@ -196,6 +199,7 @@ export class SubtitlesScheduler {
   reset() {
     this.setState("idle")
     this.subtitles = []
+    this.publishTranslatedTrack()
     this.currentIndex = -1
     this.updateCurrentSubtitle()
   }
@@ -211,22 +215,22 @@ export class SubtitlesScheduler {
   }
 
   private handleTimeUpdate = () => {
-    if (!this.active) return
-
-    const currentTime = this.videoElement.currentTime
-    this.updateSubtitles(currentTime)
+    this.updateSubtitles(this.videoElement.currentTime)
   }
 
   private handleSeeking = () => {
-    if (!this.active) return
-
-    const currentTime = this.videoElement.currentTime
-    this.updateSubtitles(currentTime)
+    this.updateSubtitles(this.videoElement.currentTime)
   }
 
   private updateSubtitles(currentTime: number) {
     const timeMs = currentTime * 1000
+    // Published whether or not captions are showing: the transcript follows
+    // playback even when the user never turned subtitle translation on.
     subtitlesStore.set(currentTimeMsAtom, timeMs)
+
+    if (!this.active) {
+      return
+    }
 
     const subtitle = this.subtitles.find((sub) => sub.start <= timeMs && sub.end > timeMs)
     const newIndex = subtitle ? this.subtitles.indexOf(subtitle) : -1
@@ -235,6 +239,10 @@ export class SubtitlesScheduler {
       this.currentIndex = newIndex
       this.updateCurrentSubtitle()
     }
+  }
+
+  private publishTranslatedTrack() {
+    subtitlesStore.set(translatedTrackAtom, [...this.subtitles])
   }
 
   private updateCurrentSubtitle() {

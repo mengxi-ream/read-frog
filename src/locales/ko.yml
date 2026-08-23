@@ -1173,16 +1173,24 @@ shortcutKeySelector:
   placeholder: 단축키를 입력해 주세요
 subtitles:
   sidebar:
-    close: AI 요약 닫기
+    close: 학습 패널 닫기
+    needsSubtitles: 이 동영상에는 자막이 없습니다. 먼저 AI 자막을 생성해 보세요.
     menu:
-      label: AI 요약
+      label: 학습
     summary:
+      tab: AI 요약
       generating: 요약을 생성하는 중…
       failedTitle: 생성하지 못했습니다
       retry: 다시 시도
       needsModel: 이 동영상을 요약하려면 자막에 사용할 LLM 모델을 선택하세요.
       openSettings: 설정 열기
-      needsSubtitles: 이 동영상에는 자막이 없습니다. 먼저 AI 자막을 생성해 보세요.
+    transcript:
+      tab: 자막
+      loading: 자막을 불러오는 중…
+      failedTitle: 자막을 불러오지 못했습니다
+      retry: 다시 시도
+      emptyTitle: 표시할 자막이 없습니다
+      backToCurrent: 현재 위치로
   loadingAiSubtitles: AI 자막 불러오는 중… (예상 3분)
   aiSubtitlesHint: 첨단 AI 음성 인식으로 정확한 자막을 생성하며, 공식 자막이 없어도 사용할 수 있습니다.
   requestAiSubtitles: AI 자막 요청
