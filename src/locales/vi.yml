@@ -1173,16 +1173,24 @@ shortcutKeySelector:
   placeholder: Vui lòng nhập phím tắt
 subtitles:
   sidebar:
-    close: Đóng tóm tắt AI
+    close: Đóng bảng học tập
+    needsSubtitles: Video này không có phụ đề — hãy thử tạo phụ đề bằng AI trước.
     menu:
-      label: Tóm tắt AI
+      label: Học tập
     summary:
+      tab: Tóm tắt AI
       generating: Đang tạo bản tóm tắt…
       failedTitle: Không tạo được
       retry: Thử lại
       needsModel: Hãy chọn một mô hình LLM cho phụ đề để tóm tắt video này.
       openSettings: Mở cài đặt
-      needsSubtitles: Video này không có phụ đề — hãy thử tạo phụ đề bằng AI trước.
+    transcript:
+      tab: Phụ đề
+      loading: Đang tải phụ đề…
+      failedTitle: Không tải được phụ đề
+      retry: Thử lại
+      emptyTitle: Không có phụ đề để hiển thị
+      backToCurrent: Về vị trí hiện tại
   loadingAiSubtitles: Đang tải phụ đề AI… (dự kiến 3 phút)
   aiSubtitlesHint: Phụ đề chính xác được tạo bằng công nghệ nhận dạng giọng nói AI tiên tiến, dùng được ngay cả khi không có phụ đề chính thức.
   requestAiSubtitles: Yêu cầu phụ đề AI

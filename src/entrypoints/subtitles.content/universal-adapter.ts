@@ -78,6 +78,8 @@ export interface SubtitlesProvidersAdapter {
   readonly supportsSidebar: boolean
   generateVideoSummary: (config: Config, videoId?: string | null) => Promise<string | null>
   hasSubtitlesAvailable: () => Promise<boolean>
+  ensureSourceTrackPublished: () => Promise<void>
+  seekTo: (seconds: number) => void
   toggleSubtitlesManually: (enabled: boolean) => void
   toggleSubtitlesByShortcut: (enabled: boolean) => void
   requestAiSubtitles: () => Promise<void>
@@ -219,6 +221,26 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   hasSubtitlesAvailable = () => this.fetcher.hasAvailableSubtitles()
+
+  /**
+   * The transcript reads `sourceTrackAtom`, which only fills once a subtitles
+   * session starts. Publishing it here does not put captions on the video:
+   * rendering is gated on `subtitlesVisibleAtom`, which only the scheduler sets.
+   */
+  ensureSourceTrackPublished = async () => {
+    if (subtitlesStore.get(sourceTrackAtom).length > 0) {
+      return
+    }
+    await this.getOrLoadSourceSubtitles()
+    this.publishSourceTrack(this.sourceProcessedSubtitles)
+  }
+
+  seekTo = (seconds: number) => {
+    const video = this.subtitlesScheduler?.getVideoElement()
+    if (video) {
+      video.currentTime = seconds
+    }
+  }
 
   downloadSourceSubtitles = async () => {
     await this.getOrLoadSourceSubtitles()

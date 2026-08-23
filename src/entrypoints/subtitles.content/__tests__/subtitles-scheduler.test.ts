@@ -30,6 +30,26 @@ describe("subtitles scheduler", () => {
     expect(subtitlesStore.get(currentTimeMsAtom)).toBe(12_500)
   })
 
+  it("publishes playback time while inactive, without resolving a cue", () => {
+    const video = createVideo(0)
+    const scheduler = new SubtitlesScheduler({ videoElement: video })
+    scheduler.supplementSubtitles([{ text: "a", start: 0, end: 20_000, translation: "A" }])
+    const calls = (video.addEventListener as unknown as ReturnType<typeof vi.fn>).mock.calls as [
+      string,
+      () => void,
+    ][]
+    const onTimeUpdate = calls.find((call) => call[0] === "timeupdate")![1]
+
+    ;(video as unknown as { currentTime: number }).currentTime = 8
+    onTimeUpdate()
+
+    // The transcript follows playback even when captions were never turned on;
+    // cue resolution stays gated so nothing reaches the player.
+    expect(subtitlesStore.get(currentTimeMsAtom)).toBe(8000)
+    expect(scheduler.isActive()).toBe(false)
+    expect(subtitlesStore.get(currentSubtitleAtom)).toBeNull()
+  })
+
   it("resyncFromVideo refreshes the active cue from the live clock", () => {
     const video = createVideo(0.25)
     const scheduler = new SubtitlesScheduler({ videoElement: video })
