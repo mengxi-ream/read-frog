@@ -987,6 +987,37 @@ options:
       fontWeight: 글꼴 굵기
       backgroundOpacity: 배경 투명도
       reset: 기본값으로 재설정
+      customCSS:
+        title: 사용자 지정 CSS
+        description: 위의 글꼴과 색상에 더해 자막 줄에 CSS를 추가합니다
+        presetTemplate: 프리셋 템플릿
+        presetTemplateDescription: 프리셋 템플릿을 바로 적용합니다. 예를 들어 듣기 연습 중에는 번역문을 흐리게 가리는 효과
+        presetPlaceholder: 템플릿 선택
+        presets:
+          blurTranslation: 번역문 흐리게
+          dashedTranslation: 번역문 점선
+          dimOriginal: 원문 연하게
+        editor:
+          placeholder: |
+            /* 예: 번역문을 흐리게 두고 마우스를 올리면 보이게 합니다 */
+            .subtitles-translation {
+              filter: blur(6px);
+            }
+
+            .subtitles-translation:hover {
+              filter: none;
+            }
+
+            /* 사용할 수 있는 선택자: .read-frog-subtitles-box, .subtitles-main, .subtitles-translation */
+          docsLink: 구성 방법은?
+          saveButton: 저장
+          savedButton: 저장됨
+          validation:
+            validating: 검증 중...
+            valid: CSS가 유효합니다
+            syntaxError: CSS에 구문 오류가 있습니다
+            tooLong: CSS가 너무 깁니다
+            saved: 모든 변경사항이 저장되었습니다
     customPrompts:
       title: 사용자 정의 자막 프롬프트
       description: 자막 번역 전용 프롬프트 템플릿으로, 웹페이지 번역 프롬프트와 별도로 관리합니다

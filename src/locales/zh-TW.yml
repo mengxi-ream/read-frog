@@ -1103,6 +1103,37 @@ options:
       fontWeight: 字重
       backgroundOpacity: 背景透明度
       reset: 重設為預設值
+      customCSS:
+        title: 自訂 CSS
+        description: 在上面的字型和顏色之上，為字幕行追加 CSS
+        presetTemplate: 預設模板
+        presetTemplateDescription: 快速套用預設模板，例如暫時遮住譯文用於聽力訓練學習的模糊效果
+        presetPlaceholder: 選擇模板
+        presets:
+          blurTranslation: 模糊譯文
+          dashedTranslation: 虛線譯文
+          dimOriginal: 弱化原文
+        editor:
+          placeholder: |
+            /* 範例：先把譯文模糊，滑鼠移上去再顯示 */
+            .subtitles-translation {
+              filter: blur(6px);
+            }
+
+            .subtitles-translation:hover {
+              filter: none;
+            }
+
+            /* 可用的選擇器：.read-frog-subtitles-box、.subtitles-main、.subtitles-translation */
+          docsLink: 如何設定？
+          saveButton: 儲存
+          savedButton: 已儲存
+          validation:
+            validating: 驗證中…
+            valid: CSS 有效
+            syntaxError: CSS 存在語法錯誤
+            tooLong: CSS 過長
+            saved: 所有變更已儲存
     customPrompts:
       title: 自訂字幕提示詞
       description: 字幕翻譯專用的提示詞範本，與網頁翻譯提示詞分開

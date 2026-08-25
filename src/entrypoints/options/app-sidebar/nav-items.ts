@@ -25,6 +25,7 @@ export const ROUTE_DEFS = [
   { path: "/page-translation/translation-control/site-rules" },
   { path: "/page-translation/translation-queue" },
   { path: "/video-subtitles/style" },
+  { path: "/video-subtitles/style/custom-css" },
   { path: "/video-subtitles/prompts" },
   { path: "/video-subtitles/subtitles-queue" },
 ] as const

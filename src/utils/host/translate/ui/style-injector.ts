@@ -159,6 +159,36 @@ export function removeSiteRuleCSS(root: StyleRoot): void {
   root.querySelector(`#${SITE_RULE_STYLE_ID}`)?.remove()
 }
 
+// ============ Subtitles Custom CSS Injection ============
+
+const SUBTITLES_CUSTOM_STYLE_ID = "read-frog-subtitles-custom-styles"
+const subtitlesCustomCSSMap = new WeakMap<StyleRoot, CSSStyleSheet>()
+
+/**
+ * Inject the user's subtitle CSS into the subtitles shadow root.
+ *
+ * Deliberately not `ensureCustomCSS` below: that one pulls in the translation preset styles first,
+ * which redefine the `--rf-*` theme tokens the subtitles root already gets from `theme.css` — the
+ * subtitle settings panel lives in that same root and would be recoloured by the side effect.
+ *
+ * Appending the sheet last is what lets custom CSS win over `subtitle-lines.css`, which is why the
+ * picked font and colour reach the line as custom properties rather than as inline styles.
+ */
+export async function ensureSubtitlesCustomCSS(root: StyleRoot, cssText: string): Promise<void> {
+  if (supportsConstructableStyleSheets(root)) {
+    let sheet = subtitlesCustomCSSMap.get(root)
+    if (!sheet) {
+      sheet = new CSSStyleSheet()
+      // Set in map first to prevent race condition with concurrent calls
+      subtitlesCustomCSSMap.set(root, sheet)
+      root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet]
+    }
+    await sheet.replace(cssText)
+  } else {
+    injectStyleElement(root, SUBTITLES_CUSTOM_STYLE_ID, cssText)
+  }
+}
+
 // ============ Custom CSS Injection ============
 
 const customCSSMap = new WeakMap<StyleRoot, CSSStyleSheet>()

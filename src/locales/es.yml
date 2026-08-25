@@ -1103,6 +1103,37 @@ options:
       fontWeight: Grosor de fuente
       backgroundOpacity: Opacidad del fondo
       reset: Restablecer a predeterminado
+      customCSS:
+        title: CSS personalizado
+        description: CSS adicional para las líneas de subtítulos, además de las fuentes y colores de arriba
+        presetTemplate: Plantilla predefinida
+        presetTemplateDescription: Aplica una plantilla lista para usar, como difuminar la traducción para taparla mientras practicas comprensión auditiva
+        presetPlaceholder: Elegir una plantilla
+        presets:
+          blurTranslation: Difuminar traducción
+          dashedTranslation: Traducción subrayada a trazos
+          dimOriginal: Atenuar original
+        editor:
+          placeholder: |
+            /* Ejemplo: difumina la traducción y muéstrala al pasar el cursor */
+            .subtitles-translation {
+              filter: blur(6px);
+            }
+
+            .subtitles-translation:hover {
+              filter: none;
+            }
+
+            /* Selectores disponibles: .read-frog-subtitles-box, .subtitles-main, .subtitles-translation */
+          docsLink: ¿Cómo configurar?
+          saveButton: Guardar
+          savedButton: Guardado
+          validation:
+            validating: Validando...
+            valid: CSS válido
+            syntaxError: CSS tiene errores de sintaxis
+            tooLong: CSS es demasiado largo
+            saved: Todos los cambios guardados
     customPrompts:
       title: Prompts personalizados de subtítulos
       description: Plantillas de prompts solo para la traducción de subtítulos, separadas de las de traducción de páginas web

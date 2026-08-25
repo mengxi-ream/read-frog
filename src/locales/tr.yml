@@ -987,6 +987,37 @@ options:
       fontWeight: Yazı kalınlığı
       backgroundOpacity: Arka plan şeffaflığı
       reset: Varsayılana sıfırla
+      customCSS:
+        title: Özel CSS
+        description: Yukarıdaki yazı tipleri ve renklerin üzerine, altyazı satırları için ek CSS
+        presetTemplate: Hazır şablon
+        presetTemplateDescription: Hazır bir şablonu hemen uygulayın — örneğin dinleme çalışırken çeviriyi bulanıklaştırıp gizleyen efekt
+        presetPlaceholder: Şablon seçin
+        presets:
+          blurTranslation: Çeviriyi bulanıklaştır
+          dashedTranslation: Çeviriye kesik çizgi
+          dimOriginal: Orijinali soluklaştır
+        editor:
+          placeholder: |
+            /* Örnek: çeviriyi bulanıklaştır, üzerine gelince göster */
+            .subtitles-translation {
+              filter: blur(6px);
+            }
+
+            .subtitles-translation:hover {
+              filter: none;
+            }
+
+            /* Kullanabileceğiniz seçiciler: .read-frog-subtitles-box, .subtitles-main, .subtitles-translation */
+          docsLink: Nasıl yapılandırılır?
+          saveButton: Kaydet
+          savedButton: Kaydedildi
+          validation:
+            validating: Doğrulanıyor...
+            valid: CSS geçerli
+            syntaxError: CSS sözdizimi hataları içeriyor
+            tooLong: CSS çok uzun
+            saved: Tüm değişiklikler kaydedildi
     customPrompts:
       title: Özel altyazı istemleri
       description: Yalnızca altyazı çevirisi için istem şablonları; web sayfası çeviri istemlerinden ayrı tutulur

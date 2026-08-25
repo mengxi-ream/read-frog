@@ -987,6 +987,37 @@ options:
       fontWeight: フォントウェイト
       backgroundOpacity: 背景の透明度
       reset: デフォルトにリセット
+      customCSS:
+        title: カスタム CSS
+        description: 上のフォントや色に加えて、字幕行に CSS を追加します
+        presetTemplate: プリセットテンプレート
+        presetTemplateDescription: プリセットテンプレートをすぐに適用します。たとえばリスニング練習の間だけ訳文をぼかして隠す効果など
+        presetPlaceholder: テンプレートを選択
+        presets:
+          blurTranslation: 訳文をぼかす
+          dashedTranslation: 訳文に破線
+          dimOriginal: 原文を弱める
+        editor:
+          placeholder: |
+            /* 例：訳文をぼかし、カーソルを重ねたときに表示する */
+            .subtitles-translation {
+              filter: blur(6px);
+            }
+
+            .subtitles-translation:hover {
+              filter: none;
+            }
+
+            /* 使用できるセレクター：.read-frog-subtitles-box、.subtitles-main、.subtitles-translation */
+          docsLink: 設定方法は?
+          saveButton: 保存
+          savedButton: 保存済み
+          validation:
+            validating: 検証中...
+            valid: CSSは有効です
+            syntaxError: CSSに構文エラーがあります
+            tooLong: CSSが長すぎます
+            saved: すべての変更が保存されました
     customPrompts:
       title: カスタム字幕プロンプト
       description: 字幕翻訳専用のプロンプトテンプレート。ウェブページ翻訳のプロンプトとは別に管理します

@@ -987,6 +987,37 @@ options:
       fontWeight: Толщина шрифта
       backgroundOpacity: Прозрачность фона
       reset: Сбросить по умолчанию
+      customCSS:
+        title: Пользовательский CSS
+        description: Дополнительный CSS для строк субтитров, поверх шрифтов и цветов выше
+        presetTemplate: Готовый шаблон
+        presetTemplateDescription: Быстро примените готовый шаблон — например, размытие перевода, чтобы скрыть его во время тренировки аудирования
+        presetPlaceholder: Выбрать шаблон
+        presets:
+          blurTranslation: Размыть перевод
+          dashedTranslation: Пунктир под переводом
+          dimOriginal: Приглушить оригинал
+        editor:
+          placeholder: |
+            /* Пример: размыть перевод и показывать его при наведении */
+            .subtitles-translation {
+              filter: blur(6px);
+            }
+
+            .subtitles-translation:hover {
+              filter: none;
+            }
+
+            /* Доступные селекторы: .read-frog-subtitles-box, .subtitles-main, .subtitles-translation */
+          docsLink: Как настроить?
+          saveButton: Сохранить
+          savedButton: Сохранено
+          validation:
+            validating: Проверка...
+            valid: CSS корректен
+            syntaxError: CSS содержит синтаксические ошибки
+            tooLong: CSS слишком длинный
+            saved: Все изменения сохранены
     customPrompts:
       title: Пользовательские промпты субтитров
       description: Шаблоны промптов только для перевода субтитров, отдельно от промптов перевода веб-страниц

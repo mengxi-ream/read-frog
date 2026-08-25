@@ -457,6 +457,14 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.videoSubtitles.title",
   },
   {
+    // A page below the style page, drilled into from the custom CSS row at its bottom.
+    sectionId: "subtitles-custom-css",
+    route: "/video-subtitles/style/custom-css",
+    titleKey: "options.videoSubtitles.style.customCSS.title",
+    descriptionKey: "options.videoSubtitles.style.customCSS.description",
+    pageKey: "options.videoSubtitles.title",
+  },
+  {
     // Its own page, drilled into from the Video Subtitles page's Custom prompts section.
     sectionId: "subtitles-custom-prompts",
     route: "/video-subtitles/prompts",

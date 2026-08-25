@@ -11,6 +11,7 @@ import {
 import {
   batchQueueConfigSchema,
   createCustomPromptsConfigSchema,
+  MAX_CUSTOM_CSS_LENGTH,
   pageTranslationShortcutSchema,
   requestQueueConfigSchema,
 } from "./translate"
@@ -40,6 +41,8 @@ export const subtitlesStyleSchema = z.object({
   main: subtitleTextStyleSchema,
   translation: subtitleTextStyleSchema,
   container: subtitleContainerStyleSchema,
+  /** Extra CSS for the subtitle lines, on top of the picked fonts and colours. `null` is off. */
+  customCSS: z.string().max(MAX_CUSTOM_CSS_LENGTH, "Custom CSS cannot exceed 8KB").nullable(),
 })
 
 export const subtitlePositionSchema = z.object({
