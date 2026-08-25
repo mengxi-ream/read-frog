@@ -184,11 +184,21 @@ export function TranscriptSection() {
               <span className="block font-mono text-[12px] leading-5 text-foreground/65 tabular-nums">
                 {formatTime(line.start)}
               </span>
-              <span className="mt-0.5 block text-[14px] leading-relaxed text-foreground/85">
+              <span
+                className={cn(
+                  "mt-0.5 block text-[14px] leading-relaxed transition-colors",
+                  isActive ? "text-foreground" : "text-foreground/85",
+                )}
+              >
                 {line.text}
               </span>
               {line.translation && (
-                <span className="mt-1 block text-[14px] leading-relaxed text-foreground/70">
+                <span
+                  className={cn(
+                    "mt-1 block text-[14px] leading-relaxed transition-colors",
+                    isActive ? "text-foreground" : "text-foreground/70",
+                  )}
+                >
                   {line.translation}
                 </span>
               )}
