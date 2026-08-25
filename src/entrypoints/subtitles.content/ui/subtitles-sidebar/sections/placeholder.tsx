@@ -10,7 +10,7 @@ import { i18n } from "@/utils/i18n"
 
 export function PlaceholderSection() {
   return (
-    <Empty className="p-6">
+    <Empty className="min-h-full p-6">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <IconFileTextAi />

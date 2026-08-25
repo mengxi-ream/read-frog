@@ -15,28 +15,29 @@ export function SidebarShell() {
   return (
     <div
       data-slot="subtitles-sidebar"
-      className="pointer-events-auto flex h-full flex-col overflow-hidden rounded-[20px] border border-border bg-popover font-light text-popover-foreground shadow-floating backdrop-blur-2xl"
+      className="pointer-events-auto flex h-full flex-col overflow-hidden rounded-[20px] border border-border bg-popover/90 font-light text-popover-foreground shadow-floating backdrop-blur-2xl backdrop-saturate-150"
     >
       <Tabs value={activeSection} onValueChange={setActiveSection} className="min-h-0 flex-1 gap-0">
-        <div className="flex items-center justify-end px-2 pt-2">
+        <div className="flex items-center gap-2 border-b border-border py-2 pr-2 pl-1">
+          <SidebarTabBar />
           <Button
             type="button"
             variant="ghost-secondary"
             size="icon-sm"
             aria-label={i18n.t("subtitles.sidebar.close")}
             onClick={() => setOpen(false)}
-            className="rounded-full"
+            className="ml-auto shrink-0 rounded-full"
           >
             <IconX className="size-4" />
           </Button>
         </div>
 
-        <div className="border-b border-border py-2">
-          <SidebarTabBar />
-        </div>
-
         {SECTIONS.map(({ id, component: Section }) => (
-          <TabsContent key={id} value={id} className="min-h-0 flex-1">
+          <TabsContent
+            key={id}
+            value={id}
+            className="min-h-0 flex-1 animate-in duration-200 ease-out fade-in-0"
+          >
             <ScrollArea className="h-full">
               <Section />
             </ScrollArea>
