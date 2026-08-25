@@ -86,6 +86,11 @@ const ExtensionActivationPage = lazy(() =>
     default: module.ExtensionActivationPage,
   })),
 )
+const SubtitlesCustomCssPage = lazy(() =>
+  import("./pages/video-subtitles/subtitles-style/custom-css").then((module) => ({
+    default: module.SubtitlesCustomCssPage,
+  })),
+)
 const SubtitlesStylePage = lazy(() =>
   import("./pages/video-subtitles/subtitles-style/style-editor").then((module) => ({
     default: module.SubtitlesStylePage,
@@ -127,6 +132,7 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/page-translation/translation-control/site-rules": SiteRulesPage,
   "/page-translation/translation-queue": TranslationQueuePage,
   "/video-subtitles/style": SubtitlesStylePage,
+  "/video-subtitles/style/custom-css": SubtitlesCustomCssPage,
   "/video-subtitles/prompts": SubtitlesCustomPromptsPage,
   "/video-subtitles/subtitles-queue": SubtitlesQueuePage,
 }

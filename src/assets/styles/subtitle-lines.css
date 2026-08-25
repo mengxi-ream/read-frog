@@ -1,0 +1,20 @@
+/**
+ * Base styling for the two subtitle lines.
+ *
+ * The font, size, weight and colour a user picks in the style editor arrive as inline custom
+ * properties on the line itself, and these rules are what turn them into real declarations.
+ * Writing the four properties inline directly would be simpler, but inline styles outrank every
+ * stylesheet rule — custom CSS could then never change a subtitle's colour without `!important`.
+ *
+ * Deliberately not inside a Tailwind layer: unlayered rules beat any layered rule regardless of
+ * specificity, which is what keeps `.text-xl` on the line from taking `font-size` back. Custom CSS
+ * is unlayered too and injected later, so it still wins over this.
+ */
+
+.subtitles-main,
+.subtitles-translation {
+  font-family: var(--rf-subtitle-font-family, inherit);
+  font-size: var(--rf-subtitle-font-size, 1em);
+  color: var(--rf-subtitle-color, inherit);
+  font-weight: var(--rf-subtitle-font-weight, inherit);
+}

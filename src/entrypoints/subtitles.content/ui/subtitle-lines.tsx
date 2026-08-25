@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react"
 import type { SubtitleTextStyle } from "@/types/config/subtitles"
 import { useAtomValue } from "jotai"
 import { useEffect, useRef } from "react"
@@ -14,13 +15,19 @@ interface SubtitleLineProps {
   className?: string
 }
 
-function getTextStyles(textStyle: SubtitleTextStyle) {
+/**
+ * The picked style, as custom properties rather than the properties themselves. `subtitle-lines.css`
+ * turns them into real declarations; going through a variable is what lets custom CSS override a
+ * colour or size without `!important`, since an inline `color` would outrank every stylesheet rule.
+ */
+function getTextStyleVars(textStyle: SubtitleTextStyle): CSSProperties {
   return {
-    fontFamily: SUBTITLE_FONT_FAMILIES[textStyle.fontFamily] || SUBTITLE_FONT_FAMILIES.system,
-    fontSize: `${textStyle.fontScale / 100}em`,
-    color: textStyle.color,
-    fontWeight: textStyle.fontWeight,
-  }
+    "--rf-subtitle-font-family":
+      SUBTITLE_FONT_FAMILIES[textStyle.fontFamily] || SUBTITLE_FONT_FAMILIES.system,
+    "--rf-subtitle-font-size": `${textStyle.fontScale / 100}em`,
+    "--rf-subtitle-color": textStyle.color,
+    "--rf-subtitle-font-weight": String(textStyle.fontWeight),
+  } as CSSProperties
 }
 
 export function MainSubtitle({ content, className }: SubtitleLineProps) {
@@ -31,7 +38,7 @@ export function MainSubtitle({ content, className }: SubtitleLineProps) {
   return (
     <div
       className={cn("subtitles-main text-xl leading-tight", className)}
-      style={getTextStyles(style.main)}
+      style={getTextStyleVars(style.main)}
     >
       {text}
     </div>
@@ -45,7 +52,7 @@ export function TranslationSubtitle({ content, className }: SubtitleLineProps) {
   const pending = content === undefined && isTranslationPending(subtitle)
   const text = content ?? subtitle?.translation ?? ""
   const { dir, lang } = getLanguageDirectionAndLang(language.targetCode)
-  const textStyles = getTextStyles(style.translation)
+  const textStyleVars = getTextStyleVars(style.translation)
   const lastFrameRef = useRef<{ start?: number; pending: boolean }>({
     start: undefined,
     pending: false,
@@ -67,11 +74,9 @@ export function TranslationSubtitle({ content, className }: SubtitleLineProps) {
           "subtitles-translation flex min-h-[1.25em] items-center justify-center leading-tight",
           className,
         )}
-        style={{
-          fontFamily: textStyles.fontFamily,
-          fontSize: textStyles.fontSize,
-          color: textStyles.color,
-        }}
+        // The pending label deliberately does not take the picked weight: it is a placeholder, not
+        // the translation, and inherits whatever the box uses.
+        style={{ ...textStyleVars, "--rf-subtitle-font-weight": undefined } as CSSProperties}
         dir={dir}
         lang={lang}
         data-pending="true"
@@ -89,7 +94,7 @@ export function TranslationSubtitle({ content, className }: SubtitleLineProps) {
         justResolved && "animate-subtitle-fade-in",
         className,
       )}
-      style={textStyles}
+      style={textStyleVars}
       dir={dir}
       lang={lang}
     >

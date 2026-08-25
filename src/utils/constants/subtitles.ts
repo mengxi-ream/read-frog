@@ -23,6 +23,9 @@ export const HIDE_NATIVE_CAPTIONS_STYLE_ID = "read-frog-hide-native-captions"
 
 // Class names
 export const SUBTITLES_VIEW_CLASS = "read-frog-subtitles-view"
+// The box the two subtitle lines sit in. Everything else about it is Tailwind utilities, but
+// custom CSS needs a name it can hold on to, so this one is part of the public contract.
+export const SUBTITLES_BOX_CLASS = "read-frog-subtitles-box"
 export const STATE_MESSAGE_CLASS = "read-frog-subtitles-state-message"
 export const TRANSLATE_BUTTON_CLASS = "read-frog-subtitles-translate-button"
 
@@ -80,6 +83,39 @@ export const SUBTITLE_FONT_FAMILIES = {
   roboto: "Roboto, sans-serif",
   "noto-sans": '"Noto Sans", "Noto Sans SC", "Noto Sans JP", "Noto Sans KR", sans-serif',
   "noto-serif": '"Noto Serif", "Noto Serif SC", "Noto Serif JP", "Noto Serif KR", serif',
+}
+
+// Custom CSS
+// The three class hooks above (view, box, and the two line classes) are what custom CSS targets.
+// Presets are appended into the editor as plain text, so each one is a self-contained block that
+// only touches properties none of the sliders own — that way stacking two of them never conflicts
+// with a font size or colour the user already picked.
+export const SUBTITLE_CSS_PRESET_IDS = [
+  "blurTranslation",
+  "dashedTranslation",
+  "dimOriginal",
+] as const
+export type SubtitleCssPresetId = (typeof SUBTITLE_CSS_PRESET_IDS)[number]
+
+export const SUBTITLE_CSS_PRESETS: Record<SubtitleCssPresetId, string> = {
+  // Hover the line itself rather than the box: the outer view is pointer-events: none, and the
+  // box is wider than the text, so revealing on the text is both simpler and more deliberate.
+  blurTranslation: `.subtitles-translation {
+  filter: blur(6px);
+  transition: filter 0.15s ease;
+}
+
+.subtitles-translation:hover {
+  filter: none;
+}`,
+  dashedTranslation: `.subtitles-translation {
+  text-decoration: underline dashed;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+}`,
+  dimOriginal: `.subtitles-main {
+  opacity: 0.6;
+}`,
 }
 
 // Subtitles source

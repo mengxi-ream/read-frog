@@ -1,5 +1,4 @@
 import { LANG_CODE_ISO6391_OPTIONS } from "@read-frog/definitions"
-import { useState } from "react"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
 import {
   Select,
@@ -11,17 +10,29 @@ import {
 } from "@/components/ui/base-ui/select"
 import { Textarea } from "@/components/ui/base-ui/textarea"
 import { i18n } from "@/utils/i18n"
-import { PREVIEW_TEXT, StylePreview } from "../style-preview"
+
+export interface PreviewControlsProps {
+  language: string
+  onLanguageChange: (language: string) => void
+  dir: "ltr" | "rtl"
+  onDirChange: (dir: "ltr" | "rtl") => void
+  text: string
+  onTextChange: (text: string) => void
+}
 
 /**
- * The preview, plus the knobs only custom CSS needs: rules can key off language and direction,
- * so the writer has to be able to point the sample at either one.
+ * The knobs only custom CSS needs: rules can key off language and direction, so the writer has to
+ * be able to point the sample at either one. They hold no state — the preview they drive sits at
+ * the top of the page, above the editor, so the page owns it.
  */
-export function PreviewPanel() {
-  const [language, setLanguage] = useState("zh")
-  const [dir, setDir] = useState<"ltr" | "rtl">("ltr")
-  const [text, setText] = useState(PREVIEW_TEXT)
-
+export function PreviewControls({
+  language,
+  onLanguageChange,
+  dir,
+  onDirChange,
+  text,
+  onTextChange,
+}: PreviewControlsProps) {
   return (
     <div className="flex w-full flex-col gap-6">
       <div className="grid grid-cols-2 gap-4">
@@ -32,7 +43,7 @@ export function PreviewPanel() {
           <Select
             value={language}
             onValueChange={(value) => {
-              if (value) setLanguage(value)
+              if (value) onLanguageChange(value)
             }}
           >
             <SelectTrigger id="language-select" className="w-full">
@@ -54,7 +65,7 @@ export function PreviewPanel() {
           <FieldLabel htmlFor="dir-select">
             {i18n.t("options.translation.translationStyle.stylePreviewDirection")}
           </FieldLabel>
-          <Select value={dir} onValueChange={(value) => setDir(value as "ltr" | "rtl")}>
+          <Select value={dir} onValueChange={(value) => onDirChange(value as "ltr" | "rtl")}>
             <SelectTrigger id="dir-select" className="w-full">
               <SelectValue />
             </SelectTrigger>
@@ -75,12 +86,10 @@ export function PreviewPanel() {
         <Textarea
           id="preview-text"
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => onTextChange(e.target.value)}
           className="min-h-20"
         />
       </Field>
-
-      <StylePreview text={text} language={language} dir={dir} />
     </div>
   )
 }

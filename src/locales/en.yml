@@ -1103,6 +1103,37 @@ options:
       fontWeight: Font weight
       backgroundOpacity: Background opacity
       reset: Reset to default
+      customCSS:
+        title: Custom CSS
+        description: Extra CSS for the subtitle lines, on top of the fonts and colors above
+        presetTemplate: Preset template
+        presetTemplateDescription: Apply a ready-made template — such as blurring the translation to cover it while you train your listening
+        presetPlaceholder: Choose a template
+        presets:
+          blurTranslation: Blur translation
+          dashedTranslation: Dashed translation
+          dimOriginal: Dim original
+        editor:
+          placeholder: |
+            /* Example: blur the translation, and reveal it on hover */
+            .subtitles-translation {
+              filter: blur(6px);
+            }
+
+            .subtitles-translation:hover {
+              filter: none;
+            }
+
+            /* Selectors you can use: .read-frog-subtitles-box, .subtitles-main, .subtitles-translation */
+          docsLink: How to configure?
+          saveButton: Save
+          savedButton: Saved
+          validation:
+            validating: Validating...
+            valid: CSS is valid
+            syntaxError: CSS has syntax errors
+            tooLong: CSS is too long
+            saved: All changes saved
     customPrompts:
       title: Custom subtitle prompts
       description: Prompt templates for subtitle translation, kept apart from the webpage translation ones

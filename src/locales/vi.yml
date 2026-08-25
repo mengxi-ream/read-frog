@@ -987,6 +987,37 @@ options:
       fontWeight: Độ đậm chữ
       backgroundOpacity: Độ trong suốt nền
       reset: Đặt lại về mặc định
+      customCSS:
+        title: CSS tùy chỉnh
+        description: CSS bổ sung cho các dòng phụ đề, ngoài phông chữ và màu sắc ở trên
+        presetTemplate: Mẫu dựng sẵn
+        presetTemplateDescription: Áp dụng nhanh một mẫu dựng sẵn — ví dụ làm mờ bản dịch để che đi khi luyện nghe
+        presetPlaceholder: Chọn mẫu
+        presets:
+          blurTranslation: Làm mờ bản dịch
+          dashedTranslation: Gạch nét đứt bản dịch
+          dimOriginal: Làm nhạt bản gốc
+        editor:
+          placeholder: |
+            /* Ví dụ: làm mờ bản dịch, di chuột vào để xem */
+            .subtitles-translation {
+              filter: blur(6px);
+            }
+
+            .subtitles-translation:hover {
+              filter: none;
+            }
+
+            /* Các bộ chọn có thể dùng: .read-frog-subtitles-box, .subtitles-main, .subtitles-translation */
+          docsLink: Cấu hình như thế nào?
+          saveButton: Lưu
+          savedButton: Đã lưu
+          validation:
+            validating: Đang xác thực...
+            valid: CSS hợp lệ
+            syntaxError: CSS có lỗi cú pháp
+            tooLong: CSS quá dài
+            saved: Tất cả thay đổi đã được lưu
     customPrompts:
       title: Lời nhắc phụ đề tùy chỉnh
       description: Mẫu lời nhắc chỉ dùng cho dịch phụ đề, tách biệt với lời nhắc dịch trang web

@@ -7,6 +7,7 @@ import { StateMessage } from "./state-message"
 import { SubtitlesSettingsPanel } from "./subtitles-settings-panel"
 import { SubtitlesUIContext } from "./subtitles-ui-context"
 import { SubtitlesView } from "./subtitles-view"
+import { useSubtitlesCustomCSS } from "./use-subtitles-custom-css"
 
 export function SubtitlesContainer() {
   const { stateData, isVisible } = useAtomValue(subtitlesDisplayAtom)
@@ -17,6 +18,8 @@ export function SubtitlesContainer() {
   // document.body: this one lives inside the player, so an anchored toast can
   // reach its trigger and survives the player going fullscreen.
   const shadowWrapper = use(ShadowWrapperContext)
+
+  useSubtitlesCustomCSS()
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-visible">
