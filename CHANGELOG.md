@@ -1,5 +1,41 @@
 # @read-frog/extension
 
+## 1.46.5
+
+### Patch Changes
+
+- [#2112](https://github.com/mengxi-ream/read-frog/pull/2112) [`a764758`](https://github.com/mengxi-ream/read-frog/commit/a7647583a1a0baba44ee3f33b9c1f9bb85763106) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(providers): fill in the missing description for providers seeded by a config migration
+
+  A provider's description is resolved from the interface language when the provider is created, which a migration cannot do — so Jalapeno Cloud reached existing users in v098 with an empty description box while fresh installs saw its blurb. v099 fills in the English description for any API provider that has none.
+
+- [#2125](https://github.com/mengxi-ream/read-frog/pull/2125) [`d0fc8e5`](https://github.com/mengxi-ream/read-frog/commit/d0fc8e57faf2d3954626312fc64fbdcb8f11629c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translation): apply the removal of custom CSS without needing a reload
+
+  Switching translated text back to a preset style, or emptying the custom CSS box, only changed the marker on the node — the stylesheet itself stayed applied until the page was reloaded. Anything the preset did not set kept the old styling, so clearing a `color` rule under the border preset, for instance, left the text its old colour. The stylesheet is now withdrawn along with the marker.
+
+- [#2125](https://github.com/mengxi-ream/read-frog/pull/2125) [`d0fc8e5`](https://github.com/mengxi-ream/read-frog/commit/d0fc8e57faf2d3954626312fc64fbdcb8f11629c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translation): stop custom CSS from breaking the settings page it is previewed on
+
+  The custom CSS written for translated text was injected into the options page's own document to render the preview, so it styled the settings UI as well. A rule as ordinary as `* { display: none }` left the options page blank on every load — editor and sidebar included — with the CSS saved in config and no way back through the UI.
+
+  The preview now renders inside a same-origin frame, so the CSS reaches the sample text and nothing else. Because a frame is a document, everything the CSS could do on a real page it still does here — `:root` variables, `body` selectors, `@font-face` and `@property` all behave as they will in the wild, and the sample now inherits an ordinary page's 16px rather than the settings page's 14px.
+
+- [#2126](https://github.com/mengxi-ream/read-frog/pull/2126) [`984894c`](https://github.com/mengxi-ream/read-frog/commit/984894c1ade4c139da6f6ab079bfb4c3a07d381a) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - docs(subtitles): point the subtitle CSS editor at its own tutorial
+
+  The "How to configure?" link in the subtitle custom CSS editor opened the page-translation
+  stylesheet guide, which documents a different selector contract: `[data-read-frog-custom-translation-style]`
+  and the translated-content wrapper, none of which exist inside the subtitles shadow root. It now
+  opens `/docs/subtitle-custom-css`, which covers the three class hooks the subtitle overlay
+  actually exposes, the preset templates, and the two places the style controls win over custom CSS.
+
+- [#2125](https://github.com/mengxi-ream/read-frog/pull/2125) [`d0fc8e5`](https://github.com/mengxi-ream/read-frog/commit/d0fc8e57faf2d3954626312fc64fbdcb8f11629c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(subtitles): add custom CSS and preset templates to the subtitle style page
+
+  The subtitle style page could only set fonts, sizes, weights and colours, so effects like blurring the translation while training your listening had nowhere to live. A custom CSS row at the bottom of that page now opens an editor with the same live preview above it, plus a preset dropdown carrying three ready-made templates — blur translation, dashed translation, and dim original — that append into the editor so they can be stacked.
+
+  The picked font, size, weight and colour now reach the subtitle lines as CSS variables rather than inline styles, so custom CSS can override them without `!important`.
+
+  The preview renders in a shadow root, the same way the real overlay does, so the CSS being previewed reaches the preview and nothing else on the settings page.
+
+- [#2108](https://github.com/mengxi-ream/read-frog/pull/2108) [`fe2957c`](https://github.com/mengxi-ream/read-frog/commit/fe2957c84c485f9e2336742d49f0c38a84593138) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): show the translate button on YouTube /live/ URLs
+
 ## 1.46.4
 
 ### Patch Changes
