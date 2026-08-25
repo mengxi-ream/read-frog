@@ -216,8 +216,24 @@ export async function ensureSubtitlesCustomCSS(root: StyleRoot, cssText: string)
 
 // ============ Custom CSS Injection ============
 
+const CUSTOM_STYLE_ID = "read-frog-custom-styles"
 const customCSSMap = new WeakMap<StyleRoot, CSSStyleSheet>()
 let documentCachedCSS: string | null = null
+
+/**
+ * Withdraw custom CSS a previous `ensureCustomCSS` put on this root.
+ *
+ * Switching back to a preset, or emptying the editor, leaves the old sheet adopted otherwise — the
+ * rules go on applying until the page is reloaded, and the options preview never reloads, so there
+ * it reads as deleting the CSS having done nothing at all.
+ *
+ * Guarded so a root that never had custom CSS does not acquire an empty sheet just for being
+ * styled by a preset.
+ */
+export async function clearCustomCSS(root: StyleRoot): Promise<void> {
+  if (!customCSSMap.has(root) && !root.querySelector(`#${CUSTOM_STYLE_ID}`)) return
+  await ensureCustomCSS(root, "")
+}
 
 /** Inject custom CSS into the given root */
 export async function ensureCustomCSS(root: StyleRoot, cssText: string): Promise<void> {
@@ -239,7 +255,7 @@ export async function ensureCustomCSS(root: StyleRoot, cssText: string): Promise
     }
     await sheet.replace(cssText)
   } else {
-    injectStyleElement(root, "read-frog-custom-styles", cssText)
+    injectStyleElement(root, CUSTOM_STYLE_ID, cssText)
   }
 
   if (root === document) {

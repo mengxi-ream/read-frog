@@ -3,7 +3,7 @@ import { camelCase } from "case-anything"
 import { translationNodeStylePresetSchema } from "@/types/config/translate"
 import { CUSTOM_TRANSLATION_NODE_ATTRIBUTE } from "@/utils/constants/translation-node-style"
 import { getContainingShadowRoot, getOwnerDocument } from "../../dom/node"
-import { ensureCustomCSS, ensurePresetStyles } from "./style-injector"
+import { clearCustomCSS, ensureCustomCSS, ensurePresetStyles } from "./style-injector"
 
 const customTranslationNodeAttribute = camelCase(CUSTOM_TRANSLATION_NODE_ATTRIBUTE)
 
@@ -26,4 +26,8 @@ export async function decorateTranslationNode(
 
   translatedNode.dataset[customTranslationNodeAttribute] = styleConfig.preset
   ensurePresetStyles(root)
+  // The attribute alone is not enough to go back to a preset: custom CSS from an earlier call is
+  // still adopted on this root, and anything the preset does not set — `border` sets no colour, for
+  // one — is still wearing it.
+  await clearCustomCSS(root)
 }
