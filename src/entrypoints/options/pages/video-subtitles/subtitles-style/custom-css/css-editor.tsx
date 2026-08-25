@@ -60,7 +60,7 @@ export function CSSEditor({ value, onChange }: CSSEditorProps) {
       {/* The section heading already names this editor, so the row carries only the docs link. */}
       <div className="flex items-start justify-end">
         <a
-          href={`${env.WXT_WEBSITE_URL}/docs/custom-css`}
+          href={`${env.WXT_WEBSITE_URL}/docs/subtitle-custom-css`}
           className="text-xs text-link hover:opacity-90"
           target="_blank"
           rel="noreferrer"
