@@ -1,4 +1,4 @@
-import { IconArrowDown, IconFileText } from "@tabler/icons-react"
+import { IconArrowDown, IconArrowUp, IconFileText } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import { useAtomValue } from "jotai"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -36,7 +36,9 @@ export function TranscriptSection() {
   const activeIndex = findActiveLine(lines, timeMs)
 
   const [following, setFollowing] = useState(true)
+  const [activeAbove, setActiveAbove] = useState(false)
   const activeRef = useRef<HTMLButtonElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
 
   const query = useQuery({
     queryKey: ["subtitles", "source-track"],
@@ -56,6 +58,29 @@ export function TranscriptSection() {
       block: "center",
       behavior: prefersReducedMotion() ? "auto" : "smooth",
     })
+  }, [following, activeIndex])
+
+  // The scroller belongs to the shell's ScrollArea, so the active row's side of
+  // it can only be read by measuring against that viewport.
+  useEffect(() => {
+    if (following) {
+      setActiveAbove(false)
+      return undefined
+    }
+    const viewport = rootRef.current?.closest('[data-slot="scroll-area-viewport"]')
+    if (!viewport) return undefined
+
+    const update = () => {
+      const row = activeRef.current
+      if (!row) {
+        setActiveAbove(false)
+        return
+      }
+      setActiveAbove(row.getBoundingClientRect().bottom < viewport.getBoundingClientRect().top)
+    }
+    update()
+    viewport.addEventListener("scroll", update, { passive: true })
+    return () => viewport.removeEventListener("scroll", update)
   }, [following, activeIndex])
 
   // Intent, not the scroll event: programmatic scrolling fires `scroll` too, so
@@ -111,17 +136,38 @@ export function TranscriptSection() {
       .exhaustive()
   }
 
+  const backToCurrent = (
+    <Button
+      type="button"
+      variant="brand"
+      size="sm"
+      onClick={() => setFollowing(true)}
+      className="pointer-events-auto shadow-floating"
+    >
+      {activeAbove ? <IconArrowUp className="size-3.5" /> : <IconArrowDown className="size-3.5" />}
+      {i18n.t("subtitles.sidebar.transcript.backToCurrent")}
+    </Button>
+  )
+
   return (
     <div
+      ref={rootRef}
       className="relative"
       onWheel={stopFollowing}
       onTouchMove={stopFollowing}
       onKeyDown={onKeyDown}
     >
-      <div className="py-2 pr-3 pl-2">
+      {/* Sticky-top only pins when it precedes the content, so the two placements
+          are separate slots rather than one element that moves. The zero-height
+          wrapper keeps either from displacing a row. */}
+      {!following && activeAbove && (
+        <div className="pointer-events-none sticky top-3 z-10 flex h-0 items-start justify-center">
+          {backToCurrent}
+        </div>
+      )}
+      <div className="space-y-1 p-2">
         {lines.map((line, index) => {
           const isActive = index === activeIndex
-          const isPlayed = activeIndex >= 0 && index < activeIndex
 
           return (
             <button
@@ -131,69 +177,30 @@ export function TranscriptSection() {
               aria-current={isActive || undefined}
               onClick={() => seekTo(line.start / 1000)}
               className={cn(
-                "group grid w-full grid-cols-[2.75rem_0.75rem_1fr] rounded-[10px] text-left transition-colors focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
-                isActive ? "bg-brand/8" : "hover:bg-muted/40",
+                "block w-full rounded-xl px-3 py-2.5 text-left transition-colors focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
+                isActive ? "bg-brand/20" : "hover:bg-muted/40",
               )}
             >
-              <span
-                className={cn(
-                  "pt-2 pr-1 text-right font-mono text-[11px] leading-5 tabular-nums transition-colors",
-                  isActive ? "text-brand" : "text-muted-foreground/60",
-                )}
-              >
+              <span className="block font-mono text-[12px] leading-5 text-foreground/65 tabular-nums">
                 {formatTime(line.start)}
               </span>
-
-              {/* The rail is the axis and the progress bar at once: it fills
-                  behind the playhead and stays hairline ahead of it. */}
-              <span className="relative" aria-hidden>
-                <span
-                  className={cn(
-                    "absolute inset-y-0 left-1/2 w-px -translate-x-1/2 transition-colors",
-                    isPlayed || isActive ? "bg-brand/70" : "bg-border/50",
-                  )}
-                />
-                <span
-                  className={cn(
-                    "absolute top-[0.85rem] left-1/2 size-1.5 -translate-x-1/2 rounded-full transition-all",
-                    isActive
-                      ? "bg-brand ring-3 ring-brand/20"
-                      : "bg-border opacity-0 group-hover:opacity-100",
-                  )}
-                />
+              <span className="mt-0.5 block text-[14px] leading-relaxed text-foreground/85">
+                {line.text}
               </span>
-
-              <span className="min-w-0 py-2 pr-1 pl-2">
-                <span
-                  className={cn(
-                    "block text-[13px] leading-relaxed transition-colors",
-                    isActive ? "font-medium text-foreground" : "text-foreground/70",
-                  )}
-                >
-                  {line.text}
+              {line.translation && (
+                <span className="mt-1 block text-[14px] leading-relaxed text-foreground/70">
+                  {line.translation}
                 </span>
-                {line.translation && (
-                  <span className="mt-0.5 block text-[13px] leading-relaxed text-muted-foreground">
-                    {line.translation}
-                  </span>
-                )}
-              </span>
+              )}
             </button>
           )
         })}
       </div>
 
-      {!following && (
-        <Button
-          type="button"
-          variant="brand"
-          size="sm"
-          onClick={() => setFollowing(true)}
-          className="sticky bottom-3 left-1/2 -translate-x-1/2 shadow-floating"
-        >
-          <IconArrowDown className="size-3.5" />
-          {i18n.t("subtitles.sidebar.transcript.backToCurrent")}
-        </Button>
+      {!following && !activeAbove && (
+        <div className="pointer-events-none sticky bottom-3 z-10 flex h-0 items-end justify-center">
+          {backToCurrent}
+        </div>
       )}
     </div>
   )
