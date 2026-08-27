@@ -1387,7 +1387,7 @@
     "id": "javdb",
     "matches": "https://javdb*.com/*",
     "excludeSelectors": [".video-number", ".score", ".has-addons"],
-    "injectedCss": ".video-title { white-space:unset; }"
+    "injectedCss": ".video-title { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }"
   },
   {
     "id": "jable",

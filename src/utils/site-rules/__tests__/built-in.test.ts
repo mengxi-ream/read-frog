@@ -218,6 +218,13 @@ describe("built-in site rules", () => {
     expect(resolved.injectedCss).toContain("max-height: unset !important")
   })
 
+  it("lets JavDB titles and their inline translations wrap instead of clipping", () => {
+    const resolved = resolveSiteRule("https://javdb.com/", BUILT_IN_SITE_RULES, [], [])
+    expect(resolved.injectedCss).toContain("white-space: normal !important")
+    expect(resolved.injectedCss).toContain("overflow: visible !important")
+    expect(resolved.injectedCss).toContain("text-overflow: clip !important")
+  })
+
   // `linkedinFeed` shipped as `https://linkedin.com/feed/*`, but LinkedIn 301s the
   // bare host, so the extension only ever sees `www.linkedin.com` and the rule never
   // matched. Restoring it by adding `www` would be worse than leaving it dead: both of
