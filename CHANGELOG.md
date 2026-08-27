@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.46.6
+
+### Patch Changes
+
+- [#2133](https://github.com/mengxi-ream/read-frog/pull/2133) [`007f06a`](https://github.com/mengxi-ream/read-frog/commit/007f06a9389d647dd8e9f54e5ac272f44056cdf3) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translate): allow page translation through root body notranslate markers
+
+- [#2128](https://github.com/mengxi-ream/read-frog/pull/2128) [`13ae12e`](https://github.com/mengxi-ream/read-frog/commit/13ae12eb4af85631352ebd9ac1e1ca2e9b40a4b1) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(site-rules): wrap translated JavDB titles instead of clipping them
+
 ## 1.46.5
 
 ### Patch Changes
