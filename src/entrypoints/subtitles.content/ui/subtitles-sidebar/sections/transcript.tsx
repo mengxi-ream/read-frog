@@ -9,7 +9,12 @@ import { Spinner } from "@/components/ui/base-ui/spinner"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 import { buildTranscript, findActiveLine } from "@/utils/subtitles/transcript"
-import { currentTimeMsAtom, sourceTrackAtom, translatedTrackAtom } from "../../../atoms"
+import {
+  currentTimeMsAtom,
+  currentVideoIdAtom,
+  sourceTrackAtom,
+  translatedTrackAtom,
+} from "../../../atoms"
 import { useSubtitlesUI } from "../../subtitles-ui-context"
 
 function formatTime(ms: number): string {
@@ -31,6 +36,7 @@ export function TranscriptSection() {
   const source = useAtomValue(sourceTrackAtom)
   const translated = useAtomValue(translatedTrackAtom)
   const timeMs = useAtomValue(currentTimeMsAtom)
+  const videoId = useAtomValue(currentVideoIdAtom)
 
   const lines = useMemo(() => buildTranscript(source, translated), [source, translated])
   const activeIndex = findActiveLine(lines, timeMs)
@@ -41,7 +47,7 @@ export function TranscriptSection() {
   const rootRef = useRef<HTMLDivElement>(null)
 
   const query = useQuery({
-    queryKey: ["subtitles", "source-track"],
+    queryKey: ["subtitles", "source-track", videoId],
     queryFn: async () => {
       await ensureSourceTrackPublished()
       return true
