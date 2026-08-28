@@ -1,4 +1,5 @@
 import type { SubtitlesFragment } from "../types"
+import type { ProvidersConfig } from "@/types/config/provider"
 import { describe, expect, it } from "vitest"
 import { buildTranscript, stripLeadingHeading, videoSummaryQueryKey } from "../video-summary"
 
@@ -40,12 +41,31 @@ describe("stripLeadingHeading", () => {
   })
 })
 
-describe("videoSummaryQueryKey", () => {
-  it("separates the cache per language and per provider", () => {
-    const base = videoSummaryQueryKey("cmn", "deepseek")
+function localProvider(model: string): ProvidersConfig[number] {
+  return {
+    id: "deepseek",
+    name: "DeepSeek",
+    enabled: true,
+    provider: "deepseek",
+    apiKey: "test-key",
+    model: { model, isCustomModel: false, customModel: null },
+  } as ProvidersConfig[number]
+}
 
-    expect(base).not.toEqual(videoSummaryQueryKey("eng", "deepseek"))
-    expect(base).not.toEqual(videoSummaryQueryKey("cmn", "openai"))
-    expect(base).toEqual(videoSummaryQueryKey("cmn", "deepseek"))
+describe("videoSummaryQueryKey", () => {
+  it("separates the cache per video, language and provider", () => {
+    const base = videoSummaryQueryKey("video-1", "cmn", [], "deepseek")
+
+    expect(base).not.toEqual(videoSummaryQueryKey("video-2", "cmn", [], "deepseek"))
+    expect(base).not.toEqual(videoSummaryQueryKey("video-1", "eng", [], "deepseek"))
+    expect(base).not.toEqual(videoSummaryQueryKey("video-1", "cmn", [], "openai"))
+    expect(base).toEqual(videoSummaryQueryKey("video-1", "cmn", [], "deepseek"))
+  })
+
+  it("separates a local provider edited under the same id", () => {
+    const before = videoSummaryQueryKey("video-1", "cmn", [localProvider("v1")], "deepseek")
+    const after = videoSummaryQueryKey("video-1", "cmn", [localProvider("v2")], "deepseek")
+
+    expect(before).not.toEqual(after)
   })
 })

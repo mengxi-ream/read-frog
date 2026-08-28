@@ -1,14 +1,44 @@
 import type { SubtitlesFragment } from "./types"
+import type { ProvidersConfig } from "@/types/config/provider"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { getLocalConfig } from "@/utils/config/storage"
 import { sendMessage } from "@/utils/message"
 import { canProviderRefGenerateText } from "@/utils/providers/provider-ref"
-import { resolveSubtitlesProviderRef } from "./processor/translator"
+import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
+import {
+  resolveSubtitlesProviderRef,
+  resolveSubtitlesProviderResolution,
+} from "./processor/translator"
 
 const VIDEO_SUMMARY_QUERY_SCOPE = ["subtitles", "video-summary"] as const
 
-export function videoSummaryQueryKey(targetCode: string, providerId: string) {
-  return [...VIDEO_SUMMARY_QUERY_SCOPE, targetCode, providerId] as const
+/**
+ * An edited local model keeps its id, so the id alone would serve its predecessor's
+ * summary forever. A hosted `modelRevision` is out of reach here; the background key has it.
+ */
+function providerIdentity(providersConfig: ProvidersConfig, providerId: string): string {
+  const resolved = resolveProviderRefForCapability("videoSubtitles", providersConfig, providerId)
+  if (!resolved) {
+    return providerId
+  }
+  return resolved.kind === "local"
+    ? JSON.stringify(resolved.config)
+    : JSON.stringify({ providerId: resolved.id, modelTier: resolved.modelTier })
+}
+
+/** Keyed by video, so same-video changes — caption track, native/AI source — reuse the summary. */
+export function videoSummaryQueryKey(
+  videoId: string | null,
+  targetCode: string,
+  providersConfig: ProvidersConfig,
+  providerId: string,
+) {
+  return [
+    ...VIDEO_SUMMARY_QUERY_SCOPE,
+    videoId,
+    targetCode,
+    providerIdentity(providersConfig, providerId),
+  ] as const
 }
 
 /** Matches every language/provider pair, for dropping the lot at once. */
@@ -46,18 +76,31 @@ export function stripLeadingHeading(summary: string): string {
     .trim()
 }
 
+export type VideoSummaryAvailability =
+  | { status: "ok" }
+  | { status: "needsModel" }
+  | { status: "hostedUnavailable"; message: string }
+
 /**
  * The subtitles provider list is gated on the wider translate capability, so
  * the default Microsoft provider is a legal choice there and then cannot be
  * prompted. Checked before the panel opens rather than after a request fails.
+ *
+ * A plan/quota refusal stays itself: the user did pick a model.
  */
-export async function canGenerateVideoSummary(): Promise<boolean> {
+export async function checkVideoSummaryAvailability(): Promise<VideoSummaryAvailability> {
   const config = await getLocalConfig()
   if (!config) {
-    return false
+    return { status: "needsModel" }
   }
-  const providerRef = await resolveSubtitlesProviderRef(config, "videoSubtitles")
-  return !!providerRef && canProviderRefGenerateText(providerRef)
+  const resolution = await resolveSubtitlesProviderResolution(config, "videoSubtitles")
+  if (resolution.status === "hostedUnavailable") {
+    return { status: "hostedUnavailable", message: resolution.message }
+  }
+  if (resolution.status === "none" || !canProviderRefGenerateText(resolution.ref)) {
+    return { status: "needsModel" }
+  }
+  return { status: "ok" }
 }
 
 export async function requestVideoSummary(fragments: SubtitlesFragment[]): Promise<string | null> {

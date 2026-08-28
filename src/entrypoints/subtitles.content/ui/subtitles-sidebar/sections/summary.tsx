@@ -9,6 +9,7 @@ import { Spinner } from "@/components/ui/base-ui/spinner"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { videoSummaryQueryKey } from "@/utils/subtitles/video-summary"
+import { currentVideoIdAtom, subtitlesStore } from "../../../atoms"
 import { useSubtitlesUI } from "../../subtitles-ui-context"
 
 function StatusCard({
@@ -35,9 +36,16 @@ export function SummarySection() {
   const { generateVideoSummary } = useSubtitlesUI()
   const language = useAtomValue(configFieldsAtomMap.language)
   const videoSubtitles = useAtomValue(configFieldsAtomMap.videoSubtitles)
+  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const videoId = useAtomValue(currentVideoIdAtom, { store: subtitlesStore })
 
   const query = useQuery({
-    queryKey: videoSummaryQueryKey(language.targetCode, videoSubtitles.providerId),
+    queryKey: videoSummaryQueryKey(
+      videoId,
+      language.targetCode,
+      providersConfig,
+      videoSubtitles.providerId,
+    ),
     queryFn: async () => {
       const summary = await generateVideoSummary()
       if (!summary) {
@@ -47,6 +55,8 @@ export function SummarySection() {
     },
     retry: false,
     staleTime: Infinity,
+    // Default GC drops a finished summary five minutes after the sidebar closes.
+    gcTime: Infinity,
     meta: { suppressToast: true },
   })
 

@@ -177,6 +177,42 @@ async function translateSingleSubtitle(
   })
 }
 
+export type SubtitlesProviderResolution =
+  | { status: "ok"; ref: SerializableProviderRef }
+  | { status: "hostedUnavailable"; message: string }
+  | { status: "none" }
+
+/** Reports without announcing, so callers can tell a plan/quota refusal from "nothing selected". */
+export async function resolveSubtitlesProviderResolution(
+  config: Config,
+  route: HostedAiTextStreamRoute,
+): Promise<SubtitlesProviderResolution> {
+  const resolved = resolveProviderRefForCapability(
+    "videoSubtitles",
+    config.providersConfig,
+    config.videoSubtitles.providerId,
+  )
+  if (!resolved) {
+    return { status: "none" }
+  }
+  try {
+    const ref = await serializeProviderRef(
+      resolved.kind === "local" ? resolved.config : resolved,
+      route,
+    )
+    return { status: "ok", ref }
+  } catch (error) {
+    if (error instanceof HostedAiProviderUnavailableError) {
+      return { status: "hostedUnavailable", message: error.message }
+    }
+    // Nothing else is expected to throw here (serializeProviderRef already
+    // fails open on an unreachable status endpoint). Keep degrading rather
+    // than introducing a new throw into the render path, but leave a trace.
+    logger.warn("[Subtitles] Provider ref resolution failed", error)
+    return { status: "none" }
+  }
+}
+
 /**
  * Resolve the subtitles provider into a transportable ref. Capability-based so
  * Built-in AI — never a row in providersConfig — is reachable, and serialized
@@ -187,37 +223,17 @@ export async function resolveSubtitlesProviderRef(
   config: Config,
   route: HostedAiTextStreamRoute,
 ): Promise<SerializableProviderRef | null> {
-  const resolved = resolveProviderRefForCapability(
-    "videoSubtitles",
-    config.providersConfig,
-    config.videoSubtitles.providerId,
-  )
-  if (!resolved) {
+  const resolution = await resolveSubtitlesProviderResolution(config, route)
+  if (resolution.status === "hostedUnavailable") {
+    // Silence here is indistinguishable from "these lines have no translation".
+    toastManager.add({
+      type: "error",
+      title: resolution.message,
+      id: SUBTITLES_HOSTED_UNAVAILABLE_TOAST_ID,
+    })
     return null
   }
-  try {
-    return await serializeProviderRef(resolved.kind === "local" ? resolved.config : resolved, route)
-  } catch (error) {
-    // Hosted tier unavailable (plan/quota). Still degrade to untranslated
-    // rather than throwing into the player's render path — but say why. The
-    // caller turns this null into empty translations that the coordinator
-    // records as successfully translated, so without a toast the run is
-    // indistinguishable from "these lines have no translation" and the cue
-    // starts are never retried.
-    if (error instanceof HostedAiProviderUnavailableError) {
-      toastManager.add({
-        type: "error",
-        title: error.message,
-        id: SUBTITLES_HOSTED_UNAVAILABLE_TOAST_ID,
-      })
-      return null
-    }
-    // Nothing else is expected to throw here (serializeProviderRef already
-    // fails open on an unreachable status endpoint). Keep degrading rather
-    // than introducing a new throw into the render path, but leave a trace.
-    logger.warn("[Subtitles] Provider ref resolution failed", error)
-    return null
-  }
+  return resolution.status === "ok" ? resolution.ref : null
 }
 
 export async function fetchSubtitlesSummary(

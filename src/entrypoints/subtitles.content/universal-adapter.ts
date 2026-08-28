@@ -34,6 +34,7 @@ import { queryClient } from "@/utils/tanstack-query"
 import {
   adPlayingAtom,
   currentTimeMsAtom,
+  currentVideoIdAtom,
   sourceTrackAtom,
   subtitlesPositionAtom,
   subtitlesSettingsPanelOpenAtom,
@@ -122,7 +123,9 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
   get videoIdChanged() {
     const currentVideoId = this.config.getVideoId?.()
-    return !!(this.sessionVideoId && currentVideoId && currentVideoId !== this.sessionVideoId)
+    // A summary-only session only ever records the source id.
+    const knownVideoId = this.sessionVideoId ?? this.sourceVideoId
+    return !!(knownVideoId && currentVideoId && currentVideoId !== knownVideoId)
   }
 
   get supportsAiSubtitles(): boolean {
@@ -142,6 +145,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   async initialize() {
+    this.publishVideoId()
     this.initializeTranslatedSubtitlesDownloader()
     void this.restorePosition()
     void this.renderTranslateButton()
@@ -211,8 +215,15 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     }
   }
 
+  private publishVideoId() {
+    subtitlesStore.set(currentVideoIdAtom, this.config.getVideoId?.() ?? null)
+  }
+
   private resetForNavigation() {
     this.switchOperationId++
+    this.publishVideoId()
+    // Keyed by video id already; this only stops them accumulating.
+    queryClient.removeQueries({ queryKey: VIDEO_SUMMARY_QUERY_SCOPE_KEY })
     this.clearNavigationReinitTimeout()
     this.teardownAdObserver()
     this.destroyScheduler()
@@ -287,8 +298,6 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private clearSourceCache() {
-    // The summary is derived from the source track, so it dies with it.
-    queryClient.removeQueries({ queryKey: VIDEO_SUMMARY_QUERY_SCOPE_KEY })
     this.sourceSubtitles = []
     this.clearSourceProcessedSubtitles()
     this.sourceVideoId = null

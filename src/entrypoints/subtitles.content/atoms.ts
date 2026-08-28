@@ -13,6 +13,9 @@ export const subtitlesStore = createStore()
 
 export const currentTimeMsAtom = atom<number>(0)
 
+/** Keys the summary, so a new video cannot read the last one's. */
+export const currentVideoIdAtom = atom<string | null>(null)
+
 /**
  * True while the host player is playing an ad (e.g. YouTube mid-roll).
  * Suppresses overlay content so main-video captions are not shown over ads.
