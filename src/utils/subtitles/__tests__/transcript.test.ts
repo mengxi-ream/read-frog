@@ -33,6 +33,12 @@ describe("buildTranscript", () => {
 
     expect(lines[1]!.translation).toBeUndefined()
   })
+
+  it("drops a translation that repeats its source line", () => {
+    const lines = buildTranscript(SOURCE, [cue("two", 2000, 3000, "two")])
+
+    expect(lines[1]!.translation).toBeUndefined()
+  })
 })
 
 describe("findActiveLine", () => {

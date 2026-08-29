@@ -231,7 +231,12 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     if (subtitlesStore.get(sourceTrackAtom).length > 0) {
       return
     }
+    const operationId = this.switchOperationId
     await this.getOrLoadSourceSubtitles()
+
+    if (operationId !== this.switchOperationId) {
+      return
+    }
     this.publishSourceTrack(this.sourceProcessedSubtitles)
   }
 
@@ -671,12 +676,27 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
   private async refreshSourceTrackIfNeeded(): Promise<void> {
     const scheduler = this.subtitlesScheduler
-    if (!scheduler || !scheduler.isActive()) {
+    const isSchedulerActive = !!scheduler?.isActive()
+    const isTranscriptInUse = subtitlesStore.get(sourceTrackAtom).length > 0
+    if (!isSchedulerActive && !isTranscriptInUse) {
       return
     }
 
     const useSameTrack = await this.fetcher.shouldUseSameTrack()
     if (useSameTrack) {
+      return
+    }
+
+    if (!scheduler || !isSchedulerActive) {
+      const operationId = this.switchOperationId
+      this.clearSourceCache()
+      this.fetcher.cleanup()
+      subtitlesStore.set(sourceTrackAtom, [])
+      await this.getOrLoadSourceSubtitles()
+      if (operationId !== this.switchOperationId) {
+        return
+      }
+      this.publishSourceTrack(this.sourceProcessedSubtitles)
       return
     }
 
