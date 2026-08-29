@@ -40,6 +40,7 @@ export function TranscriptSection() {
 
   const lines = useMemo(() => buildTranscript(source, translated), [source, translated])
   const activeIndex = findActiveLine(lines, timeMs)
+  const hasLines = lines.length > 0
 
   const [following, setFollowing] = useState(true)
   const [activeAbove, setActiveAbove] = useState(false)
@@ -88,6 +89,17 @@ export function TranscriptSection() {
     viewport.addEventListener("scroll", update, { passive: true })
     return () => viewport.removeEventListener("scroll", update)
   }, [following, activeIndex])
+
+  useEffect(() => {
+    const scrollbar = rootRef.current
+      ?.closest('[data-slot="scroll-area"]')
+      ?.querySelector('[data-slot="scroll-area-scrollbar"]')
+    if (!scrollbar) return undefined
+
+    const stop = () => setFollowing(false)
+    scrollbar.addEventListener("pointerdown", stop)
+    return () => scrollbar.removeEventListener("pointerdown", stop)
+  }, [hasLines])
 
   // Intent, not the scroll event: programmatic scrolling fires `scroll` too, so
   // reading that would make following switch itself off.

@@ -20,12 +20,17 @@ export function buildTranscript(
     translated.filter((cue) => cue.translation).map((cue) => [cue.start, cue.translation!]),
   )
 
-  return source.map((cue) => ({
-    start: cue.start,
-    end: cue.end,
-    text: cue.text,
-    translation: translationByStart.get(cue.start),
-  }))
+  return source.map((cue) => {
+    const translation = translationByStart.get(cue.start)
+    return {
+      start: cue.start,
+      end: cue.end,
+      text: cue.text,
+      // Passthrough and the error fallback copy the source into `translation`,
+      // which would print the line twice.
+      translation: translation === cue.text ? undefined : translation,
+    }
+  })
 }
 
 /**
