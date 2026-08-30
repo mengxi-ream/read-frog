@@ -84,6 +84,7 @@ describe("youtube subtitles fetcher", () => {
                   playerState: 1,
                   selectedTrackLanguageCode: null,
                   selectedTrackVssId: null,
+                  defaultCaptionTrackIndex: null,
                   cachedTimedtextUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
                 },
               },
@@ -127,6 +128,7 @@ describe("youtube subtitles fetcher", () => {
       playerState: 0,
       selectedTrackLanguageCode: "en",
       selectedTrackVssId: ".en",
+      defaultCaptionTrackIndex: null,
       cachedTimedtextUrl: null,
     }
 
@@ -181,6 +183,7 @@ describe("youtube subtitles fetcher", () => {
       playerState: 1,
       selectedTrackLanguageCode: "en",
       selectedTrackVssId: ".en",
+      defaultCaptionTrackIndex: null,
       cachedTimedtextUrl: null,
     }
     const cachedSubtitles = [{ text: "cached", start: 0, end: 1 }]
@@ -229,6 +232,7 @@ describe("youtube subtitles fetcher", () => {
       playerState: 0,
       selectedTrackLanguageCode: "en",
       selectedTrackVssId: ".en",
+      defaultCaptionTrackIndex: null,
       cachedTimedtextUrl: null,
     }
 
@@ -285,6 +289,7 @@ describe("youtube subtitles fetcher", () => {
       playerState: 0,
       selectedTrackLanguageCode: "en",
       selectedTrackVssId: ".en",
+      defaultCaptionTrackIndex: null,
       cachedTimedtextUrl: null,
     }
     const refreshedPlayerData = {
@@ -360,6 +365,7 @@ describe("youtube subtitles fetcher", () => {
       playerState: 1,
       selectedTrackLanguageCode: "en",
       selectedTrackVssId: "a.en",
+      defaultCaptionTrackIndex: null,
       cachedTimedtextUrl: null,
     }
 
@@ -375,6 +381,222 @@ describe("youtube subtitles fetcher", () => {
     expect(fetchWithRetrySpy).toHaveBeenCalledTimes(1)
     expect(fetchWithRetrySpy.mock.calls[0]?.[0]).toContain("kind=asr")
     expect(processRawEventsSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it("follows YouTube's own default caption track without touching the CC button", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+
+    Object.defineProperty(window, "location", {
+      value: {
+        href: "https://www.youtube.com/watch?v=test123",
+        search: "?v=test123",
+        origin: "https://www.youtube.com",
+        pathname: "/watch",
+        hostname: "www.youtube.com",
+      },
+      writable: true,
+    })
+
+    const playerData = {
+      videoId: "test123",
+      captionTracks: [
+        {
+          baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=ar",
+          languageCode: "ar",
+          vssId: ".ar",
+        },
+        {
+          baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
+          languageCode: "en",
+          vssId: ".en",
+        },
+      ],
+      audioCaptionTracks: [],
+      device: null,
+      cver: null,
+      playerState: 1,
+      selectedTrackLanguageCode: null,
+      selectedTrackVssId: null,
+      defaultCaptionTrackIndex: 1,
+      cachedTimedtextUrl: null,
+    }
+
+    vi.spyOn(fetcher as any, "requestPlayerData").mockResolvedValue({
+      success: true,
+      data: playerData,
+    })
+    const ensureSubtitlesEnabledSpy = vi.spyOn(fetcher as any, "ensureSubtitlesEnabled")
+    const fetchWithRetrySpy = vi.spyOn(fetcher as any, "fetchWithRetry").mockResolvedValue([])
+    vi.spyOn(fetcher as any, "processRawEvents").mockResolvedValue([])
+
+    await expect(fetcher.fetch()).resolves.toEqual([])
+
+    expect(fetchWithRetrySpy.mock.calls[0]?.[0]).toContain("lang=en")
+    expect(fetcher.getSourceLanguage()).toBe("en")
+    expect(ensureSubtitlesEnabledSpy).not.toHaveBeenCalled()
+  })
+
+  it("prefers the viewer's live selection over YouTube's default caption track", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+
+    Object.defineProperty(window, "location", {
+      value: {
+        href: "https://www.youtube.com/watch?v=test123",
+        search: "?v=test123",
+        origin: "https://www.youtube.com",
+        pathname: "/watch",
+        hostname: "www.youtube.com",
+      },
+      writable: true,
+    })
+
+    const playerData = {
+      videoId: "test123",
+      captionTracks: [
+        {
+          baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=ar",
+          languageCode: "ar",
+          vssId: ".ar",
+        },
+        {
+          baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
+          languageCode: "en",
+          vssId: ".en",
+        },
+      ],
+      audioCaptionTracks: [],
+      device: null,
+      cver: null,
+      playerState: 1,
+      selectedTrackLanguageCode: "ar",
+      selectedTrackVssId: ".ar",
+      defaultCaptionTrackIndex: 1,
+      cachedTimedtextUrl: null,
+    }
+
+    vi.spyOn(fetcher as any, "requestPlayerData").mockResolvedValue({
+      success: true,
+      data: playerData,
+    })
+    const fetchWithRetrySpy = vi.spyOn(fetcher as any, "fetchWithRetry").mockResolvedValue([])
+    vi.spyOn(fetcher as any, "processRawEvents").mockResolvedValue([])
+
+    await expect(fetcher.fetch()).resolves.toEqual([])
+
+    expect(fetchWithRetrySpy.mock.calls[0]?.[0]).toContain("lang=ar")
+  })
+
+  it("falls back to turning on YouTube CC when the response carries no default track", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+
+    Object.defineProperty(window, "location", {
+      value: {
+        href: "https://www.youtube.com/watch?v=test123",
+        search: "?v=test123",
+        origin: "https://www.youtube.com",
+        pathname: "/watch",
+        hostname: "www.youtube.com",
+      },
+      writable: true,
+    })
+
+    const captionTracks = [
+      {
+        baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=ar",
+        languageCode: "ar",
+        vssId: ".ar",
+      },
+      {
+        baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
+        languageCode: "en",
+        vssId: ".en",
+      },
+    ]
+    const basePlayerData = {
+      videoId: "test123",
+      captionTracks,
+      audioCaptionTracks: [],
+      device: null,
+      cver: null,
+      playerState: 1,
+      defaultCaptionTrackIndex: null,
+      cachedTimedtextUrl: null,
+    }
+    const captionsOff = {
+      ...basePlayerData,
+      selectedTrackLanguageCode: null,
+      selectedTrackVssId: null,
+    }
+    const captionsOn = {
+      ...basePlayerData,
+      selectedTrackLanguageCode: "en",
+      selectedTrackVssId: ".en",
+    }
+
+    let captionsEnabled = false
+    const ensureSubtitlesEnabledSpy = vi
+      .spyOn(fetcher as any, "ensureSubtitlesEnabled")
+      .mockImplementation(async () => {
+        captionsEnabled = true
+      })
+    vi.spyOn(fetcher as any, "requestPlayerData").mockImplementation(async () => ({
+      success: true,
+      data: captionsEnabled ? captionsOn : captionsOff,
+    }))
+    const fetchWithRetrySpy = vi.spyOn(fetcher as any, "fetchWithRetry").mockResolvedValue([])
+    vi.spyOn(fetcher as any, "processRawEvents").mockResolvedValue([])
+
+    await expect(fetcher.fetch()).resolves.toEqual([])
+
+    expect(ensureSubtitlesEnabledSpy).toHaveBeenCalledTimes(1)
+    expect(fetchWithRetrySpy.mock.calls[0]?.[0]).toContain("lang=en")
+    expect(fetcher.getSourceLanguage()).toBe("en")
+  })
+
+  it("does not toggle YouTube CC when the player already reports a selected track", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+
+    Object.defineProperty(window, "location", {
+      value: {
+        href: "https://www.youtube.com/watch?v=test123",
+        search: "?v=test123",
+        origin: "https://www.youtube.com",
+        pathname: "/watch",
+        hostname: "www.youtube.com",
+      },
+      writable: true,
+    })
+
+    const playerData = {
+      videoId: "test123",
+      captionTracks: [
+        {
+          baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
+          languageCode: "en",
+          vssId: ".en",
+        },
+      ],
+      audioCaptionTracks: [],
+      device: null,
+      cver: null,
+      playerState: 1,
+      selectedTrackLanguageCode: "en",
+      selectedTrackVssId: ".en",
+      defaultCaptionTrackIndex: null,
+      cachedTimedtextUrl: null,
+    }
+
+    vi.spyOn(fetcher as any, "requestPlayerData").mockResolvedValue({
+      success: true,
+      data: playerData,
+    })
+    const ensureSubtitlesEnabledSpy = vi.spyOn(fetcher as any, "ensureSubtitlesEnabled")
+    vi.spyOn(fetcher as any, "fetchWithRetry").mockResolvedValue([])
+    vi.spyOn(fetcher as any, "processRawEvents").mockResolvedValue([])
+
+    await expect(fetcher.fetch()).resolves.toEqual([])
+
+    expect(ensureSubtitlesEnabledSpy).not.toHaveBeenCalled()
   })
 
   it("returns raw parser fragments for non-AI standard subtitles", async () => {
