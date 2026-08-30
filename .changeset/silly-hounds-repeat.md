@@ -1,5 +1,5 @@
 ---
-"read-frog": patch
+"@read-frog/extension": patch
 ---
 
 fix(subtitles): follow YouTube's own default caption track
