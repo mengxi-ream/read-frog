@@ -158,6 +158,30 @@ describe("feature providers", () => {
       })
     })
 
+    it("keeps a fresh profile off Microsoft when it deletes its provider in translationOnly mode", () => {
+      // Microsoft cannot run translationOnly page mode (translation-only-gate.ts), and the
+      // provider pickers hide it while that mode is active — falling back onto it leaves the
+      // page-translate slot pointing at an option missing from its own list, which is what the
+      // selector then crashes on. Nothing in the fallback consults the gate, so the guarantee
+      // rests entirely on Google leading DEFAULT_PROVIDER_CONFIG_LIST.
+      const config = {
+        ...DEFAULT_CONFIG,
+        pageTranslation: {
+          ...DEFAULT_CONFIG.pageTranslation,
+          mode: "translationOnly" as const,
+          providerId: "deleted-provider",
+        },
+      }
+
+      const fallbacks = computeProviderFallbacksAfterDeletion(
+        "deleted-provider",
+        config,
+        DEFAULT_CONFIG.providersConfig,
+      )
+
+      expect(fallbacks.pageTranslation).toBe("google-translate-default")
+    })
+
     it("uses the system Normal tier when page translation has no local fallback", () => {
       const config = {
         ...DEFAULT_CONFIG,

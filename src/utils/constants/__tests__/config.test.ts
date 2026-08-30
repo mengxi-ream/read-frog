@@ -53,9 +53,12 @@ describe("dEFAULT_CONFIG", () => {
     }
 
     expect(parseResult.success).toBe(true)
+    // Google leads deliberately: the deletion fallback takes the first usable provider in this
+    // order, and landing page translation on Microsoft is illegal in translationOnly mode
+    // (see DEFAULT_PROVIDER_CONFIG_LIST).
     expect(DEFAULT_CONFIG.providersConfig.map((provider) => provider.id)).toEqual([
-      "microsoft-translate-default",
       "google-translate-default",
+      "microsoft-translate-default",
       "openai-default",
       "jalapenocloud-default",
       "atlascloud-default",
