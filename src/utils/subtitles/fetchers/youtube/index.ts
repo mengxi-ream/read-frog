@@ -8,11 +8,13 @@ import {
   FETCH_RETRY_DELAY_MS,
   MAX_FETCH_RETRIES,
   MAX_POT_WAIT_ATTEMPTS,
+  MAX_SELECTED_TRACK_WAIT_ATTEMPTS,
   MAX_STATE_WAIT_ATTEMPTS,
   PLAYER_DATA_REQUEST_TYPE,
   PLAYER_DATA_RESPONSE_TYPE,
   POST_MESSAGE_TIMEOUT_MS,
   POT_WAIT_INTERVAL_MS,
+  SELECTED_TRACK_WAIT_INTERVAL_MS,
   STATE_WAIT_INTERVAL_MS,
   WAIT_TIMEDTEXT_REQUEST_TYPE,
   WAIT_TIMEDTEXT_RESPONSE_TYPE,
@@ -36,6 +38,16 @@ import { buildSubtitleUrl } from "./url-builder"
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function hasSelectedTrack(playerData: PlayerData): boolean {
+  return Boolean(playerData.selectedTrackVssId || playerData.selectedTrackLanguageCode)
+}
+
+function getDefaultTrack(playerData: PlayerData): CaptionTrack | null {
+  const index = playerData.defaultCaptionTrackIndex
+  if (index === null) return null
+  return playerData.captionTracks[index] ?? null
 }
 
 function postMessageRequest(responseType: string, message: Record<string, unknown>): Promise<any> {
@@ -184,7 +196,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
       }
     }
 
-    const playerData = response.data
+    const playerData = await this.ensureTrackSelection(videoId, response.data)
     const track = this.selectTrack(playerData)
     const currentHash = this.buildTrackHash(videoId, track)
 
@@ -231,6 +243,33 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
 
     const events = await this.fetchTrackEvents(track, playerData)
     return { track, events }
+  }
+
+  private async ensureTrackSelection(videoId: string, playerData: PlayerData): Promise<PlayerData> {
+    if (
+      playerData.captionTracks.length === 0 ||
+      hasSelectedTrack(playerData) ||
+      getDefaultTrack(playerData)
+    ) {
+      return playerData
+    }
+
+    await this.ensureSubtitlesEnabled()
+
+    let latest = playerData
+    for (let i = 0; i < MAX_SELECTED_TRACK_WAIT_ATTEMPTS; i++) {
+      const response = await this.requestPlayerData(videoId)
+      if (response.success && response.data) {
+        latest = response.data
+        if (hasSelectedTrack(latest)) {
+          return latest
+        }
+      }
+
+      await sleep(SELECTED_TRACK_WAIT_INTERVAL_MS)
+    }
+
+    return latest
   }
 
   private async waitForPlayerState(videoId: string): Promise<void> {
@@ -354,6 +393,9 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
       const selectedTrack = tracks.find((t) => t.languageCode === selectedTrackLanguageCode)
       if (selectedTrack) return selectedTrack
     }
+
+    const defaultTrack = getDefaultTrack(playerData)
+    if (defaultTrack) return defaultTrack
 
     // Priority 2: Human subtitles without name - these are typically the original
     // language subtitles uploaded by the video creator

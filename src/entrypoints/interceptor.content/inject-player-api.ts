@@ -13,7 +13,12 @@ import {
   setupTimedtextObserver,
   waitForTimedtextUrl,
 } from "./timedtext-observer"
-import { errorResponse, normalizeTracks, parseAudioTracks } from "./utils"
+import {
+  errorResponse,
+  normalizeTracks,
+  parseAudioTracks,
+  resolveDefaultCaptionTrackIndex,
+} from "./utils"
 
 interface PlayerDataRequest {
   type: typeof PLAYER_DATA_REQUEST_TYPE
@@ -111,7 +116,8 @@ function getPlayerData(request: PlayerDataRequest): PlayerDataResponse {
 
     const playerResponse = player.getPlayerResponse?.()
     const videoId = playerResponse?.videoDetails?.videoId
-    const tracks = playerResponse?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? []
+    const tracklistRenderer = playerResponse?.captions?.playerCaptionsTracklistRenderer
+    const tracks = tracklistRenderer?.captionTracks ?? []
     const captionTracks = normalizeTracks(tracks)
     const selectedTrack = getSelectedTrackSnapshot(player, captionTracks)
 
@@ -131,6 +137,10 @@ function getPlayerData(request: PlayerDataRequest): PlayerDataResponse {
         playerState: player.getPlayerState?.() ?? -1,
         selectedTrackLanguageCode: selectedTrack.languageCode,
         selectedTrackVssId: selectedTrack.vssId,
+        defaultCaptionTrackIndex: resolveDefaultCaptionTrackIndex(
+          tracklistRenderer,
+          captionTracks.length,
+        ),
         cachedTimedtextUrl: getCachedTimedtextUrl(videoId),
       },
     }

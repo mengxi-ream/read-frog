@@ -45,3 +45,30 @@ export function parseAudioTracks(tracks?: any[]): AudioCaptionTrack[] {
     }
   })
 }
+
+export function resolveDefaultCaptionTrackIndex(
+  tracklistRenderer: any,
+  trackCount: number,
+): number | null {
+  const audioTracks = tracklistRenderer?.audioTracks
+  if (!Array.isArray(audioTracks) || audioTracks.length === 0) return null
+
+  const audioIndex =
+    typeof tracklistRenderer?.defaultAudioTrackIndex === "number"
+      ? tracklistRenderer.defaultAudioTrackIndex
+      : 0
+  const audioTrack = audioTracks[audioIndex] ?? audioTracks[0]
+
+  const defaultIndex = audioTrack?.defaultCaptionTrackIndex
+  if (typeof defaultIndex !== "number") return null
+
+  const captionTrackIndices = audioTrack?.captionTrackIndices
+  const resolved =
+    Array.isArray(captionTrackIndices) && !captionTrackIndices.includes(defaultIndex)
+      ? captionTrackIndices[defaultIndex]
+      : defaultIndex
+
+  if (typeof resolved !== "number" || resolved < 0 || resolved >= trackCount) return null
+
+  return resolved
+}
