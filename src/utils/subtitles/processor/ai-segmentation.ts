@@ -1,5 +1,5 @@
 import type { SubtitlesFragment } from "../types"
-import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
+import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 import { sendMessage } from "@/utils/message"
 
 const NEWLINE_PATTERN = /\n/g
@@ -101,7 +101,7 @@ export function parseSimplifiedVttToFragments(vtt: string): SubtitlesFragment[] 
  */
 export async function aiSegmentBlock(
   fragments: SubtitlesFragment[],
-  providerRef: SerializableProviderRef,
+  providerRef: PromptableProviderRef,
 ): Promise<SubtitlesFragment[]> {
   if (fragments.length === 0) {
     return fragments

@@ -8,9 +8,9 @@ import type {
 import type { SelectionToolbarInlineError } from "../inline-error"
 import type { SelectionPopoverActions } from "@/components/ui/selection-popover"
 import type { BackgroundTextStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
-import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
-import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
-import type { SystemProviderRef } from "@/utils/providers/provider-registry"
+import type { LLMProviderConfig, TranslateProviderConfig } from "@/types/config/provider"
+import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
+import type { ResolvedProviderRef, SystemProviderRef } from "@/utils/providers/provider-registry"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { HotkeyManager } from "@tanstack/hotkeys"
 import { useAtomValue, useSetAtom } from "jotai"
@@ -88,7 +88,7 @@ interface SelectionTranslatePendingOpenRequest {
  * context (pure translate providers, hosted tier unavailable).
  */
 async function getSelectionWebPagePromptContext(
-  summaryProviderRef: SerializableProviderRef | null,
+  summaryProviderRef: PromptableProviderRef | null,
   enableAIContentAware: boolean,
 ) {
   const webPageContext = await getOrCreateWebPageContext()
@@ -210,7 +210,7 @@ async function translateWithHostedTextStream({
   // provider. Fail soft — a summary the tier cannot fund degrades to raw
   // context instead of blocking the translation, whose own stream surfaces
   // the real error.
-  let summaryProviderRef: SerializableProviderRef | null = null
+  let summaryProviderRef: PromptableProviderRef | null = null
   if (translateRequest.enableAIContentAware) {
     const availability = await checkProviderAvailability(provider, "selectionTranslation")
     summaryProviderRef = availability.available ? availability.providerRef : null
@@ -259,11 +259,11 @@ async function translateWithHostedTextStream({
 
 async function translateWithStandardProvider({
   text,
-  providerConfig,
+  provider,
   translateRequest,
 }: {
   text: string
-  providerConfig: ProviderConfig
+  provider: ResolvedProviderRef<TranslateProviderConfig>
   translateRequest: SelectionToolbarTranslateRequestSlice
 }) {
   // This path is reached only for pure translate providers (the dispatch sends
@@ -277,7 +277,7 @@ async function translateWithStandardProvider({
   const translatedText = await translateTextCore({
     text,
     langConfig: translateRequest.language,
-    providerConfig,
+    providerConfig: provider,
     hostedFeature: "selectionTranslation",
     enableAIContentAware: translateRequest.enableAIContentAware,
     extraHashTags: ["selectionTranslation"],
@@ -560,7 +560,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
           setThinking(null)
           nextTranslatedText = await translateWithStandardProvider({
             text: preparedText,
-            providerConfig: provider.config,
+            provider,
             translateRequest,
           })
         }

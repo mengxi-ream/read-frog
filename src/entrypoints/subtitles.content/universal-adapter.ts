@@ -19,6 +19,7 @@ import { getDocumentDescription } from "@/utils/content/metadata"
 import { resolveLanguageCodeFromLocale } from "@/utils/content/page-language"
 import { waitForElement } from "@/utils/dom/wait-for-element"
 import { i18n } from "@/utils/i18n"
+import { canProviderRefGenerateText } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
 import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
@@ -807,8 +808,13 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
     // Resolved once per session; the cache key needs the same identity the
     // background will use, and a hosted ref costs one status fetch here rather
-    // than one per fragment.
-    const providerRef = config ? await resolveSubtitlesProviderRef(config, "videoSubtitles") : null
+    // than one per fragment. Narrowed once for the whole session: segmentation
+    // and the summary are generations, so a translate-only provider keeps the
+    // rule-based recut and skips the summary without a doomed prompt attempt
+    // per look-ahead window.
+    const providerRef = config ? await resolveSubtitlesProviderRef(config, "lineTranslation") : null
+    const promptableProviderRef =
+      providerRef && canProviderRefGenerateText(providerRef) ? providerRef : null
 
     const videoContext: SubtitlesVideoContext = {
       videoTitle: document.title || "",
@@ -825,7 +831,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
         // The session ref covers segmentation too: both subtitle routes gate on
         // the same hosted feature, and per-block re-resolution would cost a
         // hostedAi.status round trip per look-ahead window.
-        providerRef,
+        providerRef: promptableProviderRef,
         preSegmented: this.fetcher.isPreSegmented?.(),
         onChunkSegmented: (chunk, nextFragments) => {
           if (chunk.length === 0 || !chunk[0]) return
@@ -852,22 +858,26 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       onStateChange: (state, data) => scheduler.setState(state, data),
     })
     this.translationCoordinator.start(videoContext)
+    // The hash and the summary must share one ref — the promptable one — or
+    // the cache identity and the ref that rides the message could diverge.
     const summaryContextHash = buildSubtitlesSummaryContextHash(
       videoContext,
-      providerRef ?? undefined,
+      promptableProviderRef ?? undefined,
     )
     this.subtitlesSummaryContextHash = summaryContextHash ?? null
 
-    void fetchSubtitlesSummary(videoContext).then((summary) => {
-      if (!summaryContextHash) {
-        return
-      }
+    void fetchSubtitlesSummary(videoContext, config ?? undefined, promptableProviderRef).then(
+      (summary) => {
+        if (!summaryContextHash) {
+          return
+        }
 
-      if (this.subtitlesSummaryContextHash !== summaryContextHash) {
-        return
-      }
+        if (this.subtitlesSummaryContextHash !== summaryContextHash) {
+          return
+        }
 
-      videoContext.summary = summary
-    })
+        videoContext.summary = summary
+      },
+    )
   }
 }

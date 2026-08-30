@@ -26,7 +26,12 @@ vi.mock("@/utils/logger", () => ({
   },
 }))
 
-const providerRef = { kind: "local" as const, config: { id: "openai-default" } as never }
+// The trust-boundary guard is real here, so the fixture must name a provider
+// that actually has a model to prompt.
+const providerRef = {
+  kind: "local" as const,
+  config: { id: "openai-default", provider: "openai" } as never,
+}
 const jsonContent = JSON.stringify([{ s: 1000, e: 2000, t: "hello world" }])
 
 const parseableVtt = "WEBVTT\n\n1000 --> 2000\nHello world."

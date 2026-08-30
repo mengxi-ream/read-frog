@@ -1,6 +1,6 @@
 import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import type { Config } from "@/types/config/config"
-import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
+import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 import type { SubtitlesFetcher } from "@/utils/subtitles/fetchers/types"
 import type { SubtitlesVideoContext } from "@/utils/subtitles/processor/translator"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
@@ -13,6 +13,7 @@ import {
 } from "@/utils/constants/subtitles"
 import { resolveLanguageCodeFromLocale } from "@/utils/content/page-language"
 import { i18n } from "@/utils/i18n"
+import { canProviderRefGenerateText } from "@/utils/providers/provider-ref"
 import { aiSegmentBlock } from "@/utils/subtitles/processor/ai-segmentation"
 import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
 import {
@@ -171,14 +172,19 @@ export class TranslatedSubtitlesDownloader {
   ): Promise<SubtitlesFragment[]> {
     // One resolve for the whole export: segmentation runs per 60s chunk, and a
     // hosted ref would otherwise pay a hostedAi.status round trip per chunk.
-    const providerRef = await resolveSubtitlesProviderRef(config, "videoSubtitles")
+    // The generation tasks (segmentation, summary) get the ref narrowed once
+    // here — a translate-only provider exports the rule-based recut without a
+    // doomed prompt attempt per chunk.
+    const providerRef = await resolveSubtitlesProviderRef(config, "lineTranslation")
+    const promptableProviderRef =
+      providerRef && canProviderRefGenerateText(providerRef) ? providerRef : null
     this.assertActive(operationId)
     const fragments = await this.buildExportProcessedSubtitles(
       sourceSubtitles,
       sourceProcessedSubtitles,
       config,
       operationId,
-      providerRef,
+      promptableProviderRef,
     )
     this.assertActive(operationId)
     const videoContext = await this.buildExportVideoContext(
@@ -186,7 +192,7 @@ export class TranslatedSubtitlesDownloader {
       config,
       operationId,
       pageTitle,
-      providerRef,
+      promptableProviderRef,
     )
     this.assertActive(operationId)
     const translatedFragments: SubtitlesFragment[] = []
@@ -249,11 +255,11 @@ export class TranslatedSubtitlesDownloader {
     sourceProcessedSubtitles: SubtitlesFragment[],
     config: Config,
     operationId: number,
-    providerRef: SerializableProviderRef | null,
+    providerRef: PromptableProviderRef | null,
   ): Promise<SubtitlesFragment[]> {
-    // No ref means AI segmentation cannot run (no provider, or the hosted tier
-    // is unavailable); the export then keeps the same rule-based result the
-    // feature-off path produces.
+    // No ref means AI segmentation cannot run (no provider, no model to
+    // prompt, or the hosted tier is unavailable); the export then keeps the
+    // same rule-based result the feature-off path produces.
     if (!config.videoSubtitles.aiSegmentation || this.fetcher.isPreSegmented?.() || !providerRef) {
       return [...sourceProcessedSubtitles]
     }
@@ -270,7 +276,7 @@ export class TranslatedSubtitlesDownloader {
 
   private async buildExportProcessedChunk(
     chunk: SubtitlesFragment[],
-    providerRef: SerializableProviderRef,
+    providerRef: PromptableProviderRef,
     operationId: number,
   ): Promise<SubtitlesFragment[]> {
     const sourceLanguage = this.fetcher.getSourceLanguage()
@@ -454,7 +460,7 @@ export class TranslatedSubtitlesDownloader {
     config: Config,
     operationId: number,
     pageTitle: string,
-    providerRef: SerializableProviderRef | null,
+    providerRef: PromptableProviderRef | null,
   ): Promise<SubtitlesVideoContext> {
     const videoContext: SubtitlesVideoContext = {
       videoTitle: pageTitle,
@@ -467,7 +473,7 @@ export class TranslatedSubtitlesDownloader {
 
     if (summaryContextHash) {
       try {
-        videoContext.summary = await fetchSubtitlesSummary(videoContext, config)
+        videoContext.summary = await fetchSubtitlesSummary(videoContext, config, providerRef)
         this.assertActive(operationId)
       } catch {
         videoContext.summary = null

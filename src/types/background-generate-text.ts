@@ -1,8 +1,8 @@
 import type { HostedAiTextStreamRoute } from "./background-stream"
-import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
+import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 
 export interface BackgroundGenerateTextPayload {
-  providerRef: SerializableProviderRef
+  providerRef: PromptableProviderRef
   /**
    * Which hosted route a system provider bills against. Ignored for local
    * providers, which have no server-side quota.

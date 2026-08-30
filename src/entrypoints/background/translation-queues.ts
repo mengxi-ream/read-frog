@@ -4,7 +4,7 @@ import type { ProviderConfig } from "@/types/config/provider"
 import type { BatchQueueConfig, RequestQueueConfig } from "@/types/config/translate"
 import type { SubtitlePromptContext, WebPagePromptContext } from "@/types/content"
 import type { PromptResolver } from "@/utils/host/translate/api/ai"
-import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
+import type { PromptableProviderRef, SerializableProviderRef } from "@/utils/providers/provider-ref"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { browser, storage } from "#imports"
 import { isLLMProviderConfig } from "@/types/config/provider"
@@ -180,7 +180,7 @@ export async function executeBatchTranslation<TContext>(
 async function getOrGenerateSummary(args: {
   title: string
   textContent: string
-  providerRef: SerializableProviderRef
+  providerRef: PromptableProviderRef
   hostedFeature: HostedAiTextStreamRoute
   cacheKeyParts: string[]
   requestQueue: RequestQueue
@@ -248,7 +248,7 @@ const VIDEO_SUMMARY_PROMPT_VERSION = "1"
 async function getOrGenerateVideoSummary(args: {
   transcript: string
   targetLanguage: string
-  providerRef: SerializableProviderRef
+  providerRef: PromptableProviderRef
   requestQueue: RequestQueue
 }): Promise<string | null> {
   const { transcript, targetLanguage, providerRef, requestQueue } = args
@@ -681,6 +681,15 @@ export function setUpWebPageTranslationQueue(): void {
     const { webTitle, webContent, providerRef } = message.data
 
     if (!webTitle || !webContent) {
+      return null
+    }
+
+    // The payload type forces senders to narrow, but the wire is a trust
+    // boundary (a pre-update content script can send a translate-only ref).
+    // Refuse like the subtitle summary handlers do: a queue task for a
+    // provider with no model to prompt can only ever throw, after burning
+    // its retries.
+    if (!canProviderRefGenerateText(providerRef)) {
       return null
     }
 

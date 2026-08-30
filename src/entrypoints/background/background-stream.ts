@@ -20,6 +20,7 @@ import type {
   StreamRuntimeOptions,
   ThinkingSnapshot,
 } from "@/types/background-stream"
+import type { TranslateProviderConfig } from "@/types/config/provider"
 import {
   HostedAiNoteSuggestionObjectSchema,
   HostedAiNoteSuggestionStreamInputSchema,
@@ -746,12 +747,14 @@ export async function generateTextForProviderRef(
   }
 
   // Local text generation needs a real LLM: pure translate providers (DeepLX,
-  // Google, Microsoft) have no model to prompt. Callers already pick an
-  // LLM-capable provider, so this is a guard, not a branch.
-  if (!isLLMProviderConfig(providerRef.config)) {
+  // Google, Microsoft) have no model to prompt. The payload type already says
+  // LLM, but the wire is a trust boundary — a pre-update content script can
+  // still send a translate-only ref — so re-widen and check for real.
+  const localConfig = providerRef.config as TranslateProviderConfig
+  if (!isLLMProviderConfig(localConfig)) {
     throw new BackgroundStreamError(
       "invalid_request",
-      `Provider "${providerRef.config.id}" cannot generate text`,
+      `Provider "${localConfig.id}" cannot generate text`,
     )
   }
 

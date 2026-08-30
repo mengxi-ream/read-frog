@@ -1,5 +1,5 @@
 import type { HostedAiTextStreamRoute } from "@/types/background-stream"
-import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
+import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 import { logger } from "@/utils/logger"
 import { getArticleSummaryPrompt } from "@/utils/prompts/summary"
 import { MAX_TEXT_LENGTH } from "./utils"
@@ -19,13 +19,13 @@ const MAX_TITLE_LENGTH = 200
 export async function generateArticleSummary(
   title: string,
   textContent: string,
-  providerRef: SerializableProviderRef,
+  providerRef: PromptableProviderRef,
   options: {
     hostedFeature: HostedAiTextStreamRoute
     signal?: AbortSignal
     generate: (
       payload: {
-        providerRef: SerializableProviderRef
+        providerRef: PromptableProviderRef
         hostedFeature: HostedAiTextStreamRoute
         instructions: string
         prompt: string

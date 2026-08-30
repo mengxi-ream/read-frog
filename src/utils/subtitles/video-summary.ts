@@ -3,12 +3,8 @@ import type { ProvidersConfig } from "@/types/config/provider"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { getLocalConfig } from "@/utils/config/storage"
 import { sendMessage } from "@/utils/message"
-import { canProviderRefGenerateText } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
-import {
-  resolveSubtitlesProviderRef,
-  resolveSubtitlesProviderResolution,
-} from "./processor/translator"
+import { resolveSubtitlesProvider, resolveSubtitlesProviderRef } from "./processor/translator"
 
 const VIDEO_SUMMARY_QUERY_SCOPE = ["subtitles", "video-summary"] as const
 
@@ -93,11 +89,12 @@ export async function checkVideoSummaryAvailability(): Promise<VideoSummaryAvail
   if (!config) {
     return { status: "needsModel" }
   }
-  const resolution = await resolveSubtitlesProviderResolution(config, "videoSubtitles")
+  const resolution = await resolveSubtitlesProvider(config, "summary")
   if (resolution.status === "hostedUnavailable") {
     return { status: "hostedUnavailable", message: resolution.message }
   }
-  if (resolution.status === "none" || !canProviderRefGenerateText(resolution.ref)) {
+  if (resolution.status !== "ok") {
+    // "none" and "notPromptable" both land here: nothing the panel can run.
     return { status: "needsModel" }
   }
   return { status: "ok" }
@@ -114,8 +111,8 @@ export async function requestVideoSummary(fragments: SubtitlesFragment[]): Promi
     return null
   }
 
-  const providerRef = await resolveSubtitlesProviderRef(config, "videoSubtitles")
-  if (!providerRef || !canProviderRefGenerateText(providerRef)) {
+  const providerRef = await resolveSubtitlesProviderRef(config, "summary")
+  if (!providerRef) {
     return null
   }
 

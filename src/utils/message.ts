@@ -20,7 +20,7 @@ import type {
   TTSPlaybackStopRequest,
 } from "@/types/tts-playback"
 import type { HostedAiStatus } from "@/utils/hosted-ai/types"
-import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
+import type { PromptableProviderRef, SerializableProviderRef } from "@/utils/providers/provider-ref"
 import type { EdgeTTSVoice } from "@/utils/server/edge-tts/types"
 import { defineExtensionMessaging } from "@webext-core/messaging"
 
@@ -120,7 +120,9 @@ interface ProtocolMap {
   getOrGenerateWebPageSummary: (data: {
     webTitle: string
     webContent: string
-    providerRef: SerializableProviderRef
+    // A summary is a generation: the payload type forces senders to narrow,
+    // and the handler re-checks because the wire is a trust boundary.
+    providerRef: PromptableProviderRef
     // The route of the feature that triggered the summary — the summary is a
     // sub-call of that feature and bills against its quota. Optional on the
     // wire for mid-extension-update compat; absent means "pageTranslation",
@@ -140,12 +142,12 @@ interface ProtocolMap {
   getSubtitlesSummary: (data: {
     videoTitle: string
     subtitlesContext: string
-    providerRef: SerializableProviderRef
+    providerRef: PromptableProviderRef
   }) => Promise<string | null>
   getVideoSummary: (data: {
     transcript: string
     targetLanguage: string
-    providerRef: SerializableProviderRef
+    providerRef: PromptableProviderRef
   }) => Promise<string | null>
   backgroundGenerateText: (
     data: BackgroundGenerateTextPayload,
@@ -153,7 +155,7 @@ interface ProtocolMap {
   // AI subtitle segmentation
   aiSegmentSubtitles: (data: {
     jsonContent: string
-    providerRef: SerializableProviderRef
+    providerRef: PromptableProviderRef
   }) => Promise<string>
   // Hosted AI availability. Owned by the background because one response covers
   // every feature and tier — so it can be cached and shared across tabs — and

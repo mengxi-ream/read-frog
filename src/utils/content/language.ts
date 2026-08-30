@@ -1,5 +1,5 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
-import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
+import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 import { langCodeISO6393Schema } from "@read-frog/definitions"
 import { franc } from "franc"
 import { toastManager } from "@/components/ui/base-ui/toast"
@@ -31,7 +31,7 @@ export interface DetectLanguageOptions {
   /** Enable LLM detection */
   enableLLM?: boolean
   /** Provider to run LLM detection on; resolved from config when omitted. */
-  providerRef?: SerializableProviderRef
+  providerRef?: PromptableProviderRef
   /** Max text length for LLM detection (default: 500) */
   maxLengthForLLM?: number
 }
@@ -119,7 +119,7 @@ export async function detectLanguage(
  */
 export async function detectLanguageWithLLM(
   text: string,
-  providerRef?: SerializableProviderRef,
+  providerRef?: PromptableProviderRef,
 ): Promise<LangCodeISO6393 | "und" | null> {
   const MAX_ATTEMPTS = 3 // 1 original + 2 retries
 
@@ -131,7 +131,7 @@ export async function detectLanguageWithLLM(
   // Use the passed ref or resolve one from config. Resolving goes through the
   // capability registry rather than providersConfig directly, so Built-in AI —
   // which is never a row in providersConfig — is reachable here.
-  let ref: SerializableProviderRef | undefined = providerRef
+  let ref: PromptableProviderRef | undefined = providerRef
 
   if (!ref) {
     try {
@@ -154,10 +154,7 @@ export async function detectLanguageWithLLM(
         logger.info(`Provider "${ldProviderId}" cannot run language detection`)
         return null
       }
-      ref = await serializeProviderRef(
-        resolved.kind === "local" ? resolved.config : resolved,
-        "languageDetection",
-      )
+      ref = await serializeProviderRef(resolved, "languageDetection")
     } catch (error) {
       // Everything above returns null for "no LLM detection is configured",
       // which the caller reads as a legal state and quietly resolves with
