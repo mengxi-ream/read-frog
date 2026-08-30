@@ -41,3 +41,13 @@ export function buildTranscript(
 export function findActiveLine(lines: TranscriptLine[], timeMs: number): number {
   return lines.findIndex((line) => line.start <= timeMs && line.end > timeMs)
 }
+
+export function formatTimestamp(ms: number): string {
+  const total = Math.floor(ms / 1000)
+  const seconds = String(total % 60).padStart(2, "0")
+  const minutes = Math.floor(total / 60) % 60
+  const hours = Math.floor(total / 3600)
+  return hours > 0
+    ? `${hours}:${String(minutes).padStart(2, "0")}:${seconds}`
+    : `${minutes}:${seconds}`
+}

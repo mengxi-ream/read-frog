@@ -1,6 +1,6 @@
 import type { SubtitlesFragment } from "../types"
 import { describe, expect, it } from "vitest"
-import { buildTranscript, findActiveLine } from "../transcript"
+import { buildTranscript, findActiveLine, formatTimestamp } from "../transcript"
 
 function cue(text: string, start: number, end: number, translation?: string): SubtitlesFragment {
   return { text, start, end, ...(translation && { translation }) }
@@ -60,5 +60,17 @@ describe("findActiveLine", () => {
   it("reports nothing before the first cue or after the last", () => {
     expect(findActiveLine(lines, 0)).toBe(0)
     expect(findActiveLine(lines, 9999)).toBe(-1)
+  })
+})
+
+describe("formatTimestamp", () => {
+  it("pads the seconds but not the leading minutes", () => {
+    expect(formatTimestamp(9_000)).toBe("0:09")
+    expect(formatTimestamp(75_000)).toBe("1:15")
+  })
+
+  it("widens to hours only once the video reaches one", () => {
+    expect(formatTimestamp(3_599_000)).toBe("59:59")
+    expect(formatTimestamp(3_671_000)).toBe("1:01:11")
   })
 })

@@ -5,7 +5,6 @@ import { match } from "ts-pattern"
 import { browser } from "#imports"
 import { MarkdownRenderer } from "@/components/markdown-renderer"
 import { Button } from "@/components/ui/base-ui/button"
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/base-ui/empty"
 import { Skeleton } from "@/components/ui/base-ui/skeleton"
 import { configAtom } from "@/utils/atoms/config"
 import { featureProviderRefAtom } from "@/utils/atoms/provider"
@@ -13,33 +12,13 @@ import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import {
   checkVideoSummaryAvailability,
-  providerIdentity,
   videoSummaryQueryKey,
 } from "@/utils/subtitles/video-summary"
 import { currentVideoIdAtom, subtitlesStore, videoSummaryPartialAtom } from "../../../atoms"
 import { useSubtitlesUI } from "../../subtitles-ui-context"
+import { StatusCard } from "./status-card"
 
 const SKELETON_LINE_WIDTHS = ["w-full", "w-11/12", "w-4/5", "w-10/12", "w-3/5"]
-
-function StatusCard({
-  icon,
-  title,
-  children,
-}: {
-  icon: React.ReactNode
-  title: string
-  children?: React.ReactNode
-}) {
-  return (
-    <Empty className="min-h-full p-6">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">{icon}</EmptyMedia>
-        <EmptyTitle className="font-normal">{title}</EmptyTitle>
-      </EmptyHeader>
-      {children}
-    </Empty>
-  )
-}
 
 function SummaryBody({ children }: { children: React.ReactNode }) {
   return <div className="px-5 py-5">{children}</div>
