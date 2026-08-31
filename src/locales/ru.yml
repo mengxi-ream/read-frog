@@ -1239,6 +1239,7 @@ translationHub:
   translate: Перевести
   copiedToClipboard: Перевод скопирован в буфер обмена!
   copyTranslation: Копировать перевод
+  speakTranslation: Озвучить перевод
   expandCard: Развернуть карточку
   collapseCard: Свернуть карточку
   expandAllCards: Развернуть все

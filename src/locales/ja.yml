@@ -1239,6 +1239,7 @@ translationHub:
   translate: 翻訳
   copiedToClipboard: 翻訳をクリップボードにコピーしました！
   copyTranslation: 翻訳をコピー
+  speakTranslation: 翻訳を読み上げ
   expandCard: カードを展開
   collapseCard: カードを折りたたむ
   expandAllCards: すべて展開

@@ -1355,6 +1355,7 @@ translationHub:
   translate: 翻译
   copiedToClipboard: 翻译已复制到剪贴板！
   copyTranslation: 复制翻译
+  speakTranslation: 朗读翻译
   expandCard: 展开卡片
   collapseCard: 折叠卡片
   expandAllCards: 全部展开

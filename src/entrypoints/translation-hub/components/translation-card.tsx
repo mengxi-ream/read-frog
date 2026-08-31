@@ -6,6 +6,7 @@ import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { Button } from "@/components/ui/base-ui/button"
 import { anchoredToastManager } from "@/components/ui/base-ui/toast"
+import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureAttempt } from "@/utils/analytics"
 import { classifyProviderConfig } from "@/utils/analytics-provider"
@@ -37,8 +38,10 @@ export function TranslationCard({
   const request = useAtomValue(translateRequestAtom)
   const language = useAtomValue(configFieldsAtomMap.language)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
   const [selectedProviderIds, setSelectedProviderIds] = useAtom(selectedProviderIdsAtom)
   const setExpandedById = useSetAtom(translationCardExpandedStateAtom)
+  const { play, stop, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.TRANSLATION_HUB)
 
   const provider = getProviderConfigById(providersConfig, providerId)
   const providerItem = provider ? PROVIDER_ITEMS[provider.provider] : undefined
@@ -115,6 +118,16 @@ export function TranslationCard({
     }
   }
 
+  const handleSpeak = () => {
+    if (isFetching || isPlaying) {
+      stop()
+      return
+    }
+    if (mutation.data) {
+      void play(mutation.data, ttsConfig)
+    }
+  }
+
   const handleRemove = () => {
     setSelectedProviderIds(selectedProviderIds.filter((id) => id !== providerId))
     setExpandedById((prev) => {
@@ -129,6 +142,18 @@ export function TranslationCard({
   if (!provider) return null
 
   const hasContent = mutation.isError || (mutation.data !== undefined && mutation.data !== "")
+
+  const speakTitle = isFetching
+    ? i18n.t("speak.fetchingAudio")
+    : isPlaying
+      ? i18n.t("action.playing")
+      : i18n.t("translationHub.speakTranslation")
+
+  const speakIcon = isFetching
+    ? "tabler:loader-2"
+    : isPlaying
+      ? "tabler:player-stop-filled"
+      : "tabler:volume"
 
   return (
     <div className="rounded-lg border bg-card">
@@ -172,6 +197,18 @@ export function TranslationCard({
               title={i18n.t("translationHub.copyTranslation")}
             >
               <Icon icon="tabler:copy" className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          {mutation.data && !mutation.isPending && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSpeak}
+              className="h-7 w-7"
+              title={speakTitle}
+              aria-label={speakTitle}
+            >
+              <Icon icon={speakIcon} className={cn("h-3.5 w-3.5", isFetching && "animate-spin")} />
             </Button>
           )}
           {hasContent && (
