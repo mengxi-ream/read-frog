@@ -143,12 +143,13 @@ export function TranslationCard({
 
   const hasContent = mutation.isError || (mutation.data !== undefined && mutation.data !== "")
 
-  const speakTitle = isFetching
-    ? i18n.t("speak.fetchingAudio")
-    : isPlaying
-      ? i18n.t("action.playing")
-      : i18n.t("translationHub.speakTranslation")
-
+  const speakTitle = i18n.t(
+    isFetching
+      ? "speak.fetchingAudio"
+      : isPlaying
+        ? "action.playing"
+        : "translationHub.speakTranslation",
+  )
   const speakIcon = isFetching
     ? "tabler:loader-2"
     : isPlaying

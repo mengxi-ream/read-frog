@@ -21,13 +21,7 @@ const {
   requestAtom: {},
   selectedProviderIdsAtom: {},
   ttsAtom: {},
-  ttsConfigMock: {
-    defaultVoice: "en-US-AriaNeural",
-    languageVoices: {},
-    rate: 0,
-    pitch: 0,
-    volume: 0,
-  },
+  ttsConfigMock: {},
 }))
 
 interface UseMutationMockShape {
@@ -57,13 +51,13 @@ interface UseTextToSpeechMockShape {
 }
 
 const useTTSMock = vi.hoisted(() => {
-  const initial: UseTextToSpeechMockShape = {
+  const makeTTSMock = (): UseTextToSpeechMockShape => ({
     play: vi.fn<(text: string, ttsConfig: unknown) => void>(),
     stop: vi.fn<() => void>(),
     isFetching: false,
     isPlaying: false,
-  }
-  return { current: initial }
+  })
+  return { current: makeTTSMock(), makeTTSMock }
 })
 
 vi.mock("@tanstack/react-query", () => ({
@@ -121,12 +115,7 @@ vi.mock("@/entrypoints/translation-hub/atoms", () => ({
 }))
 
 beforeEach(() => {
-  useTTSMock.current = {
-    play: vi.fn<(text: string, ttsConfig: unknown) => void>(),
-    stop: vi.fn<() => void>(),
-    isFetching: false,
-    isPlaying: false,
-  }
+  useTTSMock.current = useTTSMock.makeTTSMock()
 })
 
 describe("TranslationCard copy feedback", () => {
