@@ -6,7 +6,7 @@ import type {
 import type { TTSConfig } from "@/types/config/tts"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAtomValue } from "jotai"
-import { useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
@@ -139,7 +139,7 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
   const shouldStopRef = useRef(false)
   const activeRequestIdRef = useRef<string | null>(null)
 
-  const stop = () => {
+  const stop = useCallback(() => {
     shouldStopRef.current = true
 
     const activeRequestId = activeRequestIdRef.current
@@ -151,7 +151,11 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
     setIsPlaying(false)
     setCurrentChunk(0)
     setTotalChunks(0)
-  }
+  }, [])
+
+  // Playback is delegated to the background context, so it outlives this hook.
+  // Stop in-flight synthesis or playback when the host component unmounts.
+  useEffect(() => () => stop(), [stop])
 
   const playMutation = useMutation<void, Error, PlayAudioParams>({
     meta: {
