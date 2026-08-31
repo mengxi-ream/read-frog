@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.46.7
+
+### Patch Changes
+
+- [#2135](https://github.com/mengxi-ream/read-frog/pull/2135) [`2761602`](https://github.com/mengxi-ream/read-frog/commit/27616025dfb4f1c7b7d5de369626d94a1f41a07c) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(providers): order Google Translate ahead of Microsoft in new profiles
+
+- [#2140](https://github.com/mengxi-ream/read-frog/pull/2140) [`02ad422`](https://github.com/mengxi-ream/read-frog/commit/02ad422c1e1260960e141e4012a20d93e85082aa) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translate): remember page translations in-tab so virtualized remounts stop re-translating
+
+  Virtualized pages (X articles and timelines, and any React list that unmounts off-screen rows) destroy paragraph nodes on scroll and recreate brand-new ones on the way back, so scrolling down and back up re-ran the whole translation pipeline for text the tab had already translated — every paragraph flashed its original text and a spinner while a background round trip re-fetched the same cached translation. Page-translation results are now also remembered in an in-tab memory tier keyed by the same request hash as the background cache, so remounted regions recover their translations without the round trip or the visible churn.
+
+- [#2137](https://github.com/mengxi-ream/read-frog/pull/2137) [`4c71016`](https://github.com/mengxi-ream/read-frog/commit/4c71016cc2bdf28714be2ec8777f733706390be0) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): follow YouTube's own default caption track
+
+  When the viewer had YouTube's own CC off, the player reported no selected track and the fetcher fell back to whichever caption track happened to be listed first — so a video whose first track is not the viewer's usual language had to be corrected by hand every time. The player response already names the track YouTube itself would play (`defaultCaptionTrackIndex`), so read that instead. A live selection in the player still wins, and responses that omit the field fall back to enabling CC and following the player's choice.
+
 ## 1.46.6
 
 ### Patch Changes
