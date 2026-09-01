@@ -1,44 +1,65 @@
 import type { SubtitlesFragment } from "./types"
-import type { ProvidersConfig } from "@/types/config/provider"
+import type { LLMProviderConfig } from "@/types/config/provider"
+import type { ProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { getLocalConfig } from "@/utils/config/storage"
+import { VIDEO_SUMMARY_TRANSCRIPT_CHAR_BUDGET } from "@/utils/constants/subtitles"
+import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { sendMessage } from "@/utils/message"
-import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
+import { getVideoSummaryPrompt } from "@/utils/prompts/summary"
+import { resolveModelId } from "@/utils/providers/model-id"
+import { getProviderOptionsWithOverride } from "@/utils/providers/options"
+import { getTopLevelReasoning } from "@/utils/providers/reasoning"
 import { resolveSubtitlesProvider, resolveSubtitlesProviderRef } from "./processor/translator"
 
-const VIDEO_SUMMARY_QUERY_SCOPE = ["subtitles", "video-summary"] as const
+const TRANSCRIPT_SAMPLE_WINDOWS = 8
 
-/**
- * An edited local model keeps its id, so the id alone would serve its predecessor's
- * summary forever. A hosted `modelRevision` is out of reach here; the background key has it.
- */
-function providerIdentity(providersConfig: ProvidersConfig, providerId: string): string {
-  const resolved = resolveProviderRefForCapability("videoSubtitles", providersConfig, providerId)
-  if (!resolved) {
-    return providerId
+export function sampleTranscript(transcript: string, budget: number): string {
+  if (transcript.length <= budget) {
+    return transcript
   }
-  return resolved.kind === "local"
-    ? JSON.stringify(resolved.config)
-    : JSON.stringify({ providerId: resolved.id, modelTier: resolved.modelTier })
+
+  const lines = transcript.split("\n")
+  const windowSize = Math.ceil(lines.length / TRANSCRIPT_SAMPLE_WINDOWS)
+  const separators = (TRANSCRIPT_SAMPLE_WINDOWS - 1) * 2
+  const perWindowBudget = Math.floor((budget - separators) / TRANSCRIPT_SAMPLE_WINDOWS)
+
+  const runs: string[] = []
+  for (let start = 0; start < lines.length; start += windowSize) {
+    let run = ""
+    for (const line of lines.slice(start, start + windowSize)) {
+      const next = run ? `${run}\n${line}` : line
+      if (next.length > perWindowBudget) {
+        break
+      }
+      run = next
+    }
+    if (run) {
+      runs.push(run)
+    }
+  }
+
+  return runs.join("\n\n")
 }
 
-/** Keyed by video, so same-video changes — caption track, native/AI source — reuse the summary. */
+export type VideoSummaryProviderRef = ProviderRefForCapability<"videoSubtitles"> | null
+
+export const VIDEO_SUMMARY_QUERY_SCOPE = ["subtitles", "video-summary"] as const
+
 export function videoSummaryQueryKey(
   videoId: string | null,
   targetCode: string,
-  providersConfig: ProvidersConfig,
-  providerId: string,
+  resolved: VideoSummaryProviderRef,
 ) {
-  return [
-    ...VIDEO_SUMMARY_QUERY_SCOPE,
-    videoId,
-    targetCode,
-    providerIdentity(providersConfig, providerId),
-  ] as const
-}
+  const providerIdentity = !resolved
+    ? null
+    : resolved.kind === "local"
+      ? resolved.config
+      : { providerId: resolved.id, modelTier: resolved.modelTier }
 
-/** Matches every language/provider pair, for dropping the lot at once. */
-export const VIDEO_SUMMARY_QUERY_SCOPE_KEY = VIDEO_SUMMARY_QUERY_SCOPE
+  return [...VIDEO_SUMMARY_QUERY_SCOPE, videoId, targetCode, providerIdentity] as const
+}
 
 const ZERO_WIDTH_CHARS_RE = /[\u200B-\u200D\uFEFF]/g
 
@@ -100,7 +121,32 @@ export async function checkVideoSummaryAvailability(): Promise<VideoSummaryAvail
   return { status: "ok" }
 }
 
-export async function requestVideoSummary(fragments: SubtitlesFragment[]): Promise<string | null> {
+function buildLocalStreamPayload(config: LLMProviderConfig, instructions: string, prompt: string) {
+  const reasoning = getTopLevelReasoning(config)
+  return {
+    providerId: config.id,
+    instructions,
+    prompt,
+    providerOptions: getProviderOptionsWithOverride(
+      resolveModelId(config.model) ?? "",
+      config.provider,
+      config.providerOptions,
+      reasoning,
+    ),
+    reasoning,
+    temperature: config.temperature,
+  }
+}
+
+interface VideoSummaryStreamOptions {
+  onChunk?: (partialMarkdown: string) => void
+  signal?: AbortSignal
+}
+
+export async function requestVideoSummary(
+  fragments: SubtitlesFragment[],
+  { onChunk, signal }: VideoSummaryStreamOptions = {},
+): Promise<string | null> {
   const transcript = buildTranscript(fragments)
   if (!transcript) {
     return null
@@ -116,11 +162,49 @@ export async function requestVideoSummary(fragments: SubtitlesFragment[]): Promi
     return null
   }
 
-  const markdown = await sendMessage("getVideoSummary", {
+  const targetLanguage = LANG_CODE_TO_EN_NAME[config.language.targetCode]
+
+  const cached = await sendMessage("getCachedVideoSummary", {
     transcript,
-    targetLanguage: LANG_CODE_TO_EN_NAME[config.language.targetCode],
+    targetLanguage,
     providerRef,
   })
+  if (cached) {
+    return cached
+  }
 
-  return markdown ? stripLeadingHeading(markdown.trim()) : null
+  const { systemPrompt, prompt } = getVideoSummaryPrompt(
+    targetLanguage,
+    sampleTranscript(transcript, VIDEO_SUMMARY_TRANSCRIPT_CHAR_BUDGET),
+  )
+  const payload =
+    providerRef.kind === "system"
+      ? {
+          providerId: providerRef.providerId,
+          modelTier: providerRef.modelTier,
+          requestId: getRandomUUID(),
+          hostedFeature: "videoSubtitles" as const,
+          instructions: systemPrompt,
+          prompt,
+        }
+      : buildLocalStreamPayload(providerRef.config, systemPrompt, prompt)
+
+  const snapshot = await streamBackgroundText(payload, {
+    signal,
+    onChunk: onChunk && ((chunk) => onChunk(stripLeadingHeading(chunk.output.trim()))),
+  })
+
+  const summary = stripLeadingHeading(snapshot.output.trim())
+  if (!summary) {
+    return null
+  }
+
+  await sendMessage("saveVideoSummary", {
+    transcript,
+    targetLanguage,
+    providerRef,
+    summary,
+  })
+
+  return summary
 }

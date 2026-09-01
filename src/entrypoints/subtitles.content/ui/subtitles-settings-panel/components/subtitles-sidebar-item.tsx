@@ -5,6 +5,7 @@ import { useRef, useState } from "react"
 import { match } from "ts-pattern"
 import { browser } from "#imports"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { featureProviderRefAtom } from "@/utils/atoms/provider"
 import { i18n } from "@/utils/i18n"
 import { showAnchoredSubtitlesToast } from "@/utils/subtitles/toast"
 import {
@@ -20,8 +21,7 @@ export function SubtitlesSidebarItem() {
   const [isOpen, setOpen] = useAtom(subtitlesSidebarOpenAtom, { store: subtitlesStore })
   const queryClient = useQueryClient()
   const language = useAtomValue(configFieldsAtomMap.language)
-  const videoSubtitles = useAtomValue(configFieldsAtomMap.videoSubtitles)
-  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const providerRef = useAtomValue(featureProviderRefAtom("videoSubtitles"))
   const videoId = useAtomValue(currentVideoIdAtom, { store: subtitlesStore })
   const [checking, setChecking] = useState(false)
   const anchor = useRef<HTMLButtonElement>(null)
@@ -33,16 +33,7 @@ export function SubtitlesSidebarItem() {
   const open = async () => {
     // A cached summary means both checks passed once already; re-running them
     // would make reopening wait on a round trip for an answer we have.
-    if (
-      queryClient.getQueryData(
-        videoSummaryQueryKey(
-          videoId,
-          language.targetCode,
-          providersConfig,
-          videoSubtitles.providerId,
-        ),
-      )
-    ) {
+    if (queryClient.getQueryData(videoSummaryQueryKey(videoId, language.targetCode, providerRef))) {
       setOpen(true)
       return
     }

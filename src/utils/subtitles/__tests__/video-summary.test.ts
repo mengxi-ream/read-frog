@@ -1,7 +1,13 @@
 import type { SubtitlesFragment } from "../types"
-import type { ProvidersConfig } from "@/types/config/provider"
+import type { VideoSummaryProviderRef } from "../video-summary"
+import { hashKey } from "@tanstack/react-query"
 import { describe, expect, it } from "vitest"
-import { buildTranscript, stripLeadingHeading, videoSummaryQueryKey } from "../video-summary"
+import {
+  buildTranscript,
+  sampleTranscript,
+  stripLeadingHeading,
+  videoSummaryQueryKey,
+} from "../video-summary"
 
 function fragment(text: string): SubtitlesFragment {
   return { text, start: 0, end: 1000 }
@@ -41,31 +47,99 @@ describe("stripLeadingHeading", () => {
   })
 })
 
-function localProvider(model: string): ProvidersConfig[number] {
+function localRef(model: string) {
   return {
+    kind: "local",
     id: "deepseek",
     name: "DeepSeek",
-    enabled: true,
-    provider: "deepseek",
-    apiKey: "test-key",
-    model: { model, isCustomModel: false, customModel: null },
-  } as ProvidersConfig[number]
+    config: {
+      id: "deepseek",
+      name: "DeepSeek",
+      enabled: true,
+      provider: "deepseek",
+      apiKey: "test-key",
+      model: { model, isCustomModel: false, customModel: null },
+    },
+  } as unknown as VideoSummaryProviderRef
+}
+
+function systemRef(providerId: string) {
+  return {
+    kind: "system",
+    id: providerId,
+    name: providerId,
+    modelTier: "standard",
+  } as unknown as VideoSummaryProviderRef
 }
 
 describe("videoSummaryQueryKey", () => {
   it("separates the cache per video, language and provider", () => {
-    const base = videoSummaryQueryKey("video-1", "cmn", [], "deepseek")
+    const ref = systemRef("built-in-ai")
+    const base = videoSummaryQueryKey("video-1", "cmn", ref)
 
-    expect(base).not.toEqual(videoSummaryQueryKey("video-2", "cmn", [], "deepseek"))
-    expect(base).not.toEqual(videoSummaryQueryKey("video-1", "eng", [], "deepseek"))
-    expect(base).not.toEqual(videoSummaryQueryKey("video-1", "cmn", [], "openai"))
-    expect(base).toEqual(videoSummaryQueryKey("video-1", "cmn", [], "deepseek"))
+    expect(hashKey(base)).not.toBe(hashKey(videoSummaryQueryKey("video-2", "cmn", ref)))
+    expect(hashKey(base)).not.toBe(hashKey(videoSummaryQueryKey("video-1", "eng", ref)))
+    expect(hashKey(base)).not.toBe(
+      hashKey(videoSummaryQueryKey("video-1", "cmn", systemRef("other"))),
+    )
+    expect(hashKey(base)).toBe(hashKey(videoSummaryQueryKey("video-1", "cmn", ref)))
   })
 
   it("separates a local provider edited under the same id", () => {
-    const before = videoSummaryQueryKey("video-1", "cmn", [localProvider("v1")], "deepseek")
-    const after = videoSummaryQueryKey("video-1", "cmn", [localProvider("v2")], "deepseek")
+    const before = videoSummaryQueryKey("video-1", "cmn", localRef("v1"))
+    const after = videoSummaryQueryKey("video-1", "cmn", localRef("v2"))
 
-    expect(before).not.toEqual(after)
+    expect(hashKey(before)).not.toBe(hashKey(after))
+  })
+
+  it("hashes the same regardless of the order fields were written in", () => {
+    const a = videoSummaryQueryKey("video-1", "cmn", {
+      kind: "system",
+      id: "built-in-ai",
+      name: "built-in-ai",
+      modelTier: "standard",
+    } as unknown as VideoSummaryProviderRef)
+    const b = videoSummaryQueryKey("video-1", "cmn", {
+      modelTier: "standard",
+      name: "built-in-ai",
+      id: "built-in-ai",
+      kind: "system",
+    } as unknown as VideoSummaryProviderRef)
+
+    expect(hashKey(a)).toBe(hashKey(b))
+  })
+})
+
+describe("sampleTranscript", () => {
+  const lines = (count: number) => Array.from({ length: count }, (_, i) => `line ${i}`)
+
+  it("leaves a transcript that already fits untouched", () => {
+    const transcript = "one\ntwo\nthree"
+
+    expect(sampleTranscript(transcript, 100)).toBe(transcript)
+  })
+
+  it("stays inside the budget once the transcript exceeds it", () => {
+    const transcript = lines(400).join("\n")
+
+    expect(sampleTranscript(transcript, 500).length).toBeLessThanOrEqual(500)
+  })
+
+  it("reaches the end of the video rather than only its opening", () => {
+    const transcript = lines(400).join("\n")
+    const sampled = sampleTranscript(transcript, 500)
+
+    expect(sampled).toContain("line 0")
+    expect(sampled).toContain("line 200")
+    expect(sampled).toContain("line 350")
+  })
+
+  it("keeps every sampled cue whole", () => {
+    const transcript = lines(400).join("\n")
+    const source = new Set(lines(400))
+
+    for (const cue of sampleTranscript(transcript, 500).split("\n").filter(Boolean)) {
+      expect(source.has(cue)).toBe(true)
+    }
   })
 })

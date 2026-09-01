@@ -30,13 +30,14 @@ import {
 } from "@/utils/subtitles/processor/translator"
 import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
 import { showAiSubtitlesWallToast, showSubtitlesErrorToast } from "@/utils/subtitles/toast"
-import { requestVideoSummary, VIDEO_SUMMARY_QUERY_SCOPE_KEY } from "@/utils/subtitles/video-summary"
+import { requestVideoSummary, VIDEO_SUMMARY_QUERY_SCOPE } from "@/utils/subtitles/video-summary"
 import { queryClient } from "@/utils/tanstack-query"
 import {
   adPlayingAtom,
   currentTimeMsAtom,
   currentVideoIdAtom,
   sourceTrackAtom,
+  videoSummaryPartialAtom,
   subtitlesPositionAtom,
   subtitlesSettingsPanelOpenAtom,
   subtitlesSettingsPanelViewAtom,
@@ -96,6 +97,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
   private sourceSubtitles: SubtitlesFragment[] = []
   private sourceProcessedSubtitles: SubtitlesFragment[] = []
+  private summaryAbortController: AbortController | null = null
   private sourceVideoId: string | null = null
 
   private sessionSubtitles: SubtitlesFragment[] = []
@@ -181,7 +183,20 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
   generateVideoSummary = async () => {
     await this.getOrLoadSourceSubtitles()
-    return await requestVideoSummary(this.sourceProcessedSubtitles)
+    this.summaryAbortController?.abort()
+    const abortController = new AbortController()
+    this.summaryAbortController = abortController
+    subtitlesStore.set(videoSummaryPartialAtom, "")
+    try {
+      return await requestVideoSummary(this.sourceProcessedSubtitles, {
+        signal: abortController.signal,
+        onChunk: (partialMarkdown) => subtitlesStore.set(videoSummaryPartialAtom, partialMarkdown),
+      })
+    } finally {
+      if (this.summaryAbortController === abortController) {
+        this.summaryAbortController = null
+      }
+    }
   }
 
   hasSubtitlesAvailable = () => this.fetcher.hasAvailableSubtitles()
@@ -222,9 +237,12 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
   private resetForNavigation() {
     this.switchOperationId++
+    this.summaryAbortController?.abort()
+    this.summaryAbortController = null
+    subtitlesStore.set(videoSummaryPartialAtom, "")
     this.publishVideoId()
     // Keyed by video id already; this only stops them accumulating.
-    queryClient.removeQueries({ queryKey: VIDEO_SUMMARY_QUERY_SCOPE_KEY })
+    queryClient.removeQueries({ queryKey: VIDEO_SUMMARY_QUERY_SCOPE })
     this.clearNavigationReinitTimeout()
     this.teardownAdObserver()
     this.destroyScheduler()

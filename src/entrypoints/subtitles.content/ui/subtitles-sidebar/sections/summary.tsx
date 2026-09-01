@@ -5,12 +5,15 @@ import { match } from "ts-pattern"
 import { MarkdownRenderer } from "@/components/markdown-renderer"
 import { Button } from "@/components/ui/base-ui/button"
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/base-ui/empty"
-import { Spinner } from "@/components/ui/base-ui/spinner"
+import { Skeleton } from "@/components/ui/base-ui/skeleton"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { featureProviderRefAtom } from "@/utils/atoms/provider"
 import { i18n } from "@/utils/i18n"
 import { videoSummaryQueryKey } from "@/utils/subtitles/video-summary"
-import { currentVideoIdAtom, subtitlesStore } from "../../../atoms"
+import { currentVideoIdAtom, subtitlesStore, videoSummaryPartialAtom } from "../../../atoms"
 import { useSubtitlesUI } from "../../subtitles-ui-context"
+
+const SKELETON_LINE_WIDTHS = ["w-full", "w-11/12", "w-4/5", "w-10/12", "w-3/5"]
 
 function StatusCard({
   icon,
@@ -32,20 +35,31 @@ function StatusCard({
   )
 }
 
+function SummaryBody({ children }: { children: React.ReactNode }) {
+  return <div className="px-5 py-5">{children}</div>
+}
+
+function SummarySkeleton() {
+  return (
+    <SummaryBody>
+      <div className="flex flex-col gap-3">
+        {SKELETON_LINE_WIDTHS.map((width) => (
+          <Skeleton key={width} className={`h-3.5 bg-foreground/18 ${width}`} />
+        ))}
+      </div>
+    </SummaryBody>
+  )
+}
+
 export function SummarySection() {
   const { generateVideoSummary } = useSubtitlesUI()
   const language = useAtomValue(configFieldsAtomMap.language)
-  const videoSubtitles = useAtomValue(configFieldsAtomMap.videoSubtitles)
-  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const providerRef = useAtomValue(featureProviderRefAtom("videoSubtitles"))
   const videoId = useAtomValue(currentVideoIdAtom, { store: subtitlesStore })
+  const partial = useAtomValue(videoSummaryPartialAtom, { store: subtitlesStore })
 
   const query = useQuery({
-    queryKey: videoSummaryQueryKey(
-      videoId,
-      language.targetCode,
-      providersConfig,
-      videoSubtitles.providerId,
-    ),
+    queryKey: videoSummaryQueryKey(videoId, language.targetCode, providerRef),
     queryFn: async () => {
       const summary = await generateVideoSummary()
       if (!summary) {
@@ -55,15 +69,20 @@ export function SummarySection() {
     },
     retry: false,
     staleTime: Infinity,
-    // Default GC drops a finished summary five minutes after the sidebar closes.
     gcTime: Infinity,
     meta: { suppressToast: true },
   })
 
   return match(query)
-    .with({ status: "pending" }, () => (
-      <StatusCard icon={<Spinner />} title={i18n.t("subtitles.sidebar.summary.generating")} />
-    ))
+    .with({ status: "pending" }, () =>
+      partial ? (
+        <SummaryBody>
+          <MarkdownRenderer content={partial} />
+        </SummaryBody>
+      ) : (
+        <SummarySkeleton />
+      ),
+    )
     .with({ status: "error" }, () => (
       <StatusCard icon={<IconFileTextAi />} title={i18n.t("subtitles.sidebar.summary.failedTitle")}>
         <Button type="button" variant="brand" size="sm" onClick={() => void query.refetch()}>
@@ -72,9 +91,9 @@ export function SummarySection() {
       </StatusCard>
     ))
     .with({ status: "success" }, ({ data }) => (
-      <div className="px-4 pt-1 pb-4">
+      <SummaryBody>
         <MarkdownRenderer content={data} />
-      </div>
+      </SummaryBody>
     ))
     .exhaustive()
 }

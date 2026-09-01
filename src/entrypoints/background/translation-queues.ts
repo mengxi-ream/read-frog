@@ -16,7 +16,6 @@ import {
   isNoTranslationSentinel,
 } from "@/utils/constants/prompt"
 import {
-  VIDEO_SUMMARY_TIMEOUT_MS,
   BATCH_TIMEOUT_BASE_MS,
   BATCH_TIMEOUT_PER_CHAR_MS,
   MAX_BATCH_TIMEOUT_MS,
@@ -40,7 +39,6 @@ import { normalizePromptContextValue } from "@/utils/host/translate/translate-te
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
-import { getVideoSummaryPrompt } from "@/utils/prompts/summary"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import {
   canProviderRefGenerateText,
@@ -245,64 +243,17 @@ async function getOrGenerateSummary(args: {
  */
 const VIDEO_SUMMARY_PROMPT_VERSION = "1"
 
-async function getOrGenerateVideoSummary(args: {
+function videoSummaryCacheKey(args: {
   transcript: string
   targetLanguage: string
   providerRef: PromptableProviderRef
-  requestQueue: RequestQueue
-}): Promise<string | null> {
-  const { transcript, targetLanguage, providerRef, requestQueue } = args
-
-  const cacheKey = Sha256Hex(
-    Sha256Hex(transcript),
-    targetLanguage,
+}): string {
+  return Sha256Hex(
+    Sha256Hex(args.transcript),
+    args.targetLanguage,
     VIDEO_SUMMARY_PROMPT_VERSION,
-    getProviderCacheIdentity(providerRef),
+    getProviderCacheIdentity(args.providerRef),
   )
-
-  const cached = await db.articleSummaryCache.get(cacheKey)
-  if (cached) {
-    return cached.summary
-  }
-
-  const hostedRequestId = providerRef.kind === "system" ? getRandomUUID() : undefined
-
-  const thunk = async (signal?: AbortSignal) => {
-    const cachedAgain = await db.articleSummaryCache.get(cacheKey)
-    if (cachedAgain) {
-      return cachedAgain.summary
-    }
-
-    const { systemPrompt, prompt } = getVideoSummaryPrompt(targetLanguage, transcript)
-    const summary = await generateTextForProviderRef(
-      {
-        providerRef,
-        hostedFeature: "videoSubtitles",
-        instructions: systemPrompt,
-        prompt,
-        requestId: hostedRequestId,
-      },
-      { signal },
-    )
-
-    const trimmed = summary.trim()
-    if (!trimmed) {
-      return ""
-    }
-
-    await db.articleSummaryCache.put({ key: cacheKey, summary: trimmed, createdAt: new Date() })
-    return trimmed
-  }
-
-  try {
-    const summary = await requestQueue.enqueue(thunk, Date.now(), cacheKey, undefined, {
-      timeoutMs: VIDEO_SUMMARY_TIMEOUT_MS,
-    })
-    return summary || null
-  } catch (error) {
-    logger.warn("Failed to get/generate video summary:", error)
-    return null
-  }
 }
 
 export interface TranslateBatchData<TContext = unknown> {
@@ -839,19 +790,29 @@ export function setUpSubtitlesTranslationQueue(): void {
     })
   })
 
-  onMessage("getVideoSummary", async (message) => {
-    const { requestQueue } = await queuesPromise
+  onMessage("getCachedVideoSummary", async (message) => {
     const { transcript, targetLanguage, providerRef } = message.data
-
-    if (!transcript || !canProviderRefGenerateText(providerRef)) {
+    if (!transcript) {
       return null
     }
 
-    return await getOrGenerateVideoSummary({
-      transcript,
-      targetLanguage,
-      providerRef,
-      requestQueue,
+    const cached = await db.articleSummaryCache.get(
+      videoSummaryCacheKey({ transcript, targetLanguage, providerRef }),
+    )
+    return cached?.summary ?? null
+  })
+
+  onMessage("saveVideoSummary", async (message) => {
+    const { transcript, targetLanguage, providerRef, summary } = message.data
+    const trimmed = summary.trim()
+    if (!transcript || !trimmed) {
+      return
+    }
+
+    await db.articleSummaryCache.put({
+      key: videoSummaryCacheKey({ transcript, targetLanguage, providerRef }),
+      summary: trimmed,
+      createdAt: new Date(),
     })
   })
 }
