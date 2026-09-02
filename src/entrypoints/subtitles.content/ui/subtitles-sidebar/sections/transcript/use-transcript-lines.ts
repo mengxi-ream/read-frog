@@ -35,7 +35,6 @@ export function useTranscriptLines(): TranscriptLines {
     },
     enabled: lines.length === 0,
     retry: false,
-    staleTime: Infinity,
     meta: { suppressToast: true },
   })
 

@@ -111,6 +111,20 @@ describe("transcriptSection", () => {
     expect(current?.textContent).toContain("second line")
   })
 
+  it("reloads the track when it is emptied without a video change", async () => {
+    const { ensureSourceTrackPublished } = renderTranscript({ preloaded: false })
+
+    await screen.findByText("second line")
+    expect(ensureSourceTrackPublished).toHaveBeenCalledTimes(1)
+
+    act(() => {
+      subtitlesStore.set(sourceTrackAtom, [])
+    })
+
+    await screen.findByText("second line")
+    expect(ensureSourceTrackPublished).toHaveBeenCalledTimes(2)
+  })
+
   it("seeks to the start of the row that was clicked", () => {
     const { seekTo } = renderTranscript()
 
