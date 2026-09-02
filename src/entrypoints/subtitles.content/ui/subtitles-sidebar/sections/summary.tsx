@@ -75,6 +75,14 @@ export function SummarySection() {
     return <SummarySkeleton />
   }
 
+  if (query.data) {
+    return (
+      <SummaryBody>
+        <MarkdownRenderer content={query.data} />
+      </SummaryBody>
+    )
+  }
+
   if (provider.status === "error") {
     return (
       <StatusCard icon={<IconFileTextAi />} title={i18n.t("subtitles.sidebar.summary.failedTitle")}>
