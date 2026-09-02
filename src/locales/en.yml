@@ -1302,7 +1302,6 @@ subtitles:
       openSettings: Open settings
     transcript:
       tab: Subtitles
-      loading: Loading subtitles…
       failedTitle: Could not load subtitles
       retry: Try again
       emptyTitle: No subtitles to show

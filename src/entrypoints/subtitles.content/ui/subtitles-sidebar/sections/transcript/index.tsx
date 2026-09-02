@@ -2,7 +2,7 @@ import { IconArrowDown, IconArrowUp, IconFileText } from "@tabler/icons-react"
 import { useRef } from "react"
 import { match } from "ts-pattern"
 import { Button } from "@/components/ui/base-ui/button"
-import { Spinner } from "@/components/ui/base-ui/spinner"
+import { Skeleton } from "@/components/ui/base-ui/skeleton"
 import { i18n } from "@/utils/i18n"
 import { useSubtitlesUI } from "../../../subtitles-ui-context"
 import { StatusCard } from "../status-card"
@@ -10,6 +10,39 @@ import { TranscriptRow } from "./row"
 import { useActiveRowVisibility } from "./use-active-row-visibility"
 import { useFollowIntent } from "./use-follow-intent"
 import { useTranscriptLines } from "./use-transcript-lines"
+
+const SKELETON_ROWS = [
+  ["w-full", "w-11/12"],
+  ["w-10/12", "w-3/5"],
+  ["w-11/12", "w-4/5"],
+  ["w-4/5", "w-2/3"],
+  ["w-full", "w-3/4"],
+  ["w-3/4", "w-1/2"],
+  ["w-11/12", "w-7/12"],
+  ["w-full", "w-2/3"],
+  ["w-10/12", "w-1/2"],
+  ["w-4/5", "w-3/4"],
+]
+
+function TranscriptSkeleton() {
+  return (
+    <div className="space-y-1 p-2">
+      {SKELETON_ROWS.map(([text, translation]) => (
+        <div key={`${text}-${translation}`} className="px-3 py-2.5">
+          <div className="flex h-5 items-center">
+            <Skeleton className="h-3 w-10 bg-foreground/18" />
+          </div>
+          <div className="mt-0.5 flex h-[22.75px] items-center">
+            <Skeleton className={`h-3.5 bg-foreground/18 ${text}`} />
+          </div>
+          <div className="mt-1 flex h-[22.75px] items-center">
+            <Skeleton className={`h-3.5 bg-foreground/18 ${translation}`} />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export function TranscriptSection() {
   const { seekTo } = useSubtitlesUI()
@@ -22,9 +55,7 @@ export function TranscriptSection() {
 
   if (lines.length === 0) {
     return match(query)
-      .with({ status: "pending" }, () => (
-        <StatusCard icon={<Spinner />} title={i18n.t("subtitles.sidebar.transcript.loading")} />
-      ))
+      .with({ status: "pending" }, () => <TranscriptSkeleton />)
       .with({ status: "error" }, () => (
         <StatusCard
           icon={<IconFileText />}

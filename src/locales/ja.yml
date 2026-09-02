@@ -1186,7 +1186,6 @@ subtitles:
       openSettings: 設定を開く
     transcript:
       tab: 字幕
-      loading: 字幕を読み込んでいます…
       failedTitle: 字幕を読み込めませんでした
       retry: 再試行
       emptyTitle: 表示できる字幕がありません
