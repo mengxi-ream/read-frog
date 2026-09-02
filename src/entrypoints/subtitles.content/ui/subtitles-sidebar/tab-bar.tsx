@@ -3,7 +3,10 @@ import { SECTIONS } from "./sections"
 
 export function SidebarTabBar() {
   return (
-    <TabsList variant="line" className="min-w-0 justify-start gap-3 px-1">
+    <TabsList
+      variant="line"
+      className="min-w-0 justify-start gap-3 px-1 [&_[data-slot=tabs-indicator]]:bottom-[-9px]"
+    >
       {SECTIONS.map((section) => (
         <TabsTrigger
           key={section.id}
