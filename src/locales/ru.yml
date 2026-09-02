@@ -1186,7 +1186,6 @@ subtitles:
       openSettings: Открыть настройки
     transcript:
       tab: Субтитры
-      loading: Загружаем субтитры…
       failedTitle: Не удалось загрузить субтитры
       retry: Повторить
       emptyTitle: Нет субтитров для показа

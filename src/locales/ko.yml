@@ -1186,7 +1186,6 @@ subtitles:
       openSettings: 설정 열기
     transcript:
       tab: 자막
-      loading: 자막을 불러오는 중…
       failedTitle: 자막을 불러오지 못했습니다
       retry: 다시 시도
       emptyTitle: 표시할 자막이 없습니다

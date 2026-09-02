@@ -1186,7 +1186,6 @@ subtitles:
       openSettings: Mở cài đặt
     transcript:
       tab: Phụ đề
-      loading: Đang tải phụ đề…
       failedTitle: Không tải được phụ đề
       retry: Thử lại
       emptyTitle: Không có phụ đề để hiển thị

@@ -1186,7 +1186,6 @@ subtitles:
       openSettings: Ayarları aç
     transcript:
       tab: Altyazılar
-      loading: Altyazılar yükleniyor…
       failedTitle: Altyazılar yüklenemedi
       retry: Tekrar dene
       emptyTitle: Gösterilecek altyazı yok

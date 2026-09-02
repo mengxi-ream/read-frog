@@ -1302,7 +1302,6 @@ subtitles:
       openSettings: 去设置
     transcript:
       tab: 字幕
-      loading: 正在加载字幕…
       failedTitle: 字幕加载失败
       retry: 重试
       emptyTitle: 没有可显示的字幕

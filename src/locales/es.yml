@@ -1302,7 +1302,6 @@ subtitles:
       openSettings: Abrir ajustes
     transcript:
       tab: Subtítulos
-      loading: Cargando subtítulos…
       failedTitle: No se pudieron cargar los subtítulos
       retry: Reintentar
       emptyTitle: No hay subtítulos que mostrar
