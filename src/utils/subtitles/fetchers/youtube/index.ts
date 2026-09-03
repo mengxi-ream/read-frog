@@ -77,6 +77,19 @@ function postMessageRequest(responseType: string, message: Record<string, unknow
   })
 }
 
+export async function requestPlayerData(videoId: string): Promise<{
+  success: boolean
+  error?: string
+  data?: PlayerData
+}> {
+  const resp = await postMessageRequest(PLAYER_DATA_RESPONSE_TYPE, {
+    type: PLAYER_DATA_REQUEST_TYPE,
+    expectedVideoId: videoId,
+  })
+  if (!resp) return { success: false, error: "TIMEOUT" }
+  return { success: resp.success, error: resp.error, data: resp.data }
+}
+
 export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
   private subtitles: SubtitlesFragment[] = []
   private sourceLanguage: string = ""
@@ -349,17 +362,8 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     return resp?.url ?? null
   }
 
-  private async requestPlayerData(videoId: string): Promise<{
-    success: boolean
-    error?: string
-    data?: PlayerData
-  }> {
-    const resp = await postMessageRequest(PLAYER_DATA_RESPONSE_TYPE, {
-      type: PLAYER_DATA_REQUEST_TYPE,
-      expectedVideoId: videoId,
-    })
-    if (!resp) return { success: false, error: "TIMEOUT" }
-    return { success: resp.success, error: resp.error, data: resp.data }
+  private requestPlayerData(videoId: string) {
+    return requestPlayerData(videoId)
   }
 
   private async ensureSubtitlesEnabled(): Promise<void> {

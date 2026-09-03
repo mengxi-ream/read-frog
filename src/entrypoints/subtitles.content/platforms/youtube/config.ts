@@ -5,6 +5,7 @@ import {
   YOUTUBE_NAVIGATE_FINISH_EVENT,
   YOUTUBE_NAVIGATE_START_EVENT,
 } from "@/utils/constants/subtitles"
+import { requestPlayerData } from "@/utils/subtitles/fetchers/youtube"
 import { getYoutubeVideoId } from "@/utils/subtitles/video-id"
 
 type YoutubeMode = "watch" | "embed" | "shorts"
@@ -36,6 +37,15 @@ function createYoutubeAiSubtitlesContext() {
     return null
   }
   return { videoId, url: location.href, durationSec: Math.ceil(duration) }
+}
+
+async function isYoutubeLiveContent(): Promise<boolean> {
+  const videoId = getYoutubeVideoId()
+  if (!videoId) {
+    return false
+  }
+  const response = await requestPlayerData(videoId)
+  return response.data?.isLiveContent ?? false
 }
 
 /** YouTube marks mid-rolls / pre-rolls on the html5 player with these classes. */
@@ -71,6 +81,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
     getVideoId: getYoutubeVideoId,
     createAiSubtitlesContext: createYoutubeAiSubtitlesContext,
     isAdPlaying: isYoutubeAdPlaying,
+    isLiveContent: isYoutubeLiveContent,
   },
 
   embed: {
@@ -96,6 +107,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
     getVideoId: getYoutubeVideoId,
     createAiSubtitlesContext: createYoutubeAiSubtitlesContext,
     isAdPlaying: isYoutubeAdPlaying,
+    isLiveContent: isYoutubeLiveContent,
   },
 
   shorts: {
@@ -121,6 +133,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
     getVideoId: getYoutubeVideoId,
     createAiSubtitlesContext: createYoutubeAiSubtitlesContext,
     isAdPlaying: isYoutubeAdPlaying,
+    isLiveContent: isYoutubeLiveContent,
   },
 }
 

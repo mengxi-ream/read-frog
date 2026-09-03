@@ -496,7 +496,11 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     }
   }
 
-  requestAiSubtitles = (): Promise<void> => {
+  requestAiSubtitles = async (): Promise<void> => {
+    if (await this.config.isLiveContent?.()) {
+      showAiSubtitlesWallToast(i18n.t("subtitles.errors.aiLiveReplayUnsupported"))
+      return
+    }
     return this.switchSubtitlesFetcher(SUBTITLES_SOURCE.AI)
   }
 

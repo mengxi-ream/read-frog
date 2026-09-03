@@ -1318,6 +1318,7 @@ subtitles:
     aiSubscriptionRequired: AI 字幕需要 Pro 或 Ultra 订阅
     aiPaymentRequired: 请更新支付方式后继续生成 AI 字幕
     aiVideoTooLong: 视频过长，暂不支持生成 AI 字幕
+    aiLiveReplayUnsupported: 暂不支持为直播回放生成 AI 字幕
     aiStillProcessing: 转录仍在进行中，几分钟后再点一次即可继续获取
     aiRequestFailed: AI 字幕请求失败，请稍后重试
     aiNoResponse: AI 服务未响应，使用原文显示

@@ -1202,6 +1202,7 @@ subtitles:
     aiSubscriptionRequired: AI字幕には Pro または Ultra プランが必要です
     aiPaymentRequired: AI字幕の生成を続けるにはお支払い方法を更新してください
     aiVideoTooLong: この動画は長すぎるためAI字幕を生成できません
+    aiLiveReplayUnsupported: ライブ配信のアーカイブはまだAI字幕に対応していません
     aiStillProcessing: 文字起こしは進行中です。数分後にもう一度クリックしてください
     aiRequestFailed: AI字幕のリクエストに失敗しました。しばらくしてから再試行してください
     aiNoResponse: AIサービスが応答しませんでした。原文を表示します

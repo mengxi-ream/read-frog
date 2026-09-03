@@ -342,6 +342,49 @@ describe("universalVideoAdapter", () => {
     expect(mocks.showAiSubtitlesWallToast).not.toHaveBeenCalled()
   })
 
+  it("refuses AI subtitles for live content with a toast before switching fetchers", async () => {
+    const { adapter, subtitlesFetcher } = createAdapter([])
+    ;(adapter as any).config.isLiveContent = vi.fn<() => Promise<boolean>>().mockResolvedValue(true)
+    const switchSubtitlesFetcher = vi
+      .spyOn(adapter as any, "switchSubtitlesFetcher")
+      .mockResolvedValue(undefined)
+
+    await adapter.requestAiSubtitles()
+
+    expect(mocks.showAiSubtitlesWallToast).toHaveBeenCalledWith(
+      "subtitles.errors.aiLiveReplayUnsupported",
+    )
+    expect(switchSubtitlesFetcher).not.toHaveBeenCalled()
+    expect(subtitlesFetcher.cleanup).not.toHaveBeenCalled()
+  })
+
+  it("switches to the AI fetcher when the video is not live content", async () => {
+    const { adapter } = createAdapter([])
+    ;(adapter as any).config.isLiveContent = vi
+      .fn<() => Promise<boolean>>()
+      .mockResolvedValue(false)
+    const switchSubtitlesFetcher = vi
+      .spyOn(adapter as any, "switchSubtitlesFetcher")
+      .mockResolvedValue(undefined)
+
+    await adapter.requestAiSubtitles()
+
+    expect(switchSubtitlesFetcher).toHaveBeenCalledWith(SUBTITLES_SOURCE.AI)
+    expect(mocks.showAiSubtitlesWallToast).not.toHaveBeenCalled()
+  })
+
+  it("switches to the AI fetcher when the platform cannot tell live content apart", async () => {
+    const { adapter } = createAdapter([])
+    const switchSubtitlesFetcher = vi
+      .spyOn(adapter as any, "switchSubtitlesFetcher")
+      .mockResolvedValue(undefined)
+
+    await adapter.requestAiSubtitles()
+
+    expect(switchSubtitlesFetcher).toHaveBeenCalledWith(SUBTITLES_SOURCE.AI)
+    expect(mocks.showAiSubtitlesWallToast).not.toHaveBeenCalled()
+  })
+
   it("reverts the source back to native so a failed AI switch can be retried", () => {
     const { adapter, subtitlesFetcher } = createAdapter([])
     const aiFetcher = { cleanup: vi.fn<(...args: any[]) => any>() }

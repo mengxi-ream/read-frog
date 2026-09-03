@@ -29,6 +29,8 @@ export interface PlatformConfig {
 
   createAiSubtitlesContext?: () => AiSubtitlesContext | null
 
+  isLiveContent?: () => Promise<boolean>
+
   /**
    * When true, the host player is showing an ad. Overlay captions for the main
    * video should be suppressed until the ad ends.

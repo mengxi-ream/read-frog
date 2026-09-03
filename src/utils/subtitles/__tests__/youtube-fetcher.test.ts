@@ -86,6 +86,7 @@ describe("youtube subtitles fetcher", () => {
                   selectedTrackVssId: null,
                   defaultCaptionTrackIndex: null,
                   cachedTimedtextUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
+                  isLiveContent: false,
                 },
               },
             }),
