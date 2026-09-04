@@ -30,6 +30,11 @@ import { unwrapDeepestOnlyHTMLChild } from "../../dom/find"
 import { getOwnerDocument } from "../../dom/node"
 import { canSplitGiantWithoutStrandingOwnText, extractTextContent } from "../../dom/traversal"
 import {
+  containsInlineAtomOutsideWrappers,
+  extractInlineAtomText,
+  renderInlineAtomTranslation,
+} from "../dom/inline-atoms"
+import {
   buildVirtualParagraphPlan,
   canMaterializeVirtualParagraphUnits,
   isNewlinePreservingElement,
@@ -458,7 +463,15 @@ export async function translateNodesBilingualMode(
 
     if (virtualLayoutSource) {
       const virtualParagraphPlan = buildVirtualParagraphPlan(virtualLayoutSource, config)
-      if (virtualParagraphPlan.units.length >= 2) {
+      // Virtual unit texts cannot carry inline-atom placeholders (the raw
+      // source collector drops atoms behind barriers), so a container that
+      // holds a formula stays on the whole-run path below, where the formulas
+      // are cloned into the translation. Checked only once a multi-unit plan
+      // exists, so ordinary containers pay nothing.
+      if (
+        virtualParagraphPlan.units.length >= 2 &&
+        !containsInlineAtomOutsideWrappers(virtualLayoutSource, config)
+      ) {
         // Explicit blank-line boundaries represent block paragraphs even when
         // an individual unit is short enough for the compact-label heuristic.
         await translateVirtualParagraphs(
@@ -518,11 +531,18 @@ export async function translateNodesBilingualMode(
     const sourceTextBeforeFilter = isHTMLElement(layoutSource)
       ? collectSourceTextExcludingWrappers(layoutSource)
       : null
-    const textContent = transNodes
-      .map((node) => extractTextContent(node, config))
-      .join("")
-      .trim()
+    // One extraction yields two strings: `textContent` is the prose-only
+    // legacy string (atoms contribute "") that every filter below keeps
+    // seeing; `requestText` carries a {{n}} placeholder per inline atom
+    // (formula) and is what the provider, the echo check and the layout
+    // heuristic get. Without atoms the two are byte-identical.
+    const atomExtraction = extractInlineAtomText(transNodes, config)
+    const textContent = atomExtraction.filterText.trim()
+    const requestText = atomExtraction.requestText.trim()
     if (!textContent || isNumericContent(textContent)) return
+    // A run whose only content is formulas (an equation cell, a bare
+    // display container) has nothing to translate; never send tokens alone.
+    if (atomExtraction.atoms.length > 0 && !atomExtraction.hasProse) return
 
     let bilingualState: BilingualTranslationState | undefined
     if (isHTMLElement(layoutSource) && sourceTextBeforeFilter !== null) {
@@ -631,13 +651,13 @@ export async function translateNodesBilingualMode(
 
     const realTranslatedText = await getTranslatedTextAndRemoveSpinner(
       nodes,
-      textContent,
+      requestText,
       spinner,
       translatedWrapperNode,
       isCurrent,
       "plain",
       () =>
-        translateTextForPage(textContent, "plain", {
+        translateTextForPage(requestText, "plain", {
           preserveLineBreaks,
           forceRetranslation,
         }),
@@ -648,7 +668,8 @@ export async function translateNodesBilingualMode(
       return
     }
 
-    const translatedText = getDisplayTranslation(textContent, realTranslatedText)
+    // Compared on the tokenized strings: an echo comes back with its tokens.
+    const translatedText = getDisplayTranslation(requestText, realTranslatedText)
 
     if (translatedText === "") {
       removeTranslatedWrapperWithRestore(translatedWrapperNode)
@@ -673,7 +694,15 @@ export async function translateNodesBilingualMode(
         onContentInserted: (wrapper) => {
           if (bilingualState) bilingualState.wrapperTextContent = wrapper.textContent
         },
-        sourceText: textContent,
+        // Inline atoms are cloned into the translated span at their
+        // placeholder positions; the tokenized text also stands in for the
+        // formulas' visible width in the short-inline layout heuristic.
+        renderTranslatedContent:
+          atomExtraction.atoms.length > 0
+            ? (translatedNode, text) =>
+                renderInlineAtomTranslation(translatedNode, text, atomExtraction)
+            : undefined,
+        sourceText: requestText,
       },
       translatedText,
       config.pageTranslation.translationNodeStyle,
