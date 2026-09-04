@@ -121,9 +121,11 @@ export function TTSVoiceCombobox({
       }}
       items={EDGE_TTS_VOICE_GROUPS}
       filter={filterTTSVoiceItem}
-      itemToStringLabel={(item) => item.voice}
-      itemToStringValue={(item) => item.voice}
-      isItemEqualToValue={(item, selectedValue) => item.voice === selectedValue.voice}
+      itemToStringLabel={(item) => item?.voice ?? ""}
+      itemToStringValue={(item) => item?.voice ?? ""}
+      isItemEqualToValue={(item, selectedValue) =>
+        !!item && !!selectedValue && item.voice === selectedValue.voice
+      }
       autoHighlight
     >
       <ComboboxTrigger

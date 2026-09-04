@@ -30,7 +30,7 @@ export function TargetLanguageSelector() {
     <Combobox
       value={currentItem}
       onValueChange={(item) => {
-        if (!item || item.value === "auto" || item.value === language.targetCode) {
+        if (!item || item.value === language.targetCode) {
           return
         }
 

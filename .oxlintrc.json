@@ -48,6 +48,20 @@
     "import/no-named-as-default-member": "error",
     "react/button-has-type": "error",
     "react/exhaustive-deps": "warn",
+    // React Compiler rules that oxlint 1.81 promoted into the `correctness`
+    // category. They fire on 50 pre-existing sites the codebase was never held
+    // to, and a large share are deliberate patterns (a `latestRef.current = x`
+    // write during render, a `key={sessionRef.current}` remount trigger) or
+    // plain false positives (passing a ref object to a `ref` prop). Keep them
+    // visible as warnings while the violations are worked through, matching how
+    // `react/exhaustive-deps` above is already treated.
+    "react/exhaustive-effect-dependencies": "warn",
+    "react/globals": "warn",
+    "react/immutability": "warn",
+    "react/memo-dependencies": "warn",
+    "react/no-deriving-state-in-effects": "warn",
+    "react/refs": "warn",
+    "react/set-state-in-effect": "warn",
     "react/iframe-missing-sandbox": "error",
     "react/jsx-no-constructed-context-values": "error",
     "react/no-unstable-nested-components": "error",

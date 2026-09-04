@@ -14,7 +14,7 @@ _lastSyncTimeBaseAtom.onMount = (setAtom: (newValue: number | null) => void) => 
   // Add $ to the key to get the meta key for LAST_SYNCED_CONFIG_STORAGE_KEY
   const metaKey = `local:${LAST_SYNCED_CONFIG_STORAGE_KEY}$`
 
-  const unwatch = storage.watch<LastSyncedConfigMeta>(metaKey, (newMeta, _) => {
+  const unwatch = storage.watch<LastSyncedConfigMeta>(metaKey, (newMeta) => {
     const meta = newMeta
     setAtom(meta?.lastSyncedAt ?? null)
   })
