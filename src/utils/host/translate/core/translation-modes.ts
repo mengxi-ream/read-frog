@@ -459,9 +459,14 @@ export async function translateNodesBilingualMode(
 
     if (virtualLayoutSource) {
       const virtualParagraphPlan = buildVirtualParagraphPlan(virtualLayoutSource, config)
-      if (virtualParagraphPlan.units.length >= 2) {
+      if (
+        virtualParagraphPlan.units.length >= 2 &&
+        virtualLayoutSource.querySelector("math") === null
+      ) {
         // Explicit blank-line boundaries represent block paragraphs even when
         // an individual unit is short enough for the compact-label heuristic.
+        // MathML is excluded from virtual-unit text, so keep MathML blocks on
+        // the regular path where protectBilingualMath can preserve its position.
         await translateVirtualParagraphs(
           nodes,
           virtualParagraphPlan.units,

@@ -3274,6 +3274,36 @@ describe("translate", () => {
         expect(sourceMath[0]?.getAttribute("id")).toBe("h-zero")
         expect(sourceMath[1]?.getAttribute("id")).toBe("steps")
       })
+
+      it("bilingual mode: preserves formulas in newline-separated virtual paragraphs", async () => {
+        const requestText = "First {{READ_FROG_MATH_0}} sentence.\n\nSecond sentence."
+        vi.mocked(translateTextForPage).mockResolvedValueOnce(
+          "第一句 {{READ_FROG_MATH_0}}。\n\n第二句。",
+        )
+        const callsBeforeTranslation = vi.mocked(translateTextForPage).mock.calls.length
+        render(<div data-testid="test-node" style={{ whiteSpace: "pre-wrap" }} />)
+        const node = screen.getByTestId("test-node")
+        node.innerHTML =
+          'First <math id="formula" class="ltx_Math" alttext="H_{0}"><semantics><msub><mi>H</mi><mn>0</mn></msub><annotation encoding="application/x-tex">H_{0}</annotation></semantics></math> sentence.\n\nSecond sentence.'
+        const sourceMath = node.querySelector("math")
+
+        await removeOrShowPageTranslation("bilingual", true)
+
+        expect(vi.mocked(translateTextForPage).mock.calls.slice(callsBeforeTranslation)).toEqual([
+          [requestText, "plain", PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS],
+        ])
+        const wrapper = expectTranslationWrapper(node, "bilingual")!
+        expect(wrapper.hasAttribute(VIRTUAL_PARAGRAPH_ATTRIBUTE)).toBe(false)
+        expect(wrapper).toHaveTextContent("第一句")
+        expect(wrapper).toHaveTextContent("第二句")
+
+        const translatedMath = wrapper.querySelector("math")
+        expect(translatedMath).toBeTruthy()
+        expect(translatedMath).not.toBe(sourceMath)
+        expect(translatedMath?.getAttribute("alttext")).toBe("H_{0}")
+        expect(translatedMath?.hasAttribute("id")).toBe(false)
+        expect(sourceMath?.getAttribute("id")).toBe("formula")
+      })
     })
   })
 
