@@ -143,7 +143,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
-    "@vitest/coverage-istanbul": "^5.0.0",
+    "@vitest/coverage-istanbul": "^4.1.11",
     "@wxt-dev/module-react": "^1.2.2",
     "autoprefixer": "^10.5.5",
     "eruda": "^3.4.3",
@@ -162,7 +162,7 @@
     "type-fest": "^5.9.0",
     "typescript": "^7.0.2",
     "vite": "^8.2.2",
-    "vitest": "^5.0.0",
+    "vitest": "^4.1.11",
     "web-ext": "^10.6.0",
     "wxt": "0.21.4"
   },
