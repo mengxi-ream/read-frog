@@ -153,6 +153,9 @@ describe("resolveSiteRule", () => {
           preserveTextSelectors: [".code"],
           "preserveTextSelectors.add": [".math"],
           "preserveTextSelectors.remove": [".code"],
+          atomSelectors: [".formula"],
+          "atomSelectors.add": [".formula-added"],
+          "atomSelectors.remove": [".formula"],
         }),
       ],
       [],
@@ -164,7 +167,21 @@ describe("resolveSiteRule", () => {
     expect(resolved.forceBlockStyleSelector).toBe(".block-style-added")
     expect(resolved.forceInlineNodeSelector).toBe(".inline-node-added")
     expect(resolved.forceInlineStyleSelector).toBe(".inline-style-added")
-    expect(resolved.preserveTextSelector).toBe(".math")
+    expect(resolved.atomSelector).toBe(".formula-added")
+    // Atom selectors are folded into preserve-text so atoms stop the walk.
+    expect(resolved.preserveTextSelector).toBe(".math,.formula-added")
+  })
+
+  it("keeps atom selectors walk-blocked without any preserve-text rule", () => {
+    const resolved = resolveSiteRule(
+      URL_ON_SITE,
+      [rule({ id: "built-in", atomSelectors: ["span.katex", "bad-atom["] })],
+      [rule({ id: "user", "atomSelectors.add": ["mjx-container"] })],
+      [],
+    )
+
+    expect(resolved.atomSelector).toBe("span.katex,mjx-container")
+    expect(resolved.preserveTextSelector).toBe("span.katex,mjx-container")
   })
 
   it("merges all four force selector axes independently", () => {

@@ -192,6 +192,24 @@ export function isSiteRulePreserveTextElement(element: HTMLElement, config: Conf
   return preserveTextSelector !== null && element.matches(preserveTextSelector)
 }
 
+export function isSiteRuleAtomElement(element: HTMLElement, config: Config): boolean {
+  const { atomSelector } = getEffectiveSiteRule(config, window.location.href)
+  return atomSelector !== null && element.matches(atomSelector)
+}
+
+/**
+ * An inline atom is a rendered formula whose subtree is opaque to translation:
+ * bilingual mode sends a placeholder instead of its text and clones the
+ * element back into the translation. Native MathML roots are atoms by tag
+ * (MathML keeps lowercase local names inside an HTML document); everything
+ * else comes from the `atomSelectors` site-rule family. Atoms are already
+ * walk-blocked because the resolver folds atom selectors into
+ * `preserveTextSelector`, so this predicate is only consulted by extraction.
+ */
+export function isInlineAtomElement(element: HTMLElement, config: Config): boolean {
+  return element.localName === "math" || isSiteRuleAtomElement(element, config)
+}
+
 /**
  * Whitelist gate: when the effective site rule declares `includeSelectors`,
  * only elements inside (or matching) one of them may become translation

@@ -44,6 +44,13 @@ export const siteRuleSchema = z.object({
   preserveTextSelectors: z.array(z.string()).optional(),
   "preserveTextSelectors.add": z.array(z.string()).optional(),
   "preserveTextSelectors.remove": z.array(z.string()).optional(),
+  // Inline atoms: rendered formulas (KaTeX, MathJax, MathML, Wikipedia math)
+  // whose subtree is opaque to translation. Bilingual mode replaces each with a
+  // placeholder in the request and clones the original back into the
+  // translation. Atoms also block the walk like preserveTextSelectors.
+  atomSelectors: z.array(z.string()).optional(),
+  "atomSelectors.add": z.array(z.string()).optional(),
+  "atomSelectors.remove": z.array(z.string()).optional(),
   // Tag-NAME lists (not CSS selectors) that patch the built-in DOM tag sets
   // (see DEFAULT_TAG_SETS in utils/constants/dom-rules). Delta-only by design:
   // there is deliberately no bare base key, so a rule can never be misread as

@@ -67,10 +67,24 @@ function allSelectors(rule: (typeof BUILT_IN_SITE_RULES)[number]): string[] {
     ...(rule.preserveTextSelectors ?? []),
     ...(rule["preserveTextSelectors.add"] ?? []),
     ...(rule["preserveTextSelectors.remove"] ?? []),
+    ...(rule.atomSelectors ?? []),
+    ...(rule["atomSelectors.add"] ?? []),
+    ...(rule["atomSelectors.remove"] ?? []),
   ]
 }
 
 describe("built-in site rules", () => {
+  it("resolves the inline atom defaults on any URL and folds them into preserve-text", () => {
+    const resolved = resolveSiteRule("https://example.com/article", BUILT_IN_SITE_RULES, [], [])
+    const atomSelectors = resolved.atomSelector?.split(",") ?? []
+    expect(atomSelectors).toEqual(
+      expect.arrayContaining(["span.katex", "mjx-container", ".ltx_Math"]),
+    )
+    // Atoms must stop the walk exactly like preserve-text elements.
+    const preserveTextSelectors = resolved.preserveTextSelector?.split(",") ?? []
+    expect(preserveTextSelectors).toEqual(expect.arrayContaining(atomSelectors))
+  })
+
   it("all rules pass the schema", () => {
     for (const rule of BUILT_IN_SITE_RULES) {
       const result = siteRuleSchema.safeParse(rule)

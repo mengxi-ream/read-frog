@@ -10,6 +10,7 @@ import {
 import {
   isDontWalkIntoAndDontTranslateAsChildElement,
   isDontWalkIntoButTranslateAsChildElement,
+  isInlineAtomElement,
   isShallowBlockHTMLElement,
   isShallowInlineHTMLElement,
   isTranslatedContentNode,
@@ -205,6 +206,49 @@ describe("isDontWalkIntoAndDontTranslateAsChildElement", () => {
 
     expect(isDontWalkIntoButTranslateAsChildElement(element, config)).toBe(true)
     expect(isDontWalkIntoAndDontTranslateAsChildElement(element, config)).toBe(false)
+  })
+
+  it("should treat atomSelectors as inline atoms that also block the walk", () => {
+    setHost("atom-example.org")
+    const config = configWithSiteRule({
+      id: "atoms",
+      matches: "atom-example.org",
+      atomSelectors: [".formula"],
+    })
+    const element = document.createElement("span")
+    element.classList.add("formula")
+
+    expect(isInlineAtomElement(element, config)).toBe(true)
+    expect(isDontWalkIntoButTranslateAsChildElement(element, config)).toBe(true)
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(element, config)).toBe(false)
+
+    const plain = document.createElement("span")
+    expect(isInlineAtomElement(plain, config)).toBe(false)
+  })
+
+  it("should treat native <math> roots as inline atoms without any rule", () => {
+    setHost("atom-example.org")
+    const container = document.createElement("div")
+    container.innerHTML = "<math><mi>x</mi></math>"
+    const math = container.firstElementChild as HTMLElement
+
+    expect(isInlineAtomElement(math, DEFAULT_CONFIG)).toBe(true)
+    // Nested MathML nodes are not roots.
+    expect(isInlineAtomElement(math.firstElementChild as HTMLElement, DEFAULT_CONFIG)).toBe(false)
+  })
+
+  it("should let atomSelectors.remove turn a built-in atom off", () => {
+    setHost("atom-example.org")
+    const config = configWithSiteRule({
+      id: "no-katex-atoms",
+      matches: "atom-example.org",
+      "atomSelectors.remove": ["span.katex"],
+    })
+    const katex = document.createElement("span")
+    katex.classList.add("katex")
+
+    expect(isInlineAtomElement(katex, config)).toBe(false)
+    expect(isInlineAtomElement(katex, DEFAULT_CONFIG)).toBe(true)
   })
 
   it("should skip top-level <header> in main mode", () => {
