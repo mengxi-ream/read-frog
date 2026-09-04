@@ -27,6 +27,10 @@ import {
   hasHtmlAttributeMarkerProtocol,
   isHtmlAttributeMarkerIntegrityError,
 } from "@/utils/host/translate/html-attribute-markers"
+import {
+  auditInlineAtomTokens,
+  hasInlineAtomTokens,
+} from "@/utils/host/translate/inline-atom-tokens"
 import { normalizePromptContextValue } from "@/utils/host/translate/translate-text"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
@@ -573,8 +577,18 @@ export function setUpWebPageTranslationQueue(): void {
       assertHtmlAttributeMarkerIntegrity(text, result)
     }
 
+    // A response that dropped, invented or duplicated an inline-atom
+    // placeholder is still rendered by the content script (the formulas are
+    // appended) but must not be persisted: the next visit deserves a fresh
+    // attempt instead of a permanently degraded paragraph.
+    const inlineAtomTokensIntact =
+      !hasInlineAtomTokens(text) || auditInlineAtomTokens(text, result).ok
+    if (result && !inlineAtomTokensIntact) {
+      logger.warn("Inline atom placeholders were not preserved; result not cached")
+    }
+
     // Cache the translation result if successful
-    if (result && hash) {
+    if (result && hash && inlineAtomTokensIntact) {
       await db.translationCache.put({
         key: hash,
         translation: result,

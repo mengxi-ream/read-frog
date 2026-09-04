@@ -27,6 +27,14 @@ interface TranslationInsertionContext {
   // expected content. Not fired on the no-append early return, so stray empty
   // wrappers never enter tamper surveillance.
   onContentInserted?: (wrapper: HTMLElement) => void
+  /**
+   * Fills the translated span. Defaults to a single text node; bilingual
+   * paragraphs with inline atoms (formulas) pass a renderer that rebuilds the
+   * text around cloned formula elements. Runs on the still-detached span, so
+   * the wrapper still receives ONE append and the #1918 snapshot below sees
+   * the final content.
+   */
+  renderTranslatedContent?: (translatedNode: HTMLElement, translatedText: string) => void
 }
 
 function sourceRunMatchesSelector(sources: readonly TransNode[], selector: string | null): boolean {
@@ -131,6 +139,7 @@ export async function insertTranslatedNodeIntoWrapper(
     sourceText,
     isCurrent,
     onContentInserted,
+    renderTranslatedContent,
   }: TranslationInsertionContext,
   translatedText: string,
   translationNodeStyle: TranslationNodeStyleConfig,
@@ -184,7 +193,11 @@ export async function insertTranslatedNodeIntoWrapper(
     return
   }
 
-  translatedNode.textContent = translatedText
+  if (renderTranslatedContent) {
+    renderTranslatedContent(translatedNode, translatedText)
+  } else {
+    translatedNode.textContent = translatedText
+  }
   translatedWrapperNode.appendChild(translatedNode)
   // Synchronous, pre-await: see TranslationInsertionContext.onContentInserted.
   onContentInserted?.(translatedWrapperNode)

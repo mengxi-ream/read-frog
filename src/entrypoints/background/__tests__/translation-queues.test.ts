@@ -672,6 +672,50 @@ describe("translation queue helpers", () => {
     )
   })
 
+  it("caches a translation whose inline atom placeholders all came back", async () => {
+    executeTranslateMock.mockResolvedValue("设 {{1}} 大于 {{0}}。")
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: "Let {{0}} be smaller than {{1}}.",
+        langConfig: DEFAULT_CONFIG.language,
+        providerRef: localProviderRef(googleProvider),
+        scheduleAt: Date.now(),
+        hash: "atom-hash",
+      },
+    })
+
+    expect(result).toBe("设 {{1}} 大于 {{0}}。")
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({ key: "atom-hash", translation: "设 {{1}} 大于 {{0}}。" }),
+    )
+  })
+
+  it("returns but does not cache a translation that lost an inline atom placeholder", async () => {
+    executeTranslateMock.mockResolvedValue("设 {{0}} 大于。")
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: "Let {{0}} be smaller than {{1}}.",
+        langConfig: DEFAULT_CONFIG.language,
+        providerRef: localProviderRef(googleProvider),
+        scheduleAt: Date.now(),
+        hash: "atom-hash",
+      },
+    })
+
+    expect(result).toBe("设 {{0}} 大于。")
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
   it("uses cached HTML translations when all attribute markers remain on their tags", async () => {
     translationCacheGetMock.mockResolvedValueOnce({
       key: "webpage-hash",
