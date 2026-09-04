@@ -271,7 +271,12 @@ function CustomizeButton() {
     <Tooltip>
       <TooltipTrigger
         render={
-          <Button type="button" variant="outline" size="xs" onClick={() => void duplicate()} />
+          <Button
+            type="button"
+            variant="brand-outline"
+            size="xs"
+            onClick={() => void duplicate()}
+          />
         }
       >
         {i18n.t("options.selectionToolbar.customActions.form.customize")}

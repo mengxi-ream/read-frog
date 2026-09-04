@@ -10,7 +10,7 @@ metadata:
 
 Use this skill when a user reports that the extension makes a page **leak memory, freeze, or burn CPU** ("卡死", OOM, fans spinning, page renders wrong AND slows down), especially on a specific third-party site. It turns "it feels broken" into a measured, attributed root cause with pass/fail numbers you can re-run after every fix.
 
-This skill complements [extension-real-browser-testing](../extension-real-browser-testing/SKILL.md) (functional validation, screenshots). Use that one to prove behavior; use this one to find out **who is burning the resources**.
+This skill complements [extension-puppeteer-debugging](../extension-puppeteer-debugging/SKILL.md) (functional validation, screenshots). Use that one to prove behavior; use this one to find out **who is burning the resources**.
 
 ## Core principle: the attribution ladder
 
