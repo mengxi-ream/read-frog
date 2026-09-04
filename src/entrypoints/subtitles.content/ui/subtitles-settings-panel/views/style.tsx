@@ -120,7 +120,7 @@ function SliderRow({
   const [draft, setDraft] = useState(value)
 
   useEffect(() => {
-    // eslint-disable-next-line react/set-state-in-effect
+    // oxlint-disable-next-line react/set-state-in-effect, react/no-deriving-state-in-effects -- the draft mirrors the committed value; the control owns it between commits
     setDraft(value)
   }, [value])
 

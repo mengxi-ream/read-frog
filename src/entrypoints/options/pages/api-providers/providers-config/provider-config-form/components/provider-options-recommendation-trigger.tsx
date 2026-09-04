@@ -75,6 +75,7 @@ export function ProviderOptionsRecommendationTrigger({
 
   useEffect(() => {
     if (!recommendation) {
+      // oxlint-disable-next-line react/set-state-in-effect -- closes the popover when the recommendation stops applying
       closePopover()
     }
   }, [recommendation])
@@ -98,6 +99,7 @@ export function ProviderOptionsRecommendationTrigger({
       previousMatchIndexRef.current = recommendation?.matchIndex
 
       if (recommendation) {
+        // oxlint-disable-next-line react/set-state-in-effect -- starts the attention flash once the recommendation lands
         startFlashing()
         const timeoutId = window.setTimeout(() => {
           setIsFlashing(false)

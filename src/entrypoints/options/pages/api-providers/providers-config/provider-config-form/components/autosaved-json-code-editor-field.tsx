@@ -71,7 +71,9 @@ export function AutosavedJsonCodeEditorField<TValue extends Record<string, unkno
   }, [])
 
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- a new resetKey is the reset signal
     resetSyncState()
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the dependencies are re-run triggers, not values the effect body reads
   }, [resetKey])
 
   useEffect(() => {
@@ -90,8 +92,10 @@ export function AutosavedJsonCodeEditorField<TValue extends Record<string, unkno
     lastCommittedJsonRef.current = externalJson
 
     if (currentJsonInput !== externalJson) {
+      // oxlint-disable-next-line react/set-state-in-effect -- re-syncs the editor from the external value when it changes elsewhere
       syncJsonInput(externalJson)
     }
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the dependencies are re-run triggers, not values the effect body reads
   }, [syncSignal, externalJson])
 
   const debouncedJsonInput = useDebouncedValue(jsonInput, 500)

@@ -19,6 +19,7 @@ export function ScrollRestoration() {
   const { key, pathname } = useLocation()
   const navigationType = useNavigationType()
   const currentKeyRef = useRef(key)
+  // oxlint-disable-next-line react/refs -- latest-value ref: writing it during render is what keeps callbacks in sync
   currentKeyRef.current = key
   const previousPathnameRef = useRef<string | null>(null)
 

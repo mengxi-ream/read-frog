@@ -295,6 +295,7 @@ export function SelectionToolbar() {
 
   useLayoutEffect(() => {
     updatePosition({ remeasureSelection: true })
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the dependencies are re-run triggers, not values the effect body reads
   }, [updatePosition, externalSelectionTick])
 
   useEffect(() => {

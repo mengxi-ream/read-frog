@@ -981,6 +981,7 @@ function FormatDropdown({
                 <AnimatePresence>
                   {activeRect && (
                     <motion.div
+                      // oxlint-disable-next-line react/refs -- reading the session id during render is the point -- a new key mounts a fresh node with no geometry to animate from
                       key={sessionRef.current}
                       className={cn("pointer-events-none absolute", SHAPE.bg, HOVER_TINT)}
                       initial={{
@@ -1372,6 +1373,7 @@ function EyeDropperButton({ onPick }: { onPick: (hex: string) => void }) {
   const [supported, setSupported] = useState(false)
 
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- one-shot capability probe; window is only readable after mount
     setSupported(typeof window !== "undefined" && "EyeDropper" in window)
   }, [])
 
@@ -1497,6 +1499,7 @@ function SwatchStrip({
       const p = resolveCssColor(sw)
       if (p) next[sw] = rgbToHexStr(p.r, p.g, p.b, p.a).toLowerCase()
     }
+    // oxlint-disable-next-line react/set-state-in-effect -- swatches resolve against the DOM, so they can only be computed after paint
     setResolvedSwatches(next)
   }, [swatches])
 
@@ -1573,6 +1576,7 @@ function ColorPicker({
     if (!p) return
     oklchHueRef.current = null
     const next = rgbToHsv(p.r, p.g, p.b)
+    // oxlint-disable-next-line react/set-state-in-effect -- syncs the internal hsv draft with the controlled value prop
     setHsv((prev) => ({
       h: next.s === 0 ? prev.h : next.h,
       s: next.s,
@@ -1681,6 +1685,7 @@ function ColorPicker({
       <ColorInputsRow
         parsed={parsed}
         format={currentFormat}
+        // oxlint-disable-next-line react/refs -- the hue ref carries the last non-achromatic hue so the wheel does not jump on greys
         oklchHue={oklchHueRef.current}
         onChannelChange={(channel, channelValue) => {
           const p = parsed
