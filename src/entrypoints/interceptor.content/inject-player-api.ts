@@ -142,6 +142,7 @@ function getPlayerData(request: PlayerDataRequest): PlayerDataResponse {
           captionTracks.length,
         ),
         cachedTimedtextUrl: getCachedTimedtextUrl(videoId),
+        isLiveContent: !!playerResponse?.videoDetails?.isLiveContent,
       },
     }
   } catch (e) {

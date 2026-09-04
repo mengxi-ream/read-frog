@@ -1202,6 +1202,7 @@ subtitles:
     aiSubscriptionRequired: AI 자막은 Pro 또는 Ultra 구독이 필요합니다
     aiPaymentRequired: AI 자막을 계속 생성하려면 결제 수단을 업데이트하세요
     aiVideoTooLong: 이 영상은 너무 길어 AI 자막을 만들 수 없습니다
+    aiLiveReplayUnsupported: 라이브 스트리밍 다시보기는 아직 AI 자막을 지원하지 않습니다
     aiStillProcessing: 아직 전사가 진행 중입니다. 몇 분 후 다시 클릭해 주세요
     aiRequestFailed: AI 자막 요청에 실패했습니다. 잠시 후 다시 시도해 주세요
     aiNoResponse: AI 서비스가 응답하지 않았습니다. 원문을 표시합니다

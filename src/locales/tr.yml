@@ -1202,6 +1202,7 @@ subtitles:
     aiSubscriptionRequired: Yapay zeka altyazıları için Pro veya Ultra aboneliği gerekir
     aiPaymentRequired: Yapay zeka altyazıları oluşturmaya devam etmek için ödeme yönteminizi güncelleyin
     aiVideoTooLong: Bu video yapay zeka altyazıları için çok uzun
+    aiLiveReplayUnsupported: Canlı yayın tekrarları için yapay zeka altyazıları henüz kullanılamıyor
     aiStillProcessing: Yazıya dökme hâlâ sürüyor — birkaç dakika sonra tekrar tıklayın
     aiRequestFailed: Yapay zeka altyazı isteği başarısız oldu, lütfen daha sonra tekrar deneyin
     aiNoResponse: AI hizmeti yanıt vermedi, orijinal metin gösteriliyor

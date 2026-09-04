@@ -1202,6 +1202,7 @@ subtitles:
     aiSubscriptionRequired: Phụ đề AI cần gói Pro hoặc Ultra
     aiPaymentRequired: Cập nhật phương thức thanh toán để tiếp tục tạo phụ đề AI
     aiVideoTooLong: Video này quá dài để tạo phụ đề AI
+    aiLiveReplayUnsupported: Phụ đề AI chưa hỗ trợ bản phát lại của buổi phát trực tiếp
     aiStillProcessing: Quá trình phiên âm vẫn đang chạy — hãy bấm lại sau vài phút
     aiRequestFailed: Yêu cầu phụ đề AI thất bại, vui lòng thử lại sau
     aiNoResponse: Dịch vụ AI không phản hồi, hiển thị văn bản gốc

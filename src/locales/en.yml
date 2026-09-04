@@ -1318,6 +1318,7 @@ subtitles:
     aiSubscriptionRequired: AI subtitles require a Pro or Ultra subscription
     aiPaymentRequired: Update your payment method to keep generating AI subtitles
     aiVideoTooLong: This video is too long for AI subtitles
+    aiLiveReplayUnsupported: AI subtitles aren't available for live stream replays yet
     aiStillProcessing: Transcription is still running — click again in a few minutes to pick it up
     aiRequestFailed: AI subtitle request failed, please try again later
     aiNoResponse: AI service did not respond, using original text
