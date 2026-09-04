@@ -4540,6 +4540,12 @@
     "dontWalkButTranslateTags.remove": ["CODE"]
   },
   {
+    "id": "alibaba-sourcing-rfq",
+    "description": "Alibaba's RFQ portal renders the buyer's hand-written request body in <pre class=\"value\"> (the Details / 详细描述 field). PRE is hard-blocked by default for authored code, so the entire request body was dropped from the walk while every field around it translated. This host serves sourcing pages only, no code",
+    "matches": "sourcing.alibaba.com",
+    "dontWalkTags.remove": ["PRE"]
+  },
+  {
     "id": "readfrog-x-chat",
     "description": "Skip the X Chat message footer (send time + delivery receipt). It renders twice inside the bubble — once as an aria-hidden opacity-0 spacer in the text flow, once in the absolutely positioned overlay — so both copies otherwise land in the message's translation unit. Target the footer root only: excluding its `.absolute.bottom-0.inset-e-0` wrapper too would hide that wrapper from unwrapDeepestOnlyHTMLChild, turning the bubble row into an only-child chain and moving the translation wrapper down into the pre-wrap text block",
     "matches": ["chat.x.com"],
