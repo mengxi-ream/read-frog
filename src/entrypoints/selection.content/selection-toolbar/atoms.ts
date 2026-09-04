@@ -67,7 +67,7 @@ export const contextAtom = atom(
     set(selectionSessionAtom, createSelectionSession(currentSelection, nextContext))
   },
 )
-export const isSelectionToolbarVisibleAtom = atom<boolean>(false)
+export const isSelectionToolbarOpenAtom = atom<boolean>(false)
 
 export const selectionContentAtom = atom((get) => get(selectionAtom)?.text ?? null)
 

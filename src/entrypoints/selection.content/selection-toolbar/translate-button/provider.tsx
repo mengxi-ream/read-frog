@@ -55,7 +55,7 @@ import { SelectionToolbarErrorAlert } from "../../components/selection-toolbar-e
 import { SelectionToolbarFooterContent } from "../../components/selection-toolbar-footer-content"
 import { SelectionToolbarTitleContent } from "../../components/selection-toolbar-title-content"
 import {
-  isSelectionToolbarVisibleAtom,
+  isSelectionToolbarOpenAtom,
   noteSuggestionProviderAtom,
   selectionSessionAtom,
   selectionToolbarTranslateRequestAtom,
@@ -342,7 +342,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
   const noteSuggestionProvider = useAtomValue(noteSuggestionProviderAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
-  const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
+  const setIsSelectionToolbarOpen = useSetAtom(isSelectionToolbarOpenAtom)
   const setConfig = useSetAtom(writeConfigAtom)
   const abortControllerRef = useRef<AbortController | null>(null)
   const pendingOpenRequestRef = useRef<SelectionTranslatePendingOpenRequest | null>(null)
@@ -426,9 +426,9 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
 
     setActiveSession(pendingRequest?.session ?? selectionSession)
     setSourceSurface(pendingRequest?.surface ?? ANALYTICS_SURFACE.SELECTION_TOOLBAR)
-    setIsSelectionToolbarVisible(false)
+    setIsSelectionToolbarOpen(false)
     pendingOpenRequestRef.current = null
-  }, [selectionSession, setIsSelectionToolbarVisible])
+  }, [selectionSession, setIsSelectionToolbarOpen])
 
   const handleProviderChange = useCallback(
     (providerId: string) => {
