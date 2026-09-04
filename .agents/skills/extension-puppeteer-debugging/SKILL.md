@@ -1,14 +1,55 @@
 ---
 name: extension-puppeteer-debugging
-description: Use when you need to drive the BUILT read-frog extension in real Chrome with Puppeteer — verifying a translation fix end-to-end, reproducing a DOM bug on a fixture page, or asserting restore/toggle behavior programmatically. Covers Chrome 137+ extension loading, config patching, and message-based toggling. For Playwright/Edge screenshots use extension-real-browser-testing; for leaks/freezes use extension-perf-forensics.
+description: Debug the built Read Frog extension in real Chrome. Use Chrome DevTools MCP for interactive inspection and screenshots; use the Puppeteer harness for repeatable end-to-end assertions, fixture pages, and translation toggle/restore flows. For leaks, freezes, or CPU storms use extension-perf-forensics.
 metadata:
   author: read-frog
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
-# Extension Puppeteer Debugging
+# Extension Browser Debugging
 
-Drive the built extension in headed Chrome from a Node script: install it, force a known config, toggle translation via the extension's own message bus, and assert on live DOM. Every step below exists because the obvious alternative **failed in practice** (2026-07-13, issue #1846 verification; 2026-07-31, issue #2011 repro).
+Debug the built extension in real Chrome. Choose the lightest workflow that produces trustworthy evidence:
+
+- Use Chrome DevTools MCP for interactive UI checks, extension installation/reload, extension pages and service workers, DOM/computed styles, console/network inspection, and screenshots.
+- Use the Puppeteer harness when the result must be repeatable, needs a controlled fixture or fresh profile, or requires programmatic toggle/restore assertions.
+
+Always build the artifact under test and confirm `.output/chrome-mv3/manifest.json` exists before loading it. Do not treat dev-server behavior as proof of the production build.
+
+## Chrome DevTools MCP prerequisites
+
+The extension tools are disabled by default. The MCP server must start with:
+
+```text
+--categoryExtensions=true
+```
+
+Restart the MCP client after changing its server configuration. Before building, confirm that `install_extension`, `reload_extension`, `list_extensions`, and `trigger_extension_action` are available. If they are missing, fix the MCP configuration rather than falling back silently to webpage-only tools.
+
+`install_extension` accepts an absolute path to an unpacked extension directory. The server restricts filesystem access to MCP workspace roots and the OS temp directory. If it rejects a valid build path:
+
+1. Prefer configuring or repairing the client's workspace roots.
+2. Use `--allow-unrestricted-paths` only for a trusted local client and only after the user explicitly authorizes the wider filesystem access.
+3. Never copy a build through a symlink to evade the path check.
+
+Chrome DevTools MCP launches its own Chrome profile. Concurrent MCP clients can contend for the default profile; use distinct `--userDataDir` values or `--isolated=true` when Codex, Claude, or multiple tasks may run the server at the same time. A fresh or isolated profile also avoids stale extension state, but state-dependent bugs may require a deliberate persistent test profile.
+
+## Chrome DevTools MCP workflow
+
+1. Build the extension, verify its manifest, then install the absolute `.output/chrome-mv3` path with `install_extension`.
+2. Record the returned extension ID. Confirm the extension page and MV3 service worker appear in `list_pages`.
+3. Open the actual popup/options page or a target content page.
+4. Reproduce the interaction through the real UI or extension message path.
+5. Inspect live DOM/runtime state and computed styles. For tooltips and popovers, node existence alone is insufficient: check open/closed attributes, opacity, visibility, and pointer events.
+6. Capture a raw screenshot only after the runtime evidence proves the intended state.
+7. Close temporary pages/profiles and local fixture servers created for the check.
+
+For screenshots, keep raw before/after captures as the source of truth. Label crops and stitched comparisons as supplemental artifacts. Never present a composite as a raw browser screenshot.
+
+Use a fresh profile or the Puppeteer harness when persistent browser state could affect the result. Record the browser/version, build path, target URL, interaction, runtime evidence, and screenshot path for consequential regressions.
+
+## Puppeteer workflow
+
+Drive headed Chrome from a Node script to install the extension, force known config, toggle translation via its message bus, and assert live DOM. The details below encode failures observed during issue #1846 and #2011 verification.
 
 ## Quick reference
 
@@ -30,6 +71,8 @@ Drive the built extension in headed Chrome from a Node script: install it, force
 4. Run headed; capture `page.on('console')` + `pageerror` for `Minified React error|NotFoundError` — a clean screenshot can hide a broken fiber tree.
 5. Provider: `microsoft-translate-default` needs no API key but real network. Slow the queues (`requestQueueConfig.rate/capacity = 1`) when you need to observe spinners.
 
+For loading screenshots, first record `.read-frog-spinner` count and relevant computed/inline styles, capture the raw frame, then continue waiting for translated Chinese text to prove that the run completed. A visible screenshot without matching DOM/runtime evidence is insufficient.
+
 ## Interpreting extension DOM state
 
 - Bilingual mode: original text stays; wrapper `.read-frog-translated-content-wrapper` inserted next to it.
@@ -39,5 +82,4 @@ Drive the built extension in headed Chrome from a Node script: install it, force
 
 ## Related skills
 
-- **extension-real-browser-testing** — Playwright + Edge variant, popup/options-page evaluation, screenshot evidence rules.
 - **extension-perf-forensics** — when the symptom is leak/freeze/CPU, not wrong DOM: attribution ladder, CDP metrics, tracing.
