@@ -23,7 +23,7 @@ import { SelectionToolbarTitleContent } from "../../components/selection-toolbar
 import { normalizeSelectedText } from "../../utils"
 import {
   contextAtom,
-  isSelectionToolbarVisibleAtom,
+  isSelectionToolbarOpenAtom,
   selectionAtom,
   selectionSessionAtom,
 } from "../atoms"
@@ -98,7 +98,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
   const selectionToolbarConfig = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const language = useAtomValue(configFieldsAtomMap.language)
-  const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
+  const setIsSelectionToolbarOpen = useSetAtom(isSelectionToolbarOpenAtom)
   const setConfig = useSetAtom(writeConfigAtom)
   const isSaveToNotebaseDialogOpen = useAtomValue(isSaveToNotebaseDialogOpenAtom)
   const bodyRef = useRef<HTMLDivElement>(null)
@@ -183,9 +183,9 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
     setActiveSession(pendingRequest?.session ?? selectionSession)
     setActiveActionId(pendingRequest?.actionId ?? null)
     setSourceSurface(pendingRequest?.surface ?? ANALYTICS_SURFACE.SELECTION_TOOLBAR)
-    setIsSelectionToolbarVisible(false)
+    setIsSelectionToolbarOpen(false)
     pendingOpenRequestRef.current = null
-  }, [selectionSession, setIsSelectionToolbarVisible])
+  }, [selectionSession, setIsSelectionToolbarOpen])
 
   const handleOpenChange = useCallback(
     (nextOpen: boolean) => {

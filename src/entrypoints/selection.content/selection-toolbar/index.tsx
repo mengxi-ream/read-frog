@@ -20,11 +20,7 @@ import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { cn } from "@/utils/styles/utils"
 import { matchDomainPattern } from "@/utils/url"
 import { buildContextSnapshot, readSelectionSnapshot } from "../utils"
-import {
-  clearSelectionStateAtom,
-  isSelectionToolbarVisibleAtom,
-  setSelectionStateAtom,
-} from "./atoms"
+import { clearSelectionStateAtom, isSelectionToolbarOpenAtom, setSelectionStateAtom } from "./atoms"
 import { CloseButton, DropEvent } from "./close-button"
 import { SelectionToolbarCustomActionButtons } from "./custom-action-button"
 import { createModalDialogHostController } from "./modal-dialog-host"
@@ -208,12 +204,20 @@ export function SelectionToolbar() {
   const modalDialogHostControllerRef = useRef<ModalDialogHostController>(null)
   const isPointerDownInsideOverlayRef = useRef(false)
   const preserveSelectionStateRef = useRef(false)
-  const [isSelectionToolbarVisible, setIsSelectionToolbarVisible] = useAtom(
-    isSelectionToolbarVisibleAtom,
-  )
+  const [isSelectionToolbarOpen, setIsSelectionToolbarOpen] = useAtom(isSelectionToolbarOpenAtom)
   const setSelectionState = useSetAtom(setSelectionStateAtom)
   const clearSelectionState = useSetAtom(clearSelectionStateAtom)
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
+  const isSiteDisabled = selectionToolbar.disabledSelectionToolbarPatterns?.some((pattern) =>
+    matchDomainPattern(window.location.href, pattern),
+  )
+  const { features } = selectionToolbar
+  const hasAnyEnabledFeature =
+    features.translate.enabled ||
+    features.speak.enabled ||
+    getSelectionToolbarActions(selectionToolbar).some((action) => action.enabled !== false)
+  const isSelectionToolbarVisible =
+    isSelectionToolbarOpen && selectionToolbar.enabled && !isSiteDisabled && hasAnyEnabledFeature
   const dropdownOpenRef = useRef(false)
   // Bumped per external (ebook bridge) selection so the position is re-applied
   // even when the toolbar is already visible (visibility doesn't flip then).
@@ -261,7 +265,7 @@ export function SelectionToolbar() {
           selectionScrollTargetsRef.current = []
           selectionPositionRef.current = null
           clearSelectionState()
-          setIsSelectionToolbarVisible(false)
+          setIsSelectionToolbarOpen(false)
           return
         }
 
@@ -290,7 +294,7 @@ export function SelectionToolbar() {
       tooltip.style.top = `${hostPosition.y}px`
       tooltip.style.left = `${hostPosition.x}px`
     },
-    [clearSelectionState, isSelectionToolbarVisible, setIsSelectionToolbarVisible],
+    [clearSelectionState, isSelectionToolbarVisible, setIsSelectionToolbarOpen],
   )
 
   useLayoutEffect(() => {
@@ -427,7 +431,7 @@ export function SelectionToolbar() {
           selectionScrollTargetsRef.current = collectSelectionScrollTargets(
             selectionSnapshot.ranges,
           )
-          setIsSelectionToolbarVisible(true)
+          setIsSelectionToolbarOpen(true)
         }
       })
     }
@@ -458,7 +462,7 @@ export function SelectionToolbar() {
       selectionScrollTargetsRef.current = []
 
       clearSelectionState()
-      setIsSelectionToolbarVisible(false)
+      setIsSelectionToolbarOpen(false)
     }
 
     const handleSelectionChange = () => {
@@ -484,7 +488,7 @@ export function SelectionToolbar() {
         selectionScrollTargetsRef.current = []
         // Don't hide toolbar when dropdown is open to prevent unwanted dismissal
         // (Firefox clears selection when dropdown gains focus)
-        if (!dropdownOpenRef.current) setIsSelectionToolbarVisible(false)
+        if (!dropdownOpenRef.current) setIsSelectionToolbarOpen(false)
       }
     }
 
@@ -497,7 +501,7 @@ export function SelectionToolbar() {
       document.removeEventListener("mousedown", handleMouseDown)
       document.removeEventListener("selectionchange", handleSelectionChange)
     }
-  }, [clearSelectionState, placeHostForSelection, setIsSelectionToolbarVisible, setSelectionState])
+  }, [clearSelectionState, placeHostForSelection, setIsSelectionToolbarOpen, setSelectionState])
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -532,8 +536,8 @@ export function SelectionToolbar() {
       selectionPositionRef.current = detail.anchor
       selectionAnchorTrackerRef.current = null
       selectionScrollTargetsRef.current = []
-      setIsSelectionToolbarVisible(true)
-      // Force a reposition: visibility may already be true, in which case the
+      setIsSelectionToolbarOpen(true)
+      // Force a reposition: the toolbar may already be open, in which case the
       // updatePosition layout effect would not re-run on its own.
       setExternalSelectionTick((tick) => tick + 1)
     }
@@ -550,7 +554,7 @@ export function SelectionToolbar() {
       selectionAnchorTrackerRef.current = null
       selectionScrollTargetsRef.current = []
       // Don't hide toolbar when dropdown is open to prevent unwanted dismissal
-      if (!dropdownOpenRef.current) setIsSelectionToolbarVisible(false)
+      if (!dropdownOpenRef.current) setIsSelectionToolbarOpen(false)
     }
 
     window.addEventListener(EXTERNAL_SELECTION_OPEN_EVENT, handleExternalSelectionOpen)
@@ -560,18 +564,7 @@ export function SelectionToolbar() {
       window.removeEventListener(EXTERNAL_SELECTION_OPEN_EVENT, handleExternalSelectionOpen)
       window.removeEventListener(EXTERNAL_SELECTION_CLEAR_EVENT, handleExternalSelectionClear)
     }
-  }, [clearSelectionState, setIsSelectionToolbarVisible, setSelectionState])
-
-  // Check if current site is disabled
-  const isSiteDisabled = selectionToolbar.disabledSelectionToolbarPatterns?.some((pattern) =>
-    matchDomainPattern(window.location.href, pattern),
-  )
-
-  const { features } = selectionToolbar
-  const hasAnyEnabledFeature =
-    features.translate.enabled ||
-    features.speak.enabled ||
-    getSelectionToolbarActions(selectionToolbar).some((action) => action.enabled !== false)
+  }, [clearSelectionState, setIsSelectionToolbarOpen, setSelectionState])
 
   return (
     <div

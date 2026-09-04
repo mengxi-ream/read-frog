@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react"
-import { atom, useAtomValue } from "jotai"
+import { atom, getDefaultStore, useAtomValue } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE } from "@/entrypoints/selection.content/overlay-layers"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { selectionSessionAtom } from "../atoms"
 import { SelectionToolbar } from "../index"
 import { MODAL_DIALOG_HOST_SLOT_ATTRIBUTE } from "../modal-dialog-host"
@@ -52,12 +53,20 @@ vi.mock("@/utils/atoms/config", async (importOriginal) => {
   }
 })
 
+const store = getDefaultStore()
+const DEFAULT_SELECTION_TOOLBAR_CONFIG = store.get(configFieldsAtomMap.selectionToolbar)
+
 describe("selectionToolbar - isInputOrTextarea logic", () => {
   let originalRequestAnimationFrame: typeof requestAnimationFrame
   let rafCallbacks: FrameRequestCallback[]
   let mockSelectionToString: () => string
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await store.set(
+      configFieldsAtomMap.selectionToolbar,
+      structuredClone(DEFAULT_SELECTION_TOOLBAR_CONFIG),
+    )
+
     // Mock requestAnimationFrame to execute callbacks synchronously
     rafCallbacks = []
     originalRequestAnimationFrame = window.requestAnimationFrame
@@ -145,6 +154,15 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
   const getToolbarSurface = () =>
     document.querySelector<HTMLElement>("[data-slot='selection-toolbar-surface']")
 
+  const getOverlayRoot = () =>
+    document.querySelector<HTMLElement>(`[${SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE}]`)
+
+  const expectOverlayCollapsed = () => {
+    expect(getOverlayRoot()).toHaveClass("h-0")
+    expect(getOverlayRoot()).toHaveClass("w-0")
+    expect(getOverlayRoot()).not.toHaveClass("inset-0")
+  }
+
   it("applies configured opacity on the toolbar surface instead of the overlay host", () => {
     render(<SelectionToolbar />)
 
@@ -160,21 +178,83 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
       </div>,
     )
 
-    const getOverlayRoot = () =>
-      document.querySelector<HTMLElement>(`[${SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE}]`)
-
     // Idle: no full-viewport fixed layer. A persistent inset-0 layer makes
     // Chrome claim horizontal touch pans on `touch-action: manipulation`
     // pages and fires pointercancel at page drag gestures (e.g. carousels).
-    expect(getOverlayRoot()).toHaveClass("h-0")
-    expect(getOverlayRoot()).toHaveClass("w-0")
-    expect(getOverlayRoot()).not.toHaveClass("inset-0")
+    expectOverlayCollapsed()
 
     await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
     await waitFor(() => {
       expect(getOverlayRoot()).toHaveClass("inset-0")
       expect(getOverlayRoot()).not.toHaveClass("h-0")
     })
+  })
+
+  it("keeps the overlay root collapsed when the toolbar is disabled", async () => {
+    await store.set(configFieldsAtomMap.selectionToolbar, {
+      ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
+      enabled: false,
+    })
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">{MOCK_SELECTED_TEXT}</div>
+      </div>,
+    )
+
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+
+    expect(getOverlayRoot()).toHaveClass("h-0", "w-0")
+    expect(getOverlayRoot()).not.toHaveClass("inset-0")
+  })
+
+  it("keeps the overlay root collapsed when the current site is disabled", async () => {
+    await store.set(configFieldsAtomMap.selectionToolbar, {
+      ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
+      disabledSelectionToolbarPatterns: [window.location.hostname],
+    })
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">{MOCK_SELECTED_TEXT}</div>
+      </div>,
+    )
+
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+
+    expect(getOverlayRoot()).toHaveClass("h-0", "w-0")
+    expect(getOverlayRoot()).not.toHaveClass("inset-0")
+  })
+
+  it("keeps the overlay root collapsed when no toolbar feature is enabled", async () => {
+    await store.set(configFieldsAtomMap.selectionToolbar, {
+      ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
+      features: {
+        translate: {
+          ...DEFAULT_SELECTION_TOOLBAR_CONFIG.features.translate,
+          enabled: false,
+        },
+        speak: { enabled: false },
+      },
+      builtInActions: {
+        dictionary: {
+          enabled: false,
+          providerId: "google-translate-default",
+        },
+      },
+      customActions: [],
+    })
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">{MOCK_SELECTED_TEXT}</div>
+      </div>,
+    )
+
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+
+    expect(getOverlayRoot()).toHaveClass("h-0", "w-0")
+    expect(getOverlayRoot()).not.toHaveClass("inset-0")
   })
 
   it("should show toolbar when selecting text in a normal div element", async () => {

@@ -7,7 +7,7 @@ import {
   EXTERNAL_SELECTION_CLEAR_EVENT,
   EXTERNAL_SELECTION_OPEN_EVENT,
 } from "@/utils/constants/selection"
-import { isSelectionToolbarVisibleAtom, selectionSessionAtom } from "../atoms"
+import { isSelectionToolbarOpenAtom, selectionSessionAtom } from "../atoms"
 import { SelectionToolbar } from "../index"
 
 // Mock child components
@@ -83,7 +83,7 @@ describe("selectionToolbar - external selection source", () => {
 
   beforeEach(() => {
     store.set(selectionSessionAtom, null)
-    store.set(isSelectionToolbarVisibleAtom, false)
+    store.set(isSelectionToolbarOpenAtom, false)
   })
 
   afterEach(() => {
