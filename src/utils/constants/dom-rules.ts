@@ -61,6 +61,11 @@ export const MATH_TAGS = new Set([
   "semantics",
 ])
 
+/** MathML keeps lowercase local names even inside an HTML document. */
+export function isMathRootElement(element: Element): boolean {
+  return element.localName.toLowerCase() === "math"
+}
+
 // Don't walk into these tags
 export const DONT_WALK_AND_TRANSLATE_TAGS = new Set([
   "HEAD",

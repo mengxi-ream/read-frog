@@ -1,5 +1,6 @@
 import type { TransNode } from "@/types/dom"
 import { MARK_ATTRIBUTES, NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
+import { isMathRootElement } from "@/utils/constants/dom-rules"
 import {
   assertHtmlAttributeMarkerIntegrity,
   HTML_ATTRIBUTE_MARKER,
@@ -33,9 +34,16 @@ interface AttributeSnapshot {
 
 interface ElementAttributeSnapshot {
   attributes: AttributeSnapshot[]
+  preservedChildren?: ChildNode[]
   tagName: string
   translatableAttributes: AttributeSnapshot[]
   translatableAttributeNames: Set<string>
+}
+
+interface LegacyMarkerSnapshot {
+  attributes?: AttributeSnapshot[]
+  preservedChildren?: ChildNode[]
+  value: string | null
 }
 
 export interface ProtectedTranslationHtml {
@@ -103,6 +111,38 @@ function getElementsWithAttribute(
   attributeName: string,
 ): Element[] {
   return getAllElements(root).filter((element) => element.hasAttribute(attributeName))
+}
+
+function closestMathRoot(element: Element): Element | null {
+  let current: Element | null = element
+  while (current) {
+    if (isMathRootElement(current)) return current
+    current = current.parentElement
+  }
+  return null
+}
+
+function cloneChildNodes(element: Element): ChildNode[] {
+  return [...element.childNodes].map((child) => child.cloneNode(true) as ChildNode)
+}
+
+function restorePreservedElement(
+  element: Element,
+  attributes: readonly AttributeSnapshot[],
+  children: readonly ChildNode[],
+): void {
+  for (const attribute of [...element.attributes]) element.removeAttributeNode(attribute)
+  attributes.forEach((attribute) => restoreAttribute(element, attribute))
+  element.replaceChildren(...children.map((child) => child.cloneNode(true)))
+}
+
+function isInsidePreservedRoot(element: Element, roots: ReadonlySet<Element>): boolean {
+  let current: Element | null = element
+  while (current) {
+    if (roots.has(current)) return true
+    current = current.parentElement
+  }
+  return false
 }
 
 function normalizeHtmlForComparison(html: string, ownerDoc: Document): string {
@@ -209,22 +249,53 @@ export function protectTranslationHtmlAttributes(
   const snapshots = new Map<string, ElementAttributeSnapshot>()
   const legacyContainer = ownerDoc.createElement("template")
   legacyContainer.innerHTML = sourceHtml
-  const legacyMarkerSnapshots = new Map<string, { value: string }>()
+  const legacyMarkerSnapshots = new Map<string, LegacyMarkerSnapshot>()
 
-  getElementsWithAttribute(legacyContainer.content, HTML_ATTRIBUTE_MARKER).forEach((element) => {
+  getAllElements(legacyContainer.content).forEach((element) => {
+    const mathRoot = closestMathRoot(element)
+    if (mathRoot && mathRoot !== element) {
+      // The root snapshot restores this subtree wholesale. Nested page-owned
+      // marker attributes must not accidentally join our integrity protocol.
+      element.removeAttribute(HTML_ATTRIBUTE_MARKER)
+      return
+    }
+    if (!element.hasAttribute(HTML_ATTRIBUTE_MARKER) && !isMathRootElement(element)) return
+
     const markerId = `rf-page-${legacyMarkerSnapshots.size}`
+    const preserveMath = isMathRootElement(element)
     legacyMarkerSnapshots.set(markerId, {
-      value: element.getAttribute(HTML_ATTRIBUTE_MARKER) ?? "",
+      value: element.getAttribute(HTML_ATTRIBUTE_MARKER),
+      ...(preserveMath
+        ? {
+            attributes: [...element.attributes].map(snapshotAttribute),
+            preservedChildren: cloneChildNodes(element),
+          }
+        : {}),
     })
     element.setAttribute(HTML_ATTRIBUTE_MARKER, markerId)
+    if (preserveMath) {
+      element.classList.add(NOTRANSLATE_CLASS)
+      element.setAttribute("translate", "no")
+    }
   })
   const legacyRequestHtml = legacyContainer.innerHTML
 
   getAllElements(container.content).forEach((element) => {
+    const mathRoot = closestMathRoot(element)
+    if (mathRoot && mathRoot !== element) {
+      // Only the MathML root participates in the marker protocol; its exact
+      // children are restored from the snapshot after translation.
+      element.removeAttribute(HTML_ATTRIBUTE_MARKER)
+      return
+    }
+
+    const preserveMath = isMathRootElement(element)
     const attributes = Array.from(element.attributes)
-    const translatableAttributes = attributes
-      .filter((attribute) => isTranslatableAttribute(element, attribute.name))
-      .map(snapshotAttribute)
+    const translatableAttributes = preserveMath
+      ? []
+      : attributes
+          .filter((attribute) => isTranslatableAttribute(element, attribute.name))
+          .map(snapshotAttribute)
     const translatableAttributeNames = new Set(
       translatableAttributes.map((attribute) => attribute.name.toLowerCase()),
     )
@@ -232,7 +303,7 @@ export function protectTranslationHtmlAttributes(
       .filter((attribute) => !translatableAttributeNames.has(attribute.name.toLowerCase()))
       .map(snapshotAttribute)
 
-    if (protectedAttributes.length === 0) return
+    if (protectedAttributes.length === 0 && !preserveMath) return
 
     const markerId = String(snapshots.size)
     const preserveNotranslateClass = protectedAttributes.some(
@@ -252,10 +323,15 @@ export function protectTranslationHtmlAttributes(
     if (preserveTranslateNo) {
       element.setAttribute("translate", "no")
     }
+    if (preserveMath) {
+      element.setAttribute("class", NOTRANSLATE_CLASS)
+      element.setAttribute("translate", "no")
+    }
     element.setAttribute(HTML_ATTRIBUTE_MARKER, markerId)
 
     snapshots.set(markerId, {
       attributes: protectedAttributes,
+      preservedChildren: preserveMath ? cloneChildNodes(element) : undefined,
       tagName: element.localName.toLowerCase(),
       translatableAttributes,
       translatableAttributeNames,
@@ -280,6 +356,7 @@ export function protectTranslationHtmlAttributes(
       template.innerHTML = translatedHtml
       const markedElements = getElementsWithAttribute(template.content, HTML_ATTRIBUTE_MARKER)
       const markedElementSet = new Set(markedElements)
+      const restoredPreservedRoots = new Set<Element>()
       const restoredIds = new Set<string>()
 
       for (const element of markedElements) {
@@ -308,6 +385,12 @@ export function protectTranslationHtmlAttributes(
             : element.hasAttribute(attribute.name)
           if (!hasTranslatedAttribute) restoreAttribute(element, attribute)
         })
+        if (snapshot.preservedChildren) {
+          element.replaceChildren(
+            ...snapshot.preservedChildren.map((child) => child.cloneNode(true)),
+          )
+          restoredPreservedRoots.add(element)
+        }
         restoredIds.add(markerId)
       }
 
@@ -317,7 +400,10 @@ export function protectTranslationHtmlAttributes(
       }
 
       getAllElements(template.content).forEach((element) => {
-        if (!markedElementSet.has(element)) {
+        if (
+          !markedElementSet.has(element) &&
+          !isInsidePreservedRoot(element, restoredPreservedRoots)
+        ) {
           stripUnexpectedAttributes(element)
         }
       })
@@ -344,7 +430,13 @@ export function protectTranslationHtmlAttributes(
         if (!snapshot) {
           throw new HtmlAttributeMarkerIntegrityError("unknown-output-marker", markerId ?? "")
         }
-        element.setAttribute(HTML_ATTRIBUTE_MARKER, snapshot.value)
+        if (snapshot.attributes && snapshot.preservedChildren) {
+          restorePreservedElement(element, snapshot.attributes, snapshot.preservedChildren)
+        } else if (snapshot.value === null) {
+          element.removeAttribute(HTML_ATTRIBUTE_MARKER)
+        } else {
+          element.setAttribute(HTML_ATTRIBUTE_MARKER, snapshot.value)
+        }
       })
 
       return template.innerHTML

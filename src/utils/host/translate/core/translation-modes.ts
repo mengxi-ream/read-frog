@@ -29,6 +29,7 @@ import {
 import { unwrapDeepestOnlyHTMLChild } from "../../dom/find"
 import { getOwnerDocument } from "../../dom/node"
 import { canSplitGiantWithoutStrandingOwnText, extractTextContent } from "../../dom/traversal"
+import { protectBilingualMath } from "../dom/bilingual-math"
 import {
   buildVirtualParagraphPlan,
   canMaterializeVirtualParagraphUnits,
@@ -518,11 +519,12 @@ export async function translateNodesBilingualMode(
     const sourceTextBeforeFilter = isHTMLElement(layoutSource)
       ? collectSourceTextExcludingWrappers(layoutSource)
       : null
-    const textContent = transNodes
-      .map((node) => extractTextContent(node, config))
-      .join("")
-      .trim()
-    if (!textContent || isNumericContent(textContent)) return
+    const protectedMath = protectBilingualMath(transNodes, config)
+    const filterText = protectedMath.filterText.trim()
+    const textContent = protectedMath.requestText.trim()
+    // Keep formula-only display blocks untouched. MathML is protected inline
+    // content for a prose translation, not a translation unit of its own.
+    if (!filterText || !textContent || isNumericContent(filterText)) return
 
     let bilingualState: BilingualTranslationState | undefined
     if (isHTMLElement(layoutSource) && sourceTextBeforeFilter !== null) {
@@ -542,8 +544,8 @@ export async function translateNodesBilingualMode(
       // Target-language skip runs here, BEFORE the wrapper/spinner is inserted,
       // so same-language paragraphs never touch the DOM.
       shouldFilter =
-        (await shouldFilterSmallParagraph(textContent, config)) ||
-        (await shouldSkipAsTargetLanguage(textContent, config))
+        (await shouldFilterSmallParagraph(filterText, config)) ||
+        (await shouldSkipAsTargetLanguage(filterText, config))
     } catch (error) {
       if (bilingualState) unregisterBilingualTranslationState(bilingualState)
       throw error
@@ -673,7 +675,8 @@ export async function translateNodesBilingualMode(
         onContentInserted: (wrapper) => {
           if (bilingualState) bilingualState.wrapperTextContent = wrapper.textContent
         },
-        sourceText: textContent,
+        renderTranslatedContent: protectedMath.hasMath ? protectedMath.renderInto : undefined,
+        sourceText: filterText,
       },
       translatedText,
       config.pageTranslation.translationNodeStyle,

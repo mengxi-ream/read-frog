@@ -13,6 +13,40 @@ function createNodes(html: string): TransNode[] {
 }
 
 describe("translation HTML attribute protection", () => {
+  it("restores exact MathML after compact and legacy HTML translation", () => {
+    const [paragraph] = createNodes(
+      '<p>Start <math id="formula" class="ltx_Math" alttext="H_{0}" display="inline"><semantics><msub><mi id="symbol">H</mi><mn>0</mn></msub><annotation encoding="application/x-tex">H_{0}</annotation></semantics></math> end.</p>',
+    )
+    const sourceMath = (paragraph as HTMLElement).querySelector("math")!
+    const protectedHtml = protectTranslationHtmlAttributes([paragraph!], document)
+
+    const corruptFormula = (html: string, start: string, end: string) => {
+      const template = document.createElement("template")
+      template.innerHTML = html.replace("Start", start).replace("end", end)
+      const math = template.content.querySelector("math")!
+      expect(math.classList.contains("notranslate")).toBe(true)
+      expect(math.getAttribute("translate")).toBe("no")
+      math.innerHTML = "<mi>translated-away</mi>"
+      math.setAttribute("alttext", "translated-away")
+      return template.innerHTML
+    }
+
+    const restoredCompact = document.createElement("template")
+    restoredCompact.innerHTML = protectedHtml.restore(
+      corruptFormula(protectedHtml.requestHtml, "开头", "结尾"),
+    )
+    const compactMath = restoredCompact.content.querySelector("math")!
+    expect(compactMath.outerHTML).toBe(sourceMath.outerHTML)
+    expect(restoredCompact.content.textContent).toContain("开头")
+    expect(restoredCompact.content.textContent).toContain("结尾")
+
+    const restoredLegacy = document.createElement("template")
+    restoredLegacy.innerHTML = protectedHtml.restoreLegacy(
+      corruptFormula(protectedHtml.legacyRequestHtml, "开头", "结尾"),
+    )
+    expect(restoredLegacy.content.querySelector("math")?.outerHTML).toBe(sourceMath.outerHTML)
+  })
+
   it("removes non-language attributes while retaining translatable and no-translate semantics", () => {
     const longToken = "utility-class-".repeat(80)
     const [link] = createNodes(

@@ -13,6 +13,7 @@ import {
   INLINE_ATTRIBUTE,
   INLINE_CONTENT_CLASS,
   PARAGRAPH_ATTRIBUTE,
+  PRESERVED_MATH_CLASS,
   TRANSLATION_ERROR_CONTAINER_CLASS,
   TRANSLATION_ONLY_ATTRIBUTE,
   VIRTUAL_PARAGRAPH_ATTRIBUTE,
@@ -3238,6 +3239,40 @@ describe("translate", () => {
         expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
         const wrapper = expectTranslationWrapper(node, "translationOnly")
         expect(wrapper).toBe(node.children[0])
+      })
+    })
+
+    describe("MathML formulas", () => {
+      it("bilingual mode: keeps formulas at their translated placeholder positions", async () => {
+        vi.mocked(translateTextForPage).mockImplementationOnce(async (text: string) =>
+          text
+            .replace("Starting from the initial harness", "从初始执行框架开始")
+            .replace("the protocol runs for", "该协议运行")
+            .replace("steps", "步"),
+        )
+        render(<p data-testid="test-node" />)
+        const node = screen.getByTestId("test-node")
+        node.innerHTML =
+          'Starting from the initial harness <math id="h-zero" class="ltx_Math" alttext="H_{0}"><semantics><msub><mi>H</mi><mn>0</mn></msub><annotation encoding="application/x-tex">H_{0}</annotation></semantics></math>, the protocol runs for <math id="steps" class="ltx_Math" alttext="T"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math> steps.'
+        const sourceMath = [...node.querySelectorAll("math")]
+
+        await removeOrShowPageTranslation("bilingual", true)
+
+        const request = vi.mocked(translateTextForPage).mock.calls.at(-1)?.[0]
+        expect(request).toContain("{{READ_FROG_MATH_0}}")
+        expect(request).toContain("{{READ_FROG_MATH_1}}")
+        expect(request).not.toContain("H_{0}")
+
+        const wrapper = expectTranslationWrapper(node, "bilingual")
+        const translatedMath = [...wrapper!.querySelectorAll("math")]
+        expect(translatedMath).toHaveLength(2)
+        expect(translatedMath[0]).not.toBe(sourceMath[0])
+        expect(translatedMath[0]?.classList.contains(PRESERVED_MATH_CLASS)).toBe(true)
+        expect(translatedMath[0]?.hasAttribute("id")).toBe(false)
+        expect(translatedMath[0]?.getAttribute("alttext")).toBe("H_{0}")
+        expect(translatedMath[1]?.getAttribute("alttext")).toBe("T")
+        expect(sourceMath[0]?.getAttribute("id")).toBe("h-zero")
+        expect(sourceMath[1]?.getAttribute("id")).toBe("steps")
       })
     })
   })

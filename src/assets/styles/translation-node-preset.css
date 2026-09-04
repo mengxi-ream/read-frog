@@ -24,6 +24,15 @@
   text-decoration: inherit;
 }
 
+/* Target-language presets set a UI font on every translated descendant.
+ * MathML needs a math font and must not inherit aggressive word wrapping. */
+.read-frog-translated-content-wrapper math.read-frog-preserved-math,
+.read-frog-translated-content-wrapper math.read-frog-preserved-math * {
+  overflow-wrap: normal;
+  word-break: normal;
+  font-family: math;
+}
+
 /* Simplified Chinese - macOS > Windows > Cross-platform > Fallback */
 .read-frog-translated-content-wrapper[lang="zh"],
 .read-frog-translated-content-wrapper[lang="zh"] * {

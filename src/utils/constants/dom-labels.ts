@@ -25,6 +25,11 @@ export const MARK_ATTRIBUTES = new Set([
 
 export const NOTRANSLATE_CLASS = "notranslate"
 
+// Marks MathML cloned into bilingual translations. The class lets the preset
+// stylesheet restore a math font after target-language typography is applied
+// to the rest of the translated wrapper.
+export const PRESERVED_MATH_CLASS = "read-frog-preserved-math"
+
 export const REACT_SHADOW_HOST_CLASS = "read-frog-react-shadow-host"
 
 export const SPINNER_CLASS = "read-frog-spinner"

@@ -27,6 +27,8 @@ interface TranslationInsertionContext {
   // expected content. Not fired on the no-append early return, so stray empty
   // wrappers never enter tamper surveillance.
   onContentInserted?: (wrapper: HTMLElement) => void
+  /** Render protected inline content (for example MathML) into the translated span. */
+  renderTranslatedContent?: (container: HTMLElement, translatedText: string) => void
 }
 
 function sourceRunMatchesSelector(sources: readonly TransNode[], selector: string | null): boolean {
@@ -131,6 +133,7 @@ export async function insertTranslatedNodeIntoWrapper(
     sourceText,
     isCurrent,
     onContentInserted,
+    renderTranslatedContent,
   }: TranslationInsertionContext,
   translatedText: string,
   translationNodeStyle: TranslationNodeStyleConfig,
@@ -184,7 +187,11 @@ export async function insertTranslatedNodeIntoWrapper(
     return
   }
 
-  translatedNode.textContent = translatedText
+  if (renderTranslatedContent) {
+    renderTranslatedContent(translatedNode, translatedText)
+  } else {
+    translatedNode.textContent = translatedText
+  }
   translatedWrapperNode.appendChild(translatedNode)
   // Synchronous, pre-await: see TranslationInsertionContext.onContentInserted.
   onContentInserted?.(translatedWrapperNode)

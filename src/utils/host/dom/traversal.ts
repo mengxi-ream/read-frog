@@ -24,7 +24,16 @@ import {
 
 const NON_NEWLINE_WHITESPACE_RE = /[^\S\n]/
 
-export function extractTextContent(node: TransNode, config: Config): string {
+export interface ExtractTextContentOptions {
+  /** Return an atomic replacement for an element, or undefined to use the normal extraction. */
+  replaceElement?: (element: HTMLElement) => string | undefined
+}
+
+export function extractTextContent(
+  node: TransNode,
+  config: Config,
+  options: ExtractTextContentOptions = {},
+): string {
   if (isTextNode(node)) {
     const text = node.textContent ?? ""
     const trimmed = text.trim()
@@ -39,6 +48,11 @@ export function extractTextContent(node: TransNode, config: Config): string {
   // Handle <br> elements as line breaks
   if (isHTMLElement(node) && node.tagName === "BR") {
     return "\n"
+  }
+
+  const replacement = isHTMLElement(node) ? options.replaceElement?.(node) : undefined
+  if (replacement !== undefined) {
+    return replacement
   }
 
   // We already don't walk and label the element which isDontWalkIntoElement
@@ -64,7 +78,7 @@ export function extractTextContent(node: TransNode, config: Config): string {
   return childNodes.reduce((text: string, child: Node): string => {
     // TODO: support SVGElement in the future
     if (isTextNode(child) || isHTMLElement(child)) {
-      return text + extractTextContent(child, config)
+      return text + extractTextContent(child, config, options)
     }
     return text
   }, "")
