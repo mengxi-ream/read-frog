@@ -40,6 +40,7 @@ function Table({ className, children, ...props }: React.ComponentProps<"table">)
           // node has no previous geometry to transition from, which is what stops the
           // highlight from sliding in from whichever row was hovered last time.
           <div
+            // oxlint-disable-next-line react/refs -- reading the session id during render is the point -- a new key mounts a fresh node with no geometry to animate from
             key={sessionRef.current}
             aria-hidden
             data-slot="table-row-highlight"

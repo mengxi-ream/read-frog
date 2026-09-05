@@ -84,6 +84,15 @@ errorRecovery:
     confirm: リセット
     cancel: キャンセル
 options:
+  autosave:
+    invalid: 移動する前に、エラーのある項目を修正してください。
+    failed: 変更を保存できませんでした。編集中の内容は保持されています。
+    deleted: この項目は別のページで削除されました。未保存の編集内容は保持されています。
+    retry: 再試行
+    leaveTitle: 変更が保存されていません
+    leaveDescription: 編集を続けて問題を修正するか、未保存の変更を破棄してください。
+    keepEditing: 編集を続ける
+    discard: 未保存の変更を破棄
   batchSavings:
     savedCost: API コストを約 $1% 削減
   commandPalette:
@@ -720,7 +729,7 @@ options:
           bilingual: バイリンガル
           translationOnly: 翻訳のみ
         switched: 翻訳モード：$1
-        microsoftNotSupported: Microsoft 翻訳は「翻訳のみ」モードに対応していません。有効にするには他のプロバイダーに切り替えてください。
+        providerNotSupported: $1 は「翻訳のみ」モードに対応していません。有効にするには他のプロバイダーに切り替えてください。
       translateRange:
         title: 翻訳範囲
         description: ページのメインコンテンツのみを翻訳するか、すべてのコンテンツを翻訳するかを選択します。

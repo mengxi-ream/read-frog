@@ -58,9 +58,11 @@ export function TranslationSubtitle({ content, className }: SubtitleLineProps) {
     pending: false,
   })
   const justResolved =
+    // oxlint-disable-next-line react/refs -- compares this frame against the last one to fire the fade exactly once; state here would cost the extra render the trick avoids
     !pending &&
     !!text &&
     lastFrameRef.current.pending &&
+    // oxlint-disable-next-line react/refs -- compares this frame against the last one to fire the fade exactly once
     lastFrameRef.current.start === subtitle?.start
 
   useEffect(() => {
@@ -91,6 +93,7 @@ export function TranslationSubtitle({ content, className }: SubtitleLineProps) {
     <div
       className={cn(
         "subtitles-translation text-xl leading-tight",
+        // oxlint-disable-next-line react/refs -- compares this frame against the last one to fire the fade exactly once
         justResolved && "animate-subtitle-fade-in",
         className,
       )}

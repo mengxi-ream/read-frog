@@ -319,6 +319,7 @@ export function useCustomActionExecution({
   const [thinking, setThinking] = useState<ThinkingSnapshot | null>(null)
   const lastRunKeyRef = useRef<string | null>(null)
   const bodyRefRef = useRef(bodyRef)
+  // oxlint-disable-next-line react/refs -- latest-value ref: writing it during render is what keeps callbacks in sync
   bodyRefRef.current = bodyRef
   const executionRequest = executionContext
     ? buildCustomActionExecutionRequest({
@@ -329,6 +330,7 @@ export function useCustomActionExecution({
       })
     : null
   const executionRequestRef = useRef<CustomActionExecutionRequest | null>(null)
+  // oxlint-disable-next-line react/refs -- latest-value ref: writing it during render is what keeps callbacks in sync
   executionRequestRef.current = executionRequest
   const executionRequestKey = executionRequest?.key ?? null
 

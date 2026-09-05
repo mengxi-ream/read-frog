@@ -9,8 +9,14 @@ interface OpenAIGPT5ReasoningEffortPolicy {
   recommendedValue?: OpenAIReasoningEffort
 }
 
+// Reviewed against provider catalogs and AI SDK docs on 2026-09-04.
+// Keep existing IDs: persisted provider configs validate against these enums.
 export const LLM_PROVIDER_MODELS = {
   openai: [
+    "gpt-5.6-luna",
+    "gpt-5.6-terra",
+    "gpt-5.6-sol",
+    "gpt-5.6",
     "gpt-5.5",
     "gpt-5.4-pro",
     "gpt-5.4",
@@ -37,6 +43,9 @@ export const LLM_PROVIDER_MODELS = {
     "gpt-4o-mini",
   ],
   azure: [
+    "gpt-5.6-luna",
+    "gpt-5.6-terra",
+    "gpt-5.6-sol",
     "gpt-5.4-mini",
     "gpt-5.4",
     "gpt-5.4-pro",
@@ -62,12 +71,15 @@ export const LLM_PROVIDER_MODELS = {
   ],
   deepseek: ["deepseek-v4-flash", "deepseek-v4-pro", "deepseek-chat", "deepseek-reasoner"],
   google: [
+    "gemini-3.5-flash-lite",
+    "gemini-3.8-flash",
+    "gemini-3.7-flash",
+    "gemini-3.1-flash-lite",
     "gemini-flash-lite-latest",
     "gemini-flash-latest",
     "gemini-pro-latest",
     "gemini-3.6-flash",
     "gemini-3.5-flash",
-    "gemini-3.5-flash-lite",
     "gemini-3.1-pro-preview",
     "gemini-3.1-flash-image-preview",
     "gemini-3.1-flash-lite-preview",
@@ -81,13 +93,16 @@ export const LLM_PROVIDER_MODELS = {
     "gemini-2.0-flash",
   ],
   anthropic: [
+    "claude-haiku-4-5",
+    "claude-sonnet-5",
+    "claude-opus-5",
+    "claude-fable-5-1",
     "claude-fable-5",
     "claude-opus-4-8",
     "claude-opus-4-7",
     "claude-opus-4-6",
     "claude-sonnet-4-6",
     "claude-opus-4-5",
-    "claude-haiku-4-5",
     "claude-sonnet-4-5",
     "claude-opus-4-1",
     "claude-opus-4-0",
@@ -135,8 +150,17 @@ export const LLM_PROVIDER_MODELS = {
   ],
   "openai-compatible": ["use-custom-model"],
   "open-responses": ["use-custom-model"],
-  xai: ["grok-4.20-0309-non-reasoning", "grok-4.20-0309-reasoning", "grok-4.3"],
+  xai: [
+    "grok-4.3",
+    "grok-4.6",
+    "grok-4.5",
+    "grok-4.20-non-reasoning",
+    "grok-4.20-reasoning",
+    "grok-4.20-0309-non-reasoning",
+    "grok-4.20-0309-reasoning",
+  ],
   bedrock: [
+    "us.anthropic.claude-sonnet-5",
     "amazon.titan-tg1-large",
     "amazon.titan-text-express-v1",
     "amazon.titan-text-lite-v1",
@@ -206,6 +230,10 @@ export const LLM_PROVIDER_MODELS = {
     "openai.gpt-oss-120b",
   ],
   groq: [
+    "openai/gpt-oss-20b",
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.8-27b",
+    "qwen/qwen3.6-27b",
     "gemma2-9b-it",
     "llama-3.1-8b-instant",
     "llama-3.3-70b-versatile",
@@ -220,10 +248,14 @@ export const LLM_PROVIDER_MODELS = {
     "qwen-qwq-32b",
     "qwen-2.5-32b",
     "deepseek-r1-distill-qwen-32b",
-    "openai/gpt-oss-20b",
-    "openai/gpt-oss-120b",
   ],
   deepinfra: [
+    "Qwen/Qwen3.5-9B",
+    "Qwen/Qwen3.8-27B",
+    "deepseek-ai/DeepSeek-V4-Flash",
+    "deepseek-ai/DeepSeek-V4-Pro",
+    "moonshotai/Kimi-K2.6",
+    "google/gemma-4-31B-it",
     "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
     "meta-llama/Llama-4-Scout-17B-16E-Instruct",
     "meta-llama/Llama-3.3-70B-Instruct-Turbo",
@@ -250,6 +282,8 @@ export const LLM_PROVIDER_MODELS = {
     "microsoft/WizardLM-2-8x22B",
   ],
   mistral: [
+    "mistral-small-latest",
+    "mistral-small-2603",
     "pixtral-large-latest",
     "mistral-large-latest",
     "mistral-medium-latest",
@@ -257,7 +291,6 @@ export const LLM_PROVIDER_MODELS = {
     "mistral-medium-2508",
     "mistral-medium-2505",
     "mistral-medium-3.5",
-    "mistral-small-latest",
     "magistral-small-2507",
     "magistral-medium-2507",
     "magistral-small-2506",
@@ -270,6 +303,15 @@ export const LLM_PROVIDER_MODELS = {
     "open-mixtral-8x22b",
   ],
   togetherai: [
+    "Qwen/Qwen3.5-9B",
+    "Qwen/Qwen3.5-397B-A17B",
+    "Qwen/Qwen3.7-Max",
+    "moonshotai/Kimi-K2.6",
+    "deepseek-ai/DeepSeek-V4-Pro",
+    "MiniMaxAI/MiniMax-M2.7",
+    "zai-org/GLM-5.1",
+    "openai/gpt-oss-20b",
+    "openai/gpt-oss-120b",
     "meta-llama/Llama-3.3-70B-Instruct-Turbo",
     "deepseek-ai/DeepSeek-V3",
     "meta-llama/Meta-Llama-3.3-70B-Instruct-Turbo",
@@ -291,6 +333,8 @@ export const LLM_PROVIDER_MODELS = {
     "command-r7b-12-2024",
   ],
   fireworks: [
+    "accounts/fireworks/models/gpt-oss-120b",
+    "accounts/fireworks/models/kimi-k2p6",
     "accounts/fireworks/models/firefunction-v1",
     "accounts/fireworks/models/deepseek-r1",
     "accounts/fireworks/models/deepseek-v3",
@@ -314,9 +358,10 @@ export const LLM_PROVIDER_MODELS = {
     "accounts/fireworks/models/minimax-m2",
   ],
   cerebras: [
+    "gpt-oss-120b",
+    "gemma-4-31b",
     "llama3.1-8b",
     "llama-3.3-70b",
-    "gpt-oss-120b",
     "qwen-3-32b",
     "qwen-3-235b-a22b-instruct-2507",
     "qwen-3-235b-a22b-thinking-2507",
@@ -332,7 +377,14 @@ export const LLM_PROVIDER_MODELS = {
     "sonar",
   ],
   vercel: ["v0-1.5-md", "v0-1.5-lg", "v0-1.0-md"],
-  openrouter: ["x-ai/grok-4-fast:free", "openai/gpt-4.1-mini"],
+  openrouter: [
+    "google/gemma-4-31b-it:free",
+    "openai/gpt-5.6-luna",
+    "google/gemini-3.5-flash-lite",
+    "deepseek/deepseek-v4-flash",
+    "x-ai/grok-4-fast:free",
+    "openai/gpt-4.1-mini",
+  ],
   ollama: ["gemma4:e2b", "gemma4:e4b", "gemma3:4b", "llama3.2:3b"],
   volcengine: [
     "doubao-seed-1-6-flash-250828",
@@ -351,6 +403,14 @@ export const LLM_PROVIDER_MODELS = {
     "MiniMax-M2-Stable",
   ],
   alibaba: [
+    "qwen3.8-flash",
+    "qwen3.8-max",
+    "qwen3.7-flash",
+    "qwen3.7-plus",
+    "deepseek-v4-flash",
+    "deepseek-v4-pro",
+    "kimi-k2.6",
+    "glm-5.2",
     "qwen3-max",
     "qwen3.5-plus",
     "qwen3.5-flash",
@@ -368,6 +428,8 @@ export const LLM_PROVIDER_MODELS = {
     "glm-5",
   ],
   moonshotai: [
+    "kimi-k2.6",
+    "kimi-k3",
     "moonshot-v1-8k",
     "moonshot-v1-32k",
     "moonshot-v1-128k",
@@ -378,6 +440,12 @@ export const LLM_PROVIDER_MODELS = {
     "kimi-k2-turbo",
   ],
   huggingface: [
+    "Qwen/Qwen3.5-9B",
+    "Qwen/Qwen3.8-27B",
+    "deepseek-ai/DeepSeek-V4-Flash",
+    "deepseek-ai/DeepSeek-V4-Pro",
+    "moonshotai/Kimi-K2.6",
+    "google/gemma-4-31B-it",
     "meta-llama/Llama-3.1-8B-Instruct",
     "meta-llama/Llama-3.1-70B-Instruct",
     "meta-llama/Llama-3.3-70B-Instruct",
@@ -411,6 +479,11 @@ export const PURE_TRANSLATE_PROVIDERS = [
 ] as const
 
 const OPENAI_GPT5_REASONING_EFFORT_POLICIES: OpenAIGPT5ReasoningEffortPolicy[] = [
+  {
+    pattern: /^(?:openai\/)?gpt-5\.6(?:-(?:luna|terra|sol))?$/i,
+    supportedValues: ["none", "low", "medium", "high", "xhigh", "max"],
+    recommendedValue: "none",
+  },
   {
     pattern: /^gpt-5\.4-pro$/i,
     supportedValues: ["medium", "high", "xhigh"],
@@ -486,9 +559,11 @@ export const LLM_MODEL_OPTIONS: Array<{
 }> = [
   // Gemini - specific patterns first
   // The versionless aliases track the newest generation, which uses thinkingLevel;
-  // the pro tier does not accept "minimal".
+  // Pro and Flash 3.7/3.8 do not accept "minimal".
+  // https://ai.google.dev/gemini-api/docs/thinking
   {
-    pattern: /^gemini-pro-latest$/i,
+    pattern:
+      /^(?:gemini-pro-latest|gemini-3(?:\.1)?-pro-preview(?:-customtools)?|gemini-3\.[78]-flash|gemini-flash-latest)$/i,
     options: { thinkingConfig: { thinkingLevel: "low", includeThoughts: false } },
   },
   {
@@ -525,18 +600,24 @@ export const LLM_MODEL_OPTIONS: Array<{
   // GPT-5 chat-latest variants are intentionally omitted because their docs do not advertise reasoning.effort.
   ...OPENAI_GPT5_RECOMMENDED_MODEL_OPTIONS,
 
-  // xAI Grok reasoning-capable text models - keep effort at the lowest supported level.
-  // Non-reasoning Grok variants are intentionally omitted because they do not need reasoning options.
-  // TODO: switch Grok 4.3 to the non-reasoning path once stable @ai-sdk/xai supports reasoning.effort = "none".
+  // Grok 4.3 can disable thinking; 4.5 and 4.6 cannot.
   {
-    pattern: /^(?:grok-4\.3|grok-4\.20-0309-reasoning)$/i,
+    pattern: /^grok-4\.3$/i,
+    options: { reasoningEffort: "none" },
+  },
+  {
+    pattern: /^grok-4\.[56]$/i,
+    options: { reasoningEffort: "low" },
+  },
+  {
+    pattern: /^grok-4\.20-0309-reasoning$/i,
     options: { reasoningEffort: "low" },
   },
 
   // OpenAI-compatible reasoning models exposed by Groq/Cerebras and similar providers
   {
-    pattern: /^(?:openai\/)?gpt-oss-(?:20|120)b$/i,
-    options: { reasoningEffort: "none" },
+    pattern: /^(?:openai\/|accounts\/fireworks\/models\/)?gpt-oss-(?:20|120)b$/i,
+    options: { reasoningEffort: "low" },
   },
 
   // Volcengine Doubao Seed models - disable thinking by default.
@@ -578,6 +659,11 @@ export const LLM_MODEL_OPTIONS: Array<{
   {
     pattern: /(?:^|\/)kimi-k2(?!-instruct(?:[a-z0-9.-].*)?$)(?:[a-z0-9.-].*)?$/i,
     options: { thinking: { type: "disabled" }, reasoningHistory: "disabled" },
+  },
+  // Kimi K3 always reasons and does not accept the K2 thinking options.
+  {
+    pattern: /^kimi-k3$/i,
+    options: { reasoningEffort: "low" },
   },
 
   // Namespaced Qwen3 models - disable reasoning by default.

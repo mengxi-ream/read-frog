@@ -65,7 +65,7 @@ function toBuiltInDictionaryState(
   return {
     enabled: action.enabled !== false,
     providerId: action.providerId,
-    ...(action.notebaseConnection ? { notebaseConnection: action.notebaseConnection } : {}),
+    notebaseConnection: action.notebaseConnection,
   }
 }
 

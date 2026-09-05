@@ -84,6 +84,15 @@ errorRecovery:
     confirm: Reset
     cancel: Cancel
 options:
+  autosave:
+    invalid: Please correct the highlighted fields before leaving.
+    failed: Your changes could not be saved. They are still available here.
+    deleted: This item was deleted elsewhere. Your unsaved edits have been kept.
+    retry: Retry
+    leaveTitle: Changes have not been saved
+    leaveDescription: Continue editing to fix the problem, or discard the changes that have not been saved.
+    keepEditing: Continue editing
+    discard: Discard unsaved changes
   batchSavings:
     savedCost: Saved approx. $1% on API costs
   commandPalette:
@@ -836,7 +845,7 @@ options:
           bilingual: Bilingual
           translationOnly: Translation only
         switched: "Translation mode: $1"
-        microsoftNotSupported: Microsoft Translator doesn't support translation-only mode. To enable it, switch to another provider.
+        providerNotSupported: $1 doesn't support translation-only mode. To enable it, switch to another provider.
       translateRange:
         title: Translation range
         description: Select whether to translate only the main content or all content on the page.

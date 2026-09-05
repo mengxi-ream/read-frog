@@ -4,30 +4,36 @@ import { useCallback } from "react"
 import { Field, FieldError, FieldTitle } from "@/components/ui/base-ui/field"
 import { Select } from "@/components/ui/base-ui/select"
 import { useFieldContext } from "./form-context"
+import { useAutosaveContext } from "./use-autosave"
 
 type SelectFieldAutoSaveProps = React.ComponentProps<typeof Select> & {
-  formForSubmit: { handleSubmit: () => void }
   label: React.ReactNode
   labelExtra?: React.ReactNode
 }
 
 export function SelectFieldAutoSave({
-  formForSubmit,
   label,
   labelExtra,
+  onValueChange,
   ...props
 }: SelectFieldAutoSaveProps) {
+  const autosave = useAutosaveContext()
   const field = useFieldContext<string | undefined>()
   const errors = useSelector(field.store, (state) => state.meta.errors)
   const hasError = errors.length > 0
 
   const handleValueChange = useCallback(
-    (value: unknown) => {
+    (...[value, details]: Parameters<NonNullable<SelectFieldAutoSaveProps["onValueChange"]>>) => {
       if (typeof value !== "string") return
-      field.handleChange(value)
-      formForSubmit.handleSubmit()
+      autosave.edit(
+        () => {
+          field.handleChange(value)
+          onValueChange?.(value, details)
+        },
+        { immediate: true },
+      )
     },
-    [field, formForSubmit],
+    [field, autosave, onValueChange],
   )
 
   return (
@@ -36,7 +42,7 @@ export function SelectFieldAutoSave({
         <FieldTitle>{label}</FieldTitle>
         {labelExtra}
       </div>
-      <Select value={field.state.value} onValueChange={handleValueChange} {...props}>
+      <Select {...props} value={field.state.value} onValueChange={handleValueChange}>
         {props.children}
       </Select>
       <FieldError>

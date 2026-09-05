@@ -37,6 +37,7 @@ export function SubtitlesSettingsPanel() {
         subpage
           ? {
               key: view,
+              // oxlint-disable-next-line react/refs -- the previous view is what decides the slide direction
               direction: prevViewRef.current === ROOT_VIEW ? "forward" : "back",
             }
           : undefined

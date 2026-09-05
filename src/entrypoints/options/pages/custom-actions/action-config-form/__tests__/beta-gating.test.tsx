@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
 import type { ReactNode } from "react"
+import type { Config as SeedConfig } from "@/types/config/config"
 import type { Config } from "@/types/config/config"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { describe, expect, it, vi } from "vitest"
+import { fakeBrowser } from "wxt/testing/fake-browser"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
@@ -51,6 +53,11 @@ vi.mock("../notebase-connection-field", () => ({
   ),
 }))
 
+function seedConfig(store: ReturnType<typeof createStore>, config: SeedConfig) {
+  void fakeBrowser.storage.local.set({ config })
+  store.set(configAtom, config)
+}
+
 function cloneConfig(config: Config): Config {
   return JSON.parse(JSON.stringify(config)) as Config
 }
@@ -70,7 +77,7 @@ describe("customActionConfigForm notebase availability", () => {
       },
       mappings: [],
     }
-    store.set(configAtom, config)
+    seedConfig(store, config)
 
     render(
       <Provider store={store}>
@@ -112,7 +119,7 @@ describe("customActionConfigForm notebase availability", () => {
 
   it("explains that customizing creates an editable built-in action copy", async () => {
     const store = createStore()
-    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    seedConfig(store, cloneConfig(DEFAULT_CONFIG))
 
     render(
       <Provider store={store}>
@@ -163,8 +170,8 @@ describe("customActionConfigForm notebase availability", () => {
       },
     ]
 
-    store.set(configAtom, config)
-    store.set(selectedCustomActionIdAtom, "action-1")
+    seedConfig(store, config)
+    void store.set(selectedCustomActionIdAtom, "action-1")
 
     render(
       <Provider store={store}>
@@ -210,8 +217,8 @@ describe("customActionConfigForm notebase availability", () => {
       },
     }
     config.selectionToolbar.customActions = [action]
-    store.set(configAtom, config)
-    store.set(selectedCustomActionIdAtom, action.id)
+    seedConfig(store, config)
+    void store.set(selectedCustomActionIdAtom, action.id)
 
     render(
       <Provider store={store}>

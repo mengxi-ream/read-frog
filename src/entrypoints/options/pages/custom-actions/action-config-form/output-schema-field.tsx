@@ -9,6 +9,7 @@ import { fieldContext as FieldContext } from "@/components/form/form-context"
 import { InputField } from "@/components/form/input-field"
 import { QuickInsertableTextareaField } from "@/components/form/quick-insertable-textarea-field"
 import { SelectField } from "@/components/form/select-field"
+import { useAutosaveContext } from "@/components/form/use-autosave"
 import { SortableList } from "@/components/sortable-list"
 import {
   AlertDialog,
@@ -48,6 +49,7 @@ import {
   SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS,
 } from "@/utils/constants/custom-action"
 import { i18n } from "@/utils/i18n"
+import { sanitizeCustomActionNotebaseConnection } from "@/utils/notebase/connection"
 import { withForm } from "./form"
 
 type CustomActionFormKey =
@@ -289,6 +291,7 @@ export function ReadOnlyOutputSchemaField({
 export const OutputSchemaField = withForm({
   ...{ defaultValues: {} as SelectionToolbarCustomAction },
   render: function Render({ form }) {
+    const autosave = useAutosaveContext()
     const [editingField, setEditingField] =
       useState<SelectionToolbarCustomActionOutputField | null>(null)
     const [addingField, setAddingField] = useState<SelectionToolbarCustomActionOutputField | null>(
@@ -348,8 +351,7 @@ export const OutputSchemaField = withForm({
               <SortableList
                 list={outputSchema}
                 setList={(newList) => {
-                  field.handleChange(newList)
-                  void form.handleSubmit()
+                  autosave.edit(() => field.handleChange(newList), { immediate: true })
                 }}
                 className="flex flex-col gap-2"
                 renderItem={(outputField) => (
@@ -400,8 +402,9 @@ export const OutputSchemaField = withForm({
                     if (!open) setAddingField(null)
                   }}
                   onSave={(created) => {
-                    field.handleChange([...outputSchema, created])
-                    void form.handleSubmit()
+                    autosave.edit(() => field.handleChange([...outputSchema, created]), {
+                      immediate: true,
+                    })
                     setAddingField(null)
                   }}
                 />
@@ -420,8 +423,7 @@ export const OutputSchemaField = withForm({
                     const nextOutputSchema = outputSchema.map((item) =>
                       item.id === updated.id ? updated : item,
                     )
-                    field.handleChange(nextOutputSchema)
-                    void form.handleSubmit()
+                    autosave.edit(() => field.handleChange(nextOutputSchema), { immediate: true })
                     setEditingField(null)
                   }}
                 />
@@ -434,8 +436,24 @@ export const OutputSchemaField = withForm({
                 }}
                 onConfirm={() => {
                   if (deletingFieldId) {
-                    field.handleChange(outputSchema.filter((item) => item.id !== deletingFieldId))
-                    void form.handleSubmit()
+                    autosave.edit(
+                      () => {
+                        const nextOutputSchema = field.state.value.filter(
+                          (item) => item.id !== deletingFieldId,
+                        )
+                        const connection = form.state.values.notebaseConnection
+                        if (connection) {
+                          // Drop references before field validation runs; the persistence
+                          // sanitizer cannot repair a draft rejected by handleSubmit.
+                          form.setFieldValue(
+                            "notebaseConnection",
+                            sanitizeCustomActionNotebaseConnection(connection, nextOutputSchema),
+                          )
+                        }
+                        field.handleChange(nextOutputSchema)
+                      },
+                      { immediate: true },
+                    )
                     setDeletingFieldId(null)
                   }
                 }}

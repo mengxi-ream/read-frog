@@ -84,6 +84,15 @@ errorRecovery:
     confirm: 重置
     cancel: 取消
 options:
+  autosave:
+    invalid: 请修正标出的字段后再离开。
+    failed: 修改保存失败，编辑内容已保留。
+    deleted: 此项目已在其他页面删除，未保存的编辑内容已保留。
+    retry: 重试
+    leaveTitle: 修改尚未保存
+    leaveDescription: 你可以继续编辑并修正问题，或放弃尚未保存的修改。
+    keepEditing: 继续编辑
+    discard: 放弃未保存修改
   batchSavings:
     savedCost: 约省 $1% API 费用
   commandPalette:
@@ -836,7 +845,7 @@ options:
           bilingual: 双语对照
           translationOnly: 仅显示翻译
         switched: 翻译模式：$1
-        microsoftNotSupported: Microsoft 翻译不支持仅译文模式，若想开启请切换其他提供商。
+        providerNotSupported: $1 不支持仅译文模式，若想开启请切换其他提供商。
       translateRange:
         title: 翻译范围
         description: 选择是仅翻译主要内容还是翻译页面上的所有内容。

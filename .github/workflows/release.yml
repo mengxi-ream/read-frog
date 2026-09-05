@@ -49,7 +49,7 @@ jobs:
       - name: Create Release Pull Request or Tag
         if: github.event_name != 'workflow_dispatch'
         id: changesets
-        uses: changesets/action@v2.1.0
+        uses: changesets/action@v2.1.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore(release): version packages"

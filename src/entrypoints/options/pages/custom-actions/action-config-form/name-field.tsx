@@ -36,7 +36,6 @@ export const NameField = withForm({
       >
         {(field) => (
           <field.InputFieldAutoSave
-            formForSubmit={form}
             label={i18n.t("options.selectionToolbar.customActions.form.name")}
             labelExtra={labelExtra}
             readOnly={readOnly}

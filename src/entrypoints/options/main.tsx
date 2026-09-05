@@ -5,7 +5,8 @@ import { QueryClientProvider } from "@tanstack/react-query"
 import { Provider as JotaiProvider } from "jotai"
 import { useHydrateAtoms } from "jotai/utils"
 import * as React from "react"
-import { HashRouter } from "react-router"
+import { createHashRouter, RouterProvider } from "react-router"
+import { AutosaveNavigation } from "@/components/form/autosave-navigation"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { RecoveryBoundary } from "@/components/recovery/recovery-boundary"
 import { SidebarProvider } from "@/components/ui/base-ui/sidebar"
@@ -50,6 +51,34 @@ async function initApp() {
 
   applyTheme(document.documentElement, isDarkMode(themeMode) ? "dark" : "light")
 
+  const router = createHashRouter([
+    {
+      path: "*",
+      element: (
+        <SidebarProvider>
+          <ThemeProvider>
+            <TooltipProvider>
+              <LocaleBoundary>
+                <ToastProvider>
+                  <AnchoredToastProvider>
+                    <RecoveryBoundary>
+                      <ScrollRestoration />
+                      <AutosaveNavigation />
+                      <AppShell>
+                        <App />
+                      </AppShell>
+                      <SettingsSearch />
+                    </RecoveryBoundary>
+                  </AnchoredToastProvider>
+                </ToastProvider>
+              </LocaleBoundary>
+            </TooltipProvider>
+          </ThemeProvider>
+        </SidebarProvider>
+      ),
+    },
+  ])
+
   renderPersistentReactRoot(
     root,
     <React.StrictMode>
@@ -61,27 +90,7 @@ async function initApp() {
           ]}
         >
           <QueryClientProvider client={queryClient}>
-            <HashRouter>
-              <SidebarProvider>
-                <ThemeProvider>
-                  <TooltipProvider>
-                    <LocaleBoundary>
-                      <ToastProvider>
-                        <AnchoredToastProvider>
-                          <RecoveryBoundary>
-                            <ScrollRestoration />
-                            <AppShell>
-                              <App />
-                            </AppShell>
-                            <SettingsSearch />
-                          </RecoveryBoundary>
-                        </AnchoredToastProvider>
-                      </ToastProvider>
-                    </LocaleBoundary>
-                  </TooltipProvider>
-                </ThemeProvider>
-              </SidebarProvider>
-            </HashRouter>
+            <RouterProvider router={router} />
           </QueryClientProvider>
         </HydrateAtoms>
       </JotaiProvider>

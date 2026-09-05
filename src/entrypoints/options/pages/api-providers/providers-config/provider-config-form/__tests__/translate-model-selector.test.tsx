@@ -4,7 +4,8 @@ import { useSelector } from "@tanstack/react-store"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { useEffect, useState } from "react"
 import { describe, expect, it, vi } from "vitest"
-import { formOpts, useAppForm } from "../form"
+import { AutosaveContext, toAutosaveSession } from "@/components/form/use-autosave"
+import { useProviderForm } from "../../provider-editor"
 import { TranslateModelSelector } from "../translate-model-selector"
 
 vi.mock("#imports", () => ({
@@ -60,52 +61,50 @@ function TranslateModelSelectorHarness({
 }) {
   const [providerConfig, setProviderConfig] = useState(initialConfig)
   const [submitCount, setSubmitCount] = useState(0)
-  const form = useAppForm({
-    ...formOpts,
-    defaultValues: providerConfig,
-    onSubmit: async ({ value }) => {
-      setSubmitCount((count) => count + 1)
-      setProviderConfig(value)
-    },
+  const { form, autosave } = useProviderForm(providerConfig, async (value) => {
+    setSubmitCount((count) => count + 1)
+    setProviderConfig(value)
   })
   const formValues = useSelector(form.store, (state) => state.values)
 
   useEffect(() => {
-    form.reset(providerConfig)
-  }, [providerConfig, form])
+    autosave.reconcile(providerConfig)
+  }, [providerConfig, autosave])
 
   return (
-    <form.AppForm>
-      <form.AppField
-        name="name"
-        validators={{
-          onChange: ({ value }) =>
-            value === duplicateProviderName ? "Duplicate provider name" : undefined,
-        }}
-      >
-        {(field) => (
-          <input
-            aria-label="provider-name"
-            value={field.state.value}
-            onBlur={field.handleBlur}
-            onChange={(event) => {
-              field.handleChange(event.target.value)
-              void form.handleSubmit()
-            }}
-          />
-        )}
-      </form.AppField>
-      <TranslateModelSelector form={form} />
-      <output aria-label="form-name">{formValues.name}</output>
-      <output aria-label="form-provider-options">
-        {JSON.stringify(formValues.providerOptions ?? null)}
-      </output>
-      <output aria-label="persisted-name">{providerConfig.name}</output>
-      <output aria-label="persisted-provider-options">
-        {JSON.stringify(providerConfig.providerOptions ?? null)}
-      </output>
-      <output aria-label="submit-count">{String(submitCount)}</output>
-    </form.AppForm>
+    <AutosaveContext value={toAutosaveSession(autosave)}>
+      <form.AppForm>
+        <form.AppField
+          name="name"
+          validators={{
+            onChange: ({ value }) =>
+              value === duplicateProviderName ? "Duplicate provider name" : undefined,
+          }}
+        >
+          {(field) => (
+            <input
+              aria-label="provider-name"
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(event) => {
+                const value = event.currentTarget.value
+                autosave.edit(() => field.handleChange(value), { immediate: true })
+              }}
+            />
+          )}
+        </form.AppField>
+        <TranslateModelSelector form={form} />
+        <output aria-label="form-name">{formValues.name}</output>
+        <output aria-label="form-provider-options">
+          {JSON.stringify(formValues.providerOptions ?? null)}
+        </output>
+        <output aria-label="persisted-name">{providerConfig.name}</output>
+        <output aria-label="persisted-provider-options">
+          {JSON.stringify(providerConfig.providerOptions ?? null)}
+        </output>
+        <output aria-label="submit-count">{String(submitCount)}</output>
+      </form.AppForm>
+    </AutosaveContext>
   )
 }
 

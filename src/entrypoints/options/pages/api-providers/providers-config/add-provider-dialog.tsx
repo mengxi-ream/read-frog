@@ -1,6 +1,7 @@
 import type { APIProviderTypes } from "@/types/config/provider"
-import { useAtom, useSetAtom } from "jotai"
+import { useSetAtom, useStore } from "jotai"
 import { SponsorBadge } from "@/components/badges/sponsor-badge"
+import { requestEditorNavigationAtom } from "@/components/form/autosave-navigation"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/base-ui/dialog"
@@ -15,12 +16,21 @@ import { selectedProviderIdAtom } from "./atoms"
 import { addProvider } from "./utils"
 
 export default function AddProviderDialog({ onClose }: { onClose: () => void }) {
-  const [providersConfig, setProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
+  const store = useStore()
+  const requestNavigation = useSetAtom(requestEditorNavigationAtom)
+  const setProvidersConfig = useSetAtom(configFieldsAtomMap.providersConfig)
   const setSelectedProviderId = useSetAtom(selectedProviderIdAtom)
 
   const handleAddProvider = async (providerType: APIProviderTypes) => {
-    await addProvider(providerType, providersConfig, setProvidersConfig, setSelectedProviderId)
-    onClose()
+    await requestNavigation(async () => {
+      await addProvider(
+        providerType,
+        store.get(configFieldsAtomMap.providersConfig),
+        setProvidersConfig,
+        setSelectedProviderId,
+      )
+      onClose()
+    })
   }
 
   return (

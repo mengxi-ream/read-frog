@@ -3,18 +3,19 @@
 import type { APIProviderConfig } from "@/types/config/provider"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
+import { AutosaveContext, toAutosaveSession } from "@/components/form/use-autosave"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
-import { formOpts, useAppForm } from "../form"
+import { useProviderForm } from "../../provider-editor"
 import { ProviderURLField } from "../provider-url-field"
 
 function ProviderURLFieldHarness({ providerConfig }: { providerConfig: APIProviderConfig }) {
-  const form = useAppForm({
-    ...formOpts,
-    defaultValues: providerConfig,
-    onSubmit: async () => {},
-  })
+  const { form, autosave } = useProviderForm(providerConfig, async () => {})
 
-  return <ProviderURLField form={form} />
+  return (
+    <AutosaveContext value={toAutosaveSession(autosave)}>
+      <ProviderURLField form={form} />
+    </AutosaveContext>
+  )
 }
 
 describe("ProviderURLField", () => {

@@ -84,6 +84,15 @@ errorRecovery:
     confirm: 重設
     cancel: 取消
 options:
+  autosave:
+    invalid: 請修正標示的欄位後再離開。
+    failed: 變更儲存失敗，編輯內容已保留。
+    deleted: 此項目已在其他頁面刪除，未儲存的編輯內容已保留。
+    retry: 重試
+    leaveTitle: 變更尚未儲存
+    leaveDescription: 你可以繼續編輯並修正問題，或捨棄尚未儲存的變更。
+    keepEditing: 繼續編輯
+    discard: 捨棄未儲存變更
   batchSavings:
     savedCost: 約省 $1% API 費用
   commandPalette:
@@ -836,7 +845,7 @@ options:
           bilingual: 雙語對照
           translationOnly: 僅顯示翻譯
         switched: 翻譯模式：$1
-        microsoftNotSupported: Microsoft 翻譯不支援僅譯文模式，若想開啟請切換其他提供商。
+        providerNotSupported: $1 不支援僅譯文模式，若想開啟請切換其他提供商。
       translateRange:
         title: 翻譯範圍
         description: 選擇是僅翻譯主要內容還是翻譯頁面上的所有內容。

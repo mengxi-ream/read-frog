@@ -1,10 +1,10 @@
 import type { Config } from "@/types/config/config"
 import { deepmergeCustom } from "deepmerge-ts"
+import { dequal } from "dequal"
 import { atom } from "jotai"
 import { selectAtom } from "jotai/utils"
 import { configSchema } from "@/types/config/config"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "../constants/config"
-import { logger } from "../logger"
 import { storageAdapter } from "./storage-adapter"
 
 export const configAtom = atom<Config>(DEFAULT_CONFIG)
@@ -14,140 +14,108 @@ export const mergeWithArrayOverwrite = deepmergeCustom({
   mergeArrays: (values) => values[values.length - 1],
 })
 
-/**
- * Promise-chain queue for serializing storage writes.
- *
- * Each write chains onto the previous via `.then()`, ensuring sequential execution:
- *   Promise.resolve() → task1 → task2 → task3 → ...
- *
- * This prevents race conditions when multiple writes happen in quick succession.
- * Even if a write fails, the queue continues (see `.catch(() => {})` below).
- */
+// Updaters deliberately use undefined to clear optional fields. Keep legacy
+// object-patch semantics unchanged for the other configuration consumers.
+const mergeUpdaterResult = deepmergeCustom({
+  mergeArrays: (values) => values[values.length - 1],
+  filterValues: false,
+})
+
+export type ConfigUpdate = Partial<Config> | ((current: Config) => Partial<Config>)
+
+// Shared by writers in this extension context. Other contexts remain independent.
 let writeQueue: Promise<void> = Promise.resolve()
-
-/**
- * Global counter to detect stale writes.
- *
- * Each write captures its version at invocation time. After async storage completes,
- * we compare captured vs current version to determine if this is still the latest write.
- * This prevents older writes from overwriting the optimistic UI state.
- */
 let writeVersion = 0
+let pendingWrites = 0
+const refreshListeners = new Set<() => void>()
 
-export const writeConfigAtom = atom(null, async (get, set, patch: Partial<Config>) => {
-  // ─────────────────────────────────────────────────────────────────────────
-  // STEP 1: Optimistic update (immediate UI feedback)
-  // ─────────────────────────────────────────────────────────────────────────
-  const localPrev = get(configAtom)
-  const optimisticNext = mergeWithArrayOverwrite(localPrev, patch)
-  set(configAtom, optimisticNext)
+function applyUpdate(current: Config, update: ConfigUpdate): Config {
+  return typeof update === "function"
+    ? mergeUpdaterResult(current, update(current))
+    : mergeWithArrayOverwrite(current, update)
+}
 
-  // Capture version for this write (used for stale-write detection later)
-  const currentWriteVersion = ++writeVersion
+export const writeConfigAtom = atom(null, async (get, set, update: ConfigUpdate) => {
+  const optimistic = applyUpdate(get(configAtom), update)
+  set(configAtom, optimistic)
+  const version = ++writeVersion
+  pendingWrites++
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // STEP 2: Queue the actual storage write
-  // ─────────────────────────────────────────────────────────────────────────
-  // Chain onto writeQueue so writes execute in order.
-  // Note: `.then(callback)` schedules callback to microtask queue (async),
-  // but `writeQueue = task` assignment happens synchronously.
   const task = writeQueue.then(async () => {
-    // Always read fresh from storage to capture any writes that completed before us.
-    // This ensures we don't lose concurrent field updates:
-    //   write({x:1}) then write({y:2}) → storage ends up with {x:1, y:2}
-    const configInStorage = await storageAdapter.get<Config>(
-      CONFIG_STORAGE_KEY,
-      DEFAULT_CONFIG,
-      configSchema,
-    )
-    const nextToPersist = mergeWithArrayOverwrite(configInStorage, patch)
-
+    let stored: Config | undefined
     try {
-      // Storage write always executes (not affected by version check)
-      await storageAdapter.set(CONFIG_STORAGE_KEY, nextToPersist, configSchema)
+      stored = await storageAdapter.get(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema)
+      const next = applyUpdate(stored, update)
+      await storageAdapter.set(CONFIG_STORAGE_KEY, next, configSchema)
       await storageAdapter.setMeta(CONFIG_STORAGE_KEY, { lastModifiedAt: Date.now() })
-
-      // ───────────────────────────────────────────────────────────────────
-      // STEP 3: Reconcile atom with persisted value (stale-write check)
-      // ───────────────────────────────────────────────────────────────────
-      // Only update atom if no newer writes happened since we started.
-      // If a newer write exists, its optimistic update already set the correct UI state,
-      // so we skip to avoid "flashing back" to this older value.
-      if (currentWriteVersion === writeVersion) {
-        set(configAtom, nextToPersist)
-      }
+      if (version === writeVersion && !dequal(get(configAtom), next)) set(configAtom, next)
     } catch (error) {
-      console.error("Failed to set config to storage:", nextToPersist, error)
-
-      // Roll back to storage value on error, but only if we're still the latest write.
-      if (currentWriteVersion === writeVersion) {
-        set(configAtom, configInStorage)
-      }
-
+      if (version === writeVersion && stored) set(configAtom, stored)
       throw error
+    } finally {
+      pendingWrites--
+      refreshListeners.forEach((refresh) => refresh())
     }
   })
-
-  // Update queue head. Use `.catch(() => {})` to ensure queue continues even if this write fails.
   writeQueue = task.catch(() => {})
-
   return task
 })
 
-/**
- * Initialize atom state from storage and set up cross-context sync.
- *
- * This handles three sync scenarios:
- * 1. Initial load: Read from storage when atom first mounts
- * 2. Cross-context updates: Watch for changes from other extension contexts (popup, options, etc.)
- * 3. Tab reactivation: Reload when tab becomes visible (inactive tabs may miss watch events)
- */
-configAtom.onMount = (setAtom: (newValue: Config) => void) => {
-  // Flag to avoid race condition: if watch fires before initial get() resolves,
-  // don't overwrite the fresher watch value with the stale get() result.
-  let didReceiveStorageUpdate = false
+// Watch notifications invalidate a read. Their payload may describe an older write,
+// and must never replace a newer optimistic update or an already persisted value.
+configAtom.onMount = (setAtom) => {
+  let active = true
+  let requested = false
+  let reading = false
+  let generation = 0
 
-  // Initial load from storage
-  void storageAdapter
-    .get<Config>(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema)
-    .then((value) => {
-      if (!didReceiveStorageUpdate) {
-        setAtom(value)
+  async function refresh() {
+    if (reading) return
+    reading = true
+    try {
+      while (requested) {
+        if (!active) return
+        await writeQueue
+        if (!active) return
+        if (pendingWrites > 0) continue
+        requested = false
+        const readGeneration = generation
+        const readVersion = writeVersion
+        const value = await storageAdapter.get(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema)
+        if (!active) return
+        if (readGeneration !== generation || readVersion !== writeVersion || pendingWrites > 0) {
+          requested = true
+          continue
+        }
+        setAtom((previous) => (dequal(previous, value) ? previous : value))
       }
-    })
-
-  // Watch for changes from other extension contexts (popup, options page, other tabs)
-  const unwatch = storageAdapter.watch<Config>(CONFIG_STORAGE_KEY, (value) => {
-    didReceiveStorageUpdate = true
-    setAtom(value)
-  })
-
-  // Handle tab reactivation - inactive tabs may miss storage watch events,
-  // so we reload from storage when the tab becomes visible again.
-  // See: https://github.com/mengxi-ream/read-frog/issues/435
-  const handleVisibilityChange = () => {
-    if (document.visibilityState === "visible") {
-      logger.info("configAtom onMount handleVisibilityChange when: ", new Date())
-      void storageAdapter
-        .get<Config>(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema)
-        .then(setAtom)
+    } catch {
+      // A later notification/visibility change retries reads; retain the current UI.
+    } finally {
+      reading = false
     }
   }
-  document.addEventListener("visibilitychange", handleVisibilityChange)
+
+  const requestRefresh = () => {
+    generation++
+    requested = true
+    void refresh()
+  }
+  refreshListeners.add(requestRefresh)
+  const unwatch = storageAdapter.watch<Config>(CONFIG_STORAGE_KEY, requestRefresh)
+  const onVisibilityChange = () => {
+    if (document.visibilityState === "visible") requestRefresh()
+  }
+  document.addEventListener("visibilitychange", onVisibilityChange)
+  requestRefresh()
 
   return () => {
+    active = false
+    refreshListeners.delete(requestRefresh)
     unwatch()
-    document.removeEventListener("visibilitychange", handleVisibilityChange)
+    document.removeEventListener("visibilitychange", onVisibilityChange)
   }
 }
-
-// export const configFieldAtom = <K extends Keys>(key: K) => {
-//   const readAtom = selectAtom(configAtom, (c) => c[key]); // 现在是同步
-//   const writeAtom = atom(null, (_get, set, val: Config[K]) =>
-//     set(writeConfigAtom, { [key]: val })
-//   );
-//   return [readAtom, writeAtom] as const;
-// };
 
 type Keys = keyof Config
 
@@ -158,7 +126,13 @@ export function getConfigFieldAtom<K extends Keys>(key: K) {
 
   return atom(
     (get) => get(sliceAtom),
-    (_get, set, newVal: Partial<Config[K]>) => set(writeConfigAtom, { [key]: newVal }),
+    (_get, set, newVal: Partial<Config[K]> | ((current: Config[K]) => Partial<Config[K]>)) =>
+      set(
+        writeConfigAtom,
+        typeof newVal === "function"
+          ? (current) => ({ [key]: newVal(current[key]) })
+          : { [key]: newVal },
+      ),
   )
 }
 

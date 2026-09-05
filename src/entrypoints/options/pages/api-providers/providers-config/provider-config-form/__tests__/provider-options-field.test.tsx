@@ -4,8 +4,9 @@ import type { APIProviderConfig } from "@/types/config/provider"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { useEffect, useState } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { AutosaveContext, toAutosaveSession } from "@/components/form/use-autosave"
 import { updateProviderConfig } from "@/utils/atoms/provider"
-import { formOpts, useAppForm } from "../form"
+import { useProviderForm } from "../../provider-editor"
 import { ProviderOptionsField } from "../provider-options-field"
 
 vi.mock("#imports", () => ({
@@ -66,42 +67,40 @@ function ProviderOptionsFieldHarness({
   submitDelayMs?: number
 }) {
   const [providerConfig, setProviderConfig] = useState(initialConfig)
-  const form = useAppForm({
-    ...formOpts,
-    defaultValues: providerConfig,
-    onSubmit: async ({ value }) => {
-      if (submitDelayMs > 0) {
-        await new Promise((resolve) => window.setTimeout(resolve, submitDelayMs))
-      }
+  const { form, autosave } = useProviderForm(providerConfig, async (value) => {
+    if (submitDelayMs > 0) {
+      await new Promise((resolve) => window.setTimeout(resolve, submitDelayMs))
+    }
 
-      setProviderConfig(submitDelayMs > 0 ? structuredClone(value) : value)
-    },
+    setProviderConfig(submitDelayMs > 0 ? structuredClone(value) : value)
   })
 
   useEffect(() => {
-    form.reset(providerConfig)
-  }, [providerConfig, form])
+    autosave.reconcile(providerConfig)
+  }, [providerConfig, autosave])
 
   return (
-    <>
-      <ProviderOptionsField form={form} />
-      <button
-        type="button"
-        onClick={() => {
-          if (externalProviderOptions === undefined) {
-            return
-          }
+    <AutosaveContext value={toAutosaveSession(autosave)}>
+      <>
+        <ProviderOptionsField form={form} />
+        <button
+          type="button"
+          onClick={() => {
+            if (externalProviderOptions === undefined) {
+              return
+            }
 
-          setProviderConfig(
-            updateProviderConfig(providerConfig, {
-              providerOptions: externalProviderOptions,
-            }) as APIProviderConfig,
-          )
-        }}
-      >
-        apply-external
-      </button>
-    </>
+            setProviderConfig(
+              updateProviderConfig(providerConfig, {
+                providerOptions: externalProviderOptions,
+              }) as APIProviderConfig,
+            )
+          }}
+        >
+          apply-external
+        </button>
+      </>
+    </AutosaveContext>
   )
 }
 
@@ -208,7 +207,7 @@ describe("providerOptionsField", () => {
     )
   })
 
-  it("syncs the editor when an external update arrives, even if the saved value is unchanged", async () => {
+  it("preserves an incomplete local JSON draft when an external update arrives", async () => {
     const externalProviderOptions = { enableThinking: false }
 
     render(
@@ -230,8 +229,21 @@ describe("providerOptionsField", () => {
       await Promise.resolve()
     })
 
+    expect(screen.getByLabelText("provider-options-editor")).toHaveValue("{")
+  })
+
+  it("accepts external JSON when the editor has no local changes", async () => {
+    render(
+      <ProviderOptionsFieldHarness
+        initialConfig={baseProviderConfig}
+        externalProviderOptions={{ temperature: 0 }}
+      />,
+    )
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "apply-external" }))
+    })
     expect(screen.getByLabelText("provider-options-editor")).toHaveValue(
-      JSON.stringify(externalProviderOptions, null, 2),
+      JSON.stringify({ temperature: 0 }, null, 2),
     )
   })
 

@@ -1,9 +1,10 @@
-// @vitest-environment jsdom
-
+import type { Config as SeedConfig } from "@/types/config/config"
 import type { APIProviderConfig } from "@/types/config/provider"
+// @vitest-environment jsdom
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { describe, expect, it } from "vitest"
+import { fakeBrowser } from "wxt/testing/fake-browser"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { isAPIProviderConfig } from "@/types/config/provider"
 import { configAtom } from "@/utils/atoms/config"
@@ -24,6 +25,11 @@ import {
   CustomActionEditor,
   useActionEditor,
 } from "../custom-actions/action-config-form/action-editor"
+
+function seedConfig(store: ReturnType<typeof createStore>, config: SeedConfig) {
+  void fakeBrowser.storage.local.set({ config })
+  store.set(configAtom, config)
+}
 
 function ActionContextProbe() {
   useActionEditor()
@@ -50,12 +56,12 @@ function DeleteActionProbe() {
 
 function createConfigStore() {
   const store = createStore()
-  store.set(configAtom, structuredClone(DEFAULT_CONFIG))
+  seedConfig(store, structuredClone(DEFAULT_CONFIG))
   return store
 }
 
 function CustomProviderAssignments({ providerConfig }: { providerConfig: APIProviderConfig }) {
-  const form = useProviderForm(providerConfig, async () => {})
+  const { form } = useProviderForm(providerConfig, async () => {})
 
   return (
     <CustomProviderEditor.Provider
@@ -136,7 +142,7 @@ describe("editor compound component contexts", () => {
     }
     config.selectionToolbar.customActions = [action]
     config.selectionToolbar.noteSuggestion.actionId = action.id
-    store.set(configAtom, config)
+    seedConfig(store, config)
 
     render(
       <Provider store={store}>
@@ -167,7 +173,7 @@ describe("editor compound component contexts", () => {
     config.providersConfig = config.providersConfig.map((provider) =>
       provider.id === providerConfig.id ? { ...provider, enabled: false } : provider,
     )
-    store.set(configAtom, config)
+    seedConfig(store, config)
     const dictionary = getBuiltInDictionaryAction(config.selectionToolbar)
 
     render(

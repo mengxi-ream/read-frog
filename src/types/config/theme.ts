@@ -1,4 +1,4 @@
-import z from "zod"
+import { z } from "zod"
 
 export const themeModes = ["system", "light", "dark"] as const
 export type ThemeMode = (typeof themeModes)[number]
