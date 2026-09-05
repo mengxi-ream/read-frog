@@ -997,6 +997,7 @@ function SliderComfortable({
       hoverDelayRef.current = setTimeout(() => setShowHoverTooltip(true), 100)
     } else {
       if (hoverDelayRef.current) clearTimeout(hoverDelayRef.current)
+      // oxlint-disable-next-line react/set-state-in-effect -- hides the hover tooltip when the value is changed from outside
       setShowHoverTooltip(false)
     }
     return () => {
@@ -1107,6 +1108,7 @@ function SliderComfortable({
     const percent = max === min ? 0 : Math.max(0, Math.min(1, (value - min) / (max - min)))
     animate(fillPercent, percent, spring.fast)
     animate(zeroOffset, value === min ? zeroTarget : 0, spring.fast)
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the dependencies are re-run triggers, not values the effect body reads
   }, [value, min, max, variant, fillPercent, zeroOffset, zeroTarget])
 
   const getValueFromX = useCallback(

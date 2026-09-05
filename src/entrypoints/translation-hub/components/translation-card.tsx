@@ -96,6 +96,7 @@ export function TranslationCard({
 
   useEffect(() => {
     triggerTranslation()
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the dependencies are re-run triggers, not values the effect body reads
   }, [request?.timestamp])
 
   const handleCopy = () => {

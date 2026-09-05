@@ -2,8 +2,8 @@
 
 ## Build Environment
 
-- **Node.js**: ^26.5.1
-- **pnpm**: 11.20.0 (pinned by the `packageManager` field in `package.json`)
+- **Node.js**: ^26.7.0 (installed automatically by pnpm from the `devEngines.runtime` field)
+- **pnpm**: 12.3.4 (pinned by the `packageManager` field in `package.json`)
 
 ## Build Steps
 

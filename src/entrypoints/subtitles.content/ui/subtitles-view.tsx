@@ -53,6 +53,7 @@ export function SubtitlesView({ showContent }: SubtitlesViewProps) {
 
   return (
     <div
+      // oxlint-disable-next-line react/refs -- the ref object is handed to the ref prop; nothing reads .current here
       ref={refs.window}
       style={{
         width: windowStyle.width,
@@ -66,6 +67,7 @@ export function SubtitlesView({ showContent }: SubtitlesViewProps) {
       }}
     >
       <div
+        // oxlint-disable-next-line react/refs -- the ref object is handed to the ref prop; nothing reads .current here
         ref={refs.container}
         className={cn(
           "group absolute right-0 left-0 flex w-full flex-col items-center",
@@ -76,6 +78,7 @@ export function SubtitlesView({ showContent }: SubtitlesViewProps) {
       >
         <div className="pointer-events-auto">
           <div
+            // oxlint-disable-next-line react/refs -- the ref object is handed to the ref prop; nothing reads .current here
             ref={refs.handle}
             className="mb-0.5 cursor-grab rounded bg-black/75 px-2 py-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100 active:cursor-grabbing active:opacity-100"
           >

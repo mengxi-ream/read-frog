@@ -81,6 +81,7 @@ export function WhatsNewFooter() {
       return
     }
 
+    // oxlint-disable-next-line react/set-state-in-effect -- auto-opens the popover once the gate flips
     openPopover()
   }, [shouldAutoOpenPopover])
 
@@ -91,6 +92,7 @@ export function WhatsNewFooter() {
     }
 
     void markLatestBlogPostViewed()
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the dependencies are re-run triggers, not values the effect body reads
   }, [isLastViewedDateFetched, lastViewedDateTimestamp, latestBlogPostKey, open])
 
   if (!latestBlogPost) {

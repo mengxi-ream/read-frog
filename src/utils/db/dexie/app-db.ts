@@ -1,6 +1,6 @@
 import type { EntityTable } from "dexie"
 import { upperCamelCase } from "case-anything"
-import Dexie from "dexie"
+import { Dexie } from "dexie"
 import { APP_NAME } from "@/utils/constants/app"
 import AiSegmentationCache from "./tables/ai-segmentation-cache"
 import ArticleSummaryCache from "./tables/article-summary-cache"

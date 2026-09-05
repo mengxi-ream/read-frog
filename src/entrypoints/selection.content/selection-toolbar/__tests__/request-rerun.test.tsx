@@ -101,6 +101,7 @@ vi.mock("@/components/ui/selection-popover", async () => {
 
     const setPinned = React.useCallback((value: boolean | ((value: boolean) => boolean)) => {
       setUncontrolledPinned(value)
+      // oxlint-disable-next-line react/memo-dependencies -- test double; a stable identity is what the rerun assertion measures
     }, [])
 
     // Mirrors the real Root: closing always resets the pin.
@@ -111,6 +112,7 @@ vi.mock("@/components/ui/selection-popover", async () => {
         }
         onOpenChange?.(nextOpen)
       },
+      // oxlint-disable-next-line react/memo-dependencies -- test double; a stable identity is what the rerun assertion measures
       [onOpenChange],
     )
 

@@ -76,6 +76,7 @@ export function ShadowPreviewFrame({ customCSS, children, className }: ShadowPre
     // Empty string rather than an early return: clearing the editor has to take the old sheet back
     // off, not leave the last one adopted.
     void ensureSubtitlesCustomCSS(shadowRoot, customCSS ?? "")
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the dependencies are re-run triggers, not values the effect body reads
   }, [customCSS, container])
 
   return (

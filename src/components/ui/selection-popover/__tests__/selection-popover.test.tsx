@@ -53,6 +53,7 @@ vi.mock("react-rnd", async () => {
   const ReactModule = await import("react")
 
   function MockRnd({ ref, ...props }: any) {
+    // oxlint-disable-next-line react/globals -- test double captures the latest props so assertions can read them
     latestRndProps = props
     const elementRef = ReactModule.useRef<HTMLDivElement>(null)
     const appliedDefaultRef = ReactModule.useRef(false)
