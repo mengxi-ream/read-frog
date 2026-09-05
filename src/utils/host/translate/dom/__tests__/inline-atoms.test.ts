@@ -142,6 +142,27 @@ describe("extractInlineAtomText", () => {
     expect(result.atoms).toHaveLength(1)
   })
 
+  it("tokenizes atoms nested in inline formatting, at the edges, and back to back", () => {
+    const m = (symbol: string) =>
+      `<math class="ltx_Math" alttext="${symbol}"><semantics><mi>${symbol}</mi><annotation encoding="application/x-tex">${symbol}</annotation></semantics></math>`
+    const p = paragraph(
+      `<figcaption>${m("u")} predicts <span class="ltx_font_bold">average velocity</span> ${m("v")}${m("w")} via <em><a href="#x">${m("x")}<span class="ltx_font_bold">-loss re-parameterized by ${m("y")}-pred</span></a></em>, input ${m("z")}</figcaption>`,
+    )
+    const result = extractInlineAtomText([p], DEFAULT_CONFIG)
+    expect(result.requestText).toBe(
+      "{{0}} predicts average velocity {{1}}{{2}} via {{3}}-loss re-parameterized by {{4}}-pred, input {{5}}",
+    )
+    expect(result.atoms.map((atom) => atom.getAttribute("alttext"))).toEqual([
+      "u",
+      "v",
+      "w",
+      "x",
+      "y",
+      "z",
+    ])
+    expect(result.filterText).toBe(extractTextContent(p, DEFAULT_CONFIG))
+  })
+
   it("reports no prose for a formula-only run", () => {
     const p = paragraph("<p>(<math><mi>x</mi></math>)</p>")
     const result = extractInlineAtomText([p], DEFAULT_CONFIG)
@@ -335,6 +356,19 @@ describe("renderInlineAtomTranslation", () => {
     renderInlineAtomTranslation(container, "模板里用 {{0}}，不像 {{1}}。", extraction)
     expect(container.textContent).toBe("模板里用 {{0}}，不像 x。")
     expect(container.querySelectorAll("math")).toHaveLength(1)
+  })
+
+  it("keeps adjacent clones adjacent and honors an existing dir on the atom", () => {
+    const { extraction } = extract(
+      '<p>Let <math dir="rtl"><mi>x</mi></math><math><mi>y</mi></math> be.</p>',
+    )
+    const container = document.createElement("span")
+    renderInlineAtomTranslation(container, "设 {{0}}{{1}} 为。", extraction)
+    const clones = [...container.querySelectorAll("math")]
+    expect(clones).toHaveLength(2)
+    expect(clones[0]?.nextSibling).toBe(clones[1])
+    expect(clones[0]?.getAttribute("dir")).toBe("rtl")
+    expect(clones[1]?.getAttribute("dir")).toBe("ltr")
   })
 
   it("tolerates provider bracket and digit variants", () => {
