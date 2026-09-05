@@ -1,5 +1,6 @@
 import type { ControlsConfig, PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import type { AnalyticsSurface, FeatureUsageContext } from "@/types/analytics"
+import type { Config } from "@/types/config/config"
 import type { SubtitlesSource } from "@/utils/constants/subtitles"
 import type { SubtitlesFetcher } from "@/utils/subtitles/fetchers/types"
 import type { SubtitlesVideoContext } from "@/utils/subtitles/processor/translator"
@@ -75,7 +76,7 @@ export interface SubtitlesProvidersAdapter {
   readonly supportsAiSubtitles: boolean
   getControlsConfig: () => ControlsConfig | undefined
   readonly supportsSidebar: boolean
-  generateVideoSummary: () => Promise<string | null>
+  generateVideoSummary: (config: Config) => Promise<string | null>
   hasSubtitlesAvailable: () => Promise<boolean>
   toggleSubtitlesManually: (enabled: boolean) => void
   toggleSubtitlesByShortcut: (enabled: boolean) => void
@@ -99,6 +100,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private sourceProcessedSubtitles: SubtitlesFragment[] = []
   private summaryAbortController: AbortController | null = null
   private sourceVideoId: string | null = null
+  private sourceCacheVersion = 0
+  private navigationVideoId: string | null
 
   private sessionSubtitles: SubtitlesFragment[] = []
   private sessionProcessedFragments: SubtitlesFragment[] = []
@@ -125,10 +128,9 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   get videoIdChanged() {
-    const currentVideoId = this.config.getVideoId?.()
-    // A summary-only session only ever records the source id.
-    const knownVideoId = this.sessionVideoId ?? this.sourceVideoId
-    return !!(knownVideoId && currentVideoId && currentVideoId !== knownVideoId)
+    const currentVideoId = this.config.getVideoId?.() ?? null
+    const knownVideoId = this.navigationVideoId ?? this.sessionVideoId ?? this.sourceVideoId
+    return knownVideoId !== null && currentVideoId !== knownVideoId
   }
 
   get supportsAiSubtitles(): boolean {
@@ -143,6 +145,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     fetchers: SubtitlesFetcherFactories
   }) {
     this.config = config
+    this.navigationVideoId = config.getVideoId?.() ?? null
     this.fetchers = fetchers
     this.fetcher = fetchers.native()
   }
@@ -181,17 +184,25 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     await this.trackChangeRefreshPromise
   }
 
-  generateVideoSummary = async () => {
-    await this.getOrLoadSourceSubtitles()
+  generateVideoSummary = async (config: Config) => {
     this.summaryAbortController?.abort()
     const abortController = new AbortController()
     this.summaryAbortController = abortController
+    const { signal } = abortController
     subtitlesStore.set(videoSummaryPartialAtom, "")
     try {
-      return await requestVideoSummary(this.sourceProcessedSubtitles, {
-        signal: abortController.signal,
-        onChunk: (partialMarkdown) => subtitlesStore.set(videoSummaryPartialAtom, partialMarkdown),
+      await this.getOrLoadSourceSubtitles(signal)
+      signal.throwIfAborted()
+      const summary = await requestVideoSummary(this.sourceProcessedSubtitles, config, {
+        signal,
+        onChunk: (partialMarkdown) => {
+          if (!signal.aborted) {
+            subtitlesStore.set(videoSummaryPartialAtom, partialMarkdown)
+          }
+        },
       })
+      signal.throwIfAborted()
+      return summary
     } finally {
       if (this.summaryAbortController === abortController) {
         this.summaryAbortController = null
@@ -232,14 +243,19 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private publishVideoId() {
-    subtitlesStore.set(currentVideoIdAtom, this.config.getVideoId?.() ?? null)
+    this.navigationVideoId = this.config.getVideoId?.() ?? null
+    subtitlesStore.set(currentVideoIdAtom, this.navigationVideoId)
+  }
+
+  private cancelVideoSummary() {
+    this.summaryAbortController?.abort()
+    this.summaryAbortController = null
+    subtitlesStore.set(videoSummaryPartialAtom, "")
   }
 
   private resetForNavigation() {
     this.switchOperationId++
-    this.summaryAbortController?.abort()
-    this.summaryAbortController = null
-    subtitlesStore.set(videoSummaryPartialAtom, "")
+    this.cancelVideoSummary()
     this.publishVideoId()
     // Keyed by video id already; this only stops them accumulating.
     queryClient.removeQueries({ queryKey: VIDEO_SUMMARY_QUERY_SCOPE })
@@ -282,19 +298,36 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     this.subtitlesScheduler.hide()
   }
 
-  private async getOrLoadSourceSubtitles(): Promise<SubtitlesFragment[]> {
+  private async getOrLoadSourceSubtitles(signal?: AbortSignal): Promise<SubtitlesFragment[]> {
     const currentVideoId = this.config.getVideoId?.() ?? null
-    const useSameTrack = await this.fetcher.shouldUseSameTrack()
+    const fetcher = this.fetcher
+    const cacheVersion = this.sourceCacheVersion
+    const assertCurrent = () => {
+      signal?.throwIfAborted()
+      if (
+        cacheVersion !== this.sourceCacheVersion ||
+        fetcher !== this.fetcher ||
+        currentVideoId !== (this.config.getVideoId?.() ?? null)
+      ) {
+        throw new DOMException("Subtitle load superseded", "AbortError")
+      }
+    }
+    assertCurrent()
+    const useSameTrack = await fetcher.shouldUseSameTrack()
+    assertCurrent()
 
     if (useSameTrack && this.sourceVideoId === currentVideoId && this.sourceSubtitles.length > 0) {
       return this.sourceSubtitles
     }
 
-    if (!(await this.fetcher.hasAvailableSubtitles())) {
+    const hasSubtitles = await fetcher.hasAvailableSubtitles()
+    assertCurrent()
+    if (!hasSubtitles) {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
     }
 
-    const subtitles = await this.fetcher.fetch()
+    const subtitles = await fetcher.fetch()
+    assertCurrent()
     if (subtitles.length === 0) {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
     }
@@ -317,6 +350,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private clearSourceCache() {
+    this.sourceCacheVersion++
     this.sourceSubtitles = []
     this.clearSourceProcessedSubtitles()
     this.sourceVideoId = null
@@ -335,6 +369,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private clearVisibleStateForNavigation() {
+    this.cancelVideoSummary()
     this.clearNavigationReinitTimeout()
     this.teardownAdObserver()
     this.translatedSubtitlesDownloader?.dispose()

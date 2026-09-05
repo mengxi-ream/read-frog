@@ -1,5 +1,6 @@
 import type { ControlsConfig } from "@/entrypoints/subtitles.content/platforms"
 import type { SubtitlesProvidersAdapter } from "@/entrypoints/subtitles.content/universal-adapter"
+import type { Config } from "@/types/config/config"
 import { QueryClientProvider } from "@tanstack/react-query"
 import { Provider as JotaiProvider } from "jotai"
 import { createContext, use, useMemo } from "react"
@@ -12,7 +13,7 @@ interface SubtitlesUIContextValue {
   requestAiSubtitles: () => Promise<void>
   supportsAiSubtitles: boolean
   supportsSidebar: boolean
-  generateVideoSummary: () => Promise<string | null>
+  generateVideoSummary: (config: Config) => Promise<string | null>
   hasSubtitlesAvailable: () => Promise<boolean>
   downloadSourceSubtitles: () => Promise<void>
   downloadTranslatedSubtitles: () => Promise<void>

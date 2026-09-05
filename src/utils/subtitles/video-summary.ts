@@ -1,5 +1,5 @@
 import type { SubtitlesFragment } from "./types"
-import type { LLMProviderConfig } from "@/types/config/provider"
+import type { Config } from "@/types/config/config"
 import type { ProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { getLocalConfig } from "@/utils/config/storage"
@@ -8,9 +8,6 @@ import { streamBackgroundText } from "@/utils/content-script/background-stream-c
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { sendMessage } from "@/utils/message"
 import { getVideoSummaryPrompt } from "@/utils/prompts/summary"
-import { resolveModelId } from "@/utils/providers/model-id"
-import { getProviderOptionsWithOverride } from "@/utils/providers/options"
-import { getTopLevelReasoning } from "@/utils/providers/reasoning"
 import { resolveSubtitlesProvider, resolveSubtitlesProviderRef } from "./processor/translator"
 
 const TRANSCRIPT_SAMPLE_WINDOWS = 8
@@ -121,23 +118,6 @@ export async function checkVideoSummaryAvailability(): Promise<VideoSummaryAvail
   return { status: "ok" }
 }
 
-function buildLocalStreamPayload(config: LLMProviderConfig, instructions: string, prompt: string) {
-  const reasoning = getTopLevelReasoning(config)
-  return {
-    providerId: config.id,
-    instructions,
-    prompt,
-    providerOptions: getProviderOptionsWithOverride(
-      resolveModelId(config.model) ?? "",
-      config.provider,
-      config.providerOptions,
-      reasoning,
-    ),
-    reasoning,
-    temperature: config.temperature,
-  }
-}
-
 interface VideoSummaryStreamOptions {
   onChunk?: (partialMarkdown: string) => void
   signal?: AbortSignal
@@ -145,19 +125,17 @@ interface VideoSummaryStreamOptions {
 
 export async function requestVideoSummary(
   fragments: SubtitlesFragment[],
+  config: Config,
   { onChunk, signal }: VideoSummaryStreamOptions = {},
 ): Promise<string | null> {
+  signal?.throwIfAborted()
   const transcript = buildTranscript(fragments)
   if (!transcript) {
     return null
   }
 
-  const config = await getLocalConfig()
-  if (!config) {
-    return null
-  }
-
   const providerRef = await resolveSubtitlesProviderRef(config, "summary")
+  signal?.throwIfAborted()
   if (!providerRef) {
     return null
   }
@@ -169,6 +147,7 @@ export async function requestVideoSummary(
     targetLanguage,
     providerRef,
   })
+  signal?.throwIfAborted()
   if (cached) {
     return cached
   }
@@ -187,12 +166,22 @@ export async function requestVideoSummary(
           instructions: systemPrompt,
           prompt,
         }
-      : buildLocalStreamPayload(providerRef.config, systemPrompt, prompt)
+      : {
+          providerId: providerRef.config.id,
+          providerConfig: providerRef.config,
+          instructions: systemPrompt,
+          prompt,
+        }
 
   const snapshot = await streamBackgroundText(payload, {
     signal,
-    onChunk: onChunk && ((chunk) => onChunk(stripLeadingHeading(chunk.output.trim()))),
+    onChunk: (chunk) => {
+      if (!signal?.aborted) {
+        onChunk?.(stripLeadingHeading(chunk.output.trim()))
+      }
+    },
   })
+  signal?.throwIfAborted()
 
   const summary = stripLeadingHeading(snapshot.output.trim())
   if (!summary) {
@@ -205,6 +194,7 @@ export async function requestVideoSummary(
     providerRef,
     summary,
   })
+  signal?.throwIfAborted()
 
   return summary
 }

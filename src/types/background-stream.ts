@@ -1,7 +1,7 @@
 import type { HostedAiFeature } from "@read-frog/api-contract"
 import type { JSONValue, StreamTextOnErrorCallback } from "ai"
 import type { Browser } from "#imports"
-import type { AISDKReasoning } from "@/types/config/provider"
+import type { AISDKReasoning, LLMProviderConfig } from "@/types/config/provider"
 import type { SelectionToolbarCustomActionOutputType } from "@/types/config/selection-toolbar"
 import type { HostedAiModelTier } from "@/utils/constants/provider-ids"
 import type { NoteSuggestionEnvelope } from "@/utils/note-suggestion/types"
@@ -47,6 +47,8 @@ export type HostedAiTextStreamFeature = Extract<
 export type HostedAiTextStreamRoute = HostedAiTextStreamFeature | "videoSubtitlesSegmentation"
 
 export type BackgroundStreamTextSerializablePayload = BaseBackgroundStreamSerializablePayload & {
+  /** Local model and generation settings captured with the caller's cache identity. */
+  providerConfig?: LLMProviderConfig
   /**
    * Which hosted route (and so which quota feature) a Built-in AI run bills
    * against. Ignored by local/BYOK providers. Optional so a content script

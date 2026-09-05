@@ -6,7 +6,7 @@ import { MarkdownRenderer } from "@/components/markdown-renderer"
 import { Button } from "@/components/ui/base-ui/button"
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/base-ui/empty"
 import { Skeleton } from "@/components/ui/base-ui/skeleton"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { configAtom } from "@/utils/atoms/config"
 import { featureProviderRefAtom } from "@/utils/atoms/provider"
 import { i18n } from "@/utils/i18n"
 import { videoSummaryQueryKey } from "@/utils/subtitles/video-summary"
@@ -53,15 +53,16 @@ function SummarySkeleton() {
 
 export function SummarySection() {
   const { generateVideoSummary } = useSubtitlesUI()
-  const language = useAtomValue(configFieldsAtomMap.language)
+  const config = useAtomValue(configAtom)
   const providerRef = useAtomValue(featureProviderRefAtom("videoSubtitles"))
   const videoId = useAtomValue(currentVideoIdAtom, { store: subtitlesStore })
   const partial = useAtomValue(videoSummaryPartialAtom, { store: subtitlesStore })
 
   const query = useQuery({
-    queryKey: videoSummaryQueryKey(videoId, language.targetCode, providerRef),
+    // oxlint-disable-next-line query/exhaustive-deps -- Only the target language and resolved provider affect generation; the rest of this config snapshot must not invalidate the summary.
+    queryKey: videoSummaryQueryKey(videoId, config.language.targetCode, providerRef),
     queryFn: async () => {
-      const summary = await generateVideoSummary()
+      const summary = await generateVideoSummary(config)
       if (!summary) {
         throw new Error("Empty summary")
       }

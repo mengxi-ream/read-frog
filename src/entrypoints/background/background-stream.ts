@@ -32,7 +32,7 @@ import {
 import { generateText, Output, parsePartialJson, streamText } from "ai"
 import { z } from "zod"
 import { BACKGROUND_STREAM_PORTS } from "@/types/background-stream"
-import { isLLMProviderConfig } from "@/types/config/provider"
+import { isLLMProviderConfig, llmProviderConfigItemSchema } from "@/types/config/provider"
 import { createStructuredObjectSchema } from "@/utils/ai/structured-object-schema"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { i18n } from "@/utils/i18n"
@@ -77,8 +77,13 @@ const streamPortStartEnvelopeSchema = z.object({
 const streamTextPayloadSchema = z
   .object({
     providerId: z.string().trim().min(1),
+    providerConfig: llmProviderConfigItemSchema.optional(),
   })
   .loose()
+  .refine(
+    ({ providerId, providerConfig }) =>
+      !providerConfig || (!isBuiltInAiProviderId(providerId) && providerConfig.id === providerId),
+  )
 
 // Transport-level check for BOTH provider kinds, so only the enum comes from
 // the contract; hosted-only constraints (name length, field count) are applied
@@ -635,12 +640,15 @@ async function createLocalTextPartStream(
   serializablePayload: BackgroundStreamTextSerializablePayload,
   options: StreamRuntimeOptions<BackgroundTextStreamSnapshot> = {},
 ): Promise<AsyncIterable<unknown>> {
-  const { providerId, ...streamTextParams } = serializablePayload
+  const { providerId, providerConfig, ...streamTextParams } = serializablePayload
   const { signal, onError } = options
 
-  const model = await getModelById(providerId)
+  const model = providerConfig
+    ? getLanguageModelForConfig(providerConfig)
+    : await getModelById(providerId)
   const result = streamText({
     ...(streamTextParams as Parameters<typeof streamText>[0]),
+    ...(providerConfig ? buildLocalGenerateTextParams(providerConfig) : {}),
     model,
     abortSignal: signal,
     onError: ({ error }) => {
