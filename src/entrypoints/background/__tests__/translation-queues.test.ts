@@ -183,6 +183,28 @@ describe("translation queue helpers", () => {
     ).toBe(true)
   }, 15_000)
 
+  it("registers translation handlers before queue configuration resolves", async () => {
+    let resolveConfig!: (config: typeof DEFAULT_CONFIG) => void
+    const configPromise = new Promise<typeof DEFAULT_CONFIG>((resolve) => {
+      resolveConfig = resolve
+    })
+    ensureInitializedConfigMock.mockReturnValue(configPromise)
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    const { setupSubtitlesTranslationHandlers } = await import("../subtitles-translation")
+
+    setupPageTranslationHandlers()
+    setupSubtitlesTranslationHandlers()
+
+    expect(onMessageMock.mock.calls.map(([name]) => name)).toEqual([
+      "enqueueTranslateRequest",
+      "getOrGenerateWebPageSummary",
+      "cancelPageTranslationRequests",
+      "enqueueSubtitlesTranslateRequest",
+      "getSubtitlesSummary",
+    ])
+    resolveConfig(DEFAULT_CONFIG)
+  })
+
   it("reuses the hosted requestId when RequestQueue retries the same model call", async () => {
     runStreamTextInBackgroundMock
       .mockRejectedValueOnce(new Error("network error"))
@@ -191,8 +213,8 @@ describe("translation queue helpers", () => {
         thinking: { status: "complete", text: "" },
       })
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
 
     await expect(
@@ -243,8 +265,8 @@ describe("translation queue helpers", () => {
       },
     )
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
     const enqueue = getRegisteredMessageHandler("enqueueTranslateRequest")
     const cancel = getRegisteredMessageHandler("cancelPageTranslationRequests")
 
@@ -303,8 +325,8 @@ describe("translation queue helpers", () => {
       `<span data-rf-attr="0">Bonjour</span>\n\n%%\n\n<a data-rf-attr="0">Lire</a>`,
     )
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
 
     const results = await Promise.all([
@@ -347,8 +369,8 @@ describe("translation queue helpers", () => {
   it("coalesces concurrent identical translate requests into one provider call", async () => {
     executeTranslateMock.mockResolvedValue("translated")
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
 
     const makeRequest = () =>
@@ -376,8 +398,8 @@ describe("translation queue helpers", () => {
       key: "llm-cache-hit",
       translation: "cached translation",
     })
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
 
     await expect(
@@ -397,8 +419,8 @@ describe("translation queue helpers", () => {
   })
 
   it("passes subtitle summary through the translation queue without generating a new summary", async () => {
-    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
-    setUpSubtitlesTranslationQueue()
+    const { setupSubtitlesTranslationHandlers } = await import("../subtitles-translation")
+    setupSubtitlesTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
     const result = await handler({
@@ -453,8 +475,8 @@ describe("translation queue helpers", () => {
       },
     })
 
-    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
-    setUpSubtitlesTranslationQueue()
+    const { setupSubtitlesTranslationHandlers } = await import("../subtitles-translation")
+    setupSubtitlesTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
     const requests = [
@@ -518,8 +540,8 @@ describe("translation queue helpers", () => {
   })
 
   it("passes webpage context through the translation queue without generating a new summary", async () => {
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const result = await handler({
@@ -564,8 +586,8 @@ describe("translation queue helpers", () => {
       translation: "Tom &amp; Jerry — It's on https://example.com/?page=1&copy=true <span>",
     })
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const result = await handler({
@@ -590,8 +612,8 @@ describe("translation queue helpers", () => {
     })
     executeTranslateMock.mockResolvedValue("fresh translation")
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
 
     await expect(
@@ -624,8 +646,8 @@ describe("translation queue helpers", () => {
     })
     executeTranslateMock.mockReset().mockRejectedValue(new Error("provider unavailable"))
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
 
     await expect(
@@ -649,8 +671,8 @@ describe("translation queue helpers", () => {
   it("returns and caches fresh Google translations verbatim without re-decoding", async () => {
     executeTranslateMock.mockResolvedValue("write &amp; for ampersand — It's fine")
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const result = await handler({
@@ -675,8 +697,8 @@ describe("translation queue helpers", () => {
   it("caches a translation whose inline atom placeholders all came back", async () => {
     executeTranslateMock.mockResolvedValue("设 {{1}} 大于 {{0}}。")
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const result = await handler({
@@ -698,8 +720,8 @@ describe("translation queue helpers", () => {
   it("returns but does not cache a translation that lost an inline atom placeholder", async () => {
     executeTranslateMock.mockResolvedValue("设 {{0}} 大于。")
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const result = await handler({
@@ -722,8 +744,8 @@ describe("translation queue helpers", () => {
     // paragraph with a formula re-hit the provider on every page load.
     executeTranslateMock.mockResolvedValue(NO_TRANSLATION_SENTINEL)
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const result = await handler({
@@ -748,8 +770,8 @@ describe("translation queue helpers", () => {
       translation: `<a data-rf-attr="1">Lire</a><span data-rf-attr="0">Bonjour</span>`,
     })
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const result = await handler({
@@ -775,8 +797,8 @@ describe("translation queue helpers", () => {
     })
     executeTranslateMock.mockResolvedValueOnce(`<span data-rf-attr="0">Bonjour</span>`)
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const result = await handler({
@@ -810,8 +832,8 @@ describe("translation queue helpers", () => {
       `<span data-rf-attr="rf-page-0">Fresh translation</span>`,
     )
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const result = await handler({
@@ -838,8 +860,8 @@ describe("translation queue helpers", () => {
   it("throws and does not cache a fresh translation with invalid HTML markers", async () => {
     executeTranslateMock.mockResolvedValueOnce(`<div data-rf-attr="0">Bonjour</div>`)
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const request = handler({
@@ -863,8 +885,8 @@ describe("translation queue helpers", () => {
   it("treats an empty provider result as a missing-marker integrity failure", async () => {
     executeTranslateMock.mockResolvedValueOnce("")
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const request = handler({
@@ -886,8 +908,8 @@ describe("translation queue helpers", () => {
   })
 
   it("rejects duplicate input marker IDs before reading the cache or translating", async () => {
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const request = handler({
@@ -914,8 +936,8 @@ describe("translation queue helpers", () => {
   it("does not treat marker-shaped plain text as the translationOnly HTML protocol", async () => {
     executeTranslateMock.mockResolvedValueOnce("translated plain text")
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const result = await handler({
@@ -941,8 +963,8 @@ describe("translation queue helpers", () => {
   it("returns and caches the no-translation sentinel RAW (mapping is content-side)", async () => {
     executeTranslateMock.mockResolvedValue(NO_TRANSLATION_SENTINEL)
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const result = await handler({
@@ -967,8 +989,8 @@ describe("translation queue helpers", () => {
   })
 
   it("forwards the textFormat to executeTranslate for non-batch providers", async () => {
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     await handler({
@@ -997,8 +1019,8 @@ describe("translation queue helpers", () => {
       translation: "Tom &amp; Jerry — It's a subtitle",
     })
 
-    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
-    setUpSubtitlesTranslationQueue()
+    const { setupSubtitlesTranslationHandlers } = await import("../subtitles-translation")
+    setupSubtitlesTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
     const result = await handler({
@@ -1019,8 +1041,8 @@ describe("translation queue helpers", () => {
   it("returns and caches fresh Google subtitle translations verbatim without re-decoding", async () => {
     executeTranslateMock.mockResolvedValue("write &amp; for ampersand — It's a subtitle")
 
-    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
-    setUpSubtitlesTranslationQueue()
+    const { setupSubtitlesTranslationHandlers } = await import("../subtitles-translation")
+    setupSubtitlesTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
     const result = await handler({
@@ -1048,8 +1070,8 @@ describe("translation queue helpers", () => {
       translation: "A&amp;B",
     })
 
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const result = await handler({
@@ -1071,8 +1093,8 @@ describe("translation queue helpers", () => {
     // The queue's route was briefly declared but never threaded through, which
     // would have billed every subtitle line to the page-translation quota.
     runStreamTextInBackgroundMock.mockResolvedValue({ output: "译文" })
-    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
-    setUpSubtitlesTranslationQueue()
+    const { setupSubtitlesTranslationHandlers } = await import("../subtitles-translation")
+    setupSubtitlesTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
     await handler({
@@ -1099,8 +1121,8 @@ describe("translation queue helpers", () => {
   it("bills a hosted request against the route it carries, not the queue default", async () => {
     // Input translation shares the webpage queue; without the per-request
     // route it would bill the page-translation quota it never gated on.
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     await handler({
@@ -1133,8 +1155,8 @@ describe("translation queue helpers", () => {
         batchQueueConfig: { maxCharactersPerBatch: 1000, maxItemsPerBatch: 4 },
       },
     })
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
     const base = {
@@ -1196,8 +1218,8 @@ describe("translation queue helpers", () => {
       modelTier: "advance",
       modelRevision: "advance-r1",
     }
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("getOrGenerateWebPageSummary")
     const result = await handler({
@@ -1228,8 +1250,8 @@ describe("translation queue helpers", () => {
   })
 
   it("exposes webpage summary generation as a separate background handler", async () => {
-    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
-    setUpWebPageTranslationQueue()
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("getOrGenerateWebPageSummary")
     const result = await handler({
@@ -1253,8 +1275,8 @@ describe("translation queue helpers", () => {
   })
 
   it("exposes subtitle summary generation as a separate background handler", async () => {
-    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
-    setUpSubtitlesTranslationQueue()
+    const { setupSubtitlesTranslationHandlers } = await import("../subtitles-translation")
+    setupSubtitlesTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("getSubtitlesSummary")
     const result = await handler({
@@ -1278,8 +1300,8 @@ describe("translation queue helpers", () => {
   })
 
   it("refuses a summary for a provider with no model to prompt", async () => {
-    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
-    setUpSubtitlesTranslationQueue()
+    const { setupSubtitlesTranslationHandlers } = await import("../subtitles-translation")
+    setupSubtitlesTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("getSubtitlesSummary")
     // Google is a legal videoSubtitles provider — the capability admits any
@@ -1299,8 +1321,8 @@ describe("translation queue helpers", () => {
   })
 
   it("returns null for invalid subtitle summary requests", async () => {
-    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
-    setUpSubtitlesTranslationQueue()
+    const { setupSubtitlesTranslationHandlers } = await import("../subtitles-translation")
+    setupSubtitlesTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("getSubtitlesSummary")
     const result = await handler({
@@ -1318,8 +1340,8 @@ describe("translation queue helpers", () => {
   it("returns null when subtitle summary generation has no result", async () => {
     generateArticleSummaryMock.mockResolvedValue(null)
 
-    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
-    setUpSubtitlesTranslationQueue()
+    const { setupSubtitlesTranslationHandlers } = await import("../subtitles-translation")
+    setupSubtitlesTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("getSubtitlesSummary")
     const result = await handler({
@@ -1342,8 +1364,8 @@ describe("translation queue helpers", () => {
         }),
     )
 
-    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
-    setUpSubtitlesTranslationQueue()
+    const { setupSubtitlesTranslationHandlers } = await import("../subtitles-translation")
+    setupSubtitlesTranslationHandlers()
 
     const handler = getRegisteredMessageHandler("getSubtitlesSummary")
     const firstRequest = handler({
