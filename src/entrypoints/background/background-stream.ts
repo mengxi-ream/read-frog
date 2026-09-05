@@ -152,18 +152,18 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
     const abortController = new AbortController()
     let isActive = true
     let hasStarted = false
-    let requestId: string | undefined
+    let streamRequestId: string | undefined
     let messageListener: ((rawMessage: unknown) => void) | undefined
     let disconnectListener: (() => void) | undefined
 
     const safePost = (response: StreamPortResponseWithoutRequestId<TResponse>) => {
-      if (!isActive || abortController.signal.aborted || !requestId) {
+      if (!isActive || abortController.signal.aborted || !streamRequestId) {
         return
       }
       try {
         const message: StreamPortResponse<TResponse> = {
           ...response,
-          requestId,
+          requestId: streamRequestId,
         }
         port.postMessage(message)
       } catch (error) {
@@ -204,7 +204,7 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
       const parseResult = startMessageParser(rawMessage)
       if (!parseResult.success) {
         if (parseResult.requestId) {
-          requestId = parseResult.requestId
+          streamRequestId = parseResult.requestId
           safePost({
             type: "error",
             error: { message: invalidStreamStartPayloadMessage },
@@ -222,7 +222,7 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
       }
 
       const startMessage = parseResult.message
-      requestId = startMessage.requestId
+      streamRequestId = startMessage.requestId
       hasStarted = true
       let streamError: unknown
 

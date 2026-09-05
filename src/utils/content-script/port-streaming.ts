@@ -28,7 +28,7 @@ export function createPortStreamPromise<TResponse = string>(
   return new Promise<TResponse>((resolve, reject) => {
     const { signal, onChunk, keepAliveIntervalMs = 20_000 } = options
 
-    const requestId = getRandomUUID()
+    const streamRequestId = getRandomUUID()
     const port = browser.runtime.connect({ name: portName })
 
     let settled = false
@@ -71,7 +71,7 @@ export function createPortStreamPromise<TResponse = string>(
     }
 
     messageListener = (event: StreamPortResponse<TResponse>) => {
-      if (!event || event.requestId !== requestId) {
+      if (!event || event.requestId !== streamRequestId) {
         return
       }
 
@@ -112,7 +112,7 @@ export function createPortStreamPromise<TResponse = string>(
 
     const startMessage: StreamPortStartMessage<unknown> = {
       type: "start",
-      requestId,
+      requestId: streamRequestId,
       payload: serializablePayload,
     }
 
@@ -127,7 +127,7 @@ export function createPortStreamPromise<TResponse = string>(
         try {
           const pingMessage: StreamPortRequestMessage<unknown> = {
             type: "ping",
-            requestId,
+            requestId: streamRequestId,
           }
           port.postMessage(pingMessage)
         } catch {
