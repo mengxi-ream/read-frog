@@ -21,7 +21,6 @@ export const ProviderURLField = withForm({
         <form.AppField name="url">
           {(field) => (
             <field.InputFieldAutoSave
-              formForSubmit={form}
               label={i18n.t("options.apiProviders.form.fields.url")}
               placeholder={PROVIDER_URL_PLACEHOLDERS[providerType]}
             />
@@ -39,7 +38,6 @@ export const ProviderURLField = withForm({
       <form.AppField name="baseURL">
         {(field) => (
           <field.InputFieldAutoSave
-            formForSubmit={form}
             label={labelText}
             placeholder={PROVIDER_URL_PLACEHOLDERS[providerType]}
             labelExtra={

@@ -84,6 +84,15 @@ errorRecovery:
     confirm: Sıfırla
     cancel: İptal
 options:
+  autosave:
+    invalid: Ayrılmadan önce işaretli alanları düzeltin.
+    failed: Değişiklikler kaydedilemedi. Düzenlemeleriniz burada korunuyor.
+    deleted: Bu öğe başka bir sayfada silindi. Kaydedilmemiş düzenlemeleriniz korunuyor.
+    retry: Yeniden dene
+    leaveTitle: Değişiklikler kaydedilmedi
+    leaveDescription: Sorunu düzeltmek için düzenlemeye devam edin veya kaydedilmemiş değişiklikleri iptal edin.
+    keepEditing: Düzenlemeye devam et
+    discard: Kaydedilmemiş değişiklikleri iptal et
   batchSavings:
     savedCost: API maliyetlerinde yaklaşık %$1 tasarruf
   commandPalette:

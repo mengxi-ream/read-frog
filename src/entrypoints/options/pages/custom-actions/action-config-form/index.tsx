@@ -1,5 +1,7 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
+import { dequal } from "dequal"
 import { useAtomValue } from "jotai"
+import { useState } from "react"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { BUILT_IN_DICTIONARY_ACTION_ID } from "@/utils/constants/custom-action"
 import { findSelectionToolbarAction } from "@/utils/custom-actions"
@@ -11,10 +13,14 @@ import { ActionEditor, BuiltInActionEditor, CustomActionEditor } from "./action-
 export function CustomActionConfigForm() {
   const selectionToolbarConfig = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const selectedCustomActionId = useAtomValue(selectedCustomActionIdAtom)
-  const selectedAction = selectedCustomActionId
+  const currentAction = selectedCustomActionId
     ? findSelectionToolbarAction(selectionToolbarConfig, selectedCustomActionId)
     : undefined
 
+  const [lastAction, setLastAction] = useState<SelectionToolbarCustomAction | undefined>(undefined)
+  if (currentAction && !dequal(currentAction, lastAction)) setLastAction(currentAction)
+  const selectedAction =
+    currentAction ?? (lastAction?.id === selectedCustomActionId ? lastAction : undefined)
   if (!selectedAction) {
     return (
       <EntityEditor.Empty>

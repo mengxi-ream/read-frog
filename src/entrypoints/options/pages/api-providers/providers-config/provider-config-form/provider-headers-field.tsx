@@ -55,8 +55,6 @@ export const ProviderHeadersField = withForm({
       [form],
     )
 
-    const handleSubmit = useCallback(() => form.handleSubmit(), [form])
-
     if (!isLLMProvider) {
       return null
     }
@@ -70,12 +68,10 @@ export const ProviderHeadersField = withForm({
     return (
       <AutosavedJsonCodeEditorField
         value={providerConfig.headers}
-        resetKey={providerConfig.id}
-        syncSignal={providerConfig.headers}
+        fieldName="headers"
         parse={parseHeadersJson}
         serialize={toJson}
         onCommit={handleHeadersCommit}
-        onSubmit={handleSubmit}
         editorAriaLabel="provider-headers-editor"
         placeholder={placeholderText}
         label={

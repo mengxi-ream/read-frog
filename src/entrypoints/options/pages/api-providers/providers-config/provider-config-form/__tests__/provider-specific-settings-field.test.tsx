@@ -3,8 +3,9 @@ import type { APIProviderConfig } from "@/types/config/provider"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { useEffect, useState } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { AutosaveContext, toAutosaveSession } from "@/components/form/use-autosave"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
-import { formOpts, useAppForm } from "../form"
+import { useProviderForm } from "../../provider-editor"
 import { ProviderSpecificSettingsField } from "../provider-specific-settings-field"
 
 vi.mock("#imports", () => ({
@@ -19,29 +20,27 @@ function ProviderSpecificSettingsFieldHarness({
   initialConfig?: APIProviderConfig
 }) {
   const [providerConfig, setProviderConfig] = useState(initialConfig)
-  const form = useAppForm({
-    ...formOpts,
-    defaultValues: providerConfig,
-    onSubmit: async ({ value }) => {
-      setProviderConfig(value)
-    },
+  const { form, autosave } = useProviderForm(providerConfig, async (value) => {
+    setProviderConfig(value)
   })
 
   useEffect(() => {
-    form.reset(providerConfig)
-  }, [providerConfig, form])
+    autosave.reconcile(providerConfig)
+  }, [providerConfig, autosave])
 
   return (
-    <>
-      <ProviderSpecificSettingsField form={form} />
-      <output aria-label="persisted-provider-specific-settings">
-        {JSON.stringify(
-          "providerSpecificSettings" in providerConfig
-            ? providerConfig.providerSpecificSettings
-            : null,
-        )}
-      </output>
-    </>
+    <AutosaveContext value={toAutosaveSession(autosave)}>
+      <>
+        <ProviderSpecificSettingsField form={form} />
+        <output aria-label="persisted-provider-specific-settings">
+          {JSON.stringify(
+            "providerSpecificSettings" in providerConfig
+              ? providerConfig.providerSpecificSettings
+              : null,
+          )}
+        </output>
+      </>
+    </AutosaveContext>
   )
 }
 

@@ -84,6 +84,15 @@ errorRecovery:
     confirm: 초기화
     cancel: 취소
 options:
+  autosave:
+    invalid: 이동하기 전에 표시된 필드를 수정해 주세요.
+    failed: 변경 사항을 저장하지 못했습니다. 편집 내용은 유지됩니다.
+    deleted: 다른 페이지에서 이 항목이 삭제되었습니다. 저장하지 않은 편집 내용은 유지됩니다.
+    retry: 다시 시도
+    leaveTitle: 변경 사항이 저장되지 않았습니다
+    leaveDescription: 계속 편집하여 문제를 수정하거나 저장하지 않은 변경 사항을 버릴 수 있습니다.
+    keepEditing: 계속 편집
+    discard: 저장하지 않은 변경 사항 버리기
   batchSavings:
     savedCost: API 비용 약 $1% 절감
   commandPalette:

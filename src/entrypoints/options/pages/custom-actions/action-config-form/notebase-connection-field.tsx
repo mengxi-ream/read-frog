@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useSelector } from "@tanstack/react-store"
 import { dequal } from "dequal"
 import { useCallback, useEffect, useMemo } from "react"
+import { useAutosaveContext } from "@/components/form/use-autosave"
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/base-ui/alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
 import { Button } from "@/components/ui/base-ui/button"
@@ -225,6 +226,7 @@ function getRemoteFieldSelectItems(
 export const NotebaseConnectionField = withForm({
   ...{ defaultValues: {} as SelectionToolbarCustomAction },
   render: function Render({ form }) {
+    const autosave = useAutosaveContext()
     const action = useSelector(form.store, (state) => state.values)
     const outputSchema = action.outputSchema
     const connection = action.notebaseConnection
@@ -239,10 +241,11 @@ export const NotebaseConnectionField = withForm({
 
     const updateConnection = useCallback(
       (nextConnection: SelectionToolbarCustomActionNotebaseConnection | undefined) => {
-        form.setFieldValue("notebaseConnection", nextConnection)
-        void form.handleSubmit()
+        autosave.edit(() => form.setFieldValue("notebaseConnection", nextConnection), {
+          immediate: true,
+        })
       },
-      [form],
+      [form, autosave],
     )
 
     const listQuery = useQuery(
@@ -281,13 +284,6 @@ export const NotebaseConnectionField = withForm({
         },
       }),
     )
-
-    useEffect(() => {
-      if (!dequal(connection, sanitizedConnection)) {
-        form.setFieldValue("notebaseConnection", sanitizedConnection)
-        void form.handleSubmit()
-      }
-    }, [connection, form, sanitizedConnection])
 
     useEffect(() => {
       if (!isOwnedConnection || !sanitizedConnection || !currentAccount) {

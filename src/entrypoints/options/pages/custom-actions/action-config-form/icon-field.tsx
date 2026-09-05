@@ -2,6 +2,7 @@ import type { SelectionToolbarCustomAction } from "@/types/config/selection-tool
 import { Icon } from "@iconify/react"
 import { useSelector } from "@tanstack/react-store"
 import { useState } from "react"
+import { useAutosaveContext } from "@/components/form/use-autosave"
 import { Button } from "@/components/ui/base-ui/button"
 import { Field, FieldTitle } from "@/components/ui/base-ui/field"
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/base-ui/input-group"
@@ -140,6 +141,7 @@ export const IconField = withForm({
     readOnly: false as boolean,
   },
   render: function Render({ form, readOnly }) {
+    const autosave = useAutosaveContext()
     const iconValue = useSelector(form.store, (state) => state.values.icon)
     const [iconPickerOpen, setIconPickerOpen] = useState(false)
     const hasError = !ICON_PATTERN.test(iconValue?.trim() ?? "")
@@ -168,8 +170,7 @@ export const IconField = withForm({
                 selectedIcon={field.state.value}
                 disabled={readOnly}
                 onSelect={(icon) => {
-                  field.handleChange(icon)
-                  void form.handleSubmit()
+                  autosave.edit(() => field.handleChange(icon), { immediate: true })
                   setIconPickerOpen(false)
                 }}
               />
@@ -182,10 +183,18 @@ export const IconField = withForm({
                   )}
                   aria-invalid={hasError}
                   readOnly={readOnly}
-                  onBlur={field.handleBlur}
+                  onBlur={() => {
+                    field.handleBlur()
+                    void autosave.flush()
+                  }}
+                  onCompositionStart={() => autosave.beginComposition(field.name)}
+                  onCompositionEnd={(event) => {
+                    const value = event.currentTarget.value
+                    autosave.endComposition(field.name, () => field.handleChange(value))
+                  }}
                   onChange={(e) => {
-                    field.handleChange(e.target.value)
-                    void form.handleSubmit()
+                    const value = e.currentTarget.value
+                    autosave.edit(() => field.handleChange(value))
                   }}
                 />
                 <InputGroupAddon align="inline-end">

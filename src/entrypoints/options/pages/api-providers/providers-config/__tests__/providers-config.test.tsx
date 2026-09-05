@@ -117,8 +117,8 @@ vi.mock("@/utils/atoms/config", () => ({
   writeConfigAtom,
 }))
 
-vi.mock("@/utils/atoms/provider", () => ({
-  providerConfigAtom: () => providerWriteAtom,
+vi.mock("@/utils/atoms/entity-config", () => ({
+  patchProviderConfigAtom: providerWriteAtom,
 }))
 
 vi.mock("@/utils/config/helpers", () => ({
