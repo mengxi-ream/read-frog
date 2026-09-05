@@ -49,6 +49,7 @@ import {
   SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS,
 } from "@/utils/constants/custom-action"
 import { i18n } from "@/utils/i18n"
+import { sanitizeCustomActionNotebaseConnection } from "@/utils/notebase/connection"
 import { withForm } from "./form"
 
 type CustomActionFormKey =
@@ -436,10 +437,21 @@ export const OutputSchemaField = withForm({
                 onConfirm={() => {
                   if (deletingFieldId) {
                     autosave.edit(
-                      () =>
-                        field.handleChange(
-                          outputSchema.filter((item) => item.id !== deletingFieldId),
-                        ),
+                      () => {
+                        const nextOutputSchema = field.state.value.filter(
+                          (item) => item.id !== deletingFieldId,
+                        )
+                        const connection = form.state.values.notebaseConnection
+                        if (connection) {
+                          // Drop references before field validation runs; the persistence
+                          // sanitizer cannot repair a draft rejected by handleSubmit.
+                          form.setFieldValue(
+                            "notebaseConnection",
+                            sanitizeCustomActionNotebaseConnection(connection, nextOutputSchema),
+                          )
+                        }
+                        field.handleChange(nextOutputSchema)
+                      },
                       { immediate: true },
                     )
                     setDeletingFieldId(null)
