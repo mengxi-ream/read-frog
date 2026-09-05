@@ -845,7 +845,7 @@ options:
           bilingual: 雙語對照
           translationOnly: 僅顯示翻譯
         switched: 翻譯模式：$1
-        microsoftNotSupported: Microsoft 翻譯不支援僅譯文模式，若想開啟請切換其他提供商。
+        providerNotSupported: $1 不支援僅譯文模式，若想開啟請切換其他提供商。
       translateRange:
         title: 翻譯範圍
         description: 選擇是僅翻譯主要內容還是翻譯頁面上的所有內容。

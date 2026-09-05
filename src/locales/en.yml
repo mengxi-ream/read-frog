@@ -845,7 +845,7 @@ options:
           bilingual: Bilingual
           translationOnly: Translation only
         switched: "Translation mode: $1"
-        microsoftNotSupported: Microsoft Translator doesn't support translation-only mode. To enable it, switch to another provider.
+        providerNotSupported: $1 doesn't support translation-only mode. To enable it, switch to another provider.
       translateRange:
         title: Translation range
         description: Select whether to translate only the main content or all content on the page.
