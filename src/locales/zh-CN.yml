@@ -1296,7 +1296,7 @@ subtitles:
       generating: 正在生成总结…
       failedTitle: 生成失败
       retry: 重试
-      needsModel: 请先为视频字幕选择一个 AI 模型，才能总结这个视频。
+      needsModel: 请先为视频字幕选择一个 LLM 模型，才能总结这个视频。
       openSettings: 去设置
       needsSubtitles: 当前视频没有字幕，推荐先使用 AI 生成字幕。
   loadingAiSubtitles: 正在加载 AI 字幕中（预计 3 分钟）

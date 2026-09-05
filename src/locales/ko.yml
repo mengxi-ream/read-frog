@@ -1180,7 +1180,7 @@ subtitles:
       generating: 요약을 생성하는 중…
       failedTitle: 생성하지 못했습니다
       retry: 다시 시도
-      needsModel: 이 동영상을 요약하려면 자막에 사용할 AI 모델을 선택하세요.
+      needsModel: 이 동영상을 요약하려면 자막에 사용할 LLM 모델을 선택하세요.
       openSettings: 설정 열기
       needsSubtitles: 이 동영상에는 자막이 없습니다. 먼저 AI 자막을 생성해 보세요.
   loadingAiSubtitles: AI 자막 불러오는 중… (예상 3분)

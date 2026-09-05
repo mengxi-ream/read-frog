@@ -54,7 +54,7 @@ export function SubtitlesSidebarItem() {
             anchor.current,
             {
               label: i18n.t("subtitles.sidebar.summary.openSettings"),
-              url: browser.runtime.getURL("/options.html#/api-providers"),
+              url: browser.runtime.getURL("/options.html#/api-providers?section=feature-providers"),
             },
           )
           return true

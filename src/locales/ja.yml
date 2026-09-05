@@ -1180,7 +1180,7 @@ subtitles:
       generating: 要約を生成しています…
       failedTitle: 生成できませんでした
       retry: 再試行
-      needsModel: この動画を要約するには、字幕用の AI モデルを選んでください。
+      needsModel: この動画を要約するには、字幕用の LLM モデルを選んでください。
       openSettings: 設定を開く
       needsSubtitles: この動画には字幕がありません。まず AI 字幕の生成をお試しください。
   loadingAiSubtitles: AI字幕を読み込み中…（推定3分）

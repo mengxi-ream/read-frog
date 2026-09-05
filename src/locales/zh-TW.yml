@@ -1296,7 +1296,7 @@ subtitles:
       generating: 正在產生總結…
       failedTitle: 產生失敗
       retry: 重試
-      needsModel: 請先為影片字幕選擇一個 AI 模型，才能總結這部影片。
+      needsModel: 請先為影片字幕選擇一個 LLM 模型，才能總結這部影片。
       openSettings: 前往設定
       needsSubtitles: 這部影片沒有字幕，建議先使用 AI 產生字幕。
   loadingAiSubtitles: 正在載入 AI 字幕（預計 3 分鐘）

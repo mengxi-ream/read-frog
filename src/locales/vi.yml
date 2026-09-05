@@ -1180,7 +1180,7 @@ subtitles:
       generating: Đang tạo bản tóm tắt…
       failedTitle: Không tạo được
       retry: Thử lại
-      needsModel: Hãy chọn một mô hình AI cho phụ đề để tóm tắt video này.
+      needsModel: Hãy chọn một mô hình LLM cho phụ đề để tóm tắt video này.
       openSettings: Mở cài đặt
       needsSubtitles: Video này không có phụ đề — hãy thử tạo phụ đề bằng AI trước.
   loadingAiSubtitles: Đang tải phụ đề AI… (dự kiến 3 phút)

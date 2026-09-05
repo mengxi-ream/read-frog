@@ -1296,7 +1296,7 @@ subtitles:
       generating: Generando el resumen…
       failedTitle: No se pudo generar
       retry: Reintentar
-      needsModel: Elige un modelo de IA para los subtítulos y así resumir este video.
+      needsModel: Elige un modelo LLM para los subtítulos y así resumir este video.
       openSettings: Abrir ajustes
       needsSubtitles: "Este video no tiene subtítulos: prueba a generarlos con IA primero."
   loadingAiSubtitles: Cargando subtítulos con IA… (estimado 3 min)

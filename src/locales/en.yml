@@ -1296,7 +1296,7 @@ subtitles:
       generating: Generating the summary…
       failedTitle: Could not generate
       retry: Try again
-      needsModel: Pick an AI model for video subtitles to summarize this video.
+      needsModel: Pick an LLM model for video subtitles to summarize this video.
       openSettings: Open settings
       needsSubtitles: This video has no subtitles — try generating AI subtitles first.
   loadingAiSubtitles: Loading AI subtitles… (estimated 3 min)
