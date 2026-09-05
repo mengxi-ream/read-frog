@@ -11,9 +11,10 @@ import { BATCH_SEPARATOR } from "@/utils/constants/prompt"
  * the background audits provider output before caching it, and the prompt
  * builder gates its placeholder rule on the same detector.
  *
- * ONE delimiter constant. The live provider probe decides the shipped syntax;
- * the decoder tolerates both candidate families regardless, so switching the
- * constant never orphans a cached translation.
+ * ONE token grammar, shared by all four sides: what we emit, what we decode,
+ * which literals we number around, and what the audit counts. Keeping them
+ * identical is the invariant that makes the protocol safe — see
+ * INLINE_ATOM_TOKEN_STRICT_RE.
  */
 export const INLINE_ATOM_TOKEN_DELIMITERS = { open: "{{", close: "}}" } as const
 
@@ -23,16 +24,25 @@ function escapeRegExp(value: string): string {
 
 const STRICT_TOKEN_SOURCE = `${escapeRegExp(INLINE_ATOM_TOKEN_DELIMITERS.open)}(\\d+)${escapeRegExp(INLINE_ATOM_TOKEN_DELIMITERS.close)}`
 
-/** Exactly the shape we emit: digits only, no inner whitespace. */
+/**
+ * The one token grammar: exactly the shape we emit — digits only, no inner
+ * whitespace.
+ *
+ * INVARIANT: the decoder, `nextFreeInlineAtomIndex` and `auditInlineAtomTokens`
+ * must all match on THIS pattern. A decoder that accepts a spelling the
+ * numbering scan does not reserve around will mistake page content for a
+ * placeholder — it renders the formula over the literal and silently drops both
+ * the literal and the token that was really ours.
+ *
+ * An earlier revision also decoded `[[n]]`, `⟦n⟧`, `｛｛n｝｝` and `〖n〗`, in case a
+ * provider curled the brackets. A live probe of 739 requests (14 models across
+ * 7 vendors, 6 target languages, tokens at every sentence position, up to ten
+ * per segment, adjacent, quoted, and in batches) returned `{{n}}` verbatim
+ * every time, so those spellings only ever fired on page text that happened to
+ * look like a token. If a provider is ever caught mangling one, widen this
+ * pattern — never the decoder alone.
+ */
 export const INLINE_ATOM_TOKEN_STRICT_RE = new RegExp(STRICT_TOKEN_SOURCE)
-
-// Every bracket family a provider has been seen to substitute for the emitted
-// one: fullwidth braces, mathematical white brackets and their ASCII/CJK
-// look-alikes. Bare `[n]` is deliberately absent — arXiv prose is full of
-// `[26]` citations.
-const TOLERANT_OPEN = ["{{", "｛｛", "⟦", "[[", "〖"]
-const TOLERANT_CLOSE = ["}}", "｝｝", "⟧", "]]", "〗"]
-const TOLERANT_TOKEN_SOURCE = `(?:${TOLERANT_OPEN.map(escapeRegExp).join("|")})\\s*([0-9０-９]+)\\s*(?:${TOLERANT_CLOSE.map(escapeRegExp).join("|")})`
 
 export function encodeInlineAtomToken(index: number): string {
   return `${INLINE_ATOM_TOKEN_DELIMITERS.open}${index}${INLINE_ATOM_TOKEN_DELIMITERS.close}`
@@ -51,7 +61,8 @@ export function hasInlineAtomTokens(text: string): boolean {
 /**
  * First index that cannot collide with a token-shaped literal already present
  * in the prose (template docs print `{{0}}`-style text). Tokens are numbered
- * from this offset so a literal is never mistaken for an atom on decode.
+ * from this offset so a literal is never mistaken for an atom on decode — which
+ * holds only while this scan and `decodeInlineAtomTokens` share one pattern.
  */
 export function nextFreeInlineAtomIndex(text: string): number {
   let next = 0
@@ -65,25 +76,21 @@ export type DecodedInlineAtomPart =
   | { kind: "text"; text: string }
   | { kind: "atom"; index: number; raw: string }
 
-function parseTokenIndex(digits: string): number {
-  return Number.parseInt(digits.normalize("NFKC"), 10)
-}
-
 /**
- * Split translated text into literal runs and tokens. Tolerant by design:
- * providers curl brackets, insert spaces and use fullwidth digits; all of
- * those decode to the intended atom. `raw` keeps the exact matched text so a
- * caller can re-emit an unknown token verbatim instead of eating page text.
+ * Split translated text into literal runs and tokens. Anything that is not
+ * exactly a token stays text, so a `[[0]]` the page itself wrote survives the
+ * round trip untouched. `raw` keeps the matched text so a caller can re-emit an
+ * index we never issued verbatim instead of eating page content.
  */
 export function decodeInlineAtomTokens(text: string): DecodedInlineAtomPart[] {
   const parts: DecodedInlineAtomPart[] = []
   let cursor = 0
-  for (const match of text.matchAll(new RegExp(TOLERANT_TOKEN_SOURCE, "g"))) {
+  for (const match of text.matchAll(new RegExp(STRICT_TOKEN_SOURCE, "g"))) {
     const start = match.index ?? 0
     if (start > cursor) {
       parts.push({ kind: "text", text: text.slice(cursor, start) })
     }
-    parts.push({ kind: "atom", index: parseTokenIndex(match[1]!), raw: match[0] })
+    parts.push({ kind: "atom", index: Number.parseInt(match[1]!, 10), raw: match[0] })
     cursor = start + match[0].length
   }
   if (cursor < text.length) {

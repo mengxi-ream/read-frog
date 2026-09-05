@@ -71,6 +71,9 @@ describe("decodeInlineAtomTokens", () => {
     expect(indexes).toEqual([1, 0])
   })
 
+  // Only the emitted shape decodes. Anything else is page content: a decoder
+  // wider than `nextFreeInlineAtomIndex`'s numbering scan would render a
+  // formula over one of these literals and drop the real token as a duplicate.
   it.each([
     ["inner whitespace", "{{ 2 }}"],
     ["fullwidth braces", "｛｛2｝｝"],
@@ -78,18 +81,18 @@ describe("decodeInlineAtomTokens", () => {
     ["mathematical white brackets", "⟦2⟧"],
     ["double square brackets", "[[2]]"],
     ["CJK lenticular brackets", "〖2〗"],
-  ])("tolerates %s", (_case, raw) => {
-    const parts = decodeInlineAtomTokens(`x ${raw} y`)
-    expect(parts).toEqual([
-      { kind: "text", text: "x " },
-      { kind: "atom", index: 2, raw },
-      { kind: "text", text: " y" },
-    ])
+    ["bare citation", "[26]"],
+    ["single braces", "{7}"],
+  ])("keeps %s as literal text", (_case, raw) => {
+    expect(decodeInlineAtomTokens(`x ${raw} y`)).toEqual([{ kind: "text", text: `x ${raw} y` }])
   })
 
-  it("does not treat bare citations or single braces as tokens", () => {
-    expect(decodeInlineAtomTokens("see [26] and {7}")).toEqual([
-      { kind: "text", text: "see [26] and {7}" },
+  it("does not let a token-shaped literal in the prose swallow the real token", () => {
+    // The page wrote `[[0]]`; `{{0}}` is ours. Both survive, each as itself.
+    expect(decodeInlineAtomTokens("Reshape to [[0]] before applying {{0}}.")).toEqual([
+      { kind: "text", text: "Reshape to [[0]] before applying " },
+      { kind: "atom", index: 0, raw: "{{0}}" },
+      { kind: "text", text: "." },
     ])
   })
 })
@@ -119,8 +122,15 @@ describe("auditInlineAtomTokens", () => {
     })
   })
 
-  it("accepts tolerant bracket variants as the same token", () => {
-    expect(auditInlineAtomTokens(source, "｛｛０｝｝ ⟦1⟧ {{ 2 }}").ok).toBe(true)
+  it("refuses a response that reformatted the placeholders", () => {
+    // Never observed in the live probe, but if it happens the result is a
+    // degraded render that must not reach the cache.
+    expect(auditInlineAtomTokens(source, "｛｛０｝｝ ⟦1⟧ {{ 2 }}")).toEqual({
+      ok: false,
+      missing: [0, 1, 2],
+      unknown: [],
+      duplicates: [],
+    })
   })
 })
 

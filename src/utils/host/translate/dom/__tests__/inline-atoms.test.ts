@@ -371,12 +371,16 @@ describe("renderInlineAtomTranslation", () => {
     expect(clones[1]?.getAttribute("dir")).toBe("ltr")
   })
 
-  it("tolerates provider bracket and digit variants", () => {
-    const { extraction } = extract("<p>Let <math><mi>x</mi></math> be.</p>")
+  it("leaves a token-shaped literal from the page alone", () => {
+    // `[[0]]` is prose the provider faithfully returned, not a placeholder:
+    // the formula belongs at `{{0}}` and the literal must survive verbatim.
+    const { extraction } = extract(
+      "<p>Reshape to <code>[[0]]</code> before applying <math><mi>x</mi></math>.</p>",
+    )
     const container = document.createElement("span")
-    renderInlineAtomTranslation(container, "设 ｛｛ ０ ｝｝ 为。", extraction)
+    renderInlineAtomTranslation(container, "在应用 {{0}} 前重塑为 [[0]]。", extraction)
     expect(container.querySelectorAll("math")).toHaveLength(1)
-    expect(container.textContent).toBe("设 x 为。")
+    expect(container.textContent).toBe("在应用 x 前重塑为 [[0]]。")
   })
 })
 
