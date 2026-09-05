@@ -135,10 +135,12 @@ export function useProximityHover<T extends HTMLElement>(
       measureRafRef.current = requestAnimationFrame(() => {
         measureRafRef.current = null
         if (!runMeasurement() && attemptsLeft > 1) {
+          // oxlint-disable-next-line react/immutability -- the callback retries itself; it cannot appear in its own dependency list
           scheduleMeasurement(attemptsLeft - 1)
         }
       })
     },
+    // oxlint-disable-next-line react/memo-dependencies -- the callback retries itself; it cannot appear in its own dependency list
     [runMeasurement],
   )
 

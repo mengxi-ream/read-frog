@@ -24,6 +24,7 @@ export function useAutosave<T extends object>(options: AutosaveOptions<T>) {
   useLayoutEffect(() => {
     latest.current = options
   })
+  // oxlint-disable-next-line react/refs -- The factory stores callbacks; refs are read only when events/effects invoke them.
   const [controller] = useState(() =>
     createAutosaveController<T>({
       initialValue: options.initialValue,

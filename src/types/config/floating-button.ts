@@ -1,4 +1,4 @@
-import z from "zod"
+import { z } from "zod"
 
 export const floatingButtonSides = ["left", "right"] as const
 export type FloatingButtonSide = (typeof floatingButtonSides)[number]

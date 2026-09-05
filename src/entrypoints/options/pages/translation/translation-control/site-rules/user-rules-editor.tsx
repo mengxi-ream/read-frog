@@ -52,6 +52,7 @@ export function UserRulesEditor() {
   })
   useEffect(() => {
     syncFromExternal()
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the dependencies are re-run triggers, not values the effect body reads
   }, [externalJson])
 
   const debouncedJsonInput = useDebouncedValue(jsonInput, 500)

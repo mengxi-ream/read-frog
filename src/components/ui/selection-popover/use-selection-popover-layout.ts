@@ -402,6 +402,7 @@ export function useSelectionPopoverLayout({
 
       resizeObserverFrameRef.current = requestAnimationFrame(() => {
         resizeObserverFrameRef.current = null
+        // oxlint-disable-next-line react/immutability -- the callback retries itself; it cannot appear in its own dependency list
         ensureResizeObserver()
       })
       return
@@ -440,6 +441,7 @@ export function useSelectionPopoverLayout({
 
     resizeObserverRef.current.observe(popoverRect.element)
     observedElementRef.current = popoverRect.element
+    // oxlint-disable-next-line react/memo-dependencies -- the callback retries itself; it cannot appear in its own dependency list
   }, [applyViewportLayout, cancelScheduledViewportLayout, isVisible, scheduleViewportLayout])
 
   const handleDragStart = useCallback(() => {
@@ -510,6 +512,7 @@ export function useSelectionPopoverLayout({
 
     cancelScheduledViewportLayout()
     disconnectResizeObserver()
+    // oxlint-disable-next-line react/set-state-in-effect -- resets layout state when the popover closes
     resetLayoutState()
   }, [cancelScheduledViewportLayout, disconnectResizeObserver, isVisible, resetLayoutState])
 
@@ -524,6 +527,7 @@ export function useSelectionPopoverLayout({
       syncPreferredPositionFromElement()
     })
   }, [
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the dependencies are re-run triggers, not values the effect body reads
     anchor,
     ensureResizeObserver,
     isVisible,

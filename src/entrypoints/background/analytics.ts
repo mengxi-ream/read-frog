@@ -1,7 +1,7 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { CaptureResult } from "posthog-js/dist/module.no-external"
 import type { AnalyticsFeature, FeatureUsedEventProperties } from "@/types/analytics"
-import posthog from "posthog-js/dist/module.no-external"
+import { posthog } from "posthog-js/dist/module.no-external"
 import { storage } from "#imports"
 import { env } from "@/env"
 import { ANALYTICS_FEATURE } from "@/types/analytics"

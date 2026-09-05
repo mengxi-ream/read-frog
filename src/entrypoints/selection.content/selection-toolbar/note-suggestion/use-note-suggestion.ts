@@ -73,6 +73,7 @@ export function useNoteSuggestion() {
   const completedSessionKeysRef = useRef<Set<string>>(new Set())
   const shownSessionKeysRef = useRef<Set<string>>(new Set())
   const latestRef = useRef(selectionToolbar)
+  // oxlint-disable-next-line react/refs -- latest-value ref: writing it during render is what keeps callbacks in sync
   latestRef.current = selectionToolbar
 
   const cancel = useCallback(() => {

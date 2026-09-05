@@ -169,6 +169,7 @@ export function useSaveToNotebase() {
   }
 
   const saveMutation = useMutation(
+    // oxlint-disable-next-line react/refs -- the refs are read inside the mutation callbacks, not during render
     orpc.notebaseRow.create.mutationOptions({
       meta: {
         suppressToast: true,
@@ -181,6 +182,7 @@ export function useSaveToNotebase() {
   )
 
   const saveManyMutation = useMutation(
+    // oxlint-disable-next-line react/refs -- the refs are read inside the mutation callbacks, not during render
     orpc.notebaseRow.createMany.mutationOptions({
       meta: {
         suppressToast: true,

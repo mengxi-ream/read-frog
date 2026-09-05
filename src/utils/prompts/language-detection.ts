@@ -13,7 +13,7 @@
  */
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import { LANG_CODE_TO_EN_NAME, langCodeISO6393Schema } from "@read-frog/definitions"
-import z from "zod"
+import { z } from "zod"
 import { logger } from "../logger"
 
 const supportedLanguageList = Object.entries(LANG_CODE_TO_EN_NAME)

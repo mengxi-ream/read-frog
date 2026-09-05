@@ -32,6 +32,7 @@ export function EntityListRail({ children, className, containerClassName }: Enti
     }, 100)
 
     return () => clearTimeout(timeoutId)
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the dependencies are re-run triggers, not values the effect body reads
   }, [children])
 
   useEffect(() => {

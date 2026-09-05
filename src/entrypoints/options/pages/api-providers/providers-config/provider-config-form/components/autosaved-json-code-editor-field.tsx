@@ -15,7 +15,6 @@ interface AutosavedJsonCodeEditorFieldProps<TValue extends Record<string, unknow
   placeholder: string
   editorAriaLabel: string
   fieldName: string
-  resetKey: string
   parse: (input: string) => JsonEditorParseResult<TValue>
   onCommit: (value: TValue | undefined) => void
   serialize?: (value: TValue | undefined) => string
@@ -32,7 +31,6 @@ export function AutosavedJsonCodeEditorField<TValue extends Record<string, unkno
   placeholder,
   editorAriaLabel,
   fieldName,
-  resetKey,
   parse,
   onCommit,
   serialize = defaultSerializeJson,
@@ -70,7 +68,7 @@ export function AutosavedJsonCodeEditorField<TValue extends Record<string, unkno
           setJsonError(null)
         },
       }),
-    [autosave, fieldName, resetKey],
+    [autosave, fieldName],
   )
 
   useEffect(() => {

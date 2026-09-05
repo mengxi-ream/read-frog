@@ -177,6 +177,7 @@ export default function FloatingButton() {
       pendingDragRef.current = null
     }
     lastDragPreviewRef.current = null
+    // oxlint-disable-next-line react/set-state-in-effect -- clears the drag preview once the drag ends
     setDragPreviewPosition(null)
     setIsDraggingButton(false)
     setIsHitAreaExpanded(false)

@@ -68,7 +68,6 @@ export const ProviderHeadersField = withForm({
     return (
       <AutosavedJsonCodeEditorField
         value={providerConfig.headers}
-        resetKey={providerConfig.id}
         fieldName="headers"
         parse={parseHeadersJson}
         serialize={toJson}

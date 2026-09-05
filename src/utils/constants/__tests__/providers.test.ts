@@ -19,6 +19,14 @@ import {
 } from "../providers"
 
 describe("provider constants", () => {
+  it("keeps every default provider compatible with its model schema", () => {
+    for (const provider of API_PROVIDER_TYPES) {
+      expect(apiProviderConfigItemSchema.parse(DEFAULT_PROVIDER_CONFIG[provider])).toEqual(
+        DEFAULT_PROVIDER_CONFIG[provider],
+      )
+    }
+  })
+
   it("uses the original custom provider SVG shape for both custom protocols", () => {
     expect(PROVIDER_ITEMS["openai-compatible"].logo("light")).toContain("custom-provider.svg")
     expect(PROVIDER_ITEMS["openai-compatible"].logo("dark")).toContain("custom-provider.svg")
@@ -36,7 +44,7 @@ describe("provider constants", () => {
         name: "Azure",
         provider: "azure",
         model: {
-          model: "gpt-5.4-mini",
+          model: "gpt-5.6-luna",
           isCustomModel: false,
           customModel: null,
         },

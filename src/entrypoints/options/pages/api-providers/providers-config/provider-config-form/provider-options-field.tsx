@@ -54,7 +54,6 @@ export const ProviderOptionsField = withForm({
     return (
       <AutosavedJsonCodeEditorField
         value={providerConfig.providerOptions}
-        resetKey={providerConfig.id}
         fieldName="providerOptions"
         parse={parseJson}
         serialize={toJson}

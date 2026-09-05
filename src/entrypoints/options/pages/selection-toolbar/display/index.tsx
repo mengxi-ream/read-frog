@@ -77,7 +77,7 @@ function OpacitySlider({
   const [draft, setDraft] = useState(value)
 
   useEffect(() => {
-    // eslint-disable-next-line react/set-state-in-effect
+    // oxlint-disable-next-line react/set-state-in-effect, react/no-deriving-state-in-effects -- the draft mirrors the committed value; the slider owns it between commits
     setDraft(value)
   }, [value])
 

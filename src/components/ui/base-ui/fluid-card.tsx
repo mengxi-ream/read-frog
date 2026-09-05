@@ -196,6 +196,7 @@ function FluidCardGroup({
   // the props that reflow the cards *inside* a container whose own box may not change.
   React.useEffect(() => {
     measureItems()
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the dependencies are re-run triggers, not values the effect body reads
   }, [measureItems, count, columns, orientation, separated, border])
 
   const contextValue = React.useMemo<FluidCardGroupContextValue>(
@@ -261,6 +262,7 @@ function FluidCardGroup({
         <AnimatePresence>
           {activeRect && (
             <motion.div
+              // oxlint-disable-next-line react/refs -- reading the session id during render is the point -- a new key mounts a fresh node with no geometry to animate from
               key={sessionRef.current}
               aria-hidden
               data-slot="fluid-card-highlight"

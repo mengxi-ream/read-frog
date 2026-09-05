@@ -67,6 +67,7 @@ export function Thinking({ status, content, defaultExpanded = false, className }
     return () => {
       cancelAnimationFrame(frame)
     }
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the dependencies are re-run triggers, not values the effect body reads
   }, [open, trimmedContent])
 
   const handleContentScroll = () => {
