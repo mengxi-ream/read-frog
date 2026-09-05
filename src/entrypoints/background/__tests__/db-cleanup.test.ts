@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const alarmsGetMock = vi.fn<(...args: any[]) => any>()
 const alarmsCreateMock = vi.fn<(...args: any[]) => any>()
@@ -17,6 +17,12 @@ const requestWhereMock = vi.fn<(...args: any[]) => any>()
 
 const summaryDeleteMock = vi.fn<(...args: any[]) => any>()
 const summaryWhereMock = vi.fn<(...args: any[]) => any>()
+
+const aiSegmentationDeleteMock = vi.fn<() => Promise<number>>()
+const aiSegmentationBelowMock =
+  vi.fn<(cutoff: Date) => { delete: typeof aiSegmentationDeleteMock }>()
+const aiSegmentationWhereMock =
+  vi.fn<(index: string) => { below: typeof aiSegmentationBelowMock }>()
 
 const loggerInfoMock = vi.fn<(...args: any[]) => any>()
 const loggerErrorMock = vi.fn<(...args: any[]) => any>()
@@ -63,6 +69,7 @@ vi.mock("@/utils/db/dexie/db", () => ({
       clear: vi.fn<(...args: any[]) => any>(),
     },
     aiSegmentationCache: {
+      where: aiSegmentationWhereMock,
       clear: vi.fn<(...args: any[]) => any>(),
     },
   },
@@ -112,18 +119,25 @@ describe("setUpDatabaseCleanup", () => {
         delete: summaryDeleteMock,
       }),
     })
+
+    aiSegmentationDeleteMock.mockResolvedValue(0)
+    aiSegmentationBelowMock.mockReturnValue({ delete: aiSegmentationDeleteMock })
+    aiSegmentationWhereMock.mockReturnValue({ below: aiSegmentationBelowMock })
   })
+
+  afterEach(() => vi.useRealTimers())
 
   it("does not run cleanup immediately on setup", async () => {
     const { setUpDatabaseCleanup } = await import("../db-cleanup")
     await setUpDatabaseCleanup()
 
-    expect(alarmsCreateMock).toHaveBeenCalledTimes(3)
+    expect(alarmsCreateMock).toHaveBeenCalledTimes(4)
     expect(alarmsAddListenerMock).toHaveBeenCalledTimes(1)
 
     expect(translationWhereMock).not.toHaveBeenCalled()
     expect(requestCountMock).not.toHaveBeenCalled()
     expect(summaryWhereMock).not.toHaveBeenCalled()
+    expect(aiSegmentationWhereMock).not.toHaveBeenCalled()
   })
 
   it("does not recreate alarms when they already exist", async () => {
@@ -131,11 +145,26 @@ describe("setUpDatabaseCleanup", () => {
       .mockResolvedValueOnce({ name: "cache-cleanup" })
       .mockResolvedValueOnce({ name: "request-record-cleanup" })
       .mockResolvedValueOnce({ name: "summary-cache-cleanup" })
+      .mockResolvedValueOnce({ name: "ai-segmentation-cache-cleanup" })
 
     const { setUpDatabaseCleanup } = await import("../db-cleanup")
     await setUpDatabaseCleanup()
 
     expect(alarmsCreateMock).not.toHaveBeenCalled()
+  })
+
+  it("adds the AI segmentation cleanup alarm to an installation with existing cleanup alarms", async () => {
+    alarmsGetMock.mockImplementation(async (name: string) =>
+      name === "ai-segmentation-cache-cleanup" ? null : { name },
+    )
+    const { setUpDatabaseCleanup } = await import("../db-cleanup")
+    await setUpDatabaseCleanup()
+
+    expect(alarmsCreateMock).toHaveBeenCalledExactlyOnceWith("ai-segmentation-cache-cleanup", {
+      delayInMinutes: 1,
+      periodInMinutes: 1440,
+    })
+    expect(aiSegmentationDeleteMock).not.toHaveBeenCalled()
   })
 
   it("runs only the matching cleanup handler for each alarm", async () => {
@@ -151,6 +180,7 @@ describe("setUpDatabaseCleanup", () => {
       REQUEST_RECORD_CLEANUP_ALARM,
       SUMMARY_CACHE_CLEANUP_ALARM,
       TRANSLATION_CACHE_CLEANUP_ALARM,
+      AI_SEGMENTATION_CACHE_CLEANUP_ALARM,
     } = await import("../db-cleanup")
 
     await setUpDatabaseCleanup()
@@ -169,5 +199,46 @@ describe("setUpDatabaseCleanup", () => {
 
     await alarmListener({ name: SUMMARY_CACHE_CLEANUP_ALARM })
     expect(summaryWhereMock).toHaveBeenCalledTimes(1)
+    expect(aiSegmentationWhereMock).not.toHaveBeenCalled()
+
+    await alarmListener({ name: AI_SEGMENTATION_CACHE_CLEANUP_ALARM })
+    expect(aiSegmentationWhereMock).toHaveBeenCalledTimes(1)
+    expect(translationWhereMock).toHaveBeenCalledTimes(1)
+    expect(requestCountMock).toHaveBeenCalledTimes(1)
+    expect(summaryWhereMock).toHaveBeenCalledTimes(1)
+  })
+
+  it("expires AI segmentation entries using a seven-day createdAt cutoff", async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date("2026-09-05T12:30:00.000Z"))
+    aiSegmentationDeleteMock.mockResolvedValue(3)
+    const { setUpDatabaseCleanup } = await import("../db-cleanup")
+    await setUpDatabaseCleanup()
+    const alarmListener = alarmsAddListenerMock.mock.calls[0]![0]
+    await alarmListener({ name: "ai-segmentation-cache-cleanup" })
+
+    expect(aiSegmentationWhereMock).toHaveBeenCalledExactlyOnceWith("createdAt")
+    expect(aiSegmentationBelowMock).toHaveBeenCalledExactlyOnceWith(
+      new Date("2026-08-29T12:30:00.000Z"),
+    )
+    expect(aiSegmentationDeleteMock).toHaveBeenCalledTimes(1)
+    expect(loggerInfoMock).toHaveBeenCalledWith(
+      "AI segmentation cache cleanup: Deleted 3 old entries",
+    )
+  })
+
+  it("logs an AI segmentation cleanup failure without rejecting the alarm handler", async () => {
+    const error = new Error("Database unavailable")
+    aiSegmentationDeleteMock.mockRejectedValueOnce(error)
+    const { setUpDatabaseCleanup } = await import("../db-cleanup")
+    await setUpDatabaseCleanup()
+    const alarmListener = alarmsAddListenerMock.mock.calls[0]![0]
+
+    await expect(alarmListener({ name: "ai-segmentation-cache-cleanup" })).resolves.toBeUndefined()
+    expect(loggerErrorMock).toHaveBeenCalledWith(
+      "Failed to cleanup old AI segmentation cache:",
+      error,
+    )
+    expect(loggerInfoMock).not.toHaveBeenCalled()
   })
 })

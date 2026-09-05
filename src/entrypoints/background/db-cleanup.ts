@@ -14,6 +14,9 @@ export const REQUEST_RECORD_MAX_AGE_DAYS = 120
 export const SUMMARY_CACHE_CLEANUP_ALARM = "summary-cache-cleanup"
 export const SUMMARY_CACHE_MAX_AGE_MINUTES = 7 * 24 * 60
 
+export const AI_SEGMENTATION_CACHE_CLEANUP_ALARM = "ai-segmentation-cache-cleanup"
+export const AI_SEGMENTATION_CACHE_MAX_AGE_MINUTES = 7 * 24 * 60
+
 export async function setUpDatabaseCleanup() {
   // Set up periodic alarms (only if they don't exist)
   const existingCacheAlarm = await browser.alarms.get(TRANSLATION_CACHE_CLEANUP_ALARM)
@@ -40,6 +43,14 @@ export async function setUpDatabaseCleanup() {
     })
   }
 
+  const existingAiSegmentationAlarm = await browser.alarms.get(AI_SEGMENTATION_CACHE_CLEANUP_ALARM)
+  if (!existingAiSegmentationAlarm) {
+    void browser.alarms.create(AI_SEGMENTATION_CACHE_CLEANUP_ALARM, {
+      delayInMinutes: 1,
+      periodInMinutes: CHECK_INTERVAL_MINUTES,
+    })
+  }
+
   // Register the alarm listener
   browser.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === TRANSLATION_CACHE_CLEANUP_ALARM) {
@@ -48,6 +59,8 @@ export async function setUpDatabaseCleanup() {
       await cleanupOldRequestRecords()
     } else if (alarm.name === SUMMARY_CACHE_CLEANUP_ALARM) {
       await cleanupOldSummaryCache()
+    } else if (alarm.name === AI_SEGMENTATION_CACHE_CLEANUP_ALARM) {
+      await cleanupOldAiSegmentationCache()
     }
   })
 }
@@ -160,6 +173,21 @@ export async function cleanupAllSummaryCache() {
   } catch (error) {
     logger.error("Failed to cleanup all summary cache:", error)
     throw error
+  }
+}
+
+async function cleanupOldAiSegmentationCache() {
+  try {
+    const cutoffDate = new Date()
+    cutoffDate.setTime(cutoffDate.getTime() - AI_SEGMENTATION_CACHE_MAX_AGE_MINUTES * 60 * 1000)
+
+    const deletedCount = await db.aiSegmentationCache.where("createdAt").below(cutoffDate).delete()
+
+    if (deletedCount > 0) {
+      logger.info(`AI segmentation cache cleanup: Deleted ${deletedCount} old entries`)
+    }
+  } catch (error) {
+    logger.error("Failed to cleanup old AI segmentation cache:", error)
   }
 }
 
