@@ -8,7 +8,7 @@ import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { formatHotkeyParts } from "@/utils/os"
 import { isPageTranslationShortcutEmpty } from "@/utils/page-translation-shortcut"
-import { canEnterTranslationOnlyMode } from "@/utils/providers/translation-only-gate"
+import { getTranslationOnlyBlockedReason } from "@/utils/providers/translation-only-gate"
 import { cn } from "@/utils/styles/utils"
 
 const TABLER_ICON_STROKE_WIDTH_CLASS = "[&_path]:[stroke-width:1.2]"
@@ -45,7 +45,9 @@ export default function TranslationModeSelector() {
   // no markup support (translation-only-gate.ts). Native `disabled` would
   // swallow the hover events the tooltip needs, so the button stays focusable
   // and the click becomes a no-op with the reason shown in the tooltip.
-  const nextModeBlocked = nextMode === "translationOnly" && !canEnterTranslationOnlyMode(config)
+  const blockedReason =
+    nextMode === "translationOnly" ? getTranslationOnlyBlockedReason(config) : null
+  const nextModeBlocked = blockedReason !== null
   const actionLabel = i18n.t(tooltipKey.action)
   const shortcutParts = isPageTranslationShortcutEmpty(translateConfig.modeShortcut)
     ? []
@@ -81,11 +83,7 @@ export default function TranslationModeSelector() {
             wrap inside the 320px popup instead of forcing one clipped line. */}
         <div className={cn("whitespace-nowrap", nextModeBlocked && "max-w-64 whitespace-normal")}>
           <p>{i18n.t(tooltipKey.current)}</p>
-          {nextModeBlocked ? (
-            <p>{i18n.t("options.translation.preference.translationMode.microsoftNotSupported")}</p>
-          ) : (
-            <p>{actionLabel}</p>
-          )}
+          {nextModeBlocked ? <p>{blockedReason}</p> : <p>{actionLabel}</p>}
           {!nextModeBlocked && shortcutParts.length > 0 && (
             <KbdGroup className="mt-1.5">
               {shortcutParts.map((part) => (

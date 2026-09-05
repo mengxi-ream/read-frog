@@ -729,7 +729,7 @@ options:
           bilingual: Song ngữ
           translationOnly: Chỉ bản dịch
         switched: "Chế độ dịch: $1"
-        microsoftNotSupported: Microsoft Translator không hỗ trợ chế độ chỉ bản dịch. Để bật, hãy chuyển sang nhà cung cấp khác.
+        providerNotSupported: $1 không hỗ trợ chế độ chỉ bản dịch. Để bật, hãy chuyển sang nhà cung cấp khác.
       translateRange:
         title: Phạm vi dịch
         description: Chọn chỉ dịch nội dung chính hay tất cả nội dung trên trang.

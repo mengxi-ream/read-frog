@@ -845,7 +845,7 @@ options:
           bilingual: Bilingüe
           translationOnly: Solo traducción
         switched: "Modo de traducción: $1"
-        microsoftNotSupported: Microsoft Translator no admite el modo de solo traducción. Para activarlo, cambia a otro proveedor.
+        providerNotSupported: $1 no admite el modo de solo traducción. Para activarlo, cambia a otro proveedor.
       translateRange:
         title: Alcance de la traducción
         description: Selecciona si traducir solo el contenido principal o todo el contenido de la página.
