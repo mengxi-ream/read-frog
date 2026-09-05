@@ -13,7 +13,7 @@ interface SubtitlesUIContextValue {
   requestAiSubtitles: () => Promise<void>
   supportsAiSubtitles: boolean
   supportsSidebar: boolean
-  generateVideoSummary: (config: Config) => Promise<string | null>
+  generateVideoSummary: (config: Config, videoId?: string | null) => Promise<string | null>
   hasSubtitlesAvailable: () => Promise<boolean>
   downloadSourceSubtitles: () => Promise<void>
   downloadTranslatedSubtitles: () => Promise<void>

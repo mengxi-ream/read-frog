@@ -76,7 +76,7 @@ export interface SubtitlesProvidersAdapter {
   readonly supportsAiSubtitles: boolean
   getControlsConfig: () => ControlsConfig | undefined
   readonly supportsSidebar: boolean
-  generateVideoSummary: (config: Config) => Promise<string | null>
+  generateVideoSummary: (config: Config, videoId?: string | null) => Promise<string | null>
   hasSubtitlesAvailable: () => Promise<boolean>
   toggleSubtitlesManually: (enabled: boolean) => void
   toggleSubtitlesByShortcut: (enabled: boolean) => void
@@ -184,7 +184,15 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     await this.trackChangeRefreshPromise
   }
 
-  generateVideoSummary = async (config: Config) => {
+  generateVideoSummary = async (config: Config, videoId = this.config.getVideoId?.() ?? null) => {
+    // A stale query must not cancel the new video's stream or borrow its subtitles.
+    if (
+      videoId === null ||
+      videoId !== subtitlesStore.get(currentVideoIdAtom) ||
+      videoId !== (this.config.getVideoId?.() ?? null)
+    ) {
+      throw new DOMException("Video summary superseded", "AbortError")
+    }
     this.summaryAbortController?.abort()
     const abortController = new AbortController()
     this.summaryAbortController = abortController
@@ -247,6 +255,11 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     subtitlesStore.set(currentVideoIdAtom, this.navigationVideoId)
   }
 
+  private prepareSummaryForNavigation() {
+    subtitlesStore.set(currentVideoIdAtom, null)
+    this.cancelVideoSummary()
+  }
+
   private cancelVideoSummary() {
     this.summaryAbortController?.abort()
     this.summaryAbortController = null
@@ -255,8 +268,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
   private resetForNavigation() {
     this.switchOperationId++
-    this.cancelVideoSummary()
-    this.publishVideoId()
+    this.prepareSummaryForNavigation()
     // Keyed by video id already; this only stops them accumulating.
     queryClient.removeQueries({ queryKey: VIDEO_SUMMARY_QUERY_SCOPE })
     this.clearNavigationReinitTimeout()
@@ -265,15 +277,16 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     this.clearRuntimeSession()
     this.clearSourceCache()
     this.fetcher.cleanup()
-    if (this.source !== SUBTITLES_SOURCE.NATIVE) {
-      this.source = SUBTITLES_SOURCE.NATIVE
-      this.fetcher = this.fetchers.native()
-    }
+    // A pending old fetch may still mutate its own cache after cleanup.
+    this.source = SUBTITLES_SOURCE.NATIVE
+    this.fetcher = this.fetchers.native()
     subtitlesStore.set(subtitlesSourceAtom, SUBTITLES_SOURCE.NATIVE)
     subtitlesStore.set(subtitlesSettingsPanelOpenAtom, false)
     subtitlesStore.set(subtitlesSettingsPanelViewAtom, ROOT_VIEW)
     this.showNativeSubtitles()
     void this.restorePosition()
+    // Keep the sidebar open, but publish the next query only after old state is cleared.
+    this.publishVideoId()
   }
 
   private destroyScheduler() {
@@ -369,7 +382,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private clearVisibleStateForNavigation() {
-    this.cancelVideoSummary()
+    this.prepareSummaryForNavigation()
     this.clearNavigationReinitTimeout()
     this.teardownAdObserver()
     this.translatedSubtitlesDownloader?.dispose()
@@ -433,7 +446,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private async handleNavigation() {
-    if (!this.hasPendingNavigationReset || !this.videoIdChanged) {
+    // A -> B -> A still needs to restore the state torn down at navigation start.
+    if (!this.hasPendingNavigationReset) {
       return
     }
 

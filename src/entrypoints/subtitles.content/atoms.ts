@@ -13,7 +13,7 @@ export const subtitlesStore = createStore()
 
 export const currentTimeMsAtom = atom<number>(0)
 
-/** Keys the summary, so a new video cannot read the last one's. */
+/** Keys the summary; null pauses it while navigation clears the previous source. */
 export const currentVideoIdAtom = atom<string | null>(null)
 
 /**

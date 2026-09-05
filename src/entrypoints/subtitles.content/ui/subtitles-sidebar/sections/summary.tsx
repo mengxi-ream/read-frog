@@ -62,17 +62,22 @@ export function SummarySection() {
     // oxlint-disable-next-line query/exhaustive-deps -- Only the target language and resolved provider affect generation; the rest of this config snapshot must not invalidate the summary.
     queryKey: videoSummaryQueryKey(videoId, config.language.targetCode, providerRef),
     queryFn: async () => {
-      const summary = await generateVideoSummary(config)
+      const summary = await generateVideoSummary(config, videoId)
       if (!summary) {
         throw new Error("Empty summary")
       }
       return summary
     },
     retry: false,
+    enabled: videoId !== null,
     staleTime: Infinity,
     gcTime: Infinity,
     meta: { suppressToast: true },
   })
+
+  if (videoId === null) {
+    return <SummarySkeleton />
+  }
 
   return match(query)
     .with({ status: "pending" }, () =>

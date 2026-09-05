@@ -3,7 +3,7 @@ import { QueryClient, QueryObserver } from "@tanstack/react-query"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { requestVideoSummary } from "@/utils/subtitles/video-summary"
-import { subtitlesStore, videoSummaryPartialAtom } from "../atoms"
+import { currentVideoIdAtom, subtitlesStore, videoSummaryPartialAtom } from "../atoms"
 import { UniversalVideoAdapter } from "../universal-adapter"
 
 vi.mock("@/utils/subtitles/video-summary", () => ({
@@ -63,6 +63,7 @@ describe("video summary task lifecycle", () => {
     vi.clearAllMocks()
     vi.mocked(requestVideoSummary).mockResolvedValue("summary")
     subtitlesStore.set(videoSummaryPartialAtom, "")
+    subtitlesStore.set(currentVideoIdAtom, "video-A")
     vi.stubGlobal("document", { title: "Test video", querySelector: () => null })
   })
 
