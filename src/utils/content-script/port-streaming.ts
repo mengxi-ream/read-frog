@@ -71,7 +71,7 @@ export function createPortStreamPromise<TResponse = string>(
     }
 
     messageListener = (event: StreamPortResponse<TResponse>) => {
-      if (!event || event.requestId !== streamRequestId) {
+      if (!event || event.streamRequestId !== streamRequestId) {
         return
       }
 
@@ -112,7 +112,7 @@ export function createPortStreamPromise<TResponse = string>(
 
     const startMessage: StreamPortStartMessage<unknown> = {
       type: "start",
-      requestId: streamRequestId,
+      streamRequestId,
       payload: serializablePayload,
     }
 
@@ -127,7 +127,7 @@ export function createPortStreamPromise<TResponse = string>(
         try {
           const pingMessage: StreamPortRequestMessage<unknown> = {
             type: "ping",
-            requestId: streamRequestId,
+            streamRequestId,
           }
           port.postMessage(pingMessage)
         } catch {

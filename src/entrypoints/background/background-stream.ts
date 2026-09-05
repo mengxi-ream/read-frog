@@ -16,7 +16,7 @@ import type {
   StreamPortHandler,
   StreamPortRequestMessage,
   StreamPortResponse,
-  StreamPortResponseWithoutRequestId,
+  StreamPortResponseWithoutStreamRequestId,
   StreamRuntimeOptions,
   ThinkingSnapshot,
 } from "@/types/background-stream"
@@ -70,7 +70,7 @@ function isAbortLikeError(error: unknown) {
 
 const streamPortStartEnvelopeSchema = z.object({
   type: z.literal("start"),
-  requestId: z.string().trim().min(1),
+  streamRequestId: z.string().trim().min(1),
   payload: z.unknown(),
 })
 
@@ -126,7 +126,7 @@ function createStartMessageParser<TSerializablePayload>(payloadSchema: z.ZodType
     if (!payloadResult.success) {
       return {
         success: false,
-        requestId: envelopeResult.data.requestId,
+        streamRequestId: envelopeResult.data.streamRequestId,
       }
     }
 
@@ -134,7 +134,7 @@ function createStartMessageParser<TSerializablePayload>(payloadSchema: z.ZodType
       success: true,
       message: {
         type: "start",
-        requestId: envelopeResult.data.requestId,
+        streamRequestId: envelopeResult.data.streamRequestId,
         payload: payloadResult.data as TSerializablePayload,
       },
     }
@@ -156,14 +156,14 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
     let messageListener: ((rawMessage: unknown) => void) | undefined
     let disconnectListener: (() => void) | undefined
 
-    const safePost = (response: StreamPortResponseWithoutRequestId<TResponse>) => {
+    const safePost = (response: StreamPortResponseWithoutStreamRequestId<TResponse>) => {
       if (!isActive || abortController.signal.aborted || !streamRequestId) {
         return
       }
       try {
         const message: StreamPortResponse<TResponse> = {
           ...response,
-          requestId: streamRequestId,
+          streamRequestId,
         }
         port.postMessage(message)
       } catch (error) {
@@ -203,8 +203,8 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
 
       const parseResult = startMessageParser(rawMessage)
       if (!parseResult.success) {
-        if (parseResult.requestId) {
-          streamRequestId = parseResult.requestId
+        if (parseResult.streamRequestId) {
+          streamRequestId = parseResult.streamRequestId
           safePost({
             type: "error",
             error: { message: invalidStreamStartPayloadMessage },
@@ -222,7 +222,7 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
       }
 
       const startMessage = parseResult.message
-      streamRequestId = startMessage.requestId
+      streamRequestId = startMessage.streamRequestId
       hasStarted = true
       let streamError: unknown
 

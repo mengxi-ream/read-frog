@@ -596,7 +596,7 @@ describe("background-stream", () => {
     handleStreamTextPort(mockPort.port as never)
     await mockPort.emitMessage({
       type: "start",
-      requestId: "req-text-1",
+      streamRequestId: "req-text-1",
       payload: {
         providerId: "openai-default",
         instructions: "Be concise",
@@ -614,7 +614,7 @@ describe("background-stream", () => {
     )
     expect(mockPort.postMessage).toHaveBeenNthCalledWith(1, {
       type: "chunk",
-      requestId: "req-text-1",
+      streamRequestId: "req-text-1",
       data: {
         output: "Hello",
         thinking: {
@@ -625,7 +625,7 @@ describe("background-stream", () => {
     })
     expect(mockPort.postMessage).toHaveBeenNthCalledWith(2, {
       type: "chunk",
-      requestId: "req-text-1",
+      streamRequestId: "req-text-1",
       data: {
         output: "Hello world",
         thinking: {
@@ -636,7 +636,7 @@ describe("background-stream", () => {
     })
     expect(mockPort.postMessage).toHaveBeenNthCalledWith(3, {
       type: "done",
-      requestId: "req-text-1",
+      streamRequestId: "req-text-1",
       data: {
         output: "Hello world",
         thinking: {
@@ -668,7 +668,7 @@ describe("background-stream", () => {
     handleStreamTextPort(mockPort.port as never)
     await mockPort.emitMessage({
       type: "start",
-      requestId: "summary-snapshot",
+      streamRequestId: "summary-snapshot",
       payload: {
         providerId: providerConfig.id,
         providerConfig,
@@ -711,12 +711,12 @@ describe("background-stream", () => {
     const { handleStreamTextPort } = await import("../background-stream")
     const mockPort = createMockPort("stream-text")
     handleStreamTextPort(mockPort.port as never)
-    await mockPort.emitMessage({ type: "start", requestId: "invalid-snapshot", payload })
+    await mockPort.emitMessage({ type: "start", streamRequestId: "invalid-snapshot", payload })
 
     expect(streamTextMock).not.toHaveBeenCalled()
     expect(mockPort.postMessage).toHaveBeenCalledWith({
       type: "error",
-      requestId: "invalid-snapshot",
+      streamRequestId: "invalid-snapshot",
       error: { message: "Invalid stream start payload" },
     })
   })
@@ -921,7 +921,7 @@ describe("background-stream", () => {
     handleStreamTextPort(mockPort.port as never)
     await mockPort.emitMessage({
       type: "start",
-      requestId: "req-text-error",
+      streamRequestId: "req-text-error",
       payload: {
         providerId: "openai-default",
         prompt: "Say hello",
@@ -935,7 +935,7 @@ describe("background-stream", () => {
     expect(errorMessages).toHaveLength(1)
     expect(errorMessages[0]).toMatchObject({
       type: "error",
-      requestId: "req-text-error",
+      streamRequestId: "req-text-error",
       error: {
         message: "Incorrect API key provided",
       },
@@ -951,7 +951,7 @@ describe("background-stream", () => {
     handleStreamTextPort(mockPort.port as never)
     await mockPort.emitMessage({
       type: "start",
-      requestId: "req-text-pre-stream-error",
+      streamRequestId: "req-text-pre-stream-error",
       payload: {
         providerId: "openai-default",
         prompt: "Say hello",
@@ -960,7 +960,7 @@ describe("background-stream", () => {
 
     expect(mockPort.postMessage).toHaveBeenCalledWith({
       type: "error",
-      requestId: "req-text-pre-stream-error",
+      streamRequestId: "req-text-pre-stream-error",
       error: {
         message: "Model is undefined",
       },
@@ -999,7 +999,7 @@ describe("background-stream", () => {
     handleStreamTextPort(mockPort.port as never)
     const startPromise = mockPort.emitMessage({
       type: "start",
-      requestId: "req-text-abort",
+      streamRequestId: "req-text-abort",
       payload: {
         providerId: "openai-default",
         prompt: "Say hello",
@@ -1028,7 +1028,7 @@ describe("background-stream", () => {
     handleStreamTextPort(mockPort.port as never)
     await mockPort.emitMessage({
       type: "start",
-      requestId: "req-text-invalid",
+      streamRequestId: "req-text-invalid",
       payload: {
         providerId: "   ",
       },
@@ -1036,7 +1036,7 @@ describe("background-stream", () => {
 
     expect(mockPort.postMessage).toHaveBeenCalledWith({
       type: "error",
-      requestId: "req-text-invalid",
+      streamRequestId: "req-text-invalid",
       error: { message: "Invalid stream start payload" },
     })
     expect(mockPort.disconnect).toHaveBeenCalledTimes(1)
@@ -1050,7 +1050,7 @@ describe("background-stream", () => {
     handleStreamStructuredObjectPort(emptySchemaPort.port as never)
     await emptySchemaPort.emitMessage({
       type: "start",
-      requestId: "req-structured-empty",
+      streamRequestId: "req-structured-empty",
       payload: {
         providerId: "openai-default",
         outputSchema: [],
@@ -1059,7 +1059,7 @@ describe("background-stream", () => {
 
     expect(emptySchemaPort.postMessage).toHaveBeenCalledWith({
       type: "error",
-      requestId: "req-structured-empty",
+      streamRequestId: "req-structured-empty",
       error: { message: "Invalid stream start payload" },
     })
     expect(emptySchemaPort.disconnect).toHaveBeenCalledTimes(1)
@@ -1068,7 +1068,7 @@ describe("background-stream", () => {
     handleStreamStructuredObjectPort(duplicateKeyPort.port as never)
     await duplicateKeyPort.emitMessage({
       type: "start",
-      requestId: "req-structured-duplicate",
+      streamRequestId: "req-structured-duplicate",
       payload: {
         providerId: "openai-default",
         outputSchema: [
@@ -1080,13 +1080,13 @@ describe("background-stream", () => {
 
     expect(duplicateKeyPort.postMessage).toHaveBeenCalledWith({
       type: "error",
-      requestId: "req-structured-duplicate",
+      streamRequestId: "req-structured-duplicate",
       error: { message: "Invalid stream start payload" },
     })
     expect(duplicateKeyPort.disconnect).toHaveBeenCalledTimes(1)
   })
 
-  it("disconnects invalid start message without requestId and cannot post error", async () => {
+  it("disconnects invalid start message without streamRequestId and cannot post error", async () => {
     const { handleStreamTextPort } = await import("../background-stream")
     const mockPort = createMockPort("stream-text")
 
@@ -1109,7 +1109,7 @@ describe("background-stream", () => {
     handleStreamTextPort(mockPort.port as never)
     await mockPort.emitMessage({
       type: "ping",
-      requestId: "req-ping",
+      streamRequestId: "req-ping",
     })
 
     expect(mockPort.postMessage).not.toHaveBeenCalled()

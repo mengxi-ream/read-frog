@@ -110,35 +110,35 @@ export interface StreamPortErrorPayload {
 }
 
 export type StreamPortResponse<T = string> =
-  | { type: "chunk"; requestId: string; data: T }
-  | { type: "done"; requestId: string; data: T }
-  | { type: "error"; requestId: string; error: StreamPortErrorPayload }
+  | { type: "chunk"; streamRequestId: string; data: T }
+  | { type: "done"; streamRequestId: string; data: T }
+  | { type: "error"; streamRequestId: string; error: StreamPortErrorPayload }
 
 type DistributiveOmit<T, K extends string> = T extends unknown ? Omit<T, K> : never
 
-export type StreamPortResponseWithoutRequestId<T = string> = DistributiveOmit<
+export type StreamPortResponseWithoutStreamRequestId<T = string> = DistributiveOmit<
   StreamPortResponse<T>,
-  "requestId"
+  "streamRequestId"
 >
 
 export interface StreamPortStartMessage<TSerializablePayload> {
   type: "start"
-  requestId: string
+  streamRequestId: string
   payload: TSerializablePayload
 }
 
 export interface StreamPortPingMessage {
   type: "ping"
-  requestId: string
+  streamRequestId: string
 }
 
 export type StreamPortRequestMessage<TSerializablePayload> =
   | StreamPortStartMessage<TSerializablePayload>
-  | { type: "ping"; requestId: string }
+  | { type: "ping"; streamRequestId: string }
 
 export type StartMessageParseResult<TSerializablePayload> =
   | { success: true; message: StreamPortStartMessage<TSerializablePayload> }
-  | { success: false; requestId?: string }
+  | { success: false; streamRequestId?: string }
 
 type AISDKStreamTextError = Parameters<StreamTextOnErrorCallback>[0]["error"]
 
