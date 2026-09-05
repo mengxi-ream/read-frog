@@ -1,5 +1,48 @@
 # @read-frog/extension
 
+## 1.46.8
+
+### Patch Changes
+
+- [#2152](https://github.com/mengxi-ream/read-frog/pull/2152) [`0e21ebf`](https://github.com/mengxi-ream/read-frog/commit/0e21ebff986db878c8fa64a3a90897a6be807bbb) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(site-rules): translate the Details body on Alibaba RFQ pages
+
+- [#2153](https://github.com/mengxi-ream/read-frog/pull/2153) [`c03f23e`](https://github.com/mengxi-ream/read-frog/commit/c03f23eb3385aaac81828c0384d1850b95bd9517) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(providers): refresh built-in models and translation defaults
+
+  Add current model choices and update translation defaults, including GPT-5.6 Luna, Gemini 3.5 Flash-Lite, and Qwen 3.8 Flash. Preserve saved model selections and update model-specific recommended reasoning options.
+
+- [#2155](https://github.com/mengxi-ream/read-frog/pull/2155) [`0f5e158`](https://github.com/mengxi-ream/read-frog/commit/0f5e1583d54e027ca39ed0bca6a8f4e10dce7539) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translate): keep inline formulas in bilingual translations
+
+  Bilingual page translation flattened every paragraph to plain text, so
+  rendered formulas (native MathML on arXiv, KaTeX, MathJax, Wikipedia math)
+  vanished from the translated line or leaked as glyph soup, and no site rule
+  could bring them back. Formula elements are now "inline atoms": each is sent
+  to the provider as a `{{n}}` placeholder and a sanitized clone of the
+  original element is put back at the placeholder's translated position. A new
+  `atomSelectors` site-rule family (seeded for the common renderers) decides
+  what counts as an atom; paragraphs without atoms are unchanged.
+
+- [#2103](https://github.com/mengxi-ream/read-frog/pull/2103) [`0284b5a`](https://github.com/mengxi-ream/read-frog/commit/0284b5afd302810af73e628e3adef2f5fe6aa36c) Thanks [@guangzan](https://github.com/guangzan)! - fix(selection): collapse idle selection overlay so page touch drag gestures are not stolen
+
+  The selection toolbar's always-mounted full-viewport `fixed inset-0` layer
+  made Chrome claim horizontal touch pans on pages using `touch-action:
+manipulation`, firing `pointercancel` and breaking touch drag gestures
+  (e.g. carousels). Collapse the overlay root to 0x0 while the toolbar is
+  idle; it expands back to full viewport when the toolbar becomes visible.
+
+- [#2147](https://github.com/mengxi-ream/read-frog/pull/2147) [`7ca0122`](https://github.com/mengxi-ream/read-frog/commit/7ca0122fa382186f69908accb972f1f09ee1686c) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): refuse AI subtitles for live stream replays with a toast
+
+- [#2156](https://github.com/mengxi-ream/read-frog/pull/2156) [`9ae2760`](https://github.com/mengxi-ream/read-frog/commit/9ae2760e8bb0777b4f238fbc995ed9b3ff6f3ea8) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(options): preserve IME input and autosaved drafts
+
+- [#2151](https://github.com/mengxi-ream/read-frog/pull/2151) [`c498f40`](https://github.com/mengxi-ream/read-frog/commit/c498f40ca0fd701f3fe47766d9fb3f11330209da) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - style(custom-actions): use brand outline styling for the customize button
+
+- [#2157](https://github.com/mengxi-ream/read-frog/pull/2157) [`03c3a86`](https://github.com/mengxi-ream/read-frog/commit/03c3a86f5855c5aadb4db3533e2b24bed88bef16) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translation): explain the disabled translation-only mode in a tooltip
+
+  The reason "Translation only" is greyed out never reached the screen: a disabled
+  select row is `pointer-events-none`, so the browser never rendered its native
+  `title`. Show it in a real tooltip instead, and build the sentence from whichever
+  provider blocks the mode, so the popup toggle, the mode shortcut and the options
+  select all stay correct as that list changes.
+
 ## 1.46.7
 
 ### Patch Changes
