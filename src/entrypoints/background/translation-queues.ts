@@ -10,7 +10,11 @@ import { browser, storage } from "#imports"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { putBatchRequestRecord } from "@/utils/batch-request-record"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
-import { BATCH_SEPARATOR, BATCH_SEPARATOR_LINE_PATTERN } from "@/utils/constants/prompt"
+import {
+  BATCH_SEPARATOR,
+  BATCH_SEPARATOR_LINE_PATTERN,
+  isNoTranslationSentinel,
+} from "@/utils/constants/prompt"
 import {
   BATCH_TIMEOUT_BASE_MS,
   BATCH_TIMEOUT_PER_CHAR_MS,
@@ -27,6 +31,10 @@ import {
   hasHtmlAttributeMarkerProtocol,
   isHtmlAttributeMarkerIntegrityError,
 } from "@/utils/host/translate/html-attribute-markers"
+import {
+  auditInlineAtomTokens,
+  hasInlineAtomTokens,
+} from "@/utils/host/translate/inline-atom-tokens"
 import { normalizePromptContextValue } from "@/utils/host/translate/translate-text"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
@@ -573,8 +581,23 @@ export function setUpWebPageTranslationQueue(): void {
       assertHtmlAttributeMarkerIntegrity(text, result)
     }
 
+    // A response that dropped, invented or duplicated an inline-atom
+    // placeholder is still rendered by the content script (the formulas are
+    // appended) but must not be persisted: the next visit deserves a fresh
+    // attempt instead of a permanently degraded paragraph. The sentinel is
+    // exempt — "no translation needed" carries no placeholders by definition,
+    // and auditing it as a total loss would make every already-in-target-language
+    // paragraph containing a formula re-hit the provider on every page load.
+    const inlineAtomTokensIntact =
+      !hasInlineAtomTokens(text) ||
+      isNoTranslationSentinel(result) ||
+      auditInlineAtomTokens(text, result).ok
+    if (result && !inlineAtomTokensIntact) {
+      logger.warn("Inline atom placeholders were not preserved; result not cached")
+    }
+
     // Cache the translation result if successful
-    if (result && hash) {
+    if (result && hash && inlineAtomTokensIntact) {
       await db.translationCache.put({
         key: hash,
         translation: result,

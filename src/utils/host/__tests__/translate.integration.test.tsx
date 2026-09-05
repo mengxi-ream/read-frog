@@ -10,6 +10,7 @@ import {
   BLOCK_CONTENT_CLASS,
   CONTENT_WRAPPER_CLASS,
   FLOAT_WRAP_ATTRIBUTE,
+  INLINE_ATOM_CLASS,
   INLINE_ATTRIBUTE,
   INLINE_CONTENT_CLASS,
   PARAGRAPH_ATTRIBUTE,
@@ -2460,6 +2461,168 @@ describe("translate", () => {
 
       expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
       expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT)
+    })
+  })
+
+  describe("bilingual inline atoms (formulas)", () => {
+    const mathml = (id: string, symbol: string) =>
+      `<math id="${id}" class="ltx_Math" alttext="${symbol}" display="inline"><semantics><mi>${symbol}</mi><annotation encoding="application/x-tex">${symbol}</annotation></semantics></math>`
+    const katex = (symbol: string) =>
+      `<span class="katex"><span class="katex-mathml"><math><semantics><mi>${symbol}</mi><annotation encoding="application/x-tex">${symbol}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="mord mathnormal">${symbol}</span></span></span></span>`
+
+    beforeEach(() => {
+      vi.mocked(translateTextForPage).mockReset().mockResolvedValue(MOCK_TRANSLATION)
+    })
+
+    afterEach(() => {
+      vi.mocked(translateTextForPage).mockReset().mockResolvedValue(MOCK_TRANSLATION)
+    })
+
+    it("sends placeholders, clones the formulas at their translated positions and restores cleanly", async () => {
+      vi.mocked(translateTextForPage).mockImplementation(async (text) =>
+        text === "Let {{0}} be smaller than {{1}}." ? "设 {{1}} 大于 {{0}}。" : MOCK_TRANSLATION,
+      )
+      render(<p data-testid="test-node" />)
+      const node = screen.getByTestId("test-node")
+      node.innerHTML = `Let ${mathml("m1", "x")} be smaller than ${mathml("m2", "y")}.`
+      const sourceMath = [...node.querySelectorAll("math")]
+
+      await removeOrShowPageTranslation("bilingual", true)
+
+      expect(translateTextForPage).toHaveBeenCalledWith(
+        "Let {{0}} be smaller than {{1}}.",
+        "plain",
+        DEFAULT_PAGE_TRANSLATION_OPTIONS,
+      )
+      const wrapper = expectTranslationWrapper(node, "bilingual")!
+      const clones = [...wrapper.querySelectorAll("math")]
+      expect(clones).toHaveLength(2)
+      expect(clones[0]?.getAttribute("alttext")).toBe("y")
+      expect(clones[1]?.getAttribute("alttext")).toBe("x")
+      expect(
+        clones.every(
+          (clone) => clone.classList.contains(INLINE_ATOM_CLASS) && !clone.hasAttribute("id"),
+        ),
+      ).toBe(true)
+      expect(clones).not.toContain(sourceMath[0])
+      expect(clones).not.toContain(sourceMath[1])
+      expect(wrapper.textContent).toBe("设 y 大于 x。")
+      // The source formulas are untouched.
+      expect(sourceMath.every((math) => math.isConnected && math.hasAttribute("id"))).toBe(true)
+
+      await removeOrShowPageTranslation("bilingual", true)
+
+      expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeNull()
+      expect([...node.querySelectorAll("math")]).toEqual(sourceMath)
+    })
+
+    it("renders each KaTeX formula exactly once with no glyph soup in the request", async () => {
+      vi.mocked(translateTextForPage).mockImplementation(async (text) =>
+        text.includes("{{0}}") ? "时间常数为 {{0}}。" : MOCK_TRANSLATION,
+      )
+      render(<p data-testid="test-node" />)
+      const node = screen.getByTestId("test-node")
+      node.innerHTML = `The time constant was ${katex("τ")}.`
+
+      await removeOrShowPageTranslation("bilingual", true)
+
+      const [request] = vi.mocked(translateTextForPage).mock.calls[0]!
+      expect(request).toBe("The time constant was {{0}}.")
+      expect(request).not.toContain("τ")
+      const wrapper = expectTranslationWrapper(node, "bilingual")!
+      expect(wrapper.querySelectorAll(".katex")).toHaveLength(1)
+      expect(wrapper.querySelectorAll(".katex-mathml")).toHaveLength(0)
+      expect(wrapper.textContent).toBe("时间常数为 τ。")
+    })
+
+    it("never sends a formula-only run", async () => {
+      render(<p data-testid="test-node" />)
+      const node = screen.getByTestId("test-node")
+      node.innerHTML = `(${mathml("m1", "x")})`
+
+      await removeOrShowPageTranslation("bilingual", true)
+
+      expect(translateTextForPage).not.toHaveBeenCalled()
+      expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeNull()
+    })
+
+    it("hides an echoed translation that only returns the placeholders", async () => {
+      vi.mocked(translateTextForPage).mockImplementation(async (text) => text)
+      render(<p data-testid="test-node" />)
+      const node = screen.getByTestId("test-node")
+      node.innerHTML = `Let ${mathml("m1", "x")} be the mean.`
+
+      await removeOrShowPageTranslation("bilingual", true)
+
+      expect(translateTextForPage).toHaveBeenCalledWith(
+        "Let {{0}} be the mean.",
+        "plain",
+        DEFAULT_PAGE_TRANSLATION_OPTIONS,
+      )
+      expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeNull()
+    })
+
+    it("appends a formula whose placeholder the provider dropped", async () => {
+      vi.mocked(translateTextForPage).mockResolvedValue("设为均值。")
+      render(<p data-testid="test-node" />)
+      const node = screen.getByTestId("test-node")
+      node.innerHTML = `Let ${mathml("m1", "x")} be the mean.`
+
+      await removeOrShowPageTranslation("bilingual", true)
+
+      const wrapper = expectTranslationWrapper(node, "bilingual")!
+      expect(wrapper.querySelectorAll("math")).toHaveLength(1)
+      expect(wrapper.textContent).toBe("设为均值。 x")
+    })
+
+    it("keeps a newline-preserving container with a formula on the whole-run path", async () => {
+      vi.mocked(translateTextForPage).mockImplementation(async (text) =>
+        text.includes("{{0}}") ? "第一句 {{0}}。\n\n第二句。" : MOCK_TRANSLATION,
+      )
+      render(<div data-testid="test-node" style={{ whiteSpace: "pre-wrap" }} />)
+      const node = screen.getByTestId("test-node")
+      node.innerHTML = `First ${mathml("m1", "x")} sentence.\n\nSecond sentence.`
+
+      await removeOrShowPageTranslation("bilingual", true)
+
+      expect(vi.mocked(translateTextForPage).mock.calls).toEqual([
+        [
+          "First {{0}} sentence.\n\nSecond sentence.",
+          "plain",
+          PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS,
+        ],
+      ])
+      const wrapper = expectTranslationWrapper(node, "bilingual")!
+      expect(wrapper.hasAttribute(VIRTUAL_PARAGRAPH_ATTRIBUTE)).toBe(false)
+      expect(wrapper.querySelectorAll("math")).toHaveLength(1)
+      expect(wrapper.textContent).toContain("第二句")
+    })
+
+    it("still splits the same container into virtual paragraphs without a formula", async () => {
+      render(<div data-testid="test-node" style={{ whiteSpace: "pre-wrap" }} />)
+      const node = screen.getByTestId("test-node")
+      node.innerHTML = "First plain sentence.\n\nSecond sentence."
+
+      await removeOrShowPageTranslation("bilingual", true)
+
+      expect(vi.mocked(translateTextForPage).mock.calls).toHaveLength(2)
+      expect(
+        vi.mocked(translateTextForPage).mock.calls.every(([request]) => !request.includes("{{")),
+      ).toBe(true)
+    })
+
+    it("leaves translationOnly mode on its HTML path without placeholders", async () => {
+      render(<p data-testid="test-node" />)
+      const node = screen.getByTestId("test-node")
+      node.innerHTML = `Let ${mathml("m1", "x")} be the mean.`
+
+      await removeOrShowPageTranslation("translationOnly", true)
+
+      expect(translateTextForPage).toHaveBeenCalled()
+      const [request, textFormat] = vi.mocked(translateTextForPage).mock.calls[0]!
+      expect(textFormat).toBe("html")
+      expect(request).toContain("<math")
+      expect(request).not.toContain("{{0}}")
     })
   })
 

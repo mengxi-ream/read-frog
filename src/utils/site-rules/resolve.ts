@@ -16,7 +16,14 @@ export interface ResolvedSiteRule {
   forceBlockStyleSelector: string | null
   forceInlineNodeSelector: string | null
   forceInlineStyleSelector: string | null
+  /**
+   * Also contains every atom selector: atoms must stop the walk exactly like
+   * preserve-text elements, and folding them in here keeps the hot-path
+   * predicate at a single `matches()` call.
+   */
   preserveTextSelector: string | null
+  /** Inline atoms only (formula renderers); consumed by bilingual extraction. */
+  atomSelector: string | null
   /**
    * Tag-set families: `null` means no matched rule touched the family, so
    * consumers fall back to the shipped constant Set (hot path unchanged).
@@ -50,6 +57,7 @@ export const EMPTY_RESOLVED_SITE_RULE: ResolvedSiteRule = {
   forceInlineNodeSelector: null,
   forceInlineStyleSelector: null,
   preserveTextSelector: null,
+  atomSelector: null,
   dontWalkTags: null,
   dontWalkTagsExplicitAdds: null,
   dontWalkButTranslateTags: null,
@@ -114,12 +122,12 @@ function joinSelectors(selectors: Iterable<string>): string | null {
   return merged.size > 0 ? [...merged].join(",") : null
 }
 
-function mergeSelectorDelta(
+function mergeSelectorDeltaSet(
   matched: SiteRule[],
   baseKey: keyof SiteRule,
   addKey: keyof SiteRule,
   removeKey: keyof SiteRule,
-): string | null {
+): Set<string> {
   const merged = new Set<string>()
 
   const addSelectors = (selectors: unknown) => {
@@ -146,7 +154,16 @@ function mergeSelectorDelta(
     removeSelectors(rule[removeKey])
   }
 
-  return joinSelectors(merged)
+  return merged
+}
+
+function mergeSelectorDelta(
+  matched: SiteRule[],
+  baseKey: keyof SiteRule,
+  addKey: keyof SiteRule,
+  removeKey: keyof SiteRule,
+): string | null {
+  return joinSelectors(mergeSelectorDeltaSet(matched, baseKey, addKey, removeKey))
 }
 
 const TAG_NAME_RE = /^[a-z][a-z0-9-]*$/i
@@ -265,6 +282,19 @@ export function resolveSiteRule(
     }
   }
 
+  const preserveTextSelectors = mergeSelectorDeltaSet(
+    matched,
+    "preserveTextSelectors",
+    "preserveTextSelectors.add",
+    "preserveTextSelectors.remove",
+  )
+  const atomSelectors = mergeSelectorDeltaSet(
+    matched,
+    "atomSelectors",
+    "atomSelectors.add",
+    "atomSelectors.remove",
+  )
+
   return {
     matchedRuleIds: matched.map((rule) => rule.id),
     excludeSelector: mergeSelectorDelta(
@@ -303,12 +333,8 @@ export function resolveSiteRule(
       "forceInlineStyleSelectors.add",
       "forceInlineStyleSelectors.remove",
     ),
-    preserveTextSelector: mergeSelectorDelta(
-      matched,
-      "preserveTextSelectors",
-      "preserveTextSelectors.add",
-      "preserveTextSelectors.remove",
-    ),
+    preserveTextSelector: joinSelectors([...preserveTextSelectors, ...atomSelectors]),
+    atomSelector: joinSelectors(atomSelectors),
     dontWalkTags: mergeTagSetDelta(
       matched,
       "dontWalkTags.add",

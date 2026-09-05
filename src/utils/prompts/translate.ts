@@ -5,6 +5,10 @@ import {
   HTML_ATTRIBUTE_MARKER,
   parseHtmlAttributeMarkers,
 } from "@/utils/host/translate/html-attribute-markers"
+import {
+  hasInlineAtomTokens,
+  INLINE_ATOM_TOKEN_SYSTEM_PROMPT,
+} from "@/utils/host/translate/inline-atom-tokens"
 import { DEFAULT_CONFIG } from "../constants/config"
 import {
   BATCH_SEPARATOR,
@@ -85,6 +89,15 @@ ${DEFAULT_SENTINEL_TRANSLATE_PROMPT}`
     systemPrompt = `${systemPrompt}
 
 ${HTML_ATTRIBUTE_MARKER_SYSTEM_PROMPT}`
+  }
+
+  // Inline-atom placeholders ({{n}}) stand for formulas cloned back after
+  // translation. The rule is appended only when the input carries one, so the
+  // system prompt — and with it the LLM cache hash — is untouched otherwise.
+  if (hasInlineAtomTokens(input)) {
+    systemPrompt = `${systemPrompt}
+
+${INLINE_ATOM_TOKEN_SYSTEM_PROMPT}`
   }
 
   // Build title and summary replacement values

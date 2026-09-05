@@ -25,6 +25,11 @@ export const MARK_ATTRIBUTES = new Set([
 
 export const NOTRANSLATE_CLASS = "notranslate"
 
+// Marks a formula element cloned into a bilingual translation (an "inline
+// atom"). The preset stylesheet excludes these subtrees from its wrapper-wide
+// typography rules so the page's own math CSS keeps rendering them.
+export const INLINE_ATOM_CLASS = "read-frog-inline-atom"
+
 export const REACT_SHADOW_HOST_CLASS = "read-frog-react-shadow-host"
 
 export const SPINNER_CLASS = "read-frog-spinner"

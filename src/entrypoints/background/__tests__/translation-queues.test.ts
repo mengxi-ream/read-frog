@@ -672,6 +672,76 @@ describe("translation queue helpers", () => {
     )
   })
 
+  it("caches a translation whose inline atom placeholders all came back", async () => {
+    executeTranslateMock.mockResolvedValue("设 {{1}} 大于 {{0}}。")
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: "Let {{0}} be smaller than {{1}}.",
+        langConfig: DEFAULT_CONFIG.language,
+        providerRef: localProviderRef(googleProvider),
+        scheduleAt: Date.now(),
+        hash: "atom-hash",
+      },
+    })
+
+    expect(result).toBe("设 {{1}} 大于 {{0}}。")
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({ key: "atom-hash", translation: "设 {{1}} 大于 {{0}}。" }),
+    )
+  })
+
+  it("returns but does not cache a translation that lost an inline atom placeholder", async () => {
+    executeTranslateMock.mockResolvedValue("设 {{0}} 大于。")
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: "Let {{0}} be smaller than {{1}}.",
+        langConfig: DEFAULT_CONFIG.language,
+        providerRef: localProviderRef(googleProvider),
+        scheduleAt: Date.now(),
+        hash: "atom-hash",
+      },
+    })
+
+    expect(result).toBe("设 {{0}} 大于。")
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
+  it("caches the no-translation sentinel for a paragraph that carried placeholders", async () => {
+    // The sentinel replaces the whole translation, so the placeholder audit sees
+    // a total loss. Failing it would make every already-in-target-language
+    // paragraph with a formula re-hit the provider on every page load.
+    executeTranslateMock.mockResolvedValue(NO_TRANSLATION_SENTINEL)
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: "设 {{0}} 大于 {{1}}。",
+        langConfig: DEFAULT_CONFIG.language,
+        providerRef: localProviderRef(googleProvider),
+        scheduleAt: Date.now(),
+        hash: "atom-hash",
+      },
+    })
+
+    expect(result).toBe(NO_TRANSLATION_SENTINEL)
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({ key: "atom-hash", translation: NO_TRANSLATION_SENTINEL }),
+    )
+  })
+
   it("uses cached HTML translations when all attribute markers remain on their tags", async () => {
     translationCacheGetMock.mockResolvedValueOnce({
       key: "webpage-hash",

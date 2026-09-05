@@ -38,6 +38,29 @@
     ]
   },
   {
+    "id": "readfrog-atom-defaults",
+    "description": "Keep rendered inline formulas as opaque atoms inside bilingual translations",
+    "matches": "*",
+    "atomSelectors": [
+      "span.katex",
+      "mjx-container",
+      ".MathJax",
+      ".MathJax_SVG",
+      ".MathJax_CHTML",
+      ".MathJax_Preview",
+      ".MathJax_Display",
+      "math-renderer",
+      "[aria-labelledby^=\"MathJax-SVG\"]",
+      ".mwe-math-element",
+      ".ltx_Math",
+      "span.math.inline",
+      "span.math.display",
+      ".mathjax-block",
+      "span.pretex-inline",
+      "span.math-inline"
+    ]
+  },
+  {
     "id": "pdf",
     "matches": "https://app.infread.com/pdf/*",
     "includeSelectors": ["#viewerContainer p"],
@@ -1570,6 +1593,7 @@
     "forceBlockNodeSelectors.add": ["span.display", "span.captions", "span[id^=cap]"],
     "forceBlockStyleSelectors.add": ["span.display", "span.captions", "span[id^=cap]"],
     "preserveTextSelectors": ["span.display", "span.math"],
+    "atomSelectors.add": ["span.math"],
     "injectedCss.add": [
       "h2 {font-size:unset;}",
       ".u-clamp-2-lines {-webkit-line-clamp:unset!important;}"

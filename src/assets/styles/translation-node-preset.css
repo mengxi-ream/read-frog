@@ -1,9 +1,18 @@
+/* Every `*` rule below excludes inline atoms (formula elements cloned into a
+ * translation, `.read-frog-inline-atom`) and their subtrees, so the page's own
+ * math CSS (KaTeX, MathJax, MathML) keeps rendering them. `:where()` adds no
+ * specificity, so prose cascades exactly as before. */
 .read-frog-translated-content-wrapper,
-.read-frog-translated-content-wrapper * {
+.read-frog-translated-content-wrapper
+  *:not(:where(.read-frog-inline-atom, .read-frog-inline-atom *)) {
   overflow-wrap: anywhere;
   word-break: normal;
   user-select: text;
   text-decoration-skip-ink: auto;
+}
+
+.read-frog-inline-atom {
+  overflow-wrap: normal;
 }
 
 .read-frog-translated-block-content {
@@ -26,7 +35,8 @@
 
 /* Simplified Chinese - macOS > Windows > Cross-platform > Fallback */
 .read-frog-translated-content-wrapper[lang="zh"],
-.read-frog-translated-content-wrapper[lang="zh"] * {
+.read-frog-translated-content-wrapper[lang="zh"]
+  *:not(:where(.read-frog-inline-atom, .read-frog-inline-atom *)) {
   font-family:
     "PingFang SC",
     "Microsoft YaHei",
@@ -44,7 +54,8 @@
 
 /* Traditional Chinese - macOS > Windows > Cross-platform > Fallback */
 .read-frog-translated-content-wrapper[lang="zh-TW"],
-.read-frog-translated-content-wrapper[lang="zh-TW"] * {
+.read-frog-translated-content-wrapper[lang="zh-TW"]
+  *:not(:where(.read-frog-inline-atom, .read-frog-inline-atom *)) {
   font-family:
     "PingFang TC",
     "Microsoft JhengHei",
@@ -65,7 +76,8 @@
 
 /* Japanese - macOS/Windows high-quality > Cross-platform > Legacy > Fallback */
 .read-frog-translated-content-wrapper[lang="ja"],
-.read-frog-translated-content-wrapper[lang="ja"] * {
+.read-frog-translated-content-wrapper[lang="ja"]
+  *:not(:where(.read-frog-inline-atom, .read-frog-inline-atom *)) {
   font-family:
     "Hiragino Kaku Gothic ProN",
     "Yu Gothic",
@@ -86,11 +98,14 @@
 
 /* Arabic script languages - common typography features */
 .read-frog-translated-content-wrapper[lang="ar"],
-.read-frog-translated-content-wrapper[lang="ar"] *,
+.read-frog-translated-content-wrapper[lang="ar"]
+  *:not(:where(.read-frog-inline-atom, .read-frog-inline-atom *)),
 .read-frog-translated-content-wrapper[lang="fa"],
-.read-frog-translated-content-wrapper[lang="fa"] *,
+.read-frog-translated-content-wrapper[lang="fa"]
+  *:not(:where(.read-frog-inline-atom, .read-frog-inline-atom *)),
 .read-frog-translated-content-wrapper[lang="ur"],
-.read-frog-translated-content-wrapper[lang="ur"] * {
+.read-frog-translated-content-wrapper[lang="ur"]
+  *:not(:where(.read-frog-inline-atom, .read-frog-inline-atom *)) {
   font-feature-settings:
     "rlig" 1,
     "calt" 1;
@@ -98,7 +113,8 @@
 
 /* Arabic - macOS high-quality > Cross-platform > macOS legacy > Fallback */
 .read-frog-translated-content-wrapper[lang="ar"],
-.read-frog-translated-content-wrapper[lang="ar"] * {
+.read-frog-translated-content-wrapper[lang="ar"]
+  *:not(:where(.read-frog-inline-atom, .read-frog-inline-atom *)) {
   font-family:
     "SF Arabic", "Noto Sans Arabic", "Noto Naskh Arabic", "Geeza Pro", "Traditional Arabic",
     "Segoe UI", Tahoma, Arial, sans-serif;
@@ -106,7 +122,8 @@
 
 /* Persian/Farsi - macOS > Cross-platform > Platform-specific > Fallback */
 .read-frog-translated-content-wrapper[lang="fa"],
-.read-frog-translated-content-wrapper[lang="fa"] * {
+.read-frog-translated-content-wrapper[lang="fa"]
+  *:not(:where(.read-frog-inline-atom, .read-frog-inline-atom *)) {
   font-family:
     "SF Arabic", "Noto Sans Arabic", "Geeza Pro", "Iranian Sans", "Segoe UI", Tahoma, Arial,
     sans-serif !important;
@@ -114,7 +131,8 @@
 
 /* Urdu - Specialized Nastaliq > Cross-platform > Fallback */
 .read-frog-translated-content-wrapper[lang="ur"],
-.read-frog-translated-content-wrapper[lang="ur"] * {
+.read-frog-translated-content-wrapper[lang="ur"]
+  *:not(:where(.read-frog-inline-atom, .read-frog-inline-atom *)) {
   font-family:
     "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "SF Arabic", "Noto Sans Arabic",
     "Alvi Nastaleeq", "Segoe UI", Tahoma, Arial, sans-serif;

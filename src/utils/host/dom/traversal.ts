@@ -24,7 +24,23 @@ import {
 
 const NON_NEWLINE_WHITESPACE_RE = /[^\S\n]/
 
-export function extractTextContent(node: TransNode, config: Config): string {
+export interface ExtractTextContentOptions {
+  /**
+   * Consulted for every element AFTER the translated-wrapper guard and BEFORE
+   * the dont-walk guard. Returning a string substitutes it for the element's
+   * whole subtree (the inline-atom placeholder); `undefined` means "extract
+   * normally". The position is load-bearing: earlier and clones inside our own
+   * wrappers would be re-tokenized, later and a `<math>` (a dont-walk tag) has
+   * already collapsed to "".
+   */
+  replaceElement?: (element: HTMLElement) => string | undefined
+}
+
+export function extractTextContent(
+  node: TransNode,
+  config: Config,
+  options: ExtractTextContentOptions = {},
+): string {
   if (isTextNode(node)) {
     const text = node.textContent ?? ""
     const trimmed = text.trim()
@@ -56,6 +72,11 @@ export function extractTextContent(node: TransNode, config: Config): string {
     return ""
   }
 
+  const replacement = options.replaceElement?.(node)
+  if (replacement !== undefined) {
+    return replacement
+  }
+
   if (isDontWalkIntoAndDontTranslateAsChildElement(node, config)) {
     return ""
   }
@@ -64,7 +85,7 @@ export function extractTextContent(node: TransNode, config: Config): string {
   return childNodes.reduce((text: string, child: Node): string => {
     // TODO: support SVGElement in the future
     if (isTextNode(child) || isHTMLElement(child)) {
-      return text + extractTextContent(child, config)
+      return text + extractTextContent(child, config, options)
     }
     return text
   }, "")

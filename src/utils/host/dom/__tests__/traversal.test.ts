@@ -222,6 +222,51 @@ describe("extractTextContent", () => {
       expect(extractTextContent(div, DEFAULT_CONFIG)).toBe("OuterInner")
     })
   })
+
+  describe("replaceElement hook", () => {
+    it("substitutes the returned string for the element's whole subtree", () => {
+      const p = document.createElement("p")
+      p.innerHTML = 'Let <span class="formula"><i>x</i>+1</span> be the mean.'
+      const extracted = extractTextContent(p, DEFAULT_CONFIG, {
+        replaceElement: (element) => (element.classList.contains("formula") ? "{{0}}" : undefined),
+      })
+      expect(extracted).toBe("Let {{0}} be the mean.")
+    })
+
+    it("falls through to normal extraction when the hook returns undefined", () => {
+      const p = document.createElement("p")
+      p.innerHTML = 'Let <span class="formula"><i>x</i>+1</span> be the mean.'
+      const extracted = extractTextContent(p, DEFAULT_CONFIG, { replaceElement: () => undefined })
+      expect(extracted).toBe(extractTextContent(p, DEFAULT_CONFIG))
+    })
+
+    it("intercepts a dont-walk element such as <math> before it collapses to an empty string", () => {
+      const p = document.createElement("p")
+      p.innerHTML = "Let <math><mi>x</mi></math> be the mean."
+      expect(extractTextContent(p, DEFAULT_CONFIG)).toBe("Let  be the mean.")
+      const extracted = extractTextContent(p, DEFAULT_CONFIG, {
+        replaceElement: (element) => (element.localName === "math" ? "{{0}}" : undefined),
+      })
+      expect(extracted).toBe("Let {{0}} be the mean.")
+    })
+
+    it("is never consulted for our own translated wrappers or their contents", () => {
+      const p = document.createElement("p")
+      p.innerHTML =
+        'Host <math><mi>x</mi></math><span class="read-frog-translated-content-wrapper">译文 <math><mi>y</mi></math></span>'
+      const seen: string[] = []
+      const extracted = extractTextContent(p, DEFAULT_CONFIG, {
+        replaceElement: (element) => {
+          seen.push(element.localName)
+          return element.localName === "math" ? "{{0}}" : undefined
+        },
+      })
+      expect(extracted).toBe("Host {{0}}")
+      // The paragraph itself is offered to the hook; the wrapper and the
+      // <math> inside it never are.
+      expect(seen).toEqual(["p", "math"])
+    })
+  })
 })
 
 describe("site rule node selectors", () => {
