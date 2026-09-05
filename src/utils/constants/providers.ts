@@ -36,7 +36,7 @@ import { getLobeIconsCDNUrlFn } from "../logo"
 
 export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
   openrouter: {
-    model: "x-ai/grok-4-fast:free",
+    model: "google/gemma-4-31b-it:free",
     isCustomModel: false,
     customModel: null,
   },
@@ -61,12 +61,12 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   openai: {
-    model: "gpt-5.4-mini",
+    model: "gpt-5.6-luna",
     isCustomModel: false,
     customModel: null,
   },
   azure: {
-    model: "gpt-5.4-mini",
+    model: "gpt-5.6-luna",
     isCustomModel: false,
     customModel: null,
   },
@@ -76,7 +76,7 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   google: {
-    model: "gemini-2.5-flash-lite",
+    model: "gemini-3.5-flash-lite",
     isCustomModel: false,
     customModel: null,
   },
@@ -86,7 +86,7 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   xai: {
-    model: "grok-4.20-0309-non-reasoning",
+    model: "grok-4.3",
     isCustomModel: false,
     customModel: null,
   },
@@ -96,22 +96,22 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   groq: {
-    model: "llama-3.1-8b-instant",
+    model: "openai/gpt-oss-20b",
     isCustomModel: false,
     customModel: null,
   },
   deepinfra: {
-    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    model: "Qwen/Qwen3.5-9B",
     isCustomModel: false,
     customModel: null,
   },
   mistral: {
-    model: "magistral-small-2507",
+    model: "mistral-small-latest",
     isCustomModel: false,
     customModel: null,
   },
   togetherai: {
-    model: "deepseek-ai/DeepSeek-V3",
+    model: "Qwen/Qwen3.5-9B",
     isCustomModel: false,
     customModel: null,
   },
@@ -121,12 +121,12 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   fireworks: {
-    model: "accounts/fireworks/models/llama-v3p2-3b-instruct",
+    model: "accounts/fireworks/models/gpt-oss-120b",
     isCustomModel: false,
     customModel: null,
   },
   cerebras: {
-    model: "llama3.1-8b",
+    model: "gpt-oss-120b",
     isCustomModel: false,
     customModel: null,
   },
@@ -171,17 +171,17 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   alibaba: {
-    model: "qwen3.5-flash",
+    model: "qwen3.8-flash",
     isCustomModel: false,
     customModel: null,
   },
   moonshotai: {
-    model: "kimi-k2-turbo",
+    model: "kimi-k2.6",
     isCustomModel: false,
     customModel: null,
   },
   huggingface: {
-    model: "meta-llama/Llama-3.1-8B-Instruct",
+    model: "Qwen/Qwen3.5-9B",
     isCustomModel: false,
     customModel: null,
   },

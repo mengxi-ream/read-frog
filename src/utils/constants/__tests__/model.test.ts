@@ -38,13 +38,13 @@ describe("getProviderOptions", () => {
 
       const thinkingLevelProOptions = getProviderOptions("gemini-3-pro-preview", "google")
       expect(thinkingLevelProOptions.google?.thinkingConfig).toMatchObject({
-        thinkingLevel: "minimal",
+        thinkingLevel: "low",
         includeThoughts: false,
       })
 
       const thinkingLevel31ProOptions = getProviderOptions("gemini-3.1-pro-preview", "google")
       expect(thinkingLevel31ProOptions.google?.thinkingConfig).toMatchObject({
-        thinkingLevel: "minimal",
+        thinkingLevel: "low",
         includeThoughts: false,
       })
 
@@ -77,7 +77,7 @@ describe("getProviderOptions", () => {
 
       const thinkingLevelFlashLatestOptions = getProviderOptions("gemini-flash-latest", "google")
       expect(thinkingLevelFlashLatestOptions.google?.thinkingConfig).toMatchObject({
-        thinkingLevel: "minimal",
+        thinkingLevel: "low",
         includeThoughts: false,
       })
 
@@ -149,9 +149,13 @@ describe("getProviderOptions", () => {
 
     it("should expose the current xAI Grok chat model ids", () => {
       expect(LLM_PROVIDER_MODELS.xai).toEqual([
+        "grok-4.3",
+        "grok-4.6",
+        "grok-4.5",
+        "grok-4.20-non-reasoning",
+        "grok-4.20-reasoning",
         "grok-4.20-0309-non-reasoning",
         "grok-4.20-0309-reasoning",
-        "grok-4.3",
       ])
     })
 
@@ -247,10 +251,10 @@ describe("getProviderOptions", () => {
 
     it("should return low/disabled defaults for more mainstream reasoning providers", () => {
       const grokOptions = getProviderOptions("grok-4.3", "xai")
-      expect(grokOptions.xai?.reasoningEffort).toBe("low")
+      expect(grokOptions.xai?.reasoningEffort).toBe("none")
 
       const mixedCaseGrokOptions = getProviderOptions("Grok-4.3", "xai")
-      expect(mixedCaseGrokOptions.xai?.reasoningEffort).toBe("low")
+      expect(mixedCaseGrokOptions.xai?.reasoningEffort).toBe("none")
 
       const datedGrokReasoningOptions = getProviderOptions("grok-4.20-0309-reasoning", "xai")
       expect(datedGrokReasoningOptions.xai?.reasoningEffort).toBe("low")
@@ -357,10 +361,10 @@ describe("getProviderOptions", () => {
       )
 
       const groqOptions = getProviderOptions("openai/gpt-oss-120b", "groq")
-      expect(groqOptions.groq?.reasoningEffort).toBe("none")
+      expect(groqOptions.groq?.reasoningEffort).toBe("low")
 
       const cerebrasOptions = getProviderOptions("gpt-oss-120b", "cerebras")
-      expect(cerebrasOptions.cerebras?.reasoningEffort).toBe("none")
+      expect(cerebrasOptions.cerebras?.reasoningEffort).toBe("low")
     })
 
     it("should apply Volcengine Doubao Seed thinking defaults with optional version suffixes", () => {
