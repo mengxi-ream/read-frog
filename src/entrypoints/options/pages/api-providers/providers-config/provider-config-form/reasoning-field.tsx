@@ -30,10 +30,7 @@ export const ReasoningField = withForm({
     return (
       <form.AppField name="reasoning">
         {(field) => (
-          <field.SelectFieldAutoSave
-            formForSubmit={form}
-            label={i18n.t("options.apiProviders.form.reasoning.title")}
-          >
+          <field.SelectFieldAutoSave label={i18n.t("options.apiProviders.form.reasoning.title")}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="provider-default" />
             </SelectTrigger>

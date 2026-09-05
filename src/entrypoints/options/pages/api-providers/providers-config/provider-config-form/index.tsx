@@ -1,6 +1,12 @@
 import type { APIProviderConfig, ProvidersConfig } from "@/types/config/provider"
-import { useAtom, useAtomValue, useSetAtom } from "jotai"
-import { useEffect } from "react"
+import { dequal } from "dequal"
+import { useAtomValue, useSetAtom, useStore } from "jotai"
+import { useEffect, useState } from "react"
+import {
+  AutosaveBoundary,
+  requestEditorNavigationAtom,
+} from "@/components/form/autosave-navigation"
+import { toAutosaveSession } from "@/components/form/use-autosave"
 import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-status"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import {
@@ -10,6 +16,7 @@ import {
   isTranslateProvider,
 } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
+import { patchProviderConfigAtom } from "@/utils/atoms/entity-config"
 import { providerConfigAtom } from "@/utils/atoms/provider"
 import {
   computeLanguageDetectionFallbackAfterDeletion,
@@ -34,32 +41,51 @@ export function ProviderConfigForm() {
   const selectedProviderId = useAtomValue(selectedProviderIdAtom)
   const providerConfig = useAtomValue(providerConfigAtom(selectedProviderId ?? ""))
 
-  if (!providerConfig || !isAPIProviderConfig(providerConfig)) {
+  const [lastProvider, setLastProvider] = useState<APIProviderConfig | undefined>(undefined)
+  if (
+    providerConfig &&
+    isAPIProviderConfig(providerConfig) &&
+    !dequal(providerConfig, lastProvider)
+  ) {
+    setLastProvider(providerConfig)
+  }
+  const editorProvider =
+    providerConfig && isAPIProviderConfig(providerConfig)
+      ? providerConfig
+      : lastProvider?.id === selectedProviderId
+        ? lastProvider
+        : undefined
+  if (!editorProvider) {
     return null
   }
 
-  return <EditableProviderConfig key={providerConfig.id} providerConfig={providerConfig} />
+  return <EditableProviderConfig key={editorProvider.id} providerConfig={editorProvider} />
 }
 
 function EditableProviderConfig({ providerConfig }: { providerConfig: APIProviderConfig }) {
+  const store = useStore()
+  const requestNavigation = useSetAtom(requestEditorNavigationAtom)
   const setSelectedProviderId = useSetAtom(selectedProviderIdAtom)
-  const [currentProviderConfig, setProviderConfig] = useAtom(providerConfigAtom(providerConfig.id))
-  const [allProvidersConfig, setAllProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
+  const currentProviderConfig = useAtomValue(providerConfigAtom(providerConfig.id))
+  const setAllProvidersConfig = useSetAtom(configFieldsAtomMap.providersConfig)
   const setConfig = useSetAtom(writeConfigAtom)
   const config = useAtomValue(configAtom)
   // Decides which built-in tiers count as usable below. Unknown status reads as
   // usable, so an unreachable status endpoint never traps someone with a
   // credential they want gone.
   const { status: hostedAiStatus } = useHostedAiStatus()
-  const form = useProviderForm(providerConfig, async (nextProviderConfig) => {
-    await setProviderConfig(nextProviderConfig)
+  const patchProvider = useSetAtom(patchProviderConfigAtom)
+  const { form, autosave } = useProviderForm(providerConfig, async (_snapshot, changes) => {
+    await patchProvider({ id: providerConfig.id, changes })
   })
 
   useEffect(() => {
-    if (currentProviderConfig && isAPIProviderConfig(currentProviderConfig)) {
-      form.reset(currentProviderConfig)
-    }
-  }, [currentProviderConfig, form])
+    autosave.reconcile(
+      currentProviderConfig && isAPIProviderConfig(currentProviderConfig)
+        ? currentProviderConfig
+        : undefined,
+    )
+  }, [currentProviderConfig, autosave])
 
   const chooseNextProviderConfig = (providersConfig: ProvidersConfig) => {
     const firstProvider = providersConfig.find((provider) => !isNonAPIProvider(provider.provider))
@@ -67,18 +93,23 @@ function EditableProviderConfig({ providerConfig }: { providerConfig: APIProvide
   }
 
   const handleDuplicate = async () => {
-    await duplicateProvider(
-      providerConfig,
-      allProvidersConfig,
-      setAllProvidersConfig,
-      setSelectedProviderId,
-    )
+    await requestNavigation(async () => {
+      const latest = store.get(providerConfigAtom(providerConfig.id))
+      if (!latest || !isAPIProviderConfig(latest)) return
+      await duplicateProvider(
+        latest,
+        store.get(configFieldsAtomMap.providersConfig),
+        setAllProvidersConfig,
+        setSelectedProviderId,
+      )
+    })
   }
 
   const handleDelete = async () => {
-    const updatedAllProviders = allProvidersConfig.filter(
-      (provider) => provider.id !== providerConfig.id,
-    )
+    await autosave.discard()
+    const updatedAllProviders = store
+      .get(configFieldsAtomMap.providersConfig)
+      .filter((provider) => provider.id !== providerConfig.id)
 
     const unsatisfied = findFeatureMissingProvider(updatedAllProviders, config, hostedAiStatus)
     if (unsatisfied) {
@@ -151,7 +182,7 @@ function EditableProviderConfig({ providerConfig }: { providerConfig: APIProvide
     await setAllProvidersConfig(updatedAllProviders)
     const nextProvider = chooseNextProviderConfig(updatedAllProviders)
     if (nextProvider) {
-      setSelectedProviderId(nextProvider.id)
+      await setSelectedProviderId(nextProvider.id)
     }
   }
 
@@ -163,36 +194,38 @@ function EditableProviderConfig({ providerConfig }: { providerConfig: APIProvide
     FEATURE_KEYS.some((featureKey) => FEATURE_PROVIDER_DEFS[featureKey].isProvider(providerType))
 
   return (
-    <CustomProviderEditor.Provider
-      providerConfig={providerConfig}
-      form={form}
-      duplicate={handleDuplicate}
-      delete={handleDelete}
-    >
-      <ProviderEditor.Form>
-        <EntityEditor.Root>
-          <EntityEditor.Body>
-            <ProviderEditor.ConfigHeader />
-            <ProviderEditor.NameField />
-            <ProviderEditor.DescriptionField />
-            <ProviderEditor.ConnectionFields />
-            <ProviderEditor.ProviderSpecificFields />
-            {hasTranslationModelFields && <ProviderEditor.TranslationModelFields />}
-            {hasAssignments && (
-              <ProviderEditor.Assignments>
-                <ProviderEditor.CompatibleFeatureAssignments />
-                <ProviderEditor.LanguageDetectionAssignment />
-                <ProviderEditor.CustomActionAssignments />
-              </ProviderEditor.Assignments>
-            )}
-            {hasAdvancedFields && <ProviderEditor.AdvancedFields />}
-          </EntityEditor.Body>
-          <EntityEditor.Footer>
-            <ProviderEditor.DuplicateButton />
-            <ProviderEditor.DeleteButton />
-          </EntityEditor.Footer>
-        </EntityEditor.Root>
-      </ProviderEditor.Form>
-    </CustomProviderEditor.Provider>
+    <AutosaveBoundary session={toAutosaveSession(autosave)}>
+      <CustomProviderEditor.Provider
+        providerConfig={providerConfig}
+        form={form}
+        duplicate={handleDuplicate}
+        delete={handleDelete}
+      >
+        <ProviderEditor.Form>
+          <EntityEditor.Root>
+            <EntityEditor.Body>
+              <ProviderEditor.ConfigHeader />
+              <ProviderEditor.NameField />
+              <ProviderEditor.DescriptionField />
+              <ProviderEditor.ConnectionFields />
+              <ProviderEditor.ProviderSpecificFields />
+              {hasTranslationModelFields && <ProviderEditor.TranslationModelFields />}
+              {hasAssignments && (
+                <ProviderEditor.Assignments>
+                  <ProviderEditor.CompatibleFeatureAssignments />
+                  <ProviderEditor.LanguageDetectionAssignment />
+                  <ProviderEditor.CustomActionAssignments />
+                </ProviderEditor.Assignments>
+              )}
+              {hasAdvancedFields && <ProviderEditor.AdvancedFields />}
+            </EntityEditor.Body>
+            <EntityEditor.Footer>
+              <ProviderEditor.DuplicateButton />
+              <ProviderEditor.DeleteButton />
+            </EntityEditor.Footer>
+          </EntityEditor.Root>
+        </ProviderEditor.Form>
+      </CustomProviderEditor.Provider>
+    </AutosaveBoundary>
   )
 }

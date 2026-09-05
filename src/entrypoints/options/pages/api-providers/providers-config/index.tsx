@@ -16,7 +16,7 @@ import { anchoredToastManager } from "@/components/ui/base-ui/toast"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { isAPIProvider, isAPIProviderConfig } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
-import { providerConfigAtom } from "@/utils/atoms/provider"
+import { patchProviderConfigAtom } from "@/utils/atoms/entity-config"
 import { getAPIProvidersConfig, getProviderConfigById } from "@/utils/config/helpers"
 import {
   FEATURE_KEYS,
@@ -87,7 +87,7 @@ function useRequestedProvider() {
       }
 
       handledLocationRef.current = marker
-      setSelectedProviderId(providerId)
+      void setSelectedProviderId(providerId)
       highlightRequestedField()
       return
     }
@@ -103,7 +103,7 @@ function useRequestedProvider() {
       (provider) => provider.provider === requestedType,
     )
     if (existingProvider) {
-      setSelectedProviderId(existingProvider.id)
+      void setSelectedProviderId(existingProvider.id)
       highlightRequestedField()
       return
     }
@@ -182,7 +182,7 @@ function ProviderCardList() {
   useEffect(() => {
     if (didLockInitialSelectionRef.current) return
     if (selectedProviderId) {
-      setSelectedProviderId(selectedProviderId)
+      void setSelectedProviderId(selectedProviderId)
       didLockInitialSelectionRef.current = true
     }
   }, [selectedProviderId, setSelectedProviderId])
@@ -223,7 +223,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
   const { id, name, provider, enabled } = providerConfig
   const { theme } = useTheme()
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
-  const setProviderConfig = useSetAtom(providerConfigAtom(id))
+  const patchProviderConfig = useSetAtom(patchProviderConfigAtom)
   const config = useAtomValue(configAtom)
   const sponsor = API_PROVIDER_ITEMS[provider].sponsor
   const switchRef = useRef<HTMLButtonElement>(null)
@@ -258,7 +258,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
       return
     }
 
-    void setProviderConfig({ ...providerConfig, enabled: checked })
+    void patchProviderConfig({ id, changes: { enabled: checked } })
   }
 
   return (

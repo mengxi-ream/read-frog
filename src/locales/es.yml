@@ -84,6 +84,15 @@ errorRecovery:
     confirm: Restablecer
     cancel: Cancelar
 options:
+  autosave:
+    invalid: Corrige los campos señalados antes de salir.
+    failed: No se pudieron guardar los cambios. Se han conservado aquí.
+    deleted: Este elemento se eliminó en otra página. Se han conservado tus cambios sin guardar.
+    retry: Reintentar
+    leaveTitle: Los cambios no se han guardado
+    leaveDescription: Puedes seguir editando para corregir el problema o descartar los cambios sin guardar.
+    keepEditing: Seguir editando
+    discard: Descartar cambios sin guardar
   batchSavings:
     savedCost: Ahorro aprox. del $1% en costes de API
   commandPalette:

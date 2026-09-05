@@ -39,8 +39,6 @@ export const ProviderOptionsField = withForm({
       [form],
     )
 
-    const handleSubmit = useCallback(() => form.handleSubmit(), [form])
-
     if (!isLLMProvider) {
       return null
     }
@@ -57,11 +55,10 @@ export const ProviderOptionsField = withForm({
       <AutosavedJsonCodeEditorField
         value={providerConfig.providerOptions}
         resetKey={providerConfig.id}
-        syncSignal={providerConfig.providerOptions}
+        fieldName="providerOptions"
         parse={parseJson}
         serialize={toJson}
         onCommit={handleProviderOptionsCommit}
-        onSubmit={handleSubmit}
         editorAriaLabel="provider-options-editor"
         placeholder={placeholderText}
         label={

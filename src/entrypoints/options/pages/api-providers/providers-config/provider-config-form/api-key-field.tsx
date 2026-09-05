@@ -40,7 +40,6 @@ export const APIKeyField = withForm({
         {(field) => (
           <div className="flex flex-col gap-2">
             <field.InputFieldAutoSave
-              formForSubmit={form}
               label="API Key"
               labelAfter={<GetAPIKeyButton providerType={providerType} />}
               labelExtra={<ConnectionTestButton providerConfig={providerConfig} />}

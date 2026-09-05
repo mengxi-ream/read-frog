@@ -1,6 +1,7 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { useAtomValue } from "jotai"
 import { useMemo } from "react"
+import { useAutosaveContext } from "@/components/form/use-autosave"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
 import { Field, FieldTitle } from "@/components/ui/base-ui/field"
@@ -15,6 +16,7 @@ import { withForm } from "./form"
 export const ProviderField = withForm({
   ...{ defaultValues: {} as SelectionToolbarCustomAction },
   render: function Render({ form }) {
+    const autosave = useAutosaveContext()
     const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
 
     const baseCustomActionProviders = useMemo(
@@ -54,8 +56,7 @@ export const ProviderField = withForm({
               providers={customActionProviders}
               value={field.state.value}
               onChange={(id) => {
-                field.handleChange(id)
-                void form.handleSubmit()
+                autosave.edit(() => field.handleChange(id), { immediate: true })
               }}
               placeholder={i18n.t("options.selectionToolbar.customActions.form.selectProvider")}
             />

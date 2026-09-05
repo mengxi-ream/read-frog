@@ -1,3 +1,4 @@
+import type { AutosaveController } from "@/components/form/autosave-controller"
 import type { APIProviderConfig } from "@/types/config/provider"
 import type { FeatureKey } from "@/utils/constants/feature-providers"
 import type { BuiltInAiProviderId } from "@/utils/constants/provider-ids"
@@ -6,6 +7,7 @@ import { useSelector } from "@tanstack/react-store"
 import { useAtomValue, useSetAtom } from "jotai"
 import { createContext, use, useState } from "react"
 import { PlanBadge } from "@/components/badges/plan-badge"
+import { useAutosave } from "@/components/form/use-autosave"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import {
@@ -185,18 +187,29 @@ function BuiltInProvider({
 
 export function useProviderForm(
   providerConfig: APIProviderConfig,
-  save: (providerConfig: APIProviderConfig) => Promise<void>,
+  save: (providerConfig: APIProviderConfig, changes: Partial<APIProviderConfig>) => Promise<void>,
 ) {
-  return useAppForm({
+  const form = useAppForm({
     ...formOpts,
     defaultValues: providerConfig,
-    onSubmit: async ({ value }) => {
-      await save(value)
+    onSubmitMeta: { revision: 0 },
+    onSubmit: async ({ value, meta }) => {
+      await autosave.commit(value, meta.revision)
     },
   })
+  const autosave: AutosaveController<APIProviderConfig> = useAutosave({
+    initialValue: providerConfig,
+    getDraft: () => form.state.values,
+    setField: (key, value) =>
+      form.setFieldValue(key, value as never, { dontUpdateMeta: true, dontRunListeners: true }),
+    reset: (value) => form.reset(value),
+    submit: (revision) => form.handleSubmit({ revision }),
+    persist: save,
+  })
+  return { form, autosave }
 }
 
-type ProviderForm = ReturnType<typeof useProviderForm>
+type ProviderForm = ReturnType<typeof useProviderForm>["form"]
 
 const ApiProviderFormContext = createContext<ProviderForm | null>(null)
 
@@ -289,10 +302,7 @@ function NameField() {
       }}
     >
       {(field) => (
-        <field.InputFieldAutoSave
-          formForSubmit={form}
-          label={i18n.t("options.apiProviders.form.fields.name")}
-        />
+        <field.InputFieldAutoSave label={i18n.t("options.apiProviders.form.fields.name")} />
       )}
     </form.AppField>
   )
@@ -303,10 +313,7 @@ function DescriptionField() {
   return (
     <form.AppField name="description">
       {(field) => (
-        <field.InputFieldAutoSave
-          formForSubmit={form}
-          label={i18n.t("options.apiProviders.form.fields.description")}
-        />
+        <field.InputFieldAutoSave label={i18n.t("options.apiProviders.form.fields.description")} />
       )}
     </form.AppField>
   )

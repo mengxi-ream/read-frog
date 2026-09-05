@@ -1,7 +1,14 @@
+import type { AutosaveController } from "@/components/form/autosave-controller"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
-import { useAtom, useSetAtom } from "jotai"
+import { useAtom, useSetAtom, useStore } from "jotai"
 import { createContext, use, useEffect, useState } from "react"
+import {
+  AutosaveBoundary,
+  requestEditorNavigationAtom,
+  activeAutosaveAtom,
+} from "@/components/form/autosave-navigation"
 import { QuickInsertableTextareaFieldAutoSave } from "@/components/form/quick-insertable-textarea-field-auto-save"
+import { toAutosaveSession, useAutosave } from "@/components/form/use-autosave"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,18 +23,14 @@ import {
 import { Button } from "@/components/ui/base-ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { patchActionConfigAtom } from "@/utils/atoms/entity-config"
 import {
   BUILT_IN_DICTIONARY_ACTION_ID,
   getSelectionToolbarCustomActionTokenCellText,
   SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS,
 } from "@/utils/constants/custom-action"
-import {
-  duplicateSelectionToolbarAction,
-  getSelectionToolbarActions,
-  replaceSelectionToolbarAction,
-} from "@/utils/custom-actions"
+import { duplicateSelectionToolbarAction, getSelectionToolbarActions } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
-import { sanitizeSelectionToolbarCustomAction } from "@/utils/notebase/connection"
 import { selectedCustomActionIdAtom } from "../atoms"
 import { formOpts, useAppForm } from "./form"
 import { IconField as IconFormField } from "./icon-field"
@@ -41,24 +44,39 @@ import { ProviderField as ProviderFormField } from "./provider-field"
 
 function useActionForm(
   action: SelectionToolbarCustomAction,
-  save: (nextAction: SelectionToolbarCustomAction) => Promise<void>,
+  save: (
+    nextAction: SelectionToolbarCustomAction,
+    changes: Partial<SelectionToolbarCustomAction>,
+  ) => Promise<void>,
 ) {
-  return useAppForm({
+  const form = useAppForm({
     ...formOpts,
     defaultValues: action,
-    onSubmit: async ({ value }) => {
-      await save(sanitizeSelectionToolbarCustomAction(value))
+    onSubmitMeta: { revision: 0 },
+    onSubmit: async ({ value, meta }) => {
+      await autosave.commit(value, meta.revision)
     },
   })
+  const autosave: AutosaveController<SelectionToolbarCustomAction> = useAutosave({
+    initialValue: action,
+    getDraft: () => form.state.values,
+    setField: (key, value) =>
+      form.setFieldValue(key, value as never, { dontUpdateMeta: true, dontRunListeners: true }),
+    reset: (value) => form.reset(value),
+    submit: (revision) => form.handleSubmit({ revision }),
+    persist: save,
+  })
+  return { form, autosave }
 }
 
-type ActionForm = ReturnType<typeof useActionForm>
+type ActionForm = ReturnType<typeof useActionForm>["form"]
 
 interface ActionEditorContextValue {
   state: {
     action: SelectionToolbarCustomAction
     allActions: SelectionToolbarCustomAction[]
     form: ActionForm
+    autosave: AutosaveController<SelectionToolbarCustomAction>
   }
   actions: {
     submit: () => Promise<void>
@@ -89,16 +107,21 @@ function useActionEditorController(
   action: SelectionToolbarCustomAction,
   deleteAction?: () => Promise<void>,
 ): ActionEditorContextValue {
+  const store = useStore()
+  const requestNavigation = useSetAtom(requestEditorNavigationAtom)
   const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
   const setSelectedActionId = useSetAtom(selectedCustomActionIdAtom)
 
-  const form = useActionForm(action, async (nextAction) => {
-    await setSelectionToolbar(replaceSelectionToolbarAction(selectionToolbar, nextAction))
+  const patchAction = useSetAtom(patchActionConfigAtom)
+  const { form, autosave } = useActionForm(action, async (_snapshot, changes) => {
+    await patchAction({ id: action.id, changes })
   })
 
   useEffect(() => {
-    form.reset(action)
-  }, [action, form])
+    autosave.reconcile(
+      getSelectionToolbarActions(selectionToolbar).find((item) => item.id === action.id),
+    )
+  }, [action.id, selectionToolbar, autosave])
 
   const allActions = getSelectionToolbarActions(selectionToolbar)
 
@@ -107,18 +130,25 @@ function useActionEditorController(
       action,
       allActions,
       form,
+      autosave,
     },
     actions: {
       submit: async () => {
-        await form.handleSubmit()
+        await autosave.flush()
       },
       duplicate: async () => {
-        const duplicatedAction = duplicateSelectionToolbarAction(action, allActions)
-        await setSelectionToolbar({
-          ...selectionToolbar,
-          customActions: [...selectionToolbar.customActions, duplicatedAction],
+        await requestNavigation(async () => {
+          const current = store.get(configFieldsAtomMap.selectionToolbar)
+          const currentActions = getSelectionToolbarActions(current)
+          const source = currentActions.find((item) => item.id === action.id)
+          if (!source) return
+          const duplicatedAction = duplicateSelectionToolbarAction(source, currentActions)
+          await setSelectionToolbar((latest) => ({
+            ...latest,
+            customActions: [...latest.customActions, duplicatedAction],
+          }))
+          await setSelectedActionId(duplicatedAction.id)
         })
-        setSelectedActionId(duplicatedAction.id)
       },
       ...(deleteAction ? { delete: deleteAction } : {}),
     },
@@ -133,7 +163,11 @@ function BuiltInProvider({
   children: React.ReactNode
 }) {
   const value = useActionEditorController(action)
-  return <ActionEditorContext value={value}>{children}</ActionEditorContext>
+  return (
+    <AutosaveBoundary session={toAutosaveSession(value.state.autosave)}>
+      <ActionEditorContext value={value}>{children}</ActionEditorContext>
+    </AutosaveBoundary>
+  )
 }
 
 function CustomProvider({
@@ -143,10 +177,13 @@ function CustomProvider({
   action: SelectionToolbarCustomAction
   children: React.ReactNode
 }) {
-  const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
+  const store = useStore()
+  const setSelectionToolbar = useSetAtom(configFieldsAtomMap.selectionToolbar)
   const setSelectedActionId = useSetAtom(selectedCustomActionIdAtom)
 
   const deleteAction = async () => {
+    await store.get(activeAutosaveAtom)?.discard()
+    const selectionToolbar = store.get(configFieldsAtomMap.selectionToolbar)
     const currentIndex = selectionToolbar.customActions.findIndex((item) => item.id === action.id)
     if (currentIndex < 0) {
       return
@@ -166,11 +203,15 @@ function CustomProvider({
             }
           : selectionToolbar.noteSuggestion,
     })
-    setSelectedActionId(nextSelectedAction?.id)
+    await setSelectedActionId(nextSelectedAction?.id)
   }
 
   const value = useActionEditorController(action, deleteAction)
-  return <ActionEditorContext value={value}>{children}</ActionEditorContext>
+  return (
+    <AutosaveBoundary session={toAutosaveSession(value.state.autosave)}>
+      <ActionEditorContext value={value}>{children}</ActionEditorContext>
+    </AutosaveBoundary>
+  )
 }
 
 function Form({ children }: { children: React.ReactNode }) {
@@ -212,7 +253,6 @@ function SystemPromptField({ readOnly }: { readOnly?: boolean }) {
     <form.AppField name="systemPrompt">
       {() => (
         <QuickInsertableTextareaFieldAutoSave
-          formForSubmit={form}
           label={i18n.t("options.selectionToolbar.customActions.form.systemPrompt")}
           className="max-h-80 min-h-36"
           insertCells={getActionInsertCells()}
@@ -229,7 +269,6 @@ function PromptField({ readOnly }: { readOnly?: boolean }) {
     <form.AppField name="prompt">
       {() => (
         <QuickInsertableTextareaFieldAutoSave
-          formForSubmit={form}
           label={i18n.t("options.selectionToolbar.customActions.form.prompt")}
           className="max-h-80 min-h-28"
           insertCells={getActionInsertCells()}

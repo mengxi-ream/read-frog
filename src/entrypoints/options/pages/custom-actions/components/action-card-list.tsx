@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useMemo, useState } from "react"
 import { useLocation, useNavigate } from "react-router"
+import { requestEditorNavigationAtom } from "@/components/form/autosave-navigation"
 import { SortableList } from "@/components/sortable-list"
 import { Button } from "@/components/ui/base-ui/button"
 import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
@@ -22,6 +23,7 @@ export function CustomActionCardList() {
   const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(
     configFieldsAtomMap.selectionToolbar,
   )
+  const requestNavigation = useSetAtom(requestEditorNavigationAtom)
   const setSelectedCustomActionId = useSetAtom(selectedCustomActionIdAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const { search } = useLocation()
@@ -38,7 +40,7 @@ export function CustomActionCardList() {
       actionId === BUILT_IN_DICTIONARY_ACTION_ID ||
       (actionId && customActions.some((action) => action.id === actionId))
     ) {
-      setSelectedCustomActionId(actionId)
+      void setSelectedCustomActionId(actionId)
     }
 
     if (params.has("addAction") || params.has("actionId")) {
@@ -56,19 +58,22 @@ export function CustomActionCardList() {
 
   const handleTemplateSelect = (template: CustomActionTemplate) => {
     if (customActionProviders.length === 0) return
-
-    const newAction = template.createAction(customActionProviders[0]!.id)
-
-    const existingNames = new Set(customActions.map((action) => action.name))
-    const baseName = template.id === "blank" ? DEFAULT_ACTION_NAME : newAction.name
-    newAction.name = getUniqueName(baseName, existingNames)
-
-    void setSelectionToolbarConfig({
-      ...selectionToolbarConfig,
-      customActions: [...customActions, newAction],
+    void requestNavigation(async () => {
+      const newAction = template.createAction(customActionProviders[0]!.id)
+      const baseName = template.id === "blank" ? DEFAULT_ACTION_NAME : newAction.name
+      await setSelectionToolbarConfig((current) => ({
+        ...current,
+        customActions: [
+          ...current.customActions,
+          {
+            ...newAction,
+            name: getUniqueName(baseName, new Set(current.customActions.map((item) => item.name))),
+          },
+        ],
+      }))
+      await setSelectedCustomActionId(newAction.id)
+      setDialogOpen(false)
     })
-    setSelectedCustomActionId(newAction.id)
-    setDialogOpen(false)
   }
 
   const handleReorder = (newList: SelectionToolbarCustomAction[]) => {
@@ -128,9 +133,7 @@ export function CustomActionCardList() {
 }
 
 function BuiltInDictionaryCard({ action }: { action: SelectionToolbarCustomAction }) {
-  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(
-    configFieldsAtomMap.selectionToolbar,
-  )
+  const setSelectionToolbarConfig = useSetAtom(configFieldsAtomMap.selectionToolbar)
   const [selectedCustomActionId, setSelectedCustomActionId] = useAtom(selectedCustomActionIdAtom)
 
   return (
@@ -149,8 +152,8 @@ function BuiltInDictionaryCard({ action }: { action: SelectionToolbarCustomActio
           aria-label={action.name}
           checked={action.enabled !== false}
           onCheckedChange={(enabled) => {
-            void setSelectionToolbarConfig(
-              patchSelectionToolbarAction(selectionToolbarConfig, action.id, { enabled }),
+            void setSelectionToolbarConfig((current) =>
+              patchSelectionToolbarAction(current, action.id, { enabled }),
             )
           }}
         />
@@ -160,9 +163,7 @@ function BuiltInDictionaryCard({ action }: { action: SelectionToolbarCustomActio
 }
 
 function CustomActionCard({ action }: { action: SelectionToolbarCustomAction }) {
-  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(
-    configFieldsAtomMap.selectionToolbar,
-  )
+  const setSelectionToolbarConfig = useSetAtom(configFieldsAtomMap.selectionToolbar)
   const [selectedCustomActionId, setSelectedCustomActionId] = useAtom(selectedCustomActionIdAtom)
 
   return (
@@ -182,8 +183,8 @@ function CustomActionCard({ action }: { action: SelectionToolbarCustomAction }) 
           aria-label={action.name}
           checked={action.enabled !== false}
           onCheckedChange={(enabled) => {
-            void setSelectionToolbarConfig(
-              patchSelectionToolbarAction(selectionToolbarConfig, action.id, { enabled }),
+            void setSelectionToolbarConfig((current) =>
+              patchSelectionToolbarAction(current, action.id, { enabled }),
             )
           }}
         />

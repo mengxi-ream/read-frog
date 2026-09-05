@@ -1,4 +1,5 @@
 import { atom } from "jotai"
+import { requestEditorNavigationAtom } from "@/components/form/autosave-navigation"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { getAPIProvidersConfig } from "@/utils/config/helpers"
 import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
@@ -32,7 +33,10 @@ export const selectedProviderIdAtom = atom(
       apiProvidersConfig.length > 0 ? apiProvidersConfig[0]!.id : BUILT_IN_AI_PROVIDER_ID
     return firstProviderId
   },
-  (_get, set, newValue: string | undefined) => {
-    set(internalSelectedProviderIdAtom, newValue)
+  (get, set, newValue: string | undefined) => {
+    if (get(internalSelectedProviderIdAtom) === newValue) return Promise.resolve(true)
+    return set(requestEditorNavigationAtom, () => {
+      set(internalSelectedProviderIdAtom, newValue)
+    })
   },
 )

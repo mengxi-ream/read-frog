@@ -1,8 +1,9 @@
 import type { ReactNode } from "react"
-import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react"
+import { dequal } from "dequal"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import { useAutosaveContext } from "@/components/form/use-autosave"
 import { Field, FieldError, FieldTitle } from "@/components/ui/base-ui/field"
 import { JSONCodeEditor } from "@/components/ui/json-code-editor"
-import { useDebouncedValue } from "@/hooks/use-debounced-value"
 
 export type JsonEditorParseResult<TValue> =
   | { valid: true; value: TValue | undefined }
@@ -13,11 +14,10 @@ interface AutosavedJsonCodeEditorFieldProps<TValue extends Record<string, unknow
   label: ReactNode
   placeholder: string
   editorAriaLabel: string
+  fieldName: string
   resetKey: string
-  syncSignal?: unknown
   parse: (input: string) => JsonEditorParseResult<TValue>
   onCommit: (value: TValue | undefined) => void
-  onSubmit: () => void | Promise<void>
   serialize?: (value: TValue | undefined) => string
   height?: string
 }
@@ -31,103 +31,81 @@ export function AutosavedJsonCodeEditorField<TValue extends Record<string, unkno
   label,
   placeholder,
   editorAriaLabel,
+  fieldName,
   resetKey,
-  syncSignal = value,
   parse,
   onCommit,
-  onSubmit,
   serialize = defaultSerializeJson,
   height = "150px",
 }: AutosavedJsonCodeEditorFieldProps<TValue>) {
-  const externalJson = serialize(value)
-  const [jsonInput, setJsonInput] = useState(() => externalJson)
-  const lastCommittedJsonRef = useRef(externalJson)
-  const pendingEditorCommitRef = useRef(false)
-  const editorFocusedRef = useRef(false)
-
-  const syncJsonInput = useEffectEvent((nextJson: string) => {
-    // eslint-disable-next-line react/set-state-in-effect
-    setJsonInput(nextJson)
+  const autosave = useAutosaveContext()
+  const [jsonInput, setJsonInput] = useState(() => serialize(value))
+  const [jsonError, setJsonError] = useState<string | null>(null)
+  const textRef = useRef(jsonInput)
+  const savedTextRef = useRef(jsonInput)
+  const latest = useRef({ value, parse, onCommit, serialize })
+  useLayoutEffect(() => {
+    latest.current = { value, parse, onCommit, serialize }
   })
 
-  const resetSyncState = useEffectEvent(() => {
-    lastCommittedJsonRef.current = externalJson
-    pendingEditorCommitRef.current = false
-    syncJsonInput(externalJson)
-  })
-
-  const readJsonInput = useEffectEvent(() => jsonInput)
-
-  const handleJsonInputChange = useCallback((nextJson: string) => {
-    setJsonInput(nextJson)
-  }, [])
-
-  const handleEditorFocus = useCallback(() => {
-    editorFocusedRef.current = true
-  }, [])
-
-  const handleEditorBlur = useCallback(() => {
-    editorFocusedRef.current = false
-  }, [])
-
-  useEffect(() => {
-    resetSyncState()
-  }, [resetKey])
-
-  useEffect(() => {
-    if (pendingEditorCommitRef.current && externalJson === lastCommittedJsonRef.current) {
-      pendingEditorCommitRef.current = false
-      return
-    }
-
-    pendingEditorCommitRef.current = false
-
-    const currentJsonInput = readJsonInput()
-    if (editorFocusedRef.current && currentJsonInput !== lastCommittedJsonRef.current) {
-      return
-    }
-
-    lastCommittedJsonRef.current = externalJson
-
-    if (currentJsonInput !== externalJson) {
-      syncJsonInput(externalJson)
-    }
-  }, [syncSignal, externalJson])
-
-  const debouncedJsonInput = useDebouncedValue(jsonInput, 500)
-  const parseResult = useMemo(() => parse(debouncedJsonInput), [debouncedJsonInput, parse])
+  useLayoutEffect(
+    () =>
+      autosave.registerSource(fieldName, {
+        isDirty: () => textRef.current !== savedTextRef.current,
+        snapshot: () => textRef.current,
+        prepare: () => {
+          const result = latest.current.parse(textRef.current)
+          setJsonError(result.valid ? null : result.error)
+          if (!result.valid) return false
+          if (!dequal(result.value, latest.current.value)) latest.current.onCommit(result.value)
+          return true
+        },
+        acknowledge: (snapshot) => {
+          savedTextRef.current = snapshot
+        },
+        reset: (nextValue) => {
+          const text = latest.current.serialize(nextValue as TValue | undefined)
+          textRef.current = savedTextRef.current = text
+          setJsonInput(text)
+          setJsonError(null)
+        },
+      }),
+    [autosave, fieldName, resetKey],
+  )
 
   useEffect(() => {
-    if (!parseResult.valid) {
-      return
-    }
+    const current = parse(textRef.current)
+    // Keep formatting after our own commit. Only pristine raw drafts accept external values.
+    if (current.valid && dequal(current.value, value)) return
+    if (textRef.current !== savedTextRef.current) return
+    const text = serialize(value)
+    textRef.current = savedTextRef.current = text
+    setJsonInput(text)
+    setJsonError(null)
+  }, [value, parse, serialize])
 
-    const normalizedJson = serialize(parseResult.value)
-    if (normalizedJson === lastCommittedJsonRef.current) {
-      return
-    }
-
-    lastCommittedJsonRef.current = normalizedJson
-    pendingEditorCommitRef.current = true
-    onCommit(parseResult.value)
-    void onSubmit()
-  }, [onCommit, onSubmit, parseResult, serialize])
-
-  const jsonError = !parseResult.valid ? parseResult.error : null
-
+  const updateText = (text: string) => {
+    textRef.current = text
+    setJsonInput(text)
+    setJsonError(null)
+  }
   return (
     <Field data-invalid={!!jsonError}>
       <FieldTitle>{label}</FieldTitle>
-      <JSONCodeEditor
-        aria-label={editorAriaLabel}
-        value={jsonInput}
-        onChange={handleJsonInputChange}
-        onFocus={handleEditorFocus}
-        onBlur={handleEditorBlur}
-        placeholder={placeholder}
-        hasError={!!jsonError}
-        height={height}
-      />
+      <div
+        onCompositionStartCapture={() => autosave.beginComposition(fieldName)}
+        onCompositionEndCapture={() => autosave.endComposition(fieldName, () => {})}
+      >
+        <JSONCodeEditor
+          aria-label={editorAriaLabel}
+          value={jsonInput}
+          onChange={(text) => autosave.edit(() => updateText(text))}
+          onBlur={() => void autosave.flush()}
+          placeholder={placeholder}
+          hasError={!!jsonError}
+          height={height}
+        />
+      </div>
       {jsonError && <FieldError>{jsonError}</FieldError>}
     </Field>
   )

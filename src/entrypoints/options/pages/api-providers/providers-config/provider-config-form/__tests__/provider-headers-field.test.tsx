@@ -4,7 +4,8 @@ import type { APIProviderConfig } from "@/types/config/provider"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { useEffect, useState } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { formOpts, useAppForm } from "../form"
+import { AutosaveContext, toAutosaveSession } from "@/components/form/use-autosave"
+import { useProviderForm } from "../../provider-editor"
 import { ProviderHeadersField } from "../provider-headers-field"
 
 vi.mock("#imports", () => ({
@@ -73,52 +74,35 @@ const anthropicProviderConfig: APIProviderConfig = {
 
 function ProviderHeadersFieldHarness({ initialConfig }: { initialConfig: APIProviderConfig }) {
   const [providerConfig, setProviderConfig] = useState(initialConfig)
-  const form = useAppForm({
-    ...formOpts,
-    defaultValues: providerConfig,
-    onSubmit: async ({ value }) => {
-      setProviderConfig(value)
-    },
+  const { form, autosave } = useProviderForm(providerConfig, async (value) => {
+    setProviderConfig(value)
   })
 
   useEffect(() => {
-    form.reset(providerConfig)
-  }, [providerConfig, form])
+    autosave.reconcile(providerConfig)
+  }, [providerConfig, autosave])
 
   return (
-    <>
-      <ProviderHeadersField form={form} />
-      <output aria-label="persisted-headers">
-        {JSON.stringify(providerConfig.headers ?? null)}
-      </output>
-    </>
+    <AutosaveContext value={toAutosaveSession(autosave)}>
+      <>
+        <ProviderHeadersField form={form} />
+        <output aria-label="persisted-headers">
+          {JSON.stringify(providerConfig.headers ?? null)}
+        </output>
+      </>
+    </AutosaveContext>
   )
 }
 
 function ProviderHeadersFieldSwitchHarness() {
   const [providerConfig, setProviderConfig] = useState(baseProviderConfig)
-  const form = useAppForm({
-    ...formOpts,
-    defaultValues: providerConfig,
-    onSubmit: async ({ value }) => {
-      setProviderConfig(value)
-    },
-  })
-
-  useEffect(() => {
-    form.reset(providerConfig)
-  }, [providerConfig, form])
-
   return (
     <>
       <button type="button" onClick={() => setProviderConfig(anthropicProviderConfig)}>
         switch-provider
       </button>
-      <ProviderHeadersField form={form} />
       <output aria-label="persisted-provider-id">{providerConfig.id}</output>
-      <output aria-label="persisted-headers">
-        {JSON.stringify(providerConfig.headers ?? null)}
-      </output>
+      <ProviderHeadersFieldHarness key={providerConfig.id} initialConfig={providerConfig} />
     </>
   )
 }

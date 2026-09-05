@@ -1,6 +1,6 @@
 import type { APIProviderConfig } from "@/types/config/provider"
 import { useSelector } from "@tanstack/react-store"
-import { useSetAtom } from "jotai"
+import { useAutosaveContext } from "@/components/form/use-autosave"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import {
   SelectContent,
@@ -9,14 +9,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/base-ui/select"
-import { toastManager } from "@/components/ui/base-ui/toast"
 import {
   isCustomModelOnlyProvider,
   isLLMProviderConfig,
   isProtocolCompatibleLLMProviderConfig,
   LLM_PROVIDER_MODELS,
 } from "@/types/config/provider"
-import { providerConfigAtom, updateLLMProviderConfig } from "@/utils/atoms/provider"
 import { i18n } from "@/utils/i18n"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { ModelSuggestionButton } from "./components/model-suggestion-button"
@@ -27,15 +25,14 @@ export const TranslateModelSelector = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
     const providerConfig = useSelector(form.store, (state) => state.values)
-    const setProviderConfig = useSetAtom(providerConfigAtom(providerConfig.id))
+    const autosave = useAutosaveContext()
     if (!isLLMProviderConfig(providerConfig)) return null
 
     const modelId = resolveModelId(providerConfig.model)
     const { isCustomModel, customModel, model } = providerConfig.model
 
     const applyRecommendedProviderOptions = (options: Record<string, unknown>) => {
-      form.setFieldValue("providerOptions", options)
-      void form.handleSubmit()
+      autosave.edit(() => form.setFieldValue("providerOptions", options), { immediate: true })
     }
 
     const recommendationTrigger = (
@@ -53,7 +50,6 @@ export const TranslateModelSelector = withForm({
           <form.AppField name="model.customModel">
             {(field) => (
               <field.InputFieldAutoSave
-                formForSubmit={form}
                 label={i18n.t("options.apiProviders.form.models.label")}
                 labelExtra={
                   <div className="flex items-center gap-2">
@@ -62,8 +58,9 @@ export const TranslateModelSelector = withForm({
                       <ModelSuggestionButton
                         providerConfig={providerConfig}
                         onSelect={(selectedModel) => {
-                          field.handleChange(selectedModel)
-                          void form.handleSubmit()
+                          autosave.edit(() => field.handleChange(selectedModel), {
+                            immediate: true,
+                          })
                         }}
                       />
                     )}
@@ -77,7 +74,6 @@ export const TranslateModelSelector = withForm({
           <form.AppField name="model.model">
             {(field) => (
               <field.SelectFieldAutoSave
-                formForSubmit={form}
                 label={i18n.t("options.apiProviders.form.models.label")}
                 labelExtra={recommendationTrigger}
               >
@@ -107,33 +103,13 @@ export const TranslateModelSelector = withForm({
                   id="isCustomModel-translate"
                   checked={field.state.value}
                   onCheckedChange={(checked) => {
-                    try {
-                      if (!checked) {
-                        void setProviderConfig(
-                          updateLLMProviderConfig(providerConfig, {
-                            model: {
-                              customModel: null,
-                              isCustomModel: false,
-                            },
-                          }),
-                        )
-                      } else if (checked) {
-                        void setProviderConfig(
-                          updateLLMProviderConfig(providerConfig, {
-                            model: {
-                              customModel: model,
-                              isCustomModel: true,
-                            },
-                          }),
-                        )
-                      }
-                    } catch (error) {
-                      toastManager.add({
-                        type: "error",
-                        title:
-                          error instanceof Error ? error.message : "Failed to update configuration",
-                      })
-                    }
+                    autosave.edit(
+                      () => {
+                        form.setFieldValue("model.isCustomModel", checked)
+                        form.setFieldValue("model.customModel", checked ? model : null)
+                      },
+                      { immediate: true },
+                    )
                   }}
                 />
                 <label

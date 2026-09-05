@@ -3,9 +3,9 @@ import { useSelector } from "@tanstack/react-store"
 import { Field, FieldError, FieldLabel } from "@/components/ui/base-ui/field"
 import { QuickInsertableTextarea } from "@/components/ui/insertable-textarea"
 import { useFieldContext } from "./form-context"
+import { useAutosaveContext } from "./use-autosave"
 
 interface QuickInsertableTextareaFieldAutoSaveProps {
-  formForSubmit: { handleSubmit: () => void }
   label: React.ReactNode
   insertCells?: InsertCell[]
   className?: string
@@ -13,12 +13,12 @@ interface QuickInsertableTextareaFieldAutoSaveProps {
 }
 
 export function QuickInsertableTextareaFieldAutoSave({
-  formForSubmit,
   label,
   insertCells,
   className,
   readOnly,
 }: QuickInsertableTextareaFieldAutoSaveProps) {
+  const autosave = useAutosaveContext()
   const field = useFieldContext<string>()
   const errors = useSelector(field.store, (state) => state.meta.errors)
   const hasError = errors.length > 0
@@ -30,8 +30,17 @@ export function QuickInsertableTextareaFieldAutoSave({
         id={field.name}
         value={field.state.value}
         onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => {
-          field.handleChange(event.target.value)
-          formForSubmit.handleSubmit()
+          const value = event.currentTarget.value
+          autosave.edit(() => field.handleChange(value))
+        }}
+        onCompositionStart={() => autosave.beginComposition(field.name)}
+        onCompositionEnd={(event) => {
+          const value = event.currentTarget.value
+          autosave.endComposition(field.name, () => field.handleChange(value))
+        }}
+        onBlur={() => {
+          field.handleBlur()
+          void autosave.flush()
         }}
         aria-invalid={hasError}
         className={className}
