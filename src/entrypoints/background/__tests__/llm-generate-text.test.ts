@@ -85,4 +85,35 @@ describe("llm-generate-text", () => {
     await expect(handler({ data: localPayload })).rejects.toThrow("provider unavailable")
     expect(loggerErrorMock).toHaveBeenCalled()
   })
+
+  it.each([undefined, null, "", "unknownFeature", "toString"])(
+    "rejects an invalid hosted feature (%s) before generating text",
+    async (hostedFeature) => {
+      const { setupLLMGenerateTextMessageHandlers } = await import("../llm-generate-text")
+      setupLLMGenerateTextMessageHandlers()
+      const handler = getRegisteredMessageHandler("backgroundGenerateText")
+      await expect(
+        handler({
+          data: {
+            ...localPayload,
+            providerRef: {
+              kind: "system",
+              providerId: "read-frog-free-ai",
+              modelTier: "normal",
+              modelRevision: "r1",
+            },
+            hostedFeature,
+          },
+        }),
+      ).rejects.toThrow("valid hostedFeature is required")
+      expect(generateTextForProviderRefMock).not.toHaveBeenCalled()
+    },
+  )
+
+  it("allows local generation without a hosted feature", async () => {
+    const { hostedFeature: _hostedFeature, ...payload } = localPayload
+    generateTextForProviderRefMock.mockResolvedValue("local text")
+    const { runGenerateTextInBackground } = await import("../llm-generate-text")
+    await expect(runGenerateTextInBackground(payload)).resolves.toEqual({ text: "local text" })
+  })
 })

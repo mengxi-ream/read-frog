@@ -172,6 +172,7 @@ async function translateWithTextStream({
 
   const translatedText = await streamBackgroundText(
     {
+      providerKind: "local",
       providerId,
       instructions: systemPrompt,
       prompt,
@@ -243,6 +244,7 @@ async function translateWithHostedTextStream({
 
   return streamBackgroundText(
     {
+      providerKind: "system",
       providerId: provider.id,
       modelTier: provider.modelTier,
       requestId: getRandomUUID(),

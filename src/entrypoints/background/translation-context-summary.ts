@@ -1,4 +1,4 @@
-import type { HostedAiTextStreamRoute } from "@/types/background-stream"
+import type { ProviderRequestRouting } from "@/types/hosted-request"
 import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 import type { RequestQueue } from "@/utils/request/request-queue"
 import { generateArticleSummary } from "@/utils/content/summary"
@@ -6,6 +6,7 @@ import { cleanText } from "@/utils/content/utils"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
+import { validateProviderHostedFeature } from "@/utils/hosted-ai/routing"
 import { logger } from "@/utils/logger"
 import { getProviderCacheIdentity } from "@/utils/providers/provider-ref"
 import { generateTextForProviderRef } from "./background-stream"
@@ -14,15 +15,20 @@ import { generateTextForProviderRef } from "./background-stream"
  * Cached summaries used as context by webpage and subtitle translation.
  * The caller supplies its feature queue and cache identity.
  */
-export async function getOrGenerateTranslationContextSummary(args: {
-  title: string
-  textContent: string
-  providerRef: PromptableProviderRef
-  hostedFeature: HostedAiTextStreamRoute
-  cacheKeyParts: string[]
-  requestQueue: RequestQueue
-}): Promise<string | null> {
+export async function getOrGenerateTranslationContextSummary(
+  args: ProviderRequestRouting<PromptableProviderRef> & {
+    title: string
+    textContent: string
+    cacheKeyParts: string[]
+    requestQueue: RequestQueue
+  },
+): Promise<string | null> {
   const { title, textContent, providerRef, hostedFeature, cacheKeyParts, requestQueue } = args
+  validateProviderHostedFeature(providerRef, hostedFeature)
+  const routing: ProviderRequestRouting<PromptableProviderRef> =
+    args.hostedFeature === undefined
+      ? { providerRef: args.providerRef }
+      : { providerRef: args.providerRef, hostedFeature: args.hostedFeature }
   const preparedText = cleanText(textContent)
   if (!preparedText) {
     return null
@@ -47,8 +53,7 @@ export async function getOrGenerateTranslationContextSummary(args: {
       return cachedAgain.summary
     }
 
-    const summary = await generateArticleSummary(title, textContent, providerRef, {
-      hostedFeature,
+    const summary = await generateArticleSummary(title, textContent, routing, {
       signal,
       generate: (payload, runOptions) =>
         generateTextForProviderRef({ ...payload, requestId: hostedRequestId }, runOptions),

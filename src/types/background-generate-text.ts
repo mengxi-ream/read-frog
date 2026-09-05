@@ -1,13 +1,7 @@
-import type { HostedAiTextStreamRoute } from "./background-stream"
+import type { ProviderRequestRouting } from "./hosted-request"
 import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 
-export interface BackgroundGenerateTextPayload {
-  providerRef: PromptableProviderRef
-  /**
-   * Which hosted route a system provider bills against. Ignored for local
-   * providers, which have no server-side quota.
-   */
-  hostedFeature: HostedAiTextStreamRoute
+export type BackgroundGenerateTextPayload = ProviderRequestRouting<PromptableProviderRef> & {
   instructions: string
   prompt: string
   /**

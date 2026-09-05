@@ -15,6 +15,7 @@ import {
   hasInlineAtomTokens,
 } from "@/utils/host/translate/inline-atom-tokens"
 import { normalizePromptContextValue } from "@/utils/host/translate/translate-text"
+import { validateProviderHostedFeature } from "@/utils/hosted-ai/routing"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
@@ -25,6 +26,7 @@ import {
   buildTranslationScopeKey,
   createWebPageTranslationQueues,
   getLocalProviderConfig,
+  getQueuedTranslationRouting,
   shouldUseBatchQueue,
 } from "./translation-queues"
 
@@ -54,6 +56,7 @@ export function setupPageTranslationHandlers(): void {
   const { queuesPromise, cancelledScopes } = createWebPageTranslationQueues()
 
   onMessage("enqueueTranslateRequest", async (message) => {
+    const routing = getQueuedTranslationRouting(message.data)
     const { requestQueue, batchQueue } = await queuesPromise
     const {
       data: {
@@ -70,7 +73,6 @@ export function setupPageTranslationHandlers(): void {
         webSummary,
         sessionId,
         forceRetranslation = false,
-        hostedFeature,
       },
     } = message
     const scope = buildTranslationScopeKey(message.sender, sessionId)
@@ -112,12 +114,11 @@ export function setupPageTranslationHandlers(): void {
       const data = {
         text,
         langConfig,
-        provider: providerRef,
+        ...routing,
         hash,
         scheduleAt,
         context,
         scope,
-        hostedFeature,
       }
       result = await batchQueue.enqueue(data)
     } else {
@@ -167,6 +168,7 @@ export function setupPageTranslationHandlers(): void {
   })
 
   onMessage("getOrGenerateWebPageSummary", async (message) => {
+    validateProviderHostedFeature(message.data.providerRef, message.data.hostedFeature)
     const { requestQueue } = await queuesPromise
     const { webTitle, webContent, providerRef } = message.data
 
@@ -184,15 +186,9 @@ export function setupPageTranslationHandlers(): void {
     }
 
     return await getOrGenerateTranslationContextSummary({
+      ...message.data,
       title: webTitle,
       textContent: webContent,
-      providerRef,
-      // The summary bills against the feature that triggered it (it is a
-      // sub-call of that feature, not a feature of its own); the sender names
-      // that route so the gate it serialized the ref under and the billing here
-      // cannot diverge. Absent only from a pre-update content script — page
-      // translation is the historical biller.
-      hostedFeature: message.data.hostedFeature ?? "pageTranslation",
       cacheKeyParts: [webTitle, Sha256Hex(cleanText(webContent))],
       requestQueue,
     })

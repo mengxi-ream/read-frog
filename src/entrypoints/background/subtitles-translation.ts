@@ -43,6 +43,7 @@ export function setupSubtitlesTranslationHandlers(): void {
         text,
         langConfig,
         provider: providerRef,
+        hostedFeature: "videoSubtitles" as const,
         hash,
         scheduleAt,
         context,

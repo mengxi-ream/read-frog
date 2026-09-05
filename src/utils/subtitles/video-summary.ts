@@ -1,4 +1,5 @@
 import type { SubtitlesFragment } from "./types"
+import type { BackgroundStreamTextSerializablePayload } from "@/types/background-stream"
 import type { Config } from "@/types/config/config"
 import type { ProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
@@ -156,9 +157,10 @@ export async function requestVideoSummary(
     targetLanguage,
     sampleTranscript(transcript, VIDEO_SUMMARY_TRANSCRIPT_CHAR_BUDGET),
   )
-  const payload =
+  const payload: BackgroundStreamTextSerializablePayload =
     providerRef.kind === "system"
       ? {
+          providerKind: "system",
           providerId: providerRef.providerId,
           modelTier: providerRef.modelTier,
           requestId: getRandomUUID(),
@@ -167,6 +169,7 @@ export async function requestVideoSummary(
           prompt,
         }
       : {
+          providerKind: "local",
           providerId: providerRef.config.id,
           providerConfig: providerRef.config,
           instructions: systemPrompt,

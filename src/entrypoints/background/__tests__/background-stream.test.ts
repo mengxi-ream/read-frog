@@ -135,6 +135,48 @@ describe("background-stream", () => {
     vi.clearAllMocks()
   })
 
+  it.each([undefined, null, "", "unknownFeature", "toString"])(
+    "rejects an invalid hosted feature (%s) at the stream port before calling a provider",
+    async (hostedFeature) => {
+      const { handleStreamTextPort } = await import("../background-stream")
+      const mockPort = createMockPort("stream-text")
+      handleStreamTextPort(mockPort.port as never)
+      await mockPort.emitMessage({
+        type: "start",
+        streamRequestId: "invalid-hosted-route",
+        payload: {
+          providerKind: "system",
+          providerId: "read-frog-free-ai",
+          hostedFeature,
+          instructions: "Translate",
+          prompt: "Hello",
+        },
+      })
+      expect(mockPort.postMessage).toHaveBeenCalledWith({
+        type: "error",
+        streamRequestId: "invalid-hosted-route",
+        error: { message: "Invalid stream start payload" },
+      })
+      expect(hostedStreamTextMock).not.toHaveBeenCalled()
+      expect(getModelByIdMock).not.toHaveBeenCalled()
+      expect(streamTextMock).not.toHaveBeenCalled()
+    },
+  )
+
+  it("rejects a built-in provider disguised as a local stream", async () => {
+    const { handleStreamTextPort } = await import("../background-stream")
+    const mockPort = createMockPort("stream-text")
+    handleStreamTextPort(mockPort.port as never)
+    await mockPort.emitMessage({
+      type: "start",
+      streamRequestId: "wrong-provider-kind",
+      payload: { providerKind: "local", providerId: "read-frog-free-ai", prompt: "Hello" },
+    })
+    expect(mockPort.postMessage).toHaveBeenCalledWith(expect.objectContaining({ type: "error" }))
+    expect(hostedStreamTextMock).not.toHaveBeenCalled()
+    expect(getModelByIdMock).not.toHaveBeenCalled()
+  })
+
   it("streams structured object output from background", async () => {
     getModelByIdMock.mockResolvedValue("mock-model")
     streamTextMock.mockReturnValue({
@@ -455,6 +497,8 @@ describe("background-stream", () => {
         let caught: unknown
         try {
           await runStreamTextInBackground({
+            providerKind: "system",
+            hostedFeature: "pageTranslation",
             providerId: "read-frog-free-ai",
             modelTier: "normal",
             requestId: "123e4567-e89b-42d3-a456-426614174003",
@@ -552,6 +596,7 @@ describe("background-stream", () => {
 
     await expect(
       runStreamTextInBackground({
+        providerKind: "local",
         providerId: "openai-default",
         prompt: "Say hello",
       }),
@@ -571,6 +616,7 @@ describe("background-stream", () => {
 
     await expect(
       runStreamTextInBackground({
+        providerKind: "local",
         providerId: "openai-default",
         prompt: "Say hello",
       }),
@@ -598,6 +644,7 @@ describe("background-stream", () => {
       type: "start",
       streamRequestId: "req-text-1",
       payload: {
+        providerKind: "local",
         providerId: "openai-default",
         instructions: "Be concise",
         prompt: "Say hello",
@@ -670,6 +717,7 @@ describe("background-stream", () => {
       type: "start",
       streamRequestId: "summary-snapshot",
       payload: {
+        providerKind: "local",
         providerId: providerConfig.id,
         providerConfig,
         instructions: "Summarize",
@@ -698,12 +746,19 @@ describe("background-stream", () => {
   })
 
   it.each([
-    { providerId: "other-id", providerConfig: DEFAULT_PROVIDER_CONFIG.openai },
     {
+      providerKind: "local",
+      providerId: "other-id",
+      providerConfig: DEFAULT_PROVIDER_CONFIG.openai,
+    },
+    {
+      providerKind: "local",
       providerId: DEFAULT_PROVIDER_CONFIG["microsoft-translate"].id,
       providerConfig: DEFAULT_PROVIDER_CONFIG["microsoft-translate"],
     },
     {
+      providerKind: "system",
+      hostedFeature: "pageTranslation",
       providerId: "read-frog-free-ai",
       providerConfig: { ...DEFAULT_PROVIDER_CONFIG.openai, id: "read-frog-free-ai" },
     },
@@ -738,6 +793,8 @@ describe("background-stream", () => {
     const { runStreamTextInBackground } = await import("../background-stream")
     const result = await runStreamTextInBackground(
       {
+        providerKind: "system",
+        hostedFeature: "pageTranslation",
         providerId: "read-frog-free-ai",
         modelTier: "normal",
         requestId: "123e4567-e89b-42d3-a456-426614174002",
@@ -785,6 +842,7 @@ describe("background-stream", () => {
 
     const { runStreamTextInBackground } = await import("../background-stream")
     const result = await runStreamTextInBackground({
+      providerKind: "system",
       providerId: "read-frog-free-ai",
       hostedFeature: "pageTranslation",
       instructions: "Translate text",
@@ -809,6 +867,7 @@ describe("background-stream", () => {
 
     const { runStreamTextInBackground } = await import("../background-stream")
     const result = await runStreamTextInBackground({
+      providerKind: "system",
       providerId: "read-frog-free-ai",
       hostedFeature: "selectionTranslation",
       modelTier: "normal",
@@ -851,6 +910,8 @@ describe("background-stream", () => {
     const { runStreamTextInBackground } = await import("../background-stream")
     await runStreamTextInBackground(
       {
+        providerKind: "system",
+        hostedFeature: "pageTranslation",
         providerId: "read-frog-free-ai",
         instructions: "Translate text",
         prompt: "Hello world",
@@ -882,7 +943,13 @@ describe("background-stream", () => {
     const chunkSnapshots: BackgroundTextStreamSnapshot[] = []
     const { runStreamTextInBackground } = await import("../background-stream")
     await runStreamTextInBackground(
-      { providerId: "read-frog-free-ai", instructions: "Translate text", prompt: "Hello world" },
+      {
+        providerKind: "system",
+        providerId: "read-frog-free-ai",
+        hostedFeature: "pageTranslation",
+        instructions: "Translate text",
+        prompt: "Hello world",
+      },
       {
         onChunk: (snapshot) => {
           chunkSnapshots.push(snapshot)
@@ -923,6 +990,7 @@ describe("background-stream", () => {
       type: "start",
       streamRequestId: "req-text-error",
       payload: {
+        providerKind: "local",
         providerId: "openai-default",
         prompt: "Say hello",
       },
@@ -953,6 +1021,7 @@ describe("background-stream", () => {
       type: "start",
       streamRequestId: "req-text-pre-stream-error",
       payload: {
+        providerKind: "local",
         providerId: "openai-default",
         prompt: "Say hello",
       },
@@ -1001,6 +1070,7 @@ describe("background-stream", () => {
       type: "start",
       streamRequestId: "req-text-abort",
       payload: {
+        providerKind: "local",
         providerId: "openai-default",
         prompt: "Say hello",
       },
@@ -1030,6 +1100,7 @@ describe("background-stream", () => {
       type: "start",
       streamRequestId: "req-text-invalid",
       payload: {
+        providerKind: "local",
         providerId: "   ",
       },
     })
@@ -1094,6 +1165,7 @@ describe("background-stream", () => {
     await mockPort.emitMessage({
       type: "start",
       payload: {
+        providerKind: "local",
         providerId: "openai-default",
       },
     })

@@ -230,6 +230,7 @@ describe("translation queue helpers", () => {
           },
           scheduleAt: Date.now(),
           hash: "hosted-retry-hash",
+          hostedFeature: "pageTranslation",
         },
       }),
     ).resolves.toBe("hosted translation")
@@ -285,6 +286,7 @@ describe("translation queue helpers", () => {
           scheduleAt: Date.now(),
           hash,
           sessionId: "session-a",
+          hostedFeature: "pageTranslation",
         },
         sender,
       }),
@@ -1118,7 +1120,7 @@ describe("translation queue helpers", () => {
     )
   })
 
-  it("bills a hosted request against the route it carries, not the queue default", async () => {
+  it("bills a hosted request against its explicit route", async () => {
     // Input translation shares the webpage queue; without the per-request
     // route it would bill the page-translation quota it never gated on.
     const { setupPageTranslationHandlers } = await import("../page-translation")
@@ -1147,6 +1149,39 @@ describe("translation queue helpers", () => {
     )
   })
 
+  it.each([undefined, null, "", "unknownFeature", "toString"])(
+    "rejects invalid hosted routing (%s) before reading caches or enqueueing",
+    async (hostedFeature) => {
+      const { setupPageTranslationHandlers } = await import("../page-translation")
+      setupPageTranslationHandlers()
+      translationCacheGetMock.mockResolvedValue({ translation: "cached translation" })
+      articleSummaryCacheGetMock.mockResolvedValue({ summary: "cached summary" })
+      const data = {
+        text: "hello",
+        langConfig: DEFAULT_CONFIG.language,
+        scheduleAt: Date.now(),
+        hash: "cached",
+        webTitle: "Title",
+        webContent: "Body",
+        providerRef: {
+          kind: "system",
+          providerId: "read-frog-free-ai",
+          modelTier: "normal",
+          modelRevision: "r1",
+        },
+        hostedFeature,
+      }
+      for (const name of ["enqueueTranslateRequest", "getOrGenerateWebPageSummary"]) {
+        const handler = getRegisteredMessageHandler(name)
+        await expect(handler({ data })).rejects.toThrow("valid hostedFeature is required")
+      }
+      expect(translationCacheGetMock).not.toHaveBeenCalled()
+      expect(articleSummaryCacheGetMock).not.toHaveBeenCalled()
+      expect(runStreamTextInBackgroundMock).not.toHaveBeenCalled()
+      expect(generateArticleSummaryMock).not.toHaveBeenCalled()
+    },
+  )
+
   it("keeps requests for different hosted routes in separate billing batches", async () => {
     ensureInitializedConfigMock.mockResolvedValue({
       ...DEFAULT_CONFIG,
@@ -1170,7 +1205,14 @@ describe("translation queue helpers", () => {
       scheduleAt: Date.now(),
     }
     await Promise.all([
-      handler({ data: { ...base, text: "page paragraph", hash: "route-batch-page-hash" } }),
+      handler({
+        data: {
+          ...base,
+          text: "page paragraph",
+          hash: "route-batch-page-hash",
+          hostedFeature: "pageTranslation",
+        },
+      }),
       handler({
         data: {
           ...base,
@@ -1196,16 +1238,14 @@ describe("translation queue helpers", () => {
       async (
         _title: string,
         _text: string,
-        providerRef: unknown,
+        routing: { providerRef: unknown; hostedFeature: string },
         options: {
-          hostedFeature: string
           generate: (payload: unknown, runOptions: unknown) => Promise<string>
         },
       ) =>
         options.generate(
           {
-            providerRef,
-            hostedFeature: options.hostedFeature,
+            ...routing,
             instructions: "sys",
             prompt: "user",
           },
@@ -1237,8 +1277,8 @@ describe("translation queue helpers", () => {
     expect(generateArticleSummaryMock).toHaveBeenCalledWith(
       "Page title",
       "page body",
-      hostedRef,
-      expect.objectContaining({ hostedFeature: "inputTranslation" }),
+      { providerRef: hostedRef, hostedFeature: "inputTranslation" },
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
     )
     expect(generateTextForProviderRefMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -1266,9 +1306,8 @@ describe("translation queue helpers", () => {
     expect(generateArticleSummaryMock).toHaveBeenCalledWith(
       "Page title",
       "page body",
-      { kind: "local", config: llmProvider },
+      { providerRef: { kind: "local", config: llmProvider } },
       expect.objectContaining({
-        hostedFeature: "pageTranslation",
         signal: expect.any(AbortSignal),
       }),
     )
@@ -1291,9 +1330,8 @@ describe("translation queue helpers", () => {
     expect(generateArticleSummaryMock).toHaveBeenCalledWith(
       "Video title",
       "subtitle transcript",
-      { kind: "local", config: llmProvider },
+      { providerRef: { kind: "local", config: llmProvider }, hostedFeature: "videoSubtitles" },
       expect.objectContaining({
-        hostedFeature: "videoSubtitles",
         signal: expect.any(AbortSignal),
       }),
     )

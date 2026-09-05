@@ -3,7 +3,7 @@ import type { JSONValue, StreamTextOnErrorCallback } from "ai"
 import type { Browser } from "#imports"
 import type { AISDKReasoning, LLMProviderConfig } from "@/types/config/provider"
 import type { SelectionToolbarCustomActionOutputType } from "@/types/config/selection-toolbar"
-import type { HostedAiModelTier } from "@/utils/constants/provider-ids"
+import type { BuiltInAiProviderId, HostedAiModelTier } from "@/utils/constants/provider-ids"
 import type { NoteSuggestionEnvelope } from "@/utils/note-suggestion/types"
 
 interface BaseBackgroundStreamSerializablePayload {
@@ -46,17 +46,21 @@ export type HostedAiTextStreamFeature = Extract<
  */
 export type HostedAiTextStreamRoute = HostedAiTextStreamFeature | "videoSubtitlesSegmentation"
 
-export type BackgroundStreamTextSerializablePayload = BaseBackgroundStreamSerializablePayload & {
-  /** Local model and generation settings captured with the caller's cache identity. */
-  providerConfig?: LLMProviderConfig
-  /**
-   * Which hosted route (and so which quota feature) a Built-in AI run bills
-   * against. Ignored by local/BYOK providers. Optional so a content script
-   * from before this field existed keeps working against an updated service
-   * worker mid-extension-update; absent means "pageTranslation".
-   */
-  hostedFeature?: HostedAiTextStreamRoute
-}
+export type BackgroundStreamTextSerializablePayload = BaseBackgroundStreamSerializablePayload &
+  (
+    | {
+        providerKind: "local"
+        /** Model and generation settings captured with the caller's cache identity. */
+        providerConfig?: LLMProviderConfig
+        hostedFeature?: never
+      }
+    | {
+        providerKind: "system"
+        providerId: BuiltInAiProviderId
+        providerConfig?: never
+        hostedFeature: HostedAiTextStreamRoute
+      }
+  )
 
 export interface BackgroundStructuredObjectOutputField {
   name: string

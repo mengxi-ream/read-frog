@@ -3,6 +3,7 @@ import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
 import type { BatchQueueConfig, RequestQueueConfig } from "@/types/config/translate"
 import type { WebPagePromptContext } from "@/types/content"
+import type { ProviderRequestRouting } from "@/types/hosted-request"
 import type { PromptResolver } from "@/utils/host/translate/api/ai"
 import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
@@ -19,6 +20,7 @@ import {
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { Sha256Hex } from "@/utils/hash"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
+import { requireHostedFeature } from "@/utils/hosted-ai/routing"
 import { logger } from "@/utils/logger"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
@@ -29,6 +31,25 @@ import { runStreamTextInBackground } from "./background-stream"
 import { ensureInitializedConfig } from "./config"
 
 type QueuedTranslationProvider = ProviderConfig | SerializableProviderRef
+
+type QueuedTranslationRouting =
+  | { provider: QueuedTranslationProvider; hostedFeature: HostedAiTextStreamRoute }
+  | {
+      provider: ProviderConfig | Extract<SerializableProviderRef, { kind: "local" }>
+      hostedFeature?: undefined
+    }
+
+export function getQueuedTranslationRouting(
+  request: ProviderRequestRouting,
+): QueuedTranslationRouting {
+  if (request.providerRef.kind === "local" && request.hostedFeature === undefined) {
+    return { provider: request.providerRef }
+  }
+  return {
+    provider: request.providerRef,
+    hostedFeature: requireHostedFeature(request.hostedFeature),
+  }
+}
 
 function isSerializedPageProvider(
   provider: QueuedTranslationProvider,
@@ -49,7 +70,7 @@ function getQueuedProviderId(provider: QueuedTranslationProvider): string {
 async function executeQueuedTranslation<TContext>(
   text: string,
   langConfig: Config["language"],
-  provider: QueuedTranslationProvider,
+  routing: QueuedTranslationRouting,
   promptResolver: PromptResolver<TContext>,
   options: {
     isBatch?: boolean
@@ -58,10 +79,9 @@ async function executeQueuedTranslation<TContext>(
     preserveLineBreaks?: boolean
     signal?: AbortSignal
     hostedRequestId?: string
-    /** Which hosted route a system provider bills against. */
-    hostedFeature?: HostedAiTextStreamRoute
   } = {},
 ): Promise<string> {
+  const { provider, hostedFeature } = routing
   const local = getLocalProviderConfig(provider)
   if (local) {
     return executeTranslate(text, langConfig, local, promptResolver, options)
@@ -78,10 +98,11 @@ async function executeQueuedTranslation<TContext>(
   })
   const result = await runStreamTextInBackground(
     {
+      providerKind: "system",
       providerId: system.providerId,
       modelTier: system.modelTier,
       requestId: options.hostedRequestId,
-      hostedFeature: options.hostedFeature ?? "pageTranslation",
+      hostedFeature: requireHostedFeature(hostedFeature),
       instructions: systemPrompt,
       prompt,
     },
@@ -107,35 +128,34 @@ export async function executeBatchTranslation<TContext>(
   promptResolver: PromptResolver<TContext>,
   signal?: AbortSignal,
   hostedRequestId?: string,
-  hostedFeature?: HostedAiTextStreamRoute,
 ): Promise<string[]> {
-  const { langConfig, provider, context } = dataList[0]!
+  const { langConfig, context } = dataList[0]!
   const texts = dataList.map((d) => d.text)
 
   const batchText = texts.join(`\n\n${BATCH_SEPARATOR}\n\n`)
-  const result = await executeQueuedTranslation(batchText, langConfig, provider, promptResolver, {
-    isBatch: true,
-    context,
-    signal,
-    hostedRequestId,
-    hostedFeature,
-  })
+  const result = await executeQueuedTranslation(
+    batchText,
+    langConfig,
+    dataList[0]!,
+    promptResolver,
+    {
+      isBatch: true,
+      context,
+      signal,
+      hostedRequestId,
+    },
+  )
   return parseBatchResult(result)
 }
 
-export interface TranslateBatchData<TContext = unknown> {
+export type TranslateBatchData<TContext = unknown> = QueuedTranslationRouting & {
   text: string
   langConfig: Config["language"]
-  provider: QueuedTranslationProvider
   hash: string
   scheduleAt: number
   context?: TContext
   // Cancellation scope (`${tabId}:${sessionId}`); absent = uncancellable.
   scope?: string
-  // Which hosted route a system provider bills against. Part of the batch key,
-  // so requests for different routes never share a batch (a batch bills as one
-  // unit). Absent for pre-update senders — the queue's default route applies.
-  hostedFeature?: HostedAiTextStreamRoute
 }
 
 /**
@@ -158,12 +178,6 @@ interface TranslationQueueSetupConfig<TContext = unknown> {
   // Present only for queues whose requests carry cancellation scopes.
   isScopeCancelled?: (scopeKey: string) => boolean
   queueName: "webpage" | "subtitles"
-  /**
-   * Fallback hosted route for requests that carry none (pre-update content
-   * scripts). Current senders name their own route on the request — input
-   * translation shares the webpage queue but bills separately.
-   */
-  hostedFeature: HostedAiTextStreamRoute
   // "default" means the user's stored config could not be loaded — the queue
   // is running on DEFAULT_CONFIG values (rate 8 / capacity 20), NOT what the
   // options page shows. Logged loudly so support reports are diagnosable.
@@ -174,7 +188,6 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
   const { rate, capacity } = config.requestQueueConfig
   const { maxCharactersPerBatch, maxItemsPerBatch } = config.batchQueueConfig
   const { promptResolver, isScopeCancelled, queueName, configSource } = config
-  const queueHostedFeature = config.hostedFeature
 
   logger.info(`[translation-queues] ${queueName} queue init`, {
     rate,
@@ -210,7 +223,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
       return Sha256Hex(
         `${data.langConfig.sourceCode}-${data.langConfig.targetCode}-${getQueuedProviderId(data.provider)}`,
         data.context ? JSON.stringify(data.context) : "",
-        data.hostedFeature ?? queueHostedFeature,
+        data.hostedFeature ?? "",
       )
     },
     getCharacters: (data) => data.text.length,
@@ -241,13 +254,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
           })
         }
         // Homogeneous per batch: hostedFeature is part of the batch key.
-        return await executeBatchTranslation(
-          dataList,
-          promptResolver,
-          signal,
-          hostedRequestId,
-          dataList[0]!.hostedFeature ?? queueHostedFeature,
-        )
+        return await executeBatchTranslation(dataList, promptResolver, signal, hostedRequestId)
       }
 
       return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash, meta.scopes, { timeoutMs })
@@ -262,11 +269,10 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
         if (localProvider) {
           await putBatchRequestRecord({ originalRequestCount: 1, providerConfig: localProvider })
         }
-        return executeQueuedTranslation(text, langConfig, provider, promptResolver, {
+        return executeQueuedTranslation(text, langConfig, data, promptResolver, {
           context,
           signal,
           hostedRequestId,
-          hostedFeature: data.hostedFeature ?? queueHostedFeature,
         })
       }
       return requestQueue.enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)
@@ -370,7 +376,6 @@ export function createWebPageTranslationQueues() {
         promptResolver: webPromptResolver,
         isScopeCancelled: (scopeKey) => cancelledScopes.has(scopeKey),
         queueName: "webpage",
-        hostedFeature: "pageTranslation",
         configSource,
       }),
   )
@@ -396,7 +401,6 @@ export function createSubtitlesTranslationQueues() {
         batchQueueConfig,
         promptResolver: getSubtitlesTranslatePrompt,
         queueName: "subtitles",
-        hostedFeature: "videoSubtitles",
         configSource,
       }),
   )
