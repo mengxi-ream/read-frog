@@ -388,6 +388,7 @@ export default function FloatingButton() {
       data-testid="floating-button-container"
       className={cn(
         "fixed z-2147483647 flex flex-col gap-2 print:hidden",
+        isFloatingButtonExpanded ? "pointer-events-auto" : "pointer-events-none",
         isDraggingButton
           ? "items-center"
           : floatingButtonSide === "right"
@@ -408,7 +409,7 @@ export default function FloatingButton() {
           ref={mainButtonRef}
           data-testid="floating-main-button"
           className={cn(
-            "relative flex h-10 items-center border-border bg-white shadow-lg transition-transform duration-300 dark:bg-neutral-900",
+            "pointer-events-auto relative flex h-10 items-center border-border bg-white shadow-lg transition-transform duration-300 dark:bg-neutral-900",
             isDraggingButton
               ? "w-10 cursor-grabbing touch-none justify-center rounded-full border opacity-100"
               : floatingButtonSide === "right"
