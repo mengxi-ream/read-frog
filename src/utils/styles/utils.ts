@@ -1,15 +1,9 @@
-import type { ClassValue } from "clsx"
-import { clsx } from "clsx"
-import { extendTailwindMerge } from "tailwind-merge"
+import { createCn } from "cn/config"
 
-const mergeTailwindClasses = extendTailwindMerge({
+export const cn = createCn({
   extend: {
     theme: {
       shadow: ["floating"],
     },
   },
 })
-
-export function cn(...inputs: ClassValue[]) {
-  return mergeTailwindClasses(clsx(inputs))
-}
