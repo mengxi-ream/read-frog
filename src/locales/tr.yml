@@ -1172,6 +1172,14 @@ thinking:
 shortcutKeySelector:
   placeholder: Lütfen kısayolu girin
 subtitles:
+  sidebar:
+    close: AI özetini kapat
+    menu:
+      label: AI özeti
+    placeholder:
+      tab: AI özeti
+      title: Burada henüz bir şey yok
+      description: Bu videonun özeti bu panelde görünecek.
   loadingAiSubtitles: Yapay zeka altyazıları yükleniyor… (tahmini 3 dk)
   aiSubtitlesHint: Gelişmiş yapay zeka ses tanıma ile doğru altyazılar oluşturulur; resmi altyazı olmadığında da kullanılabilir.
   requestAiSubtitles: Yapay zeka altyazısı iste

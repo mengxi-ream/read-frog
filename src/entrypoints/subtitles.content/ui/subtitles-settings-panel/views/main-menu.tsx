@@ -4,6 +4,7 @@ import { DownloadSourceSubtitles } from "../components/download-source-subtitles
 import { DownloadTranslatedSubtitles } from "../components/download-translated-subtitles"
 import { RequestAiSubtitlesItem } from "../components/request-ai-subtitles-item"
 import { SubpageMenuEntry } from "../components/subpage-menu-entry"
+import { SubtitlesSidebarItem } from "../components/subtitles-sidebar-item"
 import { SubtitlesToggle } from "../components/subtitles-toggle"
 
 export function MainMenu({ onNavigate }: { onNavigate: (id: ViewId) => void }) {
@@ -14,6 +15,7 @@ export function MainMenu({ onNavigate }: { onNavigate: (id: ViewId) => void }) {
         <SubtitlesToggle />
         <DownloadTranslatedSubtitles />
         <DownloadSourceSubtitles />
+        <SubtitlesSidebarItem />
 
         {VISIBLE_SUBPAGES.map((page) => (
           <SubpageMenuEntry

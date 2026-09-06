@@ -69,6 +69,7 @@ export interface SubtitlesProvidersAdapter {
   readonly containerShrinkRatio: ((container: HTMLElement) => number | null) | undefined
   readonly supportsAiSubtitles: boolean
   getControlsConfig: () => ControlsConfig | undefined
+  readonly supportsSidebar: boolean
   toggleSubtitlesManually: (enabled: boolean) => void
   toggleSubtitlesByShortcut: (enabled: boolean) => void
   requestAiSubtitles: () => Promise<void>
@@ -109,6 +110,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
   get containerShrinkRatio() {
     return this.config.containerShrinkRatio
+  }
+
+  get supportsSidebar() {
+    return this.config.supportsSidebar ?? false
   }
 
   get videoIdChanged() {

@@ -7,14 +7,17 @@ interface SubpageMenuEntryProps {
   icon?: ReactNode
   label: string
   onClick: () => void
+  /** Set only for rows that toggle something rather than navigate. */
+  pressed?: boolean
 }
 
-export function SubpageMenuEntry({ icon, label, onClick }: SubpageMenuEntryProps) {
+export function SubpageMenuEntry({ icon, label, onClick, pressed }: SubpageMenuEntryProps) {
   return (
     <Button
       type="button"
       variant="ghost"
       onClick={onClick}
+      aria-pressed={pressed}
       className={cn("h-auto w-full justify-start rounded-[14px] px-2 py-2 text-left")}
     >
       <div className="flex items-center gap-3">

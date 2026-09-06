@@ -9,6 +9,7 @@ interface SubtitlesUIContextValue {
   toggleSubtitles: (enabled: boolean) => void
   requestAiSubtitles: () => Promise<void>
   supportsAiSubtitles: boolean
+  supportsSidebar: boolean
   downloadSourceSubtitles: () => Promise<void>
   downloadTranslatedSubtitles: () => Promise<void>
   controlsConfig?: ControlsConfig
@@ -41,6 +42,7 @@ export function SubtitlesProviders({
       toggleSubtitles: adapter.toggleSubtitlesManually,
       requestAiSubtitles: adapter.requestAiSubtitles,
       supportsAiSubtitles: adapter.supportsAiSubtitles,
+      supportsSidebar: adapter.supportsSidebar,
       downloadSourceSubtitles: adapter.downloadSourceSubtitles,
       downloadTranslatedSubtitles: adapter.downloadTranslatedSubtitles,
       controlsConfig: adapter.getControlsConfig(),
