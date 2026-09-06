@@ -1,9 +1,9 @@
 ---
 name: adversarial-review
 description: >-
-  Adversarial code review using the opposite model. Spawns 1–3 reviewers on the
-  opposing model (Claude spawns Codex, Codex spawns Claude) to challenge work from
-  distinct critical lenses. Triggers: "adversarial review".
+  Adversarial code review using cross-model approach. Spawns reviewers on the opposing model
+  (Claude uses Codex, Codex uses Claude) to challenge work from distinct critical lenses.
+  Produces a synthesized verdict with findings and lead judgment. Triggers: "adversarial review".
 schedule: "After cook sessions that produce large diffs (200+ lines), implement plan phases, or complete a planning session"
 ---
 
@@ -34,8 +34,8 @@ Assess change size:
 
 | Size | Threshold | Reviewers |
 |------|-----------|-----------|
-| Small | < 50 lines, 1–2 files | 1 (Skeptic) |
-| Medium | 50–200 lines, 3–5 files | 2 (Skeptic + Architect) |
+| Small | < 50 lines, 1-2 files | 1 (Skeptic) |
+| Medium | 50-200 lines, 3-5 files | 2 (Skeptic + Architect) |
 | Large | 200+ lines or 5+ files | 3 (Skeptic + Architect + Minimalist) |
 
 Read `references/reviewer-lenses.md` for lens definitions.
@@ -50,7 +50,7 @@ REVIEW_DIR=$(mktemp -d /tmp/adversarial-review.XXXXXX)
 
 Determine which model you are, then spawn reviewers on the opposite:
 
-**If you are Claude** → spawn Codex reviewers via `codex exec`:
+**If you are Claude** — spawn Codex reviewers via `codex exec`:
 
 ```sh
 codex exec --skip-git-repo-check -o "$REVIEW_DIR/skeptic.md" "prompt" 2>/dev/null
@@ -59,7 +59,7 @@ codex exec --skip-git-repo-check -o "$REVIEW_DIR/skeptic.md" "prompt" 2>/dev/nul
 Use `--profile edit` only if the reviewer needs to run tests. Default to read-only.
 Run with `run_in_background: true`, monitor via `TaskOutput` with `block: true, timeout: 600000`.
 
-**If you are Codex** → spawn Claude reviewers via `claude` CLI:
+**If you are Codex** — spawn Claude reviewers via `claude` CLI:
 
 ```sh
 claude -p "prompt" > "$REVIEW_DIR/skeptic.md" 2>/dev/null
@@ -69,20 +69,7 @@ Run with `run_in_background: true`.
 
 Name each output file after the lens: `skeptic.md`, `architect.md`, `minimalist.md`.
 
-### Reviewer prompt template
-
-Each reviewer gets a single prompt containing:
-
-1. The stated intent (from Step 2)
-2. Their assigned lens (full text from references/reviewer-lenses.md)
-3. The principles relevant to their lens (file contents, not summaries)
-4. The code or diff to review
-5. Instructions: "You are an adversarial reviewer. Your job is to find real problems, not
-   validate the work. Be specific — cite files, lines, and concrete failure scenarios.
-   Rate each finding: high (blocks ship), medium (should fix), low (worth noting).
-   Write findings as a numbered markdown list to your output file."
-
-Spawn all reviewers in parallel.
+Build each reviewer's prompt using the template in `references/reviewer-prompt.md`.
 
 ## Step 4 — Verify and Synthesize Verdict
 
@@ -97,32 +84,7 @@ If any output file is missing or empty, note the failure in the verdict — do n
 a reviewer.
 
 Read each reviewer's output file from `$REVIEW_DIR/`. Deduplicate overlapping findings.
-Produce a single verdict:
-
-```
-## Intent
-<what the author is trying to achieve>
-
-## Verdict: PASS | CONTESTED | REJECT
-<one-line summary>
-
-## Findings
-<numbered list, ordered by severity (high → medium → low)>
-
-For each finding:
-- **[severity]** Description with file:line references
-- Lens: which reviewer raised it
-- Principle: which brain principle it maps to
-- Recommendation: concrete action, not vague advice
-
-## What Went Well
-<1–3 things the reviewers found no issue with — acknowledge good work>
-```
-
-**Verdict logic:**
-- **PASS** — no high-severity findings
-- **CONTESTED** — high-severity findings but reviewers disagree on them
-- **REJECT** — high-severity findings with reviewer consensus
+Produce a single verdict using the format in `references/verdict-format.md`.
 
 ## Step 5 — Render Judgment
 
@@ -131,9 +93,4 @@ principles as your frame, state which findings you would accept and which you wo
 and why. Reviewers are adversarial by design; not every finding warrants action. Call out
 false positives, overreach, and findings that mistake style for substance.
 
-Append to the verdict:
-
-```
-## Lead Judgment
-<for each finding: accept or reject with a one-line rationale>
-```
+Append the Lead Judgment section to the verdict (see `references/verdict-format.md`).
