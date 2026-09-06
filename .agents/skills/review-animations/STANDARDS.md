@@ -53,8 +53,7 @@ Find curves at [easing.dev](https://easing.dev/) or [easings.co](https://easings
 - **Never `scale(0)`.** Start from `scale(0.9–0.97)` + `opacity: 0`. Nothing in the real world appears from nothing.
 - **Origin-aware popovers.** Scale from the trigger, not center:
   ```css
-  .popover { transform-origin: var(--radix-popover-content-transform-origin); } /* Radix */
-  .popover { transform-origin: var(--transform-origin); }                       /* Base UI */
+  .popover { transform-origin: var(--transform-origin); } /* Base UI */
   ```
   **Modals are exempt** — they appear centered in the viewport, keep `transform-origin: center`.
 - **Button press feedback.** `transform: scale(0.97)` on `:active`, `transition: transform 160ms ease-out`. Subtle (0.95–0.98). Applies to any pressable element.

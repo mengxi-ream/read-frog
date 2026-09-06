@@ -30,7 +30,7 @@ configs, media queries. Never "use a nicer easing":
 /* target */
 .dropdown {
   transition: transform 200ms var(--ease-out), opacity 200ms var(--ease-out);
-  transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+  transform-origin: var(--transform-origin);
 }
 ​```
 
