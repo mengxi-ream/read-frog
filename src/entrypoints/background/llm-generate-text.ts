@@ -2,6 +2,7 @@ import type {
   BackgroundGenerateTextPayload,
   BackgroundGenerateTextResponse,
 } from "@/types/background-generate-text"
+import { validateProviderHostedFeature } from "@/utils/hosted-ai/routing"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { generateTextForProviderRef } from "./background-stream"
@@ -9,6 +10,7 @@ import { generateTextForProviderRef } from "./background-stream"
 export async function runGenerateTextInBackground(
   payload: BackgroundGenerateTextPayload,
 ): Promise<BackgroundGenerateTextResponse> {
+  validateProviderHostedFeature(payload.providerRef, payload.hostedFeature)
   return { text: await generateTextForProviderRef(payload) }
 }
 

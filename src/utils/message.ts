@@ -5,7 +5,6 @@ import type {
   BackgroundGenerateTextPayload,
   BackgroundGenerateTextResponse,
 } from "@/types/background-generate-text"
-import type { HostedAiTextStreamRoute } from "@/types/background-stream"
 import type { Config } from "@/types/config/config"
 import type { TranslationTextFormat } from "@/types/config/translate"
 import type {
@@ -13,6 +12,7 @@ import type {
   EdgeTTSSynthesizeRequest,
   EdgeTTSSynthesizeWireResponse,
 } from "@/types/edge-tts"
+import type { ProviderRequestRouting } from "@/types/hosted-request"
 import type { ProxyRequest, ProxyResponse } from "@/types/proxy-fetch"
 import type {
   TTSPlaybackStartRequest,
@@ -20,7 +20,7 @@ import type {
   TTSPlaybackStopRequest,
 } from "@/types/tts-playback"
 import type { HostedAiStatus } from "@/utils/hosted-ai/types"
-import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
+import type { PromptableProviderRef, SerializableProviderRef } from "@/utils/providers/provider-ref"
 import type { EdgeTTSVoice } from "@/utils/server/edge-tts/types"
 import { defineExtensionMessaging } from "@webext-core/messaging"
 
@@ -88,45 +88,37 @@ interface ProtocolMap {
   guideDictionaryNotebaseStateChanged: (data: { completed: boolean }) => void
   completeGuideDictionaryNotebase: (data: GuideDictionaryNotebaseCompletionInput) => void
   // request
-  enqueueTranslateRequest: (data: {
-    text: string
-    langConfig: Config["language"]
-    providerRef: SerializableProviderRef
-    scheduleAt: number
-    hash: string
-    textFormat?: TranslationTextFormat
-    // Source line breaks are semantic (newline-preserving container or typed
-    // input); providers whose transport collapses "\n" must protect them.
-    preserveLineBreaks?: boolean
-    webTitle?: string | null
-    webDescription?: string | null
-    webContent?: string | null
-    webSummary?: string | null
-    // Page-translation session this request belongs to; scopes the request
-    // for cancelPageTranslationRequests. Absent for non-page requests
-    // (input/selection translation), which are never cancellable.
-    sessionId?: string
-    forceRetranslation?: boolean
-    // Which hosted route a system provider bills against (input translation
-    // shares the webpage queue but draws on its own quota). Optional on the
-    // wire so a pre-update content script keeps working against an updated
-    // service worker; absent falls back to the queue's default route.
-    hostedFeature?: HostedAiTextStreamRoute
-  }) => Promise<string>
+  enqueueTranslateRequest: (
+    data: ProviderRequestRouting & {
+      text: string
+      langConfig: Config["language"]
+      scheduleAt: number
+      hash: string
+      textFormat?: TranslationTextFormat
+      // Source line breaks are semantic (newline-preserving container or typed
+      // input); providers whose transport collapses "\n" must protect them.
+      preserveLineBreaks?: boolean
+      webTitle?: string | null
+      webDescription?: string | null
+      webContent?: string | null
+      webSummary?: string | null
+      // Page-translation session this request belongs to; scopes the request
+      // for cancelPageTranslationRequests. Absent for non-page requests
+      // (input/selection translation), which are never cancellable.
+      sessionId?: string
+      forceRetranslation?: boolean
+    },
+  ) => Promise<string>
   // Drain queued/in-flight page-translation requests of one session (#1881).
   // The background composes the scope as `${sender.tab.id}:${sessionId}`, so a
   // tab can only ever cancel its own requests.
   cancelPageTranslationRequests: (data: { sessionId: string }) => void
-  getOrGenerateWebPageSummary: (data: {
-    webTitle: string
-    webContent: string
-    providerRef: SerializableProviderRef
-    // The route of the feature that triggered the summary — the summary is a
-    // sub-call of that feature and bills against its quota. Optional on the
-    // wire for mid-extension-update compat; absent means "pageTranslation",
-    // the historical biller.
-    hostedFeature?: HostedAiTextStreamRoute
-  }) => Promise<string | null>
+  getOrGenerateWebPageSummary: (
+    data: ProviderRequestRouting<PromptableProviderRef> & {
+      webTitle: string
+      webContent: string
+    },
+  ) => Promise<string | null>
   enqueueSubtitlesTranslateRequest: (data: {
     text: string
     langConfig: Config["language"]
@@ -140,15 +132,26 @@ interface ProtocolMap {
   getSubtitlesSummary: (data: {
     videoTitle: string
     subtitlesContext: string
-    providerRef: SerializableProviderRef
+    providerRef: PromptableProviderRef
   }) => Promise<string | null>
+  getCachedVideoSummary: (data: {
+    transcript: string
+    targetLanguage: string
+    providerRef: PromptableProviderRef
+  }) => Promise<string | null>
+  saveVideoSummary: (data: {
+    transcript: string
+    targetLanguage: string
+    providerRef: PromptableProviderRef
+    summary: string
+  }) => Promise<void>
   backgroundGenerateText: (
     data: BackgroundGenerateTextPayload,
   ) => Promise<BackgroundGenerateTextResponse>
   // AI subtitle segmentation
   aiSegmentSubtitles: (data: {
     jsonContent: string
-    providerRef: SerializableProviderRef
+    providerRef: PromptableProviderRef
   }) => Promise<string>
   // Hosted AI availability. Owned by the background because one response covers
   // every feature and tier — so it can be cached and shared across tabs — and

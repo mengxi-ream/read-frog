@@ -3,13 +3,8 @@ import type { Config } from "@/types/config/config"
 import debounce from "debounce"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
-import { isLLMProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
-import {
-  BUILT_IN_AI_FEATURE_PROVIDER,
-  classifyProviderConfig,
-  UNKNOWN_FEATURE_PROVIDER,
-} from "@/utils/analytics-provider"
+import { classifyResolvedProvider, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
   CONTENT_WRAPPER_CLASS,
@@ -62,8 +57,8 @@ import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-contex
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
 import {
+  canResolvedProviderRefGenerateText,
   checkProviderAvailability,
-  isSystemProviderRef,
   resolvePageTranslationProvider,
   resolvePageTranslationProviderOrNull,
 } from "@/utils/providers/provider-ref"
@@ -227,10 +222,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
 
     const requestedProviderConfig = resolvePageTranslationProviderOrNull(config)
-    const providerAnalytics =
-      requestedProviderConfig && isSystemProviderRef(requestedProviderConfig)
-        ? BUILT_IN_AI_FEATURE_PROVIDER
-        : classifyProviderConfig(requestedProviderConfig)
+    const providerAnalytics = classifyResolvedProvider(requestedProviderConfig)
 
     if (
       !validateTranslationConfigAndToast({
@@ -307,15 +299,15 @@ export class PageTranslationManager implements IPageTranslationManager {
         void ensureSiteRuleCSS(document, siteRule.injectedCss)
       }
 
-      // Must match the predicate `getWebPagePromptContext` uses to decide
-      // whether it needs the context at all. Excluding system providers was
-      // right while hosted runs sent no context; now that they do, skipping the
-      // warm-up only moves the Defuddle full-document parse out of setup and
-      // into the first translation call, where it blocks the first visible
-      // paragraph and janks the main thread on a long page.
+      // Same predicate `getWebPagePromptContext` uses to decide whether it
+      // needs the context at all. Excluding system providers was right while
+      // hosted runs sent no context; now that they do, skipping the warm-up
+      // only moves the Defuddle full-document parse out of setup and into the
+      // first translation call, where it blocks the first visible paragraph
+      // and janks the main thread on a long page.
       await this.primeDocumentTitleContext(
         config.pageTranslation.enableAIContentAware &&
-          (isSystemProviderRef(providerConfig) || isLLMProviderConfig(providerConfig)),
+          canResolvedProviderRefGenerateText(providerConfig),
       )
       if (this.translationSessionVersion !== sessionVersion) {
         return

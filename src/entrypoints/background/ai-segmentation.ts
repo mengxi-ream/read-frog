@@ -1,10 +1,13 @@
-import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
+import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
 import { logger } from "@/utils/logger"
 import { getSubtitlesSegmentationPrompt } from "@/utils/prompts/subtitles-segmentation"
-import { getProviderCacheIdentity } from "@/utils/providers/provider-ref"
+import {
+  canProviderRefGenerateText,
+  getProviderCacheIdentity,
+} from "@/utils/providers/provider-ref"
 import { parseSimplifiedVttToFragments } from "@/utils/subtitles/processor/ai-segmentation"
 import { generateTextForProviderRef } from "./background-stream"
 
@@ -14,7 +17,7 @@ const THINK_TAG_RE = /<\/think>([\s\S]*)/
 
 interface AiSegmentSubtitlesData {
   jsonContent: string
-  providerRef: SerializableProviderRef
+  providerRef: PromptableProviderRef
 }
 
 /**
@@ -46,6 +49,14 @@ export async function runAiSegmentSubtitles(data: AiSegmentSubtitlesData): Promi
 
   if (!jsonContent) {
     throw new Error("jsonContent is required for AI segmentation")
+  }
+
+  // The payload type forces senders to narrow, but the wire is a trust
+  // boundary (a pre-update content script can send a translate-only ref).
+  // Refuse before the cache reads: the ref could only throw deeper anyway,
+  // after a doomed generation attempt.
+  if (!canProviderRefGenerateText(providerRef)) {
+    throw new Error(`Provider cannot generate text; AI segmentation needs a promptable model`)
   }
 
   // The ref is resolved on the content side, where a session already holds one:

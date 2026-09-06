@@ -1,9 +1,9 @@
 import type { ComponentType, ReactNode } from "react"
 import { IconFileTextAi } from "@tabler/icons-react"
 import { i18n } from "@/utils/i18n"
-import { PlaceholderSection } from "./placeholder"
+import { SummarySection } from "./summary"
 
-export type SectionId = "placeholder"
+export type SectionId = "summary"
 
 export interface SectionConfig {
   id: SectionId
@@ -16,10 +16,10 @@ export interface SectionConfig {
 
 export const SECTIONS: SectionConfig[] = [
   {
-    id: "placeholder",
-    title: () => i18n.t("subtitles.sidebar.placeholder.tab"),
+    id: "summary",
+    title: () => i18n.t("subtitles.sidebar.menu.label"),
     icon: <IconFileTextAi className="size-4" />,
-    component: PlaceholderSection,
+    component: SummarySection,
   },
 ]
 

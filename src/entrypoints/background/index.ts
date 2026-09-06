@@ -30,12 +30,14 @@ import { setupLLMGenerateTextMessageHandlers } from "./llm-generate-text"
 import { initMockData } from "./mock-data"
 import { newUserGuide } from "./new-user-guide"
 import { setupNotebasePendingSaveProcessor } from "./notebase-pending-save"
+import { setupPageTranslationHandlers } from "./page-translation"
 import { proxyFetch } from "./proxy-fetch"
 import { setupSidePanelMessageHandler } from "./side-panel"
-import { setUpSubtitlesTranslationQueue, setUpWebPageTranslationQueue } from "./translation-queues"
+import { setupSubtitlesTranslationHandlers } from "./subtitles-translation"
 import { translationMessage } from "./translation-signal"
 import { setupTTSPlaybackMessageHandlers } from "./tts-playback"
 import { setupUninstallSurvey } from "./uninstall-survey"
+import { setupVideoSummaryHandlers } from "./video-summary"
 
 export default defineBackground({
   type: "module",
@@ -121,10 +123,11 @@ export default defineBackground({
     // Initialize action icons asynchronously
     void initializeActionIcons()
 
-    // Synchronous: all queue message handlers register in the first turn of
+    // Synchronous: all translation and summary handlers register in the first turn of
     // the SW so wake-triggering messages are never dropped during init.
-    setUpWebPageTranslationQueue()
-    setUpSubtitlesTranslationQueue()
+    setupPageTranslationHandlers()
+    setupSubtitlesTranslationHandlers()
+    setupVideoSummaryHandlers()
     void setUpDatabaseCleanup()
     setUpConfigBackup()
 

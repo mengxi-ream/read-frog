@@ -59,6 +59,9 @@ export const POT_WAIT_INTERVAL_MS = 200
 export const MAX_SELECTED_TRACK_WAIT_ATTEMPTS = 8
 export const SELECTED_TRACK_WAIT_INTERVAL_MS = 100
 
+// Video summary constants
+export const VIDEO_SUMMARY_TRANSCRIPT_CHAR_BUDGET = 24_000
+
 // Subtitle style constants
 export const MIN_FONT_SCALE = 30
 export const MAX_FONT_SCALE = 150

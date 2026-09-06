@@ -13,6 +13,9 @@ export const subtitlesStore = createStore()
 
 export const currentTimeMsAtom = atom<number>(0)
 
+/** Keys the summary; null pauses it while navigation clears the previous source. */
+export const currentVideoIdAtom = atom<string | null>(null)
+
 /**
  * True while the host player is playing an ad (e.g. YouTube mid-roll).
  * Suppresses overlay content so main-video captions are not shown over ads.
@@ -56,6 +59,8 @@ export const subtitlesSettingsPanelOpenAtom = atom<boolean>(false)
 export const subtitlesSettingsPanelViewAtom = atom<ViewId>(ROOT_VIEW)
 
 export const subtitlesSidebarOpenAtom = atom<boolean>(false)
+
+export const videoSummaryPartialAtom = atom<string>("")
 
 export const subtitlesSidebarActiveSectionAtom = atom<SectionId>(DEFAULT_SECTION_ID)
 

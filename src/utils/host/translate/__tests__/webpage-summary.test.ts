@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
 
-import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
+import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 import { describe, expect, it, vi } from "vitest"
 
 vi.mock("@/utils/message", () => ({
   sendMessage: vi.fn<(...args: any[]) => any>(),
 }))
 
-const localRef: SerializableProviderRef = {
+const localRef: PromptableProviderRef = {
   kind: "local",
   config: {
     id: "openai-default",
@@ -19,7 +19,7 @@ const localRef: SerializableProviderRef = {
   } as never,
 }
 
-const hostedRef: SerializableProviderRef = {
+const hostedRef: PromptableProviderRef = {
   kind: "system",
   providerId: "read-frog-advance-ai",
   modelTier: "advance",

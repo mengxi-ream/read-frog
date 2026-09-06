@@ -1,9 +1,11 @@
 import type { LangCodeISO6393, LangLevel } from "@read-frog/definitions"
 import type { HostedAiTextStreamRoute } from "@/types/background-stream"
 import type { Config } from "@/types/config/config"
+import type { LLMProviderConfig, TranslateProviderConfig } from "@/types/config/provider"
 import type { TranslationTextFormat } from "@/types/config/translate"
 import type { WebPagePromptContext } from "@/types/content"
-import type { SerializableProviderRef, UnwrappedProviderRef } from "@/utils/providers/provider-ref"
+import type { PromptableProviderRef, SerializableProviderRef } from "@/utils/providers/provider-ref"
+import type { ResolvedProviderRef } from "@/utils/providers/provider-registry"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
@@ -12,7 +14,7 @@ import { detectLanguage } from "@/utils/content/language"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
-import { isSystemProviderRef, serializeProviderRef } from "@/utils/providers/provider-ref"
+import { serializeProviderRef } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { TranslationCancelledError } from "@/utils/request/cancellation"
 import { Sha256Hex } from "../../hash"
@@ -171,8 +173,10 @@ async function buildWebPageHashComponents(
  * on one status snapshot: no per-paragraph status fetches, and a mid-session
  * status blip cannot fail in-flight paragraphs.
  */
-function getSessionProviderRefFor(provider: UnwrappedProviderRef): SerializableProviderRef | null {
-  if (!isSystemProviderRef(provider)) {
+function getSessionProviderRefFor(
+  provider: ResolvedProviderRef<TranslateProviderConfig>,
+): SerializableProviderRef | null {
+  if (provider.kind !== "system") {
     return null
   }
   const sessionRef = getPageTranslationSessionProviderRef()
@@ -207,11 +211,21 @@ let lastRequestedSystemKey: string | null = null
  * later paragraphs skip the network entirely.
  */
 export async function resolvePageProviderRef(
-  provider: UnwrappedProviderRef,
+  provider: ResolvedProviderRef<LLMProviderConfig>,
+  sessionId: string | undefined,
+  feature: HostedAiTextStreamRoute,
+): Promise<PromptableProviderRef>
+export async function resolvePageProviderRef(
+  provider: ResolvedProviderRef<TranslateProviderConfig>,
+  sessionId: string | undefined,
+  feature: HostedAiTextStreamRoute,
+): Promise<SerializableProviderRef>
+export async function resolvePageProviderRef(
+  provider: ResolvedProviderRef<TranslateProviderConfig>,
   sessionId: string | undefined,
   feature: HostedAiTextStreamRoute,
 ): Promise<SerializableProviderRef> {
-  if (!isSystemProviderRef(provider)) {
+  if (provider.kind === "local") {
     return serializeProviderRef(provider, feature)
   }
 
@@ -260,7 +274,7 @@ export interface TranslateTextOptions {
     targetCode: LangCodeISO6393
     level: LangLevel
   }
-  providerConfig: UnwrappedProviderRef
+  providerConfig: ResolvedProviderRef<TranslateProviderConfig>
   enableAIContentAware?: boolean
   extraHashTags?: string[]
   webPageContext?: WebPagePromptContext

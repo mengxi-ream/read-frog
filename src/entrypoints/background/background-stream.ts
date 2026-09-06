@@ -16,10 +16,11 @@ import type {
   StreamPortHandler,
   StreamPortRequestMessage,
   StreamPortResponse,
-  StreamPortResponseWithoutRequestId,
+  StreamPortResponseWithoutStreamRequestId,
   StreamRuntimeOptions,
   ThinkingSnapshot,
 } from "@/types/background-stream"
+import type { TranslateProviderConfig } from "@/types/config/provider"
 import {
   HostedAiNoteSuggestionObjectSchema,
   HostedAiNoteSuggestionStreamInputSchema,
@@ -31,9 +32,11 @@ import {
 import { generateText, Output, parsePartialJson, streamText } from "ai"
 import { z } from "zod"
 import { BACKGROUND_STREAM_PORTS } from "@/types/background-stream"
-import { isLLMProviderConfig } from "@/types/config/provider"
+import { isLLMProviderConfig, llmProviderConfigItemSchema } from "@/types/config/provider"
 import { createStructuredObjectSchema } from "@/utils/ai/structured-object-schema"
+import { BUILT_IN_AI_PROVIDER_IDS } from "@/utils/constants/provider-ids"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
+import { hostedTextStreamRouteSchema, requireHostedFeature } from "@/utils/hosted-ai/routing"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { noteSuggestionEnvelopeSchema } from "@/utils/note-suggestion/types"
@@ -69,15 +72,34 @@ function isAbortLikeError(error: unknown) {
 
 const streamPortStartEnvelopeSchema = z.object({
   type: z.literal("start"),
-  requestId: z.string().trim().min(1),
+  streamRequestId: z.string().trim().min(1),
   payload: z.unknown(),
 })
 
-const streamTextPayloadSchema = z
-  .object({
-    providerId: z.string().trim().min(1),
-  })
-  .loose()
+const baseStreamPayloadSchema = z.object({ providerId: z.string().trim().min(1) }).loose()
+
+const streamTextPayloadSchema = z.discriminatedUnion("providerKind", [
+  baseStreamPayloadSchema
+    .extend({
+      providerKind: z.literal("local"),
+      providerId: z
+        .string()
+        .trim()
+        .min(1)
+        .refine((id) => !isBuiltInAiProviderId(id)),
+      providerConfig: llmProviderConfigItemSchema.optional(),
+      hostedFeature: z.never().optional(),
+    })
+    .refine(
+      ({ providerId, providerConfig }) => !providerConfig || providerConfig.id === providerId,
+    ),
+  baseStreamPayloadSchema.extend({
+    providerKind: z.literal("system"),
+    providerId: z.enum(BUILT_IN_AI_PROVIDER_IDS),
+    providerConfig: z.never().optional(),
+    hostedFeature: hostedTextStreamRouteSchema,
+  }),
+])
 
 // Transport-level check for BOTH provider kinds, so only the enum comes from
 // the contract; hosted-only constraints (name length, field count) are applied
@@ -120,7 +142,7 @@ function createStartMessageParser<TSerializablePayload>(payloadSchema: z.ZodType
     if (!payloadResult.success) {
       return {
         success: false,
-        requestId: envelopeResult.data.requestId,
+        streamRequestId: envelopeResult.data.streamRequestId,
       }
     }
 
@@ -128,7 +150,7 @@ function createStartMessageParser<TSerializablePayload>(payloadSchema: z.ZodType
       success: true,
       message: {
         type: "start",
-        requestId: envelopeResult.data.requestId,
+        streamRequestId: envelopeResult.data.streamRequestId,
         payload: payloadResult.data as TSerializablePayload,
       },
     }
@@ -146,18 +168,18 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
     const abortController = new AbortController()
     let isActive = true
     let hasStarted = false
-    let requestId: string | undefined
+    let streamRequestId: string | undefined
     let messageListener: ((rawMessage: unknown) => void) | undefined
     let disconnectListener: (() => void) | undefined
 
-    const safePost = (response: StreamPortResponseWithoutRequestId<TResponse>) => {
-      if (!isActive || abortController.signal.aborted || !requestId) {
+    const safePost = (response: StreamPortResponseWithoutStreamRequestId<TResponse>) => {
+      if (!isActive || abortController.signal.aborted || !streamRequestId) {
         return
       }
       try {
         const message: StreamPortResponse<TResponse> = {
           ...response,
-          requestId,
+          streamRequestId,
         }
         port.postMessage(message)
       } catch (error) {
@@ -197,8 +219,8 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
 
       const parseResult = startMessageParser(rawMessage)
       if (!parseResult.success) {
-        if (parseResult.requestId) {
-          requestId = parseResult.requestId
+        if (parseResult.streamRequestId) {
+          streamRequestId = parseResult.streamRequestId
           safePost({
             type: "error",
             error: { message: invalidStreamStartPayloadMessage },
@@ -216,7 +238,7 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
       }
 
       const startMessage = parseResult.message
-      requestId = startMessage.requestId
+      streamRequestId = startMessage.streamRequestId
       hasStarted = true
       let streamError: unknown
 
@@ -631,15 +653,23 @@ async function consumeStructuredObjectPartStream<TOutput extends Record<string, 
 }
 
 async function createLocalTextPartStream(
-  serializablePayload: BackgroundStreamTextSerializablePayload,
+  serializablePayload: Extract<BackgroundStreamTextSerializablePayload, { providerKind: "local" }>,
   options: StreamRuntimeOptions<BackgroundTextStreamSnapshot> = {},
 ): Promise<AsyncIterable<unknown>> {
-  const { providerId, ...streamTextParams } = serializablePayload
+  const {
+    providerKind: _providerKind,
+    providerId,
+    providerConfig,
+    ...streamTextParams
+  } = serializablePayload
   const { signal, onError } = options
 
-  const model = await getModelById(providerId)
+  const model = providerConfig
+    ? getLanguageModelForConfig(providerConfig)
+    : await getModelById(providerId)
   const result = streamText({
     ...(streamTextParams as Parameters<typeof streamText>[0]),
+    ...(providerConfig ? buildLocalGenerateTextParams(providerConfig) : {}),
     model,
     abortSignal: signal,
     onError: ({ error }) => {
@@ -653,9 +683,8 @@ async function createLocalTextPartStream(
 /**
  * One oRPC procedure per hosted text feature: the server derives the billing
  * feature from the route path, so the payload's `hostedFeature` never rides
- * the wire — it only selects which procedure to call. Absent means page
- * translation, the sole caller before the field existed. Resolved lazily so
- * importing this module never touches the client proxy.
+ * the wire — it explicitly selects which procedure to call. Resolved lazily
+ * so importing this module never touches the client proxy.
  */
 const HOSTED_TEXT_STREAM_PROCEDURES: Record<HostedAiTextStreamRoute, () => HostedStreamFn> = {
   pageTranslation: () =>
@@ -675,7 +704,7 @@ const HOSTED_TEXT_STREAM_PROCEDURES: Record<HostedAiTextStreamRoute, () => Hoste
 }
 
 async function createHostedTextPartStream(
-  serializablePayload: BackgroundStreamTextSerializablePayload,
+  serializablePayload: Extract<BackgroundStreamTextSerializablePayload, { providerKind: "system" }>,
   signal?: AbortSignal,
 ): Promise<AsyncIterable<unknown>> {
   const { prompt, instructions, temperature, modelTier, requestId, hostedFeature } =
@@ -694,7 +723,7 @@ async function createHostedTextPartStream(
     throw new BackgroundStreamError("invalid_request", "Invalid hosted AI request")
   }
 
-  const procedure = HOSTED_TEXT_STREAM_PROCEDURES[hostedFeature ?? "pageTranslation"]()
+  const procedure = HOSTED_TEXT_STREAM_PROCEDURES[requireHostedFeature(hostedFeature)]()
   try {
     const stream = await procedure(input.data, { signal })
     return normalizeHostedPartStreamErrors(stream)
@@ -732,10 +761,11 @@ export async function generateTextForProviderRef(
   if (providerRef.kind === "system") {
     const partStream = await createHostedTextPartStream(
       {
+        providerKind: "system",
         providerId: providerRef.providerId,
         modelTier: providerRef.modelTier,
         requestId,
-        hostedFeature,
+        hostedFeature: requireHostedFeature(hostedFeature),
         instructions,
         prompt,
       },
@@ -746,12 +776,14 @@ export async function generateTextForProviderRef(
   }
 
   // Local text generation needs a real LLM: pure translate providers (DeepLX,
-  // Google, Microsoft) have no model to prompt. Callers already pick an
-  // LLM-capable provider, so this is a guard, not a branch.
-  if (!isLLMProviderConfig(providerRef.config)) {
+  // Google, Microsoft) have no model to prompt. The payload type already says
+  // LLM, but the wire is a trust boundary — a pre-update content script can
+  // still send a translate-only ref — so re-widen and check for real.
+  const localConfig = providerRef.config as TranslateProviderConfig
+  if (!isLLMProviderConfig(localConfig)) {
     throw new BackgroundStreamError(
       "invalid_request",
-      `Provider "${providerRef.config.id}" cannot generate text`,
+      `Provider "${localConfig.id}" cannot generate text`,
     )
   }
 
@@ -785,9 +817,10 @@ export async function runStreamTextInBackground(
     throw new DOMException("stream aborted", "AbortError")
   }
 
-  const partStream = isBuiltInAiProviderId(serializablePayload.providerId)
-    ? await createHostedTextPartStream(serializablePayload, signal)
-    : await createLocalTextPartStream(serializablePayload, options)
+  const partStream =
+    serializablePayload.providerKind === "system"
+      ? await createHostedTextPartStream(serializablePayload, signal)
+      : await createLocalTextPartStream(serializablePayload, options)
 
   return consumeTextPartStream(partStream, {
     onChunk,
@@ -796,7 +829,7 @@ export async function runStreamTextInBackground(
 }
 
 async function createLocalStructuredObjectPartStream<TOutput extends Record<string, unknown>>(
-  serializablePayload: BackgroundStreamTextSerializablePayload & {
+  serializablePayload: BackgroundStreamNoteSuggestionSerializablePayload & {
     outputSchema?: BackgroundStructuredObjectOutputField[]
   },
   objectSchema: z.ZodType<TOutput>,
@@ -965,7 +998,7 @@ const parseStructuredObjectStartMessage =
   )
 const parseNoteSuggestionStartMessage =
   createStartMessageParser<BackgroundStreamNoteSuggestionSerializablePayload>(
-    streamTextPayloadSchema,
+    baseStreamPayloadSchema,
   )
 
 export const handleStreamTextPort = createStreamPortHandler<
