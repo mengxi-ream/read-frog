@@ -56,7 +56,7 @@ function PanelContent({
     <div
       ref={panelRef}
       data-slot="subtitles-settings-panel"
-      className="pointer-events-auto relative isolate z-40 flex w-[min(19rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[20px] border border-border bg-popover text-popover-foreground shadow-floating backdrop-blur-2xl"
+      className="pointer-events-auto relative isolate z-40 flex w-[min(19rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[20px] border border-border bg-popover text-popover-foreground shadow-(--rf-elevation-floating) backdrop-blur-2xl"
       style={{ maxHeight }}
     >
       <Activity mode={header ? "visible" : "hidden"}>
