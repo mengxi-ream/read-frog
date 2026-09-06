@@ -1,9 +1,10 @@
 import type { ComponentType, ReactNode } from "react"
-import { IconFileTextAi } from "@tabler/icons-react"
+import { IconFileText, IconFileTextAi } from "@tabler/icons-react"
 import { i18n } from "@/utils/i18n"
 import { SummarySection } from "./summary"
+import { TranscriptSection } from "./transcript"
 
-export type SectionId = "summary"
+export type SectionId = "transcript" | "summary"
 
 export interface SectionConfig {
   id: SectionId
@@ -16,8 +17,14 @@ export interface SectionConfig {
 
 export const SECTIONS: SectionConfig[] = [
   {
+    id: "transcript",
+    title: () => i18n.t("subtitles.sidebar.transcript.tab"),
+    icon: <IconFileText className="size-4" />,
+    component: TranscriptSection,
+  },
+  {
     id: "summary",
-    title: () => i18n.t("subtitles.sidebar.menu.label"),
+    title: () => i18n.t("subtitles.sidebar.summary.tab"),
     icon: <IconFileTextAi className="size-4" />,
     component: SummarySection,
   },

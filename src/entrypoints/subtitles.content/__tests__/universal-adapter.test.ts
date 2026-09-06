@@ -7,6 +7,7 @@ import {
   sourceTrackAtom,
   subtitlesSourceAtom,
   subtitlesStore,
+  translatedTrackAtom,
 } from "../atoms"
 import { TranslationCoordinator } from "../translation-coordinator"
 import { UniversalVideoAdapter } from "../universal-adapter"
@@ -89,6 +90,7 @@ describe("universalVideoAdapter", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     subtitlesStore.set(sourceTrackAtom, [])
+    subtitlesStore.set(translatedTrackAtom, [])
     subtitlesStore.set(currentTimeMsAtom, 0)
     vi.stubGlobal("document", {
       title: "Test video",
@@ -527,6 +529,19 @@ describe("universalVideoAdapter", () => {
     expect(subtitlesStore.get(currentTimeMsAtom)).toBe(42_500)
 
     startSpy.mockRestore()
+  })
+
+  it("drops stale translations when an inactive track is refreshed", async () => {
+    const { adapter } = createAdapter([{ text: "hello", start: 0, end: 500 }])
+    attachScheduler(adapter, false)
+    subtitlesStore.set(sourceTrackAtom, [{ text: "old", start: 0, end: 500 }])
+    subtitlesStore.set(translatedTrackAtom, [
+      { text: "old", start: 0, end: 500, translation: "旧" },
+    ])
+
+    await adapter.handleSourceTrackChanged()
+
+    expect(subtitlesStore.get(translatedTrackAtom)).toEqual([])
   })
 
   it("replaceSourceTrackWindow drops cues that overlap the window by interval", () => {

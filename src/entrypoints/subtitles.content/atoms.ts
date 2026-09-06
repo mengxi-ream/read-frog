@@ -29,6 +29,10 @@ export const currentSubtitleAtom = atom<SubtitlesFragment | null>(null)
 /** Best original track (baseline or AI-segmented). Read-only for display/coordinator consumers. */
 export const sourceTrackAtom = atom<SubtitlesFragment[]>([])
 
+/** The scheduler's translated cues, for consumers that need the whole track
+ * rather than whichever one covers now. */
+export const translatedTrackAtom = atom<SubtitlesFragment[]>([])
+
 /**
  * Display cue: prefer a translated scheduler cue; otherwise fall back to the source track
  * at the current time (used for original / pending bilingual UI).
