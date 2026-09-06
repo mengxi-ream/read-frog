@@ -1,4 +1,4 @@
-import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
+import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { PROCESS_LOOK_AHEAD_MS } from "@/utils/constants/subtitles"
 import { effectiveLookAheadMs } from "@/utils/subtitles/lookahead"
@@ -25,20 +25,22 @@ export class SegmentationPipeline {
   private preSegmented: boolean
   private onChunkSegmented: ChunkSegmentedHandler | null
   /**
-   * Resolved once per session by the adapter, so segmentation does not pay a
-   * hostedAi.status round trip per block. Null means AI segmentation cannot
-   * run (no provider, or the hosted tier was unavailable when the session
+   * Resolved once per session by the adapter and narrowed to a promptable
+   * ref, so segmentation neither pays a hostedAi.status round trip per block
+   * nor sends a translate-only provider on a doomed generation per chunk.
+   * Null means AI segmentation cannot run (no provider, the provider has no
+   * model to prompt, or the hosted tier was unavailable when the session
    * started); chunks then fall back to rule-based optimization until a new
    * session resolves a fresh ref.
    */
-  private providerRef: SerializableProviderRef | null
+  private providerRef: PromptableProviderRef | null
 
   constructor(options: {
     baselineFragments?: SubtitlesFragment[]
     rawFragments: SubtitlesFragment[]
     getVideoElement: () => HTMLVideoElement | null
     getSourceLanguage: () => string
-    providerRef: SerializableProviderRef | null
+    providerRef: PromptableProviderRef | null
     preSegmented?: boolean
     onChunkSegmented?: ChunkSegmentedHandler
   }) {

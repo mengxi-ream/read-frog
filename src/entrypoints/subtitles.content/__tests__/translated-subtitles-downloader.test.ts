@@ -127,7 +127,12 @@ describe("translatedSubtitlesDownloader", () => {
     unsubscribe()
 
     expect(mocks.getLocalConfig).toHaveBeenCalledTimes(1)
-    expect(mocks.fetchSubtitlesSummary).toHaveBeenCalledWith(expect.any(Object), config)
+    // The summary reuses the export's narrowed session ref instead of
+    // re-resolving one of its own.
+    expect(mocks.fetchSubtitlesSummary).toHaveBeenCalledWith(expect.any(Object), config, {
+      kind: "local",
+      config: DEFAULT_PROVIDER_CONFIG.openai,
+    })
     expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(
       1,
       fragments.slice(0, 5),
@@ -356,6 +361,40 @@ describe("translatedSubtitlesDownloader", () => {
         subtitles: [{ text: "zh:Hello. World.", start: 0, end: 2000 }],
       }),
     )
+  })
+
+  it("never sends a translate-only provider on a doomed segmentation prompt", async () => {
+    // Google resolves fine for videoSubtitles — the capability gate is the
+    // wider translate one — but it has no model to prompt, so the export must
+    // take the rule-based path without one aiSegmentBlock round trip per chunk.
+    mocks.getLocalConfig.mockResolvedValue(createConfig({ aiSegmentation: true }))
+    mocks.resolveSubtitlesProviderRef.mockResolvedValue({
+      kind: "local",
+      config: DEFAULT_PROVIDER_CONFIG["google-translate"],
+    })
+
+    await createDownloader(
+      [
+        { text: "Hello.", start: 0, end: 1000 },
+        { text: "World.", start: 1000, end: 2000 },
+      ],
+      false,
+    ).downloader.download()
+
+    expect(mocks.aiSegmentBlock).not.toHaveBeenCalled()
+    // The summary is a generation too: the downloader hands it a null session
+    // ref rather than letting it re-resolve the unpromptable provider.
+    expect(mocks.fetchSubtitlesSummary).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.any(Object),
+      null,
+    )
+    expect(mocks.downloadSubtitlesAsSrt).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subtitles: [{ text: "zh:Hello. World.", start: 0, end: 2000 }],
+      }),
+    )
+    expect(status().phase).toBe(TranslatedDownloadPhase.Complete)
   })
 
   it("retries unsafe AI segmentation with smaller chunks before falling back", async () => {

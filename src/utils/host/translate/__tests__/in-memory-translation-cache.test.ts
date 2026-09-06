@@ -9,10 +9,15 @@ vi.mock("@/utils/message", () => ({
 // Non-LLM provider so hash building stays prompt-free and the pipeline needs
 // no config storage; the memory tier itself is provider-agnostic.
 const googleProviderConfig = {
+  kind: "local" as const,
   id: "google-translate-default",
-  enabled: true,
   name: "Google Translate",
-  provider: "google-translate" as const,
+  config: {
+    id: "google-translate-default",
+    enabled: true,
+    name: "Google Translate",
+    provider: "google-translate" as const,
+  },
 } as never
 
 const langConfig = {

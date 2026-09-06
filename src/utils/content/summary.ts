@@ -1,5 +1,6 @@
-import type { HostedAiTextStreamRoute } from "@/types/background-stream"
-import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
+import type { BackgroundGenerateTextPayload } from "@/types/background-generate-text"
+import type { ProviderRequestRouting } from "@/types/hosted-request"
+import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 import { logger } from "@/utils/logger"
 import { getArticleSummaryPrompt } from "@/utils/prompts/summary"
 import { MAX_TEXT_LENGTH } from "./utils"
@@ -19,17 +20,11 @@ const MAX_TITLE_LENGTH = 200
 export async function generateArticleSummary(
   title: string,
   textContent: string,
-  providerRef: SerializableProviderRef,
+  routing: ProviderRequestRouting<PromptableProviderRef>,
   options: {
-    hostedFeature: HostedAiTextStreamRoute
     signal?: AbortSignal
     generate: (
-      payload: {
-        providerRef: SerializableProviderRef
-        hostedFeature: HostedAiTextStreamRoute
-        instructions: string
-        prompt: string
-      },
+      payload: BackgroundGenerateTextPayload,
       runOptions: { signal?: AbortSignal },
     ) => Promise<string>
   },
@@ -46,15 +41,16 @@ export async function generateArticleSummary(
       preparedText,
     )
 
-    const summary = await options.generate(
-      {
-        providerRef,
-        hostedFeature: options.hostedFeature,
-        instructions: systemPrompt,
-        prompt,
-      },
-      { signal: options.signal },
-    )
+    const payload: BackgroundGenerateTextPayload =
+      routing.hostedFeature === undefined
+        ? { providerRef: routing.providerRef, instructions: systemPrompt, prompt }
+        : {
+            providerRef: routing.providerRef,
+            hostedFeature: routing.hostedFeature,
+            instructions: systemPrompt,
+            prompt,
+          }
+    const summary = await options.generate(payload, { signal: options.signal })
 
     const cleanedSummary = summary.trim()
     logger.info("Generated article summary:", `${cleanedSummary.slice(0, 100)}...`)

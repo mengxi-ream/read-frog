@@ -1288,6 +1288,17 @@ thinking:
 shortcutKeySelector:
   placeholder: 請輸入快速鍵
 subtitles:
+  sidebar:
+    close: 關閉 AI 總結
+    menu:
+      label: AI 總結
+    summary:
+      generating: 正在產生總結…
+      failedTitle: 產生失敗
+      retry: 重試
+      needsModel: 請先為影片字幕選擇一個 LLM 模型，才能總結這部影片。
+      openSettings: 前往設定
+      needsSubtitles: 這部影片沒有字幕，建議先使用 AI 產生字幕。
   loadingAiSubtitles: 正在載入 AI 字幕（預計 3 分鐘）
   aiSubtitlesHint: 透過先進 AI 辨識語音生成準確字幕，無官方字幕時依然可用。
   requestAiSubtitles: 請求 AI 字幕

@@ -25,6 +25,8 @@ export interface PlatformConfig {
 
   controls?: ControlsConfig
 
+  supportsSidebar?: boolean
+
   getVideoId?: () => string | null
 
   createAiSubtitlesContext?: () => AiSubtitlesContext | null

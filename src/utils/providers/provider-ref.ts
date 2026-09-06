@@ -1,7 +1,7 @@
-import type { SystemProviderRef } from "./provider-registry"
+import type { ResolvedProviderRef, SystemProviderRef } from "./provider-registry"
 import type { HostedAiTextStreamRoute } from "@/types/background-stream"
 import type { Config } from "@/types/config/config"
-import type { TranslateProviderConfig } from "@/types/config/provider"
+import type { LLMProviderConfig, TranslateProviderConfig } from "@/types/config/provider"
 import type { HostedAiFeature, HostedAiStatus } from "@/utils/hosted-ai/types"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import {
@@ -11,20 +11,6 @@ import {
 } from "@/utils/hosted-ai/status"
 import { sendMessage } from "@/utils/message"
 import { resolveProviderRefForCapability } from "./provider-registry"
-
-/**
- * A resolved provider with the local wrapper stripped — either the local
- * config itself or the system ref. Callers unwrap `ResolvedProviderRef` into
- * this because most of them go on to inspect the config directly (`provider
- * !== "deeplx"`, `isLLMProviderConfig`) rather than the ref around it.
- *
- * `TranslateProviderConfig` is the wider of the registry's two capability
- * predicates (`LLMProviderConfig` is a subset of it), so every feature that
- * serializes a ref fits here, including the LLM-only ones. This type therefore
- * does not constrain which provider may run which feature — callers do, by
- * resolving through `resolveProviderRefForCapability` first.
- */
-export type UnwrappedProviderRef = TranslateProviderConfig | SystemProviderRef
 
 /**
  * A provider flattened for structured-clone transport to the background. Local
@@ -41,6 +27,21 @@ export type SerializableProviderRef =
       modelRevision: string
     }
 
+/**
+ * A ref that can be prompted for free-form text. Structural, not branded:
+ * `LLMProviderConfig` is a real subtype of `TranslateProviderConfig`, so this
+ * stays assignable to `SerializableProviderRef` — caches, transport and
+ * `getProviderCacheIdentity` see no difference.
+ *
+ * Message payloads that prompt a model require this type, which turns
+ * "forgot the promptability check" from a silent per-request failure into a
+ * compile error at the sender: the only way to produce one is
+ * `canProviderRefGenerateText` or a resolution that applied it.
+ */
+export type PromptableProviderRef =
+  | { kind: "local"; config: LLMProviderConfig }
+  | Extract<SerializableProviderRef, { kind: "system" }>
+
 export class HostedAiProviderUnavailableError extends Error {
   constructor(
     readonly provider: SystemProviderRef,
@@ -51,7 +52,9 @@ export class HostedAiProviderUnavailableError extends Error {
   }
 }
 
-export function resolvePageTranslationProvider(config: Config): UnwrappedProviderRef {
+export function resolvePageTranslationProvider(
+  config: Config,
+): ResolvedProviderRef<TranslateProviderConfig> {
   const resolved = resolveProviderRefForCapability(
     "pageTranslation",
     config.providersConfig,
@@ -60,19 +63,17 @@ export function resolvePageTranslationProvider(config: Config): UnwrappedProvide
   if (!resolved) {
     throw new Error(`No page translation provider for id "${config.pageTranslation.providerId}"`)
   }
-  return resolved.kind === "local" ? resolved.config : resolved
+  return resolved
 }
 
-export function resolvePageTranslationProviderOrNull(config: Config): UnwrappedProviderRef | null {
+export function resolvePageTranslationProviderOrNull(
+  config: Config,
+): ResolvedProviderRef<TranslateProviderConfig> | null {
   try {
     return resolvePageTranslationProvider(config)
   } catch {
     return null
   }
-}
-
-export function isSystemProviderRef(provider: UnwrappedProviderRef): provider is SystemProviderRef {
-  return "kind" in provider && provider.kind === "system"
 }
 
 /**
@@ -107,7 +108,20 @@ export function getProviderCacheIdentity(ref: SerializableProviderRef): string {
  * provider is admitted to the queue and can only ever throw, after burning its
  * retries.
  */
-export function canProviderRefGenerateText(ref: SerializableProviderRef): boolean {
+export function canProviderRefGenerateText(
+  ref: SerializableProviderRef,
+): ref is PromptableProviderRef {
+  return ref.kind === "system" || isLLMProviderConfig(ref.config)
+}
+
+/**
+ * Pre-serialization twin of `canProviderRefGenerateText`: the same
+ * promptability question, asked of the registry's resolved ref before a
+ * hostedAi.status fetch is spent on it. Keep the pair in sync.
+ */
+export function canResolvedProviderRefGenerateText(
+  ref: ResolvedProviderRef,
+): ref is ResolvedProviderRef<LLMProviderConfig> {
   return ref.kind === "system" || isLLMProviderConfig(ref.config)
 }
 
@@ -170,14 +184,26 @@ export function fetchHostedAiStatus(): Promise<HostedAiStatus | undefined> {
  * decides which tier status gates the call, so it must be the feature the
  * caller actually runs — passing `pageTranslation` for a subtitle run would
  * gate on the wrong quota.
+ *
+ * The first overload preserves promptability through serialization: a caller
+ * that already holds a promptable resolved ref gets a `PromptableProviderRef`
+ * back without a runtime re-check.
  */
 export async function serializeProviderRef(
-  provider: UnwrappedProviderRef,
+  provider: ResolvedProviderRef<LLMProviderConfig>,
+  route: HostedAiTextStreamRoute,
+): Promise<PromptableProviderRef>
+export async function serializeProviderRef(
+  provider: ResolvedProviderRef<TranslateProviderConfig>,
+  route: HostedAiTextStreamRoute,
+): Promise<SerializableProviderRef>
+export async function serializeProviderRef(
+  provider: ResolvedProviderRef<TranslateProviderConfig>,
   route: HostedAiTextStreamRoute,
 ): Promise<SerializableProviderRef> {
   const feature = getHostedFeatureForRoute(route)
-  if (!isSystemProviderRef(provider)) {
-    return { kind: "local", config: provider }
+  if (provider.kind === "local") {
+    return { kind: "local", config: provider.config }
   }
 
   const status = await fetchHostedAiStatus()
@@ -200,12 +226,20 @@ export async function serializeProviderRef(
   }
 }
 
-export type ProviderAvailability =
-  | { available: true; providerRef: SerializableProviderRef }
+export type ProviderAvailability<Ref extends SerializableProviderRef = SerializableProviderRef> =
+  | { available: true; providerRef: Ref }
   | { available: false; message: string }
 
 export async function checkProviderAvailability(
-  provider: UnwrappedProviderRef,
+  provider: ResolvedProviderRef<LLMProviderConfig>,
+  route: HostedAiTextStreamRoute,
+): Promise<ProviderAvailability<PromptableProviderRef>>
+export async function checkProviderAvailability(
+  provider: ResolvedProviderRef<TranslateProviderConfig>,
+  route: HostedAiTextStreamRoute,
+): Promise<ProviderAvailability>
+export async function checkProviderAvailability(
+  provider: ResolvedProviderRef<TranslateProviderConfig>,
   route: HostedAiTextStreamRoute,
 ): Promise<ProviderAvailability> {
   try {

@@ -3,11 +3,13 @@ import type {
   BackgroundTextStreamSnapshot,
 } from "@/types/background-stream"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 import { defaultRequestRetryPolicy } from "@/utils/request/retry-policy"
 
 const streamTextMock = vi.fn<(...args: any[]) => any>()
 const outputObjectMock = vi.fn<(...args: any[]) => any>((params: Record<string, unknown>) => params)
 const getModelByIdMock = vi.fn<(...args: any[]) => any>()
+const getLanguageModelForConfigMock = vi.fn<(...args: any[]) => any>()
 const loggerErrorMock = vi.fn<(...args: any[]) => any>()
 const hostedStreamTextMock = vi.fn<(...args: any[]) => any>()
 const hostedSelectionStreamTextMock = vi.fn<(...args: any[]) => any>()
@@ -46,6 +48,7 @@ vi.mock("ai", () => ({
 
 vi.mock("@/utils/providers/model", () => ({
   getModelById: getModelByIdMock,
+  getLanguageModelForConfig: getLanguageModelForConfigMock,
 }))
 
 vi.mock("@/utils/orpc/background-client", () => ({
@@ -130,6 +133,48 @@ describe("background-stream", () => {
   beforeEach(() => {
     vi.resetModules()
     vi.clearAllMocks()
+  })
+
+  it.each([undefined, null, "", "unknownFeature", "toString"])(
+    "rejects an invalid hosted feature (%s) at the stream port before calling a provider",
+    async (hostedFeature) => {
+      const { handleStreamTextPort } = await import("../background-stream")
+      const mockPort = createMockPort("stream-text")
+      handleStreamTextPort(mockPort.port as never)
+      await mockPort.emitMessage({
+        type: "start",
+        streamRequestId: "invalid-hosted-route",
+        payload: {
+          providerKind: "system",
+          providerId: "read-frog-free-ai",
+          hostedFeature,
+          instructions: "Translate",
+          prompt: "Hello",
+        },
+      })
+      expect(mockPort.postMessage).toHaveBeenCalledWith({
+        type: "error",
+        streamRequestId: "invalid-hosted-route",
+        error: { message: "Invalid stream start payload" },
+      })
+      expect(hostedStreamTextMock).not.toHaveBeenCalled()
+      expect(getModelByIdMock).not.toHaveBeenCalled()
+      expect(streamTextMock).not.toHaveBeenCalled()
+    },
+  )
+
+  it("rejects a built-in provider disguised as a local stream", async () => {
+    const { handleStreamTextPort } = await import("../background-stream")
+    const mockPort = createMockPort("stream-text")
+    handleStreamTextPort(mockPort.port as never)
+    await mockPort.emitMessage({
+      type: "start",
+      streamRequestId: "wrong-provider-kind",
+      payload: { providerKind: "local", providerId: "read-frog-free-ai", prompt: "Hello" },
+    })
+    expect(mockPort.postMessage).toHaveBeenCalledWith(expect.objectContaining({ type: "error" }))
+    expect(hostedStreamTextMock).not.toHaveBeenCalled()
+    expect(getModelByIdMock).not.toHaveBeenCalled()
   })
 
   it("streams structured object output from background", async () => {
@@ -452,6 +497,8 @@ describe("background-stream", () => {
         let caught: unknown
         try {
           await runStreamTextInBackground({
+            providerKind: "system",
+            hostedFeature: "pageTranslation",
             providerId: "read-frog-free-ai",
             modelTier: "normal",
             requestId: "123e4567-e89b-42d3-a456-426614174003",
@@ -549,6 +596,7 @@ describe("background-stream", () => {
 
     await expect(
       runStreamTextInBackground({
+        providerKind: "local",
         providerId: "openai-default",
         prompt: "Say hello",
       }),
@@ -568,6 +616,7 @@ describe("background-stream", () => {
 
     await expect(
       runStreamTextInBackground({
+        providerKind: "local",
         providerId: "openai-default",
         prompt: "Say hello",
       }),
@@ -593,8 +642,9 @@ describe("background-stream", () => {
     handleStreamTextPort(mockPort.port as never)
     await mockPort.emitMessage({
       type: "start",
-      requestId: "req-text-1",
+      streamRequestId: "req-text-1",
       payload: {
+        providerKind: "local",
         providerId: "openai-default",
         instructions: "Be concise",
         prompt: "Say hello",
@@ -611,7 +661,7 @@ describe("background-stream", () => {
     )
     expect(mockPort.postMessage).toHaveBeenNthCalledWith(1, {
       type: "chunk",
-      requestId: "req-text-1",
+      streamRequestId: "req-text-1",
       data: {
         output: "Hello",
         thinking: {
@@ -622,7 +672,7 @@ describe("background-stream", () => {
     })
     expect(mockPort.postMessage).toHaveBeenNthCalledWith(2, {
       type: "chunk",
-      requestId: "req-text-1",
+      streamRequestId: "req-text-1",
       data: {
         output: "Hello world",
         thinking: {
@@ -633,7 +683,7 @@ describe("background-stream", () => {
     })
     expect(mockPort.postMessage).toHaveBeenNthCalledWith(3, {
       type: "done",
-      requestId: "req-text-1",
+      streamRequestId: "req-text-1",
       data: {
         output: "Hello world",
         thinking: {
@@ -643,6 +693,87 @@ describe("background-stream", () => {
       },
     })
     expect(mockPort.disconnect).toHaveBeenCalledTimes(1)
+  })
+
+  it("uses the supplied local snapshot for both the model and its generation settings", async () => {
+    const providerConfig = {
+      ...DEFAULT_PROVIDER_CONFIG.openai,
+      temperature: 0.3,
+      reasoning: "low" as const,
+    }
+    // Storage may now contain another model, or the provider may have been deleted.
+    getModelByIdMock.mockRejectedValue(new Error("Provider deleted"))
+    getLanguageModelForConfigMock.mockReturnValue("snapshot-model")
+    streamTextMock.mockReturnValue({
+      stream: (async function* () {
+        yield { type: "text-delta", text: "Snapshot summary" }
+        yield { type: "finish", finishReason: "stop" }
+      })(),
+    })
+    const { handleStreamTextPort } = await import("../background-stream")
+    const mockPort = createMockPort("stream-text")
+    handleStreamTextPort(mockPort.port as never)
+    await mockPort.emitMessage({
+      type: "start",
+      streamRequestId: "summary-snapshot",
+      payload: {
+        providerKind: "local",
+        providerId: providerConfig.id,
+        providerConfig,
+        instructions: "Summarize",
+        prompt: "Video contents",
+        temperature: 0.9,
+        reasoning: "high",
+      },
+    })
+
+    expect(getModelByIdMock).not.toHaveBeenCalled()
+    expect(getLanguageModelForConfigMock).toHaveBeenCalledWith(providerConfig)
+    expect(streamTextMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: "snapshot-model",
+        temperature: 0.3,
+        reasoning: "low",
+      }),
+    )
+    expect(streamTextMock.mock.calls[0]![0]).not.toHaveProperty("providerConfig")
+    expect(mockPort.postMessage).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        type: "done",
+        data: expect.objectContaining({ output: "Snapshot summary" }),
+      }),
+    )
+  })
+
+  it.each([
+    {
+      providerKind: "local",
+      providerId: "other-id",
+      providerConfig: DEFAULT_PROVIDER_CONFIG.openai,
+    },
+    {
+      providerKind: "local",
+      providerId: DEFAULT_PROVIDER_CONFIG["microsoft-translate"].id,
+      providerConfig: DEFAULT_PROVIDER_CONFIG["microsoft-translate"],
+    },
+    {
+      providerKind: "system",
+      hostedFeature: "pageTranslation",
+      providerId: "read-frog-free-ai",
+      providerConfig: { ...DEFAULT_PROVIDER_CONFIG.openai, id: "read-frog-free-ai" },
+    },
+  ])("rejects invalid local snapshots before starting a stream", async (payload) => {
+    const { handleStreamTextPort } = await import("../background-stream")
+    const mockPort = createMockPort("stream-text")
+    handleStreamTextPort(mockPort.port as never)
+    await mockPort.emitMessage({ type: "start", streamRequestId: "invalid-snapshot", payload })
+
+    expect(streamTextMock).not.toHaveBeenCalled()
+    expect(mockPort.postMessage).toHaveBeenCalledWith({
+      type: "error",
+      streamRequestId: "invalid-snapshot",
+      error: { message: "Invalid stream start payload" },
+    })
   })
 
   it("streams hosted text output from background", async () => {
@@ -662,6 +793,8 @@ describe("background-stream", () => {
     const { runStreamTextInBackground } = await import("../background-stream")
     const result = await runStreamTextInBackground(
       {
+        providerKind: "system",
+        hostedFeature: "pageTranslation",
         providerId: "read-frog-free-ai",
         modelTier: "normal",
         requestId: "123e4567-e89b-42d3-a456-426614174002",
@@ -709,6 +842,7 @@ describe("background-stream", () => {
 
     const { runStreamTextInBackground } = await import("../background-stream")
     const result = await runStreamTextInBackground({
+      providerKind: "system",
       providerId: "read-frog-free-ai",
       hostedFeature: "pageTranslation",
       instructions: "Translate text",
@@ -733,6 +867,7 @@ describe("background-stream", () => {
 
     const { runStreamTextInBackground } = await import("../background-stream")
     const result = await runStreamTextInBackground({
+      providerKind: "system",
       providerId: "read-frog-free-ai",
       hostedFeature: "selectionTranslation",
       modelTier: "normal",
@@ -775,6 +910,8 @@ describe("background-stream", () => {
     const { runStreamTextInBackground } = await import("../background-stream")
     await runStreamTextInBackground(
       {
+        providerKind: "system",
+        hostedFeature: "pageTranslation",
         providerId: "read-frog-free-ai",
         instructions: "Translate text",
         prompt: "Hello world",
@@ -806,7 +943,13 @@ describe("background-stream", () => {
     const chunkSnapshots: BackgroundTextStreamSnapshot[] = []
     const { runStreamTextInBackground } = await import("../background-stream")
     await runStreamTextInBackground(
-      { providerId: "read-frog-free-ai", instructions: "Translate text", prompt: "Hello world" },
+      {
+        providerKind: "system",
+        providerId: "read-frog-free-ai",
+        hostedFeature: "pageTranslation",
+        instructions: "Translate text",
+        prompt: "Hello world",
+      },
       {
         onChunk: (snapshot) => {
           chunkSnapshots.push(snapshot)
@@ -845,8 +988,9 @@ describe("background-stream", () => {
     handleStreamTextPort(mockPort.port as never)
     await mockPort.emitMessage({
       type: "start",
-      requestId: "req-text-error",
+      streamRequestId: "req-text-error",
       payload: {
+        providerKind: "local",
         providerId: "openai-default",
         prompt: "Say hello",
       },
@@ -859,7 +1003,7 @@ describe("background-stream", () => {
     expect(errorMessages).toHaveLength(1)
     expect(errorMessages[0]).toMatchObject({
       type: "error",
-      requestId: "req-text-error",
+      streamRequestId: "req-text-error",
       error: {
         message: "Incorrect API key provided",
       },
@@ -875,8 +1019,9 @@ describe("background-stream", () => {
     handleStreamTextPort(mockPort.port as never)
     await mockPort.emitMessage({
       type: "start",
-      requestId: "req-text-pre-stream-error",
+      streamRequestId: "req-text-pre-stream-error",
       payload: {
+        providerKind: "local",
         providerId: "openai-default",
         prompt: "Say hello",
       },
@@ -884,7 +1029,7 @@ describe("background-stream", () => {
 
     expect(mockPort.postMessage).toHaveBeenCalledWith({
       type: "error",
-      requestId: "req-text-pre-stream-error",
+      streamRequestId: "req-text-pre-stream-error",
       error: {
         message: "Model is undefined",
       },
@@ -923,8 +1068,9 @@ describe("background-stream", () => {
     handleStreamTextPort(mockPort.port as never)
     const startPromise = mockPort.emitMessage({
       type: "start",
-      requestId: "req-text-abort",
+      streamRequestId: "req-text-abort",
       payload: {
+        providerKind: "local",
         providerId: "openai-default",
         prompt: "Say hello",
       },
@@ -952,15 +1098,16 @@ describe("background-stream", () => {
     handleStreamTextPort(mockPort.port as never)
     await mockPort.emitMessage({
       type: "start",
-      requestId: "req-text-invalid",
+      streamRequestId: "req-text-invalid",
       payload: {
+        providerKind: "local",
         providerId: "   ",
       },
     })
 
     expect(mockPort.postMessage).toHaveBeenCalledWith({
       type: "error",
-      requestId: "req-text-invalid",
+      streamRequestId: "req-text-invalid",
       error: { message: "Invalid stream start payload" },
     })
     expect(mockPort.disconnect).toHaveBeenCalledTimes(1)
@@ -974,7 +1121,7 @@ describe("background-stream", () => {
     handleStreamStructuredObjectPort(emptySchemaPort.port as never)
     await emptySchemaPort.emitMessage({
       type: "start",
-      requestId: "req-structured-empty",
+      streamRequestId: "req-structured-empty",
       payload: {
         providerId: "openai-default",
         outputSchema: [],
@@ -983,7 +1130,7 @@ describe("background-stream", () => {
 
     expect(emptySchemaPort.postMessage).toHaveBeenCalledWith({
       type: "error",
-      requestId: "req-structured-empty",
+      streamRequestId: "req-structured-empty",
       error: { message: "Invalid stream start payload" },
     })
     expect(emptySchemaPort.disconnect).toHaveBeenCalledTimes(1)
@@ -992,7 +1139,7 @@ describe("background-stream", () => {
     handleStreamStructuredObjectPort(duplicateKeyPort.port as never)
     await duplicateKeyPort.emitMessage({
       type: "start",
-      requestId: "req-structured-duplicate",
+      streamRequestId: "req-structured-duplicate",
       payload: {
         providerId: "openai-default",
         outputSchema: [
@@ -1004,13 +1151,13 @@ describe("background-stream", () => {
 
     expect(duplicateKeyPort.postMessage).toHaveBeenCalledWith({
       type: "error",
-      requestId: "req-structured-duplicate",
+      streamRequestId: "req-structured-duplicate",
       error: { message: "Invalid stream start payload" },
     })
     expect(duplicateKeyPort.disconnect).toHaveBeenCalledTimes(1)
   })
 
-  it("disconnects invalid start message without requestId and cannot post error", async () => {
+  it("disconnects invalid start message without streamRequestId and cannot post error", async () => {
     const { handleStreamTextPort } = await import("../background-stream")
     const mockPort = createMockPort("stream-text")
 
@@ -1018,6 +1165,7 @@ describe("background-stream", () => {
     await mockPort.emitMessage({
       type: "start",
       payload: {
+        providerKind: "local",
         providerId: "openai-default",
       },
     })
@@ -1033,7 +1181,7 @@ describe("background-stream", () => {
     handleStreamTextPort(mockPort.port as never)
     await mockPort.emitMessage({
       type: "ping",
-      requestId: "req-ping",
+      streamRequestId: "req-ping",
     })
 
     expect(mockPort.postMessage).not.toHaveBeenCalled()

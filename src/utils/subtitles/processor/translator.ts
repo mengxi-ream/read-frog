@@ -2,7 +2,7 @@ import type { SubtitlesFragment } from "../types"
 import type { HostedAiTextStreamRoute } from "@/types/background-stream"
 import type { Config } from "@/types/config/config"
 import type { SubtitlePromptContext } from "@/types/content"
-import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
+import type { PromptableProviderRef, SerializableProviderRef } from "@/utils/providers/provider-ref"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { APICallError } from "ai"
 import { toastManager } from "@/components/ui/base-ui/toast"
@@ -17,7 +17,7 @@ import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
 import {
-  canProviderRefGenerateText,
+  canResolvedProviderRefGenerateText,
   getProviderCacheIdentity,
   HostedAiProviderUnavailableError,
   serializeProviderRef,
@@ -29,6 +29,26 @@ import { resolveProviderRefForCapability } from "@/utils/providers/provider-regi
  * per ≤5-cue batch, and every batch of a video hits the same verdict.
  */
 const SUBTITLES_HOSTED_UNAVAILABLE_TOAST_ID = "subtitles-hosted-unavailable"
+
+/**
+ * What the resolved provider is being asked to do. Line translation is the
+ * capability the provider list is gated on, so any resolved provider can run
+ * it; a summary or a recut is a generation, which only a promptable provider
+ * can run — the resolution reports that as its own state instead of handing
+ * out a ref the task can only throw on.
+ */
+export type SubtitlesTask = "lineTranslation" | "summary" | "segmentation"
+
+/**
+ * Line translation and the summary bill against `videoSubtitles`; segmentation
+ * has its own route for the wider output budget, but `getHostedFeatureForRoute`
+ * collapses it back onto the same status gate.
+ */
+const SUBTITLES_TASK_ROUTE: Record<SubtitlesTask, HostedAiTextStreamRoute> = {
+  lineTranslation: "videoSubtitles",
+  summary: "videoSubtitles",
+  segmentation: "videoSubtitlesSegmentation",
+}
 
 function toFriendlyErrorMessage(error: unknown): string {
   if (error instanceof APICallError) {
@@ -177,6 +197,64 @@ async function translateSingleSubtitle(
   })
 }
 
+export type SubtitlesProviderResolution<
+  Ref extends SerializableProviderRef = SerializableProviderRef,
+> =
+  | { status: "ok"; ref: Ref }
+  | { status: "hostedUnavailable"; message: string }
+  | { status: "notPromptable" }
+  | { status: "none" }
+
+/** Reports without announcing, so callers can tell a plan/quota refusal from "nothing selected". */
+export async function resolveSubtitlesProvider(
+  config: Config,
+  task: "lineTranslation",
+): Promise<SubtitlesProviderResolution>
+export async function resolveSubtitlesProvider(
+  config: Config,
+  task: "summary" | "segmentation",
+): Promise<SubtitlesProviderResolution<PromptableProviderRef>>
+export async function resolveSubtitlesProvider(
+  config: Config,
+  task: SubtitlesTask,
+): Promise<SubtitlesProviderResolution>
+export async function resolveSubtitlesProvider(
+  config: Config,
+  task: SubtitlesTask,
+): Promise<SubtitlesProviderResolution> {
+  const resolved = resolveProviderRefForCapability(
+    "videoSubtitles",
+    config.providersConfig,
+    config.videoSubtitles.providerId,
+  )
+  if (!resolved) {
+    return { status: "none" }
+  }
+  try {
+    if (task !== "lineTranslation") {
+      // A summary or a recut is a generation, but the subtitles provider list
+      // is gated on the wider translate capability — so the default Microsoft
+      // provider resolves here legally and then cannot be prompted. Refuse
+      // before serializing: no ref a caller could misuse, and no doomed
+      // hostedAi.status fetch for a provider that will never run the task.
+      if (!canResolvedProviderRefGenerateText(resolved)) {
+        return { status: "notPromptable" }
+      }
+      return { status: "ok", ref: await serializeProviderRef(resolved, SUBTITLES_TASK_ROUTE[task]) }
+    }
+    return { status: "ok", ref: await serializeProviderRef(resolved, SUBTITLES_TASK_ROUTE[task]) }
+  } catch (error) {
+    if (error instanceof HostedAiProviderUnavailableError) {
+      return { status: "hostedUnavailable", message: error.message }
+    }
+    // Nothing else is expected to throw here (serializeProviderRef already
+    // fails open on an unreachable status endpoint). Keep degrading rather
+    // than introducing a new throw into the render path, but leave a trace.
+    logger.warn("[Subtitles] Provider ref resolution failed", error)
+    return { status: "none" }
+  }
+}
+
 /**
  * Resolve the subtitles provider into a transportable ref. Capability-based so
  * Built-in AI — never a row in providersConfig — is reachable, and serialized
@@ -185,57 +263,52 @@ async function translateSingleSubtitle(
  */
 export async function resolveSubtitlesProviderRef(
   config: Config,
-  route: HostedAiTextStreamRoute,
+  task: "lineTranslation",
+): Promise<SerializableProviderRef | null>
+export async function resolveSubtitlesProviderRef(
+  config: Config,
+  task: "summary" | "segmentation",
+): Promise<PromptableProviderRef | null>
+export async function resolveSubtitlesProviderRef(
+  config: Config,
+  task: SubtitlesTask,
 ): Promise<SerializableProviderRef | null> {
-  const resolved = resolveProviderRefForCapability(
-    "videoSubtitles",
-    config.providersConfig,
-    config.videoSubtitles.providerId,
-  )
-  if (!resolved) {
+  const resolution = await resolveSubtitlesProvider(config, task)
+  if (resolution.status === "hostedUnavailable") {
+    // Silence here is indistinguishable from "these lines have no translation".
+    toastManager.add({
+      type: "error",
+      title: resolution.message,
+      id: SUBTITLES_HOSTED_UNAVAILABLE_TOAST_ID,
+    })
     return null
   }
-  try {
-    return await serializeProviderRef(resolved.kind === "local" ? resolved.config : resolved, route)
-  } catch (error) {
-    // Hosted tier unavailable (plan/quota). Still degrade to untranslated
-    // rather than throwing into the player's render path — but say why. The
-    // caller turns this null into empty translations that the coordinator
-    // records as successfully translated, so without a toast the run is
-    // indistinguishable from "these lines have no translation" and the cue
-    // starts are never retried.
-    if (error instanceof HostedAiProviderUnavailableError) {
-      toastManager.add({
-        type: "error",
-        title: error.message,
-        id: SUBTITLES_HOSTED_UNAVAILABLE_TOAST_ID,
-      })
-      return null
-    }
-    // Nothing else is expected to throw here (serializeProviderRef already
-    // fails open on an unreachable status endpoint). Keep degrading rather
-    // than introducing a new throw into the render path, but leave a trace.
-    logger.warn("[Subtitles] Provider ref resolution failed", error)
-    return null
-  }
+  // notPromptable degrades silently: unlike a hosted denial (something the
+  // user was refused), it is a configuration state the pre-flight UI explains.
+  return resolution.status === "ok" ? resolution.ref : null
 }
 
 export async function fetchSubtitlesSummary(
   videoContext: SubtitlesVideoContext,
   configOverride?: Config,
+  providerRef?: PromptableProviderRef | null,
 ): Promise<string | null> {
+  // Tri-state ref: a session that already resolved and narrowed its ref passes
+  // it through — re-resolving could mint a different cache identity mid-session
+  // and costs a second hostedAi.status round trip. `null` means the session
+  // narrowed to "no promptable provider": skip outright, no message. Omitted
+  // means "resolve here" (standalone callers).
+  if (providerRef === null) {
+    return null
+  }
+
   const config = configOverride ?? (await getLocalConfig())
   if (!config?.pageTranslation.enableAIContentAware) {
     return null
   }
 
-  const providerRef = await resolveSubtitlesProviderRef(config, "videoSubtitles")
-  // A summary is a generation, but the subtitles provider list is gated on the
-  // wider translate capability — so the default Microsoft provider resolves
-  // here perfectly well and then cannot be prompted. Bail before the message:
-  // the background admits it to the queue, where it throws and burns its
-  // retries at the start of every video.
-  if (!providerRef || !canProviderRefGenerateText(providerRef)) {
+  const ref = providerRef ?? (await resolveSubtitlesProviderRef(config, "summary"))
+  if (!ref) {
     return null
   }
 
@@ -246,7 +319,7 @@ export async function fetchSubtitlesSummary(
   return await sendMessage("getSubtitlesSummary", {
     videoTitle: videoContext.videoTitle,
     subtitlesContext: videoContext.subtitlesTextContent,
-    providerRef,
+    providerRef: ref,
   })
 }
 
@@ -260,7 +333,7 @@ export async function translateSubtitles(
     return fragments.map((f) => ({ ...f, translation: "" }))
   }
 
-  const providerRef = await resolveSubtitlesProviderRef(config, "videoSubtitles")
+  const providerRef = await resolveSubtitlesProviderRef(config, "lineTranslation")
   if (!providerRef) {
     return fragments.map((f) => ({ ...f, translation: "" }))
   }

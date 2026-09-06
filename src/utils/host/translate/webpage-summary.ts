@@ -1,6 +1,6 @@
 import type { CachedWebPageContext } from "./webpage-context"
 import type { HostedAiTextStreamRoute } from "@/types/background-stream"
-import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
+import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 import { sendMessage } from "@/utils/message"
 
 /**
@@ -10,7 +10,7 @@ import { sendMessage } from "@/utils/message"
  */
 export async function getOrGenerateWebPageSummary(
   webPageContext: CachedWebPageContext | null,
-  providerRef: SerializableProviderRef,
+  providerRef: PromptableProviderRef,
   enableAIContentAware: boolean,
   hostedFeature: HostedAiTextStreamRoute,
 ): Promise<string | null> {

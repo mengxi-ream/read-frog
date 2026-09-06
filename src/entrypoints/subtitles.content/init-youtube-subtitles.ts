@@ -12,6 +12,7 @@ import { createYoutubeCaptionTrackListener } from "./platforms/youtube/caption-t
 import { getYoutubeConfig } from "./platforms/youtube/config"
 import { watchShortsActiveReel } from "./platforms/youtube/shorts-active-reel-watcher"
 import { mountShortsTranslateButton } from "./renderer/mount-shorts-translate-button"
+import { mountSubtitlesSidebar } from "./renderer/mount-subtitles-sidebar"
 import { mountSubtitlesUI } from "./renderer/mount-subtitles-ui"
 
 function isYoutubeWatch(): boolean {
@@ -53,6 +54,7 @@ export function initYoutubeSubtitles(ctx: ContentScriptContext) {
     }
 
     await mountSubtitlesUI({ adapter, config, menuBelow: shorts })
+    mountSubtitlesSidebar(adapter)
 
     if (initialized) {
       return

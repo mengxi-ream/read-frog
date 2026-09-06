@@ -3,11 +3,11 @@ import { useAtom, useAtomValue } from "jotai"
 import { useMemo } from "react"
 import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-status"
 import { Switch } from "@/components/ui/base-ui/switch"
-import { isLLMProviderConfig } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { FEATURE_PROVIDER_DEFS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
 import { i18n } from "@/utils/i18n"
 import { isProviderIdDurablyUnusable } from "@/utils/providers/provider-availability"
+import { canResolvedProviderRefGenerateText } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
@@ -48,7 +48,7 @@ function FeatureStatusList() {
         // "does it run", so it reported every feature configured for accounts
         // whose plan funds none of them — signed-out guests included.
         const hasLLMProvider = providerRef
-          ? (providerRef.kind === "system" || isLLMProviderConfig(providerRef.config)) &&
+          ? canResolvedProviderRefGenerateText(providerRef) &&
             !isProviderIdDurablyUnusable(providerId, featureKey, status)
           : false
 

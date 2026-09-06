@@ -1,9 +1,9 @@
 import type { HostedAiFeature } from "@read-frog/api-contract"
 import type { JSONValue, StreamTextOnErrorCallback } from "ai"
 import type { Browser } from "#imports"
-import type { AISDKReasoning } from "@/types/config/provider"
+import type { AISDKReasoning, LLMProviderConfig } from "@/types/config/provider"
 import type { SelectionToolbarCustomActionOutputType } from "@/types/config/selection-toolbar"
-import type { HostedAiModelTier } from "@/utils/constants/provider-ids"
+import type { BuiltInAiProviderId, HostedAiModelTier } from "@/utils/constants/provider-ids"
 import type { NoteSuggestionEnvelope } from "@/utils/note-suggestion/types"
 
 interface BaseBackgroundStreamSerializablePayload {
@@ -46,15 +46,21 @@ export type HostedAiTextStreamFeature = Extract<
  */
 export type HostedAiTextStreamRoute = HostedAiTextStreamFeature | "videoSubtitlesSegmentation"
 
-export type BackgroundStreamTextSerializablePayload = BaseBackgroundStreamSerializablePayload & {
-  /**
-   * Which hosted route (and so which quota feature) a Built-in AI run bills
-   * against. Ignored by local/BYOK providers. Optional so a content script
-   * from before this field existed keeps working against an updated service
-   * worker mid-extension-update; absent means "pageTranslation".
-   */
-  hostedFeature?: HostedAiTextStreamRoute
-}
+export type BackgroundStreamTextSerializablePayload = BaseBackgroundStreamSerializablePayload &
+  (
+    | {
+        providerKind: "local"
+        /** Model and generation settings captured with the caller's cache identity. */
+        providerConfig?: LLMProviderConfig
+        hostedFeature?: never
+      }
+    | {
+        providerKind: "system"
+        providerId: BuiltInAiProviderId
+        providerConfig?: never
+        hostedFeature: HostedAiTextStreamRoute
+      }
+  )
 
 export interface BackgroundStructuredObjectOutputField {
   name: string
@@ -108,35 +114,35 @@ export interface StreamPortErrorPayload {
 }
 
 export type StreamPortResponse<T = string> =
-  | { type: "chunk"; requestId: string; data: T }
-  | { type: "done"; requestId: string; data: T }
-  | { type: "error"; requestId: string; error: StreamPortErrorPayload }
+  | { type: "chunk"; streamRequestId: string; data: T }
+  | { type: "done"; streamRequestId: string; data: T }
+  | { type: "error"; streamRequestId: string; error: StreamPortErrorPayload }
 
 type DistributiveOmit<T, K extends string> = T extends unknown ? Omit<T, K> : never
 
-export type StreamPortResponseWithoutRequestId<T = string> = DistributiveOmit<
+export type StreamPortResponseWithoutStreamRequestId<T = string> = DistributiveOmit<
   StreamPortResponse<T>,
-  "requestId"
+  "streamRequestId"
 >
 
 export interface StreamPortStartMessage<TSerializablePayload> {
   type: "start"
-  requestId: string
+  streamRequestId: string
   payload: TSerializablePayload
 }
 
 export interface StreamPortPingMessage {
   type: "ping"
-  requestId: string
+  streamRequestId: string
 }
 
 export type StreamPortRequestMessage<TSerializablePayload> =
   | StreamPortStartMessage<TSerializablePayload>
-  | { type: "ping"; requestId: string }
+  | { type: "ping"; streamRequestId: string }
 
 export type StartMessageParseResult<TSerializablePayload> =
   | { success: true; message: StreamPortStartMessage<TSerializablePayload> }
-  | { success: false; requestId?: string }
+  | { success: false; streamRequestId?: string }
 
 type AISDKStreamTextError = Parameters<StreamTextOnErrorCallback>[0]["error"]
 
