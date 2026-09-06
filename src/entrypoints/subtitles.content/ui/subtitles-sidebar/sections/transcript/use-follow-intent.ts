@@ -20,6 +20,7 @@ export function useFollowIntent(
   const [following, setFollowing] = useState(true)
 
   useEffect(() => {
+    if (!hasLines) return undefined
     const scrollbar = rootRef.current
       ?.closest('[data-slot="scroll-area"]')
       ?.querySelector('[data-slot="scroll-area-scrollbar"]')

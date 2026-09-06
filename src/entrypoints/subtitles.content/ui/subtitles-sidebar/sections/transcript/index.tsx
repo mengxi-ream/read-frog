@@ -1,5 +1,5 @@
 import { IconArrowDown, IconArrowUp, IconFileText } from "@tabler/icons-react"
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import { match } from "ts-pattern"
 import { Button } from "@/components/ui/base-ui/button"
 import { Skeleton } from "@/components/ui/base-ui/skeleton"
@@ -49,9 +49,9 @@ export function TranscriptSection() {
   const { lines, activeIndex, query } = useTranscriptLines()
 
   const rootRef = useRef<HTMLDivElement>(null)
-  const activeRowRef = useRef<HTMLButtonElement>(null)
+  const [activeRow, setActiveRow] = useState<HTMLButtonElement | null>(null)
   const { following, resume, intentProps } = useFollowIntent(rootRef, lines.length > 0)
-  const activeAbove = useActiveRowVisibility(rootRef, activeRowRef, activeIndex, following)
+  const activeAbove = useActiveRowVisibility(rootRef, activeRow, following)
 
   if (lines.length === 0) {
     return match(query)
@@ -101,7 +101,7 @@ export function TranscriptSection() {
             key={line.start}
             line={line}
             isActive={index === activeIndex}
-            activeRowRef={index === activeIndex ? activeRowRef : undefined}
+            activeRowRef={index === activeIndex ? setActiveRow : undefined}
             onSeek={seekTo}
           />
         ))}
