@@ -1,4 +1,6 @@
 name: Read Frog
+commands:
+  togglePageTranslation: Переключить перевод страницы
 extName: Read Frog - Переводи и учись
 extDescription: Read Frog — расширение браузера с открытым исходным кодом, которое поможет вам глубоко изучать языки на любом веб-сайте.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
@@ -478,6 +480,7 @@ options:
     pageTranslation:
       title: Перевод страницы
       description: Перевести всю страницу.
+      managedByBrowser: Управляется браузером
     translationMode:
       title: Режим перевода
       description: Переключение между двуязычным режимом и только переводом.

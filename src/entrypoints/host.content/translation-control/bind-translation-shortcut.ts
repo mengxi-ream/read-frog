@@ -14,6 +14,9 @@ import {
  * Uses sync cached config inside the hotkey callback to avoid async overhead.
  */
 export async function bindTranslationShortcutKey(pageTranslationManager: PageTranslationManager) {
+  // Skip because this handle by browser
+  if (import.meta.env.FIREFOX) return () => {}
+
   const config = await getLocalConfig()
   if (!config || isPageTranslationShortcutEmpty(config.pageTranslation.page.shortcut)) {
     return () => {}

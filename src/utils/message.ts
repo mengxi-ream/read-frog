@@ -68,6 +68,7 @@ interface ProtocolMap {
   refreshDetectedPageLanguage: () => void
   getDetectedCode: () => LangCodeISO6393
   detectedPageLanguageChanged: (data: { detectedCode: LangCodeISO6393 }) => void
+  togglePageTranslation: (data: { analyticsContext: FeatureUsageContext }) => void
   // ask host to start page translation
   askManagerToTogglePageTranslation: (data: {
     enabled: boolean

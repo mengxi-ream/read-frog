@@ -8,6 +8,7 @@ import {
   isLocalPackagesEnabled,
   resolveExtensionEnv,
 } from "./src/env/shared"
+import { TOGGLE_PAGE_TRANSLATION_COMMAND } from "./src/utils/constants/commands"
 
 const WXT_API_KEY_PATTERN = /^WXT_.*API_KEY/
 const ALLOWED_BUNDLED_API_KEYS = new Set(["WXT_POSTHOG_API_KEY"])
@@ -66,6 +67,12 @@ export default defineConfig({
     ],
     // Firefox-specific settings for MV3
     ...(browser === "firefox" && {
+      commands: {
+        [TOGGLE_PAGE_TRANSLATION_COMMAND]: {
+          suggested_key: { default: "Alt+E" },
+          description: "__MSG_commands_togglePageTranslation__",
+        },
+      },
       // Override default CSP to exclude `upgrade-insecure-requests` (Firefox MV3 default),
       // which would upgrade custom provider HTTP URLs (e.g. LAN) to HTTPS.
       content_security_policy: {

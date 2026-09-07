@@ -1,4 +1,6 @@
 name: Read Frog
+commands:
+  togglePageTranslation: Sayfa çevirisini aç/kapat
 extName: Read Frog - Çevir ve Öğren
 extDescription: Read Frog, herhangi bir web sitesinden dilleri derinlemesine öğrenmenize yardımcı olmak için tasarlanmış açık kaynaklı bir tarayıcı uzantısıdır.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
@@ -478,6 +480,7 @@ options:
     pageTranslation:
       title: Sayfa çevirisi
       description: Sayfanın tamamını çevirir.
+      managedByBrowser: Tarayıcı tarafından yönetilir
     translationMode:
       title: Çeviri modu
       description: İki dilli ve yalnızca çeviri arasında geçiş yapar.

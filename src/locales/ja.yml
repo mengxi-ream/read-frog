@@ -1,4 +1,6 @@
 name: 読書カエル
+commands:
+  togglePageTranslation: ページ翻訳を切り替える
 extName: 読書カエル - 翻訳して学ぶ
 extDescription: 読書カエルは、あらゆるウェブサイトから言語を深く学ぶために設計されたオープンソースのブラウザ拡張機能です。
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
@@ -478,6 +480,7 @@ options:
     pageTranslation:
       title: ページ翻訳
       description: ページ全体を翻訳します。
+      managedByBrowser: ブラウザーで管理
     translationMode:
       title: 翻訳モード
       description: バイリンガルと翻訳のみを切り替えます。

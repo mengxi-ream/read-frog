@@ -1,4 +1,6 @@
 name: Read Frog
+commands:
+  togglePageTranslation: Bật/tắt dịch trang
 extName: Read Frog - Dịch và học
 extDescription: Read Frog là tiện ích mở rộng trình duyệt mã nguồn mở được thiết kế để giúp bạn học ngôn ngữ sâu từ bất kỳ trang web nào.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
@@ -478,6 +480,7 @@ options:
     pageTranslation:
       title: Dịch trang
       description: Dịch toàn bộ trang.
+      managedByBrowser: Do trình duyệt quản lý
     translationMode:
       title: Chế độ dịch
       description: Chuyển giữa song ngữ và chỉ bản dịch.

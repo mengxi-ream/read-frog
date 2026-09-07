@@ -88,6 +88,14 @@ export async function bootstrapHostContent(
   }
   window.addEventListener("extension:URLChange", handleExtensionUrlChange)
 
+  const cleanupTranslationToggleListener = onMessage("togglePageTranslation", (msg) => {
+    if (manager.isActive) {
+      manager.stop({ userInitiated: true })
+    } else {
+      void manager.start(msg.data.analyticsContext)
+    }
+  })
+
   // Listen for translation state changes from background
   const cleanupTranslationStateListener = onMessage("askManagerToTogglePageTranslation", (msg) => {
     const { enabled, analyticsContext } = msg.data
@@ -131,6 +139,7 @@ export async function bootstrapHostContent(
     cleanupTranslationShortcut()
     cleanupTranslationModeShortcut()
     cleanupTranslationHubShortcut()
+    cleanupTranslationToggleListener()
     cleanupTranslationStateListener()
     cleanupFrameTranslationStateListener()
     cleanupDetectedLanguageRefreshListener()

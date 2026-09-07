@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query"
 import { useAtom, useAtomValue } from "jotai"
 import { browser } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
@@ -5,6 +6,7 @@ import { Kbd, KbdGroup } from "@/components/ui/base-ui/kbd"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { TOGGLE_PAGE_TRANSLATION_COMMAND } from "@/utils/constants/commands"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { formatHotkeyParts } from "@/utils/os.ts"
@@ -44,9 +46,16 @@ export default function TranslateButton({ className }: { className?: string }) {
 
   const isSiteBlocked = mode === "whitelist" ? !isCurrentSiteInWhitelist : isCurrentSiteInBlacklist
   const isDisabled = isIgnoreTab || isSiteBlocked
-  const shortcutParts = isPageTranslationShortcutEmpty(translateConfig.page.shortcut)
-    ? []
-    : formatHotkeyParts(translateConfig.page.shortcut)
+
+  const { data: browserShortcut = "" } = useQuery({
+    queryKey: ["browser-commands"],
+    queryFn: () => browser.commands.getAll(),
+    select: (commands) =>
+      commands.find((command) => command.name === TOGGLE_PAGE_TRANSLATION_COMMAND)?.shortcut ?? "",
+    enabled: import.meta.env.FIREFOX,
+  })
+  const shortcut = import.meta.env.FIREFOX ? browserShortcut : translateConfig.page.shortcut
+  const shortcutParts = isPageTranslationShortcutEmpty(shortcut) ? [] : formatHotkeyParts(shortcut)
 
   return (
     <Button onClick={toggleTranslation} disabled={isDisabled} className={cn("min-w-0", className)}>

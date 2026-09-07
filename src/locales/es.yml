@@ -1,4 +1,6 @@
 name: Read Frog
+commands:
+  togglePageTranslation: Alternar la traducción de la página
 extName: Read Frog - Traduce y aprende
 extDescription: Read Frog es una extensión de navegador de código abierto diseñada para ayudarte a aprender idiomas en profundidad desde cualquier sitio web.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
@@ -479,6 +481,7 @@ options:
     pageTranslation:
       title: Traducción de la página
       description: Traduce la página completa.
+      managedByBrowser: Gestionado por el navegador
     translationMode:
       title: Modo de traducción
       description: Alterna entre bilingüe y solo traducción.

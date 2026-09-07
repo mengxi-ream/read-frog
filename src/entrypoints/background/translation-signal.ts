@@ -5,6 +5,7 @@ import { browser, storage } from "#imports"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { normalizeDetectedCode } from "@/utils/config/languages"
+import { TOGGLE_PAGE_TRANSLATION_COMMAND } from "@/utils/constants/commands"
 import { CONFIG_STORAGE_KEY, DEFAULT_DETECTED_CODE } from "@/utils/constants/config"
 import { getDetectedCodeStateKey, getTranslationStateKey } from "@/utils/constants/storage-keys"
 import { shouldEnableAutoTranslation } from "@/utils/host/translate/auto-translation"
@@ -75,6 +76,34 @@ async function publishAndRefreshActiveTab(tabId: number): Promise<void> {
 }
 
 export function translationMessage() {
+  if (import.meta.env.FIREFOX) {
+    browser.commands.onCommand.addListener(async (command, tab) => {
+      if (command !== TOGGLE_PAGE_TRANSLATION_COMMAND) return
+
+      try {
+        const targetTab =
+          tab ??
+          // Firefox versions before 126 do not include the triggering tab.
+          (await browser.tabs.query({ active: true, currentWindow: true }))[0]
+
+        if (targetTab?.id === undefined) return
+
+        await sendMessage(
+          "togglePageTranslation",
+          {
+            analyticsContext: createFeatureUsageContext(
+              ANALYTICS_FEATURE.PAGE_TRANSLATION,
+              ANALYTICS_SURFACE.SHORTCUT,
+            ),
+          },
+          { tabId: targetTab.id, frameId: 0 },
+        )
+      } catch (error) {
+        logger.warn("Failed to toggle page translation from browser shortcut", error)
+      }
+    })
+  }
+
   onMessage("getEnablePageTranslationByTabId", async (msg) => {
     const { tabId } = msg.data
     return await getTranslationState(tabId)
