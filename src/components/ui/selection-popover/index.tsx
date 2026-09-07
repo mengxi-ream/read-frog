@@ -383,7 +383,7 @@ function SelectionPopoverShell({
       }
       {...props}
       className={cn(
-        `pointer-events-auto flex flex-col overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-floating ${NOTRANSLATE_CLASS}`,
+        `pointer-events-auto flex flex-col overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-(--rf-elevation-floating) ${NOTRANSLATE_CLASS}`,
         className,
       )}
       {...{ [SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE]: "" }}
