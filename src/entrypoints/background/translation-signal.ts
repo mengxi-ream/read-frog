@@ -12,6 +12,7 @@ import { shouldEnableAutoTranslation } from "@/utils/host/translate/auto-transla
 import { logger } from "@/utils/logger"
 import { onMessage, sendMessage } from "@/utils/message"
 import { getPageTranslationOriginScope } from "@/utils/url"
+import { ensureHostContentInitialized } from "./host-injection"
 import {
   injectHostContentIntoCurrentTabIframesAfterNodeTranslation,
   injectHostContentIntoTabIframes,
@@ -87,6 +88,9 @@ export function translationMessage() {
           (await browser.tabs.query({ active: true, currentWindow: true }))[0]
 
         if (targetTab?.id === undefined) return
+
+        const isHostReady = await ensureHostContentInitialized(targetTab.id)
+        if (!isHostReady) return
 
         await sendMessage(
           "togglePageTranslation",

@@ -13,6 +13,7 @@ import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { ensureInitializedConfig } from "./config"
+import { ensureHostContentInitialized } from "./host-injection"
 import { getPageTranslationEnabled, setPageTranslationEnabled } from "./page-translation-state"
 
 export const MENU_ID_TRANSLATE = "read-frog-translate"
@@ -209,6 +210,11 @@ async function handleContextMenuClick(
  * Handle translate menu click - toggle page translation
  */
 async function handleTranslateClick(tabId: number, tabUrl?: string) {
+  if (import.meta.env.FIREFOX) {
+    const isHostReady = await ensureHostContentInitialized(tabId)
+    if (!isHostReady) return
+  }
+
   const isCurrentlyTranslated = await getPageTranslationEnabled(tabId)
   const newState = !isCurrentlyTranslated
 
