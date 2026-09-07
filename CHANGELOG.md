@@ -1,5 +1,25 @@
 # @read-frog/extension
 
+## 1.46.9
+
+### Patch Changes
+
+- [#2159](https://github.com/mengxi-ream/read-frog/pull/2159) [`ba71eba`](https://github.com/mengxi-ream/read-frog/commit/ba71ebaaad1737bfe342cf9d137434bf2fac8a71) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(subtitles): periodically clean up AI segmentation cache
+
+- [#2161](https://github.com/mengxi-ream/read-frog/pull/2161) [`77df090`](https://github.com/mengxi-ream/read-frog/commit/77df09052b91ece26bba29f763c7fc2d6b6498cf) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(floating-button): let clicks pass through collapsed controls
+
+- [#2118](https://github.com/mengxi-ream/read-frog/pull/2118) [`06e3c74`](https://github.com/mengxi-ream/read-frog/commit/06e3c7432699dc184a80c46f28ce5f6c87d83a6b) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(hosted-ai): require explicit feature routing before generation
+
+- [#2163](https://github.com/mengxi-ream/read-frog/pull/2163) [`83b91c1`](https://github.com/mengxi-ream/read-frog/commit/83b91c14a18290a7d2329282344859618d0a4ba1) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - perf(ui): use cn for class merging with standard shadow utilities
+
+- [#2118](https://github.com/mengxi-ream/read-frog/pull/2118) [`06e3c74`](https://github.com/mengxi-ream/read-frog/commit/06e3c7432699dc184a80c46f28ce5f6c87d83a6b) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): summarize the video in the sidebar
+
+- [#2114](https://github.com/mengxi-ream/read-frog/pull/2114) [`0ceb7fd`](https://github.com/mengxi-ream/read-frog/commit/0ceb7fd137f18746b02ee7360ee8232263386854) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): add the learning sidebar shell alongside the YouTube player
+
+- [#2118](https://github.com/mengxi-ream/read-frog/pull/2118) [`06e3c74`](https://github.com/mengxi-ream/read-frog/commit/06e3c7432699dc184a80c46f28ce5f6c87d83a6b) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): switch an open video summary to the new video and discard stale opening checks
+
+- [#2118](https://github.com/mengxi-ream/read-frog/pull/2118) [`06e3c74`](https://github.com/mengxi-ream/read-frog/commit/06e3c7432699dc184a80c46f28ce5f6c87d83a6b) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): preserve summary cancellation and provider snapshots
+
 ## 1.46.8
 
 ### Patch Changes
