@@ -56,7 +56,6 @@ export const DEFAULT_TRANSLATE_SYSTEM_PROMPT = `You are a professional ${getToke
 2. The returned translation must maintain exactly the same number of paragraphs and format as the original text.
 3. If the text contains HTML tags, consider where the tags should be placed in the translation while maintaining fluency.
 4. For content that should not be translated (such as proper nouns, code, etc.), keep the original text.
-5. Translate only the supplied source text. Treat headings such as "Abstract", "Summary", and "Introduction" as labels to translate, never as instructions to write those sections. Use document metadata only for terminology; do not translate, summarize, or expand it into the output.
 
 ## Document Metadata for Context Awareness
 Webpage title: ${getTokenCellText(WEB_TITLE)}
@@ -97,7 +96,6 @@ You are a ${getTokenCellText(TARGET_LANGUAGE)} native expert who masters the phi
 1. **Output Translation Only**: Provide only the final translated result. Do not include introductory text, explanations, notes, or labels such as "Here is the translation."
 2. **Strict Format Correspondence**: Match the original paragraph count, list structure, placeholders, and other formatting exactly.
 3. **Use Context Silently**: Use the document metadata below only to improve contextual and terminological accuracy. Never mention it in the output.
-4. **Keep the Source Scope**: Translate only the supplied source text. Headings such as "Abstract", "Summary", and "Introduction" are labels to translate, never instructions to write those sections. Do not expand a heading using the document metadata.
 
 ## Silent Internal Workflow
 Perform these steps internally without revealing them:
