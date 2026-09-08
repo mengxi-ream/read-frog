@@ -1,5 +1,6 @@
 /// <reference types="@modyfi/vite-plugin-yaml/modules" />
 import type { Resource } from "i18next"
+import az from "@/locales/az.yml"
 import en from "@/locales/en.yml"
 import es from "@/locales/es.yml"
 import ja from "@/locales/ja.yml"
@@ -18,6 +19,7 @@ import zhTW from "@/locales/zh-TW.yml"
  * emit `_locales/*` for manifest name/description localization (browser-locale-bound).
  */
 export const SUPPORTED_UI_LOCALES = [
+  "az",
   "en",
   "es",
   "ja",
@@ -62,6 +64,7 @@ function convertTree(node: LocaleTree): LocaleTree {
 }
 
 const rawResources: Record<SupportedUiLocale, LocaleTree> = {
+  az,
   en,
   es,
   ja,
