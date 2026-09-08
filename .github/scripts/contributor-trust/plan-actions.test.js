@@ -1,28 +1,37 @@
 import { describe, expect, it } from "vitest"
 import { POLICY } from "./config.js"
-import { isMigrationChangedLineFile, planTrustActions } from "./plan-actions.js"
+import { isExcludedChangedLineFile, planTrustActions } from "./plan-actions.js"
 
-describe("isMigrationChangedLineFile", () => {
+describe("isExcludedChangedLineFile", () => {
   it("matches read-frog config migration scripts, tests, and generated fixtures", () => {
-    expect(isMigrationChangedLineFile("src/utils/config/migration-scripts/v080-to-v081.ts")).toBe(
+    expect(isExcludedChangedLineFile("src/utils/config/migration-scripts/v080-to-v081.ts")).toBe(
       true,
     )
     expect(
-      isMigrationChangedLineFile(
+      isExcludedChangedLineFile(
         "src/utils/config/__tests__/migration-scripts/v079-to-v080.test.ts",
       ),
     ).toBe(true)
-    expect(isMigrationChangedLineFile("src/utils/config/__tests__/example/v081.ts")).toBe(true)
-    expect(isMigrationChangedLineFile(".agents/skills/migration-scripts/SKILL.md")).toBe(false)
-    expect(isMigrationChangedLineFile("src/utils/config/migration.ts")).toBe(false)
-    expect(isMigrationChangedLineFile("src/utils/config/migration-scripts/types.ts")).toBe(false)
+    expect(isExcludedChangedLineFile("src/utils/config/__tests__/example/v081.ts")).toBe(true)
+    expect(isExcludedChangedLineFile(".agents/skills/migration-scripts/SKILL.md")).toBe(false)
+    expect(isExcludedChangedLineFile("src/utils/config/migration.ts")).toBe(false)
+    expect(isExcludedChangedLineFile("src/utils/config/migration-scripts/types.ts")).toBe(false)
     expect(
-      isMigrationChangedLineFile(
+      isExcludedChangedLineFile(
         "src/utils/config/__tests__/migration-scripts/all-migrations.test.ts",
       ),
     ).toBe(false)
-    expect(isMigrationChangedLineFile("src/utils/config/__tests__/example/types.ts")).toBe(false)
-    expect(isMigrationChangedLineFile("src/entrypoints/host.content/runtime.ts")).toBe(false)
+    expect(isExcludedChangedLineFile("src/utils/config/__tests__/example/types.ts")).toBe(false)
+    expect(isExcludedChangedLineFile("src/entrypoints/host.content/runtime.ts")).toBe(false)
+  })
+
+  it("excludes files within src/locales without matching similarly named paths", () => {
+    expect(isExcludedChangedLineFile("src/locales/az.yml")).toBe(true)
+    expect(isExcludedChangedLineFile("src/locales/nested/messages.json")).toBe(true)
+    expect(isExcludedChangedLineFile("src\\locales\\en.yml")).toBe(true)
+    expect(isExcludedChangedLineFile("src/locales.ts")).toBe(false)
+    expect(isExcludedChangedLineFile("src/locales-backup/en.yml")).toBe(false)
+    expect(isExcludedChangedLineFile("src/components/locales/en.yml")).toBe(false)
   })
 })
 
@@ -181,6 +190,64 @@ describe("planTrustActions", () => {
     ])
     expect(plan.closeReason).toBeNull()
   })
+
+  it("keeps a large locale-only PR open for a new contributor", () => {
+    const plan = planTrustActions({
+      pullRequest: { additions: 2300, deletions: 200 },
+      pullRequestFiles: [
+        { filename: "src/locales/az.yml", additions: 2200, deletions: 0 },
+        { filename: "src/locales/en.yml", additions: 100, deletions: 200 },
+      ],
+      score: { bucket: "new", total: 0 },
+    })
+
+    expect(plan).toMatchObject({
+      changedLines: 0,
+      excludedChangedLineAdditions: 2300,
+      excludedChangedLineDeletions: 200,
+      excludedChangedLines: 2500,
+      excludedChangedLineFiles: ["src/locales/az.yml", "src/locales/en.yml"],
+      needsMaintainerReview: true,
+      shouldClosePr: false,
+      closeReason: null,
+    })
+  })
+
+  it.each([
+    [1000, false, null],
+    [
+      1001,
+      true,
+      expect.stringContaining("1001 counted lines after excluding 3500 migration and locale lines"),
+    ],
+  ])(
+    "applies the threshold to %i non-excluded lines in a mixed PR",
+    (changedLines, shouldClosePr, closeReason) => {
+      const plan = planTrustActions({
+        pullRequestFiles: [
+          { filename: "src/locales/az.yml", additions: 1800, deletions: 200 },
+          {
+            filename: "src/utils/config/__tests__/example/v081.ts",
+            additions: 1500,
+            deletions: 0,
+          },
+          {
+            filename: "src/entrypoints/host.content/runtime.ts",
+            additions: 900,
+            deletions: changedLines - 900,
+          },
+        ],
+        score: { bucket: "new", total: 19 },
+      })
+
+      expect(plan).toMatchObject({
+        changedLines,
+        excludedChangedLines: 3500,
+        shouldClosePr,
+        closeReason,
+      })
+    },
+  )
 
   it("does not auto-close a low-score PR when it is still under the line threshold", () => {
     const plan = planTrustActions({

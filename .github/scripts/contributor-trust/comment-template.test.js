@@ -61,11 +61,11 @@ describe("buildTrustComment", () => {
     expect(comment.body).toContain("stars on owned non-fork repositories")
     expect(comment.body).toContain("Repo commits: 14")
     expect(comment.body).toContain("PR counted changed lines: 1065 (+820 / -245)")
-    expect(comment.body).toContain("Migration-related changed lines excluded: 1662 (+1662 / -0)")
+    expect(comment.body).toContain("Migration and locale changed lines excluded: 1662 (+1662 / -0)")
     expect(comment.body).toContain("Repo permission: write")
     expect(comment.body).toContain("Auto-close: score < 20 and counted changed lines > 1000")
     expect(comment.body).toContain(
-      "Migration-related files are excluded from the auto-close line count",
+      "Migration-related files and `src/locales/**` are excluded from the auto-close line count",
     )
     expect(comment.body).toContain(
       "Owned non-fork repos considered: max 42, total 42 (kilidoc/browser-tools (42))",

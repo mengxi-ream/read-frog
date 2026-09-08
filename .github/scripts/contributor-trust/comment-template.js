@@ -40,7 +40,7 @@ function getChangedLineSignal(pullRequest, plan) {
 
   if (excludedChangedLines > 0) {
     lines.push(
-      `- Migration-related changed lines excluded: ${excludedChangedLines} (+${excludedAdditions} / -${excludedDeletions})`,
+      `- Migration and locale changed lines excluded: ${excludedChangedLines} (+${excludedAdditions} / -${excludedDeletions})`,
     )
   }
 
@@ -90,7 +90,7 @@ function buildContent({ owner, repo, pullRequest, author, metrics, score, plan }
     "**Policy**",
     `- Low-score review threshold: < ${POLICY.lowScoreThreshold}`,
     `- Auto-close: score < ${POLICY.autoCloseBelowScore} and counted changed lines > ${POLICY.autoCloseAboveChangedLines}`,
-    "- Migration-related files are excluded from the auto-close line count",
+    "- Migration-related files and `src/locales/**` are excluded from the auto-close line count",
     `- Policy version: \`${POLICY.version}\``,
     "",
     `_${pullRequest.state === "closed" ? "Manually re-evaluated on a closed PR." : "Updated automatically when the PR changes or when a maintainer reruns the workflow."}_`,

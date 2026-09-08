@@ -274,7 +274,7 @@ export async function main() {
   summaryLines.push(`- Trust score: **${score.total}/100**`)
   summaryLines.push(`- PR counted changed lines: ${plan.changedLines}`)
   if (plan.excludedChangedLines > 0)
-    summaryLines.push(`- Migration-related changed lines excluded: ${plan.excludedChangedLines}`)
+    summaryLines.push(`- Migration and locale changed lines excluded: ${plan.excludedChangedLines}`)
   summaryLines.push(`- Bucket: \`${score.bucket}\``)
   summaryLines.push(`- Target label: \`${plan.targetTrustLabel}\``)
   summaryLines.push(
