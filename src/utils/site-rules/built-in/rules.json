@@ -3286,6 +3286,9 @@
   {
     "id": "arxiv",
     "matches": ["https://browse.arxiv.org", "https://arxiv.org/html/*"],
+    "injectedCss.add": [
+      ".ltx_title .read-frog-translated-inline-content, .ltx_title .read-frog-translated-block-content { line-height: 1.5; }"
+    ],
     "excludeSelectors.add": [
       ".desktop_header",
       "[class*='ltx_lst_language_']",
