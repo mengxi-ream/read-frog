@@ -12,6 +12,7 @@ import {
   currentVideoIdAtom,
   subtitlesSidebarOpenAtom,
   subtitlesStore,
+  subtitlesVisibleAtom,
   videoSummaryPartialAtom,
 } from "../atoms"
 import { SubtitlesSidebarItem } from "../ui/subtitles-settings-panel/components/subtitles-sidebar-item"
@@ -40,8 +41,11 @@ vi.mock("../ui/subtitles-ui-context", () => ({
     supportsSidebar: true,
     generateVideoSummary: adapter.generateVideoSummary,
     hasSubtitlesAvailable: adapter.hasSubtitlesAvailable,
+    toggleSubtitles,
   }),
 }))
+
+const toggleSubtitles = vi.fn<(enabled: boolean) => void>()
 
 function deferred<T>() {
   let resolve!: (value: T) => void
@@ -107,6 +111,7 @@ describe("summary panel navigation", () => {
     subtitlesStore.set(currentVideoIdAtom, videoId)
     subtitlesStore.set(videoSummaryPartialAtom, "")
     subtitlesStore.set(subtitlesSidebarOpenAtom, false)
+    subtitlesStore.set(subtitlesVisibleAtom, false)
     vi.mocked(checkVideoSummaryAvailability).mockResolvedValue({ status: "ok" })
     vi.mocked(requestVideoSummary).mockImplementation(
       async (source) => `${source[0]!.text} summary`,
@@ -268,6 +273,33 @@ describe("summary panel navigation", () => {
     expect(showAnchoredSubtitlesToast).not.toHaveBeenCalled()
     clickOpen()
     expect(await screen.findByText("B summary")).toBeInTheDocument()
+  })
+
+  it("turns subtitles on when the panel opens", async () => {
+    renderPanel(false)
+    clickOpen()
+
+    await waitFor(() => expect(subtitlesStore.get(subtitlesSidebarOpenAtom)).toBe(true))
+    expect(toggleSubtitles).toHaveBeenCalledExactlyOnceWith(true)
+  })
+
+  it("leaves subtitles alone when they are already showing", async () => {
+    subtitlesStore.set(subtitlesVisibleAtom, true)
+    renderPanel(false)
+    clickOpen()
+
+    await waitFor(() => expect(subtitlesStore.get(subtitlesSidebarOpenAtom)).toBe(true))
+    expect(toggleSubtitles).not.toHaveBeenCalled()
+  })
+
+  it("does not turn subtitles on when the video has none", async () => {
+    fetchers[0]!.hasAvailableSubtitles.mockResolvedValue(false)
+    renderPanel(false)
+    clickOpen()
+
+    await waitFor(() => expect(showAnchoredSubtitlesToast).toHaveBeenCalledOnce())
+    expect(subtitlesStore.get(subtitlesSidebarOpenAtom)).toBe(false)
+    expect(toggleSubtitles).not.toHaveBeenCalled()
   })
 
   it("invalidates a pending open even when A -> null -> A is batched", async () => {

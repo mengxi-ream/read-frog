@@ -43,6 +43,7 @@ import {
   subtitlesPositionAtom,
   subtitlesSettingsPanelOpenAtom,
   subtitlesSettingsPanelViewAtom,
+  subtitlesSidebarOpenAtom,
   subtitlesSourceAtom,
   subtitlesStore,
 } from "./atoms"
@@ -581,7 +582,9 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     const config = await getLocalConfig()
     const autoStart = config?.videoSubtitles?.autoStart ?? false
 
-    if (!autoStart) return
+    const learningOpen = subtitlesStore.get(subtitlesSidebarOpenAtom)
+
+    if (!autoStart && !learningOpen) return
 
     if (this.config.embedded) {
       const video = this.subtitlesScheduler?.getVideoElement()

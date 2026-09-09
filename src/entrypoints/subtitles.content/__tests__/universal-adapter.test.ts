@@ -5,6 +5,7 @@ import {
   adPlayingAtom,
   currentTimeMsAtom,
   sourceTrackAtom,
+  subtitlesSidebarOpenAtom,
   subtitlesSourceAtom,
   subtitlesStore,
   translatedTrackAtom,
@@ -92,6 +93,7 @@ describe("universalVideoAdapter", () => {
     subtitlesStore.set(sourceTrackAtom, [])
     subtitlesStore.set(translatedTrackAtom, [])
     subtitlesStore.set(currentTimeMsAtom, 0)
+    subtitlesStore.set(subtitlesSidebarOpenAtom, false)
     vi.stubGlobal("document", {
       title: "Test video",
       querySelector: vi.fn<(...args: any[]) => any>(() => null),
@@ -585,6 +587,33 @@ describe("universalVideoAdapter", () => {
     await firstLoad.catch(() => undefined)
 
     expect(subtitlesStore.get(sourceTrackAtom).map((cue) => cue.text)).toEqual(["hello"])
+  })
+
+  it("auto-starts subtitles for a video that arrives with the learning panel open", async () => {
+    const { adapter } = createAdapter([{ text: "hello", start: 0, end: 500 }])
+    attachScheduler(adapter, false)
+    mocks.getLocalConfig.mockResolvedValue({ videoSubtitles: { autoStart: false } })
+    const toggleSpy = vi
+      .spyOn(adapter as any, "toggleSubtitlesWithSource")
+      .mockImplementation(() => undefined)
+    subtitlesStore.set(subtitlesSidebarOpenAtom, true)
+
+    await (adapter as any).tryAutoStartSubtitles()
+
+    expect(toggleSpy).toHaveBeenCalledExactlyOnceWith(true, "auto")
+  })
+
+  it("leaves subtitles off when neither autoStart nor the learning panel asks", async () => {
+    const { adapter } = createAdapter([{ text: "hello", start: 0, end: 500 }])
+    attachScheduler(adapter, false)
+    mocks.getLocalConfig.mockResolvedValue({ videoSubtitles: { autoStart: false } })
+    const toggleSpy = vi
+      .spyOn(adapter as any, "toggleSubtitlesWithSource")
+      .mockImplementation(() => undefined)
+
+    await (adapter as any).tryAutoStartSubtitles()
+
+    expect(toggleSpy).not.toHaveBeenCalled()
   })
 
   it("replaceSourceTrackWindow drops cues that overlap the window by interval", () => {

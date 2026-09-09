@@ -8,12 +8,13 @@ import {
   sourceTrackAtom,
   subtitlesSidebarOpenAtom,
   subtitlesStore,
+  subtitlesVisibleAtom,
 } from "../../../atoms"
 import { useSubtitlesUI } from "../../subtitles-ui-context"
 import { SubpageMenuEntry } from "./subpage-menu-entry"
 
 export function SubtitlesSidebarItem() {
-  const { supportsSidebar, hasSubtitlesAvailable } = useSubtitlesUI()
+  const { supportsSidebar, hasSubtitlesAvailable, toggleSubtitles } = useSubtitlesUI()
   const [isOpen, setOpen] = useAtom(subtitlesSidebarOpenAtom, { store: subtitlesStore })
   const sourceTrack = useAtomValue(sourceTrackAtom, { store: subtitlesStore })
   const [checking, setChecking] = useState(false)
@@ -39,6 +40,13 @@ export function SubtitlesSidebarItem() {
     return null
   }
 
+  const openPanel = () => {
+    setOpen(true)
+    if (!subtitlesStore.get(subtitlesVisibleAtom)) {
+      toggleSubtitles(true)
+    }
+  }
+
   const open = async () => {
     const videoId = subtitlesStore.get(currentVideoIdAtom)
     if (videoId === null) return
@@ -50,7 +58,7 @@ export function SubtitlesSidebarItem() {
     // only re-answer a question already settled.
     if (sourceTrack.length > 0) {
       setChecking(false)
-      setOpen(true)
+      openPanel()
       return
     }
 
@@ -62,7 +70,7 @@ export function SubtitlesSidebarItem() {
         showAnchoredSubtitlesToast(i18n.t("subtitles.sidebar.needsSubtitles"), anchor.current)
         return
       }
-      setOpen(true)
+      openPanel()
     } catch {
       if (isCurrent()) {
         showAnchoredSubtitlesToast(i18n.t("subtitles.sidebar.summary.failedTitle"), anchor.current)
