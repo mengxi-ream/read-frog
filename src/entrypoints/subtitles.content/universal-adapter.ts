@@ -38,10 +38,12 @@ import {
   currentTimeMsAtom,
   currentVideoIdAtom,
   sourceTrackAtom,
+  translatedTrackAtom,
   videoSummaryPartialAtom,
   subtitlesPositionAtom,
   subtitlesSettingsPanelOpenAtom,
   subtitlesSettingsPanelViewAtom,
+  subtitlesSidebarOpenAtom,
   subtitlesSourceAtom,
   subtitlesStore,
 } from "./atoms"
@@ -78,6 +80,8 @@ export interface SubtitlesProvidersAdapter {
   readonly supportsSidebar: boolean
   generateVideoSummary: (config: Config, videoId?: string | null) => Promise<string | null>
   hasSubtitlesAvailable: () => Promise<boolean>
+  ensureSourceTrackPublished: () => Promise<void>
+  seekTo: (seconds: number) => void
   toggleSubtitlesManually: (enabled: boolean) => void
   toggleSubtitlesByShortcut: (enabled: boolean) => void
   requestAiSubtitles: () => Promise<void>
@@ -95,6 +99,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private navigationReinitTimeoutId: ReturnType<typeof setTimeout> | null = null
   private hasPendingNavigationReset = false
   private trackChangeRefreshPromise: Promise<void> | null = null
+  private pendingTranscriptLoads = 0
 
   private sourceSubtitles: SubtitlesFragment[] = []
   private sourceProcessedSubtitles: SubtitlesFragment[] = []
@@ -219,6 +224,36 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   hasSubtitlesAvailable = () => this.fetcher.hasAvailableSubtitles()
+
+  /**
+   * The transcript reads `sourceTrackAtom`, which only fills once a subtitles
+   * session starts. Publishing it here does not put captions on the video:
+   * rendering is gated on `subtitlesVisibleAtom`, which only the scheduler sets.
+   */
+  ensureSourceTrackPublished = async () => {
+    if (subtitlesStore.get(sourceTrackAtom).length > 0) {
+      return
+    }
+    const operationId = this.switchOperationId
+    this.pendingTranscriptLoads++
+    try {
+      await this.getOrLoadSourceSubtitles()
+    } finally {
+      this.pendingTranscriptLoads--
+    }
+
+    if (operationId !== this.switchOperationId) {
+      return
+    }
+    this.publishSourceTrack(this.sourceProcessedSubtitles)
+  }
+
+  seekTo = (seconds: number) => {
+    const video = this.subtitlesScheduler?.getVideoElement()
+    if (video) {
+      video.currentTime = seconds
+    }
+  }
 
   downloadSourceSubtitles = async () => {
     await this.getOrLoadSourceSubtitles()
@@ -547,7 +582,9 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     const config = await getLocalConfig()
     const autoStart = config?.videoSubtitles?.autoStart ?? false
 
-    if (!autoStart) return
+    const learningOpen = subtitlesStore.get(subtitlesSidebarOpenAtom)
+
+    if (!autoStart && !learningOpen) return
 
     if (this.config.embedded) {
       const video = this.subtitlesScheduler?.getVideoElement()
@@ -649,12 +686,31 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
   private async refreshSourceTrackIfNeeded(): Promise<void> {
     const scheduler = this.subtitlesScheduler
-    if (!scheduler || !scheduler.isActive()) {
+    const isSchedulerActive = !!scheduler?.isActive()
+
+    const isTranscriptInUse =
+      subtitlesStore.get(sourceTrackAtom).length > 0 || this.pendingTranscriptLoads > 0
+    if (!isSchedulerActive && !isTranscriptInUse) {
       return
     }
 
     const useSameTrack = await this.fetcher.shouldUseSameTrack()
     if (useSameTrack) {
+      return
+    }
+
+    if (!scheduler || !isSchedulerActive) {
+      const operationId = ++this.switchOperationId
+      this.clearRuntimeSession()
+      this.clearSourceCache()
+      this.fetcher.cleanup()
+      scheduler?.reset()
+      subtitlesStore.set(translatedTrackAtom, [])
+      await this.getOrLoadSourceSubtitles()
+      if (operationId !== this.switchOperationId) {
+        return
+      }
+      this.publishSourceTrack(this.sourceProcessedSubtitles)
       return
     }
 

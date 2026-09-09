@@ -15,6 +15,8 @@ interface SubtitlesUIContextValue {
   supportsSidebar: boolean
   generateVideoSummary: (config: Config, videoId?: string | null) => Promise<string | null>
   hasSubtitlesAvailable: () => Promise<boolean>
+  ensureSourceTrackPublished: () => Promise<void>
+  seekTo: (seconds: number) => void
   downloadSourceSubtitles: () => Promise<void>
   downloadTranslatedSubtitles: () => Promise<void>
   controlsConfig?: ControlsConfig
@@ -50,6 +52,8 @@ export function SubtitlesProviders({
       supportsSidebar: adapter.supportsSidebar,
       generateVideoSummary: adapter.generateVideoSummary,
       hasSubtitlesAvailable: adapter.hasSubtitlesAvailable,
+      ensureSourceTrackPublished: adapter.ensureSourceTrackPublished,
+      seekTo: adapter.seekTo,
       downloadSourceSubtitles: adapter.downloadSourceSubtitles,
       downloadTranslatedSubtitles: adapter.downloadTranslatedSubtitles,
       controlsConfig: adapter.getControlsConfig(),

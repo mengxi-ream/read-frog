@@ -12,6 +12,7 @@ import {
   currentVideoIdAtom,
   subtitlesSidebarOpenAtom,
   subtitlesStore,
+  subtitlesVisibleAtom,
   videoSummaryPartialAtom,
 } from "../atoms"
 import { SubtitlesSidebarItem } from "../ui/subtitles-settings-panel/components/subtitles-sidebar-item"
@@ -40,8 +41,11 @@ vi.mock("../ui/subtitles-ui-context", () => ({
     supportsSidebar: true,
     generateVideoSummary: adapter.generateVideoSummary,
     hasSubtitlesAvailable: adapter.hasSubtitlesAvailable,
+    toggleSubtitles,
   }),
 }))
+
+const toggleSubtitles = vi.fn<(enabled: boolean) => void>()
 
 function deferred<T>() {
   let resolve!: (value: T) => void
@@ -107,6 +111,7 @@ describe("summary panel navigation", () => {
     subtitlesStore.set(currentVideoIdAtom, videoId)
     subtitlesStore.set(videoSummaryPartialAtom, "")
     subtitlesStore.set(subtitlesSidebarOpenAtom, false)
+    subtitlesStore.set(subtitlesVisibleAtom, false)
     vi.mocked(checkVideoSummaryAvailability).mockResolvedValue({ status: "ok" })
     vi.mocked(requestVideoSummary).mockImplementation(
       async (source) => `${source[0]!.text} summary`,
@@ -254,36 +259,52 @@ describe("summary panel navigation", () => {
     expect(screen.queryByText("A summary")).not.toBeInTheDocument()
   })
 
-  it.each(["model", "subtitles"])(
-    "discards the pending %s check after navigation",
-    async (stage) => {
-      const modelCheck = deferred<Awaited<ReturnType<typeof checkVideoSummaryAvailability>>>()
-      const subtitlesCheck = deferred<boolean>()
-      if (stage === "model")
-        vi.mocked(checkVideoSummaryAvailability).mockReturnValueOnce(modelCheck.promise)
-      else fetchers[0]!.hasAvailableSubtitles.mockReturnValueOnce(subtitlesCheck.promise)
-      renderPanel(false)
-      clickOpen()
-      const check =
-        stage === "subtitles" ? fetchers[0]!.hasAvailableSubtitles : checkVideoSummaryAvailability
-      await waitFor(() => expect(check).toHaveBeenCalledOnce())
-      startNavigation("B")
-      await finishNavigation()
-      await act(async () => {
-        modelCheck.resolve({ status: "ok" })
-        subtitlesCheck.resolve(true)
-      })
-      expect(subtitlesStore.get(subtitlesSidebarOpenAtom)).toBe(false)
-      expect(requestVideoSummary).not.toHaveBeenCalled()
-      expect(showAnchoredSubtitlesToast).not.toHaveBeenCalled()
-      clickOpen()
-      expect(await screen.findByText("B summary")).toBeInTheDocument()
-    },
-  )
+  it("discards the pending subtitles check after navigation", async () => {
+    const subtitlesCheck = deferred<boolean>()
+    fetchers[0]!.hasAvailableSubtitles.mockReturnValueOnce(subtitlesCheck.promise)
+    renderPanel(false)
+    clickOpen()
+    await waitFor(() => expect(fetchers[0]!.hasAvailableSubtitles).toHaveBeenCalledOnce())
+    startNavigation("B")
+    await finishNavigation()
+    await act(async () => subtitlesCheck.resolve(true))
+    expect(subtitlesStore.get(subtitlesSidebarOpenAtom)).toBe(false)
+    expect(requestVideoSummary).not.toHaveBeenCalled()
+    expect(showAnchoredSubtitlesToast).not.toHaveBeenCalled()
+    clickOpen()
+    expect(await screen.findByText("B summary")).toBeInTheDocument()
+  })
+
+  it("turns subtitles on when the panel opens", async () => {
+    renderPanel(false)
+    clickOpen()
+
+    await waitFor(() => expect(subtitlesStore.get(subtitlesSidebarOpenAtom)).toBe(true))
+    expect(toggleSubtitles).toHaveBeenCalledExactlyOnceWith(true)
+  })
+
+  it("leaves subtitles alone when they are already showing", async () => {
+    subtitlesStore.set(subtitlesVisibleAtom, true)
+    renderPanel(false)
+    clickOpen()
+
+    await waitFor(() => expect(subtitlesStore.get(subtitlesSidebarOpenAtom)).toBe(true))
+    expect(toggleSubtitles).not.toHaveBeenCalled()
+  })
+
+  it("does not turn subtitles on when the video has none", async () => {
+    fetchers[0]!.hasAvailableSubtitles.mockResolvedValue(false)
+    renderPanel(false)
+    clickOpen()
+
+    await waitFor(() => expect(showAnchoredSubtitlesToast).toHaveBeenCalledOnce())
+    expect(subtitlesStore.get(subtitlesSidebarOpenAtom)).toBe(false)
+    expect(toggleSubtitles).not.toHaveBeenCalled()
+  })
 
   it("invalidates a pending open even when A -> null -> A is batched", async () => {
-    const oldCheck = deferred<Awaited<ReturnType<typeof checkVideoSummaryAvailability>>>()
-    vi.mocked(checkVideoSummaryAvailability).mockReturnValueOnce(oldCheck.promise)
+    const oldCheck = deferred<boolean>()
+    fetchers[0]!.hasAvailableSubtitles.mockReturnValueOnce(oldCheck.promise)
     renderPanel(false)
     clickOpen()
     await act(async () => {
@@ -291,7 +312,7 @@ describe("summary panel navigation", () => {
       ;(adapter as any).handleNavigationStart()
       videoId = "A"
       await (adapter as any).handleNavigation()
-      oldCheck.resolve({ status: "ok" })
+      oldCheck.resolve(true)
     })
     expect(subtitlesStore.get(subtitlesSidebarOpenAtom)).toBe(false)
     expect(requestVideoSummary).not.toHaveBeenCalled()
@@ -341,12 +362,12 @@ describe("summary panel navigation", () => {
   })
 
   it("ignores an opening check after its control unmounts", async () => {
-    const check = deferred<Awaited<ReturnType<typeof checkVideoSummaryAvailability>>>()
-    vi.mocked(checkVideoSummaryAvailability).mockReturnValueOnce(check.promise)
+    const check = deferred<boolean>()
+    fetchers[0]!.hasAvailableSubtitles.mockReturnValueOnce(check.promise)
     const view = renderPanel(false)
     clickOpen()
     view.unmount()
-    await act(async () => check.resolve({ status: "ok" }))
+    await act(async () => check.resolve(true))
     expect(subtitlesStore.get(subtitlesSidebarOpenAtom)).toBe(false)
     expect(requestVideoSummary).not.toHaveBeenCalled()
   })
@@ -354,18 +375,17 @@ describe("summary panel navigation", () => {
   it.each(["blocked", "rejected"])(
     "ignores a stale %s check without clearing the new loading state",
     async (outcome) => {
-      const oldCheck = deferred<Awaited<ReturnType<typeof checkVideoSummaryAvailability>>>()
-      const nextCheck = deferred<Awaited<ReturnType<typeof checkVideoSummaryAvailability>>>()
-      vi.mocked(checkVideoSummaryAvailability)
-        .mockReturnValueOnce(oldCheck.promise)
-        .mockReturnValueOnce(nextCheck.promise)
+      const oldCheck = deferred<boolean>()
+      const nextCheck = deferred<boolean>()
+      fetchers[0]!.hasAvailableSubtitles.mockReturnValueOnce(oldCheck.promise)
       renderPanel(false)
       clickOpen()
       startNavigation("B")
       await finishNavigation()
+      fetchers.at(-1)!.hasAvailableSubtitles.mockReturnValueOnce(nextCheck.promise)
       clickOpen()
       await act(async () => {
-        if (outcome === "blocked") oldCheck.resolve({ status: "needsModel" })
+        if (outcome === "blocked") oldCheck.resolve(false)
         else oldCheck.reject(new Error("old check failed"))
       })
       expect(
@@ -375,7 +395,7 @@ describe("summary panel navigation", () => {
       ).not.toBeNull()
       expect(showAnchoredSubtitlesToast).not.toHaveBeenCalled()
       expect(subtitlesStore.get(subtitlesSidebarOpenAtom)).toBe(false)
-      await act(async () => nextCheck.resolve({ status: "ok" }))
+      await act(async () => nextCheck.resolve(true))
       expect(await screen.findByText("B summary")).toBeInTheDocument()
     },
   )

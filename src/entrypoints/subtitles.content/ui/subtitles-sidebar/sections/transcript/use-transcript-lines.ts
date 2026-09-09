@@ -1,0 +1,47 @@
+import type { UseQueryResult } from "@tanstack/react-query"
+import type { TranscriptLine } from "@/utils/subtitles/transcript"
+import { useQuery } from "@tanstack/react-query"
+import { atom, useAtomValue } from "jotai"
+import { useMemo } from "react"
+import { buildTranscript, findActiveLine } from "@/utils/subtitles/transcript"
+import {
+  currentTimeMsAtom,
+  currentVideoIdAtom,
+  sourceTrackAtom,
+  translatedTrackAtom,
+} from "../../../../atoms"
+import { useSubtitlesUI } from "../../../subtitles-ui-context"
+
+interface TranscriptLines {
+  lines: TranscriptLine[]
+  activeIndex: number
+  videoId: string | null
+  query: UseQueryResult<boolean>
+}
+
+export function useTranscriptLines(): TranscriptLines {
+  const { ensureSourceTrackPublished } = useSubtitlesUI()
+  const source = useAtomValue(sourceTrackAtom)
+  const translated = useAtomValue(translatedTrackAtom)
+  const videoId = useAtomValue(currentVideoIdAtom)
+
+  const lines = useMemo(() => buildTranscript(source, translated), [source, translated])
+  const activeIndexAtom = useMemo(
+    () => atom((get) => findActiveLine(lines, get(currentTimeMsAtom))),
+    [lines],
+  )
+  const activeIndex = useAtomValue(activeIndexAtom)
+
+  const query = useQuery({
+    queryKey: ["subtitles", "source-track", videoId],
+    queryFn: async () => {
+      await ensureSourceTrackPublished()
+      return true
+    },
+    enabled: lines.length === 0,
+    retry: false,
+    meta: { suppressToast: true },
+  })
+
+  return { lines, activeIndex, videoId, query }
+}
