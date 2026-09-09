@@ -1,5 +1,6 @@
 import type { StateData, SubtitlesFragment, SubtitlesState } from "@/utils/subtitles/types"
 import {
+  adPlayingAtom,
   currentSubtitleAtom,
   currentTimeMsAtom,
   subtitlesStateAtom,
@@ -225,8 +226,11 @@ export class SubtitlesScheduler {
   private updateSubtitles(currentTime: number) {
     const timeMs = currentTime * 1000
     // Published whether or not captions are showing: the transcript follows
-    // playback even when the user never turned subtitle translation on.
-    subtitlesStore.set(currentTimeMsAtom, timeMs)
+    // playback even when the user never turned subtitle translation on. An ad
+    // plays through the same element, so its clock is not the video's.
+    if (!subtitlesStore.get(adPlayingAtom)) {
+      subtitlesStore.set(currentTimeMsAtom, timeMs)
+    }
 
     if (!this.active) {
       return

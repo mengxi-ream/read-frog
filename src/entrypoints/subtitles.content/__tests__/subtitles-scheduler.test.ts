@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import {
+  adPlayingAtom,
   currentSubtitleAtom,
   currentTimeMsAtom,
   subtitlesStateAtom,
@@ -21,6 +22,7 @@ describe("subtitles scheduler", () => {
     subtitlesStore.set(currentSubtitleAtom, null)
     subtitlesStore.set(subtitlesStateAtom, null)
     subtitlesStore.set(currentTimeMsAtom, 0)
+    subtitlesStore.set(adPlayingAtom, false)
   })
 
   it("syncs currentTimeMsAtom on start without waiting for timeupdate", () => {
@@ -48,6 +50,30 @@ describe("subtitles scheduler", () => {
     expect(subtitlesStore.get(currentTimeMsAtom)).toBe(8000)
     expect(scheduler.isActive()).toBe(false)
     expect(subtitlesStore.get(currentSubtitleAtom)).toBeNull()
+  })
+
+  it("holds the published time while an ad plays", () => {
+    const video = createVideo(0)
+    const scheduler = new SubtitlesScheduler({ videoElement: video })
+    const calls = (video.addEventListener as unknown as ReturnType<typeof vi.fn>).mock.calls as [
+      string,
+      () => void,
+    ][]
+    const onTimeUpdate = calls.find((call) => call[0] === "timeupdate")![1]
+    subtitlesStore.set(currentTimeMsAtom, 8000)
+
+    subtitlesStore.set(adPlayingAtom, true)
+    ;(video as unknown as { currentTime: number }).currentTime = 3
+    onTimeUpdate()
+
+    // The ad plays through the same element; its clock would drag the transcript along.
+    expect(subtitlesStore.get(currentTimeMsAtom)).toBe(8000)
+
+    subtitlesStore.set(adPlayingAtom, false)
+    onTimeUpdate()
+
+    expect(subtitlesStore.get(currentTimeMsAtom)).toBe(3000)
+    expect(scheduler.isActive()).toBe(false)
   })
 
   it("resyncFromVideo refreshes the active cue from the live clock", () => {

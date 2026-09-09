@@ -46,11 +46,11 @@ function TranscriptSkeleton() {
 
 export function TranscriptSection() {
   const { seekTo } = useSubtitlesUI()
-  const { lines, activeIndex, query } = useTranscriptLines()
+  const { lines, activeIndex, videoId, query } = useTranscriptLines()
 
   const rootRef = useRef<HTMLDivElement>(null)
   const [activeRow, setActiveRow] = useState<HTMLButtonElement | null>(null)
-  const { following, resume, intentProps } = useFollowIntent(rootRef, lines.length > 0)
+  const { following, resume, intentProps } = useFollowIntent(rootRef, videoId, lines.length > 0)
   const activeAbove = useActiveRowVisibility(rootRef, activeRow, following)
 
   if (lines.length === 0) {

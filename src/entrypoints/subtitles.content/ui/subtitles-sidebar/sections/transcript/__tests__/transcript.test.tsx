@@ -52,7 +52,12 @@ function renderTranscript({ preloaded = true }: { preloaded?: boolean } = {}) {
             } as never
           }
         >
-          <TranscriptSection />
+          <div data-slot="scroll-area">
+            <div data-slot="scroll-area-viewport" tabIndex={0}>
+              <TranscriptSection />
+            </div>
+            <div data-slot="scroll-area-scrollbar" />
+          </div>
         </SubtitlesUIContext>
       </QueryClientProvider>
     </JotaiProvider>,
@@ -123,6 +128,40 @@ describe("transcriptSection", () => {
 
     await screen.findByText("second line")
     expect(ensureSourceTrackPublished).toHaveBeenCalledTimes(2)
+  })
+
+  it("stops following when a scroll key lands on the viewport", () => {
+    renderTranscript()
+
+    // The viewport is the transcript's ancestor, so a handler on the
+    // transcript itself would never see keys aimed at it.
+    fireEvent.keyDown(document.querySelector('[data-slot="scroll-area-viewport"]')!, {
+      key: "PageDown",
+    })
+
+    expect(screen.getByText("subtitles.sidebar.transcript.backToCurrent")).toBeTruthy()
+  })
+
+  it("stops following when the scrollbar is grabbed", () => {
+    renderTranscript()
+
+    fireEvent.pointerDown(document.querySelector('[data-slot="scroll-area-scrollbar"]')!)
+
+    expect(screen.getByText("subtitles.sidebar.transcript.backToCurrent")).toBeTruthy()
+  })
+
+  it("follows the next video even after the reader scrolled away from this one", () => {
+    renderTranscript()
+    fireEvent.keyDown(document.querySelector('[data-slot="scroll-area-viewport"]')!, {
+      key: "PageDown",
+    })
+    expect(screen.getByText("subtitles.sidebar.transcript.backToCurrent")).toBeTruthy()
+
+    act(() => {
+      subtitlesStore.set(currentVideoIdAtom, "video-2")
+    })
+
+    expect(screen.queryByText("subtitles.sidebar.transcript.backToCurrent")).toBeNull()
   })
 
   it("seeks to the start of the row that was clicked", () => {

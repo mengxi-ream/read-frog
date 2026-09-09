@@ -1,5 +1,6 @@
 import type { Ref } from "react"
 import type { TranscriptLine } from "@/utils/subtitles/transcript"
+import { memo } from "react"
 import { cn } from "@/utils/styles/utils"
 import { formatTimestamp } from "@/utils/subtitles/transcript"
 
@@ -10,7 +11,12 @@ interface TranscriptRowProps {
   activeRowRef?: Ref<HTMLButtonElement>
 }
 
-export function TranscriptRow({ line, isActive, onSeek, activeRowRef }: TranscriptRowProps) {
+export const TranscriptRow = memo(function TranscriptRow({
+  line,
+  isActive,
+  onSeek,
+  activeRowRef,
+}: TranscriptRowProps) {
   return (
     <button
       ref={activeRowRef}
@@ -45,4 +51,4 @@ export function TranscriptRow({ line, isActive, onSeek, activeRowRef }: Transcri
       )}
     </button>
   )
-}
+})

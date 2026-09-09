@@ -544,6 +544,49 @@ describe("universalVideoAdapter", () => {
     expect(subtitlesStore.get(translatedTrackAtom)).toEqual([])
   })
 
+  it("resets the hidden session when an inactive track is refreshed", async () => {
+    const { adapter } = createAdapter([{ text: "hello", start: 0, end: 500 }])
+    const subtitlesScheduler = attachScheduler(adapter, false)
+    subtitlesStore.set(sourceTrackAtom, [{ text: "old", start: 0, end: 500 }])
+    ;(adapter as any).sessionProcessedFragments = [
+      { text: "old", start: 0, end: 500, translation: "旧" },
+    ]
+    ;(adapter as any).sessionVideoId = ""
+
+    await adapter.handleSourceTrackChanged()
+
+    // Otherwise re-enabling captions would resume the old cues against the new track.
+    expect((adapter as any).sessionProcessedFragments).toEqual([])
+    expect((adapter as any).sessionVideoId).toBeNull()
+    expect(subtitlesScheduler.reset).toHaveBeenCalledTimes(1)
+    expect(subtitlesStore.get(sourceTrackAtom).map((cue) => cue.text)).toEqual(["hello"])
+  })
+
+  it("refreshes the track while the transcript's first load is still in flight", async () => {
+    const { adapter, subtitlesFetcher } = createAdapter([{ text: "hello", start: 0, end: 500 }])
+    attachScheduler(adapter, false)
+    let resolveFirstFetch!: (cues: unknown) => void
+    subtitlesFetcher.fetch.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveFirstFetch = resolve
+      }),
+    )
+
+    const firstLoad = adapter.ensureSourceTrackPublished()
+    await vi.waitFor(() => expect(subtitlesFetcher.fetch).toHaveBeenCalledTimes(1))
+
+    await adapter.handleSourceTrackChanged()
+
+    // An empty atom used to read as "transcript not in use", dropping the change.
+    expect(subtitlesFetcher.cleanup).toHaveBeenCalledTimes(1)
+    expect(subtitlesFetcher.fetch).toHaveBeenCalledTimes(2)
+
+    resolveFirstFetch([{ text: "old", start: 0, end: 500 }])
+    await firstLoad.catch(() => undefined)
+
+    expect(subtitlesStore.get(sourceTrackAtom).map((cue) => cue.text)).toEqual(["hello"])
+  })
+
   it("replaceSourceTrackWindow drops cues that overlap the window by interval", () => {
     const { adapter } = createAdapter([])
     attachScheduler(adapter, true)

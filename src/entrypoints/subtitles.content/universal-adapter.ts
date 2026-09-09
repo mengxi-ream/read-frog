@@ -98,6 +98,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private navigationReinitTimeoutId: ReturnType<typeof setTimeout> | null = null
   private hasPendingNavigationReset = false
   private trackChangeRefreshPromise: Promise<void> | null = null
+  private pendingTranscriptLoads = 0
 
   private sourceSubtitles: SubtitlesFragment[] = []
   private sourceProcessedSubtitles: SubtitlesFragment[] = []
@@ -233,7 +234,12 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       return
     }
     const operationId = this.switchOperationId
-    await this.getOrLoadSourceSubtitles()
+    this.pendingTranscriptLoads++
+    try {
+      await this.getOrLoadSourceSubtitles()
+    } finally {
+      this.pendingTranscriptLoads--
+    }
 
     if (operationId !== this.switchOperationId) {
       return
@@ -678,7 +684,9 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private async refreshSourceTrackIfNeeded(): Promise<void> {
     const scheduler = this.subtitlesScheduler
     const isSchedulerActive = !!scheduler?.isActive()
-    const isTranscriptInUse = subtitlesStore.get(sourceTrackAtom).length > 0
+
+    const isTranscriptInUse =
+      subtitlesStore.get(sourceTrackAtom).length > 0 || this.pendingTranscriptLoads > 0
     if (!isSchedulerActive && !isTranscriptInUse) {
       return
     }
@@ -690,9 +698,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
     if (!scheduler || !isSchedulerActive) {
       const operationId = ++this.switchOperationId
+      this.clearRuntimeSession()
       this.clearSourceCache()
       this.fetcher.cleanup()
-      subtitlesStore.set(sourceTrackAtom, [])
+      scheduler?.reset()
       subtitlesStore.set(translatedTrackAtom, [])
       await this.getOrLoadSourceSubtitles()
       if (operationId !== this.switchOperationId) {
