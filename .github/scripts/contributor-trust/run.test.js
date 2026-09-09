@@ -232,6 +232,6 @@ describe("main", () => {
     const summary = await readFile(process.env.GITHUB_STEP_SUMMARY, "utf8")
     expect(summary).toContain("- Trust score: **78/100**")
     expect(summary).toContain("- PR counted changed lines: 25")
-    expect(summary).toContain("- Migration-related changed lines excluded: 1500")
+    expect(summary).toContain("- Migration and locale changed lines excluded: 1500")
   })
 })

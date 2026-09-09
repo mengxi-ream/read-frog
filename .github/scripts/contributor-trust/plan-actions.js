@@ -1,6 +1,7 @@
 import { bucketToLabel, MANAGED_TRUST_LABELS, POLICY } from "./config.js"
 
-const CONFIG_MIGRATION_CHANGED_LINE_PATH_PATTERNS = Object.freeze([
+const EXCLUDED_CHANGED_LINE_PATH_PATTERNS = Object.freeze([
+  /^src\/locales\/.+/,
   /^src\/utils\/config\/migration-scripts\/v\d+-to-v\d+\.ts$/,
   /^src\/utils\/config\/__tests__\/migration-scripts\/v\d+-to-v\d+\.test\.ts$/,
   /^src\/utils\/config\/__tests__\/example\/v\d+\.ts$/,
@@ -18,9 +19,9 @@ function getPullRequestFilePath(file) {
   return String(file?.filename ?? file?.path ?? "")
 }
 
-export function isMigrationChangedLineFile(filePath) {
+export function isExcludedChangedLineFile(filePath) {
   const normalizedPath = String(filePath).replaceAll("\\", "/")
-  return CONFIG_MIGRATION_CHANGED_LINE_PATH_PATTERNS.some((pattern) => pattern.test(normalizedPath))
+  return EXCLUDED_CHANGED_LINE_PATH_PATTERNS.some((pattern) => pattern.test(normalizedPath))
 }
 
 function getFallbackChangedLineDetails(pullRequest) {
@@ -59,7 +60,7 @@ function getPullRequestChangedLineDetails(pullRequest, pullRequestFiles) {
     const changedLines = additions + deletions
     const filePath = getPullRequestFilePath(file)
 
-    if (isMigrationChangedLineFile(filePath)) {
+    if (isExcludedChangedLineFile(filePath)) {
       details.excludedAdditions += additions
       details.excludedChangedLines += changedLines
       details.excludedDeletions += deletions
@@ -78,7 +79,7 @@ function getPullRequestChangedLineDetails(pullRequest, pullRequestFiles) {
 function formatChangedLineThresholdReason(score, changedLineDetails) {
   const changedLineDescription =
     changedLineDetails.excludedChangedLines > 0
-      ? `${changedLineDetails.changedLines} counted lines after excluding ${changedLineDetails.excludedChangedLines} migration-related lines`
+      ? `${changedLineDetails.changedLines} counted lines after excluding ${changedLineDetails.excludedChangedLines} migration and locale lines`
       : `${changedLineDetails.changedLines} lines`
 
   return `Score ${score.total} is below ${POLICY.autoCloseBelowScore} and the PR changes ${changedLineDescription}, exceeding ${POLICY.autoCloseAboveChangedLines}.`
