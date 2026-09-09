@@ -81,7 +81,7 @@ export function TranscriptSection() {
       variant="brand"
       size="sm"
       onClick={resume}
-      className="pointer-events-auto shadow-floating"
+      className="pointer-events-auto shadow-(--rf-elevation-floating)"
     >
       {activeAbove ? <IconArrowUp className="size-3.5" /> : <IconArrowDown className="size-3.5" />}
       {i18n.t("subtitles.sidebar.transcript.backToCurrent")}
