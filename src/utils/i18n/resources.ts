@@ -1,5 +1,6 @@
 /// <reference types="@modyfi/vite-plugin-yaml/modules" />
 import type { Resource } from "i18next"
+import az from "@/locales/az.yml"
 import en from "@/locales/en.yml"
 import es from "@/locales/es.yml"
 import ja from "@/locales/ja.yml"
@@ -18,6 +19,11 @@ import zhTW from "@/locales/zh-TW.yml"
  * emit `_locales/*` for manifest name/description localization (browser-locale-bound).
  */
 export const SUPPORTED_UI_LOCALES = [
+  // Chrome ignores _locales/az; our i18next UI still supports manual switching.
+  // "Auto" follows the browser UI language. Keep native default_locale as "en"
+  // and use the i18next facade for UI strings, not browser.i18n.getMessage().
+  // https://developer.chrome.com/docs/extensions/reference/api/i18n#locales
+  "az",
   "en",
   "es",
   "ja",
@@ -62,6 +68,7 @@ function convertTree(node: LocaleTree): LocaleTree {
 }
 
 const rawResources: Record<SupportedUiLocale, LocaleTree> = {
+  az,
   en,
   es,
   ja,

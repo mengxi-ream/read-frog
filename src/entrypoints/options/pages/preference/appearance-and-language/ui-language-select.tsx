@@ -15,6 +15,7 @@ import { i18n } from "@/utils/i18n"
 // Each language is shown in its own script (endonym), so these labels are the same
 // regardless of the current interface language and never need translation.
 const LANGUAGE_ENDONYMS: Record<Exclude<UiLanguage, "auto">, string> = {
+  az: "Azərbaycanca",
   en: "English",
   es: "Español",
   ja: "日本語",
@@ -28,6 +29,7 @@ const LANGUAGE_ENDONYMS: Record<Exclude<UiLanguage, "auto">, string> = {
 
 const UI_LANGUAGE_ORDER: UiLanguage[] = [
   "auto",
+  "az",
   "en",
   "es",
   "ja",

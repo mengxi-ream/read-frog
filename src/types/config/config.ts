@@ -131,7 +131,7 @@ const siteControlSchema = z.object({
 // parse successfully, avoiding the destructive fallback-to-DEFAULT_CONFIG path in
 // `writeConfigAtom` / `initializeConfig` during the upgrade window.
 const uiLanguageSchema = z
-  .enum(["auto", "en", "es", "ja", "ko", "ru", "tr", "vi", "zh-CN", "zh-TW"])
+  .enum(["auto", "az", "en", "es", "ja", "ko", "ru", "tr", "vi", "zh-CN", "zh-TW"])
   .default("auto")
 export type UiLanguage = z.infer<typeof uiLanguageSchema>
 
