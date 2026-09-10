@@ -124,6 +124,12 @@ interface ProtocolMap {
       // same as omitting the field: omitting it lets the background fall back to
       // resolving unscoped glossaries itself.
       glossaryTerms?: MatchedTerm[]
+      // Which glossary revision `glossaryTerms` was read from. A batch can hold
+      // requests resolved either side of an edit made while the page was still
+      // translating; without this the background would settle a disagreement by
+      // message arrival order, which is a coin flip. See
+      // `mergeBatchGlossaryTerms`.
+      glossaryRevision?: number
     },
   ) => Promise<string>
   // Drain queued/in-flight page-translation requests of one session (#1881).
@@ -147,6 +153,7 @@ interface ProtocolMap {
     summary?: string | null
     // See `enqueueTranslateRequest`.
     glossaryTerms?: MatchedTerm[]
+    glossaryRevision?: number
   }) => Promise<string>
   getSubtitlesSummary: (data: {
     videoTitle: string

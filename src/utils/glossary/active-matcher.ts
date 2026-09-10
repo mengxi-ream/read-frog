@@ -39,7 +39,21 @@ interface CachedMatcher {
 }
 
 let cached: CachedMatcher | null = null
-let inFlight: Promise<GlossaryMatcher> | null = null
+let inFlight: Promise<ActiveGlossary> | null = null
+
+/**
+ * The compiled matcher together with the revision it was built from.
+ *
+ * They travel as a PAIR because a caller that stamps a request with the revision
+ * has to stamp it with the revision of the terms it actually received. Reading
+ * `cached.revision` afterwards could see a different one: an edit in the options
+ * page nulls the cache between any two statements, and the whole point of the
+ * stamp is to survive exactly that race (see `mergeBatchGlossaryTerms`).
+ */
+export interface ActiveGlossary {
+  matcher: GlossaryMatcher
+  revision: number
+}
 
 /**
  * How this context obtains the glossary.
@@ -118,12 +132,12 @@ function watchGlossaryRevision(): void {
   }
 }
 
-export async function getActiveGlossaryMatcher(
-  targetLang: LangCodeISO6393,
-): Promise<GlossaryMatcher> {
+async function getActiveGlossary(targetLang: LangCodeISO6393): Promise<ActiveGlossary> {
   watchGlossaryRevision()
   const url = currentDocumentUrl()
-  if (cached && cached.url === url && cached.targetLang === targetLang) return cached.matcher
+  if (cached && cached.url === url && cached.targetLang === targetLang) {
+    return { matcher: cached.matcher, revision: cached.revision }
+  }
   if (inFlight) return inFlight
 
   inFlight = (async () => {
@@ -151,12 +165,14 @@ export async function getActiveGlossaryMatcher(
         // compiled matcher and just move the cache onto this URL.
         cached = { ...cached, url }
       }
-      return cached.matcher
+      return { matcher: cached.matcher, revision: cached.revision }
     } catch (error) {
       // A glossary that cannot be loaded must never fail a translation; the
       // page simply translates without it.
       logger.warn("Failed to load glossary snapshot", error)
-      return createGlossaryMatcher([])
+      // Revision 0 loses every conflict in `mergeBatchGlossaryTerms`, which is
+      // exactly right: this context has no terms to contribute to one.
+      return { matcher: createGlossaryMatcher([]), revision: 0 }
     } finally {
       inFlight = null
     }
@@ -165,16 +181,35 @@ export async function getActiveGlossaryMatcher(
   return inFlight
 }
 
+export async function getActiveGlossaryMatcher(
+  targetLang: LangCodeISO6393,
+): Promise<GlossaryMatcher> {
+  return (await getActiveGlossary(targetLang)).matcher
+}
+
+export interface ResolvedGlossaryTerms {
+  terms: MatchedTerm[]
+  /**
+   * The glossary revision `terms` were read from, so a request can say WHICH
+   * state of the glossary it is carrying. A batch can hold requests resolved
+   * either side of an edit, and the background has no other way to tell which
+   * wording is the newer one — see `mergeBatchGlossaryTerms`.
+   *
+   * 0 when there are no terms to carry, which loses every conflict.
+   */
+  revision: number
+}
+
 /** Terms present in `input`, or none when the feature is off or unavailable. */
 export async function resolveGlossaryTerms(
   input: string,
   enabled: boolean,
   targetLang: LangCodeISO6393,
-): Promise<MatchedTerm[]> {
-  if (!enabled || input.trim() === "") return []
-  const matcher = await getActiveGlossaryMatcher(targetLang)
-  if (matcher.size === 0) return []
-  return matcher.match(input)
+): Promise<ResolvedGlossaryTerms> {
+  if (!enabled || input.trim() === "") return { terms: [], revision: 0 }
+  const { matcher, revision } = await getActiveGlossary(targetLang)
+  if (matcher.size === 0) return { terms: [], revision }
+  return { terms: matcher.match(input), revision }
 }
 
 /** Drops the compiled matcher. Called after a write so the next match recompiles. */

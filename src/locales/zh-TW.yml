@@ -916,6 +916,12 @@ options:
       importOverflow: "本次匯入會超出上限 $1 條術語，未做任何變更。"
       importSuccess: "已匯入 $1 條新術語，更新 $2 條。"
       importSkipped: "已略過 $1 列無效資料和 $2 筆重複項目。"
+      importNoValidRows: "這些列都沒有指定本擴充功能能翻譯的目標語言，未做任何變更。"
+      importReplaceConfirm:
+        title: 取代整個清單？
+        description: "該術語庫下的全部 $1 條術語都會被刪除——包括所有目標語言，不只是目前選擇的那個——然後以該檔案的內容取代。此操作無法復原。"
+        confirm: 取代
+        cancel: 取消
       deleteAll:
         title: 刪除所有術語
         description: 清空你的術語庫。如果之後可能還要用,請先匯出——刪除後無法復原。

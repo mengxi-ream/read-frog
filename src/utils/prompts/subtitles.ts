@@ -75,7 +75,7 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
   const resolvedSystemPrompt = replaceTokens(systemPrompt)
   const glossaryTerms =
     options?.glossaryTerms ??
-    (await resolveGlossaryTerms(input, config.glossary.enabled, config.language.targetCode))
+    (await resolveGlossaryTerms(input, config.glossary.enabled, config.language.targetCode)).terms
   return {
     systemPrompt: appendGlossaryToSystemPrompt(resolvedSystemPrompt, glossaryTerms),
     prompt: replaceTokens(prompt),

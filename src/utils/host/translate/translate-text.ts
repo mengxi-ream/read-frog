@@ -345,7 +345,12 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
   // The same list feeds the cache hash and travels with the request, so the
   // prompt the hash describes is the prompt the background builds — it serves
   // every tab at once and could not scope this by itself.
-  const glossaryTerms = await resolveGlossaryTerms(
+  //
+  // The revision travels with it because a batch can hold paragraphs resolved
+  // either side of an edit made while this page was still translating, and it
+  // is the only thing that tells the background which wording is the newer one
+  // (see `mergeBatchGlossaryTerms`).
+  const { terms: glossaryTerms, revision: glossaryRevision } = await resolveGlossaryTerms(
     preparedText,
     glossaryEnabled,
     langConfig.targetCode,
@@ -410,6 +415,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     sessionId,
     forceRetranslation,
     glossaryTerms,
+    glossaryRevision,
     hostedFeature,
   })
   if (sessionId !== undefined) {

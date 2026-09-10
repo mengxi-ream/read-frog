@@ -135,7 +135,27 @@ export function shouldUseBatchQueue(provider: QueuedTranslationProvider): boolea
  *
  * Deliberately NOT part of `getBatchKey`. Keying on it would put every paragraph
  * with a different set of matched terms into a batch of its own, which is to say
- * it would switch batching off for anyone using a glossary.
+ * it would switch batching off for anyone using a glossary. That exclusion is
+ * only safe because `context` — which IS in the batch key — is derived per page,
+ * so two different pages cannot co-batch. Anything that trims the page content
+ * out of the batch key has to revisit this.
+ *
+ * Two members CAN still disagree about one term without any scope difference:
+ * an edit made while the page is still translating bumps the revision and
+ * invalidates the compiled matcher, so paragraphs resolved either side of it
+ * carry different wordings for one `matchKey` under a byte-identical context.
+ * The revision each member was resolved against decides — the newer wording
+ * wins, which is the edit the user just made. Arrival order must NOT decide:
+ * members race through prompt rendering before they are sent, so it is a coin
+ * flip, and half the time it would put back the wording the user just replaced.
+ *
+ * Equal revisions carrying DIFFERENT wordings cannot happen within one glossary
+ * state, so it means the stamp is not trustworthy for that key — `readSnapshot`
+ * reads the revision and the entries separately while a writer commits its rows
+ * before bumping, leaving a sub-millisecond window where post-edit entries come
+ * back under a pre-edit revision. There the term is DROPPED rather than guessed
+ * at: sending no instruction for it costs the user the wording once, whereas
+ * guessing sends a wording that is wrong half the time and then caches it.
  */
 function mergeBatchGlossaryTerms<TContext>(
   dataList: readonly TranslateBatchData<TContext>[],
@@ -145,13 +165,51 @@ function mergeBatchGlossaryTerms<TContext>(
   // matched" and must suppress that fallback.
   if (dataList.every((data) => data.glossaryTerms === undefined)) return undefined
 
-  const byMatchKey = new Map<string, MatchedTerm>()
+  const byMatchKey = new Map<string, { term: MatchedTerm; revision: number }>()
+  // Keys whose wording two members disagreed on at the SAME revision. Cleared
+  // again if a strictly newer revision turns up, which settles the key outright.
+  const unresolvable = new Set<string>()
+
   for (const data of dataList) {
+    // Absent for a sender that predates the field (an old content script still
+    // live across an update). 0 loses every disagreement, which is the safe way
+    // round: a member that cannot say how fresh its terms are never displaces
+    // one that can.
+    const revision = data.glossaryRevision ?? 0
     for (const term of data.glossaryTerms ?? []) {
-      byMatchKey.set(term.matchKey, term)
+      const existing = byMatchKey.get(term.matchKey)
+      if (existing === undefined) {
+        byMatchKey.set(term.matchKey, { term, revision })
+        continue
+      }
+      if (revision > existing.revision) {
+        byMatchKey.set(term.matchKey, { term, revision })
+        unresolvable.delete(term.matchKey)
+        continue
+      }
+      if (revision === existing.revision && !isSameWording(existing.term, term)) {
+        unresolvable.add(term.matchKey)
+      }
     }
   }
-  return [...byMatchKey.values()].sort((a, b) => a.matchKey.localeCompare(b.matchKey))
+
+  for (const matchKey of unresolvable) byMatchKey.delete(matchKey)
+
+  return [...byMatchKey.values()]
+    .map(({ term }) => term)
+    .sort((a, b) => a.matchKey.localeCompare(b.matchKey))
+}
+
+/**
+ * Whether two hits on one `matchKey` say the same thing.
+ *
+ * All three fields come from the indexed glossary entry rather than from the
+ * page's surface text (`utils/glossary/matcher.ts`), so two hits produced from
+ * the same glossary state are identical and this only ever separates hits
+ * produced from DIFFERENT states.
+ */
+function isSameWording(a: MatchedTerm, b: MatchedTerm): boolean {
+  return a.target === b.target && a.keepOriginal === b.keepOriginal && a.source === b.source
 }
 
 export async function executeBatchTranslation<TContext>(
@@ -189,6 +247,9 @@ export type TranslateBatchData<TContext = unknown> = QueuedTranslationRouting & 
   // Resolved by the sender, where the page URL is known. A separate field from
   // `context` on purpose: `context` is part of the batch key.
   glossaryTerms?: readonly MatchedTerm[]
+  // Which revision `glossaryTerms` was read from — how `mergeBatchGlossaryTerms`
+  // settles two members that disagree about one term.
+  glossaryRevision?: number
   // Cancellation scope (`${tabId}:${sessionId}`); absent = uncancellable.
   scope?: string
 }
@@ -295,7 +356,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
       return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash, meta.scopes, { timeoutMs })
     },
     executeIndividual: async (data) => {
-      const { text, langConfig, provider, hash, scheduleAt, context, scope } = data
+      const { text, langConfig, provider, hash, scheduleAt, context, scope, glossaryTerms } = data
       // This individual fallback is its own model call, but any automatic
       // retries of its RequestQueue thunk reuse the same idempotency key.
       const hostedRequestId = getLocalProviderConfig(provider) ? undefined : getRandomUUID()
@@ -308,6 +369,12 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
           context,
           signal,
           hostedRequestId,
+          // The sender's own terms, NOT the batch union: this is one item again.
+          // Dropping them here would let a batch that fell back translate
+          // without the glossary and then cache that result under a hash taken
+          // over a prompt that HAD the terms in it — a mismatch that outlives
+          // the failure by a week.
+          glossaryTerms,
         })
       }
       return requestQueue.enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)

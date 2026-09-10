@@ -293,7 +293,9 @@ export interface ImportGlossaryResult {
   duplicatesInFile: number
   /** Rows dropped because their `targetLanguage` column named a language we cannot translate into. */
   unknownLanguage: number
-  /** Set when the import was refused; the list is left untouched. */
+  /** Why the import was refused. Absent when `ok`; the list is left untouched. */
+  reason?: "overflow" | "no-valid-rows"
+  /** Set when the import was refused for `overflow`. */
   overflowBy?: number
 }
 
@@ -362,6 +364,7 @@ export async function importGlossaryRows(
       updated: 0,
       duplicatesInFile,
       unknownLanguage,
+      reason: "overflow",
       overflowBy: finalCount - MAX_GLOSSARY_TERMS,
     }
   }
@@ -380,6 +383,28 @@ export async function importGlossaryRows(
     enabled: existingByKey.get(key)?.enabled ?? true,
     updatedAt: now,
   })) as GlossaryTerm[]
+
+  // Nothing survived to write — the file was empty, or every row was dropped by
+  // an unrecognised `targetLanguage` or a third column that was never a language
+  // at all. Under "replace" the transaction below would then delete the whole
+  // list and insert nothing, reporting success. Refuse it whole, exactly as the
+  // cap refusal does and for the same reason: this is the one table holding text
+  // the user typed, and there is no undo.
+  //
+  // Deliberately not conditioned on `mode` or on the row count, so the function
+  // carries one invariant a reader can rely on without tracing its caller: it
+  // never deletes without inserting. Clearing a list on purpose has its own
+  // path, behind its own confirm.
+  if (records.length === 0) {
+    return {
+      ok: false,
+      added: 0,
+      updated: 0,
+      duplicatesInFile,
+      unknownLanguage,
+      reason: "no-valid-rows",
+    }
+  }
 
   await db.transaction("rw", db.glossaryTerm, async () => {
     if (mode === "replace") {

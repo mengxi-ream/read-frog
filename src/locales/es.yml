@@ -916,6 +916,12 @@ options:
       importOverflow: "Esa importación superaría el límite en $1 términos. No se ha cambiado nada."
       importSuccess: "Se han importado $1 términos nuevos y actualizado $2."
       importSkipped: "Se han omitido $1 filas no válidas y $2 duplicados."
+      importNoValidRows: "Ninguna de esas filas indicaba un idioma al que esta extensión pueda traducir. No se ha cambiado nada."
+      importReplaceConfirm:
+        title: "¿Reemplazar toda la lista?"
+        description: "Se eliminarán los $1 términos de este glosario —en todos los idiomas de destino, no solo en el seleccionado— y se reemplazarán por el contenido de este archivo. Esta acción no se puede deshacer."
+        confirm: Reemplazar
+        cancel: Cancelar
       deleteAll:
         title: Eliminar todos los términos
         description: Vacía tu glosario. Expórtalo primero si crees que vas a necesitar los términos — eliminarlos no se puede deshacer.

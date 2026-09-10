@@ -916,6 +916,12 @@ options:
       importOverflow: "Bu idxal limiti $1 termin aşacaq. Heç nə dəyişdirilmədi."
       importSuccess: "$1 yeni termin idxal edildi, $2 termin yeniləndi."
       importSkipped: "$1 yanlış sətir və $2 təkrar buraxıldı."
+      importNoValidRows: "Bu sətirlərin heç birində bu genişlənmənin tərcümə edə biləcəyi dil göstərilməyib. Heç nə dəyişdirilmədi."
+      importReplaceConfirm:
+        title: Bütün siyahı əvəz edilsin?
+        description: "Bu lüğətdəki $1 terminin hamısı silinəcək — yalnız seçilmiş dil deyil, bütün hədəf dillər — və bu faylın məzmunu ilə əvəz olunacaq. Bu əməliyyat geri qaytarıla bilməz."
+        confirm: Əvəz et
+        cancel: Ləğv et
       deleteAll:
         title: Bütün terminləri sil
         description: Terminlər lüğətinizi boşaldır. Terminlər sonra lazım ola bilərsə, əvvəlcə ixrac edin — silmə geri qaytarıla bilməz.

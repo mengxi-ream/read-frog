@@ -3,6 +3,16 @@ import { Icon } from "@iconify/react"
 import { useAtomValue } from "jotai"
 import { useState } from "react"
 import { LanguageCombobox } from "@/components/language-combobox"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/base-ui/alert-dialog"
 import { Button } from "@/components/ui/base-ui/button"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import { Label } from "@/components/ui/base-ui/label"
@@ -20,7 +30,7 @@ import { parseGlossaryCsv } from "@/utils/glossary/csv"
 import { exportGlossaryCsv } from "@/utils/glossary/repository"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
-import { useImportGlossary } from "./use-glossary"
+import { useGlossaryTerms, useImportGlossary } from "./use-glossary"
 
 const IMPORT_INPUT_ID = "glossary-import-file"
 
@@ -49,6 +59,14 @@ export function GlossaryImportExport({
   // file written before that column existed, and every file from another tool.
   const [fallbackLang, setFallbackLang] = useState<LangCodeISO6393>(language.targetCode)
   const { mutateAsync: importRows, isPending } = useImportGlossary(glossaryId)
+  // `isSuccess`, not just the data: an unsettled or failed query would render
+  // "All 0 terms will be deleted" on the one screen where that number IS the
+  // safety information, which understates the damage and reads as reassuring.
+  const { data: terms = [], isSuccess: termCountKnown } = useGlossaryTerms(glossaryId)
+  // Held between picking the file and confirming the replace. Replace deletes
+  // text the user typed, so it goes behind the same kind of confirm as
+  // `GlossaryDeleteAllItem` rather than firing straight off the file picker.
+  const [pendingReplaceFile, setPendingReplaceFile] = useState<File | null>(null)
 
   const handleImport = async (file: File) => {
     const { rows, skipped } = parseGlossaryCsv(await file.text())
@@ -59,12 +77,16 @@ export function GlossaryImportExport({
 
     const result = await importRows({ rows, mode, caseSensitive, fallbackLang })
 
-    // Over the cap the import is refused whole and the exact overflow is named.
-    // Truncating would leave the user unable to see which half is missing.
+    // Refused whole rather than partially applied — over the cap, or with not a
+    // single usable row. Truncating (or, under replace, emptying the list and
+    // inserting nothing) would leave the user unable to see what is missing.
     if (!result.ok) {
       toastManager.add({
         type: "error",
-        title: i18n.t("options.advanced.glossary.importOverflow", [String(result.overflowBy ?? 0)]),
+        title:
+          result.reason === "no-valid-rows"
+            ? i18n.t("options.advanced.glossary.importNoValidRows")
+            : i18n.t("options.advanced.glossary.importOverflow", [String(result.overflowBy ?? 0)]),
       })
       return
     }
@@ -163,7 +185,11 @@ export function GlossaryImportExport({
           className="hidden"
           onChange={(event) => {
             const file = event.target.files?.[0]
-            if (file) void handleImport(file)
+            if (!file) return
+            // Merge only ever adds, so it needs no confirm. Replace is the one
+            // that destroys.
+            if (mode === "replace") setPendingReplaceFile(file)
+            else void handleImport(file)
             event.target.value = ""
           }}
         />
@@ -172,6 +198,44 @@ export function GlossaryImportExport({
           <Icon icon="tabler:file-export" />
           {i18n.t("options.advanced.glossary.export")}
         </Button>
+
+        <AlertDialog
+          open={pendingReplaceFile !== null}
+          onOpenChange={(open) => {
+            if (!open) setPendingReplaceFile(null)
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {i18n.t("options.advanced.glossary.importReplaceConfirm.title")}
+              </AlertDialogTitle>
+              {/* The count, and the fact that replace crosses target languages,
+                  are the two things the label "Replace list" does not say. */}
+              <AlertDialogDescription>
+                {i18n.t("options.advanced.glossary.importReplaceConfirm.description", [
+                  String(terms.length),
+                ])}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>
+                {i18n.t("options.advanced.glossary.importReplaceConfirm.cancel")}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                variant="destructive"
+                disabled={isPending || !termCountKnown}
+                onClick={() => {
+                  const file = pendingReplaceFile
+                  setPendingReplaceFile(null)
+                  if (file) void handleImport(file)
+                }}
+              >
+                {i18n.t("options.advanced.glossary.importReplaceConfirm.confirm")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </ConfigItem>
   )

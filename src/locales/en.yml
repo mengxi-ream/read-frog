@@ -916,6 +916,12 @@ options:
       importOverflow: "That import would exceed the limit by $1 terms. Nothing was changed."
       importSuccess: "Imported $1 new and updated $2 terms."
       importSkipped: "Skipped $1 invalid rows and $2 duplicates."
+      importNoValidRows: "None of those rows named a language this extension can translate into. Nothing was changed."
+      importReplaceConfirm:
+        title: Replace the whole list?
+        description: "All $1 terms in this glossary will be deleted — every target language, not just the one selected — and replaced with the contents of this file. This cannot be undone."
+        confirm: Replace
+        cancel: Cancel
       deleteAll:
         title: Delete all terms
         description: Empty your glossary. Export first if you might want the terms back — deleting them cannot be undone.

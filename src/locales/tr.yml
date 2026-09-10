@@ -800,6 +800,12 @@ options:
       importOverflow: "Bu içe aktarma limiti $1 terim aşacak. Hiçbir şey değiştirilmedi."
       importSuccess: "$1 yeni terim içe aktarıldı, $2 terim güncellendi."
       importSkipped: "$1 geçersiz satır ve $2 yinelenen terim atlandı."
+      importNoValidRows: "Bu satırların hiçbirinde bu uzantının çevirebileceği bir dil belirtilmemiş. Hiçbir şey değiştirilmedi."
+      importReplaceConfirm:
+        title: Listenin tamamı değiştirilsin mi?
+        description: "Bu sözlükteki $1 terimin tamamı silinecek — yalnızca seçili dil değil, tüm hedef diller — ve bu dosyanın içeriğiyle değiştirilecek. Bu işlem geri alınamaz."
+        confirm: Değiştir
+        cancel: İptal
       deleteAll:
         title: Tüm terimleri sil
         description: Terim sözlüğünüzü boşaltır. Terimlere sonra ihtiyacınız olabilirse önce dışa aktarın — silme işlemi geri alınamaz.

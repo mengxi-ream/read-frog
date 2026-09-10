@@ -800,6 +800,12 @@ options:
       importOverflow: "Lần nhập này sẽ vượt giới hạn $1 thuật ngữ. Không có gì thay đổi."
       importSuccess: "Đã nhập $1 thuật ngữ mới và cập nhật $2 thuật ngữ."
       importSkipped: "Đã bỏ qua $1 dòng không hợp lệ và $2 mục trùng lặp."
+      importNoValidRows: "Không dòng nào chỉ định ngôn ngữ mà tiện ích này có thể dịch sang. Không có gì thay đổi."
+      importReplaceConfirm:
+        title: Thay thế toàn bộ danh sách?
+        description: "Toàn bộ $1 thuật ngữ trong bảng thuật ngữ này sẽ bị xóa — ở mọi ngôn ngữ đích, không chỉ ngôn ngữ đang chọn — và được thay bằng nội dung của tệp này. Không thể hoàn tác."
+        confirm: Thay thế
+        cancel: Hủy
       deleteAll:
         title: Xóa tất cả thuật ngữ
         description: Làm trống bảng thuật ngữ của bạn. Hãy xuất trước nếu bạn có thể cần dùng lại — việc xóa không thể hoàn tác.

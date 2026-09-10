@@ -800,6 +800,12 @@ options:
       importOverflow: "이 가져오기는 한도를 $1개 초과합니다. 아무것도 변경되지 않았습니다."
       importSuccess: "$1개를 새로 가져오고 $2개를 업데이트했습니다."
       importSkipped: "잘못된 행 $1개와 중복 $2개를 건너뛰었습니다."
+      importNoValidRows: "이 확장 프로그램이 번역할 수 있는 언어를 지정한 행이 없습니다. 아무것도 변경되지 않았습니다."
+      importReplaceConfirm:
+        title: 목록 전체를 교체할까요?
+        description: "이 용어집의 $1개 용어가 모두 삭제되고(선택한 언어뿐 아니라 모든 대상 언어) 이 파일의 내용으로 교체됩니다. 이 작업은 되돌릴 수 없습니다."
+        confirm: 교체
+        cancel: 취소
       deleteAll:
         title: 모든 용어 삭제
         description: 용어집을 비웁니다. 나중에 다시 필요할 수 있다면 먼저 내보내세요. 삭제는 되돌릴 수 없습니다.

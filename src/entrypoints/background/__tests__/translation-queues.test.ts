@@ -1,7 +1,8 @@
 import type { ProviderConfig } from "@/types/config/provider"
+import type { MatchedTerm } from "@/utils/glossary/types"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
+import { BATCH_SEPARATOR, NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
 import { isTranslationCancelledError } from "@/utils/request/cancellation"
 
 const onMessageMock = vi.fn<(...args: any[]) => any>()
@@ -1434,5 +1435,246 @@ describe("translation queue helpers", () => {
       "Generated summary",
     ])
     expect(generateArticleSummaryMock).toHaveBeenCalledTimes(1)
+  })
+
+  describe("batch glossary term merge", () => {
+    // Never reached on the local-provider path (executeTranslate is mocked);
+    // present only to satisfy executeBatchTranslation's signature.
+    const promptResolver = async () => ({
+      systemPrompt: "Translate accurately",
+      prompt: "Source text",
+    })
+
+    function glossaryTerm(matchKey: string, target: string): MatchedTerm {
+      return { matchKey, source: matchKey, target, keepOriginal: target === "" }
+    }
+
+    function batchMember(
+      text: string,
+      glossary: { terms?: readonly MatchedTerm[]; revision?: number } = {},
+    ) {
+      return {
+        provider: localProviderRef(llmProvider),
+        text,
+        langConfig: DEFAULT_CONFIG.language,
+        hash: `glossary-merge-${text}`,
+        scheduleAt: Date.now(),
+        glossaryTerms: glossary.terms,
+        glossaryRevision: glossary.revision,
+      }
+    }
+
+    /** The terms the batch actually sent, as executeBatchTranslation merged them. */
+    async function mergedTermsFor(dataList: ReturnType<typeof batchMember>[]) {
+      const { executeBatchTranslation } = await import("../translation-queues")
+      await executeBatchTranslation(dataList, promptResolver)
+      const options = executeTranslateMock.mock.calls.at(-1)![4] as {
+        glossaryTerms?: readonly MatchedTerm[]
+      }
+      return options.glossaryTerms
+    }
+
+    it("settles a matchKey collision by the higher revision, whichever order it arrives in", async () => {
+      const oldWording = glossaryTerm("api", "接口")
+      const newWording = glossaryTerm("api", "API 接口")
+
+      // Members race through prompt rendering, so dataList order is a coin
+      // flip: the same revision has to win from either end.
+      await expect(
+        mergedTermsFor([
+          batchMember("newer first", { terms: [newWording], revision: 7 }),
+          batchMember("older second", { terms: [oldWording], revision: 3 }),
+        ]),
+      ).resolves.toEqual([newWording])
+
+      await expect(
+        mergedTermsFor([
+          batchMember("older first", { terms: [oldWording], revision: 3 }),
+          batchMember("newer second", { terms: [newWording], revision: 7 }),
+        ]),
+      ).resolves.toEqual([newWording])
+    })
+
+    it("never lets a member with no revision displace one that has a revision", async () => {
+      const revisioned = glossaryTerm("api", "API 接口")
+      // A sender that predates the field — an old content script still live
+      // across an update — cannot say how fresh its terms are.
+      const unversioned = glossaryTerm("api", "接口")
+
+      await expect(
+        mergedTermsFor([
+          batchMember("unversioned first", { terms: [unversioned] }),
+          batchMember("revisioned second", { terms: [revisioned], revision: 5 }),
+        ]),
+      ).resolves.toEqual([revisioned])
+
+      await expect(
+        mergedTermsFor([
+          batchMember("revisioned first", { terms: [revisioned], revision: 5 }),
+          batchMember("unversioned second", { terms: [unversioned] }),
+        ]),
+      ).resolves.toEqual([revisioned])
+    })
+
+    it("drops a term two members disagree on at the same revision", async () => {
+      // One glossary state cannot hold two wordings for one key, so equal
+      // revisions carrying different ones means the stamp is untrustworthy for
+      // that key. Sending nothing costs the wording once; guessing sends the
+      // wrong one half the time and then caches it.
+      const oneWording = glossaryTerm("api", "接口")
+      const otherWording = glossaryTerm("api", "API 接口")
+      const untouched = glossaryTerm("queue", "队列")
+
+      await expect(
+        mergedTermsFor([
+          batchMember("first", { terms: [oneWording, untouched], revision: 4 }),
+          batchMember("second", { terms: [otherWording], revision: 4 }),
+        ]),
+      ).resolves.toEqual([untouched])
+    })
+
+    it("keeps a term both members agree on at the same revision", async () => {
+      // The overwhelmingly normal case: two paragraphs matched the same term
+      // against the same compiled matcher.
+      const api = glossaryTerm("api", "接口")
+
+      await expect(
+        mergedTermsFor([
+          batchMember("first", { terms: [api], revision: 4 }),
+          batchMember("second", { terms: [glossaryTerm("api", "接口")], revision: 4 }),
+        ]),
+      ).resolves.toEqual([api])
+    })
+
+    it("lets a strictly newer revision settle a key an earlier tie left unresolvable", async () => {
+      const oneWording = glossaryTerm("api", "接口")
+      const otherWording = glossaryTerm("api", "API 接口")
+      const newest = glossaryTerm("api", "应用接口")
+
+      // The tie must not survive a member that can actually answer, in either
+      // order relative to it.
+      await expect(
+        mergedTermsFor([
+          batchMember("tie a", { terms: [oneWording], revision: 4 }),
+          batchMember("tie b", { terms: [otherWording], revision: 4 }),
+          batchMember("newest", { terms: [newest], revision: 9 }),
+        ]),
+      ).resolves.toEqual([newest])
+
+      await expect(
+        mergedTermsFor([
+          batchMember("newest", { terms: [newest], revision: 9 }),
+          batchMember("tie a", { terms: [oneWording], revision: 4 }),
+          batchMember("tie b", { terms: [otherWording], revision: 4 }),
+        ]),
+      ).resolves.toEqual([newest])
+    })
+
+    it("unions terms from different members when nothing collides", async () => {
+      const api = glossaryTerm("api", "接口")
+      const queue = glossaryTerm("queue", "队列")
+
+      await expect(
+        mergedTermsFor([
+          batchMember("first", { terms: [queue], revision: 2 }),
+          batchMember("second", { terms: [api], revision: 9 }),
+        ]),
+      ).resolves.toEqual([api, queue])
+    })
+
+    it("returns undefined when no member resolved terms, so the prompt resolver can", async () => {
+      await expect(
+        mergedTermsFor([batchMember("first"), batchMember("second")]),
+      ).resolves.toBeUndefined()
+    })
+
+    it("returns an empty list when any member resolved nothing, suppressing that fallback", async () => {
+      await expect(
+        mergedTermsFor([batchMember("first"), batchMember("second", { terms: [], revision: 4 })]),
+      ).resolves.toEqual([])
+    })
+  })
+
+  describe("glossary terms on the individual fallback", () => {
+    it("sends each item's own terms when a batch exhausts its retries", async () => {
+      ensureInitializedConfigMock.mockResolvedValue({
+        ...DEFAULT_CONFIG,
+        pageTranslation: {
+          ...DEFAULT_CONFIG.pageTranslation,
+          providerId: llmProvider.id,
+          requestQueueConfig: { rate: 10, capacity: 10 },
+          batchQueueConfig: { maxCharactersPerBatch: 1000, maxItemsPerBatch: 10 },
+        },
+      })
+
+      const apiTerm: MatchedTerm = {
+        matchKey: "api",
+        source: "api",
+        target: "接口",
+        keepOriginal: false,
+      }
+      const queueTerm: MatchedTerm = {
+        matchKey: "queue",
+        source: "queue",
+        target: "队列",
+        keepOriginal: false,
+      }
+
+      // One segment back for a two-item batch is a BatchCountMismatchError,
+      // the only failure BatchQueue retries and then falls back on.
+      executeTranslateMock.mockImplementation(async (text: string) =>
+        text.includes(BATCH_SEPARATOR) ? "single segment" : `translated ${text}`,
+      )
+
+      const { setupPageTranslationHandlers } = await import("../page-translation")
+      setupPageTranslationHandlers()
+      const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+
+      const results = await Promise.all([
+        handler({
+          data: {
+            text: "alpha",
+            langConfig: DEFAULT_CONFIG.language,
+            providerRef: localProviderRef(llmProvider),
+            scheduleAt: Date.now(),
+            hash: "fallback-glossary-one",
+            glossaryTerms: [apiTerm],
+            glossaryRevision: 4,
+          },
+        }),
+        handler({
+          data: {
+            text: "beta",
+            langConfig: DEFAULT_CONFIG.language,
+            providerRef: localProviderRef(llmProvider),
+            scheduleAt: Date.now(),
+            hash: "fallback-glossary-two",
+            glossaryTerms: [queueTerm],
+            glossaryRevision: 4,
+          },
+        }),
+      ])
+
+      expect(results).toEqual(["translated alpha", "translated beta"])
+
+      const optionsFor = (text: string) =>
+        executeTranslateMock.mock.calls.find(([sent]) => sent === text)![4] as {
+          isBatch?: boolean
+          glossaryTerms?: readonly MatchedTerm[]
+        }
+
+      // The batch that failed carried the union...
+      const batchOptions = executeTranslateMock.mock.calls
+        .filter(([sent]) => String(sent).includes(BATCH_SEPARATOR))
+        .at(-1)![4]
+      expect(batchOptions).toMatchObject({ isBatch: true, glossaryTerms: [apiTerm, queueTerm] })
+
+      // ...each fallback request carries only its own item's terms. Dropping
+      // them here would cache a glossary-less translation under a hash taken
+      // over a prompt that had the terms in it.
+      expect(optionsFor("alpha").glossaryTerms).toEqual([apiTerm])
+      expect(optionsFor("beta").glossaryTerms).toEqual([queueTerm])
+      expect(optionsFor("alpha").isBatch).toBeUndefined()
+    }, 15_000)
   })
 })

@@ -916,6 +916,12 @@ options:
       importOverflow: "本次导入会超出上限 $1 条术语，未做任何更改。"
       importSuccess: "已导入 $1 条新术语，更新 $2 条。"
       importSkipped: "已跳过 $1 行无效数据和 $2 条重复项。"
+      importNoValidRows: "这些行都没有指定本扩展能翻译的目标语言，未做任何更改。"
+      importReplaceConfirm:
+        title: 替换整个列表？
+        description: "该术语库下的全部 $1 条术语都会被删除——包括所有目标语言，不只是当前选择的那个——然后用该文件的内容替换。此操作无法撤销。"
+        confirm: 替换
+        cancel: 取消
       deleteAll:
         title: 删除所有术语
         description: 清空你的术语库。如果以后可能还要用,请先导出——删除后无法恢复。

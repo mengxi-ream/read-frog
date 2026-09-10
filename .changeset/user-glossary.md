@@ -18,5 +18,6 @@ you currently translate into, so the same word can have a Chinese wording and a 
 and only the one that applies is ever sent.
 
 Turn an individual term or a whole glossary off without deleting it, import and export each list as CSV
-(now with a `targetLanguage` column; two-column files still import), or empty it in one go. Find it under
-Advanced → Glossary in the extension settings.
+(now with a `targetLanguage` column; two-column files still import), or empty it in one go. Importing with
+Replace asks for confirmation first, because it clears the glossary in every target language, not just the
+one you picked. Find it under Advanced → Glossary in the extension settings.

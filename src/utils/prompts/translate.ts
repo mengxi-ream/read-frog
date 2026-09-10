@@ -167,7 +167,7 @@ export async function getTranslatePrompt(
   // passes its own and skips this.
   const glossaryTerms =
     options?.glossaryTerms ??
-    (await resolveGlossaryTerms(input, config.glossary.enabled, config.language.targetCode))
+    (await resolveGlossaryTerms(input, config.glossary.enabled, config.language.targetCode)).terms
   return getTranslatePromptFromConfig(config.pageTranslation, targetLang, input, {
     ...options,
     glossaryTerms,

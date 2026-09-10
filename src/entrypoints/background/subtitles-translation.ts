@@ -31,6 +31,7 @@ export function setupSubtitlesTranslationHandlers(): void {
         webDescription,
         summary,
         glossaryTerms,
+        glossaryRevision,
       },
     } = message
 
@@ -60,6 +61,7 @@ export function setupSubtitlesTranslationHandlers(): void {
         // Kept off `context`, which is part of the batch key — see
         // `mergeBatchGlossaryTerms`.
         glossaryTerms,
+        glossaryRevision,
       }
       result = await batchQueue.enqueue(data)
     } else {

@@ -74,6 +74,7 @@ export function setupPageTranslationHandlers(): void {
         sessionId,
         forceRetranslation = false,
         glossaryTerms,
+        glossaryRevision,
       },
     } = message
     const scope = buildTranslationScopeKey(message.sender, sessionId)
@@ -122,6 +123,7 @@ export function setupPageTranslationHandlers(): void {
         // Kept off `context`, which is part of the batch key — see
         // `mergeBatchGlossaryTerms`.
         glossaryTerms,
+        glossaryRevision,
         scope,
       }
       result = await batchQueue.enqueue(data)

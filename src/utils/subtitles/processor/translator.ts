@@ -180,7 +180,7 @@ async function translateSingleSubtitle(
   const subtitlePromptContext = normalizeSubtitlePromptContext(videoContext)
   // Resolved once on the page, where the URL says which glossaries apply, and
   // then carried by the request — the background serves every tab at once.
-  const glossaryTerms = await resolveGlossaryTerms(
+  const { terms: glossaryTerms, revision: glossaryRevision } = await resolveGlossaryTerms(
     prepareTranslationText(text),
     glossaryEnabled,
     langConfig.targetCode,
@@ -210,6 +210,7 @@ async function translateSingleSubtitle(
     webDescription: subtitlePromptContext.webDescription,
     summary: enableAIContentAware ? subtitlePromptContext.videoSummary : undefined,
     glossaryTerms,
+    glossaryRevision,
   })
 }
 
