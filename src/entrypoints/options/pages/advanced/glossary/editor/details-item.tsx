@@ -46,7 +46,11 @@ export function GlossaryDetailsItem({ glossary }: { glossary: Glossary }) {
         <Input
           value={name}
           maxLength={MAX_GLOSSARY_NAME_LENGTH}
-          placeholder={i18n.t("options.advanced.glossary.editor.details.namePlaceholder")}
+          // The SAME string the header falls back to, so an unnamed glossary
+          // reads the same in both places instead of looking like a field
+          // someone emptied. Nothing is stored: a default name written at
+          // creation would be frozen in whatever UI language was current then.
+          placeholder={i18n.t("options.advanced.glossary.untitled")}
           onChange={(event) => setName(event.target.value)}
         />
         <Input

@@ -14,6 +14,12 @@ import { useSetGlossaryEnabled } from "./use-glossary"
  * cannot live inside the `<a>` — interactive content nested in a link is
  * invalid, and a click would both flip the switch and navigate. So the link is
  * an overlay covering the row and the switch sits above it.
+ *
+ * The three layers are ordered EXPLICITLY. `ConfigItem`'s own root is
+ * `position: relative`, which makes it a positioned box in the same stacking
+ * context as the overlay; left on `z-auto` both paint in DOM order and
+ * `ConfigItem` — coming second — swallows every click except the sliver of row
+ * padding above it.
  */
 export function GlossaryListItem({
   glossary,
@@ -48,14 +54,14 @@ export function GlossaryListItem({
       <Link
         to={`/advanced/glossary/${glossary.id}`}
         state={DRILL_IN_LOCATION_STATE}
-        className="absolute inset-0 rounded-lg outline-none"
+        className="absolute inset-0 z-10 rounded-lg outline-none"
       >
         <span className="sr-only">{name}</span>
       </Link>
       <ConfigItem title={name} description={summary}>
         {/* Above the link overlay, and swallowing its own events, so flipping
             the switch does not also open the glossary. */}
-        <div className="relative z-10 flex items-center gap-3">
+        <div className="relative z-20 flex items-center gap-3">
           <Switch
             checked={glossary.enabled}
             onPointerDown={(event) => event.stopPropagation()}

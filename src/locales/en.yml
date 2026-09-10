@@ -855,7 +855,6 @@ options:
         details:
           title: Name and description
           description: Only for finding this glossary again — neither is sent to the LLM.
-          namePlaceholder: Name
           descriptionPlaceholder: Description (optional)
         enable:
           title: Enable

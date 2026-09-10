@@ -739,7 +739,6 @@ options:
         details:
           title: 名前と説明
           description: この用語集を見つけやすくするためだけのもので、どちらも LLM には送信されません。
-          namePlaceholder: 名前
           descriptionPlaceholder: 説明（任意）
         enable:
           title: 有効にする

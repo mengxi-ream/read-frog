@@ -855,7 +855,6 @@ options:
         details:
           title: Ad və təsvir
           description: Yalnız bu lüğəti sonradan tapmaq üçündür — heç biri LLM-ə göndərilmir.
-          namePlaceholder: Ad
           descriptionPlaceholder: Təsvir (istəyə bağlı)
         enable:
           title: Aktiv et

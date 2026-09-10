@@ -855,7 +855,6 @@ options:
         details:
           title: 名稱與描述
           description: 只是方便你之後再找到這個術語庫——兩者都不會傳給 LLM。
-          namePlaceholder: 名稱
           descriptionPlaceholder: 描述（選填）
         enable:
           title: 啟用

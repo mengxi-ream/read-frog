@@ -739,7 +739,6 @@ options:
         details:
           title: Ad ve açıklama
           description: Yalnızca bu terim sözlüğünü sonradan bulmanız için — ikisi de LLM'ye gönderilmez.
-          namePlaceholder: Ad
           descriptionPlaceholder: Açıklama (isteğe bağlı)
         enable:
           title: Etkinleştir

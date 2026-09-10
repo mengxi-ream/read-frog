@@ -739,7 +739,6 @@ options:
         details:
           title: Название и описание
           description: Нужны только для того, чтобы найти этот глоссарий позже, — модели LLM они не передаются.
-          namePlaceholder: Название
           descriptionPlaceholder: Описание (необязательно)
         enable:
           title: Включить

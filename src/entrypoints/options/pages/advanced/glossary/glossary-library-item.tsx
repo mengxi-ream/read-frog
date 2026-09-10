@@ -1,10 +1,12 @@
 import { Icon } from "@iconify/react"
 import { Fragment } from "react"
+import { useNavigate } from "react-router"
 import { Button } from "@/components/ui/base-ui/button"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { MAX_GLOSSARIES } from "@/utils/constants/glossary"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
+import { DRILL_IN_LOCATION_STATE } from "../../../navigation/drill-in"
 import { GlossaryListItem } from "./glossary-list-item"
 import { useCreateGlossary, useGlossaries, useGlossaryTermCounts } from "./use-glossary"
 
@@ -13,6 +15,7 @@ import { useCreateGlossary, useGlossaries, useGlossaryTermCounts } from "./use-g
  * directly beneath it, so a new one appears exactly where the eye already is.
  */
 export function GlossaryLibraryItem() {
+  const navigate = useNavigate()
   const { data: glossaries = [], isPending } = useGlossaries()
   const { data: termCounts } = useGlossaryTermCounts()
   const { mutateAsync: create, isPending: isCreating } = useCreateGlossary()
@@ -24,7 +27,12 @@ export function GlossaryLibraryItem() {
         type: "error",
         title: i18n.t("options.advanced.glossary.library.capReached", [String(MAX_GLOSSARIES)]),
       })
+      return
     }
+    // Straight into the editor: a new glossary is empty and unnamed, so the row
+    // that would appear here says nothing the user does not already know, and
+    // everything they came to do is on the next page.
+    await navigate(`/advanced/glossary/${result.id}`, { state: DRILL_IN_LOCATION_STATE })
   }
 
   return (
