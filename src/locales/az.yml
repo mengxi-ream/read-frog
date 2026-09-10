@@ -865,7 +865,6 @@ options:
           title: Saytlar
           description: Bu lüğəti yalnız müəyyən saytlarla məhdudlaşdırın.
           allSites: Bunu boş buraxsanız, lüğət hər yerdə tətbiq olunur.
-          placeholder: Sayt daxil edin
           header: Sayt
         delete:
           title: Bu lüğəti sil

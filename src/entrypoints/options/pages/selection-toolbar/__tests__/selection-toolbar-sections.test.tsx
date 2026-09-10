@@ -94,10 +94,10 @@ describe("selection toolbar page sections", () => {
 
     expect(setSelectionToolbarMock).toHaveBeenCalledWith({
       ...selectionToolbar,
-      // Typed as a bare host, stored as the pattern that covers it and its
-      // subdomains — see `normalizeUserSitePattern`.
+      // Stored exactly as typed: `example.com` is a pattern with a meaning of
+      // its own, and the list must say what the user wrote.
       disabledSelectionToolbarPatterns: [
-        "*.example.com",
+        "example.com",
         ...selectionToolbar.disabledSelectionToolbarPatterns,
       ],
     })

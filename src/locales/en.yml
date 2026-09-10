@@ -865,7 +865,6 @@ options:
           title: Websites
           description: Restrict this glossary to certain websites.
           allSites: Leave this empty and the glossary applies everywhere.
-          placeholder: Enter a website
           header: Website
         delete:
           title: Delete this glossary

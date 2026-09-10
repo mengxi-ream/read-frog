@@ -865,7 +865,6 @@ options:
           title: 網站
           description: 限定這個術語庫只在特定網站生效。
           allSites: 留空則這個術語庫在所有網站都生效。
-          placeholder: 輸入網站
           header: 網站
         delete:
           title: 刪除這個術語庫

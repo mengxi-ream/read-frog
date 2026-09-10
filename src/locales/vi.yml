@@ -749,7 +749,6 @@ options:
           title: Trang web
           description: Giới hạn bảng thuật ngữ này cho một số trang web nhất định.
           allSites: Để trống thì bảng thuật ngữ sẽ áp dụng ở mọi nơi.
-          placeholder: Nhập trang web
           header: Trang web
         delete:
           title: Xóa bảng thuật ngữ này

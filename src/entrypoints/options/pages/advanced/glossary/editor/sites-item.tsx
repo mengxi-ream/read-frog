@@ -39,7 +39,11 @@ export function GlossarySitesItem({ glossary }: { glossary: Glossary }) {
         patterns={glossary.matchPatterns}
         onAddPattern={addPattern}
         onRemovePattern={removePattern}
-        placeholderText={i18n.t("options.advanced.glossary.editor.sites.placeholder")}
+        // An EXAMPLE rather than an instruction, and deliberately the wildcard
+        // form: nothing rewrites what is typed here, so this is where someone
+        // learns that a bare host means that host alone. Needs no translation —
+        // example.com is reserved for exactly this.
+        placeholderText="*.example.com"
         tableHeaderText={i18n.t("options.advanced.glossary.editor.sites.header")}
       />
     </ConfigItem>

@@ -19,11 +19,23 @@ function add(patterns: string[], input: string) {
 }
 
 describe("usePatternList", () => {
-  it("stores a bare host as *.host, so it covers subdomains as it always has", () => {
-    const { outcome, onChange } = add(["*.example.com"], "  Reddit.com  ")
+  it("stores a typed pattern exactly as typed", () => {
+    const { outcome, onChange } = add(["*.example.com"], "  reddit.com  ")
 
     expect(outcome).toBe("added")
-    expect(onChange).toHaveBeenCalledWith(["*.reddit.com", "*.example.com"])
+    expect(onChange).toHaveBeenCalledWith(["reddit.com", "*.example.com"])
+  })
+
+  /**
+   * `example.com` and `*.example.com` are different patterns — the first is that
+   * exact host — so both may sit in one list. Widening the typed one would make
+   * the row disagree with what was entered.
+   */
+  it("does not widen a bare host into its subdomains", () => {
+    const { outcome, onChange } = add(["*.example.com"], "example.com")
+
+    expect(outcome).toBe("added")
+    expect(onChange).toHaveBeenCalledWith(["example.com", "*.example.com"])
   })
 
   it("leaves a pattern that is already one alone", () => {
@@ -33,8 +45,8 @@ describe("usePatternList", () => {
     expect(onChange).toHaveBeenCalledWith(["example.com/docs/*"])
   })
 
-  it("catches a duplicate that was typed in the other shape", () => {
-    const { outcome, onChange } = add(["*.example.com"], " example.com ")
+  it("catches a duplicate once trimmed", () => {
+    const { outcome, onChange } = add(["example.com"], "  example.com  ")
 
     expect(outcome).toBe("duplicate")
     expect(onChange).not.toHaveBeenCalled()

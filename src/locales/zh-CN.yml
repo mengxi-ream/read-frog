@@ -865,7 +865,6 @@ options:
           title: 网站
           description: 限定这份术语库只在特定网站生效。
           allSites: 留空则这份术语库在所有网站生效。
-          placeholder: 输入网站
           header: 网站
         delete:
           title: 删除这份术语库

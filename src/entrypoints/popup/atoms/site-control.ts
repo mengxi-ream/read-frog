@@ -2,7 +2,7 @@ import type { Getter, Setter } from "jotai"
 import { atom } from "jotai"
 import { browser } from "#imports"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { normalizeUserSitePattern, urlMatchesPattern } from "@/utils/url-pattern"
+import { sitePatternForHost, urlMatchesPattern } from "@/utils/url-pattern"
 import { getActiveTabUrl } from "@/utils/utils"
 
 export function isInSiteControlList(patterns: string[], url: string): boolean {
@@ -25,9 +25,9 @@ async function toggleSiteInPatterns(
   if (!activeTabUrl) return
 
   const currentPatterns = siteControlConfig[patternsKey]
-  // Same storage shape as a host typed on the options page: this host plus
-  // anything under it.
-  const hostPattern = normalizeUserSitePattern(new URL(activeTabUrl).hostname)
+  // The user pointed at a page, not at a pattern: "this site" means this host
+  // and anything under it.
+  const hostPattern = sitePatternForHost(new URL(activeTabUrl).hostname)
 
   if (checked) {
     if (currentPatterns.some((pattern) => urlMatchesPattern(activeTabUrl, pattern))) return

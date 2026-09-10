@@ -1,7 +1,7 @@
 import type { Config } from "@/types/config/config"
 import { atom } from "jotai"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { normalizeUserSitePattern, urlMatchesPattern } from "@/utils/url-pattern"
+import { sitePatternForHost, urlMatchesPattern } from "@/utils/url-pattern"
 import { getActiveTabUrl } from "@/utils/utils"
 
 type TranslateConfig = Config["pageTranslation"]
@@ -31,9 +31,9 @@ export const toggleCurrentSiteAtom = atom(null, async (get, set, checked: boolea
   if (!activeTabUrl) return
 
   const currentPatterns = translateConfig.page.autoTranslatePatterns
-  // Stored the same way the options page stores a typed host, so the toggle
-  // covers this host and anything under it — what it has always done.
-  const hostPattern = normalizeUserSitePattern(new URL(activeTabUrl).hostname)
+  // The user pointed at a page, not at a pattern: "this site" means this host
+  // and anything under it, which is what it has always meant here.
+  const hostPattern = sitePatternForHost(new URL(activeTabUrl).hostname)
 
   if (checked) {
     // Add hostname to patterns if not already present

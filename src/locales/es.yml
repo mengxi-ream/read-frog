@@ -865,7 +865,6 @@ options:
           title: Sitios web
           description: Limita este glosario a determinados sitios web.
           allSites: Déjalo vacío y el glosario se aplicará en todas partes.
-          placeholder: Escribe un sitio web
           header: Sitio web
         delete:
           title: Eliminar este glosario

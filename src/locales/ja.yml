@@ -749,7 +749,6 @@ options:
           title: ウェブサイト
           description: この用語集を適用するウェブサイトを限定します。
           allSites: 空のままにすると、この用語集はすべてのウェブサイトに適用されます。
-          placeholder: ウェブサイトを入力
           header: ウェブサイト
         delete:
           title: この用語集を削除

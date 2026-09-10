@@ -749,7 +749,6 @@ options:
           title: Web siteleri
           description: Bu terim sözlüğünü belirli web siteleriyle sınırlayın.
           allSites: Burayı boş bırakırsanız terim sözlüğü her yerde geçerli olur.
-          placeholder: Bir web sitesi girin
           header: Web sitesi
         delete:
           title: Bu terim sözlüğünü sil

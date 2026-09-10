@@ -10,8 +10,8 @@ import { logger } from "@/utils/logger"
  * There used to be a second, hostname-only matcher (`matchDomainPattern`) behind
  * the user-facing lists, which meant two visually identical pattern tables could
  * match differently. It is gone; the one difference that mattered (a bare host
- * covering its subdomains) now lives in `normalizeUserSitePattern`, applied once
- * when a pattern is stored rather than every time one is matched.
+ * covering its subdomains) was applied once, by a config migration, to the
+ * patterns that had been stored under those semantics.
  */
 
 /**
@@ -173,33 +173,33 @@ export function urlMatchesPattern(url: string, rawPattern: string): boolean {
 }
 
 /**
- * What a bare host means in a list the user types into.
+ * The pattern to store when the EXTENSION picked a site on the user's behalf.
  *
- * `example.com` on its own is a match pattern for that exact host, which is not
- * what someone adding a site to a list means — they want `www.example.com` too.
- * So a bare host is stored as `*.example.com`, whose leading `*.` matches zero
- * or more labels and therefore covers the apex as well.
+ * The popup's per-site toggles ("always translate this site", "never translate
+ * this site") hand us a hostname, not a pattern: the user pointed at the page
+ * they were on, and what they mean by "this site" includes `www.` and whatever
+ * else lives under it. So a bare host becomes `*.host`, whose leading `*.`
+ * matches zero or more labels and therefore covers the apex too.
  *
- * This runs when a pattern is STORED, not when it is matched: the value in the
- * table is the value that matches, visible and editable, instead of a rule
- * hidden inside the matcher. Someone who wants the exact host and nothing under
- * it writes `*://example.com/*`.
+ * This is NOT applied to a pattern someone typed. `example.com` is valid
+ * match-pattern syntax with a meaning of its own — that exact host — and
+ * silently widening it would be rewriting their input. The website tables store
+ * what was typed; see `usePatternList`.
  *
- * Anything already carrying a path, a wildcard or a colon is left alone — it is
- * either already a full pattern or something `normalizeUrlPattern` will reject.
- * The colon case matters: without it `localhost:5173` would be stored as
- * `*.localhost:5173`, which is just as unsupported but harder to read. A host is
- * the one part of a URL that is case-insensitive, so it is lowercased here; a
- * path never reaches this branch.
+ * The config migration carries a frozen copy of this transform, for the stored
+ * patterns of the hostname-only matcher this module replaced.
+ *
+ * Anything already carrying a path, a wildcard or a colon is returned as-is. The
+ * colon case is reachable: an IPv6 literal host is `[::1]`, and `*.[::1]` would
+ * be nonsense.
  */
-export function normalizeUserSitePattern(input: string): string {
-  const trimmed = input.trim()
+export function sitePatternForHost(hostname: string): string {
+  const trimmed = hostname.trim()
   if (trimmed === "" || trimmed.includes("/") || trimmed.includes("*") || trimmed.includes(":")) {
     return trimmed
   }
-  // Lowercased so the stored value is canonical: without it `example.com` and
-  // `Example.com` would sit in the list as two rows that match identically, and
-  // the duplicate check in `usePatternList` compares strings.
+  // Lowercased because a host is case-insensitive and this value is compared as
+  // a string when deciding whether the site is already in the list.
   return `*.${trimmed.toLowerCase()}`
 }
 
@@ -232,5 +232,5 @@ export function getUserSitePatternError(input: string): UserSitePatternError | n
     return "gluedWildcard"
   }
 
-  return normalizeUrlPattern(normalizeUserSitePattern(trimmed)) === null ? "unsupported" : null
+  return normalizeUrlPattern(trimmed) === null ? "unsupported" : null
 }

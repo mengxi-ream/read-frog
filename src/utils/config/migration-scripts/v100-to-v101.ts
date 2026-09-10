@@ -36,7 +36,7 @@
  *
  * IMPORTANT: This is a frozen snapshot. All values are deliberately inline and it
  * imports nothing from the evolving application code — including the live
- * `normalizeUserSitePattern`, which is duplicated below on purpose so that a
+ * `sitePatternForHost`, which is duplicated below on purpose so that a
  * later change to it cannot retroactively change what this migration did.
  */
 
@@ -44,7 +44,7 @@ function isObject(value: any): value is Record<string, any> {
   return value !== null && typeof value === "object" && !Array.isArray(value)
 }
 
-/** Frozen copy of `normalizeUserSitePattern` — see the note above. */
+/** Frozen copy of `sitePatternForHost` — see the note above. */
 function toSitePattern(input: unknown): unknown {
   if (typeof input !== "string") {
     return input
