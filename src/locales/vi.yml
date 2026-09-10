@@ -325,6 +325,8 @@ options:
       llmProviderNotConfigured: Chưa chọn nhà cung cấp LLM cho $1
   patterns:
     duplicate: Mẫu này đã có trong danh sách
+    gluedWildcard: Dấu "*" phải thay cho trọn một phần của địa chỉ, ví dụ *.example.com hoặc example.*
+    unsupported: Read Frog không khớp được địa chỉ này. Cổng và các giao thức ngoài http, https đều không được hỗ trợ.
   preference:
     title: Tùy chọn
     pageDescription: Đặt giao diện của Read Frog, nơi tiện ích hoạt động và cách cấu hình được đồng bộ, sao lưu.

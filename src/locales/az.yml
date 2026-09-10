@@ -326,6 +326,8 @@ options:
       llmProviderNotConfigured: $1 üçün LLM provayderi seçilməyib
   patterns:
     duplicate: Bu şablon artıq siyahıdadır
+    gluedWildcard: '"*" ünvanın bütöv bir hissəsini əvəz etməlidir, məsələn *.example.com və ya example.*'
+    unsupported: Read Frog bu ünvanı uyğunlaşdıra bilmir. Portlar və http ilə https xaricindəki sxemlər dəstəklənmir.
   preference:
     title: Ümumi parametrlər
     pageDescription: Read Frog genişlənməsinin görünüşünü, harada işləyəcəyini, konfiqurasiyanın necə sinxronlaşdırılacağını və ehtiyat nüsxəsinin necə yaradılacağını təyin edin.

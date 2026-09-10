@@ -326,6 +326,8 @@ options:
       llmProviderNotConfigured: No LLM provider selected for $1
   patterns:
     duplicate: This pattern is already in the list
+    gluedWildcard: A "*" has to stand for a whole part of the address, like *.example.com or example.*
+    unsupported: Read Frog cannot match this address. Ports and schemes other than http and https are not supported.
   preference:
     title: Preferences
     pageDescription: Set how Read Frog looks, where it runs, and how your config is synced and backed up.

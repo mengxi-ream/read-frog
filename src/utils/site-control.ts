@@ -1,5 +1,5 @@
 import type { Config } from "@/types/config/config"
-import { matchDomainPattern } from "./url"
+import { urlMatchesPattern } from "./url-pattern"
 
 // Programmatic iframe injection writes the resolved owner-page URL here so
 // about:blank/about:srcdoc frames can inherit the site-control decision of
@@ -18,9 +18,9 @@ export function isSiteEnabled(url: string, config: Config | null): boolean {
   const { mode, blacklistPatterns, whitelistPatterns } = config.siteControl
 
   if (mode === "blacklist")
-    return !blacklistPatterns.some((pattern) => matchDomainPattern(url, pattern))
+    return !blacklistPatterns.some((pattern) => urlMatchesPattern(url, pattern))
 
-  return whitelistPatterns.some((pattern) => matchDomainPattern(url, pattern))
+  return whitelistPatterns.some((pattern) => urlMatchesPattern(url, pattern))
 }
 
 // "Effective site-control URL" means the URL we ultimately use to decide

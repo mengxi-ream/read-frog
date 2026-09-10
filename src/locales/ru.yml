@@ -325,6 +325,8 @@ options:
       llmProviderNotConfigured: LLM-провайдер не выбран для $1
   patterns:
     duplicate: Этот шаблон уже в списке
+    gluedWildcard: «*» должна заменять часть адреса целиком, например *.example.com или example.*
+    unsupported: Read Frog не может сопоставить этот адрес. Порты и схемы, кроме http и https, не поддерживаются.
   preference:
     title: Предпочтения
     pageDescription: Задайте внешний вид Read Frog, места его работы, а также синхронизацию и резервное копирование конфигурации.

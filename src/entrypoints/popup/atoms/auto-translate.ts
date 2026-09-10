@@ -1,7 +1,7 @@
 import type { Config } from "@/types/config/config"
 import { atom } from "jotai"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { matchDomainPattern } from "@/utils/url"
+import { normalizeUserSitePattern, urlMatchesPattern } from "@/utils/url-pattern"
 import { getActiveTabUrl } from "@/utils/utils"
 
 type TranslateConfig = Config["pageTranslation"]
@@ -13,7 +13,7 @@ export async function getIsInPatterns(translateConfig: TranslateConfig) {
   const activeTabUrl = await getActiveTabUrl()
   if (!activeTabUrl) return false
   return translateConfig.page.autoTranslatePatterns.some((pattern) =>
-    matchDomainPattern(activeTabUrl, pattern),
+    urlMatchesPattern(activeTabUrl, pattern),
   )
 }
 
@@ -31,22 +31,24 @@ export const toggleCurrentSiteAtom = atom(null, async (get, set, checked: boolea
   if (!activeTabUrl) return
 
   const currentPatterns = translateConfig.page.autoTranslatePatterns
-  const hostname = new URL(activeTabUrl).hostname
+  // Stored the same way the options page stores a typed host, so the toggle
+  // covers this host and anything under it — what it has always done.
+  const hostPattern = normalizeUserSitePattern(new URL(activeTabUrl).hostname)
 
   if (checked) {
     // Add hostname to patterns if not already present
-    if (!currentPatterns.some((pattern) => matchDomainPattern(activeTabUrl, pattern))) {
+    if (!currentPatterns.some((pattern) => urlMatchesPattern(activeTabUrl, pattern))) {
       void set(configFieldsAtomMap.pageTranslation, {
         page: {
           ...translateConfig.page,
-          autoTranslatePatterns: [...currentPatterns, hostname],
+          autoTranslatePatterns: [...currentPatterns, hostPattern],
         },
       })
     }
   } else {
     // Remove patterns that match the current hostname
     const filteredPatterns = currentPatterns.filter(
-      (pattern) => !matchDomainPattern(activeTabUrl, pattern),
+      (pattern) => !urlMatchesPattern(activeTabUrl, pattern),
     )
     void set(configFieldsAtomMap.pageTranslation, {
       page: {

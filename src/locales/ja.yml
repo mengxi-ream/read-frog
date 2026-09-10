@@ -325,6 +325,8 @@ options:
       llmProviderNotConfigured: $1の LLM プロバイダー未選択
   patterns:
     duplicate: このパターンは既にリストにあります
+    gluedWildcard: "「*」はアドレスの一区切り全体を表す必要があります。例: *.example.com、example.*"
+    unsupported: このアドレスは照合できません。ポート指定と、http・https 以外のスキームには対応していません。
   preference:
     title: 環境設定
     pageDescription: Read Frog の外観、動作する範囲、設定の同期とバックアップ方法を指定します。

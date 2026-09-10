@@ -13,9 +13,14 @@ const getAllFramesMock = vi.fn<(...args: any[]) => any>()
 const executeScriptMock = vi.fn<(...args: any[]) => any>()
 const storageGetItemMock = vi.fn<(...args: any[]) => any>()
 
-const getLocalConfigMock = vi.fn<(...args: any[]) => any>()
-const loggerErrorMock = vi.fn<(...args: any[]) => any>()
-const loggerWarnMock = vi.fn<(...args: any[]) => any>()
+// Hoisted: `@/utils/site-control` reaches `@/utils/logger` through the shared URL
+// matcher, so the mocked module is evaluated before a plain `const` here would be
+// initialised.
+const { getLocalConfigMock, loggerErrorMock, loggerWarnMock } = vi.hoisted(() => ({
+  getLocalConfigMock: vi.fn<(...args: any[]) => any>(),
+  loggerErrorMock: vi.fn<(...args: any[]) => any>(),
+  loggerWarnMock: vi.fn<(...args: any[]) => any>(),
+}))
 
 vi.mock("@/utils/config/storage", () => ({
   getLocalConfig: getLocalConfigMock,

@@ -2,11 +2,11 @@ import type { Getter, Setter } from "jotai"
 import { atom } from "jotai"
 import { browser } from "#imports"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { matchDomainPattern } from "@/utils/url"
+import { normalizeUserSitePattern, urlMatchesPattern } from "@/utils/url-pattern"
 import { getActiveTabUrl } from "@/utils/utils"
 
 export function isInSiteControlList(patterns: string[], url: string): boolean {
-  return patterns.some((p) => matchDomainPattern(url, p))
+  return patterns.some((p) => urlMatchesPattern(url, p))
 }
 
 // Atom to track if current site is in patterns
@@ -25,17 +25,19 @@ async function toggleSiteInPatterns(
   if (!activeTabUrl) return
 
   const currentPatterns = siteControlConfig[patternsKey]
-  const hostname = new URL(activeTabUrl).hostname
+  // Same storage shape as a host typed on the options page: this host plus
+  // anything under it.
+  const hostPattern = normalizeUserSitePattern(new URL(activeTabUrl).hostname)
 
   if (checked) {
-    if (currentPatterns.some((pattern) => matchDomainPattern(activeTabUrl, pattern))) return
+    if (currentPatterns.some((pattern) => urlMatchesPattern(activeTabUrl, pattern))) return
     await set(configFieldsAtomMap.siteControl, {
       ...siteControlConfig,
-      [patternsKey]: [...currentPatterns, hostname],
+      [patternsKey]: [...currentPatterns, hostPattern],
     })
   } else {
     const filteredPatterns = currentPatterns.filter(
-      (pattern) => !matchDomainPattern(activeTabUrl, pattern),
+      (pattern) => !urlMatchesPattern(activeTabUrl, pattern),
     )
     await set(configFieldsAtomMap.siteControl, {
       ...siteControlConfig,

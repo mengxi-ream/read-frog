@@ -122,7 +122,7 @@ export const testSeries: TestSeriesObject = {
         },
         page: {
           range: "all",
-          autoTranslatePatterns: ["spanish-news.com", "elmundo.es"],
+          autoTranslatePatterns: ["*.spanish-news.com", "*.elmundo.es"],
           neverAutoTranslatePatterns: [],
           autoTranslateLanguages: [],
           shortcut: "Alt+B",
@@ -351,7 +351,7 @@ export const testSeries: TestSeriesObject = {
       floatingButton: {
         enabled: true,
         position: 0.75,
-        disabledFloatingButtonPatterns: ["github.com"],
+        disabledFloatingButtonPatterns: ["*.github.com"],
         clickAction: "panel",
         locked: false,
         side: "right",

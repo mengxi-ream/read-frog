@@ -325,6 +325,8 @@ options:
       llmProviderNotConfigured: $1에 LLM 제공업체 미선택
   patterns:
     duplicate: 이 패턴은 이미 목록에 있습니다
+    gluedWildcard: '"*"는 주소의 한 구간 전체를 대신해야 합니다. 예: *.example.com, example.*'
+    unsupported: 이 주소는 일치시킬 수 없습니다. 포트와 http, https 이외의 스킴은 지원하지 않습니다.
   preference:
     title: 환경 설정
     pageDescription: Read Frog의 모양과 실행 범위, 설정 동기화 및 백업 방식을 지정하세요.

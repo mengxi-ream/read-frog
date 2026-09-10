@@ -4,13 +4,13 @@ import { browser } from "#imports"
 import { getLocalConfig } from "@/utils/config/storage"
 import { logger } from "@/utils/logger"
 import { isSiteEnabled, SITE_CONTROL_URL_WINDOW_KEY } from "@/utils/site-control"
-import { matchDomainPattern } from "@/utils/url"
+import { urlMatchesPattern } from "@/utils/url-pattern"
 import { resolveSiteControlUrl } from "./iframe-injection-utils"
 import { getPageTranslationEnabled } from "./page-translation-state"
 
 const HOST_CONTENT_SCRIPT_FILE = "/content-scripts/host.js" as const
 const SELECTION_CONTENT_SCRIPT_FILE = "/content-scripts/selection.js" as const
-const IFRAME_FULL_RUNTIME_AUTO_INJECT_PATTERNS = ["browse.library.kiwix.org"] as const
+const IFRAME_FULL_RUNTIME_AUTO_INJECT_PATTERNS = ["*.browse.library.kiwix.org"] as const
 
 type IframeContentScriptFile =
   | typeof HOST_CONTENT_SCRIPT_FILE
@@ -120,9 +120,7 @@ async function getFrameSnapshot(tabId: number): Promise<FrameInfoForSiteControl[
 function isFullRuntimeAutoInjectUrl(url: string | undefined): url is string {
   if (!url) return false
 
-  return IFRAME_FULL_RUNTIME_AUTO_INJECT_PATTERNS.some((pattern) =>
-    matchDomainPattern(url, pattern),
-  )
+  return IFRAME_FULL_RUNTIME_AUTO_INJECT_PATTERNS.some((pattern) => urlMatchesPattern(url, pattern))
 }
 
 function getIframeContentScriptFiles(

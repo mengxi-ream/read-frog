@@ -326,6 +326,8 @@ options:
       llmProviderNotConfigured: No se seleccionó ningún proveedor LLM para $1
   patterns:
     duplicate: Este patrón ya está en la lista
+    gluedWildcard: Un "*" debe sustituir una parte completa de la dirección, como *.example.com o example.*
+    unsupported: Read Frog no puede hacer coincidir esta dirección. No se admiten los puertos ni los esquemas distintos de http y https.
   preference:
     title: Preferencias
     pageDescription: Define la apariencia de Read Frog, dónde se ejecuta y cómo se sincroniza y respalda tu configuración.

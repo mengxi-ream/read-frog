@@ -326,6 +326,8 @@ options:
       llmProviderNotConfigured: 没有为$1选择 LLM 提供商
   patterns:
     duplicate: 该模式已在列表中
+    gluedWildcard: '"*" 必须代表地址中完整的一段，例如 *.example.com 或 example.*'
+    unsupported: 无法匹配这个地址。不支持端口，也不支持 http 和 https 以外的协议。
   preference:
     title: 偏好设置
     pageDescription: 设置陪读蛙的外观与生效范围，以及配置的同步与备份方式。

@@ -21,7 +21,7 @@ import { i18n } from "@/utils/i18n"
 import { resolveUiLocale } from "@/utils/i18n/locale-map"
 import { sendMessage } from "@/utils/message"
 import { cn } from "@/utils/styles/utils"
-import { matchDomainPattern } from "@/utils/url"
+import { urlMatchesPattern } from "@/utils/url-pattern"
 import { enablePageTranslationAtom, isDraggingButtonAtom } from "../../atoms"
 import { shadowWrapper } from "../../index"
 import HiddenButton from "./components/hidden-button"
@@ -362,7 +362,7 @@ export default function FloatingButton() {
     isFullscreen ||
     !floatingButton.enabled ||
     floatingButton.disabledFloatingButtonPatterns.some((pattern) =>
-      matchDomainPattern(window.location.href, pattern),
+      urlMatchesPattern(window.location.href, pattern),
     )
   ) {
     return null

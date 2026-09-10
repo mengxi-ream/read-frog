@@ -96,7 +96,7 @@ export const DEFAULT_CONFIG: Config = {
     },
     page: {
       range: "all",
-      autoTranslatePatterns: ["news.ycombinator.com"],
+      autoTranslatePatterns: ["*.news.ycombinator.com"],
       neverAutoTranslatePatterns: [],
       autoTranslateLanguages: [],
       shortcut: DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY,
