@@ -738,7 +738,6 @@ options:
       editor:
         details:
           title: 이름과 설명
-          description: 이 용어집을 다시 찾기 위한 정보일 뿐이며, 둘 다 LLM에 전달되지 않습니다.
           descriptionPlaceholder: 설명 (선택 사항)
         enable:
           title: 사용

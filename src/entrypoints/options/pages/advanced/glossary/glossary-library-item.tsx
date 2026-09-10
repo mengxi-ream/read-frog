@@ -21,7 +21,9 @@ export function GlossaryLibraryItem() {
   const { mutateAsync: create, isPending: isCreating } = useCreateGlossary()
 
   const handleCreate = async () => {
-    const result = await create()
+    // Localized here, where the UI language is known, and stored — the name is
+    // required, so there is no render-time fallback to reach for.
+    const result = await create(i18n.t("options.advanced.glossary.untitled"))
     if (!result.ok) {
       toastManager.add({
         type: "error",

@@ -854,7 +854,6 @@ options:
       editor:
         details:
           title: Name and description
-          description: Only for finding this glossary again — neither is sent to the LLM.
           descriptionPlaceholder: Description (optional)
         enable:
           title: Enable

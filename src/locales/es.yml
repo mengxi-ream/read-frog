@@ -854,7 +854,6 @@ options:
       editor:
         details:
           title: Nombre y descripción
-          description: Solo sirven para volver a encontrar este glosario — ninguno de los dos se envía al LLM.
           descriptionPlaceholder: Descripción (opcional)
         enable:
           title: Activar

@@ -35,18 +35,14 @@ export function GlossaryEditorPage() {
     >
       <ConfigDetailSection
         backTo="/advanced/glossary"
-        title={
-          <span id="glossary-editor">
-            {glossary?.name.trim() || i18n.t("options.advanced.glossary.untitled")}
-          </span>
-        }
+        title={<span id="glossary-editor">{glossary?.name}</span>}
       >
         {glossary && (
           <>
+            <GlossaryEditorEnableItem glossary={glossary} />
             {/* Keyed on the glossary so the debounced name and description
                 fields reset when a different one is opened. */}
             <GlossaryDetailsItem key={glossary.id} glossary={glossary} />
-            <GlossaryEditorEnableItem glossary={glossary} />
             <GlossarySitesItem glossary={glossary} />
             <GlossaryAddTermItem glossaryId={glossary.id} />
             <GlossaryTable glossaryId={glossary.id} />

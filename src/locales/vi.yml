@@ -738,7 +738,6 @@ options:
       editor:
         details:
           title: Tên và mô tả
-          description: Chỉ để bạn tìm lại bảng thuật ngữ này — cả hai đều không được gửi cho LLM.
           descriptionPlaceholder: Mô tả (tùy chọn)
         enable:
           title: Bật

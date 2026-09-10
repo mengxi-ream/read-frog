@@ -738,7 +738,6 @@ options:
       editor:
         details:
           title: Название и описание
-          description: Нужны только для того, чтобы найти этот глоссарий позже, — модели LLM они не передаются.
           descriptionPlaceholder: Описание (необязательно)
         enable:
           title: Включить

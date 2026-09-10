@@ -30,7 +30,6 @@ export function GlossaryListItem({
 }) {
   const { mutate: setEnabled } = useSetGlossaryEnabled()
 
-  const name = glossary.name.trim() || i18n.t("options.advanced.glossary.untitled")
   // Composed from separate pieces rather than one sentence per case, because a
   // single `$1 terms · $2 websites` string cannot be made grammatical for a
   // count of one in English — and a 2x2 of whole sentences is four strings per
@@ -56,9 +55,9 @@ export function GlossaryListItem({
         state={DRILL_IN_LOCATION_STATE}
         className="absolute inset-0 z-10 rounded-lg outline-none"
       >
-        <span className="sr-only">{name}</span>
+        <span className="sr-only">{glossary.name}</span>
       </Link>
-      <ConfigItem title={name} description={summary}>
+      <ConfigItem title={glossary.name} description={summary}>
         {/* Above the link overlay, and swallowing its own events, so flipping
             the switch does not also open the glossary. */}
         <div className="relative z-20 flex items-center gap-3">

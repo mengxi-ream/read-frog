@@ -43,7 +43,13 @@ export async function getGlossary(id: string): Promise<Glossary | undefined> {
 
 export type CreateGlossaryResult = { ok: true; id: string } | { ok: false; reason: "capReached" }
 
-export async function createGlossary(): Promise<CreateGlossaryResult> {
+/**
+ * `name` is REQUIRED and comes from the caller, because the default has to be
+ * localized and this layer has no UI language. It is the one place a glossary's
+ * name is allowed to be chosen, so everything downstream can render
+ * `glossary.name` without a fallback.
+ */
+export async function createGlossary(name: string): Promise<CreateGlossaryResult> {
   if ((await db.glossary.count()) >= MAX_GLOSSARIES) {
     return { ok: false, reason: "capReached" }
   }
@@ -52,7 +58,7 @@ export async function createGlossary(): Promise<CreateGlossaryResult> {
   const id = getRandomUUID()
   await db.glossary.put({
     id,
-    name: "",
+    name: name.trim().slice(0, MAX_GLOSSARY_NAME_LENGTH),
     description: "",
     enabled: true,
     // Empty = every site, so a new glossary works before it is configured.
@@ -68,6 +74,10 @@ export async function createGlossary(): Promise<CreateGlossaryResult> {
 /**
  * Rename or re-describe a glossary.
  *
+ * An empty name is IGNORED rather than stored: the name is required, and this is
+ * the boundary that guarantees it, so every reader can render `glossary.name`
+ * directly. The description has no such rule — blank is a legitimate value.
+ *
  * Deliberately does NOT bump the revision. Neither field takes part in matching
  * or reaches the prompt, so a bump would make every open page recompile up to
  * 20,000 terms because someone typed a letter into a name field.
@@ -77,7 +87,8 @@ export async function updateGlossaryMeta(
   meta: { name?: string; description?: string },
 ): Promise<void> {
   const patch: Partial<Glossary> = { updatedAt: new Date() }
-  if (meta.name !== undefined) patch.name = meta.name.slice(0, MAX_GLOSSARY_NAME_LENGTH)
+  const name = meta.name?.trim()
+  if (name) patch.name = name.slice(0, MAX_GLOSSARY_NAME_LENGTH)
   if (meta.description !== undefined) {
     patch.description = meta.description.slice(0, MAX_GLOSSARY_DESCRIPTION_LENGTH)
   }

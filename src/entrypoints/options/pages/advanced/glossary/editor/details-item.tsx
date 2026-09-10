@@ -40,12 +40,16 @@ export function GlossaryDetailsItem({ glossary }: { glossary: Glossary }) {
       id="glossary-details"
       orientation="vertical"
       title={i18n.t("options.advanced.glossary.editor.details.title")}
-      description={i18n.t("options.advanced.glossary.editor.details.description")}
     >
       <div className="flex flex-col gap-2">
         <Input
           value={name}
           maxLength={MAX_GLOSSARY_NAME_LENGTH}
+          // The name is required, and `updateGlossaryMeta` refuses to store an
+          // empty one. Snapping back on blur is how that rule shows itself —
+          // otherwise the field would sit empty while the row above still
+          // carried the old name.
+          onBlur={() => setName(glossary.name)}
           // The SAME string the header falls back to, so an unnamed glossary
           // reads the same in both places instead of looking like a field
           // someone emptied. Nothing is stored: a default name written at

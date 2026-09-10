@@ -854,7 +854,6 @@ options:
       editor:
         details:
           title: Ad və təsvir
-          description: Yalnız bu lüğəti sonradan tapmaq üçündür — heç biri LLM-ə göndərilmir.
           descriptionPlaceholder: Təsvir (istəyə bağlı)
         enable:
           title: Aktiv et

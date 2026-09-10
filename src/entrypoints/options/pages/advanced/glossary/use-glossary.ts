@@ -69,7 +69,10 @@ export function useGlossary(glossaryId: string) {
 
 export function useCreateGlossary() {
   const invalidate = useGlossaryInvalidation()
-  return useMutation({ mutationFn: createGlossary, onSuccess: () => void invalidate() })
+  return useMutation({
+    mutationFn: (name: string) => createGlossary(name),
+    onSuccess: () => void invalidate(),
+  })
 }
 
 export function useUpdateGlossaryMeta() {
