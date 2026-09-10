@@ -736,6 +736,9 @@ options:
         sites: "$1 trang web"
         sitesOne: 1 trang web
       editor:
+        sections:
+          terms: Thuật ngữ
+          maintenance: Sao lưu và xóa
         details:
           title: Tên và mô tả
           descriptionPlaceholder: Mô tả (tùy chọn)

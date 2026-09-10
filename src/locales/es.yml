@@ -852,6 +852,9 @@ options:
         sites: "$1 sitios web"
         sitesOne: 1 sitio web
       editor:
+        sections:
+          terms: Términos
+          maintenance: Copia de seguridad y eliminación
         details:
           title: Nombre y descripción
           descriptionPlaceholder: Descripción (opcional)

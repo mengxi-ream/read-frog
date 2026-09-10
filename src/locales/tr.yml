@@ -736,6 +736,9 @@ options:
         sites: "$1 web sitesi"
         sitesOne: 1 web sitesi
       editor:
+        sections:
+          terms: Terimler
+          maintenance: Yedekleme ve silme
         details:
           title: Ad ve açıklama
           descriptionPlaceholder: Açıklama (isteğe bağlı)

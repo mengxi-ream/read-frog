@@ -736,6 +736,9 @@ options:
         sites: "$1 件のウェブサイト"
         sitesOne: 1 件のウェブサイト
       editor:
+        sections:
+          terms: 用語
+          maintenance: バックアップと削除
         details:
           title: 名前と説明
           descriptionPlaceholder: 説明（任意）

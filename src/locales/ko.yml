@@ -736,6 +736,9 @@ options:
         sites: "$1개 웹사이트"
         sitesOne: 1개 웹사이트
       editor:
+        sections:
+          terms: 용어
+          maintenance: 백업과 삭제
         details:
           title: 이름과 설명
           descriptionPlaceholder: 설명 (선택 사항)

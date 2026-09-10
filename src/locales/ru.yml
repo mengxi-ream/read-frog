@@ -736,6 +736,9 @@ options:
         sites: "Сайтов: $1"
         sitesOne: "Сайтов: 1"
       editor:
+        sections:
+          terms: Термины
+          maintenance: Резервное копирование и удаление
         details:
           title: Название и описание
           descriptionPlaceholder: Описание (необязательно)

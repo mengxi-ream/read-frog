@@ -852,6 +852,9 @@ options:
         sites: "$1 個網站"
         sitesOne: 1 個網站
       editor:
+        sections:
+          terms: 術語
+          maintenance: 備份與刪除
         details:
           title: 名稱與描述
           descriptionPlaceholder: 描述（選填）

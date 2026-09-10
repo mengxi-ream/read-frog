@@ -852,6 +852,9 @@ options:
         sites: "$1 sayt"
         sitesOne: 1 sayt
       editor:
+        sections:
+          terms: Terminlər
+          maintenance: Ehtiyat nüsxə və silmə
         details:
           title: Ad və təsvir
           descriptionPlaceholder: Təsvir (istəyə bağlı)
