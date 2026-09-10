@@ -111,7 +111,19 @@ export function createGlossaryMatcher(entries: readonly GlossaryEntry[]): Glossa
   const sources = [...new Set(usable.map((entry) => entry.source))].sort(
     (a, b) => b.length - a.length,
   )
-  const pattern = new RegExp(`(?:${sources.map(termToPattern).join("|")})`, "gi")
+  const patternSource = `(?:${sources.map(termToPattern).join("|")})`
+  const pattern = new RegExp(patternSource, "gi")
+  /**
+   * The same alternation, anchored (`y`) rather than scanning (`g`).
+   *
+   * Answers the one question `pattern` cannot — "what ELSE starts exactly
+   * here?" — for the retry loop in `match`. A separate object rather than a
+   * `lastIndex` borrow of `pattern`, which is mid-scan at that moment: parsing
+   * the alternation twice measured ~2 ms at the 20,000-term cap (V8 defers the
+   * codegen until a first `exec` that most pages never reach), and that is a
+   * cheaper thing to spend than an invariant a later edit can quietly break.
+   */
+  const anchoredPattern = new RegExp(patternSource, "iy")
 
   return {
     size: usable.length,
@@ -119,31 +131,64 @@ export function createGlossaryMatcher(entries: readonly GlossaryEntry[]): Glossa
       if (rawText === "") return []
       const text = normalize(rawText)
 
+      /**
+       * The entry a hit at `[start, start + matched.length)` stands for, or
+       * `undefined` when nothing in the list claims it.
+       *
+       * Both rejections live here rather than in the pattern because neither
+       * fits in one: a single regex cannot carry a per-branch case flag, and
+       * `\b` is unusable across scripts (see `boundary.ts`).
+       */
+      const resolveAt = (start: number, matched: string): IndexedEntry | undefined => {
+        // The hit may carry the page's whitespace (two spaces, a newline, a
+        // non-breaking space) while the index is keyed on the single-spaced
+        // term, so fold runs of whitespace back down before looking it up.
+        const folded = matched.replace(/\s+/g, " ")
+        const bucket = index.get(folded.toLowerCase())
+        if (!bucket) {
+          // The regex `i` flag's canonicalisation and String#toLowerCase are not
+          // the same relation — Greek final sigma is the reachable case — so a
+          // hit can miss the index. Rare enough to log rather than defend.
+          logger.log("Glossary match had no index entry", { matched })
+          return undefined
+        }
+        for (const entry of bucket) {
+          if (entry.caseSensitive && entry.source !== folded) continue
+          if (!isAtWordBoundary(text, start, start + matched.length, entry.boundary)) continue
+          return entry
+        }
+        return undefined
+      }
+
       const hits = new Map<string, MatchedTerm>()
       pattern.lastIndex = 0
 
       let match: RegExpExecArray | null = pattern.exec(text)
       while (match !== null) {
-        const matched = match[0]
         const start = match.index
+        let end = start + match[0].length
+        let accepted = resolveAt(start, match[0])
 
-        let accepted: IndexedEntry | undefined
-        // The hit may carry the page's whitespace (two spaces, a newline, a
-        // non-breaking space) while the index is keyed on the single-spaced
-        // term, so fold runs of whitespace back down before looking it up.
-        const bucket = index.get(matched.replace(/\s+/g, " ").toLowerCase())
-        if (bucket) {
-          for (const entry of bucket) {
-            if (entry.caseSensitive && entry.source !== matched.replace(/\s+/g, " ")) continue
-            if (!isAtWordBoundary(text, start, start + matched.length, entry.boundary)) continue
-            accepted = entry
-            break
-          }
-        } else {
-          // The regex `i` flag's canonicalisation and String#toLowerCase are not
-          // the same relation — Greek final sigma is the reachable case — so a
-          // hit can miss the index. Rare enough to log rather than defend.
-          logger.log("Glossary match had no index entry", { matched })
+        // A rejection does NOT mean "no term starts here".
+        //
+        // The alternation yields exactly ONE candidate per position — the
+        // longest branch that matches, which is the only reason `sources` is
+        // sorted longest-first, since JavaScript's `|` is leftmost-FIRST and not
+        // leftmost-longest. The shorter terms that also start at `start` were
+        // therefore never generated, and `lastIndex = start + 1` below would
+        // abandon them unexamined: `Chort` is lost in `at Chort bayonet` because
+        // `Chort Bay` matched there first and then failed its end boundary.
+        //
+        // So re-ask at the same position against a window one character too
+        // short to hold the candidate just rejected, which forces the next one
+        // out. `end` strictly decreases, so this terminates; it runs only after
+        // a rejection, and the window is the span, not the paragraph.
+        while (accepted === undefined) {
+          anchoredPattern.lastIndex = 0
+          const shorter = anchoredPattern.exec(text.slice(start, end - 1))
+          if (shorter === null) break
+          end = start + shorter[0].length
+          accepted = resolveAt(start, shorter[0])
         }
 
         if (accepted) {
@@ -155,7 +200,7 @@ export function createGlossaryMatcher(entries: readonly GlossaryEntry[]): Glossa
               keepOriginal: accepted.target === "",
             })
           }
-          pattern.lastIndex = start + matched.length
+          pattern.lastIndex = end
         } else {
           // Resume ONE character in, not past the match. Skipping the whole span
           // would hide a shorter term that starts inside it.

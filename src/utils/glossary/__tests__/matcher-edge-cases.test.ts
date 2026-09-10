@@ -204,6 +204,67 @@ describe("overlapping multi-word terms", () => {
   })
 })
 
+describe("a rejected candidate and the shorter terms starting at the same position", () => {
+  const sourcesFor = (entries: GlossaryEntry[], text: string) =>
+    createGlossaryMatcher(entries)
+      .match(text)
+      .map((hit) => hit.source)
+
+  // The alternation yields exactly ONE candidate per position — the longest
+  // branch that matched — because JavaScript's `|` is leftmost-FIRST. So when
+  // that candidate is rejected afterwards, the shorter terms starting at the
+  // same position have not been examined and found wanting; they were never
+  // generated. Resuming one character later abandons them unseen.
+
+  it("recovers the shorter term when the longer one fails its end boundary", () => {
+    // No case-sensitivity anywhere: `Chort Bay` matches inside `bayonet` and is
+    // then rejected for the `o` glued to its end.
+    const entries = [entry("Chort Bay", "雀特湾"), entry("Chort", "雀特")]
+    expect(sourcesFor(entries, "we landed at Chort bayonet factory")).toEqual(["Chort"])
+    // The same two entries on text that rejects nothing — this is what makes the
+    // bug so hard to self-diagnose: the term works, just not in every sentence.
+    expect(sourcesFor(entries, "we landed at Chort today")).toEqual(["Chort"])
+    expect(sourcesFor(entries, "we landed at Chort Bay today")).toEqual(["Chort Bay"])
+  })
+
+  it("recovers the shorter term when the longer one fails its case check", () => {
+    const entries = [entry("Chort Bay", "雀特湾", true), entry("Chort", "雀特")]
+    expect(sourcesFor(entries, "we landed at chort bay before dawn")).toEqual(["Chort"])
+    expect(sourcesFor(entries, "we landed at Chort Bay before dawn")).toEqual(["Chort Bay"])
+  })
+
+  it("keeps retrying past more than one rejection", () => {
+    const entries = [
+      entry("Chort Bay Road", "雀特湾路", true),
+      entry("Chort Bay", "雀特湾", true),
+      entry("Chort", "雀特"),
+    ]
+    expect(sourcesFor(entries, "we walked chort bay road today")).toEqual(["Chort"])
+  })
+
+  it("takes the longest ACCEPTABLE term, not merely the first that survives", () => {
+    const entries = [
+      entry("Chort Bay Road", "雀特湾路", true),
+      entry("Chort Bay", "雀特湾"),
+      entry("Chort", "雀特"),
+    ]
+    expect(sourcesFor(entries, "we walked chort bay road today")).toEqual(["Chort Bay"])
+  })
+
+  it("still finds a term that starts INSIDE the rejected span", () => {
+    // What the one-character resume was written for, and it still holds: `Bay`
+    // begins six characters into the span `Chort Bay` was rejected on.
+    const entries = [entry("Chort Bay", "雀特湾", true), entry("Bay", "湾")]
+    expect(sourcesFor(entries, "we landed at chort bay now")).toEqual(["Bay"])
+  })
+
+  it("terminates when the rejected candidate is a single character", () => {
+    // The retry window is `[start, end - 1)`, empty for a one-character hit.
+    const entries = [entry("A", "甲", true)]
+    expect(sourcesFor(entries, "a lowercase a only")).toEqual([])
+  })
+})
+
 describe("string edges", () => {
   it.each([
     ["whole string", "Chort Bay"],
