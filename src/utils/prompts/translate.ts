@@ -166,7 +166,8 @@ export async function getTranslatePrompt(
   // already matched — the batch pipeline, which unions terms across a batch —
   // passes its own and skips this.
   const glossaryTerms =
-    options?.glossaryTerms ?? (await resolveGlossaryTerms(input, config.glossary.enabled))
+    options?.glossaryTerms ??
+    (await resolveGlossaryTerms(input, config.glossary.enabled, config.language.targetCode))
   return getTranslatePromptFromConfig(config.pageTranslation, targetLang, input, {
     ...options,
     glossaryTerms,

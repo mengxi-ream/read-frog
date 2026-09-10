@@ -892,6 +892,7 @@ options:
       columnEnabled: Aktiv
       columnSource: Termin
       columnTarget: Tərcümə
+      columnTargetLanguage: Hədəf dili
       toggleTerm: "$1 terminini istifadə et"
       keepOriginal: Orijinalı saxla
       delete: Sil

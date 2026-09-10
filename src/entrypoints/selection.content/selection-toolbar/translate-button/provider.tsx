@@ -158,6 +158,7 @@ async function translateWithTextStream({
   const glossaryTerms = resolveGlossaryTermsFromCache(
     preparedText,
     translateRequest.glossaryEnabled,
+    translateRequest.language.targetCode,
   )
 
   const { systemPrompt, prompt } = getTranslatePromptFromConfig(
@@ -232,6 +233,7 @@ async function translateWithHostedTextStream({
   const glossaryTerms = resolveGlossaryTermsFromCache(
     preparedText,
     translateRequest.glossaryEnabled,
+    translateRequest.language.targetCode,
   )
   if (abortController.signal.aborted) {
     throw new DOMException("aborted", "AbortError")

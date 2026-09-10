@@ -1,5 +1,8 @@
+import type { LangCodeISO6393 } from "@read-frog/definitions"
 import { Icon } from "@iconify/react"
+import { useAtomValue } from "jotai"
 import { useState } from "react"
+import { LanguageCombobox } from "@/components/language-combobox"
 import { Button } from "@/components/ui/base-ui/button"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import { Label } from "@/components/ui/base-ui/label"
@@ -12,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/base-ui/select"
 import { toastManager } from "@/components/ui/base-ui/toast"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { parseGlossaryCsv } from "@/utils/glossary/csv"
 import { exportGlossaryCsv } from "@/utils/glossary/repository"
 import { i18n } from "@/utils/i18n"
@@ -40,6 +44,10 @@ export function GlossaryImportExport({
   // whole file takes one answer, and this is the only place that answer cannot
   // be given per term.
   const [caseSensitive, setCaseSensitive] = useState(false)
+  const language = useAtomValue(configFieldsAtomMap.language)
+  // Only used for rows whose `targetLanguage` column is absent or blank — every
+  // file written before that column existed, and every file from another tool.
+  const [fallbackLang, setFallbackLang] = useState<LangCodeISO6393>(language.targetCode)
   const { mutateAsync: importRows, isPending } = useImportGlossary(glossaryId)
 
   const handleImport = async (file: File) => {
@@ -49,7 +57,7 @@ export function GlossaryImportExport({
       return
     }
 
-    const result = await importRows({ rows, mode, caseSensitive })
+    const result = await importRows({ rows, mode, caseSensitive, fallbackLang })
 
     // Over the cap the import is refused whole and the exact overflow is named.
     // Truncating would leave the user unable to see which half is missing.
@@ -68,9 +76,9 @@ export function GlossaryImportExport({
         String(result.updated),
       ]),
       description:
-        skipped.length > 0 || result.duplicatesInFile > 0
+        skipped.length > 0 || result.duplicatesInFile > 0 || result.unknownLanguage > 0
           ? i18n.t("options.advanced.glossary.importSkipped", [
-              String(skipped.length),
+              String(skipped.length + result.unknownLanguage),
               String(result.duplicatesInFile),
             ])
           : undefined,
@@ -124,6 +132,18 @@ export function GlossaryImportExport({
               <Checkbox checked={caseSensitive} onCheckedChange={setCaseSensitive} />
               {i18n.t("options.advanced.glossary.caseSensitive")}
             </label>
+
+            {/* For rows with no language of their own. A file that names one per
+                row keeps what it says. */}
+            <LanguageCombobox
+              triggerSize="sm"
+              className="text-sm"
+              value={fallbackLang}
+              onValueChange={(value) => {
+                if (value === "auto") return
+                setFallbackLang(value)
+              }}
+            />
           </span>
         </>
       }

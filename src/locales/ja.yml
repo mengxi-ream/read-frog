@@ -776,6 +776,7 @@ options:
       columnEnabled: 有効
       columnSource: 用語
       columnTarget: 訳語
+      columnTargetLanguage: 翻訳先の言語
       toggleTerm: "「$1」を使用"
       keepOriginal: 原文のまま
       delete: 削除

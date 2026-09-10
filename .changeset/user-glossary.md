@@ -13,5 +13,10 @@ terms on one wiki, work vocabulary on your company's docs, nothing anywhere else
 website listed applies everywhere. Where two glossaries give the same term different wording, the one
 lower in the list wins.
 
-Turn an individual term or a whole glossary off without deleting it, import and export each list as CSV,
-or empty it in one go. Find it under Advanced → Glossary in the extension settings.
+Each term is written for one target language, chosen next to the term itself and defaulting to whatever
+you currently translate into, so the same word can have a Chinese wording and a Japanese one side by side
+and only the one that applies is ever sent.
+
+Turn an individual term or a whole glossary off without deleting it, import and export each list as CSV
+(now with a `targetLanguage` column; two-column files still import), or empty it in one go. Find it under
+Advanced → Glossary in the extension settings.

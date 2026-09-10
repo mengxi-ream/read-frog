@@ -776,6 +776,7 @@ options:
       columnEnabled: Etkin
       columnSource: Terim
       columnTarget: Çeviri
+      columnTargetLanguage: Hedef dil
       toggleTerm: "$1 terimini kullan"
       keepOriginal: Özgün hâlini koru
       delete: Sil

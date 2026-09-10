@@ -1,3 +1,4 @@
+import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { GlossarySnapshot } from "@/utils/glossary/active-matcher"
 import { setGlossarySnapshotLoader } from "@/utils/glossary/active-matcher"
 import {
@@ -19,11 +20,14 @@ const EMPTY_SNAPSHOT: GlossarySnapshot = { revision: 0, scopeKey: "", entries: [
  * A failure resolves to an empty snapshot rather than rejecting: a broken
  * glossary must degrade to "translate without it", never to a failed page.
  */
-async function readSnapshot(url: string | undefined): Promise<GlossarySnapshot> {
+async function readSnapshot(
+  url: string | undefined,
+  targetLang: LangCodeISO6393,
+): Promise<GlossarySnapshot> {
   const [revision, glossaries, entries] = await Promise.all([
     getGlossaryRevision(),
     listGlossaries(),
-    loadGlossaryEntries(url),
+    loadGlossaryEntries(targetLang, url),
   ])
   // Already in list order, so this is stable for a given set.
   const scopeKey = glossaries
@@ -42,11 +46,11 @@ export function setupGlossaryMessageHandlers() {
   // resolved here, and every request that CAN name its page carries the terms
   // its own page resolved (see `TranslatePromptOptions.glossaryTerms`), so this
   // path is a fallback rather than the normal route.
-  setGlossarySnapshotLoader(() => readSnapshot(undefined))
+  setGlossarySnapshotLoader((_url, targetLang) => readSnapshot(undefined, targetLang))
 
   onMessage("getGlossarySnapshot", async ({ data }): Promise<GlossarySnapshot> => {
     try {
-      return await readSnapshot(data.url)
+      return await readSnapshot(data.url, data.targetLang)
     } catch (error) {
       logger.error("Failed to build glossary snapshot", error)
       return EMPTY_SNAPSHOT

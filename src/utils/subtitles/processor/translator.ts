@@ -180,7 +180,11 @@ async function translateSingleSubtitle(
   const subtitlePromptContext = normalizeSubtitlePromptContext(videoContext)
   // Resolved once on the page, where the URL says which glossaries apply, and
   // then carried by the request — the background serves every tab at once.
-  const glossaryTerms = await resolveGlossaryTerms(prepareTranslationText(text), glossaryEnabled)
+  const glossaryTerms = await resolveGlossaryTerms(
+    prepareTranslationText(text),
+    glossaryEnabled,
+    langConfig.targetCode,
+  )
   const hashComponents = await buildSubtitleHashComponents(
     text,
     providerRef,

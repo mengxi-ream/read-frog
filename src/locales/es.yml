@@ -892,6 +892,7 @@ options:
       columnEnabled: Activado
       columnSource: Término
       columnTarget: Traducción
+      columnTargetLanguage: Idioma de destino
       toggleTerm: "Usar $1"
       keepOriginal: Conservar el original
       delete: Eliminar

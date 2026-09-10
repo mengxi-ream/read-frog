@@ -776,6 +776,7 @@ options:
       columnEnabled: Bật
       columnSource: Thuật ngữ
       columnTarget: Bản dịch
+      columnTargetLanguage: Ngôn ngữ đích
       toggleTerm: "Dùng $1"
       keepOriginal: Giữ nguyên bản gốc
       delete: Xóa

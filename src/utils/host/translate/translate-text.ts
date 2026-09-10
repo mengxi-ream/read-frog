@@ -345,7 +345,11 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
   // The same list feeds the cache hash and travels with the request, so the
   // prompt the hash describes is the prompt the background builds — it serves
   // every tab at once and could not scope this by itself.
-  const glossaryTerms = await resolveGlossaryTerms(preparedText, glossaryEnabled)
+  const glossaryTerms = await resolveGlossaryTerms(
+    preparedText,
+    glossaryEnabled,
+    langConfig.targetCode,
+  )
 
   const hashComponents = await buildWebPageHashComponents(
     preparedText,

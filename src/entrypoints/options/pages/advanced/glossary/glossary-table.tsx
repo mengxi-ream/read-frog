@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/base-ui/table"
 import { MAX_GLOSSARY_TERMS } from "@/utils/constants/glossary"
 import { i18n } from "@/utils/i18n"
+import { getLanguageName } from "@/utils/language-labels"
 import { ConfigItem } from "../../../components/config-item"
 import { TruncatedText } from "../../../components/truncated-text"
 import { useDeleteGlossaryTerm, useGlossaryTerms, useSetGlossaryTermEnabled } from "./use-glossary"
@@ -105,6 +106,10 @@ export function GlossaryTable({ glossaryId }: { glossaryId: string }) {
                   term must not starve the translation column. */}
               <TableHead>{i18n.t("options.advanced.glossary.columnSource")}</TableHead>
               <TableHead>{i18n.t("options.advanced.glossary.columnTarget")}</TableHead>
+              {/* Sized, so the two term columns keep dividing the rest evenly. */}
+              <TableHead className="w-40">
+                {i18n.t("options.advanced.glossary.columnTargetLanguage")}
+              </TableHead>
               <TableHead className="w-16" />
             </TableRow>
           </TableHeader>
@@ -148,6 +153,12 @@ export function GlossaryTable({ glossaryId }: { glossaryId: string }) {
                     <TruncatedText text={term.target} />
                   )}
                 </TableCell>
+                {/* Every term is listed, in every language, so switching the
+                    extension's target language never looks like terms went
+                    missing — the column is how you tell which apply now. */}
+                <TableCell className={term.enabled ? undefined : "opacity-50"}>
+                  <TruncatedText text={getLanguageName(term.targetLang)} />
+                </TableCell>
                 <TableCell>
                   <Button
                     size="sm"
@@ -162,7 +173,7 @@ export function GlossaryTable({ glossaryId }: { glossaryId: string }) {
             ))}
             {visible.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="py-8 text-center text-muted-foreground">
+                <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
                   {isLoading
                     ? i18n.t("options.advanced.glossary.loading")
                     : terms.length === 0

@@ -47,7 +47,10 @@ interface ProtocolMap {
   // so it asks the background once per page and compiles a matcher locally.
   // `url` says which page is asking; glossaries scoped to other sites are left
   // out of the answer rather than filtered on arrival.
-  getGlossarySnapshot: (data: { url: string | undefined }) => Promise<GlossarySnapshot>
+  getGlossarySnapshot: (data: {
+    url: string | undefined
+    targetLang: LangCodeISO6393
+  }) => Promise<GlossarySnapshot>
   // translation state
   getEnablePageTranslationByTabId: (data: { tabId: number }) => boolean | undefined
   getEnablePageTranslationFromContentScript: () => Promise<boolean>

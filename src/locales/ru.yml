@@ -776,6 +776,7 @@ options:
       columnEnabled: Включено
       columnSource: Термин
       columnTarget: Перевод
+      columnTargetLanguage: Язык перевода
       toggleTerm: "Использовать $1"
       keepOriginal: Оставить оригинал
       delete: Удалить

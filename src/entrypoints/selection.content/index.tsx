@@ -97,7 +97,13 @@ export default defineContentScript({
   async main(ctx) {
     // Warm the glossary before any selection happens, so the translate path
     // reads a compiled matcher instead of waiting on a message round trip.
-    primeGlossaryMatcher()
+    // Terms are stored per target language, so the warm-up needs the configured
+    // one; a failure here costs nothing but the warm-up.
+    void getLocalConfig()
+      .then((config) => {
+        if (config) primeGlossaryMatcher(config.language.targetCode)
+      })
+      .catch(() => {})
     // Prevent double injection (manifest-based + programmatic injection)
     if (window.__READ_FROG_SELECTION_INJECTED__) return
     window.__READ_FROG_SELECTION_INJECTED__ = true

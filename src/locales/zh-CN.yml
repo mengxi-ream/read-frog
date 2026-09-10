@@ -892,6 +892,7 @@ options:
       columnEnabled: 启用
       columnSource: 术语
       columnTarget: 译文
+      columnTargetLanguage: 目标语言
       toggleTerm: "使用「$1」"
       keepOriginal: 保持原文
       delete: 删除

@@ -1,3 +1,4 @@
+import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { ParsedGlossaryRow } from "@/utils/glossary/csv"
 import type { GlossaryTermInput, ImportMode } from "@/utils/glossary/repository"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -159,11 +160,13 @@ export function useImportGlossary(glossaryId: string) {
       rows,
       mode,
       caseSensitive,
+      fallbackLang,
     }: {
       rows: ParsedGlossaryRow[]
       mode: ImportMode
       caseSensitive: boolean
-    }) => importGlossaryRows(glossaryId, rows, mode, caseSensitive),
+      fallbackLang: LangCodeISO6393
+    }) => importGlossaryRows(glossaryId, rows, mode, caseSensitive, fallbackLang),
     onSuccess: () => void invalidate(),
   })
 }

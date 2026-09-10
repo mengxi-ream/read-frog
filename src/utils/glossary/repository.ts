@@ -1,3 +1,4 @@
+import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { ParsedGlossaryRow } from "./csv"
 import type { GlossaryEntry } from "./types"
 import type Glossary from "@/utils/db/dexie/tables/glossary"
@@ -14,7 +15,7 @@ import {
   MAX_GLOSSARY_TERMS,
 } from "../constants/glossary"
 import { getRandomUUID } from "../crypto-polyfill"
-import { formatGlossaryCsv } from "./csv"
+import { formatGlossaryCsv, resolveRowTargetLanguage } from "./csv"
 import { buildMatchKey } from "./match-key"
 import { isGlossaryActiveForUrl, mergeGlossaryTerms } from "./scope"
 
@@ -124,6 +125,8 @@ export interface GlossaryTermInput {
   source: string
   target: string
   caseSensitive: boolean
+  /** Which target language this wording is for. */
+  targetLang: LangCodeISO6393
   enabled?: boolean
 }
 
@@ -180,8 +183,15 @@ export async function countGlossaryTermsByGlossary(): Promise<Map<string, number
  * reason.
  *
  * `url` is undefined where there is no page — see `isGlossaryActiveForUrl`.
+ *
+ * Terms are filtered to `targetLang`: a wording written for Japanese has no
+ * business in a Chinese prompt. That filter is also why the language needs no
+ * place in the translation cache key — see the note on the table class.
  */
-export async function loadGlossaryEntries(url?: string): Promise<GlossaryEntry[]> {
+export async function loadGlossaryEntries(
+  targetLang: LangCodeISO6393,
+  url?: string,
+): Promise<GlossaryEntry[]> {
   const active = (await listGlossaries()).filter((glossary) =>
     isGlossaryActiveForUrl(glossary, url),
   )
@@ -191,7 +201,7 @@ export async function loadGlossaryEntries(url?: string): Promise<GlossaryEntry[]
     active.map(async (glossary) => {
       const terms = await db.glossaryTerm.where("glossaryId").equals(glossary.id).toArray()
       return terms
-        .filter((term) => term.enabled)
+        .filter((term) => term.enabled && term.targetLang === targetLang)
         .map((term): GlossaryEntry => ({
           matchKey: term.matchKey,
           source: term.source,
@@ -222,8 +232,8 @@ export async function saveGlossaryTerm(
   const matchKey = buildMatchKey(source, input.caseSensitive)
 
   const clash = await db.glossaryTerm
-    .where("[glossaryId+matchKey]")
-    .equals([glossaryId, matchKey])
+    .where("[glossaryId+targetLang+matchKey]")
+    .equals([glossaryId, input.targetLang, matchKey])
     .first()
   if (clash && clash.id !== existingId) return { ok: false, reason: "duplicate" }
 
@@ -236,6 +246,7 @@ export async function saveGlossaryTerm(
     id,
     glossaryId,
     matchKey,
+    targetLang: input.targetLang,
     source,
     target: input.target.trim(),
     caseSensitive: input.caseSensitive,
@@ -280,6 +291,8 @@ export interface ImportGlossaryResult {
   updated: number
   /** Rows dropped because an earlier row in the same file claimed the same term. */
   duplicatesInFile: number
+  /** Rows dropped because their `targetLanguage` column named a language we cannot translate into. */
+  unknownLanguage: number
   /** Set when the import was refused; the list is left untouched. */
   overflowBy?: number
 }
@@ -302,26 +315,38 @@ export async function importGlossaryRows(
   rows: readonly ParsedGlossaryRow[],
   mode: ImportMode,
   caseSensitive: boolean,
+  fallbackLang: LangCodeISO6393,
 ): Promise<ImportGlossaryResult> {
-  const byMatchKey = new Map<string, ParsedGlossaryRow>()
+  // Keyed by language AND term, because one file may carry both a Chinese and a
+  // Japanese wording of the same word and neither displaces the other.
+  const byKey = new Map<string, { row: ParsedGlossaryRow; targetLang: LangCodeISO6393 }>()
   let duplicatesInFile = 0
+  let unknownLanguage = 0
   for (const row of rows) {
     const source = row.source.trim()
     if (source === "") continue
-    const key = buildMatchKey(source, caseSensitive)
+    const targetLang = resolveRowTargetLanguage(row, fallbackLang)
+    if (targetLang === null) {
+      unknownLanguage++
+      continue
+    }
+    const matchKey = buildMatchKey(source, caseSensitive)
+    const key = `${targetLang}\u0000${matchKey}`
     // Last write wins within a file: a user fixing a term further down the file
     // means the later line.
-    if (byMatchKey.has(key)) duplicatesInFile++
-    byMatchKey.set(key, { ...row, source })
+    if (byKey.has(key)) duplicatesInFile++
+    byKey.set(key, { row: { ...row, source }, targetLang })
   }
 
   const existing =
     mode === "replace" ? [] : await db.glossaryTerm.where("glossaryId").equals(glossaryId).toArray()
-  const existingByKey = new Map(existing.map((term) => [term.matchKey, term]))
+  const existingByKey = new Map(
+    existing.map((term) => [`${term.targetLang}\u0000${term.matchKey}`, term]),
+  )
 
   let added = 0
   let updated = 0
-  for (const key of byMatchKey.keys()) {
+  for (const key of byKey.keys()) {
     if (existingByKey.has(key)) updated++
     else added++
   }
@@ -329,28 +354,30 @@ export async function importGlossaryRows(
   const totalTerms = await countGlossaryTerms()
   const termsInThisGlossary = await countGlossaryTerms(glossaryId)
   const finalCount =
-    mode === "replace" ? totalTerms - termsInThisGlossary + byMatchKey.size : totalTerms + added
+    mode === "replace" ? totalTerms - termsInThisGlossary + byKey.size : totalTerms + added
   if (finalCount > MAX_GLOSSARY_TERMS) {
     return {
       ok: false,
       added: 0,
       updated: 0,
       duplicatesInFile,
+      unknownLanguage,
       overflowBy: finalCount - MAX_GLOSSARY_TERMS,
     }
   }
 
   const now = new Date()
-  const records: GlossaryTerm[] = [...byMatchKey.entries()].map(([matchKey, row]) => ({
-    id: existingByKey.get(matchKey)?.id ?? getRandomUUID(),
+  const records: GlossaryTerm[] = [...byKey.entries()].map(([key, { row, targetLang }]) => ({
+    id: existingByKey.get(key)?.id ?? getRandomUUID(),
     glossaryId,
-    matchKey,
+    matchKey: buildMatchKey(row.source, caseSensitive),
+    targetLang,
     source: row.source,
     target: row.target.trim(),
     caseSensitive,
     // An import must not silently re-enable a term the user turned off; a row
     // absent from the table is the only one that starts enabled.
-    enabled: existingByKey.get(matchKey)?.enabled ?? true,
+    enabled: existingByKey.get(key)?.enabled ?? true,
     updatedAt: now,
   })) as GlossaryTerm[]
 
@@ -362,10 +389,17 @@ export async function importGlossaryRows(
   })
   await bumpGlossaryRevision()
 
-  return { ok: true, added, updated, duplicatesInFile }
+  return { ok: true, added, updated, duplicatesInFile, unknownLanguage }
 }
 
+/** Every term in the glossary, in every language, as a three-column CSV. */
 export async function exportGlossaryCsv(glossaryId: string): Promise<string> {
   const terms = await db.glossaryTerm.where("glossaryId").equals(glossaryId).sortBy("matchKey")
-  return formatGlossaryCsv(terms.map((term) => ({ source: term.source, target: term.target })))
+  return formatGlossaryCsv(
+    terms.map((term) => ({
+      source: term.source,
+      target: term.target,
+      targetLanguage: term.targetLang,
+    })),
+  )
 }

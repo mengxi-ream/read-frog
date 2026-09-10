@@ -1,3 +1,4 @@
+import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { GlossaryEntry, GlossaryMatcher, MatchedTerm } from "./types"
 import { storage } from "#imports"
 import { GLOSSARY_REVISION_KEY } from "../constants/glossary"
@@ -30,6 +31,8 @@ const SNAPSHOT_TIMEOUT_MS = 2000
 interface CachedMatcher {
   /** The URL the snapshot was requested for; `undefined` where there is no page. */
   url: string | undefined
+  /** Terms are stored per target language, so a compiled matcher is for one. */
+  targetLang: LangCodeISO6393
   revision: number
   scopeKey: string
   matcher: GlossaryMatcher
@@ -52,11 +55,14 @@ let inFlight: Promise<GlossaryMatcher> | null = null
  * gets inlined and drags all of Dexie (~106 KB) into every page we run on.
  * Measured: it moved host.js from 2,797,947 to 2,904,171 bytes.
  */
-let loadSnapshot: (url: string | undefined) => Promise<GlossarySnapshot> = async (url) =>
-  await sendMessage("getGlossarySnapshot", { url })
+let loadSnapshot: (
+  url: string | undefined,
+  targetLang: LangCodeISO6393,
+) => Promise<GlossarySnapshot> = async (url, targetLang) =>
+  await sendMessage("getGlossarySnapshot", { url, targetLang })
 
 export function setGlossarySnapshotLoader(
-  loader: (url: string | undefined) => Promise<GlossarySnapshot>,
+  loader: (url: string | undefined, targetLang: LangCodeISO6393) => Promise<GlossarySnapshot>,
 ): void {
   loadSnapshot = loader
 }
@@ -112,30 +118,37 @@ function watchGlossaryRevision(): void {
   }
 }
 
-export async function getActiveGlossaryMatcher(): Promise<GlossaryMatcher> {
+export async function getActiveGlossaryMatcher(
+  targetLang: LangCodeISO6393,
+): Promise<GlossaryMatcher> {
   watchGlossaryRevision()
   const url = currentDocumentUrl()
-  if (cached && cached.url === url) return cached.matcher
+  if (cached && cached.url === url && cached.targetLang === targetLang) return cached.matcher
   if (inFlight) return inFlight
 
   inFlight = (async () => {
     try {
       const snapshot = await Promise.race([
-        loadSnapshot(url),
+        loadSnapshot(url, targetLang),
         new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error("glossary snapshot timed out")), SNAPSHOT_TIMEOUT_MS),
         ),
       ])
-      if (cached?.revision !== snapshot.revision || cached.scopeKey !== snapshot.scopeKey) {
+      if (
+        cached?.revision !== snapshot.revision ||
+        cached.scopeKey !== snapshot.scopeKey ||
+        cached.targetLang !== targetLang
+      ) {
         cached = {
           url,
+          targetLang,
           revision: snapshot.revision,
           scopeKey: snapshot.scopeKey,
           matcher: createGlossaryMatcher(snapshot.entries),
         }
       } else {
-        // Same glossaries, same revision, new address: keep the compiled matcher
-        // and just move the cache onto this URL.
+        // Same glossaries, same revision, same language, new address: keep the
+        // compiled matcher and just move the cache onto this URL.
         cached = { ...cached, url }
       }
       return cached.matcher
@@ -156,9 +169,10 @@ export async function getActiveGlossaryMatcher(): Promise<GlossaryMatcher> {
 export async function resolveGlossaryTerms(
   input: string,
   enabled: boolean,
+  targetLang: LangCodeISO6393,
 ): Promise<MatchedTerm[]> {
   if (!enabled || input.trim() === "") return []
-  const matcher = await getActiveGlossaryMatcher()
+  const matcher = await getActiveGlossaryMatcher(targetLang)
   if (matcher.size === 0) return []
   return matcher.match(input)
 }
@@ -174,10 +188,10 @@ export function invalidateActiveGlossaryMatcher(): void {
  * Called once when a content script starts, so the interactive paths never have
  * to wait on a message round trip while a user watches.
  */
-export function primeGlossaryMatcher(): void {
+export function primeGlossaryMatcher(targetLang: LangCodeISO6393): void {
   // Explicitly swallowed: nothing awaits this, so an escaping rejection would
   // surface as an unhandled one on a page we do not own.
-  void getActiveGlossaryMatcher().catch(() => {})
+  void getActiveGlossaryMatcher(targetLang).catch(() => {})
 }
 
 /**
@@ -191,10 +205,14 @@ export function primeGlossaryMatcher(): void {
  * at content script start is what normally makes it ready long before a
  * selection.
  */
-export function resolveGlossaryTermsFromCache(input: string, enabled: boolean): MatchedTerm[] {
+export function resolveGlossaryTermsFromCache(
+  input: string,
+  enabled: boolean,
+  targetLang: LangCodeISO6393,
+): MatchedTerm[] {
   if (!enabled || input.trim() === "") return []
-  if (!cached || cached.url !== currentDocumentUrl()) {
-    primeGlossaryMatcher()
+  if (!cached || cached.url !== currentDocumentUrl() || cached.targetLang !== targetLang) {
+    primeGlossaryMatcher(targetLang)
     return []
   }
   return cached.matcher.match(input)
