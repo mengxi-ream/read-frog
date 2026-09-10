@@ -1,6 +1,8 @@
 import type { TranslatePromptOptions, TranslatePromptResult } from "./translate"
 import type { SubtitlePromptContext } from "@/types/content"
 import { getLocalConfig } from "@/utils/config/storage"
+import { resolveGlossaryTerms } from "@/utils/glossary/active-matcher"
+import { appendGlossaryToSystemPrompt } from "@/utils/glossary/prompt"
 import { DEFAULT_CONFIG } from "../constants/config"
 import {
   BUILT_IN_SUBTITLE_TRANSLATE_PROMPTS,
@@ -65,8 +67,16 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
       .replaceAll(getTokenCellText(SUBTITLE_WEB_DESCRIPTION), description)
       .replaceAll(getTokenCellText(VIDEO_SUMMARY), summary)
 
+  // Same contract as the page-translation builder: appended AFTER token
+  // replacement so a term cannot rewrite the prompt around it, and omitted
+  // entirely when nothing matched so the prompt — which subtitles also fold into
+  // their cache key (subtitles/processor/translator.ts:143) — stays identical
+  // for a user whose glossary missed this cue.
+  const resolvedSystemPrompt = replaceTokens(systemPrompt)
+  const glossaryTerms =
+    options?.glossaryTerms ?? (await resolveGlossaryTerms(input, config.glossary.enabled))
   return {
-    systemPrompt: replaceTokens(systemPrompt),
+    systemPrompt: appendGlossaryToSystemPrompt(resolvedSystemPrompt, glossaryTerms),
     prompt: replaceTokens(prompt),
   }
 }

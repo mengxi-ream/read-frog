@@ -291,6 +291,7 @@ options:
     featureProviders:
       title: Feature providers
       description: Choose which provider to use for each feature
+      chooseProvider: Choose a provider
       features:
         pageTranslation: Page translation
         selectionTranslation: Selection toolbar translation
@@ -826,6 +827,67 @@ options:
         outputSchemaRequired: Add at least one output field
         fieldKeyRequired: Field name is required
         duplicateFieldKey: Field names must be unique
+  advanced:
+    title: Advanced
+    pageDescription: Powerful settings that are not part of the everyday path.
+    glossary:
+      title: Glossary
+      enable:
+        title: Enable
+        description: Send matching terms to the LLM so it renders them your way. The glossary travels in the prompt, so it only applies to features running on an LLM provider.
+      terms:
+        title: Terms
+        description: Add, edit and import the terms in your glossary.
+      addTerm:
+        title: Add a term
+        description: Give a term the wording you want, or leave the translation empty to keep it unchanged.
+      list:
+        title: Your terms
+        description: Only the terms that appear in a paragraph are sent with it.
+      importExport:
+        title: Import and export
+        description: Terms are a CSV file of source and translation columns, so a list can be backed up or shared.
+      sourcePlaceholder: Term
+      targetPlaceholder: Translation (leave empty to keep the original)
+      caseSensitive: Match case
+      add: Add
+      searchPlaceholder: Search terms
+      columnEnabled: Enabled
+      columnSource: Term
+      columnTarget: Translation
+      toggleTerm: "Use $1"
+      keepOriginal: Keep the original
+      delete: Delete
+      loading: Loading...
+      empty: No terms yet. Add one above, or import a CSV file.
+      noMatches: No terms match your search.
+      count: "$1 of $2 terms"
+      previous: Previous
+      next: Next
+      pageOf: "$1 / $2"
+      addError:
+        emptySource: Enter a term first.
+        tooLong: That term is too long.
+        capReached: Your glossary is full.
+        duplicate: That term is already in your glossary.
+      import: Import
+      export: Export
+      importModeMerge: Add to list
+      importModeReplace: Replace list
+      importEmpty: No terms found in that file.
+      importOverflow: "That import would exceed the limit by $1 terms. Nothing was changed."
+      importSuccess: "Imported $1 new and updated $2 terms."
+      importSkipped: "Skipped $1 invalid rows and $2 duplicates."
+      deleteAll:
+        title: Delete all terms
+        description: Empty your glossary. Export first if you might want the terms back — deleting them cannot be undone.
+        deleting: Deleting...
+        dialog:
+          title: Delete all terms
+          trigger: Delete all
+          confirm: Confirm
+          cancel: Cancel
+          description: "All $1 terms will be permanently deleted. This action cannot be undone."
   contextMenu:
     title: Context Menu
     pageDescription: Control the Read Frog entries in the browser's right-click menu.

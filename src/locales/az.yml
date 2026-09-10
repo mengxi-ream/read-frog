@@ -291,6 +291,7 @@ options:
     featureProviders:
       title: Funksiya provayderləri
       description: Hər funksiya üçün istifadə ediləcək provayderi seçin
+      chooseProvider: Provayder seç
       features:
         pageTranslation: Səhifə tərcüməsi
         selectionTranslation: Seçim alətlər panelində tərcümə
@@ -826,6 +827,67 @@ options:
         outputSchemaRequired: Ən azı bir nəticə sahəsi əlavə edin
         fieldKeyRequired: Sahənin adı tələb olunur
         duplicateFieldKey: Sahə adları unikal olmalıdır
+  advanced:
+    title: Qabaqcıl
+    pageDescription: Gündəlik istifadə üçün olmayan güclü parametrlər.
+    glossary:
+      title: Terminlər lüğəti
+      enable:
+        title: Aktiv et
+        description: Uyğun gələn terminləri LLM-ə göndərir ki, onları istədiyiniz kimi tərcümə etsin. Lüğət sorğunun içində göndərilir, ona görə də yalnız LLM provayderi üzərində işləyən funksiyalara tətbiq olunur.
+      terms:
+        title: Terminlər
+        description: Terminlər lüğətinizdəki terminləri əlavə edin, redaktə edin və idxal edin.
+      addTerm:
+        title: Termin əlavə et
+        description: Termin üçün istədiyiniz tərcüməni yazın və ya orijinalı saxlamaq üçün tərcüməni boş buraxın.
+      list:
+        title: Terminləriniz
+        description: Yalnız abzasda rast gəlinən terminlər onunla birlikdə göndərilir.
+      importExport:
+        title: İdxal və ixrac
+        description: Terminlər mənbə və tərcümə sütunlarından ibarət CSV faylıdır, ona görə də siyahını ehtiyat nüsxə kimi saxlamaq və ya paylaşmaq olar.
+      sourcePlaceholder: Termin
+      targetPlaceholder: Tərcümə (orijinalı saxlamaq üçün boş buraxın)
+      caseSensitive: Hərf registrini nəzərə al
+      add: Əlavə et
+      searchPlaceholder: Terminləri axtar
+      columnEnabled: Aktiv
+      columnSource: Termin
+      columnTarget: Tərcümə
+      toggleTerm: "$1 terminini istifadə et"
+      keepOriginal: Orijinalı saxla
+      delete: Sil
+      loading: Yüklənir...
+      empty: Hələ termin yoxdur. Yuxarıdan əlavə edin və ya CSV faylı idxal edin.
+      noMatches: Axtarışınıza uyğun termin yoxdur.
+      count: "$1 / $2 termin"
+      previous: Əvvəlki
+      next: Növbəti
+      pageOf: "$1 / $2"
+      addError:
+        emptySource: Əvvəlcə termin daxil edin.
+        tooLong: Bu termin çox uzundur.
+        capReached: Lüğətiniz doludur.
+        duplicate: Bu termin artıq lüğətinizdədir.
+      import: İdxal et
+      export: İxrac et
+      importModeMerge: Siyahıya əlavə et
+      importModeReplace: Siyahını əvəz et
+      importEmpty: Bu faylda termin tapılmadı.
+      importOverflow: "Bu idxal limiti $1 termin aşacaq. Heç nə dəyişdirilmədi."
+      importSuccess: "$1 yeni termin idxal edildi, $2 termin yeniləndi."
+      importSkipped: "$1 yanlış sətir və $2 təkrar buraxıldı."
+      deleteAll:
+        title: Bütün terminləri sil
+        description: Terminlər lüğətinizi boşaldır. Terminlər sonra lazım ola bilərsə, əvvəlcə ixrac edin — silmə geri qaytarıla bilməz.
+        deleting: Silinir...
+        dialog:
+          title: Bütün terminləri sil
+          trigger: Hamısını sil
+          confirm: Təsdiqlə
+          cancel: Ləğv et
+          description: "Bütün $1 termin həmişəlik silinəcək. Bu əməliyyatı geri qaytarmaq mümkün deyil."
   contextMenu:
     title: Kontekst menyusu
     pageDescription: Brauzerin sağ klik menyusundakı Read Frog elementlərini idarə edin.

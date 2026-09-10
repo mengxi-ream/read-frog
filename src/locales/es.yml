@@ -291,6 +291,7 @@ options:
     featureProviders:
       title: Proveedores de funciones
       description: Elige qué proveedor usar para cada función
+      chooseProvider: Elegir un proveedor
       features:
         pageTranslation: Traducción de página
         selectionTranslation: Traducción de la barra de selección
@@ -826,6 +827,67 @@ options:
         outputSchemaRequired: Añade al menos un campo de salida
         fieldKeyRequired: El nombre del campo es obligatorio
         duplicateFieldKey: Los nombres de campo deben ser únicos
+  advanced:
+    title: Avanzado
+    pageDescription: Ajustes potentes que no forman parte del uso diario.
+    glossary:
+      title: Glosario
+      enable:
+        title: Activar
+        description: Envía los términos coincidentes al LLM para que los traduzca a tu manera. El glosario viaja dentro del prompt, así que solo se aplica a las funciones que usan un proveedor LLM.
+      terms:
+        title: Términos
+        description: Añade, edita e importa los términos de tu glosario.
+      addTerm:
+        title: Añadir un término
+        description: Dale a un término la traducción que quieras, o déjala vacía para conservar el original.
+      list:
+        title: Tus términos
+        description: Solo se envían los términos que aparecen en un párrafo.
+      importExport:
+        title: Importar y exportar
+        description: Los términos son un archivo CSV con columnas de término y traducción, así que puedes guardar una copia de la lista o compartirla.
+      sourcePlaceholder: Término
+      targetPlaceholder: Traducción (déjala vacía para conservar el original)
+      caseSensitive: Distinguir mayúsculas
+      add: Añadir
+      searchPlaceholder: Buscar términos
+      columnEnabled: Activado
+      columnSource: Término
+      columnTarget: Traducción
+      toggleTerm: "Usar $1"
+      keepOriginal: Conservar el original
+      delete: Eliminar
+      loading: Cargando...
+      empty: Aún no hay términos. Añade uno arriba o importa un archivo CSV.
+      noMatches: Ningún término coincide con tu búsqueda.
+      count: "$1 de $2 términos"
+      previous: Anterior
+      next: Siguiente
+      pageOf: "$1 / $2"
+      addError:
+        emptySource: Escribe primero un término.
+        tooLong: Ese término es demasiado largo.
+        capReached: Tu glosario está lleno.
+        duplicate: Ese término ya está en tu glosario.
+      import: Importar
+      export: Exportar
+      importModeMerge: Añadir a la lista
+      importModeReplace: Reemplazar la lista
+      importEmpty: No se encontraron términos en ese archivo.
+      importOverflow: "Esa importación superaría el límite en $1 términos. No se ha cambiado nada."
+      importSuccess: "Se han importado $1 términos nuevos y actualizado $2."
+      importSkipped: "Se han omitido $1 filas no válidas y $2 duplicados."
+      deleteAll:
+        title: Eliminar todos los términos
+        description: Vacía tu glosario. Expórtalo primero si crees que vas a necesitar los términos — eliminarlos no se puede deshacer.
+        deleting: Eliminando...
+        dialog:
+          title: Eliminar todos los términos
+          trigger: Eliminar todo
+          confirm: Confirmar
+          cancel: Cancelar
+          description: "Se eliminarán permanentemente los $1 términos. Esta acción no se puede deshacer."
   contextMenu:
     title: Menú contextual
     pageDescription: Controla las opciones de Read Frog en el menú contextual del navegador.

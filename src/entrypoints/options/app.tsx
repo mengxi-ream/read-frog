@@ -38,6 +38,14 @@ const InputTranslationPage = lazy(() =>
 const TextToSpeechPage = lazy(() =>
   import("./pages/text-to-speech").then((module) => ({ default: module.TextToSpeechPage })),
 )
+const AdvancedPage = lazy(() =>
+  import("./pages/advanced").then((module) => ({ default: module.AdvancedPage })),
+)
+const GlossaryTermsPage = lazy(() =>
+  import("./pages/advanced/glossary/terms-page").then((module) => ({
+    default: module.GlossaryTermsPage,
+  })),
+)
 const HelpAndCommunityPage = lazy(() =>
   import("./pages/help-and-community").then((module) => ({ default: module.HelpAndCommunityPage })),
 )
@@ -120,7 +128,9 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/context-menu": ContextMenuPage,
   "/input-translation": InputTranslationPage,
   "/tts": TextToSpeechPage,
+  "/advanced": AdvancedPage,
   "/help-and-community": HelpAndCommunityPage,
+  "/advanced/glossary": GlossaryTermsPage,
   "/preference/config-backup": ConfigBackupPage,
   "/preference/extension-activation": ExtensionActivationPage,
   "/page-translation/custom-css": CustomCssPage,

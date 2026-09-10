@@ -290,6 +290,7 @@ options:
     featureProviders:
       title: Özellik sağlayıcıları
       description: Her özellik için kullanılacak sağlayıcıyı seçin
+      chooseProvider: Sağlayıcı seç
       features:
         pageTranslation: Sayfa çevirisi
         selectionTranslation: Seçim araç çubuğu çevirisi
@@ -710,6 +711,67 @@ options:
         outputSchemaRequired: En az bir çıktı alanı ekleyin
         fieldKeyRequired: Alan adı gerekli
         duplicateFieldKey: Alan adları benzersiz olmalıdır
+  advanced:
+    title: Gelişmiş
+    pageDescription: Her gün kullanılmayan, güçlü ayarlar.
+    glossary:
+      title: Terim sözlüğü
+      enable:
+        title: Etkinleştir
+        description: Eşleşen terimleri LLM'ye gönderir, böylece onları istediğiniz gibi çevirir. Terim sözlüğü istemin içinde gönderilir, bu yüzden yalnızca LLM sağlayıcısı üzerinde çalışan özellikler için geçerlidir.
+      terms:
+        title: Terimler
+        description: Terim sözlüğünüzdeki terimleri ekleyin, düzenleyin ve içe aktarın.
+      addTerm:
+        title: Terim ekle
+        description: Bir terime istediğiniz çeviriyi verin ya da özgün hâlini korumak için çeviriyi boş bırakın.
+      list:
+        title: Terimleriniz
+        description: Bir paragrafla yalnızca o paragrafta geçen terimler gönderilir.
+      importExport:
+        title: İçe ve dışa aktarma
+        description: Terimler, terim ve çeviri sütunlarından oluşan bir CSV dosyasıdır; böylece liste yedeklenebilir veya paylaşılabilir.
+      sourcePlaceholder: Terim
+      targetPlaceholder: Çeviri (özgün hâlini korumak için boş bırakın)
+      caseSensitive: Büyük/küçük harfe duyarlı
+      add: Ekle
+      searchPlaceholder: Terim ara
+      columnEnabled: Etkin
+      columnSource: Terim
+      columnTarget: Çeviri
+      toggleTerm: "$1 terimini kullan"
+      keepOriginal: Özgün hâlini koru
+      delete: Sil
+      loading: Yükleniyor...
+      empty: Henüz terim yok. Yukarıdan ekleyin veya bir CSV dosyası içe aktarın.
+      noMatches: Aramanızla eşleşen terim yok.
+      count: "$1 / $2 terim"
+      previous: Önceki
+      next: Sonraki
+      pageOf: "$1 / $2"
+      addError:
+        emptySource: Önce bir terim girin.
+        tooLong: Bu terim çok uzun.
+        capReached: Terim sözlüğünüz dolu.
+        duplicate: Bu terim zaten sözlüğünüzde var.
+      import: İçe aktar
+      export: Dışa aktar
+      importModeMerge: Listeye ekle
+      importModeReplace: Listeyi değiştir
+      importEmpty: Bu dosyada terim bulunamadı.
+      importOverflow: "Bu içe aktarma limiti $1 terim aşacak. Hiçbir şey değiştirilmedi."
+      importSuccess: "$1 yeni terim içe aktarıldı, $2 terim güncellendi."
+      importSkipped: "$1 geçersiz satır ve $2 yinelenen terim atlandı."
+      deleteAll:
+        title: Tüm terimleri sil
+        description: Terim sözlüğünüzü boşaltır. Terimlere sonra ihtiyacınız olabilirse önce dışa aktarın — silme işlemi geri alınamaz.
+        deleting: Siliniyor...
+        dialog:
+          title: Tüm terimleri sil
+          trigger: Tümünü sil
+          confirm: Onayla
+          cancel: İptal
+          description: "$1 terimin tamamı kalıcı olarak silinecek. Bu işlem geri alınamaz."
   contextMenu:
     title: Bağlam Menüsü
     pageDescription: Tarayıcının sağ tık menüsündeki Read Frog seçeneklerini yönetin.

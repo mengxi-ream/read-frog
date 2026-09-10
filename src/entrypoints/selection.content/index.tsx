@@ -12,6 +12,7 @@ import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { APP_NAME } from "@/utils/constants/app"
+import { primeGlossaryMatcher } from "@/utils/glossary/active-matcher"
 import { initI18n } from "@/utils/i18n"
 import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
 import { ensureIconifyBackgroundFetch } from "@/utils/iconify/setup-background-fetch"
@@ -94,6 +95,9 @@ export default defineContentScript({
   matches: ["*://*/*", "file:///*"],
   cssInjectionMode: "ui",
   async main(ctx) {
+    // Warm the glossary before any selection happens, so the translate path
+    // reads a compiled matcher instead of waiting on a message round trip.
+    primeGlossaryMatcher()
     // Prevent double injection (manifest-based + programmatic injection)
     if (window.__READ_FROG_SELECTION_INJECTED__) return
     window.__READ_FROG_SELECTION_INJECTED__ = true

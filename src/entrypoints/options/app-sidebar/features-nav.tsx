@@ -136,6 +136,17 @@ export function FeaturesNav() {
 
           <SidebarMenuItem>
             <SidebarMenuButton
+              render={<Link to="/advanced" />}
+              isActive={pathname === "/advanced"}
+              tooltip={i18n.t("options.advanced.title")}
+            >
+              <Icon icon="tabler:flask" />
+              <span>{i18n.t("options.advanced.title")}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
               render={
                 <a
                   href={browser.runtime.getURL(TRANSLATION_HUB_PAGE_PATH)}

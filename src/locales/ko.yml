@@ -290,6 +290,7 @@ options:
     featureProviders:
       title: 기능 제공업체
       description: 각 기능에 사용할 제공업체를 선택
+      chooseProvider: 제공업체 선택
       features:
         pageTranslation: 페이지 번역
         selectionTranslation: 선택 툴바 번역
@@ -710,6 +711,67 @@ options:
         outputSchemaRequired: 최소 하나의 출력 필드를 추가하세요
         fieldKeyRequired: 필드 이름은 필수입니다
         duplicateFieldKey: 필드 이름은 고유해야 합니다
+  advanced:
+    title: 고급
+    pageDescription: 자주 쓰지는 않지만 강력한 설정입니다.
+    glossary:
+      title: 용어집
+      enable:
+        title: 사용
+        description: 일치하는 용어를 LLM에 함께 전달해 원하는 표현으로 번역하게 합니다. 용어집은 프롬프트에 담겨 전달되므로, LLM 제공업체로 실행되는 기능에만 적용됩니다.
+      terms:
+        title: 용어
+        description: 용어집의 용어를 추가, 편집하거나 가져옵니다.
+      addTerm:
+        title: 용어 추가
+        description: 용어에 원하는 번역을 지정하거나, 번역을 비워 두면 원문을 그대로 유지합니다.
+      list:
+        title: 내 용어
+        description: 문단에 나타난 용어만 해당 문단과 함께 전달됩니다.
+      importExport:
+        title: 가져오기와 내보내기
+        description: 용어는 용어와 번역 두 열로 된 CSV 파일이므로, 목록을 백업하거나 공유할 수 있습니다.
+      sourcePlaceholder: 용어
+      targetPlaceholder: 번역 (비워 두면 원문 유지)
+      caseSensitive: 대소문자 구분
+      add: 추가
+      searchPlaceholder: 용어 검색
+      columnEnabled: 사용
+      columnSource: 용어
+      columnTarget: 번역
+      toggleTerm: "'$1' 사용"
+      keepOriginal: 원문 유지
+      delete: 삭제
+      loading: 불러오는 중...
+      empty: 아직 용어가 없습니다. 위에서 추가하거나 CSV 파일을 가져오세요.
+      noMatches: 검색과 일치하는 용어가 없습니다.
+      count: "$1 / $2개 용어"
+      previous: 이전
+      next: 다음
+      pageOf: "$1 / $2"
+      addError:
+        emptySource: 먼저 용어를 입력하세요.
+        tooLong: 용어가 너무 깁니다.
+        capReached: 용어집이 가득 찼습니다.
+        duplicate: 이미 용어집에 있는 용어입니다.
+      import: 가져오기
+      export: 내보내기
+      importModeMerge: 목록에 추가
+      importModeReplace: 목록 교체
+      importEmpty: 해당 파일에서 용어를 찾을 수 없습니다.
+      importOverflow: "이 가져오기는 한도를 $1개 초과합니다. 아무것도 변경되지 않았습니다."
+      importSuccess: "$1개를 새로 가져오고 $2개를 업데이트했습니다."
+      importSkipped: "잘못된 행 $1개와 중복 $2개를 건너뛰었습니다."
+      deleteAll:
+        title: 모든 용어 삭제
+        description: 용어집을 비웁니다. 나중에 다시 필요할 수 있다면 먼저 내보내세요. 삭제는 되돌릴 수 없습니다.
+        deleting: 삭제하는 중...
+        dialog:
+          title: 모든 용어 삭제
+          trigger: 모두 삭제
+          confirm: 확인
+          cancel: 취소
+          description: "$1개의 용어가 모두 영구히 삭제됩니다. 이 작업은 되돌릴 수 없습니다."
   contextMenu:
     title: 컨텍스트 메뉴
     pageDescription: 브라우저 우클릭 메뉴에 표시되는 Read Frog 항목을 설정하세요.

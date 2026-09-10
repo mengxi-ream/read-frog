@@ -291,6 +291,7 @@ options:
     featureProviders:
       title: 功能提供商
       description: 为每个功能选择使用的提供商
+      chooseProvider: 选择提供商
       features:
         pageTranslation: 网页翻译
         selectionTranslation: 划词翻译
@@ -826,6 +827,67 @@ options:
         outputSchemaRequired: 至少需要一个输出字段
         fieldKeyRequired: 字段名不能为空
         duplicateFieldKey: 字段名不能重复
+  advanced:
+    title: 高级
+    pageDescription: 不属于日常路径的强大设置。
+    glossary:
+      title: 术语库
+      enable:
+        title: 启用
+        description: 把命中的术语一并发给 LLM，让它按你的写法翻译。术语库是随提示词一起发送的，所以只对运行在 LLM 提供商上的功能生效。
+      terms:
+        title: 术语
+        description: 添加、编辑和导入术语库中的术语。
+      addTerm:
+        title: 添加术语
+        description: 给术语指定你想要的译文；留空则保持原文不变。
+      list:
+        title: 你的术语
+        description: 只有出现在段落中的术语，才会随该段落一起发送。
+      importExport:
+        title: 导入与导出
+        description: 术语就是一个包含术语和译文两列的 CSV 文件，可以用来备份或分享整份列表。
+      sourcePlaceholder: 术语
+      targetPlaceholder: 译文（留空则保持原文）
+      caseSensitive: 区分大小写
+      add: 添加
+      searchPlaceholder: 搜索术语
+      columnEnabled: 启用
+      columnSource: 术语
+      columnTarget: 译文
+      toggleTerm: "使用「$1」"
+      keepOriginal: 保持原文
+      delete: 删除
+      loading: 正在加载...
+      empty: 还没有术语。在上方添加，或导入 CSV 文件。
+      noMatches: 没有与搜索匹配的术语。
+      count: "$1 / $2 条术语"
+      previous: 上一页
+      next: 下一页
+      pageOf: "$1 / $2"
+      addError:
+        emptySource: 请先输入术语。
+        tooLong: 该术语过长。
+        capReached: 术语库已满。
+        duplicate: 该术语已在术语库中。
+      import: 导入
+      export: 导出
+      importModeMerge: 追加到列表
+      importModeReplace: 替换列表
+      importEmpty: 该文件中没有找到术语。
+      importOverflow: "本次导入会超出上限 $1 条术语，未做任何更改。"
+      importSuccess: "已导入 $1 条新术语，更新 $2 条。"
+      importSkipped: "已跳过 $1 行无效数据和 $2 条重复项。"
+      deleteAll:
+        title: 删除所有术语
+        description: 清空你的术语库。如果以后可能还要用,请先导出——删除后无法恢复。
+        deleting: 删除中...
+        dialog:
+          title: 删除所有术语
+          trigger: 全部删除
+          confirm: 确认
+          cancel: 取消
+          description: "全部 $1 条术语将被永久删除。此操作无法撤销。"
   contextMenu:
     title: 右键菜单
     pageDescription: 控制浏览器右键菜单里的 Read Frog 选项。

@@ -290,6 +290,7 @@ options:
     featureProviders:
       title: 機能プロバイダー
       description: 各機能に使用するプロバイダーを選択
+      chooseProvider: プロバイダーを選択
       features:
         pageTranslation: ページ翻訳
         selectionTranslation: 選択ツールバー翻訳
@@ -710,6 +711,67 @@ options:
         outputSchemaRequired: 少なくとも1つの出力フィールドを追加してください
         fieldKeyRequired: フィールド名は必須です
         duplicateFieldKey: フィールド名は一意である必要があります
+  advanced:
+    title: 詳細設定
+    pageDescription: 普段は使わない、強力な設定です。
+    glossary:
+      title: 用語集
+      enable:
+        title: 有効にする
+        description: 一致した用語を LLM に渡し、指定どおりの訳語で出力させます。用語集はプロンプトに含めて送られるため、LLM プロバイダーで動作する機能にのみ適用されます。
+      terms:
+        title: 用語
+        description: 用語集の用語を追加、編集、インポートします。
+      addTerm:
+        title: 用語を追加
+        description: 用語に使いたい訳語を指定できます。訳語を空欄にすると原文のままになります。
+      list:
+        title: 登録した用語
+        description: 段落に出現した用語だけが、その段落と一緒に送信されます。
+      importExport:
+        title: インポートとエクスポート
+        description: 用語は用語と訳語の 2 列からなる CSV ファイルなので、一覧をバックアップしたり共有したりできます。
+      sourcePlaceholder: 用語
+      targetPlaceholder: 訳語（空欄なら原文のまま）
+      caseSensitive: 大文字と小文字を区別
+      add: 追加
+      searchPlaceholder: 用語を検索
+      columnEnabled: 有効
+      columnSource: 用語
+      columnTarget: 訳語
+      toggleTerm: "「$1」を使用"
+      keepOriginal: 原文のまま
+      delete: 削除
+      loading: 読み込んでいます...
+      empty: 用語がまだありません。上から追加するか、CSV ファイルをインポートしてください。
+      noMatches: 検索に一致する用語はありません。
+      count: "$1 / $2 件の用語"
+      previous: 前へ
+      next: 次へ
+      pageOf: "$1 / $2"
+      addError:
+        emptySource: 先に用語を入力してください。
+        tooLong: この用語は長すぎます。
+        capReached: 用語集がいっぱいです。
+        duplicate: この用語はすでに用語集にあります。
+      import: インポート
+      export: エクスポート
+      importModeMerge: リストに追加
+      importModeReplace: リストを置き換え
+      importEmpty: そのファイルに用語が見つかりませんでした。
+      importOverflow: "このインポートは上限を $1 件超えます。変更は行われていません。"
+      importSuccess: "$1 件を新規にインポートし、$2 件を更新しました。"
+      importSkipped: "無効な行 $1 件と重複 $2 件をスキップしました。"
+      deleteAll:
+        title: すべての用語を削除
+        description: 用語集を空にします。あとで使う可能性があるなら先にエクスポートしてください。削除は元に戻せません。
+        deleting: 削除中...
+        dialog:
+          title: すべての用語を削除
+          trigger: すべて削除
+          confirm: 確認
+          cancel: キャンセル
+          description: "$1 件の用語がすべて完全に削除されます。この操作は元に戻せません。"
   contextMenu:
     title: コンテキストメニュー
     pageDescription: ブラウザーの右クリックメニューに表示される Read Frog の項目を設定します。

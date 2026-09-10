@@ -12,6 +12,7 @@ import {
   getProviderIdsForCapability,
 } from "@/utils/providers/provider-registry"
 import { floatingButtonSchema } from "./floating-button"
+import { glossaryConfigSchema } from "./glossary"
 import { languageDetectionConfigSchema } from "./language-detection"
 import { providersConfigSchema } from "./provider"
 import {
@@ -154,6 +155,7 @@ export const configSchema = z
     siteRules: siteRulesConfigSchema,
     uiLanguage: uiLanguageSchema,
     translationHub: translationHubSchema,
+    glossary: glossaryConfigSchema,
   })
   .superRefine((data, ctx) => {
     for (const featureKey of FEATURE_KEYS) {

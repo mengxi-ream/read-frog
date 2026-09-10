@@ -290,6 +290,7 @@ options:
     featureProviders:
       title: Nhà cung cấp tính năng
       description: Chọn nhà cung cấp sử dụng cho mỗi tính năng
+      chooseProvider: Chọn nhà cung cấp
       features:
         pageTranslation: Dịch trang
         selectionTranslation: Dịch thanh công cụ chọn
@@ -710,6 +711,67 @@ options:
         outputSchemaRequired: Thêm ít nhất một trường đầu ra
         fieldKeyRequired: Tên trường là bắt buộc
         duplicateFieldKey: Tên trường phải là duy nhất
+  advanced:
+    title: Nâng cao
+    pageDescription: Những thiết lập mạnh mẽ nhưng không dùng đến hằng ngày.
+    glossary:
+      title: Bảng thuật ngữ
+      enable:
+        title: Bật
+        description: Gửi các thuật ngữ khớp cho LLM để dịch đúng theo cách bạn muốn. Bảng thuật ngữ được gửi kèm trong câu lệnh, nên nó chỉ áp dụng cho các tính năng chạy trên nhà cung cấp LLM.
+      terms:
+        title: Thuật ngữ
+        description: Thêm, chỉnh sửa và nhập các thuật ngữ trong bảng thuật ngữ của bạn.
+      addTerm:
+        title: Thêm thuật ngữ
+        description: Đặt bản dịch bạn muốn cho một thuật ngữ, hoặc để trống bản dịch để giữ nguyên bản gốc.
+      list:
+        title: Thuật ngữ của bạn
+        description: Chỉ những thuật ngữ xuất hiện trong đoạn văn mới được gửi kèm đoạn đó.
+      importExport:
+        title: Nhập và xuất
+        description: Thuật ngữ là một tệp CSV gồm cột thuật ngữ và bản dịch, nên bạn có thể sao lưu hoặc chia sẻ danh sách.
+      sourcePlaceholder: Thuật ngữ
+      targetPlaceholder: Bản dịch (để trống để giữ nguyên bản gốc)
+      caseSensitive: Phân biệt chữ hoa/thường
+      add: Thêm
+      searchPlaceholder: Tìm thuật ngữ
+      columnEnabled: Bật
+      columnSource: Thuật ngữ
+      columnTarget: Bản dịch
+      toggleTerm: "Dùng $1"
+      keepOriginal: Giữ nguyên bản gốc
+      delete: Xóa
+      loading: Đang tải...
+      empty: Chưa có thuật ngữ nào. Thêm ở trên hoặc nhập từ tệp CSV.
+      noMatches: Không có thuật ngữ nào khớp với tìm kiếm.
+      count: "$1 / $2 thuật ngữ"
+      previous: Trước
+      next: Sau
+      pageOf: "$1 / $2"
+      addError:
+        emptySource: Hãy nhập thuật ngữ trước.
+        tooLong: Thuật ngữ này quá dài.
+        capReached: Bảng thuật ngữ đã đầy.
+        duplicate: Thuật ngữ này đã có trong bảng thuật ngữ.
+      import: Nhập
+      export: Xuất
+      importModeMerge: Thêm vào danh sách
+      importModeReplace: Thay thế danh sách
+      importEmpty: Không tìm thấy thuật ngữ nào trong tệp đó.
+      importOverflow: "Lần nhập này sẽ vượt giới hạn $1 thuật ngữ. Không có gì thay đổi."
+      importSuccess: "Đã nhập $1 thuật ngữ mới và cập nhật $2 thuật ngữ."
+      importSkipped: "Đã bỏ qua $1 dòng không hợp lệ và $2 mục trùng lặp."
+      deleteAll:
+        title: Xóa tất cả thuật ngữ
+        description: Làm trống bảng thuật ngữ của bạn. Hãy xuất trước nếu bạn có thể cần dùng lại — việc xóa không thể hoàn tác.
+        deleting: Đang xóa...
+        dialog:
+          title: Xóa tất cả thuật ngữ
+          trigger: Xóa tất cả
+          confirm: Xác nhận
+          cancel: Hủy
+          description: "Toàn bộ $1 thuật ngữ sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác."
   contextMenu:
     title: Menu ngữ cảnh
     pageDescription: Kiểm soát các mục Read Frog trong menu chuột phải của trình duyệt.

@@ -356,6 +356,7 @@ vi.mock("@/utils/logger", () => ({
     info: vi.fn<(...args: any[]) => any>(),
     log: vi.fn<(...args: any[]) => any>(),
     error: vi.fn<(...args: any[]) => any>(),
+    warn: vi.fn<(...args: any[]) => any>(),
   },
 }))
 

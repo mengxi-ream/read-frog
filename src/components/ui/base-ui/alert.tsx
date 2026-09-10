@@ -11,6 +11,12 @@ const alertVariants = cva(
         default: "bg-card text-card-foreground",
         destructive:
           "border-destructive bg-destructive/5 text-destructive *:data-[slot=alert-description]:text-card-foreground *:[svg]:text-current",
+        // Amber rather than `destructive`: these are "this will not do what you
+        // expect" states, not failures. The description needs its own colour
+        // because AlertDescription hard-codes `text-muted-foreground`, which
+        // would otherwise win over the inherited amber.
+        warning:
+          "border-amber-200 bg-amber-50 text-amber-900 *:data-[slot=alert-description]:text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50 dark:*:data-[slot=alert-description]:text-amber-200/80 *:[svg]:text-current",
       },
     },
     defaultVariants: {

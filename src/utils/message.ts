@@ -19,6 +19,7 @@ import type {
   TTSPlaybackStartResponse,
   TTSPlaybackStopRequest,
 } from "@/types/tts-playback"
+import type { GlossarySnapshot } from "@/utils/glossary/active-matcher"
 import type { HostedAiStatus } from "@/utils/hosted-ai/types"
 import type { PromptableProviderRef, SerializableProviderRef } from "@/utils/providers/provider-ref"
 import type { EdgeTTSVoice } from "@/utils/server/edge-tts/types"
@@ -41,6 +42,9 @@ interface ProtocolMap {
   >
   // config
   getInitialConfig: () => Config | null
+  // glossary — the terms live in IndexedDB, which a content script cannot open,
+  // so it asks the background once per page and compiles a matcher locally.
+  getGlossarySnapshot: () => Promise<GlossarySnapshot>
   // translation state
   getEnablePageTranslationByTabId: (data: { tabId: number }) => boolean | undefined
   getEnablePageTranslationFromContentScript: () => Promise<boolean>
