@@ -1,4 +1,10 @@
-const INVISIBLE_TRANSLATION_CHARACTERS_REGEX = /[\u200B-\u200D\uFEFF]/g
+/**
+ * Zero-width characters that carry no meaning but break exact comparison.
+ * Exported because anything matching against prepared text has to strip the
+ * SAME set — a glossary term stripped differently from the page text simply
+ * never matches.
+ */
+export const INVISIBLE_TRANSLATION_CHARACTERS_REGEX = /[\u200B-\u200D\uFEFF]/g
 
 export function prepareTranslationText(value: string | null | undefined): string {
   return value?.replace(INVISIBLE_TRANSLATION_CHARACTERS_REGEX, "").trim() ?? ""

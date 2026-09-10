@@ -291,6 +291,7 @@ options:
     featureProviders:
       title: Feature providers
       description: Choose which provider to use for each feature
+      chooseProvider: Choose a provider
       features:
         pageTranslation: Page translation
         selectionTranslation: Selection toolbar translation
@@ -325,6 +326,8 @@ options:
       llmProviderNotConfigured: No LLM provider selected for $1
   patterns:
     duplicate: This pattern is already in the list
+    gluedWildcard: A "*" has to stand for a whole part of the address, like *.example.com or example.*
+    unsupported: Read Frog cannot match this address. Ports and schemes other than http and https are not supported.
   preference:
     title: Preferences
     pageDescription: Set how Read Frog looks, where it runs, and how your config is synced and backed up.
@@ -826,6 +829,109 @@ options:
         outputSchemaRequired: Add at least one output field
         fieldKeyRequired: Field name is required
         duplicateFieldKey: Field names must be unique
+  advanced:
+    title: Advanced
+    pageDescription: Powerful settings that are not part of the everyday path.
+    glossary:
+      title: Glossary
+      pageDescription: Give the words that matter to you a fixed translation, and choose where each list applies.
+      untitled: Untitled glossary
+      noGlossaries: No glossaries yet.
+      enable:
+        title: Enable
+        description: Send matching terms to the LLM so it renders them your way. The glossary travels in the prompt, so it only applies to features running on an LLM provider.
+      library:
+        title: Your glossaries
+        description: Each glossary has its own terms and its own list of websites, so a set of terms for work does not follow you onto everything else.
+        button: Add a glossary
+        capReached: "You can have at most $1 glossaries."
+      summary:
+        terms: "$1 terms"
+        termsOne: 1 term
+        allSites: All websites
+        sites: "$1 websites"
+        sitesOne: 1 website
+      editor:
+        sections:
+          terms: Terms
+          maintenance: Backup and deletion
+        details:
+          title: Name and description
+          descriptionPlaceholder: Description (optional)
+        enable:
+          title: Enable
+          description: A disabled glossary keeps its terms but sends none of them.
+        sites:
+          title: Websites
+          description: Restrict this glossary to certain websites.
+          allSites: Leave this empty and the glossary applies everywhere.
+          header: Website
+        delete:
+          title: Delete this glossary
+          description: Removes the glossary and every term in it. Export first if you might want the terms back — this cannot be undone.
+          dialog:
+            trigger: Delete
+            title: Delete this glossary?
+            description: "The glossary and all $1 terms in it will be permanently deleted. This action cannot be undone."
+            confirm: Delete
+            cancel: Cancel
+      addTerm:
+        title: Add a term
+        description: Give a term the wording you want, or leave the translation empty to keep it unchanged.
+      list:
+        title: Your terms
+        description: Only the terms that appear in a paragraph are sent with it.
+      importExport:
+        title: Import and export
+        description: Terms are a CSV file of source and translation columns, so a list can be backed up or shared.
+      sourcePlaceholder: Term
+      targetPlaceholder: Translation (leave empty to keep the original)
+      caseSensitive: Match case
+      add: Add
+      searchPlaceholder: Search terms
+      columnEnabled: Enabled
+      columnSource: Term
+      columnTarget: Translation
+      columnTargetLanguage: Target language
+      toggleTerm: "Use $1"
+      keepOriginal: Keep the original
+      delete: Delete
+      loading: Loading...
+      empty: No terms yet. Add one above, or import a CSV file.
+      noMatches: No terms match your search.
+      count: "$1 of $2 terms"
+      previous: Previous
+      next: Next
+      pageOf: "$1 / $2"
+      addError:
+        emptySource: Enter a term first.
+        tooLong: That term is too long.
+        capReached: Your glossary is full.
+        duplicate: That term is already in your glossary.
+      import: Import
+      export: Export
+      importModeMerge: Add to list
+      importModeReplace: Replace list
+      importEmpty: No terms found in that file.
+      importOverflow: "That import would exceed the limit by $1 terms. Nothing was changed."
+      importSuccess: "Imported $1 new and updated $2 terms."
+      importSkipped: "Skipped $1 invalid rows and $2 duplicates."
+      importNoValidRows: "None of those rows named a language this extension can translate into. Nothing was changed."
+      importReplaceConfirm:
+        title: Replace the whole list?
+        description: "All $1 terms in this glossary will be deleted — every target language, not just the one selected — and replaced with the contents of this file. This cannot be undone."
+        confirm: Replace
+        cancel: Cancel
+      deleteAll:
+        title: Delete all terms
+        description: Empty your glossary. Export first if you might want the terms back — deleting them cannot be undone.
+        deleting: Deleting...
+        dialog:
+          title: Delete all terms
+          trigger: Delete all
+          confirm: Confirm
+          cancel: Cancel
+          description: "All $1 terms will be permanently deleted. This action cannot be undone."
   contextMenu:
     title: Context Menu
     pageDescription: Control the Read Frog entries in the browser's right-click menu.

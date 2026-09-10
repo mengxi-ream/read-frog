@@ -5,7 +5,8 @@ export interface ConfigItemProps {
   id?: string
   /** Omit to hang the row off the previous item's title instead of giving it one. */
   title?: ReactNode
-  description: ReactNode
+  /** Omit where the title says everything; the block is dropped rather than left empty. */
+  description?: ReactNode
   children: ReactNode
   /** `vertical` stacks the control under the label — for controls too wide to sit beside it. */
   orientation?: "horizontal" | "vertical"
@@ -46,9 +47,11 @@ export function ConfigItem({
           {title && (
             <h3 className={cn("text-sm leading-5 font-medium", titleClassName)}>{title}</h3>
           )}
-          <div className="text-[13px] leading-[18px] text-pretty text-muted-foreground">
-            {description}
-          </div>
+          {description !== undefined && (
+            <div className="text-[13px] leading-[18px] text-pretty text-muted-foreground">
+              {description}
+            </div>
+          )}
         </div>
       </div>
       <div className={cn("flex flex-col justify-start", layout.control)}>{children}</div>

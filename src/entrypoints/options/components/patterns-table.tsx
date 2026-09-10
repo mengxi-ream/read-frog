@@ -47,14 +47,15 @@ export function PatternsTable({
 
   // This is the only place a pattern is typed in, so it is where the outcome is reported.
   // A rejected pattern keeps its text in the field so it can be corrected rather than
-  // retyped.
+  // retyped. An empty input is the one rejection worth staying quiet about — the user
+  // pressed Enter on nothing.
   const handleAddPattern = () => {
     const result = onAddPattern(inputValue)
-    if (result === "duplicate") {
-      toastManager.add({ type: "error", title: i18n.t("options.patterns.duplicate") })
+    if (result === "empty") return
+    if (result !== "added") {
+      toastManager.add({ type: "error", title: i18n.t(`options.patterns.${result}`) })
       return
     }
-    if (result === "empty") return
 
     setInputValue("")
   }

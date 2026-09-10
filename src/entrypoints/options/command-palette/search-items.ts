@@ -17,6 +17,21 @@ type SearchItemDefinition = Omit<SearchItem, "titleKey" | "descriptionKey" | "pa
 }
 
 export const SEARCH_ITEMS: SearchItem[] = [
+  // Advanced page
+  {
+    sectionId: "glossary-enabled",
+    route: "/advanced/glossary",
+    titleKey: "options.advanced.glossary.enable.title",
+    descriptionKey: "options.advanced.glossary.enable.description",
+    pageKey: "options.advanced.glossary.title",
+  },
+  {
+    sectionId: "glossary-library",
+    route: "/advanced/glossary",
+    titleKey: "options.advanced.glossary.library.title",
+    descriptionKey: "options.advanced.glossary.library.description",
+    pageKey: "options.advanced.glossary.title",
+  },
   // Preference page
   {
     // Titled with the section, so "appearance" still finds a row that reads "Theme".

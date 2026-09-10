@@ -12,6 +12,7 @@ import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { APP_NAME } from "@/utils/constants/app"
+import { primeGlossaryMatcher } from "@/utils/glossary/active-matcher"
 import { initI18n } from "@/utils/i18n"
 import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
 import { ensureIconifyBackgroundFetch } from "@/utils/iconify/setup-background-fetch"
@@ -111,6 +112,21 @@ export default defineContentScript({
       clearEffectiveSiteControlUrl()
       return
     }
+
+    // Warm the glossary before any selection happens, so the translate path
+    // reads a compiled matcher instead of waiting on a message round trip.
+    // Terms are stored per target language, so the warm-up needs the configured
+    // one; a failure here costs nothing but the warm-up.
+    //
+    // Below the guards, not above them: this is the only message any content
+    // script sends at page load, and sending it on a site the user switched the
+    // extension off for — where the toolbar never mounts, so the matcher can
+    // never be read — is work they asked us not to do. `primeGlossaryMatcher`
+    // swallows its own failures, so no catch is needed here.
+    // `config?.` because `isSiteEnabled` tolerates a null config rather than
+    // narrowing it; `glossary` itself is always present once config is, since
+    // its schema carries a default.
+    if (config?.glossary.enabled) primeGlossaryMatcher(config.language.targetCode)
 
     // Answer ebook bridge handshakes before the React UI finishes mounting
     const cleanupExternalSelectionSource = setupExternalSelectionSource()

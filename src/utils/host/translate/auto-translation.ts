@@ -1,7 +1,7 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
 import { getFinalSourceCode } from "@/utils/config/languages"
-import { matchDomainPattern } from "@/utils/url"
+import { urlMatchesPattern } from "@/utils/url-pattern"
 
 export async function shouldEnableAutoTranslation(
   url: string,
@@ -14,13 +14,13 @@ export async function shouldEnableAutoTranslation(
   const { sourceCode } = config?.language || {}
 
   const doesMatchNeverTranslatePattern =
-    neverAutoTranslatePatterns?.some((pattern) => matchDomainPattern(url, pattern)) ?? false
+    neverAutoTranslatePatterns?.some((pattern) => urlMatchesPattern(url, pattern)) ?? false
   if (doesMatchNeverTranslatePattern) {
     return false
   }
 
   const doesMatchPattern =
-    autoTranslatePatterns?.some((pattern) => matchDomainPattern(url, pattern)) ?? false
+    autoTranslatePatterns?.some((pattern) => urlMatchesPattern(url, pattern)) ?? false
 
   let doesMatchLanguage = false
   if (detectedCodeOrUnd !== "und") {

@@ -18,6 +18,17 @@ vi.mock("@/utils/prompts/subtitles", () => ({
   getSubtitlesTranslatePrompt: getSubtitlesTranslatePromptMock,
 }))
 
+/**
+ * The enqueue calls only. Translating a fragment also asks the background for
+ * the glossary that applies to this page, so `sendMessage` call 0 is no longer
+ * the translation request.
+ */
+function enqueueRequests() {
+  return sendMessageMock.mock.calls
+    .filter((call) => call[0] === "enqueueSubtitlesTranslateRequest")
+    .map((call) => call[1])
+}
+
 describe("subtitles translator", () => {
   beforeEach(() => {
     vi.resetModules()
@@ -55,8 +66,7 @@ describe("subtitles translator", () => {
     await translateSubtitles(fragments, { ...baseContext, summary: "Ready summary" })
     await translateSubtitles(fragments, baseContext)
 
-    const firstRequest = sendMessageMock.mock.calls[0]![1]
-    const secondRequest = sendMessageMock.mock.calls[1]![1]
+    const [firstRequest, secondRequest] = enqueueRequests()
 
     expect(firstRequest.webTitle).toBe("Video title")
     expect(firstRequest.webDescription).toBe("Video description")
@@ -88,8 +98,7 @@ describe("subtitles translator", () => {
       summary: "summary-b",
     })
 
-    const firstHash = sendMessageMock.mock.calls[0]![1].hash
-    const secondHash = sendMessageMock.mock.calls[1]![1].hash
+    const [firstHash, secondHash] = enqueueRequests().map((request) => request.hash)
 
     expect(firstHash).not.toBe(secondHash)
   })
@@ -157,7 +166,7 @@ describe("subtitles translator", () => {
       summary: null,
     })
 
-    const request = sendMessageMock.mock.calls[0]![1]
+    const request = enqueueRequests()[0]
     expect(request.webTitle).toBe("Video title")
     expect(request.summary).toBeNull()
   })
@@ -183,7 +192,7 @@ describe("subtitles translator", () => {
       summary: "Ready summary",
     })
 
-    const request = sendMessageMock.mock.calls[0]![1]
+    const request = enqueueRequests()[0]
     expect(request.webTitle).toBe("Video title")
     expect(request.webDescription).toBe("Video description")
     expect(request.summary).toBeUndefined()

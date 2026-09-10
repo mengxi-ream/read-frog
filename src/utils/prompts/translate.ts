@@ -1,6 +1,9 @@
 import type { Config } from "@/types/config/config"
 import type { WebPagePromptContext } from "@/types/content"
+import type { MatchedTerm } from "@/utils/glossary/types"
 import { getLocalConfig } from "@/utils/config/storage"
+import { resolveGlossaryTerms } from "@/utils/glossary/active-matcher"
+import { appendGlossaryToSystemPrompt } from "@/utils/glossary/prompt"
 import {
   HTML_ATTRIBUTE_MARKER,
   parseHtmlAttributeMarkers,
@@ -35,6 +38,14 @@ These mandatory rules override any conflicting instructions above:
 export interface TranslatePromptOptions<TContext = unknown> {
   isBatch?: boolean
   context?: TContext
+  /**
+   * Glossary entries the caller found in `input`. Only matched terms are ever
+   * passed: the whole list would put every term in every request and, because
+   * the finished prompt is the translation cache key
+   * (host/translate/translate-text.ts:146), would orphan every cached paragraph
+   * on any glossary edit.
+   */
+  glossaryTerms?: readonly MatchedTerm[]
 }
 
 export interface TranslatePromptResult {
@@ -125,8 +136,18 @@ ${INLINE_ATOM_TOKEN_SYSTEM_PROMPT}`
       .replaceAll(getTokenCellText(WEB_CONTENT), contentText)
       .replaceAll(getTokenCellText(WEB_SUMMARY), summary)
 
+  // The glossary block is appended AFTER token replacement, and that ordering is
+  // load-bearing: a term is arbitrary user text that may contain a `{{input}}`-
+  // shaped substring, and assembling it earlier would let a user's own glossary
+  // rewrite the prompt around it. `renderGlossaryPromptBlock` returns null when
+  // nothing matched, so a user whose glossary missed this paragraph produces a
+  // prompt byte-identical to a user with no glossary — merely owning a glossary
+  // must not orphan the cache.
   return {
-    systemPrompt: replaceTokens(systemPrompt),
+    systemPrompt: appendGlossaryToSystemPrompt(
+      replaceTokens(systemPrompt),
+      options?.glossaryTerms ?? [],
+    ),
     prompt: replaceTokens(prompt),
   }
 }
@@ -137,5 +158,18 @@ export async function getTranslatePrompt(
   options?: TranslatePromptOptions<WebPagePromptContext>,
 ): Promise<TranslatePromptResult> {
   const config = (await getLocalConfig()) ?? DEFAULT_CONFIG
-  return getTranslatePromptFromConfig(config.pageTranslation, targetLang, input, options)
+  // Resolved here rather than at each call site so both prompt builds agree: the
+  // content script builds one to derive the cache key
+  // (host/translate/translate-text.ts:142) and the background builds another for
+  // the actual request. Matching is a pure function of (text, entries), so the
+  // two agree as long as they see the same glossary revision. A caller that
+  // already matched — the batch pipeline, which unions terms across a batch —
+  // passes its own and skips this.
+  const glossaryTerms =
+    options?.glossaryTerms ??
+    (await resolveGlossaryTerms(input, config.glossary.enabled, config.language.targetCode)).terms
+  return getTranslatePromptFromConfig(config.pageTranslation, targetLang, input, {
+    ...options,
+    glossaryTerms,
+  })
 }

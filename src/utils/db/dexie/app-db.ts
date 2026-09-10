@@ -5,6 +5,8 @@ import { APP_NAME } from "@/utils/constants/app"
 import AiSegmentationCache from "./tables/ai-segmentation-cache"
 import ArticleSummaryCache from "./tables/article-summary-cache"
 import BatchRequestRecord from "./tables/batch-request-record"
+import Glossary from "./tables/glossary"
+import GlossaryTerm from "./tables/glossary-term"
 import TranslationCache from "./tables/translation-cache"
 
 export default class AppDB extends Dexie {
@@ -15,6 +17,10 @@ export default class AppDB extends Dexie {
   articleSummaryCache!: EntityTable<ArticleSummaryCache, "key">
 
   aiSegmentationCache!: EntityTable<AiSegmentationCache, "key">
+
+  glossary!: EntityTable<Glossary, "id">
+
+  glossaryTerm!: EntityTable<GlossaryTerm, "id">
 
   constructor() {
     super(`${upperCamelCase(APP_NAME)}DB`)
@@ -69,9 +75,47 @@ export default class AppDB extends Dexie {
         key,
         createdAt`,
     })
+    // v5 adds the user glossary. Dexie requires every version to restate the
+    // full store set, so the four cache tables are repeated verbatim.
+    //
+    // `glossaryTerm.matchKey` is unique per GLOSSARY AND TARGET LANGUAGE, not
+    // per table: two glossaries may give the same term different wording (the
+    // merge in `utils/glossary/scope.ts` chooses), and one glossary may render
+    // the same term differently per language (only one language is ever in
+    // play, so nothing has to choose).
+    this.version(5).stores({
+      translationCache: `
+        key,
+        translation,
+        createdAt`,
+      batchRequestRecord: `
+        key,
+        createdAt,
+        originalRequestCount,
+        provider,
+        model`,
+      articleSummaryCache: `
+        key,
+        createdAt`,
+      aiSegmentationCache: `
+        key,
+        createdAt`,
+      glossary: `
+        id,
+        enabled,
+        createdAt`,
+      glossaryTerm: `
+        id,
+        glossaryId,
+        &[glossaryId+targetLang+matchKey],
+        enabled,
+        updatedAt`,
+    })
     this.translationCache.mapToClass(TranslationCache)
     this.batchRequestRecord.mapToClass(BatchRequestRecord)
     this.articleSummaryCache.mapToClass(ArticleSummaryCache)
     this.aiSegmentationCache.mapToClass(AiSegmentationCache)
+    this.glossary.mapToClass(Glossary)
+    this.glossaryTerm.mapToClass(GlossaryTerm)
   }
 }

@@ -290,6 +290,7 @@ options:
     featureProviders:
       title: Nhà cung cấp tính năng
       description: Chọn nhà cung cấp sử dụng cho mỗi tính năng
+      chooseProvider: Chọn nhà cung cấp
       features:
         pageTranslation: Dịch trang
         selectionTranslation: Dịch thanh công cụ chọn
@@ -324,6 +325,8 @@ options:
       llmProviderNotConfigured: Chưa chọn nhà cung cấp LLM cho $1
   patterns:
     duplicate: Mẫu này đã có trong danh sách
+    gluedWildcard: Dấu "*" phải thay cho trọn một phần của địa chỉ, ví dụ *.example.com hoặc example.*
+    unsupported: Read Frog không khớp được địa chỉ này. Cổng và các giao thức ngoài http, https đều không được hỗ trợ.
   preference:
     title: Tùy chọn
     pageDescription: Đặt giao diện của Read Frog, nơi tiện ích hoạt động và cách cấu hình được đồng bộ, sao lưu.
@@ -710,6 +713,109 @@ options:
         outputSchemaRequired: Thêm ít nhất một trường đầu ra
         fieldKeyRequired: Tên trường là bắt buộc
         duplicateFieldKey: Tên trường phải là duy nhất
+  advanced:
+    title: Nâng cao
+    pageDescription: Những thiết lập mạnh mẽ nhưng không dùng đến hằng ngày.
+    glossary:
+      title: Bảng thuật ngữ
+      pageDescription: Đặt bản dịch cố định cho những từ quan trọng với bạn, và chọn nơi áp dụng cho từng danh sách.
+      untitled: Bảng thuật ngữ chưa đặt tên
+      noGlossaries: Chưa có bảng thuật ngữ nào.
+      enable:
+        title: Bật
+        description: Gửi các thuật ngữ khớp cho LLM để dịch đúng theo cách bạn muốn. Bảng thuật ngữ được gửi kèm trong câu lệnh, nên nó chỉ áp dụng cho các tính năng chạy trên nhà cung cấp LLM.
+      library:
+        title: Bảng thuật ngữ của bạn
+        description: Mỗi bảng thuật ngữ có thuật ngữ riêng và danh sách trang web riêng, nên bộ thuật ngữ dùng cho công việc sẽ không đi theo bạn sang mọi nơi khác.
+        button: Thêm bảng thuật ngữ
+        capReached: "Bạn chỉ có thể có tối đa $1 bảng thuật ngữ."
+      summary:
+        terms: "$1 thuật ngữ"
+        termsOne: 1 thuật ngữ
+        allSites: Tất cả trang web
+        sites: "$1 trang web"
+        sitesOne: 1 trang web
+      editor:
+        sections:
+          terms: Thuật ngữ
+          maintenance: Sao lưu và xóa
+        details:
+          title: Tên và mô tả
+          descriptionPlaceholder: Mô tả (tùy chọn)
+        enable:
+          title: Bật
+          description: Bảng thuật ngữ đã tắt vẫn giữ các thuật ngữ nhưng không gửi thuật ngữ nào.
+        sites:
+          title: Trang web
+          description: Giới hạn bảng thuật ngữ này cho một số trang web nhất định.
+          allSites: Để trống thì bảng thuật ngữ sẽ áp dụng ở mọi nơi.
+          header: Trang web
+        delete:
+          title: Xóa bảng thuật ngữ này
+          description: Xóa bảng thuật ngữ này cùng toàn bộ thuật ngữ trong đó. Hãy xuất trước nếu bạn có thể cần dùng lại — việc xóa không thể hoàn tác.
+          dialog:
+            trigger: Xóa
+            title: Xóa bảng thuật ngữ này?
+            description: "Bảng thuật ngữ và toàn bộ $1 thuật ngữ trong đó sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác."
+            confirm: Xóa
+            cancel: Hủy
+      addTerm:
+        title: Thêm thuật ngữ
+        description: Đặt bản dịch bạn muốn cho một thuật ngữ, hoặc để trống bản dịch để giữ nguyên bản gốc.
+      list:
+        title: Thuật ngữ của bạn
+        description: Chỉ những thuật ngữ xuất hiện trong đoạn văn mới được gửi kèm đoạn đó.
+      importExport:
+        title: Nhập và xuất
+        description: Thuật ngữ là một tệp CSV gồm cột thuật ngữ và bản dịch, nên bạn có thể sao lưu hoặc chia sẻ danh sách.
+      sourcePlaceholder: Thuật ngữ
+      targetPlaceholder: Bản dịch (để trống để giữ nguyên bản gốc)
+      caseSensitive: Phân biệt chữ hoa/thường
+      add: Thêm
+      searchPlaceholder: Tìm thuật ngữ
+      columnEnabled: Bật
+      columnSource: Thuật ngữ
+      columnTarget: Bản dịch
+      columnTargetLanguage: Ngôn ngữ đích
+      toggleTerm: "Dùng $1"
+      keepOriginal: Giữ nguyên bản gốc
+      delete: Xóa
+      loading: Đang tải...
+      empty: Chưa có thuật ngữ nào. Thêm ở trên hoặc nhập từ tệp CSV.
+      noMatches: Không có thuật ngữ nào khớp với tìm kiếm.
+      count: "$1 / $2 thuật ngữ"
+      previous: Trước
+      next: Sau
+      pageOf: "$1 / $2"
+      addError:
+        emptySource: Hãy nhập thuật ngữ trước.
+        tooLong: Thuật ngữ này quá dài.
+        capReached: Bảng thuật ngữ đã đầy.
+        duplicate: Thuật ngữ này đã có trong bảng thuật ngữ.
+      import: Nhập
+      export: Xuất
+      importModeMerge: Thêm vào danh sách
+      importModeReplace: Thay thế danh sách
+      importEmpty: Không tìm thấy thuật ngữ nào trong tệp đó.
+      importOverflow: "Lần nhập này sẽ vượt giới hạn $1 thuật ngữ. Không có gì thay đổi."
+      importSuccess: "Đã nhập $1 thuật ngữ mới và cập nhật $2 thuật ngữ."
+      importSkipped: "Đã bỏ qua $1 dòng không hợp lệ và $2 mục trùng lặp."
+      importNoValidRows: "Không dòng nào chỉ định ngôn ngữ mà tiện ích này có thể dịch sang. Không có gì thay đổi."
+      importReplaceConfirm:
+        title: Thay thế toàn bộ danh sách?
+        description: "Toàn bộ $1 thuật ngữ trong bảng thuật ngữ này sẽ bị xóa — ở mọi ngôn ngữ đích, không chỉ ngôn ngữ đang chọn — và được thay bằng nội dung của tệp này. Không thể hoàn tác."
+        confirm: Thay thế
+        cancel: Hủy
+      deleteAll:
+        title: Xóa tất cả thuật ngữ
+        description: Làm trống bảng thuật ngữ của bạn. Hãy xuất trước nếu bạn có thể cần dùng lại — việc xóa không thể hoàn tác.
+        deleting: Đang xóa...
+        dialog:
+          title: Xóa tất cả thuật ngữ
+          trigger: Xóa tất cả
+          confirm: Xác nhận
+          cancel: Hủy
+          description: "Toàn bộ $1 thuật ngữ sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác."
   contextMenu:
     title: Menu ngữ cảnh
     pageDescription: Kiểm soát các mục Read Frog trong menu chuột phải của trình duyệt.

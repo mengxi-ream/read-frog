@@ -50,9 +50,11 @@ describe("shouldEnableAutoTranslation", () => {
   })
 
   it("returns true when an auto-translate pattern matches and no never-auto-translate pattern matches", async () => {
+    // The stored shape a site typed on the options page produces: this host and
+    // anything under it.
     const config = createConfig({
-      autoTranslatePatterns: ["example.com"],
-      neverAutoTranslatePatterns: ["blocked.example"],
+      autoTranslatePatterns: ["*.example.com"],
+      neverAutoTranslatePatterns: ["*.blocked.example"],
     })
 
     await expect(

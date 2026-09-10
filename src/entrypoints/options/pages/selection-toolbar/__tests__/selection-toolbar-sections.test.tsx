@@ -94,6 +94,8 @@ describe("selection toolbar page sections", () => {
 
     expect(setSelectionToolbarMock).toHaveBeenCalledWith({
       ...selectionToolbar,
+      // Stored exactly as typed: `example.com` is a pattern with a meaning of
+      // its own, and the list must say what the user wrote.
       disabledSelectionToolbarPatterns: [
         "example.com",
         ...selectionToolbar.disabledSelectionToolbarPatterns,

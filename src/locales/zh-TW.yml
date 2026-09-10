@@ -291,6 +291,7 @@ options:
     featureProviders:
       title: 功能提供者
       description: 為每個功能選擇使用的提供者
+      chooseProvider: 選擇提供者
       features:
         pageTranslation: 網頁翻譯
         selectionTranslation: 選取文字翻譯
@@ -325,6 +326,8 @@ options:
       llmProviderNotConfigured: 沒有為 $1 選擇 LLM 提供者
   patterns:
     duplicate: 該模式已在列表中
+    gluedWildcard: '"*" 必須代表位址中完整的一段，例如 *.example.com 或 example.*'
+    unsupported: 無法比對這個位址。不支援連接埠，也不支援 http 與 https 以外的協定。
   preference:
     title: 偏好設定
     pageDescription: 設定陪讀蛙的外觀與生效範圍，以及設定檔的同步與備份方式。
@@ -826,6 +829,109 @@ options:
         outputSchemaRequired: 至少需要一個輸出欄位
         fieldKeyRequired: 欄位名稱不能為空
         duplicateFieldKey: 欄位名稱不能重複
+  advanced:
+    title: 進階
+    pageDescription: 不屬於日常路徑的強大設定。
+    glossary:
+      title: 術語庫
+      pageDescription: 為你在意的詞語指定固定的譯文，並決定每份清單在哪些網站生效。
+      untitled: 未命名術語庫
+      noGlossaries: 還沒有術語庫。
+      enable:
+        title: 啟用
+        description: 把命中的術語一併傳給 LLM，讓它照你的寫法翻譯。術語庫是隨提示詞一起送出的，所以只對執行於 LLM 提供者的功能生效。
+      library:
+        title: 你的術語庫
+        description: 每個術語庫都有各自的術語和各自的網站清單，所以工作用的那套術語不會跟著你跑到其他地方。
+        button: 新增術語庫
+        capReached: "最多只能建立 $1 個術語庫。"
+      summary:
+        terms: "$1 條術語"
+        termsOne: 1 條術語
+        allSites: 所有網站
+        sites: "$1 個網站"
+        sitesOne: 1 個網站
+      editor:
+        sections:
+          terms: 術語
+          maintenance: 備份與刪除
+        details:
+          title: 名稱與描述
+          descriptionPlaceholder: 描述（選填）
+        enable:
+          title: 啟用
+          description: 停用的術語庫會保留其中的術語，但一條都不會傳送。
+        sites:
+          title: 網站
+          description: 限定這個術語庫只在特定網站生效。
+          allSites: 留空則這個術語庫在所有網站都生效。
+          header: 網站
+        delete:
+          title: 刪除這個術語庫
+          description: 會移除這個術語庫以及其中的所有術語。如果之後可能還要用，請先匯出——刪除後無法復原。
+          dialog:
+            trigger: 刪除
+            title: 要刪除這個術語庫嗎？
+            description: "這個術語庫以及其中全部 $1 筆術語將被永久刪除。此操作無法復原。"
+            confirm: 刪除
+            cancel: 取消
+      addTerm:
+        title: 新增術語
+        description: 為術語指定你想要的譯文；留空則保持原文不變。
+      list:
+        title: 你的術語
+        description: 只有出現在段落中的術語，才會隨該段落一起傳送。
+      importExport:
+        title: 匯入與匯出
+        description: 術語就是一個包含術語和譯文兩欄的 CSV 檔案，可以用來備份或分享整份清單。
+      sourcePlaceholder: 術語
+      targetPlaceholder: 譯文（留空則保持原文）
+      caseSensitive: 區分大小寫
+      add: 新增
+      searchPlaceholder: 搜尋術語
+      columnEnabled: 啟用
+      columnSource: 術語
+      columnTarget: 譯文
+      columnTargetLanguage: 目標語言
+      toggleTerm: "使用「$1」"
+      keepOriginal: 保持原文
+      delete: 刪除
+      loading: 正在載入…
+      empty: 還沒有術語。在上方新增，或匯入 CSV 檔案。
+      noMatches: 沒有與搜尋相符的術語。
+      count: "$1 / $2 條術語"
+      previous: 上一頁
+      next: 下一頁
+      pageOf: "$1 / $2"
+      addError:
+        emptySource: 請先輸入術語。
+        tooLong: 該術語過長。
+        capReached: 術語庫已滿。
+        duplicate: 該術語已在術語庫中。
+      import: 匯入
+      export: 匯出
+      importModeMerge: 附加到清單
+      importModeReplace: 取代清單
+      importEmpty: 該檔案中找不到術語。
+      importOverflow: "本次匯入會超出上限 $1 條術語，未做任何變更。"
+      importSuccess: "已匯入 $1 條新術語，更新 $2 條。"
+      importSkipped: "已略過 $1 列無效資料和 $2 筆重複項目。"
+      importNoValidRows: "這些列都沒有指定本擴充功能能翻譯的目標語言，未做任何變更。"
+      importReplaceConfirm:
+        title: 取代整個清單？
+        description: "該術語庫下的全部 $1 條術語都會被刪除——包括所有目標語言，不只是目前選擇的那個——然後以該檔案的內容取代。此操作無法復原。"
+        confirm: 取代
+        cancel: 取消
+      deleteAll:
+        title: 刪除所有術語
+        description: 清空你的術語庫。如果之後可能還要用,請先匯出——刪除後無法復原。
+        deleting: 刪除中…
+        dialog:
+          title: 刪除所有術語
+          trigger: 全部刪除
+          confirm: 確認
+          cancel: 取消
+          description: "全部 $1 筆術語將被永久刪除。此操作無法復原。"
   contextMenu:
     title: 右鍵選單
     pageDescription: 控制瀏覽器右鍵選單裡的 Read Frog 選項。

@@ -18,7 +18,7 @@ import {
 } from "@/utils/constants/selection"
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { cn } from "@/utils/styles/utils"
-import { matchDomainPattern } from "@/utils/url"
+import { urlMatchesPattern } from "@/utils/url-pattern"
 import { buildContextSnapshot, readSelectionSnapshot } from "../utils"
 import { clearSelectionStateAtom, isSelectionToolbarOpenAtom, setSelectionStateAtom } from "./atoms"
 import { CloseButton, DropEvent } from "./close-button"
@@ -209,7 +209,7 @@ export function SelectionToolbar() {
   const clearSelectionState = useSetAtom(clearSelectionStateAtom)
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const isSiteDisabled = selectionToolbar.disabledSelectionToolbarPatterns?.some((pattern) =>
-    matchDomainPattern(window.location.href, pattern),
+    urlMatchesPattern(window.location.href, pattern),
   )
   const { features } = selectionToolbar
   const hasAnyEnabledFeature =

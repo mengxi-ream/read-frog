@@ -290,6 +290,7 @@ options:
     featureProviders:
       title: 機能プロバイダー
       description: 各機能に使用するプロバイダーを選択
+      chooseProvider: プロバイダーを選択
       features:
         pageTranslation: ページ翻訳
         selectionTranslation: 選択ツールバー翻訳
@@ -324,6 +325,8 @@ options:
       llmProviderNotConfigured: $1の LLM プロバイダー未選択
   patterns:
     duplicate: このパターンは既にリストにあります
+    gluedWildcard: "「*」はアドレスの一区切り全体を表す必要があります。例: *.example.com、example.*"
+    unsupported: このアドレスは照合できません。ポート指定と、http・https 以外のスキームには対応していません。
   preference:
     title: 環境設定
     pageDescription: Read Frog の外観、動作する範囲、設定の同期とバックアップ方法を指定します。
@@ -710,6 +713,109 @@ options:
         outputSchemaRequired: 少なくとも1つの出力フィールドを追加してください
         fieldKeyRequired: フィールド名は必須です
         duplicateFieldKey: フィールド名は一意である必要があります
+  advanced:
+    title: 詳細設定
+    pageDescription: 普段は使わない、強力な設定です。
+    glossary:
+      title: 用語集
+      pageDescription: 大切な言葉に決まった訳語を指定し、それぞれの用語集を適用する範囲を選びます。
+      untitled: 無題の用語集
+      noGlossaries: 用語集がまだありません。
+      enable:
+        title: 有効にする
+        description: 一致した用語を LLM に渡し、指定どおりの訳語で出力させます。用語集はプロンプトに含めて送られるため、LLM プロバイダーで動作する機能にのみ適用されます。
+      library:
+        title: 登録した用語集
+        description: 用語集ごとに用語とウェブサイトの一覧を個別に持てるため、仕事用の用語がほかのすべてのページにまで付いて回ることはありません。
+        button: 用語集を追加
+        capReached: "用語集は最大 $1 件までです。"
+      summary:
+        terms: "$1 件の用語"
+        termsOne: 1 件の用語
+        allSites: すべてのウェブサイト
+        sites: "$1 件のウェブサイト"
+        sitesOne: 1 件のウェブサイト
+      editor:
+        sections:
+          terms: 用語
+          maintenance: バックアップと削除
+        details:
+          title: 名前と説明
+          descriptionPlaceholder: 説明（任意）
+        enable:
+          title: 有効にする
+          description: 無効にした用語集は用語を保持しますが、いずれも送信されません。
+        sites:
+          title: ウェブサイト
+          description: この用語集を適用するウェブサイトを限定します。
+          allSites: 空のままにすると、この用語集はすべてのウェブサイトに適用されます。
+          header: ウェブサイト
+        delete:
+          title: この用語集を削除
+          description: 用語集とその中のすべての用語を削除します。あとで用語を使う可能性があるなら先にエクスポートしてください。削除は元に戻せません。
+          dialog:
+            trigger: 削除
+            title: この用語集を削除しますか？
+            description: "この用語集と、その中の $1 件の用語がすべて完全に削除されます。この操作は元に戻せません。"
+            confirm: 削除
+            cancel: キャンセル
+      addTerm:
+        title: 用語を追加
+        description: 用語に使いたい訳語を指定できます。訳語を空欄にすると原文のままになります。
+      list:
+        title: 登録した用語
+        description: 段落に出現した用語だけが、その段落と一緒に送信されます。
+      importExport:
+        title: インポートとエクスポート
+        description: 用語は用語と訳語の 2 列からなる CSV ファイルなので、一覧をバックアップしたり共有したりできます。
+      sourcePlaceholder: 用語
+      targetPlaceholder: 訳語（空欄なら原文のまま）
+      caseSensitive: 大文字と小文字を区別
+      add: 追加
+      searchPlaceholder: 用語を検索
+      columnEnabled: 有効
+      columnSource: 用語
+      columnTarget: 訳語
+      columnTargetLanguage: 翻訳先の言語
+      toggleTerm: "「$1」を使用"
+      keepOriginal: 原文のまま
+      delete: 削除
+      loading: 読み込んでいます...
+      empty: 用語がまだありません。上から追加するか、CSV ファイルをインポートしてください。
+      noMatches: 検索に一致する用語はありません。
+      count: "$1 / $2 件の用語"
+      previous: 前へ
+      next: 次へ
+      pageOf: "$1 / $2"
+      addError:
+        emptySource: 先に用語を入力してください。
+        tooLong: この用語は長すぎます。
+        capReached: 用語集がいっぱいです。
+        duplicate: この用語はすでに用語集にあります。
+      import: インポート
+      export: エクスポート
+      importModeMerge: リストに追加
+      importModeReplace: リストを置き換え
+      importEmpty: そのファイルに用語が見つかりませんでした。
+      importOverflow: "このインポートは上限を $1 件超えます。変更は行われていません。"
+      importSuccess: "$1 件を新規にインポートし、$2 件を更新しました。"
+      importSkipped: "無効な行 $1 件と重複 $2 件をスキップしました。"
+      importNoValidRows: "この拡張機能が翻訳できる言語を指定した行がありませんでした。変更は行われていません。"
+      importReplaceConfirm:
+        title: リスト全体を置き換えますか？
+        description: "この用語集の $1 件すべてが削除され（選択中の言語だけでなく、すべての対象言語が対象です）、このファイルの内容に置き換えられます。この操作は元に戻せません。"
+        confirm: 置き換える
+        cancel: キャンセル
+      deleteAll:
+        title: すべての用語を削除
+        description: 用語集を空にします。あとで使う可能性があるなら先にエクスポートしてください。削除は元に戻せません。
+        deleting: 削除中...
+        dialog:
+          title: すべての用語を削除
+          trigger: すべて削除
+          confirm: 確認
+          cancel: キャンセル
+          description: "$1 件の用語がすべて完全に削除されます。この操作は元に戻せません。"
   contextMenu:
     title: コンテキストメニュー
     pageDescription: ブラウザーの右クリックメニューに表示される Read Frog の項目を設定します。

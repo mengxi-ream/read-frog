@@ -7,9 +7,9 @@ import {
   TRANSLATE_BUTTON_CLASS,
   YOUTUBE_NATIVE_SUBTITLES_CLASS,
 } from "@/utils/constants/subtitles"
+import { normalizeUrlPattern } from "@/utils/url-pattern"
 import { BUILT_IN_SITE_RULES } from "../built-in"
 import rawBuiltInRules from "../built-in/rules.json"
-import { normalizeUrlPattern } from "../match"
 import { resolveSiteRule } from "../resolve"
 
 const RAW_BUILT_IN_SITE_RULES = rawBuiltInRules as unknown as Array<Record<string, unknown>>

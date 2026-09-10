@@ -35,6 +35,7 @@ import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
+import { resolveGlossaryTermsFromCache } from "@/utils/glossary/active-matcher"
 import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { translateTextCore } from "@/utils/host/translate/translate-text"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
@@ -152,6 +153,14 @@ async function translateWithTextStream({
   )
   throwIfAborted()
 
+  // Read from the already-compiled matcher — no await on this path. See
+  // `resolveGlossaryTermsFromCache`.
+  const glossaryTerms = resolveGlossaryTermsFromCache(
+    preparedText,
+    translateRequest.glossaryEnabled,
+    translateRequest.language.targetCode,
+  )
+
   const { systemPrompt, prompt } = getTranslatePromptFromConfig(
     { customPromptsConfig: translateRequest.customPromptsConfig },
     targetLangName,
@@ -167,6 +176,7 @@ async function translateWithTextStream({
             },
           }
         : {}),
+      glossaryTerms,
     },
   )
 
@@ -220,6 +230,11 @@ async function translateWithHostedTextStream({
     summaryProviderRef,
     translateRequest.enableAIContentAware,
   )
+  const glossaryTerms = resolveGlossaryTermsFromCache(
+    preparedText,
+    translateRequest.glossaryEnabled,
+    translateRequest.language.targetCode,
+  )
   if (abortController.signal.aborted) {
     throw new DOMException("aborted", "AbortError")
   }
@@ -239,6 +254,7 @@ async function translateWithHostedTextStream({
             },
           }
         : {}),
+      glossaryTerms,
     },
   )
 
@@ -282,6 +298,7 @@ async function translateWithStandardProvider({
     providerConfig: provider,
     hostedFeature: "selectionTranslation",
     enableAIContentAware: translateRequest.enableAIContentAware,
+    glossaryEnabled: translateRequest.glossaryEnabled,
     extraHashTags: ["selectionTranslation"],
     webPageContext,
   })

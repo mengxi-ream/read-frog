@@ -44,6 +44,12 @@ export default defineConfig({
       }),
     permissions: [
       "storage",
+      // The glossary is the only user-authored, non-regenerable data the
+      // extension stores locally. Without this, IndexedDB is "best-effort" and
+      // the browser may evict it under disk pressure — fine for the translation
+      // caches, data loss for a term list the user typed by hand. It also lifts
+      // the 10 MB quota the 20,000-term cap would otherwise sit close to.
+      "unlimitedStorage",
       "tabs",
       "alarms",
       "cookies",
@@ -74,7 +80,7 @@ export default defineConfig({
       browser_specific_settings: {
         gecko: {
           id: "{bd311a81-4530-4fcc-9178-74006155461b}",
-          strict_min_version: "112.0",
+          strict_min_version: "140.0",
           data_collection_permissions: {
             required: ["none"],
             optional: ["technicalAndInteraction"],

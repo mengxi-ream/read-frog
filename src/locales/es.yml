@@ -291,6 +291,7 @@ options:
     featureProviders:
       title: Proveedores de funciones
       description: Elige qué proveedor usar para cada función
+      chooseProvider: Elegir un proveedor
       features:
         pageTranslation: Traducción de página
         selectionTranslation: Traducción de la barra de selección
@@ -325,6 +326,8 @@ options:
       llmProviderNotConfigured: No se seleccionó ningún proveedor LLM para $1
   patterns:
     duplicate: Este patrón ya está en la lista
+    gluedWildcard: Un "*" debe sustituir una parte completa de la dirección, como *.example.com o example.*
+    unsupported: Read Frog no puede hacer coincidir esta dirección. No se admiten los puertos ni los esquemas distintos de http y https.
   preference:
     title: Preferencias
     pageDescription: Define la apariencia de Read Frog, dónde se ejecuta y cómo se sincroniza y respalda tu configuración.
@@ -826,6 +829,109 @@ options:
         outputSchemaRequired: Añade al menos un campo de salida
         fieldKeyRequired: El nombre del campo es obligatorio
         duplicateFieldKey: Los nombres de campo deben ser únicos
+  advanced:
+    title: Avanzado
+    pageDescription: Ajustes potentes que no forman parte del uso diario.
+    glossary:
+      title: Glosario
+      pageDescription: Da una traducción fija a las palabras que te importan y elige dónde se aplica cada lista.
+      untitled: Glosario sin título
+      noGlossaries: Aún no hay glosarios.
+      enable:
+        title: Activar
+        description: Envía los términos coincidentes al LLM para que los traduzca a tu manera. El glosario viaja dentro del prompt, así que solo se aplica a las funciones que usan un proveedor LLM.
+      library:
+        title: Tus glosarios
+        description: Cada glosario tiene sus propios términos y su propia lista de sitios web, así que un conjunto de términos para el trabajo no te acompaña en todo lo demás.
+        button: Añadir un glosario
+        capReached: "Puedes tener como máximo $1 glosarios."
+      summary:
+        terms: "$1 términos"
+        termsOne: 1 término
+        allSites: Todos los sitios web
+        sites: "$1 sitios web"
+        sitesOne: 1 sitio web
+      editor:
+        sections:
+          terms: Términos
+          maintenance: Copia de seguridad y eliminación
+        details:
+          title: Nombre y descripción
+          descriptionPlaceholder: Descripción (opcional)
+        enable:
+          title: Activar
+          description: Un glosario desactivado conserva sus términos, pero no envía ninguno.
+        sites:
+          title: Sitios web
+          description: Limita este glosario a determinados sitios web.
+          allSites: Déjalo vacío y el glosario se aplicará en todas partes.
+          header: Sitio web
+        delete:
+          title: Eliminar este glosario
+          description: Elimina el glosario y todos los términos que contiene. Expórtalo primero si crees que vas a necesitar los términos — esto no se puede deshacer.
+          dialog:
+            trigger: Eliminar
+            title: ¿Eliminar este glosario?
+            description: "Se eliminarán permanentemente el glosario y los $1 términos que contiene. Esta acción no se puede deshacer."
+            confirm: Eliminar
+            cancel: Cancelar
+      addTerm:
+        title: Añadir un término
+        description: Dale a un término la traducción que quieras, o déjala vacía para conservar el original.
+      list:
+        title: Tus términos
+        description: Solo se envían los términos que aparecen en un párrafo.
+      importExport:
+        title: Importar y exportar
+        description: Los términos son un archivo CSV con columnas de término y traducción, así que puedes guardar una copia de la lista o compartirla.
+      sourcePlaceholder: Término
+      targetPlaceholder: Traducción (déjala vacía para conservar el original)
+      caseSensitive: Distinguir mayúsculas
+      add: Añadir
+      searchPlaceholder: Buscar términos
+      columnEnabled: Activado
+      columnSource: Término
+      columnTarget: Traducción
+      columnTargetLanguage: Idioma de destino
+      toggleTerm: "Usar $1"
+      keepOriginal: Conservar el original
+      delete: Eliminar
+      loading: Cargando...
+      empty: Aún no hay términos. Añade uno arriba o importa un archivo CSV.
+      noMatches: Ningún término coincide con tu búsqueda.
+      count: "$1 de $2 términos"
+      previous: Anterior
+      next: Siguiente
+      pageOf: "$1 / $2"
+      addError:
+        emptySource: Escribe primero un término.
+        tooLong: Ese término es demasiado largo.
+        capReached: Tu glosario está lleno.
+        duplicate: Ese término ya está en tu glosario.
+      import: Importar
+      export: Exportar
+      importModeMerge: Añadir a la lista
+      importModeReplace: Reemplazar la lista
+      importEmpty: No se encontraron términos en ese archivo.
+      importOverflow: "Esa importación superaría el límite en $1 términos. No se ha cambiado nada."
+      importSuccess: "Se han importado $1 términos nuevos y actualizado $2."
+      importSkipped: "Se han omitido $1 filas no válidas y $2 duplicados."
+      importNoValidRows: "Ninguna de esas filas indicaba un idioma al que esta extensión pueda traducir. No se ha cambiado nada."
+      importReplaceConfirm:
+        title: "¿Reemplazar toda la lista?"
+        description: "Se eliminarán los $1 términos de este glosario —en todos los idiomas de destino, no solo en el seleccionado— y se reemplazarán por el contenido de este archivo. Esta acción no se puede deshacer."
+        confirm: Reemplazar
+        cancel: Cancelar
+      deleteAll:
+        title: Eliminar todos los términos
+        description: Vacía tu glosario. Expórtalo primero si crees que vas a necesitar los términos — eliminarlos no se puede deshacer.
+        deleting: Eliminando...
+        dialog:
+          title: Eliminar todos los términos
+          trigger: Eliminar todo
+          confirm: Confirmar
+          cancel: Cancelar
+          description: "Se eliminarán permanentemente los $1 términos. Esta acción no se puede deshacer."
   contextMenu:
     title: Menú contextual
     pageDescription: Controla las opciones de Read Frog en el menú contextual del navegador.
