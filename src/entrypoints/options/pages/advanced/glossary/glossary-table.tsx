@@ -67,94 +67,112 @@ export function GlossaryTable({ glossaryId }: { glossaryId: string }) {
 
         {/* No horizontal scroll: a long term must not make the whole table
             pannable. `table-fixed` is what makes the column widths below
-            binding, and is what gives the cells a width to truncate against. */}
-        <div className="rounded-md border">
-          <Table className="table-fixed">
-            <TableHeader>
-              <TableRow>
-                {/* Header text would be wider than the control it labels and
-                    would set the column width under `table-fixed`. The name is
-                    on each checkbox instead. */}
-                <TableHead className="w-12">
-                  <span className="sr-only">
-                    {i18n.t("options.advanced.glossary.columnEnabled")}
-                  </span>
-                </TableHead>
-                {/* Left unsized on purpose: under `table-fixed` the columns with
-                    no width divide what the two fixed ones leave, so these two
-                    stay equal halves without anyone doing the arithmetic. A long
-                    term must not starve the translation column. */}
-                <TableHead>{i18n.t("options.advanced.glossary.columnSource")}</TableHead>
-                <TableHead>{i18n.t("options.advanced.glossary.columnTarget")}</TableHead>
-                <TableHead className="w-16" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {visible.map((term: GlossaryTerm) => (
-                <TableRow key={term.id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={term.enabled}
-                      // The row already reads as the term, so the label names
-                      // which one this box belongs to rather than saying "enabled"
-                      // fifty times over.
-                      aria-label={i18n.t("options.advanced.glossary.toggleTerm", [term.source])}
-                      onCheckedChange={(checked) => setEnabled({ id: term.id, enabled: checked })}
-                    />
-                  </TableCell>
-                  {/* Dimmed rather than hidden or moved: a disabled term is still
+            binding, and is what gives the cells a width to truncate against.
+
+            Capped and scrolling, because a full page of 50 rows measured 2,431px
+            — nearly three screens — and everything after it, including the
+            export that "delete all" tells you to take first, sat below that.
+            Header and body stay in ONE table so the two unsized columns keep
+            dividing the remaining width identically.
+
+            The border and the radius are on the SCROLL container rather than a
+            wrapper around it, so `overflow` clips the rows to the rounded
+            corners instead of letting them square it off. */}
+        <Table
+          className="table-fixed"
+          containerClassName="max-h-[420px] overflow-y-auto rounded-md border"
+        >
+          {/* Pinned on the CELLS, not on `<thead>`: a sticky row group is
+              painted under the body's cells whatever its z-index, so the rows
+              scrolled straight through it.
+
+              `z-20` on the header ROW is the other half. Every `TableRow` is
+              `relative z-10` for the pointer-following highlight, which makes
+              each body row a stacking context at the same level as the header's
+              — and later in document order, so it won. A z-index on the cells
+              cannot fix that: they are trapped inside their own row's context. */}
+          <TableHeader className="[&_th]:sticky [&_th]:top-0 [&_th]:bg-background">
+            <TableRow className="z-20">
+              {/* Header text would be wider than the control it labels and
+                  would set the column width under `table-fixed`. The name is
+                  on each checkbox instead. */}
+              <TableHead className="w-12">
+                <span className="sr-only">{i18n.t("options.advanced.glossary.columnEnabled")}</span>
+              </TableHead>
+              {/* Left unsized on purpose: under `table-fixed` the columns with
+                  no width divide what the two fixed ones leave, so these two
+                  stay equal halves without anyone doing the arithmetic. A long
+                  term must not starve the translation column. */}
+              <TableHead>{i18n.t("options.advanced.glossary.columnSource")}</TableHead>
+              <TableHead>{i18n.t("options.advanced.glossary.columnTarget")}</TableHead>
+              <TableHead className="w-16" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {visible.map((term: GlossaryTerm) => (
+              <TableRow key={term.id}>
+                <TableCell>
+                  <Checkbox
+                    checked={term.enabled}
+                    // The row already reads as the term, so the label names
+                    // which one this box belongs to rather than saying "enabled"
+                    // fifty times over.
+                    aria-label={i18n.t("options.advanced.glossary.toggleTerm", [term.source])}
+                    onCheckedChange={(checked) => setEnabled({ id: term.id, enabled: checked })}
+                  />
+                </TableCell>
+                {/* Dimmed rather than hidden or moved: a disabled term is still
                       the user's, and it must stay exactly where they left it so
                       the box they just unticked is the box they can retick. */}
-                  <TableCell className={term.enabled ? "font-medium" : "font-medium opacity-50"}>
-                    <span className="flex items-center gap-2">
-                      <TruncatedText text={term.source} className="min-w-0" />
-                      {/* Only case-sensitive terms are marked: the default needs no
+                <TableCell className={term.enabled ? "font-medium" : "font-medium opacity-50"}>
+                  <span className="flex items-center gap-2">
+                    <TruncatedText text={term.source} className="min-w-0" />
+                    {/* Only case-sensitive terms are marked: the default needs no
                           badge, and labelling every row would be noise. `shrink-0`
                           so the term truncates instead of squeezing the badge. */}
-                      {term.caseSensitive && (
-                        <Badge variant="outline" className="shrink-0 font-normal">
-                          {i18n.t("options.advanced.glossary.caseSensitive")}
-                        </Badge>
-                      )}
-                    </span>
-                  </TableCell>
-                  {/* An empty target is the keep-the-original case, spelled out
-                      rather than left as a blank cell that reads like missing data. */}
-                  <TableCell className={term.enabled ? undefined : "opacity-50"}>
-                    {term.target === "" ? (
-                      <span className="text-muted-foreground">
-                        {i18n.t("options.advanced.glossary.keepOriginal")}
-                      </span>
-                    ) : (
-                      <TruncatedText text={term.target} />
+                    {term.caseSensitive && (
+                      <Badge variant="outline" className="shrink-0 font-normal">
+                        {i18n.t("options.advanced.glossary.caseSensitive")}
+                      </Badge>
                     )}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      aria-label={i18n.t("options.advanced.glossary.delete")}
-                      onClick={() => deleteTerm(term.id)}
-                    >
-                      <Icon icon="tabler:trash" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {visible.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={4} className="py-8 text-center text-muted-foreground">
-                    {isLoading
-                      ? i18n.t("options.advanced.glossary.loading")
-                      : terms.length === 0
-                        ? i18n.t("options.advanced.glossary.empty")
-                        : i18n.t("options.advanced.glossary.noMatches")}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                  </span>
+                </TableCell>
+                {/* An empty target is the keep-the-original case, spelled out
+                      rather than left as a blank cell that reads like missing data. */}
+                <TableCell className={term.enabled ? undefined : "opacity-50"}>
+                  {term.target === "" ? (
+                    <span className="text-muted-foreground">
+                      {i18n.t("options.advanced.glossary.keepOriginal")}
+                    </span>
+                  ) : (
+                    <TruncatedText text={term.target} />
+                  )}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    aria-label={i18n.t("options.advanced.glossary.delete")}
+                    onClick={() => deleteTerm(term.id)}
+                  >
+                    <Icon icon="tabler:trash" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+            {visible.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={4} className="py-8 text-center text-muted-foreground">
+                  {isLoading
+                    ? i18n.t("options.advanced.glossary.loading")
+                    : terms.length === 0
+                      ? i18n.t("options.advanced.glossary.empty")
+                      : i18n.t("options.advanced.glossary.noMatches")}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
 
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
           <span>

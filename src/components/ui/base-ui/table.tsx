@@ -14,7 +14,17 @@ const TableContext = React.createContext<TableContextValue | null>(null)
  * than a per-row `:hover`, so moving down the table reads as a single moving object. Give
  * every body row an `index`; header rows leave it off.
  */
-function Table({ className, children, ...props }: React.ComponentProps<"table">) {
+interface TableProps extends React.ComponentProps<"table"> {
+  /**
+   * Classes for the scroll container around the table, which is where a height
+   * cap belongs: it is the element that already scrolls, so `max-h-*` there is
+   * what a sticky header pins against. Setting one on the table itself would
+   * clip rather than scroll.
+   */
+  containerClassName?: string
+}
+
+function Table({ className, containerClassName, children, ...props }: TableProps) {
   const containerRef = React.useRef<HTMLDivElement>(null)
   const { activeIndex, itemRects, sessionRef, handlers, registerItem } =
     useProximityHover(containerRef)
@@ -30,7 +40,7 @@ function Table({ className, children, ...props }: React.ComponentProps<"table">)
       <div
         ref={containerRef}
         data-slot="table-container"
-        className="relative w-full overflow-x-auto"
+        className={cn("relative w-full overflow-x-auto", containerClassName)}
         onMouseEnter={handlers.onMouseEnter}
         onMouseMove={handlers.onMouseMove}
         onMouseLeave={handlers.onMouseLeave}
