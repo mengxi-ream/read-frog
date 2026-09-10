@@ -28,13 +28,19 @@ const MODE_LABEL_KEY = {
   replace: "options.advanced.glossary.importModeReplace",
 } as const satisfies Record<ImportMode, string>
 
-export function GlossaryImportExport() {
+export function GlossaryImportExport({
+  glossaryId,
+  glossaryName,
+}: {
+  glossaryId: string
+  glossaryName: string
+}) {
   const [mode, setMode] = useState<ImportMode>("merge")
   // A CSV carries only source,target — there is no per-row case flag — so the
   // whole file takes one answer, and this is the only place that answer cannot
   // be given per term.
   const [caseSensitive, setCaseSensitive] = useState(false)
-  const { mutateAsync: importRows, isPending } = useImportGlossary()
+  const { mutateAsync: importRows, isPending } = useImportGlossary(glossaryId)
 
   const handleImport = async (file: File) => {
     const { rows, skipped } = parseGlossaryCsv(await file.text())
@@ -72,11 +78,17 @@ export function GlossaryImportExport() {
   }
 
   const handleExport = async () => {
-    const csv = await exportGlossaryCsv()
+    const csv = await exportGlossaryCsv(glossaryId)
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }))
     const anchor = document.createElement("a")
     anchor.href = url
-    anchor.download = "read-frog-glossary.csv"
+    // Named after the glossary so exporting several does not produce a folder of
+    // identically named files. Anything a filesystem dislikes becomes a dash.
+    const slug = glossaryName
+      .trim()
+      .replace(/[^\p{L}\p{N}_-]+/gu, "-")
+      .replace(/^-+|-+$/g, "")
+    anchor.download = slug ? `read-frog-glossary-${slug}.csv` : "read-frog-glossary.csv"
     anchor.click()
     URL.revokeObjectURL(url)
   }

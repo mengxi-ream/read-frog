@@ -19,25 +19,18 @@ type SearchItemDefinition = Omit<SearchItem, "titleKey" | "descriptionKey" | "pa
 export const SEARCH_ITEMS: SearchItem[] = [
   // Advanced page
   {
-    sectionId: "glossary",
-    route: "/advanced",
-    titleKey: "options.advanced.glossary.title",
-    descriptionKey: "options.advanced.glossary.enable.description",
-    pageKey: "options.advanced.title",
-  },
-  {
-    sectionId: "glossary-terms",
-    route: "/advanced/glossary",
-    titleKey: "options.advanced.glossary.terms.title",
-    descriptionKey: "options.advanced.glossary.terms.description",
-    pageKey: "options.advanced.title",
-  },
-  {
     sectionId: "glossary-enabled",
-    route: "/advanced",
+    route: "/advanced/glossary",
     titleKey: "options.advanced.glossary.enable.title",
     descriptionKey: "options.advanced.glossary.enable.description",
-    pageKey: "options.advanced.title",
+    pageKey: "options.advanced.glossary.title",
+  },
+  {
+    sectionId: "glossary-library",
+    route: "/advanced/glossary",
+    titleKey: "options.advanced.glossary.library.title",
+    descriptionKey: "options.advanced.glossary.library.description",
+    pageKey: "options.advanced.glossary.title",
   },
   // Preference page
   {

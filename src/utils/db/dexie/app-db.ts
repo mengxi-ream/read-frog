@@ -5,6 +5,7 @@ import { APP_NAME } from "@/utils/constants/app"
 import AiSegmentationCache from "./tables/ai-segmentation-cache"
 import ArticleSummaryCache from "./tables/article-summary-cache"
 import BatchRequestRecord from "./tables/batch-request-record"
+import Glossary from "./tables/glossary"
 import GlossaryTerm from "./tables/glossary-term"
 import TranslationCache from "./tables/translation-cache"
 
@@ -16,6 +17,8 @@ export default class AppDB extends Dexie {
   articleSummaryCache!: EntityTable<ArticleSummaryCache, "key">
 
   aiSegmentationCache!: EntityTable<AiSegmentationCache, "key">
+
+  glossary!: EntityTable<Glossary, "id">
 
   glossaryTerm!: EntityTable<GlossaryTerm, "id">
 
@@ -74,6 +77,10 @@ export default class AppDB extends Dexie {
     })
     // v5 adds the user glossary. Dexie requires every version to restate the
     // full store set, so the four cache tables are repeated verbatim.
+    //
+    // `glossaryTerm.matchKey` is unique per GLOSSARY, not per table: two
+    // glossaries may give the same term different wording, and choosing between
+    // them belongs to the merge in `utils/glossary/scope.ts`.
     this.version(5).stores({
       translationCache: `
         key,
@@ -91,9 +98,14 @@ export default class AppDB extends Dexie {
       aiSegmentationCache: `
         key,
         createdAt`,
+      glossary: `
+        id,
+        enabled,
+        createdAt`,
       glossaryTerm: `
         id,
-        &matchKey,
+        glossaryId,
+        &[glossaryId+matchKey],
         enabled,
         updatedAt`,
     })
@@ -101,6 +113,7 @@ export default class AppDB extends Dexie {
     this.batchRequestRecord.mapToClass(BatchRequestRecord)
     this.articleSummaryCache.mapToClass(ArticleSummaryCache)
     this.aiSegmentationCache.mapToClass(AiSegmentationCache)
+    this.glossary.mapToClass(Glossary)
     this.glossaryTerm.mapToClass(GlossaryTerm)
   }
 }

@@ -138,6 +138,7 @@ async function translateTextUsingPageConfig(
     providerConfig,
     hostedFeature: "pageTranslation",
     enableAIContentAware: config.pageTranslation.enableAIContentAware,
+    glossaryEnabled: config.glossary.enabled,
     extraHashTags: options.extraHashTags,
     webPageContext: options.webPageContext,
     textFormat: options.textFormat,
@@ -268,6 +269,7 @@ export async function translateTextForInput(
     providerConfig: resolved,
     hostedFeature: "inputTranslation",
     enableAIContentAware: config.pageTranslation.enableAIContentAware,
+    glossaryEnabled: config.glossary.enabled,
     webPageContext,
     // User-typed newlines are always meaningful.
     preserveLineBreaks: true,

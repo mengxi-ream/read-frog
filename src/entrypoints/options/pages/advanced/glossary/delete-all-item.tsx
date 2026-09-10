@@ -22,9 +22,9 @@ import { useDeleteAllGlossaryTerms, useGlossaryTerms } from "./use-glossary"
  * that regenerates — it deletes text the user typed. Export sits directly above
  * it so the way out is the thing they just scrolled past.
  */
-export function GlossaryDeleteAllItem() {
-  const { data: terms = [] } = useGlossaryTerms()
-  const { mutateAsync: deleteAll, isPending } = useDeleteAllGlossaryTerms()
+export function GlossaryDeleteAllItem({ glossaryId }: { glossaryId: string }) {
+  const { data: terms = [] } = useGlossaryTerms(glossaryId)
+  const { mutateAsync: deleteAll, isPending } = useDeleteAllGlossaryTerms(glossaryId)
   const [open, setOpen] = useState(false)
 
   const handleDeleteAll = async () => {

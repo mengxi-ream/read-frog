@@ -1,9 +1,14 @@
 import type { ParsedGlossaryRow } from "./csv"
 import type { GlossaryEntry } from "./types"
+import type Glossary from "@/utils/db/dexie/tables/glossary"
 import type GlossaryTerm from "@/utils/db/dexie/tables/glossary-term"
 import { storage } from "#imports"
 import { db } from "@/utils/db/dexie/db"
 import {
+  GLOSSARY_REVISION_KEY,
+  MAX_GLOSSARIES,
+  MAX_GLOSSARY_DESCRIPTION_LENGTH,
+  MAX_GLOSSARY_NAME_LENGTH,
   MAX_GLOSSARY_SOURCE_LENGTH,
   MAX_GLOSSARY_TARGET_LENGTH,
   MAX_GLOSSARY_TERMS,
@@ -11,13 +16,7 @@ import {
 import { getRandomUUID } from "../crypto-polyfill"
 import { formatGlossaryCsv } from "./csv"
 import { buildMatchKey } from "./match-key"
-
-/**
- * Bumped on every write. The content script compiles a matcher from a snapshot
- * and caches it against this number, so it can tell a stale compile from a
- * current one without diffing the term list.
- */
-const GLOSSARY_REVISION_KEY = "local:glossaryRevision" as const
+import { isGlossaryActiveForUrl, mergeGlossaryTerms } from "./scope"
 
 export async function getGlossaryRevision(): Promise<number> {
   return (await storage.getItem<number>(GLOSSARY_REVISION_KEY)) ?? 0
@@ -28,6 +27,87 @@ async function bumpGlossaryRevision(): Promise<number> {
   await storage.setItem<number>(GLOSSARY_REVISION_KEY, next)
   return next
 }
+
+// ---------------------------------------------------------------------------
+// Glossaries
+// ---------------------------------------------------------------------------
+
+/** Oldest first: the order the list is shown in, and the precedence order. */
+export async function listGlossaries(): Promise<Glossary[]> {
+  return db.glossary.orderBy("createdAt").toArray()
+}
+
+export async function getGlossary(id: string): Promise<Glossary | undefined> {
+  return db.glossary.get(id)
+}
+
+export type CreateGlossaryResult = { ok: true; id: string } | { ok: false; reason: "capReached" }
+
+export async function createGlossary(): Promise<CreateGlossaryResult> {
+  if ((await db.glossary.count()) >= MAX_GLOSSARIES) {
+    return { ok: false, reason: "capReached" }
+  }
+
+  const now = new Date()
+  const id = getRandomUUID()
+  await db.glossary.put({
+    id,
+    name: "",
+    description: "",
+    enabled: true,
+    // Empty = every site, so a new glossary works before it is configured.
+    matchPatterns: [],
+    createdAt: now,
+    updatedAt: now,
+  })
+  // Deliberately no revision bump: an empty glossary changes nothing a page
+  // could match, and bumping would recompile every open page's matcher.
+  return { ok: true, id }
+}
+
+/**
+ * Rename or re-describe a glossary.
+ *
+ * Deliberately does NOT bump the revision. Neither field takes part in matching
+ * or reaches the prompt, so a bump would make every open page recompile up to
+ * 20,000 terms because someone typed a letter into a name field.
+ */
+export async function updateGlossaryMeta(
+  id: string,
+  meta: { name?: string; description?: string },
+): Promise<void> {
+  const patch: Partial<Glossary> = { updatedAt: new Date() }
+  if (meta.name !== undefined) patch.name = meta.name.slice(0, MAX_GLOSSARY_NAME_LENGTH)
+  if (meta.description !== undefined) {
+    patch.description = meta.description.slice(0, MAX_GLOSSARY_DESCRIPTION_LENGTH)
+  }
+  await db.glossary.update(id, patch)
+}
+
+export async function setGlossaryEnabled(id: string, enabled: boolean): Promise<void> {
+  const updated = await db.glossary.update(id, { enabled, updatedAt: new Date() })
+  if (updated === 0) return
+  await bumpGlossaryRevision()
+}
+
+export async function setGlossaryPatterns(id: string, matchPatterns: string[]): Promise<void> {
+  const updated = await db.glossary.update(id, { matchPatterns, updatedAt: new Date() })
+  if (updated === 0) return
+  await bumpGlossaryRevision()
+}
+
+/** Removes the glossary and everything in it, in one transaction. */
+export async function deleteGlossary(id: string): Promise<void> {
+  await db.transaction("rw", db.glossary, db.glossaryTerm, async () => {
+    await db.glossaryTerm.where("glossaryId").equals(id).delete()
+    await db.glossary.delete(id)
+  })
+  await bumpGlossaryRevision()
+}
+
+// ---------------------------------------------------------------------------
+// Terms
+// ---------------------------------------------------------------------------
 
 export interface GlossaryTermInput {
   source: string
@@ -51,39 +131,76 @@ function validate(input: GlossaryTermInput): "emptySource" | "tooLong" | null {
   return null
 }
 
-export async function listGlossaryTerms(): Promise<GlossaryTerm[]> {
-  return db.glossaryTerm.orderBy("updatedAt").reverse().toArray()
-}
-
-export async function countGlossaryTerms(): Promise<number> {
-  return db.glossaryTerm.count()
+export async function listGlossaryTerms(glossaryId: string): Promise<GlossaryTerm[]> {
+  return db.glossaryTerm
+    .where("glossaryId")
+    .equals(glossaryId)
+    .reverse()
+    .sortBy("updatedAt")
+    .then((terms) => terms.reverse())
 }
 
 /**
- * Entries the matcher should compile. Disabled rows are dropped here rather
- * than inside the matcher, so the matcher stays a pure function of what it was
- * handed and the snapshot sent to a content script carries nothing unusable.
+ * How many terms are stored.
+ *
+ * Without an id this is the TOTAL across every glossary, which is what
+ * `MAX_GLOSSARY_TERMS` caps: the ceiling protects the compiled alternation and
+ * the memory it lives in, and neither cares how the terms are filed.
  */
-export async function loadGlossaryEntries(): Promise<GlossaryEntry[]> {
-  const terms = await db.glossaryTerm.toArray()
-  return terms
-    .filter((term) => term.enabled)
-    .map((term) => ({
-      matchKey: term.matchKey,
-      source: term.source,
-      target: term.target,
-      caseSensitive: term.caseSensitive,
-    }))
+export async function countGlossaryTerms(glossaryId?: string): Promise<number> {
+  if (glossaryId === undefined) return db.glossaryTerm.count()
+  return db.glossaryTerm.where("glossaryId").equals(glossaryId).count()
+}
+
+export async function countGlossaryTermsByGlossary(): Promise<Map<string, number>> {
+  const counts = new Map<string, number>()
+  await db.glossaryTerm.each((term) => {
+    counts.set(term.glossaryId, (counts.get(term.glossaryId) ?? 0) + 1)
+  })
+  return counts
 }
 
 /**
- * Create or update one entry.
+ * The entries the matcher should compile for a page.
+ *
+ * Scoping happens HERE rather than inside the matcher so that the snapshot sent
+ * to a content script carries nothing it cannot use, and so the matcher stays a
+ * pure function of what it was handed. Disabled rows are dropped for the same
+ * reason.
+ *
+ * `url` is undefined where there is no page — see `isGlossaryActiveForUrl`.
+ */
+export async function loadGlossaryEntries(url?: string): Promise<GlossaryEntry[]> {
+  const active = (await listGlossaries()).filter((glossary) =>
+    isGlossaryActiveForUrl(glossary, url),
+  )
+  if (active.length === 0) return []
+
+  const groups = await Promise.all(
+    active.map(async (glossary) => {
+      const terms = await db.glossaryTerm.where("glossaryId").equals(glossary.id).toArray()
+      return terms
+        .filter((term) => term.enabled)
+        .map((term): GlossaryEntry => ({
+          matchKey: term.matchKey,
+          source: term.source,
+          target: term.target,
+          caseSensitive: term.caseSensitive,
+        }))
+    }),
+  )
+  return mergeGlossaryTerms(groups)
+}
+
+/**
+ * Create or update one term.
  *
  * `existingId` distinguishes an edit from an add: editing a row's source text
- * changes its `matchKey`, which must not collide with a DIFFERENT row, but must
- * be allowed to stay on the row being edited.
+ * changes its `matchKey`, which must not collide with a DIFFERENT row in the
+ * same glossary, but must be allowed to stay on the row being edited.
  */
 export async function saveGlossaryTerm(
+  glossaryId: string,
   input: GlossaryTermInput,
   existingId?: string,
 ): Promise<SaveGlossaryTermResult> {
@@ -93,7 +210,10 @@ export async function saveGlossaryTerm(
   const source = input.source.trim()
   const matchKey = buildMatchKey(source, input.caseSensitive)
 
-  const clash = await db.glossaryTerm.where("matchKey").equals(matchKey).first()
+  const clash = await db.glossaryTerm
+    .where("[glossaryId+matchKey]")
+    .equals([glossaryId, matchKey])
+    .first()
   if (clash && clash.id !== existingId) return { ok: false, reason: "duplicate" }
 
   if (!existingId && (await countGlossaryTerms()) >= MAX_GLOSSARY_TERMS) {
@@ -103,6 +223,7 @@ export async function saveGlossaryTerm(
   const id = existingId ?? getRandomUUID()
   await db.glossaryTerm.put({
     id,
+    glossaryId,
     matchKey,
     source,
     target: input.target.trim(),
@@ -120,13 +241,7 @@ export async function saveGlossaryTerm(
  *
  * Deliberately does NOT restamp `updatedAt`. The table is ordered by it, so a
  * restamp would teleport the row the user just clicked to the top of page 1 —
- * out of view entirely when they are further down a paginated list. Nothing
- * depends on the stamp to notice this edit: a cross-device merge compares a row
- * against its base, and plan D12.6 fixes `updatedAt` as display ordering plus a
- * tie-break rather than the edit signal.
- *
- * Addressed by `id` rather than `matchKey` precisely because `id` is the stable
- * key — see the note on the table class.
+ * out of view entirely when they are further down a paginated list.
  */
 export async function setGlossaryTermEnabled(id: string, enabled: boolean): Promise<void> {
   // A row deleted in another tab between render and click updates nothing, and
@@ -141,8 +256,8 @@ export async function deleteGlossaryTerm(id: string): Promise<void> {
   await bumpGlossaryRevision()
 }
 
-export async function deleteAllGlossaryTerms(): Promise<void> {
-  await db.glossaryTerm.clear()
+export async function deleteAllGlossaryTerms(glossaryId: string): Promise<void> {
+  await db.glossaryTerm.where("glossaryId").equals(glossaryId).delete()
   await bumpGlossaryRevision()
 }
 
@@ -159,17 +274,20 @@ export interface ImportGlossaryResult {
 }
 
 /**
- * Import parsed rows.
+ * Import parsed rows into one glossary.
  *
- * Deduped by `matchKey` BEFORE any write: the table has a unique index on it and
- * Dexie's `bulkPut` would otherwise commit the survivors and report a partial
- * failure, leaving the caller unable to say what actually landed.
+ * Deduped by `matchKey` BEFORE any write: the table has a unique index on
+ * `[glossaryId+matchKey]` and Dexie's `bulkPut` would otherwise commit the
+ * survivors and report a partial failure, leaving the caller unable to say what
+ * actually landed.
  *
  * Over the cap the import is REFUSED whole, reporting the exact overflow. Never
  * truncate — a silently half-imported glossary is worse than a rejected one,
- * because the user cannot see which half is missing.
+ * because the user cannot see which half is missing. The cap counts every
+ * glossary, so an import is measured against the whole library, not this list.
  */
 export async function importGlossaryRows(
+  glossaryId: string,
   rows: readonly ParsedGlossaryRow[],
   mode: ImportMode,
   caseSensitive: boolean,
@@ -186,7 +304,8 @@ export async function importGlossaryRows(
     byMatchKey.set(key, { ...row, source })
   }
 
-  const existing = mode === "replace" ? [] : await db.glossaryTerm.toArray()
+  const existing =
+    mode === "replace" ? [] : await db.glossaryTerm.where("glossaryId").equals(glossaryId).toArray()
   const existingByKey = new Map(existing.map((term) => [term.matchKey, term]))
 
   let added = 0
@@ -196,7 +315,10 @@ export async function importGlossaryRows(
     else added++
   }
 
-  const finalCount = mode === "replace" ? byMatchKey.size : existing.length + added
+  const totalTerms = await countGlossaryTerms()
+  const termsInThisGlossary = await countGlossaryTerms(glossaryId)
+  const finalCount =
+    mode === "replace" ? totalTerms - termsInThisGlossary + byMatchKey.size : totalTerms + added
   if (finalCount > MAX_GLOSSARY_TERMS) {
     return {
       ok: false,
@@ -210,6 +332,7 @@ export async function importGlossaryRows(
   const now = new Date()
   const records: GlossaryTerm[] = [...byMatchKey.entries()].map(([matchKey, row]) => ({
     id: existingByKey.get(matchKey)?.id ?? getRandomUUID(),
+    glossaryId,
     matchKey,
     source: row.source,
     target: row.target.trim(),
@@ -221,7 +344,9 @@ export async function importGlossaryRows(
   })) as GlossaryTerm[]
 
   await db.transaction("rw", db.glossaryTerm, async () => {
-    if (mode === "replace") await db.glossaryTerm.clear()
+    if (mode === "replace") {
+      await db.glossaryTerm.where("glossaryId").equals(glossaryId).delete()
+    }
     await db.glossaryTerm.bulkPut(records)
   })
   await bumpGlossaryRevision()
@@ -229,7 +354,7 @@ export async function importGlossaryRows(
   return { ok: true, added, updated, duplicatesInFile }
 }
 
-export async function exportGlossaryCsv(): Promise<string> {
-  const terms = await db.glossaryTerm.orderBy("matchKey").toArray()
+export async function exportGlossaryCsv(glossaryId: string): Promise<string> {
+  const terms = await db.glossaryTerm.where("glossaryId").equals(glossaryId).sortBy("matchKey")
   return formatGlossaryCsv(terms.map((term) => ({ source: term.source, target: term.target })))
 }

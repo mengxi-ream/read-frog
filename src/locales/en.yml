@@ -834,12 +834,47 @@ options:
     pageDescription: Powerful settings that are not part of the everyday path.
     glossary:
       title: Glossary
+      pageDescription: Give the words that matter to you a fixed translation, and choose where each list applies.
+      untitled: Untitled glossary
+      noGlossaries: No glossaries yet.
       enable:
         title: Enable
         description: Send matching terms to the LLM so it renders them your way. The glossary travels in the prompt, so it only applies to features running on an LLM provider.
-      terms:
-        title: Terms
-        description: Add, edit and import the terms in your glossary.
+      library:
+        title: Your glossaries
+        description: Each glossary has its own terms and its own list of websites, so a set of terms for work does not follow you onto everything else.
+        button: Add a glossary
+        capReached: "You can have at most $1 glossaries."
+      summary:
+        terms: "$1 terms"
+        termsOne: 1 term
+        allSites: All websites
+        sites: "$1 websites"
+        sitesOne: 1 website
+      editor:
+        details:
+          title: Name and description
+          description: Only for finding this glossary again — neither is sent to the LLM.
+          namePlaceholder: Name
+          descriptionPlaceholder: Description (optional)
+        enable:
+          title: Enable
+          description: A disabled glossary keeps its terms but sends none of them.
+        sites:
+          title: Websites
+          description: Restrict this glossary to certain websites.
+          allSites: Leave this empty and the glossary applies everywhere.
+          placeholder: Enter a website
+          header: Website
+        delete:
+          title: Delete this glossary
+          description: Removes the glossary and every term in it. Export first if you might want the terms back — this cannot be undone.
+          dialog:
+            trigger: Delete
+            title: Delete this glossary?
+            description: "The glossary and all $1 terms in it will be permanently deleted. This action cannot be undone."
+            confirm: Delete
+            cancel: Cancel
       addTerm:
         title: Add a term
         description: Give a term the wording you want, or leave the translation empty to keep it unchanged.

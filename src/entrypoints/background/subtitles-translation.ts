@@ -21,7 +21,17 @@ export function setupSubtitlesTranslationHandlers(): void {
   onMessage("enqueueSubtitlesTranslateRequest", async (message) => {
     const { requestQueue, batchQueue } = await queuesPromise
     const {
-      data: { text, langConfig, providerRef, scheduleAt, hash, webTitle, webDescription, summary },
+      data: {
+        text,
+        langConfig,
+        providerRef,
+        scheduleAt,
+        hash,
+        webTitle,
+        webDescription,
+        summary,
+        glossaryTerms,
+      },
     } = message
 
     if (hash) {
@@ -47,6 +57,9 @@ export function setupSubtitlesTranslationHandlers(): void {
         hash,
         scheduleAt,
         context,
+        // Kept off `context`, which is part of the batch key — see
+        // `mergeBatchGlossaryTerms`.
+        glossaryTerms,
       }
       result = await batchQueue.enqueue(data)
     } else {
@@ -58,7 +71,10 @@ export function setupSubtitlesTranslationHandlers(): void {
         throw new Error("Built-in AI subtitle translation must use the batch queue")
       }
       const thunk = (signal?: AbortSignal) =>
-        executeTranslate(text, langConfig, localConfig, getSubtitlesTranslatePrompt, { signal })
+        executeTranslate(text, langConfig, localConfig, getSubtitlesTranslatePrompt, {
+          signal,
+          glossaryTerms,
+        })
       result = await requestQueue.enqueue(thunk, scheduleAt, hash)
     }
 

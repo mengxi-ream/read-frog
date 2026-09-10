@@ -1,10 +1,20 @@
 import type { GlossaryEntry, GlossaryMatcher, MatchedTerm } from "./types"
+import { storage } from "#imports"
+import { GLOSSARY_REVISION_KEY } from "../constants/glossary"
 import { logger } from "../logger"
 import { sendMessage } from "../message"
 import { createGlossaryMatcher } from "./matcher"
 
 export interface GlossarySnapshot {
   revision: number
+  /**
+   * Which glossaries the requested URL activates, as a stable string.
+   *
+   * Lets this side tell "the page moved but the same glossaries apply" from "a
+   * different set applies now", so an in-page navigation costs one small message
+   * instead of recompiling up to 20,000 terms.
+   */
+  scopeKey: string
   entries: GlossaryEntry[]
 }
 
@@ -17,7 +27,15 @@ export interface GlossarySnapshot {
  */
 const SNAPSHOT_TIMEOUT_MS = 2000
 
-let cached: { revision: number; matcher: GlossaryMatcher } | null = null
+interface CachedMatcher {
+  /** The URL the snapshot was requested for; `undefined` where there is no page. */
+  url: string | undefined
+  revision: number
+  scopeKey: string
+  matcher: GlossaryMatcher
+}
+
+let cached: CachedMatcher | null = null
 let inFlight: Promise<GlossaryMatcher> | null = null
 
 /**
@@ -34,35 +52,91 @@ let inFlight: Promise<GlossaryMatcher> | null = null
  * gets inlined and drags all of Dexie (~106 KB) into every page we run on.
  * Measured: it moved host.js from 2,797,947 to 2,904,171 bytes.
  */
-let loadSnapshot: () => Promise<GlossarySnapshot> = async () =>
-  await sendMessage("getGlossarySnapshot", undefined)
+let loadSnapshot: (url: string | undefined) => Promise<GlossarySnapshot> = async (url) =>
+  await sendMessage("getGlossarySnapshot", { url })
 
-export function setGlossarySnapshotLoader(loader: () => Promise<GlossarySnapshot>): void {
+export function setGlossarySnapshotLoader(
+  loader: (url: string | undefined) => Promise<GlossarySnapshot>,
+): void {
   loadSnapshot = loader
 }
 
 /**
+ * The URL whose glossaries apply here.
+ *
+ * `undefined` in a worker, and in any context that is not a page — the
+ * background resolving a prompt it was not handed terms for. A glossary scoped
+ * to particular sites must not leak into those, which is what
+ * `isGlossaryActiveForUrl` does with an absent URL.
+ */
+function currentDocumentUrl(): string | undefined {
+  if (typeof document === "undefined" || typeof location === "undefined") return undefined
+  return location.href
+}
+
+/**
  * The compiled matcher for this context, built at most once per glossary
- * revision.
+ * revision and per set of applicable glossaries.
  *
  * In a content script this costs ONE message for the whole page, not one per
  * paragraph: the compiled matcher is cached at module level and every paragraph
  * matches against it locally. A per-paragraph round trip would put a message hop
  * on the hottest path in the product.
+ *
+ * A URL change — an in-page navigation on a site whose glossaries are scoped by
+ * path — re-asks the background, but recompiles only if the revision or the set
+ * of applicable glossaries actually moved.
  */
+let revisionWatchStarted = false
+
+/**
+ * Drop the cached matcher whenever the glossary is written to.
+ *
+ * The cache is keyed on the page URL, so without this an edit made in the
+ * options page would not reach a tab that is already open until it navigated.
+ * The alternative — re-requesting the snapshot on every call — puts a message
+ * hop on the hottest path in the product, once per paragraph.
+ *
+ * Started lazily on first use so every context that actually matches gets one
+ * watcher, and a context that never matches pays nothing.
+ */
+function watchGlossaryRevision(): void {
+  if (revisionWatchStarted) return
+  revisionWatchStarted = true
+  try {
+    storage.watch<number>(GLOSSARY_REVISION_KEY, () => invalidateActiveGlossaryMatcher())
+  } catch (error) {
+    // Never worth failing a translation over: the matcher is still correct, it
+    // just will not notice an edit until the page reloads.
+    logger.warn("Could not watch the glossary revision", error)
+  }
+}
+
 export async function getActiveGlossaryMatcher(): Promise<GlossaryMatcher> {
+  watchGlossaryRevision()
+  const url = currentDocumentUrl()
+  if (cached && cached.url === url) return cached.matcher
   if (inFlight) return inFlight
 
   inFlight = (async () => {
     try {
       const snapshot = await Promise.race([
-        loadSnapshot(),
+        loadSnapshot(url),
         new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error("glossary snapshot timed out")), SNAPSHOT_TIMEOUT_MS),
         ),
       ])
-      if (cached?.revision !== snapshot.revision) {
-        cached = { revision: snapshot.revision, matcher: createGlossaryMatcher(snapshot.entries) }
+      if (cached?.revision !== snapshot.revision || cached.scopeKey !== snapshot.scopeKey) {
+        cached = {
+          url,
+          revision: snapshot.revision,
+          scopeKey: snapshot.scopeKey,
+          matcher: createGlossaryMatcher(snapshot.entries),
+        }
+      } else {
+        // Same glossaries, same revision, new address: keep the compiled matcher
+        // and just move the cache onto this URL.
+        cached = { ...cached, url }
       }
       return cached.matcher
     } catch (error) {
@@ -112,13 +186,14 @@ export function primeGlossaryMatcher(): void {
  * The selection toolbar runs while the user waits and races an abort, so this
  * must not add an await: an earlier version resolved the config and the snapshot
  * here, and the added latency was enough to let a popover close before the
- * request was issued. Uses the matcher only if it is already compiled, and
- * otherwise starts warming it for next time — `primeGlossaryMatcher` at content
- * script start is what normally makes it ready long before a selection.
+ * request was issued. Uses the matcher only if it is already compiled for this
+ * page, and otherwise starts warming it for next time — `primeGlossaryMatcher`
+ * at content script start is what normally makes it ready long before a
+ * selection.
  */
 export function resolveGlossaryTermsFromCache(input: string, enabled: boolean): MatchedTerm[] {
   if (!enabled || input.trim() === "") return []
-  if (!cached) {
+  if (!cached || cached.url !== currentDocumentUrl()) {
     primeGlossaryMatcher()
     return []
   }

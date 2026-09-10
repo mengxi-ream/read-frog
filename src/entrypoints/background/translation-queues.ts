@@ -4,6 +4,7 @@ import type { ProviderConfig } from "@/types/config/provider"
 import type { BatchQueueConfig, RequestQueueConfig } from "@/types/config/translate"
 import type { WebPagePromptContext } from "@/types/content"
 import type { ProviderRequestRouting } from "@/types/hosted-request"
+import type { MatchedTerm } from "@/utils/glossary/types"
 import type { PromptResolver } from "@/utils/host/translate/api/ai"
 import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
@@ -79,6 +80,7 @@ async function executeQueuedTranslation<TContext>(
     preserveLineBreaks?: boolean
     signal?: AbortSignal
     hostedRequestId?: string
+    glossaryTerms?: readonly MatchedTerm[]
   } = {},
 ): Promise<string> {
   const { provider, hostedFeature } = routing
@@ -95,6 +97,7 @@ async function executeQueuedTranslation<TContext>(
   const { systemPrompt, prompt } = await promptResolver(targetLangName, text, {
     isBatch: options.isBatch,
     context: options.context,
+    glossaryTerms: options.glossaryTerms,
   })
   const result = await runStreamTextInBackground(
     {
@@ -123,6 +126,34 @@ export function shouldUseBatchQueue(provider: QueuedTranslationProvider): boolea
   return local ? isLLMProviderConfig(local) : true
 }
 
+/**
+ * The glossary terms for a whole batch: every member's terms, deduped.
+ *
+ * Each item resolved its own terms against its own text, so the union is what
+ * the joined text would have matched — minus any term that only appears to span
+ * the separator between two paragraphs, which was never really there.
+ *
+ * Deliberately NOT part of `getBatchKey`. Keying on it would put every paragraph
+ * with a different set of matched terms into a batch of its own, which is to say
+ * it would switch batching off for anyone using a glossary.
+ */
+function mergeBatchGlossaryTerms<TContext>(
+  dataList: readonly TranslateBatchData<TContext>[],
+): MatchedTerm[] | undefined {
+  // `undefined` means "nobody resolved terms", which lets the prompt resolver
+  // fall back to resolving them itself. An empty array means "resolved, nothing
+  // matched" and must suppress that fallback.
+  if (dataList.every((data) => data.glossaryTerms === undefined)) return undefined
+
+  const byMatchKey = new Map<string, MatchedTerm>()
+  for (const data of dataList) {
+    for (const term of data.glossaryTerms ?? []) {
+      byMatchKey.set(term.matchKey, term)
+    }
+  }
+  return [...byMatchKey.values()].sort((a, b) => a.matchKey.localeCompare(b.matchKey))
+}
+
 export async function executeBatchTranslation<TContext>(
   dataList: TranslateBatchData<TContext>[],
   promptResolver: PromptResolver<TContext>,
@@ -143,6 +174,7 @@ export async function executeBatchTranslation<TContext>(
       context,
       signal,
       hostedRequestId,
+      glossaryTerms: mergeBatchGlossaryTerms(dataList),
     },
   )
   return parseBatchResult(result)
@@ -154,6 +186,9 @@ export type TranslateBatchData<TContext = unknown> = QueuedTranslationRouting & 
   hash: string
   scheduleAt: number
   context?: TContext
+  // Resolved by the sender, where the page URL is known. A separate field from
+  // `context` on purpose: `context` is part of the batch key.
+  glossaryTerms?: readonly MatchedTerm[]
   // Cancellation scope (`${tabId}:${sessionId}`); absent = uncancellable.
   scope?: string
 }

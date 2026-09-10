@@ -20,6 +20,7 @@ import type {
   TTSPlaybackStopRequest,
 } from "@/types/tts-playback"
 import type { GlossarySnapshot } from "@/utils/glossary/active-matcher"
+import type { MatchedTerm } from "@/utils/glossary/types"
 import type { HostedAiStatus } from "@/utils/hosted-ai/types"
 import type { PromptableProviderRef, SerializableProviderRef } from "@/utils/providers/provider-ref"
 import type { EdgeTTSVoice } from "@/utils/server/edge-tts/types"
@@ -44,7 +45,9 @@ interface ProtocolMap {
   getInitialConfig: () => Config | null
   // glossary — the terms live in IndexedDB, which a content script cannot open,
   // so it asks the background once per page and compiles a matcher locally.
-  getGlossarySnapshot: () => Promise<GlossarySnapshot>
+  // `url` says which page is asking; glossaries scoped to other sites are left
+  // out of the answer rather than filtered on arrival.
+  getGlossarySnapshot: (data: { url: string | undefined }) => Promise<GlossarySnapshot>
   // translation state
   getEnablePageTranslationByTabId: (data: { tabId: number }) => boolean | undefined
   getEnablePageTranslationFromContentScript: () => Promise<boolean>
@@ -111,6 +114,13 @@ interface ProtocolMap {
       // (input/selection translation), which are never cancellable.
       sessionId?: string
       forceRetranslation?: boolean
+      // Glossary terms the SENDER found in `text`. Resolved where the page URL
+      // is known, so a glossary scoped to this site reaches the prompt and one
+      // scoped elsewhere does not — the background serves every tab and cannot
+      // tell them apart. Passing `[]` means "nothing matched", which is not the
+      // same as omitting the field: omitting it lets the background fall back to
+      // resolving unscoped glossaries itself.
+      glossaryTerms?: MatchedTerm[]
     },
   ) => Promise<string>
   // Drain queued/in-flight page-translation requests of one session (#1881).
@@ -132,6 +142,8 @@ interface ProtocolMap {
     webTitle?: string | null
     webDescription?: string | null
     summary?: string | null
+    // See `enqueueTranslateRequest`.
+    glossaryTerms?: MatchedTerm[]
   }) => Promise<string>
   getSubtitlesSummary: (data: {
     videoTitle: string

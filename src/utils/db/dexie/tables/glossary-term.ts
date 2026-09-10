@@ -15,11 +15,18 @@ import { Entity } from "dexie"
  * `matchKey` is the *identity* used when reconciling two devices' glossaries.
  * Keeping them separate is what makes a source-text edit an in-place update
  * rather than a cross-device delete+add — see docs/glossary-feature-plan.md D12.1.
+ *
+ * `matchKey` is unique WITHIN a glossary, not across the table: two glossaries
+ * may legitimately give the same term different wording, and deciding between
+ * them is the merge's job, not the storage layer's.
  */
 export default class GlossaryTerm extends Entity {
   id!: string
 
-  /** `s:<source>` when case-sensitive, `i:<lowercased source>` otherwise. Unique. */
+  /** The glossary this term belongs to. */
+  glossaryId!: string
+
+  /** `s:<source>` when case-sensitive, `i:<lowercased source>` otherwise. Unique per glossary. */
   matchKey!: string
 
   source!: string

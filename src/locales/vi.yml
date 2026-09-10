@@ -718,12 +718,47 @@ options:
     pageDescription: Những thiết lập mạnh mẽ nhưng không dùng đến hằng ngày.
     glossary:
       title: Bảng thuật ngữ
+      pageDescription: Đặt bản dịch cố định cho những từ quan trọng với bạn, và chọn nơi áp dụng cho từng danh sách.
+      untitled: Bảng thuật ngữ chưa đặt tên
+      noGlossaries: Chưa có bảng thuật ngữ nào.
       enable:
         title: Bật
         description: Gửi các thuật ngữ khớp cho LLM để dịch đúng theo cách bạn muốn. Bảng thuật ngữ được gửi kèm trong câu lệnh, nên nó chỉ áp dụng cho các tính năng chạy trên nhà cung cấp LLM.
-      terms:
-        title: Thuật ngữ
-        description: Thêm, chỉnh sửa và nhập các thuật ngữ trong bảng thuật ngữ của bạn.
+      library:
+        title: Bảng thuật ngữ của bạn
+        description: Mỗi bảng thuật ngữ có thuật ngữ riêng và danh sách trang web riêng, nên bộ thuật ngữ dùng cho công việc sẽ không đi theo bạn sang mọi nơi khác.
+        button: Thêm bảng thuật ngữ
+        capReached: "Bạn chỉ có thể có tối đa $1 bảng thuật ngữ."
+      summary:
+        terms: "$1 thuật ngữ"
+        termsOne: 1 thuật ngữ
+        allSites: Tất cả trang web
+        sites: "$1 trang web"
+        sitesOne: 1 trang web
+      editor:
+        details:
+          title: Tên và mô tả
+          description: Chỉ để bạn tìm lại bảng thuật ngữ này — cả hai đều không được gửi cho LLM.
+          namePlaceholder: Tên
+          descriptionPlaceholder: Mô tả (tùy chọn)
+        enable:
+          title: Bật
+          description: Bảng thuật ngữ đã tắt vẫn giữ các thuật ngữ nhưng không gửi thuật ngữ nào.
+        sites:
+          title: Trang web
+          description: Giới hạn bảng thuật ngữ này cho một số trang web nhất định.
+          allSites: Để trống thì bảng thuật ngữ sẽ áp dụng ở mọi nơi.
+          placeholder: Nhập trang web
+          header: Trang web
+        delete:
+          title: Xóa bảng thuật ngữ này
+          description: Xóa bảng thuật ngữ này cùng toàn bộ thuật ngữ trong đó. Hãy xuất trước nếu bạn có thể cần dùng lại — việc xóa không thể hoàn tác.
+          dialog:
+            trigger: Xóa
+            title: Xóa bảng thuật ngữ này?
+            description: "Bảng thuật ngữ và toàn bộ $1 thuật ngữ trong đó sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác."
+            confirm: Xóa
+            cancel: Hủy
       addTerm:
         title: Thêm thuật ngữ
         description: Đặt bản dịch bạn muốn cho một thuật ngữ, hoặc để trống bản dịch để giữ nguyên bản gốc.

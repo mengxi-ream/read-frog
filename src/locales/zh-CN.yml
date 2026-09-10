@@ -834,12 +834,47 @@ options:
     pageDescription: 不属于日常路径的强大设置。
     glossary:
       title: 术语库
+      pageDescription: 给你在意的词固定一个译法，并选择每份术语库在哪些网站生效。
+      untitled: 未命名术语库
+      noGlossaries: 还没有术语库。
       enable:
         title: 启用
         description: 把命中的术语一并发给 LLM，让它按你的写法翻译。术语库是随提示词一起发送的，所以只对运行在 LLM 提供商上的功能生效。
-      terms:
-        title: 术语
-        description: 添加、编辑和导入术语库中的术语。
+      library:
+        title: 你的术语库
+        description: 每份术语库都有各自的术语和各自的网站列表，所以为工作准备的一组术语不会跟着你出现在其他所有地方。
+        button: 添加术语库
+        capReached: "最多只能创建 $1 份术语库。"
+      summary:
+        terms: "$1 条术语"
+        termsOne: 1 条术语
+        allSites: 所有网站
+        sites: "$1 个网站"
+        sitesOne: 1 个网站
+      editor:
+        details:
+          title: 名称与描述
+          description: 仅用于方便你以后找到这份术语库——两者都不会发送给 LLM。
+          namePlaceholder: 名称
+          descriptionPlaceholder: 描述（可选）
+        enable:
+          title: 启用
+          description: 停用后术语仍会保留，但一条都不会发送。
+        sites:
+          title: 网站
+          description: 限定这份术语库只在特定网站生效。
+          allSites: 留空则这份术语库在所有网站生效。
+          placeholder: 输入网站
+          header: 网站
+        delete:
+          title: 删除这份术语库
+          description: 删除这份术语库及其中的所有术语。如果以后可能还要用，请先导出——此操作无法撤销。
+          dialog:
+            trigger: 删除
+            title: 删除这份术语库？
+            description: "这份术语库及其中全部 $1 条术语将被永久删除。此操作无法撤销。"
+            confirm: 删除
+            cancel: 取消
       addTerm:
         title: 添加术语
         description: 给术语指定你想要的译文；留空则保持原文不变。

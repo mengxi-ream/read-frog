@@ -8,8 +8,8 @@ import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
 import { useSaveGlossaryTerm } from "./use-glossary"
 
-export function GlossaryAddTermItem() {
-  const { mutateAsync: saveTerm, isPending } = useSaveGlossaryTerm()
+export function GlossaryAddTermItem({ glossaryId }: { glossaryId: string }) {
+  const { mutateAsync: saveTerm, isPending } = useSaveGlossaryTerm(glossaryId)
   const [source, setSource] = useState("")
   const [target, setTarget] = useState("")
   // Deliberately NOT reset after an add: someone entering a run of

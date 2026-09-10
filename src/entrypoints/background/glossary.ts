@@ -1,8 +1,15 @@
 import type { GlossarySnapshot } from "@/utils/glossary/active-matcher"
 import { setGlossarySnapshotLoader } from "@/utils/glossary/active-matcher"
-import { getGlossaryRevision, loadGlossaryEntries } from "@/utils/glossary/repository"
+import {
+  getGlossaryRevision,
+  listGlossaries,
+  loadGlossaryEntries,
+} from "@/utils/glossary/repository"
+import { isGlossaryActiveForUrl } from "@/utils/glossary/scope"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
+
+const EMPTY_SNAPSHOT: GlossarySnapshot = { revision: 0, scopeKey: "", entries: [] }
 
 /**
  * Serves the glossary to content scripts, which cannot open the extension's
@@ -12,22 +19,37 @@ import { onMessage } from "@/utils/message"
  * A failure resolves to an empty snapshot rather than rejecting: a broken
  * glossary must degrade to "translate without it", never to a failed page.
  */
-async function readSnapshot(): Promise<GlossarySnapshot> {
-  const [revision, entries] = await Promise.all([getGlossaryRevision(), loadGlossaryEntries()])
-  return { revision, entries }
+async function readSnapshot(url: string | undefined): Promise<GlossarySnapshot> {
+  const [revision, glossaries, entries] = await Promise.all([
+    getGlossaryRevision(),
+    listGlossaries(),
+    loadGlossaryEntries(url),
+  ])
+  // Already in list order, so this is stable for a given set.
+  const scopeKey = glossaries
+    .filter((glossary) => isGlossaryActiveForUrl(glossary, url))
+    .map((glossary) => glossary.id)
+    .join(",")
+  return { revision, scopeKey, entries }
 }
 
 export function setupGlossaryMessageHandlers() {
   // The background reads the database directly — it cannot message itself, and
   // it is the context that builds the prompt actually sent to the provider.
-  setGlossarySnapshotLoader(readSnapshot)
+  //
+  // It passes no URL: the background serves every tab at once, so it has no one
+  // page to scope by. Only glossaries that apply everywhere reach a prompt
+  // resolved here, and every request that CAN name its page carries the terms
+  // its own page resolved (see `TranslatePromptOptions.glossaryTerms`), so this
+  // path is a fallback rather than the normal route.
+  setGlossarySnapshotLoader(() => readSnapshot(undefined))
 
-  onMessage("getGlossarySnapshot", async (): Promise<GlossarySnapshot> => {
+  onMessage("getGlossarySnapshot", async ({ data }): Promise<GlossarySnapshot> => {
     try {
-      return await readSnapshot()
+      return await readSnapshot(data.url)
     } catch (error) {
       logger.error("Failed to build glossary snapshot", error)
-      return { revision: 0, entries: [] }
+      return EMPTY_SNAPSHOT
     }
   })
 }

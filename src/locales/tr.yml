@@ -718,12 +718,47 @@ options:
     pageDescription: Her gün kullanılmayan, güçlü ayarlar.
     glossary:
       title: Terim sözlüğü
+      pageDescription: Sizin için önemli olan sözcüklere sabit bir çeviri verin ve her listenin nerede geçerli olacağını seçin.
+      untitled: Adsız terim sözlüğü
+      noGlossaries: Henüz terim sözlüğü yok.
       enable:
         title: Etkinleştir
         description: Eşleşen terimleri LLM'ye gönderir, böylece onları istediğiniz gibi çevirir. Terim sözlüğü istemin içinde gönderilir, bu yüzden yalnızca LLM sağlayıcısı üzerinde çalışan özellikler için geçerlidir.
-      terms:
-        title: Terimler
-        description: Terim sözlüğünüzdeki terimleri ekleyin, düzenleyin ve içe aktarın.
+      library:
+        title: Terim sözlükleriniz
+        description: Her terim sözlüğünün kendi terimleri ve kendi site listesi vardır; böylece iş için hazırladığınız terimler diğer her yerde karşınıza çıkmaz.
+        button: Terim sözlüğü ekle
+        capReached: "En fazla $1 terim sözlüğünüz olabilir."
+      summary:
+        terms: "$1 terim"
+        termsOne: 1 terim
+        allSites: Tüm web siteleri
+        sites: "$1 web sitesi"
+        sitesOne: 1 web sitesi
+      editor:
+        details:
+          title: Ad ve açıklama
+          description: Yalnızca bu terim sözlüğünü sonradan bulmanız için — ikisi de LLM'ye gönderilmez.
+          namePlaceholder: Ad
+          descriptionPlaceholder: Açıklama (isteğe bağlı)
+        enable:
+          title: Etkinleştir
+          description: Devre dışı bırakılan bir terim sözlüğü terimlerini korur ama hiçbirini göndermez.
+        sites:
+          title: Web siteleri
+          description: Bu terim sözlüğünü belirli web siteleriyle sınırlayın.
+          allSites: Burayı boş bırakırsanız terim sözlüğü her yerde geçerli olur.
+          placeholder: Bir web sitesi girin
+          header: Web sitesi
+        delete:
+          title: Bu terim sözlüğünü sil
+          description: Terim sözlüğünü ve içindeki tüm terimleri kaldırır. Terimlere sonra ihtiyacınız olabilirse önce dışa aktarın — bu işlem geri alınamaz.
+          dialog:
+            trigger: Sil
+            title: Bu terim sözlüğü silinsin mi?
+            description: "Terim sözlüğü ve içindeki $1 terimin tamamı kalıcı olarak silinecek. Bu işlem geri alınamaz."
+            confirm: Sil
+            cancel: İptal
       addTerm:
         title: Terim ekle
         description: Bir terime istediğiniz çeviriyi verin ya da özgün hâlini korumak için çeviriyi boş bırakın.

@@ -834,12 +834,47 @@ options:
     pageDescription: 不屬於日常路徑的強大設定。
     glossary:
       title: 術語庫
+      pageDescription: 為你在意的詞語指定固定的譯文，並決定每份清單在哪些網站生效。
+      untitled: 未命名術語庫
+      noGlossaries: 還沒有術語庫。
       enable:
         title: 啟用
         description: 把命中的術語一併傳給 LLM，讓它照你的寫法翻譯。術語庫是隨提示詞一起送出的，所以只對執行於 LLM 提供者的功能生效。
-      terms:
-        title: 術語
-        description: 新增、編輯和匯入術語庫中的術語。
+      library:
+        title: 你的術語庫
+        description: 每個術語庫都有各自的術語和各自的網站清單，所以工作用的那套術語不會跟著你跑到其他地方。
+        button: 新增術語庫
+        capReached: "最多只能建立 $1 個術語庫。"
+      summary:
+        terms: "$1 條術語"
+        termsOne: 1 條術語
+        allSites: 所有網站
+        sites: "$1 個網站"
+        sitesOne: 1 個網站
+      editor:
+        details:
+          title: 名稱與描述
+          description: 只是方便你之後再找到這個術語庫——兩者都不會傳給 LLM。
+          namePlaceholder: 名稱
+          descriptionPlaceholder: 描述（選填）
+        enable:
+          title: 啟用
+          description: 停用的術語庫會保留其中的術語，但一條都不會傳送。
+        sites:
+          title: 網站
+          description: 限定這個術語庫只在特定網站生效。
+          allSites: 留空則這個術語庫在所有網站都生效。
+          placeholder: 輸入網站
+          header: 網站
+        delete:
+          title: 刪除這個術語庫
+          description: 會移除這個術語庫以及其中的所有術語。如果之後可能還要用，請先匯出——刪除後無法復原。
+          dialog:
+            trigger: 刪除
+            title: 要刪除這個術語庫嗎？
+            description: "這個術語庫以及其中全部 $1 筆術語將被永久刪除。此操作無法復原。"
+            confirm: 刪除
+            cancel: 取消
       addTerm:
         title: 新增術語
         description: 為術語指定你想要的譯文；留空則保持原文不變。

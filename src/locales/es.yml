@@ -834,12 +834,47 @@ options:
     pageDescription: Ajustes potentes que no forman parte del uso diario.
     glossary:
       title: Glosario
+      pageDescription: Da una traducción fija a las palabras que te importan y elige dónde se aplica cada lista.
+      untitled: Glosario sin título
+      noGlossaries: Aún no hay glosarios.
       enable:
         title: Activar
         description: Envía los términos coincidentes al LLM para que los traduzca a tu manera. El glosario viaja dentro del prompt, así que solo se aplica a las funciones que usan un proveedor LLM.
-      terms:
-        title: Términos
-        description: Añade, edita e importa los términos de tu glosario.
+      library:
+        title: Tus glosarios
+        description: Cada glosario tiene sus propios términos y su propia lista de sitios web, así que un conjunto de términos para el trabajo no te acompaña en todo lo demás.
+        button: Añadir un glosario
+        capReached: "Puedes tener como máximo $1 glosarios."
+      summary:
+        terms: "$1 términos"
+        termsOne: 1 término
+        allSites: Todos los sitios web
+        sites: "$1 sitios web"
+        sitesOne: 1 sitio web
+      editor:
+        details:
+          title: Nombre y descripción
+          description: Solo sirven para volver a encontrar este glosario — ninguno de los dos se envía al LLM.
+          namePlaceholder: Nombre
+          descriptionPlaceholder: Descripción (opcional)
+        enable:
+          title: Activar
+          description: Un glosario desactivado conserva sus términos, pero no envía ninguno.
+        sites:
+          title: Sitios web
+          description: Limita este glosario a determinados sitios web.
+          allSites: Déjalo vacío y el glosario se aplicará en todas partes.
+          placeholder: Escribe un sitio web
+          header: Sitio web
+        delete:
+          title: Eliminar este glosario
+          description: Elimina el glosario y todos los términos que contiene. Expórtalo primero si crees que vas a necesitar los términos — esto no se puede deshacer.
+          dialog:
+            trigger: Eliminar
+            title: ¿Eliminar este glosario?
+            description: "Se eliminarán permanentemente el glosario y los $1 términos que contiene. Esta acción no se puede deshacer."
+            confirm: Eliminar
+            cancel: Cancelar
       addTerm:
         title: Añadir un término
         description: Dale a un término la traducción que quieras, o déjala vacía para conservar el original.

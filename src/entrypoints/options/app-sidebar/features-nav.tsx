@@ -25,6 +25,9 @@ const OVERLAY_TOOLS_PATHS = ["/floating-button", "/selection-toolbar", "/context
 export function FeaturesNav() {
   const { pathname } = useLocation()
   const isOverlayToolsActive = OVERLAY_TOOLS_PATHS.includes(pathname)
+  // `startsWith`, so the group stays lit while a single glossary is open on
+  // `/advanced/glossary/:glossaryId`.
+  const isAdvancedActive = pathname.startsWith("/advanced")
 
   return (
     <SidebarGroup>
@@ -134,16 +137,37 @@ export function FeaturesNav() {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              render={<Link to="/advanced" />}
-              isActive={pathname === "/advanced"}
-              tooltip={i18n.t("options.advanced.title")}
-            >
-              <Icon icon="tabler:flask" />
-              <span>{i18n.t("options.advanced.title")}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          <Collapsible defaultOpen={isAdvancedActive} className="group/collapsible">
+            <SidebarMenuItem>
+              <CollapsibleTrigger
+                render={
+                  <SidebarMenuButton
+                    isActive={isAdvancedActive}
+                    tooltip={i18n.t("options.advanced.title")}
+                  />
+                }
+              >
+                <Icon icon="tabler:flask" />
+                <span>{i18n.t("options.advanced.title")}</span>
+                <Icon
+                  icon="tabler:chevron-right"
+                  className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarMenuSub>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton
+                      render={<Link to="/advanced/glossary" />}
+                      isActive={pathname.startsWith("/advanced/glossary")}
+                    >
+                      <span>{i18n.t("options.advanced.glossary.title")}</span>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
 
           <SidebarMenuItem>
             <SidebarMenuButton

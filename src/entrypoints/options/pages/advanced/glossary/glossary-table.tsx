@@ -26,8 +26,8 @@ import { useDeleteGlossaryTerm, useGlossaryTerms, useSetGlossaryTermEnabled } fr
  */
 const PAGE_SIZE = 50
 
-export function GlossaryTable() {
-  const { data: terms = [], isLoading } = useGlossaryTerms()
+export function GlossaryTable({ glossaryId }: { glossaryId: string }) {
+  const { data: terms = [], isLoading } = useGlossaryTerms(glossaryId)
   const { mutate: deleteTerm } = useDeleteGlossaryTerm()
   const { mutate: setEnabled } = useSetGlossaryTermEnabled()
   const [query, setQuery] = useState("")

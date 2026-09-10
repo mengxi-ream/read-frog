@@ -834,12 +834,47 @@ options:
     pageDescription: Gündəlik istifadə üçün olmayan güclü parametrlər.
     glossary:
       title: Terminlər lüğəti
+      pageDescription: Sizin üçün vacib olan sözlərə sabit tərcümə təyin edin və hər siyahının harada tətbiq olunacağını seçin.
+      untitled: Adsız lüğət
+      noGlossaries: Hələ lüğət yoxdur.
       enable:
         title: Aktiv et
         description: Uyğun gələn terminləri LLM-ə göndərir ki, onları istədiyiniz kimi tərcümə etsin. Lüğət sorğunun içində göndərilir, ona görə də yalnız LLM provayderi üzərində işləyən funksiyalara tətbiq olunur.
-      terms:
-        title: Terminlər
-        description: Terminlər lüğətinizdəki terminləri əlavə edin, redaktə edin və idxal edin.
+      library:
+        title: Lüğətləriniz
+        description: Hər lüğətin öz terminləri və öz sayt siyahısı var, ona görə də iş üçün nəzərdə tutulmuş terminlər dəsti sizinlə birlikdə hər yerə keçmir.
+        button: Lüğət əlavə et
+        capReached: "Ən çoxu $1 lüğətiniz ola bilər."
+      summary:
+        terms: "$1 termin"
+        termsOne: 1 termin
+        allSites: Bütün saytlar
+        sites: "$1 sayt"
+        sitesOne: 1 sayt
+      editor:
+        details:
+          title: Ad və təsvir
+          description: Yalnız bu lüğəti sonradan tapmaq üçündür — heç biri LLM-ə göndərilmir.
+          namePlaceholder: Ad
+          descriptionPlaceholder: Təsvir (istəyə bağlı)
+        enable:
+          title: Aktiv et
+          description: Deaktiv lüğət terminlərini saxlayır, lakin onlardan heç birini göndərmir.
+        sites:
+          title: Saytlar
+          description: Bu lüğəti yalnız müəyyən saytlarla məhdudlaşdırın.
+          allSites: Bunu boş buraxsanız, lüğət hər yerdə tətbiq olunur.
+          placeholder: Sayt daxil edin
+          header: Sayt
+        delete:
+          title: Bu lüğəti sil
+          description: Lüğəti və içindəki bütün terminləri silir. Terminlər sonra lazım ola bilərsə, əvvəlcə ixrac edin — bunu geri qaytarmaq mümkün deyil.
+          dialog:
+            trigger: Sil
+            title: Bu lüğət silinsin?
+            description: "Lüğət və içindəki bütün $1 termin həmişəlik silinəcək. Bu əməliyyatı geri qaytarmaq mümkün deyil."
+            confirm: Sil
+            cancel: Ləğv et
       addTerm:
         title: Termin əlavə et
         description: Termin üçün istədiyiniz tərcüməni yazın və ya orijinalı saxlamaq üçün tərcüməni boş buraxın.

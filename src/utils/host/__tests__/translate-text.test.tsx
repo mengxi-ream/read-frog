@@ -167,7 +167,10 @@ describe("translate-text", () => {
       const result = await translateTextForPage("test text")
 
       expect(result).toBe("")
-      expect(mockSendMessage).toHaveBeenCalledOnce()
+      // One TRANSLATION request; the page also asks for the glossary snapshot.
+      expect(
+        mockSendMessage.mock.calls.filter(([type]: [string]) => type === "enqueueTranslateRequest"),
+      ).toHaveLength(1)
     })
 
     it("returns a response containing the sentinel inside longer text verbatim", async () => {
