@@ -27,11 +27,11 @@ export function GlossarySitesItem({ glossary }: { glossary: Glossary }) {
       description={
         <>
           {i18n.t("options.advanced.glossary.editor.sites.description")}
-          {glossary.matchPatterns.length === 0 && (
-            <span className="mt-1 block">
-              {i18n.t("options.advanced.glossary.editor.sites.allSites")}
-            </span>
-          )}
+          {/* Runs on from the sentence before it rather than sitting on its own
+              line: it qualifies that sentence, and stacked it read as a second,
+              unrelated rule. */}
+          {glossary.matchPatterns.length === 0 &&
+            ` ${i18n.t("options.advanced.glossary.editor.sites.allSites")}`}
         </>
       }
     >
