@@ -85,59 +85,61 @@ export function GlossaryImportExport() {
     <ConfigItem
       id="glossary-import-export"
       title={i18n.t("options.advanced.glossary.importExport.title")}
-      description={i18n.t("options.advanced.glossary.importExport.description")}
+      description={
+        <>
+          {i18n.t("options.advanced.glossary.importExport.description")}
+          {/* These two qualify what an import will DO, so they sit with the
+              explanation rather than in the action column beside the buttons. */}
+          <span className="mt-2 flex flex-wrap items-center gap-2">
+            <Select value={mode} onValueChange={(value) => setMode(value as ImportMode)}>
+              <SelectTrigger size="sm">
+                {/* `render` + explicit children, not a bare `SelectValue`: the
+                    bare form shows the raw value ("merge") instead of the label. */}
+                <SelectValue render={<span />}>{i18n.t(MODE_LABEL_KEY[mode])}</SelectValue>
+              </SelectTrigger>
+              <SelectContent align="start">
+                <SelectGroup>
+                  {IMPORT_MODES.map((importMode) => (
+                    <SelectItem key={importMode} value={importMode}>
+                      {i18n.t(MODE_LABEL_KEY[importMode])}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            <label className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Checkbox checked={caseSensitive} onCheckedChange={setCaseSensitive} />
+              {i18n.t("options.advanced.glossary.caseSensitive")}
+            </label>
+          </span>
+        </>
+      }
     >
-      {/* Two rows: what an import will DO on top, the actions themselves under it. */}
-      <div className="flex flex-col items-end gap-2">
-        <div className="flex items-center gap-2">
-          <Select value={mode} onValueChange={(value) => setMode(value as ImportMode)}>
-            <SelectTrigger size="sm">
-              {/* `render` + explicit children, not a bare `SelectValue`: the bare
-                  form shows the raw value ("merge") instead of the item's label. */}
-              <SelectValue render={<span />}>{i18n.t(MODE_LABEL_KEY[mode])}</SelectValue>
-            </SelectTrigger>
-            <SelectContent align="end">
-              <SelectGroup>
-                {IMPORT_MODES.map((importMode) => (
-                  <SelectItem key={importMode} value={importMode}>
-                    {i18n.t(MODE_LABEL_KEY[importMode])}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="sm" className="p-0" disabled={isPending}>
+          {/* The label fills the button so the whole control opens the picker. */}
+          <Label htmlFor={IMPORT_INPUT_ID} className="w-full gap-1 px-2.5 text-[length:inherit]">
+            <Icon icon="tabler:file-import" />
+            {i18n.t("options.advanced.glossary.import")}
+          </Label>
+        </Button>
+        <input
+          id={IMPORT_INPUT_ID}
+          type="file"
+          accept=".csv,text/csv,text/plain"
+          className="hidden"
+          onChange={(event) => {
+            const file = event.target.files?.[0]
+            if (file) void handleImport(file)
+            event.target.value = ""
+          }}
+        />
 
-          <label className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <Checkbox checked={caseSensitive} onCheckedChange={setCaseSensitive} />
-            {i18n.t("options.advanced.glossary.caseSensitive")}
-          </label>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="p-0" disabled={isPending}>
-            {/* The label fills the button so the whole control opens the picker. */}
-            <Label htmlFor={IMPORT_INPUT_ID} className="w-full gap-1 px-2.5 text-[length:inherit]">
-              <Icon icon="tabler:file-import" />
-              {i18n.t("options.advanced.glossary.import")}
-            </Label>
-          </Button>
-          <input
-            id={IMPORT_INPUT_ID}
-            type="file"
-            accept=".csv,text/csv,text/plain"
-            className="hidden"
-            onChange={(event) => {
-              const file = event.target.files?.[0]
-              if (file) void handleImport(file)
-              event.target.value = ""
-            }}
-          />
-
-          <Button variant="outline" size="sm" onClick={() => void handleExport()}>
-            <Icon icon="tabler:file-export" />
-            {i18n.t("options.advanced.glossary.export")}
-          </Button>
-        </div>
+        <Button variant="outline" size="sm" onClick={() => void handleExport()}>
+          <Icon icon="tabler:file-export" />
+          {i18n.t("options.advanced.glossary.export")}
+        </Button>
       </div>
     </ConfigItem>
   )
