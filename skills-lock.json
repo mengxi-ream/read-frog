@@ -41,7 +41,7 @@
       "source": "vercel-labs/json-render",
       "sourceType": "github",
       "skillPath": "skills/react/SKILL.md",
-      "computedHash": "7950a6403bae48f638036768fd5d4a4643aaaa3bde04e99d4d8f2d1f485ab63d"
+      "computedHash": "7d6d1fc6eb68610aae450ff37281f0898db5fdac6fbbcf301d46ac17b6c3acfc"
     },
     "review-animations": {
       "source": "emilkowalski/skills",
@@ -53,19 +53,19 @@
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/composition-patterns/SKILL.md",
-      "computedHash": "575757e3e25761c8c562d6e395d29f0b76c98b1273c0bd72d88e6ab1bc9c7d42"
+      "computedHash": "f98931159fa9c7fed043bcd18a891a46dcf89ababa38df13a4c5b7b30dc0ce07"
     },
     "vercel-react-best-practices": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/react-best-practices/SKILL.md",
-      "computedHash": "ca7b0c0c6e5f2750043f7f0cd72d16ac4e2abc48f9b5500d047a4b77a2506212"
+      "computedHash": "3219a1944e404ffc14d1d9d6aef6dd2e3855b81387ee0a044ccbfe14d34c2357"
     },
     "web-design-guidelines": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/web-design-guidelines/SKILL.md",
-      "computedHash": "f3bc47f890f42a44db1007ab390709ec368e4b8c089baee6b0007182236ac474"
+      "computedHash": "a6a44d5498f7e8f68289902f3dedfc6f38ae0cee1e96527c80724cf27f727c2a"
     },
     "webext-core": {
       "source": "Timeraa/skills",
