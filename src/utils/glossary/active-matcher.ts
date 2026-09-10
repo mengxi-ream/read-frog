@@ -39,7 +39,28 @@ interface CachedMatcher {
 }
 
 let cached: CachedMatcher | null = null
-let inFlight: Promise<ActiveGlossary> | null = null
+
+/**
+ * In-flight loads, keyed by the SAME two fields the cache hit compares.
+ *
+ * A single slot would hand the second caller the first caller's glossary, and
+ * both keys genuinely vary within one content script: input translation
+ * resolves its own target language (`translateTextForInput`) while the page is
+ * being warmed for another, and an in-page navigation changes the URL that
+ * decides which glossaries apply.
+ */
+const inFlight = new Map<string, Promise<ActiveGlossary>>()
+
+/**
+ * Bumped by every invalidation.
+ *
+ * A load that began before the bump is holding rows the write has already
+ * superseded, and `storage.watch` has ALREADY delivered the only notification
+ * there will be — so installing that result would strand the stale matcher in
+ * this context until a navigation or a further edit. The counter is what lets
+ * the load recognise itself as superseded after the fact.
+ */
+let generation = 0
 
 /**
  * The compiled matcher together with the revision it was built from.
@@ -138,9 +159,16 @@ async function getActiveGlossary(targetLang: LangCodeISO6393): Promise<ActiveGlo
   if (cached && cached.url === url && cached.targetLang === targetLang) {
     return { matcher: cached.matcher, revision: cached.revision }
   }
-  if (inFlight) return inFlight
-
-  inFlight = (async () => {
+  // The generation leads, so a caller arriving AFTER an invalidation cannot join
+  // a load that started before it — that load is holding pre-edit rows, and
+  // handing them over would be the very stale serve the generation guard below
+  // exists to prevent, just for a different caller. It starts its own instead.
+  // An ISO 639-3 code cannot contain "|", so the rest cannot collide.
+  const startedAt = generation
+  const key = `${startedAt}|${targetLang}|${url ?? ""}`
+  const alreadyLoading = inFlight.get(key)
+  if (alreadyLoading) return alreadyLoading
+  const load = (async () => {
     try {
       const snapshot = await Promise.race([
         loadSnapshot(url, targetLang),
@@ -148,6 +176,13 @@ async function getActiveGlossary(targetLang: LangCodeISO6393): Promise<ActiveGlo
           setTimeout(() => reject(new Error("glossary snapshot timed out")), SNAPSHOT_TIMEOUT_MS),
         ),
       ])
+      if (generation !== startedAt) {
+        // Written to while this load was outstanding, so these rows predate the
+        // write. Serve them to THIS caller — it asked before the edit, and the
+        // revision they carry is honest, so a post-edit sibling correctly wins
+        // the batch key — but never install them, so the next call re-asks.
+        return { matcher: createGlossaryMatcher(snapshot.entries), revision: snapshot.revision }
+      }
       if (
         cached?.revision !== snapshot.revision ||
         cached.scopeKey !== snapshot.scopeKey ||
@@ -173,12 +208,20 @@ async function getActiveGlossary(targetLang: LangCodeISO6393): Promise<ActiveGlo
       // Revision 0 loses every conflict in `mergeBatchGlossaryTerms`, which is
       // exactly right: this context has no terms to contribute to one.
       return { matcher: createGlossaryMatcher([]), revision: 0 }
-    } finally {
-      inFlight = null
     }
   })()
 
-  return inFlight
+  inFlight.set(key, load)
+  // Released here rather than in a `finally` inside the load: a loader that
+  // throws synchronously would run that `finally` BEFORE the `set` above, with
+  // `load` still in its temporal dead zone — a ReferenceError thrown out of a
+  // path whose whole contract is to fail soft.
+  const release = () => {
+    if (inFlight.get(key) === load) inFlight.delete(key)
+  }
+  load.then(release, release)
+
+  return load
 }
 
 export async function getActiveGlossaryMatcher(
@@ -215,6 +258,9 @@ export async function resolveGlossaryTerms(
 /** Drops the compiled matcher. Called after a write so the next match recompiles. */
 export function invalidateActiveGlossaryMatcher(): void {
   cached = null
+  // Any load already in flight read its rows before this write, so it must not
+  // be allowed to publish them once it lands.
+  generation++
 }
 
 /**

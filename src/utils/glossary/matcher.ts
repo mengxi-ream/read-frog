@@ -47,6 +47,21 @@ function stripInvisible(value: string): string {
   return value.replace(INVISIBLE_TRANSLATION_CHARACTERS_REGEX, "")
 }
 
+/**
+ * Fold every run of whitespace down to a single space, and trim the ends.
+ *
+ * `termToPattern` compiles a term's internal whitespace to `\s+`, so a source's
+ * own spacing is already meaningless to MATCHING — but it survived into the
+ * index key, the case-sensitive comparison and the `sources` dedupe, none of
+ * which fold it. A term stored as `Chort  Bay` therefore compiled a pattern that
+ * matched the page fine and then found no bucket, so the hit was dropped: the
+ * term sat in the list, enabled, and silently never applied. Same for a tab, a
+ * newline or a full-width space.
+ */
+function collapseWhitespace(value: string): string {
+  return value.replace(/\s+/g, " ").trim()
+}
+
 interface IndexedEntry extends GlossaryEntry {
   boundary: BoundaryRequirement
 }
@@ -67,9 +82,13 @@ export function createGlossaryMatcher(entries: readonly GlossaryEntry[]): Glossa
   // position without consuming input.
   const usable = entries
     .filter((entry) => stripInvisible(entry.source).trim() !== "")
-    // Trimmed to agree with `buildMatchKey`, which trims too — an entry stored
-    // with stray outer spaces otherwise compiled a pattern that could not match.
-    .map((entry) => ({ ...entry, source: normalize(stripInvisible(entry.source).trim()) }))
+    // Folded to the one whitespace form the hit side uses — see
+    // `collapseWhitespace`. Trimming alone (which is all `buildMatchKey` does)
+    // left interior runs to break the lookup.
+    .map((entry) => ({
+      ...entry,
+      source: normalize(collapseWhitespace(stripInvisible(entry.source))),
+    }))
   if (usable.length === 0) return EMPTY_MATCHER
 
   // Bucketed by case-folded source so a single case-insensitive scan can serve

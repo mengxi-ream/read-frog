@@ -133,29 +133,33 @@ export function shouldUseBatchQueue(provider: QueuedTranslationProvider): boolea
  * the joined text would have matched — minus any term that only appears to span
  * the separator between two paragraphs, which was never really there.
  *
- * Deliberately NOT part of `getBatchKey`. Keying on it would put every paragraph
- * with a different set of matched terms into a batch of its own, which is to say
- * it would switch batching off for anyone using a glossary. That exclusion is
- * only safe because `context` — which IS in the batch key — is derived per page,
- * so two different pages cannot co-batch. Anything that trims the page content
- * out of the batch key has to revisit this.
+ * The term LIST is deliberately not part of `getBatchKey` — it differs per
+ * paragraph, so keying on it would put every paragraph in a batch of its own and
+ * end batching for anyone using a glossary. The glossary REVISION is in the key
+ * instead: one global counter that every paragraph of a page carries alike, so
+ * it costs nothing in the steady state while guaranteeing that a batch holds
+ * exactly one glossary state.
  *
- * Two members CAN still disagree about one term without any scope difference:
- * an edit made while the page is still translating bumps the revision and
- * invalidates the compiled matcher, so paragraphs resolved either side of it
- * carry different wordings for one `matchKey` under a byte-identical context.
- * The revision each member was resolved against decides — the newer wording
- * wins, which is the edit the user just made. Arrival order must NOT decide:
- * members race through prompt rendering before they are sent, so it is a coin
- * flip, and half the time it would put back the wording the user just replaced.
+ * That guarantee is what makes this union sound, and it cannot be recovered by
+ * any rule applied here, because a term's ABSENCE from a member is overloaded:
+ * "the user deleted it", "my text does not contain it", "the feature was
+ * switched off mid-page" (which bumps no revision at all) and "my snapshot timed
+ * out" are the same value. Without the key component, a member carrying an
+ * emptied list could not out-vote an older member's term, the prompt would apply
+ * the removed wording to that member's text, and the result would be cached
+ * under a hash built with NO terms — the hash a re-translation computes too, so
+ * nothing would ever evict it.
  *
- * Equal revisions carrying DIFFERENT wordings cannot happen within one glossary
- * state, so it means the stamp is not trustworthy for that key — `readSnapshot`
- * reads the revision and the entries separately while a writer commits its rows
- * before bumping, leaving a sub-millisecond window where post-edit entries come
- * back under a pre-edit revision. There the term is DROPPED rather than guessed
- * at: sending no instruction for it costs the user the wording once, whereas
- * guessing sends a wording that is wrong half the time and then caches it.
+ * The revision comparison below is therefore defence in depth rather than the
+ * live mechanism, kept so that a future change to the batch key cannot silently
+ * reintroduce the mixed-state batch. What IS still live is the tie: equal
+ * revisions carrying DIFFERENT wordings cannot happen within one glossary state,
+ * so it means the stamp is not trustworthy for that key — `readSnapshot` reads
+ * the revision and the entries separately while a writer commits its rows before
+ * bumping, leaving a sub-millisecond window where post-edit entries come back
+ * under a pre-edit revision. There the term is DROPPED rather than guessed at:
+ * sending no instruction costs the user the wording once, whereas guessing sends
+ * a wording that is wrong half the time and then caches it.
  */
 function mergeBatchGlossaryTerms<TContext>(
   dataList: readonly TranslateBatchData<TContext>[],
@@ -320,6 +324,13 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
         `${data.langConfig.sourceCode}-${data.langConfig.targetCode}-${getQueuedProviderId(data.provider)}`,
         data.context ? JSON.stringify(data.context) : "",
         data.hostedFeature ?? "",
+        // Not the terms — the REVISION. The terms differ per paragraph and
+        // keying on them would end batching for glossary users; the revision is
+        // one global counter that every paragraph of a page carries alike, so
+        // this component is inert except across an edit. What it buys is that a
+        // batch can only ever hold one glossary state, which is the only way to
+        // represent a REMOVAL: see `mergeBatchGlossaryTerms`.
+        `glossaryRevision:${data.glossaryRevision ?? 0}`,
       )
     },
     getCharacters: (data) => data.text.length,

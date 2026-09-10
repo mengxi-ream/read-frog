@@ -1677,4 +1677,198 @@ describe("translation queue helpers", () => {
       expect(optionsFor("alpha").isBatch).toBeUndefined()
     }, 15_000)
   })
+
+  // The merge above runs BELOW the batch key, so it can only ever see members
+  // the key already agreed to put together. These go through the real
+  // `enqueueTranslateRequest` handler so the BatchQueue actually applies
+  // `getBatchKey`.
+  describe("glossary revision in the batch key", () => {
+    const apiTerm: MatchedTerm = {
+      matchKey: "api",
+      source: "api",
+      target: "接口",
+      keepOriginal: false,
+    }
+
+    const queueTerm: MatchedTerm = {
+      matchKey: "queue",
+      source: "queue",
+      target: "队列",
+      keepOriginal: false,
+    }
+
+    // Byte-identical on every member, so `context` — the only other per-page
+    // component of the key — cannot be what separates them.
+    const pageContext = {
+      webTitle: "Page title",
+      webDescription: "Page description",
+      webContent: "Page body",
+    }
+
+    const JOINED = `\n\n${BATCH_SEPARATOR}\n\n`
+
+    /** Room for every member of these tests in one batch, so a split is the key's doing. */
+    function useBatchingConfig() {
+      ensureInitializedConfigMock.mockResolvedValue({
+        ...DEFAULT_CONFIG,
+        pageTranslation: {
+          ...DEFAULT_CONFIG.pageTranslation,
+          providerId: llmProvider.id,
+          requestQueueConfig: { rate: 10, capacity: 10 },
+          batchQueueConfig: { maxCharactersPerBatch: 1000, maxItemsPerBatch: 10 },
+        },
+      })
+
+      // Echo one segment per segment received. A batch that came back with the
+      // wrong count would retry and then fall back to individual requests,
+      // which would inflate the call count these tests read.
+      executeTranslateMock.mockImplementation(async (text: string) =>
+        text
+          .split(JOINED)
+          .map((segment) => `translated ${segment}`)
+          .join(JOINED),
+      )
+    }
+
+    async function startHandler() {
+      const { setupPageTranslationHandlers } = await import("../page-translation")
+      setupPageTranslationHandlers()
+      return getRegisteredMessageHandler("enqueueTranslateRequest")
+    }
+
+    function enqueue(
+      handler: ReturnType<typeof getRegisteredMessageHandler>,
+      text: string,
+      glossary: { terms?: readonly MatchedTerm[]; revision?: number } = {},
+    ) {
+      return handler({
+        data: {
+          ...pageContext,
+          text,
+          langConfig: DEFAULT_CONFIG.language,
+          providerRef: localProviderRef(llmProvider),
+          scheduleAt: Date.now(),
+          // Distinct per member: the dedup key is the hash, and two members
+          // sharing one would collapse into a single task before any batching.
+          hash: `revision-key-${text}`,
+          glossaryTerms: glossary.terms,
+          glossaryRevision: glossary.revision,
+        },
+      })
+    }
+
+    /** What each model call was asked to translate, in call order. */
+    const sentTexts = () => executeTranslateMock.mock.calls.map(([text]) => text as string)
+
+    const optionsFor = (text: string) =>
+      executeTranslateMock.mock.calls.find(([sent]) => sent === text)![4] as {
+        isBatch?: boolean
+        glossaryTerms?: readonly MatchedTerm[]
+      }
+
+    it("splits the batch when one member's term list was emptied mid-page", async () => {
+      useBatchingConfig()
+      const handler = await startHandler()
+
+      // Both texts contain the term, and the context is identical, so without
+      // the revision in the key these are one batch. B was resolved after the
+      // user deleted the term: an EMPTY list at a NEWER revision. Absence is
+      // not a vote in `mergeBatchGlossaryTerms` — it cannot out-vote A — so a
+      // shared batch would apply the deleted wording to B's text and cache the
+      // result under a hash built with no terms at all, the same hash a
+      // re-translation computes, so nothing would ever evict it.
+      await expect(
+        Promise.all([
+          enqueue(handler, "the api is fast", { terms: [apiTerm], revision: 3 }),
+          enqueue(handler, "the api is slow", { terms: [], revision: 4 }),
+        ]),
+      ).resolves.toEqual(["translated the api is fast", "translated the api is slow"])
+
+      expect(sentTexts()).toHaveLength(2)
+      expect(sentTexts()).toEqual(expect.arrayContaining(["the api is fast", "the api is slow"]))
+      // Two calls could also mean the batch failed and fell back per item; these
+      // are two batches of one, each still on the batch path.
+      expect(optionsFor("the api is fast")).toMatchObject({
+        isBatch: true,
+        glossaryTerms: [apiTerm],
+      })
+      // The removal survives as a removal, which is the whole point.
+      expect(optionsFor("the api is slow")).toMatchObject({ isBatch: true, glossaryTerms: [] })
+    }, 15_000)
+
+    it("splits the batch when a member carries no revision because the feature was switched off", async () => {
+      useBatchingConfig()
+      const handler = await startHandler()
+
+      // Switching the glossary off mid-page bumps NO revision: the resolver
+      // returns {terms: [], revision: 0}. Revision 0 loses every comparison in
+      // `mergeBatchGlossaryTerms`, so no merge rule can reach this case — it is
+      // the batch key or nothing.
+      await expect(
+        Promise.all([
+          enqueue(handler, "the api is fast", { terms: [apiTerm], revision: 3 }),
+          enqueue(handler, "the api is slow", { terms: [], revision: 0 }),
+        ]),
+      ).resolves.toEqual(["translated the api is fast", "translated the api is slow"])
+
+      expect(sentTexts()).toHaveLength(2)
+      expect(sentTexts()).toEqual(expect.arrayContaining(["the api is fast", "the api is slow"]))
+      expect(optionsFor("the api is fast")).toMatchObject({
+        isBatch: true,
+        glossaryTerms: [apiTerm],
+      })
+      expect(optionsFor("the api is slow")).toMatchObject({ isBatch: true, glossaryTerms: [] })
+    }, 15_000)
+
+    it("still batches every paragraph of a page together at one revision", async () => {
+      useBatchingConfig()
+      const handler = await startHandler()
+
+      // The steady state: the revision is one global counter, so every
+      // paragraph of a page carries the same value and the component is inert.
+      // If this ever splits, batching is off for everyone using a glossary.
+      //
+      // The four term LISTS deliberately all differ, because that is the
+      // regression this guards: real paragraphs each match a different subset,
+      // so anyone who puts the term list back into `getBatchKey` would give
+      // every paragraph its own batch. Four identical lists could not see that.
+      const members = [
+        { text: "first para", terms: [apiTerm] },
+        { text: "second para", terms: [] },
+        { text: "third para", terms: [apiTerm, queueTerm] },
+        { text: "fourth para", terms: [queueTerm] },
+      ]
+      await expect(
+        Promise.all(
+          members.map((member) =>
+            enqueue(handler, member.text, { terms: member.terms, revision: 4 }),
+          ),
+        ),
+      ).resolves.toEqual(members.map((member) => `translated ${member.text}`))
+
+      expect(sentTexts()).toEqual([members.map((member) => member.text).join(JOINED)])
+    }, 15_000)
+
+    it("still batches paragraphs that carry no revision at all", async () => {
+      useBatchingConfig()
+      const handler = await startHandler()
+
+      // Everyone not using a glossary, plus any content script that predates
+      // the field. The mixture is the point: `?? 0` is only load-bearing when an
+      // explicit 0 sits beside an absent one — an old content script alongside a
+      // new one with the glossary switched off, on one page. Four absent values
+      // would fold onto one key with or without it.
+      const members = [
+        { text: "first para", glossary: {} },
+        { text: "second para", glossary: { revision: 0 } },
+        { text: "third para", glossary: {} },
+        { text: "fourth para", glossary: { terms: [], revision: 0 } },
+      ]
+      await expect(
+        Promise.all(members.map((member) => enqueue(handler, member.text, member.glossary))),
+      ).resolves.toEqual(members.map((member) => `translated ${member.text}`))
+
+      expect(sentTexts()).toEqual([members.map((member) => member.text).join(JOINED)])
+    }, 15_000)
+  })
 })

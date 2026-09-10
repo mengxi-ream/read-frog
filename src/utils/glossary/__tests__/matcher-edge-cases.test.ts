@@ -48,6 +48,94 @@ describe("multi-word terms across real page whitespace", () => {
   })
 })
 
+/**
+ * The other side of the whitespace problem: the run is in the STORED SOURCE.
+ *
+ * Nothing folds a term's interior spacing on the way in — the editor and CSV
+ * import only trim — so a term pasted out of a wrapped page is stored as
+ * `Chort  Bay` and looks perfectly ordinary in the list. Matching it was never
+ * the problem: `termToPattern` compiles the run to `\s+`, so the pattern found
+ * the page text fine. The hit was then looked up in an index keyed on the
+ * unfolded source, found no bucket, and was dropped — the term sat there,
+ * enabled, and silently never applied to anything.
+ */
+describe("terms stored with an interior whitespace run", () => {
+  const sourcesFor = (entries: GlossaryEntry[], text: string) =>
+    createGlossaryMatcher(entries)
+      .match(text)
+      .map((hit) => hit.source)
+
+  it("matches the page's single space and the doubled text it was copied from", () => {
+    const matcher = createGlossaryMatcher([entry("Chort  Bay", "雀特湾")])
+    expect(matcher.size).toBe(1)
+    // `source` comes back folded, which is the point: it is the string rendered
+    // into the glossary block of the system prompt, and sending `Chort  Bay`
+    // there would only teach the model the user's stray keystroke. `matchKey`
+    // is deliberately untouched — it is the stored row's identity, and the
+    // repository built it from the source as typed.
+    const expected = {
+      matchKey: "i:chort  bay",
+      source: "Chort Bay",
+      target: "雀特湾",
+      keepOriginal: false,
+    }
+    expect(matcher.match("at Chort Bay now")).toEqual([expected])
+    expect(matcher.match("at Chort  Bay now")).toEqual([expected])
+  })
+
+  // Every separator `\s` covers, since each one reaches the store the same way:
+  // a tab or newline from copied source, a full-width space from CJK input.
+  const STORED_RUNS: [label: string, source: string][] = [
+    ["a tab", "Chort\tBay"],
+    ["a newline", "Chort\nBay"],
+    ["a full-width space", "Chort　Bay"],
+    ["a mixed run", "Chort 　\n\tBay"],
+  ]
+
+  it("pins the separators those cases turn on, which no diff can show", () => {
+    // A full-width space is written literally above, exactly as it arrives from
+    // a CJK keyboard — and it is indistinguishable from an ASCII one on screen.
+    // An editor that normalised it, or a rewrite of the escapes into literals,
+    // would leave every case below reading the same and passing for the wrong
+    // reason, so the bytes are asserted rather than trusted.
+    // `Array.from` rather than a spread, which `no-misused-spread` refuses on a
+    // string. Splitting by code point is what is wanted here anyway: every
+    // separator below is one BMP character, so there is no pair to break.
+    const separators = STORED_RUNS.map(([, source]) =>
+      Array.from(source.slice("Chort".length, -"Bay".length), (char) => char.codePointAt(0)),
+    )
+    expect(separators).toEqual([[0x09], [0x0a], [0x3000], [0x20, 0x3000, 0x0a, 0x09]])
+  })
+
+  it.each(STORED_RUNS)("matches when the stored source holds %s", (_label, source) => {
+    const entries = [entry(source, "雀特湾")]
+    expect(sourcesFor(entries, "at Chort Bay now")).toEqual(["Chort Bay"])
+    expect(sourcesFor(entries, `at ${source} now`)).toEqual(["Chort Bay"])
+  })
+
+  it("matches a case-sensitive term, and still refuses another casing", () => {
+    // The half that a fix applied only to the index lookup would miss: the
+    // case-sensitive branch compares the ENTRY'S OWN source against the folded
+    // hit, so an unfolded source fails that comparison even once the bucket is
+    // found — the term would stay just as dead, only later in the function.
+    const entries = [entry("Chort  Bay", "雀特湾", true)]
+    expect(sourcesFor(entries, "at Chort Bay now")).toEqual(["Chort Bay"])
+    expect(sourcesFor(entries, "at Chort  Bay now")).toEqual(["Chort Bay"])
+    expect(sourcesFor(entries, "at chort bay now")).toEqual([])
+    expect(sourcesFor(entries, "at chort  bay now")).toEqual([])
+  })
+
+  it("leaves an entry that was already single-spaced exactly as it was", () => {
+    const entries = [entry("Chort Bay", "雀特湾"), entry("Chort", "雀特")]
+    const matcher = createGlossaryMatcher(entries)
+    expect(matcher.size).toBe(2)
+    expect(matcher.match("landed at Chort Bay")).toEqual([
+      { matchKey: "i:chort bay", source: "Chort Bay", target: "雀特湾", keepOriginal: false },
+    ])
+    expect(sourcesFor(entries, "landed at Chort")).toEqual(["Chort"])
+  })
+})
+
 describe("unicode normalisation", () => {
   const NFC = "café" // é as one code point
   const NFD = "café" // e + combining acute

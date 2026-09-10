@@ -49,7 +49,16 @@ export function GlossaryDetailsItem({ glossary }: { glossary: Glossary }) {
           // empty one. Snapping back on blur is how that rule shows itself —
           // otherwise the field would sit empty while the row above still
           // carried the old name.
-          onBlur={() => setName(glossary.name)}
+          //
+          // Only for a value the store would actually refuse. Restoring
+          // unconditionally discarded ordinary renames: the restore is itself a
+          // value change, so it cancels the pending 500 ms timer and schedules
+          // one for the OLD name, which then compares equal and never saves.
+          // Typing a name and tabbing straight to the next field — the normal
+          // way to fill a form — lost it every time.
+          onBlur={() => {
+            if (!name.trim()) setName(glossary.name)
+          }}
           // The SAME string the header falls back to, so an unnamed glossary
           // reads the same in both places instead of looking like a field
           // someone emptied. Nothing is stored: a default name written at
