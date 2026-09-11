@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/base-ui/select"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { parseGlossaryCsv } from "@/utils/glossary/csv"
+import { decodeGlossaryCsv, parseGlossaryCsv, UTF8_BOM } from "@/utils/glossary/csv"
 import { exportGlossaryCsv } from "@/utils/glossary/repository"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
@@ -69,7 +69,10 @@ export function GlossaryImportExport({
   const [pendingReplaceFile, setPendingReplaceFile] = useState<File | null>(null)
 
   const handleImport = async (file: File) => {
-    const { rows, skipped } = parseGlossaryCsv(await file.text())
+    // `arrayBuffer`, not `text`: the latter is UTF-8 only and turns a file Excel
+    // saved in the system code page into replacement characters rather than an
+    // error. `decodeGlossaryCsv` tries strict UTF-8 first and can tell.
+    const { rows, skipped } = parseGlossaryCsv(decodeGlossaryCsv(await file.arrayBuffer()))
     if (rows.length === 0) {
       toastManager.add({ type: "error", title: i18n.t("options.advanced.glossary.importEmpty") })
       return
@@ -109,7 +112,9 @@ export function GlossaryImportExport({
 
   const handleExport = async () => {
     const csv = await exportGlossaryCsv(glossaryId)
-    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }))
+    // The BOM is what makes the file open as UTF-8 in Excel instead of as
+    // mojibake; the parser strips it back off on the way in.
+    const url = URL.createObjectURL(new Blob([UTF8_BOM + csv], { type: "text/csv;charset=utf-8" }))
     const anchor = document.createElement("a")
     anchor.href = url
     // Named after the glossary so exporting several does not produce a folder of
@@ -150,6 +155,8 @@ export function GlossaryImportExport({
               </SelectContent>
             </Select>
 
+            {/* For rows with no case column of their own — every file written by
+                another tool. Our own export names it per row and keeps it. */}
             <label className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <Checkbox checked={caseSensitive} onCheckedChange={setCaseSensitive} />
               {i18n.t("options.advanced.glossary.caseSensitive")}
