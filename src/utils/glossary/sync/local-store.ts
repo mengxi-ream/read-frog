@@ -1,6 +1,6 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { SyncedGlossary, SyncedTerm } from "./document"
-import type { GlossarySnapshot } from "./merge-document"
+import type { GlossaryChangeCounts, GlossarySnapshot } from "./merge-document"
 import type GlossaryTerm from "@/utils/db/dexie/tables/glossary-term"
 import { MAX_GLOSSARIES, MAX_GLOSSARY_TERMS } from "@/utils/constants/glossary"
 import { db } from "@/utils/db/dexie/db"
@@ -9,6 +9,7 @@ import {
   GLOSSARY_SYNC_UNDO_ID,
 } from "@/utils/db/dexie/tables/glossary-sync-snapshot"
 import { bumpGlossaryRevision } from "../repository"
+import { countLocalChanges } from "./merge-document"
 
 /** Everything the sync sends, in the shape the merge works on. */
 export async function readLocalGlossary(): Promise<GlossarySnapshot> {
@@ -81,6 +82,11 @@ export class GlossaryChangedDuringSyncError extends Error {
  *
  * `undo` is captured here, from the rows as they stand, so the snapshot the user
  * can restore is the one the merge actually replaced.
+ *
+ * Returns what it did to this device's rows. Counted here, against the rows it
+ * is replacing and the payload it is storing, because this is the only point
+ * that holds both — and by then the user's conflict answers are already in the
+ * payload, which the merge's own stats predate.
  */
 export async function applyMergedGlossary({
   glossaries,
@@ -92,40 +98,49 @@ export async function applyMergedGlossary({
   terms: readonly SyncedTerm[]
   email: string
   expectedFingerprint: string
-}): Promise<void> {
-  await db.transaction("rw", db.glossary, db.glossaryTerm, db.glossarySyncSnapshot, async () => {
-    const current = await readLocalGlossary()
-    if (fingerprint(current) !== expectedFingerprint) {
-      throw new GlossaryChangedDuringSyncError()
-    }
+}): Promise<GlossaryChangeCounts> {
+  const counts = await db.transaction(
+    "rw",
+    db.glossary,
+    db.glossaryTerm,
+    db.glossarySyncSnapshot,
+    async () => {
+      const current = await readLocalGlossary()
+      if (fingerprint(current) !== expectedFingerprint) {
+        throw new GlossaryChangedDuringSyncError()
+      }
 
-    const now = new Date()
-    await db.glossarySyncSnapshot.put({
-      id: GLOSSARY_SYNC_UNDO_ID,
-      email: "",
-      source: "sync",
-      capturedAt: now,
-      glossaries: [...current.glossaries],
-      terms: [...current.terms],
-    })
+      const now = new Date()
+      await db.glossarySyncSnapshot.put({
+        id: GLOSSARY_SYNC_UNDO_ID,
+        email: "",
+        source: "sync",
+        capturedAt: now,
+        glossaries: [...current.glossaries],
+        terms: [...current.terms],
+      })
 
-    await db.glossary.clear()
-    await db.glossaryTerm.clear()
-    await db.glossary.bulkPut(glossaries.map((glossary) => ({ ...glossary })))
-    await db.glossaryTerm.bulkPut(terms.map(toStoredTerm))
+      await db.glossary.clear()
+      await db.glossaryTerm.clear()
+      await db.glossary.bulkPut(glossaries.map((glossary) => ({ ...glossary })))
+      await db.glossaryTerm.bulkPut(terms.map(toStoredTerm))
 
-    await db.glossarySyncSnapshot.put({
-      id: GLOSSARY_SYNC_BASE_ID,
-      email,
-      capturedAt: now,
-      glossaries: glossaries.map((glossary) => ({ ...glossary })),
-      terms: terms.map((term) => ({ ...term })),
-    })
-  })
+      await db.glossarySyncSnapshot.put({
+        id: GLOSSARY_SYNC_BASE_ID,
+        email,
+        capturedAt: now,
+        glossaries: glossaries.map((glossary) => ({ ...glossary })),
+        terms: terms.map((term) => ({ ...term })),
+      })
+
+      return countLocalChanges(current, { glossaries, terms })
+    },
+  )
 
   // Once, after the whole write, so every open page recompiles its matcher
   // instead of waiting for its next navigation.
   await bumpGlossaryRevision()
+  return counts
 }
 
 /**

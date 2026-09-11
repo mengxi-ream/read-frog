@@ -420,7 +420,7 @@ options:
           disabled: desactivado
           upToDate: Los glosarios ya están sincronizados
           uploaded: Glosarios subidos a la nube
-          merged: "Glosarios sincronizados: $1 recibidos, $2 enviados"
+          merged: "Glosarios sincronizados: $1 añadidos, $2 actualizados, $3 eliminados"
           undo: Deshacer
           undone: Glosarios restaurados a como estaban antes de la sincronización
           undoUnavailable: "Esa acción ya no se puede deshacer: tus glosarios han cambiado desde entonces."
@@ -493,13 +493,13 @@ options:
           confirm: Eliminar
       reset:
         title: Restablecer configuración
-        description: Restablecer toda la configuración al valor predeterminado
+        description: Restablecer toda la configuración a sus valores por defecto. Tus glosarios no se ven afectados.
         dialog:
           title: Restablecer configuración
           trigger: Restablecer configuración
           confirm: Confirmar
           cancel: Cancelar
-          description: Esta operación borrará todas tus configuraciones personalizadas y las restablecerá a los valores predeterminados. Confirma para continuar.
+          description: Esta operación borrará toda tu configuración personalizada y la restablecerá a los valores por defecto. Tus glosarios se conservan; elimínalos desde la página de glosarios. Confirma, por favor.
     userExperience:
       title: Experiencia de usuario
       beta:

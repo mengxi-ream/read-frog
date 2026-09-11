@@ -419,7 +419,7 @@ options:
           disabled: đã tắt
           upToDate: Bảng thuật ngữ đã được đồng bộ
           uploaded: Đã tải bảng thuật ngữ lên đám mây
-          merged: "Đã đồng bộ bảng thuật ngữ: nhận $1, gửi $2"
+          merged: "Đã đồng bộ bộ thuật ngữ: thêm $1, cập nhật $2, xoá $3"
           undo: Hoàn tác
           undone: Đã khôi phục bảng thuật ngữ về trạng thái trước khi đồng bộ
           undoUnavailable: Không thể hoàn tác nữa — bộ thuật ngữ của bạn đã thay đổi kể từ đó.
@@ -492,13 +492,13 @@ options:
           confirm: Xóa
       reset:
         title: Đặt lại cấu hình
-        description: Đặt lại tất cả cấu hình về giá trị mặc định
+        description: Đặt lại toàn bộ cấu hình về mặc định. Bộ thuật ngữ của bạn không bị ảnh hưởng.
         dialog:
           title: Đặt lại cấu hình
           trigger: Đặt lại cấu hình
           confirm: Xác nhận
           cancel: Hủy
-          description: Thao tác này sẽ xóa tất cả cấu hình tùy chỉnh của bạn và đặt lại về giá trị mặc định. Vui lòng xác nhận.
+          description: Thao tác này sẽ xoá toàn bộ cấu hình tuỳ chỉnh và đặt lại về mặc định. Bộ thuật ngữ của bạn được giữ lại — hãy xoá chúng từ trang bộ thuật ngữ. Vui lòng xác nhận.
     userExperience:
       title: Trải nghiệm người dùng
       beta:

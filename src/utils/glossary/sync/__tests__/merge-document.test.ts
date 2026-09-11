@@ -1,7 +1,7 @@
 import type { SyncedGlossary, SyncedTerm } from "../document"
 import { describe, expect, it } from "vitest"
 import { MAX_GLOSSARIES, MAX_GLOSSARY_TERMS } from "@/utils/constants/glossary"
-import { mergeGlossaryDocuments } from "../merge-document"
+import { countLocalChanges, mergeGlossaryDocuments } from "../merge-document"
 
 const T0 = new Date("2026-01-01T00:00:00.000Z")
 const T1 = new Date("2026-02-01T00:00:00.000Z")
@@ -445,5 +445,70 @@ describe("mergeGlossaryDocuments — the timestamps a merged row carries", () =>
     const merged = merge(snapshot([]), snapshot([mine]), snapshot([theirs]))
 
     expect(merged.glossaries[0]!.createdAt).toEqual(T1)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// The three numbers the toast reports
+// ---------------------------------------------------------------------------
+
+describe("countLocalChanges", () => {
+  const g = glossary("g")
+
+  it("says nothing happened when nothing did", () => {
+    const rows = snapshot([g], [term("g", "token")])
+    expect(countLocalChanges(rows, rows)).toEqual({ added: 0, updated: 0, removed: 0 })
+  })
+
+  it("counts a row that arrived", () => {
+    const before = snapshot([g], [term("g", "token")])
+    const after = snapshot([g], [term("g", "token"), term("g", "widget")])
+    expect(countLocalChanges(before, after)).toEqual({ added: 1, updated: 0, removed: 0 })
+  })
+
+  /**
+   * The gap that motivated this: `incoming`/`outgoing` are both zero for a sync
+   * that only carried a deletion, so the old toast read as though nothing had
+   * happened while rows were disappearing.
+   */
+  it("counts a row that left, which in/out never did", () => {
+    const before = snapshot([g], [term("g", "token"), term("g", "widget")])
+    const after = snapshot([g], [term("g", "token")])
+    expect(countLocalChanges(before, after)).toEqual({ added: 0, updated: 0, removed: 1 })
+  })
+
+  it("counts a reworded row as an update, not as an add and a delete", () => {
+    const before = snapshot([g], [term("g", "token", { target: "旧" })])
+    const after = snapshot([g], [term("g", "token", { target: "新" })])
+    expect(countLocalChanges(before, after)).toEqual({ added: 0, updated: 1, removed: 0 })
+  })
+
+  /** A term's identity is the triple, so a new uuid for the same term is not news. */
+  it("does not call a re-filed row an add", () => {
+    const before = snapshot([g], [term("g", "token", { id: "old-uuid" })])
+    const after = snapshot([g], [term("g", "token", { id: "new-uuid" })])
+    expect(countLocalChanges(before, after)).toEqual({ added: 0, updated: 0, removed: 0 })
+  })
+
+  /** Editing the source text IS a new identity, so it reads as one in, one out. */
+  it("reads a source-text edit as a row leaving and a row arriving", () => {
+    const before = snapshot([g], [term("g", "token")])
+    const after = snapshot([g], [term("g", "widget")])
+    expect(countLocalChanges(before, after)).toEqual({ added: 1, updated: 0, removed: 1 })
+  })
+
+  it("counts glossaries alongside terms, including a website-list change", () => {
+    const before = snapshot([glossary("g", { matchPatterns: ["a.com"] })], [term("g", "token")])
+    const after = snapshot(
+      [glossary("g", { matchPatterns: ["a.com", "b.com"] }), glossary("h")],
+      [term("g", "token")],
+    )
+    expect(countLocalChanges(before, after)).toEqual({ added: 1, updated: 1, removed: 0 })
+  })
+
+  it("counts a deleted glossary and everything that went with it", () => {
+    const before = snapshot([g, glossary("h")], [term("g", "token"), term("h", "widget")])
+    const after = snapshot([g], [term("g", "token")])
+    expect(countLocalChanges(before, after)).toEqual({ added: 0, updated: 0, removed: 2 })
   })
 })

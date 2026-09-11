@@ -419,7 +419,7 @@ options:
           disabled: 사용 안 함
           upToDate: 용어집이 이미 최신입니다
           uploaded: 용어집을 클라우드에 업로드했습니다
-          merged: "용어집 동기화 완료: $1개 수신, $2개 전송"
+          merged: "용어집을 동기화했습니다: 추가 $1, 수정 $2, 삭제 $3"
           undo: 실행 취소
           undone: 용어집을 동기화 전 상태로 되돌렸습니다
           undoUnavailable: 실행 취소를 더 이상 사용할 수 없습니다 — 이후 용어집이 변경되었습니다.
@@ -492,13 +492,13 @@ options:
           confirm: 삭제
       reset:
         title: 기본 설정 복원
-        description: 모든 설정을 기본값으로 재설정
+        description: 모든 설정을 기본값으로 되돌립니다. 용어집은 영향을 받지 않습니다
         dialog:
           title: 기본 설정 복원
           trigger: 설정 초기화
           confirm: 확인
           cancel: 취소
-          description: 이 작업은 모든 사용자 지정 설정을 지우고 기본값으로 재설정합니다. 삭제하시겠습니까?
+          description: 이 작업은 모든 사용자 설정을 지우고 기본값으로 되돌립니다. 용어집은 유지됩니다 — 삭제하려면 용어집 페이지에서 진행하세요. 확인해 주세요.
     userExperience:
       title: 사용자 경험
       beta:

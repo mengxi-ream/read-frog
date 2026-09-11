@@ -61,10 +61,23 @@ export function useGlossaryTermCounts() {
   return useQuery({ queryKey: TERM_COUNTS_QUERY_KEY, queryFn: countGlossaryTermsByGlossary })
 }
 
+/**
+ * `null` rather than `undefined` for a glossary that is not there.
+ *
+ * "Not found" is a real answer here, and a common one: deleting from the editor
+ * invalidates this query while the page is still mounted — the navigate away
+ * only runs after the mutation resolves — so it refetches an id that no longer
+ * exists. React Query treats an `undefined` result as a broken query function
+ * and throws, which the global `QueryCache` handler turns into a "Something
+ * went wrong" toast on an operation that in fact succeeded.
+ *
+ * `editor-page.tsx` already reads a falsy value as "go back to the library",
+ * which is what should happen.
+ */
 export function useGlossary(glossaryId: string) {
   return useQuery({
     queryKey: glossaryQueryKey(glossaryId),
-    queryFn: () => getGlossary(glossaryId),
+    queryFn: async () => (await getGlossary(glossaryId)) ?? null,
   })
 }
 

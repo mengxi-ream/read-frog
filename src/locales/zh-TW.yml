@@ -420,7 +420,7 @@ options:
           disabled: 已停用
           upToDate: 術語庫已是最新
           uploaded: 術語庫已上傳到雲端
-          merged: "術語庫已同步：接收 $1 筆，上傳 $2 筆"
+          merged: "詞彙庫已同步：新增 $1，更新 $2，刪除 $3"
           undo: 復原
           undone: 術語庫已還原成同步前的樣子
           undoUnavailable: 該復原已失效 — 之後詞彙庫已發生變化。
@@ -493,13 +493,13 @@ options:
           confirm: 刪除
       reset:
         title: 重設設定
-        description: 重設所有設定為預設值
+        description: 將所有設定重設為預設，詞彙庫不受影響
         dialog:
           title: 重設設定
           trigger: 重設設定
           confirm: 確認
           cancel: 取消
-          description: 此操作會清空所有自訂設定，並將其重設為預設值，請確認是否清除。
+          description: 此操作將清空您所有的自訂設定，並重設為預設值。詞彙庫會保留 — 如需刪除請至詞彙庫頁面操作。請確認。
     userExperience:
       title: 使用體驗
       beta:

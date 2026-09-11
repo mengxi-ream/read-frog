@@ -137,6 +137,58 @@ export interface GlossarySnapshot {
   terms: readonly SyncedTerm[]
 }
 
+/** What a sync did to the rows on THIS device. */
+export interface GlossaryChangeCounts {
+  added: number
+  updated: number
+  removed: number
+}
+
+/**
+ * The three numbers the toast reports, taken from the rows rather than from the
+ * merge's own stats.
+ *
+ * `incoming`/`outgoing` answer "which direction did this row move", which is the
+ * merge's question, not the user's: a sync that only propagated deletions counts
+ * zero in both and reads as though nothing happened. These answer "what is in my
+ * glossary now that was not before", which is the question someone clicking Sync
+ * is actually asking, and it names deletions out loud.
+ *
+ * Computed from a before/after pair rather than accumulated during the merge, so
+ * the user's conflict answers — applied after the merge, in `applyResolutions` —
+ * are already in it. The caller runs this inside the write transaction against
+ * exactly what it is about to store, so the numbers describe the rows on disk.
+ */
+export function countLocalChanges(
+  before: GlossarySnapshot,
+  after: GlossarySnapshot,
+): GlossaryChangeCounts {
+  let added = 0
+  let updated = 0
+
+  const glossariesBefore = new Map(before.glossaries.map((row) => [row.id, row]))
+  for (const row of after.glossaries) {
+    const was = glossariesBefore.get(row.id)
+    if (was === undefined) added++
+    else if (!glossaryEqual(was, row)) updated++
+  }
+
+  const termsBefore = new Map(before.terms.map((row) => [termIdentity(row), row]))
+  for (const row of after.terms) {
+    const was = termsBefore.get(termIdentity(row))
+    if (was === undefined) added++
+    else if (!termEqual(was, row)) updated++
+  }
+
+  const glossariesAfter = new Set(after.glossaries.map((row) => row.id))
+  const termsAfter = new Set(after.terms.map(termIdentity))
+  const removed =
+    before.glossaries.filter((row) => !glossariesAfter.has(row.id)).length +
+    before.terms.filter((row) => !termsAfter.has(termIdentity(row))).length
+
+  return { added, updated, removed }
+}
+
 function termsByGlossary(terms: readonly SyncedTerm[]): Map<string, SyncedTerm[]> {
   const map = new Map<string, SyncedTerm[]>()
   for (const term of terms) {

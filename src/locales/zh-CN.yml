@@ -420,7 +420,7 @@ options:
           disabled: 已停用
           upToDate: 术语库已是最新
           uploaded: 术语库已上传到云端
-          merged: "术语库已同步：接收 $1 条，上传 $2 条"
+          merged: "术语库已同步：新增 $1，更新 $2，删除 $3"
           undo: 撤销
           undone: 术语库已恢复到同步前的样子
           undoUnavailable: 该撤销已失效 — 之后术语库已发生变化。
@@ -493,13 +493,13 @@ options:
           confirm: 删除
       reset:
         title: 恢复默认配置
-        description: 将所有配置重置为默认
+        description: 将所有配置重置为默认，术语库不受影响
         dialog:
           title: 恢复默认配置
           trigger: 重置配置
           confirm: 确认
           cancel: 取消
-          description: 该操作将清空您的所有自定义配置，并将其重置为默认值，请确认是否清除。
+          description: 该操作将清空您的所有自定义配置，并将其重置为默认值。术语库会保留 — 如需删除请到术语库页面操作。请确认是否清除。
     userExperience:
       title: 使用体验
       beta:

@@ -420,7 +420,7 @@ options:
           disabled: söndürülüb
           upToDate: Lüğətlər artıq sinxrondur
           uploaded: Lüğətlər buluda yükləndi
-          merged: "Lüğətlər sinxronlaşdırıldı: $1 gəldi, $2 getdi"
+          merged: "Lüğətlər sinxronlaşdırıldı: $1 əlavə, $2 yeniləndi, $3 silindi"
           undo: Geri al
           undone: Lüğətlər sinxronizasiyadan əvvəlki halına qaytarıldı
           undoUnavailable: Bu geri alma artıq mümkün deyil — lüğətləriniz o vaxtdan bəri dəyişib.
@@ -493,13 +493,13 @@ options:
           confirm: Sil
       reset:
         title: Konfiqurasiyanın sıfırlanması
-        description: Bütün konfiqurasiyanı standart dəyərlərə qaytarın
+        description: Bütün parametrləri ilkin dəyərlərə sıfırla. Lüğətlərinizə toxunulmur.
         dialog:
           title: Konfiqurasiyanın sıfırlanması
           trigger: Konfiqurasiyanı sıfırla
           confirm: Təsdiqlə
           cancel: Ləğv et
-          description: Bu əməliyyat bütün fərdi konfiqurasiyalarınızı siləcək və onları standart dəyərlərə qaytaracaq. Təsdiqləyin.
+          description: Bu əməliyyat bütün fərdi parametrlərinizi silib ilkin dəyərlərə qaytaracaq. Lüğətləriniz saxlanılır — silmək üçün lüğət səhifəsindən istifadə edin. Zəhmət olmasa təsdiqləyin.
     userExperience:
       title: İstifadəçi təcrübəsi
       beta:

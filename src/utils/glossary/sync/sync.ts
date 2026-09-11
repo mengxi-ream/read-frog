@@ -1,5 +1,5 @@
 import type { SyncedGlossary, SyncedTerm } from "./document"
-import type { GlossaryConflict, GlossaryMerge } from "./merge-document"
+import type { GlossaryChangeCounts, GlossaryConflict, GlossaryMerge } from "./merge-document"
 import { getGoogleUserInfo, getValidAccessToken } from "@/utils/google-drive/auth"
 import { logger } from "@/utils/logger"
 import { readRemoteGlossary, writeRemoteGlossary } from "./drive-store"
@@ -230,7 +230,8 @@ export function isDestructive(removing: number, total: number): boolean {
 export type ConflictResolutions = Map<string, "local" | "remote">
 
 export type CommitGlossarySyncResult =
-  | { status: "applied"; merge: GlossaryMerge }
+  /** `counts` is what the write did to this device, measured against the rows it replaced. */
+  | { status: "applied"; merge: GlossaryMerge; counts: GlossaryChangeCounts }
   | { status: "retry"; reason: "changed-underneath" | "changed-locally" }
   | { status: "blocked"; reason: "busy" }
 
@@ -254,8 +255,9 @@ export async function commitGlossarySync(
       const written = await writeRemoteGlossary(payload, plan.remote)
       if (!written.ok) return { status: "retry", reason: "changed-underneath" }
 
+      let counts: GlossaryChangeCounts
       try {
-        await applyMergedGlossary({
+        counts = await applyMergedGlossary({
           glossaries: payload.glossaries,
           terms: payload.terms,
           email: plan.email,
@@ -272,7 +274,7 @@ export async function commitGlossarySync(
         throw error
       }
 
-      return { status: "applied", merge }
+      return { status: "applied", merge, counts }
     },
     () => ({ status: "blocked", reason: "busy" }),
   )

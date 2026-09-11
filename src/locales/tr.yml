@@ -419,7 +419,7 @@ options:
           disabled: kapalı
           upToDate: Sözlükler zaten eşit
           uploaded: Sözlükler buluta yüklendi
-          merged: "Sözlükler eşitlendi: $1 geldi, $2 gitti"
+          merged: "Sözlükler eşitlendi: $1 eklendi, $2 güncellendi, $3 silindi"
           undo: Geri al
           undone: Sözlükler eşitlemeden önceki haline döndürüldü
           undoUnavailable: Bu geri alma artık kullanılamıyor — sözlükleriniz o zamandan beri değişti.
@@ -492,13 +492,13 @@ options:
           confirm: Sil
       reset:
         title: Yapılandırmayı Sıfırla
-        description: Tüm yapılandırmayı varsayılan değere sıfırla
+        description: Tüm ayarları varsayılan değerlere sıfırla. Sözlükleriniz etkilenmez.
         dialog:
           title: Yapılandırmayı sıfırla
           trigger: Yapılandırmayı sıfırla
           confirm: Onayla
           cancel: İptal
-          description: Bu işlem tüm özel yapılandırmalarınızı temizleyecek ve varsayılan değerlere sıfırlayacaktır. Lütfen onaylayın.
+          description: Bu işlem tüm özel ayarlarınızı silip varsayılan değerlere döndürür. Sözlükleriniz korunur — silmek için sözlük sayfasını kullanın. Lütfen onaylayın.
     userExperience:
       title: Kullanıcı deneyimi
       beta:

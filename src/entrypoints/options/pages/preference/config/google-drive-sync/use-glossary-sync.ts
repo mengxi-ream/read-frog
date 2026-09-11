@@ -45,14 +45,23 @@ export function useGlossarySync() {
 
     await invalidateGlossary()
 
-    const { stats } = result.merge
-    const incoming = stats.glossaries.incoming + stats.terms.incoming
-    const outgoing = stats.glossaries.outgoing + stats.terms.outgoing
+    // What the sync did to THIS device, in the words the glossary screen uses.
+    // The old "in/out" counted which direction each row moved, which is the
+    // merge's question rather than the user's — and it counted deletions in
+    // neither, so a sync that only propagated deletions read as a no-op.
+    //
+    // All three zero means nothing here changed, which at this point can only
+    // mean the cloud took this device's copy: `planGlossarySync` returns
+    // `no-change` when neither side moved, so a commit always moved something.
+    const { added, updated, removed } = result.counts
+    const changedHere = added + updated + removed > 0
 
     toastManager.add({
       type: "success",
       title:
-        plan.remote === null ? t("uploaded") : t("merged", [String(incoming), String(outgoing)]),
+        plan.remote === null || !changedHere
+          ? t("uploaded")
+          : t("merged", [String(added), String(updated), String(removed)]),
       // A snapshot plus one button, rather than a record of what each row lost:
       // less code, and it undoes a merge nobody wanted in one click instead of
       // asking the user to reconstruct it row by row.

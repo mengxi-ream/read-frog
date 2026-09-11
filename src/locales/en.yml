@@ -420,7 +420,7 @@ options:
           disabled: off
           upToDate: Glossaries already in sync
           uploaded: Glossaries uploaded to cloud
-          merged: "Glossaries synced: $1 in, $2 out"
+          merged: "Glossaries synced: $1 added, $2 updated, $3 removed"
           undo: Undo
           undone: Glossaries restored to how they were before the sync
           undoUnavailable: That undo is no longer available — your glossaries have changed since.
@@ -493,13 +493,13 @@ options:
           confirm: Delete
       reset:
         title: Reset config
-        description: Reset all config to default value
+        description: Reset all config to default value. Your glossaries are not affected.
         dialog:
           title: Reset config
           trigger: Reset config
           confirm: Confirm
           cancel: Cancel
-          description: This operation will clear all your custom configurations and reset them to default values. Please confirm.
+          description: This operation will clear all your custom configurations and reset them to default values. Your glossaries are kept — delete those from the glossary page. Please confirm.
     userExperience:
       title: User experience
       beta:

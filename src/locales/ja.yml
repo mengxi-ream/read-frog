@@ -419,7 +419,7 @@ options:
           disabled: 無効
           upToDate: 用語集は同期済みです
           uploaded: 用語集をクラウドにアップロードしました
-          merged: "用語集を同期しました：受信 $1 件、送信 $2 件"
+          merged: "用語集を同期しました: 追加 $1、更新 $2、削除 $3"
           undo: 元に戻す
           undone: 用語集を同期前の状態に戻しました
           undoUnavailable: この操作は取り消せなくなりました — その後に用語集が変更されています。
@@ -492,13 +492,13 @@ options:
           confirm: 削除
       reset:
         title: 設定をリセット
-        description: すべての設定をデフォルト値にリセットします。
+        description: すべての設定を既定値に戻します。用語集は影響を受けません
         dialog:
           title: 設定をリセット
           trigger: 設定をリセット
           confirm: 確認
           cancel: キャンセル
-          description: この操作は、すべての設定をデフォルト値にリセットします。ご確認ください。
+          description: この操作はすべてのカスタム設定を消去し、既定値に戻します。用語集は保持されます — 削除する場合は用語集ページから行ってください。確認してください。
     userExperience:
       title: ユーザー体験
       beta:
