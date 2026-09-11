@@ -440,12 +440,18 @@ options:
             cancel: Ləğv et
       manualSync:
         title: Konfiqurasiyanın əl ilə sinxronlaşdırılması
-        description: Konfiqurasiya parametrlərini əl ilə idxal və ixrac edin
+        description: Ayarlarınızı əl ilə idxal və ixrac edin, lüğətləriniz də birlikdə gəlir
         import: İdxal et
         export: İxrac et
         importSuccess: Konfiqurasiya uğurla idxal edildi
         exportSuccess: Konfiqurasiya uğurla ixrac edildi
         importError: İdxal alınmadı
+        glossaryImported: "$1 termin idxal edildi və əvvəlki lüğətləriniz əvəz olundu."
+        glossaryUndo: Geri al
+        glossaryUndone: Lüğətləriniz idxaldan əvvəlki halına qaytarıldı
+        glossaryMalformed: Həmin fayldakı lüğətlər oxuna bilmədi. Heç nə dəyişmədi.
+        glossaryVersionTooNew: Həmin fayldakı lüğətləri Read Frog-un daha yeni versiyası yazıb. Əvvəlcə genişlənməni yeniləyin.
+        glossaryCapExceeded: "Həmin faylda $2 limitindən $1 çox lüğət sətri var. Heç nə dəyişmədi."
         exportOptions:
           title: İxrac seçimlərini təyin edin
           description: İxrac edilən konfiqurasiyaya API açarlarının daxil edilib-edilməyəcəyini seçin. API açarlarının daxil edilməsi məxfi məlumatların sızmasına səbəb ola bilər, buna görə bunu yalnız təhlükəsiz mühitlərdə etmək tövsiyə olunur.

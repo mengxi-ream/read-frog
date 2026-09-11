@@ -440,12 +440,18 @@ options:
             cancel: 取消
       manualSync:
         title: 手動設定同步
-        description: 手動匯入與匯出設定
+        description: 手動匯入匯出你的設定，術語庫也一併帶走
         import: 匯入
         export: 匯出
         importSuccess: 設定匯入成功
         exportSuccess: 設定匯出成功
         importError: 匯入失敗
+        glossaryImported: "已匯入 $1 筆術語，取代了原有的術語庫。"
+        glossaryUndo: 復原
+        glossaryUndone: 術語庫已還原成匯入前的樣子
+        glossaryMalformed: 那個檔案裡的術語庫無法讀取，本次未做任何變更。
+        glossaryVersionTooNew: 那個檔案裡的術語庫由較新版本的 Read Frog 寫入，請先更新擴充功能。
+        glossaryCapExceeded: "那個檔案的術語庫資料比上限 $2 筆多出 $1 筆，本次未做任何變更。"
         exportOptions:
           title: 選擇匯出選項
           description: 請選擇是否在匯出的設定中包含 API 金鑰。包含 API 金鑰可能會洩露敏感資訊，建議僅在安全環境下使用。

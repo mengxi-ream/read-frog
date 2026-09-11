@@ -23,10 +23,14 @@ import { addBackup } from "@/utils/backup/storage"
 import { migrateConfig } from "@/utils/config/migration"
 import { EXTENSION_VERSION } from "@/utils/constants/app"
 import { CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
+import { MAX_GLOSSARIES, MAX_GLOSSARY_TERMS } from "@/utils/constants/glossary"
+import { readGlossaryDocument } from "@/utils/glossary/sync/document"
+import { replaceGlossary, restoreUndoSnapshot } from "@/utils/glossary/sync/local-store"
 import { i18n } from "@/utils/i18n"
 import { queryClient } from "@/utils/tanstack-query"
 import { ConfigItem } from "../../../../components/config-item"
 import { ViewConfig } from "../../../../components/view-config"
+import { useGlossaryInvalidation } from "../../../advanced/glossary/use-glossary"
 
 export function ManualConfigSyncConfigItems() {
   const config = useAtomValue(configAtom)
@@ -53,6 +57,7 @@ export function ManualConfigSyncConfigItems() {
 function ImportConfig() {
   const currentConfig = useAtomValue(configAtom)
   const setConfig = useSetAtom(writeConfigAtom)
+  const invalidateGlossary = useGlossaryInvalidation()
 
   const { mutate: importConfig, isPending: isImporting } = useMutation({
     mutationFn: async (file: File) => {
@@ -74,6 +79,7 @@ function ImportConfig() {
       const parsed = JSON.parse(fileContent) as {
         schemaVersion?: unknown
         config?: unknown
+        glossary?: unknown
       }
 
       const importConfigSchemaVersion = parsed.schemaVersion
@@ -89,14 +95,74 @@ function ImportConfig() {
       }
 
       const newConfig = await migrateConfig(parsed.config, importConfigSchemaVersion)
+
+      // Read BEFORE anything is written: a file carrying a glossary this build
+      // cannot read, or one over the cap, must not land a half import that
+      // replaces the settings and leaves the terms behind.
+      const glossary = parsed.glossary === undefined ? null : readGlossaryDocument(parsed.glossary)
+      if (glossary && !glossary.ok) {
+        throw new Error(
+          glossary.reason === "version-too-new"
+            ? i18n.t("options.preference.config.manualSync.glossaryVersionTooNew")
+            : i18n.t("options.preference.config.manualSync.glossaryMalformed"),
+        )
+      }
+
       await addBackup(currentConfig, EXTENSION_VERSION)
       await setConfig(newConfig)
+
+      if (!glossary?.ok) return { glossaryTerms: null }
+
+      const replaced = await replaceGlossary(glossary.document)
+      if (!replaced.ok) {
+        throw new Error(
+          i18n.t("options.preference.config.manualSync.glossaryCapExceeded", [
+            String(replaced.overflowBy),
+            String(replaced.reason === "termCapExceeded" ? MAX_GLOSSARY_TERMS : MAX_GLOSSARIES),
+          ]),
+        )
+      }
+      return { glossaryTerms: replaced.terms }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       void queryClient.invalidateQueries({ queryKey: ["config-backups"] })
+      void invalidateGlossary()
       toastManager.add({
         type: "success",
         title: i18n.t("options.preference.config.manualSync.importSuccess"),
+        description:
+          result.glossaryTerms === null
+            ? undefined
+            : i18n.t("options.preference.config.manualSync.glossaryImported", [
+                String(result.glossaryTerms),
+              ]),
+        // The terms it replaced are still in the undo slot, so one click puts
+        // them back — the settings keep their own history in the backup list.
+        actionProps:
+          result.glossaryTerms === null
+            ? undefined
+            : {
+                children: i18n.t("options.preference.config.manualSync.glossaryUndo"),
+                onClick: () => {
+                  void (async () => {
+                    // The sync base still describes the last real agreement with
+                    // the cloud, and an import never touched it.
+                    if (!(await restoreUndoSnapshot({ clearBase: false }))) return
+                    await invalidateGlossary()
+                    toastManager.add({
+                      type: "success",
+                      title: i18n.t("options.preference.config.manualSync.glossaryUndone"),
+                    })
+                  })()
+                },
+              },
+      })
+    },
+    onError: (error) => {
+      toastManager.add({
+        type: "error",
+        title: i18n.t("options.preference.config.manualSync.importError"),
+        description: error instanceof Error ? error.message : undefined,
       })
     },
   })

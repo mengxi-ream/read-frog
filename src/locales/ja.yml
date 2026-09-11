@@ -439,12 +439,18 @@ options:
             cancel: キャンセル
       manualSync:
         title: 手動設定同期
-        description: 手動で設定をインポート・エクスポート
+        description: 設定を手動でインポート・エクスポートします。用語集も一緒に含まれます
         import: インポート
         export: エクスポート
         importSuccess: 設定のインポートが完了しました
         exportSuccess: 設定のエクスポートが完了しました
         importError: インポートに失敗しました
+        glossaryImported: "用語 $1 件をインポートし、これまでの用語集を置き換えました。"
+        glossaryUndo: 元に戻す
+        glossaryUndone: 用語集をインポート前の状態に戻しました
+        glossaryMalformed: そのファイルの用語集を読み取れませんでした。何も変更していません。
+        glossaryVersionTooNew: そのファイルの用語集は新しいバージョンの Read Frog で書かれています。先に拡張機能を更新してください。
+        glossaryCapExceeded: "そのファイルの用語集データは上限 $2 件を $1 件超えています。何も変更していません。"
         exportOptions:
           title: エクスポートオプションを選択
           description: エクスポートする設定にAPIキーを含めるかどうかを選択してください。APIキーを含めると機密情報が漏洩する可能性があるため、安全な環境でのみ使用することをお勧めします。

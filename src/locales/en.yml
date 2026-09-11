@@ -368,7 +368,7 @@ options:
       title: Config
       googleDrive:
         title: Google Drive cloud sync
-        description: Downloads config when remote is newer, uploads config when local is newer Your glossaries travel in a file of their own, merged term by term rather than replaced.
+        description: Downloads config when remote is newer, uploads config when local is newer. Your glossaries travel in a file of their own, merged term by term rather than replaced.
         sync: Sync to Google Drive
         syncing: Syncing...
         syncSuccess:
@@ -440,12 +440,18 @@ options:
             cancel: Cancel
       manualSync:
         title: Manual config sync
-        description: Manually import and export your configuration settings
+        description: Manually import and export your configuration settings, and your glossaries with them
         import: Import
         export: Export
         importSuccess: Config imported successfully
         exportSuccess: Config exported successfully
         importError: Import failed
+        glossaryImported: "$1 glossary terms were imported, replacing the ones you had."
+        glossaryUndo: Undo
+        glossaryUndone: Your glossaries were restored to how they were before the import
+        glossaryMalformed: The glossaries in that file could not be read. Nothing was changed.
+        glossaryVersionTooNew: The glossaries in that file were written by a newer version of Read Frog. Update the extension first.
+        glossaryCapExceeded: "That file holds $1 more glossary rows than the limit of $2. Nothing was changed."
         exportOptions:
           title: Select export options
           description: Please choose whether to include API Keys in the exported config. Including API Keys may leak sensitive information, so it's recommended to use only in secure environments.

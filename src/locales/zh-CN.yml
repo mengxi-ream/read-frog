@@ -440,12 +440,18 @@ options:
             cancel: 取消
       manualSync:
         title: 手动配置同步
-        description: 手动导入和导出您的配置设置
+        description: 手动导入导出你的配置，术语库也一并带走
         import: 导入
         export: 导出
         importSuccess: 配置导入成功
         exportSuccess: 配置导出成功
         importError: 导入失败
+        glossaryImported: "已导入 $1 条术语，替换了原有的术语库。"
+        glossaryUndo: 撤销
+        glossaryUndone: 术语库已恢复到导入前的样子
+        glossaryMalformed: 那个文件里的术语库无法读取，本次未做任何改动。
+        glossaryVersionTooNew: 那个文件里的术语库由更新版本的 Read Frog 写入，请先升级扩展。
+        glossaryCapExceeded: "那个文件的术语库数据比上限 $2 条多出 $1 条，本次未做任何改动。"
         exportOptions:
           title: 选择导出选项
           description: 请选择是否在导出的配置中包含 API Keys。包含 API Keys 可能会泄露敏感信息，建议仅在安全环境下使用。

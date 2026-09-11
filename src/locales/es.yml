@@ -428,7 +428,7 @@ options:
           busy: Otra pestaña está sincronizando tus glosarios ahora mismo.
           malformed: No se pudo leer el archivo de glosarios de tu Drive, así que no se cambió nada.
           versionTooNew: Ese archivo de glosarios lo escribió una versión más reciente de Read Frog. Actualiza la extensión primero.
-          duplicateFiles: Tu Drive tiene más de un archivo de glosarios. No se cambió nada: elimina el sobrante.
+          duplicateFiles: Tu Drive tiene más de un archivo de glosarios. No se cambió nada - elimina el sobrante.
           capExceeded: "La fusión superaría el límite de glosarios en $1. No se cambió nada."
           failed: Falló la sincronización de glosarios
           review:
@@ -440,12 +440,18 @@ options:
             cancel: Cancelar
       manualSync:
         title: Sincronización manual de configuración
-        description: Importa y exporta manualmente tus ajustes de configuración
+        description: Importa y exporta tu configuración manualmente, con tus glosarios incluidos
         import: Importar
         export: Exportar
         importSuccess: Configuración importada correctamente
         exportSuccess: Configuración exportada correctamente
         importError: Error al importar
+        glossaryImported: "Se importaron $1 términos, sustituyendo los glosarios que tenías."
+        glossaryUndo: Deshacer
+        glossaryUndone: Tus glosarios volvieron a como estaban antes de la importación
+        glossaryMalformed: No se pudieron leer los glosarios de ese archivo. No se cambió nada.
+        glossaryVersionTooNew: Los glosarios de ese archivo los escribió una versión más reciente de Read Frog. Actualiza la extensión primero.
+        glossaryCapExceeded: "Ese archivo tiene $1 filas de glosario más que el límite de $2. No se cambió nada."
         exportOptions:
           title: Seleccionar opciones de exportación
           description: Elige si incluir claves API en la configuración exportada. Incluir claves API puede filtrar información sensible, por lo que se recomienda usarlo solo en entornos seguros.

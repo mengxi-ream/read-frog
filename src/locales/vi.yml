@@ -439,12 +439,18 @@ options:
             cancel: Hủy
       manualSync:
         title: Đồng bộ cấu hình thủ công
-        description: Nhập và xuất cài đặt cấu hình thủ công
+        description: Nhập và xuất cấu hình thủ công, kèm theo bảng thuật ngữ của bạn
         import: Nhập
         export: Xuất
         importSuccess: Nhập cấu hình thành công
         exportSuccess: Xuất cấu hình thành công
         importError: Nhập thất bại
+        glossaryImported: "Đã nhập $1 thuật ngữ, thay thế bảng thuật ngữ bạn đang có."
+        glossaryUndo: Hoàn tác
+        glossaryUndone: Bảng thuật ngữ đã trở lại như trước khi nhập
+        glossaryMalformed: Không đọc được bảng thuật ngữ trong tệp đó. Không có gì thay đổi.
+        glossaryVersionTooNew: Bảng thuật ngữ trong tệp đó do một phiên bản Read Frog mới hơn ghi. Hãy cập nhật tiện ích trước.
+        glossaryCapExceeded: "Tệp đó có nhiều hơn giới hạn $2 dòng bảng thuật ngữ $1 dòng. Không có gì thay đổi."
         exportOptions:
           title: Chọn tùy chọn xuất
           description: Vui lòng chọn có bao gồm API Keys trong cấu hình xuất hay không. Bao gồm API Keys có thể làm rò rỉ thông tin nhạy cảm, vì vậy khuyến nghị chỉ sử dụng trong môi trường an toàn.

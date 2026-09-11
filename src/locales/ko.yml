@@ -439,12 +439,18 @@ options:
             cancel: 취소
       manualSync:
         title: 수동 설정 동기화
-        description: 수동으로 설정 가져오기 및 내보내기
+        description: 설정을 수동으로 가져오고 내보냅니다. 용어집도 함께 포함됩니다
         import: 가져오기
         export: 내보내기
         importSuccess: 설정 가져오기 완료
         exportSuccess: 설정 내보내기 완료
         importError: 가져오기 실패
+        glossaryImported: "용어 $1개를 가져와 기존 용어집을 대체했습니다."
+        glossaryUndo: 실행 취소
+        glossaryUndone: 용어집을 가져오기 전 상태로 되돌렸습니다
+        glossaryMalformed: 그 파일의 용어집을 읽을 수 없습니다. 아무것도 변경하지 않았습니다.
+        glossaryVersionTooNew: 그 파일의 용어집은 더 새로운 버전의 Read Frog가 저장한 것입니다. 먼저 확장 프로그램을 업데이트하세요.
+        glossaryCapExceeded: "그 파일의 용어집 항목이 한도 $2개보다 $1개 많습니다. 아무것도 변경하지 않았습니다."
         exportOptions:
           title: 내보내기 옵션 선택
           description: 내보내는 설정에 API 키를 포함할지 선택하세요. API 키를 포함하면 민감한 정보가 유출될 수 있으므로 안전한 환경에서만 사용하는 것을 권장합니다.

@@ -439,12 +439,18 @@ options:
             cancel: İptal
       manualSync:
         title: Manuel yapılandırma senkronizasyonu
-        description: Yapılandırma ayarlarınızı manuel olarak içe ve dışa aktarın
+        description: Ayarlarınızı elle içe ve dışa aktarın, sözlükleriniz de birlikte gelir
         import: İçe Aktar
         export: Dışa Aktar
         importSuccess: Yapılandırma başarıyla içe aktarıldı
         exportSuccess: Yapılandırma başarıyla dışa aktarıldı
         importError: İçe aktarma başarısız
+        glossaryImported: "$1 terim içe aktarıldı ve önceki sözlükleriniz değiştirildi."
+        glossaryUndo: Geri al
+        glossaryUndone: Sözlükleriniz içe aktarmadan önceki haline döndürüldü
+        glossaryMalformed: O dosyadaki sözlükler okunamadı. Hiçbir şey değişmedi.
+        glossaryVersionTooNew: O dosyadaki sözlükleri Read Frog'un daha yeni bir sürümü yazmış. Önce uzantıyı güncelleyin.
+        glossaryCapExceeded: "O dosyada $2 sınırından $1 fazla sözlük satırı var. Hiçbir şey değişmedi."
         exportOptions:
           title: Dışa aktarma seçeneklerini seçin
           description: Lütfen dışa aktarılan yapılandırmaya API Anahtarlarını dahil edip etmemeyi seçin. API Anahtarlarını dahil etmek hassas bilgileri sızdırabilir, bu nedenle yalnızca güvenli ortamlarda kullanılması önerilir.
