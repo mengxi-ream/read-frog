@@ -22,6 +22,50 @@ export type GoogleDriveFile = z.infer<typeof googleDriveFileSchema>
 export type GoogleDriveFileListResponse = z.infer<typeof googleDriveFileListResponseSchema>
 
 /**
+ * Every file in appDataFolder with this name.
+ *
+ * Usually one, but nothing stops there being more: two tabs syncing at the same
+ * moment both find nothing and both create one, and from then on each is bound
+ * to a different file and neither sees the other's writes. A caller that cannot
+ * survive that has to look at the count, which `findFileInAppData` throws away.
+ */
+export async function findFilesInAppData(fileName: string): Promise<GoogleDriveFile[]> {
+  try {
+    const accessToken = await getValidAccessToken()
+
+    const url = new URL(`${GOOGLE_DRIVE_API_BASE}/files`)
+    url.searchParams.set("spaces", "appDataFolder")
+    url.searchParams.set("q", `name='${fileName}'`)
+    url.searchParams.set("fields", "files(id, name, mimeType, modifiedTime, size)")
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        await clearAccessToken()
+      }
+      throw new Error(`Failed to search file: ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    const result = googleDriveFileListResponseSchema.safeParse(data)
+
+    if (!result.success) {
+      throw new Error(`Invalid response from Google Drive API: ${result.error.message}`)
+    }
+
+    return result.data.files
+  } catch (error) {
+    logger.error("Failed to find files in appData", error)
+    throw error
+  }
+}
+
+/**
  * Search for file in Google Drive appDataFolder
  */
 export async function findFileInAppData(fileName: string): Promise<GoogleDriveFile | null> {

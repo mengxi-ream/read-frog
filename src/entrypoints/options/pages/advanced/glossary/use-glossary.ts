@@ -38,7 +38,7 @@ function termsQueryKey(glossaryId: string) {
  * glossary's own fields, and getting that wrong shows a stale count next to a
  * fresh name.
  */
-function useGlossaryInvalidation() {
+export function useGlossaryInvalidation() {
   const queryClient = useQueryClient()
   return () =>
     Promise.all([

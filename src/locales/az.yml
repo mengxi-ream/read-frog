@@ -368,7 +368,7 @@ options:
       title: Konfiqurasiya
       googleDrive:
         title: Google Drive ilə bulud sinxronlaşdırması
-        description: Uzaqdakı konfiqurasiya daha yenidirsə endirir, yerli konfiqurasiya daha yenidirsə yükləyir
+        description: Uzaqdakı konfiqurasiya daha yenidirsə endirir, yerli konfiqurasiya daha yenidirsə yükləyir. Lüğətləriniz ayrıca faylda daşınır və bütövlükdə əvəz olunmaq yerinə termin-termin birləşdirilir.
         sync: Google Drive ilə sinxronlaşdır
         syncing: Sinxronlaşdırılır...
         syncSuccess:
@@ -413,6 +413,31 @@ options:
             title: Birləşdirilmiş konfiqurasiyada yoxlama xətaları var.
             description: "Düzəltmək üçün aşağıdakı fərqləri tənzimləyin:"
           moreErrors: ...və daha $1 xəta
+        glossary:
+          thisDevice: Bu cihaz
+          cloud: Bulud
+          deleted: Silinib
+          disabled: söndürülüb
+          syncing: Lüğətlər sinxronlaşdırılır...
+          upToDate: Lüğətlər artıq sinxrondur
+          uploaded: Lüğətlər buluda yükləndi
+          merged: "Lüğətlər sinxronlaşdırıldı: $1 gəldi, $2 getdi"
+          undo: Geri al
+          undone: Lüğətlər sinxronizasiyadan əvvəlki halına qaytarıldı
+          retry: Sinxronizasiya zamanı lüğət dəyişdi. Yenidən işə salın.
+          busy: Başqa bir tab hazırda lüğətlərinizi sinxronlaşdırır.
+          malformed: Drive-dakı lüğət faylı oxuna bilmədi, ona görə heç nə dəyişmədi.
+          versionTooNew: Həmin lüğət faylını Read Frog-un daha yeni versiyası yazıb. Əvvəlcə genişlənməni yeniləyin.
+          duplicateFiles: Drive-ınızda birdən çox lüğət faylı var. Heç nə dəyişmədi - artıq olanı silin.
+          capExceeded: "Birləşdirmə lüğət limitini $1 aşardı. Heç nə dəyişmədi."
+          failed: Lüğət sinxronizasiyası alınmadı
+          review:
+            title: Bu lüğət sinxronizasiyasını nəzərdən keçirin
+            description: İki nüsxənin fərqləndiyi yerlərdə nəyin qalacağını seçin.
+            firstSync: "Bu cihazda ilk sinxronizasiya: buluddan $1, yuxarı $2."
+            destructive: "Bu sinxronizasiya bu cihazdakı $2 lüğət sətrindən $1-ni silir."
+            confirm: Sinxronlaşdır
+            cancel: Ləğv et
       manualSync:
         title: Konfiqurasiyanın əl ilə sinxronlaşdırılması
         description: Konfiqurasiya parametrlərini əl ilə idxal və ixrac edin

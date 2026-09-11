@@ -368,7 +368,7 @@ options:
       title: 設定
       googleDrive:
         title: Google Drive 雲端同步
-        description: 遠端設定較新時下載，本機設定較新時上傳
+        description: 遠端設定較新時下載，本機設定較新時上傳；術語庫走單獨一個檔案，逐條合併而不是整份覆蓋。
         sync: 同步到 Google Drive
         syncing: 同步中…
         syncSuccess:
@@ -413,6 +413,31 @@ options:
             title: 合併後的設定存在驗證錯誤
             description: 請調整下方差異以修復：
           moreErrors: …還有 $1 個錯誤
+        glossary:
+          thisDevice: 本機
+          cloud: 雲端
+          deleted: 已刪除
+          disabled: 已停用
+          syncing: 正在同步術語庫…
+          upToDate: 術語庫已是最新
+          uploaded: 術語庫已上傳到雲端
+          merged: "術語庫已同步：接收 $1 筆，上傳 $2 筆"
+          undo: 復原
+          undone: 術語庫已還原成同步前的樣子
+          retry: 同步期間術語庫有變動，請再執行一次。
+          busy: 另一個分頁正在同步你的術語庫。
+          malformed: 雲端的術語庫檔案無法讀取，本次未做任何變更。
+          versionTooNew: 該術語庫檔案由較新版本的 Read Frog 寫入，請先更新擴充功能。
+          duplicateFiles: 你的雲端有多個術語庫檔案，本次未做任何變更，請先刪除多餘的那個。
+          capExceeded: "合併後會超出術語庫上限 $1 筆，本次未做任何變更。"
+          failed: 術語庫同步失敗
+          review:
+            title: 確認這次術語庫同步
+            description: 兩邊不一致的地方，請選擇要保留哪一個。
+            firstSync: "本機首次同步：從雲端接收 $1 筆，上傳 $2 筆。"
+            destructive: "這次同步會刪除本機 $2 筆術語庫資料中的 $1 筆。"
+            confirm: 同步
+            cancel: 取消
       manualSync:
         title: 手動設定同步
         description: 手動匯入與匯出設定

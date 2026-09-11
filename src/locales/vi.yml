@@ -367,7 +367,7 @@ options:
       title: Cấu hình
       googleDrive:
         title: Đồng bộ đám mây Google Drive
-        description: Tải xuống khi bản từ xa mới hơn, tải lên khi bản cục bộ mới hơn
+        description: Tải xuống khi bản từ xa mới hơn, tải lên khi bản cục bộ mới hơn. Bảng thuật ngữ đi trong tệp riêng, được hợp nhất theo từng mục thay vì bị thay thế.
         sync: Đồng bộ với Google Drive
         syncing: Đang đồng bộ...
         syncSuccess:
@@ -412,6 +412,31 @@ options:
             title: Cấu hình đã hợp nhất có lỗi xác thực
             description: "Điều chỉnh các khác biệt bên dưới để sửa:"
           moreErrors: ...và $1 lỗi nữa
+        glossary:
+          thisDevice: Thiết bị này
+          cloud: Đám mây
+          deleted: Đã xóa
+          disabled: đã tắt
+          syncing: Đang đồng bộ bảng thuật ngữ...
+          upToDate: Bảng thuật ngữ đã được đồng bộ
+          uploaded: Đã tải bảng thuật ngữ lên đám mây
+          merged: "Đã đồng bộ bảng thuật ngữ: nhận $1, gửi $2"
+          undo: Hoàn tác
+          undone: Đã khôi phục bảng thuật ngữ về trạng thái trước khi đồng bộ
+          retry: Bảng thuật ngữ đã thay đổi trong lúc đồng bộ. Hãy chạy lại.
+          busy: Một thẻ khác đang đồng bộ bảng thuật ngữ của bạn.
+          malformed: Không đọc được tệp bảng thuật ngữ trên Drive, nên không có gì thay đổi.
+          versionTooNew: Tệp bảng thuật ngữ đó do một phiên bản Read Frog mới hơn ghi. Hãy cập nhật tiện ích trước.
+          duplicateFiles: Drive của bạn có nhiều hơn một tệp bảng thuật ngữ. Không có gì thay đổi - hãy xóa tệp thừa.
+          capExceeded: "Hợp nhất sẽ vượt giới hạn bảng thuật ngữ $1 mục. Không có gì thay đổi."
+          failed: Đồng bộ bảng thuật ngữ thất bại
+          review:
+            title: Xem lại lần đồng bộ bảng thuật ngữ này
+            description: Chọn giữ lại cái nào ở những chỗ hai bản khác nhau.
+            firstSync: "Lần đồng bộ đầu trên thiết bị này: $1 về từ đám mây, $2 gửi lên."
+            destructive: "Lần đồng bộ này xóa $1 trong $2 dòng bảng thuật ngữ trên thiết bị này."
+            confirm: Đồng bộ
+            cancel: Hủy
       manualSync:
         title: Đồng bộ cấu hình thủ công
         description: Nhập và xuất cài đặt cấu hình thủ công

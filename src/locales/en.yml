@@ -368,7 +368,7 @@ options:
       title: Config
       googleDrive:
         title: Google Drive cloud sync
-        description: Downloads config when remote is newer, uploads config when local is newer
+        description: Downloads config when remote is newer, uploads config when local is newer Your glossaries travel in a file of their own, merged term by term rather than replaced.
         sync: Sync to Google Drive
         syncing: Syncing...
         syncSuccess:
@@ -413,6 +413,31 @@ options:
             title: The merged config has validation errors.
             description: "Adjust the differences below to fix:"
           moreErrors: ...and $1 more errors
+        glossary:
+          thisDevice: This device
+          cloud: Cloud
+          deleted: Deleted
+          disabled: off
+          syncing: Syncing glossaries...
+          upToDate: Glossaries already in sync
+          uploaded: Glossaries uploaded to cloud
+          merged: "Glossaries synced: $1 in, $2 out"
+          undo: Undo
+          undone: Glossaries restored to how they were before the sync
+          retry: The glossary changed while syncing. Run it again.
+          busy: Another tab is syncing your glossaries right now.
+          malformed: The glossary file in your Drive could not be read, so nothing was changed.
+          versionTooNew: That glossary file was written by a newer version of Read Frog. Update the extension first.
+          duplicateFiles: Your Drive holds more than one glossary file. Nothing was changed - please remove the extra one.
+          capExceeded: "Merging would go over the glossary limit by $1. Nothing was changed."
+          failed: Glossary sync failed
+          review:
+            title: Review this glossary sync
+            description: Choose what to keep where the two copies disagree.
+            firstSync: "First sync on this device: $1 coming from the cloud, $2 going up."
+            destructive: "This sync removes $1 of the $2 glossary rows on this device."
+            confirm: Sync
+            cancel: Cancel
       manualSync:
         title: Manual config sync
         description: Manually import and export your configuration settings

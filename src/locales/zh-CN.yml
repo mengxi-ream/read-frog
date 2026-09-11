@@ -368,7 +368,7 @@ options:
       title: 配置
       googleDrive:
         title: Google Drive 云端同步
-        description: 远端配置较新时下载，本地配置较新时上传
+        description: 远端配置较新时下载，本地配置较新时上传；术语库走单独一个文件，按条合并而不是整份覆盖。
         sync: 同步到 Google Drive
         syncing: 同步中...
         syncSuccess:
@@ -413,6 +413,31 @@ options:
             title: 合并后的配置存在验证错误
             description: 请调整下方差异以修复：
           moreErrors: ...还有 $1 个错误
+        glossary:
+          thisDevice: 本机
+          cloud: 云端
+          deleted: 已删除
+          disabled: 已停用
+          syncing: 正在同步术语库…
+          upToDate: 术语库已是最新
+          uploaded: 术语库已上传到云端
+          merged: "术语库已同步：接收 $1 条，上传 $2 条"
+          undo: 撤销
+          undone: 术语库已恢复到同步前的样子
+          retry: 同步过程中术语库有改动，请再运行一次。
+          busy: 另一个标签页正在同步你的术语库。
+          malformed: 云端的术语库文件无法读取，本次未做任何改动。
+          versionTooNew: 那个术语库文件由更新版本的 Read Frog 写入，请先升级扩展。
+          duplicateFiles: 你的云端存在多个术语库文件，本次未做任何改动，请先删掉多余的那个。
+          capExceeded: "合并后会超出术语库上限 $1 条，本次未做任何改动。"
+          failed: 术语库同步失败
+          review:
+            title: 确认这次术语库同步
+            description: 两边不一致的地方，请选择保留哪一个。
+            firstSync: "本机首次同步：从云端接收 $1 条，上传 $2 条。"
+            destructive: "这次同步会删掉本机 $2 条术语库数据中的 $1 条。"
+            confirm: 同步
+            cancel: 取消
       manualSync:
         title: 手动配置同步
         description: 手动导入和导出您的配置设置

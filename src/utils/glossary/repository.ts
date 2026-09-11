@@ -23,7 +23,11 @@ export async function getGlossaryRevision(): Promise<number> {
   return (await storage.getItem<number>(GLOSSARY_REVISION_KEY)) ?? 0
 }
 
-async function bumpGlossaryRevision(): Promise<number> {
+/**
+ * Exported for the Drive sync, which writes many rows in one transaction and
+ * must bump once at the end rather than once per row.
+ */
+export async function bumpGlossaryRevision(): Promise<number> {
   const next = (await getGlossaryRevision()) + 1
   await storage.setItem<number>(GLOSSARY_REVISION_KEY, next)
   return next

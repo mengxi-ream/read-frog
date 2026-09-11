@@ -6,12 +6,14 @@ import { toastManager } from "@/components/ui/base-ui/toast"
 import { useGoogleDriveAuth } from "@/hooks/use-google-drive-auth"
 import { resolutionsAtom, unresolvedConfigsAtom } from "@/utils/atoms/google-drive-sync"
 import { lastSyncTimeAtom } from "@/utils/atoms/last-sync-time"
-import { clearAccessToken } from "@/utils/google-drive/auth"
+import { clearAccessToken, getValidAccessToken } from "@/utils/google-drive/auth"
 import { syncConfig } from "@/utils/google-drive/sync"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { ConfigItem } from "../../../../components/config-item"
+import { GlossarySyncReviewDialog } from "./components/glossary-review-dialog"
 import { UnresolvedDialog } from "./components/unresolved-dialog"
+import { useGlossarySync } from "./use-glossary-sync"
 
 export function GoogleDriveSyncConfigItem() {
   const [isSyncing, setIsSyncing] = useState(false)
@@ -23,9 +25,29 @@ export function GoogleDriveSyncConfigItem() {
   const setUnresolvedData = useSetAtom(unresolvedConfigsAtom)
   const setResolutions = useSetAtom(resolutionsAtom)
   const lastSyncTime = useAtomValue(lastSyncTimeAtom)
+  const glossarySync = useGlossarySync()
 
   const handleSync = async () => {
     setIsSyncing(true)
+
+    // Taken once, before either half. `getValidAccessToken` re-authenticates
+    // inside a 60s buffer and asks which account to use, so two halves each
+    // fetching their own can end up bound to two different Google accounts.
+    //
+    // Failing here ends the whole sync rather than falling through: neither half
+    // can do anything without a token, and letting them try would put the
+    // account chooser in front of the user a second time for the same click.
+    try {
+      await getValidAccessToken()
+    } catch (error) {
+      logger.error("Google Drive sync could not get a token", error)
+      toastManager.add({
+        type: "error",
+        title: i18n.t("options.preference.config.googleDrive.syncError"),
+      })
+      setIsSyncing(false)
+      return
+    }
 
     const result = await syncConfig()
 
@@ -48,6 +70,10 @@ export function GoogleDriveSyncConfigItem() {
         description: result.error.message,
       })
     }
+
+    // The glossary lives in its own Drive file and fails for its own reasons, so
+    // it runs whatever the config half did and says so separately.
+    await glossarySync.start()
 
     setIsSyncing(false)
   }
@@ -131,6 +157,12 @@ export function GoogleDriveSyncConfigItem() {
         open={isOpen}
         onResolved={() => handleDialogClose(true)}
         onCancelled={() => handleDialogClose(false)}
+      />
+
+      <GlossarySyncReviewDialog
+        plan={glossarySync.pendingPlan}
+        onCancel={glossarySync.cancel}
+        onConfirm={(resolutions) => void glossarySync.confirm(resolutions)}
       />
     </>
   )

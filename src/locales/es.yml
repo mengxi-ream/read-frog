@@ -368,7 +368,7 @@ options:
       title: Configuración
       googleDrive:
         title: Sincronización cloud con Google Drive
-        description: Descarga la configuración cuando la remota es más reciente, sube la configuración cuando la local es más reciente
+        description: Descarga la configuración cuando la remota es más reciente, sube la configuración cuando la local es más reciente. Tus glosarios viajan en un archivo propio y se fusionan término a término en vez de reemplazarse.
         sync: Sincronizar con Google Drive
         syncing: Sincronizando...
         syncSuccess:
@@ -413,6 +413,31 @@ options:
             title: La configuración combinada tiene errores de validación.
             description: "Ajusta las diferencias siguientes para corregir:"
           moreErrors: ...y $1 errores más
+        glossary:
+          thisDevice: Este dispositivo
+          cloud: Nube
+          deleted: Eliminado
+          disabled: desactivado
+          syncing: Sincronizando glosarios...
+          upToDate: Los glosarios ya están sincronizados
+          uploaded: Glosarios subidos a la nube
+          merged: "Glosarios sincronizados: $1 recibidos, $2 enviados"
+          undo: Deshacer
+          undone: Glosarios restaurados a como estaban antes de la sincronización
+          retry: El glosario cambió durante la sincronización. Vuelve a ejecutarla.
+          busy: Otra pestaña está sincronizando tus glosarios ahora mismo.
+          malformed: No se pudo leer el archivo de glosarios de tu Drive, así que no se cambió nada.
+          versionTooNew: Ese archivo de glosarios lo escribió una versión más reciente de Read Frog. Actualiza la extensión primero.
+          duplicateFiles: Tu Drive tiene más de un archivo de glosarios. No se cambió nada: elimina el sobrante.
+          capExceeded: "La fusión superaría el límite de glosarios en $1. No se cambió nada."
+          failed: Falló la sincronización de glosarios
+          review:
+            title: Revisa esta sincronización de glosarios
+            description: Elige qué conservar donde las dos copias no coinciden.
+            firstSync: "Primera sincronización en este dispositivo: $1 llegan de la nube, $2 se suben."
+            destructive: "Esta sincronización elimina $1 de las $2 filas de glosario de este dispositivo."
+            confirm: Sincronizar
+            cancel: Cancelar
       manualSync:
         title: Sincronización manual de configuración
         description: Importa y exporta manualmente tus ajustes de configuración

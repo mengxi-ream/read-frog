@@ -367,7 +367,7 @@ options:
       title: Yapılandırma
       googleDrive:
         title: Google Drive bulut senkronizasyonu
-        description: Uzak daha yeniyse indirir, yerel daha yeniyse yükler
+        description: Uzak daha yeniyse indirir, yerel daha yeniyse yükler. Sözlükleriniz kendi dosyasında taşınır ve tümüyle değiştirilmek yerine terim terim birleştirilir.
         sync: Google Drive'a Senkronize Et
         syncing: Senkronize ediliyor...
         syncSuccess:
@@ -412,6 +412,31 @@ options:
             title: Birleştirilmiş yapılandırmada doğrulama hataları var
             description: "Düzeltmek için aşağıdaki farklılıkları ayarlayın:"
           moreErrors: ...ve $1 hata daha
+        glossary:
+          thisDevice: Bu cihaz
+          cloud: Bulut
+          deleted: Silindi
+          disabled: kapalı
+          syncing: Sözlükler eşitleniyor...
+          upToDate: Sözlükler zaten eşit
+          uploaded: Sözlükler buluta yüklendi
+          merged: "Sözlükler eşitlendi: $1 geldi, $2 gitti"
+          undo: Geri al
+          undone: Sözlükler eşitlemeden önceki haline döndürüldü
+          retry: Eşitleme sırasında sözlük değişti. Yeniden çalıştırın.
+          busy: Başka bir sekme şu anda sözlüklerinizi eşitliyor.
+          malformed: Drive'daki sözlük dosyası okunamadı, bu yüzden hiçbir şey değişmedi.
+          versionTooNew: O sözlük dosyasını Read Frog'un daha yeni bir sürümü yazmış. Önce uzantıyı güncelleyin.
+          duplicateFiles: Drive'ınızda birden fazla sözlük dosyası var. Hiçbir şey değişmedi - lütfen fazla olanı silin.
+          capExceeded: "Birleştirme sözlük sınırını $1 aşardı. Hiçbir şey değişmedi."
+          failed: Sözlük eşitleme başarısız
+          review:
+            title: Bu sözlük eşitlemesini gözden geçirin
+            description: İki kopyanın ayrıldığı yerlerde neyin kalacağını seçin.
+            firstSync: "Bu cihazda ilk eşitleme: buluttan $1, yukarı $2."
+            destructive: "Bu eşitleme, bu cihazdaki $2 sözlük satırının $1 tanesini siler."
+            confirm: Eşitle
+            cancel: İptal
       manualSync:
         title: Manuel yapılandırma senkronizasyonu
         description: Yapılandırma ayarlarınızı manuel olarak içe ve dışa aktarın

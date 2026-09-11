@@ -367,7 +367,7 @@ options:
       title: 設定
       googleDrive:
         title: Google Driveクラウド同期
-        description: リモートが新しい場合はダウンロード、ローカルが新しい場合はアップロード
+        description: リモートが新しい場合はダウンロード、ローカルが新しい場合はアップロード。用語集は専用のファイルで同期され、まるごと置き換えではなく用語ごとに統合されます。
         sync: Google Driveに同期
         syncing: 同期中...
         syncSuccess:
@@ -412,6 +412,31 @@ options:
             title: マージされた設定に検証エラーがあります
             description: 以下の差異を調整して修正してください：
           moreErrors: ...他 $1 件のエラー
+        glossary:
+          thisDevice: このデバイス
+          cloud: クラウド
+          deleted: 削除済み
+          disabled: 無効
+          syncing: 用語集を同期しています…
+          upToDate: 用語集は同期済みです
+          uploaded: 用語集をクラウドにアップロードしました
+          merged: "用語集を同期しました：受信 $1 件、送信 $2 件"
+          undo: 元に戻す
+          undone: 用語集を同期前の状態に戻しました
+          retry: 同期中に用語集が変更されました。もう一度実行してください。
+          busy: 別のタブが用語集を同期しています。
+          malformed: クラウドの用語集ファイルを読み取れなかったため、何も変更していません。
+          versionTooNew: その用語集ファイルは新しいバージョンの Read Frog で書かれています。先に拡張機能を更新してください。
+          duplicateFiles: クラウドに用語集ファイルが複数あります。何も変更していません。余分なファイルを削除してください。
+          capExceeded: "統合すると用語集の上限を $1 件超えるため、何も変更していません。"
+          failed: 用語集の同期に失敗しました
+          review:
+            title: この用語集の同期を確認
+            description: 2 つのコピーが食い違う箇所について、どちらを残すか選んでください。
+            firstSync: "このデバイスでの初回同期：クラウドから $1 件、アップロード $2 件。"
+            destructive: "この同期は、このデバイスの用語集データ $2 件のうち $1 件を削除します。"
+            confirm: 同期
+            cancel: キャンセル
       manualSync:
         title: 手動設定同期
         description: 手動で設定をインポート・エクスポート
