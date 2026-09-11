@@ -16,6 +16,10 @@ device tells you what is coming and what is going before it touches anything, a
 sync that would remove a large part of your list asks first, and any sync can be
 undone from the toast it leaves behind.
 
+Signing in with a different Google account tells you what is about to happen
+before it happens: how many glossary rows this device is sending up to the new
+account, and how to keep only that account's glossaries instead.
+
 Exporting your settings to a file now includes your glossaries, and importing
 such a file brings them back — so moving to a new machine, or taking a copy
 before a reset, no longer leaves the terms you typed behind.
