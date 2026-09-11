@@ -1,5 +1,6 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { ParsedGlossaryRow } from "./csv"
+import type { GlossaryTargetLang } from "./target-language"
 import type { GlossaryEntry } from "./types"
 import type Glossary from "@/utils/db/dexie/tables/glossary"
 import type GlossaryTerm from "@/utils/db/dexie/tables/glossary-term"
@@ -18,6 +19,7 @@ import { getRandomUUID } from "../crypto-polyfill"
 import { formatGlossaryCsv } from "./csv"
 import { buildMatchKey } from "./match-key"
 import { isGlossaryActiveForUrl, mergeGlossaryTerms } from "./scope"
+import { appliesToLanguage, targetLangPrecedence } from "./target-language"
 
 export async function getGlossaryRevision(): Promise<number> {
   return (await storage.getItem<number>(GLOSSARY_REVISION_KEY)) ?? 0
@@ -129,8 +131,8 @@ export interface GlossaryTermInput {
   source: string
   target: string
   caseSensitive: boolean
-  /** Which target language this wording is for. */
-  targetLang: LangCodeISO6393
+  /** Which target language this wording is for, or every language. */
+  targetLang: GlossaryTargetLang
   enabled?: boolean
 }
 
@@ -190,7 +192,9 @@ export async function countGlossaryTermsByGlossary(): Promise<Map<string, number
  *
  * Terms are filtered to `targetLang`: a wording written for Japanese has no
  * business in a Chinese prompt. That filter is also why the language needs no
- * place in the translation cache key — see the note on the table class.
+ * place in the translation cache key — see the note on the table class. Rows
+ * filed under `ALL_LANGUAGES` pass every filter and lose to a row written for
+ * the language in play.
  */
 export async function loadGlossaryEntries(
   targetLang: LangCodeISO6393,
@@ -204,14 +208,21 @@ export async function loadGlossaryEntries(
   const groups = await Promise.all(
     active.map(async (glossary) => {
       const terms = await db.glossaryTerm.where("glossaryId").equals(glossary.id).toArray()
-      return terms
-        .filter((term) => term.enabled && term.targetLang === targetLang)
-        .map((term): GlossaryEntry => ({
-          matchKey: term.matchKey,
-          source: term.source,
-          target: term.target,
-          caseSensitive: term.caseSensitive,
-        }))
+      return (
+        terms
+          .filter((term) => term.enabled && appliesToLanguage(term.targetLang, targetLang))
+          // Language-independent rows first, so the merge below — later wins —
+          // lets a wording written for THIS language override the one written for
+          // every language. Sorting inside the glossary's own group keeps the
+          // cross-glossary order (the later glossary wins) exactly as it was.
+          .sort((a, b) => targetLangPrecedence(a.targetLang) - targetLangPrecedence(b.targetLang))
+          .map((term): GlossaryEntry => ({
+            matchKey: term.matchKey,
+            source: term.source,
+            target: term.target,
+            caseSensitive: term.caseSensitive,
+          }))
+      )
     }),
   )
   return mergeGlossaryTerms(groups)

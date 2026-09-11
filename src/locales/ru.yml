@@ -816,6 +816,7 @@ options:
       columnSource: Термин
       columnTarget: Перевод
       columnTargetLanguage: Язык перевода
+      allLanguages: Все языки
       toggleTerm: "Использовать $1"
       editTerm: "Изменить $1"
       keepOriginal: Оставить оригинал

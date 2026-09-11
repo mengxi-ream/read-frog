@@ -816,6 +816,7 @@ options:
       columnSource: 용어
       columnTarget: 번역
       columnTargetLanguage: 대상 언어
+      allLanguages: 모든 언어
       toggleTerm: "'$1' 사용"
       editTerm: "'$1' 편집"
       keepOriginal: 원문 유지

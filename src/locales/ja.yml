@@ -816,6 +816,7 @@ options:
       columnSource: 用語
       columnTarget: 訳語
       columnTargetLanguage: 翻訳先の言語
+      allLanguages: すべての言語
       toggleTerm: "「$1」を使用"
       editTerm: "「$1」を編集"
       keepOriginal: 原文のまま

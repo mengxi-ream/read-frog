@@ -1,7 +1,8 @@
 import type GlossaryTerm from "@/utils/db/dexie/tables/glossary-term"
 import { Icon } from "@iconify/react"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { LanguageCombobox } from "@/components/language-combobox"
+import { getGlossaryTargetLanguageItems } from "@/components/language-combobox-options"
 import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
@@ -16,7 +17,7 @@ import { toastManager } from "@/components/ui/base-ui/toast"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { MAX_GLOSSARY_SOURCE_LENGTH, MAX_GLOSSARY_TARGET_LENGTH } from "@/utils/constants/glossary"
 import { i18n } from "@/utils/i18n"
-import { getLanguageName } from "@/utils/language-labels"
+import { getGlossaryTargetLangLabel } from "@/utils/language-labels"
 import { TruncatedText } from "../../../components/truncated-text"
 import { saveTermErrorTitle } from "./save-term-error"
 import {
@@ -115,7 +116,7 @@ function TermReadRow({ term, onEdit }: { term: GlossaryTerm; onEdit: () => void 
           target language never looks like terms went missing — the column is how
           you tell which apply now. */}
       <TableCell className={term.enabled ? undefined : "opacity-50"}>
-        <TruncatedText text={getLanguageName(term.targetLang)} />
+        <TruncatedText text={getGlossaryTargetLangLabel(term.targetLang)} />
       </TableCell>
       <TableCell>
         <span className="flex items-center gap-1">
@@ -158,6 +159,10 @@ function TermEditRow({
   const [target, setTarget] = useState(term.target)
   const [caseSensitive, setCaseSensitive] = useState(term.caseSensitive)
   const [targetLang, setTargetLang] = useState(term.targetLang)
+  const languageItems = useMemo(
+    () => getGlossaryTargetLanguageItems(i18n.t("options.advanced.glossary.allLanguages")),
+    [],
+  )
 
   const canSave = !isPending && source.trim() !== ""
 
@@ -263,18 +268,18 @@ function TermEditRow({
         </InputGroup>
       </TableCell>
       <TableCell>
+        {/* The same rows the add form offers, "All languages" pinned first —
+            a term whose wording is not written for any one language, which is
+            what an empty translation means. No `auto` row and so no guard
+            against one: this value type never had it. */}
         <LanguageCombobox
+          items={languageItems}
           value={targetLang}
           // Fills the column, which `table-fixed` has already sized: the
           // trigger is `w-auto` by default and would otherwise grow with
           // whichever language name it is showing.
           className="w-full"
-          onValueChange={(value) => {
-            // No page to detect from, so "auto" is not on offer here — and a
-            // term with no language could never be filtered into a prompt.
-            if (value === "auto") return
-            setTargetLang(value)
-          }}
+          onValueChange={setTargetLang}
         />
       </TableCell>
       <TableCell>

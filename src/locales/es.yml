@@ -932,6 +932,7 @@ options:
       columnSource: Término
       columnTarget: Traducción
       columnTargetLanguage: Idioma de destino
+      allLanguages: Todos los idiomas
       toggleTerm: "Usar $1"
       editTerm: "Editar $1"
       keepOriginal: Conservar el original

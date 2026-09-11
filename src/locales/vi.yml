@@ -816,6 +816,7 @@ options:
       columnSource: Thuật ngữ
       columnTarget: Bản dịch
       columnTargetLanguage: Ngôn ngữ đích
+      allLanguages: Tất cả ngôn ngữ
       toggleTerm: "Dùng $1"
       editTerm: "Sửa $1"
       keepOriginal: Giữ nguyên bản gốc

@@ -932,6 +932,7 @@ options:
       columnSource: 术语
       columnTarget: 译文
       columnTargetLanguage: 目标语言
+      allLanguages: 所有语言
       toggleTerm: "使用「$1」"
       editTerm: "编辑「$1」"
       keepOriginal: 保持原文

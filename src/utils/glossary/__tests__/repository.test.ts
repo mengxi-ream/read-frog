@@ -3,14 +3,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { storage } from "#imports"
 import { GLOSSARY_REVISION_KEY, MAX_GLOSSARY_TERMS } from "../../constants/glossary"
 import { formatGlossaryCsv, parseGlossaryCsv } from "../csv"
-import { importGlossaryRows } from "../repository"
+import { importGlossaryRows, loadGlossaryEntries } from "../repository"
 
 /**
- * An in-memory stand-in for the two Dexie calls `importGlossaryRows` makes
- * against `glossaryTerm`, faithful enough that a destructive bug shows up as
+ * An in-memory stand-in for the Dexie calls `importGlossaryRows` and
+ * `loadGlossaryEntries` make, faithful enough that a destructive bug shows up as
  * missing DATA rather than only as a missing spy call: `delete()` really drops
  * the rows and `bulkPut()` really writes them, so "the list survived a refused
  * import" is asserted on the rows themselves.
+ *
+ * `glossary.orderBy("createdAt")` really sorts, because the cross-glossary
+ * precedence rule IS that order and a double that returned insertion order
+ * would pass a test the product fails.
  */
 const dexie = vi.hoisted(() => {
   interface StoredTerm {
@@ -25,7 +29,17 @@ const dexie = vi.hoisted(() => {
     updatedAt: Date
   }
 
-  const state = { rows: [] as StoredTerm[] }
+  interface StoredGlossary {
+    id: string
+    name: string
+    description: string
+    enabled: boolean
+    matchPatterns: string[]
+    createdAt: Date
+    updatedAt: Date
+  }
+
+  const state = { rows: [] as StoredTerm[], glossaries: [] as StoredGlossary[] }
   const bulkPutSpy = vi.fn<(records: StoredTerm[]) => void>()
   const deleteSpy = vi.fn<(glossaryId: string) => void>()
   const transactionSpy = vi.fn<(mode: string) => void>()
@@ -70,12 +84,26 @@ const dexie = vi.hoisted(() => {
     },
   }
 
+  const glossary = {
+    orderBy(index: string) {
+      if (index !== "createdAt") {
+        throw new Error(`glossary test double has no index "${index}"`)
+      }
+      return {
+        async toArray() {
+          return [...state.glossaries].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+        },
+      }
+    },
+  }
+
   return {
     state,
     bulkPutSpy,
     deleteSpy,
     transactionSpy,
     db: {
+      glossary,
       glossaryTerm,
       async transaction(mode: string, _table: unknown, body: () => Promise<void>) {
         transactionSpy(mode)
@@ -203,6 +231,35 @@ describe("importGlossaryRows — a round trip through the CSV", () => {
   it("files a row under the language the file names, not a default", async () => {
     await importRows([csvRow("Go", "囲碁", { targetLanguage: "jpn" })], "merge")
     expect(dexie.state.rows[0]?.targetLang).toBe("jpn")
+  })
+
+  /**
+   * The language column is what carries a row's target language home, so a row
+   * belonging to every language has to survive the trip like any other. If the
+   * token came back unrecognised the row would be dropped; if it came back as a
+   * language the row would land beside its original under a different key.
+   */
+  it("brings an all-languages row back as one", async () => {
+    dexie.state.rows = [
+      storedTerm({
+        id: "react",
+        matchKey: "i:react",
+        source: "React",
+        target: "",
+        targetLang: "all",
+      }),
+    ]
+    const csv = exportedCsv(dexie.state.rows)
+    expect(csv).toContain(",all,")
+
+    const parsed = parseGlossaryCsv(csv)
+    if (!parsed.ok) throw new Error("export did not re-parse")
+    const result = await importRows(parsed.rows, "merge")
+
+    expect(result).toMatchObject({ ok: true, added: 0, updated: 1 })
+    expect(identify(dexie.state.rows)).toEqual([
+      { glossaryId: GLOSSARY_ID, source: "React", targetLang: "all" },
+    ])
   })
 })
 
@@ -400,5 +457,179 @@ describe("importGlossaryRows", () => {
     })
     expect(dexie.state.rows).toHaveLength(MAX_GLOSSARY_TERMS - 1)
     expectNothingHappened()
+  })
+})
+
+describe("loadGlossaryEntries — which wording a page gets", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    dexie.state.rows = []
+    dexie.state.glossaries = []
+  })
+
+  function storedGlossary(id: string, createdAt: string) {
+    return {
+      id,
+      name: id,
+      description: "",
+      enabled: true,
+      // Empty = every site, so `url` never has to be passed here.
+      matchPatterns: [] as string[],
+      createdAt: new Date(createdAt),
+      updatedAt: new Date(createdAt),
+    }
+  }
+
+  function wordings(entries: readonly { source: string; target: string }[]) {
+    return entries.map((entry) => `${entry.source}=>${entry.target}`).sort()
+  }
+
+  /**
+   * The keep-the-original case, which is the feature's headline ask: an empty
+   * translation is an instruction to leave the word alone, and that is true in
+   * every language. Filed under one language it stopped firing the moment the
+   * user switched target language, with nothing on screen to say so.
+   */
+  it("sends an all-languages row to every language", async () => {
+    dexie.state.glossaries = [storedGlossary("only", "2026-01-01")]
+    dexie.state.rows = [
+      storedTerm({
+        id: "react",
+        glossaryId: "only",
+        matchKey: "i:react",
+        source: "React",
+        target: "",
+        targetLang: "all",
+      }),
+    ]
+
+    expect(wordings(await loadGlossaryEntries("cmn"))).toEqual(["React=>"])
+    expect(wordings(await loadGlossaryEntries("jpn"))).toEqual(["React=>"])
+  })
+
+  it("still keeps a wording written for another language out", async () => {
+    dexie.state.glossaries = [storedGlossary("only", "2026-01-01")]
+    dexie.state.rows = [
+      storedTerm({
+        id: "go-jpn",
+        glossaryId: "only",
+        matchKey: "i:go",
+        source: "Go",
+        target: "囲碁",
+        targetLang: "jpn",
+      }),
+    ]
+
+    expect(await loadGlossaryEntries("cmn")).toEqual([])
+    expect(wordings(await loadGlossaryEntries("jpn"))).toEqual(["Go=>囲碁"])
+  })
+
+  /**
+   * Both rows are legal and both apply, so something has to decide. The specific
+   * one does: the user wrote it for this language on purpose, while the
+   * all-languages row is the fallback they wrote for the rest.
+   */
+  it("lets a wording written for this language beat the all-languages one", async () => {
+    dexie.state.glossaries = [storedGlossary("only", "2026-01-01")]
+    dexie.state.rows = [
+      storedTerm({
+        id: "go-all",
+        glossaryId: "only",
+        matchKey: "i:go",
+        source: "Go",
+        target: "",
+        targetLang: "all",
+      }),
+      storedTerm({
+        id: "go-cmn",
+        glossaryId: "only",
+        matchKey: "i:go",
+        source: "Go",
+        target: "围棋",
+        targetLang: "cmn",
+      }),
+    ]
+
+    expect(wordings(await loadGlossaryEntries("cmn"))).toEqual(["Go=>围棋"])
+    expect(wordings(await loadGlossaryEntries("jpn"))).toEqual(["Go=>"])
+  })
+
+  /**
+   * The rule cannot depend on which order the rows come back in. Dexie returns
+   * them by index, which is not an order the user chose or can see, so without
+   * the sort this is a coin flip that lands differently on two machines.
+   */
+  it("decides the same way whichever order the rows are stored in", async () => {
+    dexie.state.glossaries = [storedGlossary("only", "2026-01-01")]
+    dexie.state.rows = [
+      storedTerm({
+        id: "go-cmn",
+        glossaryId: "only",
+        matchKey: "i:go",
+        source: "Go",
+        target: "围棋",
+        targetLang: "cmn",
+      }),
+      storedTerm({
+        id: "go-all",
+        glossaryId: "only",
+        matchKey: "i:go",
+        source: "Go",
+        target: "",
+        targetLang: "all",
+      }),
+    ]
+
+    expect(wordings(await loadGlossaryEntries("cmn"))).toEqual(["Go=>围棋"])
+  })
+
+  /**
+   * The precedence added above lives INSIDE one glossary's own group. Across
+   * glossaries the older rule stands — the later glossary wins, because that is
+   * the order the list is shown in — and an all-languages row in a later
+   * glossary must not lose to a specific row in an earlier one.
+   */
+  it("keeps the later glossary winning, whichever language each row names", async () => {
+    dexie.state.glossaries = [
+      storedGlossary("older", "2026-01-01"),
+      storedGlossary("newer", "2026-02-01"),
+    ]
+    dexie.state.rows = [
+      storedTerm({
+        id: "old-cmn",
+        glossaryId: "older",
+        matchKey: "i:go",
+        source: "Go",
+        target: "围棋",
+        targetLang: "cmn",
+      }),
+      storedTerm({
+        id: "new-all",
+        glossaryId: "newer",
+        matchKey: "i:go",
+        source: "Go",
+        target: "",
+        targetLang: "all",
+      }),
+    ]
+
+    expect(wordings(await loadGlossaryEntries("cmn"))).toEqual(["Go=>"])
+  })
+
+  it("drops a disabled all-languages row like any other", async () => {
+    dexie.state.glossaries = [storedGlossary("only", "2026-01-01")]
+    dexie.state.rows = [
+      storedTerm({
+        id: "off",
+        glossaryId: "only",
+        matchKey: "i:react",
+        source: "React",
+        target: "",
+        targetLang: "all",
+        enabled: false,
+      }),
+    ]
+
+    expect(await loadGlossaryEntries("cmn")).toEqual([])
   })
 })

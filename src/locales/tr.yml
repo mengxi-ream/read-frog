@@ -816,6 +816,7 @@ options:
       columnSource: Terim
       columnTarget: Çeviri
       columnTargetLanguage: Hedef dil
+      allLanguages: Tüm diller
       toggleTerm: "$1 terimini kullan"
       editTerm: "$1 terimini düzenle"
       keepOriginal: Özgün hâlini koru

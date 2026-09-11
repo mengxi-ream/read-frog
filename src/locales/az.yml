@@ -932,6 +932,7 @@ options:
       columnSource: Termin
       columnTarget: Tərcümə
       columnTargetLanguage: Hədəf dili
+      allLanguages: Bütün dillər
       toggleTerm: "$1 terminini istifadə et"
       editTerm: "$1 terminini redaktə et"
       keepOriginal: Orijinalı saxla

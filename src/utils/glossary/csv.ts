@@ -1,6 +1,8 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { GlossaryTargetLang } from "./target-language"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { MAX_GLOSSARY_SOURCE_LENGTH, MAX_GLOSSARY_TARGET_LENGTH } from "../constants/glossary"
+import { ALL_LANGUAGES } from "./target-language"
 
 /**
  * One row of a glossary CSV, after the file has been checked.
@@ -14,7 +16,7 @@ import { MAX_GLOSSARY_SOURCE_LENGTH, MAX_GLOSSARY_TARGET_LENGTH } from "../const
 export interface ParsedGlossaryRow {
   source: string
   target: string
-  targetLanguage: LangCodeISO6393
+  targetLanguage: GlossaryTargetLang
   caseSensitive: boolean
 }
 
@@ -191,7 +193,8 @@ export function parseGlossaryCsv(content: string): GlossaryCsvParseResult {
       skipped.push({ line: record.line, reason: "missing-field" })
       continue
     }
-    if (!isKnownLanguageCode(targetLanguage)) {
+    const declaredLanguage = parseTargetLanguageCell(targetLanguage)
+    if (declaredLanguage === null) {
       // Covers blank as well as unrecognised. Filing the row under some default
       // would bury a Japanese wording in the Chinese list, where the user would
       // never think to look for it.
@@ -199,7 +202,7 @@ export function parseGlossaryCsv(content: string): GlossaryCsvParseResult {
       continue
     }
 
-    rows.push({ source, target, targetLanguage, caseSensitive })
+    rows.push({ source, target, targetLanguage: declaredLanguage, caseSensitive })
   }
 
   return { ok: true, rows, skipped }
@@ -267,4 +270,17 @@ export function decodeGlossaryCsv(buffer: ArrayBuffer): string {
 /** Whether a string names a language the extension can translate into. */
 export function isKnownLanguageCode(code: string): code is LangCodeISO6393 {
   return Object.hasOwn(LANG_CODE_TO_EN_NAME, code)
+}
+/**
+ * The `targetLanguage` cell as a value a term can be stored under, or null when
+ * it names nothing we can file the row by.
+ *
+ * `all` is accepted as itself, case-insensitively, because that is what an
+ * export writes for a row whose wording is not written for any one language. It
+ * cannot be mistaken for a language: the extension's list carries no code
+ * spelled that way, which `target-language.test.ts` asserts.
+ */
+export function parseTargetLanguageCell(declared: string): GlossaryTargetLang | null {
+  if (declared.toLowerCase() === ALL_LANGUAGES) return ALL_LANGUAGES
+  return isKnownLanguageCode(declared) ? declared : null
 }

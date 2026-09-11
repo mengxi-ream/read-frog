@@ -1,13 +1,15 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { GlossaryTargetLang } from "@/utils/glossary/target-language"
 import { Icon } from "@iconify/react"
 import { useAtomValue } from "jotai"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { LanguageCombobox } from "@/components/language-combobox"
+import { getGlossaryTargetLanguageItems } from "@/components/language-combobox-options"
 import { Button } from "@/components/ui/base-ui/button"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import { Input } from "@/components/ui/base-ui/input"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { defaultGlossaryTargetLang } from "@/utils/glossary/target-language"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
 import { saveTermErrorTitle } from "./save-term-error"
@@ -18,10 +20,17 @@ export function GlossaryAddTermItem({ glossaryId }: { glossaryId: string }) {
   const language = useAtomValue(configFieldsAtomMap.language)
   const [source, setSource] = useState("")
   const [target, setTarget] = useState("")
-  // Defaults to what the extension currently translates into, which is what a
-  // term is nearly always being written for. Kept after an add, like the case
-  // box: someone entering a run of Japanese terms picks it once.
-  const [targetLang, setTargetLang] = useState<LangCodeISO6393>(language.targetCode)
+  // Null is "the user has not answered", and the answer is then derived from the
+  // translation field: a wording belongs to the language it is written in, and a
+  // term with no wording belongs to all of them. Once they do answer it is
+  // theirs and survives an add, like the case box below: someone entering a run
+  // of Japanese terms picks it once.
+  const [chosenLang, setChosenLang] = useState<GlossaryTargetLang | null>(null)
+  const targetLang = chosenLang ?? defaultGlossaryTargetLang(target, language.targetCode)
+  const languageItems = useMemo(
+    () => getGlossaryTargetLanguageItems(i18n.t("options.advanced.glossary.allLanguages")),
+    [],
+  )
   // Deliberately NOT reset after an add: someone entering a run of
   // case-sensitive terms ticks it once. There is no global default for it —
   // the box is right here, and the only place the choice cannot be made per
@@ -71,11 +80,9 @@ export function GlossaryAddTermItem({ glossaryId }: { glossaryId: string }) {
           <LanguageCombobox
             // Default size, not `sm`: the inputs and the Add button beside it are
             // `h-8` and `sm` is `h-7`, which left the row a pixel out of line.
+            items={languageItems}
             value={targetLang}
-            onValueChange={(value) => {
-              if (value === "auto") return
-              setTargetLang(value)
-            }}
+            onValueChange={setChosenLang}
           />
           <Button disabled={isPending || source.trim() === ""} onClick={() => void handleAdd()}>
             <Icon icon="tabler:plus" />
