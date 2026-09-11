@@ -62,8 +62,21 @@ export type SyncPrompt =
   /**
    * Two independently built glossaries meeting for the first time. The moment
    * that actually matters, so it is shown even though nothing is in conflict.
+   *
+   * `accountChanged` separates "this device has never synced" from "this device
+   * synced, as somebody else". The second is the one that needs saying out loud:
+   * the merge is about to put terms built under the previous account into THIS
+   * account's Drive, and the user may have switched precisely to keep the two
+   * apart.
    */
-  | { kind: "first-sync"; incoming: number; outgoing: number; conflicts: number }
+  | {
+      kind: "first-sync"
+      incoming: number
+      outgoing: number
+      conflicts: number
+      accountChanged: boolean
+      email: string
+    }
   | { kind: "destructive"; removing: number; total: number }
   | { kind: "conflicts"; conflicts: GlossaryConflict[] }
 
@@ -114,18 +127,30 @@ export async function planGlossarySync(): Promise<PlanGlossarySyncResult> {
 
   const localFingerprint = fingerprint(local)
 
+  // Worked out before the branch below, not inside it: an account change has to
+  // be noticed whether or not the new account already has a file, and reading
+  // the absent case first is how it went unnoticed.
+  const accountChanged = storedBase !== null && storedBase.email !== email
+  const isFirstSync = storedBase === null || accountChanged
+
   if (remote.status === "absent") {
     if (local.glossaries.length === 0 && local.terms.length === 0) {
       return { status: "no-change" }
     }
+    const outgoing = local.glossaries.length + local.terms.length
     // Nothing to reconcile against, and above all nothing to delete: an absent
-    // file is not an empty glossary.
+    // file is not an empty glossary. It still gets a prompt when the account
+    // changed, because "upload everything this device has into the account you
+    // just switched to" is not something to do without saying so.
     return {
       status: "ready",
       plan: {
         email,
         fingerprint: localFingerprint,
         remote: null,
+        prompts: accountChanged
+          ? [{ kind: "first-sync", incoming: 0, outgoing, conflicts: 0, accountChanged, email }]
+          : [],
         merge: {
           glossaries: [...local.glossaries],
           terms: [...local.terms],
@@ -137,7 +162,6 @@ export async function planGlossarySync(): Promise<PlanGlossarySyncResult> {
             localRowsTotal: local.glossaries.length + local.terms.length,
           },
         },
-        prompts: [],
       },
     }
   }
@@ -146,9 +170,7 @@ export async function planGlossarySync(): Promise<PlanGlossarySyncResult> {
   // cloud. Using it would read that account's rows as this one's deletions —
   // "log out, sign in with the work account" must not be two clicks to replace
   // 4,000 terms with 12.
-  const usableBase =
-    storedBase?.email === email ? storedBase.snapshot : { glossaries: [], terms: [] }
-  const isFirstSync = storedBase === null || storedBase.email !== email
+  const usableBase = isFirstSync ? { glossaries: [], terms: [] } : storedBase.snapshot
 
   const merged = mergeGlossaryDocuments({
     base: usableBase,
@@ -177,6 +199,8 @@ export async function planGlossarySync(): Promise<PlanGlossarySyncResult> {
       incoming: stats.glossaries.incoming + stats.terms.incoming,
       outgoing: stats.glossaries.outgoing + stats.terms.outgoing,
       conflicts: merged.merge.conflicts.length,
+      accountChanged,
+      email,
     })
   }
   if (isDestructive(stats.localRowsRemoved, stats.localRowsTotal)) {

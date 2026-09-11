@@ -102,6 +102,20 @@ export function GlossarySyncReviewDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
+        {/* The account changed under this device. Said out loud because the merge
+            is about to put terms built under the previous account into this
+            one's Drive, and switching accounts is often done to keep them
+            apart — so the way out is spelled out rather than left to be
+            guessed at. */}
+        {firstSync?.kind === "first-sync" && firstSync.accountChanged && (
+          <p className="rounded-md border bg-muted/40 p-2.5 text-sm">
+            {i18n.t("options.preference.config.googleDrive.glossary.review.accountChanged", [
+              firstSync.email,
+              String(firstSync.outgoing),
+            ])}
+          </p>
+        )}
+
         {/* Its own paragraph, not a line in the description: this is the only
             thing on the screen that can cost the user data, and every
             catastrophic path this design was reviewed against ends here. */}

@@ -434,6 +434,7 @@ options:
             title: Bu sözlük eşitlemesini gözden geçirin
             description: İki kopyanın ayrıldığı yerlerde neyin kalacağını seçin.
             firstSync: "Bu cihazda ilk eşitleme: buluttan $1, yukarı $2."
+            accountChanged: "$1 olarak oturum açtınız; bu, cihazın en son eşitlediği hesap değil. Cihazdaki $2 sözlük satırı bu hesaba yüklenecek. Yalnızca bu hesabın sözlüklerini istiyorsanız iptal edin, buradakileri silin ve yeniden eşitleyin."
             destructive: "Bu eşitleme, bu cihazdaki $2 sözlük satırının $1 tanesini siler."
             confirm: Eşitle
             cancel: İptal

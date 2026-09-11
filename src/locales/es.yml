@@ -435,6 +435,7 @@ options:
             title: Revisa esta sincronización de glosarios
             description: Elige qué conservar donde las dos copias no coinciden.
             firstSync: "Primera sincronización en este dispositivo: $1 llegan de la nube, $2 se suben."
+            accountChanged: "Has iniciado sesión como $1, que no es la cuenta con la que este dispositivo se sincronizó por última vez. Sus $2 filas de glosario se subirán a esta cuenta. Para quedarte solo con los glosarios de esta cuenta, cancela, borra los de aquí y sincroniza de nuevo."
             destructive: "Esta sincronización elimina $1 de las $2 filas de glosario de este dispositivo."
             confirm: Sincronizar
             cancel: Cancelar

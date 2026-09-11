@@ -435,6 +435,7 @@ options:
             title: Bu lüğət sinxronizasiyasını nəzərdən keçirin
             description: İki nüsxənin fərqləndiyi yerlərdə nəyin qalacağını seçin.
             firstSync: "Bu cihazda ilk sinxronizasiya: buluddan $1, yuxarı $2."
+            accountChanged: "$1 hesabı ilə daxil olmusunuz — bu cihazın sonuncu dəfə sinxronlaşdırdığı hesab deyil. Cihazdakı $2 lüğət sətri bu hesaba yüklənəcək. Yalnız bu hesabın lüğətlərini istəyirsinizsə, ləğv edin, buradakıları silin və yenidən sinxronlaşdırın."
             destructive: "Bu sinxronizasiya bu cihazdakı $2 lüğət sətrindən $1-ni silir."
             confirm: Sinxronlaşdır
             cancel: Ləğv et
