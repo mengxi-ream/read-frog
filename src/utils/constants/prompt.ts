@@ -208,54 +208,21 @@ Direct translation without separators
 `
 
 /**
- * The marker rule: a heading plus a single body line. Both sentences in that
- * line are load-bearing — the language test, and the ban on mixing the marker
- * into translated text (isNoTranslationSentinel matches the marker exactly, so
- * mixed output reaches the page verbatim).
+ * Safety-first marker rule selected from the September 2026 target-language
+ * benchmark: 12 prompt variants, six strong/weak Atlas models, 416 tasks, and
+ * Simplified Chinese/English/Japanese targets. Compared with the previous
+ * every-word rule, this wording distinguishes preserved tokens (brand names,
+ * handles, URLs, numbers, code) from foreign-language prose while producing the
+ * fewest hidden owed translations among the Chinese finalists.
  *
- * Benchmarked on 120 real paragraphs scraped from react.dev / MDN / Wikipedia /
- * vitejs / arXiv, each hand-labelled for whether a translation is actually owed
- * — identifiers like `ArrayBuffer` and pure code are excluded, since dropping
- * those is correct rather than a bug, leaving 107. 4 runs x 8 models:
- * deepseek-v4-pro/flash, glm-4.7, qwen3.5-27b, gpt-5-nano, gpt-5.4-nano/mini,
- * gpt-4o-mini, target language Simplified Chinese. Share of owed paragraphs
- * that rendered nothing:
- *
- *   original wording, marker shown in the example   7.9%   (deepseek-v4-pro 18.0%)
- *   this wording, marker absent from the example    4.7%   (deepseek-v4-pro  1.6%)
- *   two longer variants, same removal               4.2% and 4.9%
- *
- * Original vs any fix is significant (z = -5.5); the three fixes are not
- * distinguishable from each other (|z| < 1.3). One edit carries the win —
- * deleting the marked slot from the worked example — so among wordings that
- * measure the same, take the shortest. Concretely, do not add back:
- *
- * 1. The marked example slot. Showing one of three example segments marked
- *    taught a ~1-in-3 marker base rate that outweighed the rule. Re-wording that
- *    segment does not help, only deleting it does — which is why the page
- *    pipeline now uses the same plain DEFAULT_BATCH_TRANSLATE_PROMPT that
- *    subtitles use. See the "keeps the marker out of the batch format example"
- *    test, which is what actually guards this.
- * 2. A negative list of the misfiring shapes (headings, API names, bibliography
- *    entries, error messages). It costs +894 characters on every batch request
- *    and buys nothing measurable. It also made gpt-5-nano worse — and gpt-5-nano
- *    never emits the marker at all, so the block was not changing its marker
- *    decisions; naming those shapes primed it to leave them untranslated by
- *    echoing the source, which the equality check in getDisplayTranslation then
- *    renders as nothing just the same.
- * 3. The clause "instead of repeating the paragraph". Told not to repeat, models
- *    produce something different rather than nothing: already-target-language
- *    paragraphs translated back into the source language rose from 8 to 22
- *    occurrences over the same runs.
- *
- * The wording that caused the bug was the conjunct "and needs no translation",
- * read by models as an independent trigger for anything they judged
- * untranslatable — a smaller effect than the example, but the same failure.
- * Code maps the marker to "", so each such paragraph rendered as nothing. Keep
- * the condition a pure language test.
+ * Keep the rule parameterized: the user selected it for every target language.
+ * It remains a probabilistic fallback, not the primary language detector. In
+ * particular, keep BatchQueue's count validation and individual fallback: they
+ * reject a multi-item batch that collapses to one marker instead of accepting
+ * it as a verdict for every item.
  */
 export const DEFAULT_SENTINEL_TRANSLATE_PROMPT = `## Already-translated Input Rule
-Use the exact marker ${NO_TRANSLATION_SENTINEL} as a paragraph's entire translation only when every word of it is already ${getTokenCellText(TARGET_LANGUAGE)}; otherwise always translate. Never mix the marker with translated text.`
+Output only ${NO_TRANSLATION_SENTINEL} when only non-translatable names, brands, handles, URLs, numbers, or code differ from ${getTokenCellText(TARGET_LANGUAGE)}. A foreign-language phrase or clause must be translated.`
 
 // === Subtitles Segmentation Prompts ===
 
