@@ -845,6 +845,7 @@ options:
         description: Hər lüğətin öz terminləri və öz sayt siyahısı var, ona görə də iş üçün nəzərdə tutulmuş terminlər dəsti sizinlə birlikdə hər yerə keçmir.
         button: Lüğət əlavə et
         capReached: "Ən çoxu $1 lüğətiniz ola bilər."
+        termUsage: "Bütün lüğətlər üzrə $2 termindən $1 istifadə olunub"
       summary:
         terms: "$1 termin"
         termsOne: 1 termin
@@ -899,14 +900,13 @@ options:
       loading: Yüklənir...
       empty: Hələ termin yoxdur. Yuxarıdan əlavə edin və ya CSV faylı idxal edin.
       noMatches: Axtarışınıza uyğun termin yoxdur.
-      count: "$1 / $2 termin"
       previous: Əvvəlki
       next: Növbəti
       pageOf: "$1 / $2"
       addError:
         emptySource: Əvvəlcə termin daxil edin.
         tooLong: Bu termin çox uzundur.
-        capReached: Lüğətiniz doludur.
+        capReached: "Bütün lüğətləriniz birlikdə $1 terminlik limitə çatıb."
         duplicate: Bu termin artıq lüğətinizdədir.
       import: İdxal et
       export: İxrac et

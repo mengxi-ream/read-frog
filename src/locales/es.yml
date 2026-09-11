@@ -845,6 +845,7 @@ options:
         description: Cada glosario tiene sus propios términos y su propia lista de sitios web, así que un conjunto de términos para el trabajo no te acompaña en todo lo demás.
         button: Añadir un glosario
         capReached: "Puedes tener como máximo $1 glosarios."
+        termUsage: "$1 de $2 términos usados entre todos tus glosarios"
       summary:
         terms: "$1 términos"
         termsOne: 1 término
@@ -899,14 +900,13 @@ options:
       loading: Cargando...
       empty: Aún no hay términos. Añade uno arriba o importa un archivo CSV.
       noMatches: Ningún término coincide con tu búsqueda.
-      count: "$1 de $2 términos"
       previous: Anterior
       next: Siguiente
       pageOf: "$1 / $2"
       addError:
         emptySource: Escribe primero un término.
         tooLong: Ese término es demasiado largo.
-        capReached: Tu glosario está lleno.
+        capReached: "Entre todos tus glosarios has alcanzado el límite de $1 términos."
         duplicate: Ese término ya está en tu glosario.
       import: Importar
       export: Exportar

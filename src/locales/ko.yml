@@ -729,6 +729,7 @@ options:
         description: 용어집마다 고유한 용어와 웹사이트 목록이 있으므로, 업무용 용어 모음이 다른 모든 곳까지 따라오지 않습니다.
         button: 용어집 추가
         capReached: "용어집은 최대 $1개까지 만들 수 있습니다."
+        termUsage: "모든 용어집을 통틀어 $2개 용어 중 $1개 사용 중"
       summary:
         terms: "$1개 용어"
         termsOne: 1개 용어
@@ -783,14 +784,13 @@ options:
       loading: 불러오는 중...
       empty: 아직 용어가 없습니다. 위에서 추가하거나 CSV 파일을 가져오세요.
       noMatches: 검색과 일치하는 용어가 없습니다.
-      count: "$1 / $2개 용어"
       previous: 이전
       next: 다음
       pageOf: "$1 / $2"
       addError:
         emptySource: 먼저 용어를 입력하세요.
         tooLong: 용어가 너무 깁니다.
-        capReached: 용어집이 가득 찼습니다.
+        capReached: "모든 용어집을 통틀어 용어 수가 한도인 $1개에 도달했습니다."
         duplicate: 이미 용어집에 있는 용어입니다.
       import: 가져오기
       export: 내보내기

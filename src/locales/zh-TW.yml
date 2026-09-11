@@ -845,6 +845,7 @@ options:
         description: 每個術語庫都有各自的術語和各自的網站清單，所以工作用的那套術語不會跟著你跑到其他地方。
         button: 新增術語庫
         capReached: "最多只能建立 $1 個術語庫。"
+        termUsage: "所有術語庫合計已使用 $1 / $2 條術語"
       summary:
         terms: "$1 條術語"
         termsOne: 1 條術語
@@ -899,14 +900,13 @@ options:
       loading: 正在載入…
       empty: 還沒有術語。在上方新增，或匯入 CSV 檔案。
       noMatches: 沒有與搜尋相符的術語。
-      count: "$1 / $2 條術語"
       previous: 上一頁
       next: 下一頁
       pageOf: "$1 / $2"
       addError:
         emptySource: 請先輸入術語。
         tooLong: 該術語過長。
-        capReached: 術語庫已滿。
+        capReached: "所有術語庫的術語總數已達上限 $1 條。"
         duplicate: 該術語已在術語庫中。
       import: 匯入
       export: 匯出

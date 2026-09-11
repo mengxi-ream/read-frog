@@ -3,7 +3,7 @@ import { Fragment } from "react"
 import { useNavigate } from "react-router"
 import { Button } from "@/components/ui/base-ui/button"
 import { toastManager } from "@/components/ui/base-ui/toast"
-import { MAX_GLOSSARIES } from "@/utils/constants/glossary"
+import { MAX_GLOSSARIES, MAX_GLOSSARY_TERMS } from "@/utils/constants/glossary"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
 import { DRILL_IN_LOCATION_STATE } from "../../../navigation/drill-in"
@@ -17,7 +17,14 @@ import { useCreateGlossary, useGlossaries, useGlossaryTermCounts } from "./use-g
 export function GlossaryLibraryItem() {
   const navigate = useNavigate()
   const { data: glossaries = [], isPending } = useGlossaries()
-  const { data: termCounts } = useGlossaryTermCounts()
+  const { data: termCounts, isSuccess: termCountsKnown } = useGlossaryTermCounts()
+  // The term cap counts every glossary, so this is the only place the number
+  // means anything: on one glossary's page it read as headroom that was not
+  // there. Withheld until the query settles rather than shown as 0 of 20,000,
+  // which understates how full the library is.
+  const termsUsed = termCountsKnown
+    ? [...(termCounts?.values() ?? [])].reduce((total, count) => total + count, 0)
+    : null
   const { mutateAsync: create, isPending: isCreating } = useCreateGlossary()
 
   const handleCreate = async () => {
@@ -79,6 +86,15 @@ export function GlossaryLibraryItem() {
               </Fragment>
             ))}
           </div>
+        )}
+
+        {termsUsed !== null && glossaries.length > 0 && (
+          <p className="text-xs text-muted-foreground">
+            {i18n.t("options.advanced.glossary.library.termUsage", [
+              String(termsUsed),
+              String(MAX_GLOSSARY_TERMS),
+            ])}
+          </p>
         )}
       </div>
     </ConfigItem>

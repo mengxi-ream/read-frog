@@ -320,8 +320,13 @@ export async function importGlossaryRows(
   fallbackLang: LangCodeISO6393,
 ): Promise<ImportGlossaryResult> {
   // Keyed by language AND term, because one file may carry both a Chinese and a
-  // Japanese wording of the same word and neither displaces the other.
-  const byKey = new Map<string, { row: ParsedGlossaryRow; targetLang: LangCodeISO6393 }>()
+  // Japanese wording of the same word and neither displaces the other. The
+  // resolved case flag is carried alongside so the key and the row it writes
+  // cannot disagree about which of `s:` / `i:` the term lives under.
+  const byKey = new Map<
+    string,
+    { row: ParsedGlossaryRow; targetLang: LangCodeISO6393; caseSensitive: boolean }
+  >()
   let duplicatesInFile = 0
   let unknownLanguage = 0
   for (const row of rows) {
@@ -332,12 +337,15 @@ export async function importGlossaryRows(
       unknownLanguage++
       continue
     }
-    const matchKey = buildMatchKey(source, caseSensitive)
+    // The row's own column wins; `caseSensitive` is the import's checkbox, which
+    // answers for every file written before the column existed.
+    const rowCaseSensitive = row.caseSensitive ?? caseSensitive
+    const matchKey = buildMatchKey(source, rowCaseSensitive)
     const key = `${targetLang}\u0000${matchKey}`
     // Last write wins within a file: a user fixing a term further down the file
     // means the later line.
     if (byKey.has(key)) duplicatesInFile++
-    byKey.set(key, { row: { ...row, source }, targetLang })
+    byKey.set(key, { row: { ...row, source }, targetLang, caseSensitive: rowCaseSensitive })
   }
 
   const existing =
@@ -370,19 +378,21 @@ export async function importGlossaryRows(
   }
 
   const now = new Date()
-  const records: GlossaryTerm[] = [...byKey.entries()].map(([key, { row, targetLang }]) => ({
-    id: existingByKey.get(key)?.id ?? getRandomUUID(),
-    glossaryId,
-    matchKey: buildMatchKey(row.source, caseSensitive),
-    targetLang,
-    source: row.source,
-    target: row.target.trim(),
-    caseSensitive,
-    // An import must not silently re-enable a term the user turned off; a row
-    // absent from the table is the only one that starts enabled.
-    enabled: existingByKey.get(key)?.enabled ?? true,
-    updatedAt: now,
-  })) as GlossaryTerm[]
+  const records: GlossaryTerm[] = [...byKey.entries()].map(
+    ([key, { row, targetLang, caseSensitive: rowCaseSensitive }]) => ({
+      id: existingByKey.get(key)?.id ?? getRandomUUID(),
+      glossaryId,
+      matchKey: buildMatchKey(row.source, rowCaseSensitive),
+      targetLang,
+      source: row.source,
+      target: row.target.trim(),
+      caseSensitive: rowCaseSensitive,
+      // An import must not silently re-enable a term the user turned off; a row
+      // absent from the table is the only one that starts enabled.
+      enabled: existingByKey.get(key)?.enabled ?? true,
+      updatedAt: now,
+    }),
+  ) as GlossaryTerm[]
 
   // Nothing survived to write — the file was empty, or every row was dropped by
   // an unrecognised `targetLanguage` or a third column that was never a language
@@ -417,7 +427,13 @@ export async function importGlossaryRows(
   return { ok: true, added, updated, duplicatesInFile, unknownLanguage }
 }
 
-/** Every term in the glossary, in every language, as a three-column CSV. */
+/**
+ * Every term in the glossary, in every language, as a four-column CSV.
+ *
+ * `caseSensitive` travels because it is half of `matchKey`: an export that
+ * dropped it could not be imported back onto the rows it came from, and the
+ * product's own copy offers this file as the backup to take before a delete.
+ */
 export async function exportGlossaryCsv(glossaryId: string): Promise<string> {
   const terms = await db.glossaryTerm.where("glossaryId").equals(glossaryId).sortBy("matchKey")
   return formatGlossaryCsv(
@@ -425,6 +441,7 @@ export async function exportGlossaryCsv(glossaryId: string): Promise<string> {
       source: term.source,
       target: term.target,
       targetLanguage: term.targetLang,
+      caseSensitive: term.caseSensitive,
     })),
   )
 }

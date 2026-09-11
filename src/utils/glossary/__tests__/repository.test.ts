@@ -3,6 +3,7 @@ import type { ParsedGlossaryRow } from "../csv"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { storage } from "#imports"
 import { GLOSSARY_REVISION_KEY, MAX_GLOSSARY_TERMS } from "../../constants/glossary"
+import { formatGlossaryCsv, parseGlossaryCsv } from "../csv"
 import { importGlossaryRows } from "../repository"
 
 /**
@@ -117,9 +118,73 @@ function importRows(
   rows: readonly ParsedGlossaryRow[],
   mode: "merge" | "replace",
   fallbackLang: LangCodeISO6393 = "cmn",
+  /** The import's checkbox, which only answers for rows carrying no column. */
+  caseSensitive = false,
 ) {
-  return importGlossaryRows(GLOSSARY_ID, rows, mode, false, fallbackLang)
+  return importGlossaryRows(GLOSSARY_ID, rows, mode, caseSensitive, fallbackLang)
 }
+
+/** Exactly what `exportGlossaryCsv` writes for a set of stored rows. */
+function exportedCsv(rows: readonly (typeof dexie.state.rows)[number][]) {
+  return formatGlossaryCsv(
+    rows.map((row) => ({
+      source: row.source,
+      target: row.target,
+      targetLanguage: row.targetLang,
+      caseSensitive: row.caseSensitive,
+    })),
+  )
+}
+
+describe("importGlossaryRows — a round trip through the CSV", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    dexie.state.rows = []
+  })
+
+  function seedMixedCaseList() {
+    dexie.state.rows = [
+      storedTerm({ id: "go", matchKey: "s:Go", source: "Go", target: "围棋", caseSensitive: true }),
+      storedTerm({ id: "api", matchKey: "i:api", source: "api", target: "接口" }),
+    ]
+  }
+
+  /**
+   * The flow the product's own copy offers as the backup to take before an
+   * irreversible delete. `caseSensitive` is half of `matchKey` (`s:` / `i:`), so
+   * while the export dropped it, every case-sensitive term came back under the
+   * other prefix, missed the row it came from, and was inserted BESIDE it: the
+   * list doubled and the term quietly stopped honouring its case rule.
+   */
+  it("updates the rows it came from instead of inserting twins", async () => {
+    seedMixedCaseList()
+    const csv = exportedCsv(dexie.state.rows)
+
+    // The checkbox says "not case sensitive" and must NOT win here: the file
+    // names the flag per row, and that is the term's own identity.
+    const result = await importRows(parseGlossaryCsv(csv).rows, "merge")
+
+    expect(result).toMatchObject({ ok: true, added: 0, updated: 2 })
+    expect(dexie.state.rows).toHaveLength(2)
+    expect(dexie.state.rows.map((row) => row.matchKey).sort()).toEqual(["i:api", "s:Go"])
+    expect(dexie.state.rows.find((row) => row.source === "Go")?.caseSensitive).toBe(true)
+  })
+
+  it("survives a second round trip without growing", async () => {
+    seedMixedCaseList()
+    await importRows(parseGlossaryCsv(exportedCsv(dexie.state.rows)).rows, "merge")
+    await importRows(parseGlossaryCsv(exportedCsv(dexie.state.rows)).rows, "merge")
+    expect(dexie.state.rows).toHaveLength(2)
+  })
+
+  it("still lets the import's checkbox answer for a file that carries no column", async () => {
+    // Every file from another tool, and the shape the third column established.
+    const { rows } = parseGlossaryCsv("Go,围棋")
+    await importRows(rows, "merge", "cmn", true)
+    expect(dexie.state.rows.map((row) => row.matchKey)).toEqual(["s:Go"])
+    expect(dexie.state.rows[0]?.caseSensitive).toBe(true)
+  })
+})
 
 describe("importGlossaryRows", () => {
   const storageValues = new Map<string, unknown>()

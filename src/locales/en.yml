@@ -845,6 +845,7 @@ options:
         description: Each glossary has its own terms and its own list of websites, so a set of terms for work does not follow you onto everything else.
         button: Add a glossary
         capReached: "You can have at most $1 glossaries."
+        termUsage: "$1 of $2 terms used across all glossaries"
       summary:
         terms: "$1 terms"
         termsOne: 1 term
@@ -899,14 +900,13 @@ options:
       loading: Loading...
       empty: No terms yet. Add one above, or import a CSV file.
       noMatches: No terms match your search.
-      count: "$1 of $2 terms"
       previous: Previous
       next: Next
       pageOf: "$1 / $2"
       addError:
         emptySource: Enter a term first.
         tooLong: That term is too long.
-        capReached: Your glossary is full.
+        capReached: "Your glossaries have reached the limit of $1 terms in total."
         duplicate: That term is already in your glossary.
       import: Import
       export: Export

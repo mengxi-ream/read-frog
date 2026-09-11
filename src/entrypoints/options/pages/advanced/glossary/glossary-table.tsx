@@ -13,7 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/base-ui/table"
-import { MAX_GLOSSARY_TERMS } from "@/utils/constants/glossary"
 import { i18n } from "@/utils/i18n"
 import { getLanguageName } from "@/utils/language-labels"
 import { ConfigItem } from "../../../components/config-item"
@@ -186,11 +185,17 @@ export function GlossaryTable({ glossaryId }: { glossaryId: string }) {
         </Table>
 
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+          {/* This glossary's own total, with no cap beside it: the 20,000 cap
+              counts the whole library, so pairing it with a per-glossary number
+              told the user they had room when the library was nearly full — and
+              then refused the add with "your glossary is full". The cap now
+              lives on the library section, at the scope it is enforced on.
+              Reuses the list row's two strings, which already carry the
+              singular English needs. */}
           <span>
-            {i18n.t("options.advanced.glossary.count", [
-              String(terms.length),
-              String(MAX_GLOSSARY_TERMS),
-            ])}
+            {terms.length === 1
+              ? i18n.t("options.advanced.glossary.summary.termsOne")
+              : i18n.t("options.advanced.glossary.summary.terms", [String(terms.length)])}
           </span>
           {pageCount > 1 && (
             <span className="flex items-center gap-2">

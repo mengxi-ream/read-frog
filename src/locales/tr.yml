@@ -729,6 +729,7 @@ options:
         description: Her terim sözlüğünün kendi terimleri ve kendi site listesi vardır; böylece iş için hazırladığınız terimler diğer her yerde karşınıza çıkmaz.
         button: Terim sözlüğü ekle
         capReached: "En fazla $1 terim sözlüğünüz olabilir."
+        termUsage: "Tüm terim sözlükleriniz için ayrılan toplam $2 terimin $1 tanesi kullanıldı."
       summary:
         terms: "$1 terim"
         termsOne: 1 terim
@@ -783,14 +784,13 @@ options:
       loading: Yükleniyor...
       empty: Henüz terim yok. Yukarıdan ekleyin veya bir CSV dosyası içe aktarın.
       noMatches: Aramanızla eşleşen terim yok.
-      count: "$1 / $2 terim"
       previous: Önceki
       next: Sonraki
       pageOf: "$1 / $2"
       addError:
         emptySource: Önce bir terim girin.
         tooLong: Bu terim çok uzun.
-        capReached: Terim sözlüğünüz dolu.
+        capReached: "Tüm terim sözlüklerinizdeki toplam terim sayısı $1 limitine ulaştı."
         duplicate: Bu terim zaten sözlüğünüzde var.
       import: İçe aktar
       export: Dışa aktar
