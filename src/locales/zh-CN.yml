@@ -902,7 +902,7 @@ options:
           description: 停用后术语仍会保留，但一条都不会发送。
         sites:
           title: 网站
-          description: 限定这份术语库只在特定网站生效。
+          description: 限定这份术语库只在特定网站生效。*.example.com 包含该网站及其子域名；只写 example.com 则仅匹配这一个确切地址。
           allSites: 留空则这份术语库在所有网站生效。
           header: 网站
         delete:

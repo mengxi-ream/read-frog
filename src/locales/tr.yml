@@ -786,7 +786,7 @@ options:
           description: Devre dışı bırakılan bir terim sözlüğü terimlerini korur ama hiçbirini göndermez.
         sites:
           title: Web siteleri
-          description: Bu terim sözlüğünü belirli web siteleriyle sınırlayın.
+          description: Bu terim sözlüğünü belirli web siteleriyle sınırlayın. *.example.com siteyi ve alt alan adlarını kapsar; tek başına example.com yalnızca tam olarak o adresle eşleşir.
           allSites: Burayı boş bırakırsanız terim sözlüğü her yerde geçerli olur.
           header: Web sitesi
         delete:

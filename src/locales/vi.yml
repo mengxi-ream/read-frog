@@ -786,7 +786,7 @@ options:
           description: Bảng thuật ngữ đã tắt vẫn giữ các thuật ngữ nhưng không gửi thuật ngữ nào.
         sites:
           title: Trang web
-          description: Giới hạn bảng thuật ngữ này cho một số trang web nhất định.
+          description: Giới hạn bảng thuật ngữ này cho một số trang web nhất định. *.example.com bao gồm trang đó và các tên miền phụ; chỉ ghi example.com thì chỉ khớp đúng địa chỉ đó.
           allSites: Để trống thì bảng thuật ngữ sẽ áp dụng ở mọi nơi.
           header: Trang web
         delete:

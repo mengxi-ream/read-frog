@@ -902,7 +902,7 @@ options:
           description: Un glosario desactivado conserva sus términos, pero no envía ninguno.
         sites:
           title: Sitios web
-          description: Limita este glosario a determinados sitios web.
+          description: Limita este glosario a determinados sitios web. *.example.com incluye el sitio y sus subdominios; example.com por sí solo coincide únicamente con esa dirección exacta.
           allSites: Déjalo vacío y el glosario se aplicará en todas partes.
           header: Sitio web
         delete:
