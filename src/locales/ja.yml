@@ -729,6 +729,7 @@ options:
         description: 用語集ごとに用語とウェブサイトの一覧を個別に持てるため、仕事用の用語がほかのすべてのページにまで付いて回ることはありません。
         button: 用語集を追加
         capReached: "用語集は最大 $1 件までです。"
+        termUsage: "すべての用語集を合わせて、$2 件中 $1 件の用語を使用しています。"
       summary:
         terms: "$1 件の用語"
         termsOne: 1 件の用語
@@ -783,14 +784,13 @@ options:
       loading: 読み込んでいます...
       empty: 用語がまだありません。上から追加するか、CSV ファイルをインポートしてください。
       noMatches: 検索に一致する用語はありません。
-      count: "$1 / $2 件の用語"
       previous: 前へ
       next: 次へ
       pageOf: "$1 / $2"
       addError:
         emptySource: 先に用語を入力してください。
         tooLong: この用語は長すぎます。
-        capReached: 用語集がいっぱいです。
+        capReached: "すべての用語集を合わせた用語数が上限の $1 件に達しました。"
         duplicate: この用語はすでに用語集にあります。
       import: インポート
       export: エクスポート

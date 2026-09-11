@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import { Input } from "@/components/ui/base-ui/input"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { MAX_GLOSSARY_TERMS } from "@/utils/constants/glossary"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
 import { useSaveGlossaryTerm } from "./use-glossary"
@@ -37,7 +38,13 @@ export function GlossaryAddTermItem({ glossaryId }: { glossaryId: string }) {
     }
     toastManager.add({
       type: "error",
-      title: i18n.t(`options.advanced.glossary.addError.${result.reason}`),
+      // Spelled out rather than folded into the dynamic key: this is the one
+      // refusal whose reason is invisible on this page, because the cap counts
+      // every glossary and the user is looking at one of them.
+      title:
+        result.reason === "capReached"
+          ? i18n.t("options.advanced.glossary.addError.capReached", [String(MAX_GLOSSARY_TERMS)])
+          : i18n.t(`options.advanced.glossary.addError.${result.reason}`),
     })
   }
 

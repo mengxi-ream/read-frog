@@ -845,6 +845,7 @@ options:
         description: 每份术语库都有各自的术语和各自的网站列表，所以为工作准备的一组术语不会跟着你出现在其他所有地方。
         button: 添加术语库
         capReached: "最多只能创建 $1 份术语库。"
+        termUsage: "所有术语库合计已使用 $1 条术语，上限 $2 条"
       summary:
         terms: "$1 条术语"
         termsOne: 1 条术语
@@ -899,14 +900,13 @@ options:
       loading: 正在加载...
       empty: 还没有术语。在上方添加，或导入 CSV 文件。
       noMatches: 没有与搜索匹配的术语。
-      count: "$1 / $2 条术语"
       previous: 上一页
       next: 下一页
       pageOf: "$1 / $2"
       addError:
         emptySource: 请先输入术语。
         tooLong: 该术语过长。
-        capReached: 术语库已满。
+        capReached: "所有术语库的术语总数已达上限 $1 条。"
         duplicate: 该术语已在术语库中。
       import: 导入
       export: 导出
