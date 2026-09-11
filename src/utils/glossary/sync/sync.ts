@@ -1,6 +1,5 @@
 import type { SyncedGlossary, SyncedTerm } from "./document"
 import type { GlossaryConflict, GlossaryMerge } from "./merge-document"
-import { storage } from "#imports"
 import { getGoogleUserInfo, getValidAccessToken } from "@/utils/google-drive/auth"
 import { logger } from "@/utils/logger"
 import { readRemoteGlossary, writeRemoteGlossary } from "./drive-store"
@@ -11,7 +10,7 @@ import {
   readLocalGlossary,
   readSyncBase,
 } from "./local-store"
-import { mergeGlossaryDocuments } from "./merge-document"
+import { mergeGlossaryDocuments, termIdentity, withDistinctIds } from "./merge-document"
 
 /**
  * A merge that removes more than this much of what the device holds is not
@@ -26,36 +25,32 @@ import { mergeGlossaryDocuments } from "./merge-document"
 const DESTRUCTIVE_ROW_COUNT = 50
 const DESTRUCTIVE_ROW_FRACTION = 0.2
 
-const LOCK_KEY = "local:glossarySyncLock" as const
-const LOCK_TTL_MS = 2 * 60 * 1000
-
-interface Lock {
-  owner: string
-  takenAt: number
-}
+const LOCK_NAME = "read-frog:glossary-sync"
 
 /**
- * A lease, because `isSyncing` is React state in one tab and the options page
+ * A mutex, because `isSyncing` is React state in one tab and the options page
  * can be open in several.
  *
  * Without it two tabs that both find no file both create one, and from then on
  * each device is bound to a different file and neither ever sees the other's
- * terms. It is a lease rather than a flag so that a tab closed mid-sync cannot
- * lock the feature until the browser restarts.
+ * terms.
+ *
+ * `navigator.locks` rather than a lease in `storage`: a read-then-write lease is
+ * not atomic, so two tabs can interleave until each re-read sees its own write
+ * and both believe they hold it — which is precisely the case it exists to
+ * prevent. The Web Locks API is genuinely exclusive across tabs of the origin,
+ * needs no TTL to guess at how long a sync should take (a 20,000-term upload on
+ * a poor connection must not have its lock stolen), and releases on its own when
+ * a tab closes mid-sync.
+ *
+ * `ifAvailable` so a second tab is told it is busy rather than queueing behind a
+ * sync whose plan will be stale by the time it runs.
  */
-async function acquireLock(owner: string): Promise<boolean> {
-  const held = await storage.getItem<Lock>(LOCK_KEY)
-  if (held && Date.now() - held.takenAt < LOCK_TTL_MS) return false
-  await storage.setItem<Lock>(LOCK_KEY, { owner, takenAt: Date.now() })
-  // Re-read: two tabs can pass the check above in the same tick, and the one
-  // whose write landed last is the one that owns it.
-  const now = await storage.getItem<Lock>(LOCK_KEY)
-  return now?.owner === owner
-}
-
-async function releaseLock(owner: string): Promise<void> {
-  const held = await storage.getItem<Lock>(LOCK_KEY)
-  if (held?.owner === owner) await storage.removeItem(LOCK_KEY)
+async function withSyncLock<T>(run: () => Promise<T>, onBusy: () => T): Promise<T> {
+  return navigator.locks.request(LOCK_NAME, { ifAvailable: true }, async (lock) => {
+    if (!lock) return onBusy()
+    return run()
+  })
 }
 
 export type SyncPrompt =
@@ -251,38 +246,36 @@ export async function commitGlossarySync(
   plan: GlossarySyncPlan,
   resolutions?: ConflictResolutions,
 ): Promise<CommitGlossarySyncResult> {
-  const owner = `${Date.now()}-${Math.random().toString(36).slice(2)}`
-  if (!(await acquireLock(owner))) return { status: "blocked", reason: "busy" }
+  return withSyncLock<CommitGlossarySyncResult>(
+    async () => {
+      const merge = resolutions?.size ? applyResolutions(plan.merge, resolutions) : plan.merge
+      const payload = { glossaries: merge.glossaries, terms: merge.terms }
 
-  try {
-    const merge = resolutions?.size ? applyResolutions(plan.merge, resolutions) : plan.merge
-    const payload = { glossaries: merge.glossaries, terms: merge.terms }
+      const written = await writeRemoteGlossary(payload, plan.remote)
+      if (!written.ok) return { status: "retry", reason: "changed-underneath" }
 
-    const written = await writeRemoteGlossary(payload, plan.remote)
-    if (!written.ok) return { status: "retry", reason: "changed-underneath" }
-
-    try {
-      await applyMergedGlossary({
-        glossaries: payload.glossaries,
-        terms: payload.terms,
-        email: plan.email,
-        expectedFingerprint: plan.fingerprint,
-      })
-    } catch (error) {
-      if (error instanceof GlossaryChangedDuringSyncError) {
-        // The cloud now holds the merge, this device does not, and its base
-        // still describes the old agreement — so the next sync merges the two
-        // and converges. Nothing is lost; the user just runs it again.
-        logger.warn("Glossary changed during sync; leaving the local rows alone")
-        return { status: "retry", reason: "changed-locally" }
+      try {
+        await applyMergedGlossary({
+          glossaries: payload.glossaries,
+          terms: payload.terms,
+          email: plan.email,
+          expectedFingerprint: plan.fingerprint,
+        })
+      } catch (error) {
+        if (error instanceof GlossaryChangedDuringSyncError) {
+          // The cloud now holds the merge, this device does not, and its base
+          // still describes the old agreement — so the next sync merges the two
+          // and converges. Nothing is lost; the user just runs it again.
+          logger.warn("Glossary changed during sync; leaving the local rows alone")
+          return { status: "retry", reason: "changed-locally" }
+        }
+        throw error
       }
-      throw error
-    }
 
-    return { status: "applied", merge }
-  } finally {
-    await releaseLock(owner)
-  }
+      return { status: "applied", merge }
+    },
+    () => ({ status: "blocked", reason: "busy" }),
+  )
 }
 
 /**
@@ -290,14 +283,33 @@ export async function commitGlossarySync(
  *
  * A choice of `remote` on a row the cloud deleted means letting the delete
  * through, so the row leaves the output entirely rather than being replaced.
+ *
+ * Terms are keyed with `termIdentity`, the same function that produced the
+ * conflict keys. A second key builder written to look the same is how the user's
+ * answers stopped matching the rows they were asked about: `set` added a second
+ * row for one `(glossaryId, targetLang, matchKey)` triple instead of replacing
+ * the first — which the unique index rejects, after the upload — and `delete`
+ * matched nothing, so a delete the user chose never happened.
  */
 export function applyResolutions(
   merge: GlossaryMerge,
   resolutions: ConflictResolutions,
 ): GlossaryMerge {
   const glossaries = new Map(merge.glossaries.map((row) => [row.id, row]))
-  const terms = new Map(merge.terms.map((row) => [termKey(row), row]))
+  const terms = new Map(merge.terms.map((row) => [termIdentity(row), row]))
   const droppedGlossaries = new Set<string>()
+  // Of those, the ones this device actually had — so their terms can be counted
+  // as rows lost, while a glossary only the cloud held costs this device none.
+  const droppedLocalGlossaries = new Set<string>()
+
+  // Only rows THIS DEVICE holds count towards the destructive gate, so a
+  // released row is counted by whether the conflict had a local side — never by
+  // differencing output lengths. Choosing "this device" on a glossary the user
+  // deleted and the cloud edited drops the cloud's whole copy, which can be
+  // thousands of rows this device never had: differencing counts every one of
+  // them, the clamp below then reports it as the entire local library, and the
+  // user is told a sync that loses them nothing is about to erase everything.
+  let removedByUser = 0
 
   for (const entry of merge.conflicts) {
     const choice = resolutions.get(entry.conflict.key)
@@ -308,28 +320,73 @@ export function applyResolutions(
       if (chosen === undefined) {
         glossaries.delete(entry.conflict.key)
         droppedGlossaries.add(entry.conflict.key)
-      } else {
-        glossaries.set(chosen.id, chosen)
+        if (entry.conflict.local !== undefined) {
+          // This device had the glossary, so it had rows in it. Its terms are
+          // counted below, once, as they are filtered out.
+          droppedLocalGlossaries.add(entry.conflict.key)
+          removedByUser++
+        }
+        continue
       }
+      // The side the user picked, with what the merge worked out about the
+      // things they were not asked about. The dialog offers a NAME, so taking
+      // the raw row would also silently revert this glossary's website list to
+      // one device's copy — throwing away the union the merge just built, which
+      // is the same loss the no-base union exists to prevent.
+      const merged = glossaries.get(chosen.id)
+      glossaries.set(
+        chosen.id,
+        merged
+          ? {
+              ...chosen,
+              matchPatterns: merged.matchPatterns,
+              createdAt: merged.createdAt,
+              updatedAt: merged.updatedAt,
+            }
+          : chosen,
+      )
       continue
     }
 
     const chosen = choice === "local" ? entry.conflict.local : entry.conflict.remote
-    if (chosen === undefined) terms.delete(entry.conflict.key)
-    else terms.set(entry.conflict.key, chosen)
+    if (chosen === undefined) {
+      terms.delete(entry.conflict.key)
+      if (entry.conflict.local !== undefined) removedByUser++
+    } else {
+      terms.set(entry.conflict.key, chosen)
+    }
   }
+
+  const resolvedGlossaries = [...glossaries.values()]
+  const allTerms = [...terms.values()]
+  // A glossary the user chose to delete takes its terms with it, the same way
+  // deleting one in the options page does. Those of its terms this device held
+  // are rows it loses, so they join the count above.
+  const survives = (term: SyncedTerm) => !droppedGlossaries.has(term.glossaryId)
+  removedByUser += allTerms.filter(
+    (term) => !survives(term) && droppedLocalGlossaries.has(term.glossaryId),
+  ).length
+
+  // Raw side rows carry their own uuids, so swapping one in can put two terms
+  // back under a single Dexie primary key — the invariant `mergeGlossaryDocuments`
+  // established and this function would otherwise quietly undo, one call before
+  // the payload is uploaded and `bulkPut` drops all but the last of the pair.
+  const resolvedTerms = withDistinctIds(allTerms.filter(survives))
 
   return {
     ...merge,
-    glossaries: [...glossaries.values()],
-    // A glossary the user chose to delete takes its terms with it, the same way
-    // deleting one in the options page does.
-    terms: [...terms.values()].filter((term) => !droppedGlossaries.has(term.glossaryId)),
+    glossaries: resolvedGlossaries,
+    terms: resolvedTerms,
+    stats: {
+      ...merge.stats,
+      glossaries: { ...merge.stats.glossaries },
+      terms: { ...merge.stats.terms },
+      localRowsRemoved: Math.min(
+        merge.stats.localRowsRemoved + removedByUser,
+        merge.stats.localRowsTotal,
+      ),
+    },
   }
-}
-
-function termKey(term: SyncedTerm): string {
-  return `${term.glossaryId} ${term.targetLang} ${term.matchKey}`
 }
 
 export type { SyncedGlossary, SyncedTerm }

@@ -417,12 +417,12 @@ options:
           cloud: クラウド
           deleted: 削除済み
           disabled: 無効
-          syncing: 用語集を同期しています…
           upToDate: 用語集は同期済みです
           uploaded: 用語集をクラウドにアップロードしました
           merged: "用語集を同期しました：受信 $1 件、送信 $2 件"
           undo: 元に戻す
           undone: 用語集を同期前の状態に戻しました
+          undoUnavailable: この操作は取り消せなくなりました — その後に用語集が変更されています。
           retry: 同期中に用語集が変更されました。もう一度実行してください。
           busy: 別のタブが用語集を同期しています。
           malformed: クラウドの用語集ファイルを読み取れなかったため、何も変更していません。
@@ -445,10 +445,12 @@ options:
         export: エクスポート
         importSuccess: 設定のインポートが完了しました
         exportSuccess: 設定のエクスポートが完了しました
+        exportGlossaryFailed: 設定はエクスポートされましたが、用語集を読み取れなかったためファイルに含まれていません。
         importError: インポートに失敗しました
         glossaryImported: "用語 $1 件をインポートし、これまでの用語集を置き換えました。"
         glossaryUndo: 元に戻す
         glossaryUndone: 用語集をインポート前の状態に戻しました
+        glossaryUndoUnavailable: この操作は取り消せなくなりました — その後に用語集が変更されています。
         glossaryMalformed: そのファイルの用語集を読み取れませんでした。何も変更していません。
         glossaryVersionTooNew: そのファイルの用語集は新しいバージョンの Read Frog で書かれています。先に拡張機能を更新してください。
         glossaryCapExceeded: "そのファイルの用語集データは上限 $2 件を $1 件超えています。何も変更していません。"

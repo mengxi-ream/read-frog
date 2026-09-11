@@ -12,6 +12,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/base-ui/alert-dialog"
 import { Button } from "@/components/ui/base-ui/button"
+import { applyResolutions, isDestructive } from "@/utils/glossary/sync/sync"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 
@@ -75,6 +76,32 @@ export function GlossarySyncReviewDialog({
     return prompt?.kind === "conflicts" ? prompt.conflicts : []
   }, [plan])
 
+  const resolutions = useMemo(() => {
+    const map: ConflictResolutions = new Map()
+    for (const entry of conflicts) {
+      const choice = choices[entry.conflict.key]
+      if (choice) map.set(entry.conflict.key, choice)
+    }
+    return map
+  }, [conflicts, choices])
+
+  /**
+   * The gate, re-measured against the answers given so far.
+   *
+   * The plan's own `destructive` prompt was computed before the user touched
+   * anything, so resolving conflicts towards the deleting side can walk a sync
+   * past a warning that was true when it was calculated and is not any more.
+   * Recomputing here keeps one dialog and one Confirm button: the paragraph
+   * simply appears, with the real count, as soon as the choices earn it.
+   */
+  const resolved = useMemo(
+    () => (plan && resolutions.size ? applyResolutions(plan.merge, resolutions) : plan?.merge),
+    [plan, resolutions],
+  )
+  const removing = resolved?.stats.localRowsRemoved ?? 0
+  const total = resolved?.stats.localRowsTotal ?? 0
+  const showDestructive = destructive?.kind === "destructive" || isDestructive(removing, total)
+
   const close = () => {
     setChoices({})
     onCancel()
@@ -119,11 +146,11 @@ export function GlossarySyncReviewDialog({
         {/* Its own paragraph, not a line in the description: this is the only
             thing on the screen that can cost the user data, and every
             catastrophic path this design was reviewed against ends here. */}
-        {destructive?.kind === "destructive" && (
+        {showDestructive && (
           <p className="rounded-md border border-destructive/40 bg-destructive/5 p-2.5 text-sm">
             {i18n.t("options.preference.config.googleDrive.glossary.review.destructive", [
-              String(destructive.removing),
-              String(destructive.total),
+              String(removing),
+              String(total),
             ])}
           </p>
         )}
@@ -168,11 +195,6 @@ export function GlossarySyncReviewDialog({
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={() => {
-              const resolutions: ConflictResolutions = new Map()
-              for (const entry of conflicts) {
-                const choice = choices[entry.conflict.key]
-                if (choice) resolutions.set(entry.conflict.key, choice)
-              }
               setChoices({})
               onConfirm(resolutions)
             }}

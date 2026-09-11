@@ -58,17 +58,30 @@ export type RemoteGlossaryWrite = { ok: true } | { ok: false; reason: "changed-u
  *
  * `If-Match` is not used: Drive v3's support for it on this endpoint is not
  * something this codebase has verified.
+ *
+ * The `expected === null` branch is re-checked for the same reason, and it is
+ * the one the cross-tab lock alone does not cover: whether a file exists is
+ * decided in `planGlossarySync`, which runs BEFORE the lock is taken, so two
+ * tabs can both plan against an empty Drive and only then serialise. Creating
+ * unconditionally there gives the account two glossary files, which is a state
+ * `readRemoteGlossary` refuses outright and the UI offers no way out of. Looking
+ * again from inside the lock turns that into an ordinary re-merge.
  */
 export async function writeRemoteGlossary(
   payload: { glossaries: readonly SyncedGlossary[]; terms: readonly SyncedTerm[] },
   expected: { fileId: string; modifiedTime: string } | null,
 ): Promise<RemoteGlossaryWrite> {
+  const files = await findFilesInAppData(GLOSSARY_SYNC_FILENAME)
+
   if (expected) {
-    const files = await findFilesInAppData(GLOSSARY_SYNC_FILENAME)
     const current = files.find((file) => file.id === expected.fileId)
     if (!current || files.length > 1 || current.modifiedTime !== expected.modifiedTime) {
       return { ok: false, reason: "changed-underneath" }
     }
+  } else if (files.length > 0) {
+    // Planned against an absent file, but one exists now. Uploading would make
+    // a second; the caller re-plans against the file that appeared instead.
+    return { ok: false, reason: "changed-underneath" }
   }
 
   await uploadFile(GLOSSARY_SYNC_FILENAME, formatGlossaryDocument(payload), expected?.fileId)

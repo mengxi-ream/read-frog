@@ -32,6 +32,16 @@ export default class GlossarySyncSnapshot extends Entity {
   /** The Google account this snapshot belongs to. Empty on an `undo` row. */
   email!: string
 
+  /**
+   * Which operation wrote an `undo` row — a sync or a file import. Absent on a
+   * `base` row, and on an `undo` row written before this field existed.
+   *
+   * One slot, two writers, and their toasts outlive them: without this the sync
+   * toast's Undo can restore an import's snapshot, and take the sync base with
+   * it. Not indexed; only ever read alongside the row it stamps.
+   */
+  source?: "sync" | "import"
+
   capturedAt!: Date
 
   glossaries!: SyncedGlossary[]

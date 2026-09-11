@@ -66,42 +66,15 @@ export async function findFilesInAppData(fileName: string): Promise<GoogleDriveF
 }
 
 /**
- * Search for file in Google Drive appDataFolder
+ * The one file in appDataFolder with this name, or null.
+ *
+ * Delegates rather than repeating the query: the two used to be the same
+ * thirty-five lines apart from their last statement, so pagination, an added
+ * `fields` entry or different 401 handling had to be remembered twice.
  */
 export async function findFileInAppData(fileName: string): Promise<GoogleDriveFile | null> {
-  try {
-    const accessToken = await getValidAccessToken()
-
-    const url = new URL(`${GOOGLE_DRIVE_API_BASE}/files`)
-    url.searchParams.set("spaces", "appDataFolder")
-    url.searchParams.set("q", `name='${fileName}'`)
-    url.searchParams.set("fields", "files(id, name, mimeType, modifiedTime, size)")
-
-    const response = await fetch(url.toString(), {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        await clearAccessToken()
-      }
-      throw new Error(`Failed to search file: ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    const result = googleDriveFileListResponseSchema.safeParse(data)
-
-    if (!result.success) {
-      throw new Error(`Invalid response from Google Drive API: ${result.error.message}`)
-    }
-
-    return result.data.files.length > 0 ? result.data.files[0]! : null
-  } catch (error) {
-    logger.error("Failed to find file in appData", error)
-    throw error
-  }
+  const files = await findFilesInAppData(fileName)
+  return files.length > 0 ? files[0]! : null
 }
 
 export async function downloadFile(fileId: string): Promise<string> {

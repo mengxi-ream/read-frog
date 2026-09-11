@@ -27,6 +27,17 @@ export function GoogleDriveSyncConfigItem() {
   const lastSyncTime = useAtomValue(lastSyncTimeAtom)
   const glossarySync = useGlossarySync()
 
+  // Always leaves `isSyncing` false, so a fault in either half cannot strand the
+  // button disabled until the page is reloaded.
+  const runGlossarySync = async () => {
+    setIsSyncing(true)
+    try {
+      await glossarySync.start()
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
   const handleSync = async () => {
     setIsSyncing(true)
 
@@ -52,9 +63,17 @@ export function GoogleDriveSyncConfigItem() {
     const result = await syncConfig()
 
     if (result.status === "unresolved") {
+      // The config half needs the user, and its dialog is now up. The glossary
+      // half waits for it: opening a second alert dialog on top leaves two
+      // modals with no stated order, and dismissing the wrong one cancels the
+      // glossary sync outright. `handleDialogClose` starts it once this closes.
       setUnresolvedData(result.data)
       setIsOpen(true)
-    } else if (result.status === "success") {
+      setIsSyncing(false)
+      return
+    }
+
+    if (result.status === "success") {
       const messages = {
         uploaded: i18n.t("options.preference.config.googleDrive.syncSuccess.uploaded"),
         downloaded: i18n.t("options.preference.config.googleDrive.syncSuccess.downloaded"),
@@ -73,9 +92,7 @@ export function GoogleDriveSyncConfigItem() {
 
     // The glossary lives in its own Drive file and fails for its own reasons, so
     // it runs whatever the config half did and says so separately.
-    await glossarySync.start()
-
-    setIsSyncing(false)
+    await runGlossarySync()
   }
 
   const handleLogout = async () => {
@@ -101,6 +118,10 @@ export function GoogleDriveSyncConfigItem() {
         title: i18n.t("options.preference.config.googleDrive.syncError"),
       })
     }
+    // Deferred from `handleSync` so the two dialogs never overlap. It runs even
+    // when the config half was cancelled: the two files fail for their own
+    // reasons, and one being abandoned is not a reason to skip the other.
+    void runGlossarySync()
   }
 
   const formatLastSyncTime = (timestamp: number): string => {

@@ -25,7 +25,11 @@ import { EXTENSION_VERSION } from "@/utils/constants/app"
 import { CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
 import { MAX_GLOSSARIES, MAX_GLOSSARY_TERMS } from "@/utils/constants/glossary"
 import { readGlossaryDocument } from "@/utils/glossary/sync/document"
-import { replaceGlossary, restoreUndoSnapshot } from "@/utils/glossary/sync/local-store"
+import {
+  checkGlossaryCaps,
+  replaceGlossary,
+  restoreUndoSnapshot,
+} from "@/utils/glossary/sync/local-store"
 import { i18n } from "@/utils/i18n"
 import { queryClient } from "@/utils/tanstack-query"
 import { ConfigItem } from "../../../../components/config-item"
@@ -108,6 +112,20 @@ function ImportConfig() {
         )
       }
 
+      // The cap belongs up here with the other two refusals, not inside the
+      // replace below: everything after this line writes. Asking afterwards
+      // swapped the settings, left the terms behind, and said "Nothing was
+      // changed" — the one half import all three of these checks exist to stop.
+      const overflow = glossary?.ok ? checkGlossaryCaps(glossary.document) : null
+      if (overflow) {
+        throw new Error(
+          i18n.t("options.preference.config.manualSync.glossaryCapExceeded", [
+            String(overflow.overflowBy),
+            String(overflow.reason === "termCapExceeded" ? MAX_GLOSSARY_TERMS : MAX_GLOSSARIES),
+          ]),
+        )
+      }
+
       await addBackup(currentConfig, EXTENSION_VERSION)
       await setConfig(newConfig)
 
@@ -147,7 +165,17 @@ function ImportConfig() {
                   void (async () => {
                     // The sync base still describes the last real agreement with
                     // the cloud, and an import never touched it.
-                    if (!(await restoreUndoSnapshot({ clearBase: false }))) return
+                    // Refused when the slot has since been taken by a sync.
+                    // Say so rather than leaving the click to do nothing.
+                    if (!(await restoreUndoSnapshot({ source: "import", clearBase: false }))) {
+                      toastManager.add({
+                        type: "error",
+                        title: i18n.t(
+                          "options.preference.config.manualSync.glossaryUndoUnavailable",
+                        ),
+                      })
+                      return
+                    }
                     await invalidateGlossary()
                     toastManager.add({
                       type: "success",

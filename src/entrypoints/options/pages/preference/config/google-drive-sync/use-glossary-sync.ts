@@ -8,11 +8,6 @@ import { logger } from "@/utils/logger"
 import { useGlossaryInvalidation } from "../../../advanced/glossary/use-glossary"
 
 /**
- * Every string this hook shows lives under one prefix, and the keys are picked
- * at runtime from a result's own tag, so they are asserted rather than checked.
- * The parity test over the locale files is what keeps them honest.
- */
-/**
  * One cast, in one place, instead of one at each of the fifteen call sites.
  *
  * The keys below are picked at runtime from a result's own tag, so the generated
@@ -65,8 +60,15 @@ export function useGlossarySync() {
         children: t("undo"),
         onClick: () => {
           void (async () => {
-            const restored = await restoreUndoSnapshot({ clearBase: true })
-            if (!restored) return
+            // A refusal means the slot now belongs to something else — an
+            // import, most likely, while this toast was still on screen. Said
+            // out loud, because a button that does nothing at all reads as a
+            // bug rather than as a refusal.
+            const restored = await restoreUndoSnapshot({ source: "sync", clearBase: true })
+            if (!restored) {
+              toastManager.add({ type: "error", title: t("undoUnavailable") })
+              return
+            }
             await invalidateGlossary()
             toastManager.add({ type: "success", title: t("undone") })
           })()

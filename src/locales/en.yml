@@ -418,12 +418,12 @@ options:
           cloud: Cloud
           deleted: Deleted
           disabled: off
-          syncing: Syncing glossaries...
           upToDate: Glossaries already in sync
           uploaded: Glossaries uploaded to cloud
           merged: "Glossaries synced: $1 in, $2 out"
           undo: Undo
           undone: Glossaries restored to how they were before the sync
+          undoUnavailable: That undo is no longer available — your glossaries have changed since.
           retry: The glossary changed while syncing. Run it again.
           busy: Another tab is syncing your glossaries right now.
           malformed: The glossary file in your Drive could not be read, so nothing was changed.
@@ -446,10 +446,12 @@ options:
         export: Export
         importSuccess: Config imported successfully
         exportSuccess: Config exported successfully
+        exportGlossaryFailed: Your settings were exported, but your glossaries could not be read and are not in the file.
         importError: Import failed
         glossaryImported: "$1 glossary terms were imported, replacing the ones you had."
         glossaryUndo: Undo
         glossaryUndone: Your glossaries were restored to how they were before the import
+        glossaryUndoUnavailable: That undo is no longer available — your glossaries have changed since.
         glossaryMalformed: The glossaries in that file could not be read. Nothing was changed.
         glossaryVersionTooNew: The glossaries in that file were written by a newer version of Read Frog. Update the extension first.
         glossaryCapExceeded: "That file holds $1 more glossary rows than the limit of $2. Nothing was changed."

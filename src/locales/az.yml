@@ -418,12 +418,12 @@ options:
           cloud: Bulud
           deleted: Silinib
           disabled: söndürülüb
-          syncing: Lüğətlər sinxronlaşdırılır...
           upToDate: Lüğətlər artıq sinxrondur
           uploaded: Lüğətlər buluda yükləndi
           merged: "Lüğətlər sinxronlaşdırıldı: $1 gəldi, $2 getdi"
           undo: Geri al
           undone: Lüğətlər sinxronizasiyadan əvvəlki halına qaytarıldı
+          undoUnavailable: Bu geri alma artıq mümkün deyil — lüğətləriniz o vaxtdan bəri dəyişib.
           retry: Sinxronizasiya zamanı lüğət dəyişdi. Yenidən işə salın.
           busy: Başqa bir tab hazırda lüğətlərinizi sinxronlaşdırır.
           malformed: Drive-dakı lüğət faylı oxuna bilmədi, ona görə heç nə dəyişmədi.
@@ -446,10 +446,12 @@ options:
         export: İxrac et
         importSuccess: Konfiqurasiya uğurla idxal edildi
         exportSuccess: Konfiqurasiya uğurla ixrac edildi
+        exportGlossaryFailed: Parametrləriniz ixrac edildi, lakin lüğətləriniz oxuna bilmədi və fayla daxil edilmədi.
         importError: İdxal alınmadı
         glossaryImported: "$1 termin idxal edildi və əvvəlki lüğətləriniz əvəz olundu."
         glossaryUndo: Geri al
         glossaryUndone: Lüğətləriniz idxaldan əvvəlki halına qaytarıldı
+        glossaryUndoUnavailable: Bu geri alma artıq mümkün deyil — lüğətləriniz o vaxtdan bəri dəyişib.
         glossaryMalformed: Həmin fayldakı lüğətlər oxuna bilmədi. Heç nə dəyişmədi.
         glossaryVersionTooNew: Həmin fayldakı lüğətləri Read Frog-un daha yeni versiyası yazıb. Əvvəlcə genişlənməni yeniləyin.
         glossaryCapExceeded: "Həmin faylda $2 limitindən $1 çox lüğət sətri var. Heç nə dəyişmədi."

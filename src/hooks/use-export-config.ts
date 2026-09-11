@@ -41,11 +41,18 @@ export function useExportConfig({
       // Best effort, and deliberately so: this hook is also what the recovery
       // screen offers when the extension is already broken, and a database that
       // will not open must not be able to stop the settings from getting out.
+      //
+      // Best effort is not the same as silent, though. The file is the user's
+      // backup of the one thing in the product they cannot get back any other
+      // way, so a missing glossary is said out loud in the toast rather than
+      // logged to a console nobody is reading.
       let glossary: ReturnType<typeof buildGlossaryDocument> | undefined
+      let glossaryFailed = false
       if (includeGlossary) {
         try {
           glossary = buildGlossaryDocument(await readLocalGlossary())
         } catch (error) {
+          glossaryFailed = true
           logger.error("Could not read the glossary for export", error)
         }
       }
@@ -64,11 +71,15 @@ export function useExportConfig({
       )
       const blob = new Blob([json], { type: "text/json" })
       saveAs(blob, `${kebabCase(APP_NAME)}-config-v${schemaVersion}.json`)
+      return { glossaryFailed }
     },
-    onSuccess: () => {
+    onSuccess: ({ glossaryFailed }) => {
       toastManager.add({
-        type: "success",
+        type: glossaryFailed ? "warning" : "success",
         title: i18n.t("options.preference.config.manualSync.exportSuccess"),
+        description: glossaryFailed
+          ? i18n.t("options.preference.config.manualSync.exportGlossaryFailed")
+          : undefined,
       })
     },
   })

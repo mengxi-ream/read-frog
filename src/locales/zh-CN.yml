@@ -418,12 +418,12 @@ options:
           cloud: 云端
           deleted: 已删除
           disabled: 已停用
-          syncing: 正在同步术语库…
           upToDate: 术语库已是最新
           uploaded: 术语库已上传到云端
           merged: "术语库已同步：接收 $1 条，上传 $2 条"
           undo: 撤销
           undone: 术语库已恢复到同步前的样子
+          undoUnavailable: 该撤销已失效 — 之后术语库已发生变化。
           retry: 同步过程中术语库有改动，请再运行一次。
           busy: 另一个标签页正在同步你的术语库。
           malformed: 云端的术语库文件无法读取，本次未做任何改动。
@@ -446,10 +446,12 @@ options:
         export: 导出
         importSuccess: 配置导入成功
         exportSuccess: 配置导出成功
+        exportGlossaryFailed: 设置已导出，但术语库无法读取，未包含在文件中。
         importError: 导入失败
         glossaryImported: "已导入 $1 条术语，替换了原有的术语库。"
         glossaryUndo: 撤销
         glossaryUndone: 术语库已恢复到导入前的样子
+        glossaryUndoUnavailable: 该撤销已失效 — 之后术语库已发生变化。
         glossaryMalformed: 那个文件里的术语库无法读取，本次未做任何改动。
         glossaryVersionTooNew: 那个文件里的术语库由更新版本的 Read Frog 写入，请先升级扩展。
         glossaryCapExceeded: "那个文件的术语库数据比上限 $2 条多出 $1 条，本次未做任何改动。"

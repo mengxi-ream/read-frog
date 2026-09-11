@@ -418,12 +418,12 @@ options:
           cloud: Nube
           deleted: Eliminado
           disabled: desactivado
-          syncing: Sincronizando glosarios...
           upToDate: Los glosarios ya están sincronizados
           uploaded: Glosarios subidos a la nube
           merged: "Glosarios sincronizados: $1 recibidos, $2 enviados"
           undo: Deshacer
           undone: Glosarios restaurados a como estaban antes de la sincronización
+          undoUnavailable: "Esa acción ya no se puede deshacer: tus glosarios han cambiado desde entonces."
           retry: El glosario cambió durante la sincronización. Vuelve a ejecutarla.
           busy: Otra pestaña está sincronizando tus glosarios ahora mismo.
           malformed: No se pudo leer el archivo de glosarios de tu Drive, así que no se cambió nada.
@@ -446,10 +446,12 @@ options:
         export: Exportar
         importSuccess: Configuración importada correctamente
         exportSuccess: Configuración exportada correctamente
+        exportGlossaryFailed: Se exportó tu configuración, pero no se pudieron leer tus glosarios y no están en el archivo.
         importError: Error al importar
         glossaryImported: "Se importaron $1 términos, sustituyendo los glosarios que tenías."
         glossaryUndo: Deshacer
         glossaryUndone: Tus glosarios volvieron a como estaban antes de la importación
+        glossaryUndoUnavailable: "Esa acción ya no se puede deshacer: tus glosarios han cambiado desde entonces."
         glossaryMalformed: No se pudieron leer los glosarios de ese archivo. No se cambió nada.
         glossaryVersionTooNew: Los glosarios de ese archivo los escribió una versión más reciente de Read Frog. Actualiza la extensión primero.
         glossaryCapExceeded: "Ese archivo tiene $1 filas de glosario más que el límite de $2. No se cambió nada."

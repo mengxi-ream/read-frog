@@ -352,3 +352,98 @@ describe("mergeGlossaryDocuments — what the destructive gate reads", () => {
     expect(merged.stats.localRowsTotal).toBe(4)
   })
 })
+
+// ---------------------------------------------------------------------------
+// Ways the merge could hand the writer something it cannot store, or quietly
+// drop what only this device had
+// ---------------------------------------------------------------------------
+
+describe("mergeGlossaryDocuments — what the writer receives", () => {
+  /**
+   * `bulkPut` keys on the uuid, so two rows carrying one uuid means the second
+   * silently replaces the first — and the NEXT sync reads the vanished identity
+   * as a deletion to propagate. Identity is the triple; the uuid is only this
+   * device's storage key, so the loser may safely be renumbered.
+   */
+  it("gives every term its own primary key when one row was reworded on both", () => {
+    const g = glossary("g")
+    const before = term("g", "token")
+    // The same row, id and all, renamed differently on each device.
+    const mine = { ...before, id: before.id, source: "alpha", matchKey: "i:alpha", updatedAt: T1 }
+    const theirs = { ...before, id: before.id, source: "beta", matchKey: "i:beta", updatedAt: T1 }
+
+    const merged = merge(snapshot([g], [before]), snapshot([g], [mine]), snapshot([g], [theirs]))
+
+    expect(merged.terms.map((t) => t.source).sort()).toEqual(["alpha", "beta"])
+    expect(new Set(merged.terms.map((t) => t.id)).size).toBe(merged.terms.length)
+  })
+
+  it("keeps the untouched rows' ids exactly as they were", () => {
+    const g = glossary("g")
+    const mine = term("g", "token")
+    const merged = merge(snapshot([g], [mine]), snapshot([g], [mine]), snapshot([g], [mine]))
+    expect(merged.terms.map((t) => t.id)).toEqual([mine.id])
+  })
+
+  /**
+   * No base for the row means nobody ever agreed this list, so the empty set is
+   * the only honest ancestor. Reading local's own list as the base instead made
+   * every site only this device had look like one the cloud deleted — dropped
+   * without a conflict, without a count, and then uploaded.
+   */
+  it("unions the website lists when the same glossary has no base", () => {
+    const mine = glossary("g", { matchPatterns: ["example.com", "mine.com"] })
+    const theirs = glossary("g", { matchPatterns: ["example.com", "theirs.com"] })
+
+    const merged = merge(snapshot([]), snapshot([mine]), snapshot([theirs]))
+
+    expect(merged.glossaries[0]!.matchPatterns.sort()).toEqual([
+      "example.com",
+      "mine.com",
+      "theirs.com",
+    ])
+  })
+})
+
+describe("mergeGlossaryDocuments — the timestamps a merged row carries", () => {
+  /**
+   * A row built on `local` keeps this device's older stamp even when it took the
+   * wording from the cloud. The two then hold the same text under different
+   * stamps forever: the next sync sees content-equal rows, says "unchanged" and
+   * never uploads, while `preferNewer` keeps consulting the stamp first.
+   */
+  it("takes the newer stamp when it takes the newer wording", () => {
+    const g = glossary("g")
+    const before = term("g", "token", { target: "旧", updatedAt: T0 })
+    const mine = term("g", "token", { target: "我的", updatedAt: T1 })
+    const theirs = term("g", "token", { target: "他们的", updatedAt: T2 })
+
+    const merged = merge(snapshot([g], [before]), snapshot([g], [mine]), snapshot([g], [theirs]))
+
+    expect(merged.terms[0]!.target).toBe("他们的")
+    expect(merged.terms[0]!.updatedAt).toEqual(T2)
+  })
+
+  it("agrees on the stamp whichever device runs the merge", () => {
+    const g = glossary("g")
+    const before = term("g", "token", { target: "旧", updatedAt: T0 })
+    const mine = term("g", "token", { target: "我的", updatedAt: T1 })
+    const theirs = term("g", "token", { target: "他们的", updatedAt: T2 })
+
+    const here = merge(snapshot([g], [before]), snapshot([g], [mine]), snapshot([g], [theirs]))
+    const there = merge(snapshot([g], [before]), snapshot([g], [theirs]), snapshot([g], [mine]))
+
+    expect(here.terms[0]!.updatedAt).toEqual(there.terms[0]!.updatedAt)
+    expect(here.terms[0]!.target).toBe(there.terms[0]!.target)
+  })
+
+  /** A glossary was created once; two devices holding it means it was copied. */
+  it("keeps the earlier creation time on a glossary both sides changed", () => {
+    const mine = glossary("g", { name: "Mine", createdAt: T1, updatedAt: T1 })
+    const theirs = glossary("g", { name: "Theirs", createdAt: T2, updatedAt: T2 })
+
+    const merged = merge(snapshot([]), snapshot([mine]), snapshot([theirs]))
+
+    expect(merged.glossaries[0]!.createdAt).toEqual(T1)
+  })
+})
