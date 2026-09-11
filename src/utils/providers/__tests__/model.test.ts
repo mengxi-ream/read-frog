@@ -101,7 +101,10 @@ function createAnthropicProviderConfig(headers?: Record<string, unknown>) {
   }
 }
 
-function createOpenRouterProviderConfig(headers?: Record<string, unknown>) {
+function createOpenRouterProviderConfig(
+  headers?: Record<string, unknown>,
+  providerSpecificSettings?: Record<string, unknown>,
+) {
   return {
     id: "openrouter-default",
     name: "OpenRouter",
@@ -115,6 +118,7 @@ function createOpenRouterProviderConfig(headers?: Record<string, unknown>) {
       customModel: null,
     },
     ...(headers !== undefined && { headers }),
+    ...(providerSpecificSettings !== undefined && { providerSpecificSettings }),
   }
 }
 
@@ -185,6 +189,67 @@ describe("getModelById", () => {
     )
     expect(createOpenAICompatibleMock.mock.calls[0]?.[0]).not.toHaveProperty("url")
     expect(openAICompatibleLanguageModelMock).toHaveBeenCalledWith("x-ai/grok-4-fast:free")
+  })
+
+  it("locks the OpenRouter request body to the configured providers", async () => {
+    getStorageItemMock.mockResolvedValue({
+      providersConfig: [createOpenRouterProviderConfig(undefined, { only: "deepinfra, together" })],
+    })
+
+    const { getModelById } = await import("../model")
+    await getModelById("openrouter-default")
+
+    const transformRequestBody = createOpenAICompatibleMock.mock.calls[0]?.[0]
+      ?.transformRequestBody as (body: Record<string, unknown>) => Record<string, unknown>
+    expect(transformRequestBody).toBeTypeOf("function")
+
+    expect(
+      transformRequestBody({ model: "x-ai/grok-4-fast:free", messages: [{ role: "user" }] }),
+    ).toEqual({
+      model: "x-ai/grok-4-fast:free",
+      messages: [{ role: "user" }],
+      provider: {
+        only: ["deepinfra", "together"],
+        allow_fallbacks: false,
+      },
+    })
+  })
+
+  it("keeps other OpenRouter routing fields the user set through provider options", async () => {
+    getStorageItemMock.mockResolvedValue({
+      providersConfig: [createOpenRouterProviderConfig(undefined, { only: "deepinfra" })],
+    })
+
+    const { getModelById } = await import("../model")
+    await getModelById("openrouter-default")
+
+    const transformRequestBody = createOpenAICompatibleMock.mock.calls[0]?.[0]
+      ?.transformRequestBody as (body: Record<string, unknown>) => Record<string, unknown>
+
+    expect(transformRequestBody({ provider: { sort: "throughput" } })).toEqual({
+      provider: {
+        sort: "throughput",
+        only: ["deepinfra"],
+        allow_fallbacks: false,
+      },
+    })
+    expect(transformRequestBody({ provider: "not-an-object" })).toEqual({
+      provider: {
+        only: ["deepinfra"],
+        allow_fallbacks: false,
+      },
+    })
+  })
+
+  it("leaves OpenRouter requests untouched without a provider lock", async () => {
+    getStorageItemMock.mockResolvedValue({
+      providersConfig: [createOpenRouterProviderConfig()],
+    })
+
+    const { getModelById } = await import("../model")
+    await getModelById("openrouter-default")
+
+    expect(createOpenAICompatibleMock.mock.calls[0]?.[0]).not.toHaveProperty("transformRequestBody")
   })
 
   it("passes Ollama root base URL and disables think on the language model", async () => {

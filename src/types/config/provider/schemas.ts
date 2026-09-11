@@ -19,6 +19,7 @@ import {
 import {
   azureProviderSpecificSettingsSchema,
   bedrockProviderSpecificSettingsSchema,
+  openrouterProviderSpecificSettingsSchema,
 } from "./provider-specific-settings"
 
 export const providerSponsorConfigSchema = z.object({
@@ -109,6 +110,7 @@ const llmProviderConfigSchemaList = [
   baseOpenAICompatibleLLMProviderConfigSchema.extend({
     provider: z.literal("openrouter"),
     model: createProviderModelSchema<"openrouter">("openrouter"),
+    providerSpecificSettings: openrouterProviderSpecificSettingsSchema.optional(),
   }),
   baseOpenAICompatibleLLMProviderConfigSchema.extend({
     provider: z.literal("minimax"),

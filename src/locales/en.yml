@@ -218,6 +218,9 @@ options:
         apiMode: API mode
         resourceName: Azure resource name (optional)
         apiVersion: API version
+        onlyProviders: Lock providers
+      providerSettingHints:
+        onlyProvidersHint: Comma-separated OpenRouter provider slugs, e.g. deepinfra, together or deepinfra/turbo. Requests are sent only to these providers, with fallbacks disabled. Leave empty to use OpenRouter's default load balancing.
       providerSettingOptionLabels:
         responses: Responses API
         chatCompletions: Chat Completions

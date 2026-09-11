@@ -218,6 +218,9 @@ options:
         apiMode: API rejimi
         resourceName: Azure resursunun adı (istəyə bağlı)
         apiVersion: API versiyası
+        onlyProviders: Provayderləri kilidlə
+      providerSettingHints:
+        onlyProvidersHint: Vergüllə ayrılmış OpenRouter provayder slug-ları (məs. deepinfra, together və ya deepinfra/turbo). Sorğular yalnızca bu provayderlərə göndərilir və ehtiyat variantlar söndürülür. OpenRouter-ın standart yük balanslaşdırması üçün boş buraxın.
       providerSettingOptionLabels:
         responses: Responses API
         chatCompletions: Chat Completions

@@ -8,6 +8,7 @@ export const DEFAULT_AZURE_API_MODE: AzureApiMode = "responses"
 interface ProviderSettingBaseUiMeta {
   labelKey: string
   placeholder?: string
+  hintKey?: string
 }
 
 interface ProviderSettingTextUiMeta extends ProviderSettingBaseUiMeta {
@@ -90,11 +91,40 @@ export const azureProviderSpecificSettingsSchema = z.strictObject({
     }),
 })
 
+/**
+ * OpenRouter load balances each request across every provider serving the model unless told
+ * otherwise. `only` pins the request to an explicit provider allow-list, which is what
+ * "lock the provider" means here; leaving it empty keeps OpenRouter's default price-based
+ * load balancing.
+ *
+ * Slugs are the ones OpenRouter prints on each model's provider list, and may target a
+ * single endpoint variant (`deepinfra/turbo`) or region (`google-vertex/us-east5`) as well
+ * as a whole provider (`deepinfra`).
+ */
+export const openrouterProviderSpecificSettingsSchema = z.strictObject({
+  only: z
+    .string()
+    .trim()
+    .optional()
+    .meta({
+      providerSettingUi: {
+        labelKey: "onlyProviders",
+        type: "text",
+        placeholder: "deepinfra, together",
+        hintKey: "onlyProvidersHint",
+      },
+    }),
+})
+export type OpenRouterProviderSpecificSettings = z.infer<
+  typeof openrouterProviderSpecificSettingsSchema
+>
+
 export const PROVIDER_SPECIFIC_SETTINGS_SCHEMAS: Partial<
   Record<LLMProviderTypes, ProviderSpecificSettingsSchema>
 > = {
   azure: azureProviderSpecificSettingsSchema,
   bedrock: bedrockProviderSpecificSettingsSchema,
+  openrouter: openrouterProviderSpecificSettingsSchema,
 }
 
 export function getProviderSpecificSettingFields(

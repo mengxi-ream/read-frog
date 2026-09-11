@@ -4,6 +4,7 @@ import {
   azureProviderSpecificSettingsSchema,
   bedrockProviderSpecificSettingsSchema,
   getProviderSpecificSettingFields,
+  openrouterProviderSpecificSettingsSchema,
 } from "../provider"
 
 describe("provider-specific settings metadata", () => {
@@ -41,6 +42,18 @@ describe("provider-specific settings metadata", () => {
         labelKey: "apiVersion",
         type: "text",
         placeholder: "v1",
+      },
+    ])
+  })
+
+  it("returns the OpenRouter provider lock field from Zod metadata", () => {
+    expect(getProviderSpecificSettingFields(openrouterProviderSpecificSettingsSchema)).toEqual([
+      {
+        key: "only",
+        labelKey: "onlyProviders",
+        type: "text",
+        placeholder: "deepinfra, together",
+        hintKey: "onlyProvidersHint",
       },
     ])
   })

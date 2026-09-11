@@ -217,6 +217,9 @@ options:
         apiMode: Chế độ API
         resourceName: Tên tài nguyên Azure (tùy chọn)
         apiVersion: Phiên bản API
+        onlyProviders: Khóa nhà cung cấp
+      providerSettingHints:
+        onlyProvidersHint: Các slug nhà cung cấp OpenRouter cách nhau bằng dấu phẩy (ví dụ deepinfra, together hoặc deepinfra/turbo). Yêu cầu chỉ được gửi đến các nhà cung cấp này và tắt dự phòng. Để trống để dùng cân bằng tải mặc định của OpenRouter.
       providerSettingOptionLabels:
         responses: Responses API
         chatCompletions: Chat Completions

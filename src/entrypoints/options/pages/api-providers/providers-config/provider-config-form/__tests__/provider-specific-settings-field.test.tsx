@@ -105,6 +105,28 @@ describe("providerSpecificSettingsField", () => {
     )
   })
 
+  it("renders the OpenRouter provider lock and persists it", async () => {
+    render(
+      <ProviderSpecificSettingsFieldHarness initialConfig={DEFAULT_PROVIDER_CONFIG.openrouter} />,
+    )
+
+    const onlyInput = screen.getByLabelText(
+      "options.apiProviders.form.providerSettingLabels.onlyProviders",
+    )
+    expect(onlyInput).toHaveValue("")
+
+    fireEvent.change(onlyInput, { target: { value: "deepinfra, together" } })
+
+    await act(async () => {
+      vi.advanceTimersByTime(500)
+      await Promise.resolve()
+    })
+
+    expect(screen.getByLabelText("persisted-provider-specific-settings")).toHaveTextContent(
+      '{"only":"deepinfra, together"}',
+    )
+  })
+
   it("does not render or write settings for providers without provider-specific schemas", async () => {
     render(<ProviderSpecificSettingsFieldHarness initialConfig={DEFAULT_PROVIDER_CONFIG.openai} />)
 
