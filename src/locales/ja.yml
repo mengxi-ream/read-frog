@@ -775,6 +775,7 @@ options:
         sites: "$1 件のウェブサイト"
         sitesOne: 1 件のウェブサイト
       editor:
+        docsLink: 使い方は?
         sections:
           terms: 用語
           maintenance: バックアップと削除

@@ -891,6 +891,7 @@ options:
         sites: "$1 個網站"
         sitesOne: 1 個網站
       editor:
+        docsLink: 如何使用？
         sections:
           terms: 術語
           maintenance: 備份與刪除
