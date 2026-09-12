@@ -779,8 +779,11 @@ options:
       columnTarget: Çeviri
       columnTargetLanguage: Hedef dil
       toggleTerm: "$1 terimini kullan"
+      editTerm: "$1 terimini düzenle"
       keepOriginal: Özgün hâlini koru
       delete: Sil
+      save: Kaydet
+      cancel: İptal
       loading: Yükleniyor...
       empty: Henüz terim yok. Yukarıdan ekleyin veya bir CSV dosyası içe aktarın.
       noMatches: Aramanızla eşleşen terim yok.

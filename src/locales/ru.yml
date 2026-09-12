@@ -779,8 +779,11 @@ options:
       columnTarget: Перевод
       columnTargetLanguage: Язык перевода
       toggleTerm: "Использовать $1"
+      editTerm: "Изменить $1"
       keepOriginal: Оставить оригинал
       delete: Удалить
+      save: Сохранить
+      cancel: Отмена
       loading: Загрузка...
       empty: Терминов пока нет. Добавьте термин выше или импортируйте CSV-файл.
       noMatches: Нет терминов, соответствующих запросу.

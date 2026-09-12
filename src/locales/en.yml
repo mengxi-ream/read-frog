@@ -895,8 +895,11 @@ options:
       columnTarget: Translation
       columnTargetLanguage: Target language
       toggleTerm: "Use $1"
+      editTerm: "Edit $1"
       keepOriginal: Keep the original
       delete: Delete
+      save: Save
+      cancel: Cancel
       loading: Loading...
       empty: No terms yet. Add one above, or import a CSV file.
       noMatches: No terms match your search.

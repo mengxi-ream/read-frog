@@ -895,8 +895,11 @@ options:
       columnTarget: Tərcümə
       columnTargetLanguage: Hədəf dili
       toggleTerm: "$1 terminini istifadə et"
+      editTerm: "$1 terminini redaktə et"
       keepOriginal: Orijinalı saxla
       delete: Sil
+      save: Yadda saxla
+      cancel: Ləğv et
       loading: Yüklənir...
       empty: Hələ termin yoxdur. Yuxarıdan əlavə edin və ya CSV faylı idxal edin.
       noMatches: Axtarışınıza uyğun termin yoxdur.

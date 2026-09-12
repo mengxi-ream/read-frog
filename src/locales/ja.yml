@@ -779,8 +779,11 @@ options:
       columnTarget: 訳語
       columnTargetLanguage: 翻訳先の言語
       toggleTerm: "「$1」を使用"
+      editTerm: "「$1」を編集"
       keepOriginal: 原文のまま
       delete: 削除
+      save: 保存
+      cancel: キャンセル
       loading: 読み込んでいます...
       empty: 用語がまだありません。上から追加するか、CSV ファイルをインポートしてください。
       noMatches: 検索に一致する用語はありません。

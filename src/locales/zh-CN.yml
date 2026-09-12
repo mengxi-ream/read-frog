@@ -895,8 +895,11 @@ options:
       columnTarget: 译文
       columnTargetLanguage: 目标语言
       toggleTerm: "使用「$1」"
+      editTerm: "编辑「$1」"
       keepOriginal: 保持原文
       delete: 删除
+      save: 保存
+      cancel: 取消
       loading: 正在加载...
       empty: 还没有术语。在上方添加，或导入 CSV 文件。
       noMatches: 没有与搜索匹配的术语。

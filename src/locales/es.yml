@@ -895,8 +895,11 @@ options:
       columnTarget: Traducción
       columnTargetLanguage: Idioma de destino
       toggleTerm: "Usar $1"
+      editTerm: "Editar $1"
       keepOriginal: Conservar el original
       delete: Eliminar
+      save: Guardar
+      cancel: Cancelar
       loading: Cargando...
       empty: Aún no hay términos. Añade uno arriba o importa un archivo CSV.
       noMatches: Ningún término coincide con tu búsqueda.

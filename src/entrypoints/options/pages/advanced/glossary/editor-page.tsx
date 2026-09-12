@@ -58,7 +58,12 @@ export function GlossaryEditorPage() {
         title={i18n.t("options.advanced.glossary.editor.sections.terms")}
       >
         <GlossaryAddTermItem glossaryId={glossary.id} />
-        <GlossaryTable glossaryId={glossary.id} />
+        {/* Keyed for the same reason the details form is: opening a different
+            glossary does not unmount this page, and every piece of state the
+            table holds — the search, the page number, which row is open for
+            editing, the frozen row order — is about the list that was on screen
+            a moment ago. */}
+        <GlossaryTable key={glossary.id} glossaryId={glossary.id} />
       </ConfigSection>
 
       <ConfigSection

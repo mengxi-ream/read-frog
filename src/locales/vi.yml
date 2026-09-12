@@ -779,8 +779,11 @@ options:
       columnTarget: Bản dịch
       columnTargetLanguage: Ngôn ngữ đích
       toggleTerm: "Dùng $1"
+      editTerm: "Sửa $1"
       keepOriginal: Giữ nguyên bản gốc
       delete: Xóa
+      save: Lưu
+      cancel: Hủy
       loading: Đang tải...
       empty: Chưa có thuật ngữ nào. Thêm ở trên hoặc nhập từ tệp CSV.
       noMatches: Không có thuật ngữ nào khớp với tìm kiếm.

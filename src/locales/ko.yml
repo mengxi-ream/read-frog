@@ -779,8 +779,11 @@ options:
       columnTarget: 번역
       columnTargetLanguage: 대상 언어
       toggleTerm: "'$1' 사용"
+      editTerm: "'$1' 편집"
       keepOriginal: 원문 유지
       delete: 삭제
+      save: 저장
+      cancel: 취소
       loading: 불러오는 중...
       empty: 아직 용어가 없습니다. 위에서 추가하거나 CSV 파일을 가져오세요.
       noMatches: 검색과 일치하는 용어가 없습니다.
