@@ -775,6 +775,7 @@ options:
         sites: "$1 web sitesi"
         sitesOne: 1 web sitesi
       editor:
+        docsLink: Nasıl çalışır?
         sections:
           terms: Terimler
           maintenance: Yedekleme ve silme

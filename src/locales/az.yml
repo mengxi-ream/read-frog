@@ -891,6 +891,7 @@ options:
         sites: "$1 sayt"
         sitesOne: 1 sayt
       editor:
+        docsLink: Necə işləyir?
         sections:
           terms: Terminlər
           maintenance: Ehtiyat nüsxə və silmə

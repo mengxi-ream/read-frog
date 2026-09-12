@@ -775,6 +775,7 @@ options:
         sites: "$1개 웹사이트"
         sitesOne: 1개 웹사이트
       editor:
+        docsLink: 어떻게 작동하나요?
         sections:
           terms: 용어
           maintenance: 백업과 삭제

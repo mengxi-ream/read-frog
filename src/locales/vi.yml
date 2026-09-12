@@ -775,6 +775,7 @@ options:
         sites: "$1 trang web"
         sitesOne: 1 trang web
       editor:
+        docsLink: Nó hoạt động thế nào?
         sections:
           terms: Thuật ngữ
           maintenance: Sao lưu và xóa

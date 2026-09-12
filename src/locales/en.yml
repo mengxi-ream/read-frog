@@ -891,6 +891,7 @@ options:
         sites: "$1 websites"
         sitesOne: 1 website
       editor:
+        docsLink: How does it work?
         sections:
           terms: Terms
           maintenance: Backup and deletion

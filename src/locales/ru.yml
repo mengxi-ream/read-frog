@@ -775,6 +775,7 @@ options:
         sites: "Сайтов: $1"
         sitesOne: "Сайтов: 1"
       editor:
+        docsLink: Как это работает?
         sections:
           terms: Термины
           maintenance: Резервное копирование и удаление
