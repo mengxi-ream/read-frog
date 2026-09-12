@@ -787,7 +787,7 @@ options:
           description: 無効にした用語集は用語を保持しますが、いずれも送信されません。
         sites:
           title: ウェブサイト
-          description: この用語集を適用するウェブサイトを限定します。*.example.com はそのサイトとサブドメインを含みます。example.com だけを書いた場合はそのアドレスにのみ一致します。
+          description: この用語集を適用するウェブサイトを限定します。example.com はそのアドレスのみ、*.example.com はサブドメインも含み、example.com/docs/* はサイトの一部分だけに絞ります。
           allSites: 空のままにすると、この用語集はすべてのウェブサイトに適用されます。
           header: ウェブサイト
         delete:
