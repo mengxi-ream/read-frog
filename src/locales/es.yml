@@ -902,7 +902,7 @@ options:
           description: Un glosario desactivado conserva sus términos, pero no envía ninguno.
         sites:
           title: Sitios web
-          description: Limita este glosario a determinados sitios web.
+          description: Limita este glosario a determinados sitios web. *.example.com incluye el sitio y sus subdominios; example.com por sí solo coincide únicamente con esa dirección exacta.
           allSites: Déjalo vacío y el glosario se aplicará en todas partes.
           header: Sitio web
         delete:
@@ -932,9 +932,13 @@ options:
       columnSource: Término
       columnTarget: Traducción
       columnTargetLanguage: Idioma de destino
+      allLanguages: Todos los idiomas
       toggleTerm: "Usar $1"
+      editTerm: "Editar $1"
       keepOriginal: Conservar el original
       delete: Eliminar
+      save: Guardar
+      cancel: Cancelar
       loading: Cargando...
       empty: Aún no hay términos. Añade uno arriba o importa un archivo CSV.
       noMatches: Ningún término coincide con tu búsqueda.

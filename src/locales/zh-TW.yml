@@ -902,7 +902,7 @@ options:
           description: 停用的術語庫會保留其中的術語，但一條都不會傳送。
         sites:
           title: 網站
-          description: 限定這個術語庫只在特定網站生效。
+          description: 限定這個術語庫只在特定網站生效。*.example.com 包含該網站及其子網域；只寫 example.com 則僅比對這一個確切網址。
           allSites: 留空則這個術語庫在所有網站都生效。
           header: 網站
         delete:
@@ -932,9 +932,13 @@ options:
       columnSource: 術語
       columnTarget: 譯文
       columnTargetLanguage: 目標語言
+      allLanguages: 所有語言
       toggleTerm: "使用「$1」"
+      editTerm: "編輯「$1」"
       keepOriginal: 保持原文
       delete: 刪除
+      save: 儲存
+      cancel: 取消
       loading: 正在載入…
       empty: 還沒有術語。在上方新增，或匯入 CSV 檔案。
       noMatches: 沒有與搜尋相符的術語。

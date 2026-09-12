@@ -902,7 +902,7 @@ options:
           description: 停用后术语仍会保留，但一条都不会发送。
         sites:
           title: 网站
-          description: 限定这份术语库只在特定网站生效。
+          description: 限定这份术语库只在特定网站生效。*.example.com 包含该网站及其子域名；只写 example.com 则仅匹配这一个确切地址。
           allSites: 留空则这份术语库在所有网站生效。
           header: 网站
         delete:
@@ -932,9 +932,13 @@ options:
       columnSource: 术语
       columnTarget: 译文
       columnTargetLanguage: 目标语言
+      allLanguages: 所有语言
       toggleTerm: "使用「$1」"
+      editTerm: "编辑「$1」"
       keepOriginal: 保持原文
       delete: 删除
+      save: 保存
+      cancel: 取消
       loading: 正在加载...
       empty: 还没有术语。在上方添加，或导入 CSV 文件。
       noMatches: 没有与搜索匹配的术语。

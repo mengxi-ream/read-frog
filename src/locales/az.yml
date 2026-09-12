@@ -902,7 +902,7 @@ options:
           description: Deaktiv lüğət terminlərini saxlayır, lakin onlardan heç birini göndərmir.
         sites:
           title: Saytlar
-          description: Bu lüğəti yalnız müəyyən saytlarla məhdudlaşdırın.
+          description: Bu lüğəti yalnız müəyyən saytlarla məhdudlaşdırın. *.example.com saytı və onun alt domenlərini əhatə edir; tək başına example.com yalnız həmin dəqiq ünvana uyğun gəlir.
           allSites: Bunu boş buraxsanız, lüğət hər yerdə tətbiq olunur.
           header: Sayt
         delete:
@@ -932,9 +932,13 @@ options:
       columnSource: Termin
       columnTarget: Tərcümə
       columnTargetLanguage: Hədəf dili
+      allLanguages: Bütün dillər
       toggleTerm: "$1 terminini istifadə et"
+      editTerm: "$1 terminini redaktə et"
       keepOriginal: Orijinalı saxla
       delete: Sil
+      save: Yadda saxla
+      cancel: Ləğv et
       loading: Yüklənir...
       empty: Hələ termin yoxdur. Yuxarıdan əlavə edin və ya CSV faylı idxal edin.
       noMatches: Axtarışınıza uyğun termin yoxdur.

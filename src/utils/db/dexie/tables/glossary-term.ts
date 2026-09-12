@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { GlossaryTargetLang } from "@/utils/glossary/target-language"
 import { Entity } from "dexie"
 
 /**
@@ -40,8 +40,14 @@ export default class GlossaryTerm extends Entity {
    * means the language needs no place in the translation cache key: the global
    * target language is already hashed, and the terms that survive the filter are
    * hashed with the rendered prompt.
+   *
+   * `ALL_LANGUAGES` is a legal value, for a wording that is not written for any
+   * one language — in practice the keep-the-original case. It is part of the
+   * unique index like any other value, so the same term may carry both a
+   * language-independent row and a language-specific one; the specific one wins
+   * where both apply. See `utils/glossary/target-language.ts`.
    */
-  targetLang!: LangCodeISO6393
+  targetLang!: GlossaryTargetLang
 
   source!: string
 

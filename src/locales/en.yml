@@ -902,7 +902,7 @@ options:
           description: A disabled glossary keeps its terms but sends none of them.
         sites:
           title: Websites
-          description: Restrict this glossary to certain websites.
+          description: Restrict this glossary to certain websites. *.example.com covers the site and its subdomains; example.com on its own matches only that exact address.
           allSites: Leave this empty and the glossary applies everywhere.
           header: Website
         delete:
@@ -932,9 +932,13 @@ options:
       columnSource: Term
       columnTarget: Translation
       columnTargetLanguage: Target language
+      allLanguages: All languages
       toggleTerm: "Use $1"
+      editTerm: "Edit $1"
       keepOriginal: Keep the original
       delete: Delete
+      save: Save
+      cancel: Cancel
       loading: Loading...
       empty: No terms yet. Add one above, or import a CSV file.
       noMatches: No terms match your search.

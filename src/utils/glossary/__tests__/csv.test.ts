@@ -1,7 +1,14 @@
 import type { ParsedGlossaryRow } from "../csv"
 import { describe, expect, it } from "vitest"
 import { MAX_GLOSSARY_SOURCE_LENGTH } from "../../constants/glossary"
-import { decodeGlossaryCsv, formatGlossaryCsv, parseGlossaryCsv, UTF8_BOM } from "../csv"
+import {
+  decodeGlossaryCsv,
+  formatGlossaryCsv,
+  parseGlossaryCsv,
+  parseTargetLanguageCell,
+  UTF8_BOM,
+} from "../csv"
+import { ALL_LANGUAGES } from "../target-language"
 
 const HEADER = "source,target,targetLanguage,caseSensitive"
 
@@ -254,6 +261,32 @@ describe("decodeGlossaryCsv", () => {
   })
 
   it("never returns the replacement characters `File.text()` would have", () => {
-    expect(decodeGlossaryCsv(bytes(...GB18030))).not.toContain("�")
+    expect(decodeGlossaryCsv(bytes(...GB18030))).not.toContain("\uFFFD")
+  })
+})
+
+describe("parseTargetLanguageCell", () => {
+  it("keeps the language the cell names", () => {
+    expect(parseTargetLanguageCell("jpn")).toBe("jpn")
+  })
+
+  /**
+   * What an export writes for a row not written for any one language. Read
+   * case-insensitively because a spreadsheet is as likely to hand it back
+   * capitalised as it took it.
+   */
+  it("keeps an all-languages cell as one", () => {
+    expect(parseTargetLanguageCell("all")).toBe(ALL_LANGUAGES)
+    expect(parseTargetLanguageCell("ALL")).toBe(ALL_LANGUAGES)
+  })
+
+  /**
+   * Dropped rather than filed under some default: a Japanese wording buried in
+   * the Chinese list is somewhere the user would never look for it.
+   */
+  it("refuses a cell that names no language we know", () => {
+    expect(parseTargetLanguageCell("zz")).toBeNull()
+    expect(parseTargetLanguageCell("Chinese")).toBeNull()
+    expect(parseTargetLanguageCell("")).toBeNull()
   })
 })
