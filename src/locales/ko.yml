@@ -787,7 +787,7 @@ options:
           description: 사용하지 않는 용어집은 용어를 그대로 보관하지만 아무것도 전달하지 않습니다.
         sites:
           title: 웹사이트
-          description: 이 용어집을 특정 웹사이트에만 적용합니다. *.example.com은 해당 사이트와 하위 도메인까지 포함하고, example.com만 쓰면 그 주소에만 일치합니다.
+          description: 이 용어집을 특정 웹사이트에만 적용합니다. example.com은 그 주소만, *.example.com은 하위 도메인까지, example.com/docs/*는 사이트의 한 부분만 포함합니다.
           allSites: 비워 두면 용어집이 모든 곳에 적용됩니다.
           header: 웹사이트
         delete:

@@ -903,7 +903,7 @@ options:
           description: A disabled glossary keeps its terms but sends none of them.
         sites:
           title: Websites
-          description: Restrict this glossary to certain websites. *.example.com covers the site and its subdomains; example.com on its own matches only that exact address.
+          description: Restrict this glossary to certain websites. example.com is that address alone; *.example.com adds subdomains; example.com/docs/* narrows to one part of a site.
           allSites: Leave this empty and the glossary applies everywhere.
           header: Website
         delete:

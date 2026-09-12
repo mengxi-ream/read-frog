@@ -903,7 +903,7 @@ options:
           description: Deaktiv lüğət terminlərini saxlayır, lakin onlardan heç birini göndərmir.
         sites:
           title: Saytlar
-          description: Bu lüğəti yalnız müəyyən saytlarla məhdudlaşdırın. *.example.com saytı və onun alt domenlərini əhatə edir; tək başına example.com yalnız həmin dəqiq ünvana uyğun gəlir.
+          description: Bu lüğəti yalnız müəyyən saytlarla məhdudlaşdırın. example.com yalnız həmin ünvandır; *.example.com alt domenləri əlavə edir; example.com/docs/* saytın bir hissəsinə daraldır.
           allSites: Bunu boş buraxsanız, lüğət hər yerdə tətbiq olunur.
           header: Sayt
         delete:

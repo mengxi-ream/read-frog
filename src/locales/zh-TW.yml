@@ -903,7 +903,7 @@ options:
           description: 停用的術語庫會保留其中的術語，但一條都不會傳送。
         sites:
           title: 網站
-          description: 限定這個術語庫只在特定網站生效。*.example.com 包含該網站及其子網域；只寫 example.com 則僅比對這一個確切網址。
+          description: 限定這個術語庫只在特定網站生效。example.com 僅比對這一個網址；*.example.com 還包含子網域；example.com/docs/* 則只涵蓋網站的某一部分。
           allSites: 留空則這個術語庫在所有網站都生效。
           header: 網站
         delete:
