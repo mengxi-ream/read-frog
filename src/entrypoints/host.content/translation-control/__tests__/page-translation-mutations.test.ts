@@ -761,6 +761,58 @@ describe("pageTranslationManager mutation re-walk", () => {
     manager.stop()
   })
 
+  it("does not scan a blocked shadow host added inside a current translated source", async () => {
+    document.body.innerHTML = `<p id="summary">Original summary</p>`
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const observer = intersectionObservers[0]!
+    const summary = document.getElementById("summary") as HTMLElement
+    const wrapper = document.createElement("span")
+    wrapper.className = "notranslate read-frog-translated-content-wrapper"
+    wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+    wrapper.append("译文")
+    summary.append(wrapper)
+    const state: BilingualTranslationState = {
+      layoutSource: summary,
+      sourceTextContent: "Original summary",
+      status: "active",
+      walkId: "walk-id",
+      wrapper,
+      wrapperTextContent: "译文",
+    }
+    registerBilingualTranslationState(state)
+    await flushDomUpdates()
+    observer.observe.mockClear()
+    mockWalkAndLabelElement.mockClear()
+    mockIsDontWalkIntoButTranslateAsChildElement.mockImplementation((element: HTMLElement) =>
+      element.classList.contains("notranslate"),
+    )
+
+    const host = document.createElement("span")
+    host.className = "notranslate"
+    const shadowRoot = host.attachShadow({ mode: "open" })
+    const shadowContainer = document.createElement("div")
+    shadowContainer.innerHTML = `<p id="blocked-shadow-paragraph">Blocked shadow content</p>`
+    shadowRoot.append(shadowContainer)
+    summary.prepend(host)
+    await flushDomUpdates()
+
+    const shadowParagraph = shadowRoot.getElementById("blocked-shadow-paragraph") as HTMLElement
+    expect(observer.observe).not.toHaveBeenCalledWith(shadowParagraph)
+    expect(mockWalkAndLabelElement).not.toHaveBeenCalledWith(
+      shadowContainer,
+      "walk-id",
+      DEFAULT_CONFIG,
+      expect.anything(),
+    )
+
+    unregisterBilingualTranslationState(state)
+    manager.stop()
+  })
+
   it("retranslates exactly once when the site re-renders a node containing our wrapper (#1831)", async () => {
     document.body.innerHTML = `
       <p id="tweet"><span id="source">Original content</span></p>

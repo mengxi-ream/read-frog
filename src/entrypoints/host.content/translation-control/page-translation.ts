@@ -1192,6 +1192,18 @@ export class PageTranslationManager implements IPageTranslationManager {
    * considered as part of the document.
    */
   private observeIsolatedDescendantsMutations(element: HTMLElement, config?: Config): void {
+    // The config-enabled path also scans newly discovered isolated trees. Apply
+    // the same walkability gates as observeTopLevelParagraphs before crossing
+    // a shadow boundary, whose children cannot inspect their light-DOM host via
+    // parentElement.
+    if (config) {
+      if (hasNoWalkAncestor(element, config)) return
+      if (this.isWalkBlockedElement(element, config)) {
+        this.walkBlockedElementsCache.add(element)
+        return
+      }
+    }
+
     // Check if this element has a shadow root
     if (element.shadowRoot) {
       for (const child of element.shadowRoot.children) {
