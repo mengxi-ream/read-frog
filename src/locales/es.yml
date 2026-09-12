@@ -103,6 +103,7 @@ options:
     toggle: Alternar barra lateral
     settings: Configuración
     features: Funciones
+    translation: Traducción
     product: Producto
   tools:
     translationHub: Centro de traducción
@@ -918,7 +919,7 @@ options:
         description: Solo se envían los términos que aparecen en un párrafo.
       importExport:
         title: Importar y exportar
-        description: Los términos son un archivo CSV con columnas de término y traducción, así que puedes guardar una copia de la lista o compartirla.
+        description: "Los términos son un CSV con las columnas source, target, targetLanguage y caseSensitive: el archivo que escribe Exportar."
       sourcePlaceholder: Término
       targetPlaceholder: Traducción (déjala vacía para conservar el original)
       caseSensitive: Distinguir mayúsculas
@@ -947,10 +948,11 @@ options:
       importModeMerge: Añadir a la lista
       importModeReplace: Reemplazar la lista
       importEmpty: No se encontraron términos en ese archivo.
+      importMissingHeader: "Ese archivo no es una exportación de glosario de Read Frog. Necesita estas columnas:"
       importOverflow: "Esa importación superaría el límite en $1 términos. No se ha cambiado nada."
       importSuccess: "Se han importado $1 términos nuevos y actualizado $2."
       importSkipped: "Se han omitido $1 filas no válidas y $2 duplicados."
-      importNoValidRows: "Ninguna de esas filas indicaba un idioma al que esta extensión pueda traducir. No se ha cambiado nada."
+      importNoValidRows: No se pudo importar ninguna de esas filas. No se cambió nada.
       importReplaceConfirm:
         title: "¿Reemplazar toda la lista?"
         description: "Se eliminarán los $1 términos de este glosario —en todos los idiomas de destino, no solo en el seleccionado— y se reemplazarán por el contenido de este archivo. Esta acción no se puede deshacer."

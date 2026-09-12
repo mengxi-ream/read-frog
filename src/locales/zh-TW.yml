@@ -103,6 +103,7 @@ options:
     toggle: 切換側邊欄
     settings: 設定
     features: 功能
+    translation: 翻譯
     product: 產品
   tools:
     translationHub: 翻譯中心
@@ -918,7 +919,7 @@ options:
         description: 只有出現在段落中的術語，才會隨該段落一起傳送。
       importExport:
         title: 匯入與匯出
-        description: 術語就是一個包含術語和譯文兩欄的 CSV 檔案，可以用來備份或分享整份清單。
+        description: 詞彙是一個 CSV 檔，包含 source、target、targetLanguage、caseSensitive 四欄，即匯出所產生的格式。
       sourcePlaceholder: 術語
       targetPlaceholder: 譯文（留空則保持原文）
       caseSensitive: 區分大小寫
@@ -947,10 +948,11 @@ options:
       importModeMerge: 附加到清單
       importModeReplace: 取代清單
       importEmpty: 該檔案中找不到術語。
+      importMissingHeader: 該檔案不是 Read Frog 的詞彙庫匯出檔。它需要這些欄位：
       importOverflow: "本次匯入會超出上限 $1 條術語，未做任何變更。"
       importSuccess: "已匯入 $1 條新術語，更新 $2 條。"
       importSkipped: "已略過 $1 列無效資料和 $2 筆重複項目。"
-      importNoValidRows: "這些列都沒有指定本擴充功能能翻譯的目標語言，未做任何變更。"
+      importNoValidRows: 這些列都無法匯入，未做任何變更。
       importReplaceConfirm:
         title: 取代整個清單？
         description: "該術語庫下的全部 $1 條術語都會被刪除——包括所有目標語言，不只是目前選擇的那個——然後以該檔案的內容取代。此操作無法復原。"

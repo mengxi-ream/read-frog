@@ -103,6 +103,7 @@ options:
     toggle: Bật/tắt thanh bên
     settings: Cài đặt
     features: Tính năng
+    translation: Dịch
     product: Sản phẩm
   tools:
     translationHub: Trung tâm Dịch thuật
@@ -802,7 +803,7 @@ options:
         description: Chỉ những thuật ngữ xuất hiện trong đoạn văn mới được gửi kèm đoạn đó.
       importExport:
         title: Nhập và xuất
-        description: Thuật ngữ là một tệp CSV gồm cột thuật ngữ và bản dịch, nên bạn có thể sao lưu hoặc chia sẻ danh sách.
+        description: Thuật ngữ là tệp CSV gồm các cột source, target, targetLanguage và caseSensitive — đúng tệp mà Xuất tạo ra.
       sourcePlaceholder: Thuật ngữ
       targetPlaceholder: Bản dịch (để trống để giữ nguyên bản gốc)
       caseSensitive: Phân biệt chữ hoa/thường
@@ -831,10 +832,11 @@ options:
       importModeMerge: Thêm vào danh sách
       importModeReplace: Thay thế danh sách
       importEmpty: Không tìm thấy thuật ngữ nào trong tệp đó.
+      importMissingHeader: "Tệp đó không phải là tệp xuất bộ thuật ngữ của Read Frog. Nó cần các cột sau:"
       importOverflow: "Lần nhập này sẽ vượt giới hạn $1 thuật ngữ. Không có gì thay đổi."
       importSuccess: "Đã nhập $1 thuật ngữ mới và cập nhật $2 thuật ngữ."
       importSkipped: "Đã bỏ qua $1 dòng không hợp lệ và $2 mục trùng lặp."
-      importNoValidRows: "Không dòng nào chỉ định ngôn ngữ mà tiện ích này có thể dịch sang. Không có gì thay đổi."
+      importNoValidRows: Không thể nhập bất kỳ dòng nào trong số đó. Không có gì thay đổi.
       importReplaceConfirm:
         title: Thay thế toàn bộ danh sách?
         description: "Toàn bộ $1 thuật ngữ trong bảng thuật ngữ này sẽ bị xóa — ở mọi ngôn ngữ đích, không chỉ ngôn ngữ đang chọn — và được thay bằng nội dung của tệp này. Không thể hoàn tác."

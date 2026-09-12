@@ -103,6 +103,7 @@ options:
     toggle: サイドバーを切り替え
     settings: 設定
     features: 機能
+    translation: 翻訳
     product: 製品
   tools:
     translationHub: 翻訳ハブ
@@ -802,7 +803,7 @@ options:
         description: 段落に出現した用語だけが、その段落と一緒に送信されます。
       importExport:
         title: インポートとエクスポート
-        description: 用語は用語と訳語の 2 列からなる CSV ファイルなので、一覧をバックアップしたり共有したりできます。
+        description: 用語は source, target, targetLanguage, caseSensitive の 4 列からなる CSV です。エクスポートが書き出す形式と同じです。
       sourcePlaceholder: 用語
       targetPlaceholder: 訳語（空欄なら原文のまま）
       caseSensitive: 大文字と小文字を区別
@@ -831,10 +832,11 @@ options:
       importModeMerge: リストに追加
       importModeReplace: リストを置き換え
       importEmpty: そのファイルに用語が見つかりませんでした。
+      importMissingHeader: "このファイルは Read Frog の用語集エクスポートではありません。次の列が必要です:"
       importOverflow: "このインポートは上限を $1 件超えます。変更は行われていません。"
       importSuccess: "$1 件を新規にインポートし、$2 件を更新しました。"
       importSkipped: "無効な行 $1 件と重複 $2 件をスキップしました。"
-      importNoValidRows: "この拡張機能が翻訳できる言語を指定した行がありませんでした。変更は行われていません。"
+      importNoValidRows: いずれの行もインポートできませんでした。変更はありません。
       importReplaceConfirm:
         title: リスト全体を置き換えますか？
         description: "この用語集の $1 件すべてが削除され（選択中の言語だけでなく、すべての対象言語が対象です）、このファイルの内容に置き換えられます。この操作は元に戻せません。"

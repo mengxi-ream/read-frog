@@ -1,4 +1,3 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { ParsedGlossaryRow } from "@/utils/glossary/csv"
 import type { GlossaryTermInput, ImportMode } from "@/utils/glossary/repository"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -169,17 +168,8 @@ export function useDeleteAllGlossaryTerms(glossaryId: string) {
 export function useImportGlossary(glossaryId: string) {
   const invalidate = useGlossaryInvalidation()
   return useMutation({
-    mutationFn: ({
-      rows,
-      mode,
-      caseSensitive,
-      fallbackLang,
-    }: {
-      rows: ParsedGlossaryRow[]
-      mode: ImportMode
-      caseSensitive: boolean
-      fallbackLang: LangCodeISO6393
-    }) => importGlossaryRows(glossaryId, rows, mode, caseSensitive, fallbackLang),
+    mutationFn: ({ rows, mode }: { rows: ParsedGlossaryRow[]; mode: ImportMode }) =>
+      importGlossaryRows(glossaryId, rows, mode),
     onSuccess: () => void invalidate(),
   })
 }

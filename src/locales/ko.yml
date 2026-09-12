@@ -103,6 +103,7 @@ options:
     toggle: 사이드바 전환
     settings: 설정
     features: 기능
+    translation: 번역
     product: 제품
   tools:
     translationHub: 번역 허브
@@ -802,7 +803,7 @@ options:
         description: 문단에 나타난 용어만 해당 문단과 함께 전달됩니다.
       importExport:
         title: 가져오기와 내보내기
-        description: 용어는 용어와 번역 두 열로 된 CSV 파일이므로, 목록을 백업하거나 공유할 수 있습니다.
+        description: 용어는 source, target, targetLanguage, caseSensitive 네 개 열로 이루어진 CSV입니다. 내보내기가 만드는 형식과 같습니다.
       sourcePlaceholder: 용어
       targetPlaceholder: 번역 (비워 두면 원문 유지)
       caseSensitive: 대소문자 구분
@@ -831,10 +832,11 @@ options:
       importModeMerge: 목록에 추가
       importModeReplace: 목록 교체
       importEmpty: 해당 파일에서 용어를 찾을 수 없습니다.
+      importMissingHeader: "이 파일은 Read Frog 용어집 내보내기 파일이 아닙니다. 다음 열이 필요합니다:"
       importOverflow: "이 가져오기는 한도를 $1개 초과합니다. 아무것도 변경되지 않았습니다."
       importSuccess: "$1개를 새로 가져오고 $2개를 업데이트했습니다."
       importSkipped: "잘못된 행 $1개와 중복 $2개를 건너뛰었습니다."
-      importNoValidRows: "이 확장 프로그램이 번역할 수 있는 언어를 지정한 행이 없습니다. 아무것도 변경되지 않았습니다."
+      importNoValidRows: 해당 행을 하나도 가져올 수 없습니다. 변경된 내용이 없습니다.
       importReplaceConfirm:
         title: 목록 전체를 교체할까요?
         description: "이 용어집의 $1개 용어가 모두 삭제되고(선택한 언어뿐 아니라 모든 대상 언어) 이 파일의 내용으로 교체됩니다. 이 작업은 되돌릴 수 없습니다."

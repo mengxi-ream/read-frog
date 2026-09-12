@@ -103,6 +103,7 @@ options:
     toggle: Toggle sidebar
     settings: Settings
     features: Features
+    translation: Translation
     product: Product
   tools:
     translationHub: Translation Hub
@@ -918,7 +919,7 @@ options:
         description: Only the terms that appear in a paragraph are sent with it.
       importExport:
         title: Import and export
-        description: Terms are a CSV file of source and translation columns, so a list can be backed up or shared.
+        description: Terms are a CSV of source, target, targetLanguage and caseSensitive columns — the file Export writes.
       sourcePlaceholder: Term
       targetPlaceholder: Translation (leave empty to keep the original)
       caseSensitive: Match case
@@ -947,10 +948,11 @@ options:
       importModeMerge: Add to list
       importModeReplace: Replace list
       importEmpty: No terms found in that file.
+      importMissingHeader: "That file is not a Read Frog glossary export. It needs these columns:"
       importOverflow: "That import would exceed the limit by $1 terms. Nothing was changed."
       importSuccess: "Imported $1 new and updated $2 terms."
       importSkipped: "Skipped $1 invalid rows and $2 duplicates."
-      importNoValidRows: "None of those rows named a language this extension can translate into. Nothing was changed."
+      importNoValidRows: None of those rows could be imported. Nothing was changed.
       importReplaceConfirm:
         title: Replace the whole list?
         description: "All $1 terms in this glossary will be deleted — every target language, not just the one selected — and replaced with the contents of this file. This cannot be undone."

@@ -103,6 +103,7 @@ options:
     toggle: Yan paneli aç və ya bağla
     settings: Parametrlər
     features: Funksiyalar
+    translation: Tərcümə
     product: Məhsul
   tools:
     translationHub: Tərcümə mərkəzi
@@ -918,7 +919,7 @@ options:
         description: Yalnız abzasda rast gəlinən terminlər onunla birlikdə göndərilir.
       importExport:
         title: İdxal və ixrac
-        description: Terminlər mənbə və tərcümə sütunlarından ibarət CSV faylıdır, ona görə də siyahını ehtiyat nüsxə kimi saxlamaq və ya paylaşmaq olar.
+        description: Terminlər source, target, targetLanguage və caseSensitive sütunlarından ibarət CSV faylıdır — İxrac məhz bunu yazır.
       sourcePlaceholder: Termin
       targetPlaceholder: Tərcümə (orijinalı saxlamaq üçün boş buraxın)
       caseSensitive: Hərf registrini nəzərə al
@@ -947,10 +948,11 @@ options:
       importModeMerge: Siyahıya əlavə et
       importModeReplace: Siyahını əvəz et
       importEmpty: Bu faylda termin tapılmadı.
+      importMissingHeader: "Bu fayl Read Frog lüğət ixracı deyil. Bu sütunlar tələb olunur:"
       importOverflow: "Bu idxal limiti $1 termin aşacaq. Heç nə dəyişdirilmədi."
       importSuccess: "$1 yeni termin idxal edildi, $2 termin yeniləndi."
       importSkipped: "$1 yanlış sətir və $2 təkrar buraxıldı."
-      importNoValidRows: "Bu sətirlərin heç birində bu genişlənmənin tərcümə edə biləcəyi dil göstərilməyib. Heç nə dəyişdirilmədi."
+      importNoValidRows: Bu sətirlərin heç biri idxal edilə bilmədi. Heç nə dəyişdirilmədi.
       importReplaceConfirm:
         title: Bütün siyahı əvəz edilsin?
         description: "Bu lüğətdəki $1 terminin hamısı silinəcək — yalnız seçilmiş dil deyil, bütün hədəf dillər — və bu faylın məzmunu ilə əvəz olunacaq. Bu əməliyyat geri qaytarıla bilməz."

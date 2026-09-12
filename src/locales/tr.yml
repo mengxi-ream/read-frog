@@ -103,6 +103,7 @@ options:
     toggle: Kenar çubuğunu aç/kapat
     settings: Ayarlar
     features: Özellikler
+    translation: Çeviri
     product: Ürün
   tools:
     translationHub: Çeviri Merkezi
@@ -802,7 +803,7 @@ options:
         description: Bir paragrafla yalnızca o paragrafta geçen terimler gönderilir.
       importExport:
         title: İçe ve dışa aktarma
-        description: Terimler, terim ve çeviri sütunlarından oluşan bir CSV dosyasıdır; böylece liste yedeklenebilir veya paylaşılabilir.
+        description: Terimler source, target, targetLanguage ve caseSensitive sütunlarından oluşan bir CSV dosyasıdır — Dışa aktar bu dosyayı yazar.
       sourcePlaceholder: Terim
       targetPlaceholder: Çeviri (özgün hâlini korumak için boş bırakın)
       caseSensitive: Büyük/küçük harfe duyarlı
@@ -831,10 +832,11 @@ options:
       importModeMerge: Listeye ekle
       importModeReplace: Listeyi değiştir
       importEmpty: Bu dosyada terim bulunamadı.
+      importMissingHeader: "Bu dosya bir Read Frog sözlük dışa aktarımı değil. Şu sütunlar gerekli:"
       importOverflow: "Bu içe aktarma limiti $1 terim aşacak. Hiçbir şey değiştirilmedi."
       importSuccess: "$1 yeni terim içe aktarıldı, $2 terim güncellendi."
       importSkipped: "$1 geçersiz satır ve $2 yinelenen terim atlandı."
-      importNoValidRows: "Bu satırların hiçbirinde bu uzantının çevirebileceği bir dil belirtilmemiş. Hiçbir şey değiştirilmedi."
+      importNoValidRows: Bu satırların hiçbiri içe aktarılamadı. Hiçbir şey değiştirilmedi.
       importReplaceConfirm:
         title: Listenin tamamı değiştirilsin mi?
         description: "Bu sözlükteki $1 terimin tamamı silinecek — yalnızca seçili dil değil, tüm hedef diller — ve bu dosyanın içeriğiyle değiştirilecek. Bu işlem geri alınamaz."
