@@ -1,5 +1,30 @@
 # @read-frog/extension
 
+## 1.47.1
+
+### Patch Changes
+
+- [#2182](https://github.com/mengxi-ream/read-frog/pull/2182) [`17c778c`](https://github.com/mengxi-ream/read-frog/commit/17c778c496b44401a4652388c41adf37a14d839d) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(glossary): link the guide from a glossary's own page
+
+  A glossary raises questions the settings page can only answer in a sentence: what
+  `*.example.com` covers and what it leaves out, what an empty translation does, why a
+  term can be written for one target language, and which providers honour any of it. The
+  glossary editor now carries a **How does it work?** link to the Glossary guide on the
+  website, beside the glossary's name — where those questions come up, rather than next to
+  one control that only answers one of them.
+
+- [#2184](https://github.com/mengxi-ream/read-frog/pull/2184) [`f5541ff`](https://github.com/mengxi-ream/read-frog/commit/f5541ff67b7de8d8a7ec16d65414fe30c8070e08) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(glossary): say that a website pattern can also end in a wildcard
+
+  A glossary's website list explained the leading `*` and nothing else, so the
+  trailing one was invisible: a pattern can carry a path, and that path can end in
+  `*`. That is the difference between scoping a glossary to a whole novel site and
+  scoping it to one book on it — `example.com/novel/12345/*` — and nobody could
+  find it from the screen.
+
+  The line now names all three forms in the space the previous two took:
+  `example.com` is that address alone, `*.example.com` adds subdomains, and
+  `example.com/docs/*` narrows to one part of a site.
+
 ## 1.47.0
 
 ### Minor Changes
