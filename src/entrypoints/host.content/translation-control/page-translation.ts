@@ -1040,7 +1040,14 @@ export class PageTranslationManager implements IPageTranslationManager {
         // the added subtree is structural churn, not new translatable content.
         // Walking it would insert a duplicate wrapper that the site may retain
         // when it later unwraps the temporary element.
-        if (findCurrentBilingualLayoutSource(rec.target)) continue
+        if (findCurrentBilingualLayoutSource(rec.target)) {
+          rec.addedNodes.forEach((node) => {
+            if (isHTMLElement(node)) {
+              this.observeIsolatedDescendantsMutations(node, config)
+            }
+          })
+          continue
+        }
         rec.addedNodes.forEach((node) => {
           if (isHTMLElement(node)) {
             this.addWalkBlockedElements(node, config)
@@ -1184,12 +1191,17 @@ export class PageTranslationManager implements IPageTranslationManager {
    * These can't be found as top level paragraph elements because isolated shadow roots and iframes are not
    * considered as part of the document.
    */
-  private observeIsolatedDescendantsMutations(element: HTMLElement): void {
+  private observeIsolatedDescendantsMutations(element: HTMLElement, config?: Config): void {
     // Check if this element has a shadow root
     if (element.shadowRoot) {
       for (const child of element.shadowRoot.children) {
         if (isHTMLElement(child)) {
           this.observeMutations(child)
+          // A light-DOM re-walk can be skipped when its translated ancestor is
+          // still current, but document observers cannot see into a newly
+          // attached shadow root. Scan that isolated tree explicitly without
+          // translating the unchanged light-DOM host (#2185).
+          if (config) void this.observeTopLevelParagraphs(child, config)
         }
       }
     }
@@ -1197,7 +1209,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     // Recursively check children
     for (const child of element.children) {
       if (isHTMLElement(child)) {
-        this.observeIsolatedDescendantsMutations(child)
+        this.observeIsolatedDescendantsMutations(child, config)
       }
     }
   }
