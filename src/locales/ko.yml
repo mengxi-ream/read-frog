@@ -378,6 +378,7 @@ options:
           noChange: 설정이 이미 동기화됨
           unresolved: 설정 충돌을 해결하고 동기화했습니다
         syncError: 설정 동기화 실패, 다시 시도해 주세요
+        accountChangedError: 대화 상자가 열려 있는 동안 로그인된 Google 계정이 바뀌었습니다. 아무것도 업로드하지 않았습니다. 다시 동기화하세요.
         metadataCorrupted: 동기화 메타데이터가 손상되어 원격 구성을 적용했습니다
         lastSyncTime: 마지막 동기화 시간
         logout: 로그아웃

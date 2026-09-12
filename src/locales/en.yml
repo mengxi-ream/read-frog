@@ -379,6 +379,7 @@ options:
           noChange: Config already in sync
           unresolved: Config conflicts resolved and synced
         syncError: Config sync failed, please try again
+        accountChangedError: The signed-in Google account changed while the dialog was open. Nothing was uploaded — sync again.
         metadataCorrupted: Sync metadata corrupted, remote config applied
         lastSyncTime: Last sync at
         logout: Logout

@@ -378,6 +378,7 @@ options:
           noChange: Ayarlar zaten güncel
           unresolved: Ayar çakışmaları çözüldü ve eşitlendi
         syncError: Ayar eşitlemesi başarısız, lütfen tekrar deneyin
+        accountChangedError: İletişim kutusu açıkken oturum açılan Google hesabı değişti. Hiçbir şey yüklenmedi; yeniden eşitleyin.
         metadataCorrupted: Senkronizasyon meta verileri bozuk, uzak yapılandırma uygulandı
         lastSyncTime: Son senkronizasyon
         logout: Çıkış yap

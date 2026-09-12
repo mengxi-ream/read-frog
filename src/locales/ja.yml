@@ -378,6 +378,7 @@ options:
           noChange: 設定は既に同期済みです
           unresolved: 設定の競合を解決して同期しました
         syncError: 設定の同期に失敗しました。もう一度お試しください
+        accountChangedError: ダイアログを開いている間にログイン中の Google アカウントが変わりました。何もアップロードしていません。もう一度同期してください。
         metadataCorrupted: 同期メタデータが破損しています。リモート設定を適用しました
         lastSyncTime: 最終同期時間
         logout: ログアウト

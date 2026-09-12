@@ -379,6 +379,7 @@ options:
           noChange: Parametrlər artıq sinxrondur
           unresolved: Parametr münaqişələri həll edildi və sinxronlaşdırıldı
         syncError: Parametr sinxronizasiyası alınmadı, yenidən cəhd edin
+        accountChangedError: Dialoq açıq ikən daxil olunmuş Google hesabı dəyişdi. Heç nə yüklənmədi — yenidən sinxronlaşdırın.
         metadataCorrupted: Sinxronlaşdırma metaməlumatları zədələnib, uzaqdakı konfiqurasiya tətbiq edildi
         lastSyncTime: Son sinxronlaşdırma vaxtı
         logout: Çıxış et

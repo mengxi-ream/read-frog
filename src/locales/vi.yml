@@ -378,6 +378,7 @@ options:
           noChange: Cấu hình đã được đồng bộ
           unresolved: Đã giải quyết xung đột cấu hình và đồng bộ
         syncError: Đồng bộ cấu hình thất bại, vui lòng thử lại
+        accountChangedError: Tài khoản Google đã đăng nhập thay đổi trong khi hộp thoại đang mở. Chưa tải lên gì cả — hãy đồng bộ lại.
         metadataCorrupted: Siêu dữ liệu đồng bộ bị hỏng, đã áp dụng cấu hình từ xa
         lastSyncTime: Đồng bộ lần cuối lúc
         logout: Đăng xuất

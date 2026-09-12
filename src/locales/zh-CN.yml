@@ -379,6 +379,7 @@ options:
           noChange: 配置已是最新状态
           unresolved: 配置冲突已解决并同步
         syncError: 配置同步失败，请重试
+        accountChangedError: 对话框打开期间登录的 Google 账号发生了变化，未上传任何内容，请重新同步。
         metadataCorrupted: 同步数据损坏，已自动应用远端配置
         lastSyncTime: 最后同步时间
         logout: 登出账号

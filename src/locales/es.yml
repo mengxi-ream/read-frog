@@ -379,6 +379,7 @@ options:
           noChange: La configuración ya está sincronizada
           unresolved: Conflictos de configuración resueltos y sincronizados
         syncError: Error al sincronizar la configuración, inténtalo de nuevo
+        accountChangedError: La cuenta de Google conectada cambió mientras el diálogo estaba abierto. No se subió nada; vuelve a sincronizar.
         metadataCorrupted: Metadatos de sincronización dañados, configuración remota aplicada
         lastSyncTime: Última sincronización a las
         logout: Cerrar sesión

@@ -8,8 +8,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { ConfigVersionTooNewError } from "@/utils/config/errors"
 import { getLocalConfigAndMeta, setLocalConfigAndMeta } from "@/utils/config/storage"
 import { getLastSyncedConfigAndMeta, setLastSyncConfigAndMeta } from "@/utils/config/sync"
+import { buildFreshDefaultConfig } from "@/utils/constants/config"
+import { getGoogleUserInfo, GoogleAccountChangedError, getValidAccessToken } from "../auth"
 import { getRemoteConfigAndMetaWithUserEmail, setRemoteConfigAndMeta } from "../storage"
-import { syncConfig } from "../sync"
+import { syncConfig, syncMergedConfig } from "../sync"
 
 // Mock the storage modules
 vi.mock("@/utils/config/storage", () => ({
@@ -25,6 +27,13 @@ vi.mock("@/utils/config/sync", () => ({
 vi.mock("../storage", () => ({
   getRemoteConfigAndMetaWithUserEmail: vi.fn<(...args: any[]) => any>(),
   setRemoteConfigAndMeta: vi.fn<(...args: any[]) => any>(),
+}))
+
+// `GoogleAccountChangedError` stays real — the tests assert on the class.
+vi.mock("../auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../auth")>()),
+  getValidAccessToken: vi.fn<(...args: any[]) => any>(),
+  getGoogleUserInfo: vi.fn<(...args: any[]) => any>(),
 }))
 
 // Mock the logger
@@ -462,5 +471,49 @@ describe("syncConfig", () => {
       expect((result as any).error).toBeInstanceOf(ConfigVersionTooNewError)
       expect((result as any).error.message).toBe("Please upgrade")
     })
+  })
+})
+
+describe("syncMergedConfig — bound to the account the sync was started for", () => {
+  /**
+   * The conflict dialog can stay open indefinitely, so the token is resolved
+   * again when the user confirms. The ACCOUNT must still be the one the sync
+   * began under: uploading to whoever is current puts the merged config in
+   * their Drive while `setLastSyncConfigAndMeta` records the original address
+   * as having agreed to it.
+   */
+  it("refuses, before writing anything, when the account has changed", async () => {
+    vi.mocked(getGoogleUserInfo).mockResolvedValue({
+      id: "1",
+      email: "b@test.com",
+      verified_email: true,
+    })
+
+    await expect(syncMergedConfig(buildFreshDefaultConfig(), "a@test.com")).rejects.toBeInstanceOf(
+      GoogleAccountChangedError,
+    )
+
+    expect(setLocalConfigAndMeta).not.toHaveBeenCalled()
+    expect(setRemoteConfigAndMeta).not.toHaveBeenCalled()
+    expect(setLastSyncConfigAndMeta).not.toHaveBeenCalled()
+  })
+
+  it("uploads with the verified token when it is still the same account", async () => {
+    vi.mocked(getValidAccessToken).mockResolvedValue("verified-token")
+    vi.mocked(getGoogleUserInfo).mockResolvedValue({
+      id: "1",
+      email: "a@test.com",
+      verified_email: true,
+    })
+
+    // A real config: unlike the guard above, this path reaches `configSchema`,
+    // and the stub shape the other tests use does not satisfy it.
+    await syncMergedConfig(buildFreshDefaultConfig(), "a@test.com")
+
+    expect(setRemoteConfigAndMeta).toHaveBeenCalledWith(expect.anything(), "verified-token")
+    expect(setLastSyncConfigAndMeta).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ email: "a@test.com" }),
+    )
   })
 })
