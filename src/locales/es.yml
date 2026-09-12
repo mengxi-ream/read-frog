@@ -103,6 +103,7 @@ options:
     toggle: Alternar barra lateral
     settings: Configuración
     features: Funciones
+    translation: Traducción
     product: Producto
   tools:
     translationHub: Centro de traducción
@@ -368,16 +369,17 @@ options:
       title: Configuración
       googleDrive:
         title: Sincronización cloud con Google Drive
-        description: Descarga la configuración cuando la remota es más reciente, sube la configuración cuando la local es más reciente
+        description: Descarga la configuración cuando la remota es más reciente, sube la configuración cuando la local es más reciente. Tus glosarios viajan en un archivo propio y se fusionan término a término en vez de reemplazarse.
         sync: Sincronizar con Google Drive
         syncing: Sincronizando...
         syncSuccess:
           uploaded: Configuración local subida a la nube
           downloaded: Configuración remota aplicada
-          sameChanges: Mismos cambios en ambos lados, sincronizado
-          noChange: Ya está sincronizado
-          unresolved: Conflictos resueltos y sincronizados
-        syncError: Error de sincronización, inténtalo de nuevo
+          sameChanges: Los mismos cambios de configuración en ambos lados, sincronizado
+          noChange: La configuración ya está sincronizada
+          unresolved: Conflictos de configuración resueltos y sincronizados
+        syncError: Error al sincronizar la configuración, inténtalo de nuevo
+        accountChangedError: La cuenta de Google conectada cambió mientras el diálogo estaba abierto. No se subió nada; vuelve a sincronizar.
         metadataCorrupted: Metadatos de sincronización dañados, configuración remota aplicada
         lastSyncTime: Última sincronización a las
         logout: Cerrar sesión
@@ -413,14 +415,50 @@ options:
             title: La configuración combinada tiene errores de validación.
             description: "Ajusta las diferencias siguientes para corregir:"
           moreErrors: ...y $1 errores más
+        glossary:
+          thisDevice: Este dispositivo
+          cloud: Nube
+          deleted: Eliminado
+          disabled: desactivado
+          upToDate: Los glosarios ya están sincronizados
+          uploaded: Glosarios subidos a la nube
+          merged: "Glosarios sincronizados: $1 añadidos, $2 actualizados, $3 eliminados"
+          undo: Deshacer
+          undone: Glosarios restaurados a como estaban antes de la sincronización
+          undoUnavailable: "Esa acción ya no se puede deshacer: tus glosarios han cambiado desde entonces."
+          retry: El glosario cambió durante la sincronización. Vuelve a ejecutarla.
+          accountChangedRetry: La cuenta de Google conectada cambió mientras el diálogo estaba abierto. No se subió nada; vuelve a sincronizar.
+          busy: Otra pestaña está sincronizando tus glosarios ahora mismo.
+          malformed: No se pudo leer el archivo de glosarios de tu Drive, así que no se cambió nada.
+          versionTooNew: Ese archivo de glosarios lo escribió una versión más reciente de Read Frog. Actualiza la extensión primero.
+          duplicateFiles: Tu Drive tiene más de un archivo de glosarios. No se cambió nada - elimina el sobrante.
+          capExceeded: "La fusión superaría el límite de glosarios en $1. No se cambió nada."
+          failed: Falló la sincronización de glosarios
+          review:
+            title: Revisa esta sincronización de glosarios
+            description: Elige qué conservar donde las dos copias no coinciden.
+            firstSync: "Primera sincronización en este dispositivo: $1 llegan de la nube, $2 se suben."
+            accountChanged: "Has iniciado sesión como $1, que no es la cuenta con la que este dispositivo se sincronizó por última vez. Sus $2 filas de glosario se subirán a esta cuenta. Para quedarte solo con los glosarios de esta cuenta, cancela, borra los de aquí y sincroniza de nuevo."
+            destructive: "Esta sincronización elimina $1 de las $2 filas de glosario de este dispositivo."
+            moreConflicts: "Hay $1 diferencias más que no se muestran. Cada una conserva la elección de la fusión."
+            confirm: Sincronizar
+            cancel: Cancelar
       manualSync:
         title: Sincronización manual de configuración
-        description: Importa y exporta manualmente tus ajustes de configuración
+        description: Importa y exporta tu configuración manualmente, con tus glosarios incluidos
         import: Importar
         export: Exportar
         importSuccess: Configuración importada correctamente
         exportSuccess: Configuración exportada correctamente
+        exportGlossaryFailed: Se exportó tu configuración, pero no se pudieron leer tus glosarios y no están en el archivo.
         importError: Error al importar
+        glossaryImported: "Se importaron $1 términos, sustituyendo los glosarios que tenías."
+        glossaryUndo: Deshacer
+        glossaryUndone: Tus glosarios volvieron a como estaban antes de la importación
+        glossaryUndoUnavailable: "Esa acción ya no se puede deshacer: tus glosarios han cambiado desde entonces."
+        glossaryMalformed: No se pudieron leer los glosarios de ese archivo. No se cambió nada.
+        glossaryVersionTooNew: Los glosarios de ese archivo los escribió una versión más reciente de Read Frog. Actualiza la extensión primero.
+        glossaryCapExceeded: "Ese archivo tiene $1 filas de glosario más que el límite de $2. No se cambió nada."
         exportOptions:
           title: Seleccionar opciones de exportación
           description: Elige si incluir claves API en la configuración exportada. Incluir claves API puede filtrar información sensible, por lo que se recomienda usarlo solo en entornos seguros.
@@ -459,13 +497,13 @@ options:
           confirm: Eliminar
       reset:
         title: Restablecer configuración
-        description: Restablecer toda la configuración al valor predeterminado
+        description: Restablecer toda la configuración a sus valores por defecto. Tus glosarios no se ven afectados.
         dialog:
           title: Restablecer configuración
           trigger: Restablecer configuración
           confirm: Confirmar
           cancel: Cancelar
-          description: Esta operación borrará todas tus configuraciones personalizadas y las restablecerá a los valores predeterminados. Confirma para continuar.
+          description: Esta operación borrará toda tu configuración personalizada y la restablecerá a los valores por defecto. Tus glosarios se conservan; elimínalos desde la página de glosarios. Confirma, por favor.
     userExperience:
       title: Experiencia de usuario
       beta:
@@ -884,7 +922,7 @@ options:
         description: Solo se envían los términos que aparecen en un párrafo.
       importExport:
         title: Importar y exportar
-        description: Los términos son un archivo CSV con columnas de término y traducción, así que puedes guardar una copia de la lista o compartirla.
+        description: "Los términos son un CSV con las columnas source, target, targetLanguage y caseSensitive: el archivo que escribe Exportar."
       sourcePlaceholder: Término
       targetPlaceholder: Traducción (déjala vacía para conservar el original)
       caseSensitive: Distinguir mayúsculas
@@ -913,10 +951,11 @@ options:
       importModeMerge: Añadir a la lista
       importModeReplace: Reemplazar la lista
       importEmpty: No se encontraron términos en ese archivo.
+      importMissingHeader: "Ese archivo no es una exportación de glosario de Read Frog. Necesita estas columnas:"
       importOverflow: "Esa importación superaría el límite en $1 términos. No se ha cambiado nada."
       importSuccess: "Se han importado $1 términos nuevos y actualizado $2."
       importSkipped: "Se han omitido $1 filas no válidas y $2 duplicados."
-      importNoValidRows: "Ninguna de esas filas indicaba un idioma al que esta extensión pueda traducir. No se ha cambiado nada."
+      importNoValidRows: No se pudo importar ninguna de esas filas. No se cambió nada.
       importReplaceConfirm:
         title: "¿Reemplazar toda la lista?"
         description: "Se eliminarán los $1 términos de este glosario —en todos los idiomas de destino, no solo en el seleccionado— y se reemplazarán por el contenido de este archivo. Esta acción no se puede deshacer."

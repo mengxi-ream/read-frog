@@ -15,7 +15,7 @@ import {
   MAX_GLOSSARY_TERMS,
 } from "../constants/glossary"
 import { getRandomUUID } from "../crypto-polyfill"
-import { formatGlossaryCsv, resolveRowTargetLanguage } from "./csv"
+import { formatGlossaryCsv } from "./csv"
 import { buildMatchKey } from "./match-key"
 import { isGlossaryActiveForUrl, mergeGlossaryTerms } from "./scope"
 
@@ -23,7 +23,11 @@ export async function getGlossaryRevision(): Promise<number> {
   return (await storage.getItem<number>(GLOSSARY_REVISION_KEY)) ?? 0
 }
 
-async function bumpGlossaryRevision(): Promise<number> {
+/**
+ * Exported for the Drive sync, which writes many rows in one transaction and
+ * must bump once at the end rather than once per row.
+ */
+export async function bumpGlossaryRevision(): Promise<number> {
   const next = (await getGlossaryRevision()) + 1
   await storage.setItem<number>(GLOSSARY_REVISION_KEY, next)
   return next
@@ -291,8 +295,6 @@ export interface ImportGlossaryResult {
   updated: number
   /** Rows dropped because an earlier row in the same file claimed the same term. */
   duplicatesInFile: number
-  /** Rows dropped because their `targetLanguage` column named a language we cannot translate into. */
-  unknownLanguage: number
   /** Why the import was refused. Absent when `ok`; the list is left untouched. */
   reason?: "overflow" | "no-valid-rows"
   /** Set when the import was refused for `overflow`. */
@@ -316,36 +318,25 @@ export async function importGlossaryRows(
   glossaryId: string,
   rows: readonly ParsedGlossaryRow[],
   mode: ImportMode,
-  caseSensitive: boolean,
-  fallbackLang: LangCodeISO6393,
 ): Promise<ImportGlossaryResult> {
   // Keyed by language AND term, because one file may carry both a Chinese and a
-  // Japanese wording of the same word and neither displaces the other. The
-  // resolved case flag is carried alongside so the key and the row it writes
-  // cannot disagree about which of `s:` / `i:` the term lives under.
-  const byKey = new Map<
-    string,
-    { row: ParsedGlossaryRow; targetLang: LangCodeISO6393; caseSensitive: boolean }
-  >()
+  // Japanese wording of the same word and neither displaces the other.
+  //
+  // Both halves come from the row itself. `parseGlossaryCsv` requires the file
+  // to name them and drops any row that does not, so there is nothing left here
+  // to resolve or to fall back to — which is the point: the key this writes
+  // under is the one the file asked for.
+  const byKey = new Map<string, { row: ParsedGlossaryRow }>()
   let duplicatesInFile = 0
-  let unknownLanguage = 0
   for (const row of rows) {
     const source = row.source.trim()
     if (source === "") continue
-    const targetLang = resolveRowTargetLanguage(row, fallbackLang)
-    if (targetLang === null) {
-      unknownLanguage++
-      continue
-    }
-    // The row's own column wins; `caseSensitive` is the import's checkbox, which
-    // answers for every file written before the column existed.
-    const rowCaseSensitive = row.caseSensitive ?? caseSensitive
-    const matchKey = buildMatchKey(source, rowCaseSensitive)
-    const key = `${targetLang}\u0000${matchKey}`
+    const matchKey = buildMatchKey(source, row.caseSensitive)
+    const key = `${row.targetLanguage}\u0000${matchKey}`
     // Last write wins within a file: a user fixing a term further down the file
     // means the later line.
     if (byKey.has(key)) duplicatesInFile++
-    byKey.set(key, { row: { ...row, source }, targetLang, caseSensitive: rowCaseSensitive })
+    byKey.set(key, { row: { ...row, source } })
   }
 
   const existing =
@@ -371,28 +362,25 @@ export async function importGlossaryRows(
       added: 0,
       updated: 0,
       duplicatesInFile,
-      unknownLanguage,
       reason: "overflow",
       overflowBy: finalCount - MAX_GLOSSARY_TERMS,
     }
   }
 
   const now = new Date()
-  const records: GlossaryTerm[] = [...byKey.entries()].map(
-    ([key, { row, targetLang, caseSensitive: rowCaseSensitive }]) => ({
-      id: existingByKey.get(key)?.id ?? getRandomUUID(),
-      glossaryId,
-      matchKey: buildMatchKey(row.source, rowCaseSensitive),
-      targetLang,
-      source: row.source,
-      target: row.target.trim(),
-      caseSensitive: rowCaseSensitive,
-      // An import must not silently re-enable a term the user turned off; a row
-      // absent from the table is the only one that starts enabled.
-      enabled: existingByKey.get(key)?.enabled ?? true,
-      updatedAt: now,
-    }),
-  ) as GlossaryTerm[]
+  const records: GlossaryTerm[] = [...byKey.entries()].map(([key, { row }]) => ({
+    id: existingByKey.get(key)?.id ?? getRandomUUID(),
+    glossaryId,
+    matchKey: buildMatchKey(row.source, row.caseSensitive),
+    targetLang: row.targetLanguage,
+    source: row.source,
+    target: row.target.trim(),
+    caseSensitive: row.caseSensitive,
+    // An import must not silently re-enable a term the user turned off; a row
+    // absent from the table is the only one that starts enabled.
+    enabled: existingByKey.get(key)?.enabled ?? true,
+    updatedAt: now,
+  })) as GlossaryTerm[]
 
   // Nothing survived to write — the file was empty, or every row was dropped by
   // an unrecognised `targetLanguage` or a third column that was never a language
@@ -411,7 +399,6 @@ export async function importGlossaryRows(
       added: 0,
       updated: 0,
       duplicatesInFile,
-      unknownLanguage,
       reason: "no-valid-rows",
     }
   }
@@ -424,7 +411,7 @@ export async function importGlossaryRows(
   })
   await bumpGlossaryRevision()
 
-  return { ok: true, added, updated, duplicatesInFile, unknownLanguage }
+  return { ok: true, added, updated, duplicatesInFile }
 }
 
 /**

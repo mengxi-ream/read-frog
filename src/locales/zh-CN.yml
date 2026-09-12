@@ -103,6 +103,7 @@ options:
     toggle: 切换侧边栏
     settings: 设置
     features: 功能
+    translation: 翻译
     product: 产品
   tools:
     translationHub: 翻译中心
@@ -368,16 +369,17 @@ options:
       title: 配置
       googleDrive:
         title: Google Drive 云端同步
-        description: 远端配置较新时下载，本地配置较新时上传
+        description: 远端配置较新时下载，本地配置较新时上传；术语库走单独一个文件，按条合并而不是整份覆盖。
         sync: 同步到 Google Drive
         syncing: 同步中...
         syncSuccess:
           uploaded: 本地配置已上传至云端
           downloaded: 已应用远程配置
-          sameChanges: 本地和远程修改一致，已同步
-          noChange: 已是最新状态
-          unresolved: 冲突已解决并同步至本地和云端
-        syncError: 同步失败，请重试
+          sameChanges: 两端配置改动相同，已同步
+          noChange: 配置已是最新状态
+          unresolved: 配置冲突已解决并同步
+        syncError: 配置同步失败，请重试
+        accountChangedError: 对话框打开期间登录的 Google 账号发生了变化，未上传任何内容，请重新同步。
         metadataCorrupted: 同步数据损坏，已自动应用远端配置
         lastSyncTime: 最后同步时间
         logout: 登出账号
@@ -413,14 +415,50 @@ options:
             title: 合并后的配置存在验证错误
             description: 请调整下方差异以修复：
           moreErrors: ...还有 $1 个错误
+        glossary:
+          thisDevice: 本机
+          cloud: 云端
+          deleted: 已删除
+          disabled: 已停用
+          upToDate: 术语库已是最新
+          uploaded: 术语库已上传到云端
+          merged: "术语库已同步：新增 $1，更新 $2，删除 $3"
+          undo: 撤销
+          undone: 术语库已恢复到同步前的样子
+          undoUnavailable: 该撤销已失效 — 之后术语库已发生变化。
+          retry: 同步过程中术语库有改动，请再运行一次。
+          accountChangedRetry: 对话框打开期间登录的 Google 账号发生了变化，未上传任何内容，请重新同步。
+          busy: 另一个标签页正在同步你的术语库。
+          malformed: 云端的术语库文件无法读取，本次未做任何改动。
+          versionTooNew: 那个术语库文件由更新版本的 Read Frog 写入，请先升级扩展。
+          duplicateFiles: 你的云端存在多个术语库文件，本次未做任何改动，请先删掉多余的那个。
+          capExceeded: "合并后会超出术语库上限 $1 条，本次未做任何改动。"
+          failed: 术语库同步失败
+          review:
+            title: 确认这次术语库同步
+            description: 两边不一致的地方，请选择保留哪一个。
+            firstSync: "本机首次同步：从云端接收 $1 条，上传 $2 条。"
+            accountChanged: "当前登录的是 $1，和这台设备上次同步的账号不是同一个。本机的 $2 条术语库数据会被上传到这个账号。如果只想要这个账号的术语库，请取消、先把本机的删掉，再同步一次。"
+            destructive: "这次同步会删掉本机 $2 条术语库数据中的 $1 条。"
+            moreConflicts: "另有 $1 处差异未列出，均按合并结果处理。"
+            confirm: 同步
+            cancel: 取消
       manualSync:
         title: 手动配置同步
-        description: 手动导入和导出您的配置设置
+        description: 手动导入导出你的配置，术语库也一并带走
         import: 导入
         export: 导出
         importSuccess: 配置导入成功
         exportSuccess: 配置导出成功
+        exportGlossaryFailed: 设置已导出，但术语库无法读取，未包含在文件中。
         importError: 导入失败
+        glossaryImported: "已导入 $1 条术语，替换了原有的术语库。"
+        glossaryUndo: 撤销
+        glossaryUndone: 术语库已恢复到导入前的样子
+        glossaryUndoUnavailable: 该撤销已失效 — 之后术语库已发生变化。
+        glossaryMalformed: 那个文件里的术语库无法读取，本次未做任何改动。
+        glossaryVersionTooNew: 那个文件里的术语库由更新版本的 Read Frog 写入，请先升级扩展。
+        glossaryCapExceeded: "那个文件的术语库数据比上限 $2 条多出 $1 条，本次未做任何改动。"
         exportOptions:
           title: 选择导出选项
           description: 请选择是否在导出的配置中包含 API Keys。包含 API Keys 可能会泄露敏感信息，建议仅在安全环境下使用。
@@ -459,13 +497,13 @@ options:
           confirm: 删除
       reset:
         title: 恢复默认配置
-        description: 将所有配置重置为默认
+        description: 将所有配置重置为默认，术语库不受影响
         dialog:
           title: 恢复默认配置
           trigger: 重置配置
           confirm: 确认
           cancel: 取消
-          description: 该操作将清空您的所有自定义配置，并将其重置为默认值，请确认是否清除。
+          description: 该操作将清空您的所有自定义配置，并将其重置为默认值。术语库会保留 — 如需删除请到术语库页面操作。请确认是否清除。
     userExperience:
       title: 使用体验
       beta:
@@ -884,7 +922,7 @@ options:
         description: 只有出现在段落中的术语，才会随该段落一起发送。
       importExport:
         title: 导入与导出
-        description: 术语就是一个包含术语和译文两列的 CSV 文件，可以用来备份或分享整份列表。
+        description: 术语是一个 CSV 文件，包含 source、target、targetLanguage、caseSensitive 四列，即导出所生成的格式。
       sourcePlaceholder: 术语
       targetPlaceholder: 译文（留空则保持原文）
       caseSensitive: 区分大小写
@@ -913,10 +951,11 @@ options:
       importModeMerge: 追加到列表
       importModeReplace: 替换列表
       importEmpty: 该文件中没有找到术语。
+      importMissingHeader: 该文件不是 Read Frog 的术语库导出文件。它需要这些列：
       importOverflow: "本次导入会超出上限 $1 条术语，未做任何更改。"
       importSuccess: "已导入 $1 条新术语，更新 $2 条。"
       importSkipped: "已跳过 $1 行无效数据和 $2 条重复项。"
-      importNoValidRows: "这些行都没有指定本扩展能翻译的目标语言，未做任何更改。"
+      importNoValidRows: 这些行都无法导入，未做任何更改。
       importReplaceConfirm:
         title: 替换整个列表？
         description: "该术语库下的全部 $1 条术语都会被删除——包括所有目标语言，不只是当前选择的那个——然后用该文件的内容替换。此操作无法撤销。"

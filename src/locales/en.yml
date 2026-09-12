@@ -103,6 +103,7 @@ options:
     toggle: Toggle sidebar
     settings: Settings
     features: Features
+    translation: Translation
     product: Product
   tools:
     translationHub: Translation Hub
@@ -368,16 +369,17 @@ options:
       title: Config
       googleDrive:
         title: Google Drive cloud sync
-        description: Downloads config when remote is newer, uploads config when local is newer
+        description: Downloads config when remote is newer, uploads config when local is newer. Your glossaries travel in a file of their own, merged term by term rather than replaced.
         sync: Sync to Google Drive
         syncing: Syncing...
         syncSuccess:
           uploaded: Local config uploaded to cloud
           downloaded: Remote config applied
-          sameChanges: Same changes on both sides, synced
-          noChange: Already in sync
-          unresolved: Conflicts resolved and synced
-        syncError: Sync failed, please try again
+          sameChanges: Same config changes on both sides, synced
+          noChange: Config already in sync
+          unresolved: Config conflicts resolved and synced
+        syncError: Config sync failed, please try again
+        accountChangedError: The signed-in Google account changed while the dialog was open. Nothing was uploaded — sync again.
         metadataCorrupted: Sync metadata corrupted, remote config applied
         lastSyncTime: Last sync at
         logout: Logout
@@ -413,14 +415,50 @@ options:
             title: The merged config has validation errors.
             description: "Adjust the differences below to fix:"
           moreErrors: ...and $1 more errors
+        glossary:
+          thisDevice: This device
+          cloud: Cloud
+          deleted: Deleted
+          disabled: off
+          upToDate: Glossaries already in sync
+          uploaded: Glossaries uploaded to cloud
+          merged: "Glossaries synced: $1 added, $2 updated, $3 removed"
+          undo: Undo
+          undone: Glossaries restored to how they were before the sync
+          undoUnavailable: That undo is no longer available — your glossaries have changed since.
+          retry: The glossary changed while syncing. Run it again.
+          accountChangedRetry: The signed-in Google account changed while the dialog was open. Nothing was uploaded — sync again.
+          busy: Another tab is syncing your glossaries right now.
+          malformed: The glossary file in your Drive could not be read, so nothing was changed.
+          versionTooNew: That glossary file was written by a newer version of Read Frog. Update the extension first.
+          duplicateFiles: Your Drive holds more than one glossary file. Nothing was changed - please remove the extra one.
+          capExceeded: "Merging would go over the glossary limit by $1. Nothing was changed."
+          failed: Glossary sync failed
+          review:
+            title: Review this glossary sync
+            description: Choose what to keep where the two copies disagree.
+            firstSync: "First sync on this device: $1 coming from the cloud, $2 going up."
+            accountChanged: "Signed in as $1, which is not the account this device last synced with. Its $2 glossary rows will be uploaded to this account. To take only this account's glossaries, cancel, delete yours here, and sync again."
+            destructive: "This sync removes $1 of the $2 glossary rows on this device."
+            moreConflicts: "$1 more differences are not listed. Each keeps the merge's own choice."
+            confirm: Sync
+            cancel: Cancel
       manualSync:
         title: Manual config sync
-        description: Manually import and export your configuration settings
+        description: Manually import and export your configuration settings, and your glossaries with them
         import: Import
         export: Export
         importSuccess: Config imported successfully
         exportSuccess: Config exported successfully
+        exportGlossaryFailed: Your settings were exported, but your glossaries could not be read and are not in the file.
         importError: Import failed
+        glossaryImported: "$1 glossary terms were imported, replacing the ones you had."
+        glossaryUndo: Undo
+        glossaryUndone: Your glossaries were restored to how they were before the import
+        glossaryUndoUnavailable: That undo is no longer available — your glossaries have changed since.
+        glossaryMalformed: The glossaries in that file could not be read. Nothing was changed.
+        glossaryVersionTooNew: The glossaries in that file were written by a newer version of Read Frog. Update the extension first.
+        glossaryCapExceeded: "That file holds $1 more glossary rows than the limit of $2. Nothing was changed."
         exportOptions:
           title: Select export options
           description: Please choose whether to include API Keys in the exported config. Including API Keys may leak sensitive information, so it's recommended to use only in secure environments.
@@ -459,13 +497,13 @@ options:
           confirm: Delete
       reset:
         title: Reset config
-        description: Reset all config to default value
+        description: Reset all config to default value. Your glossaries are not affected.
         dialog:
           title: Reset config
           trigger: Reset config
           confirm: Confirm
           cancel: Cancel
-          description: This operation will clear all your custom configurations and reset them to default values. Please confirm.
+          description: This operation will clear all your custom configurations and reset them to default values. Your glossaries are kept — delete those from the glossary page. Please confirm.
     userExperience:
       title: User experience
       beta:
@@ -884,7 +922,7 @@ options:
         description: Only the terms that appear in a paragraph are sent with it.
       importExport:
         title: Import and export
-        description: Terms are a CSV file of source and translation columns, so a list can be backed up or shared.
+        description: Terms are a CSV of source, target, targetLanguage and caseSensitive columns — the file Export writes.
       sourcePlaceholder: Term
       targetPlaceholder: Translation (leave empty to keep the original)
       caseSensitive: Match case
@@ -913,10 +951,11 @@ options:
       importModeMerge: Add to list
       importModeReplace: Replace list
       importEmpty: No terms found in that file.
+      importMissingHeader: "That file is not a Read Frog glossary export. It needs these columns:"
       importOverflow: "That import would exceed the limit by $1 terms. Nothing was changed."
       importSuccess: "Imported $1 new and updated $2 terms."
       importSkipped: "Skipped $1 invalid rows and $2 duplicates."
-      importNoValidRows: "None of those rows named a language this extension can translate into. Nothing was changed."
+      importNoValidRows: None of those rows could be imported. Nothing was changed.
       importReplaceConfirm:
         title: Replace the whole list?
         description: "All $1 terms in this glossary will be deleted — every target language, not just the one selected — and replaced with the contents of this file. This cannot be undone."

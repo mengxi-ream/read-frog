@@ -22,11 +22,26 @@ export type GoogleDriveFile = z.infer<typeof googleDriveFileSchema>
 export type GoogleDriveFileListResponse = z.infer<typeof googleDriveFileListResponseSchema>
 
 /**
- * Search for file in Google Drive appDataFolder
+ * Every file in appDataFolder with this name.
+ *
+ * `token` is for a caller that has already decided WHICH ACCOUNT it is writing
+ * to. Resolving the token here instead reads whatever is in storage at the
+ * moment of the call, so a sync that verified the account a step earlier can
+ * still have another tab switch it out from under the request — and then record
+ * the write under the account it thought it was talking to. Omitted, the
+ * behaviour is unchanged.
+ *
+ * Usually one, but nothing stops there being more: two tabs syncing at the same
+ * moment both find nothing and both create one, and from then on each is bound
+ * to a different file and neither sees the other's writes. A caller that cannot
+ * survive that has to look at the count, which `findFileInAppData` throws away.
  */
-export async function findFileInAppData(fileName: string): Promise<GoogleDriveFile | null> {
+export async function findFilesInAppData(
+  fileName: string,
+  token?: string,
+): Promise<GoogleDriveFile[]> {
   try {
-    const accessToken = await getValidAccessToken()
+    const accessToken = token ?? (await getValidAccessToken())
 
     const url = new URL(`${GOOGLE_DRIVE_API_BASE}/files`)
     url.searchParams.set("spaces", "appDataFolder")
@@ -53,16 +68,31 @@ export async function findFileInAppData(fileName: string): Promise<GoogleDriveFi
       throw new Error(`Invalid response from Google Drive API: ${result.error.message}`)
     }
 
-    return result.data.files.length > 0 ? result.data.files[0]! : null
+    return result.data.files
   } catch (error) {
-    logger.error("Failed to find file in appData", error)
+    logger.error("Failed to find files in appData", error)
     throw error
   }
 }
 
-export async function downloadFile(fileId: string): Promise<string> {
+/**
+ * The one file in appDataFolder with this name, or null.
+ *
+ * Delegates rather than repeating the query: the two used to be the same
+ * thirty-five lines apart from their last statement, so pagination, an added
+ * `fields` entry or different 401 handling had to be remembered twice.
+ */
+export async function findFileInAppData(
+  fileName: string,
+  token?: string,
+): Promise<GoogleDriveFile | null> {
+  const files = await findFilesInAppData(fileName, token)
+  return files.length > 0 ? files[0]! : null
+}
+
+export async function downloadFile(fileId: string, token?: string): Promise<string> {
   try {
-    const accessToken = await getValidAccessToken()
+    const accessToken = token ?? (await getValidAccessToken())
 
     const url = `${GOOGLE_DRIVE_API_BASE}/files/${fileId}?alt=media`
 
@@ -93,9 +123,10 @@ export async function uploadFile(
   fileName: string,
   content: string,
   fileId?: string,
+  token?: string,
 ): Promise<GoogleDriveFile> {
   try {
-    const accessToken = await getValidAccessToken()
+    const accessToken = token ?? (await getValidAccessToken())
 
     const metadata = {
       name: fileName,
