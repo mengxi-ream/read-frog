@@ -20,8 +20,8 @@ export type RemoteGlossaryRead =
   | { status: "absent" }
   | { status: "unreadable"; reason: "malformed" | "version-too-new" | "duplicate-files" }
 
-export async function readRemoteGlossary(): Promise<RemoteGlossaryRead> {
-  const files = await findFilesInAppData(GLOSSARY_SYNC_FILENAME)
+export async function readRemoteGlossary(accessToken: string): Promise<RemoteGlossaryRead> {
+  const files = await findFilesInAppData(GLOSSARY_SYNC_FILENAME, accessToken)
   if (files.length === 0) return { status: "absent" }
   if (files.length > 1) {
     // Two tabs that both found nothing both created one. Picking the first would
@@ -32,7 +32,7 @@ export async function readRemoteGlossary(): Promise<RemoteGlossaryRead> {
   }
 
   const file = files[0]!
-  const parsed = parseGlossaryDocument(await downloadFile(file.id))
+  const parsed = parseGlossaryDocument(await downloadFile(file.id, accessToken))
   if (!parsed.ok) return { status: "unreadable", reason: parsed.reason }
 
   return {
@@ -59,6 +59,13 @@ export type RemoteGlossaryWrite = { ok: true } | { ok: false; reason: "changed-u
  * `If-Match` is not used: Drive v3's support for it on this endpoint is not
  * something this codebase has verified.
  *
+ * `accessToken` is required, not optional: the caller has verified which account
+ * it belongs to, and every request this makes has to go to THAT account. Letting
+ * the helpers resolve their own would leave the check the caller just performed
+ * binding nothing — another tab can switch accounts in between, and an
+ * absent-file plan would then create the file in the new account while the base
+ * records the old one as having agreed to it.
+ *
  * The `expected === null` branch is re-checked for the same reason, and it is
  * the one the cross-tab lock alone does not cover: whether a file exists is
  * decided in `planGlossarySync`, which runs BEFORE the lock is taken, so two
@@ -70,8 +77,9 @@ export type RemoteGlossaryWrite = { ok: true } | { ok: false; reason: "changed-u
 export async function writeRemoteGlossary(
   payload: { glossaries: readonly SyncedGlossary[]; terms: readonly SyncedTerm[] },
   expected: { fileId: string; modifiedTime: string } | null,
+  accessToken: string,
 ): Promise<RemoteGlossaryWrite> {
-  const files = await findFilesInAppData(GLOSSARY_SYNC_FILENAME)
+  const files = await findFilesInAppData(GLOSSARY_SYNC_FILENAME, accessToken)
 
   if (expected) {
     const current = files.find((file) => file.id === expected.fileId)
@@ -84,6 +92,11 @@ export async function writeRemoteGlossary(
     return { ok: false, reason: "changed-underneath" }
   }
 
-  await uploadFile(GLOSSARY_SYNC_FILENAME, formatGlossaryDocument(payload), expected?.fileId)
+  await uploadFile(
+    GLOSSARY_SYNC_FILENAME,
+    formatGlossaryDocument(payload),
+    expected?.fileId,
+    accessToken,
+  )
   return { ok: true }
 }

@@ -113,7 +113,7 @@ export async function planGlossarySync(): Promise<PlanGlossarySyncResult> {
   const [local, storedBase, remote] = await Promise.all([
     readLocalGlossary(),
     readSyncBase(),
-    readRemoteGlossary(),
+    readRemoteGlossary(accessToken),
   ])
 
   if (remote.status === "unreadable") {
@@ -263,7 +263,8 @@ export async function commitGlossarySync(
       // an account the user did not plan for is the exact thing the
       // account-change prompt exists to stop, and it would then be recorded
       // under `plan.email` as though the old account had agreed to it.
-      const { email } = await getGoogleUserInfo(await getValidAccessToken())
+      const accessToken = await getValidAccessToken()
+      const { email } = await getGoogleUserInfo(accessToken)
       if (email !== plan.email) {
         logger.warn("Google account changed between planning and committing the glossary sync")
         return { status: "retry", reason: "account-changed" }
@@ -272,7 +273,10 @@ export async function commitGlossarySync(
       const merge = resolutions?.size ? applyResolutions(plan.merge, resolutions) : plan.merge
       const payload = { glossaries: merge.glossaries, terms: merge.terms }
 
-      const written = await writeRemoteGlossary(payload, plan.remote)
+      // The verified token, not a fresh lookup: `writeRemoteGlossary` and the
+      // helpers under it would each resolve their own, so the check above would
+      // bind nothing and the write could still land in another account.
+      const written = await writeRemoteGlossary(payload, plan.remote, accessToken)
       if (!written.ok) return { status: "retry", reason: "changed-underneath" }
 
       let counts: GlossaryChangeCounts
