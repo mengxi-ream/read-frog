@@ -103,11 +103,13 @@ const EMPTY_STATS = { incoming: 0, outgoing: 0, removed: 0, unchanged: 0 }
  * decision the user might be asked for is in `prompts`, and nothing has been
  * written to the cloud or to Dexie when this returns.
  */
-export async function planGlossarySync(): Promise<PlanGlossarySyncResult> {
-  // Once, at the top. `getValidAccessToken` re-authenticates inside a 60s buffer
-  // and asks which account to use, so taking it twice in one sync can bind the
-  // two halves to two different Google accounts.
-  const accessToken = await getValidAccessToken()
+export async function planGlossarySync(token?: string): Promise<PlanGlossarySyncResult> {
+  // The caller's token when there is one, so both halves of a single Sync click
+  // land in the same Drive. `getValidAccessToken` re-authenticates inside a 60s
+  // buffer and asks which account to use, so resolving it again here is how one
+  // click ended up writing the config to one account and the glossary to
+  // another.
+  const accessToken = token ?? (await getValidAccessToken())
   const { email } = await getGoogleUserInfo(accessToken)
 
   const [local, storedBase, remote] = await Promise.all([

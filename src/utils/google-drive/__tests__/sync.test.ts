@@ -125,14 +125,41 @@ describe("syncConfig", () => {
       const result = await syncConfig()
 
       expect(result).toEqual({ status: "success", action: "uploaded" })
+      // The second argument is the caller's access token, so both halves of one
+      // Sync click reach the same account; undefined here because this test
+      // calls `syncConfig()` with none.
       expect(setRemoteConfigAndMeta).toHaveBeenCalledWith(
         createConfigValueAndMeta(localConfig, { lastModifiedAt: 1000 }),
+        undefined,
       )
       expect(setLastSyncConfigAndMeta).toHaveBeenCalledWith(
         localConfig,
         expect.objectContaining({ email: "a@test.com" }),
       )
       expect(setLocalConfigAndMeta).not.toHaveBeenCalled()
+    })
+
+    /**
+     * One Sync click takes one token and both halves must use it. Each helper
+     * resolving its own is how a single click could write the config to the
+     * account the user started on and the glossary to one another tab switched
+     * to.
+     */
+    it("1.3 passes the caller's token down to every Drive call", async () => {
+      const localConfig = createTestConfig({ setting1: "local" })
+      vi.mocked(getLocalConfigAndMeta).mockResolvedValue(
+        createConfigValueAndMeta(localConfig, { lastModifiedAt: 1000 }),
+      )
+      vi.mocked(getLastSyncedConfigAndMeta).mockResolvedValue(null)
+      vi.mocked(getRemoteConfigAndMetaWithUserEmail).mockResolvedValue({
+        configValueAndMeta: null,
+        email: "a@test.com",
+      })
+
+      await syncConfig("token-from-the-click")
+
+      expect(getRemoteConfigAndMetaWithUserEmail).toHaveBeenCalledWith("token-from-the-click")
+      expect(setRemoteConfigAndMeta).toHaveBeenCalledWith(expect.anything(), "token-from-the-click")
     })
   })
 

@@ -60,12 +60,12 @@ export async function syncMergedConfig(mergedConfig: Config, email: string): Pro
   }
 }
 
-export async function syncConfig(): Promise<SyncResult> {
+export async function syncConfig(token?: string): Promise<SyncResult> {
   try {
     const localConfigValueAndMeta = await getLocalConfigAndMeta()
     const lastSyncedConfigValueAndMeta = await getLastSyncedConfigAndMeta()
     const { configValueAndMeta: remoteConfigValueAndMeta, email } =
-      await getRemoteConfigAndMetaWithUserEmail()
+      await getRemoteConfigAndMetaWithUserEmail(token)
 
     const now = Date.now()
 
@@ -81,7 +81,7 @@ export async function syncConfig(): Promise<SyncResult> {
         return { status: "success", action: "downloaded" }
       }
       logger.info("No remote config found, uploading local config")
-      await setRemoteConfigAndMeta(localConfigValueAndMeta)
+      await setRemoteConfigAndMeta(localConfigValueAndMeta, token)
       await setLastSyncConfigAndMeta(localConfigValueAndMeta.value, {
         ...localConfigValueAndMeta.meta,
         email,
@@ -117,7 +117,7 @@ export async function syncConfig(): Promise<SyncResult> {
         }
 
         await setLocalConfigAndMeta(mergedConfigValueAndMeta.value, mergedConfigValueAndMeta.meta)
-        await setRemoteConfigAndMeta(mergedConfigValueAndMeta)
+        await setRemoteConfigAndMeta(mergedConfigValueAndMeta, token)
         await setLastSyncConfigAndMeta(mergedConfigValueAndMeta.value, {
           ...mergedConfigValueAndMeta.meta,
           email,
@@ -137,7 +137,7 @@ export async function syncConfig(): Promise<SyncResult> {
       }
     } else if (localChangedSinceSync) {
       logger.info("Local config is newer, uploading local config")
-      await setRemoteConfigAndMeta(localConfigValueAndMeta)
+      await setRemoteConfigAndMeta(localConfigValueAndMeta, token)
       await setLastSyncConfigAndMeta(localConfigValueAndMeta.value, {
         ...localConfigValueAndMeta.meta,
         email,

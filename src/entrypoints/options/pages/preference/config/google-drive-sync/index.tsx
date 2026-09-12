@@ -29,10 +29,10 @@ export function GoogleDriveSyncConfigItem() {
 
   // Always leaves `isSyncing` false, so a fault in either half cannot strand the
   // button disabled until the page is reloaded.
-  const runGlossarySync = async () => {
+  const runGlossarySync = async (token?: string) => {
     setIsSyncing(true)
     try {
-      await glossarySync.start()
+      await glossarySync.start(token)
     } finally {
       setIsSyncing(false)
     }
@@ -48,8 +48,9 @@ export function GoogleDriveSyncConfigItem() {
     // Failing here ends the whole sync rather than falling through: neither half
     // can do anything without a token, and letting them try would put the
     // account chooser in front of the user a second time for the same click.
+    let accessToken: string
     try {
-      await getValidAccessToken()
+      accessToken = await getValidAccessToken()
     } catch (error) {
       logger.error("Google Drive sync could not get a token", error)
       toastManager.add({
@@ -60,7 +61,11 @@ export function GoogleDriveSyncConfigItem() {
       return
     }
 
-    const result = await syncConfig()
+    // Passed down, not just fetched: both halves have to reach the same Drive,
+    // and each resolving its own token is what let one click write the config
+    // to the account the user started with and the glossary to the one another
+    // tab switched to.
+    const result = await syncConfig(accessToken)
 
     if (result.status === "unresolved") {
       // The config half needs the user, and its dialog is now up. The glossary
@@ -92,7 +97,7 @@ export function GoogleDriveSyncConfigItem() {
 
     // The glossary lives in its own Drive file and fails for its own reasons, so
     // it runs whatever the config half did and says so separately.
-    await runGlossarySync()
+    await runGlossarySync(accessToken)
   }
 
   const handleLogout = async () => {
@@ -121,6 +126,8 @@ export function GoogleDriveSyncConfigItem() {
     // Deferred from `handleSync` so the two dialogs never overlap. It runs even
     // when the config half was cancelled: the two files fail for their own
     // reasons, and one being abandoned is not a reason to skip the other.
+    // No token here on purpose: the config dialog can sit open for minutes, and
+    // the one taken for that click may well have expired by now.
     void runGlossarySync()
   }
 

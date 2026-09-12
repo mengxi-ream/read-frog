@@ -1,6 +1,6 @@
 import type { GlossaryMerge } from "../merge-document"
 import { describe, expect, it } from "vitest"
-import { mergeGlossaryDocuments, termIdentity } from "../merge-document"
+import { mergeGlossaryDocuments, termIdentity, withDistinctIds } from "../merge-document"
 import { applyResolutions, isDestructive } from "../sync"
 
 const T0 = new Date("2026-01-01T00:00:00.000Z")
@@ -384,5 +384,52 @@ describe("applyResolutions — what it must not undo", () => {
 
     expect(resolved.glossaries).toEqual([])
     expect(resolved.stats.localRowsRemoved).toBe(6)
+  })
+})
+
+/**
+ * The two dedupes `replaceGlossary` runs before it writes, kept honest here
+ * because the write itself needs Dexie. Both exist so the rows on disk match
+ * the `fingerprintAfter` recorded alongside them — otherwise the import's Undo
+ * compares against a state that never existed and refuses forever.
+ */
+describe("what an imported document must be reduced to before it is stored", () => {
+  const T = new Date("2026-01-01T00:00:00.000Z")
+  const gl = (id: string, name: string) => ({
+    id,
+    name,
+    description: "",
+    enabled: true,
+    matchPatterns: [] as string[],
+    createdAt: T,
+    updatedAt: T,
+  })
+  const tm = (id: string, matchKey: string) => ({
+    id,
+    glossaryId: "g",
+    matchKey,
+    targetLang: "cmn",
+    source: matchKey.slice(2),
+    target: "x",
+    caseSensitive: false,
+    enabled: true,
+    updatedAt: T,
+  })
+
+  /** `bulkPut` keeps the last of a duplicated primary key; the count must agree. */
+  it("collapses glossaries sharing an id, last one winning", () => {
+    const rows = [gl("g", "first"), gl("g", "second"), gl("h", "other")]
+    const deduped = [...new Map(rows.map((row) => [row.id, row])).values()]
+    expect(deduped.map((row) => row.id)).toEqual(["g", "h"])
+    expect(deduped.find((row) => row.id === "g")?.name).toBe("second")
+  })
+
+  /** And the unique index rejects two rows under one identity triple. */
+  it("collapses terms sharing an identity, then separates their primary keys", () => {
+    const rows = [tm("a", "i:token"), tm("b", "i:token"), tm("a", "i:widget")]
+    const byIdentity = [...new Map(rows.map((row) => [termIdentity(row), row])).values()]
+    expect(byIdentity).toHaveLength(2)
+    const ids = withDistinctIds(byIdentity).map((row) => row.id)
+    expect(new Set(ids).size).toBe(ids.length)
   })
 })

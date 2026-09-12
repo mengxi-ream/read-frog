@@ -268,10 +268,16 @@ export async function replaceGlossary(document: {
   const overflow = checkGlossaryCaps(document)
   if (overflow) return { ok: false, ...overflow }
 
+  // Two glossary rows under one id: `bulkPut` keeps the last, so the tables end
+  // up differing from the `fingerprintAfter` recorded below and the import's
+  // Undo then refuses forever, stranding the glossary it replaced. Deduped
+  // here, before both the fingerprint and the write, exactly as the terms are.
+  const glossaries = [...new Map(document.glossaries.map((row) => [row.id, row])).values()]
+
   // A term whose glossary is not in the same file would be unreachable from
   // every screen while still counting against the cap — the same grave the merge
   // refuses to dig.
-  const ids = new Set(document.glossaries.map((glossary) => glossary.id))
+  const ids = new Set(glossaries.map((glossary) => glossary.id))
   const owned = document.terms.filter((term) => ids.has(term.glossaryId))
 
   // Two rows the database cannot hold at once, deduped here rather than left to
@@ -292,7 +298,7 @@ export async function replaceGlossary(document: {
       id: GLOSSARY_SYNC_UNDO_ID,
       email: "",
       source: "import",
-      fingerprintAfter: fingerprint({ glossaries: document.glossaries, terms }),
+      fingerprintAfter: fingerprint({ glossaries, terms }),
       capturedAt: new Date(),
       glossaries: [...current.glossaries],
       terms: [...current.terms],
@@ -300,10 +306,10 @@ export async function replaceGlossary(document: {
 
     await db.glossary.clear()
     await db.glossaryTerm.clear()
-    await db.glossary.bulkPut(document.glossaries.map((glossary) => ({ ...glossary })))
+    await db.glossary.bulkPut(glossaries.map((glossary) => ({ ...glossary })))
     await db.glossaryTerm.bulkPut(terms.map(toStoredTerm))
   })
 
   await bumpGlossaryRevision()
-  return { ok: true, glossaries: document.glossaries.length, terms: terms.length }
+  return { ok: true, glossaries: glossaries.length, terms: terms.length }
 }

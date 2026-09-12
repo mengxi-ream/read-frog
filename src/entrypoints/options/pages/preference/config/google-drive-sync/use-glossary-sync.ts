@@ -91,10 +91,10 @@ export function useGlossarySync() {
     })
   }
 
-  const start = async () => {
+  const start = async (token?: string) => {
     let planned: Awaited<ReturnType<typeof planGlossarySync>>
     try {
-      planned = await planGlossarySync()
+      planned = await planGlossarySync(token)
     } catch (error) {
       logger.error("Glossary sync failed to plan", error)
       toastManager.add({ type: "error", title: t("failed") })
