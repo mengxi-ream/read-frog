@@ -425,6 +425,7 @@ options:
           undone: Sözlükler eşitlemeden önceki haline döndürüldü
           undoUnavailable: Bu geri alma artık kullanılamıyor — sözlükleriniz o zamandan beri değişti.
           retry: Eşitleme sırasında sözlük değişti. Yeniden çalıştırın.
+          accountChangedRetry: İletişim kutusu açıkken oturum açılan Google hesabı değişti. Hiçbir şey yüklenmedi; yeniden eşitleyin.
           busy: Başka bir sekme şu anda sözlüklerinizi eşitliyor.
           malformed: Drive'daki sözlük dosyası okunamadı, bu yüzden hiçbir şey değişmedi.
           versionTooNew: O sözlük dosyasını Read Frog'un daha yeni bir sürümü yazmış. Önce uzantıyı güncelleyin.

@@ -38,9 +38,14 @@ function sideSummary(entry: GlossaryConflict, side: Side): string {
   if (row === undefined) return i18n.t("options.preference.config.googleDrive.glossary.deleted")
 
   if (entry.level === "glossary") {
-    const glossary = row as { name: string; enabled: boolean }
+    const glossary = row as { name: string; description: string; enabled: boolean }
     const name = glossary.name.trim() || i18n.t("options.advanced.glossary.untitled")
-    return glossary.enabled ? name : `${name} · ${offLabel()}`
+    const description = glossary.description.trim()
+    // The description is shown because it can be the ONLY thing in conflict:
+    // without it the two buttons render identically and the user is picking
+    // blind between two values neither of them is being told apart by.
+    const label = description ? `${name} · ${description}` : name
+    return glossary.enabled ? label : `${label} · ${offLabel()}`
   }
 
   const term = row as { target: string; enabled: boolean }
@@ -50,12 +55,20 @@ function sideSummary(entry: GlossaryConflict, side: Side): string {
 }
 
 /**
- * Which side the merge already leaned towards, so the buttons open on the answer
- * the user would get by doing nothing.
+ * Which side the merge already took, or null when it took from both.
+ *
+ * Null matters: the merge works field by field, so a row can end up with this
+ * device's name and the cloud's on/off state, matching NEITHER side. Falling
+ * back to "remote" there highlighted a value the merge was not going to write
+ * — and since an untouched conflict is never added to `resolutions`, Confirm
+ * then committed the blend the dialog had just said it would not. Highlighting
+ * nothing is the honest reading: neither side alone is what happens.
  */
-function defaultSide(entry: GlossaryConflict): Side {
+function defaultSide(entry: GlossaryConflict): Side | null {
   const resolution = JSON.stringify(entry.conflict.resolution)
-  return JSON.stringify(entry.conflict.local) === resolution ? "local" : "remote"
+  if (JSON.stringify(entry.conflict.local) === resolution) return "local"
+  if (JSON.stringify(entry.conflict.remote) === resolution) return "remote"
+  return null
 }
 
 export function GlossarySyncReviewDialog({
@@ -159,7 +172,7 @@ export function GlossarySyncReviewDialog({
           <div className="flex max-h-72 flex-col gap-2 overflow-y-auto">
             {conflicts.map((entry) => {
               const key = entry.conflict.key
-              const selected = choices[key] ?? defaultSide(entry)
+              const selected: Side | null = choices[key] ?? defaultSide(entry)
               return (
                 <div key={key} className="flex flex-col gap-1.5 rounded-md border p-2.5">
                   <span className="text-sm font-medium">{conflictLabel(entry)}</span>

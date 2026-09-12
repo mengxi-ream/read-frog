@@ -426,6 +426,7 @@ options:
           undone: Glosarios restaurados a como estaban antes de la sincronización
           undoUnavailable: "Esa acción ya no se puede deshacer: tus glosarios han cambiado desde entonces."
           retry: El glosario cambió durante la sincronización. Vuelve a ejecutarla.
+          accountChangedRetry: La cuenta de Google conectada cambió mientras el diálogo estaba abierto. No se subió nada; vuelve a sincronizar.
           busy: Otra pestaña está sincronizando tus glosarios ahora mismo.
           malformed: No se pudo leer el archivo de glosarios de tu Drive, así que no se cambió nada.
           versionTooNew: Ese archivo de glosarios lo escribió una versión más reciente de Read Frog. Actualiza la extensión primero.

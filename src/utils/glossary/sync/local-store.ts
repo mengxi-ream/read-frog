@@ -9,7 +9,7 @@ import {
   GLOSSARY_SYNC_UNDO_ID,
 } from "@/utils/db/dexie/tables/glossary-sync-snapshot"
 import { bumpGlossaryRevision } from "../repository"
-import { countLocalChanges } from "./merge-document"
+import { countLocalChanges, termIdentity, withDistinctIds } from "./merge-document"
 
 /** Everything the sync sends, in the shape the merge works on. */
 export async function readLocalGlossary(): Promise<GlossarySnapshot> {
@@ -115,6 +115,9 @@ export async function applyMergedGlossary({
         id: GLOSSARY_SYNC_UNDO_ID,
         email: "",
         source: "sync",
+        // What the tables will hold once this transaction commits, so `undo`
+        // can tell later edits from the state it is entitled to replace.
+        fingerprintAfter: fingerprint({ glossaries, terms }),
         capturedAt: now,
         glossaries: [...current.glossaries],
         terms: [...current.terms],
@@ -173,6 +176,15 @@ export async function restoreUndoSnapshot({
       // snapshot is not the one this toast promised to put back, and
       // `clearBase` is only right for the operation that wrote it.
       if (undo.source !== source) return false
+      // The user has edited the glossary since. This replaces both tables
+      // wholesale, so going ahead would silently delete every one of those
+      // edits — an undo that destroys newer work is not an undo.
+      if (
+        undo.fingerprintAfter !== undefined &&
+        undo.fingerprintAfter !== fingerprint(await readLocalGlossary())
+      ) {
+        return false
+      }
 
       await db.glossary.clear()
       await db.glossaryTerm.clear()
@@ -260,7 +272,19 @@ export async function replaceGlossary(document: {
   // every screen while still counting against the cap — the same grave the merge
   // refuses to dig.
   const ids = new Set(document.glossaries.map((glossary) => glossary.id))
-  const terms = document.terms.filter((term) => ids.has(term.glossaryId))
+  const owned = document.terms.filter((term) => ids.has(term.glossaryId))
+
+  // Two rows the database cannot hold at once, deduped here rather than left to
+  // `bulkPut`. A file is not required to have come from this extension, and a
+  // hand-edited one can carry the same `(glossaryId, targetLang, matchKey)`
+  // twice under different uuids: the unique index rejects that, the transaction
+  // rolls back, and the settings import that already replaced the config
+  // reports failure with the new settings installed. Last wins, which is what
+  // `mergeSets` does with the same shape.
+  const byIdentity = new Map(owned.map((term) => [termIdentity(term), term]))
+  // ...and two rows sharing one primary key, which `bulkPut` would silently
+  // collapse to whichever came last.
+  const terms = withDistinctIds([...byIdentity.values()])
 
   await db.transaction("rw", db.glossary, db.glossaryTerm, db.glossarySyncSnapshot, async () => {
     const current = await readLocalGlossary()
@@ -268,6 +292,7 @@ export async function replaceGlossary(document: {
       id: GLOSSARY_SYNC_UNDO_ID,
       email: "",
       source: "import",
+      fingerprintAfter: fingerprint({ glossaries: document.glossaries, terms }),
       capturedAt: new Date(),
       glossaries: [...current.glossaries],
       terms: [...current.terms],

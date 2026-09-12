@@ -426,6 +426,7 @@ options:
           undone: 術語庫已還原成同步前的樣子
           undoUnavailable: 該復原已失效 — 之後詞彙庫已發生變化。
           retry: 同步期間術語庫有變動，請再執行一次。
+          accountChangedRetry: 對話框開啟期間登入的 Google 帳號發生變化，未上傳任何內容，請重新同步。
           busy: 另一個分頁正在同步你的術語庫。
           malformed: 雲端的術語庫檔案無法讀取，本次未做任何變更。
           versionTooNew: 該術語庫檔案由較新版本的 Read Frog 寫入，請先更新擴充功能。

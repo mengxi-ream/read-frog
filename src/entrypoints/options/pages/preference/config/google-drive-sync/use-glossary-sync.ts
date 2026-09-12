@@ -39,7 +39,12 @@ export function useGlossarySync() {
       return
     }
     if (result.status === "retry") {
-      toastManager.add({ type: "error", title: t("retry") })
+      // An account change is not "run it again and it will work" — the user has
+      // to know which account they are now signed in as before they do.
+      toastManager.add({
+        type: "error",
+        title: result.reason === "account-changed" ? t("accountChangedRetry") : t("retry"),
+      })
       return
     }
 

@@ -210,3 +210,62 @@ describe("planGlossarySync — refusals and gates", () => {
     expect(result.plan.prompts).toContainEqual({ kind: "destructive", removing: 8, total: 11 })
   })
 })
+
+describe("planGlossarySync — a first sync that moves nothing", () => {
+  /**
+   * A device set up from the same exported file already agrees with the cloud,
+   * so every statistic is zero. Returning "no change" there left the base unset
+   * — and a device with no base treats its NEXT sync as a first sync too, which
+   * reads a term the user has since deleted as one arriving from the cloud and
+   * puts it back.
+   */
+  it("is still committed, because committing is what records the base", async () => {
+    const rows = snapshot([glossary("g")], [term("g", "token")])
+    state.local = rows
+    state.remote = remoteDoc(rows)
+    state.base = null
+
+    const result = await planGlossarySync()
+
+    expect(result.status).toBe("ready")
+  })
+
+  it("asks the user nothing, because nothing is happening", async () => {
+    const rows = snapshot([glossary("g")], [term("g", "token")])
+    state.local = rows
+    state.remote = remoteDoc(rows)
+    state.base = null
+
+    const result = await planGlossarySync()
+
+    if (result.status !== "ready") throw new Error("expected a plan")
+    expect(result.plan.prompts).toEqual([])
+  })
+
+  /** Once a base exists, an unchanged sync has nothing left to record. */
+  it("reports no change once the base is already there", async () => {
+    const rows = snapshot([glossary("g")], [term("g", "token")])
+    state.local = rows
+    state.remote = remoteDoc(rows)
+    state.base = { email: EMAIL, snapshot: rows }
+
+    expect((await planGlossarySync()).status).toBe("no-change")
+  })
+
+  /**
+   * The deletion this exists to protect: with the base recorded by the first
+   * sync, removing a term locally reads as a local deletion to propagate rather
+   * than as a cloud row arriving.
+   */
+  it("lets a later local deletion propagate instead of being resurrected", async () => {
+    const withTerm = snapshot([glossary("g")], [term("g", "token")])
+    state.base = { email: EMAIL, snapshot: withTerm }
+    state.remote = remoteDoc(withTerm)
+    state.local = snapshot([glossary("g")], [])
+
+    const result = await planGlossarySync()
+
+    if (result.status !== "ready") throw new Error("expected a plan")
+    expect(result.plan.merge.terms).toEqual([])
+  })
+})

@@ -185,10 +185,17 @@ export async function planGlossarySync(): Promise<PlanGlossarySyncResult> {
     stats.terms.incoming === 0 &&
     stats.terms.outgoing === 0 &&
     stats.terms.removed === 0
-  if (nothingMoved) return { status: "no-change" }
+  // A first sync still has to be committed even when it moves nothing, because
+  // committing is what records the base. A device set up from the same exported
+  // file already agrees with the cloud, so every statistic is zero — and without
+  // a base the NEXT sync is a first sync too, which reads a term the user has
+  // since deleted as one arriving from the cloud and puts it back.
+  if (nothingMoved && !isFirstSync) return { status: "no-change" }
 
   const prompts: SyncPrompt[] = []
-  if (isFirstSync) {
+  // Nothing to tell the user about when nothing moved; the commit runs anyway,
+  // silently, for the base.
+  if (isFirstSync && !nothingMoved) {
     prompts.push({
       kind: "first-sync",
       incoming: stats.glossaries.incoming + stats.terms.incoming,
@@ -232,7 +239,7 @@ export type ConflictResolutions = Map<string, "local" | "remote">
 export type CommitGlossarySyncResult =
   /** `counts` is what the write did to this device, measured against the rows it replaced. */
   | { status: "applied"; merge: GlossaryMerge; counts: GlossaryChangeCounts }
-  | { status: "retry"; reason: "changed-underneath" | "changed-locally" }
+  | { status: "retry"; reason: "changed-underneath" | "changed-locally" | "account-changed" }
   | { status: "blocked"; reason: "busy" }
 
 /**
@@ -249,6 +256,19 @@ export async function commitGlossarySync(
 ): Promise<CommitGlossarySyncResult> {
   return withSyncLock<CommitGlossarySyncResult>(
     async () => {
+      // The plan named an account, and everything after this writes to whichever
+      // one the token now belongs to. A review dialog can sit open past the
+      // token's expiry, and re-authenticating asks which account to use; another
+      // tab can switch accounts outright. Uploading this device's glossary into
+      // an account the user did not plan for is the exact thing the
+      // account-change prompt exists to stop, and it would then be recorded
+      // under `plan.email` as though the old account had agreed to it.
+      const { email } = await getGoogleUserInfo(await getValidAccessToken())
+      if (email !== plan.email) {
+        logger.warn("Google account changed between planning and committing the glossary sync")
+        return { status: "retry", reason: "account-changed" }
+      }
+
       const merge = resolutions?.size ? applyResolutions(plan.merge, resolutions) : plan.merge
       const payload = { glossaries: merge.glossaries, terms: merge.terms }
 

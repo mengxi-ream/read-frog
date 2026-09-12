@@ -426,6 +426,7 @@ options:
           undone: Glossaries restored to how they were before the sync
           undoUnavailable: That undo is no longer available — your glossaries have changed since.
           retry: The glossary changed while syncing. Run it again.
+          accountChangedRetry: The signed-in Google account changed while the dialog was open. Nothing was uploaded — sync again.
           busy: Another tab is syncing your glossaries right now.
           malformed: The glossary file in your Drive could not be read, so nothing was changed.
           versionTooNew: That glossary file was written by a newer version of Read Frog. Update the extension first.

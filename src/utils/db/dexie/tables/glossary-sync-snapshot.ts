@@ -42,6 +42,17 @@ export default class GlossarySyncSnapshot extends Entity {
    */
   source?: "sync" | "import"
 
+  /**
+   * On an `undo` row, a `fingerprint()` of the rows the operation LEFT behind.
+   *
+   * Undo replaces both tables wholesale, so it is only safe while they still
+   * hold what the operation put there. Anything the user typed afterwards would
+   * be thrown away without a word — the toast can outlive the state it promises
+   * to restore. Absent on a `base` row, and on an `undo` row written before this
+   * field existed.
+   */
+  fingerprintAfter?: string
+
   capturedAt!: Date
 
   glossaries!: SyncedGlossary[]

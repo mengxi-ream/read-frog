@@ -426,6 +426,7 @@ options:
           undone: 术语库已恢复到同步前的样子
           undoUnavailable: 该撤销已失效 — 之后术语库已发生变化。
           retry: 同步过程中术语库有改动，请再运行一次。
+          accountChangedRetry: 对话框打开期间登录的 Google 账号发生了变化，未上传任何内容，请重新同步。
           busy: 另一个标签页正在同步你的术语库。
           malformed: 云端的术语库文件无法读取，本次未做任何改动。
           versionTooNew: 那个术语库文件由更新版本的 Read Frog 写入，请先升级扩展。

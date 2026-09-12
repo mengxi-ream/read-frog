@@ -425,6 +425,7 @@ options:
           undone: Đã khôi phục bảng thuật ngữ về trạng thái trước khi đồng bộ
           undoUnavailable: Không thể hoàn tác nữa — bộ thuật ngữ của bạn đã thay đổi kể từ đó.
           retry: Bảng thuật ngữ đã thay đổi trong lúc đồng bộ. Hãy chạy lại.
+          accountChangedRetry: Tài khoản Google đã đăng nhập thay đổi trong khi hộp thoại đang mở. Chưa tải lên gì cả — hãy đồng bộ lại.
           busy: Một thẻ khác đang đồng bộ bảng thuật ngữ của bạn.
           malformed: Không đọc được tệp bảng thuật ngữ trên Drive, nên không có gì thay đổi.
           versionTooNew: Tệp bảng thuật ngữ đó do một phiên bản Read Frog mới hơn ghi. Hãy cập nhật tiện ích trước.

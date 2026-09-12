@@ -426,6 +426,7 @@ options:
           undone: Lüğətlər sinxronizasiyadan əvvəlki halına qaytarıldı
           undoUnavailable: Bu geri alma artıq mümkün deyil — lüğətləriniz o vaxtdan bəri dəyişib.
           retry: Sinxronizasiya zamanı lüğət dəyişdi. Yenidən işə salın.
+          accountChangedRetry: Dialoq açıq ikən daxil olunmuş Google hesabı dəyişdi. Heç nə yüklənmədi — yenidən sinxronlaşdırın.
           busy: Başqa bir tab hazırda lüğətlərinizi sinxronlaşdırır.
           malformed: Drive-dakı lüğət faylı oxuna bilmədi, ona görə heç nə dəyişmədi.
           versionTooNew: Həmin lüğət faylını Read Frog-un daha yeni versiyası yazıb. Əvvəlcə genişlənməni yeniləyin.
