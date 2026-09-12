@@ -375,10 +375,10 @@ options:
         syncSuccess:
           uploaded: Yerli konfiqurasiya buluda yükləndi
           downloaded: Uzaqdakı konfiqurasiya tətbiq edildi
-          sameChanges: Hər iki tərəfdə eyni dəyişikliklər var, sinxronlaşdırıldı
-          noChange: Artıq sinxronlaşdırılıb
-          unresolved: Ziddiyyətlər həll edildi və sinxronlaşdırıldı
-        syncError: Sinxronlaşdırma alınmadı, yenidən cəhd edin
+          sameChanges: Hər iki tərəfdə eyni parametr dəyişiklikləri, sinxronlaşdırıldı
+          noChange: Parametrlər artıq sinxrondur
+          unresolved: Parametr münaqişələri həll edildi və sinxronlaşdırıldı
+        syncError: Parametr sinxronizasiyası alınmadı, yenidən cəhd edin
         metadataCorrupted: Sinxronlaşdırma metaməlumatları zədələnib, uzaqdakı konfiqurasiya tətbiq edildi
         lastSyncTime: Son sinxronlaşdırma vaxtı
         logout: Çıxış et

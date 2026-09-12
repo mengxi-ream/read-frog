@@ -374,10 +374,10 @@ options:
         syncSuccess:
           uploaded: 로컬 설정이 클라우드에 업로드됨
           downloaded: 원격 설정이 적용됨
-          sameChanges: 로컬과 원격 변경 사항이 동일하여 동기화됨
-          noChange: 이미 동기화됨
-          unresolved: 충돌이 해결되고 로컬 및 클라우드에 동기화됨
-        syncError: 동기화 실패, 다시 시도해 주세요
+          sameChanges: 양쪽 설정 변경이 같아 동기화했습니다
+          noChange: 설정이 이미 동기화됨
+          unresolved: 설정 충돌을 해결하고 동기화했습니다
+        syncError: 설정 동기화 실패, 다시 시도해 주세요
         metadataCorrupted: 동기화 메타데이터가 손상되어 원격 구성을 적용했습니다
         lastSyncTime: 마지막 동기화 시간
         logout: 로그아웃

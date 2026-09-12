@@ -375,10 +375,10 @@ options:
         syncSuccess:
           uploaded: Local config uploaded to cloud
           downloaded: Remote config applied
-          sameChanges: Same changes on both sides, synced
-          noChange: Already in sync
-          unresolved: Conflicts resolved and synced
-        syncError: Sync failed, please try again
+          sameChanges: Same config changes on both sides, synced
+          noChange: Config already in sync
+          unresolved: Config conflicts resolved and synced
+        syncError: Config sync failed, please try again
         metadataCorrupted: Sync metadata corrupted, remote config applied
         lastSyncTime: Last sync at
         logout: Logout

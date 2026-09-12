@@ -374,10 +374,10 @@ options:
         syncSuccess:
           uploaded: Yerel ayarlar buluta yüklendi
           downloaded: Uzak ayarlar uygulandı
-          sameChanges: Yerel ve uzak değişiklikler aynı, senkronize edildi
-          noChange: Zaten güncel
-          unresolved: Çakışmalar çözüldü ve senkronize edildi
-        syncError: Senkronizasyon başarısız, lütfen tekrar deneyin
+          sameChanges: Her iki tarafta aynı ayar değişiklikleri, eşitlendi
+          noChange: Ayarlar zaten güncel
+          unresolved: Ayar çakışmaları çözüldü ve eşitlendi
+        syncError: Ayar eşitlemesi başarısız, lütfen tekrar deneyin
         metadataCorrupted: Senkronizasyon meta verileri bozuk, uzak yapılandırma uygulandı
         lastSyncTime: Son senkronizasyon
         logout: Çıkış yap

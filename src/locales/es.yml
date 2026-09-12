@@ -375,10 +375,10 @@ options:
         syncSuccess:
           uploaded: Configuración local subida a la nube
           downloaded: Configuración remota aplicada
-          sameChanges: Mismos cambios en ambos lados, sincronizado
-          noChange: Ya está sincronizado
-          unresolved: Conflictos resueltos y sincronizados
-        syncError: Error de sincronización, inténtalo de nuevo
+          sameChanges: Los mismos cambios de configuración en ambos lados, sincronizado
+          noChange: La configuración ya está sincronizada
+          unresolved: Conflictos de configuración resueltos y sincronizados
+        syncError: Error al sincronizar la configuración, inténtalo de nuevo
         metadataCorrupted: Metadatos de sincronización dañados, configuración remota aplicada
         lastSyncTime: Última sincronización a las
         logout: Cerrar sesión
