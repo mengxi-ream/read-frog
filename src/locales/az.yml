@@ -1056,6 +1056,8 @@ options:
       managePrompts: Təlimatları idarə et
       communityPrompts: İcmadan təlimat əldə et və ya icma ilə paylaş
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      variableReference: Dəyişənlər arayışı
+      variableReferenceUrl: https://readfrog.app/en/docs/page-translation/prompts/variables
       addPrompt: Təlimat əlavə et
       default: Standart
       builtIn: Daxili

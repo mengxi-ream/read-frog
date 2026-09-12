@@ -940,6 +940,8 @@ options:
       managePrompts: Quản lý prompt
       communityPrompts: Nhận hoặc chia sẻ prompt từ cộng đồng
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      variableReference: Tham chiếu biến
+      variableReferenceUrl: https://readfrog.app/vi/docs/page-translation/prompts/variables
       addPrompt: Thêm Prompt
       default: Mặc định
       builtIn: Tích hợp sẵn

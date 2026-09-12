@@ -1056,6 +1056,8 @@ options:
       managePrompts: 管理提示詞
       communityPrompts: 取得或分享社群提示詞
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/820
+      variableReference: 變數詳解
+      variableReferenceUrl: https://readfrog.app/zh-TW/docs/page-translation/prompts/variables
       addPrompt: 新增提示詞
       default: 通用
       builtIn: 內建
