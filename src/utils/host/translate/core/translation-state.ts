@@ -445,6 +445,23 @@ export function isBilingualTranslationStateCurrent(state: BilingualTranslationSt
   )
 }
 
+/**
+ * Nearest translated ancestor whose host text and wrapper are still current.
+ *
+ * Some sites temporarily wrap existing text in a new element for hover or
+ * citation decoration. Re-walking that element would translate the same text
+ * again even though the surrounding logical source has not changed.
+ */
+export function findCurrentBilingualLayoutSource(node: Node): HTMLElement | undefined {
+  let current = node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement
+  while (current) {
+    const state = bilingualTranslationsBySource.get(current)
+    if (state && isBilingualTranslationStateCurrent(state)) return current
+    current = current.parentElement
+  }
+  return undefined
+}
+
 export function findStaleBilingualLayoutSource(node: Node): HTMLElement | undefined {
   let current = node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement
   while (current) {

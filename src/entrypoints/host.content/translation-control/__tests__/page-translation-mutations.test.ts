@@ -668,6 +668,58 @@ describe("pageTranslationManager mutation re-walk", () => {
     manager.stop()
   })
 
+  it("ignores temporary wrappers around unchanged text inside a translated source (#2185)", async () => {
+    document.body.innerHTML = `<p id="summary">Original summary</p>`
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const observer = intersectionObservers[0]!
+    const summary = document.getElementById("summary") as HTMLElement
+    const source = summary.firstChild as Text
+    const wrapper = document.createElement("span")
+    wrapper.className = "notranslate read-frog-translated-content-wrapper"
+    wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+    wrapper.append("译文")
+    summary.append(wrapper)
+    const state: BilingualTranslationState = {
+      layoutSource: summary,
+      sourceTextContent: "Original summary",
+      status: "active",
+      walkId: "walk-id",
+      wrapper,
+      wrapperTextContent: "译文",
+    }
+    registerBilingualTranslationState(state)
+    await flushDomUpdates()
+    observer.observe.mockClear()
+    mockWalkAndLabelElement.mockClear()
+    mockTranslateNodesBilingualMode.mockClear()
+
+    // Google AI Overview citation hover temporarily moves the existing Text
+    // node into a decorator, then unwraps it while preserving child nodes.
+    for (let i = 0; i < 3; i += 1) {
+      const decorator = document.createElement("span")
+      decorator.className = "yADgie"
+      decorator.append(source)
+      summary.prepend(decorator)
+      await flushDomUpdates()
+
+      summary.insertBefore(source, decorator)
+      decorator.remove()
+      await flushDomUpdates()
+    }
+
+    expect(observer.observe).not.toHaveBeenCalled()
+    expect(mockWalkAndLabelElement).not.toHaveBeenCalled()
+    expect(mockTranslateNodesBilingualMode).not.toHaveBeenCalled()
+    expect(summary.querySelectorAll(".read-frog-translated-content-wrapper")).toHaveLength(1)
+
+    unregisterBilingualTranslationState(state)
+    manager.stop()
+  })
+
   it("retranslates exactly once when the site re-renders a node containing our wrapper (#1831)", async () => {
     document.body.innerHTML = `
       <p id="tweet"><span id="source">Original content</span></p>

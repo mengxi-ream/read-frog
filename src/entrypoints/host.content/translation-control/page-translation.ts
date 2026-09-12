@@ -30,6 +30,7 @@ import {
   walkAndLabelElementChunked,
 } from "@/utils/host/dom/traversal"
 import {
+  findCurrentBilingualLayoutSource,
   findStaleBilingualLayoutSource,
   findStaleTranslationOnlyAnchor,
   getBilingualTranslationStateForWrapper,
@@ -1033,6 +1034,13 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     for (const rec of hostRecords) {
       if (rec.type === "childList") {
+        // Sites such as Google Search temporarily wrap existing text in a new
+        // element while showing citation hover UI. If the surrounding
+        // bilingual source is still current, its host text did not change and
+        // the added subtree is structural churn, not new translatable content.
+        // Walking it would insert a duplicate wrapper that the site may retain
+        // when it later unwraps the temporary element.
+        if (findCurrentBilingualLayoutSource(rec.target)) continue
         rec.addedNodes.forEach((node) => {
           if (isHTMLElement(node)) {
             this.addWalkBlockedElements(node, config)
