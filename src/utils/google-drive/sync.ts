@@ -6,6 +6,7 @@ import { getLocalConfigAndMeta, setLocalConfigAndMeta } from "../config/storage"
 import { getLastSyncedConfigAndMeta, setLastSyncConfigAndMeta } from "../config/sync"
 import { CONFIG_SCHEMA_VERSION } from "../constants/config"
 import { logger } from "../logger"
+import { GoogleAccountChangedError, getGoogleUserInfo, getValidAccessToken } from "./auth"
 import { getRemoteConfigAndMetaWithUserEmail, setRemoteConfigAndMeta } from "./storage"
 
 export type SyncAction = "uploaded" | "downloaded" | "same-changes" | "no-change"
@@ -25,6 +26,18 @@ export async function syncMergedConfig(mergedConfig: Config, email: string): Pro
   try {
     const now = Date.now()
 
+    // Before anything is written. This runs from a dialog the user can leave
+    // open indefinitely, so the token has to be resolved again — but the
+    // ACCOUNT must still be the one the sync was started for. Uploading to
+    // whoever is current would put the merged config in their Drive while
+    // `setLastSyncConfigAndMeta` below recorded the original address as having
+    // agreed to it, and would leave the glossary half bound to the other one.
+    const accessToken = await getValidAccessToken()
+    const current = await getGoogleUserInfo(accessToken)
+    if (current.email !== email) {
+      throw new GoogleAccountChangedError(email, current.email)
+    }
+
     // Validate merged config
     const validatedConfigResult = configSchema.safeParse(mergedConfig)
     if (!validatedConfigResult.success) {
@@ -40,11 +53,14 @@ export async function syncMergedConfig(mergedConfig: Config, email: string): Pro
       lastModifiedAt: now,
     })
 
-    // Upload to Google Drive
-    await setRemoteConfigAndMeta({
-      value: validatedConfig,
-      meta: { schemaVersion: CONFIG_SCHEMA_VERSION, lastModifiedAt: now },
-    })
+    // Upload to Google Drive, with the token whose account was just verified.
+    await setRemoteConfigAndMeta(
+      {
+        value: validatedConfig,
+        meta: { schemaVersion: CONFIG_SCHEMA_VERSION, lastModifiedAt: now },
+      },
+      accessToken,
+    )
 
     // Update sync metadata
     await setLastSyncConfigAndMeta(validatedConfig, {
@@ -60,12 +76,12 @@ export async function syncMergedConfig(mergedConfig: Config, email: string): Pro
   }
 }
 
-export async function syncConfig(): Promise<SyncResult> {
+export async function syncConfig(token?: string): Promise<SyncResult> {
   try {
     const localConfigValueAndMeta = await getLocalConfigAndMeta()
     const lastSyncedConfigValueAndMeta = await getLastSyncedConfigAndMeta()
     const { configValueAndMeta: remoteConfigValueAndMeta, email } =
-      await getRemoteConfigAndMetaWithUserEmail()
+      await getRemoteConfigAndMetaWithUserEmail(token)
 
     const now = Date.now()
 
@@ -81,7 +97,7 @@ export async function syncConfig(): Promise<SyncResult> {
         return { status: "success", action: "downloaded" }
       }
       logger.info("No remote config found, uploading local config")
-      await setRemoteConfigAndMeta(localConfigValueAndMeta)
+      await setRemoteConfigAndMeta(localConfigValueAndMeta, token)
       await setLastSyncConfigAndMeta(localConfigValueAndMeta.value, {
         ...localConfigValueAndMeta.meta,
         email,
@@ -117,7 +133,7 @@ export async function syncConfig(): Promise<SyncResult> {
         }
 
         await setLocalConfigAndMeta(mergedConfigValueAndMeta.value, mergedConfigValueAndMeta.meta)
-        await setRemoteConfigAndMeta(mergedConfigValueAndMeta)
+        await setRemoteConfigAndMeta(mergedConfigValueAndMeta, token)
         await setLastSyncConfigAndMeta(mergedConfigValueAndMeta.value, {
           ...mergedConfigValueAndMeta.meta,
           email,
@@ -137,7 +153,7 @@ export async function syncConfig(): Promise<SyncResult> {
       }
     } else if (localChangedSinceSync) {
       logger.info("Local config is newer, uploading local config")
-      await setRemoteConfigAndMeta(localConfigValueAndMeta)
+      await setRemoteConfigAndMeta(localConfigValueAndMeta, token)
       await setLastSyncConfigAndMeta(localConfigValueAndMeta.value, {
         ...localConfigValueAndMeta.meta,
         email,

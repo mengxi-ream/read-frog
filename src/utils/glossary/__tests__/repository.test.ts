@@ -1,4 +1,3 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { ParsedGlossaryRow } from "../csv"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { storage } from "#imports"
@@ -114,23 +113,26 @@ function identify(rows: readonly (typeof dexie.state.rows)[number][]) {
   }))
 }
 
-function importRows(
-  rows: readonly ParsedGlossaryRow[],
-  mode: "merge" | "replace",
-  fallbackLang: LangCodeISO6393 = "cmn",
-  /** The import's checkbox, which only answers for rows carrying no column. */
-  caseSensitive = false,
-) {
-  return importGlossaryRows(GLOSSARY_ID, rows, mode, caseSensitive, fallbackLang)
+function importRows(rows: readonly ParsedGlossaryRow[], mode: "merge" | "replace") {
+  return importGlossaryRows(GLOSSARY_ID, rows, mode)
+}
+
+/** A row as `parseGlossaryCsv` now hands it over: every field present. */
+function csvRow(
+  source: string,
+  target: string,
+  overrides: Partial<ParsedGlossaryRow> = {},
+): ParsedGlossaryRow {
+  return { source, target, targetLanguage: "cmn", caseSensitive: false, ...overrides }
 }
 
 /** Exactly what `exportGlossaryCsv` writes for a set of stored rows. */
 function exportedCsv(rows: readonly (typeof dexie.state.rows)[number][]) {
   return formatGlossaryCsv(
-    rows.map((row) => ({
+    rows.map<ParsedGlossaryRow>((row) => ({
       source: row.source,
       target: row.target,
-      targetLanguage: row.targetLang,
+      targetLanguage: row.targetLang as ParsedGlossaryRow["targetLanguage"],
       caseSensitive: row.caseSensitive,
     })),
   )
@@ -162,7 +164,9 @@ describe("importGlossaryRows — a round trip through the CSV", () => {
 
     // The checkbox says "not case sensitive" and must NOT win here: the file
     // names the flag per row, and that is the term's own identity.
-    const result = await importRows(parseGlossaryCsv(csv).rows, "merge")
+    const parsed = parseGlossaryCsv(csv)
+    if (!parsed.ok) throw new Error("export did not re-parse")
+    const result = await importRows(parsed.rows, "merge")
 
     expect(result).toMatchObject({ ok: true, added: 0, updated: 2 })
     expect(dexie.state.rows).toHaveLength(2)
@@ -170,19 +174,35 @@ describe("importGlossaryRows — a round trip through the CSV", () => {
     expect(dexie.state.rows.find((row) => row.source === "Go")?.caseSensitive).toBe(true)
   })
 
+  function reimport() {
+    const parsed = parseGlossaryCsv(exportedCsv(dexie.state.rows))
+    if (!parsed.ok) throw new Error("export did not re-parse")
+    return importRows(parsed.rows, "merge")
+  }
+
   it("survives a second round trip without growing", async () => {
     seedMixedCaseList()
-    await importRows(parseGlossaryCsv(exportedCsv(dexie.state.rows)).rows, "merge")
-    await importRows(parseGlossaryCsv(exportedCsv(dexie.state.rows)).rows, "merge")
+    await reimport()
+    await reimport()
     expect(dexie.state.rows).toHaveLength(2)
   })
 
-  it("still lets the import's checkbox answer for a file that carries no column", async () => {
-    // Every file from another tool, and the shape the third column established.
-    const { rows } = parseGlossaryCsv("Go,围棋")
-    await importRows(rows, "merge", "cmn", true)
-    expect(dexie.state.rows.map((row) => row.matchKey)).toEqual(["s:Go"])
+  /**
+   * The file is the only thing that answers this now. The import screen used to
+   * carry a checkbox and a language picker for rows that named neither, which
+   * meant one file could land under two different keys depending on controls
+   * the user had to think about; `parseGlossaryCsv` requires the columns
+   * instead, so a row that reaches here has already said which key it wants.
+   */
+  it("takes the case rule from the row, under the key the file asked for", async () => {
+    await importRows([csvRow("Go", "围棋", { caseSensitive: true })], "merge")
+    expect(dexie.state.rows.map((stored) => stored.matchKey)).toEqual(["s:Go"])
     expect(dexie.state.rows[0]?.caseSensitive).toBe(true)
+  })
+
+  it("files a row under the language the file names, not a default", async () => {
+    await importRows([csvRow("Go", "囲碁", { targetLanguage: "jpn" })], "merge")
+    expect(dexie.state.rows[0]?.targetLang).toBe("jpn")
   })
 })
 
@@ -218,6 +238,10 @@ describe("importGlossaryRows", () => {
      * The regression this guards: replace mode used to delete the whole
      * glossary, insert the empty record list, and report success. This is the
      * one table holding text the user typed, and there is no undo.
+     *
+     * Through the real parser, because that is now the first line of defence:
+     * BCP 47 tags are not the ISO 639-3 codes terms are filed under, so every
+     * row is dropped before the importer sees it and `rows` arrives empty.
      */
     it("keeps the list when every row names a language we do not know", async () => {
       dexie.state.rows = [
@@ -225,43 +249,20 @@ describe("importGlossaryRows", () => {
         storedTerm({ id: "keep-cpu", matchKey: "i:cpu", source: "CPU", target: "处理器" }),
       ]
 
-      // BCP 47 tags, not the ISO 639-3 codes the extension files terms under.
-      const result = await importRows(
-        [
-          { source: "GPU", target: "显卡", targetLanguage: "zh-CN" },
-          { source: "CPU", target: "处理器", targetLanguage: "en" },
-        ],
-        "replace",
+      const parsed = parseGlossaryCsv(
+        "source,target,targetLanguage,caseSensitive\nGPU,显卡,zh-CN,false\nCPU,处理器,en,false",
       )
+      if (!parsed.ok) throw new Error("header should have been accepted")
+      expect(parsed.rows).toEqual([])
+      expect(parsed.skipped.map((skip) => skip.reason)).toEqual([
+        "unknown-language",
+        "unknown-language",
+      ])
 
-      expect(result).toEqual({
-        ok: false,
-        added: 0,
-        updated: 0,
-        duplicatesInFile: 0,
-        unknownLanguage: 2,
-        reason: "no-valid-rows",
-      })
+      const result = await importRows(parsed.rows, "replace")
+
+      expect(result).toMatchObject({ ok: false, reason: "no-valid-rows" })
       expect(dexie.state.rows.map((row) => row.id)).toEqual(["keep-gpu", "keep-cpu"])
-      expectNothingHappened()
-    })
-
-    /** A third-party export whose third column is a note, not a language. */
-    it("keeps the list when the third column was never a language", async () => {
-      dexie.state.rows = [storedTerm({ id: "keep-gpu", matchKey: "i:gpu", source: "GPU" })]
-
-      const result = await importRows(
-        [
-          { source: "Acheron", target: "", targetLanguage: "proper noun" },
-          { source: "Helldiver", target: "地狱潜兵", targetLanguage: "keep original" },
-        ],
-        "replace",
-      )
-
-      expect(result.ok).toBe(false)
-      expect(result.reason).toBe("no-valid-rows")
-      expect(result.unknownLanguage).toBe(2)
-      expect(dexie.state.rows.map((row) => row.id)).toEqual(["keep-gpu"])
       expectNothingHappened()
     })
 
@@ -273,13 +274,7 @@ describe("importGlossaryRows", () => {
     it("refuses the same file in merge mode too", async () => {
       dexie.state.rows = [storedTerm({ id: "keep-gpu", matchKey: "i:gpu", source: "GPU" })]
 
-      const result = await importRows(
-        [
-          { source: "GPU", target: "显卡", targetLanguage: "zh-CN" },
-          { source: "CPU", target: "处理器", targetLanguage: "en" },
-        ],
-        "merge",
-      )
+      const result = await importRows([], "merge")
 
       expect(result.ok).toBe(false)
       expect(result.reason).toBe("no-valid-rows")
@@ -291,17 +286,10 @@ describe("importGlossaryRows", () => {
     it("keeps the list when every row's source is blank", async () => {
       dexie.state.rows = [storedTerm({ id: "keep-gpu", matchKey: "i:gpu", source: "GPU" })]
 
-      const result = await importRows(
-        [
-          { source: "   ", target: "显卡" },
-          { source: "", target: "处理器" },
-        ],
-        "replace",
-      )
+      const result = await importRows([csvRow("   ", "显卡"), csvRow("", "处理器")], "replace")
 
       expect(result.ok).toBe(false)
       expect(result.reason).toBe("no-valid-rows")
-      expect(result.unknownLanguage).toBe(0)
       expect(dexie.state.rows.map((row) => row.id)).toEqual(["keep-gpu"])
       expectNothingHappened()
     })
@@ -314,20 +302,21 @@ describe("importGlossaryRows", () => {
         storedTerm({ id: "other", glossaryId: OTHER_GLOSSARY_ID, source: "elsewhere" }),
       ]
 
-      const result = await importRows(
-        [
-          { source: "GPU", target: "显卡", targetLanguage: "zh-CN" },
-          { source: "Helldiver", target: "地狱潜兵", targetLanguage: "cmn" },
-        ],
-        "replace",
+      // Through the parser, because that is where "partially valid" now lives:
+      // the first row names a BCP 47 tag and is dropped, the second survives.
+      const parsed = parseGlossaryCsv(
+        "source,target,targetLanguage,caseSensitive\nGPU,显卡,zh-CN,false\nHelldiver,地狱潜兵,cmn,false",
       )
+      if (!parsed.ok) throw new Error("header should have been accepted")
+      expect(parsed.skipped.map((skip) => skip.reason)).toEqual(["unknown-language"])
+
+      const result = await importRows(parsed.rows, "replace")
 
       expect(result).toEqual({
         ok: true,
         added: 1,
         updated: 0,
         duplicatesInFile: 0,
-        unknownLanguage: 1,
       })
       expect(dexie.deleteSpy).toHaveBeenCalledWith(GLOSSARY_ID)
       expect(dexie.transactionSpy).toHaveBeenCalledWith("rw")
@@ -357,7 +346,6 @@ describe("importGlossaryRows", () => {
         added: 0,
         updated: 0,
         duplicatesInFile: 0,
-        unknownLanguage: 0,
         reason: "no-valid-rows",
       })
       expect(dexie.state.rows.map((row) => row.id)).toEqual(["kept", "other"])
@@ -365,14 +353,13 @@ describe("importGlossaryRows", () => {
       expect(storageValues.get(GLOSSARY_REVISION_KEY)).toBeUndefined()
     })
 
-    it("imports a two-column file under the language chosen for the import", async () => {
+    it("files each row under the language its own row names", async () => {
       const result = await importRows(
         [
-          { source: "GPU", target: "显卡" },
-          { source: "CPU", target: "处理器" },
+          csvRow("GPU", "显卡", { targetLanguage: "jpn" }),
+          csvRow("CPU", "处理器", { targetLanguage: "jpn" }),
         ],
         "merge",
-        "jpn",
       )
 
       expect(result).toEqual({
@@ -380,7 +367,6 @@ describe("importGlossaryRows", () => {
         added: 2,
         updated: 0,
         duplicatesInFile: 0,
-        unknownLanguage: 0,
       })
       expect(identify(dexie.state.rows)).toEqual([
         { glossaryId: GLOSSARY_ID, source: "GPU", targetLang: "jpn" },
@@ -402,20 +388,13 @@ describe("importGlossaryRows", () => {
       }),
     )
 
-    const result = await importRows(
-      [
-        { source: "GPU", target: "显卡" },
-        { source: "CPU", target: "处理器" },
-      ],
-      "merge",
-    )
+    const result = await importRows([csvRow("GPU", "显卡"), csvRow("CPU", "处理器")], "merge")
 
     expect(result).toEqual({
       ok: false,
       added: 0,
       updated: 0,
       duplicatesInFile: 0,
-      unknownLanguage: 0,
       reason: "overflow",
       overflowBy: 1,
     })

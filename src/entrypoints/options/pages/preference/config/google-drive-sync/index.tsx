@@ -1,17 +1,19 @@
 import { Icon } from "@iconify/react"
 import { useAtomValue, useSetAtom } from "jotai"
-import { Activity, useState } from "react"
+import { Activity, useRef, useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { useGoogleDriveAuth } from "@/hooks/use-google-drive-auth"
 import { resolutionsAtom, unresolvedConfigsAtom } from "@/utils/atoms/google-drive-sync"
 import { lastSyncTimeAtom } from "@/utils/atoms/last-sync-time"
-import { clearAccessToken } from "@/utils/google-drive/auth"
+import { clearAccessToken, getGoogleUserInfo, getValidAccessToken } from "@/utils/google-drive/auth"
 import { syncConfig } from "@/utils/google-drive/sync"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { ConfigItem } from "../../../../components/config-item"
+import { GlossarySyncReviewDialog } from "./components/glossary-review-dialog"
 import { UnresolvedDialog } from "./components/unresolved-dialog"
+import { useGlossarySync } from "./use-glossary-sync"
 
 export function GoogleDriveSyncConfigItem() {
   const [isSyncing, setIsSyncing] = useState(false)
@@ -23,16 +25,73 @@ export function GoogleDriveSyncConfigItem() {
   const setUnresolvedData = useSetAtom(unresolvedConfigsAtom)
   const setResolutions = useSetAtom(resolutionsAtom)
   const lastSyncTime = useAtomValue(lastSyncTimeAtom)
+  const glossarySync = useGlossarySync()
+
+  /**
+   * The account the current Sync click was made under.
+   *
+   * A ref because the glossary half can run long after the click, once the
+   * config conflict dialog closes, and it has to be held to the account the
+   * user was on when they pressed the button rather than to whoever is signed
+   * in by then.
+   */
+  const clickAccount = useRef<string | undefined>(undefined)
+
+  // Always leaves `isSyncing` false, so a fault in either half cannot strand the
+  // button disabled until the page is reloaded.
+  const runGlossarySync = async (options?: { token?: string; expectedEmail?: string }) => {
+    setIsSyncing(true)
+    try {
+      await glossarySync.start(options)
+    } finally {
+      setIsSyncing(false)
+    }
+  }
 
   const handleSync = async () => {
     setIsSyncing(true)
 
-    const result = await syncConfig()
+    // Taken once, before either half. `getValidAccessToken` re-authenticates
+    // inside a 60s buffer and asks which account to use, so two halves each
+    // fetching their own can end up bound to two different Google accounts.
+    //
+    // Failing here ends the whole sync rather than falling through: neither half
+    // can do anything without a token, and letting them try would put the
+    // account chooser in front of the user a second time for the same click.
+    let accessToken: string
+    let accountEmail: string
+    try {
+      accessToken = await getValidAccessToken()
+      accountEmail = (await getGoogleUserInfo(accessToken)).email
+      clickAccount.current = accountEmail
+    } catch (error) {
+      logger.error("Google Drive sync could not get a token", error)
+      toastManager.add({
+        type: "error",
+        title: i18n.t("options.preference.config.googleDrive.syncError"),
+      })
+      setIsSyncing(false)
+      return
+    }
+
+    // Passed down, not just fetched: both halves have to reach the same Drive,
+    // and each resolving its own token is what let one click write the config
+    // to the account the user started with and the glossary to the one another
+    // tab switched to.
+    const result = await syncConfig(accessToken)
 
     if (result.status === "unresolved") {
+      // The config half needs the user, and its dialog is now up. The glossary
+      // half waits for it: opening a second alert dialog on top leaves two
+      // modals with no stated order, and dismissing the wrong one cancels the
+      // glossary sync outright. `handleDialogClose` starts it once this closes.
       setUnresolvedData(result.data)
       setIsOpen(true)
-    } else if (result.status === "success") {
+      setIsSyncing(false)
+      return
+    }
+
+    if (result.status === "success") {
       const messages = {
         uploaded: i18n.t("options.preference.config.googleDrive.syncSuccess.uploaded"),
         downloaded: i18n.t("options.preference.config.googleDrive.syncSuccess.downloaded"),
@@ -49,7 +108,9 @@ export function GoogleDriveSyncConfigItem() {
       })
     }
 
-    setIsSyncing(false)
+    // The glossary lives in its own Drive file and fails for its own reasons, so
+    // it runs whatever the config half did and says so separately.
+    await runGlossarySync({ token: accessToken, expectedEmail: accountEmail })
   }
 
   const handleLogout = async () => {
@@ -75,6 +136,15 @@ export function GoogleDriveSyncConfigItem() {
         title: i18n.t("options.preference.config.googleDrive.syncError"),
       })
     }
+    // Deferred from `handleSync` so the two dialogs never overlap. It runs even
+    // when the config half was cancelled: the two files fail for their own
+    // reasons, and one being abandoned is not a reason to skip the other.
+    // No token: this dialog can sit open for minutes and the one taken for that
+    // click may well have expired. The ACCOUNT still carries over, though —
+    // without it a fresh token would silently bind this half to whoever another
+    // tab has since switched to, and the config would already have gone to the
+    // account the click started on.
+    void runGlossarySync({ expectedEmail: clickAccount.current })
   }
 
   const formatLastSyncTime = (timestamp: number): string => {
@@ -131,6 +201,12 @@ export function GoogleDriveSyncConfigItem() {
         open={isOpen}
         onResolved={() => handleDialogClose(true)}
         onCancelled={() => handleDialogClose(false)}
+      />
+
+      <GlossarySyncReviewDialog
+        plan={glossarySync.pendingPlan}
+        onCancel={glossarySync.cancel}
+        onConfirm={(resolutions) => void glossarySync.confirm(resolutions)}
       />
     </>
   )

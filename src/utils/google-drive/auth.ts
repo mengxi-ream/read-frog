@@ -25,6 +25,24 @@ const googleUserInfoSchema = z.object({
   picture: z.url().optional(),
 })
 
+/**
+ * The signed-in account is no longer the one an operation was started for.
+ *
+ * Thrown rather than silently retargeted: a dialog can stay open long enough
+ * for another tab to switch accounts, and finishing the write against whoever
+ * is current puts the user's data in a Drive they did not choose while the
+ * metadata still records the one they did.
+ */
+export class GoogleAccountChangedError extends Error {
+  constructor(
+    readonly expected: string,
+    readonly actual: string,
+  ) {
+    super(`Google account changed from ${expected} to ${actual}`)
+    this.name = "GoogleAccountChangedError"
+  }
+}
+
 export type GoogleAuthToken = z.infer<typeof googleAuthTokenSchema>
 export type GoogleUserInfo = z.infer<typeof googleUserInfoSchema>
 
