@@ -438,6 +438,7 @@ options:
             firstSync: "Lần đồng bộ đầu trên thiết bị này: $1 về từ đám mây, $2 gửi lên."
             accountChanged: "Bạn đang đăng nhập bằng $1, không phải tài khoản mà thiết bị này đồng bộ lần trước. $2 dòng bảng thuật ngữ của thiết bị này sẽ được tải lên tài khoản đó. Nếu chỉ muốn lấy bảng thuật ngữ của tài khoản này, hãy hủy, xóa bảng ở đây rồi đồng bộ lại."
             destructive: "Lần đồng bộ này xóa $1 trong $2 dòng bảng thuật ngữ trên thiết bị này."
+            moreConflicts: "Còn $1 khác biệt không được liệt kê. Mỗi mục giữ lựa chọn của quá trình hợp nhất."
             confirm: Đồng bộ
             cancel: Hủy
       manualSync:

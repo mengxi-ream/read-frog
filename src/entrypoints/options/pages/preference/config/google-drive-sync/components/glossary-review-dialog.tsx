@@ -18,6 +18,17 @@ import { cn } from "@/utils/styles/utils"
 
 type Side = "local" | "remote"
 
+/**
+ * How many conflicts get a pair of buttons.
+ *
+ * A bulk re-import on two devices can conflict thousands of rows, and the cap
+ * is 20,000 terms — mounting two buttons each stalls or kills the options page
+ * before the user can confirm anything. Nobody resolves three thousand rows by
+ * hand either, so the rest keep the merge's own choice and the dialog says how
+ * many. A crash would have applied nothing at all.
+ */
+const MAX_LISTED_CONFLICTS = 100
+
 /** The name to put on a conflict, taken from whichever side still has the row. */
 function conflictLabel(entry: GlossaryConflict): string {
   if (entry.level === "glossary") {
@@ -48,10 +59,17 @@ function sideSummary(entry: GlossaryConflict, side: Side): string {
     return glossary.enabled ? label : `${label} · ${offLabel()}`
   }
 
-  const term = row as { target: string; enabled: boolean }
+  const term = row as { source: string; target: string; enabled: boolean }
   const wording =
     term.target === "" ? i18n.t("options.advanced.glossary.keepOriginal") : term.target
-  return term.enabled ? wording : `${wording} · ${offLabel()}`
+  const label = term.enabled ? wording : `${wording} · ${offLabel()}`
+  // Two devices can retype a case-insensitive term with different casing:
+  // `Token` and `TOKEN` share one identity, so this is one conflicted row whose
+  // difference is entirely in the source. Without it here both buttons read the
+  // same and the heading shows only one of the two spellings.
+  const other = side === "local" ? entry.conflict.remote : entry.conflict.local
+  const differs = other !== undefined && other.source !== term.source
+  return differs ? `${term.source} → ${label}` : label
 }
 
 /**
@@ -88,6 +106,9 @@ export function GlossarySyncReviewDialog({
     const prompt = plan?.prompts.find((entry) => entry.kind === "conflicts")
     return prompt?.kind === "conflicts" ? prompt.conflicts : []
   }, [plan])
+
+  const listed = useMemo(() => conflicts.slice(0, MAX_LISTED_CONFLICTS), [conflicts])
+  const unlisted = conflicts.length - listed.length
 
   const resolutions = useMemo(() => {
     const map: ConflictResolutions = new Map()
@@ -168,9 +189,17 @@ export function GlossarySyncReviewDialog({
           </p>
         )}
 
-        {conflicts.length > 0 && (
+        {unlisted > 0 && (
+          <p className="text-sm text-muted-foreground">
+            {i18n.t("options.preference.config.googleDrive.glossary.review.moreConflicts", [
+              String(unlisted),
+            ])}
+          </p>
+        )}
+
+        {listed.length > 0 && (
           <div className="flex max-h-72 flex-col gap-2 overflow-y-auto">
-            {conflicts.map((entry) => {
+            {listed.map((entry) => {
               const key = entry.conflict.key
               const selected: Side | null = choices[key] ?? defaultSide(entry)
               return (
