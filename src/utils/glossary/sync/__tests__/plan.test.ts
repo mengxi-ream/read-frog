@@ -269,3 +269,38 @@ describe("planGlossarySync — a first sync that moves nothing", () => {
     expect(result.plan.merge.terms).toEqual([])
   })
 })
+
+describe("planGlossarySync — held to the account the click was made under", () => {
+  /**
+   * The glossary half can run long after the click, once the config conflict
+   * dialog closes. It cannot reuse that click's token — the dialog can sit open
+   * past its expiry — but it must still be held to the ACCOUNT, or a fresh
+   * token silently binds it to whoever another tab has since switched to.
+   */
+  it("refuses when the signed-in account is no longer the one that was clicked", async () => {
+    state.local = snapshot([glossary("g")], [term("g", "token")])
+    state.remote = { status: "absent" }
+    state.email = "b@example.com"
+
+    const result = await planGlossarySync({ expectedEmail: "a@example.com" })
+
+    expect(result).toEqual({ status: "blocked", reason: "account-changed" })
+  })
+
+  it("proceeds when it is still the same account", async () => {
+    state.local = snapshot([glossary("g")], [term("g", "token")])
+    state.remote = { status: "absent" }
+    state.email = EMAIL
+
+    expect((await planGlossarySync({ expectedEmail: EMAIL })).status).toBe("ready")
+  })
+
+  /** An immediate sync names no expectation; it IS the click. */
+  it("does not second-guess a sync that passes no account", async () => {
+    state.local = snapshot([glossary("g")], [term("g", "token")])
+    state.remote = { status: "absent" }
+    state.email = "anyone@example.com"
+
+    expect((await planGlossarySync()).status).toBe("ready")
+  })
+})

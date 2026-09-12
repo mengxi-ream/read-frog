@@ -91,10 +91,10 @@ export function useGlossarySync() {
     })
   }
 
-  const start = async (token?: string) => {
+  const start = async (options?: { token?: string; expectedEmail?: string }) => {
     let planned: Awaited<ReturnType<typeof planGlossarySync>>
     try {
-      planned = await planGlossarySync(token)
+      planned = await planGlossarySync(options)
     } catch (error) {
       logger.error("Glossary sync failed to plan", error)
       toastManager.add({ type: "error", title: t("failed") })
@@ -112,15 +112,17 @@ export function useGlossarySync() {
         title:
           planned.reason === "cap-exceeded"
             ? t("capExceeded", [String(planned.overflowBy ?? 0)])
-            : t(
-                planned.reason === "version-too-new"
-                  ? "versionTooNew"
-                  : planned.reason === "duplicate-files"
-                    ? "duplicateFiles"
-                    : planned.reason === "busy"
-                      ? "busy"
-                      : "malformed",
-              ),
+            : planned.reason === "account-changed"
+              ? t("accountChangedRetry")
+              : t(
+                  planned.reason === "version-too-new"
+                    ? "versionTooNew"
+                    : planned.reason === "duplicate-files"
+                      ? "duplicateFiles"
+                      : planned.reason === "busy"
+                        ? "busy"
+                        : "malformed",
+                ),
       })
       return
     }

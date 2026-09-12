@@ -90,7 +90,13 @@ export type PlanGlossarySyncResult =
   | { status: "no-change" }
   | {
       status: "blocked"
-      reason: "malformed" | "version-too-new" | "duplicate-files" | "cap-exceeded" | "busy"
+      reason:
+        | "malformed"
+        | "version-too-new"
+        | "duplicate-files"
+        | "cap-exceeded"
+        | "busy"
+        | "account-changed"
       overflowBy?: number
     }
 
@@ -103,14 +109,31 @@ const EMPTY_STATS = { incoming: 0, outgoing: 0, removed: 0, unchanged: 0 }
  * decision the user might be asked for is in `prompts`, and nothing has been
  * written to the cloud or to Dexie when this returns.
  */
-export async function planGlossarySync(token?: string): Promise<PlanGlossarySyncResult> {
-  // The caller's token when there is one, so both halves of a single Sync click
-  // land in the same Drive. `getValidAccessToken` re-authenticates inside a 60s
-  // buffer and asks which account to use, so resolving it again here is how one
-  // click ended up writing the config to one account and the glossary to
-  // another.
+export async function planGlossarySync({
+  token,
+  expectedEmail,
+}: {
+  /** The token the click already resolved, so both halves reach one Drive. */
+  token?: string
+  /** The account that click was made under, when the plan is running later. */
+  expectedEmail?: string
+} = {}): Promise<PlanGlossarySyncResult> {
+  // `getValidAccessToken` re-authenticates inside a 60s buffer and asks which
+  // account to use, so resolving it again per half is how one click ended up
+  // writing the config to one account and the glossary to another.
   const accessToken = token ?? (await getValidAccessToken())
   const { email } = await getGoogleUserInfo(accessToken)
+
+  // The deferred half — the one that waits for the config dialog to close —
+  // cannot reuse the token, because that dialog can sit open past its expiry.
+  // It can still be held to the ACCOUNT, which is the part that matters: a
+  // fresh token for whoever happens to be signed in now would plan and commit
+  // against them, and `commitGlossarySync`'s own check would pass, because the
+  // plan it compares against was built under the wrong account too.
+  if (expectedEmail !== undefined && email !== expectedEmail) {
+    logger.warn("Google account changed before the glossary sync could start")
+    return { status: "blocked", reason: "account-changed" }
+  }
 
   const [local, storedBase, remote] = await Promise.all([
     readLocalGlossary(),
