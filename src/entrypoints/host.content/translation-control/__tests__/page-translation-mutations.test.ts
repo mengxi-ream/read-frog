@@ -838,6 +838,39 @@ describe("pageTranslationManager mutation re-walk", () => {
     }
   })
 
+  it.each([8, 64])("bounds ancestor checks when inserting a subtree of depth %i", async (depth) => {
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    try {
+      const container = document.createElement("div")
+      let leaf = container
+      for (let index = 1; index < depth; index += 1) {
+        const child = document.createElement("div")
+        leaf.append(child)
+        leaf = child
+      }
+      const paragraph = document.createElement("p")
+      paragraph.textContent = "Deeply nested content"
+      leaf.append(paragraph)
+      mockHasNoWalkAncestor.mockClear()
+
+      document.body.append(container)
+      await flushDomUpdates()
+
+      // One check for labeling and one for isolated observer discovery;
+      // neither should walk the ancestor chain again for every descendant.
+      expect(mockHasNoWalkAncestor.mock.calls.map(([element]) => element)).toEqual([
+        container,
+        container,
+      ])
+      expect(intersectionObservers[0]!.observe).toHaveBeenCalledWith(paragraph)
+    } finally {
+      manager.stop()
+    }
+  })
+
   it.each(["current source", "new source", "unblocked source"])(
     "walks nested shadow content once under a %s (#2185)",
     async (sourceKind) => {

@@ -1240,37 +1240,34 @@ export class PageTranslationManager implements IPageTranslationManager {
     config?: Config,
     options: { scanIsolatedTrees?: boolean } = {},
   ): void {
-    // Keep observation and traversal behind the same walkability gates before
-    // crossing a shadow boundary: children cannot inspect their light-DOM
-    // host via parentElement.
-    if (config) {
-      if (hasNoWalkAncestor(element, config)) return
-      if (this.isWalkBlockedElement(element, config)) {
-        this.cacheWalkBlockedElement(element)
+    // Check ancestors outside this traversal once. Within it, visiting a child
+    // already means its ancestors passed the gate, so only test that child.
+    if (config && hasNoWalkAncestor(element, config)) return
+
+    const visit = (current: HTMLElement): void => {
+      if (config && this.isWalkBlockedElement(current, config)) {
+        this.cacheWalkBlockedElement(current)
         return
       }
-    }
 
-    // Check if this element has a shadow root
-    if (element.shadowRoot) {
-      for (const child of element.shadowRoot.children) {
-        if (isHTMLElement(child)) {
-          this.observeMutations(child, config)
-          // Only the current-source shortcut needs a separate isolated walk.
-          // The walker already crosses nested shadow roots, so recursive
-          // observer registration above must not scan those subtrees again.
-          if (config && options.scanIsolatedTrees) {
-            void this.observeTopLevelParagraphs(child, config)
+      if (current.shadowRoot) {
+        for (const child of current.shadowRoot.children) {
+          if (isHTMLElement(child)) {
+            this.observeMutations(child, config)
+            // Only the current-source shortcut needs a separate isolated walk.
+            // The walker already crosses nested shadow roots, so recursive
+            // observer registration above must not scan those subtrees again.
+            if (config && options.scanIsolatedTrees) {
+              void this.observeTopLevelParagraphs(child, config)
+            }
           }
         }
       }
-    }
 
-    // Recursively check children
-    for (const child of element.children) {
-      if (isHTMLElement(child)) {
-        this.observeIsolatedDescendantsMutations(child, config, options)
+      for (const child of current.children) {
+        if (isHTMLElement(child)) visit(child)
       }
     }
+    visit(element)
   }
 }
