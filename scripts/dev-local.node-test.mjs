@@ -1,11 +1,6 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
-import {
-  assertApiIdentity,
-  assertLoginPage,
-  createWxtEnvironment,
-  resolveMonorepoRoot,
-} from "./dev-local.mjs"
+import { assertApiIdentity, createWxtEnvironment, resolveMonorepoRoot } from "./dev-local.mjs"
 
 describe("local extension worktree connection", () => {
   const identity = { instance: "wt-abc", fingerprint: "checkout-abc" }
@@ -56,24 +51,5 @@ describe("local extension worktree connection", () => {
       /different monorepo worktree/,
     )
     assert.throws(() => assertApiIdentity({ ...ready, status: 503 }, identity, topology.api))
-  })
-
-  it("requires a reachable login page", () => {
-    assert.doesNotThrow(() => assertLoginPage({ status: 200, headers: {} }, topology.www))
-    assert.doesNotThrow(() =>
-      assertLoginPage({ status: 302, headers: { location: "/en/log-in" } }, topology.www),
-    )
-    assert.throws(
-      () => assertLoginPage({ status: 404, headers: {} }, topology.www),
-      /not available/,
-    )
-    assert.throws(
-      () =>
-        assertLoginPage(
-          { status: 302, headers: { location: "https://www.readfrog.app/log-in" } },
-          topology.www,
-        ),
-      /redirects outside/,
-    )
   })
 })

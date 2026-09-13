@@ -53,7 +53,7 @@ export function probePortlessUrl(url, path, timeoutMs = 3_000) {
         resolveProbe({ status: response.statusCode, headers: response.headers })
       },
     )
-    probe.setTimeout(timeoutMs, () => probe.destroy(new Error(`Timed out connecting to ${target}`)))
+    probe.setTimeout(timeoutMs, () => probe.destroy(new Error(`Timed out waiting for ${target}`)))
     probe.on("error", rejectProbe)
     probe.end()
   })
@@ -68,19 +68,6 @@ export function assertApiIdentity(response, identity, url) {
     response.headers["x-read-frog-dev-checkout"] !== identity.fingerprint
   ) {
     throw new Error(`The API at ${url} belongs to a different monorepo worktree.`)
-  }
-}
-
-export function assertLoginPage(response, url) {
-  if (!response.status || response.status < 200 || response.status >= 400) {
-    throw new Error(`The login page at ${url}/log-in is not available (HTTP ${response.status}).`)
-  }
-  if (
-    response.status >= 300 &&
-    response.headers.location &&
-    new URL(response.headers.location, `${url}/log-in`).origin !== new URL(url).origin
-  ) {
-    throw new Error(`The login page at ${url}/log-in redirects outside this worktree.`)
   }
 }
 
@@ -104,10 +91,9 @@ async function main() {
 
   try {
     assertApiIdentity(await probePortlessUrl(topology.api, "/ready"), identity, topology.api)
-    assertLoginPage(await probePortlessUrl(topology.www, "/log-in"), topology.www)
   } catch (error) {
     throw new Error(
-      `Start this monorepo worktree with pnpm dev:www before pnpm dev:local. ${error.message}`,
+      `Start this monorepo worktree's API with pnpm dev:www or pnpm dev:server before pnpm dev:local. ${error.message}`,
       { cause: error },
     )
   }
