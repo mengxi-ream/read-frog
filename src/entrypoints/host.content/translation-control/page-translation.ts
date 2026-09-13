@@ -143,6 +143,7 @@ export class PageTranslationManager implements IPageTranslationManager {
   private walkId: string | null = null
   private intersectionOptions: IntersectionObserverInit
   private walkBlockedElementsCache = new WeakSet<HTMLElement>()
+  private ancestorsWithWalkBlockedElements = new WeakSet<HTMLElement>()
   private refreshingTranslatedSources = new WeakSet<HTMLElement>()
   private translatedSourceMutationVersions = new WeakMap<HTMLElement, number>()
   private retranslationBudgets = new WeakMap<HTMLElement, RetranslationBudget>()
@@ -464,6 +465,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.translationSessionVersion += 1
     this.walkId = null
     this.walkBlockedElementsCache = new WeakSet()
+    this.ancestorsWithWalkBlockedElements = new WeakSet()
     this.refreshingTranslatedSources = new WeakSet()
     this.translatedSourceMutationVersions = new WeakMap()
     this.pendingRetranslateRetries.forEach((retry) => retry.clear())
@@ -690,7 +692,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     if (hasNoWalkAncestor(container, config)) return
 
     const onBlockedElement = (element: HTMLElement) => {
-      this.walkBlockedElementsCache.add(element)
+      this.cacheWalkBlockedElement(element)
     }
     if (options.chunked) {
       const result = await walkAndLabelElementChunked(container, walkId, config, {
@@ -857,6 +859,43 @@ export class PageTranslationManager implements IPageTranslationManager {
     return isWalkBlockedElementFilter(element, config)
   }
 
+  private cacheWalkBlockedElement(element: HTMLElement): void {
+    this.walkBlockedElementsCache.add(element)
+    let current: HTMLElement | null = element
+    while (current) {
+      const root = current.getRootNode()
+      current =
+        current.parentElement ?? (root instanceof ShadowRoot ? (root.host as HTMLElement) : null)
+      if (current) this.ancestorsWithWalkBlockedElements.add(current)
+    }
+  }
+
+  private collectNewlyWalkableSubtrees(element: HTMLElement, config: Config): HTMLElement[] {
+    if (this.didChangeToWalkable(element, config)) return [element]
+    if (
+      this.walkBlockedElementsCache.has(element) ||
+      !this.ancestorsWithWalkBlockedElements.has(element)
+    )
+      return []
+
+    // Ancestor selectors can reveal a cached descendant without changing the
+    // ancestor's own walkability. Only follow branches leading to cached
+    // blockers; ordinary class/style churn must not scan the entire subtree.
+    // Weak membership avoids retaining detached nodes through their ancestors.
+    const result: HTMLElement[] = []
+    const children = [...element.children, ...(element.shadowRoot?.children ?? [])]
+    for (const child of children) {
+      if (
+        isHTMLElement(child) &&
+        (this.walkBlockedElementsCache.has(child) ||
+          this.ancestorsWithWalkBlockedElements.has(child))
+      ) {
+        result.push(...this.collectNewlyWalkableSubtrees(child, config))
+      }
+    }
+    return result
+  }
+
   /**
    * Handle attribute changes and only trigger observation
    * when element transitions from blocked to walkable.
@@ -867,7 +906,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     // Update cache with current state
     if (isWalkBlockedNow) {
-      this.walkBlockedElementsCache.add(element)
+      this.cacheWalkBlockedElement(element)
     } else {
       this.walkBlockedElementsCache.delete(element)
     }
@@ -882,7 +921,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     const walkBlockedElements = deepQueryTopLevelSelector(element, (el) =>
       this.isWalkBlockedElement(el, config),
     )
-    walkBlockedElements.forEach((el) => this.walkBlockedElementsCache.add(el))
+    walkBlockedElements.forEach((el) => this.cacheWalkBlockedElement(el))
   }
 
   /**
@@ -1057,12 +1096,13 @@ export class PageTranslationManager implements IPageTranslationManager {
         })
       } else if (this.isWalkabilityAttributeMutation(rec)) {
         const el = rec.target
-        if (isHTMLElement(el) && this.didChangeToWalkable(el, config)) {
-          void this.observeTopLevelParagraphs(el, config)
+        if (!isHTMLElement(el)) continue
+        for (const unblocked of this.collectNewlyWalkableSubtrees(el, config)) {
+          void this.observeTopLevelParagraphs(unblocked, config)
           // A blocked addition under a current source can skip isolated-tree
           // registration. Observe future shadow mutations when it unblocks.
           // Descendant hosts may still be blocked after this ancestor opens.
-          this.observeIsolatedDescendantsMutations(el, config)
+          this.observeIsolatedDescendantsMutations(unblocked, config)
         }
       }
     }
@@ -1203,7 +1243,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     if (config) {
       if (hasNoWalkAncestor(element, config)) return
       if (this.isWalkBlockedElement(element, config)) {
-        this.walkBlockedElementsCache.add(element)
+        this.cacheWalkBlockedElement(element)
         return
       }
     }

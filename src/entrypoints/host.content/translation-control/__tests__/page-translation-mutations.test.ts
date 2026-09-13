@@ -431,6 +431,43 @@ describe("pageTranslationManager mutation re-walk", () => {
     manager.stop()
   })
 
+  it("only rechecks branches with cached blockers after an ancestor attribute changes", async () => {
+    document.body.innerHTML = `<div id="ancestor">
+      <section><p id="blocked" hidden>Hidden content</p></section>
+      <section id="unrelated"><p>Visible content</p></section>
+    </div>`
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    try {
+      const ancestor = document.getElementById("ancestor") as HTMLElement
+      const blocked = document.getElementById("blocked") as HTMLElement
+      const unrelated = document.getElementById("unrelated") as HTMLElement
+      mockIsDontWalkIntoAndDontTranslateAsChildElement.mockClear()
+      mockWalkAndLabelElement.mockClear()
+
+      ancestor.classList.add("highlighted")
+      await flushDomUpdates()
+
+      expect(mockIsDontWalkIntoAndDontTranslateAsChildElement).toHaveBeenCalledWith(
+        blocked,
+        DEFAULT_CONFIG,
+      )
+      expect(mockIsDontWalkIntoAndDontTranslateAsChildElement).not.toHaveBeenCalledWith(
+        unrelated,
+        DEFAULT_CONFIG,
+      )
+      expect(mockIsDontWalkIntoAndDontTranslateAsChildElement).not.toHaveBeenCalledWith(
+        unrelated.firstElementChild,
+        DEFAULT_CONFIG,
+      )
+      expect(mockWalkAndLabelElement).not.toHaveBeenCalled()
+    } finally {
+      manager.stop()
+    }
+  })
+
   it("retranslates an existing logical source after its text expands in place", async () => {
     document.body.innerHTML = `
       <p id="tweet"><span id="source">Truncated tweet</span></p>
@@ -854,6 +891,8 @@ describe("pageTranslationManager mutation re-walk", () => {
     ["nested dynamic shadow host", "class", "notranslate"],
     ["nested dynamic shadow host", "hidden", ""],
     ["nested dynamic shadow host", "aria-hidden", "true"],
+    ["ancestor selector", "class", "collapsed"],
+    ["ancestor selector", "aria-hidden", "true"],
   ])(
     "observes later shadow mutations after a blocked %s (%s) becomes walkable",
     async (blockedTarget, attribute, value) => {
@@ -902,7 +941,20 @@ describe("pageTranslationManager mutation re-walk", () => {
       } else if (blockedElement !== host) {
         blockedElement.append(host)
       }
-      blockedElement.setAttribute("data-site-rule-blocked", "")
+      if (blockedTarget === "ancestor selector") {
+        document.head.innerHTML = `<style>
+          [data-css-container].collapsed [data-css-hidden],
+          [data-css-container][aria-hidden="true"] [data-css-hidden] { display: none; }
+        </style>`
+        blockedElement.setAttribute("data-css-container", "")
+        host.setAttribute("data-css-hidden", "")
+        mockIsDontWalkIntoAndDontTranslateAsChildElement.mockImplementation(
+          (element: HTMLElement) =>
+            isBlockedForTraversal(element) || getComputedStyle(element).display === "none",
+        )
+      } else {
+        blockedElement.setAttribute("data-site-rule-blocked", "")
+      }
       blockedElement.setAttribute(attribute, value)
       if (blockedTarget.startsWith("nested")) {
         host.setAttribute("data-site-rule-blocked", "")
