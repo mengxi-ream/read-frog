@@ -455,6 +455,9 @@ export function isBilingualTranslationStateCurrent(state: BilingualTranslationSt
 export function findCurrentBilingualLayoutSource(node: Node): HTMLElement | undefined {
   let current = node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement
   while (current) {
+    const virtualGroup = virtualParagraphGroupsBySource.get(current)
+    if (virtualGroup && isVirtualParagraphGroupCurrent(virtualGroup)) return current
+
     const state = bilingualTranslationsBySource.get(current)
     if (state && isBilingualTranslationStateCurrent(state)) return current
     current = current.parentElement

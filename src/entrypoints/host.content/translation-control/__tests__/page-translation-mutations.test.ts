@@ -4,10 +4,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { GIANT_SPLIT_STRANDED_TEXT_MAX_UNITS } from "@/utils/constants/translate"
 import {
+  isVirtualParagraphGroupCurrent,
   markExtensionDrivenNodeRemoval,
+  markVirtualParagraphGroupInserted,
   registerBilingualTranslationState,
+  registerVirtualParagraphGroup,
   unregisterBilingualTranslationState,
+  unregisterVirtualParagraphGroup,
   type BilingualTranslationState,
+  type VirtualParagraphGroup,
 } from "@/utils/host/translate/core/translation-state"
 import { PageTranslationManager } from "../page-translation"
 
@@ -718,6 +723,78 @@ describe("pageTranslationManager mutation re-walk", () => {
 
     unregisterBilingualTranslationState(state)
     manager.stop()
+  })
+
+  it("ignores decorators inside current virtual paragraph groups but retranslates text changes", async () => {
+    document.body.innerHTML = `<div id="summary" style="white-space: pre-wrap"><span>First paragraph</span>\n\n<span>Second paragraph</span></div>`
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const observer = intersectionObservers[0]!
+    const summary = document.getElementById("summary") as HTMLElement
+    const sourceSpan = summary.firstElementChild as HTMLElement
+    const source = sourceSpan.firstChild as Text
+    const group: VirtualParagraphGroup = {
+      id: "virtual-group",
+      walkId: "walk-id",
+      status: "active",
+      layoutSource: summary,
+      wrappers: new Set(),
+      splitRecords: [],
+      sourceSnapshots: [...summary.childNodes].map((node) => ({
+        source: node as Text | HTMLElement,
+        parent: summary,
+        value: node.textContent ?? "",
+      })),
+      sourceTextContent: summary.textContent ?? "",
+      wrapperPlacements: new Map(),
+    }
+    for (const span of [...summary.children]) {
+      const wrapper = document.createElement("span")
+      wrapper.className = "notranslate read-frog-translated-content-wrapper"
+      wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+      wrapper.textContent = "译文"
+      span.after(wrapper)
+      group.wrappers.add(wrapper)
+    }
+    registerVirtualParagraphGroup(group)
+    markVirtualParagraphGroupInserted(group)
+    await flushDomUpdates()
+    observer.observe.mockClear()
+    mockWalkAndLabelElement.mockClear()
+    mockTranslateNodesBilingualMode.mockClear()
+
+    try {
+      for (let i = 0; i < 3; i += 1) {
+        // The atomic inline source stays in place; only its descendant Text
+        // moves, so the group's snapshots and wrapper placement remain valid.
+        const decorator = document.createElement("span")
+        decorator.append(source)
+        sourceSpan.append(decorator)
+        await flushDomUpdates()
+        expect(isVirtualParagraphGroupCurrent(group)).toBe(true)
+
+        sourceSpan.insertBefore(source, decorator)
+        decorator.remove()
+        await flushDomUpdates()
+      }
+      expect(observer.observe).not.toHaveBeenCalled()
+      expect(mockWalkAndLabelElement).not.toHaveBeenCalled()
+      expect(mockTranslateNodesBilingualMode).not.toHaveBeenCalled()
+      expect(summary.querySelectorAll(".read-frog-translated-content-wrapper")).toHaveLength(2)
+
+      source.data = "Updated first paragraph"
+      await flushDomUpdates()
+      expect(mockTranslateNodesBilingualMode).toHaveBeenCalledExactlyOnceWith(
+        [summary],
+        "walk-id",
+        DEFAULT_CONFIG,
+      )
+    } finally {
+      unregisterVirtualParagraphGroup(group)
+      manager.stop()
+    }
   })
 
   it("still observes shadow content added inside a current translated source (#2185)", async () => {
