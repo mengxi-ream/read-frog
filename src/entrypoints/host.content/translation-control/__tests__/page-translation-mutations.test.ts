@@ -203,7 +203,10 @@ function walkAndLabelVisibleParagraphs(
   walkId: string,
   onBlockedElement?: (blocked: HTMLElement) => void,
 ) {
-  if (isBlockedForTraversal(element)) {
+  if (
+    mockIsDontWalkIntoButTranslateAsChildElement(element, DEFAULT_CONFIG) ||
+    mockIsDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)
+  ) {
     onBlockedElement?.(element)
     return {
       forceBlock: false,
@@ -213,7 +216,8 @@ function walkAndLabelVisibleParagraphs(
 
   element.setAttribute("data-read-frog-walked", walkId)
 
-  for (const child of element.children) {
+  // Like the real labeling walk, one call traverses nested shadow trees too.
+  for (const child of [...element.children, ...(element.shadowRoot?.children ?? [])]) {
     if (child instanceof HTMLElement) {
       walkAndLabelVisibleParagraphs(child, walkId, onBlockedElement)
     }
@@ -834,46 +838,86 @@ describe("pageTranslationManager mutation re-walk", () => {
     }
   })
 
-  it("still observes shadow content added inside a current translated source (#2185)", async () => {
-    document.body.innerHTML = `<p id="summary">Original summary</p>`
+  it.each(["current source", "new source", "unblocked source"])(
+    "walks nested shadow content once under a %s (#2185)",
+    async (sourceKind) => {
+      document.body.innerHTML = `<p id="summary">Original summary</p>`
 
-    const manager = new PageTranslationManager()
-    await manager.start()
-    await flushDomUpdates()
+      const manager = new PageTranslationManager()
+      await manager.start()
+      await flushDomUpdates()
 
-    const observer = intersectionObservers[0]!
-    const summary = document.getElementById("summary") as HTMLElement
-    const wrapper = document.createElement("span")
-    wrapper.className = "notranslate read-frog-translated-content-wrapper"
-    wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
-    wrapper.append("译文")
-    summary.append(wrapper)
-    const state: BilingualTranslationState = {
-      layoutSource: summary,
-      sourceTextContent: "Original summary",
-      status: "active",
-      walkId: "walk-id",
-      wrapper,
-      wrapperTextContent: "译文",
-    }
-    registerBilingualTranslationState(state)
-    await flushDomUpdates()
-    observer.observe.mockClear()
+      const observer = intersectionObservers[0]!
+      const summary = document.getElementById("summary") as HTMLElement
+      const wrapper = document.createElement("span")
+      wrapper.className = "notranslate read-frog-translated-content-wrapper"
+      wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+      wrapper.append("译文")
+      summary.append(wrapper)
+      const state: BilingualTranslationState = {
+        layoutSource: summary,
+        sourceTextContent: "Original summary",
+        status: "active",
+        walkId: "walk-id",
+        wrapper,
+        wrapperTextContent: "译文",
+      }
+      if (sourceKind === "current source") registerBilingualTranslationState(state)
+      await flushDomUpdates()
+      observer.observe.mockClear()
 
-    const host = document.createElement("span")
-    const shadowRoot = host.attachShadow({ mode: "open" })
-    const shadowContainer = document.createElement("div")
-    shadowContainer.innerHTML = `<p id="shadow-paragraph">New shadow content</p>`
-    shadowRoot.append(shadowContainer)
-    summary.prepend(host)
-    await flushDomUpdates()
+      const host = document.createElement("span")
+      const shadowRoot = host.attachShadow({ mode: "open" })
+      const shadowContainer = document.createElement("div")
+      shadowContainer.innerHTML = `<p id="shadow-paragraph">New shadow content</p>`
+      shadowRoot.append(shadowContainer)
+      const paragraphs = [shadowContainer.firstElementChild as HTMLElement]
+      let innermostContainer = shadowContainer
+      for (let depth = 1; depth < 4; depth += 1) {
+        const nestedHost = document.createElement("span")
+        const nestedContainer = document.createElement("div")
+        nestedContainer.innerHTML = `<p>Shadow content at depth ${depth}</p>`
+        nestedHost.attachShadow({ mode: "open" }).append(nestedContainer)
+        innermostContainer.append(nestedHost)
+        innermostContainer = nestedContainer
+        paragraphs.push(nestedContainer.firstElementChild as HTMLElement)
+      }
+      host.hidden = sourceKind === "unblocked source"
+      mockWalkAndLabelElement.mockClear()
+      try {
+        summary.prepend(host)
+        await flushDomUpdates()
 
-    const shadowParagraph = shadowRoot.getElementById("shadow-paragraph") as HTMLElement
-    expect(observer.observe).toHaveBeenCalledWith(shadowParagraph)
+        if (sourceKind === "unblocked source") {
+          mockWalkAndLabelElement.mockClear()
+          host.hidden = false
+          await flushDomUpdates()
+        }
+        expect(mockWalkAndLabelElement).toHaveBeenCalledExactlyOnceWith(
+          sourceKind === "current source" ? shadowContainer : host,
+          "walk-id",
+          DEFAULT_CONFIG,
+          expect.anything(),
+        )
+        for (const paragraph of paragraphs) {
+          expect(observer.observe).toHaveBeenCalledWith(paragraph)
+        }
 
-    unregisterBilingualTranslationState(state)
-    manager.stop()
-  })
+        // Register every nested observer even though labeling starts only once.
+        observer.observe.mockClear()
+        mockWalkAndLabelElement.mockClear()
+        const laterParagraph = document.createElement("p")
+        laterParagraph.textContent = "Later innermost content"
+        innermostContainer.append(laterParagraph)
+        await flushDomUpdates()
+        expect(observer.observe).toHaveBeenCalledExactlyOnceWith(laterParagraph)
+        expect(mockWalkAndLabelElement).toHaveBeenCalledTimes(1)
+      } finally {
+        unregisterBilingualTranslationState(state)
+        manager.stop()
+      }
+    },
+  )
 
   it.each([
     ["host", "class", "notranslate"],

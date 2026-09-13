@@ -1082,7 +1082,7 @@ export class PageTranslationManager implements IPageTranslationManager {
         if (findCurrentBilingualLayoutSource(rec.target)) {
           rec.addedNodes.forEach((node) => {
             if (isHTMLElement(node)) {
-              this.observeIsolatedDescendantsMutations(node, config)
+              this.observeIsolatedDescendantsMutations(node, config, { scanIsolatedTrees: true })
             }
           })
           continue
@@ -1235,11 +1235,14 @@ export class PageTranslationManager implements IPageTranslationManager {
    * These can't be found as top level paragraph elements because isolated shadow roots and iframes are not
    * considered as part of the document.
    */
-  private observeIsolatedDescendantsMutations(element: HTMLElement, config?: Config): void {
-    // The config-enabled path also scans newly discovered isolated trees. Apply
-    // the same walkability gates as observeTopLevelParagraphs before crossing
-    // a shadow boundary, whose children cannot inspect their light-DOM host via
-    // parentElement.
+  private observeIsolatedDescendantsMutations(
+    element: HTMLElement,
+    config?: Config,
+    options: { scanIsolatedTrees?: boolean } = {},
+  ): void {
+    // Keep observation and traversal behind the same walkability gates before
+    // crossing a shadow boundary: children cannot inspect their light-DOM
+    // host via parentElement.
     if (config) {
       if (hasNoWalkAncestor(element, config)) return
       if (this.isWalkBlockedElement(element, config)) {
@@ -1253,11 +1256,12 @@ export class PageTranslationManager implements IPageTranslationManager {
       for (const child of element.shadowRoot.children) {
         if (isHTMLElement(child)) {
           this.observeMutations(child, config)
-          // A light-DOM re-walk can be skipped when its translated ancestor is
-          // still current, but document observers cannot see into a newly
-          // attached shadow root. Scan that isolated tree explicitly without
-          // translating the unchanged light-DOM host (#2185).
-          if (config) void this.observeTopLevelParagraphs(child, config)
+          // Only the current-source shortcut needs a separate isolated walk.
+          // The walker already crosses nested shadow roots, so recursive
+          // observer registration above must not scan those subtrees again.
+          if (config && options.scanIsolatedTrees) {
+            void this.observeTopLevelParagraphs(child, config)
+          }
         }
       }
     }
@@ -1265,7 +1269,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     // Recursively check children
     for (const child of element.children) {
       if (isHTMLElement(child)) {
-        this.observeIsolatedDescendantsMutations(child, config)
+        this.observeIsolatedDescendantsMutations(child, config, options)
       }
     }
   }
