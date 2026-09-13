@@ -933,7 +933,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     if (!this.observedMutationRoots.has(container)) {
       this.observedMutationRoots.add(container)
       const mutationObserver = new MutationObserver((records) => {
-        void this.handleMutationRecords(records)
+        void this.handleMutationRecords(records, container)
       })
 
       mutationObserver.observe(container, {
@@ -1027,7 +1027,10 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
   }
 
-  private async handleMutationRecords(records: MutationRecord[]): Promise<void> {
+  private async handleMutationRecords(
+    records: MutationRecord[],
+    observationRoot: HTMLElement,
+  ): Promise<void> {
     const sessionVersion = this.translationSessionVersion
     const hostRecords: MutationRecord[] = []
     for (const record of records) {
@@ -1047,6 +1050,58 @@ export class PageTranslationManager implements IPageTranslationManager {
       if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return
     }
 
+    // Document observers cannot cross shadow boundaries. Keep isolated
+    // observers alive even while hidden, then check the current enclosing
+    // hosts before processing their records. Sibling selectors and other CSS
+    // dependencies can reveal a host without changing any of its ancestors.
+    let mutationConfig: Config | undefined
+    let revealedRoot: HTMLElement | undefined
+    const shadowWalkRoots: HTMLElement[] = []
+    let root = observationRoot.getRootNode()
+    while (root instanceof ShadowRoot) {
+      if (isHTMLElement(root.host)) shadowWalkRoots.unshift(root.host)
+      root = root.host.getRootNode()
+    }
+    if (shadowWalkRoots.length > 0) {
+      // The observed top-level shadow child and its light-DOM ancestors can
+      // also be blocked, independently of the enclosing shadow hosts.
+      shadowWalkRoots.push(observationRoot)
+      mutationConfig = (await getLocalConfig()) ?? undefined
+      if (!mutationConfig) {
+        logger.error("Global config is not initialized")
+        return
+      }
+      if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return
+      for (const host of shadowWalkRoots) {
+        if (
+          hasNoWalkAncestor(host, mutationConfig) ||
+          this.isWalkBlockedElement(host, mutationConfig)
+        ) {
+          this.cacheWalkBlockedElement(host)
+          // A hidden tree may itself receive more isolated roots. Register
+          // them too, without labeling or translating any of their content.
+          for (const record of hostRecords) {
+            if (record.type !== "childList") continue
+            for (const node of record.addedNodes) {
+              if (isHTMLElement(node))
+                this.observeIsolatedDescendantsMutations(node, mutationConfig)
+            }
+          }
+          return
+        }
+        if (this.walkBlockedElementsCache.has(host)) {
+          revealedRoot ??= host
+        }
+      }
+      if (revealedRoot) {
+        shadowWalkRoots.forEach((host) => this.walkBlockedElementsCache.delete(host))
+        // Also recover on a characterData-only first update, before the
+        // ordinary fast path rejects text with no registered translation.
+        void this.observeTopLevelParagraphs(revealedRoot, mutationConfig)
+        this.observeIsolatedDescendantsMutations(revealedRoot, mutationConfig)
+      }
+    }
+
     const staleTranslatedSources = new Set<HTMLElement>()
     for (const record of hostRecords) {
       const staleSource = findStaleBilingualLayoutSource(record.target)
@@ -1064,14 +1119,17 @@ export class PageTranslationManager implements IPageTranslationManager {
     const needsTraversalHandling = hostRecords.some((record) => record.type !== "characterData")
     if (staleTranslatedSources.size === 0 && !needsTraversalHandling) return
 
-    const config = await getLocalConfig()
+    const config = mutationConfig ?? (await getLocalConfig())
     if (!config) {
       logger.error("Global config is not initialized")
       return
     }
     if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return
 
-    for (const rec of hostRecords) {
+    // Recovery already walked and registered the whole enclosing tree. Still
+    // refresh stale translations below, but do not walk each addition again.
+    const traversalRecords = revealedRoot ? [] : hostRecords
+    for (const rec of traversalRecords) {
       if (rec.type === "childList") {
         // Sites such as Google Search temporarily wrap existing text in a new
         // element while showing citation hover UI. If the surrounding
@@ -1240,14 +1298,15 @@ export class PageTranslationManager implements IPageTranslationManager {
     config?: Config,
     options: { scanIsolatedTrees?: boolean } = {},
   ): void {
-    // Check ancestors outside this traversal once. Within it, visiting a child
-    // already means its ancestors passed the gate, so only test that child.
-    if (config && hasNoWalkAncestor(element, config)) return
+    // Always discover observers: external CSS dependencies can reveal a host
+    // without a mutation on the host or its ancestors. Only scanning is gated.
+    const canScan = !config || !hasNoWalkAncestor(element, config)
 
-    const visit = (current: HTMLElement): void => {
-      if (config && this.isWalkBlockedElement(current, config)) {
+    const visit = (current: HTMLElement, ancestorsWalkable: boolean): void => {
+      let walkable = ancestorsWalkable
+      if (config && ancestorsWalkable && this.isWalkBlockedElement(current, config)) {
         this.cacheWalkBlockedElement(current)
-        return
+        walkable = false
       }
 
       if (current.shadowRoot) {
@@ -1257,7 +1316,7 @@ export class PageTranslationManager implements IPageTranslationManager {
             // Only the current-source shortcut needs a separate isolated walk.
             // The walker already crosses nested shadow roots, so recursive
             // observer registration above must not scan those subtrees again.
-            if (config && options.scanIsolatedTrees) {
+            if (config && options.scanIsolatedTrees && walkable) {
               void this.observeTopLevelParagraphs(child, config)
             }
           }
@@ -1265,9 +1324,9 @@ export class PageTranslationManager implements IPageTranslationManager {
       }
 
       for (const child of current.children) {
-        if (isHTMLElement(child)) visit(child)
+        if (isHTMLElement(child)) visit(child, walkable)
       }
     }
-    visit(element)
+    visit(element, canScan)
   }
 }
