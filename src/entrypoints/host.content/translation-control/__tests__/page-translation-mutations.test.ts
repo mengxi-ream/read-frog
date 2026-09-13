@@ -768,6 +768,9 @@ describe("pageTranslationManager mutation re-walk", () => {
     ["ancestor", "hidden", ""],
     ["host", "aria-hidden", "true"],
     ["ancestor", "aria-hidden", "true"],
+    ["nested host", "class", "notranslate"],
+    ["nested host", "hidden", ""],
+    ["nested host", "aria-hidden", "true"],
   ])(
     "observes later shadow mutations after a blocked %s (%s) becomes walkable",
     async (blockedTarget, attribute, value) => {
@@ -805,6 +808,10 @@ describe("pageTranslationManager mutation re-walk", () => {
       if (blockedElement !== host) blockedElement.append(host)
       blockedElement.setAttribute("data-site-rule-blocked", "")
       blockedElement.setAttribute(attribute, value)
+      if (blockedTarget === "nested host") {
+        host.setAttribute("data-site-rule-blocked", "")
+        host.setAttribute(attribute, value)
+      }
       const shadowRoot = host.attachShadow({ mode: "open" })
       const shadowContainer = document.createElement("div")
       shadowContainer.innerHTML = `<p id="blocked-shadow-paragraph">Blocked shadow content</p>`
@@ -823,6 +830,23 @@ describe("pageTranslationManager mutation re-walk", () => {
 
       blockedElement.removeAttribute(attribute)
       await flushDomUpdates()
+      observer.observe.mockClear()
+
+      // Unblocking the outer ancestor must preserve any remaining inner gate,
+      // including for content added while that host is still blocked.
+      mockWalkAndLabelElement.mockClear()
+      const paragraphAfterOuterUnblock = document.createElement("p")
+      paragraphAfterOuterUnblock.textContent = "Content added after the outer element opens"
+      shadowContainer.append(paragraphAfterOuterUnblock)
+      await flushDomUpdates()
+
+      const stillBlocked = blockedTarget === "nested host"
+      expect(observer.observe).toHaveBeenCalledTimes(stillBlocked ? 0 : 1)
+      expect(mockWalkAndLabelElement).toHaveBeenCalledTimes(stillBlocked ? 0 : 1)
+
+      if (stillBlocked) host.removeAttribute(attribute)
+      await flushDomUpdates()
+      expect(observer.observe).toHaveBeenCalledWith(paragraphAfterOuterUnblock)
       observer.observe.mockClear()
 
       const laterParagraph = document.createElement("p")

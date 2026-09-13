@@ -1061,7 +1061,8 @@ export class PageTranslationManager implements IPageTranslationManager {
           void this.observeTopLevelParagraphs(el, config)
           // A blocked addition under a current source can skip isolated-tree
           // registration. Observe future shadow mutations when it unblocks.
-          this.observeIsolatedDescendantsMutations(el)
+          // Descendant hosts may still be blocked after this ancestor opens.
+          this.observeIsolatedDescendantsMutations(el, config)
         }
       }
     }
