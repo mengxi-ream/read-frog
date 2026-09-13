@@ -1059,6 +1059,9 @@ export class PageTranslationManager implements IPageTranslationManager {
         const el = rec.target
         if (isHTMLElement(el) && this.didChangeToWalkable(el, config)) {
           void this.observeTopLevelParagraphs(el, config)
+          // A blocked addition under a current source can skip isolated-tree
+          // registration. Observe future shadow mutations when it unblocks.
+          this.observeIsolatedDescendantsMutations(el)
         }
       }
     }
