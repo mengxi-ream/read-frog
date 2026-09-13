@@ -940,6 +940,8 @@ options:
       managePrompts: プロンプトを管理
       communityPrompts: コミュニティからプロンプトを取得・共有
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      variableReference: 変数リファレンス
+      variableReferenceUrl: https://readfrog.app/ja/docs/page-translation/prompts/variables
       addPrompt: プロンプトを追加
       default: デフォルト
       builtIn: 組み込み

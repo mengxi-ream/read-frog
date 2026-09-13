@@ -940,6 +940,8 @@ options:
       managePrompts: 프롬프트 관리
       communityPrompts: 커뮤니티에서 프롬프트 가져오기 또는 공유
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      variableReference: 변수 레퍼런스
+      variableReferenceUrl: https://readfrog.app/ko/docs/page-translation/prompts/variables
       addPrompt: 프롬프트 추가
       default: 기본
       builtIn: 기본 제공

@@ -940,6 +940,8 @@ options:
       managePrompts: Promptları yönet
       communityPrompts: Topluluktan prompt al veya paylaş
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      variableReference: Değişken başvurusu
+      variableReferenceUrl: https://readfrog.app/tr/docs/page-translation/prompts/variables
       addPrompt: Prompt ekle
       default: Varsayılan
       builtIn: Yerleşik

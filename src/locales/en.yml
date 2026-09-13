@@ -1056,6 +1056,8 @@ options:
       managePrompts: Manage prompts
       communityPrompts: Get or share prompts from community
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      variableReference: Variable reference
+      variableReferenceUrl: https://readfrog.app/en/docs/page-translation/prompts/variables
       addPrompt: Add prompt
       default: Default
       builtIn: Built-in

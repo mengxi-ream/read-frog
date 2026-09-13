@@ -940,6 +940,8 @@ options:
       managePrompts: Управление промптами
       communityPrompts: Получайте или делитесь промптами с сообществом
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      variableReference: Справочник переменных
+      variableReferenceUrl: https://readfrog.app/ru/docs/page-translation/prompts/variables
       addPrompt: Добавить промпт
       default: По умолчанию
       builtIn: Встроенный
