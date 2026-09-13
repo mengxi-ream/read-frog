@@ -30,6 +30,7 @@ import {
   walkAndLabelElementChunked,
 } from "@/utils/host/dom/traversal"
 import {
+  findCurrentBilingualLayoutSource,
   findStaleBilingualLayoutSource,
   findStaleTranslationOnlyAnchor,
   getBilingualTranslationStateForWrapper,
@@ -142,6 +143,7 @@ export class PageTranslationManager implements IPageTranslationManager {
   private walkId: string | null = null
   private intersectionOptions: IntersectionObserverInit
   private walkBlockedElementsCache = new WeakSet<HTMLElement>()
+  private ancestorsWithWalkBlockedElements = new WeakSet<HTMLElement>()
   private refreshingTranslatedSources = new WeakSet<HTMLElement>()
   private translatedSourceMutationVersions = new WeakMap<HTMLElement, number>()
   private retranslationBudgets = new WeakMap<HTMLElement, RetranslationBudget>()
@@ -463,6 +465,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.translationSessionVersion += 1
     this.walkId = null
     this.walkBlockedElementsCache = new WeakSet()
+    this.ancestorsWithWalkBlockedElements = new WeakSet()
     this.refreshingTranslatedSources = new WeakSet()
     this.translatedSourceMutationVersions = new WeakMap()
     this.pendingRetranslateRetries.forEach((retry) => retry.clear())
@@ -689,7 +692,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     if (hasNoWalkAncestor(container, config)) return
 
     const onBlockedElement = (element: HTMLElement) => {
-      this.walkBlockedElementsCache.add(element)
+      this.cacheWalkBlockedElement(element)
     }
     if (options.chunked) {
       const result = await walkAndLabelElementChunked(container, walkId, config, {
@@ -856,6 +859,43 @@ export class PageTranslationManager implements IPageTranslationManager {
     return isWalkBlockedElementFilter(element, config)
   }
 
+  private cacheWalkBlockedElement(element: HTMLElement): void {
+    this.walkBlockedElementsCache.add(element)
+    let current: HTMLElement | null = element
+    while (current) {
+      const root = current.getRootNode()
+      current =
+        current.parentElement ?? (root instanceof ShadowRoot ? (root.host as HTMLElement) : null)
+      if (current) this.ancestorsWithWalkBlockedElements.add(current)
+    }
+  }
+
+  private collectNewlyWalkableSubtrees(element: HTMLElement, config: Config): HTMLElement[] {
+    if (this.didChangeToWalkable(element, config)) return [element]
+    if (
+      this.walkBlockedElementsCache.has(element) ||
+      !this.ancestorsWithWalkBlockedElements.has(element)
+    )
+      return []
+
+    // Ancestor selectors can reveal a cached descendant without changing the
+    // ancestor's own walkability. Only follow branches leading to cached
+    // blockers; ordinary class/style churn must not scan the entire subtree.
+    // Weak membership avoids retaining detached nodes through their ancestors.
+    const result: HTMLElement[] = []
+    const children = [...element.children, ...(element.shadowRoot?.children ?? [])]
+    for (const child of children) {
+      if (
+        isHTMLElement(child) &&
+        (this.walkBlockedElementsCache.has(child) ||
+          this.ancestorsWithWalkBlockedElements.has(child))
+      ) {
+        result.push(...this.collectNewlyWalkableSubtrees(child, config))
+      }
+    }
+    return result
+  }
+
   /**
    * Handle attribute changes and only trigger observation
    * when element transitions from blocked to walkable.
@@ -866,7 +906,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     // Update cache with current state
     if (isWalkBlockedNow) {
-      this.walkBlockedElementsCache.add(element)
+      this.cacheWalkBlockedElement(element)
     } else {
       this.walkBlockedElementsCache.delete(element)
     }
@@ -881,13 +921,13 @@ export class PageTranslationManager implements IPageTranslationManager {
     const walkBlockedElements = deepQueryTopLevelSelector(element, (el) =>
       this.isWalkBlockedElement(el, config),
     )
-    walkBlockedElements.forEach((el) => this.walkBlockedElementsCache.add(el))
+    walkBlockedElements.forEach((el) => this.cacheWalkBlockedElement(el))
   }
 
   /**
    * Start observing mutations for a container and all its shadow roots
    */
-  private observeMutations(container: HTMLElement): void {
+  private observeMutations(container: HTMLElement, config?: Config): void {
     // Dynamic pages re-add the same subtrees repeatedly; without dedup every
     // re-added shadow host gained a duplicate subtree observer (#1831).
     if (!this.observedMutationRoots.has(container)) {
@@ -906,7 +946,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
       this.mutationObservers.push(mutationObserver)
     }
-    this.observeIsolatedDescendantsMutations(container)
+    this.observeIsolatedDescendantsMutations(container, config)
   }
 
   private static readonly SELF_NODE_CLASSES = [
@@ -1033,17 +1073,36 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     for (const rec of hostRecords) {
       if (rec.type === "childList") {
+        // Sites such as Google Search temporarily wrap existing text in a new
+        // element while showing citation hover UI. If the surrounding
+        // bilingual source is still current, its host text did not change and
+        // the added subtree is structural churn, not new translatable content.
+        // Walking it would insert a duplicate wrapper that the site may retain
+        // when it later unwraps the temporary element.
+        if (findCurrentBilingualLayoutSource(rec.target)) {
+          rec.addedNodes.forEach((node) => {
+            if (isHTMLElement(node)) {
+              this.observeIsolatedDescendantsMutations(node, config, { scanIsolatedTrees: true })
+            }
+          })
+          continue
+        }
         rec.addedNodes.forEach((node) => {
           if (isHTMLElement(node)) {
             this.addWalkBlockedElements(node, config)
             void this.observeTopLevelParagraphs(node, config)
-            this.observeIsolatedDescendantsMutations(node)
+            this.observeIsolatedDescendantsMutations(node, config)
           }
         })
       } else if (this.isWalkabilityAttributeMutation(rec)) {
         const el = rec.target
-        if (isHTMLElement(el) && this.didChangeToWalkable(el, config)) {
-          void this.observeTopLevelParagraphs(el, config)
+        if (!isHTMLElement(el)) continue
+        for (const unblocked of this.collectNewlyWalkableSubtrees(el, config)) {
+          void this.observeTopLevelParagraphs(unblocked, config)
+          // A blocked addition under a current source can skip isolated-tree
+          // registration. Observe future shadow mutations when it unblocks.
+          // Descendant hosts may still be blocked after this ancestor opens.
+          this.observeIsolatedDescendantsMutations(unblocked, config)
         }
       }
     }
@@ -1176,12 +1235,33 @@ export class PageTranslationManager implements IPageTranslationManager {
    * These can't be found as top level paragraph elements because isolated shadow roots and iframes are not
    * considered as part of the document.
    */
-  private observeIsolatedDescendantsMutations(element: HTMLElement): void {
+  private observeIsolatedDescendantsMutations(
+    element: HTMLElement,
+    config?: Config,
+    options: { scanIsolatedTrees?: boolean } = {},
+  ): void {
+    // Keep observation and traversal behind the same walkability gates before
+    // crossing a shadow boundary: children cannot inspect their light-DOM
+    // host via parentElement.
+    if (config) {
+      if (hasNoWalkAncestor(element, config)) return
+      if (this.isWalkBlockedElement(element, config)) {
+        this.cacheWalkBlockedElement(element)
+        return
+      }
+    }
+
     // Check if this element has a shadow root
     if (element.shadowRoot) {
       for (const child of element.shadowRoot.children) {
         if (isHTMLElement(child)) {
-          this.observeMutations(child)
+          this.observeMutations(child, config)
+          // Only the current-source shortcut needs a separate isolated walk.
+          // The walker already crosses nested shadow roots, so recursive
+          // observer registration above must not scan those subtrees again.
+          if (config && options.scanIsolatedTrees) {
+            void this.observeTopLevelParagraphs(child, config)
+          }
         }
       }
     }
@@ -1189,7 +1269,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     // Recursively check children
     for (const child of element.children) {
       if (isHTMLElement(child)) {
-        this.observeIsolatedDescendantsMutations(child)
+        this.observeIsolatedDescendantsMutations(child, config, options)
       }
     }
   }
