@@ -771,6 +771,9 @@ describe("pageTranslationManager mutation re-walk", () => {
     ["nested host", "class", "notranslate"],
     ["nested host", "hidden", ""],
     ["nested host", "aria-hidden", "true"],
+    ["nested shadow host", "class", "notranslate"],
+    ["nested shadow host", "hidden", ""],
+    ["nested shadow host", "aria-hidden", "true"],
   ])(
     "observes later shadow mutations after a blocked %s (%s) becomes walkable",
     async (blockedTarget, attribute, value) => {
@@ -805,10 +808,14 @@ describe("pageTranslationManager mutation re-walk", () => {
 
       const host = document.createElement("span")
       const blockedElement = blockedTarget === "host" ? host : document.createElement("span")
-      if (blockedElement !== host) blockedElement.append(host)
+      if (blockedTarget === "nested shadow host") {
+        blockedElement.attachShadow({ mode: "open" }).append(host)
+      } else if (blockedElement !== host) {
+        blockedElement.append(host)
+      }
       blockedElement.setAttribute("data-site-rule-blocked", "")
       blockedElement.setAttribute(attribute, value)
-      if (blockedTarget === "nested host") {
+      if (blockedTarget.startsWith("nested")) {
         host.setAttribute("data-site-rule-blocked", "")
         host.setAttribute(attribute, value)
       }
@@ -840,7 +847,7 @@ describe("pageTranslationManager mutation re-walk", () => {
       shadowContainer.append(paragraphAfterOuterUnblock)
       await flushDomUpdates()
 
-      const stillBlocked = blockedTarget === "nested host"
+      const stillBlocked = blockedTarget.startsWith("nested")
       expect(observer.observe).toHaveBeenCalledTimes(stillBlocked ? 0 : 1)
       expect(mockWalkAndLabelElement).toHaveBeenCalledTimes(stillBlocked ? 0 : 1)
 

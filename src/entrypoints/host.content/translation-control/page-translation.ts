@@ -888,7 +888,7 @@ export class PageTranslationManager implements IPageTranslationManager {
   /**
    * Start observing mutations for a container and all its shadow roots
    */
-  private observeMutations(container: HTMLElement): void {
+  private observeMutations(container: HTMLElement, config?: Config): void {
     // Dynamic pages re-add the same subtrees repeatedly; without dedup every
     // re-added shadow host gained a duplicate subtree observer (#1831).
     if (!this.observedMutationRoots.has(container)) {
@@ -907,7 +907,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
       this.mutationObservers.push(mutationObserver)
     }
-    this.observeIsolatedDescendantsMutations(container)
+    this.observeIsolatedDescendantsMutations(container, config)
   }
 
   private static readonly SELF_NODE_CLASSES = [
@@ -1212,7 +1212,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     if (element.shadowRoot) {
       for (const child of element.shadowRoot.children) {
         if (isHTMLElement(child)) {
-          this.observeMutations(child)
+          this.observeMutations(child, config)
           // A light-DOM re-walk can be skipped when its translated ancestor is
           // still current, but document observers cannot see into a newly
           // attached shadow root. Scan that isolated tree explicitly without
