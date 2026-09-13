@@ -219,6 +219,9 @@ options:
         apiMode: API 模式
         resourceName: Azure 資源名稱（選填）
         apiVersion: API 版本
+        onlyProviders: 鎖定供應商
+      providerSettingHints:
+        onlyProvidersHint: 以半形逗號分隔的 OpenRouter 供應商 slug，例如 deepinfra、together 或 deepinfra/turbo。請求只會傳送給這些供應商，並停用備援。留空則使用 OpenRouter 預設的負載平衡。
       providerSettingOptionLabels:
         responses: Responses API
         chatCompletions: Chat Completions

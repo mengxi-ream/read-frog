@@ -218,6 +218,9 @@ options:
         apiMode: API モード
         resourceName: Azure リソース名（任意）
         apiVersion: API バージョン
+        onlyProviders: プロバイダーを固定
+      providerSettingHints:
+        onlyProvidersHint: OpenRouter のプロバイダー slug をカンマ区切りで入力します（例：deepinfra、together、deepinfra/turbo）。リクエストはこれらのプロバイダーにのみ送信され、フォールバックは無効になります。空欄の場合は OpenRouter のデフォルトの負荷分散を使用します。
       providerSettingOptionLabels:
         responses: Responses API
         chatCompletions: Chat Completions

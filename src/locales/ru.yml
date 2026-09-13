@@ -218,6 +218,9 @@ options:
         apiMode: Режим API
         resourceName: Имя ресурса Azure (необязательно)
         apiVersion: Версия API
+        onlyProviders: Зафиксировать провайдеров
+      providerSettingHints:
+        onlyProvidersHint: Slugs провайдеров OpenRouter через запятую (например, deepinfra, together или deepinfra/turbo). Запросы отправляются только этим провайдерам, резервные варианты отключены. Оставьте пустым, чтобы использовать балансировку нагрузки OpenRouter по умолчанию.
       providerSettingOptionLabels:
         responses: Responses API
         chatCompletions: Chat Completions

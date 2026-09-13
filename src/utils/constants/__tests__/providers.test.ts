@@ -132,6 +132,22 @@ describe("provider constants", () => {
     )
   })
 
+  it("accepts an OpenRouter provider lock and rejects unknown provider-specific settings", () => {
+    const locked = {
+      ...DEFAULT_PROVIDER_CONFIG.openrouter,
+      providerSpecificSettings: { only: "deepinfra/turbo, together" },
+    }
+
+    expect(apiProviderConfigItemSchema.parse(locked)).toEqual(locked)
+
+    expect(() =>
+      apiProviderConfigItemSchema.parse({
+        ...DEFAULT_PROVIDER_CONFIG.openrouter,
+        providerSpecificSettings: { order: ["deepinfra"] },
+      }),
+    ).toThrow(/Unrecognized key/)
+  })
+
   it("uses distinct connection URL fields for the two protocol adapters", () => {
     const openAICompatibleConfig = DEFAULT_PROVIDER_CONFIG["openai-compatible"]
     expect(apiProviderConfigItemSchema.parse(openAICompatibleConfig)).toEqual(

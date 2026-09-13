@@ -40,6 +40,7 @@ import { getLLMProvidersConfig, getProviderConfigById } from "../config/helpers"
 import { CONFIG_STORAGE_KEY } from "../constants/config"
 import { getProviderHeadersWithOverride } from "./headers"
 import { resolveModelId } from "./model-id"
+import { getOpenRouterProviderRouting } from "./openrouter-routing"
 
 const DEDICATED_PROVIDER_FACTORY_BY_TYPE = {
   openai: createOpenAI,
@@ -89,6 +90,35 @@ function getAzureApiMode(providerConfig: LLMProviderConfig): AzureApiMode {
   return apiMode === "chat" ? "chat" : DEFAULT_AZURE_API_MODE
 }
 
+/**
+ * OpenRouter's provider lock can only be expressed as a `provider` object in the request
+ * body, and the AI SDK's OpenAI-compatible provider exposes no first-class option for it.
+ * Its `transformRequestBody` hook is the one place that sees every request — streaming and
+ * not — so the lock is applied there instead of at each call site.
+ *
+ * Routing the user already wrote into provider options (a `sort`, say) survives; the lock
+ * only wins on the fields it owns.
+ */
+function getOpenRouterRequestBodyTransform(providerConfig: LLMProviderConfig) {
+  if (providerConfig.provider !== "openrouter") {
+    return undefined
+  }
+
+  const routing = getOpenRouterProviderRouting(providerConfig.providerSpecificSettings)
+  if (!routing) {
+    return undefined
+  }
+
+  return (body: Record<string, unknown>): Record<string, unknown> => {
+    const existingRouting =
+      typeof body.provider === "object" && body.provider !== null && !Array.isArray(body.provider)
+        ? (body.provider as Record<string, unknown>)
+        : {}
+
+    return { ...body, provider: { ...existingRouting, ...routing } }
+  }
+}
+
 async function getLanguageModelById(providerId: string) {
   const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
   if (!config) {
@@ -117,15 +147,18 @@ export function getLanguageModelForConfig(providerConfig: LLMProviderConfig) {
   const providerSpecificSettings = getProviderSpecificSettings(providerConfig)
 
   const provider = match(providerConfig)
-    .when(isOpenAICompatibleLLMProviderConfig, (matchedConfig) =>
-      createOpenAICompatible({
+    .when(isOpenAICompatibleLLMProviderConfig, (matchedConfig) => {
+      const transformRequestBody = getOpenRouterRequestBodyTransform(matchedConfig)
+
+      return createOpenAICompatible({
         name: matchedConfig.provider,
         baseURL: matchedConfig.baseURL,
         supportsStructuredOutputs: true,
         ...(matchedConfig.apiKey && { apiKey: matchedConfig.apiKey }),
         ...(headers && { headers }),
-      }),
-    )
+        ...(transformRequestBody && { transformRequestBody }),
+      })
+    })
     .when(isOpenResponsesLLMProviderConfig, (matchedConfig) =>
       createOpenResponses({
         name: matchedConfig.provider,

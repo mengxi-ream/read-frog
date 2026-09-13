@@ -218,6 +218,9 @@ options:
         apiMode: API 모드
         resourceName: Azure 리소스 이름(선택 사항)
         apiVersion: API 버전
+        onlyProviders: 프로바이더 고정
+      providerSettingHints:
+        onlyProvidersHint: OpenRouter 프로바이더 slug를 쉼표로 구분해 입력하세요(예：deepinfra, together, deepinfra/turbo). 요청은 이 프로바이더로만 전송되며 폴백이 비활성화됩니다. 비워 두면 OpenRouter의 기본 로드 밸런싱을 사용합니다.
       providerSettingOptionLabels:
         responses: Responses API
         chatCompletions: Chat Completions

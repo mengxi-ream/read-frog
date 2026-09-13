@@ -2,6 +2,7 @@ import type { APIProviderConfig, ProviderSpecificSettingField } from "@/types/co
 import { useSelector } from "@tanstack/react-store"
 import { useMemo } from "react"
 import { useAutosaveContext } from "@/components/form/use-autosave"
+import { HelpTooltip } from "@/components/help-tooltip"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
 import {
@@ -61,6 +62,17 @@ export const ProviderSpecificSettingsField = withForm({
       const fieldLabel = i18n.t(
         `options.apiProviders.form.providerSettingLabels.${def.labelKey}` as never,
       )
+      const fieldHint = def.hintKey
+        ? i18n.t(`options.apiProviders.form.providerSettingHints.${def.hintKey}` as never)
+        : undefined
+      const label = fieldHint ? (
+        <div className="flex items-center gap-1.5">
+          <span>{fieldLabel}</span>
+          <HelpTooltip>{fieldHint}</HelpTooltip>
+        </div>
+      ) : (
+        fieldLabel
+      )
       const fieldValue = localSettings[def.key]
 
       if (def.type === "select") {
@@ -69,7 +81,7 @@ export const ProviderSpecificSettingsField = withForm({
 
         return (
           <Field key={fieldId}>
-            <FieldLabel htmlFor={fieldId}>{fieldLabel}</FieldLabel>
+            <FieldLabel htmlFor={fieldId}>{label}</FieldLabel>
             <Select
               value={selectedValue}
               onValueChange={(value) =>
@@ -103,7 +115,7 @@ export const ProviderSpecificSettingsField = withForm({
 
       return (
         <Field key={fieldId}>
-          <FieldLabel htmlFor={fieldId}>{fieldLabel}</FieldLabel>
+          <FieldLabel htmlFor={fieldId}>{label}</FieldLabel>
           <Input
             id={fieldId}
             type={def.type}

@@ -219,6 +219,9 @@ options:
         apiMode: Modo de API
         resourceName: Nombre del recurso de Azure (opcional)
         apiVersion: Versión de API
+        onlyProviders: Bloquear proveedores
+      providerSettingHints:
+        onlyProvidersHint: Slugs de proveedores de OpenRouter separados por comas (p. ej. deepinfra, together o deepinfra/turbo). Las solicitudes se envían solo a estos proveedores y se desactivan los respaldos. Déjalo vacío para usar el balanceo de carga predeterminado de OpenRouter.
       providerSettingOptionLabels:
         responses: Responses API
         chatCompletions: Chat Completions
