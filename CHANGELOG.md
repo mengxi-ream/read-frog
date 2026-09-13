@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.47.2
+
+### Patch Changes
+
+- [#2187](https://github.com/mengxi-ream/read-frog/pull/2187) [`788afe3`](https://github.com/mengxi-ream/read-frog/commit/788afe306de99a504e2256f9248620d4b5737871) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(prompts): link the prompt editors to the prompt variable reference
+
+- [#2189](https://github.com/mengxi-ream/read-frog/pull/2189) [`94201a3`](https://github.com/mengxi-ream/read-frog/commit/94201a3fcfc82ee3443ebdeb2fd8866d66d742b7) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translate): exclude the entire Substack video player from translation
+
 ## 1.47.1
 
 ### Patch Changes
