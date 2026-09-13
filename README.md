@@ -259,6 +259,8 @@ Ask AI to understand the project: [Dosu](https://app.dosu.dev/29569286-71ba-47dd
 
 Check out the [Contribution Guide](https://readfrog.app/en/docs/code-contribution/contribution-guide) for more details.
 
+For the local monorepo API and website, see [Portless extension development](./PORTLESS_LOCAL_DEVELOPMENT.md).
+
 ReadFrog is dual-licensed under GPLv3 and a commercial license.
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for contributor licensing terms.
