@@ -851,6 +851,9 @@ describe("pageTranslationManager mutation re-walk", () => {
     ["nested shadow host", "class", "notranslate"],
     ["nested shadow host", "hidden", ""],
     ["nested shadow host", "aria-hidden", "true"],
+    ["nested dynamic shadow host", "class", "notranslate"],
+    ["nested dynamic shadow host", "hidden", ""],
+    ["nested dynamic shadow host", "aria-hidden", "true"],
   ])(
     "observes later shadow mutations after a blocked %s (%s) becomes walkable",
     async (blockedTarget, attribute, value) => {
@@ -883,9 +886,18 @@ describe("pageTranslationManager mutation re-walk", () => {
         element.classList.contains("notranslate"),
       )
 
+      mockHasNoWalkAncestor.mockImplementation((element: HTMLElement) => {
+        let parent = element.parentElement
+        while (parent) {
+          if (isBlockedForTraversal(parent) || parent.classList.contains("notranslate")) return true
+          parent = parent.parentElement
+        }
+        return false
+      })
+
       const host = document.createElement("span")
       const blockedElement = blockedTarget === "host" ? host : document.createElement("span")
-      if (blockedTarget === "nested shadow host") {
+      if (blockedTarget.includes("shadow host")) {
         blockedElement.attachShadow({ mode: "open" }).append(host)
       } else if (blockedElement !== host) {
         blockedElement.append(host)
@@ -914,6 +926,17 @@ describe("pageTranslationManager mutation re-walk", () => {
 
       blockedElement.removeAttribute(attribute)
       await flushDomUpdates()
+
+      let mutationContainer = shadowContainer
+      if (blockedTarget === "nested dynamic shadow host") {
+        // The still-blocked top-level shadow child has its own observer so it
+        // can detect unblocking. Adding a host beneath it must retain the gate.
+        const addedHost = document.createElement("span")
+        mutationContainer = document.createElement("div")
+        addedHost.attachShadow({ mode: "open" }).append(mutationContainer)
+        host.append(addedHost)
+        await flushDomUpdates()
+      }
       observer.observe.mockClear()
 
       // Unblocking the outer ancestor must preserve any remaining inner gate,
@@ -921,7 +944,7 @@ describe("pageTranslationManager mutation re-walk", () => {
       mockWalkAndLabelElement.mockClear()
       const paragraphAfterOuterUnblock = document.createElement("p")
       paragraphAfterOuterUnblock.textContent = "Content added after the outer element opens"
-      shadowContainer.append(paragraphAfterOuterUnblock)
+      mutationContainer.append(paragraphAfterOuterUnblock)
       await flushDomUpdates()
 
       const stillBlocked = blockedTarget.startsWith("nested")
@@ -935,7 +958,7 @@ describe("pageTranslationManager mutation re-walk", () => {
 
       const laterParagraph = document.createElement("p")
       laterParagraph.textContent = "Content added after unblocking"
-      shadowContainer.append(laterParagraph)
+      mutationContainer.append(laterParagraph)
       await flushDomUpdates()
 
       expect(observer.observe).toHaveBeenCalledWith(laterParagraph)

@@ -1052,7 +1052,7 @@ export class PageTranslationManager implements IPageTranslationManager {
           if (isHTMLElement(node)) {
             this.addWalkBlockedElements(node, config)
             void this.observeTopLevelParagraphs(node, config)
-            this.observeIsolatedDescendantsMutations(node)
+            this.observeIsolatedDescendantsMutations(node, config)
           }
         })
       } else if (this.isWalkabilityAttributeMutation(rec)) {
