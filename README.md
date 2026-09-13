@@ -259,7 +259,7 @@ Ask AI to understand the project: [Dosu](https://app.dosu.dev/29569286-71ba-47dd
 
 Check out the [Contribution Guide](https://readfrog.app/en/docs/code-contribution/contribution-guide) for more details.
 
-For the local monorepo API and website, see [Portless extension development](./PORTLESS_LOCAL_DEVELOPMENT.md).
+For a local monorepo backend, start that worktree with `pnpm dev:www`, then run `pnpm dev:local` here. Set `WXT_MONOREPO_PATH` to select another worktree.
 
 ReadFrog is dual-licensed under GPLv3 and a commercial license.
 
