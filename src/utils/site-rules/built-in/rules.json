@@ -882,6 +882,7 @@
     "id": "substack",
     "matches": ["*.substack.com", "newsletter.rootsofprogress.org", "www.lennysnewsletter.com"],
     "excludeSelectors": [
+      ".shows-video-player-container",
       ".publication-footer",
       ".subscribe-footer",
       ".main-menu",
