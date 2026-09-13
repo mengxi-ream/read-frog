@@ -265,7 +265,7 @@ describe("saveToNotebaseButton notebase availability", () => {
       },
     }
     mockAuthState.isPending = false
-    vi.mocked(orpcClient.notebase.create).mockResolvedValue({
+    const createResult = {
       txid: 1,
       notebase: {
         id: "notebase-1",
@@ -276,15 +276,16 @@ describe("saveToNotebaseButton notebase availability", () => {
         srsDesiredRetention: 0.9,
         srsEnableShortTerm: true,
         srsMaximumInterval: 36500,
-        srsLearningSteps: ["1m"],
-        srsRelearningSteps: ["10m"],
+        srsLearningSteps: ["1m" as const],
+        srsRelearningSteps: ["10m" as const],
         srsLeechThreshold: 8,
         srsEnableFuzz: false,
         srsWeights: null,
         createdAt: new Date(0),
         updatedAt: new Date(0),
       },
-    })
+    }
+    vi.mocked(orpcClient.notebase.create).mockResolvedValue(createResult)
     vi.mocked(orpcClient.notebase.list).mockResolvedValue([
       { id: "notebase-1", name: "Summarize Notes" },
     ])
