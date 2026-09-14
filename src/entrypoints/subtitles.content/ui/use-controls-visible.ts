@@ -38,14 +38,21 @@ export function useControlsInfo(
     const observer = new MutationObserver(() => {
       updateInfo(videoContainer)
     })
+    const resizeObserver = new ResizeObserver(() => {
+      updateInfo(videoContainer)
+    })
 
     observer.observe(videoContainer, {
       attributes: true,
       attributeFilter: ["class"],
       subtree: true,
     })
+    resizeObserver.observe(videoContainer)
 
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+      resizeObserver.disconnect()
+    }
   })
 
   useEffect(() => {
