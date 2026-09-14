@@ -1,6 +1,5 @@
 import type { ControlsConfig } from "@/entrypoints/subtitles.content/platforms"
 import { useEffect, useEffectEvent, useState } from "react"
-import { MAX_CONTROLS_HEIGHT_RATIO } from "@/utils/constants/subtitles"
 import { getContainingShadowRoot } from "@/utils/host/dom/node"
 
 interface ControlsInfo {
@@ -17,10 +16,9 @@ export function useControlsInfo(
   const updateInfo = useEffectEvent((container: HTMLElement) => {
     if (!controlsConfig) return
 
-    const maxHeight = container.getBoundingClientRect().height * MAX_CONTROLS_HEIGHT_RATIO
     setInfo({
       controlsVisible: controlsConfig.checkVisibility(container),
-      controlsHeight: Math.min(controlsConfig.measureHeight(container), maxHeight),
+      controlsHeight: controlsConfig.measureHeight(container),
     })
   })
 
@@ -30,15 +28,12 @@ export function useControlsInfo(
     const element = elementRef.current
     const shadowRoot = element ? getContainingShadowRoot(element) : null
     const shadowHost = shadowRoot?.host as HTMLElement | undefined
-    const videoContainer = shadowHost?.parentElement ?? controlsConfig.findVideoContainer?.()
+    const videoContainer = controlsConfig.findVideoContainer?.() ?? shadowHost?.parentElement
     if (!videoContainer) return undefined
 
     updateInfo(videoContainer)
 
     const observer = new MutationObserver(() => {
-      updateInfo(videoContainer)
-    })
-    const resizeObserver = new ResizeObserver(() => {
       updateInfo(videoContainer)
     })
 
@@ -47,12 +42,8 @@ export function useControlsInfo(
       attributeFilter: ["class"],
       subtree: true,
     })
-    resizeObserver.observe(videoContainer)
 
-    return () => {
-      observer.disconnect()
-      resizeObserver.disconnect()
-    }
+    return () => observer.disconnect()
   })
 
   useEffect(() => {
