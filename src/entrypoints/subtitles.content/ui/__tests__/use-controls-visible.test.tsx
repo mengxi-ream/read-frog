@@ -41,10 +41,11 @@ function mountPlayer(height: number) {
   }
 }
 
-function configMeasuring(height: number): ControlsConfig {
+function configMeasuring(height: number, findVideoContainer?: () => HTMLElement): ControlsConfig {
   return {
     measureHeight: () => height,
     checkVisibility: () => true,
+    findVideoContainer,
   }
 }
 
@@ -61,6 +62,20 @@ describe("useControlsInfo", () => {
     const { result } = renderHook(() => useControlsInfo({ current: element }, configMeasuring(495)))
 
     expect(result.current.controlsHeight).toBeCloseTo(495 * 0.25)
+  })
+
+  it("caps against the configured player when the host sits in a short controls row", () => {
+    const { element } = mountPlayer(48)
+    const player = document.createElement("div")
+    player.getBoundingClientRect = () => ({ height: 400 }) as DOMRect
+    const { result } = renderHook(() =>
+      useControlsInfo(
+        { current: element },
+        configMeasuring(50, () => player),
+      ),
+    )
+
+    expect(result.current.controlsHeight).toBe(50)
   })
 
   it("recomputes the cap when the player resizes without a class change", () => {

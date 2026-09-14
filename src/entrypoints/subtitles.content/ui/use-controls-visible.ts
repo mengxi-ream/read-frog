@@ -1,5 +1,6 @@
 import type { ControlsConfig } from "@/entrypoints/subtitles.content/platforms"
 import { useEffect, useEffectEvent, useState } from "react"
+import { MAX_CONTROLS_HEIGHT_RATIO } from "@/utils/constants/subtitles"
 import { getContainingShadowRoot } from "@/utils/host/dom/node"
 
 interface ControlsInfo {
@@ -16,9 +17,10 @@ export function useControlsInfo(
   const updateInfo = useEffectEvent((container: HTMLElement) => {
     if (!controlsConfig) return
 
+    const maxHeight = container.getBoundingClientRect().height * MAX_CONTROLS_HEIGHT_RATIO
     setInfo({
       controlsVisible: controlsConfig.checkVisibility(container),
-      controlsHeight: controlsConfig.measureHeight(container),
+      controlsHeight: Math.min(controlsConfig.measureHeight(container), maxHeight),
     })
   })
 
@@ -36,14 +38,21 @@ export function useControlsInfo(
     const observer = new MutationObserver(() => {
       updateInfo(videoContainer)
     })
+    const resizeObserver = new ResizeObserver(() => {
+      updateInfo(videoContainer)
+    })
 
     observer.observe(videoContainer, {
       attributes: true,
       attributeFilter: ["class"],
       subtree: true,
     })
+    resizeObserver.observe(videoContainer)
 
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+      resizeObserver.disconnect()
+    }
   })
 
   useEffect(() => {
