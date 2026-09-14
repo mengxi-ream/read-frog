@@ -964,8 +964,6 @@ describe("pageTranslationManager mutation re-walk", () => {
 
         controller.classList.remove("collapsed")
         await flushDomUpdates()
-        ;(changedParagraph.firstChild as Text).data = "Visible text edit"
-        await flushDomUpdates()
         expect(mockTranslateNodesBilingualMode).toHaveBeenCalledExactlyOnceWith(
           [changedParagraph],
           "walk-id",
@@ -979,59 +977,78 @@ describe("pageTranslationManager mutation re-walk", () => {
     },
   )
 
-  it("gates stale text updates when the observed shadow child itself becomes notranslate", async () => {
-    const host = document.createElement("span")
-    const container = document.createElement("div")
-    container.innerHTML = `<p>Initial content</p>`
-    host.attachShadow({ mode: "open" }).append(container)
-    document.body.append(host)
-    mockIsDontWalkIntoButTranslateAsChildElement.mockImplementation((element: HTMLElement) =>
-      element.classList.contains("notranslate"),
-    )
-    const manager = new PageTranslationManager()
-    await manager.start()
-    await flushDomUpdates()
-
-    const paragraph = container.firstElementChild as HTMLElement
-    const source = paragraph.firstChild as Text
-    const wrapper = document.createElement("span")
-    wrapper.className = "notranslate read-frog-translated-content-wrapper"
-    wrapper.textContent = "译文"
-    paragraph.append(wrapper)
-    const state: BilingualTranslationState = {
-      layoutSource: paragraph,
-      sourceTextContent: "Initial content",
-      status: "active",
-      walkId: "walk-id",
-      wrapper,
-      wrapperTextContent: "译文",
-    }
-    registerBilingualTranslationState(state)
-    try {
-      await flushDomUpdates()
-      mockWalkAndLabelElement.mockClear()
-      mockTranslateNodesBilingualMode.mockClear()
-      container.classList.add("notranslate")
-      await flushDomUpdates()
-      source.data = "Edit while excluded"
-      await flushDomUpdates()
-      expect(mockWalkAndLabelElement).not.toHaveBeenCalled()
-      expect(mockTranslateNodesBilingualMode).not.toHaveBeenCalled()
-
-      container.classList.remove("notranslate")
-      await flushDomUpdates()
-      source.data = "Edit after restoring translation"
-      await flushDomUpdates()
-      expect(mockTranslateNodesBilingualMode).toHaveBeenCalledExactlyOnceWith(
-        [paragraph],
-        "walk-id",
-        DEFAULT_CONFIG,
+  it.each(["reveal", "detach", "stop"])(
+    "retains blocked stale sources until %s",
+    async (action) => {
+      const host = document.createElement("span")
+      const container = document.createElement("div")
+      container.innerHTML = `<p>Initial content</p>`
+      host.attachShadow({ mode: "open" }).append(container)
+      document.body.append(host)
+      mockIsDontWalkIntoButTranslateAsChildElement.mockImplementation((element: HTMLElement) =>
+        element.classList.contains("notranslate"),
       )
-    } finally {
-      unregisterBilingualTranslationState(state)
-      manager.stop()
-    }
-  })
+      mockHasNoWalkAncestor.mockImplementation((element: HTMLElement) => {
+        let parent = element.parentElement
+        while (parent) {
+          if (isBlockedForTraversal(parent) || parent.classList.contains("notranslate")) return true
+          parent = parent.parentElement
+        }
+        return false
+      })
+      const manager = new PageTranslationManager()
+      await manager.start()
+      await flushDomUpdates()
+
+      const paragraph = container.firstElementChild as HTMLElement
+      const source = paragraph.firstChild as Text
+      const wrapper = document.createElement("span")
+      wrapper.className = "notranslate read-frog-translated-content-wrapper"
+      wrapper.textContent = "译文"
+      paragraph.append(wrapper)
+      const state: BilingualTranslationState = {
+        layoutSource: paragraph,
+        sourceTextContent: "Initial content",
+        status: "active",
+        walkId: "walk-id",
+        wrapper,
+        wrapperTextContent: "译文",
+      }
+      registerBilingualTranslationState(state)
+      try {
+        await flushDomUpdates()
+        mockWalkAndLabelElement.mockClear()
+        mockTranslateNodesBilingualMode.mockClear()
+        container.classList.add("notranslate")
+        await flushDomUpdates()
+        source.data = "Edit while excluded"
+        await flushDomUpdates()
+        source.data = "Latest edit while excluded"
+        await flushDomUpdates()
+        expect(mockWalkAndLabelElement).not.toHaveBeenCalled()
+        expect(mockTranslateNodesBilingualMode).not.toHaveBeenCalled()
+
+        host.hidden = true
+        await flushDomUpdates()
+        container.classList.remove("notranslate")
+        await flushDomUpdates()
+        expect(mockTranslateNodesBilingualMode).not.toHaveBeenCalled()
+        if (action === "detach") host.remove()
+        if (action === "stop") manager.stop()
+        host.hidden = false
+        await flushDomUpdates()
+        document.body.classList.add("unrelated-change")
+        await flushDomUpdates()
+        expect(source.data).toBe("Latest edit while excluded")
+        expect(mockTranslateNodesBilingualMode.mock.calls).toEqual(
+          action === "reveal" ? [[[paragraph], "walk-id", DEFAULT_CONFIG]] : [],
+        )
+      } finally {
+        unregisterBilingualTranslationState(state)
+        manager.stop()
+      }
+    },
+  )
 
   it.each([8, 64])("bounds ancestor checks when inserting a subtree of depth %i", async (depth) => {
     const manager = new PageTranslationManager()

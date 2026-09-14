@@ -146,6 +146,9 @@ export class PageTranslationManager implements IPageTranslationManager {
   private ancestorsWithWalkBlockedElements = new WeakSet<HTMLElement>()
   private refreshingTranslatedSources = new WeakSet<HTMLElement>()
   private translatedSourceMutationVersions = new WeakMap<HTMLElement, number>()
+  // Enumerable for external CSS reveals, without retaining detached DOM trees.
+  private blockedStaleSources = new Set<WeakRef<HTMLElement>>()
+  private blockedStaleSourceRefs = new WeakMap<HTMLElement, WeakRef<HTMLElement>>()
   private retranslationBudgets = new WeakMap<HTMLElement, RetranslationBudget>()
   private retranslateRetries = new WeakMap<HTMLElement, DebouncedRetry>()
   // Strong and enumerable so stop() can cancel in-flight retries; entries are
@@ -468,6 +471,8 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.ancestorsWithWalkBlockedElements = new WeakSet()
     this.refreshingTranslatedSources = new WeakSet()
     this.translatedSourceMutationVersions = new WeakMap()
+    this.blockedStaleSources.clear()
+    this.blockedStaleSourceRefs = new WeakMap()
     this.pendingRetranslateRetries.forEach((retry) => retry.clear())
     this.pendingRetranslateRetries.clear()
     this.retranslateRetries = new WeakMap()
@@ -1050,6 +1055,19 @@ export class PageTranslationManager implements IPageTranslationManager {
       if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return
     }
 
+    const staleTranslatedSources = new Set<HTMLElement>()
+    for (const record of hostRecords) {
+      const staleSource = findStaleBilingualLayoutSource(record.target)
+      if (staleSource) staleTranslatedSources.add(staleSource)
+      // In-place-swapped anchors must also recover after host edits.
+      const staleAnchor = findStaleTranslationOnlyAnchor(record.target)
+      if (staleAnchor) staleTranslatedSources.add(staleAnchor)
+    }
+    staleTranslatedSources.forEach((source) => {
+      const nextVersion = (this.translatedSourceMutationVersions.get(source) ?? 0) + 1
+      this.translatedSourceMutationVersions.set(source, nextVersion)
+    })
+
     // Document observers cannot cross shadow boundaries. Keep isolated
     // observers alive even while hidden, then check the current enclosing
     // hosts before processing their records. Sibling selectors and other CSS
@@ -1078,6 +1096,7 @@ export class PageTranslationManager implements IPageTranslationManager {
           this.isWalkBlockedElement(host, mutationConfig)
         ) {
           this.cacheWalkBlockedElement(host)
+          staleTranslatedSources.forEach((source) => this.deferBlockedStaleSource(source))
           // A hidden tree may itself receive more isolated roots. Register
           // them too, without labeling or translating any of their content.
           for (const record of hostRecords) {
@@ -1102,22 +1121,13 @@ export class PageTranslationManager implements IPageTranslationManager {
       }
     }
 
-    const staleTranslatedSources = new Set<HTMLElement>()
-    for (const record of hostRecords) {
-      const staleSource = findStaleBilingualLayoutSource(record.target)
-      if (staleSource) staleTranslatedSources.add(staleSource)
-      // In-place-swapped anchors (translationOnly): host re-renders such as an
-      // expand/"show more" must retranslate, not stay in the source language.
-      const staleAnchor = findStaleTranslationOnlyAnchor(record.target)
-      if (staleAnchor) staleTranslatedSources.add(staleAnchor)
-    }
-    staleTranslatedSources.forEach((source) => {
-      const nextVersion = (this.translatedSourceMutationVersions.get(source) ?? 0) + 1
-      this.translatedSourceMutationVersions.set(source, nextVersion)
-    })
-
     const needsTraversalHandling = hostRecords.some((record) => record.type !== "characterData")
-    if (staleTranslatedSources.size === 0 && !needsTraversalHandling) return
+    if (
+      staleTranslatedSources.size === 0 &&
+      this.blockedStaleSources.size === 0 &&
+      !needsTraversalHandling
+    )
+      return
 
     const config = mutationConfig ?? (await getLocalConfig())
     if (!config) {
@@ -1125,6 +1135,18 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
     if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return
+
+    // A reveal can mutate an ancestor or a CSS-controlling sibling rather than
+    // the edited source. Retry pending sources on the next observable update.
+    for (const ref of this.blockedStaleSources) {
+      const source = ref.deref()
+      if (source?.isConnected && this.isSourceWalkBlocked(source, config)) continue
+      this.blockedStaleSources.delete(ref)
+      if (source) {
+        this.blockedStaleSourceRefs.delete(source)
+        if (source.isConnected) staleTranslatedSources.add(source)
+      }
+    }
 
     // Recovery already walked and registered the whole enclosing tree. Still
     // refresh stale translations below, but do not walk each addition again.
@@ -1172,6 +1194,24 @@ export class PageTranslationManager implements IPageTranslationManager {
     )
   }
 
+  private deferBlockedStaleSource(source: HTMLElement): void {
+    if (this.blockedStaleSourceRefs.has(source)) return
+    const ref = new WeakRef(source)
+    this.blockedStaleSourceRefs.set(source, ref)
+    this.blockedStaleSources.add(ref)
+  }
+
+  private isSourceWalkBlocked(source: HTMLElement, config: Config): boolean {
+    let current = source
+    while (true) {
+      if (hasNoWalkAncestor(current, config) || this.isWalkBlockedElement(current, config))
+        return true
+      const root = current.getRootNode()
+      if (!(root instanceof ShadowRoot) || !isHTMLElement(root.host)) return false
+      current = root.host
+    }
+  }
+
   private async retranslateChangedSource(
     source: HTMLElement,
     config: Config,
@@ -1195,6 +1235,10 @@ export class PageTranslationManager implements IPageTranslationManager {
     let passes = 0
     try {
       do {
+        if (this.isSourceWalkBlocked(source, config)) {
+          this.deferBlockedStaleSource(source)
+          return
+        }
         if (!this.consumeRetranslationBudget(source)) {
           // Budget exhausted: converge later instead of looping now (#1831).
           this.scheduleRetranslateRetry(source, sessionVersion)
