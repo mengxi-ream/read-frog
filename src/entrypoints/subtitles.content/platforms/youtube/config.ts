@@ -70,8 +70,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
     controls: {
       measureHeight: (container) => {
         const player = container.closest(".html5-video-player")
-        const progressBar = player?.querySelector(".ytp-progress-bar-container")
-        const controlsBar = progressBar?.parentElement
+        const controlsBar = player?.querySelector(".ytp-chrome-bottom")
         return controlsBar?.getBoundingClientRect().height ?? DEFAULT_CONTROLS_HEIGHT
       },
       checkVisibility: (container) => {
@@ -100,7 +99,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
       measureHeight: () => {
         const wrapper = document.querySelector(".quick-actions-wrapper")
         const player = document.querySelector("#movie_player")
-        const progressBar = player?.querySelector(".ytp-progress-bar-container")
+        const progressBar = player?.querySelector(".ytp-chrome-bottom .ytp-progress-bar-container")
         if (!wrapper || !progressBar) return DEFAULT_CONTROLS_HEIGHT
         return wrapper.getBoundingClientRect().top - progressBar.getBoundingClientRect().top
       },
