@@ -4,6 +4,7 @@ import {
   MAX_CHARS_CJK,
   MAX_WORDS,
   MIN_STANDALONE_CUE_DURATION_MS,
+  PAUSE_TIMEOUT_MS,
 } from "@/utils/constants/subtitles"
 import { getSubtitlesSegmentationPrompt } from "../subtitles-segmentation"
 
@@ -33,6 +34,21 @@ describe("subtitles segmentation prompt", () => {
       `${MIN_STANDALONE_CUE_DURATION_MS} ms`,
     )
     expect(DEFAULT_SUBTITLES_SEGMENTATION_SYSTEM_PROMPT).toContain("must never stand alone")
+  })
+
+  it("treats a silence longer than the pause timeout as a boundary even for brief cues", () => {
+    const briefRule = DEFAULT_SUBTITLES_SEGMENTATION_SYSTEM_PROMPT.split("\n").find((line) =>
+      line.includes("Exception for brief cues"),
+    )
+    expect(briefRule).toContain(`${PAUSE_TIMEOUT_MS} ms`)
+    expect(DEFAULT_SUBTITLES_SEGMENTATION_SYSTEM_PROMPT).toContain("A silence is a hard boundary")
+    expect(DEFAULT_SUBTITLES_SEGMENTATION_SYSTEM_PROMPT).toContain(
+      "a line repeated after a pause is a second cue",
+    )
+    const finalCheck = DEFAULT_SUBTITLES_SEGMENTATION_SYSTEM_PROMPT.slice(
+      DEFAULT_SUBTITLES_SEGMENTATION_SYSTEM_PROMPT.indexOf("## Final check before you answer"),
+    )
+    expect(finalCheck).toContain(`silence longer than ${PAUSE_TIMEOUT_MS} ms`)
   })
 
   it("ends with a final check that restates the hard limits after the examples", () => {

@@ -2,6 +2,7 @@ import {
   MAX_CHARS_CJK,
   MAX_WORDS,
   MIN_STANDALONE_CUE_DURATION_MS,
+  PAUSE_TIMEOUT_MS,
 } from "@/utils/constants/subtitles"
 
 export const WEB_PAGE_PROMPT_TOKENS = [
@@ -257,7 +258,8 @@ This is a sentence.
    - Never merge fragments into a cue that would exceed the limit, even if that leaves a clause incomplete.
    - If one complete sentence exceeds the limit, split it at the most natural clause boundary (a comma, a conjunction, a pause) so both halves stay as balanced as possible.
    - If a single input fragment already exceeds the limit on its own, output it unchanged as its own cue with its own "s" and "e". Do not attach any other fragment to it — you cannot split inside a fragment because it has no inner timestamps.
-   - Exception for brief cues: a cue that would last less than ${MIN_STANDALONE_CUE_DURATION_MS} ms ("e" of its last fragment minus "s" of its first) must never stand alone — a viewer cannot read a cue that brief. Merge it into the neighbouring cue it belongs to grammatically, even if the merged cue then exceeds the length limit, and even if that neighbour is an over-long fragment. When either side would work, pick the side that keeps the merged cue within the limit.
+   - A silence is a hard boundary: when the gap between one fragment's "e" and the next fragment's "s" is longer than ${PAUSE_TIMEOUT_MS} ms, never put those two fragments in the same cue — a cue that spans the silence keeps its text on screen while nobody is speaking. This holds for every rule on this list, including the brief-cue exception below, and even when the fragment after the silence repeats the text before it: a line repeated after a pause is a second cue, not a duplicate to collapse.
+   - Exception for brief cues: a cue that would last less than ${MIN_STANDALONE_CUE_DURATION_MS} ms ("e" of its last fragment minus "s" of its first) must never stand alone — a viewer cannot read a cue that brief. Merge it into the neighbouring cue it belongs to grammatically, even if the merged cue then exceeds the length limit, and even if that neighbour is an over-long fragment, but only across a gap of at most ${PAUSE_TIMEOUT_MS} ms; if both neighbours are further away than that, the brief cue stays alone. When either side would work, pick the side that keeps the merged cue within the limit.
 2. **Complete sentences** - Within the length limit, each cue should be a complete, standalone sentence that expresses a full thought.
    - A clause that cannot stand alone as a complete thought should be merged with the clause it depends on, as long as the merged cue stays within the limit. Signs of incomplete clauses:
      - Sets up a condition, time, or reason but doesn't state the result/consequence
@@ -319,7 +321,8 @@ CORRECT (the first over-long fragment stays unchanged; the brief "2" joins the n
 
 ## Final check before you answer
 - No cue is longer than ${MAX_WORDS} words or ${MAX_CHARS_CJK} characters, except a single input fragment that was already over the limit, or a cue that had to absorb a fragment shorter than ${MIN_STANDALONE_CUE_DURATION_MS} ms.
-- No cue lasts less than ${MIN_STANDALONE_CUE_DURATION_MS} ms.
+- No cue lasts less than ${MIN_STANDALONE_CUE_DURATION_MS} ms, unless a silence longer than ${PAUSE_TIMEOUT_MS} ms on both sides left it alone.
+- No cue spans a silence longer than ${PAUSE_TIMEOUT_MS} ms between two of its fragments.
 - Every start time is the "s" of that cue's first fragment and every end time is the "e" of its last fragment. Never use the next cue's start as an end time.`
 
 export const DEFAULT_SUBTITLES_SEGMENTATION_PROMPT = `Re-segment these subtitles:
