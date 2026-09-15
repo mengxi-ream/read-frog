@@ -5,7 +5,6 @@ import { env } from "@/env"
 import { storageAdapter } from "@/utils/atoms/storage-adapter"
 import { selectFreshTranslateProviders } from "@/utils/config/default-translate-provider"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
-import { recordFeatureActiveDay } from "@/utils/feature-active-days"
 import { initI18n, setUiLanguage } from "@/utils/i18n"
 import { ensureInstalledAtRecorded } from "@/utils/install-time"
 import { logger } from "@/utils/logger"
@@ -13,7 +12,6 @@ import { onMessage } from "@/utils/message"
 import { openOptionsPage } from "@/utils/navigation"
 import { SessionCacheGroupRegistry } from "@/utils/session-cache/session-cache-group-registry"
 import { runAiSegmentSubtitles } from "./ai-segmentation"
-import { captureFeatureUsedEventInBackground } from "./analytics"
 import { dispatchBackgroundStreamPort } from "./background-stream"
 import { initializeActionIcons, registerActionIconListeners } from "./browser-action-icon"
 import { ensureInitializedConfig, isFreshInstalledConfig } from "./config"
@@ -26,6 +24,7 @@ import {
   setUpDatabaseCleanup,
 } from "./db-cleanup"
 import { setupEdgeTTSMessageHandlers } from "./edge-tts"
+import { setupFeatureUsedEventHandlers } from "./feature-used-event"
 import { setupGlossaryMessageHandlers } from "./glossary"
 import { setupHostedAiStatusHandler } from "./hosted-ai-status"
 import { setupIframeInjection } from "./iframe-injection"
@@ -119,21 +118,8 @@ export default defineBackground({
       await cleanupAllAiSegmentationCache()
     })
 
-    // One subscription, two independent consumers — @webext-core/messaging throws if a
-    // key is registered twice. Active days are counted here rather than inside the
-    // analytics capture because that path returns early on the analytics opt-in, which
-    // defaults off on Firefox: routing engagement through it would freeze the count at
-    // zero for exactly the people who still use the extension. Failures are skipped
-    // because someone whose provider has been erroring for days is the last person to
-    // ask for a store review.
-    onMessage("trackFeatureUsedEvent", async (message) => {
-      if (message.data.outcome === "success") {
-        void recordFeatureActiveDay()
-      }
-      await captureFeatureUsedEventInBackground(message.data)
-    })
-
     newUserGuide()
+    setupFeatureUsedEventHandlers()
     translationMessage()
     registerActionIconListeners()
 
