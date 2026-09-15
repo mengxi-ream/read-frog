@@ -315,7 +315,12 @@ CORRECT (the first over-long fragment stays unchanged; the brief "2" joins the n
 前回の発行よりなんなら余裕悪くね?どう?今回ちょっとイン価がレベル
 
 356720 --> 359919
-2やからね。もしかしたらその価ダメージがめちゃめちゃ強いかもしらん。`
+2やからね。もしかしたらその価ダメージがめちゃめちゃ強いかもしらん。
+
+## Final check before you answer
+- No cue is longer than ${MAX_WORDS} words or ${MAX_CHARS_CJK} characters, except a single input fragment that was already over the limit, or a cue that had to absorb a fragment shorter than ${MIN_STANDALONE_CUE_DURATION_MS} ms.
+- No cue lasts less than ${MIN_STANDALONE_CUE_DURATION_MS} ms.
+- Every start time is the "s" of that cue's first fragment and every end time is the "e" of its last fragment. Never use the next cue's start as an end time.`
 
 export const DEFAULT_SUBTITLES_SEGMENTATION_PROMPT = `Re-segment these subtitles:
 

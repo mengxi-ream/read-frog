@@ -35,6 +35,18 @@ describe("subtitles segmentation prompt", () => {
     expect(DEFAULT_SUBTITLES_SEGMENTATION_SYSTEM_PROMPT).toContain("must never stand alone")
   })
 
+  it("ends with a final check that restates the hard limits after the examples", () => {
+    const finalCheck = DEFAULT_SUBTITLES_SEGMENTATION_SYSTEM_PROMPT.indexOf(
+      "## Final check before you answer",
+    )
+    const lastExample = DEFAULT_SUBTITLES_SEGMENTATION_SYSTEM_PROMPT.lastIndexOf("CORRECT (")
+    expect(finalCheck).toBeGreaterThan(lastExample)
+    const tail = DEFAULT_SUBTITLES_SEGMENTATION_SYSTEM_PROMPT.slice(finalCheck)
+    expect(tail).toContain(`${MAX_WORDS} words or ${MAX_CHARS_CJK} characters`)
+    expect(tail).toContain(`${MIN_STANDALONE_CUE_DURATION_MS} ms`)
+    expect(tail).toContain("Never use the next cue's start as an end time")
+  })
+
   it("injects the fragments into the user prompt", () => {
     const { systemPrompt, prompt } = getSubtitlesSegmentationPrompt('[{"s":0,"e":1,"t":"x"}]')
     expect(systemPrompt).toBe(DEFAULT_SUBTITLES_SEGMENTATION_SYSTEM_PROMPT)
