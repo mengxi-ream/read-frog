@@ -31,7 +31,7 @@ export function StoreReviewPrompt() {
         getFeatureActiveDays(),
         isStoreReviewPromptDismissed(),
       ])
-      return shouldShowStoreReviewPrompt({ activeDayCount: activeDays.count, dismissed })
+      return shouldShowStoreReviewPrompt(activeDays.count, dismissed)
     },
   })
 

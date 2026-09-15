@@ -1,32 +1,22 @@
 import { storage } from "#imports"
 
-export const INSTALLED_AT_STORAGE_KEY = "installedAt"
-
-const INSTALLED_AT_KEY = `local:${INSTALLED_AT_STORAGE_KEY}` as const
+const INSTALLED_AT_KEY = "local:installedAt" as const
 
 /**
  * Records when this profile first ran a build that tracks install time.
  *
  * Deliberately written on any `onInstalled` reason rather than only "install": nothing
  * recorded a timestamp before this shipped, so every already-installed user arrives here
- * through "update" and is stamped then.
+ * through "update" and is stamped then. Only ever writes when the key is missing, so
+ * later updates leave the original alone.
  *
- * Nothing gates on this today — the store review prompt counts active days instead — but
- * it is kept because an install timestamp is the kind of data that cannot be recovered
- * later: skip recording it now and the earliest knowable install date becomes whenever
- * recording finally starts.
- *
- * Only ever writes when the key is missing, so later updates leave the original alone.
+ * Nothing reads it today — the store review prompt counts active days instead — but an
+ * install timestamp cannot be recovered later: skip recording it now and the earliest
+ * knowable install date becomes whenever recording finally starts.
  */
-export async function ensureInstalledAtRecorded(now: number = Date.now()): Promise<number> {
-  const existing = await getInstalledAt()
-  if (existing !== null) return existing
+export async function ensureInstalledAtRecorded(): Promise<void> {
+  const existing = await storage.getItem<number>(INSTALLED_AT_KEY)
+  if (typeof existing === "number" && Number.isFinite(existing)) return
 
-  await storage.setItem(INSTALLED_AT_KEY, now)
-  return now
-}
-
-export async function getInstalledAt(): Promise<number | null> {
-  const value = await storage.getItem<number>(INSTALLED_AT_KEY)
-  return typeof value === "number" && Number.isFinite(value) ? value : null
+  await storage.setItem(INSTALLED_AT_KEY, Date.now())
 }

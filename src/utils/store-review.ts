@@ -1,6 +1,6 @@
 import { storage } from "#imports"
 
-export const STORE_REVIEW_PROMPT_DISMISSED_STORAGE_KEY = "storeReviewPromptDismissed"
+const DISMISSED_KEY = "local:storeReviewPromptDismissed" as const
 
 /**
  * How many distinct days someone has to have successfully used a feature before the
@@ -12,8 +12,6 @@ export const STORE_REVIEW_PROMPT_DISMISSED_STORAGE_KEY = "storeReviewPromptDismi
  */
 export const STORE_REVIEW_PROMPT_MIN_ACTIVE_DAYS = 3
 
-const DISMISSED_KEY = `local:${STORE_REVIEW_PROMPT_DISMISSED_STORAGE_KEY}` as const
-
 export async function isStoreReviewPromptDismissed(): Promise<boolean> {
   return (await storage.getItem<boolean>(DISMISSED_KEY)) === true
 }
@@ -23,13 +21,6 @@ export async function dismissStoreReviewPrompt(): Promise<void> {
   await storage.setItem(DISMISSED_KEY, true)
 }
 
-export function shouldShowStoreReviewPrompt({
-  activeDayCount,
-  dismissed,
-}: {
-  activeDayCount: number
-  dismissed: boolean
-}): boolean {
-  if (dismissed) return false
-  return activeDayCount >= STORE_REVIEW_PROMPT_MIN_ACTIVE_DAYS
+export function shouldShowStoreReviewPrompt(activeDayCount: number, dismissed: boolean): boolean {
+  return !dismissed && activeDayCount >= STORE_REVIEW_PROMPT_MIN_ACTIVE_DAYS
 }

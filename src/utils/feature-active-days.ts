@@ -1,9 +1,7 @@
 import { storage } from "#imports"
 import { logger } from "./logger"
 
-export const FEATURE_ACTIVE_DAYS_STORAGE_KEY = "featureActiveDays"
-
-const STORAGE_KEY = `local:${FEATURE_ACTIVE_DAYS_STORAGE_KEY}` as const
+const STORAGE_KEY = "local:featureActiveDays" as const
 
 export interface FeatureActiveDays {
   /** Local calendar day of the most recent successful feature use, as `YYYY-MM-DD`. */
@@ -63,9 +61,9 @@ export function nextFeatureActiveDays(
  * Never throws. It runs fire-and-forget after a translation has already been delivered,
  * so a storage hiccup must not surface as an unhandled rejection.
  */
-export async function recordFeatureActiveDay(now: Date = new Date()): Promise<void> {
+export async function recordFeatureActiveDay(): Promise<void> {
   try {
-    const today = getLocalDayKey(now)
+    const today = getLocalDayKey(new Date())
     const next = nextFeatureActiveDays(await getFeatureActiveDays(), today)
     if (!next) return
 
