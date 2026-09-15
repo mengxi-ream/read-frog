@@ -54,6 +54,11 @@ popup:
     notification: Có gì mới trong Read Frog
   aiSmartContext: Ngữ cảnh thông minh AI
   aiSmartContextDescription: Sử dụng ngữ cảnh trang web để cải thiện chất lượng dịch. Yêu cầu nhà cung cấp dịch LLM.
+  storeReview:
+    title: Bạn thấy Read Frog thế nào?
+    description: Một đánh giá trên cửa hàng sẽ giúp nhiều người đọc khác tìm thấy nó.
+    action: Viết đánh giá
+    dismiss: Đóng
   more:
     title: Thêm
     help: Trợ giúp

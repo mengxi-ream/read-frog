@@ -54,6 +54,11 @@ popup:
     notification: 陪讀蛙更新動態
   aiSmartContext: AI 智慧上下文
   aiSmartContextDescription: 結合網頁前後文提升翻譯品質。需要設定 LLM 翻譯服務提供者。
+  storeReview:
+    title: 用得還順手嗎？
+    description: 到商店留個評價，能幫助更多人發現陪讀蛙。
+    action: 去評價
+    dismiss: 關閉
   more:
     title: 更多
     help: 說明

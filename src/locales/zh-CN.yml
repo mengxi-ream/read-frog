@@ -54,6 +54,11 @@ popup:
     notification: 陪读蛙更新动态
   aiSmartContext: AI 智能上下文
   aiSmartContextDescription: 结合网页上下文提升翻译效果。需要配置 LLM 翻译服务商。
+  storeReview:
+    title: 用得还顺手吗？
+    description: 去商店留个评价，能帮更多人发现陪读蛙。
+    action: 去评价
+    dismiss: 关闭
   more:
     title: 更多
     help: 帮助

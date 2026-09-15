@@ -54,6 +54,11 @@ popup:
     notification: Novedades de Read Frog
   aiSmartContext: Contexto inteligente de IA
   aiSmartContextDescription: Usa el contexto de la página web para mejorar la calidad de la traducción. Requiere un proveedor de traducción LLM.
+  storeReview:
+    title: ¿Te gusta Read Frog?
+    description: Una reseña en la tienda ayuda a que otros lectores lo descubran.
+    action: Escribir una reseña
+    dismiss: Descartar
   more:
     title: Más
     help: Ayuda

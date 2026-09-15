@@ -54,6 +54,11 @@ popup:
     notification: Read Frog yenilikləri
   aiSmartContext: Süni intellektlə ağıllı kontekst
   aiSmartContextDescription: Tərcümənin keyfiyyətini artırmaq üçün səhifənin kontekstindən istifadə edir. LLM tərcümə provayderi tələb olunur.
+  storeReview:
+    title: Read Frog xoşunuza gəlir?
+    description: Mağazada yazacağınız qısa rəy digər oxucuların onu tapmasına kömək edir.
+    action: Rəy yaz
+    dismiss: Bağla
   more:
     title: Daha çox
     help: Kömək
