@@ -54,6 +54,11 @@ popup:
     notification: 読書カエルの最新情報
   aiSmartContext: AI スマートコンテキスト
   aiSmartContextDescription: ウェブページのコンテキストを使用して翻訳品質を向上させます。LLM翻訳プロバイダーが必要です。
+  storeReview:
+    title: Read Frog はいかがですか？
+    description: ストアでのレビューが、他の読者に見つけてもらう助けになります。
+    action: レビューを書く
+    dismiss: 閉じる
   more:
     title: その他
     help: ヘルプ

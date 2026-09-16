@@ -54,6 +54,11 @@ popup:
     notification: Что нового в Read Frog
   aiSmartContext: Умный контекст ИИ
   aiSmartContextDescription: Использует контекст веб-страницы для улучшения качества перевода. Требуется LLM-провайдер перевода.
+  storeReview:
+    title: Нравится Read Frog?
+    description: Отзыв в магазине поможет другим читателям найти расширение.
+    action: Оставить отзыв
+    dismiss: Закрыть
   more:
     title: Ещё
     help: Помощь

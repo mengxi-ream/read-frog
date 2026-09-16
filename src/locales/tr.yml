@@ -54,6 +54,11 @@ popup:
     notification: Read Frog'da yenilikler
   aiSmartContext: AI Akıllı Bağlam
   aiSmartContextDescription: Çeviri kalitesini artırmak için web sayfası bağlamını kullanır. LLM çeviri sağlayıcısı gerektirir.
+  storeReview:
+    title: Read Frog'u beğendiniz mi?
+    description: Mağazaya bırakacağınız kısa bir değerlendirme, diğer okurların onu bulmasına yardımcı olur.
+    action: Değerlendirme yaz
+    dismiss: Kapat
   more:
     title: Daha Fazla
     help: Yardım

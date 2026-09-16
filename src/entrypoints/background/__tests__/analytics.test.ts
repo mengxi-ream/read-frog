@@ -8,10 +8,6 @@ import {
   resolveDistinctIdOverride,
 } from "../analytics"
 
-type MessageHandler<TData, TResult = void> = (message: {
-  data: TData
-}) => TResult | Promise<TResult>
-
 type PostHogCaptureMock = (...args: Parameters<PostHog["capture"]>) => void
 type PostHogInitMock = (...args: Parameters<PostHog["init"]>) => void
 type PostHogRegisterMock = (...args: Parameters<PostHog["register"]>) => void
@@ -22,7 +18,6 @@ const DEFAULT_FEATURE_PROVIDER = {
 } as const
 
 describe("background analytics", () => {
-  let trackFeatureUsedEventHandler: MessageHandler<FeatureUsedEventProperties> | undefined
   let storageGetItemMock = vi.fn<(key: string) => Promise<unknown>>()
   let storageSetItemMock = vi.fn<(key: string, value: unknown) => Promise<void>>()
   let getTargetLanguageMock = vi.fn<() => Promise<"cmn" | undefined>>()
@@ -30,14 +25,6 @@ describe("background analytics", () => {
   let posthogCaptureMock = vi.fn<PostHogCaptureMock>()
   let posthogRegisterMock = vi.fn<PostHogRegisterMock>()
   let loggerWarnMock = vi.fn<(...args: unknown[]) => void>()
-
-  function requireMessageHandler<TData>(
-    handler: MessageHandler<TData> | undefined,
-    name: string,
-  ): MessageHandler<TData> {
-    if (!handler) throw new Error(`Message handler not registered: ${name}`)
-    return handler
-  }
 
   function createAnalytics(overrides?: {
     apiHost?: string
@@ -62,11 +49,6 @@ describe("background analytics", () => {
       getCurrentDate: overrides?.getCurrentDate ?? (() => new Date("2026-07-14T12:00:00.000Z")),
       getStorageItem: storageGetItemMock,
       getTargetLanguage: getTargetLanguageMock,
-      messageRegistrar: {
-        registerTrackFeatureUsedEvent(handler) {
-          trackFeatureUsedEventHandler = handler
-        },
-      },
       posthog: {
         init: posthogInitMock,
         capture: posthogCaptureMock,
@@ -104,7 +86,6 @@ describe("background analytics", () => {
   }
 
   beforeEach(() => {
-    trackFeatureUsedEventHandler = undefined
     storageGetItemMock = vi.fn<(key: string) => Promise<unknown>>()
     storageSetItemMock = vi
       .fn<(key: string, value: unknown) => Promise<void>>()
@@ -119,18 +100,13 @@ describe("background analytics", () => {
   it("registers a handler that initializes PostHog with the shared anonymous distinct ID", async () => {
     storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
 
-    const { setupAnalyticsMessageHandlers } = createAnalytics()
-    setupAnalyticsMessageHandlers()
-
-    const handler = requireMessageHandler(trackFeatureUsedEventHandler, "trackFeatureUsedEvent")
-    await handler({
-      data: {
-        feature: "page_translation",
-        surface: "popup",
-        outcome: "success",
-        latency_ms: 1_500,
-        ...DEFAULT_FEATURE_PROVIDER,
-      },
+    const { captureFeatureUsedEventInBackground } = createAnalytics()
+    await captureFeatureUsedEventInBackground({
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 1_500,
+      ...DEFAULT_FEATURE_PROVIDER,
     })
 
     expect(posthogInitMock).toHaveBeenCalledWith(
@@ -171,10 +147,7 @@ describe("background analytics", () => {
   it("downgrades legacy feature messages without provider fields to unknown/unknown", async () => {
     storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
 
-    const { setupAnalyticsMessageHandlers } = createAnalytics()
-    setupAnalyticsMessageHandlers()
-
-    const handler = requireMessageHandler(trackFeatureUsedEventHandler, "trackFeatureUsedEvent")
+    const { captureFeatureUsedEventInBackground } = createAnalytics()
     const legacyProperties = {
       feature: "page_translation",
       surface: "popup",
@@ -182,7 +155,7 @@ describe("background analytics", () => {
       latency_ms: 250,
     } as unknown as FeatureUsedEventProperties
 
-    await handler({ data: legacyProperties })
+    await captureFeatureUsedEventInBackground(legacyProperties)
 
     expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", {
       ...legacyProperties,
