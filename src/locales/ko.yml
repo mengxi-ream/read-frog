@@ -219,6 +219,7 @@ options:
         enterCustomModel: 사용자 정의 모델 이름 입력
       advancedOptions: 고급 옵션
       providerSettingLabels:
+        qualityOptimized: 번역 품질 우선
         region: 리전
         apiMode: API 모드
         resourceName: Azure 리소스 이름(선택 사항)

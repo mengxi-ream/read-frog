@@ -3,10 +3,38 @@ import { z } from "zod"
 import {
   azureProviderSpecificSettingsSchema,
   bedrockProviderSpecificSettingsSchema,
+  deeplProviderSpecificSettingsSchema,
+  providerConfigItemSchema,
   getProviderSpecificSettingFields,
 } from "../provider"
 
 describe("provider-specific settings metadata", () => {
+  it("returns the DeepL quality switch from Zod metadata", () => {
+    expect(getProviderSpecificSettingFields(deeplProviderSpecificSettingsSchema)).toEqual([
+      { key: "qualityOptimized", labelKey: "qualityOptimized", type: "switch" },
+    ])
+  })
+
+  it.each([undefined, {}, { qualityOptimized: false }, { qualityOptimized: true }])(
+    "preserves compatible DeepL settings: %j",
+    (providerSpecificSettings) => {
+      const config = {
+        id: "deepl-default",
+        name: "DeepL",
+        enabled: true,
+        provider: "deepl",
+        ...(providerSpecificSettings === undefined ? {} : { providerSpecificSettings }),
+      }
+      expect(providerConfigItemSchema.parse(config)).toEqual(config)
+    },
+  )
+
+  it("rejects non-boolean DeepL quality settings", () => {
+    expect(
+      deeplProviderSpecificSettingsSchema.safeParse({ qualityOptimized: "true" }).success,
+    ).toBe(false)
+  })
+
   it("returns the Bedrock region field from Zod metadata", () => {
     expect(getProviderSpecificSettingFields(bedrockProviderSpecificSettingsSchema)).toEqual([
       {

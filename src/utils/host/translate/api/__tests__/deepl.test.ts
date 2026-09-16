@@ -83,6 +83,52 @@ describe("deepl translate adapter", () => {
     })
   })
 
+  it.each([
+    { qualityOptimized: undefined, textFormat: "plain", apiKey: "test-key" },
+    { qualityOptimized: false, textFormat: "plain", apiKey: "test-key" },
+    { qualityOptimized: true, textFormat: "plain", apiKey: "test-key" },
+    { qualityOptimized: true, textFormat: "html", apiKey: "test-key" },
+    { qualityOptimized: true, textFormat: "plain", apiKey: "test-key:fx" },
+  ] as const)(
+    "uses qualityOptimized=$qualityOptimized for $textFormat input with $apiKey",
+    async ({ qualityOptimized, textFormat, apiKey }) => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        json: async () => ({ translations: [{ text: "Hallo" }] }),
+      })
+      const signal = new AbortController().signal
+      const text = textFormat === "html" ? "<p>Hello</p>" : "Hello"
+
+      expect(
+        await deeplTranslate(
+          text,
+          "auto",
+          "de",
+          {
+            id: "deepl-default",
+            enabled: true,
+            name: "DeepL",
+            provider: "deepl",
+            apiKey,
+            providerSpecificSettings: { qualityOptimized },
+          },
+          { textFormat, signal },
+        ),
+      ).toBe("Hallo")
+
+      const [url, requestInit] = fetchMock.mock.calls[0]!
+      expect(url).toBe(`${getDeepLBaseURL(apiKey)}/v2/translate`)
+      expect(requestInit.signal).toBe(signal)
+      const body = JSON.parse(requestInit.body)
+      expect(body).toEqual({
+        text: [text],
+        target_lang: "DE",
+        ...(qualityOptimized ? { model_type: "quality_optimized" } : {}),
+        ...(textFormat === "html" ? { tag_handling: "html" } : {}),
+      })
+    },
+  )
+
   it.each(["plain", undefined] as const)(
     "omits tag_handling for %s text format",
     async (textFormat) => {

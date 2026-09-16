@@ -220,6 +220,7 @@ options:
         enterCustomModel: Introduce el nombre del modelo personalizado
       advancedOptions: Opciones avanzadas
       providerSettingLabels:
+        qualityOptimized: Priorizar la calidad de la traducción
         region: Región
         apiMode: Modo de API
         resourceName: Nombre del recurso de Azure (opcional)

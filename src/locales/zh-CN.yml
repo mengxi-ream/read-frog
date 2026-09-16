@@ -220,6 +220,7 @@ options:
         enterCustomModel: 输入自定义模型名称
       advancedOptions: 高级选项
       providerSettingLabels:
+        qualityOptimized: 优先优化翻译质量
         region: 区域
         apiMode: API 模式
         resourceName: Azure 资源名称（可选）

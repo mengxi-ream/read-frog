@@ -219,6 +219,7 @@ options:
         enterCustomModel: Введите название пользовательской модели
       advancedOptions: Расширенные настройки
       providerSettingLabels:
+        qualityOptimized: Приоритет качества перевода
         region: Регион
         apiMode: Режим API
         resourceName: Имя ресурса Azure (необязательно)

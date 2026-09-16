@@ -219,6 +219,7 @@ options:
         enterCustomModel: カスタムモデル名を入力
       advancedOptions: 詳細オプション
       providerSettingLabels:
+        qualityOptimized: 翻訳品質を優先
         region: リージョン
         apiMode: API モード
         resourceName: Azure リソース名（任意）

@@ -220,6 +220,7 @@ options:
         enterCustomModel: Fərdi modelin adını daxil edin
       advancedOptions: Əlavə parametrlər
       providerSettingLabels:
+        qualityOptimized: Tərcümə keyfiyyətinə üstünlük ver
         region: Bölgə
         apiMode: API rejimi
         resourceName: Azure resursunun adı (istəyə bağlı)

@@ -1,4 +1,4 @@
-import type { LLMProviderTypes } from "./constants"
+import type { APIProviderTypes } from "./constants"
 import { z } from "zod"
 
 export const AZURE_API_MODES = ["responses", "chat"] as const
@@ -23,7 +23,14 @@ interface ProviderSettingSelectUiMeta extends ProviderSettingBaseUiMeta {
   }>
 }
 
-export type ProviderSettingUiMeta = ProviderSettingTextUiMeta | ProviderSettingSelectUiMeta
+interface ProviderSettingSwitchUiMeta extends ProviderSettingBaseUiMeta {
+  type: "switch"
+}
+
+export type ProviderSettingUiMeta =
+  | ProviderSettingTextUiMeta
+  | ProviderSettingSelectUiMeta
+  | ProviderSettingSwitchUiMeta
 
 declare module "zod" {
   interface GlobalMeta {
@@ -90,11 +97,24 @@ export const azureProviderSpecificSettingsSchema = z.strictObject({
     }),
 })
 
+export const deeplProviderSpecificSettingsSchema = z.strictObject({
+  qualityOptimized: z
+    .boolean()
+    .optional()
+    .meta({
+      providerSettingUi: {
+        labelKey: "qualityOptimized",
+        type: "switch",
+      },
+    }),
+})
+
 export const PROVIDER_SPECIFIC_SETTINGS_SCHEMAS: Partial<
-  Record<LLMProviderTypes, ProviderSpecificSettingsSchema>
+  Record<APIProviderTypes, ProviderSpecificSettingsSchema>
 > = {
   azure: azureProviderSpecificSettingsSchema,
   bedrock: bedrockProviderSpecificSettingsSchema,
+  deepl: deeplProviderSpecificSettingsSchema,
 }
 
 export function getProviderSpecificSettingFields(
@@ -107,7 +127,7 @@ export function getProviderSpecificSettingFields(
       throw new Error(`providerSpecificSettings.${key} is missing providerSettingUi metadata`)
     }
 
-    if (ui.type !== "text" && ui.type !== "select") {
+    if (ui.type !== "text" && ui.type !== "select" && ui.type !== "switch") {
       const unsupportedTypeValue = (ui as { type: unknown }).type
       const unsupportedType =
         typeof unsupportedTypeValue === "string"

@@ -51,6 +51,9 @@ async function requestDeepLTranslations(
     text: sourceTexts,
     ...(normalizedLanguages.source ? { source_lang: normalizedLanguages.source } : {}),
     target_lang: normalizedLanguages.target,
+    ...(providerConfig.providerSpecificSettings?.qualityOptimized
+      ? { model_type: "quality_optimized" }
+      : {}),
     ...(options?.textFormat === "html" ? { tag_handling: "html" } : {}),
   })
 

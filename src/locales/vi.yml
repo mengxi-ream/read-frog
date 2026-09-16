@@ -219,6 +219,7 @@ options:
         enterCustomModel: Nhập tên mô hình tùy chỉnh
       advancedOptions: Tùy chọn nâng cao
       providerSettingLabels:
+        qualityOptimized: Ưu tiên chất lượng bản dịch
         region: Khu vực
         apiMode: Chế độ API
         resourceName: Tên tài nguyên Azure (tùy chọn)

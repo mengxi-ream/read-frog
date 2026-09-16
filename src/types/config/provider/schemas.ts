@@ -19,6 +19,7 @@ import {
 import {
   azureProviderSpecificSettingsSchema,
   bedrockProviderSpecificSettingsSchema,
+  deeplProviderSpecificSettingsSchema,
 } from "./provider-specific-settings"
 
 export const providerSponsorConfigSchema = z.object({
@@ -217,6 +218,7 @@ const apiProviderConfigSchemaList = [
   }),
   baseAPIProviderConfigSchema.extend({
     provider: z.literal("deepl"),
+    providerSpecificSettings: deeplProviderSpecificSettingsSchema.optional(),
   }),
 ] as const
 

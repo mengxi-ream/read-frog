@@ -69,6 +69,61 @@ describe("providerSpecificSettingsField", () => {
     )
   })
 
+  it("defaults the DeepL quality switch off and persists enabling and disabling it", async () => {
+    render(<ProviderSpecificSettingsFieldHarness initialConfig={DEFAULT_PROVIDER_CONFIG.deepl} />)
+
+    const qualitySwitch = screen.getByRole("switch", {
+      name: "options.apiProviders.form.providerSettingLabels.qualityOptimized",
+    })
+    expect(qualitySwitch).not.toBeChecked()
+
+    await act(async () => {
+      fireEvent.click(qualitySwitch)
+    })
+    expect(qualitySwitch).toBeChecked()
+    expect(screen.getByLabelText("persisted-provider-specific-settings")).toHaveTextContent(
+      '{"qualityOptimized":true}',
+    )
+
+    await act(async () => {
+      fireEvent.click(qualitySwitch)
+    })
+    expect(qualitySwitch).not.toBeChecked()
+    expect(screen.getByLabelText("persisted-provider-specific-settings")).toHaveTextContent(
+      '{"qualityOptimized":false}',
+    )
+  })
+
+  it("restores an enabled DeepL quality switch from saved settings", () => {
+    render(
+      <ProviderSpecificSettingsFieldHarness
+        initialConfig={{
+          ...DEFAULT_PROVIDER_CONFIG.deepl,
+          providerSpecificSettings: { qualityOptimized: true },
+        }}
+      />,
+    )
+    expect(
+      screen.getByRole("switch", {
+        name: "options.apiProviders.form.providerSettingLabels.qualityOptimized",
+      }),
+    ).toBeChecked()
+  })
+
+  it.each(["deeplx", "azure", "bedrock"] as const)(
+    "does not show the DeepL quality switch for %s",
+    (provider) => {
+      render(
+        <ProviderSpecificSettingsFieldHarness initialConfig={DEFAULT_PROVIDER_CONFIG[provider]} />,
+      )
+      expect(
+        screen.queryByRole("switch", {
+          name: "options.apiProviders.form.providerSettingLabels.qualityOptimized",
+        }),
+      ).not.toBeInTheDocument()
+    },
+  )
+
   it("renders Azure settings without a region field and persists non-empty values", async () => {
     render(<ProviderSpecificSettingsFieldHarness initialConfig={DEFAULT_PROVIDER_CONFIG.azure} />)
 

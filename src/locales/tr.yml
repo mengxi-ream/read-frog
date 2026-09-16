@@ -219,6 +219,7 @@ options:
         enterCustomModel: Özel model adını girin
       advancedOptions: Gelişmiş seçenekler
       providerSettingLabels:
+        qualityOptimized: Çeviri kalitesine öncelik ver
         region: Bölge
         apiMode: API modu
         resourceName: Azure kaynak adı (isteğe bağlı)

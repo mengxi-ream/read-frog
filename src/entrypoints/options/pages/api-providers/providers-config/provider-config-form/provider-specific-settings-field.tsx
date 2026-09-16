@@ -12,9 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/base-ui/select"
+import { Switch } from "@/components/ui/base-ui/switch"
 import {
   getProviderSpecificSettingFields,
-  isLLMProvider,
   PROVIDER_SPECIFIC_SETTINGS_SCHEMAS,
 } from "@/types/config/provider"
 import { compactObject } from "@/types/utils"
@@ -35,7 +35,6 @@ export const ProviderSpecificSettingsField = withForm({
     const autosave = useAutosaveContext()
     const localSettings: Record<string, unknown> = getProviderSpecificSettings(providerConfig)
     const settingsSchema = useMemo(() => {
-      if (!isLLMProvider(providerType)) return null
       return PROVIDER_SPECIFIC_SETTINGS_SCHEMAS[providerType] ?? null
     }, [providerType])
     const updateSetting = (key: string, value: unknown) => {
@@ -62,6 +61,21 @@ export const ProviderSpecificSettingsField = withForm({
         `options.apiProviders.form.providerSettingLabels.${def.labelKey}` as never,
       )
       const fieldValue = localSettings[def.key]
+
+      if (def.type === "switch") {
+        return (
+          <Field key={fieldId} orientation="horizontal">
+            <FieldLabel htmlFor={fieldId}>{fieldLabel}</FieldLabel>
+            <Switch
+              id={fieldId}
+              checked={fieldValue === true}
+              onCheckedChange={(checked) =>
+                autosave.edit(() => updateSetting(def.key, checked), { immediate: true })
+              }
+            />
+          </Field>
+        )
+      }
 
       if (def.type === "select") {
         const selectedValue = typeof fieldValue === "string" ? fieldValue : def.defaultValue
