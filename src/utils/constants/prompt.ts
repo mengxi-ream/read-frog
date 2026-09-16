@@ -1,3 +1,10 @@
+import {
+  MAX_CHARS_CJK,
+  MAX_WORDS,
+  MIN_STANDALONE_CUE_DURATION_MS,
+  PAUSE_TIMEOUT_MS,
+} from "@/utils/constants/subtitles"
+
 export const WEB_PAGE_PROMPT_TOKENS = [
   "targetLanguage",
   "input",
@@ -246,13 +253,19 @@ Hello world.
 2000 --> 3500
 This is a sentence.
 
-## Rules
-1. **Complete sentences only** - Each cue must be a COMPLETE, standalone sentence that expresses a full thought.
-2. **Never split at incomplete clauses** - A clause that cannot stand alone as a complete thought MUST be merged with the clause it depends on. Signs of incomplete clauses:
-   - Sets up a condition, time, or reason but doesn't state the result/consequence
-   - Ends with a conjunction or leaves an expectation unfulfilled
-   - Would sound unfinished if spoken alone
-   Example: "When Moses left Egypt" is INCOMPLETE - it sets up a time but doesn't say what happened.
+## Rules (in priority order — an earlier rule always wins over a later one)
+1. **Length limit** - A cue may hold at most ${MAX_WORDS} words, or at most ${MAX_CHARS_CJK} characters for Chinese, Japanese, Korean and other languages written without spaces. This limit beats every rule below it:
+   - Never merge fragments into a cue that would exceed the limit, even if that leaves a clause incomplete.
+   - If one complete sentence exceeds the limit, split it at the most natural clause boundary (a comma, a conjunction, a pause) so both halves stay as balanced as possible.
+   - If a single input fragment already exceeds the limit on its own, output it unchanged as its own cue with its own "s" and "e". Do not attach any other fragment to it — you cannot split inside a fragment because it has no inner timestamps.
+   - A silence is a hard boundary: when the gap between one fragment's "e" and the next fragment's "s" is longer than ${PAUSE_TIMEOUT_MS} ms, never put those two fragments in the same cue — a cue that spans the silence keeps its text on screen while nobody is speaking. This holds for every rule on this list, including the brief-cue exception below, and even when the fragment after the silence repeats the text before it: a line repeated after a pause is a second cue, not a duplicate to collapse.
+   - Exception for brief cues: a cue that would last less than ${MIN_STANDALONE_CUE_DURATION_MS} ms ("e" of its last fragment minus "s" of its first) must never stand alone — a viewer cannot read a cue that brief. Merge it into the neighbouring cue it belongs to grammatically, even if the merged cue then exceeds the length limit, and even if that neighbour is an over-long fragment, but only across a gap of at most ${PAUSE_TIMEOUT_MS} ms; if both neighbours are further away than that, the brief cue stays alone. When either side would work, pick the side that keeps the merged cue within the limit.
+2. **Complete sentences** - Within the length limit, each cue should be a complete, standalone sentence that expresses a full thought.
+   - A clause that cannot stand alone as a complete thought should be merged with the clause it depends on, as long as the merged cue stays within the limit. Signs of incomplete clauses:
+     - Sets up a condition, time, or reason but doesn't state the result/consequence
+     - Ends with a conjunction or leaves an expectation unfulfilled
+     - Would sound unfinished if spoken alone
+   Example: "When Moses left Egypt" is INCOMPLETE - it sets up a time but doesn't say what happened, so merge it with what follows if the result fits the limit.
 3. **Timestamp extraction algorithm** - For EACH sentence:
    - Find the FIRST word of the sentence in the input array → use its "s" value as START time
    - Find the LAST word of the sentence in the input array → use its "e" value as END time
@@ -284,7 +297,33 @@ I thought the story was about him.
 
 Explanation:
 - "Moses had died" → first word "Moses" has s:134200, last word "died" has e:136160 → 134200 --> 136160
-- "I thought the story was about him" → first word "I" has s:136160, last word "him" has e:138160 → 136160 --> 138160`
+- "I thought the story was about him" → first word "I" has s:136160, last word "him" has e:138160 → 136160 --> 138160
+
+## Critical Example: Length Beats Completeness, Brief Cues Still Join
+
+Input (Japanese, limit ${MAX_CHARS_CJK} characters; the first and third fragments already exceed it on their own at 33 characters each, the second lasts 200 ms, far under the ${MIN_STANDALONE_CUE_DURATION_MS} ms minimum):
+[{"s":332039,"e":335039,"t":"前回の発行よりなんなら余裕悪くね?どう?今回ちょっとイン価がレベル"},{"s":356720,"e":356920,"t":"2"},{"s":356920,"e":359919,"t":"やからね。もしかしたらその価ダメージがめちゃめちゃ強いかもしらん。"}]
+
+WRONG (everything merged because "レベル" and "2" are incomplete — the cue is now 67 characters):
+332039 --> 359919
+前回の発行よりなんなら余裕悪くね?どう?今回ちょっとイン価がレベル2やからね。もしかしたらその価ダメージがめちゃめちゃ強いかもしらん。
+
+WRONG (the 200 ms fragment "2" left alone as a cue that flashes on screen):
+356720 --> 356920
+2
+
+CORRECT (the first over-long fragment stays unchanged; the brief "2" joins the next cue even though that cue is over the limit):
+332039 --> 335039
+前回の発行よりなんなら余裕悪くね?どう?今回ちょっとイン価がレベル
+
+356720 --> 359919
+2やからね。もしかしたらその価ダメージがめちゃめちゃ強いかもしらん。
+
+## Final check before you answer
+- No cue is longer than ${MAX_WORDS} words or ${MAX_CHARS_CJK} characters, except a single input fragment that was already over the limit, or a cue that had to absorb a fragment shorter than ${MIN_STANDALONE_CUE_DURATION_MS} ms.
+- No cue lasts less than ${MIN_STANDALONE_CUE_DURATION_MS} ms, unless a silence longer than ${PAUSE_TIMEOUT_MS} ms on both sides left it alone.
+- No cue spans a silence longer than ${PAUSE_TIMEOUT_MS} ms between two of its fragments.
+- Every start time is the "s" of that cue's first fragment and every end time is the "e" of its last fragment. Never use the next cue's start as an end time.`
 
 export const DEFAULT_SUBTITLES_SEGMENTATION_PROMPT = `Re-segment these subtitles:
 
