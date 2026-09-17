@@ -61,7 +61,7 @@ describe("dEFAULT_CONFIG", () => {
       "microsoft-translate-default",
       "openai-default",
       "jalapenocloud-default",
-      "atlascloud-default",
+      "deepseek-default",
     ])
     expect(DEFAULT_CONFIG.pageTranslation.providerId).toBe("microsoft-translate-default")
     expect(DEFAULT_CONFIG.selectionToolbar.features.translate.providerId).toBe(
@@ -81,11 +81,11 @@ describe("dEFAULT_CONFIG", () => {
       }),
     )
     expect(
-      DEFAULT_CONFIG.providersConfig.find((provider) => provider.id === "atlascloud-default"),
+      DEFAULT_CONFIG.providersConfig.find((provider) => provider.id === "deepseek-default"),
     ).toEqual(
       expect.objectContaining({
         model: {
-          model: "deepseek-ai/deepseek-v4-flash",
+          model: "deepseek-v4-flash",
           isCustomModel: false,
           customModel: null,
         },
