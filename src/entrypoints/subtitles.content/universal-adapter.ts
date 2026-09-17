@@ -727,6 +727,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private showNativeSubtitles() {
+    this.fetcher.showNativeSubtitles?.()
     if (!this.isNativeSubtitlesHidden) {
       return
     }
@@ -737,6 +738,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private hideNativeSubtitles() {
+    this.fetcher.hideNativeSubtitles?.()
     if (this.isNativeSubtitlesHidden) {
       return
     }
