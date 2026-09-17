@@ -240,10 +240,6 @@ export const PROVIDER_ITEMS: Record<
     name: "Atlas Cloud",
     website: "https://readfrog.s.gy/altas",
     apiKeyUrl: "https://readfrog.s.gy/altas",
-    sponsor: {
-      sponsoring: true,
-      referUrl: "https://readfrog.s.gy/altas",
-    },
   },
   "openai-compatible": {
     logo: () => customProviderLogo,
