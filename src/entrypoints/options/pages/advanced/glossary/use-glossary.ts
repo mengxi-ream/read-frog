@@ -1,4 +1,3 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { ParsedGlossaryRow } from "@/utils/glossary/csv"
 import type { GlossaryTermInput, ImportMode } from "@/utils/glossary/repository"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -38,7 +37,7 @@ function termsQueryKey(glossaryId: string) {
  * glossary's own fields, and getting that wrong shows a stale count next to a
  * fresh name.
  */
-function useGlossaryInvalidation() {
+export function useGlossaryInvalidation() {
   const queryClient = useQueryClient()
   return () =>
     Promise.all([
@@ -61,10 +60,23 @@ export function useGlossaryTermCounts() {
   return useQuery({ queryKey: TERM_COUNTS_QUERY_KEY, queryFn: countGlossaryTermsByGlossary })
 }
 
+/**
+ * `null` rather than `undefined` for a glossary that is not there.
+ *
+ * "Not found" is a real answer here, and a common one: deleting from the editor
+ * invalidates this query while the page is still mounted — the navigate away
+ * only runs after the mutation resolves — so it refetches an id that no longer
+ * exists. React Query treats an `undefined` result as a broken query function
+ * and throws, which the global `QueryCache` handler turns into a "Something
+ * went wrong" toast on an operation that in fact succeeded.
+ *
+ * `editor-page.tsx` already reads a falsy value as "go back to the library",
+ * which is what should happen.
+ */
 export function useGlossary(glossaryId: string) {
   return useQuery({
     queryKey: glossaryQueryKey(glossaryId),
-    queryFn: () => getGlossary(glossaryId),
+    queryFn: async () => (await getGlossary(glossaryId)) ?? null,
   })
 }
 
@@ -156,17 +168,8 @@ export function useDeleteAllGlossaryTerms(glossaryId: string) {
 export function useImportGlossary(glossaryId: string) {
   const invalidate = useGlossaryInvalidation()
   return useMutation({
-    mutationFn: ({
-      rows,
-      mode,
-      caseSensitive,
-      fallbackLang,
-    }: {
-      rows: ParsedGlossaryRow[]
-      mode: ImportMode
-      caseSensitive: boolean
-      fallbackLang: LangCodeISO6393
-    }) => importGlossaryRows(glossaryId, rows, mode, caseSensitive, fallbackLang),
+    mutationFn: ({ rows, mode }: { rows: ParsedGlossaryRow[]; mode: ImportMode }) =>
+      importGlossaryRows(glossaryId, rows, mode),
     onSuccess: () => void invalidate(),
   })
 }

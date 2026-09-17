@@ -21,9 +21,19 @@ function AutoBadge() {
   return <span className="rounded-full bg-neutral-200 px-1 text-xs dark:bg-neutral-800">auto</span>
 }
 
-interface LanguageComboboxProps {
-  value: LangCodeISO6393 | "auto"
-  onValueChange: (value: LangCodeISO6393 | "auto") => void
+interface LanguageComboboxProps<T extends string> {
+  // `NoInfer` so `items` alone decides `T`. Inferring from `value` instead would
+  // narrow `T` to whatever a caller's state happens to be typed as — a page
+  // holding a `LangCodeISO6393` would lose `"auto"` from its own handler, and
+  // its guard against it would become a dead comparison.
+  value: NoInfer<T>
+  onValueChange: (value: NoInfer<T>) => void
+  /**
+   * The rows to offer. Omit for the languages plus `auto`, which is what every
+   * surface beside a page wants; pass your own to offer a different pinned row —
+   * `getGlossaryTargetLanguageItems` is the one caller doing that today.
+   */
+  items?: LanguageItem<T>[]
   detectedLangCode?: LangCodeISO6393
   /** Offers auto under a fixed name, for callers with no page to detect a language from. */
   autoLabel?: string
@@ -33,19 +43,24 @@ interface LanguageComboboxProps {
   className?: string
 }
 
-export function LanguageCombobox({
+export function LanguageCombobox<T extends string = LangCodeISO6393 | "auto">({
   value,
   onValueChange,
+  items,
   detectedLangCode,
   autoLabel,
   placeholder,
   triggerSize,
   className,
-}: LanguageComboboxProps) {
-  const languageItems = useMemo(
-    () => getLanguageItems(detectedLangCode, autoLabel),
-    [detectedLangCode, autoLabel],
-  )
+}: LanguageComboboxProps<T>) {
+  const languageItems = useMemo(() => {
+    if (items) return items
+    // The rows built here are `LangCodeISO6393 | "auto"`, which is exactly the
+    // default `T`. A caller whose values are anything else — the glossary's
+    // `all` — has to pass `items`, because there are no rows this branch could
+    // build for it.
+    return getLanguageItems(detectedLangCode, autoLabel) as LanguageItem<T>[]
+  }, [items, detectedLangCode, autoLabel])
 
   return (
     <Combobox
@@ -70,7 +85,7 @@ export function LanguageCombobox({
         {/* `ComboboxValue` renders no element of its own, so both children below land
             directly in the trigger's flex row. */}
         <ComboboxValue placeholder={placeholder ?? i18n.t("translationHub.searchLanguages")}>
-          {(item: LanguageItem | null) => (
+          {(item: LanguageItem<T> | null) => (
             <>
               <span className="min-w-0 flex-1 truncate text-left">
                 {item?.label ?? placeholder ?? i18n.t("translationHub.searchLanguages")}
@@ -88,7 +103,7 @@ export function LanguageCombobox({
           placeholder={placeholder ?? i18n.t("translationHub.searchLanguages")}
         />
         <ComboboxList>
-          {(item: LanguageItem) => (
+          {(item: LanguageItem<T>) => (
             <ComboboxItem key={item.value} value={item}>
               {item.label}
               {/* The badge is what marks a language name as the auto row; an `autoLabel`

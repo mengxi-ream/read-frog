@@ -1,4 +1,5 @@
 import { Navigate, useParams } from "react-router"
+import { env } from "@/env"
 import { i18n } from "@/utils/i18n"
 import { ConfigDetailSection } from "../../../components/config-detail-section"
 import { ConfigSection } from "../../../components/config-section"
@@ -44,7 +45,24 @@ export function GlossaryEditorPage() {
     >
       <ConfigDetailSection
         backTo="/advanced/glossary"
-        title={<span id="glossary-editor">{glossary.name}</span>}
+        title={
+          <span id="glossary-editor" className="truncate">
+            {glossary.name}
+          </span>
+        }
+        // On the page where the questions come up — what a website pattern covers,
+        // what an empty translation does, which providers honour any of it — rather
+        // than beside one of the controls, because it answers all of them.
+        action={
+          <a
+            href={`${env.WXT_WEBSITE_URL}/docs/glossary`}
+            className="shrink-0 text-xs font-normal text-link hover:opacity-90"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {i18n.t("options.advanced.glossary.editor.docsLink")}
+          </a>
+        }
       >
         <GlossaryEditorEnableItem glossary={glossary} />
         {/* Keyed on the glossary so the debounced name and description fields
@@ -58,7 +76,12 @@ export function GlossaryEditorPage() {
         title={i18n.t("options.advanced.glossary.editor.sections.terms")}
       >
         <GlossaryAddTermItem glossaryId={glossary.id} />
-        <GlossaryTable glossaryId={glossary.id} />
+        {/* Keyed for the same reason the details form is: opening a different
+            glossary does not unmount this page, and every piece of state the
+            table holds — the search, the page number, which row is open for
+            editing, the frozen row order — is about the list that was on screen
+            a moment ago. */}
+        <GlossaryTable key={glossary.id} glossaryId={glossary.id} />
       </ConfigSection>
 
       <ConfigSection

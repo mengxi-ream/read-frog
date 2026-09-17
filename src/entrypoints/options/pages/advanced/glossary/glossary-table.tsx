@@ -1,9 +1,6 @@
 import type GlossaryTerm from "@/utils/db/dexie/tables/glossary-term"
-import { Icon } from "@iconify/react"
 import { useMemo, useState } from "react"
-import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
-import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import { Input } from "@/components/ui/base-ui/input"
 import {
   Table,
@@ -14,10 +11,9 @@ import {
   TableRow,
 } from "@/components/ui/base-ui/table"
 import { i18n } from "@/utils/i18n"
-import { getLanguageName } from "@/utils/language-labels"
 import { ConfigItem } from "../../../components/config-item"
-import { TruncatedText } from "../../../components/truncated-text"
-import { useDeleteGlossaryTerm, useGlossaryTerms, useSetGlossaryTermEnabled } from "./use-glossary"
+import { GlossaryTermRow } from "./term-row"
+import { useGlossaryTerms } from "./use-glossary"
 
 /**
  * Rows shown at once. The cap is 20,000 terms, and nobody scrolls to row 12,000
@@ -26,21 +22,91 @@ import { useDeleteGlossaryTerm, useGlossaryTerms, useSetGlossaryTermEnabled } fr
  */
 const PAGE_SIZE = 50
 
+/**
+ * The order the rows are shown in, frozen per row for as long as the table is open.
+ *
+ * `listGlossaryTerms` orders by `updatedAt` and `saveGlossaryTerm` restamps it on
+ * every write, so without this an edit would move the row the user just finished
+ * editing to the far end of the list — off the page entirely on any list longer
+ * than one. That is the same trap `setGlossaryTermEnabled` sidesteps by not
+ * restamping at all, which an edit cannot do: `updatedAt` is what decides the
+ * winner when two devices' glossaries are reconciled.
+ *
+ * Rows keep the number they were first given, and anything new is numbered last
+ * and so lands at the end — which is where a freshly added term has always
+ * appeared. Numbers are only handed out, never reclaimed, so a delete cannot pull
+ * a later row into a slot that is already spoken for.
+ *
+ * Numbering happens during render rather than in an effect, which is React's own
+ * answer for state that has to remember something across renders: the component
+ * re-runs immediately with the new numbers and only that result is committed, so
+ * no render ever paints rows in an order that is about to change.
+ *
+ * The condition is about the rows themselves, NOT about the identity of the array
+ * holding them, and that is load-bearing. A render-phase update has to make its
+ * own condition false or it never stops, and `terms` is a fresh array on every
+ * render for as long as the query is loading — `useGlossaryTerms` has no data
+ * yet, so the `= []` default builds a new one each time. Under StrictMode, which
+ * runs the component twice, that loading render happens twice in a row, so an
+ * `!==` check against the previous array can never settle: it re-rendered until
+ * React gave up with "Too many re-renders" and the whole options page dropped
+ * into its recovery screen, every single time a glossary was opened in a dev
+ * build. Asking "is any row unnumbered?" ends after one update whatever the
+ * array identity does, and is simply false while the list is empty.
+ */
+function useStableOrder(terms: GlossaryTerm[]) {
+  const [positions, setPositions] = useState<ReadonlyMap<string, number>>(() => new Map())
+
+  if (terms.some((term) => !positions.has(term.id))) {
+    setPositions(numberNewRows(terms, positions))
+  }
+
+  return useMemo(
+    () =>
+      terms
+        .map((term, index) => ({
+          term,
+          // Not yet numbered means this render is the one it arrived in — so it
+          // sorts by where it already is, after everything that has a number.
+          // That is the slot it is about to be given, so the list never settles
+          // visibly.
+          position: positions.get(term.id) ?? positions.size + index,
+        }))
+        .sort((a, b) => a.position - b.position)
+        .map((entry) => entry.term),
+    [terms, positions],
+  )
+}
+
+function numberNewRows(
+  terms: GlossaryTerm[],
+  previous: ReadonlyMap<string, number>,
+): ReadonlyMap<string, number> {
+  const positions = new Map(previous)
+  for (const term of terms) {
+    if (!positions.has(term.id)) positions.set(term.id, positions.size)
+  }
+  return positions
+}
+
 export function GlossaryTable({ glossaryId }: { glossaryId: string }) {
   const { data: terms = [], isLoading } = useGlossaryTerms(glossaryId)
-  const { mutate: deleteTerm } = useDeleteGlossaryTerm()
-  const { mutate: setEnabled } = useSetGlossaryTermEnabled()
   const [query, setQuery] = useState("")
   const [page, setPage] = useState(0)
+  // At most one row is editable at a time: two open rows could both be renamed
+  // onto the same term, and only the second would be told.
+  const [editingId, setEditingId] = useState<string | null>(null)
+
+  const ordered = useStableOrder(terms)
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase()
-    if (needle === "") return terms
-    return terms.filter(
+    if (needle === "") return ordered
+    return ordered.filter(
       (term) =>
         term.source.toLowerCase().includes(needle) || term.target.toLowerCase().includes(needle),
     )
-  }, [terms, query])
+  }, [ordered, query])
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, pageCount - 1)
@@ -60,6 +126,10 @@ export function GlossaryTable({ glossaryId }: { glossaryId: string }) {
             onChange={(event) => {
               setQuery(event.target.value)
               setPage(0)
+              // Searching or paging can carry the open row off screen, and its
+              // draft dies with the unmounted cells. Closing it here is what
+              // stops the table from reopening an empty editor on the way back.
+              setEditingId(null)
             }}
             placeholder={i18n.t("options.advanced.glossary.searchPlaceholder")}
           />
@@ -109,66 +179,22 @@ export function GlossaryTable({ glossaryId }: { glossaryId: string }) {
               <TableHead className="w-40">
                 {i18n.t("options.advanced.glossary.columnTargetLanguage")}
               </TableHead>
-              <TableHead className="w-16" />
+              {/* Wide enough for the two buttons every row carries — edit and
+                  delete while reading, save and cancel while editing — so the
+                  term columns do not resize the moment a row is opened. */}
+              <TableHead className="w-24" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {visible.map((term: GlossaryTerm) => (
-              <TableRow key={term.id}>
-                <TableCell>
-                  <Checkbox
-                    checked={term.enabled}
-                    // The row already reads as the term, so the label names
-                    // which one this box belongs to rather than saying "enabled"
-                    // fifty times over.
-                    aria-label={i18n.t("options.advanced.glossary.toggleTerm", [term.source])}
-                    onCheckedChange={(checked) => setEnabled({ id: term.id, enabled: checked })}
-                  />
-                </TableCell>
-                {/* Dimmed rather than hidden or moved: a disabled term is still
-                      the user's, and it must stay exactly where they left it so
-                      the box they just unticked is the box they can retick. */}
-                <TableCell className={term.enabled ? "font-medium" : "font-medium opacity-50"}>
-                  <span className="flex items-center gap-2">
-                    <TruncatedText text={term.source} className="min-w-0" />
-                    {/* Only case-sensitive terms are marked: the default needs no
-                          badge, and labelling every row would be noise. `shrink-0`
-                          so the term truncates instead of squeezing the badge. */}
-                    {term.caseSensitive && (
-                      <Badge variant="outline" className="shrink-0 font-normal">
-                        {i18n.t("options.advanced.glossary.caseSensitive")}
-                      </Badge>
-                    )}
-                  </span>
-                </TableCell>
-                {/* An empty target is the keep-the-original case, spelled out
-                      rather than left as a blank cell that reads like missing data. */}
-                <TableCell className={term.enabled ? undefined : "opacity-50"}>
-                  {term.target === "" ? (
-                    <span className="text-muted-foreground">
-                      {i18n.t("options.advanced.glossary.keepOriginal")}
-                    </span>
-                  ) : (
-                    <TruncatedText text={term.target} />
-                  )}
-                </TableCell>
-                {/* Every term is listed, in every language, so switching the
-                    extension's target language never looks like terms went
-                    missing — the column is how you tell which apply now. */}
-                <TableCell className={term.enabled ? undefined : "opacity-50"}>
-                  <TruncatedText text={getLanguageName(term.targetLang)} />
-                </TableCell>
-                <TableCell>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    aria-label={i18n.t("options.advanced.glossary.delete")}
-                    onClick={() => deleteTerm(term.id)}
-                  >
-                    <Icon icon="tabler:trash" />
-                  </Button>
-                </TableCell>
-              </TableRow>
+              <GlossaryTermRow
+                key={term.id}
+                term={term}
+                glossaryId={glossaryId}
+                isEditing={editingId === term.id}
+                onEdit={() => setEditingId(term.id)}
+                onDone={() => setEditingId(null)}
+              />
             ))}
             {visible.length === 0 && (
               <TableRow>
@@ -203,7 +229,10 @@ export function GlossaryTable({ glossaryId }: { glossaryId: string }) {
                 size="sm"
                 variant="outline"
                 disabled={currentPage === 0}
-                onClick={() => setPage(currentPage - 1)}
+                onClick={() => {
+                  setPage(currentPage - 1)
+                  setEditingId(null)
+                }}
               >
                 {i18n.t("options.advanced.glossary.previous")}
               </Button>
@@ -215,7 +244,10 @@ export function GlossaryTable({ glossaryId }: { glossaryId: string }) {
                 size="sm"
                 variant="outline"
                 disabled={currentPage >= pageCount - 1}
-                onClick={() => setPage(currentPage + 1)}
+                onClick={() => {
+                  setPage(currentPage + 1)
+                  setEditingId(null)
+                }}
               >
                 {i18n.t("options.advanced.glossary.next")}
               </Button>

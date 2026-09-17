@@ -8,23 +8,28 @@ import { downloadFile, findFileInAppData, uploadFile } from "./api"
 import { getGoogleUserInfo, getValidAccessToken } from "./auth"
 import { GOOGLE_DRIVE_CONFIG_FILENAME } from "./constants"
 
-export async function getRemoteConfigAndMetaWithUserEmail(): Promise<{
+/**
+ * `token` binds every request here to one account. Resolving it per helper
+ * instead lets another tab switch accounts mid-sync, which can put the config
+ * in one Drive and the glossary in another under a single click.
+ */
+export async function getRemoteConfigAndMetaWithUserEmail(token?: string): Promise<{
   configValueAndMeta: ConfigValueAndMeta | null
   email: string
 }> {
   try {
-    const accessToken = await getValidAccessToken()
+    const accessToken = token ?? (await getValidAccessToken())
 
     // Fetch user email from Google API
     const userInfo = await getGoogleUserInfo(accessToken)
 
-    const file = await findFileInAppData(GOOGLE_DRIVE_CONFIG_FILENAME)
+    const file = await findFileInAppData(GOOGLE_DRIVE_CONFIG_FILENAME, accessToken)
 
     if (!file) {
       return { configValueAndMeta: null, email: userInfo.email }
     }
 
-    const content = await downloadFile(file.id)
+    const content = await downloadFile(file.id, accessToken)
     const remoteData = JSON.parse(content) as ConfigValueAndMeta
 
     let migratedConfig: Config
@@ -56,12 +61,13 @@ export async function getRemoteConfigAndMetaWithUserEmail(): Promise<{
 
 export async function setRemoteConfigAndMeta(
   configValueAndMeta: ConfigValueAndMeta,
+  token?: string,
 ): Promise<void> {
   try {
-    const existingFile = await findFileInAppData(GOOGLE_DRIVE_CONFIG_FILENAME)
+    const existingFile = await findFileInAppData(GOOGLE_DRIVE_CONFIG_FILENAME, token)
 
     const content = JSON.stringify(configValueAndMeta, null, 2)
-    await uploadFile(GOOGLE_DRIVE_CONFIG_FILENAME, content, existingFile?.id)
+    await uploadFile(GOOGLE_DRIVE_CONFIG_FILENAME, content, existingFile?.id, token)
   } catch (error) {
     logger.error("Failed to upload local config", error)
     throw error

@@ -22,6 +22,7 @@ import {
   selectAllRemoteAtom,
   unresolvedConfigsAtom,
 } from "@/utils/atoms/google-drive-sync"
+import { GoogleAccountChangedError } from "@/utils/google-drive/auth"
 import { syncMergedConfig } from "@/utils/google-drive/sync"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
@@ -73,6 +74,14 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
       onResolved()
     } catch (error) {
       logger.error("Failed to sync merged config", error)
+      // Worth naming: "sync failed, try again" would send the user round the
+      // same loop, when what they need to know is which account they are on.
+      if (error instanceof GoogleAccountChangedError) {
+        toastManager.add({
+          type: "error",
+          title: i18n.t("options.preference.config.googleDrive.accountChangedError"),
+        })
+      }
       onCancelled()
     } finally {
       setIsConfirming(false)

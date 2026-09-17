@@ -16,7 +16,6 @@ import {
 import { EXTENSION_VERSION } from "@/utils/constants/app"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { logger } from "@/utils/logger"
-import { onMessage } from "@/utils/message"
 import {
   createStorageFeatureUsageCache,
   getFeatureUsageDay,
@@ -43,17 +42,7 @@ interface BackgroundAnalyticsClient {
   register: (...args: Parameters<typeof posthog.register>) => void
 }
 
-type BackgroundAnalyticsMessageHandler<TData, TResult> = (message: {
-  data: TData
-}) => TResult | Promise<TResult>
-
 type LocalStorageKey = `local:${string}`
-
-interface BackgroundAnalyticsMessageRegistrar {
-  registerTrackFeatureUsedEvent: (
-    handler: BackgroundAnalyticsMessageHandler<FeatureUsedEventProperties, void>,
-  ) => void
-}
 
 interface BackgroundAnalyticsRuntime {
   apiHost?: string
@@ -66,21 +55,12 @@ interface BackgroundAnalyticsRuntime {
   getCurrentDate: () => Date
   getStorageItem: (key: LocalStorageKey) => Promise<unknown>
   getTargetLanguage: () => Promise<LangCodeISO6393 | undefined>
-  messageRegistrar: BackgroundAnalyticsMessageRegistrar
   posthog: BackgroundAnalyticsClient
   setStorageItem: (key: LocalStorageKey, value: unknown) => Promise<void>
   warn: typeof logger.warn
 }
 
 const DEV_POSTHOG_TEST_UUID = "00000000-0000-0000-0000-000000000001"
-
-function createDefaultMessageRegistrar(): BackgroundAnalyticsMessageRegistrar {
-  return {
-    registerTrackFeatureUsedEvent(handler) {
-      onMessage("trackFeatureUsedEvent", handler)
-    },
-  }
-}
 
 function normalizeDistinctIdOverride(value: string | undefined): string | undefined {
   if (typeof value !== "string") {
@@ -126,7 +106,6 @@ function createDefaultRuntime(): BackgroundAnalyticsRuntime {
       const config = await getLocalConfig()
       return config?.language.targetCode
     },
-    messageRegistrar: createDefaultMessageRegistrar(),
     posthog,
     setStorageItem,
     warn: logger.warn,
@@ -505,19 +484,11 @@ export function createBackgroundAnalytics(
     }
   }
 
-  function setupAnalyticsMessageHandlers(): void {
-    runtime.messageRegistrar.registerTrackFeatureUsedEvent(async (message) => {
-      await captureFeatureUsedEventInBackground(message.data)
-    })
-  }
-
   return {
     captureFeatureUsedEventInBackground,
-    setupAnalyticsMessageHandlers,
   }
 }
 
 const backgroundAnalytics = createBackgroundAnalytics()
 
-export const { captureFeatureUsedEventInBackground, setupAnalyticsMessageHandlers } =
-  backgroundAnalytics
+export const { captureFeatureUsedEventInBackground } = backgroundAnalytics

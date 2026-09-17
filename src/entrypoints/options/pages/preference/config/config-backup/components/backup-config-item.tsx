@@ -155,6 +155,10 @@ function MoreOptions({ backupId, backup }: { backupId: string; backup: ConfigBac
   const { mutate: exportConfig, isPending: isExporting } = useExportConfig({
     config: backup.config,
     schemaVersion: backup.schemaVersion,
+    // A stored backup is a config from a particular moment. Today's glossaries
+    // were not part of that moment, and attaching them would make the file claim
+    // a state that never existed.
+    includeGlossary: false,
   })
 
   return (

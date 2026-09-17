@@ -1,5 +1,186 @@
 # @read-frog/extension
 
+## 1.47.3
+
+### Patch Changes
+
+- [#2195](https://github.com/mengxi-ream/read-frog/pull/2195) [`38e3b1a`](https://github.com/mengxi-ream/read-frog/commit/38e3b1a330e3c25c8bec8fae7058044004736e12) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(popup): ask for a store review once you have actually been using Read Frog
+
+  A small card now appears at the bottom of the popup offering to open the store's review
+  page, and it only shows up after you have successfully used a feature on three separate
+  days. Asking on engagement rather than on how long ago you installed means the question
+  only reaches people who have something to say, and a translation that failed never
+  counts toward it.
+
+  The card floats over the popup instead of sitting in the layout, so it never pushes the
+  controls around while you are reaching for them. Closing it, or going through to the
+  store, retires it for good — there is no second ask.
+
+  Rating from the More menu now also lands on the right store. Firefox users were being
+  sent to the Chrome Web Store, and Chrome and Firefox now open the reviews view directly
+  rather than the listing page.
+
+- [#2194](https://github.com/mengxi-ream/read-frog/pull/2194) [`a6384f6`](https://github.com/mengxi-ream/read-frog/commit/a6384f633609973a2161e8f47414331454538779) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): rank cue length above sentence completeness in AI segmentation
+
+- [#2193](https://github.com/mengxi-ream/read-frog/pull/2193) [`5141886`](https://github.com/mengxi-ream/read-frog/commit/514188603026bf4783864072f53d288bb8a0f331) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): keep YouTube subtitles on screen after the miniplayer leaves a stray progress bar
+
+## 1.47.2
+
+### Patch Changes
+
+- [#2187](https://github.com/mengxi-ream/read-frog/pull/2187) [`788afe3`](https://github.com/mengxi-ream/read-frog/commit/788afe306de99a504e2256f9248620d4b5737871) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(prompts): link the prompt editors to the prompt variable reference
+
+- [#2189](https://github.com/mengxi-ream/read-frog/pull/2189) [`94201a3`](https://github.com/mengxi-ream/read-frog/commit/94201a3fcfc82ee3443ebdeb2fd8866d66d742b7) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translate): exclude the entire Substack video player from translation
+
+## 1.47.1
+
+### Patch Changes
+
+- [#2182](https://github.com/mengxi-ream/read-frog/pull/2182) [`17c778c`](https://github.com/mengxi-ream/read-frog/commit/17c778c496b44401a4652388c41adf37a14d839d) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(glossary): link the guide from a glossary's own page
+
+  A glossary raises questions the settings page can only answer in a sentence: what
+  `*.example.com` covers and what it leaves out, what an empty translation does, why a
+  term can be written for one target language, and which providers honour any of it. The
+  glossary editor now carries a **How does it work?** link to the Glossary guide on the
+  website, beside the glossary's name — where those questions come up, rather than next to
+  one control that only answers one of them.
+
+- [#2184](https://github.com/mengxi-ream/read-frog/pull/2184) [`f5541ff`](https://github.com/mengxi-ream/read-frog/commit/f5541ff67b7de8d8a7ec16d65414fe30c8070e08) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(glossary): say that a website pattern can also end in a wildcard
+
+  A glossary's website list explained the leading `*` and nothing else, so the
+  trailing one was invisible: a pattern can carry a path, and that path can end in
+  `*`. That is the difference between scoping a glossary to a whole novel site and
+  scoping it to one book on it — `example.com/novel/12345/*` — and nobody could
+  find it from the screen.
+
+  The line now names all three forms in the space the previous two took:
+  `example.com` is that address alone, `*.example.com` adds subdomains, and
+  `example.com/docs/*` narrows to one part of a site.
+
+## 1.47.0
+
+### Minor Changes
+
+- [#2180](https://github.com/mengxi-ream/read-frog/pull/2180) [`56b189c`](https://github.com/mengxi-ream/read-frog/commit/56b189c6960e29bc988b38195c163b3af9aec73e) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(glossary): sync your glossaries across devices, and carry them in exports
+
+  Your glossaries now sync through Google Drive alongside your settings, in a file
+  of their own. They are merged rather than replaced: terms added on two machines
+  end up as one list, a term you edited on one and turned off on the other keeps
+  both changes, and deleting a term on one device removes it on the others instead
+  of having it come back on the next sync.
+
+  Where the two copies genuinely disagree — the same term reworded differently on
+  each machine — you are shown the two versions and pick. The first sync on a
+  device tells you what is coming and what is going before it touches anything, a
+  sync that would remove a large part of your list asks first, and any sync can be
+  undone from the toast it leaves behind. Each sync says what it did to this
+  device: how many terms were added, updated and removed.
+
+  Signing in with a different Google account tells you what is about to happen
+  before it happens: how many glossary rows this device is sending up to the new
+  account, and how to keep only that account's glossaries instead.
+
+  Exporting your settings to a file now includes your glossaries, and importing
+  such a file brings them back — so moving to a new machine, or taking a copy
+  before a reset, no longer leaves the terms you typed behind. Resetting your
+  config leaves your glossaries alone, and now says so.
+
+  **Importing a glossary CSV is stricter, and some files that used to work will
+  not.** The file must carry the four columns Export writes —
+  `source,target,targetLanguage,caseSensitive` — with every cell filled. A term's
+  case rule and target language are part of what identifies it, so a file that
+  leaves them out cannot say which rows it is describing; the import screen used
+  to guess with a checkbox and a language picker, which meant one file could land
+  two different ways. Those two controls are gone. Two-column files from other
+  tools, exports from before those columns existed, and a bare term on a line of
+  its own are refused now, with a message naming the columns. Export a glossary to
+  see the shape, or add the header and the two columns to an existing file.
+
+  The sidebar groups Page Translation, Video Subtitles and Input Translation under
+  one Translation entry, and Advanced moves to the bottom.
+
+- [#2171](https://github.com/mengxi-ream/read-frog/pull/2171) [`0f537ad`](https://github.com/mengxi-ream/read-frog/commit/0f537ad0ec2ec83edf23ad49b357c13250fe567a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(glossary): add user-defined glossaries
+
+  Define a term once and every AI translation uses your wording. Leave a term's translation empty to keep it
+  in the original language, which is usually what names and usernames need. Only the terms that actually
+  appear in a paragraph are sent to the model, so a large glossary costs nothing on pages that do not use it.
+
+  Terms live in glossaries, and each glossary can be limited to the websites you want it on — a set of game
+  terms on one wiki, work vocabulary on your company's docs, nothing anywhere else. A glossary with no
+  website listed applies everywhere. Where two glossaries give the same term different wording, the one
+  lower in the list wins.
+
+  Each term is written for one target language, chosen next to the term itself and defaulting to whatever
+  you currently translate into, so the same word can have a Chinese wording and a Japanese one side by side
+  and only the one that applies is ever sent.
+
+  Turn an individual term or a whole glossary off without deleting it, import and export each list as CSV
+  (now with a `targetLanguage` column; two-column files still import), or empty it in one go. Importing with
+  Replace asks for confirmation first, because it clears the glossary in every target language, not just the
+  one you picked. Find it under Advanced → Glossary in the extension settings.
+
+### Patch Changes
+
+- [#2181](https://github.com/mengxi-ream/read-frog/pull/2181) [`3e29045`](https://github.com/mengxi-ream/read-frog/commit/3e29045702dcb2698ea8e5a64cead1e705461735) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(glossary): let a term apply to every target language
+
+  A term with no translation means "leave this word alone", which is true whatever you are
+  translating into — but until now it had to be filed under one language, so it quietly
+  stopped working the moment you switched target language. Terms can now be set to **All
+  languages**, and that is what a term with an empty translation is set to by default.
+
+  Where both exist, a wording written for the language you are translating into wins over
+  the all-languages one, so a term can keep its original form everywhere except where you
+  have given it a rendering. Exports carry the setting and imports read it back.
+
+  The website list on a glossary now explains the difference between `*.example.com`, which
+  covers a site and its subdomains, and `example.com`, which matches only that exact address.
+
+- [#2181](https://github.com/mengxi-ream/read-frog/pull/2181) [`3e29045`](https://github.com/mengxi-ream/read-frog/commit/3e29045702dcb2698ea8e5a64cead1e705461735) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(glossary): edit a term without deleting and re-adding it
+
+  Every part of a term can now be changed in place. The pencil on a row turns it into
+  fields: the term itself, its translation, the target language it is written for, and
+  whether it matches case — the `Aa` button on the term field. Enter or the tick saves,
+  Escape or the cross throws the edit away. Fixing a typo no longer means deleting the row
+  and typing the whole thing again, which also lost the term's on/off state.
+
+  Editing a term keeps it exactly where it was in the list. The list is ordered by when
+  each term was last changed, so without this the row you had just finished editing would
+  jump to the end — off the page entirely on a list longer than one.
+
+- [#2175](https://github.com/mengxi-ream/read-frog/pull/2175) [`1cf3e5f`](https://github.com/mengxi-ream/read-frog/commit/1cf3e5fa48741dc38f8aab7c08853bded426214c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(glossary): correct term matching, CSV round-tripping, and the term counter
+
+  A term is no longer skipped when a longer term starts at the same place and does not
+  apply there. `Chort` was lost in "landed at Chort bayonet" because `Chort Bay` matched
+  first and then failed at its edge — while the same term still worked in other sentences,
+  which made it hard to notice.
+
+  Exported CSVs now carry each term's case-sensitivity setting and open correctly in Excel,
+  so exporting and re-importing a glossary lands back on the rows it came from instead of
+  adding a second copy of every case-sensitive term. Files saved by Excel in a regional
+  encoding are read properly rather than imported as garbled text, and a quoted value
+  spanning two lines no longer turns into a stray "keep the original" rule.
+
+  The term count under a glossary now describes that glossary, and the 20,000-term limit —
+  which counts every glossary together — is shown with the glossary library, where it
+  applies. Running out of room says so in those terms instead of calling one glossary full.
+
+- [#2178](https://github.com/mengxi-ream/read-frog/pull/2178) [`02318d0`](https://github.com/mengxi-ream/read-frog/commit/02318d0aa4d8290684aa204108fba3f68c7e3a1e) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(i18n): give the note suggestion feature one Chinese name
+
+  In Chinese the feature was 猜你想存 on the card and in the Built-in AI lists, but
+  保存建议 (儲存建議 in zh-TW) in the settings toggle, the command palette, and the
+  card's own on/off switch — so searching the settings for the name you saw on the page
+  turned up nothing ([#2176](https://github.com/mengxi-ream/read-frog/issues/2176)). All of them now read 猜你想存.
+
+- [#2171](https://github.com/mengxi-ream/read-frog/pull/2171) [`0f537ad`](https://github.com/mengxi-ream/read-frog/commit/0f537ad0ec2ec83edf23ad49b357c13250fe567a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - chore(firefox): raise the minimum supported Firefox to 140
+
+  The manifest previously declared Firefox 112 as the floor, a value set when Firefox
+  first shipped MV3 and never revisited. The extension already calls `Intl.Segmenter`
+  on the page-translation path (`filter-small-paragraph.ts`), which requires Firefox
+  125, so the declared floor was not one the code could keep. Firefox 140 is a
+  currently supported ESR.
+
+- [#2177](https://github.com/mengxi-ream/read-frog/pull/2177) [`a250e6c`](https://github.com/mengxi-ream/read-frog/commit/a250e6c41f5460b6a8b28bbe6004b5c254307370) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translation): distinguish preserved names and code from foreign-language prose when skipping already-translated paragraphs
+
 ## 1.46.9
 
 ### Patch Changes

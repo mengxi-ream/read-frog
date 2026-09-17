@@ -1,8 +1,5 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
 import { Icon } from "@iconify/react"
-import { useAtomValue } from "jotai"
 import { useState } from "react"
-import { LanguageCombobox } from "@/components/language-combobox"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,7 +11,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/base-ui/alert-dialog"
 import { Button } from "@/components/ui/base-ui/button"
-import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import { Label } from "@/components/ui/base-ui/label"
 import {
   Select,
@@ -25,7 +21,6 @@ import {
   SelectValue,
 } from "@/components/ui/base-ui/select"
 import { toastManager } from "@/components/ui/base-ui/toast"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { decodeGlossaryCsv, parseGlossaryCsv, UTF8_BOM } from "@/utils/glossary/csv"
 import { exportGlossaryCsv } from "@/utils/glossary/repository"
 import { i18n } from "@/utils/i18n"
@@ -50,14 +45,6 @@ export function GlossaryImportExport({
   glossaryName: string
 }) {
   const [mode, setMode] = useState<ImportMode>("merge")
-  // A CSV carries only source,target — there is no per-row case flag — so the
-  // whole file takes one answer, and this is the only place that answer cannot
-  // be given per term.
-  const [caseSensitive, setCaseSensitive] = useState(false)
-  const language = useAtomValue(configFieldsAtomMap.language)
-  // Only used for rows whose `targetLanguage` column is absent or blank — every
-  // file written before that column existed, and every file from another tool.
-  const [fallbackLang, setFallbackLang] = useState<LangCodeISO6393>(language.targetCode)
   const { mutateAsync: importRows, isPending } = useImportGlossary(glossaryId)
   // `isSuccess`, not just the data: an unsettled or failed query would render
   // "All 0 terms will be deleted" on the one screen where that number IS the
@@ -72,13 +59,26 @@ export function GlossaryImportExport({
     // `arrayBuffer`, not `text`: the latter is UTF-8 only and turns a file Excel
     // saved in the system code page into replacement characters rather than an
     // error. `decodeGlossaryCsv` tries strict UTF-8 first and can tell.
-    const { rows, skipped } = parseGlossaryCsv(decodeGlossaryCsv(await file.arrayBuffer()))
+    const parsed = parseGlossaryCsv(decodeGlossaryCsv(await file.arrayBuffer()))
+    // Not one of ours, so its columns are unknown and its rows cannot be placed.
+    // The message names the format rather than saying the file is bad, because
+    // the way out is to export a glossary and look at it.
+    if (!parsed.ok) {
+      toastManager.add({
+        type: "error",
+        title: i18n.t("options.advanced.glossary.importMissingHeader"),
+        description: "source,target,targetLanguage,caseSensitive",
+      })
+      return
+    }
+
+    const { rows, skipped } = parsed
     if (rows.length === 0) {
       toastManager.add({ type: "error", title: i18n.t("options.advanced.glossary.importEmpty") })
       return
     }
 
-    const result = await importRows({ rows, mode, caseSensitive, fallbackLang })
+    const result = await importRows({ rows, mode })
 
     // Refused whole rather than partially applied — over the cap, or with not a
     // single usable row. Truncating (or, under replace, emptying the list and
@@ -101,9 +101,9 @@ export function GlossaryImportExport({
         String(result.updated),
       ]),
       description:
-        skipped.length > 0 || result.duplicatesInFile > 0 || result.unknownLanguage > 0
+        skipped.length > 0 || result.duplicatesInFile > 0
           ? i18n.t("options.advanced.glossary.importSkipped", [
-              String(skipped.length + result.unknownLanguage),
+              String(skipped.length),
               String(result.duplicatesInFile),
             ])
           : undefined,
@@ -135,8 +135,11 @@ export function GlossaryImportExport({
       description={
         <>
           {i18n.t("options.advanced.glossary.importExport.description")}
-          {/* These two qualify what an import will DO, so they sit with the
-              explanation rather than in the action column beside the buttons. */}
+          {/* Qualifies what an import will DO, so it sits with the explanation
+              rather than in the action column beside the buttons. The case rule
+              and the target language used to live here too; they are columns in
+              the file now, which is the only place that can answer them per
+              row. */}
           <span className="mt-2 flex flex-wrap items-center gap-2">
             <Select value={mode} onValueChange={(value) => setMode(value as ImportMode)}>
               <SelectTrigger size="sm">
@@ -154,25 +157,6 @@ export function GlossaryImportExport({
                 </SelectGroup>
               </SelectContent>
             </Select>
-
-            {/* For rows with no case column of their own — every file written by
-                another tool. Our own export names it per row and keeps it. */}
-            <label className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Checkbox checked={caseSensitive} onCheckedChange={setCaseSensitive} />
-              {i18n.t("options.advanced.glossary.caseSensitive")}
-            </label>
-
-            {/* For rows with no language of their own. A file that names one per
-                row keeps what it says. */}
-            <LanguageCombobox
-              triggerSize="sm"
-              className="text-sm"
-              value={fallbackLang}
-              onValueChange={(value) => {
-                if (value === "auto") return
-                setFallbackLang(value)
-              }}
-            />
           </span>
         </>
       }
