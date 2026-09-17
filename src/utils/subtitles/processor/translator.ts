@@ -8,9 +8,11 @@ import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { APICallError } from "ai"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { isLLMProviderConfig } from "@/types/config/provider"
+import { classifySerializedProvider } from "@/utils/analytics-provider"
 import { getLocalConfig } from "@/utils/config/storage"
 import { cleanText } from "@/utils/content/utils"
 import { resolveGlossaryTerms } from "@/utils/glossary/active-matcher"
+import { trackGlossaryUsed } from "@/utils/glossary/analytics"
 import { Sha256Hex } from "@/utils/hash"
 import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { normalizePromptContextValue } from "@/utils/host/translate/translate-text"
@@ -185,6 +187,7 @@ async function translateSingleSubtitle(
     glossaryEnabled,
     langConfig.targetCode,
   )
+  trackGlossaryUsed("videoSubtitles", glossaryTerms, classifySerializedProvider(providerRef))
   const hashComponents = await buildSubtitleHashComponents(
     text,
     providerRef,

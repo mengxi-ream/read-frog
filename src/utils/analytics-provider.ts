@@ -4,6 +4,7 @@ import type {
   FeatureProviderAnalytics,
 } from "@/types/analytics"
 import type { ProviderConfig } from "@/types/config/provider"
+import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
 import type { ResolvedProviderRef } from "@/utils/providers/provider-registry"
 import { ANALYTICS_PROVIDER } from "@/types/analytics"
 import { ALL_PROVIDER_TYPES, isLLMProvider, isLLMProviderConfig } from "@/types/config/provider"
@@ -44,6 +45,21 @@ export function classifyResolvedProvider(
   if (!provider) return UNKNOWN_FEATURE_PROVIDER
   if (provider.kind === "local") return classifyProviderConfig(provider.config)
   if (isBuiltInAiProviderId(provider.id)) return BUILT_IN_AI_FEATURE_PROVIDER
+  return UNKNOWN_FEATURE_PROVIDER
+}
+
+/**
+ * Same classification as `classifyResolvedProvider`, for a ref that has already
+ * been serialized for transport. A serialized system ref keeps only its id, so
+ * the branch that reads `config` is unreachable for it — which is why the two
+ * cannot share an implementation.
+ */
+export function classifySerializedProvider(
+  provider: SerializableProviderRef | null | undefined,
+): FeatureProviderAnalytics {
+  if (!provider) return UNKNOWN_FEATURE_PROVIDER
+  if (provider.kind === "local") return classifyProviderConfig(provider.config)
+  if (isBuiltInAiProviderId(provider.providerId)) return BUILT_IN_AI_FEATURE_PROVIDER
   return UNKNOWN_FEATURE_PROVIDER
 }
 
