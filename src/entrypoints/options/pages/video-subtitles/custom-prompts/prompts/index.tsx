@@ -35,6 +35,16 @@ export function SubtitlesCustomPromptsPage() {
           promptAtoms={promptAtoms}
           insertCells={insertCells}
           builtInPrompts={getBuiltInSubtitleTranslatePrompts()}
+          toolbarStart={
+            <a
+              href={i18n.t("options.translation.personalizedPrompts.variableReferenceUrl")}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-sm text-link hover:opacity-90"
+            >
+              {i18n.t("options.translation.personalizedPrompts.variableReference")}
+            </a>
+          }
         />
       </ConfigDetailSection>
     </PageLayout>

@@ -240,10 +240,6 @@ export const PROVIDER_ITEMS: Record<
     name: "Atlas Cloud",
     website: "https://readfrog.s.gy/altas",
     apiKeyUrl: "https://readfrog.s.gy/altas",
-    sponsor: {
-      sponsoring: true,
-      referUrl: "https://readfrog.s.gy/altas",
-    },
   },
   "openai-compatible": {
     logo: () => customProviderLogo,
@@ -724,7 +720,7 @@ export const DEFAULT_PROVIDER_CONFIG_LIST: ProvidersConfig = [
   DEFAULT_PROVIDER_CONFIG["microsoft-translate"],
   DEFAULT_PROVIDER_CONFIG.openai,
   DEFAULT_PROVIDER_CONFIG.jalapenocloud,
-  DEFAULT_PROVIDER_CONFIG.atlascloud,
+  DEFAULT_PROVIDER_CONFIG.deepseek,
 ]
 
 /** Resolve a provider's default description in the active interface language. */

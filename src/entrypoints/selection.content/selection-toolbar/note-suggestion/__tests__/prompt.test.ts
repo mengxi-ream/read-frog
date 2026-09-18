@@ -34,6 +34,7 @@ describe("buildNoteSuggestionPrompts", () => {
     paragraphs: "The ephemeral beauty of cherry blossoms.",
     targetLanguage: "Simplified Chinese",
     webTitle: "Sakura Season",
+    webUrl: "https://example.com/sakura",
     webContent: "The full article discusses cherry blossoms.",
     action: createAction(),
   }
@@ -146,7 +147,11 @@ describe("buildNoteSuggestionPrompts", () => {
       selection: "s".repeat(20_000),
       paragraphs: "p".repeat(40_000),
       webTitle: "t".repeat(5_000),
+      webUrl: `https://example.com/${"u".repeat(5_000)}`,
       webContent: "w".repeat(30_000),
+      action: createAction({
+        prompt: "Prompt url={{webUrl}}",
+      }),
     })
     const combined = `${systemPrompt}\n${prompt}`
 
@@ -156,6 +161,8 @@ describe("buildNoteSuggestionPrompts", () => {
     expect(combined).not.toContain("p".repeat(2_501))
     expect(combined).toContain("t".repeat(200))
     expect(combined).not.toContain("t".repeat(201))
+    expect(combined).toContain("u".repeat(500 - "https://example.com/".length))
+    expect(combined).not.toContain("u".repeat(500 - "https://example.com/".length + 1))
     expect(combined).toContain("w".repeat(2_000))
     expect(combined).not.toContain("w".repeat(2_001))
   })

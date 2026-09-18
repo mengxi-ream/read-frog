@@ -54,6 +54,11 @@ popup:
     notification: 陪讀蛙更新動態
   aiSmartContext: AI 智慧上下文
   aiSmartContextDescription: 結合網頁前後文提升翻譯品質。需要設定 LLM 翻譯服務提供者。
+  storeReview:
+    title: 用得還順手嗎？
+    description: 到商店留個評價，能幫助更多人發現陪讀蛙。
+    action: 去評價
+    dismiss: 關閉
   more:
     title: 更多
     help: 說明
@@ -737,6 +742,7 @@ options:
           paragraphs: 與選取範圍相交的段落內容，會以空行串接，傳給自訂 AI 指令時會截斷到前 2000 個字元
           targetLanguage: 使用者的目標語言
           webTitle: 網頁標題
+          webUrl: 目前網頁的完整 URL
           webContent: 從目前頁面擷取的網頁內文（截斷到前 2000 個字元）
         delete: 刪除
         deleteDialog:
@@ -1056,6 +1062,8 @@ options:
       managePrompts: 管理提示詞
       communityPrompts: 取得或分享社群提示詞
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/820
+      variableReference: 變數詳解
+      variableReferenceUrl: https://readfrog.app/zh-TW/docs/page-translation/prompts/variables
       addPrompt: 新增提示詞
       default: 通用
       builtIn: 內建

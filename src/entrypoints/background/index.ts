@@ -6,12 +6,12 @@ import { storageAdapter } from "@/utils/atoms/storage-adapter"
 import { selectFreshTranslateProviders } from "@/utils/config/default-translate-provider"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 import { initI18n, setUiLanguage } from "@/utils/i18n"
+import { ensureInstalledAtRecorded } from "@/utils/install-time"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { openOptionsPage } from "@/utils/navigation"
 import { SessionCacheGroupRegistry } from "@/utils/session-cache/session-cache-group-registry"
 import { runAiSegmentSubtitles } from "./ai-segmentation"
-import { setupAnalyticsMessageHandlers } from "./analytics"
 import { dispatchBackgroundStreamPort } from "./background-stream"
 import { initializeActionIcons, registerActionIconListeners } from "./browser-action-icon"
 import { ensureInitializedConfig, isFreshInstalledConfig } from "./config"
@@ -24,6 +24,7 @@ import {
   setUpDatabaseCleanup,
 } from "./db-cleanup"
 import { setupEdgeTTSMessageHandlers } from "./edge-tts"
+import { setupFeatureUsedEventHandlers } from "./feature-used-event"
 import { setupGlossaryMessageHandlers } from "./glossary"
 import { setupHostedAiStatusHandler } from "./hosted-ai-status"
 import { setupIframeInjection } from "./iframe-injection"
@@ -46,6 +47,11 @@ export default defineBackground({
     logger.info("Hello background!", { id: browser.runtime.id })
 
     browser.runtime.onInstalled.addListener(async (details) => {
+      // First, and for every reason rather than just "install": this is the only place the
+      // install time is ever recorded, and it must not be lost to a service worker dying
+      // during the slower work below.
+      await ensureInstalledAtRecorded()
+
       await ensureInitializedConfig()
 
       // Open tutorial page when extension is installed
@@ -113,7 +119,7 @@ export default defineBackground({
     })
 
     newUserGuide()
-    setupAnalyticsMessageHandlers()
+    setupFeatureUsedEventHandlers()
     translationMessage()
     registerActionIconListeners()
 

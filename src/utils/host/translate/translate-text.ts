@@ -10,9 +10,11 @@ import type { ResolvedProviderRef } from "@/utils/providers/provider-registry"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
+import { classifyResolvedProvider } from "@/utils/analytics-provider"
 import { isNoTranslationSentinel } from "@/utils/constants/prompt"
 import { detectLanguage } from "@/utils/content/language"
 import { resolveGlossaryTerms } from "@/utils/glossary/active-matcher"
+import { trackGlossaryUsed } from "@/utils/glossary/analytics"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
@@ -355,6 +357,10 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     glossaryEnabled,
     langConfig.targetCode,
   )
+  // Covers page, input and pure-translate-provider selection runs, which all
+  // enter here; the two prompt-building selection paths and subtitles resolve
+  // their own terms and report at their own resolve sites.
+  trackGlossaryUsed(hostedFeature, glossaryTerms, classifyResolvedProvider(providerConfig))
 
   const hashComponents = await buildWebPageHashComponents(
     preparedText,

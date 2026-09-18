@@ -54,6 +54,11 @@ popup:
     notification: Read Frog의 새로운 소식
   aiSmartContext: AI 스마트 컨텍스트
   aiSmartContextDescription: 웹페이지 컨텍스트를 사용하여 번역 품질을 향상시킵니다. LLM 번역 제공자가 필요합니다.
+  storeReview:
+    title: Read Frog 잘 쓰고 계신가요?
+    description: 스토어에 리뷰를 남기면 더 많은 사람이 찾을 수 있어요.
+    action: 리뷰 남기기
+    dismiss: 닫기
   more:
     title: 더보기
     help: 도움말
@@ -736,6 +741,7 @@ options:
           paragraphs: 선택 영역과 겹치는 문단 내용을 빈 줄로 이어 붙인 값이며, 사용자 정의 AI 액션에 전달될 때는 앞의 2000자로 잘립니다
           targetLanguage: 사용자의 대상 언어
           webTitle: 웹페이지 제목
+          webUrl: 현재 페이지의 전체 URL
           webContent: 현재 페이지에서 추출한 웹페이지 본문(앞의 2000자로 잘린 버전)
         delete: 삭제
         deleteDialog:
@@ -940,6 +946,8 @@ options:
       managePrompts: 프롬프트 관리
       communityPrompts: 커뮤니티에서 프롬프트 가져오기 또는 공유
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      variableReference: 변수 레퍼런스
+      variableReferenceUrl: https://readfrog.app/ko/docs/page-translation/prompts/variables
       addPrompt: 프롬프트 추가
       default: 기본
       builtIn: 기본 제공

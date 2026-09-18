@@ -54,6 +54,11 @@ popup:
     notification: Read Frog yenilikləri
   aiSmartContext: Süni intellektlə ağıllı kontekst
   aiSmartContextDescription: Tərcümənin keyfiyyətini artırmaq üçün səhifənin kontekstindən istifadə edir. LLM tərcümə provayderi tələb olunur.
+  storeReview:
+    title: Read Frog xoşunuza gəlir?
+    description: Mağazada yazacağınız qısa rəy digər oxucuların onu tapmasına kömək edir.
+    action: Rəy yaz
+    dismiss: Bağla
   more:
     title: Daha çox
     help: Kömək
@@ -737,6 +742,7 @@ options:
           paragraphs: Boş sətirlərlə birləşdirilmiş, seçimlə kəsişən abzasların mətni; fərdi süni intellekt əməliyyatlarına göndərilərkən ilk 2000 simvolla məhdudlaşdırılır
           targetLanguage: "İstifadəçinin hədəf dili"
           webTitle: Veb səhifənin başlığı
+          webUrl: Cari səhifənin tam URL-i
           webContent: Cari səhifədən çıxarılan, ilk 2000 simvolla məhdudlaşdırılmış veb səhifə məzmunu
         delete: Sil
         deleteDialog:
@@ -1056,6 +1062,8 @@ options:
       managePrompts: Təlimatları idarə et
       communityPrompts: İcmadan təlimat əldə et və ya icma ilə paylaş
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      variableReference: Dəyişənlər arayışı
+      variableReferenceUrl: https://readfrog.app/en/docs/page-translation/prompts/variables
       addPrompt: Təlimat əlavə et
       default: Standart
       builtIn: Daxili

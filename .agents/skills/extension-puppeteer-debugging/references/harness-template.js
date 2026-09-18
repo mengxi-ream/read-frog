@@ -66,9 +66,13 @@ async function patchConfig(browser) {
       if (!config) return 'no-config-yet'
       config.language.targetCode = 'cmn'
       config.language.sourceCode = 'auto'
-      config.translate.mode = 'translationOnly' // <-- inline YOUR mutations here
+      // Top-level key is `pageTranslation` (NOT `translate` — that name is gone).
+      // The schema is non-strict, so a stale key is silently stripped and the
+      // patch appears to succeed while changing nothing. Always echo the value back.
+      config.pageTranslation.mode = 'translationOnly' // <-- inline YOUR mutations here
+      config.pageTranslation.providerId = 'microsoft-translate-default'
       await chrome.storage.local.set({ config })
-      return `ok mode=${config.translate.mode} target=${config.language.targetCode}`
+      return `ok mode=${config.pageTranslation.mode} target=${config.language.targetCode}`
     })
   let result = await patch()
   for (let i = 0; i < 20 && result === 'no-config-yet'; i++) {

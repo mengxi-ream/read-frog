@@ -236,11 +236,11 @@ importers:
         specifier: ^1.3.3
         version: 1.3.3(@types/react@19.2.18)(react@19.2.8)
       '@read-frog/api-contract':
-        specifier: 0.14.0
-        version: 0.14.0(@opentelemetry/api@1.9.1)
+        specifier: 0.16.0
+        version: 0.16.0(@opentelemetry/api@1.9.1)
       '@read-frog/definitions':
-        specifier: 0.4.4
-        version: 0.4.4
+        specifier: 0.5.1
+        version: 0.5.1
       '@remixicon/react':
         specifier: ^4.9.0
         version: 4.9.0(react@19.2.8)
@@ -2347,11 +2347,11 @@ packages:
       '@types/react':
         optional: true
 
-  '@read-frog/api-contract@0.14.0':
-    resolution: {integrity: sha512-LDfjzQcjZYmjJK+xyCtDIvx+kmBSZpp3jQH/4cSJnwWctJpFLrYGDJXNvztm96npX+ihXeBDdAEjtZ6A/UEsGA==}
+  '@read-frog/api-contract@0.16.0':
+    resolution: {integrity: sha512-7bMAvJPEAF4ySEL0VNffPrAwhBu4ZxTwFC3VvdxK2zeY8zXHIWMI8qx2sHjfJ4/x88dBzhPdoeihU1yTCq1CoQ==}
 
-  '@read-frog/definitions@0.4.4':
-    resolution: {integrity: sha512-HnBrzjhfwvzD0CLcAtpzUOvhjfy1ratFWfh58Bw2p4ogcu5mzMCmGMNQw0LH1VK+g8g/+9k8GKHuNcYsDhvJAA==}
+  '@read-frog/definitions@0.5.1':
+    resolution: {integrity: sha512-avFqEmc3Ol5fbAatBQEF/oZSxhOa/scS1fQpOCbAHZ1QVkvJqtCSunecWxzWOoad/CYW76WcR1xKgQqqfuK/RQ==}
 
   '@remixicon/react@4.9.0':
     resolution: {integrity: sha512-5/jLDD4DtKxH2B4QVXTobvV1C2uL8ab9D5yAYNtFt+w80O0Ys1xFOrspqROL3fjrZi+7ElFUWE37hBfaAl6U+Q==}
@@ -8794,15 +8794,15 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
-  '@read-frog/api-contract@0.14.0(@opentelemetry/api@1.9.1)':
+  '@read-frog/api-contract@0.16.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@orpc/contract': 1.14.6(@opentelemetry/api@1.9.1)
-      '@read-frog/definitions': 0.4.4
+      '@read-frog/definitions': 0.5.1
       zod: 4.5.4
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@read-frog/definitions@0.4.4':
+  '@read-frog/definitions@0.5.1':
     dependencies:
       '@date-fns/tz': 1.5.0
       date-fns: 4.4.0

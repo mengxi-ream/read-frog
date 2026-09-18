@@ -54,6 +54,11 @@ popup:
     notification: Что нового в Read Frog
   aiSmartContext: Умный контекст ИИ
   aiSmartContextDescription: Использует контекст веб-страницы для улучшения качества перевода. Требуется LLM-провайдер перевода.
+  storeReview:
+    title: Нравится Read Frog?
+    description: Отзыв в магазине поможет другим читателям найти расширение.
+    action: Оставить отзыв
+    dismiss: Закрыть
   more:
     title: Ещё
     help: Помощь
@@ -736,6 +741,7 @@ options:
           paragraphs: Текст абзацев, пересекающихся с выделением, объединённый пустыми строками; при отправке в пользовательские AI-действия обрезается до первых 2000 символов
           targetLanguage: Целевой язык пользователя
           webTitle: Заголовок веб-страницы
+          webUrl: Полный URL текущей страницы
           webContent: Содержимое веб-страницы, извлечённое с текущей страницы и сокращённое до первых 2000 символов
         delete: Удалить
         deleteDialog:
@@ -940,6 +946,8 @@ options:
       managePrompts: Управление промптами
       communityPrompts: Получайте или делитесь промптами с сообществом
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      variableReference: Справочник переменных
+      variableReferenceUrl: https://readfrog.app/ru/docs/page-translation/prompts/variables
       addPrompt: Добавить промпт
       default: По умолчанию
       builtIn: Встроенный

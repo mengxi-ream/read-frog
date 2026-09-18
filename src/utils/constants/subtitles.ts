@@ -9,6 +9,7 @@ export const PAUSE_TIMEOUT_MS = 1_000
 export const MAX_WORDS = 15
 export const MAX_CHARS_CJK = 30
 export const SENTENCE_END_PATTERN = /[,.。?？！!；;…؟۔\n]$/
+export const MIN_STANDALONE_CUE_DURATION_MS = 1000
 
 // On-demand translation constants
 export const TRANSLATION_BATCH_SIZE = 5
@@ -77,6 +78,7 @@ export const DEFAULT_SUBTITLE_COLOR = "#FFFFFF"
 export const DEFAULT_DISPLAY_MODE = "bilingual" as const
 export const DEFAULT_TRANSLATION_POSITION = "above" as const
 export const DEFAULT_CONTROLS_HEIGHT = 60
+export const MAX_CONTROLS_HEIGHT_RATIO = 0.25
 export const DEFAULT_SUBTITLE_POSITION = { percent: 10, anchor: "bottom" } as const
 // Mnemonic for "captions", and it echoes YouTube's own `C` key without taking it over.
 export const DEFAULT_SUBTITLES_TOGGLE_SHORTCUT_KEY = "Alt+C"

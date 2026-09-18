@@ -54,6 +54,11 @@ popup:
     notification: Có gì mới trong Read Frog
   aiSmartContext: Ngữ cảnh thông minh AI
   aiSmartContextDescription: Sử dụng ngữ cảnh trang web để cải thiện chất lượng dịch. Yêu cầu nhà cung cấp dịch LLM.
+  storeReview:
+    title: Bạn thấy Read Frog thế nào?
+    description: Một đánh giá trên cửa hàng sẽ giúp nhiều người đọc khác tìm thấy nó.
+    action: Viết đánh giá
+    dismiss: Đóng
   more:
     title: Thêm
     help: Trợ giúp
@@ -736,6 +741,7 @@ options:
           paragraphs: Nội dung các đoạn giao với vùng chọn, được nối bằng dòng trống, sẽ bị cắt còn 2000 ký tự đầu khi gửi vào hành động AI tùy chỉnh
           targetLanguage: Ngôn ngữ đích của người dùng
           webTitle: Tiêu đề trang web
+          webUrl: URL đầy đủ của trang hiện tại
           webContent: Nội dung trang web được trích xuất từ trang hiện tại (bị cắt còn 2000 ký tự đầu)
         delete: Xóa
         deleteDialog:
@@ -940,6 +946,8 @@ options:
       managePrompts: Quản lý prompt
       communityPrompts: Nhận hoặc chia sẻ prompt từ cộng đồng
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      variableReference: Tham chiếu biến
+      variableReferenceUrl: https://readfrog.app/vi/docs/page-translation/prompts/variables
       addPrompt: Thêm Prompt
       default: Mặc định
       builtIn: Tích hợp sẵn

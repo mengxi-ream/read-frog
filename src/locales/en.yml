@@ -54,6 +54,11 @@ popup:
     notification: What's new in Read Frog
   aiSmartContext: AI Smart Context
   aiSmartContextDescription: Uses webpage context to improve translation quality. Requires LLM translation provider.
+  storeReview:
+    title: Enjoying Read Frog?
+    description: A quick store review helps other readers find it.
+    action: Write a review
+    dismiss: Dismiss
   more:
     title: More
     help: Help
@@ -737,6 +742,7 @@ options:
           paragraphs: Intersecting paragraph text joined with blank lines, truncated to the first 2000 characters when sent to custom AI actions
           targetLanguage: "User's target language"
           webTitle: Webpage title
+          webUrl: Full URL of the current page
           webContent: Webpage content extracted from the current page, truncated to the first 2000 characters
         delete: Delete
         deleteDialog:
@@ -1056,6 +1062,8 @@ options:
       managePrompts: Manage prompts
       communityPrompts: Get or share prompts from community
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      variableReference: Variable reference
+      variableReferenceUrl: https://readfrog.app/en/docs/page-translation/prompts/variables
       addPrompt: Add prompt
       default: Default
       builtIn: Built-in

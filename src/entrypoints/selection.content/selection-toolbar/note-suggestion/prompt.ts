@@ -13,6 +13,7 @@ import {
 const NOTE_SUGGESTION_MAX_SELECTION_CHARS = 1500
 const NOTE_SUGGESTION_MAX_PARAGRAPHS_CHARS = 2500
 const NOTE_SUGGESTION_MAX_WEB_TITLE_CHARS = 200
+const NOTE_SUGGESTION_MAX_WEB_URL_CHARS = 500
 const NOTE_SUGGESTION_MAX_WEB_CONTENT_CHARS = 2000
 const NOTE_SUGGESTION_MAX_ACTION_SYSTEM_PROMPT_CHARS = 12000
 const NOTE_SUGGESTION_MAX_ACTION_PROMPT_CHARS = 12000
@@ -54,6 +55,7 @@ export interface NoteSuggestionPromptInput {
   /** English name of the user's target language. */
   targetLanguage: string
   webTitle: string
+  webUrl: string
   webContent: string
   /** The single action selected in Note suggestion settings. */
   action: SelectionToolbarCustomAction
@@ -152,6 +154,7 @@ export function buildNoteSuggestionPrompts(input: NoteSuggestionPromptInput): {
     paragraphs: truncateForPrompt(input.paragraphs, NOTE_SUGGESTION_MAX_PARAGRAPHS_CHARS),
     targetLanguage: input.targetLanguage,
     webTitle: truncateForPrompt(input.webTitle, NOTE_SUGGESTION_MAX_WEB_TITLE_CHARS),
+    webUrl: truncateForPrompt(input.webUrl, NOTE_SUGGESTION_MAX_WEB_URL_CHARS),
     webContent: truncateForPrompt(input.webContent, NOTE_SUGGESTION_MAX_WEB_CONTENT_CHARS),
   }
   const action = capActionFieldDescriptions(input.action, tokens)

@@ -42,6 +42,7 @@ export interface CustomActionExecutionContext {
     paragraphs: string
     targetLanguage: string
     webTitle: string
+    webUrl: string
     webContent: string
   }
 }
@@ -177,6 +178,7 @@ export function buildCustomActionExecutionPlan(
         paragraphs: truncateContextTextForCustomAction(contextText || cleanSelection),
         targetLanguage: LANG_CODE_TO_EN_NAME[customActionRequest.language.targetCode],
         webTitle: webPageContext?.webTitle ?? document.title,
+        webUrl: webPageContext?.url ?? window.location.href,
         webContent: webPageContext?.webContent || "",
       },
     },

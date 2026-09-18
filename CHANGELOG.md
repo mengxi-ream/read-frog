@@ -1,5 +1,37 @@
 # @read-frog/extension
 
+## 1.47.3
+
+### Patch Changes
+
+- [#2195](https://github.com/mengxi-ream/read-frog/pull/2195) [`38e3b1a`](https://github.com/mengxi-ream/read-frog/commit/38e3b1a330e3c25c8bec8fae7058044004736e12) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(popup): ask for a store review once you have actually been using Read Frog
+
+  A small card now appears at the bottom of the popup offering to open the store's review
+  page, and it only shows up after you have successfully used a feature on three separate
+  days. Asking on engagement rather than on how long ago you installed means the question
+  only reaches people who have something to say, and a translation that failed never
+  counts toward it.
+
+  The card floats over the popup instead of sitting in the layout, so it never pushes the
+  controls around while you are reaching for them. Closing it, or going through to the
+  store, retires it for good — there is no second ask.
+
+  Rating from the More menu now also lands on the right store. Firefox users were being
+  sent to the Chrome Web Store, and Chrome and Firefox now open the reviews view directly
+  rather than the listing page.
+
+- [#2194](https://github.com/mengxi-ream/read-frog/pull/2194) [`a6384f6`](https://github.com/mengxi-ream/read-frog/commit/a6384f633609973a2161e8f47414331454538779) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): rank cue length above sentence completeness in AI segmentation
+
+- [#2193](https://github.com/mengxi-ream/read-frog/pull/2193) [`5141886`](https://github.com/mengxi-ream/read-frog/commit/514188603026bf4783864072f53d288bb8a0f331) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): keep YouTube subtitles on screen after the miniplayer leaves a stray progress bar
+
+## 1.47.2
+
+### Patch Changes
+
+- [#2187](https://github.com/mengxi-ream/read-frog/pull/2187) [`788afe3`](https://github.com/mengxi-ream/read-frog/commit/788afe306de99a504e2256f9248620d4b5737871) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(prompts): link the prompt editors to the prompt variable reference
+
+- [#2189](https://github.com/mengxi-ream/read-frog/pull/2189) [`94201a3`](https://github.com/mengxi-ream/read-frog/commit/94201a3fcfc82ee3443ebdeb2fd8866d66d742b7) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translate): exclude the entire Substack video player from translation
+
 ## 1.47.1
 
 ### Patch Changes

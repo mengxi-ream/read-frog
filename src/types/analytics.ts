@@ -9,6 +9,7 @@ export const ANALYTICS_FEATURE = {
   VIDEO_SUBTITLES: "video_subtitles",
   TEXT_TO_SPEECH: "text_to_speech",
   NOTE_SUGGESTION: "note_suggestion",
+  GLOSSARY: "glossary",
 } as const
 
 export type AnalyticsFeature = (typeof ANALYTICS_FEATURE)[keyof typeof ANALYTICS_FEATURE]
@@ -27,6 +28,7 @@ export const ANALYTICS_SURFACE = {
   TRANSLATION_HUB: "translation_hub",
   VIDEO_SUBTITLES: "video_subtitles",
   VIDEO_SUBTITLES_AUTO: "video_subtitles_auto",
+  PAGE_TRANSLATION: "page_translation",
   TTS_SETTINGS: "tts_settings",
 } as const
 

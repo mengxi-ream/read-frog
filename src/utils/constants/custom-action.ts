@@ -74,6 +74,7 @@ export const SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS = [
   "paragraphs",
   "targetLanguage",
   "webTitle",
+  "webUrl",
   "webContent",
 ] as const
 
