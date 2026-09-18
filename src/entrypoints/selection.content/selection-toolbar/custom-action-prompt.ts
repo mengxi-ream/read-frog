@@ -6,6 +6,7 @@ export interface SelectionToolbarCustomActionPromptTokens {
   paragraphs: string
   targetLanguage: string
   webTitle: string
+  webUrl: string
   webContent: string
 }
 
@@ -21,6 +22,7 @@ export function replaceSelectionToolbarCustomActionPromptTokens(
       tokens.targetLanguage,
     )
     .replaceAll(getSelectionToolbarCustomActionTokenCellText("webTitle"), tokens.webTitle)
+    .replaceAll(getSelectionToolbarCustomActionTokenCellText("webUrl"), tokens.webUrl)
     .replaceAll(getSelectionToolbarCustomActionTokenCellText("webContent"), tokens.webContent)
 }
 

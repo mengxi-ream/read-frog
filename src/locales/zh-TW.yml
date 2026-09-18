@@ -742,6 +742,7 @@ options:
           paragraphs: 與選取範圍相交的段落內容，會以空行串接，傳給自訂 AI 指令時會截斷到前 2000 個字元
           targetLanguage: 使用者的目標語言
           webTitle: 網頁標題
+          webUrl: 目前網頁的完整 URL
           webContent: 從目前頁面擷取的網頁內文（截斷到前 2000 個字元）
         delete: 刪除
         deleteDialog:

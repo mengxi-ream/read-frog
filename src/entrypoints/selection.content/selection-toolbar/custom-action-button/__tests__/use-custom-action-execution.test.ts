@@ -193,5 +193,18 @@ describe("buildCustomActionExecutionPlan", () => {
     )
     expect(plan.executionContext?.promptTokens.webContent).toBe(webPageContext.webContent)
     expect(plan.executionContext?.promptTokens.selection).toBe("Selected text")
+    expect(plan.executionContext?.promptTokens.webUrl).toBe(webPageContext.url)
+  })
+
+  it("falls back to the live location when the webpage context is unavailable", () => {
+    const plan = buildCustomActionExecutionPlan(
+      createCustomActionRequest(),
+      "Selected text",
+      "context",
+      null,
+    )
+
+    expect(plan.error).toBeNull()
+    expect(plan.executionContext?.promptTokens.webUrl).toBe(window.location.href)
   })
 })

@@ -742,6 +742,7 @@ options:
           paragraphs: Boş sətirlərlə birləşdirilmiş, seçimlə kəsişən abzasların mətni; fərdi süni intellekt əməliyyatlarına göndərilərkən ilk 2000 simvolla məhdudlaşdırılır
           targetLanguage: "İstifadəçinin hədəf dili"
           webTitle: Veb səhifənin başlığı
+          webUrl: Cari səhifənin tam URL-i
           webContent: Cari səhifədən çıxarılan, ilk 2000 simvolla məhdudlaşdırılmış veb səhifə məzmunu
         delete: Sil
         deleteDialog:
