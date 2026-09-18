@@ -7,6 +7,9 @@ account:
   webApp: 網頁應用程式
   logout: 退出登入
   logoutError: 退出登入失敗，請重試
+  grantAccess: 授予存取權限
+  grantAccessHint: 需要存取 readfrog.app
+  grantAccessError: 授予存取權限失敗，請重試
 dataTypes:
   string: 文字
   number: 數字

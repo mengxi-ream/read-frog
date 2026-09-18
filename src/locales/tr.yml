@@ -7,6 +7,9 @@ account:
   webApp: Web uygulaması
   logout: Çıkış yap
   logoutError: Çıkış yapılamadı. Lütfen tekrar deneyin.
+  grantAccess: Erişim ver
+  grantAccessHint: readfrog.app erişimi gerekiyor
+  grantAccessError: Erişim verilemedi. Lütfen tekrar deneyin.
 dataTypes:
   string: Metin
   number: Sayı

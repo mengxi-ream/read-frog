@@ -14,7 +14,6 @@ import {
   AccountNameWithPlan,
   LogoutMenuItem,
   WebAppMenuItem,
-  openLogIn,
   useUserAccountMenu,
 } from "./shared"
 
@@ -52,9 +51,10 @@ export function UserAccountMenuSidebar() {
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton
+            ref={account.logInAnchorRef}
             size="lg"
             tooltip={i18n.t("account.login")}
-            onClick={openLogIn}
+            onClick={account.logIn}
             className="cursor-pointer"
           >
             {avatar}

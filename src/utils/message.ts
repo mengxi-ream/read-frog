@@ -189,6 +189,11 @@ interface ProtocolMap {
   // cache management
   clearAllTranslationRelatedCache: () => Promise<void>
   clearAiSegmentationCache: () => Promise<void>
+  // Drops the cached session verdict. Granting a host permission changes no
+  // cookie, so the background's cookie listener never fires — without this the
+  // "signed out" entry cached while the permission was missing would outlive
+  // the grant. Awaiting it before refetching keeps the two ordered.
+  invalidateAuthCache: () => Promise<void>
   // edge tts
   edgeTtsSynthesize: (data: EdgeTTSSynthesizeRequest) => Promise<EdgeTTSSynthesizeWireResponse>
   edgeTtsListVoices: () => Promise<EdgeTTSVoice[]>

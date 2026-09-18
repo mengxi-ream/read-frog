@@ -7,6 +7,9 @@ account:
   webApp: Веб-приложение
   logout: Выйти
   logoutError: Не удалось выйти. Попробуйте ещё раз.
+  grantAccess: Предоставить доступ
+  grantAccessHint: Нужен доступ к readfrog.app
+  grantAccessError: Не удалось предоставить доступ. Попробуйте ещё раз.
 dataTypes:
   string: Текст
   number: Число

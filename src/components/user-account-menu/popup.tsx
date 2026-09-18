@@ -14,7 +14,6 @@ import {
   AccountNameWithPlan,
   LogoutMenuItem,
   WebAppMenuItem,
-  openLogIn,
   useUserAccountMenu,
 } from "./shared"
 
@@ -46,7 +45,13 @@ export function UserAccountMenuPopup() {
       <div className="flex items-center gap-2">
         {avatar}
         <span className="text-sm text-muted-foreground">{displayName}</span>
-        <Button size="xs" variant="outline" onClick={openLogIn}>
+        <Button
+          ref={account.logInAnchorRef}
+          size="xs"
+          variant="outline"
+          disabled={account.grantAccess.isPending}
+          onClick={account.logIn}
+        >
           {i18n.t("account.login")}
         </Button>
       </div>

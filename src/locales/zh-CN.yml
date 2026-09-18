@@ -7,6 +7,9 @@ account:
   webApp: 网页应用
   logout: 退出登录
   logoutError: 退出登录失败，请重试
+  grantAccess: 授予访问权限
+  grantAccessHint: 需要访问 readfrog.app
+  grantAccessError: 授予访问权限失败，请重试
 dataTypes:
   string: 文本
   number: 数字
