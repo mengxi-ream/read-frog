@@ -8,8 +8,10 @@ import {
   markExtensionDrivenNodeRemoval,
   markVirtualParagraphGroupInserted,
   registerBilingualTranslationState,
+  registerTranslationOnlyAnchorState,
   registerVirtualParagraphGroup,
   unregisterBilingualTranslationState,
+  unregisterTranslationOnlyAnchorState,
   unregisterVirtualParagraphGroup,
   type BilingualTranslationState,
   type VirtualParagraphGroup,
@@ -223,7 +225,14 @@ function walkAndLabelVisibleParagraphs(
     }
   }
 
-  if (element.tagName === "P" && element.textContent?.trim()) {
+  // Mirror the real rule (traversal.ts walkNode): ANY element with a non-blank
+  // direct Text child is labelled, inline ones included -- that is exactly how
+  // #2185's inline decorator got promoted to a unit. Labelling only <p> here
+  // would make every inline-promotion assertion pass vacuously.
+  const hasDirectText = [...element.childNodes].some(
+    (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim(),
+  )
+  if ((element.tagName === "P" || hasDirectText) && element.textContent?.trim()) {
     element.setAttribute("data-read-frog-paragraph", "")
   }
 
@@ -764,6 +773,148 @@ describe("pageTranslationManager mutation re-walk", () => {
 
     unregisterBilingualTranslationState(state)
     manager.stop()
+  })
+
+  it("does not promote a node added into a STALE bilingual source to its own unit (#2185)", async () => {
+    // The shipped #2186 guard only fired while the enclosing source was still
+    // CURRENT. A genuine mid-sentence insertion makes it stale, so the addition
+    // fell through and observeTopLevelParagraphs promoted the inline span to a
+    // unit of its own -- the same defect, on the other half of the branch.
+    document.body.innerHTML = `<p id="summary">Original summary</p>`
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const observer = intersectionObservers[0]!
+    const summary = document.getElementById("summary") as HTMLElement
+    const wrapper = document.createElement("span")
+    wrapper.className = "notranslate read-frog-translated-content-wrapper"
+    wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+    wrapper.append("译文")
+    summary.append(wrapper)
+    const state: BilingualTranslationState = {
+      layoutSource: summary,
+      sourceTextContent: "Original summary",
+      status: "active",
+      walkId: "walk-id",
+      wrapper,
+      wrapperTextContent: "译文",
+    }
+    registerBilingualTranslationState(state)
+    await flushDomUpdates()
+    observer.observe.mockClear()
+    mockWalkAndLabelElement.mockClear()
+    mockTranslateNodesBilingualMode.mockClear()
+
+    try {
+      // A genuinely new inline run mid-sentence: the source's host text changes,
+      // so the state goes stale and the budgeted retranslation path owns it.
+      const inserted = document.createElement("span")
+      inserted.textContent = " and a newly inserted clause"
+      summary.insertBefore(inserted, wrapper)
+      await flushDomUpdates()
+
+      // The addition must never become a walk root of its own.
+      expect(observer.observe).not.toHaveBeenCalledWith(inserted)
+      expect(mockWalkAndLabelElement.mock.calls.some(([element]) => element === inserted)).toBe(
+        false,
+      )
+
+      // ...but the enclosing unit still recovers, exactly once.
+      expect(mockTranslateNodesBilingualMode).toHaveBeenCalledTimes(1)
+      expect(mockTranslateNodesBilingualMode).toHaveBeenCalledWith(
+        [summary],
+        expect.any(String),
+        DEFAULT_CONFIG,
+      )
+    } finally {
+      unregisterBilingualTranslationState(state)
+      manager.stop()
+    }
+  })
+
+  it("still walks additions that are not inside any registered source", async () => {
+    // Anti-dead-zone guard: the currency-independent skip must not swallow
+    // ordinary infinite-scroll content appended beside a translated paragraph.
+    document.body.innerHTML = `<div id="feed"><p id="first">First paragraph</p></div>`
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const observer = intersectionObservers[0]!
+    const feed = document.getElementById("feed") as HTMLElement
+    const first = document.getElementById("first") as HTMLElement
+    const wrapper = document.createElement("span")
+    wrapper.className = "notranslate read-frog-translated-content-wrapper"
+    wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+    wrapper.append("译文")
+    first.append(wrapper)
+    const state: BilingualTranslationState = {
+      layoutSource: first,
+      sourceTextContent: "First paragraph",
+      status: "active",
+      walkId: "walk-id",
+      wrapper,
+      wrapperTextContent: "译文",
+    }
+    registerBilingualTranslationState(state)
+    await flushDomUpdates()
+    observer.observe.mockClear()
+    mockWalkAndLabelElement.mockClear()
+
+    try {
+      const second = document.createElement("p")
+      second.id = "second"
+      second.textContent = "Second paragraph"
+      feed.append(second)
+      await flushDomUpdates()
+
+      expect(mockWalkAndLabelElement.mock.calls.some(([element]) => element === second)).toBe(true)
+      expect(observer.observe).toHaveBeenCalledWith(second)
+    } finally {
+      unregisterBilingualTranslationState(state)
+      manager.stop()
+    }
+  })
+
+  it("does not match translationOnly anchors, so their additions keep being walked", async () => {
+    // The guard reads only the bilingual registries, so it is structurally inert
+    // in translationOnly sessions. That is load-bearing, not incidental:
+    // translationOnly staleness is RUN-scoped (isTranslationOnlySwapRecordCurrent
+    // recurses only into record.runNodes), so a node appended BESIDE a recorded
+    // run can never make the anchor stale. Matching anchors here would turn them
+    // into permanent no-walk dead zones with nothing to rescue the addition.
+    document.body.innerHTML = `<p id="bio">你好世界</p>`
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const observer = intersectionObservers[0]!
+    const bio = document.getElementById("bio") as HTMLElement
+    registerTranslationOnlyAnchorState({
+      anchor: bio,
+      attributeAdjustments: [],
+      swaps: [],
+    })
+    await flushDomUpdates()
+    observer.observe.mockClear()
+    mockWalkAndLabelElement.mockClear()
+
+    try {
+      const added = document.createElement("span")
+      added.textContent = "A later untranslated clause"
+      bio.append(added)
+      await flushDomUpdates()
+
+      expect(mockWalkAndLabelElement.mock.calls.some(([element]) => element === added)).toBe(true)
+      expect(observer.observe).toHaveBeenCalledWith(added)
+    } finally {
+      unregisterTranslationOnlyAnchorState(bio)
+      manager.stop()
+    }
   })
 
   it("ignores decorators inside current virtual paragraph groups but retranslates text changes", async () => {

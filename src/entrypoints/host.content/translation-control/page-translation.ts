@@ -30,7 +30,7 @@ import {
   walkAndLabelElementChunked,
 } from "@/utils/host/dom/traversal"
 import {
-  findCurrentBilingualLayoutSource,
+  findEnclosingBilingualLayoutSource,
   findStaleBilingualLayoutSource,
   findStaleTranslationOnlyAnchor,
   getBilingualTranslationStateForWrapper,
@@ -146,9 +146,9 @@ export class PageTranslationManager implements IPageTranslationManager {
   private ancestorsWithWalkBlockedElements = new WeakSet<HTMLElement>()
   private refreshingTranslatedSources = new WeakSet<HTMLElement>()
   private translatedSourceMutationVersions = new WeakMap<HTMLElement, number>()
-  // Enumerable for external CSS reveals, without retaining detached DOM trees.
-  private blockedStaleSources = new Set<WeakRef<HTMLElement>>()
-  private blockedStaleSourceRefs = new WeakMap<HTMLElement, WeakRef<HTMLElement>>()
+  // Enumerable so an external CSS reveal can retry them; pruned by isConnected
+  // on every pass, so a detached source is dropped at the next mutation batch.
+  private blockedStaleSources = new Set<HTMLElement>()
   private retranslationBudgets = new WeakMap<HTMLElement, RetranslationBudget>()
   private retranslateRetries = new WeakMap<HTMLElement, DebouncedRetry>()
   // Strong and enumerable so stop() can cancel in-flight retries; entries are
@@ -472,7 +472,6 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.refreshingTranslatedSources = new WeakSet()
     this.translatedSourceMutationVersions = new WeakMap()
     this.blockedStaleSources.clear()
-    this.blockedStaleSourceRefs = new WeakMap()
     this.pendingRetranslateRetries.forEach((retry) => retry.clear())
     this.pendingRetranslateRetries.clear()
     this.retranslateRetries = new WeakMap()
@@ -1032,6 +1031,79 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
   }
 
+  /**
+   * Re-check the shadow hosts enclosing an isolated observer before its records
+   * are processed.
+   *
+   * Document observers cannot cross shadow boundaries, so isolated observers stay
+   * registered even while their host is blocked. Sibling selectors and other
+   * external CSS can reveal such a host without mutating it or any of its
+   * ancestors, so the enclosing chain has to be re-tested per batch rather than
+   * trusted from registration time.
+   *
+   * Returns `null` when the caller must abandon the batch (a host is still
+   * blocked, config is missing, or the session moved on). Otherwise returns the
+   * config it had to resolve — the caller reuses it instead of fetching twice —
+   * and the host whose reveal this call recovered, if any.
+   *
+   * Side effect: when a host is still blocked this defers the caller's
+   * `staleTranslatedSources` into `blockedStaleSources`, so they are retried
+   * once a later batch observes the reveal.
+   */
+  private async resolveShadowObservationGate(
+    observationRoot: HTMLElement,
+    hostRecords: MutationRecord[],
+    staleTranslatedSources: Set<HTMLElement>,
+    sessionVersion: number,
+  ): Promise<{ config?: Config; revealedRoot?: HTMLElement } | null> {
+    const shadowWalkRoots: HTMLElement[] = []
+    let root = observationRoot.getRootNode()
+    while (root instanceof ShadowRoot) {
+      if (isHTMLElement(root.host)) shadowWalkRoots.unshift(root.host)
+      root = root.host.getRootNode()
+    }
+    if (shadowWalkRoots.length === 0) return {}
+
+    // The observed top-level shadow child and its light-DOM ancestors can
+    // also be blocked, independently of the enclosing shadow hosts.
+    shadowWalkRoots.push(observationRoot)
+    const config = await getLocalConfig()
+    if (!config) {
+      logger.error("Global config is not initialized")
+      return null
+    }
+    if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return null
+
+    let revealedRoot: HTMLElement | undefined
+    for (const host of shadowWalkRoots) {
+      if (hasNoWalkAncestor(host, config) || this.isWalkBlockedElement(host, config)) {
+        this.cacheWalkBlockedElement(host)
+        staleTranslatedSources.forEach((source) => this.blockedStaleSources.add(source))
+        // A hidden tree may itself receive more isolated roots. Register
+        // them too, without labeling or translating any of their content.
+        for (const record of hostRecords) {
+          if (record.type !== "childList") continue
+          for (const node of record.addedNodes) {
+            if (isHTMLElement(node)) this.observeIsolatedDescendantsMutations(node, config)
+          }
+        }
+        return null
+      }
+      if (this.walkBlockedElementsCache.has(host)) {
+        revealedRoot ??= host
+      }
+    }
+
+    if (revealedRoot) {
+      shadowWalkRoots.forEach((host) => this.walkBlockedElementsCache.delete(host))
+      // Also recover on a characterData-only first update, before the
+      // ordinary fast path rejects text with no registered translation.
+      void this.observeTopLevelParagraphs(revealedRoot, config)
+      this.observeIsolatedDescendantsMutations(revealedRoot, config)
+    }
+    return { config, revealedRoot }
+  }
+
   private async handleMutationRecords(
     records: MutationRecord[],
     observationRoot: HTMLElement,
@@ -1068,58 +1140,14 @@ export class PageTranslationManager implements IPageTranslationManager {
       this.translatedSourceMutationVersions.set(source, nextVersion)
     })
 
-    // Document observers cannot cross shadow boundaries. Keep isolated
-    // observers alive even while hidden, then check the current enclosing
-    // hosts before processing their records. Sibling selectors and other CSS
-    // dependencies can reveal a host without changing any of its ancestors.
-    let mutationConfig: Config | undefined
-    let revealedRoot: HTMLElement | undefined
-    const shadowWalkRoots: HTMLElement[] = []
-    let root = observationRoot.getRootNode()
-    while (root instanceof ShadowRoot) {
-      if (isHTMLElement(root.host)) shadowWalkRoots.unshift(root.host)
-      root = root.host.getRootNode()
-    }
-    if (shadowWalkRoots.length > 0) {
-      // The observed top-level shadow child and its light-DOM ancestors can
-      // also be blocked, independently of the enclosing shadow hosts.
-      shadowWalkRoots.push(observationRoot)
-      mutationConfig = (await getLocalConfig()) ?? undefined
-      if (!mutationConfig) {
-        logger.error("Global config is not initialized")
-        return
-      }
-      if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return
-      for (const host of shadowWalkRoots) {
-        if (
-          hasNoWalkAncestor(host, mutationConfig) ||
-          this.isWalkBlockedElement(host, mutationConfig)
-        ) {
-          this.cacheWalkBlockedElement(host)
-          staleTranslatedSources.forEach((source) => this.deferBlockedStaleSource(source))
-          // A hidden tree may itself receive more isolated roots. Register
-          // them too, without labeling or translating any of their content.
-          for (const record of hostRecords) {
-            if (record.type !== "childList") continue
-            for (const node of record.addedNodes) {
-              if (isHTMLElement(node))
-                this.observeIsolatedDescendantsMutations(node, mutationConfig)
-            }
-          }
-          return
-        }
-        if (this.walkBlockedElementsCache.has(host)) {
-          revealedRoot ??= host
-        }
-      }
-      if (revealedRoot) {
-        shadowWalkRoots.forEach((host) => this.walkBlockedElementsCache.delete(host))
-        // Also recover on a characterData-only first update, before the
-        // ordinary fast path rejects text with no registered translation.
-        void this.observeTopLevelParagraphs(revealedRoot, mutationConfig)
-        this.observeIsolatedDescendantsMutations(revealedRoot, mutationConfig)
-      }
-    }
+    const gate = await this.resolveShadowObservationGate(
+      observationRoot,
+      hostRecords,
+      staleTranslatedSources,
+      sessionVersion,
+    )
+    if (!gate) return
+    const { config: mutationConfig, revealedRoot } = gate
 
     const needsTraversalHandling = hostRecords.some((record) => record.type !== "characterData")
     if (
@@ -1138,14 +1166,10 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     // A reveal can mutate an ancestor or a CSS-controlling sibling rather than
     // the edited source. Retry pending sources on the next observable update.
-    for (const ref of this.blockedStaleSources) {
-      const source = ref.deref()
-      if (source?.isConnected && this.isSourceWalkBlocked(source, config)) continue
-      this.blockedStaleSources.delete(ref)
-      if (source) {
-        this.blockedStaleSourceRefs.delete(source)
-        if (source.isConnected) staleTranslatedSources.add(source)
-      }
+    for (const source of this.blockedStaleSources) {
+      if (source.isConnected && this.isSourceWalkBlocked(source, config)) continue
+      this.blockedStaleSources.delete(source)
+      if (source.isConnected) staleTranslatedSources.add(source)
     }
 
     // Recovery already walked and registered the whole enclosing tree. Still
@@ -1153,13 +1177,19 @@ export class PageTranslationManager implements IPageTranslationManager {
     const traversalRecords = revealedRoot ? [] : hostRecords
     for (const rec of traversalRecords) {
       if (rec.type === "childList") {
-        // Sites such as Google Search temporarily wrap existing text in a new
-        // element while showing citation hover UI. If the surrounding
-        // bilingual source is still current, its host text did not change and
-        // the added subtree is structural churn, not new translatable content.
-        // Walking it would insert a duplicate wrapper that the site may retain
-        // when it later unwraps the temporary element.
-        if (findCurrentBilingualLayoutSource(rec.target)) {
+        // A node added inside an already-registered bilingual source is that
+        // source's business, never a translation unit of its own. Walking it as
+        // a fresh walk root recomputes "top-level paragraph" relative to the
+        // addition, so an inline span promotes itself to a unit and gets a
+        // second wrapper inside the enclosing one; Google Search's citation
+        // hover then unwraps its decorator preserving children and the
+        // duplicate stays (#2185).
+        //
+        // Skipping strands nothing — see findEnclosingBilingualLayoutSource for
+        // the current/stale duality that makes this safe. Shadow text is
+        // invisible to collectHostText, so isolated trees inside the addition
+        // are still discovered and scanned.
+        if (findEnclosingBilingualLayoutSource(rec.target)) {
           rec.addedNodes.forEach((node) => {
             if (isHTMLElement(node)) {
               this.observeIsolatedDescendantsMutations(node, config, { scanIsolatedTrees: true })
@@ -1192,13 +1222,6 @@ export class PageTranslationManager implements IPageTranslationManager {
         this.retranslateChangedSource(source, config, sessionVersion),
       ),
     )
-  }
-
-  private deferBlockedStaleSource(source: HTMLElement): void {
-    if (this.blockedStaleSourceRefs.has(source)) return
-    const ref = new WeakRef(source)
-    this.blockedStaleSourceRefs.set(source, ref)
-    this.blockedStaleSources.add(ref)
   }
 
   private isSourceWalkBlocked(source: HTMLElement, config: Config): boolean {
@@ -1236,7 +1259,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     try {
       do {
         if (this.isSourceWalkBlocked(source, config)) {
-          this.deferBlockedStaleSource(source)
+          this.blockedStaleSources.add(source)
           return
         }
         if (!this.consumeRetranslationBudget(source)) {

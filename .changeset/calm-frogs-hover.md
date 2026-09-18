@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-fix(translate): prevent duplicate translations from temporary DOM wrappers
+fix(translate): stop translating nodes a site adds inside an already-translated paragraph (bilingual mode)
