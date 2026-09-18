@@ -1,5 +1,33 @@
 # @read-frog/extension
 
+## 1.47.4
+
+### Patch Changes
+
+- [#2203](https://github.com/mengxi-ream/read-frog/pull/2203) [`3166b7f`](https://github.com/mengxi-ream/read-frog/commit/3166b7fcbf92e9f291129bd1a77e0a7b3568b158) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - style(providers): drop the sponsor badge from Atlas Cloud
+
+- [#2186](https://github.com/mengxi-ream/read-frog/pull/2186) [`f672b31`](https://github.com/mengxi-ream/read-frog/commit/f672b31d6bb97ac2b0fdae78bad51f02eb0498e1) Thanks [@kv-chiu](https://github.com/kv-chiu)! - fix(translate): stop translating nodes a site adds inside an already-translated paragraph (bilingual mode)
+
+- [#2208](https://github.com/mengxi-ream/read-frog/pull/2208) [`55b551d`](https://github.com/mengxi-ream/read-frog/commit/55b551d20add4cc45de0a6e4be1d4d9f297a9bfc) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(custom-actions): add a {{webUrl}} prompt cell for the current page URL
+
+- [#2206](https://github.com/mengxi-ream/read-frog/pull/2206) [`9849557`](https://github.com/mengxi-ream/read-frog/commit/9849557d8f58696738e3a0db05938403e5636b15) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - chore(providers): swap Atlas Cloud for DeepSeek in the fresh-install provider list
+
+- [#2205](https://github.com/mengxi-ream/read-frog/pull/2205) [`ad9cf88`](https://github.com/mengxi-ream/read-frog/commit/ad9cf880bc6caa186196dde7b15080b3c8ad6bb9) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - chore(analytics): count glossary terms reaching a prompt as feature usage
+
+  Anonymous usage analytics now records a `glossary` feature the moment one of your terms
+  actually matches and goes into a translation prompt, alongside the events the other
+  features already report. Owning a glossary reports nothing; the terms have to match.
+
+  The event says which feature the terms rode in on — page translation, subtitles, the
+  selection toolbar, or input translation — and nothing else. The terms themselves, and
+  the text they matched in, never leave the browser. It is throttled by the same
+  once-per-day cache as every other feature-usage event, and the analytics opt-out in
+  Settings switches it off with the rest.
+
+- [#2213](https://github.com/mengxi-ream/read-frog/pull/2213) [`6e7225d`](https://github.com/mengxi-ream/read-frog/commit/6e7225d79dc45fb03064b4170eb26d56fb187066) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(site-rules): reveal clipped translations in Google AI Overview source hover cards
+
+- [#2210](https://github.com/mengxi-ream/read-frog/pull/2210) [`de3809d`](https://github.com/mengxi-ream/read-frog/commit/de3809d588fb6e757dc8ecf4ad7ea9c16a638fd7) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(account): recover from a stuck Guest state caused by restricted site access
+
 ## 1.47.3
 
 ### Patch Changes
