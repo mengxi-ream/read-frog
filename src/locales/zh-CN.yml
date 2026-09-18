@@ -742,6 +742,7 @@ options:
           paragraphs: 与选区相交的段落内容，会以空行拼接，传给自定义 AI 指令时会截断到前 2000 个字符
           targetLanguage: 用户的目标语言
           webTitle: 网页标题
+          webUrl: 当前网页的完整 URL
           webContent: 当前网页提取出的正文内容（截断到前 2000 个字符）
         delete: 删除
         deleteDialog:

@@ -741,6 +741,7 @@ options:
           paragraphs: Seçimle kesişen paragraf metni; boş satırlarla birleştirilir ve özel AI eylemlerine gönderilirken ilk 2000 karaktere kısaltılır
           targetLanguage: Kullanıcının hedef dili
           webTitle: Web sayfası başlığı
+          webUrl: Geçerli sayfanın tam URL'si
           webContent: Geçerli sayfadan çıkarılan ve ilk 2000 karaktere kısaltılan web sayfası içeriği
         delete: Sil
         deleteDialog:

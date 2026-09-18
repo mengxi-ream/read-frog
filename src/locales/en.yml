@@ -742,6 +742,7 @@ options:
           paragraphs: Intersecting paragraph text joined with blank lines, truncated to the first 2000 characters when sent to custom AI actions
           targetLanguage: "User's target language"
           webTitle: Webpage title
+          webUrl: Full URL of the current page
           webContent: Webpage content extracted from the current page, truncated to the first 2000 characters
         delete: Delete
         deleteDialog:

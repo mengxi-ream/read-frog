@@ -741,6 +741,7 @@ options:
           paragraphs: 선택 영역과 겹치는 문단 내용을 빈 줄로 이어 붙인 값이며, 사용자 정의 AI 액션에 전달될 때는 앞의 2000자로 잘립니다
           targetLanguage: 사용자의 대상 언어
           webTitle: 웹페이지 제목
+          webUrl: 현재 페이지의 전체 URL
           webContent: 현재 페이지에서 추출한 웹페이지 본문(앞의 2000자로 잘린 버전)
         delete: 삭제
         deleteDialog:

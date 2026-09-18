@@ -163,6 +163,7 @@ export function useNoteSuggestion() {
         paragraphs: input.paragraphsText,
         targetLanguage: input.targetLangName,
         webTitle: input.webTitle,
+        webUrl: webPageContext?.url ?? window.location.href,
         webContent: webPageContext?.webContent ?? "",
         action: actionSnapshot,
         envelopeContract: provider.kind === "system" ? "hosted" : "local",
