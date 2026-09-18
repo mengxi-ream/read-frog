@@ -445,6 +445,52 @@ export function isBilingualTranslationStateCurrent(state: BilingualTranslationSt
   )
 }
 
+/**
+ * Nearest ancestor (or the node itself) registered as a bilingual layout source
+ * or virtual paragraph group — regardless of whether that registration is still
+ * current.
+ *
+ * A node ADDED inside a registered source is that source's business, never a
+ * translation unit of its own: `observeTopLevelParagraphs` computes "top-level
+ * paragraph" RELATIVE TO ITS WALK ROOT, so walking the addition promotes an
+ * inline span to a unit and gives it a second wrapper inside the enclosing one
+ * (#2185).
+ *
+ * Scope: this covers the childList route only. The attribute/reveal route
+ * (`collectNewlyWalkableSubtrees` -> `observeTopLevelParagraphs(unblocked)`)
+ * still creates a walk root inside a registered source, deliberately — the
+ * duality below does NOT hold there, because `collectRawSource` drops
+ * non-translatable children entirely, so revealing one changes what is
+ * translatable WITHOUT changing `collectHostText`. The enclosing source stays
+ * current, nothing would retranslate it, and skipping that walk would strand
+ * revealed accordion / "show more" content permanently.
+ *
+ * The currency-independence is what makes refusing that walk safe. A registered
+ * source is in exactly one of two states, and both are already handled:
+ *  • current — `collectHostText` still equals its snapshot, so the addition
+ *    brought no new host text (a hover decorator only re-parents existing Text);
+ *  • stale — `findStaleBilingualLayoutSource` below resolves the SAME element
+ *    from the SAME record in the same pass, so `retranslateChangedSource` is
+ *    already scheduled for it under the #1831 budget.
+ * There is no third case, so callers strand nothing by skipping the walk.
+ *
+ * `parentElement` only — this must NEVER cross a shadow host. `collectHostText`
+ * is shadow-blind, so a source found across a host could not vouch for text
+ * inside the shadow tree and that text would be skipped forever.
+ * (`PageTranslationManager.isSourceWalkBlocked` crosses hosts on purpose; do
+ * not copy its shape here.)
+ */
+export function findEnclosingBilingualLayoutSource(node: Node): HTMLElement | undefined {
+  let current = node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement
+  while (current) {
+    if (virtualParagraphGroupsBySource.has(current) || bilingualTranslationsBySource.has(current)) {
+      return current
+    }
+    current = current.parentElement
+  }
+  return undefined
+}
+
 export function findStaleBilingualLayoutSource(node: Node): HTMLElement | undefined {
   let current = node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement
   while (current) {
