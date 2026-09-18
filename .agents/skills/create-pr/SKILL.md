@@ -38,7 +38,8 @@ Follow these steps:
    - Treat the recording as verification evidence: do not tick **Verified through manual testing** unless both the state assertions and the visual QA passed.
    - If no demo is required, write `Not applicable — no user-visible change.` in the PR template's `## Screenshots` section.
 
-5. **Upload the demo to GitHub attachments**
+5. **Upload the demo to GitHub attachments** — only when step 4 produced a recording
+   - Skip this step entirely when step 4 decided no demo was required, or when it reported that the environment could not reproduce the behavior faithfully. There is no file to upload, and the `## Screenshots` section already says so. Go straight to step 6.
    - Use [`gh-image`](https://github.com/drogers0/gh-image) so the PR embeds a repository-scoped `user-attachments` video instead of a third-party asset host.
    - Check before uploading:
 
@@ -117,10 +118,11 @@ Follow these steps:
      - Comprehensive PR description following the template at `.github/PULL_REQUEST_TEMPLATE.md`
      - If an issue number was provided, include it in the PR description using `Closes #<issue-number>`
      - If no issue number was provided, search for a relevant issue only if it is easy to identify; otherwise leave the issue field empty instead of blocking the workflow
-     - Put the uploaded `user-attachments` URL and the demonstrated scenes in the `## Screenshots` section, inside the `read-frog-pr-demo` markers
+     - Put the uploaded `user-attachments` URL and the demonstrated scenes in the `## Screenshots` section, inside the `read-frog-pr-demo` markers — or the step 4 sentence saying why there is none
+     - Write each paragraph of the body as a single line. GitHub renders a newline inside a PR body as a line break, so a hard-wrapped paragraph arrives on the page broken at the column you wrapped it at.
 
-10. **Verify the demo embed**
-   - For a PR with a demo, confirm the attachment survived the body without printing the whole body:
+10. **Verify the demo embed** — only for a PR that has one
+   - Skip when no demo was required. Otherwise confirm the attachment survived the body without printing the whole body:
 
      ```bash
      gh pr view <pr> --repo mengxi-ream/read-frog --json body -q .body | grep -c 'github.com/user-attachments/'

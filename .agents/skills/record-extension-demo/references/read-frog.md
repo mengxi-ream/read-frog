@@ -6,7 +6,7 @@ Repo-specific facts for the generic workflow in `SKILL.md`. Do not re-derive the
 
 - `python3` is 3.12 with Pillow installed, and `ffmpeg`/`ffprobe` are on `PATH` (Homebrew). `scripts/build_demo.py` and `scripts/qa_demo.py` run directly — no venv, no `ffmpeg-static`.
 - Puppeteer is **not** a dependency of this repo. `npm i puppeteer` inside the session scratchpad; Chrome binaries are already cached in `~/.cache/puppeteer`, so this is fast and installs nothing into the repository.
-- Upload with `gh image <file> --repo mengxi-ream/read-frog` (gh-image v1.3.0 is installed; normal `gh` token, no session cookie). It prints one bare `user-attachments` URL. The upload step is carried over from the skill this was ported from and has not been exercised in this repository yet — check its output before pasting it into a PR body.
+- Upload with `gh image <file> --repo mengxi-ream/read-frog`. Verified here on 2026-09-17 with gh-image v1.3.0: it went through the normal `gh` token, asked for no browser session and no Keychain access, and printed one bare `user-attachments` URL. Accept nothing else as the result.
 - Measured cost of a small take: `pnpm build` ≈ 5 s (warm), record two scenes ≈ 40 s, assemble MP4 + GIF ≈ 10 s.
 
 ## Build the artifact under test
@@ -56,7 +56,7 @@ Caption pills and click rings are injected into the page the extension is transl
 ## Before the take
 
 - Warm the fixture and the translation path once (translate, restore, close), then start the screencast. The first run pays for provider connection and content-script init.
-- A screencast only emits on repaint, and this matters more here than it sounds: a measured two-scene take produced **9 and 3 frames**, not hundreds. A 1px scroll nudge buys roughly one frame, so budget nudges through the presentation hold and let `hold_last_seconds` carry the rest. For a scene with no motion at all, write an explicit `page.screenshot({ type: 'jpeg' })` frame. ~6 KB frames are blank, ~126 KB is a painted 1280×800 frame.
+- A screencast only emits on repaint, and this matters more here than it sounds: a measured two-scene take produced **15 and 5 frames**, not hundreds. A page with nothing to scroll — the popup, the options page — can produce **zero**, and `build_demo.py` then fails with `No frames found`. The template's answer is an explicit `page.screenshot` at scene open when nothing arrived, a 1.5 s settle that samples the screen on a 150 ms beat so the change is legible rather than a 4-frame jump cut, one authoritative frame after the assertion, and `hold_last_seconds` for the hold. ~6 KB frames are blank, ~126 KB is a painted 1280×800 frame.
 - Gate on a selector or a translated-node count, never on a fixed sleep and never on `networkidle` for a page with long-polling or media.
 - Production builds make `logger` a no-op, so an empty console proves nothing about the extension's own code path. Assert the DOM.
 

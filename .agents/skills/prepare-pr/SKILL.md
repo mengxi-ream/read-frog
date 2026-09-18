@@ -70,7 +70,7 @@ Follow these steps:
 
 7. **Record a demo for user-visible frontend changes**
    - Same rule as `/create-pr` step 4: a demo is required when the diff changes user-visible behavior, and not required for implementation-only changes.
-   - Invoke the `record-extension-demo` skill, keep the recording in the scratchpad, and upload it with `gh image "<file>" --repo mengxi-ream/read-frog` before writing the description.
+   - When one is required, invoke the `record-extension-demo` skill, keep the recording in the scratchpad, and upload it with `gh image "<file>" --repo mengxi-ream/read-frog` before writing the description. When none is required, skip straight to the next step — there is nothing to record or upload.
 
 8. **Create Markdown for PR Description**
    - Create a markdown file in docs/ folder which only contains the description of the PR and for me later to copy paste:

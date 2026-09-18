@@ -20,15 +20,26 @@ const PAGE_DIR = path.join(__dirname, 'page')
 const OUT = path.join(__dirname, 'demo-work', 'candidate')
 const PORT = 8931
 const VIEWPORT = { width: 1280, height: 800, deviceScaleFactor: 1 }
+const SETTLE_MS = 1500 // presentation-only; see recordScene()
+const SAMPLE_MS = 150 // frame sampling beat during the settle
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 function serve() {
   const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css' }
+  const root = path.resolve(PAGE_DIR)
   return new Promise((resolve) => {
     const server = http.createServer((req, res) => {
-      const file = path.join(PAGE_DIR, req.url === '/' ? 'index.html' : req.url)
+      // Resolve first, then confirm the target is still inside the fixture dir:
+      // `path.join` happily normalizes `/../../etc/passwd` out of PAGE_DIR.
+      const requested = decodeURIComponent(new URL(req.url, 'http://localhost').pathname)
+      const file = path.resolve(root, '.' + (requested === '/' ? '/index.html' : requested))
+      if (file !== root && !file.startsWith(root + path.sep)) {
+        res.writeHead(403); res.end(); return
+      }
       try {
+        // Read BEFORE writeHead: a read that throws after writeHead(200)
+        // (e.g. /favicon.ico) double-writes headers and kills the harness.
         const body = fs.readFileSync(file)
         res.writeHead(200, { 'content-type': MIME[path.extname(file)] || 'text/plain' })
         res.end(body)
@@ -36,7 +47,8 @@ function serve() {
         res.writeHead(404); res.end()
       }
     })
-    server.listen(PORT, () => resolve(server))
+    // Loopback only — this serves a local fixture, not the network.
+    server.listen(PORT, '127.0.0.1', () => resolve(server))
   })
 }
 
@@ -113,11 +125,24 @@ async function recordScene(page, name, action) {
   const cdp = await page.createCDPSession()
   const frames = []
   let seq = 0
-  const onFrame = async ({ data, metadata, sessionId }) => {
+  const writeFrame = (base64) => {
     const file = `frame-${String(seq).padStart(5, '0')}.jpg`
-    fs.writeFileSync(path.join(dir, file), Buffer.from(data, 'base64'))
-    frames.push({ file, timestamp: metadata.timestamp, sequence: ++seq })
+    fs.writeFileSync(path.join(dir, file), Buffer.from(base64, 'base64'))
+    // CDP screencast timestamps are epoch seconds, so Date.now() shares their
+    // clock and a synthesized frame sorts correctly among captured ones.
+    return { file, timestamp: Date.now() / 1000, sequence: ++seq }
+  }
+  const onFrame = async ({ data, metadata, sessionId }) => {
+    frames.push({ ...writeFrame(data), timestamp: metadata.timestamp })
     try { await cdp.send('Page.screencastFrameAck', { sessionId }) } catch {}
+  }
+  /* A screencast only emits ON REPAINT. A popup, an options page, or any view
+   * with nothing to scroll can therefore produce ZERO frames, and build_demo.py
+   * rejects an empty frames.json. Screenshot the viewport explicitly instead of
+   * hoping for a repaint. deviceScaleFactor MUST be 1 (see VIEWPORT) or this
+   * lands at device pixels and the builder rejects the size mismatch. */
+  const captureFrame = async () => {
+    frames.push(writeFrame((await page.screenshot({ type: 'jpeg', quality: 90, encoding: 'base64' }))))
   }
   await cdp.send('Page.enable')
   cdp.on('Page.screencastFrame', onFrame)
@@ -126,13 +151,26 @@ async function recordScene(page, name, action) {
       format: 'jpeg', quality: 90,
       maxWidth: VIEWPORT.width, maxHeight: VIEWPORT.height, everyNthFrame: 1,
     })
-    // A screencast only emits on repaint: a static page produces NO frames.
-    // Each 1px scroll nudge buys roughly one frame.
+    // Nudge a repaint to open the scene; screenshot it if nothing arrives.
     await page.evaluate(() => { window.scrollBy(0, 1); window.scrollBy(0, -1) })
     await sleep(400)
+    if (frames.length === 0) await captureFrame()
     const assertion = await action()
-    // presentation hold: idle frames while the end state is on screen
-    for (let i = 0; i < 6; i++) { await page.evaluate(() => { window.scrollBy(0, 1); window.scrollBy(0, -1) }); await sleep(400) }
+    /* Presentation settle, NOT a readiness wait: the assertion above already
+     * decided the scene passed. This only keeps the screencast open long enough
+     * to catch repaints still landing (translations arrive node by node), so the
+     * video shows the change happening instead of cutting on the first frame
+     * that satisfied the assertion. The nudge samples the screen on a beat: a
+     * settle with no repaints at all otherwise yields a 4-frame, visibly choppy
+     * scene. */
+    for (let waited = 0; waited < SETTLE_MS; waited += SAMPLE_MS) {
+      await page.evaluate(() => { window.scrollBy(0, 1); window.scrollBy(0, -1) })
+      await sleep(SAMPLE_MS)
+    }
+    // The authoritative final frame: taken after the assertion passed, so the
+    // last thing the reviewer sees is the state that was actually verified.
+    // The builder holds it for the scene's hold_last_seconds — no idle loop.
+    await captureFrame()
     fs.writeFileSync(path.join(dir, 'assertion.json'), JSON.stringify(assertion, null, 2))
     console.log(`[scene ${name}]`, JSON.stringify(assertion))
   } finally {

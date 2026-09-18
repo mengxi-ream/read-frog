@@ -18,7 +18,7 @@ Per scene:
 6. `await cdp.send('Page.stopScreencast')` in a `finally` path.
 7. Remove the listener and detach the session after stopping.
 
-A screencast only emits on repaint. On a static page nothing arrives: nudge a repaint at scene start (scroll by 1px and back, or toggle a class on the overlay), and write an explicit `page.screenshot({ type: 'jpeg' })` frame when a scene would otherwise be empty. A ~6 KB frame is blank; ~50 KB is painted.
+A screencast only emits on repaint. On a page with nothing to scroll — a popup, an options page — nothing arrives at all, and an empty `frames.json` fails the build. Nudge a repaint at scene start (scroll by 1px and back, or toggle a class on the overlay), screenshot the viewport explicitly when no frame has arrived, and always screenshot one authoritative frame after the assertion passes. A ~6 KB frame is blank; ~50 KB is painted.
 
 ## Frame metadata
 
@@ -44,13 +44,13 @@ Implement one reusable recorder that accepts a scene name and an async action, c
 restore config and viewport
 wait for extension readiness (service worker + content script + fixture selector)
 start screencast
+nudge a repaint; screenshot the viewport if no frame arrived
 show caption pill and click highlight
 perform action
 wait for and assert the transition and final state
 capture an authoritative final frame at screencast pixel size
-hold the end state
 stop screencast in finally
-write frames.json
+write frames.json (the builder holds the last frame for hold_last_seconds)
 ```
 
 Never use a fixed sleep as a readiness condition. After an assertion succeeds, a two-to-three-second presentation hold is appropriate; encode it through captured idle frames or the manifest's `hold_last_seconds`.
