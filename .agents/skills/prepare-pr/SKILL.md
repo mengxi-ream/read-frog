@@ -68,12 +68,17 @@ Follow these steps:
 6. **Push the branch to remote**
    - Run `git push -u origin <branch-name>` if needed
 
-7. **Create Markdown for PR Description**
+7. **Record a demo for user-visible frontend changes**
+   - Same rule as `/create-pr` step 4: a demo is required when the diff changes user-visible behavior, and not required for implementation-only changes.
+   - Invoke the `record-extension-demo` skill, keep the recording in the scratchpad, and upload it with `gh image "<file>" --repo mengxi-ream/read-frog` before writing the description.
+
+8. **Create Markdown for PR Description**
    - Create a markdown file in docs/ folder which only contains the description of the PR and for me later to copy paste:
      - Comprehensive PR description following the template at `.github/PULL_REQUEST_TEMPLATE.md`
      - If an issue number was provided, include it in the PR description using `Closes #<issue-number>`
      - If no issue number was provided, search for a relevant issue only if it is easy to identify; otherwise leave the issue field empty instead of blocking the workflow
      - Leave the file uncommitted; it should stay local even after the branch is pushed
+     - Put the uploaded `user-attachments` URL and the demonstrated scenes in the `## Screenshots` section between `<!-- read-frog-pr-demo:start -->` and `<!-- read-frog-pr-demo:end -->`, or write `Not applicable — no user-visible change.`
 
 ## Commit Convention
 
