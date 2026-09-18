@@ -7,6 +7,9 @@ account:
   webApp: Veb tətbiqi
   logout: Çıxış et
   logoutError: Çıxış etmək mümkün olmadı. Yenidən cəhd edin.
+  grantAccess: İcazə ver
+  grantAccessHint: Read Frog-un giriş vəziyyətinizi oxuya bilməsi üçün readfrog.app-a giriş icazəsi lazımdır.
+  grantAccessError: İcazə verilə bilmədi. Yenidən cəhd edin.
 dataTypes:
   string: Mətn
   number: Ədəd

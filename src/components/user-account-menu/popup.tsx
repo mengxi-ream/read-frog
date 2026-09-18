@@ -46,9 +46,21 @@ export function UserAccountMenuPopup() {
       <div className="flex items-center gap-2">
         {avatar}
         <span className="text-sm text-muted-foreground">{displayName}</span>
-        <Button size="xs" variant="outline" onClick={openLogIn}>
-          {i18n.t("account.login")}
-        </Button>
+        {account.needsHostPermission ? (
+          <Button
+            size="xs"
+            variant="outline"
+            title={i18n.t("account.grantAccessHint")}
+            disabled={account.grantAccess.isPending}
+            onClick={() => account.grantAccess.mutate()}
+          >
+            {i18n.t("account.grantAccess")}
+          </Button>
+        ) : (
+          <Button size="xs" variant="outline" onClick={openLogIn}>
+            {i18n.t("account.login")}
+          </Button>
+        )}
       </div>
     ))
     .with(ACCOUNT_STATE.AUTHED, () => (

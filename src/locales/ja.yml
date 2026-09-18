@@ -7,6 +7,9 @@ account:
   webApp: ウェブアプリ
   logout: ログアウト
   logoutError: ログアウトに失敗しました。もう一度お試しください。
+  grantAccess: アクセスを許可
+  grantAccessHint: ログイン状態を読み取るには、Read Frog に readfrog.app へのアクセス許可が必要です。
+  grantAccessError: アクセスの許可に失敗しました。もう一度お試しください。
 dataTypes:
   string: テキスト
   number: 数値

@@ -105,6 +105,31 @@ export function proxyFetch() {
     })
   }
 
+  // A host permission granted after the fact — from our own prompt, or from the
+  // browser's extension settings — leaves no trace the cookie listener above can
+  // see, because no cookie changed. All that changed is that the very next
+  // get-session will finally carry the session cookie, so the "signed out"
+  // verdict cached while the permission was missing has to go. Without this the
+  // user grants access and still sees Guest until the browser session ends.
+  if (browser.permissions?.onAdded) {
+    browser.permissions.onAdded.addListener((permissions) => {
+      if (!permissions.origins?.length) return
+
+      logger.info("[ProxyFetch] Host permission granted, invalidating auth cache:", {
+        origins: permissions.origins,
+      })
+      invalidateAuthCache().catch((error) =>
+        logger.error("[ProxyFetch] Failed to invalidate auth cache:", error),
+      )
+    })
+  }
+
+  // Lets the grant flow clear the cache and *know* it happened before refetching
+  // the session — onAdded above races the refetch, this does not.
+  onMessage("invalidateAuthCache", async () => {
+    await invalidateAuthCache()
+  })
+
   // Proxy cross-origin fetches for content scripts and other contexts
   onMessage("backgroundFetch", async (message): Promise<ProxyResponse> => {
     logger.info("[ProxyFetch] Background fetch:", message.data)

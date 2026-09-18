@@ -6,9 +6,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/ava
 import { DropdownMenuItem } from "@/components/ui/base-ui/dropdown-menu"
 import { env } from "@/env"
 import { authClient } from "@/utils/auth/auth-client"
+import {
+  hasAccountHostPermission,
+  requestAccountHostPermission,
+} from "@/utils/auth/host-permission"
 import { i18n } from "@/utils/i18n"
+import { sendMessage } from "@/utils/message"
 import { orpc } from "@/utils/orpc/client"
 import { cn } from "@/utils/styles/utils"
+
+const HOST_PERMISSION_QUERY_KEY = ["account", "hostPermission"] as const
 
 export const ACCOUNT_STATE = {
   LOADING: "loading",
@@ -41,7 +48,8 @@ export function openWebApp() {
 }
 
 export function useUserAccountMenu() {
-  const { data, isPending } = authClient.useSession()
+  const session = authClient.useSession()
+  const { data, isPending } = session
   const user = data?.user
   const plan = useAccountPlan(user?.id)
   const logout = useMutation({
@@ -50,6 +58,27 @@ export function useUserAccountMenu() {
       if (error) throw error
     },
     meta: { errorDescription: i18n.t("account.logoutError") },
+  })
+
+  const hostPermission = useQuery({
+    queryKey: HOST_PERMISSION_QUERY_KEY,
+    queryFn: hasAccountHostPermission,
+    staleTime: 30_000,
+    meta: { suppressToast: true },
+  })
+
+  const grantAccess = useMutation({
+    mutationFn: async () => {
+      const granted = await requestAccountHostPermission()
+      if (!granted) return
+
+      // Ordered on purpose. The background caches the session verdict for 24h
+      // and only evicts it on a cookie change, which granting a permission is
+      // not — refetching first would just re-serve the stale "signed out".
+      await sendMessage("invalidateAuthCache")
+      await Promise.all([hostPermission.refetch(), session.refetch()])
+    },
+    meta: { errorDescription: i18n.t("account.grantAccessError") },
   })
 
   const state: AccountState = isPending
@@ -64,6 +93,12 @@ export function useUserAccountMenu() {
     plan,
     isPending,
     logout,
+    grantAccess,
+    // Only meaningful while signed out. Without the host permission the session
+    // read can never carry the cookie, so "Guest" here is a withheld permission
+    // wearing a signed-out costume — and sending the user to the login page
+    // just loops them back to this same state.
+    needsHostPermission: state === ACCOUNT_STATE.GUEST && hostPermission.data === false,
     displayName: user?.name?.trim() || "Guest",
     avatarSrc: user ? user.image : guest,
     fallbackText: user ? getUserInitials(user.name) : "G",

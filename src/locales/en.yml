@@ -7,6 +7,9 @@ account:
   webApp: Web app
   logout: Log out
   logoutError: Failed to log out. Please try again.
+  grantAccess: Grant access
+  grantAccessHint: Read Frog needs access to readfrog.app to read your login state.
+  grantAccessError: Failed to grant access. Please try again.
 dataTypes:
   string: Text
   number: Number

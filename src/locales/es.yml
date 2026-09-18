@@ -7,6 +7,9 @@ account:
   webApp: Aplicación web
   logout: Cerrar sesión
   logoutError: No se pudo cerrar sesión. Inténtalo de nuevo.
+  grantAccess: Conceder acceso
+  grantAccessHint: Read Frog necesita acceso a readfrog.app para leer tu estado de sesión.
+  grantAccessError: No se pudo conceder el acceso. Inténtalo de nuevo.
 dataTypes:
   string: Texto
   number: Número
