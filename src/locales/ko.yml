@@ -8,7 +8,7 @@ account:
   logout: 로그아웃
   logoutError: 로그아웃하지 못했습니다. 다시 시도해 주세요.
   grantAccess: 액세스 허용
-  grantAccessHint: 로그인 상태를 확인하려면 Read Frog에 readfrog.app 액세스 권한이 필요합니다.
+  grantAccessHint: readfrog.app 액세스 권한이 필요합니다
   grantAccessError: 액세스 허용에 실패했습니다. 다시 시도해 주세요.
 dataTypes:
   string: 텍스트

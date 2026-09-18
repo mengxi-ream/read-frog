@@ -8,7 +8,7 @@ import * as React from "react"
 import { browser } from "#imports"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { RecoveryBoundary } from "@/components/recovery/recovery-boundary"
-import { ToastProvider } from "@/components/ui/base-ui/toast"
+import { AnchoredToastProvider, ToastProvider } from "@/components/ui/base-ui/toast"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { configAtom } from "@/utils/atoms/config"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
@@ -112,9 +112,11 @@ async function initApp() {
               <TooltipProvider>
                 <LocaleBoundary>
                   <ToastProvider>
-                    <RecoveryBoundary>
-                      <App />
-                    </RecoveryBoundary>
+                    <AnchoredToastProvider>
+                      <RecoveryBoundary>
+                        <App />
+                      </RecoveryBoundary>
+                    </AnchoredToastProvider>
                   </ToastProvider>
                 </LocaleBoundary>
               </TooltipProvider>

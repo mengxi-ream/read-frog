@@ -8,7 +8,7 @@ account:
   logout: Đăng xuất
   logoutError: Đăng xuất thất bại. Vui lòng thử lại.
   grantAccess: Cấp quyền truy cập
-  grantAccessHint: Read Frog cần quyền truy cập readfrog.app để đọc trạng thái đăng nhập của bạn.
+  grantAccessHint: Cần quyền truy cập readfrog.app
   grantAccessError: Không thể cấp quyền truy cập. Vui lòng thử lại.
 dataTypes:
   string: Văn bản

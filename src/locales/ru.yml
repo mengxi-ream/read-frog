@@ -8,7 +8,7 @@ account:
   logout: Выйти
   logoutError: Не удалось выйти. Попробуйте ещё раз.
   grantAccess: Предоставить доступ
-  grantAccessHint: Read Frog нужен доступ к readfrog.app, чтобы определить, вошли ли вы в аккаунт.
+  grantAccessHint: Нужен доступ к readfrog.app
   grantAccessError: Не удалось предоставить доступ. Попробуйте ещё раз.
 dataTypes:
   string: Текст

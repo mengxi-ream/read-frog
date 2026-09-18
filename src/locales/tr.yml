@@ -8,7 +8,7 @@ account:
   logout: Çıkış yap
   logoutError: Çıkış yapılamadı. Lütfen tekrar deneyin.
   grantAccess: Erişim ver
-  grantAccessHint: Read Frog'un oturum durumunuzu okuyabilmesi için readfrog.app erişimine ihtiyacı var.
+  grantAccessHint: readfrog.app erişimi gerekiyor
   grantAccessError: Erişim verilemedi. Lütfen tekrar deneyin.
 dataTypes:
   string: Metin

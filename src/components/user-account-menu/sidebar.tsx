@@ -14,7 +14,6 @@ import {
   AccountNameWithPlan,
   LogoutMenuItem,
   WebAppMenuItem,
-  openLogIn,
   useUserAccountMenu,
 } from "./shared"
 
@@ -48,29 +47,22 @@ export function UserAccountMenuSidebar() {
         </SidebarMenuItem>
       </SidebarMenu>
     ))
-    .with(ACCOUNT_STATE.GUEST, () => {
-      // Sending someone to the login page while the host permission is missing
-      // loops them straight back to this button, so ask for the permission
-      // first and only then offer to log in.
-      const { needsHostPermission } = account
-      const label = needsHostPermission ? i18n.t("account.grantAccess") : i18n.t("account.login")
-
-      return (
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              tooltip={needsHostPermission ? i18n.t("account.grantAccessHint") : label}
-              onClick={needsHostPermission ? () => account.grantAccess.mutate() : openLogIn}
-              className="cursor-pointer"
-            >
-              {avatar}
-              <span className="truncate font-medium">{label}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      )
-    })
+    .with(ACCOUNT_STATE.GUEST, () => (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            ref={account.logInAnchorRef}
+            size="lg"
+            tooltip={i18n.t("account.login")}
+            onClick={account.logIn}
+            className="cursor-pointer"
+          >
+            {avatar}
+            <span className="truncate font-medium">{i18n.t("account.login")}</span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    ))
     .with(ACCOUNT_STATE.AUTHED, () => (
       <SidebarMenu>
         <SidebarMenuItem>

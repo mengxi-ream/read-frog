@@ -1,9 +1,11 @@
 import { IconLogout, IconWorld } from "@tabler/icons-react"
 import { useMutation, useQuery } from "@tanstack/react-query"
+import { useRef } from "react"
 import guest from "@/assets/icons/avatars/guest.svg"
 import { PlanBadge } from "@/components/badges/plan-badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
 import { DropdownMenuItem } from "@/components/ui/base-ui/dropdown-menu"
+import { anchoredToastManager, toastManager } from "@/components/ui/base-ui/toast"
 import { env } from "@/env"
 import { authClient } from "@/utils/auth/auth-client"
 import {
@@ -16,6 +18,46 @@ import { orpc } from "@/utils/orpc/client"
 import { cn } from "@/utils/styles/utils"
 
 const HOST_PERMISSION_QUERY_KEY = ["account", "hostPermission"] as const
+/** Stable, so pressing Log in twice refreshes one toast instead of stacking two. */
+const GRANT_ACCESS_TOAST_ID = "read-frog-account-host-permission"
+/**
+ * Longer than the 3s anchored default, which measured out at 3.15s on the real
+ * popup — not enough to read the line, decide, and aim at the button before it
+ * leaves. Matches the subtitles wall, which lengthened its own for the same
+ * reason: a toast carrying an action has to outlast one that only reports.
+ */
+const GRANT_ACCESS_TOAST_TIMEOUT_MS = 10_000
+
+/**
+ * Raised over the Log in control the user just pressed, carrying the one thing
+ * they cannot work out for themselves — that they are signed in and the
+ * extension simply cannot see it — plus the button that fixes it. Follows the
+ * subtitles wall: a sentence, an action the user chooses to press, and never a
+ * navigation of its own.
+ *
+ * Falls back to the docked corner without an anchor, because the anchored
+ * viewport drops any toast whose anchor is missing and the refusal would
+ * otherwise vanish silently.
+ */
+function showGrantAccessToast(anchor: HTMLElement | null, onGrant: () => void) {
+  const manager = anchor ? anchoredToastManager : toastManager
+  const toastId = manager.add({
+    id: GRANT_ACCESS_TOAST_ID,
+    type: "info",
+    title: i18n.t("account.grantAccessHint"),
+    timeout: GRANT_ACCESS_TOAST_TIMEOUT_MS,
+    // Down, not up. The account row sits at the top edge of the popup, so the
+    // default "above the anchor" has nowhere to render.
+    ...(anchor && { positionerProps: { anchor, side: "bottom" as const, sideOffset: 6 } }),
+    actionProps: {
+      children: i18n.t("account.grantAccess"),
+      onClick: () => {
+        manager.close(toastId)
+        onGrant()
+      },
+    },
+  })
+}
 
 export const ACCOUNT_STATE = {
   LOADING: "loading",
@@ -67,6 +109,10 @@ export function useUserAccountMenu() {
     meta: { suppressToast: true },
   })
 
+  // Anchors the toast to the Log in control, so the explanation lands on the
+  // thing that was just pressed rather than in the corner of the popup.
+  const logInAnchorRef = useRef<HTMLButtonElement | null>(null)
+
   const grantAccess = useMutation({
     mutationFn: async () => {
       const granted = await requestAccountHostPermission()
@@ -87,6 +133,20 @@ export function useUserAccountMenu() {
       ? ACCOUNT_STATE.GUEST
       : ACCOUNT_STATE.AUTHED
 
+  // Without the host permission the session read can never carry the cookie, so
+  // "Guest" here is a withheld permission wearing a signed-out costume. Sending
+  // the user to the login page would loop them straight back to this state, so
+  // the press explains itself first and offers the grant instead.
+  const needsHostPermission = state === ACCOUNT_STATE.GUEST && hostPermission.data === false
+
+  const logIn = () => {
+    if (!needsHostPermission) {
+      openLogIn()
+      return
+    }
+    showGrantAccessToast(logInAnchorRef.current, () => grantAccess.mutate())
+  }
+
   return {
     state,
     user,
@@ -94,11 +154,9 @@ export function useUserAccountMenu() {
     isPending,
     logout,
     grantAccess,
-    // Only meaningful while signed out. Without the host permission the session
-    // read can never carry the cookie, so "Guest" here is a withheld permission
-    // wearing a signed-out costume — and sending the user to the login page
-    // just loops them back to this same state.
-    needsHostPermission: state === ACCOUNT_STATE.GUEST && hostPermission.data === false,
+    needsHostPermission,
+    logIn,
+    logInAnchorRef,
     displayName: user?.name?.trim() || "Guest",
     avatarSrc: user ? user.image : guest,
     fallbackText: user ? getUserInitials(user.name) : "G",
