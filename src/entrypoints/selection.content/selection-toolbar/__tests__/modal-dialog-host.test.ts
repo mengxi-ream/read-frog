@@ -188,15 +188,15 @@ describe("modal dialog host placement", () => {
     const selectedText = document.createTextNode("Selected")
     dialog.append(selectedText)
     const slotOffsets = [10, 5, 2, 0]
-    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
-      function (this: HTMLElement) {
-        if (this.hasAttribute(MODAL_DIALOG_HOST_SLOT_ATTRIBUTE)) {
-          return DOMRect.fromRect({ x: slotOffsets.shift() ?? 0, y: 0 })
-        }
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      if (this.hasAttribute(MODAL_DIALOG_HOST_SLOT_ATTRIBUTE)) {
+        return DOMRect.fromRect({ x: slotOffsets.shift() ?? 0, y: 0 })
+      }
 
-        return DOMRect.fromRect()
-      },
-    )
+      return DOMRect.fromRect()
+    })
     const controller = trackController(host)
 
     controller.placeForRanges([createRange(selectedText)])
@@ -213,13 +213,13 @@ describe("modal dialog host placement", () => {
     const { dialog } = createActiveDialog()
     const selectedText = document.createTextNode("Selected")
     dialog.append(selectedText)
-    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
-      function (this: HTMLElement) {
-        return this.hasAttribute(MODAL_DIALOG_HOST_SLOT_ATTRIBUTE)
-          ? DOMRect.fromRect({ x: 10, y: 10 })
-          : DOMRect.fromRect()
-      },
-    )
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      return this.hasAttribute(MODAL_DIALOG_HOST_SLOT_ATTRIBUTE)
+        ? DOMRect.fromRect({ x: 10, y: 10 })
+        : DOMRect.fromRect()
+    })
     const controller = trackController(host)
 
     controller.placeForRanges([createRange(selectedText)])

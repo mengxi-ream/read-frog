@@ -151,3 +151,122 @@ class ESBuildAndJSDOMCompatibleTextEncoder extends TextEncoder {
 }
 
 globalThis.TextEncoder = ESBuildAndJSDOMCompatibleTextEncoder
+
+// jsdom 30.1 ships @asamuzakjp/dom-selector 9, which rejects any selector longer
+// than 2048 characters (`Selector exceeds maximum allowed length of 2048`); the 8.x
+// it replaced had no such cap. No browser does either — verified in Chrome 153,
+// where matches(), closest() and querySelector() all accept a 4000-character list —
+// so this is a jsdom limitation, not a product constraint, and it belongs here
+// rather than in the hot-path selector code.
+//
+// It bites because site rules union their selector lists: the effective
+// includeSelector for a github URL is ~2.5k characters across 71 entries, and
+// `isSiteRuleExcludedElement` feeds it straight to matches()/closest().
+// Splitting the list on its top-level commas and testing chunk by chunk is exactly
+// equivalent for a selector list. Only matches()/closest() are patched: they are
+// the only ones a selector this long reaches (every other resolved selector field
+// is well under the cap).
+const JSDOM_SELECTOR_LENGTH_LIMIT = 2048
+
+/** Split a selector list on its top-level commas, ignoring commas nested in
+ * `:is(...)`, `[attr="a,b"]` and the like. */
+function splitSelectorList(selector: string): string[] {
+  const parts: string[] = []
+  let depth = 0
+  let quote: string | null = null
+  let start = 0
+
+  for (let i = 0; i < selector.length; i++) {
+    const char = selector[i]!
+    if (quote !== null) {
+      if (char === "\\") {
+        i++
+      } else if (char === quote) {
+        quote = null
+      }
+      continue
+    }
+    if (char === '"' || char === "'") {
+      quote = char
+    } else if (char === "(" || char === "[") {
+      depth++
+    } else if (char === ")" || char === "]") {
+      depth--
+    } else if (char === "," && depth === 0) {
+      parts.push(selector.slice(start, i))
+      start = i + 1
+    }
+  }
+  parts.push(selector.slice(start))
+
+  return parts.map((part) => part.trim()).filter(Boolean)
+}
+
+/** Regroup a selector list into the fewest chunks that each stay under the cap. */
+function chunkSelector(selector: string): string[] {
+  const chunks: string[] = []
+  let current = ""
+
+  for (const part of splitSelectorList(selector)) {
+    const next = current === "" ? part : `${current},${part}`
+    if (next.length > JSDOM_SELECTOR_LENGTH_LIMIT && current !== "") {
+      chunks.push(current)
+      current = part
+    } else {
+      current = next
+    }
+  }
+  if (current !== "") {
+    chunks.push(current)
+  }
+
+  return chunks
+}
+
+if (typeof Element !== "undefined") {
+  const prototype = Element.prototype
+  // Read through the descriptors: a direct `prototype.matches` reference would be
+  // re-resolved after the patch below lands and recurse forever.
+  const nativeMatches = Object.getOwnPropertyDescriptor(prototype, "matches")?.value as (
+    this: Element,
+    selector: string,
+  ) => boolean
+  const nativeClosest = Object.getOwnPropertyDescriptor(prototype, "closest")?.value as (
+    this: Element,
+    selector: string,
+  ) => Element | null
+
+  // defineProperty rather than assignment: both methods are declared as overload
+  // sets whose tag-name overloads are type predicates, which a plain
+  // `(selector: string) => …` replacement is not assignable to.
+  Object.defineProperty(prototype, "matches", {
+    configurable: true,
+    writable: true,
+    value: function (this: Element, selector: string) {
+      if (selector.length <= JSDOM_SELECTOR_LENGTH_LIMIT) {
+        return nativeMatches.call(this, selector)
+      }
+      return chunkSelector(selector).some((chunk) => nativeMatches.call(this, chunk))
+    },
+  })
+
+  Object.defineProperty(prototype, "closest", {
+    configurable: true,
+    writable: true,
+    value: function (this: Element, selector: string) {
+      if (selector.length <= JSDOM_SELECTOR_LENGTH_LIMIT) {
+        return nativeClosest.call(this, selector)
+      }
+      // Every chunk's hit lies on this element's ancestor chain, so the hits are
+      // totally ordered by containment; the real answer is the deepest one.
+      let deepest: Element | null = null
+      for (const chunk of chunkSelector(selector)) {
+        const hit = nativeClosest.call(this, chunk)
+        if (hit !== null && (deepest === null || deepest.contains(hit))) {
+          deepest = hit
+        }
+      }
+      return deepest
+    },
+  })
+}
