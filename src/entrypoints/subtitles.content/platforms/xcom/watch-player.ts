@@ -5,8 +5,7 @@ import { XCOM_PLAYER_MUTATION_DEBOUNCE_MS } from "@/utils/constants/subtitles"
 // navigation, and an observer bound to the old one never fires again.
 export function watchXcomPlayer(onChanged: () => void) {
   const trigger = debounce(onChanged, XCOM_PLAYER_MUTATION_DEBOUNCE_MS)
-  // Leading edge as well as trailing: the controls bar fades in from the mutation
-  // that creates it, so waiting out the debounce lands our button mid-fade.
+  // Leading edge too: waiting out the debounce lands our button mid fade-in.
   const observer = new MutationObserver(() => {
     if (!trigger.isPending) {
       onChanged()

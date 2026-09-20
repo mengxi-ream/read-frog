@@ -32,6 +32,17 @@ function belongsToStatus(video: HTMLVideoElement, statusId: string): boolean {
   )
 }
 
+function pickActiveCandidate(candidates: HTMLVideoElement[]): HTMLVideoElement | null {
+  const visibleCandidates = candidates.filter(hasRenderedSize)
+
+  return (
+    visibleCandidates.find((video) => video.closest("[data-testid='videoComponent']:hover")) ??
+    visibleCandidates.find((video) => video.closest(XCOM_PLAYER_CONTAINER_SELECTOR)) ??
+    visibleCandidates.find((video) => !video.paused) ??
+    pickSingleCandidate(candidates)
+  )
+}
+
 function pickSingleCandidate(candidates: HTMLVideoElement[]): HTMLVideoElement | null {
   const visibleCandidates = candidates.filter(hasRenderedSize)
 
@@ -59,7 +70,38 @@ export function getCurrentPrimaryXcomStatusVideo(): HTMLVideoElement | null {
   const statusId = getXcomStatusId()
   const current = statusId ? candidates.filter((video) => belongsToStatus(video, statusId)) : []
 
-  return pickSingleCandidate(current.length > 0 ? current : candidates)
+  if (current.length > 0) {
+    return pickSingleCandidate(current)
+  }
+
+  return pickActiveCandidate(candidates)
+}
+
+export function getXcomVideoStatusId(video: HTMLVideoElement): string | null {
+  const article = video.closest("article")
+  if (!article) {
+    return null
+  }
+
+  for (const anchor of article.querySelectorAll<HTMLAnchorElement>("a[href]")) {
+    const statusId = getXcomStatusIdFromUrl(anchor.href)
+    if (statusId) {
+      return statusId
+    }
+  }
+
+  return null
+}
+
+// On a timeline the URL carries no status id, so read it off the active tweet.
+export function getCurrentXcomVideoId(): string | null {
+  const statusId = getXcomStatusId()
+  if (statusId) {
+    return statusId
+  }
+
+  const video = getCurrentXcomSubtitlesVideo()
+  return video ? getXcomVideoStatusId(video) : null
 }
 
 export function getReadFrogXcomStatusVideo(): HTMLVideoElement | null {

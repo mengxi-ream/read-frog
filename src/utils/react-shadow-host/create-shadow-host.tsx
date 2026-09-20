@@ -46,8 +46,7 @@ export function createReactShadowHost(
     </ShadowWrapperContext>
   )
 
-  // Render before returning, so callers never insert an empty host: a concurrent
-  // first paint shows a 0x0 element and the reflow when it fills in is visible.
+  // Render before returning, so callers never insert an empty host and paint a 0x0 element.
   flushSync(() => root.render(wrappedComponent))
 
   ;(shadowHost as any).__reactShadowContainerCleanup = () => {

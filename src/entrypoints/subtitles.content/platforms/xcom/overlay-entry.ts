@@ -11,9 +11,13 @@ import { renderSubtitlesTranslateButton } from "../../renderer/render-translate-
 import { getCurrentPrimaryXcomStatusVideo, getXcomStatusVideoContainer } from "./dom"
 
 // x.com has no stable selectors, so we stamp our own for getXcomConfig to target.
+// Any control button's icon sits four levels below the controls group.
+const CONTROL_ICON_SELECTOR = 'button[role="button"] > div > svg'
+
 function findNativeControlsGroup(videoContainer: HTMLElement): HTMLElement | null {
   return (
-    videoContainer.querySelector('[data-testid="captions"]')?.parentElement?.parentElement ?? null
+    videoContainer.querySelector(CONTROL_ICON_SELECTOR)?.parentElement?.parentElement?.parentElement
+      ?.parentElement ?? null
   )
 }
 
@@ -61,7 +65,14 @@ export function ensureXcomOverlayEntryPoint(): boolean {
   const controls = findNativeControlsGroup(videoContainer)
   clearStamps({ container: videoContainer, controls })
   videoContainer.setAttribute(XCOM_PLAYER_CONTAINER_ATTRIBUTE, "true")
-  controls?.setAttribute(XCOM_CONTROLS_CONTAINER_ATTRIBUTE, "true")
+
+  // The previous video's group survives on a timeline, so drop the orphaned button.
+  if (!controls) {
+    removeTranslateButton()
+    return true
+  }
+
+  controls.setAttribute(XCOM_CONTROLS_CONTAINER_ATTRIBUTE, "true")
 
   return true
 }

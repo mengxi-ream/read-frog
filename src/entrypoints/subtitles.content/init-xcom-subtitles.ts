@@ -1,10 +1,13 @@
 import type { ContentScriptContext } from "#imports"
 import { XCOM_STATUS_POLL_INTERVAL_MS } from "@/utils/constants/subtitles"
-import { getXcomStatusId } from "@/utils/subtitles/video-id"
 import { bindSubtitlesToggleShortcut } from "./bind-subtitles-toggle-shortcut"
 import { createXcomSubtitlesAdapter } from "./platforms/xcom"
 import { getXcomConfig } from "./platforms/xcom/config"
-import { getCurrentPrimaryXcomStatusVideo, getXcomStatusVideoContainer } from "./platforms/xcom/dom"
+import {
+  getCurrentPrimaryXcomStatusVideo,
+  getCurrentXcomVideoId,
+  getXcomStatusVideoContainer,
+} from "./platforms/xcom/dom"
 import {
   clearXcomOverlayEntryPoints,
   ensureXcomOverlayEntryPoint,
@@ -37,20 +40,32 @@ export function initXcomSubtitles(ctx: ContentScriptContext) {
   const config = getXcomConfig()
   let adapter: ReturnType<typeof createXcomSubtitlesAdapter> | null = null
   let initialized = false
-  let lastStatusId = getXcomStatusId()
+  let lastVideoId: string | null = null
   let lastVideoContainer: HTMLElement | null = null
 
+  const remount = async (activeAdapter: NonNullable<typeof adapter>) => {
+    lastVideoContainer = getCurrentVideoContainer()
+    lastVideoId = getCurrentXcomVideoId()
+    await mountSubtitlesUI({ adapter: activeAdapter, config })
+    activeAdapter.notifyNavigation()
+  }
+
   const syncEntryPoint = () => {
-    if (adapter && ensureXcomOverlayEntryPoint()) {
-      mountXcomTranslateButton(adapter)
+    if (!adapter || !ensureXcomOverlayEntryPoint()) {
+      return
+    }
+
+    mountXcomTranslateButton(adapter)
+
+    if (initialized && getCurrentVideoContainer() !== lastVideoContainer) {
+      void remount(adapter)
     }
   }
 
   ctx.onInvalidated(watchXcomPlayer(syncEntryPoint))
 
   const tryInit = async () => {
-    const videoContainer = getCurrentVideoContainer()
-    if (!getXcomStatusId() || !videoContainer || !ensureXcomOverlayEntryPoint()) {
+    if (!getCurrentVideoContainer() || !ensureXcomOverlayEntryPoint()) {
       return
     }
 
@@ -58,8 +73,8 @@ export function initXcomSubtitles(ctx: ContentScriptContext) {
     await mountSubtitlesUI({ adapter, config })
     mountSubtitlesSidebar(adapter)
 
-    lastStatusId = getXcomStatusId()
-    lastVideoContainer = videoContainer
+    lastVideoId = getCurrentXcomVideoId()
+    lastVideoContainer = getCurrentVideoContainer()
 
     if (initialized) {
       return
@@ -74,36 +89,28 @@ export function initXcomSubtitles(ctx: ContentScriptContext) {
   void tryInit()
 
   const intervalId = setInterval(() => {
-    const statusId = getXcomStatusId()
-    if (!statusId) {
+    const videoContainer = getCurrentVideoContainer()
+    if (!videoContainer) {
       clearXcomOverlayEntryPoints()
-      lastStatusId = null
+      lastVideoId = null
       lastVideoContainer = null
       return
     }
 
-    const videoContainer = getCurrentVideoContainer()
-    if (!adapter || !initialized || !videoContainer) {
+    if (!adapter || !initialized) {
       void tryInit()
       return
     }
 
-    if (statusId === lastStatusId && videoContainer === lastVideoContainer) {
+    const videoId = getCurrentXcomVideoId()
+    if (videoId === lastVideoId && videoContainer === lastVideoContainer) {
       syncEntryPoint()
       return
     }
 
-    lastStatusId = statusId
-    lastVideoContainer = videoContainer
-
-    void (async () => {
-      if (!ensureXcomOverlayEntryPoint()) {
-        return
-      }
-
-      await mountSubtitlesUI({ adapter, config })
-      adapter.notifyNavigation()
-    })()
+    if (ensureXcomOverlayEntryPoint()) {
+      void remount(adapter)
+    }
   }, XCOM_STATUS_POLL_INTERVAL_MS)
 
   ctx.onInvalidated(() => clearInterval(intervalId))

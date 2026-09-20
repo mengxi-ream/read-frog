@@ -1,8 +1,7 @@
 import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import { TextTrackFetcher } from "@/utils/subtitles/fetchers"
-import { getXcomStatusId } from "@/utils/subtitles/video-id"
 import { UniversalVideoAdapter } from "../../universal-adapter"
-import { getCurrentXcomSubtitlesVideo } from "./dom"
+import { getCurrentXcomSubtitlesVideo, getCurrentXcomVideoId } from "./dom"
 
 export function createXcomSubtitlesAdapter(config: PlatformConfig) {
   return new UniversalVideoAdapter({
@@ -11,7 +10,7 @@ export function createXcomSubtitlesAdapter(config: PlatformConfig) {
       native: () =>
         new TextTrackFetcher({
           resolveVideo: getCurrentXcomSubtitlesVideo,
-          getVideoId: getXcomStatusId,
+          getVideoId: getCurrentXcomVideoId,
         }),
     },
   })
