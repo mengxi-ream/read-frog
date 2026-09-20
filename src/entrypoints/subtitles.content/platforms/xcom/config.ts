@@ -4,7 +4,7 @@ import {
   XCOM_CONTROLS_CONTAINER_SELECTOR,
   XCOM_PLAYER_CONTAINER_SELECTOR,
 } from "@/utils/constants/subtitles"
-import { findXcomControlsGroup, getCurrentXcomVideoId } from "./dom"
+import { getCurrentXcomVideoId } from "./dom"
 
 export function getXcomConfig(): PlatformConfig {
   return {
@@ -19,7 +19,10 @@ export function getXcomConfig(): PlatformConfig {
     controls: {
       findVideoContainer: () => document.querySelector<HTMLElement>(XCOM_PLAYER_CONTAINER_SELECTOR),
       measureHeight: () => DEFAULT_CONTROLS_HEIGHT,
-      checkVisibility: (container) => !!findXcomControlsGroup(container),
+      checkVisibility: (container) => {
+        const player = container.closest("[data-testid='videoComponent']") ?? container
+        return player.matches(":hover, :focus-within") || !!container.querySelector("video")?.paused
+      },
     },
     getVideoId: getCurrentXcomVideoId,
   }
