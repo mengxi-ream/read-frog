@@ -10,7 +10,7 @@ import {
   ensureXcomOverlayEntryPoint,
   mountXcomTranslateButton,
 } from "./platforms/xcom/overlay-entry"
-import { watchXcomPlayerControls } from "./platforms/xcom/watch-player"
+import { watchXcomPlayer } from "./platforms/xcom/watch-player"
 import { mountSubtitlesSidebar } from "./renderer/mount-subtitles-sidebar"
 import { mountSubtitlesUI } from "./renderer/mount-subtitles-ui"
 
@@ -46,8 +46,7 @@ export function initXcomSubtitles(ctx: ContentScriptContext) {
     }
   }
 
-  const controlsWatcher = watchXcomPlayerControls(syncEntryPoint)
-  ctx.onInvalidated(() => controlsWatcher.disconnect())
+  ctx.onInvalidated(watchXcomPlayer(syncEntryPoint))
 
   const tryInit = async () => {
     const videoContainer = getCurrentVideoContainer()
@@ -61,7 +60,6 @@ export function initXcomSubtitles(ctx: ContentScriptContext) {
 
     lastStatusId = getXcomStatusId()
     lastVideoContainer = videoContainer
-    controlsWatcher.observe(videoContainer)
 
     if (initialized) {
       return
@@ -97,7 +95,6 @@ export function initXcomSubtitles(ctx: ContentScriptContext) {
 
     lastStatusId = statusId
     lastVideoContainer = videoContainer
-    controlsWatcher.observe(videoContainer)
 
     void (async () => {
       if (!ensureXcomOverlayEntryPoint()) {

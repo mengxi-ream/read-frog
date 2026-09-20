@@ -1,5 +1,6 @@
 import type { Theme } from "@/types/config/theme"
 import { createContext } from "react"
+import { flushSync } from "react-dom"
 import ReactDOM from "react-dom/client"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
@@ -45,7 +46,9 @@ export function createReactShadowHost(
     </ShadowWrapperContext>
   )
 
-  root.render(wrappedComponent)
+  // Render before returning, so callers never insert an empty host: a concurrent
+  // first paint shows a 0x0 element and the reflow when it fills in is visible.
+  flushSync(() => root.render(wrappedComponent))
 
   ;(shadowHost as any).__reactShadowContainerCleanup = () => {
     root.unmount()

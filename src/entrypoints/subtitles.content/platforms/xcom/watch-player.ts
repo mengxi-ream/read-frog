@@ -1,26 +1,22 @@
 import debounce from "debounce"
-import { XCOM_CONTROLS_MUTATION_DEBOUNCE_MS } from "@/utils/constants/subtitles"
+import { XCOM_PLAYER_MUTATION_DEBOUNCE_MS } from "@/utils/constants/subtitles"
 
-// Observes the video container, not the document: the timeline mutates constantly.
-export function watchXcomPlayerControls(onControlsChanged: () => void) {
-  const trigger = debounce(onControlsChanged, XCOM_CONTROLS_MUTATION_DEBOUNCE_MS)
-  const observer = new MutationObserver(trigger)
-  let observed: HTMLElement | null = null
+// Watches the document, not the player container: x.com swaps the container on
+// navigation, and an observer bound to the old one never fires again.
+export function watchXcomPlayer(onChanged: () => void) {
+  const trigger = debounce(onChanged, XCOM_PLAYER_MUTATION_DEBOUNCE_MS)
+  // Leading edge as well as trailing: the controls bar fades in from the mutation
+  // that creates it, so waiting out the debounce lands our button mid-fade.
+  const observer = new MutationObserver(() => {
+    if (!trigger.isPending) {
+      onChanged()
+    }
+    trigger()
+  })
+  observer.observe(document.body, { childList: true, subtree: true })
 
-  return {
-    observe(videoContainer: HTMLElement) {
-      if (observed === videoContainer) {
-        return
-      }
-
-      observer.disconnect()
-      observed = videoContainer
-      observer.observe(videoContainer, { childList: true, subtree: true })
-    },
-    disconnect() {
-      trigger.clear()
-      observer.disconnect()
-      observed = null
-    },
+  return () => {
+    trigger.clear()
+    observer.disconnect()
   }
 }
