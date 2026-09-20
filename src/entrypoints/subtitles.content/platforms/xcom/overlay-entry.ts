@@ -8,19 +8,13 @@ import {
 } from "@/utils/constants/subtitles"
 import { removeReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
 import { renderSubtitlesTranslateButton } from "../../renderer/render-translate-button"
-import { getCurrentPrimaryXcomStatusVideo, getXcomStatusVideoContainer } from "./dom"
+import {
+  findXcomControlsGroup,
+  getCurrentPrimaryXcomStatusVideo,
+  getXcomStatusVideoContainer,
+} from "./dom"
 
 // x.com has no stable selectors, so we stamp our own for getXcomConfig to target.
-// Any control button's icon sits four levels below the controls group.
-const CONTROL_ICON_SELECTOR = 'button[role="button"] > div > svg'
-
-function findNativeControlsGroup(videoContainer: HTMLElement): HTMLElement | null {
-  return (
-    videoContainer.querySelector(CONTROL_ICON_SELECTOR)?.parentElement?.parentElement?.parentElement
-      ?.parentElement ?? null
-  )
-}
-
 function clearStamps(except?: {
   container?: HTMLElement | null
   controls?: HTMLElement | null
@@ -62,7 +56,7 @@ export function ensureXcomOverlayEntryPoint(): boolean {
     return false
   }
 
-  const controls = findNativeControlsGroup(videoContainer)
+  const controls = findXcomControlsGroup(videoContainer)
   clearStamps({ container: videoContainer, controls })
   videoContainer.setAttribute(XCOM_PLAYER_CONTAINER_ATTRIBUTE, "true")
 

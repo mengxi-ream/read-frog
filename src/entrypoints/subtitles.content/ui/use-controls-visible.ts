@@ -45,6 +45,7 @@ export function useControlsInfo(
     observer.observe(videoContainer, {
       attributes: true,
       attributeFilter: ["class"],
+      childList: true,
       subtree: true,
     })
     resizeObserver.observe(videoContainer)

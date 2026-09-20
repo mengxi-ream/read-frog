@@ -1,6 +1,9 @@
 import { XCOM_PLAYER_CONTAINER_SELECTOR } from "@/utils/constants/subtitles"
 import { getXcomStatusId, getXcomStatusIdFromUrl } from "@/utils/subtitles/video-id"
 
+// Any control button's icon sits four levels below the controls group.
+const XCOM_CONTROL_ICON_SELECTOR = 'button[role="button"] > div > svg'
+
 const XCOM_VIDEO_CONTAINER_SELECTORS = [
   "[data-testid='videoPlayer']",
   "[data-testid='videoComponent']",
@@ -60,6 +63,13 @@ function pickSingleCandidate(candidates: HTMLVideoElement[]): HTMLVideoElement |
 export function getXcomStatusVideoContainer(video: HTMLVideoElement): HTMLElement | null {
   return (
     video.closest<HTMLElement>(XCOM_VIDEO_CONTAINER_SELECTORS.join(", ")) ?? video.parentElement
+  )
+}
+
+export function findXcomControlsGroup(videoContainer: HTMLElement): HTMLElement | null {
+  return (
+    videoContainer.querySelector(XCOM_CONTROL_ICON_SELECTOR)?.parentElement?.parentElement
+      ?.parentElement?.parentElement ?? null
   )
 }
 
