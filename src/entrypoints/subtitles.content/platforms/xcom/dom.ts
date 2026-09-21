@@ -35,13 +35,19 @@ function belongsToStatus(video: HTMLVideoElement, statusId: string): boolean {
   )
 }
 
-function pickActiveCandidate(candidates: HTMLVideoElement[]): HTMLVideoElement | null {
-  const visibleCandidates = candidates.filter(hasRenderedSize)
+// `preferred` is the video the URL names, which only wins while the reader has not
+// singled another one out: replies and quotes carry videos of their own.
+function pickActiveCandidate(
+  candidates: HTMLVideoElement[],
+  preferred: HTMLVideoElement[],
+): HTMLVideoElement | null {
+  const rendered = candidates.filter(hasRenderedSize)
 
   return (
-    visibleCandidates.find((video) => video.closest("[data-testid='videoComponent']:hover")) ??
-    visibleCandidates.find((video) => video.closest(XCOM_PLAYER_CONTAINER_SELECTOR)) ??
-    visibleCandidates.find((video) => !video.paused) ??
+    rendered.find((video) => video.closest("[data-testid='videoComponent']:hover")) ??
+    rendered.find((video) => video.closest(XCOM_PLAYER_CONTAINER_SELECTOR)) ??
+    pickSingleCandidate(preferred) ??
+    rendered.find((video) => !video.paused) ??
     pickSingleCandidate(candidates)
   )
 }
@@ -80,11 +86,7 @@ export function getCurrentPrimaryXcomStatusVideo(): HTMLVideoElement | null {
   const statusId = getXcomStatusId()
   const current = statusId ? candidates.filter((video) => belongsToStatus(video, statusId)) : []
 
-  if (current.length > 0) {
-    return pickSingleCandidate(current)
-  }
-
-  return pickActiveCandidate(candidates)
+  return pickActiveCandidate(candidates, current)
 }
 
 export function getXcomVideoStatusId(video: HTMLVideoElement): string | null {
@@ -103,15 +105,10 @@ export function getXcomVideoStatusId(video: HTMLVideoElement): string | null {
   return null
 }
 
-// On a timeline the URL carries no status id, so read it off the active tweet.
+// The URL names only the main post, and names nothing on a timeline.
 export function getCurrentXcomVideoId(): string | null {
-  const statusId = getXcomStatusId()
-  if (statusId) {
-    return statusId
-  }
-
   const video = getCurrentXcomSubtitlesVideo()
-  return video ? getXcomVideoStatusId(video) : null
+  return (video && getXcomVideoStatusId(video)) ?? getXcomStatusId()
 }
 
 export function getReadFrogXcomStatusVideo(): HTMLVideoElement | null {
