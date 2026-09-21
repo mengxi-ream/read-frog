@@ -15,9 +15,15 @@ export interface TextTrackFetcherOptions {
 }
 
 const SUBTITLE_KINDS = new Set<TextTrackKind>(["subtitles", "captions"])
+// x.com renders captions from a partial duplicate track; never use it as the source.
+const DUPLICATE_TRACK_LABEL = "clone"
+
+function isSubtitleTrack(track: TextTrack): boolean {
+  return SUBTITLE_KINDS.has(track.kind) && track.label !== DUPLICATE_TRACK_LABEL
+}
 
 function selectTrack(video: HTMLVideoElement): TextTrack | null {
-  const candidates = Array.from(video.textTracks).filter((track) => SUBTITLE_KINDS.has(track.kind))
+  const candidates = Array.from(video.textTracks).filter(isSubtitleTrack)
   return (
     candidates.find((track) => track.mode === "showing") ??
     candidates.find((track) => track.kind === "subtitles") ??
@@ -32,6 +38,8 @@ export class TextTrackFetcher implements SubtitlesFetcher {
   private cachedTrackHash: string | null = null
   private originalModes = new Map<TextTrack, TextTrackMode>()
   private rehideTimer: ReturnType<typeof setTimeout> | null = null
+  private watchedTracks: TextTrackList | null = null
+  private readonly rehideOnTrackChange = () => this.hideShowingTracks()
 
   constructor(private options: TextTrackFetcherOptions) {}
 
@@ -96,9 +104,12 @@ export class TextTrackFetcher implements SubtitlesFetcher {
       this.rehideTimer = null
       this.hideShowingTracks()
     }, TEXT_TRACK_NATIVE_REHIDE_DELAY_MS)
+    this.watchTrackChanges()
   }
 
   showNativeSubtitles(): void {
+    // Before restoring, or putting a track back to "showing" re-triggers the watcher.
+    this.unwatchTrackChanges()
     this.clearRehideTimer()
     for (const [track, mode] of this.originalModes) {
       track.mode = mode
@@ -141,6 +152,25 @@ export class TextTrackFetcher implements SubtitlesFetcher {
         this.setMode(track, "hidden")
       }
     }
+  }
+
+  // The player can reveal captions long after we hid them, so stay subscribed.
+  private watchTrackChanges(): void {
+    const tracks = this.options.resolveVideo()?.textTracks ?? null
+    if (!tracks || tracks === this.watchedTracks) {
+      return
+    }
+
+    this.unwatchTrackChanges()
+    this.watchedTracks = tracks
+    tracks.addEventListener("addtrack", this.rehideOnTrackChange)
+    tracks.addEventListener("change", this.rehideOnTrackChange)
+  }
+
+  private unwatchTrackChanges(): void {
+    this.watchedTracks?.removeEventListener("addtrack", this.rehideOnTrackChange)
+    this.watchedTracks?.removeEventListener("change", this.rehideOnTrackChange)
+    this.watchedTracks = null
   }
 
   private clearRehideTimer(): void {

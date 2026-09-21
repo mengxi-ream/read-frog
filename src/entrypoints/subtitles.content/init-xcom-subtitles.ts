@@ -15,7 +15,7 @@ import {
 } from "./platforms/xcom/overlay-entry"
 import { watchXcomPlayer } from "./platforms/xcom/watch-player"
 import { mountSubtitlesSidebar } from "./renderer/mount-subtitles-sidebar"
-import { mountSubtitlesUI } from "./renderer/mount-subtitles-ui"
+import { mountSubtitlesUI, unmountSubtitlesUI } from "./renderer/mount-subtitles-ui"
 
 function isXcomHost(): boolean {
   const { hostname } = window.location
@@ -91,7 +91,12 @@ export function initXcomSubtitles(ctx: ContentScriptContext) {
   const intervalId = setInterval(() => {
     const videoContainer = getCurrentVideoContainer()
     if (!videoContainer) {
+      // Or the overlay's React root stays alive inside a discarded player.
       clearXcomOverlayEntryPoints()
+      if (lastVideoContainer) {
+        unmountSubtitlesUI()
+        adapter?.notifyNavigation()
+      }
       lastVideoId = null
       lastVideoContainer = null
       return

@@ -15,7 +15,7 @@ export interface PlatformConfig {
     video: string
     playerContainer: string
     controlsBar?: string
-    nativeSubtitles: string
+    nativeSubtitles?: string
   }
 
   events: {

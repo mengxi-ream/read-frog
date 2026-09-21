@@ -13,7 +13,6 @@ export function getXcomConfig(): PlatformConfig {
       video: `${XCOM_PLAYER_CONTAINER_SELECTOR} video`,
       playerContainer: XCOM_PLAYER_CONTAINER_SELECTOR,
       controlsBar: XCOM_CONTROLS_CONTAINER_SELECTOR,
-      nativeSubtitles: "[data-read-frog-xcom-native-subtitles]",
     },
     events: {},
     controls: {

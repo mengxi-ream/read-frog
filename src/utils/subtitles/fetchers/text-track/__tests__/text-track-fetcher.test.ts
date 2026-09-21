@@ -28,8 +28,29 @@ class FakeTrack extends EventTarget {
   }
 }
 
+type FakeTrackList = FakeTrack[] & {
+  addEventListener: (type: string, listener: () => void) => void
+  removeEventListener: (type: string, listener: () => void) => void
+  emit: (type: string) => void
+}
+
+function trackListOf(tracks: FakeTrack[]): FakeTrackList {
+  const listeners = new Map<string, Set<() => void>>()
+  return Object.assign(tracks, {
+    addEventListener(type: string, listener: () => void) {
+      listeners.set(type, (listeners.get(type) ?? new Set()).add(listener))
+    },
+    removeEventListener(type: string, listener: () => void) {
+      listeners.get(type)?.delete(listener)
+    },
+    emit(type: string) {
+      for (const listener of listeners.get(type) ?? []) listener()
+    },
+  })
+}
+
 function videoWith(...tracks: FakeTrack[]): HTMLVideoElement {
-  return { textTracks: tracks } as unknown as HTMLVideoElement
+  return { textTracks: trackListOf(tracks) } as unknown as HTMLVideoElement
 }
 
 function createFetcher(video: HTMLVideoElement | null, videoId = "1") {
@@ -80,6 +101,36 @@ describe("TextTrackFetcher", () => {
 
     videoId = "2"
     await expect(fetcher.shouldUseSameTrack()).resolves.toBe(false)
+  })
+
+  it("keeps hiding captions the player reveals after we hid them", () => {
+    const track = new FakeTrack("subtitles", "English", "en", "disabled")
+    const video = videoWith(track)
+    const tracks = video.textTracks as unknown as FakeTrackList
+    const fetcher = createFetcher(video)
+
+    fetcher.hideNativeSubtitles()
+    vi.advanceTimersByTime(TEXT_TRACK_NATIVE_REHIDE_DELAY_MS)
+
+    track.mode = "showing"
+    tracks.emit("change")
+    expect(track.mode).toBe("hidden")
+
+    fetcher.showNativeSubtitles()
+    track.mode = "showing"
+    tracks.emit("change")
+    expect(track.mode).toBe("showing")
+  })
+
+  it("ignores the duplicate track the player renders itself", async () => {
+    const real = new FakeTrack("subtitles", "English.srt", "EN", "hidden")
+    real.loadCues("hello")
+    const clone = new FakeTrack("captions", "clone", "", "showing")
+    clone.loadCues("partial")
+
+    const fetcher = createFetcher(videoWith(clone, real))
+
+    await expect(fetcher.fetch()).resolves.toEqual([{ text: "hello", start: 0, end: 1000 }])
   })
 
   it("hides showing tracks, re-applies after the player flips them back, and restores on show", () => {
