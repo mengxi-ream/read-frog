@@ -6,6 +6,7 @@ import { createFeatureUsageContext, trackFeatureAttempt } from "@/utils/analytic
 import { classifyResolvedProvider } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { INPUT_REPLACE_REQUEST_TYPE } from "@/utils/constants/input-injector"
+import { getDeepActiveElement } from "@/utils/dom/active-element"
 import { translateTextForInput } from "@/utils/host/translate/translate-variants"
 import { HostedAiProviderUnavailableError } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
@@ -145,7 +146,8 @@ export function useInputTranslation() {
       if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
         text = element.value
       } else if (element.isContentEditable) {
-        text = element.textContent || ""
+        // textContent joins paragraphs and drops <br> line breaks in rich editors.
+        text = element.innerText || ""
       } else {
         return
       }
@@ -213,13 +215,13 @@ export function useInputTranslation() {
         if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
           currentText = element.value
         } else if (element.isContentEditable) {
-          currentText = element.textContent || ""
+          currentText = element.innerText || ""
         } else {
           currentText = originalText
         }
 
         // Only apply translation if content hasn't changed during async operation
-        if (currentText.trim() === originalText && translatedText) {
+        if (element.isConnected && currentText.trim() === originalText && translatedText) {
           setTextWithUndo(element, translatedText)
         }
       } catch (error) {
@@ -260,7 +262,7 @@ export function useInputTranslation() {
       }
 
       // Check if the active element is an input field
-      const activeElement = document.activeElement
+      const activeElement = getDeepActiveElement()
       const isInputField =
         activeElement instanceof HTMLInputElement ||
         activeElement instanceof HTMLTextAreaElement ||
