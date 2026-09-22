@@ -1,9 +1,13 @@
+import { getDeepActiveElement } from "@/utils/dom/active-element"
 import { isDraftElement, replaceDraft } from "./editors/draft-js"
+import { isLexicalElement, replaceLexical } from "./editors/lexical"
 import { isSlateElement, replaceSlate } from "./editors/slate"
 
 export function replaceText(text: string): boolean {
-  const element = document.activeElement
+  const element = getDeepActiveElement()
   if (!element || !(element as HTMLElement).isContentEditable) return false
+
+  if (isLexicalElement(element)) return replaceLexical(element, text)
 
   if (isSlateElement(element)) return replaceSlate(element, text)
 
