@@ -1,7 +1,7 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { CaptureResult } from "posthog-js/dist/module.no-external"
+import type { PageAnalyticsContext } from "./page-analytics-context"
 import type { AnalyticsFeature, FeatureUsedEventProperties } from "@/types/analytics"
-import type { TranslationMode } from "@/types/config/translate"
 import { posthog } from "posthog-js/dist/module.no-external"
 import { storage } from "#imports"
 import { env } from "@/env"
@@ -17,26 +17,67 @@ import {
 import { EXTENSION_VERSION } from "@/utils/constants/app"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { logger } from "@/utils/logger"
+import { getAnalyticsSiteDomain } from "@/utils/url"
 import {
   createStorageFeatureUsageCache,
   getFeatureUsageDay,
   type FeatureUsageCache,
 } from "./analytics-feature-cache"
+import { getPageAnalyticsContext } from "./page-analytics-context"
 
-type BackgroundFeatureUsedEventProperties = FeatureUsedEventProperties & {
-  target_language?: LangCodeISO6393
+/** Properties every `feature_used` event carries once the background has enriched it. */
+type BaseFeatureUsedEventProperties = Omit<FeatureUsedEventProperties, "feature" | "char_count"> & {
+  /** Hostname only — see `getAnalyticsSiteDomain`. */
   site_domain?: string
-  page_language?: LangCodeISO6393
-  translation_mode?: TranslationMode
+  target_language?: LangCodeISO6393
 }
 
-interface FeatureUsedEventSource {
-  /** Hostname only — see `getAnalyticsSiteDomain`. */
-  siteDomain?: string
-  pageContext?: {
-    page_language?: LangCodeISO6393
-    translation_mode?: TranslationMode
-  }
+interface TextFeatureUsedEventProperties {
+  /** Length of the translated source text, never the text itself. */
+  char_count?: number
+}
+
+/**
+ * Properties only one feature reports, keyed by feature. A feature without an entry
+ * reports the base properties alone; every entry needs a matching enricher in
+ * `createFeatureEventEnrichers`, which the compiler enforces.
+ */
+interface FeatureSpecificEventProperties {
+  page_translation: PageAnalyticsContext
+  selection_translation: TextFeatureUsedEventProperties
+  input_translation: TextFeatureUsedEventProperties
+  translation_hub: TextFeatureUsedEventProperties
+}
+
+type FeatureWithSpecificProperties = keyof FeatureSpecificEventProperties
+
+type FeatureUsedEventPropertiesFor<F extends AnalyticsFeature> = BaseFeatureUsedEventProperties & {
+  feature: F
+} & (F extends FeatureWithSpecificProperties ? FeatureSpecificEventProperties[F] : unknown)
+
+export type PageTranslationFeatureUsedEventProperties =
+  FeatureUsedEventPropertiesFor<"page_translation">
+
+/** One member per feature, so each event can only carry the properties its feature defines. */
+export type BackgroundFeatureUsedEventProperties = {
+  [F in AnalyticsFeature]: FeatureUsedEventPropertiesFor<F>
+}[AnalyticsFeature]
+
+/** The tab a feature was used in, as reported by the message sender. */
+export interface FeatureUsedEventTab {
+  id?: number
+  url?: string
+}
+
+interface FeatureEventSource {
+  properties: FeatureUsedEventProperties
+  tab?: FeatureUsedEventTab
+}
+
+type FeatureEventEnrichers = {
+  [F in FeatureWithSpecificProperties]: (
+    source: FeatureEventSource,
+  ) => Promise<FeatureSpecificEventProperties[F]>
 }
 
 /**
@@ -67,6 +108,7 @@ interface BackgroundAnalyticsRuntime {
   featureUsageCache?: FeatureUsageCache
   getCurrentDate: () => Date
   getStorageItem: (key: LocalStorageKey) => Promise<unknown>
+  getPageAnalyticsContext: (tabId: number) => Promise<PageAnalyticsContext>
   getTargetLanguage: () => Promise<LangCodeISO6393 | undefined>
   posthog: BackgroundAnalyticsClient
   setStorageItem: (key: LocalStorageKey, value: unknown) => Promise<void>
@@ -115,6 +157,7 @@ function createDefaultRuntime(): BackgroundAnalyticsRuntime {
       : undefined,
     getCurrentDate: () => new Date(),
     getStorageItem,
+    getPageAnalyticsContext,
     getTargetLanguage: async () => {
       const config = await getLocalConfig()
       return config?.language.targetCode
@@ -295,12 +338,65 @@ export function filterAnalyticsCaptureResult(data: CaptureResult | null): Captur
   return mutableFilteredData
 }
 
+async function readCharCount({
+  properties,
+}: FeatureEventSource): Promise<TextFeatureUsedEventProperties> {
+  return properties.char_count !== undefined ? { char_count: properties.char_count } : {}
+}
+
+function createFeatureEventEnrichers(runtime: BackgroundAnalyticsRuntime): FeatureEventEnrichers {
+  return {
+    page_translation: async ({ tab }) =>
+      typeof tab?.id === "number" ? await runtime.getPageAnalyticsContext(tab.id) : {},
+    selection_translation: readCharCount,
+    input_translation: readCharCount,
+    translation_hub: readCharCount,
+  }
+}
+
 export function createBackgroundAnalytics(
   runtime: BackgroundAnalyticsRuntime = createDefaultRuntime(),
 ) {
   let clientPromise: Promise<BackgroundAnalyticsClient | null> | null = null
   let missingConfigWarned = false
   const featureCaptureQueues = new Map<AnalyticsFeature, Promise<void>>()
+  const featureEventEnrichers = createFeatureEventEnrichers(runtime)
+
+  function hasFeatureEnricher(feature: AnalyticsFeature): feature is FeatureWithSpecificProperties {
+    return Object.hasOwn(featureEventEnrichers, feature)
+  }
+
+  async function getFeatureSpecificProperties(
+    source: FeatureEventSource,
+  ): Promise<Partial<FeatureSpecificEventProperties[FeatureWithSpecificProperties]>> {
+    const { feature } = source.properties
+    if (!hasFeatureEnricher(feature)) return {}
+
+    try {
+      return await featureEventEnrichers[feature](source)
+    } catch (error) {
+      runtime.warn(`[Analytics] Failed to add ${feature} properties to analytics event`, error)
+      return {}
+    }
+  }
+
+  async function buildFeatureUsedEventProperties(
+    source: FeatureEventSource,
+  ): Promise<BackgroundFeatureUsedEventProperties> {
+    // `char_count` is not a base property; it is re-added by the enrichers of the
+    // features that define it.
+    const { char_count: _charCount, ...properties } = source.properties
+    const siteDomain = getAnalyticsSiteDomain(source.tab?.url)
+
+    // Feature-specific properties come only from the enricher keyed by `feature`, so the
+    // result is that feature's member of the union.
+    return {
+      ...properties,
+      ...normalizeFeatureProviderAnalytics(properties.provider, properties.backend_kind),
+      ...(siteDomain ? { site_domain: siteDomain } : {}),
+      ...(await getFeatureSpecificProperties(source)),
+    }
+  }
 
   async function isAnalyticsEnabled(): Promise<boolean> {
     const enabled = await runtime.getStorageItem(`local:${ANALYTICS_ENABLED_STORAGE_KEY}`)
@@ -443,20 +539,20 @@ export function createBackgroundAnalytics(
     })
   }
 
+  /**
+   * Single entry point for `feature_used`: every feature reports through here, and all
+   * enrichment (site domain, feature-specific properties, target language) happens in
+   * the background so callers only send what they observed.
+   */
   async function captureFeatureUsedEventInBackground(
     properties: FeatureUsedEventProperties,
-    source: FeatureUsedEventSource = {},
+    tab?: FeatureUsedEventTab,
   ): Promise<void> {
     if (!(await isAnalyticsEnabled())) {
       return
     }
 
-    const normalizedProperties: BackgroundFeatureUsedEventProperties = {
-      ...properties,
-      ...normalizeFeatureProviderAnalytics(properties.provider, properties.backend_kind),
-      ...(source.siteDomain ? { site_domain: source.siteDomain } : {}),
-      ...source.pageContext,
-    }
+    const normalizedProperties = await buildFeatureUsedEventProperties({ properties, tab })
 
     // Funnel features must record every step (e.g. note-suggestion shown vs
     // accepted), so they skip the once-per-day-per-feature adoption throttle —

@@ -10,10 +10,7 @@ const handlers = new Map<string, Handler>()
 const recordFeatureActiveDayMock = vi.fn<() => Promise<void>>()
 const captureMock =
   vi.fn<
-    (
-      properties: FeatureUsedEventProperties,
-      source?: { siteDomain?: string; pageContext?: Record<string, string> },
-    ) => Promise<void>
+    (properties: FeatureUsedEventProperties, tab?: { id?: number; url?: string }) => Promise<void>
   >()
 
 vi.mock("@/utils/message", () => ({
@@ -29,14 +26,8 @@ vi.mock("@/utils/feature-active-days", () => ({
 vi.mock("../analytics", () => ({
   captureFeatureUsedEventInBackground: (
     properties: FeatureUsedEventProperties,
-    source?: { siteDomain?: string; pageContext?: Record<string, string> },
-  ) => captureMock(properties, source),
-}))
-
-const getPageAnalyticsContextMock = vi.fn<(tabId: number) => Promise<Record<string, string>>>()
-
-vi.mock("../page-analytics-context", () => ({
-  getPageAnalyticsContext: (tabId: number) => getPageAnalyticsContextMock(tabId),
+    tab?: { id?: number; url?: string },
+  ) => captureMock(properties, tab),
 }))
 
 const { setupFeatureUsedEventHandlers } = await import("../feature-used-event")
@@ -63,9 +54,6 @@ describe("setupFeatureUsedEventHandlers", () => {
     handlers.clear()
     recordFeatureActiveDayMock.mockReset().mockResolvedValue(undefined)
     captureMock.mockReset().mockResolvedValue(undefined)
-    getPageAnalyticsContextMock
-      .mockReset()
-      .mockResolvedValue({ page_language: "jpn", translation_mode: "bilingual" })
     setupFeatureUsedEventHandlers()
   })
 
@@ -81,19 +69,13 @@ describe("setupFeatureUsedEventHandlers", () => {
 
   it("still reports a failure to analytics", async () => {
     await send("failure")
-    expect(captureMock).toHaveBeenCalledWith(
-      { ...BASE_EVENT, outcome: "failure" },
-      { siteDomain: undefined, pageContext: {} },
-    )
+    expect(captureMock).toHaveBeenCalledWith({ ...BASE_EVENT, outcome: "failure" }, undefined)
   })
 
   it("fans the same event out to both consumers", async () => {
     await send("success")
     expect(recordFeatureActiveDayMock).toHaveBeenCalledTimes(1)
-    expect(captureMock).toHaveBeenCalledWith(
-      { ...BASE_EVENT, outcome: "success" },
-      { siteDomain: undefined, pageContext: {} },
-    )
+    expect(captureMock).toHaveBeenCalledWith({ ...BASE_EVENT, outcome: "success" }, undefined)
   })
 
   it("does not wait on the active-day write before reporting to analytics", async () => {
@@ -106,36 +88,11 @@ describe("setupFeatureUsedEventHandlers", () => {
     expect(captureMock).toHaveBeenCalledTimes(1)
   })
 
-  it("reports only the hostname of the sender tab", async () => {
+  it("hands the sender tab to analytics without interpreting it", async () => {
     await send("success", "https://mail.google.com/mail/u/0/#inbox/abc?x=1")
     expect(captureMock).toHaveBeenCalledWith(
       { ...BASE_EVENT, outcome: "success" },
-      {
-        siteDomain: "mail.google.com",
-        pageContext: { page_language: "jpn", translation_mode: "bilingual" },
-      },
+      { id: 42, url: "https://mail.google.com/mail/u/0/#inbox/abc?x=1" },
     )
-  })
-
-  it("reports no site domain for non-web tabs", async () => {
-    await send("success", "chrome-extension://abc/translation-hub.html")
-    expect(captureMock).toHaveBeenCalledWith(
-      { ...BASE_EVENT, outcome: "success" },
-      expect.objectContaining({ siteDomain: undefined }),
-    )
-  })
-
-  it("adds page context only to page translation events", async () => {
-    const handler = handlers.get("trackFeatureUsedEvent")!
-    await handler({
-      data: { ...BASE_EVENT, feature: "selection_translation", outcome: "success" },
-      sender: { tab: { id: 42, url: "https://github.com/" } },
-    })
-
-    expect(getPageAnalyticsContextMock).not.toHaveBeenCalled()
-    expect(captureMock).toHaveBeenCalledWith(expect.anything(), {
-      siteDomain: "github.com",
-      pageContext: {},
-    })
   })
 })

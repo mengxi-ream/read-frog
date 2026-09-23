@@ -1,5 +1,6 @@
 import type { CaptureResult, PostHog } from "posthog-js/dist/module.no-external"
 import type { FeatureUsageCache } from "../analytics-feature-cache"
+import type { PageAnalyticsContext } from "../page-analytics-context"
 import type { FeatureUsedEventProperties } from "@/types/analytics"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import {
@@ -17,10 +18,19 @@ const DEFAULT_FEATURE_PROVIDER = {
   backend_kind: "llm",
 } as const
 
+const TTS_EVENT = {
+  feature: "text_to_speech",
+  surface: "tts_settings",
+  outcome: "success",
+  latency_ms: 100,
+  ...DEFAULT_FEATURE_PROVIDER,
+} as const
+
 describe("background analytics", () => {
   let storageGetItemMock = vi.fn<(key: string) => Promise<unknown>>()
   let storageSetItemMock = vi.fn<(key: string, value: unknown) => Promise<void>>()
   let getTargetLanguageMock = vi.fn<() => Promise<"cmn" | undefined>>()
+  let getPageAnalyticsContextMock = vi.fn<(tabId: number) => Promise<PageAnalyticsContext>>()
   let posthogInitMock = vi.fn<PostHogInitMock>()
   let posthogCaptureMock = vi.fn<PostHogCaptureMock>()
   let posthogRegisterMock = vi.fn<PostHogRegisterMock>()
@@ -48,6 +58,7 @@ describe("background analytics", () => {
       featureUsageCache: overrides?.featureUsageCache,
       getCurrentDate: overrides?.getCurrentDate ?? (() => new Date("2026-07-14T12:00:00.000Z")),
       getStorageItem: storageGetItemMock,
+      getPageAnalyticsContext: getPageAnalyticsContextMock,
       getTargetLanguage: getTargetLanguageMock,
       posthog: {
         init: posthogInitMock,
@@ -91,6 +102,9 @@ describe("background analytics", () => {
       .fn<(key: string, value: unknown) => Promise<void>>()
       .mockResolvedValue(undefined)
     getTargetLanguageMock = vi.fn<() => Promise<"cmn" | undefined>>().mockResolvedValue("cmn")
+    getPageAnalyticsContextMock = vi
+      .fn<(tabId: number) => Promise<PageAnalyticsContext>>()
+      .mockResolvedValue({ page_language: "jpn", translation_mode: "bilingual" })
     posthogInitMock = vi.fn<PostHogInitMock>()
     posthogCaptureMock = vi.fn<PostHogCaptureMock>()
     posthogRegisterMock = vi.fn<PostHogRegisterMock>()
@@ -187,7 +201,7 @@ describe("background analytics", () => {
     })
   })
 
-  it("adds the sender site domain and char count to feature events", async () => {
+  it("adds the sender tab's hostname and the char count to text feature events", async () => {
     storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
 
     const { captureFeatureUsedEventInBackground } = createAnalytics()
@@ -200,7 +214,7 @@ describe("background analytics", () => {
         char_count: 42,
         ...DEFAULT_FEATURE_PROVIDER,
       },
-      { siteDomain: "github.com" },
+      { id: 42, url: "https://github.com/org/repo/issues/1?q=secret#frag" },
     )
 
     expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", {
@@ -213,6 +227,86 @@ describe("background analytics", () => {
       site_domain: "github.com",
       target_language: "cmn",
     })
+    expect(getPageAnalyticsContextMock).not.toHaveBeenCalled()
+  })
+
+  it("reports no site domain for non-web tabs", async () => {
+    storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
+
+    const { captureFeatureUsedEventInBackground } = createAnalytics()
+    await captureFeatureUsedEventInBackground(
+      { ...TTS_EVENT },
+      { id: 42, url: "chrome-extension://abc/translation-hub.html" },
+    )
+
+    expect(posthogCaptureMock).toHaveBeenCalledWith(
+      "feature_used",
+      expect.not.objectContaining({ site_domain: expect.anything() }),
+    )
+  })
+
+  it("adds page language and translation mode only to page translation events", async () => {
+    storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
+
+    const { captureFeatureUsedEventInBackground } = createAnalytics()
+    await captureFeatureUsedEventInBackground(
+      {
+        feature: "page_translation",
+        surface: "popup",
+        outcome: "success",
+        latency_ms: 100,
+        ...DEFAULT_FEATURE_PROVIDER,
+      },
+      { id: 42, url: "https://www.nikkei.com/article/1" },
+    )
+
+    expect(getPageAnalyticsContextMock).toHaveBeenCalledWith(42)
+    expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", {
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 100,
+      ...DEFAULT_FEATURE_PROVIDER,
+      site_domain: "www.nikkei.com",
+      page_language: "jpn",
+      translation_mode: "bilingual",
+      target_language: "cmn",
+    })
+  })
+
+  it("drops char_count from features that do not define it", async () => {
+    storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
+
+    const { captureFeatureUsedEventInBackground } = createAnalytics()
+    await captureFeatureUsedEventInBackground({ ...TTS_EVENT, char_count: 7 })
+
+    expect(posthogCaptureMock).toHaveBeenCalledWith(
+      "feature_used",
+      expect.not.objectContaining({ char_count: expect.anything() }),
+    )
+  })
+
+  it("still reports the event when page context lookup fails", async () => {
+    storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
+    getPageAnalyticsContextMock.mockRejectedValue(new Error("storage unavailable"))
+
+    const { captureFeatureUsedEventInBackground } = createAnalytics()
+    await captureFeatureUsedEventInBackground(
+      {
+        feature: "page_translation",
+        surface: "popup",
+        outcome: "success",
+        latency_ms: 100,
+        ...DEFAULT_FEATURE_PROVIDER,
+      },
+      { id: 42, url: "https://github.com/" },
+    )
+
+    expect(posthogCaptureMock).toHaveBeenCalledWith(
+      "feature_used",
+      expect.objectContaining({ feature: "page_translation", site_domain: "github.com" }),
+    )
+    expect(loggerWarnMock).toHaveBeenCalled()
   })
 
   it("keeps site_domain and char_count through the PostHog property filter", () => {
