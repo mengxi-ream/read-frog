@@ -16,8 +16,13 @@ vi.mock("@/utils/logger", () => ({
   },
 }))
 
-const { buildFeatureUsedEventProperties, getLatencyMs, trackFeatureUsed } =
-  await import("@/utils/analytics")
+const {
+  buildFeatureUsedEventProperties,
+  createFeatureUsageContext,
+  getLatencyMs,
+  trackFeatureAttempt,
+  trackFeatureUsed,
+} = await import("@/utils/analytics")
 
 describe("analytics helpers", () => {
   beforeEach(() => {
@@ -75,6 +80,31 @@ describe("analytics helpers", () => {
       provider: "read-frog-built-in-ai",
       backend_kind: "llm",
     })
+  })
+
+  it("reports char_count from the tracked use, not from the usage context", async () => {
+    sendMessageMock.mockResolvedValue(undefined)
+    const context = createFeatureUsageContext(
+      ANALYTICS_FEATURE.TRANSLATION_HUB,
+      ANALYTICS_SURFACE.TRANSLATION_HUB,
+      0,
+    )
+
+    expect(context).not.toHaveProperty("char_count")
+
+    await trackFeatureAttempt(
+      { ...context, provider: "openai", backend_kind: "llm", char_count: 42 },
+      async () => "translated",
+    )
+
+    expect(sendMessageMock).toHaveBeenCalledWith(
+      "trackFeatureUsedEvent",
+      expect.objectContaining({
+        feature: ANALYTICS_FEATURE.TRANSLATION_HUB,
+        outcome: "success",
+        char_count: 42,
+      }),
+    )
   })
 
   it("tracks feature usage with the expected event payload", async () => {

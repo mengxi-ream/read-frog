@@ -12,13 +12,21 @@ import { sendMessage } from "@/utils/message"
 export interface FeatureUsedEventInput extends FeatureUsageContext, FeatureProviderAnalytics {
   outcome: AnalyticsOutcome
   finishedAt?: number
+  /**
+   * Measured on the input of this one use, so it is passed when the use is reported
+   * rather than carried on the usage context. Only text translation features set it.
+   */
+  char_count?: number
 }
+
+/** Everything `trackFeatureUsed` needs except the outcome, which the attempt decides. */
+export type FeatureAttemptInput = Omit<FeatureUsedEventInput, "outcome" | "finishedAt">
 
 export function createFeatureUsageContext(
   feature: FeatureUsageContext["feature"],
   surface: AnalyticsSurface,
   startedAt = Date.now(),
-  metadata?: Pick<FeatureUsageContext, "action_id" | "action_name" | "char_count">,
+  metadata?: Pick<FeatureUsageContext, "action_id" | "action_name">,
 ): FeatureUsageContext {
   return {
     feature,
@@ -68,7 +76,7 @@ export async function trackFeatureUsed(input: FeatureUsedEventInput): Promise<vo
 }
 
 export async function trackFeatureAttempt<T>(
-  context: FeatureUsageContext & FeatureProviderAnalytics,
+  context: FeatureAttemptInput,
   run: () => Promise<T>,
 ): Promise<T> {
   try {

@@ -56,10 +56,9 @@ export function TranslationCard({
           ...createFeatureUsageContext(
             ANALYTICS_FEATURE.TRANSLATION_HUB,
             ANALYTICS_SURFACE.TRANSLATION_HUB,
-            undefined,
-            { char_count: req.inputText.length },
           ),
           ...classifyProviderConfig(provider),
+          char_count: req.inputText.length,
         },
         async () => {
           if (!provider) throw new Error("Provider not found")

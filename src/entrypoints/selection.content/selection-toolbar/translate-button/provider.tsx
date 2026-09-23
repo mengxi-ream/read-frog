@@ -478,8 +478,6 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
       const analyticsContext = createFeatureUsageContext(
         ANALYTICS_FEATURE.SELECTION_TRANSLATION,
         sourceSurface,
-        undefined,
-        { char_count: preparedText.length },
       )
       const providerAnalytics = classifyResolvedProvider(translateRequest.provider)
 
@@ -497,6 +495,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
         void trackFeatureUsed({
           ...analyticsContext,
           ...providerAnalytics,
+          char_count: preparedText.length,
           outcome: "failure",
         })
         return
@@ -510,6 +509,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
         void trackFeatureUsed({
           ...analyticsContext,
           ...providerAnalytics,
+          char_count: preparedText.length,
           outcome: "failure",
         })
         return
@@ -550,6 +550,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
           void trackFeatureUsed({
             ...analyticsContext,
             ...providerAnalytics,
+            char_count: preparedText.length,
             outcome: "failure",
           })
           return
@@ -596,6 +597,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
         void trackFeatureUsed({
           ...analyticsContext,
           ...providerAnalytics,
+          char_count: preparedText.length,
           outcome: "success",
         })
       } catch (caughtError) {
@@ -608,6 +610,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
           void trackFeatureUsed({
             ...analyticsContext,
             ...providerAnalytics,
+            char_count: preparedText.length,
             outcome: "failure",
           })
         }
