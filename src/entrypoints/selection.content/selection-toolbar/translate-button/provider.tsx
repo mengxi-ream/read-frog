@@ -478,6 +478,8 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
       const analyticsContext = createFeatureUsageContext(
         ANALYTICS_FEATURE.SELECTION_TRANSLATION,
         sourceSurface,
+        undefined,
+        { char_count: preparedText.length },
       )
       const providerAnalytics = classifyResolvedProvider(translateRequest.provider)
 

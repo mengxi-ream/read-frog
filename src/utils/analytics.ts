@@ -18,7 +18,7 @@ export function createFeatureUsageContext(
   feature: FeatureUsageContext["feature"],
   surface: AnalyticsSurface,
   startedAt = Date.now(),
-  metadata?: Pick<FeatureUsageContext, "action_id" | "action_name">,
+  metadata?: Pick<FeatureUsageContext, "action_id" | "action_name" | "char_count">,
 ): FeatureUsageContext {
   return {
     feature,
@@ -40,6 +40,7 @@ export function buildFeatureUsedEventProperties({
   finishedAt = Date.now(),
   action_id,
   action_name,
+  char_count,
   provider,
   backend_kind,
 }: FeatureUsedEventInput): FeatureUsedEventProperties {
@@ -52,6 +53,7 @@ export function buildFeatureUsedEventProperties({
     backend_kind,
     ...(action_id !== undefined ? { action_id } : {}),
     ...(action_name !== undefined ? { action_name } : {}),
+    ...(char_count !== undefined ? { char_count } : {}),
   }
 }
 

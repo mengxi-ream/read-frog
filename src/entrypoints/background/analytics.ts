@@ -1,6 +1,7 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { CaptureResult } from "posthog-js/dist/module.no-external"
 import type { AnalyticsFeature, FeatureUsedEventProperties } from "@/types/analytics"
+import type { TranslationMode } from "@/types/config/translate"
 import { posthog } from "posthog-js/dist/module.no-external"
 import { storage } from "#imports"
 import { env } from "@/env"
@@ -24,6 +25,18 @@ import {
 
 type BackgroundFeatureUsedEventProperties = FeatureUsedEventProperties & {
   target_language?: LangCodeISO6393
+  site_domain?: string
+  page_language?: LangCodeISO6393
+  translation_mode?: TranslationMode
+}
+
+interface FeatureUsedEventSource {
+  /** Hostname only — see `getAnalyticsSiteDomain`. */
+  siteDomain?: string
+  pageContext?: {
+    page_language?: LangCodeISO6393
+    translation_mode?: TranslationMode
+  }
 }
 
 /**
@@ -360,7 +373,9 @@ export function createBackgroundAnalytics(
     return clientPromise
   }
 
-  async function captureFeatureUsedEvent(properties: FeatureUsedEventProperties): Promise<boolean> {
+  async function captureFeatureUsedEvent(
+    properties: BackgroundFeatureUsedEventProperties,
+  ): Promise<boolean> {
     try {
       const client = await getPostHogClient()
       if (!client) {
@@ -399,7 +414,7 @@ export function createBackgroundAnalytics(
   }
 
   async function captureFeatureUsedEventWithCache(
-    properties: FeatureUsedEventProperties,
+    properties: BackgroundFeatureUsedEventProperties,
     featureUsageCache: FeatureUsageCache,
   ): Promise<void> {
     await runFeatureCaptureSerially(properties.feature, async () => {
@@ -430,14 +445,17 @@ export function createBackgroundAnalytics(
 
   async function captureFeatureUsedEventInBackground(
     properties: FeatureUsedEventProperties,
+    source: FeatureUsedEventSource = {},
   ): Promise<void> {
     if (!(await isAnalyticsEnabled())) {
       return
     }
 
-    const normalizedProperties: FeatureUsedEventProperties = {
+    const normalizedProperties: BackgroundFeatureUsedEventProperties = {
       ...properties,
       ...normalizeFeatureProviderAnalytics(properties.provider, properties.backend_kind),
+      ...(source.siteDomain ? { site_domain: source.siteDomain } : {}),
+      ...source.pageContext,
     }
 
     // Funnel features must record every step (e.g. note-suggestion shown vs
@@ -476,7 +494,7 @@ export function createBackgroundAnalytics(
   }
 
   async function buildBackgroundFeatureUsedEventProperties(
-    properties: FeatureUsedEventProperties,
+    properties: BackgroundFeatureUsedEventProperties,
   ): Promise<BackgroundFeatureUsedEventProperties> {
     return {
       ...properties,

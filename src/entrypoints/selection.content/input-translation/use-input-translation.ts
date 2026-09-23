@@ -196,6 +196,8 @@ export function useInputTranslation() {
             ...createFeatureUsageContext(
               ANALYTICS_FEATURE.INPUT_TRANSLATION,
               ANALYTICS_SURFACE.INPUT_TRANSLATION,
+              undefined,
+              { char_count: text.length },
             ),
             // Capability-resolved so Built-in AI is not reported as "unknown":
             // it is synthesized by the registry and never a providersConfig row.

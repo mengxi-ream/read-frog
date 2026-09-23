@@ -59,6 +59,8 @@ export interface FeatureUsageContext {
   startedAt: number
   action_id?: string
   action_name?: string
+  /** Length of the translated source text. Never the text itself. */
+  char_count?: number
 }
 
 export interface FeatureUsedEventProperties extends FeatureProviderAnalytics {
@@ -68,4 +70,5 @@ export interface FeatureUsedEventProperties extends FeatureProviderAnalytics {
   latency_ms: number
   action_id?: string
   action_name?: string
+  char_count?: number
 }

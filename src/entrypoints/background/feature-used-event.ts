@@ -1,6 +1,9 @@
+import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { recordFeatureActiveDay } from "@/utils/feature-active-days"
 import { onMessage } from "@/utils/message"
+import { getAnalyticsSiteDomain } from "@/utils/url"
 import { captureFeatureUsedEventInBackground } from "./analytics"
+import { getPageAnalyticsContext } from "./page-analytics-context"
 
 /**
  * Sole subscriber to the feature-used event, fanning it out to the two consumers that
@@ -21,6 +24,18 @@ export function setupFeatureUsedEventHandlers(): void {
       void recordFeatureActiveDay()
     }
 
-    await captureFeatureUsedEventInBackground(message.data)
+    // Derived from the sender's top-level tab rather than trusted from the payload,
+    // so it reflects the site the user is on even when the feature ran in an iframe.
+    // Extension pages (popup, options, translation hub) have no http(s) tab URL.
+    const tabId = message.sender?.tab?.id
+    const pageContext =
+      message.data.feature === ANALYTICS_FEATURE.PAGE_TRANSLATION && typeof tabId === "number"
+        ? await getPageAnalyticsContext(tabId).catch(() => ({}))
+        : {}
+
+    await captureFeatureUsedEventInBackground(message.data, {
+      siteDomain: getAnalyticsSiteDomain(message.sender?.tab?.url),
+      pageContext,
+    })
   })
 }

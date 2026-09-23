@@ -187,6 +187,45 @@ describe("background analytics", () => {
     })
   })
 
+  it("adds the sender site domain and char count to feature events", async () => {
+    storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
+
+    const { captureFeatureUsedEventInBackground } = createAnalytics()
+    await captureFeatureUsedEventInBackground(
+      {
+        feature: "selection_translation",
+        surface: "selection_toolbar",
+        outcome: "success",
+        latency_ms: 100,
+        char_count: 42,
+        ...DEFAULT_FEATURE_PROVIDER,
+      },
+      { siteDomain: "github.com" },
+    )
+
+    expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", {
+      feature: "selection_translation",
+      surface: "selection_toolbar",
+      outcome: "success",
+      latency_ms: 100,
+      char_count: 42,
+      ...DEFAULT_FEATURE_PROVIDER,
+      site_domain: "github.com",
+      target_language: "cmn",
+    })
+  })
+
+  it("keeps site_domain and char_count through the PostHog property filter", () => {
+    const filtered = filterAnalyticsCaptureResult({
+      event: "feature_used",
+      properties: { site_domain: "github.com", char_count: 42 },
+      timestamp: new Date("2026-03-16T19:02:43.960Z"),
+      uuid: "test-uuid",
+    }).properties
+
+    expect(filtered).toEqual({ site_domain: "github.com", char_count: 42 })
+  })
+
   it("keeps reporting repeated feature events when no cache is configured", async () => {
     mockEnabledAnalyticsStorage()
     const { captureFeatureUsedEventInBackground } = createAnalytics()

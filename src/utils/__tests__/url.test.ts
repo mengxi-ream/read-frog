@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest"
-import { areSamePageTranslationOrigin, getPageTranslationOriginScope } from "../url"
+import {
+  areSamePageTranslationOrigin,
+  getAnalyticsSiteDomain,
+  getPageTranslationOriginScope,
+} from "../url"
 
 describe("page translation origin scope", () => {
   it("uses origin for http and https URLs", () => {
@@ -38,5 +42,21 @@ describe("page translation origin scope", () => {
     expect(
       areSamePageTranslationOrigin("file:///Users/example/a.html", "file:///Users/example/b.html"),
     ).toBe(false)
+  })
+})
+
+describe("getAnalyticsSiteDomain", () => {
+  it("returns only the hostname of http and https URLs", () => {
+    expect(getAnalyticsSiteDomain("https://user:pw@docs.example.com:8443/a/b?q=secret#frag")).toBe(
+      "docs.example.com",
+    )
+    expect(getAnalyticsSiteDomain("http://localhost:3000/")).toBe("localhost")
+  })
+
+  it("returns undefined for non-web, invalid, or missing URLs", () => {
+    expect(getAnalyticsSiteDomain("chrome-extension://abc/popup.html")).toBeUndefined()
+    expect(getAnalyticsSiteDomain("file:///Users/me/notes.html")).toBeUndefined()
+    expect(getAnalyticsSiteDomain("not a url")).toBeUndefined()
+    expect(getAnalyticsSiteDomain(undefined)).toBeUndefined()
   })
 })
