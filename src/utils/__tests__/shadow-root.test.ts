@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
   BLOCK_ATTRIBUTE,
@@ -8,7 +8,11 @@ import {
   WALKED_ATTRIBUTE,
 } from "@/utils/constants/dom-labels"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
-import { insertShadowRootUIWrapperInto, OVERLAY_SHADOW_ROOT_CSS } from "../shadow-root"
+import {
+  insertShadowRootUIWrapperInto,
+  OVERLAY_SHADOW_ROOT_CSS,
+  reattachShadowHostOnBodySwap,
+} from "../shadow-root"
 
 function createOverlayShadowRoot() {
   const shadowHost = document.createElement("read-frog-selection")
@@ -65,5 +69,48 @@ describe("insertShadowRootUIWrapperInto", () => {
       expect(element).not.toHaveAttribute(PARAGRAPH_ATTRIBUTE)
       expect(element).not.toHaveAttribute(BLOCK_ATTRIBUTE)
     }
+  })
+})
+
+describe("reattachShadowHostOnBodySwap", () => {
+  let originalBody: HTMLElement
+
+  beforeEach(() => {
+    originalBody = document.body
+  })
+
+  afterEach(() => {
+    if (document.body !== originalBody) document.body.replaceWith(originalBody)
+    originalBody.replaceChildren()
+  })
+
+  it("preserves the mounted UI across body replacements and stops after cleanup", async () => {
+    const shadowHost = document.createElement("read-frog-selection")
+    const shadowRoot = shadowHost.attachShadow({ mode: "open" })
+    const button = document.createElement("button")
+    shadowRoot.append(button)
+    document.body.append(shadowHost)
+
+    const stop = reattachShadowHostOnBodySwap(shadowHost)
+    document.body.append(document.createElement("main"))
+    await Promise.resolve()
+    expect(shadowHost.parentElement).toBe(originalBody)
+
+    const secondBody = document.createElement("body")
+    originalBody.replaceWith(secondBody)
+    await Promise.resolve()
+    expect(shadowHost.parentElement).toBe(secondBody)
+    expect(shadowHost.shadowRoot).toBe(shadowRoot)
+    expect(shadowRoot.firstChild).toBe(button)
+
+    const thirdBody = document.createElement("body")
+    secondBody.replaceWith(thirdBody)
+    await Promise.resolve()
+    expect(shadowHost.parentElement).toBe(thirdBody)
+
+    stop()
+    thirdBody.replaceWith(document.createElement("body"))
+    await Promise.resolve()
+    expect(shadowHost.isConnected).toBe(false)
   })
 })
