@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-feat(analytics): add analytics features
+feat(analytics): report feature-specific language and usage context

@@ -38,6 +38,8 @@ const BASE_EVENT = {
   latency_ms: 100,
   provider: "openai",
   backend_kind: "llm",
+  target_language: "cmn",
+  translation_mode: "bilingual",
 } as const
 
 function send(outcome: "success" | "failure", tabUrl?: string): Promise<unknown> {

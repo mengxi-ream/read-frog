@@ -1,10 +1,11 @@
+import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { FeatureUsageContext } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import debounce from "debounce"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
-import { classifyResolvedProvider, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
+import { classifyResolvedProvider } from "@/utils/analytics-provider"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
   CONTENT_WRAPPER_CLASS,
@@ -89,7 +90,7 @@ interface IPageTranslationManager {
    * Starts the automatic page translation functionality
    * Registers observers, touch triggers and set storage
    */
-  start: (analyticsContext?: FeatureUsageContext) => Promise<void>
+  start: (analyticsContext?: FeatureUsageContext<"page_translation">) => Promise<void>
 
   /**
    * Stops the automatic page translation functionality
@@ -162,7 +163,12 @@ export class PageTranslationManager implements IPageTranslationManager {
   private lastAppliedTranslatedTitle: string | null = null
   private titleRequestVersion = 0
 
-  constructor(intersectionOptions: SimpleIntersectionOptions = {}) {
+  constructor(
+    intersectionOptions: SimpleIntersectionOptions = {},
+    private readonly getDetectedPageLanguage: (
+      url: string,
+    ) => LangCodeISO6393 | "und" | undefined = () => undefined,
+  ) {
     if (intersectionOptions.threshold !== undefined) {
       if (intersectionOptions.threshold < 0 || intersectionOptions.threshold > 1) {
         throw new Error("IntersectionObserver threshold must be between 0 and 1")
@@ -179,7 +185,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     return this.isPageTranslating
   }
 
-  async start(analyticsContext?: FeatureUsageContext): Promise<void> {
+  async start(analyticsContext?: FeatureUsageContext<"page_translation">): Promise<void> {
     if (this.isPageTranslating) {
       console.warn("PageTranslationManager is already active")
       return
@@ -206,7 +212,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
   private async runStart(
     startToken: symbol,
-    analyticsContext?: FeatureUsageContext,
+    analyticsContext?: FeatureUsageContext<"page_translation">,
   ): Promise<void> {
     const trackedContext = window === window.top ? analyticsContext : undefined
 
@@ -216,18 +222,24 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
     if (!config) {
       console.warn("Config is not initialized")
-      if (trackedContext) {
-        void trackFeatureUsed({
-          ...trackedContext,
-          ...UNKNOWN_FEATURE_PROVIDER,
-          outcome: "failure",
-        })
-      }
       return
     }
 
     const requestedProviderConfig = resolvePageTranslationProviderOrNull(config)
     const providerAnalytics = classifyResolvedProvider(requestedProviderConfig)
+    const startedUrl = window.location.href
+    const configuredSourceCode = config.language.sourceCode
+    const pageAnalytics = () => {
+      const sourceCode =
+        configuredSourceCode === "auto"
+          ? this.getDetectedPageLanguage(startedUrl)
+          : configuredSourceCode
+      return {
+        translation_mode: config.pageTranslation.mode,
+        target_language: config.language.targetCode,
+        ...(sourceCode && sourceCode !== "und" ? { source_language: sourceCode } : {}),
+      }
+    }
 
     if (
       !validateTranslationConfigAndToast({
@@ -240,6 +252,7 @@ export class PageTranslationManager implements IPageTranslationManager {
         void trackFeatureUsed({
           ...trackedContext,
           ...providerAnalytics,
+          ...pageAnalytics(),
           outcome: "failure",
         })
       }
@@ -260,6 +273,7 @@ export class PageTranslationManager implements IPageTranslationManager {
         void trackFeatureUsed({
           ...trackedContext,
           ...providerAnalytics,
+          ...pageAnalytics(),
           outcome: "failure",
         })
       }
@@ -387,6 +401,7 @@ export class PageTranslationManager implements IPageTranslationManager {
         void trackFeatureUsed({
           ...trackedContext,
           ...providerAnalytics,
+          ...pageAnalytics(),
           outcome: "success",
         })
       }
@@ -395,6 +410,7 @@ export class PageTranslationManager implements IPageTranslationManager {
         void trackFeatureUsed({
           ...trackedContext,
           ...providerAnalytics,
+          ...pageAnalytics(),
           outcome: "failure",
         })
       }

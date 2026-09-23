@@ -360,7 +360,12 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
   // Covers page, input and pure-translate-provider selection runs, which all
   // enter here; the two prompt-building selection paths and subtitles resolve
   // their own terms and report at their own resolve sites.
-  trackGlossaryUsed(hostedFeature, glossaryTerms, classifyResolvedProvider(providerConfig))
+  trackGlossaryUsed(
+    hostedFeature,
+    glossaryTerms,
+    langConfig.targetCode,
+    classifyResolvedProvider(providerConfig),
+  )
 
   const hashComponents = await buildWebPageHashComponents(
     preparedText,

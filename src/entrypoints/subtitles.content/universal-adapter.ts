@@ -1,5 +1,5 @@
 import type { ControlsConfig, PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
-import type { AnalyticsSurface, FeatureUsageContext } from "@/types/analytics"
+import type { FeatureUsageContext, SurfaceByFeature } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import type { SubtitlesSource } from "@/utils/constants/subtitles"
 import type { SubtitlesFetcher } from "@/utils/subtitles/fetchers/types"
@@ -56,7 +56,7 @@ import { ROOT_VIEW } from "./ui/subtitles-settings-panel/views"
 
 type SubtitlesToggleSource = "manual" | "auto" | "shortcut"
 
-const TOGGLE_SOURCE_SURFACE: Record<SubtitlesToggleSource, AnalyticsSurface> = {
+const TOGGLE_SOURCE_SURFACE: Record<SubtitlesToggleSource, SurfaceByFeature["video_subtitles"]> = {
   manual: ANALYTICS_SURFACE.VIDEO_SUBTITLES,
   auto: ANALYTICS_SURFACE.VIDEO_SUBTITLES_AUTO,
   shortcut: ANALYTICS_SURFACE.SHORTCUT,
@@ -618,7 +618,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     )
   }
 
-  private handleToggleSubtitles(enabled: boolean, analyticsContext?: FeatureUsageContext) {
+  private handleToggleSubtitles(
+    enabled: boolean,
+    analyticsContext?: FeatureUsageContext<"video_subtitles">,
+  ) {
     if (enabled) {
       void this.switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE, analyticsContext)
     } else {
@@ -638,7 +641,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
   private async switchSubtitlesFetcher(
     next: SubtitlesSource,
-    analyticsContext?: FeatureUsageContext,
+    analyticsContext?: FeatureUsageContext<"video_subtitles">,
   ): Promise<void> {
     const make = this.fetchers[next]
     if (!make) {
@@ -757,11 +760,13 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     this.isNativeSubtitlesHidden = true
   }
 
-  private async startTranslation(analyticsContext?: FeatureUsageContext) {
+  private async startTranslation(analyticsContext?: FeatureUsageContext<"video_subtitles">) {
     let providerAnalytics = UNKNOWN_FEATURE_PROVIDER
+    let targetLanguage: Config["language"]["targetCode"] | undefined
 
     try {
       const analyticsConfig = await getLocalConfig()
+      targetLanguage = analyticsConfig?.language.targetCode
       // Resolve through the capability registry, not providersConfig: Built-in
       // AI is synthesized by the registry and is never a row there, so the
       // lookup returned undefined and every hosted subtitle run was reported as
@@ -793,10 +798,11 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
           this.subtitlesScheduler?.supplementSubtitles(this.sessionProcessedFragments)
           this.subtitlesScheduler?.setState("idle")
         }
-        if (analyticsContext) {
+        if (analyticsContext && targetLanguage) {
           void trackFeatureUsed({
             ...analyticsContext,
             ...providerAnalytics,
+            target_language: targetLanguage,
             outcome: "success",
           })
         }
@@ -812,24 +818,26 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       await this.getOrLoadSourceSubtitles()
       this.sessionSubtitles = this.sourceSubtitles
 
-      if (await this.shouldSkipTranslationForCurrentTrack()) {
+      if (this.shouldSkipTranslationForCurrentTrack(analyticsConfig)) {
         this.processPassthroughSubtitles()
       } else {
-        await this.processTranslatedSubtitles()
+        await this.processTranslatedSubtitles(analyticsConfig)
       }
-      if (analyticsContext) {
+      if (analyticsContext && targetLanguage) {
         void trackFeatureUsed({
           ...analyticsContext,
           ...providerAnalytics,
+          target_language: targetLanguage,
           outcome: "success",
         })
       }
       return true
     } catch (error) {
-      if (analyticsContext) {
+      if (analyticsContext && targetLanguage) {
         void trackFeatureUsed({
           ...analyticsContext,
           ...providerAnalytics,
+          target_language: targetLanguage,
           outcome: "failure",
         })
       }
@@ -864,8 +872,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     }
   }
 
-  private async shouldSkipTranslationForCurrentTrack(): Promise<boolean> {
-    const config = await getLocalConfig()
+  private shouldSkipTranslationForCurrentTrack(config: Config | null): boolean {
     const targetLanguage = config?.language.targetCode
     const sourceLanguage = resolveLanguageCodeFromLocale(this.fetcher.getSourceLanguage())
 
@@ -910,11 +917,9 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     this.publishSourceTrack(next)
   }
 
-  private async processTranslatedSubtitles() {
+  private async processTranslatedSubtitles(config: Config | null) {
     const scheduler = this.subtitlesScheduler
     if (!scheduler) return
-
-    const config = await getLocalConfig()
 
     const useAiSegmentation = !!config?.videoSubtitles?.aiSegmentation
 

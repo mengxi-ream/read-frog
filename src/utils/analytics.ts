@@ -1,38 +1,32 @@
 import type {
-  AnalyticsOutcome,
-  AnalyticsSurface,
-  FeatureProviderAnalytics,
+  AnalyticsFeature,
   FeatureUsageContext,
   FeatureUsedEventProperties,
+  SurfaceByFeature,
 } from "@/types/analytics"
 import { ANALYTICS_FEATURE_USED_EVENT } from "@/utils/constants/analytics"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
 
-export interface FeatureUsedEventInput extends FeatureUsageContext, FeatureProviderAnalytics {
-  outcome: AnalyticsOutcome
-  finishedAt?: number
-  /**
-   * Measured on the input of this one use, so it is passed when the use is reported
-   * rather than carried on the usage context. Only text translation features set it.
-   */
-  char_count?: number
-}
+type WithTiming<T> = T extends unknown
+  ? Omit<T, "latency_ms"> & { startedAt: number; finishedAt?: number }
+  : never
+type WithoutOutcome<T> = T extends unknown ? Omit<T, "outcome" | "finishedAt"> : never
+
+export type FeatureUsedEventInput = WithTiming<FeatureUsedEventProperties>
 
 /** Everything `trackFeatureUsed` needs except the outcome, which the attempt decides. */
-export type FeatureAttemptInput = Omit<FeatureUsedEventInput, "outcome" | "finishedAt">
+export type FeatureAttemptInput = WithoutOutcome<FeatureUsedEventInput>
 
-export function createFeatureUsageContext(
-  feature: FeatureUsageContext["feature"],
-  surface: AnalyticsSurface,
+export function createFeatureUsageContext<F extends AnalyticsFeature>(
+  feature: F,
+  surface: SurfaceByFeature[NoInfer<F>],
   startedAt = Date.now(),
-  metadata?: Pick<FeatureUsageContext, "action_id" | "action_name">,
-): FeatureUsageContext {
+): FeatureUsageContext<F> {
   return {
     feature,
     surface,
     startedAt,
-    ...metadata,
   }
 }
 
@@ -40,28 +34,13 @@ export function getLatencyMs(startedAt: number, finishedAt = Date.now()): number
   return Math.max(0, finishedAt - startedAt)
 }
 
-export function buildFeatureUsedEventProperties({
-  feature,
-  surface,
-  outcome,
-  startedAt,
-  finishedAt = Date.now(),
-  action_id,
-  action_name,
-  char_count,
-  provider,
-  backend_kind,
-}: FeatureUsedEventInput): FeatureUsedEventProperties {
+export function buildFeatureUsedEventProperties(
+  input: FeatureUsedEventInput,
+): FeatureUsedEventProperties {
+  const { startedAt, finishedAt = Date.now(), ...properties } = input
   return {
-    feature,
-    surface,
-    outcome,
+    ...properties,
     latency_ms: getLatencyMs(startedAt, finishedAt),
-    provider,
-    backend_kind,
-    ...(action_id !== undefined ? { action_id } : {}),
-    ...(action_name !== undefined ? { action_name } : {}),
-    ...(char_count !== undefined ? { char_count } : {}),
   }
 }
 

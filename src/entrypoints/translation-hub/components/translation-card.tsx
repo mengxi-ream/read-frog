@@ -59,6 +59,7 @@ export function TranslationCard({
           ),
           ...classifyProviderConfig(provider),
           char_count: req.inputText.length,
+          target_language: req.targetLanguage,
         },
         async () => {
           if (!provider) throw new Error("Provider not found")

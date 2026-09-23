@@ -187,7 +187,12 @@ async function translateSingleSubtitle(
     glossaryEnabled,
     langConfig.targetCode,
   )
-  trackGlossaryUsed("videoSubtitles", glossaryTerms, classifySerializedProvider(providerRef))
+  trackGlossaryUsed(
+    "videoSubtitles",
+    glossaryTerms,
+    langConfig.targetCode,
+    classifySerializedProvider(providerRef),
+  )
   const hashComponents = await buildSubtitleHashComponents(
     text,
     providerRef,

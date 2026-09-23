@@ -429,6 +429,16 @@ describe("translate-text", () => {
   })
 
   describe("translateTextForInput", () => {
+    it("reports the resolved target used by the input request", async () => {
+      mockSendMessage.mockResolvedValue("translated input")
+      const onTargetLanguageResolved = vi.fn<(targetLanguage: string) => void>()
+
+      await translateTextForInput("hello", "eng", "cmn", onTargetLanguageResolved)
+
+      expect(onTargetLanguageResolved).toHaveBeenCalledOnce()
+      expect(onTargetLanguageResolved).toHaveBeenCalledWith("cmn")
+    })
+
     it("skips webpage context loading for non-llm input translations", async () => {
       mockSendMessage.mockResolvedValue("translated input")
 

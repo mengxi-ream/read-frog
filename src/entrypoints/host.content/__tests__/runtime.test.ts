@@ -20,6 +20,7 @@ const {
   messageHandlers: new Map<string, (msg?: any) => any>(),
   managerInstances: [] as Array<{
     isActive: boolean
+    getDetectedPageLanguage?: (url: string) => string | undefined
     start: ReturnType<typeof vi.fn>
     stop: ReturnType<typeof vi.fn>
     refreshSiteRuleCSS: ReturnType<typeof vi.fn>
@@ -80,6 +81,7 @@ vi.mock("../translation-control/node-translation", () => ({
 vi.mock("../translation-control/page-translation", () => ({
   PageTranslationManager: class {
     isActive = false
+    getDetectedPageLanguage?: (url: string) => string | undefined
     start = vi.fn<(...args: any[]) => any>(async () => {
       this.isActive = true
     })
@@ -94,7 +96,8 @@ vi.mock("../translation-control/page-translation", () => ({
       vi.fn<(...args: any[]) => any>(),
     )
 
-    constructor() {
+    constructor(_options: unknown, getDetectedPageLanguage?: (url: string) => string | undefined) {
+      this.getDetectedPageLanguage = getDetectedPageLanguage
       managerInstances.push(this)
     }
   },
@@ -225,7 +228,37 @@ describe("bootstrapHostContent URL changes", () => {
       url: window.location.href,
       detectedCodeOrUnd: "jpn",
     })
+    expect(managerInstances[0]?.getDetectedPageLanguage?.(window.location.href)).toBe("jpn")
 
+    invalidate()
+  })
+
+  it("ignores an older detection that completes after the page URL changes", async () => {
+    const { ctx, invalidate } = createContentScriptContext()
+    await bootstrapHostContent(ctx, null)
+    const manager = managerInstances[0]
+    const oldUrl = window.location.href
+    let resolveOld: ((result: { detectedCodeOrUnd: string }) => void) | undefined
+    mockDetectPageLanguageLightweight.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveOld = resolve
+        }),
+    )
+    mockDetectPageLanguageLightweight.mockResolvedValueOnce({ detectedCodeOrUnd: "jpn" })
+
+    messageHandlers.get("refreshDetectedPageLanguage")?.()
+    window.history.pushState({}, "", "/analytics-new-page")
+    const newUrl = window.location.href
+    window.dispatchEvent(
+      new CustomEvent("extension:URLChange", { detail: { from: oldUrl, to: newUrl } }),
+    )
+    await flushAsyncWork()
+    resolveOld?.({ detectedCodeOrUnd: "fra" })
+    await flushAsyncWork()
+
+    expect(manager?.getDetectedPageLanguage?.(oldUrl)).toBeUndefined()
+    expect(manager?.getDetectedPageLanguage?.(newUrl)).toBe("jpn")
     invalidate()
   })
 })

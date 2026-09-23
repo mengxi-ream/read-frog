@@ -46,6 +46,9 @@ describe("analytics helpers", () => {
         finishedAt: 1_500,
         provider: "openai",
         backend_kind: "llm",
+        translation_mode: "bilingual",
+        target_language: "cmn",
+        source_language: "jpn",
       }),
     ).toEqual({
       feature: ANALYTICS_FEATURE.PAGE_TRANSLATION,
@@ -54,6 +57,9 @@ describe("analytics helpers", () => {
       latency_ms: 1_500,
       provider: "openai",
       backend_kind: "llm",
+      translation_mode: "bilingual",
+      target_language: "cmn",
+      source_language: "jpn",
     })
   })
 
@@ -93,7 +99,13 @@ describe("analytics helpers", () => {
     expect(context).not.toHaveProperty("char_count")
 
     await trackFeatureAttempt(
-      { ...context, provider: "openai", backend_kind: "llm", char_count: 42 },
+      {
+        ...context,
+        provider: "openai",
+        backend_kind: "llm",
+        char_count: 42,
+        target_language: "cmn",
+      },
       async () => "translated",
     )
 
@@ -118,6 +130,8 @@ describe("analytics helpers", () => {
       finishedAt: 1_500,
       provider: "openai" as const,
       backend_kind: "llm" as const,
+      translation_mode: "bilingual" as const,
+      target_language: "cmn" as const,
     }
 
     await expect(trackFeatureUsed(input)).resolves.toBeUndefined()
@@ -141,6 +155,8 @@ describe("analytics helpers", () => {
         finishedAt: 1_500,
         provider: "openai",
         backend_kind: "llm",
+        translation_mode: "bilingual",
+        target_language: "cmn",
       }),
     ).resolves.toBeUndefined()
 
