@@ -17,7 +17,11 @@ import { initI18n } from "@/utils/i18n"
 import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
 import { ensureIconifyBackgroundFetch } from "@/utils/iconify/setup-background-fetch"
 import { protectSelectAllShadowRoot } from "@/utils/select-all"
-import { insertShadowRootUIWrapperInto, OVERLAY_SHADOW_ROOT_CSS } from "@/utils/shadow-root"
+import {
+  insertShadowRootUIWrapperInto,
+  OVERLAY_SHADOW_ROOT_CSS,
+  reattachShadowHostOnBodySwap,
+} from "@/utils/shadow-root"
 import {
   clearEffectiveSiteControlUrl,
   getEffectiveSiteControlUrl,
@@ -89,6 +93,7 @@ async function mountSelectionUI(ctx: ContentScriptContext) {
   })
 
   ui.mount()
+  ctx.onInvalidated(reattachShadowHostOnBodySwap(ui.shadowHost))
 }
 
 export default defineContentScript({

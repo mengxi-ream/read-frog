@@ -2,7 +2,7 @@ import type { JSONValue } from "ai"
 import type { RefObject } from "react"
 import type { SelectionToolbarCustomActionRequestSlice } from "../atoms"
 import type { SelectionToolbarInlineError } from "../inline-error"
-import type { AnalyticsSurface, FeatureProviderAnalytics } from "@/types/analytics"
+import type { FeatureProviderAnalytics, SurfaceByFeature } from "@/types/analytics"
 import type {
   BackgroundStructuredObjectStreamSnapshot,
   ThinkingSnapshot,
@@ -61,7 +61,7 @@ interface CustomActionExecutionRequest {
   analytics: FeatureProviderAnalytics & {
     actionId: string
     actionName: string
-    surface: AnalyticsSurface
+    surface: SurfaceByFeature["custom_ai_action"]
   }
   key: string
   payload: {
@@ -232,7 +232,7 @@ function buildCustomActionExecutionRequest({
   popoverSessionKey,
   rerunNonce,
 }: {
-  analyticsSurface: AnalyticsSurface
+  analyticsSurface: SurfaceByFeature["custom_ai_action"]
   executionContext: CustomActionExecutionContext
   popoverSessionKey: number
   rerunNonce: number
@@ -308,7 +308,7 @@ export function useCustomActionExecution({
   popoverSessionKey,
   rerunNonce,
 }: {
-  analyticsSurface: AnalyticsSurface
+  analyticsSurface: SurfaceByFeature["custom_ai_action"]
   bodyRef: RefObject<HTMLDivElement | null>
   executionContext: CustomActionExecutionContext | null
   open: boolean
@@ -364,12 +364,11 @@ export function useCustomActionExecution({
     const analyticsContext = createFeatureUsageContext(
       ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
       request.analytics.surface,
-      Date.now(),
-      {
-        action_id: request.analytics.actionId,
-        action_name: request.analytics.actionName,
-      },
     )
+    const actionAnalytics = {
+      action_id: request.analytics.actionId,
+      action_name: request.analytics.actionName,
+    }
     const providerAnalytics: FeatureProviderAnalytics = {
       provider: request.analytics.provider,
       backend_kind: request.analytics.backend_kind,
@@ -412,6 +411,7 @@ export function useCustomActionExecution({
         setThinking(finalResult.thinking)
         void trackFeatureUsed({
           ...analyticsContext,
+          ...actionAnalytics,
           ...providerAnalytics,
           outcome: "success",
         })
@@ -428,6 +428,7 @@ export function useCustomActionExecution({
         setError(createSelectionToolbarRuntimeError("customAction", caughtError))
         void trackFeatureUsed({
           ...analyticsContext,
+          ...actionAnalytics,
           ...providerAnalytics,
           outcome: "failure",
         })

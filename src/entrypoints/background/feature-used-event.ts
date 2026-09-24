@@ -21,6 +21,8 @@ export function setupFeatureUsedEventHandlers(): void {
       void recordFeatureActiveDay()
     }
 
-    await captureFeatureUsedEventInBackground(message.data)
+    // The sender's top-level tab, not anything from the payload, identifies the page:
+    // it reflects the site the user is on even when the feature ran in an iframe.
+    await captureFeatureUsedEventInBackground(message.data, message.sender?.tab)
   })
 }

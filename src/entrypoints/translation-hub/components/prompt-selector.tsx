@@ -19,7 +19,9 @@ export function PromptSelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
 
   // Only show when at least one LLM provider is selected
-  const hasLLMProvider = selectedProviders.some((p) => isLLMProvider(p.provider))
+  const hasLLMProvider = selectedProviders.some(
+    (provider) => provider.kind === "system" || isLLMProvider(provider.config.provider),
+  )
   if (!hasLLMProvider) return null
 
   const { patterns, promptId } = translateConfig.customPromptsConfig

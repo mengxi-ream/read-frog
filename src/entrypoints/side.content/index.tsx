@@ -18,7 +18,11 @@ import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { initI18n } from "@/utils/i18n"
 import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
 import { protectSelectAllShadowRoot } from "@/utils/select-all"
-import { insertShadowRootUIWrapperInto, OVERLAY_SHADOW_ROOT_CSS } from "@/utils/shadow-root"
+import {
+  insertShadowRootUIWrapperInto,
+  OVERLAY_SHADOW_ROOT_CSS,
+  reattachShadowHostOnBodySwap,
+} from "@/utils/shadow-root"
 import { isSiteEnabled } from "@/utils/site-control"
 import { queryClient } from "@/utils/tanstack-query"
 import { getLocalThemeMode } from "@/utils/theme"
@@ -125,5 +129,6 @@ export default defineContentScript({
     })
 
     ui.mount()
+    ctx.onInvalidated(reattachShadowHostOnBodySwap(ui.shadowHost))
   },
 })

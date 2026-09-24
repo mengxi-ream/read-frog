@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.47.5
+
+### Patch Changes
+
+- [#2218](https://github.com/mengxi-ream/read-frog/pull/2218) [`0bfc7ac`](https://github.com/mengxi-ream/read-frog/commit/0bfc7acd15f6b47a49f13cf7145bda68b4144475) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(input-translation): restore translation in Reddit reply editors
+
+- [#2226](https://github.com/mengxi-ream/read-frog/pull/2226) [`f1cde34`](https://github.com/mengxi-ream/read-frog/commit/f1cde34a011ba959d8d9d3111ef7f9000bdd4a7b) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translation): keep Read Frog controls mounted after client-side body replacement
+
 ## 1.47.4
 
 ### Patch Changes

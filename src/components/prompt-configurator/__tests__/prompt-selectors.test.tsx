@@ -30,7 +30,7 @@ vi.mock("jotai", () => ({
   },
   useAtomValue: (atom: object) => {
     if (atom === providerRefAtom) return testState.pageTranslationProviderRef
-    if (atom === selectedProvidersAtom) return [{ provider: "mock-llm" }]
+    if (atom === selectedProvidersAtom) return [testState.pageTranslationProviderRef]
     throw new Error("Unexpected atom")
   },
 }))
@@ -177,6 +177,12 @@ describe("translation prompt selectors", () => {
 
   it("shows the selected built-in and uses the same order in Translation Hub", () => {
     testState.pageTranslation!.customPromptsConfig.promptId = "precision-rewrite"
+    testState.pageTranslationProviderRef = {
+      kind: "system",
+      id: "read-frog-free-ai",
+      name: "Built-in AI",
+      modelTier: "normal",
+    }
     render(<TranslationHubPromptSelector />)
 
     expect(screen.getByRole("combobox")).toHaveTextContent("Deep polish")

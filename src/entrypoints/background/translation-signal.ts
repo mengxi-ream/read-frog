@@ -32,7 +32,7 @@ function notifyPageTranslationStateChanged(tabId: number, enabled: boolean) {
 function requestManagerToTogglePageTranslation(
   tabId: number,
   enabled: boolean,
-  analyticsContext?: FeatureUsageContext,
+  analyticsContext?: FeatureUsageContext<"page_translation">,
 ) {
   void sendMessage("askManagerToTogglePageTranslation", { enabled, analyticsContext }, tabId).catch(
     (error) => logger.warn("Failed to ask page translation manager to toggle", error),

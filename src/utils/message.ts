@@ -57,11 +57,11 @@ interface ProtocolMap {
   tryToSetEnablePageTranslationByTabId: (data: {
     tabId: number
     enabled: boolean
-    analyticsContext?: FeatureUsageContext
+    analyticsContext?: FeatureUsageContext<"page_translation">
   }) => void
   tryToSetEnablePageTranslationOnContentScript: (data: {
     enabled: boolean
-    analyticsContext?: FeatureUsageContext
+    analyticsContext?: FeatureUsageContext<"page_translation">
   }) => void
   setAndNotifyPageTranslationStateChangedByManager: (data: {
     enabled: boolean
@@ -81,7 +81,7 @@ interface ProtocolMap {
   // ask host to start page translation
   askManagerToTogglePageTranslation: (data: {
     enabled: boolean
-    analyticsContext?: FeatureUsageContext
+    analyticsContext?: FeatureUsageContext<"page_translation">
   }) => void
   openSelectionTranslationFromContextMenu: (data: { selectionText: string }) => void
   openSelectionCustomActionFromContextMenu: (data: {

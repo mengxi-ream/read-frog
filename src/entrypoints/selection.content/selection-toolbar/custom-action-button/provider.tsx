@@ -261,11 +261,8 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
           ...createFeatureUsageContext(
             ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
             ANALYTICS_SURFACE.CONTEXT_MENU,
-            Date.now(),
-            {
-              action_id: actionId,
-            },
           ),
+          action_id: actionId,
           ...UNKNOWN_FEATURE_PROVIDER,
           outcome: "failure",
         })
@@ -280,12 +277,9 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
           ...createFeatureUsageContext(
             ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
             ANALYTICS_SURFACE.CONTEXT_MENU,
-            Date.now(),
-            {
-              action_id: action.id,
-              action_name: action.name,
-            },
           ),
+          action_id: action.id,
+          action_name: action.name,
           ...classifyResolvedProvider(
             resolveProviderRefForCapability("customAction", providersConfig, action.providerId),
           ),
@@ -335,17 +329,13 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
       return
     }
 
+    if (!activeActionId) return
     const analyticsContext = createFeatureUsageContext(
       ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
       sourceSurface,
-      Date.now(),
-      {
-        action_id: activeActionId ?? undefined,
-        action_name: activeAction?.name,
-      },
     )
     const nextErrorKey = JSON.stringify({
-      actionId: analyticsContext.action_id ?? null,
+      actionId: activeActionId,
       description: executionPlan.error.description,
       popoverSessionKey,
       surface: sourceSurface,
@@ -358,11 +348,13 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
 
     void trackFeatureUsed({
       ...analyticsContext,
+      action_id: activeActionId,
+      ...(activeAction ? { action_name: activeAction.name } : {}),
       ...classifyResolvedProvider(customActionRequest.provider),
       outcome: "failure",
     })
   }, [
-    activeAction?.name,
+    activeAction,
     activeActionId,
     executionPlan.error,
     executionPlan.executionContext,

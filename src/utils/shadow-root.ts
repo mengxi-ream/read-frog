@@ -23,3 +23,19 @@ export function insertShadowRootUIWrapperInto(container: HTMLElement, shadowHost
 
   return wrapper
 }
+
+/** Keep an existing UI and its React state when a client router replaces <body>. */
+export function reattachShadowHostOnBodySwap(shadowHost: HTMLElement): () => void {
+  let currentBody = document.body
+  const observer = new MutationObserver(() => {
+    const nextBody = document.body
+    if (!nextBody || nextBody === currentBody) return
+
+    currentBody = nextBody
+    if (shadowHost.parentElement !== nextBody) nextBody.append(shadowHost)
+  })
+
+  // Only direct children of <html> matter. Changes inside <body> cannot trigger this observer.
+  observer.observe(document.documentElement, { childList: true })
+  return () => observer.disconnect()
+}
