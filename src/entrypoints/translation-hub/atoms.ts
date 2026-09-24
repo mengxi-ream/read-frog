@@ -1,8 +1,8 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
-import type { TranslateProviderConfig } from "@/types/config/provider"
 import { atom } from "jotai"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { filterEnabledProvidersConfig, getTranslateProvidersConfig } from "@/utils/config/helpers"
+import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 
 // === LangCode Atoms (derive from config, local override) ===
 const sourceLangCodeOverrideAtom = atom<LangCodeISO6393 | "auto" | null>(null)
@@ -61,13 +61,13 @@ export const selectedProviderIdsAtom = atom(
 // === Translation Card UI State ===
 export const translationCardExpandedStateAtom = atom<Record<string, boolean>>({})
 
-// === Derived: Selected Provider Configs (read-only) ===
+// === Derived: Selected Provider Refs (read-only) ===
 export const selectedProvidersAtom = atom((get) => {
   const ids = get(selectedProviderIdsAtom)
   const providersConfig = get(configFieldsAtomMap.providersConfig)
   return ids
-    .map((id) => providersConfig.find((p) => p.id === id))
-    .filter((p): p is TranslateProviderConfig => p !== undefined)
+    .map((id) => resolveProviderRefForCapability("pageTranslation", providersConfig, id))
+    .filter((provider) => provider !== null)
 })
 
 // === Write-Only Action Atom (only for operations that touch multiple atoms) ===

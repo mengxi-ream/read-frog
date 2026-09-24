@@ -11,6 +11,9 @@ const {
   providersAtom,
   requestAtom,
   selectedProviderIdsAtom,
+  translateTextCoreMock,
+  providerRefState,
+  mutationFnState,
 } = vi.hoisted(() => ({
   anchoredToastAddMock: vi.fn<(options: unknown) => void>(),
   clipboardWriteMock: vi.fn<(text: string) => void>(),
@@ -18,6 +21,9 @@ const {
   providersAtom: {},
   requestAtom: {},
   selectedProviderIdsAtom: {},
+  translateTextCoreMock: vi.fn<() => Promise<string>>(),
+  providerRefState: { kind: "local" },
+  mutationFnState: { current: null as null | ((request: unknown) => Promise<string | undefined>) },
 }))
 
 interface UseMutationMockShape {
@@ -40,7 +46,10 @@ const useMutationMock = vi.hoisted(() => {
 })
 
 vi.mock("@tanstack/react-query", () => ({
-  useMutation: () => useMutationMock.current,
+  useMutation: (options: { mutationFn: (request: unknown) => Promise<string | undefined> }) => {
+    mutationFnState.current = options.mutationFn
+    return useMutationMock.current
+  },
 }))
 
 vi.mock("jotai", () => ({
@@ -77,6 +86,24 @@ vi.mock("@/utils/config/helpers", () => ({
   getProviderConfigById: () => ({ id: "provider-1", name: "OpenAI", provider: "openai" }),
 }))
 
+vi.mock("@/utils/providers/provider-registry", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/utils/providers/provider-registry")>()),
+  BUILT_IN_AI_PROVIDER_LOGO: "built-in-logo",
+  resolveProviderRefForCapability: () =>
+    providerRefState.kind === "system"
+      ? { kind: "system", id: "read-frog-free-ai", name: "Built-in AI", modelTier: "normal" }
+      : {
+          kind: "local",
+          id: "provider-1",
+          name: "OpenAI",
+          config: { id: "provider-1", name: "OpenAI", provider: "openai" },
+        },
+}))
+
+vi.mock("@/utils/host/translate/translate-text", () => ({
+  translateTextCore: translateTextCoreMock,
+}))
+
 vi.mock("@/utils/i18n", () => ({
   i18n: { t: (key: string) => key },
 }))
@@ -89,6 +116,7 @@ vi.mock("@/entrypoints/translation-hub/atoms", () => ({
 
 describe("TranslationCard copy feedback", () => {
   beforeEach(() => {
+    providerRefState.kind = "local"
     anchoredToastAddMock.mockReset()
     clipboardWriteMock.mockReset()
     Object.defineProperty(navigator, "clipboard", {
@@ -126,8 +154,44 @@ describe("TranslationCard copy feedback", () => {
   })
 })
 
+describe("TranslationCard built-in translation", () => {
+  it("routes built-in AI through the hosted page translation pipeline", async () => {
+    providerRefState.kind = "system"
+    translateTextCoreMock.mockResolvedValueOnce("Translated by built-in AI")
+    render(
+      <TranslationCard
+        providerId="read-frog-free-ai"
+        isExpanded
+        onExpandedChange={vi.fn<(expanded: boolean) => void>()}
+      />,
+    )
+
+    const result = await mutationFnState.current!({
+      inputText: "Hello",
+      sourceLanguage: "eng",
+      targetLanguage: "cmn",
+      timestamp: 1,
+    })
+
+    expect(result).toBe("Translated by built-in AI")
+    expect(translateTextCoreMock).toHaveBeenCalledWith({
+      text: "Hello",
+      langConfig: { sourceCode: "eng", targetCode: "cmn", level: "intermediate" },
+      providerConfig: {
+        kind: "system",
+        id: "read-frog-free-ai",
+        name: "Built-in AI",
+        modelTier: "normal",
+      },
+      hostedFeature: "pageTranslation",
+      preserveLineBreaks: true,
+    })
+  })
+})
+
 describe("TranslationCard error display", () => {
   beforeEach(() => {
+    providerRefState.kind = "local"
     useMutationMock.current = {
       data: undefined,
       isError: true,
