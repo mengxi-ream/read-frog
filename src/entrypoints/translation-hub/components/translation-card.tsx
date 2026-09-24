@@ -58,6 +58,8 @@ export function TranslationCard({
             ANALYTICS_SURFACE.TRANSLATION_HUB,
           ),
           ...classifyProviderConfig(provider),
+          char_count: req.inputText.length,
+          target_language: req.targetLanguage,
         },
         async () => {
           if (!provider) throw new Error("Provider not found")

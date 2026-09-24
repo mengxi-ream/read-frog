@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import { createFeatureUsageContext } from "@/utils/analytics"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { PageTranslationManager } from "../page-translation"
 
@@ -135,6 +137,54 @@ describe("pageTranslationManager mutation observer root", () => {
       expect.anything(),
     )
 
+    manager.stop()
+  })
+
+  it("reports the selected page language and mode before the event reaches background", async () => {
+    const manager = new PageTranslationManager({}, () => "jpn")
+    await manager.start(
+      createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.POPUP),
+    )
+
+    expect(mockSendMessage).toHaveBeenCalledWith(
+      "trackFeatureUsedEvent",
+      expect.objectContaining({
+        feature: "page_translation",
+        source_language: "jpn",
+        target_language: DEFAULT_CONFIG.language.targetCode,
+        translation_mode: DEFAULT_CONFIG.pageTranslation.mode,
+      }),
+    )
+    manager.stop()
+  })
+
+  it("omits an unknown detected source without substituting English", async () => {
+    const manager = new PageTranslationManager({}, () => "und")
+    await manager.start(
+      createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.POPUP),
+    )
+
+    expect(mockSendMessage).toHaveBeenCalledWith(
+      "trackFeatureUsedEvent",
+      expect.not.objectContaining({ source_language: expect.anything() }),
+    )
+    manager.stop()
+  })
+
+  it("uses the configured source when it is explicit", async () => {
+    mockGetLocalConfig.mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      language: { ...DEFAULT_CONFIG.language, sourceCode: "eng" },
+    })
+    const manager = new PageTranslationManager({}, () => "jpn")
+    await manager.start(
+      createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.POPUP),
+    )
+
+    expect(mockSendMessage).toHaveBeenCalledWith(
+      "trackFeatureUsedEvent",
+      expect.objectContaining({ source_language: "eng" }),
+    )
     manager.stop()
   })
 })

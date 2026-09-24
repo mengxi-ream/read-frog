@@ -3,27 +3,32 @@ import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 
-export type NoteSuggestionAnalyticsAction = "suggestion_shown" | "suggestion_accepted"
+type NoteSuggestionAnalyticsInput = {
+  startedAt?: number
+  provider?: FeatureProviderAnalytics
+} & ({ action_id: "suggestion_shown" } | { action_id: "suggestion_accepted"; action_name: string })
 
-export function trackNoteSuggestionEvent(
-  actionId: NoteSuggestionAnalyticsAction,
-  options: {
-    startedAt?: number
-    actionName?: string
-    provider?: FeatureProviderAnalytics
-  } = {},
-) {
+export function trackNoteSuggestionEvent(input: NoteSuggestionAnalyticsInput) {
+  const context = createFeatureUsageContext(
+    ANALYTICS_FEATURE.NOTE_SUGGESTION,
+    ANALYTICS_SURFACE.SELECTION_TOOLBAR,
+    input.startedAt ?? Date.now(),
+  )
+  const provider = input.provider ?? UNKNOWN_FEATURE_PROVIDER
+  if (input.action_id === "suggestion_shown") {
+    void trackFeatureUsed({
+      ...context,
+      ...provider,
+      action_id: "suggestion_shown",
+      outcome: "success",
+    })
+    return
+  }
   void trackFeatureUsed({
-    ...createFeatureUsageContext(
-      ANALYTICS_FEATURE.NOTE_SUGGESTION,
-      ANALYTICS_SURFACE.SELECTION_TOOLBAR,
-      options.startedAt ?? Date.now(),
-      {
-        action_id: actionId,
-        ...(options.actionName !== undefined ? { action_name: options.actionName } : {}),
-      },
-    ),
-    ...(options.provider ?? UNKNOWN_FEATURE_PROVIDER),
+    ...context,
+    ...provider,
+    action_id: "suggestion_accepted",
+    action_name: input.action_name,
     outcome: "success",
   })
 }

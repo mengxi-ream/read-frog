@@ -1,4 +1,6 @@
+import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { AllProviderTypes } from "@/types/config/provider"
+import type { TranslationMode } from "@/types/config/translate"
 
 export const ANALYTICS_FEATURE = {
   PAGE_TRANSLATION: "page_translation",
@@ -53,19 +55,58 @@ export interface FeatureProviderAnalytics {
   backend_kind: AnalyticsBackendKind
 }
 
-export interface FeatureUsageContext {
-  feature: AnalyticsFeature
-  surface: AnalyticsSurface
-  startedAt: number
-  action_id?: string
-  action_name?: string
+export interface SurfaceByFeature {
+  page_translation:
+    | "popup"
+    | "floating_button"
+    | "context_menu"
+    | "page_auto"
+    | "shortcut"
+    | "touch_gesture"
+  selection_translation: "selection_toolbar" | "context_menu" | "shortcut"
+  custom_ai_action: "selection_toolbar" | "context_menu"
+  input_translation: "input_translation"
+  translation_hub: "translation_hub"
+  video_subtitles: "video_subtitles" | "video_subtitles_auto" | "shortcut"
+  text_to_speech: "selection_toolbar" | "context_menu" | "tts_settings"
+  note_suggestion: "selection_toolbar"
+  glossary: "page_translation" | "video_subtitles" | "selection_toolbar" | "input_translation"
 }
 
-export interface FeatureUsedEventProperties extends FeatureProviderAnalytics {
-  feature: AnalyticsFeature
-  surface: AnalyticsSurface
+export type FeatureUsageContext<F extends AnalyticsFeature = AnalyticsFeature> = {
+  feature: F
+  surface: SurfaceByFeature[F]
+  startedAt: number
+}
+
+export interface ObservedByFeature {
+  page_translation: {
+    translation_mode: TranslationMode
+    target_language: LangCodeISO6393
+    source_language?: LangCodeISO6393
+  }
+  selection_translation: { char_count: number; target_language: LangCodeISO6393 }
+  custom_ai_action: { action_id: string; action_name?: string }
+  input_translation: { char_count: number; target_language: LangCodeISO6393 }
+  translation_hub: { char_count: number; target_language: LangCodeISO6393 }
+  video_subtitles: { target_language: LangCodeISO6393 }
+  text_to_speech: Record<never, never>
+  note_suggestion:
+    | { action_id: "suggestion_shown" }
+    | { action_id: "suggestion_accepted"; action_name: string }
+  glossary: { target_language: LangCodeISO6393 }
+}
+
+export interface FeatureUsedEventBase extends FeatureProviderAnalytics {
   outcome: AnalyticsOutcome
   latency_ms: number
-  action_id?: string
-  action_name?: string
 }
+
+export type FeatureUsedEventPropertiesFor<F extends AnalyticsFeature> = FeatureUsedEventBase & {
+  feature: F
+  surface: SurfaceByFeature[F]
+} & ObservedByFeature[F]
+
+export type FeatureUsedEventProperties = {
+  [F in AnalyticsFeature]: FeatureUsedEventPropertiesFor<F>
+}[AnalyticsFeature]

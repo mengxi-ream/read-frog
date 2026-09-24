@@ -94,7 +94,8 @@ export function NoteSuggestionCard({
       return
     }
 
-    trackNoteSuggestionEvent("suggestion_shown", {
+    trackNoteSuggestionEvent({
+      action_id: "suggestion_shown",
       startedAt: firedAt,
       provider: analyticsProvider,
     })
@@ -141,9 +142,10 @@ export function NoteSuggestionCard({
     })
     if (outcome === "saved") {
       setSaveState("saved")
-      trackNoteSuggestionEvent("suggestion_accepted", {
+      trackNoteSuggestionEvent({
+        action_id: "suggestion_accepted",
         startedAt: firedAt,
-        actionName: liveAction.name,
+        action_name: liveAction.name,
         provider: analyticsProvider,
       })
     }

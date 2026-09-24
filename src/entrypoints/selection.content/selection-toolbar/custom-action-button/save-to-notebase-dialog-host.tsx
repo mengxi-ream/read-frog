@@ -124,12 +124,16 @@ export function SaveToNotebaseDialogHost() {
     setDialogState({ open: false })
   }
 
-  const recordSuggestionAcceptedIfNeeded = (actionName?: string) => {
+  const recordSuggestionAcceptedIfNeeded = (actionName: string) => {
     if (analyticsSource !== "note_suggestion") {
       return
     }
 
-    trackNoteSuggestionEvent("suggestion_accepted", { actionName, provider: analyticsProvider })
+    trackNoteSuggestionEvent({
+      action_id: "suggestion_accepted",
+      action_name: actionName,
+      provider: analyticsProvider,
+    })
   }
 
   const buildCustomActionsWithDraft = (draft: SelectionToolbarCustomAction) => {
