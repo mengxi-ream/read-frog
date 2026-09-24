@@ -116,7 +116,7 @@ describe("TranslationCard speech", () => {
       />,
     )
 
-    fireEvent.click(screen.getByRole("button", { name: "action.speak" }))
+    fireEvent.click(screen.getByRole("button", { name: "translationHub.speakTranslation" }))
 
     expect(ttsPlayMock).toHaveBeenCalledWith("Translated text", ttsConfig)
   })
@@ -157,7 +157,7 @@ describe("TranslationCard speech", () => {
       />,
     )
 
-    expect(screen.queryByRole("button", { name: "action.speak" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "translationHub.speakTranslation" })).toBeNull()
 
     useMutationMock.current.data = "Translated text"
     useMutationMock.current.isPending = true
@@ -169,7 +169,7 @@ describe("TranslationCard speech", () => {
       />,
     )
 
-    expect(screen.queryByRole("button", { name: "action.speak" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "translationHub.speakTranslation" })).toBeNull()
   })
 })
 

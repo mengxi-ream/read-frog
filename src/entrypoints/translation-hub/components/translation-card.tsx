@@ -139,7 +139,7 @@ export function TranslationCard({
     ? "speak.fetchingAudio"
     : isPlaying
       ? "action.playing"
-      : "action.speak"
+      : "translationHub.speakTranslation"
 
   const handleSpeak = () => {
     if (isFetching || isPlaying) {

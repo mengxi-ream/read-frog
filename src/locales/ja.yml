@@ -1428,6 +1428,8 @@ translationHub:
   translate: 翻訳
   copiedToClipboard: 翻訳をクリップボードにコピーしました！
   copyTranslation: 翻訳をコピー
+  speakSourceText: 原文を読み上げる
+  speakTranslation: 翻訳文を読み上げる
   expandCard: カードを展開
   collapseCard: カードを折りたたむ
   expandAllCards: すべて展開
