@@ -1544,6 +1544,8 @@ translationHub:
   translate: Traducir
   copiedToClipboard: ¡Traducción copiada al portapapeles!
   copyTranslation: Copiar traducción
+  speakSourceText: Leer texto original
+  speakTranslation: Leer traducción
   expandCard: Expandir tarjeta
   collapseCard: Contraer tarjeta
   expandAllCards: Expandir todo

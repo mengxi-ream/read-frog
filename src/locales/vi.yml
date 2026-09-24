@@ -1428,6 +1428,8 @@ translationHub:
   translate: Dịch
   copiedToClipboard: Đã sao chép bản dịch vào bộ nhớ tạm!
   copyTranslation: Sao chép bản dịch
+  speakSourceText: Đọc văn bản gốc
+  speakTranslation: Đọc bản dịch
   expandCard: Mở rộng thẻ
   collapseCard: Thu gọn thẻ
   expandAllCards: Mở rộng tất cả

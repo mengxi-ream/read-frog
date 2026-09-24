@@ -11,6 +11,9 @@ const {
   providersAtom,
   requestAtom,
   selectedProviderIdsAtom,
+  ttsAtom,
+  ttsPlayMock,
+  ttsStopMock,
   translateTextCoreMock,
   providerRefState,
   mutationFnState,
@@ -21,10 +24,16 @@ const {
   providersAtom: {},
   requestAtom: {},
   selectedProviderIdsAtom: {},
+  ttsAtom: {},
+  ttsPlayMock: vi.fn<(text: string, config: object) => Promise<void>>(),
+  ttsStopMock: vi.fn<() => void>(),
   translateTextCoreMock: vi.fn<() => Promise<string>>(),
   providerRefState: { kind: "local" },
   mutationFnState: { current: null as null | ((request: unknown) => Promise<string | undefined>) },
 }))
+
+const ttsState = vi.hoisted(() => ({ isFetching: false, isPlaying: false }))
+const ttsConfig = vi.hoisted(() => ({ defaultVoice: "en-US-AriaNeural" }))
 
 interface UseMutationMockShape {
   data: string | undefined
@@ -57,6 +66,7 @@ vi.mock("jotai", () => ({
   useAtomValue: (atom: object) => {
     if (atom === requestAtom) return null
     if (atom === languageAtom) return { level: "intermediate" }
+    if (atom === ttsAtom) return ttsConfig
     if (atom === providersAtom) return []
     return undefined
   },
@@ -75,12 +85,102 @@ vi.mock("@/components/ui/base-ui/toast", () => ({
   anchoredToastManager: { add: anchoredToastAddMock },
 }))
 
+vi.mock("@/hooks/use-text-to-speech", () => ({
+  useTextToSpeech: () => ({
+    play: ttsPlayMock,
+    stop: ttsStopMock,
+    ...ttsState,
+  }),
+}))
+
 vi.mock("@/utils/atoms/config", () => ({
   configFieldsAtomMap: {
     language: languageAtom,
+    tts: ttsAtom,
     providersConfig: providersAtom,
   },
 }))
+
+describe("TranslationCard speech", () => {
+  beforeEach(() => {
+    ttsPlayMock.mockReset().mockResolvedValue(undefined)
+    ttsStopMock.mockReset()
+    ttsState.isFetching = false
+    ttsState.isPlaying = false
+    useMutationMock.current = {
+      data: "Translated text",
+      isError: false,
+      isPending: false,
+      mutate: vi.fn<(request: unknown) => void>(),
+      error: undefined,
+    }
+  })
+
+  it("plays the card's translated text using the configured voice settings", () => {
+    render(
+      <TranslationCard
+        providerId="provider-1"
+        isExpanded
+        onExpandedChange={vi.fn<(expanded: boolean) => void>()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: "translationHub.speakTranslation" }))
+
+    expect(ttsPlayMock).toHaveBeenCalledWith("Translated text", ttsConfig)
+  })
+
+  it("stops speech while audio is loading or playing", () => {
+    ttsState.isFetching = true
+    const { rerender } = render(
+      <TranslationCard
+        providerId="provider-1"
+        isExpanded
+        onExpandedChange={vi.fn<(expanded: boolean) => void>()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: "speak.fetchingAudio" }))
+    ttsState.isFetching = false
+    ttsState.isPlaying = true
+    rerender(
+      <TranslationCard
+        providerId="provider-1"
+        isExpanded
+        onExpandedChange={vi.fn<(expanded: boolean) => void>()}
+      />,
+    )
+    fireEvent.click(screen.getByRole("button", { name: "action.playing" }))
+
+    expect(ttsStopMock).toHaveBeenCalledTimes(2)
+    expect(ttsPlayMock).not.toHaveBeenCalled()
+  })
+
+  it("hides speech until a translation succeeds", () => {
+    useMutationMock.current.data = undefined
+    const { rerender } = render(
+      <TranslationCard
+        providerId="provider-1"
+        isExpanded
+        onExpandedChange={vi.fn<(expanded: boolean) => void>()}
+      />,
+    )
+
+    expect(screen.queryByRole("button", { name: "translationHub.speakTranslation" })).toBeNull()
+
+    useMutationMock.current.data = "Translated text"
+    useMutationMock.current.isPending = true
+    rerender(
+      <TranslationCard
+        providerId="provider-1"
+        isExpanded
+        onExpandedChange={vi.fn<(expanded: boolean) => void>()}
+      />,
+    )
+
+    expect(screen.queryByRole("button", { name: "translationHub.speakTranslation" })).toBeNull()
+  })
+})
 
 vi.mock("@/utils/config/helpers", () => ({
   getProviderConfigById: () => ({ id: "provider-1", name: "OpenAI", provider: "openai" }),

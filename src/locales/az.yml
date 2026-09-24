@@ -1537,6 +1537,8 @@ translationHub:
   translate: Tərcümə et
   copiedToClipboard: Tərcümə mübadilə buferinə köçürüldü!
   copyTranslation: Tərcüməni köçür
+  speakSourceText: Mənbə mətni səsləndir
+  speakTranslation: Tərcüməni səsləndir
   expandCard: Kartı genişləndir
   collapseCard: Kartı yığ
   expandAllCards: Hamısını genişləndir

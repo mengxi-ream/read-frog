@@ -1428,6 +1428,8 @@ translationHub:
   translate: Перевести
   copiedToClipboard: Перевод скопирован в буфер обмена!
   copyTranslation: Копировать перевод
+  speakSourceText: Озвучить исходный текст
+  speakTranslation: Озвучить перевод
   expandCard: Развернуть карточку
   collapseCard: Свернуть карточку
   expandAllCards: Развернуть все

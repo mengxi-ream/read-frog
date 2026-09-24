@@ -1428,6 +1428,8 @@ translationHub:
   translate: Çevir
   copiedToClipboard: Çeviri panoya kopyalandı!
   copyTranslation: Çeviriyi kopyala
+  speakSourceText: Kaynak metni seslendir
+  speakTranslation: Çeviriyi seslendir
   expandCard: Kartı genişlet
   collapseCard: Kartı daralt
   expandAllCards: Tümünü genişlet
