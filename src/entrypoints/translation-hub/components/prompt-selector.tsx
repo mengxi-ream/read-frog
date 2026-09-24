@@ -13,10 +13,12 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { DEFAULT_TRANSLATE_PROMPT_ID } from "@/utils/constants/prompt"
 import { i18n } from "@/utils/i18n"
 import { selectedProvidersAtom } from "../atoms"
+import { getHubPromptConfig } from "../prompt"
 
 export function PromptSelector() {
   const selectedProviders = useAtomValue(selectedProvidersAtom)
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
+  const [hubConfig, setHubConfig] = useAtom(configFieldsAtomMap.translationHub)
+  const translateConfig = useAtomValue(configFieldsAtomMap.pageTranslation)
 
   // Only show when at least one LLM provider is selected
   const hasLLMProvider = selectedProviders.some(
@@ -24,7 +26,12 @@ export function PromptSelector() {
   )
   if (!hasLLMProvider) return null
 
-  const { patterns, promptId } = translateConfig.customPromptsConfig
+  const { patterns, promptId } = getHubPromptConfig(
+    hubConfig.promptId ??
+      translateConfig.customPromptsConfig.promptId ??
+      DEFAULT_TRANSLATE_PROMPT_ID,
+    translateConfig.customPromptsConfig,
+  )
   const items = getPageTranslatePromptSelectItems(patterns)
   const selectedItem = items.find(({ value }) => value === promptId) ?? items[0]
 
@@ -33,12 +40,7 @@ export function PromptSelector() {
       items={items}
       value={promptId ?? DEFAULT_TRANSLATE_PROMPT_ID}
       onValueChange={(value) => {
-        void setTranslateConfig({
-          customPromptsConfig: {
-            ...translateConfig.customPromptsConfig,
-            promptId: value ?? DEFAULT_TRANSLATE_PROMPT_ID,
-          },
-        })
+        void setHubConfig({ promptId: value ?? DEFAULT_TRANSLATE_PROMPT_ID })
       }}
     >
       <SelectTrigger className="w-36">

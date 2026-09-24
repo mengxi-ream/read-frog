@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/base-ui/textarea"
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { DEFAULT_TRANSLATE_PROMPT_ID } from "@/utils/constants/prompt"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 import {
@@ -13,6 +14,7 @@ import {
   targetLangCodeAtom,
   translateRequestAtom,
 } from "../atoms"
+import { getHubPromptConfig } from "../prompt"
 
 export function TextInput() {
   const [value, setValue] = useAtom(inputTextAtom)
@@ -20,6 +22,8 @@ export function TextInput() {
   const targetLangCode = useAtomValue(targetLangCodeAtom)
   const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
   const setTranslateRequest = useSetAtom(translateRequestAtom)
+  const hubConfig = useAtomValue(configFieldsAtomMap.translationHub)
+  const pageTranslation = useAtomValue(configFieldsAtomMap.pageTranslation)
   const { play, stop, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.TRANSLATION_HUB)
 
   const speechAction = isFetching
@@ -43,6 +47,12 @@ export function TextInput() {
       sourceLanguage: sourceLangCode,
       targetLanguage: targetLangCode,
       timestamp: Date.now(),
+      promptConfig: getHubPromptConfig(
+        hubConfig.promptId ??
+          pageTranslation.customPromptsConfig.promptId ??
+          DEFAULT_TRANSLATE_PROMPT_ID,
+        pageTranslation.customPromptsConfig,
+      ),
     })
   }
 
