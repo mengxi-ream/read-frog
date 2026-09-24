@@ -168,7 +168,7 @@ Background 移除 `getTargetLanguage`、`getPageAnalyticsContext` runtime 依赖
 4. **页面源语言**：在顶层 content runtime 缓存与 URL 关联的原始检测结果，向页面 manager 注入读取接口；manager 根据本次源设置在发送消息前构造 `source_language`，`auto` 无可信结果时省略。Background 不参与取值。
 5. **Background 收口**：删除页面 analytics context 查询、通用目标语言读取和无意义的 char count enricher；用仓库现有的 `ts-pattern` 对 feature 做穷尽匹配，在各分支校验并挑选允许的字段，保留活跃天数、去重与 PostHog 过滤流程。
 6. **统计迁移**：更新依赖 `target_language` 的 PostHog 查询/说明。旧版本表示全局配置偏好，新版本表示本次执行目标；使用已有 `extension_version` 划分版本，不把两个时期同名属性直接混算。新版非翻译功能不再有该属性。
-7. **发布记录**：实现用户可见的 telemetry 语义修正时，按仓库规则加入 `@read-frog/extension` patch changeset，内容使用 conventional commit 格式。
+7. **发布记录**：本次仅调整埋点语义，不生成 `@read-frog/extension` changeset；发布后按扩展版本区分新旧事件数据。
 
 ## 验证与完成标准
 
@@ -182,5 +182,5 @@ Background 移除 `getTargetLanguage`、`getPageAnalyticsContext` runtime 依赖
 ## 实施状态
 
 - [x] 类型契约、各功能的目标语言上报、页面源语言本地快照与 background `ts-pattern` 校验已在本分支实现。
-- [x] 既有 changeset 已更新；类型检查与 Chrome 扩展构建通过。`SKIP_FREE_API=true` 的全量测试在限制并发后通过：332 个测试文件、3486 个测试通过，1 个文件和 4 个测试按配置跳过。
+- [x] 埋点 changeset 已移除；类型检查与 Chrome 扩展构建通过。推送前全量测试通过：333 个测试文件、3490 个测试。
 - [ ] PostHog 中依赖旧 `target_language` 语义的查询需在新扩展版本发布后按 `extension_version` 划分，再切换到新定义。
