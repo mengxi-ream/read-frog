@@ -8,13 +8,17 @@ import { Button } from "@/components/ui/base-ui/button"
 import { anchoredToastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureAttempt } from "@/utils/analytics"
-import { classifyProviderConfig } from "@/utils/analytics-provider"
+import { classifyResolvedProvider } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { getProviderConfigById } from "@/utils/config/helpers"
 import { PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
+import { translateTextCore } from "@/utils/host/translate/translate-text"
 import { i18n } from "@/utils/i18n"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
+import {
+  BUILT_IN_AI_PROVIDER_LOGO,
+  resolveProviderRefForCapability,
+} from "@/utils/providers/provider-registry"
 import { cn } from "@/utils/styles/utils"
 import {
   selectedProviderIdsAtom,
@@ -40,8 +44,13 @@ export function TranslationCard({
   const [selectedProviderIds, setSelectedProviderIds] = useAtom(selectedProviderIdsAtom)
   const setExpandedById = useSetAtom(translationCardExpandedStateAtom)
 
-  const provider = getProviderConfigById(providersConfig, providerId)
-  const providerItem = provider ? PROVIDER_ITEMS[provider.provider] : undefined
+  const provider = resolveProviderRefForCapability("pageTranslation", providersConfig, providerId)
+  const providerLogo =
+    provider?.kind === "system"
+      ? BUILT_IN_AI_PROVIDER_LOGO
+      : provider?.kind === "local"
+        ? PROVIDER_ITEMS[provider.config.provider].logo(theme)
+        : undefined
 
   // Track request IDs to ignore stale responses from slow providers
   const requestIdRef = useRef(0)
@@ -57,7 +66,7 @@ export function TranslationCard({
             ANALYTICS_FEATURE.TRANSLATION_HUB,
             ANALYTICS_SURFACE.TRANSLATION_HUB,
           ),
-          ...classifyProviderConfig(provider),
+          ...classifyResolvedProvider(provider),
           char_count: req.inputText.length,
           target_language: req.targetLanguage,
         },
@@ -65,16 +74,26 @@ export function TranslationCard({
           if (!provider) throw new Error("Provider not found")
 
           const myRequestId = ++requestIdRef.current
-          const result = await executeTranslate(
-            req.inputText,
-            {
-              sourceCode: req.sourceLanguage,
-              targetCode: req.targetLanguage,
-              level: language.level,
-            },
-            provider,
-            getTranslatePrompt,
-          )
+          const langConfig = {
+            sourceCode: req.sourceLanguage,
+            targetCode: req.targetLanguage,
+            level: language.level,
+          }
+          const result =
+            provider.kind === "system"
+              ? await translateTextCore({
+                  text: req.inputText,
+                  langConfig,
+                  providerConfig: provider,
+                  hostedFeature: "pageTranslation",
+                  preserveLineBreaks: true,
+                })
+              : await executeTranslate(
+                  req.inputText,
+                  langConfig,
+                  provider.config,
+                  getTranslatePrompt,
+                )
 
           // Ignore stale responses - return undefined to silently discard
           if (requestIdRef.current !== myRequestId) {
@@ -142,8 +161,8 @@ export function TranslationCard({
         )}
       >
         <div className="flex items-center space-x-2">
-          {providerItem ? (
-            <ProviderIcon logo={providerItem.logo(theme)} name={provider.name} size="sm" />
+          {providerLogo ? (
+            <ProviderIcon logo={providerLogo} name={provider.name} size="sm" />
           ) : (
             <div className="flex h-5 w-5 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
               ?
