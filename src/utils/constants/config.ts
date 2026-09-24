@@ -51,7 +51,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 101
+export const CONFIG_SCHEMA_VERSION = 102
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
@@ -233,6 +233,10 @@ export const DEFAULT_CONFIG: Config = {
   uiLanguage: "auto",
   translationHub: {
     shortcut: DEFAULT_TRANSLATION_HUB_SHORTCUT_KEY,
+    selectedProviderIds: null,
+    sourceCode: null,
+    targetCode: null,
+    promptId: DEFAULT_TRANSLATE_PROMPTS_CONFIG.promptId,
   },
   glossary: { ...DEFAULT_GLOSSARY_CONFIG },
 }

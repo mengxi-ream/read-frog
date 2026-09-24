@@ -1,6 +1,8 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { Button } from "@/components/ui/base-ui/button"
 import { Textarea } from "@/components/ui/base-ui/textarea"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { DEFAULT_TRANSLATE_PROMPT_ID } from "@/utils/constants/prompt"
 import { i18n } from "@/utils/i18n"
 import {
   inputTextAtom,
@@ -8,12 +10,15 @@ import {
   targetLangCodeAtom,
   translateRequestAtom,
 } from "../atoms"
+import { getHubPromptConfig } from "../prompt"
 
 export function TextInput() {
   const [value, setValue] = useAtom(inputTextAtom)
   const sourceLangCode = useAtomValue(sourceLangCodeAtom)
   const targetLangCode = useAtomValue(targetLangCodeAtom)
   const setTranslateRequest = useSetAtom(translateRequestAtom)
+  const hubConfig = useAtomValue(configFieldsAtomMap.translationHub)
+  const pageTranslation = useAtomValue(configFieldsAtomMap.pageTranslation)
 
   const handleTranslate = () => {
     if (!value.trim()) return
@@ -22,6 +27,12 @@ export function TextInput() {
       sourceLanguage: sourceLangCode,
       targetLanguage: targetLangCode,
       timestamp: Date.now(),
+      promptConfig: getHubPromptConfig(
+        hubConfig.promptId ??
+          pageTranslation.customPromptsConfig.promptId ??
+          DEFAULT_TRANSLATE_PROMPT_ID,
+        pageTranslation.customPromptsConfig,
+      ),
     })
   }
 

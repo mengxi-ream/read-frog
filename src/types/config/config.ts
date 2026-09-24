@@ -85,8 +85,20 @@ const sideContentSchema = z.object({
 const translationHubSchema = z
   .object({
     shortcut: pageTranslationShortcutSchema,
+    selectedProviderIds: z.array(z.string().min(1)).nullable().default(null),
+    sourceCode: langCodeISO6393Schema.or(z.literal("auto")).nullable().default(null),
+    targetCode: langCodeISO6393Schema.nullable().default(null),
+    // A missing ID in a pre-migration config must stay unset until v102 copies
+    // the page prompt; another UI context may write this config first.
+    promptId: z.string().min(1).nullable().default(null),
   })
-  .default({ shortcut: DEFAULT_TRANSLATION_HUB_SHORTCUT_KEY })
+  .default({
+    shortcut: DEFAULT_TRANSLATION_HUB_SHORTCUT_KEY,
+    selectedProviderIds: null,
+    sourceCode: null,
+    targetCode: null,
+    promptId: null,
+  })
 
 // beta experience schema
 const betaExperienceSchema = z.object({

@@ -1,29 +1,35 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { Config } from "@/types/config/config"
 import { atom } from "jotai"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { filterEnabledProvidersConfig, getTranslateProvidersConfig } from "@/utils/config/helpers"
-import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
+import {
+  getProviderIdsForCapability,
+  resolveProviderRefForCapability,
+} from "@/utils/providers/provider-registry"
 
-// === LangCode Atoms (derive from config, local override) ===
-const sourceLangCodeOverrideAtom = atom<LangCodeISO6393 | "auto" | null>(null)
-const targetLangCodeOverrideAtom = atom<LangCodeISO6393 | null>(null)
+// === Language preferences (null follows the extension language setting) ===
 
 export const sourceLangCodeAtom = atom(
   (get) => {
-    const override = get(sourceLangCodeOverrideAtom)
-    if (override !== null) return override
-    return get(configFieldsAtomMap.language).sourceCode
+    return (
+      get(configFieldsAtomMap.translationHub).sourceCode ??
+      get(configFieldsAtomMap.language).sourceCode
+    )
   },
-  (_get, set, value: LangCodeISO6393 | "auto") => set(sourceLangCodeOverrideAtom, value),
+  (_get, set, value: LangCodeISO6393 | "auto") =>
+    set(configFieldsAtomMap.translationHub, { sourceCode: value }),
 )
 
 export const targetLangCodeAtom = atom(
   (get) => {
-    const override = get(targetLangCodeOverrideAtom)
-    if (override !== null) return override
-    return get(configFieldsAtomMap.language).targetCode
+    return (
+      get(configFieldsAtomMap.translationHub).targetCode ??
+      get(configFieldsAtomMap.language).targetCode
+    )
   },
-  (_get, set, value: LangCodeISO6393) => set(targetLangCodeOverrideAtom, value),
+  (_get, set, value: LangCodeISO6393) =>
+    set(configFieldsAtomMap.translationHub, { targetCode: value }),
 )
 
 // === Input Atom ===
@@ -43,19 +49,27 @@ export const detectedLangCodeAtom = atom(
   (get) => get(detectedSourceLangCodeAtom) ?? FALLBACK_DETECTED_LANG_CODE,
 )
 
-// === Selected Provider IDs (only store IDs, get config from configFieldsAtomMap) ===
-const selectedProviderIdsOverrideAtom = atom<string[] | null>(null)
+// === Selected Provider IDs (null follows enabled local translation providers) ===
+export function getAvailableHubProviderIds(config: Pick<Config, "providersConfig">): string[] {
+  return getProviderIdsForCapability("pageTranslation", config.providersConfig, {
+    requireEnable: true,
+  })
+}
 
 export const selectedProviderIdsAtom = atom(
   (get) => {
-    const override = get(selectedProviderIdsOverrideAtom)
-    if (override !== null) return override
-    // Default: all enabled translate providers' IDs
+    const ids = get(configFieldsAtomMap.translationHub).selectedProviderIds
     const providersConfig = get(configFieldsAtomMap.providersConfig)
-    const translateProviders = getTranslateProvidersConfig(providersConfig)
-    return filterEnabledProvidersConfig(translateProviders).map((p) => p.id)
+    if (ids === null) {
+      return filterEnabledProvidersConfig(getTranslateProvidersConfig(providersConfig)).map(
+        (provider) => provider.id,
+      )
+    }
+    const available = new Set(getAvailableHubProviderIds({ providersConfig }))
+    return [...new Set(ids)].filter((id) => available.has(id))
   },
-  (_get, set, ids: string[]) => set(selectedProviderIdsOverrideAtom, ids),
+  (_get, set, ids: string[]) =>
+    set(configFieldsAtomMap.translationHub, { selectedProviderIds: ids }),
 )
 
 // === Translation Card UI State ===
@@ -74,10 +88,12 @@ export const selectedProvidersAtom = atom((get) => {
 export const exchangeLangCodesAtom = atom(null, (get, set) => {
   const source = get(sourceLangCodeAtom)
   const target = get(targetLangCodeAtom)
-  set(sourceLangCodeAtom, target)
   // `auto` is no language to hand to the target side, so it hands over the one the source
   // selector was reading — the detected one — and the swap stays what the eye saw.
-  set(targetLangCodeAtom, source === "auto" ? get(detectedLangCodeAtom) : source)
+  void set(configFieldsAtomMap.translationHub, {
+    sourceCode: target,
+    targetCode: source === "auto" ? get(detectedLangCodeAtom) : source,
+  })
 })
 
 // === Translation Request (Command Pattern) ===
@@ -87,6 +103,7 @@ export interface TranslateRequest {
   sourceLanguage: LangCodeISO6393 | "auto"
   targetLanguage: LangCodeISO6393
   timestamp: number
+  promptConfig: Config["pageTranslation"]["customPromptsConfig"]
 }
 
 export const translateRequestAtom = atom<TranslateRequest | null>(null)

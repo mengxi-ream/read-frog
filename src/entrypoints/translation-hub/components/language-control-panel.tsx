@@ -69,7 +69,7 @@ export function LanguageControlPanel() {
         className="min-w-0 flex-1"
         value={targetLangCode}
         onValueChange={(value) => {
-          if (value !== "auto") setTargetLangCode(value)
+          if (value !== "auto") void setTargetLangCode(value)
         }}
         label={i18n.t("side.targetLang")}
       />
