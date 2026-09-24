@@ -1,7 +1,6 @@
 import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import {
   DEFAULT_CONTROLS_HEIGHT,
-  XCOM_CONTROLS_CONTAINER_SELECTOR,
   XCOM_PLAYER_CONTAINER_SELECTOR,
 } from "@/utils/constants/subtitles"
 import { getCurrentXcomVideoId } from "./dom"
@@ -12,7 +11,6 @@ export function getXcomConfig(): PlatformConfig {
     selectors: {
       video: `${XCOM_PLAYER_CONTAINER_SELECTOR} video`,
       playerContainer: XCOM_PLAYER_CONTAINER_SELECTOR,
-      controlsBar: XCOM_CONTROLS_CONTAINER_SELECTOR,
     },
     events: {},
     controls: {

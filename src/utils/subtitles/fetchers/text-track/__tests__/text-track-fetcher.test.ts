@@ -122,15 +122,33 @@ describe("TextTrackFetcher", () => {
     expect(track.mode).toBe("showing")
   })
 
-  it("ignores the duplicate track the player renders itself", async () => {
+  it("lets the caller exclude tracks from selection", async () => {
     const real = new FakeTrack("subtitles", "English.srt", "EN", "hidden")
     real.loadCues("hello")
-    const clone = new FakeTrack("captions", "clone", "", "showing")
-    clone.loadCues("partial")
+    const render = new FakeTrack("captions", "render", "", "showing")
+    render.loadCues("partial")
 
-    const fetcher = createFetcher(videoWith(clone, real))
+    const fetcher = new TextTrackFetcher({
+      resolveVideo: () => videoWith(render, real),
+      getVideoId: () => "1",
+      isSourceTrack: (track) => track.label !== "render",
+    })
 
     await expect(fetcher.fetch()).resolves.toEqual([{ text: "hello", start: 0, end: 1000 }])
+  })
+
+  it("restores the mode the player last asked for, not the one it had first", () => {
+    const track = new FakeTrack("captions", "English", "en", "showing")
+    const video = videoWith(track)
+    const tracks = video.textTracks as unknown as FakeTrackList
+    const fetcher = createFetcher(video)
+
+    fetcher.hideNativeSubtitles()
+    track.mode = "disabled"
+    tracks.emit("change")
+    fetcher.showNativeSubtitles()
+
+    expect(track.mode).toBe("disabled")
   })
 
   it("hides showing tracks, re-applies after the player flips them back, and restores on show", () => {

@@ -60,6 +60,8 @@ export const XCOM_PLAYER_CONTAINER_SELECTOR = `[${XCOM_PLAYER_CONTAINER_ATTRIBUT
 export const XCOM_CONTROLS_CONTAINER_SELECTOR = `[${XCOM_CONTROLS_CONTAINER_ATTRIBUTE}="true"]`
 export const XCOM_STATUS_POLL_INTERVAL_MS = 2000
 export const XCOM_PLAYER_MUTATION_DEBOUNCE_MS = 50
+// x.com renders captions from a partial duplicate track labelled like this.
+export const XCOM_RENDER_TRACK_LABEL = "clone"
 
 // YouTube player wait constants
 export const MAX_PLAYER_WAIT_ATTEMPTS = 50

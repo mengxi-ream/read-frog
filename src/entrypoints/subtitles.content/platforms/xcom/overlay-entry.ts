@@ -1,6 +1,5 @@
 import type { SubtitlesProvidersAdapter } from "../../universal-adapter"
 import {
-  TRANSLATE_BUTTON_CONTAINER_ID,
   XCOM_CONTROLS_CONTAINER_ATTRIBUTE,
   XCOM_CONTROLS_CONTAINER_SELECTOR,
   XCOM_PLAYER_CONTAINER_ATTRIBUTE,
@@ -37,10 +36,9 @@ function clearStamps(except?: {
 let mountedButton: HTMLElement | null = null
 
 function removeTranslateButton(): void {
-  const host = mountedButton ?? document.getElementById(TRANSLATE_BUTTON_CONTAINER_ID)
-  mountedButton = null
-  if (host) {
-    removeReactShadowHost(host)
+  if (mountedButton) {
+    removeReactShadowHost(mountedButton)
+    mountedButton = null
   }
 }
 
@@ -73,7 +71,7 @@ export function ensureXcomOverlayEntryPoint(): boolean {
 
 export function mountXcomTranslateButton(adapter: SubtitlesProvidersAdapter): void {
   const controls = document.querySelector(XCOM_CONTROLS_CONTAINER_SELECTOR)
-  if (!controls || controls.querySelector(`#${TRANSLATE_BUTTON_CONTAINER_ID}`)) {
+  if (!controls || mountedButton?.parentElement === controls) {
     return
   }
 
