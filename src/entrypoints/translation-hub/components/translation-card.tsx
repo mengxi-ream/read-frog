@@ -7,6 +7,7 @@ import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { Button } from "@/components/ui/base-ui/button"
 import { anchoredToastManager } from "@/components/ui/base-ui/toast"
+import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureAttempt } from "@/utils/analytics"
@@ -46,9 +47,11 @@ export function TranslationCard({
   const request = useAtomValue(translateRequestAtom)
   const language = useAtomValue(configFieldsAtomMap.language)
   const glossary = useAtomValue(configFieldsAtomMap.glossary)
+  const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const [selectedProviderIds, setSelectedProviderIds] = useAtom(selectedProviderIdsAtom)
   const setExpandedById = useSetAtom(translationCardExpandedStateAtom)
+  const { play, stop, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.TRANSLATION_HUB)
 
   const provider = resolveProviderRefForCapability("pageTranslation", providersConfig, providerId)
   const providerLogo =
@@ -152,6 +155,7 @@ export function TranslationCard({
 
   const requestTranslation = () => {
     if (request?.inputText.trim()) {
+      stop()
       mutation.mutate(request)
     }
   }
@@ -182,6 +186,7 @@ export function TranslationCard({
   }
 
   const handleRemove = () => {
+    stop()
     void setSelectedProviderIds(selectedProviderIds.filter((id) => id !== providerId))
     setExpandedById((prev) => {
       if (!(providerId in prev)) return prev
@@ -195,6 +200,19 @@ export function TranslationCard({
   if (!provider) return null
 
   const hasContent = mutation.isError || (mutation.data !== undefined && mutation.data !== "")
+  const speechAction = isFetching
+    ? "speak.fetchingAudio"
+    : isPlaying
+      ? "action.playing"
+      : "translationHub.speakTranslation"
+
+  const handleSpeak = () => {
+    if (isFetching || isPlaying) {
+      stop()
+    } else if (mutation.data) {
+      void play(mutation.data, ttsConfig)
+    }
+  }
 
   return (
     <div className="rounded-lg border bg-card">
@@ -226,6 +244,27 @@ export function TranslationCard({
               title={i18n.t("translationHub.retryTranslation")}
             >
               <Icon icon="tabler:refresh" className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          {mutation.data && !mutation.isPending && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSpeak}
+              className="h-7 w-7"
+              title={i18n.t(speechAction)}
+              aria-label={i18n.t(speechAction)}
+            >
+              <Icon
+                icon={
+                  isFetching
+                    ? "tabler:loader-2"
+                    : isPlaying
+                      ? "tabler:player-stop-filled"
+                      : "tabler:volume"
+                }
+                className={cn("h-3.5 w-3.5", isFetching && "animate-spin")}
+              />
             </Button>
           )}
           {mutation.data && !mutation.isPending && (

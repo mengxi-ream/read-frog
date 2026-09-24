@@ -68,7 +68,7 @@ export interface SurfaceByFeature {
   input_translation: "input_translation"
   translation_hub: "translation_hub"
   video_subtitles: "video_subtitles" | "video_subtitles_auto" | "shortcut"
-  text_to_speech: "selection_toolbar" | "context_menu" | "tts_settings"
+  text_to_speech: "selection_toolbar" | "context_menu" | "tts_settings" | "translation_hub"
   note_suggestion: "selection_toolbar"
   glossary: "page_translation" | "video_subtitles" | "selection_toolbar" | "input_translation"
 }

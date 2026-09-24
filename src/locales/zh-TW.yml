@@ -1544,6 +1544,8 @@ translationHub:
   translate: 翻譯
   copiedToClipboard: 翻譯已複製到剪貼簿！
   copyTranslation: 複製翻譯
+  speakSourceText: 朗讀原文
+  speakTranslation: 朗讀譯文
   expandCard: 展開卡片
   collapseCard: 摺疊卡片
   expandAllCards: 全部展開
