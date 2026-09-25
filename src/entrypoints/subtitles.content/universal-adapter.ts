@@ -22,6 +22,7 @@ import { waitForElement } from "@/utils/dom/wait-for-element"
 import { i18n } from "@/utils/i18n"
 import { canProviderRefGenerateText } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
+import { removeReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
 import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
 import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
 import {
@@ -566,8 +567,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       return
     }
 
-    const existingButton = container.querySelector(`#${TRANSLATE_BUTTON_CONTAINER_ID}`)
-    existingButton?.remove()
+    const existingButton = container.querySelector<HTMLElement>(`#${TRANSLATE_BUTTON_CONTAINER_ID}`)
+    if (existingButton) {
+      removeReactShadowHost(existingButton)
+    }
 
     const toggleButton = renderSubtitlesTranslateButton({ adapter: this })
 
@@ -727,6 +730,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private showNativeSubtitles() {
+    this.fetcher.showNativeSubtitles?.()
     if (!this.isNativeSubtitlesHidden) {
       return
     }
@@ -737,7 +741,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private hideNativeSubtitles() {
-    if (this.isNativeSubtitlesHidden) {
+    this.fetcher.hideNativeSubtitles?.()
+    if (this.isNativeSubtitlesHidden || !this.config.selectors.nativeSubtitles) {
       return
     }
 

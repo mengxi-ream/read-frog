@@ -19,6 +19,20 @@ interface MountSubtitlesUIOptions {
   menuBelow?: boolean
 }
 
+// Tracked by reference: a detached host can no longer be found by id.
+let mountedHost: HTMLElement | null = null
+
+export function unmountSubtitlesUI(): void {
+  const host = mountedHost ?? document.getElementById(READ_FROG_SUBTITLES_UI_HOST_ID)
+  mountedHost = null
+  if (!host) {
+    return
+  }
+
+  ;(host as any).__reactShadowContainerCleanup?.()
+  host.remove()
+}
+
 export async function mountSubtitlesUI({
   adapter,
   config,
@@ -33,16 +47,13 @@ export async function mountSubtitlesUI({
     parentEl.style.position = "relative"
   }
 
-  const existingHost = document.getElementById(
-    READ_FROG_SUBTITLES_UI_HOST_ID,
-  ) as HTMLDivElement | null
+  const existingHost = mountedHost ?? document.getElementById(READ_FROG_SUBTITLES_UI_HOST_ID)
   if (existingHost) {
     if (existingHost.parentElement === parentEl) {
       return
     }
 
-    ;(existingHost as any).__reactShadowContainerCleanup?.()
-    existingHost.remove()
+    unmountSubtitlesUI()
   }
 
   const shadowHost = document.createElement("div")
@@ -87,6 +98,7 @@ export async function mountSubtitlesUI({
     hostBuilder.cleanup()
   }
 
+  mountedHost = shadowHost
   parentEl.appendChild(shadowHost)
 
   const app = (

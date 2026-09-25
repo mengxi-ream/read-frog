@@ -21,6 +21,7 @@ import {
 } from "@/utils/constants/subtitles"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { i18n } from "@/utils/i18n"
+import { sleep } from "@/utils/sleep"
 import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
 import { getYoutubeVideoId } from "@/utils/subtitles/video-id"
 import { detectFormat } from "./format-detector"
@@ -35,10 +36,6 @@ import {
 import { extractPotToken } from "./pot-token"
 import { youtubeSubtitlesResponseSchema } from "./types"
 import { buildSubtitleUrl } from "./url-builder"
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
 
 function hasSelectedTrack(playerData: PlayerData): boolean {
   return Boolean(playerData.selectedTrackVssId || playerData.selectedTrackLanguageCode)

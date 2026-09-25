@@ -48,6 +48,21 @@ export const ENSURE_SUBTITLES_REQUEST_TYPE = "READ_FROG_ENSURE_SUBTITLES"
 export const ENSURE_SUBTITLES_RESPONSE_TYPE = "READ_FROG_ENSURE_SUBTITLES_DONE"
 export const POST_MESSAGE_TIMEOUT_MS = 6000
 
+// TextTrack mechanism
+export const TEXT_TRACK_CUE_WAIT_TIMEOUT_MS = 8000
+export const TEXT_TRACK_CUE_POLL_INTERVAL_MS = 100
+export const TEXT_TRACK_NATIVE_REHIDE_DELAY_MS = 500
+
+// x.com specific
+export const XCOM_PLAYER_CONTAINER_ATTRIBUTE = "data-read-frog-xcom-player-container"
+export const XCOM_CONTROLS_CONTAINER_ATTRIBUTE = "data-read-frog-xcom-controls"
+export const XCOM_PLAYER_CONTAINER_SELECTOR = `[${XCOM_PLAYER_CONTAINER_ATTRIBUTE}="true"]`
+export const XCOM_CONTROLS_CONTAINER_SELECTOR = `[${XCOM_CONTROLS_CONTAINER_ATTRIBUTE}="true"]`
+export const XCOM_STATUS_POLL_INTERVAL_MS = 2000
+export const XCOM_PLAYER_MUTATION_DEBOUNCE_MS = 50
+// x.com renders captions from a partial duplicate track labelled like this.
+export const XCOM_RENDER_TRACK_LABEL = "clone"
+
 // YouTube player wait constants
 export const MAX_PLAYER_WAIT_ATTEMPTS = 50
 export const PLAYER_WAIT_INTERVAL_MS = 100

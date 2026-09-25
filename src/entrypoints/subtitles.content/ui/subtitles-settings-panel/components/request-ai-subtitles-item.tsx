@@ -21,6 +21,10 @@ export function RequestAiSubtitlesItem() {
   const isVisible = useAtomValue(subtitlesVisibleAtom, { store: subtitlesStore })
   const buttonId = "read-frog-request-ai-subtitles"
 
+  if (!supportsAiSubtitles) {
+    return null
+  }
+
   const usingAi = source === SUBTITLES_SOURCE.AI && isVisible && !pending
   const label = usingAi
     ? i18n.t("subtitles.usingAiSubtitles")
@@ -73,7 +77,7 @@ export function RequestAiSubtitlesItem() {
         variant="ghost-secondary"
         size="icon-sm"
         onClick={handleRequest}
-        disabled={pending || usingAi || !supportsAiSubtitles}
+        disabled={pending || usingAi}
       >
         {pending && <IconLoader2 className="size-3.5 animate-spin" />}
       </Button>
