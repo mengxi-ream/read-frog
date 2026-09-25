@@ -6,10 +6,11 @@ import {
   TEXT_TRACK_NATIVE_REHIDE_DELAY_MS,
 } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
+import { sleep } from "@/utils/sleep"
 import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
 import { cuesToFragments } from "./cues"
 
-export interface TextTrackFetcherOptions {
+interface TextTrackFetcherOptions {
   resolveVideo: () => HTMLVideoElement | null
   getVideoId: () => string | null
   isSourceTrack?: (track: TextTrack) => boolean
@@ -186,35 +187,14 @@ export class TextTrackFetcher implements SubtitlesFetcher {
     }
   }
 
-  private waitForCues(track: TextTrack): Promise<TextTrackCueList> {
-    const loaded = () => (track.cues && track.cues.length > 0 ? track.cues : null)
-    const ready = loaded()
-    if (ready) {
-      return Promise.resolve(ready)
+  private async waitForCues(track: TextTrack): Promise<TextTrackCueList> {
+    const attempts = TEXT_TRACK_CUE_WAIT_TIMEOUT_MS / TEXT_TRACK_CUE_POLL_INTERVAL_MS
+    for (let i = 0; i <= attempts; i++) {
+      if (track.cues?.length) {
+        return track.cues
+      }
+      await sleep(TEXT_TRACK_CUE_POLL_INTERVAL_MS)
     }
-
-    return new Promise((resolve, reject) => {
-      const finish = (cues: TextTrackCueList | null) => {
-        clearTimeout(timeoutId)
-        clearInterval(intervalId)
-        track.removeEventListener("cuechange", check)
-        if (cues) {
-          resolve(cues)
-        } else {
-          reject(new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound")))
-        }
-      }
-
-      const check = () => {
-        const cues = loaded()
-        if (cues) {
-          finish(cues)
-        }
-      }
-
-      const timeoutId = setTimeout(() => finish(loaded()), TEXT_TRACK_CUE_WAIT_TIMEOUT_MS)
-      const intervalId = setInterval(check, TEXT_TRACK_CUE_POLL_INTERVAL_MS)
-      track.addEventListener("cuechange", check)
-    })
+    throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
   }
 }

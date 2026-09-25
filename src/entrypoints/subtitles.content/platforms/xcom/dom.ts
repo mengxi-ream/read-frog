@@ -89,7 +89,7 @@ export function getCurrentPrimaryXcomStatusVideo(): HTMLVideoElement | null {
   return pickActiveCandidate(candidates, current)
 }
 
-export function getXcomVideoStatusId(video: HTMLVideoElement): string | null {
+function getXcomVideoStatusId(video: HTMLVideoElement): string | null {
   const article = video.closest("article")
   if (!article) {
     return null
@@ -111,7 +111,7 @@ export function getCurrentXcomVideoId(): string | null {
   return (video && getXcomVideoStatusId(video)) ?? getXcomStatusId()
 }
 
-export function getReadFrogXcomStatusVideo(): HTMLVideoElement | null {
+function getReadFrogXcomStatusVideo(): HTMLVideoElement | null {
   return pickSingleCandidate(
     Array.from(
       document.querySelectorAll<HTMLVideoElement>(`${XCOM_PLAYER_CONTAINER_SELECTOR} video`),

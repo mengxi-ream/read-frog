@@ -3,7 +3,7 @@ import { decodeHTML } from "entities"
 
 const CUE_TAG_PATTERN = /<[^>]+>/g
 
-export function cleanCueText(text: string): string {
+function cleanCueText(text: string): string {
   // Strip markup first: decoding an escaped "<" would turn real text into a tag.
   return decodeHTML(text.replace(CUE_TAG_PATTERN, ""))
     .split("\n")

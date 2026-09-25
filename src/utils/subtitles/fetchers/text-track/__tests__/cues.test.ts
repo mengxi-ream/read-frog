@@ -1,21 +1,21 @@
 import { describe, expect, it } from "vitest"
-import { cleanCueText, cuesToFragments } from "../cues"
+import { cuesToFragments } from "../cues"
 
 function cue(startTime: number, endTime: number, text: string): TextTrackCue {
   return { startTime, endTime, text } as unknown as TextTrackCue
 }
 
-describe("cleanCueText", () => {
+describe("cuesToFragments", () => {
   it("strips cue tags and decodes entities", () => {
-    expect(cleanCueText("<c.yellow>Tom &amp; Jerry</c>")).toBe("Tom & Jerry")
+    expect(cuesToFragments([cue(0, 1, "<c.yellow>Tom &amp; Jerry</c>")])[0]?.text).toBe(
+      "Tom & Jerry",
+    )
   })
 
   it("trims lines and drops empty ones", () => {
-    expect(cleanCueText("  first  \n\n  second  ")).toBe("first\nsecond")
+    expect(cuesToFragments([cue(0, 1, "  first  \n\n  second  ")])[0]?.text).toBe("first\nsecond")
   })
-})
 
-describe("cuesToFragments", () => {
   it("converts seconds to rounded milliseconds", () => {
     expect(cuesToFragments([cue(1.2345, 2.5, "hi")])).toEqual([
       { text: "hi", start: 1235, end: 2500 },

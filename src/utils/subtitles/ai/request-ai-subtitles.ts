@@ -5,6 +5,7 @@ import { safe } from "@orpc/client"
 import { i18n } from "@/utils/i18n"
 import { isORPCPublicAppError } from "@/utils/notebase/errors"
 import { orpcClient } from "@/utils/orpc/client"
+import { sleep } from "@/utils/sleep"
 import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
 import { billingAction, upgradeAction } from "./entitlement"
 
@@ -36,10 +37,6 @@ const MS_PER_SECOND = 1_000
  */
 function pollTimeoutMs(durationSec: number): number {
   return Math.min(POLL_MAX_TIMEOUT_MS, POLL_BASE_TIMEOUT_MS + durationSec * 100)
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 /**
