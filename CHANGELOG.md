@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.48.1
+
+### Patch Changes
+
+- [#2235](https://github.com/mengxi-ream/read-frog/pull/2235) [`b81a4b9`](https://github.com/mengxi-ream/read-frog/commit/b81a4b961d68f6765118f114bf62b60dfbf1599b) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(subtitles): keep YouTube auto-generated captions visible for their full cue duration
+
+- [#2234](https://github.com/mengxi-ream/read-frog/pull/2234) [`1c39cd1`](https://github.com/mengxi-ream/read-frog/commit/1c39cd10dcf631f8ae5e2e2fc57dd8fda92e5e9b) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(subtitles): keep the video subtitle switch in sync across YouTube navigation
+
 ## 1.48.0
 
 ### Minor Changes
