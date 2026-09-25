@@ -482,8 +482,8 @@ describe("youTube Subtitle Parsers", () => {
       expect(result).toHaveLength(1)
       expect(result[0]!.text).toBe("テスト文章。")
       expect(result[0]!.start).toBe(1000)
-      // end = last seg start (3000 + 500) + ESTIMATED_WORD_DURATION_MS (200) = 3700
-      expect(result[0]!.end).toBe(3700)
+      // The final segment remains visible through the event's advertised duration.
+      expect(result[0]!.end).toBe(5000)
     })
 
     it("should split on sentence boundary with separator events", () => {
@@ -497,6 +497,59 @@ describe("youTube Subtitle Parsers", () => {
       expect(result).toHaveLength(2)
       expect(result[0]!.text).toBe("First.")
       expect(result[1]!.text).toBe("Second.")
+    })
+
+    it("keeps short ASR sentences visible for their full event duration", () => {
+      const events: YoutubeTimedText[] = [
+        { tStartMs: 38000, dDurationMs: 0, wWinId: 1, aAppend: 1, segs: [{ utf8: "\n" }] },
+        { tStartMs: 39000, dDurationMs: 2000, wWinId: 1, segs: [{ utf8: "So, I had" }] },
+        {
+          tStartMs: 41000,
+          dDurationMs: 2000,
+          wWinId: 1,
+          segs: [{ utf8: "nothing to do with it." }],
+        },
+        {
+          tStartMs: 43000,
+          dDurationMs: 2000,
+          wWinId: 1,
+          segs: [{ utf8: "And when did you join the Mirror?" }],
+        },
+      ]
+
+      const result = parseScrollingAsrSubtitles(events, "en")
+
+      expect(result).toEqual([
+        { text: "So, I had nothing to do with it.", start: 39000, end: 43000 },
+        { text: "And when did you join the Mirror?", start: 43000, end: 45000 },
+      ])
+      expect(result.some((fragment) => fragment.start <= 42000 && fragment.end > 42000)).toBe(true)
+      expect(result.some((fragment) => fragment.start <= 44000 && fragment.end > 44000)).toBe(true)
+
+      const displayed = optimizeSubtitles(result, "en")
+      expect(displayed).toEqual([
+        {
+          text: "So, I had nothing to do with it. And when did you join the Mirror?",
+          start: 39000,
+          end: 45000,
+        },
+      ])
+    })
+
+    it("uses the next segment offset when splitting within one ASR event", () => {
+      const events: YoutubeTimedText[] = [
+        {
+          tStartMs: 1000,
+          dDurationMs: 2000,
+          wWinId: 1,
+          segs: [{ utf8: "First." }, { utf8: "Second.", tOffsetMs: 1000 }],
+        },
+      ]
+
+      expect(parseScrollingAsrSubtitles(events, "en")).toEqual([
+        { text: "First.", start: 1000, end: 2000 },
+        { text: "Second.", start: 2000, end: 3000 },
+      ])
     })
 
     it("should add space when merging English text across events", () => {
