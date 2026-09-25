@@ -128,18 +128,17 @@ export function PanelShell({ children, open, onClose, header, transition }: Pane
 
   return (
     <div ref={rootRef} className={rootClassName}>
-      <Activity mode={open ? "visible" : "hidden"}>
-        <div className={positionClassName} style={positionStyle}>
-          <PanelContent
-            panelRef={panelRef}
-            header={header}
-            transition={transition}
-            maxHeight={maxHeight}
-          >
-            {children}
-          </PanelContent>
-        </div>
-      </Activity>
+      {/* Activity pauses Jotai subscriptions while hidden, leaving the switch stale after navigation. */}
+      <div className={positionClassName} style={positionStyle} hidden={!open}>
+        <PanelContent
+          panelRef={panelRef}
+          header={header}
+          transition={transition}
+          maxHeight={maxHeight}
+        >
+          {children}
+        </PanelContent>
+      </div>
     </div>
   )
 }
