@@ -33,7 +33,7 @@ export function DownloadSourceSubtitles() {
 
   return (
     <SubtitlesSettingsItem
-      icon={<IconDownload className="size-4" />}
+      icon={<IconDownload className="size-3.5" />}
       label={title}
       labelFor={buttonId}
     >

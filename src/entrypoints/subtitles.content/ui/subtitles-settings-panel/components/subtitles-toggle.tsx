@@ -16,7 +16,7 @@ export function SubtitlesToggle() {
 
   return (
     <SubtitlesSettingsItem
-      icon={<IconSubtitles className="size-4" />}
+      icon={<IconSubtitles className="size-3.5" />}
       label={title}
       labelFor={switchId}
     >

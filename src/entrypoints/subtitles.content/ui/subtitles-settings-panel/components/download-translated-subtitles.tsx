@@ -28,7 +28,7 @@ export function DownloadTranslatedSubtitles() {
 
   return (
     <SubtitlesSettingsItem
-      icon={<IconLanguage className="size-4" />}
+      icon={<IconLanguage className="size-3.5" />}
       label={
         <div className="flex min-w-0 flex-col">
           <span className="truncate">{title}</span>

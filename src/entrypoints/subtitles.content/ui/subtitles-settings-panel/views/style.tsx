@@ -45,8 +45,8 @@ import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-ho
 import { subtitlesStore } from "../../../atoms"
 
 const SELECT_TRIGGER_CLASS =
-  "min-w-[5.5rem] text-[13px] text-popover-foreground [&_[data-slot=select-value]]:text-popover-foreground [&_[data-slot=select-icon]]:text-muted-foreground"
-const SELECT_CONTENT_CLASS = "[&_[role=option]]:text-[13px]"
+  "min-w-[5.5rem] text-xs text-popover-foreground [&_[data-slot=select-value]]:text-popover-foreground [&_[data-slot=select-icon]]:text-muted-foreground"
+const SELECT_CONTENT_CLASS = "[&_[role=option]]:text-xs"
 /* The panel sits on `bg-muted/50` rows, so the scrubber needs the popover surface
    under it to keep the fill and the label's occluder reading as one control. */
 const SLIDER_CLASS = "bg-popover"
@@ -65,9 +65,9 @@ function SettingsGroup({
   children: ReactNode
 }) {
   return (
-    <div className="mb-4">
-      <div className="mb-1.5 flex items-center justify-between px-0.5">
-        <div className="flex items-center gap-1.5 text-[13px] font-medium text-popover-foreground">
+    <div className="mb-2.5">
+      <div className="mb-1 flex items-center justify-between px-0.5">
+        <div className="flex items-center gap-1.5 text-xs font-medium text-popover-foreground">
           {icon}
           {title}
         </div>
@@ -81,15 +81,15 @@ function SettingsGroup({
           <IconRefresh className="size-3.5" />
         </Button>
       </div>
-      <div className="divide-y divide-border rounded-xl border bg-muted/50">{children}</div>
+      <div className="divide-y divide-border rounded-lg border bg-muted/50">{children}</div>
     </div>
   )
 }
 
 function SettingRow({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="flex items-center justify-between px-3 py-2.5">
-      <span className="text-[13px] text-popover-foreground">{label}</span>
+    <div className="flex items-center justify-between px-2.5 py-1.5">
+      <span className="text-xs text-popover-foreground">{label}</span>
       {children}
     </div>
   )
@@ -125,7 +125,7 @@ function SliderRow({
   }, [value])
 
   return (
-    <div className="px-3 py-2.5">
+    <div className="px-2.5 py-1.5">
       <SliderComfortable
         variant="scrubber"
         label={label}
@@ -231,7 +231,7 @@ export function StyleView() {
   }
 
   return (
-    <div className="min-h-[calc(100cqh-6rem)] px-3 pt-3 pb-4">
+    <div className="px-2 pt-2 pb-0.5">
       <SettingsGroup
         icon={<IconSettings className="size-3.5" />}
         title={i18n.t("options.videoSubtitles.style.generalSettings")}

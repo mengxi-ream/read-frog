@@ -3,8 +3,10 @@ import themeCSS from "@/assets/styles/theme.css?inline"
 import { SUBTITLES_THEME, TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
 import { createReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
 import { SubtitlesSettingsPanel } from "../ui/subtitles-settings-panel"
+import { isMenuInControls } from "../ui/subtitles-settings-panel/menu-placement"
 import { SubtitlesTranslateButton } from "../ui/subtitles-translate-button"
 import { SubtitlesProviders } from "../ui/subtitles-ui-context"
+import { isolatePlayerEvents } from "./isolate-player-events"
 
 const wrapperCSS = `
   :host {
@@ -42,25 +44,22 @@ const embedWrapperCSS = `
 
 export function renderSubtitlesTranslateButton({
   adapter,
-  openBelow = false,
 }: {
   adapter: SubtitlesProvidersAdapter
-  openBelow?: boolean
 }): HTMLDivElement {
   const existingContainer = document.querySelector<HTMLDivElement>(
     `#${TRANSLATE_BUTTON_CONTAINER_ID}`,
   )
   if (existingContainer) return existingContainer
 
-  const component =
-    adapter.embedded && !openBelow ? (
-      <SubtitlesProviders adapter={adapter}>
-        <SubtitlesTranslateButton />
-        <SubtitlesSettingsPanel />
-      </SubtitlesProviders>
-    ) : (
+  const component = isMenuInControls(adapter.embedded) ? (
+    <SubtitlesProviders adapter={adapter}>
       <SubtitlesTranslateButton />
-    )
+      <SubtitlesSettingsPanel />
+    </SubtitlesProviders>
+  ) : (
+    <SubtitlesTranslateButton />
+  )
 
   const shadowHost = createReactShadowHost(component, {
     position: "inline",
@@ -73,9 +72,7 @@ export function renderSubtitlesTranslateButton({
   shadowHost.id = TRANSLATE_BUTTON_CONTAINER_ID
 
   if (adapter.embedded) {
-    for (const eventType of ["click", "mousedown", "pointerdown", "dblclick"]) {
-      shadowHost.addEventListener(eventType, (e) => e.stopPropagation())
-    }
+    isolatePlayerEvents(shadowHost)
   }
 
   return shadowHost

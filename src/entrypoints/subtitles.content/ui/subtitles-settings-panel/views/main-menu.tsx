@@ -9,8 +9,8 @@ import { SubtitlesToggle } from "../components/subtitles-toggle"
 
 export function MainMenu({ onNavigate }: { onNavigate: (id: ViewId) => void }) {
   return (
-    <div className="px-2 py-2.5">
-      <div className="space-y-1.5">
+    <div className="p-1">
+      <div className="space-y-0.5">
         <RequestAiSubtitlesItem />
         <SubtitlesToggle />
         <DownloadTranslatedSubtitles />

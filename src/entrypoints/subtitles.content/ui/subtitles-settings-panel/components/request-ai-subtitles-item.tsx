@@ -49,7 +49,7 @@ export function RequestAiSubtitlesItem() {
 
   return (
     <SubtitlesSettingsItem
-      icon={<IconSubtitlesAi className={cn("size-4", usingAi && "text-primary")} />}
+      icon={<IconSubtitlesAi className={cn("size-3.5", usingAi && "text-primary")} />}
       label={
         <span className="inline-flex items-center gap-1.5">
           <span className="truncate">{label}</span>
