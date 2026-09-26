@@ -1,21 +1,21 @@
 // @vitest-environment jsdom
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import { StructuredObjectRenderer } from "@/components/custom-action/structured-object-renderer"
 import { Thinking } from "@/components/thinking"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
-import { SelectionSourceContent } from "../../components/selection-source-content"
-import { StructuredObjectRenderer } from "../custom-action-button/structured-object-renderer"
+import { SelectionSourceContent } from "@/components/ui/selection-popover/selection-source-content"
 import { TranslationContent } from "../translate-button/translation-content"
 
-vi.mock("../../components/copy-button", () => ({
+vi.mock("@/components/ui/selection-popover/copy-button", () => ({
   CopyButton: () => <button type="button">Copy</button>,
 }))
 
-vi.mock("../../components/speak-button", () => ({
+vi.mock("@/components/ui/selection-popover/speak-button", () => ({
   SpeakButton: () => <button type="button">Speak</button>,
 }))
 
-vi.mock("../custom-action-button/field-speak-button", () => ({
+vi.mock("@/components/custom-action/field-speak-button", () => ({
   FieldSpeakButton: () => <button type="button">Field speak</button>,
 }))
 

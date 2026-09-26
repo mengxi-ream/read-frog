@@ -1,4 +1,4 @@
-import type { SelectionToolbarInlineError } from "../selection-toolbar/inline-error"
+import type { SelectionToolbarInlineError } from "./inline-error"
 import { IconAlertCircle } from "@tabler/icons-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/base-ui/alert"
 import { cn } from "@/utils/styles/utils"

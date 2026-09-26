@@ -5,7 +5,7 @@ import type {
 import type { PendingCreateNotebaseSave, PendingNotebaseSave } from "@/utils/notebase/pending-save"
 import { useMutation } from "@tanstack/react-query"
 import { useAtom } from "jotai"
-import { useState } from "react"
+import { use, useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
 import { Button } from "@/components/ui/base-ui/button"
 import {
@@ -17,7 +17,6 @@ import {
   DialogTitle,
 } from "@/components/ui/base-ui/dialog"
 import { toastManager } from "@/components/ui/base-ui/toast"
-import { shadowWrapper } from "@/entrypoints/selection.content"
 import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.content/overlay-layers"
 import { env } from "@/env"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -49,6 +48,7 @@ import {
   setPendingNotebaseSave,
 } from "@/utils/notebase/pending-save"
 import { orpcClient } from "@/utils/orpc/client"
+import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { showNotebaseLimitExceededToast } from "./notebase-limit-toast"
 import { saveToNotebaseDialogAtom } from "./save-to-notebase-dialog-atom"
 
@@ -103,6 +103,7 @@ async function completeGuideDictionaryNotebaseFromPending(pendingSave: PendingCr
 }
 
 export function SaveToNotebaseDialogHost() {
+  const shadowWrapper = use(ShadowWrapperContext)
   const [dialogState, setDialogState] = useAtom(saveToNotebaseDialogAtom)
   const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(
     configFieldsAtomMap.selectionToolbar,

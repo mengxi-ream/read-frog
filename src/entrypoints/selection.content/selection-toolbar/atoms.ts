@@ -1,8 +1,7 @@
 import type { ContextSnapshot, SelectionSnapshot } from "../utils"
+import type { SelectionToolbarCustomActionRequestSlice } from "@/components/custom-action/use-custom-action-execution"
 import type { Config } from "@/types/config/config"
-import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type {
-  CustomActionProviderRef,
   ProviderRefForCapability,
   SelectionTranslationProviderRef,
 } from "@/utils/providers/provider-registry"
@@ -93,12 +92,6 @@ export interface SelectionToolbarTranslateRequestSlice {
   glossaryEnabled: boolean
   customPromptsConfig: Config["pageTranslation"]["customPromptsConfig"]
   provider: SelectionTranslationProviderRef | null
-}
-
-export interface SelectionToolbarCustomActionRequestSlice {
-  language: Config["language"]
-  action: SelectionToolbarCustomAction | null
-  provider: CustomActionProviderRef | null
 }
 
 function createSelectionToolbarTranslateRequestSliceAtom() {

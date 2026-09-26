@@ -17,12 +17,9 @@ const mocks = vi.hoisted(() => ({
   track: vi.fn<(...args: any[]) => any>(),
 }))
 
-vi.mock(
-  "@/entrypoints/selection.content/selection-toolbar/custom-action-button/use-save-to-notebase",
-  () => ({
-    useSaveToNotebase: () => ({ save: mocks.save, isSaving: false }),
-  }),
-)
+vi.mock("@/components/custom-action/use-save-to-notebase", () => ({
+  useSaveToNotebase: () => ({ save: mocks.save, isSaving: false }),
+}))
 
 vi.mock("@/components/ui/base-ui/toast", () => ({
   toastManager: { add: mocks.toastAdd },

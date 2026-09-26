@@ -2,15 +2,15 @@ import { IconLoader2, IconPlayerStopFilled, IconVolume } from "@tabler/icons-rea
 import { useAtomValue } from "jotai"
 import { useCallback } from "react"
 import { buttonVariants } from "@/components/ui/base-ui/button"
+import {
+  SelectionPopoverTooltip,
+  useSelectionTooltipState,
+} from "@/components/ui/selection-popover/selection-tooltip"
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
-import {
-  SelectionPopoverTooltip,
-  useSelectionTooltipState,
-} from "../../components/selection-tooltip"
 
 export function FieldSpeakButton({ text, disabled }: { text: string; disabled: boolean }) {
   const {

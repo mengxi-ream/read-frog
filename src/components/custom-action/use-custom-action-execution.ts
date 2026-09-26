@@ -1,38 +1,44 @@
 import type { JSONValue } from "ai"
 import type { RefObject } from "react"
-import type { SelectionToolbarCustomActionRequestSlice } from "../atoms"
-import type { SelectionToolbarInlineError } from "../inline-error"
+import type { SelectionToolbarInlineError } from "@/components/ui/selection-popover/inline-error"
 import type { FeatureProviderAnalytics, SurfaceByFeature } from "@/types/analytics"
 import type {
   BackgroundStructuredObjectStreamSnapshot,
   ThinkingSnapshot,
 } from "@/types/background-stream"
+import type { Config } from "@/types/config/config"
 import type { AISDKReasoning } from "@/types/config/provider"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { HostedAiModelTier } from "@/utils/constants/provider-ids"
 import type { CachedWebPageContext } from "@/utils/host/translate/webpage-context"
 import type { CustomActionProviderRef } from "@/utils/providers/provider-registry"
+
+export interface SelectionToolbarCustomActionRequestSlice {
+  language: Config["language"]
+  action: SelectionToolbarCustomAction | null
+  provider: CustomActionProviderRef | null
+}
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { useCallback, useEffect, useRef, useState } from "react"
+import {
+  createSelectionToolbarPrecheckError,
+  createSelectionToolbarRuntimeError,
+  isAbortError,
+} from "@/components/ui/selection-popover/inline-error"
 import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { classifyResolvedProvider } from "@/utils/analytics-provider"
 import { streamBackgroundStructuredObject } from "@/utils/content-script/background-stream-client"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
+import { truncateContextTextForCustomAction } from "@/utils/custom-action-prompt"
+import {
+  buildSelectionToolbarCustomActionSystemPrompt,
+  replaceSelectionToolbarCustomActionPromptTokens,
+} from "@/utils/custom-action-prompt"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { getTopLevelReasoning } from "@/utils/providers/reasoning"
-import { truncateContextTextForCustomAction } from "../../utils"
-import {
-  buildSelectionToolbarCustomActionSystemPrompt,
-  replaceSelectionToolbarCustomActionPromptTokens,
-} from "../custom-action-prompt"
-import {
-  createSelectionToolbarPrecheckError,
-  createSelectionToolbarRuntimeError,
-  isAbortError,
-} from "../inline-error"
 
 export interface CustomActionExecutionContext {
   action: SelectionToolbarCustomAction
