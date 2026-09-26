@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.49.0
+
+### Minor Changes
+
+- [#2202](https://github.com/mengxi-ream/read-frog/pull/2202) [`5048e54`](https://github.com/mengxi-ream/read-frog/commit/5048e542036efe8e107c605d573e5bb965584134) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): translate captions on x.com status videos
+
+### Patch Changes
+
+- [#2242](https://github.com/mengxi-ream/read-frog/pull/2242) [`f347fa5`](https://github.com/mengxi-ream/read-frog/commit/f347fa5f845fe9a6dbc6e25674d1b0be5ad9c327) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): keep the subtitle menu inside the video and below the player's own menus
+
 ## 1.48.1
 
 ### Patch Changes
