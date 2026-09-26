@@ -4,9 +4,9 @@ import ReactDOM from "react-dom/client"
 import themeCSS from "@/assets/styles/theme.css?inline"
 import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
 import {
+  DEFAULT_SUBTITLES_UI_Z_INDEX,
   READ_FROG_SUBTITLES_UI_HOST_ID,
   SUBTITLES_THEME,
-  SUBTITLES_UI_Z_INDEX,
 } from "@/utils/constants/subtitles"
 import { waitForElement } from "@/utils/dom/wait-for-element"
 import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
@@ -20,7 +20,7 @@ import { mountSubtitlesToast } from "./mount-subtitles-toast"
 
 interface MountSubtitlesUIOptions {
   adapter: SubtitlesProvidersAdapter
-  config: Pick<PlatformConfig, "selectors">
+  config: Pick<PlatformConfig, "selectors" | "subtitlesZIndex">
   menuBelow?: boolean
 }
 
@@ -71,7 +71,7 @@ export async function mountSubtitlesUI({
     right: 0;
     bottom: 0;
     pointer-events: none;
-    z-index: ${SUBTITLES_UI_Z_INDEX};
+    z-index: ${config.subtitlesZIndex ?? DEFAULT_SUBTITLES_UI_Z_INDEX};
     transition: bottom 0.2s ease-out;
     overflow: visible;
   `

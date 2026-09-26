@@ -23,9 +23,7 @@ export const TRANSLATE_BUTTON_CONTAINER_ID = "read-frog-subtitles-translate-butt
 export const SUBTITLES_SIDEBAR_HOST_ID = "read-frog-subtitles-sidebar-host"
 export const HIDE_NATIVE_CAPTIONS_STYLE_ID = "read-frog-hide-native-captions"
 
-// Above the video and its native captions, below the player's controls and menus
-// (YouTube: video 10, captions 41, controls 59, settings menu 2300).
-export const SUBTITLES_UI_Z_INDEX = 50
+export const DEFAULT_SUBTITLES_UI_Z_INDEX = 60
 
 // Class names
 export const SUBTITLES_VIEW_CLASS = "read-frog-subtitles-view"
