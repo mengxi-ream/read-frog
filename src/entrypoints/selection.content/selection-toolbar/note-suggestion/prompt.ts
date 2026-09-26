@@ -1,10 +1,10 @@
-import type { SelectionToolbarCustomActionPromptTokens } from "../custom-action-prompt"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
-import { NOTE_SUGGESTION_MAX_NOTES } from "@/utils/note-suggestion/types"
+import type { SelectionToolbarCustomActionPromptTokens } from "@/utils/custom-action-prompt"
 import {
   buildStructuredOutputFieldList,
   replaceSelectionToolbarCustomActionPromptTokens,
-} from "../custom-action-prompt"
+} from "@/utils/custom-action-prompt"
+import { NOTE_SUGGESTION_MAX_NOTES } from "@/utils/note-suggestion/types"
 
 // Bound page-derived text and user-authored prompts so one suggestion cannot
 // consume an unbounded amount of the user's provider quota. The fixed

@@ -16,6 +16,7 @@ import { primeGlossaryMatcher } from "@/utils/glossary/active-matcher"
 import { initI18n } from "@/utils/i18n"
 import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
 import { ensureIconifyBackgroundFetch } from "@/utils/iconify/setup-background-fetch"
+import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { protectSelectAllShadowRoot } from "@/utils/select-all"
 import {
   insertShadowRootUIWrapperInto,
@@ -70,19 +71,21 @@ async function mountSelectionUI(ctx: ContentScriptContext) {
 
       const root = ReactDOM.createRoot(wrapper)
       root.render(
-        <QueryClientProvider client={queryClient}>
-          <JotaiProvider>
-            <HydrateAtoms initialValues={[[baseThemeModeAtom, themeMode]]}>
-              <ThemeProvider container={wrapper}>
-                <TooltipProvider>
-                  <LocaleBoundary>
-                    <App uiContainer={container} portalContainer={shadow} />
-                  </LocaleBoundary>
-                </TooltipProvider>
-              </ThemeProvider>
-            </HydrateAtoms>
-          </JotaiProvider>
-        </QueryClientProvider>,
+        <ShadowWrapperContext value={wrapper}>
+          <QueryClientProvider client={queryClient}>
+            <JotaiProvider>
+              <HydrateAtoms initialValues={[[baseThemeModeAtom, themeMode]]}>
+                <ThemeProvider container={wrapper}>
+                  <TooltipProvider>
+                    <LocaleBoundary>
+                      <App uiContainer={container} portalContainer={shadow} />
+                    </LocaleBoundary>
+                  </TooltipProvider>
+                </ThemeProvider>
+              </HydrateAtoms>
+            </JotaiProvider>
+          </QueryClientProvider>
+        </ShadowWrapperContext>,
       )
       return root
     },

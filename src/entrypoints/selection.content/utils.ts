@@ -44,8 +44,6 @@ const PARAGRAPH_LIKE_TAGS = new Set([
 const SEMANTIC_CONTAINER_TAGS = new Set(["ARTICLE", "ASIDE", "BODY", "MAIN", "NAV", "SECTION"])
 const PARAGRAPH_DISPLAY_VALUES = new Set(["block", "list-item"])
 
-export const CUSTOM_ACTION_CONTEXT_CHAR_LIMIT = 2000
-
 export function normalizeSelectedText(value: string | null | undefined) {
   return value?.replace(ZERO_WIDTH_CHAR_REGEX, "").trim() ?? ""
 }
@@ -413,11 +411,4 @@ export function buildContextSnapshot(selection: SelectionSnapshot | null): Conte
     text: paragraphs.join(PARAGRAPH_SEPARATOR),
     paragraphs,
   }
-}
-
-export function truncateContextTextForCustomAction(
-  contextText: string,
-  limit = CUSTOM_ACTION_CONTEXT_CHAR_LIMIT,
-) {
-  return contextText.slice(0, limit)
 }

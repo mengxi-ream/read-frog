@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   buildSelectionToolbarCustomActionSystemPrompt,
   replaceSelectionToolbarCustomActionPromptTokens,
+  truncateContextTextForCustomAction,
 } from "../custom-action-prompt"
 
 describe("replaceSelectionToolbarCustomActionPromptTokens", () => {
@@ -130,5 +131,11 @@ describe("buildSelectionToolbarCustomActionSystemPrompt", () => {
 
     expect(result).toContain("## Structured Output Contract")
     expect(result).not.toContain("system=")
+  })
+})
+
+describe("truncateContextTextForCustomAction", () => {
+  it("keeps only the leading characters for custom action context tokens", () => {
+    expect(truncateContextTextForCustomAction("abcdefghij", 4)).toBe("abcd")
   })
 })

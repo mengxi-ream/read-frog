@@ -249,11 +249,11 @@ vi.mock("@/components/ui/selection-popover", async () => {
   }
 })
 
-vi.mock("../../components/selection-toolbar-title-content", () => ({
+vi.mock("@/components/ui/selection-popover/selection-toolbar-title-content", () => ({
   SelectionToolbarTitleContent: ({ title }: { title: string }) => <div>{title}</div>,
 }))
 
-vi.mock("../../components/selection-toolbar-footer-content", () => ({
+vi.mock("@/components/ui/selection-popover/selection-toolbar-footer-content", () => ({
   SelectionToolbarFooterContent: ({
     children,
     paragraphsText,
@@ -321,7 +321,7 @@ vi.mock("../translate-button/translation-content", () => ({
   ),
 }))
 
-vi.mock("../custom-action-button/structured-object-renderer", () => ({
+vi.mock("@/components/custom-action/structured-object-renderer", () => ({
   StructuredObjectRenderer: ({ value }: { value: Record<string, unknown> | null }) => (
     <pre>{JSON.stringify(value)}</pre>
   ),

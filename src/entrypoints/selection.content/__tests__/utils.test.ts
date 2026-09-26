@@ -1,11 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from "vitest"
-import {
-  buildContextSnapshot,
-  createRangeSnapshot,
-  readSelectionSnapshot,
-  truncateContextTextForCustomAction,
-} from "../utils"
+import { buildContextSnapshot, createRangeSnapshot, readSelectionSnapshot } from "../utils"
 
 function createSelectionSnapshot(range: Range, text = range.toString()) {
   return {
@@ -372,11 +367,5 @@ describe("readSelectionSnapshot", () => {
       ],
     })
     expect(getRangeAt).toHaveBeenCalledWith(0)
-  })
-})
-
-describe("truncateContextTextForCustomAction", () => {
-  it("keeps only the leading characters for custom action context tokens", () => {
-    expect(truncateContextTextForCustomAction("abcdefghij", 4)).toBe("abcd")
   })
 })

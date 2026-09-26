@@ -1,6 +1,6 @@
 import type { ThinkingSnapshot } from "@/types/background-stream"
 import type { SelectionToolbarCustomActionOutputField } from "@/types/config/selection-toolbar"
-import { SelectionSourceContent } from "../../components/selection-source-content"
+import { SelectionSourceContent } from "@/components/ui/selection-popover/selection-source-content"
 import { StructuredObjectRenderer } from "./structured-object-renderer"
 
 interface CustomActionContentProps {

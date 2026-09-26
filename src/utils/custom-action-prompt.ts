@@ -98,3 +98,12 @@ export function buildSelectionToolbarCustomActionSystemPrompt(
 
   return resolvedPrompt ? `${resolvedPrompt}\n\n${contract}` : contract
 }
+
+export const CUSTOM_ACTION_CONTEXT_CHAR_LIMIT = 2000
+
+export function truncateContextTextForCustomAction(
+  contextText: string,
+  limit = CUSTOM_ACTION_CONTEXT_CHAR_LIMIT,
+) {
+  return contextText.slice(0, limit)
+}
