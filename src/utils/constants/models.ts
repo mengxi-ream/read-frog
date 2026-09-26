@@ -9,10 +9,13 @@ interface OpenAIGPT5ReasoningEffortPolicy {
   recommendedValue?: OpenAIReasoningEffort
 }
 
-// Reviewed against provider catalogs and AI SDK docs on 2026-09-04.
+// Reviewed against provider catalogs and AI SDK docs on 2026-09-26.
 // Keep existing IDs: persisted provider configs validate against these enums.
 export const LLM_PROVIDER_MODELS = {
   openai: [
+    "gpt-6-astra",
+    "gpt-6-sol",
+    "gpt-6-luna",
     "gpt-5.6-luna",
     "gpt-5.6-terra",
     "gpt-5.6-sol",
@@ -43,6 +46,9 @@ export const LLM_PROVIDER_MODELS = {
     "gpt-4o-mini",
   ],
   azure: [
+    "gpt-6-astra",
+    "gpt-6-sol",
+    "gpt-6-luna",
     "gpt-5.6-luna",
     "gpt-5.6-terra",
     "gpt-5.6-sol",
@@ -479,6 +485,21 @@ export const PURE_TRANSLATE_PROVIDERS = [
 ] as const
 
 const OPENAI_GPT5_REASONING_EFFORT_POLICIES: OpenAIGPT5ReasoningEffortPolicy[] = [
+  {
+    pattern: /^(?:openai\/)?gpt-6-astra$/i,
+    supportedValues: ["low", "medium", "high", "xhigh", "max"],
+    recommendedValue: "low",
+  },
+  {
+    pattern: /^(?:openai\/)?gpt-6-sol$/i,
+    supportedValues: ["none", "low", "medium", "high", "xhigh", "max"],
+    recommendedValue: "medium",
+  },
+  {
+    pattern: /^(?:openai\/)?gpt-6-luna$/i,
+    supportedValues: ["none", "low", "medium", "high", "xhigh", "max"],
+    recommendedValue: "medium",
+  },
   {
     pattern: /^(?:openai\/)?gpt-5\.6(?:-(?:luna|terra|sol))?$/i,
     supportedValues: ["none", "low", "medium", "high", "xhigh", "max"],
