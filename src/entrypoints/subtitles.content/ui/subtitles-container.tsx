@@ -5,7 +5,8 @@ import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-ho
 import { subtitlesDisplayAtom, subtitlesShowContentAtom, subtitlesShowStateAtom } from "../atoms"
 import { StateMessage } from "./state-message"
 import { SubtitlesSettingsPanel } from "./subtitles-settings-panel"
-import { SubtitlesUIContext } from "./subtitles-ui-context"
+import { isMenuInControls } from "./subtitles-settings-panel/menu-placement"
+import { useSubtitlesUI } from "./subtitles-ui-context"
 import { SubtitlesView } from "./subtitles-view"
 import { useSubtitlesCustomCSS } from "./use-subtitles-custom-css"
 
@@ -13,7 +14,7 @@ export function SubtitlesContainer() {
   const { stateData, isVisible } = useAtomValue(subtitlesDisplayAtom)
   const showState = useAtomValue(subtitlesShowStateAtom)
   const showContent = useAtomValue(subtitlesShowContentAtom)
-  const ui = use(SubtitlesUIContext)
+  const { embedded } = useSubtitlesUI()
   // Portals into this host rather than the docked toast host, which hangs off
   // document.body: this one lives inside the player, so an anchored toast can
   // reach its trigger and survives the player going fullscreen.
@@ -32,7 +33,7 @@ export function SubtitlesContainer() {
         )}
       </div>
 
-      {(!ui?.embedded || ui?.openBelow) && (
+      {!isMenuInControls(embedded) && (
         <div className="absolute inset-0 z-40 overflow-visible">
           <SubtitlesSettingsPanel />
         </div>

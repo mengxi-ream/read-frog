@@ -86,7 +86,11 @@ export function SubtitlesSidebarItem() {
     <SubpageMenuEntry
       ref={anchor}
       icon={
-        checking ? <IconLoader2 className="size-4 animate-spin" /> : <IconBook className="size-4" />
+        checking ? (
+          <IconLoader2 className="size-3.5 animate-spin" />
+        ) : (
+          <IconBook className="size-3.5" />
+        )
       }
       label={i18n.t("subtitles.sidebar.menu.label")}
       onClick={() => (isOpen ? setOpen(false) : void open())}

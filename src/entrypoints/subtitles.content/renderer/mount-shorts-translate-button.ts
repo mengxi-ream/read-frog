@@ -11,6 +11,6 @@ export async function mountShortsTranslateButton(
   const container = await waitForElement(SHORTS_CONTROLS_SELECTOR)
   if (!container) return
 
-  const host = renderSubtitlesTranslateButton({ adapter, openBelow: true })
+  const host = renderSubtitlesTranslateButton({ adapter })
   if (host.parentElement !== container) container.insertBefore(host, container.firstChild)
 }

@@ -3,7 +3,11 @@ import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import ReactDOM from "react-dom/client"
 import themeCSS from "@/assets/styles/theme.css?inline"
 import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
-import { READ_FROG_SUBTITLES_UI_HOST_ID, SUBTITLES_THEME } from "@/utils/constants/subtitles"
+import {
+  DEFAULT_SUBTITLES_UI_Z_INDEX,
+  READ_FROG_SUBTITLES_UI_HOST_ID,
+  SUBTITLES_THEME,
+} from "@/utils/constants/subtitles"
 import { waitForElement } from "@/utils/dom/wait-for-element"
 import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
@@ -11,11 +15,12 @@ import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder
 import { applyTheme } from "@/utils/theme"
 import { SubtitlesContainer } from "../ui/subtitles-container"
 import { SubtitlesProviders } from "../ui/subtitles-ui-context"
+import { isolatePlayerEvents } from "./isolate-player-events"
 import { mountSubtitlesToast } from "./mount-subtitles-toast"
 
 interface MountSubtitlesUIOptions {
   adapter: SubtitlesProvidersAdapter
-  config: Pick<PlatformConfig, "selectors">
+  config: Pick<PlatformConfig, "selectors" | "subtitlesZIndex">
   menuBelow?: boolean
 }
 
@@ -66,7 +71,7 @@ export async function mountSubtitlesUI({
     right: 0;
     bottom: 0;
     pointer-events: none;
-    z-index: 9999;
+    z-index: ${config.subtitlesZIndex ?? DEFAULT_SUBTITLES_UI_Z_INDEX};
     transition: bottom 0.2s ease-out;
     overflow: visible;
   `
@@ -98,6 +103,7 @@ export async function mountSubtitlesUI({
     hostBuilder.cleanup()
   }
 
+  isolatePlayerEvents(shadowHost)
   mountedHost = shadowHost
   parentEl.appendChild(shadowHost)
 
