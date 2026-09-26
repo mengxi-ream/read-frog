@@ -112,8 +112,9 @@ export function useVerticalDrag() {
     })
   })
 
-  const onMouseDown = useEffectEvent((e: MouseEvent) => {
+  const onPointerDown = useEffectEvent((e: PointerEvent) => {
     if (e.button !== 0) return
+    handleRef.current?.setPointerCapture(e.pointerId)
     isDraggingRef.current = true
     setIsDragging(true)
     startYRef.current = e.clientY
@@ -122,7 +123,7 @@ export function useVerticalDrag() {
     e.stopPropagation()
   })
 
-  const onMouseMove = useEffectEvent((e: MouseEvent) => {
+  const onPointerMove = useEffectEvent((e: PointerEvent) => {
     if (!isDraggingRef.current) return
 
     const rects = getRects(containerRef)
@@ -165,7 +166,7 @@ export function useVerticalDrag() {
     setPosition({ ...startPositionRef.current, percent: newPercent })
   })
 
-  const onMouseUp = useEffectEvent(() => {
+  const onPointerUp = useEffectEvent(() => {
     if (!isDraggingRef.current) return
     isDraggingRef.current = false
     setIsDragging(false)
@@ -191,9 +192,10 @@ export function useVerticalDrag() {
     const container = containerRef.current
     if (!handle || !container) return undefined
 
-    handle.addEventListener("mousedown", onMouseDown)
-    window.addEventListener("mousemove", onMouseMove)
-    window.addEventListener("mouseup", onMouseUp)
+    handle.addEventListener("pointerdown", onPointerDown)
+    handle.addEventListener("pointermove", onPointerMove)
+    handle.addEventListener("pointerup", onPointerUp)
+    handle.addEventListener("lostpointercapture", onPointerUp)
 
     const resizeObserver = new ResizeObserver(() => {
       updateWindowStyle()
@@ -221,9 +223,10 @@ export function useVerticalDrag() {
 
     return () => {
       cancelAnimationFrame(frame)
-      handle.removeEventListener("mousedown", onMouseDown)
-      window.removeEventListener("mousemove", onMouseMove)
-      window.removeEventListener("mouseup", onMouseUp)
+      handle.removeEventListener("pointerdown", onPointerDown)
+      handle.removeEventListener("pointermove", onPointerMove)
+      handle.removeEventListener("pointerup", onPointerUp)
+      handle.removeEventListener("lostpointercapture", onPointerUp)
       resizeObserver.disconnect()
     }
   })
