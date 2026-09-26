@@ -61,7 +61,7 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   openai: {
-    model: "gpt-5.6-luna",
+    model: "gpt-6-luna",
     isCustomModel: false,
     customModel: null,
   },
