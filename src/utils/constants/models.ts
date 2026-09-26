@@ -13,9 +13,9 @@ interface OpenAIGPT5ReasoningEffortPolicy {
 // Keep existing IDs: persisted provider configs validate against these enums.
 export const LLM_PROVIDER_MODELS = {
   openai: [
+    "gpt-6-luna",
     "gpt-6-astra",
     "gpt-6-sol",
-    "gpt-6-luna",
     "gpt-5.6-luna",
     "gpt-5.6-terra",
     "gpt-5.6-sol",
@@ -46,9 +46,9 @@ export const LLM_PROVIDER_MODELS = {
     "gpt-4o-mini",
   ],
   azure: [
+    "gpt-6-luna",
     "gpt-6-astra",
     "gpt-6-sol",
-    "gpt-6-luna",
     "gpt-5.6-luna",
     "gpt-5.6-terra",
     "gpt-5.6-sol",
