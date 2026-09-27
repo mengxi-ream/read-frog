@@ -2,8 +2,8 @@ import type { SelectionToolbarCustomAction } from "@/types/config/selection-tool
 import type { CustomActionTemplate } from "@/utils/constants/custom-action-templates"
 import { Icon } from "@iconify/react"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
-import { useEffect, useMemo, useState } from "react"
-import { useLocation, useNavigate } from "react-router"
+import { useMemo, useState } from "react"
+import { useLocation } from "react-router"
 import { requestEditorNavigationAtom } from "@/components/form/autosave-navigation"
 import { SortableList } from "@/components/sortable-list"
 import { Button } from "@/components/ui/base-ui/button"
@@ -13,10 +13,11 @@ import { BUILT_IN_DICTIONARY_ACTION_ID, DEFAULT_ACTION_NAME } from "@/utils/cons
 import { getBuiltInDictionaryAction, patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { getUniqueName } from "@/utils/name"
+import { CUSTOM_ACTION_ADD_QUERY_PARAM } from "@/utils/navigation"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { EntityListItem } from "../../../components/entity-list-item"
 import { EntityListRail } from "../../../components/entity-list-rail"
-import { selectedCustomActionIdAtom } from "../atoms"
+import { customActionEditorTabAtom, selectedCustomActionIdAtom } from "../atoms"
 import { AddActionDialog } from "./add-action-dialog"
 
 export function CustomActionCardList() {
@@ -25,31 +26,15 @@ export function CustomActionCardList() {
   )
   const requestNavigation = useSetAtom(requestEditorNavigationAtom)
   const setSelectedCustomActionId = useSetAtom(selectedCustomActionIdAtom)
+  const setEditorTab = useSetAtom(customActionEditorTabAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const { search } = useLocation()
-  const navigate = useNavigate()
-  const [dialogOpen, setDialogOpen] = useState(() => new URLSearchParams(search).has("addAction"))
+  // Read at mount only; `useCustomActionDeepLink` strips the param right after.
+  const [dialogOpen, setDialogOpen] = useState(() =>
+    new URLSearchParams(search).has(CUSTOM_ACTION_ADD_QUERY_PARAM),
+  )
   const customActions = selectionToolbarConfig.customActions
   const builtInDictionary = getBuiltInDictionaryAction(selectionToolbarConfig)
-
-  useEffect(() => {
-    const params = new URLSearchParams(search)
-    const actionId = params.get("actionId")
-
-    if (
-      actionId === BUILT_IN_DICTIONARY_ACTION_ID ||
-      (actionId && customActions.some((action) => action.id === actionId))
-    ) {
-      void setSelectedCustomActionId(actionId)
-    }
-
-    if (params.has("addAction") || params.has("actionId")) {
-      params.delete("addAction")
-      params.delete("actionId")
-      const nextSearch = params.toString()
-      void navigate({ search: nextSearch ? `?${nextSearch}` : "" }, { replace: true })
-    }
-  }, [search, navigate, customActions, setSelectedCustomActionId])
 
   const customActionProviders = useMemo(
     () => getSelectableProvidersForCapability("customAction", providersConfig),
@@ -71,6 +56,7 @@ export function CustomActionCardList() {
           },
         ],
       }))
+      setEditorTab("config")
       await setSelectedCustomActionId(newAction.id)
       setDialogOpen(false)
     })

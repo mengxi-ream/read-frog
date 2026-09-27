@@ -31,6 +31,7 @@ export default defineConfig({
     ? {
         "@read-frog/definitions": path.resolve(monorepoRoot, "packages/definitions/src"),
         "@read-frog/api-contract": path.resolve(monorepoRoot, "packages/api-contract/src"),
+        "@read-frog/layout-engine": path.resolve(monorepoRoot, "packages/layout-engine/src"),
       }
     : {},
   manifest: ({ mode, browser }) => ({
@@ -94,6 +95,11 @@ export default defineConfig({
     excludeSources: ["docs/**/*", "assets/**/*", "repos/**/*", "readmes/**/*"],
   },
   hooks: {
+    // With local packages the bundle holds @read-frog/layout-engine's readable
+    // source, which must never leave this machine.
+    "zip:start": () => {
+      if (useLocalPackages) throw new Error("Do not zip a build made with local packages")
+    },
     "vite:build:extendConfig": (entrypoints, viteConfig) => {
       const entrypoint = entrypoints.length === 1 ? entrypoints[0] : undefined
       if (entrypoint?.type !== "content-script") return
@@ -130,6 +136,12 @@ export default defineConfig({
         "@codemirror/search",
         "@codemirror/commands",
         "@lezer/common",
+        // @codemirror/lang-liquid's parser and highlighting share these with the other languages.
+        "@lezer/highlight",
+        "@lezer/lr",
+        // The aliased layout engine source lives in the monorepo: resolve its
+        // dependencies from here, or the bundle gets a second React.
+        ...(useLocalPackages ? ["react", "react-dom", "liquidjs", "dompurify", "morphdom"] : []),
       ],
     },
     plugins: [

@@ -18,6 +18,7 @@ import {
 } from "@/utils/guide/dictionary-notebase"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
+import { buildCustomActionOptionsRoute } from "@/utils/navigation"
 import {
   classifyConnectedNotebaseOwnership,
   createNotebaseConnectedAccountSnapshot,
@@ -121,7 +122,7 @@ export function useSaveToNotebase() {
         onClick: () => {
           toastManager.close(toastId)
           void sendMessage("openOptionsPage", {
-            route: `/custom-actions?actionId=${encodeURIComponent(actionId)}`,
+            route: buildCustomActionOptionsRoute(actionId, { tab: "notebase" }),
           })
         },
       },

@@ -652,6 +652,12 @@ options:
       edit: Chỉnh sửa hành động AI
       empty: Chưa có hành động AI tùy chỉnh
       noEnabledLlmProvider: Hãy bật ít nhất một nhà cung cấp LLM trước khi tạo hành động AI tùy chỉnh
+      tabs:
+        config: Cấu hình
+        notebase: Notebase
+        hasErrors: Có lỗi
+        connected: Đã kết nối
+        needsAttention: Cần chú ý
       form:
         name: Tên
         customize: Tùy chỉnh
@@ -677,7 +683,6 @@ options:
         fieldType: Loại trường
         fieldDescription: Mô tả
         fieldDescriptionPlaceholder: Mô tả nội dung mà trường này nên chứa...
-        fieldSpeaking: Bật đọc thành tiếng
         actions: Thao tác
         cancel: Hủy
         save: Lưu
@@ -694,6 +699,64 @@ options:
           description: Trường đầu ra này sẽ bị xóa.
           confirm: Xóa
           cancel: Hủy
+        layout:
+          title: Bố cục
+          description: Cách kết quả hiển thị trong cửa sổ bật lên. HTML kèm Liquid; các trường được điền dần khi câu trả lời được truyền về.
+          reset: Khôi phục mặc định
+          resetFieldList: Danh sách trường
+          resetDictionary: Thẻ từ điển
+          resetSentenceAnalysis: Thẻ phân tích câu
+          resetConfirmTitle: Thay thế bố cục này?
+          resetConfirmDescription: Nội dung trong trình soạn thảo sẽ bị thay thế. Sau đó bạn vẫn có thể hoàn tác trong trình soạn thảo.
+          resetConfirm: Thay thế
+          edit: Chỉnh sửa
+          preview: Xem trước
+          width: Chiều rộng
+          themeLight: Sáng
+          themeDark: Tối
+          replay: Phát lại
+          sampleData: Dữ liệu mẫu
+          sampleDataHint: Chỉ dùng cho bản xem trước này và không được lưu.
+          sampleDataReset: Đặt lại mẫu
+          sampleValue: Mẫu $1
+          insertField: Trường
+          insertSpeak: Nút đọc
+          insertCondition: Khi có giá trị
+          insertContext: Ngữ cảnh
+          insertLoop: Mọi trường
+          syntaxHelp: Cú pháp
+          builtInHint: Không thể chỉnh sửa bố cục của từ điển tích hợp. Hãy tùy chỉnh để chỉnh sửa một bản sao.
+          viewSource: Xem mã nguồn
+          emptyNotice: Bố cục này trống nên cửa sổ bật lên hiển thị danh sách trường mặc định.
+          fallbackBanner: Không thể hiển thị bố cục này nên bố cục mặc định được dùng thay thế. $1
+          sanitized: "Đã gỡ bỏ vì lý do an toàn: $1"
+          unusedFields: "Không có trong bố cục này:"
+          tooLong: Bố cục chỉ được dài tối đa $1 ký tự.
+          renameSkipped: Bố cục vẫn tham chiếu đến "$1". Hãy cập nhật thủ công.
+          reservedName: '"ctx" và "forloop" là tên dành riêng trong bố cục. Hãy chọn tên khác.'
+          help:
+            output: Hiển thị giá trị của một trường. HTML trong giá trị sẽ được thoát ký tự.
+            condition: Chỉ hiển thị nội dung khi trường có giá trị.
+            loop: Lặp lại cho từng trường theo thứ tự. Có thể dùng f.name, f.value và f.type.
+            speak: Mọi phần tử có data-speak sẽ đọc to giá trị (hoặc văn bản của chính nó nếu giá trị trống) khi câu trả lời hoàn tất.
+            status: Tạo kiểu theo trạng thái. data-status của phần tử chứa là streaming, done hoặc error.
+            filters: newline_to_br giữ ngắt dòng (đặt ở cuối); lines tách văn bản thành danh sách dòng.
+            styles: CSS trong khối <style> chỉ áp dụng bên trong kết quả này. Các màu --rf-* theo giao diện sáng và tối.
+          lint:
+            parseError: "Lỗi cú pháp Liquid: $1"
+            unknownField: Không có trường nào tên "$1".
+            unknownContextKey: 'ctx không có "$1". Có sẵn: $2.'
+            fieldShadowedByLocal: Bố cục này gán giá trị cho "$1", làm che mất trường cùng tên.
+            liquidInStyle: Liquid không chạy trong <style>; phần này được giữ nguyên dạng văn bản.
+            styleInConditional: Khối <style> luôn được áp dụng, kể cả khi nằm trong thẻ "$1".
+            cssImport: "@import bị gỡ bỏ. Bố cục không thể tải kiểu từ bên ngoài."
+            cssFontFace: "@font-face bị gỡ bỏ. Hãy dùng phông chữ có sẵn trên thiết bị."
+            unquotedAttributeOutput: Hãy đặt giá trị thuộc tính này trong dấu ngoặc kép, nếu không giá trị có thể thoát ra ngoài thuộc tính.
+            filterIgnored: Bộ lọc bị bỏ qua trong thẻ "$1". Hãy gán giá trị đã lọc trước.
+            newlineToBrNotLast: newline_to_br chỉ hoạt động khi là bộ lọc cuối cùng của một đầu ra.
+            tooLong: Bố cục này dài hơn $1 ký tự và không thể lưu.
+            fieldNotShown: '"$1" không được hiển thị trong bố cục này.'
+            reservedFieldName: Tên trường "$1" là tên dành riêng trong bố cục. Hãy đổi tên trường.
         notebase:
           title: Kết nối Notebase
           description: Lưu kết quả có cấu trúc của hành động này vào Notebase từ xa.
@@ -752,6 +815,77 @@ options:
           description: Hành động này không thể hoàn tác.
           confirm: Xóa
           cancel: Hủy
+      templates:
+        dictionary:
+          name: "Từ điển"
+          description: "Tra từ kèm định nghĩa, phiên âm và bản dịch đoạn văn"
+          systemPrompt: |-
+            Bạn là trợ lý từ điển dành cho người học ngôn ngữ.
+
+            ## Mục tiêu
+            Dựa vào từ được chọn và các đoạn văn xung quanh, hãy tạo một mục từ điển ngắn gọn khớp với đối tượng đầu ra được yêu cầu.
+
+            ## Quy tắc
+            1. Tập trung vào nghĩa phù hợp nhất với các đoạn văn đã cho.
+            2. Chuẩn hóa Mục từ về dạng cơ bản/dạng gốc.
+            3. Định nghĩa phải chính xác và dễ hiểu với người học.
+            4. Với Câu, chỉ trích ra câu hoàn chỉnh trong các đoạn văn đã cho có chứa từ được chọn. Không kèm các câu trước và sau.
+            5. Bản dịch câu chỉ dịch Câu đã trích ra.
+            6. Phiên âm phải dùng cách ghi chuẩn cho ngôn ngữ của từ (ví dụ IPA cho tiếng Anh, pinyin cho tiếng Trung, romaji cho tiếng Nhật).
+            7. Từ loại ghi bằng tiếng Anh (noun, verb, adjective, v.v.).
+            8. Độ khó phải là một cấp độ CEFR (A1, A2, B1, B2, C1 hoặc C2).
+            9. Nếu không biết một trường, hãy trả về chuỗi rỗng thay vì đoán.
+            10. Trả lời tất cả các trường văn bản bằng {{targetLanguage}}, trừ khi cần giữ nguyên dạng gốc cho rõ ràng.
+            11. Dạng trong câu đánh dấu vị trí của từ được chọn trong Câu. Đây là một CHUỖI chứa mảng JSON gọn gồm các phần tử {"text": ...}, mỗi phần tử trích nguyên văn từng ký tự trong Câu, ví dụ [{"text":"blossoms"}]. Nếu Câu tách từ thành các phần riêng (ví dụ "anrufen" trong "Er ruft seine Mutter an"), hãy cho mỗi phần một phần tử, theo thứ tự: [{"text":"ruft"},{"text":"an"}]. Hãy thoát (escape) đúng các dấu ngoặc kép bên trong.
+
+            ## Ví dụ
+
+            ### Ví dụ 1
+            Đầu vào: Văn bản chọn="blossoms", Đoạn văn="Spring arrives quietly in the park. The ephemeral beauty of cherry blossoms reminds us to cherish each moment. Families and friends gather beneath the trees.", Ngôn ngữ đích=tiếng Trung
+
+            Đầu ra:
+            - Mục từ: blossom
+            - Phiên âm: /ˈblɒs.əm/
+            - Từ loại: noun
+            - Câu: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+            - Dạng trong câu: [{"text":"blossoms"}]
+            - Định nghĩa: 花；花朵（尤指果树的花）
+            - Bản dịch câu: 樱花短暂的美丽提醒我们珍惜每一刻。
+            - Độ khó: B2
+
+            ### Ví dụ 2
+            Đầu vào: Văn bản chọn="感動", Đoạn văn="この映画はつまらないと思ったけど、最後は感動した。", Ngôn ngữ đích=tiếng Anh
+
+            Đầu ra:
+            - Mục từ: 感動
+            - Phiên âm: kandou
+            - Từ loại: noun
+            - Câu: この映画はつまらないと思ったけど、最後は感動した。
+            - Dạng trong câu: [{"text":"感動"}]
+            - Định nghĩa: Being deeply moved; emotional touch
+            - Bản dịch câu: I thought this movie was boring, but the ending was moving.
+            - Độ khó: B1
+          prompt: |-
+            ## Đầu vào
+            Văn bản chọn: {{selection}}
+            Đoạn văn: {{paragraphs}}
+            Ngôn ngữ đích: {{targetLanguage}}
+          fieldTerm: "Mục từ"
+          fieldTermDescription: "Dạng cơ bản/dạng gốc của từ được chọn."
+          fieldPhonetic: "Phiên âm"
+          fieldPhoneticDescription: "Phiên âm chuẩn cho ngôn ngữ của từ (ví dụ IPA cho tiếng Anh, pinyin cho tiếng Trung, romaji cho tiếng Nhật)."
+          fieldPartOfSpeech: "Từ loại"
+          fieldPartOfSpeechDescription: "Loại ngữ pháp (ví dụ noun, verb, adjective)."
+          fieldSentence: "Câu"
+          fieldSentenceDescription: "Câu hoàn chỉnh trong các đoạn văn ở trên có chứa từ được chọn. Không kèm các câu trước và sau."
+          fieldSentenceTerm: "Dạng trong câu"
+          fieldSentenceTermDescription: 'Vị trí của từ được chọn trong Câu: một mảng JSON được tuần tự hóa thành chuỗi, mỗi phần của từ là một phần tử {"text": chuỗi}, mỗi phần tử trích nguyên văn Câu (ví dụ [{"text":"blossoms"}]).'
+          fieldDefinition: "Định nghĩa"
+          fieldDefinitionDescription: "Một định nghĩa ngắn gọn cho nghĩa trong ngữ cảnh."
+          fieldSentenceTranslation: "Bản dịch câu"
+          fieldSentenceTranslationDescription: "Bản dịch chỉ của Câu."
+          fieldDifficulty: "Độ khó"
+          fieldDifficultyDescription: "Cấp độ khó CEFR ước tính: A1, A2, B1, B2, C1 hoặc C2."
       errors:
         nameRequired: Tên là bắt buộc
         duplicateName: 'Tên hành động trùng lặp "$1"'
@@ -1283,6 +1417,7 @@ action:
   regenerate: Tạo lại
   viewContextDetails: Ngữ cảnh
   customizeCustomAction: Tùy chỉnh hành động $1
+  customActionLayoutFallback: Không thể hiển thị kết quả này theo bố cục nên đang hiển thị dạng đơn giản.
   saveToNotebase: Lưu vào Notebase
   saveToNotebaseSaving: Đang lưu...
   saveToNotebaseSuccess: Đã lưu vào Notebase

@@ -38,7 +38,6 @@ function createAction(): SelectionToolbarCustomAction {
         name: "Summary",
         type: "string",
         description: "",
-        speaking: false,
       },
     ],
   }

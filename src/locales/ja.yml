@@ -652,6 +652,12 @@ options:
       edit: AI アクションを編集
       empty: カスタム AI アクションはまだありません
       noEnabledLlmProvider: カスタム AI アクションを作成する前に、少なくとも1つのLLMプロバイダーを有効化してください
+      tabs:
+        config: 設定
+        notebase: Notebase
+        hasErrors: エラーがあります
+        connected: 接続済み
+        needsAttention: 要確認
       form:
         name: 名前
         customize: カスタマイズ
@@ -677,7 +683,6 @@ options:
         fieldType: フィールド型
         fieldDescription: 説明
         fieldDescriptionPlaceholder: このフィールドに含めるべき内容を説明してください...
-        fieldSpeaking: 読み上げを有効にする
         actions: 操作
         cancel: キャンセル
         save: 保存
@@ -694,6 +699,64 @@ options:
           description: この出力フィールドは削除されます。
           confirm: 削除
           cancel: キャンセル
+        layout:
+          title: レイアウト
+          description: ポップアップでの結果の表示方法です。HTML と Liquid で記述し、回答のストリーミングに合わせてフィールドが埋まります。
+          reset: デフォルトに戻す
+          resetFieldList: フィールド一覧
+          resetDictionary: 辞書カード
+          resetSentenceAnalysis: 文分析カード
+          resetConfirmTitle: このレイアウトを置き換えますか？
+          resetConfirmDescription: エディターの内容が置き換えられます。あとからエディターで元に戻すこともできます。
+          resetConfirm: 置き換える
+          edit: 編集
+          preview: プレビュー
+          width: 幅
+          themeLight: ライト
+          themeDark: ダーク
+          replay: 再生
+          sampleData: サンプルデータ
+          sampleDataHint: このプレビューでのみ使われ、保存されません。
+          sampleDataReset: サンプルをリセット
+          sampleValue: $1のサンプル
+          insertField: フィールド
+          insertSpeak: 読み上げボタン
+          insertCondition: 値があるとき
+          insertContext: コンテキスト
+          insertLoop: すべてのフィールド
+          syntaxHelp: 構文
+          builtInHint: 組み込み辞書のレイアウトは編集できません。「カスタマイズ」でコピーを作成して編集してください。
+          viewSource: ソースを表示
+          emptyNotice: レイアウトが空のため、ポップアップにはデフォルトのフィールド一覧が表示されます。
+          fallbackBanner: このレイアウトは表示できないため、デフォルトのレイアウトを使用しています。$1
+          sanitized: 安全のため削除されました：$1
+          unusedFields: このレイアウトにないフィールド：
+          tooLong: レイアウトは最大 $1 文字です。
+          renameSkipped: レイアウトはまだ「$1」を参照しています。手動で更新してください。
+          reservedName: 「ctx」と「forloop」はレイアウトの予約名です。別の名前を選んでください。
+          help:
+            output: フィールドの値を表示します。値に含まれる HTML はエスケープされます。
+            condition: フィールドに値があるときだけ中身を表示します。
+            loop: すべてのフィールドについて順に繰り返します。f.name、f.value、f.type が使えます。
+            speak: data-speak を付けた要素は、回答の完了後にその値（空なら要素自身のテキスト）を読み上げます。
+            status: 状態ごとにスタイルを設定します。ホストの data-status は streaming、done、error のいずれかです。
+            filters: newline_to_br は改行を保持します（最後に置いてください）。lines はテキストを行のリストに分けます。
+            styles: <style> ブロックの CSS はこの結果の中だけに適用されます。--rf-* の色はライト／ダークテーマに追従します。
+          lint:
+            parseError: Liquid の構文エラー：$1
+            unknownField: 「$1」という名前のフィールドはありません。
+            unknownContextKey: ctx に「$1」はありません。使用可能：$2。
+            fieldShadowedByLocal: このレイアウトで「$1」に値を代入しているため、同じ名前のフィールドが隠れます。
+            liquidInStyle: <style> 内では Liquid は実行されず、そのままのテキストとして残ります。
+            styleInConditional: <style> ブロックは「$1」タグの中にあっても常に適用されます。
+            cssImport: "@import は削除されます。レイアウトから外部のスタイルは読み込めません。"
+            cssFontFace: "@font-face は削除されます。端末にあるフォントを使ってください。"
+            unquotedAttributeOutput: この属性値を引用符で囲んでください。囲まないと値が属性の外にはみ出すおそれがあります。
+            filterIgnored: 「$1」タグではフィルターは無視されます。先にフィルター後の値を代入してください。
+            newlineToBrNotLast: newline_to_br は出力の最後のフィルターとしてのみ機能します。
+            tooLong: このレイアウトは $1 文字を超えているため保存できません。
+            fieldNotShown: 「$1」はこのレイアウトに表示されません。
+            reservedFieldName: フィールド名「$1」はレイアウトの予約名です。フィールドの名前を変更してください。
         notebase:
           title: Notebase 接続
           description: このアクションの構造化された結果をリモート Notebase に保存します。
@@ -752,6 +815,77 @@ options:
           description: この操作は元に戻せません。
           confirm: 削除
           cancel: キャンセル
+      templates:
+        dictionary:
+          name: "辞書"
+          description: "意味・発音・段落の翻訳付きで単語を調べる"
+          systemPrompt: |-
+            あなたは語学学習者のための辞書アシスタントです。
+
+            ## 目的
+            語句とその前後の段落をもとに、指定された出力オブジェクトに合った簡潔な辞書項目を作成してください。
+
+            ## ルール
+            1. 与えられた段落に最も合う意味に焦点を当ててください。
+            2. 見出し語は基本形（原形）に正規化してください。
+            3. 意味は正確で、学習者にわかりやすく書いてください。
+            4. 例文には、与えられた段落のうち選択された語句を含む完全な一文だけを抜き出してください。前後の文は含めないでください。
+            5. 例文の翻訳では、抜き出した例文だけを翻訳してください。
+            6. 発音はその語の言語の標準的な表記を使ってください（例：英語は IPA、中国語はピンイン、日本語はローマ字）。
+            7. 品詞は英語で書いてください（noun、verb、adjective など）。
+            8. 難易度は CEFR レベル（A1、A2、B1、B2、C1、C2）のいずれかにしてください。
+            9. わからない項目は、推測せずに空文字列を返してください。
+            10. 原文の形が必要な場合を除き、すべてのテキスト項目は {{targetLanguage}} で答えてください。
+            11. 例文中の語形は、選択された語句が例文のどこにあるかを示します。これは {"text": ...} 要素からなるコンパクトな JSON 配列を含む文字列で、各要素は例文を一字一句そのまま引用します。例：[{"text":"blossoms"}]。例文で語句が複数の部分に分かれている場合（例：「Er ruft seine Mutter an」の「anrufen」）は、部分ごとに順番に 1 要素ずつ書いてください：[{"text":"ruft"},{"text":"an"}]。内側の引用符は正しくエスケープしてください。
+
+            ## 例
+
+            ### 例 1
+            入力：選択テキスト="blossoms"、段落="Spring arrives quietly in the park. The ephemeral beauty of cherry blossoms reminds us to cherish each moment. Families and friends gather beneath the trees."、ターゲット言語=中国語
+
+            出力：
+            - 見出し語：blossom
+            - 発音：/ˈblɒs.əm/
+            - 品詞：noun
+            - 例文：The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+            - 例文中の語形：[{"text":"blossoms"}]
+            - 意味：花；花朵（尤指果树的花）
+            - 例文の翻訳：樱花短暂的美丽提醒我们珍惜每一刻。
+            - 難易度：B2
+
+            ### 例 2
+            入力：選択テキスト="感動"、段落="この映画はつまらないと思ったけど、最後は感動した。"、ターゲット言語=英語
+
+            出力：
+            - 見出し語：感動
+            - 発音：kandou
+            - 品詞：noun
+            - 例文：この映画はつまらないと思ったけど、最後は感動した。
+            - 例文中の語形：[{"text":"感動"}]
+            - 意味：Being deeply moved; emotional touch
+            - 例文の翻訳：I thought this movie was boring, but the ending was moving.
+            - 難易度：B1
+          prompt: |-
+            ## 入力
+            選択テキスト：{{selection}}
+            段落：{{paragraphs}}
+            ターゲット言語：{{targetLanguage}}
+          fieldTerm: "見出し語"
+          fieldTermDescription: "選択された語句の基本形（原形）。"
+          fieldPhonetic: "発音"
+          fieldPhoneticDescription: "その語の言語の標準的な発音表記（例：英語は IPA、中国語はピンイン、日本語はローマ字）。"
+          fieldPartOfSpeech: "品詞"
+          fieldPartOfSpeechDescription: "文法上の品詞（例：noun、verb、adjective）。"
+          fieldSentence: "例文"
+          fieldSentenceDescription: "上の段落のうち、選択された語句を含む完全な一文。前後の文は含めないでください。"
+          fieldSentenceTerm: "例文中の語形"
+          fieldSentenceTermDescription: '選択された語句の例文中の位置：文字列として直列化された JSON 配列で、語句の部分ごとに {"text": 文字列} を 1 要素とし、それぞれ例文をそのまま引用します（例：[{"text":"blossoms"}]）。'
+          fieldDefinition: "意味"
+          fieldDefinitionDescription: "文脈に合った意味の簡潔な定義を 1 つ。"
+          fieldSentenceTranslation: "例文の翻訳"
+          fieldSentenceTranslationDescription: "例文だけの翻訳。"
+          fieldDifficulty: "難易度"
+          fieldDifficultyDescription: "推定 CEFR 難易度：A1、A2、B1、B2、C1、C2。"
       errors:
         nameRequired: 名前は必須です
         duplicateName: '重複するアクション名 "$1"'
@@ -1283,6 +1417,7 @@ action:
   regenerate: 再生成
   viewContextDetails: コンテキスト
   customizeCustomAction: $1 アクションをカスタマイズ
+  customActionLayoutFallback: この結果はレイアウトで表示できないため、簡易表示にしています。
   saveToNotebase: Notebase に保存
   saveToNotebaseSaving: 保存中...
   saveToNotebaseSuccess: Notebase に保存しました

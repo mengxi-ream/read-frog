@@ -653,6 +653,12 @@ options:
       edit: Editar acción AI
       empty: Aún no hay acciones AI personalizadas
       noEnabledLlmProvider: Activa al menos un proveedor LLM antes de crear acciones AI personalizadas
+      tabs:
+        config: Configuración
+        notebase: Notebase
+        hasErrors: Hay errores
+        connected: Conectado
+        needsAttention: Requiere atención
       form:
         name: Nombre
         customize: Personalizar
@@ -678,7 +684,6 @@ options:
         fieldType: Tipo de campo
         fieldDescription: Descripción
         fieldDescriptionPlaceholder: Describe qué debe contener este campo...
-        fieldSpeaking: Activar lectura en voz alta
         actions: Acciones
         cancel: Cancelar
         save: Guardar
@@ -695,6 +700,64 @@ options:
           description: Este campo de salida se eliminará.
           confirm: Eliminar
           cancel: Cancelar
+        layout:
+          title: Diseño
+          description: Cómo se muestra el resultado en la ventana emergente. HTML con Liquid; los campos se rellenan a medida que llega la respuesta.
+          reset: Restaurar predeterminado
+          resetFieldList: Lista de campos
+          resetDictionary: Tarjeta de diccionario
+          resetSentenceAnalysis: Tarjeta de análisis de oraciones
+          resetConfirmTitle: ¿Reemplazar este diseño?
+          resetConfirmDescription: Se reemplazará el contenido del editor. Después aún podrás deshacerlo en el editor.
+          resetConfirm: Reemplazar
+          edit: Editar
+          preview: Vista previa
+          width: Ancho
+          themeLight: Claro
+          themeDark: Oscuro
+          replay: Reproducir
+          sampleData: Datos de ejemplo
+          sampleDataHint: Solo se usan en esta vista previa y nunca se guardan.
+          sampleDataReset: Restablecer ejemplos
+          sampleValue: Ejemplo de $1
+          insertField: Campo
+          insertSpeak: Botón de lectura
+          insertCondition: Si tiene valor
+          insertContext: Contexto
+          insertLoop: Todos los campos
+          syntaxHelp: Sintaxis
+          builtInHint: El diseño del diccionario integrado no se puede editar. Personalízalo para editar una copia.
+          viewSource: Ver código
+          emptyNotice: Este diseño está vacío, así que la ventana emergente muestra la lista de campos predeterminada.
+          fallbackBanner: Este diseño no se puede mostrar, así que se usa el diseño predeterminado. $1
+          sanitized: "Eliminado por seguridad: $1"
+          unusedFields: "No aparecen en este diseño:"
+          tooLong: Un diseño puede tener como máximo $1 caracteres.
+          renameSkipped: El diseño aún hace referencia a «$1». Actualízalo a mano.
+          reservedName: «ctx» y «forloop» están reservados en los diseños. Elige otro nombre.
+          help:
+            output: Muestra el valor de un campo. El HTML del valor se escapa.
+            condition: Muestra el contenido solo cuando el campo tiene un valor.
+            loop: Se repite para cada campo, en orden. Puedes usar f.name, f.value y f.type.
+            speak: Cualquier elemento con data-speak lee en voz alta el valor (o su propio texto si el valor está vacío) cuando la respuesta termina.
+            status: Aplica estilos según el estado. El data-status del contenedor es streaming, done o error.
+            filters: newline_to_br conserva los saltos de línea (úsalo al final); lines divide el texto en una lista de líneas.
+            styles: El CSS de un bloque <style> solo se aplica dentro de este resultado. Los colores --rf-* siguen los temas claro y oscuro.
+          lint:
+            parseError: "Error de sintaxis de Liquid: $1"
+            unknownField: No hay ningún campo llamado «$1».
+            unknownContextKey: "ctx no tiene «$1». Disponibles: $2."
+            fieldShadowedByLocal: Este diseño asigna «$1», lo que oculta el campo con ese nombre.
+            liquidInStyle: Liquid no se ejecuta dentro de <style>; esto se conserva como texto.
+            styleInConditional: Un bloque <style> siempre se aplica, aunque esté dentro de una etiqueta «$1».
+            cssImport: "@import se elimina. Los diseños no pueden cargar estilos externos."
+            cssFontFace: "@font-face se elimina. Usa fuentes que ya estén en el dispositivo."
+            unquotedAttributeOutput: Pon comillas alrededor de este valor de atributo, o el valor podría salirse de él.
+            filterIgnored: Los filtros se ignoran en una etiqueta «$1». Asigna primero el valor filtrado.
+            newlineToBrNotLast: newline_to_br solo funciona como último filtro de una salida.
+            tooLong: Este diseño supera los $1 caracteres y no se puede guardar.
+            fieldNotShown: «$1» no aparece en este diseño.
+            reservedFieldName: El nombre de campo «$1» está reservado en los diseños. Cambia el nombre del campo.
         notebase:
           title: Conexión de Notebase
           description: Guarda los resultados estructurados de esta acción en una Notebase remota.
@@ -776,6 +839,7 @@ options:
             8. Dificultad debe ser un nivel CEFR (A1, A2, B1, B2, C1 o C2).
             9. Si un campo es desconocido, devuelve una cadena vacía en lugar de adivinar.
             10. Responde en {{targetLanguage}} para todos los campos textuales, salvo que se requiera texto en la forma de origen para mayor claridad.
+            11. Término en la oración marca dónde está el término seleccionado dentro de Oración. Es una CADENA que contiene un arreglo JSON compacto de elementos {"text": ...}, cada uno citando Oración carácter por carácter, p. ej. [{"text":"blossoms"}]. Si Oración divide el término en partes separadas (p. ej. "anrufen" en "Er ruft seine Mutter an"), da un elemento por parte, en orden: [{"text":"ruft"},{"text":"an"}]. Escapa correctamente las comillas internas.
 
             ## Ejemplos
 
@@ -787,6 +851,7 @@ options:
             - Fonética: /ˈblɒs.əm/
             - Categoría gramatical: noun
             - Oración: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+            - Término en la oración: [{"text":"blossoms"}]
             - Definición: 花；花朵（尤指果树的花）
             - Traducción de la oración: 樱花短暂的美丽提醒我们珍惜每一刻。
             - Dificultad: B2
@@ -799,6 +864,7 @@ options:
             - Fonética: kandou
             - Categoría gramatical: noun
             - Oración: この映画はつまらないと思ったけど、最後は感動した。
+            - Término en la oración: [{"text":"感動"}]
             - Definición: Being deeply moved; emotional touch
             - Traducción de la oración: I thought this movie was boring, but the ending was moving.
             - Dificultad: B1
@@ -815,12 +881,63 @@ options:
           fieldPartOfSpeechDescription: Categoría gramatical (p. ej., noun, verb, adjective).
           fieldSentence: Oración
           fieldSentenceDescription: La oración completa de los párrafos anteriores que contiene el término seleccionado. No incluyas las oraciones anteriores ni posteriores.
+          fieldSentenceTerm: Término en la oración
+          fieldSentenceTermDescription: 'Dónde está el término seleccionado dentro de Oración: un arreglo JSON serializado como cadena, con un elemento {"text": cadena} por cada parte del término, cada uno citando Oración exactamente (p. ej. [{"text":"blossoms"}]).'
           fieldDefinition: Definición
           fieldDefinitionDescription: Una definición concisa para el sentido contextual.
           fieldSentenceTranslation: Traducción de la oración
           fieldSentenceTranslationDescription: La traducción únicamente de la Oración.
           fieldDifficulty: Dificultad
           fieldDifficultyDescription: Nivel de dificultad CEFR estimado A1, A2, B1, B2, C1 o C2.
+        sentenceAnalysis:
+          name: Análisis de oraciones
+          description: Desglosa oraciones largas con componentes por colores, glosas y una traducción
+          systemPrompt: |-
+            Eres un profesor de gramática que anota oraciones largas y difíciles para estudiantes de idiomas.
+
+            ## Objetivo
+            Señala las partes gramaticales de la Selección para que el estudiante vea su estructura de un vistazo, incluidas las partes de dentro de cada cláusula.
+
+            ## Reglas
+            1. Cada anotación cita en "text" un fragmento de la Selección, copiado carácter por carácter (mismas palabras, mayúsculas y puntuación). Sin espacios al principio ni al final.
+            2. Anota las partes de la cláusula principal (sujeto, predicado, objeto, complemento, adverbial, ...) Y las partes de dentro de cada cláusula. Cada cláusula lleva una anotación de tipo "clause" que la cubre entera, además de anotaciones separadas para sus propias partes.
+            3. "type" debe ser exactamente uno de: subject, predicate, object, complement, attributive, adverbial, appositive, connector, clause. Pon los detalles más finos en "note".
+            4. Enumera las anotaciones en el orden en que empiezan en la Selección; cuando dos empiecen en el mismo lugar, pon primero la más larga.
+            5. Si el texto citado aparece más de una vez en la Selección, añade "occurrence": n (1 = la primera aparición).
+            6. Los fragmentos pueden anidarse (una cláusula contiene sus partes), pero nunca deben solaparse parcialmente.
+            7. "note": una glosa muy breve en {{targetLanguage}} (8 palabras como máximo). Para una cláusula: su tipo y el elemento al que se vincula.
+            8. "hard": true para vocabulario difícil, modismos o gramática compleja; en caso contrario, false.
+            9. No anotes cada palabra; omite los artículos y las palabras triviales salvo que importen.
+            10. Traducción: una traducción natural de toda la Selección en {{targetLanguage}}.
+            11. Estructura: una o dos oraciones en {{targetLanguage}} que describan el patrón de la oración.
+            12. El valor de Anotaciones es una CADENA que contiene un arreglo JSON compacto. Escapa correctamente las comillas internas. No lo envuelvas en markdown.
+
+            ## Ejemplo
+            Selección: The man who called yesterday said that he would come.
+            Anotaciones: "[{\"text\":\"The man who called yesterday\",\"type\":\"subject\",\"note\":\"主语，含定语从句\",\"hard\":false},{\"text\":\"who called yesterday\",\"type\":\"clause\",\"note\":\"定语从句，修饰 man\",\"hard\":false},{\"text\":\"who\",\"type\":\"subject\",\"note\":\"关系代词作主语\",\"hard\":false},{\"text\":\"called\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"yesterday\",\"type\":\"adverbial\",\"note\":\"时间\",\"hard\":false},{\"text\":\"said\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"that he would come\",\"type\":\"clause\",\"note\":\"宾语从句，作 said 的宾语\",\"hard\":false},{\"text\":\"that\",\"type\":\"connector\",\"note\":\"引导宾语从句\",\"hard\":false},{\"text\":\"he\",\"type\":\"subject\",\"note\":\"\",\"hard\":false},{\"text\":\"would come\",\"type\":\"predicate\",\"note\":\"过去将来时\",\"hard\":false}]"
+          prompt: |-
+            ## Entrada
+            Selección: {{selection}}
+            Párrafos: {{paragraphs}}
+            Idioma de destino: {{targetLanguage}}
+          fieldAnnotations: Anotaciones
+          fieldAnnotationsDescription: 'Un arreglo JSON serializado como cadena. Cada elemento es {"text": string, "type": string, "note": string, "hard": boolean, "occurrence"?: number}; "text" cita exactamente un fragmento de la Selección.'
+          fieldTranslation: Traducción
+          fieldTranslationDescription: Traducción natural de toda la Selección en {{targetLanguage}}.
+          fieldStructure: Estructura
+          fieldStructureDescription: Una o dos oraciones en {{targetLanguage}} que describan el patrón de la oración.
+          roles:
+            subject: Sujeto
+            predicate: Predicado
+            object: Objeto
+            complement: Complemento
+            attributive: Atributivo
+            adverbial: Adverbial
+            appositive: Aposición
+            clause: Cláusula
+            connector: Conector
+            other: Otro
+          hardLabel: Difícil
         improveWriting:
           name: Mejorar escritura
           description: Analiza errores de escritura y sugiere mejoras
@@ -1399,6 +1516,7 @@ action:
   regenerate: Regenerar
   viewContextDetails: Contexto
   customizeCustomAction: Personalizar la acción $1
+  customActionLayoutFallback: Este resultado no se puede mostrar con su diseño, así que se muestra una vista simplificada.
   saveToNotebase: Guardar en Notebase
   saveToNotebaseSaving: Guardando...
   saveToNotebaseSuccess: Guardado en Notebase

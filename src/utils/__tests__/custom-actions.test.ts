@@ -70,6 +70,48 @@ describe("selection toolbar built-in actions", () => {
     expect(next.customActions).toEqual([])
   })
 
+  it("never persists the built-in Dictionary's layout", () => {
+    const selectionToolbar = cloneSelectionToolbar()
+    const dictionary = getBuiltInDictionaryAction(selectionToolbar)
+    expect(dictionary.layout).toEqual(expect.any(String))
+
+    const next = replaceSelectionToolbarAction(selectionToolbar, {
+      ...dictionary,
+      layout: "<p>Attempted layout edit</p>",
+    })
+
+    expect(next.builtInActions.dictionary).not.toHaveProperty("layout")
+    expect(getBuiltInDictionaryAction(next).layout).toBe(dictionary.layout)
+    expect(next.customActions).toEqual([])
+  })
+
+  it("stores a custom action's layout as given", () => {
+    const selectionToolbar = cloneSelectionToolbar()
+    const custom = {
+      ...getBuiltInDictionaryAction(selectionToolbar),
+      id: "custom-action",
+      name: "Custom",
+      layout: "<p>{{ Before }}</p>",
+    }
+    selectionToolbar.customActions = [custom]
+
+    const next = replaceSelectionToolbarAction(selectionToolbar, {
+      ...custom,
+      layout: "<p>{{ After }}</p>",
+    })
+
+    expect(next.customActions[0]?.layout).toBe("<p>{{ After }}</p>")
+  })
+
+  it("copies the layout when duplicating", () => {
+    const selectionToolbar = cloneSelectionToolbar()
+    const dictionary = getBuiltInDictionaryAction(selectionToolbar)
+    const custom = { ...dictionary, id: "custom-action", name: "Custom", layout: "<p>mine</p>" }
+
+    expect(duplicateSelectionToolbarAction(dictionary, [dictionary]).layout).toBe(dictionary.layout)
+    expect(duplicateSelectionToolbarAction(custom, [dictionary, custom]).layout).toBe("<p>mine</p>")
+  })
+
   it("deep-copies enabled, provider, and the full connection into an editable action", () => {
     const selectionToolbar = cloneSelectionToolbar()
     selectionToolbar.builtInActions.dictionary = {

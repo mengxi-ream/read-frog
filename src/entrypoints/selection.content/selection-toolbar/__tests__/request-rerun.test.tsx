@@ -9,10 +9,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { fakeBrowser } from "wxt/testing/fake-browser"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { configAtom } from "@/utils/atoms/config"
-import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import { buildContextSnapshot, createRangeSnapshot, normalizeSelectedText } from "../../utils"
 import { setSelectionStateAtom } from "../atoms"
@@ -321,9 +322,17 @@ vi.mock("../translate-button/translation-content", () => ({
   ),
 }))
 
-vi.mock("../custom-action-button/structured-object-renderer", () => ({
-  StructuredObjectRenderer: ({ value }: { value: Record<string, unknown> | null }) => (
-    <pre>{JSON.stringify(value)}</pre>
+vi.mock("@/components/layout-host/custom-action-layout-view", () => ({
+  CustomActionLayoutView: ({
+    source,
+    value,
+  }: {
+    source: string
+    value: Record<string, unknown> | null
+  }) => (
+    <pre data-testid="custom-action-layout" data-layout-source={source}>
+      {JSON.stringify(value)}
+    </pre>
   ),
 }))
 
@@ -1933,6 +1942,68 @@ describe("selection toolbar requests", () => {
     await waitFor(() => {
       expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(2)
     })
+  })
+
+  it("does not rerun a custom action when only its layout changes", async () => {
+    streamBackgroundStructuredObjectMock.mockResolvedValue(
+      createStructuredObjectSnapshot({ summary: "done" }),
+    )
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const action = {
+      ...structuredClone(DEFAULT_DICTIONARY_ACTION),
+      id: "layout-action",
+      name: "Layout Action",
+      layout: "<p>first layout</p>",
+    }
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.selectionToolbar.customActions = [action]
+    // The layout editor saves through storage, which the content script's
+    // config atom follows; seed it too so the mount-time refresh keeps the action.
+    await fakeBrowser.storage.local.set({ [CONFIG_STORAGE_KEY]: config })
+
+    try {
+      const store = createStore()
+      store.set(configAtom, cloneConfig(config))
+      setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+      renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+
+      fireEvent.click(await screen.findByRole("button", { name: action.name }))
+
+      await waitFor(() => {
+        expect(screen.getByText('{"summary":"done"}')).toBeInTheDocument()
+      })
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
+      expect(screen.getByTestId("custom-action-layout")).toHaveAttribute(
+        "data-layout-source",
+        "<p>first layout</p>",
+      )
+
+      const updatedConfig = cloneConfig(config)
+      updatedConfig.selectionToolbar.customActions = [{ ...action, layout: "<p>second layout</p>" }]
+      await act(async () => {
+        await fakeBrowser.storage.local.set({ [CONFIG_STORAGE_KEY]: updatedConfig })
+      })
+
+      await waitFor(() => {
+        expect(screen.getByTestId("custom-action-layout")).toHaveAttribute(
+          "data-layout-source",
+          "<p>second layout</p>",
+        )
+      })
+
+      await act(async () => {
+        await Promise.resolve()
+      })
+
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
+      expect(screen.getByText('{"summary":"done"}')).toBeInTheDocument()
+    } finally {
+      await fakeBrowser.storage.local.remove(CONFIG_STORAGE_KEY)
+    }
   })
 
   it("keeps a pending custom action request alive across a passive config refresh", async () => {

@@ -37,7 +37,6 @@ describe("selectionToolbarCustomActionTrigger", () => {
               name: "Summary",
               type: "string",
               description: "",
-              speaking: false,
             },
           ],
         }}

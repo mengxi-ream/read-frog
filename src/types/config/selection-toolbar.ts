@@ -1,6 +1,13 @@
 import { HostedAiOutputFieldTypeSchema } from "@read-frog/api-contract"
 import { z } from "zod"
 
+// Upper bound (UTF-16 code units) of a custom action's HTML layout. NEVER lower
+// it: an older build that reads a config holding a longer layout fails schema
+// validation, falls back to DEFAULT_CONFIG and overwrites the synced remote
+// copy. Raising it is fine only together with a CONFIG_SCHEMA_VERSION bump, so
+// older builds refuse the newer config instead of choking on it.
+export const MAX_CUSTOM_ACTION_LAYOUT_LENGTH = 32768
+
 // The contract's field-type enum is the source of truth: these values ride the
 // wire to hostedAi.customAction unchanged. Only the enum is shared — length
 // caps and strictness stay hosted-only so BYOK actions are not constrained.
@@ -11,7 +18,6 @@ export const selectionToolbarCustomActionOutputFieldSchema = z.object({
   name: z.string().trim().min(1),
   type: selectionToolbarCustomActionOutputTypeSchema,
   description: z.string(),
-  speaking: z.boolean(),
 })
 
 export const selectionToolbarCustomActionNotebaseMappingSchema = z.object({
@@ -56,6 +62,11 @@ export const selectionToolbarCustomActionSchema = z
     prompt: z.string(),
     outputSchema: z.array(selectionToolbarCustomActionOutputFieldSchema).min(1),
     notebaseConnection: selectionToolbarCustomActionNotebaseConnectionSchema.optional(),
+    // HTML + Liquid template for the result. Optional, not defaulted, and never
+    // syntax-checked here: a missing or blank layout renders the default field
+    // list, and a template error must not fail the whole config parse (which
+    // would replace the user's config with DEFAULT_CONFIG).
+    layout: z.string().max(MAX_CUSTOM_ACTION_LAYOUT_LENGTH).optional(),
   })
   .superRefine((action, ctx) => {
     const nameSet = new Set<string>()

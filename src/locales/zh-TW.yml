@@ -653,6 +653,12 @@ options:
       edit: 編輯 AI 指令
       empty: 目前沒有自訂 AI 指令
       noEnabledLlmProvider: 請先啟用至少一個 LLM 提供者後再建立自訂 AI 指令
+      tabs:
+        config: 設定
+        notebase: 筆記庫
+        hasErrors: 有錯誤
+        connected: 已連線
+        needsAttention: 需要處理
       form:
         name: 名稱
         customize: 自訂
@@ -678,7 +684,6 @@ options:
         fieldType: 欄位類型
         fieldDescription: 描述
         fieldDescriptionPlaceholder: 描述此欄位應包含的內容…
-        fieldSpeaking: 啟用朗讀
         actions: 操作
         cancel: 取消
         save: 儲存
@@ -695,6 +700,64 @@ options:
           description: 此輸出欄位將被移除。
           confirm: 刪除
           cancel: 取消
+        layout:
+          title: 版面
+          description: 結果在彈出視窗中的顯示方式。使用 HTML + Liquid，欄位會隨回答串流填入。
+          reset: 還原預設
+          resetFieldList: 欄位清單
+          resetDictionary: 字典卡片
+          resetSentenceAnalysis: 句子分析卡片
+          resetConfirmTitle: 取代目前的版面？
+          resetConfirmDescription: 編輯器中的內容將被取代，之後仍可在編輯器中復原。
+          resetConfirm: 取代
+          edit: 編輯
+          preview: 預覽
+          width: 寬度
+          themeLight: 淺色
+          themeDark: 深色
+          replay: 重播
+          sampleData: 範例資料
+          sampleDataHint: 僅用於此預覽，不會儲存。
+          sampleDataReset: 重設範例
+          sampleValue: $1範例
+          insertField: 欄位
+          insertSpeak: 朗讀按鈕
+          insertCondition: 有值時顯示
+          insertContext: 上下文
+          insertLoop: 所有欄位
+          syntaxHelp: 語法
+          builtInHint: 內建字典的版面無法編輯。點選「自訂」複製一份後再修改。
+          viewSource: 檢視原始碼
+          emptyNotice: 版面為空，彈出視窗將顯示預設的欄位清單。
+          fallbackBanner: 此版面無法顯示，已改用預設版面。$1
+          sanitized: 基於安全考量已移除：$1
+          unusedFields: 未在版面中顯示：
+          tooLong: 版面最多 $1 個字元。
+          renameSkipped: 版面中仍參照「$1」，請手動修改。
+          reservedName: 「ctx」和「forloop」是版面保留名稱，請換一個名稱。
+          help:
+            output: 顯示欄位的值，值中的 HTML 會被跳脫。
+            condition: 僅當欄位有值時顯示其中的內容。
+            loop: 依序對每個欄位重複一次，可使用 f.name、f.value 和 f.type。
+            speak: 帶有 data-speak 的任何元素會在回答完成後朗讀該值（值為空時朗讀元素本身的文字）。
+            status: 依狀態設定樣式，宿主的 data-status 為 streaming、done 或 error。
+            filters: newline_to_br 保留換行（需放在最後）；lines 將文字拆成逐行的清單。
+            styles: <style> 中的 CSS 只作用於此結果。--rf-* 色彩會跟隨淺色和深色主題。
+          lint:
+            parseError: Liquid 語法錯誤：$1
+            unknownField: 沒有名為「$1」的欄位。
+            unknownContextKey: ctx 中沒有「$1」。可用：$2。
+            fieldShadowedByLocal: 版面中對「$1」賦值，會遮住同名欄位。
+            liquidInStyle: <style> 中不會執行 Liquid，這裡會照原文保留。
+            styleInConditional: <style> 區塊一律生效，即使放在「$1」標籤中。
+            cssImport: "@import 會被移除，版面無法載入外部樣式。"
+            cssFontFace: "@font-face 會被移除，請使用裝置上已有的字型。"
+            unquotedAttributeOutput: 請為這個屬性值加上引號，否則值可能突破屬性範圍。
+            filterIgnored: 「$1」標籤中的篩選器會被忽略，請先將篩選後的值指派給變數。
+            newlineToBrNotLast: newline_to_br 只有作為輸出的最後一個篩選器才有效。
+            tooLong: 版面超過 $1 個字元，無法儲存。
+            fieldNotShown: 「$1」未在此版面中顯示。
+            reservedFieldName: 欄位名稱「$1」是版面保留名稱，請重新命名該欄位。
         notebase:
           title: 筆記庫連線
           description: 將這個指令的結構化結果儲存到遠端筆記庫。
@@ -776,6 +839,7 @@ options:
             8. 難度必須是 CEFR 等級（A1、A2、B1、B2、C1 或 C2）。
             9. 如果某個欄位無法判斷，請回傳空字串，不要猜測。
             10. 除非必須使用來源形式才能保持清楚，所有文字欄位都請使用 {{targetLanguage}} 回答。
+            11. 「句中詞形」欄位標出所選字詞在「句子」中的位置：它是一個字串，內容是精簡的 JSON 陣列，每項為 {"text": ...}，逐字引用「句子」中的原文，例如 [{"text":"blossoms"}]。如果「句子」把字詞拆成了幾個部分（例如德文 "anrufen" 在 "Er ruft seine Mutter an" 中），請依序每個部分一項：[{"text":"ruft"},{"text":"an"}]。請正確跳脫內部的引號。
 
             ## 範例
 
@@ -787,6 +851,7 @@ options:
             - 音標：/ˈblɒs.əm/
             - 詞性：noun
             - 句子：The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+            - 句中詞形：[{"text":"blossoms"}]
             - 定義：花；花朵（尤指果樹的花）
             - 句子翻譯：櫻花短暫的美麗提醒我們珍惜每一刻。
             - 難度：B2
@@ -799,6 +864,7 @@ options:
             - 音標：kandou
             - 詞性：noun
             - 句子：この映画はつまらないと思ったけど、最後は感動した。
+            - 句中詞形：[{"text":"感動"}]
             - 定義：Being deeply moved; emotional touch
             - 句子翻譯：I thought this movie was boring, but the ending was moving.
             - 難度：B1
@@ -815,12 +881,63 @@ options:
           fieldPartOfSpeechDescription: 文法類別（例如 noun、verb、adjective）。
           fieldSentence: 句子
           fieldSentenceDescription: 提取上方段落中包含所選字詞的完整句子，不要包含前後句。
+          fieldSentenceTerm: 句中詞形
+          fieldSentenceTermDescription: '所選字詞在「句子」中的位置：序列化為字串的 JSON 陣列，字詞的每個部分一項 {"text": 字串}，逐字引用「句子」原文（例如 [{"text":"blossoms"}]）。'
           fieldDefinition: 定義
           fieldDefinitionDescription: 針對脈絡語意提供一則精簡定義。
           fieldSentenceTranslation: 句子翻譯
           fieldSentenceTranslationDescription: 只翻譯提取出的句子。
           fieldDifficulty: 難度
           fieldDifficultyDescription: 預估 CEFR 難度等級 A1、A2、B1、B2、C1 或 C2。
+        sentenceAnalysis:
+          name: 長難句分析
+          description: 拆解長難句：成分與子句標色、難點註解與整句翻譯
+          systemPrompt: |-
+            你是一位文法老師，為語言學習者標註較長、較難的句子。
+
+            ## 目標
+            指出選取文字中的各個文法成分，讓學習者一眼看清句子結構，包括每個子句內部的成分。
+
+            ## 規則
+            1. 每條標註在 "text" 中引用選取文字的一個片段，逐字元照抄（字詞、大小寫和標點都相同）。首尾不要帶空格。
+            2. 既要標註主要子句的成分（主詞、述語、受詞、補語、狀語……），也要標註每個子句內部的成分。每個子句用一條 "type" 為 "clause" 的標註涵蓋整個子句，再為它自己的各個成分分別標註。
+            3. "type" 必須是以下之一：subject, predicate, object, complement, attributive, adverbial, appositive, connector, clause。更細的資訊寫進 "note"。
+            4. 依各條標註在選取文字中的起始位置排列；兩條標註起點相同時，較長的排在前面。
+            5. 如果引用的文字在選取文字中出現不只一次，加上 "occurrence": n（1 表示第一次出現）。
+            6. 片段可以巢狀（子句包含它的成分），但絕不能部分重疊。
+            7. "note"：以 {{targetLanguage}} 撰寫的極簡釋義（不超過 8 個詞）。子句的 note 寫明子句類型及它所依附的成分。
+            8. 難字、慣用語或複雜文法設為 "hard": true，否則為 false。
+            9. 不要逐字標註；冠詞和無關緊要的字詞除非值得一提，否則略過。
+            10. 譯文：以 {{targetLanguage}} 自然地翻譯整個選取文字。
+            11. 句子結構：以 {{targetLanguage}} 寫一到兩句話，說明句型。
+            12. 標註的值是一個字串，內容為精簡的 JSON 陣列。內部引號必須正確跳脫。不要用 markdown 包裹。
+
+            ## 範例
+            選取文字：The man who called yesterday said that he would come.
+            標註："[{\"text\":\"The man who called yesterday\",\"type\":\"subject\",\"note\":\"主语，含定语从句\",\"hard\":false},{\"text\":\"who called yesterday\",\"type\":\"clause\",\"note\":\"定语从句，修饰 man\",\"hard\":false},{\"text\":\"who\",\"type\":\"subject\",\"note\":\"关系代词作主语\",\"hard\":false},{\"text\":\"called\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"yesterday\",\"type\":\"adverbial\",\"note\":\"时间\",\"hard\":false},{\"text\":\"said\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"that he would come\",\"type\":\"clause\",\"note\":\"宾语从句，作 said 的宾语\",\"hard\":false},{\"text\":\"that\",\"type\":\"connector\",\"note\":\"引导宾语从句\",\"hard\":false},{\"text\":\"he\",\"type\":\"subject\",\"note\":\"\",\"hard\":false},{\"text\":\"would come\",\"type\":\"predicate\",\"note\":\"过去将来时\",\"hard\":false}]"
+          prompt: |-
+            ## 輸入
+            選取文字：{{selection}}
+            段落：{{paragraphs}}
+            目標語言：{{targetLanguage}}
+          fieldAnnotations: 標註
+          fieldAnnotationsDescription: '以字串形式序列化的 JSON 陣列。每一項為 {"text": string, "type": string, "note": string, "hard": boolean, "occurrence"?: number}；"text" 必須原樣引用選取文字中的一個片段。'
+          fieldTranslation: 譯文
+          fieldTranslationDescription: 以 {{targetLanguage}} 自然地翻譯整個選取文字。
+          fieldStructure: 句子結構
+          fieldStructureDescription: 以 {{targetLanguage}} 寫一到兩句話，說明句型。
+          roles:
+            subject: 主詞
+            predicate: 述語
+            object: 受詞
+            complement: 補語
+            attributive: 修飾語
+            adverbial: 狀語
+            appositive: 同位語
+            clause: 子句
+            connector: 連接詞
+            other: 其他
+          hardLabel: 難點
         improveWriting:
           name: 改善寫作
           description: 分析寫作錯誤並提出改善建議
@@ -1399,6 +1516,7 @@ action:
   regenerate: 重新產生
   viewContextDetails: 前後文
   customizeCustomAction: 自訂「$1」動作
+  customActionLayoutFallback: 此結果無法依版面顯示，目前為簡化顯示。
   saveToNotebase: 儲存到筆記庫
   saveToNotebaseSaving: 儲存中…
   saveToNotebaseSuccess: 已儲存到筆記庫

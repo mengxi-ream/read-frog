@@ -652,6 +652,12 @@ options:
       edit: AI eylemini düzenle
       empty: Henüz özel AI eylemi yok
       noEnabledLlmProvider: Özel AI eylemleri oluşturmadan önce en az bir LLM sağlayıcısını etkinleştirin
+      tabs:
+        config: Yapılandırma
+        notebase: Notebase
+        hasErrors: Hatalar var
+        connected: Bağlı
+        needsAttention: İlgilenilmesi gerekiyor
       form:
         name: Ad
         customize: Özelleştir
@@ -677,7 +683,6 @@ options:
         fieldType: Alan türü
         fieldDescription: Açıklama
         fieldDescriptionPlaceholder: Bu alanın ne içermesi gerektiğini açıklayın...
-        fieldSpeaking: Sesli okumayı etkinleştir
         actions: İşlemler
         cancel: İptal
         save: Kaydet
@@ -694,6 +699,64 @@ options:
           description: Bu çıktı alanı kaldırılacaktır.
           confirm: Sil
           cancel: İptal
+        layout:
+          title: Düzen
+          description: Sonucun açılır pencerede nasıl göründüğü. Liquid ile HTML; yanıt akarken alanlar dolar.
+          reset: Varsayılana döndür
+          resetFieldList: Alan listesi
+          resetDictionary: Sözlük kartı
+          resetSentenceAnalysis: Cümle analizi kartı
+          resetConfirmTitle: Bu düzen değiştirilsin mi?
+          resetConfirmDescription: Düzenleyicinin içeriği değiştirilecek. Daha sonra düzenleyicide geri alabilirsiniz.
+          resetConfirm: Değiştir
+          edit: Düzenle
+          preview: Önizleme
+          width: Genişlik
+          themeLight: Açık
+          themeDark: Koyu
+          replay: Yeniden oynat
+          sampleData: Örnek veriler
+          sampleDataHint: Yalnızca bu önizlemede kullanılır ve kaydedilmez.
+          sampleDataReset: Örnekleri sıfırla
+          sampleValue: Örnek $1
+          insertField: Alan
+          insertSpeak: Seslendirme düğmesi
+          insertCondition: Doluysa
+          insertContext: Bağlam
+          insertLoop: Tüm alanlar
+          syntaxHelp: Sözdizimi
+          builtInHint: Yerleşik sözlüğün düzeni düzenlenemez. Bir kopyasını düzenlemek için özelleştirin.
+          viewSource: Kaynağı görüntüle
+          emptyNotice: Bu düzen boş olduğu için açılır pencerede varsayılan alan listesi gösterilir.
+          fallbackBanner: Bu düzen gösterilemediği için varsayılan düzen kullanılıyor. $1
+          sanitized: "Güvenlik için kaldırıldı: $1"
+          unusedFields: "Bu düzende yok:"
+          tooLong: Bir düzen en fazla $1 karakter olabilir.
+          renameSkipped: Düzen hâlâ "$1" alanına başvuruyor. Elle güncelleyin.
+          reservedName: '"ctx" ve "forloop" düzenlerde ayrılmış adlardır. Başka bir ad seçin.'
+          help:
+            output: Bir alanın değerini gösterir. Değerdeki HTML kaçışlanır.
+            condition: İçeriği yalnızca alanın bir değeri olduğunda gösterir.
+            loop: Her alan için sırayla tekrarlanır. f.name, f.value ve f.type kullanılabilir.
+            speak: data-speak içeren her öğe, yanıt tamamlandığında değeri (değer boşsa kendi metnini) sesli okur.
+            status: Duruma göre stil verir. Kapsayıcının data-status değeri streaming, done veya error olur.
+            filters: newline_to_br satır sonlarını korur (en sona koyun); lines metni satır listesine böler.
+            styles: <style> bloğundaki CSS yalnızca bu sonucun içinde geçerlidir. --rf-* renkleri açık ve koyu temayı izler.
+          lint:
+            parseError: "Liquid sözdizimi hatası: $1"
+            unknownField: '"$1" adında bir alan yok.'
+            unknownContextKey: 'ctx içinde "$1" yok. Kullanılabilir: $2.'
+            fieldShadowedByLocal: Bu düzen "$1" adına değer atıyor; bu, aynı adlı alanı gizler.
+            liquidInStyle: <style> içinde Liquid çalışmaz; bu düz metin olarak kalır.
+            styleInConditional: Bir <style> bloğu, "$1" etiketinin içinde olsa bile her zaman uygulanır.
+            cssImport: "@import kaldırılır. Düzenler dış stilleri yükleyemez."
+            cssFontFace: "@font-face kaldırılır. Cihazda zaten bulunan yazı tiplerini kullanın."
+            unquotedAttributeOutput: Bu öznitelik değerini tırnak içine alın, yoksa değer öznitelikten taşabilir.
+            filterIgnored: '"$1" etiketinde filtreler yok sayılır. Önce filtrelenmiş değeri atayın.'
+            newlineToBrNotLast: newline_to_br yalnızca bir çıktının son filtresi olarak çalışır.
+            tooLong: Bu düzen $1 karakterden uzun ve kaydedilemez.
+            fieldNotShown: '"$1" bu düzende gösterilmiyor.'
+            reservedFieldName: '"$1" alan adı düzenlerde ayrılmıştır. Alanı yeniden adlandırın.'
         notebase:
           title: Notebase bağlantısı
           description: Bu eylemin yapılandırılmış sonuçlarını uzak bir Notebase'e kaydedin.
@@ -752,6 +815,77 @@ options:
           description: Bu işlem geri alınamaz.
           confirm: Sil
           cancel: İptal
+      templates:
+        dictionary:
+          name: "Sözlük"
+          description: "Sözcükleri tanım, okunuş ve paragraf çevirisiyle arayın"
+          systemPrompt: |-
+            Dil öğrenenler için bir sözlük asistanısınız.
+
+            ## Amaç
+            Verilen sözcük ve çevresindeki paragraflara dayanarak, istenen çıktı nesnesine uyan kısa bir sözlük maddesi oluşturun.
+
+            ## Kurallar
+            1. Verilen paragraflara en iyi uyan anlama odaklanın.
+            2. Sözcüğü temel/sözlük biçimine getirin.
+            3. Tanımı kesin ve öğrenenlerin anlayacağı şekilde yazın.
+            4. Cümle için verilen paragraflardan yalnızca seçilen sözcüğü içeren tam cümleyi çıkarın. Önceki ve sonraki cümleleri eklemeyin.
+            5. Cümle çevirisi yalnızca çıkarılan Cümleyi çevirmelidir.
+            6. Okunuş, sözcüğün dilinin standart gösterimini kullanmalıdır (örneğin İngilizce için IPA, Mandarin Çincesi için pinyin, Japonca için romaji).
+            7. Sözcük türünü İngilizce yazın (noun, verb, adjective vb.).
+            8. Zorluk bir CEFR düzeyi olmalıdır (A1, A2, B1, B2, C1 veya C2).
+            9. Bir alan bilinmiyorsa tahmin etmek yerine boş bir dize döndürün.
+            10. Açıklık için kaynak biçimde metin gerekmedikçe tüm metin alanlarını {{targetLanguage}} dilinde yanıtlayın.
+            11. Cümledeki biçim, seçilen sözcüğün Cümlede nerede durduğunu işaretler. {"text": ...} öğelerinden oluşan kısa bir JSON dizisi içeren bir DİZEDİR; her öğe Cümleden harfi harfine alıntı yapar, örneğin [{"text":"blossoms"}]. Cümle sözcüğü ayrı parçalara bölüyorsa (örneğin "Er ruft seine Mutter an" içindeki "anrufen"), her parça için sırayla bir öğe verin: [{"text":"ruft"},{"text":"an"}]. İçteki tırnak işaretlerini doğru şekilde kaçış karakteriyle yazın.
+
+            ## Örnekler
+
+            ### Örnek 1
+            Girdi: Seçim="blossoms", Paragraflar="Spring arrives quietly in the park. The ephemeral beauty of cherry blossoms reminds us to cherish each moment. Families and friends gather beneath the trees.", Hedef dil=Çince
+
+            Çıktı:
+            - Sözcük: blossom
+            - Okunuş: /ˈblɒs.əm/
+            - Sözcük türü: noun
+            - Cümle: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+            - Cümledeki biçim: [{"text":"blossoms"}]
+            - Tanım: 花；花朵（尤指果树的花）
+            - Cümle çevirisi: 樱花短暂的美丽提醒我们珍惜每一刻。
+            - Zorluk: B2
+
+            ### Örnek 2
+            Girdi: Seçim="感動", Paragraflar="この映画はつまらないと思ったけど、最後は感動した。", Hedef dil=İngilizce
+
+            Çıktı:
+            - Sözcük: 感動
+            - Okunuş: kandou
+            - Sözcük türü: noun
+            - Cümle: この映画はつまらないと思ったけど、最後は感動した。
+            - Cümledeki biçim: [{"text":"感動"}]
+            - Tanım: Being deeply moved; emotional touch
+            - Cümle çevirisi: I thought this movie was boring, but the ending was moving.
+            - Zorluk: B1
+          prompt: |-
+            ## Girdi
+            Seçim: {{selection}}
+            Paragraflar: {{paragraphs}}
+            Hedef dil: {{targetLanguage}}
+          fieldTerm: "Sözcük"
+          fieldTermDescription: "Seçilen sözcüğün temel/sözlük biçimi."
+          fieldPhonetic: "Okunuş"
+          fieldPhoneticDescription: "Sözcüğün dili için standart okunuş gösterimi (örneğin İngilizce için IPA, Mandarin Çincesi için pinyin, Japonca için romaji)."
+          fieldPartOfSpeech: "Sözcük türü"
+          fieldPartOfSpeechDescription: "Dilbilgisel kategori (örneğin noun, verb, adjective)."
+          fieldSentence: "Cümle"
+          fieldSentenceDescription: "Yukarıdaki paragraflarda seçilen sözcüğü içeren tam cümle. Önceki ve sonraki cümleleri eklemeyin."
+          fieldSentenceTerm: "Cümledeki biçim"
+          fieldSentenceTermDescription: 'Seçilen sözcüğün Cümledeki yeri: dizeye dönüştürülmüş bir JSON dizisi; sözcüğün her parçası için bir {"text": dize} öğesi, her biri Cümleden birebir alıntı (örneğin [{"text":"blossoms"}]).'
+          fieldDefinition: "Tanım"
+          fieldDefinitionDescription: "Bağlamdaki anlam için kısa bir tanım."
+          fieldSentenceTranslation: "Cümle çevirisi"
+          fieldSentenceTranslationDescription: "Yalnızca Cümlenin çevirisi."
+          fieldDifficulty: "Zorluk"
+          fieldDifficultyDescription: "Tahmini CEFR zorluk düzeyi: A1, A2, B1, B2, C1 veya C2."
       errors:
         nameRequired: Ad gerekli
         duplicateName: 'Yinelenen eylem adı "$1"'
@@ -1283,6 +1417,7 @@ action:
   regenerate: Yeniden oluştur
   viewContextDetails: Bağlam
   customizeCustomAction: $1 eylemini özelleştir
+  customActionLayoutFallback: Bu sonuç kendi düzeninde gösterilemediği için sade görünümde gösteriliyor.
   saveToNotebase: Notebase'e Kaydet
   saveToNotebaseSaving: Kaydediliyor...
   saveToNotebaseSuccess: Notebase'e kaydedildi

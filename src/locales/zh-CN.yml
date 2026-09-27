@@ -653,6 +653,12 @@ options:
       edit: 编辑 AI 指令
       empty: 暂无自定义 AI 指令
       noEnabledLlmProvider: 请先启用至少一个 LLM 提供商后再创建自定义 AI 指令
+      tabs:
+        config: 配置
+        notebase: 笔记库
+        hasErrors: 有错误
+        connected: 已连接
+        needsAttention: 需要处理
       form:
         name: 名称
         customize: 定制化
@@ -678,7 +684,6 @@ options:
         fieldType: 字段类型
         fieldDescription: 描述
         fieldDescriptionPlaceholder: 描述此字段应包含的内容...
-        fieldSpeaking: 启用朗读
         actions: 操作
         cancel: 取消
         save: 保存
@@ -695,6 +700,64 @@ options:
           description: 此输出字段将被移除。
           confirm: 删除
           cancel: 取消
+        layout:
+          title: 版式
+          description: 结果在弹窗中的显示方式。使用 HTML + Liquid，字段会随回答流式填入。
+          reset: 恢复默认
+          resetFieldList: 字段列表
+          resetDictionary: 词典卡片
+          resetSentenceAnalysis: 句子分析卡片
+          resetConfirmTitle: 替换当前版式？
+          resetConfirmDescription: 编辑器中的内容将被替换，之后仍可在编辑器中撤销。
+          resetConfirm: 替换
+          edit: 编辑
+          preview: 预览
+          width: 宽度
+          themeLight: 浅色
+          themeDark: 深色
+          replay: 重放
+          sampleData: 示例数据
+          sampleDataHint: 仅用于此预览，不会保存。
+          sampleDataReset: 重置示例
+          sampleValue: $1示例
+          insertField: 字段
+          insertSpeak: 朗读按钮
+          insertCondition: 有值时显示
+          insertContext: 上下文
+          insertLoop: 所有字段
+          syntaxHelp: 语法
+          builtInHint: 内置词典的版式不可编辑。点击「定制化」复制一份后再修改。
+          viewSource: 查看源码
+          emptyNotice: 版式为空，弹窗将显示默认的字段列表。
+          fallbackBanner: 此版式无法显示，已改用默认版式。$1
+          sanitized: 出于安全考虑已移除：$1
+          unusedFields: 未在版式中显示：
+          tooLong: 版式最多 $1 个字符。
+          renameSkipped: 版式中仍引用「$1」，请手动修改。
+          reservedName: 「ctx」和「forloop」是版式保留名，请换一个名称。
+          help:
+            output: 显示字段的值，值中的 HTML 会被转义。
+            condition: 仅当字段有值时显示其中的内容。
+            loop: 按顺序对每个字段重复一次，可使用 f.name、f.value 和 f.type。
+            speak: 带 data-speak 的任意元素会在回答完成后朗读该值（值为空时朗读元素自身的文字）。
+            status: 按状态设置样式，宿主的 data-status 为 streaming、done 或 error。
+            filters: newline_to_br 保留换行（需放在最后）；lines 把文本拆成按行的列表。
+            styles: <style> 中的 CSS 只作用于此结果。--rf-* 颜色会跟随浅色和深色主题。
+          lint:
+            parseError: Liquid 语法错误：$1
+            unknownField: 没有名为「$1」的字段。
+            unknownContextKey: ctx 中没有「$1」。可用：$2。
+            fieldShadowedByLocal: 版式中给「$1」赋了值，会遮住同名字段。
+            liquidInStyle: <style> 中不会执行 Liquid，这里会按原文保留。
+            styleInConditional: <style> 块总会生效，即使放在「$1」标签中。
+            cssImport: "@import 会被移除，版式不能加载外部样式。"
+            cssFontFace: "@font-face 会被移除，请使用设备上已有的字体。"
+            unquotedAttributeOutput: 请给这个属性值加上引号，否则值可能突破属性边界。
+            filterIgnored: 「$1」标签中的过滤器会被忽略，请先把过滤后的值赋给变量。
+            newlineToBrNotLast: newline_to_br 只有作为输出的最后一个过滤器才有效。
+            tooLong: 版式超过 $1 个字符，无法保存。
+            fieldNotShown: 「$1」未在此版式中显示。
+            reservedFieldName: 字段名「$1」是版式保留名，请重命名该字段。
         notebase:
           title: 笔记库连接
           description: 将这个指令的结构化结果保存到远程笔记库。
@@ -776,6 +839,7 @@ options:
             8. 难度必须是 CEFR 等级（A1, A2, B1, B2, C1, 或 C2）。
             9. 如果某个字段未知，返回空字符串而非猜测。
             10. 除非需要保留原文形式，所有文本字段均使用 {{targetLanguage}} 作答。
+            11. “句中词形”字段标出选中词语在“句子”中的位置：它是一个字符串，内容是紧凑的 JSON 数组，每项为 {"text": ...}，逐字引用“句子”中的原文，例如 [{"text":"blossoms"}]。如果“句子”把词语拆成了几部分（例如德语 "anrufen" 在 "Er ruft seine Mutter an" 中），按顺序每部分一项：[{"text":"ruft"},{"text":"an"}]。注意正确转义内部的引号。
 
             ## 示例
 
@@ -787,6 +851,7 @@ options:
             - 音标：/ˈblɒs.əm/
             - 词性：noun
             - 句子：The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+            - 句中词形：[{"text":"blossoms"}]
             - 释义：花；花朵（尤指果树的花）
             - 句子翻译：樱花短暂的美丽提醒我们珍惜每一刻。
             - 难度：B2
@@ -799,6 +864,7 @@ options:
             - 音标：kandou
             - 词性：noun
             - 句子：この映画はつまらないと思ったけど、最後は感動した。
+            - 句中词形：[{"text":"感動"}]
             - 释义：Being deeply moved; emotional touch
             - 句子翻译：I thought this movie was boring, but the ending was moving.
             - 难度：B1
@@ -815,12 +881,63 @@ options:
           fieldPartOfSpeechDescription: 语法类别（如 noun、verb、adjective）。
           fieldSentence: 句子
           fieldSentenceDescription: 提取上方段落中包含选中词语的完整句子，不要包含前后句。
+          fieldSentenceTerm: 句中词形
+          fieldSentenceTermDescription: '选中词语在“句子”中的位置：序列化为字符串的 JSON 数组，词语的每个部分一项 {"text": 字符串}，逐字引用“句子”原文（如 [{"text":"blossoms"}]）。'
           fieldDefinition: 释义
           fieldDefinitionDescription: 针对语境含义的一条简洁释义。
           fieldSentenceTranslation: 句子翻译
           fieldSentenceTranslationDescription: 只翻译提取出的句子。
           fieldDifficulty: 难度
           fieldDifficultyDescription: 预估 CEFR 难度等级：A1、A2、B1、B2、C1 或 C2。
+        sentenceAnalysis:
+          name: 长难句分析
+          description: 拆解长难句：成分与从句标色、难点注释与整句翻译
+          systemPrompt: |-
+            你是一位语法老师，为语言学习者标注较长、较难的句子。
+
+            ## 目标
+            指出选中文本中的各个语法成分，让学习者一眼看清句子结构，包括每个从句内部的成分。
+
+            ## 规则
+            1. 每条标注在 "text" 中引用选中文本的一个片段，逐字符照抄（单词、大小写和标点都相同）。首尾不要带空格。
+            2. 既要标注主句的成分（主语、谓语、宾语、补语、状语……），也要标注每个从句内部的成分。每个从句用一条 "type" 为 "clause" 的标注覆盖整个从句，再为它自己的各个成分分别标注。
+            3. "type" 必须是以下之一：subject, predicate, object, complement, attributive, adverbial, appositive, connector, clause。更细的信息写进 "note"。
+            4. 按各条标注在选中文本中的起始位置排列；两条标注起点相同时，较长的排在前面。
+            5. 如果引用的文字在选中文本中出现不止一次，加上 "occurrence": n（1 表示第一次出现）。
+            6. 片段可以嵌套（从句包含它的成分），但绝不能部分重叠。
+            7. "note"：用 {{targetLanguage}} 写的极简释义（不超过 8 个词）。从句的 note 写明从句类型及它所依附的成分。
+            8. 难词、习语或复杂语法设为 "hard": true，否则为 false。
+            9. 不要逐词标注；冠词和无关紧要的词除非值得一提，否则跳过。
+            10. 译文：用 {{targetLanguage}} 自然地翻译整个选中文本。
+            11. 句子结构：用 {{targetLanguage}} 写一到两句话，说明句型。
+            12. 标注的值是一个字符串，内容为紧凑的 JSON 数组。内部引号必须正确转义。不要用 markdown 包裹。
+
+            ## 示例
+            选中文本：The man who called yesterday said that he would come.
+            标注："[{\"text\":\"The man who called yesterday\",\"type\":\"subject\",\"note\":\"主语，含定语从句\",\"hard\":false},{\"text\":\"who called yesterday\",\"type\":\"clause\",\"note\":\"定语从句，修饰 man\",\"hard\":false},{\"text\":\"who\",\"type\":\"subject\",\"note\":\"关系代词作主语\",\"hard\":false},{\"text\":\"called\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"yesterday\",\"type\":\"adverbial\",\"note\":\"时间\",\"hard\":false},{\"text\":\"said\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"that he would come\",\"type\":\"clause\",\"note\":\"宾语从句，作 said 的宾语\",\"hard\":false},{\"text\":\"that\",\"type\":\"connector\",\"note\":\"引导宾语从句\",\"hard\":false},{\"text\":\"he\",\"type\":\"subject\",\"note\":\"\",\"hard\":false},{\"text\":\"would come\",\"type\":\"predicate\",\"note\":\"过去将来时\",\"hard\":false}]"
+          prompt: |-
+            ## 输入
+            选中文本：{{selection}}
+            段落内容：{{paragraphs}}
+            目标语言：{{targetLanguage}}
+          fieldAnnotations: 标注
+          fieldAnnotationsDescription: '以字符串形式序列化的 JSON 数组。每一项为 {"text": string, "type": string, "note": string, "hard": boolean, "occurrence"?: number}；"text" 必须原样引用选中文本中的一个片段。'
+          fieldTranslation: 译文
+          fieldTranslationDescription: 用 {{targetLanguage}} 自然地翻译整个选中文本。
+          fieldStructure: 句子结构
+          fieldStructureDescription: 用 {{targetLanguage}} 写一到两句话，说明句型。
+          roles:
+            subject: 主语
+            predicate: 谓语
+            object: 宾语
+            complement: 补语
+            attributive: 定语
+            adverbial: 状语
+            appositive: 同位语
+            clause: 从句
+            connector: 连接词
+            other: 其他
+          hardLabel: 难点
         improveWriting:
           name: 写作改进
           description: 分析写作错误并提供改进建议
@@ -1399,6 +1516,7 @@ action:
   regenerate: 重新生成
   viewContextDetails: 上下文
   customizeCustomAction: 定制“$1”动作
+  customActionLayoutFallback: 此结果无法按版式显示，当前为简化显示。
   saveToNotebase: 保存到笔记库
   saveToNotebaseSaving: 保存中...
   saveToNotebaseSuccess: 已保存到笔记库

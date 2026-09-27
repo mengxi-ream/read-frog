@@ -1,6 +1,7 @@
 import type { ComponentProps, ReactNode } from "react"
 import type { SelectionSession } from "../atoms"
 import type { SelectionPopoverActions } from "@/components/ui/selection-popover"
+import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { useAtomValue, useSetAtom } from "jotai"
 import { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
@@ -162,6 +163,14 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
   const displayedIsRunning =
     (isOpen && webPageContext === undefined) || (executionPlan.executionContext ? isRunning : false)
   const displayedThinking = executionPlan.executionContext ? thinking : null
+  const layoutStatus = displayedIsRunning ? "streaming" : displayedError ? "error" : "done"
+  // The layout's ctx mirrors the prompt tokens of the run on screen; before
+  // there is one (precheck, page context still loading) it falls back to the
+  // same sources those tokens are built from.
+  const layoutSelection = executionPlan.executionContext?.promptTokens.selection ?? cleanSelection
+  const layoutTargetLanguage =
+    executionPlan.executionContext?.promptTokens.targetLanguage ??
+    LANG_CODE_TO_EN_NAME[language.targetCode]
 
   const resetPopoverSession = useCallback((options?: { clearAnchor?: boolean }) => {
     setActiveSession(null)
@@ -403,8 +412,10 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
             ref={bodyRef}
           >
             <CustomActionContent
-              isRunning={displayedIsRunning}
-              outputSchema={activeAction?.outputSchema ?? []}
+              action={activeAction}
+              status={layoutStatus}
+              selection={layoutSelection}
+              targetLanguage={layoutTargetLanguage}
               selectionContent={selectionText}
               value={displayedResult}
               thinking={displayedThinking}

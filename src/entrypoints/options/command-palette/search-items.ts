@@ -1,4 +1,8 @@
 import type { GeneratedI18nStructure } from "#i18n"
+import {
+  CUSTOM_ACTION_LAYOUT_SECTION_ID,
+  CUSTOM_ACTION_NOTEBASE_SECTION_ID,
+} from "@/utils/navigation"
 
 type I18nKey = keyof GeneratedI18nStructure
 
@@ -194,6 +198,22 @@ export const SEARCH_ITEMS: SearchItem[] = [
     route: "/custom-actions",
     titleKey: "options.selectionToolbar.customActions.title",
     descriptionKey: "options.selectionToolbar.customActions.description",
+    pageKey: "options.selectionToolbar.customActions.title",
+  },
+  {
+    // The Layout heading in the Config tab; the scroll switches to that tab first.
+    sectionId: CUSTOM_ACTION_LAYOUT_SECTION_ID,
+    route: "/custom-actions",
+    titleKey: "options.selectionToolbar.customActions.form.layout.title",
+    descriptionKey: "options.selectionToolbar.customActions.form.layout.description",
+    pageKey: "options.selectionToolbar.customActions.title",
+  },
+  {
+    // The Notebase tab trigger itself; the scroll activates it.
+    sectionId: CUSTOM_ACTION_NOTEBASE_SECTION_ID,
+    route: "/custom-actions",
+    titleKey: "options.selectionToolbar.customActions.form.notebase.title",
+    descriptionKey: "options.selectionToolbar.customActions.form.notebase.description",
     pageKey: "options.selectionToolbar.customActions.title",
   },
 

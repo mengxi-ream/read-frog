@@ -21,6 +21,7 @@ import { backgroundAuthClient } from "@/utils/auth/background-auth-client"
 import { getLocalConfig, setLocalConfig } from "@/utils/config/storage"
 import { patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { logger } from "@/utils/logger"
+import { buildCustomActionOptionsRoute } from "@/utils/navigation"
 import {
   classifyConnectedNotebaseOwnership,
   createNotebaseConnectedAccountSnapshot,
@@ -730,7 +731,7 @@ export function setupNotebasePendingSaveProcessor(waitUntilReady: () => Promise<
       await browser.tabs.create({
         active: true,
         url: browser.runtime.getURL(
-          `/options.html#/custom-actions?actionId=${encodeURIComponent(actionId)}`,
+          buildCustomActionOptionsRoute(actionId, { tab: "notebase", full: true }),
         ),
       })
     },

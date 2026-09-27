@@ -122,7 +122,6 @@ function createAction(): SelectionToolbarCustomAction {
         name: "summary",
         type: "string",
         description: "",
-        speaking: false,
       },
     ],
   }
@@ -632,7 +631,7 @@ describe("saveToNotebaseButton notebase availability", () => {
 
     expect(toastManagerMock.close).toHaveBeenCalledWith("toast-id")
     expect(sendMessage).toHaveBeenCalledWith("openOptionsPage", {
-      route: "/custom-actions?actionId=action-1",
+      route: "/custom-actions?actionId=action-1&tab=notebase",
     })
   })
 

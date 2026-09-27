@@ -3,6 +3,8 @@ import type {
   SelectionToolbarCustomActionOutputField,
 } from "@/types/config/selection-toolbar"
 import { Icon } from "@iconify/react"
+import { LAYOUT_RESERVED_FIELD_NAMES } from "@read-frog/layout-engine/contract"
+import { renameLayoutFieldRefs } from "@read-frog/layout-engine/editor"
 import { useForm } from "@tanstack/react-form"
 import { useEffect, useState } from "react"
 import { fieldContext as FieldContext } from "@/components/form/form-context"
@@ -23,7 +25,6 @@ import {
 } from "@/components/ui/base-ui/alert-dialog"
 import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
-import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -39,6 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/base-ui/select"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { selectionToolbarCustomActionOutputTypeSchema } from "@/types/config/selection-toolbar"
 import {
   createOutputSchemaField,
@@ -49,6 +51,7 @@ import {
   SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS,
 } from "@/utils/constants/custom-action"
 import { i18n } from "@/utils/i18n"
+import { CUSTOM_ACTION_LAYOUT_HOST } from "@/utils/layout-host/host"
 import { sanitizeCustomActionNotebaseConnection } from "@/utils/notebase/connection"
 import { withForm } from "./form"
 
@@ -58,7 +61,6 @@ type CustomActionFormKey =
   | "fieldType"
   | "fieldDescription"
   | "fieldDescriptionPlaceholder"
-  | "fieldSpeaking"
   | "editFieldDialog.save"
   | "deleteFieldDialog.title"
   | "deleteFieldDialog.description"
@@ -107,6 +109,11 @@ function FieldDialog({
     }
     if (errorType === "duplicate") {
       return i18n.t("options.selectionToolbar.customActions.errors.duplicateFieldKey")
+    }
+    // Layouts cannot reach a field named after `ctx` or the loop drop. UI-only on
+    // purpose: the config schema must keep accepting fields saved before layouts.
+    if (isReservedLayoutName(normalizeOutputSchemaFieldName(value))) {
+      return i18n.t("options.selectionToolbar.customActions.form.layout.reservedName")
     }
     return undefined
   }
@@ -188,22 +195,6 @@ function FieldDialog({
                 </FieldContext>
               )}
             </form.Field>
-            <form.Field name="speaking">
-              {(speakingField) => {
-                const checkboxId = `custom-action-field-speaking-${outputField.id}`
-
-                return (
-                  <Field orientation="horizontal" className="items-center">
-                    <Checkbox
-                      id={checkboxId}
-                      checked={speakingField.state.value}
-                      onCheckedChange={(checked) => speakingField.handleChange(checked)}
-                    />
-                    <FieldLabel htmlFor={checkboxId}>{t("fieldSpeaking")}</FieldLabel>
-                  </Field>
-                )
-              }}
-            </form.Field>
           </FieldGroup>
           <DialogFooter>
             <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
@@ -218,6 +209,12 @@ function FieldDialog({
       </DialogContent>
     </Dialog>
   )
+}
+
+const RESERVED_LAYOUT_NAMES = new Set<string>(LAYOUT_RESERVED_FIELD_NAMES)
+
+function isReservedLayoutName(name: string) {
+  return RESERVED_LAYOUT_NAMES.has(name)
 }
 
 function DeleteFieldDialog({
@@ -420,10 +417,38 @@ export const OutputSchemaField = withForm({
                     if (!open) setEditingField(null)
                   }}
                   onSave={(updated) => {
+                    const previous = outputSchema.find((item) => item.id === updated.id)
                     const nextOutputSchema = outputSchema.map((item) =>
                       item.id === updated.id ? updated : item,
                     )
-                    autosave.edit(() => field.handleChange(nextOutputSchema), { immediate: true })
+                    let renameSkipped = false
+                    autosave.edit(
+                      () => {
+                        // Move the layout's references in the same write as the rename, so no
+                        // saved state has a layout pointing at a field that no longer exists.
+                        const layout = form.state.values.layout
+                        if (previous && previous.name !== updated.name && layout?.trim()) {
+                          const renamed = renameLayoutFieldRefs(
+                            layout,
+                            [{ from: previous.name, to: updated.name }],
+                            CUSTOM_ACTION_LAYOUT_HOST,
+                          )
+                          if (renamed.changed) form.setFieldValue("layout", renamed.source)
+                          renameSkipped = renamed.skipped !== undefined
+                        }
+                        field.handleChange(nextOutputSchema)
+                      },
+                      { immediate: true },
+                    )
+                    if (renameSkipped && previous) {
+                      toastManager.add({
+                        type: "warning",
+                        title: i18n.t(
+                          "options.selectionToolbar.customActions.form.layout.renameSkipped",
+                          [previous.name],
+                        ),
+                      })
+                    }
                     setEditingField(null)
                   }}
                 />

@@ -131,7 +131,6 @@ function createCustomAction(
         name: "result",
         type: "string",
         description: "Result",
-        speaking: false,
       },
     ],
   }

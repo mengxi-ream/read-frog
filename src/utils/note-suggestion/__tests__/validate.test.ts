@@ -15,20 +15,18 @@ function createAction(
     systemPrompt: "system",
     prompt: "prompt",
     outputSchema: [
-      { id: "field-term", name: "Term", type: "string", description: "", speaking: true },
+      { id: "field-term", name: "Term", type: "string", description: "" },
       {
         id: "field-definition",
         name: "Definition",
         type: "string",
         description: "",
-        speaking: false,
       },
       {
         id: "field-difficulty",
         name: "Difficulty",
         type: "number",
         description: "",
-        speaking: false,
       },
     ],
     ...overrides,
@@ -152,7 +150,6 @@ describe("validateNoteSuggestion", () => {
           name: "Score",
           type: "number",
           description: "",
-          speaking: false,
         },
       ],
     })

@@ -37,12 +37,6 @@
       "skillPath": "skills/improve-animations/SKILL.md",
       "computedHash": "eeb219a407e325b687af88db25771cc3018e3148245604112f5ac6990b6fd79c"
     },
-    "react": {
-      "source": "vercel-labs/json-render",
-      "sourceType": "github",
-      "skillPath": "skills/react/SKILL.md",
-      "computedHash": "7950a6403bae48f638036768fd5d4a4643aaaa3bde04e99d4d8f2d1f485ab63d"
-    },
     "review-animations": {
       "source": "emilkowalski/skills",
       "sourceType": "github",

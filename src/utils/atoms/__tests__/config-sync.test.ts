@@ -142,7 +142,6 @@ describe("config persistence and invalidation", () => {
           name: "result",
           type: "string" as const,
           description: "Result",
-          speaking: false,
         },
       ],
     }

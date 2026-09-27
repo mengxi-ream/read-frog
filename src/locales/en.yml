@@ -653,6 +653,12 @@ options:
       edit: Edit AI action
       empty: No custom AI actions yet
       noEnabledLlmProvider: Enable at least one LLM provider before creating custom AI actions
+      tabs:
+        config: Config
+        notebase: Notebase
+        hasErrors: Has errors
+        connected: Connected
+        needsAttention: Needs attention
       form:
         name: Name
         customize: Customize
@@ -678,7 +684,6 @@ options:
         fieldType: Field type
         fieldDescription: Description
         fieldDescriptionPlaceholder: Describe what this field should contain...
-        fieldSpeaking: Enable speaking
         actions: Actions
         cancel: Cancel
         save: Save
@@ -695,6 +700,64 @@ options:
           description: This output field will be removed.
           confirm: Delete
           cancel: Cancel
+        layout:
+          title: Layout
+          description: How the result shows in the popup. HTML with Liquid; fields fill in as the answer streams.
+          reset: Restore default
+          resetFieldList: Field list
+          resetDictionary: Dictionary card
+          resetSentenceAnalysis: Sentence analysis card
+          resetConfirmTitle: Replace this layout?
+          resetConfirmDescription: The editor's contents will be replaced. You can still undo it in the editor afterwards.
+          resetConfirm: Replace
+          edit: Edit
+          preview: Preview
+          width: Width
+          themeLight: Light
+          themeDark: Dark
+          replay: Replay
+          sampleData: Sample data
+          sampleDataHint: Only used in this preview and never saved.
+          sampleDataReset: Reset samples
+          sampleValue: Sample $1
+          insertField: Field
+          insertSpeak: Speak button
+          insertCondition: If filled
+          insertContext: Context
+          insertLoop: Every field
+          syntaxHelp: Syntax
+          builtInHint: The built-in Dictionary's layout can't be edited. Customize it to edit a copy.
+          viewSource: View source
+          emptyNotice: This layout is empty, so the popup shows the default field list.
+          fallbackBanner: This layout can't be shown, so the default layout is used instead. $1
+          sanitized: "Removed for safety: $1"
+          unusedFields: "Not in this layout:"
+          tooLong: A layout can be at most $1 characters.
+          renameSkipped: The layout still refers to “$1”. Update it by hand.
+          reservedName: “ctx” and “forloop” are reserved in layouts. Choose another name.
+          help:
+            output: Shows a field's value. HTML in the value is escaped.
+            condition: Shows the content only when the field has a value.
+            loop: Repeats for every field, in order. f.name, f.value and f.type are available.
+            speak: Any element with data-speak reads the value aloud (or its own text if the value is empty) once the answer is done.
+            status: Styles by state. The host's data-status is streaming, done or error.
+            filters: newline_to_br keeps line breaks (use it last); lines splits text into a list of lines.
+            styles: CSS in a <style> block only applies inside this result. The --rf-* colors follow the light and dark themes.
+          lint:
+            parseError: "Liquid syntax error: $1"
+            unknownField: There's no field named “$1”.
+            unknownContextKey: "ctx has no “$1”. Available: $2."
+            fieldShadowedByLocal: “$1” is assigned in this layout, which hides the field with that name.
+            liquidInStyle: Liquid doesn't run inside <style>. This is kept as plain text.
+            styleInConditional: A <style> block always applies, even inside a “$1” tag.
+            cssImport: "@import is removed. Layouts can't load outside styles."
+            cssFontFace: "@font-face is removed. Use fonts already on the device."
+            unquotedAttributeOutput: Quote this attribute value, or the value can break out of it.
+            filterIgnored: Filters are ignored in a “$1” tag. Assign the filtered value first.
+            newlineToBrNotLast: newline_to_br only works as the last filter of an output.
+            tooLong: This layout is longer than $1 characters and can't be saved.
+            fieldNotShown: “$1” isn't shown in this layout.
+            reservedFieldName: The field name “$1” is reserved in layouts. Rename the field.
         notebase:
           title: Notebase connection
           description: Save this action's structured results to a remote notebase.
@@ -776,6 +839,7 @@ options:
             8. Difficulty must be a CEFR level (A1, A2, B1, B2, C1, or C2).
             9. If a field is unknown, return an empty string instead of guessing.
             10. Respond in {{targetLanguage}} for all textual fields unless source-form text is required for clarity.
+            11. Term in Sentence marks where the selected term stands in Sentence. It is a STRING containing a compact JSON array of {"text": ...} items, each quoting Sentence character for character, e.g. [{"text":"blossoms"}]. If Sentence splits the term into separate parts (e.g. "anrufen" in "Er ruft seine Mutter an"), give one item per part, in order: [{"text":"ruft"},{"text":"an"}]. Escape the inner quotes correctly.
 
             ## Examples
 
@@ -787,6 +851,7 @@ options:
             - Phonetic: /ˈblɒs.əm/
             - Part of Speech: noun
             - Sentence: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+            - Term in Sentence: [{"text":"blossoms"}]
             - Definition: 花；花朵（尤指果树的花）
             - Sentence Translation: 樱花短暂的美丽提醒我们珍惜每一刻。
             - Difficulty: B2
@@ -799,6 +864,7 @@ options:
             - Phonetic: kandou
             - Part of Speech: noun
             - Sentence: この映画はつまらないと思ったけど、最後は感動した。
+            - Term in Sentence: [{"text":"感動"}]
             - Definition: Being deeply moved; emotional touch
             - Sentence Translation: I thought this movie was boring, but the ending was moving.
             - Difficulty: B1
@@ -815,12 +881,63 @@ options:
           fieldPartOfSpeechDescription: Grammatical category (e.g., noun, verb, adjective).
           fieldSentence: Sentence
           fieldSentenceDescription: The complete sentence from the paragraphs above that contains the selected term. Do not include surrounding sentences.
+          fieldSentenceTerm: Term in Sentence
+          fieldSentenceTermDescription: 'Where the selected term stands in Sentence: a JSON array serialized as a string, one {"text": string} item per part of the term, each quoting Sentence exactly (e.g. [{"text":"blossoms"}]).'
           fieldDefinition: Definition
           fieldDefinitionDescription: One concise definition for the contextual sense.
           fieldSentenceTranslation: Sentence Translation
           fieldSentenceTranslationDescription: The translation of Sentence only.
           fieldDifficulty: Difficulty
           fieldDifficultyDescription: Estimated CEFR difficulty level A1, A2, B1, B2, C1, or C2.
+        sentenceAnalysis:
+          name: Sentence Analysis
+          description: Break down long sentences with color-coded components, glosses, and a translation
+          systemPrompt: |-
+            You are a grammar tutor who annotates long, difficult sentences for language learners.
+
+            ## Goal
+            Point out the grammatical parts of the Selection so a learner sees its structure at a glance, including the parts inside every clause.
+
+            ## Rules
+            1. Each annotation quotes one span of the Selection in "text", copied character for character (same words, case and punctuation). No leading or trailing spaces.
+            2. Annotate the main clause's parts (subject, predicate, object, complement, adverbial, ...) AND the parts inside every clause. A clause gets one annotation of type "clause" covering the whole clause, plus separate annotations for its own parts.
+            3. "type" must be exactly one of: subject, predicate, object, complement, attributive, adverbial, appositive, connector, clause. Put finer detail in "note".
+            4. List annotations in the order they start in the Selection; when two start at the same place, list the longer one first.
+            5. If the quoted text appears more than once in the Selection, add "occurrence": n (1 = the first appearance).
+            6. Spans may nest (a clause contains its parts) but must never partially overlap.
+            7. "note": a very short gloss in {{targetLanguage}} (at most 8 words). For a clause: its kind and what it attaches to.
+            8. "hard": true for difficult vocabulary, idioms or tricky grammar; otherwise false.
+            9. Do not annotate every word; skip articles and trivial words unless they matter.
+            10. Translation: a natural translation of the whole Selection in {{targetLanguage}}.
+            11. Structure: one or two sentences in {{targetLanguage}} describing the sentence pattern.
+            12. The Annotations value is a STRING that contains a compact JSON array. Escape the inner quotes correctly. Do not wrap it in markdown.
+
+            ## Example
+            Selection: The man who called yesterday said that he would come.
+            Annotations: "[{\"text\":\"The man who called yesterday\",\"type\":\"subject\",\"note\":\"主语，含定语从句\",\"hard\":false},{\"text\":\"who called yesterday\",\"type\":\"clause\",\"note\":\"定语从句，修饰 man\",\"hard\":false},{\"text\":\"who\",\"type\":\"subject\",\"note\":\"关系代词作主语\",\"hard\":false},{\"text\":\"called\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"yesterday\",\"type\":\"adverbial\",\"note\":\"时间\",\"hard\":false},{\"text\":\"said\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"that he would come\",\"type\":\"clause\",\"note\":\"宾语从句，作 said 的宾语\",\"hard\":false},{\"text\":\"that\",\"type\":\"connector\",\"note\":\"引导宾语从句\",\"hard\":false},{\"text\":\"he\",\"type\":\"subject\",\"note\":\"\",\"hard\":false},{\"text\":\"would come\",\"type\":\"predicate\",\"note\":\"过去将来时\",\"hard\":false}]"
+          prompt: |-
+            ## Input
+            Selection: {{selection}}
+            Paragraphs: {{paragraphs}}
+            Target language: {{targetLanguage}}
+          fieldAnnotations: Annotations
+          fieldAnnotationsDescription: 'A JSON array serialized as a string. Each item is {"text": string, "type": string, "note": string, "hard": boolean, "occurrence"?: number}; "text" quotes a span of the Selection exactly.'
+          fieldTranslation: Translation
+          fieldTranslationDescription: Natural translation of the whole Selection in {{targetLanguage}}.
+          fieldStructure: Structure
+          fieldStructureDescription: One or two sentences in {{targetLanguage}} describing the sentence pattern.
+          roles:
+            subject: Subject
+            predicate: Predicate
+            object: Object
+            complement: Complement
+            attributive: Attributive
+            adverbial: Adverbial
+            appositive: Appositive
+            clause: Clause
+            connector: Connector
+            other: Other
+          hardLabel: Difficult
         improveWriting:
           name: Improve Writing
           description: Analyze writing errors and suggest improvements
@@ -1399,6 +1516,7 @@ action:
   regenerate: Regenerate
   viewContextDetails: Context
   customizeCustomAction: Customize $1 action
+  customActionLayoutFallback: This result can't be shown in its layout, so a simplified view is shown.
   saveToNotebase: Save to Notebase
   saveToNotebaseSaving: Saving...
   saveToNotebaseSuccess: Saved to Notebase

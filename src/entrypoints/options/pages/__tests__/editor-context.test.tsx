@@ -136,7 +136,6 @@ describe("editor compound component contexts", () => {
           name: "result",
           type: "string" as const,
           description: "Result",
-          speaking: false,
         },
       ],
     }

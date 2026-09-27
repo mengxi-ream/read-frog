@@ -284,7 +284,6 @@ describe("useNoteSuggestion", () => {
           name: "Word",
           type: "string",
           description: "The vocabulary term",
-          speaking: true,
         },
       ],
     }
