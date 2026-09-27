@@ -17,7 +17,7 @@ export default function App() {
             <LanguageControlPanel />
           </div>
           <div className="order-3 flex justify-end lg:order-2 lg:h-full lg:items-end">
-            <div className="flex items-center gap-2">
+            <div className="flex max-w-full min-w-0 items-center gap-2">
               <PromptSelector />
               <TranslationServiceDropdown />
               <TranslationPanelActions />
