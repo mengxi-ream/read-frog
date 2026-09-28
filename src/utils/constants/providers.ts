@@ -32,7 +32,7 @@ import {
 } from "@/types/config/provider"
 import { omit, pick } from "@/types/utils"
 import { i18n } from "@/utils/i18n"
-import { getLobeIconsCDNUrlFn } from "../logo"
+import { getBundledLobeIconUrlFn } from "../logo"
 
 export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
   openrouter: {
@@ -198,12 +198,12 @@ export const PROVIDER_ITEMS: Record<
   }
 > = {
   "microsoft-translate": {
-    logo: getLobeIconsCDNUrlFn("microsoft-color"),
+    logo: getBundledLobeIconUrlFn("microsoft-color"),
     name: NON_API_TRANSLATE_PROVIDERS_MAP["microsoft-translate"],
     website: "https://translator.microsoft.com",
   },
   "google-translate": {
-    logo: getLobeIconsCDNUrlFn("google-color"),
+    logo: getBundledLobeIconUrlFn("google-color"),
     name: NON_API_TRANSLATE_PROVIDERS_MAP["google-translate"],
     website: "https://translate.google.com",
   },
@@ -231,7 +231,7 @@ export const PROVIDER_ITEMS: Record<
     },
   },
   atlascloud: {
-    logo: getLobeIconsCDNUrlFn("atlascloud"),
+    logo: getBundledLobeIconUrlFn("atlascloud"),
     name: "Atlas Cloud",
     website: "https://readfrog.s.gy/altas",
     apiKeyUrl: "https://readfrog.s.gy/altas",
@@ -247,97 +247,97 @@ export const PROVIDER_ITEMS: Record<
     website: `${env.WXT_WEBSITE_URL}/docs/providers/openai-compatible-providers`,
   },
   openrouter: {
-    logo: getLobeIconsCDNUrlFn("openrouter"),
+    logo: getBundledLobeIconUrlFn("openrouter"),
     name: "OpenRouter",
     website: "https://openrouter.ai/",
   },
   minimax: {
-    logo: getLobeIconsCDNUrlFn("minimax-color"),
+    logo: getBundledLobeIconUrlFn("minimax-color"),
     name: "MiniMax",
     website: "https://platform.minimax.io",
   },
   siliconflow: {
-    logo: getLobeIconsCDNUrlFn("siliconcloud-color"),
+    logo: getBundledLobeIconUrlFn("siliconcloud-color"),
     name: "SiliconFlow",
     website: "https://siliconflow.cn/",
   },
   openai: {
-    logo: getLobeIconsCDNUrlFn("openai"),
+    logo: getBundledLobeIconUrlFn("openai"),
     name: "OpenAI",
     website: "https://platform.openai.com",
   },
   azure: {
-    logo: getLobeIconsCDNUrlFn("azure-color"),
+    logo: getBundledLobeIconUrlFn("azure-color"),
     name: "Azure",
     website: "https://azure.microsoft.com/products/ai-services/openai-service",
   },
   deepseek: {
-    logo: getLobeIconsCDNUrlFn("deepseek-color"),
+    logo: getBundledLobeIconUrlFn("deepseek-color"),
     name: "DeepSeek",
     website: "https://platform.deepseek.com",
   },
   google: {
-    logo: getLobeIconsCDNUrlFn("gemini-color"),
+    logo: getBundledLobeIconUrlFn("gemini-color"),
     name: "Gemini",
     website: "https://aistudio.google.com",
   },
   anthropic: {
-    logo: getLobeIconsCDNUrlFn("anthropic"),
+    logo: getBundledLobeIconUrlFn("anthropic"),
     name: "Anthropic",
     website: "https://console.anthropic.com",
   },
   xai: {
-    logo: getLobeIconsCDNUrlFn("grok"),
+    logo: getBundledLobeIconUrlFn("grok"),
     name: "Grok",
     website: "https://x.ai/api",
   },
   bedrock: {
-    logo: getLobeIconsCDNUrlFn("bedrock-color"),
+    logo: getBundledLobeIconUrlFn("bedrock-color"),
     name: "Amazon Bedrock",
     website: "https://aws.amazon.com/bedrock/",
   },
   groq: {
-    logo: getLobeIconsCDNUrlFn("groq"),
+    logo: getBundledLobeIconUrlFn("groq"),
     name: "Groq",
     website: "https://groq.com",
   },
   deepinfra: {
-    logo: getLobeIconsCDNUrlFn("deepinfra-color"),
+    logo: getBundledLobeIconUrlFn("deepinfra-color"),
     name: "DeepInfra",
     website: "https://deepinfra.com",
   },
   mistral: {
-    logo: getLobeIconsCDNUrlFn("mistral-color"),
+    logo: getBundledLobeIconUrlFn("mistral-color"),
     name: "Mistral AI",
     website: "https://mistral.ai",
   },
   togetherai: {
-    logo: getLobeIconsCDNUrlFn("together-color"),
+    logo: getBundledLobeIconUrlFn("together-color"),
     name: "Together.ai",
     website: "https://together.ai",
   },
   cohere: {
-    logo: getLobeIconsCDNUrlFn("cohere-color"),
+    logo: getBundledLobeIconUrlFn("cohere-color"),
     name: "Cohere",
     website: "https://cohere.com",
   },
   fireworks: {
-    logo: getLobeIconsCDNUrlFn("fireworks-color"),
+    logo: getBundledLobeIconUrlFn("fireworks-color"),
     name: "Fireworks AI",
     website: "https://fireworks.ai",
   },
   cerebras: {
-    logo: getLobeIconsCDNUrlFn("cerebras-color"),
+    logo: getBundledLobeIconUrlFn("cerebras-color"),
     name: "Cerebras",
     website: "https://cerebras.ai",
   },
   replicate: {
-    logo: getLobeIconsCDNUrlFn("replicate"),
+    logo: getBundledLobeIconUrlFn("replicate"),
     name: "Replicate",
     website: "https://replicate.com",
   },
   perplexity: {
-    logo: getLobeIconsCDNUrlFn("perplexity-color"),
+    logo: getBundledLobeIconUrlFn("perplexity-color"),
     name: "Perplexity",
     website: "https://perplexity.ai",
   },
@@ -347,27 +347,27 @@ export const PROVIDER_ITEMS: Record<
     website: "https://dashboard.x-aio.com/zh/register?ref=c356c1daba9a4641a18e",
   },
   ollama: {
-    logo: getLobeIconsCDNUrlFn("ollama"),
+    logo: getBundledLobeIconUrlFn("ollama"),
     name: "Ollama",
     website: "https://ollama.ai",
   },
   volcengine: {
-    logo: getLobeIconsCDNUrlFn("volcengine-color"),
+    logo: getBundledLobeIconUrlFn("volcengine-color"),
     name: "Volcengine",
     website: "https://www.volcengine.com/product/doubao",
   },
   alibaba: {
-    logo: getLobeIconsCDNUrlFn("bailian-color"),
+    logo: getBundledLobeIconUrlFn("bailian-color"),
     name: "Alibaba Cloud",
     website: "https://modelstudio.alibabacloud.com/",
   },
   moonshotai: {
-    logo: getLobeIconsCDNUrlFn("moonshot"),
+    logo: getBundledLobeIconUrlFn("moonshot"),
     name: "Moonshot AI",
     website: "https://platform.moonshot.cn/",
   },
   huggingface: {
-    logo: getLobeIconsCDNUrlFn("huggingface-color"),
+    logo: getBundledLobeIconUrlFn("huggingface-color"),
     name: "Hugging Face",
     website: "https://huggingface.co/",
   },
