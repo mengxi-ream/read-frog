@@ -3,12 +3,13 @@ import { dequal } from "dequal"
 import { useAtomValue } from "jotai"
 import { useState } from "react"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { BUILT_IN_DICTIONARY_ACTION_ID } from "@/utils/constants/custom-action"
+import { isBuiltInActionId } from "@/utils/constants/custom-action"
 import { findSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { EntityEditor } from "../../../components/entity-editor"
 import { selectedCustomActionIdAtom } from "../atoms"
 import { ActionEditor, BuiltInActionEditor, CustomActionEditor } from "./action-editor"
+import { ActionEditorTabs } from "./editor-tabs"
 
 export function CustomActionConfigForm() {
   const selectionToolbarConfig = useAtomValue(configFieldsAtomMap.selectionToolbar)
@@ -31,30 +32,37 @@ export function CustomActionConfigForm() {
     )
   }
 
-  if (selectedAction.id === BUILT_IN_DICTIONARY_ACTION_ID) {
-    return <BuiltInDictionaryEditor key={selectedAction.id} action={selectedAction} />
+  // Force remount per action to avoid transient undefined field states during selection switches.
+  if (isBuiltInActionId(selectedAction.id)) {
+    return <BuiltInEditor key={selectedAction.id} action={selectedAction} />
   }
 
-  // Force remount per action to avoid transient undefined field states during selection switches.
   return <EditableActionEditor key={selectedAction.id} action={selectedAction} />
 }
 
-function BuiltInDictionaryEditor({ action }: { action: SelectionToolbarCustomAction }) {
+// A built-in action is read-only but for its provider and its Notebase
+// connection; "Customize" makes an editable copy.
+function BuiltInEditor({ action }: { action: SelectionToolbarCustomAction }) {
   return (
     <BuiltInActionEditor.Provider action={action}>
       <ActionEditor.Form>
         <EntityEditor.Root>
-          <EntityEditor.Body>
-            <ActionEditor.NameField readOnly>
-              <ActionEditor.CustomizeButton />
-            </ActionEditor.NameField>
-            <ActionEditor.IconField readOnly />
-            <ActionEditor.ProviderField />
-            <ActionEditor.SystemPromptField readOnly />
-            <ActionEditor.PromptField readOnly />
-            <ActionEditor.OutputSchema.ReadOnly />
-            <ActionEditor.NotebaseConnectionField />
-          </EntityEditor.Body>
+          <ActionEditorTabs
+            config={
+              <EntityEditor.Body>
+                <ActionEditor.NameField readOnly>
+                  <ActionEditor.CustomizeButton />
+                </ActionEditor.NameField>
+                <ActionEditor.IconField readOnly />
+                <ActionEditor.ProviderField />
+                <ActionEditor.SystemPromptField readOnly />
+                <ActionEditor.PromptField readOnly />
+                <ActionEditor.OutputSchema.ReadOnly />
+                <ActionEditor.Layout.ReadOnly />
+              </EntityEditor.Body>
+            }
+            notebase={<ActionEditor.NotebaseConnectionField variant="tab" />}
+          />
         </EntityEditor.Root>
       </ActionEditor.Form>
     </BuiltInActionEditor.Provider>
@@ -66,15 +74,20 @@ function EditableActionEditor({ action }: { action: SelectionToolbarCustomAction
     <CustomActionEditor.Provider action={action}>
       <ActionEditor.Form>
         <EntityEditor.Root>
-          <EntityEditor.Body>
-            <ActionEditor.NameField />
-            <ActionEditor.IconField />
-            <ActionEditor.ProviderField />
-            <ActionEditor.SystemPromptField />
-            <ActionEditor.PromptField />
-            <ActionEditor.OutputSchema.Editable />
-            <ActionEditor.NotebaseConnectionField />
-          </EntityEditor.Body>
+          <ActionEditorTabs
+            config={
+              <EntityEditor.Body>
+                <ActionEditor.NameField />
+                <ActionEditor.IconField />
+                <ActionEditor.ProviderField />
+                <ActionEditor.SystemPromptField />
+                <ActionEditor.PromptField />
+                <ActionEditor.OutputSchema.Editable />
+                <ActionEditor.Layout.Editable />
+              </EntityEditor.Body>
+            }
+            notebase={<ActionEditor.NotebaseConnectionField variant="tab" />}
+          />
           <EntityEditor.Footer>
             <ActionEditor.DuplicateButton />
             <ActionEditor.DeleteButton />

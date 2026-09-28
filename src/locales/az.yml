@@ -653,6 +653,12 @@ options:
       edit: Süni intellekt əməliyyatını redaktə et
       empty: Hələ fərdi süni intellekt əməliyyatı yoxdur
       noEnabledLlmProvider: Fərdi süni intellekt əməliyyatları yaratmazdan əvvəl ən azı bir LLM provayderini aktiv edin
+      tabs:
+        config: Konfiqurasiya
+        notebase: Notebase
+        hasErrors: Xətalar var
+        connected: Qoşulub
+        needsAttention: Diqqət tələb edir
       form:
         name: Ad
         customize: Fərdiləşdir
@@ -678,7 +684,6 @@ options:
         fieldType: Sahənin növü
         fieldDescription: Təsvir
         fieldDescriptionPlaceholder: Bu sahədə nəyin olacağını təsvir edin...
-        fieldSpeaking: Səsləndirməni aktiv et
         actions: Əməliyyatlar
         cancel: Ləğv et
         save: Yadda saxla
@@ -695,6 +700,64 @@ options:
           description: Bu nəticə sahəsi silinəcək.
           confirm: Sil
           cancel: Ləğv et
+        layout:
+          title: Tərtibat
+          description: Nəticənin açılan pəncərədə necə göründüyü. Liquid ilə HTML; cavab axdıqca sahələr doldurulur.
+          reset: Defolta qaytar
+          resetFieldList: Sahə siyahısı
+          resetDictionary: Lüğət kartı
+          resetSentenceAnalysis: Cümlə təhlili kartı
+          resetConfirmTitle: Bu tərtibat əvəz edilsin?
+          resetConfirmDescription: Redaktordakı məzmun əvəz ediləcək. Sonra redaktorda geri qaytara bilərsiniz.
+          resetConfirm: Əvəz et
+          edit: Redaktə et
+          preview: Önizləmə
+          width: En
+          themeLight: Açıq
+          themeDark: Tünd
+          replay: Yenidən oynat
+          sampleData: Nümunə məlumat
+          sampleDataHint: Yalnız bu önizləmədə istifadə olunur və yadda saxlanılmır.
+          sampleDataReset: Nümunələri sıfırla
+          sampleValue: Nümunə $1
+          insertField: Sahə
+          insertSpeak: Səsləndirmə düyməsi
+          insertCondition: Doludursa
+          insertContext: Kontekst
+          insertLoop: Bütün sahələr
+          syntaxHelp: Sintaksis
+          builtInHint: Daxili lüğətin tərtibatı redaktə edilə bilməz. Surətini redaktə etmək üçün fərdiləşdirin.
+          viewSource: Mənbəyə bax
+          emptyNotice: Bu tərtibat boşdur, ona görə açılan pəncərədə defolt sahə siyahısı göstərilir.
+          fallbackBanner: Bu tərtibat göstərilə bilmir, ona görə defolt tərtibat istifadə olunur. $1
+          sanitized: "Təhlükəsizlik üçün silindi: $1"
+          unusedFields: "Bu tərtibatda yoxdur:"
+          tooLong: Tərtibat ən çox $1 simvol ola bilər.
+          renameSkipped: Tərtibat hələ də "$1" sahəsinə istinad edir. Onu əl ilə yeniləyin.
+          reservedName: '"ctx" və "forloop" tərtibatlarda ehtiyatda saxlanılır. Başqa ad seçin.'
+          help:
+            output: Sahənin dəyərini göstərir. Dəyərdəki HTML ekranlaşdırılır.
+            condition: Məzmunu yalnız sahənin dəyəri olduqda göstərir.
+            loop: Hər sahə üçün ardıcıl təkrarlanır. f.name, f.value və f.type istifadə edilə bilər.
+            speak: data-speak olan istənilən element cavab hazır olduqda dəyəri (dəyər boşdursa, öz mətnini) səsli oxuyur.
+            status: Vəziyyətə görə üslub verir. Konteynerin data-status dəyəri streaming, done və ya error olur.
+            filters: newline_to_br sətir keçidlərini saxlayır (sonda istifadə edin); lines mətni sətir siyahısına bölür.
+            styles: <style> blokundakı CSS yalnız bu nəticənin daxilində tətbiq olunur. --rf-* rəngləri açıq və tünd temaya uyğunlaşır.
+          lint:
+            parseError: "Liquid sintaksis xətası: $1"
+            unknownField: '"$1" adlı sahə yoxdur.'
+            unknownContextKey: 'ctx daxilində "$1" yoxdur. Mövcud olanlar: $2.'
+            fieldShadowedByLocal: Bu tərtibat "$1" adına dəyər mənimsədir və bu, eyniadlı sahəni gizlədir.
+            liquidInStyle: <style> daxilində Liquid işləmir; bu, adi mətn kimi qalır.
+            styleInConditional: <style> bloku "$1" teqinin içində olsa belə həmişə tətbiq olunur.
+            cssImport: "@import silinir. Tərtibatlar xarici üslubları yükləyə bilməz."
+            cssFontFace: "@font-face silinir. Cihazda artıq olan şriftlərdən istifadə edin."
+            unquotedAttributeOutput: Bu atribut dəyərini dırnaq içinə alın, əks halda dəyər atributdan kənara çıxa bilər.
+            filterIgnored: '"$1" teqində filtrlər nəzərə alınmır. Əvvəlcə filtrlənmiş dəyəri mənimsədin.'
+            newlineToBrNotLast: newline_to_br yalnız çıxışın son filtri olduqda işləyir.
+            tooLong: Bu tərtibat $1 simvoldan uzundur və yadda saxlanıla bilməz.
+            fieldNotShown: '"$1" bu tərtibatda göstərilmir.'
+            reservedFieldName: '"$1" sahə adı tərtibatlarda ehtiyatda saxlanılır. Sahənin adını dəyişin.'
         notebase:
           title: Notebase qoşulması
           description: Bu əməliyyatın strukturlaşdırılmış nəticələrini uzaqdakı Notebase daxilində saxlayın.
@@ -776,6 +839,7 @@ options:
             8. Çətinlik CEFR səviyyəsi olmalıdır (A1, A2, B1, B2, C1 və ya C2).
             9. Sahənin dəyəri məlum deyilsə, təxmin etmək əvəzinə boş sətir qaytarın.
             10. Aydınlıq üçün mənbə formasında mətn tələb olunmadıqda bütün mətn sahələrini {{targetLanguage}} dilində yazın.
+            11. Cümlədəki forma seçilmiş sözün Cümlədə harada olduğunu göstərir. Bu, {"text": ...} elementlərindən ibarət yığcam JSON massivi saxlayan SƏTİRdir; hər element Cümlədən hərfi-hərfinə sitat gətirir, məsələn [{"text":"çiçəklərinin"}]. Cümlə sözü ayrı hissələrə bölürsə (məsələn, "Er ruft seine Mutter an" cümləsində "anrufen"), hər hissə üçün ardıcıllıqla bir element verin: [{"text":"ruft"},{"text":"an"}]. Daxili dırnaq işarələrini düzgün escape edin.
 
             ## Nümunələr
 
@@ -787,6 +851,7 @@ options:
             - Tələffüz: /tʃiˈtʃæc/
             - Nitq hissəsi: isim
             - Cümlə: Albalı çiçəklərinin ötəri gözəlliyi bizə hər anın qədrini bilməyi xatırladır.
+            - Cümlədəki forma: [{"text":"çiçəklərinin"}]
             - Tərif: Bitkinin çoxalma orqanı; xüsusilə meyvə ağacının çiçəyi.
             - Cümlənin tərcüməsi: Albalı çiçəklərinin ötəri gözəlliyi bizə hər anın qədrini bilməyi xatırladır.
             - Çətinlik: B2
@@ -799,6 +864,7 @@ options:
             - Tələffüz: /tæsiɾlænˈmæc/
             - Nitq hissəsi: feil
             - Cümlə: Bu filmin darıxdırıcı olduğunu düşünürdüm, amma sonunda təsirləndim.
+            - Cümlədəki forma: [{"text":"təsirləndim"}]
             - Tərif: Dərin hisslər keçirmək, duyğulanmaq.
             - Cümlənin tərcüməsi: Bu filmin darıxdırıcı olduğunu düşünürdüm, amma sonunda təsirləndim.
             - Çətinlik: B1
@@ -815,12 +881,79 @@ options:
           fieldPartOfSpeechDescription: Qrammatik kateqoriya (məsələn, isim, feil, sifət).
           fieldSentence: Cümlə
           fieldSentenceDescription: Yuxarıdakı abzaslarda seçilmiş sözün olduğu tam cümlə. Ətrafdakı cümlələri daxil etməyin.
+          fieldSentenceTerm: Cümlədəki forma
+          fieldSentenceTermDescription: 'Seçilmiş sözün Cümlədə yeri: sətir kimi seriallaşdırılmış JSON massivi, sözün hər hissəsi üçün bir {"text": sətir} elementi, hər biri Cümlədən dəqiq sitat (məs. [{"text":"çiçəklərinin"}]).'
           fieldDefinition: Tərif
           fieldDefinitionDescription: Kontekstdəki mənaya uyğun bir qısa tərif.
           fieldSentenceTranslation: Cümlənin tərcüməsi
           fieldSentenceTranslationDescription: Yalnız cümlənin tərcüməsi.
           fieldDifficulty: Çətinlik
           fieldDifficultyDescription: Təxmini CEFR çətinlik səviyyəsi A1, A2, B1, B2, C1 və ya C2.
+        sentenceAnalysis:
+          name: "Cümlə təhlili"
+          description: "Uzun cümləni müəllim kimi işarələyir: əsası, hər budaq cümləni və çətin yerləri"
+          fieldAnnotations: "Annotasiyalar"
+          fieldTranslation: "Tərcümə"
+          roles:
+            subject: "Mübtəda"
+            predicate: "Xəbər"
+            object: "Tamamlıq"
+            complement: "Tamamlayıcı"
+            attributive: "Təyin"
+            adverbial: "Zərflik"
+            appositive: "Əlavə"
+            connector: "Bağlayıcı"
+          clauses:
+            subject: "Mübtəda budaq cümləsi"
+            object: "Tamamlıq budaq cümləsi"
+            complement: "Xəbər budaq cümləsi"
+            attributive: "Təyin budaq cümləsi"
+            adverbial: "Zərflik budaq cümləsi"
+            appositive: "Əlavə budaq cümləsi"
+            clause: "Budaq cümlə"
+          adverbialClauses:
+            time: "Zaman budaq cümləsi"
+            place: "Yer budaq cümləsi"
+            cause: "Səbəb budaq cümləsi"
+            condition: "Şərt budaq cümləsi"
+            concession: "Güzəşt budaq cümləsi"
+            purpose: "Məqsəd budaq cümləsi"
+            result: "Nəticə budaq cümləsi"
+            manner: "Tərz budaq cümləsi"
+            comparison: "Müqayisə budaq cümləsi"
+          forms:
+            infinitive: "Məsdər"
+            gerund: "Feili isim"
+            presentParticiple: "-ing"
+            pastParticiple: "V3"
+          senses:
+            time: "Zaman"
+            place: "Yer"
+            cause: "Səbəb"
+            condition: "Şərt"
+            concession: "Güzəşt"
+            purpose: "Məqsəd"
+            result: "Nəticə"
+            manner: "Tərz"
+            comparison: "Müqayisə"
+          obstacles:
+            inversion: "İnversiya"
+            fronting: "Önə çəkmə"
+            ellipsis: "Ellipsis"
+            passive: "Məchul"
+            subjunctive: "Arzu şəkli"
+            parenthesis: "Ara söz"
+            dummyIt: "Formal it"
+            postponedSubject: "Həqiqi mübtəda"
+            cleft: "Vurğu quruluşu"
+            comparison: "Müqayisə"
+            negation: "İnkar"
+            split: "Ayrılma"
+            idiom: "İdiom"
+          restoreLabel: "Düz sıra:"
+          hardLabel: "Çətin"
+          trunkLabel: "Yalnız əsas"
+          slashesLabel: "Fasilələr"
         improveWriting:
           name: Yazını təkmilləşdir
           description: Yazı xətalarını təhlil edin və düzəlişlər təklif edin
@@ -1399,6 +1532,7 @@ action:
   regenerate: Yenidən yarat
   viewContextDetails: Kontekst
   customizeCustomAction: $1 əməliyyatını fərdiləşdir
+  customActionLayoutFallback: Bu nəticə öz tərtibatında göstərilə bilmir, ona görə sadələşdirilmiş görünüş göstərilir.
   saveToNotebase: Notebase daxilində yadda saxla
   saveToNotebaseSaving: Yadda saxlanılır...
   saveToNotebaseSuccess: Notebase daxilində yadda saxlanıldı

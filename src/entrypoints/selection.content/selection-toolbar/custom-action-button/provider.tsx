@@ -162,6 +162,12 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
   const displayedIsRunning =
     (isOpen && webPageContext === undefined) || (executionPlan.executionContext ? isRunning : false)
   const displayedThinking = executionPlan.executionContext ? thinking : null
+  const layoutStatus = displayedIsRunning ? "streaming" : displayedError ? "error" : "done"
+  // The layout's ctx mirrors the prompt tokens of the run on screen; before
+  // there is one (precheck, page context still loading) it falls back to the
+  // same sources those tokens are built from.
+  const layoutSelection = executionPlan.executionContext?.promptTokens.selection ?? cleanSelection
+  const layoutTargetCode = executionPlan.executionContext?.targetCode ?? language.targetCode
 
   const resetPopoverSession = useCallback((options?: { clearAnchor?: boolean }) => {
     setActiveSession(null)
@@ -403,8 +409,10 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
             ref={bodyRef}
           >
             <CustomActionContent
-              isRunning={displayedIsRunning}
-              outputSchema={activeAction?.outputSchema ?? []}
+              action={activeAction}
+              status={layoutStatus}
+              selection={layoutSelection}
+              targetCode={layoutTargetCode}
               selectionContent={selectionText}
               value={displayedResult}
               thinking={displayedThinking}

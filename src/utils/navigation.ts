@@ -86,6 +86,95 @@ export function shouldHighlightApiKey(search: string): boolean {
   return new URLSearchParams(search).get(HIGHLIGHT_QUERY_PARAM) === API_KEY_HIGHLIGHT_VALUE
 }
 
+/** The tabs of the custom action editor, in display order. */
+export const CUSTOM_ACTION_EDITOR_TABS = ["config", "notebase"] as const
+
+export type CustomActionEditorTab = (typeof CUSTOM_ACTION_EDITOR_TABS)[number]
+
+/** Names the custom action the editor should open. */
+export const CUSTOM_ACTION_ID_QUERY_PARAM = "actionId"
+
+/** Names the editor tab to show once the action is open. */
+export const CUSTOM_ACTION_TAB_QUERY_PARAM = "tab"
+
+/** Opens the "add action" dialog. */
+export const CUSTOM_ACTION_ADD_QUERY_PARAM = "addAction"
+
+/** The `id` on the Layout heading in the Config tab, so `?section=` can reach it. */
+export const CUSTOM_ACTION_LAYOUT_SECTION_ID = "custom-actions-layout"
+
+/** The `id` on the Notebase tab trigger, so `?section=` can reach it. */
+export const CUSTOM_ACTION_NOTEBASE_SECTION_ID = "custom-actions-notebase"
+
+export interface CustomActionOptionsRouteOptions {
+  /** Left out, the editor opens on its first tab. */
+  tab?: CustomActionEditorTab
+  /**
+   * Prefix the route with `/options.html#`, for callers that build the extension URL themselves
+   * instead of going through `openOptionsPage`.
+   */
+  full?: boolean
+}
+
+/** Route to the custom action editor with one action selected, optionally on a given tab. */
+export function buildCustomActionOptionsRoute(
+  actionId: string,
+  options?: CustomActionOptionsRouteOptions & { full?: false },
+): `/${string}`
+export function buildCustomActionOptionsRoute(
+  actionId: string,
+  options: CustomActionOptionsRouteOptions & { full: true },
+): `/options.html#/${string}`
+export function buildCustomActionOptionsRoute(
+  actionId: string,
+  options?: CustomActionOptionsRouteOptions,
+): `/${string}` {
+  // encodeURIComponent rather than URLSearchParams: existing links spell a space `%20`, not `+`.
+  const id = encodeURIComponent(actionId)
+  let route: `/${string}` = `/custom-actions?${CUSTOM_ACTION_ID_QUERY_PARAM}=${id}`
+  if (options?.tab) {
+    route = `${route}&${CUSTOM_ACTION_TAB_QUERY_PARAM}=${options.tab}`
+  }
+  return options?.full ? `/options.html#${route}` : route
+}
+
+function parseCustomActionEditorTab(value: string | null): CustomActionEditorTab | null {
+  const tab = value?.trim()
+  return CUSTOM_ACTION_EDITOR_TABS.find((item) => item === tab) ?? null
+}
+
+export interface CustomActionDeepLink {
+  actionId: string | null
+  /** Null when the link names no tab, or one this version does not have. */
+  tab: CustomActionEditorTab | null
+  /** `search` with the custom action params removed: `""` or `?…`. */
+  remainingSearch: string
+}
+
+/**
+ * Reads the custom action params out of `search` and strips them. Returns null when there are
+ * none, so running it again on `remainingSearch` is a no-op: a link applies once, not per render.
+ */
+export function consumeCustomActionDeepLink(search: string): CustomActionDeepLink | null {
+  const params = new URLSearchParams(search)
+  const keys = [
+    CUSTOM_ACTION_ID_QUERY_PARAM,
+    CUSTOM_ACTION_TAB_QUERY_PARAM,
+    CUSTOM_ACTION_ADD_QUERY_PARAM,
+  ]
+  if (!keys.some((key) => params.has(key))) {
+    return null
+  }
+
+  const actionId = params.get(CUSTOM_ACTION_ID_QUERY_PARAM)?.trim() || null
+  const tab = parseCustomActionEditorTab(params.get(CUSTOM_ACTION_TAB_QUERY_PARAM))
+  for (const key of keys) {
+    params.delete(key)
+  }
+  const remaining = params.toString()
+  return { actionId, tab, remainingSearch: remaining ? `?${remaining}` : "" }
+}
+
 export async function openOptionsPage(options?: OpenOptionsPageOptions) {
   const route = options?.route ?? ""
 

@@ -1,8 +1,9 @@
 import type { GeneratedI18nStructure } from "#i18n"
+import type { SupportedUiLocale } from "./resources"
 import type { UiLanguage } from "@/types/config/config"
-import i18next, { changeLanguage, init, t as translate } from "i18next"
+import i18next, { changeLanguage, getFixedT, init, t as translate } from "i18next"
 import { resolveUiLocale } from "./locale-map"
-import { DEFAULT_UI_LOCALE, resources } from "./resources"
+import { DEFAULT_UI_LOCALE, resources, SUPPORTED_UI_LOCALES } from "./resources"
 
 /**
  * Runtime-switchable i18n facade.
@@ -103,3 +104,20 @@ function rawT(key: string, substitutions?: Substitution[]): string {
 }
 
 export const i18n: { t: FacadeT } = { t: rawT }
+
+/** The locale `i18n.t` translates into; the default one before `initI18n` has run. */
+export function getUiLocale(): SupportedUiLocale {
+  const language = i18next.language
+  return (SUPPORTED_UI_LOCALES as readonly string[]).includes(language)
+    ? (language as SupportedUiLocale)
+    : DEFAULT_UI_LOCALE
+}
+
+/**
+ * `i18n.t` in `locale` instead of the UI language, for text that follows another
+ * language setting: a result card's words follow the target language, like the
+ * model's notes on it. For keys without substitutions.
+ */
+export function translateIn(locale: SupportedUiLocale, key: I18nKey): string {
+  return getFixedT(locale)(key)
+}

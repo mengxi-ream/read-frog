@@ -47,6 +47,12 @@ vi.mock("../output-schema-field", () => ({
   ReadOnlyOutputSchemaField: () => <div>ReadOnlyOutputSchemaField</div>,
 }))
 
+// The layout editor and preview (CodeMirror, shadow DOM) are verified in a browser.
+vi.mock("../layout-field", () => ({
+  LayoutField: () => <div>LayoutField</div>,
+  ReadOnlyLayoutField: () => <div>ReadOnlyLayoutField</div>,
+}))
+
 vi.mock("../notebase-connection-field", () => ({
   NotebaseConnectionField: () => (
     <div>{i18n.t("options.selectionToolbar.customActions.form.notebase.title")}</div>
@@ -91,6 +97,8 @@ describe("customActionConfigForm notebase availability", () => {
     expect(screen.getByText("IconField:readOnly")).toBeInTheDocument()
     expect(screen.queryByText("OutputSchemaField")).not.toBeInTheDocument()
     expect(screen.getByText("ReadOnlyOutputSchemaField")).toBeInTheDocument()
+    expect(screen.queryByText("LayoutField")).not.toBeInTheDocument()
+    expect(screen.getByText("ReadOnlyLayoutField")).toBeInTheDocument()
     expect(screen.getByText("ProviderField")).toBeInTheDocument()
     expect(
       screen.queryByText(i18n.t("options.selectionToolbar.customActions.form.delete")),
@@ -201,7 +209,6 @@ describe("customActionConfigForm notebase availability", () => {
           name: "summary",
           type: "string" as const,
           description: "Summary",
-          speaking: false,
         },
       ],
       notebaseConnection: {
@@ -228,6 +235,7 @@ describe("customActionConfigForm notebase availability", () => {
 
     expect(screen.getByText("NameField:editable")).toBeInTheDocument()
     expect(screen.getByText("OutputSchemaField")).toBeInTheDocument()
+    expect(screen.getByText("LayoutField")).toBeInTheDocument()
     expect(
       screen.queryByRole("button", {
         name: i18n.t("options.selectionToolbar.customActions.form.customize"),

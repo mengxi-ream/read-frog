@@ -4,6 +4,7 @@ import { useCallback } from "react"
 import { buttonVariants } from "@/components/ui/base-ui/button"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
+import { buildCustomActionOptionsRoute } from "@/utils/navigation"
 import { cn } from "@/utils/styles/utils"
 import {
   SelectionPopoverTooltip,
@@ -27,7 +28,7 @@ export function CustomActionToolButton({
   const handleClick = useCallback(() => {
     handlePress()
     void sendMessage("openOptionsPage", {
-      route: `/custom-actions?actionId=${encodeURIComponent(action.id)}`,
+      route: buildCustomActionOptionsRoute(action.id),
     })
   }, [action.id, handlePress])
 

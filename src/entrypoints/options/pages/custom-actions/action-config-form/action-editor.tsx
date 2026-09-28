@@ -31,9 +31,10 @@ import {
 } from "@/utils/constants/custom-action"
 import { duplicateSelectionToolbarAction, getSelectionToolbarActions } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
-import { selectedCustomActionIdAtom } from "../atoms"
+import { customActionEditorTabAtom, selectedCustomActionIdAtom } from "../atoms"
 import { formOpts, useAppForm } from "./form"
 import { IconField as IconFormField } from "./icon-field"
+import { LayoutField as EditableLayoutFormField, ReadOnlyLayoutField } from "./layout-field"
 import { NameField as NameFormField } from "./name-field"
 import { NotebaseConnectionField as NotebaseConnectionFormField } from "./notebase-connection-field"
 import {
@@ -147,6 +148,8 @@ function useActionEditorController(
             ...latest,
             customActions: [...latest.customActions, duplicatedAction],
           }))
+          // Set in the same tick as the selection, so the copy mounts straight onto "config".
+          store.set(customActionEditorTabAtom, "config")
           await setSelectedActionId(duplicatedAction.id)
         })
       },
@@ -289,9 +292,20 @@ function ReadOnlyOutputSchema() {
   return <ReadOnlyOutputSchemaField outputSchema={action.outputSchema} />
 }
 
-function NotebaseConnectionField() {
+function EditableLayout() {
   const { form } = useActionEditor().state
-  return <NotebaseConnectionFormField form={form} />
+  return <EditableLayoutFormField form={form} />
+}
+
+// Built-in layouts are read-only; "Customize" makes an editable copy.
+function ReadOnlyLayout() {
+  const { action } = useActionEditor().state
+  return <ReadOnlyLayoutField action={action} customizeButton={<CustomizeButton />} />
+}
+
+function NotebaseConnectionField({ variant }: { variant?: "card" | "tab" }) {
+  const { form } = useActionEditor().state
+  return <NotebaseConnectionFormField form={form} variant={variant} />
 }
 
 function DuplicateButton() {
@@ -368,6 +382,10 @@ export const ActionEditor = {
   OutputSchema: {
     Editable: EditableOutputSchema,
     ReadOnly: ReadOnlyOutputSchema,
+  },
+  Layout: {
+    Editable: EditableLayout,
+    ReadOnly: ReadOnlyLayout,
   },
   NotebaseConnectionField,
   CustomizeButton,

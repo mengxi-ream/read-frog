@@ -1,0 +1,196 @@
+== css
+
+@keyframes rf-spin{to{transform:rotate(360deg)}}
+.rf-speak{box-sizing:border-box;display:inline-flex;flex:none;align-items:center;justify-content:center;width:24px;height:24px;margin:0;padding:0;border:1px solid transparent;border-radius:min(calc(var(--rf-radius, 10px) - 2px), 10px);background:transparent;background-clip:padding-box;color:var(--rf-muted-foreground);font:inherit;outline:none;user-select:none;transition:all 150ms cubic-bezier(0.4, 0, 0.2, 1)}
+.rf-speak:hover{background-color:var(--rf-secondary)}
+:host([data-theme=dark]) .rf-speak:hover{background-color:color-mix(in oklab, var(--rf-secondary) 50%, transparent)}
+.rf-speak:focus-visible{border-color:var(--rf-ring);box-shadow:0 0 0 3px color-mix(in oklab, var(--rf-ring) 50%, transparent)}
+.rf-speak:active{transform:translateY(1px)}
+.rf-speak[aria-disabled=true]{opacity:0.5;pointer-events:none}
+.rf-speak svg{flex:none;width:12px;height:12px;pointer-events:none}
+.rf-speak .rf-i-load,.rf-speak .rf-i-stop,.rf-speak[data-speak-state=loading] .rf-i-vol,.rf-speak[data-speak-state=playing] .rf-i-vol{display:none}
+.rf-speak[data-speak-state=loading] .rf-i-load{display:block;animation:rf-spin 1s linear infinite}
+.rf-speak[data-speak-state=playing] .rf-i-stop{display:block}
+.rf-head{display:flex;align-items:center;gap:2px;height:24px}
+.rf-label{display:inline-flex;align-items:center;gap:2px;min-width:0;font-size:12px;line-height:16px;font-weight:500;color:var(--rf-muted-foreground)}
+.rf-label svg{flex:none;width:12px;height:12px}
+.rf-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rf-value{font-size:14px;line-height:20px;white-space:pre-wrap;overflow-wrap:anywhere}
+.rf-fields{display:flex;flex-direction:column;gap:12px}
+
+
+== nothing yet (streaming)
+
+<div class="rf-fields">
+  <section class="rf-field" data-rf-key="f1">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-type" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l3 0"/><path d="M14 20l7 0"/><path d="M6.9 15l6.9 0"/><path d="M10.2 6.3l5.8 13.7"/><path d="M5 20l6 -16l2 0l7 16"/></svg><span class="rf-name">Term</span>
+      </span>
+    </div>
+    <div class="rf-value">…</div>
+  </section>
+  <section class="rf-field" data-rf-key="f2">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-hash" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l14 0"/><path d="M5 15l14 0"/><path d="M11 4l-4 16"/><path d="M17 4l-4 16"/></svg><span class="rf-name">Count</span>
+      </span>
+    </div>
+    <div class="rf-value">…</div>
+  </section>
+  <section class="rf-field" data-rf-key="f3">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-type" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l3 0"/><path d="M14 20l7 0"/><path d="M6.9 15l6.9 0"/><path d="M10.2 6.3l5.8 13.7"/><path d="M5 20l6 -16l2 0l7 16"/></svg><span class="rf-name">Note</span>
+      </span>
+    </div>
+    <div class="rf-value">…</div>
+  </section>
+  <section class="rf-field" data-rf-key="f|1">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-type" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l3 0"/><path d="M14 20l7 0"/><path d="M6.9 15l6.9 0"/><path d="M10.2 6.3l5.8 13.7"/><path d="M5 20l6 -16l2 0l7 16"/></svg><span class="rf-name">Evil &#34;&lt;b&gt;name&lt;/b&gt;</span>
+      </span>
+      <button type="button" class="rf-speak" data-speak="" aria-disabled="true"><svg class="rf-i-vol" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 8a5 5 0 0 1 0 8"/><path d="M17.7 5a9 9 0 0 1 0 14"/><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"/></svg><svg class="rf-i-load" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9"/></svg><svg class="rf-i-stop" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" stroke="none" aria-hidden="true"><path d="M17 4h-10a3 3 0 0 0 -3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3 -3v-10a3 3 0 0 0 -3 -3z"/></svg></button>
+    </div>
+    <div class="rf-value">…</div>
+  </section>
+</div>
+
+
+== half (streaming)
+
+<div class="rf-fields">
+  <section class="rf-field" data-rf-key="f1">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-type" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l3 0"/><path d="M14 20l7 0"/><path d="M6.9 15l6.9 0"/><path d="M10.2 6.3l5.8 13.7"/><path d="M5 20l6 -16l2 0l7 16"/></svg><span class="rf-name">Term</span>
+      </span>
+    </div>
+    <div class="rf-value">blos</div>
+  </section>
+  <section class="rf-field" data-rf-key="f2">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-hash" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l14 0"/><path d="M5 15l14 0"/><path d="M11 4l-4 16"/><path d="M17 4l-4 16"/></svg><span class="rf-name">Count</span>
+      </span>
+    </div>
+    <div class="rf-value">3</div>
+  </section>
+  <section class="rf-field" data-rf-key="f3">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-type" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l3 0"/><path d="M14 20l7 0"/><path d="M6.9 15l6.9 0"/><path d="M10.2 6.3l5.8 13.7"/><path d="M5 20l6 -16l2 0l7 16"/></svg><span class="rf-name">Note</span>
+      </span>
+    </div>
+    <div class="rf-value">…</div>
+  </section>
+  <section class="rf-field" data-rf-key="f|1">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-type" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l3 0"/><path d="M14 20l7 0"/><path d="M6.9 15l6.9 0"/><path d="M10.2 6.3l5.8 13.7"/><path d="M5 20l6 -16l2 0l7 16"/></svg><span class="rf-name">Evil &#34;&lt;b&gt;name&lt;/b&gt;</span>
+      </span>
+      <button type="button" class="rf-speak" data-speak="" aria-disabled="true"><svg class="rf-i-vol" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 8a5 5 0 0 1 0 8"/><path d="M17.7 5a9 9 0 0 1 0 14"/><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"/></svg><svg class="rf-i-load" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9"/></svg><svg class="rf-i-stop" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" stroke="none" aria-hidden="true"><path d="M17 4h-10a3 3 0 0 0 -3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3 -3v-10a3 3 0 0 0 -3 -3z"/></svg></button>
+    </div>
+    <div class="rf-value">…</div>
+  </section>
+</div>
+
+
+== done (done)
+
+<div class="rf-fields">
+  <section class="rf-field" data-rf-key="f1">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-type" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l3 0"/><path d="M14 20l7 0"/><path d="M6.9 15l6.9 0"/><path d="M10.2 6.3l5.8 13.7"/><path d="M5 20l6 -16l2 0l7 16"/></svg><span class="rf-name">Term</span>
+      </span>
+    </div>
+    <div class="rf-value">blossom</div>
+  </section>
+  <section class="rf-field" data-rf-key="f2">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-hash" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l14 0"/><path d="M5 15l14 0"/><path d="M11 4l-4 16"/><path d="M17 4l-4 16"/></svg><span class="rf-name">Count</span>
+      </span>
+    </div>
+    <div class="rf-value">3</div>
+  </section>
+  <section class="rf-field" data-rf-key="f3">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-type" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l3 0"/><path d="M14 20l7 0"/><path d="M6.9 15l6.9 0"/><path d="M10.2 6.3l5.8 13.7"/><path d="M5 20l6 -16l2 0l7 16"/></svg><span class="rf-name">Note</span>
+      </span>
+    </div>
+    <div class="rf-value">line one
+line &lt;two&gt; &amp; {{ not liquid }}</div>
+  </section>
+  <section class="rf-field" data-rf-key="f|1">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-type" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l3 0"/><path d="M14 20l7 0"/><path d="M6.9 15l6.9 0"/><path d="M10.2 6.3l5.8 13.7"/><path d="M5 20l6 -16l2 0l7 16"/></svg><span class="rf-name">Evil &#34;&lt;b&gt;name&lt;/b&gt;</span>
+      </span>
+      <button type="button" class="rf-speak" data-speak="&lt;img src=x onerror=alert(1)&gt;"><svg class="rf-i-vol" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 8a5 5 0 0 1 0 8"/><path d="M17.7 5a9 9 0 0 1 0 14"/><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"/></svg><svg class="rf-i-load" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9"/></svg><svg class="rf-i-stop" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" stroke="none" aria-hidden="true"><path d="M17 4h-10a3 3 0 0 0 -3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3 -3v-10a3 3 0 0 0 -3 -3z"/></svg></button>
+    </div>
+    <div class="rf-value">&lt;img src=x onerror=alert(1)&gt;</div>
+  </section>
+</div>
+
+
+== done, empty values (done)
+
+<div class="rf-fields">
+  <section class="rf-field" data-rf-key="f1">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-type" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l3 0"/><path d="M14 20l7 0"/><path d="M6.9 15l6.9 0"/><path d="M10.2 6.3l5.8 13.7"/><path d="M5 20l6 -16l2 0l7 16"/></svg><span class="rf-name">Term</span>
+      </span>
+    </div>
+    <div class="rf-value">—</div>
+  </section>
+  <section class="rf-field" data-rf-key="f2">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-hash" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l14 0"/><path d="M5 15l14 0"/><path d="M11 4l-4 16"/><path d="M17 4l-4 16"/></svg><span class="rf-name">Count</span>
+      </span>
+    </div>
+    <div class="rf-value">0</div>
+  </section>
+  <section class="rf-field" data-rf-key="f3">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-type" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l3 0"/><path d="M14 20l7 0"/><path d="M6.9 15l6.9 0"/><path d="M10.2 6.3l5.8 13.7"/><path d="M5 20l6 -16l2 0l7 16"/></svg><span class="rf-name">Note</span>
+      </span>
+    </div>
+    <div class="rf-value">—</div>
+  </section>
+  <section class="rf-field" data-rf-key="f|1">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-type" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l3 0"/><path d="M14 20l7 0"/><path d="M6.9 15l6.9 0"/><path d="M10.2 6.3l5.8 13.7"/><path d="M5 20l6 -16l2 0l7 16"/></svg><span class="rf-name">Evil &#34;&lt;b&gt;name&lt;/b&gt;</span>
+      </span>
+      <button type="button" class="rf-speak" data-speak="" aria-disabled="true"><svg class="rf-i-vol" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 8a5 5 0 0 1 0 8"/><path d="M17.7 5a9 9 0 0 1 0 14"/><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"/></svg><svg class="rf-i-load" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9"/></svg><svg class="rf-i-stop" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" stroke="none" aria-hidden="true"><path d="M17 4h-10a3 3 0 0 0 -3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3 -3v-10a3 3 0 0 0 -3 -3z"/></svg></button>
+    </div>
+    <div class="rf-value">—</div>
+  </section>
+</div>
+
+
+== error (error)
+
+<div class="rf-fields">
+  <section class="rf-field" data-rf-key="f1">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-type" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l3 0"/><path d="M14 20l7 0"/><path d="M6.9 15l6.9 0"/><path d="M10.2 6.3l5.8 13.7"/><path d="M5 20l6 -16l2 0l7 16"/></svg><span class="rf-name">Term</span>
+      </span>
+    </div>
+    <div class="rf-value">blossom</div>
+  </section>
+  <section class="rf-field" data-rf-key="f2">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-hash" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l14 0"/><path d="M5 15l14 0"/><path d="M11 4l-4 16"/><path d="M17 4l-4 16"/></svg><span class="rf-name">Count</span>
+      </span>
+    </div>
+    <div class="rf-value">—</div>
+  </section>
+  <section class="rf-field" data-rf-key="f3">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-type" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l3 0"/><path d="M14 20l7 0"/><path d="M6.9 15l6.9 0"/><path d="M10.2 6.3l5.8 13.7"/><path d="M5 20l6 -16l2 0l7 16"/></svg><span class="rf-name">Note</span>
+      </span>
+    </div>
+    <div class="rf-value">—</div>
+  </section>
+  <section class="rf-field" data-rf-key="f|1">
+    <div class="rf-head">
+      <span class="rf-label"><svg class="rf-i-type" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l3 0"/><path d="M14 20l7 0"/><path d="M6.9 15l6.9 0"/><path d="M10.2 6.3l5.8 13.7"/><path d="M5 20l6 -16l2 0l7 16"/></svg><span class="rf-name">Evil &#34;&lt;b&gt;name&lt;/b&gt;</span>
+      </span>
+      <button type="button" class="rf-speak" data-speak="" aria-disabled="true"><svg class="rf-i-vol" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 8a5 5 0 0 1 0 8"/><path d="M17.7 5a9 9 0 0 1 0 14"/><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"/></svg><svg class="rf-i-load" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9"/></svg><svg class="rf-i-stop" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" stroke="none" aria-hidden="true"><path d="M17 4h-10a3 3 0 0 0 -3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3 -3v-10a3 3 0 0 0 -3 -3z"/></svg></button>
+    </div>
+    <div class="rf-value">—</div>
+  </section>
+</div>
+

@@ -652,6 +652,12 @@ options:
       edit: AI 액션 편집
       empty: 아직 커스텀 AI 액션이 없습니다
       noEnabledLlmProvider: 커스텀 AI 액션을 만들기 전에 최소 하나의 LLM 제공업체를 활성화하세요
+      tabs:
+        config: 구성
+        notebase: Notebase
+        hasErrors: 오류 있음
+        connected: 연결됨
+        needsAttention: 확인 필요
       form:
         name: 이름
         customize: 사용자 지정
@@ -677,7 +683,6 @@ options:
         fieldType: 필드 유형
         fieldDescription: 설명
         fieldDescriptionPlaceholder: 이 필드에 포함할 내용을 설명하세요...
-        fieldSpeaking: 음성 읽기 사용
         actions: 작업
         cancel: 취소
         save: 저장
@@ -694,6 +699,64 @@ options:
           description: 이 출력 필드가 제거됩니다.
           confirm: 삭제
           cancel: 취소
+        layout:
+          title: 레이아웃
+          description: 팝업에서 결과가 표시되는 방식입니다. HTML과 Liquid로 작성하며, 응답이 스트리밍되는 동안 필드가 채워집니다.
+          reset: 기본값으로 복원
+          resetFieldList: 필드 목록
+          resetDictionary: 사전 카드
+          resetSentenceAnalysis: 문장 분석 카드
+          resetConfirmTitle: 이 레이아웃을 바꿀까요?
+          resetConfirmDescription: 편집기의 내용이 바뀝니다. 이후에도 편집기에서 실행 취소할 수 있습니다.
+          resetConfirm: 바꾸기
+          edit: 편집
+          preview: 미리 보기
+          width: 너비
+          themeLight: 라이트
+          themeDark: 다크
+          replay: 다시 재생
+          sampleData: 샘플 데이터
+          sampleDataHint: 이 미리 보기에서만 사용되며 저장되지 않습니다.
+          sampleDataReset: 샘플 초기화
+          sampleValue: $1 샘플
+          insertField: 필드
+          insertSpeak: 읽기 버튼
+          insertCondition: 값이 있을 때
+          insertContext: 컨텍스트
+          insertLoop: 모든 필드
+          syntaxHelp: 문법
+          builtInHint: 기본 제공 사전의 레이아웃은 편집할 수 없습니다. '사용자 지정'으로 사본을 만들어 편집하세요.
+          viewSource: 소스 보기
+          emptyNotice: 레이아웃이 비어 있어 팝업에 기본 필드 목록이 표시됩니다.
+          fallbackBanner: 이 레이아웃을 표시할 수 없어 기본 레이아웃을 대신 사용합니다. $1
+          sanitized: "안전을 위해 제거됨: $1"
+          unusedFields: "이 레이아웃에 없는 필드:"
+          tooLong: 레이아웃은 최대 $1자까지 가능합니다.
+          renameSkipped: 레이아웃이 아직 '$1'을(를) 참조합니다. 직접 수정하세요.
+          reservedName: "'ctx'와 'forloop'는 레이아웃 예약어입니다. 다른 이름을 선택하세요."
+          help:
+            output: 필드 값을 표시합니다. 값에 포함된 HTML은 이스케이프됩니다.
+            condition: 필드에 값이 있을 때만 내용을 표시합니다.
+            loop: 모든 필드에 대해 순서대로 반복합니다. f.name, f.value, f.type을 사용할 수 있습니다.
+            speak: data-speak가 있는 요소는 응답이 완료된 후 값(비어 있으면 요소 자신의 텍스트)을 읽어 줍니다.
+            status: 상태별로 스타일을 지정합니다. 호스트의 data-status는 streaming, done, error 중 하나입니다.
+            filters: newline_to_br는 줄바꿈을 유지하고(마지막에 사용), lines는 텍스트를 줄 목록으로 나눕니다.
+            styles: <style> 블록의 CSS는 이 결과 안에서만 적용됩니다. --rf-* 색상은 라이트/다크 테마를 따릅니다.
+          lint:
+            parseError: "Liquid 문법 오류: $1"
+            unknownField: 이름이 '$1'인 필드가 없습니다.
+            unknownContextKey: "ctx에 '$1'이(가) 없습니다. 사용 가능: $2."
+            fieldShadowedByLocal: 이 레이아웃에서 '$1'에 값을 할당하므로 같은 이름의 필드가 가려집니다.
+            liquidInStyle: <style> 안에서는 Liquid가 실행되지 않고 일반 텍스트로 남습니다.
+            styleInConditional: <style> 블록은 '$1' 태그 안에 있어도 항상 적용됩니다.
+            cssImport: "@import는 제거됩니다. 레이아웃은 외부 스타일을 불러올 수 없습니다."
+            cssFontFace: "@font-face는 제거됩니다. 기기에 있는 글꼴을 사용하세요."
+            unquotedAttributeOutput: 이 속성 값을 따옴표로 감싸세요. 그렇지 않으면 값이 속성 밖으로 벗어날 수 있습니다.
+            filterIgnored: "'$1' 태그에서는 필터가 무시됩니다. 먼저 필터를 적용한 값을 할당하세요."
+            newlineToBrNotLast: newline_to_br는 출력의 마지막 필터일 때만 동작합니다.
+            tooLong: 이 레이아웃은 $1자를 넘어 저장할 수 없습니다.
+            fieldNotShown: "'$1'은(는) 이 레이아웃에 표시되지 않습니다."
+            reservedFieldName: 필드 이름 '$1'은(는) 레이아웃 예약어입니다. 필드 이름을 바꾸세요.
         notebase:
           title: Notebase 연결
           description: 이 액션의 구조화된 결과를 원격 Notebase에 저장합니다.
@@ -752,6 +815,142 @@ options:
           description: 이 작업은 취소할 수 없습니다.
           confirm: 삭제
           cancel: 취소
+      templates:
+        dictionary:
+          name: "사전"
+          description: "뜻, 발음, 문단 번역과 함께 단어 찾기"
+          systemPrompt: |-
+            당신은 언어 학습자를 위한 사전 도우미입니다.
+
+            ## 목표
+            주어진 표제어와 주변 문단을 바탕으로, 요구된 출력 객체에 맞는 간결한 사전 항목을 작성하세요.
+
+            ## 규칙
+            1. 제공된 문단에 가장 잘 맞는 의미에 집중하세요.
+            2. 표제어는 기본형(원형)으로 정규화하세요.
+            3. 뜻은 정확하고 학습자가 이해하기 쉽게 쓰세요.
+            4. 예문에는 제공된 문단에서 선택한 표제어가 들어 있는 완전한 한 문장만 추출하세요. 앞뒤 문장은 포함하지 마세요.
+            5. 예문 번역은 추출한 예문만 번역하세요.
+            6. 발음은 해당 언어의 표준 표기법을 사용하세요(예: 영어는 IPA, 중국어는 병음, 일본어는 로마자).
+            7. 품사는 영어로 쓰세요(noun, verb, adjective 등).
+            8. 난이도는 CEFR 등급(A1, A2, B1, B2, C1, C2) 중 하나여야 합니다.
+            9. 알 수 없는 항목은 추측하지 말고 빈 문자열을 반환하세요.
+            10. 원문 형태가 필요한 경우를 제외하고 모든 텍스트 항목은 {{targetLanguage}}(으)로 답하세요.
+            11. 예문 속 형태는 선택한 표제어가 예문의 어디에 있는지 표시합니다. {"text": ...} 항목으로 이루어진 간결한 JSON 배열을 담은 문자열이며, 각 항목은 예문을 한 글자도 바꾸지 않고 그대로 인용합니다. 예: [{"text":"blossoms"}]. 예문에서 표제어가 여러 부분으로 나뉘어 있으면(예: "Er ruft seine Mutter an"의 "anrufen") 부분마다 순서대로 한 항목씩 쓰세요: [{"text":"ruft"},{"text":"an"}]. 안쪽 따옴표는 올바르게 이스케이프하세요.
+
+            ## 예시
+
+            ### 예시 1
+            입력: 선택 텍스트="blossoms", 문단="Spring arrives quietly in the park. The ephemeral beauty of cherry blossoms reminds us to cherish each moment. Families and friends gather beneath the trees.", 대상 언어=중국어
+
+            출력:
+            - 표제어: blossom
+            - 발음: /ˈblɒs.əm/
+            - 품사: noun
+            - 예문: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+            - 예문 속 형태: [{"text":"blossoms"}]
+            - 뜻: 花；花朵（尤指果树的花）
+            - 예문 번역: 樱花短暂的美丽提醒我们珍惜每一刻。
+            - 난이도: B2
+
+            ### 예시 2
+            입력: 선택 텍스트="感動", 문단="この映画はつまらないと思ったけど、最後は感動した。", 대상 언어=영어
+
+            출력:
+            - 표제어: 感動
+            - 발음: kandou
+            - 품사: noun
+            - 예문: この映画はつまらないと思ったけど、最後は感動した。
+            - 예문 속 형태: [{"text":"感動"}]
+            - 뜻: Being deeply moved; emotional touch
+            - 예문 번역: I thought this movie was boring, but the ending was moving.
+            - 난이도: B1
+          prompt: |-
+            ## 입력
+            선택 텍스트: {{selection}}
+            문단: {{paragraphs}}
+            대상 언어: {{targetLanguage}}
+          fieldTerm: "표제어"
+          fieldTermDescription: "선택한 표제어의 기본형(원형)."
+          fieldPhonetic: "발음"
+          fieldPhoneticDescription: "해당 언어의 표준 발음 표기(예: 영어는 IPA, 중국어는 병음, 일본어는 로마자)."
+          fieldPartOfSpeech: "품사"
+          fieldPartOfSpeechDescription: "문법 범주(예: noun, verb, adjective)."
+          fieldSentence: "예문"
+          fieldSentenceDescription: "위 문단에서 선택한 표제어가 들어 있는 완전한 한 문장. 앞뒤 문장은 포함하지 마세요."
+          fieldSentenceTerm: "예문 속 형태"
+          fieldSentenceTermDescription: '예문에서 선택한 표제어의 위치: 문자열로 직렬화된 JSON 배열로, 표제어의 부분마다 {"text": 문자열} 항목 하나이며 각각 예문을 그대로 인용합니다(예: [{"text":"blossoms"}]).'
+          fieldDefinition: "뜻"
+          fieldDefinitionDescription: "문맥상 의미에 대한 간결한 정의 하나."
+          fieldSentenceTranslation: "예문 번역"
+          fieldSentenceTranslationDescription: "예문만 번역한 것."
+          fieldDifficulty: "난이도"
+          fieldDifficultyDescription: "추정 CEFR 난이도: A1, A2, B1, B2, C1 또는 C2."
+        sentenceAnalysis:
+          name: "문장 구조 분석"
+          description: "긴 문장을 선생님처럼 표시해 뼈대, 절, 어려운 부분을 한눈에 보여 줍니다"
+          fieldAnnotations: "주석"
+          fieldTranslation: "번역"
+          roles:
+            subject: "주어"
+            predicate: "서술어"
+            object: "목적어"
+            complement: "보어"
+            attributive: "수식어"
+            adverbial: "부사어"
+            appositive: "동격어"
+            connector: "접속사"
+          clauses:
+            subject: "주어절"
+            object: "목적어절"
+            complement: "보어절"
+            attributive: "관계사절"
+            adverbial: "부사절"
+            appositive: "동격절"
+            clause: "절"
+          adverbialClauses:
+            time: "시간 부사절"
+            place: "장소 부사절"
+            cause: "이유 부사절"
+            condition: "조건 부사절"
+            concession: "양보 부사절"
+            purpose: "목적 부사절"
+            result: "결과 부사절"
+            manner: "방법 부사절"
+            comparison: "비교 부사절"
+          forms:
+            infinitive: "to부정사"
+            gerund: "동명사"
+            presentParticiple: "현재분사"
+            pastParticiple: "과거분사"
+          senses:
+            time: "시간"
+            place: "장소"
+            cause: "이유"
+            condition: "조건"
+            concession: "양보"
+            purpose: "목적"
+            result: "결과"
+            manner: "방법"
+            comparison: "비교"
+          obstacles:
+            inversion: "도치"
+            fronting: "전치"
+            ellipsis: "생략"
+            passive: "수동태"
+            subjunctive: "가정법"
+            parenthesis: "삽입"
+            dummyIt: "가주어"
+            postponedSubject: "진주어"
+            cleft: "강조구문"
+            comparison: "비교"
+            negation: "부정"
+            split: "분리"
+            idiom: "관용구"
+          restoreLabel: "원래 어순:"
+          hardLabel: "어려움"
+          trunkLabel: "뼈대만"
+          slashesLabel: "끊어 읽기"
       errors:
         nameRequired: 이름은 필수입니다
         duplicateName: '중복된 액션 이름 "$1"'
@@ -1283,6 +1482,7 @@ action:
   regenerate: 다시 생성
   viewContextDetails: 컨텍스트
   customizeCustomAction: $1 작업 맞춤 설정
+  customActionLayoutFallback: 이 결과를 레이아웃으로 표시할 수 없어 간단한 보기로 표시합니다.
   saveToNotebase: Notebase에 저장
   saveToNotebaseSaving: 저장 중...
   saveToNotebaseSuccess: Notebase에 저장했습니다

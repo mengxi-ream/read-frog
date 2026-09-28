@@ -225,9 +225,18 @@ function getRemoteFieldSelectItems(
 
 export const NotebaseConnectionField = withForm({
   ...{ defaultValues: {} as SelectionToolbarCustomAction },
-  render: function Render({ form }) {
+  props: {
+    /** "tab" drops the dashed card and the title, for when a tab already frames and names it. */
+    variant: "card" as "card" | "tab" | undefined,
+  },
+  render: function Render({ form, variant = "card" }) {
     const autosave = useAutosaveContext()
-    const action = useSelector(form.store, (state) => state.values)
+    // Only outputSchema and notebaseConnection are read from `action`. The field stays mounted in a
+    // hidden tab, so re-render when those change, not on every keystroke elsewhere in the form.
+    const action = useSelector(form.store, (state) => state.values, {
+      compare: (a, b) =>
+        a.outputSchema === b.outputSchema && a.notebaseConnection === b.notebaseConnection,
+    })
     const outputSchema = action.outputSchema
     const connection = action.notebaseConnection
     const { data: session, isPending: isSessionPending } = authClient.useSession()
@@ -403,11 +412,19 @@ export const NotebaseConnectionField = withForm({
     }
 
     return (
-      <Field className="gap-4 rounded-xl border border-dashed bg-muted/10 p-4">
-        <div className="space-y-1">
-          <FieldTitle>{t("title")}</FieldTitle>
+      <Field
+        className={
+          variant === "tab" ? "gap-4" : "gap-4 rounded-xl border border-dashed bg-muted/10 p-4"
+        }
+      >
+        {variant === "tab" ? (
           <p className="text-sm text-muted-foreground">{t("description")}</p>
-        </div>
+        ) : (
+          <div className="space-y-1">
+            <FieldTitle>{t("title")}</FieldTitle>
+            <p className="text-sm text-muted-foreground">{t("description")}</p>
+          </div>
+        )}
 
         {!isAuthenticated && !isSessionPending && (
           <Alert>

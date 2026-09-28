@@ -649,10 +649,21 @@ options:
       description: Add your own structured AI actions for selected text
       configTitle: Action config
       builtIn: Built-in
+      badges:
+        new: New
+        updated: Updated
+        createdFrom: Created from $1
+        updatedFrom: Updated from $1
       add: Add AI action
       edit: Edit AI action
       empty: No custom AI actions yet
       noEnabledLlmProvider: Enable at least one LLM provider before creating custom AI actions
+      tabs:
+        config: Config
+        notebase: Notebase
+        hasErrors: Has errors
+        connected: Connected
+        needsAttention: Needs attention
       form:
         name: Name
         customize: Customize
@@ -678,7 +689,6 @@ options:
         fieldType: Field type
         fieldDescription: Description
         fieldDescriptionPlaceholder: Describe what this field should contain...
-        fieldSpeaking: Enable speaking
         actions: Actions
         cancel: Cancel
         save: Save
@@ -695,6 +705,64 @@ options:
           description: This output field will be removed.
           confirm: Delete
           cancel: Cancel
+        layout:
+          title: Layout
+          description: How the result shows in the popup. HTML with Liquid; fields fill in as the answer streams.
+          reset: Restore default
+          resetFieldList: Field list
+          resetDictionary: Dictionary card
+          resetSentenceAnalysis: Sentence analysis card
+          resetConfirmTitle: Replace this layout?
+          resetConfirmDescription: The editor's contents will be replaced. You can still undo it in the editor afterwards.
+          resetConfirm: Replace
+          edit: Edit
+          preview: Preview
+          width: Width
+          themeLight: Light
+          themeDark: Dark
+          replay: Replay
+          sampleData: Sample data
+          sampleDataHint: Only used in this preview and never saved.
+          sampleDataReset: Reset samples
+          sampleValue: Sample $1
+          insertField: Field
+          insertSpeak: Speak button
+          insertCondition: If filled
+          insertContext: Context
+          insertLoop: Every field
+          syntaxHelp: Syntax
+          builtInHint: The built-in Dictionary's layout can't be edited. Customize it to edit a copy.
+          viewSource: View source
+          emptyNotice: This layout is empty, so the popup shows the default field list.
+          fallbackBanner: This layout can't be shown, so the default layout is used instead. $1
+          sanitized: "Removed for safety: $1"
+          unusedFields: "Not in this layout:"
+          tooLong: A layout can be at most $1 characters.
+          renameSkipped: The layout still refers to “$1”. Update it by hand.
+          reservedName: “ctx” and “forloop” are reserved in layouts. Choose another name.
+          help:
+            output: Shows a field's value. HTML in the value is escaped.
+            condition: Shows the content only when the field has a value.
+            loop: Repeats for every field, in order. f.name, f.value and f.type are available.
+            speak: Any element with data-speak reads the value aloud (or its own text if the value is empty) once the answer is done.
+            status: Styles by state. The host's data-status is streaming, done or error.
+            filters: newline_to_br keeps line breaks (use it last); lines splits text into a list of lines.
+            styles: CSS in a <style> block only applies inside this result. The --rf-* colors follow the light and dark themes.
+          lint:
+            parseError: "Liquid syntax error: $1"
+            unknownField: There's no field named “$1”.
+            unknownContextKey: "ctx has no “$1”. Available: $2."
+            fieldShadowedByLocal: “$1” is assigned in this layout, which hides the field with that name.
+            liquidInStyle: Liquid doesn't run inside <style>. This is kept as plain text.
+            styleInConditional: A <style> block always applies, even inside a “$1” tag.
+            cssImport: "@import is removed. Layouts can't load outside styles."
+            cssFontFace: "@font-face is removed. Use fonts already on the device."
+            unquotedAttributeOutput: Quote this attribute value, or the value can break out of it.
+            filterIgnored: Filters are ignored in a “$1” tag. Assign the filtered value first.
+            newlineToBrNotLast: newline_to_br only works as the last filter of an output.
+            tooLong: This layout is longer than $1 characters and can't be saved.
+            fieldNotShown: “$1” isn't shown in this layout.
+            reservedFieldName: The field name “$1” is reserved in layouts. Rename the field.
         notebase:
           title: Notebase connection
           description: Save this action's structured results to a remote notebase.
@@ -776,6 +844,7 @@ options:
             8. Difficulty must be a CEFR level (A1, A2, B1, B2, C1, or C2).
             9. If a field is unknown, return an empty string instead of guessing.
             10. Respond in {{targetLanguage}} for all textual fields unless source-form text is required for clarity.
+            11. Term in Sentence marks where the selected term stands in Sentence. It is a STRING containing a compact JSON array of {"text": ...} items, each quoting Sentence character for character, e.g. [{"text":"blossoms"}]. If Sentence splits the term into separate parts (e.g. "anrufen" in "Er ruft seine Mutter an"), give one item per part, in order: [{"text":"ruft"},{"text":"an"}]. Escape the inner quotes correctly.
 
             ## Examples
 
@@ -787,6 +856,7 @@ options:
             - Phonetic: /ˈblɒs.əm/
             - Part of Speech: noun
             - Sentence: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+            - Term in Sentence: [{"text":"blossoms"}]
             - Definition: 花；花朵（尤指果树的花）
             - Sentence Translation: 樱花短暂的美丽提醒我们珍惜每一刻。
             - Difficulty: B2
@@ -799,6 +869,7 @@ options:
             - Phonetic: kandou
             - Part of Speech: noun
             - Sentence: この映画はつまらないと思ったけど、最後は感動した。
+            - Term in Sentence: [{"text":"感動"}]
             - Definition: Being deeply moved; emotional touch
             - Sentence Translation: I thought this movie was boring, but the ending was moving.
             - Difficulty: B1
@@ -815,12 +886,134 @@ options:
           fieldPartOfSpeechDescription: Grammatical category (e.g., noun, verb, adjective).
           fieldSentence: Sentence
           fieldSentenceDescription: The complete sentence from the paragraphs above that contains the selected term. Do not include surrounding sentences.
+          fieldSentenceTerm: Term in Sentence
+          fieldSentenceTermDescription: 'Where the selected term stands in Sentence: a JSON array serialized as a string, one {"text": string} item per part of the term, each quoting Sentence exactly (e.g. [{"text":"blossoms"}]).'
           fieldDefinition: Definition
           fieldDefinitionDescription: One concise definition for the contextual sense.
           fieldSentenceTranslation: Sentence Translation
           fieldSentenceTranslationDescription: The translation of Sentence only.
           fieldDifficulty: Difficulty
           fieldDifficultyDescription: Estimated CEFR difficulty level A1, A2, B1, B2, C1, or C2.
+        sentenceAnalysis:
+          name: "Sentence Analysis"
+          description: "Mark up a long sentence like a teacher: its core, every clause, and what makes it hard"
+          systemPrompt: |-
+            You are a grammar tutor. Mark up the Selection (a sentence in any language) so a learner sees its structure at a glance: the core of the main clause, every clause and longer phrase, and whatever makes the sentence hard to read.
+
+            ## $1
+            Each annotation quotes one span of the Selection and says what it is, with these keys only:
+            - "text": the span, copied character for character from the Selection: the same words in the same order, with nothing left out, added or replaced (no "…"), and no spaces at either end.
+            - "type": the span's role in its clause, exactly one of: subject, predicate, object, complement, attributive, adverbial, appositive, connector. Nothing else is a type: a clause or a phrase gets the type of the role it plays, and what kind of clause or phrase it is goes in "form".
+            - "form": only for a clause or a non-finite phrase, exactly one of: clause, infinitive, gerund, present-participle, past-participle.
+            - "sense": only for an adverbial clause, or an adverbial participle or infinitive phrase, exactly one of: time, place, cause, condition, concession, purpose, result, manner, comparison.
+            - "head": only for an attributive, an appositive, or a clause that is an object or complement: the one word it modifies or completes, copied from the Selection (the noun a relative clause describes, the verb an object clause completes).
+            - "obstacle": only where a learner is likely to stumble, exactly one of: inversion, fronting, ellipsis, passive, subjunctive, parenthesis, dummy-it, postponed-subject, cleft, comparison, negation, split, idiom.
+            - "restore": only with fronting, inversion or ellipsis: the clause in plain word order, with any missing words put back.
+            - "note": at most 10 words in {{targetLanguage}}, only when it adds what the keys above cannot say (what an idiom means, what a pronoun refers to).
+            - "occurrence": only when the same text appears more than once in the Selection: 1 for the first appearance, 2 for the second, and so on.
+            Leave out every optional key that does not apply; never add a key of your own.
+
+            ## What to annotate
+            1. The main clause: its subject, predicate, object or complement, and adverbials. There is no annotation for the main clause or the sentence as a whole.
+            2. Every subordinate clause: one annotation for the whole clause, with "form": "clause" and the type of the role it plays (a relative clause is attributive; a clause after a verb such as "said" is an object). Then its connector, its predicate, and any subject, object, complement or adverbial inside it that is more than a single pronoun.
+            3. Participle, infinitive and gerund phrases, and prepositional phrases of three or more words that modify something.
+            4. Skip articles and determiners, a single adjective or adverb next to the word it modifies, the inside of an ordinary noun phrase, and auxiliaries on their own.
+            5. A predicate is the whole verb group ("has been meeting"), including a word inside it ("had originally been designed"). When other words split a predicate ("did she turn … down", "rief … an", "ne … pas"), annotate each piece on its own, all as predicates.
+            6. The word that opens a clause (that, which, who, if, although, dass, que, …) is its connector, even when it is also the clause's subject or object. Particles and case endings stay inside the phrase they mark.
+            7. Spans may nest (a clause contains its parts) but never partly overlap. List annotations in the order they start; when two start at the same place, list the longer one first.
+
+            ## Hard structures
+            A structure is never a type: the words keep their roles, and "obstacle" names the structure.
+            - Fronting and inversion ("Not until …, did scientists begin …", "Had I known …"): the fronted part keeps its role, with "obstacle": "fronting" and "restore"; an auxiliary or verb placed before its subject is a predicate with "obstacle": "inversion".
+            - A cleft ("It was X that …"): X keeps its role, with "obstacle": "cleft" and "restore" (the sentence without "It was … that"). "It was" and "that" get no annotation.
+            - A dummy "it" ("It is believed that …"): "It" is a subject with "obstacle": "dummy-it"; the clause it stands for is a subject with "form": "clause" and "obstacle": "postponed-subject".
+            - A split verb ("turned … down", "rief … an"): each piece is a predicate with "obstacle": "split".
+            - A parenthesis (a phrase or clause set off by commas inside another): its role, with "obstacle": "parenthesis".
+
+            ## $2
+            A natural translation of the whole Selection in {{targetLanguage}}.
+
+            ## Format
+            The $1 value is a STRING holding a compact JSON array; escape its inner double quotes as \". Do not wrap it in markdown.
+
+            ## Examples
+            Selection: The report that the committee published last week, which surprised many readers, was never discussed in public.
+            $1: "[{\"text\":\"The report that the committee published last week, which surprised many readers\",\"type\":\"subject\"},{\"text\":\"that the committee published last week\",\"type\":\"attributive\",\"form\":\"clause\",\"head\":\"report\"},{\"text\":\"that\",\"type\":\"connector\"},{\"text\":\"the committee\",\"type\":\"subject\"},{\"text\":\"published\",\"type\":\"predicate\"},{\"text\":\"last week\",\"type\":\"adverbial\"},{\"text\":\"which surprised many readers\",\"type\":\"attributive\",\"form\":\"clause\",\"head\":\"report\",\"obstacle\":\"parenthesis\"},{\"text\":\"which\",\"type\":\"connector\"},{\"text\":\"surprised\",\"type\":\"predicate\"},{\"text\":\"many readers\",\"type\":\"object\"},{\"text\":\"was never discussed\",\"type\":\"predicate\",\"obstacle\":\"passive\"},{\"text\":\"in public\",\"type\":\"adverbial\"}]"
+
+            Selection: Exhausted by the long journey, the travelers decided to rest as soon as they arrived.
+            $1: "[{\"text\":\"Exhausted by the long journey\",\"type\":\"adverbial\",\"form\":\"past-participle\",\"sense\":\"cause\"},{\"text\":\"the travelers\",\"type\":\"subject\"},{\"text\":\"decided\",\"type\":\"predicate\"},{\"text\":\"to rest\",\"type\":\"object\",\"form\":\"infinitive\"},{\"text\":\"as soon as they arrived\",\"type\":\"adverbial\",\"form\":\"clause\",\"sense\":\"time\"},{\"text\":\"as soon as\",\"type\":\"connector\"},{\"text\":\"arrived\",\"type\":\"predicate\"}]"
+
+            Selection: Only then did she turn the offer down, fearing it was a trap.
+            $1: "[{\"text\":\"Only then\",\"type\":\"adverbial\",\"obstacle\":\"fronting\",\"restore\":\"she turned the offer down only then\"},{\"text\":\"did\",\"type\":\"predicate\",\"obstacle\":\"inversion\"},{\"text\":\"she\",\"type\":\"subject\"},{\"text\":\"turn\",\"type\":\"predicate\",\"obstacle\":\"split\"},{\"text\":\"the offer\",\"type\":\"object\"},{\"text\":\"down\",\"type\":\"predicate\",\"obstacle\":\"split\"},{\"text\":\"fearing it was a trap\",\"type\":\"adverbial\",\"form\":\"present-participle\",\"sense\":\"cause\"},{\"text\":\"it was a trap\",\"type\":\"object\",\"form\":\"clause\",\"head\":\"fearing\",\"obstacle\":\"ellipsis\",\"restore\":\"that it was a trap\"},{\"text\":\"was\",\"type\":\"predicate\"},{\"text\":\"a trap\",\"type\":\"complement\"}]"
+          prompt: |-
+            ## Input
+            Selection: {{selection}}
+            Paragraphs: {{paragraphs}}
+            Target language: {{targetLanguage}}
+          fieldAnnotations: "Annotations"
+          fieldAnnotationsDescription: 'A compact JSON array serialized as a string. Each item has "text" and "type", plus only the optional keys that apply ("form", "sense", "head", "obstacle", "restore", "note", "occurrence").'
+          fieldTranslation: "Translation"
+          fieldTranslationDescription: "A natural translation of the whole Selection in {{targetLanguage}}."
+          roles:
+            subject: "Subject"
+            predicate: "Predicate"
+            object: "Object"
+            complement: "Complement"
+            attributive: "Attributive"
+            adverbial: "Adverbial"
+            appositive: "Appositive"
+            connector: "Connector"
+          clauses:
+            subject: "Subject clause"
+            object: "Object clause"
+            complement: "Complement clause"
+            attributive: "Relative clause"
+            adverbial: "Adverbial clause"
+            appositive: "Appositive clause"
+            clause: "Clause"
+          adverbialClauses:
+            time: "Time clause"
+            place: "Place clause"
+            cause: "Reason clause"
+            condition: "Condition clause"
+            concession: "Concession clause"
+            purpose: "Purpose clause"
+            result: "Result clause"
+            manner: "Manner clause"
+            comparison: "Comparison clause"
+          forms:
+            infinitive: "Infinitive"
+            gerund: "Gerund"
+            presentParticiple: "-ing"
+            pastParticiple: "-ed"
+          senses:
+            time: "Time"
+            place: "Place"
+            cause: "Reason"
+            condition: "If"
+            concession: "Though"
+            purpose: "Purpose"
+            result: "Result"
+            manner: "Manner"
+            comparison: "Compare"
+          obstacles:
+            inversion: "Inverted"
+            fronting: "Fronted"
+            ellipsis: "Omitted"
+            passive: "Passive"
+            subjunctive: "Unreal"
+            parenthesis: "Aside"
+            dummyIt: "Dummy it"
+            postponedSubject: "Real subject"
+            cleft: "Cleft"
+            comparison: "Compare"
+            negation: "Negation"
+            split: "Split"
+            idiom: "Idiom"
+          restoreLabel: "Plain order:"
+          hardLabel: "Difficult"
+          trunkLabel: "Skeleton"
+          slashesLabel: "Breaks"
         improveWriting:
           name: Improve Writing
           description: Analyze writing errors and suggest improvements
@@ -1399,6 +1592,7 @@ action:
   regenerate: Regenerate
   viewContextDetails: Context
   customizeCustomAction: Customize $1 action
+  customActionLayoutFallback: This result can't be shown in its layout, so a simplified view is shown.
   saveToNotebase: Save to Notebase
   saveToNotebaseSaving: Saving...
   saveToNotebaseSuccess: Saved to Notebase

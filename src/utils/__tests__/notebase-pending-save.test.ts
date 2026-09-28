@@ -32,14 +32,12 @@ function createAction(): SelectionToolbarCustomAction {
         name: "summary",
         type: "string",
         description: "",
-        speaking: false,
       },
       {
         id: "field-score",
         name: "score",
         type: "number",
         description: "",
-        speaking: false,
       },
     ],
   }

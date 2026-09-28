@@ -20,6 +20,9 @@ import { selectedCustomActionIdAtom } from "../../atoms"
 // validation, autosave controller, entity writer and navigation are all real.
 vi.mock("../provider-field", () => ({ ProviderField: () => null }))
 vi.mock("../notebase-connection-field", () => ({ NotebaseConnectionField: () => null }))
+// The layout's CodeMirror editor and shadow-DOM preview are verified in a browser; the rename
+// and delete paths below only touch the form's `layout` value.
+vi.mock("../layout-field", () => ({ LayoutField: () => null, ReadOnlyLayoutField: () => null }))
 
 function createAction(): SelectionToolbarCustomAction {
   return {
@@ -34,7 +37,6 @@ function createAction(): SelectionToolbarCustomAction {
       name: id,
       type: "string",
       description: id,
-      speaking: false,
     })),
     notebaseConnection: {
       notebaseId: "words",
@@ -92,6 +94,18 @@ async function deleteMeaning() {
   fireEvent.click(
     within(dialog).getByRole("button", {
       name: "options.selectionToolbar.customActions.form.deleteFieldDialog.confirm",
+    }),
+  )
+}
+
+async function renameMeaning(to: string) {
+  const row = screen.getByText("meaning", { selector: "span.font-medium" }).parentElement!
+  fireEvent.click(within(row).getAllByRole("button")[0]!)
+  const dialog = await screen.findByRole("dialog")
+  fireEvent.change(within(dialog).getAllByRole("textbox")[0]!, { target: { value: to } })
+  fireEvent.click(
+    within(dialog).getByRole("button", {
+      name: "options.selectionToolbar.customActions.form.editFieldDialog.save",
     }),
   )
 }
@@ -160,5 +174,68 @@ describe("output schema autosave", () => {
       expect((await getPersistedAction()).outputSchema).toEqual([action.outputSchema[1]!]),
     )
     expect((await getPersistedAction()).notebaseConnection).toBeUndefined()
+  })
+
+  it("moves the layout's references in the same write as a field rename", async () => {
+    const action = createAction()
+    action.layout =
+      '<p>{{ meaning }}</p>{% if ["meaning"] != blank %}<i>{{ example | upcase }}</i>{% endif %}'
+    await setup(action)
+    const writes = vi.spyOn(fakeBrowser.storage.local, "set")
+
+    await renameMeaning("definition")
+
+    await waitFor(async () =>
+      expect((await getPersistedAction()).outputSchema[0]!.name).toBe("definition"),
+    )
+    const expectedLayout =
+      '<p>{{ ["definition"] }}</p>{% if ["definition"] != blank %}<i>{{ example | upcase }}</i>{% endif %}'
+    expect((await getPersistedAction()).layout).toBe(expectedLayout)
+    const configWrites = writes.mock.calls.filter(([items]) =>
+      Object.hasOwn(items, CONFIG_STORAGE_KEY),
+    )
+    expect(configWrites).toHaveLength(1)
+    expect(configWrites[0]![0]).toMatchObject({
+      [CONFIG_STORAGE_KEY]: {
+        selectionToolbar: {
+          customActions: [
+            {
+              layout: expectedLayout,
+              outputSchema: [expect.objectContaining({ name: "definition" }), expect.anything()],
+            },
+          ],
+        },
+      },
+    })
+  })
+
+  it("keeps the layout and warns when the rename cannot be applied safely", async () => {
+    const action = createAction()
+    // `definition` is a template local, so a moved reference would read it instead.
+    action.layout = '{% assign definition = "x" %}{{ meaning }} {{ definition }}'
+    await setup(action)
+
+    await renameMeaning("definition")
+
+    await waitFor(async () =>
+      expect((await getPersistedAction()).outputSchema[0]!.name).toBe("definition"),
+    )
+    expect((await getPersistedAction()).layout).toBe(action.layout)
+    expect(
+      await screen.findByText("options.selectionToolbar.customActions.form.layout.renameSkipped"),
+    ).toBeInTheDocument()
+  })
+
+  it("leaves the layout untouched when a field is deleted", async () => {
+    const action = createAction()
+    action.layout = "<p>{{ meaning }}</p><p>{{ example }}</p>"
+    await setup(action)
+
+    await deleteMeaning()
+
+    await waitFor(async () =>
+      expect((await getPersistedAction()).outputSchema).toEqual([action.outputSchema[1]!]),
+    )
+    expect((await getPersistedAction()).layout).toBe(action.layout)
   })
 })

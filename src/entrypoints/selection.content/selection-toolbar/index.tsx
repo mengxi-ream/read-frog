@@ -107,15 +107,11 @@ function getNearestSelectionOverlayElement(node: Node | null) {
   return null
 }
 
-function isNodeInsideSelectionOverlay(
-  node: Node | null,
+function isNodeDirectlyInsideSelectionOverlay(
+  node: Node,
   overlayContainer: HTMLElement | null,
   overlayShadowRoot: ShadowRoot | null,
 ) {
-  if (!node) {
-    return false
-  }
-
   if (overlayContainer?.contains(node)) {
     return true
   }
@@ -130,6 +126,27 @@ function isNodeInsideSelectionOverlay(
   }
 
   return node === overlayShadowRoot || node.getRootNode() === overlayShadowRoot
+}
+
+function isNodeInsideSelectionOverlay(
+  node: Node | null,
+  overlayContainer: HTMLElement | null,
+  overlayShadowRoot: ShadowRoot | null,
+) {
+  // A shadow root nested inside the overlay (a custom action's layout renders
+  // in one) hides its nodes from `contains`, `closest` and the root check, so
+  // each enclosing shadow host is checked in turn.
+  let current = node
+  while (current) {
+    if (isNodeDirectlyInsideSelectionOverlay(current, overlayContainer, overlayShadowRoot)) {
+      return true
+    }
+
+    const root = current.getRootNode()
+    current = root instanceof ShadowRoot ? root.host : null
+  }
+
+  return false
 }
 
 function collectSelectionBoundaryNodes(selection: Selection) {

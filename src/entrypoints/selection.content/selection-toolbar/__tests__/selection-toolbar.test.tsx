@@ -241,6 +241,10 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
           enabled: false,
           providerId: "google-translate-default",
         },
+        sentenceAnalysis: {
+          enabled: false,
+          providerId: "google-translate-default",
+        },
       },
       customActions: [],
     })
@@ -584,6 +588,49 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     await triggerMouseUpWithSelection(overlayTextElement)
     expectToolbarHidden()
+  })
+
+  it("should not show toolbar when the selection is inside a shadow root nested in the overlay", async () => {
+    // Production shape: the toolbar and popover live in the extension's shadow
+    // root, and a custom action layout renders in its own shadow root inside it.
+    const extensionHost = document.createElement("read-frog-selection")
+    const extensionRoot = extensionHost.attachShadow({ mode: "open" })
+    const mount = document.createElement("div")
+    const layoutHost = document.createElement("div")
+    extensionRoot.append(mount, layoutHost)
+    const layoutRoot = layoutHost.attachShadow({ mode: "open" })
+    const layoutText = document.createElement("span")
+    layoutText.textContent = MOCK_SELECTED_TEXT
+    layoutRoot.append(layoutText)
+    const pageElement = document.createElement("p")
+    pageElement.textContent = "Page text"
+    document.body.append(extensionHost, pageElement)
+
+    render(<SelectionToolbar />, { container: mount })
+    await clearToolbarState()
+
+    const textNode = layoutText.firstChild
+    if (!textNode) {
+      throw new Error("Missing layout text node")
+    }
+
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      anchorNode: textNode,
+      focusNode: textNode,
+      rangeCount: 1,
+      toString: vi.fn<(...args: any[]) => any>(() => MOCK_SELECTED_TEXT),
+      getRangeAt: () => ({
+        startContainer: textNode,
+        startOffset: 0,
+        endContainer: textNode,
+        endOffset: MOCK_SELECTED_TEXT.length,
+      }),
+      containsNode: vi.fn<(...args: any[]) => any>(() => true),
+    }))
+
+    await triggerMouseUpWithSelection(pageElement)
+
+    expect(extensionRoot.querySelector(".absolute.z-2147483647")).toHaveClass("opacity-0")
   })
 
   it("should show toolbar when selection contains the click target", async () => {

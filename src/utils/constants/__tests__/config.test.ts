@@ -24,12 +24,21 @@ describe("dEFAULT_CONFIG", () => {
     })
     vi.resetModules()
 
-    const { createDefaultDictionaryAction, DEFAULT_CONFIG } = await import("../config")
+    const { createDefaultDictionaryAction, createDefaultSentenceAnalysisAction, DEFAULT_CONFIG } =
+      await import("../config")
     const defaultDictionaryAction = createDefaultDictionaryAction()
+    const defaultSentenceAnalysisAction = createDefaultSentenceAnalysisAction()
 
     expect(defaultDictionaryAction).toEqual(
       expect.objectContaining({
         id: "default-dictionary",
+        icon: "streamline-color:dictionary-language-book-flat",
+      }),
+    )
+    expect(defaultSentenceAnalysisAction).toEqual(
+      expect.objectContaining({
+        id: "default-sentence-analysis",
+        icon: "streamline-color:search-visual-flat",
       }),
     )
     expect(defaultDictionaryAction?.outputSchema).toEqual(
@@ -143,5 +152,60 @@ describe("dEFAULT_CONFIG", () => {
       }),
     )
     expect(configSchema.safeParse(config).success).toBe(true)
+  })
+})
+
+describe("createDefaultDictionaryAction layout", () => {
+  it("is the dictionary card built for the renamed field ids", async () => {
+    const { createDefaultDictionaryAction } = await import("../config")
+    const { buildDictionaryActionLayout } = await import("@/utils/layout-host/slots")
+
+    const action = createDefaultDictionaryAction()
+
+    expect(action?.layout).toEqual(expect.any(String))
+    expect(action?.layout).toBe(buildDictionaryActionLayout(action?.outputSchema ?? []))
+    expect(action?.layout).toContain("default-dictionary-term")
+  })
+
+  it("places every field exactly once, leaving the card's tail empty", async () => {
+    const { createDefaultDictionaryAction } = await import("../config")
+    const { compileLayout, renderLayoutHtml } = await import("@read-frog/layout-engine/core")
+    const { buildCustomActionLayoutScope } = await import("@/utils/layout-host/host")
+    const { getDictionarySlots } = await import("@/utils/layout-host/slots")
+
+    const action = createDefaultDictionaryAction()
+    if (!action?.layout) throw new Error("expected the built-in Dictionary to carry a layout")
+    const compiled = compileLayout(action.layout)
+    if (!compiled.ok) throw compiled.error
+
+    const value: Record<string, string> = Object.fromEntries(
+      action.outputSchema.map((field, index) => [field.name, `value ${index}`]),
+    )
+    // The term's quotes are not shown as text: they mark the sentence.
+    const slots = getDictionarySlots(action.outputSchema)
+    const sentence = value[slots.context?.name ?? ""]
+    const termName = slots.contextTerm?.name ?? ""
+    value[termName] = JSON.stringify([{ text: sentence }])
+    const html = renderLayoutHtml(
+      compiled.compiled,
+      buildCustomActionLayoutScope({
+        outputSchema: action.outputSchema,
+        value,
+        selection: "blossom",
+        targetCode: "cmn",
+        status: "done",
+      }),
+    )
+    // Text between tags: the headword is also in its button's data-speak,
+    // which is an attribute and not counted.
+    const textRuns = html.split(/<[^>]*>/).map((run) => run.trim())
+
+    expect(action.outputSchema).toHaveLength(8)
+    for (const [name, shown] of Object.entries(value)) {
+      if (name === termName) continue
+      expect(textRuns.filter((run) => run === shown)).toHaveLength(1)
+    }
+    expect(html).toContain(`<b class="rf-d-mark">${sentence}</b>`)
+    expect(html).not.toContain('class="rf-field"')
   })
 })

@@ -57,14 +57,12 @@ function createAction(
         name: "Term",
         type: "string",
         description: "",
-        speaking: true,
       },
       {
         id: "field-definition",
         name: "Definition",
         type: "string",
         description: "",
-        speaking: false,
       },
     ],
     ...overrides,
@@ -204,7 +202,6 @@ describe("NoteSuggestionCard", () => {
           name: "Word",
           type: "string",
           description: "",
-          speaking: true,
         },
       ],
     })
