@@ -348,6 +348,7 @@ A layout is HTML with Liquid (the liquidjs flavor of Shopify's template language
 - Allowed: common text, heading, list and table elements (\`div\`, \`span\`, \`p\`, \`b\`, \`strong\`, \`em\`, \`mark\`, \`code\`, \`blockquote\`, \`ul\`, \`li\`, \`dl\`, \`table\`, \`h1\`–\`h6\`, \`section\`, \`ruby\`/\`rt\`, …), \`details\`/\`summary\`, \`button\`, \`a\`, \`img\`, and basic SVG (\`svg\`, \`path\`, \`circle\`, \`rect\`, \`line\`, gradients). Attributes: \`class\`, \`style\`, \`title\`, \`lang\`, \`dir\`, \`role\`, \`hidden\`, \`open\`, \`colspan\`/\`rowspan\`, sizes, SVG presentation attributes, and any \`data-*\` or \`aria-*\`.
 - Removed: scripts and event handlers (\`onclick\`…), forms and inputs, iframes, \`id\`s, and anything that loads a resource. \`<a href>\` must be http(s) (it opens in a new tab); \`<img src>\` must be a \`data:image/…\` URI.
 - There is no JavaScript. Interactivity comes from \`<details>\`, CSS (\`:hover\`) and the attributes below.
+- Whitespace between tags is text. Under \`white-space: pre-wrap\` every line break and indent in the markup shows up in the result, so trim it with \`{%-\` / \`-%}\` or keep that markup on one line, and put \`pre-wrap\` only on an element that holds a value directly.
 
 ### CSS
 - Put CSS in \`<style>\` blocks (they always apply wherever they sit; Liquid doesn't run inside them) or in \`style\` attributes. It applies only inside this result.
