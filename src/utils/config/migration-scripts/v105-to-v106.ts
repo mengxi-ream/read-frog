@@ -16,9 +16,14 @@
  * turned on but kept off the toolbar: it waits in the menu. One the user has
  * turned on already is on their toolbar, and stays there.
  *
- * A config that already has an `order` array (a second run) is returned by
- * identity. One without a `selectionToolbar` object is left for the schema
- * parse that follows to report.
+ * Each part is applied on its own, not skipped because another is there: a
+ * UI context that loaded ahead of this migration and saved a setting has
+ * stored the schema's defaults for both lists (empty) with the config still
+ * marked v105. So an empty or missing `order` is seeded, a missing `unpinned`
+ * starts empty, and Improve Writing is turned on whatever the lists hold. A
+ * config that needs none of it (a second run) is returned by identity; one
+ * without a `selectionToolbar` object is left for the schema parse that
+ * follows to report.
  *
  * IMPORTANT: This is a frozen snapshot. All ids are hardcoded inline; it
  * imports nothing from the evolving application code.
@@ -42,34 +47,38 @@ export function migrate(oldConfig: any): any {
   }
 
   const selectionToolbar = oldConfig.selectionToolbar
-  if (!isObject(selectionToolbar) || Array.isArray(selectionToolbar.order)) {
+  if (!isObject(selectionToolbar)) {
     return oldConfig
   }
 
-  const customActionIds: string[] = Array.isArray(selectionToolbar.customActions)
-    ? selectionToolbar.customActions
-        .map((action: any) => (isObject(action) ? action.id : undefined))
-        .filter((id: any) => typeof id === "string" && id !== "")
-    : []
+  const next: Record<string, any> = { ...selectionToolbar }
+  let changed = false
+
+  if (!Array.isArray(selectionToolbar.order) || selectionToolbar.order.length === 0) {
+    const customActionIds: string[] = Array.isArray(selectionToolbar.customActions)
+      ? selectionToolbar.customActions
+          .map((action: any) => (isObject(action) ? action.id : undefined))
+          .filter((id: any) => typeof id === "string" && id !== "")
+      : []
+    next.order = [...new Set([...FEATURE_IDS, ...BUILT_IN_ACTION_IDS, ...customActionIds])]
+    changed = true
+  }
+
+  if (!Array.isArray(selectionToolbar.unpinned)) {
+    next.unpinned = []
+    changed = true
+  }
 
   const builtInActions = selectionToolbar.builtInActions
   const improveWriting = isObject(builtInActions) ? builtInActions.improveWriting : undefined
-  const turnOnImproveWriting = isObject(improveWriting) && improveWriting.enabled === false
-
-  return {
-    ...oldConfig,
-    selectionToolbar: {
-      ...selectionToolbar,
-      ...(turnOnImproveWriting
-        ? {
-            builtInActions: {
-              ...builtInActions,
-              improveWriting: { ...improveWriting, enabled: true },
-            },
-          }
-        : {}),
-      order: [...new Set([...FEATURE_IDS, ...BUILT_IN_ACTION_IDS, ...customActionIds])],
-      unpinned: turnOnImproveWriting ? [IMPROVE_WRITING_ID] : [],
-    },
+  if (isObject(improveWriting) && improveWriting.enabled === false) {
+    next.builtInActions = {
+      ...builtInActions,
+      improveWriting: { ...improveWriting, enabled: true },
+    }
+    next.unpinned = [...new Set([...next.unpinned, IMPROVE_WRITING_ID])]
+    changed = true
   }
+
+  return changed ? { ...oldConfig, selectionToolbar: next } : oldConfig
 }
