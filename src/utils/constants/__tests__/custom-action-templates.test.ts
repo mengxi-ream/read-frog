@@ -8,10 +8,8 @@ import {
   buildDictionaryActionLayout,
   buildSentenceAnalysisActionLayout,
 } from "@/utils/layout-host/slots"
-import {
-  CUSTOM_ACTION_TEMPLATES,
-  getSentenceAnalysisLayoutLabels,
-} from "../custom-action-templates"
+import { createDefaultDictionaryAction, createDefaultSentenceAnalysisAction } from "../config"
+import { CUSTOM_ACTION_TEMPLATES } from "../custom-action-templates"
 
 function createFromTemplate(id: string) {
   const template = CUSTOM_ACTION_TEMPLATES.find((candidate) => candidate.id === id)
@@ -32,14 +30,13 @@ describe("custom action template layouts", () => {
     expect(action.layout).not.toBe(DEFAULT_LAYOUT)
   })
 
-  it("gives the sentence analysis preset its card, built for its three stable fields", () => {
+  it("gives the sentence analysis preset its card, built for its two stable fields", () => {
     const action = createFromTemplate("sentence-analysis")
 
     expect(action.icon).toBe("tabler:highlight")
     expect(action.outputSchema.map((field) => [field.id, field.type])).toEqual([
       ["sentence-analysis-annotations", "string"],
       ["sentence-analysis-translation", "string"],
-      ["sentence-analysis-structure", "string"],
     ])
     // i18n is mocked to return the key, so this checks the wiring, not the text.
     const prefix = "options.selectionToolbar.customActions.templates.sentenceAnalysis"
@@ -48,9 +45,7 @@ describe("custom action template layouts", () => {
       description: `${prefix}.fieldAnnotationsDescription`,
     })
     expect(action.systemPrompt).toBe(`${prefix}.systemPrompt`)
-    expect(action.layout).toBe(
-      buildSentenceAnalysisActionLayout(action.outputSchema, getSentenceAnalysisLayoutLabels()),
-    )
+    expect(action.layout).toBe(buildSentenceAnalysisActionLayout(action.outputSchema))
     expect(action.layout).not.toBe(DEFAULT_LAYOUT)
 
     const layout = action.layout ?? ""
@@ -66,4 +61,30 @@ describe("custom action template layouts", () => {
 
     expect(selectionToolbarCustomActionsSchema.safeParse(actions).success).toBe(true)
   })
+
+  it.each([
+    ["dictionary", createDefaultDictionaryAction, "default-dictionary"],
+    ["sentence-analysis", createDefaultSentenceAnalysisAction, "default-sentence-analysis"],
+  ] as const)(
+    "builds the built-in %s from its preset, with default- field ids and a card for them",
+    (templateId, createBuiltIn, actionId) => {
+      const preset = createFromTemplate(templateId)
+      const builtIn = createBuiltIn()
+
+      expect(builtIn.id).toBe(actionId)
+      expect(builtIn.providerId).toBe("read-frog-free-ai")
+      expect(builtIn.systemPrompt).toBe(preset.systemPrompt)
+      expect(builtIn.outputSchema.map((field) => field.id)).toEqual(
+        preset.outputSchema.map((field) => `default-${field.id}`),
+      )
+      expect(builtIn.layout).not.toBe(preset.layout)
+      expect(builtIn.layout).toBe(
+        templateId === "dictionary"
+          ? buildDictionaryActionLayout(builtIn.outputSchema)
+          : buildSentenceAnalysisActionLayout(builtIn.outputSchema),
+      )
+      // Built once per field set: every read gets the same string.
+      expect(createBuiltIn().layout).toBe(builtIn.layout)
+    },
+  )
 })

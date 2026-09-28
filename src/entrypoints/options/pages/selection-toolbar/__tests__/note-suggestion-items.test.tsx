@@ -6,7 +6,7 @@ import type { SelectionToolbarCustomAction } from "@/types/config/selection-tool
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
+import { getBuiltInActions, getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import { NoteSuggestionItems } from "../actions/note-suggestion-items"
 
 const {
@@ -151,7 +151,7 @@ describe("NoteSuggestionItems", () => {
     })
   })
 
-  it("lists the built-in action first and keeps disabled custom actions selectable", () => {
+  it("lists the built-in actions first and keeps disabled custom actions selectable", () => {
     const selectionToolbar = testState.selectionToolbar!
     const disabledAction = createCustomAction("disabled-action", "Disabled Action", false)
     const enabledAction = createCustomAction("enabled-action", "Enabled Action", true)
@@ -164,10 +164,9 @@ describe("NoteSuggestionItems", () => {
 
     render(<NoteSuggestionItems />)
 
-    const builtInAction = getBuiltInDictionaryAction(selectionToolbar)
     const options = screen.getAllByRole("option")
     expect(options.map((option) => option.textContent)).toEqual([
-      builtInAction.name,
+      ...getBuiltInActions(selectionToolbar).map((action) => action.name),
       disabledAction.name,
       enabledAction.name,
     ])
@@ -179,7 +178,7 @@ describe("NoteSuggestionItems", () => {
     expect(selector).toBeEnabled()
     expect(screen.getByRole("switch")).not.toBeChecked()
 
-    fireEvent.click(options[2]!)
+    fireEvent.click(options.at(-1)!)
 
     expect(setSelectionToolbarMock).toHaveBeenCalledWith({
       ...selectionToolbar,

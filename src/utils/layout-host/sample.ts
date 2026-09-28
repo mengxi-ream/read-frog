@@ -1,30 +1,30 @@
+import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { DictionarySlot, SentenceAnalysisSlot } from "@read-frog/layout-engine/presets"
 import type { SelectionToolbarCustomActionOutputField } from "@/types/config/selection-toolbar"
 import type { SupportedUiLocale } from "@/utils/i18n/locales"
 import { DEFAULT_UI_LOCALE } from "@/utils/i18n/locales"
+import { langCodeOfLocale } from "./labels"
 import { getDictionarySlots, getSentenceAnalysisSlots, isSentenceAnalysisShaped } from "./slots"
 
 // Sample results for the layout preview on the options page. Values are keyed
 // by field NAME, the shape a model's structured output has; user edits to the
 // samples are keyed by field id so they survive a rename.
+//
+// Samples are answers written in a language the extension has words in, keyed
+// by that language's UI locale: the preview picks the one in the reader's
+// language (see contentLocaleFor), whose target language is the locale's own.
 
-// A worked Dictionary answer per UI language, so the preview reads like a
-// lookup by someone who uses that language: an English word explained in the
-// UI language, or, in English, a Chinese word explained in English.
+// A worked Dictionary answer per language, so the preview reads like a lookup
+// by someone who reads that language: an English word explained in it, or, in
+// English, a Chinese word explained in English.
 interface DictionarySample {
   selection: string
-  targetLanguage: string
   values: Record<DictionarySlot, string>
 }
 
-function englishWordSample(
-  targetLanguage: string,
-  definition: string,
-  contextTranslation: string,
-): DictionarySample {
+function englishWordSample(definition: string, contextTranslation: string): DictionarySample {
   return {
     selection: "blossoms",
-    targetLanguage,
     values: {
       term: "blossom",
       phonetic: "/ˈblɒs.əm/",
@@ -41,7 +41,6 @@ function englishWordSample(
 const DICTIONARY_SAMPLES: Record<SupportedUiLocale, DictionarySample> = {
   en: {
     selection: "珍惜",
-    targetLanguage: "English",
     values: {
       term: "珍惜",
       phonetic: "zhēnxī",
@@ -54,144 +53,218 @@ const DICTIONARY_SAMPLES: Record<SupportedUiLocale, DictionarySample> = {
       difficulty: "B1",
     },
   },
-  "zh-CN": englishWordSample(
-    "Simplified Mandarin Chinese",
-    "花；花朵（尤指果树的花）",
-    "樱花短暂的美丽提醒我们珍惜每一刻。",
-  ),
-  "zh-TW": englishWordSample(
-    "Traditional Mandarin Chinese",
-    "花；花朵（尤指果樹的花）",
-    "櫻花短暫的美麗提醒我們珍惜每一刻。",
-  ),
+  "zh-CN": englishWordSample("花；花朵（尤指果树的花）", "樱花短暂的美丽提醒我们珍惜每一刻。"),
+  "zh-TW": englishWordSample("花；花朵（尤指果樹的花）", "櫻花短暫的美麗提醒我們珍惜每一刻。"),
   ja: englishWordSample(
-    "Japanese",
     "花（特に果樹の花）",
     "桜のはかない美しさは、一瞬一瞬を大切にするよう私たちに思い出させてくれる。",
   ),
   ko: englishWordSample(
-    "Korean",
     "꽃 (특히 과일나무의 꽃)",
     "벚꽃의 덧없는 아름다움은 매 순간을 소중히 여기라고 우리에게 일깨워 준다.",
   ),
   ru: englishWordSample(
-    "Russian",
     "цветок; цветение (особенно плодовых деревьев)",
     "Мимолётная красота цветущей вишни напоминает нам ценить каждое мгновение.",
   ),
   tr: englishWordSample(
-    "Turkish",
     "çiçek (özellikle meyve ağaçlarının çiçeği)",
     "Kiraz çiçeklerinin geçici güzelliği bize her anın kıymetini bilmemizi hatırlatır.",
   ),
   vi: englishWordSample(
-    "Vietnamese",
     "hoa (đặc biệt là hoa của cây ăn quả)",
     "Vẻ đẹp phù du của hoa anh đào nhắc nhở chúng ta trân trọng từng khoảnh khắc.",
   ),
   es: englishWordSample(
-    "Spanish",
     "flor (especialmente la de un árbol frutal)",
     "La belleza efímera de los cerezos en flor nos recuerda valorar cada momento.",
   ),
   az: englishWordSample(
-    "Azerbaijani",
     "çiçək (xüsusilə meyvə ağacının çiçəyi)",
     "Albalı çiçəklərinin ötəri gözəlliyi bizə hər anın qədrini bilməyi xatırladır.",
   ),
 }
 
-// The UI language's sample; an unknown language gets the default one.
-function dictionarySampleFor(locale: string | undefined): DictionarySample {
+// The locale of the samples for `locale`: itself when there are samples in
+// it, else the default one.
+function sampleLocaleFor(locale: string | undefined): SupportedUiLocale {
   return locale !== undefined && Object.hasOwn(DICTIONARY_SAMPLES, locale)
-    ? DICTIONARY_SAMPLES[locale as SupportedUiLocale]
-    : DICTIONARY_SAMPLES[DEFAULT_UI_LOCALE]
+    ? (locale as SupportedUiLocale)
+    : DEFAULT_UI_LOCALE
 }
 
-// A real answer to the Sentence Analysis preset's prompt (deepseek-chat,
-// target language Chinese), so a sentence-analysis-shaped action previews
-// with what a model actually returns: annotations quoting nested parts of the
-// sentence, as a JSON array inside a string, which the preview's replay
-// streams in a chunk at a time (each annotation appears once it is complete).
-export const SENTENCE_ANALYSIS_SAMPLE_SELECTION =
+// A Sentence Analysis answer per language, the same way round as the
+// dictionary's: an English sentence explained in that language, or, in
+// English, a Chinese sentence explained in English. The annotations are real
+// answers to the built-in prompt (gpt-6-luna for the English sentence,
+// deepseek-chat for the Chinese one, the modified word of an attributive added
+// from another model's answer), with notes written in so the preview shows
+// them; models add a note only when the keys cannot say it. They travel as a
+// compact JSON array inside a string, like a model writes them, which the
+// preview's replay streams in a chunk at a time.
+interface SentenceAnalysisSample {
+  selection: string
+  values: Record<SentenceAnalysisSlot, string>
+}
+
+interface SentenceAnalysisAnnotation {
+  text: string
+  type: string
+  form?: string
+  sense?: string
+  head?: string
+  obstacle?: string
+  restore?: string
+  note?: string
+}
+
+function sentenceAnalysisValues(
+  annotations: SentenceAnalysisAnnotation[],
+  translation: string,
+): Record<SentenceAnalysisSlot, string> {
+  return { annotations: JSON.stringify(annotations), translation }
+}
+
+const ENGLISH_SENTENCE =
   "The committee has postponed the decision which was expected last week, citing concerns that the proposal, if implemented hastily, could undermine public trust."
-const SENTENCE_ANALYSIS_SAMPLE_TARGET_LANGUAGE = "Simplified Mandarin Chinese"
 
-const SENTENCE_ANALYSIS_SAMPLE_ANNOTATIONS = [
-  { text: "The committee", type: "subject", note: "主语", hard: false },
-  { text: "has postponed", type: "predicate", note: "现在完成时", hard: false },
-  {
-    text: "the decision which was expected last week",
-    type: "object",
-    note: "宾语，含定语从句",
-    hard: false,
-  },
-  {
-    text: "which was expected last week",
-    type: "clause",
-    note: "定语从句，修饰 decision",
-    hard: false,
-  },
-  { text: "which", type: "subject", note: "关系代词作主语", hard: false },
-  { text: "was expected", type: "predicate", note: "被动语态", hard: false },
-  { text: "last week", type: "adverbial", note: "时间状语", hard: false },
-  {
-    text: "citing concerns that the proposal, if implemented hastily, could undermine public trust",
-    type: "adverbial",
-    note: "现在分词作状语",
-    hard: true,
-  },
-  {
-    text: "that the proposal, if implemented hastily, could undermine public trust",
-    type: "clause",
-    note: "同位语从句，说明 concerns",
-    hard: true,
-  },
-  { text: "that", type: "connector", note: "引导同位语从句", hard: false },
-  {
-    text: "the proposal, if implemented hastily,",
-    type: "subject",
-    note: "主语，含插入条件",
-    hard: false,
-  },
-  { text: "if implemented hastily", type: "clause", note: "条件状语从句，省略主语", hard: true },
-  { text: "if", type: "connector", note: "引导条件状语从句", hard: false },
-  { text: "implemented", type: "predicate", note: "过去分词，被动", hard: false },
-  { text: "hastily", type: "adverbial", note: "方式状语", hard: false },
-  { text: "could undermine", type: "predicate", note: "情态动词+动词", hard: false },
-  { text: "public trust", type: "object", note: "宾语", hard: false },
-]
+// `notes`: why the committee postponed; where the subject's verb is.
+function englishSentenceSample(
+  notes: [reason: string, verb: string],
+  translation: string,
+): SentenceAnalysisSample {
+  return {
+    selection: ENGLISH_SENTENCE,
+    values: sentenceAnalysisValues(
+      [
+        { text: "The committee", type: "subject" },
+        { text: "has postponed", type: "predicate" },
+        { text: "the decision which was expected last week", type: "object" },
+        {
+          text: "which was expected last week",
+          type: "attributive",
+          form: "clause",
+          head: "decision",
+        },
+        { text: "which", type: "connector" },
+        { text: "was expected", type: "predicate", obstacle: "passive" },
+        { text: "last week", type: "adverbial" },
+        {
+          text: "citing concerns that the proposal, if implemented hastily, could undermine public trust",
+          type: "adverbial",
+          form: "present-participle",
+          sense: "cause",
+          note: notes[0],
+        },
+        { text: "concerns", type: "object" },
+        {
+          text: "that the proposal, if implemented hastily, could undermine public trust",
+          type: "appositive",
+          form: "clause",
+          head: "concerns",
+        },
+        { text: "that", type: "connector" },
+        { text: "the proposal", type: "subject", note: notes[1] },
+        {
+          text: "if implemented hastily",
+          type: "adverbial",
+          form: "clause",
+          sense: "condition",
+          obstacle: "ellipsis",
+          restore: "if the proposal is implemented hastily",
+        },
+        { text: "if", type: "connector" },
+        { text: "implemented", type: "predicate", obstacle: "passive" },
+        { text: "could undermine", type: "predicate" },
+        { text: "public trust", type: "object" },
+      ],
+      translation,
+    ),
+  }
+}
 
-const SENTENCE_ANALYSIS_SAMPLE_VALUES: Record<SentenceAnalysisSlot, string> = {
-  // Compact, like the model wrote it.
-  annotations: JSON.stringify(SENTENCE_ANALYSIS_SAMPLE_ANNOTATIONS),
-  translation:
+const SENTENCE_ANALYSIS_SAMPLES: Record<SupportedUiLocale, SentenceAnalysisSample> = {
+  en: {
+    selection: "虽然这个方案成本很高，但大多数专家认为它是解决城市交通拥堵的唯一办法。",
+    values: sentenceAnalysisValues(
+      [
+        { text: "虽然这个方案成本很高", type: "adverbial", form: "clause", sense: "concession" },
+        { text: "虽然", type: "connector" },
+        { text: "这个方案", type: "subject" },
+        {
+          text: "成本很高",
+          type: "predicate",
+          note: "A subject and predicate acting as the predicate",
+        },
+        { text: "但", type: "connector", note: "Pairs with 虽然; English keeps only one" },
+        { text: "大多数专家", type: "subject" },
+        { text: "认为", type: "predicate" },
+        { text: "它是解决城市交通拥堵的唯一办法", type: "object", form: "clause", head: "认为" },
+        { text: "它", type: "subject" },
+        { text: "是", type: "predicate" },
+        { text: "解决城市交通拥堵的唯一办法", type: "complement" },
+        { text: "解决城市交通拥堵的", type: "attributive", head: "办法" },
+      ],
+      "Although this plan is very costly, most experts believe it is the only way to solve urban traffic congestion.",
+    ),
+  },
+  "zh-CN": englishSentenceSample(
+    ["说明推迟的理由", "它的谓语是插入语后面的 could undermine"],
     "委员会推迟了原定于上周做出的决定，理由是担心该提案如果仓促实施，可能会损害公众信任。",
-  structure:
-    "主句为“The committee has postponed the decision”，后接which引导的定语从句修饰decision，现在分词短语citing concerns作伴随状语，其中that引导同位语从句解释concerns，同位语从句内又含if引导的条件状语从句。",
+  ),
+  "zh-TW": englishSentenceSample(
+    ["說明延後的理由", "它的述語是插入語後面的 could undermine"],
+    "委員會延後了原定於上週做出的決定，理由是擔心該提案若倉促實施，可能會損害公眾信任。",
+  ),
+  ja: englishSentenceSample(
+    ["延期の理由を示す", "述語は挿入句の後の could undermine"],
+    "委員会は、提案を性急に実施すれば国民の信頼を損ないかねないとの懸念を理由に、先週予定されていた決定を延期した。",
+  ),
+  ko: englishSentenceSample(
+    ["연기한 이유를 밝힘", "서술어는 삽입구 뒤의 could undermine"],
+    "위원회는 제안이 성급하게 시행되면 대중의 신뢰를 훼손할 수 있다는 우려를 들어 지난주로 예정되었던 결정을 연기했다.",
+  ),
+  ru: englishSentenceSample(
+    ["Объясняет причину отсрочки", "Его сказуемое — could undermine после вставки"],
+    "Комитет отложил решение, которого ожидали на прошлой неделе, сославшись на опасения, что предложение, если его поспешно реализовать, может подорвать доверие общества.",
+  ),
+  tr: englishSentenceSample(
+    ["Ertelemenin gerekçesini verir", "Yüklemi ara sözden sonraki could undermine"],
+    "Komite, teklifin aceleyle uygulanması halinde kamuoyunun güvenini sarsabileceği endişesini gerekçe göstererek geçen hafta beklenen kararı erteledi.",
+  ),
+  vi: englishSentenceSample(
+    ["Nêu lý do hoãn quyết định", "Vị ngữ của nó là could undermine sau phần chèn"],
+    "Ủy ban đã hoãn quyết định vốn được chờ đợi từ tuần trước, viện dẫn lo ngại rằng đề xuất này, nếu được thực thi vội vàng, có thể làm suy giảm lòng tin của công chúng.",
+  ),
+  es: englishSentenceSample(
+    ["Da el motivo del aplazamiento", "Su verbo es could undermine, tras el inciso"],
+    "El comité ha aplazado la decisión que se esperaba la semana pasada, alegando la preocupación de que la propuesta, si se aplica con prisas, podría socavar la confianza pública.",
+  ),
+  az: englishSentenceSample(
+    ["Təxirə salmanın səbəbini göstərir", "Onun xəbəri ara sözdən sonrakı could undermine-dir"],
+    "Komitə təklifin tələsik həyata keçirilərsə ictimai etimadı sarsıda biləcəyi ilə bağlı narahatlıqları əsas gətirərək keçən həftə gözlənilən qərarı təxirə saldı.",
+  ),
 }
 
 export const LAYOUT_SAMPLE_NUMBER = 3
 
 // The selection and target language the preview renders with: those of the
-// sentence-analysis sample, or of the UI language's dictionary sample.
+// sentence-analysis sample for a sentence-analysis-shaped action, else of the
+// dictionary sample, written in `locale`.
 export function getLayoutSampleContext(
   outputSchema: SelectionToolbarCustomActionOutputField[],
   locale?: string,
-): { selection: string; targetLanguage: string } {
-  if (isSentenceAnalysisShaped(outputSchema)) {
-    return {
-      selection: SENTENCE_ANALYSIS_SAMPLE_SELECTION,
-      targetLanguage: SENTENCE_ANALYSIS_SAMPLE_TARGET_LANGUAGE,
-    }
-  }
-  const { selection, targetLanguage } = dictionarySampleFor(locale)
-  return { selection, targetLanguage }
+): { selection: string; targetCode: LangCodeISO6393 } {
+  const sampleLocale = sampleLocaleFor(locale)
+  const { selection } = isSentenceAnalysisShaped(outputSchema)
+    ? SENTENCE_ANALYSIS_SAMPLES[sampleLocale]
+    : DICTIONARY_SAMPLES[sampleLocale]
+  return { selection, targetCode: langCodeOfLocale(sampleLocale) }
 }
 
 export interface LayoutSampleOptions {
-  // The UI language, which picks the dictionary sample; defaults to the
-  // default UI language.
+  // The language the sample answers are written in, as a UI locale (see
+  // contentLocaleFor); defaults to the default UI language.
   locale?: string
   // Text for a string field with no curated sample; defaults to the name.
   placeholder?: (field: SelectionToolbarCustomActionOutputField) => string
@@ -207,13 +280,15 @@ export function buildLayoutSampleValues(
 ): Record<string, string | number> {
   // Curated text by field id, for the fields a generated card places.
   const curatedByFieldId = new Map<string, string>()
-  const dictionarySample = dictionarySampleFor(options.locale)
+  const sampleLocale = sampleLocaleFor(options.locale)
+  const dictionarySample = DICTIONARY_SAMPLES[sampleLocale]
   for (const [slot, field] of Object.entries(getDictionarySlots(outputSchema))) {
     if (field) curatedByFieldId.set(field.id, dictionarySample.values[slot as DictionarySlot])
   }
+  const sentenceAnalysisSample = SENTENCE_ANALYSIS_SAMPLES[sampleLocale]
   for (const [slot, field] of Object.entries(getSentenceAnalysisSlots(outputSchema))) {
     if (field) {
-      curatedByFieldId.set(field.id, SENTENCE_ANALYSIS_SAMPLE_VALUES[slot as SentenceAnalysisSlot])
+      curatedByFieldId.set(field.id, sentenceAnalysisSample.values[slot as SentenceAnalysisSlot])
     }
   }
 

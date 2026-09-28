@@ -890,54 +890,125 @@ options:
           fieldDifficulty: Difficulty
           fieldDifficultyDescription: Estimated CEFR difficulty level A1, A2, B1, B2, C1, or C2.
         sentenceAnalysis:
-          name: Sentence Analysis
-          description: Break down long sentences with color-coded components, glosses, and a translation
+          name: "Sentence Analysis"
+          description: "Mark up a long sentence like a teacher: its core, every clause, and what makes it hard"
           systemPrompt: |-
-            You are a grammar tutor who annotates long, difficult sentences for language learners.
+            You are a grammar tutor. Mark up the Selection (a sentence in any language) so a learner sees its structure at a glance: the core of the main clause, every clause and longer phrase, and whatever makes the sentence hard to read.
 
-            ## Goal
-            Point out the grammatical parts of the Selection so a learner sees its structure at a glance, including the parts inside every clause.
+            ## $1
+            Each annotation quotes one span of the Selection and says what it is, with these keys only:
+            - "text": the span, copied character for character from the Selection: the same words in the same order, with nothing left out, added or replaced (no "…"), and no spaces at either end.
+            - "type": the span's role in its clause, exactly one of: subject, predicate, object, complement, attributive, adverbial, appositive, connector. Nothing else is a type: a clause or a phrase gets the type of the role it plays, and what kind of clause or phrase it is goes in "form".
+            - "form": only for a clause or a non-finite phrase, exactly one of: clause, infinitive, gerund, present-participle, past-participle.
+            - "sense": only for an adverbial clause, or an adverbial participle or infinitive phrase, exactly one of: time, place, cause, condition, concession, purpose, result, manner, comparison.
+            - "head": only for an attributive, an appositive, or a clause that is an object or complement: the one word it modifies or completes, copied from the Selection (the noun a relative clause describes, the verb an object clause completes).
+            - "obstacle": only where a learner is likely to stumble, exactly one of: inversion, fronting, ellipsis, passive, subjunctive, parenthesis, dummy-it, postponed-subject, cleft, comparison, negation, split, idiom.
+            - "restore": only with fronting, inversion or ellipsis: the clause in plain word order, with any missing words put back.
+            - "note": at most 10 words in {{targetLanguage}}, only when it adds what the keys above cannot say (what an idiom means, what a pronoun refers to).
+            - "occurrence": only when the same text appears more than once in the Selection: 1 for the first appearance, 2 for the second, and so on.
+            Leave out every optional key that does not apply; never add a key of your own.
 
-            ## Rules
-            1. Each annotation quotes one span of the Selection in "text", copied character for character (same words, case and punctuation). No leading or trailing spaces.
-            2. Annotate the main clause's parts (subject, predicate, object, complement, adverbial, ...) AND the parts inside every clause. A clause gets one annotation of type "clause" covering the whole clause, plus separate annotations for its own parts.
-            3. "type" must be exactly one of: subject, predicate, object, complement, attributive, adverbial, appositive, connector, clause. Put finer detail in "note".
-            4. List annotations in the order they start in the Selection; when two start at the same place, list the longer one first.
-            5. If the quoted text appears more than once in the Selection, add "occurrence": n (1 = the first appearance).
-            6. Spans may nest (a clause contains its parts) but must never partially overlap.
-            7. "note": a very short gloss in {{targetLanguage}} (at most 8 words). For a clause: its kind and what it attaches to.
-            8. "hard": true for difficult vocabulary, idioms or tricky grammar; otherwise false.
-            9. Do not annotate every word; skip articles and trivial words unless they matter.
-            10. Translation: a natural translation of the whole Selection in {{targetLanguage}}.
-            11. Structure: one or two sentences in {{targetLanguage}} describing the sentence pattern.
-            12. The Annotations value is a STRING that contains a compact JSON array. Escape the inner quotes correctly. Do not wrap it in markdown.
+            ## What to annotate
+            1. The main clause: its subject, predicate, object or complement, and adverbials. There is no annotation for the main clause or the sentence as a whole.
+            2. Every subordinate clause: one annotation for the whole clause, with "form": "clause" and the type of the role it plays (a relative clause is attributive; a clause after a verb such as "said" is an object). Then its connector, its predicate, and any subject, object, complement or adverbial inside it that is more than a single pronoun.
+            3. Participle, infinitive and gerund phrases, and prepositional phrases of three or more words that modify something.
+            4. Skip articles and determiners, a single adjective or adverb next to the word it modifies, the inside of an ordinary noun phrase, and auxiliaries on their own.
+            5. A predicate is the whole verb group ("has been meeting"), including a word inside it ("had originally been designed"). When other words split a predicate ("did she turn … down", "rief … an", "ne … pas"), annotate each piece on its own, all as predicates.
+            6. The word that opens a clause (that, which, who, if, although, dass, que, …) is its connector, even when it is also the clause's subject or object. Particles and case endings stay inside the phrase they mark.
+            7. Spans may nest (a clause contains its parts) but never partly overlap. List annotations in the order they start; when two start at the same place, list the longer one first.
 
-            ## Example
-            Selection: The man who called yesterday said that he would come.
-            Annotations: "[{\"text\":\"The man who called yesterday\",\"type\":\"subject\",\"note\":\"主语，含定语从句\",\"hard\":false},{\"text\":\"who called yesterday\",\"type\":\"clause\",\"note\":\"定语从句，修饰 man\",\"hard\":false},{\"text\":\"who\",\"type\":\"subject\",\"note\":\"关系代词作主语\",\"hard\":false},{\"text\":\"called\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"yesterday\",\"type\":\"adverbial\",\"note\":\"时间\",\"hard\":false},{\"text\":\"said\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"that he would come\",\"type\":\"clause\",\"note\":\"宾语从句，作 said 的宾语\",\"hard\":false},{\"text\":\"that\",\"type\":\"connector\",\"note\":\"引导宾语从句\",\"hard\":false},{\"text\":\"he\",\"type\":\"subject\",\"note\":\"\",\"hard\":false},{\"text\":\"would come\",\"type\":\"predicate\",\"note\":\"过去将来时\",\"hard\":false}]"
+            ## Hard structures
+            A structure is never a type: the words keep their roles, and "obstacle" names the structure.
+            - Fronting and inversion ("Not until …, did scientists begin …", "Had I known …"): the fronted part keeps its role, with "obstacle": "fronting" and "restore"; an auxiliary or verb placed before its subject is a predicate with "obstacle": "inversion".
+            - A cleft ("It was X that …"): X keeps its role, with "obstacle": "cleft" and "restore" (the sentence without "It was … that"). "It was" and "that" get no annotation.
+            - A dummy "it" ("It is believed that …"): "It" is a subject with "obstacle": "dummy-it"; the clause it stands for is a subject with "form": "clause" and "obstacle": "postponed-subject".
+            - A split verb ("turned … down", "rief … an"): each piece is a predicate with "obstacle": "split".
+            - A parenthesis (a phrase or clause set off by commas inside another): its role, with "obstacle": "parenthesis".
+
+            ## $2
+            A natural translation of the whole Selection in {{targetLanguage}}.
+
+            ## Format
+            The $1 value is a STRING holding a compact JSON array; escape its inner double quotes as \". Do not wrap it in markdown.
+
+            ## Examples
+            Selection: The report that the committee published last week, which surprised many readers, was never discussed in public.
+            $1: "[{\"text\":\"The report that the committee published last week, which surprised many readers\",\"type\":\"subject\"},{\"text\":\"that the committee published last week\",\"type\":\"attributive\",\"form\":\"clause\",\"head\":\"report\"},{\"text\":\"that\",\"type\":\"connector\"},{\"text\":\"the committee\",\"type\":\"subject\"},{\"text\":\"published\",\"type\":\"predicate\"},{\"text\":\"last week\",\"type\":\"adverbial\"},{\"text\":\"which surprised many readers\",\"type\":\"attributive\",\"form\":\"clause\",\"head\":\"report\",\"obstacle\":\"parenthesis\"},{\"text\":\"which\",\"type\":\"connector\"},{\"text\":\"surprised\",\"type\":\"predicate\"},{\"text\":\"many readers\",\"type\":\"object\"},{\"text\":\"was never discussed\",\"type\":\"predicate\",\"obstacle\":\"passive\"},{\"text\":\"in public\",\"type\":\"adverbial\"}]"
+
+            Selection: Exhausted by the long journey, the travelers decided to rest as soon as they arrived.
+            $1: "[{\"text\":\"Exhausted by the long journey\",\"type\":\"adverbial\",\"form\":\"past-participle\",\"sense\":\"cause\"},{\"text\":\"the travelers\",\"type\":\"subject\"},{\"text\":\"decided\",\"type\":\"predicate\"},{\"text\":\"to rest\",\"type\":\"object\",\"form\":\"infinitive\"},{\"text\":\"as soon as they arrived\",\"type\":\"adverbial\",\"form\":\"clause\",\"sense\":\"time\"},{\"text\":\"as soon as\",\"type\":\"connector\"},{\"text\":\"arrived\",\"type\":\"predicate\"}]"
+
+            Selection: Only then did she turn the offer down, fearing it was a trap.
+            $1: "[{\"text\":\"Only then\",\"type\":\"adverbial\",\"obstacle\":\"fronting\",\"restore\":\"she turned the offer down only then\"},{\"text\":\"did\",\"type\":\"predicate\",\"obstacle\":\"inversion\"},{\"text\":\"she\",\"type\":\"subject\"},{\"text\":\"turn\",\"type\":\"predicate\",\"obstacle\":\"split\"},{\"text\":\"the offer\",\"type\":\"object\"},{\"text\":\"down\",\"type\":\"predicate\",\"obstacle\":\"split\"},{\"text\":\"fearing it was a trap\",\"type\":\"adverbial\",\"form\":\"present-participle\",\"sense\":\"cause\"},{\"text\":\"it was a trap\",\"type\":\"object\",\"form\":\"clause\",\"head\":\"fearing\",\"obstacle\":\"ellipsis\",\"restore\":\"that it was a trap\"},{\"text\":\"was\",\"type\":\"predicate\"},{\"text\":\"a trap\",\"type\":\"complement\"}]"
           prompt: |-
             ## Input
             Selection: {{selection}}
             Paragraphs: {{paragraphs}}
             Target language: {{targetLanguage}}
-          fieldAnnotations: Annotations
-          fieldAnnotationsDescription: 'A JSON array serialized as a string. Each item is {"text": string, "type": string, "note": string, "hard": boolean, "occurrence"?: number}; "text" quotes a span of the Selection exactly.'
-          fieldTranslation: Translation
-          fieldTranslationDescription: Natural translation of the whole Selection in {{targetLanguage}}.
-          fieldStructure: Structure
-          fieldStructureDescription: One or two sentences in {{targetLanguage}} describing the sentence pattern.
+          fieldAnnotations: "Annotations"
+          fieldAnnotationsDescription: 'A compact JSON array serialized as a string. Each item has "text" and "type", plus only the optional keys that apply ("form", "sense", "head", "obstacle", "restore", "note", "occurrence").'
+          fieldTranslation: "Translation"
+          fieldTranslationDescription: "A natural translation of the whole Selection in {{targetLanguage}}."
           roles:
-            subject: Subject
-            predicate: Predicate
-            object: Object
-            complement: Complement
-            attributive: Attributive
-            adverbial: Adverbial
-            appositive: Appositive
-            clause: Clause
-            connector: Connector
-            other: Other
-          hardLabel: Difficult
+            subject: "Subject"
+            predicate: "Predicate"
+            object: "Object"
+            complement: "Complement"
+            attributive: "Attributive"
+            adverbial: "Adverbial"
+            appositive: "Appositive"
+            connector: "Connector"
+          clauses:
+            subject: "Subject clause"
+            object: "Object clause"
+            complement: "Complement clause"
+            attributive: "Relative clause"
+            adverbial: "Adverbial clause"
+            appositive: "Appositive clause"
+            clause: "Clause"
+          adverbialClauses:
+            time: "Time clause"
+            place: "Place clause"
+            cause: "Reason clause"
+            condition: "Condition clause"
+            concession: "Concession clause"
+            purpose: "Purpose clause"
+            result: "Result clause"
+            manner: "Manner clause"
+            comparison: "Comparison clause"
+          forms:
+            infinitive: "Infinitive"
+            gerund: "Gerund"
+            presentParticiple: "-ing"
+            pastParticiple: "-ed"
+          senses:
+            time: "Time"
+            place: "Place"
+            cause: "Reason"
+            condition: "If"
+            concession: "Though"
+            purpose: "Purpose"
+            result: "Result"
+            manner: "Manner"
+            comparison: "Compare"
+          obstacles:
+            inversion: "Inverted"
+            fronting: "Fronted"
+            ellipsis: "Omitted"
+            passive: "Passive"
+            subjunctive: "Unreal"
+            parenthesis: "Aside"
+            dummyIt: "Dummy it"
+            postponedSubject: "Real subject"
+            cleft: "Cleft"
+            comparison: "Compare"
+            negation: "Negation"
+            split: "Split"
+            idiom: "Idiom"
+          restoreLabel: "Plain order:"
+          hardLabel: "Difficult"
+          trunkLabel: "Skeleton"
+          slashesLabel: "Breaks"
         improveWriting:
           name: Improve Writing
           description: Analyze writing errors and suggest improvements

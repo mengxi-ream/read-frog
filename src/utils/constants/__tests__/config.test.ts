@@ -183,7 +183,7 @@ describe("createDefaultDictionaryAction layout", () => {
         outputSchema: action.outputSchema,
         value,
         selection: "blossom",
-        targetLanguage: "Chinese",
+        targetCode: "cmn",
         status: "done",
       }),
     )

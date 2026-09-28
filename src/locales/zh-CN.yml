@@ -890,54 +890,70 @@ options:
           fieldDifficulty: 难度
           fieldDifficultyDescription: 预估 CEFR 难度等级：A1、A2、B1、B2、C1 或 C2。
         sentenceAnalysis:
-          name: 长难句分析
-          description: 拆解长难句：成分与从句标色、难点注释与整句翻译
-          systemPrompt: |-
-            你是一位语法老师，为语言学习者标注较长、较难的句子。
-
-            ## 目标
-            指出选中文本中的各个语法成分，让学习者一眼看清句子结构，包括每个从句内部的成分。
-
-            ## 规则
-            1. 每条标注在 "text" 中引用选中文本的一个片段，逐字符照抄（单词、大小写和标点都相同）。首尾不要带空格。
-            2. 既要标注主句的成分（主语、谓语、宾语、补语、状语……），也要标注每个从句内部的成分。每个从句用一条 "type" 为 "clause" 的标注覆盖整个从句，再为它自己的各个成分分别标注。
-            3. "type" 必须是以下之一：subject, predicate, object, complement, attributive, adverbial, appositive, connector, clause。更细的信息写进 "note"。
-            4. 按各条标注在选中文本中的起始位置排列；两条标注起点相同时，较长的排在前面。
-            5. 如果引用的文字在选中文本中出现不止一次，加上 "occurrence": n（1 表示第一次出现）。
-            6. 片段可以嵌套（从句包含它的成分），但绝不能部分重叠。
-            7. "note"：用 {{targetLanguage}} 写的极简释义（不超过 8 个词）。从句的 note 写明从句类型及它所依附的成分。
-            8. 难词、习语或复杂语法设为 "hard": true，否则为 false。
-            9. 不要逐词标注；冠词和无关紧要的词除非值得一提，否则跳过。
-            10. 译文：用 {{targetLanguage}} 自然地翻译整个选中文本。
-            11. 句子结构：用 {{targetLanguage}} 写一到两句话，说明句型。
-            12. 标注的值是一个字符串，内容为紧凑的 JSON 数组。内部引号必须正确转义。不要用 markdown 包裹。
-
-            ## 示例
-            选中文本：The man who called yesterday said that he would come.
-            标注："[{\"text\":\"The man who called yesterday\",\"type\":\"subject\",\"note\":\"主语，含定语从句\",\"hard\":false},{\"text\":\"who called yesterday\",\"type\":\"clause\",\"note\":\"定语从句，修饰 man\",\"hard\":false},{\"text\":\"who\",\"type\":\"subject\",\"note\":\"关系代词作主语\",\"hard\":false},{\"text\":\"called\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"yesterday\",\"type\":\"adverbial\",\"note\":\"时间\",\"hard\":false},{\"text\":\"said\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"that he would come\",\"type\":\"clause\",\"note\":\"宾语从句，作 said 的宾语\",\"hard\":false},{\"text\":\"that\",\"type\":\"connector\",\"note\":\"引导宾语从句\",\"hard\":false},{\"text\":\"he\",\"type\":\"subject\",\"note\":\"\",\"hard\":false},{\"text\":\"would come\",\"type\":\"predicate\",\"note\":\"过去将来时\",\"hard\":false}]"
-          prompt: |-
-            ## 输入
-            选中文本：{{selection}}
-            段落内容：{{paragraphs}}
-            目标语言：{{targetLanguage}}
-          fieldAnnotations: 标注
-          fieldAnnotationsDescription: '以字符串形式序列化的 JSON 数组。每一项为 {"text": string, "type": string, "note": string, "hard": boolean, "occurrence"?: number}；"text" 必须原样引用选中文本中的一个片段。'
-          fieldTranslation: 译文
-          fieldTranslationDescription: 用 {{targetLanguage}} 自然地翻译整个选中文本。
-          fieldStructure: 句子结构
-          fieldStructureDescription: 用 {{targetLanguage}} 写一到两句话，说明句型。
+          name: "长难句分析"
+          description: "像老师一样批注长难句：主干、从句和难点一目了然"
+          fieldAnnotations: "标注"
+          fieldTranslation: "译文"
           roles:
-            subject: 主语
-            predicate: 谓语
-            object: 宾语
-            complement: 补语
-            attributive: 定语
-            adverbial: 状语
-            appositive: 同位语
-            clause: 从句
-            connector: 连接词
-            other: 其他
-          hardLabel: 难点
+            subject: "主语"
+            predicate: "谓语"
+            object: "宾语"
+            complement: "补语"
+            attributive: "定语"
+            adverbial: "状语"
+            appositive: "同位语"
+            connector: "连接词"
+          clauses:
+            subject: "主语从句"
+            object: "宾语从句"
+            complement: "表语从句"
+            attributive: "定语从句"
+            adverbial: "状语从句"
+            appositive: "同位语从句"
+            clause: "从句"
+          adverbialClauses:
+            time: "时间状从"
+            place: "地点状从"
+            cause: "原因状从"
+            condition: "条件状从"
+            concession: "让步状从"
+            purpose: "目的状从"
+            result: "结果状从"
+            manner: "方式状从"
+            comparison: "比较状从"
+          forms:
+            infinitive: "不定式"
+            gerund: "动名词"
+            presentParticiple: "现在分词"
+            pastParticiple: "过去分词"
+          senses:
+            time: "时间"
+            place: "地点"
+            cause: "原因"
+            condition: "条件"
+            concession: "让步"
+            purpose: "目的"
+            result: "结果"
+            manner: "方式"
+            comparison: "比较"
+          obstacles:
+            inversion: "倒装"
+            fronting: "前置"
+            ellipsis: "省略"
+            passive: "被动"
+            subjunctive: "虚拟"
+            parenthesis: "插入"
+            dummyIt: "形式主语"
+            postponedSubject: "真主语"
+            cleft: "强调句"
+            comparison: "比较"
+            negation: "否定"
+            split: "拆分"
+            idiom: "习语"
+          restoreLabel: "还原："
+          hardLabel: "难点"
+          trunkLabel: "只看主干"
+          slashesLabel: "断句"
         improveWriting:
           name: 写作改进
           description: 分析写作错误并提供改进建议

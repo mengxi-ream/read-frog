@@ -1,3 +1,4 @@
+import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { LayoutStatus } from "@read-frog/layout-engine/contract"
 import type { ThinkingSnapshot } from "@/types/background-stream"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
@@ -14,10 +15,10 @@ import { SelectionSourceContent } from "../../components/selection-source-conten
 interface CustomActionContentProps {
   action: SelectionToolbarCustomAction | null
   status: LayoutStatus
-  // The prompt tokens the run used, exposed to the layout as ctx.selection /
-  // ctx.targetLanguage.
+  // What the run used: its selection prompt token (ctx.selection) and target
+  // language (ctx.targetLanguage, and the language of the card's own words).
   selection: string
-  targetLanguage: string
+  targetCode: LangCodeISO6393
   selectionContent: string | null | undefined
   value: Record<string, unknown> | null
   thinking: ThinkingSnapshot | null
@@ -27,7 +28,7 @@ export function CustomActionContent({
   action,
   status,
   selection,
-  targetLanguage,
+  targetCode,
   selectionContent,
   value,
   thinking,
@@ -62,7 +63,7 @@ export function CustomActionContent({
               outputSchema={action.outputSchema}
               value={value}
               selection={selection}
-              targetLanguage={targetLanguage}
+              targetCode={targetCode}
               status={status}
               theme={theme}
               speakSurface={ANALYTICS_SURFACE.SELECTION_TOOLBAR}

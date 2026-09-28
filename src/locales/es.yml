@@ -890,54 +890,70 @@ options:
           fieldDifficulty: Dificultad
           fieldDifficultyDescription: Nivel de dificultad CEFR estimado A1, A2, B1, B2, C1 o C2.
         sentenceAnalysis:
-          name: Análisis de oraciones
-          description: Desglosa oraciones largas con componentes por colores, glosas y una traducción
-          systemPrompt: |-
-            Eres un profesor de gramática que anota oraciones largas y difíciles para estudiantes de idiomas.
-
-            ## Objetivo
-            Señala las partes gramaticales de la Selección para que el estudiante vea su estructura de un vistazo, incluidas las partes de dentro de cada cláusula.
-
-            ## Reglas
-            1. Cada anotación cita en "text" un fragmento de la Selección, copiado carácter por carácter (mismas palabras, mayúsculas y puntuación). Sin espacios al principio ni al final.
-            2. Anota las partes de la cláusula principal (sujeto, predicado, objeto, complemento, adverbial, ...) Y las partes de dentro de cada cláusula. Cada cláusula lleva una anotación de tipo "clause" que la cubre entera, además de anotaciones separadas para sus propias partes.
-            3. "type" debe ser exactamente uno de: subject, predicate, object, complement, attributive, adverbial, appositive, connector, clause. Pon los detalles más finos en "note".
-            4. Enumera las anotaciones en el orden en que empiezan en la Selección; cuando dos empiecen en el mismo lugar, pon primero la más larga.
-            5. Si el texto citado aparece más de una vez en la Selección, añade "occurrence": n (1 = la primera aparición).
-            6. Los fragmentos pueden anidarse (una cláusula contiene sus partes), pero nunca deben solaparse parcialmente.
-            7. "note": una glosa muy breve en {{targetLanguage}} (8 palabras como máximo). Para una cláusula: su tipo y el elemento al que se vincula.
-            8. "hard": true para vocabulario difícil, modismos o gramática compleja; en caso contrario, false.
-            9. No anotes cada palabra; omite los artículos y las palabras triviales salvo que importen.
-            10. Traducción: una traducción natural de toda la Selección en {{targetLanguage}}.
-            11. Estructura: una o dos oraciones en {{targetLanguage}} que describan el patrón de la oración.
-            12. El valor de Anotaciones es una CADENA que contiene un arreglo JSON compacto. Escapa correctamente las comillas internas. No lo envuelvas en markdown.
-
-            ## Ejemplo
-            Selección: The man who called yesterday said that he would come.
-            Anotaciones: "[{\"text\":\"The man who called yesterday\",\"type\":\"subject\",\"note\":\"主语，含定语从句\",\"hard\":false},{\"text\":\"who called yesterday\",\"type\":\"clause\",\"note\":\"定语从句，修饰 man\",\"hard\":false},{\"text\":\"who\",\"type\":\"subject\",\"note\":\"关系代词作主语\",\"hard\":false},{\"text\":\"called\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"yesterday\",\"type\":\"adverbial\",\"note\":\"时间\",\"hard\":false},{\"text\":\"said\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"that he would come\",\"type\":\"clause\",\"note\":\"宾语从句，作 said 的宾语\",\"hard\":false},{\"text\":\"that\",\"type\":\"connector\",\"note\":\"引导宾语从句\",\"hard\":false},{\"text\":\"he\",\"type\":\"subject\",\"note\":\"\",\"hard\":false},{\"text\":\"would come\",\"type\":\"predicate\",\"note\":\"过去将来时\",\"hard\":false}]"
-          prompt: |-
-            ## Entrada
-            Selección: {{selection}}
-            Párrafos: {{paragraphs}}
-            Idioma de destino: {{targetLanguage}}
-          fieldAnnotations: Anotaciones
-          fieldAnnotationsDescription: 'Un arreglo JSON serializado como cadena. Cada elemento es {"text": string, "type": string, "note": string, "hard": boolean, "occurrence"?: number}; "text" cita exactamente un fragmento de la Selección.'
-          fieldTranslation: Traducción
-          fieldTranslationDescription: Traducción natural de toda la Selección en {{targetLanguage}}.
-          fieldStructure: Estructura
-          fieldStructureDescription: Una o dos oraciones en {{targetLanguage}} que describan el patrón de la oración.
+          name: "Análisis de oraciones"
+          description: "Marca una oración larga como un profesor: su núcleo, cada cláusula y lo que la hace difícil"
+          fieldAnnotations: "Anotaciones"
+          fieldTranslation: "Traducción"
           roles:
-            subject: Sujeto
-            predicate: Predicado
-            object: Objeto
-            complement: Complemento
-            attributive: Atributivo
-            adverbial: Adverbial
-            appositive: Aposición
-            clause: Cláusula
-            connector: Conector
-            other: Otro
-          hardLabel: Difícil
+            subject: "Sujeto"
+            predicate: "Predicado"
+            object: "Objeto"
+            complement: "Complemento"
+            attributive: "Atributivo"
+            adverbial: "Adverbial"
+            appositive: "Aposición"
+            connector: "Conector"
+          clauses:
+            subject: "Cláusula sujeto"
+            object: "Cláusula objeto"
+            complement: "Cláusula complemento"
+            attributive: "Cláusula de relativo"
+            adverbial: "Cláusula adverbial"
+            appositive: "Cláusula apositiva"
+            clause: "Cláusula"
+          adverbialClauses:
+            time: "Cláusula temporal"
+            place: "Cláusula de lugar"
+            cause: "Cláusula causal"
+            condition: "Cláusula condicional"
+            concession: "Cláusula concesiva"
+            purpose: "Cláusula final"
+            result: "Cláusula consecutiva"
+            manner: "Cláusula modal"
+            comparison: "Cláusula comparativa"
+          forms:
+            infinitive: "Infinitivo"
+            gerund: "Gerundio"
+            presentParticiple: "-ing"
+            pastParticiple: "Participio"
+          senses:
+            time: "Tiempo"
+            place: "Lugar"
+            cause: "Causa"
+            condition: "Condición"
+            concession: "Concesión"
+            purpose: "Finalidad"
+            result: "Resultado"
+            manner: "Modo"
+            comparison: "Comparación"
+          obstacles:
+            inversion: "Inversión"
+            fronting: "Anteposición"
+            ellipsis: "Elipsis"
+            passive: "Pasiva"
+            subjunctive: "Subjuntivo"
+            parenthesis: "Inciso"
+            dummyIt: "Sujeto formal"
+            postponedSubject: "Sujeto real"
+            cleft: "Escindida"
+            comparison: "Comparación"
+            negation: "Negación"
+            split: "Separado"
+            idiom: "Modismo"
+          restoreLabel: "Orden normal:"
+          hardLabel: "Difícil"
+          trunkLabel: "Esqueleto"
+          slashesLabel: "Pausas"
         improveWriting:
           name: Mejorar escritura
           description: Analiza errores de escritura y sugiere mejoras

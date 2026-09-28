@@ -9,7 +9,7 @@ import {
   IconShieldCheck,
   IconSun,
 } from "@tabler/icons-react"
-import i18next from "i18next"
+import { useAtomValue } from "jotai"
 import { useEffect, useMemo, useState } from "react"
 import { CustomActionLayoutView } from "@/components/layout-host/custom-action-layout-view"
 import { useTheme } from "@/components/providers/theme-provider"
@@ -26,7 +26,9 @@ import {
 } from "@/components/ui/base-ui/popover"
 import { Textarea } from "@/components/ui/base-ui/textarea"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
+import { contentLocaleFor } from "@/utils/layout-host/labels"
 import {
   buildLayoutSampleValues,
   buildStreamingFrames,
@@ -218,8 +220,10 @@ export function LayoutPreview({
   const [replayFrame, setReplayFrame] = useState<number | null>(null)
   const [renderInfo, setRenderInfo] = useState<CustomActionLayoutRenderInfo | null>(null)
 
-  // The sample follows the UI language (LocaleBoundary remounts the page on a switch).
-  const locale = i18next.language
+  // The sample answer is written in the reader's language, like the answers the popup
+  // shows: the target language when a sample is written in it, else the UI language.
+  const { targetCode } = useAtomValue(configFieldsAtomMap.language)
+  const locale = contentLocaleFor(targetCode)
   const values = useMemo(
     () =>
       buildLayoutSampleValues(outputSchema, {
@@ -231,7 +235,7 @@ export function LayoutPreview({
     [outputSchema, sampleOverrides, locale],
   )
   const frames = useMemo(() => buildStreamingFrames(values, outputSchema), [values, outputSchema])
-  const { selection, targetLanguage } = getLayoutSampleContext(outputSchema, locale)
+  const sample = getLayoutSampleContext(outputSchema, locale)
 
   useEffect(() => {
     if (replayFrame === null) return undefined
@@ -293,8 +297,8 @@ export function LayoutPreview({
               source={source}
               outputSchema={outputSchema}
               value={value}
-              selection={selection}
-              targetLanguage={targetLanguage}
+              selection={sample.selection}
+              targetCode={sample.targetCode}
               status={status}
               theme={theme}
               speakSurface={ANALYTICS_SURFACE.TTS_SETTINGS}

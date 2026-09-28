@@ -139,7 +139,13 @@ describe("liquid layout language", () => {
     expect(field?.apply).toBe('["the term"]')
 
     const ctxKeys = complete("{{ ctx.")?.options.map((option) => option.label)
-    expect(ctxKeys).toEqual(["fields", "selection", "targetLanguage", "status"])
+    expect(ctxKeys).toEqual([
+      "fields",
+      "selection",
+      "targetLanguage",
+      "sentenceAnalysisLabels",
+      "status",
+    ])
   })
 
   it("offers the ctx.fields entry keys on the loop variable", () => {

@@ -27,6 +27,10 @@ function createConfig(enabled: boolean): Config {
           enabled: false,
           providerId: "read-frog-free-ai",
         },
+        sentenceAnalysis: {
+          enabled: false,
+          providerId: "read-frog-free-ai",
+        },
       },
       customActions: [],
     },
@@ -63,6 +67,8 @@ describe("background context menu", () => {
           "contextMenu.readAloudSelection": 'Read aloud "%s"',
           "contextMenu.showOriginal": "Show Original",
           "options.selectionToolbar.customActions.templates.dictionary.name": "Dictionary",
+          "options.selectionToolbar.customActions.templates.sentenceAnalysis.name":
+            "Sentence Analysis",
         })[key] ?? key,
     ) as typeof i18n.t
   })
@@ -139,6 +145,24 @@ describe("background context menu", () => {
     expect(browser.contextMenus.create).toHaveBeenNthCalledWith(4, {
       id: `${MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX}default-dictionary`,
       title: "Dictionary",
+      contexts: ["selection"],
+    })
+  })
+
+  it("creates the built-in Sentence Analysis item after the Dictionary's", async () => {
+    const config = createConfig(true)
+    config.selectionToolbar.builtInActions.dictionary.enabled = true
+    config.selectionToolbar.builtInActions.sentenceAnalysis.enabled = true
+    ensureInitializedConfigMock.mockResolvedValue(config)
+
+    const { initializeContextMenu, MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX } =
+      await import("../context-menu")
+
+    await initializeContextMenu()
+
+    expect(browser.contextMenus.create).toHaveBeenNthCalledWith(5, {
+      id: `${MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX}default-sentence-analysis`,
+      title: "Sentence Analysis",
       contexts: ["selection"],
     })
   })

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
   duplicateSelectionToolbarAction,
+  findSelectionToolbarAction,
   getBuiltInDictionaryAction,
   getSelectionToolbarActions,
   replaceSelectionToolbarAction,
@@ -13,7 +14,7 @@ function cloneSelectionToolbar() {
 }
 
 describe("selection toolbar built-in actions", () => {
-  it("always resolves Dictionary before custom actions", () => {
+  it("always resolves the built-in actions before custom actions", () => {
     const selectionToolbar = cloneSelectionToolbar()
     const dictionary = getBuiltInDictionaryAction(selectionToolbar)
     selectionToolbar.customActions = [
@@ -26,8 +27,58 @@ describe("selection toolbar built-in actions", () => {
 
     expect(getSelectionToolbarActions(selectionToolbar).map((action) => action.id)).toEqual([
       "default-dictionary",
+      "default-sentence-analysis",
       "custom-action",
     ])
+  })
+
+  it("resolves the built-in Sentence Analysis from its stored state", () => {
+    const selectionToolbar = cloneSelectionToolbar()
+    selectionToolbar.builtInActions.sentenceAnalysis = {
+      enabled: false,
+      providerId: "openai-default",
+    }
+
+    const action = findSelectionToolbarAction(selectionToolbar, "default-sentence-analysis")
+    expect(action).toMatchObject({
+      id: "default-sentence-analysis",
+      enabled: false,
+      providerId: "openai-default",
+      icon: "tabler:highlight",
+    })
+    expect(action?.outputSchema.map((field) => field.id)).toEqual([
+      "default-sentence-analysis-annotations",
+      "default-sentence-analysis-translation",
+    ])
+    expect(action?.layout).toContain("default-sentence-analysis-annotations")
+  })
+
+  it("persists only mutable state when replacing the built-in Sentence Analysis", () => {
+    const selectionToolbar = cloneSelectionToolbar()
+    const action = findSelectionToolbarAction(selectionToolbar, "default-sentence-analysis")!
+
+    const next = replaceSelectionToolbarAction(selectionToolbar, {
+      ...action,
+      name: "Renamed",
+      systemPrompt: "Changed",
+      providerId: "openai-default",
+      enabled: false,
+    })
+
+    expect(next.builtInActions).toEqual({
+      dictionary: selectionToolbar.builtInActions.dictionary,
+      sentenceAnalysis: {
+        enabled: false,
+        providerId: "openai-default",
+        notebaseConnection: undefined,
+      },
+    })
+    expect(next.customActions).toBe(selectionToolbar.customActions)
+    expect(findSelectionToolbarAction(next, "default-sentence-analysis")).toMatchObject({
+      name: action.name,
+      systemPrompt: action.systemPrompt,
+      providerId: "openai-default",
+    })
   })
 
   it("persists only mutable state when replacing the built-in Dictionary", () => {

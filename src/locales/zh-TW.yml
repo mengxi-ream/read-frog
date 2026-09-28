@@ -890,54 +890,70 @@ options:
           fieldDifficulty: 難度
           fieldDifficultyDescription: 預估 CEFR 難度等級 A1、A2、B1、B2、C1 或 C2。
         sentenceAnalysis:
-          name: 長難句分析
-          description: 拆解長難句：成分與子句標色、難點註解與整句翻譯
-          systemPrompt: |-
-            你是一位文法老師，為語言學習者標註較長、較難的句子。
-
-            ## 目標
-            指出選取文字中的各個文法成分，讓學習者一眼看清句子結構，包括每個子句內部的成分。
-
-            ## 規則
-            1. 每條標註在 "text" 中引用選取文字的一個片段，逐字元照抄（字詞、大小寫和標點都相同）。首尾不要帶空格。
-            2. 既要標註主要子句的成分（主詞、述語、受詞、補語、狀語……），也要標註每個子句內部的成分。每個子句用一條 "type" 為 "clause" 的標註涵蓋整個子句，再為它自己的各個成分分別標註。
-            3. "type" 必須是以下之一：subject, predicate, object, complement, attributive, adverbial, appositive, connector, clause。更細的資訊寫進 "note"。
-            4. 依各條標註在選取文字中的起始位置排列；兩條標註起點相同時，較長的排在前面。
-            5. 如果引用的文字在選取文字中出現不只一次，加上 "occurrence": n（1 表示第一次出現）。
-            6. 片段可以巢狀（子句包含它的成分），但絕不能部分重疊。
-            7. "note"：以 {{targetLanguage}} 撰寫的極簡釋義（不超過 8 個詞）。子句的 note 寫明子句類型及它所依附的成分。
-            8. 難字、慣用語或複雜文法設為 "hard": true，否則為 false。
-            9. 不要逐字標註；冠詞和無關緊要的字詞除非值得一提，否則略過。
-            10. 譯文：以 {{targetLanguage}} 自然地翻譯整個選取文字。
-            11. 句子結構：以 {{targetLanguage}} 寫一到兩句話，說明句型。
-            12. 標註的值是一個字串，內容為精簡的 JSON 陣列。內部引號必須正確跳脫。不要用 markdown 包裹。
-
-            ## 範例
-            選取文字：The man who called yesterday said that he would come.
-            標註："[{\"text\":\"The man who called yesterday\",\"type\":\"subject\",\"note\":\"主语，含定语从句\",\"hard\":false},{\"text\":\"who called yesterday\",\"type\":\"clause\",\"note\":\"定语从句，修饰 man\",\"hard\":false},{\"text\":\"who\",\"type\":\"subject\",\"note\":\"关系代词作主语\",\"hard\":false},{\"text\":\"called\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"yesterday\",\"type\":\"adverbial\",\"note\":\"时间\",\"hard\":false},{\"text\":\"said\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"that he would come\",\"type\":\"clause\",\"note\":\"宾语从句，作 said 的宾语\",\"hard\":false},{\"text\":\"that\",\"type\":\"connector\",\"note\":\"引导宾语从句\",\"hard\":false},{\"text\":\"he\",\"type\":\"subject\",\"note\":\"\",\"hard\":false},{\"text\":\"would come\",\"type\":\"predicate\",\"note\":\"过去将来时\",\"hard\":false}]"
-          prompt: |-
-            ## 輸入
-            選取文字：{{selection}}
-            段落：{{paragraphs}}
-            目標語言：{{targetLanguage}}
-          fieldAnnotations: 標註
-          fieldAnnotationsDescription: '以字串形式序列化的 JSON 陣列。每一項為 {"text": string, "type": string, "note": string, "hard": boolean, "occurrence"?: number}；"text" 必須原樣引用選取文字中的一個片段。'
-          fieldTranslation: 譯文
-          fieldTranslationDescription: 以 {{targetLanguage}} 自然地翻譯整個選取文字。
-          fieldStructure: 句子結構
-          fieldStructureDescription: 以 {{targetLanguage}} 寫一到兩句話，說明句型。
+          name: "長難句分析"
+          description: "像老師一樣批註長難句：主幹、子句和難點一目了然"
+          fieldAnnotations: "標註"
+          fieldTranslation: "譯文"
           roles:
-            subject: 主詞
-            predicate: 述語
-            object: 受詞
-            complement: 補語
-            attributive: 修飾語
-            adverbial: 狀語
-            appositive: 同位語
-            clause: 子句
-            connector: 連接詞
-            other: 其他
-          hardLabel: 難點
+            subject: "主詞"
+            predicate: "述語"
+            object: "受詞"
+            complement: "補語"
+            attributive: "修飾語"
+            adverbial: "狀語"
+            appositive: "同位語"
+            connector: "連接詞"
+          clauses:
+            subject: "主詞子句"
+            object: "受詞子句"
+            complement: "補語子句"
+            attributive: "形容詞子句"
+            adverbial: "副詞子句"
+            appositive: "同位語子句"
+            clause: "子句"
+          adverbialClauses:
+            time: "時間子句"
+            place: "地點子句"
+            cause: "原因子句"
+            condition: "條件子句"
+            concession: "讓步子句"
+            purpose: "目的子句"
+            result: "結果子句"
+            manner: "方式子句"
+            comparison: "比較子句"
+          forms:
+            infinitive: "不定詞"
+            gerund: "動名詞"
+            presentParticiple: "現在分詞"
+            pastParticiple: "過去分詞"
+          senses:
+            time: "時間"
+            place: "地點"
+            cause: "原因"
+            condition: "條件"
+            concession: "讓步"
+            purpose: "目的"
+            result: "結果"
+            manner: "方式"
+            comparison: "比較"
+          obstacles:
+            inversion: "倒裝"
+            fronting: "前置"
+            ellipsis: "省略"
+            passive: "被動"
+            subjunctive: "假設"
+            parenthesis: "插入"
+            dummyIt: "虛主詞"
+            postponedSubject: "真主詞"
+            cleft: "強調句"
+            comparison: "比較"
+            negation: "否定"
+            split: "拆分"
+            idiom: "慣用語"
+          restoreLabel: "還原："
+          hardLabel: "難點"
+          trunkLabel: "只看主幹"
+          slashesLabel: "斷句"
         improveWriting:
           name: 改善寫作
           description: 分析寫作錯誤並提出改善建議

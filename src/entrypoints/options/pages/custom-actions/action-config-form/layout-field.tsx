@@ -66,7 +66,6 @@ import {
 } from "@/components/ui/base-ui/popover"
 import { Skeleton } from "@/components/ui/base-ui/skeleton"
 import { MAX_CUSTOM_ACTION_LAYOUT_LENGTH } from "@/types/config/selection-toolbar"
-import { getSentenceAnalysisLayoutLabels } from "@/utils/constants/custom-action-templates"
 import { i18n } from "@/utils/i18n"
 import { resolveActionLayout } from "@/utils/layout-host/resolve"
 import {
@@ -469,10 +468,7 @@ function getResetLayout(target: ResetTarget, outputSchema: Field[]): string {
     case "dictionary":
       return buildDictionaryActionLayout(outputSchema) ?? DEFAULT_LAYOUT
     case "sentenceAnalysis":
-      return (
-        buildSentenceAnalysisActionLayout(outputSchema, getSentenceAnalysisLayoutLabels()) ??
-        DEFAULT_LAYOUT
-      )
+      return buildSentenceAnalysisActionLayout(outputSchema) ?? DEFAULT_LAYOUT
     default:
       return DEFAULT_LAYOUT
   }

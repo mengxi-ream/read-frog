@@ -1,13 +1,12 @@
 import type { SelectionToolbarCustomActionOutputField } from "@/types/config/selection-toolbar"
+import { compileLayout, renderLayoutHtml } from "@read-frog/layout-engine/core"
 import {
   buildDictionaryLayout,
   buildSentenceAnalysisLayout,
 } from "@read-frog/layout-engine/presets"
 import { describe, expect, it } from "vitest"
-import {
-  CUSTOM_ACTION_TEMPLATES,
-  getSentenceAnalysisLayoutLabels,
-} from "@/utils/constants/custom-action-templates"
+import { CUSTOM_ACTION_TEMPLATES } from "@/utils/constants/custom-action-templates"
+import { buildCustomActionLayoutScope } from "../host"
 import {
   buildDictionaryActionLayout,
   buildSentenceAnalysisActionLayout,
@@ -135,14 +134,13 @@ describe("buildDictionaryActionLayout", () => {
 })
 
 describe("getSentenceAnalysisSlots", () => {
-  it("recognizes the preset's ids, with or without a prefix", () => {
-    for (const prefix of ["", "copy-"]) {
+  it("recognizes preset and built-in ids, and copies of them", () => {
+    for (const prefix of ["", "default-", "copy-"]) {
       const slots = getSentenceAnalysisSlots([
         field(`${prefix}sentence-analysis-annotations`, "A"),
         field(`${prefix}sentence-analysis-translation`, "T"),
-        field(`${prefix}sentence-analysis-structure`, "St"),
       ])
-      expect(namesBySlot(slots)).toEqual({ annotations: "A", translation: "T", structure: "St" })
+      expect(namesBySlot(slots)).toEqual({ annotations: "A", translation: "T" })
     }
   })
 
@@ -153,6 +151,8 @@ describe("getSentenceAnalysisSlots", () => {
       "sentence-analysis-annotations-2",
       "Sentence-Analysis-Annotations",
       "sentence-analysis-segments",
+      // The first version's third field: a plain row now.
+      "sentence-analysis-structure",
     ]
     expect(getSentenceAnalysisSlots(ids.map((id) => field(id, id)))).toEqual({})
 
@@ -164,29 +164,47 @@ describe("getSentenceAnalysisSlots", () => {
   })
 
   it("needs the annotations slot to be sentence-analysis-shaped", () => {
-    const labels = getSentenceAnalysisLayoutLabels()
     expect(isSentenceAnalysisShaped(presetSchema("sentence-analysis"))).toBe(true)
     const withoutAnnotations = [field("sentence-analysis-translation", "T")]
     expect(isSentenceAnalysisShaped(withoutAnnotations)).toBe(false)
-    expect(buildSentenceAnalysisActionLayout(withoutAnnotations, labels)).toBeNull()
+    expect(buildSentenceAnalysisActionLayout(withoutAnnotations)).toBeNull()
   })
 })
 
 describe("buildSentenceAnalysisActionLayout", () => {
   it("builds the card for the recognized slots, annotating the selection", () => {
-    const labels = getSentenceAnalysisLayoutLabels()
     const schema = presetSchema("sentence-analysis")
 
-    expect(buildSentenceAnalysisActionLayout(schema, labels)).toBe(
+    expect(buildSentenceAnalysisActionLayout(schema)).toBe(
       buildSentenceAnalysisLayout({
         slots: {
           annotations: "sentence-analysis-annotations",
           translation: "sentence-analysis-translation",
-          structure: "sentence-analysis-structure",
         },
-        labels,
+        labels: { ctxKey: "sentenceAnalysisLabels" },
         source: { ctxKey: "selection" },
       }),
     )
+  })
+
+  it("shows a first-version structure field as a row of its own", () => {
+    const schema = [
+      ...presetSchema("sentence-analysis"),
+      field("sentence-analysis-structure", "Structure"),
+    ]
+    const compiled = compileLayout(buildSentenceAnalysisActionLayout(schema) ?? "")
+    if (!compiled.ok) throw compiled.error
+    const html = renderLayoutHtml(
+      compiled.compiled,
+      buildCustomActionLayoutScope({
+        outputSchema: schema,
+        value: { Structure: "Main clause first." },
+        selection: "It rained.",
+        targetCode: "eng",
+        status: "done",
+      }),
+    )
+    expect(html).toContain('data-rf-key="sentence-analysis-structure"')
+    expect(html).toContain("Main clause first.")
   })
 })

@@ -1,5 +1,7 @@
 import { HostedAiOutputFieldTypeSchema } from "@read-frog/api-contract"
 import { z } from "zod"
+import { isBuiltInActionId } from "@/utils/constants/custom-action"
+import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
 
 // Upper bound (UTF-16 code units) of a custom action's HTML layout. NEVER lower
 // it: an older build that reads a config holding a longer layout fails schema
@@ -49,6 +51,13 @@ export const selectionToolbarBuiltInActionStateSchema = z.object({
 
 export const selectionToolbarBuiltInActionsSchema = z.object({
   dictionary: selectionToolbarBuiltInActionStateSchema,
+  // `.default()` is load-bearing: a config stored before v104 still parses in
+  // UI contexts that load ahead of the background migration, instead of
+  // falling back to DEFAULT_CONFIG and writing that over the user's settings.
+  sentenceAnalysis: selectionToolbarBuiltInActionStateSchema.default(() => ({
+    enabled: true,
+    providerId: BUILT_IN_AI_PROVIDER_ID,
+  })),
 })
 
 export const selectionToolbarCustomActionSchema = z
@@ -137,10 +146,10 @@ export const selectionToolbarCustomActionsSchema = z
   .superRefine((actions, ctx) => {
     const idSet = new Set<string>()
     actions.forEach((action, index) => {
-      if (action.id === "default-dictionary") {
+      if (isBuiltInActionId(action.id)) {
         ctx.addIssue({
           code: "custom",
-          message: 'Action id "default-dictionary" is reserved for the built-in Dictionary.',
+          message: `Action id "${action.id}" is reserved for a built-in action.`,
           path: [index, "id"],
         })
       }

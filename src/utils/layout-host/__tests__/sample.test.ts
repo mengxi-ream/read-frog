@@ -1,5 +1,11 @@
 import type { SelectionToolbarCustomActionOutputField } from "@/types/config/selection-toolbar"
 import { compileLayout, renderLayoutHtml } from "@read-frog/layout-engine/core"
+import {
+  SENTENCE_ANALYSIS_FORMS,
+  SENTENCE_ANALYSIS_OBSTACLES,
+  SENTENCE_ANALYSIS_ROLES,
+  SENTENCE_ANALYSIS_SENSES,
+} from "@read-frog/layout-engine/presets"
 import { describe, expect, it } from "vitest"
 import { CUSTOM_ACTION_TEMPLATES } from "@/utils/constants/custom-action-templates"
 import { SUPPORTED_UI_LOCALES } from "@/utils/i18n/locales"
@@ -9,7 +15,6 @@ import {
   buildStreamingFrames,
   getLayoutSampleContext,
   LAYOUT_SAMPLE_NUMBER,
-  SENTENCE_ANALYSIS_SAMPLE_SELECTION,
 } from "../sample"
 import { getDictionarySlots, getSentenceAnalysisSlots } from "../slots"
 
@@ -40,7 +45,7 @@ function renderWithJson(source: string, text: unknown, selection = ""): string {
       outputSchema: [field("json", "json")],
       value: { json: text },
       selection,
-      targetLanguage: "Chinese",
+      targetCode: "cmn",
       status: "done",
     }),
   )
@@ -49,6 +54,26 @@ function renderWithJson(source: string, text: unknown, selection = ""): string {
 // How many complete items `parse_json` reads from a (possibly truncated) array.
 function parsedCount(text: unknown): number {
   return Number(renderWithJson("{%- assign a = json | parse_json -%}{{ a | size }}", text) || 0)
+}
+
+// How many `head` words the `annotate` filter links onto `selection`.
+function linkedHeadCount(annotations: string, selection: string): number {
+  const html = renderWithJson(
+    '{%- assign a = json | parse_json -%}{%- assign events = ctx.selection | annotate: a, "text", "head" -%}{%- for e in events -%}{%- if e.kind == "enter" and e.key == "head" -%}h{%- endif -%}{%- endfor -%}',
+    annotations,
+    selection,
+  )
+  return html.length
+}
+
+interface SampleAnnotation {
+  text: string
+  type: string
+  form?: string
+  sense?: string
+  head?: string
+  obstacle?: string
+  note?: string
 }
 
 // The nesting depth of every annotation the `annotate` filter anchors onto
@@ -126,24 +151,53 @@ describe("buildLayoutSampleValues", () => {
     expect(buildLayoutSampleValues(schema, { locale: "ja" })[term.name]).toBe("blossom")
   })
 
-  it("fills sentence analysis slots with a real model answer for the sample sentence", () => {
+  it.each(SUPPORTED_UI_LOCALES)(
+    "gives %s a sentence analysis sample that anchors and keeps to the card's vocabularies",
+    (locale) => {
+      const schema = presetSchema("sentence-analysis")
+      const slots = getSentenceAnalysisSlots(schema)
+      const values = buildLayoutSampleValues(schema, { locale })
+      const { selection } = getLayoutSampleContext(schema, locale)
+
+      // A JSON array inside a string, compact like a model writes it.
+      const text = String(values[slots.annotations!.name])
+      const annotations = JSON.parse(text) as SampleAnnotation[]
+      expect(text).toBe(JSON.stringify(annotations))
+      // Every quote anchors onto the sentence, nested, and so does every head.
+      const depths = annotatedDepths(text, selection)
+      expect(depths).toHaveLength(annotations.length)
+      expect(Math.max(...depths)).toBeGreaterThanOrEqual(2)
+      expect(linkedHeadCount(text, selection)).toBe(
+        annotations.filter((annotation) => annotation.head !== undefined).length,
+      )
+      const valuesOf = (key: "type" | "form" | "sense" | "obstacle") =>
+        annotations.flatMap((annotation) =>
+          annotation[key] === undefined ? [] : [annotation[key]],
+        )
+      for (const type of valuesOf("type")) expect(SENTENCE_ANALYSIS_ROLES).toContain(type)
+      for (const form of valuesOf("form")) {
+        expect(["clause", ...SENTENCE_ANALYSIS_FORMS]).toContain(form)
+      }
+      for (const sense of valuesOf("sense")) expect(SENTENCE_ANALYSIS_SENSES).toContain(sense)
+      for (const obstacle of valuesOf("obstacle")) {
+        expect(SENTENCE_ANALYSIS_OBSTACLES).toContain(obstacle)
+      }
+      expect(annotations.some((annotation) => annotation.note)).toBe(true)
+      expect(values[slots.translation!.name]).not.toBe("")
+      // English analyses a Chinese sentence; every other language an English one.
+      expect(/\p{Script=Han}/u.test(selection)).toBe(locale === "en")
+    },
+  )
+
+  it("explains the sentence in each UI language's own words", () => {
     const schema = presetSchema("sentence-analysis")
     const slots = getSentenceAnalysisSlots(schema)
-    const values = buildLayoutSampleValues(schema)
-
-    // A JSON array inside a string, compact like the model wrote it, whose
-    // quotes all anchor onto the sample sentence, nested.
-    const text = String(values[slots.annotations!.name])
-    const annotations = JSON.parse(text) as Array<{ text: string; type: string }>
-    expect(text).toBe(JSON.stringify(annotations))
-    const depths = annotatedDepths(text, SENTENCE_ANALYSIS_SAMPLE_SELECTION)
-    expect(depths).toHaveLength(annotations.length)
-    expect(Math.max(...depths)).toBeGreaterThanOrEqual(3)
-    expect(new Set(annotations.map((annotation) => annotation.type))).toEqual(
-      new Set(["subject", "predicate", "object", "clause", "adverbial", "connector"]),
-    )
-    expect(values[slots.translation!.name]).toContain("委员会推迟了")
-    expect(values[slots.structure!.name]).toContain("主句为")
+    for (const slot of [slots.annotations!, slots.translation!]) {
+      const texts = SUPPORTED_UI_LOCALES.map(
+        (locale) => buildLayoutSampleValues(schema, { locale })[slot.name],
+      )
+      expect(new Set(texts).size).toBe(SUPPORTED_UI_LOCALES.length)
+    }
   })
 
   it("streams the sample's annotations in one at a time", () => {
@@ -161,21 +215,43 @@ describe("buildLayoutSampleValues", () => {
     }
   })
 
-  it("picks the sample context by the action's shape and the UI language", () => {
-    expect(getLayoutSampleContext(presetSchema("sentence-analysis"), "ja").selection).toBe(
-      SENTENCE_ANALYSIS_SAMPLE_SELECTION,
+  it("recognizes the built-in's default-sentence-analysis-* ids too", () => {
+    const schema = presetSchema("sentence-analysis").map((entry) => ({
+      ...entry,
+      id: `default-${entry.id}`,
+    }))
+    const translation = getSentenceAnalysisSlots(schema).translation!
+    expect(buildLayoutSampleValues(schema, { locale: "zh-CN" })[translation.name]).toContain(
+      "委员会推迟了",
+    )
+  })
+
+  // A sample is an answer written in the locale's language, so that language
+  // is its target language: the card's words follow it like the notes do.
+  it("picks the sample context by the action's shape and the answer's language", () => {
+    const sentenceAnalysis = presetSchema("sentence-analysis")
+    expect(getLayoutSampleContext(sentenceAnalysis, "ja")).toEqual({
+      selection: expect.stringMatching(/^The committee has postponed/),
+      targetCode: "jpn",
+    })
+    expect(getLayoutSampleContext(sentenceAnalysis, "en")).toEqual({
+      selection: expect.stringMatching(/^虽然/),
+      targetCode: "eng",
+    })
+    expect(getLayoutSampleContext(sentenceAnalysis, "xx")).toEqual(
+      getLayoutSampleContext(sentenceAnalysis, "en"),
     )
     expect(getLayoutSampleContext(dictionarySchema(), "en")).toEqual({
       selection: "珍惜",
-      targetLanguage: "English",
+      targetCode: "eng",
     })
-    expect(getLayoutSampleContext(dictionarySchema(), "ja")).toEqual({
+    expect(getLayoutSampleContext(dictionarySchema(), "zh-TW")).toEqual({
       selection: "blossoms",
-      targetLanguage: "Japanese",
+      targetCode: "cmn-Hant",
     })
     expect(getLayoutSampleContext([field("a", "Summary")], "ko")).toEqual({
       selection: "blossoms",
-      targetLanguage: "Korean",
+      targetCode: "kor",
     })
   })
 

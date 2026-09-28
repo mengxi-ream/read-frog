@@ -8,6 +8,25 @@ import { getUniqueName } from "@/utils/name"
 export const ICON_PATTERN = /^[^:\s]+:[^:\s]+$/
 export const DEFAULT_ACTION_NAME = "Custom AI Action"
 export const BUILT_IN_DICTIONARY_ACTION_ID = "default-dictionary"
+export const BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID = "default-sentence-analysis"
+
+// The code-owned actions, by id → their key in `selectionToolbar.builtInActions`,
+// which persists only their enabled/provider/Notebase state. Listed in the
+// order they appear in, ahead of the user's own actions.
+export const BUILT_IN_ACTION_KEYS = {
+  [BUILT_IN_DICTIONARY_ACTION_ID]: "dictionary",
+  [BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID]: "sentenceAnalysis",
+} as const
+
+export type BuiltInActionId = keyof typeof BUILT_IN_ACTION_KEYS
+export type BuiltInActionKey = (typeof BUILT_IN_ACTION_KEYS)[BuiltInActionId]
+
+export const BUILT_IN_ACTION_IDS = Object.keys(BUILT_IN_ACTION_KEYS) as BuiltInActionId[]
+
+export function isBuiltInActionId(id: string): id is BuiltInActionId {
+  return Object.hasOwn(BUILT_IN_ACTION_KEYS, id)
+}
+
 export function createOutputSchemaField(
   name: string,
   type: SelectionToolbarCustomActionOutputType = "string",

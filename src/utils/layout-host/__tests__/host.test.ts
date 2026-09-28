@@ -16,6 +16,7 @@ describe("the custom action layout host", () => {
       "fields",
       "selection",
       "targetLanguage",
+      "sentenceAnalysisLabels",
       "status",
     ])
   })
@@ -41,13 +42,42 @@ describe("the custom action layout host", () => {
         ],
         value: { "the term": "blossom <b>" },
         selection: "blossoms",
-        targetLanguage: "Chinese",
+        targetCode: "cmn",
         status: "streaming",
       }),
     )
 
     expect(html).toBe(
-      "blossom &lt;b&gt;|blossoms|Chinese|streaming|t:blossom &lt;b&gt;:false;n::true;",
+      "blossom &lt;b&gt;|blossoms|Simplified Mandarin Chinese|streaming|t:blossom &lt;b&gt;:false;n::true;",
+    )
+  })
+
+  // The words come from the i18n mock, tagged with the locale they were asked in.
+  it.each([
+    ["cmn", "zh-CN"],
+    ["cmn-Hant", "zh-TW"],
+    ["jpn", "ja"],
+    ["eng", "en"],
+    // No words in French: the UI language's (the mock's is en).
+    ["fra", "en"],
+  ] as const)("puts the card's words in ctx in the language of %s", (targetCode, locale) => {
+    const compiled = compileLayout(
+      "{{ ctx.sentenceAnalysisLabels.roles.subject }}|{{ ctx.sentenceAnalysisLabels.forms['present-participle'] }}",
+    )
+    if (!compiled.ok) throw compiled.error
+    const html = renderLayoutHtml(
+      compiled.compiled,
+      buildCustomActionLayoutScope({
+        outputSchema: [],
+        value: null,
+        selection: "",
+        targetCode,
+        status: "done",
+      }),
+    )
+    const prefix = "options.selectionToolbar.customActions.templates.sentenceAnalysis"
+    expect(html).toBe(
+      `${prefix}.roles.subject@${locale}|${prefix}.forms.presentParticiple@${locale}`,
     )
   })
 

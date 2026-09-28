@@ -9,8 +9,8 @@ import { SortableList } from "@/components/sortable-list"
 import { Button } from "@/components/ui/base-ui/button"
 import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { BUILT_IN_DICTIONARY_ACTION_ID, DEFAULT_ACTION_NAME } from "@/utils/constants/custom-action"
-import { getBuiltInDictionaryAction, patchSelectionToolbarAction } from "@/utils/custom-actions"
+import { DEFAULT_ACTION_NAME } from "@/utils/constants/custom-action"
+import { getBuiltInActions, patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { getUniqueName } from "@/utils/name"
 import { CUSTOM_ACTION_ADD_QUERY_PARAM } from "@/utils/navigation"
@@ -34,7 +34,7 @@ export function CustomActionCardList() {
     new URLSearchParams(search).has(CUSTOM_ACTION_ADD_QUERY_PARAM),
   )
   const customActions = selectionToolbarConfig.customActions
-  const builtInDictionary = getBuiltInDictionaryAction(selectionToolbarConfig)
+  const builtInActions = getBuiltInActions(selectionToolbarConfig)
 
   const customActionProviders = useMemo(
     () => getSelectableProvidersForCapability("customAction", providersConfig),
@@ -112,19 +112,21 @@ export function CustomActionCardList() {
         <h3 className="px-1 text-xs font-medium text-muted-foreground">
           {i18n.t("options.selectionToolbar.customActions.builtIn" as never)}
         </h3>
-        <BuiltInDictionaryCard action={builtInDictionary} />
+        {builtInActions.map((action) => (
+          <BuiltInActionCard key={action.id} action={action} />
+        ))}
       </section>
     </div>
   )
 }
 
-function BuiltInDictionaryCard({ action }: { action: SelectionToolbarCustomAction }) {
+function BuiltInActionCard({ action }: { action: SelectionToolbarCustomAction }) {
   const setSelectionToolbarConfig = useSetAtom(configFieldsAtomMap.selectionToolbar)
   const [selectedCustomActionId, setSelectedCustomActionId] = useAtom(selectedCustomActionIdAtom)
 
   return (
     <EntityListItem.Root
-      data-action-id={BUILT_IN_DICTIONARY_ACTION_ID}
+      data-action-id={action.id}
       selected={selectedCustomActionId === action.id}
       className={action.enabled === false ? "opacity-70" : undefined}
       onClick={() => setSelectedCustomActionId(action.id)}

@@ -1,3 +1,4 @@
+import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { JSONValue } from "ai"
 import type { RefObject } from "react"
 import type { SelectionToolbarCustomActionRequestSlice } from "../atoms"
@@ -37,6 +38,8 @@ import {
 export interface CustomActionExecutionContext {
   action: SelectionToolbarCustomAction
   provider: CustomActionProviderRef
+  // The target language the run asks for; promptTokens.targetLanguage names it.
+  targetCode: LangCodeISO6393
   promptTokens: {
     selection: string
     paragraphs: string
@@ -173,6 +176,7 @@ export function buildCustomActionExecutionPlan(
     executionContext: {
       action,
       provider,
+      targetCode: customActionRequest.language.targetCode,
       promptTokens: {
         selection: cleanSelection,
         paragraphs: truncateContextTextForCustomAction(contextText || cleanSelection),

@@ -1,3 +1,4 @@
+import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { LayoutStatus } from "@read-frog/layout-engine/contract"
 import type { LayoutRenderReport, LayoutWarnCode } from "@read-frog/layout-engine/dom"
 import type { SurfaceByFeature } from "@/types/analytics"
@@ -28,7 +29,8 @@ interface CustomActionLayoutViewProps {
   outputSchema: SelectionToolbarCustomActionOutputField[]
   value: Record<string, unknown> | null
   selection: string
-  targetLanguage: string
+  // The target language the answer is in; the card's own words follow it.
+  targetCode: LangCodeISO6393
   status: LayoutStatus
   theme: "light" | "dark"
   speakSurface?: SurfaceByFeature["text_to_speech"]
@@ -57,7 +59,7 @@ export function CustomActionLayoutView({
   outputSchema,
   value,
   selection,
-  targetLanguage,
+  targetCode,
   status,
   theme,
   speakSurface,
@@ -65,8 +67,8 @@ export function CustomActionLayoutView({
   onRenderInfo,
 }: CustomActionLayoutViewProps) {
   const scope = useMemo(
-    () => buildCustomActionLayoutScope({ outputSchema, value, selection, targetLanguage, status }),
-    [outputSchema, value, selection, targetLanguage, status],
+    () => buildCustomActionLayoutScope({ outputSchema, value, selection, targetCode, status }),
+    [outputSchema, value, selection, targetCode, status],
   )
   const speak = useExtensionSpeakAdapter(speakSurface)
 

@@ -2,7 +2,7 @@ import { useSetAtom, useStore } from "jotai"
 import { useEffect } from "react"
 import { useLocation, useNavigate } from "react-router"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { BUILT_IN_DICTIONARY_ACTION_ID } from "@/utils/constants/custom-action"
+import { isBuiltInActionId } from "@/utils/constants/custom-action"
 import { i18n } from "@/utils/i18n"
 import { consumeCustomActionDeepLink } from "@/utils/navigation"
 import { ConfigItem } from "../../components/config-item"
@@ -31,10 +31,7 @@ function useCustomActionDeepLink() {
     const { actionId, tab } = deepLink
     if (actionId) {
       const actions = store.get(configFieldsAtomMap.selectionToolbar).customActions
-      if (
-        actionId === BUILT_IN_DICTIONARY_ACTION_ID ||
-        actions.some((action) => action.id === actionId)
-      ) {
+      if (isBuiltInActionId(actionId) || actions.some((action) => action.id === actionId)) {
         // A link to an action without a tab lands on its first tab.
         void setSelectedCustomActionId(actionId).then((proceeded) => {
           if (proceeded) setEditorTab(tab ?? "config")

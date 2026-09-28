@@ -60,6 +60,9 @@ vi.mock("@/utils/i18n", () => ({
   },
   initI18n: async () => {},
   setUiLanguage: async () => {},
+  getUiLocale: () => "en",
+  // Tags the key with the locale asked for, so tests can see which one was.
+  translateIn: (locale: string, key: string) => `${key}@${locale}`,
 }))
 
 // LocaleBoundary is a separate module from the mocked facade above and pulls in i18next +

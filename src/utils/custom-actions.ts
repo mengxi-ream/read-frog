@@ -3,22 +3,36 @@ import type {
   SelectionToolbarBuiltInActionState,
   SelectionToolbarCustomAction,
 } from "@/types/config/selection-toolbar"
-import { createDefaultDictionaryAction } from "@/utils/constants/config"
-import { BUILT_IN_DICTIONARY_ACTION_ID } from "@/utils/constants/custom-action"
+import type { BuiltInActionId } from "@/utils/constants/custom-action"
+import {
+  createDefaultDictionaryAction,
+  createDefaultSentenceAnalysisAction,
+} from "@/utils/constants/config"
+import {
+  BUILT_IN_ACTION_IDS,
+  BUILT_IN_ACTION_KEYS,
+  BUILT_IN_DICTIONARY_ACTION_ID,
+  BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID,
+  isBuiltInActionId,
+} from "@/utils/constants/custom-action"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { getUniqueName } from "@/utils/name"
 
 type SelectionToolbarConfig = Config["selectionToolbar"]
 
-export function getBuiltInDictionaryAction(
-  selectionToolbar: SelectionToolbarConfig,
-): SelectionToolbarCustomAction {
-  const definition = createDefaultDictionaryAction()
-  if (!definition) {
-    throw new Error("Built-in Dictionary action definition is unavailable")
-  }
+const BUILT_IN_ACTION_DEFINITIONS: Record<BuiltInActionId, () => SelectionToolbarCustomAction> = {
+  [BUILT_IN_DICTIONARY_ACTION_ID]: createDefaultDictionaryAction,
+  [BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID]: createDefaultSentenceAnalysisAction,
+}
 
-  const state = selectionToolbar.builtInActions?.dictionary ?? {
+// A built-in action as it reads: its code-owned definition in the current UI
+// language, with the persisted enabled/provider/Notebase state merged on.
+export function getBuiltInAction(
+  selectionToolbar: SelectionToolbarConfig,
+  id: BuiltInActionId,
+): SelectionToolbarCustomAction {
+  const definition = BUILT_IN_ACTION_DEFINITIONS[id]()
+  const state = selectionToolbar.builtInActions?.[BUILT_IN_ACTION_KEYS[id]] ?? {
     enabled: definition.enabled !== false,
     providerId: definition.providerId,
   }
@@ -30,18 +44,30 @@ export function getBuiltInDictionaryAction(
   }
 }
 
+export function getBuiltInDictionaryAction(
+  selectionToolbar: SelectionToolbarConfig,
+): SelectionToolbarCustomAction {
+  return getBuiltInAction(selectionToolbar, BUILT_IN_DICTIONARY_ACTION_ID)
+}
+
+export function getBuiltInActions(
+  selectionToolbar: SelectionToolbarConfig,
+): SelectionToolbarCustomAction[] {
+  return BUILT_IN_ACTION_IDS.map((id) => getBuiltInAction(selectionToolbar, id))
+}
+
 export function getSelectionToolbarActions(
   selectionToolbar: SelectionToolbarConfig,
 ): SelectionToolbarCustomAction[] {
-  return [getBuiltInDictionaryAction(selectionToolbar), ...selectionToolbar.customActions]
+  return [...getBuiltInActions(selectionToolbar), ...selectionToolbar.customActions]
 }
 
 export function findSelectionToolbarAction(
   selectionToolbar: SelectionToolbarConfig,
   actionId: string,
 ): SelectionToolbarCustomAction | undefined {
-  if (actionId === BUILT_IN_DICTIONARY_ACTION_ID) {
-    return getBuiltInDictionaryAction(selectionToolbar)
+  if (isBuiltInActionId(actionId)) {
+    return getBuiltInAction(selectionToolbar, actionId)
   }
   return selectionToolbar.customActions.find((action) => action.id === actionId)
 }
@@ -59,9 +85,7 @@ export function resolveNoteSuggestionAction(
   return action
 }
 
-function toBuiltInDictionaryState(
-  action: SelectionToolbarCustomAction,
-): SelectionToolbarBuiltInActionState {
+function toBuiltInState(action: SelectionToolbarCustomAction): SelectionToolbarBuiltInActionState {
   return {
     enabled: action.enabled !== false,
     providerId: action.providerId,
@@ -73,12 +97,12 @@ export function replaceSelectionToolbarAction(
   selectionToolbar: SelectionToolbarConfig,
   action: SelectionToolbarCustomAction,
 ): SelectionToolbarConfig {
-  if (action.id === BUILT_IN_DICTIONARY_ACTION_ID) {
+  if (isBuiltInActionId(action.id)) {
     return {
       ...selectionToolbar,
       builtInActions: {
         ...selectionToolbar.builtInActions,
-        dictionary: toBuiltInDictionaryState(action),
+        [BUILT_IN_ACTION_KEYS[action.id]]: toBuiltInState(action),
       },
     }
   }

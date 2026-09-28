@@ -1,5 +1,10 @@
 import { langCodeISO6393Schema, langLevel } from "@read-frog/definitions"
 import { z } from "zod"
+import {
+  BUILT_IN_ACTION_IDS,
+  BUILT_IN_ACTION_KEYS,
+  isBuiltInActionId,
+} from "@/utils/constants/custom-action"
 import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
 import {
   MAX_SELECTION_OVERLAY_OPACITY,
@@ -61,7 +66,7 @@ const selectionToolbarSchema = z
   .superRefine((selectionToolbar, ctx) => {
     const actionId = selectionToolbar.noteSuggestion.actionId
     const actionExists =
-      actionId === "default-dictionary" ||
+      isBuiltInActionId(actionId) ||
       selectionToolbar.customActions.some((action) => action.id === actionId)
 
     if (!actionExists) {
@@ -221,10 +226,13 @@ export const configSchema = z
     }
 
     const actionProviderEntries = [
-      {
-        providerId: data.selectionToolbar.builtInActions.dictionary.providerId,
-        path: ["selectionToolbar", "builtInActions", "dictionary", "providerId"] as const,
-      },
+      ...BUILT_IN_ACTION_IDS.map((id) => {
+        const key = BUILT_IN_ACTION_KEYS[id]
+        return {
+          providerId: data.selectionToolbar.builtInActions[key].providerId,
+          path: ["selectionToolbar", "builtInActions", key, "providerId"] as const,
+        }
+      }),
       ...data.selectionToolbar.customActions.map((action, index) => ({
         providerId: action.providerId,
         path: ["selectionToolbar", "customActions", index, "providerId"] as const,

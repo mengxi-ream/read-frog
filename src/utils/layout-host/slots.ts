@@ -1,8 +1,4 @@
-import type {
-  DictionarySlot,
-  SentenceAnalysisLayoutLabels,
-  SentenceAnalysisSlot,
-} from "@read-frog/layout-engine/presets"
+import type { DictionarySlot, SentenceAnalysisSlot } from "@read-frog/layout-engine/presets"
 import type { SelectionToolbarCustomActionOutputField } from "@/types/config/selection-toolbar"
 import {
   buildDictionaryLayout,
@@ -36,9 +32,10 @@ const DICTIONARY_SLOT_BY_ID_SUFFIX: Record<string, DictionarySlot> = {
   difficulty: "difficulty",
 }
 
-// `sentence-analysis-*` from the Sentence Analysis preset (copies keep the
-// ids), anchored at the end like the dictionary's.
-const SENTENCE_ANALYSIS_SLOT_ID_RE = /(?:^|-)sentence-analysis-(annotations|translation|structure)$/
+// `sentence-analysis-*` (the Sentence Analysis preset) and
+// `default-sentence-analysis-*` (the built-in, and copies of it), anchored at
+// the end like the dictionary's.
+const SENTENCE_ANALYSIS_SLOT_ID_RE = /(?:^|-)sentence-analysis-(annotations|translation)$/
 
 export function getDictionarySlots(
   outputSchema: readonly Field[],
@@ -90,15 +87,17 @@ export function buildDictionaryActionLayout(outputSchema: readonly Field[]): str
   return buildDictionaryLayout({ slots: slotIds(getDictionarySlots(outputSchema)) })
 }
 
+// The ctx key the sentence analysis card reads its words from: the host puts
+// them there when it renders, in the reader's language (see labels.ts), so the
+// layout itself holds none.
+export const SENTENCE_ANALYSIS_LABELS_CTX_KEY = "sentenceAnalysisLabels"
+
 // The sentence analysis card for this action's fields, annotating and
 // speaking the selection; null when it has no annotations field.
-export function buildSentenceAnalysisActionLayout(
-  outputSchema: readonly Field[],
-  labels: SentenceAnalysisLayoutLabels,
-): string | null {
+export function buildSentenceAnalysisActionLayout(outputSchema: readonly Field[]): string | null {
   return buildSentenceAnalysisLayout({
     slots: slotIds(getSentenceAnalysisSlots(outputSchema)),
-    labels,
+    labels: { ctxKey: SENTENCE_ANALYSIS_LABELS_CTX_KEY },
     source: { ctxKey: "selection" },
   })
 }

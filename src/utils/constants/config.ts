@@ -6,11 +6,19 @@ import type {
 } from "@/types/config/selection-toolbar"
 import type { PageTranslateRange } from "@/types/config/translate"
 import { DEFAULT_LAYOUT } from "@read-frog/layout-engine/presets"
-import i18next from "i18next"
-import { buildDictionaryActionLayout } from "@/utils/layout-host/slots"
+import {
+  buildDictionaryActionLayout,
+  buildSentenceAnalysisActionLayout,
+} from "@/utils/layout-host/slots"
 import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
-import { BUILT_IN_DICTIONARY_ACTION_ID } from "./custom-action"
-import { CUSTOM_ACTION_TEMPLATES } from "./custom-action-templates"
+import {
+  BUILT_IN_DICTIONARY_ACTION_ID,
+  BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID,
+} from "./custom-action"
+import {
+  createDictionaryDefinition,
+  createSentenceAnalysisDefinition,
+} from "./custom-action-templates"
 import { DEFAULT_GLOSSARY_CONFIG } from "./glossary"
 import {
   DEFAULT_SUBTITLE_TRANSLATE_PROMPTS_CONFIG,
@@ -57,29 +65,28 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 103
+export const CONFIG_SCHEMA_VERSION = 104
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
 
-let builtInDictionaryLayoutMemo: { key: string; layout: string } | null = null
+type OutputSchema = SelectionToolbarCustomActionOutputField[]
 
-// The built-in Dictionary's card layout, rebuilt only when the UI language or
-// the fields' ids/names change: it is resolved on every read of the action.
-// The localized names already track the language; it is in the key as well so
-// any localized text the card gains later cannot go stale on a switch.
-function getBuiltInDictionaryLayout(
-  outputSchema: SelectionToolbarCustomActionOutputField[],
-): string {
-  const key = JSON.stringify([i18next.language, ...outputSchema.map((f) => [f.id, f.name])])
-  if (builtInDictionaryLayoutMemo?.key !== key) {
-    builtInDictionaryLayoutMemo = {
-      key,
-      layout: buildDictionaryActionLayout(outputSchema) ?? DEFAULT_LAYOUT,
-    }
+// A built-in action's card, rebuilt only when its fields' ids change: it is
+// resolved on every read of the action. Cards place fields by id and hold no
+// words of their own (the sentence analysis card's come from ctx), so nothing
+// else about the language or the names goes into one.
+function memoizeBuiltInLayout(build: (outputSchema: OutputSchema) => string | null) {
+  let memo: { key: string; layout: string } | null = null
+  return (outputSchema: OutputSchema): string => {
+    const key = JSON.stringify(outputSchema.map((field) => field.id))
+    if (memo?.key !== key) memo = { key, layout: build(outputSchema) ?? DEFAULT_LAYOUT }
+    return memo.layout
   }
-  return builtInDictionaryLayoutMemo.layout
 }
+
+const getBuiltInDictionaryLayout = memoizeBuiltInLayout(buildDictionaryActionLayout)
+const getBuiltInSentenceAnalysisLayout = memoizeBuiltInLayout(buildSentenceAnalysisActionLayout)
 
 /**
  * Build the code-owned Dictionary action definition in the current UI locale.
@@ -87,11 +94,8 @@ function getBuiltInDictionaryLayout(
  * fields onto this definition at read time. The layout is generated here too
  * (never persisted), so it always follows the current locale's field names.
  */
-export function createDefaultDictionaryAction(): SelectionToolbarCustomAction | null {
-  const template = CUSTOM_ACTION_TEMPLATES.find((t) => t.id === "dictionary")
-  if (!template) return null
-
-  const action = template.createAction(BUILT_IN_AI_PROVIDER_ID)
+export function createDefaultDictionaryAction(): SelectionToolbarCustomAction {
+  const action = createDictionaryDefinition(BUILT_IN_AI_PROVIDER_ID)
   const outputSchema = action.outputSchema.map((field) => ({
     ...field,
     id: field.id.startsWith("dictionary-")
@@ -102,10 +106,29 @@ export function createDefaultDictionaryAction(): SelectionToolbarCustomAction | 
     ...action,
     id: BUILT_IN_DICTIONARY_ACTION_ID,
     outputSchema,
-    // Rebuilt AFTER the id rename: the card's tail matches the fields it has
-    // already placed by id, so the preset's layout (keyed on `dictionary-*`)
+    // Built for the renamed ids: the card's tail matches the fields it has
+    // already placed by id, so the preset's card (keyed on `dictionary-*`)
     // would list every slot field a second time.
     layout: getBuiltInDictionaryLayout(outputSchema),
+  }
+}
+
+/**
+ * The code-owned Sentence Analysis action, built like the Dictionary: from its
+ * preset, with `default-` field ids, in the current UI locale, and only its
+ * enabled/provider/Notebase state persisted.
+ */
+export function createDefaultSentenceAnalysisAction(): SelectionToolbarCustomAction {
+  const action = createSentenceAnalysisDefinition(BUILT_IN_AI_PROVIDER_ID)
+  const outputSchema = action.outputSchema.map((field) => ({
+    ...field,
+    id: `default-${field.id}`,
+  }))
+  return {
+    ...action,
+    id: BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID,
+    outputSchema,
+    layout: getBuiltInSentenceAnalysisLayout(outputSchema),
   }
 }
 
@@ -184,6 +207,10 @@ export const DEFAULT_CONFIG: Config = {
     },
     builtInActions: {
       dictionary: {
+        enabled: true,
+        providerId: BUILT_IN_AI_PROVIDER_ID,
+      },
+      sentenceAnalysis: {
         enabled: true,
         providerId: BUILT_IN_AI_PROVIDER_ID,
       },
@@ -285,6 +312,10 @@ export function buildFreshDefaultConfig(): Config {
       ...DEFAULT_CONFIG.selectionToolbar,
       builtInActions: {
         dictionary: {
+          enabled: true,
+          providerId: BUILT_IN_AI_PROVIDER_ID,
+        },
+        sentenceAnalysis: {
           enabled: true,
           providerId: BUILT_IN_AI_PROVIDER_ID,
         },

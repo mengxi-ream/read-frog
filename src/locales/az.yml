@@ -890,54 +890,70 @@ options:
           fieldDifficulty: Çətinlik
           fieldDifficultyDescription: Təxmini CEFR çətinlik səviyyəsi A1, A2, B1, B2, C1 və ya C2.
         sentenceAnalysis:
-          name: Cümlə təhlili
-          description: Uzun cümlələri rənglənmiş üzvlər, qısa izahlar və tərcümə ilə təhlil edin
-          systemPrompt: |-
-            Siz dil öyrənənlər üçün uzun və çətin cümlələri izah edən qrammatika müəllimisiniz.
-
-            ## Məqsəd
-            Seçimin qrammatik hissələrini göstərin ki, öyrənən onun quruluşunu, o cümlədən hər budaq cümlənin daxilindəki hissələri bir baxışda görsün.
-
-            ## Qaydalar
-            1. Hər annotasiya "text" sahəsində Seçimdən bir parçanı simvol-simvol köçürərək sitat gətirir (eyni sözlər, eyni böyük-kiçik hərflər və durğu işarələri). Əvvəlində və sonunda boşluq olmasın.
-            2. Baş cümlənin üzvlərini (mübtəda, xəbər, tamamlıq, tamamlayıcı, zərflik, ...) VƏ hər budaq cümlənin daxilindəki üzvləri işarələyin. Hər budaq cümlə onu bütövlükdə əhatə edən "clause" tipli bir annotasiya, üstəlik öz üzvləri üçün ayrıca annotasiyalar alır.
-            3. "type" dəqiq olaraq bunlardan biri olmalıdır: subject, predicate, object, complement, attributive, adverbial, appositive, connector, clause. Daha incə təfərrüatı "note" sahəsinə yazın.
-            4. Annotasiyaları Seçimdə başladıqları ardıcıllıqla sıralayın; ikisi eyni yerdən başlayırsa, uzun olanı əvvəl yazın.
-            5. Sitat gətirilən mətn Seçimdə bir dəfədən çox keçirsə, "occurrence": n əlavə edin (1 = ilk dəfə keçdiyi yer).
-            6. Parçalar bir-birinin içində ola bilər (budaq cümlə öz üzvlərini əhatə edir), lakin heç vaxt qismən üst-üstə düşməməlidir.
-            7. "note": {{targetLanguage}} dilində çox qısa izah (ən çoxu 8 söz). Budaq cümlə üçün: onun növü və nəyə aid olduğu.
-            8. Çətin söz, idiom və ya mürəkkəb qrammatika üçün "hard": true, əks halda false.
-            9. Hər sözü işarələməyin; artikl və əhəmiyyətsiz sözləri, vacib olmadıqca, buraxın.
-            10. Tərcümə: bütün Seçimin {{targetLanguage}} dilinə təbii tərcüməsi.
-            11. Struktur: cümlə modelini təsvir edən, {{targetLanguage}} dilində bir-iki cümlə.
-            12. Annotasiyalar dəyəri kompakt JSON massivindən ibarət SƏTİRdir. Daxili dırnaqları düzgün ekranlaşdırın. Onu markdown-a bükməyin.
-
-            ## Nümunə
-            Seçim: The man who called yesterday said that he would come.
-            Annotasiyalar: "[{\"text\":\"The man who called yesterday\",\"type\":\"subject\",\"note\":\"主语，含定语从句\",\"hard\":false},{\"text\":\"who called yesterday\",\"type\":\"clause\",\"note\":\"定语从句，修饰 man\",\"hard\":false},{\"text\":\"who\",\"type\":\"subject\",\"note\":\"关系代词作主语\",\"hard\":false},{\"text\":\"called\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"yesterday\",\"type\":\"adverbial\",\"note\":\"时间\",\"hard\":false},{\"text\":\"said\",\"type\":\"predicate\",\"note\":\"\",\"hard\":false},{\"text\":\"that he would come\",\"type\":\"clause\",\"note\":\"宾语从句，作 said 的宾语\",\"hard\":false},{\"text\":\"that\",\"type\":\"connector\",\"note\":\"引导宾语从句\",\"hard\":false},{\"text\":\"he\",\"type\":\"subject\",\"note\":\"\",\"hard\":false},{\"text\":\"would come\",\"type\":\"predicate\",\"note\":\"过去将来时\",\"hard\":false}]"
-          prompt: |-
-            ## Giriş
-            Seçim: {{selection}}
-            Abzaslar: {{paragraphs}}
-            Hədəf dili: {{targetLanguage}}
-          fieldAnnotations: Annotasiyalar
-          fieldAnnotationsDescription: 'Sətir kimi serializasiya olunmuş JSON massivi. Hər element {"text": string, "type": string, "note": string, "hard": boolean, "occurrence"?: number} formasındadır; "text" Seçimdən bir parçanı dəqiq sitat gətirir.'
-          fieldTranslation: Tərcümə
-          fieldTranslationDescription: Bütün Seçimin {{targetLanguage}} dilinə təbii tərcüməsi.
-          fieldStructure: Struktur
-          fieldStructureDescription: Cümlə modelini təsvir edən, {{targetLanguage}} dilində bir-iki cümlə.
+          name: "Cümlə təhlili"
+          description: "Uzun cümləni müəllim kimi işarələyir: əsası, hər budaq cümləni və çətin yerləri"
+          fieldAnnotations: "Annotasiyalar"
+          fieldTranslation: "Tərcümə"
           roles:
-            subject: Mübtəda
-            predicate: Xəbər
-            object: Tamamlıq
-            complement: Tamamlayıcı
-            attributive: Təyin
-            adverbial: Zərflik
-            appositive: Əlavə
-            clause: Budaq cümlə
-            connector: Bağlayıcı
-            other: Digər
-          hardLabel: Çətin
+            subject: "Mübtəda"
+            predicate: "Xəbər"
+            object: "Tamamlıq"
+            complement: "Tamamlayıcı"
+            attributive: "Təyin"
+            adverbial: "Zərflik"
+            appositive: "Əlavə"
+            connector: "Bağlayıcı"
+          clauses:
+            subject: "Mübtəda budaq cümləsi"
+            object: "Tamamlıq budaq cümləsi"
+            complement: "Xəbər budaq cümləsi"
+            attributive: "Təyin budaq cümləsi"
+            adverbial: "Zərflik budaq cümləsi"
+            appositive: "Əlavə budaq cümləsi"
+            clause: "Budaq cümlə"
+          adverbialClauses:
+            time: "Zaman budaq cümləsi"
+            place: "Yer budaq cümləsi"
+            cause: "Səbəb budaq cümləsi"
+            condition: "Şərt budaq cümləsi"
+            concession: "Güzəşt budaq cümləsi"
+            purpose: "Məqsəd budaq cümləsi"
+            result: "Nəticə budaq cümləsi"
+            manner: "Tərz budaq cümləsi"
+            comparison: "Müqayisə budaq cümləsi"
+          forms:
+            infinitive: "Məsdər"
+            gerund: "Feili isim"
+            presentParticiple: "-ing"
+            pastParticiple: "V3"
+          senses:
+            time: "Zaman"
+            place: "Yer"
+            cause: "Səbəb"
+            condition: "Şərt"
+            concession: "Güzəşt"
+            purpose: "Məqsəd"
+            result: "Nəticə"
+            manner: "Tərz"
+            comparison: "Müqayisə"
+          obstacles:
+            inversion: "İnversiya"
+            fronting: "Önə çəkmə"
+            ellipsis: "Ellipsis"
+            passive: "Məchul"
+            subjunctive: "Arzu şəkli"
+            parenthesis: "Ara söz"
+            dummyIt: "Formal it"
+            postponedSubject: "Həqiqi mübtəda"
+            cleft: "Vurğu quruluşu"
+            comparison: "Müqayisə"
+            negation: "İnkar"
+            split: "Ayrılma"
+            idiom: "İdiom"
+          restoreLabel: "Düz sıra:"
+          hardLabel: "Çətin"
+          trunkLabel: "Yalnız əsas"
+          slashesLabel: "Fasilələr"
         improveWriting:
           name: Yazını təkmilləşdir
           description: Yazı xətalarını təhlil edin və düzəlişlər təklif edin
