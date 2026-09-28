@@ -205,6 +205,20 @@ export async function insertTranslatedNodeIntoWrapper(
 
   if (isCurrent && !isCurrent()) return
 
+  // GitHub renders footnotes inside <sub> with line-height: 0. The original
+  // text wraps in the outer paragraph's line boxes, but our block translation
+  // is an inline-block inside <sub> and lays out its own lines. Inheriting
+  // that zero line height gives those lines no vertical advance: they paint
+  // at the same y coordinate while the translation's content box has no height.
+  // Inline translations still flow through the paragraph's line boxes, so
+  // leave their inherited line height alone.
+  if (
+    translatedNode.classList.contains(BLOCK_CONTENT_CLASS) &&
+    Number.parseFloat(window.getComputedStyle(translatedNode).lineHeight) === 0
+  ) {
+    translatedNode.style.lineHeight = "normal"
+  }
+
   if (
     translatedNode.classList.contains(BLOCK_CONTENT_CLASS) &&
     isDisplacedBelowFloat(translatedNode)
