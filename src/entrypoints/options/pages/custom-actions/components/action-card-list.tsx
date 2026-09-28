@@ -11,6 +11,7 @@ import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
   BUILT_IN_DICTIONARY_ACTION_ID,
+  BUILT_IN_IMPROVE_WRITING_ACTION_ID,
   BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID,
   DEFAULT_ACTION_NAME,
 } from "@/utils/constants/custom-action"
@@ -143,6 +144,9 @@ function BuiltInActionCard({ action }: { action: SelectionToolbarCustomAction })
           <RecentChangeBadge kind="updated" date="2026-09-27" />
         )}
         {action.id === BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID && (
+          <RecentChangeBadge kind="new" date="2026-09-27" />
+        )}
+        {action.id === BUILT_IN_IMPROVE_WRITING_ACTION_ID && (
           <RecentChangeBadge kind="new" date="2026-09-27" />
         )}
       </EntityListItem.Badges>

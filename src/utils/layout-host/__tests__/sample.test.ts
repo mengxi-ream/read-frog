@@ -1,6 +1,7 @@
 import type { SelectionToolbarCustomActionOutputField } from "@/types/config/selection-toolbar"
 import { compileLayout, renderLayoutHtml } from "@read-frog/layout-engine/core"
 import {
+  IMPROVE_WRITING_TYPES,
   SENTENCE_ANALYSIS_FORMS,
   SENTENCE_ANALYSIS_OBSTACLES,
   SENTENCE_ANALYSIS_ROLES,
@@ -16,7 +17,7 @@ import {
   getLayoutSampleContext,
   LAYOUT_SAMPLE_NUMBER,
 } from "../sample"
-import { getDictionarySlots, getSentenceAnalysisSlots } from "../slots"
+import { getDictionarySlots, getImproveWritingSlots, getSentenceAnalysisSlots } from "../slots"
 
 type Field = SelectionToolbarCustomActionOutputField
 
@@ -62,6 +63,17 @@ function linkedHeadCount(annotations: string, selection: string): number {
     '{%- assign a = json | parse_json -%}{%- assign events = ctx.selection | annotate: a, "text", "head" -%}{%- for e in events -%}{%- if e.kind == "enter" and e.key == "head" -%}h{%- endif -%}{%- endfor -%}',
     annotations,
     selection,
+  )
+  return html.length
+}
+
+// Where the marks and their fixes land: `annotate` over the selection by
+// `text`, and over the improved text by `fix`.
+function anchoredCount(annotations: string, text: string, key = "text"): number {
+  const html = renderWithJson(
+    `{%- assign a = json | parse_json -%}{%- assign events = ctx.selection | annotate: a, "${key}" -%}{%- for e in events -%}{%- if e.kind == "enter" -%}m{%- endif -%}{%- endfor -%}`,
+    annotations,
+    text,
   )
   return html.length
 }
@@ -226,6 +238,54 @@ describe("buildLayoutSampleValues", () => {
     )
   })
 
+  it.each(SUPPORTED_UI_LOCALES)(
+    "gives %s an Improve Writing sample whose marks and fixes all anchor",
+    (locale) => {
+      const schema = presetSchema("improve-writing")
+      const slots = getImproveWritingSlots(schema)
+      const values = buildLayoutSampleValues(schema, { locale })
+      const { selection } = getLayoutSampleContext(schema, locale)
+
+      const text = String(values[slots.annotations!.name])
+      const marks = JSON.parse(text) as Array<{
+        text: string
+        fix?: string
+        type: string
+        note: string
+      }>
+      expect(text).toBe(JSON.stringify(marks))
+      // Every quote anchors onto the selection, and every fix onto the rewrite.
+      expect(anchoredCount(text, selection)).toBe(marks.length)
+      const improved = String(values[slots.improved!.name])
+      expect(anchoredCount(text, improved, "fix")).toBe(marks.filter((mark) => mark.fix).length)
+      for (const mark of marks) {
+        expect(IMPROVE_WRITING_TYPES).toContain(mark.type)
+        expect(mark.note).not.toBe("")
+      }
+      // Every tier shows: an error, something awkward, a choice worth keeping.
+      expect(new Set(marks.map((mark) => mark.type))).toEqual(
+        new Set(
+          locale === "en" ? ["good", "grammar", "unnatural"] : ["good", "register", "grammar"],
+        ),
+      )
+      expect(values[slots.setting!.name]).not.toBe("")
+      expect(values[slots.summary!.name]).not.toBe("")
+      // English marks a Chinese learner's sentence; every other language an English email.
+      expect(/\p{Script=Han}/u.test(selection)).toBe(locale === "en")
+    },
+  )
+
+  it("marks the email in each UI language's own words", () => {
+    const schema = presetSchema("improve-writing")
+    const slots = getImproveWritingSlots(schema)
+    for (const slot of [slots.setting!, slots.annotations!, slots.summary!]) {
+      const texts = SUPPORTED_UI_LOCALES.map(
+        (locale) => buildLayoutSampleValues(schema, { locale })[slot.name],
+      )
+      expect(new Set(texts).size).toBe(SUPPORTED_UI_LOCALES.length)
+    }
+  })
+
   // A sample is an answer written in the locale's language, so that language
   // is its target language: the card's words follow it like the notes do.
   it("picks the sample context by the action's shape and the answer's language", () => {
@@ -248,6 +308,15 @@ describe("buildLayoutSampleValues", () => {
     expect(getLayoutSampleContext(dictionarySchema(), "zh-TW")).toEqual({
       selection: "blossoms",
       targetCode: "cmn-Hant",
+    })
+    const improveWriting = presetSchema("improve-writing")
+    expect(getLayoutSampleContext(improveWriting, "vi")).toEqual({
+      selection: expect.stringMatching(/^Dear Professor Lee/),
+      targetCode: "vie",
+    })
+    expect(getLayoutSampleContext(improveWriting, "en")).toEqual({
+      selection: expect.stringMatching(/^我昨天/),
+      targetCode: "eng",
     })
     expect(getLayoutSampleContext([field("a", "Summary")], "ko")).toEqual({
       selection: "blossoms",

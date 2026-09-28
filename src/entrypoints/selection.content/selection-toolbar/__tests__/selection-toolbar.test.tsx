@@ -249,6 +249,10 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
           enabled: false,
           providerId: "google-translate-default",
         },
+        improveWriting: {
+          enabled: false,
+          providerId: "google-translate-default",
+        },
       },
       customActions: [],
     })

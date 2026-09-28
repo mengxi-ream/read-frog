@@ -31,6 +31,7 @@ describe("getSelectionToolbarItems", () => {
       "speak",
       "default-dictionary",
       "default-sentence-analysis",
+      "default-improve-writing",
       "a",
       "b",
     ])
@@ -48,6 +49,7 @@ describe("getSelectionToolbarItems", () => {
       "translate",
       "a",
       "default-dictionary",
+      "default-improve-writing",
     ])
   })
 
@@ -59,6 +61,7 @@ describe("getSelectionToolbarItems", () => {
       "translate",
       "default-dictionary",
       "default-sentence-analysis",
+      "default-improve-writing",
       "new",
     ])
   })
@@ -80,6 +83,7 @@ describe("getSelectionToolbarItems", () => {
       speak: [false, false],
       "default-dictionary": [true, true],
       "default-sentence-analysis": [false, true],
+      "default-improve-writing": [true, true],
       a: [false, true],
       b: [true, false],
     })
@@ -94,6 +98,7 @@ describe("reorderSelectionToolbarItems", () => {
       "translate",
       "a",
       "speak",
+      "default-improve-writing",
       "default-dictionary",
       "b",
       "default-sentence-analysis",
@@ -113,12 +118,13 @@ describe("reorderSelectionToolbarItems for the enabled items only", () => {
     const selectionToolbar = toolbarWith(["a", "b"])
     selectionToolbar.features.speak.enabled = false
     selectionToolbar.customActions[0]!.enabled = false
-    // The menu lists translate, dictionary, sentence analysis and b; b goes first.
+    // The menu lists translate, the three built-in actions and b; b goes first.
     const next = reorderSelectionToolbarItems(selectionToolbar, [
       "b",
       "translate",
       "default-dictionary",
       "default-sentence-analysis",
+      "default-improve-writing",
     ])
 
     expect(next.order).toEqual([
@@ -126,8 +132,9 @@ describe("reorderSelectionToolbarItems for the enabled items only", () => {
       "speak",
       "translate",
       "default-dictionary",
-      "a",
       "default-sentence-analysis",
+      "a",
+      "default-improve-writing",
     ])
     expect(next.customActions.map((action) => action.id)).toEqual(["b", "a"])
   })
@@ -151,6 +158,7 @@ describe("setSelectionToolbarCustomActions", () => {
       "b",
       "default-dictionary",
       "default-sentence-analysis",
+      "default-improve-writing",
     ])
   })
 
@@ -168,10 +176,16 @@ describe("setSelectionToolbarCustomActions", () => {
 
 describe("setSelectionToolbarItemPinned", () => {
   it("unpins and pins an item through the unpinned list, once each", () => {
+    // Improve Writing starts unpinned.
     const unpinned = setSelectionToolbarItemPinned(toolbarWith(), "speak", false)
-    expect(unpinned.unpinned).toEqual(["speak"])
-    expect(setSelectionToolbarItemPinned(unpinned, "speak", false).unpinned).toEqual(["speak"])
-    expect(setSelectionToolbarItemPinned(unpinned, "speak", true).unpinned).toEqual([])
+    expect(unpinned.unpinned).toEqual(["default-improve-writing", "speak"])
+    expect(setSelectionToolbarItemPinned(unpinned, "speak", false).unpinned).toEqual([
+      "default-improve-writing",
+      "speak",
+    ])
+    expect(setSelectionToolbarItemPinned(unpinned, "speak", true).unpinned).toEqual([
+      "default-improve-writing",
+    ])
   })
 
   it("leaves the item's enabled switch alone, so the pin outlives turning it off and on", () => {

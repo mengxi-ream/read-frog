@@ -108,6 +108,7 @@ describe("SelectionToolbarMoreMenu", () => {
       "translate",
       "default-dictionary",
       "default-sentence-analysis",
+      "default-improve-writing",
     ])
     expect(within(row("mine")).getByText("Mine")).toBeInTheDocument()
     expect(within(row("translate")).getByText(i18n.t("action.translation"))).toBeInTheDocument()

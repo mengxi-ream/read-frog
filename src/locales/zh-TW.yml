@@ -718,6 +718,7 @@ options:
           resetFieldList: 欄位清單
           resetDictionary: 字典卡片
           resetSentenceAnalysis: 句子分析卡片
+          resetImproveWriting: "改善寫作卡片"
           resetConfirmTitle: 取代目前的版面？
           resetConfirmDescription: 編輯器中的內容將被取代，之後仍可在編輯器中復原。
           resetConfirm: 取代
@@ -737,7 +738,7 @@ options:
           insertContext: 上下文
           insertLoop: 所有欄位
           syntaxHelp: 語法
-          builtInHint: 內建字典的版面無法編輯。點選「自訂」複製一份後再修改。
+          builtInHint: 內建指令的版面無法編輯。點選「自訂」複製一份後再修改。
           viewSource: 檢視原始碼
           emptyNotice: 版面為空，彈出視窗將顯示預設的欄位清單。
           fallbackBanner: 此版面無法顯示，已改用預設版面。$1
@@ -966,49 +967,33 @@ options:
           trunkLabel: "只看主幹"
           slashesLabel: "斷句"
         improveWriting:
-          name: 改善寫作
-          description: 分析寫作錯誤並提出改善建議
-          systemPrompt: |-
-            你是協助語言學習者的寫作助理。
-
-            ## 目標
-            根據選取文字及其周圍段落，分析寫作問題並產生改寫版本。
-
-            ## 語言規則（重要）
-            1. 偵測 Selection 的原文語言，記為 {{originLanguage}}。
-            2. 「錯誤分析」欄位必須使用 {{targetLanguage}}。
-            3. 「改寫版本」欄位必須保持 {{originLanguage}}。
-            4. 絕對不要將「改寫版本」翻譯成 {{targetLanguage}}，除非 {{originLanguage}} 本來就是 {{targetLanguage}}。
-
-            ## 寫作規則
-            1. 找出文法、拼字、標點和用字錯誤。
-            2. 修改要自然，並保留作者原意與語氣。
-            3. 如果沒有明顯錯誤，請在「錯誤分析」中明確說明，並回傳輕度潤飾後的「改寫版本」。
-            4. 「改寫版本」應簡潔且可直接使用。
-
-            ## 範例
-            範例 A：
-            - Selection: He go to school yesterday, and he don't finish his homework.
-            - 偵測到 {{originLanguage}}：English
-            - {{targetLanguage}}：Chinese
-            - 錯誤分析（中文 — {{targetLanguage}}）：有主詞動詞一致與時態錯誤：go 應改為 went，don't 應改為 didn't，finish 應配合過去時態語境。
-            - 改寫版本（英文 — {{originLanguage}}）：He went to school yesterday, and he didn't finish his homework.
-
-            範例 B：
-            - Selection: 昨日私は友達に会いて、一緒に映画を見るました。
-            - 偵測到 {{originLanguage}}：Japanese
-            - {{targetLanguage}}：English
-            - 錯誤分析（English — {{targetLanguage}}）：There are verb conjugation errors: 会いて should be 会って (te-form of 会う), and 見るました should be 見ました (past tense of 見る in masu-form).
-            - 改寫版本（日文 — {{originLanguage}}）：昨日私は友達に会って、一緒に映画を見ました。
-          prompt: |-
-            ## 輸入
-            選取文字：{{selection}}
-            段落：{{paragraphs}}
-            目標語言：{{targetLanguage}}
-          fieldErrorAnalysis: 錯誤分析
-          fieldErrorAnalysisDescription: 使用 {{targetLanguage}} 說明選取文字中的文法、拼字、標點和用字問題。
-          fieldImprovedVersion: 改寫版本
-          fieldImprovedVersionDescription: 以原文語言修正並改善選取文字後的版本。
+          name: "改善寫作"
+          description: "像老師一樣批改：標出錯誤和不道地的表達，依場合給出修改後的版本"
+          fieldSetting: "場合"
+          fieldAnnotations: "標註"
+          fieldImproved: "修改後"
+          fieldSummary: "總評"
+          types:
+            spelling: "拼寫"
+            grammar: "文法"
+            punctuation: "標點"
+            wordChoice: "用詞"
+            logic: "邏輯"
+            unnatural: "不道地"
+            register: "得體"
+            clarity: "清晰"
+            good: "亮點"
+          tiers:
+            error: "錯誤"
+            awkward: "欠妥"
+            good: "亮點"
+          hideFixesLabel: "藏答案"
+          hiddenHintLabel: "先自己想想怎麼改，再看答案。"
+          showImprovedLabel: "顯示修改後版本"
+          improvedLabel: "修改後"
+          copyLabel: "複製"
+          unchangedLabel: "與原文相同，無需修改"
+          removeLabel: "刪掉"
         blank:
           name: 空白
           description: 從空白指令開始建立

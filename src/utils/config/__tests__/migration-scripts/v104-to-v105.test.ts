@@ -1,68 +1,90 @@
 import { describe, expect, it } from "vitest"
 import { migrate } from "../../migration-scripts/v104-to-v105"
 
-function storedConfig(customActions: any[] = []): any {
+function storedConfig(
+  dictionary: any = { enabled: true, providerId: "deepseek-default" },
+  customActions: any[] = [],
+): any {
   return {
     uiLanguage: "zh-CN",
     selectionToolbar: {
       enabled: true,
-      features: { translate: { enabled: true }, speak: { enabled: false } },
+      opacity: 100,
       builtInActions: {
-        dictionary: { enabled: true, providerId: "read-frog-free-ai" },
-        sentenceAnalysis: { enabled: false, providerId: "read-frog-free-ai" },
+        dictionary,
+        sentenceAnalysis: { enabled: true, providerId: "openai-default" },
       },
       customActions,
+      noteSuggestion: { enabled: true, actionId: "default-dictionary", providerId: "openai" },
     },
   }
 }
 
 describe("v104 -> v105 migration", () => {
-  it("seeds the toolbar order the toolbar already had, with every item pinned", () => {
-    const old = storedConfig([{ id: "b-action" }, { id: "a-action" }])
+  it("adds the built-in Improve Writing, turned off, on the Dictionary's provider", () => {
+    const old = storedConfig(undefined, [{ id: "my-action" }])
     const migrated = migrate(old)
 
-    expect(migrated.selectionToolbar.order).toEqual([
-      "translate",
-      "speak",
-      "default-dictionary",
-      "default-sentence-analysis",
-      "b-action",
-      "a-action",
-    ])
-    expect(migrated.selectionToolbar.unpinned).toEqual([])
-    // Enabled or not, every item gets its place; nothing else changes.
-    expect(migrated.selectionToolbar.features).toBe(old.selectionToolbar.features)
-    expect(migrated.selectionToolbar.builtInActions).toBe(old.selectionToolbar.builtInActions)
-    expect(migrated.selectionToolbar.customActions).toBe(old.selectionToolbar.customActions)
+    expect(migrated.selectionToolbar.builtInActions).toEqual({
+      dictionary: { enabled: true, providerId: "deepseek-default" },
+      sentenceAnalysis: { enabled: true, providerId: "openai-default" },
+      improveWriting: { enabled: false, providerId: "deepseek-default" },
+    })
+    // Everything else is carried over untouched.
     expect(migrated.uiLanguage).toBe("zh-CN")
-    expect(old.selectionToolbar).not.toHaveProperty("order")
-  })
-
-  it("lists only the toolbar's own items without custom actions", () => {
-    expect(migrate(storedConfig()).selectionToolbar.order).toEqual([
-      "translate",
-      "speak",
-      "default-dictionary",
-      "default-sentence-analysis",
-    ])
-  })
-
-  it("skips custom actions without a usable id, and duplicates", () => {
-    const migrated = migrate(
-      storedConfig([{ id: "x" }, { name: "no id" }, null, { id: "x" }, { id: "" }]),
+    expect(migrated.selectionToolbar.noteSuggestion).toBe(old.selectionToolbar.noteSuggestion)
+    expect(migrated.selectionToolbar.builtInActions.dictionary).toBe(
+      old.selectionToolbar.builtInActions.dictionary,
     )
-    expect(migrated.selectionToolbar.order.slice(4)).toEqual(["x"])
+    expect(migrated.selectionToolbar.builtInActions.sentenceAnalysis).toBe(
+      old.selectionToolbar.builtInActions.sentenceAnalysis,
+    )
+    expect(migrated.selectionToolbar.customActions).toBe(old.selectionToolbar.customActions)
+    expect(old.selectionToolbar.builtInActions).not.toHaveProperty("improveWriting")
   })
 
-  it("returns a config that already has an order by identity", () => {
-    const config = storedConfig()
-    config.selectionToolbar.order = ["speak", "translate"]
-    expect(migrate(config)).toBe(config)
+  it("is turned off whether or not the Dictionary is", () => {
+    const migrated = migrate(storedConfig({ enabled: false, providerId: "read-frog-free-ai" }))
+    expect(migrated.selectionToolbar.builtInActions.improveWriting).toEqual({
+      enabled: false,
+      providerId: "read-frog-free-ai",
+    })
   })
 
-  it("leaves configs without a selection toolbar for the schema to report", () => {
-    const config = { uiLanguage: "en" }
+  it.each([
+    ["no Dictionary state", undefined],
+    ["a Dictionary without a provider", { enabled: true }],
+    ["a blank provider", { enabled: true, providerId: "" }],
+    ["a non-string provider", { enabled: true, providerId: 7 }],
+  ])("falls back to the Built-in AI with %s", (_case, dictionary) => {
+    const old = storedConfig(dictionary)
+    if (dictionary === undefined) delete old.selectionToolbar.builtInActions.dictionary
+    expect(migrate(old).selectionToolbar.builtInActions.improveWriting).toEqual({
+      enabled: false,
+      providerId: "read-frog-free-ai",
+    })
+  })
+
+  it("returns the config by identity once the state exists", () => {
+    const once = migrate(storedConfig())
+    expect(migrate(once)).toBe(once)
+
+    // A state a UI context wrote first is kept as it is.
+    const written = storedConfig()
+    written.selectionToolbar.builtInActions.improveWriting = {
+      enabled: true,
+      providerId: "openai-default",
+    }
+    expect(migrate(written)).toBe(written)
+  })
+
+  it.each([
+    ["null", null],
+    ["an array", []],
+    ["no selection toolbar", { uiLanguage: "en" }],
+    ["no builtInActions", { selectionToolbar: { customActions: [] } }],
+    ["a non-object builtInActions", { selectionToolbar: { builtInActions: [] } }],
+  ])("leaves %s for the schema to report", (_case, config) => {
     expect(migrate(config)).toBe(config)
-    expect(migrate(null)).toBeNull()
   })
 })

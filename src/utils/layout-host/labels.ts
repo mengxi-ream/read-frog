@@ -1,5 +1,8 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
-import type { SentenceAnalysisLayoutLabels } from "@read-frog/layout-engine/presets"
+import type {
+  ImproveWritingLayoutLabels,
+  SentenceAnalysisLayoutLabels,
+} from "@read-frog/layout-engine/presets"
 import type { SupportedUiLocale } from "@/utils/i18n/locales"
 import { getUiLocale, translateIn } from "@/utils/i18n"
 
@@ -125,6 +128,49 @@ export function getSentenceAnalysisLabels(locale: SupportedUiLocale): SentenceAn
   if (!labels) {
     labels = buildSentenceAnalysisLabels(locale)
     sentenceAnalysisLabelsByLocale.set(locale, labels)
+  }
+  return labels
+}
+
+const IW_PREFIX = "options.selectionToolbar.customActions.templates.improveWriting"
+
+function buildImproveWritingLabels(locale: SupportedUiLocale): ImproveWritingLayoutLabels {
+  const t = (key: Parameters<typeof translateIn>[1]) => translateIn(locale, key)
+  return {
+    types: {
+      spelling: t(`${IW_PREFIX}.types.spelling`),
+      grammar: t(`${IW_PREFIX}.types.grammar`),
+      punctuation: t(`${IW_PREFIX}.types.punctuation`),
+      "word-choice": t(`${IW_PREFIX}.types.wordChoice`),
+      logic: t(`${IW_PREFIX}.types.logic`),
+      unnatural: t(`${IW_PREFIX}.types.unnatural`),
+      register: t(`${IW_PREFIX}.types.register`),
+      clarity: t(`${IW_PREFIX}.types.clarity`),
+      good: t(`${IW_PREFIX}.types.good`),
+    },
+    tiers: {
+      error: t(`${IW_PREFIX}.tiers.error`),
+      awkward: t(`${IW_PREFIX}.tiers.awkward`),
+      good: t(`${IW_PREFIX}.tiers.good`),
+    },
+    hideFixes: t(`${IW_PREFIX}.hideFixesLabel`),
+    hiddenHint: t(`${IW_PREFIX}.hiddenHintLabel`),
+    showImproved: t(`${IW_PREFIX}.showImprovedLabel`),
+    improved: t(`${IW_PREFIX}.improvedLabel`),
+    copy: t(`${IW_PREFIX}.copyLabel`),
+    unchanged: t(`${IW_PREFIX}.unchangedLabel`),
+    remove: t(`${IW_PREFIX}.removeLabel`),
+  }
+}
+
+const improveWritingLabelsByLocale = new Map<SupportedUiLocale, ImproveWritingLayoutLabels>()
+
+// The Improve Writing card's words in `locale`.
+export function getImproveWritingLabels(locale: SupportedUiLocale): ImproveWritingLayoutLabels {
+  let labels = improveWritingLabelsByLocale.get(locale)
+  if (!labels) {
+    labels = buildImproveWritingLabels(locale)
+    improveWritingLabelsByLocale.set(locale, labels)
   }
   return labels
 }
