@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/selection-popover"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
+import { SELECTION_TOOLBAR_FOOTER_COMPACT_CLASSES } from "./selection-toolbar-footer-compact"
 import { SelectionPopoverTooltip, useSelectionTooltipState } from "./selection-tooltip"
 
 function PreviewField({
@@ -170,18 +171,27 @@ export function SelectionToolbarFooterContent({
   const popoverOverlay = useSelectionPopoverOverlayProps()
 
   return (
-    <SelectionPopover.Footer className={cn("justify-between gap-3 border-t", className)}>
+    <SelectionPopover.Footer
+      className={cn(
+        // Only extra controls crowd the row: the provider and the two icon
+        // buttons alone fit a 320px popover in every locale.
+        children && "@container/footer",
+        "justify-between gap-3 border-t",
+        className,
+      )}
+    >
       <div className="max-w-52 min-w-0 flex-1">
         <ProviderSelector
           providers={providers}
           value={value}
           onChange={onProviderChange}
-          className="max-w-60"
+          className="max-w-full"
+          triggerNameClassName={SELECTION_TOOLBAR_FOOTER_COMPACT_CLASSES.label}
           triggerSize="sm"
           selectContentProps={popoverOverlay}
         />
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex min-w-0 items-center gap-1">
         {children}
         <ContextDetailsButton titleText={titleText} paragraphsText={paragraphsText} />
         <RegenerateButton onRegenerate={onRegenerate} />

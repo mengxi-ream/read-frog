@@ -39,6 +39,8 @@ interface ProviderSelectorProps {
   onChange: (id: string) => void
   placeholder?: string
   className?: string
+  /** Applied to the selected provider's name in the trigger, not to the list items. */
+  triggerNameClassName?: string
   triggerSize?: ProviderSelectorTriggerSize
   selectContentProps?: Pick<
     ComponentProps<typeof SelectContent>,
@@ -104,6 +106,7 @@ export default function ProviderSelector({
   onChange,
   placeholder,
   className,
+  triggerNameClassName,
   triggerSize = "default",
   selectContentProps,
 }: ProviderSelectorProps) {
@@ -119,6 +122,7 @@ export default function ProviderSelector({
         onChange={onChange}
         placeholder={placeholder}
         className={className}
+        triggerNameClassName={triggerNameClassName}
         triggerSize={triggerSize}
         selectContentProps={selectContentProps}
         theme={theme}
@@ -133,6 +137,7 @@ export default function ProviderSelector({
       onChange={onChange}
       placeholder={placeholder}
       className={className}
+      triggerNameClassName={triggerNameClassName}
       triggerSize={triggerSize}
       selectContentProps={selectContentProps}
       theme={theme}
@@ -146,6 +151,7 @@ function GroupedSelect({
   onChange,
   placeholder,
   className,
+  triggerNameClassName,
   triggerSize,
   theme,
   selectContentProps,
@@ -155,6 +161,7 @@ function GroupedSelect({
   onChange: (id: string) => void
   placeholder?: string
   className?: string
+  triggerNameClassName?: string
   triggerSize: ProviderSelectorTriggerSize
   selectContentProps?: Pick<
     ComponentProps<typeof SelectContent>,
@@ -178,6 +185,7 @@ function GroupedSelect({
               logo={getProviderLogo(provider, theme)}
               name={getProviderName(provider)}
               size="sm"
+              textClassName={triggerNameClassName}
             />
           )}
         </SelectValue>
@@ -212,6 +220,7 @@ function UngroupedSelect({
   onChange,
   placeholder,
   className,
+  triggerNameClassName,
   triggerSize,
   theme,
   selectContentProps,
@@ -221,6 +230,7 @@ function UngroupedSelect({
   onChange: (id: string) => void
   placeholder?: string
   className?: string
+  triggerNameClassName?: string
   triggerSize: ProviderSelectorTriggerSize
   selectContentProps?: Pick<
     ComponentProps<typeof SelectContent>,
@@ -245,6 +255,7 @@ function UngroupedSelect({
               logo={getProviderLogo(provider, theme)}
               name={getProviderName(provider)}
               size="sm"
+              textClassName={triggerNameClassName}
             />
           )}
         </SelectValue>
