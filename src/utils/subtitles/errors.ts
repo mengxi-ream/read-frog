@@ -1,15 +1,4 @@
-/**
- * A call to action carried alongside a toast error — "Upgrade", "Log in".
- * Described as data rather than a callback so the layer that raises the error
- * stays free of UI concerns and the tests can assert on it without comparing
- * functions; the content script's toast host turns it into a button.
- */
-export interface SubtitlesErrorAction {
-  /** Already localized. */
-  label: string
-  /** Absolute URL, opened through the background worker on click. */
-  url: string
-}
+import type { ErrorAction } from "@/utils/error-action"
 
 export class SubtitlesError extends Error {
   readonly code: string
@@ -22,9 +11,9 @@ export class SubtitlesError extends Error {
 }
 
 export class ToastSubtitlesError extends SubtitlesError {
-  readonly action?: SubtitlesErrorAction
+  readonly action?: ErrorAction
 
-  constructor(code: string, action?: SubtitlesErrorAction) {
+  constructor(code: string, action?: ErrorAction) {
     super(code)
     this.name = "ToastSubtitlesError"
     this.action = action

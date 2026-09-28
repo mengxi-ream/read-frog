@@ -1,49 +1,4 @@
 import type { VideoTranscriptUsagePool } from "@read-frog/api-contract"
-import type { SubtitlesErrorAction } from "@/utils/subtitles/errors"
-import { env } from "@/env"
-import { i18n } from "@/utils/i18n"
-
-/**
- * The single place that knows where an AI-subtitles denial sends the user and
- * what its button says. Every wall — the click-time pre-flight and the server's
- * own error codes — builds its call to action from here, so moving a landing
- * page is one edit rather than a grep across the subtitles pipeline.
- */
-
-function websiteUrl(path: string): string {
-  return new URL(path, env.WXT_WEBSITE_URL).toString()
-}
-
-export function pricingUrl(): string {
-  return websiteUrl("/pricing")
-}
-
-/** Billing lives in the app's settings dialog, not on the marketing page. */
-export function billingUrl(): string {
-  return websiteUrl("/home")
-}
-
-export function logInUrl(): string {
-  return websiteUrl("/log-in")
-}
-
-export function upgradeAction(): SubtitlesErrorAction {
-  return { label: i18n.t("action.upgrade"), url: pricingUrl() }
-}
-
-/**
- * Dunning, not cancellation: they already pay and the card just failed, so
- * sending them to pricing would invite an existing subscriber to subscribe
- * again — and a button reading "Upgrade" would say the wrong thing to someone
- * who already did.
- */
-export function billingAction(): SubtitlesErrorAction {
-  return { label: i18n.t("action.updatePayment"), url: billingUrl() }
-}
-
-export function logInAction(): SubtitlesErrorAction {
-  return { label: i18n.t("account.login"), url: logInUrl() }
-}
 
 /**
  * When the quota runs dry, "when does it come back" is the earliest date any

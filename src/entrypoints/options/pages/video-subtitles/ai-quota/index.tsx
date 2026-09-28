@@ -7,14 +7,11 @@ import { Progress, ProgressLabel } from "@/components/ui/base-ui/progress"
 import { Skeleton } from "@/components/ui/base-ui/skeleton"
 import { openLogIn } from "@/components/user-account-menu/shared"
 import { authClient } from "@/utils/auth/auth-client"
+import { pricingUrl } from "@/utils/error-action"
 import { i18n } from "@/utils/i18n"
 import { orpc } from "@/utils/orpc/client"
 import { cn } from "@/utils/styles/utils"
-import {
-  formatQuotaDate,
-  launchBonusCutoffLabel,
-  pricingUrl,
-} from "@/utils/subtitles/ai/entitlement"
+import { formatQuotaDate, launchBonusCutoffLabel } from "@/utils/subtitles/ai/entitlement"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
 
