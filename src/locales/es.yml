@@ -1515,6 +1515,8 @@ translation:
   autoModeSameLanguage: El idioma detectado '$1' es el mismo que el idioma de destino
   extensionContextInvalidated: La extensión se actualizó. Actualiza esta página e inténtalo de nuevo.
 speak:
+  languageDetectionFallback: Se usa la detección local de idioma
+  languageDetectionSettingsHint: En Ajustes, elige un LLM disponible o la detección local.
   fetchingAudio: Generando audio...
   playingAudio: Reproduciendo audio...
   failedToGenerateSpeech: No se pudo generar voz

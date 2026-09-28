@@ -1510,6 +1510,8 @@ translation:
   autoModeSameLanguage: Ngôn ngữ phát hiện '$1' giống với ngôn ngữ đích
   extensionContextInvalidated: Tiện ích đã được cập nhật. Hãy tải lại trang này rồi thử lại.
 speak:
+  languageDetectionFallback: Đã chuyển sang phát hiện ngôn ngữ cục bộ
+  languageDetectionSettingsHint: Trong Cài đặt, chọn LLM khả dụng hoặc phát hiện cục bộ.
   fetchingAudio: Đang tạo âm thanh...
   playingAudio: Đang phát âm thanh...
   failedToGenerateSpeech: Không thể tạo giọng nói

@@ -1510,6 +1510,8 @@ translation:
   autoModeSameLanguage: 감지된 언어 '$1'은(는) 대상 언어와 같습니다
   extensionContextInvalidated: 확장 프로그램이 업데이트되었습니다. 이 페이지를 새로고침한 후 다시 시도하세요.
 speak:
+  languageDetectionFallback: 로컬 언어 감지로 전환했습니다
+  languageDetectionSettingsHint: 설정에서 사용 가능한 LLM을 선택하거나 로컬 감지로 바꾸세요.
   fetchingAudio: 오디오 생성 중...
   playingAudio: 오디오 재생 중...
   failedToGenerateSpeech: 음성 생성 실패

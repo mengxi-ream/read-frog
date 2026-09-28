@@ -1,19 +1,22 @@
 // @vitest-environment jsdom
 import type { ReactNode } from "react"
 import type { TTSConfig } from "@/types/config/tts"
+import type { DetectLanguageOptions } from "@/utils/content/language"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 const sendMessageMock = vi.fn<(type: string, data?: any) => Promise<any>>()
-const detectLanguageMock = vi.fn<(text: string) => Promise<string>>()
+const detectLanguageMock =
+  vi.fn<(text: string, options?: DetectLanguageOptions) => Promise<string>>()
 
 vi.mock("@/utils/message", () => ({
   sendMessage: (type: string, data?: any) => sendMessageMock(type, data),
 }))
 vi.mock("@/utils/content/language", () => ({
-  detectLanguage: (text: string) => detectLanguageMock(text),
+  detectLanguage: (text: string, options?: DetectLanguageOptions) =>
+    detectLanguageMock(text, options),
 }))
 vi.mock("@/utils/analytics", () => ({
   createFeatureUsageContext: () => ({}),
@@ -86,6 +89,10 @@ describe("useTextToSpeech superseded runs", () => {
           ([type, data]) => type === "edgeTtsSynthesize" && data.text === "A",
         ),
       ).toBe(true),
+    )
+    expect(detectLanguageMock).toHaveBeenCalledWith(
+      "A",
+      expect.objectContaining({ llmFallbackToastContext: "speak" }),
     )
     await act(async () => {
       await result.current.play("B", ttsConfig)

@@ -1520,6 +1520,8 @@ translation:
   autoModeSameLanguage: 偵測到的語言「$1」與目標語言相同
   extensionContextInvalidated: 擴充功能已更新，請重新整理此頁面後再試一次。
 speak:
+  languageDetectionFallback: 已改用本機語言偵測
+  languageDetectionSettingsHint: 可在設定中更換可用的大型語言模型，或選擇本機偵測。
   fetchingAudio: 正在取得音訊…
   playingAudio: 正在播放音訊…
   failedToGenerateSpeech: 語音產生失敗

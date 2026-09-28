@@ -30,6 +30,8 @@ export interface DetectLanguageOptions {
   minLength?: number
   /** Enable LLM detection */
   enableLLM?: boolean
+  /** Use a speaking-specific warning when LLM voice detection falls back. */
+  llmFallbackToastContext?: "speak"
   /** Provider to run LLM detection on; resolved from config when omitted. */
   providerRef?: PromptableProviderRef
   /** Max text length for LLM detection (default: 500) */
@@ -70,14 +72,15 @@ export async function detectLanguageWithSource(
       }
     } catch (error) {
       logger.warn("LLM detection failed, falling back to franc:", error)
+      const isSpeaking = options.llmFallbackToastContext === "speak"
       toastManager.add({
         type: "warning",
-        // A plan or quota denial says what to do about it; anything else is
-        // just "it didn't work".
-        title:
-          error instanceof HostedAiProviderUnavailableError
+        title: isSpeaking
+          ? i18n.t("speak.languageDetectionFallback")
+          : error instanceof HostedAiProviderUnavailableError
             ? error.message
             : i18n.t("languageDetection.llmFailed"),
+        description: isSpeaking ? i18n.t("speak.languageDetectionSettingsHint") : undefined,
         id: LLM_DETECTION_FALLBACK_TOAST_ID,
       })
     }

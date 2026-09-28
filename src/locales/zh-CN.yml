@@ -1520,6 +1520,8 @@ translation:
   autoModeSameLanguage: 检测到的语言 '$1' 与目标语言相同
   extensionContextInvalidated: 扩展已更新，请刷新此页面后重试。
 speak:
+  languageDetectionFallback: 已改用本地语言检测
+  languageDetectionSettingsHint: 可在设置中更换可用的大模型，或选择本地检测。
   fetchingAudio: 正在获取音频...
   playingAudio: 正在播放音频...
   failedToGenerateSpeech: 语音生成失败

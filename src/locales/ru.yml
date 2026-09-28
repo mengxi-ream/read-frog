@@ -1510,6 +1510,8 @@ translation:
   autoModeSameLanguage: Обнаруженный язык '$1' совпадает с целевым языком
   extensionContextInvalidated: Расширение обновлено. Обновите эту страницу и повторите попытку.
 speak:
+  languageDetectionFallback: Используется локальное определение языка
+  languageDetectionSettingsHint: В настройках выберите доступную LLM или локальное определение.
   fetchingAudio: Генерация аудио...
   playingAudio: Воспроизведение аудио...
   failedToGenerateSpeech: Не удалось сгенерировать речь
