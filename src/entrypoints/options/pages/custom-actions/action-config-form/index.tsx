@@ -77,7 +77,9 @@ function EditableActionEditor({ action }: { action: SelectionToolbarCustomAction
           <ActionEditorTabs
             config={
               <EntityEditor.Body>
-                <ActionEditor.NameField />
+                <ActionEditor.NameField>
+                  <ActionEditor.AiConfigHelperButton />
+                </ActionEditor.NameField>
                 <ActionEditor.IconField />
                 <ActionEditor.ProviderField />
                 <ActionEditor.SystemPromptField />

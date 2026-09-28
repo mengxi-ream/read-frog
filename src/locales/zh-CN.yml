@@ -668,6 +668,12 @@ options:
         name: 名称
         customize: 定制化
         customizeTooltip: 内置指令不允许更改提示词，点此按钮来修改指令提示词
+        aiConfigHelper:
+          trigger: "让 AI 帮我配置"
+          title: "让 AI 帮我配置"
+          description: "复制下面的提示词，发给你常用的 AI 助手（ChatGPT、Claude、DeepSeek、Kimi 等）。它会先问你想做什么，再告诉你每一项怎么填。提示词里带有这个动作当前的配置，但不含 API Key。"
+          copy: "复制提示词"
+          copyFailed: "复制失败，请重试"
         icon: 图标
         iconField:
           chooseAriaLabel: 选择图标
@@ -991,6 +997,11 @@ options:
         blank:
           name: 空白
           description: 从空白模板开始创建指令
+          prompt: |-
+            ## 输入
+            选中文本：{{selection}}
+            段落内容：{{paragraphs}}
+            目标语言：{{targetLanguage}}
       errors:
         nameRequired: 名称不能为空
         duplicateName: '重复的指令名称 "$1"'

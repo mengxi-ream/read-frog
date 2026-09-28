@@ -662,6 +662,12 @@ options:
         name: Tên
         customize: Tùy chỉnh
         customizeTooltip: Không thể thay đổi prompt của tác vụ tích hợp. Nhấp vào nút này để tạo bản sao có thể chỉnh sửa và thay đổi prompt.
+        aiConfigHelper:
+          trigger: "Cấu hình bằng AI"
+          title: "Cấu hình bằng AI"
+          description: "Sao chép prompt bên dưới và dán vào trợ lý AI bạn hay dùng (ChatGPT, Claude, DeepSeek, Kimi…). Nó sẽ hỏi bạn muốn gì trước, rồi hướng dẫn bạn điền từng mục. Prompt có kèm cấu hình hiện tại của tác vụ này, nhưng không có khóa API."
+          copy: "Sao chép prompt"
+          copyFailed: "Không sao chép được prompt. Hãy thử lại."
         icon: Biểu tượng
         iconField:
           chooseAriaLabel: Chọn biểu tượng
@@ -980,6 +986,12 @@ options:
           copyLabel: "Sao chép"
           unchangedLabel: "Không cần sửa"
           removeLabel: "xóa"
+        blank:
+          prompt: |-
+            ## Đầu vào
+            Văn bản chọn: {{selection}}
+            Đoạn văn: {{paragraphs}}
+            Ngôn ngữ đích: {{targetLanguage}}
       errors:
         nameRequired: Tên là bắt buộc
         duplicateName: 'Tên hành động trùng lặp "$1"'

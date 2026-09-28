@@ -663,6 +663,12 @@ options:
         name: Ad
         customize: Fərdiləşdir
         customizeTooltip: Daxili təlimatları dəyişmək mümkün deyil. Redaktə edilə bilən surət yaratmaq və təlimatları dəyişmək üçün buraya klikləyin.
+        aiConfigHelper:
+          trigger: "Süni intellektlə qur"
+          title: "Süni intellektlə qur"
+          description: "Aşağıdakı təlimatı kopyalayıb istifadə etdiyiniz süni intellekt köməkçisinə (ChatGPT, Claude, DeepSeek, Kimi…) yapışdırın. Əvvəlcə nə istədiyinizi soruşacaq, sonra hər ayara nə yazmalı olduğunuzu deyəcək. Təlimatda bu əməliyyatın cari ayarları var, API açarları isə yoxdur."
+          copy: "Təlimatı kopyala"
+          copyFailed: "Təlimatı kopyalamaq mümkün olmadı. Yenidən cəhd edin."
         icon: İşarə
         iconField:
           chooseAriaLabel: İşarə seç
@@ -986,6 +992,11 @@ options:
         blank:
           name: Boş
           description: Boş əməliyyatla sıfırdan başlayın
+          prompt: |-
+            ## Giriş
+            Seçim: {{selection}}
+            Abzaslar: {{paragraphs}}
+            Hədəf dili: {{targetLanguage}}
       errors:
         nameRequired: Ad tələb olunur
         duplicateName: 'Təkrarlanan əməliyyat adı: "$1"'

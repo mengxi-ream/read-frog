@@ -239,7 +239,9 @@ export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
       icon: "tabler:sparkles",
       providerId,
       systemPrompt: "",
-      prompt: "",
+      // Not empty: the Built-in AI, which new actions default to, rejects a
+      // request without a prompt.
+      prompt: i18n.t(`${T_PREFIX}.blank.prompt`),
       outputSchema: [
         createOutputSchemaField(
           i18n.t("options.selectionToolbar.customActions.form.defaultFieldName"),
