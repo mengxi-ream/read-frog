@@ -230,7 +230,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expect(getOverlayRoot()).not.toHaveClass("inset-0")
   })
 
-  it("still shows the toolbar, with its more menu, when nothing is pinned", async () => {
+  it("keeps the overlay root collapsed when no toolbar item is enabled", async () => {
     await store.set(configFieldsAtomMap.selectionToolbar, {
       ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
       features: {
@@ -251,6 +251,24 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
         },
       },
       customActions: [],
+    })
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">{MOCK_SELECTED_TEXT}</div>
+      </div>,
+    )
+
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+
+    expect(getOverlayRoot()).toHaveClass("h-0", "w-0")
+    expect(getOverlayRoot()).not.toHaveClass("inset-0")
+  })
+
+  it("shows the toolbar with just its more menu when no enabled item is pinned", async () => {
+    await store.set(configFieldsAtomMap.selectionToolbar, {
+      ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
+      unpinned: ["translate", "speak", "default-dictionary", "default-sentence-analysis"],
     })
     render(
       <div>

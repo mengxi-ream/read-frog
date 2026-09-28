@@ -5,13 +5,13 @@ import { SelectionToolbarCustomActionTrigger } from "./custom-action-button/cust
 import { SpeakButton } from "./speak-button"
 import { TranslateButton } from "./translate-button"
 
-// The buttons of the items pinned to the toolbar, in the toolbar's order. The
-// rest are in its "more" menu.
+// The buttons of the enabled items pinned to the toolbar, in the toolbar's
+// order. The other enabled items are in its "more" menu only.
 export function SelectionToolbarPinnedItems() {
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
 
   return getSelectionToolbarItems(selectionToolbar)
-    .filter((item) => item.enabled)
+    .filter((item) => item.enabled && item.pinned)
     .map((item) => {
       if (item.kind === "action") {
         return <SelectionToolbarCustomActionTrigger key={item.id} action={item.action} />

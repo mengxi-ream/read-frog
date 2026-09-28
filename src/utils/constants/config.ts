@@ -218,6 +218,7 @@ export const DEFAULT_CONFIG: Config = {
     },
     customActions: [],
     order: [...SELECTION_TOOLBAR_FEATURE_IDS, ...BUILT_IN_ACTION_IDS],
+    unpinned: [],
     noteSuggestion: {
       enabled: true,
       actionId: BUILT_IN_DICTIONARY_ACTION_ID,

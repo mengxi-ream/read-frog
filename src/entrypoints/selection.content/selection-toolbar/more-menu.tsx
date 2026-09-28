@@ -36,7 +36,7 @@ import { i18n } from "@/utils/i18n"
 import {
   getSelectionToolbarItems,
   reorderSelectionToolbarItems,
-  setSelectionToolbarItemEnabled,
+  setSelectionToolbarItemPinned,
 } from "@/utils/selection-toolbar-items"
 import { cn } from "@/utils/styles/utils"
 import { shadowWrapper } from ".."
@@ -49,10 +49,9 @@ import { useSelectionTranslationPopover } from "./translate-button/provider"
 
 type SelectionSpeech = ReturnType<typeof useSelectionSpeech>
 
-// The toolbar's "more" menu: every item the toolbar can show, pinned or not,
-// in the toolbar's order. A row runs its item; its pin puts the item on the
-// toolbar or takes it off (the item's own enabled switch); its grip drags it
-// to a new place in the order.
+// The toolbar's "more" menu: every enabled item, pinned or not, in the
+// toolbar's order. A row runs its item; its pin puts the item's button on the
+// toolbar or takes it off; its grip drags it to a new place in the order.
 export function SelectionToolbarMoreMenu() {
   const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
   const [open, setOpen] = useState(false)
@@ -65,7 +64,7 @@ export function SelectionToolbarMoreMenu() {
   const { openToolbarTranslation } = useSelectionTranslationPopover()
   const { openToolbarCustomAction } = useSelectionCustomActionPopover()
   const speech = useSelectionSpeech()
-  const items = getSelectionToolbarItems(selectionToolbar)
+  const items = getSelectionToolbarItems(selectionToolbar).filter((item) => item.enabled)
   const label = i18n.t("action.moreActions")
 
   const changeOpen = (nextOpen: boolean) => {
@@ -130,9 +129,9 @@ export function SelectionToolbarMoreMenu() {
           items={items}
           speech={speech}
           onRun={runItem}
-          onPinChange={(item, enabled) => {
+          onPinChange={(item, pinned) => {
             void setSelectionToolbar((current) =>
-              setSelectionToolbarItemEnabled(current, item.id, enabled),
+              setSelectionToolbarItemPinned(current, item.id, pinned),
             )
           }}
           onReorder={(orderedIds) => {
@@ -154,7 +153,7 @@ function MoreMenuItems({
   items: SelectionToolbarItem[]
   speech: SelectionSpeech
   onRun: (item: SelectionToolbarItem) => void
-  onPinChange: (item: SelectionToolbarItem, enabled: boolean) => void
+  onPinChange: (item: SelectionToolbarItem, pinned: boolean) => void
   onReorder: (orderedIds: string[]) => void
 }) {
   const sensors = useSensors(
@@ -206,7 +205,7 @@ function MoreMenuRow({
   item: SelectionToolbarItem
   speech: SelectionSpeech
   onRun: (item: SelectionToolbarItem) => void
-  onPinChange: (item: SelectionToolbarItem, enabled: boolean) => void
+  onPinChange: (item: SelectionToolbarItem, pinned: boolean) => void
 }) {
   const {
     attributes,
@@ -217,7 +216,7 @@ function MoreMenuRow({
     transition,
     isDragging,
   } = useSortable({ id: item.id })
-  const pinLabel = i18n.t(item.enabled ? "action.unpinFromToolbar" : "action.pinToToolbar")
+  const pinLabel = i18n.t(item.pinned ? "action.unpinFromToolbar" : "action.pinToToolbar")
 
   return (
     <li
@@ -255,15 +254,15 @@ function MoreMenuRow({
             aria-label={pinLabel}
             className={cn(
               "mr-0.5 flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-sm",
-              item.enabled
+              item.pinned
                 ? "text-accent-blue hover:text-accent-blue-hover"
                 : "text-muted-foreground opacity-0 group-hover/row:opacity-100 hover:text-foreground focus-visible:opacity-100",
             )}
-            onClick={() => onPinChange(item, !item.enabled)}
+            onClick={() => onPinChange(item, !item.pinned)}
           />
         }
       >
-        {item.enabled ? <IconPinnedFilled className="size-4" /> : <IconPin className="size-4" />}
+        {item.pinned ? <IconPinnedFilled className="size-4" /> : <IconPin className="size-4" />}
       </SelectionToolbarTooltip>
     </li>
   )

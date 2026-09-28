@@ -7,7 +7,8 @@ import type { TestSeriesObject } from "./types"
  *
  * Delta from v104: `selectionToolbar.order`, the order of every toolbar item
  * by id, seeded with the order the toolbar already had — translate, speak, the
- * built-in actions, then the series' own custom actions in their listed order.
+ * built-in actions, then the series' own custom actions in their listed order —
+ * and `selectionToolbar.unpinned`, empty: every item stays pinned.
  */
 
 export const testSeries: TestSeriesObject = {
@@ -364,6 +365,7 @@ export const testSeries: TestSeriesObject = {
       },
       selectionToolbar: {
         order: ["translate", "speak", "default-dictionary", "default-sentence-analysis"],
+        unpinned: [],
         noteSuggestion: {
           enabled: true,
           actionId: "default-dictionary",
@@ -763,6 +765,7 @@ export const testSeries: TestSeriesObject = {
       },
       selectionToolbar: {
         order: ["translate", "speak", "default-dictionary", "default-sentence-analysis"],
+        unpinned: [],
         noteSuggestion: {
           enabled: true,
           actionId: "default-dictionary",
@@ -1177,6 +1180,7 @@ export const testSeries: TestSeriesObject = {
           "default-sentence-analysis",
           "coverage-action",
         ],
+        unpinned: [],
         noteSuggestion: {
           enabled: true,
           actionId: "default-dictionary",
@@ -1658,6 +1662,7 @@ export const testSeries: TestSeriesObject = {
       },
       selectionToolbar: {
         order: ["translate", "speak", "default-dictionary", "default-sentence-analysis"],
+        unpinned: [],
         noteSuggestion: {
           enabled: true,
           actionId: "default-dictionary",
@@ -2063,6 +2068,7 @@ export const testSeries: TestSeriesObject = {
           "default-sentence-analysis",
           "vocab-card",
         ],
+        unpinned: [],
         noteSuggestion: {
           enabled: true,
           actionId: "default-dictionary",

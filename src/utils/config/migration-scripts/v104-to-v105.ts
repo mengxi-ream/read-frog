@@ -1,16 +1,14 @@
 /**
  * Migration script from v104 to v105.
  *
- * Adds `selectionToolbar.order`, the order of every item on the selection
- * toolbar by id, which its "more" menu lets the user drag. It is seeded with
- * the order the toolbar already had: translate, speak, the built-in actions
- * (Dictionary, then Sentence Analysis), then the user's own actions in the
- * order they were listed.
+ * Adds two lists for the selection toolbar's "more" menu:
  *
- * Until now a toolbar with every item turned off did not show at all; from
- * v105 it shows its "more" menu, which lists them. A user who had turned
- * every item off gets the toolbar switched off instead, so it stays hidden
- * for them as before.
+ * - `selectionToolbar.order`: the order of every toolbar item by id, which
+ *   the menu lets the user drag. Seeded with the order the toolbar already
+ *   had: translate, speak, the built-in actions (Dictionary, then Sentence
+ *   Analysis), then the user's own actions in the order they were listed.
+ * - `selectionToolbar.unpinned`: the items kept off the toolbar itself.
+ *   Empty: every item the toolbar showed stays on it.
  *
  * A config that already has an `order` array (a second run) is returned by
  * identity. One without a `selectionToolbar` object is left for the schema
@@ -37,29 +35,18 @@ export function migrate(oldConfig: any): any {
     return oldConfig
   }
 
-  const customActions: any[] = Array.isArray(selectionToolbar.customActions)
+  const customActionIds: string[] = Array.isArray(selectionToolbar.customActions)
     ? selectionToolbar.customActions
+        .map((action: any) => (isObject(action) ? action.id : undefined))
+        .filter((id: any) => typeof id === "string" && id !== "")
     : []
-  const customActionIds: string[] = customActions
-    .map((action: any) => (isObject(action) ? action.id : undefined))
-    .filter((id: any) => typeof id === "string" && id !== "")
-
-  // A missing or malformed item counts as on: only a toolbar known to have
-  // everything off is switched off.
-  const everythingOff = [
-    selectionToolbar.features?.translate,
-    selectionToolbar.features?.speak,
-    selectionToolbar.builtInActions?.dictionary,
-    selectionToolbar.builtInActions?.sentenceAnalysis,
-    ...customActions,
-  ].every((item) => isObject(item) && item.enabled === false)
 
   return {
     ...oldConfig,
     selectionToolbar: {
       ...selectionToolbar,
-      ...(everythingOff ? { enabled: false } : {}),
       order: [...new Set([...FEATURE_IDS, ...BUILT_IN_ACTION_IDS, ...customActionIds])],
+      unpinned: [],
     },
   }
 }

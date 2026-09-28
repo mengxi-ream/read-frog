@@ -63,6 +63,10 @@ const selectionToolbarSchema = z
     // before this field parse in UI contexts that load ahead of the
     // background migration.
     order: z.array(z.string().min(1)).default([]),
+    // Ids of the items kept off the toolbar itself, in its "more" menu only.
+    // Every other item is pinned. Independent of an item's enabled switch,
+    // so a pin survives the item being turned off and on.
+    unpinned: z.array(z.string().min(1)).default([]),
     noteSuggestion: z.object({
       enabled: z.boolean(),
       actionId: z.string().nonempty(),

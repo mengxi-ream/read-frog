@@ -16,6 +16,7 @@ import {
   EXTERNAL_SELECTION_OPEN_EVENT,
   MARGIN,
 } from "@/utils/constants/selection"
+import { getSelectionToolbarItems } from "@/utils/selection-toolbar-items"
 import { cn } from "@/utils/styles/utils"
 import { urlMatchesPattern } from "@/utils/url-pattern"
 import { buildContextSnapshot, readSelectionSnapshot } from "../utils"
@@ -226,9 +227,11 @@ export function SelectionToolbar() {
   const isSiteDisabled = selectionToolbar.disabledSelectionToolbarPatterns?.some((pattern) =>
     urlMatchesPattern(window.location.href, pattern),
   )
-  // Shown even with nothing pinned: its "more" menu still holds every item.
+  // With nothing pinned the toolbar still shows its "more" menu; with nothing
+  // enabled there is nothing to show.
+  const hasAnyEnabledItem = getSelectionToolbarItems(selectionToolbar).some((item) => item.enabled)
   const isSelectionToolbarVisible =
-    isSelectionToolbarOpen && selectionToolbar.enabled && !isSiteDisabled
+    isSelectionToolbarOpen && selectionToolbar.enabled && !isSiteDisabled && hasAnyEnabledItem
   const dropdownOpenRef = useRef(false)
   // Bumped per external (ebook bridge) selection so the position is re-applied
   // even when the toolbar is already visible (visibility doesn't flip then).
@@ -593,7 +596,7 @@ export function SelectionToolbar() {
       )}
       {...{ [SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE]: "" }}
     >
-      {selectionToolbar.enabled && !isSiteDisabled && (
+      {selectionToolbar.enabled && !isSiteDisabled && hasAnyEnabledItem && (
         <div
           ref={tooltipRef}
           inert={!isSelectionToolbarVisible}

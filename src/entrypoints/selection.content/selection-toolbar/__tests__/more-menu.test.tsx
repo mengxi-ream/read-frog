@@ -89,16 +89,19 @@ const pinButton = (id: string) =>
   })
 
 describe("SelectionToolbarMoreMenu", () => {
-  it("lists every item in the toolbar's order, pinned or not", async () => {
+  it("lists every enabled item in the toolbar's order, pinned or not", async () => {
     await renderMenu((config) => {
       const dictionary = getBuiltInDictionaryAction(config.selectionToolbar)
       config.selectionToolbar.customActions = [
-        { ...dictionary, id: "mine", name: "Mine", enabled: false },
+        { ...dictionary, id: "mine", name: "Mine" },
+        { ...dictionary, id: "off", name: "Off", enabled: false },
       ]
-      config.selectionToolbar.order = ["mine", "speak", "translate"]
+      config.selectionToolbar.order = ["mine", "speak", "off", "translate"]
+      config.selectionToolbar.unpinned = ["mine", "off"]
     })
     await openMenu()
 
+    // A disabled item is nowhere, pinned or not.
     expect(itemIds()).toEqual([
       "mine",
       "speak",
@@ -112,9 +115,9 @@ describe("SelectionToolbarMoreMenu", () => {
     expect(pinButton("translate")).toHaveAccessibleName(i18n.t("action.unpinFromToolbar"))
   })
 
-  it("pins and unpins an item by its own enabled switch", async () => {
+  it("pins and unpins an item without touching its enabled switch", async () => {
     const store = await renderMenu((config) => {
-      config.selectionToolbar.builtInActions.sentenceAnalysis.enabled = false
+      config.selectionToolbar.unpinned = ["default-sentence-analysis"]
     })
     await openMenu()
 
@@ -122,10 +125,11 @@ describe("SelectionToolbarMoreMenu", () => {
     fireEvent.click(pinButton("default-sentence-analysis"))
 
     await waitFor(() => {
-      const selectionToolbar = store.get(configFieldsAtomMap.selectionToolbar)
-      expect(selectionToolbar.features.translate.enabled).toBe(false)
-      expect(selectionToolbar.builtInActions.sentenceAnalysis.enabled).toBe(true)
+      expect(store.get(configFieldsAtomMap.selectionToolbar).unpinned).toEqual(["translate"])
     })
+    const selectionToolbar = store.get(configFieldsAtomMap.selectionToolbar)
+    expect(selectionToolbar.features.translate.enabled).toBe(true)
+    expect(selectionToolbar.builtInActions.sentenceAnalysis.enabled).toBe(true)
     expect(pinButton("translate")).toHaveAccessibleName(i18n.t("action.pinToToolbar"))
     expect(pinButton("default-sentence-analysis")).toHaveAccessibleName(
       i18n.t("action.unpinFromToolbar"),

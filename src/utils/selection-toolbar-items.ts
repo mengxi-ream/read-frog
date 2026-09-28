@@ -2,38 +2,49 @@ import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { SelectionToolbarFeatureId } from "@/utils/constants/selection"
 import { SELECTION_TOOLBAR_FEATURE_IDS } from "@/utils/constants/selection"
-import { getSelectionToolbarActions, patchSelectionToolbarAction } from "@/utils/custom-actions"
+import { getSelectionToolbarActions } from "@/utils/custom-actions"
 
 type SelectionToolbarConfig = Config["selectionToolbar"]
 
 // Everything the selection toolbar can show, in one list: its own translate
-// and speak buttons and every action, built-in or custom. An item is pinned
-// (shown on the toolbar) when it is enabled; the rest wait in the toolbar's
-// "more" menu, which lists them all.
+// and speak buttons and every action, built-in or custom. An enabled item
+// (its own switch, in settings) is in the toolbar's "more" menu; a disabled
+// one is nowhere. A pinned item also has its button on the toolbar itself.
+// Pinning is a state of its own, kept while the item is disabled.
 export type SelectionToolbarItem =
-  | { kind: "feature"; id: SelectionToolbarFeatureId; enabled: boolean }
-  | { kind: "action"; id: string; enabled: boolean; action: SelectionToolbarCustomAction }
-
-function isFeatureId(id: string): id is SelectionToolbarFeatureId {
-  return (SELECTION_TOOLBAR_FEATURE_IDS as readonly string[]).includes(id)
-}
+  | { kind: "feature"; id: SelectionToolbarFeatureId; enabled: boolean; pinned: boolean }
+  | {
+      kind: "action"
+      id: string
+      enabled: boolean
+      pinned: boolean
+      action: SelectionToolbarCustomAction
+    }
 
 // Every item in `selectionToolbar.order`. An id the order does not name (an
 // action added since) keeps its default place after the ordered ones —
 // features, then built-in actions, then custom actions — and an id no item
-// has (an action deleted since) is skipped.
+// has (an action deleted since) is skipped. Items are pinned unless listed
+// in `selectionToolbar.unpinned`.
 export function getSelectionToolbarItems(
   selectionToolbar: SelectionToolbarConfig,
 ): SelectionToolbarItem[] {
+  const unpinned = new Set(selectionToolbar.unpinned ?? [])
   const byId = new Map<string, SelectionToolbarItem>()
   for (const id of SELECTION_TOOLBAR_FEATURE_IDS) {
-    byId.set(id, { kind: "feature", id, enabled: selectionToolbar.features[id].enabled })
+    byId.set(id, {
+      kind: "feature",
+      id,
+      enabled: selectionToolbar.features[id].enabled,
+      pinned: !unpinned.has(id),
+    })
   }
   for (const action of getSelectionToolbarActions(selectionToolbar)) {
     byId.set(action.id, {
       kind: "action",
       id: action.id,
       enabled: action.enabled !== false,
+      pinned: !unpinned.has(action.id),
       action,
     })
   }
@@ -49,19 +60,32 @@ export function getSelectionToolbarItems(
   return [...ordered, ...byId.values()]
 }
 
-// The toolbar in a new order of item ids (the menu's, after a drag). The
-// custom actions' own list follows it, so it reads in the same order wherever
-// it is shown.
+// `allIds` with the ids of `moved` put in the order `moved` gives them, each
+// in a place one of them held: every other id stays where it was.
+function reslot(allIds: readonly string[], moved: readonly string[]): string[] {
+  const movedIds = new Set(moved)
+  let next = 0
+  return allIds.map((id) => (movedIds.has(id) ? (moved[next++] ?? id) : id))
+}
+
+// The toolbar with some of its items in a new order (the "more" menu's, after
+// a drag: it lists only the enabled ones), the rest keeping their places. The
+// custom actions' own list follows, so it reads in the same order wherever it
+// is shown.
 export function reorderSelectionToolbarItems(
   selectionToolbar: SelectionToolbarConfig,
   orderedIds: readonly string[],
 ): SelectionToolbarConfig {
-  const rank = new Map(orderedIds.map((id, index) => [id, index]))
+  const order = reslot(
+    getSelectionToolbarItems(selectionToolbar).map((item) => item.id),
+    orderedIds,
+  )
+  const rank = new Map(order.map((id, index) => [id, index]))
   const rankOf = (id: string) => rank.get(id) ?? Number.MAX_SAFE_INTEGER
   return {
     ...selectionToolbar,
-    order: [...orderedIds],
-    // A stable sort: actions the ids do not name keep their relative order.
+    order,
+    // A stable sort: actions the order does not name keep their relative order.
     customActions: selectionToolbar.customActions.toSorted((a, b) => rankOf(a.id) - rankOf(b.id)),
   }
 }
@@ -73,31 +97,21 @@ export function setSelectionToolbarCustomActions(
   selectionToolbar: SelectionToolbarConfig,
   customActions: SelectionToolbarCustomAction[],
 ): SelectionToolbarConfig {
-  const customIds = new Set(customActions.map((action) => action.id))
   const next = { ...selectionToolbar, customActions }
-  const inOrder = customActions.map((action) => action.id)
-  let slot = 0
-  const order = getSelectionToolbarItems(next).map((item) =>
-    customIds.has(item.id) ? (inOrder[slot++] ?? item.id) : item.id,
+  const order = reslot(
+    getSelectionToolbarItems(next).map((item) => item.id),
+    customActions.map((action) => action.id),
   )
   return { ...next, order }
 }
 
-// Pins an item to the toolbar or unpins it: its own enabled switch, the same
-// one the settings pages toggle.
-export function setSelectionToolbarItemEnabled(
+// Puts an item's button on the toolbar, or takes it off (it stays in the
+// "more" menu). Its enabled switch is left as it is.
+export function setSelectionToolbarItemPinned(
   selectionToolbar: SelectionToolbarConfig,
   id: string,
-  enabled: boolean,
+  pinned: boolean,
 ): SelectionToolbarConfig {
-  if (isFeatureId(id)) {
-    return {
-      ...selectionToolbar,
-      features: {
-        ...selectionToolbar.features,
-        [id]: { ...selectionToolbar.features[id], enabled },
-      },
-    }
-  }
-  return patchSelectionToolbarAction(selectionToolbar, id, { enabled })
+  const unpinned = (selectionToolbar.unpinned ?? []).filter((other) => other !== id)
+  return { ...selectionToolbar, unpinned: pinned ? unpinned : [...unpinned, id] }
 }

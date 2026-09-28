@@ -6,7 +6,7 @@ import {
   getSelectionToolbarItems,
   reorderSelectionToolbarItems,
   setSelectionToolbarCustomActions,
-  setSelectionToolbarItemEnabled,
+  setSelectionToolbarItemPinned,
 } from "@/utils/selection-toolbar-items"
 
 function toolbarWith(customIds: string[] = [], order?: string[]) {
@@ -63,20 +63,25 @@ describe("getSelectionToolbarItems", () => {
     ])
   })
 
-  it("reads each item's pin from its own enabled switch", () => {
-    const selectionToolbar = toolbarWith(["a"])
+  it("reads each item's enabled switch, and pins everything the unpinned list does not name", () => {
+    const selectionToolbar = toolbarWith(["a", "b"])
     selectionToolbar.features.speak.enabled = false
     selectionToolbar.builtInActions.sentenceAnalysis.enabled = false
     selectionToolbar.customActions[0]!.enabled = false
-    const pinned = Object.fromEntries(
-      getSelectionToolbarItems(selectionToolbar).map((item) => [item.id, item.enabled]),
+    selectionToolbar.unpinned = ["speak", "b", "gone"]
+    const states = Object.fromEntries(
+      getSelectionToolbarItems(selectionToolbar).map((item) => [
+        item.id,
+        [item.enabled, item.pinned],
+      ]),
     )
-    expect(pinned).toEqual({
-      translate: true,
-      speak: false,
-      "default-dictionary": true,
-      "default-sentence-analysis": false,
-      a: false,
+    expect(states).toEqual({
+      translate: [true, true],
+      speak: [false, false],
+      "default-dictionary": [true, true],
+      "default-sentence-analysis": [false, true],
+      a: [false, true],
+      b: [true, false],
     })
   })
 })
@@ -100,6 +105,31 @@ describe("reorderSelectionToolbarItems", () => {
     expect(idsOf(next)).toEqual(order)
     // The input is not touched.
     expect(selectionToolbar.customActions.map((action) => action.id)).toEqual(["a", "b", "c"])
+  })
+})
+
+describe("reorderSelectionToolbarItems for the enabled items only", () => {
+  it("moves them among their own places, leaving the disabled ones where they were", () => {
+    const selectionToolbar = toolbarWith(["a", "b"])
+    selectionToolbar.features.speak.enabled = false
+    selectionToolbar.customActions[0]!.enabled = false
+    // The menu lists translate, dictionary, sentence analysis and b; b goes first.
+    const next = reorderSelectionToolbarItems(selectionToolbar, [
+      "b",
+      "translate",
+      "default-dictionary",
+      "default-sentence-analysis",
+    ])
+
+    expect(next.order).toEqual([
+      "b",
+      "speak",
+      "translate",
+      "default-dictionary",
+      "a",
+      "default-sentence-analysis",
+    ])
+    expect(next.customActions.map((action) => action.id)).toEqual(["b", "a"])
   })
 })
 
@@ -136,25 +166,23 @@ describe("setSelectionToolbarCustomActions", () => {
   })
 })
 
-describe("setSelectionToolbarItemEnabled", () => {
-  it("pins and unpins the features by their own switch", () => {
-    const next = setSelectionToolbarItemEnabled(toolbarWith(), "speak", false)
-    expect(next.features.speak.enabled).toBe(false)
-    expect(next.features.translate.enabled).toBe(true)
-    expect(setSelectionToolbarItemEnabled(next, "speak", true).features.speak.enabled).toBe(true)
+describe("setSelectionToolbarItemPinned", () => {
+  it("unpins and pins an item through the unpinned list, once each", () => {
+    const unpinned = setSelectionToolbarItemPinned(toolbarWith(), "speak", false)
+    expect(unpinned.unpinned).toEqual(["speak"])
+    expect(setSelectionToolbarItemPinned(unpinned, "speak", false).unpinned).toEqual(["speak"])
+    expect(setSelectionToolbarItemPinned(unpinned, "speak", true).unpinned).toEqual([])
   })
 
-  it("pins and unpins built-in and custom actions by their enabled state", () => {
+  it("leaves the item's enabled switch alone, so the pin outlives turning it off and on", () => {
     const selectionToolbar = toolbarWith(["a"])
-    const builtIn = setSelectionToolbarItemEnabled(selectionToolbar, "default-dictionary", false)
-    expect(builtIn.builtInActions.dictionary.enabled).toBe(false)
+    const next = setSelectionToolbarItemPinned(selectionToolbar, "a", false)
+    expect(next.customActions).toBe(selectionToolbar.customActions)
+    expect(next.features).toBe(selectionToolbar.features)
+    expect(next.builtInActions).toBe(selectionToolbar.builtInActions)
 
-    const custom = setSelectionToolbarItemEnabled(selectionToolbar, "a", false)
-    expect(custom.customActions[0]!.enabled).toBe(false)
-  })
-
-  it("leaves the toolbar as it is for an unknown id", () => {
-    const selectionToolbar = toolbarWith()
-    expect(setSelectionToolbarItemEnabled(selectionToolbar, "gone", false)).toBe(selectionToolbar)
+    next.customActions = [{ ...next.customActions[0]!, enabled: false }]
+    next.customActions = [{ ...next.customActions[0]!, enabled: true }]
+    expect(getSelectionToolbarItems(next).find((item) => item.id === "a")?.pinned).toBe(false)
   })
 })

@@ -17,7 +17,7 @@ function storedConfig(customActions: any[] = []): any {
 }
 
 describe("v104 -> v105 migration", () => {
-  it("seeds the toolbar order the toolbar already had", () => {
+  it("seeds the toolbar order the toolbar already had, with every item pinned", () => {
     const old = storedConfig([{ id: "b-action" }, { id: "a-action" }])
     const migrated = migrate(old)
 
@@ -29,6 +29,7 @@ describe("v104 -> v105 migration", () => {
       "b-action",
       "a-action",
     ])
+    expect(migrated.selectionToolbar.unpinned).toEqual([])
     // Enabled or not, every item gets its place; nothing else changes.
     expect(migrated.selectionToolbar.features).toBe(old.selectionToolbar.features)
     expect(migrated.selectionToolbar.builtInActions).toBe(old.selectionToolbar.builtInActions)
@@ -51,25 +52,6 @@ describe("v104 -> v105 migration", () => {
       storedConfig([{ id: "x" }, { name: "no id" }, null, { id: "x" }, { id: "" }]),
     )
     expect(migrated.selectionToolbar.order.slice(4)).toEqual(["x"])
-  })
-
-  it("switches off a toolbar that had every item turned off, which kept it hidden", () => {
-    const old = storedConfig([{ id: "x", enabled: false }])
-    old.selectionToolbar.features.translate.enabled = false
-    old.selectionToolbar.builtInActions.dictionary.enabled = false
-    expect(migrate(old).selectionToolbar.enabled).toBe(false)
-
-    // One item still on (a custom action is on unless it says otherwise).
-    const withAction = storedConfig([{ id: "x" }])
-    withAction.selectionToolbar.features.translate.enabled = false
-    withAction.selectionToolbar.builtInActions.dictionary.enabled = false
-    expect(migrate(withAction).selectionToolbar.enabled).toBe(true)
-    expect(migrate(storedConfig()).selectionToolbar.enabled).toBe(true)
-
-    // Missing items count as on.
-    const partial = storedConfig()
-    delete partial.selectionToolbar.features
-    expect(migrate(partial).selectionToolbar).not.toHaveProperty("enabled", false)
   })
 
   it("returns a config that already has an order by identity", () => {
