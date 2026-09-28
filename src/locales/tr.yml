@@ -951,6 +951,12 @@ options:
           hardLabel: "Zor"
           trunkLabel: "Sadece iskelet"
           slashesLabel: "Duraklar"
+        blank:
+          prompt: |-
+            ## Girdi
+            Seçim: {{selection}}
+            Paragraflar: {{paragraphs}}
+            Hedef dil: {{targetLanguage}}
       errors:
         nameRequired: Ad gerekli
         duplicateName: 'Yinelenen eylem adı "$1"'

@@ -1001,6 +1001,11 @@ options:
         blank:
           name: Boş
           description: Boş əməliyyatla sıfırdan başlayın
+          prompt: |-
+            ## Giriş
+            Seçim: {{selection}}
+            Abzaslar: {{paragraphs}}
+            Hədəf dili: {{targetLanguage}}
       errors:
         nameRequired: Ad tələb olunur
         duplicateName: 'Təkrarlanan əməliyyat adı: "$1"'

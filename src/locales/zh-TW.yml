@@ -1006,6 +1006,11 @@ options:
         blank:
           name: 空白
           description: 從空白指令開始建立
+          prompt: |-
+            ## 輸入
+            選取文字：{{selection}}
+            段落：{{paragraphs}}
+            目標語言：{{targetLanguage}}
       errors:
         nameRequired: 名稱不能為空
         duplicateName: 重複的指令名稱「$1」

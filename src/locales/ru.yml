@@ -951,6 +951,12 @@ options:
           hardLabel: "Сложно"
           trunkLabel: "Только основа"
           slashesLabel: "Паузы"
+        blank:
+          prompt: |-
+            ## Ввод
+            Выделение: {{selection}}
+            Абзацы: {{paragraphs}}
+            Целевой язык: {{targetLanguage}}
       errors:
         nameRequired: Название обязательно
         duplicateName: 'Дублирующееся имя действия "$1"'

@@ -951,6 +951,12 @@ options:
           hardLabel: "難所"
           trunkLabel: "骨組みだけ"
           slashesLabel: "スラッシュ"
+        blank:
+          prompt: |-
+            ## 入力
+            選択テキスト：{{selection}}
+            段落：{{paragraphs}}
+            ターゲット言語：{{targetLanguage}}
       errors:
         nameRequired: 名前は必須です
         duplicateName: '重複するアクション名 "$1"'

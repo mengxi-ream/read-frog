@@ -951,6 +951,12 @@ options:
           hardLabel: "어려움"
           trunkLabel: "뼈대만"
           slashesLabel: "끊어 읽기"
+        blank:
+          prompt: |-
+            ## 입력
+            선택 텍스트: {{selection}}
+            문단: {{paragraphs}}
+            대상 언어: {{targetLanguage}}
       errors:
         nameRequired: 이름은 필수입니다
         duplicateName: '중복된 액션 이름 "$1"'

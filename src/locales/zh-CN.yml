@@ -1006,6 +1006,11 @@ options:
         blank:
           name: 空白
           description: 从空白模板开始创建指令
+          prompt: |-
+            ## 输入
+            选中文本：{{selection}}
+            段落内容：{{paragraphs}}
+            目标语言：{{targetLanguage}}
       errors:
         nameRequired: 名称不能为空
         duplicateName: '重复的指令名称 "$1"'
