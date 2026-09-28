@@ -57,14 +57,14 @@ export function TranslationServiceDropdown() {
   const builtInProviders = providerOptions.filter(isSystemProviderSelectorItem)
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex min-w-0 items-center gap-2">
       <Select multiple value={selectedIds} onValueChange={setSelectedIds}>
-        <SelectTrigger className="min-w-52">
-          <SelectValue placeholder={i18n.t("translateService.selectServices")}>
+        <SelectTrigger className="w-52 min-w-0">
+          <SelectValue className="min-w-0" placeholder={i18n.t("translateService.selectServices")}>
             {selectedIds.length > 0 ? (
-              <div className="flex items-center gap-2">
-                <span>{i18n.t("translateService.translationProviders")}</span>
-                <span className="rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="truncate">{i18n.t("translateService.translationProviders")}</span>
+                <span className="shrink-0 rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
                   {selectedIds.length}
                 </span>
               </div>
@@ -129,6 +129,7 @@ export function TranslationServiceDropdown() {
       <Button
         variant="outline"
         size="icon"
+        className="shrink-0"
         onClick={handleConfigureAPI}
         title={i18n.t("translateService.configureAPI")}
       >

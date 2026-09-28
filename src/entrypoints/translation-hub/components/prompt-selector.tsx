@@ -43,8 +43,8 @@ export function PromptSelector() {
         void setHubConfig({ promptId: value ?? DEFAULT_TRANSLATE_PROMPT_ID })
       }}
     >
-      <SelectTrigger className="w-36">
-        <SelectValue placeholder={i18n.t("translatePrompt.title")}>
+      <SelectTrigger className="w-36 min-w-0">
+        <SelectValue className="min-w-0" placeholder={i18n.t("translatePrompt.title")}>
           <span className="truncate">
             {selectedItem?.label ?? i18n.t("options.translation.personalizedPrompts.default")}
           </span>
