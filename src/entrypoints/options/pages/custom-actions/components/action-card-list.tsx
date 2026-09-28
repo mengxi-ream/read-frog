@@ -9,7 +9,11 @@ import { SortableList } from "@/components/sortable-list"
 import { Button } from "@/components/ui/base-ui/button"
 import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { DEFAULT_ACTION_NAME } from "@/utils/constants/custom-action"
+import {
+  BUILT_IN_DICTIONARY_ACTION_ID,
+  BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID,
+  DEFAULT_ACTION_NAME,
+} from "@/utils/constants/custom-action"
 import { getBuiltInActions, patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { getUniqueName } from "@/utils/name"
@@ -19,7 +23,7 @@ import { EntityListItem } from "../../../components/entity-list-item"
 import { EntityListRail } from "../../../components/entity-list-rail"
 import { customActionEditorTabAtom, selectedCustomActionIdAtom } from "../atoms"
 import { AddActionDialog } from "./add-action-dialog"
-import { BuiltInActionBadge } from "./built-in-action-badge"
+import { RecentChangeBadge } from "./recent-change-badge"
 
 export function CustomActionCardList() {
   const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(
@@ -133,7 +137,12 @@ function BuiltInActionCard({ action }: { action: SelectionToolbarCustomAction })
       onClick={() => setSelectedCustomActionId(action.id)}
     >
       <EntityListItem.Badges>
-        <BuiltInActionBadge actionId={action.id} />
+        {action.id === BUILT_IN_DICTIONARY_ACTION_ID && (
+          <RecentChangeBadge kind="updated" date="2026-09-27" />
+        )}
+        {action.id === BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID && (
+          <RecentChangeBadge kind="new" date="2026-09-27" />
+        )}
       </EntityListItem.Badges>
       <EntityListItem.Content>
         <EntityListItem.Identity>
