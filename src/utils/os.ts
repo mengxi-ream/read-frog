@@ -1,4 +1,7 @@
-import { formatPageTranslationShortcut } from "./page-translation-shortcut"
+import {
+  formatPageTranslationShortcut,
+  formatPageTranslationShortcutParts,
+} from "./page-translation-shortcut"
 
 type OS = "Windows" | "MacOS" | "Linux" | "iOS" | "Android" | "Unknown"
 
@@ -33,14 +36,7 @@ export function formatHotkey(hotkey: string): string {
 }
 
 export function formatHotkeyParts(hotkey: string): string[] {
-  const platform = getHotkeyPlatform()
-  const formattedHotkey = formatPageTranslationShortcut(hotkey, platform)
-  const separator = platform === "mac" ? /\s+/ : /\+/
-
-  return formattedHotkey
-    .split(separator)
-    .map((part) => part.trim())
-    .filter(Boolean)
+  return formatPageTranslationShortcutParts(hotkey, getHotkeyPlatform())
 }
 
 export function getCommandPaletteShortcutHint(): string {

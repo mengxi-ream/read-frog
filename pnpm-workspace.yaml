@@ -8,6 +8,7 @@ trustPolicyExclude:
   - react-redux@9.2.0
   - reselect@5.1.1
   - semver@6.3.1
+  - why-is-node-running@3.2.2
 
 allowBuilds:
   core-js: true

@@ -281,7 +281,6 @@ options:
         cerebras: Sürətli tərcümə və mətn təhlili üçün son dərəcə sürətli süni intellekt icrası
         replicate: Xüsusi tərcümə tapşırıqları üçün müxtəlif açıq mənbəli modellərə çıxış
         perplexity: Kontekstə uyğun tərcümə və oxu dəstəyi üçün real vaxt bilikləri ilə zənginləşdirilmiş süni intellekt
-        vercel: Veb məzmununun tərcüməsi və təhlili üçün optimallaşdırılmış süni intellekt modelləri
         volcengine: Tərcümə və oxu üçün Doubao modellərini təqdim edən ByteDance bulud süni intellekt platforması
         minimax: Mətn yaratmaq üçün təkmil MiniMax-M2 modellərini təqdim edən MiniMax süni intellekt platforması
         alibaba: Təkmil mühakimə və çoxdilli imkanları olan Alibaba Cloud Qwen model seriyası

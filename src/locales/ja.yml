@@ -280,7 +280,6 @@ options:
         cerebras: 高速翻訳とテキスト分析に最適な超高速AI推論
         replicate: 専門的な翻訳タスクのための多様なオープンソースモデルへのアクセス
         perplexity: 文脈的翻訳と読解支援のためのリアルタイム知識強化AI
-        vercel: ウェブコンテンツの翻訳と分析に最適化されたAIモデル
         volcengine: ByteDanceのクラウドAIプラットフォーム、Doubaoモデルを提供
         minimax: MiniMax AIプラットフォーム、先進的なMiniMax-M2モデルを提供
         alibaba: アリババクラウドのQwenモデルシリーズ、高度な推論と多言語機能を備える

@@ -189,10 +189,6 @@ const llmProviderConfigSchemaList = [
     model: createProviderModelSchema<"perplexity">("perplexity"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal("vercel"),
-    model: createProviderModelSchema<"vercel">("vercel"),
-  }),
-  baseAPIProviderConfigSchema.extend({
     provider: z.literal("ollama"),
     model: createProviderModelSchema<"ollama">("ollama"),
   }),

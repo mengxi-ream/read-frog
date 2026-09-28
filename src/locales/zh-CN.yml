@@ -281,7 +281,6 @@ options:
         cerebras: 超快速 AI 推理，适合快速翻译和文本分析
         replicate: 访问多样化开源模型，适合专业翻译任务
         perplexity: 实时知识增强 AI，提供语境化翻译和阅读辅助
-        vercel: 针对网页内容翻译和分析优化的 AI 模型
         volcengine: 字节跳动旗下云平台，提供豆包系列大模型
         minimax: MiniMax AI平台，提供先进的MiniMax-M2系列大模型
         alibaba: 阿里云通义千问系列模型，具备先进的推理和多语言能力

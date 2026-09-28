@@ -375,14 +375,7 @@ export const LLM_PROVIDER_MODELS = {
     "zai-glm-4.7",
   ],
   replicate: ["meta/meta-llama-3.1-70b-instruct", "meta/meta-llama-3.1-8b-instruct"],
-  perplexity: [
-    "sonar-deep-research",
-    "sonar-reasoning-pro",
-    "sonar-reasoning",
-    "sonar-pro",
-    "sonar",
-  ],
-  vercel: ["v0-1.5-md", "v0-1.5-lg", "v0-1.0-md"],
+  perplexity: ["perplexity/sonar", "fast", "low", "medium", "high", "xhigh"],
   openrouter: [
     "google/gemma-4-31b-it:free",
     "openai/gpt-5.6-luna",
