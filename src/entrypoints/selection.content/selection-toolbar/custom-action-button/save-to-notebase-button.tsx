@@ -1,8 +1,11 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
+import { IconBookmarkPlus } from "@tabler/icons-react"
 import { Button } from "@/components/ui/base-ui/button"
 import { authClient } from "@/utils/auth/auth-client"
 import { i18n } from "@/utils/i18n"
 import { sanitizeCustomActionNotebaseConnection } from "@/utils/notebase/connection"
+import { cn } from "@/utils/styles/utils"
+import { SELECTION_TOOLBAR_FOOTER_COMPACT_CLASSES } from "../../components/selection-toolbar-footer-compact"
 import { useSaveToNotebase } from "./use-save-to-notebase"
 
 export function SaveToNotebaseButton({
@@ -29,26 +32,31 @@ export function SaveToNotebaseButton({
     void save({ action, results: [result] })
   }
 
-  if (!connection) {
-    return (
-      <Button
-        type="button"
-        variant="brand"
-        size="sm"
-        disabled={isSessionPending || isRunning || !result}
-        onClick={handleClick}
-      >
-        {i18n.t("action.saveToNotebase")}
-      </Button>
-    )
-  }
+  const isDisabled = connection
+    ? isSessionPending ||
+      isRunning ||
+      !result ||
+      (isAuthenticated && !hasCurrentAccount) ||
+      isSaving
+    : isSessionPending || isRunning || !result
+  const label =
+    connection && isSaving ? i18n.t("action.saveToNotebaseSaving") : i18n.t("action.saveToNotebase")
 
-  const isDisabled =
-    isSessionPending || isRunning || !result || (isAuthenticated && !hasCurrentAccount) || isSaving
-
+  // Shrinks with the footer: the label truncates, then gives way to an icon.
   return (
-    <Button type="button" size="sm" variant="brand" disabled={isDisabled} onClick={handleClick}>
-      {isSaving ? i18n.t("action.saveToNotebaseSaving") : i18n.t("action.saveToNotebase")}
+    <Button
+      type="button"
+      variant="brand"
+      size="sm"
+      className={cn("min-w-0 shrink", SELECTION_TOOLBAR_FOOTER_COMPACT_CLASSES.button)}
+      title={label}
+      disabled={isDisabled}
+      onClick={handleClick}
+    >
+      <IconBookmarkPlus className={SELECTION_TOOLBAR_FOOTER_COMPACT_CLASSES.icon} />
+      <span className={cn("truncate", SELECTION_TOOLBAR_FOOTER_COMPACT_CLASSES.label)}>
+        {label}
+      </span>
     </Button>
   )
 }
