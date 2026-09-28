@@ -464,6 +464,7 @@ describe("feature providers", () => {
           providerId: "jalapenocloud-default",
           notebaseConnection: undefined,
         },
+        improveWriting: DEFAULT_CONFIG.selectionToolbar.builtInActions.improveWriting,
       })
     })
 

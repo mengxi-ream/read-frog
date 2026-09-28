@@ -58,6 +58,11 @@ export const selectionToolbarBuiltInActionsSchema = z.object({
     enabled: true,
     providerId: BUILT_IN_AI_PROVIDER_ID,
   })),
+  // Off until the user turns it on (v105), for the same reason as above.
+  improveWriting: selectionToolbarBuiltInActionStateSchema.default(() => ({
+    enabled: false,
+    providerId: BUILT_IN_AI_PROVIDER_ID,
+  })),
 })
 
 export const selectionToolbarCustomActionSchema = z

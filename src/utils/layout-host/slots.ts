@@ -42,8 +42,9 @@ const DICTIONARY_SLOT_BY_ID_SUFFIX: Record<string, DictionarySlot> = {
 // the end like the dictionary's.
 const SENTENCE_ANALYSIS_SLOT_ID_RE = /(?:^|-)sentence-analysis-(annotations|translation)$/
 
-// `improve-writing-*` (the Improve Writing preset), anchored at the end like
-// the others.
+// `improve-writing-*` (the Improve Writing preset) and
+// `default-improve-writing-*` (the built-in, and copies of it), anchored at
+// the end like the others.
 const IMPROVE_WRITING_SLOT_ID_RE = /(?:^|-)improve-writing-(setting|annotations|improved|summary)$/
 
 export function getDictionarySlots(

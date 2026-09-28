@@ -733,7 +733,7 @@ options:
           insertContext: Kontekst
           insertLoop: Bütün sahələr
           syntaxHelp: Sintaksis
-          builtInHint: Daxili lüğətin tərtibatı redaktə edilə bilməz. Surətini redaktə etmək üçün fərdiləşdirin.
+          builtInHint: Daxili əməliyyatın tərtibatı redaktə edilə bilməz. Surətini redaktə etmək üçün fərdiləşdirin.
           viewSource: Mənbəyə bax
           emptyNotice: Bu tərtibat boşdur, ona görə açılan pəncərədə defolt sahə siyahısı göstərilir.
           fallbackBanner: Bu tərtibat göstərilə bilmir, ona görə defolt tərtibat istifadə olunur. $1

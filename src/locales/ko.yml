@@ -732,7 +732,7 @@ options:
           insertContext: 컨텍스트
           insertLoop: 모든 필드
           syntaxHelp: 문법
-          builtInHint: 기본 제공 사전의 레이아웃은 편집할 수 없습니다. '사용자 지정'으로 사본을 만들어 편집하세요.
+          builtInHint: 기본 제공 작업의 레이아웃은 편집할 수 없습니다. '사용자 지정'으로 사본을 만들어 편집하세요.
           viewSource: 소스 보기
           emptyNotice: 레이아웃이 비어 있어 팝업에 기본 필드 목록이 표시됩니다.
           fallbackBanner: 이 레이아웃을 표시할 수 없어 기본 레이아웃을 대신 사용합니다. $1

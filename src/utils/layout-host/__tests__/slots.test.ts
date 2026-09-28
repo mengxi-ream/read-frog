@@ -214,8 +214,8 @@ describe("buildSentenceAnalysisActionLayout", () => {
 })
 
 describe("getImproveWritingSlots", () => {
-  it("recognizes preset ids, and copies of them", () => {
-    for (const prefix of ["", "copy-"]) {
+  it("recognizes preset ids, the built-in's, and copies of them", () => {
+    for (const prefix of ["", "default-", "copy-"]) {
       const slots = getImproveWritingSlots([
         field(`${prefix}improve-writing-setting`, "S"),
         field(`${prefix}improve-writing-annotations`, "A"),

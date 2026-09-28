@@ -738,7 +738,7 @@ options:
           insertContext: Context
           insertLoop: Every field
           syntaxHelp: Syntax
-          builtInHint: The built-in Dictionary's layout can't be edited. Customize it to edit a copy.
+          builtInHint: A built-in action's layout can't be edited. Customize it to edit a copy.
           viewSource: View source
           emptyNotice: This layout is empty, so the popup shows the default field list.
           fallbackBanner: This layout can't be shown, so the default layout is used instead. $1

@@ -738,7 +738,7 @@ options:
           insertContext: 上下文
           insertLoop: 所有欄位
           syntaxHelp: 語法
-          builtInHint: 內建字典的版面無法編輯。點選「自訂」複製一份後再修改。
+          builtInHint: 內建指令的版面無法編輯。點選「自訂」複製一份後再修改。
           viewSource: 檢視原始碼
           emptyNotice: 版面為空，彈出視窗將顯示預設的欄位清單。
           fallbackBanner: 此版面無法顯示，已改用預設版面。$1

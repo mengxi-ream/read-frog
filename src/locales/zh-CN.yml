@@ -738,7 +738,7 @@ options:
           insertContext: 上下文
           insertLoop: 所有字段
           syntaxHelp: 语法
-          builtInHint: 内置词典的版式不可编辑。点击「定制化」复制一份后再修改。
+          builtInHint: 内置指令的版式不可编辑。点击「定制化」复制一份后再修改。
           viewSource: 查看源码
           emptyNotice: 版式为空，弹窗将显示默认的字段列表。
           fallbackBanner: 此版式无法显示，已改用默认版式。$1

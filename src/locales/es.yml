@@ -733,7 +733,7 @@ options:
           insertContext: Contexto
           insertLoop: Todos los campos
           syntaxHelp: Sintaxis
-          builtInHint: El diseño del diccionario integrado no se puede editar. Personalízalo para editar una copia.
+          builtInHint: El diseño de una acción integrada no se puede editar. Personalízala para editar una copia.
           viewSource: Ver código
           emptyNotice: Este diseño está vacío, así que la ventana emergente muestra la lista de campos predeterminada.
           fallbackBanner: Este diseño no se puede mostrar, así que se usa el diseño predeterminado. $1

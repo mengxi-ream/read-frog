@@ -732,7 +732,7 @@ options:
           insertContext: Bağlam
           insertLoop: Tüm alanlar
           syntaxHelp: Sözdizimi
-          builtInHint: Yerleşik sözlüğün düzeni düzenlenemez. Bir kopyasını düzenlemek için özelleştirin.
+          builtInHint: Yerleşik eylemin düzeni düzenlenemez. Bir kopyasını düzenlemek için özelleştirin.
           viewSource: Kaynağı görüntüle
           emptyNotice: Bu düzen boş olduğu için açılır pencerede varsayılan alan listesi gösterilir.
           fallbackBanner: Bu düzen gösterilemediği için varsayılan düzen kullanılıyor. $1

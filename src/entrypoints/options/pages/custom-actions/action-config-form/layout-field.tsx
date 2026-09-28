@@ -611,7 +611,7 @@ export const LayoutField = withForm({
 })
 
 // ---------------------------------------------------------------------------
-// Read-only layout (built-in Dictionary)
+// Read-only layout (the built-in actions)
 
 export function ReadOnlyLayoutField({
   action,

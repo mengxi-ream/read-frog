@@ -732,7 +732,7 @@ options:
           insertContext: Ngữ cảnh
           insertLoop: Mọi trường
           syntaxHelp: Cú pháp
-          builtInHint: Không thể chỉnh sửa bố cục của từ điển tích hợp. Hãy tùy chỉnh để chỉnh sửa một bản sao.
+          builtInHint: Không thể chỉnh sửa bố cục của tác vụ tích hợp. Hãy tùy chỉnh để chỉnh sửa một bản sao.
           viewSource: Xem mã nguồn
           emptyNotice: Bố cục này trống nên cửa sổ bật lên hiển thị danh sách trường mặc định.
           fallbackBanner: Không thể hiển thị bố cục này nên bố cục mặc định được dùng thay thế. $1
