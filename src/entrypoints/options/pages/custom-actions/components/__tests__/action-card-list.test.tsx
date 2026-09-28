@@ -3,7 +3,7 @@
 import { render, screen } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { MemoryRouter } from "react-router"
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest"
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
@@ -23,6 +23,10 @@ beforeAll(() => {
 
 afterAll(() => {
   vi.unstubAllGlobals()
+})
+
+afterEach(() => {
+  vi.useRealTimers()
 })
 
 describe("CustomActionCardList", () => {
@@ -61,5 +65,29 @@ describe("CustomActionCardList", () => {
     expect(
       customAction.compareDocumentPosition(builtInDictionary) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy()
+  })
+
+  it("shows New on Sentence Analysis and Updated on Dictionary during the badge window", () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(2026, 8, 27))
+    const store = createStore()
+    store.set(configAtom, structuredClone(DEFAULT_CONFIG))
+
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <CustomActionCardList />
+        </MemoryRouter>
+      </Provider>,
+    )
+
+    const dictionary = document.querySelector('[data-action-id="default-dictionary"]')!
+    const sentenceAnalysis = document.querySelector('[data-action-id="default-sentence-analysis"]')!
+    expect(dictionary).toHaveTextContent(
+      i18n.t("options.selectionToolbar.customActions.badges.updated"),
+    )
+    expect(sentenceAnalysis).toHaveTextContent(
+      i18n.t("options.selectionToolbar.customActions.badges.new"),
+    )
   })
 })

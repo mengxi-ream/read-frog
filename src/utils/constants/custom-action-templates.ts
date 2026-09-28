@@ -35,7 +35,7 @@ export function createDictionaryDefinition(providerId: string): CustomActionDefi
     id: getRandomUUID(),
     name: i18n.t(`${T_PREFIX}.dictionary.name`),
     enabled: true,
-    icon: "tabler:book-2",
+    icon: "streamline-color:dictionary-language-book-flat",
     providerId,
     systemPrompt: i18n.t(`${T_PREFIX}.dictionary.systemPrompt`),
     prompt: i18n.t(`${T_PREFIX}.dictionary.prompt`),
@@ -105,7 +105,7 @@ export function createSentenceAnalysisDefinition(providerId: string): CustomActi
     id: getRandomUUID(),
     name: i18n.t(`${SA_PREFIX}.name`),
     enabled: true,
-    icon: "tabler:highlight",
+    icon: "streamline-color:hand-held-tablet-drawing-flat",
     providerId,
     systemPrompt: i18n.t(`${SA_PREFIX}.systemPrompt`, [annotations, translation]),
     prompt: i18n.t(`${SA_PREFIX}.prompt`),
@@ -134,7 +134,7 @@ export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
     id: "dictionary",
     nameKey: `${T_PREFIX}.dictionary.name`,
     descriptionKey: `${T_PREFIX}.dictionary.description`,
-    icon: "tabler:book-2",
+    icon: "streamline-color:dictionary-language-book-flat",
     createAction: (providerId: string): SelectionToolbarCustomAction => {
       const action = createDictionaryDefinition(providerId)
       // The card names its fields, so it is built from this schema; the
@@ -149,7 +149,7 @@ export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
     id: "sentence-analysis",
     nameKey: `${SA_PREFIX}.name`,
     descriptionKey: `${SA_PREFIX}.description`,
-    icon: "tabler:highlight",
+    icon: "streamline-color:hand-held-tablet-drawing-flat",
     createAction: (providerId: string): SelectionToolbarCustomAction => {
       const action = createSentenceAnalysisDefinition(providerId)
       // Built from this schema like the dictionary card; the preset always

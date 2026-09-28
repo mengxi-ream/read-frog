@@ -649,6 +649,11 @@ options:
       description: Add your own structured AI actions for selected text
       configTitle: Action config
       builtIn: Built-in
+      badges:
+        new: New
+        updated: Updated
+        createdFrom: Created from $1
+        updatedFrom: Updated from $1
       add: Add AI action
       edit: Edit AI action
       empty: No custom AI actions yet

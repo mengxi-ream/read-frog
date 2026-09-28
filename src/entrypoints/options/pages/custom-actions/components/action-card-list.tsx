@@ -19,6 +19,7 @@ import { EntityListItem } from "../../../components/entity-list-item"
 import { EntityListRail } from "../../../components/entity-list-rail"
 import { customActionEditorTabAtom, selectedCustomActionIdAtom } from "../atoms"
 import { AddActionDialog } from "./add-action-dialog"
+import { BuiltInActionBadge } from "./built-in-action-badge"
 
 export function CustomActionCardList() {
   const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(
@@ -131,6 +132,9 @@ function BuiltInActionCard({ action }: { action: SelectionToolbarCustomAction })
       className={action.enabled === false ? "opacity-70" : undefined}
       onClick={() => setSelectedCustomActionId(action.id)}
     >
+      <EntityListItem.Badges>
+        <BuiltInActionBadge actionId={action.id} />
+      </EntityListItem.Badges>
       <EntityListItem.Content>
         <EntityListItem.Identity>
           <Icon icon={action.icon} className="size-4 shrink-0 text-zinc-600 dark:text-zinc-300" />

@@ -9,10 +9,7 @@
  * - Provider: the built-in Dictionary's, the one the user already runs built-in
  *   actions on (the Built-in AI unless they changed it); the Built-in AI when
  *   the Dictionary has none.
- * - Enabled, unless the user already has a Sentence Analysis action of their
- *   own — one made from the Sentence Analysis preset, recognized by a field id
- *   ending in `sentence-analysis-annotations` — so the toolbar does not show
- *   the same action twice. They can still turn the built-in on.
+ * - Enabled for every existing user. The Dictionary's enabled state is kept.
  *
  * A config whose `builtInActions` already has the key (a second run) is
  * returned by identity. One without a `builtInActions` object is left for the
@@ -23,23 +20,9 @@
  */
 
 const BUILT_IN_AI_PROVIDER_ID = "read-frog-free-ai"
-const SENTENCE_ANALYSIS_ANNOTATIONS_FIELD_ID = /(?:^|-)sentence-analysis-annotations$/
 
 function isObject(value: any): value is Record<string, any> {
   return value !== null && typeof value === "object" && !Array.isArray(value)
-}
-
-function isSentenceAnalysisAction(action: any): boolean {
-  return (
-    isObject(action) &&
-    Array.isArray(action.outputSchema) &&
-    action.outputSchema.some(
-      (field: any) =>
-        isObject(field) &&
-        typeof field.id === "string" &&
-        SENTENCE_ANALYSIS_ANNOTATIONS_FIELD_ID.test(field.id),
-    )
-  )
 }
 
 export function migrate(oldConfig: any): any {
@@ -64,10 +47,6 @@ export function migrate(oldConfig: any): any {
     typeof dictionaryProviderId === "string" && dictionaryProviderId !== ""
       ? dictionaryProviderId
       : BUILT_IN_AI_PROVIDER_ID
-  const hasOwnSentenceAnalysis =
-    Array.isArray(selectionToolbar.customActions) &&
-    selectionToolbar.customActions.some(isSentenceAnalysisAction)
-
   return {
     ...oldConfig,
     selectionToolbar: {
@@ -75,7 +54,7 @@ export function migrate(oldConfig: any): any {
       builtInActions: {
         ...builtInActions,
         sentenceAnalysis: {
-          enabled: !hasOwnSentenceAnalysis,
+          enabled: true,
           providerId,
         },
       },

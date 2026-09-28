@@ -24,12 +24,21 @@ describe("dEFAULT_CONFIG", () => {
     })
     vi.resetModules()
 
-    const { createDefaultDictionaryAction, DEFAULT_CONFIG } = await import("../config")
+    const { createDefaultDictionaryAction, createDefaultSentenceAnalysisAction, DEFAULT_CONFIG } =
+      await import("../config")
     const defaultDictionaryAction = createDefaultDictionaryAction()
+    const defaultSentenceAnalysisAction = createDefaultSentenceAnalysisAction()
 
     expect(defaultDictionaryAction).toEqual(
       expect.objectContaining({
         id: "default-dictionary",
+        icon: "streamline-color:dictionary-language-book-flat",
+      }),
+    )
+    expect(defaultSentenceAnalysisAction).toEqual(
+      expect.objectContaining({
+        id: "default-sentence-analysis",
+        icon: "streamline-color:hand-held-tablet-drawing-flat",
       }),
     )
     expect(defaultDictionaryAction?.outputSchema).toEqual(

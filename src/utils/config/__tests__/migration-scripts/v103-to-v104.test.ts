@@ -1,27 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { migrate } from "../../migration-scripts/v103-to-v104"
 
-/** A stored v103 custom action with the given output field ids. Typed `any`
- * like the migration it feeds — this is a stored shape, not the schema. */
-function storedAction(id: string, fieldIds: string[]): any {
-  return {
-    id,
-    name: `Action ${id}`,
-    enabled: true,
-    icon: "tabler:sparkles",
-    providerId: "openai-default",
-    systemPrompt: "",
-    prompt: "{{selection}}",
-    outputSchema: fieldIds.map((fieldId) => ({
-      id: fieldId,
-      name: `Field ${fieldId}`,
-      type: "string",
-      description: "",
-    })),
-    layout: "",
-  }
-}
-
 function storedConfig(
   dictionary: any = { enabled: true, providerId: "deepseek-default" },
   customActions: any[] = [],
@@ -40,7 +19,8 @@ function storedConfig(
 
 describe("v103 -> v104 migration", () => {
   it("adds the built-in Sentence Analysis, enabled, on the Dictionary's provider", () => {
-    const old = storedConfig()
+    const existingAction = { id: "my-action" }
+    const old = storedConfig(undefined, [existingAction])
     const migrated = migrate(old)
 
     expect(migrated.selectionToolbar.builtInActions).toEqual({
@@ -53,6 +33,7 @@ describe("v103 -> v104 migration", () => {
     expect(migrated.selectionToolbar.builtInActions.dictionary).toBe(
       old.selectionToolbar.builtInActions.dictionary,
     )
+    expect(migrated.selectionToolbar.customActions).toBe(old.selectionToolbar.customActions)
     expect(old.selectionToolbar.builtInActions).not.toHaveProperty("sentenceAnalysis")
   })
 
@@ -76,34 +57,6 @@ describe("v103 -> v104 migration", () => {
       enabled: true,
       providerId: "read-frog-free-ai",
     })
-  })
-
-  it.each([
-    ["made from the preset", "sentence-analysis-annotations"],
-    ["copied from a copy", "default-sentence-analysis-annotations"],
-  ])("starts disabled next to a Sentence Analysis action %s", (_case, fieldId) => {
-    const migrated = migrate(
-      storedConfig(undefined, [
-        storedAction("other", ["x"]),
-        storedAction("mine", [fieldId, "sentence-analysis-translation"]),
-      ]),
-    )
-    expect(migrated.selectionToolbar.builtInActions.sentenceAnalysis).toEqual({
-      enabled: false,
-      providerId: "deepseek-default",
-    })
-  })
-
-  it("does not take near misses for a Sentence Analysis action", () => {
-    const migrated = migrate(
-      storedConfig(undefined, [
-        storedAction("a", ["sentence-analysis-annotations-2", "xsentence-analysis-annotations"]),
-        storedAction("b", ["sentence-analysis-translation"]),
-        { id: "broken", outputSchema: "sentence-analysis-annotations" },
-        null,
-      ]),
-    )
-    expect(migrated.selectionToolbar.builtInActions.sentenceAnalysis.enabled).toBe(true)
   })
 
   it("returns the config by identity once the state exists", () => {

@@ -649,6 +649,11 @@ options:
       description: 为划词添加你自己的结构化 AI 操作
       configTitle: 指令配置
       builtIn: 内置
+      badges:
+        new: 新增
+        updated: 已更新
+        createdFrom: 创建于 $1
+        updatedFrom: 更新于 $1
       add: 添加 AI 指令
       edit: 编辑 AI 指令
       empty: 暂无自定义 AI 指令

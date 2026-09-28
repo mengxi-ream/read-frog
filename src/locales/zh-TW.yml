@@ -649,6 +649,11 @@ options:
       description: 為選取文字新增自訂的結構化 AI 指令
       configTitle: 指令設定
       builtIn: 內建
+      badges:
+        new: 新增
+        updated: 已更新
+        createdFrom: 建立於 $1
+        updatedFrom: 更新於 $1
       add: 新增 AI 指令
       edit: 編輯 AI 指令
       empty: 目前沒有自訂 AI 指令
