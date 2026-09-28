@@ -21,10 +21,12 @@ import type {
   ThinkingSnapshot,
 } from "@/types/background-stream"
 import type { TranslateProviderConfig } from "@/types/config/provider"
+import type { ErrorAction } from "@/utils/error-action"
 import {
   HostedAiNoteSuggestionObjectSchema,
   HostedAiNoteSuggestionStreamInputSchema,
   HostedAiOutputFieldTypeSchema,
+  HostedAiQuotaExhaustedDataSchema,
   HostedAiRateLimitErrorDataSchema,
   HostedAiStreamStructuredObjectInputSchema,
   HostedAiStreamTextInputSchema,
@@ -35,6 +37,7 @@ import { BACKGROUND_STREAM_PORTS } from "@/types/background-stream"
 import { isLLMProviderConfig, llmProviderConfigItemSchema } from "@/types/config/provider"
 import { createStructuredObjectSchema } from "@/utils/ai/structured-object-schema"
 import { BUILT_IN_AI_PROVIDER_IDS } from "@/utils/constants/provider-ids"
+import { upgradeAction } from "@/utils/error-action"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { hostedTextStreamRouteSchema, requireHostedFeature } from "@/utils/hosted-ai/routing"
 import { i18n } from "@/utils/i18n"
@@ -271,7 +274,13 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
         }
 
         logger.error("[Background] Stream Function failed", finalError)
-        safePost({ type: "error", error: { message: extractAISDKErrorMessage(finalError) } })
+        safePost({
+          type: "error",
+          error: {
+            message: extractAISDKErrorMessage(finalError),
+            action: finalError instanceof BackgroundStreamError ? finalError.action : undefined,
+          },
+        })
       } finally {
         cleanup()
         try {
@@ -306,13 +315,15 @@ class BackgroundStreamError extends Error {
   constructor(
     readonly code: string,
     message: string,
-    options?: { cause?: unknown; retryAfterMs?: number },
+    options?: { cause?: unknown; retryAfterMs?: number; action?: ErrorAction },
   ) {
     super(message, { cause: options?.cause })
     this.retryAfterMs = options?.retryAfterMs
+    this.action = options?.action
   }
 
   readonly retryAfterMs?: number
+  readonly action?: ErrorAction
 }
 
 function withRequestErrorMeta<T extends Error>(
@@ -395,6 +406,19 @@ function getHostedAiRateLimitMessage(error: unknown): string {
 const HOSTED_AI_TIER_RESTRICTED = "HOSTED_AI_TIER_RESTRICTED" satisfies PublicAppErrorCode
 const HOSTED_AI_QUOTA_EXHAUSTED = "HOSTED_AI_QUOTA_EXHAUSTED" satisfies PublicAppErrorCode
 
+/**
+ * Every pool but Ultra's has a bigger plan above it, so running one dry offers
+ * the upgrade. Ultra is the top of the ladder: pricing has nothing to sell a
+ * subscriber there, so the message stands alone. A payload that fails to parse
+ * still offers it — nearly everyone who hits a wall is below Ultra.
+ */
+function getHostedAiQuotaExhaustedAction(error: unknown): ErrorAction | undefined {
+  const parsed = HostedAiQuotaExhaustedDataSchema.safeParse(
+    isRecord(error) ? error.data : undefined,
+  )
+  return parsed.success && parsed.data.policyId === "ultra-weekly-v1" ? undefined : upgradeAction()
+}
+
 function normalizeHostedAiError(error: unknown): unknown {
   switch (getOrpcErrorCode(error)) {
     case HOSTED_AI_TIER_RESTRICTED:
@@ -415,7 +439,7 @@ function normalizeHostedAiError(error: unknown): unknown {
         new BackgroundStreamError(
           "HOSTED_AI_QUOTA_EXHAUSTED",
           i18n.t("hostedAi.availability.quotaExhausted"),
-          { cause: error },
+          { cause: error, action: getHostedAiQuotaExhaustedAction(error) },
         ),
         { isRetryable: false, kind: "access-denied" },
       )

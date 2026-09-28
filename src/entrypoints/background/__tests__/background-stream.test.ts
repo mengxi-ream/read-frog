@@ -3,6 +3,7 @@ import type {
   BackgroundTextStreamSnapshot,
 } from "@/types/background-stream"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { env } from "@/env"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 import { defaultRequestRetryPolicy } from "@/utils/request/retry-policy"
 
@@ -412,6 +413,64 @@ describe("background-stream", () => {
         consecutiveRateLimits: 0,
       }),
     ).toEqual({ action: "fail", failQueue: true })
+  })
+
+  function mockHostedCustomActionQuotaExhausted(policyId: string) {
+    hostedStreamStructuredObjectMock.mockResolvedValue(
+      (async function* () {
+        yield { type: "start" }
+        throw Object.assign(new Error("Built-in AI credit exhausted"), {
+          code: "HOSTED_AI_QUOTA_EXHAUSTED",
+          status: 429,
+          data: { modelTier: "normal", policyId, usedPercent: 100, resetAt: null },
+        })
+      })(),
+    )
+  }
+
+  async function runHostedCustomActionOverPort(streamRequestId: string) {
+    const { handleStreamStructuredObjectPort } = await import("../background-stream")
+    const mockPort = createMockPort("stream-structured-object")
+    handleStreamStructuredObjectPort(mockPort.port as never)
+    await mockPort.emitMessage({
+      type: "start",
+      streamRequestId,
+      payload: {
+        providerId: "read-frog-free-ai",
+        modelTier: "normal",
+        requestId: "123e4567-e89b-42d3-a456-426614174021",
+        instructions: "Return structured data",
+        prompt: "Analyze selection",
+        outputSchema: [{ name: "score", type: "number" }],
+      },
+    })
+    return mockPort.postMessage.mock.calls
+      .map((call) => call[0] as { type: string; error?: { message: string; action?: unknown } })
+      .find((message) => message.type === "error")
+  }
+
+  it("sends an upgrade to pricing across the port when a plan below Ultra runs out of credit", async () => {
+    mockHostedCustomActionQuotaExhausted("custom-action-user-daily-v1")
+
+    expect(await runHostedCustomActionOverPort("req-quota-upgrade")).toEqual({
+      type: "error",
+      streamRequestId: "req-quota-upgrade",
+      error: {
+        message: "hostedAi.availability.quotaExhausted",
+        action: {
+          label: "action.upgrade",
+          url: new URL("/pricing", env.WXT_WEBSITE_URL).toString(),
+        },
+      },
+    })
+  })
+
+  it("offers no upgrade when the Ultra pool itself runs dry", async () => {
+    mockHostedCustomActionQuotaExhausted("ultra-weekly-v1")
+
+    const errorMessage = await runHostedCustomActionOverPort("req-quota-ultra")
+    expect(errorMessage?.error?.message).toBe("hostedAi.availability.quotaExhausted")
+    expect(errorMessage?.error?.action).toBeUndefined()
   })
 
   it.each([

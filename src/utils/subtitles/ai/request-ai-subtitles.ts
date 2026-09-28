@@ -2,12 +2,12 @@ import type { VideoTranscriptStatus } from "@read-frog/api-contract"
 import type { SubtitlesError } from "@/utils/subtitles/errors"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { safe } from "@orpc/client"
+import { billingAction, upgradeAction } from "@/utils/error-action"
 import { i18n } from "@/utils/i18n"
 import { isORPCPublicAppError } from "@/utils/notebase/errors"
 import { orpcClient } from "@/utils/orpc/client"
 import { sleep } from "@/utils/sleep"
 import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
-import { billingAction, upgradeAction } from "./entitlement"
 
 export interface AiSubtitlesContext {
   videoId: string

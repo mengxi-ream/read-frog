@@ -1,4 +1,4 @@
-import type { SubtitlesErrorAction } from "./errors"
+import type { ErrorAction } from "@/utils/error-action"
 import { anchoredToastManager, toastManager } from "@/components/ui/base-ui/toast"
 import { sendMessage } from "@/utils/message"
 
@@ -35,7 +35,7 @@ function usableAnchor(): HTMLElement | null {
   return isAnchorVisible(aiRequestAnchor) ? aiRequestAnchor : null
 }
 
-function show(title: string, action: SubtitlesErrorAction | undefined, anchor: HTMLElement | null) {
+function show(title: string, action: ErrorAction | undefined, anchor: HTMLElement | null) {
   const manager = anchor ? anchoredToastManager : toastManager
   const toastId = manager.add({
     id: WALL_TOAST_ID,
@@ -64,7 +64,7 @@ function show(title: string, action: SubtitlesErrorAction | undefined, anchor: H
  * navigates on its own — stealing focus with a new tab in the middle of a
  * video is what this replaces.
  */
-export function showSubtitlesErrorToast(title: string, action?: SubtitlesErrorAction): void {
+export function showSubtitlesErrorToast(title: string, action?: ErrorAction): void {
   show(title, action, null)
 }
 
@@ -76,7 +76,7 @@ export function showSubtitlesErrorToast(title: string, action?: SubtitlesErrorAc
  * Falls back to the docked corner when that control is off screen — a refusal
  * arriving after the panel closed still has to be seen.
  */
-export function showAiSubtitlesWallToast(title: string, action?: SubtitlesErrorAction): void {
+export function showAiSubtitlesWallToast(title: string, action?: ErrorAction): void {
   show(title, action, usableAnchor())
 }
 
@@ -88,7 +88,7 @@ export function showAiSubtitlesWallToast(title: string, action?: SubtitlesErrorA
 export function showAnchoredSubtitlesToast(
   title: string,
   anchor: HTMLElement | null,
-  action?: SubtitlesErrorAction,
+  action?: ErrorAction,
 ): void {
   show(title, action, isAnchorVisible(anchor) ? anchor : null)
 }

@@ -1,3 +1,5 @@
+import type { ErrorAction } from "@/utils/error-action"
+import { StreamPortError } from "@/utils/content-script/port-streaming"
 import { isExtensionContextInvalidatedError } from "@/utils/error/extension-context"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { i18n } from "@/utils/i18n"
@@ -5,6 +7,7 @@ import { i18n } from "@/utils/i18n"
 export interface SelectionToolbarInlineError {
   title: string
   description: string
+  action?: ErrorAction
 }
 
 type SelectionToolbarErrorKind = "translate" | "customAction"
@@ -68,5 +71,6 @@ export function createSelectionToolbarRuntimeError(
   return {
     title: getErrorTitle(kind),
     description: toErrorDescription(kind, error),
+    action: error instanceof StreamPortError ? error.action : undefined,
   }
 }
