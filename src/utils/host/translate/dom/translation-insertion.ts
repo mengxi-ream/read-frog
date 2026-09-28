@@ -210,8 +210,12 @@ export async function insertTranslatedNodeIntoWrapper(
   // is an inline-block inside <sub> and lays out its own lines. Inheriting
   // that zero line height gives those lines no vertical advance: they paint
   // at the same y coordinate while the translation's content box has no height.
-  // Restore line height only for translations that actually inherit zero.
-  if (Number.parseFloat(window.getComputedStyle(translatedNode).lineHeight) === 0) {
+  // Inline translations still flow through the paragraph's line boxes, so
+  // leave their inherited line height alone.
+  if (
+    translatedNode.classList.contains(BLOCK_CONTENT_CLASS) &&
+    Number.parseFloat(window.getComputedStyle(translatedNode).lineHeight) === 0
+  ) {
     translatedNode.style.lineHeight = "normal"
   }
 
