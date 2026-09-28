@@ -70,8 +70,10 @@ import { i18n } from "@/utils/i18n"
 import { resolveActionLayout } from "@/utils/layout-host/resolve"
 import {
   buildDictionaryActionLayout,
+  buildImproveWritingActionLayout,
   buildSentenceAnalysisActionLayout,
   isDictionaryShaped,
+  isImproveWritingShaped,
   isSentenceAnalysisShaped,
 } from "@/utils/layout-host/slots"
 import { CUSTOM_ACTION_LAYOUT_SECTION_ID } from "@/utils/navigation"
@@ -95,6 +97,7 @@ type LayoutKey =
   | "resetFieldList"
   | "resetDictionary"
   | "resetSentenceAnalysis"
+  | "resetImproveWriting"
   | "resetConfirmTitle"
   | "resetConfirmDescription"
   | "resetConfirm"
@@ -401,7 +404,7 @@ function LayoutEditorPane({
 // ---------------------------------------------------------------------------
 // Restore default
 
-type ResetTarget = "fieldList" | "dictionary" | "sentenceAnalysis"
+type ResetTarget = "fieldList" | "dictionary" | "sentenceAnalysis" | "improveWriting"
 
 function ResetMenu({
   outputSchema,
@@ -429,6 +432,11 @@ function ResetMenu({
         {isSentenceAnalysisShaped(outputSchema) && (
           <DropdownMenuItem onClick={() => onReset("sentenceAnalysis")}>
             {t("resetSentenceAnalysis")}
+          </DropdownMenuItem>
+        )}
+        {isImproveWritingShaped(outputSchema) && (
+          <DropdownMenuItem onClick={() => onReset("improveWriting")}>
+            {t("resetImproveWriting")}
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>
@@ -469,6 +477,8 @@ function getResetLayout(target: ResetTarget, outputSchema: Field[]): string {
       return buildDictionaryActionLayout(outputSchema) ?? DEFAULT_LAYOUT
     case "sentenceAnalysis":
       return buildSentenceAnalysisActionLayout(outputSchema) ?? DEFAULT_LAYOUT
+    case "improveWriting":
+      return buildImproveWritingActionLayout(outputSchema) ?? DEFAULT_LAYOUT
     default:
       return DEFAULT_LAYOUT
   }

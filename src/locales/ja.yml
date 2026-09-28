@@ -706,6 +706,7 @@ options:
           resetFieldList: フィールド一覧
           resetDictionary: 辞書カード
           resetSentenceAnalysis: 文分析カード
+          resetImproveWriting: "文章添削カード"
           resetConfirmTitle: このレイアウトを置き換えますか？
           resetConfirmDescription: エディターの内容が置き換えられます。あとからエディターで元に戻すこともできます。
           resetConfirm: 置き換える
@@ -951,6 +952,34 @@ options:
           hardLabel: "難所"
           trunkLabel: "骨組みだけ"
           slashesLabel: "スラッシュ"
+        improveWriting:
+          name: "文章添削"
+          description: "先生のように添削：誤りや不自然な表現に印をつけ、場面に合った文に直します"
+          fieldSetting: "場面"
+          fieldAnnotations: "添削"
+          fieldImproved: "修正後"
+          fieldSummary: "総評"
+          types:
+            spelling: "表記"
+            grammar: "文法"
+            punctuation: "句読点"
+            wordChoice: "語彙"
+            logic: "論理"
+            unnatural: "不自然"
+            register: "文体"
+            clarity: "明確さ"
+            good: "好表現"
+          tiers:
+            error: "誤り"
+            awkward: "要改善"
+            good: "好表現"
+          hideFixesLabel: "答えを隠す"
+          hiddenHintLabel: "まず自分で直してみましょう。"
+          showImprovedLabel: "修正後を表示"
+          improvedLabel: "修正後"
+          copyLabel: "コピー"
+          unchangedLabel: "直すところはありません"
+          removeLabel: "削除"
       errors:
         nameRequired: 名前は必須です
         duplicateName: '重複するアクション名 "$1"'

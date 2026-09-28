@@ -707,6 +707,7 @@ options:
           resetFieldList: Sahə siyahısı
           resetDictionary: Lüğət kartı
           resetSentenceAnalysis: Cümlə təhlili kartı
+          resetImproveWriting: "Yazı təkmilləşdirmə kartı"
           resetConfirmTitle: Bu tərtibat əvəz edilsin?
           resetConfirmDescription: Redaktordakı məzmun əvəz ediləcək. Sonra redaktorda geri qaytara bilərsiniz.
           resetConfirm: Əvəz et
@@ -955,49 +956,33 @@ options:
           trunkLabel: "Yalnız əsas"
           slashesLabel: "Fasilələr"
         improveWriting:
-          name: Yazını təkmilləşdir
-          description: Yazı xətalarını təhlil edin və düzəlişlər təklif edin
-          systemPrompt: |-
-            Siz dil öyrənənlər üçün yazı köməkçisisiniz.
-
-            ## Məqsəd
-            Seçilmiş mətn və ətrafındakı abzaslar əsasında yazı problemlərini təhlil edin və təkmilləşdirilmiş versiya hazırlayın.
-
-            ## Dil qaydaları (vacib)
-            1. Seçilmiş mətnin orijinal dilini {{originLanguage}} kimi müəyyən edin.
-            2. "Xətaların təhlili" sahəsi {{targetLanguage}} dilində yazılmalıdır.
-            3. "Təkmilləşdirilmiş versiya" sahəsi {{originLanguage}} dilində qalmalıdır.
-            4. {{originLanguage}} və {{targetLanguage}} eyni olmadıqda "Təkmilləşdirilmiş versiya" sahəsini {{targetLanguage}} dilinə heç vaxt tərcümə etməyin.
-
-            ## Yazı qaydaları
-            1. Qrammatika, orfoqrafiya, durğu işarələri və söz seçimi xətalarını müəyyən edin.
-            2. Düzəlişləri təbii edin, müəllifin niyyətini və üslubunu qoruyun.
-            3. Ciddi xəta yoxdursa, bunu "Xətaların təhlili" sahəsində aydın bildirin və yüngül redaktə edilmiş "Təkmilləşdirilmiş versiya" qaytarın.
-            4. "Təkmilləşdirilmiş versiya" qısa və birbaşa istifadəyə hazır olsun.
-
-            ## Nümunələr
-            Nümunə A:
-            - Seçim: "O dünən məktəbə gedir və ev tapşırığını bitirmir."
-            - Aşkarlanan {{originLanguage}}: Azərbaycan dili
-            - {{targetLanguage}}: Azərbaycan dili
-            - Xətaların təhlili (Azərbaycan dili, {{targetLanguage}}): Zaman uyğunsuzluğu var. "Dünən" keçmiş zamanı bildirir, buna görə "gedir" əvəzinə "getdi", "bitirmir" əvəzinə "bitirmədi" yazılmalıdır.
-            - Təkmilləşdirilmiş versiya (Azərbaycan dili, {{originLanguage}}): O dünən məktəbə getdi və ev tapşırığını bitirmədi.
-
-            Nümunə B:
-            - Seçim: "Dünən mən dostuma görüşdüm və birlikdə filmə baxdıq."
-            - Aşkarlanan {{originLanguage}}: Azərbaycan dili
-            - {{targetLanguage}}: Azərbaycan dili
-            - Xətaların təhlili (Azərbaycan dili, {{targetLanguage}}): "Görüşmək" feili ilə "dostuma" deyil, "dostumla" işlənməlidir.
-            - Təkmilləşdirilmiş versiya (Azərbaycan dili, {{originLanguage}}): Dünən mən dostumla görüşdüm və birlikdə filmə baxdıq.
-          prompt: |-
-            ## Giriş
-            Seçim: {{selection}}
-            Abzaslar: {{paragraphs}}
-            Hədəf dili: {{targetLanguage}}
-          fieldErrorAnalysis: Xətaların təhlili
-          fieldErrorAnalysisDescription: Qrammatika, orfoqrafiya, durğu işarələri və söz seçimi problemlərini {{targetLanguage}} dilində izah edin.
-          fieldImprovedVersion: Təkmilləşdirilmiş versiya
-          fieldImprovedVersionDescription: Seçilmiş mətnin orijinal dilində düzəldilmiş və təkmilləşdirilmiş versiyası.
+          name: "Yazını təkmilləşdir"
+          description: "Müəllim kimi səhvləri və qeyri-təbii ifadələri işarələyir, mətni vəziyyətə uyğun düzəldir"
+          fieldSetting: "Kontekst"
+          fieldAnnotations: "Qeydlər"
+          fieldImproved: "Düzəldilmiş mətn"
+          fieldSummary: "Xülasə"
+          types:
+            spelling: "Orfoqrafiya"
+            grammar: "Qrammatika"
+            punctuation: "Durğu işarələri"
+            wordChoice: "Söz seçimi"
+            logic: "Məntiq"
+            unnatural: "Qeyri-təbii"
+            register: "Üslub"
+            clarity: "Aydınlıq"
+            good: "Uğurlu seçim"
+          tiers:
+            error: "Səhv"
+            awkward: "Qüsurlu"
+            good: "Uğurlu"
+          hideFixesLabel: "Düzəlişləri gizlət"
+          hiddenHintLabel: "Əvvəlcə özünüz düzəltməyə çalışın."
+          showImprovedLabel: "Göstər"
+          improvedLabel: "Düzəldilmiş mətn"
+          copyLabel: "Kopyala"
+          unchangedLabel: "Dəyişəcək heç nə yoxdur"
+          removeLabel: "sil"
         blank:
           name: Boş
           description: Boş əməliyyatla sıfırdan başlayın

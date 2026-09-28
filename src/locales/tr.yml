@@ -706,6 +706,7 @@ options:
           resetFieldList: Alan listesi
           resetDictionary: Sözlük kartı
           resetSentenceAnalysis: Cümle analizi kartı
+          resetImproveWriting: "Yazı iyileştirme kartı"
           resetConfirmTitle: Bu düzen değiştirilsin mi?
           resetConfirmDescription: Düzenleyicinin içeriği değiştirilecek. Daha sonra düzenleyicide geri alabilirsiniz.
           resetConfirm: Değiştir
@@ -951,6 +952,34 @@ options:
           hardLabel: "Zor"
           trunkLabel: "Sadece iskelet"
           slashesLabel: "Duraklar"
+        improveWriting:
+          name: "Yazıyı iyileştir"
+          description: "Bir öğretmen gibi hataları ve doğal olmayan ifadeleri işaretler, metni duruma göre düzeltir"
+          fieldSetting: "Bağlam"
+          fieldAnnotations: "İşaretler"
+          fieldImproved: "Düzeltilmiş metin"
+          fieldSummary: "Özet"
+          types:
+            spelling: "Yazım"
+            grammar: "Dil bilgisi"
+            punctuation: "Noktalama"
+            wordChoice: "Sözcük seçimi"
+            logic: "Mantık"
+            unnatural: "Doğal değil"
+            register: "Üslup"
+            clarity: "Açıklık"
+            good: "İyi seçim"
+          tiers:
+            error: "Hata"
+            awkward: "Pürüzlü"
+            good: "İyi"
+          hideFixesLabel: "Düzeltmeleri gizle"
+          hiddenHintLabel: "Önce kendiniz düzeltmeyi deneyin."
+          showImprovedLabel: "Göster"
+          improvedLabel: "Düzeltilmiş metin"
+          copyLabel: "Kopyala"
+          unchangedLabel: "Değiştirilecek bir şey yok"
+          removeLabel: "sil"
       errors:
         nameRequired: Ad gerekli
         duplicateName: 'Yinelenen eylem adı "$1"'

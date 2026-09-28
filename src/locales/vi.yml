@@ -706,6 +706,7 @@ options:
           resetFieldList: Danh sách trường
           resetDictionary: Thẻ từ điển
           resetSentenceAnalysis: Thẻ phân tích câu
+          resetImproveWriting: "Thẻ cải thiện bài viết"
           resetConfirmTitle: Thay thế bố cục này?
           resetConfirmDescription: Nội dung trong trình soạn thảo sẽ bị thay thế. Sau đó bạn vẫn có thể hoàn tác trong trình soạn thảo.
           resetConfirm: Thay thế
@@ -951,6 +952,34 @@ options:
           hardLabel: "Khó"
           trunkLabel: "Chỉ xem nòng cốt"
           slashesLabel: "Ngắt câu"
+        improveWriting:
+          name: "Cải thiện bài viết"
+          description: "Chấm như giáo viên: đánh dấu lỗi và cách diễn đạt chưa tự nhiên, sửa lại cho hợp hoàn cảnh"
+          fieldSetting: "Ngữ cảnh"
+          fieldAnnotations: "Chú thích"
+          fieldImproved: "Bản đã sửa"
+          fieldSummary: "Nhận xét"
+          types:
+            spelling: "Chính tả"
+            grammar: "Ngữ pháp"
+            punctuation: "Dấu câu"
+            wordChoice: "Dùng từ"
+            logic: "Logic"
+            unnatural: "Thiếu tự nhiên"
+            register: "Văn phong"
+            clarity: "Rõ ràng"
+            good: "Điểm hay"
+          tiers:
+            error: "Lỗi"
+            awkward: "Chưa ổn"
+            good: "Điểm hay"
+          hideFixesLabel: "Ẩn đáp án"
+          hiddenHintLabel: "Hãy tự sửa trước đã."
+          showImprovedLabel: "Hiện bản đã sửa"
+          improvedLabel: "Bản đã sửa"
+          copyLabel: "Sao chép"
+          unchangedLabel: "Không cần sửa"
+          removeLabel: "xóa"
       errors:
         nameRequired: Tên là bắt buộc
         duplicateName: 'Tên hành động trùng lặp "$1"'

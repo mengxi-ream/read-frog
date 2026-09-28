@@ -1,7 +1,12 @@
 import { LANG_CODE_ISO6393_OPTIONS, LOCALE_TO_ISO6393 } from "@read-frog/definitions"
 import { describe, expect, it } from "vitest"
 import { SUPPORTED_UI_LOCALES } from "@/utils/i18n/locales"
-import { contentLocaleFor, getSentenceAnalysisLabels, langCodeOfLocale } from "../labels"
+import {
+  contentLocaleFor,
+  getImproveWritingLabels,
+  getSentenceAnalysisLabels,
+  langCodeOfLocale,
+} from "../labels"
 
 const SA_PREFIX = "options.selectionToolbar.customActions.templates.sentenceAnalysis"
 
@@ -40,5 +45,23 @@ describe("getSentenceAnalysisLabels", () => {
   it("builds a locale's words once", () => {
     expect(getSentenceAnalysisLabels("ko")).toBe(getSentenceAnalysisLabels("ko"))
     expect(getSentenceAnalysisLabels("ko")).not.toBe(getSentenceAnalysisLabels("ja"))
+  })
+})
+
+describe("getImproveWritingLabels", () => {
+  const IW_PREFIX = "options.selectionToolbar.customActions.templates.improveWriting"
+
+  it("names every value in the locale asked for", () => {
+    const labels = getImproveWritingLabels("ja")
+    expect(labels.types["word-choice"]).toBe(`${IW_PREFIX}.types.wordChoice@ja`)
+    expect(labels.types.good).toBe(`${IW_PREFIX}.types.good@ja`)
+    expect(labels.tiers.awkward).toBe(`${IW_PREFIX}.tiers.awkward@ja`)
+    expect(labels.hideFixes).toBe(`${IW_PREFIX}.hideFixesLabel@ja`)
+    expect(labels.remove).toBe(`${IW_PREFIX}.removeLabel@ja`)
+  })
+
+  it("builds a locale's words once", () => {
+    expect(getImproveWritingLabels("ko")).toBe(getImproveWritingLabels("ko"))
+    expect(getImproveWritingLabels("ko")).not.toBe(getImproveWritingLabels("ja"))
   })
 })

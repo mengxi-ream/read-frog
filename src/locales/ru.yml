@@ -706,6 +706,7 @@ options:
           resetFieldList: Список полей
           resetDictionary: Карточка словаря
           resetSentenceAnalysis: Карточка разбора предложения
+          resetImproveWriting: "Карточка улучшения текста"
           resetConfirmTitle: Заменить этот макет?
           resetConfirmDescription: Содержимое редактора будет заменено. Отменить замену можно будет в редакторе.
           resetConfirm: Заменить
@@ -951,6 +952,34 @@ options:
           hardLabel: "Сложно"
           trunkLabel: "Только основа"
           slashesLabel: "Паузы"
+        improveWriting:
+          name: "Улучшить текст"
+          description: "Отмечает ошибки и неудачные фразы, как учитель, и исправляет текст под ситуацию"
+          fieldSetting: "Ситуация"
+          fieldAnnotations: "Пометки"
+          fieldImproved: "Исправленный текст"
+          fieldSummary: "Итог"
+          types:
+            spelling: "Орфография"
+            grammar: "Грамматика"
+            punctuation: "Пунктуация"
+            wordChoice: "Выбор слова"
+            logic: "Логика"
+            unnatural: "Неестественно"
+            register: "Стиль"
+            clarity: "Ясность"
+            good: "Удачно"
+          tiers:
+            error: "Ошибки"
+            awkward: "Неудачно"
+            good: "Удачно"
+          hideFixesLabel: "Скрыть исправления"
+          hiddenHintLabel: "Сначала попробуйте исправить сами."
+          showImprovedLabel: "Показать"
+          improvedLabel: "Исправленный текст"
+          copyLabel: "Копировать"
+          unchangedLabel: "Исправлять нечего"
+          removeLabel: "удалить"
       errors:
         nameRequired: Название обязательно
         duplicateName: 'Дублирующееся имя действия "$1"'

@@ -1,10 +1,20 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
-import type { DictionarySlot, SentenceAnalysisSlot } from "@read-frog/layout-engine/presets"
+import type {
+  DictionarySlot,
+  ImproveWritingSlot,
+  SentenceAnalysisSlot,
+} from "@read-frog/layout-engine/presets"
 import type { SelectionToolbarCustomActionOutputField } from "@/types/config/selection-toolbar"
 import type { SupportedUiLocale } from "@/utils/i18n/locales"
 import { DEFAULT_UI_LOCALE } from "@/utils/i18n/locales"
 import { langCodeOfLocale } from "./labels"
-import { getDictionarySlots, getSentenceAnalysisSlots, isSentenceAnalysisShaped } from "./slots"
+import {
+  getDictionarySlots,
+  getImproveWritingSlots,
+  getSentenceAnalysisSlots,
+  isImproveWritingShaped,
+  isSentenceAnalysisShaped,
+} from "./slots"
 
 // Sample results for the layout preview on the options page. Values are keyed
 // by field NAME, the shape a model's structured output has; user edits to the
@@ -246,10 +256,183 @@ const SENTENCE_ANALYSIS_SAMPLES: Record<SupportedUiLocale, SentenceAnalysisSampl
   ),
 }
 
+// An Improve Writing answer per language, the same way round as the others:
+// an English email to a professor marked in that language, or, in English, a
+// Chinese learner's sentence marked in English. Each shows every tier — an
+// error with a short fix written between the lines, an awkward phrase whose
+// longer fix leaves a pen mark, a choice worth keeping — and the setting the
+// marks are judged against.
+interface ImproveWritingSample {
+  selection: string
+  values: Record<ImproveWritingSlot, string>
+}
+
+interface ImproveWritingMark {
+  text: string
+  fix?: string
+  type: string
+  tag?: string
+  note: string
+}
+
+const ENGLISH_EMAIL =
+  "Dear Professor Lee, I want to know if you are free tomorrow. I have some questions about the homework and hope you can explain me."
+
+// The email's marks and summary in one language: the greeting that works,
+// the request's tone, and explain's object.
+function englishEmailSample(words: {
+  setting: string
+  greeting: string
+  toneTag: string
+  tone: string
+  explain: string
+  summary: string
+}): ImproveWritingSample {
+  const marks: ImproveWritingMark[] = [
+    { text: "Dear Professor Lee,", type: "good", note: words.greeting },
+    {
+      text: "I want to know if you are free tomorrow",
+      fix: "I was wondering if you might be free tomorrow",
+      type: "register",
+      tag: words.toneTag,
+      note: words.tone,
+    },
+    {
+      text: "explain me",
+      fix: "explain them to me",
+      type: "grammar",
+      tag: "explain",
+      note: words.explain,
+    },
+  ]
+  return {
+    selection: ENGLISH_EMAIL,
+    values: {
+      setting: words.setting,
+      annotations: JSON.stringify(marks),
+      improved:
+        "Dear Professor Lee, I was wondering if you might be free tomorrow. I have some questions about the homework and hope you can explain them to me.",
+      summary: words.summary,
+    },
+  }
+}
+
+const IMPROVE_WRITING_SAMPLES: Record<SupportedUiLocale, ImproveWritingSample> = {
+  en: {
+    selection: "我昨天去商店想买三个书，可是我没有带钱，所以我不买了。",
+    values: {
+      setting: "Casual · practice chat",
+      annotations: JSON.stringify([
+        {
+          text: "去商店想买",
+          type: "good",
+          note: "Natural serial verbs: go somewhere to do something.",
+        },
+        {
+          text: "三个书",
+          fix: "三本书",
+          type: "grammar",
+          tag: "measure",
+          note: "Books take the measure word 本, not the generic 个.",
+        },
+        {
+          text: "可是我没有带钱",
+          fix: "结果忘了带钱",
+          type: "unnatural",
+          tag: "结果",
+          note: "结果 tells how it turned out; 忘了带钱 says what happened.",
+        },
+        {
+          text: "所以我不买了",
+          fix: "就没买成",
+          type: "grammar",
+          tag: "不 vs 没",
+          note: "Negate past events with 没; 没买成 means you couldn't buy them.",
+        },
+      ] satisfies ImproveWritingMark[]),
+      improved: "我昨天去商店想买三本书，结果忘了带钱，就没买成。",
+      summary: "Clear meaning; watch the measure word and 没 for the past.",
+    },
+  },
+  "zh-CN": englishEmailSample({
+    setting: "正式 · 写给教授的邮件",
+    greeting: "称呼得体：Professor + 姓",
+    toneTag: "语气",
+    tone: "对教授直接说 I want 显得生硬，I was wondering 更委婉",
+    explain: "explain 不直接接人：explain sth to sb",
+    summary: "称呼得体，但请求的语气对教授来说有点生硬。",
+  }),
+  "zh-TW": englishEmailSample({
+    setting: "正式 · 寫給教授的郵件",
+    greeting: "稱呼得體：Professor + 姓",
+    toneTag: "語氣",
+    tone: "對教授直接說 I want 顯得生硬，I was wondering 更委婉",
+    explain: "explain 不直接接人：explain sth to sb",
+    summary: "稱呼得體，但請求的語氣對教授來說有點生硬。",
+  }),
+  ja: englishEmailSample({
+    setting: "フォーマル · 教授へのメール",
+    greeting: "Professor + 姓の呼びかけは適切",
+    toneTag: "語調",
+    tone: "教授に I want は直接的すぎる。I was wondering の方が丁寧",
+    explain: "explain は人を直接目的語にしない：explain sth to sb",
+    summary: "呼びかけは適切だが、依頼の口調が教授には少し直接的すぎる。",
+  }),
+  ko: englishEmailSample({
+    setting: "격식 · 교수님께 보내는 메일",
+    greeting: "Professor + 성으로 부른 호칭이 적절해요",
+    toneTag: "어조",
+    tone: "교수님께 I want는 너무 직접적이에요. I was wondering이 더 공손해요",
+    explain: "explain 뒤에 사람을 바로 쓰지 않아요: explain sth to sb",
+    summary: "호칭은 적절하지만 부탁하는 어조가 교수님께는 조금 딱딱해요.",
+  }),
+  ru: englishEmailSample({
+    setting: "Официально · письмо профессору",
+    greeting: "Уместное обращение: Professor + фамилия",
+    toneTag: "тон",
+    tone: "I want звучит резко для профессора; I was wondering вежливее",
+    explain: "После explain не ставят человека: explain sth to sb",
+    summary: "Обращение уместное, но просьба звучит для профессора резковато.",
+  }),
+  tr: englishEmailSample({
+    setting: "Resmî · hocaya e-posta",
+    greeting: "Uygun hitap: Professor + soyadı",
+    toneTag: "ton",
+    tone: "Hocaya I want fazla doğrudan; I was wondering daha kibar",
+    explain: "explain doğrudan kişi almaz: explain sth to sb",
+    summary: "Hitap uygun, ama rica bir hoca için biraz fazla doğrudan.",
+  }),
+  vi: englishEmailSample({
+    setting: "Trang trọng · email gửi giáo sư",
+    greeting: "Cách xưng hô phù hợp: Professor + họ",
+    toneTag: "giọng",
+    tone: "Nói I want với giáo sư hơi thẳng; I was wondering lịch sự hơn",
+    explain: "explain không đi thẳng với người: explain sth to sb",
+    summary: "Xưng hô phù hợp, nhưng lời nhờ hơi thẳng với một giáo sư.",
+  }),
+  es: englishEmailSample({
+    setting: "Formal · correo a un profesor",
+    greeting: "Saludo adecuado: Professor + apellido",
+    toneTag: "tono",
+    tone: "I want suena brusco con un profesor; I was wondering es más cortés",
+    explain: "explain no lleva a la persona directa: explain sth to sb",
+    summary: "El saludo es adecuado, pero la petición suena algo brusca para un profesor.",
+  }),
+  az: englishEmailSample({
+    setting: "Rəsmi · professora məktub",
+    greeting: "Uyğun müraciət: Professor + soyad",
+    toneTag: "ton",
+    tone: "Professora I want çox birbaşadır; I was wondering daha nəzakətlidir",
+    explain: "explain şəxsi birbaşa qəbul etmir: explain sth to sb",
+    summary: "Müraciət uyğundur, amma xahiş professor üçün bir az kəskin səslənir.",
+  }),
+}
+
 export const LAYOUT_SAMPLE_NUMBER = 3
 
 // The selection and target language the preview renders with: those of the
-// sentence-analysis sample for a sentence-analysis-shaped action, else of the
+// sentence-analysis sample for a sentence-analysis-shaped action, of the
+// Improve Writing sample for an Improve-Writing-shaped one, else of the
 // dictionary sample, written in `locale`.
 export function getLayoutSampleContext(
   outputSchema: SelectionToolbarCustomActionOutputField[],
@@ -258,7 +441,9 @@ export function getLayoutSampleContext(
   const sampleLocale = sampleLocaleFor(locale)
   const { selection } = isSentenceAnalysisShaped(outputSchema)
     ? SENTENCE_ANALYSIS_SAMPLES[sampleLocale]
-    : DICTIONARY_SAMPLES[sampleLocale]
+    : isImproveWritingShaped(outputSchema)
+      ? IMPROVE_WRITING_SAMPLES[sampleLocale]
+      : DICTIONARY_SAMPLES[sampleLocale]
   return { selection, targetCode: langCodeOfLocale(sampleLocale) }
 }
 
@@ -289,6 +474,12 @@ export function buildLayoutSampleValues(
   for (const [slot, field] of Object.entries(getSentenceAnalysisSlots(outputSchema))) {
     if (field) {
       curatedByFieldId.set(field.id, sentenceAnalysisSample.values[slot as SentenceAnalysisSlot])
+    }
+  }
+  const improveWritingSample = IMPROVE_WRITING_SAMPLES[sampleLocale]
+  for (const [slot, field] of Object.entries(getImproveWritingSlots(outputSchema))) {
+    if (field) {
+      curatedByFieldId.set(field.id, improveWritingSample.values[slot as ImproveWritingSlot])
     }
   }
 

@@ -706,6 +706,7 @@ options:
           resetFieldList: 필드 목록
           resetDictionary: 사전 카드
           resetSentenceAnalysis: 문장 분석 카드
+          resetImproveWriting: "글쓰기 첨삭 카드"
           resetConfirmTitle: 이 레이아웃을 바꿀까요?
           resetConfirmDescription: 편집기의 내용이 바뀝니다. 이후에도 편집기에서 실행 취소할 수 있습니다.
           resetConfirm: 바꾸기
@@ -951,6 +952,34 @@ options:
           hardLabel: "어려움"
           trunkLabel: "뼈대만"
           slashesLabel: "끊어 읽기"
+        improveWriting:
+          name: "글쓰기 첨삭"
+          description: "선생님처럼 첨삭해요: 틀린 곳과 어색한 표현을 표시하고 상황에 맞게 고쳐 줍니다"
+          fieldSetting: "상황"
+          fieldAnnotations: "첨삭"
+          fieldImproved: "고친 글"
+          fieldSummary: "총평"
+          types:
+            spelling: "맞춤법"
+            grammar: "문법"
+            punctuation: "문장 부호"
+            wordChoice: "어휘"
+            logic: "논리"
+            unnatural: "부자연스러움"
+            register: "격식"
+            clarity: "명확성"
+            good: "좋은 표현"
+          tiers:
+            error: "오류"
+            awkward: "어색함"
+            good: "좋은 표현"
+          hideFixesLabel: "정답 숨기기"
+          hiddenHintLabel: "먼저 직접 고쳐 보세요."
+          showImprovedLabel: "고친 글 보기"
+          improvedLabel: "고친 글"
+          copyLabel: "복사"
+          unchangedLabel: "고칠 곳이 없어요"
+          removeLabel: "삭제"
       errors:
         nameRequired: 이름은 필수입니다
         duplicateName: '중복된 액션 이름 "$1"'
