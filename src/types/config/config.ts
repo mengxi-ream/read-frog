@@ -16,6 +16,7 @@ import {
   doesProviderSupportsCapability,
   getProviderIdsForCapability,
 } from "@/utils/providers/provider-registry"
+import { normalizeSelectionToolbarLists } from "@/utils/selection-toolbar-order"
 import { floatingButtonSchema } from "./floating-button"
 import { glossaryConfigSchema } from "./glossary"
 import { languageDetectionConfigSchema } from "./language-detection"
@@ -58,10 +59,9 @@ const selectionToolbarSchema = z
     builtInActions: selectionToolbarBuiltInActionsSchema,
     customActions: selectionToolbarCustomActionsSchema,
     // The order of every toolbar item (translate, speak and the actions), by
-    // id. It may miss items (an action added since) and name ones that are
-    // gone; see getSelectionToolbarItems. `.default([])` lets a config stored
-    // before this field parse in UI contexts that load ahead of the
-    // background migration.
+    // id. Kept in step with the items by the transform below. `.default([])`
+    // lets a config stored before this field parse in UI contexts that load
+    // ahead of the background migration.
     order: z.array(z.string().min(1)).default([]),
     // Ids of the items kept off the toolbar itself, in its "more" menu only.
     // Every other item is pinned. Independent of an item's enabled switch,
@@ -87,6 +87,9 @@ const selectionToolbarSchema = z
       })
     }
   })
+  // Every parse brings `order` and `unpinned` in step with the actions there
+  // are, so adding or deleting an action never has to update them itself.
+  .transform((selectionToolbar) => normalizeSelectionToolbarLists(selectionToolbar))
 
 // side content schema
 const sideContentSchema = z.object({
