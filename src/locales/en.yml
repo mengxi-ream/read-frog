@@ -1657,6 +1657,8 @@ translation:
   autoModeSameLanguage: Detected language '$1' is the same as target language
   extensionContextInvalidated: The extension was updated. Refresh this page and try again.
 speak:
+  languageDetectionFallback: Using local language detection
+  languageDetectionSettingsHint: In Settings, choose an available LLM or switch to local detection.
   fetchingAudio: Generating audio...
   playingAudio: Playing audio...
   failedToGenerateSpeech: Failed to generate speech

@@ -73,6 +73,9 @@ async function resolveVoiceForText(
   const detectedLanguage = await detectLanguage(text, {
     minLength: 0,
     enableLLM,
+    // Voice detection can fall back without blocking speech. Tell the user
+    // what happened and how to choose a working detection mode.
+    llmFallbackToastContext: "speak",
   })
   logger.info("[TextToSpeech] Resolving voice for text", {
     text,

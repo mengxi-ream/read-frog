@@ -1515,6 +1515,8 @@ translation:
   autoModeSameLanguage: Aşkarlanan '$1' dili hədəf dili ilə eynidir
   extensionContextInvalidated: Genişlənmə yeniləndi. Bu səhifəni yeniləyib yenidən cəhd edin.
 speak:
+  languageDetectionFallback: Yerli dil aşkarlanmasına keçildi
+  languageDetectionSettingsHint: Ayarlarda işlək LLM seçin və ya yerli aşkarlamaya keçin.
   fetchingAudio: Səs yaradılır...
   playingAudio: Səs oxudulur...
   failedToGenerateSpeech: Nitq yaratmaq mümkün olmadı

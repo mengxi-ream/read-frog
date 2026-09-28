@@ -1510,6 +1510,8 @@ translation:
   autoModeSameLanguage: Algılanan dil '$1' hedef dille aynı
   extensionContextInvalidated: Uzantı güncellendi. Bu sayfayı yenileyip tekrar deneyin.
 speak:
+  languageDetectionFallback: Yerel dil algılamaya geçildi
+  languageDetectionSettingsHint: Ayarlardan kullanılabilir bir LLM veya yerel algılamayı seçin.
   fetchingAudio: Ses oluşturuluyor...
   playingAudio: Ses çalınıyor...
   failedToGenerateSpeech: Konuşma oluşturulamadı

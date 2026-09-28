@@ -93,6 +93,28 @@ describe("detectLanguageWithSource", () => {
       )
     })
 
+    it("explains the fallback for speaking without presenting it as a login gate", async () => {
+      serializeProviderRefMock.mockRejectedValue(
+        new HostedAiProviderUnavailableError(BUILT_IN_PROVIDER, "Log in to use this provider"),
+      )
+      mockFranc.mockReturnValue("eng")
+
+      await expect(
+        detectLanguageWithSource("This is enough text to detect language.", {
+          enableLLM: true,
+          llmFallbackToastContext: "speak",
+        }),
+      ).resolves.toEqual({ code: "eng", source: "franc" })
+
+      expect(toastAddMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "warning",
+          title: "speak.languageDetectionFallback",
+          description: "speak.languageDetectionSettingsHint",
+        }),
+      )
+    })
+
     it("stays silent when no provider is configured at all", async () => {
       getLocalConfigMock.mockResolvedValue({
         languageDetection: { mode: "llm", providerId: "" },

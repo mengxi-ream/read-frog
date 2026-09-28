@@ -1510,6 +1510,8 @@ translation:
   autoModeSameLanguage: 検出された言語 '$1' はターゲット言語と同じです
   extensionContextInvalidated: 拡張機能が更新されました。このページを再読み込みしてからもう一度お試しください。
 speak:
+  languageDetectionFallback: ローカルの言語検出に切り替えました
+  languageDetectionSettingsHint: 設定で利用可能なLLMに変更するか、ローカル検出を選んでください。
   fetchingAudio: 音声を生成しています...
   playingAudio: 音声を再生しています...
   failedToGenerateSpeech: 音声生成に失敗しました
