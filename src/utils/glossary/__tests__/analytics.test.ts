@@ -45,6 +45,21 @@ describe("trackGlossaryUsed", () => {
     })
   })
 
+  it("reports zero latency even when the clock moves between reads", () => {
+    let clock = 1_000
+    const nowSpy = vi.spyOn(Date, "now").mockImplementation(() => (clock += 5))
+    try {
+      trackGlossaryUsed("pageTranslation", [term], "cmn", {
+        provider: "openai",
+        backend_kind: "llm",
+      })
+    } finally {
+      nowSpy.mockRestore()
+    }
+
+    expect(lastEvent().latency_ms).toBe(0)
+  })
+
   it("stays silent when nothing matched, so merely owning a glossary reports nothing", () => {
     trackGlossaryUsed("pageTranslation", [], "cmn", { provider: "openai", backend_kind: "llm" })
 

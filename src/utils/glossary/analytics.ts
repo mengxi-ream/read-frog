@@ -88,11 +88,14 @@ export function trackGlossaryUsed(
   if (reportedAt !== undefined && now - reportedAt < REPORT_INTERVAL_MS) return
   lastReportedAt.set(surface, now)
 
+  // A glossary match has no duration, so it starts and finishes at the same
+  // instant: latency is 0 by construction, not by how fast two clock reads run.
   void trackFeatureUsed({
-    ...createFeatureUsageContext(ANALYTICS_FEATURE.GLOSSARY, surface),
+    ...createFeatureUsageContext(ANALYTICS_FEATURE.GLOSSARY, surface, now),
     ...(provider ?? UNKNOWN_FEATURE_PROVIDER),
     target_language: targetLanguage,
     outcome: "success",
+    finishedAt: now,
   })
 }
 

@@ -24,7 +24,6 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible"
 import { createPerplexity } from "@ai-sdk/perplexity"
 import { createReplicate } from "@ai-sdk/replicate"
 import { createTogetherAI } from "@ai-sdk/togetherai"
-import { createVercel } from "@ai-sdk/vercel"
 import { createXai } from "@ai-sdk/xai"
 import { createOllama } from "ai-sdk-ollama"
 import { match } from "ts-pattern"
@@ -58,7 +57,6 @@ const DEDICATED_PROVIDER_FACTORY_BY_TYPE = {
   cerebras: createCerebras,
   replicate: createReplicate,
   perplexity: createPerplexity,
-  vercel: createVercel,
   ollama: createOllama,
   alibaba: createAlibaba,
   moonshotai: createMoonshotAI,

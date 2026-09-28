@@ -37,7 +37,7 @@ jobs:
           ref: ${{ github.event.inputs.tag }}
 
       - name: Setup pnpm and Node.js
-        uses: pnpm/setup@v2
+        uses: pnpm/setup@v3
         with:
           cache: true
           install: false
@@ -121,13 +121,11 @@ jobs:
           fi
 
       - name: Build and Zip Extension
-        if: steps.changesets.outputs.published == 'true' || github.event_name ==
-          'workflow_dispatch'
+        if: steps.changesets.outputs.published == 'true' || github.event_name == 'workflow_dispatch'
         run: pnpm zip:all
 
       - name: Upload Extension Zip to Release
-        if: steps.changesets.outputs.published == 'true' || github.event_name ==
-          'workflow_dispatch'
+        if: steps.changesets.outputs.published == 'true' || github.event_name == 'workflow_dispatch'
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             TAG="${{ github.event.inputs.tag }}"

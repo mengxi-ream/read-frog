@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { pageTranslationShortcutSchema } from "@/types/config/translate"
 import {
   formatPageTranslationShortcut,
+  formatPageTranslationShortcutParts,
   isValidConfiguredPageTranslationShortcut,
   normalizePageTranslationShortcut,
 } from "../page-translation-shortcut"
@@ -16,8 +17,24 @@ describe("page translation shortcut helpers", () => {
   })
 
   it("formats shortcuts for platform-native display", () => {
-    expect(formatPageTranslationShortcut("Mod+Shift+K", "mac")).toBe("⌘ ⇧ K")
+    // macOS lists modifiers in Apple's Control, Option, Shift, Command order.
+    expect(formatPageTranslationShortcut("Mod+Shift+K", "mac")).toBe("⇧ ⌘ K")
     expect(formatPageTranslationShortcut("Mod+Shift+K", "windows")).toBe("Ctrl+Shift+K")
+  })
+
+  it("splits shortcuts into display parts, keeping a literal plus key", () => {
+    expect(formatPageTranslationShortcutParts("Mod+Shift+K", "mac")).toEqual(["⇧", "⌘", "K"])
+    expect(formatPageTranslationShortcutParts("Mod+Shift+K", "windows")).toEqual([
+      "Ctrl",
+      "Shift",
+      "K",
+    ])
+    expect(formatPageTranslationShortcutParts("Mod+Shift++", "windows")).toEqual([
+      "Ctrl",
+      "Shift",
+      "+",
+    ])
+    expect(formatPageTranslationShortcutParts("", "windows")).toEqual([])
   })
 
   it("validates configured shortcuts while rejecting single keys and modifier-only shortcuts", () => {

@@ -29,6 +29,20 @@ export function formatPageTranslationShortcut(
   return formatForDisplay(configuredHotkey, platform ? { platform } : undefined)
 }
 
+export function formatPageTranslationShortcutParts(
+  hotkey: string | null | undefined,
+  platform?: HotkeyPlatform,
+): string[] {
+  if (isPageTranslationShortcutEmpty(hotkey)) {
+    return []
+  }
+
+  // Ask the library for the parts instead of splitting its display string: on
+  // Windows/Linux the parts are joined with "+", which is also a valid key ("Mod++").
+  const configuredHotkey = hotkey?.trim() ?? ""
+  return formatForDisplay(configuredHotkey, platform ? { platform, parts: true } : { parts: true })
+}
+
 export function isValidConfiguredPageTranslationShortcut(
   hotkey: string,
   platform: HotkeyPlatform = detectPlatform(),
