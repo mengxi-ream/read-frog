@@ -17,6 +17,11 @@
  *   (Liquid has no array literals; `contains` on the split array is an exact
  *   match. Should an id contain the separator, the ids are compared one by
  *   one instead.) Either way the result looks exactly as it did before.
+ * - Unless that layout would outgrow the schema's cap on a layout: v102 bounds
+ *   neither how many fields an action has nor how long their ids are, and a
+ *   config the schema refuses is replaced by the defaults, losing everything
+ *   in it. Such an action gets the plain layout instead, without its speak
+ *   buttons (it takes hundreds of speaking fields to get there).
  *
  * The template walks `ctx.fields` and never names a field, so it keeps working
  * however the action's fields are renamed, reordered, added or removed; a
@@ -129,6 +134,16 @@ ${speakAssign}<div class="rf-fields">
 `
 }
 
+// The schema's cap on a layout (MAX_CUSTOM_ACTION_LAYOUT_LENGTH) at v103.
+const MAX_LAYOUT_LENGTH = 32768
+
+// The layout for an action whose `speakIds` fields were speaking, or the plain
+// one when that would not fit the cap (see the header).
+function fittingLayout(speakIds: string[]): string {
+  const layout = buildLayout(speakIds)
+  return layout.length <= MAX_LAYOUT_LENGTH ? layout : buildLayout([])
+}
+
 // The action with its fields' `speaking` flags removed, and the ids of the
 // fields that had it set; the action itself when no field carries the flag.
 function stripSpeaking(action: Record<string, any>): {
@@ -177,7 +192,7 @@ export function migrate(oldConfig: any): any {
       return action
     }
     changed = true
-    return { ...action, layout: buildLayout(speakIds) }
+    return { ...action, layout: fittingLayout(speakIds) }
   })
 
   if (!changed) {

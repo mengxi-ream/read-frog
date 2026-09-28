@@ -111,6 +111,18 @@ describe("v102 to v103 migration", () => {
     }
   })
 
+  // A layout past the cap fails the schema, which would reset the whole config.
+  it("gives the plain layout to an action whose speak list would outgrow the cap", () => {
+    const outputSchema = Array.from({ length: 1000 }, (_, index) =>
+      storedField(`speaking-${String(index).padStart(4, "0")}-${"x".repeat(30)}`, true),
+    )
+    const action = migrateOne(storedAction("many", { outputSchema }))
+
+    expect(action.layout).toBe(frozenLayout())
+    expect(action.layout.length).toBeLessThanOrEqual(MAX_CUSTOM_ACTION_LAYOUT_LENGTH)
+    expect(action.outputSchema.some((field: any) => "speaking" in field)).toBe(false)
+  })
+
   it("keeps a speak button on exactly the fields that were speaking", () => {
     const action = migrateOne(
       storedAction("s", {
