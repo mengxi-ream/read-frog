@@ -17,10 +17,15 @@ vi.mock("../translate-button", () => ({
 
 vi.mock("../speak-button", () => ({
   SpeakButton: () => null,
+  SelectionSpeechProvider: ({ children }: { children: React.ReactNode }) => children,
 }))
 
-vi.mock("../custom-action-button", () => ({
-  SelectionToolbarCustomActionButtons: () => null,
+vi.mock("../pinned-items", () => ({
+  SelectionToolbarPinnedItems: () => null,
+}))
+
+vi.mock("../more-menu", () => ({
+  SelectionToolbarMoreMenu: () => <button type="button" data-testid="more-menu" />,
 }))
 
 // Mock atoms

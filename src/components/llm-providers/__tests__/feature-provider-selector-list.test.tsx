@@ -105,6 +105,7 @@ describe("featureProviderSelectorList custom action filtering", () => {
     ]
     config.selectionToolbar.builtInActions.dictionary.enabled = false
     config.selectionToolbar.builtInActions.sentenceAnalysis.enabled = false
+    config.selectionToolbar.builtInActions.improveWriting.enabled = false
 
     renderWithConfig(config)
 

@@ -1564,6 +1564,10 @@ action:
   translation: Tərcümə
   speak: Səsləndir
   playing: Oxudulur
+  moreActions: Digər əməliyyatlar
+  pinToToolbar: Alətlər panelinə sabitlə
+  unpinFromToolbar: Alətlər panelindən ayır
+  dragToReorder: Sıralamaq üçün sürükləyin
 noteSuggestion:
   title: Saxlamağa dəyər
   description: Notebase daxilində saxlamaq istədiyiniz sözləri seçin və istənilən vaxt təkrarlayın.

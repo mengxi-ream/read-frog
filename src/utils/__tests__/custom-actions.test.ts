@@ -54,12 +54,12 @@ describe("selection toolbar built-in actions", () => {
     expect(action?.layout).toContain("default-sentence-analysis-annotations")
   })
 
-  it("resolves the built-in Improve Writing turned off until the user turns it on", () => {
+  it("resolves the built-in Improve Writing, on by default, from its stored state", () => {
     const selectionToolbar = cloneSelectionToolbar()
     const action = findSelectionToolbarAction(selectionToolbar, "default-improve-writing")
     expect(action).toMatchObject({
       id: "default-improve-writing",
-      enabled: false,
+      enabled: true,
       providerId: DEFAULT_CONFIG.selectionToolbar.builtInActions.improveWriting.providerId,
       icon: "streamline-color:ai-edit-spark-flat",
     })
@@ -72,11 +72,11 @@ describe("selection toolbar built-in actions", () => {
     expect(action?.layout).toContain("default-improve-writing-annotations")
 
     selectionToolbar.builtInActions.improveWriting = {
-      enabled: true,
+      enabled: false,
       providerId: "openai-default",
     }
     expect(findSelectionToolbarAction(selectionToolbar, "default-improve-writing")).toMatchObject({
-      enabled: true,
+      enabled: false,
       providerId: "openai-default",
     })
   })

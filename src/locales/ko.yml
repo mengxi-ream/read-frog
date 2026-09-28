@@ -1559,6 +1559,10 @@ action:
   translation: 번역
   speak: 읽기
   playing: 재생 중
+  moreActions: 더 보기
+  pinToToolbar: 도구 모음에 고정
+  unpinFromToolbar: 도구 모음에서 고정 해제
+  dragToReorder: 드래그하여 순서 변경
 noteSuggestion:
   title: 저장 추천
   description: Notebase에 저장할 단어를 선택하고 언제든지 복습하세요.

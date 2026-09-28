@@ -58,7 +58,9 @@ export const selectionToolbarBuiltInActionsSchema = z.object({
     enabled: true,
     providerId: BUILT_IN_AI_PROVIDER_ID,
   })),
-  // Off until the user turns it on (v105), for the same reason as above.
+  // For the same reason as above. Off: a config stored before v105 has not
+  // been through v106 either, which turns it on and unpins it, so it must not
+  // land on the toolbar in the meantime.
   improveWriting: selectionToolbarBuiltInActionStateSchema.default(() => ({
     enabled: false,
     providerId: BUILT_IN_AI_PROVIDER_ID,

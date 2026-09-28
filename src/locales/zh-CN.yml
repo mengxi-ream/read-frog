@@ -1569,6 +1569,10 @@ action:
   translation: 翻译
   speak: 朗读
   playing: 播放中
+  moreActions: 更多操作
+  pinToToolbar: 固定到工具栏
+  unpinFromToolbar: 从工具栏取消固定
+  dragToReorder: 拖动以排序
 noteSuggestion:
   title: 猜你想存
   description: 选择要存入笔记库的词，将来随时复习

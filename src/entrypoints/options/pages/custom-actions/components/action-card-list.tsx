@@ -20,6 +20,7 @@ import { i18n } from "@/utils/i18n"
 import { getUniqueName } from "@/utils/name"
 import { CUSTOM_ACTION_ADD_QUERY_PARAM } from "@/utils/navigation"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
+import { setSelectionToolbarCustomActions } from "@/utils/selection-toolbar-items"
 import { EntityListItem } from "../../../components/entity-list-item"
 import { EntityListRail } from "../../../components/entity-list-rail"
 import { customActionEditorTabAtom, selectedCustomActionIdAtom } from "../atoms"
@@ -68,11 +69,12 @@ export function CustomActionCardList() {
     })
   }
 
+  // The toolbar's order follows, so the selection toolbar and its menu list
+  // the actions the same way.
   const handleReorder = (newList: SelectionToolbarCustomAction[]) => {
-    void setSelectionToolbarConfig({
-      ...selectionToolbarConfig,
-      customActions: newList,
-    })
+    void setSelectionToolbarConfig(
+      setSelectionToolbarCustomActions(selectionToolbarConfig, newList),
+    )
   }
 
   return (
