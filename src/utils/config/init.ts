@@ -61,7 +61,12 @@ export async function initializeConfig(): Promise<InitializeConfigResult> {
     }
   }
 
-  if (!configSchema.safeParse(config).success) {
+  const parsedConfig = configSchema.safeParse(config)
+  if (parsedConfig.success) {
+    // Stored as every reader gets it: defaults filled in, the selection
+    // toolbar's order and pins in step with its actions.
+    config = parsedConfig.data
+  } else {
     logger.warn("Config is invalid, using default config")
     await initI18n(DEFAULT_CONFIG.uiLanguage)
     config = buildFreshDefaultConfig()

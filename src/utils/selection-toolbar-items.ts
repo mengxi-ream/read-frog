@@ -3,6 +3,7 @@ import type { SelectionToolbarCustomAction } from "@/types/config/selection-tool
 import type { SelectionToolbarFeatureId } from "@/utils/constants/selection"
 import { SELECTION_TOOLBAR_FEATURE_IDS } from "@/utils/constants/selection"
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
+import { normalizeSelectionToolbarLists } from "@/utils/selection-toolbar-order"
 
 type SelectionToolbarConfig = Config["selectionToolbar"]
 
@@ -21,43 +22,30 @@ export type SelectionToolbarItem =
       action: SelectionToolbarCustomAction
     }
 
-// Every item in `selectionToolbar.order`. An id the order does not name (an
-// action added since) keeps its default place after the ordered ones —
-// features, then built-in actions, then custom actions — and an id no item
-// has (an action deleted since) is skipped. Items are pinned unless listed
-// in `selectionToolbar.unpinned`.
+function isFeatureId(id: string): id is SelectionToolbarFeatureId {
+  return (SELECTION_TOOLBAR_FEATURE_IDS as readonly string[]).includes(id)
+}
+
+// Every item in the toolbar's order, pinned unless `selectionToolbar.unpinned`
+// names it. A parsed config has both lists in step already; they are brought
+// in step here too (see normalizeSelectionToolbarLists), so a config that did
+// not come through the schema reads the same.
 export function getSelectionToolbarItems(
   selectionToolbar: SelectionToolbarConfig,
 ): SelectionToolbarItem[] {
-  const unpinned = new Set(selectionToolbar.unpinned ?? [])
-  const byId = new Map<string, SelectionToolbarItem>()
-  for (const id of SELECTION_TOOLBAR_FEATURE_IDS) {
-    byId.set(id, {
-      kind: "feature",
-      id,
-      enabled: selectionToolbar.features[id].enabled,
-      pinned: !unpinned.has(id),
-    })
-  }
-  for (const action of getSelectionToolbarActions(selectionToolbar)) {
-    byId.set(action.id, {
-      kind: "action",
-      id: action.id,
-      enabled: action.enabled !== false,
-      pinned: !unpinned.has(action.id),
-      action,
-    })
-  }
-
-  const ordered: SelectionToolbarItem[] = []
-  for (const id of selectionToolbar.order ?? []) {
-    const item = byId.get(id)
-    if (!item) continue
-    ordered.push(item)
-    byId.delete(id)
-  }
-  // A Map iterates in insertion order: what is left is in the default order.
-  return [...ordered, ...byId.values()]
+  const { order, unpinned } = normalizeSelectionToolbarLists(selectionToolbar)
+  const unpinnedIds = new Set(unpinned)
+  const actions = new Map(
+    getSelectionToolbarActions(selectionToolbar).map((action) => [action.id, action]),
+  )
+  return order.flatMap((id): SelectionToolbarItem[] => {
+    const pinned = !unpinnedIds.has(id)
+    if (isFeatureId(id)) {
+      return [{ kind: "feature", id, enabled: selectionToolbar.features[id].enabled, pinned }]
+    }
+    const action = actions.get(id)
+    return action ? [{ kind: "action", id, enabled: action.enabled !== false, pinned, action }] : []
+  })
 }
 
 // `allIds` with the ids of `moved` put in the order `moved` gives them, each
