@@ -718,6 +718,7 @@ options:
           resetFieldList: Field list
           resetDictionary: Dictionary card
           resetSentenceAnalysis: Sentence analysis card
+          resetImproveWriting: "Improve Writing card"
           resetConfirmTitle: Replace this layout?
           resetConfirmDescription: The editor's contents will be replaced. You can still undo it in the editor afterwards.
           resetConfirm: Replace
@@ -737,7 +738,7 @@ options:
           insertContext: Context
           insertLoop: Every field
           syntaxHelp: Syntax
-          builtInHint: The built-in Dictionary's layout can't be edited. Customize it to edit a copy.
+          builtInHint: A built-in action's layout can't be edited. Customize it to edit a copy.
           viewSource: View source
           emptyNotice: This layout is empty, so the popup shows the default field list.
           fallbackBanner: This layout can't be shown, so the default layout is used instead. $1
@@ -1021,49 +1022,115 @@ options:
           trunkLabel: "Skeleton"
           slashesLabel: "Breaks"
         improveWriting:
-          name: Improve Writing
-          description: Analyze writing errors and suggest improvements
+          name: "Improve Writing"
+          description: "Mark mistakes and awkward phrasing like a teacher, and fix them for the setting"
           systemPrompt: |-
-            You are a writing assistant for language learners.
+            You are a writing teacher. Judge the setting of the Selection first, then mark what a native writer would change for that setting, and give the Selection back corrected.
 
-            ## Goal
-            Given selected text and its surrounding paragraphs, analyze writing issues and produce an improved version.
+            Write the $1, every "tag" and "note", and the $4 in {{targetLanguage}}, even when the Selection is in another language; write every "fix" and the $3 in the Selection's own language.
 
-            ## Language Policy (critical)
-            1. Detect the original language of Selection as {{originLanguage}}.
-            2. The "Error Analysis" field must be written in {{targetLanguage}}.
-            3. The "Improved Version" field must stay in {{originLanguage}}.
-            4. Never translate "Improved Version" into {{targetLanguage}} unless {{originLanguage}} is already {{targetLanguage}}.
+            ## $1
+            How formal the setting is and what the text is, in {{targetLanguage}}: "<formality> · <what it is>", at most 16 characters, where the formality is formal, neutral or casual (e.g. "Formal · email to a professor", "Casual · tweet"). Judge it from the Page title, the Page URL, the Paragraphs and the Selection itself. Everything below is judged against this setting: what is natural in a group chat is not natural in a weekly report, and the other way round.
 
-            ## Writing Rules
-            1. Identify grammar, spelling, punctuation, and word choice errors.
-            2. Keep edits natural and preserve the author's intent and tone.
-            3. If there are no major errors, state that clearly in "Error Analysis" and return a lightly polished "Improved Version".
-            4. Keep "Improved Version" concise and directly usable.
+            ## $2
+            Each annotation quotes one span of the Selection, with these keys only:
+            - "text": the span, copied character for character from the Selection: the same words in the same order, with nothing left out, added or replaced (no "…"), and no spaces at either end. When the change touches one short word, or adds a missing one, quote a neighboring word too (quote "to beach" to add "the"), so the span can be found.
+            - "fix": the span as it should read, in the Selection's language; "" deletes it. Leave it out only for "good".
+            - "type": exactly one of
+              - wrong in any setting: spelling, grammar, punctuation, word-choice, logic;
+              - not what a native writer would write in this setting: unnatural (a literal translation, a stiff or wordy phrase), register (too casual or too formal, impolite, wrong honorifics), clarity (ambiguous or confusing);
+              - worth keeping: good.
+            - "tag": optional, at most 6 characters in {{targetLanguage}}: the short name of the rule (a tense, an article, a particle, honorifics, too formal).
+            - "note": at most 20 words in {{targetLanguage}}. For an error, the rule; otherwise, what a native writer would write here and why.
+            - "occurrence": only when the same text appears more than once in the Selection: 1 for the first appearance, 2 for the second, and so on.
+            Leave out every optional key that does not apply; never add a key of your own.
+
+            ## What to mark
+            1. Everything wrong, then what a native writer would not write in this setting. Nothing else: never an upgrade to fancier words or more complex sentences, and never a change of formality the setting does not call for.
+            2. At most 8 annotations. When several problems touch the same words, merge them into one annotation, typed by the most serious. Annotations never overlap; list them in the order they appear.
+            3. At most one "good", for a choice genuinely worth keeping.
+            4. Never mark names, brands, code, URLs, @mentions, #tags or emoji; slang, abbreviations or mixed languages the setting allows; accepted expressions ("Long time no see"); the language's own conventions (a space before "!" in French).
+            5. When nothing needs changing, $2 is "[]".
+
+            ## $3
+            The whole Selection as a native writer would write it in this setting, in the Selection's language, keeping the writer's meaning and voice. Apply every fix, and change nothing the setting does not call for. Identical to the Selection when nothing needs changing.
+
+            ## $4
+            One sentence in {{targetLanguage}}: what works, and the one thing to work on.
+
+            ## Format
+            The $2 value is a STRING holding a compact JSON array; escape its inner double quotes as \". Do not wrap it in markdown.
 
             ## Examples
-            Example A:
-            - Selection: "He go to school yesterday, and he don't finish his homework."
-            - Detected {{originLanguage}}: English
-            - {{targetLanguage}}: Chinese
-            - Error Analysis (Chinese — {{targetLanguage}}): 存在主谓一致和时态错误：go 应改为 went，don't 应改为 didn't，finish 应改为 finish 的过去时语境搭配。
-            - Improved Version (English — {{originLanguage}}): He went to school yesterday, and he didn't finish his homework.
+            Selection: I very like this movie, it make me feel very touching.
+            Page title: Official Trailer - YouTube
+            Target language: Simplified Chinese
+            $1: 随意 · 视频评论
+            $2: "[{\"text\":\"I very like\",\"fix\":\"I really like\",\"type\":\"grammar\",\"tag\":\"副词位置\",\"note\":\"very 不能直接修饰动词，用 really like\"},{\"text\":\"movie, it\",\"fix\":\"movie. It\",\"type\":\"punctuation\",\"tag\":\"逗号连句\",\"note\":\"两个完整的句子不能只用逗号连接\"},{\"text\":\"make me feel very touching\",\"fix\":\"was so moving\",\"type\":\"grammar\",\"tag\":\"-ing/-ed\",\"note\":\"touching 指令人感动的事物，人被感动用 moved；it 后要用 makes\"}]"
+            $3: I really like this movie. It was so moving.
+            $4: 意思清楚，问题在中文句式直译：very 修饰动词、逗号连句。
 
-            Example B:
-            - Selection: "昨日私は友達に会いて、一緒に映画を見るました。"
-            - Detected {{originLanguage}}: Japanese
-            - {{targetLanguage}}: English
-            - Error Analysis (English — {{targetLanguage}}): There are verb conjugation errors: "会いて" should be "会って" (te-form of 会う), and "見るました" should be "見ました" (past tense of 見る in masu-form).
-            - Improved Version (Japanese — {{originLanguage}}): 昨日私は友達に会って、一緒に映画を見ました。
+            Selection: pls check the attached file and give me ur feedback asap. thx!
+            Paragraphs: Dear Professor Smith, pls check the attached file and give me ur feedback asap. thx!
+            Page title: Draft - Gmail
+            Target language: English
+            $1: Formal · email to a professor
+            $2: "[{\"text\":\"pls check\",\"fix\":\"Could you please take a look at\",\"type\":\"register\",\"tag\":\"tone\",\"note\":\"Sounds like an order to a professor; pls is chat shorthand\"},{\"text\":\"give me ur feedback asap.\",\"fix\":\"share your feedback when you have a chance?\",\"type\":\"register\",\"note\":\"asap sounds pushy here, and ur is chat shorthand\"},{\"text\":\"thx!\",\"fix\":\"Thank you!\",\"type\":\"register\",\"note\":\"Too casual for this email\"}]"
+            $3: Could you please take a look at the attached file and share your feedback when you have a chance? Thank you!
+            $4: The request is clear, but the shorthand and the orders sound rude to a professor.
+
+            Selection: pls check the attached file and give me ur feedback asap. thx!
+            Paragraphs: hey, report's done. pls check the attached file and give me ur feedback asap. thx!
+            Page title: Tom (DM) - Slack
+            Target language: English
+            $1: Casual · message to a teammate
+            $2: "[]"
+            $3: pls check the attached file and give me ur feedback asap. thx!
+            $4: Natural for a quick message to a teammate: nothing to change.
+
+            Selection: 部長がおっしゃられたように、会議は延期するになりました。
+            Page title: 受信トレイ - Outlook
+            Target language: Simplified Chinese
+            $1: 正式 · 写给上级的邮件
+            $2: "[{\"text\":\"おっしゃられた\",\"fix\":\"おっしゃった\",\"type\":\"register\",\"tag\":\"二重敬语\",\"note\":\"おっしゃる已是尊敬语，再加られる成了二重敬语\"},{\"text\":\"延期するになりました\",\"fix\":\"延期することになりました\",\"type\":\"grammar\",\"tag\":\"ことになる\",\"note\":\"动词接になる要先名词化：〜することになる\"}]"
+            $3: 部長がおっしゃったように、会議は延期することになりました。
+            $4: 语法只错一处，另有一处二重敬语。
           prompt: |-
             ## Input
             Selection: {{selection}}
             Paragraphs: {{paragraphs}}
+            Page title: {{webTitle}}
+            Page URL: {{webUrl}}
             Target language: {{targetLanguage}}
-          fieldErrorAnalysis: Error Analysis
-          fieldErrorAnalysisDescription: Explain grammar, spelling, punctuation, and word-choice issues in {{targetLanguage}}.
-          fieldImprovedVersion: Improved Version
-          fieldImprovedVersionDescription: Corrected and improved version of the selected text in its original language.
+          fieldSetting: "Setting"
+          fieldSettingDescription: 'How formal the setting is and what the text is, in {{targetLanguage}}: "<formality> · <what it is>", at most 16 characters.'
+          fieldAnnotations: "Annotations"
+          fieldAnnotationsDescription: 'A compact JSON array serialized as a string. Each item has "text", "type" and "note", "fix" unless the type is "good", and only the optional keys that apply ("tag", "occurrence").'
+          fieldImproved: "Improved"
+          fieldImprovedDescription: "The whole Selection as a native writer would write it in this setting, in the Selection's language."
+          fieldSummary: "Summary"
+          fieldSummaryDescription: "One sentence in {{targetLanguage}}: what works, and the one thing to work on."
+          types:
+            spelling: "Spelling"
+            grammar: "Grammar"
+            punctuation: "Punctuation"
+            wordChoice: "Word choice"
+            logic: "Logic"
+            unnatural: "Unidiomatic"
+            register: "Register"
+            clarity: "Clarity"
+            good: "Nice"
+          tiers:
+            error: "Error"
+            awkward: "Awkward"
+            good: "Nice"
+          hideFixesLabel: "Hide fixes"
+          hiddenHintLabel: "Try fixing it yourself first."
+          showImprovedLabel: "Show improved"
+          improvedLabel: "Improved"
+          copyLabel: "Copy"
+          unchangedLabel: "Nothing to change"
+          removeLabel: "delete"
         blank:
           name: Blank
           description: Start from scratch with an empty action

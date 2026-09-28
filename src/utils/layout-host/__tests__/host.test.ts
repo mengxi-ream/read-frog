@@ -17,6 +17,7 @@ describe("the custom action layout host", () => {
       "selection",
       "targetLanguage",
       "sentenceAnalysisLabels",
+      "improveWritingLabels",
       "status",
     ])
   })
@@ -62,7 +63,7 @@ describe("the custom action layout host", () => {
     ["fra", "en"],
   ] as const)("puts the card's words in ctx in the language of %s", (targetCode, locale) => {
     const compiled = compileLayout(
-      "{{ ctx.sentenceAnalysisLabels.roles.subject }}|{{ ctx.sentenceAnalysisLabels.forms['present-participle'] }}",
+      "{{ ctx.sentenceAnalysisLabels.roles.subject }}|{{ ctx.sentenceAnalysisLabels.forms['present-participle'] }}|{{ ctx.improveWritingLabels.types['word-choice'] }}",
     )
     if (!compiled.ok) throw compiled.error
     const html = renderLayoutHtml(
@@ -76,8 +77,9 @@ describe("the custom action layout host", () => {
       }),
     )
     const prefix = "options.selectionToolbar.customActions.templates.sentenceAnalysis"
+    const iwPrefix = "options.selectionToolbar.customActions.templates.improveWriting"
     expect(html).toBe(
-      `${prefix}.roles.subject@${locale}|${prefix}.forms.presentParticiple@${locale}`,
+      `${prefix}.roles.subject@${locale}|${prefix}.forms.presentParticiple@${locale}|${iwPrefix}.types.wordChoice@${locale}`,
     )
   })
 

@@ -144,6 +144,7 @@ describe("liquid layout language", () => {
       "selection",
       "targetLanguage",
       "sentenceAnalysisLabels",
+      "improveWritingLabels",
       "status",
     ])
   })

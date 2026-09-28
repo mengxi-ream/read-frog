@@ -378,7 +378,8 @@ describe("ProvidersConfig", () => {
 
   it("counts default assignments on the free Built-in AI card badge", () => {
     // Note suggestion defaults to the OpenAI provider, so only the built-in
-    // Dictionary and Sentence Analysis actions count on the free card; the
+    // Dictionary, Sentence Analysis and Improve Writing actions count on the
+    // free card (Improve Writing is turned off, but still assigned to it); the
     // Ultra card has nothing assigned and shows no badge.
     const { container } = renderProvidersConfig()
 
@@ -391,7 +392,7 @@ describe("ProvidersConfig", () => {
     }
 
     expect(
-      within(freeCard).getByText("options.apiProviders.badges.featureCount:2"),
+      within(freeCard).getByText("options.apiProviders.badges.featureCount:3"),
     ).toBeInTheDocument()
     expect(
       within(ultraCard).queryByText(/options\.apiProviders\.badges\.featureCount/),
@@ -411,7 +412,7 @@ describe("ProvidersConfig", () => {
     }
 
     expect(
-      within(freeCard).getByText("options.apiProviders.badges.featureCount:3"),
+      within(freeCard).getByText("options.apiProviders.badges.featureCount:4"),
     ).toBeInTheDocument()
   })
 
