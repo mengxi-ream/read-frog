@@ -1,5 +1,45 @@
 # @read-frog/extension
 
+## 1.49.0
+
+### Minor Changes
+
+- [#2247](https://github.com/mengxi-ream/read-frog/pull/2247) [`ba7780e`](https://github.com/mengxi-ream/read-frog/commit/ba7780eddbb95517ee61350bbd1c6a8dc5103c40) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(custom-actions): add tabs and an editable html layout editor
+
+- [#2251](https://github.com/mengxi-ream/read-frog/pull/2251) [`b553fee`](https://github.com/mengxi-ream/read-frog/commit/b553feeaad6956dfb3dd24b975eb90abfc49613e) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(custom-actions): mark writing like a teacher in the Improve Writing template, judged against the setting it is written for
+
+- [#2252](https://github.com/mengxi-ream/read-frog/pull/2252) [`8a1a738`](https://github.com/mengxi-ream/read-frog/commit/8a1a7386c8daf4d9bca8e8da72aea71e828e71d8) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(selection-toolbar): add a "more" menu to the selection toolbar that lists every action, runs it, pins it to the toolbar, and drags it into order
+
+- [#2202](https://github.com/mengxi-ream/read-frog/pull/2202) [`5048e54`](https://github.com/mengxi-ream/read-frog/commit/5048e542036efe8e107c605d573e5bb965584134) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): translate captions on x.com status videos
+
+### Patch Changes
+
+- [#2250](https://github.com/mengxi-ream/read-frog/pull/2250) [`1c78dd5`](https://github.com/mengxi-ream/read-frog/commit/1c78dd50ab2f0c2ec0f626a391895262a0af324e) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(custom-actions): give the Blank template a default prompt so new actions run on the Built-in AI
+
+- [#2247](https://github.com/mengxi-ream/read-frog/pull/2247) [`ba7780e`](https://github.com/mengxi-ream/read-frog/commit/ba7780eddbb95517ee61350bbd1c6a8dc5103c40) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(custom-actions): enable built-in Sentence Analysis for existing users and highlight new or updated built-in actions
+
+- [#2249](https://github.com/mengxi-ream/read-frog/pull/2249) [`36a2fe1`](https://github.com/mengxi-ream/read-frog/commit/36a2fe1faf45e7d8f238f64348aec3f8b1dae9e9) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(custom-actions): add a "Configure with AI" button that copies a prompt for any AI chat assistant to help set up or change an action
+
+- [#2247](https://github.com/mengxi-ream/read-frog/pull/2247) [`ba7780e`](https://github.com/mengxi-ream/read-frog/commit/ba7780eddbb95517ee61350bbd1c6a8dc5103c40) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(dictionary): redesign the dictionary result card and bold the looked-up word in its example sentence
+
+- [#2248](https://github.com/mengxi-ream/read-frog/pull/2248) [`625bb2d`](https://github.com/mengxi-ream/read-frog/commit/625bb2d8f98c55341c25cc5e86844e8048dab357) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translation): prevent multiline translations in footnotes from overlapping
+
+- [#2241](https://github.com/mengxi-ream/read-frog/pull/2241) [`b4a45b9`](https://github.com/mengxi-ream/read-frog/commit/b4a45b9455eb0f63b450cb9610d87ac33883f0e9) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(providers): add GPT-6 Astra/Sol/Luna models and default OpenAI to GPT-6 Luna
+
+- [#2251](https://github.com/mengxi-ream/read-frog/pull/2251) [`b553fee`](https://github.com/mengxi-ream/read-frog/commit/b553feeaad6956dfb3dd24b975eb90abfc49613e) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(custom-actions): add Improve Writing as a built-in action, turned on and waiting in the selection toolbar's more menu until you pin it
+
+- [#2253](https://github.com/mengxi-ream/read-frog/pull/2253) [`2556613`](https://github.com/mengxi-ream/read-frog/commit/2556613cf2a5c4ce51280425f9c3a1cfa659deb4) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(shortcuts): show macOS modifier keys in Apple's standard order and keep a "+" key visible in shortcut hints
+
+- [#2253](https://github.com/mengxi-ream/read-frog/pull/2253) [`2556613`](https://github.com/mengxi-ream/read-frog/commit/2556613cf2a5c4ce51280425f9c3a1cfa659deb4) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(providers): move Perplexity to its Agent API and migrate saved Sonar models, since Perplexity has shut down Sonar Chat Completions
+
+- [#2253](https://github.com/mengxi-ream/read-frog/pull/2253) [`2556613`](https://github.com/mengxi-ream/read-frog/commit/2556613cf2a5c4ce51280425f9c3a1cfa659deb4) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(providers): remove the Vercel v0 provider, whose API has been shut down, and keep saved Vercel providers as OpenAI-compatible custom providers
+
+- [#2247](https://github.com/mengxi-ream/read-frog/pull/2247) [`ba7780e`](https://github.com/mengxi-ream/read-frog/commit/ba7780eddbb95517ee61350bbd1c6a8dc5103c40) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(custom-actions): add a built-in sentence analysis action that marks up long sentences the way a teacher would
+
+- [#2242](https://github.com/mengxi-ream/read-frog/pull/2242) [`f347fa5`](https://github.com/mengxi-ream/read-frog/commit/f347fa5f845fe9a6dbc6e25674d1b0be5ad9c327) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): keep the subtitle menu inside the video and below the player's own menus
+
+- [#2246](https://github.com/mengxi-ream/read-frog/pull/2246) [`e990d95`](https://github.com/mengxi-ream/read-frog/commit/e990d951a8fbeee3cbdfff77104f9618f356d9d6) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(translation-hub): keep the prompt selector from overlapping the target language
+
 ## 1.48.1
 
 ### Patch Changes
