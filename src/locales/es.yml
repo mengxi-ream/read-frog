@@ -1579,6 +1579,10 @@ action:
   translation: Traducción
   speak: Leer en voz alta
   playing: Reproduciendo
+  moreActions: Más acciones
+  pinToToolbar: Fijar en la barra
+  unpinFromToolbar: Quitar de la barra
+  dragToReorder: Arrastra para reordenar
 noteSuggestion:
   title: Quizás quieras guardar
   description: Elige qué palabras guardar en tu Notebase y repásalas cuando quieras.

@@ -24,8 +24,12 @@ vi.mock("../speak-button", () => ({
   SpeakButton: () => null,
 }))
 
-vi.mock("../custom-action-button", () => ({
-  SelectionToolbarCustomActionButtons: () => null,
+vi.mock("../pinned-items", () => ({
+  SelectionToolbarPinnedItems: () => null,
+}))
+
+vi.mock("../more-menu", () => ({
+  SelectionToolbarMoreMenu: () => <button type="button" data-testid="more-menu" />,
 }))
 
 // Mock atoms
@@ -226,7 +230,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expect(getOverlayRoot()).not.toHaveClass("inset-0")
   })
 
-  it("keeps the overlay root collapsed when no toolbar feature is enabled", async () => {
+  it("still shows the toolbar, with its more menu, when nothing is pinned", async () => {
     await store.set(configFieldsAtomMap.selectionToolbar, {
       ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
       features: {
@@ -257,8 +261,11 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
 
-    expect(getOverlayRoot()).toHaveClass("h-0", "w-0")
-    expect(getOverlayRoot()).not.toHaveClass("inset-0")
+    await waitFor(() => {
+      expect(getOverlayRoot()).toHaveClass("inset-0")
+    })
+    expectToolbarVisible()
+    expect(screen.getByTestId("more-menu")).toBeInTheDocument()
   })
 
   it("should show toolbar when selecting text in a normal div element", async () => {

@@ -19,8 +19,12 @@ vi.mock("../speak-button", () => ({
   SpeakButton: () => null,
 }))
 
-vi.mock("../custom-action-button", () => ({
-  SelectionToolbarCustomActionButtons: () => null,
+vi.mock("../pinned-items", () => ({
+  SelectionToolbarPinnedItems: () => null,
+}))
+
+vi.mock("../more-menu", () => ({
+  SelectionToolbarMoreMenu: () => <button type="button" data-testid="more-menu" />,
 }))
 
 // Mock atoms

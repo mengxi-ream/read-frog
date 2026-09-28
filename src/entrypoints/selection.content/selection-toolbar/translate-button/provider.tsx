@@ -335,6 +335,9 @@ function TranslateFooterContent({
 
 interface SelectionTranslationContextValue {
   prepareToolbarOpen: () => void
+  // Opens the translation from the toolbar without its button (from the
+  // toolbar's "more" menu), anchored where that button would be.
+  openToolbarTranslation: (anchorElement: HTMLElement | null) => void
 }
 
 const SelectionTranslationContext = createContext<SelectionTranslationContextValue | null>(null)
@@ -796,6 +799,22 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     [commitOpenRequest],
   )
 
+  const openToolbarTranslation = useCallback(
+    (anchorElement: HTMLElement | null) => {
+      if (!selectionSession || !anchorElement) {
+        return
+      }
+
+      const rect = anchorElement.getBoundingClientRect()
+      openSelectionTranslationRequest({
+        anchor: { x: rect.left, y: rect.top },
+        session: selectionSession,
+        surface: ANALYTICS_SURFACE.SELECTION_TOOLBAR,
+      })
+    },
+    [openSelectionTranslationRequest, selectionSession],
+  )
+
   const openFromContextMenu = useCallback(() => {
     openSelectionTranslationRequest(resolveContextMenuRequest(), {
       showMissingSelectionToast: true,
@@ -841,8 +860,9 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
   const contextValue = useMemo<SelectionTranslationContextValue>(
     () => ({
       prepareToolbarOpen,
+      openToolbarTranslation,
     }),
-    [prepareToolbarOpen],
+    [openToolbarTranslation, prepareToolbarOpen],
   )
 
   return (

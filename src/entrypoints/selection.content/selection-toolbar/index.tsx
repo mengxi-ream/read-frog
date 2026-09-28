@@ -16,14 +16,14 @@ import {
   EXTERNAL_SELECTION_OPEN_EVENT,
   MARGIN,
 } from "@/utils/constants/selection"
-import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { cn } from "@/utils/styles/utils"
 import { urlMatchesPattern } from "@/utils/url-pattern"
 import { buildContextSnapshot, readSelectionSnapshot } from "../utils"
 import { clearSelectionStateAtom, isSelectionToolbarOpenAtom, setSelectionStateAtom } from "./atoms"
 import { CloseButton, DropEvent } from "./close-button"
-import { SelectionToolbarCustomActionButtons } from "./custom-action-button"
 import { createModalDialogHostController } from "./modal-dialog-host"
+import { SelectionToolbarMoreMenu } from "./more-menu"
+import { SelectionToolbarPinnedItems } from "./pinned-items"
 import {
   collectSelectionScrollTargets,
   createSelectionAnchorTracker,
@@ -34,8 +34,6 @@ import {
   SelectionDirection,
   viewportPointToHostPoint,
 } from "./positioning"
-import { SpeakButton } from "./speak-button"
-import { TranslateButton } from "./translate-button"
 
 const EXTERNAL_SELECTION_DIRECTION_MAP: Record<EbookBridgeSelectionDirection, SelectionDirection> =
   {
@@ -228,13 +226,9 @@ export function SelectionToolbar() {
   const isSiteDisabled = selectionToolbar.disabledSelectionToolbarPatterns?.some((pattern) =>
     urlMatchesPattern(window.location.href, pattern),
   )
-  const { features } = selectionToolbar
-  const hasAnyEnabledFeature =
-    features.translate.enabled ||
-    features.speak.enabled ||
-    getSelectionToolbarActions(selectionToolbar).some((action) => action.enabled !== false)
+  // Shown even with nothing pinned: its "more" menu still holds every item.
   const isSelectionToolbarVisible =
-    isSelectionToolbarOpen && selectionToolbar.enabled && !isSiteDisabled && hasAnyEnabledFeature
+    isSelectionToolbarOpen && selectionToolbar.enabled && !isSiteDisabled
   const dropdownOpenRef = useRef(false)
   // Bumped per external (ebook bridge) selection so the position is re-applied
   // even when the toolbar is already visible (visibility doesn't flip then).
@@ -599,7 +593,7 @@ export function SelectionToolbar() {
       )}
       {...{ [SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE]: "" }}
     >
-      {selectionToolbar.enabled && !isSiteDisabled && hasAnyEnabledFeature && (
+      {selectionToolbar.enabled && !isSiteDisabled && (
         <div
           ref={tooltipRef}
           inert={!isSelectionToolbarVisible}
@@ -616,10 +610,9 @@ export function SelectionToolbar() {
             style={{ opacity: "var(--rf-selection-opacity, 1)" }}
           >
             <div className="no-scrollbar flex max-w-105 items-center overflow-x-auto overflow-y-hidden rounded-sm">
-              {features.translate.enabled && <TranslateButton />}
-              {features.speak.enabled && <SpeakButton />}
-              <SelectionToolbarCustomActionButtons />
+              <SelectionToolbarPinnedItems />
             </div>
+            <SelectionToolbarMoreMenu />
             <CloseButton />
           </div>
         </div>

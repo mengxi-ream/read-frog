@@ -9,38 +9,53 @@ import { i18n } from "@/utils/i18n"
 import { SelectionToolbarTooltip, useSelectionTooltipState } from "../components/selection-tooltip"
 import { selectionContentAtom } from "./atoms"
 
-export function SpeakButton() {
+// Reads the selection aloud from the toolbar: its speak button, and the speak
+// row of its "more" menu.
+export function useSelectionSpeech() {
   const selectionContent = useAtomValue(selectionContentAtom)
   const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
   const { play, stop, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.SELECTION_TOOLBAR)
   const isBusy = isFetching || isPlaying
+
+  // Starts reading, or stops the reading in progress. False when nothing is
+  // selected to read.
+  const toggle = useCallback((): boolean => {
+    if (isBusy) {
+      stop()
+      return true
+    }
+
+    if (!selectionContent) {
+      toastManager.add({ type: "error", title: i18n.t("speak.noTextSelected") })
+      return false
+    }
+
+    void play(selectionContent, ttsConfig)
+    return true
+  }, [isBusy, play, selectionContent, stop, ttsConfig])
+
+  const label = isFetching
+    ? i18n.t("speak.fetchingAudio")
+    : isPlaying
+      ? i18n.t("action.playing")
+      : i18n.t("action.speak")
+
+  return { isFetching, isPlaying, label, toggle }
+}
+
+export function SpeakButton() {
+  const { isFetching, isPlaying, label: tooltipText, toggle } = useSelectionSpeech()
   const {
     handlePress,
     onOpenChange: handleTooltipOpenChange,
     open: tooltipOpen,
   } = useSelectionTooltipState()
 
-  const handleClick = useCallback(async () => {
-    if (isBusy) {
+  const handleClick = useCallback(() => {
+    if (toggle()) {
       handlePress()
-      stop()
-      return
     }
-
-    if (!selectionContent) {
-      toastManager.add({ type: "error", title: i18n.t("speak.noTextSelected") })
-      return
-    }
-
-    handlePress()
-    void play(selectionContent, ttsConfig)
-  }, [handlePress, isBusy, play, selectionContent, stop, ttsConfig])
-
-  const tooltipText = isFetching
-    ? i18n.t("speak.fetchingAudio")
-    : isPlaying
-      ? i18n.t("action.playing")
-      : i18n.t("action.speak")
+  }, [handlePress, toggle])
 
   return (
     <SelectionToolbarTooltip

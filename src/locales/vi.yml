@@ -1530,6 +1530,10 @@ action:
   translation: Dịch
   speak: Đọc
   playing: Đang phát
+  moreActions: Thêm thao tác
+  pinToToolbar: Ghim vào thanh công cụ
+  unpinFromToolbar: Bỏ ghim khỏi thanh công cụ
+  dragToReorder: Kéo để sắp xếp lại
 noteSuggestion:
   title: Có thể bạn muốn lưu
   description: Chọn những từ bạn muốn lưu vào Notebase để ôn tập bất cứ lúc nào.

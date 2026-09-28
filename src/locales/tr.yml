@@ -1530,6 +1530,10 @@ action:
   translation: Çeviri
   speak: Oku
   playing: Çalınıyor
+  moreActions: Diğer eylemler
+  pinToToolbar: Araç çubuğuna sabitle
+  unpinFromToolbar: Araç çubuğundan kaldır
+  dragToReorder: Sıralamak için sürükleyin
 noteSuggestion:
   title: Kaydetmek isteyebilirsiniz
   description: Notebase'inize kaydetmek istediğiniz kelimeleri seçin ve dilediğiniz zaman tekrarlayın.

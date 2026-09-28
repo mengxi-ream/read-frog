@@ -57,6 +57,12 @@ const selectionToolbarSchema = z
     }),
     builtInActions: selectionToolbarBuiltInActionsSchema,
     customActions: selectionToolbarCustomActionsSchema,
+    // The order of every toolbar item (translate, speak and the actions), by
+    // id. It may miss items (an action added since) and name ones that are
+    // gone; see getSelectionToolbarItems. `.default([])` lets a config stored
+    // before this field parse in UI contexts that load ahead of the
+    // background migration.
+    order: z.array(z.string().min(1)).default([]),
     noteSuggestion: z.object({
       enabled: z.boolean(),
       actionId: z.string().nonempty(),

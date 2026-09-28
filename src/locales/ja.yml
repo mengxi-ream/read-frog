@@ -1530,6 +1530,10 @@ action:
   translation: 翻訳
   speak: 読み上げ
   playing: 再生中
+  moreActions: その他の操作
+  pinToToolbar: ツールバーに固定
+  unpinFromToolbar: ツールバーから固定解除
+  dragToReorder: ドラッグして並べ替え
 noteSuggestion:
   title: 保存におすすめ
   description: Notebase に保存したい単語を選んで、いつでも復習できます。

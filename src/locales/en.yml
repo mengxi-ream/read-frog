@@ -1639,6 +1639,10 @@ action:
   translation: Translation
   speak: Speak
   playing: Playing
+  moreActions: More actions
+  pinToToolbar: Pin to toolbar
+  unpinFromToolbar: Unpin from toolbar
+  dragToReorder: Drag to reorder
 noteSuggestion:
   title: You might want to save
   description: Choose which words to save to your Notebase and review anytime.

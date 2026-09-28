@@ -1530,6 +1530,10 @@ action:
   translation: Перевод
   speak: Озвучить
   playing: Воспроизведение
+  moreActions: Другие действия
+  pinToToolbar: Закрепить на панели
+  unpinFromToolbar: Открепить от панели
+  dragToReorder: Перетащите, чтобы изменить порядок
 noteSuggestion:
   title: Стоит сохранить
   description: Выберите слова для сохранения в Notebase и повторяйте их в любое время.
