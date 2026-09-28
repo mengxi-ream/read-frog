@@ -662,6 +662,12 @@ options:
         name: 名前
         customize: カスタマイズ
         customizeTooltip: 組み込みアクションのプロンプトは変更できません。このボタンをクリックして編集可能なコピーを作成し、プロンプトを変更します。
+        aiConfigHelper:
+          trigger: "AI に設定を手伝ってもらう"
+          title: "AI に設定を手伝ってもらう"
+          description: "下のプロンプトをコピーして、普段使っている AI アシスタント（ChatGPT、Claude、DeepSeek、Kimi など）に貼り付けてください。まずやりたいことを質問し、その後で各項目に何を入力すればよいかを教えてくれます。プロンプトにはこのアクションの現在の設定が含まれますが、API キーは含まれません。"
+          copy: "プロンプトをコピー"
+          copyFailed: "プロンプトをコピーできませんでした。もう一度お試しください。"
         icon: アイコン
         iconField:
           chooseAriaLabel: アイコンを選択

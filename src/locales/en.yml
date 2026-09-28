@@ -668,6 +668,12 @@ options:
         name: Name
         customize: Customize
         customizeTooltip: Built-in instructions do not allow prompt changes. Click here to create an editable copy and modify the prompts.
+        aiConfigHelper:
+          trigger: "Configure with AI"
+          title: "Configure with AI"
+          description: "Copy the prompt below and paste it into your AI chat assistant (ChatGPT, Claude, DeepSeek, Kimi…). It asks what you want first, then tells you what to put in each setting. The prompt includes this action's current settings, but no API keys."
+          copy: "Copy prompt"
+          copyFailed: "Couldn't copy the prompt. Try again."
         icon: Icon
         iconField:
           chooseAriaLabel: Choose icon
