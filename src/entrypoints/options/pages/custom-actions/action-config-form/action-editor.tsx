@@ -32,6 +32,7 @@ import {
 import { duplicateSelectionToolbarAction, getSelectionToolbarActions } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { customActionEditorTabAtom, selectedCustomActionIdAtom } from "../atoms"
+import { AiConfigHelperButton as AiConfigHelperPopover } from "./ai-config-helper-button"
 import { formOpts, useAppForm } from "./form"
 import { IconField as IconFormField } from "./icon-field"
 import { LayoutField as EditableLayoutFormField, ReadOnlyLayoutField } from "./layout-field"
@@ -341,6 +342,11 @@ function CustomizeButton() {
   )
 }
 
+function AiConfigHelperButton() {
+  const { form } = useActionEditor().state
+  return <AiConfigHelperPopover getAction={() => form.state.values} />
+}
+
 function DeleteButton() {
   const deleteAction = useRequiredActionEditorCommand("delete")
   const [open, setOpen] = useState(false)
@@ -389,6 +395,7 @@ export const ActionEditor = {
   },
   NotebaseConnectionField,
   CustomizeButton,
+  AiConfigHelperButton,
   DuplicateButton,
   DeleteButton,
 }

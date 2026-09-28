@@ -668,6 +668,12 @@ options:
         name: 名稱
         customize: 自訂
         customizeTooltip: 內建指令不允許修改提示詞，點此按鈕來修改指令提示詞
+        aiConfigHelper:
+          trigger: "讓 AI 幫我設定"
+          title: "讓 AI 幫我設定"
+          description: "複製下方的提示詞，貼給你常用的 AI 助理（ChatGPT、Claude、DeepSeek、Kimi 等）。它會先問你想做什麼，再告訴你每一項怎麼填。提示詞包含這個動作目前的設定，但不含 API 金鑰。"
+          copy: "複製提示詞"
+          copyFailed: "複製失敗，請再試一次"
         icon: 圖示
         iconField:
           chooseAriaLabel: 選擇圖示

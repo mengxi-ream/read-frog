@@ -663,6 +663,12 @@ options:
         name: Nombre
         customize: Personalizar
         customizeTooltip: Las instrucciones integradas no permiten cambiar los prompts. Haz clic aquí para crear una copia editable y modificar los prompts.
+        aiConfigHelper:
+          trigger: "Configurar con IA"
+          title: "Configurar con IA"
+          description: "Copia el prompt de abajo y pégalo en tu asistente de IA (ChatGPT, Claude, DeepSeek, Kimi…). Primero te preguntará qué quieres y luego te dirá qué poner en cada ajuste. El prompt incluye la configuración actual de esta acción, pero no las claves de API."
+          copy: "Copiar prompt"
+          copyFailed: "No se pudo copiar el prompt. Inténtalo de nuevo."
         icon: Icono
         iconField:
           chooseAriaLabel: Elegir icono

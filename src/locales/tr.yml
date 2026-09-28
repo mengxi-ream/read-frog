@@ -662,6 +662,12 @@ options:
         name: Ad
         customize: Özelleştir
         customizeTooltip: Yerleşik eylemin istemleri değiştirilemez. Düzenlenebilir bir kopya oluşturup istemleri değiştirmek için bu düğmeye tıklayın.
+        aiConfigHelper:
+          trigger: "Yapay zekâyla yapılandır"
+          title: "Yapay zekâyla yapılandır"
+          description: "Aşağıdaki istemi kopyalayıp kullandığınız yapay zekâ sohbet asistanına (ChatGPT, Claude, DeepSeek, Kimi…) yapıştırın. Önce ne istediğinizi sorar, ardından her ayara ne yazmanız gerektiğini söyler. İstem bu eylemin mevcut ayarlarını içerir ama API anahtarlarını içermez."
+          copy: "İstemi kopyala"
+          copyFailed: "İstem kopyalanamadı. Tekrar deneyin."
         icon: Simge
         iconField:
           chooseAriaLabel: Simge seç

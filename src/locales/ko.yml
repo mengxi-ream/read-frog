@@ -662,6 +662,12 @@ options:
         name: 이름
         customize: 사용자 지정
         customizeTooltip: 기본 제공 작업의 프롬프트는 변경할 수 없습니다. 이 버튼을 클릭하여 편집 가능한 복사본을 만들고 프롬프트를 수정하세요.
+        aiConfigHelper:
+          trigger: "AI로 설정하기"
+          title: "AI로 설정하기"
+          description: "아래 프롬프트를 복사해 평소 쓰는 AI 어시스턴트(ChatGPT, Claude, DeepSeek, Kimi 등)에 붙여 넣으세요. 먼저 원하는 것을 물어본 다음, 각 항목에 무엇을 입력할지 알려 줍니다. 프롬프트에는 이 작업의 현재 설정이 포함되지만 API 키는 포함되지 않습니다."
+          copy: "프롬프트 복사"
+          copyFailed: "프롬프트를 복사하지 못했습니다. 다시 시도하세요."
         icon: 아이콘
         iconField:
           chooseAriaLabel: 아이콘 선택
