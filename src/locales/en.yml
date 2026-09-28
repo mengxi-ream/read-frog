@@ -1067,6 +1067,11 @@ options:
         blank:
           name: Blank
           description: Start from scratch with an empty action
+          prompt: |-
+            ## Input
+            Selection: {{selection}}
+            Paragraphs: {{paragraphs}}
+            Target language: {{targetLanguage}}
       errors:
         nameRequired: Name is required
         duplicateName: 'Duplicate action name "$1"'

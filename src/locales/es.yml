@@ -1007,6 +1007,11 @@ options:
         blank:
           name: En blanco
           description: Empieza desde cero con una acción vacía
+          prompt: |-
+            ## Entrada
+            Selección: {{selection}}
+            Párrafos: {{paragraphs}}
+            Idioma de destino: {{targetLanguage}}
       errors:
         nameRequired: El nombre es obligatorio
         duplicateName: 'Nombre de acción duplicado "$1"'

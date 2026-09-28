@@ -957,6 +957,12 @@ options:
           hardLabel: "Khó"
           trunkLabel: "Chỉ xem nòng cốt"
           slashesLabel: "Ngắt câu"
+        blank:
+          prompt: |-
+            ## Đầu vào
+            Văn bản chọn: {{selection}}
+            Đoạn văn: {{paragraphs}}
+            Ngôn ngữ đích: {{targetLanguage}}
       errors:
         nameRequired: Tên là bắt buộc
         duplicateName: 'Tên hành động trùng lặp "$1"'

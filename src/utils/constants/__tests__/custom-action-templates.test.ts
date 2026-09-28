@@ -1,14 +1,22 @@
+import { readFile } from "node:fs/promises"
+import { HostedAiStreamStructuredObjectInputSchema } from "@read-frog/api-contract"
 import { compileLayout } from "@read-frog/layout-engine/core"
 import { lintLayout } from "@read-frog/layout-engine/editor"
 import { DEFAULT_LAYOUT } from "@read-frog/layout-engine/presets"
 import { describe, expect, it } from "vitest"
+import {
+  buildSelectionToolbarCustomActionSystemPrompt,
+  replaceSelectionToolbarCustomActionPromptTokens,
+} from "@/entrypoints/selection.content/selection-toolbar/custom-action-prompt"
 import { selectionToolbarCustomActionsSchema } from "@/types/config/selection-toolbar"
+import { SUPPORTED_UI_LOCALES } from "@/utils/i18n/locales"
 import { CUSTOM_ACTION_LAYOUT_HOST } from "@/utils/layout-host/host"
 import {
   buildDictionaryActionLayout,
   buildSentenceAnalysisActionLayout,
 } from "@/utils/layout-host/slots"
 import { createDefaultDictionaryAction, createDefaultSentenceAnalysisAction } from "../config"
+import { getSelectionToolbarCustomActionTokenCellText } from "../custom-action"
 import { CUSTOM_ACTION_TEMPLATES } from "../custom-action-templates"
 
 function createFromTemplate(id: string) {
@@ -16,6 +24,53 @@ function createFromTemplate(id: string) {
   if (!template) throw new Error(`missing template ${id}`)
   return template.createAction("openai-default")
 }
+
+// A locale's `blank.prompt` block, its indentation removed. i18n is mocked in
+// tests, so the text is read from the locale file.
+async function readBlankPrompt(locale: string): Promise<string | undefined> {
+  const text = await readFile(new URL(`../../../locales/${locale}.yml`, import.meta.url), "utf8")
+  const block = /^ {8}blank:\n(?: {10}.*\n)*? {10}prompt: \|-\n((?: {12}.*\n)+)/m.exec(text)?.[1]
+  return block?.replace(/^ {12}/gm, "").trimEnd()
+}
+
+describe("blank custom action template prompt", () => {
+  // New actions default to the Built-in AI, whose contract requires a prompt:
+  // an empty one fails the request before it is sent.
+  it("gives a new Blank action a request the Built-in AI accepts", () => {
+    const action = createFromTemplate("blank")
+    const tokens = {
+      selection: "serendipity",
+      paragraphs: "Finding it was pure serendipity.",
+      targetLanguage: "Japanese",
+      webTitle: "",
+      webUrl: "https://example.com/",
+      webContent: "",
+    }
+
+    const input = HostedAiStreamStructuredObjectInputSchema.safeParse({
+      instructions: buildSelectionToolbarCustomActionSystemPrompt(
+        action.systemPrompt,
+        tokens,
+        action.outputSchema,
+      ),
+      prompt: replaceSelectionToolbarCustomActionPromptTokens(action.prompt, tokens),
+      outputSchema: action.outputSchema.map(({ name, type }) => ({ name, type })),
+    })
+
+    expect(input.success).toBe(true)
+  })
+
+  it.each(SUPPORTED_UI_LOCALES)(
+    "hands the model the selection and its context in %s",
+    async (locale) => {
+      const prompt = await readBlankPrompt(locale)
+
+      for (const token of ["selection", "paragraphs", "targetLanguage"] as const) {
+        expect(prompt).toContain(getSelectionToolbarCustomActionTokenCellText(token))
+      }
+    },
+  )
+})
 
 describe("custom action template layouts", () => {
   it.each(["improve-writing", "blank"])("gives %s the default field list", (id) => {
