@@ -295,6 +295,9 @@ importers:
       '@read-frog/definitions':
         specifier: 0.5.1
         version: 0.5.1
+      '@read-frog/layout-engine':
+        specifier: 0.1.0
+        version: 0.1.0(dompurify@3.4.16)(liquidjs@10.29.0)(morphdom@2.7.8)(react@19.3.0)
       '@remixicon/react':
         specifier: ^4.9.0
         version: 4.9.0(react@19.3.0)
@@ -2449,6 +2452,21 @@ packages:
 
   '@read-frog/definitions@0.5.1':
     resolution: {integrity: sha512-avFqEmc3Ol5fbAatBQEF/oZSxhOa/scS1fQpOCbAHZ1QVkvJqtCSunecWxzWOoad/CYW76WcR1xKgQqqfuK/RQ==}
+
+  '@read-frog/layout-engine@0.1.0':
+    resolution: {integrity: sha512-9dHy4ATRVlaC9u8pSCKktTjx1tc7NRBgQrbknZEzg8XsBqZx2i9IOz93Q9Bv/GNeQtpenBoCF8s14r25rBuFKQ==}
+    peerDependencies:
+      dompurify: ^3.4.16
+      liquidjs: ~10.29.0
+      morphdom: ^2.7.8
+      react: ^19.3.0
+    peerDependenciesMeta:
+      dompurify:
+        optional: true
+      morphdom:
+        optional: true
+      react:
+        optional: true
 
   '@remix-run/route-pattern@0.22.1':
     resolution: {integrity: sha512-czdGJWh09Lapvcqt7Vb09KlrU2PhRJ8xQaI+AItTuD9aDJ5MAgxnS38lnys6Ll+6RJEqPiaUqTwIQhVLwFvv+w==}
@@ -9110,6 +9128,14 @@ snapshots:
       '@date-fns/tz': 1.5.0
       date-fns: 4.4.0
       zod: 4.6.5
+
+  '@read-frog/layout-engine@0.1.0(dompurify@3.4.16)(liquidjs@10.29.0)(morphdom@2.7.8)(react@19.3.0)':
+    dependencies:
+      liquidjs: 10.29.0
+    optionalDependencies:
+      dompurify: 3.4.16
+      morphdom: 2.7.8
+      react: 19.3.0
 
   '@remix-run/route-pattern@0.22.1': {}
 
