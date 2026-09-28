@@ -49,7 +49,10 @@ describe("trackGlossaryUsed", () => {
     let clock = 1_000
     const nowSpy = vi.spyOn(Date, "now").mockImplementation(() => (clock += 5))
     try {
-      trackGlossaryUsed("pageTranslation", [term], "cmn", { provider: "openai", backend_kind: "llm" })
+      trackGlossaryUsed("pageTranslation", [term], "cmn", {
+        provider: "openai",
+        backend_kind: "llm",
+      })
     } finally {
       nowSpy.mockRestore()
     }
