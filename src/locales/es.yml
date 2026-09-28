@@ -712,6 +712,7 @@ options:
           resetFieldList: Lista de campos
           resetDictionary: Tarjeta de diccionario
           resetSentenceAnalysis: Tarjeta de análisis de oraciones
+          resetImproveWriting: "Tarjeta de mejora de escritura"
           resetConfirmTitle: ¿Reemplazar este diseño?
           resetConfirmDescription: Se reemplazará el contenido del editor. Después aún podrás deshacerlo en el editor.
           resetConfirm: Reemplazar
@@ -731,7 +732,7 @@ options:
           insertContext: Contexto
           insertLoop: Todos los campos
           syntaxHelp: Sintaxis
-          builtInHint: El diseño del diccionario integrado no se puede editar. Personalízalo para editar una copia.
+          builtInHint: El diseño de una acción integrada no se puede editar. Personalízala para editar una copia.
           viewSource: Ver código
           emptyNotice: Este diseño está vacío, así que la ventana emergente muestra la lista de campos predeterminada.
           fallbackBanner: Este diseño no se puede mostrar, así que se usa el diseño predeterminado. $1
@@ -960,49 +961,33 @@ options:
           trunkLabel: "Esqueleto"
           slashesLabel: "Pausas"
         improveWriting:
-          name: Mejorar escritura
-          description: Analiza errores de escritura y sugiere mejoras
-          systemPrompt: |-
-            Eres un asistente de escritura para estudiantes de idiomas.
-
-            ## Objetivo
-            Dado un texto seleccionado y sus párrafos circundantes, analiza problemas de escritura y produce una versión mejorada.
-
-            ## Política de idioma (crítica)
-            1. Detecta el idioma original de Selección como {{originLanguage}}.
-            2. El campo "Análisis de errores" debe escribirse en {{targetLanguage}}.
-            3. El campo "Versión mejorada" debe mantenerse en {{originLanguage}}.
-            4. Nunca traduzcas "Versión mejorada" a {{targetLanguage}} a menos que {{originLanguage}} ya sea {{targetLanguage}}.
-
-            ## Reglas de escritura
-            1. Identifica errores de gramática, ortografía, puntuación y elección de palabras.
-            2. Mantén las ediciones naturales y conserva la intención y el tono del autor.
-            3. Si no hay errores importantes, indícalo claramente en "Análisis de errores" y devuelve una "Versión mejorada" ligeramente pulida.
-            4. Mantén "Versión mejorada" concisa y directamente utilizable.
-
-            ## Ejemplos
-            Ejemplo A:
-            - Selección: "He go to school yesterday, and he don't finish his homework."
-            - {{originLanguage}} detectado: inglés
-            - {{targetLanguage}}: chino
-            - Análisis de errores (chino — {{targetLanguage}}): 存在主谓一致和时态错误：go 应改为 went，don't 应改为 didn't，finish 应改为 finish 的过去时语境搭配。
-            - Versión mejorada (inglés — {{originLanguage}}): He went to school yesterday, and he didn't finish his homework.
-
-            Ejemplo B:
-            - Selección: "昨日私は友達に会いて、一緒に映画を見るました。"
-            - {{originLanguage}} detectado: japonés
-            - {{targetLanguage}}: inglés
-            - Análisis de errores (inglés — {{targetLanguage}}): There are verb conjugation errors: "会いて" should be "会って" (te-form of 会う), and "見るました" should be "見ました" (past tense of 見る in masu-form).
-            - Versión mejorada (japonés — {{originLanguage}}): 昨日私は友達に会って、一緒に映画を見ました。
-          prompt: |-
-            ## Entrada
-            Selección: {{selection}}
-            Párrafos: {{paragraphs}}
-            Idioma de destino: {{targetLanguage}}
-          fieldErrorAnalysis: Análisis de errores
-          fieldErrorAnalysisDescription: Explica problemas de gramática, ortografía, puntuación y elección de palabras en {{targetLanguage}}.
-          fieldImprovedVersion: Versión mejorada
-          fieldImprovedVersionDescription: Versión corregida y mejorada del texto seleccionado en su idioma original.
+          name: "Mejorar escritura"
+          description: "Marca errores y expresiones poco naturales como un profesor, y los corrige según la situación"
+          fieldSetting: "Contexto"
+          fieldAnnotations: "Anotaciones"
+          fieldImproved: "Versión mejorada"
+          fieldSummary: "Resumen"
+          types:
+            spelling: "Ortografía"
+            grammar: "Gramática"
+            punctuation: "Puntuación"
+            wordChoice: "Léxico"
+            logic: "Lógica"
+            unnatural: "Poco natural"
+            register: "Registro"
+            clarity: "Claridad"
+            good: "Acierto"
+          tiers:
+            error: "Error"
+            awkward: "Mejorable"
+            good: "Acierto"
+          hideFixesLabel: "Ocultar correcciones"
+          hiddenHintLabel: "Primero intenta corregirlo tú."
+          showImprovedLabel: "Mostrar versión mejorada"
+          improvedLabel: "Versión mejorada"
+          copyLabel: "Copiar"
+          unchangedLabel: "No hay nada que cambiar"
+          removeLabel: "eliminar"
         blank:
           name: En blanco
           description: Empieza desde cero con una acción vacía
@@ -1578,6 +1563,10 @@ action:
   translation: Traducción
   speak: Leer en voz alta
   playing: Reproduciendo
+  moreActions: Más acciones
+  pinToToolbar: Fijar en la barra
+  unpinFromToolbar: Quitar de la barra
+  dragToReorder: Arrastra para reordenar
 noteSuggestion:
   title: Quizás quieras guardar
   description: Elige qué palabras guardar en tu Notebase y repásalas cuando quieras.

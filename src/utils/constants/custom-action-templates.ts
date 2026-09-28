@@ -5,12 +5,15 @@ import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { i18n } from "@/utils/i18n"
 import {
   buildDictionaryActionLayout,
+  buildImproveWritingActionLayout,
   buildSentenceAnalysisActionLayout,
 } from "@/utils/layout-host/slots"
 import { createOutputSchemaField } from "./custom-action"
 
 const T_PREFIX = "options.selectionToolbar.customActions.templates"
 const SA_PREFIX = `${T_PREFIX}.sentenceAnalysis`
+const IW_PREFIX = `${T_PREFIX}.improveWriting`
+const IMPROVE_WRITING_ICON = "streamline-color:ai-edit-spark-flat"
 type I18nKey = keyof GeneratedI18nStructure
 
 export interface CustomActionTemplate {
@@ -129,6 +132,55 @@ export function createSentenceAnalysisDefinition(providerId: string): CustomActi
   }
 }
 
+// Like Sentence Analysis, the prompt and the field descriptions are English in
+// every UI language, and name the fields, whose names are localized. The model
+// judges the setting first (its first field), then marks the selection and
+// rewrites it for that setting, writing its words in the target language.
+export function createImproveWritingDefinition(providerId: string): CustomActionDefinition {
+  const setting = i18n.t(`${IW_PREFIX}.fieldSetting`)
+  const annotations = i18n.t(`${IW_PREFIX}.fieldAnnotations`)
+  const improved = i18n.t(`${IW_PREFIX}.fieldImproved`)
+  const summary = i18n.t(`${IW_PREFIX}.fieldSummary`)
+  return {
+    id: getRandomUUID(),
+    name: i18n.t(`${IW_PREFIX}.name`),
+    enabled: true,
+    icon: IMPROVE_WRITING_ICON,
+    providerId,
+    systemPrompt: i18n.t(`${IW_PREFIX}.systemPrompt`, [setting, annotations, improved, summary]),
+    prompt: i18n.t(`${IW_PREFIX}.prompt`),
+    // In the order the card fills: the setting it judges everything by, the
+    // marks (a JSON array inside a string field, like Sentence Analysis's),
+    // the rewrite, and the one-line summary.
+    outputSchema: [
+      createOutputSchemaField(
+        setting,
+        "string",
+        i18n.t(`${IW_PREFIX}.fieldSettingDescription`),
+        "improve-writing-setting",
+      ),
+      createOutputSchemaField(
+        annotations,
+        "string",
+        i18n.t(`${IW_PREFIX}.fieldAnnotationsDescription`),
+        "improve-writing-annotations",
+      ),
+      createOutputSchemaField(
+        improved,
+        "string",
+        i18n.t(`${IW_PREFIX}.fieldImprovedDescription`),
+        "improve-writing-improved",
+      ),
+      createOutputSchemaField(
+        summary,
+        "string",
+        i18n.t(`${IW_PREFIX}.fieldSummaryDescription`),
+        "improve-writing-summary",
+      ),
+    ],
+  }
+}
+
 export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
   {
     id: "dictionary",
@@ -162,31 +214,18 @@ export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
   },
   {
     id: "improve-writing",
-    nameKey: `${T_PREFIX}.improveWriting.name`,
-    descriptionKey: `${T_PREFIX}.improveWriting.description`,
-    icon: "tabler:pencil-check",
-    createAction: (providerId: string): SelectionToolbarCustomAction => ({
-      id: getRandomUUID(),
-      name: i18n.t(`${T_PREFIX}.improveWriting.name`),
-      enabled: true,
-      icon: "tabler:pencil-check",
-      providerId,
-      systemPrompt: i18n.t(`${T_PREFIX}.improveWriting.systemPrompt`),
-      prompt: i18n.t(`${T_PREFIX}.improveWriting.prompt`),
-      outputSchema: [
-        createOutputSchemaField(
-          i18n.t(`${T_PREFIX}.improveWriting.fieldErrorAnalysis`),
-          "string",
-          i18n.t(`${T_PREFIX}.improveWriting.fieldErrorAnalysisDescription`),
-        ),
-        createOutputSchemaField(
-          i18n.t(`${T_PREFIX}.improveWriting.fieldImprovedVersion`),
-          "string",
-          i18n.t(`${T_PREFIX}.improveWriting.fieldImprovedVersionDescription`),
-        ),
-      ],
-      layout: DEFAULT_LAYOUT,
-    }),
+    nameKey: `${IW_PREFIX}.name`,
+    descriptionKey: `${IW_PREFIX}.description`,
+    icon: IMPROVE_WRITING_ICON,
+    createAction: (providerId: string): SelectionToolbarCustomAction => {
+      const action = createImproveWritingDefinition(providerId)
+      // Built from this schema like the other cards; the preset always has
+      // the annotations slot, so it is never null.
+      return {
+        ...action,
+        layout: buildImproveWritingActionLayout(action.outputSchema) ?? DEFAULT_LAYOUT,
+      }
+    },
   },
   {
     id: "blank",

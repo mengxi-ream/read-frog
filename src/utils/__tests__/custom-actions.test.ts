@@ -28,6 +28,7 @@ describe("selection toolbar built-in actions", () => {
     expect(getSelectionToolbarActions(selectionToolbar).map((action) => action.id)).toEqual([
       "default-dictionary",
       "default-sentence-analysis",
+      "default-improve-writing",
       "custom-action",
     ])
   })
@@ -53,6 +54,33 @@ describe("selection toolbar built-in actions", () => {
     expect(action?.layout).toContain("default-sentence-analysis-annotations")
   })
 
+  it("resolves the built-in Improve Writing, on by default, from its stored state", () => {
+    const selectionToolbar = cloneSelectionToolbar()
+    const action = findSelectionToolbarAction(selectionToolbar, "default-improve-writing")
+    expect(action).toMatchObject({
+      id: "default-improve-writing",
+      enabled: true,
+      providerId: DEFAULT_CONFIG.selectionToolbar.builtInActions.improveWriting.providerId,
+      icon: "streamline-color:ai-edit-spark-flat",
+    })
+    expect(action?.outputSchema.map((field) => field.id)).toEqual([
+      "default-improve-writing-setting",
+      "default-improve-writing-annotations",
+      "default-improve-writing-improved",
+      "default-improve-writing-summary",
+    ])
+    expect(action?.layout).toContain("default-improve-writing-annotations")
+
+    selectionToolbar.builtInActions.improveWriting = {
+      enabled: false,
+      providerId: "openai-default",
+    }
+    expect(findSelectionToolbarAction(selectionToolbar, "default-improve-writing")).toMatchObject({
+      enabled: false,
+      providerId: "openai-default",
+    })
+  })
+
   it("persists only mutable state when replacing the built-in Sentence Analysis", () => {
     const selectionToolbar = cloneSelectionToolbar()
     const action = findSelectionToolbarAction(selectionToolbar, "default-sentence-analysis")!
@@ -72,6 +100,7 @@ describe("selection toolbar built-in actions", () => {
         providerId: "openai-default",
         notebaseConnection: undefined,
       },
+      improveWriting: selectionToolbar.builtInActions.improveWriting,
     })
     expect(next.customActions).toBe(selectionToolbar.customActions)
     expect(findSelectionToolbarAction(next, "default-sentence-analysis")).toMatchObject({

@@ -17,9 +17,10 @@ import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import { buildContextSnapshot, createRangeSnapshot, normalizeSelectedText } from "../../utils"
 import { setSelectionStateAtom } from "../atoms"
-import { SelectionToolbarCustomActionButtons } from "../custom-action-button"
 import { SelectionCustomActionProvider } from "../custom-action-button/provider"
 import { SelectionToolbar } from "../index"
+import { SelectionToolbarPinnedItems } from "../pinned-items"
+import { SelectionSpeechProvider } from "../speak-button"
 import { TranslateButton } from "../translate-button"
 import { SelectionTranslationProvider } from "../translate-button/provider"
 
@@ -580,7 +581,9 @@ function renderWithProviders(ui: ReactElement, store = createStore()) {
       <Provider store={store}>
         <TooltipProvider>
           <SelectionTranslationProvider>
-            <SelectionCustomActionProvider>{ui}</SelectionCustomActionProvider>
+            <SelectionCustomActionProvider>
+              <SelectionSpeechProvider>{ui}</SelectionSpeechProvider>
+            </SelectionCustomActionProvider>
           </SelectionTranslationProvider>
         </TooltipProvider>
       </Provider>
@@ -1650,7 +1653,7 @@ describe("selection toolbar requests", () => {
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
-    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
 
     const action = DEFAULT_DICTIONARY_ACTION
 
@@ -1744,7 +1747,7 @@ describe("selection toolbar requests", () => {
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
-    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
 
     const action = DEFAULT_DICTIONARY_ACTION
 
@@ -1805,7 +1808,7 @@ describe("selection toolbar requests", () => {
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     setSelectionState(store, { text: "Selected text" })
-    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
 
     const action = DEFAULT_DICTIONARY_ACTION
 
@@ -1839,7 +1842,7 @@ describe("selection toolbar requests", () => {
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     setSelectionState(store, { text: "Selected text" })
-    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
 
     const trigger = screen.getByRole("button", { name: actionName })
     await openTooltip(trigger)
@@ -1858,7 +1861,7 @@ describe("selection toolbar requests", () => {
   it("shows a toast when a custom action context menu request cannot recover a selection snapshot", async () => {
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
-    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
 
     const action = DEFAULT_DICTIONARY_ACTION
 
@@ -1904,7 +1907,7 @@ describe("selection toolbar requests", () => {
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
-    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
 
     const actionName = DEFAULT_DICTIONARY_ACTION.name
 
@@ -1969,7 +1972,7 @@ describe("selection toolbar requests", () => {
       const store = createStore()
       store.set(configAtom, cloneConfig(config))
       setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
-      renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+      renderWithProviders(<SelectionToolbarPinnedItems />, store)
 
       fireEvent.click(await screen.findByRole("button", { name: action.name }))
 
@@ -2024,7 +2027,7 @@ describe("selection toolbar requests", () => {
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
-    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
 
     const actionName = DEFAULT_DICTIONARY_ACTION.name
 
@@ -2080,7 +2083,7 @@ describe("selection toolbar requests", () => {
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
-    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
 
     const actionName = DEFAULT_DICTIONARY_ACTION.name
 
@@ -2133,7 +2136,7 @@ describe("selection toolbar requests", () => {
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
-    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
 
     const action = DEFAULT_DICTIONARY_ACTION
     const nextProviderId = findAlternateLLMProviderId(store.get(configAtom), action.providerId)
@@ -2188,7 +2191,7 @@ describe("selection toolbar requests", () => {
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     setSelectionState(store, { text: "   ", range: createRangeFor(paragraph) })
-    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
 
     const actionName = DEFAULT_DICTIONARY_ACTION.name
 
@@ -2224,7 +2227,7 @@ describe("selection toolbar requests", () => {
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
-    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
 
     const actionName = DEFAULT_DICTIONARY_ACTION.name
 

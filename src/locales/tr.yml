@@ -711,6 +711,7 @@ options:
           resetFieldList: Alan listesi
           resetDictionary: Sözlük kartı
           resetSentenceAnalysis: Cümle analizi kartı
+          resetImproveWriting: "Yazı iyileştirme kartı"
           resetConfirmTitle: Bu düzen değiştirilsin mi?
           resetConfirmDescription: Düzenleyicinin içeriği değiştirilecek. Daha sonra düzenleyicide geri alabilirsiniz.
           resetConfirm: Değiştir
@@ -730,7 +731,7 @@ options:
           insertContext: Bağlam
           insertLoop: Tüm alanlar
           syntaxHelp: Sözdizimi
-          builtInHint: Yerleşik sözlüğün düzeni düzenlenemez. Bir kopyasını düzenlemek için özelleştirin.
+          builtInHint: Yerleşik eylemin düzeni düzenlenemez. Bir kopyasını düzenlemek için özelleştirin.
           viewSource: Kaynağı görüntüle
           emptyNotice: Bu düzen boş olduğu için açılır pencerede varsayılan alan listesi gösterilir.
           fallbackBanner: Bu düzen gösterilemediği için varsayılan düzen kullanılıyor. $1
@@ -956,6 +957,34 @@ options:
           hardLabel: "Zor"
           trunkLabel: "Sadece iskelet"
           slashesLabel: "Duraklar"
+        improveWriting:
+          name: "Yazıyı iyileştir"
+          description: "Bir öğretmen gibi hataları ve doğal olmayan ifadeleri işaretler, metni duruma göre düzeltir"
+          fieldSetting: "Bağlam"
+          fieldAnnotations: "İşaretler"
+          fieldImproved: "Düzeltilmiş metin"
+          fieldSummary: "Özet"
+          types:
+            spelling: "Yazım"
+            grammar: "Dil bilgisi"
+            punctuation: "Noktalama"
+            wordChoice: "Sözcük seçimi"
+            logic: "Mantık"
+            unnatural: "Doğal değil"
+            register: "Üslup"
+            clarity: "Açıklık"
+            good: "İyi seçim"
+          tiers:
+            error: "Hata"
+            awkward: "Pürüzlü"
+            good: "İyi"
+          hideFixesLabel: "Düzeltmeleri gizle"
+          hiddenHintLabel: "Önce kendiniz düzeltmeyi deneyin."
+          showImprovedLabel: "Göster"
+          improvedLabel: "Düzeltilmiş metin"
+          copyLabel: "Kopyala"
+          unchangedLabel: "Değiştirilecek bir şey yok"
+          removeLabel: "sil"
         blank:
           prompt: |-
             ## Girdi
@@ -1529,6 +1558,10 @@ action:
   translation: Çeviri
   speak: Oku
   playing: Çalınıyor
+  moreActions: Diğer eylemler
+  pinToToolbar: Araç çubuğuna sabitle
+  unpinFromToolbar: Araç çubuğundan kaldır
+  dragToReorder: Sıralamak için sürükleyin
 noteSuggestion:
   title: Kaydetmek isteyebilirsiniz
   description: Notebase'inize kaydetmek istediğiniz kelimeleri seçin ve dilediğiniz zaman tekrarlayın.

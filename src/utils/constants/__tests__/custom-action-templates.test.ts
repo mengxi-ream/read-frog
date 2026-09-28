@@ -13,6 +13,7 @@ import { SUPPORTED_UI_LOCALES } from "@/utils/i18n/locales"
 import { CUSTOM_ACTION_LAYOUT_HOST } from "@/utils/layout-host/host"
 import {
   buildDictionaryActionLayout,
+  buildImproveWritingActionLayout,
   buildSentenceAnalysisActionLayout,
 } from "@/utils/layout-host/slots"
 import { createDefaultDictionaryAction, createDefaultSentenceAnalysisAction } from "../config"
@@ -73,8 +74,35 @@ describe("blank custom action template prompt", () => {
 })
 
 describe("custom action template layouts", () => {
-  it.each(["improve-writing", "blank"])("gives %s the default field list", (id) => {
-    expect(createFromTemplate(id).layout).toBe(DEFAULT_LAYOUT)
+  it("gives the blank template the default field list", () => {
+    expect(createFromTemplate("blank").layout).toBe(DEFAULT_LAYOUT)
+  })
+
+  it("gives the improve writing preset its card, built for its four stable fields", () => {
+    const action = createFromTemplate("improve-writing")
+
+    expect(action.icon).toBe("streamline-color:ai-edit-spark-flat")
+    expect(action.outputSchema.map((field) => [field.id, field.type])).toEqual([
+      ["improve-writing-setting", "string"],
+      ["improve-writing-annotations", "string"],
+      ["improve-writing-improved", "string"],
+      ["improve-writing-summary", "string"],
+    ])
+    // i18n is mocked to return the key, so this checks the wiring, not the text.
+    const prefix = "options.selectionToolbar.customActions.templates.improveWriting"
+    expect(action.outputSchema[1]).toMatchObject({
+      name: `${prefix}.fieldAnnotations`,
+      description: `${prefix}.fieldAnnotationsDescription`,
+    })
+    expect(action.systemPrompt).toBe(`${prefix}.systemPrompt`)
+    expect(action.prompt).toBe(`${prefix}.prompt`)
+    expect(action.layout).toBe(buildImproveWritingActionLayout(action.outputSchema))
+    expect(action.layout).not.toBe(DEFAULT_LAYOUT)
+
+    const layout = action.layout ?? ""
+    expect(compileLayout(layout).ok).toBe(true)
+    const diagnostics = lintLayout(layout, CUSTOM_ACTION_LAYOUT_HOST, action.outputSchema)
+    expect(diagnostics.filter((diagnostic) => diagnostic.severity === "error")).toEqual([])
   })
 
   it("gives the dictionary preset the card built for its own fields", () => {

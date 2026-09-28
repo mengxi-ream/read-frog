@@ -6,12 +6,14 @@ import type {
 import type { BuiltInActionId } from "@/utils/constants/custom-action"
 import {
   createDefaultDictionaryAction,
+  createDefaultImproveWritingAction,
   createDefaultSentenceAnalysisAction,
 } from "@/utils/constants/config"
 import {
   BUILT_IN_ACTION_IDS,
   BUILT_IN_ACTION_KEYS,
   BUILT_IN_DICTIONARY_ACTION_ID,
+  BUILT_IN_IMPROVE_WRITING_ACTION_ID,
   BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID,
   isBuiltInActionId,
 } from "@/utils/constants/custom-action"
@@ -23,6 +25,7 @@ type SelectionToolbarConfig = Config["selectionToolbar"]
 const BUILT_IN_ACTION_DEFINITIONS: Record<BuiltInActionId, () => SelectionToolbarCustomAction> = {
   [BUILT_IN_DICTIONARY_ACTION_ID]: createDefaultDictionaryAction,
   [BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID]: createDefaultSentenceAnalysisAction,
+  [BUILT_IN_IMPROVE_WRITING_ACTION_ID]: createDefaultImproveWritingAction,
 }
 
 // A built-in action as it reads: its code-owned definition in the current UI

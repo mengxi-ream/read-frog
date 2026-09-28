@@ -22,10 +22,15 @@ vi.mock("../translate-button", () => ({
 
 vi.mock("../speak-button", () => ({
   SpeakButton: () => null,
+  SelectionSpeechProvider: ({ children }: { children: React.ReactNode }) => children,
 }))
 
-vi.mock("../custom-action-button", () => ({
-  SelectionToolbarCustomActionButtons: () => null,
+vi.mock("../pinned-items", () => ({
+  SelectionToolbarPinnedItems: () => null,
+}))
+
+vi.mock("../more-menu", () => ({
+  SelectionToolbarMoreMenu: () => <button type="button" data-testid="more-menu" />,
 }))
 
 // Mock atoms
@@ -226,7 +231,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expect(getOverlayRoot()).not.toHaveClass("inset-0")
   })
 
-  it("keeps the overlay root collapsed when no toolbar feature is enabled", async () => {
+  it("keeps the overlay root collapsed when no toolbar item is enabled", async () => {
     await store.set(configFieldsAtomMap.selectionToolbar, {
       ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
       features: {
@@ -245,6 +250,10 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
           enabled: false,
           providerId: "google-translate-default",
         },
+        improveWriting: {
+          enabled: false,
+          providerId: "google-translate-default",
+        },
       },
       customActions: [],
     })
@@ -259,6 +268,27 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     expect(getOverlayRoot()).toHaveClass("h-0", "w-0")
     expect(getOverlayRoot()).not.toHaveClass("inset-0")
+  })
+
+  it("shows the toolbar with just its more menu when no enabled item is pinned", async () => {
+    await store.set(configFieldsAtomMap.selectionToolbar, {
+      ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
+      unpinned: ["translate", "speak", "default-dictionary", "default-sentence-analysis"],
+    })
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">{MOCK_SELECTED_TEXT}</div>
+      </div>,
+    )
+
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+
+    await waitFor(() => {
+      expect(getOverlayRoot()).toHaveClass("inset-0")
+    })
+    expectToolbarVisible()
+    expect(screen.getByTestId("more-menu")).toBeInTheDocument()
   })
 
   it("should show toolbar when selecting text in a normal div element", async () => {

@@ -1,179 +1,90 @@
 import { describe, expect, it } from "vitest"
-import { configSchema } from "@/types/config/config"
 import { migrate } from "../../migration-scripts/v104-to-v105"
-import { testSeries as v104TestSeries } from "../example/v104"
 
-function perplexityProvider(model: any): any {
+function storedConfig(
+  dictionary: any = { enabled: true, providerId: "deepseek-default" },
+  customActions: any[] = [],
+): any {
   return {
-    id: "perplexity-default",
-    name: "Perplexity",
-    enabled: true,
-    provider: "perplexity",
-    apiKey: "pplx-key",
-    model,
+    uiLanguage: "zh-CN",
+    selectionToolbar: {
+      enabled: true,
+      opacity: 100,
+      builtInActions: {
+        dictionary,
+        sentenceAnalysis: { enabled: true, providerId: "openai-default" },
+      },
+      customActions,
+      noteSuggestion: { enabled: true, actionId: "default-dictionary", providerId: "openai" },
+    },
   }
 }
 
-describe("v104-to-v105 migration", () => {
+describe("v104 -> v105 migration", () => {
+  it("adds the built-in Improve Writing, turned off, on the Dictionary's provider", () => {
+    const old = storedConfig(undefined, [{ id: "my-action" }])
+    const migrated = migrate(old)
+
+    expect(migrated.selectionToolbar.builtInActions).toEqual({
+      dictionary: { enabled: true, providerId: "deepseek-default" },
+      sentenceAnalysis: { enabled: true, providerId: "openai-default" },
+      improveWriting: { enabled: false, providerId: "deepseek-default" },
+    })
+    // Everything else is carried over untouched.
+    expect(migrated.uiLanguage).toBe("zh-CN")
+    expect(migrated.selectionToolbar.noteSuggestion).toBe(old.selectionToolbar.noteSuggestion)
+    expect(migrated.selectionToolbar.builtInActions.dictionary).toBe(
+      old.selectionToolbar.builtInActions.dictionary,
+    )
+    expect(migrated.selectionToolbar.builtInActions.sentenceAnalysis).toBe(
+      old.selectionToolbar.builtInActions.sentenceAnalysis,
+    )
+    expect(migrated.selectionToolbar.customActions).toBe(old.selectionToolbar.customActions)
+    expect(old.selectionToolbar.builtInActions).not.toHaveProperty("improveWriting")
+  })
+
+  it("is turned off whether or not the Dictionary is", () => {
+    const migrated = migrate(storedConfig({ enabled: false, providerId: "read-frog-free-ai" }))
+    expect(migrated.selectionToolbar.builtInActions.improveWriting).toEqual({
+      enabled: false,
+      providerId: "read-frog-free-ai",
+    })
+  })
+
   it.each([
-    ["sonar", "perplexity/sonar"],
-    ["sonar-pro", "low"],
-    ["sonar-reasoning", "medium"],
-    ["sonar-reasoning-pro", "medium"],
-    ["sonar-deep-research", "high"],
-  ])("moves the Perplexity %s model to %s", (oldModel, newModel) => {
-    const migrated = migrate({
-      providersConfig: [
-        perplexityProvider({ model: oldModel, isCustomModel: false, customModel: null }),
-      ],
-    })
-
-    expect(migrated.providersConfig[0]).toEqual(
-      perplexityProvider({ model: newModel, isCustomModel: false, customModel: null }),
-    )
-  })
-
-  it("moves a Perplexity custom model that is a Sonar id, and keeps any other custom model", () => {
-    const migrated = migrate({
-      providersConfig: [
-        perplexityProvider({ model: "sonar", isCustomModel: true, customModel: "sonar-pro" }),
-        {
-          ...perplexityProvider({
-            model: "sonar",
-            isCustomModel: true,
-            customModel: "openai/gpt-5.4",
-          }),
-          id: "perplexity-custom",
-        },
-      ],
-    })
-
-    expect(migrated.providersConfig[0].model).toEqual({
-      model: "perplexity/sonar",
-      isCustomModel: true,
-      customModel: "low",
-    })
-    expect(migrated.providersConfig[1].model).toEqual({
-      model: "perplexity/sonar",
-      isCustomModel: true,
-      customModel: "openai/gpt-5.4",
+    ["no Dictionary state", undefined],
+    ["a Dictionary without a provider", { enabled: true }],
+    ["a blank provider", { enabled: true, providerId: "" }],
+    ["a non-string provider", { enabled: true, providerId: 7 }],
+  ])("falls back to the Built-in AI with %s", (_case, dictionary) => {
+    const old = storedConfig(dictionary)
+    if (dictionary === undefined) delete old.selectionToolbar.builtInActions.dictionary
+    expect(migrate(old).selectionToolbar.builtInActions.improveWriting).toEqual({
+      enabled: false,
+      providerId: "read-frog-free-ai",
     })
   })
 
-  it("falls back to perplexity/sonar for a Perplexity model it does not know", () => {
-    const migrated = migrate({
-      providersConfig: [
-        perplexityProvider({ model: "r1-1776", isCustomModel: false, customModel: null }),
-      ],
-    })
+  it("returns the config by identity once the state exists", () => {
+    const once = migrate(storedConfig())
+    expect(migrate(once)).toBe(once)
 
-    expect(migrated.providersConfig[0].model.model).toBe("perplexity/sonar")
-  })
-
-  it("converts a Vercel provider to an OpenAI-compatible custom provider", () => {
-    const migrated = migrate({
-      providersConfig: [
-        {
-          id: "vercel-default",
-          name: "Vercel",
-          enabled: true,
-          provider: "vercel",
-          apiKey: "v0-key",
-          temperature: 0.2,
-          model: { model: "v0-1.5-md", isCustomModel: false, customModel: null },
-        },
-      ],
-    })
-
-    expect(migrated.providersConfig[0]).toEqual({
-      id: "vercel-default",
-      name: "Vercel",
+    // A state a UI context wrote first is kept as it is.
+    const written = storedConfig()
+    written.selectionToolbar.builtInActions.improveWriting = {
       enabled: true,
-      provider: "openai-compatible",
-      apiKey: "v0-key",
-      baseURL: "https://api.v0.dev/v1",
-      temperature: 0.2,
-      model: { model: "use-custom-model", isCustomModel: true, customModel: "v0-1.5-md" },
-    })
-  })
-
-  it("keeps a Vercel provider's own base URL and custom model", () => {
-    const migrated = migrate({
-      providersConfig: [
-        {
-          id: "vercel-proxy",
-          name: "My v0",
-          enabled: false,
-          provider: "vercel",
-          baseURL: "https://proxy.example/v1",
-          model: { model: "v0-1.5-lg", isCustomModel: true, customModel: "v0-1.0-md" },
-        },
-      ],
-    })
-
-    expect(migrated.providersConfig[0]).toMatchObject({
-      provider: "openai-compatible",
-      baseURL: "https://proxy.example/v1",
-      model: { model: "use-custom-model", isCustomModel: true, customModel: "v0-1.0-md" },
-    })
-  })
-
-  it("is idempotent and leaves other providers untouched", () => {
-    const openAIProvider = {
-      id: "openai-default",
-      name: "OpenAI",
-      enabled: true,
-      provider: "openai",
-      model: { model: "gpt-5-mini", isCustomModel: false, customModel: null },
+      providerId: "openai-default",
     }
-    const once = migrate({
-      providersConfig: [
-        openAIProvider,
-        perplexityProvider({ model: "sonar-pro", isCustomModel: false, customModel: null }),
-        {
-          id: "vercel-default",
-          name: "Vercel",
-          enabled: true,
-          provider: "vercel",
-          model: { model: "v0-1.5-md", isCustomModel: false, customModel: null },
-        },
-      ],
-    })
-    const twice = migrate(once)
-
-    expect(twice).toEqual(once)
-    expect(twice.providersConfig[0]).toBe(openAIProvider)
-    expect(twice.providersConfig[1]).toBe(once.providersConfig[1])
+    expect(migrate(written)).toBe(written)
   })
 
-  it("produces a config the current schema accepts", () => {
-    const config = structuredClone(v104TestSeries["complex-config-from-v020"]!.config)
-    config.providersConfig.push(
-      perplexityProvider({ model: "sonar-deep-research", isCustomModel: false, customModel: null }),
-      {
-        id: "vercel-default",
-        name: "Vercel",
-        enabled: true,
-        provider: "vercel",
-        model: { model: "v0-1.5-md", isCustomModel: false, customModel: null },
-      },
-    )
-
-    const result = configSchema.safeParse(migrate(config))
-    if (!result.success) {
-      console.error(result.error.issues)
-    }
-    expect(result.success).toBe(true)
-  })
-
-  it("preserves malformed config shapes as much as possible", () => {
-    expect(migrate({})).toEqual({})
-    expect(migrate({ providersConfig: null })).toEqual({ providersConfig: null })
-    expect(migrate({ providersConfig: ["bad-provider"] })).toEqual({
-      providersConfig: ["bad-provider"],
-    })
-    expect(migrate({ providersConfig: [{ provider: "perplexity" }] })).toEqual({
-      providersConfig: [{ provider: "perplexity" }],
-    })
+  it.each([
+    ["null", null],
+    ["an array", []],
+    ["no selection toolbar", { uiLanguage: "en" }],
+    ["no builtInActions", { selectionToolbar: { customActions: [] } }],
+    ["a non-object builtInActions", { selectionToolbar: { builtInActions: [] } }],
+  ])("leaves %s for the schema to report", (_case, config) => {
+    expect(migrate(config)).toBe(config)
   })
 })

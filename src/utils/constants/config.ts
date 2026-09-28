@@ -8,15 +8,19 @@ import type { PageTranslateRange } from "@/types/config/translate"
 import { DEFAULT_LAYOUT } from "@read-frog/layout-engine/presets"
 import {
   buildDictionaryActionLayout,
+  buildImproveWritingActionLayout,
   buildSentenceAnalysisActionLayout,
 } from "@/utils/layout-host/slots"
 import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
 import {
+  BUILT_IN_ACTION_IDS,
   BUILT_IN_DICTIONARY_ACTION_ID,
+  BUILT_IN_IMPROVE_WRITING_ACTION_ID,
   BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID,
 } from "./custom-action"
 import {
   createDictionaryDefinition,
+  createImproveWritingDefinition,
   createSentenceAnalysisDefinition,
 } from "./custom-action-templates"
 import { DEFAULT_GLOSSARY_CONFIG } from "./glossary"
@@ -30,7 +34,7 @@ import {
   DEFAULT_PROVIDER_CONFIG_LIST,
   MICROSOFT_TRANSLATE_PROVIDER_ID,
 } from "./providers"
-import { DEFAULT_SELECTION_OVERLAY_OPACITY } from "./selection"
+import { DEFAULT_SELECTION_OVERLAY_OPACITY, SELECTION_TOOLBAR_FEATURE_IDS } from "./selection"
 import { DEFAULT_SIDE_CONTENT_WIDTH } from "./side"
 import {
   DEFAULT_BACKGROUND_OPACITY,
@@ -65,7 +69,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 105
+export const CONFIG_SCHEMA_VERSION = 107
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
@@ -87,6 +91,7 @@ function memoizeBuiltInLayout(build: (outputSchema: OutputSchema) => string | nu
 
 const getBuiltInDictionaryLayout = memoizeBuiltInLayout(buildDictionaryActionLayout)
 const getBuiltInSentenceAnalysisLayout = memoizeBuiltInLayout(buildSentenceAnalysisActionLayout)
+const getBuiltInImproveWritingLayout = memoizeBuiltInLayout(buildImproveWritingActionLayout)
 
 /**
  * Build the code-owned Dictionary action definition in the current UI locale.
@@ -129,6 +134,27 @@ export function createDefaultSentenceAnalysisAction(): SelectionToolbarCustomAct
     id: BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID,
     outputSchema,
     layout: getBuiltInSentenceAnalysisLayout(outputSchema),
+  }
+}
+
+/**
+ * The code-owned Improve Writing action, built like Sentence Analysis. Unlike
+ * the other built-in actions it starts off the toolbar itself (see
+ * `selectionToolbar.unpinned`): it waits in the toolbar's "more" menu. A
+ * config without its state reads it as off, as the schema does.
+ */
+export function createDefaultImproveWritingAction(): SelectionToolbarCustomAction {
+  const action = createImproveWritingDefinition(BUILT_IN_AI_PROVIDER_ID)
+  const outputSchema = action.outputSchema.map((field) => ({
+    ...field,
+    id: `default-${field.id}`,
+  }))
+  return {
+    ...action,
+    id: BUILT_IN_IMPROVE_WRITING_ACTION_ID,
+    enabled: false,
+    outputSchema,
+    layout: getBuiltInImproveWritingLayout(outputSchema),
   }
 }
 
@@ -214,8 +240,14 @@ export const DEFAULT_CONFIG: Config = {
         enabled: true,
         providerId: BUILT_IN_AI_PROVIDER_ID,
       },
+      improveWriting: {
+        enabled: true,
+        providerId: BUILT_IN_AI_PROVIDER_ID,
+      },
     },
     customActions: [],
+    order: [...SELECTION_TOOLBAR_FEATURE_IDS, ...BUILT_IN_ACTION_IDS],
+    unpinned: [BUILT_IN_IMPROVE_WRITING_ACTION_ID],
     noteSuggestion: {
       enabled: true,
       actionId: BUILT_IN_DICTIONARY_ACTION_ID,
@@ -316,6 +348,10 @@ export function buildFreshDefaultConfig(): Config {
           providerId: BUILT_IN_AI_PROVIDER_ID,
         },
         sentenceAnalysis: {
+          enabled: true,
+          providerId: BUILT_IN_AI_PROVIDER_ID,
+        },
+        improveWriting: {
           enabled: true,
           providerId: BUILT_IN_AI_PROVIDER_ID,
         },

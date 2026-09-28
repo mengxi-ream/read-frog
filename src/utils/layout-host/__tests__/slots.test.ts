@@ -2,6 +2,7 @@ import type { SelectionToolbarCustomActionOutputField } from "@/types/config/sel
 import { compileLayout, renderLayoutHtml } from "@read-frog/layout-engine/core"
 import {
   buildDictionaryLayout,
+  buildImproveWritingLayout,
   buildSentenceAnalysisLayout,
 } from "@read-frog/layout-engine/presets"
 import { describe, expect, it } from "vitest"
@@ -9,10 +10,13 @@ import { CUSTOM_ACTION_TEMPLATES } from "@/utils/constants/custom-action-templat
 import { buildCustomActionLayoutScope } from "../host"
 import {
   buildDictionaryActionLayout,
+  buildImproveWritingActionLayout,
   buildSentenceAnalysisActionLayout,
   getDictionarySlots,
+  getImproveWritingSlots,
   getSentenceAnalysisSlots,
   isDictionaryShaped,
+  isImproveWritingShaped,
   isSentenceAnalysisShaped,
 } from "../slots"
 
@@ -206,5 +210,99 @@ describe("buildSentenceAnalysisActionLayout", () => {
     )
     expect(html).toContain('data-rf-key="sentence-analysis-structure"')
     expect(html).toContain("Main clause first.")
+  })
+})
+
+describe("getImproveWritingSlots", () => {
+  it("recognizes preset ids, the built-in's, and copies of them", () => {
+    for (const prefix of ["", "default-", "copy-"]) {
+      const slots = getImproveWritingSlots([
+        field(`${prefix}improve-writing-setting`, "S"),
+        field(`${prefix}improve-writing-annotations`, "A"),
+        field(`${prefix}improve-writing-improved`, "I"),
+        field(`${prefix}improve-writing-summary`, "U"),
+      ])
+      expect(namesBySlot(slots)).toEqual({
+        setting: "S",
+        annotations: "A",
+        improved: "I",
+        summary: "U",
+      })
+    }
+  })
+
+  it("ignores UUIDs, near misses and the first version's fields", () => {
+    const ids = [
+      crypto.randomUUID(),
+      "ximprove-writing-annotations",
+      "improve-writing-annotations-2",
+      "Improve-Writing-Improved",
+      "improve-writing-error-analysis",
+      "sentence-analysis-annotations",
+    ]
+    expect(getImproveWritingSlots(ids.map((id) => field(id, id)))).toEqual({})
+  })
+
+  it("needs the annotations slot to be improve-writing-shaped", () => {
+    expect(isImproveWritingShaped(presetSchema("improve-writing"))).toBe(true)
+    // The first version's action had no stable ids: it keeps its own layout.
+    const firstVersion = [
+      field(crypto.randomUUID(), "Error Analysis"),
+      field(crypto.randomUUID(), "Improved Version"),
+    ]
+    expect(isImproveWritingShaped(firstVersion)).toBe(false)
+    const withoutAnnotations = [field("improve-writing-improved", "I")]
+    expect(isImproveWritingShaped(withoutAnnotations)).toBe(false)
+    expect(buildImproveWritingActionLayout(withoutAnnotations)).toBeNull()
+    // No shape claims another's fields.
+    expect(isSentenceAnalysisShaped(presetSchema("improve-writing"))).toBe(false)
+    expect(isImproveWritingShaped(presetSchema("sentence-analysis"))).toBe(false)
+  })
+})
+
+describe("buildImproveWritingActionLayout", () => {
+  it("builds the card for the recognized slots, marking the selection", () => {
+    expect(buildImproveWritingActionLayout(presetSchema("improve-writing"))).toBe(
+      buildImproveWritingLayout({
+        slots: {
+          setting: "improve-writing-setting",
+          annotations: "improve-writing-annotations",
+          improved: "improve-writing-improved",
+          summary: "improve-writing-summary",
+        },
+        labels: { ctxKey: "improveWritingLabels" },
+        source: { ctxKey: "selection" },
+      }),
+    )
+  })
+
+  it("renders an answer with the words of the reader's language", () => {
+    const schema = presetSchema("improve-writing")
+    const slots = getImproveWritingSlots(schema)
+    const compiled = compileLayout(buildImproveWritingActionLayout(schema) ?? "")
+    if (!compiled.ok) throw compiled.error
+    const html = renderLayoutHtml(
+      compiled.compiled,
+      buildCustomActionLayoutScope({
+        outputSchema: schema,
+        value: {
+          [slots.setting!.name]: "正式 · 邮件",
+          [slots.annotations!.name]: JSON.stringify([
+            { text: "I very like", fix: "I really like", type: "grammar", note: "n" },
+          ]),
+          [slots.improved!.name]: "I really like it.",
+          [slots.summary!.name]: "s",
+        },
+        selection: "I very like it.",
+        targetCode: "cmn",
+        status: "done",
+      }),
+    )
+    const prefix = "options.selectionToolbar.customActions.templates.improveWriting"
+    // The i18n mock tags each word with the locale it was asked in.
+    expect(html).toContain(`${prefix}.types.grammar@zh-CN`)
+    expect(html).toContain(`data-toggle="off-error"><i></i>${prefix}.tiers.error@zh-CN 1</button>`)
+    expect(html).toContain("<rt>I really like</rt>")
+    expect(html).toContain('data-copy="I really like it."')
   })
 })

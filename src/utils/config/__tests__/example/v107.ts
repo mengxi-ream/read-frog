@@ -1,14 +1,15 @@
 import type { TestSeriesObject } from "./types"
 
 /**
- * Frozen v105 fixtures. Written out in full on purpose: an example file that
- * spreads the previous version is not a snapshot, because editing v104 would
- * silently change what v105 asserts.
+ * Frozen v107 fixtures. Written out in full on purpose: an example file that
+ * spreads the previous version is not a snapshot, because editing v106 would
+ * silently change what v107 asserts.
  *
- * Delta from v104: `selectionToolbar.builtInActions` gains `improveWriting`,
- * the stored state of the built-in Improve Writing action — turned off, on the
- * built-in Dictionary's provider. Its prompt, fields and card are generated at
- * read time, so nothing else is stored.
+ * Delta from v106: stored Perplexity providers move from the retired `sonar*`
+ * models to Agent API models, and stored Vercel providers become
+ * OpenAI-compatible custom providers. None of these series has either
+ * provider, so they carry over unchanged; the conversions themselves are
+ * covered by `v106-to-v107.test.ts`.
  */
 
 export const testSeries: TestSeriesObject = {
@@ -364,6 +365,14 @@ export const testSeries: TestSeriesObject = {
         width: 700,
       },
       selectionToolbar: {
+        order: [
+          "translate",
+          "speak",
+          "default-dictionary",
+          "default-sentence-analysis",
+          "default-improve-writing",
+        ],
+        unpinned: ["default-improve-writing"],
         noteSuggestion: {
           enabled: true,
           actionId: "default-dictionary",
@@ -393,7 +402,7 @@ export const testSeries: TestSeriesObject = {
             providerId: "deepseek-default",
           },
           improveWriting: {
-            enabled: false,
+            enabled: true,
             providerId: "deepseek-default",
           },
         },
@@ -766,6 +775,14 @@ export const testSeries: TestSeriesObject = {
         width: 420,
       },
       selectionToolbar: {
+        order: [
+          "translate",
+          "speak",
+          "default-dictionary",
+          "default-sentence-analysis",
+          "default-improve-writing",
+        ],
+        unpinned: ["default-improve-writing"],
         noteSuggestion: {
           enabled: true,
           actionId: "default-dictionary",
@@ -795,7 +812,7 @@ export const testSeries: TestSeriesObject = {
             providerId: "google-default",
           },
           improveWriting: {
-            enabled: false,
+            enabled: true,
             providerId: "google-default",
           },
         },
@@ -1177,6 +1194,15 @@ export const testSeries: TestSeriesObject = {
         width: 420,
       },
       selectionToolbar: {
+        order: [
+          "translate",
+          "speak",
+          "default-dictionary",
+          "default-sentence-analysis",
+          "default-improve-writing",
+          "coverage-action",
+        ],
+        unpinned: ["default-improve-writing"],
         noteSuggestion: {
           enabled: true,
           actionId: "default-dictionary",
@@ -1280,7 +1306,7 @@ export const testSeries: TestSeriesObject = {
             providerId: "read-frog-free-ai",
           },
           improveWriting: {
-            enabled: false,
+            enabled: true,
             providerId: "read-frog-free-ai",
           },
         },
@@ -1661,6 +1687,14 @@ export const testSeries: TestSeriesObject = {
         width: 420,
       },
       selectionToolbar: {
+        order: [
+          "translate",
+          "speak",
+          "default-dictionary",
+          "default-sentence-analysis",
+          "default-improve-writing",
+        ],
+        unpinned: ["default-improve-writing"],
         noteSuggestion: {
           enabled: true,
           actionId: "default-dictionary",
@@ -1690,7 +1724,7 @@ export const testSeries: TestSeriesObject = {
             providerId: "google-default",
           },
           improveWriting: {
-            enabled: false,
+            enabled: true,
             providerId: "google-default",
           },
         },
@@ -2063,6 +2097,15 @@ export const testSeries: TestSeriesObject = {
         width: 420,
       },
       selectionToolbar: {
+        order: [
+          "translate",
+          "speak",
+          "default-dictionary",
+          "default-sentence-analysis",
+          "default-improve-writing",
+          "vocab-card",
+        ],
+        unpinned: ["default-improve-writing"],
         noteSuggestion: {
           enabled: true,
           actionId: "default-dictionary",
@@ -2137,7 +2180,7 @@ export const testSeries: TestSeriesObject = {
             providerId: "google-default",
           },
           improveWriting: {
-            enabled: false,
+            enabled: true,
             providerId: "google-default",
           },
         },
