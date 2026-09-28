@@ -1,6 +1,7 @@
+import type { ReactNode } from "react"
 import { IconLoader2, IconPlayerStopFilled, IconVolume } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
-import { useCallback } from "react"
+import { createContext, use, useCallback } from "react"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
@@ -9,9 +10,8 @@ import { i18n } from "@/utils/i18n"
 import { SelectionToolbarTooltip, useSelectionTooltipState } from "../components/selection-tooltip"
 import { selectionContentAtom } from "./atoms"
 
-// Reads the selection aloud from the toolbar: its speak button, and the speak
-// row of its "more" menu.
-export function useSelectionSpeech() {
+// Reads the selection aloud from the toolbar.
+function useSelectionSpeechController() {
   const selectionContent = useAtomValue(selectionContentAtom)
   const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
   const { play, stop, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.SELECTION_TOOLBAR)
@@ -41,6 +41,26 @@ export function useSelectionSpeech() {
       : i18n.t("action.speak")
 
   return { isFetching, isPlaying, label, toggle }
+}
+
+type SelectionSpeech = ReturnType<typeof useSelectionSpeechController>
+
+const SelectionSpeechContext = createContext<SelectionSpeech | null>(null)
+
+// One reader for the whole toolbar: its speak button and the speak row of its
+// "more" menu show, and stop, the same playback, which outlives the button
+// being unpinned.
+export function SelectionSpeechProvider({ children }: { children: ReactNode }) {
+  const speech = useSelectionSpeechController()
+  return <SelectionSpeechContext value={speech}>{children}</SelectionSpeechContext>
+}
+
+export function useSelectionSpeech(): SelectionSpeech {
+  const speech = use(SelectionSpeechContext)
+  if (!speech) {
+    throw new Error("Selection speech must be used within SelectionSpeechProvider.")
+  }
+  return speech
 }
 
 export function SpeakButton() {

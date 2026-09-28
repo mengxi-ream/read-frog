@@ -35,6 +35,7 @@ import {
   SelectionDirection,
   viewportPointToHostPoint,
 } from "./positioning"
+import { SelectionSpeechProvider } from "./speak-button"
 
 const EXTERNAL_SELECTION_DIRECTION_MAP: Record<EbookBridgeSelectionDirection, SelectionDirection> =
   {
@@ -607,17 +608,19 @@ export function SelectionToolbar() {
               : "pointer-events-none opacity-0",
           )}
         >
-          <div
-            data-slot="selection-toolbar-surface"
-            className="flex items-center rounded-sm border border-border/50 bg-popover shadow-(--rf-elevation-floating)"
-            style={{ opacity: "var(--rf-selection-opacity, 1)" }}
-          >
-            <div className="no-scrollbar flex max-w-105 items-center overflow-x-auto overflow-y-hidden rounded-sm">
-              <SelectionToolbarPinnedItems />
+          <SelectionSpeechProvider>
+            <div
+              data-slot="selection-toolbar-surface"
+              className="flex items-center rounded-sm border border-border/50 bg-popover shadow-(--rf-elevation-floating)"
+              style={{ opacity: "var(--rf-selection-opacity, 1)" }}
+            >
+              <div className="no-scrollbar flex max-w-105 items-center overflow-x-auto overflow-y-hidden rounded-sm">
+                <SelectionToolbarPinnedItems />
+              </div>
+              <SelectionToolbarMoreMenu />
+              <CloseButton />
             </div>
-            <SelectionToolbarMoreMenu />
-            <CloseButton />
-          </div>
+          </SelectionSpeechProvider>
         </div>
       )}
     </div>

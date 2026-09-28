@@ -17,6 +17,7 @@ vi.mock("../translate-button", () => ({
 
 vi.mock("../speak-button", () => ({
   SpeakButton: () => null,
+  SelectionSpeechProvider: ({ children }: { children: React.ReactNode }) => children,
 }))
 
 vi.mock("../pinned-items", () => ({

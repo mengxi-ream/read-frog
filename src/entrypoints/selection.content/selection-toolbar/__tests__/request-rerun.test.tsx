@@ -20,6 +20,7 @@ import { setSelectionStateAtom } from "../atoms"
 import { SelectionCustomActionProvider } from "../custom-action-button/provider"
 import { SelectionToolbar } from "../index"
 import { SelectionToolbarPinnedItems } from "../pinned-items"
+import { SelectionSpeechProvider } from "../speak-button"
 import { TranslateButton } from "../translate-button"
 import { SelectionTranslationProvider } from "../translate-button/provider"
 
@@ -580,7 +581,9 @@ function renderWithProviders(ui: ReactElement, store = createStore()) {
       <Provider store={store}>
         <TooltipProvider>
           <SelectionTranslationProvider>
-            <SelectionCustomActionProvider>{ui}</SelectionCustomActionProvider>
+            <SelectionCustomActionProvider>
+              <SelectionSpeechProvider>{ui}</SelectionSpeechProvider>
+            </SelectionCustomActionProvider>
           </SelectionTranslationProvider>
         </TooltipProvider>
       </Provider>
