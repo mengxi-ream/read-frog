@@ -256,7 +256,7 @@ function MoreMenuRow({
             className={cn(
               "mr-0.5 flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-sm",
               item.enabled
-                ? "text-brand"
+                ? "text-accent-blue hover:text-accent-blue-hover"
                 : "text-muted-foreground opacity-0 group-hover/row:opacity-100 hover:text-foreground focus-visible:opacity-100",
             )}
             onClick={() => onPinChange(item, !item.enabled)}
