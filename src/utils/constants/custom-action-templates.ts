@@ -105,7 +105,7 @@ export function createSentenceAnalysisDefinition(providerId: string): CustomActi
     id: getRandomUUID(),
     name: i18n.t(`${SA_PREFIX}.name`),
     enabled: true,
-    icon: "streamline-color:hand-held-tablet-drawing-flat",
+    icon: "streamline-color:search-visual-flat",
     providerId,
     systemPrompt: i18n.t(`${SA_PREFIX}.systemPrompt`, [annotations, translation]),
     prompt: i18n.t(`${SA_PREFIX}.prompt`),
@@ -149,7 +149,7 @@ export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
     id: "sentence-analysis",
     nameKey: `${SA_PREFIX}.name`,
     descriptionKey: `${SA_PREFIX}.description`,
-    icon: "streamline-color:hand-held-tablet-drawing-flat",
+    icon: "streamline-color:search-visual-flat",
     createAction: (providerId: string): SelectionToolbarCustomAction => {
       const action = createSentenceAnalysisDefinition(providerId)
       // Built from this schema like the dictionary card; the preset always

@@ -33,7 +33,7 @@ describe("custom action template layouts", () => {
   it("gives the sentence analysis preset its card, built for its two stable fields", () => {
     const action = createFromTemplate("sentence-analysis")
 
-    expect(action.icon).toBe("tabler:highlight")
+    expect(action.icon).toBe("streamline-color:search-visual-flat")
     expect(action.outputSchema.map((field) => [field.id, field.type])).toEqual([
       ["sentence-analysis-annotations", "string"],
       ["sentence-analysis-translation", "string"],

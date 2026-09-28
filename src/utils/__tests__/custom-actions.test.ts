@@ -44,7 +44,7 @@ describe("selection toolbar built-in actions", () => {
       id: "default-sentence-analysis",
       enabled: false,
       providerId: "openai-default",
-      icon: "tabler:highlight",
+      icon: "streamline-color:search-visual-flat",
     })
     expect(action?.outputSchema.map((field) => field.id)).toEqual([
       "default-sentence-analysis-annotations",

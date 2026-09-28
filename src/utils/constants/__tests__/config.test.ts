@@ -38,7 +38,7 @@ describe("dEFAULT_CONFIG", () => {
     expect(defaultSentenceAnalysisAction).toEqual(
       expect.objectContaining({
         id: "default-sentence-analysis",
-        icon: "streamline-color:hand-held-tablet-drawing-flat",
+        icon: "streamline-color:search-visual-flat",
       }),
     )
     expect(defaultDictionaryAction?.outputSchema).toEqual(
