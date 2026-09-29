@@ -49,12 +49,6 @@ export interface SaveToNotebaseRequest {
   action: SelectionToolbarCustomAction
   /** One record per note, keyed by output-field name. */
   results: Array<Record<string, unknown>>
-  /**
-   * When set, the action does not exist in config yet: the save flow skips the
-   * connected path and opens the create dialog carrying this draft, which is
-   * appended to config only when the dialog is confirmed.
-   */
-  actionDraft?: SelectionToolbarCustomAction
   analyticsSource?: SaveToNotebaseAnalyticsSource
   /** Provider classification carried into dialog-confirm analytics. */
   analyticsProvider?: FeatureProviderAnalytics
@@ -62,7 +56,7 @@ export interface SaveToNotebaseRequest {
 
 /**
  * Shared save-to-notebase orchestration used by the custom action popover and
- * the save suggestion card. Behavior mirrors the original single-result flow;
+ * the note suggestion card. Behavior mirrors the original single-result flow;
  * multi-result requests batch rows through `notebaseRow.createMany`.
  */
 export function useSaveToNotebase() {
@@ -207,7 +201,7 @@ export function useSaveToNotebase() {
   }
 
   const save = async (request: SaveToNotebaseRequest): Promise<SaveToNotebaseOutcome> => {
-    const { action, results, actionDraft, analyticsSource, analyticsProvider } = request
+    const { action, results, analyticsSource, analyticsProvider } = request
     if (results.length === 0) {
       return "failed"
     }
@@ -221,7 +215,6 @@ export function useSaveToNotebase() {
         pendingNotebaseSave: createPendingNotebaseSave(action, results, Date.now(), {
           guideDictionaryNotebaseTracking: guideDictionaryNotebaseTracking ?? undefined,
         }),
-        ...(actionDraft ? { pendingActionDraft: actionDraft } : {}),
         ...(analyticsSource ? { analyticsSource } : {}),
         ...(analyticsProvider ? { analyticsProvider } : {}),
       })
@@ -246,9 +239,10 @@ export function useSaveToNotebase() {
       return "dialog_opened" as const
     }
 
-    const connection = actionDraft
-      ? null
-      : sanitizeCustomActionNotebaseConnection(action.notebaseConnection, action.outputSchema)
+    const connection = sanitizeCustomActionNotebaseConnection(
+      action.notebaseConnection,
+      action.outputSchema,
+    )
 
     if (!connection) {
       return openCreateOrConnectDialog()

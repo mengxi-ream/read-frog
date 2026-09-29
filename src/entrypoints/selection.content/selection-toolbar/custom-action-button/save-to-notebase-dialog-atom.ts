@@ -1,8 +1,5 @@
 import type { FeatureProviderAnalytics } from "@/types/analytics"
-import type {
-  SelectionToolbarCustomAction,
-  SelectionToolbarCustomActionNotebaseAccount,
-} from "@/types/config/selection-toolbar"
+import type { SelectionToolbarCustomActionNotebaseAccount } from "@/types/config/selection-toolbar"
 import type {
   PendingConnectedNotebaseSave,
   PendingCreateNotebaseSave,
@@ -17,12 +14,6 @@ export type SaveToNotebaseDialogState =
       open: true
       mode: "create_or_connect"
       pendingNotebaseSave: PendingCreateNotebaseSave
-      /**
-       * Present when the action does not exist in config yet (save suggestion
-       * flow). It is appended to config at dialog confirm — the "real action
-       * button" moment. Invariant: pendingActionDraft.id === pendingNotebaseSave.actionId.
-       */
-      pendingActionDraft?: SelectionToolbarCustomAction
       analyticsSource?: SaveToNotebaseAnalyticsSource
       analyticsProvider?: FeatureProviderAnalytics
     }

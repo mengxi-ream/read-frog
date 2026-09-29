@@ -1,7 +1,4 @@
-import type {
-  SelectionToolbarCustomAction,
-  SelectionToolbarCustomActionNotebaseAccount,
-} from "@/types/config/selection-toolbar"
+import type { SelectionToolbarCustomActionNotebaseAccount } from "@/types/config/selection-toolbar"
 import type { PendingCreateNotebaseSave, PendingNotebaseSave } from "@/utils/notebase/pending-save"
 import { useMutation } from "@tanstack/react-query"
 import { useAtom } from "jotai"
@@ -22,15 +19,10 @@ import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.conten
 import { env } from "@/env"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { authClient } from "@/utils/auth/auth-client"
-import {
-  findSelectionToolbarAction,
-  getSelectionToolbarActions,
-  replaceSelectionToolbarAction,
-} from "@/utils/custom-actions"
+import { patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
-import { getUniqueName } from "@/utils/name"
 import { buildCustomActionOptionsRoute } from "@/utils/navigation"
 import { trackNoteSuggestionEvent } from "@/utils/note-suggestion/analytics"
 import {
@@ -114,10 +106,6 @@ export function SaveToNotebaseDialogHost() {
   const [isPreparingLogin, setIsPreparingLogin] = useState(false)
   const pendingNotebaseSave = dialogState.open ? dialogState.pendingNotebaseSave : null
   const mode = dialogState.open ? dialogState.mode : null
-  const pendingActionDraft =
-    dialogState.open && dialogState.mode === "create_or_connect"
-      ? dialogState.pendingActionDraft
-      : undefined
   const analyticsSource = dialogState.open ? dialogState.analyticsSource : undefined
   const analyticsProvider = dialogState.open ? dialogState.analyticsProvider : undefined
 
@@ -137,32 +125,6 @@ export function SaveToNotebaseDialogHost() {
     })
   }
 
-  const buildCustomActionsWithDraft = (draft: SelectionToolbarCustomAction) => {
-    const existingNames = new Set(
-      getSelectionToolbarActions(selectionToolbarConfig).map((item) => item.name),
-    )
-    const named = existingNames.has(draft.name)
-      ? { ...draft, name: getUniqueName(draft.name, existingNames) }
-      : draft
-    return [...selectionToolbarConfig.customActions, named]
-  }
-
-  /**
-   * Append a draft action (note suggestion flow) to config. Called at the
-   * dialog confirm — the "real action button" moment — before login redirects,
-   * so the background pending-save processor finds the action afterwards.
-   */
-  const ensureDraftActionInConfig = async (draft: SelectionToolbarCustomAction) => {
-    if (findSelectionToolbarAction(selectionToolbarConfig, draft.id)) {
-      return
-    }
-
-    await setSelectionToolbarConfig({
-      ...selectionToolbarConfig,
-      customActions: buildCustomActionsWithDraft(draft),
-    })
-  }
-
   const createAndSaveMutation = useMutation({
     meta: {
       suppressToast: true,
@@ -172,7 +134,6 @@ export function SaveToNotebaseDialogHost() {
     }: {
       pendingNotebaseSave: PendingCreateNotebaseSave
       connectedAccount: SelectionToolbarCustomActionNotebaseAccount
-      pendingActionDraft?: SelectionToolbarCustomAction
     }) => {
       await orpcClient.notebase.create(buildNotebaseCreateInputFromPending(pendingCreateSave))
       return pendingCreateSave
@@ -182,29 +143,11 @@ export function SaveToNotebaseDialogHost() {
         createdPendingSave,
         variables.connectedAccount,
       )
-      const draft = variables.pendingActionDraft
-      const existingAction = findSelectionToolbarAction(
-        selectionToolbarConfig,
-        createdPendingSave.actionId,
+      await setSelectionToolbarConfig(
+        patchSelectionToolbarAction(selectionToolbarConfig, createdPendingSave.actionId, {
+          notebaseConnection: nextConnection,
+        }),
       )
-      // Draft path appends the action together with its connection in one
-      // config write, so a failed notebase.create never leaves an orphan action.
-      const nextSelectionToolbar =
-        draft && !existingAction
-          ? {
-              ...selectionToolbarConfig,
-              customActions: buildCustomActionsWithDraft({
-                ...draft,
-                notebaseConnection: nextConnection,
-              }),
-            }
-          : existingAction
-            ? replaceSelectionToolbarAction(selectionToolbarConfig, {
-                ...existingAction,
-                notebaseConnection: nextConnection,
-              })
-            : selectionToolbarConfig
-      await setSelectionToolbarConfig(nextSelectionToolbar)
 
       closeDialog()
       toastManager.add({
@@ -269,11 +212,7 @@ export function SaveToNotebaseDialogHost() {
       return
     }
 
-    createAndSaveMutation.mutate({
-      pendingNotebaseSave,
-      connectedAccount: currentAccount,
-      pendingActionDraft,
-    })
+    createAndSaveMutation.mutate({ pendingNotebaseSave, connectedAccount: currentAccount })
   }
 
   const handleLoginWithPending = async (pendingSave: PendingNotebaseSave) => {
@@ -319,10 +258,6 @@ export function SaveToNotebaseDialogHost() {
       return
     }
 
-    if (pendingActionDraft) {
-      await ensureDraftActionInConfig(pendingActionDraft)
-    }
-
     await handleLoginWithPending(pendingNotebaseSave)
   }
 
@@ -334,13 +269,9 @@ export function SaveToNotebaseDialogHost() {
     await handleLoginWithPending(pendingNotebaseSave)
   }
 
-  const handleConnectExisting = async () => {
+  const handleConnectExisting = () => {
     if (!pendingNotebaseSave) {
       return
-    }
-
-    if (pendingActionDraft) {
-      await ensureDraftActionInConfig(pendingActionDraft)
     }
 
     closeDialog()
@@ -425,7 +356,7 @@ export function SaveToNotebaseDialogHost() {
             type="button"
             variant="outline"
             disabled={isCreateFlowBusy}
-            onClick={() => void handleConnectExisting()}
+            onClick={handleConnectExisting}
           >
             {mode === "connected_login_required"
               ? i18n.t("action.saveToNotebaseGoConfigure")
