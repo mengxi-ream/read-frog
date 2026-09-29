@@ -55,11 +55,7 @@ export function CustomActionsConfig() {
       title={i18n.t("options.selectionToolbar.customActions.configTitle")}
       description={i18n.t("options.selectionToolbar.customActions.description")}
     >
-      <EntityEditorLayout
-        stack
-        list={<CustomActionCardList />}
-        editor={<CustomActionConfigForm />}
-      />
+      <EntityEditorLayout list={<CustomActionCardList />} editor={<CustomActionConfigForm />} />
     </ConfigItem>
   )
 }

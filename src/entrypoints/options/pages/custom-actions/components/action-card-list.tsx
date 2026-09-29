@@ -120,9 +120,11 @@ export function CustomActionCardList() {
         <h3 className="px-1 text-xs font-medium text-muted-foreground">
           {i18n.t("options.selectionToolbar.customActions.builtIn" as never)}
         </h3>
-        {builtInActions.map((action) => (
-          <BuiltInActionCard key={action.id} action={action} />
-        ))}
+        <div className="flex flex-col gap-4 pt-2">
+          {builtInActions.map((action) => (
+            <BuiltInActionCard key={action.id} action={action} />
+          ))}
+        </div>
       </section>
     </div>
   )
