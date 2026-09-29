@@ -5,42 +5,32 @@ interface EntityEditorLayoutProps {
   editor: React.ReactNode
   className?: string
   listClassName?: string
-  /**
-   * Put the list above the editor when the layout itself is narrow, measured with a container
-   * query rather than the viewport, so the options sidebar is accounted for.
-   */
-  stack?: boolean
 }
 
+/**
+ * Puts the list above the editor when the layout itself is narrow, measured with a container
+ * query rather than the viewport, so the options sidebar is accounted for. The breakpoint is the
+ * list's 13rem, the 1rem gap and a 37rem minimum for the editor beside them.
+ */
 export function EntityEditorLayout({
   list,
   editor,
   className,
   listClassName,
-  stack = false,
 }: EntityEditorLayoutProps) {
-  if (stack) {
-    return (
-      <div className="@container/entity-editor">
-        <div className={cn("flex flex-col gap-4 @3xl/entity-editor:flex-row", className)}>
-          <div
-            className={cn(
-              "flex w-full flex-col gap-4 @3xl/entity-editor:w-40 @5xl/entity-editor:w-52",
-              listClassName,
-            )}
-          >
-            {list}
-          </div>
-          <div className="min-w-0 flex-1">{editor}</div>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className={cn("flex gap-4", className)}>
-      <div className={cn("flex w-40 flex-col gap-4 lg:w-52", listClassName)}>{list}</div>
-      <div className="min-w-0 flex-1">{editor}</div>
+    <div className="@container/entity-editor">
+      <div className={cn("flex flex-col gap-4 @min-[51rem]/entity-editor:flex-row", className)}>
+        <div
+          className={cn(
+            "flex w-full flex-col gap-4 @min-[51rem]/entity-editor:w-52",
+            listClassName,
+          )}
+        >
+          {list}
+        </div>
+        <div className="min-w-0 flex-1">{editor}</div>
+      </div>
     </div>
   )
 }
