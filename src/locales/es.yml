@@ -1474,6 +1474,9 @@ options:
           description: Esto eliminará todos los resultados de segmentación AI en caché. La próxima vez que reproduzcas un video con segmentación AI activada, se volverán a procesar los subtítulos.
   whatsNew:
     title: Novedades
+    postType:
+      promotion: Promoción
+      update: Actualización
   rateUs:
     title: Calificarnos
   configMigration:

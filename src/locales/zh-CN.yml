@@ -1479,6 +1479,9 @@ options:
           description: 这将删除所有已缓存的 AI 断句结果。下次播放启用 AI 断句的视频时，将重新处理字幕。
   whatsNew:
     title: 最近更新
+    postType:
+      promotion: 优惠
+      update: 更新
   rateUs:
     title: 好评支持
   configMigration:

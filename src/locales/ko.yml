@@ -1469,6 +1469,9 @@ options:
           description: 모든 캐시된 AI 분할 결과가 삭제됩니다. 다음에 AI 분할이 활성화된 비디오를 재생하면 자막이 다시 처리됩니다.
   whatsNew:
     title: 새로운 기능
+    postType:
+      promotion: 프로모션
+      update: 업데이트
   rateUs:
     title: 리뷰 남기기
   configMigration:

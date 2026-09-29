@@ -1,3 +1,4 @@
+import type { Plan } from "@/components/badges/plan-badge"
 import { IconLogout, IconWorld } from "@tabler/icons-react"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useRef } from "react"
@@ -93,7 +94,7 @@ export function useUserAccountMenu() {
   const session = authClient.useSession()
   const { data, isPending } = session
   const user = data?.user
-  const plan = useAccountPlan(user?.id)
+  const plan = useAccountPlanQuery(user?.id).data?.plan
   const logout = useMutation({
     mutationFn: async () => {
       const { error } = await authClient.signOut()
@@ -164,9 +165,10 @@ export function useUserAccountMenu() {
 }
 
 /**
- * The plan this account is on, or `undefined` while it is unknown — signed out,
- * still loading, or the lookup failed. Every caller renders nothing in that
- * case, so a billing outage costs a badge, never a broken account menu.
+ * The billing lookup behind the account's plan. Its `data?.plan` is `undefined`
+ * while the plan is unknown — signed out, still loading, or the lookup failed.
+ * The account menus render nothing in that case, so a billing outage costs a
+ * badge, never a broken account menu.
  *
  * Scoped by user id for the same reason `useHostedAiStatus` is: oRPC's
  * generated key ignores identity, so without the suffix a sign-out followed by
@@ -174,8 +176,8 @@ export function useUserAccountMenu() {
  * entry went stale. Suffixing leaves `orpc.billing.key()` invalidation
  * prefix-matching intact.
  */
-function useAccountPlan(userId: string | undefined) {
-  const query = useQuery(
+function useAccountPlanQuery(userId: string | undefined) {
+  return useQuery(
     orpc.billing.status.queryOptions({
       queryKey: [...orpc.billing.status.queryKey(), userId ?? "guest"],
       enabled: userId !== undefined,
@@ -184,7 +186,22 @@ function useAccountPlan(userId: string | undefined) {
       meta: { suppressToast: true },
     }),
   )
-  return query.data?.plan
+}
+
+/**
+ * The plan for decisions that must not act on a guess: `undefined` while the
+ * session or billing is still loading, `null` once it is settled that there is
+ * no plan to go on — a guest, or a failed lookup.
+ */
+export function useResolvedAccountPlan(): Plan | null | undefined {
+  const { data, isPending } = authClient.useSession()
+  const userId = data?.user?.id
+  const planQuery = useAccountPlanQuery(userId)
+
+  if (isPending) return undefined
+  if (userId === undefined) return null
+  if (planQuery.isPending) return undefined
+  return planQuery.data?.plan ?? null
 }
 
 /**
