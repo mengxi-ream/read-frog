@@ -86,9 +86,7 @@ export function SubtitlesView({ showContent }: SubtitlesViewProps) {
           </div>
         </div>
 
-        <Activity mode={showContent ? "visible" : "hidden"}>
-          <SubtitlesContent />
-        </Activity>
+        <SubtitlesContent />
       </div>
     </div>
   )
