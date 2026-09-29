@@ -1,8 +1,9 @@
-import type { LayoutSampleOverrides } from "./layout-preview"
+import type { LayoutSampleDataEditing } from "./layout-preview"
 import type { LiquidCodeEditorHandle, LiquidEditorField } from "@/components/ui/liquid-code-editor"
 import type {
   SelectionToolbarCustomAction,
   SelectionToolbarCustomActionOutputField,
+  SelectionToolbarCustomActionSampleData,
 } from "@/types/config/selection-toolbar"
 import { formatFieldRef, LAYOUT_CTX_ROOT } from "@read-frog/layout-engine/contract"
 import { analyzeLayout } from "@read-frog/layout-engine/editor"
@@ -501,12 +502,19 @@ function LayoutHeading({ actions }: { actions?: React.ReactNode }) {
   )
 }
 
-function EditableLayoutField({ outputSchema }: { outputSchema: Field[] }) {
+function EditableLayoutField({
+  outputSchema,
+  sampleData,
+  sampleDataEditing,
+}: {
+  outputSchema: Field[]
+  sampleData: SelectionToolbarCustomActionSampleData | undefined
+  sampleDataEditing: LayoutSampleDataEditing
+}) {
   const autosave = useAutosaveContext()
   const field = useFieldContext<string | undefined>()
   const layout = useSelector(field.store, (state) => state.value)
   const errors = useSelector(field.store, (state) => state.meta.errors)
-  const [sampleOverrides, setSampleOverrides] = useState<LayoutSampleOverrides>({})
   const [pendingReset, setPendingReset] = useState<ResetTarget | null>(null)
   const [editing, setEditing] = useState(false)
 
@@ -522,8 +530,8 @@ function EditableLayoutField({ outputSchema }: { outputSchema: Field[] }) {
   const previewProps = {
     source: previewSource,
     outputSchema,
-    sampleOverrides,
-    onSampleOverridesChange: setSampleOverrides,
+    sampleData,
+    sampleDataEditing,
   }
 
   return (
@@ -601,10 +609,29 @@ function EditableLayoutField({ outputSchema }: { outputSchema: Field[] }) {
 export const LayoutField = withForm({
   ...{ defaultValues: {} as SelectionToolbarCustomAction },
   render: function Render({ form }) {
+    const autosave = useAutosaveContext()
     const outputSchema = useSelector(form.store, (state) => state.values.outputSchema)
     return (
-      <form.AppField name="layout">
-        {() => <EditableLayoutField outputSchema={outputSchema} />}
+      <form.AppField name="sampleData">
+        {(sampleDataField) => (
+          <form.AppField name="layout">
+            {() => (
+              <EditableLayoutField
+                outputSchema={outputSchema}
+                sampleData={sampleDataField.state.value}
+                sampleDataEditing={{
+                  saved: true,
+                  onChange: (next) => autosave.edit(() => sampleDataField.handleChange(next)),
+                  onCompositionStart: () => autosave.beginComposition(sampleDataField.name),
+                  onCompositionEnd: (next) =>
+                    autosave.endComposition(sampleDataField.name, () =>
+                      sampleDataField.handleChange(next),
+                    ),
+                }}
+              />
+            )}
+          </form.AppField>
+        )}
       </form.AppField>
     )
   },
@@ -617,10 +644,11 @@ export function ReadOnlyLayoutField({
   action,
   customizeButton,
 }: {
-  action: Pick<SelectionToolbarCustomAction, "layout" | "outputSchema">
+  action: Pick<SelectionToolbarCustomAction, "layout" | "outputSchema" | "sampleData">
   customizeButton?: React.ReactNode
 }) {
-  const [sampleOverrides, setSampleOverrides] = useState<LayoutSampleOverrides>({})
+  // A built-in action saves no sample data: edits here stay in this preview.
+  const [sampleData, setSampleData] = useState(action.sampleData)
   const source = resolveActionLayout(action)
   const editorFields = useMemo(() => toEditorFields(action.outputSchema), [action.outputSchema])
 
@@ -634,8 +662,8 @@ export function ReadOnlyLayoutField({
       <LayoutPreview
         source={source}
         outputSchema={action.outputSchema}
-        sampleOverrides={sampleOverrides}
-        onSampleOverridesChange={setSampleOverrides}
+        sampleData={sampleData}
+        sampleDataEditing={{ saved: false, onChange: setSampleData }}
         frameClassName="max-h-[min(420px,55vh)]"
       />
       <Collapsible>
