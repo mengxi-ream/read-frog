@@ -1616,6 +1616,9 @@ options:
           description: This will delete all cached AI segmentation results. The next time you play a video with AI segmentation enabled, it will re-process the subtitles.
   whatsNew:
     title: What's New
+    postType:
+      promotion: Promotion
+      update: Update
   rateUs:
     title: Rate Us
   configMigration:

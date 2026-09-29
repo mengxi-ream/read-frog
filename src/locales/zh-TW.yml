@@ -1479,6 +1479,9 @@ options:
           description: 這將刪除所有已快取的 AI 斷句結果。下次播放啟用 AI 斷句的影片時，將重新處理字幕。
   whatsNew:
     title: 最近更新
+    postType:
+      promotion: 優惠
+      update: 更新
   rateUs:
     title: 給予好評
   configMigration:

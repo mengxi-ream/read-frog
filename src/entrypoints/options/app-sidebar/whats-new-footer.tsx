@@ -2,6 +2,7 @@ import { Icon } from "@iconify/react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAtomValue } from "jotai"
 import { useCallback, useEffect, useEffectEvent, useState } from "react"
+import { BlogPostTypeBadge } from "@/components/badges/blog-post-type-badge"
 import {
   Popover,
   PopoverContent,
@@ -11,6 +12,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/base-ui/popover"
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/base-ui/sidebar"
+import { useResolvedAccountPlan } from "@/components/user-account-menu/shared"
 import { env } from "@/env"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
@@ -29,6 +31,7 @@ export function WhatsNewFooter() {
   const [open, setOpen] = useState(false)
   const uiLanguage = useAtomValue(configFieldsAtomMap.uiLanguage)
   const blogLocale = getBlogLocaleFromUILanguage(uiLanguage)
+  const plan = useResolvedAccountPlan()
 
   const { data: lastViewedDate, isFetched: isLastViewedDateFetched } = useQuery({
     queryKey: ["last-viewed-blog-date"],
@@ -71,9 +74,16 @@ export function WhatsNewFooter() {
     ? `${latestBlogPost.url}:${latestBlogPost.date.toISOString()}`
     : null
   const lastViewedDateTimestamp = lastViewedDate?.getTime() ?? null
+  // Pro and Ultra already pay, so a sale must not pop open on them; the post
+  // stays one click away behind What's New. Hold off until the plan is known,
+  // or a paid account would see the sale flash open while billing loads.
+  const holdsPromotionBack =
+    latestBlogPost?.type === "promotion" &&
+    (plan === undefined || plan === "pro" || plan === "ultra")
   const shouldAutoOpenPopover =
     isLastViewedDateFetched &&
     isLatestBlogPostFetched &&
+    !holdsPromotionBack &&
     hasNewBlogPost(lastViewedDate ?? null, latestBlogPostDate)
 
   useEffect(() => {
@@ -164,6 +174,9 @@ export function WhatsNewFooter() {
 
         <PopoverHeader className="gap-2">
           <PopoverTitle>
+            {latestBlogPost.type && (
+              <BlogPostTypeBadge type={latestBlogPost.type} className="mr-1.5" />
+            )}
             <a
               href={blogUrl}
               target="_blank"

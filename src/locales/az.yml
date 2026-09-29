@@ -1474,6 +1474,9 @@ options:
           description: Keşdəki bütün süni intellekt seqmentləşdirmə nəticələri silinəcək. Növbəti dəfə süni intellekt seqmentləşdirməsi aktiv halda video açdıqda subtitrlər yenidən işlənəcək.
   whatsNew:
     title: Yeniliklər
+    postType:
+      promotion: Kampaniya
+      update: Yeniləmə
   rateUs:
     title: Bizi qiymətləndir
   configMigration:

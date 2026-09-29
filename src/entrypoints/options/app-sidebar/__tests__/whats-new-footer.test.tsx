@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import type { ReactNode } from "react"
+import type { Plan } from "@/components/badges/plan-badge"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import * as React from "react"
@@ -10,6 +11,7 @@ const getBlogLocaleFromUILanguageMock = vi.fn<(...args: any[]) => any>(() => "zh
 const getLastViewedBlogDateMock = vi.fn<(...args: any[]) => any>()
 const getLatestBlogDateMock = vi.fn<(...args: any[]) => any>()
 const saveLastViewedBlogDateMock = vi.fn<(...args: any[]) => any>()
+const useResolvedAccountPlanMock = vi.fn<() => Plan | null | undefined>(() => null)
 
 vi.mock("#imports", () => ({
   i18n: {
@@ -118,6 +120,10 @@ vi.mock("@/components/ui/base-ui/popover", async () => {
   }
 })
 
+vi.mock("@/components/user-account-menu/shared", () => ({
+  useResolvedAccountPlan: () => useResolvedAccountPlanMock(),
+}))
+
 vi.mock("@/utils/blog", async () => {
   return {
     buildBilibiliEmbedUrl: vi.fn<(...args: any[]) => any>(() => null),
@@ -164,14 +170,18 @@ function createQueryClient() {
 
 function renderWhatsNewFooter() {
   const queryClient = createQueryClient()
+  // A fresh element each call: re-rendering the same one lets React skip the component.
+  const ui = () => (
+    <QueryClientProvider client={queryClient}>
+      <WhatsNewFooter />
+    </QueryClientProvider>
+  )
+  const result = render(ui())
 
   return {
     queryClient,
-    ...render(
-      <QueryClientProvider client={queryClient}>
-        <WhatsNewFooter />
-      </QueryClientProvider>,
-    ),
+    ...result,
+    rerender: () => result.rerender(ui()),
   }
 }
 
@@ -183,8 +193,11 @@ const latestBlogPost = {
   url: "/blog/spring-release",
 }
 
+const promotionPost = { ...latestBlogPost, type: "promotion" }
+
 afterEach(() => {
   vi.clearAllMocks()
+  useResolvedAccountPlanMock.mockReturnValue(null)
 })
 
 describe("whatsNewFooter", () => {
@@ -300,5 +313,56 @@ describe("whatsNewFooter", () => {
       expect(saveLastViewedBlogDateMock).toHaveBeenCalledTimes(1)
       expect(saveLastViewedBlogDateMock).toHaveBeenCalledWith(latestBlogPost.date)
     })
+  })
+
+  it.each<Plan>(["pro", "ultra"])(
+    "does not auto-open or mark a promotion as viewed for %s accounts",
+    async (plan) => {
+      useResolvedAccountPlanMock.mockReturnValue(plan)
+      getLatestBlogDateMock.mockResolvedValue(promotionPost)
+      getLastViewedBlogDateMock.mockResolvedValue(null)
+      saveLastViewedBlogDateMock.mockResolvedValue(undefined)
+
+      renderWhatsNewFooter()
+
+      await screen.findByRole("button", { name: "options.whatsNew.title" })
+      await act(async () => {
+        await Promise.resolve()
+      })
+
+      expect(screen.queryByTestId("whats-new-popover-content")).not.toBeInTheDocument()
+      expect(saveLastViewedBlogDateMock).not.toHaveBeenCalled()
+    },
+  )
+
+  it("auto-opens a promotion only once the plan turns out to be free", async () => {
+    useResolvedAccountPlanMock.mockReturnValue(undefined)
+    getLatestBlogDateMock.mockResolvedValue(promotionPost)
+    getLastViewedBlogDateMock.mockResolvedValue(null)
+    saveLastViewedBlogDateMock.mockResolvedValue(undefined)
+
+    const { rerender } = renderWhatsNewFooter()
+
+    await screen.findByRole("button", { name: "options.whatsNew.title" })
+    await act(async () => {
+      await Promise.resolve()
+    })
+    expect(screen.queryByTestId("whats-new-popover-content")).not.toBeInTheDocument()
+
+    useResolvedAccountPlanMock.mockReturnValue("free")
+    rerender()
+
+    expect(await screen.findByTestId("whats-new-popover-content")).toBeInTheDocument()
+  })
+
+  it("auto-opens a non-promotion post for paid accounts", async () => {
+    useResolvedAccountPlanMock.mockReturnValue("ultra")
+    getLatestBlogDateMock.mockResolvedValue({ ...latestBlogPost, type: "update" })
+    getLastViewedBlogDateMock.mockResolvedValue(null)
+    saveLastViewedBlogDateMock.mockResolvedValue(undefined)
+
+    renderWhatsNewFooter()
+
+    expect(await screen.findByTestId("whats-new-popover-content")).toBeInTheDocument()
   })
 })

@@ -1469,6 +1469,9 @@ options:
           description: すべてのキャッシュされたAI区切り結果が削除されます。次回AI区切りを有効にして動画を再生すると、字幕が再処理されます。
   whatsNew:
     title: 新機能
+    postType:
+      promotion: キャンペーン
+      update: アップデート
   rateUs:
     title: レビューを書く
   configMigration:

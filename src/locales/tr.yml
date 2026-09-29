@@ -1469,6 +1469,9 @@ options:
           description: Tüm önbelleğe alınmış AI bölümlendirme sonuçları silinecektir. AI bölümlendirme etkinleştirilmiş bir video oynatıldığında altyazılar yeniden işlenecektir.
   whatsNew:
     title: Yenilikler
+    postType:
+      promotion: Kampanya
+      update: Güncelleme
   rateUs:
     title: Bizi Değerlendirin
   configMigration:

@@ -1469,6 +1469,9 @@ options:
           description: Tất cả kết quả AI phân đoạn đã lưu trong bộ nhớ đệm sẽ bị xóa. Lần tới khi phát video có bật AI phân đoạn, phụ đề sẽ được xử lý lại.
   whatsNew:
     title: Có gì mới
+    postType:
+      promotion: Khuyến mãi
+      update: Cập nhật
   rateUs:
     title: Đánh giá chúng tôi
   configMigration:
