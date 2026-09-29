@@ -723,8 +723,10 @@ options:
           replay: 再生
           sampleData: サンプルデータ
           sampleDataHint: このプレビューでのみ使われ、保存されません。
+          sampleDataSavedHint: このプレビューでのみ使われ、このアクションと一緒に保存されます。
           sampleDataReset: サンプルをリセット
-          sampleValue: $1のサンプル
+          sampleSelection: 選択したテキスト
+          sampleTargetLanguage: 翻訳先の言語
           insertField: フィールド
           insertSpeak: 読み上げボタン
           insertCondition: 値があるとき

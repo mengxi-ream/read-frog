@@ -1,39 +1,124 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
-import type {
-  DictionarySlot,
-  ImproveWritingSlot,
-  SentenceAnalysisSlot,
-} from "@read-frog/layout-engine/presets"
-import type {
-  SelectionToolbarCustomActionOutputField,
-  SelectionToolbarCustomActionSampleData,
-} from "@/types/config/selection-toolbar"
-import type { SupportedUiLocale } from "@/utils/i18n/locales"
-import { contentLocaleFor, langCodeOfLocale } from "./labels"
-import {
-  getDictionarySlots,
-  getImproveWritingSlots,
-  getSentenceAnalysisSlots,
-  isImproveWritingShaped,
-  isSentenceAnalysisShaped,
-} from "./slots"
+/**
+ * Migration script from v107 to v108.
+ *
+ * Gives every custom action `sampleData`: what the layout preview on the
+ * options page renders the action's result with — the text the reader
+ * selected, the language the answer is written for, and one value per output
+ * field, keyed by field id. Until now the preview built it on every render
+ * and the user's edits to it were never saved; from v108 a custom action
+ * stores all of it, and the editor keeps it in step with the fields.
+ *
+ * Each action gets the sample its preview showed at v107, written for the
+ * reader of `language.targetCode`:
+ * - the curated sample for the fields a generated card places (recognized by
+ *   the field ids the Dictionary, Sentence Analysis and Improve Writing
+ *   presets create; the first field per slot), in the UI language whose
+ *   words match the target language, else in `uiLanguage` — or English when
+ *   that is "auto", since the browser's language cannot be known here;
+ * - "3" for a number field (values are text, like a model's answer; the
+ *   layout scope converts a number field's);
+ * - the field's own name for any other field. (v107 showed "Sample <name>" in
+ *   the UI language; a saved sample holds the name alone, so it reads the
+ *   same in every language.)
+ * The selection is the Sentence Analysis sample's for an action with its
+ * annotations field, the Improve Writing sample's for one with that card's
+ * annotations field, else the Dictionary sample's.
+ *
+ * The built-in actions persist nothing but their enabled/provider/Notebase
+ * state, so `builtInActions` stays as it is: their preview generates a sample.
+ *
+ * The CONFIG_SCHEMA_VERSION bump is what protects sync: an older build refuses
+ * a v108 config instead of quietly dropping every `sampleData` (the schema
+ * strips unknown keys) and uploading the result.
+ *
+ * An action that already has an object in `sampleData` keeps it. Entries that
+ * are not objects, and an `outputSchema` that is not an array, are left for
+ * the schema parse that follows to report.
+ *
+ * Idempotent: a second run finds every action with sample data and returns
+ * the config by identity, as it does whenever there is nothing to change.
+ *
+ * IMPORTANT: This is a frozen snapshot. All values and helpers are deliberately
+ * inline and it imports nothing from the evolving application code — the
+ * samples below are verbatim copies of those in `utils/layout-host/sample.ts`
+ * as they stood when v108 shipped, not references to them.
+ */
 
-// Sample data for the layout preview on the options page: the selection, the
-// language the answer is written for, and a value per output field, keyed by
-// field id so it survives a rename. A custom action saves its sample data; a
-// built-in action's preview generates it. v107-to-v108 holds a frozen copy of
-// what is generated here, for the custom actions it gave sample data to.
-//
-// Samples are answers written in a language the extension has words in, keyed
-// by that language's UI locale: a new sample is written in the reader's
-// language (see contentLocaleFor), and its target language is the locale's own.
+function isObject(value: any): value is Record<string, any> {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+}
+
+// The language each UI locale is written in (LANG_CODE_OF_UI_LOCALE).
+const LANG_CODE_OF_UI_LOCALE: Record<string, string> = {
+  en: "eng",
+  "zh-CN": "cmn",
+  "zh-TW": "cmn-Hant",
+  ja: "jpn",
+  ko: "kor",
+  ru: "rus",
+  tr: "tur",
+  vi: "vie",
+  es: "spa",
+  az: "azj",
+}
+
+const UI_LOCALE_OF_LANG_CODE = new Map(
+  Object.entries(LANG_CODE_OF_UI_LOCALE).map(([locale, code]) => [code, locale]),
+)
+
+// The locale a sample is written in for this config's reader: the target
+// language's when the extension has words in it, else the UI language's.
+function sampleLocaleOf(config: Record<string, any>): string {
+  const targetCode = isObject(config.language) ? config.language.targetCode : undefined
+  const targetLocale =
+    typeof targetCode === "string" ? UI_LOCALE_OF_LANG_CODE.get(targetCode) : undefined
+  if (targetLocale) return targetLocale
+  const uiLanguage = config.uiLanguage
+  return typeof uiLanguage === "string" && Object.hasOwn(LANG_CODE_OF_UI_LOCALE, uiLanguage)
+    ? uiLanguage
+    : "en"
+}
+
+// Frozen copies of the slot ids of `utils/layout-host/slots.ts`: the presets'
+// `dictionary-*`, `sentence-analysis-*` and `improve-writing-*` field ids, and
+// the built-ins' `default-*` ones, which copies of them keep.
+const DICTIONARY_SLOT_ID_RE =
+  /(?:^|-)dictionary-(term|phonetic|part-of-speech|definition|context-translation|context-term|context|difficulty)$/
+
+const DICTIONARY_SLOT_BY_ID_SUFFIX: Record<string, string> = {
+  term: "term",
+  phonetic: "phonetic",
+  "part-of-speech": "partOfSpeech",
+  definition: "definition",
+  context: "context",
+  "context-term": "contextTerm",
+  "context-translation": "contextTranslation",
+  difficulty: "difficulty",
+}
+
+const SENTENCE_ANALYSIS_SLOT_ID_RE = /(?:^|-)sentence-analysis-(annotations|translation)$/
+
+const IMPROVE_WRITING_SLOT_ID_RE = /(?:^|-)improve-writing-(setting|annotations|improved|summary)$/
+
+// The field that fills each slot: the first one whose id names it.
+function slotFields(fields: Record<string, any>[], slotOf: (id: string) => string | undefined) {
+  const slots = new Map<string, Record<string, any>>()
+  for (const field of fields) {
+    const slot = slotOf(field.id)
+    if (slot && !slots.has(slot)) slots.set(slot, field)
+  }
+  return slots
+}
+
+// ---------------------------------------------------------------------------
+// The curated samples, verbatim.
 
 // A worked Dictionary answer per language, so the preview reads like a lookup
 // by someone who reads that language: an English word explained in it, or, in
 // English, a Chinese word explained in English.
 interface DictionarySample {
   selection: string
-  values: Record<DictionarySlot, string>
+  values: Record<string, string>
 }
 
 function englishWordSample(definition: string, contextTranslation: string): DictionarySample {
@@ -52,7 +137,7 @@ function englishWordSample(definition: string, contextTranslation: string): Dict
   }
 }
 
-const DICTIONARY_SAMPLES: Record<SupportedUiLocale, DictionarySample> = {
+const DICTIONARY_SAMPLES: Record<string, DictionarySample> = {
   en: {
     selection: "珍惜",
     values: {
@@ -110,7 +195,7 @@ const DICTIONARY_SAMPLES: Record<SupportedUiLocale, DictionarySample> = {
 // preview's replay streams in a chunk at a time.
 interface SentenceAnalysisSample {
   selection: string
-  values: Record<SentenceAnalysisSlot, string>
+  values: Record<string, string>
 }
 
 interface SentenceAnalysisAnnotation {
@@ -127,7 +212,7 @@ interface SentenceAnalysisAnnotation {
 function sentenceAnalysisValues(
   annotations: SentenceAnalysisAnnotation[],
   translation: string,
-): Record<SentenceAnalysisSlot, string> {
+): Record<string, string> {
   return { annotations: JSON.stringify(annotations), translation }
 }
 
@@ -189,7 +274,7 @@ function englishSentenceSample(
   }
 }
 
-const SENTENCE_ANALYSIS_SAMPLES: Record<SupportedUiLocale, SentenceAnalysisSample> = {
+const SENTENCE_ANALYSIS_SAMPLES: Record<string, SentenceAnalysisSample> = {
   en: {
     selection: "虽然这个方案成本很高，但大多数专家认为它是解决城市交通拥堵的唯一办法。",
     values: sentenceAnalysisValues(
@@ -260,7 +345,7 @@ const SENTENCE_ANALYSIS_SAMPLES: Record<SupportedUiLocale, SentenceAnalysisSampl
 // marks are judged against.
 interface ImproveWritingSample {
   selection: string
-  values: Record<ImproveWritingSlot, string>
+  values: Record<string, string>
 }
 
 interface ImproveWritingMark {
@@ -313,7 +398,7 @@ function englishEmailSample(words: {
   }
 }
 
-const IMPROVE_WRITING_SAMPLES: Record<SupportedUiLocale, ImproveWritingSample> = {
+const IMPROVE_WRITING_SAMPLES: Record<string, ImproveWritingSample> = {
   en: {
     selection: "我昨天去商店想买三个书，可是我没有带钱，所以我不买了。",
     values: {
@@ -424,153 +509,69 @@ const IMPROVE_WRITING_SAMPLES: Record<SupportedUiLocale, ImproveWritingSample> =
   }),
 }
 
-type Field = SelectionToolbarCustomActionOutputField
-type SampleData = SelectionToolbarCustomActionSampleData
+// ---------------------------------------------------------------------------
 
-// A number field's sample. Every sample value is text, like a model's answer;
-// the layout scope converts a number field's.
-const SAMPLE_NUMBER = "3"
+// The sample for `outputSchema`, written in `locale`.
+function createSampleData(fields: Record<string, any>[], locale: string): Record<string, any> {
+  const dictionary = slotFields(fields, (id) => {
+    const suffix = DICTIONARY_SLOT_ID_RE.exec(id)?.[1]
+    return suffix === undefined ? undefined : DICTIONARY_SLOT_BY_ID_SUFFIX[suffix]
+  })
+  const sentenceAnalysis = slotFields(fields, (id) => SENTENCE_ANALYSIS_SLOT_ID_RE.exec(id)?.[1])
+  const improveWriting = slotFields(fields, (id) => IMPROVE_WRITING_SLOT_ID_RE.exec(id)?.[1])
 
-// The value a new sample gives a field of `outputSchema`, written in `locale`:
-// a number for a number field, the curated text for a field a generated card
-// places, else the field's own name.
-function sampleValueFor(
-  outputSchema: readonly Field[],
-  locale: SupportedUiLocale,
-): (field: Field) => string {
   const curatedByFieldId = new Map<string, string>()
-  const place = <S extends string>(
-    slots: Partial<Record<S, Field>>,
-    curated: Readonly<Record<S, string>>,
-  ) => {
-    for (const [slot, field] of Object.entries(slots) as Array<[S, Field | undefined]>) {
-      if (field) curatedByFieldId.set(field.id, curated[slot])
-    }
+  const place = (slots: Map<string, Record<string, any>>, curated: Record<string, string>) => {
+    for (const [slot, field] of slots) curatedByFieldId.set(field.id, curated[slot]!)
   }
-  place<DictionarySlot>(getDictionarySlots(outputSchema), DICTIONARY_SAMPLES[locale].values)
-  place<SentenceAnalysisSlot>(
-    getSentenceAnalysisSlots(outputSchema),
-    SENTENCE_ANALYSIS_SAMPLES[locale].values,
-  )
-  place<ImproveWritingSlot>(
-    getImproveWritingSlots(outputSchema),
-    IMPROVE_WRITING_SAMPLES[locale].values,
-  )
-  return (field) =>
-    field.type === "number" ? SAMPLE_NUMBER : (curatedByFieldId.get(field.id) ?? field.name)
-}
+  place(dictionary, DICTIONARY_SAMPLES[locale]!.values)
+  place(sentenceAnalysis, SENTENCE_ANALYSIS_SAMPLES[locale]!.values)
+  place(improveWriting, IMPROVE_WRITING_SAMPLES[locale]!.values)
 
-// A new sample for an action with `outputSchema`, written for a reader of
-// `targetCode`. Its selection is the sentence analysis sample's for a
-// sentence-analysis-shaped action, the Improve Writing sample's for an
-// Improve-Writing-shaped one, else the dictionary sample's.
-export function createLayoutSampleData(
-  outputSchema: readonly Field[],
-  targetCode: LangCodeISO6393,
-): SampleData {
-  const locale = contentLocaleFor(targetCode)
-  const { selection } = isSentenceAnalysisShaped(outputSchema)
-    ? SENTENCE_ANALYSIS_SAMPLES[locale]
-    : isImproveWritingShaped(outputSchema)
-      ? IMPROVE_WRITING_SAMPLES[locale]
-      : DICTIONARY_SAMPLES[locale]
-  const valueOf = sampleValueFor(outputSchema, locale)
+  const { selection } = sentenceAnalysis.has("annotations")
+    ? SENTENCE_ANALYSIS_SAMPLES[locale]!
+    : improveWriting.has("annotations")
+      ? IMPROVE_WRITING_SAMPLES[locale]!
+      : DICTIONARY_SAMPLES[locale]!
+
   return {
     selection,
-    targetCode: langCodeOfLocale(locale),
-    values: Object.fromEntries(outputSchema.map((field) => [field.id, valueOf(field)])),
-  }
-}
-
-// `sampleData` kept in step with `outputSchema`: a field it has no value for
-// gets a new one, in the sample's language, and the values of fields that are
-// gone are dropped. Without sample data (a built-in action, or sample data
-// that could not be read), a new sample for a reader of `targetCode`.
-export function syncLayoutSampleData(
-  sampleData: SampleData | undefined,
-  outputSchema: readonly Field[],
-  targetCode: LangCodeISO6393,
-): SampleData {
-  if (!sampleData) return createLayoutSampleData(outputSchema, targetCode)
-  const valueOf = sampleValueFor(outputSchema, contentLocaleFor(sampleData.targetCode))
-  const { values } = sampleData
-  return {
-    ...sampleData,
+    targetCode: LANG_CODE_OF_UI_LOCALE[locale],
     values: Object.fromEntries(
-      outputSchema.map((field) => [
+      fields.map((field) => [
         field.id,
-        Object.hasOwn(values, field.id) ? values[field.id]! : valueOf(field),
+        field.type === "number"
+          ? "3"
+          : (curatedByFieldId.get(field.id) ?? (typeof field.name === "string" ? field.name : "")),
       ]),
     ),
   }
 }
 
-// The values a layout reads, keyed by field NAME like a model's structured
-// output. `sampleData` is in step with `outputSchema` (syncLayoutSampleData);
-// a field it has no value for reads as blank.
-export function layoutSampleValues(
-  sampleData: SampleData,
-  outputSchema: readonly Field[],
-): Record<string, string> {
-  const values: Record<string, string> = {}
-  for (const field of outputSchema) {
-    // defineProperty: a field named `__proto__` must stay an own key.
-    Object.defineProperty(values, field.name, {
-      value: Object.hasOwn(sampleData.values, field.id) ? sampleData.values[field.id] : "",
-      enumerable: true,
-      writable: true,
-      configurable: true,
-    })
-  }
-  return values
-}
-
-// The partial results a stream would deliver on the way to `values`: fields
-// arrive in schema order, strings grow a chunk at a time (never splitting a
-// surrogate pair), and every frame extends the one before it. Starts with {}
-// (everything pending) and ends with the complete values.
-export function buildStreamingFrames(
-  values: Readonly<Record<string, unknown>>,
-  outputSchema: SelectionToolbarCustomActionOutputField[],
-  options: { maxFrames?: number } = {},
-): Array<Record<string, unknown>> {
-  const entries: Array<[name: string, value: unknown]> = []
-  const seen = new Set<string>()
-  for (const field of outputSchema) {
-    if (seen.has(field.name) || !Object.hasOwn(values, field.name)) continue
-    seen.add(field.name)
-    entries.push([field.name, values[field.name]])
+export function migrate(oldConfig: any): any {
+  const customActions = oldConfig?.selectionToolbar?.customActions
+  if (!Array.isArray(customActions)) {
+    return oldConfig
   }
 
-  const totalChars = entries.reduce(
-    (sum, [, value]) => sum + (typeof value === "string" ? Array.from(value).length : 0),
-    0,
-  )
-  const step = Math.max(1, Math.ceil(totalChars / Math.max(1, options.maxFrames ?? 60)))
-
-  const frames: Array<Record<string, unknown>> = [{}]
-  let current: Record<string, unknown> = {}
-  const push = (name: string, value: unknown) => {
-    current = { ...current }
-    Object.defineProperty(current, name, {
-      value,
-      enumerable: true,
-      writable: true,
-      configurable: true,
-    })
-    frames.push(current)
+  const needsSampleData = (action: any) =>
+    isObject(action) && !isObject(action.sampleData) && Array.isArray(action.outputSchema)
+  if (!customActions.some(needsSampleData)) {
+    return oldConfig
   }
 
-  for (const [name, value] of entries) {
-    if (typeof value !== "string" || value === "") {
-      push(name, value)
-      continue
-    }
-    const chars = Array.from(value)
-    for (let end = step; ; end += step) {
-      push(name, chars.slice(0, Math.min(end, chars.length)).join(""))
-      if (end >= chars.length) break
-    }
+  const locale = sampleLocaleOf(oldConfig)
+  return {
+    ...oldConfig,
+    selectionToolbar: {
+      ...oldConfig.selectionToolbar,
+      customActions: customActions.map((action: any) => {
+        if (!needsSampleData(action)) return action
+        const fields = action.outputSchema.filter(
+          (field: any) => isObject(field) && typeof field.id === "string",
+        )
+        return { ...action, sampleData: createSampleData(fields, locale) }
+      }),
+    },
   }
-  return frames
 }

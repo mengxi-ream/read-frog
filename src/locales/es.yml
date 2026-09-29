@@ -724,8 +724,10 @@ options:
           replay: Reproducir
           sampleData: Datos de ejemplo
           sampleDataHint: Solo se usan en esta vista previa y nunca se guardan.
+          sampleDataSavedHint: Solo se usan en esta vista previa y se guardan con esta instrucción.
           sampleDataReset: Restablecer ejemplos
-          sampleValue: Ejemplo de $1
+          sampleSelection: Texto seleccionado
+          sampleTargetLanguage: Idioma de destino
           insertField: Campo
           insertSpeak: Botón de lectura
           insertCondition: Si tiene valor

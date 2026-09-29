@@ -1,6 +1,9 @@
 import type { LayoutStatus } from "@read-frog/layout-engine/contract"
 import type { CustomActionLayoutRenderInfo } from "@/components/layout-host/custom-action-layout-view"
-import type { SelectionToolbarCustomActionOutputField } from "@/types/config/selection-toolbar"
+import type {
+  SelectionToolbarCustomActionOutputField,
+  SelectionToolbarCustomActionSampleData,
+} from "@/types/config/selection-toolbar"
 import {
   IconAlertTriangle,
   IconForms,
@@ -9,8 +12,11 @@ import {
   IconShieldCheck,
   IconSun,
 } from "@tabler/icons-react"
+import { dequal } from "dequal"
 import { useAtomValue } from "jotai"
 import { useEffect, useMemo, useState } from "react"
+import { LanguageCombobox } from "@/components/language-combobox"
+import { getTargetLanguageItems } from "@/components/language-combobox-options"
 import { CustomActionLayoutView } from "@/components/layout-host/custom-action-layout-view"
 import { useTheme } from "@/components/providers/theme-provider"
 import { Button } from "@/components/ui/base-ui/button"
@@ -26,18 +32,20 @@ import {
 } from "@/components/ui/base-ui/popover"
 import { Textarea } from "@/components/ui/base-ui/textarea"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
+import { MAX_CUSTOM_ACTION_SAMPLE_TEXT_LENGTH } from "@/types/config/selection-toolbar"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
-import { contentLocaleFor } from "@/utils/layout-host/labels"
 import {
-  buildLayoutSampleValues,
   buildStreamingFrames,
-  getLayoutSampleContext,
+  createLayoutSampleData,
+  layoutSampleValues,
+  syncLayoutSampleData,
 } from "@/utils/layout-host/sample"
 import { cn } from "@/utils/styles/utils"
 import { LayoutPreviewFrame } from "./layout-preview-frame"
 
 type Field = SelectionToolbarCustomActionOutputField
+type SampleData = SelectionToolbarCustomActionSampleData
 
 type LayoutKey =
   | "preview"
@@ -47,7 +55,10 @@ type LayoutKey =
   | "replay"
   | "sampleData"
   | "sampleDataHint"
+  | "sampleDataSavedHint"
   | "sampleDataReset"
+  | "sampleSelection"
+  | "sampleTargetLanguage"
 
 function t(key: LayoutKey) {
   return i18n.t(`options.selectionToolbar.customActions.form.layout.${key}`)
@@ -60,15 +71,25 @@ type PreviewWidth = (typeof PREVIEW_WIDTHS)[number]
 // One streamed chunk per frame while replaying.
 const REPLAY_FRAME_MS = 30
 
-export type LayoutSampleOverrides = Readonly<Record<string, string>>
+// How the preview's sample data is edited: saved with the action, through a
+// custom action's form, or kept to this preview, for a built-in action.
+// `next` is always the whole sample data, never a part of it.
+export interface LayoutSampleDataEditing {
+  saved: boolean
+  onChange: (next: SampleData) => void
+  onCompositionStart?: () => void
+  onCompositionEnd?: (next: SampleData) => void
+}
 
 interface LayoutPreviewProps {
   // The layout to render, already resolved (a blank layout means the default).
   source: string
   outputSchema: Field[]
-  sampleOverrides: LayoutSampleOverrides
+  // The action's sample data; kept in step with `outputSchema` here, and
+  // generated when there is none (see syncLayoutSampleData).
+  sampleData: SampleData | undefined
   // Omitted: the sample data is not editable here.
-  onSampleOverridesChange?: (next: LayoutSampleOverrides) => void
+  sampleDataEditing?: LayoutSampleDataEditing
   className?: string
   frameClassName?: string
 }
@@ -105,17 +126,54 @@ function Segment<T extends string | number>({
   )
 }
 
+function SampleTextField({
+  id,
+  label,
+  value,
+  editing,
+  withText,
+}: {
+  id: string
+  label: string
+  value: string
+  editing: LayoutSampleDataEditing
+  // The whole sample data with this text in it.
+  withText: (text: string) => SampleData
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={id} className="text-xs text-muted-foreground">
+        {label}
+      </Label>
+      <Textarea
+        id={id}
+        value={value}
+        rows={1}
+        maxLength={MAX_CUSTOM_ACTION_SAMPLE_TEXT_LENGTH}
+        className="min-h-8 text-sm"
+        onChange={(event) => editing.onChange(withText(event.target.value))}
+        onCompositionStart={() => editing.onCompositionStart?.()}
+        onCompositionEnd={(event) =>
+          editing.onCompositionEnd?.(withText(event.currentTarget.value))
+        }
+      />
+    </div>
+  )
+}
+
 function SampleDataEditor({
   outputSchema,
-  values,
-  overrides,
-  onChange,
+  sampleData,
+  fresh,
+  editing,
 }: {
   outputSchema: Field[]
-  values: Record<string, string | number>
-  overrides: LayoutSampleOverrides
-  onChange: (next: LayoutSampleOverrides) => void
+  sampleData: SampleData
+  // What "Reset samples" puts back: a new sample for the current fields.
+  fresh: SampleData
+  editing: LayoutSampleDataEditing
 }) {
+  const targetLanguageItems = useMemo(() => getTargetLanguageItems(), [])
   return (
     <Popover>
       <PopoverTrigger render={<Button type="button" variant="ghost" size="xs" />}>
@@ -125,35 +183,53 @@ function SampleDataEditor({
       <PopoverContent align="end" className="max-h-[60vh] w-80 overflow-y-auto">
         <PopoverHeader>
           <PopoverTitle>{t("sampleData")}</PopoverTitle>
-          <PopoverDescription>{t("sampleDataHint")}</PopoverDescription>
+          <PopoverDescription>
+            {t(editing.saved ? "sampleDataSavedHint" : "sampleDataHint")}
+          </PopoverDescription>
         </PopoverHeader>
         <div className="flex flex-col gap-3">
-          {outputSchema.map((field) => {
-            const id = `layout-sample-${field.id}`
-            const value = overrides[field.id] ?? String(values[field.name] ?? "")
-            return (
-              <div key={field.id} className="flex flex-col gap-1.5">
-                <Label htmlFor={id} className="text-xs text-muted-foreground">
-                  {field.name}
-                </Label>
-                <Textarea
-                  id={id}
-                  value={value}
-                  rows={1}
-                  className="min-h-8 text-sm"
-                  onChange={(event) => onChange({ ...overrides, [field.id]: event.target.value })}
-                />
-              </div>
-            )
-          })}
+          <SampleTextField
+            id="layout-sample-selection"
+            label={t("sampleSelection")}
+            value={sampleData.selection}
+            editing={editing}
+            withText={(selection) => ({ ...sampleData, selection })}
+          />
+          {/* The language the answer is written for: `ctx.targetLanguage`, and the
+              words of the sentence analysis and Improve Writing cards. */}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs leading-none font-medium text-muted-foreground">
+              {t("sampleTargetLanguage")}
+            </span>
+            <LanguageCombobox
+              items={targetLanguageItems}
+              value={sampleData.targetCode}
+              onValueChange={(targetCode) => editing.onChange({ ...sampleData, targetCode })}
+              triggerSize="sm"
+              className="w-full"
+            />
+          </div>
+          {outputSchema.map((field) => (
+            <SampleTextField
+              key={field.id}
+              id={`layout-sample-${field.id}`}
+              label={field.name}
+              value={Object.hasOwn(sampleData.values, field.id) ? sampleData.values[field.id]! : ""}
+              editing={editing}
+              withText={(text) => ({
+                ...sampleData,
+                values: { ...sampleData.values, [field.id]: text },
+              })}
+            />
+          ))}
         </div>
         <Button
           type="button"
           variant="outline"
           size="xs"
           className="self-end"
-          disabled={Object.keys(overrides).length === 0}
-          onClick={() => onChange({})}
+          disabled={dequal(sampleData, fresh)}
+          onClick={() => editing.onChange(fresh)}
         >
           {t("sampleDataReset")}
         </Button>
@@ -208,8 +284,8 @@ function RenderNotices({ info }: { info: CustomActionLayoutRenderInfo | null }) 
 export function LayoutPreview({
   source,
   outputSchema,
-  sampleOverrides,
-  onSampleOverridesChange,
+  sampleData: storedSampleData,
+  sampleDataEditing,
   className,
   frameClassName,
 }: LayoutPreviewProps) {
@@ -220,22 +296,22 @@ export function LayoutPreview({
   const [replayFrame, setReplayFrame] = useState<number | null>(null)
   const [renderInfo, setRenderInfo] = useState<CustomActionLayoutRenderInfo | null>(null)
 
-  // The sample answer is written in the reader's language, like the answers the popup
-  // shows: the target language when a sample is written in it, else the UI language.
+  // A new sample is written for the reader's target language, like the answers the
+  // popup shows; saved sample data keeps the language it was written for.
   const { targetCode } = useAtomValue(configFieldsAtomMap.language)
-  const locale = contentLocaleFor(targetCode)
+  const sampleData = useMemo(
+    () => syncLayoutSampleData(storedSampleData, outputSchema, targetCode),
+    [storedSampleData, outputSchema, targetCode],
+  )
+  const freshSampleData = useMemo(
+    () => createLayoutSampleData(outputSchema, targetCode),
+    [outputSchema, targetCode],
+  )
   const values = useMemo(
-    () =>
-      buildLayoutSampleValues(outputSchema, {
-        locale,
-        overrides: sampleOverrides,
-        placeholder: (field) =>
-          i18n.t("options.selectionToolbar.customActions.form.layout.sampleValue", [field.name]),
-      }),
-    [outputSchema, sampleOverrides, locale],
+    () => layoutSampleValues(sampleData, outputSchema),
+    [sampleData, outputSchema],
   )
   const frames = useMemo(() => buildStreamingFrames(values, outputSchema), [values, outputSchema])
-  const sample = getLayoutSampleContext(outputSchema, locale)
 
   useEffect(() => {
     if (replayFrame === null) return undefined
@@ -269,12 +345,12 @@ export function LayoutPreview({
             { value: "dark", label: <IconMoon />, title: t("themeDark") },
           ]}
         />
-        {onSampleOverridesChange && (
+        {sampleDataEditing && (
           <SampleDataEditor
             outputSchema={outputSchema}
-            values={values}
-            overrides={sampleOverrides}
-            onChange={onSampleOverridesChange}
+            sampleData={sampleData}
+            fresh={freshSampleData}
+            editing={sampleDataEditing}
           />
         )}
         <Button type="button" variant="ghost" size="xs" onClick={() => setReplayFrame(0)}>
@@ -297,8 +373,8 @@ export function LayoutPreview({
               source={source}
               outputSchema={outputSchema}
               value={value}
-              selection={sample.selection}
-              targetCode={sample.targetCode}
+              selection={sampleData.selection}
+              targetCode={sampleData.targetCode}
               status={status}
               theme={theme}
               speakSurface={ANALYTICS_SURFACE.TTS_SETTINGS}

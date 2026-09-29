@@ -216,6 +216,11 @@ describe("customActionConfigForm notebase availability", () => {
           description: "Summary",
         },
       ],
+      sampleData: {
+        selection: "A long article",
+        targetCode: "eng" as const,
+        values: { "summary-field": "A short summary" },
+      },
       notebaseConnection: {
         notebaseId: "table-1",
         notebaseNameSnapshot: "Articles",
@@ -267,6 +272,7 @@ describe("customActionConfigForm notebase availability", () => {
     })
     expect(duplicate.id).not.toBe(action.id)
     expect(duplicate.notebaseConnection).not.toBe(action.notebaseConnection)
+    expect(duplicate.sampleData).not.toBe(action.sampleData)
   })
 
   it("copies a prompt carrying the custom action's current settings", async () => {

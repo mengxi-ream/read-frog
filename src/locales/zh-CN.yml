@@ -729,8 +729,10 @@ options:
           replay: 重放
           sampleData: 示例数据
           sampleDataHint: 仅用于此预览，不会保存。
+          sampleDataSavedHint: 仅用于此预览，随此指令一起保存。
           sampleDataReset: 重置示例
-          sampleValue: $1示例
+          sampleSelection: 选中的文本
+          sampleTargetLanguage: 目标语言
           insertField: 字段
           insertSpeak: 朗读按钮
           insertCondition: 有值时显示

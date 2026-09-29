@@ -17,6 +17,7 @@ import {
 } from "@/utils/constants/custom-action"
 import { getBuiltInActions, patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
+import { createLayoutSampleData } from "@/utils/layout-host/sample"
 import { getUniqueName } from "@/utils/name"
 import { CUSTOM_ACTION_ADD_QUERY_PARAM } from "@/utils/navigation"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
@@ -35,6 +36,7 @@ export function CustomActionCardList() {
   const setSelectedCustomActionId = useSetAtom(selectedCustomActionIdAtom)
   const setEditorTab = useSetAtom(customActionEditorTabAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const { targetCode } = useAtomValue(configFieldsAtomMap.language)
   const { search } = useLocation()
   // Read at mount only; `useCustomActionDeepLink` strips the param right after.
   const [dialogOpen, setDialogOpen] = useState(() =>
@@ -60,6 +62,7 @@ export function CustomActionCardList() {
           {
             ...newAction,
             name: getUniqueName(baseName, new Set(current.customActions.map((item) => item.name))),
+            sampleData: createLayoutSampleData(newAction.outputSchema, targetCode),
           },
         ],
       }))
@@ -120,9 +123,11 @@ export function CustomActionCardList() {
         <h3 className="px-1 text-xs font-medium text-muted-foreground">
           {i18n.t("options.selectionToolbar.customActions.builtIn" as never)}
         </h3>
-        {builtInActions.map((action) => (
-          <BuiltInActionCard key={action.id} action={action} />
-        ))}
+        <div className="flex flex-col gap-4 pt-2">
+          {builtInActions.map((action) => (
+            <BuiltInActionCard key={action.id} action={action} />
+          ))}
+        </div>
       </section>
     </div>
   )
