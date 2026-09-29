@@ -723,8 +723,10 @@ options:
           replay: Повторить
           sampleData: Пример данных
           sampleDataHint: Используется только в этом предпросмотре и не сохраняется.
+          sampleDataSavedHint: Используется только в этом предпросмотре и сохраняется вместе с командой.
           sampleDataReset: Сбросить примеры
-          sampleValue: Пример «$1»
+          sampleSelection: Выделенный текст
+          sampleTargetLanguage: Язык перевода
           insertField: Поле
           insertSpeak: Кнопка озвучивания
           insertCondition: Если заполнено

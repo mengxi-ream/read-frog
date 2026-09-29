@@ -38,6 +38,11 @@ function createAction(): SelectionToolbarCustomAction {
       type: "string",
       description: id,
     })),
+    sampleData: {
+      selection: "A word",
+      targetCode: "eng",
+      values: { meaning: "Its meaning", example: "An example" },
+    },
     notebaseConnection: {
       notebaseId: "words",
       notebaseNameSnapshot: "Words",
@@ -124,6 +129,8 @@ describe("output schema autosave", () => {
     const expected: SelectionToolbarCustomAction = {
       ...action,
       outputSchema: [action.outputSchema[1]!],
+      // The deleted field's sample value goes in the same write.
+      sampleData: { ...action.sampleData!, values: { example: "An example" } },
       notebaseConnection: {
         ...action.notebaseConnection!,
         mappings: [action.notebaseConnection!.mappings[1]!],

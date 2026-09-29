@@ -724,8 +724,10 @@ options:
           replay: Yenidən oynat
           sampleData: Nümunə məlumat
           sampleDataHint: Yalnız bu önizləmədə istifadə olunur və yadda saxlanılmır.
+          sampleDataSavedHint: Yalnız bu önizləmədə istifadə olunur və bu təlimatla birlikdə yadda saxlanılır.
           sampleDataReset: Nümunələri sıfırla
-          sampleValue: Nümunə $1
+          sampleSelection: Seçilmiş mətn
+          sampleTargetLanguage: Hədəf dili
           insertField: Sahə
           insertSpeak: Səsləndirmə düyməsi
           insertCondition: Doludursa

@@ -723,8 +723,10 @@ options:
           replay: Phát lại
           sampleData: Dữ liệu mẫu
           sampleDataHint: Chỉ dùng cho bản xem trước này và không được lưu.
+          sampleDataSavedHint: Chỉ dùng cho bản xem trước này và được lưu cùng tác vụ này.
           sampleDataReset: Đặt lại mẫu
-          sampleValue: Mẫu $1
+          sampleSelection: Văn bản đã chọn
+          sampleTargetLanguage: Ngôn ngữ đích
           insertField: Trường
           insertSpeak: Nút đọc
           insertCondition: Khi có giá trị

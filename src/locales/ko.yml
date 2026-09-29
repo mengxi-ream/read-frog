@@ -723,8 +723,10 @@ options:
           replay: 다시 재생
           sampleData: 샘플 데이터
           sampleDataHint: 이 미리 보기에서만 사용되며 저장되지 않습니다.
+          sampleDataSavedHint: 이 미리 보기에서만 사용되며 이 작업과 함께 저장됩니다.
           sampleDataReset: 샘플 초기화
-          sampleValue: $1 샘플
+          sampleSelection: 선택한 텍스트
+          sampleTargetLanguage: 대상 언어
           insertField: 필드
           insertSpeak: 읽기 버튼
           insertCondition: 값이 있을 때

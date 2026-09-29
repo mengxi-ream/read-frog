@@ -723,8 +723,10 @@ options:
           replay: Yeniden oynat
           sampleData: Örnek veriler
           sampleDataHint: Yalnızca bu önizlemede kullanılır ve kaydedilmez.
+          sampleDataSavedHint: Yalnızca bu önizlemede kullanılır ve bu eylemle birlikte kaydedilir.
           sampleDataReset: Örnekleri sıfırla
-          sampleValue: Örnek $1
+          sampleSelection: Seçili metin
+          sampleTargetLanguage: Hedef dil
           insertField: Alan
           insertSpeak: Seslendirme düğmesi
           insertCondition: Doluysa

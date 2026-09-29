@@ -729,8 +729,10 @@ options:
           replay: Replay
           sampleData: Sample data
           sampleDataHint: Only used in this preview and never saved.
+          sampleDataSavedHint: Only used in this preview, and saved with this action.
           sampleDataReset: Reset samples
-          sampleValue: Sample $1
+          sampleSelection: Selected text
+          sampleTargetLanguage: Target language
           insertField: Field
           insertSpeak: Speak button
           insertCondition: If filled

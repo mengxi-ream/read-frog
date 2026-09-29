@@ -1,4 +1,5 @@
 import { HostedAiOutputFieldTypeSchema } from "@read-frog/api-contract"
+import { langCodeISO6393Schema } from "@read-frog/definitions"
 import { z } from "zod"
 import { isBuiltInActionId } from "@/utils/constants/custom-action"
 import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
@@ -10,6 +11,10 @@ import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
 // older builds refuse the newer config instead of choking on it.
 export const MAX_CUSTOM_ACTION_LAYOUT_LENGTH = 32768
 
+// Upper bound (UTF-16 code units) of each text in a custom action's sample
+// data. NEVER lower it, for the reason given above.
+export const MAX_CUSTOM_ACTION_SAMPLE_TEXT_LENGTH = 32768
+
 // The contract's field-type enum is the source of truth: these values ride the
 // wire to hostedAi.customAction unchanged. Only the enum is shared — length
 // caps and strictness stay hosted-only so BYOK actions are not constrained.
@@ -20,6 +25,16 @@ export const selectionToolbarCustomActionOutputFieldSchema = z.object({
   name: z.string().trim().min(1),
   type: selectionToolbarCustomActionOutputTypeSchema,
   description: z.string(),
+})
+
+// What the layout preview renders an action's result with: the text the
+// reader selected, the language the answer is written for, and each output
+// field's value by field id (an id survives a rename). Values are text, the
+// way a model answers; the layout scope converts a number field's text.
+export const selectionToolbarCustomActionSampleDataSchema = z.object({
+  selection: z.string().max(MAX_CUSTOM_ACTION_SAMPLE_TEXT_LENGTH),
+  targetCode: langCodeISO6393Schema,
+  values: z.record(z.string(), z.string().max(MAX_CUSTOM_ACTION_SAMPLE_TEXT_LENGTH)),
 })
 
 export const selectionToolbarCustomActionNotebaseMappingSchema = z.object({
@@ -83,6 +98,12 @@ export const selectionToolbarCustomActionSchema = z
     // list, and a template error must not fail the whole config parse (which
     // would replace the user's config with DEFAULT_CONFIG).
     layout: z.string().max(MAX_CUSTOM_ACTION_LAYOUT_LENGTH).optional(),
+    // The layout preview's sample, one value per output field. Every custom
+    // action has one (v108 gave one to those from before); a built-in action
+    // persists none, so its preview generates it. Bad sample data is dropped
+    // rather than failing the whole config parse, which would replace the
+    // user's config with DEFAULT_CONFIG; the editor then generates a new one.
+    sampleData: selectionToolbarCustomActionSampleDataSchema.optional().catch(undefined),
   })
   .superRefine((action, ctx) => {
     const nameSet = new Set<string>()
@@ -190,6 +211,9 @@ export type SelectionToolbarCustomActionOutputType = z.infer<
 >
 export type SelectionToolbarCustomActionOutputField = z.infer<
   typeof selectionToolbarCustomActionOutputFieldSchema
+>
+export type SelectionToolbarCustomActionSampleData = z.infer<
+  typeof selectionToolbarCustomActionSampleDataSchema
 >
 export type SelectionToolbarCustomActionNotebaseMapping = z.infer<
   typeof selectionToolbarCustomActionNotebaseMappingSchema

@@ -31,6 +31,7 @@ import {
 } from "@/utils/constants/custom-action"
 import { duplicateSelectionToolbarAction, getSelectionToolbarActions } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
+import { syncLayoutSampleData } from "@/utils/layout-host/sample"
 import { customActionEditorTabAtom, selectedCustomActionIdAtom } from "../atoms"
 import { AiConfigHelperButton as AiConfigHelperPopover } from "./ai-config-helper-button"
 import { formOpts, useAppForm } from "./form"
@@ -144,7 +145,16 @@ function useActionEditorController(
           const currentActions = getSelectionToolbarActions(current)
           const source = currentActions.find((item) => item.id === action.id)
           if (!source) return
-          const duplicatedAction = duplicateSelectionToolbarAction(source, currentActions)
+          // A custom action's sample data is copied; a built-in action saves
+          // none, so its copy gets a new one.
+          const duplicatedAction = {
+            ...duplicateSelectionToolbarAction(source, currentActions),
+            sampleData: syncLayoutSampleData(
+              source.sampleData,
+              source.outputSchema,
+              store.get(configFieldsAtomMap.language).targetCode,
+            ),
+          }
           await setSelectionToolbar((latest) => ({
             ...latest,
             customActions: [...latest.customActions, duplicatedAction],
