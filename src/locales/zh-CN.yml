@@ -644,7 +644,7 @@ options:
       providerUnavailable: 所选提供商不可用
     customActions:
       title: 自定义 AI 指令
-      pageDescription: 编写自己的提示词，从划词工具栏对选中的文本运行。
+      pageDescription: 编写自己的提示词，从划词工具栏对选中的文本运行。指令生成结果的数据、样式和交互都可以自定义。
       description: 为划词添加你自己的结构化 AI 操作
       configTitle: 指令配置
       builtIn: 内置
@@ -1574,6 +1574,7 @@ action:
   pinToToolbar: 固定到工具栏
   unpinFromToolbar: 从工具栏取消固定
   dragToReorder: 拖动以排序
+  addCustomAction: 添加自定义 AI 指令
 noteSuggestion:
   title: 猜你想存
   description: 选择要存入笔记库的词，将来随时复习

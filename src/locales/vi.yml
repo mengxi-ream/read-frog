@@ -643,7 +643,7 @@ options:
       providerUnavailable: Nhà cung cấp đã chọn không khả dụng
     customActions:
       title: Hành động AI tùy chỉnh
-      pageDescription: Viết prompt của riêng bạn và chạy trên văn bản đã chọn từ thanh công cụ chọn văn bản.
+      pageDescription: Viết prompt của riêng bạn và chạy trên văn bản đã chọn từ thanh công cụ chọn văn bản. Dữ liệu, kiểu dáng và cách tương tác của kết quả đều có thể tùy chỉnh.
       description: Thêm các hành động AI có cấu trúc của riêng bạn cho văn bản được chọn
       configTitle: Cấu hình hành động
       builtIn: Tích hợp
@@ -1564,6 +1564,7 @@ action:
   pinToToolbar: Ghim vào thanh công cụ
   unpinFromToolbar: Bỏ ghim khỏi thanh công cụ
   dragToReorder: Kéo để sắp xếp lại
+  addCustomAction: Thêm hành động AI tùy chỉnh
 noteSuggestion:
   title: Có thể bạn muốn lưu
   description: Chọn những từ bạn muốn lưu vào Notebase để ôn tập bất cứ lúc nào.

@@ -644,7 +644,7 @@ options:
       providerUnavailable: El proveedor seleccionado no está disponible
     customActions:
       title: Acciones AI personalizadas
-      pageDescription: Escribe tus propios prompts y ejecútalos sobre el texto seleccionado desde la barra de selección.
+      pageDescription: Escribe tus propios prompts y ejecútalos sobre el texto seleccionado desde la barra de selección. Los datos, el estilo y la interacción de cada resultado son totalmente personalizables.
       description: Añade tus propias acciones AI estructuradas para texto seleccionado
       configTitle: Configuración de acciones
       builtIn: Integrada
@@ -1569,6 +1569,7 @@ action:
   pinToToolbar: Fijar en la barra
   unpinFromToolbar: Quitar de la barra
   dragToReorder: Arrastra para reordenar
+  addCustomAction: Añadir acción AI personalizada
 noteSuggestion:
   title: Quizás quieras guardar
   description: Elige qué palabras guardar en tu Notebase y repásalas cuando quieras.
