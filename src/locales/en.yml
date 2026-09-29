@@ -732,6 +732,7 @@ options:
           sampleDataSavedHint: Only used in this preview, and saved with this action.
           sampleDataReset: Reset samples
           sampleSelection: Selected text
+          sampleTargetLanguage: Target language
           insertField: Field
           insertSpeak: Speak button
           insertCondition: If filled

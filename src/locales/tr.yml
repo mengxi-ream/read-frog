@@ -726,6 +726,7 @@ options:
           sampleDataSavedHint: Yalnızca bu önizlemede kullanılır ve bu eylemle birlikte kaydedilir.
           sampleDataReset: Örnekleri sıfırla
           sampleSelection: Seçili metin
+          sampleTargetLanguage: Hedef dil
           insertField: Alan
           insertSpeak: Seslendirme düğmesi
           insertCondition: Doluysa

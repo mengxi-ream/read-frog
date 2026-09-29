@@ -732,6 +732,7 @@ options:
           sampleDataSavedHint: 僅用於此預覽，隨此指令一起儲存。
           sampleDataReset: 重設範例
           sampleSelection: 選取的文字
+          sampleTargetLanguage: 目標語言
           insertField: 欄位
           insertSpeak: 朗讀按鈕
           insertCondition: 有值時顯示

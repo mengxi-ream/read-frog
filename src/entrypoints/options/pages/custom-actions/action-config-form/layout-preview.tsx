@@ -15,6 +15,8 @@ import {
 import { dequal } from "dequal"
 import { useAtomValue } from "jotai"
 import { useEffect, useMemo, useState } from "react"
+import { LanguageCombobox } from "@/components/language-combobox"
+import { getTargetLanguageItems } from "@/components/language-combobox-options"
 import { CustomActionLayoutView } from "@/components/layout-host/custom-action-layout-view"
 import { useTheme } from "@/components/providers/theme-provider"
 import { Button } from "@/components/ui/base-ui/button"
@@ -56,6 +58,7 @@ type LayoutKey =
   | "sampleDataSavedHint"
   | "sampleDataReset"
   | "sampleSelection"
+  | "sampleTargetLanguage"
 
 function t(key: LayoutKey) {
   return i18n.t(`options.selectionToolbar.customActions.form.layout.${key}`)
@@ -170,6 +173,7 @@ function SampleDataEditor({
   fresh: SampleData
   editing: LayoutSampleDataEditing
 }) {
+  const targetLanguageItems = useMemo(() => getTargetLanguageItems(), [])
   return (
     <Popover>
       <PopoverTrigger render={<Button type="button" variant="ghost" size="xs" />}>
@@ -191,6 +195,20 @@ function SampleDataEditor({
             editing={editing}
             withText={(selection) => ({ ...sampleData, selection })}
           />
+          {/* The language the answer is written for: `ctx.targetLanguage`, and the
+              words of the sentence analysis and Improve Writing cards. */}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs leading-none font-medium text-muted-foreground">
+              {t("sampleTargetLanguage")}
+            </span>
+            <LanguageCombobox
+              items={targetLanguageItems}
+              value={sampleData.targetCode}
+              onValueChange={(targetCode) => editing.onChange({ ...sampleData, targetCode })}
+              triggerSize="sm"
+              className="w-full"
+            />
+          </div>
           {outputSchema.map((field) => (
             <SampleTextField
               key={field.id}

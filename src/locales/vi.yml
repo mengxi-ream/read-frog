@@ -726,6 +726,7 @@ options:
           sampleDataSavedHint: Chỉ dùng cho bản xem trước này và được lưu cùng tác vụ này.
           sampleDataReset: Đặt lại mẫu
           sampleSelection: Văn bản đã chọn
+          sampleTargetLanguage: Ngôn ngữ đích
           insertField: Trường
           insertSpeak: Nút đọc
           insertCondition: Khi có giá trị

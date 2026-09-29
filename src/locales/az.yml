@@ -727,6 +727,7 @@ options:
           sampleDataSavedHint: Yalnız bu önizləmədə istifadə olunur və bu təlimatla birlikdə yadda saxlanılır.
           sampleDataReset: Nümunələri sıfırla
           sampleSelection: Seçilmiş mətn
+          sampleTargetLanguage: Hədəf dili
           insertField: Sahə
           insertSpeak: Səsləndirmə düyməsi
           insertCondition: Doludursa

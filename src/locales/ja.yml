@@ -726,6 +726,7 @@ options:
           sampleDataSavedHint: このプレビューでのみ使われ、このアクションと一緒に保存されます。
           sampleDataReset: サンプルをリセット
           sampleSelection: 選択したテキスト
+          sampleTargetLanguage: 翻訳先の言語
           insertField: フィールド
           insertSpeak: 読み上げボタン
           insertCondition: 値があるとき

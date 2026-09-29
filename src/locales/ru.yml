@@ -726,6 +726,7 @@ options:
           sampleDataSavedHint: Используется только в этом предпросмотре и сохраняется вместе с командой.
           sampleDataReset: Сбросить примеры
           sampleSelection: Выделенный текст
+          sampleTargetLanguage: Язык перевода
           insertField: Поле
           insertSpeak: Кнопка озвучивания
           insertCondition: Если заполнено
