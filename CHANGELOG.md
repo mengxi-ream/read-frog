@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.49.2
+
+### Patch Changes
+
+- [#2271](https://github.com/mengxi-ream/read-frog/pull/2271) [`2acb82a`](https://github.com/mengxi-ream/read-frog/commit/2acb82ada2a4ac12b3b6b09a4536e6d7337aefec) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(options): give the custom action and API provider lists the same layout
+
+- [#2272](https://github.com/mengxi-ream/read-frog/pull/2272) [`17f09e1`](https://github.com/mengxi-ream/read-frog/commit/17f09e17dff294afa2734a6815a4e64c4477b43e) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(custom-actions): save layout sample data with each custom AI action
+
 ## 1.49.1
 
 ### Patch Changes
