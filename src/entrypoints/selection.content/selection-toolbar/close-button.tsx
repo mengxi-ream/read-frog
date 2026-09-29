@@ -47,7 +47,8 @@ export function CloseButton() {
         container={shadowWrapper}
         align="start"
         side="right"
-        className={`${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay} w-fit! whitespace-nowrap`}
+        positionerClassName={SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay}
+        className="w-fit! whitespace-nowrap"
       >
         <DropdownMenuItem
           onMouseDown={handleMouseDown}
