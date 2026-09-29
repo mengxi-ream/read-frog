@@ -138,6 +138,11 @@ export function buildCustomActionOptionsRoute(
   return options?.full ? `/options.html#${route}` : route
 }
 
+/** Route to the custom action page with the "add action" dialog already open. */
+export function buildAddCustomActionOptionsRoute(): `/${string}` {
+  return `/custom-actions?${CUSTOM_ACTION_ADD_QUERY_PARAM}=1`
+}
+
 function parseCustomActionEditorTab(value: string | null): CustomActionEditorTab | null {
   const tab = value?.trim()
   return CUSTOM_ACTION_EDITOR_TABS.find((item) => item === tab) ?? null

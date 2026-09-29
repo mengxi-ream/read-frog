@@ -643,7 +643,7 @@ options:
       providerUnavailable: Seçilen sağlayıcı kullanılamıyor
     customActions:
       title: Özel AI Eylemleri
-      pageDescription: Kendi istemlerinizi yazın ve seçim araç çubuğundan seçili metin üzerinde çalıştırın.
+      pageDescription: Kendi istemlerinizi yazın ve seçim araç çubuğundan seçili metin üzerinde çalıştırın. Her sonucun verileri, stili ve etkileşimleri tamamen özelleştirilebilir.
       description: Seçilen metin için kendi yapılandırılmış AI eylemlerinizi ekleyin
       configTitle: Eylem yapılandırması
       builtIn: Yerleşik
@@ -1564,6 +1564,7 @@ action:
   pinToToolbar: Araç çubuğuna sabitle
   unpinFromToolbar: Araç çubuğundan kaldır
   dragToReorder: Sıralamak için sürükleyin
+  addCustomAction: Özel AI eylemi ekle
 noteSuggestion:
   title: Kaydetmek isteyebilirsiniz
   description: Notebase'inize kaydetmek istediğiniz kelimeleri seçin ve dilediğiniz zaman tekrarlayın.

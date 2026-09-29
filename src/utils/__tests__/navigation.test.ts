@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { browser } from "#imports"
 import {
+  buildAddCustomActionOptionsRoute,
   buildCustomActionOptionsRoute,
   buildProviderConfigRoute,
   buildProviderTypeConfigRoute,
   consumeCustomActionDeepLink,
+  CUSTOM_ACTION_ADD_QUERY_PARAM,
   getRequestedProviderType,
   openOptionsPage,
   shouldHighlightApiKey,
@@ -112,6 +114,19 @@ describe("custom action routes", () => {
     expect(consumeCustomActionDeepLink(search)).toEqual({
       actionId: "a&b c",
       tab: "notebase",
+      remainingSearch: "",
+    })
+  })
+
+  it("links to the add action dialog, and strips that param too", () => {
+    const route = buildAddCustomActionOptionsRoute()
+    const search = route.slice(route.indexOf("?"))
+
+    expect(route.startsWith("/custom-actions?")).toBe(true)
+    expect(new URLSearchParams(search).has(CUSTOM_ACTION_ADD_QUERY_PARAM)).toBe(true)
+    expect(consumeCustomActionDeepLink(search)).toEqual({
+      actionId: null,
+      tab: null,
       remainingSearch: "",
     })
   })

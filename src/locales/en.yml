@@ -644,7 +644,7 @@ options:
       providerUnavailable: Selected provider is unavailable
     customActions:
       title: Custom AI Actions
-      pageDescription: Write your own prompts and run them on selected text from the selection toolbar.
+      pageDescription: Write your own prompts and run them on selected text from the selection toolbar. The data, style and interactions of each result are all yours to customize.
       description: Add your own structured AI actions for selected text
       configTitle: Action config
       builtIn: Built-in
@@ -1711,6 +1711,7 @@ action:
   pinToToolbar: Pin to toolbar
   unpinFromToolbar: Unpin from toolbar
   dragToReorder: Drag to reorder
+  addCustomAction: Add custom AI action
 noteSuggestion:
   title: You might want to save
   description: Choose which words to save to your Notebase and review anytime.

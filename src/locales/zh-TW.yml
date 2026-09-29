@@ -644,7 +644,7 @@ options:
       providerUnavailable: 所選提供者無法使用
     customActions:
       title: 自訂 AI 指令
-      pageDescription: 撰寫自己的提示詞，從劃詞工具列對選取的文字執行。
+      pageDescription: 撰寫自己的提示詞，從劃詞工具列對選取的文字執行。指令產生結果的資料、樣式和互動都可以自訂。
       description: 為選取文字新增自訂的結構化 AI 指令
       configTitle: 指令設定
       builtIn: 內建
@@ -1574,6 +1574,7 @@ action:
   pinToToolbar: 釘選到工具列
   unpinFromToolbar: 從工具列取消釘選
   dragToReorder: 拖曳以排序
+  addCustomAction: 新增自訂 AI 指令
 noteSuggestion:
   title: 猜你想存
   description: 選擇要存入筆記庫的詞，將來隨時複習
