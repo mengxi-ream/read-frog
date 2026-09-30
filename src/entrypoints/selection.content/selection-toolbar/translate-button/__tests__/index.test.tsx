@@ -22,7 +22,7 @@ vi.mock("@/components/ui/selection-popover", () => ({
   },
 }))
 
-vi.mock("../../../components/selection-tooltip", () => ({
+vi.mock("@/components/ui/selection-popover/selection-tooltip", () => ({
   SelectionToolbarTooltip: ({ render: renderElement }: { render: ReactElement }) => renderElement,
 }))
 

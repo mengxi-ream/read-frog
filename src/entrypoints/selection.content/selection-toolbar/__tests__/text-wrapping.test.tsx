@@ -3,14 +3,14 @@ import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { Thinking } from "@/components/thinking"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
-import { SelectionSourceContent } from "../../components/selection-source-content"
+import { SelectionSourceContent } from "@/components/ui/selection-popover/selection-source-content"
 import { TranslationContent } from "../translate-button/translation-content"
 
-vi.mock("../../components/copy-button", () => ({
+vi.mock("@/components/ui/selection-popover/copy-button", () => ({
   CopyButton: () => <button type="button">Copy</button>,
 }))
 
-vi.mock("../../components/speak-button", () => ({
+vi.mock("@/components/ui/selection-popover/speak-button", () => ({
   SpeakButton: () => <button type="button">Speak</button>,
 }))
 

@@ -2,11 +2,11 @@ import { RiTranslate } from "@remixicon/react"
 import { useAtomValue } from "jotai"
 import { Kbd, KbdGroup } from "@/components/ui/base-ui/kbd"
 import { SelectionPopover } from "@/components/ui/selection-popover"
+import { SelectionToolbarTooltip } from "@/components/ui/selection-popover/selection-tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { formatHotkeyParts } from "@/utils/os"
 import { isPageTranslationShortcutEmpty } from "@/utils/page-translation-shortcut"
-import { SelectionToolbarTooltip } from "../../components/selection-tooltip"
 import { useSelectionTranslationPopover } from "./provider"
 
 export function TranslateButton() {

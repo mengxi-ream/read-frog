@@ -3,6 +3,7 @@ import type { NoteSuggestionNoteRecord } from "@/utils/note-suggestion/types"
 import { IconBookmarkPlus } from "@tabler/icons-react"
 import { useAtom } from "jotai"
 import { useEffect, useId, useState } from "react"
+import { useSaveToNotebase } from "@/components/custom-action/use-save-to-notebase"
 import { Button } from "@/components/ui/base-ui/button"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import {
@@ -20,7 +21,6 @@ import { findSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { trackNoteSuggestionEvent } from "@/utils/note-suggestion/analytics"
 import { getOutputSchemaFingerprint } from "@/utils/notebase/pending-save"
-import { useSaveToNotebase } from "../custom-action-button/use-save-to-notebase"
 
 function formatNoteValue(value: string | number | null): string | null {
   if (value === null) {

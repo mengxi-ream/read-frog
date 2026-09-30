@@ -2,14 +2,14 @@ import type { SelectionToolbarCustomAction } from "@/types/config/selection-tool
 import { IconTool } from "@tabler/icons-react"
 import { useCallback } from "react"
 import { buttonVariants } from "@/components/ui/base-ui/button"
+import {
+  SelectionPopoverTooltip,
+  useSelectionTooltipState,
+} from "@/components/ui/selection-popover/selection-tooltip"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { buildCustomActionOptionsRoute } from "@/utils/navigation"
 import { cn } from "@/utils/styles/utils"
-import {
-  SelectionPopoverTooltip,
-  useSelectionTooltipState,
-} from "../../components/selection-tooltip"
 
 export function CustomActionToolButton({
   action,

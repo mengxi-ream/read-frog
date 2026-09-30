@@ -1,10 +1,10 @@
 import type { ReactNode } from "react"
-import { useCallback, useState } from "react"
+import { use, useCallback, useState } from "react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { useSelectionPopoverOverlayProps } from "@/components/ui/selection-popover"
+import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.content/overlay-layers"
+import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { cn } from "@/utils/styles/utils"
-import { shadowWrapper } from ".."
-import { SELECTION_CONTENT_OVERLAY_LAYERS } from "../overlay-layers"
 
 const TOOLTIP_TRIGGER_PRESS_REASON = "trigger-press"
 
@@ -99,6 +99,8 @@ function SelectionTooltip({
 export function SelectionToolbarTooltip(
   props: Omit<SelectionTooltipProps, "container" | "positionerClassName">,
 ) {
+  const shadowWrapper = use(ShadowWrapperContext)
+
   return (
     <SelectionTooltip
       container={shadowWrapper ?? document.body}

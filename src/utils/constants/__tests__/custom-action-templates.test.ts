@@ -4,11 +4,11 @@ import { compileLayout } from "@read-frog/layout-engine/core"
 import { lintLayout } from "@read-frog/layout-engine/editor"
 import { DEFAULT_LAYOUT } from "@read-frog/layout-engine/presets"
 import { describe, expect, it } from "vitest"
+import { selectionToolbarCustomActionsSchema } from "@/types/config/selection-toolbar"
 import {
   buildSelectionToolbarCustomActionSystemPrompt,
   replaceSelectionToolbarCustomActionPromptTokens,
-} from "@/entrypoints/selection.content/selection-toolbar/custom-action-prompt"
-import { selectionToolbarCustomActionsSchema } from "@/types/config/selection-toolbar"
+} from "@/utils/custom-action-prompt"
 import { SUPPORTED_UI_LOCALES } from "@/utils/i18n/locales"
 import { CUSTOM_ACTION_LAYOUT_HOST } from "@/utils/layout-host/host"
 import {
