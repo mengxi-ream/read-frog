@@ -1,5 +1,8 @@
 import type { SubtitlesProvidersAdapter } from "../../universal-adapter"
-import { NETFLIX_CONTROLS_GROUP_SELECTOR } from "@/utils/constants/subtitles"
+import {
+  NETFLIX_CONTROLS_GROUP_SELECTOR,
+  NETFLIX_TRANSLATE_BUTTON_ZOOM,
+} from "@/utils/constants/subtitles"
 import { removeReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
 import { renderSubtitlesTranslateButton } from "../../renderer/render-translate-button"
 
@@ -12,7 +15,7 @@ export function mountNetflixTranslateButton(adapter: SubtitlesProvidersAdapter):
   }
 
   removeNetflixTranslateButton()
-  mountedButton = renderSubtitlesTranslateButton({ adapter })
+  mountedButton = renderSubtitlesTranslateButton({ adapter, zoom: NETFLIX_TRANSLATE_BUTTON_ZOOM })
   group.insertBefore(mountedButton, group.firstChild)
 }
 

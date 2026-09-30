@@ -8,6 +8,7 @@ import {
   NETFLIX_PAGE_POLL_INTERVAL_MS,
   NETFLIX_PAGE_WAIT_TIMEOUT_MS,
 } from "@/utils/constants/subtitles"
+import { pollUntil } from "@/utils/poll"
 import { findCapturedTtml } from "./ttml-capture"
 
 interface TimedTextTrack {
@@ -28,14 +29,9 @@ interface NetflixPlayer {
 
 let replacedTrack: { movieId: number; track: TimedTextTrack } | null = null
 
-async function waitFor<T>(read: () => T | null): Promise<T | null> {
-  const deadline = Date.now() + NETFLIX_PAGE_WAIT_TIMEOUT_MS
-  let value = read()
-  while (value === null && Date.now() < deadline) {
-    await new Promise((resolve) => setTimeout(resolve, NETFLIX_PAGE_POLL_INTERVAL_MS))
-    value = read()
-  }
-  return value
+const PAGE_WAIT = {
+  timeoutMs: NETFLIX_PAGE_WAIT_TIMEOUT_MS,
+  intervalMs: NETFLIX_PAGE_POLL_INTERVAL_MS,
 }
 
 function getReadyPlayer(): NetflixPlayer | null {
@@ -89,7 +85,7 @@ async function handleRequest(
     translatable: false,
     ttml: null,
   }
-  const player = await waitFor(getReadyPlayer)
+  const player = await pollUntil(getReadyPlayer, PAGE_WAIT)
   if (!player) return response
 
   const movieId = player.getMovieId()
@@ -103,7 +99,7 @@ async function handleRequest(
   response.trackId = track?.trackId ?? null
   response.translatable = isTranslatable(track)
   if (action === "load" && track && response.translatable) {
-    response.ttml = await waitFor(() => findCapturedTtml(movieId, track.trackId))
+    response.ttml = await pollUntil(() => findCapturedTtml(movieId, track.trackId), PAGE_WAIT)
   }
   return response
 }
