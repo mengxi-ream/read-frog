@@ -27,7 +27,7 @@ interface NetflixPlayer {
   setTimedTextTrack: (track: TimedTextTrack) => void
 }
 
-let replacedTrack: { movieId: number; track: TimedTextTrack } | null = null
+let replacedTrack: { movieId: number; track: TimedTextTrack; pickedTrackId: string } | null = null
 
 const PAGE_WAIT = {
   timeoutMs: NETFLIX_PAGE_WAIT_TIMEOUT_MS,
@@ -68,7 +68,9 @@ function ensureTranslatableTrack(player: NetflixPlayer): TimedTextTrack | null {
     tracks[0]
   if (!next) return null
 
-  if (current) replacedTrack = { movieId: player.getMovieId(), track: current }
+  if (current) {
+    replacedTrack = { movieId: player.getMovieId(), track: current, pickedTrackId: next.trackId }
+  }
   player.setTimedTextTrack(next)
   return next
 }
@@ -90,8 +92,14 @@ async function handleRequest(
 
   const movieId = player.getMovieId()
   if (action === "restore") {
-    if (replacedTrack?.movieId === movieId) player.setTimedTextTrack(replacedTrack.track)
+    const previous = replacedTrack
     replacedTrack = null
+    if (
+      previous?.movieId === movieId &&
+      player.getTimedTextTrack()?.trackId === previous.pickedTrackId
+    ) {
+      player.setTimedTextTrack(previous.track)
+    }
   }
 
   const track = action === "load" ? ensureTranslatableTrack(player) : player.getTimedTextTrack()
