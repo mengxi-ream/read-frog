@@ -69,7 +69,7 @@
 
 🔊 播放器默认静音，记得打开声音。
 
-https://github.com/user-attachments/assets/b00d0031-94cd-4d5d-9e55-dd5353428983
+https://github.com/user-attachments/assets/2556f7bb-f6d4-45ac-845b-975be8572d68
 
 ## 👋🏻 快速开始 & 加入我们的社区
 

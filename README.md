@@ -69,7 +69,7 @@ Master languages effortlessly and deeply with AI, right in your browser.
 
 🔊 The player starts muted — turn the sound on.
 
-https://github.com/user-attachments/assets/0f93fe8f-f87c-446d-a174-c45642d1a6ff
+https://github.com/user-attachments/assets/c000c3e7-40af-4621-8a7f-72a685732c31
 
 ## 👋🏻 Getting Started & Join Our Community
 

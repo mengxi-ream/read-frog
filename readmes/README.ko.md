@@ -68,7 +68,7 @@
 
 🔊 플레이어가 음소거 상태로 시작되니 소리를 켜고 보세요.
 
-https://github.com/user-attachments/assets/0f93fe8f-f87c-446d-a174-c45642d1a6ff
+https://github.com/user-attachments/assets/c000c3e7-40af-4621-8a7f-72a685732c31
 
 ## 👋🏻 시작하기 및 커뮤니티 참여
 

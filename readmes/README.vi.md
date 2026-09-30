@@ -68,7 +68,7 @@ Học ngôn ngữ dễ hơn và sâu hơn ngay trong trình duyệt của bạn.
 
 🔊 Trình phát mặc định tắt tiếng, hãy bật âm thanh.
 
-https://github.com/user-attachments/assets/0f93fe8f-f87c-446d-a174-c45642d1a6ff
+https://github.com/user-attachments/assets/c000c3e7-40af-4621-8a7f-72a685732c31
 
 ## 👋🏻 Bắt đầu và tham gia cộng đồng
 

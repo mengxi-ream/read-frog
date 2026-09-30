@@ -68,7 +68,7 @@ Domina idiomas con más facilidad y profundidad usando IA directamente en tu nav
 
 🔊 El reproductor empieza silenciado: activa el sonido.
 
-https://github.com/user-attachments/assets/0f93fe8f-f87c-446d-a174-c45642d1a6ff
+https://github.com/user-attachments/assets/c000c3e7-40af-4621-8a7f-72a685732c31
 
 ## 👋🏻 Primeros pasos y comunidad
 
