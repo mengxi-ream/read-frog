@@ -66,10 +66,9 @@ Học ngôn ngữ dễ hơn và sâu hơn ngay trong trình duyệt của bạn.
 
 ## 📺 Demo
 
-<div align="center">
-  <img src="../assets/node-translation-demo.gif" width="38%" alt="Giao diện popup của Read Frog" />
-  <img src="../assets/page-translation-demo.gif" width="60%" alt="Giao diện dịch của Read Frog" />
-</div>
+🔊 Trình phát mặc định tắt tiếng, hãy bật âm thanh.
+
+https://github.com/user-attachments/assets/c000c3e7-40af-4621-8a7f-72a685732c31
 
 ## 👋🏻 Bắt đầu và tham gia cộng đồng
 

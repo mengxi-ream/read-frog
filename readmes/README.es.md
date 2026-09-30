@@ -66,10 +66,9 @@ Domina idiomas con más facilidad y profundidad usando IA directamente en tu nav
 
 ## 📺 Demo
 
-<div align="center">
-  <img src="../assets/node-translation-demo.gif" width="38%" alt="Interfaz emergente de Read Frog" />
-  <img src="../assets/page-translation-demo.gif" width="60%" alt="Interfaz de traducción de Read Frog" />
-</div>
+🔊 El reproductor empieza silenciado: activa el sonido.
+
+https://github.com/user-attachments/assets/c000c3e7-40af-4621-8a7f-72a685732c31
 
 ## 👋🏻 Primeros pasos y comunidad
 

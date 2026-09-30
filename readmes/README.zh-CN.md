@@ -67,10 +67,9 @@
 
 ## 📺 演示
 
-<div align="center">
-  <img src="../assets/node-translation-demo.gif" width="38%" alt="Read Frog 弹窗界面" />
-  <img src="../assets/page-translation-demo.gif" width="60%" alt="Read Frog 翻译界面" />
-</div>
+🔊 播放器默认静音，记得打开声音。
+
+https://github.com/user-attachments/assets/2556f7bb-f6d4-45ac-845b-975be8572d68
 
 ## 👋🏻 快速开始 & 加入我们的社区
 

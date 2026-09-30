@@ -66,10 +66,9 @@
 
 ## 📺 デモ
 
-<div align="center">
-  <img src="../assets/node-translation-demo.gif" width="38%" alt="Read Frog ポップアップ画面" />
-  <img src="../assets/page-translation-demo.gif" width="60%" alt="Read Frog 翻訳画面" />
-</div>
+🔊 プレーヤーはミュートで始まります。音声をオンにしてご覧ください。
+
+https://github.com/user-attachments/assets/c000c3e7-40af-4621-8a7f-72a685732c31
 
 ## 👋🏻 はじめに・コミュニティ
 

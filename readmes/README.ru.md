@@ -66,10 +66,9 @@ Open-source расширение для браузера, помогающее �
 
 ## 📺 Демо
 
-<div align="center">
-  <img src="../assets/node-translation-demo.gif" width="38%" alt="Интерфейс popup Read Frog" />
-  <img src="../assets/page-translation-demo.gif" width="60%" alt="Интерфейс перевода Read Frog" />
-</div>
+🔊 Плеер запускается без звука — включите его.
+
+https://github.com/user-attachments/assets/c000c3e7-40af-4621-8a7f-72a685732c31
 
 ## 👋🏻 Начало работы и сообщество
 

@@ -66,10 +66,9 @@
 
 ## 📺 데모
 
-<div align="center">
-  <img src="../assets/node-translation-demo.gif" width="38%" alt="Read Frog 팝업 인터페이스" />
-  <img src="../assets/page-translation-demo.gif" width="60%" alt="Read Frog 번역 인터페이스" />
-</div>
+🔊 플레이어가 음소거 상태로 시작되니 소리를 켜고 보세요.
+
+https://github.com/user-attachments/assets/c000c3e7-40af-4621-8a7f-72a685732c31
 
 ## 👋🏻 시작하기 및 커뮤니티 참여
 
