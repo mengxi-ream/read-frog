@@ -67,10 +67,9 @@ Master languages effortlessly and deeply with AI, right in your browser.
 
 ## 📺 Demo
 
-<div align="center">
-  <img src="assets/node-translation-demo.gif" width="38%" alt="Read Frog Popup Interface" />
-  <img src="assets/page-translation-demo.gif" width="60%" alt="Read Frog Translation Interface" />
-</div>
+🔊 The player starts muted — turn the sound on.
+
+https://github.com/user-attachments/assets/0f93fe8f-f87c-446d-a174-c45642d1a6ff
 
 ## 👋🏻 Getting Started & Join Our Community
 

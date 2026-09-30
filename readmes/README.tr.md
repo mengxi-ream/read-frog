@@ -66,10 +66,9 @@ AI ile dilleri doğrudan tarayıcınızda daha kolay ve derin öğrenin.
 
 ## 📺 Demo
 
-<div align="center">
-  <img src="../assets/node-translation-demo.gif" width="38%" alt="Read Frog açılır pencere arayüzü" />
-  <img src="../assets/page-translation-demo.gif" width="60%" alt="Read Frog çeviri arayüzü" />
-</div>
+🔊 Oynatıcı sessiz başlar, sesi açmayı unutmayın.
+
+https://github.com/user-attachments/assets/0f93fe8f-f87c-446d-a174-c45642d1a6ff
 
 ## 👋🏻 Başlangıç ve topluluk
 
