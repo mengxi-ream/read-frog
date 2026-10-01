@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.49.3
+
+### Patch Changes
+
+- [#2279](https://github.com/mengxi-ream/read-frog/pull/2279) [`9317728`](https://github.com/mengxi-ream/read-frog/commit/931772800526323a5b6032306b427de997591f91) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(custom-actions): add a button beside the Action config description that plays the custom AI actions intro film
+
 ## 1.49.2
 
 ### Patch Changes
