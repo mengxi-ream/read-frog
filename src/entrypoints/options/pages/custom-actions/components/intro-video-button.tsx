@@ -29,7 +29,7 @@ export function IntroVideoButton() {
 
   return (
     <Dialog>
-      <DialogTrigger render={<Button type="button" variant="ghost" size="xs" />}>
+      <DialogTrigger render={<Button type="button" variant="outline" size="xs" />}>
         <Icon icon="tabler:player-play" />
         {i18n.t("options.selectionToolbar.customActions.introVideo.trigger")}
       </DialogTrigger>
