@@ -44,8 +44,10 @@ const embedWrapperCSS = `
 
 export function renderSubtitlesTranslateButton({
   adapter,
+  zoom,
 }: {
   adapter: SubtitlesProvidersAdapter
+  zoom?: number
 }): HTMLDivElement {
   const existingContainer = document.querySelector<HTMLDivElement>(
     `#${TRANSLATE_BUTTON_CONTAINER_ID}`,
@@ -64,7 +66,11 @@ export function renderSubtitlesTranslateButton({
   const shadowHost = createReactShadowHost(component, {
     position: "inline",
     inheritStyles: false,
-    cssContent: [themeCSS, adapter.embedded ? embedWrapperCSS : wrapperCSS],
+    cssContent: [
+      themeCSS,
+      adapter.embedded ? embedWrapperCSS : wrapperCSS,
+      ...(zoom ? [`:host { height: auto; zoom: ${zoom}; }`] : []),
+    ],
     forcedTheme: SUBTITLES_THEME,
     ...(adapter.embedded && { style: { position: "relative" } }),
   })

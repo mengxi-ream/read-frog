@@ -65,6 +65,22 @@ export const XCOM_PLAYER_MUTATION_DEBOUNCE_MS = 50
 // x.com renders captions from a partial duplicate track labelled like this.
 export const XCOM_RENDER_TRACK_LABEL = "clone"
 
+// Netflix specific
+export const NETFLIX_WATCH_PATH_PATTERN = /^\/watch\/(\d+)/
+export const NETFLIX_TTML_URL_PATTERN =
+  /^https:\/\/[^/]+\.oca\.nflxvideo\.net\/\?([ovet]=[^=&]+&?){4}$/
+export const NETFLIX_PLAYER_SELECTOR = "[data-uia='player']"
+export const NETFLIX_CONTROLS_SELECTOR = "[data-uia='controls-standard']"
+export const NETFLIX_CONTROLS_GROUP_SELECTOR =
+  "div:has(> div > [data-uia='control-audio-subtitle'])"
+export const NETFLIX_NATIVE_SUBTITLES_SELECTOR = ".player-timedtext"
+export const NETFLIX_SUBTITLES_REQUEST_TYPE = "READ_FROG_NETFLIX_SUBTITLES"
+export const NETFLIX_SUBTITLES_RESPONSE_TYPE = "READ_FROG_NETFLIX_SUBTITLES_DONE"
+export const NETFLIX_PAGE_WAIT_TIMEOUT_MS = 5000
+export const NETFLIX_PAGE_POLL_INTERVAL_MS = 100
+export const NETFLIX_WATCH_POLL_INTERVAL_MS = 1000
+export const NETFLIX_TRANSLATE_BUTTON_ZOOM = 1.4
+
 // YouTube player wait constants
 export const MAX_PLAYER_WAIT_ATTEMPTS = 50
 export const PLAYER_WAIT_INTERVAL_MS = 100

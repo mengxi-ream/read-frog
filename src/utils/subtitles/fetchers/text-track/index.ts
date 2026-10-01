@@ -6,7 +6,7 @@ import {
   TEXT_TRACK_NATIVE_REHIDE_DELAY_MS,
 } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
-import { sleep } from "@/utils/sleep"
+import { pollUntil } from "@/utils/poll"
 import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
 import { cuesToFragments } from "./cues"
 
@@ -188,13 +188,13 @@ export class TextTrackFetcher implements SubtitlesFetcher {
   }
 
   private async waitForCues(track: TextTrack): Promise<TextTrackCueList> {
-    const attempts = TEXT_TRACK_CUE_WAIT_TIMEOUT_MS / TEXT_TRACK_CUE_POLL_INTERVAL_MS
-    for (let i = 0; i <= attempts; i++) {
-      if (track.cues?.length) {
-        return track.cues
-      }
-      await sleep(TEXT_TRACK_CUE_POLL_INTERVAL_MS)
+    const cues = await pollUntil(() => (track.cues?.length ? track.cues : null), {
+      timeoutMs: TEXT_TRACK_CUE_WAIT_TIMEOUT_MS,
+      intervalMs: TEXT_TRACK_CUE_POLL_INTERVAL_MS,
+    })
+    if (!cues) {
+      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
     }
-    throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
+    return cues
   }
 }
