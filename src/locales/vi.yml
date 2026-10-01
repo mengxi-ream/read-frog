@@ -646,6 +646,9 @@ options:
       pageDescription: Viết prompt của riêng bạn và chạy trên văn bản đã chọn từ thanh công cụ chọn văn bản. Dữ liệu, kiểu dáng và cách tương tác của kết quả đều có thể tùy chỉnh.
       description: Thêm các hành động AI có cấu trúc của riêng bạn cho văn bản được chọn
       configTitle: Cấu hình hành động
+      introVideo:
+        trigger: "Xem video"
+        title: "Hành động AI tùy chỉnh trong 30 giây"
       builtIn: Tích hợp
       add: Thêm hành động AI
       edit: Chỉnh sửa hành động AI

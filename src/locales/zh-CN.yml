@@ -647,6 +647,9 @@ options:
       pageDescription: 编写自己的提示词，从划词工具栏对选中的文本运行。指令生成结果的数据、样式和交互都可以自定义。
       description: 为划词添加你自己的结构化 AI 操作
       configTitle: 指令配置
+      introVideo:
+        trigger: "观看视频"
+        title: "30 秒了解自定义 AI 指令"
       builtIn: 内置
       badges:
         new: 新增

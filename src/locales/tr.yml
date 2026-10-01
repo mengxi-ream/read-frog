@@ -646,6 +646,9 @@ options:
       pageDescription: Kendi istemlerinizi yazın ve seçim araç çubuğundan seçili metin üzerinde çalıştırın. Her sonucun verileri, stili ve etkileşimleri tamamen özelleştirilebilir.
       description: Seçilen metin için kendi yapılandırılmış AI eylemlerinizi ekleyin
       configTitle: Eylem yapılandırması
+      introVideo:
+        trigger: "Videoyu izle"
+        title: "30 saniyede Özel AI Eylemleri"
       builtIn: Yerleşik
       add: AI eylemi ekle
       edit: AI eylemini düzenle

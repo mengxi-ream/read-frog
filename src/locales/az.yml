@@ -647,6 +647,9 @@ options:
       pageDescription: Öz təlimatlarınızı yazın və seçim alətlər panelindən seçilmiş mətnə tətbiq edin. Hər nəticənin məlumatları, üslubu və qarşılıqlı əlaqəsi tam fərdiləşdirilə bilər.
       description: Seçilmiş mətn üçün strukturlaşdırılmış fərdi süni intellekt əməliyyatları əlavə edin
       configTitle: Əməliyyat konfiqurasiyası
+      introVideo:
+        trigger: "Videoya baxın"
+        title: "30 saniyədə fərdi süni intellekt əməliyyatları"
       builtIn: Daxili
       add: Süni intellekt əməliyyatı əlavə et
       edit: Süni intellekt əməliyyatını redaktə et

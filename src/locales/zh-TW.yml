@@ -647,6 +647,9 @@ options:
       pageDescription: 撰寫自己的提示詞，從劃詞工具列對選取的文字執行。指令產生結果的資料、樣式和互動都可以自訂。
       description: 為選取文字新增自訂的結構化 AI 指令
       configTitle: 指令設定
+      introVideo:
+        trigger: "觀看影片"
+        title: "30 秒了解自訂 AI 指令"
       builtIn: 內建
       badges:
         new: 新增

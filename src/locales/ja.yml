@@ -646,6 +646,9 @@ options:
       pageDescription: 独自のプロンプトを作成し、選択ツールバーから選択したテキストに対して実行します。生成結果のデータ、スタイル、インタラクションはすべてカスタマイズできます。
       description: 選択テキスト向けに独自の構造化 AI アクションを追加
       configTitle: アクション設定
+      introVideo:
+        trigger: "動画を見る"
+        title: "30 秒でわかるカスタム AI アクション"
       builtIn: 組み込み
       add: AI アクションを追加
       edit: AI アクションを編集
