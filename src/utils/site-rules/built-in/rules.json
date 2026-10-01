@@ -106,8 +106,6 @@
       ".vector-header"
     ],
     "forceInlineStyleSelectors": [".chemf", ".mwe-math-element", "[role=math]", ".nowrap"],
-    "minCharacters": 4,
-    "minWords": 2,
     "injectedCss": ".read-frog-translated-content-wrapper {content-visibility:auto;}\n.no-article-text-sister-projects li { height:unset; }",
     "excludeSelectors.add": [".lazy-image-placeholder"],
     "preserveTextSelectors": [".chemf", ".mwe-math-element", "[role=math]", ".nowrap"],
