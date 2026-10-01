@@ -4,6 +4,7 @@ import type { SelectionToolbarCustomAction } from "@/types/config/selection-tool
 import type { ValidatedNoteSuggestion } from "@/utils/note-suggestion/types"
 import { useAtomValue } from "jotai"
 import { useCallback, useRef, useState } from "react"
+import { isAbortError } from "@/components/ui/selection-popover/inline-error"
 import { classifyResolvedProvider } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { streamBackgroundNoteSuggestion } from "@/utils/content-script/background-stream-client"
@@ -19,7 +20,6 @@ import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { fetchHostedAiStatus } from "@/utils/providers/provider-ref"
 import { getTopLevelReasoning } from "@/utils/providers/reasoning"
-import { isAbortError } from "../inline-error"
 import { buildNoteSuggestionPrompts } from "./prompt"
 
 export interface NoteSuggestionSessionResult {

@@ -6,7 +6,7 @@ import { SelectionToolbarCustomActionTrigger } from "../custom-action-trigger"
 
 const openToolbarCustomActionMock = vi.fn<(...args: any[]) => any>()
 
-vi.mock("../../../components/selection-tooltip", () => ({
+vi.mock("@/components/ui/selection-popover/selection-tooltip", () => ({
   SelectionToolbarTooltip: ({ render: renderElement }: { render: ReactElement }) => renderElement,
 }))
 

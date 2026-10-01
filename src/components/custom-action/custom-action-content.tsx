@@ -7,10 +7,10 @@ import { use, useMemo, useState } from "react"
 import { CustomActionLayoutView } from "@/components/layout-host/custom-action-layout-view"
 import { ThemeContext } from "@/components/providers/theme-provider"
 import { Thinking } from "@/components/thinking"
+import { SelectionSourceContent } from "@/components/ui/selection-popover/selection-source-content"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { i18n } from "@/utils/i18n"
 import { resolveActionLayout } from "@/utils/layout-host/resolve"
-import { SelectionSourceContent } from "../../components/selection-source-content"
 
 interface CustomActionContentProps {
   action: SelectionToolbarCustomAction | null

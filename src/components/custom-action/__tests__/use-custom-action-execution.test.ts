@@ -4,9 +4,9 @@ import { act, render, screen, waitFor } from "@testing-library/react"
 import { createElement } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { CUSTOM_ACTION_CONTEXT_CHAR_LIMIT } from "@/utils/custom-action-prompt"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
-import { CUSTOM_ACTION_CONTEXT_CHAR_LIMIT } from "../../../utils"
 import {
   buildCustomActionExecutionPlan,
   useCustomActionWebPageContext,

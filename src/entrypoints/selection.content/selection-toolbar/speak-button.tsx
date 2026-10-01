@@ -3,11 +3,14 @@ import { IconLoader2, IconPlayerStopFilled, IconVolume } from "@tabler/icons-rea
 import { useAtomValue } from "jotai"
 import { createContext, use, useCallback } from "react"
 import { toastManager } from "@/components/ui/base-ui/toast"
+import {
+  SelectionToolbarTooltip,
+  useSelectionTooltipState,
+} from "@/components/ui/selection-popover/selection-tooltip"
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
-import { SelectionToolbarTooltip, useSelectionTooltipState } from "../components/selection-tooltip"
 import { selectionContentAtom } from "./atoms"
 
 // Reads the selection aloud from the toolbar.

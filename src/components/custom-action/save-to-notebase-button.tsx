@@ -1,11 +1,11 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { IconBookmarkPlus } from "@tabler/icons-react"
 import { Button } from "@/components/ui/base-ui/button"
+import { SELECTION_TOOLBAR_FOOTER_COMPACT_CLASSES } from "@/components/ui/selection-popover/selection-toolbar-footer-compact"
 import { authClient } from "@/utils/auth/auth-client"
 import { i18n } from "@/utils/i18n"
 import { sanitizeCustomActionNotebaseConnection } from "@/utils/notebase/connection"
 import { cn } from "@/utils/styles/utils"
-import { SELECTION_TOOLBAR_FOOTER_COMPACT_CLASSES } from "../../components/selection-toolbar-footer-compact"
 import { useSaveToNotebase } from "./use-save-to-notebase"
 
 export function SaveToNotebaseButton({

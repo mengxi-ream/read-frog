@@ -2,9 +2,9 @@ import type { ThinkingSnapshot } from "@/types/background-stream"
 import { IconLoader2 } from "@tabler/icons-react"
 import { Activity } from "react"
 import { Thinking } from "@/components/thinking"
-import { CopyButton } from "../../components/copy-button"
-import { SelectionSourceContent } from "../../components/selection-source-content"
-import { SpeakButton } from "../../components/speak-button"
+import { CopyButton } from "@/components/ui/selection-popover/copy-button"
+import { SelectionSourceContent } from "@/components/ui/selection-popover/selection-source-content"
+import { SpeakButton } from "@/components/ui/selection-popover/speak-button"
 
 interface TranslationContentProps {
   selectionContent: string | null | undefined
