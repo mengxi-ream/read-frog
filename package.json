@@ -113,7 +113,7 @@
     "lucide-react": "^1.48.0",
     "morphdom": "^2.7.8",
     "motion": "^13.4.4",
-    "posthog-js": "^1.434.15",
+    "posthog-js": "^1.434.16",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-error-boundary": "^6.1.6",
