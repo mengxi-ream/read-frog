@@ -647,6 +647,9 @@ options:
       pageDescription: Escribe tus propios prompts y ejecútalos sobre el texto seleccionado desde la barra de selección. Los datos, el estilo y la interacción de cada resultado son totalmente personalizables.
       description: Añade tus propias acciones AI estructuradas para texto seleccionado
       configTitle: Configuración de acciones
+      introVideo:
+        trigger: "Ver vídeo"
+        title: "Acciones AI personalizadas en 30 segundos"
       builtIn: Integrada
       add: Añadir acción AI
       edit: Editar acción AI

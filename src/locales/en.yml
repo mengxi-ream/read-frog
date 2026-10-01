@@ -647,6 +647,9 @@ options:
       pageDescription: Write your own prompts and run them on selected text from the selection toolbar. The data, style and interactions of each result are all yours to customize.
       description: Add your own structured AI actions for selected text
       configTitle: Action config
+      introVideo:
+        trigger: "Watch video"
+        title: "Custom AI Actions in 30 seconds"
       builtIn: Built-in
       badges:
         new: New
