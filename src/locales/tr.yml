@@ -848,6 +848,14 @@ options:
             9. Bir alan bilinmiyorsa tahmin etmek yerine boş bir dize döndürün.
             10. Açıklık için kaynak biçimde metin gerekmedikçe tüm metin alanlarını {{targetLanguage}} dilinde yanıtlayın.
             11. Cümledeki biçim, seçilen sözcüğün Cümlede nerede durduğunu işaretler. {"text": ...} öğelerinden oluşan kısa bir JSON dizisi içeren bir DİZEDİR; her öğe Cümleden harfi harfine alıntı yapar, örneğin [{"text":"blossoms"}]. Cümle sözcüğü ayrı parçalara bölüyorsa (örneğin "Er ruft seine Mutter an" içindeki "anrufen"), her parça için sırayla bir öğe verin: [{"text":"ruft"},{"text":"an"}]. İçteki tırnak işaretlerini doğru şekilde kaçış karakteriyle yazın.
+            12. Akılda tutma ipuçları, iyi bir öğretmenin tam da bu sözcük için yapacağı gibi, öğrencinin seçilen sözcüğün kendisini (çevirisini değil, kendi dilindeki hâlini) hatırlamasına yardım eder. Her satırda bir tane olmak üzere en fazla 3 ipucu verin, en yararlısı başta olsun. Yalnızca gerçekten işe yarayan ipuçlarını yazın; zayıf bir ipucu eklemektense az ipucu daha iyidir. Gerçekten işe yarayan bir şey yoksa zorla ipucu üretmeyin, boş bir dize döndürün. Her satır tek bir tekniktir: satıra tekniğin adı ve iki nokta ile başlayın; teknik adı da içerik de {{targetLanguage}} dilinde olsun. Önce sözcüğün nasıl kurulduğundan başlayın, sonra gerçekten işe yarayan başka şeyleri ekleyin:
+               - Sözcük yapısı: anlamlı parçaları (kök, ön ek, son ek ya da birleşik sözcüğü oluşturan sözcükler) ve bunların anlamı nasıl oluşturduğu.
+               - Karakterler: Çince karakterlerle yazılan bir sözcük için (Çince, Japoncadaki kanji sözcükler, Çince kökenli Korece sözcükler) her karakterin anlamı ya da bir karakterin parçaları.
+               - Köken: sözcüğün nereden geldiği ya da öğrencinin muhtemelen bildiği ilgili bir sözcük (başka bir dilde aynı kökten bir sözcük, bir alıntı sözcük, başka bir dilde aynı karakterlerle yazılan sözcük).
+               - Eş / Karşıt anlamlı: yakın anlamlı bir sözcük ve farkı ya da karşıt anlamlısı.
+               - Karıştırılan sözcük: yazılışı ya da söylenişi benzeyen bir sözcük ve ikisinin nasıl ayırt edileceği.
+               - Eşdizim: sözcüğün sıkça kullanıldığı, tek parça olarak öğrenmeye değer bir kalıp.
+               Uymayan teknikleri atlayın; bir tekniğin uymadığını söyleyen satır yazmayın. Her ipucu Tanım'da olmayan bir şey öğretmelidir: anlamı başka sözlerle tekrarlamayın, Cümle'yi yeniden anlatmayın, çekimli biçimi açıklamayın. Yalnızca emin olduğunuz bilgileri yazın: köken, kök ya da karakter parçası uydurmayın. Tartışmalı ya da efsane niteliğindeki köken hikâyelerini, “sadece eğlenceli bir hatırlama yolu” diye sunarak bile yazmayın (sincere “balmumsuz” anlamından gelmez, posh da bir kısaltma değildir). Bir sözcüğü parçalara ya da karakterlere yalnızca bunlar gerçekten anlamı oluşturuyorsa ayırın; 犹豫 ya da 葡萄 gibi sözcükler bir bütündür, onlar için başka bir teknik kullanın. Hiçbir dilde ses benzerliğine dayalı kelime oyunu yapmayın ve bir sözcüğü alakasız sözcüklere bölmeyin.
 
             ## Örnekler
 
@@ -862,6 +870,9 @@ options:
             - Cümledeki biçim: [{"text":"blossoms"}]
             - Tanım: 花；花朵（尤指果树的花）
             - Cümle çevirisi: 樱花短暂的美丽提醒我们珍惜每一刻。
+            - Akılda tutma ipuçları:
+              词源：和 bloom（开花）同源，bl- 开头的 bloom、blossom 都和开花有关
+              近义词：bloom 多指花开的状态，blossom 常指果树（樱桃、苹果）的花
             - Zorluk: B2
 
             ### Örnek 2
@@ -875,6 +886,9 @@ options:
             - Cümledeki biçim: [{"text":"感動"}]
             - Tanım: Being deeply moved; emotional touch
             - Cümle çevirisi: I thought this movie was boring, but the ending was moving.
+            - Akılda tutma ipuçları:
+              Characters: 感 (feel) + 動 (move): your feelings are moved.
+              Collocation: 感動する = to be moved; 感動的 = moving, touching.
             - Zorluk: B1
           prompt: |-
             ## Girdi
@@ -895,6 +909,8 @@ options:
           fieldDefinitionDescription: "Bağlamdaki anlam için kısa bir tanım."
           fieldSentenceTranslation: "Cümle çevirisi"
           fieldSentenceTranslationDescription: "Yalnızca Cümlenin çevirisi."
+          fieldMemoryTips: "Akılda tutma ipuçları"
+          fieldMemoryTipsDescription: "Sözcüğü hatırlamanın yolları: en fazla 3 ipucu, her satırda bir tane, her biri teknik adı ve iki nokta ile başlar (ör. Sözcük yapısı: …); gerçekten işe yarayan bir şey yoksa boş dize."
           fieldDifficulty: "Zorluk"
           fieldDifficultyDescription: "Tahmini CEFR zorluk düzeyi: A1, A2, B1, B2, C1 veya C2."
         sentenceAnalysis:

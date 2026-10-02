@@ -87,6 +87,17 @@ export function createDictionaryDefinition(providerId: string): CustomActionDefi
         i18n.t(`${T_PREFIX}.dictionary.fieldSentenceTranslationDescription`),
         "dictionary-context-translation",
       ),
+      // Plain text, one tip per line, and empty when nothing helps: a JSON
+      // array here lost every tip on some answers (models cut the inner string
+      // short), and plain lines read as they are in a Notebase card. Not the
+      // last field: after this long value, deepseek-v4-flash broke the end of
+      // its JSON on 4% of answers; a short Difficulty last keeps it closing.
+      createOutputSchemaField(
+        i18n.t(`${T_PREFIX}.dictionary.fieldMemoryTips`),
+        "string",
+        i18n.t(`${T_PREFIX}.dictionary.fieldMemoryTipsDescription`),
+        "dictionary-memory-tips",
+      ),
       createOutputSchemaField(
         i18n.t(`${T_PREFIX}.dictionary.fieldDifficulty`),
         "string",

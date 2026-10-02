@@ -146,7 +146,7 @@ function BuiltInActionCard({ action }: { action: SelectionToolbarCustomAction })
     >
       <EntityListItem.Badges>
         {action.id === BUILT_IN_DICTIONARY_ACTION_ID && (
-          <RecentChangeBadge kind="updated" date="2026-09-27" />
+          <RecentChangeBadge kind="updated" date="2026-10-02" />
         )}
         {action.id === BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID && (
           <RecentChangeBadge kind="new" date="2026-09-27" />

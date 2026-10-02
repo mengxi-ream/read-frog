@@ -24,7 +24,7 @@ type Field = SelectionToolbarCustomActionOutputField
 // built-in Dictionary, and copies of it). Anchored at the end so `…-context`
 // never claims `…-context-translation` or `…-context-term`.
 const DICTIONARY_SLOT_ID_RE =
-  /(?:^|-)dictionary-(term|phonetic|part-of-speech|definition|context-translation|context-term|context|difficulty)$/
+  /(?:^|-)dictionary-(term|phonetic|part-of-speech|definition|context-translation|context-term|context|difficulty|memory-tips)$/
 
 const DICTIONARY_SLOT_BY_ID_SUFFIX: Record<string, DictionarySlot> = {
   term: "term",
@@ -35,6 +35,7 @@ const DICTIONARY_SLOT_BY_ID_SUFFIX: Record<string, DictionarySlot> = {
   "context-term": "contextTerm",
   "context-translation": "contextTranslation",
   difficulty: "difficulty",
+  "memory-tips": "memoryTips",
 }
 
 // `sentence-analysis-*` (the Sentence Analysis preset) and

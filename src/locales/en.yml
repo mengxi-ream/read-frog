@@ -856,6 +856,14 @@ options:
             9. If a field is unknown, return an empty string instead of guessing.
             10. Respond in {{targetLanguage}} for all textual fields unless source-form text is required for clarity.
             11. Term in Sentence marks where the selected term stands in Sentence. It is a STRING containing a compact JSON array of {"text": ...} items, each quoting Sentence character for character, e.g. [{"text":"blossoms"}]. If Sentence splits the term into separate parts (e.g. "anrufen" in "Er ruft seine Mutter an"), give one item per part, in order: [{"text":"ruft"},{"text":"an"}]. Escape the inner quotes correctly.
+            12. Memory Tips helps the learner remember the selected term itself (in its own language, not its translation), the way a good teacher would for this particular term. Give up to 3 tips, one per line, the most helpful first. Only give tips that really help; fewer is better than a weak one, and if nothing really helps, return an empty string rather than forcing one. Each line is one technique: begin it with the technique's name and a colon, both in {{targetLanguage}}. Start from how the term is built, then add what else really helps:
+               - Word parts: its meaningful parts (root, prefix, suffix, or the words of a compound) and how they add up to the meaning.
+               - Characters: for a term written in Chinese characters (Chinese, Japanese kanji, Korean words of Chinese origin), what each character means, or the components of a character.
+               - Origin: where it comes from, or a related word the learner likely knows (a cognate, a loanword, the same characters in another language).
+               - Synonym / Antonym: a near-synonym and how it differs, or an opposite.
+               - Look-alike: a word that looks or sounds alike, and how to tell them apart.
+               - Collocation: a common phrase it is used in, worth learning as one chunk.
+               Skip techniques that don't fit, and never write a line saying one doesn't apply. Each tip must teach something Definition does not: never restate the meaning, retell Sentence, or explain the inflected form. State only facts you are sure of: never invent an etymology, a root or a character component. Leave out origin stories that are disputed or myths, even framed as just a fun way to remember (sincere does not come from 'without wax', and posh is not an acronym). Split a word into parts or characters only when they really build its meaning; a word like 犹豫 or 葡萄 is one unit, so use another technique for it. No sound-alike puns in any language, and no splitting a word into unrelated words.
 
             ## Examples
 
@@ -870,6 +878,9 @@ options:
             - Term in Sentence: [{"text":"blossoms"}]
             - Definition: 花；花朵（尤指果树的花）
             - Sentence Translation: 樱花短暂的美丽提醒我们珍惜每一刻。
+            - Memory Tips:
+              词源：和 bloom（开花）同源，bl- 开头的 bloom、blossom 都和开花有关
+              近义词：bloom 多指花开的状态，blossom 常指果树（樱桃、苹果）的花
             - Difficulty: B2
 
             ### Example 2
@@ -883,6 +894,9 @@ options:
             - Term in Sentence: [{"text":"感動"}]
             - Definition: Being deeply moved; emotional touch
             - Sentence Translation: I thought this movie was boring, but the ending was moving.
+            - Memory Tips:
+              Characters: 感 (feel) + 動 (move): your feelings are moved.
+              Collocation: 感動する = to be moved; 感動的 = moving, touching.
             - Difficulty: B1
           prompt: |-
             ## Input
@@ -903,6 +917,8 @@ options:
           fieldDefinitionDescription: One concise definition for the contextual sense.
           fieldSentenceTranslation: Sentence Translation
           fieldSentenceTranslationDescription: The translation of Sentence only.
+          fieldMemoryTips: "Memory Tips"
+          fieldMemoryTipsDescription: "Ways to remember the term: up to 3 tips, one per line, each beginning with its technique and a colon (e.g. Word parts: …); an empty string when nothing really helps."
           fieldDifficulty: Difficulty
           fieldDifficultyDescription: Estimated CEFR difficulty level A1, A2, B1, B2, C1, or C2.
         sentenceAnalysis:
