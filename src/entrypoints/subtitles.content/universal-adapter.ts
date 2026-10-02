@@ -16,6 +16,7 @@ import {
   SUBTITLES_SOURCE,
   TRANSLATE_BUTTON_CONTAINER_ID,
 } from "@/utils/constants/subtitles"
+import { getSourceDocumentTitle } from "@/utils/content/document-title"
 import { getDocumentDescription } from "@/utils/content/metadata"
 import { resolveLanguageCodeFromLocale } from "@/utils/content/page-language"
 import { waitForElement } from "@/utils/dom/wait-for-element"
@@ -261,7 +262,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
     await downloadSubtitlesAsSrt({
       subtitles: this.sourceProcessedSubtitles,
-      pageTitle: document.title || "",
+      pageTitle: getSourceDocumentTitle(),
       videoId: this.config.getVideoId?.(),
     })
   }
@@ -950,7 +951,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       providerRef && canProviderRefGenerateText(providerRef) ? providerRef : null
 
     const videoContext: SubtitlesVideoContext = {
-      videoTitle: document.title || "",
+      videoTitle: getSourceDocumentTitle(),
       videoDescription: getDocumentDescription(document),
       subtitlesTextContent: this.sessionSubtitles.map((f) => f.text).join(""),
     }

@@ -11,6 +11,7 @@ import {
   PROCESS_LOOK_AHEAD_MS,
   TRANSLATION_BATCH_SIZE,
 } from "@/utils/constants/subtitles"
+import { getSourceDocumentTitle } from "@/utils/content/document-title"
 import { resolveLanguageCodeFromLocale } from "@/utils/content/page-language"
 import { i18n } from "@/utils/i18n"
 import { canProviderRefGenerateText } from "@/utils/providers/provider-ref"
@@ -57,7 +58,7 @@ export class TranslatedSubtitlesDownloader {
     this.isDownloading = true
     this.snapshotFetcher = this.getFetcher()
     const operationId = ++this.operationId
-    const pageTitle = document.title || ""
+    const pageTitle = getSourceDocumentTitle()
     const videoId = this.config.getVideoId?.()
     this.setStatus(TranslatedDownloadPhase.Checking, null)
 

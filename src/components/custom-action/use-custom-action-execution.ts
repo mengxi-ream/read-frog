@@ -30,6 +30,7 @@ import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { classifyResolvedProvider } from "@/utils/analytics-provider"
 import { streamBackgroundStructuredObject } from "@/utils/content-script/background-stream-client"
+import { getSourceDocumentTitle } from "@/utils/content/document-title"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { truncateContextTextForCustomAction } from "@/utils/custom-action-prompt"
 import {
@@ -187,7 +188,7 @@ export function buildCustomActionExecutionPlan(
         selection: cleanSelection,
         paragraphs: truncateContextTextForCustomAction(contextText || cleanSelection),
         targetLanguage: LANG_CODE_TO_EN_NAME[customActionRequest.language.targetCode],
-        webTitle: webPageContext?.webTitle ?? document.title,
+        webTitle: webPageContext?.webTitle ?? getSourceDocumentTitle(),
         webUrl: webPageContext?.url ?? window.location.href,
         webContent: webPageContext?.webContent || "",
       },

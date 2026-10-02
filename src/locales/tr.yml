@@ -1139,6 +1139,9 @@ options:
         range:
           main: Ana içerik
           all: Tüm içerik
+      translateTitle:
+        title: Sekme başlığını çevir
+        description: Tarayıcı sekmesinde görünen sayfa başlığını da çevirir. Orijinal başlığı korumak için devre dışı bırakın.
     hoverTranslation:
       title: Üzerine gelme çevirisi
       enable:

@@ -1,7 +1,9 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { ContentScriptContext } from "#imports"
 import type { Config } from "@/types/config/config"
-import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { storage } from "#imports"
+import { configSchema } from "@/types/config/config"
+import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { detectPageLanguageLightweight } from "@/utils/content/page-language"
 import { ensurePresetStyles } from "@/utils/host/translate/ui/style-injector"
 import { logger } from "@/utils/logger"
@@ -42,6 +44,20 @@ export async function bootstrapHostContent(
   )
 
   const cleanupPageTranslationTriggers = manager.registerPageTranslationTriggers()
+
+  // The tab-title switch applies to an already-translated page at once. Only
+  // the top frame owns the title, so iframes skip parsing every config write.
+  const cleanupTitleTranslationWatch =
+    window === window.top
+      ? storage.watch<Config>(`local:${CONFIG_STORAGE_KEY}`, (config) => {
+          const parsedConfig = configSchema.safeParse(config)
+          if (parsedConfig.success) {
+            manager.setTitleTranslationEnabled(
+              parsedConfig.data.pageTranslation.page.translateTitle,
+            )
+          }
+        })
+      : () => {}
 
   const cleanupTranslationShortcut = await bindTranslationShortcutKey(manager)
 
@@ -141,6 +157,7 @@ export async function bootstrapHostContent(
     cleanupUrlListener()
     teardownNodeTranslation()
     cleanupPageTranslationTriggers()
+    cleanupTitleTranslationWatch()
     cleanupTranslationShortcut()
     cleanupTranslationModeShortcut()
     cleanupTranslationHubShortcut()

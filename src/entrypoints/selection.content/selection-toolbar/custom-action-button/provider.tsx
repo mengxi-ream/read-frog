@@ -24,6 +24,7 @@ import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { classifyResolvedProvider, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
+import { getSourceDocumentTitle } from "@/utils/content/document-title"
 import { findSelectionToolbarAction, patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { onMessage } from "@/utils/message"
 import {
@@ -117,7 +118,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
     return activeSession?.contextSnapshot.text || cleanSelection
   }, [activeSession?.contextSnapshot.text, cleanSelection])
   const webPageContext = useCustomActionWebPageContext(isOpen, popoverSessionKey)
-  const titleText = (webPageContext?.webTitle ?? document.title) || null
+  const titleText = (webPageContext?.webTitle ?? getSourceDocumentTitle()) || null
   const activeAction = useMemo(() => {
     if (!activeActionId) {
       return null

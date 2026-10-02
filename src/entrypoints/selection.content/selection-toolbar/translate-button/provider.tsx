@@ -43,6 +43,7 @@ import { classifyProviderConfig, classifyResolvedProvider } from "@/utils/analyt
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
+import { getSourceDocumentTitle } from "@/utils/content/document-title"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { resolveGlossaryTermsFromCache } from "@/utils/glossary/active-matcher"
 import { trackGlossaryUsed } from "@/utils/glossary/analytics"
@@ -388,7 +389,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     useSelectionOpenRequestResolver(selectionSession)
   const selectionText = activeSession?.selectionSnapshot.text ?? null
   const paragraphsText = activeSession?.contextSnapshot.text ?? selectionText
-  const titleText = document.title || null
+  const titleText = getSourceDocumentTitle() || null
   const translateProviders = useMemo(
     () => getSelectableProvidersForCapability("selectionTranslation", providersConfig),
     [providersConfig],

@@ -1,3 +1,6 @@
+import { useAtom } from "jotai"
+import { Switch } from "@/components/ui/base-ui/switch"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
@@ -7,6 +10,8 @@ import { TranslationModeSelect } from "./translation-mode-select"
 
 /** How a page gets translated once translation starts — what is shown, and how much of it. */
 export function PreferenceSection() {
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
+
   return (
     <ConfigSection title={i18n.t("options.translation.preference.title")}>
       <ConfigItem
@@ -27,6 +32,20 @@ export function PreferenceSection() {
         description={i18n.t("options.translation.preference.translateRange.description")}
       >
         <TranslateRangeSelect />
+      </ConfigItem>
+      <ConfigItem
+        id="translate-title"
+        title={i18n.t("options.translation.preference.translateTitle.title")}
+        description={i18n.t("options.translation.preference.translateTitle.description")}
+      >
+        <Switch
+          checked={translateConfig.page.translateTitle}
+          onCheckedChange={(checked) => {
+            void setTranslateConfig({
+              page: { ...translateConfig.page, translateTitle: checked },
+            })
+          }}
+        />
       </ConfigItem>
     </ConfigSection>
   )

@@ -18,6 +18,10 @@ import {
   GIANT_PARAGRAPH_SPLIT_VIEWPORT_MULTIPLIER,
   GIANT_SPLIT_STRANDED_TEXT_MAX_UNITS,
 } from "@/utils/constants/translate"
+import {
+  clearAppliedDocumentTitleTranslation,
+  setAppliedDocumentTitleTranslation,
+} from "@/utils/content/document-title"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import {
   hasNoWalkAncestor,
@@ -115,6 +119,13 @@ interface IPageTranslationManager {
   refreshSiteRuleCSS: () => Promise<void>
 
   /**
+   * Applies the "translate tab title" switch to a running session in place:
+   * off puts the page's own title back, on translates it. Body translations
+   * stay mounted either way.
+   */
+  setTitleTranslationEnabled: (enabled: boolean) => void
+
+  /**
    * Registers page translation triggers
    */
   registerPageTranslationTriggers: () => () => void
@@ -159,9 +170,15 @@ export class PageTranslationManager implements IPageTranslationManager {
   /** Pending initial chunked walk; mutation handling serializes behind it. */
   private initialWalkDone: Promise<void> | null = null
   private titleObserver: MutationObserver | null = null
+  // Non-null exactly while the tab title is being tracked.
   private lastSourceTitle: string | null = null
   private lastAppliedTranslatedTitle: string | null = null
+  // Never reset: a request from before a stop or a switch-off must not match
+  // a later one's version.
   private titleRequestVersion = 0
+  // The "translate tab title" switch: read when a session starts, then kept
+  // current by setTitleTranslationEnabled.
+  private titleTranslationEnabled = true
 
   constructor(
     intersectionOptions: SimpleIntersectionOptions = {},
@@ -224,6 +241,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       console.warn("Config is not initialized")
       return
     }
+    this.titleTranslationEnabled = config.pageTranslation.page.translateTitle
 
     const requestedProviderConfig = resolvePageTranslationProviderOrNull(config)
     const providerAnalytics = classifyResolvedProvider(requestedProviderConfig)
@@ -331,7 +349,11 @@ export class PageTranslationManager implements IPageTranslationManager {
       if (this.translationSessionVersion !== sessionVersion) {
         return
       }
-      this.startDocumentTitleTracking()
+      // The live value, not the config read above: the switch may have been
+      // flipped while this start was awaiting.
+      if (this.titleTranslationEnabled) {
+        this.startDocumentTitleTracking()
+      }
 
       // Listen to existing elements when they enter the viewport
       const walkId = getRandomUUID()
@@ -420,6 +442,18 @@ export class PageTranslationManager implements IPageTranslationManager {
 
   stop(options?: { userInitiated?: boolean }): void {
     this.stopInternal({ notify: true, userInitiated: options?.userInitiated })
+  }
+
+  setTitleTranslationEnabled(enabled: boolean): void {
+    this.titleTranslationEnabled = enabled
+    if (!this.isPageTranslating) {
+      return
+    }
+    if (enabled) {
+      this.startDocumentTitleTracking()
+    } else {
+      this.stopDocumentTitleTracking()
+    }
   }
 
   async refreshSiteRuleCSS(): Promise<void> {
@@ -584,20 +618,19 @@ export class PageTranslationManager implements IPageTranslationManager {
   }
 
   private startDocumentTitleTracking(): void {
-    if (!this.shouldManageDocumentTitle()) {
+    if (!this.shouldManageDocumentTitle() || this.lastSourceTitle !== null) {
       return
     }
 
     this.lastSourceTitle = document.title || ""
     this.lastAppliedTranslatedTitle = null
-    this.titleRequestVersion = 0
 
     this.observeDocumentTitle()
     void this.syncDocumentTitle(this.lastSourceTitle)
   }
 
   private stopDocumentTitleTracking(): void {
-    if (!this.shouldManageDocumentTitle()) {
+    if (!this.shouldManageDocumentTitle() || this.lastSourceTitle === null) {
       return
     }
 
@@ -616,6 +649,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     if (this.lastSourceTitle !== null && document.title !== this.lastSourceTitle) {
       document.title = this.lastSourceTitle
     }
+    clearAppliedDocumentTitleTranslation()
 
     this.lastSourceTitle = null
     this.lastAppliedTranslatedTitle = null
@@ -675,6 +709,8 @@ export class PageTranslationManager implements IPageTranslationManager {
 
       const nextTitle = translatedTitle || sourceTitle
       this.lastAppliedTranslatedTitle = nextTitle
+      // Before the write, so no prompt can see the translation without it.
+      setAppliedDocumentTitleTranslation(sourceTitle, nextTitle)
 
       if (document.title === nextTitle) {
         return

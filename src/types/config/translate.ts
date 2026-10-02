@@ -203,6 +203,12 @@ export const translateConfigSchema = z.object({
   }),
   page: z.object({
     range: pageTranslateRangeSchema,
+    // Whether the browser tab title is translated along with the page. Only
+    // decides what the tab shows: prompts and cache keys always use the page's
+    // own title, so switching it never invalidates cached translations.
+    // `.default()` for the same reason as `node.forceRetranslation`: pre-v109
+    // config must still parse in UI contexts that load before the migration.
+    translateTitle: z.boolean().default(true),
     autoTranslatePatterns: z.array(z.string()),
     neverAutoTranslatePatterns: z.array(z.string()),
     autoTranslateLanguages: z.array(langCodeISO6393Schema),

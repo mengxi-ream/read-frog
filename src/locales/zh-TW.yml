@@ -1149,6 +1149,9 @@ options:
         range:
           main: 主要內容
           all: 全部內容
+      translateTitle:
+        title: 翻譯分頁標題
+        description: 翻譯網頁時，同時翻譯瀏覽器分頁上的標題。關閉後保留原標題。
     hoverTranslation:
       title: 滑鼠停留翻譯
       enable:

@@ -1139,6 +1139,9 @@ options:
         range:
           main: メインコンテンツ
           all: すべてのコンテンツ
+      translateTitle:
+        title: タブのタイトルを翻訳
+        description: ページを翻訳するときに、ブラウザのタブに表示されるタイトルも翻訳します。オフにすると元のタイトルのままです。
     hoverTranslation:
       title: ホバー翻訳
       enable:

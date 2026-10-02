@@ -1144,6 +1144,9 @@ options:
         range:
           main: Contenido principal
           all: Todo el contenido
+      translateTitle:
+        title: Traducir el título de la pestaña
+        description: Traduce también el título de la página que se muestra en la pestaña del navegador. Desactívalo para conservar el título original.
     hoverTranslation:
       title: Traducción al pasar el cursor
       enable:
