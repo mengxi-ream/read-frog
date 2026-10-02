@@ -1,5 +1,17 @@
 # @read-frog/extension
 
+## 1.50.0
+
+### Minor Changes
+
+- [#2265](https://github.com/mengxi-ream/read-frog/pull/2265) [`1301679`](https://github.com/mengxi-ream/read-frog/commit/1301679e8ddb1865c9a6184394429a2120a29c8c) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): translate Netflix subtitles
+
+### Patch Changes
+
+- [#2283](https://github.com/mengxi-ream/read-frog/pull/2283) [`308a08d`](https://github.com/mengxi-ream/read-frog/commit/308a08d73091300c14fe2bf184d59895478174ef) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translation): respect global short-text settings on Wikipedia
+
+- [#2278](https://github.com/mengxi-ream/read-frog/pull/2278) [`4303272`](https://github.com/mengxi-ream/read-frog/commit/430327214ede8f497e47fc27f55d1d2b720191fc) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): hide the X subtitle toggle when the video player controls are not shown
+
 ## 1.49.3
 
 ### Patch Changes
