@@ -1133,6 +1133,9 @@ options:
           translationOnly: Yalnızca çeviri
         switched: "Çeviri modu: $1"
         providerNotSupported: $1 yalnızca çeviri modunu desteklemez. Etkinleştirmek için başka bir sağlayıcıya geçin.
+      translateTitle:
+        title: Sayfa başlığını çevir
+        description: Tarayıcı sekmesinin başlığını sayfayla birlikte çevirir.
       translateRange:
         title: Çeviri kapsamı
         description: Sayfadaki yalnızca ana içeriğin mi yoksa tüm içeriğin mi çevrileceğini seçin.

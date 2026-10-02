@@ -2,6 +2,8 @@
 
 import type { ContentScriptContext } from "#imports"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { storage } from "#imports"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { bootstrapHostContent } from "../runtime"
 
 const {
@@ -24,6 +26,7 @@ const {
     start: ReturnType<typeof vi.fn>
     stop: ReturnType<typeof vi.fn>
     refreshSiteRuleCSS: ReturnType<typeof vi.fn>
+    setTitleTranslationEnabled: ReturnType<typeof vi.fn>
     registerPageTranslationTriggers: ReturnType<typeof vi.fn>
   }>,
   mockBindTranslationShortcutKey: vi.fn<(...args: any[]) => any>(),
@@ -91,6 +94,8 @@ vi.mock("../translation-control/page-translation", () => ({
     })
 
     refreshSiteRuleCSS = vi.fn<(...args: any[]) => any>(async () => {})
+
+    setTitleTranslationEnabled = vi.fn<(...args: any[]) => any>()
 
     registerPageTranslationTriggers = vi.fn<(...args: any[]) => any>(() =>
       vi.fn<(...args: any[]) => any>(),
@@ -178,6 +183,29 @@ describe("bootstrapHostContent URL changes", () => {
     })
 
     invalidate()
+  })
+
+  it("applies title preferences to the live manager and cleans up its config subscription", async () => {
+    const unwatch = vi.fn<() => void>()
+    const watch = vi.spyOn(storage, "watch").mockReturnValue(unwatch)
+    const { ctx, invalidate } = createContentScriptContext()
+    try {
+      await bootstrapHostContent(ctx, DEFAULT_CONFIG)
+      const onConfigChange = watch.mock.calls.find(([key]) => key === "local:config")?.[1]
+      expect(onConfigChange).toBeDefined()
+
+      const config = structuredClone(DEFAULT_CONFIG)
+      config.pageTranslation.page.translateTitle = false
+      onConfigChange!(config, DEFAULT_CONFIG)
+
+      expect(managerInstances[0]!.setTitleTranslationEnabled).toHaveBeenCalledWith(false)
+      expect(managerInstances[0]!.start).not.toHaveBeenCalled()
+      expect(managerInstances[0]!.stop).not.toHaveBeenCalled()
+      invalidate()
+      expect(unwatch).toHaveBeenCalledOnce()
+    } finally {
+      watch.mockRestore()
+    }
   })
 
   it("keeps inactive page translation inactive and only asks auto-translation on SPA navigation", async () => {

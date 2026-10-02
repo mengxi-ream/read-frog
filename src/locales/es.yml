@@ -1138,6 +1138,9 @@ options:
           translationOnly: Solo traducción
         switched: "Modo de traducción: $1"
         providerNotSupported: $1 no admite el modo de solo traducción. Para activarlo, cambia a otro proveedor.
+      translateTitle:
+        title: Traducir el título de la página
+        description: Traduce el título de la pestaña del navegador junto con la página.
       translateRange:
         title: Alcance de la traducción
         description: Selecciona si traducir solo el contenido principal o todo el contenido de la página.

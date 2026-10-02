@@ -6,6 +6,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { i18n } from "@/utils/i18n"
 import { HoverTranslationSection } from "../hover-translation"
 import { PersonalizedPromptsSection } from "../personalized-prompts"
 import { PreferenceSection } from "../preference"
@@ -97,6 +98,25 @@ describe("translation page sections", () => {
       "/shortcuts?section=node-translation-hotkey",
     )
   })
+
+  it.each([true, false])(
+    "toggles title translation from %s without changing other page preferences",
+    (enabled) => {
+      const translate = testState.pageTranslation!
+      translate.page.translateTitle = enabled
+      renderInRouter(<PreferenceSection />)
+
+      const toggle = screen.getByRole("switch", {
+        name: i18n.t("options.translation.preference.translateTitle.title"),
+      })
+      expect(toggle).toHaveAttribute("aria-checked", String(enabled))
+      fireEvent.click(toggle)
+
+      expect(setTranslateMock).toHaveBeenCalledWith({
+        page: { ...translate.page, translateTitle: !enabled },
+      })
+    },
+  )
 
   it("shows the preset and its preview while the style is not custom", () => {
     testState.pageTranslation!.translationNodeStyle.isCustom = false

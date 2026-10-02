@@ -1133,6 +1133,9 @@ options:
           translationOnly: Chỉ bản dịch
         switched: "Chế độ dịch: $1"
         providerNotSupported: $1 không hỗ trợ chế độ chỉ bản dịch. Để bật, hãy chuyển sang nhà cung cấp khác.
+      translateTitle:
+        title: Dịch tiêu đề trang
+        description: Dịch tiêu đề thẻ trình duyệt cùng với trang.
       translateRange:
         title: Phạm vi dịch
         description: Chọn chỉ dịch nội dung chính hay tất cả nội dung trên trang.

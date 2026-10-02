@@ -1133,6 +1133,9 @@ options:
           translationOnly: 翻訳のみ
         switched: 翻訳モード：$1
         providerNotSupported: $1 は「翻訳のみ」モードに対応していません。有効にするには他のプロバイダーに切り替えてください。
+      translateTitle:
+        title: ページタイトルを翻訳
+        description: ページと一緒にブラウザーのタブタイトルを翻訳します。
       translateRange:
         title: 翻訳範囲
         description: ページのメインコンテンツのみを翻訳するか、すべてのコンテンツを翻訳するかを選択します。

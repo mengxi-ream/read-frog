@@ -1143,6 +1143,9 @@ options:
           translationOnly: 仅显示翻译
         switched: 翻译模式：$1
         providerNotSupported: $1 不支持仅译文模式，若想开启请切换其他提供商。
+      translateTitle:
+        title: 翻译网页标题
+        description: 翻译网页时，同时翻译浏览器标签页标题。
       translateRange:
         title: 翻译范围
         description: 选择是仅翻译主要内容还是翻译页面上的所有内容。

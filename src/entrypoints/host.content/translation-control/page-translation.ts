@@ -114,6 +114,9 @@ interface IPageTranslationManager {
    */
   refreshSiteRuleCSS: () => Promise<void>
 
+  /** Updates title translation in place without restarting page content translation. */
+  setTitleTranslationEnabled: (enabled: boolean) => void
+
   /**
    * Registers page translation triggers
    */
@@ -161,7 +164,10 @@ export class PageTranslationManager implements IPageTranslationManager {
   private titleObserver: MutationObserver | null = null
   private lastSourceTitle: string | null = null
   private lastAppliedTranslatedTitle: string | null = null
+  // Monotonic across off/on cycles so older requests cannot overwrite a newer title.
   private titleRequestVersion = 0
+  private titleTranslationEnabled = true
+  private titleTrackingReady = false
 
   constructor(
     intersectionOptions: SimpleIntersectionOptions = {},
@@ -224,6 +230,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       console.warn("Config is not initialized")
       return
     }
+    this.titleTranslationEnabled = config.pageTranslation.page.translateTitle
 
     const requestedProviderConfig = resolvePageTranslationProviderOrNull(config)
     const providerAnalytics = classifyResolvedProvider(requestedProviderConfig)
@@ -331,7 +338,8 @@ export class PageTranslationManager implements IPageTranslationManager {
       if (this.translationSessionVersion !== sessionVersion) {
         return
       }
-      this.startDocumentTitleTracking()
+      this.titleTrackingReady = true
+      this.setTitleTranslationEnabled(this.titleTranslationEnabled)
 
       // Listen to existing elements when they enter the viewport
       const walkId = getRandomUUID()
@@ -422,6 +430,18 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.stopInternal({ notify: true, userInitiated: options?.userInitiated })
   }
 
+  setTitleTranslationEnabled(enabled: boolean): void {
+    this.titleTranslationEnabled = enabled
+    // A pending start must finish priming the original page context first.
+    if (!this.isPageTranslating || !this.titleTrackingReady) return
+
+    if (enabled) {
+      this.startDocumentTitleTracking()
+    } else {
+      this.stopDocumentTitleTracking()
+    }
+  }
+
   async refreshSiteRuleCSS(): Promise<void> {
     // Never tear down wrappers / observers on a route change. A full
     // stop→start flash is what users see as "translations disappear then
@@ -492,6 +512,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.pendingRetranslateRetries.clear()
     this.retranslateRetries = new WeakMap()
     this.retranslationBudgets = new WeakMap()
+    this.titleTrackingReady = false
     this.stopDocumentTitleTracking()
 
     if (this.intersectionObserver) {
@@ -584,20 +605,19 @@ export class PageTranslationManager implements IPageTranslationManager {
   }
 
   private startDocumentTitleTracking(): void {
-    if (!this.shouldManageDocumentTitle()) {
+    if (!this.shouldManageDocumentTitle() || this.lastSourceTitle !== null) {
       return
     }
 
     this.lastSourceTitle = document.title || ""
     this.lastAppliedTranslatedTitle = null
-    this.titleRequestVersion = 0
 
     this.observeDocumentTitle()
     void this.syncDocumentTitle(this.lastSourceTitle)
   }
 
   private stopDocumentTitleTracking(): void {
-    if (!this.shouldManageDocumentTitle()) {
+    if (!this.shouldManageDocumentTitle() || this.lastSourceTitle === null) {
       return
     }
 
@@ -642,7 +662,11 @@ export class PageTranslationManager implements IPageTranslationManager {
   }
 
   private handleDocumentTitleMutation(): void {
-    if (!this.isPageTranslating || !this.shouldManageDocumentTitle()) {
+    if (
+      !this.isPageTranslating ||
+      !this.titleTranslationEnabled ||
+      !this.shouldManageDocumentTitle()
+    ) {
       return
     }
 

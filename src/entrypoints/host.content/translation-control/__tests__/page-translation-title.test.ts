@@ -142,6 +142,125 @@ describe("pageTranslationManager title handling", () => {
     manager.stop()
   })
 
+  it.each(["bilingual", "translationOnly"])(
+    "keeps source titles untouched while page translation is active in %s mode when disabled",
+    async (mode) => {
+      mockGetLocalConfig.mockResolvedValue({
+        ...DEFAULT_CONFIG,
+        pageTranslation: {
+          ...DEFAULT_CONFIG.pageTranslation,
+          mode,
+          page: { ...DEFAULT_CONFIG.pageTranslation.page, translateTitle: false },
+        },
+      })
+      mockTranslateTextForPageTitle.mockResolvedValue("Translated Title")
+
+      const manager = new PageTranslationManager()
+      try {
+        await manager.start()
+        await flushDomUpdates()
+
+        expect(manager.isActive).toBe(true)
+        expect(document.title).toBe("Original Title")
+
+        document.title = "Updated Source Title"
+        await flushDomUpdates()
+
+        expect(document.title).toBe("Updated Source Title")
+        expect(mockTranslateTextForPageTitle).not.toHaveBeenCalled()
+      } finally {
+        manager.stop()
+      }
+      expect(document.title).toBe("Updated Source Title")
+    },
+  )
+
+  it("restores the latest source title immediately without stopping body translation", async () => {
+    mockTranslateTextForPageTitle.mockResolvedValue("Translated Title")
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+      document.title = "Updated Source Title"
+      await flushDomUpdates()
+
+      manager.setTitleTranslationEnabled(false)
+
+      expect(document.title).toBe("Updated Source Title")
+      expect(manager.isActive).toBe(true)
+      expect(mockRemoveAllTranslatedWrapperNodes).not.toHaveBeenCalled()
+
+      document.title = "New Source While Disabled"
+      await flushDomUpdates()
+      expect(mockTranslateTextForPageTitle).toHaveBeenCalledTimes(2)
+
+      manager.setTitleTranslationEnabled(true)
+      await flushDomUpdates()
+      expect(mockTranslateTextForPageTitle).toHaveBeenLastCalledWith("New Source While Disabled")
+      expect(document.title).toBe("Translated Title")
+    } finally {
+      manager.stop()
+    }
+    expect(document.title).toBe("New Source While Disabled")
+  })
+
+  it("ignores an in-flight title result after disabling and re-enabling title translation", async () => {
+    const stale = createDeferred<string>()
+    const fresh = createDeferred<string>()
+    mockTranslateTextForPageTitle
+      .mockImplementationOnce(() => stale.promise)
+      .mockImplementationOnce(() => fresh.promise)
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      manager.setTitleTranslationEnabled(false)
+      document.title = "New Source Title"
+      manager.setTitleTranslationEnabled(true)
+
+      stale.resolve("Stale Translation")
+      await flushDomUpdates()
+      expect(document.title).toBe("New Source Title")
+
+      fresh.resolve("Fresh Translation")
+      await flushDomUpdates()
+      expect(document.title).toBe("Fresh Translation")
+    } finally {
+      manager.stop()
+    }
+  })
+
+  it("does not translate after being disabled while webpage context is loading", async () => {
+    const context = createDeferred<unknown>()
+    mockGetOrCreateWebPageContext.mockReturnValue(context.promise)
+    mockGetLocalConfig.mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      pageTranslation: {
+        ...DEFAULT_CONFIG.pageTranslation,
+        providerId: "openai-default",
+        enableAIContentAware: true,
+      },
+    })
+    const manager = new PageTranslationManager()
+    const starting = manager.start()
+    try {
+      await flushDomUpdates()
+      manager.setTitleTranslationEnabled(false)
+      context.resolve({ webTitle: "Original Title" })
+      await starting
+      await flushDomUpdates()
+
+      expect(manager.isActive).toBe(true)
+      expect(document.title).toBe("Original Title")
+      expect(mockTranslateTextForPageTitle).not.toHaveBeenCalled()
+    } finally {
+      context.resolve({ webTitle: "Original Title" })
+      await starting
+      manager.stop()
+    }
+  })
+
   it("primes webpage context on start for AI-aware llm translation", async () => {
     mockGetLocalConfig.mockResolvedValue({
       ...DEFAULT_CONFIG,

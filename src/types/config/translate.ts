@@ -203,6 +203,8 @@ export const translateConfigSchema = z.object({
   }),
   page: z.object({
     range: pageTranslateRangeSchema,
+    // UI/content contexts can read stored settings before background migration.
+    translateTitle: z.boolean().default(true),
     autoTranslatePatterns: z.array(z.string()),
     neverAutoTranslatePatterns: z.array(z.string()),
     autoTranslateLanguages: z.array(langCodeISO6393Schema),
