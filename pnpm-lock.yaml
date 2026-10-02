@@ -293,8 +293,8 @@ importers:
         specifier: 0.6.1
         version: 0.6.1
       '@read-frog/layout-engine':
-        specifier: 0.2.0
-        version: 0.2.0(dompurify@3.4.16)(liquidjs@10.29.0)(morphdom@2.7.8)(react@19.3.0)
+        specifier: 0.3.0
+        version: 0.3.0(dompurify@3.4.16)(liquidjs@10.29.0)(morphdom@2.7.8)(react@19.3.0)
       '@remixicon/react':
         specifier: ^4.9.0
         version: 4.9.0(react@19.3.0)
@@ -2461,8 +2461,8 @@ packages:
   '@read-frog/definitions@0.6.1':
     resolution: {integrity: sha512-x8nzRaKiMBb9K1SM0l/lt45fKoRe9t3W9CU+TG2zXTZSCyvvuWnTUwtwZlH8jRzh9im6lPl6hPhXyp6H78Ccjg==}
 
-  '@read-frog/layout-engine@0.2.0':
-    resolution: {integrity: sha512-50nTdx5AOAjEVw5vK2WDDOPqebU7EM6QZTN23nD4RJqqQtaXRbs370ksU6qToq4EtSmxEZbcK5SuqNYkAWTOUg==}
+  '@read-frog/layout-engine@0.3.0':
+    resolution: {integrity: sha512-Hsnv6r8+VSWfqrn7//wjlT74KMfCX4NbULlMOL6in8PqW6jPdOy7YczAnc/LESiWcyK8+Utv/X2F0vVdlQ1WpQ==}
     peerDependencies:
       dompurify: ^3.4.16
       liquidjs: ~10.29.0
@@ -9163,7 +9163,7 @@ snapshots:
       date-fns: 4.4.0
       zod: 4.6.5
 
-  '@read-frog/layout-engine@0.2.0(dompurify@3.4.16)(liquidjs@10.29.0)(morphdom@2.7.8)(react@19.3.0)':
+  '@read-frog/layout-engine@0.3.0(dompurify@3.4.16)(liquidjs@10.29.0)(morphdom@2.7.8)(react@19.3.0)':
     dependencies:
       liquidjs: 10.29.0
     optionalDependencies:
