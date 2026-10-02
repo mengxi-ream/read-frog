@@ -2,6 +2,8 @@
 
 import type { ContentScriptContext } from "#imports"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { storage } from "#imports"
+import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { bootstrapHostContent } from "../runtime"
 
 const {
@@ -24,6 +26,7 @@ const {
     start: ReturnType<typeof vi.fn>
     stop: ReturnType<typeof vi.fn>
     refreshSiteRuleCSS: ReturnType<typeof vi.fn>
+    setTitleTranslationEnabled: ReturnType<typeof vi.fn>
     registerPageTranslationTriggers: ReturnType<typeof vi.fn>
   }>,
   mockBindTranslationShortcutKey: vi.fn<(...args: any[]) => any>(),
@@ -91,6 +94,8 @@ vi.mock("../translation-control/page-translation", () => ({
     })
 
     refreshSiteRuleCSS = vi.fn<(...args: any[]) => any>(async () => {})
+
+    setTitleTranslationEnabled = vi.fn<(...args: any[]) => any>()
 
     registerPageTranslationTriggers = vi.fn<(...args: any[]) => any>(() =>
       vi.fn<(...args: any[]) => any>(),
@@ -178,6 +183,39 @@ describe("bootstrapHostContent URL changes", () => {
     })
 
     invalidate()
+  })
+
+  it("applies the tab title switch to the live session and stops watching on invalidation", async () => {
+    const unwatch = vi.fn<() => void>()
+    const watch = vi.spyOn(storage, "watch").mockReturnValue(unwatch)
+    const { ctx, invalidate } = createContentScriptContext()
+    try {
+      await bootstrapHostContent(ctx, null)
+      const manager = managerInstances[0]!
+      const onConfigChange = watch.mock.calls.find(
+        ([key]) => key === `local:${CONFIG_STORAGE_KEY}`,
+      )?.[1]
+      expect(onConfigChange).toBeDefined()
+
+      const switchedOff = structuredClone(DEFAULT_CONFIG)
+      switchedOff.pageTranslation.page.translateTitle = false
+      onConfigChange!(switchedOff, DEFAULT_CONFIG)
+
+      expect(manager.setTitleTranslationEnabled).toHaveBeenLastCalledWith(false)
+      expect(manager.stop).not.toHaveBeenCalled()
+
+      // Written before v109: the schema default keeps the title translated.
+      const preMigration: any = structuredClone(DEFAULT_CONFIG)
+      delete preMigration.pageTranslation.page.translateTitle
+      onConfigChange!(preMigration, switchedOff)
+
+      expect(manager.setTitleTranslationEnabled).toHaveBeenLastCalledWith(true)
+
+      invalidate()
+      expect(unwatch).toHaveBeenCalledOnce()
+    } finally {
+      watch.mockRestore()
+    }
   })
 
   it("keeps inactive page translation inactive and only asks auto-translation on SPA navigation", async () => {

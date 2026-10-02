@@ -1139,6 +1139,9 @@ options:
         range:
           main: Nội dung chính
           all: Tất cả nội dung
+      translateTitle:
+        title: Dịch tiêu đề tab
+        description: Dịch cả tiêu đề trang hiển thị trên tab trình duyệt. Tắt để giữ nguyên tiêu đề gốc.
     hoverTranslation:
       title: Dịch khi di chuột
       enable:

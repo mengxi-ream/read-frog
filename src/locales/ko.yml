@@ -1139,6 +1139,9 @@ options:
         range:
           main: 주요 내용
           all: 전체 내용
+      translateTitle:
+        title: 탭 제목 번역
+        description: 페이지를 번역할 때 브라우저 탭에 표시되는 제목도 번역합니다. 끄면 원래 제목이 유지됩니다.
     hoverTranslation:
       title: 호버 번역
       enable:

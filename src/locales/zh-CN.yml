@@ -1149,6 +1149,9 @@ options:
         range:
           main: 主要内容
           all: 全部内容
+      translateTitle:
+        title: 翻译标签页标题
+        description: 翻译网页时，同时翻译浏览器标签页上的标题。关闭后保留原标题。
     hoverTranslation:
       title: 悬停翻译
       enable:

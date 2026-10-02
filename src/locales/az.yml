@@ -1144,6 +1144,9 @@ options:
         range:
           main: Əsas məzmun
           all: Bütün məzmun
+      translateTitle:
+        title: Vərəq başlığını tərcümə et
+        description: Brauzer vərəqində görünən səhifə başlığını da tərcümə edir. Orijinal başlığı saxlamaq üçün deaktiv edin.
     hoverTranslation:
       title: Kursorla tərcümə
       enable:

@@ -2,6 +2,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { getSourceDocumentTitle } from "@/utils/content/document-title"
 import { PageTranslationManager } from "../page-translation"
 
 const {
@@ -115,6 +116,7 @@ describe("pageTranslationManager title handling", () => {
     document.head.innerHTML = ""
     document.body.innerHTML = "<main>Article body</main>"
     document.title = "Original Title"
+    delete window.__READ_FROG_TRANSLATED_DOCUMENT_TITLE__
 
     vi.stubGlobal("IntersectionObserver", MockIntersectionObserver)
 
@@ -199,6 +201,136 @@ describe("pageTranslationManager title handling", () => {
         url: window.location.href,
       },
     )
+  })
+
+  it("keeps the page's own title readable for prompts while the tab shows the translation", async () => {
+    mockTranslateTextForPageTitle
+      .mockResolvedValueOnce("Translated Title")
+      .mockResolvedValueOnce("Translated Updated Title")
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    expect(document.title).toBe("Translated Title")
+    expect(getSourceDocumentTitle()).toBe("Original Title")
+
+    document.title = "Updated Source Title"
+    await flushDomUpdates()
+
+    expect(document.title).toBe("Translated Updated Title")
+    expect(getSourceDocumentTitle()).toBe("Updated Source Title")
+
+    manager.stop()
+
+    expect(document.title).toBe("Updated Source Title")
+    expect(window.__READ_FROG_TRANSLATED_DOCUMENT_TITLE__).toBeUndefined()
+  })
+
+  it("leaves the tab title alone when title translation is switched off", async () => {
+    mockGetLocalConfig.mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      pageTranslation: {
+        ...DEFAULT_CONFIG.pageTranslation,
+        page: { ...DEFAULT_CONFIG.pageTranslation.page, translateTitle: false },
+      },
+    })
+    mockTranslateTextForPageTitle.mockResolvedValue("Translated Title")
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    expect(manager.isActive).toBe(true)
+    expect(document.title).toBe("Original Title")
+
+    document.title = "Updated Source Title"
+    await flushDomUpdates()
+
+    expect(document.title).toBe("Updated Source Title")
+    expect(mockTranslateTextForPageTitle).not.toHaveBeenCalled()
+    expect(getSourceDocumentTitle()).toBe("Updated Source Title")
+
+    manager.stop()
+
+    expect(document.title).toBe("Updated Source Title")
+  })
+
+  it("switches title translation off and on without touching the translated page", async () => {
+    mockTranslateTextForPageTitle
+      .mockResolvedValueOnce("Translated Title")
+      .mockResolvedValueOnce("Translated Later Title")
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+    expect(document.title).toBe("Translated Title")
+
+    manager.setTitleTranslationEnabled(false)
+
+    expect(document.title).toBe("Original Title")
+    expect(window.__READ_FROG_TRANSLATED_DOCUMENT_TITLE__).toBeUndefined()
+    expect(manager.isActive).toBe(true)
+    expect(mockRemoveAllTranslatedWrapperNodes).not.toHaveBeenCalled()
+
+    document.title = "Later Source Title"
+    await flushDomUpdates()
+    expect(mockTranslateTextForPageTitle).toHaveBeenCalledTimes(1)
+
+    manager.setTitleTranslationEnabled(true)
+    await flushDomUpdates()
+
+    expect(mockTranslateTextForPageTitle).toHaveBeenLastCalledWith("Later Source Title")
+    expect(document.title).toBe("Translated Later Title")
+    expect(getSourceDocumentTitle()).toBe("Later Source Title")
+
+    manager.stop()
+
+    expect(document.title).toBe("Later Source Title")
+  })
+
+  it("drops a title result that lands after the switch went off and on again", async () => {
+    const stale = createDeferred<string>()
+    const fresh = createDeferred<string>()
+    mockTranslateTextForPageTitle
+      .mockImplementationOnce(() => stale.promise)
+      .mockImplementationOnce(() => fresh.promise)
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    manager.setTitleTranslationEnabled(false)
+    manager.setTitleTranslationEnabled(true)
+
+    stale.resolve("Stale Translation")
+    await flushDomUpdates()
+    expect(document.title).toBe("Original Title")
+
+    fresh.resolve("Fresh Translation")
+    await flushDomUpdates()
+    expect(document.title).toBe("Fresh Translation")
+
+    manager.stop()
+  })
+
+  it("honors a switch flipped while start is still awaiting", async () => {
+    const notified = createDeferred<undefined>()
+    mockSendMessage.mockImplementationOnce(() => notified.promise)
+    mockTranslateTextForPageTitle.mockResolvedValue("Translated Title")
+
+    const manager = new PageTranslationManager()
+    const starting = manager.start()
+    await flushDomUpdates()
+
+    manager.setTitleTranslationEnabled(false)
+    notified.resolve(undefined)
+    await starting
+    await flushDomUpdates()
+
+    expect(manager.isActive).toBe(true)
+    expect(document.title).toBe("Original Title")
+    expect(mockTranslateTextForPageTitle).not.toHaveBeenCalled()
+
+    manager.stop()
   })
 
   it("does not retrigger title translation for its own managed title updates", async () => {

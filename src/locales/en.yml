@@ -1286,6 +1286,9 @@ options:
         range:
           main: Main content
           all: All content
+      translateTitle:
+        title: Translate tab title
+        description: Also translate the page title shown in the browser tab. Turn it off to keep the original title.
     hoverTranslation:
       title: Hover translation
       enable:

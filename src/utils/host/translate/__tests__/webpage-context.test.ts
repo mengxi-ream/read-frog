@@ -52,6 +52,7 @@ describe("getOrCreateWebPageContext", () => {
     document.title = "Original Title"
     document.body.innerHTML = "<main>Page body</main>"
     window.history.replaceState({}, "", "/article")
+    delete window.__READ_FROG_TRANSLATED_DOCUMENT_TITLE__
   })
 
   it("keeps the original title stable on the same URL", async () => {
@@ -106,6 +107,67 @@ describe("getOrCreateWebPageContext", () => {
       "<h1>Readable page body</h1>",
       window.location.href,
     )
+  })
+
+  it("uses the page's own title for a context built while the tab shows its translation", async () => {
+    const { getOrCreateWebPageContext } = await loadModule()
+    const { setAppliedDocumentTitleTranslation } = await import("@/utils/content/document-title")
+
+    await getOrCreateWebPageContext()
+
+    // Page translation swapped the tab title, then an SPA navigation changed
+    // the URL before the router set the next title, which rebuilds the context.
+    setAppliedDocumentTitleTranslation("Original Title", "Translated Browser Title")
+    document.title = "Translated Browser Title"
+    window.history.replaceState({}, "", "/article-2")
+
+    const rebuilt = await getOrCreateWebPageContext()
+
+    expect(mockDefuddleConstructor).toHaveBeenCalledTimes(2)
+    expect(rebuilt?.webTitle).toBe("Original Title")
+  })
+
+  it("keeps the context across an in-page anchor jump", async () => {
+    document.body.innerHTML = `<main>Page body</main><h2 id="far">Far section</h2>`
+    const { getOrCreateWebPageContext } = await loadModule()
+
+    const first = await getOrCreateWebPageContext()
+
+    // By now the page holds its translations; re-reading it would change the content.
+    document.body.innerHTML += "<p>Translated paragraph</p>"
+    mockParse.mockReturnValueOnce({ contentMarkdown: "# Page body with translations" })
+    window.history.replaceState({}, "", "/article#far")
+
+    const second = await getOrCreateWebPageContext()
+
+    expect(mockDefuddleConstructor).toHaveBeenCalledTimes(1)
+    expect(second).toEqual({ ...first, url: window.location.href })
+  })
+
+  it("matches a percent-encoded anchor to its element", async () => {
+    document.body.innerHTML = `<main>Page body</main><h2 id="历史">History</h2>`
+    const { getOrCreateWebPageContext } = await loadModule()
+
+    await getOrCreateWebPageContext()
+    window.history.replaceState({}, "", "/article#历史")
+
+    expect(window.location.href).toContain("#%E5%8E%86%E5%8F%B2")
+    await getOrCreateWebPageContext()
+    expect(mockDefuddleConstructor).toHaveBeenCalledTimes(1)
+  })
+
+  it("rebuilds the context when a hash route changes", async () => {
+    const { getOrCreateWebPageContext } = await loadModule()
+
+    await getOrCreateWebPageContext()
+    window.history.replaceState({}, "", "/article#/settings")
+    await getOrCreateWebPageContext()
+
+    // Leaving the route for the bare URL is a route change too.
+    window.history.replaceState({}, "", "/article")
+    await getOrCreateWebPageContext()
+
+    expect(mockDefuddleConstructor).toHaveBeenCalledTimes(3)
   })
 
   it("refreshes the cached title and content after the URL changes", async () => {
