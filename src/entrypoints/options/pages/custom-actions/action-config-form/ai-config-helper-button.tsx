@@ -61,7 +61,7 @@ export function AiConfigHelperButton({
 
   return (
     <Popover>
-      <PopoverTrigger render={<Button type="button" variant="brand-outline" size="xs" />}>
+      <PopoverTrigger render={<Button type="button" variant="outline-accent" size="xs" />}>
         <Icon icon="tabler:sparkles" />
         {t("trigger")}
       </PopoverTrigger>

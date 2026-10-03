@@ -337,7 +337,7 @@ function CustomizeButton() {
         render={
           <Button
             type="button"
-            variant="brand-outline"
+            variant="outline-accent"
             size="xs"
             onClick={() => void duplicate()}
           />

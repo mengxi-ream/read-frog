@@ -48,7 +48,7 @@ export function StoreReviewPrompt() {
   if (!shouldShow) return null
 
   return (
-    <div className="absolute inset-x-4 bottom-3 z-10 flex flex-col gap-2 rounded-lg border border-brand/40 bg-background px-3 py-2.5 shadow-lg">
+    <div className="absolute inset-x-4 bottom-3 z-10 flex flex-col gap-2 rounded-lg border border-accent/40 bg-background px-3 py-2.5 shadow-lg">
       <Button
         variant="ghost"
         size="icon-xs"
@@ -64,7 +64,7 @@ export function StoreReviewPrompt() {
           {i18n.t("popup.storeReview.description")}
         </span>
       </div>
-      <Button variant="brand" size="sm" className="self-start" onClick={() => void handleRate()}>
+      <Button variant="accent" size="sm" className="self-start" onClick={() => void handleRate()}>
         <Icon icon="tabler:star-filled" />
         {i18n.t("popup.storeReview.action")}
       </Button>

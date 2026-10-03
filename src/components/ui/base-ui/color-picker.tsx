@@ -888,10 +888,10 @@ function FormatDropdown({
     >
       <Menu.Trigger
         className={cn(
-          "flex cursor-pointer items-center justify-between gap-2 px-3 text-[13px] font-medium hover:bg-accent hover:text-foreground",
+          "flex cursor-pointer items-center justify-between gap-2 px-3 text-[13px] font-medium hover:bg-muted hover:text-foreground",
           CONTROL_CLASS,
           SHAPE.input,
-          open ? "bg-accent text-foreground" : "text-muted-foreground active:bg-accent",
+          open ? "bg-muted text-foreground" : "text-muted-foreground active:bg-muted",
         )}
       >
         <span>{FORMAT_LABELS[value]}</span>
@@ -1074,7 +1074,7 @@ interface ColorInputProps {
 }
 
 const INPUT_SHELL_CLASS =
-  "flex items-center bg-transparent transition-colors duration-75 hover:bg-accent active:bg-accent focus-within:ring-1 focus-within:ring-ring select-none h-9"
+  "flex items-center bg-transparent transition-colors duration-75 hover:bg-muted active:bg-muted focus-within:ring-1 focus-within:ring-ring select-none h-9"
 
 function boundValue(n: number, min?: number, max?: number, wrap = false): number {
   if (wrap && min !== undefined && max !== undefined) {
@@ -1387,7 +1387,7 @@ function EyeDropperButton({ onPick }: { onPick: (hex: string) => void }) {
       onClick={handleClick}
       aria-label="Pick color from screen"
       className={cn(
-        "flex cursor-pointer items-center justify-center px-3 text-muted-foreground hover:bg-accent hover:text-foreground active:bg-accent",
+        "flex cursor-pointer items-center justify-center px-3 text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted",
         CONTROL_CLASS,
         SHAPE.input,
       )}
@@ -2008,7 +2008,7 @@ function ColorPickerPopover({
       <div ref={ref} className="inline-flex">
         <Popover.Trigger
           className={cn(
-            "flex cursor-pointer items-center gap-2 border border-border px-2 text-[13px] font-medium hover:bg-accent",
+            "flex cursor-pointer items-center gap-2 border border-border px-2 text-[13px] font-medium hover:bg-muted",
             CONTROL_CLASS,
             SHAPE.input,
             triggerClassName,

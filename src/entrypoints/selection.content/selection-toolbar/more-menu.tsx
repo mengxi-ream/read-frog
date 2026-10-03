@@ -115,7 +115,7 @@ export function SelectionToolbarMoreMenu() {
         render={
           <button
             type="button"
-            className="flex h-7 shrink-0 cursor-pointer items-center justify-center px-1 hover:bg-accent data-popup-open:bg-accent"
+            className="flex h-7 shrink-0 cursor-pointer items-center justify-center px-1 hover:bg-muted data-popup-open:bg-muted"
           />
         }
       >
@@ -153,7 +153,7 @@ export function SelectionToolbarMoreMenu() {
         {/* Its icon lines up with the rows' icons, past their grips. */}
         <button
           type="button"
-          className="flex h-8 shrink-0 cursor-pointer items-center gap-2 rounded-md pr-1 pl-4.5 text-left text-muted-foreground hover:bg-accent hover:text-foreground"
+          className="flex h-8 shrink-0 cursor-pointer items-center gap-2 rounded-md pr-1 pl-4.5 text-left text-muted-foreground hover:bg-secondary hover:text-foreground"
           onClick={addCustomAction}
         >
           <IconPlus className="size-4 shrink-0" strokeWidth={1.6} />
@@ -245,8 +245,8 @@ function MoreMenuRow({
       data-item-id={item.id}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
-        "group/row relative flex h-8 items-center rounded-md hover:bg-accent",
-        isDragging && "z-10 bg-accent shadow-sm",
+        "group/row relative flex h-8 items-center rounded-md hover:bg-secondary",
+        isDragging && "z-10 bg-secondary shadow-sm",
       )}
     >
       <button
@@ -276,7 +276,7 @@ function MoreMenuRow({
             className={cn(
               "mr-0.5 flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-sm",
               item.pinned
-                ? "text-accent-blue hover:text-accent-blue-hover"
+                ? "text-accent hover:text-(--rf-accent-hover)"
                 : "text-muted-foreground opacity-0 group-hover/row:opacity-100 hover:text-foreground focus-visible:opacity-100",
             )}
             onClick={() => onPinChange(item, !item.pinned)}

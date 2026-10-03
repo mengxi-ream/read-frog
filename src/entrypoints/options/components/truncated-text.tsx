@@ -53,7 +53,7 @@ export function TruncatedText({ text, className }: { text: string; className?: s
       <TooltipTrigger render={<span ref={ref} className={cn("block truncate", className)} />}>
         {text}
       </TooltipTrigger>
-      {isTruncated && <TooltipContent className="max-w-100 break-words">{text}</TooltipContent>}
+      {isTruncated && <TooltipContent className="max-w-100 wrap-anywhere">{text}</TooltipContent>}
     </Tooltip>
   )
 }

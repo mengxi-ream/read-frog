@@ -88,7 +88,7 @@ export function SpeakButton() {
       render={
         <button
           type="button"
-          className="flex h-7 cursor-pointer items-center justify-center px-2 hover:bg-accent"
+          className="flex h-7 cursor-pointer items-center justify-center px-2 hover:bg-muted"
           onClick={handleClick}
           aria-label={tooltipText}
         />

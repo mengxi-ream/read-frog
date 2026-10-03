@@ -25,7 +25,7 @@ export const TranscriptRow = memo(function TranscriptRow({
       onClick={() => onSeek(line.start / 1000)}
       className={cn(
         "block w-full rounded-xl px-3 py-2.5 text-left transition-colors focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
-        isActive ? "bg-brand/20" : "hover:bg-muted/40",
+        isActive ? "bg-accent/20" : "hover:bg-muted/40",
       )}
     >
       <span className="block font-mono text-[12px] leading-5 text-foreground/65 tabular-nums">

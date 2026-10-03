@@ -39,7 +39,7 @@ export function RecentChangeBadge({ kind, date }: { kind: ChangeKind; date: stri
     <div className="absolute -top-2 right-2 flex items-center justify-center">
       <Tooltip>
         <TooltipTrigger
-          render={<Badge className="cursor-default bg-blue-500" size="sm" tabIndex={0} />}
+          render={<Badge variant="accent" className="cursor-default" size="sm" tabIndex={0} />}
         >
           {i18n.t(`${key}.${kind}`)}
         </TooltipTrigger>

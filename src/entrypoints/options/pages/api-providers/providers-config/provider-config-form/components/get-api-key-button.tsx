@@ -13,7 +13,7 @@ export function GetAPIKeyButton({ providerType }: { providerType: APIProviderTyp
   return (
     <Button
       size="xs"
-      variant="brand-outline"
+      variant="outline-accent"
       render={<a href={apiKeyUrl} target="_blank" rel="noreferrer" />}
     >
       {i18n.t("options.apiProviders.apiKey.getAPIKey")}

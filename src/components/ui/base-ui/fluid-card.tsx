@@ -509,7 +509,7 @@ function FluidCard({
             type="button"
             onClick={onDismiss}
             aria-label="Dismiss"
-            className="absolute top-2 right-2 z-30 flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors duration-[80ms] outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 motion-reduce:transition-none"
+            className="absolute top-2 right-2 z-30 flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors duration-[80ms] outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 motion-reduce:transition-none"
           >
             <IconX className="size-4 stroke-[1.5]" />
           </button>
@@ -808,8 +808,8 @@ type FluidCardButtonVariant = "primary" | "secondary" | "ghost" | "link"
 
 const FLUID_CARD_BUTTON_VARIANTS: Record<FluidCardButtonVariant, string> = {
   primary: "bg-foreground text-background hover:bg-foreground/90 active:bg-foreground/80",
-  secondary: "bg-accent text-foreground hover:bg-accent/80 active:bg-accent",
-  ghost: "text-muted-foreground hover:bg-accent hover:text-foreground active:bg-accent",
+  secondary: "bg-secondary text-foreground hover:bg-secondary/80 active:bg-secondary",
+  ghost: "text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted",
   link: "text-foreground underline-offset-4 hover:underline px-0! h-auto!",
 }
 

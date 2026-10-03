@@ -27,7 +27,7 @@ export function SubtitlesTranslateButton() {
       }}
       className={cn(
         `${TRANSLATE_BUTTON_CLASS} relative m-0 flex h-full w-12 cursor-pointer items-center justify-center rounded-[14px] border-none p-0 transition-all duration-200`,
-        panelOpen ? "bg-accent shadow-inner" : "bg-transparent",
+        panelOpen ? "bg-muted shadow-inner" : "bg-transparent",
       )}
     >
       <img

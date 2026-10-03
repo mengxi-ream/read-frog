@@ -30,10 +30,10 @@ export function TranslationHubButton() {
       <TooltipTrigger render={<Button variant="ghost" size="icon" onClick={handleClick} />}>
         <Icon icon="tabler:language-hiragana" />
       </TooltipTrigger>
-      <TooltipContent className="max-w-[200px] text-wrap">
+      <TooltipContent className="max-w-[200px] flex-col items-start text-wrap has-data-[slot=kbd]:pr-3">
         {i18n.t("popup.hub.tooltip")}
         {shortcutParts.length > 0 && (
-          <KbdGroup className="mt-1.5 flex">
+          <KbdGroup className="flex">
             {shortcutParts.map((part) => (
               <Kbd key={part}>{part}</Kbd>
             ))}

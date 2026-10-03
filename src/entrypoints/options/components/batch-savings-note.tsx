@@ -9,8 +9,8 @@ import { i18n } from "@/utils/i18n"
  * The figure is the share of requests batching folded away over the last week — "approx."
  * because a request saved is not exactly a proportional amount of spend saved.
  *
- * Blue from `--link` rather than `--accent-blue`: the accent is a fill, tuned to sit behind
- * white content, and its dark value is too dark to read as text on the near-black surface.
+ * Blue from `--link` rather than `--accent`: the accent is a fill, tuned to sit behind white
+ * content, and its dark value is too dark to read as text on the near-black surface.
  */
 export function BatchSavingsNote() {
   const savingPercent = useBatchRequestSavingPercent()

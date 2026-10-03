@@ -78,7 +78,7 @@ export default function TranslationModeSelector() {
           className={cn(currentModeIcon.className, currentMode === "translationOnly" && "size-4.5")}
         />
       </TooltipTrigger>
-      <TooltipContent>
+      <TooltipContent className="has-data-[slot=kbd]:pr-3">
         {/* The blocked-reason line is much longer than the mode labels; let it
             wrap inside the 320px popup instead of forcing one clipped line. */}
         <div className={cn("whitespace-nowrap", nextModeBlocked && "max-w-64 whitespace-normal")}>
