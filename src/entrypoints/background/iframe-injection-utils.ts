@@ -1,6 +1,7 @@
 export interface FrameInfoForSiteControl {
   frameId: number
   parentFrameId: number
+  documentId?: string
   url?: string
 }
 

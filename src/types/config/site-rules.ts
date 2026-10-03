@@ -68,6 +68,10 @@ export const siteRuleSchema = z.object({
   "forceInlineTranslationTags.remove": z.array(z.string()).optional(),
   minCharacters: z.number().int().min(0).optional(),
   minWords: z.number().int().min(0).optional(),
+  // Opt in to host + selection runtime in this page's existing and future
+  // iframes. Matching frame URLs can also opt in independently. Refresh after
+  // changing this setting; false overrides an earlier matching rule.
+  injectIntoIframes: z.boolean().optional(),
   injectedCss: z.string().max(MAX_CUSTOM_CSS_LENGTH).optional(),
   "injectedCss.add": z.array(z.string().max(MAX_CUSTOM_CSS_LENGTH)).optional(),
   enabled: z.boolean().optional(),

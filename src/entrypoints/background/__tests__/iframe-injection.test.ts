@@ -11,6 +11,7 @@ const webNavigationOnBeforeNavigateAddListenerMock = vi.fn<(...args: any[]) => a
 const webNavigationOnCompletedAddListenerMock = vi.fn<(...args: any[]) => any>()
 const getAllFramesMock = vi.fn<(...args: any[]) => any>()
 const executeScriptMock = vi.fn<(...args: any[]) => any>()
+const tabsGetMock = vi.fn<(...args: any[]) => any>()
 const storageGetItemMock = vi.fn<(...args: any[]) => any>()
 
 // Hoisted: `@/utils/site-control` reaches `@/utils/logger` through the shared URL
@@ -45,6 +46,7 @@ interface FrameInfo {
   frameId: number
   parentFrameId: number
   url?: string
+  documentId?: string
 }
 
 let currentTabId = 0
@@ -67,9 +69,11 @@ function createDetails(overrides: Partial<NavigationDetails> = {}): NavigationDe
 function createConfig({
   nodeTranslationEnabled = false,
   siteControl,
+  siteRules,
 }: {
   nodeTranslationEnabled?: boolean
   siteControl?: Config["siteControl"]
+  siteRules?: Config["siteRules"]
 } = {}): Config {
   return {
     translate: {
@@ -82,6 +86,7 @@ function createConfig({
       blacklistPatterns: [],
       whitelistPatterns: [],
     },
+    siteRules: siteRules ?? { userRules: [], disabledBuiltInRules: [] },
   } as unknown as Config
 }
 
@@ -116,6 +121,7 @@ describe("setupIframeInjection", () => {
     currentTabId += 1
 
     browser.tabs.onRemoved.addListener = tabsOnRemovedAddListenerMock
+    browser.tabs.get = tabsGetMock
     browser.webNavigation.onBeforeNavigate.addListener =
       webNavigationOnBeforeNavigateAddListenerMock
     browser.webNavigation.onCompleted.addListener = webNavigationOnCompletedAddListenerMock
@@ -124,6 +130,7 @@ describe("setupIframeInjection", () => {
     storage.getItem = storageGetItemMock
 
     getLocalConfigMock.mockResolvedValue(null)
+    tabsGetMock.mockResolvedValue({ url: "https://example.com/app" })
     getAllFramesMock.mockResolvedValue([
       createFrame(0, "https://example.com/app", -1),
       createFrame(2, "https://example.com/frame"),
@@ -219,6 +226,7 @@ describe("setupIframeInjection", () => {
     const { onCompleted } = await setupSubject()
     storageGetItemMock.mockResolvedValue({ enabled: false })
     getLocalConfigMock.mockResolvedValue(createConfig({ nodeTranslationEnabled: false }))
+    tabsGetMock.mockResolvedValue({ url: "https://browse.library.kiwix.org/viewer" })
     getAllFramesMock.mockResolvedValue([
       createFrame(0, "https://browse.library.kiwix.org/viewer", -1),
       createFrame(2, "https://reader.example/frame"),
@@ -321,6 +329,171 @@ describe("setupIframeInjection", () => {
       }),
     )
 
+    expect(executeScriptMock).not.toHaveBeenCalled()
+  })
+
+  it("injects current and late cross-origin or blank frames from a user rule on the top URL", async () => {
+    const { onBeforeNavigate, onCompleted } = await setupSubject()
+    storageGetItemMock.mockResolvedValue({ enabled: false })
+    const topUrl = "https://example.com/app"
+    getLocalConfigMock.mockResolvedValue(
+      createConfig({
+        siteRules: {
+          userRules: [{ id: "reader", matches: "example.com/app", injectIntoIframes: true }],
+          disabledBuiltInRules: [],
+        },
+      }),
+    )
+    getAllFramesMock.mockResolvedValue([
+      createFrame(0, topUrl, -1),
+      createFrame(2, "https://other.example/article"),
+    ])
+    onBeforeNavigate(createDetails({ frameId: 0, url: topUrl }))
+    await onCompleted(createDetails({ frameId: 0, url: topUrl }))
+    expect(executeScriptMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        target: { tabId: currentTabId, frameIds: [2] },
+        files: [SELECTION_CONTENT_SCRIPT_FILE],
+      }),
+    )
+
+    executeScriptMock.mockClear()
+    getAllFramesMock.mockResolvedValue([createFrame(0, topUrl, -1), createFrame(4, "about:srcdoc")])
+    await onCompleted(createDetails({ frameId: 4, documentId: "late-doc", url: "about:srcdoc" }))
+    expect(executeScriptMock).toHaveBeenCalledTimes(3)
+    expect(executeScriptMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        args: [SITE_CONTROL_URL_WINDOW_KEY, topUrl],
+      }),
+    )
+    expect(executeScriptMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        target: { tabId: currentTabId, documentIds: ["late-doc"] },
+        files: [SELECTION_CONTENT_SCRIPT_FILE],
+      }),
+    )
+  })
+
+  it("dedupes concurrent top-page scanning and frame completion for the same document", async () => {
+    const { onCompleted } = await setupSubject()
+    storageGetItemMock.mockResolvedValue({ enabled: false })
+    const url = "https://latentk.com/insight/progressive-git/"
+    tabsGetMock.mockResolvedValue({ url })
+    getLocalConfigMock.mockResolvedValue(createConfig())
+    getAllFramesMock.mockResolvedValue([
+      createFrame(0, url, -1),
+      { ...createFrame(2, `${url}attachments/sandbox-1/`), documentId: "doc-1" },
+    ])
+    await Promise.all([
+      onCompleted(createDetails({ frameId: 0, url })),
+      onCompleted(createDetails({ url: `${url}attachments/sandbox-1/` })),
+    ])
+    expect(executeScriptMock).toHaveBeenCalledTimes(3)
+    for (const [call] of executeScriptMock.mock.calls) {
+      expect(call.target).toEqual({ tabId: currentTabId, documentIds: ["doc-1"] })
+    }
+  })
+
+  it("recovers the top-page rule after a service worker restart", async () => {
+    const { onCompleted } = await setupSubject()
+    storageGetItemMock.mockResolvedValue({ enabled: false })
+    tabsGetMock.mockResolvedValue({ url: "https://latentk.com/insight/progressive-git/" })
+    getLocalConfigMock.mockResolvedValue(createConfig())
+    await onCompleted(createDetails({ url: "https://other.example/frame" }))
+    expect(executeScriptMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        files: [SELECTION_CONTENT_SCRIPT_FILE],
+      }),
+    )
+    expect(executeScriptMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://latentk.com/insight/progressive-git/"],
+      }),
+    )
+  })
+
+  it.each(["user override", "disabled built-in"])(
+    "honors %s when disabling Kiwix injection",
+    async (mode) => {
+      const { onCompleted } = await setupSubject()
+      storageGetItemMock.mockResolvedValue({ enabled: false })
+      const url = "https://browse.library.kiwix.org/viewer"
+      tabsGetMock.mockResolvedValue({ url })
+      getLocalConfigMock.mockResolvedValue(
+        createConfig({
+          siteRules: {
+            userRules:
+              mode === "user override"
+                ? [
+                    {
+                      id: "disable-kiwix",
+                      matches: "*.browse.library.kiwix.org",
+                      injectIntoIframes: false,
+                    },
+                  ]
+                : [],
+            disabledBuiltInRules: mode === "disabled built-in" ? ["readfrog-kiwix-iframes"] : [],
+          },
+        }),
+      )
+      await onCompleted(createDetails({ frameId: 0, url }))
+      await onCompleted(createDetails({ url: `${url}/article` }))
+      expect(getAllFramesMock).not.toHaveBeenCalled()
+      expect(executeScriptMock).not.toHaveBeenCalled()
+    },
+  )
+
+  it("rechecks rule changes before injecting a late iframe", async () => {
+    const { onCompleted } = await setupSubject()
+    storageGetItemMock.mockResolvedValue({ enabled: false })
+    const url = "https://browse.library.kiwix.org/viewer"
+    tabsGetMock.mockResolvedValue({ url })
+    getLocalConfigMock.mockResolvedValue(createConfig())
+    await onCompleted(createDetails({ frameId: 0, url }))
+    executeScriptMock.mockClear()
+    getLocalConfigMock.mockResolvedValue(
+      createConfig({
+        siteRules: {
+          userRules: [
+            { id: "disable", matches: "*.browse.library.kiwix.org", injectIntoIframes: false },
+          ],
+          disabledBuiltInRules: [],
+        },
+      }),
+    )
+    await onCompleted(createDetails({ frameId: 4, url: "https://other.example/late" }))
+    expect(executeScriptMock).not.toHaveBeenCalled()
+  })
+
+  it("does not carry an enabled top-page rule into the next navigation", async () => {
+    const { onBeforeNavigate, onCompleted } = await setupSubject()
+    storageGetItemMock.mockResolvedValue({ enabled: false })
+    getLocalConfigMock.mockResolvedValue(createConfig())
+    await onCompleted(createDetails({ frameId: 0, url: "https://browse.library.kiwix.org/viewer" }))
+    executeScriptMock.mockClear()
+    onBeforeNavigate(createDetails({ frameId: 0, url: "https://example.com/app" }))
+    await onCompleted(createDetails())
+    expect(executeScriptMock).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    {
+      id: "excluded",
+      matches: "example.com",
+      excludeMatches: ["example.com/app"],
+      injectIntoIframes: true,
+    },
+    { id: "disabled", matches: "example.com", enabled: false, injectIntoIframes: true },
+  ])("does not activate a filtered user rule ($id)", async (rule) => {
+    const { onCompleted } = await setupSubject()
+    storageGetItemMock.mockResolvedValue({ enabled: false })
+    getLocalConfigMock.mockResolvedValue(
+      createConfig({
+        siteRules: { userRules: [rule], disabledBuiltInRules: [] },
+      }),
+    )
+    await onCompleted(createDetails({ url: "https://other.example/frame" }))
+    expect(getAllFramesMock).not.toHaveBeenCalled()
     expect(executeScriptMock).not.toHaveBeenCalled()
   })
 

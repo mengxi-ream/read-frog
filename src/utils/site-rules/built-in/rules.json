@@ -4573,6 +4573,24 @@
     "dontWalkTags.remove": ["PRE"]
   },
   {
+    "id": "readfrog-kiwix-iframes",
+    "description": "Enable selection tools in Kiwix reader frames",
+    "matches": "*.browse.library.kiwix.org",
+    "injectIntoIframes": true
+  },
+  {
+    "id": "readfrog-latentk-iframes",
+    "description": "Enable selection tools in Progressive Git's embedded practice pages",
+    "matches": "latentk.com/insight/progressive-git/*",
+    "injectIntoIframes": true
+  },
+  {
+    "id": "readfrog-w3schools-iframes",
+    "description": "Enable selection tools in the HTML iframe tutorial's embedded page",
+    "matches": "www.w3schools.com/html/html_iframe.asp",
+    "injectIntoIframes": true
+  },
+  {
     "id": "readfrog-x-chat",
     "description": "Skip the X Chat message footer (send time + delivery receipt). It renders twice inside the bubble — once as an aria-hidden opacity-0 spacer in the text flow, once in the absolutely positioned overlay — so both copies otherwise land in the message's translation unit. Target the footer root only: excluding its `.absolute.bottom-0.inset-e-0` wrapper too would hide that wrapper from unwrapDeepestOnlyHTMLChild, turning the bubble row into an only-child chain and moving the translation wrapper down into the pre-wrap text block",
     "matches": ["chat.x.com"],

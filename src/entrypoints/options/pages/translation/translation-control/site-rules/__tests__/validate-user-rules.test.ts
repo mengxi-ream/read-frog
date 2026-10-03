@@ -4,6 +4,22 @@ import { MAX_SITE_RULES_JSON_LENGTH, MAX_USER_SITE_RULES } from "@/types/config/
 import { validateUserRulesDocument } from "../validate-user-rules"
 
 describe("validateUserRulesDocument", () => {
+  it.each([true, false])(
+    "accepts injectIntoIframes: %s without stripping it",
+    (injectIntoIframes) => {
+      const rules = [{ id: "iframe-tools", matches: "example.com", injectIntoIframes }]
+      expect(validateUserRulesDocument(JSON.stringify(rules))).toEqual({ ok: true, rules })
+    },
+  )
+
+  it("rejects non-boolean iframe injection settings", () => {
+    expect(
+      validateUserRulesDocument(
+        JSON.stringify([{ id: "iframe-tools", matches: "example.com", injectIntoIframes: "true" }]),
+      ),
+    ).toMatchObject({ ok: false, kind: "schema" })
+  })
+
   it("treats an empty or whitespace-only document as no rules", () => {
     expect(validateUserRulesDocument("")).toEqual({ ok: true, rules: [] })
     expect(validateUserRulesDocument("  \n\t  ")).toEqual({ ok: true, rules: [] })

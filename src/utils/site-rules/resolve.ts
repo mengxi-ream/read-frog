@@ -64,6 +64,7 @@ export interface ResolvedSiteRule {
   forceInlineTranslationTags: ReadonlySet<string> | null
   minCharacters: number | null
   minWords: number | null
+  injectIntoIframes: boolean | null
   injectedCss: string | null
 }
 
@@ -85,6 +86,7 @@ export const EMPTY_RESOLVED_SITE_RULE: ResolvedSiteRule = {
   forceInlineTranslationTags: null,
   minCharacters: null,
   minWords: null,
+  injectIntoIframes: null,
   injectedCss: null,
 }
 
@@ -284,6 +286,7 @@ export function resolveSiteRule(
 
   let minCharacters: number | null = null
   let minWords: number | null = null
+  let injectIntoIframes: boolean | null = null
   const dontWalkTagsExplicitAdds = new Set<string>()
   const cssParts: string[] = []
   for (const rule of matched) {
@@ -292,6 +295,9 @@ export function resolveSiteRule(
     }
     if (rule.minWords !== undefined) {
       minWords = rule.minWords
+    }
+    if (rule.injectIntoIframes !== undefined) {
+      injectIntoIframes = rule.injectIntoIframes
     }
     const injectedCssParts = [rule.injectedCss, ...(rule["injectedCss.add"] ?? [])]
     for (const css of injectedCssParts) {
@@ -389,6 +395,7 @@ export function resolveSiteRule(
     ),
     minCharacters,
     minWords,
+    injectIntoIframes,
     injectedCss: cssParts.length > 0 ? cssParts.join("\n") : null,
   }
 }
