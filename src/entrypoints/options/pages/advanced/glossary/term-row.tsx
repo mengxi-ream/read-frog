@@ -26,9 +26,6 @@ import {
   useSetGlossaryTermEnabled,
 } from "./use-glossary"
 
-/** See the note at the source field: a cell's colour is for text, not for fields. */
-const EDIT_FIELD_CLASS = "text-foreground"
-
 interface TermRowProps {
   term: GlossaryTerm
   glossaryId: string
@@ -211,11 +208,6 @@ function TermEditRow({
           <InputGroupInput
             value={source}
             maxLength={MAX_GLOSSARY_SOURCE_LENGTH}
-            // `Input` sets no colour of its own, and `TableCell` paints its
-            // contents `text-muted-foreground` — which is right for a cell of
-            // read-only text and wrong for a field, where it made what the user
-            // had just typed look like the placeholder.
-            className={EDIT_FIELD_CLASS}
             // The row was opened to be edited, so the field it opened for takes
             // focus. Cancelling remounts the read row, which hands focus back to
             // the document rather than trapping it here.
@@ -255,7 +247,6 @@ function TermEditRow({
           <InputGroupInput
             value={target}
             maxLength={MAX_GLOSSARY_TARGET_LENGTH}
-            className={EDIT_FIELD_CLASS}
             aria-label={i18n.t("options.advanced.glossary.columnTarget")}
             // The same placeholder the add form uses, which is where "leave it
             // empty to keep the original" is spelled out — the read row's

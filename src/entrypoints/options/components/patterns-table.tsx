@@ -98,8 +98,8 @@ export function PatternsTable({
           <div className={cn("max-h-42 overflow-y-auto", rowsClassName)}>
             <Table>
               <TableBody>
-                {patterns.map((pattern, index) => (
-                  <TableRow key={pattern} index={index} className={ACTION_COLUMN}>
+                {patterns.map((pattern) => (
+                  <TableRow key={pattern} className={ACTION_COLUMN}>
                     <TableCell>{pattern}</TableCell>
                     <TableCell className="text-right">
                       <Button
