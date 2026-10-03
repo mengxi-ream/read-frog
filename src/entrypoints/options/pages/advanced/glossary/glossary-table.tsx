@@ -3,7 +3,6 @@ import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import { Input } from "@/components/ui/base-ui/input"
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -147,68 +146,71 @@ export function GlossaryTable({ glossaryId }: { glossaryId: string }) {
 
             The border and the radius are on the SCROLL container rather than a
             wrapper around it, so `overflow` clips the rows to the rounded
-            corners instead of letting them square it off. */}
-        <Table
-          className="table-fixed"
-          containerClassName="max-h-[420px] overflow-y-auto rounded-md border"
-        >
-          {/* Pinned on the CELLS, not on `<thead>`: a sticky row group is
-              painted under the body's cells whatever its z-index, so the rows
-              scrolled straight through it.
+            corners instead of letting them square it off.
 
-              `z-20` on the header ROW is the other half. Every `TableRow` is
-              `relative z-10` for the pointer-following highlight, which makes
-              each body row a stacking context at the same level as the header's
-              — and later in document order, so it won. A z-index on the cells
-              cannot fix that: they are trapped inside their own row's context. */}
-          <TableHeader className="[&_th]:sticky [&_th]:top-0 [&_th]:bg-background">
-            <TableRow className="z-20">
-              {/* Header text would be wider than the control it labels and
-                  would set the column width under `table-fixed`. The name is
-                  on each checkbox instead. */}
-              <TableHead className="w-12">
-                <span className="sr-only">{i18n.t("options.advanced.glossary.columnEnabled")}</span>
-              </TableHead>
-              {/* Left unsized on purpose: under `table-fixed` the columns with
-                  no width divide what the two fixed ones leave, so these two
-                  stay equal halves without anyone doing the arithmetic. A long
-                  term must not starve the translation column. */}
-              <TableHead>{i18n.t("options.advanced.glossary.columnSource")}</TableHead>
-              <TableHead>{i18n.t("options.advanced.glossary.columnTarget")}</TableHead>
-              {/* Sized, so the two term columns keep dividing the rest evenly. */}
-              <TableHead className="w-40">
-                {i18n.t("options.advanced.glossary.columnTargetLanguage")}
-              </TableHead>
-              {/* Wide enough for the two buttons every row carries — edit and
-                  delete while reading, save and cancel while editing — so the
-                  term columns do not resize the moment a row is opened. */}
-              <TableHead className="w-24" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {visible.map((term: GlossaryTerm) => (
-              <GlossaryTermRow
-                key={term.id}
-                term={term}
-                glossaryId={glossaryId}
-                isEditing={editingId === term.id}
-                onEdit={() => setEditingId(term.id)}
-                onDone={() => setEditingId(null)}
-              />
-            ))}
-            {visible.length === 0 && (
+            A bare `<table>` rather than `Table`: `Table` wraps itself in its own
+            `overflow-x-auto` box, and that box — not this one — would become
+            the scroll container the sticky header pins against. */}
+        <div className="max-h-[420px] overflow-y-auto rounded-md border">
+          <table data-slot="table" className="w-full table-fixed caption-bottom text-sm">
+            {/* The header's line is drawn as an inset shadow: a collapsed border
+                belongs to the table rather than the header, so it would stay
+                behind and scroll away under a pinned header.
+
+                The header's usual muted tint is translucent, which would let the
+                rows show through once it is pinned, so here the same tint is
+                mixed onto the page background to make it opaque. */}
+            <TableHeader className="sticky top-0 z-10 bg-[color-mix(in_srgb,var(--rf-muted)_50%,var(--rf-background))] shadow-[inset_0_-1px_0_var(--rf-border)] [&_tr]:border-b-0">
               <TableRow>
-                <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
-                  {isLoading
-                    ? i18n.t("options.advanced.glossary.loading")
-                    : terms.length === 0
-                      ? i18n.t("options.advanced.glossary.empty")
-                      : i18n.t("options.advanced.glossary.noMatches")}
-                </TableCell>
+                {/* Header text would be wider than the control it labels and
+                    would set the column width under `table-fixed`. The name is
+                    on each checkbox instead. */}
+                <TableHead className="w-12">
+                  <span className="sr-only">
+                    {i18n.t("options.advanced.glossary.columnEnabled")}
+                  </span>
+                </TableHead>
+                {/* Left unsized on purpose: under `table-fixed` the columns with
+                    no width divide what the two fixed ones leave, so these two
+                    stay equal halves without anyone doing the arithmetic. A long
+                    term must not starve the translation column. */}
+                <TableHead>{i18n.t("options.advanced.glossary.columnSource")}</TableHead>
+                <TableHead>{i18n.t("options.advanced.glossary.columnTarget")}</TableHead>
+                {/* Sized, so the two term columns keep dividing the rest evenly. */}
+                <TableHead className="w-40">
+                  {i18n.t("options.advanced.glossary.columnTargetLanguage")}
+                </TableHead>
+                {/* Wide enough for the two buttons every row carries — edit and
+                    delete while reading, save and cancel while editing — so the
+                    term columns do not resize the moment a row is opened. */}
+                <TableHead className="w-24" />
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {visible.map((term: GlossaryTerm) => (
+                <GlossaryTermRow
+                  key={term.id}
+                  term={term}
+                  glossaryId={glossaryId}
+                  isEditing={editingId === term.id}
+                  onEdit={() => setEditingId(term.id)}
+                  onDone={() => setEditingId(null)}
+                />
+              ))}
+              {visible.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                    {isLoading
+                      ? i18n.t("options.advanced.glossary.loading")
+                      : terms.length === 0
+                        ? i18n.t("options.advanced.glossary.empty")
+                        : i18n.t("options.advanced.glossary.noMatches")}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </table>
+        </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
           {/* This glossary's own total, with no cap beside it: the 20,000 cap

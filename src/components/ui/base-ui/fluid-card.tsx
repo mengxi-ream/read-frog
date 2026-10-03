@@ -11,7 +11,7 @@ import { cn } from "@/utils/styles/utils"
  * fluidfunctionalism.com/docs/card. Same anatomy as the plain `Card` next door (header,
  * title, description, action, content, footer), with a sibling `FluidCardGroup` that owns
  * layout — stacked list, inline rows, or grid — plus the magnetic proximity highlight that
- * previews where a click will land, the same one `Table` uses on its rows.
+ * previews where a click will land.
  *
  * Deliberately kept beside `card.tsx` rather than replacing it: the surface here is
  * transparent and borderless by default, leaning on hairline dividers and the highlight
@@ -177,7 +177,7 @@ function FluidCardGroup({
     useProximityHover(containerRef, { axis: columns > 1 ? "xy" : "y" })
 
   // Assign each child a stable proximity index, so callers never thread one through by
-  // hand the way Table asks them to — here the group owns it.
+  // hand — the group owns it.
   const childArray = React.Children.toArray(children).filter(React.isValidElement)
   const count = childArray.length
   const indexed = childArray.map((child, index) =>
@@ -345,7 +345,7 @@ function FluidCard({
 
   // Divider geometry: draw a hairline toward the neighbour below and to the right, but
   // drop it next to the active *or* selected card so the highlight and the selection fill
-  // read clean — the same trick Table plays on its row borders.
+  // read clean.
   const self = index ?? -1
   const col = index === undefined ? 0 : index % columns
   const hasBelow = index !== undefined && index + columns < count
