@@ -43,6 +43,20 @@ describe("resolveSiteRule", () => {
     expect(resolved.minWords).toBe(3)
   })
 
+  it("lets user rules explicitly disable built-in iframe injection", () => {
+    const builtIn = rule({ id: "built-in", injectIntoIframes: true })
+    expect(resolveSiteRule(URL_ON_SITE, [builtIn], [], []).injectIntoIframes).toBe(true)
+    expect(
+      resolveSiteRule(URL_ON_SITE, [builtIn], [rule({ id: "user", injectIntoIframes: false })], [])
+        .injectIntoIframes,
+    ).toBe(false)
+    expect(resolveSiteRule(URL_ON_SITE, [builtIn], [], [builtIn.id]).injectIntoIframes).toBeNull()
+    expect(
+      resolveSiteRule(URL_ON_SITE, [], [rule({ id: "unrelated", minWords: 1 })], [])
+        .injectIntoIframes,
+    ).toBeNull()
+  })
+
   it("concatenates injectedCss instead of replacing it", () => {
     const resolved = resolveSiteRule(
       URL_ON_SITE,

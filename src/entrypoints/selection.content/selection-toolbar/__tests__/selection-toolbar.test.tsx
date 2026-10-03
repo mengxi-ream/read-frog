@@ -4,6 +4,7 @@ import { atom, getDefaultStore, useAtomValue } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE } from "@/entrypoints/selection.content/overlay-layers"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { DEFERRED_SELECTION_OPEN_EVENT } from "@/utils/constants/selection"
 import { selectionSessionAtom } from "../atoms"
 import { SelectionToolbar } from "../index"
 import { MODAL_DIALOG_HOST_SLOT_ATTRIBUTE } from "../modal-dialog-host"
@@ -167,6 +168,42 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expect(getOverlayRoot()).toHaveClass("w-0")
     expect(getOverlayRoot()).not.toHaveClass("inset-0")
   }
+
+  it("replays a lazy iframe selection once the toolbar listeners are installed", async () => {
+    const view = render(<SelectionToolbar />)
+    expect(window.__READ_FROG_SELECTION_TOOLBAR_READY__).toBe(true)
+    await act(async () => {
+      window.dispatchEvent(
+        new CustomEvent(DEFERRED_SELECTION_OPEN_EVENT, {
+          detail: { text: MOCK_SELECTED_TEXT, x: 100, y: 100 },
+        }),
+      )
+      const callbacks = [...rafCallbacks]
+      rafCallbacks = []
+      callbacks.forEach((callback) => callback(0))
+    })
+    expectToolbarVisible()
+    await clearToolbarState()
+    view.unmount()
+    expect(window.__READ_FROG_SELECTION_TOOLBAR_READY__).toBe(false)
+  })
+
+  it("ignores stale or malformed deferred selections", async () => {
+    render(<SelectionToolbar />)
+    await act(async () => {
+      window.dispatchEvent(
+        new CustomEvent(DEFERRED_SELECTION_OPEN_EVENT, {
+          detail: { text: "Old selection", x: 100, y: 100 },
+        }),
+      )
+      window.dispatchEvent(
+        new CustomEvent(DEFERRED_SELECTION_OPEN_EVENT, {
+          detail: { text: MOCK_SELECTED_TEXT, x: Number.NaN, y: 100 },
+        }),
+      )
+    })
+    expectToolbarHidden()
+  })
 
   it("applies configured opacity on the toolbar surface instead of the overlay host", () => {
     render(<SelectionToolbar />)

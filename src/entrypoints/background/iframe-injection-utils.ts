@@ -1,10 +1,32 @@
 export interface FrameInfoForSiteControl {
   frameId: number
   parentFrameId: number
+  documentId?: string
   url?: string
 }
 
 const SITE_CONTROL_URL_RE = /^(?:https?|file):/i
+
+function getHttpOrigin(url: string | undefined): string | undefined {
+  if (!url) return undefined
+  try {
+    const parsed = new URL(url)
+    return /^https?:$/.test(parsed.protocol) ? parsed.origin : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/** Browser-supplied origin wins: "null" is an opaque sandbox, not a URL fallback. */
+export function isSameOriginIframeSender(
+  topUrl: string | undefined,
+  senderOrigin: string | undefined,
+  frameUrl: string | undefined,
+): boolean {
+  const topOrigin = getHttpOrigin(topUrl)
+  const frameOrigin = senderOrigin ?? getHttpOrigin(frameUrl)
+  return topOrigin !== undefined && frameOrigin === topOrigin
+}
 
 function isSiteControlUrl(url: string | undefined): url is string {
   if (!url) {

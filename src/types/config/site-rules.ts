@@ -68,6 +68,11 @@ export const siteRuleSchema = z.object({
   "forceInlineTranslationTags.remove": z.array(z.string()).optional(),
   minCharacters: z.number().int().min(0).optional(),
   minWords: z.number().int().min(0).optional(),
+  // Same-origin frames lazily load selection tools on a real gesture by
+  // default. True eagerly injects host + selection in existing/future frames,
+  // including cross-origin ones; false disables lazy activation too. Matching
+  // frame URLs can opt in independently. Refresh after changing this setting.
+  injectIntoIframes: z.boolean().optional(),
   injectedCss: z.string().max(MAX_CUSTOM_CSS_LENGTH).optional(),
   "injectedCss.add": z.array(z.string().max(MAX_CUSTOM_CSS_LENGTH)).optional(),
   enabled: z.boolean().optional(),
