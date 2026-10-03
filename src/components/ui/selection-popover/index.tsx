@@ -578,7 +578,7 @@ function SelectionPopoverBody({
     defaultTagName: "div",
     props: mergeProps<"div">(
       {
-        className: cn("min-h-0 flex-1 overflow-y-auto scroll-driven:scroll-fade", className),
+        className: cn("min-h-0 flex-1 overflow-y-auto", className),
       },
       props,
     ),
