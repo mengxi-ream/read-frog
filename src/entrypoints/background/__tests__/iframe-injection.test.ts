@@ -1,6 +1,7 @@
 import type { Config } from "@/types/config/config"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { browser, storage } from "#imports"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { SITE_CONTROL_URL_WINDOW_KEY } from "@/utils/site-control"
 
 const HOST_CONTENT_SCRIPT_FILE = "/content-scripts/host.js"
@@ -17,11 +18,14 @@ const storageGetItemMock = vi.fn<(...args: any[]) => any>()
 // Hoisted: `@/utils/site-control` reaches `@/utils/logger` through the shared URL
 // matcher, so the mocked module is evaluated before a plain `const` here would be
 // initialised.
-const { getLocalConfigMock, loggerErrorMock, loggerWarnMock } = vi.hoisted(() => ({
+const { getLocalConfigMock, loggerErrorMock, loggerWarnMock, onMessageMock } = vi.hoisted(() => ({
   getLocalConfigMock: vi.fn<(...args: any[]) => any>(),
   loggerErrorMock: vi.fn<(...args: any[]) => any>(),
   loggerWarnMock: vi.fn<(...args: any[]) => any>(),
+  onMessageMock: vi.fn<(...args: any[]) => any>(),
 }))
+
+vi.mock("@/utils/message", () => ({ onMessage: onMessageMock }))
 
 vi.mock("@/utils/config/storage", () => ({
   getLocalConfig: getLocalConfigMock,
@@ -76,6 +80,7 @@ function createConfig({
   siteRules?: Config["siteRules"]
 } = {}): Config {
   return {
+    selectionToolbar: DEFAULT_CONFIG.selectionToolbar,
     translate: {
       node: {
         enabled: nodeTranslationEnabled,
@@ -112,6 +117,9 @@ async function setupSubject() {
     onRemoved,
     onBeforeNavigate,
     onCompleted,
+    activateSelection: onMessageMock.mock.calls.find(
+      ([type]) => type === "activateSameOriginIframeSelectionRuntime",
+    )![1] as (message: { sender: Record<string, unknown> }) => Promise<boolean>,
   }
 }
 
@@ -137,6 +145,92 @@ describe("setupIframeInjection", () => {
     ])
     storageGetItemMock.mockResolvedValue({ enabled: true })
     executeScriptMock.mockResolvedValue(undefined)
+  })
+
+  it("loads both runtimes only when a same-origin iframe selection requests them", async () => {
+    const { activateSelection } = await setupSubject()
+    getLocalConfigMock.mockResolvedValue(createConfig())
+    storageGetItemMock.mockResolvedValue({ enabled: false })
+    expect(
+      await activateSelection({
+        sender: {
+          tab: { id: currentTabId },
+          frameId: 2,
+          documentId: "doc-1",
+          url: "https://example.com/frame",
+          origin: "https://example.com",
+        },
+      }),
+    ).toBe(true)
+    expect(executeScriptMock).toHaveBeenCalledTimes(3)
+    expect(executeScriptMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        files: [SELECTION_CONTENT_SCRIPT_FILE],
+        target: { tabId: currentTabId, documentIds: ["doc-1"] },
+      }),
+    )
+  })
+
+  it.each([
+    { frameId: 0, origin: "https://example.com", url: "https://example.com/app" },
+    { frameId: 2, origin: "https://ads.example", url: "https://ads.example/frame" },
+    { frameId: 2, origin: "null", url: "https://example.com/frame" },
+  ])("rejects an ineligible selection sender ($origin, frame $frameId)", async (sender) => {
+    const { activateSelection } = await setupSubject()
+    expect(await activateSelection({ sender: { ...sender, tab: { id: currentTabId } } })).toBe(
+      false,
+    )
+    expect(executeScriptMock).not.toHaveBeenCalled()
+  })
+
+  it("supports inherited blank origins and refuses a stale document", async () => {
+    const { activateSelection } = await setupSubject()
+    getLocalConfigMock.mockResolvedValue(createConfig())
+    getAllFramesMock.mockResolvedValue([
+      createFrame(0, "https://example.com/app", -1),
+      { ...createFrame(2, "about:srcdoc"), documentId: "current-doc" },
+    ])
+    const sender = {
+      tab: { id: currentTabId },
+      frameId: 2,
+      url: "about:srcdoc",
+      origin: "https://example.com",
+    }
+    expect(await activateSelection({ sender: { ...sender, documentId: "old-doc" } })).toBe(false)
+    expect(executeScriptMock).not.toHaveBeenCalled()
+    expect(await activateSelection({ sender: { ...sender, documentId: "current-doc" } })).toBe(true)
+  })
+
+  it("honors explicit false and disabled site control for lazy activation", async () => {
+    const { activateSelection } = await setupSubject()
+    const message = {
+      sender: {
+        tab: { id: currentTabId },
+        frameId: 2,
+        url: "https://example.com/frame",
+        origin: "https://example.com",
+      },
+    }
+    getLocalConfigMock.mockResolvedValue(
+      createConfig({
+        siteRules: {
+          userRules: [{ id: "off", matches: "example.com/app", injectIntoIframes: false }],
+          disabledBuiltInRules: [],
+        },
+      }),
+    )
+    expect(await activateSelection(message)).toBe(false)
+    getLocalConfigMock.mockResolvedValue(
+      createConfig({
+        siteControl: {
+          mode: "blacklist",
+          blacklistPatterns: ["example.com"],
+          whitelistPatterns: [],
+        },
+      }),
+    )
+    expect(await activateSelection(message)).toBe(false)
+    expect(executeScriptMock).not.toHaveBeenCalled()
   })
 
   it("skips iframe injection when page translation and node translation are not enabled", async () => {
@@ -377,7 +471,7 @@ describe("setupIframeInjection", () => {
   it("dedupes concurrent top-page scanning and frame completion for the same document", async () => {
     const { onCompleted } = await setupSubject()
     storageGetItemMock.mockResolvedValue({ enabled: false })
-    const url = "https://latentk.com/insight/progressive-git/"
+    const url = "https://browse.library.kiwix.org/viewer/"
     tabsGetMock.mockResolvedValue({ url })
     getLocalConfigMock.mockResolvedValue(createConfig())
     getAllFramesMock.mockResolvedValue([
@@ -397,7 +491,7 @@ describe("setupIframeInjection", () => {
   it("recovers the top-page rule after a service worker restart", async () => {
     const { onCompleted } = await setupSubject()
     storageGetItemMock.mockResolvedValue({ enabled: false })
-    tabsGetMock.mockResolvedValue({ url: "https://latentk.com/insight/progressive-git/" })
+    tabsGetMock.mockResolvedValue({ url: "https://browse.library.kiwix.org/viewer" })
     getLocalConfigMock.mockResolvedValue(createConfig())
     await onCompleted(createDetails({ url: "https://other.example/frame" }))
     expect(executeScriptMock).toHaveBeenCalledWith(
@@ -407,7 +501,7 @@ describe("setupIframeInjection", () => {
     )
     expect(executeScriptMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://latentk.com/insight/progressive-git/"],
+        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://browse.library.kiwix.org/viewer"],
       }),
     )
   })

@@ -4,9 +4,11 @@ import { browser } from "#imports"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { logger } from "@/utils/logger"
+import { onMessage } from "@/utils/message"
 import { isSiteEnabled, SITE_CONTROL_URL_WINDOW_KEY } from "@/utils/site-control"
 import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
-import { resolveSiteControlUrl } from "./iframe-injection-utils"
+import { urlMatchesPattern } from "@/utils/url-pattern"
+import { isSameOriginIframeSender, resolveSiteControlUrl } from "./iframe-injection-utils"
 import { getPageTranslationEnabled } from "./page-translation-state"
 
 const HOST_CONTENT_SCRIPT_FILE = "/content-scripts/host.js" as const
@@ -291,6 +293,64 @@ export async function injectHostContentIntoCurrentTabIframesAfterNodeTranslation
 }
 
 export function setupIframeInjection() {
+  onMessage("activateSameOriginIframeSelectionRuntime", async ({ sender }) => {
+    const tabId = sender.tab?.id
+    if (tabId === undefined || !sender.frameId) return false
+    try {
+      const [tab, storedConfig, frames] = await Promise.all([
+        browser.tabs.get(tabId),
+        getLocalConfig(),
+        getFrameSnapshot(tabId),
+      ])
+      const config = storedConfig ?? DEFAULT_CONFIG
+      const frameUrl = resolveSiteControlUrl(sender.frameId, sender.url, frames)
+      const senderOrigin =
+        "origin" in sender && typeof sender.origin === "string" ? sender.origin : undefined
+      if (!isSameOriginIframeSender(tab.url, senderOrigin, frameUrl) || !tab.url || !frameUrl)
+        return false
+      const documentId =
+        "documentId" in sender && typeof sender.documentId === "string"
+          ? sender.documentId
+          : undefined
+      const frame = frames.find((candidate) => candidate.frameId === sender.frameId)
+      if (!frame || (documentId && frame.documentId && frame.documentId !== documentId))
+        return false
+      if (!isSiteEnabled(tab.url, config) || !isSiteEnabled(frameUrl, config)) return false
+      if (
+        !config.selectionToolbar.enabled ||
+        config.selectionToolbar.disabledSelectionToolbarPatterns.some((pattern) =>
+          urlMatchesPattern(frameUrl, pattern),
+        )
+      )
+        return false
+      if (
+        getEffectiveSiteRule(config, tab.url).injectIntoIframes === false ||
+        getEffectiveSiteRule(config, frameUrl).injectIntoIframes === false
+      )
+        return false
+
+      const details = { tabId, frameId: sender.frameId, documentId, url: sender.url }
+      await injectHostContentIntoFrame(details, frames, config, {
+        includeSelectionContent: true,
+        siteControlUrlOverride: tab.url,
+      })
+      // An eager rule may already be injecting this document. Its ready event
+      // will replay the gesture once React is mounted.
+      return getIframeContentScriptFiles({ includeSelectionContent: true }).every(
+        (file) =>
+          injectedDocumentKeysByFrameAndScript.get(getScriptFrameInjectionKey(details, file)) ===
+            getDocumentInjectionKey(details) ||
+          pendingScriptDocumentKeys.has(getScriptDocumentInjectionKey(details, file)),
+      )
+    } catch (error) {
+      logger.warn(
+        "[Background][IframeInjection] Failed to activate same-origin selection runtime",
+        error,
+      )
+      return false
+    }
+  })
+
   browser.tabs.onRemoved.addListener(clearTabDocumentState)
   browser.webNavigation.onBeforeNavigate.addListener((details) => {
     if (details.frameId === 0) {

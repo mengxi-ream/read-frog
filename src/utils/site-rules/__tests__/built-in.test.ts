@@ -77,13 +77,13 @@ describe("built-in site rules", () => {
   it.each([
     "https://browse.library.kiwix.org/viewer",
     "https://en.browse.library.kiwix.org/content/article",
-    "https://latentk.com/insight/progressive-git/",
-    "https://www.w3schools.com/html/html_iframe.asp",
   ])("enables iframe selection tools on %s", (url) => {
     expect(resolveSiteRule(url, BUILT_IN_SITE_RULES, [], []).injectIntoIframes).toBe(true)
   })
 
   it.each([
+    "https://latentk.com/insight/progressive-git/",
+    "https://www.w3schools.com/html/html_iframe.asp",
     "https://example.com/article",
     "https://latentk.com/insight/unrelated/",
     "https://www.w3schools.com/html/html_intro.asp",
