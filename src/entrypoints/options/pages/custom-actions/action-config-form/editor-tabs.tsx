@@ -1,4 +1,5 @@
 import type { CustomActionEditorTab } from "@/utils/navigation"
+import { IconSettings, IconTable } from "@tabler/icons-react"
 import { useSelector } from "@tanstack/react-store"
 import { useAtom } from "jotai"
 import { useMemo, useRef } from "react"
@@ -91,10 +92,12 @@ export function ActionEditorTabs({
 
   return (
     <Tabs value={tab} onValueChange={handleValueChange} className="gap-4">
-      {/* Flush with the card's top and sides, so the hairline runs edge to edge. */}
+      {/* Flush with the card's top and sides, so the hairline runs edge to edge; the
+          list's px-1 and a tab's px-3 line the first label up with the fields below. */}
       <div ref={tabBarRef} className={cn("-mx-4 -mt-4", SCROLL_MARGIN)}>
-        <TabsList variant="line" className="w-full">
+        <TabsList variant="line" className="w-full px-1">
           <TabsTrigger value="config">
+            <IconSettings />
             {t("config")}
             <ConfigTabStatus />
           </TabsTrigger>
@@ -103,6 +106,7 @@ export function ActionEditorTabs({
             value="notebase"
             className={SCROLL_MARGIN}
           >
+            <IconTable />
             {t("notebase")}
             <NotebaseTabStatus />
           </TabsTrigger>

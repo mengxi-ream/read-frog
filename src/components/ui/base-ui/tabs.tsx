@@ -19,13 +19,16 @@ function Tabs({ className, orientation = "horizontal", ...props }: TabsPrimitive
 }
 
 const tabsListVariants = cva(
-  "group/tabs-list inline-flex w-fit justify-center text-muted-foreground group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col",
+  "group/tabs-list inline-flex w-fit text-muted-foreground group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col",
   {
     variants: {
       variant: {
-        default: "items-center rounded-lg bg-muted p-[3px] group-data-horizontal/tabs:h-8",
+        default:
+          "items-center justify-center rounded-lg bg-muted p-[3px] group-data-horizontal/tabs:h-8",
         /* The hairline runs under the whole list (beside it, when vertical) and the
-           active tab's bar sits on it. Add `w-full` for X's equal-width tabs. */
+           active tab's bar sits on it. Add `w-full` to run the hairline across the
+           container: the tabs keep to their labels' width at its start, so a wide
+           list doesn't spread them apart. */
         line: "items-stretch group-data-horizontal/tabs:h-10 group-data-horizontal/tabs:border-b group-data-vertical/tabs:border-e",
       },
     },
@@ -146,12 +149,12 @@ function TabsList({
 }
 
 const tabsTriggerVariants = cva(
-  "group/tabs-trigger relative inline-flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-transparent text-sm font-medium whitespace-nowrap text-foreground/60 transition-all group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 dark:text-muted-foreground dark:hover:text-foreground data-active:text-foreground dark:data-active:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/tabs-trigger relative inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-md border border-transparent text-sm font-medium whitespace-nowrap text-foreground/60 transition-all group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 dark:text-muted-foreground dark:hover:text-foreground data-active:text-foreground dark:data-active:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default:
-          "h-[calc(100%-1px)] px-1.5 py-0.5 has-data-[icon=inline-end]:pr-1 has-data-[icon=inline-start]:pl-1 data-active:bg-background data-active:shadow-sm dark:data-active:border-input dark:data-active:bg-input/30",
+          "h-[calc(100%-1px)] flex-1 px-1.5 py-0.5 has-data-[icon=inline-end]:pr-1 has-data-[icon=inline-start]:pl-1 data-active:bg-background data-active:shadow-sm dark:data-active:border-input dark:data-active:bg-input/30",
         line: "border-0 px-3 group-data-horizontal/tabs:h-full group-data-vertical/tabs:py-1.5",
       },
     },
