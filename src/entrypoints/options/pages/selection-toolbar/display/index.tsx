@@ -84,7 +84,6 @@ function OpacitySlider({
   return (
     <div className="w-56">
       <SliderComfortable
-        variant="scrubber"
         aria-label={i18n.t("options.selectionToolbar.display.opacity.title")}
         min={MIN_SELECTION_OVERLAY_OPACITY}
         max={MAX_SELECTION_OVERLAY_OPACITY}

@@ -127,7 +127,6 @@ function SliderRow({
   return (
     <div className="px-2.5 py-1.5">
       <SliderComfortable
-        variant="scrubber"
         label={label}
         min={min}
         max={max}
