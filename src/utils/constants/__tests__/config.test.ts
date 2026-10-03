@@ -200,7 +200,7 @@ describe("createDefaultDictionaryAction layout", () => {
     // which is an attribute and not counted.
     const textRuns = html.split(/<[^>]*>/).map((run) => run.trim())
 
-    expect(action.outputSchema).toHaveLength(8)
+    expect(action.outputSchema).toHaveLength(9)
     for (const [name, shown] of Object.entries(value)) {
       if (name === termName) continue
       expect(textRuns.filter((run) => run === shown)).toHaveLength(1)

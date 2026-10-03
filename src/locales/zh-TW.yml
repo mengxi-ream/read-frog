@@ -856,6 +856,14 @@ options:
             9. 如果某個欄位無法判斷，請回傳空字串，不要猜測。
             10. 除非必須使用來源形式才能保持清楚，所有文字欄位都請使用 {{targetLanguage}} 回答。
             11. 「句中詞形」欄位標出所選字詞在「句子」中的位置：它是一個字串，內容是精簡的 JSON 陣列，每項為 {"text": ...}，逐字引用「句子」中的原文，例如 [{"text":"blossoms"}]。如果「句子」把字詞拆成了幾個部分（例如德文 "anrufen" 在 "Er ruft seine Mutter an" 中），請依序每個部分一項：[{"text":"ruft"},{"text":"an"}]。請正確跳脫內部的引號。
+            12. 「記憶技巧」欄位請像一位好老師那樣，針對這個詞條本身的特點，教學習者記住它（講的是所選字詞本身，不是它的翻譯）。最多給 3 條，每條一行，最有幫助的放在最前面。只寫真正有用的技巧，寧缺勿濫；如果沒有真正有用的，就回傳空字串，不要硬湊。每行只講一種技巧，以技巧名稱和冒號開頭，技巧名稱和內容都使用 {{targetLanguage}}。先從字詞的構成著手，再補充其他真正有用的：
+               - 字根字首：字詞的組成部分（字根、字首、字尾，或複合字裡的各個字），以及它們如何組合出字義。
+               - 拆字：以漢字書寫的詞（中文、日文漢字詞、源自漢字的韓文詞），每個字的意思，或一個字的部件。
+               - 字源：字詞的來源，或學習者可能認識的相關字詞（同源字、外來語、其他語言中寫法相同的漢字詞）。
+               - 近義詞／反義詞：一個近義詞及兩者的差別，或一個反義詞。
+               - 易混淆字：外形或讀音相近的字詞，以及如何分辨。
+               - 搭配：它常用的固定搭配，值得整組記住。
+               不適用的技巧直接略過，不要寫一行說明它不適用。每條都要說出「定義」沒說到的東西：不要換句話重複字義、複述「句子」，或解釋字詞的屈折變化。只寫你確定的事實：不要編造字源、字根或漢字部件。有爭議或屬於民間傳說的字源故事不要寫，即使說成「只當趣味記」也不行（sincere 並非來自「無蠟」，posh 也不是首字母縮寫）。只有當各部分或各個字確實組成字義時才拆開講；「猶豫」「葡萄」這類不能按字拆開理解的詞，請改用其他技巧。不要用任何語言的諧音，也不要把一個字詞拆成不相干的字詞來記。
 
             ## 範例
 
@@ -870,6 +878,9 @@ options:
             - 句中詞形：[{"text":"blossoms"}]
             - 定義：花；花朵（尤指果樹的花）
             - 句子翻譯：櫻花短暫的美麗提醒我們珍惜每一刻。
+            - 記憶技巧：
+              字源：和 bloom（開花）同源，bl- 開頭的 bloom、blossom 都和開花有關
+              近義詞：bloom 多指花開的狀態，blossom 常指果樹（櫻桃、蘋果）的花
             - 難度：B2
 
             ### 範例 2
@@ -883,6 +894,9 @@ options:
             - 句中詞形：[{"text":"感動"}]
             - 定義：Being deeply moved; emotional touch
             - 句子翻譯：I thought this movie was boring, but the ending was moving.
+            - 記憶技巧：
+              Characters: 感 (feel) + 動 (move): your feelings are moved.
+              Collocation: 感動する = to be moved; 感動的 = moving, touching.
             - 難度：B1
           prompt: |-
             ## 輸入
@@ -903,6 +917,8 @@ options:
           fieldDefinitionDescription: 針對脈絡語意提供一則精簡定義。
           fieldSentenceTranslation: 句子翻譯
           fieldSentenceTranslationDescription: 只翻譯提取出的句子。
+          fieldMemoryTips: "記憶技巧"
+          fieldMemoryTipsDescription: "幫助記住詞條的方法：最多 3 條，每條一行，以技巧名稱和冒號開頭（例如 字根字首：…）；沒有真正有用的就回傳空字串。"
           fieldDifficulty: 難度
           fieldDifficultyDescription: 預估 CEFR 難度等級 A1、A2、B1、B2、C1 或 C2。
         sentenceAnalysis:

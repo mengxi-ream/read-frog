@@ -36,7 +36,11 @@ interface DictionarySample {
   values: Record<DictionarySlot, string>
 }
 
-function englishWordSample(definition: string, contextTranslation: string): DictionarySample {
+function englishWordSample(
+  definition: string,
+  contextTranslation: string,
+  memoryTips: string,
+): DictionarySample {
   return {
     selection: "blossoms",
     values: {
@@ -48,6 +52,7 @@ function englishWordSample(definition: string, contextTranslation: string): Dict
       contextTerm: '[{"text":"blossoms"}]',
       contextTranslation,
       difficulty: "B2",
+      memoryTips,
     },
   }
 }
@@ -65,37 +70,54 @@ const DICTIONARY_SAMPLES: Record<SupportedUiLocale, DictionarySample> = {
       contextTranslation:
         "The fleeting beauty of cherry blossoms reminds us to cherish every moment.",
       difficulty: "B1",
+      memoryTips:
+        "Characters: 珍 (treasure, with 王 for jade) + 惜 (to value, with 忄 for heart): hold something dear like jade.\nCollocation: 珍惜时间 = to make the most of your time; 珍惜机会 = to value a chance.",
     },
   },
-  "zh-CN": englishWordSample("花；花朵（尤指果树的花）", "樱花短暂的美丽提醒我们珍惜每一刻。"),
-  "zh-TW": englishWordSample("花；花朵（尤指果樹的花）", "櫻花短暫的美麗提醒我們珍惜每一刻。"),
+  "zh-CN": englishWordSample(
+    "花；花朵（尤指果树的花）",
+    "樱花短暂的美丽提醒我们珍惜每一刻。",
+    "词源：和 bloom（开花）同源，bl- 开头的 bloom、blossom 都和开花有关\n近义词：bloom 多指花开的状态，blossom 常指果树（樱桃、苹果）的花",
+  ),
+  "zh-TW": englishWordSample(
+    "花；花朵（尤指果樹的花）",
+    "櫻花短暫的美麗提醒我們珍惜每一刻。",
+    "字源：和 bloom（開花）同源，bl- 開頭的 bloom、blossom 都和開花有關\n近義詞：bloom 多指花開的狀態，blossom 常指果樹（櫻桃、蘋果）的花",
+  ),
   ja: englishWordSample(
     "花（特に果樹の花）",
     "桜のはかない美しさは、一瞬一瞬を大切にするよう私たちに思い出させてくれる。",
+    "語源：bloom（花が咲く）と同じ語源で、bl- で始まる bloom・blossom はどちらも花に関わる語\n類義語：bloom は花が咲いている状態、blossom は特に果樹（桜・りんご）の花",
   ),
   ko: englishWordSample(
     "꽃 (특히 과일나무의 꽃)",
     "벚꽃의 덧없는 아름다움은 매 순간을 소중히 여기라고 우리에게 일깨워 준다.",
+    "어원: bloom(꽃이 피다)과 어원이 같아, bl-로 시작하는 bloom·blossom은 모두 꽃과 관련된 말\n유의어: bloom은 꽃이 핀 상태, blossom은 특히 과일나무(벚나무·사과나무)의 꽃",
   ),
   ru: englishWordSample(
     "цветок; цветение (особенно плодовых деревьев)",
     "Мимолётная красота цветущей вишни напоминает нам ценить каждое мгновение.",
+    "Происхождение: однокоренное с bloom («цвести»), и оба слова на bl- связаны с цветением\nСиноним: bloom — само цветение, blossom — цветы плодовых деревьев (вишни, яблони)",
   ),
   tr: englishWordSample(
     "çiçek (özellikle meyve ağaçlarının çiçeği)",
     "Kiraz çiçeklerinin geçici güzelliği bize her anın kıymetini bilmemizi hatırlatır.",
+    "Köken: bloom (çiçek açmak) ile aynı kökten gelir; bl- ile başlayan iki kelime de çiçekle ilgilidir\nEş anlamlı: bloom çiçek açma hâlidir, blossom ise özellikle meyve ağaçlarının (kiraz, elma) çiçeğidir",
   ),
   vi: englishWordSample(
     "hoa (đặc biệt là hoa của cây ăn quả)",
     "Vẻ đẹp phù du của hoa anh đào nhắc nhở chúng ta trân trọng từng khoảnh khắc.",
+    "Nguồn gốc: cùng gốc với bloom (nở hoa); hai từ bắt đầu bằng bl- này đều liên quan đến hoa\nTừ đồng nghĩa: bloom là trạng thái nở hoa, blossom thường là hoa của cây ăn quả (anh đào, táo)",
   ),
   es: englishWordSample(
     "flor (especialmente la de un árbol frutal)",
     "La belleza efímera de los cerezos en flor nos recuerda valorar cada momento.",
+    "Origen: comparte raíz con bloom (florecer); las dos palabras con bl- tienen que ver con las flores\nSinónimo: bloom es el hecho de florecer; blossom, la flor de un árbol frutal (cerezo, manzano)",
   ),
   az: englishWordSample(
     "çiçək (xüsusilə meyvə ağacının çiçəyi)",
     "Albalı çiçəklərinin ötəri gözəlliyi bizə hər anın qədrini bilməyi xatırladır.",
+    "Mənşə: bloom (çiçəkləmək) ilə eyni kökdəndir; bl- ilə başlayan hər iki söz çiçəklə bağlıdır\nSinonim: bloom çiçəkləmə halıdır, blossom isə xüsusilə meyvə ağaclarının (albalı, alma) çiçəyidir",
   ),
 }
 

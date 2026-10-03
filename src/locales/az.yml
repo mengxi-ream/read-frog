@@ -851,6 +851,14 @@ options:
             9. Sahənin dəyəri məlum deyilsə, təxmin etmək əvəzinə boş sətir qaytarın.
             10. Aydınlıq üçün mənbə formasında mətn tələb olunmadıqda bütün mətn sahələrini {{targetLanguage}} dilində yazın.
             11. Cümlədəki forma seçilmiş sözün Cümlədə harada olduğunu göstərir. Bu, {"text": ...} elementlərindən ibarət yığcam JSON massivi saxlayan SƏTİRdir; hər element Cümlədən hərfi-hərfinə sitat gətirir, məsələn [{"text":"çiçəklərinin"}]. Cümlə sözü ayrı hissələrə bölürsə (məsələn, "Er ruft seine Mutter an" cümləsində "anrufen"), hər hissə üçün ardıcıllıqla bir element verin: [{"text":"ruft"},{"text":"an"}]. Daxili dırnaq işarələrini düzgün escape edin.
+            12. Yadda saxlama üsulları, yaxşı müəllimin məhz bu söz üçün edəcəyi kimi, öyrənənə seçilmiş sözün özünü (tərcüməsini yox, öz dilindəki formasını) yadda saxlamağa kömək edir. Hər sətirdə bir dənə olmaqla ən çox 3 məsləhət verin, ən faydalısı birinci gəlsin. Yalnız həqiqətən kömək edən məsləhətləri yazın; zəif məsləhət əlavə etməkdənsə az olması yaxşıdır, həqiqətən kömək edən heç nə yoxdursa, zorla məsləhət uydurmayın, boş sətir qaytarın. Hər sətir yalnız bir üsuldur: sətri üsulun adı və iki nöqtə ilə başlayın; həm üsulun adı, həm də məzmun {{targetLanguage}} dilində olsun. Əvvəlcə sözün necə qurulduğundan başlayın, sonra həqiqətən kömək edən başqa şeyləri əlavə edin:
+               - Söz quruluşu: sözün mənalı hissələri (kök, prefiks, şəkilçi və ya mürəkkəb sözü təşkil edən sözlər) və onların birlikdə mənanı necə yaratdığı.
+               - Heroqliflər: Çin heroqlifləri ilə yazılan söz üçün (Çin dili, yapon dilində kanji ilə yazılan sözlər, Çin mənşəli koreya sözləri) hər heroqlifin mənası və ya bir heroqlifin hissələri.
+               - Mənşə: sözün haradan gəldiyi və ya öyrənənin çox güman ki, bildiyi əlaqəli söz (başqa dildə eyni kökdən olan söz, alınma söz, başqa dildə eyni heroqliflərlə yazılan söz).
+               - Sinonim / Antonim: yaxın mənalı söz və fərqi, ya da əks mənalı söz.
+               - Oxşar söz: yazılışı və ya səslənməsi oxşar olan söz və onları necə ayırmaq.
+               - Söz birləşməsi: sözün tez-tez işləndiyi, bütöv şəkildə öyrənməyə dəyən ifadə.
+               Uyğun gəlməyən üsulları buraxın və bir üsulun uyğun gəlmədiyini deyən sətir yazmayın. Hər məsləhət Tərifdə olmayan bir şey öyrətməlidir: mənanı başqa sözlərlə təkrarlamayın, Cümləni yenidən danışmayın və sözün dəyişmiş formasını izah etməyin. Yalnız əmin olduğunuz faktları yazın: mənşə, kök və ya heroqlif hissəsi uydurmayın. Mübahisəli və ya əfsanə xarakterli mənşə hekayələrini, hətta «sadəcə əyləncəli yadda saxlama yolu» kimi təqdim etsəniz belə, yazmayın (sincere «mumsuz» sözündən gəlmir, posh da abreviatura deyil). Sözü hissələrə və ya heroqliflərə yalnız onlar həqiqətən mənanı yaradanda bölün; 犹豫 və ya 葡萄 kimi sözlər bütöv vahiddir, onlar üçün başqa üsuldan istifadə edin. Heç bir dildə səs oxşarlığına əsaslanan söz oyunlarından və sözü əlaqəsiz sözlərə bölməkdən çəkinin.
 
             ## Nümunələr
 
@@ -865,6 +873,9 @@ options:
             - Cümlədəki forma: [{"text":"çiçəklərinin"}]
             - Tərif: Bitkinin çoxalma orqanı; xüsusilə meyvə ağacının çiçəyi.
             - Cümlənin tərcüməsi: Albalı çiçəklərinin ötəri gözəlliyi bizə hər anın qədrini bilməyi xatırladır.
+            - Yadda saxlama üsulları:
+              Söz quruluşu: çiçək + -lə- → çiçəkləmək (çiçək açmaq), çiçək + -li → çiçəkli (çiçəyi olan)
+              Söz birləşməsi: çiçək açmaq — bitkinin çiçəkləməsi; bütöv ifadə kimi yadda saxlayın
             - Çətinlik: B2
 
             ### Nümunə 2
@@ -878,6 +889,9 @@ options:
             - Cümlədəki forma: [{"text":"təsirləndim"}]
             - Tərif: Dərin hisslər keçirmək, duyğulanmaq.
             - Cümlənin tərcüməsi: Bu filmin darıxdırıcı olduğunu düşünürdüm, amma sonunda təsirləndim.
+            - Yadda saxlama üsulları:
+              Söz quruluşu: təsir (ərəb mənşəli söz) + -lən- (feil düzəldən şəkilçi) + -mək → təsirə düşmək
+              Söz birləşməsi: bir şeydən təsirlənmək — -dan/-dən şəkilçisi ilə işlənir: filmdən təsirlənmək
             - Çətinlik: B1
           prompt: |-
             ## Giriş
@@ -898,6 +912,8 @@ options:
           fieldDefinitionDescription: Kontekstdəki mənaya uyğun bir qısa tərif.
           fieldSentenceTranslation: Cümlənin tərcüməsi
           fieldSentenceTranslationDescription: Yalnız cümlənin tərcüməsi.
+          fieldMemoryTips: "Yadda saxlama üsulları"
+          fieldMemoryTipsDescription: "Sözü yadda saxlamağın yolları: ən çox 3 məsləhət, hər sətirdə bir, hər biri üsulun adı və iki nöqtə ilə başlayır (məsələn, Söz quruluşu: …); həqiqətən kömək edən heç nə yoxdursa, boş sətir."
           fieldDifficulty: Çətinlik
           fieldDifficultyDescription: Təxmini CEFR çətinlik səviyyəsi A1, A2, B1, B2, C1 və ya C2.
         sentenceAnalysis:

@@ -851,6 +851,14 @@ options:
             9. Si un campo es desconocido, devuelve una cadena vacía en lugar de adivinar.
             10. Responde en {{targetLanguage}} para todos los campos textuales, salvo que se requiera texto en la forma de origen para mayor claridad.
             11. Término en la oración marca dónde está el término seleccionado dentro de Oración. Es una CADENA que contiene un arreglo JSON compacto de elementos {"text": ...}, cada uno citando Oración carácter por carácter, p. ej. [{"text":"blossoms"}]. Si Oración divide el término en partes separadas (p. ej. "anrufen" en "Er ruft seine Mutter an"), da un elemento por parte, en orden: [{"text":"ruft"},{"text":"an"}]. Escapa correctamente las comillas internas.
+            12. Trucos para recordar ayuda al estudiante a recordar el propio término seleccionado (en su idioma, no su traducción), como lo haría un buen profesor con este término en concreto. Da hasta 3 trucos, uno por línea, el más útil primero. Escribe solo trucos que de verdad ayuden; mejor menos que uno flojo, y si nada ayuda de verdad, devuelve una cadena vacía en lugar de forzar uno. Cada línea es una sola técnica: empiézala con el nombre de la técnica y dos puntos, ambos en {{targetLanguage}}. Parte de cómo está formado el término y luego añade lo que de verdad ayude:
+               - Formación: sus partes con significado (raíz, prefijo, sufijo o las palabras de un compuesto) y cómo se combinan para dar el significado.
+               - Caracteres: para un término escrito con caracteres chinos (chino, palabras japonesas en kanji, palabras coreanas de origen chino), qué significa cada carácter o qué componentes tiene un carácter.
+               - Origen: de dónde viene, o una palabra relacionada que el estudiante probablemente conozca (un cognado, un préstamo, los mismos caracteres en otro idioma).
+               - Sinónimo / Antónimo: un sinónimo cercano y en qué se diferencia, o un antónimo.
+               - Parónimo: una palabra que se escribe o suena parecido, y cómo distinguirlas.
+               - Colocación: una expresión habitual en la que se usa, que conviene aprender como bloque.
+               Omite las técnicas que no encajen y no escribas ninguna línea para decir que una no aplica. Cada truco debe enseñar algo que la Definición no dice: no repitas el significado con otras palabras, no vuelvas a contar la Oración ni expliques la forma flexionada. Afirma solo lo que sepas con certeza: nunca inventes una etimología, una raíz ni un componente de un carácter. Omite las historias de origen discutidas o que son mitos, aunque las presentes solo como una forma divertida de recordar (sincere no viene de «sin cera» y posh no es un acrónimo). Divide una palabra en partes o caracteres solo cuando de verdad forman su significado; palabras como 犹豫 o 葡萄 son una unidad, así que usa otra técnica con ellas. Nada de juegos de palabras por parecido sonoro en ningún idioma ni de partir una palabra en palabras sin relación.
 
             ## Ejemplos
 
@@ -865,6 +873,9 @@ options:
             - Término en la oración: [{"text":"blossoms"}]
             - Definición: 花；花朵（尤指果树的花）
             - Traducción de la oración: 樱花短暂的美丽提醒我们珍惜每一刻。
+            - Trucos para recordar:
+              词源：和 bloom（开花）同源，bl- 开头的 bloom、blossom 都和开花有关
+              近义词：bloom 多指花开的状态，blossom 常指果树（樱桃、苹果）的花
             - Dificultad: B2
 
             ### Ejemplo 2
@@ -878,6 +889,9 @@ options:
             - Término en la oración: [{"text":"感動"}]
             - Definición: Being deeply moved; emotional touch
             - Traducción de la oración: I thought this movie was boring, but the ending was moving.
+            - Trucos para recordar:
+              Characters: 感 (feel) + 動 (move): your feelings are moved.
+              Collocation: 感動する = to be moved; 感動的 = moving, touching.
             - Dificultad: B1
           prompt: |-
             ## Entrada
@@ -898,6 +912,8 @@ options:
           fieldDefinitionDescription: Una definición concisa para el sentido contextual.
           fieldSentenceTranslation: Traducción de la oración
           fieldSentenceTranslationDescription: La traducción únicamente de la Oración.
+          fieldMemoryTips: "Trucos para recordar"
+          fieldMemoryTipsDescription: "Formas de recordar el término: hasta 3 trucos, uno por línea, cada uno empieza con su técnica y dos puntos (p. ej., Formación: …); una cadena vacía si nada ayuda de verdad."
           fieldDifficulty: Dificultad
           fieldDifficultyDescription: Nivel de dificultad CEFR estimado A1, A2, B1, B2, C1 o C2.
         sentenceAnalysis:
