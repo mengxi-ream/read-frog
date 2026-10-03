@@ -183,9 +183,14 @@ export function GoogleDriveSyncConfigItem() {
             </Activity>
             <Button variant="outline" size="sm" onClick={handleSync} disabled={isSyncing}>
               <Icon icon="logos:google-drive" />
-              {isSyncing
-                ? i18n.t("options.preference.config.googleDrive.syncing")
-                : i18n.t("options.preference.config.googleDrive.sync")}
+              {/* On a span: the button's own background would be clipped to the text too. */}
+              {isSyncing ? (
+                <span className="shimmer">
+                  {i18n.t("options.preference.config.googleDrive.syncing")}
+                </span>
+              ) : (
+                i18n.t("options.preference.config.googleDrive.sync")
+              )}
             </Button>
           </div>
           <Activity mode={lastSyncTime ? "visible" : "hidden"}>

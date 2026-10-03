@@ -200,11 +200,13 @@ export function GlossaryTable({ glossaryId }: { glossaryId: string }) {
               {visible.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
-                    {isLoading
-                      ? i18n.t("options.advanced.glossary.loading")
-                      : terms.length === 0
-                        ? i18n.t("options.advanced.glossary.empty")
-                        : i18n.t("options.advanced.glossary.noMatches")}
+                    {isLoading ? (
+                      <span className="shimmer">{i18n.t("options.advanced.glossary.loading")}</span>
+                    ) : terms.length === 0 ? (
+                      i18n.t("options.advanced.glossary.empty")
+                    ) : (
+                      i18n.t("options.advanced.glossary.noMatches")
+                    )}
                   </TableCell>
                 </TableRow>
               )}

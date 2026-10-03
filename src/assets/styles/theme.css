@@ -11,6 +11,10 @@
 /* Base UI uses data-orientation="horizontal|vertical", map to short variants for Tailwind */
 @custom-variant data-horizontal (&[data-orientation="horizontal"]);
 @custom-variant data-vertical (&[data-orientation="vertical"]);
+/* Gate for shadcn's `scroll-fade-*`: where `animation-timeline` is missing (Firefox stable),
+   its fallback pins both edge fades on for good, even on a list that doesn't overflow, so
+   those browsers should get no fade at all. Write `scroll-driven:scroll-fade`, never bare. */
+@custom-variant scroll-driven (@supports (animation-timeline: scroll()));
 
 @theme inline {
   /* Use read-frog-prefixed theme tokens to avoid collisions with host-page custom properties inside shadow roots. */

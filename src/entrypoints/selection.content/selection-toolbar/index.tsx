@@ -618,7 +618,7 @@ export function SelectionToolbar() {
               className="flex items-center overflow-hidden rounded-sm border border-border/50 bg-popover shadow-(--rf-elevation-floating)"
               style={{ opacity: "var(--rf-selection-opacity, 1)" }}
             >
-              <div className="no-scrollbar flex max-w-105 items-center overflow-x-auto overflow-y-hidden">
+              <div className="no-scrollbar flex max-w-105 items-center overflow-x-auto overflow-y-hidden scroll-driven:scroll-fade-x">
                 <SelectionToolbarPinnedItems />
               </div>
               {hasAnyPinnedItem && <div className="w-px shrink-0 self-stretch bg-border" />}
