@@ -86,7 +86,7 @@ export function SummarySection() {
   if (provider.status === "error") {
     return (
       <StatusCard icon={<IconFileTextAi />} title={i18n.t("subtitles.sidebar.summary.failedTitle")}>
-        <Button type="button" variant="brand" size="sm" onClick={() => void provider.refetch()}>
+        <Button type="button" variant="accent" size="sm" onClick={() => void provider.refetch()}>
           {i18n.t("subtitles.sidebar.summary.retry")}
         </Button>
       </StatusCard>
@@ -103,7 +103,7 @@ export function SummarySection() {
           >
             <Button
               type="button"
-              variant="brand"
+              variant="accent"
               size="sm"
               onClick={() =>
                 void sendMessage("openPage", {
@@ -138,7 +138,7 @@ export function SummarySection() {
     )
     .with({ status: "error" }, () => (
       <StatusCard icon={<IconFileTextAi />} title={i18n.t("subtitles.sidebar.summary.failedTitle")}>
-        <Button type="button" variant="brand" size="sm" onClick={() => void query.refetch()}>
+        <Button type="button" variant="accent" size="sm" onClick={() => void query.refetch()}>
           {i18n.t("subtitles.sidebar.summary.retry")}
         </Button>
       </StatusCard>

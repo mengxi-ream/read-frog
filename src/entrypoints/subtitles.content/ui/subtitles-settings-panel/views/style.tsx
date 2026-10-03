@@ -76,7 +76,7 @@ function SettingsGroup({
           variant="ghost"
           size="icon-sm"
           onClick={onReset}
-          className="cursor-pointer text-muted-foreground hover:bg-accent/60 hover:text-popover-foreground"
+          className="cursor-pointer text-muted-foreground hover:bg-muted/60 hover:text-popover-foreground"
         >
           <IconRefresh className="size-3.5" />
         </Button>

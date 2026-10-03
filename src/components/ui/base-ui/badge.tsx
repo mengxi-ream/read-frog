@@ -16,6 +16,7 @@ const badgeVariants = cva(
         outline: "border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground",
         ghost: "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
         link: "text-primary underline-offset-4 hover:underline",
+        brand: "bg-brand text-brand-foreground [a]:hover:bg-brand/80",
         accent: "bg-accent text-accent-foreground [a]:hover:bg-accent/80",
         // Translucent glass. Paints its own background and text colour, and
         // needs the base `border-transparent` intact — the rim gradient is the

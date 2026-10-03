@@ -116,7 +116,7 @@ function LaunchBonusPromo() {
     return null
   }
   return (
-    <p className="text-[13px] leading-[18px] text-blue-600 dark:text-blue-400">
+    <p className="text-[13px] leading-[18px] text-link">
       {i18n.t("options.videoSubtitles.aiQuota.launchBonusPromo", [cutoff])}
     </p>
   )

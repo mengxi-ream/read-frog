@@ -15,11 +15,11 @@ import { cn } from "@/utils/styles/utils"
    styles have to read the `--rf-*` originals, which are declared on `:root` and so
    inherit into the shadow roots the content scripts render into.
 
-   `--active` has no equivalent, so the fill borrows `--rf-accent`: subtle enough that
+   `--active` has no equivalent, so the fill borrows `--rf-muted`: subtle enough that
    a label sitting on top of it stays readable. That leaves the hover preview needing a
-   different tint — at 40% accent it would vanish wherever it overlaps the fill — so it
+   different tint — at 40% muted it would vanish wherever it overlaps the fill — so it
    shifts to a muted-foreground wash that reads on filled and unfilled track alike. */
-const FILL_COLOR = "var(--rf-accent)"
+const FILL_COLOR = "var(--rf-muted)"
 const HOVER_PREVIEW_COLOR = "color-mix(in srgb, var(--rf-muted-foreground) 20%, transparent)"
 const FOCUS_RING_COLOR = "var(--rf-ring)"
 
@@ -1139,7 +1139,7 @@ function SliderComfortable({
           )}
           <span
             className={cn(
-              "absolute inset-y-0 start-0 w-(--slider-fill) bg-accent transition-[width] duration-100 ease-out",
+              "absolute inset-y-0 start-0 w-(--slider-fill) bg-muted transition-[width] duration-100 ease-out",
               DRAG_MOTION[variant],
             )}
           />

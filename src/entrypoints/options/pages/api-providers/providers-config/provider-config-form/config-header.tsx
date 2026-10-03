@@ -45,7 +45,7 @@ export function ConfigHeader({
       </a>
       {shouldShowSponsorCTA ? (
         <Button
-          variant="brand"
+          variant="accent"
           size="sm"
           render={<a href={sponsorReferUrl} target="_blank" rel="noreferrer" />}
         >

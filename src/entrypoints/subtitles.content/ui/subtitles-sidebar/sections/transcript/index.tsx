@@ -61,7 +61,7 @@ export function TranscriptSection() {
           icon={<IconFileText />}
           title={i18n.t("subtitles.sidebar.transcript.failedTitle")}
         >
-          <Button type="button" variant="brand" size="sm" onClick={() => void query.refetch()}>
+          <Button type="button" variant="accent" size="sm" onClick={() => void query.refetch()}>
             {i18n.t("subtitles.sidebar.transcript.retry")}
           </Button>
         </StatusCard>
@@ -78,10 +78,10 @@ export function TranscriptSection() {
   const backToCurrent = (
     <Button
       type="button"
-      variant="brand"
+      variant="accent"
       size="sm"
       onClick={resume}
-      className="pointer-events-auto shadow-(--rf-elevation-floating)"
+      className="pointer-events-auto shadow-[var(--btn-bevel),var(--rf-elevation-floating)]"
     >
       {activeAbove ? <IconArrowUp className="size-3.5" /> : <IconArrowDown className="size-3.5" />}
       {i18n.t("subtitles.sidebar.transcript.backToCurrent")}

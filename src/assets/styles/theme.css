@@ -37,7 +37,6 @@
   --color-accent: var(--rf-accent);
   --color-accent-foreground: var(--rf-accent-foreground);
   --color-destructive: var(--rf-destructive);
-  --color-destructive-foreground: var(--rf-destructive-foreground);
   --color-border: var(--rf-border);
   --color-input: var(--rf-input);
   --color-ring: var(--rf-ring);
@@ -54,22 +53,16 @@
   --color-sidebar-accent-foreground: var(--rf-sidebar-accent-foreground);
   --color-sidebar-border: var(--rf-sidebar-border);
   --color-sidebar-ring: var(--rf-sidebar-ring);
-  --radius-sm: calc(var(--rf-radius) - 4px);
-  --radius-md: calc(var(--rf-radius) - 2px);
+  --radius-sm: calc(var(--rf-radius) * 0.6);
+  --radius-md: calc(var(--rf-radius) * 0.8);
   --radius-lg: var(--rf-radius);
-  --radius-xl: calc(var(--rf-radius) + 4px);
-  --radius-2xl: calc(var(--rf-radius) + 8px);
-  --radius-3xl: calc(var(--rf-radius) + 12px);
-  --radius-4xl: calc(var(--rf-radius) + 16px);
+  --radius-xl: calc(var(--rf-radius) * 1.4);
+  --radius-2xl: calc(var(--rf-radius) * 1.8);
+  --radius-3xl: calc(var(--rf-radius) * 2.2);
+  --radius-4xl: calc(var(--rf-radius) * 2.6);
   /* Additional theme variables */
   --color-warning: var(--rf-warning);
-  --color-warning-foreground: var(--rf-warning-foreground);
-  --color-toast-info: var(--rf-toast-info);
-  --color-toast-success: var(--rf-toast-success);
-  --color-toast-warning: var(--rf-toast-warning);
   --color-link: var(--rf-link);
-  --color-accent-blue: var(--rf-accent-blue);
-  --color-accent-blue-hover: var(--rf-accent-blue-hover);
   --animate-toast-success-odd: toast-success-odd 0.32s cubic-bezier(0.5, 1, 0.89, 1);
   --animate-toast-success-even: toast-success-even 0.32s cubic-bezier(0.5, 1, 0.89, 1);
   --animate-toast-error-odd: toast-error-odd 0.28s cubic-bezier(0.5, 1, 0.89, 1);
@@ -180,6 +173,34 @@
   }
 }
 
+/* Tailwind's shadow scale redrawn after Notion's popover shadow, as in the design system
+   (`@repo/ui`'s theme.css), so the whole scale is one family. md, which every floating surface
+   uses (menus, popovers, selects, comboboxes, toasts), is the drop Notion gives its menus: a near
+   shadow at y with 1.6y of blur and a far one at 4y with 1.2x that blur, with no spread. The other
+   steps scale it; xs is the near shadow alone, since it rests in the page. A shadow is only depth:
+   the edge is the component's own `ring-1 ring-foreground/10` or `border`. The colour comes from
+   --rf-elevation-ink and --rf-elevation-strength, so dark mode deepens the whole scale without a
+   second copy of it, and `shadow-blue-600/10` and the like still recolour it. */
+@theme {
+  --shadow-2xs: 0 1px 0 0 rgb(var(--rf-elevation-ink) / calc(0.05 * var(--rf-elevation-strength)));
+  --shadow-xs: 0 1px 2px 0 rgb(var(--rf-elevation-ink) / calc(0.06 * var(--rf-elevation-strength)));
+  --shadow-sm:
+    0 1px 2px 0 rgb(var(--rf-elevation-ink) / calc(0.06 * var(--rf-elevation-strength))),
+    0 4px 5px 0 rgb(var(--rf-elevation-ink) / calc(0.04 * var(--rf-elevation-strength)));
+  --shadow-md:
+    0 5px 8px 0 rgb(var(--rf-elevation-ink) / calc(0.027 * var(--rf-elevation-strength))),
+    0 20px 24px 0 rgb(var(--rf-elevation-ink) / calc(0.05 * var(--rf-elevation-strength)));
+  --shadow-lg:
+    0 7px 11px 0 rgb(var(--rf-elevation-ink) / calc(0.027 * var(--rf-elevation-strength))),
+    0 28px 34px 0 rgb(var(--rf-elevation-ink) / calc(0.06 * var(--rf-elevation-strength)));
+  --shadow-xl:
+    0 10px 16px 0 rgb(var(--rf-elevation-ink) / calc(0.027 * var(--rf-elevation-strength))),
+    0 40px 48px 0 rgb(var(--rf-elevation-ink) / calc(0.07 * var(--rf-elevation-strength)));
+  --shadow-2xl:
+    0 14px 22px 0 rgb(var(--rf-elevation-ink) / calc(0.027 * var(--rf-elevation-strength))),
+    0 56px 67px 0 rgb(var(--rf-elevation-ink) / calc(0.08 * var(--rf-elevation-strength)));
+}
+
 :root {
   /* Latin → Inter Variable (bundled via @fontsource-variable/inter, imported
      only in the extension's own pages — not content scripts). CJK stays on the
@@ -194,60 +215,170 @@
   --rf-font-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
     monospace;
-  --rf-background: oklch(1 0 0);
-  --rf-foreground: oklch(0.141 0.005 285.823);
-  --rf-card: oklch(1 0 0);
-  --rf-card-foreground: oklch(0.141 0.005 285.823);
-  --rf-popover: oklch(1 0 0);
-  --rf-popover-foreground: oklch(0.141 0.005 285.823);
-  --rf-primary: oklch(0.205 0 0);
-  --rf-primary-foreground: oklch(0.985 0 0);
-  --rf-brand: oklch(76.034% 0.12361 82.191);
-  --rf-brand-foreground: oklch(0.985 0 0);
-  --rf-secondary: oklch(0.967 0.001 286.375);
-  --rf-secondary-foreground: oklch(0.47 0.006 285.885);
-  --rf-muted: oklch(0.967 0.001 286.375);
-  --rf-muted-foreground: oklch(0.552 0.016 285.938);
-  --rf-accent: oklch(0.967 0.001 286.375);
-  --rf-accent-foreground: oklch(0.21 0.006 285.885);
-  --rf-destructive: oklch(0.577 0.245 27.325);
-  --rf-border: oklch(0.92 0.004 286.32);
-  --rf-input: oklch(0.92 0.004 286.32);
-  --rf-ring: oklch(0.705 0.015 286.067);
-  --rf-chart-1: oklch(89.215% 0.05562 82.191);
-  --rf-chart-2: oklch(82.026% 0.09271 82.191);
-  --rf-chart-3: oklch(76.034% 0.12361 82.191);
-  --rf-chart-4: oklch(57.026% 0.09271 82.191);
-  --rf-chart-5: oklch(38.017% 0.06181 82.191);
-  --rf-radius: 0.625rem;
-  --rf-sidebar: oklch(0.985 0 0);
-  --rf-sidebar-foreground: oklch(0.141 0.005 285.823);
-  --rf-sidebar-primary: oklch(0.205 0 0);
-  --rf-sidebar-primary-foreground: oklch(0.985 0 0);
-  --rf-sidebar-accent: oklch(0.967 0.001 286.375);
-  --rf-sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-  --rf-sidebar-border: oklch(0.92 0.004 286.32);
-  --rf-sidebar-ring: oklch(0.705 0.015 286.067);
-  /* Additional theme variables */
-  --rf-warning: oklch(97.3% 0.071 103.193);
-  --rf-toast-info: var(--color-blue-500);
-  --rf-toast-success: var(--color-emerald-500);
-  --rf-toast-warning: var(--color-amber-500);
-  --rf-link: oklch(54.6% 0.245 262.881);
-  /* The one chromatic colour in an otherwise neutral UI. It marks a control as on
-     (the switch's track, and checkbox / radio whenever they move off the neutral
-     `--rf-primary`) and marks the inviting thing to do in a region (the dashed
-     "add" buttons). Named for what it is rather than for either role, because
-     shadcn already spends `--rf-primary` and `--rf-accent` on neutrals.
 
-     Opacity is fine for tinting a surface with it — `bg-accent-blue/10` behind a
-     dashed border — but not for deriving hover from the solid fill: opacity
-     composites against the page, so `bg-accent-blue/90` would lighten on the white
-     surface and darken on the near-black one. Hence a real second colour, which
-     moves *away* from the surface in both themes — 4.4pp darker on white, 4.5pp
-     lighter on black — so the `.dark` override flips the direction, not the intent. */
-  --rf-accent-blue: oklch(69.256% 0.16062 265.19);
-  --rf-accent-blue-hover: oklch(64.859% 0.16447 264.759);
+  /* Scales, copied from the design system. Kept out of @theme so components cannot reach past
+     the semantic layer. Names match the Tailwind palette they alias, so a stray text-neutral-900
+     lands on the same colour; lemon and cornflower have no Tailwind counterpart by design. */
+  --rf-neutral-50: var(--color-neutral-50);
+  --rf-neutral-100: var(--color-neutral-100);
+  --rf-neutral-200: var(--color-neutral-200);
+  --rf-neutral-300: var(--color-neutral-300);
+  --rf-neutral-400: var(--color-neutral-400);
+  --rf-neutral-500: var(--color-neutral-500);
+  --rf-neutral-600: var(--color-neutral-600);
+  --rf-neutral-700: var(--color-neutral-700);
+  --rf-neutral-800: var(--color-neutral-800);
+  --rf-neutral-900: var(--color-neutral-900);
+  --rf-neutral-950: var(--color-neutral-950);
+
+  --rf-red-50: var(--color-red-50);
+  --rf-red-100: var(--color-red-100);
+  --rf-red-200: var(--color-red-200);
+  --rf-red-300: var(--color-red-300);
+  --rf-red-400: var(--color-red-400);
+  --rf-red-500: var(--color-red-500);
+  --rf-red-600: var(--color-red-600);
+  --rf-red-700: var(--color-red-700);
+  --rf-red-800: var(--color-red-800);
+  --rf-red-900: var(--color-red-900);
+  --rf-red-950: var(--color-red-950);
+
+  /* lemon: Tailwind yellow's lightness and hue curve turned 3 degrees toward lemon, with
+     Tailwind's chroma capped at 95% of the sRGB edge. The 50-steps are inserted halfway steps:
+     450 is the light-mode brand, 550 the dark-mode brand, 650 the dark bevel's shade. */
+  --rf-lemon-50: oklch(98.7% 0.026 105.276);
+  --rf-lemon-100: oklch(97.3% 0.071 106.257);
+  --rf-lemon-200: oklch(94.5% 0.129 104.604);
+  --rf-lemon-300: oklch(90.5% 0.1795 101.175);
+  --rf-lemon-400: oklch(86% 0.16779 95);
+  --rf-lemon-450: oklch(82.75% 0.16086 92.055);
+  --rf-lemon-500: oklch(79.5% 0.15438 89.111);
+  --rf-lemon-550: oklch(73.8% 0.14395 84.004);
+  --rf-lemon-600: oklch(68.1% 0.13451 78.898);
+  --rf-lemon-650: oklch(61.75% 0.12429 74.202);
+  --rf-lemon-700: oklch(55.4% 0.11446 69.506);
+  --rf-lemon-800: oklch(47.6% 0.10161 64.971);
+  --rf-lemon-900: oklch(42.1% 0.09328 60.772);
+  --rf-lemon-950: oklch(28.6% 0.066 56.877);
+
+  /* cornflower: the extension's old accent blue grown into a scale, Tailwind blue's lightness
+     curve at one fixed hue. 400 was the light accent and 550 is the dark one; the light accent
+     is now 450, half a step deeper, so white text on it reads. */
+  --rf-cornflower-50: oklch(97% 0.01363 265.19);
+  --rf-cornflower-100: oklch(93.2% 0.03115 265.19);
+  --rf-cornflower-200: oklch(88.2% 0.05743 265.19);
+  --rf-cornflower-300: oklch(80.9% 0.10221 265.19);
+  --rf-cornflower-400: oklch(69.256% 0.16062 265.19);
+  --rf-cornflower-450: oklch(65.778% 0.17098 265.19);
+  --rf-cornflower-500: oklch(62.3% 0.18134 265.19);
+  --rf-cornflower-550: oklch(58% 0.18 265.19);
+  --rf-cornflower-600: oklch(54.6% 0.19216 265.19);
+  --rf-cornflower-700: oklch(48.8% 0.19059 265.19);
+  --rf-cornflower-800: oklch(42.4% 0.15608 265.19);
+  --rf-cornflower-900: oklch(37.9% 0.11451 265.19);
+  --rf-cornflower-950: oklch(28.2% 0.07137 265.19);
+
+  --rf-blue-50: var(--color-blue-50);
+  --rf-blue-100: var(--color-blue-100);
+  --rf-blue-200: var(--color-blue-200);
+  --rf-blue-300: var(--color-blue-300);
+  --rf-blue-400: var(--color-blue-400);
+  /* inserted: 400->500 jumps 0.084 L; the dark --rf-link sits between them */
+  --rf-blue-450: oklch(66% 0.184 254.753);
+  --rf-blue-500: var(--color-blue-500);
+  /* inserted: halfway between 500 and 600, the light --rf-link */
+  --rf-blue-550: oklch(58.5% 0.2295 261.348);
+  --rf-blue-600: var(--color-blue-600);
+  --rf-blue-700: var(--color-blue-700);
+  --rf-blue-800: var(--color-blue-800);
+  --rf-blue-900: var(--color-blue-900);
+  --rf-blue-950: var(--color-blue-950);
+}
+
+/* Semantic layer, the design system's, behind the `--rf-` prefix. Components only ever reference
+   these. Contrast notes in the design system's theme.css are APCA Lc. */
+:root {
+  --rf-background: var(--color-white);
+  --rf-foreground: var(--rf-neutral-950);
+  --rf-card: var(--color-white);
+  --rf-card-foreground: var(--rf-neutral-950);
+  --rf-popover: var(--color-white);
+  --rf-popover-foreground: var(--rf-neutral-950);
+  /* The shadow scale's colour (see @theme above): Notion's near-black, at the scale's own opacity. */
+  --rf-elevation-ink: 25 25 25;
+  --rf-elevation-strength: 1;
+  --rf-primary: var(--rf-neutral-900);
+  --rf-primary-foreground: var(--rf-neutral-50);
+  --rf-secondary: var(--rf-neutral-100);
+  --rf-secondary-foreground: var(--rf-neutral-900);
+  --rf-muted: var(--rf-neutral-100);
+  --rf-muted-foreground: var(--rf-neutral-500);
+  /* The one chromatic colour for doing things. It fills the inviting action in a region and marks
+     a control as on (the switch's track, a checked checkbox or radio, the dashed "add" buttons).
+     Neutral hovers and highlights are `muted` and `secondary`, never this. */
+  --rf-accent: var(--rf-cornflower-450);
+  --rf-accent-foreground: var(--color-white);
+  /* White on lemon is chosen for looks over readability. Reserve it for the few things we most
+     want pressed. */
+  --rf-brand: var(--rf-lemon-450);
+  --rf-brand-foreground: var(--color-white);
+  --rf-destructive: var(--rf-red-600);
+  --rf-border: var(--rf-neutral-200);
+  --rf-input: var(--rf-neutral-200);
+  --rf-ring: var(--rf-neutral-400);
+  --rf-link: var(--rf-blue-550);
+
+  /* Solid buttons are a flat fill under a bevel, after openui.com's BevelButton: a 1px top
+     highlight, a glow fading down from the top, a shade along the bottom, then a drop shadow.
+     Hover lightens the fill by the neighbouring step and active deepens it. On accent and brand
+     the shade, edge and drop take the next step of the fill's own scale, 600, rather than 800 or
+     black, which would drag blue toward grey and lemon toward brown. */
+  --rf-primary-hover: var(--rf-neutral-800);
+  --rf-primary-active: var(--rf-neutral-950);
+  --rf-primary-edge: oklch(1 0 0 / 12%);
+  --rf-primary-bevel:
+    inset 0 1px 0 oklch(1 0 0 / 20%), inset 0 6px 10px -5px oklch(1 0 0 / 14%),
+    inset 0 -4px 7px -2px oklch(0 0 0 / 55%), 0 1px 2px oklch(0 0 0 / 14%),
+    0 2px 6px -2px oklch(0 0 0 / 16%);
+  --rf-primary-press: inset 0 1px 3px oklch(0 0 0 / 50%);
+  --rf-brand-hover: var(--rf-lemon-400);
+  --rf-brand-active: var(--rf-lemon-500);
+  --rf-brand-edge: color-mix(in oklab, var(--rf-lemon-600) 40%, transparent);
+  --rf-brand-bevel:
+    inset 0 1px 0 oklch(1 0 0 / 55%), inset 0 6px 10px -5px oklch(1 0 0 / 32%),
+    inset 0 -4px 7px -2px color-mix(in oklab, var(--rf-lemon-600) 35%, transparent),
+    0 1px 2px color-mix(in oklab, var(--rf-lemon-600) 20%, transparent),
+    0 2px 6px -2px color-mix(in oklab, var(--rf-lemon-600) 26%, transparent);
+  --rf-brand-press: inset 0 1px 3px color-mix(in oklab, var(--rf-lemon-650) 40%, transparent);
+  --rf-accent-hover: var(--rf-cornflower-400);
+  --rf-accent-active: var(--rf-cornflower-500);
+  --rf-accent-edge: color-mix(in oklab, var(--rf-cornflower-600) 40%, transparent);
+  --rf-accent-bevel:
+    inset 0 1px 0 oklch(1 0 0 / 32%), inset 0 6px 10px -5px oklch(1 0 0 / 20%),
+    inset 0 -4px 7px -2px color-mix(in oklab, var(--rf-cornflower-600) 45%, transparent),
+    0 1px 2px color-mix(in oklab, var(--rf-cornflower-600) 18%, transparent),
+    0 2px 6px -2px color-mix(in oklab, var(--rf-cornflower-600) 24%, transparent);
+  --rf-accent-press: inset 0 1px 3px color-mix(in oklab, var(--rf-cornflower-700) 40%, transparent);
+
+  /* Charts are one hue, the accent's; lemon is kept for the brand. chart-1 is the accent itself and
+     each later step moves further from the page, so here they darken and in dark mode they lighten. */
+  --rf-chart-1: var(--rf-cornflower-450);
+  --rf-chart-2: var(--rf-cornflower-550);
+  --rf-chart-3: var(--rf-cornflower-700);
+  --rf-chart-4: var(--rf-cornflower-800);
+  --rf-chart-5: var(--rf-cornflower-950);
+  --rf-radius: 0.625rem;
+  --rf-sidebar: var(--rf-neutral-50);
+  --rf-sidebar-foreground: var(--rf-neutral-950);
+  --rf-sidebar-primary: var(--rf-neutral-900);
+  --rf-sidebar-primary-foreground: var(--rf-neutral-50);
+  --rf-sidebar-accent: var(--rf-neutral-100);
+  --rf-sidebar-accent-foreground: var(--rf-neutral-900);
+  --rf-sidebar-border: var(--rf-neutral-200);
+  --rf-sidebar-ring: var(--rf-neutral-400);
+
+  /* Extension-only tokens */
+  --rf-warning: oklch(97.3% 0.071 103.193);
   --rf-elevation-floating: 0 8px 40px 0 rgb(0 0 0 / 0.08), 0 0 1px 0 rgb(0 0 0 / 0.08);
   /* The colours `--animate-ring-flash` pulses to. Kept in step with the `aria-invalid` rules
      on `Input`, whose destructive tint differs per theme, since a keyframe cannot carry a
@@ -257,52 +388,75 @@
 }
 
 .dark {
-  --rf-background: oklch(0.141 0.005 285.823);
-  --rf-foreground: oklch(0.985 0 0);
-  --rf-card: oklch(0.21 0.006 285.885);
-  --rf-card-foreground: oklch(0.985 0 0);
-  --rf-popover: oklch(0.21 0.006 285.885);
-  --rf-popover-foreground: oklch(0.985 0 0);
-  --rf-primary: oklch(0.922 0 0);
-  --rf-primary-foreground: oklch(0.205 0 0);
-  --rf-brand: oklch(76.034% 0.12361 82.191);
-  --rf-brand-foreground: oklch(0.205 0 0);
-  --rf-secondary: oklch(0.274 0.006 286.033);
-  --rf-secondary-foreground: oklch(0.775 0 0);
-  --rf-muted: oklch(0.274 0.006 286.033);
-  --rf-muted-foreground: oklch(0.705 0.015 286.067);
-  --rf-accent: oklch(0.274 0.006 286.033);
-  --rf-accent-foreground: oklch(0.985 0 0);
-  --rf-destructive: oklch(0.704 0.191 22.216);
+  --rf-background: var(--rf-neutral-950);
+  --rf-foreground: var(--rf-neutral-50);
+  --rf-card: var(--rf-neutral-900);
+  --rf-card-foreground: var(--rf-neutral-50);
+  --rf-popover: var(--rf-neutral-900);
+  --rf-popover-foreground: var(--rf-neutral-50);
+  /* Light mode's ink would lighten this page rather than darken it. Black at eight times the
+     opacity reads as the same drop: a near-black page leaves a shadow little room to darken. */
+  --rf-elevation-ink: 0 0 0;
+  --rf-elevation-strength: 8;
+  --rf-primary: var(--rf-neutral-200);
+  --rf-primary-foreground: var(--rf-neutral-900);
+  --rf-secondary: var(--rf-neutral-800);
+  --rf-secondary-foreground: var(--rf-neutral-50);
+  --rf-muted: var(--rf-neutral-800);
+  --rf-muted-foreground: var(--rf-neutral-400);
+  --rf-accent: var(--rf-cornflower-550);
+  --rf-accent-foreground: var(--color-white);
+  --rf-brand: var(--rf-lemon-550);
+  --rf-brand-foreground: var(--color-white);
+  --rf-destructive: var(--rf-red-400);
   --rf-border: oklch(1 0 0 / 10%);
   --rf-input: oklch(1 0 0 / 15%);
-  --rf-ring: oklch(0.552 0.016 285.938);
-  --rf-chart-1: oklch(38.017% 0.06181 82.191);
-  --rf-chart-2: oklch(57.026% 0.09271 82.191);
-  --rf-chart-3: oklch(76.034% 0.12361 82.191);
-  --rf-chart-4: oklch(82.026% 0.09271 82.191);
-  --rf-chart-5: oklch(89.215% 0.05562 82.191);
-  --rf-sidebar: oklch(0.21 0.006 285.885);
-  --rf-sidebar-foreground: oklch(0.985 0 0);
-  --rf-sidebar-primary: oklch(0.922 0 0);
-  --rf-sidebar-primary-foreground: oklch(0.205 0 0);
-  --rf-sidebar-accent: oklch(0.274 0.006 286.033);
-  --rf-sidebar-accent-foreground: oklch(0.985 0 0);
+  --rf-ring: var(--rf-neutral-500);
+  --rf-link: var(--rf-blue-450);
+
+  /* Dark-mode primary is a light button, so it takes a light bevel: a white top edge and a faint
+     shade. The accent and brand shades still come from their own scales, 700 and 650, since the
+     fills themselves sit deeper here. */
+  --rf-primary-hover: var(--rf-neutral-100);
+  --rf-primary-active: var(--rf-neutral-300);
+  --rf-primary-edge: oklch(0 0 0 / 8%);
+  --rf-primary-bevel:
+    inset 0 2px 1px -0.5px var(--color-white), inset 0 -3px 6px -1px oklch(0 0 0 / 12%),
+    0 1px 2px oklch(0 0 0 / 60%);
+  --rf-primary-press: inset 0 1px 3px oklch(0 0 0 / 22%);
+  --rf-brand-hover: var(--rf-lemon-500);
+  --rf-brand-active: var(--rf-lemon-600);
+  --rf-brand-edge: oklch(1 0 0 / 14%);
+  --rf-brand-bevel:
+    inset 0 1px 0 oklch(1 0 0 / 40%), inset 0 6px 10px -5px oklch(1 0 0 / 20%),
+    inset 0 -4px 7px -2px color-mix(in oklab, var(--rf-lemon-650) 50%, transparent),
+    0 1px 2px oklch(0 0 0 / 60%);
+  --rf-brand-press: inset 0 1px 3px color-mix(in oklab, var(--rf-lemon-700) 45%, transparent);
+  --rf-accent-hover: var(--rf-cornflower-500);
+  --rf-accent-active: var(--rf-cornflower-600);
+  --rf-accent-edge: oklch(1 0 0 / 12%);
+  --rf-accent-bevel:
+    inset 0 1px 0 oklch(1 0 0 / 25%), inset 0 6px 10px -5px oklch(1 0 0 / 14%),
+    inset 0 -4px 7px -2px color-mix(in oklab, var(--rf-cornflower-700) 55%, transparent),
+    0 1px 2px oklch(0 0 0 / 60%);
+  --rf-accent-press: inset 0 1px 3px color-mix(in oklab, var(--rf-cornflower-700) 60%, transparent);
+
+  --rf-chart-1: var(--rf-cornflower-550);
+  --rf-chart-2: var(--rf-cornflower-400);
+  --rf-chart-3: var(--rf-cornflower-300);
+  --rf-chart-4: var(--rf-cornflower-200);
+  --rf-chart-5: var(--rf-cornflower-50);
+  --rf-sidebar: var(--rf-neutral-900);
+  --rf-sidebar-foreground: var(--rf-neutral-50);
+  --rf-sidebar-primary: var(--rf-neutral-200);
+  --rf-sidebar-primary-foreground: var(--rf-neutral-900);
+  --rf-sidebar-accent: var(--rf-neutral-800);
+  --rf-sidebar-accent-foreground: var(--rf-neutral-50);
   --rf-sidebar-border: oklch(1 0 0 / 10%);
-  --rf-sidebar-ring: oklch(0.552 0.016 285.938);
-  /* Additional theme variables */
+  --rf-sidebar-ring: var(--rf-neutral-500);
+
+  /* Extension-only tokens */
   --rf-warning: oklch(42.1% 0.095 57.708);
-  --rf-toast-info: var(--color-blue-500);
-  --rf-toast-success: var(--color-emerald-500);
-  --rf-toast-warning: var(--color-amber-500);
-  --rf-link: oklch(70.7% 0.165 254.624);
-  /* Darker and a touch more saturated than the light-theme blue. The light value
-     is 7.1:1 against this near-black surface but only 2.8:1 against the white
-     thumb, which is what makes it glare and washes the thumb into it; dropping to
-     L 58% lands both at ~4.5:1. Hover goes lighter here — see the note in
-     `:root` — because on a dark surface, darker recedes. */
-  --rf-accent-blue: oklch(58% 0.18 265.19);
-  --rf-accent-blue-hover: oklch(62.5% 0.175 264.759);
   --rf-elevation-floating: 0 8px 40px 0 rgb(0 0 0 / 0.28), 0 0 1px 0 rgb(0 0 0 / 0.28);
   /* Mirrors `dark:aria-invalid:*` on `Input`: a softened border and a stronger ring, because
      the light-theme pair is too hot against a near-black surface. */
