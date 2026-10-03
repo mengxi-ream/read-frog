@@ -1,101 +1,24 @@
 import * as React from "react"
-import { useProximityHover } from "@/hooks/use-proximity-hover"
 import { cn } from "@/utils/styles/utils"
 
-interface TableContextValue {
-  registerItem: (index: number, element: HTMLElement | null) => void
-  activeIndex: number | null
-}
-
-const TableContext = React.createContext<TableContextValue | null>(null)
-
-/**
- * Rows light up through one highlight that follows the pointer to the nearest row rather
- * than a per-row `:hover`, so moving down the table reads as a single moving object. Give
- * every body row an `index`; header rows leave it off.
- */
-interface TableProps extends React.ComponentProps<"table"> {
-  /**
-   * Classes for the scroll container around the table, which is where a height
-   * cap belongs: it is the element that already scrolls, so `max-h-*` there is
-   * what a sticky header pins against. Setting one on the table itself would
-   * clip rather than scroll.
-   */
-  containerClassName?: string
-}
-
-function Table({ className, containerClassName, children, ...props }: TableProps) {
-  const containerRef = React.useRef<HTMLDivElement>(null)
-  const { activeIndex, itemRects, sessionRef, handlers, registerItem } =
-    useProximityHover(containerRef)
-
-  const activeRect = activeIndex !== null ? itemRects[activeIndex] : null
-  const contextValue = React.useMemo(
-    () => ({ registerItem, activeIndex }),
-    [registerItem, activeIndex],
-  )
-
+function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
-    <TableContext.Provider value={contextValue}>
-      <div
-        ref={containerRef}
-        data-slot="table-container"
-        className={cn("relative w-full overflow-x-auto", containerClassName)}
-        onMouseEnter={handlers.onMouseEnter}
-        onMouseMove={handlers.onMouseMove}
-        onMouseLeave={handlers.onMouseLeave}
-      >
-        {activeRect && (
-          // Keyed on the hover session so each pointer entry mounts a fresh node: a new
-          // node has no previous geometry to transition from, which is what stops the
-          // highlight from sliding in from whichever row was hovered last time.
-          <div
-            // oxlint-disable-next-line react/refs -- reading the session id during render is the point -- a new key mounts a fresh node with no geometry to animate from
-            key={sessionRef.current}
-            aria-hidden
-            data-slot="table-row-highlight"
-            className="pointer-events-none absolute bg-accent transition-[top,left,width,height] duration-[80ms] ease-out motion-reduce:transition-none"
-            style={{
-              top: activeRect.top,
-              left: activeRect.left,
-              width: activeRect.width,
-              height: activeRect.height,
-            }}
-          />
-        )}
-        <table
-          data-slot="table"
-          // Separated borders with zero spacing render the same as collapsed ones, but a
-          // collapsed border belongs to the table rather than the cell, so it paints
-          // outside a sticky header's layer and scrolls out from under it. Row lines
-          // therefore live on the cells (see TableRow) and survive a pinned header.
-          className={cn(
-            "w-full caption-bottom border-separate border-spacing-0 text-[13px]",
-            className,
-          )}
-          {...props}
-        >
-          {children}
-        </table>
-      </div>
-    </TableContext.Provider>
+    <div data-slot="table-container" className="relative w-full overflow-x-auto">
+      <table
+        data-slot="table"
+        className={cn("w-full caption-bottom text-sm", className)}
+        {...props}
+      />
+    </div>
   )
 }
 
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
-  return <thead data-slot="table-header" className={className} {...props} />
-}
-
-function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
-  return <tbody data-slot="table-body" className={className} {...props} />
-}
-
-function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   return (
-    <tfoot
-      data-slot="table-footer"
+    <thead
+      data-slot="table-header"
       className={cn(
-        "bg-muted/50 font-medium [&>tr:first-child>*]:border-t [&>tr:last-child>*]:border-b-0",
+        "bg-muted/50 [&_tr]:border-b [&_tr]:hover:bg-transparent [&_tr]:has-aria-expanded:bg-transparent",
         className,
       )}
       {...props}
@@ -103,45 +26,32 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   )
 }
 
-function TableRow({
-  index,
-  className,
-  ref,
-  ...props
-}: React.ComponentProps<"tr"> & {
-  /** Position among body rows, for the proximity highlight. Omit on header rows. */
-  index?: number
-}) {
-  const rowRef = React.useRef<HTMLTableRowElement | null>(null)
-  const context = React.useContext(TableContext)
+function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
+  return (
+    <tbody
+      data-slot="table-body"
+      className={cn("[&_tr:last-child]:border-0", className)}
+      {...props}
+    />
+  )
+}
 
-  React.useEffect(() => {
-    if (index === undefined || !context) return undefined
-    context.registerItem(index, rowRef.current)
-    return () => context.registerItem(index, null)
-  }, [index, context])
+function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
+  return (
+    <tfoot
+      data-slot="table-footer"
+      className={cn("border-t bg-muted/50 font-medium [&>tr]:last:border-b-0", className)}
+      {...props}
+    />
+  )
+}
 
-  const isBodyRow = index !== undefined
-  const activeIndex = context?.activeIndex ?? null
-  const isActive = isBodyRow && activeIndex === index
-  // The highlight draws no border of its own, so the lines it touches — its own bottom
-  // border and the row's above it — drop out while it sits there, leaving clean edges.
-  const hideBorder =
-    activeIndex !== null &&
-    (isBodyRow ? index === activeIndex || index === activeIndex - 1 : activeIndex === 0)
-
+function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   return (
     <tr
-      ref={(node) => {
-        rowRef.current = node
-        if (typeof ref === "function") ref(node)
-        else if (ref) ref.current = node
-      }}
       data-slot="table-row"
-      data-active={isActive ? "true" : undefined}
       className={cn(
-        "group/row relative z-10 [&>*]:border-b [&>*]:transition-[border-color] [&>*]:duration-[80ms]",
-        hideBorder ? "[&>*]:border-transparent" : "[&>*]:border-border/60",
+        "border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
         className,
       )}
       {...props}
@@ -154,7 +64,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "px-3 py-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
+        "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
         className,
       )}
       {...props}
@@ -166,10 +76,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
   return (
     <td
       data-slot="table-cell"
-      className={cn(
-        "px-3 py-2 align-middle whitespace-nowrap text-muted-foreground transition-colors duration-[80ms] group-data-[active=true]/row:text-foreground [&:has([role=checkbox])]:pr-0",
-        className,
-      )}
+      className={cn("p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0", className)}
       {...props}
     />
   )

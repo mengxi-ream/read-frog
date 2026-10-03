@@ -88,7 +88,7 @@ describe("CustomActionCardList", () => {
 
   it("shows New on Sentence Analysis and Improve Writing, Updated on Dictionary, during the badge window", () => {
     vi.useFakeTimers()
-    vi.setSystemTime(new Date(2026, 8, 27))
+    vi.setSystemTime(new Date(2026, 9, 2))
     const store = createStore()
     store.set(configAtom, structuredClone(DEFAULT_CONFIG))
 

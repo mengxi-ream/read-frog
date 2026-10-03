@@ -55,6 +55,7 @@ describe("getDictionarySlots", () => {
         field(`${prefix}dictionary-context-term`, "CM"),
         field(`${prefix}dictionary-context-translation`, "CT"),
         field(`${prefix}dictionary-difficulty`, "L"),
+        field(`${prefix}dictionary-memory-tips`, "M"),
       ])
       expect(namesBySlot(slots)).toEqual({
         term: "T",
@@ -65,6 +66,7 @@ describe("getDictionarySlots", () => {
         contextTerm: "CM",
         contextTranslation: "CT",
         difficulty: "L",
+        memoryTips: "M",
       })
     }
   })

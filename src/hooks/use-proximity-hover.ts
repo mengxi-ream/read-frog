@@ -29,7 +29,7 @@ interface UseProximityHoverReturn {
   setActiveIndex: Dispatch<SetStateAction<number | null>>
   itemRects: ItemRect[]
   /** Bumped on each pointer entry so a consumer can remount its highlight per session. */
-  sessionRef: RefObject<number>
+  session: number
   handlers: {
     onMouseEnter: () => void
     onMouseMove: (event: React.MouseEvent) => void
@@ -51,6 +51,18 @@ interface UseProximityHoverReturn {
  */
 const MEASUREMENT_ATTEMPTS = 3
 
+function isSameRect(a: ItemRect | undefined, b: ItemRect | undefined) {
+  return (
+    a === b ||
+    (a !== undefined &&
+      b !== undefined &&
+      a.top === b.top &&
+      a.left === b.left &&
+      a.width === b.width &&
+      a.height === b.height)
+  )
+}
+
 /**
  * Tracks which item the pointer is nearest, so one moving highlight can follow it instead
  * of every item lighting up on its own `:hover`. Items register themselves by index; the
@@ -63,34 +75,28 @@ export function useProximityHover<T extends HTMLElement>(
   { axis = "y" }: UseProximityHoverOptions = {},
 ): UseProximityHoverReturn {
   const itemsRef = useRef(new Map<number, HTMLElement>())
-  const [activeIndex, setActiveIndex] = useState<number | null>(null)
-  const [itemRects, setItemRects] = useState<ItemRect[]>([])
   const itemRectsRef = useRef<ItemRect[]>([])
-  const sessionRef = useRef(0)
-  const moveRafRef = useRef<number | null>(null)
-  const measureRafRef = useRef<number | null>(null)
+  const [itemRects, setItemRects] = useState<ItemRect[]>([])
+  const [activeIndex, setActiveIndex] = useState<number | null>(null)
+  const [session, setSession] = useState(0)
+  const moveFrameRef = useRef<number | null>(null)
+  const measureFrameRef = useRef<number | null>(null)
 
   /**
    * Publishes a rect per registered item. Returns false when the pass could not finish —
    * no container, or an item without a layout box — and publishes nothing in that case, so
    * the last complete measurement stands instead of being overwritten with zeroes.
    */
-  const runMeasurement = useCallback(() => {
-    const container = containerRef.current
-    if (!container) return false
+  const measure = useCallback(() => {
+    if (!containerRef.current) return false
 
     const rects: ItemRect[] = []
-    let everyItemHasLayout = true
-
-    itemsRef.current.forEach((element, index) => {
+    for (const [index, element] of itemsRef.current) {
       // An element inside a hidden subtree has no offsetParent and reports every offset as
       // 0. Publishing that would pin the highlight to the top of the list.
       const hasLayoutBox =
         element.offsetParent !== null || element.offsetWidth > 0 || element.offsetHeight > 0
-      if (!hasLayoutBox) {
-        everyItemHasLayout = false
-        return
-      }
+      if (!hasLayoutBox) return false
       // offset* rather than getBoundingClientRect: these are layout values relative to the
       // offsetParent, the same coordinate space an absolutely positioned highlight uses,
       // and they are unaffected by any transform on an ancestor.
@@ -100,24 +106,13 @@ export function useProximityHover<T extends HTMLElement>(
         width: element.offsetWidth,
         height: element.offsetHeight,
       }
-    })
-
-    if (!everyItemHasLayout) return false
+    }
 
     // Skip the state update when nothing moved, so redundant remeasures don't re-render.
     const previous = itemRectsRef.current
-    let changed = previous.length !== rects.length
+    let changed = rects.length !== previous.length
     for (let index = 0; !changed && index < rects.length; index++) {
-      const before = previous[index]
-      const after = rects[index]
-      if (before === after) continue
-      changed =
-        !before ||
-        !after ||
-        before.top !== after.top ||
-        before.left !== after.left ||
-        before.width !== after.width ||
-        before.height !== after.height
+      changed = !isSameRect(rects[index], previous[index])
     }
     if (changed) {
       itemRectsRef.current = rects
@@ -127,150 +122,92 @@ export function useProximityHover<T extends HTMLElement>(
   }, [containerRef])
 
   /** Coalesces every trigger — registration, resize — into one remeasure next frame. */
-  const scheduleMeasurement = useCallback(
-    (attemptsLeft: number) => {
-      if (measureRafRef.current !== null) {
-        cancelAnimationFrame(measureRafRef.current)
+  const measureItems = useCallback(() => {
+    let attemptsLeft = MEASUREMENT_ATTEMPTS
+    const attempt = () => {
+      measureFrameRef.current = null
+      if (!measure() && --attemptsLeft > 0) {
+        measureFrameRef.current = requestAnimationFrame(attempt)
       }
-      measureRafRef.current = requestAnimationFrame(() => {
-        measureRafRef.current = null
-        if (!runMeasurement() && attemptsLeft > 1) {
-          // oxlint-disable-next-line react/immutability -- the callback retries itself; it cannot appear in its own dependency list
-          scheduleMeasurement(attemptsLeft - 1)
-        }
-      })
-    },
-    // oxlint-disable-next-line react/memo-dependencies -- the callback retries itself; it cannot appear in its own dependency list
-    [runMeasurement],
-  )
+    }
+    if (measureFrameRef.current !== null) cancelAnimationFrame(measureFrameRef.current)
+    measureFrameRef.current = requestAnimationFrame(attempt)
+  }, [measure])
 
   const registerItem = useCallback(
     (index: number, element: HTMLElement | null) => {
-      if (element) {
-        itemsRef.current.set(index, element)
-      } else {
-        itemsRef.current.delete(index)
-      }
-      scheduleMeasurement(MEASUREMENT_ATTEMPTS)
+      if (element) itemsRef.current.set(index, element)
+      else itemsRef.current.delete(index)
+      measureItems()
     },
-    [scheduleMeasurement],
+    [measureItems],
   )
-
-  const onMouseMove = useCallback(
-    (event: React.MouseEvent) => {
-      const pointerX = event.clientX
-      const pointerY = event.clientY
-
-      if (moveRafRef.current !== null) {
-        cancelAnimationFrame(moveRafRef.current)
-      }
-
-      moveRafRef.current = requestAnimationFrame(() => {
-        moveRafRef.current = null
-        const container = containerRef.current
-        if (!container) return
-
-        const containerRect = container.getBoundingClientRect()
-        // Item rects are layout values while the pointer lives in visual space, so an
-        // ancestor `transform: scale` has to be divided back out before comparing. The two
-        // axes scale independently.
-        const scaleX = container.offsetWidth > 0 ? containerRect.width / container.offsetWidth : 1
-        const scaleY =
-          container.offsetHeight > 0 ? containerRect.height / container.offsetHeight : 1
-
-        let closestIndex: number | null = null
-        let closestDistance = Infinity
-        let containingIndex: number | null = null
-
-        const rects = itemRectsRef.current
-        for (let index = 0; index < rects.length; index++) {
-          const rect = rects[index]
-          if (!rect) continue
-
-          const itemTop =
-            containerRect.top + (container.clientTop + rect.top - container.scrollTop) * scaleY
-          const itemHeight = rect.height * scaleY
-
-          if (axis === "y") {
-            if (pointerY >= itemTop && pointerY <= itemTop + itemHeight) {
-              containingIndex = index
-            }
-            const distance = Math.abs(pointerY - (itemTop + itemHeight / 2))
-            if (distance < closestDistance) {
-              closestDistance = distance
-              closestIndex = index
-            }
-            continue
-          }
-
-          const itemLeft =
-            containerRect.left + (container.clientLeft + rect.left - container.scrollLeft) * scaleX
-          const itemWidth = rect.width * scaleX
-          if (
-            pointerX >= itemLeft &&
-            pointerX <= itemLeft + itemWidth &&
-            pointerY >= itemTop &&
-            pointerY <= itemTop + itemHeight
-          ) {
-            containingIndex = index
-          }
-
-          const distance = Math.hypot(
-            pointerX - (itemLeft + itemWidth / 2),
-            pointerY - (itemTop + itemHeight / 2),
-          )
-          if (distance < closestDistance) {
-            closestDistance = distance
-            closestIndex = index
-          }
-        }
-
-        setActiveIndex(containingIndex ?? closestIndex)
-      })
-    },
-    [axis, containerRef],
-  )
-
-  const onMouseEnter = useCallback(() => {
-    sessionRef.current += 1
-  }, [])
-
-  const onMouseLeave = useCallback(() => {
-    if (moveRafRef.current !== null) {
-      cancelAnimationFrame(moveRafRef.current)
-      moveRafRef.current = null
-    }
-    setActiveIndex(null)
-  }, [])
 
   // A reflow moves items even though the registered set is unchanged, which would leave
   // the published rects stale. Coalesced through the same frame as registration.
   useEffect(() => {
     const container = containerRef.current
     if (!container || typeof ResizeObserver === "undefined") return undefined
-    const observer = new ResizeObserver(() => scheduleMeasurement(MEASUREMENT_ATTEMPTS))
+    const observer = new ResizeObserver(measureItems)
     observer.observe(container)
     return () => observer.disconnect()
-  }, [containerRef, scheduleMeasurement])
+  }, [containerRef, measureItems])
 
-  useEffect(() => {
-    return () => {
-      if (moveRafRef.current !== null) cancelAnimationFrame(moveRafRef.current)
-      if (measureRafRef.current !== null) cancelAnimationFrame(measureRafRef.current)
-    }
-  }, [])
+  useEffect(
+    () => () => {
+      if (moveFrameRef.current !== null) cancelAnimationFrame(moveFrameRef.current)
+      if (measureFrameRef.current !== null) cancelAnimationFrame(measureFrameRef.current)
+    },
+    [],
+  )
 
-  const measureItems = useCallback(() => {
-    scheduleMeasurement(MEASUREMENT_ATTEMPTS)
-  }, [scheduleMeasurement])
+  const handlers = {
+    onMouseEnter: () => setSession((current) => current + 1),
+    onMouseMove: (event: React.MouseEvent) => {
+      const { clientX: pointerX, clientY: pointerY } = event
+      if (moveFrameRef.current !== null) cancelAnimationFrame(moveFrameRef.current)
+      moveFrameRef.current = requestAnimationFrame(() => {
+        moveFrameRef.current = null
+        const container = containerRef.current
+        if (!container) return
 
-  return {
-    activeIndex,
-    setActiveIndex,
-    itemRects,
-    sessionRef,
-    handlers: { onMouseEnter, onMouseMove, onMouseLeave },
-    registerItem,
-    measureItems,
+        // Item rects are layout values while the pointer lives in visual space, so an
+        // ancestor `transform: scale` has to be divided back out before comparing. The two
+        // axes scale independently.
+        const box = container.getBoundingClientRect()
+        const scaleX = container.offsetWidth > 0 ? box.width / container.offsetWidth : 1
+        const scaleY = container.offsetHeight > 0 ? box.height / container.offsetHeight : 1
+        const originX = box.left + (container.clientLeft - container.scrollLeft) * scaleX
+        const originY = box.top + (container.clientTop - container.scrollTop) * scaleY
+
+        let closestIndex: number | null = null
+        let closestDistance = Infinity
+        let containingIndex: number | null = null
+        const rects = itemRectsRef.current
+        for (let index = 0; index < rects.length; index++) {
+          const rect = rects[index]
+          if (!rect) continue
+          const halfWidth = (rect.width * scaleX) / 2
+          const halfHeight = (rect.height * scaleY) / 2
+          // On the "y" axis every item spans the pointer's column, so only height counts.
+          const dx = axis === "y" ? 0 : pointerX - (originX + rect.left * scaleX + halfWidth)
+          const dy = pointerY - (originY + rect.top * scaleY + halfHeight)
+          if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) containingIndex = index
+          const distance = Math.hypot(dx, dy)
+          if (distance < closestDistance) {
+            closestDistance = distance
+            closestIndex = index
+          }
+        }
+        setActiveIndex(containingIndex ?? closestIndex)
+      })
+    },
+    onMouseLeave: () => {
+      if (moveFrameRef.current !== null) cancelAnimationFrame(moveFrameRef.current)
+      moveFrameRef.current = null
+      setActiveIndex(null)
+    },
   }
+
+  return { activeIndex, setActiveIndex, itemRects, session, handlers, registerItem, measureItems }
 }
