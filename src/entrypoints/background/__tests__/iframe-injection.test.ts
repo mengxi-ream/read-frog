@@ -74,10 +74,12 @@ function createConfig({
   nodeTranslationEnabled = false,
   siteControl,
   siteRules,
+  eagerIframeInjection = false,
 }: {
   nodeTranslationEnabled?: boolean
   siteControl?: Config["siteControl"]
   siteRules?: Config["siteRules"]
+  eagerIframeInjection?: boolean
 } = {}): Config {
   return {
     selectionToolbar: DEFAULT_CONFIG.selectionToolbar,
@@ -91,7 +93,12 @@ function createConfig({
       blacklistPatterns: [],
       whitelistPatterns: [],
     },
-    siteRules: siteRules ?? { userRules: [], disabledBuiltInRules: [] },
+    siteRules: siteRules ?? {
+      userRules: eagerIframeInjection
+        ? [{ id: "reader-iframes", matches: "reader.example", injectIntoIframes: true }]
+        : [],
+      disabledBuiltInRules: [],
+    },
   } as unknown as Config
 }
 
@@ -277,14 +284,16 @@ describe("setupIframeInjection", () => {
     )
   })
 
-  it("auto-injects host and selection content for allowlisted iframes when page translation is disabled", async () => {
+  it("auto-injects host and selection content for rule-enabled iframes when page translation is disabled", async () => {
     const { onCompleted } = await setupSubject()
     storageGetItemMock.mockResolvedValue({ enabled: false })
-    getLocalConfigMock.mockResolvedValue(createConfig({ nodeTranslationEnabled: false }))
+    getLocalConfigMock.mockResolvedValue(
+      createConfig({ nodeTranslationEnabled: false, eagerIframeInjection: true }),
+    )
 
     await onCompleted(
       createDetails({
-        url: "https://browse.library.kiwix.org/content/wikipedia_en_all_maxi_2026-02/A/Computer_science",
+        url: "https://reader.example/content/wikipedia_en_all_maxi_2026-02/A/Computer_science",
       }),
     )
 
@@ -296,7 +305,7 @@ describe("setupIframeInjection", () => {
         func: expect.any(Function),
         args: [
           SITE_CONTROL_URL_WINDOW_KEY,
-          "https://browse.library.kiwix.org/content/wikipedia_en_all_maxi_2026-02/A/Computer_science",
+          "https://reader.example/content/wikipedia_en_all_maxi_2026-02/A/Computer_science",
         ],
       }),
     )
@@ -316,14 +325,16 @@ describe("setupIframeInjection", () => {
     )
   })
 
-  it("auto-injects existing and late iframes for allowlisted top pages", async () => {
+  it("auto-injects existing and late iframes for rule-enabled top pages", async () => {
     const { onCompleted } = await setupSubject()
     storageGetItemMock.mockResolvedValue({ enabled: false })
-    getLocalConfigMock.mockResolvedValue(createConfig({ nodeTranslationEnabled: false }))
-    tabsGetMock.mockResolvedValue({ url: "https://browse.library.kiwix.org/viewer" })
+    getLocalConfigMock.mockResolvedValue(
+      createConfig({ nodeTranslationEnabled: false, eagerIframeInjection: true }),
+    )
+    tabsGetMock.mockResolvedValue({ url: "https://reader.example/viewer" })
     getAllFramesMock.mockResolvedValue([
-      createFrame(0, "https://browse.library.kiwix.org/viewer", -1),
-      createFrame(2, "https://reader.example/frame"),
+      createFrame(0, "https://reader.example/viewer", -1),
+      createFrame(2, "https://embedded.example/frame"),
     ])
 
     await onCompleted(
@@ -331,7 +342,7 @@ describe("setupIframeInjection", () => {
         frameId: 0,
         documentId: "top-doc",
         parentFrameId: -1,
-        url: "https://browse.library.kiwix.org/viewer",
+        url: "https://reader.example/viewer",
       }),
     )
 
@@ -340,7 +351,7 @@ describe("setupIframeInjection", () => {
       1,
       expect.objectContaining({
         target: { tabId: currentTabId, frameIds: [2] },
-        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://browse.library.kiwix.org/viewer"],
+        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://reader.example/viewer"],
       }),
     )
     expect(executeScriptMock).toHaveBeenNthCalledWith(
@@ -360,15 +371,15 @@ describe("setupIframeInjection", () => {
 
     executeScriptMock.mockClear()
     getAllFramesMock.mockResolvedValue([
-      createFrame(0, "https://browse.library.kiwix.org/viewer", -1),
-      createFrame(4, "https://reader.example/late-frame"),
+      createFrame(0, "https://reader.example/viewer", -1),
+      createFrame(4, "https://embedded.example/late-frame"),
     ])
 
     await onCompleted(
       createDetails({
         frameId: 4,
         documentId: "doc-late",
-        url: "https://reader.example/late-frame",
+        url: "https://embedded.example/late-frame",
       }),
     )
 
@@ -377,7 +388,7 @@ describe("setupIframeInjection", () => {
       1,
       expect.objectContaining({
         target: { tabId: currentTabId, documentIds: ["doc-late"] },
-        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://browse.library.kiwix.org/viewer"],
+        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://reader.example/viewer"],
       }),
     )
     expect(executeScriptMock).toHaveBeenNthCalledWith(
@@ -396,22 +407,23 @@ describe("setupIframeInjection", () => {
     )
   })
 
-  it("respects site control during allowlisted full-runtime iframe injection", async () => {
+  it("respects site control during rule-enabled full-runtime iframe injection", async () => {
     const { onCompleted } = await setupSubject()
     storageGetItemMock.mockResolvedValue({ enabled: false })
     getLocalConfigMock.mockResolvedValue(
       createConfig({
         nodeTranslationEnabled: false,
+        eagerIframeInjection: true,
         siteControl: {
           mode: "blacklist",
-          blacklistPatterns: ["browse.library.kiwix.org"],
+          blacklistPatterns: ["reader.example"],
           whitelistPatterns: [],
         },
       }),
     )
     getAllFramesMock.mockResolvedValue([
-      createFrame(0, "https://browse.library.kiwix.org/viewer", -1),
-      createFrame(2, "https://reader.example/frame"),
+      createFrame(0, "https://reader.example/viewer", -1),
+      createFrame(2, "https://embedded.example/frame"),
     ])
 
     await onCompleted(
@@ -419,7 +431,7 @@ describe("setupIframeInjection", () => {
         frameId: 0,
         documentId: "top-doc",
         parentFrameId: -1,
-        url: "https://browse.library.kiwix.org/viewer",
+        url: "https://reader.example/viewer",
       }),
     )
 
@@ -471,9 +483,9 @@ describe("setupIframeInjection", () => {
   it("dedupes concurrent top-page scanning and frame completion for the same document", async () => {
     const { onCompleted } = await setupSubject()
     storageGetItemMock.mockResolvedValue({ enabled: false })
-    const url = "https://browse.library.kiwix.org/viewer/"
+    const url = "https://reader.example/viewer/"
     tabsGetMock.mockResolvedValue({ url })
-    getLocalConfigMock.mockResolvedValue(createConfig())
+    getLocalConfigMock.mockResolvedValue(createConfig({ eagerIframeInjection: true }))
     getAllFramesMock.mockResolvedValue([
       createFrame(0, url, -1),
       { ...createFrame(2, `${url}attachments/sandbox-1/`), documentId: "doc-1" },
@@ -491,8 +503,8 @@ describe("setupIframeInjection", () => {
   it("recovers the top-page rule after a service worker restart", async () => {
     const { onCompleted } = await setupSubject()
     storageGetItemMock.mockResolvedValue({ enabled: false })
-    tabsGetMock.mockResolvedValue({ url: "https://browse.library.kiwix.org/viewer" })
-    getLocalConfigMock.mockResolvedValue(createConfig())
+    tabsGetMock.mockResolvedValue({ url: "https://reader.example/viewer" })
+    getLocalConfigMock.mockResolvedValue(createConfig({ eagerIframeInjection: true }))
     await onCompleted(createDetails({ url: "https://other.example/frame" }))
     expect(executeScriptMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -501,32 +513,36 @@ describe("setupIframeInjection", () => {
     )
     expect(executeScriptMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://browse.library.kiwix.org/viewer"],
+        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://reader.example/viewer"],
       }),
     )
   })
 
-  it.each(["user override", "disabled built-in"])(
-    "honors %s when disabling Kiwix injection",
+  it.each(["false override", "disabled user rule"])(
+    "honors %s when disabling eager iframe injection",
     async (mode) => {
       const { onCompleted } = await setupSubject()
       storageGetItemMock.mockResolvedValue({ enabled: false })
-      const url = "https://browse.library.kiwix.org/viewer"
+      const url = "https://reader.example/viewer"
       tabsGetMock.mockResolvedValue({ url })
       getLocalConfigMock.mockResolvedValue(
         createConfig({
           siteRules: {
             userRules:
-              mode === "user override"
+              mode === "false override"
                 ? [
-                    {
-                      id: "disable-kiwix",
-                      matches: "*.browse.library.kiwix.org",
-                      injectIntoIframes: false,
-                    },
+                    { id: "enabled", matches: "reader.example", injectIntoIframes: true },
+                    { id: "off", matches: "reader.example", injectIntoIframes: false },
                   ]
-                : [],
-            disabledBuiltInRules: mode === "disabled built-in" ? ["readfrog-kiwix-iframes"] : [],
+                : [
+                    {
+                      id: "disabled",
+                      matches: "reader.example",
+                      injectIntoIframes: true,
+                      enabled: false,
+                    },
+                  ],
+            disabledBuiltInRules: [],
           },
         }),
       )
@@ -540,17 +556,15 @@ describe("setupIframeInjection", () => {
   it("rechecks rule changes before injecting a late iframe", async () => {
     const { onCompleted } = await setupSubject()
     storageGetItemMock.mockResolvedValue({ enabled: false })
-    const url = "https://browse.library.kiwix.org/viewer"
+    const url = "https://reader.example/viewer"
     tabsGetMock.mockResolvedValue({ url })
-    getLocalConfigMock.mockResolvedValue(createConfig())
+    getLocalConfigMock.mockResolvedValue(createConfig({ eagerIframeInjection: true }))
     await onCompleted(createDetails({ frameId: 0, url }))
     executeScriptMock.mockClear()
     getLocalConfigMock.mockResolvedValue(
       createConfig({
         siteRules: {
-          userRules: [
-            { id: "disable", matches: "*.browse.library.kiwix.org", injectIntoIframes: false },
-          ],
+          userRules: [{ id: "disable", matches: "*.reader.example", injectIntoIframes: false }],
           disabledBuiltInRules: [],
         },
       }),
@@ -562,8 +576,8 @@ describe("setupIframeInjection", () => {
   it("does not carry an enabled top-page rule into the next navigation", async () => {
     const { onBeforeNavigate, onCompleted } = await setupSubject()
     storageGetItemMock.mockResolvedValue({ enabled: false })
-    getLocalConfigMock.mockResolvedValue(createConfig())
-    await onCompleted(createDetails({ frameId: 0, url: "https://browse.library.kiwix.org/viewer" }))
+    getLocalConfigMock.mockResolvedValue(createConfig({ eagerIframeInjection: true }))
+    await onCompleted(createDetails({ frameId: 0, url: "https://reader.example/viewer" }))
     executeScriptMock.mockClear()
     onBeforeNavigate(createDetails({ frameId: 0, url: "https://example.com/app" }))
     await onCompleted(createDetails())
@@ -596,8 +610,8 @@ describe("setupIframeInjection", () => {
     storageGetItemMock.mockResolvedValue({ enabled: false })
     getLocalConfigMock.mockResolvedValue(createConfig({ nodeTranslationEnabled: false }))
     getAllFramesMock.mockResolvedValue([
-      createFrame(0, "https://browse.library.kiwix.org/viewer", -1),
-      createFrame(2, "https://browse.library.kiwix.org/content/article"),
+      createFrame(0, "https://reader.example/viewer", -1),
+      createFrame(2, "https://reader.example/content/article"),
     ])
 
     await injectHostContentIntoTabIframes(currentTabId, { requirePageTranslationEnabled: false })
@@ -623,7 +637,7 @@ describe("setupIframeInjection", () => {
       1,
       expect.objectContaining({
         target: { tabId: currentTabId, frameIds: [2] },
-        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://browse.library.kiwix.org/content/article"],
+        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://reader.example/content/article"],
       }),
     )
     expect(executeScriptMock).toHaveBeenNthCalledWith(
