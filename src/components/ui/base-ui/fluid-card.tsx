@@ -173,7 +173,7 @@ function FluidCardGroup({
   const reduceMotion = useReducedMotion()
   // More than one column wraps into a grid, where the nearest item has to be resolved in
   // two dimensions; a single column is a plain vertical list.
-  const { activeIndex, itemRects, sessionRef, handlers, registerItem, measureItems } =
+  const { activeIndex, itemRects, session, handlers, registerItem, measureItems } =
     useProximityHover(containerRef, { axis: columns > 1 ? "xy" : "y" })
 
   // Assign each child a stable proximity index, so callers never thread one through by
@@ -262,8 +262,7 @@ function FluidCardGroup({
         <AnimatePresence>
           {activeRect && (
             <motion.div
-              // oxlint-disable-next-line react/refs -- reading the session id during render is the point -- a new key mounts a fresh node with no geometry to animate from
-              key={sessionRef.current}
+              key={session}
               aria-hidden
               data-slot="fluid-card-highlight"
               className={cn("pointer-events-none absolute z-0 rounded-xl", HOVER_TINT)}

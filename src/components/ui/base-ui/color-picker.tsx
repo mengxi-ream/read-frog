@@ -839,15 +839,8 @@ function FormatDropdown({
   const portalContainer = use(ColorPickerPortalContainerContext)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const {
-    activeIndex,
-    setActiveIndex,
-    itemRects,
-    sessionRef,
-    handlers,
-    registerItem,
-    measureItems,
-  } = useProximityHover(containerRef)
+  const { activeIndex, setActiveIndex, itemRects, session, handlers, registerItem, measureItems } =
+    useProximityHover(containerRef)
 
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
 
@@ -981,8 +974,7 @@ function FormatDropdown({
                 <AnimatePresence>
                   {activeRect && (
                     <motion.div
-                      // oxlint-disable-next-line react/refs -- reading the session id during render is the point -- a new key mounts a fresh node with no geometry to animate from
-                      key={sessionRef.current}
+                      key={session}
                       className={cn("pointer-events-none absolute", SHAPE.bg, HOVER_TINT)}
                       initial={{
                         opacity: 0,

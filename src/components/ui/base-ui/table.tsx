@@ -3,17 +3,16 @@ import { useProximityHover } from "@/hooks/use-proximity-hover"
 import { cn } from "@/utils/styles/utils"
 
 interface TableContextValue {
-  registerItem: (index: number, element: HTMLElement | null) => void
   activeIndex: number | null
+  registerItem: (index: number, element: HTMLElement | null) => void
 }
 
-const TableContext = React.createContext<TableContextValue | null>(null)
+// Outside a Table a row has nothing to register with and is never active.
+const TableContext = React.createContext<TableContextValue>({
+  activeIndex: null,
+  registerItem: () => {},
+})
 
-/**
- * Rows light up through one highlight that follows the pointer to the nearest row rather
- * than a per-row `:hover`, so moving down the table reads as a single moving object. Give
- * every body row an `index`; header rows leave it off.
- */
 interface TableProps extends React.ComponentProps<"table"> {
   /**
    * Classes for the scroll container around the table, which is where a height
@@ -24,43 +23,36 @@ interface TableProps extends React.ComponentProps<"table"> {
   containerClassName?: string
 }
 
-function Table({ className, containerClassName, children, ...props }: TableProps) {
+/**
+ * Rows light up through one highlight that follows the pointer to the nearest row rather
+ * than a per-row `:hover`, so moving down the table reads as a single moving object. Give
+ * every body row an `index`; header rows leave it off.
+ */
+function Table({ className, containerClassName, ...props }: TableProps) {
   const containerRef = React.useRef<HTMLDivElement>(null)
-  const { activeIndex, itemRects, sessionRef, handlers, registerItem } =
+  const { activeIndex, itemRects, session, handlers, registerItem } =
     useProximityHover(containerRef)
-
-  const activeRect = activeIndex !== null ? itemRects[activeIndex] : null
-  const contextValue = React.useMemo(
-    () => ({ registerItem, activeIndex }),
-    [registerItem, activeIndex],
-  )
+  const activeRect = activeIndex === null ? undefined : itemRects[activeIndex]
+  const context = React.useMemo(() => ({ activeIndex, registerItem }), [activeIndex, registerItem])
 
   return (
-    <TableContext.Provider value={contextValue}>
+    <TableContext value={context}>
       <div
         ref={containerRef}
         data-slot="table-container"
         className={cn("relative w-full overflow-x-auto", containerClassName)}
-        onMouseEnter={handlers.onMouseEnter}
-        onMouseMove={handlers.onMouseMove}
-        onMouseLeave={handlers.onMouseLeave}
+        {...handlers}
       >
         {activeRect && (
           // Keyed on the hover session so each pointer entry mounts a fresh node: a new
           // node has no previous geometry to transition from, which is what stops the
           // highlight from sliding in from whichever row was hovered last time.
           <div
-            // oxlint-disable-next-line react/refs -- reading the session id during render is the point -- a new key mounts a fresh node with no geometry to animate from
-            key={sessionRef.current}
+            key={session}
             aria-hidden
             data-slot="table-row-highlight"
             className="pointer-events-none absolute bg-accent transition-[top,left,width,height] duration-[80ms] ease-out motion-reduce:transition-none"
-            style={{
-              top: activeRect.top,
-              left: activeRect.left,
-              width: activeRect.width,
-              height: activeRect.height,
-            }}
+            style={activeRect}
           />
         )}
         <table
@@ -74,30 +66,25 @@ function Table({ className, containerClassName, children, ...props }: TableProps
             className,
           )}
           {...props}
-        >
-          {children}
-        </table>
+        />
       </div>
-    </TableContext.Provider>
+    </TableContext>
   )
 }
 
-function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
-  return <thead data-slot="table-header" className={className} {...props} />
+function TableHeader(props: React.ComponentProps<"thead">) {
+  return <thead data-slot="table-header" {...props} />
 }
 
-function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
-  return <tbody data-slot="table-body" className={className} {...props} />
+function TableBody(props: React.ComponentProps<"tbody">) {
+  return <tbody data-slot="table-body" {...props} />
 }
 
 function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   return (
     <tfoot
       data-slot="table-footer"
-      className={cn(
-        "bg-muted/50 font-medium [&>tr:first-child>*]:border-t [&>tr:last-child>*]:border-b-0",
-        className,
-      )}
+      className={cn("bg-muted/50 font-medium [&>tr:last-child>*]:border-b-0", className)}
       {...props}
     />
   )
@@ -112,33 +99,28 @@ function TableRow({
   /** Position among body rows, for the proximity highlight. Omit on header rows. */
   index?: number
 }) {
-  const rowRef = React.useRef<HTMLTableRowElement | null>(null)
-  const context = React.useContext(TableContext)
+  const rowRef = React.useRef<HTMLTableRowElement>(null)
+  // Hands the caller the row itself; the handle is only read once the row has mounted.
+  React.useImperativeHandle(ref, () => rowRef.current as HTMLTableRowElement, [])
+  const { activeIndex, registerItem } = React.useContext(TableContext)
 
   React.useEffect(() => {
-    if (index === undefined || !context) return undefined
-    context.registerItem(index, rowRef.current)
-    return () => context.registerItem(index, null)
-  }, [index, context])
+    if (index === undefined) return undefined
+    registerItem(index, rowRef.current)
+    return () => registerItem(index, null)
+  }, [index, registerItem])
 
-  const isBodyRow = index !== undefined
-  const activeIndex = context?.activeIndex ?? null
-  const isActive = isBodyRow && activeIndex === index
   // The highlight draws no border of its own, so the lines it touches — its own bottom
   // border and the row's above it — drop out while it sits there, leaving clean edges.
-  const hideBorder =
-    activeIndex !== null &&
-    (isBodyRow ? index === activeIndex || index === activeIndex - 1 : activeIndex === 0)
+  // Rows without an index sit just above the first body row.
+  const position = index ?? -1
+  const hideBorder = activeIndex === position || activeIndex === position + 1
 
   return (
     <tr
-      ref={(node) => {
-        rowRef.current = node
-        if (typeof ref === "function") ref(node)
-        else if (ref) ref.current = node
-      }}
+      ref={rowRef}
       data-slot="table-row"
-      data-active={isActive ? "true" : undefined}
+      data-active={activeIndex === index || undefined}
       className={cn(
         "group/row relative z-10 [&>*]:border-b [&>*]:transition-[border-color] [&>*]:duration-[80ms]",
         hideBorder ? "[&>*]:border-transparent" : "[&>*]:border-border/60",
