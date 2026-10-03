@@ -18,7 +18,7 @@ export function SidebarShell() {
       className="pointer-events-auto flex h-full flex-col overflow-hidden rounded-[20px] border border-border bg-popover/90 font-light text-popover-foreground shadow-(--rf-elevation-floating) backdrop-blur-2xl backdrop-saturate-150"
     >
       <Tabs value={activeSection} onValueChange={setActiveSection} className="min-h-0 flex-1 gap-0">
-        <div className="flex items-center gap-2 border-b border-border py-2 pr-2 pl-1">
+        <div className="flex items-center gap-2 border-b border-border px-2">
           <SidebarTabBar />
           <Button
             type="button"
