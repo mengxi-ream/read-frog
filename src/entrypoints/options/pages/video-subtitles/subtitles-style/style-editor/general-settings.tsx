@@ -149,6 +149,7 @@ export function GeneralSettings() {
         <Field orientation="responsive">
           <FieldTitle>{i18n.t("options.videoSubtitles.style.backgroundOpacity")}</FieldTitle>
           <SliderComfortable
+            variant="scrubber"
             aria-label={i18n.t("options.videoSubtitles.style.backgroundOpacity")}
             min={MIN_BACKGROUND_OPACITY}
             max={MAX_BACKGROUND_OPACITY}

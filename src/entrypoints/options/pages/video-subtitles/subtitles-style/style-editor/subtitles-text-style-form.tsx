@@ -91,6 +91,7 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
       <Field orientation="responsive">
         <FieldTitle>{i18n.t("options.videoSubtitles.style.fontScale")}</FieldTitle>
         <SliderComfortable
+          variant="scrubber"
           aria-label={i18n.t("options.videoSubtitles.style.fontScale")}
           min={MIN_FONT_SCALE}
           max={MAX_FONT_SCALE}
@@ -105,6 +106,7 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
       <Field orientation="responsive">
         <FieldTitle>{i18n.t("options.videoSubtitles.style.fontWeight")}</FieldTitle>
         <SliderComfortable
+          variant="scrubber"
           aria-label={i18n.t("options.videoSubtitles.style.fontWeight")}
           min={MIN_FONT_WEIGHT}
           max={MAX_FONT_WEIGHT}

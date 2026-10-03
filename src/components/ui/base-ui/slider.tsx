@@ -926,6 +926,8 @@ function Slider({
   )
 }
 
+type SliderComfortableVariant = "pips" | "scrubber"
+
 interface SliderComfortableProps {
   value: number
   onChange: (value: number) => void
@@ -934,6 +936,8 @@ interface SliderComfortableProps {
   min?: number
   max?: number
   step?: number
+  /** `pips` puts a dot on every step; `scrubber` fills a plain track. */
+  variant?: SliderComfortableVariant
   /** Rendered inside the track, and used to name the thumb unless `aria-label` overrides it. */
   label?: string
   /**
@@ -947,16 +951,67 @@ interface SliderComfortableProps {
   className?: string
 }
 
-/* A scrubber: the bordered box is the whole track, the fill is the value, and the
-   label and formatted value sit on top of it. Base UI owns the behaviour —
-   pointer and keyboard input, ARIA — so everything here is styling, apart from
-   tracking which value the pointer hovers over so the box can preview it before a
-   press.
+/* Pips sit this far in from each wall: 12px of padding plus half a 5px dot. */
+const PIP_INSET = 14.5
 
-   The thumb has no look of its own. It is a transparent hit area centred on the
-   fill's edge, so grabbing near the edge drags from where it is instead of
-   jumping; the visible grip rides inside the fill, a few px short of its edge, and
-   is held clear of the left wall when the fill is too narrow to contain it. */
+/* Hides every pip left of the fill's end or of a few px past the grip, whichever
+   is further right. */
+const PIP_MASK =
+  "linear-gradient(to right, transparent max(var(--slider-fill), var(--slider-grip) + 6px), black calc(max(var(--slider-fill), var(--slider-grip) + 6px) + 2px))"
+
+/* The thumb is the hit area that drags from where the value is. A pip slider
+   wants every press to land on the pip under the pointer instead, so its thumb
+   lets presses through. */
+const THUMB: Record<SliderComfortableVariant, string> = {
+  scrubber: "w-6",
+  pips: "pointer-events-none w-px",
+}
+
+/* A scrubber's drag tracks the pointer 1:1, so its fill stops easing while
+   dragging. A pip slider's fill moves a whole step at a time, which reads better
+   eased. Base UI flags a press as dragging from pointerdown, so a scrubber's press
+   lands at once too; keys and outside updates ease either way. */
+const DRAG_MOTION: Record<SliderComfortableVariant, string> = {
+  scrubber: "group-data-dragging/slider:transition-none",
+  pips: "",
+}
+
+type Geometry = Record<"fill" | "grip" | "anchor", string>
+
+/* Where a value lands along the box, as CSS lengths against the control's padding
+   box: where the fill ends, where the 2px grip starts, and where a tooltip for that
+   value centres. `steps` is how many steps span the range. */
+function geometryFor(
+  variant: SliderComfortableVariant,
+  steps: number,
+): (ratio: number) => Geometry {
+  if (variant === "pips") {
+    /* The grip marks the value's pip. The fill covers it and stops halfway to the
+       next one, so the next pip stays uncovered at any spacing pips suit (about
+       10px or more); it is empty at the minimum and full at the maximum. At either
+       end the grip steps 2.5px out toward the wall, clear of the label and value. */
+    return (ratio) => {
+      const next = Math.min(1, ratio + 1 / steps)
+      const fill = ratio === 0 ? "0px" : ratio === 1 ? "100%" : pipPosition((ratio + next) / 2)
+      const nudge = ratio === 0 ? " - 2.5px" : ratio === 1 ? " + 2.5px" : ""
+      return { fill, grip: `calc(${pipPosition(ratio)} - 1px${nudge})`, anchor: pipPosition(ratio) }
+    }
+  }
+  /* The fill is the value's share of the box; the grip rides inside it, a few px
+     short of its edge, held clear of the left wall. */
+  return (ratio) => {
+    const edge = `${ratio * 100}%`
+    return { fill: edge, grip: `max(7px, ${edge} - 9px)`, anchor: edge }
+  }
+}
+
+/* The bordered box is the whole track, the fill is the value, and the label and
+   value sit on top of it. Base UI owns the behaviour — pointer and keyboard input,
+   ARIA — so everything here is styling, apart from tracking which value the
+   pointer hovers over so the box can preview it before a press.
+
+   The thumb has no look of its own: the grip is drawn by the visuals layer, which
+   reads the value's position from CSS variables the control sets. */
 function SliderComfortable({
   value,
   onChange,
@@ -964,6 +1019,7 @@ function SliderComfortable({
   min = 0,
   max = 100,
   step = 1,
+  variant = "pips",
   label,
   "aria-label": ariaLabel,
   formatValue = String,
@@ -972,34 +1028,65 @@ function SliderComfortable({
 }: SliderComfortableProps) {
   const [hoverValue, setHoverValue] = useState<number>()
   const trackRef = useRef<HTMLDivElement>(null)
+  const hoverTimeout = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(() => () => clearTimeout(hoverTimeout.current), [])
+  /* Base UI 1.8.0 drops the commit of a touch tap: the native touchstart restarts
+     the press after pointerdown has already set the value, so pointerup finds
+     nothing to commit. A pointer change still uncommitted when the control lets
+     go of the pointer is committed here instead. (A mouse press commits first, so
+     this stays empty for it.) */
+  const uncommitted = useRef<number | null>(null)
+  const geometry = geometryFor(variant, (max - min) / step)
+  const current = geometry(toRatio(value, min, max))
+  const hover = hoverValue === undefined ? undefined : geometry(toRatio(hoverValue, min, max))
+  const pips = variant === "pips"
 
   return (
     <SliderPrimitive.Root
       value={value}
-      onValueChange={onChange}
-      onValueCommitted={onCommit}
+      onValueChange={(next, details) => {
+        const pointer = details.reason === "track-press" || details.reason === "drag"
+        uncommitted.current = pointer ? next : null
+        onChange(next)
+      }}
+      onValueCommitted={(next) => {
+        uncommitted.current = null
+        onCommit?.(next)
+      }}
       min={min}
       max={max}
       step={step}
       disabled={disabled}
       className="w-full touch-none select-none data-disabled:pointer-events-none data-disabled:opacity-50"
     >
-      {/* No padding: the hover tooltip is placed against the control's box but
-          its position is measured on the track, so the two must coincide. The
-          label and value get an overlay row to pad instead, since Base UI keeps
-          the indicator in the track's flow, where they would stack under it. */}
+      {/* Base UI maps a press across the control's content box, so the only
+          padding is a pip slider's inset, which lines that box up with the first
+          and last pip. Everything drawn is laid out against the padding box. */}
       <SliderPrimitive.Control
         className={cn(
           "group/slider relative h-8 cursor-ew-resize rounded-lg border border-border text-[13px] text-muted-foreground outline outline-offset-2 outline-transparent transition-[color,outline-color] duration-100 before:absolute before:-inset-x-2 before:inset-y-0 hover:text-foreground has-focus-visible:text-foreground has-focus-visible:outline-ring",
+          pips && "px-[14.5px]",
           className,
         )}
         style={
           {
-            "--slider-fill": `${toPercent(value, min, max)}%`,
-            "--slider-hover":
-              hoverValue === undefined ? undefined : `${toPercent(hoverValue, min, max)}%`,
+            "--slider-fill": current.fill,
+            "--slider-grip": current.grip,
+            "--slider-hover-fill": hover?.fill,
+            "--slider-hover-anchor": hover?.anchor,
           } as CSSProperties
         }
+        onLostPointerCapture={() => {
+          const pending = uncommitted.current
+          uncommitted.current = null
+          if (pending !== null) onCommit?.(pending)
+        }}
+        onPointerEnter={() => clearTimeout(hoverTimeout.current)}
+        onPointerLeave={() => {
+          /* Drop the preview once the tooltip has faded, so a hidden tooltip left
+             parked past the wall can't widen a scrolling ancestor. */
+          hoverTimeout.current = setTimeout(() => setHoverValue(undefined), 150)
+        }}
         onPointerMove={(event) => {
           if (event.pointerType !== "mouse") return
           /* The track is the box Base UI maps a press across, so measuring it
@@ -1010,28 +1097,60 @@ function SliderComfortable({
           setHoverValue(valueAt((event.clientX - left) / width, min, max, step))
         }}
       >
-        <SliderPrimitive.Track ref={trackRef} className="h-full overflow-hidden rounded-[inherit]">
-          {/* Keys and outside updates ease the fill to its new width. Base UI
-              flags a press as dragging from pointerdown, so a press lands at
-              once and a drag tracks the pointer 1:1. */}
-          <SliderPrimitive.Indicator className="bg-accent transition-[width] duration-100 ease-out group-data-dragging/slider:transition-none">
-            <span className="absolute inset-y-2 start-[max(7px,100%-9px)] w-0.5 rounded-full bg-foreground/25 transition-[top,bottom,background-color] duration-100 group-hover/slider:inset-y-1.75 group-hover/slider:bg-foreground/50 group-has-focus-visible/slider:inset-y-1.75 group-has-focus-visible/slider:bg-foreground" />
-          </SliderPrimitive.Indicator>
+        <div className="absolute inset-0 overflow-hidden rounded-[inherit]">
+          {pips && (
+            <>
+              {/* Pips under the fill, and the one the grip stands on, are masked
+                  out, so the fill and grip never sit on top of a dot. */}
+              <div className="absolute inset-0" style={{ maskImage: PIP_MASK }}>
+                {pipRatios(min, max, step).map((ratio) => (
+                  <span
+                    key={ratio}
+                    className="absolute top-1/2 size-[5px] -translate-1/2 rounded-full bg-muted-foreground/30"
+                    style={{ left: pipPosition(ratio) }}
+                  />
+                ))}
+              </div>
+              {/* A blank copy of the label and value hides the pips behind them.
+                  It sits under the fill, so the fill still shows behind the text. */}
+              <div
+                aria-hidden
+                className="absolute inset-0 flex items-center gap-3 px-4 text-transparent *:bg-background *:outline-8 *:outline-background"
+              >
+                {label && <span className="min-w-0 truncate">{label}</span>}
+                <span className="ms-auto shrink-0 tabular-nums">{formatValue(value)}</span>
+              </div>
+            </>
+          )}
+          <span
+            className={cn(
+              "absolute inset-y-0 start-0 w-(--slider-fill) bg-accent transition-[width] duration-100 ease-out",
+              DRAG_MOTION[variant],
+            )}
+          />
           {/* The hover preview and its tooltip stay mounted so the first hover
               fades in like every later one. A drag hides them through
               `visibility`, which can't lose to hover's `opacity` on order. */}
           <span
             className="absolute inset-y-0 bg-muted-foreground/20 opacity-0 transition-opacity duration-150 group-hover/slider:opacity-100 group-data-dragging/slider:invisible"
             style={{
-              left: "min(var(--slider-fill), var(--slider-hover))",
+              left: "min(var(--slider-fill), var(--slider-hover-fill))",
               width:
-                "max(var(--slider-fill) - var(--slider-hover), var(--slider-hover) - var(--slider-fill))",
+                "max(var(--slider-fill) - var(--slider-hover-fill), var(--slider-hover-fill) - var(--slider-fill))",
             }}
           />
+          <span
+            className={cn(
+              "absolute inset-y-2 start-(--slider-grip) w-0.5 rounded-full bg-foreground/25 transition-[left,top,bottom,background-color] duration-100 ease-out group-hover/slider:inset-y-1.75 group-hover/slider:bg-foreground/50 group-has-focus-visible/slider:inset-y-1.75 group-has-focus-visible/slider:bg-foreground",
+              DRAG_MOTION[variant],
+            )}
+          />
+        </div>
+        <SliderPrimitive.Track ref={trackRef} className="h-full">
           <SliderPrimitive.Thumb
             aria-label={ariaLabel}
             getAriaValueText={(_, thumbValue) => formatValue(thumbValue)}
-            className="h-full w-6"
+            className={cn("h-full", THUMB[variant])}
           />
         </SliderPrimitive.Track>
         <div className="pointer-events-none absolute inset-0 flex items-center gap-3 px-4">
@@ -1044,7 +1163,7 @@ function SliderComfortable({
         </div>
         <span
           aria-hidden
-          className="pointer-events-none absolute bottom-full left-(--slider-hover) mb-2 -translate-x-1/2 translate-y-1 rounded-md bg-foreground px-2 py-1 text-[12px] whitespace-nowrap text-background tabular-nums opacity-0 transition-[opacity,translate] duration-100 group-hover/slider:translate-y-0 group-hover/slider:opacity-100 group-hover/slider:delay-100 group-data-dragging/slider:invisible"
+          className="pointer-events-none absolute bottom-full left-(--slider-hover-anchor) mb-2 -translate-x-1/2 translate-y-1 rounded-md bg-foreground px-2 py-1 text-[12px] whitespace-nowrap text-background tabular-nums opacity-0 transition-[opacity,translate] duration-100 group-hover/slider:translate-y-0 group-hover/slider:opacity-100 group-hover/slider:delay-100 group-data-dragging/slider:invisible"
         >
           {hoverValue !== undefined && formatValue(hoverValue)}
         </span>
@@ -1053,16 +1172,48 @@ function SliderComfortable({
   )
 }
 
-function toPercent(value: number, min: number, max: number) {
-  return ((value - min) / (max - min)) * 100
+function toRatio(value: number, min: number, max: number) {
+  return max > min ? Math.min(1, Math.max(0, (value - min) / (max - min))) : 0
+}
+
+/* Pips spread across the box less an inset at each wall, matching the content box
+   Base UI maps a press across. */
+function pipPosition(ratio: number) {
+  return `calc(${PIP_INSET}px + ${ratio} * (100% - ${2 * PIP_INSET}px))`
+}
+
+/* One pip per whole step from `min`. A `max` off that grid gets no pip: a press is
+   snapped to the grid, so a pip there could not always be pressed. Keys still
+   reach it, and the grip then stands at the wall. */
+function pipRatios(min: number, max: number, step: number) {
+  const steps = (max - min) / step
+  if (!(steps > 0)) return [0]
+  return Array.from({ length: Math.floor(steps + 1e-9) + 1 }, (_, index) => index / steps)
 }
 
 /* The value a press at `ratio` along the track would set, snapped the way Base UI
    snaps one, so the preview never promises a value the click won't deliver. */
 function valueAt(ratio: number, min: number, max: number, step: number) {
   const steps = Math.round((Math.min(1, Math.max(0, ratio)) * (max - min)) / step)
-  return Math.min(max, min + steps * step)
+  const decimals = Math.max(decimalPrecision(step), decimalPrecision(min))
+  return Math.min(max, Number((min + steps * step).toFixed(decimals)))
+}
+
+/* Base UI's own precision rule, which isn't exported: the number of decimals a
+   step or bound is written with, so 0.1 * 3 lands on 0.3, not 0.30000000000000004. */
+function decimalPrecision(num: number) {
+  if (Math.abs(num) < 1 && num !== 0) {
+    const [mantissa = "", exponent = "0"] = num.toExponential().split("e-")
+    return (mantissa.split(".")[1]?.length ?? 0) + Number.parseInt(exponent, 10)
+  }
+  return num.toString().split(".")[1]?.length ?? 0
 }
 
 export { Slider, SliderComfortable }
-export type { SliderComfortableProps, SliderProps, SliderValue, ValuePosition }
+export type {
+  SliderComfortableProps,
+  SliderComfortableVariant,
+  SliderProps,
+  SliderValue,
+  ValuePosition,
+}
