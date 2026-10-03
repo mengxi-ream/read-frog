@@ -4,22 +4,7 @@ import { cva } from "class-variance-authority"
 import * as React from "react"
 import { cn } from "@/utils/styles/utils"
 
-type TabsProps = Omit<TabsPrimitive.Root.Props, "onValueChange"> & {
-  /**
-   * Callback fired when the selected tab changes.
-   * API compatible with old Radix-based shadcn Tabs.
-   */
-  onValueChange?: (value: any) => void
-}
-
-function Tabs({ className, orientation = "horizontal", onValueChange, ...props }: TabsProps) {
-  const handleValueChange = React.useCallback(
-    (value: unknown, _eventDetails: unknown) => {
-      onValueChange?.(value)
-    },
-    [onValueChange],
-  )
-
+function Tabs({ className, orientation = "horizontal", ...props }: TabsPrimitive.Root.Props) {
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
@@ -28,7 +13,6 @@ function Tabs({ className, orientation = "horizontal", onValueChange, ...props }
       // tabs then lose `aria-orientation` and keep Left/Right as their arrow keys.
       orientation={orientation}
       className={cn("group/tabs flex gap-2 data-horizontal:flex-col", className)}
-      onValueChange={handleValueChange}
       {...props}
     />
   )
