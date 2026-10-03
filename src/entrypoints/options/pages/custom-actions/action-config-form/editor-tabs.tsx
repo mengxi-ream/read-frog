@@ -91,19 +91,17 @@ export function ActionEditorTabs({
 
   return (
     <Tabs value={tab} onValueChange={handleValueChange} className="gap-4">
-      <div ref={tabBarRef} className={cn("-mx-4 border-b px-3 pb-2", SCROLL_MARGIN)}>
-        <TabsList
-          variant="line"
-          className="justify-start gap-4 [&_[data-slot=tabs-indicator]]:bottom-[-9px]"
-        >
-          <TabsTrigger value="config" className="flex-none px-1">
+      {/* Flush with the card's top and sides, so the hairline runs edge to edge. */}
+      <div ref={tabBarRef} className={cn("-mx-4 -mt-4", SCROLL_MARGIN)}>
+        <TabsList variant="line" className="w-full">
+          <TabsTrigger value="config">
             {t("config")}
             <ConfigTabStatus />
           </TabsTrigger>
           <TabsTrigger
             id={CUSTOM_ACTION_NOTEBASE_SECTION_ID}
             value="notebase"
-            className={cn("flex-none px-1", SCROLL_MARGIN)}
+            className={SCROLL_MARGIN}
           >
             {t("notebase")}
             <NotebaseTabStatus />
