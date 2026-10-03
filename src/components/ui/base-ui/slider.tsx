@@ -62,7 +62,6 @@ const THUMB_SIZE = 20
 const THUMB_SIZE_REST = 16
 const TRACK_BG_HEIGHT = 18
 const DOT_SIZE = 4
-const PIP_SIZE = 5
 // Inset track BG so its rounded-end centers align with thumb centers at min/max
 const TRACK_INSET = (THUMB_SIZE - TRACK_BG_HEIGHT) / 2
 
@@ -927,17 +926,9 @@ function Slider({
   )
 }
 
-interface SliderComfortableProps extends Omit<
-  HTMLAttributes<HTMLDivElement>,
-  | "onChange"
-  | "defaultValue"
-  | "onDrag"
-  | "onDragStart"
-  | "onDragEnd"
-  | "onDragOver"
-  | "onAnimationStart"
-> {
-  ref?: Ref<HTMLDivElement>
+type SliderComfortableVariant = "pips" | "scrubber"
+
+interface SliderComfortableProps {
   value: number
   onChange: (value: number) => void
   /** Fires once per interaction, on release — for writes too expensive to run per frame. */
@@ -945,7 +936,8 @@ interface SliderComfortableProps extends Omit<
   min?: number
   max?: number
   step?: number
-  variant?: "pips" | "scrubber"
+  /** `pips` puts a dot on every step; `scrubber` fills a plain track. */
+  variant?: SliderComfortableVariant
   /** Rendered inside the track, and used to name the thumb unless `aria-label` overrides it. */
   label?: string
   /**
@@ -955,10 +947,75 @@ interface SliderComfortableProps extends Omit<
   "aria-label"?: string
   formatValue?: (v: number) => string
   disabled?: boolean
+  /** Applied to the track box, e.g. to give it a background. */
+  className?: string
 }
 
+/* Pips sit this far in from each wall: 12px of padding plus half a 5px dot. */
+const PIP_INSET = 14.5
+
+/* Hides every pip left of the fill's end or of a few px past the grip, whichever
+   is further right. The fill ends halfway between pips, so this never cuts one. */
+const PIP_MASK =
+  "linear-gradient(to right, transparent max(var(--slider-fill), var(--slider-grip) + 6px), black calc(max(var(--slider-fill), var(--slider-grip) + 6px) + 2px))"
+
+/* How far a pip keeps from the label and the value. */
+const PIP_TEXT_GAP = 6
+
+/* The thumb is the hit area that drags from where the value is. A pip slider
+   wants every press to land on the pip under the pointer instead, so its thumb
+   lets presses through. */
+const THUMB: Record<SliderComfortableVariant, string> = {
+  scrubber: "w-6",
+  pips: "pointer-events-none w-px",
+}
+
+/* A scrubber's drag tracks the pointer 1:1, so its fill stops easing while
+   dragging. A pip slider's fill moves a whole step at a time, which reads better
+   eased. Base UI flags a press as dragging from pointerdown, so a scrubber's press
+   lands at once too; keys and outside updates ease either way. */
+const DRAG_MOTION: Record<SliderComfortableVariant, string> = {
+  scrubber: "group-data-dragging/slider:transition-none",
+  pips: "",
+}
+
+type Geometry = Record<"fill" | "grip" | "anchor", string>
+
+/* Where a value lands along the box, as CSS lengths against the control's padding
+   box: where the fill ends, where the 2px grip starts, and where a tooltip for that
+   value centres. `steps` is how many steps span the range. */
+function geometryFor(
+  variant: SliderComfortableVariant,
+  steps: number,
+): (ratio: number) => Geometry {
+  if (variant === "pips") {
+    /* The grip marks the value's pip. The fill covers it and stops halfway to the
+       next one, so the next pip stays uncovered at any spacing pips suit (about
+       10px or more); it is empty at the minimum and full at the maximum. At either
+       end the grip steps 2.5px out toward the wall, clear of the label and value. */
+    return (ratio) => {
+      const next = Math.min(1, ratio + 1 / steps)
+      const fill = ratio === 0 ? "0px" : ratio === 1 ? "100%" : pipPosition((ratio + next) / 2)
+      const nudge = ratio === 0 ? " - 2.5px" : ratio === 1 ? " + 2.5px" : ""
+      return { fill, grip: `calc(${pipPosition(ratio)} - 1px${nudge})`, anchor: pipPosition(ratio) }
+    }
+  }
+  /* The fill is the value's share of the box; the grip rides inside it, a few px
+     short of its edge, held clear of the left wall. */
+  return (ratio) => {
+    const edge = `${ratio * 100}%`
+    return { fill: edge, grip: `max(7px, ${edge} - 9px)`, anchor: edge }
+  }
+}
+
+/* The bordered box is the whole track, the fill is the value, and the label and
+   value sit on top of it. Base UI owns the behaviour — pointer and keyboard input,
+   ARIA — so everything here is styling, apart from tracking which value the
+   pointer hovers over so the box can preview it before a press.
+
+   The thumb has no look of its own: the grip is drawn by the visuals layer, which
+   reads the value's position from CSS variables the control sets. */
 function SliderComfortable({
-  ref,
   value,
   onChange,
   onCommit,
@@ -971,539 +1028,221 @@ function SliderComfortable({
   formatValue = String,
   disabled = false,
   className,
-  ...props
 }: SliderComfortableProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const dragging = useRef(false)
-  const handleDragging = useRef(false)
-  // Last value emitted during the current drag — `value` can lag a frame behind
-  // when the parent batches, and the commit has to report what was released on.
-  const latestValue = useRef(value)
-  const [isHovered, setIsHovered] = useState(false)
-  const [isPressed, setIsPressed] = useState(false)
-  const [isFocused, setIsFocused] = useState(false)
-  const [hoverPreview, setHoverPreview] = useState<{
-    left: number
-    width: number
-    snappedValue: number
-    cursorX: number
-  } | null>(null)
-  const [showHoverTooltip, setShowHoverTooltip] = useState(false)
-  const hoverDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  // Show hover tooltip after 100ms delay
-  useEffect(() => {
-    if (isHovered) {
-      hoverDelayRef.current = setTimeout(() => setShowHoverTooltip(true), 100)
-    } else {
-      if (hoverDelayRef.current) clearTimeout(hoverDelayRef.current)
-      // oxlint-disable-next-line react/set-state-in-effect -- hides the hover tooltip when the value is changed from outside
-      setShowHoverTooltip(false)
+  const [hoverValue, setHoverValue] = useState<number>()
+  const trackRef = useRef<HTMLDivElement>(null)
+  const hoverTimeout = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(() => () => clearTimeout(hoverTimeout.current), [])
+  /* Base UI 1.8.0 drops the commit of a touch tap: the native touchstart restarts
+     the press after pointerdown has already set the value, so pointerup finds
+     nothing to commit. A pointer change still uncommitted when the control lets
+     go of the pointer is committed here instead. (A mouse press commits first, so
+     this stays empty for it.) */
+  const uncommitted = useRef<number | null>(null)
+  const geometry = geometryFor(variant, (max - min) / step)
+  const current = geometry(toRatio(value, min, max))
+  const hover = hoverValue === undefined ? undefined : geometry(toRatio(hoverValue, min, max))
+  const pips = variant === "pips"
+  /* Where the label ends and the value starts, so the pips behind them can be
+     left out. Leaving them out rather than painting over them keeps the box
+     see-through on any surface. */
+  const labelRef = useRef<HTMLDivElement>(null)
+  const valueRef = useRef<HTMLOutputElement>(null)
+  const [readout, setReadout] = useState<{ width: number; labelEnd: number; valueStart: number }>()
+  const hasLabel = Boolean(label)
+  useLayoutEffect(() => {
+    const valueElement = valueRef.current
+    const labelElement = hasLabel ? labelRef.current : null
+    const row = valueElement?.parentElement
+    if (!pips || !valueElement || !row) return undefined
+    const measure = () =>
+      setReadout({
+        width: row.offsetWidth,
+        labelEnd: labelElement ? labelElement.offsetLeft + labelElement.offsetWidth : 0,
+        valueStart: valueElement.offsetLeft,
+      })
+    measure()
+    const observer = new ResizeObserver(measure)
+    for (const element of [row, valueElement, labelElement]) {
+      if (element) observer.observe(element)
     }
-    return () => {
-      if (hoverDelayRef.current) clearTimeout(hoverDelayRef.current)
-    }
-  }, [isHovered])
-
-  const mergedRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      containerRef.current = el
-      if (typeof ref === "function") ref(el)
-      else if (ref) (ref as { current: HTMLDivElement | null }).current = el
-    },
-    [ref],
-  )
-
-  const pipSteps = useMemo(
-    () => Array.from({ length: Math.round((max - min) / step) + 1 }, (_, i) => min + i * step),
-    [min, max, step],
-  )
-  const pipCount = pipSteps.length
-
-  const fillPercent = useMotionValue(
-    max === min ? 0 : Math.max(0, Math.min(1, (value - min) / (max - min))),
-  )
-  // Small offset when value is at min so the handle line stays visible
-  const zeroTarget = variant === "pips" ? 8 : 17
-  const zeroOffset = useMotionValue(value === min ? zeroTarget : 0)
-
-  const fillWidthStyle = useTransform(fillPercent, (p) => `${p * 100}%`)
-  const handleLeftStyle = useTransform(
-    [fillPercent, zeroOffset] as MotionValue<number>[],
-    ([p, zo]) => `calc(${(p as number) * 100}% - 8px + ${zo as number}px)`,
-  )
-  const handleLineLeftStyle = useTransform(
-    [fillPercent, zeroOffset] as MotionValue<number>[],
-    ([p, zo]) => `calc(${(p as number) * 100}% - 9px + ${zo as number}px)`,
-  )
-  // Pips-specific: offset by px-3 (12px) padding so fill edge aligns with active pip center
-  const pipsFillWidthStyle = useTransform(
-    [fillPercent, zeroOffset] as MotionValue<number>[],
-    ([p, zo]) =>
-      `calc(${(p as number) * 100}% + ${20 - 20 * (p as number) - (zo as number) * 2.5}px)`,
-  )
-  const pipsHandleLineLeftStyle = useTransform(
-    fillPercent,
-    (p) => `calc(${p * 100}% + ${11 - 24 * p}px)`,
-  )
-  const pipsMaskStyle = useTransform(
-    [fillPercent, zeroOffset] as MotionValue<number>[],
-    ([p, zo]) => {
-      const offset = 20 - 20 * (p as number) - (zo as number) * 2.5
-      return `linear-gradient(to right, transparent calc(${(p as number) * 100}% + ${offset}px), black calc(${(p as number) * 100}% + ${offset + 2}px))`
-    },
-  )
-
-  const computeHoverPreview = useCallback(
-    (clientX: number) => {
-      const el = containerRef.current
-      if (!el) return
-      const rect = el.getBoundingClientRect()
-      // Use clientWidth (padding box) — CSS % and absolute left/width are relative to it
-      const w = el.clientWidth
-      if (w <= 0 || rect.width <= 0) return
-      // Normalize cursor to layout space so it matches `w` (layout, padding box).
-      // offsetWidth is the layout border-box; the difference vs `w` is the
-      // horizontal border contribution split across both sides.
-      const scale = rect.width / el.offsetWidth
-      const borderLeftLayout = (el.offsetWidth - w) / 2
-      const layoutX = (clientX - rect.left) / scale - borderLeftLayout
-      const clamped = Math.max(0, Math.min(w, layoutX))
-
-      let snappedVal: number
-      if (variant === "pips") {
-        if (pipCount <= 1) return
-        const index = Math.max(
-          0,
-          Math.min(pipCount - 1, Math.round((clamped / w) * (pipCount - 1))),
-        )
-        snappedVal = at(pipSteps, index)
-      } else {
-        const raw = min + (clamped / w) * (max - min)
-        snappedVal = Math.max(min, Math.min(max, Math.round((raw - min) / step) * step + min))
-      }
-      const snappedPercent = max === min ? 0 : (snappedVal - min) / (max - min)
-      const snappedX = snappedPercent * w
-
-      // Current handle position — for pips, match the visual fill edge offset
-      const currentPercent = fillPercent.get()
-      const handleX =
-        variant === "pips"
-          ? currentPercent * w + (20 - 20 * currentPercent - zeroOffset.get() * 2.5)
-          : currentPercent * w
-
-      // Extend hover bar to container edges at extremes so there's no gap
-      const edgeX = snappedVal === min ? 0 : snappedVal === max ? w : snappedX
-      const left = Math.min(handleX, edgeX)
-      const width = Math.abs(edgeX - handleX)
-      setHoverPreview({ left, width, snappedValue: snappedVal, cursorX: snappedX })
-    },
-    [variant, pipSteps, pipCount, min, max, step, fillPercent, zeroOffset],
-  )
-
-  // Sync fill on programmatic value change
-  useEffect(() => {
-    latestValue.current = value
-    if (dragging.current || handleDragging.current) return
-    const percent = max === min ? 0 : Math.max(0, Math.min(1, (value - min) / (max - min)))
-    animate(fillPercent, percent, spring.fast)
-    animate(zeroOffset, value === min ? zeroTarget : 0, spring.fast)
-    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the dependencies are re-run triggers, not values the effect body reads
-  }, [value, min, max, variant, fillPercent, zeroOffset, zeroTarget])
-
-  const getValueFromX = useCallback(
-    (clientX: number) => {
-      const rect = containerRef.current?.getBoundingClientRect()
-      if (!rect) return min
-      const clamped = Math.max(0, Math.min(rect.width, clientX - rect.left))
-      if (variant === "pips") {
-        if (pipCount <= 1) return min
-        const index = Math.max(
-          0,
-          Math.min(pipCount - 1, Math.round((clamped / rect.width) * (pipCount - 1))),
-        )
-        return at(pipSteps, index)
-      }
-      const raw = min + (clamped / rect.width) * (max - min)
-      const snapped = Math.round((raw - min) / step) * step + min
-      return Math.max(min, Math.min(max, snapped))
-    },
-    [variant, pipSteps, pipCount, min, max, step],
-  )
-
-  const handlePointerDown = useCallback(
-    (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (disabled) return
-      if (e.pointerType === "mouse" && e.button !== 0) return
-      e.preventDefault()
-      dragging.current = true
-      setIsPressed(true)
-      const newVal = getValueFromX(e.clientX)
-      latestValue.current = newVal
-      onChange(newVal)
-      animate(fillPercent, Math.max(0, Math.min(1, (newVal - min) / (max - min))), spring.fast)
-      animate(zeroOffset, newVal === min ? zeroTarget : 0, spring.fast)
-      ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
-    },
-    [disabled, getValueFromX, onChange, fillPercent, zeroOffset, zeroTarget, min, max],
-  )
-
-  const handlePointerMove = useCallback(
-    (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (!dragging.current) return
-      const newVal = getValueFromX(e.clientX)
-      latestValue.current = newVal
-      onChange(newVal)
-      const newPercent = Math.max(0, Math.min(1, (newVal - min) / (max - min)))
-      if (variant === "scrubber") fillPercent.set(newPercent)
-      else animate(fillPercent, newPercent, spring.fast)
-      animate(zeroOffset, newVal === min ? zeroTarget : 0, spring.fast)
-    },
-    [getValueFromX, onChange, variant, fillPercent, zeroOffset, zeroTarget, min, max],
-  )
-
-  const handlePointerUp = useCallback(() => {
-    const wasDragging = dragging.current
-    dragging.current = false
-    setIsPressed(false)
-    setHoverPreview(null)
-    if (wasDragging) onCommit?.(latestValue.current)
-  }, [onCommit])
-
-  // Resize handle drag handlers (direct cursor position)
-  const handleResizePointerDown = useCallback(
-    (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (disabled) return
-      if (e.pointerType === "mouse" && e.button !== 0) return
-      e.preventDefault()
-      e.stopPropagation()
-      handleDragging.current = true
-      setIsPressed(true)
-      const newVal = getValueFromX(e.clientX)
-      latestValue.current = newVal
-      onChange(newVal)
-      fillPercent.set(Math.max(0, Math.min(1, (newVal - min) / (max - min))))
-      animate(zeroOffset, newVal === min ? zeroTarget : 0, spring.fast)
-      ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
-    },
-    [disabled, getValueFromX, onChange, fillPercent, zeroOffset, zeroTarget, min, max],
-  )
-
-  const handleResizePointerMove = useCallback(
-    (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (!handleDragging.current) return
-      const newVal = getValueFromX(e.clientX)
-      latestValue.current = newVal
-      onChange(newVal)
-      fillPercent.set(Math.max(0, Math.min(1, (newVal - min) / (max - min))))
-      animate(zeroOffset, newVal === min ? zeroTarget : 0, spring.fast)
-    },
-    [getValueFromX, onChange, fillPercent, zeroOffset, zeroTarget, min, max],
-  )
-
-  const handleResizePointerUp = useCallback(() => {
-    const wasDragging = handleDragging.current
-    handleDragging.current = false
-    setIsPressed(false)
-    setHoverPreview(null)
-    if (wasDragging) onCommit?.(latestValue.current)
-  }, [onCommit])
-
-  const isActive = isHovered || isFocused
+    return () => observer.disconnect()
+  }, [pips, hasLabel])
 
   return (
-    <div
-      className="relative w-full touch-none"
-      onPointerEnter={() => {
-        if (!disabled) setIsHovered(true)
+    <SliderPrimitive.Root
+      value={value}
+      onValueChange={(next, details) => {
+        const pointer = details.reason === "track-press" || details.reason === "drag"
+        uncommitted.current = pointer ? next : null
+        onChange(next)
       }}
-      onPointerLeave={() => {
-        if (!disabled) {
-          setIsHovered(false)
-          setHoverPreview(null)
-        }
+      onValueCommitted={(next) => {
+        uncommitted.current = null
+        onCommit?.(next)
       }}
-      onMouseMove={(e) => {
-        if (disabled || dragging.current || handleDragging.current) return
-        computeHoverPreview(e.clientX)
-      }}
+      min={min}
+      max={max}
+      step={step}
+      disabled={disabled}
+      className="w-full touch-none select-none data-disabled:pointer-events-none data-disabled:opacity-50"
     >
-      {/* Extended hit area — 8px beyond each edge */}
-      <div
-        className="absolute cursor-ew-resize"
-        style={{ left: -8, right: -8, top: 0, bottom: 0 }}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-      />
-
-      {/* Hover value tooltip — outside overflow-hidden container */}
-      <AnimatePresence>
-        {hoverPreview && showHoverTooltip && !isPressed && (
-          <motion.div
-            key="hover-tooltip"
-            className="pointer-events-none absolute z-20 -translate-x-1/2"
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 4, transition: spring.fast.exit }}
-            transition={spring.fast}
-            style={{ left: hoverPreview.cursorX, top: -30 }}
-          >
-            <span className="rounded-md bg-foreground px-2 py-1 text-[12px] whitespace-nowrap text-background tabular-nums">
-              {formatValue(hoverPreview.snappedValue)}
-            </span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <motion.div
-        ref={mergedRef}
+      {/* Base UI maps a press across the control's content box, so the only
+          padding is a pip slider's inset, which lines that box up with the first
+          and last pip. Everything drawn is laid out against the padding box. */}
+      <SliderPrimitive.Control
         className={cn(
-          "relative h-8 w-full touch-none overflow-hidden rounded-lg border border-border outline-offset-2 select-none",
-          variant === "scrubber"
-            ? "flex cursor-ew-resize items-center gap-3 px-4"
-            : "cursor-ew-resize",
-          disabled && "pointer-events-none opacity-50",
+          "group/slider relative h-8 cursor-ew-resize rounded-lg border border-border text-[13px] text-muted-foreground outline outline-offset-2 outline-transparent transition-[color,outline-color] duration-100 before:absolute before:-inset-x-2 before:inset-y-0 hover:text-foreground has-focus-visible:text-foreground has-focus-visible:outline-ring",
+          pips && "px-[14.5px]",
           className,
         )}
-        initial={false}
-        animate={{
-          outline: isFocused ? `1px solid ${FOCUS_RING_COLOR}` : "1px solid transparent",
+        style={
+          {
+            "--slider-fill": current.fill,
+            "--slider-grip": current.grip,
+            "--slider-hover-fill": hover?.fill,
+            "--slider-hover-anchor": hover?.anchor,
+          } as CSSProperties
+        }
+        onLostPointerCapture={() => {
+          const pending = uncommitted.current
+          uncommitted.current = null
+          if (pending !== null) onCommit?.(pending)
         }}
-        transition={spring.fast}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-        {...props}
+        onPointerEnter={() => clearTimeout(hoverTimeout.current)}
+        onPointerLeave={() => {
+          /* Drop the preview once the tooltip has faded, so a hidden tooltip left
+             parked past the wall can't widen a scrolling ancestor. */
+          hoverTimeout.current = setTimeout(() => setHoverValue(undefined), 150)
+        }}
+        onPointerMove={(event) => {
+          if (event.pointerType !== "mouse") return
+          /* The track is the box Base UI maps a press across, so measuring it
+             keeps the preview and the press in agreement. */
+          const track = trackRef.current
+          if (!track) return
+          const { left, width } = track.getBoundingClientRect()
+          setHoverValue(valueAt((event.clientX - left) / width, min, max, step))
+        }}
       >
-        {/* Invisible Base UI Slider for keyboard nav + a11y */}
-        <SliderPrimitive.Root
-          value={[value]}
-          onValueChange={(v) => onChange(at(v, 0))}
-          onValueCommitted={(v) => {
-            // Pointer commits come from the handlers above — the primitive is
-            // pointer-events:none, so anything here came from the keyboard.
-            if (!dragging.current && !handleDragging.current) onCommit?.(at(v, 0))
-          }}
-          min={min}
-          max={max}
-          step={step}
-          disabled={disabled}
-          className="pointer-events-none absolute inset-0 opacity-0 [&_*]:pointer-events-none"
+        <div className="absolute inset-0 overflow-hidden rounded-[inherit]">
+          {pips && (
+            <div className="absolute inset-0" style={{ maskImage: PIP_MASK }}>
+              {pipRatios(min, max, step, readout).map((ratio) => (
+                <span
+                  key={ratio}
+                  className="absolute top-1/2 size-[5px] -translate-1/2 rounded-full bg-muted-foreground/30"
+                  style={{ left: pipPosition(ratio) }}
+                />
+              ))}
+            </div>
+          )}
+          <span
+            className={cn(
+              "absolute inset-y-0 start-0 w-(--slider-fill) bg-accent transition-[width] duration-100 ease-out",
+              DRAG_MOTION[variant],
+            )}
+          />
+          {/* The hover preview and its tooltip stay mounted so the first hover
+              fades in like every later one. A drag hides them through
+              `visibility`, which can't lose to hover's `opacity` on order. */}
+          <span
+            className="absolute inset-y-0 bg-muted-foreground/20 opacity-0 transition-opacity duration-150 group-hover/slider:opacity-100 group-data-dragging/slider:invisible"
+            style={{
+              left: "min(var(--slider-fill), var(--slider-hover-fill))",
+              width:
+                "max(var(--slider-fill) - var(--slider-hover-fill), var(--slider-hover-fill) - var(--slider-fill))",
+            }}
+          />
+          <span
+            className={cn(
+              "absolute inset-y-2 start-(--slider-grip) w-0.5 rounded-full bg-foreground/25 transition-[left,top,bottom,background-color] duration-100 ease-out group-hover/slider:inset-y-1.75 group-hover/slider:bg-foreground/50 group-has-focus-visible/slider:inset-y-1.75 group-has-focus-visible/slider:bg-foreground",
+              DRAG_MOTION[variant],
+            )}
+          />
+        </div>
+        <SliderPrimitive.Track ref={trackRef} className="h-full">
+          <SliderPrimitive.Thumb
+            aria-label={ariaLabel}
+            getAriaValueText={(_, thumbValue) => formatValue(thumbValue)}
+            className={cn("h-full", THUMB[variant])}
+          />
+        </SliderPrimitive.Track>
+        <div className="pointer-events-none absolute inset-0 flex items-center gap-3 px-4">
+          {label && (
+            <SliderPrimitive.Label ref={labelRef} className="min-w-0 truncate">
+              {label}
+            </SliderPrimitive.Label>
+          )}
+          <SliderPrimitive.Value ref={valueRef} className="ms-auto shrink-0 tabular-nums">
+            {() => formatValue(value)}
+          </SliderPrimitive.Value>
+        </div>
+        <span
+          aria-hidden
+          className="pointer-events-none absolute bottom-full left-(--slider-hover-anchor) mb-2 -translate-x-1/2 translate-y-1 rounded-md bg-foreground px-2 py-1 text-[12px] whitespace-nowrap text-background tabular-nums opacity-0 transition-[opacity,translate] duration-100 group-hover/slider:translate-y-0 group-hover/slider:opacity-100 group-hover/slider:delay-100 group-data-dragging/slider:invisible"
         >
-          <SliderPrimitive.Control className="h-full w-full">
-            <SliderPrimitive.Track className="h-full w-full">
-              <SliderPrimitive.Indicator />
-            </SliderPrimitive.Track>
-            <SliderPrimitive.Thumb
-              index={0}
-              aria-label={ariaLabel ?? label}
-              className="block outline-none"
-              onFocus={(e) => {
-                if ((e.currentTarget as HTMLElement).matches(":focus-visible")) setIsFocused(true)
-              }}
-              onBlur={() => setIsFocused(false)}
-            />
-          </SliderPrimitive.Control>
-        </SliderPrimitive.Root>
-
-        {/* Hover preview */}
-        <motion.div
-          className="pointer-events-none absolute inset-y-0 z-[3]"
-          initial={false}
-          animate={{ opacity: hoverPreview && !isPressed ? 1 : 0 }}
-          transition={{ opacity: { duration: 0.15 } }}
-          style={{
-            left: hoverPreview ? hoverPreview.left : 0,
-            width: hoverPreview ? hoverPreview.width : 0,
-            backgroundColor: HOVER_PREVIEW_COLOR,
-          }}
-        />
-
-        {/* Pips: dots layer — z-[1] */}
-        {variant === "pips" && (
-          <motion.div
-            className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-between px-3"
-            style={{ WebkitMaskImage: pipsMaskStyle, maskImage: pipsMaskStyle }}
-          >
-            {pipSteps.map((pipValue) => {
-              const isActivePip = pipValue === value
-              return (
-                <div
-                  key={pipValue}
-                  className="relative flex items-center justify-center"
-                  style={{ width: PIP_SIZE, height: PIP_SIZE }}
-                >
-                  <motion.div
-                    className="rounded-full"
-                    initial={false}
-                    animate={{
-                      backgroundColor: isActivePip
-                        ? "var(--rf-foreground)"
-                        : "var(--rf-muted-foreground)",
-                      opacity: isActivePip ? 1 : 0.3,
-                    }}
-                    transition={spring.fast}
-                    style={{ width: PIP_SIZE, height: PIP_SIZE }}
-                  />
-                </div>
-              )
-            })}
-          </motion.div>
-        )}
-
-        {/* Pips: label + value BG layer — z-[2] (occludes dots behind text) */}
-        {variant === "pips" && (
-          <div
-            className="pointer-events-none absolute inset-0 z-[2] flex items-center px-2"
-            aria-hidden
-          >
-            {label && (
-              <span className="bg-background px-2 text-[13px] text-transparent select-none">
-                {label}
-              </span>
-            )}
-            <span
-              className="ml-auto bg-background px-2 text-[13px] text-transparent tabular-nums select-none"
-              style={{ minWidth: `${formatValue(max).length}ch` }}
-            >
-              {formatValue(value)}
-            </span>
-          </div>
-        )}
-
-        {/* Pips: fill — z-[3] */}
-        {variant === "pips" && (
-          <motion.div
-            className="pointer-events-none absolute top-0 bottom-0 left-0 z-[3]"
-            style={{ width: pipsFillWidthStyle, backgroundColor: FILL_COLOR }}
-          />
-        )}
-
-        {/* Pips: handle line — z-[3] */}
-        {variant === "pips" && (
-          <motion.div
-            className="pointer-events-none absolute z-[3] rounded-full"
-            initial={false}
-            animate={{
-              top: isActive ? 7 : 8,
-              bottom: isActive ? 7 : 8,
-              backgroundColor: isFocused
-                ? "var(--rf-foreground)"
-                : isHovered
-                  ? "color-mix(in srgb, var(--rf-foreground) 50%, transparent)"
-                  : "color-mix(in srgb, var(--rf-foreground) 25%, transparent)",
-            }}
-            transition={spring.fast}
-            style={{ left: pipsHandleLineLeftStyle, width: 2 }}
-          />
-        )}
-
-        {/* Pips: label + value text layer — z-[4] */}
-        {variant === "pips" && (
-          <div className="pointer-events-none absolute inset-0 z-[4] flex items-center px-2">
-            {label && (
-              <motion.span
-                className="px-2 text-[13px]"
-                initial={false}
-                animate={{
-                  color: isActive ? "var(--rf-foreground)" : "var(--rf-muted-foreground)",
-                }}
-                transition={spring.fast}
-              >
-                {label}
-              </motion.span>
-            )}
-            <motion.span
-              className="ml-auto px-2 text-[13px] tabular-nums"
-              initial={false}
-              animate={{
-                color: isActive ? "var(--rf-foreground)" : "var(--rf-muted-foreground)",
-              }}
-              transition={spring.fast}
-              style={{ minWidth: `${formatValue(max).length}ch`, textAlign: "right" }}
-            >
-              {formatValue(value)}
-            </motion.span>
-          </div>
-        )}
-
-        {/* Scrubber: fill */}
-        {variant === "scrubber" && (
-          <motion.div
-            className="pointer-events-none absolute top-0 bottom-0 left-0"
-            style={{ width: fillWidthStyle, backgroundColor: FILL_COLOR }}
-          />
-        )}
-
-        {/* Scrubber: handle line */}
-        {variant === "scrubber" && (
-          <motion.div
-            className="pointer-events-none absolute z-10 rounded-full"
-            initial={false}
-            animate={{
-              top: isActive ? 7 : 8,
-              bottom: isActive ? 7 : 8,
-              backgroundColor: isFocused
-                ? "var(--rf-foreground)"
-                : isHovered
-                  ? "color-mix(in srgb, var(--rf-foreground) 50%, transparent)"
-                  : "color-mix(in srgb, var(--rf-foreground) 25%, transparent)",
-            }}
-            transition={spring.fast}
-            style={{ left: handleLineLeftStyle, width: 2 }}
-          />
-        )}
-
-        {/* Scrubber: label */}
-        {variant === "scrubber" && label && (
-          <motion.span
-            className="z-10 shrink-0 text-[13px]"
-            initial={false}
-            animate={{
-              color: isActive ? "var(--rf-foreground)" : "var(--rf-muted-foreground)",
-            }}
-            transition={spring.fast}
-          >
-            {label}
-          </motion.span>
-        )}
-
-        {/* Scrubber: flex-1 spacer + value */}
-        {variant === "scrubber" && (
-          <>
-            <div className="flex-1" />
-            <motion.span
-              className="z-10 shrink-0 text-right text-[13px] tabular-nums"
-              initial={false}
-              animate={{
-                color: isActive ? "var(--rf-foreground)" : "var(--rf-muted-foreground)",
-              }}
-              transition={spring.fast}
-              style={{ minWidth: `${formatValue(max).length}ch` }}
-            >
-              {formatValue(value)}
-            </motion.span>
-          </>
-        )}
-
-        {/* Resize handle (scrubber only) */}
-        {variant === "scrubber" && (
-          <motion.div
-            className="absolute top-0 bottom-0 z-20 w-2 cursor-ew-resize"
-            style={{ left: handleLeftStyle }}
-            onPointerDown={handleResizePointerDown}
-            onPointerMove={handleResizePointerMove}
-            onPointerUp={handleResizePointerUp}
-            onPointerCancel={handleResizePointerUp}
-          />
-        )}
-      </motion.div>
-    </div>
+          {hoverValue !== undefined && formatValue(hoverValue)}
+        </span>
+      </SliderPrimitive.Control>
+    </SliderPrimitive.Root>
   )
 }
 
+function toRatio(value: number, min: number, max: number) {
+  return max > min ? Math.min(1, Math.max(0, (value - min) / (max - min))) : 0
+}
+
+/* Pips spread across the box less an inset at each wall, matching the content box
+   Base UI maps a press across. */
+function pipPosition(ratio: number) {
+  return `calc(${PIP_INSET}px + ${ratio} * (100% - ${2 * PIP_INSET}px))`
+}
+
+/* One pip per whole step from `min`. A `max` off that grid gets no pip: a press is
+   snapped to the grid, so a pip there could not always be pressed. Keys still
+   reach it, and the grip then stands at the wall. Once the label and value have
+   been measured, pips that would touch either are left out whole. */
+function pipRatios(
+  min: number,
+  max: number,
+  step: number,
+  readout?: { width: number; labelEnd: number; valueStart: number },
+) {
+  const steps = (max - min) / step
+  if (!(steps > 0)) return [0]
+  const ratios = Array.from({ length: Math.floor(steps + 1e-9) + 1 }, (_, index) => index / steps)
+  if (!readout) return ratios
+  const { width, labelEnd, valueStart } = readout
+  return ratios.filter((ratio) => {
+    const center = PIP_INSET + ratio * (width - 2 * PIP_INSET)
+    return center - 2.5 >= labelEnd + PIP_TEXT_GAP && center + 2.5 <= valueStart - PIP_TEXT_GAP
+  })
+}
+
+/* The value a press at `ratio` along the track would set, snapped the way Base UI
+   snaps one, so the preview never promises a value the click won't deliver. */
+function valueAt(ratio: number, min: number, max: number, step: number) {
+  const steps = Math.round((Math.min(1, Math.max(0, ratio)) * (max - min)) / step)
+  const decimals = Math.max(decimalPrecision(step), decimalPrecision(min))
+  return Math.min(max, Number((min + steps * step).toFixed(decimals)))
+}
+
+/* Base UI's own precision rule, which isn't exported: the number of decimals a
+   step or bound is written with, so 0.1 * 3 lands on 0.3, not 0.30000000000000004. */
+function decimalPrecision(num: number) {
+  if (Math.abs(num) < 1 && num !== 0) {
+    const [mantissa = "", exponent = "0"] = num.toExponential().split("e-")
+    return (mantissa.split(".")[1]?.length ?? 0) + Number.parseInt(exponent, 10)
+  }
+  return num.toString().split(".")[1]?.length ?? 0
+}
+
 export { Slider, SliderComfortable }
-export type { SliderComfortableProps, SliderProps, SliderValue, ValuePosition }
+export type {
+  SliderComfortableProps,
+  SliderComfortableVariant,
+  SliderProps,
+  SliderValue,
+  ValuePosition,
+}
