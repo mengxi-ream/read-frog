@@ -955,9 +955,12 @@ interface SliderComfortableProps {
 const PIP_INSET = 14.5
 
 /* Hides every pip left of the fill's end or of a few px past the grip, whichever
-   is further right. */
+   is further right. The fill ends halfway between pips, so this never cuts one. */
 const PIP_MASK =
   "linear-gradient(to right, transparent max(var(--slider-fill), var(--slider-grip) + 6px), black calc(max(var(--slider-fill), var(--slider-grip) + 6px) + 2px))"
+
+/* How far a pip keeps from the label and the value. */
+const PIP_TEXT_GAP = 6
 
 /* The thumb is the hit area that drags from where the value is. A pip slider
    wants every press to land on the pip under the pointer instead, so its thumb
@@ -1040,6 +1043,31 @@ function SliderComfortable({
   const current = geometry(toRatio(value, min, max))
   const hover = hoverValue === undefined ? undefined : geometry(toRatio(hoverValue, min, max))
   const pips = variant === "pips"
+  /* Where the label ends and the value starts, so the pips behind them can be
+     left out. Leaving them out rather than painting over them keeps the box
+     see-through on any surface. */
+  const labelRef = useRef<HTMLDivElement>(null)
+  const valueRef = useRef<HTMLOutputElement>(null)
+  const [readout, setReadout] = useState<{ width: number; labelEnd: number; valueStart: number }>()
+  const hasLabel = Boolean(label)
+  useLayoutEffect(() => {
+    const valueElement = valueRef.current
+    const labelElement = hasLabel ? labelRef.current : null
+    const row = valueElement?.parentElement
+    if (!pips || !valueElement || !row) return undefined
+    const measure = () =>
+      setReadout({
+        width: row.offsetWidth,
+        labelEnd: labelElement ? labelElement.offsetLeft + labelElement.offsetWidth : 0,
+        valueStart: valueElement.offsetLeft,
+      })
+    measure()
+    const observer = new ResizeObserver(measure)
+    for (const element of [row, valueElement, labelElement]) {
+      if (element) observer.observe(element)
+    }
+    return () => observer.disconnect()
+  }, [pips, hasLabel])
 
   return (
     <SliderPrimitive.Root
@@ -1099,28 +1127,15 @@ function SliderComfortable({
       >
         <div className="absolute inset-0 overflow-hidden rounded-[inherit]">
           {pips && (
-            <>
-              {/* Pips under the fill, and the one the grip stands on, are masked
-                  out, so the fill and grip never sit on top of a dot. */}
-              <div className="absolute inset-0" style={{ maskImage: PIP_MASK }}>
-                {pipRatios(min, max, step).map((ratio) => (
-                  <span
-                    key={ratio}
-                    className="absolute top-1/2 size-[5px] -translate-1/2 rounded-full bg-muted-foreground/30"
-                    style={{ left: pipPosition(ratio) }}
-                  />
-                ))}
-              </div>
-              {/* A blank copy of the label and value hides the pips behind them.
-                  It sits under the fill, so the fill still shows behind the text. */}
-              <div
-                aria-hidden
-                className="absolute inset-0 flex items-center gap-3 px-4 text-transparent *:bg-background *:outline-8 *:outline-background"
-              >
-                {label && <span className="min-w-0 truncate">{label}</span>}
-                <span className="ms-auto shrink-0 tabular-nums">{formatValue(value)}</span>
-              </div>
-            </>
+            <div className="absolute inset-0" style={{ maskImage: PIP_MASK }}>
+              {pipRatios(min, max, step, readout).map((ratio) => (
+                <span
+                  key={ratio}
+                  className="absolute top-1/2 size-[5px] -translate-1/2 rounded-full bg-muted-foreground/30"
+                  style={{ left: pipPosition(ratio) }}
+                />
+              ))}
+            </div>
           )}
           <span
             className={cn(
@@ -1155,9 +1170,11 @@ function SliderComfortable({
         </SliderPrimitive.Track>
         <div className="pointer-events-none absolute inset-0 flex items-center gap-3 px-4">
           {label && (
-            <SliderPrimitive.Label className="min-w-0 truncate">{label}</SliderPrimitive.Label>
+            <SliderPrimitive.Label ref={labelRef} className="min-w-0 truncate">
+              {label}
+            </SliderPrimitive.Label>
           )}
-          <SliderPrimitive.Value className="ms-auto shrink-0 tabular-nums">
+          <SliderPrimitive.Value ref={valueRef} className="ms-auto shrink-0 tabular-nums">
             {() => formatValue(value)}
           </SliderPrimitive.Value>
         </div>
@@ -1184,11 +1201,23 @@ function pipPosition(ratio: number) {
 
 /* One pip per whole step from `min`. A `max` off that grid gets no pip: a press is
    snapped to the grid, so a pip there could not always be pressed. Keys still
-   reach it, and the grip then stands at the wall. */
-function pipRatios(min: number, max: number, step: number) {
+   reach it, and the grip then stands at the wall. Once the label and value have
+   been measured, pips that would touch either are left out whole. */
+function pipRatios(
+  min: number,
+  max: number,
+  step: number,
+  readout?: { width: number; labelEnd: number; valueStart: number },
+) {
   const steps = (max - min) / step
   if (!(steps > 0)) return [0]
-  return Array.from({ length: Math.floor(steps + 1e-9) + 1 }, (_, index) => index / steps)
+  const ratios = Array.from({ length: Math.floor(steps + 1e-9) + 1 }, (_, index) => index / steps)
+  if (!readout) return ratios
+  const { width, labelEnd, valueStart } = readout
+  return ratios.filter((ratio) => {
+    const center = PIP_INSET + ratio * (width - 2 * PIP_INSET)
+    return center - 2.5 >= labelEnd + PIP_TEXT_GAP && center + 2.5 <= valueStart - PIP_TEXT_GAP
+  })
 }
 
 /* The value a press at `ratio` along the track would set, snapped the way Base UI
