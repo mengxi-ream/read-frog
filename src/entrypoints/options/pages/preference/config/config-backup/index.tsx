@@ -38,7 +38,7 @@ export function ConfigBackupPage() {
         <div className="space-y-4">
           {isPending && (
             <div className="py-8 text-center text-muted-foreground">
-              {i18n.t("options.preference.config.backup.loading")}
+              <span className="shimmer">{i18n.t("options.preference.config.backup.loading")}</span>
             </div>
           )}
 

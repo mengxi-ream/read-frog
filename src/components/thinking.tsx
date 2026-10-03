@@ -112,14 +112,18 @@ export function Thinking({ status, content, defaultExpanded = false, className }
           )}
         />
       </CollapsibleTrigger>
-      <CollapsibleContent
-        ref={contentRef}
-        className="max-h-32 overflow-y-auto px-3 pb-2.5"
-        onScroll={handleContentScroll}
-      >
-        <p className="text-xs [overflow-wrap:anywhere] break-words whitespace-pre-wrap text-muted-foreground">
-          {trimmedContent}
-        </p>
+      <CollapsibleContent>
+        {/* Scrolls inside the panel, not on it: Base UI holds a closing panel open until its
+            own animations finish, and the fade's scroll-driven ones only finish at the end. */}
+        <div
+          ref={contentRef}
+          className="max-h-32 overflow-y-auto px-3 pb-2.5 scroll-driven:scroll-fade"
+          onScroll={handleContentScroll}
+        >
+          <p className="text-xs [overflow-wrap:anywhere] break-words whitespace-pre-wrap text-muted-foreground">
+            {trimmedContent}
+          </p>
+        </div>
       </CollapsibleContent>
     </Collapsible>
   )

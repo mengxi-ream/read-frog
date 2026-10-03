@@ -619,7 +619,9 @@ export const NotebaseConnectionField = withForm({
               )}
 
             {isOwnedConnection && !!sanitizedConnection?.notebaseId && schemaQuery.isPending && (
-              <p className="text-sm text-muted-foreground">{t("schemaLoading")}</p>
+              <p className="text-sm text-muted-foreground">
+                <span className="shimmer">{t("schemaLoading")}</span>
+              </p>
             )}
 
             {isOwnedConnection && !!sanitizedConnection?.notebaseId && schemaQuery.data && (
