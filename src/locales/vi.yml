@@ -101,6 +101,38 @@ options:
     leaveDescription: Tiếp tục chỉnh sửa để khắc phục vấn đề hoặc bỏ các thay đổi chưa lưu.
     keepEditing: Tiếp tục chỉnh sửa
     discard: Bỏ thay đổi chưa lưu
+  dictionaryStorage:
+    title: Nơi lưu Custom Action
+    pageDescription: Chọn nơi lưu kết quả Custom Action và từ điển.
+    loadFailed: Không đọc được cài đặt lưu trữ.
+    saveFailed: Không lưu được cài đặt lưu trữ.
+    provider:
+      title: Phương thức lưu trữ
+      description: Lựa chọn này áp dụng cho nút Lưu của kết quả Custom Action và từ điển.
+      notebase: Read Frog Notebase
+      local: Bộ nhớ cục bộ
+      webdav: WebDAV
+      notebaseDescription: Lưu vào tài khoản Read Frog và áp dụng giới hạn của Notebase.
+      localDescription: Lưu bằng IndexedDB trong hồ sơ trình duyệt này. Các bản ghi không được đồng bộ.
+    webdav:
+      title: Kết nối WebDAV
+      description: Mỗi kết quả được lưu thành một tệp JSON riêng. Hãy dùng HTTPS; chỉ cho phép HTTP với localhost.
+      serverUrl: URL máy chủ WebDAV
+      directory: Thư mục đích
+      username: Tên người dùng
+      password: Mật khẩu hoặc mật khẩu ứng dụng
+      save: Lưu cài đặt
+      test: Kiểm tra kết nối
+      testing: Đang kiểm tra...
+      testSucceeded: Kết nối WebDAV thành công.
+    records:
+      title: Kết quả đã lưu
+      notebaseDescription: Quản lý bản ghi Read Frog Notebase tại readfrog.app.
+      loading: Đang tải kết quả đã lưu...
+      empty: Chưa có kết quả nào được lưu bằng phương thức này.
+      fieldsUnavailable: Không thể hiển thị các trường kết quả.
+      delete: Xóa
+      deleting: Đang xóa...
   batchSavings:
     savedCost: Tiết kiệm khoảng $1% chi phí API
   commandPalette:
@@ -1578,6 +1610,27 @@ action:
   saveToNotebasePendingLogin: Đăng nhập để hoàn tất lưu
   saveToNotebasePendingLoginDescription: Sau khi đăng nhập, Read Frog sẽ tự động tạo Notebase và lưu kết quả này.
   saveToNotebasePendingConnectedLoginDescription: Sau khi đăng nhập, Read Frog sẽ lưu vào Notebase đã kết nối nếu có thể. Nếu tài khoản này không dùng được, Read Frog sẽ tạo Notebase mới và lưu kết quả này.
+  customActionResultStorageLoading: Đang tải cài đặt lưu trữ...
+  customActionResultSaveLocal: Lưu cục bộ
+  customActionResultSaveWebDav: Lưu vào WebDAV
+  customActionResultStorageSaving: Đang lưu...
+  customActionResultStorageSavedLocal: Đã lưu cục bộ
+  customActionResultStorageSavedWebDav: Đã lưu vào WebDAV
+  customActionResultStorageSaveFailed: Không lưu được kết quả
+  customActionResultStorageErrorGeneric: Không thể lưu kết quả. Hãy kiểm tra cài đặt lưu trữ rồi thử lại.
+  customActionResultStorageErrorInvalidConfig: Hãy kiểm tra URL máy chủ WebDAV và thư mục đích.
+  customActionResultStorageErrorHttpsRequired: Hãy dùng HTTPS cho WebDAV. Chỉ cho phép HTTP với localhost.
+  customActionResultStorageErrorHttpNotLocal: Chỉ cho phép HTTP với localhost. Hãy dùng HTTPS cho máy chủ khác.
+  customActionResultStorageErrorInvalidCredentials: Hãy kiểm tra tên người dùng và mật khẩu WebDAV.
+  customActionResultStorageErrorUnauthorized: WebDAV đã từ chối tên người dùng hoặc mật khẩu ứng dụng.
+  customActionResultStorageErrorForbidden: WebDAV từ chối quyền truy cập thư mục này.
+  customActionResultStorageErrorNotFound: Không tìm thấy điểm cuối WebDAV hoặc thư mục đích.
+  customActionResultStorageErrorDirectoryMissing: Không tạo được thư mục cha trên máy chủ WebDAV.
+  customActionResultStorageErrorServer: Máy chủ WebDAV không thể hoàn tất yêu cầu.
+  customActionResultStorageErrorNetwork: Không thể kết nối với WebDAV. Hãy kiểm tra địa chỉ máy chủ và mạng.
+  customActionResultStorageErrorResponse: WebDAV trả về phản hồi không mong đợi.
+  customActionResultStorageErrorDatabase: Không đọc hoặc ghi được kết quả cục bộ.
+  customActionResultStorageErrorProvider: Phương thức lưu trữ đã chọn không khả dụng.
   upgrade: Nâng cấp
   updatePayment: Cập nhật thanh toán
   openCustomActions: Mở Custom AI Actions

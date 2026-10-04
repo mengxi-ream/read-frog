@@ -101,6 +101,38 @@ options:
     leaveDescription: Продолжите редактирование, чтобы исправить проблему, или отмените несохранённые изменения.
     keepEditing: Продолжить редактирование
     discard: Отменить несохранённые изменения
+  dictionaryStorage:
+    title: Хранилище Custom Action
+    pageDescription: Выберите, где сохранять результаты Custom Action и словаря.
+    loadFailed: Не удалось прочитать настройки хранилища.
+    saveFailed: Не удалось сохранить настройки хранилища.
+    provider:
+      title: Способ хранения
+      description: Этот выбор применяется к кнопке сохранения результатов Custom Action и словаря.
+      notebase: Read Frog Notebase
+      local: Локальное хранилище
+      webdav: WebDAV
+      notebaseDescription: Сохраняет в аккаунт Read Frog с ограничениями Notebase.
+      localDescription: Сохраняет в этом профиле браузера через IndexedDB. Записи не синхронизируются.
+    webdav:
+      title: Подключение WebDAV
+      description: Каждый результат сохраняется в отдельный файл JSON. Используйте HTTPS; HTTP разрешён только для localhost.
+      serverUrl: Адрес сервера WebDAV
+      directory: Целевая папка
+      username: Имя пользователя
+      password: Пароль или пароль приложения
+      save: Сохранить настройки
+      test: Проверить подключение
+      testing: Проверка...
+      testSucceeded: Подключение WebDAV работает.
+    records:
+      title: Сохранённые результаты
+      notebaseDescription: Записи Read Frog Notebase доступны для управления на readfrog.app.
+      loading: Загрузка сохранённых результатов...
+      empty: Здесь пока нет сохранённых результатов.
+      fieldsUnavailable: Не удалось показать поля результата.
+      delete: Удалить
+      deleting: Удаление...
   batchSavings:
     savedCost: Сэкономлено примерно $1% расходов на API
   commandPalette:
@@ -1578,6 +1610,27 @@ action:
   saveToNotebasePendingLogin: Войдите, чтобы завершить сохранение
   saveToNotebasePendingLoginDescription: После входа Read Frog автоматически создаст Notebase и сохранит этот результат.
   saveToNotebasePendingConnectedLoginDescription: После входа Read Frog сохранит в подключённую Notebase, если это возможно. Если аккаунт не может её использовать, будет создана новая Notebase.
+  customActionResultStorageLoading: Загрузка настроек хранилища...
+  customActionResultSaveLocal: Сохранить локально
+  customActionResultSaveWebDav: Сохранить в WebDAV
+  customActionResultStorageSaving: Сохранение...
+  customActionResultStorageSavedLocal: Сохранено локально
+  customActionResultStorageSavedWebDav: Сохранено в WebDAV
+  customActionResultStorageSaveFailed: Не удалось сохранить результат
+  customActionResultStorageErrorGeneric: Не удалось сохранить результат. Проверьте настройки и повторите попытку.
+  customActionResultStorageErrorInvalidConfig: Проверьте адрес сервера WebDAV и целевую папку.
+  customActionResultStorageErrorHttpsRequired: Используйте HTTPS для WebDAV. HTTP разрешён только для localhost.
+  customActionResultStorageErrorHttpNotLocal: HTTP разрешён только для localhost. Для других серверов используйте HTTPS.
+  customActionResultStorageErrorInvalidCredentials: Проверьте имя пользователя и пароль WebDAV.
+  customActionResultStorageErrorUnauthorized: WebDAV отклонил имя пользователя или пароль приложения.
+  customActionResultStorageErrorForbidden: WebDAV запретил доступ к этой папке.
+  customActionResultStorageErrorNotFound: Сервер WebDAV или целевая папка не найдены.
+  customActionResultStorageErrorDirectoryMissing: Не удалось создать родительскую папку на сервере WebDAV.
+  customActionResultStorageErrorServer: Сервер WebDAV не смог выполнить запрос.
+  customActionResultStorageErrorNetwork: Не удалось связаться с WebDAV. Проверьте адрес сервера и сеть.
+  customActionResultStorageErrorResponse: WebDAV вернул неожиданный ответ.
+  customActionResultStorageErrorDatabase: Не удалось прочитать или записать локальные результаты.
+  customActionResultStorageErrorProvider: Выбранный способ хранения недоступен.
   upgrade: Повысить тариф
   updatePayment: Обновить оплату
   openCustomActions: Открыть Custom AI Actions

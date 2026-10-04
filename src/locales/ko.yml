@@ -101,6 +101,38 @@ options:
     leaveDescription: 계속 편집하여 문제를 수정하거나 저장하지 않은 변경 사항을 버릴 수 있습니다.
     keepEditing: 계속 편집
     discard: 저장하지 않은 변경 사항 버리기
+  dictionaryStorage:
+    title: Custom Action 저장 위치
+    pageDescription: Custom Action 및 사전 결과를 저장할 위치를 선택하세요.
+    loadFailed: 저장 설정을 읽지 못했습니다.
+    saveFailed: 저장 설정을 저장하지 못했습니다.
+    provider:
+      title: 저장 방식
+      description: Custom Action 및 사전 결과의 저장 버튼에 적용됩니다.
+      notebase: Read Frog Notebase
+      local: 로컬 저장소
+      webdav: WebDAV
+      notebaseDescription: Read Frog 계정에 저장되며 Notebase 사용 한도가 적용됩니다.
+      localDescription: IndexedDB를 사용해 이 브라우저 프로필에 저장합니다. 동기화되지 않습니다.
+    webdav:
+      title: WebDAV 연결
+      description: 결과마다 별도의 JSON 파일로 저장합니다. HTTPS를 사용하세요. HTTP는 localhost에서만 허용됩니다.
+      serverUrl: WebDAV 서버 URL
+      directory: 대상 폴더
+      username: 사용자 이름
+      password: 비밀번호 또는 앱 전용 비밀번호
+      save: 설정 저장
+      test: 연결 테스트
+      testing: 테스트 중...
+      testSucceeded: WebDAV 연결에 성공했습니다.
+    records:
+      title: 저장된 결과
+      notebaseDescription: Read Frog Notebase 기록은 readfrog.app에서 관리하세요.
+      loading: 저장된 결과를 불러오는 중...
+      empty: 이 저장 방식으로 저장된 결과가 없습니다.
+      fieldsUnavailable: 결과 필드를 표시하지 못했습니다.
+      delete: 삭제
+      deleting: 삭제 중...
   batchSavings:
     savedCost: API 비용 약 $1% 절감
   commandPalette:
@@ -1578,6 +1610,27 @@ action:
   saveToNotebasePendingLogin: 로그인 후 저장 완료
   saveToNotebasePendingLoginDescription: 로그인 후 Read Frog가 Notebase를 만들고 이 결과를 자동으로 저장합니다.
   saveToNotebasePendingConnectedLoginDescription: 로그인 후 Read Frog는 가능하면 연결된 Notebase에 저장합니다. 이 계정에서 사용할 수 없으면 새 Notebase를 만들고 저장합니다.
+  customActionResultStorageLoading: 저장 설정을 불러오는 중...
+  customActionResultSaveLocal: 로컬에 저장
+  customActionResultSaveWebDav: WebDAV에 저장
+  customActionResultStorageSaving: 저장 중...
+  customActionResultStorageSavedLocal: 로컬에 저장했습니다
+  customActionResultStorageSavedWebDav: WebDAV에 저장했습니다
+  customActionResultStorageSaveFailed: 결과를 저장하지 못했습니다
+  customActionResultStorageErrorGeneric: 저장할 수 없습니다. 저장 설정을 확인한 후 다시 시도하세요.
+  customActionResultStorageErrorInvalidConfig: WebDAV 서버 URL과 대상 폴더를 확인하세요.
+  customActionResultStorageErrorHttpsRequired: WebDAV에는 HTTPS를 사용하세요. HTTP는 localhost에서만 허용됩니다.
+  customActionResultStorageErrorHttpNotLocal: HTTP는 localhost에서만 허용됩니다. 다른 서버에는 HTTPS를 사용하세요.
+  customActionResultStorageErrorInvalidCredentials: WebDAV 사용자 이름과 비밀번호를 확인하세요.
+  customActionResultStorageErrorUnauthorized: WebDAV에서 사용자 이름 또는 앱 전용 비밀번호를 거부했습니다.
+  customActionResultStorageErrorForbidden: WebDAV에서 이 폴더에 대한 접근을 거부했습니다.
+  customActionResultStorageErrorNotFound: WebDAV 주소 또는 대상 폴더를 찾을 수 없습니다.
+  customActionResultStorageErrorDirectoryMissing: WebDAV 서버에서 상위 폴더를 만들지 못했습니다.
+  customActionResultStorageErrorServer: WebDAV 서버가 요청을 완료하지 못했습니다.
+  customActionResultStorageErrorNetwork: WebDAV에 연결할 수 없습니다. 서버 주소와 네트워크를 확인하세요.
+  customActionResultStorageErrorResponse: WebDAV에서 예상하지 못한 응답을 반환했습니다.
+  customActionResultStorageErrorDatabase: 로컬 결과를 읽거나 저장하지 못했습니다.
+  customActionResultStorageErrorProvider: 선택한 저장 방식을 사용할 수 없습니다.
   upgrade: 업그레이드
   updatePayment: 결제 수단 업데이트
   openCustomActions: Custom AI Actions 열기

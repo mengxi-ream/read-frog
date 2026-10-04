@@ -8,6 +8,11 @@ type RoutePath = (typeof ROUTE_DEFS)[number]["path"]
 const PreferencePage = lazy(() =>
   import("./pages/preference").then((module) => ({ default: module.PreferencePage })),
 )
+const DictionaryStoragePage = lazy(() =>
+  import("./pages/dictionary-storage").then((module) => ({
+    default: module.DictionaryStoragePage,
+  })),
+)
 const ShortcutsPage = lazy(() =>
   import("./pages/shortcuts").then((module) => ({ default: module.ShortcutsPage })),
 )
@@ -123,6 +128,7 @@ const SubtitlesQueuePage = lazy(() =>
 const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/": ApiProvidersPage,
   "/preference": PreferencePage,
+  "/dictionary-storage": DictionaryStoragePage,
   "/shortcuts": ShortcutsPage,
   "/api-providers": ApiProvidersPage,
   "/custom-actions": CustomActionsPage,

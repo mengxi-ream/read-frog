@@ -42,6 +42,17 @@ export function SettingsNav() {
 
           <SidebarMenuItem>
             <SidebarMenuButton
+              render={<Link to="/dictionary-storage" />}
+              isActive={pathname === "/dictionary-storage"}
+              tooltip={i18n.t("options.dictionaryStorage.title")}
+            >
+              <Icon icon="tabler:database" />
+              <span>{i18n.t("options.dictionaryStorage.title")}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
               render={<Link to="/shortcuts" />}
               isActive={pathname === "/shortcuts"}
               tooltip={i18n.t("options.shortcuts.title")}

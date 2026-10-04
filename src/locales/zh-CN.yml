@@ -101,6 +101,38 @@ options:
     leaveDescription: 你可以继续编辑并修正问题，或放弃尚未保存的修改。
     keepEditing: 继续编辑
     discard: 放弃未保存修改
+  dictionaryStorage:
+    title: Custom Action 存储
+    pageDescription: 选择 Custom Action 和词典结果的保存位置。
+    loadFailed: 无法读取存储设置。
+    saveFailed: 无法保存存储设置。
+    provider:
+      title: 存储方式
+      description: 此设置决定 Custom Action 和词典结果的保存按钮会使用哪种存储方式。
+      notebase: Read Frog 笔记库
+      local: 本地存储
+      webdav: WebDAV
+      notebaseDescription: 通过 Read Frog 账号保存，并受笔记库额度限制。
+      localDescription: 使用 IndexedDB 保存在此浏览器配置中，不会同步。
+    webdav:
+      title: WebDAV 连接
+      description: 每条结果会作为单独的 JSON 文件保存到指定目录。默认要求 HTTPS；仅 localhost 允许使用 HTTP。
+      serverUrl: WebDAV 服务器地址
+      directory: 目标目录
+      username: 用户名
+      password: 密码或应用专用密码
+      save: 保存设置
+      test: 测试连接
+      testing: 正在测试...
+      testSucceeded: WebDAV 连接成功。
+    records:
+      title: 已保存的结果
+      notebaseDescription: Read Frog 笔记库中的记录请在 readfrog.app 管理。
+      loading: 正在读取已保存的结果...
+      empty: 此存储方式还没有保存结果。
+      fieldsUnavailable: 无法显示结果字段。
+      delete: 删除
+      deleting: 正在删除...
   batchSavings:
     savedCost: 约省 $1% API 费用
   commandPalette:
@@ -1588,6 +1620,27 @@ action:
   saveToNotebasePendingLogin: 登录后继续保存
   saveToNotebasePendingLoginDescription: 登录完成后，Read Frog 会自动创建笔记库并保存当前结果。
   saveToNotebasePendingConnectedLoginDescription: 登录完成后，Read Frog 会优先保存到已连接的笔记库；如果当前账号无法使用它，会创建新的笔记库并保存当前结果。
+  customActionResultStorageLoading: 正在读取存储设置...
+  customActionResultSaveLocal: 保存到本地
+  customActionResultSaveWebDav: 保存到 WebDAV
+  customActionResultStorageSaving: 正在保存...
+  customActionResultStorageSavedLocal: 已保存到本地
+  customActionResultStorageSavedWebDav: 已保存到 WebDAV
+  customActionResultStorageSaveFailed: 保存结果失败
+  customActionResultStorageErrorGeneric: 无法保存结果。请检查存储设置后重试。
+  customActionResultStorageErrorInvalidConfig: 请检查 WebDAV 服务器地址和目标目录。
+  customActionResultStorageErrorHttpsRequired: WebDAV 连接请使用 HTTPS；仅 localhost 允许使用 HTTP。
+  customActionResultStorageErrorHttpNotLocal: 只有 localhost 可以使用 HTTP；其他服务器请使用 HTTPS。
+  customActionResultStorageErrorInvalidCredentials: 请检查 WebDAV 用户名和密码字段。
+  customActionResultStorageErrorUnauthorized: WebDAV 拒绝了用户名或应用专用密码。
+  customActionResultStorageErrorForbidden: WebDAV 拒绝访问此目录。
+  customActionResultStorageErrorNotFound: 找不到 WebDAV 地址或目标目录。
+  customActionResultStorageErrorDirectoryMissing: 无法在 WebDAV 服务器上创建上级目录。
+  customActionResultStorageErrorServer: WebDAV 服务器无法完成此请求。
+  customActionResultStorageErrorNetwork: 无法连接 WebDAV。请检查服务器地址和网络连接。
+  customActionResultStorageErrorResponse: WebDAV 返回了无法识别的响应。
+  customActionResultStorageErrorDatabase: 无法读取或写入本地保存的结果。
+  customActionResultStorageErrorProvider: 所选存储方式当前不可用。
   upgrade: 升级
   updatePayment: 更新支付方式
   openCustomActions: 打开 Custom AI Actions

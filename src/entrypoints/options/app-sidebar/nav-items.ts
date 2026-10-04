@@ -1,6 +1,7 @@
 export const ROUTE_DEFS = [
   { path: "/" },
   { path: "/preference" },
+  { path: "/dictionary-storage" },
   { path: "/shortcuts" },
   { path: "/api-providers" },
   { path: "/custom-actions" },

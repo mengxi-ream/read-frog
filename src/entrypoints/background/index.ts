@@ -17,6 +17,7 @@ import { initializeActionIcons, registerActionIconListeners } from "./browser-ac
 import { ensureInitializedConfig, isFreshInstalledConfig } from "./config"
 import { setUpConfigBackup } from "./config-backup"
 import { initializeContextMenu, registerContextMenuListeners } from "./context-menu"
+import { setupCustomActionResultStorageMessageHandlers } from "./custom-action-result-storage"
 import {
   cleanupAllAiSegmentationCache,
   cleanupAllSummaryCache,
@@ -151,6 +152,7 @@ export default defineBackground({
     proxyFetch()
     setupHostedAiStatusHandler()
     setupGlossaryMessageHandlers()
+    setupCustomActionResultStorageMessageHandlers()
     setupNotebasePendingSaveProcessor(() => backgroundReady)
     setupEdgeTTSMessageHandlers()
     setupLLMGenerateTextMessageHandlers()

@@ -101,6 +101,38 @@ options:
     leaveDescription: Sorunu düzeltmek için düzenlemeye devam edin veya kaydedilmemiş değişiklikleri iptal edin.
     keepEditing: Düzenlemeye devam et
     discard: Kaydedilmemiş değişiklikleri iptal et
+  dictionaryStorage:
+    title: Custom Action depolama
+    pageDescription: Custom Action ve sözlük sonuçlarının nereye kaydedileceğini seçin.
+    loadFailed: Depolama ayarları okunamadı.
+    saveFailed: Depolama ayarları kaydedilemedi.
+    provider:
+      title: Depolama yöntemi
+      description: Bu seçim, Custom Action ve sözlük sonuçlarındaki Kaydet düğmesine uygulanır.
+      notebase: Read Frog Notebase
+      local: Yerel depolama
+      webdav: WebDAV
+      notebaseDescription: Read Frog hesabınıza kaydedilir ve Notebase sınırlarına tabidir.
+      localDescription: IndexedDB ile bu tarayıcı profilinde saklanır. Bu kayıtlar eşitlenmez.
+    webdav:
+      title: WebDAV bağlantısı
+      description: Her sonuç ayrı bir JSON dosyası olarak kaydedilir. HTTPS kullanın; HTTP yalnızca localhost için kabul edilir.
+      serverUrl: WebDAV sunucu URL'si
+      directory: Hedef dizin
+      username: Kullanıcı adı
+      password: Parola veya uygulamaya özel parola
+      save: Ayarları kaydet
+      test: Bağlantıyı test et
+      testing: Test ediliyor...
+      testSucceeded: WebDAV bağlantısı başarılı.
+    records:
+      title: Kaydedilen sonuçlar
+      notebaseDescription: Read Frog Notebase kayıtlarını readfrog.app üzerinden yönetin.
+      loading: Kaydedilen sonuçlar yükleniyor...
+      empty: Bu depolama yöntemiyle henüz sonuç kaydedilmedi.
+      fieldsUnavailable: Sonuç alanları gösterilemedi.
+      delete: Sil
+      deleting: Siliniyor...
   batchSavings:
     savedCost: API maliyetlerinde yaklaşık %$1 tasarruf
   commandPalette:
@@ -1578,6 +1610,27 @@ action:
   saveToNotebasePendingLogin: Kaydetmeyi tamamlamak için giriş yapın
   saveToNotebasePendingLoginDescription: Giriş yaptıktan sonra Read Frog Notebase'i oluşturur ve bu sonucu otomatik olarak kaydeder.
   saveToNotebasePendingConnectedLoginDescription: Girişten sonra Read Frog mümkünse bağlı Notebase'e kaydeder. Bu hesap onu kullanamazsa yeni bir Notebase oluşturup kaydeder.
+  customActionResultStorageLoading: Depolama ayarları yükleniyor...
+  customActionResultSaveLocal: Yerel olarak kaydet
+  customActionResultSaveWebDav: WebDAV'e kaydet
+  customActionResultStorageSaving: Kaydediliyor...
+  customActionResultStorageSavedLocal: Yerel olarak kaydedildi
+  customActionResultStorageSavedWebDav: WebDAV'e kaydedildi
+  customActionResultStorageSaveFailed: Sonuç kaydedilemedi
+  customActionResultStorageErrorGeneric: Sonuç kaydedilemedi. Depolama ayarlarını kontrol edip yeniden deneyin.
+  customActionResultStorageErrorInvalidConfig: WebDAV sunucu URL'sini ve hedef dizini kontrol edin.
+  customActionResultStorageErrorHttpsRequired: WebDAV için HTTPS kullanın. HTTP'ye yalnızca localhost için izin verilir.
+  customActionResultStorageErrorHttpNotLocal: HTTP yalnızca localhost için kullanılabilir. Diğer sunucular için HTTPS kullanın.
+  customActionResultStorageErrorInvalidCredentials: WebDAV kullanıcı adı ve parola alanlarını kontrol edin.
+  customActionResultStorageErrorUnauthorized: WebDAV kullanıcı adını veya uygulamaya özel parolayı reddetti.
+  customActionResultStorageErrorForbidden: WebDAV bu dizine erişimi reddetti.
+  customActionResultStorageErrorNotFound: WebDAV uç noktası veya hedef dizin bulunamadı.
+  customActionResultStorageErrorDirectoryMissing: WebDAV sunucusunda üst dizin oluşturulamadı.
+  customActionResultStorageErrorServer: WebDAV sunucusu isteği tamamlayamadı.
+  customActionResultStorageErrorNetwork: WebDAV'e ulaşılamadı. Sunucu adresini ve ağ bağlantısını kontrol edin.
+  customActionResultStorageErrorResponse: WebDAV beklenmeyen bir yanıt döndürdü.
+  customActionResultStorageErrorDatabase: Yerel sonuçlar okunamadı veya yazılamadı.
+  customActionResultStorageErrorProvider: Seçilen depolama yöntemi kullanılamıyor.
   upgrade: Yükselt
   updatePayment: Ödemeyi güncelle
   openCustomActions: Custom AI Actions'ı aç

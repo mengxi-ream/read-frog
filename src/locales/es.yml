@@ -101,6 +101,38 @@ options:
     leaveDescription: Puedes seguir editando para corregir el problema o descartar los cambios sin guardar.
     keepEditing: Seguir editando
     discard: Descartar cambios sin guardar
+  dictionaryStorage:
+    title: Almacenamiento de Custom Action
+    pageDescription: Elige dónde guardar los resultados de Custom Action y del diccionario.
+    loadFailed: No se pudieron leer los ajustes de almacenamiento.
+    saveFailed: No se pudieron guardar los ajustes de almacenamiento.
+    provider:
+      title: Almacenamiento
+      description: Esta opción se aplica al botón Guardar de Custom Action y del diccionario.
+      notebase: Read Frog Notebase
+      local: Almacenamiento local
+      webdav: WebDAV
+      notebaseDescription: Se guarda en tu cuenta de Read Frog y se aplican los límites de Notebase.
+      localDescription: Se guarda en este perfil del navegador con IndexedDB. Estos registros no se sincronizan.
+    webdav:
+      title: Conexión WebDAV
+      description: Cada resultado se guarda como un archivo JSON independiente. Usa HTTPS; HTTP solo se permite en localhost.
+      serverUrl: URL del servidor WebDAV
+      directory: Carpeta de destino
+      username: Nombre de usuario
+      password: Contraseña o contraseña específica de la aplicación
+      save: Guardar ajustes
+      test: Probar conexión
+      testing: Probando...
+      testSucceeded: La conexión WebDAV funciona.
+    records:
+      title: Resultados guardados
+      notebaseDescription: Administra los registros de Read Frog Notebase en readfrog.app.
+      loading: Cargando resultados guardados...
+      empty: Todavía no hay resultados guardados con este método.
+      fieldsUnavailable: No se pudieron mostrar los campos del resultado.
+      delete: Eliminar
+      deleting: Eliminando...
   batchSavings:
     savedCost: Ahorro aprox. del $1% en costes de API
   commandPalette:
@@ -1583,6 +1615,27 @@ action:
   saveToNotebasePendingLogin: Inicia sesión para terminar de guardar
   saveToNotebasePendingLoginDescription: Después de iniciar sesión, Read Frog creará la Notebase y guardará este resultado automáticamente.
   saveToNotebasePendingConnectedLoginDescription: Después de iniciar sesión, Read Frog guardará en la Notebase conectada si es posible. Si esta cuenta no puede usarla, creará una nueva Notebase y guardará este resultado.
+  customActionResultStorageLoading: Cargando almacenamiento...
+  customActionResultSaveLocal: Guardar localmente
+  customActionResultSaveWebDav: Guardar en WebDAV
+  customActionResultStorageSaving: Guardando...
+  customActionResultStorageSavedLocal: Guardado localmente
+  customActionResultStorageSavedWebDav: Guardado en WebDAV
+  customActionResultStorageSaveFailed: No se pudo guardar el resultado
+  customActionResultStorageErrorGeneric: No se pudo guardar. Comprueba los ajustes de almacenamiento e inténtalo de nuevo.
+  customActionResultStorageErrorInvalidConfig: Comprueba la URL del servidor WebDAV y la carpeta de destino.
+  customActionResultStorageErrorHttpsRequired: Usa HTTPS para WebDAV. HTTP solo se permite en localhost.
+  customActionResultStorageErrorHttpNotLocal: HTTP solo se permite en localhost. Usa HTTPS para otros servidores.
+  customActionResultStorageErrorInvalidCredentials: Comprueba los campos de usuario y contraseña de WebDAV.
+  customActionResultStorageErrorUnauthorized: WebDAV rechazó el usuario o la contraseña de aplicación.
+  customActionResultStorageErrorForbidden: WebDAV denegó el acceso a esta carpeta.
+  customActionResultStorageErrorNotFound: No se encontró el endpoint WebDAV o la carpeta de destino.
+  customActionResultStorageErrorDirectoryMissing: No se pudo crear una carpeta superior en el servidor WebDAV.
+  customActionResultStorageErrorServer: El servidor WebDAV no pudo completar la solicitud.
+  customActionResultStorageErrorNetwork: No se pudo conectar con WebDAV. Comprueba el servidor y la conexión.
+  customActionResultStorageErrorResponse: WebDAV devolvió una respuesta inesperada.
+  customActionResultStorageErrorDatabase: No se pudieron leer ni guardar los resultados locales.
+  customActionResultStorageErrorProvider: El método de almacenamiento seleccionado no está disponible.
   upgrade: Mejorar plan
   updatePayment: Actualizar pago
   openCustomActions: Abrir Custom AI Actions

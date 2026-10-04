@@ -28,6 +28,15 @@ const mockAuthState = vi.hoisted(() => ({
   },
   isPending: false,
 }))
+const mockAuthUseSession = vi.hoisted(() =>
+  vi.fn<
+    () => {
+      data: { user: { id: string; name: string; email: string; image: null } } | undefined
+      isPending: boolean
+    }
+  >(),
+)
+const mockStorageProvider = vi.hoisted(() => ({ provider: "notebase" as string | null }))
 
 const toastManagerMock = vi.hoisted(() => ({
   add: vi.fn<(...args: any[]) => any>(),
@@ -43,11 +52,12 @@ const guideTrackingMocks = vi.hoisted(() => ({
 
 vi.mock("@/utils/auth/auth-client", () => ({
   authClient: {
-    useSession: () => ({
-      data: mockAuthState.session,
-      isPending: mockAuthState.isPending,
-    }),
+    useSession: mockAuthUseSession,
   },
+}))
+
+vi.mock("@/utils/custom-action-result-storage/use-storage-provider", () => ({
+  useCustomActionResultStorageProvider: () => mockStorageProvider.provider,
 }))
 
 vi.mock("@/utils/message", () => ({
@@ -264,6 +274,11 @@ describe("saveToNotebaseButton notebase availability", () => {
       },
     }
     mockAuthState.isPending = false
+    mockStorageProvider.provider = "notebase"
+    mockAuthUseSession.mockImplementation(() => ({
+      data: mockAuthState.session,
+      isPending: mockAuthState.isPending,
+    }))
     const createResult = {
       txid: 1,
       notebase: {
@@ -303,6 +318,40 @@ describe("saveToNotebaseButton notebase availability", () => {
 
     expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") })).toBeEnabled()
   })
+
+  it.each([
+    { provider: "local", buttonKey: "action.customActionResultSaveLocal" },
+    { provider: "webdav", buttonKey: "action.customActionResultSaveWebDav" },
+  ] as const)(
+    "saves through $provider without querying login or Notebase APIs",
+    async ({ provider, buttonKey }) => {
+      mockStorageProvider.provider = provider
+      mockAuthUseSession.mockClear()
+      document.title = "Article title"
+      vi.mocked(sendMessage).mockResolvedValueOnce({ ok: true, value: 1 } as never)
+      const config = cloneConfig(DEFAULT_CONFIG)
+      renderButton(config, createAction())
+
+      fireEvent.click(await screen.findByRole("button", { name: i18n.t(buttonKey) }))
+
+      await waitFor(() => {
+        expect(sendMessage).toHaveBeenCalledWith(
+          "saveCustomActionResults",
+          expect.objectContaining({
+            actionId: "action-1",
+            results: [{ summary: "A short summary" }],
+            sourceUrl: window.location.href,
+            sourceTitle: "Article title",
+          }),
+        )
+      })
+      expect(mockAuthUseSession).not.toHaveBeenCalled()
+      expect(orpcClient.notebase.list).not.toHaveBeenCalled()
+      expect(orpcClient.notebase.getSchema).not.toHaveBeenCalled()
+      expect(notebaseRowCreateMock).not.toHaveBeenCalled()
+      expect(orpcClient.notebase.create).not.toHaveBeenCalled()
+    },
+  )
 
   it("opens a create/connect dialog for an unconnected custom action", () => {
     const config = cloneConfig(DEFAULT_CONFIG)

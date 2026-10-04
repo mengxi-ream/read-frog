@@ -1,7 +1,7 @@
 import type { SelectionToolbarCustomActionNotebaseAccount } from "@/types/config/selection-toolbar"
 import type { PendingCreateNotebaseSave, PendingNotebaseSave } from "@/utils/notebase/pending-save"
 import { useMutation } from "@tanstack/react-query"
-import { useAtom } from "jotai"
+import { useAtom, useAtomValue } from "jotai"
 import { use, useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
 import { Button } from "@/components/ui/base-ui/button"
@@ -18,6 +18,7 @@ import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.conten
 import { env } from "@/env"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { authClient } from "@/utils/auth/auth-client"
+import { useCustomActionResultStorageProvider } from "@/utils/custom-action-result-storage/use-storage-provider"
 import { patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
@@ -96,6 +97,16 @@ async function completeGuideDictionaryNotebaseFromPending(pendingSave: PendingCr
 }
 
 export function SaveToNotebaseDialogHost() {
+  const provider = useCustomActionResultStorageProvider()
+  const dialogState = useAtomValue(saveToNotebaseDialogAtom)
+  const isNoteSuggestionDialog =
+    dialogState.open && dialogState.analyticsSource === "note_suggestion"
+  if (provider !== "notebase" && !isNoteSuggestionDialog) return null
+
+  return <NotebaseSaveToNotebaseDialogHost />
+}
+
+function NotebaseSaveToNotebaseDialogHost() {
   const shadowWrapper = use(ShadowWrapperContext)
   const [dialogState, setDialogState] = useAtom(saveToNotebaseDialogAtom)
   const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(

@@ -101,6 +101,38 @@ options:
     leaveDescription: Problemi həll etmək üçün redaktəyə davam edin və ya yadda saxlanmamış dəyişikliklərdən imtina edin.
     keepEditing: Redaktəyə davam et
     discard: Saxlanmamış dəyişiklikləri ləğv et
+  dictionaryStorage:
+    title: Custom Action yaddaşı
+    pageDescription: Custom Action və lüğət nəticələrinin harada saxlanacağını seçin.
+    loadFailed: Yaddaş parametrləri oxunmadı.
+    saveFailed: Yaddaş parametrləri saxlanmadı.
+    provider:
+      title: Yaddaş üsulu
+      description: Bu seçim Custom Action və lüğət nəticələrinin Saxla düyməsinə tətbiq olunur.
+      notebase: Read Frog Notebase
+      local: Yerli yaddaş
+      webdav: WebDAV
+      notebaseDescription: Read Frog hesabınızda saxlanır və Notebase limitlərinə tabedir.
+      localDescription: IndexedDB vasitəsilə bu brauzer profilində saxlanır. Qeydlər sinxronlaşdırılmır.
+    webdav:
+      title: WebDAV bağlantısı
+      description: Hər nəticə ayrıca JSON faylı kimi saxlanır. HTTPS istifadə edin; HTTP yalnız localhost üçün icazəlidir.
+      serverUrl: WebDAV server URL-i
+      directory: Hədəf qovluq
+      username: İstifadəçi adı
+      password: Parol və ya tətbiq üçün xüsusi parol
+      save: Parametrləri saxla
+      test: Bağlantını yoxla
+      testing: Yoxlanılır...
+      testSucceeded: WebDAV bağlantısı uğurludur.
+    records:
+      title: Saxlanmış nəticələr
+      notebaseDescription: Read Frog Notebase qeydlərini readfrog.app saytında idarə edin.
+      loading: Saxlanmış nəticələr yüklənir...
+      empty: Bu üsulla hələ nəticə saxlanmayıb.
+      fieldsUnavailable: Nəticə sahələrini göstərmək mümkün olmadı.
+      delete: Sil
+      deleting: Silinir...
   batchSavings:
     savedCost: API xərclərinə təxminən $1% qənaət edilib
   commandPalette:
@@ -1583,6 +1615,27 @@ action:
   saveToNotebasePendingLogin: Yadda saxlamanı tamamlamaq üçün daxil olun
   saveToNotebasePendingLoginDescription: Daxil olduqdan sonra Read Frog avtomatik olaraq Notebase yaradacaq və bu nəticəni saxlayacaq.
   saveToNotebasePendingConnectedLoginDescription: Daxil olduqdan sonra Read Frog mümkün olduqda qoşulmuş Notebase daxilində yadda saxlayacaq. Bu hesab ondan istifadə edə bilməsə, Read Frog yeni Notebase yaradacaq və bu nəticəni saxlayacaq.
+  customActionResultStorageLoading: Yaddaş parametrləri yüklənir...
+  customActionResultSaveLocal: Yerli olaraq saxla
+  customActionResultSaveWebDav: WebDAV-da saxla
+  customActionResultStorageSaving: Saxlanılır...
+  customActionResultStorageSavedLocal: Yerli olaraq saxlanıldı
+  customActionResultStorageSavedWebDav: WebDAV-da saxlanıldı
+  customActionResultStorageSaveFailed: Nəticəni saxlamaq mümkün olmadı
+  customActionResultStorageErrorGeneric: Nəticəni saxlamaq mümkün olmadı. Parametrləri yoxlayıb yenidən cəhd edin.
+  customActionResultStorageErrorInvalidConfig: WebDAV server URL-ini və hədəf qovluğu yoxlayın.
+  customActionResultStorageErrorHttpsRequired: WebDAV üçün HTTPS istifadə edin. HTTP yalnız localhost üçün icazəlidir.
+  customActionResultStorageErrorHttpNotLocal: HTTP yalnız localhost üçün icazəlidir. Digər serverlər üçün HTTPS istifadə edin.
+  customActionResultStorageErrorInvalidCredentials: WebDAV istifadəçi adı və parol sahələrini yoxlayın.
+  customActionResultStorageErrorUnauthorized: WebDAV istifadəçi adını və ya tətbiq parolunu qəbul etmədi.
+  customActionResultStorageErrorForbidden: WebDAV bu qovluğa girişi rədd etdi.
+  customActionResultStorageErrorNotFound: WebDAV ünvanı və ya hədəf qovluq tapılmadı.
+  customActionResultStorageErrorDirectoryMissing: WebDAV serverində ana qovluğu yaratmaq mümkün olmadı.
+  customActionResultStorageErrorServer: WebDAV serveri sorğunu tamamlaya bilmədi.
+  customActionResultStorageErrorNetwork: WebDAV-a qoşulmaq mümkün olmadı. Server ünvanını və şəbəkəni yoxlayın.
+  customActionResultStorageErrorResponse: WebDAV gözlənilməz cavab qaytardı.
+  customActionResultStorageErrorDatabase: Yerli nəticələri oxumaq və ya yazmaq mümkün olmadı.
+  customActionResultStorageErrorProvider: Seçilmiş yaddaş üsulu əlçatan deyil.
   upgrade: Abunəliyi yüksəlt
   updatePayment: Ödənişi yenilə
   openCustomActions: Fərdi süni intellekt əməliyyatlarını aç

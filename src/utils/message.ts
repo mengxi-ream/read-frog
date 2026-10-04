@@ -19,6 +19,11 @@ import type {
   TTSPlaybackStartResponse,
   TTSPlaybackStopRequest,
 } from "@/types/tts-playback"
+import type {
+  CustomActionResultRecord,
+  CustomActionResultStorageResponse,
+  SaveCustomActionResultsRequest,
+} from "@/utils/custom-action-result-storage/types"
 import type { GlossarySnapshot } from "@/utils/glossary/active-matcher"
 import type { MatchedTerm } from "@/utils/glossary/types"
 import type { HostedAiStatus } from "@/utils/hosted-ai/types"
@@ -43,6 +48,19 @@ interface ProtocolMap {
   >
   // config
   getInitialConfig: () => Config | null
+  // Custom Action / dictionary results are stored by the background extension
+  // context so IndexedDB is extension-owned and WebDAV credentials never cross
+  // the message boundary.
+  saveCustomActionResults: (
+    data: SaveCustomActionResultsRequest,
+  ) => Promise<CustomActionResultStorageResponse<number>>
+  listCustomActionResults: () => Promise<
+    CustomActionResultStorageResponse<CustomActionResultRecord[]>
+  >
+  deleteCustomActionResult: (data: {
+    id: string
+  }) => Promise<CustomActionResultStorageResponse<void>>
+  testWebDavCustomActionResultStorage: () => Promise<CustomActionResultStorageResponse<void>>
   // glossary — the terms live in IndexedDB, which a content script cannot open,
   // so it asks the background once per page and compiles a matcher locally.
   // `url` says which page is asking; glossaries scoped to other sites are left

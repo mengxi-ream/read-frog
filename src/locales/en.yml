@@ -101,6 +101,38 @@ options:
     leaveDescription: Continue editing to fix the problem, or discard the changes that have not been saved.
     keepEditing: Continue editing
     discard: Discard unsaved changes
+  dictionaryStorage:
+    title: Custom Action storage
+    pageDescription: Choose where Custom Action and dictionary results are saved.
+    loadFailed: Could not read storage settings.
+    saveFailed: Could not save storage settings.
+    provider:
+      title: Storage provider
+      description: This choice applies to the Save button for Custom Action and dictionary results.
+      notebase: Read Frog Notebase
+      local: Local storage
+      webdav: WebDAV
+      notebaseDescription: Saves through your Read Frog account and follows Notebase limits.
+      localDescription: Saves in this browser profile with IndexedDB. These records are not synced.
+    webdav:
+      title: WebDAV connection
+      description: Each result is saved as a separate JSON file in the selected directory. Use HTTPS; HTTP is accepted only for localhost.
+      serverUrl: WebDAV server URL
+      directory: Target directory
+      username: Username
+      password: Password or app-specific password
+      save: Save settings
+      test: Test connection
+      testing: Testing...
+      testSucceeded: WebDAV connection succeeded.
+    records:
+      title: Saved results
+      notebaseDescription: Read Frog Notebase records are managed on readfrog.app.
+      loading: Loading saved results...
+      empty: No results have been saved with this provider yet.
+      fieldsUnavailable: Result fields could not be displayed.
+      delete: Delete
+      deleting: Deleting...
   batchSavings:
     savedCost: Saved approx. $1% on API costs
   commandPalette:
@@ -1725,6 +1757,27 @@ action:
   saveToNotebasePendingLogin: Log in to finish saving
   saveToNotebasePendingLoginDescription: After login, Read Frog will create the Notebase and save this result automatically.
   saveToNotebasePendingConnectedLoginDescription: After login, Read Frog will save to the connected Notebase when possible. If this account cannot use it, Read Frog will create a new Notebase and save this result.
+  customActionResultStorageLoading: Loading storage...
+  customActionResultSaveLocal: Save locally
+  customActionResultSaveWebDav: Save to WebDAV
+  customActionResultStorageSaving: Saving...
+  customActionResultStorageSavedLocal: Saved locally
+  customActionResultStorageSavedWebDav: Saved to WebDAV
+  customActionResultStorageSaveFailed: Failed to save result
+  customActionResultStorageErrorGeneric: The result could not be saved. Check your storage settings and try again.
+  customActionResultStorageErrorInvalidConfig: Check the WebDAV server URL and target directory.
+  customActionResultStorageErrorHttpsRequired: Use HTTPS for WebDAV. HTTP is allowed only for localhost.
+  customActionResultStorageErrorHttpNotLocal: HTTP is allowed only for localhost. Use HTTPS for other servers.
+  customActionResultStorageErrorInvalidCredentials: Check the WebDAV username and password fields.
+  customActionResultStorageErrorUnauthorized: WebDAV rejected the username or app-specific password.
+  customActionResultStorageErrorForbidden: WebDAV denied access to this directory.
+  customActionResultStorageErrorNotFound: The WebDAV endpoint or target directory was not found.
+  customActionResultStorageErrorDirectoryMissing: A parent directory could not be created on the WebDAV server.
+  customActionResultStorageErrorServer: The WebDAV server could not complete the request.
+  customActionResultStorageErrorNetwork: Could not reach WebDAV. Check the server address and network connection.
+  customActionResultStorageErrorResponse: WebDAV returned an unexpected response.
+  customActionResultStorageErrorDatabase: Local storage could not read or write the saved results.
+  customActionResultStorageErrorProvider: The selected storage provider is unavailable.
   upgrade: Upgrade
   updatePayment: Update payment
   openCustomActions: Open Custom AI Actions

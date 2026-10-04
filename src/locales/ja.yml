@@ -101,6 +101,38 @@ options:
     leaveDescription: 編集を続けて問題を修正するか、未保存の変更を破棄してください。
     keepEditing: 編集を続ける
     discard: 未保存の変更を破棄
+  dictionaryStorage:
+    title: Custom Action の保存先
+    pageDescription: Custom Action と辞書の結果を保存する場所を選択します。
+    loadFailed: 保存設定を読み込めませんでした。
+    saveFailed: 保存設定を保存できませんでした。
+    provider:
+      title: 保存先
+      description: Custom Action と辞書の結果にある保存ボタンの保存先です。
+      notebase: Read Frog Notebase
+      local: ローカルストレージ
+      webdav: WebDAV
+      notebaseDescription: Read Frog アカウントに保存します。Notebase の利用上限が適用されます。
+      localDescription: IndexedDB を使ってこのブラウザープロファイルに保存します。同期されません。
+    webdav:
+      title: WebDAV 接続
+      description: 結果ごとに個別の JSON ファイルとして保存します。HTTPS を使用してください。HTTP は localhost のみ利用できます。
+      serverUrl: WebDAV サーバー URL
+      directory: 保存先ディレクトリ
+      username: ユーザー名
+      password: パスワードまたはアプリ専用パスワード
+      save: 設定を保存
+      test: 接続をテスト
+      testing: テスト中...
+      testSucceeded: WebDAV に接続できました。
+    records:
+      title: 保存した結果
+      notebaseDescription: Read Frog Notebase の記録は readfrog.app で管理できます。
+      loading: 保存した結果を読み込んでいます...
+      empty: この保存先にはまだ結果がありません。
+      fieldsUnavailable: 結果のフィールドを表示できませんでした。
+      delete: 削除
+      deleting: 削除中...
   batchSavings:
     savedCost: API コストを約 $1% 削減
   commandPalette:
@@ -1578,6 +1610,27 @@ action:
   saveToNotebasePendingLogin: ログイン後に保存を完了
   saveToNotebasePendingLoginDescription: ログイン後、Read Frog が Notebase を作成し、この結果を自動で保存します。
   saveToNotebasePendingConnectedLoginDescription: ログイン後、Read Frog は可能であれば接続済み Notebase に保存します。このアカウントで利用できない場合は、新しい Notebase を作成して保存します。
+  customActionResultStorageLoading: 保存先を読み込み中...
+  customActionResultSaveLocal: ローカルに保存
+  customActionResultSaveWebDav: WebDAV に保存
+  customActionResultStorageSaving: 保存中...
+  customActionResultStorageSavedLocal: ローカルに保存しました
+  customActionResultStorageSavedWebDav: WebDAV に保存しました
+  customActionResultStorageSaveFailed: 結果を保存できませんでした
+  customActionResultStorageErrorGeneric: 保存できませんでした。保存設定を確認して再試行してください。
+  customActionResultStorageErrorInvalidConfig: WebDAV サーバー URL と保存先ディレクトリを確認してください。
+  customActionResultStorageErrorHttpsRequired: WebDAV には HTTPS を使用してください。HTTP は localhost のみ利用できます。
+  customActionResultStorageErrorHttpNotLocal: HTTP は localhost のみ利用できます。他のサーバーでは HTTPS を使用してください。
+  customActionResultStorageErrorInvalidCredentials: WebDAV のユーザー名とパスワードを確認してください。
+  customActionResultStorageErrorUnauthorized: WebDAV がユーザー名またはアプリ専用パスワードを拒否しました。
+  customActionResultStorageErrorForbidden: WebDAV がこのディレクトリへのアクセスを拒否しました。
+  customActionResultStorageErrorNotFound: WebDAV エンドポイントまたは保存先ディレクトリが見つかりません。
+  customActionResultStorageErrorDirectoryMissing: WebDAV サーバーに親ディレクトリを作成できませんでした。
+  customActionResultStorageErrorServer: WebDAV サーバーがリクエストを完了できませんでした。
+  customActionResultStorageErrorNetwork: WebDAV に接続できません。サーバー URL とネットワークを確認してください。
+  customActionResultStorageErrorResponse: WebDAV から予期しない応答がありました。
+  customActionResultStorageErrorDatabase: ローカルの結果を読み書きできませんでした。
+  customActionResultStorageErrorProvider: 選択した保存先を利用できません。
   upgrade: アップグレード
   updatePayment: 支払いを更新
   openCustomActions: Custom AI Actions を開く

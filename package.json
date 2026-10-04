@@ -148,6 +148,7 @@
     "@wxt-dev/module-react": "^1.2.2",
     "autoprefixer": "^10.6.1",
     "eruda": "^3.4.3",
+    "fake-indexeddb": "^6.2.5",
     "husky": "^9.1.7",
     "jsdom": "^30.1.1",
     "lexical": "0.51.0",
