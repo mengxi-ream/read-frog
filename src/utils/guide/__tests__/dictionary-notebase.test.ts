@@ -11,7 +11,7 @@ import {
   startGuideDictionaryNotebaseTracking,
 } from "../dictionary-notebase"
 
-const GUIDE_URL = "https://readfrog.app/guide/step-3"
+const GUIDE_URL = "https://readfrog.app/guide/step-4"
 
 function localKey(key: string) {
   return `local:${key}`
@@ -39,25 +39,29 @@ describe("Dictionary Notebase guide tracking", () => {
     storage.removeItem = storageRemoveItemMock
   })
 
-  it("recognizes official guide step 3 routes by pathname suffix", () => {
+  it("recognizes official guide step routes by pathname suffix", () => {
     expect(isGuideDictionaryNotebaseGuideUrl(GUIDE_URL)).toBe(true)
-    expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/guide/step-3/")).toBe(true)
-    expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/en/guide/step-3")).toBe(true)
-    expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/zh-TW/guide/step-3")).toBe(true)
+    expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/guide/step-4/")).toBe(true)
+    expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/en/guide/step-4")).toBe(true)
+    expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/zh-TW/guide/step-4")).toBe(true)
     expect(
       isGuideDictionaryNotebaseGuideUrl(
-        "https://readfrog.app/fr-CA/guide/step-3/?from=guide#dictionary",
+        "https://readfrog.app/fr-CA/guide/step-4/?from=guide#dictionary",
       ),
     ).toBe(true)
-    expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/docs/guide/step-3")).toBe(true)
-    expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/guide/step-30")).toBe(false)
-    expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/guide/step-3/details")).toBe(
+    expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/docs/guide/step-4")).toBe(true)
+    // Not tied to a step number, so moving the save task between steps keeps working.
+    expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/guide/step-3")).toBe(true)
+    expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/guide/step-12")).toBe(true)
+    expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/guide")).toBe(false)
+    expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/guide/step-x")).toBe(false)
+    expect(isGuideDictionaryNotebaseGuideUrl("https://readfrog.app/guide/step-4/details")).toBe(
       false,
     )
-    expect(isGuideDictionaryNotebaseGuideUrl("https://example.com/guide/step-3")).toBe(false)
+    expect(isGuideDictionaryNotebaseGuideUrl("https://example.com/guide/step-4")).toBe(false)
   })
 
-  it("starts a short-lived tracking session only from guide step 3", async () => {
+  it("starts a short-lived tracking session only from guide step routes", async () => {
     await expect(
       startGuideDictionaryNotebaseTracking("https://readfrog.app/docs", 1_000),
     ).resolves.toEqual({ completed: false })
@@ -76,7 +80,7 @@ describe("Dictionary Notebase guide tracking", () => {
     })
   })
 
-  it("returns active tracking only for the default Dictionary action on guide step 3", async () => {
+  it("returns active tracking only for the default Dictionary action on a guide step", async () => {
     await startGuideDictionaryNotebaseTracking(GUIDE_URL, 1_000)
 
     await expect(
