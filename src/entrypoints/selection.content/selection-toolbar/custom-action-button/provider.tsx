@@ -272,6 +272,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
           action_id: actionId,
           ...UNKNOWN_FEATURE_PROVIDER,
           outcome: "failure",
+          failure_reason: "precheck",
         })
         toastManager.add({ type: "error", title: nextError.description })
         return
@@ -291,6 +292,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
             resolveProviderRefForCapability("customAction", providersConfig, action.providerId),
           ),
           outcome: "failure",
+          failure_reason: "precheck",
         })
         toastManager.add({ type: "error", title: nextError.description })
         return
@@ -359,6 +361,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
       ...(activeAction ? { action_name: activeAction.name } : {}),
       ...classifyResolvedProvider(customActionRequest.provider),
       outcome: "failure",
+      failure_reason: "precheck",
     })
   }, [
     activeAction,

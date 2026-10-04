@@ -134,20 +134,21 @@ export function NoteSuggestionCard({
       return
     }
 
+    // Accepting is the click. Whether the notes reached the Notebase, possibly
+    // after a login round trip, is reported by note_save.
+    trackNoteSuggestionEvent({
+      action_id: "suggestion_accepted",
+      startedAt: firedAt,
+      action_name: liveAction.name,
+      provider: analyticsProvider,
+    })
     const outcome = await save({
       action: liveAction,
       results: selectedNotes,
       analyticsSource: "note_suggestion",
-      analyticsProvider,
     })
     if (outcome === "saved") {
       setSaveState("saved")
-      trackNoteSuggestionEvent({
-        action_id: "suggestion_accepted",
-        startedAt: firedAt,
-        action_name: liveAction.name,
-        provider: analyticsProvider,
-      })
     }
   }
 

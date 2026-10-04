@@ -54,10 +54,11 @@ export default defineBackground({
 
       await ensureInitializedConfig()
 
-      // Open tutorial page when extension is installed
+      // Open tutorial page when extension is installed. `from=install` tells
+      // fresh installs apart from other visits in the website's guide analytics.
       if (details.reason === "install") {
         await browser.tabs.create({
-          url: `${env.WXT_WEBSITE_URL}/guide/step-1`,
+          url: `${env.WXT_WEBSITE_URL}/guide/step-1?from=install`,
         })
       }
 

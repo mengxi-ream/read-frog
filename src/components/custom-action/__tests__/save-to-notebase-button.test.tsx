@@ -80,26 +80,16 @@ vi.mock("@/utils/orpc/client", () => ({
         }),
       },
     },
-    notebaseRow: {
-      create: {
-        mutationOptions: (options: unknown) => ({
-          mutationFn: notebaseRowCreateMock,
-          ...(options as object),
-        }),
-      },
-      createMany: {
-        mutationOptions: (options: unknown) => ({
-          mutationFn: notebaseRowCreateManyMock,
-          ...(options as object),
-        }),
-      },
-    },
   },
   orpcClient: {
     notebase: {
       create: vi.fn<(...args: any[]) => any>(),
       getSchema: vi.fn<(...args: any[]) => any>(),
       list: vi.fn<(...args: any[]) => any>(),
+    },
+    notebaseRow: {
+      create: notebaseRowCreateMock,
+      createMany: notebaseRowCreateManyMock,
     },
   },
 }))
@@ -562,6 +552,76 @@ describe("saveToNotebaseButton notebase availability", () => {
         notebaseId: "notebase-1",
         sourceUrl: "https://readfrog.app/guide/step-3",
       })
+    })
+  })
+
+  it("sends the guide save context with the row and reports the save's steps", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    guideTrackingMocks.canUseGuideDictionaryNotebaseTracking.mockReturnValue(true)
+    guideTrackingMocks.getActiveGuideDictionaryNotebaseTrackingForAction.mockResolvedValue({
+      id: "tracking-1",
+      actionId: "default-dictionary",
+      sourceUrl: "https://readfrog.app/guide/step-4",
+      startedAt: 1_000,
+      expiresAt: 1_801_000,
+    })
+    const action = createConnectedDictionaryAction()
+    vi.mocked(orpcClient.notebase.getSchema).mockResolvedValueOnce(createSchemaForAction(action))
+    renderButton(config, action)
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(notebaseRowCreateMock).toHaveBeenCalledWith(expect.anything(), {
+        context: { noteSave: { surface: "custom_action", isGuide: true } },
+      })
+    })
+    expect(sendMessage).toHaveBeenCalledWith(
+      "trackFeatureUsedEvent",
+      expect.objectContaining({
+        feature: "note_save",
+        action_id: "save_requested",
+        save_source: "custom_action",
+        note_count: 1,
+      }),
+    )
+    await waitFor(() => {
+      expect(sendMessage).toHaveBeenCalledWith(
+        "trackFeatureUsedEvent",
+        expect.objectContaining({
+          feature: "note_save",
+          action_id: "save_completed",
+          outcome: "success",
+          path: "direct",
+          is_guide: true,
+        }),
+      )
+    })
+  })
+
+  it("reports a rejected direct save with its failure reason", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    notebaseRowCreateMock.mockRejectedValueOnce(
+      new ORPCError("NOTE_LIMIT_EXCEEDED", { status: 403 }),
+    )
+    renderButton(config, createConnectedAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(sendMessage).toHaveBeenCalledWith(
+        "trackFeatureUsedEvent",
+        expect.objectContaining({
+          feature: "note_save",
+          action_id: "save_completed",
+          outcome: "failure",
+          failure_reason: "note_limit",
+          path: "direct",
+          is_guide: false,
+        }),
+      )
     })
   })
 

@@ -2,6 +2,7 @@ import type { NotebaseGetSchemaOutput } from "@read-frog/api-contract"
 import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { PendingCreateNotebaseSave, PendingNotebaseSave } from "@/utils/notebase/pending-save"
+import { ORPCError } from "@orpc/client"
 import { describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
@@ -134,6 +135,7 @@ function createDeps({
     openNotebasePage: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
     openActionOptions: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
     completeGuideDictionaryNotebase: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
+    reportNoteSave: vi.fn<(...args: any[]) => any>(),
     now: () => 1_000,
     log: {
       info: vi.fn<(...args: any[]) => any>(),
@@ -311,7 +313,15 @@ describe("notebase pending save processor", () => {
 
     expect(loggedInDeps.createNotebase).toHaveBeenCalledWith(
       buildNotebaseCreateInputFromPending(pending),
+      { surface: "custom_action", isGuide: false },
     )
+    expect(loggedInDeps.reportNoteSave).toHaveBeenCalledExactlyOnceWith({
+      saveSource: "custom_action",
+      isGuide: false,
+      noteCount: 1,
+      path: "after_login",
+      startedAt: pending.createdAt,
+    })
     expect(loggedInDeps.setConfig).toHaveBeenCalledWith(
       expect.objectContaining({
         selectionToolbar: expect.objectContaining({
@@ -351,7 +361,13 @@ describe("notebase pending save processor", () => {
 
     await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
 
-    expect(deps.createNotebase).toHaveBeenCalledWith(buildNotebaseCreateInputFromPending(pending))
+    expect(deps.createNotebase).toHaveBeenCalledWith(buildNotebaseCreateInputFromPending(pending), {
+      surface: "custom_action",
+      isGuide: true,
+    })
+    expect(deps.reportNoteSave).toHaveBeenCalledWith(
+      expect.objectContaining({ path: "after_login", isGuide: true }),
+    )
     expect(deps.completeGuideDictionaryNotebase).toHaveBeenCalledWith({
       trackingId: "tracking-1",
       actionId: "default-dictionary",
@@ -395,14 +411,20 @@ describe("notebase pending save processor", () => {
 
     await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
 
-    expect(deps.createRow).toHaveBeenCalledWith({
-      notebaseId: "notebase-1",
-      data: {
-        cells: {
-          "column-summary": "A short summary",
+    expect(deps.createRow).toHaveBeenCalledWith(
+      {
+        notebaseId: "notebase-1",
+        data: {
+          cells: {
+            "column-summary": "A short summary",
+          },
         },
       },
-    })
+      { surface: "custom_action", isGuide: false },
+    )
+    expect(deps.reportNoteSave).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ path: "after_login", noteCount: 1 }),
+    )
     expect(deps.createRows).not.toHaveBeenCalled()
     expect(deps.createNotebase).not.toHaveBeenCalled()
     expect(deps.clearPendingNotebaseSave).toHaveBeenCalledTimes(1)
@@ -429,10 +451,13 @@ describe("notebase pending save processor", () => {
 
     expect(deps.createRow).not.toHaveBeenCalled()
     expect(deps.createRows).toHaveBeenCalledTimes(1)
-    expect(deps.createRows).toHaveBeenCalledWith({
-      notebaseId: "notebase-1",
-      rows: [{ cells: { "column-summary": "First" } }, { cells: { "column-summary": "Second" } }],
-    })
+    expect(deps.createRows).toHaveBeenCalledWith(
+      {
+        notebaseId: "notebase-1",
+        rows: [{ cells: { "column-summary": "First" } }, { cells: { "column-summary": "Second" } }],
+      },
+      { surface: "custom_action", isGuide: false },
+    )
     expect(deps.clearPendingNotebaseSave).toHaveBeenCalledTimes(1)
     expect(deps.openNotebasePage).toHaveBeenCalledWith("notebase-1")
   })
@@ -552,5 +577,60 @@ describe("notebase pending save processor", () => {
       notebaseId: expect.any(String),
       sourceUrl: "https://readfrog.app/guide/step-3",
     })
+  })
+  it("sends and reports the note-suggestion source the user saved from", async () => {
+    const action = createConnectedAction()
+    const pending = createPendingConnectedNotebaseSave(
+      action,
+      action.notebaseConnection!,
+      [{ summary: "First" }, { summary: "Second" }],
+      1_000,
+      { saveSource: "note_suggestion" },
+    )
+    const deps = createDeps({ pending, config: createConfig(action), authenticated: true })
+    deps.getSchema.mockResolvedValueOnce(createConnectedSchema())
+
+    await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+    expect(deps.createRows).toHaveBeenCalledWith(expect.anything(), {
+      surface: "note_suggestion",
+      isGuide: false,
+    })
+    expect(deps.reportNoteSave).toHaveBeenCalledExactlyOnceWith({
+      saveSource: "note_suggestion",
+      isGuide: false,
+      noteCount: 2,
+      path: "after_login",
+      startedAt: 1_000,
+    })
+  })
+
+  it("reports a pending save dropped for an error retrying cannot fix", async () => {
+    const action = createAction()
+    const pending = createPendingNotebaseSave(action, [{ summary: "A short summary" }], 1_000)
+    const deps = createDeps({ pending, config: createConfig(action), authenticated: true })
+    deps.createNotebase.mockRejectedValueOnce(
+      new ORPCError("CELL_VALIDATION_FAILED", { status: 422 }),
+    )
+
+    await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+    expect(deps.clearPendingNotebaseSave).toHaveBeenCalledTimes(1)
+    expect(deps.reportNoteSave).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ path: "after_login", failureReason: "validation" }),
+    )
+  })
+
+  it("reports nothing while a pending save waits to be retried", async () => {
+    const action = createAction()
+    const pending = createPendingNotebaseSave(action, [{ summary: "A short summary" }], 1_000)
+    const deps = createDeps({ pending, config: createConfig(action), authenticated: true })
+    deps.createNotebase.mockRejectedValueOnce(new Error("network hiccup"))
+    deps.getSchema.mockRejectedValueOnce(new Error("still offline"))
+
+    await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+    expect(deps.clearPendingNotebaseSave).not.toHaveBeenCalled()
+    expect(deps.reportNoteSave).not.toHaveBeenCalled()
   })
 })

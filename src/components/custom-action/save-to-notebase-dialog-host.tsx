@@ -1,3 +1,4 @@
+import type { AnalyticsFailureReason } from "@/types/analytics"
 import type { SelectionToolbarCustomActionNotebaseAccount } from "@/types/config/selection-toolbar"
 import type { PendingCreateNotebaseSave, PendingNotebaseSave } from "@/utils/notebase/pending-save"
 import { useMutation } from "@tanstack/react-query"
@@ -16,6 +17,7 @@ import {
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.content/overlay-layers"
 import { env } from "@/env"
+import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { authClient } from "@/utils/auth/auth-client"
 import { patchSelectionToolbarAction } from "@/utils/custom-actions"
@@ -23,7 +25,7 @@ import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
 import { buildCustomActionOptionsRoute } from "@/utils/navigation"
-import { trackNoteSuggestionEvent } from "@/utils/note-suggestion/analytics"
+import { trackNoteSaveCompleted } from "@/utils/note-save/analytics"
 import {
   createNotebaseConnectedAccountSnapshot,
   formatNotebaseConnectedAccountLabel,
@@ -38,6 +40,7 @@ import {
   buildNotebaseConnectionFromPending,
   buildNotebaseCreateInputFromPending,
   getNotebaseDetailUrl,
+  getPendingNotebaseSaveContext,
   setPendingNotebaseSave,
 } from "@/utils/notebase/pending-save"
 import { orpcClient } from "@/utils/orpc/client"
@@ -107,22 +110,23 @@ export function SaveToNotebaseDialogHost() {
   const [isPreparingLogin, setIsPreparingLogin] = useState(false)
   const pendingNotebaseSave = dialogState.open ? dialogState.pendingNotebaseSave : null
   const mode = dialogState.open ? dialogState.mode : null
-  const analyticsSource = dialogState.open ? dialogState.analyticsSource : undefined
-  const analyticsProvider = dialogState.open ? dialogState.analyticsProvider : undefined
 
   const closeDialog = () => {
     setDialogState({ open: false })
   }
 
-  const recordSuggestionAcceptedIfNeeded = (actionName: string) => {
-    if (analyticsSource !== "note_suggestion") {
-      return
-    }
-
-    trackNoteSuggestionEvent({
-      action_id: "suggestion_accepted",
-      action_name: actionName,
-      provider: analyticsProvider,
+  const trackCreateAndSaveCompleted = (
+    pendingCreateSave: PendingCreateNotebaseSave,
+    failureReason?: AnalyticsFailureReason,
+  ) => {
+    const context = getPendingNotebaseSaveContext(pendingCreateSave)
+    trackNoteSaveCompleted({
+      saveSource: context.surface,
+      isGuide: context.isGuide,
+      noteCount: pendingCreateSave.rows.length,
+      path: "create_notebase",
+      startedAt: pendingCreateSave.createdAt,
+      ...(failureReason ? { failureReason } : {}),
     })
   }
 
@@ -136,7 +140,9 @@ export function SaveToNotebaseDialogHost() {
       pendingNotebaseSave: PendingCreateNotebaseSave
       connectedAccount: SelectionToolbarCustomActionNotebaseAccount
     }) => {
-      await orpcClient.notebase.create(buildNotebaseCreateInputFromPending(pendingCreateSave))
+      await orpcClient.notebase.create(buildNotebaseCreateInputFromPending(pendingCreateSave), {
+        context: { noteSave: getPendingNotebaseSaveContext(pendingCreateSave) },
+      })
       return pendingCreateSave
     },
     onSuccess: async (createdPendingSave, variables) => {
@@ -156,7 +162,7 @@ export function SaveToNotebaseDialogHost() {
         title: i18n.t("action.saveToNotebaseSuccess"),
         description: createdPendingSave.actionName,
       })
-      recordSuggestionAcceptedIfNeeded(createdPendingSave.actionName)
+      trackCreateAndSaveCompleted(createdPendingSave)
       await completeGuideDictionaryNotebaseFromPending(createdPendingSave)
 
       try {
@@ -168,7 +174,8 @@ export function SaveToNotebaseDialogHost() {
         logger.warn("[SaveToNotebaseDialogHost] Failed to open Notebase detail page", error)
       }
     },
-    onError: (error: unknown) => {
+    onError: (error: unknown, variables) => {
+      trackCreateAndSaveCompleted(variables.pendingNotebaseSave, classifyFailureReason(error))
       if (isORPCUnauthorizedError(error)) {
         toastManager.add({
           type: "error",
@@ -242,7 +249,6 @@ export function SaveToNotebaseDialogHost() {
             ? i18n.t("action.saveToNotebasePendingConnectedLoginDescription")
             : i18n.t("action.saveToNotebasePendingLoginDescription"),
       })
-      recordSuggestionAcceptedIfNeeded(pendingSave.actionName)
     } catch (error) {
       toastManager.add({
         type: "error",

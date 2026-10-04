@@ -1,14 +1,13 @@
-import type { ORPCRouterClient } from "@read-frog/api-contract"
+import type { ExtensionORPCClient, ExtensionORPCClientContext } from "./client-context"
 import { createORPCClient } from "@orpc/client"
 import { RPCLink } from "@orpc/client/fetch"
 import { ORPC_PREFIX } from "@read-frog/definitions"
 import { env } from "@/env"
+import { buildExtensionORPCHeaders } from "./client-context"
 
-const link = new RPCLink({
+const link = new RPCLink<ExtensionORPCClientContext>({
   url: `${env.WXT_API_URL}${ORPC_PREFIX}`,
-  headers: {
-    "x-orpc-source": "extension",
-  },
+  headers: ({ context }) => buildExtensionORPCHeaders(context),
   fetch: (request, init) => {
     return fetch(request, {
       ...init,
@@ -17,4 +16,4 @@ const link = new RPCLink({
   },
 })
 
-export const backgroundOrpcClient: ORPCRouterClient = createORPCClient(link)
+export const backgroundOrpcClient: ExtensionORPCClient = createORPCClient(link)

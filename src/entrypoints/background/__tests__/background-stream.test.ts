@@ -461,6 +461,8 @@ describe("background-stream", () => {
           label: "action.upgrade",
           url: new URL("/pricing", env.WXT_WEBSITE_URL).toString(),
         },
+        // Classified in the background, where the hosted-AI error code still exists.
+        reason: "quota_exceeded",
       },
     })
   })
@@ -1091,6 +1093,7 @@ describe("background-stream", () => {
       streamRequestId: "req-text-pre-stream-error",
       error: {
         message: "Model is undefined",
+        reason: "unknown",
       },
     })
     expect(mockPort.disconnect).toHaveBeenCalledTimes(1)

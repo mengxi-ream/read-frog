@@ -1,16 +1,18 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LangCodeISO6393, NoteSaveSurface } from "@read-frog/definitions"
 import type { CaptureResult } from "posthog-js/dist/module.no-external"
 import type {
+  AnalyticsFailureReason,
   AnalyticsFeature,
   FeatureUsedEventProperties,
+  NoteSavePath,
   SurfaceByFeature,
 } from "@/types/analytics"
-import { langCodeISO6393Schema } from "@read-frog/definitions"
+import { langCodeISO6393Schema, NOTE_SAVE_SURFACES } from "@read-frog/definitions"
 import { posthog } from "posthog-js/dist/module.no-external"
 import { match } from "ts-pattern"
 import { storage } from "#imports"
 import { env } from "@/env"
-import { ANALYTICS_FEATURE } from "@/types/analytics"
+import { ANALYTICS_FAILURE_REASONS, ANALYTICS_FEATURE } from "@/types/analytics"
 import { translationModeSchema } from "@/types/config/translate"
 import { normalizeFeatureProviderAnalytics } from "@/utils/analytics-provider"
 import {
@@ -46,6 +48,7 @@ const FEATURE_SURFACES = {
   video_subtitles: ["video_subtitles", "video_subtitles_auto", "shortcut"],
   text_to_speech: ["selection_toolbar", "context_menu", "tts_settings"],
   note_suggestion: ["selection_toolbar"],
+  note_save: ["selection_toolbar"],
   glossary: ["page_translation", "video_subtitles", "selection_toolbar", "input_translation"],
 } as const satisfies { [F in AnalyticsFeature]: readonly SurfaceByFeature[F][] }
 
@@ -59,9 +62,12 @@ export interface FeatureUsedEventTab {
  * Features whose events are multi-step funnels (every step must be recorded)
  * and whose volume is bounded elsewhere, so they bypass the
  * once-per-day-per-feature adoption throttle instead of losing their second
- * same-day event to it.
+ * same-day event to it. Custom actions are here because the throttle kept only
+ * the day's first outcome, so their success rate read as the first try's.
  */
 const FEATURES_BYPASSING_DAILY_FEATURE_CACHE = new Set<AnalyticsFeature>([
+  ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
+  ANALYTICS_FEATURE.NOTE_SAVE,
   ANALYTICS_FEATURE.NOTE_SUGGESTION,
 ])
 
@@ -314,6 +320,22 @@ function isCharCount(value: unknown): value is number {
   return typeof value === "number" && Number.isInteger(value) && value >= 0
 }
 
+const FAILURE_REASONS: ReadonlySet<string> = new Set(ANALYTICS_FAILURE_REASONS)
+const NOTE_SAVE_SURFACE_VALUES: ReadonlySet<string> = new Set(NOTE_SAVE_SURFACES)
+const NOTE_SAVE_PATHS: ReadonlySet<string> = new Set<NoteSavePath>([
+  "direct",
+  "create_notebase",
+  "after_login",
+])
+
+function isFailureReason(value: unknown): value is AnalyticsFailureReason {
+  return typeof value === "string" && FAILURE_REASONS.has(value)
+}
+
+function isNoteSaveSurface(value: unknown): value is NoteSaveSurface {
+  return typeof value === "string" && NOTE_SAVE_SURFACE_VALUES.has(value)
+}
+
 /** Pick only documented event fields, including for messages from older content scripts. */
 function normalizeFeatureUsedEvent(
   properties: FeatureUsedEventProperties,
@@ -328,6 +350,13 @@ function normalizeFeatureUsedEvent(
   ) {
     return null
   }
+  if (
+    feature === "note_save" &&
+    properties.action_id !== "save_requested" &&
+    properties.action_id !== "save_completed"
+  ) {
+    return null
+  }
   if (!(FEATURE_SURFACES[feature] as readonly string[]).includes(properties.surface)) return null
   if (properties.outcome !== "success" && properties.outcome !== "failure") return null
   if (typeof properties.latency_ms !== "number" || !Number.isFinite(properties.latency_ms)) {
@@ -338,6 +367,9 @@ function normalizeFeatureUsedEvent(
     outcome: properties.outcome,
     latency_ms: properties.latency_ms,
     ...normalizeFeatureProviderAnalytics(properties.provider, properties.backend_kind),
+    ...(properties.outcome === "failure" && isFailureReason(properties.failure_reason)
+      ? { failure_reason: properties.failure_reason }
+      : {}),
   }
   const siteDomain = getAnalyticsSiteDomain(tab?.url)
   const siteProperties = siteDomain ? { site_domain: siteDomain } : {}
@@ -438,6 +470,39 @@ function normalizeFeatureUsedEvent(
         surface: event.surface,
         action_id: event.action_id,
         action_name: event.action_name,
+      }
+    })
+    .with({ feature: "note_save", action_id: "save_requested" }, (event) => {
+      if (!isNoteSaveSurface(event.save_source) || !isCharCount(event.note_count)) return null
+      return {
+        ...common,
+        ...siteProperties,
+        feature: event.feature,
+        surface: event.surface,
+        action_id: event.action_id,
+        save_source: event.save_source,
+        note_count: event.note_count,
+      }
+    })
+    .with({ feature: "note_save", action_id: "save_completed" }, (event) => {
+      if (
+        !isNoteSaveSurface(event.save_source) ||
+        !isCharCount(event.note_count) ||
+        !NOTE_SAVE_PATHS.has(event.path) ||
+        typeof event.is_guide !== "boolean"
+      ) {
+        return null
+      }
+      return {
+        ...common,
+        ...siteProperties,
+        feature: event.feature,
+        surface: event.surface,
+        action_id: event.action_id,
+        save_source: event.save_source,
+        note_count: event.note_count,
+        path: event.path,
+        is_guide: event.is_guide,
       }
     })
     .with({ feature: "text_to_speech" }, (event) => ({
