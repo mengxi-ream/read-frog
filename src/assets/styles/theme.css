@@ -367,7 +367,7 @@
   --rf-chart-3: var(--rf-cornflower-700);
   --rf-chart-4: var(--rf-cornflower-800);
   --rf-chart-5: var(--rf-cornflower-950);
-  --rf-radius: 0.625rem;
+  --rf-radius: 0.5rem;
   --rf-sidebar: var(--rf-neutral-50);
   --rf-sidebar-foreground: var(--rf-neutral-950);
   --rf-sidebar-primary: var(--rf-neutral-900);
@@ -379,7 +379,11 @@
 
   /* Extension-only tokens */
   --rf-warning: oklch(97.3% 0.071 103.193);
-  --rf-elevation-floating: 0 8px 40px 0 rgb(0 0 0 / 0.08), 0 0 1px 0 rgb(0 0 0 / 0.08);
+  /* shadow-md's two drops as a property, for a surface that stacks them under a button's bevel:
+     the bevel and a shadow-* class both write --tw-shadow, so only one of the two can win. */
+  --rf-elevation-floating:
+    0 5px 8px 0 rgb(var(--rf-elevation-ink) / calc(0.027 * var(--rf-elevation-strength))),
+    0 20px 24px 0 rgb(var(--rf-elevation-ink) / calc(0.05 * var(--rf-elevation-strength)));
   /* The colours `--animate-ring-flash` pulses to. Kept in step with the `aria-invalid` rules
      on `Input`, whose destructive tint differs per theme, since a keyframe cannot carry a
      `.dark` variant of its own. */
@@ -457,7 +461,10 @@
 
   /* Extension-only tokens */
   --rf-warning: oklch(42.1% 0.095 57.708);
-  --rf-elevation-floating: 0 8px 40px 0 rgb(0 0 0 / 0.28), 0 0 1px 0 rgb(0 0 0 / 0.28);
+  /* Declared again so it resolves against this block's ink and strength. */
+  --rf-elevation-floating:
+    0 5px 8px 0 rgb(var(--rf-elevation-ink) / calc(0.027 * var(--rf-elevation-strength))),
+    0 20px 24px 0 rgb(var(--rf-elevation-ink) / calc(0.05 * var(--rf-elevation-strength)));
   /* Mirrors `dark:aria-invalid:*` on `Input`: a softened border and a stronger ring, because
      the light-theme pair is too hot against a near-black surface. */
   --rf-ring-flash-border: color-mix(in oklab, var(--rf-destructive) 50%, transparent);
