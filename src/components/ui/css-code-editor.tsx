@@ -47,7 +47,7 @@ export function CSSCodeEditor({
         syntaxHighlighting: true,
       }}
       className={cn(
-        "overflow-hidden rounded-md border",
+        "overflow-hidden rounded-lg border",
         "focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50",
         hasError &&
           "border-destructive focus-within:border-destructive focus-within:ring-destructive/50",

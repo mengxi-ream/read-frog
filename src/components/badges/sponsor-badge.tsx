@@ -17,7 +17,7 @@ export function SponsorBadge({ size = "sm", className, labelI18nKey }: SponsorBa
       variant="secondary"
       size={size}
       className={cn(
-        "h-4 gap-0.5 border-amber-200 bg-amber-100 px-1.5 text-[9px] font-semibold text-amber-800 shadow-sm dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300",
+        "h-4 gap-0.5 border-amber-200 bg-amber-100 px-1.5 text-[9px] font-semibold text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300",
         className,
       )}
     >

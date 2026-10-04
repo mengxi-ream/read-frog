@@ -29,8 +29,7 @@ function createLanguageItem(code: LangCodeISO6393): LanguageItem<LangCodeISO6393
   }
 }
 
-const langSelectorTriggerClasses =
-  "!h-14 w-30 rounded-lg shadow-xs pr-2 gap-1 justify-between bg-transparent"
+const langSelectorTriggerClasses = "!h-14 w-30 rounded-lg pr-2 gap-1 justify-between bg-transparent"
 
 const langSelectorContentClasses = "flex flex-col items-start text-base font-medium min-w-0 flex-1"
 

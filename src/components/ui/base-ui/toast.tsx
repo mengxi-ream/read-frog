@@ -257,7 +257,7 @@ function AnchoredToasts({
                 className={cn(
                   "pointer-events-auto relative max-w-full bg-popover text-popover-foreground shadow-sm transition-[scale,opacity] select-none data-ending-style:scale-98 data-ending-style:opacity-0 data-limited:opacity-0 data-starting-style:scale-98 data-starting-style:opacity-0 motion-reduce:transition-none",
                   tooltipStyle
-                    ? "rounded-md text-xs text-balance ring-1 ring-foreground/10"
+                    ? "rounded-lg text-xs text-balance ring-1 ring-foreground/10"
                     : "rounded-2xl border",
                   getUpsertReplayClassName(toast),
                 )}
