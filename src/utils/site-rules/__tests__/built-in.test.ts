@@ -74,6 +74,18 @@ function allSelectors(rule: (typeof BUILT_IN_SITE_RULES)[number]): string[] {
 }
 
 describe("built-in site rules", () => {
+  it.each([
+    "https://browse.library.kiwix.org/viewer",
+    "https://en.browse.library.kiwix.org/content/article",
+    "https://latentk.com/insight/progressive-git/",
+    "https://www.w3schools.com/html/html_iframe.asp",
+    "https://example.com/article",
+    "https://latentk.com/insight/unrelated/",
+    "https://www.w3schools.com/html/html_intro.asp",
+  ])("keeps iframe runtime opt-in on %s", (url) => {
+    expect(resolveSiteRule(url, BUILT_IN_SITE_RULES, [], []).injectIntoIframes).toBeNull()
+  })
+
   it("resolves the inline atom defaults on any URL and folds them into preserve-text", () => {
     const resolved = resolveSiteRule("https://example.com/article", BUILT_IN_SITE_RULES, [], [])
     const atomSelectors = resolved.atomSelector?.split(",") ?? []

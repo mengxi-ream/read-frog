@@ -71,6 +71,7 @@ interface ProtocolMap {
   notifyTranslationStateChanged: (data: { enabled: boolean }) => void
   ensureIframeHostContentInjected: (data: { tabId?: number }) => void
   injectCurrentIframesAfterTopFrameNodeTranslation: () => void
+  activateSameOriginIframeSelectionRuntime: () => boolean
   reportDetectedPageLanguage: (data: {
     detectedCodeOrUnd: LangCodeISO6393 | "und"
     url: string

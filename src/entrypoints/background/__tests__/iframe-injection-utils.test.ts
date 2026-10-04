@@ -1,5 +1,19 @@
 import { describe, expect, it } from "vitest"
-import { resolveSiteControlUrl } from "../iframe-injection-utils"
+import { isSameOriginIframeSender, resolveSiteControlUrl } from "../iframe-injection-utils"
+
+describe("isSameOriginIframeSender", () => {
+  it.each([
+    ["https://example.com/app", undefined, "https://example.com/frame", true],
+    ["https://example.com/app", undefined, "http://example.com/frame", false],
+    ["https://example.com/app", undefined, "https://example.com:444/frame", false],
+    ["https://example.com/app", undefined, "https://sub.example.com/frame", false],
+    ["https://example.com/app", "null", "https://example.com/frame", false],
+    ["https://example.com/app", "https://example.com", "about:srcdoc", true],
+    ["file:///article", undefined, "file:///frame", false],
+  ])("compares effective origins for %s / %s / %s", (top, origin, frame, expected) => {
+    expect(isSameOriginIframeSender(top, origin, frame)).toBe(expected)
+  })
+})
 
 describe("resolveSiteControlUrl", () => {
   it("keeps regular page URLs unchanged", () => {
