@@ -241,7 +241,7 @@ function FluidCardGroup({
           "relative grid",
           // A shared frame clips the highlight and the hairlines to its rounded corners;
           // separated tiles clip themselves.
-          outlined && !separated && "overflow-hidden rounded-2xl border border-border/60",
+          outlined && !separated && "overflow-hidden rounded-xl border border-border/60",
           separated ? "gap-2" : "gap-0",
           className,
         )}
@@ -265,7 +265,7 @@ function FluidCardGroup({
               key={session}
               aria-hidden
               data-slot="fluid-card-highlight"
-              className={cn("pointer-events-none absolute z-0 rounded-2xl", HOVER_TINT)}
+              className={cn("pointer-events-none absolute z-0 rounded-xl", HOVER_TINT)}
               initial={{ opacity: 0, ...activeRect }}
               animate={{ opacity: 1, ...activeRect }}
               exit={{ opacity: 0, transition: reduceMotion ? { duration: 0 } : fastExit }}
@@ -375,9 +375,9 @@ function FluidCard({
   // reads as a plain rectangle, while a card in a continuous block leans on the shared
   // group frame for both.
   const tileShape = !group
-    ? "overflow-hidden rounded-2xl"
+    ? "overflow-hidden rounded-xl"
     : separated && outlined
-      ? "overflow-hidden rounded-2xl border border-border/60"
+      ? "overflow-hidden rounded-xl border border-border/60"
       : ""
 
   // The stretched overlay makes the whole card the click target while keeping action
@@ -475,7 +475,7 @@ function FluidCard({
         {selected && (
           <span
             aria-hidden
-            className={cn("pointer-events-none absolute inset-0 -z-10 rounded-2xl", SELECTED_TINT)}
+            className={cn("pointer-events-none absolute inset-0 -z-10 rounded-xl", SELECTED_TINT)}
           />
         )}
 

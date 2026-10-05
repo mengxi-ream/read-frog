@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-style(ui): restore the larger corner radius on cards, panels, and dialogs
+style(ui): give list cards and preview surfaces the card radius
