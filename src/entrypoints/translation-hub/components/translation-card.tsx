@@ -215,7 +215,7 @@ export function TranslationCard({
   }
 
   return (
-    <div className="rounded-lg border bg-card">
+    <div className="rounded-xl border bg-card">
       <div
         className={cn(
           "flex items-center justify-between px-3 py-2",

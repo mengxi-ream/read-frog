@@ -159,7 +159,7 @@ export function PagePreviewFrame({ children, className }: PagePreviewFrameProps)
     // The border lives out here rather than on the frame. `box-sizing: border-box` would otherwise
     // take it out of the height set below, leaving the frame's viewport two pixels shorter than the
     // content measured to fit it — which is a scrollbar on a preview that fits perfectly.
-    <div className={cn("w-full overflow-hidden rounded-md border bg-background", className)}>
+    <div className={cn("w-full overflow-hidden rounded-xl border bg-background", className)}>
       <iframe
         ref={frameRef}
         title="preview"
