@@ -338,7 +338,7 @@ describe("notebase pending save processor", () => {
       guideDictionaryNotebaseTracking: {
         id: "tracking-1",
         actionId: "default-dictionary",
-        sourceUrl: "https://readfrog.app/guide/step-3",
+        sourceUrl: "https://readfrog.app/guide/step-4",
         startedAt: 1_000,
         expiresAt: 1_801_000,
       },
@@ -356,7 +356,7 @@ describe("notebase pending save processor", () => {
       trackingId: "tracking-1",
       actionId: "default-dictionary",
       notebaseId: pending.notebaseId,
-      sourceUrl: "https://readfrog.app/guide/step-3",
+      sourceUrl: "https://readfrog.app/guide/step-4",
     })
   })
 
@@ -449,7 +449,7 @@ describe("notebase pending save processor", () => {
         guideDictionaryNotebaseTracking: {
           id: "tracking-1",
           actionId: "default-dictionary",
-          sourceUrl: "https://readfrog.app/guide/step-3",
+          sourceUrl: "https://readfrog.app/guide/step-4",
           startedAt: 1_000,
           expiresAt: 1_801_000,
         },
@@ -469,7 +469,7 @@ describe("notebase pending save processor", () => {
       trackingId: "tracking-1",
       actionId: "default-dictionary",
       notebaseId: "notebase-1",
-      sourceUrl: "https://readfrog.app/guide/step-3",
+      sourceUrl: "https://readfrog.app/guide/step-4",
     })
   })
 
@@ -523,7 +523,7 @@ describe("notebase pending save processor", () => {
         guideDictionaryNotebaseTracking: {
           id: "tracking-1",
           actionId: "default-dictionary",
-          sourceUrl: "https://readfrog.app/guide/step-3",
+          sourceUrl: "https://readfrog.app/guide/step-4",
           startedAt: 1_000,
           expiresAt: 1_801_000,
         },
@@ -550,7 +550,7 @@ describe("notebase pending save processor", () => {
       trackingId: "tracking-1",
       actionId: "default-dictionary",
       notebaseId: expect.any(String),
-      sourceUrl: "https://readfrog.app/guide/step-3",
+      sourceUrl: "https://readfrog.app/guide/step-4",
     })
   })
 })
