@@ -621,6 +621,74 @@ describe("notebase pending save processor", () => {
     )
   })
 
+  it("reports a created Notebase as saved even when the action can no longer be connected", async () => {
+    const action = createAction()
+    const pending = createPendingNotebaseSave(action, [{ summary: "A short summary" }], 1_000)
+    const config = createConfig(action)
+    const configWithoutAction = cloneConfig(config)
+    configWithoutAction.selectionToolbar.customActions = []
+    const deps = createDeps({ pending, config, authenticated: true })
+    // The action is deleted while the create is in flight.
+    deps.getConfig.mockImplementation(async () =>
+      deps.createNotebase.mock.calls.length > 0 ? configWithoutAction : config,
+    )
+
+    await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+    expect(deps.createNotebase).toHaveBeenCalledTimes(1)
+    expect(deps.clearPendingNotebaseSave).toHaveBeenCalledTimes(1)
+    expect(deps.reportNoteSave).toHaveBeenCalledExactlyOnceWith(
+      expect.not.objectContaining({ failureReason: expect.anything() }),
+    )
+  })
+
+  it("reports a connected pending save dropped for mappings that no longer match", async () => {
+    const action = createConnectedAction()
+    const pending = createPendingConnectedNotebaseSave(
+      action,
+      action.notebaseConnection!,
+      [{ summary: "A short summary" }],
+      1_000,
+    )
+    const deps = createDeps({ pending, config: createConfig(action), authenticated: true })
+    const schema = createConnectedSchema()
+    deps.getSchema.mockResolvedValueOnce({
+      ...schema,
+      notebaseColumns: schema.notebaseColumns.map((column) => ({ ...column, id: "column-other" })),
+    })
+
+    await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+    expect(deps.createRow).not.toHaveBeenCalled()
+    expect(deps.openActionOptions).toHaveBeenCalledWith(action.id)
+    expect(deps.reportNoteSave).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ path: "after_login", failureReason: "validation" }),
+    )
+  })
+
+  it("reports a rejected connected row only once its pending save is cleared", async () => {
+    const action = createConnectedAction()
+    const pending = createPendingConnectedNotebaseSave(
+      action,
+      action.notebaseConnection!,
+      [{ summary: "A short summary" }],
+      1_000,
+    )
+    const deps = createDeps({ pending, config: createConfig(action), authenticated: true })
+    deps.getSchema.mockResolvedValue(createConnectedSchema())
+    deps.createRow.mockRejectedValue(new ORPCError("CELL_VALIDATION_FAILED", { status: 422 }))
+    deps.clearPendingNotebaseSave.mockRejectedValueOnce(new Error("storage busy"))
+    const processPendingSave = createNotebasePendingSaveProcessor(deps)
+
+    await processPendingSave("auth-cookie-change")
+    expect(deps.reportNoteSave).not.toHaveBeenCalled()
+
+    await processPendingSave("startup")
+    expect(deps.reportNoteSave).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ failureReason: "validation" }),
+    )
+  })
+
   it("reports nothing while a pending save waits to be retried", async () => {
     const action = createAction()
     const pending = createPendingNotebaseSave(action, [{ summary: "A short summary" }], 1_000)

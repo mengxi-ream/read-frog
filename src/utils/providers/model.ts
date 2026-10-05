@@ -39,6 +39,7 @@ import { getLLMProvidersConfig, getProviderConfigById } from "../config/helpers"
 import { CONFIG_STORAGE_KEY } from "../constants/config"
 import { getProviderHeadersWithOverride } from "./headers"
 import { resolveModelId } from "./model-id"
+import { ProviderSetupError } from "./provider-setup-error"
 
 const DEDICATED_PROVIDER_FACTORY_BY_TYPE = {
   openai: createOpenAI,
@@ -90,13 +91,13 @@ function getAzureApiMode(providerConfig: LLMProviderConfig): AzureApiMode {
 async function getLanguageModelById(providerId: string) {
   const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
   if (!config) {
-    throw new Error("Config not found")
+    throw new ProviderSetupError("Config not found")
   }
 
   const LLMProvidersConfig = getLLMProvidersConfig(config.providersConfig)
   const providerConfig = getProviderConfigById(LLMProvidersConfig, providerId)
   if (!providerConfig) {
-    throw new Error(`Provider ${providerId} not found`)
+    throw new ProviderSetupError(`Provider ${providerId} not found`)
   }
 
   return getLanguageModelForConfig(providerConfig)
@@ -145,7 +146,7 @@ export function getLanguageModelForConfig(providerConfig: LLMProviderConfig) {
   const modelId = resolveModelId(providerConfig.model)
 
   if (!modelId) {
-    throw new Error("Model is undefined")
+    throw new ProviderSetupError("Model is undefined")
   }
 
   if (providerConfig.provider === "azure" && getAzureApiMode(providerConfig) === "chat") {

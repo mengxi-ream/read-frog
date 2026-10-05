@@ -435,9 +435,10 @@ describe("background analytics", () => {
     expect(cache.setLastReportedDay).not.toHaveBeenCalled()
   })
 
-  // The throttle kept only a day's first outcome, so a dictionary that failed
-  // once and then worked read as failing all day.
-  it("records every custom-action attempt with its failure reason, bypassing the daily cache", async () => {
+  // A feature-wide throttle kept only a day's first outcome, so a dictionary
+  // that worked once and then failed read as working all day; one event per
+  // attempt would send a hostname for every run instead.
+  it("records each custom-action outcome and failure reason once a day", async () => {
     mockEnabledAnalyticsStorage()
     const { cache } = createMemoryFeatureUsageCache()
     const { captureFeatureUsedEventInBackground } = createAnalytics({
@@ -451,24 +452,26 @@ describe("background analytics", () => {
       action_id: "default-dictionary",
       action_name: "Dictionary",
     }
-
-    await captureFeatureUsedEventInBackground({
+    const missingKey = {
       ...attempt,
-      outcome: "failure",
-      failure_reason: "missing_api_key",
-    })
+      outcome: "failure" as const,
+      failure_reason: "missing_api_key" as const,
+    }
+    const rateLimited = { ...missingKey, failure_reason: "rate_limited" as const }
+
     await captureFeatureUsedEventInBackground({ ...attempt, outcome: "success" })
+    await captureFeatureUsedEventInBackground(missingKey)
+    await captureFeatureUsedEventInBackground({ ...attempt, outcome: "success" })
+    await captureFeatureUsedEventInBackground(missingKey)
+    await captureFeatureUsedEventInBackground(rateLimited)
 
+    expect(posthogCaptureMock).toHaveBeenCalledTimes(3)
     expect(posthogCaptureMock).toHaveBeenNthCalledWith(1, "feature_used", {
-      ...attempt,
-      outcome: "failure",
-      failure_reason: "missing_api_key",
-    })
-    expect(posthogCaptureMock).toHaveBeenNthCalledWith(2, "feature_used", {
       ...attempt,
       outcome: "success",
     })
-    expect(cache.getLastReportedDay).not.toHaveBeenCalled()
+    expect(posthogCaptureMock).toHaveBeenNthCalledWith(2, "feature_used", missingKey)
+    expect(posthogCaptureMock).toHaveBeenNthCalledWith(3, "feature_used", rateLimited)
   })
 
   it("keeps a failure reason only on failures and only when it is a known reason", async () => {

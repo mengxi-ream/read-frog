@@ -1,6 +1,7 @@
 import type { NotebaseRowCreateInput, NotebaseRowCreateManyInput } from "@read-frog/api-contract"
 import type { NoteSaveSurface } from "@read-frog/definitions"
 import type { SaveToNotebaseAnalyticsSource } from "./save-to-notebase-dialog-atom"
+import type { AnalyticsFailureReason } from "@/types/analytics"
 import type {
   SelectionToolbarCustomAction,
   SelectionToolbarCustomActionNotebaseAccount,
@@ -238,6 +239,23 @@ export function useSaveToNotebase() {
     const saveSource: NoteSaveSurface = analyticsSource ?? "custom_action"
     trackNoteSaveRequested({ saveSource, noteCount: results.length })
 
+    // A failure before the row write ends the request here, so it reports a
+    // completion too: a request without one should only mean an abandoned login.
+    const trackFailedBeforeWrite = (failureReason: AnalyticsFailureReason) => {
+      void (async () => {
+        const trackingLookup = getGuideDictionaryNotebaseTracking(action.id)
+        const tracking = trackingLookup ? await trackingLookup.catch(() => null) : null
+        trackNoteSaveCompleted({
+          saveSource,
+          isGuide: tracking !== null,
+          noteCount: results.length,
+          startedAt,
+          path: "direct",
+          failureReason,
+        })
+      })()
+    }
+
     const openCreateOrConnectDialog = async () => {
       const trackingLookup = getGuideDictionaryNotebaseTracking(action.id)
       const guideDictionaryNotebaseTracking = trackingLookup ? await trackingLookup : null
@@ -301,6 +319,7 @@ export function useSaveToNotebase() {
     }
 
     if (!currentAccount) {
+      trackFailedBeforeWrite("auth_required")
       toastManager.add({ type: "error", title: i18n.t("action.saveToNotebaseLoginRequired") })
       return "failed"
     }
@@ -340,6 +359,7 @@ export function useSaveToNotebase() {
       }
       const mappingValidation = validateNotebaseMappings(actionWithRefreshedConnection, schema)
       if (mappingValidation.kind !== "valid") {
+        trackFailedBeforeWrite("validation")
         buildConnectionInvalidToast(action.id)
         return "failed"
       }
@@ -390,6 +410,7 @@ export function useSaveToNotebase() {
         return await openCreateOrConnectDialog()
       }
 
+      trackFailedBeforeWrite(classifyFailureReason(error))
       if (isORPCUnauthorizedError(error)) {
         toastManager.add({
           type: "error",

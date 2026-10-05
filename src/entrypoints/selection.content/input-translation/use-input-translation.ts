@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef } from "react"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
+import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { classifyResolvedProvider, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { INPUT_REPLACE_REQUEST_TYPE } from "@/utils/constants/input-injector"
@@ -241,6 +242,7 @@ export function useInputTranslation() {
             char_count: text.length,
             target_language: targetLanguage,
             outcome: "failure",
+            failure_reason: classifyFailureReason(error),
           })
         }
         // A hosted plan/quota denial is a state the user can act on, not a

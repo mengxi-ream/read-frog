@@ -152,6 +152,25 @@ describe("NoteSuggestionCard", () => {
     },
   )
 
+  it("records one acceptance per suggestion when a failed save is retried", async () => {
+    mocks.save.mockResolvedValueOnce("failed").mockResolvedValueOnce("saved")
+    const action = createAction()
+    const store = createStoreWithAction(action)
+    // The config reloads from storage before the retry; keep the action there.
+    await storage.setItem("local:config", store.get(configAtom))
+    renderCard(store, action)
+
+    clickSave()
+    await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(1))
+    clickSave()
+    await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(2))
+
+    const acceptances = mocks.track.mock.calls.filter(
+      ([event]) => event.action_id === "suggestion_accepted",
+    )
+    expect(acceptances).toHaveLength(1)
+  })
+
   it("records no acceptance for a stale suggestion", async () => {
     renderCard(createStoreWithAction(), createAction())
 

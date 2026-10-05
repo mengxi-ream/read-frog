@@ -13,11 +13,14 @@ import { captureFeatureUsedEventInBackground } from "./analytics"
  * still using the extension — opting out of telemetry is not the same as stopping.
  *
  * Failures are skipped: someone whose provider has been erroring for days is the last
- * person to ask for a store review.
+ * person to ask for a store review. So is a note save request, which only records the
+ * click; its save_completed says whether the save worked.
  */
 export function setupFeatureUsedEventHandlers(): void {
   onMessage("trackFeatureUsedEvent", async (message) => {
-    if (message.data.outcome === "success") {
+    const isSaveRequest =
+      message.data.feature === "note_save" && message.data.action_id === "save_requested"
+    if (message.data.outcome === "success" && !isSaveRequest) {
       void recordFeatureActiveDay()
     }
 

@@ -214,6 +214,17 @@ function createSchemaForAction(action: SelectionToolbarCustomAction): NotebaseGe
   }
 }
 
+function getNoteSaveCompletions() {
+  return vi
+    .mocked(sendMessage)
+    .mock.calls.filter(
+      ([type, data]) =>
+        type === "trackFeatureUsedEvent" &&
+        (data as { action_id?: string }).action_id === "save_completed",
+    )
+    .map(([, data]) => data)
+}
+
 function renderButton(config: Config, action: SelectionToolbarCustomAction) {
   const store = createStore()
   store.set(configAtom, config)
@@ -623,6 +634,97 @@ describe("saveToNotebaseButton notebase availability", () => {
         }),
       )
     })
+  })
+
+  it("reports a save that failed before the row write", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    vi.mocked(orpcClient.notebase.list).mockRejectedValueOnce(new TypeError("Failed to fetch"))
+    renderButton(config, createConnectedAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(sendMessage).toHaveBeenCalledWith(
+        "trackFeatureUsedEvent",
+        expect.objectContaining({
+          feature: "note_save",
+          action_id: "save_completed",
+          outcome: "failure",
+          failure_reason: "network",
+          path: "direct",
+        }),
+      )
+    })
+    expect(notebaseRowCreateMock).not.toHaveBeenCalled()
+  })
+
+  it("reports a create retried after a failure once, as the save that succeeded", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    vi.mocked(orpcClient.notebase.create).mockRejectedValueOnce(new TypeError("Failed to fetch"))
+    renderButton(config, createAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }),
+    )
+    await waitFor(() => expect(toastManagerMock.add).toHaveBeenCalled())
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: i18n.t("action.saveToNotebaseCreateAndSaveShort"),
+      }),
+    )
+
+    await waitFor(() => expect(orpcClient.notebase.create).toHaveBeenCalledTimes(2))
+    await waitFor(() => expect(getNoteSaveCompletions()).toHaveLength(1))
+    expect(getNoteSaveCompletions()[0]).toMatchObject({
+      outcome: "success",
+      path: "create_notebase",
+    })
+  })
+
+  it("reports the last create failure once the user leaves the dialog", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    vi.mocked(orpcClient.notebase.create).mockRejectedValueOnce(
+      new ORPCError("NOTE_LIMIT_EXCEEDED", { status: 403 }),
+    )
+    renderButton(config, createAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }),
+    )
+    await waitFor(() => expect(orpcClient.notebase.create).toHaveBeenCalledTimes(1))
+    expect(getNoteSaveCompletions()).toHaveLength(0)
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: i18n.t("action.saveToNotebaseConnectExisting") }),
+    )
+
+    expect(getNoteSaveCompletions()).toEqual([
+      expect.objectContaining({
+        outcome: "failure",
+        failure_reason: "note_limit",
+        path: "create_notebase",
+      }),
+    ])
+  })
+
+  it("reports a create dialog a signed-in user leaves without trying as dismissed", () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    renderButton(config, createAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseConnectExisting") }),
+    )
+
+    expect(getNoteSaveCompletions()).toEqual([
+      expect.objectContaining({ outcome: "failure", failure_reason: "dismissed" }),
+    ])
   })
 
   it("does not mark guide complete for default Dictionary saves outside guide step 3", async () => {

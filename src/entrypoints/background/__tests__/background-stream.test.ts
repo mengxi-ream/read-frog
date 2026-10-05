@@ -5,6 +5,7 @@ import type {
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { env } from "@/env"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
+import { ProviderSetupError } from "@/utils/providers/provider-setup-error"
 import { defaultRequestRetryPolicy } from "@/utils/request/retry-policy"
 
 const streamTextMock = vi.fn<(...args: any[]) => any>()
@@ -1073,7 +1074,7 @@ describe("background-stream", () => {
   })
 
   it("keeps outer catch as fallback for pre-stream errors", async () => {
-    getModelByIdMock.mockRejectedValue(new Error("Model is undefined"))
+    getModelByIdMock.mockRejectedValue(new ProviderSetupError("Model is undefined"))
     const { handleStreamTextPort } = await import("../background-stream")
     const mockPort = createMockPort("stream-text")
 
@@ -1093,7 +1094,7 @@ describe("background-stream", () => {
       streamRequestId: "req-text-pre-stream-error",
       error: {
         message: "Model is undefined",
-        reason: "unknown",
+        reason: "precheck",
       },
     })
     expect(mockPort.disconnect).toHaveBeenCalledTimes(1)

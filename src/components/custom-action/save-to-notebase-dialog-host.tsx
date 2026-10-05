@@ -3,7 +3,7 @@ import type { SelectionToolbarCustomActionNotebaseAccount } from "@/types/config
 import type { PendingCreateNotebaseSave, PendingNotebaseSave } from "@/utils/notebase/pending-save"
 import { useMutation } from "@tanstack/react-query"
 import { useAtom } from "jotai"
-import { use, useState } from "react"
+import { use, useRef, useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
 import { Button } from "@/components/ui/base-ui/button"
 import {
@@ -115,10 +115,22 @@ export function SaveToNotebaseDialogHost() {
     setDialogState({ open: false })
   }
 
+  // One completion per request. A failed create keeps the dialog open for a
+  // retry, so its failure is only final once the user leaves without saving;
+  // a login hand-off reports nothing here, since the background reports that
+  // save after login.
+  const reportedSavesRef = useRef(new WeakSet<PendingNotebaseSave>())
+  const lastCreateFailureRef = useRef(new WeakMap<PendingNotebaseSave, AnalyticsFailureReason>())
+
   const trackCreateAndSaveCompleted = (
     pendingCreateSave: PendingCreateNotebaseSave,
     failureReason?: AnalyticsFailureReason,
   ) => {
+    if (reportedSavesRef.current.has(pendingCreateSave)) {
+      return
+    }
+    reportedSavesRef.current.add(pendingCreateSave)
+
     const context = getPendingNotebaseSaveContext(pendingCreateSave)
     trackNoteSaveCompleted({
       saveSource: context.surface,
@@ -128,6 +140,22 @@ export function SaveToNotebaseDialogHost() {
       startedAt: pendingCreateSave.createdAt,
       ...(failureReason ? { failureReason } : {}),
     })
+  }
+
+  // The user left the create dialog without saving or logging in. Declining
+  // the login that the dialog asks for is the abandoned login itself, so a
+  // signed-out dismissal without a failed attempt reports nothing.
+  const trackLeftWithoutSaving = () => {
+    if (pendingNotebaseSave?.kind !== "create_notebase") {
+      return
+    }
+
+    const failureReason =
+      lastCreateFailureRef.current.get(pendingNotebaseSave) ??
+      (isAuthenticated ? "dismissed" : undefined)
+    if (failureReason) {
+      trackCreateAndSaveCompleted(pendingNotebaseSave, failureReason)
+    }
   }
 
   const createAndSaveMutation = useMutation({
@@ -146,6 +174,9 @@ export function SaveToNotebaseDialogHost() {
       return pendingCreateSave
     },
     onSuccess: async (createdPendingSave, variables) => {
+      // Reported before the config write: the notes are on the server now, and
+      // a write that fails below reaches onError, which must not undo that.
+      trackCreateAndSaveCompleted(createdPendingSave)
       const nextConnection = buildNotebaseConnectionFromPending(
         createdPendingSave,
         variables.connectedAccount,
@@ -162,7 +193,6 @@ export function SaveToNotebaseDialogHost() {
         title: i18n.t("action.saveToNotebaseSuccess"),
         description: createdPendingSave.actionName,
       })
-      trackCreateAndSaveCompleted(createdPendingSave)
       await completeGuideDictionaryNotebaseFromPending(createdPendingSave)
 
       try {
@@ -175,7 +205,7 @@ export function SaveToNotebaseDialogHost() {
       }
     },
     onError: (error: unknown, variables) => {
-      trackCreateAndSaveCompleted(variables.pendingNotebaseSave, classifyFailureReason(error))
+      lastCreateFailureRef.current.set(variables.pendingNotebaseSave, classifyFailureReason(error))
       if (isORPCUnauthorizedError(error)) {
         toastManager.add({
           type: "error",
@@ -281,6 +311,7 @@ export function SaveToNotebaseDialogHost() {
       return
     }
 
+    trackLeftWithoutSaving()
     closeDialog()
     void sendMessage("openOptionsPage", {
       route: buildCustomActionOptionsRoute(pendingNotebaseSave.actionId, { tab: "notebase" }),
@@ -309,6 +340,7 @@ export function SaveToNotebaseDialogHost() {
       open={dialogState.open}
       onOpenChange={(open) => {
         if (!open) {
+          trackLeftWithoutSaving()
           closeDialog()
         }
       }}

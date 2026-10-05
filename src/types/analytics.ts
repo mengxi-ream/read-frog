@@ -54,13 +54,17 @@ export const ANALYTICS_FAILURE_REASONS = [
   "note_limit",
   "not_found",
   "validation",
+  // The user closed the save dialog without saving or logging in.
+  "dismissed",
   "unknown",
 ] as const
 
 export type AnalyticsFailureReason = (typeof ANALYTICS_FAILURE_REASONS)[number]
 
 /** How a Notebase save reached the server. */
-export type NoteSavePath = "direct" | "create_notebase" | "after_login"
+export const NOTE_SAVE_PATHS = ["direct", "create_notebase", "after_login"] as const
+
+export type NoteSavePath = (typeof NOTE_SAVE_PATHS)[number]
 
 export const ANALYTICS_PROVIDER = {
   BUILT_IN_AI: "read-frog-built-in-ai",

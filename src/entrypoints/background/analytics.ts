@@ -4,7 +4,6 @@ import type {
   AnalyticsFailureReason,
   AnalyticsFeature,
   FeatureUsedEventProperties,
-  NoteSavePath,
   SurfaceByFeature,
 } from "@/types/analytics"
 import { langCodeISO6393Schema, NOTE_SAVE_SURFACES } from "@read-frog/definitions"
@@ -12,7 +11,7 @@ import { posthog } from "posthog-js/dist/module.no-external"
 import { match } from "ts-pattern"
 import { storage } from "#imports"
 import { env } from "@/env"
-import { ANALYTICS_FAILURE_REASONS, ANALYTICS_FEATURE } from "@/types/analytics"
+import { ANALYTICS_FAILURE_REASONS, ANALYTICS_FEATURE, NOTE_SAVE_PATHS } from "@/types/analytics"
 import { translationModeSchema } from "@/types/config/translate"
 import { normalizeFeatureProviderAnalytics } from "@/utils/analytics-provider"
 import {
@@ -29,6 +28,7 @@ import {
   createStorageFeatureUsageCache,
   getFeatureUsageDay,
   type FeatureUsageCache,
+  type FeatureUsageCacheKey,
 } from "./analytics-feature-cache"
 type BackgroundFeatureUsedEventProperties = FeatureUsedEventProperties & { site_domain?: string }
 
@@ -60,16 +60,32 @@ export interface FeatureUsedEventTab {
 
 /**
  * Features whose events are multi-step funnels (every step must be recorded)
- * and whose volume is bounded elsewhere, so they bypass the
+ * and whose volume is bounded by deliberate user actions, so they bypass the
  * once-per-day-per-feature adoption throttle instead of losing their second
- * same-day event to it. Custom actions are here because the throttle kept only
- * the day's first outcome, so their success rate read as the first try's.
+ * same-day event to it: a suggestion is shown once per popover session and
+ * accepted at most once, and note saves follow an explicit Save click.
  */
 const FEATURES_BYPASSING_DAILY_FEATURE_CACHE = new Set<AnalyticsFeature>([
-  ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
   ANALYTICS_FEATURE.NOTE_SAVE,
   ANALYTICS_FEATURE.NOTE_SUGGESTION,
 ])
+
+/**
+ * Custom actions keep the daily throttle per outcome and failure reason rather
+ * than per feature: a day's first success would otherwise hide every later
+ * failure, while one event per attempt would send a hostname for every run.
+ */
+function getDailyFeatureCacheKey(
+  properties: BackgroundFeatureUsedEventProperties,
+): FeatureUsageCacheKey {
+  if (properties.feature !== ANALYTICS_FEATURE.CUSTOM_AI_ACTION) {
+    return properties.feature
+  }
+
+  return properties.outcome === "failure"
+    ? `${properties.feature}:failure:${properties.failure_reason ?? "unknown"}`
+    : `${properties.feature}:success`
+}
 
 interface BackgroundAnalyticsClient {
   capture: (...args: Parameters<typeof posthog.capture>) => void
@@ -322,11 +338,7 @@ function isCharCount(value: unknown): value is number {
 
 const FAILURE_REASONS: ReadonlySet<string> = new Set(ANALYTICS_FAILURE_REASONS)
 const NOTE_SAVE_SURFACE_VALUES: ReadonlySet<string> = new Set(NOTE_SAVE_SURFACES)
-const NOTE_SAVE_PATHS: ReadonlySet<string> = new Set<NoteSavePath>([
-  "direct",
-  "create_notebase",
-  "after_login",
-])
+const NOTE_SAVE_PATH_VALUES: ReadonlySet<string> = new Set(NOTE_SAVE_PATHS)
 
 function isFailureReason(value: unknown): value is AnalyticsFailureReason {
   return typeof value === "string" && FAILURE_REASONS.has(value)
@@ -350,13 +362,6 @@ function normalizeFeatureUsedEvent(
   ) {
     return null
   }
-  if (
-    feature === "note_save" &&
-    properties.action_id !== "save_requested" &&
-    properties.action_id !== "save_completed"
-  ) {
-    return null
-  }
   if (!(FEATURE_SURFACES[feature] as readonly string[]).includes(properties.surface)) return null
   if (properties.outcome !== "success" && properties.outcome !== "failure") return null
   if (typeof properties.latency_ms !== "number" || !Number.isFinite(properties.latency_ms)) {
@@ -374,6 +379,8 @@ function normalizeFeatureUsedEvent(
   const siteDomain = getAnalyticsSiteDomain(tab?.url)
   const siteProperties = siteDomain ? { site_domain: siteDomain } : {}
 
+  // Unknown steps (e.g. from a newer content script) fall through to null at
+  // runtime, while a step added to the types without a branch fails to compile.
   return match(properties)
     .with({ feature: "page_translation" }, (event) => {
       if (!isLanguageCode(event.target_language)) return null
@@ -488,7 +495,7 @@ function normalizeFeatureUsedEvent(
       if (
         !isNoteSaveSurface(event.save_source) ||
         !isCharCount(event.note_count) ||
-        !NOTE_SAVE_PATHS.has(event.path) ||
+        !NOTE_SAVE_PATH_VALUES.has(event.path) ||
         typeof event.is_guide !== "boolean"
       ) {
         return null
@@ -511,7 +518,7 @@ function normalizeFeatureUsedEvent(
       feature: event.feature,
       surface: event.surface,
     }))
-    .exhaustive()
+    .exhaustive(() => null)
 }
 
 export function createBackgroundAnalytics(
@@ -635,10 +642,11 @@ export function createBackgroundAnalytics(
   ): Promise<void> {
     await runFeatureCaptureSerially(properties.feature, async () => {
       const currentDay = getFeatureUsageDay(runtime.getCurrentDate())
+      const cacheKey = getDailyFeatureCacheKey(properties)
       let lastReportedDay: string | undefined
 
       try {
-        lastReportedDay = await featureUsageCache.getLastReportedDay(properties.feature)
+        lastReportedDay = await featureUsageCache.getLastReportedDay(cacheKey)
       } catch (error) {
         runtime.warn("[Analytics] Failed to read the daily feature usage cache", error)
       }
@@ -652,7 +660,7 @@ export function createBackgroundAnalytics(
       }
 
       try {
-        await featureUsageCache.setLastReportedDay(properties.feature, currentDay)
+        await featureUsageCache.setLastReportedDay(cacheKey, currentDay)
       } catch (error) {
         runtime.warn("[Analytics] Failed to write the daily feature usage cache", error)
       }
@@ -678,12 +686,9 @@ export function createBackgroundAnalytics(
     }
 
     // Funnel features must record every step (e.g. note-suggestion shown vs
-    // accepted), so they skip the once-per-day-per-feature adoption throttle —
-    // the daily cache keys on feature only and would drop the second same-day
-    // event. Volume stays bounded: a note-suggestion shown event requires a
-    // manual selection translation that produced a valid suggestion (once per
-    // popover session), and error retries are capped by the per-provider
-    // failure cooldown.
+    // accepted), so they skip the once-per-day adoption throttle, which would
+    // drop the second same-day event. Their volume follows deliberate user
+    // actions; see FEATURES_BYPASSING_DAILY_FEATURE_CACHE.
     if (
       !runtime.featureUsageCache ||
       FEATURES_BYPASSING_DAILY_FEATURE_CACHE.has(normalizedProperties.feature)

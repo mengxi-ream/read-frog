@@ -5,6 +5,7 @@ import type {
   NotebaseRowCreateInput,
   NotebaseRowCreateManyInput,
 } from "@read-frog/api-contract"
+import type { AnalyticsFailureReason } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomActionNotebaseAccount } from "@/types/config/selection-toolbar"
 import type { GuideDictionaryNotebaseCompletionInput } from "@/utils/guide/dictionary-notebase"
@@ -171,6 +172,8 @@ async function completePendingSave(
   })
   if (applied.status !== "valid" || !applied.config) {
     await deps.clearPendingNotebaseSave()
+    // The Notebase and its notes exist; only connecting the action failed.
+    reportPendingSaveOutcome(deps, pendingNotebaseSave)
     deps.log.info("[NotebasePendingSave] Cleared pending save before writing connection", {
       status: applied.status,
       pendingId: pendingNotebaseSave.id,
@@ -361,6 +364,8 @@ async function createReplacementNotebaseFromConnectedPending(
   )
   if (applied.status !== "valid" || !applied.config) {
     await deps.clearPendingNotebaseSave()
+    // The replacement Notebase and its notes exist; only connecting the action failed.
+    reportPendingSaveOutcome(deps, pendingNotebaseSave)
     deps.log.info(
       "[NotebasePendingSave] Cleared connected pending save before writing replacement connection",
       {
@@ -633,6 +638,10 @@ async function processConnectedPendingSave(
       pendingNotebaseSave,
       "[NotebasePendingSave] Cleared connected pending save with invalid mappings",
     )
+    // Dropped like the server's validation error below, which retrying cannot fix either.
+    reportPendingSaveOutcome(deps, pendingNotebaseSave, {
+      reason: "validation" satisfies AnalyticsFailureReason,
+    })
     return
   }
 
@@ -693,13 +702,13 @@ async function processConnectedPendingSave(
     }
 
     if (isORPCValidationError(error)) {
-      reportPendingSaveOutcome(deps, pendingNotebaseSave, error)
       await clearConnectedPendingAndOpenActionOptions(
         deps,
         pendingNotebaseSave,
         "[NotebasePendingSave] Cleared connected pending save after row validation error",
         error,
       )
+      reportPendingSaveOutcome(deps, pendingNotebaseSave, error)
       return
     }
 
@@ -782,7 +791,9 @@ export function setupNotebasePendingSaveProcessor(waitUntilReady: () => Promise<
     reportNoteSave: (completion) => {
       void captureFeatureUsedEventInBackground(
         buildFeatureUsedEventProperties(createNoteSaveCompletedEvent(completion)),
-      )
+      ).catch((error) => {
+        logger.warn("[NotebasePendingSave] Failed to report the save outcome", error)
+      })
     },
     openNotebasePage: async (notebaseId) => {
       await browser.tabs.create({

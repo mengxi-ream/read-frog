@@ -10,6 +10,7 @@ import { useRef, useState } from "react"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
+import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { EDGE_TTS_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { detectLanguage } from "@/utils/content/language"
@@ -189,6 +190,7 @@ export function useTextToSpeech(
       void trackFeatureUsed({
         ...variables.analyticsContext,
         outcome: "failure",
+        failure_reason: classifyFailureReason(error),
       })
       toastManager.add({
         type: "error",

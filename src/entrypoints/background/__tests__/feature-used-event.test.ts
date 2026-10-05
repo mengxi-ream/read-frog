@@ -69,6 +69,26 @@ describe("setupFeatureUsedEventHandlers", () => {
     expect(recordFeatureActiveDayMock).not.toHaveBeenCalled()
   })
 
+  it("does not count an active day for a note save request, which only records the click", async () => {
+    const handler = handlers.get("trackFeatureUsedEvent")
+    await handler?.({
+      data: {
+        feature: "note_save",
+        surface: "selection_toolbar",
+        latency_ms: 0,
+        provider: "unknown",
+        backend_kind: "unknown",
+        action_id: "save_requested",
+        save_source: "custom_action",
+        note_count: 1,
+        outcome: "success",
+      },
+    })
+
+    expect(recordFeatureActiveDayMock).not.toHaveBeenCalled()
+    expect(captureMock).toHaveBeenCalledTimes(1)
+  })
+
   it("still reports a failure to analytics", async () => {
     await send("failure")
     expect(captureMock).toHaveBeenCalledWith({ ...BASE_EVENT, outcome: "failure" }, undefined)

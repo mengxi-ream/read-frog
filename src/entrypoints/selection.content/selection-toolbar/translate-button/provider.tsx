@@ -39,6 +39,7 @@ import { SelectionToolbarTitleContent } from "@/components/ui/selection-popover/
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
+import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { classifyProviderConfig, classifyResolvedProvider } from "@/utils/analytics-provider"
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
@@ -513,6 +514,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
           char_count: preparedText.length,
           target_language,
           outcome: "failure",
+          failure_reason: "precheck",
         })
         return
       }
@@ -528,6 +530,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
           char_count: preparedText.length,
           target_language,
           outcome: "failure",
+          failure_reason: "precheck",
         })
         return
       }
@@ -570,6 +573,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
             char_count: preparedText.length,
             target_language,
             outcome: "failure",
+            failure_reason: "precheck",
           })
           return
         } else if (isLLMProviderConfig(provider.config)) {
@@ -632,6 +636,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
             char_count: preparedText.length,
             target_language,
             outcome: "failure",
+            failure_reason: classifyFailureReason(caughtError),
           })
         }
       } finally {
