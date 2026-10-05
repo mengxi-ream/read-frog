@@ -51,7 +51,7 @@ export function BuiltInRules() {
             BUILT_IN_SITE_RULES.length,
           ])}
         </div>
-        <div className="flex flex-col divide-y rounded-2xl border">
+        <div className="flex flex-col divide-y rounded-md border">
           {visibleRules.map((rule) => (
             <BuiltInRuleRow key={rule.id} rule={rule} />
           ))}
