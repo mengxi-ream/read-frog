@@ -1,5 +1,7 @@
+import type { NotebaseRowCreateInput, NotebaseRowCreateManyInput } from "@read-frog/api-contract"
+import type { NoteSaveSurface } from "@read-frog/definitions"
 import type { SaveToNotebaseAnalyticsSource } from "./save-to-notebase-dialog-atom"
-import type { FeatureProviderAnalytics } from "@/types/analytics"
+import type { AnalyticsFailureReason } from "@/types/analytics"
 import type {
   SelectionToolbarCustomAction,
   SelectionToolbarCustomActionNotebaseAccount,
@@ -9,6 +11,7 @@ import { useMutation } from "@tanstack/react-query"
 import { useAtom, useSetAtom } from "jotai"
 import { useRef, useState } from "react"
 import { toastManager } from "@/components/ui/base-ui/toast"
+import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { authClient } from "@/utils/auth/auth-client"
 import { patchSelectionToolbarAction } from "@/utils/custom-actions"
@@ -19,6 +22,7 @@ import {
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { buildCustomActionOptionsRoute } from "@/utils/navigation"
+import { trackNoteSaveCompleted, trackNoteSaveRequested } from "@/utils/note-save/analytics"
 import {
   classifyConnectedNotebaseOwnership,
   createNotebaseConnectedAccountSnapshot,
@@ -39,7 +43,7 @@ import {
   createPendingNotebaseSave,
   getNotebaseDetailUrl,
 } from "@/utils/notebase/pending-save"
-import { orpc, orpcClient } from "@/utils/orpc/client"
+import { orpcClient } from "@/utils/orpc/client"
 import { showNotebaseLimitExceededToast } from "./notebase-limit-toast"
 import { saveToNotebaseDialogAtom } from "./save-to-notebase-dialog-atom"
 
@@ -50,8 +54,23 @@ export interface SaveToNotebaseRequest {
   /** One record per note, keyed by output-field name. */
   results: Array<Record<string, unknown>>
   analyticsSource?: SaveToNotebaseAnalyticsSource
-  /** Provider classification carried into dialog-confirm analytics. */
-  analyticsProvider?: FeatureProviderAnalytics
+}
+
+/** One direct save, as reported to the server (request header) and to analytics. */
+interface DirectNoteSaveAttempt {
+  saveSource: NoteSaveSurface
+  isGuide: boolean
+  noteCount: number
+  startedAt: number
+}
+
+interface DirectNoteSaveVariables<TInput> {
+  input: TInput
+  attempt: DirectNoteSaveAttempt
+}
+
+function toNoteSaveContext(attempt: DirectNoteSaveAttempt) {
+  return { analytics: { surface: attempt.saveSource, isGuide: attempt.isGuide } }
 }
 
 /**
@@ -83,7 +102,8 @@ export function useSaveToNotebase() {
     }).catch(() => {})
   }
 
-  const handleSaveSuccess = (notebaseId: string) => {
+  const handleSaveSuccess = (notebaseId: string, attempt: DirectNoteSaveAttempt) => {
+    trackNoteSaveCompleted({ ...attempt, path: "direct" })
     const notebaseUrl = getNotebaseDetailUrl(notebaseId)
     const guideTracking = savingGuideTrackingRef.current
     savingGuideTrackingRef.current = null
@@ -123,7 +143,12 @@ export function useSaveToNotebase() {
     })
   }
 
-  const handleSaveError = (error: unknown) => {
+  const handleSaveError = (error: unknown, attempt: DirectNoteSaveAttempt) => {
+    trackNoteSaveCompleted({
+      ...attempt,
+      path: "direct",
+      failureReason: classifyFailureReason(error),
+    })
     savingGuideTrackingRef.current = null
     if (isORPCUnauthorizedError(error)) {
       toastManager.add({ type: "error", title: i18n.t("action.saveToNotebaseLoginRequired") })
@@ -163,31 +188,35 @@ export function useSaveToNotebase() {
     })
   }
 
-  const saveMutation = useMutation(
-    // oxlint-disable-next-line react/refs -- the refs are read inside the mutation callbacks, not during render
-    orpc.notebaseRow.create.mutationOptions({
-      meta: {
-        suppressToast: true,
-      },
-      onSuccess: (_data, variables) => {
-        handleSaveSuccess(variables.notebaseId)
-      },
-      onError: handleSaveError,
-    }),
-  )
+  // Plain mutations rather than the oRPC query utils: each call carries its own
+  // save context, which the utils only accept once per mutation.
+  const saveMutation = useMutation({
+    meta: {
+      suppressToast: true,
+    },
+    mutationFn: ({ input, attempt }: DirectNoteSaveVariables<NotebaseRowCreateInput>) =>
+      orpcClient.notebaseRow.create(input, { context: toNoteSaveContext(attempt) }),
+    onSuccess: (_data, variables) => {
+      handleSaveSuccess(variables.input.notebaseId, variables.attempt)
+    },
+    onError: (error, variables) => {
+      handleSaveError(error, variables.attempt)
+    },
+  })
 
-  const saveManyMutation = useMutation(
-    // oxlint-disable-next-line react/refs -- the refs are read inside the mutation callbacks, not during render
-    orpc.notebaseRow.createMany.mutationOptions({
-      meta: {
-        suppressToast: true,
-      },
-      onSuccess: (_data, variables) => {
-        handleSaveSuccess(variables.notebaseId)
-      },
-      onError: handleSaveError,
-    }),
-  )
+  const saveManyMutation = useMutation({
+    meta: {
+      suppressToast: true,
+    },
+    mutationFn: ({ input, attempt }: DirectNoteSaveVariables<NotebaseRowCreateManyInput>) =>
+      orpcClient.notebaseRow.createMany(input, { context: toNoteSaveContext(attempt) }),
+    onSuccess: (_data, variables) => {
+      handleSaveSuccess(variables.input.notebaseId, variables.attempt)
+    },
+    onError: (error, variables) => {
+      handleSaveError(error, variables.attempt)
+    },
+  })
 
   // Returns null synchronously when guide tracking does not apply, so dialog
   // opens on the common path stay synchronous within the click event.
@@ -201,9 +230,30 @@ export function useSaveToNotebase() {
   }
 
   const save = async (request: SaveToNotebaseRequest): Promise<SaveToNotebaseOutcome> => {
-    const { action, results, analyticsSource, analyticsProvider } = request
+    const { action, results, analyticsSource } = request
     if (results.length === 0) {
       return "failed"
+    }
+
+    const startedAt = Date.now()
+    const saveSource: NoteSaveSurface = analyticsSource ?? "custom_action"
+    trackNoteSaveRequested({ saveSource, noteCount: results.length })
+
+    // A failure before the row write ends the request here, so it reports a
+    // completion too: a request without one should only mean an abandoned login.
+    const trackFailedBeforeWrite = (failureReason: AnalyticsFailureReason) => {
+      void (async () => {
+        const trackingLookup = getGuideDictionaryNotebaseTracking(action.id)
+        const tracking = trackingLookup ? await trackingLookup.catch(() => null) : null
+        trackNoteSaveCompleted({
+          saveSource,
+          isGuide: tracking !== null,
+          noteCount: results.length,
+          startedAt,
+          path: "direct",
+          failureReason,
+        })
+      })()
     }
 
     const openCreateOrConnectDialog = async () => {
@@ -212,11 +262,10 @@ export function useSaveToNotebase() {
       setSaveToNotebaseDialog({
         open: true,
         mode: "create_or_connect",
-        pendingNotebaseSave: createPendingNotebaseSave(action, results, Date.now(), {
+        pendingNotebaseSave: createPendingNotebaseSave(action, results, startedAt, {
           guideDictionaryNotebaseTracking: guideDictionaryNotebaseTracking ?? undefined,
+          saveSource,
         }),
-        ...(analyticsSource ? { analyticsSource } : {}),
-        ...(analyticsProvider ? { analyticsProvider } : {}),
       })
       return "dialog_opened" as const
     }
@@ -229,12 +278,11 @@ export function useSaveToNotebase() {
       setSaveToNotebaseDialog({
         open: true,
         mode: "foreign_connection",
-        pendingNotebaseSave: createPendingNotebaseSave(action, results, Date.now(), {
+        pendingNotebaseSave: createPendingNotebaseSave(action, results, startedAt, {
           guideDictionaryNotebaseTracking: guideDictionaryNotebaseTracking ?? undefined,
+          saveSource,
         }),
         connectedAccount,
-        ...(analyticsSource ? { analyticsSource } : {}),
-        ...(analyticsProvider ? { analyticsProvider } : {}),
       })
       return "dialog_opened" as const
     }
@@ -255,9 +303,10 @@ export function useSaveToNotebase() {
         action,
         connection,
         results,
-        Date.now(),
+        startedAt,
         {
           guideDictionaryNotebaseTracking: guideDictionaryNotebaseTracking ?? undefined,
+          saveSource,
         },
       )
       setSaveToNotebaseDialog({
@@ -265,13 +314,12 @@ export function useSaveToNotebase() {
         mode: "connected_login_required",
         pendingNotebaseSave,
         connectedAccount: pendingNotebaseSave.connectionSnapshot.connectedAccount,
-        ...(analyticsSource ? { analyticsSource } : {}),
-        ...(analyticsProvider ? { analyticsProvider } : {}),
       })
       return "dialog_opened"
     }
 
     if (!currentAccount) {
+      trackFailedBeforeWrite("auth_required")
       toastManager.add({ type: "error", title: i18n.t("action.saveToNotebaseLoginRequired") })
       return "failed"
     }
@@ -311,6 +359,7 @@ export function useSaveToNotebase() {
       }
       const mappingValidation = validateNotebaseMappings(actionWithRefreshedConnection, schema)
       if (mappingValidation.kind !== "valid") {
+        trackFailedBeforeWrite("validation")
         buildConnectionInvalidToast(action.id)
         return "failed"
       }
@@ -321,6 +370,12 @@ export function useSaveToNotebase() {
       savingNotebaseNameRef.current = refreshedConnection.notebaseNameSnapshot
       const trackingLookup = getGuideDictionaryNotebaseTracking(action.id)
       savingGuideTrackingRef.current = trackingLookup ? await trackingLookup : null
+      const attempt: DirectNoteSaveAttempt = {
+        saveSource,
+        isGuide: savingGuideTrackingRef.current !== null,
+        noteCount: cellsList.length,
+        startedAt,
+      }
 
       // Row-save failures are toasted by the mutation onError handlers; the
       // outer catch below only handles pre-save failures (list/getSchema).
@@ -328,15 +383,21 @@ export function useSaveToNotebase() {
         const [firstCells] = cellsList
         if (cellsList.length === 1 && firstCells) {
           await saveMutation.mutateAsync({
-            notebaseId: refreshedConnection.notebaseId,
-            data: {
-              cells: firstCells,
+            input: {
+              notebaseId: refreshedConnection.notebaseId,
+              data: {
+                cells: firstCells,
+              },
             },
+            attempt,
           })
         } else {
           await saveManyMutation.mutateAsync({
-            notebaseId: refreshedConnection.notebaseId,
-            rows: cellsList.map((cells) => ({ cells })),
+            input: {
+              notebaseId: refreshedConnection.notebaseId,
+              rows: cellsList.map((cells) => ({ cells })),
+            },
+            attempt,
           })
         }
       } catch {
@@ -349,6 +410,7 @@ export function useSaveToNotebase() {
         return await openCreateOrConnectDialog()
       }
 
+      trackFailedBeforeWrite(classifyFailureReason(error))
       if (isORPCUnauthorizedError(error)) {
         toastManager.add({
           type: "error",

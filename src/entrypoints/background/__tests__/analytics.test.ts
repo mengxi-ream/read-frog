@@ -353,33 +353,27 @@ describe("background analytics", () => {
     })
 
     await captureFeatureUsedEventInBackground({
-      feature: "custom_ai_action",
+      feature: "text_to_speech",
       surface: "context_menu",
       outcome: "failure",
       latency_ms: 100,
       ...DEFAULT_FEATURE_PROVIDER,
-      action_id: "dictionary",
-      action_name: "Dictionary",
     })
     await captureFeatureUsedEventInBackground({
-      feature: "custom_ai_action",
+      feature: "text_to_speech",
       surface: "selection_toolbar",
       outcome: "success",
       latency_ms: 200,
       ...DEFAULT_FEATURE_PROVIDER,
-      action_id: "explain",
-      action_name: "Explain",
     })
 
     expect(posthogCaptureMock).toHaveBeenCalledOnce()
     expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", {
-      feature: "custom_ai_action",
+      feature: "text_to_speech",
       surface: "context_menu",
       outcome: "failure",
       latency_ms: 100,
       ...DEFAULT_FEATURE_PROVIDER,
-      action_id: "dictionary",
-      action_name: "Dictionary",
     })
     expect(cache.setLastReportedDay).toHaveBeenCalledOnce()
   })
@@ -439,6 +433,115 @@ describe("background analytics", () => {
     expect(posthogCaptureMock).toHaveBeenCalledTimes(2)
     expect(cache.getLastReportedDay).not.toHaveBeenCalled()
     expect(cache.setLastReportedDay).not.toHaveBeenCalled()
+  })
+
+  // A feature-wide throttle kept only a day's first outcome, so a dictionary
+  // that worked once and then failed read as working all day; one event per
+  // attempt would send a hostname for every run instead.
+  it("records each custom-action outcome and failure reason once a day", async () => {
+    mockEnabledAnalyticsStorage()
+    const { cache } = createMemoryFeatureUsageCache()
+    const { captureFeatureUsedEventInBackground } = createAnalytics({
+      featureUsageCache: cache,
+    })
+    const attempt = {
+      feature: "custom_ai_action" as const,
+      surface: "selection_toolbar" as const,
+      latency_ms: 40,
+      ...DEFAULT_FEATURE_PROVIDER,
+      action_id: "default-dictionary",
+      action_name: "Dictionary",
+    }
+    const missingKey = {
+      ...attempt,
+      outcome: "failure" as const,
+      failure_reason: "missing_api_key" as const,
+    }
+    const rateLimited = { ...missingKey, failure_reason: "rate_limited" as const }
+
+    await captureFeatureUsedEventInBackground({ ...attempt, outcome: "success" })
+    await captureFeatureUsedEventInBackground(missingKey)
+    await captureFeatureUsedEventInBackground({ ...attempt, outcome: "success" })
+    await captureFeatureUsedEventInBackground(missingKey)
+    await captureFeatureUsedEventInBackground(rateLimited)
+
+    expect(posthogCaptureMock).toHaveBeenCalledTimes(3)
+    expect(posthogCaptureMock).toHaveBeenNthCalledWith(1, "feature_used", {
+      ...attempt,
+      outcome: "success",
+    })
+    expect(posthogCaptureMock).toHaveBeenNthCalledWith(2, "feature_used", missingKey)
+    expect(posthogCaptureMock).toHaveBeenNthCalledWith(3, "feature_used", rateLimited)
+  })
+
+  it("keeps a failure reason only on failures and only when it is a known reason", async () => {
+    mockEnabledAnalyticsStorage()
+    const { captureFeatureUsedEventInBackground } = createAnalytics()
+    const attempt = {
+      feature: "custom_ai_action" as const,
+      surface: "selection_toolbar" as const,
+      latency_ms: 40,
+      ...DEFAULT_FEATURE_PROVIDER,
+      action_id: "default-dictionary",
+    }
+
+    await captureFeatureUsedEventInBackground({
+      ...attempt,
+      outcome: "success",
+      failure_reason: "network",
+    })
+    await captureFeatureUsedEventInBackground({
+      ...attempt,
+      outcome: "failure",
+      failure_reason: "gremlins" as never,
+    })
+
+    expect(posthogCaptureMock).toHaveBeenNthCalledWith(1, "feature_used", {
+      ...attempt,
+      outcome: "success",
+    })
+    expect(posthogCaptureMock).toHaveBeenNthCalledWith(2, "feature_used", {
+      ...attempt,
+      outcome: "failure",
+    })
+  })
+
+  it("records both note-save steps and drops malformed ones", async () => {
+    mockEnabledAnalyticsStorage()
+    const { cache } = createMemoryFeatureUsageCache()
+    const { captureFeatureUsedEventInBackground } = createAnalytics({
+      featureUsageCache: cache,
+    })
+    const requested = {
+      feature: "note_save" as const,
+      surface: "selection_toolbar" as const,
+      outcome: "success" as const,
+      latency_ms: 0,
+      ...DEFAULT_FEATURE_PROVIDER,
+      action_id: "save_requested" as const,
+      save_source: "note_suggestion" as const,
+      note_count: 2,
+    }
+    const completed = {
+      ...requested,
+      outcome: "failure" as const,
+      latency_ms: 900,
+      action_id: "save_completed" as const,
+      path: "after_login" as const,
+      is_guide: true,
+      failure_reason: "note_limit" as const,
+    }
+
+    await captureFeatureUsedEventInBackground(requested)
+    await captureFeatureUsedEventInBackground(completed)
+    await captureFeatureUsedEventInBackground({ ...completed, path: "teleport" as never })
+    await captureFeatureUsedEventInBackground({ ...requested, save_source: "popup" as never })
+    await captureFeatureUsedEventInBackground({ ...requested, action_id: "save_maybe" as never })
+
+    expect(posthogCaptureMock).toHaveBeenCalledTimes(2)
+    expect(posthogCaptureMock).toHaveBeenNthCalledWith(1, "feature_used", requested)
+    expect(posthogCaptureMock).toHaveBeenNthCalledWith(2, "feature_used", completed)
+    expect(cache.getLastReportedDay).not.toHaveBeenCalled()
   })
 
   it("reports a feature again after the Shanghai calendar day changes", async () => {

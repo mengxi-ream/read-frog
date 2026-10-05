@@ -5,6 +5,7 @@ import debounce from "debounce"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
+import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { classifyResolvedProvider } from "@/utils/analytics-provider"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
@@ -272,6 +273,7 @@ export class PageTranslationManager implements IPageTranslationManager {
           ...providerAnalytics,
           ...pageAnalytics(),
           outcome: "failure",
+          failure_reason: "precheck",
         })
       }
       return
@@ -293,6 +295,7 @@ export class PageTranslationManager implements IPageTranslationManager {
           ...providerAnalytics,
           ...pageAnalytics(),
           outcome: "failure",
+          failure_reason: "precheck",
         })
       }
       return
@@ -434,6 +437,7 @@ export class PageTranslationManager implements IPageTranslationManager {
           ...providerAnalytics,
           ...pageAnalytics(),
           outcome: "failure",
+          failure_reason: classifyFailureReason(error),
         })
       }
       throw error

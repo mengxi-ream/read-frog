@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/selection-popover/inline-error"
 import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
+import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { classifyResolvedProvider } from "@/utils/analytics-provider"
 import { streamBackgroundStructuredObject } from "@/utils/content-script/background-stream-client"
 import { getSourceDocumentTitle } from "@/utils/content/document-title"
@@ -442,6 +443,7 @@ export function useCustomActionExecution({
           ...actionAnalytics,
           ...providerAnalytics,
           outcome: "failure",
+          failure_reason: classifyFailureReason(caughtError),
         })
       } finally {
         if (!isCancelled) {

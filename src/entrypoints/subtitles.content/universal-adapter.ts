@@ -8,6 +8,7 @@ import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
+import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { classifyResolvedProvider, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
@@ -845,6 +846,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
           ...providerAnalytics,
           target_language: targetLanguage,
           outcome: "failure",
+          failure_reason: classifyFailureReason(error),
         })
       }
 

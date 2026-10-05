@@ -1,4 +1,5 @@
 import type { NotebaseCreateInput, NotebaseGetSchemaOutput } from "@read-frog/api-contract"
+import type { NoteSaveSurface } from "@read-frog/definitions"
 import type { z } from "zod"
 import type { Config } from "@/types/config/config"
 import type {
@@ -7,7 +8,7 @@ import type {
   SelectionToolbarCustomActionNotebaseConnection,
   SelectionToolbarCustomActionOutputField,
 } from "@/types/config/selection-toolbar"
-import { NOTEBASE_COLUMN_TYPE_INFO } from "@read-frog/definitions"
+import { NOTE_SAVE_SURFACES, NOTEBASE_COLUMN_TYPE_INFO } from "@read-frog/definitions"
 import { z as zod } from "zod"
 import { storage } from "#imports"
 import { env } from "@/env"
@@ -36,6 +37,8 @@ const pendingNotebaseSaveBaseSchema = zod.object({
   actionName: zod.string().min(1),
   outputSchemaFingerprint: zod.string(),
   guideDictionaryNotebaseTracking: guideDictionaryNotebaseTrackingSchema.optional(),
+  /** The UI the user saved from; optional so saves pending across an update still parse. */
+  saveSource: zod.enum(NOTE_SAVE_SURFACES).optional(),
 })
 
 const pendingNotebaseSaveRowSchema = zod.object({
@@ -104,6 +107,7 @@ export type PendingConnectedNotebaseSave = z.infer<typeof pendingConnectedNoteba
 
 interface PendingNotebaseSaveOptions {
   guideDictionaryNotebaseTracking?: PendingNotebaseSave["guideDictionaryNotebaseTracking"]
+  saveSource?: NoteSaveSurface
 }
 
 export type PendingNotebaseSaveActionStatus =
@@ -156,6 +160,7 @@ export function createPendingNotebaseSave(
     ...(options?.guideDictionaryNotebaseTracking
       ? { guideDictionaryNotebaseTracking: options.guideDictionaryNotebaseTracking }
       : {}),
+    ...(options?.saveSource ? { saveSource: options.saveSource } : {}),
     notebaseId: getRandomUUID(),
     columns,
     rows: results.map((result) => ({
@@ -185,6 +190,7 @@ export function createPendingConnectedNotebaseSave(
     ...(options?.guideDictionaryNotebaseTracking
       ? { guideDictionaryNotebaseTracking: options.guideDictionaryNotebaseTracking }
       : {}),
+    ...(options?.saveSource ? { saveSource: options.saveSource } : {}),
     connectionSnapshot: connection,
     results,
   }
@@ -418,4 +424,15 @@ export function doesSchemaMatchPendingColumns(
       column.config.format === "number"
     )
   })
+}
+
+/** The save context a pending save reports, both as a request header and in analytics. */
+export function getPendingNotebaseSaveContext(pending: PendingNotebaseSave): {
+  surface: NoteSaveSurface
+  isGuide: boolean
+} {
+  return {
+    surface: pending.saveSource ?? "custom_action",
+    isGuide: pending.guideDictionaryNotebaseTracking !== undefined,
+  }
 }

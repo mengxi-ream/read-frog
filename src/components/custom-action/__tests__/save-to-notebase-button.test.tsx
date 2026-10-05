@@ -80,26 +80,16 @@ vi.mock("@/utils/orpc/client", () => ({
         }),
       },
     },
-    notebaseRow: {
-      create: {
-        mutationOptions: (options: unknown) => ({
-          mutationFn: notebaseRowCreateMock,
-          ...(options as object),
-        }),
-      },
-      createMany: {
-        mutationOptions: (options: unknown) => ({
-          mutationFn: notebaseRowCreateManyMock,
-          ...(options as object),
-        }),
-      },
-    },
   },
   orpcClient: {
     notebase: {
       create: vi.fn<(...args: any[]) => any>(),
       getSchema: vi.fn<(...args: any[]) => any>(),
       list: vi.fn<(...args: any[]) => any>(),
+    },
+    notebaseRow: {
+      create: notebaseRowCreateMock,
+      createMany: notebaseRowCreateManyMock,
     },
   },
 }))
@@ -222,6 +212,17 @@ function createSchemaForAction(action: SelectionToolbarCustomAction): NotebaseGe
       updatedAt: new Date(),
     })),
   }
+}
+
+function getNoteSaveCompletions() {
+  return vi
+    .mocked(sendMessage)
+    .mock.calls.filter(
+      ([type, data]) =>
+        type === "trackFeatureUsedEvent" &&
+        (data as { action_id?: string }).action_id === "save_completed",
+    )
+    .map(([, data]) => data)
 }
 
 function renderButton(config: Config, action: SelectionToolbarCustomAction) {
@@ -563,6 +564,167 @@ describe("saveToNotebaseButton notebase availability", () => {
         sourceUrl: "https://readfrog.app/guide/step-4",
       })
     })
+  })
+
+  it("sends the guide save context with the row and reports the save's steps", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    guideTrackingMocks.canUseGuideDictionaryNotebaseTracking.mockReturnValue(true)
+    guideTrackingMocks.getActiveGuideDictionaryNotebaseTrackingForAction.mockResolvedValue({
+      id: "tracking-1",
+      actionId: "default-dictionary",
+      sourceUrl: "https://readfrog.app/guide/step-4",
+      startedAt: 1_000,
+      expiresAt: 1_801_000,
+    })
+    const action = createConnectedDictionaryAction()
+    vi.mocked(orpcClient.notebase.getSchema).mockResolvedValueOnce(createSchemaForAction(action))
+    renderButton(config, action)
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(notebaseRowCreateMock).toHaveBeenCalledWith(expect.anything(), {
+        context: { analytics: { surface: "custom_action", isGuide: true } },
+      })
+    })
+    expect(sendMessage).toHaveBeenCalledWith(
+      "trackFeatureUsedEvent",
+      expect.objectContaining({
+        feature: "note_save",
+        action_id: "save_requested",
+        save_source: "custom_action",
+        note_count: 1,
+      }),
+    )
+    await waitFor(() => {
+      expect(sendMessage).toHaveBeenCalledWith(
+        "trackFeatureUsedEvent",
+        expect.objectContaining({
+          feature: "note_save",
+          action_id: "save_completed",
+          outcome: "success",
+          path: "direct",
+          is_guide: true,
+        }),
+      )
+    })
+  })
+
+  it("reports a rejected direct save with its failure reason", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    notebaseRowCreateMock.mockRejectedValueOnce(
+      new ORPCError("NOTE_LIMIT_EXCEEDED", { status: 403 }),
+    )
+    renderButton(config, createConnectedAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(sendMessage).toHaveBeenCalledWith(
+        "trackFeatureUsedEvent",
+        expect.objectContaining({
+          feature: "note_save",
+          action_id: "save_completed",
+          outcome: "failure",
+          failure_reason: "note_limit",
+          path: "direct",
+          is_guide: false,
+        }),
+      )
+    })
+  })
+
+  it("reports a save that failed before the row write", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    vi.mocked(orpcClient.notebase.list).mockRejectedValueOnce(new TypeError("Failed to fetch"))
+    renderButton(config, createConnectedAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(sendMessage).toHaveBeenCalledWith(
+        "trackFeatureUsedEvent",
+        expect.objectContaining({
+          feature: "note_save",
+          action_id: "save_completed",
+          outcome: "failure",
+          failure_reason: "network",
+          path: "direct",
+        }),
+      )
+    })
+    expect(notebaseRowCreateMock).not.toHaveBeenCalled()
+  })
+
+  it("reports a create retried after a failure once, as the save that succeeded", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    vi.mocked(orpcClient.notebase.create).mockRejectedValueOnce(new TypeError("Failed to fetch"))
+    renderButton(config, createAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }),
+    )
+    await waitFor(() => expect(toastManagerMock.add).toHaveBeenCalled())
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: i18n.t("action.saveToNotebaseCreateAndSaveShort"),
+      }),
+    )
+
+    await waitFor(() => expect(orpcClient.notebase.create).toHaveBeenCalledTimes(2))
+    await waitFor(() => expect(getNoteSaveCompletions()).toHaveLength(1))
+    expect(getNoteSaveCompletions()[0]).toMatchObject({
+      outcome: "success",
+      path: "create_notebase",
+    })
+  })
+
+  it("reports the last create failure once the user leaves the dialog", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    vi.mocked(orpcClient.notebase.create).mockRejectedValueOnce(
+      new ORPCError("NOTE_LIMIT_EXCEEDED", { status: 403 }),
+    )
+    renderButton(config, createAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }),
+    )
+    await waitFor(() => expect(orpcClient.notebase.create).toHaveBeenCalledTimes(1))
+    expect(getNoteSaveCompletions()).toHaveLength(0)
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: i18n.t("action.saveToNotebaseConnectExisting") }),
+    )
+
+    expect(getNoteSaveCompletions()).toEqual([
+      expect.objectContaining({
+        outcome: "failure",
+        failure_reason: "note_limit",
+        path: "create_notebase",
+      }),
+    ])
+  })
+
+  it("reports a create dialog a signed-in user leaves without trying as dismissed", () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    renderButton(config, createAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseConnectExisting") }),
+    )
+
+    expect(getNoteSaveCompletions()).toEqual([
+      expect.objectContaining({ outcome: "failure", failure_reason: "dismissed" }),
+    ])
   })
 
   it("does not mark guide complete for default Dictionary saves outside guide step 3", async () => {

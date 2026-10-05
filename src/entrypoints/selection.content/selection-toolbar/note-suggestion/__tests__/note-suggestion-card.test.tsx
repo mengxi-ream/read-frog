@@ -130,9 +130,56 @@ describe("NoteSuggestionCard", () => {
       action: liveAction,
       results: [{ Term: "ephemeral", Definition: "lasting a very short time" }],
       analyticsSource: "note_suggestion",
-      analyticsProvider: { provider: "openai", backend_kind: "llm" },
     })
     expect(mocks.toastAdd).not.toHaveBeenCalled()
+  })
+
+  // Accepting is the click; note_save reports whether the notes arrived, so a
+  // login round trip no longer counts as an acceptance only some of the time.
+  it.each(["saved", "dialog_opened", "failed"] as const)(
+    "records the acceptance on click even when the save ends %s",
+    async (outcome) => {
+      mocks.save.mockResolvedValueOnce(outcome)
+      const action = createAction()
+      renderCard(createStoreWithAction(action), action)
+
+      clickSave()
+
+      await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(1))
+      expect(mocks.track).toHaveBeenCalledWith(
+        expect.objectContaining({ action_id: "suggestion_accepted", action_name: action.name }),
+      )
+    },
+  )
+
+  it("records one acceptance per suggestion when a failed save is retried", async () => {
+    mocks.save.mockResolvedValueOnce("failed").mockResolvedValueOnce("saved")
+    const action = createAction()
+    const store = createStoreWithAction(action)
+    // The config reloads from storage before the retry; keep the action there.
+    await storage.setItem("local:config", store.get(configAtom))
+    renderCard(store, action)
+
+    clickSave()
+    await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(1))
+    clickSave()
+    await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(2))
+
+    const acceptances = mocks.track.mock.calls.filter(
+      ([event]) => event.action_id === "suggestion_accepted",
+    )
+    expect(acceptances).toHaveLength(1)
+  })
+
+  it("records no acceptance for a stale suggestion", async () => {
+    renderCard(createStoreWithAction(), createAction())
+
+    clickSave()
+
+    await waitFor(() => expect(mocks.toastAdd).toHaveBeenCalledTimes(1))
+    expect(mocks.track).not.toHaveBeenCalledWith(
+      expect.objectContaining({ action_id: "suggestion_accepted" }),
+    )
   })
 
   it("selects every suggested note by default and saves only the checked notes", async () => {

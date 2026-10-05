@@ -4,6 +4,7 @@ import type {
   FeatureUsedEventProperties,
   SurfaceByFeature,
 } from "@/types/analytics"
+import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { ANALYTICS_FEATURE_USED_EVENT } from "@/utils/constants/analytics"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
@@ -69,6 +70,7 @@ export async function trackFeatureAttempt<T>(
     void trackFeatureUsed({
       ...context,
       outcome: "failure",
+      failure_reason: classifyFailureReason(error),
     })
     throw error
   }

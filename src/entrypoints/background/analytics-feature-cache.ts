@@ -10,9 +10,12 @@ const featureUsageDayFormatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 })
 
+/** A feature, or a feature split further (e.g. by outcome) to throttle each part separately. */
+export type FeatureUsageCacheKey = AnalyticsFeature | `${AnalyticsFeature}:${string}`
+
 export interface FeatureUsageCache {
-  getLastReportedDay: (feature: AnalyticsFeature) => Promise<string | undefined>
-  setLastReportedDay: (feature: AnalyticsFeature, day: string) => Promise<void>
+  getLastReportedDay: (key: FeatureUsageCacheKey) => Promise<string | undefined>
+  setLastReportedDay: (key: FeatureUsageCacheKey, day: string) => Promise<void>
 }
 
 interface FeatureUsageCacheStorage {
@@ -20,7 +23,8 @@ interface FeatureUsageCacheStorage {
   setItem: (key: FeatureUsageCacheStorageKey, value: unknown) => Promise<void>
 }
 
-type FeatureUsageCacheStorageKey = `local:analyticsFeatureUsedLastReportedDay:${AnalyticsFeature}`
+type FeatureUsageCacheStorageKey =
+  `local:analyticsFeatureUsedLastReportedDay:${FeatureUsageCacheKey}`
 
 export function getFeatureUsageDay(date: Date): string {
   const parts = featureUsageDayFormatter.formatToParts(date)
@@ -36,21 +40,21 @@ export function getFeatureUsageDay(date: Date): string {
 }
 
 export function getFeatureUsageCacheStorageKey(
-  feature: AnalyticsFeature,
+  key: FeatureUsageCacheKey,
 ): FeatureUsageCacheStorageKey {
-  return `local:analyticsFeatureUsedLastReportedDay:${feature}`
+  return `local:analyticsFeatureUsedLastReportedDay:${key}`
 }
 
 export function createStorageFeatureUsageCache(
   cacheStorage: FeatureUsageCacheStorage,
 ): FeatureUsageCache {
   return {
-    async getLastReportedDay(feature) {
-      const value = await cacheStorage.getItem(getFeatureUsageCacheStorageKey(feature))
+    async getLastReportedDay(key) {
+      const value = await cacheStorage.getItem(getFeatureUsageCacheStorageKey(key))
       return typeof value === "string" && FEATURE_USAGE_DAY_PATTERN.test(value) ? value : undefined
     },
-    async setLastReportedDay(feature, day) {
-      await cacheStorage.setItem(getFeatureUsageCacheStorageKey(feature), day)
+    async setLastReportedDay(key, day) {
+      await cacheStorage.setItem(getFeatureUsageCacheStorageKey(key), day)
     },
   }
 }
