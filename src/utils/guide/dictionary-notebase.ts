@@ -8,7 +8,10 @@ export const GUIDE_DICTIONARY_NOTEBASE_ACTION_ID = BUILT_IN_DICTIONARY_ACTION_ID
 export const GUIDE_DICTIONARY_NOTEBASE_COMPLETED_STORAGE_KEY = "guideDictionaryNotebaseCompleted"
 export const GUIDE_DICTIONARY_NOTEBASE_SESSION_STORAGE_KEY = "guideDictionaryNotebaseSession"
 export const GUIDE_DICTIONARY_NOTEBASE_SESSION_TTL_MS = 30 * 60 * 1000
-const GUIDE_DICTIONARY_NOTEBASE_ROUTE_PATH_SUFFIX = "/guide/step-3"
+// Any guide step rather than one step number: the website decides which step hosts
+// the save task (it moved from step 3 to step 4 once, and tracking silently stopped
+// starting), and only that page opens a session through the handshake.
+const GUIDE_STEP_PATH_PATTERN = /\/guide\/step-\d+$/
 
 export const guideDictionaryNotebaseTrackingSchema = z.object({
   id: z.string().nonempty(),
@@ -52,9 +55,7 @@ export function isGuideDictionaryNotebaseGuideUrl(rawUrl: string) {
     const isOfficialOrigin = env.WXT_OFFICIAL_SITE_ORIGINS.includes(url.origin)
     const normalizedPathname = url.pathname.replace(/\/$/, "")
 
-    return (
-      isOfficialOrigin && normalizedPathname.endsWith(GUIDE_DICTIONARY_NOTEBASE_ROUTE_PATH_SUFFIX)
-    )
+    return isOfficialOrigin && GUIDE_STEP_PATH_PATTERN.test(normalizedPathname)
   } catch {
     return false
   }

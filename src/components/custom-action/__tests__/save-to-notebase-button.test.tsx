@@ -382,7 +382,7 @@ describe("saveToNotebaseButton notebase availability", () => {
     guideTrackingMocks.getActiveGuideDictionaryNotebaseTrackingForAction.mockResolvedValue({
       id: "tracking-1",
       actionId: "default-dictionary",
-      sourceUrl: "https://readfrog.app/guide/step-3",
+      sourceUrl: "https://readfrog.app/guide/step-4",
       startedAt: 1_000,
       expiresAt: 1_801_000,
     })
@@ -402,7 +402,7 @@ describe("saveToNotebaseButton notebase availability", () => {
         trackingId: "tracking-1",
         actionId: "default-dictionary",
         notebaseId: expect.any(String),
-        sourceUrl: "https://readfrog.app/guide/step-3",
+        sourceUrl: "https://readfrog.app/guide/step-4",
       })
     })
   })
@@ -532,7 +532,7 @@ describe("saveToNotebaseButton notebase availability", () => {
     guideTrackingMocks.getActiveGuideDictionaryNotebaseTrackingForAction.mockResolvedValue({
       id: "tracking-1",
       actionId: "default-dictionary",
-      sourceUrl: "https://readfrog.app/guide/step-3",
+      sourceUrl: "https://readfrog.app/guide/step-4",
       startedAt: 1_000,
       expiresAt: 1_801_000,
     })
@@ -550,7 +550,7 @@ describe("saveToNotebaseButton notebase availability", () => {
         trackingId: "tracking-1",
         actionId: "default-dictionary",
         notebaseId: "notebase-1",
-        sourceUrl: "https://readfrog.app/guide/step-3",
+        sourceUrl: "https://readfrog.app/guide/step-4",
       })
     })
   })
