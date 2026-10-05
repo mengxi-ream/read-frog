@@ -1,5 +1,5 @@
-import type { Client } from "@orpc/client"
-import type { ORPCRouterClient } from "@read-frog/api-contract"
+import type { ContractRouterClient } from "@orpc/contract"
+import type { contract } from "@read-frog/api-contract"
 import type { ClientContextHeaderInput } from "@read-frog/definitions"
 import { CLIENT_CONTEXT_HEADER, formatClientContextHeader } from "@read-frog/definitions"
 import { storage } from "#imports"
@@ -8,18 +8,17 @@ import {
   DEFAULT_ANALYTICS_ENABLED,
 } from "@/utils/constants/analytics"
 
-/** Per-call context the extension's oRPC clients accept. */
+/**
+ * Per-call context the extension's oRPC links accept. Name each field after
+ * what the link does with it, not after the feature passing it, so a new
+ * caller reuses a field instead of adding one.
+ */
 export interface ExtensionORPCClientContext {
-  /** Where a Notebase write came from, reported to the server's save analytics. */
-  noteSave?: ClientContextHeaderInput
+  /** Sent as the client-context header: telemetry only, left out while analytics is off. */
+  analytics?: ClientContextHeaderInput
 }
 
-type WithClientContext<T, TContext extends ExtensionORPCClientContext> =
-  T extends Client<never, infer TInput, infer TOutput, infer TError>
-    ? Client<TContext, TInput, TOutput, TError>
-    : { [K in keyof T]: WithClientContext<T[K], TContext> }
-
-export type ExtensionORPCClient = WithClientContext<ORPCRouterClient, ExtensionORPCClientContext>
+export type ExtensionORPCClient = ContractRouterClient<typeof contract, ExtensionORPCClientContext>
 
 async function isAnalyticsEnabled(): Promise<boolean> {
   try {
@@ -31,14 +30,14 @@ async function isAnalyticsEnabled(): Promise<boolean> {
 }
 
 /**
- * Headers for one call. The save context is telemetry, so it is only sent
- * while the user keeps the extension's analytics switch on.
+ * Headers for one call. The analytics context is telemetry, so it is only
+ * sent while the user keeps the extension's analytics switch on.
  */
 export async function buildExtensionORPCHeaders(
   context: ExtensionORPCClientContext | undefined,
 ): Promise<Record<string, string>> {
   const headers: Record<string, string> = { "x-orpc-source": "extension" }
-  const clientContext = context?.noteSave && formatClientContextHeader(context.noteSave)
+  const clientContext = context?.analytics && formatClientContextHeader(context.analytics)
   if (clientContext && (await isAnalyticsEnabled())) {
     headers[CLIENT_CONTEXT_HEADER] = clientContext
   }

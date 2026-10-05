@@ -141,7 +141,7 @@ export function SaveToNotebaseDialogHost() {
       connectedAccount: SelectionToolbarCustomActionNotebaseAccount
     }) => {
       await orpcClient.notebase.create(buildNotebaseCreateInputFromPending(pendingCreateSave), {
-        context: { noteSave: getPendingNotebaseSaveContext(pendingCreateSave) },
+        context: { analytics: getPendingNotebaseSaveContext(pendingCreateSave) },
       })
       return pendingCreateSave
     },

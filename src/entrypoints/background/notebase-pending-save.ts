@@ -771,11 +771,11 @@ export function setupNotebasePendingSaveProcessor(waitUntilReady: () => Promise<
     setConfig: setLocalConfig,
     getAuthenticatedAccount,
     createNotebase: (input, noteSave) =>
-      backgroundOrpcClient.notebase.create(input, { context: { noteSave } }),
+      backgroundOrpcClient.notebase.create(input, { context: { analytics: noteSave } }),
     createRow: (input, noteSave) =>
-      backgroundOrpcClient.notebaseRow.create(input, { context: { noteSave } }),
+      backgroundOrpcClient.notebaseRow.create(input, { context: { analytics: noteSave } }),
     createRows: (input, noteSave) =>
-      backgroundOrpcClient.notebaseRow.createMany(input, { context: { noteSave } }),
+      backgroundOrpcClient.notebaseRow.createMany(input, { context: { analytics: noteSave } }),
     listNotebases: () => backgroundOrpcClient.notebase.list({}),
     getSchema: (id) => backgroundOrpcClient.notebase.getSchema({ id }),
     completeGuideDictionaryNotebase: completeGuideDictionaryNotebaseAndNotify,

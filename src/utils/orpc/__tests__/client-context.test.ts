@@ -3,7 +3,7 @@ import { storage } from "#imports"
 import { DEFAULT_ANALYTICS_ENABLED } from "@/utils/constants/analytics"
 import { buildExtensionORPCHeaders } from "../client-context"
 
-const NOTE_SAVE = { noteSave: { surface: "note_suggestion" as const, isGuide: true } }
+const ANALYTICS_CONTEXT = { analytics: { surface: "note_suggestion" as const, isGuide: true } }
 
 function mockAnalyticsSwitch(value: unknown) {
   storage.getItem = vi.fn<(...args: any[]) => any>(() => Promise.resolve(value))
@@ -14,7 +14,7 @@ describe("buildExtensionORPCHeaders", () => {
     mockAnalyticsSwitch(true)
   })
 
-  it("only identifies the extension on calls without a save context", async () => {
+  it("only identifies the extension on calls without analytics context", async () => {
     await expect(buildExtensionORPCHeaders(undefined)).resolves.toEqual({
       "x-orpc-source": "extension",
     })
@@ -23,17 +23,17 @@ describe("buildExtensionORPCHeaders", () => {
     })
   })
 
-  it("adds the save context while the analytics switch is on", async () => {
-    await expect(buildExtensionORPCHeaders(NOTE_SAVE)).resolves.toEqual({
+  it("adds the analytics context while the analytics switch is on", async () => {
+    await expect(buildExtensionORPCHeaders(ANALYTICS_CONTEXT)).resolves.toEqual({
       "x-orpc-source": "extension",
       "x-read-frog-client-context": "surface=note_suggestion, guide",
     })
   })
 
-  it("leaves the save context out once the user turned analytics off", async () => {
+  it("leaves the analytics context out once the user turned analytics off", async () => {
     mockAnalyticsSwitch(false)
 
-    await expect(buildExtensionORPCHeaders(NOTE_SAVE)).resolves.toEqual({
+    await expect(buildExtensionORPCHeaders(ANALYTICS_CONTEXT)).resolves.toEqual({
       "x-orpc-source": "extension",
     })
   })
@@ -41,15 +41,15 @@ describe("buildExtensionORPCHeaders", () => {
   it("follows the browser default when the switch was never set", async () => {
     mockAnalyticsSwitch(undefined)
 
-    const headers = await buildExtensionORPCHeaders(NOTE_SAVE)
+    const headers = await buildExtensionORPCHeaders(ANALYTICS_CONTEXT)
 
     expect("x-read-frog-client-context" in headers).toBe(DEFAULT_ANALYTICS_ENABLED)
   })
 
-  it("sends no save context when the switch cannot be read", async () => {
+  it("sends no analytics context when the switch cannot be read", async () => {
     storage.getItem = vi.fn<(...args: any[]) => any>(() => Promise.reject(new Error("no storage")))
 
-    await expect(buildExtensionORPCHeaders(NOTE_SAVE)).resolves.toEqual({
+    await expect(buildExtensionORPCHeaders(ANALYTICS_CONTEXT)).resolves.toEqual({
       "x-orpc-source": "extension",
     })
   })

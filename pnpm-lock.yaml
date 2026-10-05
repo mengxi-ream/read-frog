@@ -280,6 +280,9 @@ importers:
       '@orpc/client':
         specifier: ^1.15.4
         version: 1.15.4(@opentelemetry/api@1.9.1)
+      '@orpc/contract':
+        specifier: ^1.15.4
+        version: 1.15.4(@opentelemetry/api@1.9.1)
       '@orpc/tanstack-query':
         specifier: ^1.15.4
         version: 1.15.4(@opentelemetry/api@1.9.1)(@orpc/client@1.15.4(@opentelemetry/api@1.9.1))(@tanstack/query-core@5.104.0)

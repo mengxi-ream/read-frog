@@ -574,7 +574,7 @@ describe("saveToNotebaseButton notebase availability", () => {
 
     await waitFor(() => {
       expect(notebaseRowCreateMock).toHaveBeenCalledWith(expect.anything(), {
-        context: { noteSave: { surface: "custom_action", isGuide: true } },
+        context: { analytics: { surface: "custom_action", isGuide: true } },
       })
     })
     expect(sendMessage).toHaveBeenCalledWith(

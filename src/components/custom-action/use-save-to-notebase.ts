@@ -69,7 +69,7 @@ interface DirectNoteSaveVariables<TInput> {
 }
 
 function toNoteSaveContext(attempt: DirectNoteSaveAttempt) {
-  return { noteSave: { surface: attempt.saveSource, isGuide: attempt.isGuide } }
+  return { analytics: { surface: attempt.saveSource, isGuide: attempt.isGuide } }
 }
 
 /**
