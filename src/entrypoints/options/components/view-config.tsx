@@ -36,7 +36,7 @@ export function ViewConfig({
         <DialogHeader>
           <DialogTitle>{i18n.t("options.preference.config.viewConfig.title")}</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="h-96 w-full rounded-lg border bg-muted">
+        <ScrollArea className="h-96 w-full rounded-2xl border bg-muted">
           <pre className="overflow-wrap-anywhere p-4 text-xs break-all whitespace-pre-wrap">
             {JSON.stringify(
               {

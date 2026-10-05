@@ -10,7 +10,7 @@ function Root({ children, className, selected, ...props }: RootProps) {
   return (
     <div
       className={cn(
-        "relative cursor-pointer rounded-lg border bg-card p-3 transition-colors",
+        "relative cursor-pointer rounded-2xl border bg-card p-3 transition-colors",
         selected && "border-primary",
         className,
       )}

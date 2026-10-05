@@ -414,7 +414,7 @@ export const NotebaseConnectionField = withForm({
     return (
       <Field
         className={
-          variant === "tab" ? "gap-4" : "gap-4 rounded-xl border border-dashed bg-muted/10 p-4"
+          variant === "tab" ? "gap-4" : "gap-4 rounded-2xl border border-dashed bg-muted/10 p-4"
         }
       >
         {variant === "tab" ? (

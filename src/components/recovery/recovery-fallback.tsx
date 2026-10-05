@@ -50,7 +50,7 @@ export function RecoveryFallback({ error, onRecovered }: RecoveryFallbackProps) 
 
   return (
     <div className="min-h-full w-full p-4 md:p-6">
-      <div className="mx-auto max-w-xl space-y-4 rounded-xl border bg-card p-4 md:p-6">
+      <div className="mx-auto max-w-xl space-y-4 rounded-2xl border bg-card p-4 md:p-6">
         <div className="space-y-2">
           <h2 className="text-lg font-semibold">{i18n.t("errorRecovery.title")}</h2>
           <p className="text-sm text-muted-foreground">{i18n.t("errorRecovery.description")}</p>

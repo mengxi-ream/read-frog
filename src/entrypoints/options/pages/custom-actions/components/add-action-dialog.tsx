@@ -33,7 +33,7 @@ export function AddActionDialog({
           <button
             key={template.id}
             type="button"
-            className="flex items-center gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-muted/70"
+            className="flex items-center gap-3 rounded-2xl border p-3 text-left transition-colors hover:bg-muted/70"
             onClick={() => onSelect(template)}
           >
             <Icon

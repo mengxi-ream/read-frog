@@ -4,7 +4,7 @@ function Root({ children, className }: { children: React.ReactNode; className?: 
   return (
     <div
       className={cn(
-        "flex flex-1 flex-col justify-between rounded-xl border bg-card p-4",
+        "flex flex-1 flex-col justify-between rounded-2xl border bg-card p-4",
         className,
       )}
     >
@@ -25,7 +25,7 @@ function Empty({ children, className }: { children: React.ReactNode; className?:
   return (
     <div
       className={cn(
-        "flex min-h-[420px] flex-1 items-center justify-center rounded-xl border bg-card p-4 text-sm text-muted-foreground",
+        "flex min-h-[420px] flex-1 items-center justify-center rounded-2xl border bg-card p-4 text-sm text-muted-foreground",
         className,
       )}
     >

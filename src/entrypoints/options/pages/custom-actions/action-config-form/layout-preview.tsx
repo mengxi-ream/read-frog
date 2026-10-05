@@ -361,7 +361,7 @@ export function LayoutPreview({
 
       <LayoutPreviewFrame
         theme={theme}
-        className={cn("rounded-xl border bg-muted/40 p-4", frameClassName)}
+        className={cn("rounded-2xl border bg-muted/40 p-4", frameClassName)}
       >
         <div
           className="mx-auto overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-lg"
