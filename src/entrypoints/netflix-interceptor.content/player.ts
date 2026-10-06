@@ -3,6 +3,7 @@ import type {
   NetflixSubtitlesResponse,
 } from "@/utils/subtitles/fetchers/netflix"
 import {
+  NETFLIX_LOAD_TIMEOUT_MS,
   NETFLIX_SUBTITLES_REQUEST_TYPE,
   NETFLIX_SUBTITLES_RESPONSE_TYPE,
   NETFLIX_PAGE_POLL_INTERVAL_MS,
@@ -29,9 +30,20 @@ interface NetflixPlayer {
 
 let replacedTrack: { movieId: number; track: TimedTextTrack; pickedTrackId: string } | null = null
 
-const PAGE_WAIT = {
-  timeoutMs: NETFLIX_PAGE_WAIT_TIMEOUT_MS,
-  intervalMs: NETFLIX_PAGE_POLL_INTERVAL_MS,
+// Each wait gets whatever time is left before the request's deadline.
+function untilDeadline(deadline: number) {
+  return { timeoutMs: deadline - Date.now(), intervalMs: NETFLIX_PAGE_POLL_INTERVAL_MS }
+}
+
+function emptyResponse(requestId: string): NetflixSubtitlesResponse {
+  return {
+    type: NETFLIX_SUBTITLES_RESPONSE_TYPE,
+    requestId,
+    movieId: null,
+    trackId: null,
+    translatable: false,
+    ttml: null,
+  }
 }
 
 function getReadyPlayer(): NetflixPlayer | null {
@@ -79,15 +91,12 @@ async function handleRequest(
   requestId: string,
   action: NetflixSubtitlesAction,
 ): Promise<NetflixSubtitlesResponse> {
-  const response: NetflixSubtitlesResponse = {
-    type: NETFLIX_SUBTITLES_RESPONSE_TYPE,
-    requestId,
-    movieId: null,
-    trackId: null,
-    translatable: false,
-    ttml: null,
-  }
-  const player = await pollUntil(getReadyPlayer, PAGE_WAIT)
+  const response = emptyResponse(requestId)
+  // A load shares one deadline between the player and its subtitle file, so the content
+  // script knows the longest it can take.
+  const deadline =
+    Date.now() + (action === "load" ? NETFLIX_LOAD_TIMEOUT_MS : NETFLIX_PAGE_WAIT_TIMEOUT_MS)
+  const player = await pollUntil(getReadyPlayer, untilDeadline(deadline))
   if (!player) return response
 
   const movieId = player.getMovieId()
@@ -107,7 +116,10 @@ async function handleRequest(
   response.trackId = track?.trackId ?? null
   response.translatable = isTranslatable(track)
   if (action === "load" && track && response.translatable) {
-    response.ttml = await pollUntil(() => findCapturedTtml(movieId, track.trackId), PAGE_WAIT)
+    response.ttml = await pollUntil(
+      () => findCapturedTtml(movieId, track.trackId),
+      untilDeadline(deadline),
+    )
   }
   return response
 }
@@ -120,9 +132,10 @@ export function listenForSubtitlesRequests(): void {
     ) {
       return
     }
-    void handleRequest(event.data.requestId, event.data.action).then(
-      (response) => window.postMessage(response, window.location.origin),
-      () => {},
-    )
+    const { requestId, action } = event.data
+    // Answer even when reading the player throws, so the content script is not left waiting.
+    void handleRequest(requestId, action)
+      .catch(() => emptyResponse(requestId))
+      .then((response) => window.postMessage(response, window.location.origin))
   })
 }

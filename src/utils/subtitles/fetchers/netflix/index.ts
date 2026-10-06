@@ -2,8 +2,10 @@ import type { SubtitlesFetcher } from "../types"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { z } from "zod"
 import {
+  NETFLIX_LOAD_POST_MESSAGE_TIMEOUT_MS,
   NETFLIX_SUBTITLES_REQUEST_TYPE,
   NETFLIX_SUBTITLES_RESPONSE_TYPE,
+  POST_MESSAGE_TIMEOUT_MS,
 } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
 import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
@@ -26,10 +28,11 @@ export type NetflixSubtitlesResponse = z.infer<typeof netflixSubtitlesResponseSc
 async function requestNetflixSubtitles(
   action: NetflixSubtitlesAction,
 ): Promise<NetflixSubtitlesResponse | null> {
-  const response = await postMessageRequest(NETFLIX_SUBTITLES_RESPONSE_TYPE, {
-    type: NETFLIX_SUBTITLES_REQUEST_TYPE,
-    action,
-  })
+  const response = await postMessageRequest(
+    NETFLIX_SUBTITLES_RESPONSE_TYPE,
+    { type: NETFLIX_SUBTITLES_REQUEST_TYPE, action },
+    action === "load" ? NETFLIX_LOAD_POST_MESSAGE_TIMEOUT_MS : POST_MESSAGE_TIMEOUT_MS,
+  )
   const parsed = netflixSubtitlesResponseSchema.safeParse(response)
   return parsed.success ? parsed.data : null
 }
@@ -42,7 +45,8 @@ export class NetflixSubtitlesFetcher implements SubtitlesFetcher {
 
   async fetch(): Promise<SubtitlesFragment[]> {
     const response = await requestNetflixSubtitles("load")
-    if (!response) {
+    // No reply, or a player that never became ready: either way the wait ran out.
+    if (!response || response.movieId === null) {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.fetchSubTimeout"))
     }
     if (
@@ -52,9 +56,16 @@ export class NetflixSubtitlesFetcher implements SubtitlesFetcher {
     ) {
       return this.subtitles
     }
+    if (!response.translatable) {
+      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
+    }
+    // The video has a usable track, but its subtitle file never reached the page script.
+    if (!response.ttml) {
+      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.trackFileNotLoaded"))
+    }
 
-    const parsed = response.translatable && response.ttml ? parseNetflixTtml(response.ttml) : null
-    if (!parsed?.fragments.length) {
+    const parsed = parseNetflixTtml(response.ttml)
+    if (!parsed.fragments.length) {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
     }
 

@@ -2,15 +2,25 @@
 
 import type { NetflixSubtitlesResponse } from ".."
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import {
+  NETFLIX_LOAD_POST_MESSAGE_TIMEOUT_MS,
+  POST_MESSAGE_TIMEOUT_MS,
+} from "@/utils/constants/subtitles"
 import { NetflixSubtitlesFetcher } from ".."
 
 vi.mock("@/utils/i18n", () => ({ i18n: { t: (key: string) => key } }))
 
 const postMessageRequest =
-  vi.fn<(type: string, message: { action: string }) => Promise<NetflixSubtitlesResponse | null>>()
+  vi.fn<
+    (
+      type: string,
+      message: { action: string },
+      timeoutMs?: number,
+    ) => Promise<NetflixSubtitlesResponse | null>
+  >()
 vi.mock("@/utils/subtitles/fetchers/post-message-request", () => ({
-  postMessageRequest: (type: string, message: { action: string }) =>
-    postMessageRequest(type, message),
+  postMessageRequest: (type: string, message: { action: string }, timeoutMs?: number) =>
+    postMessageRequest(type, message, timeoutMs),
 }))
 
 const TTML = `<?xml version="1.0" encoding="utf-8"?>
@@ -58,6 +68,43 @@ describe("NetflixSubtitlesFetcher", () => {
     )
   })
 
+  it("says the subtitles failed to load when the track's file never reached the page", async () => {
+    respondWith({ load: response({ ttml: null }) })
+
+    await expect(new NetflixSubtitlesFetcher().fetch()).rejects.toThrow(
+      "subtitles.errors.trackFileNotLoaded",
+    )
+  })
+
+  it("reports a player that never became ready as a timeout", async () => {
+    respondWith({
+      load: response({ movieId: null, trackId: null, translatable: false, ttml: null }),
+    })
+
+    await expect(new NetflixSubtitlesFetcher().fetch()).rejects.toThrow(
+      "subtitles.errors.fetchSubTimeout",
+    )
+  })
+
+  it("waits out the page's load deadline but gives other requests the usual time", async () => {
+    respondWith({ load: response(), state: response() })
+    const fetcher = new NetflixSubtitlesFetcher()
+
+    await fetcher.fetch()
+    await fetcher.shouldUseSameTrack()
+
+    expect(postMessageRequest).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ action: "load" }),
+      NETFLIX_LOAD_POST_MESSAGE_TIMEOUT_MS,
+    )
+    expect(postMessageRequest).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ action: "state" }),
+      POST_MESSAGE_TIMEOUT_MS,
+    )
+  })
+
   it("treats a malformed response from the page like no response at all", async () => {
     respondWith({ load: { ...response(), movieId: "1" } as unknown as NetflixSubtitlesResponse })
 
@@ -96,6 +143,7 @@ describe("NetflixSubtitlesFetcher", () => {
     expect(postMessageRequest).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({ action: "restore" }),
+      POST_MESSAGE_TIMEOUT_MS,
     )
   })
 })

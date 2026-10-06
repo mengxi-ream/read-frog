@@ -1653,6 +1653,7 @@ subtitles:
     fetchSubTimeout: YouTube altyazılar alınırken zaman aşımı oluştu.
     buttonNotFound: Altyazı butonu bulunamadı
     noSubtitlesFound: Bu video için altyazı bulunmuyor
+    trackFileNotLoaded: Altyazılar yüklenemedi, lütfen sayfayı yenilemeyi deneyin
     videoNotFound: Video öğesi bulunamadı
     controlsBarNotFound: Kontrol çubuğu bulunamadı
     aiRateLimited: Çok fazla istek, lütfen daha sonra tekrar deneyin
