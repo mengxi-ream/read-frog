@@ -33,7 +33,7 @@ export default function TranslateButton({
     >
       <IconCheck
         className={cn(
-          "absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full bg-green-500 text-white",
+          "absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full bg-success text-white",
           isEnabled ? "block" : "hidden",
         )}
       />

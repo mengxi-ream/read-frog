@@ -62,13 +62,13 @@ function getUpsertReplayClassName(toast: {
   return isEven ? "animate-toast-success-even" : "animate-toast-success-odd"
 }
 
-// Only an error is coloured: the icon's shape already says which kind of news it is.
+// Success, warning and error take their status colour; info and loading stay neutral.
 function ToastIcon({ type }: { type: string | undefined }): ReactElement | null {
   let icon: ReactNode = null
 
-  if (type === "success") icon = <IconCircleCheck aria-hidden="true" />
+  if (type === "success") icon = <IconCircleCheck className="text-success" aria-hidden="true" />
   if (type === "info") icon = <IconInfoCircle aria-hidden="true" />
-  if (type === "warning") icon = <IconAlertTriangle aria-hidden="true" />
+  if (type === "warning") icon = <IconAlertTriangle className="text-warning" aria-hidden="true" />
   if (type === "error") icon = <IconAlertOctagon className="text-destructive" aria-hidden="true" />
   if (type === "loading") {
     icon = <IconLoader className="animate-spin motion-reduce:animate-none" aria-hidden="true" />

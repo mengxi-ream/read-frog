@@ -42,7 +42,7 @@ export function CopyButton({ text }: { text: string | undefined }) {
         />
       }
     >
-      {copied ? <IconCheck className="text-green-500" /> : <IconCopy />}
+      {copied ? <IconCheck className="text-success" /> : <IconCopy />}
     </SelectionPopoverTooltip>
   )
 }

@@ -25,8 +25,8 @@ export const STYLE_MAP = {
     label: "options.preference.config.googleDrive.unresolved.remoteLatest",
   },
   unresolved: {
-    bg: "bg-orange-100/50 dark:bg-orange-900/30",
-    border: "border-l-orange-500",
+    bg: "bg-warning/10",
+    border: "border-l-warning",
   },
 } as const
 

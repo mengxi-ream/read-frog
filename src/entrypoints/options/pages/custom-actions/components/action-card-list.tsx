@@ -103,7 +103,7 @@ export function CustomActionCardList() {
       </Dialog>
 
       {customActionProviders.length === 0 && (
-        <div className="text-sm text-amber-600 dark:text-amber-400">
+        <div className="text-sm text-warning">
           {i18n.t("options.selectionToolbar.customActions.noEnabledLlmProvider")}
         </div>
       )}

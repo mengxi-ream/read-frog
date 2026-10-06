@@ -23,7 +23,7 @@ export function ErrorButton({ error }: { error: APICallError }) {
         }
       />
       <HoverCardContent container={shadowWrapper} className="notranslate w-64" render={<Alert />}>
-        <IconAlertCircle className="size-4 text-red-500!" />
+        <IconAlertCircle className="size-4 text-destructive!" />
         <AlertTitle>Translation Error</AlertTitle>
         <AlertDescription className="break-all">
           {!isContextInvalidated && <StatusCode statusCode={error.statusCode ?? 500} />}
@@ -43,13 +43,13 @@ function StatusCode({ statusCode }: { statusCode: number }) {
     const firstDigit = Math.floor(code / 100)
     switch (firstDigit) {
       case 2:
-        return "bg-green-500" // 2xx - Success
+        return "bg-success" // 2xx - Success
       case 3:
         return "bg-blue-500" // 3xx - Redirection
       case 4:
-        return "bg-yellow-500" // 4xx - Client Error
+        return "bg-warning" // 4xx - Client Error
       case 5:
-        return "bg-red-500" // 5xx - Server Error
+        return "bg-destructive" // 5xx - Server Error
       default:
         return "bg-gray-500" // Unknown
     }

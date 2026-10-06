@@ -117,7 +117,7 @@ export function UserRulesEditor() {
         <div className="flex items-center justify-between gap-2">
           <div
             className={cn(
-              "text-sm text-green-500",
+              "text-sm text-success",
               isValidating && "text-muted-foreground",
               !validation.ok && "text-destructive",
             )}

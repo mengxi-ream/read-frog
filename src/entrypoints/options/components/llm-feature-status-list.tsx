@@ -98,7 +98,7 @@ export function LlmFeatureStatusList({
           <span
             className={cn(
               "size-2 shrink-0 rounded-full",
-              hasLLMProvider ? "bg-green-500" : "bg-orange-400",
+              hasLLMProvider ? "bg-success" : "bg-warning",
             )}
           />
           <span className="text-[13px]">{text}</span>

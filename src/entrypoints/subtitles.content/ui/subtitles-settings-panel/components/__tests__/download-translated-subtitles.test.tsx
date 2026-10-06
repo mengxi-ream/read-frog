@@ -153,7 +153,7 @@ describe("download translated subtitles", () => {
     setStatus(store, TranslatedDownloadPhase.Complete, null)
     const completeMessage = screen.getByText("subtitles.actions.downloadTranslatedComplete")
     expect(completeMessage).toBeInTheDocument()
-    expect(completeMessage).toHaveClass("text-emerald-300")
+    expect(completeMessage).toHaveClass("text-success")
     expect(button).not.toBeDisabled()
   })
 })
