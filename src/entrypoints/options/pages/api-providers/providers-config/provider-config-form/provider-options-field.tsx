@@ -67,7 +67,11 @@ export const ProviderOptionsField = withForm({
               <HelpTooltip>{i18n.t("options.apiProviders.form.providerOptionsHint")}</HelpTooltip>
             </div>
             <a
-              href="https://ai-sdk.dev/providers/ai-sdk-providers"
+              href={
+                providerConfig.provider === "bilibili-translate"
+                  ? "https://index-translate.bilibili.com/"
+                  : "https://ai-sdk.dev/providers/ai-sdk-providers"
+              }
               target="_blank"
               rel="noreferrer"
               className="text-xs text-link hover:opacity-90"
