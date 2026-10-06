@@ -466,7 +466,7 @@ export function validateTranslationConfigAndToast(
     provider.kind === "local" &&
     isAPIProviderConfig(provider.config) &&
     !provider.config.apiKey?.trim() &&
-    !["deeplx", "ollama"].includes(provider.config.provider)
+    !["deeplx", "ollama", "bilibili-translate"].includes(provider.config.provider)
   ) {
     toastManager.add({ type: "error", title: i18n.t("noAPIKeyConfig.warning") })
     logger.info("validateTranslationConfig: returning false (no API key)")

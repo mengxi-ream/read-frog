@@ -33,7 +33,7 @@ export function ModelSuggestionButton({
   onSelect,
   disabled,
 }: ModelSuggestionButtonProps) {
-  const { apiKey } = providerConfig
+  const apiKey = providerConfig.apiKey?.trim()
   const connectionURL = getProviderConnectionURL(providerConfig)
   const mutation = useMutation({
     mutationKey: ["fetchModels", providerConfig.provider, connectionURL],
@@ -41,12 +41,12 @@ export function ModelSuggestionButton({
       errorDescription: i18n.t("options.apiProviders.form.models.fetchError"),
     },
     mutationFn: async () => {
-      if (!apiKey) {
+      if (!apiKey && providerConfig.provider !== "bilibili-translate") {
         throw new Error(i18n.t("options.apiProviders.form.models.apiKeyRequired"))
       }
 
       const response = await fetch(getProviderModelsURL(providerConfig), {
-        headers: { Authorization: `Bearer ${apiKey}` },
+        headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
       })
       if (!response.ok) {
         throw new Error(await extractErrorMessage(response))

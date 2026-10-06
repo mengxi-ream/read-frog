@@ -41,9 +41,7 @@ export const ProviderURLField = withForm({
             label={labelText}
             placeholder={PROVIDER_URL_PLACEHOLDERS[providerType]}
             labelExtra={
-              (providerType === "ollama" || providerType === "bilibili-translate") && (
-                <ConnectionTestButton providerConfig={providerConfig} />
-              )
+              providerType === "ollama" && <ConnectionTestButton providerConfig={providerConfig} />
             }
           />
         )}
