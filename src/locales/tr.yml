@@ -1377,7 +1377,7 @@ options:
       title: Temel ayarlar
       enable:
         title: Video altyazılarını aç
-        description: Oynatıcı kontrollerine bir çeviri düğmesi ekler. Şimdilik yalnızca YouTube destekleniyor.
+        description: YouTube, X ve Netflix'te oynatıcı kontrollerine bir çeviri düğmesi ekler.
       autoStart:
         title: Video açılınca çevir
         description: Video yüklenir yüklenmez, düğmeye basmadan altyazıları çevirmeye başlar.

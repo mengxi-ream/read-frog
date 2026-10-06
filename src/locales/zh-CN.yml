@@ -1387,7 +1387,7 @@ options:
       title: 基础设置
       enable:
         title: 开启视频字幕
-        description: 在视频播放器控制栏加上翻译按钮。目前只支持 YouTube。
+        description: 在 YouTube、X 和 Netflix 的视频播放器控制栏加上翻译按钮。
       autoStart:
         title: 打开视频就翻译
         description: 视频加载完成后自动开始翻译字幕，不用再点按钮。
