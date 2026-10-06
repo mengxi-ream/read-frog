@@ -205,7 +205,7 @@ export const PROVIDER_ITEMS: Record<
   "bilibili-translate": {
     logo: () => "https://www.bilibili.com/favicon.ico",
     name: "Bilibili Index Translate",
-    website: "https://github.com/bilibili/Index-Translate",
+    website: "https://index-translate.bilibili.com/",
   },
   "microsoft-translate": {
     logo: getLobeIconsCDNUrlFn("microsoft-color"),
