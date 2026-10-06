@@ -37,6 +37,8 @@
   --color-accent: var(--rf-accent);
   --color-accent-foreground: var(--rf-accent-foreground);
   --color-destructive: var(--rf-destructive);
+  --color-success: var(--rf-success);
+  --color-warning: var(--rf-warning);
   --color-border: var(--rf-border);
   --color-input: var(--rf-input);
   --color-ring: var(--rf-ring);
@@ -61,7 +63,6 @@
   --radius-3xl: calc(var(--rf-radius) * 2.2);
   --radius-4xl: calc(var(--rf-radius) * 2.6);
   /* Additional theme variables */
-  --color-warning: var(--rf-warning);
   --color-link: var(--rf-link);
   --animate-toast-success-odd: toast-success-odd 0.32s cubic-bezier(0.5, 1, 0.89, 1);
   --animate-toast-success-even: toast-success-even 0.32s cubic-bezier(0.5, 1, 0.89, 1);
@@ -323,6 +324,12 @@
   --rf-brand: var(--rf-lemon-450);
   --rf-brand-foreground: var(--color-white);
   --rf-destructive: var(--rf-red-600);
+  /* The status colours beside destructive, from the options page's "is this feature on an LLM
+     provider" dots, green-500 and orange-400. Those are the dark-mode values; here each goes one
+     step deeper, as destructive does, so it reads the same against the page in both themes. No
+     foreground: tint instead, as `bg-success/10 text-success`. */
+  --rf-success: var(--color-green-600);
+  --rf-warning: var(--color-orange-500);
   --rf-border: var(--rf-neutral-200);
   --rf-input: var(--rf-neutral-200);
   --rf-ring: var(--rf-neutral-400);
@@ -378,7 +385,6 @@
   --rf-sidebar-ring: var(--rf-neutral-400);
 
   /* Extension-only tokens */
-  --rf-warning: oklch(97.3% 0.071 103.193);
   /* shadow-md's two drops as a property, for a surface that stacks them under a button's bevel:
      the bevel and a shadow-* class both write --tw-shadow, so only one of the two can win. */
   --rf-elevation-floating:
@@ -413,6 +419,8 @@
   --rf-brand: var(--rf-lemon-550);
   --rf-brand-foreground: var(--color-white);
   --rf-destructive: var(--rf-red-400);
+  --rf-success: var(--color-green-500);
+  --rf-warning: var(--color-orange-400);
   --rf-border: oklch(1 0 0 / 10%);
   --rf-input: oklch(1 0 0 / 15%);
   --rf-ring: var(--rf-neutral-500);
@@ -460,7 +468,6 @@
   --rf-sidebar-ring: var(--rf-neutral-500);
 
   /* Extension-only tokens */
-  --rf-warning: oklch(42.1% 0.095 57.708);
   /* Declared again so it resolves against this block's ink and strength. */
   --rf-elevation-floating:
     0 5px 8px 0 rgb(var(--rf-elevation-ink) / calc(0.027 * var(--rf-elevation-strength))),

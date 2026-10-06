@@ -243,11 +243,7 @@ function RenderNotices({ info }: { info: CustomActionLayoutRenderInfo | null }) 
   const notices: React.ReactNode[] = []
   if (info.fellBack) {
     notices.push(
-      <p
-        key="fallback"
-        role="status"
-        className="flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-300"
-      >
+      <p key="fallback" role="status" className="flex items-start gap-1.5 text-xs text-warning">
         <IconAlertTriangle className="mt-px size-3.5 shrink-0" />
         <span className="min-w-0 break-words">
           {i18n.t("options.selectionToolbar.customActions.form.layout.fallbackBanner", [

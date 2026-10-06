@@ -45,7 +45,7 @@ export function SetApiKeyWarning({ providerConfig }: { providerConfig: ProviderC
     .split(LINK_SLOT)
 
   return (
-    <div className="border-warning-border rounded-md border bg-warning px-2 text-xs">
+    <div className="rounded-md border border-warning/30 bg-warning/10 px-2 text-xs">
       {before}
       {inRouterContext ? (
         <Link to={route} className={LINK_CLASS}>

@@ -12,7 +12,7 @@ const downloadTranslatedSubtitlesMessageVariants = cva(
     variants: {
       tone: {
         [DOWNLOAD_TRANSLATED_SUBTITLES_MESSAGE_TONE.Muted]: "text-muted-foreground",
-        [DOWNLOAD_TRANSLATED_SUBTITLES_MESSAGE_TONE.Success]: "text-emerald-300",
+        [DOWNLOAD_TRANSLATED_SUBTITLES_MESSAGE_TONE.Success]: "text-success",
       },
     },
     defaultVariants: {
