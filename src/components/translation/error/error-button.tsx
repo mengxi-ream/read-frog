@@ -23,7 +23,7 @@ export function ErrorButton({ error }: { error: APICallError }) {
         }
       />
       <HoverCardContent container={shadowWrapper} className="notranslate w-64" render={<Alert />}>
-        <IconAlertCircle className="size-4 text-red-500!" />
+        <IconAlertCircle className="size-4 text-destructive!" />
         <AlertTitle>Translation Error</AlertTitle>
         <AlertDescription className="break-all">
           {!isContextInvalidated && <StatusCode statusCode={error.statusCode ?? 500} />}
