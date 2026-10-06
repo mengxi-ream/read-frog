@@ -97,6 +97,7 @@ describe("provider constants", () => {
       "siliconflow",
       "tensdaq",
       "volcengine",
+      "bilibili-translate",
     ])
     expect(OPEN_RESPONSES_LLM_PROVIDER_TYPES).toEqual(["open-responses"])
     expect(PROTOCOL_COMPATIBLE_LLM_PROVIDER_TYPES.slice(0, 5)).toEqual([

@@ -13,10 +13,10 @@ import {
 describe("providerSupportsTranslationOnlyMode", () => {
   it("refuses the providers whose endpoint cannot preserve markup", () => {
     expect(providerSupportsTranslationOnlyMode("microsoft-translate")).toBe(false)
-    expect(providerSupportsTranslationOnlyMode("bilibili-translate")).toBe(false)
   })
 
   it("allows every provider not on that list", () => {
+    expect(providerSupportsTranslationOnlyMode("bilibili-translate")).toBe(true)
     expect(providerSupportsTranslationOnlyMode("google-translate")).toBe(true)
     expect(providerSupportsTranslationOnlyMode("deeplx")).toBe(true)
   })

@@ -262,6 +262,7 @@ options:
         google: 고급 추론 능력을 갖춘 구글의 주력 AI 모델
         anthropic: 안전성과 추론 능력이 뛰어난 Claude 모델
         xai: 실시간 데이터 접근이 가능한 Grok 모델을 제공하는 일론 머스크의 AI 회사
+        bilibiliTranslate: 번역과 AI 기능을 위한 Bilibili 무료 Index 모델. API 키 불필요
         atlascloud: DeepSeek, Kimi, Qwen, Doubao, GLM 등 최신 모델에 OpenAI 호환 방식으로 접근하는 통합 플랫폼
         jalapenocloud: 최고의 팀들이 사용하는 엔터프라이즈급 AI, 이제 당신을 위해 찾아왔습니다!
         siliconflow: 중국 및 국제 모델을 위한 고성능 추론 플랫폼

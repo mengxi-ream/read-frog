@@ -79,6 +79,10 @@ const topLevelReasoningConfigSchema = {
 
 const llmProviderConfigSchemaList = [
   baseOpenAICompatibleLLMProviderConfigSchema.extend({
+    provider: z.literal("bilibili-translate"),
+    model: createProviderModelSchema<"bilibili-translate">("bilibili-translate"),
+  }),
+  baseOpenAICompatibleLLMProviderConfigSchema.extend({
     provider: z.literal("atlascloud"),
     model: createProviderModelSchema<"atlascloud">("atlascloud"),
   }),
@@ -218,9 +222,6 @@ const apiProviderConfigSchemaList = [
 
 export const providerConfigSchemaList = [
   ...apiProviderConfigSchemaList,
-  baseProviderConfigSchema.extend({
-    provider: z.literal("bilibili-translate"),
-  }),
   baseProviderConfigSchema.extend({
     provider: z.literal("google-translate"),
   }),

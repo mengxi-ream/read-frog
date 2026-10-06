@@ -16,6 +16,7 @@ function needsApiKeyWarning(
   return (
     !!providerConfig &&
     isAPIProviderConfig(providerConfig) &&
+    providerConfig.provider !== "bilibili-translate" &&
     !isPureAPIProvider(providerConfig.provider) &&
     !providerConfig.apiKey
   )

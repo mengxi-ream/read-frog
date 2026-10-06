@@ -263,6 +263,7 @@ options:
         google: 具有先进推理能力的谷歌旗舰 AI 模型
         anthropic: 以安全性和推理能力著称的 Claude 模型
         xai: 马斯克的 AI 公司，提供具有实时数据访问能力的 Grok 模型
+        bilibiliTranslate: Bilibili 免费 Index 模型，支持翻译与 AI 功能，无需 API Key
         atlascloud: 统一的 OpenAI 兼容模型平台，提供 DeepSeek、Kimi、Qwen、豆包、GLM 等较新模型
         jalapenocloud: 顶尖团队都在用的企业级 AI，现在为你而来！
         siliconflow: 面向中国和国际模型的高性能推理平台

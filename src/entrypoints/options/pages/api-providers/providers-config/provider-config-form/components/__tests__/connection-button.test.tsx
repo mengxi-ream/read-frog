@@ -29,6 +29,13 @@ describe("ConnectionTestButton", () => {
     mutationMock.reset.mockReset()
   })
 
+  it("allows testing Bilibili without an API key", () => {
+    render(<ConnectionTestButton providerConfig={DEFAULT_PROVIDER_CONFIG["bilibili-translate"]} />)
+    expect(
+      screen.getByRole("button", { name: "options.apiProviders.testConnection.button" }),
+    ).toBeEnabled()
+  })
+
   it("clears successful feedback when the Open Responses endpoint changes", async () => {
     const providerConfig = {
       ...DEFAULT_PROVIDER_CONFIG["open-responses"],

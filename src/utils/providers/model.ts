@@ -37,6 +37,7 @@ import {
 import { compactObject } from "@/types/utils"
 import { getLLMProvidersConfig, getProviderConfigById } from "../config/helpers"
 import { CONFIG_STORAGE_KEY } from "../constants/config"
+import { bilibiliFetch } from "./bilibili"
 import { getProviderHeadersWithOverride } from "./headers"
 import { resolveModelId } from "./model-id"
 import { ProviderSetupError } from "./provider-setup-error"
@@ -121,6 +122,7 @@ export function getLanguageModelForConfig(providerConfig: LLMProviderConfig) {
         name: matchedConfig.provider,
         baseURL: matchedConfig.baseURL,
         supportsStructuredOutputs: true,
+        ...(matchedConfig.provider === "bilibili-translate" && { fetch: bilibiliFetch }),
         ...(matchedConfig.apiKey && { apiKey: matchedConfig.apiKey }),
         ...(headers && { headers }),
       }),

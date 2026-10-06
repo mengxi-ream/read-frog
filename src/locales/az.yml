@@ -263,6 +263,7 @@ options:
         google: Təkmil mühakimə imkanlarına malik aparıcı Google süni intellekt modelləri
         anthropic: Təhlükəsizliyi və güclü mühakimə qabiliyyəti ilə tanınan Claude modelləri
         xai: Real vaxt məlumatlarına çıxışı olan Grok modellərini təqdim edən, Elon Musk tərəfindən qurulmuş süni intellekt şirkəti
+        bilibiliTranslate: Tərcümə və süni intellekt funksiyaları üçün pulsuz Bilibili Index modeli; API açarı tələb olunmur
         atlascloud: Yeni DeepSeek, Kimi, Qwen, Doubao, GLM və digər modellərə OpenAI ilə uyğun vahid çıxış
         jalapenocloud: Aparıcı komandaların istifadə etdiyi korporativ səviyyəli süni intellekt indi sizin üçün də əlçatandır!
         siliconflow: Çin və beynəlxalq modellər üçün yüksək məhsuldarlıqlı model icrası platforması

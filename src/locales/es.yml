@@ -263,6 +263,7 @@ options:
         google: Modelos AI principales de Google con capacidades avanzadas de razonamiento
         anthropic: Modelos Claude conocidos por su seguridad y excelente razonamiento
         xai: Empresa de AI de Elon Musk que ofrece modelos Grok con acceso a datos en tiempo real
+        bilibiliTranslate: Modelo Index gratuito de Bilibili para traducción y funciones de IA, sin clave API
         atlascloud: Plataforma unificada compatible con OpenAI para modelos recientes como DeepSeek, Kimi, Qwen, Doubao y GLM
         jalapenocloud: IA de nivel empresarial que utilizan los mejores equipos, ¡ahora para ti!
         siliconflow: Plataforma de inferencia de alto rendimiento para modelos chinos e internacionales

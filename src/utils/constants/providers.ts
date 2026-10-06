@@ -35,6 +35,11 @@ import { i18n } from "@/utils/i18n"
 import { getLobeIconsCDNUrlFn } from "../logo"
 
 export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
+  "bilibili-translate": {
+    model: "Index-Translate-35B-A3B",
+    isCustomModel: false,
+    customModel: null,
+  },
   openrouter: {
     model: "google/gemma-4-31b-it:free",
     isCustomModel: false,
@@ -199,7 +204,7 @@ export const PROVIDER_ITEMS: Record<
 > = {
   "bilibili-translate": {
     logo: () => "https://www.bilibili.com/favicon.ico",
-    name: NON_API_TRANSLATE_PROVIDERS_MAP["bilibili-translate"],
+    name: "Bilibili Index Translate",
     website: "https://github.com/bilibili/Index-Translate",
   },
   "microsoft-translate": {
@@ -384,6 +389,8 @@ export const DEFAULT_PROVIDER_CONFIG = {
     name: PROVIDER_ITEMS["bilibili-translate"].name,
     enabled: true,
     provider: "bilibili-translate",
+    baseURL: "https://index-translate.bilibili.com/v1",
+    model: DEFAULT_LLM_PROVIDER_MODELS["bilibili-translate"],
   },
   "google-translate": {
     id: "google-translate-default",
@@ -676,6 +683,7 @@ export const FORCED_PROVIDER_HEADERS: Partial<Record<LLMProviderTypes, Record<st
 }
 
 export const PROVIDER_URL_PLACEHOLDERS: Partial<Record<APIProviderTypes, string>> = {
+  "bilibili-translate": DEFAULT_PROVIDER_CONFIG["bilibili-translate"].baseURL,
   jalapenocloud: DEFAULT_PROVIDER_CONFIG.jalapenocloud.baseURL,
   atlascloud: DEFAULT_PROVIDER_CONFIG.atlascloud.baseURL,
   siliconflow: DEFAULT_PROVIDER_CONFIG.siliconflow.baseURL,

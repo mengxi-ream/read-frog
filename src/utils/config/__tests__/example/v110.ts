@@ -109,6 +109,10 @@ export const testSeries: TestSeriesObject = {
           name: "Bilibili Index Translate",
           enabled: true,
           provider: "bilibili-translate",
+          description:
+            "Free Bilibili Index model for translation and AI features; no API key required",
+          baseURL: "https://index-translate.bilibili.com/v1",
+          model: { model: "Index-Translate-35B-A3B", isCustomModel: false, customModel: null },
         },
       ],
       pageTranslation: {
@@ -534,6 +538,10 @@ export const testSeries: TestSeriesObject = {
           name: "Bilibili Index Translate",
           enabled: true,
           provider: "bilibili-translate",
+          description:
+            "Free Bilibili Index model for translation and AI features; no API key required",
+          baseURL: "https://index-translate.bilibili.com/v1",
+          model: { model: "Index-Translate-35B-A3B", isCustomModel: false, customModel: null },
         },
       ],
       pageTranslation: {
@@ -951,6 +959,10 @@ export const testSeries: TestSeriesObject = {
           name: "Bilibili Index Translate",
           enabled: true,
           provider: "bilibili-translate",
+          description:
+            "Free Bilibili Index model for translation and AI features; no API key required",
+          baseURL: "https://index-translate.bilibili.com/v1",
+          model: { model: "Index-Translate-35B-A3B", isCustomModel: false, customModel: null },
         },
       ],
       pageTranslation: {
@@ -1470,6 +1482,10 @@ export const testSeries: TestSeriesObject = {
           name: "Bilibili Index Translate",
           enabled: true,
           provider: "bilibili-translate",
+          description:
+            "Free Bilibili Index model for translation and AI features; no API key required",
+          baseURL: "https://index-translate.bilibili.com/v1",
+          model: { model: "Index-Translate-35B-A3B", isCustomModel: false, customModel: null },
         },
       ],
       pageTranslation: {
@@ -1887,6 +1903,10 @@ export const testSeries: TestSeriesObject = {
           name: "Bilibili Index Translate",
           enabled: true,
           provider: "bilibili-translate",
+          description:
+            "Free Bilibili Index model for translation and AI features; no API key required",
+          baseURL: "https://index-translate.bilibili.com/v1",
+          model: { model: "Index-Translate-35B-A3B", isCustomModel: false, customModel: null },
         },
       ],
       pageTranslation: {

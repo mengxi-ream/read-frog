@@ -62,6 +62,7 @@ export function isTranslateProvider(provider: string): provider is TranslateProv
 }
 
 export const LLM_PROVIDER_TYPES = [
+  "bilibili-translate",
   "openai",
   "deepseek",
   "google",
@@ -108,6 +109,7 @@ const HOSTED_OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES = [
   "siliconflow",
   "tensdaq",
   "volcengine",
+  "bilibili-translate",
 ] as const satisfies Readonly<LLMProviderTypes[]>
 
 export const OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES = [
@@ -214,6 +216,7 @@ export const API_PROVIDER_TYPES = [
   "alibaba",
   "moonshotai",
   "huggingface",
+  "bilibili-translate",
 ] as const satisfies Readonly<(keyof typeof LLM_PROVIDER_MODELS | "deeplx" | "deepl")[]>
 export type APIProviderTypes = (typeof API_PROVIDER_TYPES)[number]
 export function isAPIProvider(provider: string): provider is APIProviderTypes {

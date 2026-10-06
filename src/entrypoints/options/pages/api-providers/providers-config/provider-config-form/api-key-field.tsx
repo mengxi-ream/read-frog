@@ -31,7 +31,7 @@ export const APIKeyField = withForm({
     }, [isHighlighted, setHighlightedField])
 
     const providerType = providerConfig.provider
-    if (providerType === "ollama") {
+    if (providerType === "ollama" || providerType === "bilibili-translate") {
       return <></>
     }
 

@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-import { API_PROVIDER_TYPES } from "@/types/config/provider"
 import { migrate } from "../../migration-scripts/v098-to-v099"
 
 /**
@@ -74,9 +73,43 @@ describe("v098 to v099 migration", () => {
     expect(twice).toBe(once)
   })
 
-  it("covers every API provider type, so no type can be seeded without a description", () => {
+  it("covers every API provider type that existed in v099", () => {
+    // Frozen alongside the migration; new providers seed their own descriptions.
+    const providerTypes = [
+      "openai-compatible",
+      "open-responses",
+      "jalapenocloud",
+      "atlascloud",
+      "openrouter",
+      "minimax",
+      "siliconflow",
+      "tensdaq",
+      "volcengine",
+      "openai",
+      "deepseek",
+      "google",
+      "anthropic",
+      "xai",
+      "deeplx",
+      "deepl",
+      "azure",
+      "bedrock",
+      "groq",
+      "deepinfra",
+      "mistral",
+      "togetherai",
+      "cohere",
+      "fireworks",
+      "cerebras",
+      "replicate",
+      "perplexity",
+      "ollama",
+      "alibaba",
+      "moonshotai",
+      "huggingface",
+    ]
     const config = {
-      providersConfig: API_PROVIDER_TYPES.map((provider, index) => ({
+      providersConfig: providerTypes.map((provider, index) => ({
         id: `p${index}`,
         name: provider,
         enabled: true,

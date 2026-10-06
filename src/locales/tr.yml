@@ -262,6 +262,7 @@ options:
         google: Gelişmiş akıl yürütme yeteneklerine sahip Google'ın amiral gemisi AI modelleri
         anthropic: Güvenlik ve akıl yürütme mükemmelliğiyle tanınan Claude modelleri
         xai: Gerçek zamanlı veri erişimli Grok modelleri sunan Elon Musk'ın AI şirketi
+        bilibiliTranslate: Çeviri ve yapay zekâ özellikleri için ücretsiz Bilibili Index modeli; API anahtarı gerekmez
         atlascloud: DeepSeek, Kimi, Qwen, Doubao ve GLM gibi yeni modellere OpenAI uyumlu birleşik erişim platformu
         jalapenocloud: En iyi ekiplerin kullandığı kurumsal düzeyde yapay zekâ, şimdi sizin için!
         siliconflow: Çin ve uluslararası modeller için yüksek performanslı çıkarım platformu
