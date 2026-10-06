@@ -69,7 +69,7 @@ export const ProviderOptionsField = withForm({
             <a
               href={
                 providerConfig.provider === "bilibili-translate"
-                  ? "https://index-translate.bilibili.com/"
+                  ? "https://github.com/bilibili/Index-Translate"
                   : "https://ai-sdk.dev/providers/ai-sdk-providers"
               }
               target="_blank"
