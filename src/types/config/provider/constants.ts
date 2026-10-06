@@ -19,6 +19,7 @@ export {
 
 // translate provider names
 export const TRANSLATE_PROVIDER_TYPES = [
+  "bilibili-translate",
   "google-translate",
   "microsoft-translate",
   "deeplx",
@@ -234,6 +235,7 @@ export function isNonAPIProvider(provider: string): provider is NonAPIProviderTy
 
 // all provider names
 export const ALL_PROVIDER_TYPES = [
+  "bilibili-translate",
   "google-translate",
   "microsoft-translate",
   "deeplx",

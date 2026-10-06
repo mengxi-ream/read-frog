@@ -6,6 +6,7 @@ import type { MatchedTerm } from "@/utils/glossary/types"
 import { ISO6393_TO_6391, LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { isLLMProviderConfig, isNonAPIProvider, isPureAPIProvider } from "@/types/config/provider"
 import { aiTranslate } from "./api/ai"
+import { bilibiliTranslate } from "./api/bilibili"
 import { deeplTranslate } from "./api/deepl"
 import { deeplxTranslate } from "./api/deeplx"
 import { googleTranslate } from "./api/google"
@@ -38,7 +39,14 @@ export async function executeTranslate<TContext>(
   const { provider } = providerConfig
   let translatedText = ""
 
-  if (isNonAPIProvider(provider)) {
+  if (provider === "bilibili-translate") {
+    translatedText = await bilibiliTranslate(
+      preparedText,
+      langConfig.sourceCode === "auto" ? "auto" : LANG_CODE_TO_EN_NAME[langConfig.sourceCode],
+      LANG_CODE_TO_EN_NAME[langConfig.targetCode],
+      options,
+    )
+  } else if (isNonAPIProvider(provider)) {
     const sourceLang =
       langConfig.sourceCode === "auto" ? "auto" : (ISO6393_TO_6391[langConfig.sourceCode] ?? "auto")
     const targetLang = ISO6393_TO_6391[langConfig.targetCode]

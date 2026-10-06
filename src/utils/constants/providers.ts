@@ -197,6 +197,11 @@ export const PROVIDER_ITEMS: Record<
     apiKeyUrl?: string
   }
 > = {
+  "bilibili-translate": {
+    logo: () => "https://www.bilibili.com/favicon.ico",
+    name: NON_API_TRANSLATE_PROVIDERS_MAP["bilibili-translate"],
+    website: "https://github.com/bilibili/Index-Translate",
+  },
   "microsoft-translate": {
     logo: getLobeIconsCDNUrlFn("microsoft-color"),
     name: NON_API_TRANSLATE_PROVIDERS_MAP["microsoft-translate"],
@@ -374,6 +379,12 @@ export const PROVIDER_ITEMS: Record<
 }
 
 export const DEFAULT_PROVIDER_CONFIG = {
+  "bilibili-translate": {
+    id: "bilibili-translate-default",
+    name: PROVIDER_ITEMS["bilibili-translate"].name,
+    enabled: true,
+    provider: "bilibili-translate",
+  },
   "google-translate": {
     id: "google-translate-default",
     name: PROVIDER_ITEMS["google-translate"].name,
@@ -700,6 +711,7 @@ export const PROVIDER_URL_PLACEHOLDERS: Partial<Record<APIProviderTypes, string>
 export const DEFAULT_PROVIDER_CONFIG_LIST: ProvidersConfig = [
   DEFAULT_PROVIDER_CONFIG["google-translate"],
   DEFAULT_PROVIDER_CONFIG["microsoft-translate"],
+  DEFAULT_PROVIDER_CONFIG["bilibili-translate"],
   DEFAULT_PROVIDER_CONFIG.openai,
   DEFAULT_PROVIDER_CONFIG.jalapenocloud,
   DEFAULT_PROVIDER_CONFIG.deepseek,

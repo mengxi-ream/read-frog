@@ -219,6 +219,9 @@ const apiProviderConfigSchemaList = [
 export const providerConfigSchemaList = [
   ...apiProviderConfigSchemaList,
   baseProviderConfigSchema.extend({
+    provider: z.literal("bilibili-translate"),
+  }),
+  baseProviderConfigSchema.extend({
     provider: z.literal("google-translate"),
   }),
   baseProviderConfigSchema.extend({

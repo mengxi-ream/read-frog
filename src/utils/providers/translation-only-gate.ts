@@ -17,7 +17,10 @@ import { i18n } from "@/utils/i18n"
  * `getTranslationOnlyBlockedReason`, which names the provider from PROVIDER_ITEMS,
  * so adding one here needs no UI change and no new copy.
  */
-const PROVIDERS_WITHOUT_MARKUP_SUPPORT: readonly AllProviderTypes[] = ["microsoft-translate"]
+const PROVIDERS_WITHOUT_MARKUP_SUPPORT: readonly AllProviderTypes[] = [
+  "microsoft-translate",
+  "bilibili-translate",
+]
 
 const providersWithoutMarkupSupport: ReadonlySet<string> = new Set(PROVIDERS_WITHOUT_MARKUP_SUPPORT)
 

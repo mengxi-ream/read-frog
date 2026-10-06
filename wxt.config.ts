@@ -45,6 +45,7 @@ export default defineConfig({
       }),
     permissions: [
       "storage",
+      "declarativeNetRequestWithHostAccess",
       // The glossary is the only user-authored, non-regenerable data the
       // extension stores locally. Without this, IndexedDB is "best-effort" and
       // the browser may evict it under disk pressure — fine for the translation
