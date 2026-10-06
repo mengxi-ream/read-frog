@@ -1,6 +1,6 @@
 name: Read Frog
-extName: Read Frog - Çevir ve Öğren
-extDescription: Read Frog, herhangi bir web sitesinden dilleri derinlemesine öğrenmenize yardımcı olmak için tasarlanmış açık kaynaklı bir tarayıcı uzantısıdır.
+extName: "Read Frog - Yapay Zekâ Çeviri ve Kartlar"
+extDescription: "Web sayfaları ve YouTube, Netflix, X altyazıları için yapay zekâ ile iki dilli çeviri. Yeni kelimeleri kaydedip kartlarla çalışın."
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: Giriş yap

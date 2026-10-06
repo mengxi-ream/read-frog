@@ -1,6 +1,6 @@
 name: 陪读蛙
-extName: 陪读蛙 - 翻译与学习
-extDescription: 陪读蛙是一款开放源代码的浏览器插件，旨在帮助您从任何网站深入学习语言。
+extName: "陪读蛙 - AI 双语翻译、视频字幕与背单词"
+extDescription: "用 AI 双语对照翻译网页，以及 YouTube、Netflix、X 的视频字幕。遇到生词一键保存，用闪卡复习。"
 uninstallSurveyUrl: https://tally.so/r/3E9XDL
 account:
   login: 登录
