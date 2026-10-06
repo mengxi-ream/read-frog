@@ -193,6 +193,7 @@ export const PROVIDER_ITEMS: Record<
     logo: (theme: Theme) => string
     name: string
     website: string
+    providerOptionsDocsUrl?: string
     sponsor?: ProviderSponsorConfig
     /**
      * Where someone signs up for or copies this provider's key. Only providers that set it get
@@ -206,6 +207,7 @@ export const PROVIDER_ITEMS: Record<
     logo: () => "https://www.bilibili.com/favicon.ico",
     name: "Bilibili Index Translate",
     website: "https://index-translate.bilibili.com/",
+    providerOptionsDocsUrl: "https://github.com/bilibili/Index-Translate",
   },
   "microsoft-translate": {
     logo: getLobeIconsCDNUrlFn("microsoft-color"),

@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer"
 import { generateText, Output, streamText } from "ai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { z } from "zod"
@@ -11,12 +12,17 @@ let transport: typeof fetch
 const ENDPOINT = "https://index-translate.bilibili.com/v1/chat/completions"
 
 function completion(content: string) {
-  return Response.json({
+  const body = {
     id: "test",
     created: 1,
     model: "Index-Translate-35B-A3B",
     choices: [{ index: 0, message: { role: "assistant", content }, finish_reason: "stop" }],
     usage: { prompt_tokens: 10, completion_tokens: 5 },
+  }
+  // The shared TextEncoder shim truncates non-ASCII characters. Supply UTF-8
+  // bytes so the SDK receives the same response body on every Node version.
+  return new Response(Buffer.from(JSON.stringify(body), "utf8"), {
+    headers: { "Content-Type": "application/json" },
   })
 }
 
@@ -28,7 +34,7 @@ function streamingCompletion(content: string) {
     (chunk) =>
       `data: ${JSON.stringify({ id: "test", created: 1, model: "Index-Translate-35B-A3B", ...chunk })}\n\n`,
   )
-  return new Response(chunks.join("") + "data: [DONE]\n\n", {
+  return new Response(Buffer.from(chunks.join("") + "data: [DONE]\n\n", "utf8"), {
     headers: { "Content-Type": "text/event-stream" },
   })
 }
@@ -104,7 +110,7 @@ describe("Bilibili model integration", () => {
   it.each(["dictionary", "sentence analysis", "writing improvement", "note suggestion"])(
     "preserves structured streaming for %s",
     async (action) => {
-      const output = { result: `Valid ${action} result` }
+      const output = { result: `有效的 ${action} 结果` }
       fetchMock.mockImplementation(async () => streamingCompletion(JSON.stringify(output)))
       const result = streamText({
         model,

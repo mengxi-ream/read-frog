@@ -3,6 +3,7 @@ import { useSelector } from "@tanstack/react-store"
 import { useCallback } from "react"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { isLLMProviderConfig } from "@/types/config/provider"
+import { PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { i18n } from "@/utils/i18n"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getRecommendedProviderOptions } from "@/utils/providers/options"
@@ -68,9 +69,8 @@ export const ProviderOptionsField = withForm({
             </div>
             <a
               href={
-                providerConfig.provider === "bilibili-translate"
-                  ? "https://github.com/bilibili/Index-Translate"
-                  : "https://ai-sdk.dev/providers/ai-sdk-providers"
+                PROVIDER_ITEMS[providerConfig.provider].providerOptionsDocsUrl ??
+                "https://ai-sdk.dev/providers/ai-sdk-providers"
               }
               target="_blank"
               rel="noreferrer"
