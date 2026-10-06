@@ -136,6 +136,72 @@ describe("NetflixSubtitlesFetcher", () => {
     await expect(fetcher.shouldUseSameTrack()).resolves.toBe(false)
   })
 
+  it("has no track to compare before its first load", async () => {
+    respondWith({ state: response() })
+
+    await expect(new NetflixSubtitlesFetcher().shouldUseSameTrack()).resolves.toBe(false)
+    expect(postMessageRequest).not.toHaveBeenCalled()
+  })
+
+  it("does not restart a load that is still running", async () => {
+    let finishLoad!: (reply: NetflixSubtitlesResponse) => void
+    postMessageRequest.mockImplementation((_type, message) =>
+      message.action === "load"
+        ? new Promise((resolve) => {
+            finishLoad = resolve
+          })
+        : Promise.resolve(response({ trackId: "T:ja" })),
+    )
+    const fetcher = new NetflixSubtitlesFetcher()
+    const loading = fetcher.fetch()
+
+    await expect(fetcher.shouldUseSameTrack()).resolves.toBe(true)
+    expect(postMessageRequest).toHaveBeenCalledTimes(1)
+
+    finishLoad(response())
+    await loading
+  })
+
+  it("waits for another track or episode before retrying a load that failed", async () => {
+    const fetcher = new NetflixSubtitlesFetcher()
+    respondWith({ load: response({ ttml: null }), state: response() })
+    await expect(fetcher.fetch()).rejects.toThrow("subtitles.errors.trackFileNotLoaded")
+
+    await expect(fetcher.shouldUseSameTrack()).resolves.toBe(true)
+
+    respondWith({ state: response({ trackId: "T:ja" }) })
+    await expect(fetcher.shouldUseSameTrack()).resolves.toBe(false)
+
+    respondWith({ state: response({ movieId: 2 }) })
+    await expect(fetcher.shouldUseSameTrack()).resolves.toBe(false)
+  })
+
+  it("retries a load that found no player once the player is ready", async () => {
+    const fetcher = new NetflixSubtitlesFetcher()
+    const noPlayer = response({ movieId: null, trackId: null, translatable: false, ttml: null })
+    respondWith({ load: noPlayer, state: noPlayer })
+    await expect(fetcher.fetch()).rejects.toThrow("subtitles.errors.fetchSubTimeout")
+
+    await expect(fetcher.shouldUseSameTrack()).resolves.toBe(true)
+
+    respondWith({ state: response() })
+    await expect(fetcher.shouldUseSameTrack()).resolves.toBe(false)
+  })
+
+  it("never serves the previous track's subtitles after a load of another track fails", async () => {
+    const fetcher = new NetflixSubtitlesFetcher()
+    respondWith({ load: response() })
+    await fetcher.fetch()
+    respondWith({ load: response({ trackId: "T:ja", ttml: null }) })
+    await expect(fetcher.fetch()).rejects.toThrow("subtitles.errors.trackFileNotLoaded")
+
+    respondWith({
+      load: response({ trackId: "T:ja", ttml: TTML.replace("Hello there.", "やあ。") }),
+    })
+
+    await expect(fetcher.fetch()).resolves.toEqual([{ text: "やあ。", start: 1000, end: 2000 }])
+  })
+
   it("asks the page to put back the track it replaced when native subtitles return", () => {
     respondWith({})
     new NetflixSubtitlesFetcher().showNativeSubtitles()

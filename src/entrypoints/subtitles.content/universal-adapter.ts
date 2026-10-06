@@ -364,7 +364,9 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       }
     }
     assertCurrent()
-    const useSameTrack = await fetcher.shouldUseSameTrack()
+    // Asking the fetcher can cost a round trip to the page, so skip it when nothing is cached.
+    const hasCachedSource = this.sourceVideoId === currentVideoId && this.sourceSubtitles.length > 0
+    const useSameTrack = hasCachedSource && (await fetcher.shouldUseSameTrack())
     assertCurrent()
 
     if (useSameTrack && this.sourceVideoId === currentVideoId && this.sourceSubtitles.length > 0) {
@@ -792,7 +794,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
         this.sessionProcessedFragments.length > 0 && this.sessionVideoId === currentVideoId
       this.sessionVideoId = currentVideoId
 
-      const useSameTrack = await this.fetcher.shouldUseSameTrack()
+      // Only a running session can be resumed, so a fresh start skips the track check.
+      const useSameTrack = hasCurrentSession && (await this.fetcher.shouldUseSameTrack())
 
       if (useSameTrack && hasCurrentSession) {
         // Translated sessions create a coordinator; passthrough sessions only cache rendered fragments.
