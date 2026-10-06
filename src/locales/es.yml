@@ -1655,7 +1655,7 @@ subtitles:
     httpUnknown: Error HTTP $1
     invalidResponse: Formato de respuesta de subtítulos de Youtube no válido
     networkError: Se produjo un error de red al obtener subtítulos
-    fetchSubTimeout: Se agotó el tiempo al obtener subtítulos de youtube
+    fetchSubTimeout: Se agotó el tiempo al obtener subtítulos
     buttonNotFound: Botón de subtítulos no encontrado
     noSubtitlesFound: No hay subtítulos disponibles para este video
     videoNotFound: Elemento de video no encontrado

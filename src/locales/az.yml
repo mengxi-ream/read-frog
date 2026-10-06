@@ -1648,7 +1648,7 @@ subtitles:
     httpUnknown: HTTP xətası $1
     invalidResponse: YouTube subtitr cavabının formatı yanlışdır
     networkError: Subtitrlər gətirilərkən şəbəkə xətası baş verdi
-    fetchSubTimeout: YouTube subtitrlərinin gətirilməsi üçün vaxt bitdi
+    fetchSubTimeout: Subtitrlərin gətirilməsi üçün vaxt bitdi
     buttonNotFound: Subtitr düyməsi tapılmadı
     noSubtitlesFound: Bu video üçün subtitr yoxdur
     videoNotFound: Video elementi tapılmadı

@@ -1650,7 +1650,7 @@ subtitles:
     httpUnknown: HTTP hatası $1
     invalidResponse: YouTube altyazı yanıt biçimi geçersiz
     networkError: YouTube altyazılar alınırken ağ hatası oluştu.
-    fetchSubTimeout: YouTube altyazılar alınırken zaman aşımı oluştu.
+    fetchSubTimeout: Altyazılar alınırken zaman aşımı oluştu.
     buttonNotFound: Altyazı butonu bulunamadı
     noSubtitlesFound: Bu video için altyazı bulunmuyor
     videoNotFound: Video öğesi bulunamadı
