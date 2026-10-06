@@ -1,6 +1,6 @@
-name: 読書カエル
-extName: 読書カエル - 翻訳して学ぶ
-extDescription: 読書カエルは、あらゆるウェブサイトから言語を深く学ぶために設計されたオープンソースのブラウザ拡張機能です。
+name: Read Frog
+extName: "Read Frog - AI対訳翻訳・二重字幕・単語帳"
+extDescription: "ウェブページと YouTube・Netflix・X の動画字幕を AI で対訳翻訳。知らない単語は保存して、フラッシュカードで復習できます。"
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: ログイン
@@ -54,7 +54,7 @@ popup:
   discord:
     tooltip: Discordに参加して開発者とつながり、新機能を先行体験しましょう
   blog:
-    notification: 読書カエルの最新情報
+    notification: Read Frog の最新情報
   aiSmartContext: AI スマートコンテキスト
   aiSmartContextDescription: ウェブページのコンテキストを使用して翻訳品質を向上させます。LLM翻訳プロバイダーが必要です。
   storeReview:

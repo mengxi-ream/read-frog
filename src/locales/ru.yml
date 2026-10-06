@@ -1,6 +1,6 @@
 name: Read Frog
-extName: Read Frog - Переводи и учись
-extDescription: Read Frog — расширение браузера с открытым исходным кодом, которое поможет вам глубоко изучать языки на любом веб-сайте.
+extName: "Read Frog - ИИ-перевод и карточки"
+extDescription: "Двуязычный ИИ-перевод веб-страниц и субтитров YouTube, Netflix и X. Сохраняйте новые слова и повторяйте их на карточках."
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: Войти
