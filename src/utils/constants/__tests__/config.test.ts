@@ -68,6 +68,7 @@ describe("dEFAULT_CONFIG", () => {
     expect(DEFAULT_CONFIG.providersConfig.map((provider) => provider.id)).toEqual([
       "google-translate-default",
       "microsoft-translate-default",
+      "bilibili-translate-default",
       "openai-default",
       "jalapenocloud-default",
       "deepseek-default",
