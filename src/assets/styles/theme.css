@@ -232,18 +232,6 @@
   --rf-neutral-900: var(--color-neutral-900);
   --rf-neutral-950: var(--color-neutral-950);
 
-  --rf-red-50: var(--color-red-50);
-  --rf-red-100: var(--color-red-100);
-  --rf-red-200: var(--color-red-200);
-  --rf-red-300: var(--color-red-300);
-  --rf-red-400: var(--color-red-400);
-  --rf-red-500: var(--color-red-500);
-  --rf-red-600: var(--color-red-600);
-  --rf-red-700: var(--color-red-700);
-  --rf-red-800: var(--color-red-800);
-  --rf-red-900: var(--color-red-900);
-  --rf-red-950: var(--color-red-950);
-
   /* lemon: Tailwind yellow's lightness and hue curve turned 3 degrees toward lemon, with
      Tailwind's chroma capped at 95% of the sRGB edge. The 50-steps are inserted halfway steps:
      450 is the light-mode brand, 550 the dark-mode brand, 650 the dark bevel's shade. */
@@ -323,13 +311,14 @@
      want pressed. */
   --rf-brand: var(--rf-lemon-450);
   --rf-brand-foreground: var(--color-white);
-  --rf-destructive: var(--rf-red-600);
-  /* The status colours beside destructive, from the options page's "is this feature on an LLM
-     provider" dots, green-500 and orange-400. Those are the dark-mode values; here each goes one
-     step deeper, as destructive does, so it reads the same against the page in both themes. No
-     foreground: tint instead, as `bg-success/10 text-success`. */
-  --rf-success: var(--color-green-600);
-  --rf-warning: var(--color-orange-500);
+  /* The status colours, the design system's mint, apricot and watermelon: drawn inside sRGB with
+     chroma near the accent's, so they read milky like lemon and cornflower instead of Tailwind's
+     P3 neon. Success and warning are best as dots, icons and tints (Lc 43.7 and 43.3 as text on
+     white); destructive carries form errors and stays at Lc 61.8. Warning stops at hue 62, short
+     of lemon. No foreground: tint instead, as `bg-success/10 text-success`. */
+  --rf-destructive: oklch(65% 0.17 18);
+  --rf-success: oklch(73% 0.14 163);
+  --rf-warning: oklch(76% 0.14 62);
   --rf-border: var(--rf-neutral-200);
   --rf-input: var(--rf-neutral-200);
   --rf-ring: var(--rf-neutral-400);
@@ -418,9 +407,10 @@
   --rf-accent-foreground: var(--color-white);
   --rf-brand: var(--rf-lemon-550);
   --rf-brand-foreground: var(--color-white);
-  --rf-destructive: var(--rf-red-400);
-  --rf-success: var(--color-green-500);
-  --rf-warning: var(--color-orange-400);
+  /* Lighter and a touch whiter on the dark page: Lc 64.0, 65.3 and 53.0 on the popover. */
+  --rf-destructive: oklch(74% 0.14 16);
+  --rf-success: oklch(77% 0.13 163);
+  --rf-warning: oklch(80% 0.12 64);
   --rf-border: oklch(1 0 0 / 10%);
   --rf-input: oklch(1 0 0 / 15%);
   --rf-ring: var(--rf-neutral-500);
