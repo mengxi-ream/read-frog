@@ -7,7 +7,7 @@ import type {
   SelectionToolbarCustomActionNotebaseAccount,
 } from "@/types/config/selection-toolbar"
 import type { GuideDictionaryNotebaseTracking } from "@/utils/guide/dictionary-notebase"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAtom, useSetAtom } from "jotai"
 import { useRef, useState } from "react"
 import { toastManager } from "@/components/ui/base-ui/toast"
@@ -43,7 +43,7 @@ import {
   createPendingNotebaseSave,
   getNotebaseDetailUrl,
 } from "@/utils/notebase/pending-save"
-import { orpcClient } from "@/utils/orpc/client"
+import { orpc, orpcClient } from "@/utils/orpc/client"
 import { showNotebaseLimitExceededToast } from "./notebase-limit-toast"
 import { saveToNotebaseDialogAtom } from "./save-to-notebase-dialog-atom"
 
@@ -83,6 +83,7 @@ export function useSaveToNotebase() {
     configFieldsAtomMap.selectionToolbar,
   )
   const setSaveToNotebaseDialog = useSetAtom(saveToNotebaseDialogAtom)
+  const queryClient = useQueryClient()
   const { data: session } = authClient.useSession()
   const isAuthenticated = !!session?.user
   const currentAccount = createNotebaseConnectedAccountSnapshot(session?.user)
@@ -104,6 +105,10 @@ export function useSaveToNotebase() {
 
   const handleSaveSuccess = (notebaseId: string, attempt: DirectNoteSaveAttempt) => {
     trackNoteSaveCompleted({ ...attempt, path: "direct" })
+    // The new note can change both which notebase is the recent one and its count.
+    void queryClient.invalidateQueries({
+      queryKey: orpc.srs.recentNotebaseScheduleStatusStats.key(),
+    })
     const notebaseUrl = getNotebaseDetailUrl(notebaseId)
     const guideTracking = savingGuideTrackingRef.current
     savingGuideTrackingRef.current = null

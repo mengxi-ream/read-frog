@@ -39,6 +39,7 @@ import {
   selectionAtom,
   selectionSessionAtom,
 } from "../atoms"
+import { ReviewDueTab } from "../review-due-tab"
 import { useSelectionOpenRequestResolver } from "../use-selection-open-request"
 
 interface SelectionCustomActionPendingOpenRequest {
@@ -423,6 +424,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
             />
             <SelectionToolbarErrorAlert error={displayedError} />
           </SelectionPopover.Body>
+          <ReviewDueTab source="extension_custom_ai_action" />
           <CustomActionFooterContent
             paragraphsText={paragraphsText}
             providers={baseCustomActionProviders}

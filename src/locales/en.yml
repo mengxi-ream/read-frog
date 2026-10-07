@@ -1729,6 +1729,8 @@ action:
   updatePayment: Update payment
   openCustomActions: Open Custom AI Actions
   openNotebase: Open Notebase
+  reviewDueOne: "$1 note to review"
+  reviewDueOther: "$1 notes to review"
   contextDetailsTitleLabel: Title
   contextDetailsParagraphsLabel: Paragraphs
   translation: Translation
