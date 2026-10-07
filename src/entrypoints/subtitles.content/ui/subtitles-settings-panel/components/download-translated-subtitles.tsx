@@ -2,6 +2,7 @@ import { IconDownload, IconLanguage, IconLoader2 } from "@tabler/icons-react"
 import { cva } from "class-variance-authority"
 import { Button } from "@/components/ui/base-ui/button"
 import { i18n } from "@/utils/i18n"
+import { cn } from "@/utils/styles/utils"
 import { DOWNLOAD_TRANSLATED_SUBTITLES_MESSAGE_TONE } from "./download-translated-subtitles.constants"
 import { SubtitlesSettingsItem } from "./subtitles-settings-item"
 import { useDownloadTranslatedSubtitles } from "./use-download-translated-subtitles"
@@ -34,7 +35,10 @@ export function DownloadTranslatedSubtitles() {
           <span className="truncate">{title}</span>
           {message && (
             <span
-              className={downloadTranslatedSubtitlesMessageVariants({ tone: messageTone })}
+              className={cn(
+                downloadTranslatedSubtitlesMessageVariants({ tone: messageTone }),
+                isRunning && "shimmer",
+              )}
               aria-live="polite"
             >
               {message}

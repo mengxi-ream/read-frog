@@ -2,7 +2,6 @@ import type { APIProviderConfig } from "@/types/config/provider"
 import { IconCheck, IconHourglassLow, IconX } from "@tabler/icons-react"
 import { useMutation } from "@tanstack/react-query"
 import { useCallback, useEffect, useRef, useState } from "react"
-import LoadingDots from "@/components/loading-dots"
 import { Button } from "@/components/ui/base-ui/button"
 import { getObjectWithoutAPIKeys } from "@/utils/config/api"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
@@ -191,10 +190,9 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
       disabled={mutation.isPending || (!apiKey && provider !== "deeplx" && provider !== "ollama")}
     >
       {mutation.isPending ? (
-        <>
-          <LoadingDots className="scale-75" />
-          <span className="text-xs">{i18n.t("options.apiProviders.testConnection.testing")}</span>
-        </>
+        <span className="shimmer text-xs">
+          {i18n.t("options.apiProviders.testConnection.testing")}
+        </span>
       ) : visibleFeedback ? (
         <>
           <ConnectionFeedbackIcon feedback={visibleFeedback} />
