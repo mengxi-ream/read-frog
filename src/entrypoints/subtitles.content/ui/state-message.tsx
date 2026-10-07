@@ -42,7 +42,11 @@ export function StateMessage({ state, message }: StateMessageProps) {
         className="flex items-center justify-center rounded-md bg-black/50 px-3 py-2 text-base leading-tight font-medium whitespace-nowrap shadow-[0_4px_16px_rgba(0,0,0,0.35)] backdrop-blur-sm"
         style={{ color }}
       >
-        {text}
+        {/* AI subtitles can take minutes; a static label reads as stuck. The box is
+            always dark over the video, so the sweep brightens toward white. */}
+        <span className={state === "loading" ? "shimmer shimmer-color-white" : undefined}>
+          {text}
+        </span>
       </div>
     </div>
   )

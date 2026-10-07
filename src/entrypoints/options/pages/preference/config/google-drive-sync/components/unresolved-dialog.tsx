@@ -201,9 +201,13 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
             void handleConfirm()
           }}
         >
-          {isConfirming
-            ? i18n.t("options.preference.config.googleDrive.syncing")
-            : i18n.t("options.preference.config.googleDrive.unresolved.confirm")}
+          {isConfirming ? (
+            <span className="shimmer">
+              {i18n.t("options.preference.config.googleDrive.syncing")}
+            </span>
+          ) : (
+            i18n.t("options.preference.config.googleDrive.unresolved.confirm")
+          )}
         </AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>

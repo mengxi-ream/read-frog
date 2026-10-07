@@ -193,7 +193,9 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
       {mutation.isPending ? (
         <>
           <LoadingDots className="scale-75" />
-          <span className="text-xs">{i18n.t("options.apiProviders.testConnection.testing")}</span>
+          <span className="shimmer text-xs">
+            {i18n.t("options.apiProviders.testConnection.testing")}
+          </span>
         </>
       ) : visibleFeedback ? (
         <>
