@@ -151,7 +151,7 @@ export function GlossaryTable({ glossaryId }: { glossaryId: string }) {
             A bare `<table>` rather than `Table`: `Table` wraps itself in its own
             `overflow-x-auto` box, and that box — not this one — would become
             the scroll container the sticky header pins against. */}
-        <div className="max-h-[420px] overflow-y-auto rounded-md border">
+        <div className="max-h-[420px] overflow-y-auto rounded-lg border">
           <table data-slot="table" className="w-full table-fixed caption-bottom text-sm">
             {/* The header's line is drawn as an inset shadow: a collapsed border
                 belongs to the table rather than the header, so it would stay
