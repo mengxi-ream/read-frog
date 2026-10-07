@@ -1582,6 +1582,8 @@ action:
   updatePayment: 결제 수단 업데이트
   openCustomActions: Custom AI Actions 열기
   openNotebase: Notebase 열기
+  reviewDueOne: "복습할 카드 $1장"
+  reviewDueOther: "복습할 카드 $1장"
   contextDetailsTitleLabel: 제목
   contextDetailsParagraphsLabel: 문단 내용
   translation: 번역

@@ -1592,6 +1592,8 @@ action:
   updatePayment: 更新付款方式
   openCustomActions: 開啟自訂 AI 指令
   openNotebase: 開啟筆記庫
+  reviewDueOne: "$1 張卡片需複習"
+  reviewDueOther: "$1 張卡片需複習"
   contextDetailsTitleLabel: 標題
   contextDetailsParagraphsLabel: 段落內容
   translation: 翻譯

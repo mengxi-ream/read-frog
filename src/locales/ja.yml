@@ -1582,6 +1582,8 @@ action:
   updatePayment: 支払いを更新
   openCustomActions: Custom AI Actions を開く
   openNotebase: Notebase を開く
+  reviewDueOne: "$1 枚のカードが復習待ち"
+  reviewDueOther: "$1 枚のカードが復習待ち"
   contextDetailsTitleLabel: タイトル
   contextDetailsParagraphsLabel: 段落内容
   translation: 翻訳

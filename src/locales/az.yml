@@ -1587,6 +1587,8 @@ action:
   updatePayment: Ödənişi yenilə
   openCustomActions: Fərdi süni intellekt əməliyyatlarını aç
   openNotebase: Notebase səhifəsini aç
+  reviewDueOne: "$1 kart təkrar gözləyir"
+  reviewDueOther: "$1 kart təkrar gözləyir"
   contextDetailsTitleLabel: Başlıq
   contextDetailsParagraphsLabel: Abzaslar
   translation: Tərcümə

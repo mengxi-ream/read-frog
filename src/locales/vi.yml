@@ -1582,6 +1582,8 @@ action:
   updatePayment: Cập nhật thanh toán
   openCustomActions: Mở Custom AI Actions
   openNotebase: Mở Notebase
+  reviewDueOne: "$1 thẻ cần ôn tập"
+  reviewDueOther: "$1 thẻ cần ôn tập"
   contextDetailsTitleLabel: Tiêu đề
   contextDetailsParagraphsLabel: Các đoạn văn
   translation: Dịch

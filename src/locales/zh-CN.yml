@@ -1592,6 +1592,8 @@ action:
   updatePayment: 更新支付方式
   openCustomActions: 打开 Custom AI Actions
   openNotebase: 打开笔记库
+  reviewDueOne: "$1 张卡片需复习"
+  reviewDueOther: "$1 张卡片需复习"
   contextDetailsTitleLabel: 标题
   contextDetailsParagraphsLabel: 段落内容
   translation: 翻译

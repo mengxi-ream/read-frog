@@ -80,6 +80,11 @@ vi.mock("@/utils/orpc/client", () => ({
         }),
       },
     },
+    srs: {
+      recentNotebaseScheduleStatusStats: {
+        key: () => ["srs", "recentNotebaseScheduleStatusStats"],
+      },
+    },
   },
   orpcClient: {
     notebase: {
@@ -280,6 +285,7 @@ describe("saveToNotebaseButton notebase availability", () => {
         srsRelearningSteps: ["10m" as const],
         srsLeechThreshold: 8,
         srsEnableFuzz: false,
+        srsModelVersion: "FSRS-6" as const,
         srsWeights: null,
         createdAt: new Date(0),
         updatedAt: new Date(0),
