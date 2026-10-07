@@ -363,7 +363,7 @@
   --rf-chart-3: var(--rf-cornflower-700);
   --rf-chart-4: var(--rf-cornflower-800);
   --rf-chart-5: var(--rf-cornflower-950);
-  --rf-radius: 0.5rem;
+  --rf-radius: 0.625rem;
   --rf-sidebar: var(--rf-neutral-50);
   --rf-sidebar-foreground: var(--rf-neutral-950);
   --rf-sidebar-primary: var(--rf-neutral-900);
