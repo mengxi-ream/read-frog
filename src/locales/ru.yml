@@ -1582,8 +1582,8 @@ action:
   updatePayment: Обновить оплату
   openCustomActions: Открыть Custom AI Actions
   openNotebase: Открыть Notebase
-  reviewDueOne: "Заметок к повторению: $1"
-  reviewDueOther: "Заметок к повторению: $1"
+  reviewDueOne: "Карточек к повторению: $1"
+  reviewDueOther: "Карточек к повторению: $1"
   contextDetailsTitleLabel: Заголовок
   contextDetailsParagraphsLabel: Абзацы
   translation: Перевод

@@ -12,9 +12,9 @@ import { orpc } from "@/utils/orpc/client"
 const COUNT_MARK = "\uE000"
 
 /**
- * "N notes to review", tucked into the popover's bottom-right corner above the
+ * "N cards to review", tucked into the popover's bottom-right corner above the
  * footer: the due cards of the user's most recently used notebase, opening its
- * review page. It counts notes, like the queue: one card per note at a time.
+ * review page. Like the queue, it counts one card per note at a time.
  * Renders nothing for guests, on errors, or when nothing is due.
  */
 export function ReviewDueTab({ source }: { source: ReviewEntrySource }) {
