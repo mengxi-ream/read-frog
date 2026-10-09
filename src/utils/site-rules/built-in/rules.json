@@ -2410,7 +2410,8 @@
       "[role=listitem] {overflow:scroll;}",
       "[role=listitem] div {-webkit-line-clamp:unset;}",
       "[class*='km-listitem--medium'] {height:unset !important;}",
-      ".MuiListItem-root a > div :nth-child(2) {height:unset !important;}"
+      ".MuiListItem-root a > div :nth-child(2) {height:unset !important;}",
+      ".learnGuide .read-frog-translated-content-wrapper, .learnGuide .read-frog-translated-content-wrapper span:not(:where(.read-frog-inline-atom, .read-frog-inline-atom *)) {position:static !important; inset:auto !important; width:auto !important; height:auto !important; z-index:auto !important;}"
     ]
   },
   {
