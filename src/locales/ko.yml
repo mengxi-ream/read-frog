@@ -1377,7 +1377,7 @@ options:
       title: 기본 설정
       enable:
         title: 비디오 자막 켜기
-        description: 동영상 플레이어 컨트롤 바에 번역 버튼을 추가합니다. 현재는 YouTube만 지원합니다.
+        description: YouTube, X, Netflix의 동영상 플레이어 컨트롤 바에 번역 버튼을 추가합니다.
       autoStart:
         title: 영상을 열면 바로 번역
         description: 영상이 로드되면 버튼을 누르지 않아도 자막 번역을 시작합니다.

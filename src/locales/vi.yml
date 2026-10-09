@@ -1377,7 +1377,7 @@ options:
       title: Cơ bản
       enable:
         title: Bật phụ đề video
-        description: Thêm nút dịch vào thanh điều khiển của trình phát. Hiện chỉ hỗ trợ YouTube.
+        description: Thêm nút dịch vào thanh điều khiển của trình phát trên YouTube, X và Netflix.
       autoStart:
         title: Mở video là dịch
         description: Bắt đầu dịch ngay khi video tải xong, không cần bấm nút.
