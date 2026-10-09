@@ -20,6 +20,7 @@
     ".codex/**",
     ".cursor/**",
     "pnpm-lock.yaml",
+    "CHANGELOG.md",
     "**/*.svg"
   ],
   "sortTailwindcss": {

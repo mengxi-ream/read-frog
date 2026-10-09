@@ -1,4 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
+// Warm config's module graph at collection time, which has no timeout. Each test
+// still re-imports it after vi.resetModules(), but no longer pays the cold load
+// inside its 5s budget.
+import "../config"
 
 describe("dEFAULT_CONFIG", () => {
   const originalCrypto = globalThis.crypto
