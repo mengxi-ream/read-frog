@@ -90,7 +90,7 @@ export function PatternsTable({
           of its own, the header's tint was the list's only boundary and read as hanging
           off the input. */}
       {patterns.length > 0 && (
-        <div className="overflow-hidden rounded-md border">
+        <div className="overflow-hidden rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow className={ACTION_COLUMN}>

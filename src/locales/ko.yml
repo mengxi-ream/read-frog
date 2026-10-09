@@ -1,6 +1,6 @@
 name: Read Frog
-extName: Read Frog - 번역하고 배우기
-extDescription: Read Frog는 모든 웹사이트에서 언어를 깊이 있게 학습할 수 있도록 도와주는 오픈 소스 브라우저 확장 프로그램입니다.
+extName: "Read Frog - AI 이중 번역·동영상 자막·단어장"
+extDescription: "웹페이지와 YouTube·Netflix·X 동영상 자막을 AI로 이중 번역합니다. 모르는 단어는 저장해 플래시카드로 복습하세요."
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: 로그인
@@ -1377,7 +1377,7 @@ options:
       title: 기본 설정
       enable:
         title: 비디오 자막 켜기
-        description: 동영상 플레이어 컨트롤 바에 번역 버튼을 추가합니다. 현재는 YouTube만 지원합니다.
+        description: YouTube, X, Netflix의 동영상 플레이어 컨트롤 바에 번역 버튼을 추가합니다.
       autoStart:
         title: 영상을 열면 바로 번역
         description: 영상이 로드되면 버튼을 누르지 않아도 자막 번역을 시작합니다.
@@ -1582,6 +1582,8 @@ action:
   updatePayment: 결제 수단 업데이트
   openCustomActions: Custom AI Actions 열기
   openNotebase: Notebase 열기
+  reviewDueOne: "복습할 카드 $1장"
+  reviewDueOther: "복습할 카드 $1장"
   contextDetailsTitleLabel: 제목
   contextDetailsParagraphsLabel: 문단 내용
   translation: 번역
@@ -1650,7 +1652,7 @@ subtitles:
     httpUnknown: HTTP 오류 $1
     invalidResponse: 유튜브 자막 응답 형식이 잘못되었습니다
     networkError: 자막을 가져오는 도중 네트워크 오류가 발생했습니다
-    fetchSubTimeout: 유튜브 자막 가져오기 시간이 초과되었습니다
+    fetchSubTimeout: 자막 가져오기 시간이 초과되었습니다
     buttonNotFound: 자막 버튼을 찾을 수 없습니다
     noSubtitlesFound: 현재 영상에 자막이 없습니다
     trackFileNotLoaded: 자막을 불러오지 못했습니다. 페이지를 새로고침해 보세요

@@ -1,6 +1,6 @@
 name: Read Frog
-extName: Read Frog - Çevir ve Öğren
-extDescription: Read Frog, herhangi bir web sitesinden dilleri derinlemesine öğrenmenize yardımcı olmak için tasarlanmış açık kaynaklı bir tarayıcı uzantısıdır.
+extName: "Read Frog - Yapay Zekâ Çeviri ve Kartlar"
+extDescription: "Web sayfaları ve YouTube, Netflix, X altyazıları için yapay zekâ ile iki dilli çeviri. Yeni kelimeleri kaydedip kartlarla çalışın."
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: Giriş yap
@@ -1377,7 +1377,7 @@ options:
       title: Temel ayarlar
       enable:
         title: Video altyazılarını aç
-        description: Oynatıcı kontrollerine bir çeviri düğmesi ekler. Şimdilik yalnızca YouTube destekleniyor.
+        description: YouTube, X ve Netflix'te oynatıcı kontrollerine bir çeviri düğmesi ekler.
       autoStart:
         title: Video açılınca çevir
         description: Video yüklenir yüklenmez, düğmeye basmadan altyazıları çevirmeye başlar.
@@ -1582,6 +1582,8 @@ action:
   updatePayment: Ödemeyi güncelle
   openCustomActions: Custom AI Actions'ı aç
   openNotebase: Notebase'i aç
+  reviewDueOne: "$1 kart tekrar bekliyor"
+  reviewDueOther: "$1 kart tekrar bekliyor"
   contextDetailsTitleLabel: Başlık
   contextDetailsParagraphsLabel: Paragraflar
   translation: Çeviri
@@ -1650,7 +1652,7 @@ subtitles:
     httpUnknown: HTTP hatası $1
     invalidResponse: YouTube altyazı yanıt biçimi geçersiz
     networkError: YouTube altyazılar alınırken ağ hatası oluştu.
-    fetchSubTimeout: YouTube altyazılar alınırken zaman aşımı oluştu.
+    fetchSubTimeout: Altyazılar alınırken zaman aşımı oluştu.
     buttonNotFound: Altyazı butonu bulunamadı
     noSubtitlesFound: Bu video için altyazı bulunmuyor
     trackFileNotLoaded: Altyazılar yüklenemedi, lütfen sayfayı yenilemeyi deneyin

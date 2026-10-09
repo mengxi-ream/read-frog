@@ -33,21 +33,18 @@ interface ConnectionTestVariables {
 const connectionTestFeedbackIconConfig = {
   success: {
     Icon: IconCheck,
-    containerClassName:
-      "flex size-4 items-center justify-center rounded-full bg-green-200 dark:bg-green-800/50",
-    iconClassName: "size-3 text-green-700 dark:text-green-300 stroke-[2.5]",
+    containerClassName: "flex size-4 items-center justify-center rounded-full bg-success/15",
+    iconClassName: "size-3 text-success stroke-[2.5]",
   },
   failed: {
     Icon: IconX,
-    containerClassName:
-      "flex size-4 items-center justify-center rounded-full bg-red-200 dark:bg-red-800/50",
-    iconClassName: "size-3 text-red-700 dark:text-red-300 stroke-[2.5]",
+    containerClassName: "flex size-4 items-center justify-center rounded-full bg-destructive/15",
+    iconClassName: "size-3 text-destructive stroke-[2.5]",
   },
   slow: {
     Icon: IconHourglassLow,
-    containerClassName:
-      "flex size-4 items-center justify-center rounded-full bg-yellow-200 dark:bg-yellow-800/50",
-    iconClassName: "size-3 text-yellow-700 dark:text-yellow-300 stroke-[2.5]",
+    containerClassName: "flex size-4 items-center justify-center rounded-full bg-warning/15",
+    iconClassName: "size-3 text-warning stroke-[2.5]",
   },
 } satisfies Record<
   ConnectionTestFeedback,
@@ -196,7 +193,9 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
       {mutation.isPending ? (
         <>
           <LoadingDots className="scale-75" />
-          <span className="text-xs">{i18n.t("options.apiProviders.testConnection.testing")}</span>
+          <span className="shimmer text-xs">
+            {i18n.t("options.apiProviders.testConnection.testing")}
+          </span>
         </>
       ) : visibleFeedback ? (
         <>

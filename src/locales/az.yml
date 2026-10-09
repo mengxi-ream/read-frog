@@ -1,6 +1,6 @@
 name: Read Frog
-extName: "Read Frog: Tərcümə et və öyrən"
-extDescription: Read Frog istənilən saytdan dilləri dərindən öyrənməyinizə kömək edən açıq mənbəli brauzer genişlənməsidir.
+extName: "Read Frog - Sİ tərcüməsi və söz kartları"
+extDescription: "Veb-səhifələr və YouTube, Netflix, X altyazıları üçün Sİ ilə ikidilli tərcümə. Yeni sözləri saxlayın, kartlarla təkrarlayın."
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: Daxil ol
@@ -1382,7 +1382,7 @@ options:
       title: Əsas parametrlər
       enable:
         title: Video subtitrlərini aktiv et
-        description: Video pleyerin idarəetmə panelinə tərcümə düyməsi əlavə edir. Hələlik yalnız YouTube üçün.
+        description: YouTube, X və Netflix-də video pleyerin idarəetmə panelinə tərcümə düyməsi əlavə edir.
       autoStart:
         title: Açılan kimi tərcümə et
         description: Düyməyə basmadan video yüklənən kimi tərcüməyə başlayın.
@@ -1587,6 +1587,8 @@ action:
   updatePayment: Ödənişi yenilə
   openCustomActions: Fərdi süni intellekt əməliyyatlarını aç
   openNotebase: Notebase səhifəsini aç
+  reviewDueOne: "$1 kart təkrar gözləyir"
+  reviewDueOther: "$1 kart təkrar gözləyir"
   contextDetailsTitleLabel: Başlıq
   contextDetailsParagraphsLabel: Abzaslar
   translation: Tərcümə
@@ -1648,7 +1650,7 @@ subtitles:
     httpUnknown: HTTP xətası $1
     invalidResponse: YouTube subtitr cavabının formatı yanlışdır
     networkError: Subtitrlər gətirilərkən şəbəkə xətası baş verdi
-    fetchSubTimeout: YouTube subtitrlərinin gətirilməsi üçün vaxt bitdi
+    fetchSubTimeout: Subtitrlərin gətirilməsi üçün vaxt bitdi
     buttonNotFound: Subtitr düyməsi tapılmadı
     noSubtitlesFound: Bu video üçün subtitr yoxdur
     trackFileNotLoaded: Subtitrləri yükləmək mümkün olmadı, səhifəni yeniləməyə cəhd edin

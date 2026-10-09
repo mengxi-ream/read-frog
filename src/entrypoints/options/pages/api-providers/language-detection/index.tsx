@@ -39,7 +39,7 @@ export function LanguageDetectionConfig() {
   const statusIndicator = useMemo(() => {
     if (!hasProviders) {
       return {
-        color: "bg-orange-400",
+        color: "bg-warning",
         text: i18n.t("options.apiProviders.languageDetection.status.noProviders"),
       }
     }
@@ -50,7 +50,7 @@ export function LanguageDetectionConfig() {
       }
     }
     return {
-      color: "bg-green-500",
+      color: "bg-success",
       text: i18n.t("options.apiProviders.languageDetection.status.llmEnabled"),
     }
   }, [hasProviders, isLLMMode])

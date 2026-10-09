@@ -37,6 +37,8 @@
   --color-accent: var(--rf-accent);
   --color-accent-foreground: var(--rf-accent-foreground);
   --color-destructive: var(--rf-destructive);
+  --color-success: var(--rf-success);
+  --color-warning: var(--rf-warning);
   --color-border: var(--rf-border);
   --color-input: var(--rf-input);
   --color-ring: var(--rf-ring);
@@ -61,7 +63,6 @@
   --radius-3xl: calc(var(--rf-radius) * 2.2);
   --radius-4xl: calc(var(--rf-radius) * 2.6);
   /* Additional theme variables */
-  --color-warning: var(--rf-warning);
   --color-link: var(--rf-link);
   --animate-toast-success-odd: toast-success-odd 0.32s cubic-bezier(0.5, 1, 0.89, 1);
   --animate-toast-success-even: toast-success-even 0.32s cubic-bezier(0.5, 1, 0.89, 1);
@@ -231,18 +232,6 @@
   --rf-neutral-900: var(--color-neutral-900);
   --rf-neutral-950: var(--color-neutral-950);
 
-  --rf-red-50: var(--color-red-50);
-  --rf-red-100: var(--color-red-100);
-  --rf-red-200: var(--color-red-200);
-  --rf-red-300: var(--color-red-300);
-  --rf-red-400: var(--color-red-400);
-  --rf-red-500: var(--color-red-500);
-  --rf-red-600: var(--color-red-600);
-  --rf-red-700: var(--color-red-700);
-  --rf-red-800: var(--color-red-800);
-  --rf-red-900: var(--color-red-900);
-  --rf-red-950: var(--color-red-950);
-
   /* lemon: Tailwind yellow's lightness and hue curve turned 3 degrees toward lemon, with
      Tailwind's chroma capped at 95% of the sRGB edge. The 50-steps are inserted halfway steps:
      450 is the light-mode brand, 550 the dark-mode brand, 650 the dark bevel's shade. */
@@ -322,7 +311,14 @@
      want pressed. */
   --rf-brand: var(--rf-lemon-450);
   --rf-brand-foreground: var(--color-white);
-  --rf-destructive: var(--rf-red-600);
+  /* The status colours, the design system's mint, tangerine and watermelon: drawn inside sRGB with
+     chroma at the accent's 0.17 or under, so they read clear like lemon and cornflower instead of
+     Tailwind's P3 neon, and each as light as it can be while still reaching Lc 60 as text on white.
+     Warning keeps to hue 54, short of lemon and of the brown a darker orange slides into. No
+     foreground: tint instead, as `bg-success/10 text-success`. */
+  --rf-destructive: oklch(66% 0.18 18);
+  --rf-success: oklch(62.4% 0.134 160);
+  --rf-warning: oklch(65.3% 0.155 54);
   --rf-border: var(--rf-neutral-200);
   --rf-input: var(--rf-neutral-200);
   --rf-ring: var(--rf-neutral-400);
@@ -367,7 +363,7 @@
   --rf-chart-3: var(--rf-cornflower-700);
   --rf-chart-4: var(--rf-cornflower-800);
   --rf-chart-5: var(--rf-cornflower-950);
-  --rf-radius: 0.5rem;
+  --rf-radius: 0.625rem;
   --rf-sidebar: var(--rf-neutral-50);
   --rf-sidebar-foreground: var(--rf-neutral-950);
   --rf-sidebar-primary: var(--rf-neutral-900);
@@ -378,7 +374,6 @@
   --rf-sidebar-ring: var(--rf-neutral-400);
 
   /* Extension-only tokens */
-  --rf-warning: oklch(97.3% 0.071 103.193);
   /* shadow-md's two drops as a property, for a surface that stacks them under a button's bevel:
      the bevel and a shadow-* class both write --tw-shadow, so only one of the two can win. */
   --rf-elevation-floating:
@@ -412,7 +407,10 @@
   --rf-accent-foreground: var(--color-white);
   --rf-brand: var(--rf-lemon-550);
   --rf-brand-foreground: var(--color-white);
-  --rf-destructive: var(--rf-red-400);
+  /* Lighter and a touch whiter: each clears Lc 60 on the popover, the lightest dark surface. */
+  --rf-destructive: oklch(78.2% 0.121 18);
+  --rf-success: oklch(75.2% 0.136 160);
+  --rf-warning: oklch(77.7% 0.142 54);
   --rf-border: oklch(1 0 0 / 10%);
   --rf-input: oklch(1 0 0 / 15%);
   --rf-ring: var(--rf-neutral-500);
@@ -460,7 +458,6 @@
   --rf-sidebar-ring: var(--rf-neutral-500);
 
   /* Extension-only tokens */
-  --rf-warning: oklch(42.1% 0.095 57.708);
   /* Declared again so it resolves against this block's ink and strength. */
   --rf-elevation-floating:
     0 5px 8px 0 rgb(var(--rf-elevation-ink) / calc(0.027 * var(--rf-elevation-strength))),

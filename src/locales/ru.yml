@@ -1,6 +1,6 @@
 name: Read Frog
-extName: Read Frog - Переводи и учись
-extDescription: Read Frog — расширение браузера с открытым исходным кодом, которое поможет вам глубоко изучать языки на любом веб-сайте.
+extName: "Read Frog - ИИ-перевод и карточки"
+extDescription: "Двуязычный ИИ-перевод веб-страниц и субтитров YouTube, Netflix и X. Сохраняйте новые слова и повторяйте их на карточках."
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: Войти
@@ -1377,7 +1377,7 @@ options:
       title: Основное
       enable:
         title: Включить видеосубтитры
-        description: Добавляет кнопку перевода в панель управления плеера. Пока поддерживается только YouTube.
+        description: Добавляет кнопку перевода в панель управления плеера на YouTube, X и Netflix.
       autoStart:
         title: Переводить сразу при открытии
         description: Начинать перевод субтитров, как только видео загрузилось, без нажатия кнопки.
@@ -1582,6 +1582,8 @@ action:
   updatePayment: Обновить оплату
   openCustomActions: Открыть Custom AI Actions
   openNotebase: Открыть Notebase
+  reviewDueOne: "Карточек к повторению: $1"
+  reviewDueOther: "Карточек к повторению: $1"
   contextDetailsTitleLabel: Заголовок
   contextDetailsParagraphsLabel: Абзацы
   translation: Перевод
@@ -1650,7 +1652,7 @@ subtitles:
     httpUnknown: Ошибка HTTP $1
     invalidResponse: Неверный формат ответа субтитров YouTube
     networkError: Произошла сетевая ошибка при получении субтитров
-    fetchSubTimeout: Получение субтитров YouTube завершилось с ошибкой
+    fetchSubTimeout: Истекло время ожидания при получении субтитров
     buttonNotFound: Кнопка субтитров не найдена
     noSubtitlesFound: Для этого видео нет субтитров
     trackFileNotLoaded: Не удалось загрузить субтитры, попробуйте обновить страницу

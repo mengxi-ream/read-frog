@@ -1,6 +1,6 @@
 name: Read Frog
-extName: Read Frog - Traduce y aprende
-extDescription: Read Frog es una extensión de navegador de código abierto diseñada para ayudarte a aprender idiomas en profundidad desde cualquier sitio web.
+extName: "Read Frog - Traducción con IA y flashcards"
+extDescription: "Traducción bilingüe con IA para webs y subtítulos de YouTube, Netflix y X. Guarda palabras nuevas y repásalas con flashcards."
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
   login: Iniciar sesión
@@ -1382,7 +1382,7 @@ options:
       title: Aspectos básicos
       enable:
         title: Activar subtítulos de video
-        description: Añade un botón de traducción a los controles del reproductor. Por ahora solo funciona en YouTube.
+        description: Añade un botón de traducción a los controles del reproductor en YouTube, X y Netflix.
       autoStart:
         title: Traducir al abrir el video
         description: Empieza a traducir en cuanto se carga el video, sin pulsar el botón.
@@ -1587,6 +1587,8 @@ action:
   updatePayment: Actualizar pago
   openCustomActions: Abrir Custom AI Actions
   openNotebase: Abrir Notebase
+  reviewDueOne: "$1 tarjeta por repasar"
+  reviewDueOther: "$1 tarjetas por repasar"
   contextDetailsTitleLabel: Título
   contextDetailsParagraphsLabel: Párrafos
   translation: Traducción
@@ -1655,7 +1657,7 @@ subtitles:
     httpUnknown: Error HTTP $1
     invalidResponse: Formato de respuesta de subtítulos de Youtube no válido
     networkError: Se produjo un error de red al obtener subtítulos
-    fetchSubTimeout: Se agotó el tiempo al obtener subtítulos de youtube
+    fetchSubTimeout: Se agotó el tiempo al obtener subtítulos
     buttonNotFound: Botón de subtítulos no encontrado
     noSubtitlesFound: No hay subtítulos disponibles para este video
     trackFileNotLoaded: No se pudieron cargar los subtítulos; intenta actualizar la página

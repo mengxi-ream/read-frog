@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.50.2
+
+### Patch Changes
+
+- [#2313](https://github.com/mengxi-ream/read-frog/pull/2313) [`51f9d67`](https://github.com/mengxi-ream/read-frog/commit/51f9d67beb599dd30ab0b7ab5f7b201dec4d7ef3) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(selection-toolbar): show how many cards are due in the most recently used notebase and open its review page
+
+- [#2315](https://github.com/mengxi-ream/read-frog/pull/2315) [`e779fe1`](https://github.com/mengxi-ream/read-frog/commit/e779fe174d442f6284cbed3202f2ecd369abf32a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - style(ui): shimmer the status text of long waits in subtitles and provider settings
+
+- [#2312](https://github.com/mengxi-ream/read-frog/pull/2312) [`484af18`](https://github.com/mengxi-ream/read-frog/commit/484af18db81d70421ce5140c7ac5d3a834dc05a4) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - style(ui): redraw the success, warning and destructive colors to match brand and accent and read at Lc 60
+
+- [#2306](https://github.com/mengxi-ream/read-frog/pull/2306) [`001e0b2`](https://github.com/mengxi-ream/read-frog/commit/001e0b2984fbdb267e7dd68dd1b1b32e170d7310) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - i18n(manifest): name what Read Frog does in the extension name and description in every language, and use the Read Frog name in Japanese
+
+- [#2311](https://github.com/mengxi-ream/read-frog/pull/2311) [`0f81543`](https://github.com/mengxi-ream/read-frog/commit/0f815436ec7170845635f3b1599b8a4465a75827) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - style(ui): add success and warning status colors and use them for status dots, checks and toast icons
+
 ## 1.50.1
 
 ### Patch Changes

@@ -1,7 +1,7 @@
 import type { AnalyticsFailureReason } from "@/types/analytics"
 import type { SelectionToolbarCustomActionNotebaseAccount } from "@/types/config/selection-toolbar"
 import type { PendingCreateNotebaseSave, PendingNotebaseSave } from "@/utils/notebase/pending-save"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAtom } from "jotai"
 import { use, useRef, useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
@@ -43,7 +43,7 @@ import {
   getPendingNotebaseSaveContext,
   setPendingNotebaseSave,
 } from "@/utils/notebase/pending-save"
-import { orpcClient } from "@/utils/orpc/client"
+import { orpc, orpcClient } from "@/utils/orpc/client"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { showNotebaseLimitExceededToast } from "./notebase-limit-toast"
 import { saveToNotebaseDialogAtom } from "./save-to-notebase-dialog-atom"
@@ -108,6 +108,7 @@ export function SaveToNotebaseDialogHost() {
   const isAuthenticated = !!session?.user
   const currentAccount = createNotebaseConnectedAccountSnapshot(session?.user)
   const [isPreparingLogin, setIsPreparingLogin] = useState(false)
+  const queryClient = useQueryClient()
   const pendingNotebaseSave = dialogState.open ? dialogState.pendingNotebaseSave : null
   const mode = dialogState.open ? dialogState.mode : null
 
@@ -177,6 +178,10 @@ export function SaveToNotebaseDialogHost() {
       // Reported before the config write: the notes are on the server now, and
       // a write that fails below reaches onError, which must not undo that.
       trackCreateAndSaveCompleted(createdPendingSave)
+      // The new notebase is now the most recently used one.
+      void queryClient.invalidateQueries({
+        queryKey: orpc.srs.recentNotebaseScheduleStatusStats.key(),
+      })
       const nextConnection = buildNotebaseConnectionFromPending(
         createdPendingSave,
         variables.connectedAccount,

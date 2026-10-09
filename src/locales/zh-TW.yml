@@ -1,6 +1,6 @@
 name: 陪讀蛙
-extName: 陪讀蛙 - 翻譯與學習
-extDescription: 陪讀蛙是一款開放原始碼的瀏覽器擴充功能，能協助使用者在任何網站上深入學習語言。
+extName: "陪讀蛙 - AI 雙語翻譯、影片字幕與背單字"
+extDescription: "用 AI 雙語對照翻譯網頁，以及 YouTube、Netflix、X 的影片字幕。遇到生字一鍵儲存，用閃卡複習。"
 uninstallSurveyUrl: https://tally.so/r/3E9XDL
 account:
   login: 登入
@@ -1387,7 +1387,7 @@ options:
       title: 基礎設定
       enable:
         title: 開啟影片字幕
-        description: 在影片播放器控制列加上翻譯按鈕。目前只支援 YouTube。
+        description: 在 YouTube、X 和 Netflix 的影片播放器控制列加上翻譯按鈕。
       autoStart:
         title: 打開影片就翻譯
         description: 影片載入完成後自動開始翻譯字幕，不用再點按鈕。
@@ -1592,6 +1592,8 @@ action:
   updatePayment: 更新付款方式
   openCustomActions: 開啟自訂 AI 指令
   openNotebase: 開啟筆記庫
+  reviewDueOne: "$1 張卡片需複習"
+  reviewDueOther: "$1 張卡片需複習"
   contextDetailsTitleLabel: 標題
   contextDetailsParagraphsLabel: 段落內容
   translation: 翻譯
@@ -1660,7 +1662,7 @@ subtitles:
     httpUnknown: HTTP 錯誤 $1
     invalidResponse: YouTube 字幕回應格式無效
     networkError: 取得字幕時發生網路錯誤
-    fetchSubTimeout: 取得 YouTube 字幕逾時
+    fetchSubTimeout: 取得字幕逾時
     buttonNotFound: 找不到字幕按鈕
     noSubtitlesFound: 這部影片沒有字幕
     trackFileNotLoaded: 字幕載入失敗，請重新整理頁面後再試一次

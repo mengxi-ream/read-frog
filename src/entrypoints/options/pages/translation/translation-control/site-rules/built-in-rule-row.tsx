@@ -74,7 +74,7 @@ export function BuiltInRuleRow({ rule }: { rule: SiteRule }) {
           onClick={handleCopy}
         >
           {copied ? (
-            <Icon icon="tabler:check" className="text-green-500" />
+            <Icon icon="tabler:check" className="text-success" />
           ) : (
             <Icon icon="tabler:copy" />
           )}

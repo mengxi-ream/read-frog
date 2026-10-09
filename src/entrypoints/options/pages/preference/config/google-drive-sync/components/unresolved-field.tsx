@@ -43,9 +43,9 @@ export function ConflictField({ pathKey, indent }: ConflictFieldProps) {
 
     return {
       icon: "tabler:git-merge",
-      iconClass: "text-orange-500 dark:text-orange-400",
+      iconClass: "text-warning",
       label,
-      labelClass: "text-orange-600 dark:text-orange-300 font-semibold",
+      labelClass: "text-warning font-semibold",
     }
   }
   const { icon, iconClass, label, labelClass } = getIconAndLabel()
