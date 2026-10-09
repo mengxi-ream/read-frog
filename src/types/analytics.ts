@@ -119,7 +119,7 @@ export interface ObservedByFeature {
   input_translation: { char_count: number; target_language: LangCodeISO6393 }
   translation_hub: { char_count: number; target_language: LangCodeISO6393 }
   video_subtitles: { target_language: LangCodeISO6393 }
-  text_to_speech: Record<never, never>
+  text_to_speech: unknown
   note_suggestion:
     | { action_id: "suggestion_shown" }
     | { action_id: "suggestion_accepted"; action_name: string }
