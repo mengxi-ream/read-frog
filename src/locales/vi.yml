@@ -1655,6 +1655,7 @@ subtitles:
     fetchSubTimeout: Quá thời gian lấy phụ đề
     buttonNotFound: Không tìm thấy nút phụ đề
     noSubtitlesFound: Video hiện tại không có phụ đề
+    trackFileNotLoaded: Không tải được phụ đề, vui lòng thử tải lại trang
     videoNotFound: Không tìm thấy phần tử video
     controlsBarNotFound: Không tìm thấy thanh điều khiển
     aiRateLimited: Quá nhiều yêu cầu, vui lòng thử lại sau

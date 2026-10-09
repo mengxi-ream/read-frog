@@ -4,6 +4,7 @@ import { getRandomUUID } from "@/utils/crypto-polyfill"
 export function postMessageRequest(
   responseType: string,
   message: Record<string, unknown>,
+  timeoutMs = POST_MESSAGE_TIMEOUT_MS,
 ): Promise<any> {
   return new Promise((resolve) => {
     const requestId = getRandomUUID()
@@ -27,6 +28,6 @@ export function postMessageRequest(
     setTimeout(() => {
       window.removeEventListener("message", handler)
       resolve(null)
-    }, POST_MESSAGE_TIMEOUT_MS)
+    }, timeoutMs)
   })
 }

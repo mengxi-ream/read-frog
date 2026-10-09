@@ -1655,6 +1655,7 @@ subtitles:
     fetchSubTimeout: Истекло время ожидания при получении субтитров
     buttonNotFound: Кнопка субтитров не найдена
     noSubtitlesFound: Для этого видео нет субтитров
+    trackFileNotLoaded: Не удалось загрузить субтитры, попробуйте обновить страницу
     videoNotFound: Видео элемент не найден
     controlsBarNotFound: Панель управления не найдена
     aiRateLimited: Слишком много запросов, пожалуйста, повторите позже

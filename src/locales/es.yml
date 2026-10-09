@@ -1660,6 +1660,7 @@ subtitles:
     fetchSubTimeout: Se agotó el tiempo al obtener subtítulos
     buttonNotFound: Botón de subtítulos no encontrado
     noSubtitlesFound: No hay subtítulos disponibles para este video
+    trackFileNotLoaded: No se pudieron cargar los subtítulos; intenta actualizar la página
     videoNotFound: Elemento de video no encontrado
     controlsBarNotFound: Barra de controles no encontrada
     aiRateLimited: Demasiadas solicitudes, inténtalo de nuevo más tarde

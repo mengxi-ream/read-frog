@@ -1655,6 +1655,7 @@ subtitles:
     fetchSubTimeout: 자막 가져오기 시간이 초과되었습니다
     buttonNotFound: 자막 버튼을 찾을 수 없습니다
     noSubtitlesFound: 현재 영상에 자막이 없습니다
+    trackFileNotLoaded: 자막을 불러오지 못했습니다. 페이지를 새로고침해 보세요
     videoNotFound: 비디오 요소를 찾을 수 없습니다
     controlsBarNotFound: 컨트롤 바를 찾을 수 없습니다
     aiRateLimited: 요청이 너무 많습니다. 나중에 다시 시도해 주세요

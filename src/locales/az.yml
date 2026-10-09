@@ -1653,6 +1653,7 @@ subtitles:
     fetchSubTimeout: Subtitrlərin gətirilməsi üçün vaxt bitdi
     buttonNotFound: Subtitr düyməsi tapılmadı
     noSubtitlesFound: Bu video üçün subtitr yoxdur
+    trackFileNotLoaded: Subtitrləri yükləmək mümkün olmadı, səhifəni yeniləməyə cəhd edin
     videoNotFound: Video elementi tapılmadı
     controlsBarNotFound: İdarəetmə paneli tapılmadı
     aiRateLimited: Həddindən artıq sorğu var, daha sonra yenidən cəhd edin

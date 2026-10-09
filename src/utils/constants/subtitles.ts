@@ -76,7 +76,14 @@ export const NETFLIX_CONTROLS_GROUP_SELECTOR =
 export const NETFLIX_NATIVE_SUBTITLES_SELECTOR = ".player-timedtext"
 export const NETFLIX_SUBTITLES_REQUEST_TYPE = "READ_FROG_NETFLIX_SUBTITLES"
 export const NETFLIX_SUBTITLES_RESPONSE_TYPE = "READ_FROG_NETFLIX_SUBTITLES_DONE"
+// The page script answers "state" and "restore" within this, inside POST_MESSAGE_TIMEOUT_MS.
 export const NETFLIX_PAGE_WAIT_TIMEOUT_MS = 5000
+// The page script answers "load" within this one deadline, which covers waiting for the player
+// and then for its subtitle file.
+export const NETFLIX_LOAD_TIMEOUT_MS = 10_000
+// Outwaits the page's load deadline, with room for its last poll even in a throttled background
+// tab, so a slow load reports how it ended instead of timing out.
+export const NETFLIX_LOAD_POST_MESSAGE_TIMEOUT_MS = NETFLIX_LOAD_TIMEOUT_MS + 2000
 export const NETFLIX_PAGE_POLL_INTERVAL_MS = 100
 export const NETFLIX_WATCH_POLL_INTERVAL_MS = 1000
 export const NETFLIX_TRANSLATE_BUTTON_ZOOM = 1.4

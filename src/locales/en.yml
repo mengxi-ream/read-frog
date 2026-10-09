@@ -1802,6 +1802,7 @@ subtitles:
     fetchSubTimeout: Fetching captions timed out
     buttonNotFound: Subtitle button not found
     noSubtitlesFound: No subtitles available for this video
+    trackFileNotLoaded: Subtitles failed to load, please try refreshing the page
     videoNotFound: Video element not found
     controlsBarNotFound: Controls bar not found
     aiRateLimited: Too many requests, please try again later

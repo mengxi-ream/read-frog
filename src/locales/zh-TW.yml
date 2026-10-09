@@ -1665,6 +1665,7 @@ subtitles:
     fetchSubTimeout: 取得字幕逾時
     buttonNotFound: 找不到字幕按鈕
     noSubtitlesFound: 這部影片沒有字幕
+    trackFileNotLoaded: 字幕載入失敗，請重新整理頁面後再試一次
     videoNotFound: 找不到影片元素
     controlsBarNotFound: 找不到控制列
     aiRateLimited: 請求過於頻繁，請稍後再試
