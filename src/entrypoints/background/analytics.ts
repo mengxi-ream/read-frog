@@ -42,7 +42,7 @@ const FEATURE_SURFACES = {
     "touch_gesture",
   ],
   selection_translation: ["selection_toolbar", "context_menu", "shortcut"],
-  custom_ai_action: ["selection_toolbar", "context_menu"],
+  custom_ai_action: ["selection_toolbar", "context_menu", "video_subtitles"],
   input_translation: ["input_translation"],
   translation_hub: ["translation_hub"],
   video_subtitles: ["video_subtitles", "video_subtitles_auto", "shortcut"],
