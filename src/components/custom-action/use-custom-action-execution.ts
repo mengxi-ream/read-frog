@@ -20,7 +20,7 @@ export interface SelectionToolbarCustomActionRequestSlice {
   provider: CustomActionProviderRef | null
 }
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   createSelectionToolbarPrecheckError,
   createSelectionToolbarRuntimeError,
@@ -348,12 +348,18 @@ export function useCustomActionExecution({
   executionRequestRef.current = executionRequest
   const executionRequestKey = executionRequest?.key ?? null
 
-  const resetSessionState = useCallback(() => {
+  // Every session or reuse starts from a blank card, including one whose
+  // request fails precheck and never reaches run(). Adjusted during render so
+  // the reset lands before the run effect of the same commit.
+  const resetKey = `${popoverSessionKey}:${rerunNonce}`
+  const [appliedResetKey, setAppliedResetKey] = useState(resetKey)
+  if (appliedResetKey !== resetKey) {
+    setAppliedResetKey(resetKey)
     setIsRunning(false)
     setResult(null)
     setError(null)
     setThinking(null)
-  }, [])
+  }
 
   useEffect(() => {
     if (!open || !executionRequestKey) {
@@ -469,7 +475,6 @@ export function useCustomActionExecution({
   return {
     error,
     isRunning,
-    resetSessionState,
     result,
     thinking,
   }

@@ -8,6 +8,7 @@ import { getLanguageDirectionAndLang } from "@/utils/content/language-direction"
 import { cn } from "@/utils/styles/utils"
 import { isTranslationPending } from "@/utils/subtitles/display-rules"
 import { displaySubtitleAtom } from "../atoms"
+import { SubtitleWordTokens } from "../learning/subtitle-word-tokens"
 import { SubtitlePendingLabel } from "./subtitle-pending-label"
 
 interface SubtitleLineProps {
@@ -40,7 +41,7 @@ export function MainSubtitle({ content, className }: SubtitleLineProps) {
       className={cn("subtitles-main text-xl leading-tight", className)}
       style={getTextStyleVars(style.main)}
     >
-      {text}
+      {content === undefined ? <SubtitleWordTokens text={text} /> : text}
     </div>
   )
 }

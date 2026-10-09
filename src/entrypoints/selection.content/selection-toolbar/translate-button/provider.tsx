@@ -31,6 +31,7 @@ import {
   createSelectionToolbarRuntimeError,
   isAbortError,
 } from "@/components/ui/selection-popover/inline-error"
+import { ReviewDueTab } from "@/components/ui/selection-popover/review-due-tab"
 import { SelectionToolbarErrorAlert } from "@/components/ui/selection-popover/selection-toolbar-error-alert"
 import { SelectionToolbarFooterContent } from "@/components/ui/selection-popover/selection-toolbar-footer-content"
 import { SelectionToolbarTitleContent } from "@/components/ui/selection-popover/selection-toolbar-title-content"
@@ -66,7 +67,6 @@ import {
 } from "../atoms"
 import { NoteSuggestionCard } from "../note-suggestion/note-suggestion-card"
 import { useNoteSuggestion } from "../note-suggestion/use-note-suggestion"
-import { ReviewDueTab } from "../review-due-tab"
 import { useSelectionOpenRequestResolver } from "../use-selection-open-request"
 import { useSelectionShortcuts } from "../use-selection-shortcuts"
 import { TargetLanguageSelector } from "./target-language-selector"
