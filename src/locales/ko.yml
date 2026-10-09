@@ -1652,7 +1652,7 @@ subtitles:
     httpUnknown: HTTP 오류 $1
     invalidResponse: 유튜브 자막 응답 형식이 잘못되었습니다
     networkError: 자막을 가져오는 도중 네트워크 오류가 발생했습니다
-    fetchSubTimeout: 유튜브 자막 가져오기 시간이 초과되었습니다
+    fetchSubTimeout: 자막 가져오기 시간이 초과되었습니다
     buttonNotFound: 자막 버튼을 찾을 수 없습니다
     noSubtitlesFound: 현재 영상에 자막이 없습니다
     videoNotFound: 비디오 요소를 찾을 수 없습니다

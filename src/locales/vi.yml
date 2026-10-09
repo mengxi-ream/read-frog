@@ -1652,7 +1652,7 @@ subtitles:
     httpUnknown: Lỗi HTTP $1
     invalidResponse: Định dạng phản hồi phụ đề Youtube không hợp lệ
     networkError: Xảy ra lỗi mạng khi lấy phụ đề
-    fetchSubTimeout: Quá thời gian lấy phụ đề Youtube
+    fetchSubTimeout: Quá thời gian lấy phụ đề
     buttonNotFound: Không tìm thấy nút phụ đề
     noSubtitlesFound: Video hiện tại không có phụ đề
     videoNotFound: Không tìm thấy phần tử video

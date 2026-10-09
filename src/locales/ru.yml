@@ -1652,7 +1652,7 @@ subtitles:
     httpUnknown: Ошибка HTTP $1
     invalidResponse: Неверный формат ответа субтитров YouTube
     networkError: Произошла сетевая ошибка при получении субтитров
-    fetchSubTimeout: Получение субтитров YouTube завершилось с ошибкой
+    fetchSubTimeout: Истекло время ожидания при получении субтитров
     buttonNotFound: Кнопка субтитров не найдена
     noSubtitlesFound: Для этого видео нет субтитров
     videoNotFound: Видео элемент не найден

@@ -1662,7 +1662,7 @@ subtitles:
     httpUnknown: HTTP 错误 $1
     invalidResponse: youtube 字幕响应格式无效
     networkError: 获取字幕时发生网络错误
-    fetchSubTimeout: 获取 youtube 字幕超时
+    fetchSubTimeout: 获取字幕超时
     buttonNotFound: 字幕按钮未找到
     noSubtitlesFound: 当前视频没有字幕
     videoNotFound: 视频元素未找到

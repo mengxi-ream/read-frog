@@ -1652,7 +1652,7 @@ subtitles:
     httpUnknown: HTTP エラー $1
     invalidResponse: YouTube字幕のレスポンス形式が無効です
     networkError: 字幕取得時にネットワークエラーが発生しました
-    fetchSubTimeout: YouTube字幕の取得がタイムアウトしました
+    fetchSubTimeout: 字幕の取得がタイムアウトしました
     buttonNotFound: 字幕ボタンが見つかりません
     noSubtitlesFound: この動画には字幕がありません
     videoNotFound: 動画要素が見つかりません
