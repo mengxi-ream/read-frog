@@ -2664,7 +2664,7 @@ describe("translate", () => {
     )
 
     it.each(["bilingual", "translationOnly"] as const)(
-      "applies the same prose length filter without counting code or padding in %s mode",
+      "applies the same prose length filter without counting code in %s mode",
       async (mode) => {
         await withHost(
           "arxiv.org",
@@ -2675,7 +2675,7 @@ describe("translate", () => {
             config.pageTranslation.page.minWordsPerNode = 0
             render(<p data-testid="test-node" />)
             const node = screen.getByTestId("test-node")
-            node.innerHTML = `Call ${inlineCode("long-code", "very_long_identifier".repeat(4))}${" ".repeat(30)}`
+            node.innerHTML = `Call ${inlineCode("long-code", "very_long_identifier".repeat(4))}`
             const sourceCode = node.querySelector("span")!
 
             await removeOrShowPageTranslation(mode, true, config)

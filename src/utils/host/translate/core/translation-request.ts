@@ -38,7 +38,11 @@ export function preparePageTranslationSource(
   return { ...extraction, nodes, filterText, requestText: extraction.requestText.trim() }
 }
 
-/** Run before either mode inserts its spinner; virtual paragraphs use this too. */
+/**
+ * Run before either mode inserts its spinner; virtual paragraphs use this too.
+ * Pass prose (`filterText`), never the HTML request: language detection on
+ * markup is noise.
+ */
 export async function shouldSkipPageTranslationText(
   text: string,
   config: Config,
