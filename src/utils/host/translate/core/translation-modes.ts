@@ -28,10 +28,11 @@ import {
 } from "../../dom/filter"
 import { unwrapDeepestOnlyHTMLChild } from "../../dom/find"
 import { getOwnerDocument } from "../../dom/node"
-import { canSplitGiantWithoutStrandingOwnText, extractTextContent } from "../../dom/traversal"
+import { canSplitGiantWithoutStrandingOwnText } from "../../dom/traversal"
 import {
   containsInlineAtomOutsideWrappers,
   extractInlineAtomText,
+  getInlineAtomSelector,
   renderInlineAtomTranslation,
 } from "../dom/inline-atoms"
 import {
@@ -1085,7 +1086,9 @@ async function translateTranslationOnlyRun(
       return
     }
 
-    const innerTextContent = transNodes.map((node) => extractTextContent(node, config)).join("")
+    // Same prose-only text bilingual filters on: inline atoms (formulas,
+    // inline code) contribute nothing to the length and language checks.
+    const innerTextContent = extractInlineAtomText(transNodes, config).filterText
     if (!innerTextContent.trim() || isNumericContent(innerTextContent)) return
 
     if (await shouldFilterSmallParagraph(innerTextContent, config)) return
@@ -1095,7 +1098,11 @@ async function translateTranslationOnlyRun(
     if (await shouldSkipAsTargetLanguage(innerTextContent, config)) return
 
     const ownerDoc = getOwnerDocument(targetNode)
-    const protectedHtml = protectTranslationHtmlAttributes(transNodes, ownerDoc)
+    const protectedHtml = protectTranslationHtmlAttributes(
+      transNodes,
+      ownerDoc,
+      getInlineAtomSelector(config),
+    )
     const textContent = protectedHtml.sourceHtml
     if (!textContent) return
 
