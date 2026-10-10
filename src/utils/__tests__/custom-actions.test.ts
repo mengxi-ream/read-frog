@@ -252,6 +252,25 @@ describe("selection toolbar built-in actions", () => {
     )
   })
 
+  it("writes back a state without a key without one, until the key changes", () => {
+    const selectionToolbar = cloneSelectionToolbar()
+    delete selectionToolbar.builtInActions.dictionary.shortcut
+    const dictionary = getBuiltInDictionaryAction(selectionToolbar)
+    expect(dictionary.shortcut).toBe("Alt+Shift+D")
+
+    const providerChanged = replaceSelectionToolbarAction(selectionToolbar, {
+      ...dictionary,
+      providerId: "openai-default",
+    })
+    expect(providerChanged.builtInActions.dictionary).not.toHaveProperty("shortcut")
+
+    const keyChanged = replaceSelectionToolbarAction(selectionToolbar, {
+      ...dictionary,
+      shortcut: "Alt+Shift+K",
+    })
+    expect(keyChanged.builtInActions.dictionary.shortcut).toBe("Alt+Shift+K")
+  })
+
   it("resolves the configured Note suggestion action even when it is disabled", () => {
     const selectionToolbar = cloneSelectionToolbar()
     const customAction = {

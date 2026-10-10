@@ -769,18 +769,21 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     }
   }, [resolveContextMenuOpenRequest])
 
-  const resolveShortcutRequest = useCallback((): SelectionTranslatePendingOpenRequest | null => {
-    const request = resolveShortcutOpenRequest()
-    if (!request) {
-      return null
-    }
+  const resolveShortcutRequest = useCallback(
+    (session: SelectionSession | null): SelectionTranslatePendingOpenRequest | null => {
+      const request = resolveShortcutOpenRequest(session)
+      if (!request) {
+        return null
+      }
 
-    return {
-      anchor: request.anchor,
-      session: request.session,
-      surface: ANALYTICS_SURFACE.SHORTCUT,
-    }
-  }, [resolveShortcutOpenRequest])
+      return {
+        anchor: request.anchor,
+        session: request.session,
+        surface: ANALYTICS_SURFACE.SHORTCUT,
+      }
+    },
+    [resolveShortcutOpenRequest],
+  )
 
   const openSelectionTranslationRequest = useCallback(
     (
@@ -823,14 +826,17 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     })
   }, [openSelectionTranslationRequest, resolveContextMenuRequest])
 
-  useSelectionShortcuts({ translate: selectionToolbar.features.translate.shortcut }, () => {
-    const request = resolveShortcutRequest()
-    if (!request) {
-      return false
-    }
-    openSelectionTranslationRequest(request)
-    return true
-  })
+  useSelectionShortcuts(
+    { translate: selectionToolbar.features.translate.shortcut },
+    (_, session) => {
+      const request = resolveShortcutRequest(session)
+      if (!request) {
+        return false
+      }
+      openSelectionTranslationRequest(request)
+      return true
+    },
+  )
 
   useEffect(() => {
     return onMessage("openSelectionTranslationFromContextMenu", () => {

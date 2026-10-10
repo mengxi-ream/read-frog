@@ -7,7 +7,6 @@ import {
 } from "@/utils/constants/custom-action"
 import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
 import {
-  DEFAULT_SELECTION_SPEAK_SHORTCUT_KEY,
   MAX_SELECTION_OVERLAY_OPACITY,
   MIN_SELECTION_OVERLAY_OPACITY,
 } from "@/utils/constants/selection"
@@ -46,9 +45,12 @@ const selectionToolbarFeatureSchema = z.object({
 
 const selectionToolbarSpeakFeatureSchema = z.object({
   enabled: z.boolean(),
-  // `.default()` lets a config stored before v110 parse in UI contexts that
-  // load ahead of the background migration.
-  shortcut: shortcutSchema.default(DEFAULT_SELECTION_SPEAK_SHORTCUT_KEY),
+  // Missing means the default key (see getSpeakShortcut); empty means the user
+  // cleared it. Optional rather than defaulted: a UI context that parses a
+  // pre-v110 config and writes it back must not store the default, or the v110
+  // migration could no longer tell it from a key the user chose, and would not
+  // check it against the user's other shortcuts.
+  shortcut: shortcutSchema.optional(),
 })
 
 // Text selection toolbar schema

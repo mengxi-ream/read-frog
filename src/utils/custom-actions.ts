@@ -91,12 +91,22 @@ export function resolveNoteSuggestionAction(
   return action
 }
 
-function toBuiltInState(action: SelectionToolbarCustomAction): SelectionToolbarBuiltInActionState {
+// A state without a key reads as the action's default key, and is written
+// back without one while the key is still that default: a UI context that
+// writes a pre-v110 config must not store the default, or the v110 migration
+// could no longer tell it from a key the user chose.
+function toBuiltInState(
+  action: SelectionToolbarCustomAction & { id: BuiltInActionId },
+  current: SelectionToolbarBuiltInActionState | undefined,
+): SelectionToolbarBuiltInActionState {
+  const keepsDefaultKey =
+    current?.shortcut === undefined &&
+    action.shortcut === BUILT_IN_ACTION_DEFAULT_SHORTCUTS[action.id]
   return {
     enabled: action.enabled !== false,
     providerId: action.providerId,
     notebaseConnection: action.notebaseConnection,
-    shortcut: action.shortcut,
+    ...(keepsDefaultKey ? {} : { shortcut: action.shortcut }),
   }
 }
 
@@ -105,11 +115,12 @@ export function replaceSelectionToolbarAction(
   action: SelectionToolbarCustomAction,
 ): SelectionToolbarConfig {
   if (isBuiltInActionId(action.id)) {
+    const key = BUILT_IN_ACTION_KEYS[action.id]
     return {
       ...selectionToolbar,
       builtInActions: {
         ...selectionToolbar.builtInActions,
-        [BUILT_IN_ACTION_KEYS[action.id]]: toBuiltInState(action),
+        [key]: toBuiltInState({ ...action, id: action.id }, selectionToolbar.builtInActions?.[key]),
       },
     }
   }

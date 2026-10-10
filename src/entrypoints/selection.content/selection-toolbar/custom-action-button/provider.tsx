@@ -331,8 +331,8 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
     [selectionToolbarConfig],
   )
 
-  useSelectionShortcuts(actionShortcuts, (actionId) => {
-    const request = resolveShortcutOpenRequest()
+  useSelectionShortcuts(actionShortcuts, (actionId, session) => {
+    const request = resolveShortcutOpenRequest(session)
     if (!request) {
       return false
     }

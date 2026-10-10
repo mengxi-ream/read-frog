@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest"
+import { configSchema } from "@/types/config/config"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { migrate } from "../../migration-scripts/v109-to-v110"
 
 function createConfig(overrides: { translateShortcut?: string; hubShortcut?: string } = {}) {
@@ -90,6 +92,29 @@ describe("v109-to-v110 migration", () => {
     }
 
     expect(migrate(oldConfig)).toBe(oldConfig)
+  })
+
+  it("still checks the keys of a pre-v110 config a UI context parsed and wrote back first", () => {
+    // A v109 config, as a UI context that loads ahead of the migration parses it.
+    const { selectionToolbar } = structuredClone(DEFAULT_CONFIG)
+    delete selectionToolbar.features.speak.shortcut
+    for (const state of Object.values(selectionToolbar.builtInActions)) {
+      delete state.shortcut
+    }
+    const parsed = configSchema.parse({
+      ...DEFAULT_CONFIG,
+      translationHub: { ...DEFAULT_CONFIG.translationHub, shortcut: "Alt+Shift+R" },
+      selectionToolbar,
+    })
+
+    // Nothing is filled in for it to write back...
+    expect(parsed.selectionToolbar.features.speak).not.toHaveProperty("shortcut")
+    expect(parsed.selectionToolbar.builtInActions.dictionary).not.toHaveProperty("shortcut")
+
+    // ...so the migration still sees Speak's default is the Hub's key.
+    const migrated = migrate(JSON.parse(JSON.stringify(parsed)))
+    expect(migrated.selectionToolbar.features.speak.shortcut).toBe("")
+    expect(migrated.selectionToolbar.builtInActions.dictionary.shortcut).toBe("Alt+Shift+D")
   })
 
   it("leaves malformed config shapes unchanged", () => {

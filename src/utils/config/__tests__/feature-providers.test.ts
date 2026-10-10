@@ -463,8 +463,6 @@ describe("feature providers", () => {
           enabled: false,
           providerId: "jalapenocloud-default",
           notebaseConnection: undefined,
-          // A state without a key reads as the action's default key, and is written back so.
-          shortcut: "Alt+Shift+G",
         },
         improveWriting: DEFAULT_CONFIG.selectionToolbar.builtInActions.improveWriting,
       })

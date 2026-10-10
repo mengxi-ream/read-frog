@@ -10,6 +10,7 @@ import {
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { getSpeakShortcut } from "@/utils/constants/selection"
 import { i18n } from "@/utils/i18n"
 import { selectionContentAtom } from "./atoms"
 import { ShortcutTooltipLabel } from "./shortcut-hint"
@@ -25,17 +26,21 @@ function useSelectionSpeechController() {
 
   // The key toggles like the button, but with nothing to read it lets the
   // page have the keystroke rather than complain.
-  useSelectionShortcuts({ speak: speak.enabled ? speak.shortcut : undefined }, () => {
-    if (isBusy) {
-      stop()
+  useSelectionShortcuts(
+    { speak: speak.enabled ? getSpeakShortcut(speak) : undefined },
+    (_, session) => {
+      if (isBusy) {
+        stop()
+        return true
+      }
+      const text = session?.selectionSnapshot.text
+      if (!text) {
+        return false
+      }
+      void play(text, ttsConfig, { surface: ANALYTICS_SURFACE.SHORTCUT })
       return true
-    }
-    if (!selectionContent) {
-      return false
-    }
-    void play(selectionContent, ttsConfig, { surface: ANALYTICS_SURFACE.SHORTCUT })
-    return true
-  })
+    },
+  )
 
   // Starts reading, or stops the reading in progress. False when nothing is
   // selected to read.
@@ -100,7 +105,7 @@ export function SpeakButton() {
 
   return (
     <SelectionToolbarTooltip
-      content={<ShortcutTooltipLabel label={tooltipText} shortcut={speak.shortcut} />}
+      content={<ShortcutTooltipLabel label={tooltipText} shortcut={getSpeakShortcut(speak)} />}
       open={tooltipOpen}
       onOpenChange={handleTooltipOpenChange}
       render={

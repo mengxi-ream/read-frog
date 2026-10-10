@@ -1,5 +1,6 @@
 import { useAtom } from "jotai"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { getSpeakShortcut } from "@/utils/constants/selection"
 import { i18n } from "@/utils/i18n"
 import { ShortcutConfigItem } from "./shortcut-config-item"
 import { TurnedOffNote } from "./turned-off-note"
@@ -18,7 +19,7 @@ export function SelectionSpeakShortcut() {
           {!speak.enabled && <TurnedOffNote />}
         </>
       }
-      shortcut={speak.shortcut}
+      shortcut={getSpeakShortcut(speak)}
       onChange={(nextShortcut) => {
         void setSelectionToolbar((current) => ({
           ...current,

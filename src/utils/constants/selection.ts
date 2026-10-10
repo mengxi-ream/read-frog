@@ -33,3 +33,8 @@ export type SelectionToolbarFeatureId = (typeof SELECTION_TOOLBAR_FEATURE_IDS)[n
 // Reads the selection aloud. Alt+Shift, like the built-in actions' keys (see
 // BUILT_IN_ACTION_DEFAULT_SHORTCUTS); S is taken by ChromeOS, so R, for "read".
 export const DEFAULT_SELECTION_SPEAK_SHORTCUT_KEY = "Alt+Shift+R"
+
+// Speak's key: a config without one has the default key, an empty one has none.
+export function getSpeakShortcut(speak: { shortcut?: string }) {
+  return speak.shortcut ?? DEFAULT_SELECTION_SPEAK_SHORTCUT_KEY
+}

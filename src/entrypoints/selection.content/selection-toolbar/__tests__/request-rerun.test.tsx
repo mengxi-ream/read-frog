@@ -1865,6 +1865,41 @@ describe("selection toolbar requests", () => {
     }
   })
 
+  it("acts on the selection the key is pressed on, made or changed with the keyboard", async () => {
+    streamBackgroundStructuredObjectMock.mockResolvedValue(
+      createStructuredObjectSnapshot({ summary: "Keyboard selection result" }),
+    )
+    const recorded = document.createElement("p")
+    recorded.textContent = "Text selected with the mouse earlier."
+    const live = document.createElement("p")
+    live.textContent = "Text selected with Shift and the arrow keys."
+    document.body.append(recorded, live)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    // The toolbar recorded a mouse selection; the keyboard has since moved it.
+    setSelectionState(store, {
+      text: "Text selected with the mouse earlier.",
+      range: createRangeFor(recorded),
+    })
+    const selection = window.getSelection()!
+    selection.removeAllRanges()
+    selection.addRange(createRangeFor(live))
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
+
+    try {
+      expect(pressShortcutInAct("Alt+Shift+D").defaultPrevented).toBe(true)
+      await waitFor(() => {
+        expect(screen.getByText('{"summary":"Keyboard selection result"}')).toBeInTheDocument()
+      })
+      const paragraphs = screen.getByTestId("footer-paragraphs").textContent
+      expect(paragraphs).toContain("Text selected with Shift and the arrow keys.")
+      expect(paragraphs).not.toContain("Text selected with the mouse earlier.")
+    } finally {
+      selection.removeAllRanges()
+    }
+  })
+
   it("leaves a custom action's key to the page when nothing is selected", async () => {
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))

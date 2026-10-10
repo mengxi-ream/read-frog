@@ -122,6 +122,31 @@ describe("SelectionSpeechProvider", () => {
     expect(event.defaultPrevented).toBe(true)
   })
 
+  it("reads a selection made with the keyboard, which the toolbar never recorded", () => {
+    tts.isPlaying = false
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected with Shift and the arrow keys"
+    document.body.appendChild(paragraph)
+    const range = document.createRange()
+    range.selectNodeContents(paragraph)
+    window.getSelection()!.addRange(range)
+    renderSpeech()
+
+    try {
+      const event = pressSpeakKey()
+
+      expect(tts.play).toHaveBeenCalledWith(
+        "Selected with Shift and the arrow keys",
+        DEFAULT_CONFIG.tts,
+        { surface: "shortcut" },
+      )
+      expect(event.defaultPrevented).toBe(true)
+    } finally {
+      window.getSelection()!.removeAllRanges()
+      paragraph.remove()
+    }
+  })
+
   it("stops the reading in progress from its key", () => {
     renderSpeech()
 
