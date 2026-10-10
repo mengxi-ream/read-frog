@@ -1531,6 +1531,9 @@ options:
       aiSegmentation:
         title: AI smart segmentation
         description: Lets AI re-cut the subtitles into lines that read as sentences. It sets their timing too, so lines can drift out of sync. Needs an LLM translation provider.
+      wordLookupAction:
+        title: Word lookup action
+        description: The AI action that answers a click on a word in the subtitles. Dictionary unless you pick one of your own.
     aiQuota:
       title: AI subtitles quota
       description: AI speech recognition gets you accurate subtitles for any video

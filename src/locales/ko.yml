@@ -1384,6 +1384,9 @@ options:
       aiSegmentation:
         title: AI 스마트 분할
         description: AI가 자막을 문장처럼 읽히도록 다시 나눕니다. 타이밍도 AI가 정하므로 싱크가 어긋날 수 있습니다. LLM 번역 공급자가 필요합니다.
+      wordLookupAction:
+        title: 단어 조회 액션
+        description: 자막의 단어를 클릭했을 때 실행할 AI 액션입니다. 기본은 사전이며 직접 만든 액션으로 바꿀 수 있습니다.
     aiQuota:
       title: AI 자막 사용량
       description: AI 음성 인식으로 모든 동영상에 정확한 자막을 만들어 줍니다

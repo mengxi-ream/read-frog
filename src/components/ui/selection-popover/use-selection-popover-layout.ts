@@ -39,7 +39,7 @@ interface UseSelectionPopoverLayoutResult {
   handleWheel: (event: React.WheelEvent<HTMLElement>) => void
 }
 
-const DEFAULT_WIDTH = 500
+export const SELECTION_POPOVER_DEFAULT_WIDTH = 500
 const MIN_WIDTH = 320
 const MIN_HEIGHT = 180
 const BOTTOM_EDGE_TOLERANCE = 1
@@ -90,7 +90,9 @@ function getEffectiveMinHeight(maxHeight: number) {
 }
 
 function getInitialWidth(maxWidth: number) {
-  return maxWidth > 0 ? Math.min(DEFAULT_WIDTH, maxWidth) : DEFAULT_WIDTH
+  return maxWidth > 0
+    ? Math.min(SELECTION_POPOVER_DEFAULT_WIDTH, maxWidth)
+    : SELECTION_POPOVER_DEFAULT_WIDTH
 }
 
 function getInitialPosition(anchor: Position | null) {

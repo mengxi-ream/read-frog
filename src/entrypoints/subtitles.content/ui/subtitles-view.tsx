@@ -33,7 +33,7 @@ function SubtitlesContent() {
       className={`${SUBTITLES_VIEW_CLASS} pointer-events-none flex w-full flex-col items-center justify-end pb-3`}
     >
       <div
-        className={`${SUBTITLES_BOX_CLASS} pointer-events-auto mx-auto flex w-fit max-w-[90%] cursor-text flex-col gap-2 rounded px-2 py-1.5 text-center text-white select-text`}
+        className={`${SUBTITLES_BOX_CLASS} pointer-events-auto mx-auto flex w-fit max-w-[90%] flex-col gap-2 rounded px-2 py-1.5 text-center text-white select-none`}
         style={containerStyle}
       >
         <Activity mode={showMain ? "visible" : "hidden"}>

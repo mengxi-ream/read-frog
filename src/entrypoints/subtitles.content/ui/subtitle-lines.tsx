@@ -41,7 +41,7 @@ export function MainSubtitle({ content, className }: SubtitleLineProps) {
       className={cn("subtitles-main text-xl leading-tight", className)}
       style={getTextStyleVars(style.main)}
     >
-      {content === undefined ? <SubtitleWordTokens text={text} /> : text}
+      {content === undefined ? <SubtitleWordTokens /> : text}
     </div>
   )
 }

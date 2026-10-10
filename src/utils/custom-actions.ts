@@ -75,6 +75,14 @@ export function findSelectionToolbarAction(
   return selectionToolbar.customActions.find((action) => action.id === actionId)
 }
 
+export function resolveWordLookupAction(config: Config): SelectionToolbarCustomAction {
+  const action = findSelectionToolbarAction(config.selectionToolbar, config.wordLookup.actionId)
+  if (action && action.enabled !== false) {
+    return action
+  }
+  return getBuiltInDictionaryAction(config.selectionToolbar)
+}
+
 export function resolveNoteSuggestionAction(
   selectionToolbar: SelectionToolbarConfig,
 ): SelectionToolbarCustomAction {

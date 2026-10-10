@@ -1,43 +1,59 @@
 // @vitest-environment jsdom
 import type { ReactNode } from "react"
-import type { Mock } from "vitest"
 import { act, renderHook } from "@testing-library/react"
+import { Provider } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { subtitlesStore } from "../../atoms"
 import { SubtitlesUIContext } from "../../ui/subtitles-ui-context"
+import { closeWordLookupAtom, wordLookupAtom } from "../atoms"
 import { useLookupPlayback } from "../use-lookup-playback"
 
-interface FakePlayer {
-  paused: boolean
-  pauseVideo: Mock<() => void>
-  playVideo: Mock<() => void>
-  isVideoPaused: Mock<() => boolean>
-}
-
-function createPlayer(initiallyPaused: boolean) {
-  const player: FakePlayer = {
-    paused: initiallyPaused,
-    pauseVideo: vi.fn<() => void>(() => {
-      player.paused = true
-    }),
-    playVideo: vi.fn<() => void>(() => {
-      player.paused = false
-    }),
-    isVideoPaused: vi.fn<() => boolean>(() => player.paused),
+function createVideo(initiallyPaused: boolean) {
+  const video = document.createElement("video")
+  let paused = initiallyPaused
+  Object.defineProperty(video, "paused", { get: () => paused })
+  const pause = vi.spyOn(video, "pause").mockImplementation(() => {
+    paused = true
+  })
+  const play = vi.spyOn(video, "play").mockImplementation(async () => {
+    paused = false
+  })
+  const pressPlay = () => {
+    paused = false
+    video.dispatchEvent(new Event("play"))
   }
-  return player
+  return { video, pause, play, pressPlay }
 }
 
-function renderPlayback(player: FakePlayer, open: boolean) {
+function setOpen(open: boolean) {
+  act(() => {
+    subtitlesStore.set(
+      wordLookupAtom,
+      open ? { cueStart: 0, tokenIndex: 0, anchor: { x: 0, y: 0 } } : null,
+    )
+  })
+}
+
+function renderPlayback(video: HTMLVideoElement) {
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <SubtitlesUIContext
-      value={{ ...player } as unknown as React.ContextType<typeof SubtitlesUIContext>}
-    >
-      {children}
-    </SubtitlesUIContext>
+    <Provider store={subtitlesStore}>
+      <SubtitlesUIContext
+        value={
+          { getVideoElement: () => video } as unknown as React.ContextType<
+            typeof SubtitlesUIContext
+          >
+        }
+      >
+        {children}
+      </SubtitlesUIContext>
+    </Provider>
   )
-  return renderHook((props: { open: boolean }) => useLookupPlayback(props.open), {
-    wrapper,
-    initialProps: { open },
+  return renderHook(() => useLookupPlayback(), { wrapper })
+}
+
+function advancePastResumeDelay() {
+  act(() => {
+    vi.advanceTimersByTime(250)
   })
 }
 
@@ -47,72 +63,60 @@ describe("useLookupPlayback", () => {
   })
 
   afterEach(() => {
+    subtitlesStore.set(closeWordLookupAtom)
     vi.useRealTimers()
   })
 
   it("pauses a playing video on open and resumes it shortly after close", () => {
-    const player = createPlayer(false)
-    const { rerender } = renderPlayback(player, false)
+    const { video, pause, play } = createVideo(false)
+    renderPlayback(video)
 
-    rerender({ open: true })
-    expect(player.pauseVideo).toHaveBeenCalledTimes(1)
+    setOpen(true)
+    expect(pause).toHaveBeenCalledTimes(1)
 
-    rerender({ open: false })
-    expect(player.playVideo).not.toHaveBeenCalled()
-    act(() => {
-      vi.advanceTimersByTime(250)
-    })
-    expect(player.playVideo).toHaveBeenCalledTimes(1)
+    setOpen(false)
+    expect(play).not.toHaveBeenCalled()
+    advancePastResumeDelay()
+    expect(play).toHaveBeenCalledTimes(1)
   })
 
   it("leaves a video the viewer had already paused alone", () => {
-    const player = createPlayer(true)
-    const { rerender } = renderPlayback(player, false)
+    const { video, pause, play } = createVideo(true)
+    renderPlayback(video)
 
-    rerender({ open: true })
-    rerender({ open: false })
-    act(() => {
-      vi.advanceTimersByTime(250)
-    })
+    setOpen(true)
+    setOpen(false)
+    advancePastResumeDelay()
 
-    expect(player.pauseVideo).not.toHaveBeenCalled()
-    expect(player.playVideo).not.toHaveBeenCalled()
+    expect(pause).not.toHaveBeenCalled()
+    expect(play).not.toHaveBeenCalled()
   })
 
   it("does not resume when the viewer pressed play while the card was open", () => {
-    const player = createPlayer(false)
-    const { rerender } = renderPlayback(player, false)
+    const { video, play, pressPlay } = createVideo(false)
+    renderPlayback(video)
 
-    rerender({ open: true })
-    act(() => {
-      player.paused = false
-      document.dispatchEvent(new Event("play"))
-    })
-    rerender({ open: false })
-    act(() => {
-      vi.advanceTimersByTime(250)
-    })
+    setOpen(true)
+    act(pressPlay)
+    setOpen(false)
+    advancePastResumeDelay()
 
-    expect(player.playVideo).not.toHaveBeenCalled()
+    expect(play).not.toHaveBeenCalled()
   })
 
   it("keeps the pause when a second word reopens the card within the resume delay", () => {
-    const player = createPlayer(false)
-    const { rerender } = renderPlayback(player, false)
+    const { video, pause, play } = createVideo(false)
+    renderPlayback(video)
 
-    rerender({ open: true })
-    rerender({ open: false })
-    rerender({ open: true })
-    act(() => {
-      vi.advanceTimersByTime(250)
-    })
-    expect(player.playVideo).not.toHaveBeenCalled()
-    expect(player.pauseVideo).toHaveBeenCalledTimes(1)
+    setOpen(true)
+    setOpen(false)
+    setOpen(true)
+    advancePastResumeDelay()
+    expect(play).not.toHaveBeenCalled()
+    expect(pause).toHaveBeenCalledTimes(1)
 
-    rerender({ open: false })
-    act(() => {
-      vi.advanceTimersByTime(250)
-    })
-    expect(player.playVideo).toHaveBeenCalledTimes(1)
+    setOpen(false)
+    advancePastResumeDelay()
+    expect(play).toHaveBeenCalledTimes(1)
   })
 })

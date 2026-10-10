@@ -29,6 +29,7 @@ import { siteRulesConfigSchema } from "./site-rules"
 import { videoSubtitlesSchema } from "./subtitles"
 import { pageTranslationShortcutSchema, translateConfigSchema } from "./translate"
 import { ttsConfigSchema } from "./tts"
+import { wordLookupConfigSchema } from "./word-lookup"
 // Language schema
 const languageSchema = z.object({
   sourceCode: langCodeISO6393Schema.or(z.literal("auto")),
@@ -186,6 +187,7 @@ export const configSchema = z
     uiLanguage: uiLanguageSchema,
     translationHub: translationHubSchema,
     glossary: glossaryConfigSchema,
+    wordLookup: wordLookupConfigSchema,
   })
   .superRefine((data, ctx) => {
     for (const featureKey of FEATURE_KEYS) {

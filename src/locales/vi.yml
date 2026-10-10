@@ -1384,6 +1384,9 @@ options:
       aiSegmentation:
         title: AI phân đoạn thông minh
         description: AI cắt lại phụ đề thành những dòng đọc như câu hoàn chỉnh. AI cũng quyết định thời điểm hiện, nên dòng có thể lệch. Cần nhà cung cấp dịch LLM.
+      wordLookupAction:
+        title: Hành động tra từ
+        description: Hành động AI chạy khi bạn nhấp vào một từ trong phụ đề. Mặc định là từ điển, bạn có thể chọn hành động của riêng mình.
     aiQuota:
       title: Hạn mức phụ đề AI
       description: AI dùng công nghệ nhận dạng giọng nói để tạo phụ đề chính xác cho mọi video
