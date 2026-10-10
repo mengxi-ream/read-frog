@@ -19,15 +19,10 @@ import {
   MARGIN,
   SELECTION_TOOLBAR_READY_EVENT,
 } from "@/utils/constants/selection"
-import { getDeepActiveElement } from "@/utils/dom/active-element"
 import { getSelectionToolbarItems } from "@/utils/selection-toolbar-items"
 import { cn } from "@/utils/styles/utils"
 import { urlMatchesPattern } from "@/utils/url-pattern"
-import {
-  buildContextSnapshot,
-  readSelectionSnapshot,
-  readTextFieldSelectionSnapshot,
-} from "../utils"
+import { buildContextSnapshot, readSelectionSnapshot } from "../utils"
 import { clearSelectionStateAtom, isSelectionToolbarOpenAtom, setSelectionStateAtom } from "./atoms"
 import { CloseButton, DropEvent } from "./close-button"
 import { createModalDialogHostController } from "./modal-dialog-host"
@@ -391,12 +386,9 @@ export function SelectionToolbar() {
       // Use requestAnimationFrame to delay selection check
       // This ensures selectionchange event fires first if text selection was cleared
       requestAnimationFrame(() => {
-        // The focused field, through any open shadow root it sits in. The
-        // click target is compared with document.activeElement instead: at
-        // the document both are the shadow host.
-        const activeField = getDeepActiveElement()
         const isInputOrTextarea =
-          activeField instanceof HTMLInputElement || activeField instanceof HTMLTextAreaElement
+          document.activeElement instanceof HTMLInputElement ||
+          document.activeElement instanceof HTMLTextAreaElement
 
         if (isInputOrTextarea && e.target !== document.activeElement) {
           return
@@ -417,10 +409,7 @@ export function SelectionToolbar() {
           return
         }
 
-        // Firefox reports a text field's selection only through the field.
-        const selectionSnapshot =
-          readSelectionSnapshot(selection) ??
-          (isInputOrTextarea ? readTextFieldSelectionSnapshot(activeField) : null)
+        const selectionSnapshot = readSelectionSnapshot(selection)
 
         // https://github.com/mengxi-ream/read-frog/issues/547
         // https://github.com/mengxi-ream/read-frog/pull/790
@@ -507,11 +496,8 @@ export function SelectionToolbar() {
         return
       }
 
-      // if the selected content is cleared, hide the tooltip. A text field's
-      // selection counts too: Firefox keeps it out of window.getSelection().
-      const hasSelectedText =
-        !!selection?.toString().trim() || !!readTextFieldSelectionSnapshot(getDeepActiveElement())
-      if (!hasSelectedText) {
+      // if the selected content is cleared, hide the tooltip
+      if (!selection || selection.toString().trim().length === 0) {
         if (preserveSelectionStateRef.current) {
           return
         }

@@ -4,14 +4,9 @@ import { matchesKeyboardEvent } from "@tanstack/hotkeys"
 import { useAtomValue } from "jotai"
 import { useEffect, useEffectEvent } from "react"
 import { SELECTION_SHORTCUT_CLAIMED_EVENT } from "@/utils/constants/selection"
-import { getDeepActiveElement } from "@/utils/dom/active-element"
 import { isShortcutEmpty, isValidShortcut } from "@/utils/shortcut"
 import { shadowWrapper } from ".."
-import {
-  buildContextSnapshot,
-  readSelectionSnapshot,
-  readTextFieldSelectionSnapshot,
-} from "../utils"
+import { buildContextSnapshot, readSelectionSnapshot } from "../utils"
 import { createSelectionSession, selectionSessionAtom } from "./atoms"
 
 function isEditable(element: Element | null) {
@@ -62,10 +57,7 @@ function readLiveSelectionSession(): SelectionSession | null {
   if (isInOwnUi(selection?.anchorNode ?? null)) {
     return null
   }
-  const activeField = getDeepActiveElement()
-  const snapshot =
-    readSelectionSnapshot(selection) ??
-    (isInOwnUi(activeField) ? null : readTextFieldSelectionSnapshot(activeField))
+  const snapshot = readSelectionSnapshot(selection)
   return snapshot ? createSelectionSession(snapshot, buildContextSnapshot(snapshot)) : null
 }
 

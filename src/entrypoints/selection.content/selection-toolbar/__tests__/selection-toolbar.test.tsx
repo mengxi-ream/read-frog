@@ -374,67 +374,6 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     spy.mockRestore()
   })
 
-  it("shows the toolbar for a textarea selection the page selection does not report, as in Firefox", async () => {
-    // Firefox keeps a text field's selection out of window.getSelection().
-    setMockSelectionText("")
-    render(
-      <div>
-        <SelectionToolbar />
-        <SelectionSessionProbe />
-        <textarea data-testid="test-element" defaultValue="i has went to the store" />
-      </div>,
-    )
-
-    const element = screen.getByTestId<HTMLTextAreaElement>("test-element")
-    element.setSelectionRange(2, 10)
-    const spy = vi.spyOn(document, "activeElement", "get").mockReturnValue(element)
-
-    await triggerMouseUpWithSelection(element)
-    await waitFor(() => expectToolbarVisible())
-    expect(screen.getByTestId("selection-session")).toHaveTextContent("has went")
-
-    // Nor does a selectionchange clear it while the field still holds the selection.
-    await act(async () => {
-      document.dispatchEvent(new Event("selectionchange"))
-    })
-    expect(screen.getByTestId("selection-session")).toHaveTextContent("has went")
-
-    element.setSelectionRange(4, 4)
-    await act(async () => {
-      document.dispatchEvent(new Event("selectionchange"))
-    })
-    expect(screen.getByTestId("selection-session")).toHaveTextContent("empty")
-
-    spy.mockRestore()
-  })
-
-  it("reads a field's selection through the open shadow root it sits in", async () => {
-    setMockSelectionText("")
-    render(
-      <div>
-        <SelectionToolbar />
-        <SelectionSessionProbe />
-      </div>,
-    )
-    const host = document.createElement("div")
-    document.body.appendChild(host)
-    const textarea = document.createElement("textarea")
-    textarea.value = "i has went to the store"
-    host.attachShadow({ mode: "open" }).appendChild(textarea)
-    textarea.focus()
-    textarea.setSelectionRange(2, 10)
-
-    try {
-      // At the document, both the focus and the click are the shadow host.
-      expect(document.activeElement).toBe(host)
-      await triggerMouseUpWithSelection(host)
-      await waitFor(() => expectToolbarVisible())
-      expect(screen.getByTestId("selection-session")).toHaveTextContent("has went")
-    } finally {
-      host.remove()
-    }
-  })
-
   it("should not show toolbar when input is activeElement but click target is outside", async () => {
     render(
       <div>
