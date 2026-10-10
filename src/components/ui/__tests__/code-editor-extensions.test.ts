@@ -20,18 +20,20 @@ import { closePercentBrace, liquid } from "@codemirror/lang-liquid"
 import { linter, lintGutter } from "@codemirror/lint"
 import { EditorState } from "@codemirror/state"
 import { EditorView } from "@codemirror/view"
+import { refreshFieldPills } from "@read-frog/layout-engine/codemirror"
 import { DEFAULT_LAYOUT } from "@read-frog/layout-engine/presets"
 import { color } from "@uiw/codemirror-extensions-color"
 import {
   getDefaultExtensions,
   EditorState as ReactCodeMirrorEditorState,
 } from "@uiw/react-codemirror"
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it } from "vitest"
 import { cssLinter } from "@/utils/css/lint-css"
 import { i18n } from "@/utils/i18n"
 import { CUSTOM_ACTION_LAYOUT_HOST } from "@/utils/layout-host/host"
 import {
   layoutLengthLimit,
+  liquidLayoutFieldPills,
   liquidLayoutLanguage,
   liquidLayoutLinter,
 } from "../liquid-code-editor-extensions"
@@ -95,6 +97,7 @@ describe("codeMirror extension sets resolve with a single @codemirror/state inst
           liquidLayoutLanguage(() => fields),
           liquidLayoutLinter({ getFields: () => fields, maxLength: 32768 }),
           lintGutter(),
+          liquidLayoutFieldPills(() => fields),
           layoutLengthLimit(32768, () => {}),
           EditorView.lineWrapping,
         ],
@@ -164,5 +167,37 @@ describe("liquid layout language", () => {
       extensions: [layoutLengthLimit(6, () => rejected++)],
     })
     expect(oversized.update({ changes: { from: 0, to: 1 } }).state.doc.toString()).toBe("23456789")
+  })
+})
+
+describe("liquid layout field pills", () => {
+  let view: EditorView | null = null
+
+  afterEach(() => {
+    view?.destroy()
+    view = null
+  })
+
+  const pillLabels = () =>
+    [...view!.dom.querySelectorAll(".cm-rf-field-pill")].map((pill) => pill.textContent)
+
+  it("shows references to output fields by name as pills, and leaves unknown names as text", () => {
+    const doc = '{{ ["the term"] }}{% if Term != blank %}{{ ["nope"] }}{% endif %}'
+    let fields: LiquidEditorField[] = [
+      { id: "f1", name: "the term", type: "string", description: "" },
+      { id: "f2", name: "Term", type: "string", description: "" },
+    ]
+    view = new EditorView({
+      parent: document.body,
+      state: EditorState.create({ doc, extensions: [liquidLayoutFieldPills(() => fields)] }),
+    })
+
+    expect(pillLabels()).toEqual(["the term", "Term"])
+    expect(view.state.doc.toString()).toBe(doc)
+
+    // A removed field stops being a pill once the editor refreshes.
+    fields = fields.slice(0, 1)
+    refreshFieldPills(view)
+    expect(pillLabels()).toEqual(["the term"])
   })
 })

@@ -1,6 +1,6 @@
 /**
  * CodeMirror extensions for the custom action Layout editor: the layout
- * engine's Liquid + HTML language and linter
+ * engine's Liquid + HTML language, linter and field pills
  * (@read-frog/layout-engine/codemirror) in the extension's words, and the
  * length cap.
  *
@@ -14,7 +14,7 @@ import type { LayoutField, LayoutLintCode } from "@read-frog/layout-engine/contr
 import type { LayoutDiagnostic } from "@read-frog/layout-engine/editor"
 import type { SelectionToolbarCustomActionOutputType } from "@/types/config/selection-toolbar"
 import { EditorState } from "@codemirror/state"
-import { layoutLanguage, layoutLinter } from "@read-frog/layout-engine/codemirror"
+import { fieldPills, layoutLanguage, layoutLinter } from "@read-frog/layout-engine/codemirror"
 import { ExternalChange } from "@uiw/react-codemirror"
 import { i18n } from "@/utils/i18n"
 import { createCustomActionLayoutHost, CUSTOM_ACTION_LAYOUT_HOST } from "@/utils/layout-host/host"
@@ -33,6 +33,18 @@ function describeField(field: LayoutField): string {
 
 export function liquidLayoutLanguage(getFields: () => readonly LiquidEditorField[]): Extension {
   return layoutLanguage({ host: CUSTOM_ACTION_LAYOUT_HOST, getFields, describeField })
+}
+
+// ---------------------------------------------------------------------------
+// Field pills
+
+// Each reference to a known output field (`["Term"]`, or a bare `Term`) shows
+// as a pill with the field's name; the text keeps the reference. A pill is
+// atomic: the cursor steps over it and Backspace deletes the whole reference.
+// Unknown names stay text, for the linter to flag. Their colors come from
+// `--rf-field-pill-background` / `--rf-field-pill-foreground`.
+export function liquidLayoutFieldPills(getFields: () => readonly LiquidEditorField[]): Extension {
+  return fieldPills({ host: CUSTOM_ACTION_LAYOUT_HOST, getFields })
 }
 
 // ---------------------------------------------------------------------------

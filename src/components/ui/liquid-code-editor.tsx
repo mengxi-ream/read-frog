@@ -2,8 +2,9 @@
  * Liquid Code Editor Component
  *
  * CodeMirror editor for custom action layouts (HTML + Liquid), cloned from
- * CSSCodeEditor. Lazy-load it: @codemirror/lang-liquid pulls in the HTML, CSS
- * and JavaScript languages.
+ * CSSCodeEditor. References to output fields show as pills with the field's
+ * name. Lazy-load it: @codemirror/lang-liquid pulls in the HTML, CSS and
+ * JavaScript languages.
  *
  * The document is owned by CodeMirror. `value` is only read to follow
  * external rewrites (a field rename, "restore default", the expanded editor):
@@ -16,12 +17,14 @@ import type { ReactCodeMirrorRef } from "@uiw/react-codemirror"
 import type { LiquidEditorField } from "./liquid-code-editor-extensions"
 import { forceLinting, lintGutter } from "@codemirror/lint"
 import { EditorView } from "@codemirror/view"
+import { refreshFieldPills } from "@read-frog/layout-engine/codemirror"
 import CodeMirror, { ExternalChange } from "@uiw/react-codemirror"
 import { useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from "react"
 import { useTheme } from "@/components/providers/theme-provider"
 import { cn } from "@/utils/styles/utils"
 import {
   layoutLengthLimit,
+  liquidLayoutFieldPills,
   liquidLayoutLanguage,
   liquidLayoutLinter,
 } from "./liquid-code-editor-extensions"
@@ -89,6 +92,7 @@ function createEditorExtensions(
     liquidLayoutLanguage(getFields),
     liquidLayoutLinter({ getFields, maxLength: options.maxLength }),
     lintGutter(),
+    liquidLayoutFieldPills(getFields),
     layoutLengthLimit(options.maxLength, () => bridge.current.onTooLong?.()),
     EditorView.lineWrapping,
     // IME: autosave waits for the composition to end. The DOM events are the
@@ -203,12 +207,15 @@ export function LiquidCodeEditor({
     view.dispatch({ changes: diffTexts(current, value), annotations: ExternalChange.of(true) })
   }, [value])
 
-  // New field names change what the linter reports without a document change.
+  // New field names change the pills and what the linter reports without a
+  // document change.
   const fieldKey = fields.map((field) => `${field.type}:${field.name}`).join("\n")
   useEffect(() => {
     const view = editorRef.current?.view
-    if (view) forceLinting(view)
-    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the key is a re-lint trigger, not a value the effect reads
+    if (!view) return
+    refreshFieldPills(view)
+    forceLinting(view)
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the key is a refresh trigger, not a value the effect reads
   }, [fieldKey])
 
   useImperativeHandle(
