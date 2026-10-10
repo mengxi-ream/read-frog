@@ -408,6 +408,33 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     spy.mockRestore()
   })
 
+  it("reads a field's selection through the open shadow root it sits in", async () => {
+    setMockSelectionText("")
+    render(
+      <div>
+        <SelectionToolbar />
+        <SelectionSessionProbe />
+      </div>,
+    )
+    const host = document.createElement("div")
+    document.body.appendChild(host)
+    const textarea = document.createElement("textarea")
+    textarea.value = "i has went to the store"
+    host.attachShadow({ mode: "open" }).appendChild(textarea)
+    textarea.focus()
+    textarea.setSelectionRange(2, 10)
+
+    try {
+      // At the document, both the focus and the click are the shadow host.
+      expect(document.activeElement).toBe(host)
+      await triggerMouseUpWithSelection(host)
+      await waitFor(() => expectToolbarVisible())
+      expect(screen.getByTestId("selection-session")).toHaveTextContent("has went")
+    } finally {
+      host.remove()
+    }
+  })
+
   it("should not show toolbar when input is activeElement but click target is outside", async () => {
     render(
       <div>

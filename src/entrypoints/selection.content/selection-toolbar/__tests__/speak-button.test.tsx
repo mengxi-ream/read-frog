@@ -147,6 +147,27 @@ describe("SelectionSpeechProvider", () => {
     }
   })
 
+  it("reads a field's selection through the open shadow root it sits in", () => {
+    tts.isPlaying = false
+    const host = document.createElement("div")
+    document.body.appendChild(host)
+    const textarea = document.createElement("textarea")
+    textarea.value = "Selected in a web component"
+    host.attachShadow({ mode: "open" }).appendChild(textarea)
+    renderSpeech()
+    textarea.focus()
+    textarea.setSelectionRange(0, 8)
+
+    try {
+      const event = pressSpeakKey()
+
+      expect(tts.play).toHaveBeenCalledWith("Selected", DEFAULT_CONFIG.tts, { surface: "shortcut" })
+      expect(event.defaultPrevented).toBe(true)
+    } finally {
+      host.remove()
+    }
+  })
+
   it("stops the reading in progress from its key", () => {
     renderSpeech()
 

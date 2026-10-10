@@ -3,6 +3,7 @@ import type { SelectionSession } from "./atoms"
 import { matchesKeyboardEvent } from "@tanstack/hotkeys"
 import { useAtomValue } from "jotai"
 import { useEffect, useEffectEvent } from "react"
+import { getDeepActiveElement } from "@/utils/dom/active-element"
 import { isShortcutEmpty, isValidShortcut } from "@/utils/shortcut"
 import { shadowWrapper } from ".."
 import {
@@ -51,8 +52,10 @@ function readLiveSelectionSession(): SelectionSession | null {
   if (isInOwnUi(selection?.anchorNode ?? null)) {
     return null
   }
+  const activeField = getDeepActiveElement()
   const snapshot =
-    readSelectionSnapshot(selection) ?? readTextFieldSelectionSnapshot(document.activeElement)
+    readSelectionSnapshot(selection) ??
+    (isInOwnUi(activeField) ? null : readTextFieldSelectionSnapshot(activeField))
   return snapshot ? createSelectionSession(snapshot, buildContextSnapshot(snapshot)) : null
 }
 

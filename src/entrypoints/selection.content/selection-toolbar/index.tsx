@@ -19,6 +19,7 @@ import {
   MARGIN,
   SELECTION_TOOLBAR_READY_EVENT,
 } from "@/utils/constants/selection"
+import { getDeepActiveElement } from "@/utils/dom/active-element"
 import { getSelectionToolbarItems } from "@/utils/selection-toolbar-items"
 import { cn } from "@/utils/styles/utils"
 import { urlMatchesPattern } from "@/utils/url-pattern"
@@ -390,9 +391,12 @@ export function SelectionToolbar() {
       // Use requestAnimationFrame to delay selection check
       // This ensures selectionchange event fires first if text selection was cleared
       requestAnimationFrame(() => {
+        // The focused field, through any open shadow root it sits in. The
+        // click target is compared with document.activeElement instead: at
+        // the document both are the shadow host.
+        const activeField = getDeepActiveElement()
         const isInputOrTextarea =
-          document.activeElement instanceof HTMLInputElement ||
-          document.activeElement instanceof HTMLTextAreaElement
+          activeField instanceof HTMLInputElement || activeField instanceof HTMLTextAreaElement
 
         if (isInputOrTextarea && e.target !== document.activeElement) {
           return
@@ -416,7 +420,7 @@ export function SelectionToolbar() {
         // Firefox reports a text field's selection only through the field.
         const selectionSnapshot =
           readSelectionSnapshot(selection) ??
-          (isInputOrTextarea ? readTextFieldSelectionSnapshot(document.activeElement) : null)
+          (isInputOrTextarea ? readTextFieldSelectionSnapshot(activeField) : null)
 
         // https://github.com/mengxi-ream/read-frog/issues/547
         // https://github.com/mengxi-ream/read-frog/pull/790
@@ -506,7 +510,7 @@ export function SelectionToolbar() {
       // if the selected content is cleared, hide the tooltip. A text field's
       // selection counts too: Firefox keeps it out of window.getSelection().
       const hasSelectedText =
-        !!selection?.toString().trim() || !!readTextFieldSelectionSnapshot(document.activeElement)
+        !!selection?.toString().trim() || !!readTextFieldSelectionSnapshot(getDeepActiveElement())
       if (!hasSelectedText) {
         if (preserveSelectionStateRef.current) {
           return
