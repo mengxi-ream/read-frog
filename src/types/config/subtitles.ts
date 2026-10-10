@@ -8,11 +8,11 @@ import {
   MIN_FONT_SCALE,
   MIN_FONT_WEIGHT,
 } from "@/utils/constants/subtitles"
+import { shortcutSchema } from "./shortcut"
 import {
   batchQueueConfigSchema,
   createCustomPromptsConfigSchema,
   MAX_CUSTOM_CSS_LENGTH,
-  pageTranslationShortcutSchema,
   requestQueueConfigSchema,
 } from "./translate"
 
@@ -53,7 +53,7 @@ export const subtitlePositionSchema = z.object({
 export const videoSubtitlesSchema = z.object({
   enabled: z.boolean(),
   autoStart: z.boolean(),
-  toggleShortcut: pageTranslationShortcutSchema,
+  toggleShortcut: shortcutSchema,
   providerId: z.string().nonempty(),
   style: subtitlesStyleSchema,
   aiSegmentation: z.boolean(),

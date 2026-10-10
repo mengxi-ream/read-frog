@@ -1,6 +1,7 @@
 import type { Config } from "@/types/config/config"
 import type { Point } from "@/types/dom"
 import { HOTKEY_EVENT_KEYS } from "@/utils/constants/hotkeys"
+import { SELECTION_SHORTCUT_CLAIMED_EVENT } from "@/utils/constants/selection"
 
 const NODE_TRANSLATION_HOLD_TRIGGER_MS = 500
 const CLICK_AND_HOLD_MOVE_TOLERANCE = 6
@@ -307,6 +308,21 @@ export function registerNodeTranslationTriggerListeners({
           }
         }
       })()
+    },
+    { signal },
+  )
+
+  // A selection shortcut took a key this listener never saw: the hotkey's
+  // modifier was part of a combo, as when another key reaches keydown above.
+  window.addEventListener(
+    SELECTION_SHORTCUT_CLAIMED_EVENT,
+    () => {
+      if (shouldIgnoreEvent()) return
+      isHotkeySessionPure = false
+      if (isHotkeyPressed && timerId) {
+        clearTimeout(timerId)
+        timerId = null
+      }
     },
     { signal },
   )

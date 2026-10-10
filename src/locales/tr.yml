@@ -521,7 +521,7 @@ options:
         description: Hataları bulmamıza, arayüzü iyileştirmemize ve daha fazlasına yardım ederek Read Frog'u geliştirin
   shortcuts:
     title: Kısayollar
-    pageDescription: Okurken çeviriyi başlatan tuşları belirleyin.
+    pageDescription: Okurken çeviri, sesli okuma ve AI eylemlerini başlatan tuşları belirleyin.
     setShortcut: Kısayolu ayarla
     pageTranslation:
       title: Sayfa çevirisi
@@ -541,6 +541,15 @@ options:
     translationHub:
       title: Çeviri Merkezi
       description: Çeviri Merkezini yeni bir sekmede açar.
+    selectionSpeak:
+      title: "Seçimi sesli okuma"
+      description: "Seçili metni sesli okur. Durdurmak için tekrar basın."
+    actions:
+      title: "AI eylemleri"
+      description: "Seçili metin üzerinde bir AI eylemi çalıştırır. Özel eylemlerin, burada atayana kadar kısayolu yoktur."
+    turnedOff: "Kapalı olduğu için bu kısayol, tekrar açılana kadar hiçbir şey yapmaz."
+    clash: "“$1” ile aynı kısayol. Birini değiştirin."
+    taken: "$1 zaten “$2” tarafından kullanılıyor."
   overlayTools:
     title: Kaplama Araçları
   inputTranslation:

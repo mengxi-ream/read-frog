@@ -4,11 +4,8 @@ import { HotkeyManager } from "@tanstack/hotkeys"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { getLocalConfig, setLocalConfig } from "@/utils/config/storage"
 import { i18n } from "@/utils/i18n"
-import {
-  isPageTranslationShortcutEmpty,
-  isValidConfiguredPageTranslationShortcut,
-} from "@/utils/page-translation-shortcut"
 import { getTranslationOnlyBlockedReason } from "@/utils/providers/translation-only-gate"
+import { isShortcutEmpty, isValidShortcut } from "@/utils/shortcut"
 
 const NEXT_MODE: Record<TranslationMode, TranslationMode> = {
   bilingual: "translationOnly",
@@ -17,12 +14,12 @@ const NEXT_MODE: Record<TranslationMode, TranslationMode> = {
 
 export async function bindTranslationModeShortcutKey() {
   const config = await getLocalConfig()
-  if (!config || isPageTranslationShortcutEmpty(config.pageTranslation.modeShortcut)) {
+  if (!config || isShortcutEmpty(config.pageTranslation.modeShortcut)) {
     return () => {}
   }
 
   const shortcut = config.pageTranslation.modeShortcut
-  if (!isValidConfiguredPageTranslationShortcut(shortcut)) {
+  if (!isValidShortcut(shortcut)) {
     return () => {}
   }
 

@@ -522,7 +522,7 @@ options:
         description: 透過協助我們定位 bug、最佳化介面配置等改善陪讀蛙
   shortcuts:
     title: 快速鍵
-    pageDescription: 設定閱讀時觸發翻譯的按鍵。
+    pageDescription: 設定閱讀時觸發翻譯、朗讀和 AI 指令的按鍵。
     setShortcut: 設定快速鍵
     pageTranslation:
       title: 網頁翻譯
@@ -542,6 +542,15 @@ options:
     translationHub:
       title: 翻譯中心
       description: 在新分頁中開啟翻譯中心。
+    selectionSpeak:
+      title: "選取文字朗讀"
+      description: "朗讀選取的文字，再按一次停止。"
+    actions:
+      title: "AI 指令"
+      description: "對選取的文字執行 AI 指令。自訂指令預設沒有快速鍵，在這裡設定即可。"
+    turnedOff: "此功能已關閉，重新開啟前快速鍵不會生效。"
+    clash: "與「$1」的快速鍵相同，請修改其中一個。"
+    taken: "$1 已被「$2」使用。"
   overlayTools:
     title: 懸浮工具
   inputTranslation:

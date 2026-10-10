@@ -25,9 +25,10 @@ import {
   selectionToolbarBuiltInActionsSchema,
   selectionToolbarCustomActionsSchema,
 } from "./selection-toolbar"
+import { shortcutSchema } from "./shortcut"
 import { siteRulesConfigSchema } from "./site-rules"
 import { videoSubtitlesSchema } from "./subtitles"
-import { pageTranslationShortcutSchema, translateConfigSchema } from "./translate"
+import { translateConfigSchema } from "./translate"
 import { ttsConfigSchema } from "./tts"
 // Language schema
 const languageSchema = z.object({
@@ -39,11 +40,17 @@ const languageSchema = z.object({
 const selectionToolbarFeatureSchema = z.object({
   enabled: z.boolean(),
   providerId: z.string().nonempty(),
-  shortcut: pageTranslationShortcutSchema,
+  shortcut: shortcutSchema,
 })
 
 const selectionToolbarSpeakFeatureSchema = z.object({
   enabled: z.boolean(),
+  // Missing means the default key (see getSpeakShortcut); empty means the user
+  // cleared it. Optional rather than defaulted: a UI context that parses a
+  // pre-v110 config and writes it back must not store the default, or the v110
+  // migration could no longer tell it from a key the user chose, and would not
+  // check it against the user's other shortcuts.
+  shortcut: shortcutSchema.optional(),
 })
 
 // Text selection toolbar schema
@@ -102,7 +109,7 @@ const sideContentSchema = z.object({
 // and writing that over the user's settings.
 const translationHubSchema = z
   .object({
-    shortcut: pageTranslationShortcutSchema,
+    shortcut: shortcutSchema,
     selectedProviderIds: z.array(z.string().min(1)).nullable().default(null),
     sourceCode: langCodeISO6393Schema.or(z.literal("auto")).nullable().default(null),
     targetCode: langCodeISO6393Schema.nullable().default(null),
