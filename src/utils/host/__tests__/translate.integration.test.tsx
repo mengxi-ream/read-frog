@@ -2640,6 +2640,55 @@ describe("translate", () => {
       vi.mocked(translateTextForPage).mockReset().mockResolvedValue(MOCK_TRANSLATION)
     })
 
+    it.each(["bilingual", "translationOnly"] as const)(
+      "does not translate a code-only paragraph in %s mode",
+      async (mode) => {
+        await withHost(
+          "arxiv.org",
+          async () => {
+            render(<p data-testid="test-node" />)
+            const node = screen.getByTestId("test-node")
+            node.innerHTML = `(${inlineCode("code-only")})`
+            const sourceCode = node.querySelector("span")!
+
+            await removeOrShowPageTranslation(mode, true)
+
+            expect(translateTextForPage).not.toHaveBeenCalled()
+            expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeNull()
+            expect(node.querySelector("span")).toBe(sourceCode)
+            expect(node.textContent).toBe("(invoke)")
+          },
+          "/html/2609.26891",
+        )
+      },
+    )
+
+    it.each(["bilingual", "translationOnly"] as const)(
+      "applies the same prose length filter without counting code or padding in %s mode",
+      async (mode) => {
+        await withHost(
+          "arxiv.org",
+          async () => {
+            const config = structuredClone(DEFAULT_CONFIG)
+            config.pageTranslation.mode = mode
+            config.pageTranslation.page.minCharactersPerNode = 20
+            config.pageTranslation.page.minWordsPerNode = 0
+            render(<p data-testid="test-node" />)
+            const node = screen.getByTestId("test-node")
+            node.innerHTML = `Call ${inlineCode("long-code", "very_long_identifier".repeat(4))}${" ".repeat(30)}`
+            const sourceCode = node.querySelector("span")!
+
+            await removeOrShowPageTranslation(mode, true, config)
+
+            expect(translateTextForPage).not.toHaveBeenCalled()
+            expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeNull()
+            expect(node.querySelector("span")).toBe(sourceCode)
+          },
+          "/html/2609.26891",
+        )
+      },
+    )
+
     it.each(["arxiv.org", "ar5iv.labs.arxiv.org"])(
       "preserves repeated inline identifiers in bilingual translations on %s",
       async (host) => {
