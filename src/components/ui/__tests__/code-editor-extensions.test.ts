@@ -41,6 +41,14 @@ describe("codeMirror extension sets resolve with a single @codemirror/state inst
     expect(ReactCodeMirrorEditorState).toBe(EditorState)
   })
 
+  // A second @codemirror/view throws nothing: the editor just never reads the
+  // other copy's facets, so the languages' input handlers (closing tags, `%}`)
+  // and the completion popup stop working without a word.
+  it("shares one EditorView between the app and the Liquid language packages", () => {
+    const state = EditorState.create({ extensions: [liquidLayoutLanguage(() => [])] })
+    expect(state.facet(EditorView.inputHandler)).not.toHaveLength(0)
+  })
+
   it("resolves the JSONCodeEditor extension set", () => {
     const allowEmptyJsonLinter = linter((view) => {
       const content = view.state.doc.toString().trim()
