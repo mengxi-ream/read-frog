@@ -12,6 +12,8 @@
  * and resolve them through the app's own @codemirror/state instance.
  * They fail whenever the lockfile splits the CodeMirror packages again.
  */
+import type { LayoutCompletionSource } from "@read-frog/layout-engine/codemirror"
+import type { LiquidEditorField } from "../liquid-code-editor-extensions"
 import { css } from "@codemirror/lang-css"
 import { json, jsonParseLinter } from "@codemirror/lang-json"
 import { closePercentBrace, liquid } from "@codemirror/lang-liquid"
@@ -26,11 +28,12 @@ import {
 } from "@uiw/react-codemirror"
 import { describe, expect, it } from "vitest"
 import { cssLinter } from "@/utils/css/lint-css"
+import { i18n } from "@/utils/i18n"
+import { CUSTOM_ACTION_LAYOUT_HOST } from "@/utils/layout-host/host"
 import {
-  createLayoutCompletionSource,
   layoutLengthLimit,
-  layoutLinter,
   liquidLayoutLanguage,
+  liquidLayoutLinter,
 } from "../liquid-code-editor-extensions"
 
 describe("codeMirror extension sets resolve with a single @codemirror/state instance", () => {
@@ -74,7 +77,7 @@ describe("codeMirror extension sets resolve with a single @codemirror/state inst
   })
 
   it("resolves the LiquidCodeEditor extension set", () => {
-    const fields = [{ name: "term", type: "string" as const }]
+    const fields = [{ id: "term", name: "term", type: "string" as const }]
 
     expect(() =>
       EditorState.create({
@@ -82,7 +85,7 @@ describe("codeMirror extension sets resolve with a single @codemirror/state inst
         extensions: [
           ...getDefaultExtensions({ theme: "dark" }),
           liquidLayoutLanguage(() => fields),
-          layoutLinter({ getFieldNames: () => ["term"], maxLength: 32768 }),
+          liquidLayoutLinter({ getFields: () => fields, maxLength: 32768 }),
           lintGutter(),
           layoutLengthLimit(32768, () => {}),
           EditorView.lineWrapping,
@@ -93,26 +96,28 @@ describe("codeMirror extension sets resolve with a single @codemirror/state inst
 })
 
 describe("liquid layout language", () => {
-  // liquidLayoutLanguage swaps lang-liquid's stock completion source by
-  // position; this fails first when an upgrade reshapes liquid()'s support.
-  it("still finds lang-liquid's support in the shape it swaps the completion into", () => {
+  // The layout engine's layoutLanguage swaps lang-liquid's stock completion
+  // source by position, and lang-liquid is a peer dependency: the version
+  // installed here is the one it gets. This fails first when an upgrade
+  // reshapes liquid()'s support.
+  it("still finds lang-liquid's support in the shape the layout engine swaps the completion into", () => {
     const parts = liquid().support
     expect(Array.isArray(parts)).toBe(true)
     expect(parts).toHaveLength(4)
     expect((parts as unknown[])[3]).toBe(closePercentBrace)
   })
 
-  function complete(doc: string, explicit = false) {
-    const state = EditorState.create({
-      doc,
-      extensions: [liquidLayoutLanguage(() => [{ name: "the term", type: "string" }])],
-    })
+  function complete(doc: string) {
+    const fields: LiquidEditorField[] = [
+      { id: "f1", name: "the term", type: "number", description: "" },
+    ]
+    const state = EditorState.create({ doc, extensions: [liquidLayoutLanguage(() => fields)] })
     const pos = doc.length
     // The subset of CompletionContext lang-liquid's source reads.
     const context = {
       state,
       pos,
-      explicit,
+      explicit: false,
       matchBefore(expr: RegExp) {
         const line = state.doc.lineAt(pos)
         const before = line.text.slice(0, pos - line.from)
@@ -120,38 +125,20 @@ describe("liquid layout language", () => {
         return match ? { from: pos - match[0].length, to: pos, text: match[0] } : null
       },
     }
-    const source = createLayoutCompletionSource(() => [{ name: "the term", type: "string" }])
-    return source(context as unknown as Parameters<typeof source>[0])
+    // The layout engine's source replaces lang-liquid's stock one.
+    const [source, ...others] = state.languageDataAt<LayoutCompletionSource>("autocomplete", pos)
+    expect(others).toEqual([])
+    return source!(context as unknown as Parameters<LayoutCompletionSource>[0])
   }
 
-  it("offers only tags the layout engine keeps", () => {
-    const labels = complete("{% ", true)?.options.map((option) => option.label) ?? []
-    expect(labels).toContain("if")
-    expect(labels).toContain("assign")
-    expect(labels).not.toContain("include")
-    expect(labels).not.toContain("cycle")
-    expect(labels).not.toContain("capture")
-    expect(new Set(labels).size).toBe(labels.length)
-  })
-
-  it("completes fields to bracket references and ctx to its keys", () => {
+  it("completes output fields by name with their type, and ctx to the custom action keys", () => {
     const field = complete("{{ the")?.options.find((option) => option.label === "the term")
-    expect(field?.apply).toBe('["the term"]')
+    expect(field).toMatchObject({ apply: '["the term"]', detail: i18n.t("dataTypes.number") })
+    expect(field).not.toHaveProperty("info")
 
-    const ctxKeys = complete("{{ ctx.")?.options.map((option) => option.label)
-    expect(ctxKeys).toEqual([
-      "fields",
-      "selection",
-      "targetLanguage",
-      "sentenceAnalysisLabels",
-      "improveWritingLabels",
-      "status",
-    ])
-  })
-
-  it("offers the ctx.fields entry keys on the loop variable", () => {
-    const keys = complete("{% for f in ctx.fields %}{{ f.")?.options.map((option) => option.label)
-    expect(keys).toEqual(["id", "name", "type", "value", "pending"])
+    expect(complete("{{ ctx.")?.options.map((option) => option.label)).toEqual(
+      CUSTOM_ACTION_LAYOUT_HOST.ctxKeys,
+    )
   })
 
   it("rejects typing past the length cap but lets an oversized text shrink", () => {

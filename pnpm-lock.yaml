@@ -296,8 +296,8 @@ importers:
         specifier: 0.8.0
         version: 0.8.0
       '@read-frog/layout-engine':
-        specifier: 0.3.0
-        version: 0.3.0(dompurify@3.4.16)(liquidjs@10.29.0)(morphdom@2.7.8)(react@19.3.0)
+        specifier: 0.4.0
+        version: 0.4.0(@codemirror/lang-liquid@6.3.3)(@codemirror/lint@6.9.7)(@codemirror/state@6.7.6)(@codemirror/view@6.43.14)(dompurify@3.4.16)(liquidjs@10.30.0)(morphdom@2.7.8)(react@19.3.0)
       '@remixicon/react':
         specifier: ^4.9.0
         version: 4.9.0(react@19.3.0)
@@ -401,8 +401,8 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0
       liquidjs:
-        specifier: ~10.29.0
-        version: 10.29.0
+        specifier: ~10.30.0
+        version: 10.30.0
       lucide-react:
         specifier: ^1.54.0
         version: 1.54.0(@types/react@19.3.0)(react@19.3.0)
@@ -2480,14 +2480,26 @@ packages:
   '@read-frog/definitions@0.8.0':
     resolution: {integrity: sha512-OoGGFXYUq7mC7blCbK48rDq5ZK5pY5H1eF32iJ4D1yFTcFCOCOoD4xDkr5YkHurLY/po7k85I8LC35xoBSYS9Q==}
 
-  '@read-frog/layout-engine@0.3.0':
-    resolution: {integrity: sha512-Hsnv6r8+VSWfqrn7//wjlT74KMfCX4NbULlMOL6in8PqW6jPdOy7YczAnc/LESiWcyK8+Utv/X2F0vVdlQ1WpQ==}
+  '@read-frog/layout-engine@0.4.0':
+    resolution: {integrity: sha512-jDsoxg1MG38TpagcAM1dmlYOP3vaBZrqavlCiKJxwXbY8acOtTp6pHlpUYYlUDjFpiIsTSLxrjuIfLq5oCA1AQ==}
     peerDependencies:
+      '@codemirror/lang-liquid': ^6.3.3
+      '@codemirror/lint': ^6.9.7
+      '@codemirror/state': ^6.7.6
+      '@codemirror/view': ^6.43.14
       dompurify: ^3.4.16
-      liquidjs: ~10.29.0
+      liquidjs: ~10.30.0
       morphdom: ^2.7.8
       react: ^19.3.0
     peerDependenciesMeta:
+      '@codemirror/lang-liquid':
+        optional: true
+      '@codemirror/lint':
+        optional: true
+      '@codemirror/state':
+        optional: true
+      '@codemirror/view':
+        optional: true
       dompurify:
         optional: true
       morphdom:
@@ -5296,8 +5308,8 @@ packages:
     engines: {node: '>=22.22.1'}
     hasBin: true
 
-  liquidjs@10.29.0:
-    resolution: {integrity: sha512-pCVOhs6FLAR8su3ItJ07diN26t6W5dHQRnmTMy8HPyTFuv1+oSCVJIGp5pGjfQyOZfh50KswvKtMTp6p4JEIdw==}
+  liquidjs@10.30.0:
+    resolution: {integrity: sha512-Fw4wA+8CZsJkaeLEIlPE3AoponfjEZhj7FQvYNcAEcg7jNRik7mEMoaco382FBdrYlykVf6w4vClPNctz2OYjg==}
     engines: {node: '>=16'}
     hasBin: true
 
@@ -9142,10 +9154,14 @@ snapshots:
       date-fns: 4.4.0
       zod: 4.6.5
 
-  '@read-frog/layout-engine@0.3.0(dompurify@3.4.16)(liquidjs@10.29.0)(morphdom@2.7.8)(react@19.3.0)':
+  '@read-frog/layout-engine@0.4.0(@codemirror/lang-liquid@6.3.3)(@codemirror/lint@6.9.7)(@codemirror/state@6.7.6)(@codemirror/view@6.43.14)(dompurify@3.4.16)(liquidjs@10.30.0)(morphdom@2.7.8)(react@19.3.0)':
     dependencies:
-      liquidjs: 10.29.0
+      liquidjs: 10.30.0
     optionalDependencies:
+      '@codemirror/lang-liquid': 6.3.3
+      '@codemirror/lint': 6.9.7
+      '@codemirror/state': 6.7.6
+      '@codemirror/view': 6.43.14
       dompurify: 3.4.16
       morphdom: 2.7.8
       react: 19.3.0
@@ -11653,7 +11669,7 @@ snapshots:
     optionalDependencies:
       yaml: 2.9.1
 
-  liquidjs@10.29.0:
+  liquidjs@10.30.0:
     dependencies:
       commander: 10.0.1
 

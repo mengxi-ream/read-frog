@@ -22,8 +22,8 @@ import { useTheme } from "@/components/providers/theme-provider"
 import { cn } from "@/utils/styles/utils"
 import {
   layoutLengthLimit,
-  layoutLinter,
   liquidLayoutLanguage,
+  liquidLayoutLinter,
 } from "./liquid-code-editor-extensions"
 
 export type { LiquidEditorField } from "./liquid-code-editor-extensions"
@@ -84,12 +84,10 @@ function createEditorExtensions(
     else latest.onCompositionEnd?.(view.state.doc.toString())
   }
 
+  const getFields = () => bridge.current.fields
   return [
-    liquidLayoutLanguage(() => bridge.current.fields),
-    layoutLinter({
-      getFieldNames: () => bridge.current.fields.map((field) => field.name),
-      maxLength: options.maxLength,
-    }),
+    liquidLayoutLanguage(getFields),
+    liquidLayoutLinter({ getFields, maxLength: options.maxLength }),
     lintGutter(),
     layoutLengthLimit(options.maxLength, () => bridge.current.onTooLong?.()),
     EditorView.lineWrapping,

@@ -1,5 +1,5 @@
 import type { LayoutSampleDataEditing } from "./layout-preview"
-import type { LiquidCodeEditorHandle, LiquidEditorField } from "@/components/ui/liquid-code-editor"
+import type { LiquidCodeEditorHandle } from "@/components/ui/liquid-code-editor"
 import type {
   SelectionToolbarCustomAction,
   SelectionToolbarCustomActionOutputField,
@@ -179,10 +179,6 @@ function getUnusedFields(source: string, outputSchema: Field[]): Field[] {
   return outputSchema.filter((field) => !referenced.has(field.name))
 }
 
-function toEditorFields(outputSchema: Field[]): LiquidEditorField[] {
-  return outputSchema.map(({ name, type, description }) => ({ name, type, description }))
-}
-
 // ---------------------------------------------------------------------------
 // Toolbar
 
@@ -340,7 +336,6 @@ function LayoutEditorPane({
 }: LayoutEditorPaneProps) {
   const editor = useRef<LiquidCodeEditorHandle>(null)
   const [limitHit, setLimitHit] = useState(false)
-  const editorFields = useMemo(() => toEditorFields(outputSchema), [outputSchema])
   const analyzedValue = useDeferredValue(value)
   const unusedFields = useMemo(
     () => getUnusedFields(analyzedValue, outputSchema),
@@ -355,7 +350,7 @@ function LayoutEditorPane({
           <LiquidCodeEditor
             handleRef={editor}
             value={value}
-            fields={editorFields}
+            fields={outputSchema}
             maxLength={MAX_CUSTOM_ACTION_LAYOUT_LENGTH}
             onChange={(next) => {
               setLimitHit(false)
@@ -650,7 +645,6 @@ export function ReadOnlyLayoutField({
   // A built-in action saves no sample data: edits here stay in this preview.
   const [sampleData, setSampleData] = useState(action.sampleData)
   const source = resolveActionLayout(action)
-  const editorFields = useMemo(() => toEditorFields(action.outputSchema), [action.outputSchema])
 
   return (
     <Field>
@@ -684,7 +678,7 @@ export function ReadOnlyLayoutField({
           <Suspense fallback={<Skeleton className="h-72" />}>
             <LiquidCodeEditor
               value={source}
-              fields={editorFields}
+              fields={action.outputSchema}
               maxLength={MAX_CUSTOM_ACTION_LAYOUT_LENGTH}
               readOnly
               maxHeight="480px"
