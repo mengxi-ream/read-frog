@@ -196,6 +196,21 @@ describe("background analytics", () => {
     })
   })
 
+  it("forwards text-to-speech events from the Translation Hub", async () => {
+    storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
+
+    const { captureFeatureUsedEventInBackground } = createAnalytics()
+    await captureFeatureUsedEventInBackground(
+      { ...TTS_EVENT, surface: "translation_hub" },
+      { id: 42, url: "chrome-extension://abc/translation-hub.html" },
+    )
+
+    expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", {
+      ...TTS_EVENT,
+      surface: "translation_hub",
+    })
+  })
+
   it("adds the sender tab's hostname and the char count to text feature events", async () => {
     storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
 

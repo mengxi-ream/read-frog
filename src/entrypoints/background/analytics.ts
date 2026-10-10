@@ -32,7 +32,31 @@ import {
 } from "./analytics-feature-cache"
 type BackgroundFeatureUsedEventProperties = FeatureUsedEventProperties & { site_domain?: string }
 
-const FEATURE_SURFACES = {
+type FeatureSurfaceLists = { [F in AnalyticsFeature]: readonly SurfaceByFeature[F][] }
+
+type UnlistedFeatureSurfaces<T extends FeatureSurfaceLists> = {
+  [
+    F in AnalyticsFeature as [Exclude<SurfaceByFeature[F], T[F][number]>] extends [never]
+      ? never
+      : F
+  ]: Exclude<SurfaceByFeature[F], T[F][number]>
+}
+
+/**
+ * `satisfies FeatureSurfaceLists` would only reject surfaces the types do not
+ * allow. This also rejects a typed surface the list leaves out, which the
+ * background would otherwise drop at runtime without any error.
+ */
+function listEveryFeatureSurface<const T extends FeatureSurfaceLists>(
+  surfaces: T &
+    (keyof UnlistedFeatureSurfaces<T> extends never
+      ? unknown
+      : { unlistedSurfaces: UnlistedFeatureSurfaces<T> }),
+): T {
+  return surfaces
+}
+
+const FEATURE_SURFACES = listEveryFeatureSurface({
   page_translation: [
     "popup",
     "floating_button",
@@ -46,11 +70,17 @@ const FEATURE_SURFACES = {
   input_translation: ["input_translation"],
   translation_hub: ["translation_hub"],
   video_subtitles: ["video_subtitles", "video_subtitles_auto", "shortcut"],
-  text_to_speech: ["selection_toolbar", "context_menu", "shortcut", "tts_settings"],
+  text_to_speech: [
+    "selection_toolbar",
+    "context_menu",
+    "shortcut",
+    "tts_settings",
+    "translation_hub",
+  ],
   note_suggestion: ["selection_toolbar"],
   note_save: ["selection_toolbar"],
   glossary: ["page_translation", "video_subtitles", "selection_toolbar", "input_translation"],
-} as const satisfies { [F in AnalyticsFeature]: readonly SurfaceByFeature[F][] }
+})
 
 /** The tab a feature was used in, as reported by the message sender. */
 export interface FeatureUsedEventTab {
