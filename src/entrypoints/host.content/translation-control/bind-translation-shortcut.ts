@@ -4,10 +4,7 @@ import { HotkeyManager } from "@tanstack/hotkeys"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { getLocalConfig } from "@/utils/config/storage"
-import {
-  isPageTranslationShortcutEmpty,
-  isValidConfiguredPageTranslationShortcut,
-} from "@/utils/page-translation-shortcut"
+import { isShortcutEmpty, isValidShortcut } from "@/utils/shortcut"
 
 /**
  * Binds page translation shortcut key from the given config.
@@ -15,12 +12,12 @@ import {
  */
 export async function bindTranslationShortcutKey(pageTranslationManager: PageTranslationManager) {
   const config = await getLocalConfig()
-  if (!config || isPageTranslationShortcutEmpty(config.pageTranslation.page.shortcut)) {
+  if (!config || isShortcutEmpty(config.pageTranslation.page.shortcut)) {
     return () => {}
   }
 
   const shortcut = config.pageTranslation.page.shortcut
-  if (!isValidConfiguredPageTranslationShortcut(shortcut)) {
+  if (!isValidShortcut(shortcut)) {
     return () => {}
   }
 

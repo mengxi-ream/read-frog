@@ -8,7 +8,7 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { formatHotkeyParts } from "@/utils/os.ts"
-import { isPageTranslationShortcutEmpty } from "@/utils/page-translation-shortcut"
+import { isShortcutEmpty } from "@/utils/shortcut"
 import { cn } from "@/utils/styles/utils"
 import { isPageTranslatedAtom } from "../atoms/auto-translate"
 import { isIgnoreTabAtom } from "../atoms/ignore"
@@ -44,7 +44,7 @@ export default function TranslateButton({ className }: { className?: string }) {
 
   const isSiteBlocked = mode === "whitelist" ? !isCurrentSiteInWhitelist : isCurrentSiteInBlacklist
   const isDisabled = isIgnoreTab || isSiteBlocked
-  const shortcutParts = isPageTranslationShortcutEmpty(translateConfig.page.shortcut)
+  const shortcutParts = isShortcutEmpty(translateConfig.page.shortcut)
     ? []
     : formatHotkeyParts(translateConfig.page.shortcut)
 

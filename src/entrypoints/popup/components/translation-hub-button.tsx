@@ -8,7 +8,7 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { TRANSLATION_HUB_PAGE_PATH } from "@/utils/constants/translation-hub"
 import { i18n } from "@/utils/i18n"
 import { formatHotkeyParts } from "@/utils/os"
-import { isPageTranslationShortcutEmpty } from "@/utils/page-translation-shortcut"
+import { isShortcutEmpty } from "@/utils/shortcut"
 
 export function TranslationHubButton() {
   const translationHub = useAtomValue(configFieldsAtomMap.translationHub)
@@ -21,7 +21,7 @@ export function TranslationHubButton() {
 
   // The hub is buried enough that people ask where it lives; the tooltip is the
   // one place that can teach the shortcut at the moment they reach for it.
-  const shortcutParts = isPageTranslationShortcutEmpty(translationHub.shortcut)
+  const shortcutParts = isShortcutEmpty(translationHub.shortcut)
     ? []
     : formatHotkeyParts(translationHub.shortcut)
 

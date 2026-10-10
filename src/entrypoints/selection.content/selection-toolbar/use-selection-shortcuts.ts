@@ -1,10 +1,7 @@
 import type { Hotkey } from "@tanstack/hotkeys"
 import { HotkeyManager } from "@tanstack/hotkeys"
 import { useEffect, useEffectEvent } from "react"
-import {
-  isPageTranslationShortcutEmpty,
-  isValidConfiguredPageTranslationShortcut,
-} from "@/utils/page-translation-shortcut"
+import { isShortcutEmpty, isValidShortcut } from "@/utils/shortcut"
 import { shadowWrapper } from ".."
 
 function isEditable(element: Element | null) {
@@ -39,9 +36,7 @@ export function useSelectionShortcuts(
 ) {
   const onRun = useEffectEvent(run)
   const bindings = Object.entries(shortcuts).filter(
-    (entry): entry is [string, string] =>
-      !isPageTranslationShortcutEmpty(entry[1]) &&
-      isValidConfiguredPageTranslationShortcut(entry[1]!),
+    (entry): entry is [string, string] => !isShortcutEmpty(entry[1]) && isValidShortcut(entry[1]!),
   )
   const bindingsKey = JSON.stringify(bindings)
 

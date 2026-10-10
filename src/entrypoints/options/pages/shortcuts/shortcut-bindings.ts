@@ -1,7 +1,7 @@
 import type { Config } from "@/types/config/config"
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
-import { isSameShortcut } from "@/utils/page-translation-shortcut"
+import { isSameShortcut } from "@/utils/shortcut"
 
 /** One recorded key combination on the Shortcuts page, by the id of its row. */
 export interface ShortcutBinding {

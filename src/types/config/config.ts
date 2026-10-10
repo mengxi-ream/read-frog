@@ -26,9 +26,10 @@ import {
   selectionToolbarBuiltInActionsSchema,
   selectionToolbarCustomActionsSchema,
 } from "./selection-toolbar"
+import { shortcutSchema } from "./shortcut"
 import { siteRulesConfigSchema } from "./site-rules"
 import { videoSubtitlesSchema } from "./subtitles"
-import { pageTranslationShortcutSchema, translateConfigSchema } from "./translate"
+import { translateConfigSchema } from "./translate"
 import { ttsConfigSchema } from "./tts"
 // Language schema
 const languageSchema = z.object({
@@ -40,14 +41,14 @@ const languageSchema = z.object({
 const selectionToolbarFeatureSchema = z.object({
   enabled: z.boolean(),
   providerId: z.string().nonempty(),
-  shortcut: pageTranslationShortcutSchema,
+  shortcut: shortcutSchema,
 })
 
 const selectionToolbarSpeakFeatureSchema = z.object({
   enabled: z.boolean(),
   // `.default()` lets a config stored before v110 parse in UI contexts that
   // load ahead of the background migration.
-  shortcut: pageTranslationShortcutSchema.default(DEFAULT_SELECTION_SPEAK_SHORTCUT_KEY),
+  shortcut: shortcutSchema.default(DEFAULT_SELECTION_SPEAK_SHORTCUT_KEY),
 })
 
 // Text selection toolbar schema
@@ -106,7 +107,7 @@ const sideContentSchema = z.object({
 // and writing that over the user's settings.
 const translationHubSchema = z
   .object({
-    shortcut: pageTranslationShortcutSchema,
+    shortcut: shortcutSchema,
     selectedProviderIds: z.array(z.string().min(1)).nullable().default(null),
     sourceCode: langCodeISO6393Schema.or(z.literal("auto")).nullable().default(null),
     targetCode: langCodeISO6393Schema.nullable().default(null),

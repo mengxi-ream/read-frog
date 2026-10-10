@@ -13,15 +13,15 @@ export type HotkeyPlatform = ReturnType<typeof detectPlatform>
 const LETTER_CODE_RE = /^[A-Z]$/i
 const DIGIT_CODE_RE = /^\d$/
 
-export function isPageTranslationShortcutEmpty(hotkey: string | null | undefined): boolean {
+export function isShortcutEmpty(hotkey: string | null | undefined): boolean {
   return !hotkey?.trim()
 }
 
-export function formatPageTranslationShortcut(
+export function formatShortcut(
   hotkey: string | null | undefined,
   platform?: HotkeyPlatform,
 ): string {
-  if (isPageTranslationShortcutEmpty(hotkey)) {
+  if (isShortcutEmpty(hotkey)) {
     return ""
   }
 
@@ -29,11 +29,11 @@ export function formatPageTranslationShortcut(
   return formatForDisplay(configuredHotkey, platform ? { platform } : undefined)
 }
 
-export function formatPageTranslationShortcutParts(
+export function formatShortcutParts(
   hotkey: string | null | undefined,
   platform?: HotkeyPlatform,
 ): string[] {
-  if (isPageTranslationShortcutEmpty(hotkey)) {
+  if (isShortcutEmpty(hotkey)) {
     return []
   }
 
@@ -43,11 +43,11 @@ export function formatPageTranslationShortcutParts(
   return formatForDisplay(configuredHotkey, platform ? { platform, parts: true } : { parts: true })
 }
 
-export function isValidConfiguredPageTranslationShortcut(
+export function isValidShortcut(
   hotkey: string,
   platform: HotkeyPlatform = detectPlatform(),
 ): boolean {
-  const normalizedHotkey = normalizePageTranslationShortcut(hotkey, platform)
+  const normalizedHotkey = normalizeShortcut(hotkey, platform)
   if (!normalizedHotkey) {
     return false
   }
@@ -56,11 +56,11 @@ export function isValidConfiguredPageTranslationShortcut(
   return parsedHotkey.modifiers.length > 0 && hasNonModifierKey(parsedHotkey, platform)
 }
 
-export function normalizePageTranslationShortcut(
+export function normalizeShortcut(
   hotkey: string,
   platform: HotkeyPlatform = detectPlatform(),
 ): string | null {
-  if (isPageTranslationShortcutEmpty(hotkey)) {
+  if (isShortcutEmpty(hotkey)) {
     return ""
   }
 
@@ -111,16 +111,16 @@ export function isSameShortcut(
   right: string | null | undefined,
   platform: HotkeyPlatform = detectPlatform(),
 ): boolean {
-  if (isPageTranslationShortcutEmpty(left) || isPageTranslationShortcutEmpty(right)) {
+  if (isShortcutEmpty(left) || isShortcutEmpty(right)) {
     return false
   }
 
-  const normalizedLeft = normalizePageTranslationShortcut(left!, platform)
-  const normalizedRight = normalizePageTranslationShortcut(right!, platform)
+  const normalizedLeft = normalizeShortcut(left!, platform)
+  const normalizedRight = normalizeShortcut(right!, platform)
   return !!normalizedLeft && normalizedLeft.toLowerCase() === normalizedRight?.toLowerCase()
 }
 
-export function keyboardEventToPageTranslationShortcut(
+export function keyboardEventToShortcut(
   event: KeyboardEvent,
   platform: HotkeyPlatform = detectPlatform(),
 ): string | null {
@@ -143,7 +143,7 @@ export function keyboardEventToPageTranslationShortcut(
   }
 
   parts.push(resolveShortcutEventKey(event))
-  return normalizePageTranslationShortcut(parts.join("+"), platform)
+  return normalizeShortcut(parts.join("+"), platform)
 }
 
 function resolveShortcutEventKey(event: KeyboardEvent): string {

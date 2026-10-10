@@ -1,6 +1,6 @@
 import { Kbd, KbdGroup } from "@/components/ui/base-ui/kbd"
 import { formatHotkeyParts } from "@/utils/os"
-import { isPageTranslationShortcutEmpty } from "@/utils/page-translation-shortcut"
+import { isShortcutEmpty } from "@/utils/shortcut"
 
 // A toolbar button's tooltip: its name, then its keys as key caps when it has
 // a key.
@@ -11,7 +11,7 @@ export function ShortcutTooltipLabel({
   label: string
   shortcut: string | undefined
 }) {
-  if (isPageTranslationShortcutEmpty(shortcut)) {
+  if (isShortcutEmpty(shortcut)) {
     return label
   }
 
