@@ -2,6 +2,7 @@
 import { act, render } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { afterEach, describe, expect, it, vi } from "vitest"
+import { SELECTION_SHORTCUT_CLAIMED_EVENT } from "@/utils/constants/selection"
 import { useSelectionShortcuts } from "../use-selection-shortcuts"
 
 const ownUi = vi.hoisted(() => ({ wrapper: null as HTMLElement | null }))
@@ -44,6 +45,27 @@ afterEach(() => {
 })
 
 describe("useSelectionShortcuts", () => {
+  it("tells the paragraph hotkey about a key it claims, and only then", () => {
+    const claimed = vi.fn<() => void>()
+    window.addEventListener(SELECTION_SHORTCUT_CLAIMED_EVENT, claimed)
+    render(
+      <Provider store={createStore()}>
+        <Bindings />
+      </Provider>,
+    )
+
+    try {
+      run.mockReturnValueOnce(false)
+      expect(pressFrom(document.body).defaultPrevented).toBe(false)
+      expect(claimed).not.toHaveBeenCalled()
+
+      expect(pressFrom(document.body).defaultPrevented).toBe(true)
+      expect(claimed).toHaveBeenCalledTimes(1)
+    } finally {
+      window.removeEventListener(SELECTION_SHORTCUT_CLAIMED_EVENT, claimed)
+    }
+  })
+
   it("leaves the keys to a field in a shadow root nested in the extension's own UI", () => {
     const uiHost = document.createElement("div")
     document.body.appendChild(uiHost)

@@ -3,6 +3,7 @@ import type { SelectionSession } from "./atoms"
 import { matchesKeyboardEvent } from "@tanstack/hotkeys"
 import { useAtomValue } from "jotai"
 import { useEffect, useEffectEvent } from "react"
+import { SELECTION_SHORTCUT_CLAIMED_EVENT } from "@/utils/constants/selection"
 import { getDeepActiveElement } from "@/utils/dom/active-element"
 import { isShortcutEmpty, isValidShortcut } from "@/utils/shortcut"
 import { shadowWrapper } from ".."
@@ -117,6 +118,8 @@ export function useSelectionShortcuts(
       }
       event.preventDefault()
       event.stopImmediatePropagation()
+      // The key no longer reaches the paragraph hotkey's listener: tell it.
+      window.dispatchEvent(new Event(SELECTION_SHORTCUT_CLAIMED_EVENT))
     }
 
     window.addEventListener("keydown", handleKeydown, { capture: true })
