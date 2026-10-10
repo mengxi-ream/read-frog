@@ -1,7 +1,4 @@
-import {
-  formatPageTranslationShortcut,
-  formatPageTranslationShortcutParts,
-} from "./page-translation-shortcut"
+import { formatShortcut, formatShortcutParts } from "./shortcut"
 
 type OS = "Windows" | "MacOS" | "Linux" | "iOS" | "Android" | "Unknown"
 
@@ -32,11 +29,11 @@ function getHotkeyPlatform() {
 }
 
 export function formatHotkey(hotkey: string): string {
-  return formatPageTranslationShortcut(hotkey, getHotkeyPlatform())
+  return formatShortcut(hotkey, getHotkeyPlatform())
 }
 
 export function formatHotkeyParts(hotkey: string): string[] {
-  return formatPageTranslationShortcutParts(hotkey, getHotkeyPlatform())
+  return formatShortcutParts(hotkey, getHotkeyPlatform())
 }
 
 export function getCommandPaletteShortcutHint(): string {

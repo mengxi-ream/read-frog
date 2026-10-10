@@ -7,8 +7,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { formatHotkeyParts } from "@/utils/os"
-import { isPageTranslationShortcutEmpty } from "@/utils/page-translation-shortcut"
 import { getTranslationOnlyBlockedReason } from "@/utils/providers/translation-only-gate"
+import { isShortcutEmpty } from "@/utils/shortcut"
 import { cn } from "@/utils/styles/utils"
 
 const TABLER_ICON_STROKE_WIDTH_CLASS = "[&_path]:[stroke-width:1.2]"
@@ -49,7 +49,7 @@ export default function TranslationModeSelector() {
     nextMode === "translationOnly" ? getTranslationOnlyBlockedReason(config) : null
   const nextModeBlocked = blockedReason !== null
   const actionLabel = i18n.t(tooltipKey.action)
-  const shortcutParts = isPageTranslationShortcutEmpty(translateConfig.modeShortcut)
+  const shortcutParts = isShortcutEmpty(translateConfig.modeShortcut)
     ? []
     : formatHotkeyParts(translateConfig.modeShortcut)
 

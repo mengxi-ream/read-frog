@@ -522,7 +522,7 @@ options:
         description: Xətaları tapmaqda, görünüşü təkmilləşdirməkdə və digər işlərdə bizə kömək edərək Read Frog təcrübəsini yaxşılaşdırın
   shortcuts:
     title: Qısayollar
-    pageDescription: Oxuyarkən tərcüməni başladan düymələri təyin edin.
+    pageDescription: Oxuyarkən tərcümə, səsləndirmə və süni intellekt əməliyyatlarını başladan düymələri təyin edin.
     setShortcut: Qısayol təyin et
     pageTranslation:
       title: Səhifə tərcüməsi
@@ -542,6 +542,15 @@ options:
     translationHub:
       title: Tərcümə mərkəzi
       description: Tərcümə mərkəzini yeni vərəqdə açın.
+    selectionSpeak:
+      title: "Seçilmiş mətnin səsləndirilməsi"
+      description: "Seçilmiş mətni ucadan oxuyun. Dayandırmaq üçün yenidən basın."
+    actions:
+      title: "Süni intellekt əməliyyatları"
+      description: "Seçilmiş mətn üzərində süni intellekt əməliyyatı işə salın. Fərdi əməliyyatların burada təyin edənə qədər qısayolu olmur."
+    turnedOff: "Bu funksiya söndürülüb, yenidən yandırana qədər bu qısayol heç nə etmir."
+    clash: "“$1” ilə eyni qısayol. Birini dəyişin."
+    taken: "$1 artıq “$2” tərəfindən istifadə olunur."
   overlayTools:
     title: Səhifəüstü alətlər
   inputTranslation:

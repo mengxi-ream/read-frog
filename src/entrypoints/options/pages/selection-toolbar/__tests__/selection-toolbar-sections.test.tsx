@@ -2,6 +2,7 @@
 
 import type { Config } from "@/types/config/config"
 import { fireEvent, render, screen } from "@testing-library/react"
+import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { ActionsSection } from "../actions"
@@ -69,7 +70,12 @@ describe("selection toolbar page sections", () => {
   it("switches one built-in action at a time, leaving the other enabled", () => {
     const selectionToolbar = testState.selectionToolbar!
 
-    render(<ActionsSection />)
+    // Its rows link to their keys on the Shortcuts page.
+    render(
+      <MemoryRouter>
+        <ActionsSection />
+      </MemoryRouter>,
+    )
     const [translate, speak] = screen.getAllByRole("switch")
 
     fireEvent.click(speak!)

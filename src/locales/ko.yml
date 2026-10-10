@@ -521,7 +521,7 @@ options:
         description: 버그를 찾고 UI 레이아웃을 다듬는 등 Read Frog 개선에 기여합니다
   shortcuts:
     title: 단축키
-    pageDescription: 읽는 중에 번역을 실행하는 키를 설정합니다.
+    pageDescription: 읽는 중에 번역, 읽기, AI 액션을 실행하는 키를 설정합니다.
     setShortcut: 단축키 설정
     pageTranslation:
       title: 페이지 번역
@@ -541,6 +541,15 @@ options:
     translationHub:
       title: 번역 허브
       description: 번역 허브를 새 탭에서 엽니다.
+    selectionSpeak:
+      title: "선택 영역 읽기"
+      description: "선택한 텍스트를 소리 내어 읽습니다. 다시 누르면 멈춥니다."
+    actions:
+      title: "AI 액션"
+      description: "선택한 텍스트에 AI 액션을 실행합니다. 커스텀 액션은 처음에 단축키가 없으니 여기서 설정하세요."
+    turnedOff: "이 기능이 꺼져 있어 다시 켤 때까지 이 키는 동작하지 않습니다."
+    clash: "“$1”과(와) 같은 키입니다. 하나를 바꾸세요."
+    taken: "$1 키는 이미 “$2”에서 사용 중입니다."
   overlayTools:
     title: 오버레이 도구
   inputTranslation:

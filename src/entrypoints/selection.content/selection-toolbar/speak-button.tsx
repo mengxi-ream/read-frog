@@ -10,15 +10,37 @@ import {
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { getSpeakShortcut } from "@/utils/constants/selection"
 import { i18n } from "@/utils/i18n"
 import { selectionContentAtom } from "./atoms"
+import { ShortcutTooltipLabel } from "./shortcut-hint"
+import { useSelectionShortcuts } from "./use-selection-shortcuts"
 
-// Reads the selection aloud from the toolbar.
+// Reads the selection aloud from the toolbar, or from its key.
 function useSelectionSpeechController() {
   const selectionContent = useAtomValue(selectionContentAtom)
   const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
+  const { speak } = useAtomValue(configFieldsAtomMap.selectionToolbar).features
   const { play, stop, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.SELECTION_TOOLBAR)
   const isBusy = isFetching || isPlaying
+
+  // The key toggles like the button, but with nothing to read it lets the
+  // page have the keystroke rather than complain.
+  useSelectionShortcuts(
+    { speak: speak.enabled ? getSpeakShortcut(speak) : undefined },
+    (_, session) => {
+      if (isBusy) {
+        stop()
+        return true
+      }
+      const text = session?.selectionSnapshot.text
+      if (!text) {
+        return false
+      }
+      void play(text, ttsConfig, { surface: ANALYTICS_SURFACE.SHORTCUT })
+      return true
+    },
+  )
 
   // Starts reading, or stops the reading in progress. False when nothing is
   // selected to read.
@@ -50,9 +72,9 @@ type SelectionSpeech = ReturnType<typeof useSelectionSpeechController>
 
 const SelectionSpeechContext = createContext<SelectionSpeech | null>(null)
 
-// One reader for the whole toolbar: its speak button and the speak row of its
-// "more" menu show, and stop, the same playback, which outlives the button
-// being unpinned.
+// One reader for the whole toolbar: its speak button, the speak row of its
+// "more" menu and the speak key show, and stop, the same playback, which
+// outlives the button being unpinned and the toolbar being hidden.
 export function SelectionSpeechProvider({ children }: { children: ReactNode }) {
   const speech = useSelectionSpeechController()
   return <SelectionSpeechContext value={speech}>{children}</SelectionSpeechContext>
@@ -68,6 +90,7 @@ export function useSelectionSpeech(): SelectionSpeech {
 
 export function SpeakButton() {
   const { isFetching, isPlaying, label: tooltipText, toggle } = useSelectionSpeech()
+  const { speak } = useAtomValue(configFieldsAtomMap.selectionToolbar).features
   const {
     handlePress,
     onOpenChange: handleTooltipOpenChange,
@@ -82,7 +105,7 @@ export function SpeakButton() {
 
   return (
     <SelectionToolbarTooltip
-      content={tooltipText}
+      content={<ShortcutTooltipLabel label={tooltipText} shortcut={getSpeakShortcut(speak)} />}
       open={tooltipOpen}
       onOpenChange={handleTooltipOpenChange}
       render={
