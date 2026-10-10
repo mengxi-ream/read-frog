@@ -1,8 +1,6 @@
 import type { Config } from "@/types/config/config"
 import type { TranslationMode } from "@/types/config/translate"
 import type { TransNode } from "@/types/dom"
-import { logger } from "@/utils/logger"
-import { resolvePageTranslationProvider } from "@/utils/providers/provider-ref"
 import {
   CONTENT_WRAPPER_CLASS,
   NOTRANSLATE_CLASS,
@@ -28,12 +26,8 @@ import {
 } from "../../dom/filter"
 import { unwrapDeepestOnlyHTMLChild } from "../../dom/find"
 import { getOwnerDocument } from "../../dom/node"
-import { canSplitGiantWithoutStrandingOwnText, extractTextContent } from "../../dom/traversal"
-import {
-  containsInlineAtomOutsideWrappers,
-  extractInlineAtomText,
-  renderInlineAtomTranslation,
-} from "../dom/inline-atoms"
+import { canSplitGiantWithoutStrandingOwnText } from "../../dom/traversal"
+import { containsInlineAtomOutsideWrappers, renderInlineAtomTranslation } from "../dom/inline-atoms"
 import {
   buildVirtualParagraphPlan,
   canMaterializeVirtualParagraphUnits,
@@ -50,7 +44,6 @@ import {
   restoreTranslationOnlySwapsForAnchor,
   teardownVirtualTranslationOnlyGeneration,
 } from "../dom/translation-cleanup"
-import { protectTranslationHtmlAttributes } from "../dom/translation-html-attributes"
 import { insertTranslatedNodeIntoWrapper } from "../dom/translation-insertion"
 import {
   applyInPlaceTextSwap,
@@ -64,14 +57,15 @@ import {
   insertVirtualParagraphWrappers,
   materializeVirtualParagraphUnitRuns,
 } from "../dom/virtual-paragraph-insertion"
-import { shouldFilterSmallParagraph } from "../filter-small-paragraph"
-import { isHtmlAttributeMarkerIntegrityError } from "../html-attribute-markers"
-import { shouldSkipAsTargetLanguage } from "../target-language-skip"
-import { normalizeForComparison } from "../text-preparation"
 import { translateTextForPage } from "../translate-variants"
 import { setTranslationDirAndLang } from "../translation-attributes"
 import { createSpinnerInside, getTranslatedTextAndRemoveSpinner } from "../ui/spinner"
-import { isNumericContent } from "../ui/translation-utils"
+import {
+  createPageTranslationRequest,
+  getDisplayTranslation,
+  preparePageTranslationSource,
+  shouldSkipPageTranslationText,
+} from "./translation-request"
 import {
   attachBilingualTranslationWrapper,
   collectSourceTextExcludingWrappers,
@@ -99,90 +93,6 @@ import {
 
 let virtualParagraphGroupSequence = 0
 let virtualTranslationOnlyGenerationSequence = 0
-const unsupportedDeepLXHtmlAttributeProviders = new Set<string>()
-const supportedDeepLXHtmlAttributeProviders = new Set<string>()
-type DeepLXHtmlAttributeProbeResult = "supported" | "unsupported" | "unknown"
-interface DeepLXHtmlAttributeProbe {
-  promise: Promise<DeepLXHtmlAttributeProbeResult>
-  resolve: (result: DeepLXHtmlAttributeProbeResult) => void
-}
-const deepLXHtmlAttributeProbes = new Map<string, DeepLXHtmlAttributeProbe>()
-
-function translateTextForAction(
-  text: string,
-  textFormat: "plain" | "html",
-  forceRetranslation: boolean = false,
-): Promise<string> {
-  return translateTextForPage(text, textFormat, { forceRetranslation })
-}
-
-function createDeepLXHtmlAttributeProbe(): DeepLXHtmlAttributeProbe {
-  let resolve!: (result: DeepLXHtmlAttributeProbeResult) => void
-  const promise = new Promise<DeepLXHtmlAttributeProbeResult>((resolvePromise) => {
-    resolve = resolvePromise
-  })
-  return { promise, resolve }
-}
-
-function finishDeepLXHtmlAttributeProbe(
-  providerKey: string,
-  probe: DeepLXHtmlAttributeProbe | undefined,
-  result: DeepLXHtmlAttributeProbeResult,
-): void {
-  if (!probe || deepLXHtmlAttributeProbes.get(providerKey) !== probe) return
-  deepLXHtmlAttributeProbes.delete(providerKey)
-  probe.resolve(result)
-}
-
-async function acquireDeepLXHtmlAttributeProbe(providerKey: string): Promise<{
-  probe?: DeepLXHtmlAttributeProbe
-  useLegacy: boolean
-}> {
-  while (true) {
-    if (unsupportedDeepLXHtmlAttributeProviders.has(providerKey)) {
-      return { useLegacy: true }
-    }
-    if (supportedDeepLXHtmlAttributeProviders.has(providerKey)) {
-      return { useLegacy: false }
-    }
-
-    const activeProbe = deepLXHtmlAttributeProbes.get(providerKey)
-    if (!activeProbe) {
-      const probe = createDeepLXHtmlAttributeProbe()
-      deepLXHtmlAttributeProbes.set(providerKey, probe)
-      return { probe, useLegacy: false }
-    }
-
-    // An empty/skipped request or a transient error proves neither support nor
-    // incompatibility. Re-enter the loop so exactly one waiter owns the next probe.
-    await activeProbe.promise
-  }
-}
-
-function getDeepLXHtmlAttributeProviderKey(config: Config): string | undefined {
-  const resolved = resolvePageTranslationProvider(config)
-  if (resolved.kind === "system" || resolved.config.provider !== "deeplx") {
-    return undefined
-  }
-  return `${resolved.config.id}:${resolved.config.baseURL ?? ""}`
-}
-
-function getDisplayTranslation(
-  sourceText: string,
-  translatedText: string | undefined,
-  comparisonText: string | undefined = translatedText,
-) {
-  if (translatedText === undefined) {
-    return undefined
-  }
-
-  // comparisonText lets the HTML-marker path (#1832) compare a normalized
-  // variant while the raw translatedText is what gets displayed; the folding
-  // normalization (#1835) applies on top for both paths.
-  return normalizeForComparison(sourceText) === normalizeForComparison(comparisonText)
-    ? ""
-    : translatedText
-}
 
 function createBilingualWrapper(
   ownerDoc: Document,
@@ -206,11 +116,7 @@ async function filterVirtualParagraphUnits(
   config: Config,
 ): Promise<VirtualParagraphUnit[]> {
   const included = await Promise.all(
-    units.map(async (unit) => {
-      if (isNumericContent(unit.text)) return false
-      if (await shouldFilterSmallParagraph(unit.text, config)) return false
-      return !(await shouldSkipAsTargetLanguage(unit.text, config))
-    }),
+    units.map(async (unit) => !(await shouldSkipPageTranslationText(unit.text, config))),
   )
   return units.filter((_, index) => included[index])
 }
@@ -531,18 +437,9 @@ export async function translateNodesBilingualMode(
     const sourceTextBeforeFilter = isHTMLElement(layoutSource)
       ? collectSourceTextExcludingWrappers(layoutSource)
       : null
-    // One extraction yields two strings: `textContent` is the prose-only
-    // legacy string (atoms contribute "") that every filter below keeps
-    // seeing; `requestText` carries a {{n}} placeholder per inline atom
-    // (formula) and is what the provider, the echo check and the layout
-    // heuristic get. Without atoms the two are byte-identical.
-    const atomExtraction = extractInlineAtomText(transNodes, config)
-    const textContent = atomExtraction.filterText.trim()
-    const requestText = atomExtraction.requestText.trim()
-    if (!textContent || isNumericContent(textContent)) return
-    // A run whose only content is formulas (an equation cell, a bare
-    // display container) has nothing to translate; never send tokens alone.
-    if (atomExtraction.atoms.length > 0 && !atomExtraction.hasProse) return
+    const atomExtraction = preparePageTranslationSource(transNodes, config)
+    if (!atomExtraction) return
+    const requestText = atomExtraction.requestText
 
     let bilingualState: BilingualTranslationState | undefined
     if (isHTMLElement(layoutSource) && sourceTextBeforeFilter !== null) {
@@ -561,9 +458,7 @@ export async function translateNodesBilingualMode(
     try {
       // Target-language skip runs here, BEFORE the wrapper/spinner is inserted,
       // so same-language paragraphs never touch the DOM.
-      shouldFilter =
-        (await shouldFilterSmallParagraph(textContent, config)) ||
-        (await shouldSkipAsTargetLanguage(textContent, config))
+      shouldFilter = await shouldSkipPageTranslationText(atomExtraction.filterText, config)
     } catch (error) {
       if (bilingualState) unregisterBilingualTranslationState(bilingualState)
       throw error
@@ -649,18 +544,18 @@ export async function translateNodesBilingualMode(
         : layoutSource.parentElement
     const preserveLineBreaks = flowContainer ? isNewlinePreservingElement(flowContainer) : false
 
+    const request = createPageTranslationRequest(atomExtraction, config, "plain", {
+      preserveLineBreaks,
+      forceRetranslation,
+    })
     const realTranslatedText = await getTranslatedTextAndRemoveSpinner(
       nodes,
-      requestText,
+      request.sourceText,
       spinner,
       translatedWrapperNode,
       isCurrent,
-      "plain",
-      () =>
-        translateTextForPage(requestText, "plain", {
-          preserveLineBreaks,
-          forceRetranslation,
-        }),
+      request.textFormat,
+      request.translate,
     )
 
     if (!isCurrent()) {
@@ -669,7 +564,7 @@ export async function translateNodesBilingualMode(
     }
 
     // Compared on the tokenized strings: an echo comes back with its tokens.
-    const translatedText = getDisplayTranslation(requestText, realTranslatedText)
+    const translatedText = request.getDisplayText(realTranslatedText)
 
     if (translatedText === "") {
       removeTranslatedWrapperWithRestore(translatedWrapperNode)
@@ -1085,19 +980,12 @@ async function translateTranslationOnlyRun(
       return
     }
 
-    const innerTextContent = transNodes.map((node) => extractTextContent(node, config)).join("")
-    if (!innerTextContent.trim() || isNumericContent(innerTextContent)) return
-
-    if (await shouldFilterSmallParagraph(innerTextContent, config)) return
-
-    // Check the plain text, not the HTML string sent to the provider — franc
-    // on markup is noise. Runs before the wrapper is inserted into the DOM.
-    if (await shouldSkipAsTargetLanguage(innerTextContent, config)) return
+    const source = preparePageTranslationSource(transNodes, config)
+    if (!source || (await shouldSkipPageTranslationText(source.filterText, config))) return
 
     const ownerDoc = getOwnerDocument(targetNode)
-    const protectedHtml = protectTranslationHtmlAttributes(transNodes, ownerDoc)
-    const textContent = protectedHtml.sourceHtml
-    if (!textContent) return
+    const request = createPageTranslationRequest(source, config, "html", { forceRetranslation })
+    if (!request.sourceText) return
 
     // Taken before the provider request; the response handler compares against
     // it to detect host mutations that happened while the request was in
@@ -1125,81 +1013,16 @@ async function translateTranslationOnlyRun(
     }
     batchDOMOperation(insertOperation)
 
-    // The source string mixes text nodes with element outerHTML and the result
-    // is re-rendered via innerHTML, so providers must treat it as HTML to keep
-    // its tags intact.
-    const deepLXProviderKey = getDeepLXHtmlAttributeProviderKey(config)
-    const translateLegacyHtml = async () => {
-      const translatedHtml = await translateTextForAction(
-        protectedHtml.legacyRequestHtml,
-        "html",
-        forceRetranslation,
-      )
-      return translatedHtml ? protectedHtml.restoreLegacy(translatedHtml) : translatedHtml
-    }
-    const translateRequest = async () => {
-      if (!protectedHtml.hasPlaceholders) return translateLegacyHtml()
-
-      let ownedDeepLXProbe: DeepLXHtmlAttributeProbe | undefined
-      if (deepLXProviderKey) {
-        const probeDecision = await acquireDeepLXHtmlAttributeProbe(deepLXProviderKey)
-        if (probeDecision.useLegacy) return translateLegacyHtml()
-        ownedDeepLXProbe = probeDecision.probe
-      }
-
-      try {
-        const translatedHtml = await translateTextForAction(
-          protectedHtml.requestHtml,
-          "html",
-          forceRetranslation,
-        )
-        if (!translatedHtml) {
-          if (deepLXProviderKey) {
-            finishDeepLXHtmlAttributeProbe(deepLXProviderKey, ownedDeepLXProbe, "unknown")
-          }
-          return translatedHtml
-        }
-
-        const restoredHtml = protectedHtml.restore(translatedHtml)
-        if (deepLXProviderKey) {
-          supportedDeepLXHtmlAttributeProviders.add(deepLXProviderKey)
-          finishDeepLXHtmlAttributeProbe(deepLXProviderKey, ownedDeepLXProbe, "supported")
-        }
-        return restoredHtml
-      } catch (error) {
-        if (!isHtmlAttributeMarkerIntegrityError(error)) {
-          if (deepLXProviderKey) {
-            finishDeepLXHtmlAttributeProbe(deepLXProviderKey, ownedDeepLXProbe, "unknown")
-          }
-          throw error
-        }
-
-        if (deepLXProviderKey) {
-          unsupportedDeepLXHtmlAttributeProviders.add(deepLXProviderKey)
-          supportedDeepLXHtmlAttributeProviders.delete(deepLXProviderKey)
-          finishDeepLXHtmlAttributeProbe(deepLXProviderKey, ownedDeepLXProbe, "unsupported")
-        }
-        logger.warn("HTML attribute placeholders were not preserved; retrying full HTML", error)
-        return translateLegacyHtml()
-      }
-    }
-
     const realTranslatedText = await getTranslatedTextAndRemoveSpinner(
       nodes,
-      textContent,
+      request.sourceText,
       spinner,
       translatedWrapperNode,
       isCurrent,
-      "html",
-      translateRequest,
+      request.textFormat,
+      request.translate,
     )
-    const translatedText = realTranslatedText
-      ? getDisplayTranslation(
-          protectedHtml.comparisonSourceHtml,
-          realTranslatedText,
-          protectedHtml.normalizeForComparison(realTranslatedText),
-        )
-      : realTranslatedText
+    const translatedText = request.getDisplayText(realTranslatedText)
 
     if (!translatedText) {
       // Keep the wrapper when translation failed so the injected error UI remains visible.
