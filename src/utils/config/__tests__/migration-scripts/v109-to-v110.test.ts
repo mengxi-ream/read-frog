@@ -75,6 +75,23 @@ describe("v109-to-v110 migration", () => {
     expect(migrated.selectionToolbar.builtInActions.improveWriting.shortcut).toBe("Alt+Shift+W")
   })
 
+  it("keeps clear of keys already saved on the new shortcuts", () => {
+    const oldConfig = createConfig()
+    oldConfig.selectionToolbar.features.speak = { enabled: true, shortcut: "Alt+Shift+D" } as never
+    ;(
+      oldConfig.selectionToolbar.builtInActions.sentenceAnalysis as Record<string, unknown>
+    ).shortcut = "Alt+Shift+W"
+    ;(oldConfig.selectionToolbar.customActions[0] as Record<string, unknown>).shortcut =
+      "Alt+Shift+R"
+
+    const migrated = migrate(oldConfig)
+
+    expect(migrated.selectionToolbar.features.speak.shortcut).toBe("Alt+Shift+D")
+    expect(migrated.selectionToolbar.builtInActions.dictionary.shortcut).toBe("")
+    expect(migrated.selectionToolbar.builtInActions.sentenceAnalysis.shortcut).toBe("Alt+Shift+W")
+    expect(migrated.selectionToolbar.builtInActions.improveWriting.shortcut).toBe("")
+  })
+
   it("does not mistake other modifiers or the plus key for a default", () => {
     const migrated = migrate(
       createConfig({ translateShortcut: "Mod+Shift+D", hubShortcut: "Alt+Shift++" }),

@@ -39,9 +39,18 @@ function isInOwnUi(node: Node | null) {
 
 // Typing in a field of the extension's own UI (a dialog over the page, say):
 // the page's selection is still held there, but the keys are the user's text.
+// The field can sit in a shadow root nested in that UI (a custom action's
+// card), where the root's own activeElement is only the nested host.
 function isTypingInOwnUi() {
   const root = shadowWrapper?.getRootNode()
-  return root instanceof ShadowRoot && isEditable(root.activeElement)
+  if (!(root instanceof ShadowRoot)) {
+    return false
+  }
+  let focused = root.activeElement
+  while (focused?.shadowRoot?.activeElement) {
+    focused = focused.shadowRoot.activeElement
+  }
+  return isEditable(focused)
 }
 
 // The page's selection as it is when the key is pressed. The toolbar records one only on

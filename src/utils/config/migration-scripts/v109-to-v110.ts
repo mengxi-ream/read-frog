@@ -71,14 +71,25 @@ function toKey(shortcut: unknown): string | null {
   return [...[...new Set(modifiers)].sort(), key].join("+")
 }
 
-// The keys the reader's existing shortcuts press.
+// The keys the reader's existing shortcuts press, the new ones included: a
+// newer options page can save one (Speak's, an action's) before this runs.
 function collectTakenKeys(config: Record<string, any>): Set<string> {
+  const selectionToolbar = config.selectionToolbar
+  const builtInActions = isRecord(selectionToolbar?.builtInActions)
+    ? Object.values(selectionToolbar.builtInActions)
+    : []
+  const customActions = Array.isArray(selectionToolbar?.customActions)
+    ? selectionToolbar.customActions
+    : []
   const shortcuts = [
     config.pageTranslation?.page?.shortcut,
     config.pageTranslation?.modeShortcut,
-    config.selectionToolbar?.features?.translate?.shortcut,
+    selectionToolbar?.features?.translate?.shortcut,
+    selectionToolbar?.features?.speak?.shortcut,
     config.videoSubtitles?.toggleShortcut,
     config.translationHub?.shortcut,
+    ...builtInActions.map((state: any) => (isRecord(state) ? state.shortcut : undefined)),
+    ...customActions.map((action: any) => (isRecord(action) ? action.shortcut : undefined)),
   ]
   return new Set(shortcuts.map(toKey).filter((key): key is string => key !== null))
 }
