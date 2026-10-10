@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { buildContextSnapshot, createRangeSnapshot, readSelectionSnapshot } from "../utils"
 
 function createSelectionSnapshot(range: Range, text = range.toString()) {
@@ -15,6 +15,42 @@ function createSelectionSnapshot(range: Range, text = range.toString()) {
     ],
   }
 }
+
+// Chrome reports a selection inside an <input>/<textarea> as a range around the
+// control element itself; the selected text is only reachable via toString().
+function createTextControlSelection(
+  control: HTMLInputElement | HTMLTextAreaElement,
+  text: string,
+): Selection {
+  const parent = control.parentNode
+  if (!parent) {
+    throw new Error("Text control is detached")
+  }
+
+  const index = Array.prototype.indexOf.call(parent.childNodes, control)
+  const range = document.createRange()
+  range.setStart(parent, index)
+  range.setEnd(parent, index + 1)
+
+  return {
+    toString: () => text,
+    anchorNode: parent,
+    focusNode: parent,
+    rangeCount: 1,
+    getRangeAt: () => range,
+    getComposedRanges: () => [range],
+  } as unknown as Selection
+}
+
+const DEMO_HEAD_HTML = `
+  <title>Shortcut demo</title>
+  <style>body{font:20px/1.6 system-ui;margin:70px auto;max-width:760px;color:#1f2328}</style>
+`
+
+afterEach(() => {
+  document.head.innerHTML = ""
+  document.body.innerHTML = ""
+})
 
 describe("buildContextSnapshot", () => {
   it("returns the nearest paragraph-like element text for selections spanning inline DOM nodes", () => {
@@ -118,6 +154,188 @@ describe("buildContextSnapshot", () => {
       text: "Alpha Beta gamma",
       paragraphs: ["Alpha Beta gamma"],
     })
+  })
+
+  it("never collects head, style or script text when no block ancestor sits below body", () => {
+    document.head.innerHTML = DEMO_HEAD_HTML
+    document.body.innerHTML = `
+      <span id="selection">Alpha beta</span>
+      <style>.inline { color: red; }</style>
+      <script>window.readFrogFixture = true</script>
+      <noscript>Enable JavaScript</noscript>
+    `
+
+    const selectionNode = document.getElementById("selection")?.firstChild
+    if (!selectionNode) {
+      throw new Error("Selection node not found")
+    }
+
+    const range = document.createRange()
+    range.setStart(selectionNode, 0)
+    range.setEnd(selectionNode, selectionNode.textContent?.length ?? 0)
+
+    expect(buildContextSnapshot(createSelectionSnapshot(range))).toEqual({
+      text: "Alpha beta",
+      paragraphs: ["Alpha beta"],
+    })
+  })
+})
+
+describe("text control selections", () => {
+  it("uses the focused textarea's current value instead of the page's head text", () => {
+    document.head.innerHTML = DEMO_HEAD_HTML
+    document.body.innerHTML = `
+      <h1>Demo</h1>
+      <p>First paragraph on the page.</p>
+      <p>Second paragraph on the page.</p>
+      <textarea id="field">Default textarea text</textarea>
+    `
+
+    const textarea = document.getElementById("field")
+    if (!(textarea instanceof HTMLTextAreaElement)) {
+      throw new Error("Textarea not found")
+    }
+
+    textarea.value = "I has wrote this sentence badly."
+    textarea.focus()
+    textarea.setSelectionRange(0, textarea.value.length)
+
+    const snapshot = readSelectionSnapshot(
+      createTextControlSelection(textarea, "I has wrote this sentence badly."),
+    )
+
+    expect(snapshot?.textControl).toEqual({
+      value: "I has wrote this sentence badly.",
+      selectionStart: 0,
+      selectionEnd: 32,
+    })
+    expect(buildContextSnapshot(snapshot)).toEqual({
+      text: "I has wrote this sentence badly.",
+      paragraphs: ["I has wrote this sentence badly."],
+    })
+  })
+
+  it("keeps only the blank-line separated textarea paragraphs that overlap the selection", () => {
+    document.body.innerHTML = `<div><textarea id="field"></textarea></div>`
+
+    const textarea = document.getElementById("field")
+    if (!(textarea instanceof HTMLTextAreaElement)) {
+      throw new Error("Textarea not found")
+    }
+
+    textarea.value = [
+      "Opening paragraph,\nwrapped onto a second line.",
+      "Middle paragraph with the target words.",
+      "Closing paragraph.",
+    ].join("\n\n  \n")
+    textarea.focus()
+
+    const middleStart = textarea.value.indexOf("target words")
+    textarea.setSelectionRange(middleStart, middleStart + "target words".length)
+    expect(
+      buildContextSnapshot(
+        readSelectionSnapshot(createTextControlSelection(textarea, "target words")),
+      ),
+    ).toEqual({
+      text: "Middle paragraph with the target words.",
+      paragraphs: ["Middle paragraph with the target words."],
+    })
+
+    const spanStart = textarea.value.indexOf("second line")
+    textarea.setSelectionRange(spanStart, middleStart)
+    expect(
+      buildContextSnapshot(
+        readSelectionSnapshot(
+          createTextControlSelection(textarea, textarea.value.slice(spanStart, middleStart)),
+        ),
+      )?.paragraphs,
+    ).toEqual([
+      "Opening paragraph, wrapped onto a second line.",
+      "Middle paragraph with the target words.",
+    ])
+  })
+
+  it("uses the value of a focused text input", () => {
+    document.body.innerHTML = `
+      <p>
+        <label for="field">Search the docs</label>
+        <input id="field" type="search" value="selection toolbar shortcuts">
+      </p>
+    `
+
+    const input = document.getElementById("field")
+    if (!(input instanceof HTMLInputElement)) {
+      throw new Error("Input not found")
+    }
+
+    input.focus()
+    input.setSelectionRange(10, 17)
+
+    expect(
+      buildContextSnapshot(readSelectionSnapshot(createTextControlSelection(input, "toolbar"))),
+    ).toEqual({
+      text: "selection toolbar shortcuts",
+      paragraphs: ["selection toolbar shortcuts"],
+    })
+  })
+
+  it("never reads the value of a password field", () => {
+    document.body.innerHTML = `
+      <p>
+        <label for="field">Password</label>
+        <input id="field" type="password" value="hunter2secret">
+      </p>
+    `
+
+    const input = document.getElementById("field")
+    if (!(input instanceof HTMLInputElement)) {
+      throw new Error("Input not found")
+    }
+
+    input.focus()
+    input.setSelectionRange(0, 6)
+
+    const snapshot = readSelectionSnapshot(createTextControlSelection(input, "••••••"))
+
+    expect(snapshot?.textControl).toBeUndefined()
+    expect(JSON.stringify(buildContextSnapshot(snapshot))).not.toContain("hunter2")
+  })
+
+  it("ignores focused controls that do not hold the selection", () => {
+    document.body.innerHTML = `
+      <p id="paragraph">Alpha <span id="selection">Beta</span> gamma</p>
+      <input id="checkbox" type="checkbox">
+      <textarea id="field">Caret only</textarea>
+    `
+
+    const selectionNode = document.getElementById("selection")?.firstChild
+    const checkbox = document.getElementById("checkbox")
+    const textarea = document.getElementById("field")
+    if (
+      !selectionNode ||
+      !(checkbox instanceof HTMLInputElement) ||
+      !(textarea instanceof HTMLTextAreaElement)
+    ) {
+      throw new Error("Fixtures not found")
+    }
+
+    const range = document.createRange()
+    range.setStart(selectionNode, 0)
+    range.setEnd(selectionNode, selectionNode.textContent?.length ?? 0)
+    const selection = {
+      toString: () => "Beta",
+      rangeCount: 1,
+      getRangeAt: () => range,
+    } as unknown as Selection
+
+    checkbox.focus()
+    expect(readSelectionSnapshot(selection)?.textControl).toBeUndefined()
+
+    textarea.focus()
+    textarea.setSelectionRange(3, 3)
+    const snapshot = readSelectionSnapshot(selection)
+    expect(snapshot?.textControl).toBeUndefined()
+    expect(buildContextSnapshot(snapshot)?.paragraphs).toEqual(["Alpha Beta gamma"])
   })
 })
 
