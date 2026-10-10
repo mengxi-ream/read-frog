@@ -199,9 +199,16 @@ function stripUnexpectedAttributes(
   })
 }
 
+/**
+ * `noTranslateSelector` names elements whose text must reach the provider
+ * untranslated (inline atoms such as formulas and inline code). They go out
+ * marked `class="notranslate" translate="no"`, which HTML translators honor,
+ * and `restore` puts their original attributes back.
+ */
 export function protectTranslationHtmlAttributes(
   nodes: readonly TransNode[],
   ownerDoc: Document,
+  noTranslateSelector: string | null = null,
 ): ProtectedTranslationHtml {
   const container = cloneAndCleanNodes(nodes, ownerDoc)
   const sourceHtml = container.innerHTML
@@ -231,19 +238,30 @@ export function protectTranslationHtmlAttributes(
     const protectedAttributes = attributes
       .filter((attribute) => !translatableAttributeNames.has(attribute.name.toLowerCase()))
       .map(snapshotAttribute)
+    const isNoTranslateElement =
+      noTranslateSelector !== null && element.matches(noTranslateSelector)
 
-    if (protectedAttributes.length === 0) return
+    if (protectedAttributes.length === 0) {
+      // Unmarked elements are stripped back to their translatable attributes
+      // on restore, so this request-only marker never reaches the page.
+      if (isNoTranslateElement) element.setAttribute("translate", "no")
+      return
+    }
 
     const markerId = String(snapshots.size)
-    const preserveNotranslateClass = protectedAttributes.some(
-      (attribute) =>
-        attribute.name.toLowerCase() === "class" &&
-        attribute.value.split(/\s+/).includes(NOTRANSLATE_CLASS),
-    )
-    const preserveTranslateNo = protectedAttributes.some(
-      (attribute) =>
-        attribute.name.toLowerCase() === "translate" && attribute.value.toLowerCase() === "no",
-    )
+    const preserveNotranslateClass =
+      isNoTranslateElement ||
+      protectedAttributes.some(
+        (attribute) =>
+          attribute.name.toLowerCase() === "class" &&
+          attribute.value.split(/\s+/).includes(NOTRANSLATE_CLASS),
+      )
+    const preserveTranslateNo =
+      isNoTranslateElement ||
+      protectedAttributes.some(
+        (attribute) =>
+          attribute.name.toLowerCase() === "translate" && attribute.value.toLowerCase() === "no",
+      )
 
     protectedAttributes.forEach((attribute) => removeAttribute(element, attribute))
     if (preserveNotranslateClass) {
