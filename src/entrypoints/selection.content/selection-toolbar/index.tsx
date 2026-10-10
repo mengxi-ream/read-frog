@@ -22,7 +22,11 @@ import {
 import { getSelectionToolbarItems } from "@/utils/selection-toolbar-items"
 import { cn } from "@/utils/styles/utils"
 import { urlMatchesPattern } from "@/utils/url-pattern"
-import { buildContextSnapshot, readSelectionSnapshot } from "../utils"
+import {
+  buildContextSnapshot,
+  readSelectionSnapshot,
+  readTextFieldSelectionSnapshot,
+} from "../utils"
 import { clearSelectionStateAtom, isSelectionToolbarOpenAtom, setSelectionStateAtom } from "./atoms"
 import { CloseButton, DropEvent } from "./close-button"
 import { createModalDialogHostController } from "./modal-dialog-host"
@@ -409,7 +413,10 @@ export function SelectionToolbar() {
           return
         }
 
-        const selectionSnapshot = readSelectionSnapshot(selection)
+        // Firefox reports a text field's selection only through the field.
+        const selectionSnapshot =
+          readSelectionSnapshot(selection) ??
+          (isInputOrTextarea ? readTextFieldSelectionSnapshot(document.activeElement) : null)
 
         // https://github.com/mengxi-ream/read-frog/issues/547
         // https://github.com/mengxi-ream/read-frog/pull/790
@@ -496,8 +503,11 @@ export function SelectionToolbar() {
         return
       }
 
-      // if the selected content is cleared, hide the tooltip
-      if (!selection || selection.toString().trim().length === 0) {
+      // if the selected content is cleared, hide the tooltip. A text field's
+      // selection counts too: Firefox keeps it out of window.getSelection().
+      const hasSelectedText =
+        !!selection?.toString().trim() || !!readTextFieldSelectionSnapshot(document.activeElement)
+      if (!hasSelectedText) {
         if (preserveSelectionStateRef.current) {
           return
         }

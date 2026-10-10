@@ -1,6 +1,11 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from "vitest"
-import { buildContextSnapshot, createRangeSnapshot, readSelectionSnapshot } from "../utils"
+import {
+  buildContextSnapshot,
+  createRangeSnapshot,
+  readSelectionSnapshot,
+  readTextFieldSelectionSnapshot,
+} from "../utils"
 
 function createSelectionSnapshot(range: Range, text = range.toString()) {
   return {
@@ -367,5 +372,43 @@ describe("readSelectionSnapshot", () => {
       ],
     })
     expect(getRangeAt).toHaveBeenCalledWith(0)
+  })
+})
+
+describe("readTextFieldSelectionSnapshot", () => {
+  function field<T extends HTMLInputElement | HTMLTextAreaElement>(element: T, value: string) {
+    element.value = value
+    document.body.appendChild(element)
+    return element
+  }
+
+  it("reads the text selected in a textarea or text input, with a range around the field", () => {
+    const textarea = field(document.createElement("textarea"), "i has went to the store")
+    textarea.setSelectionRange(2, 10)
+
+    const snapshot = readTextFieldSelectionSnapshot(textarea)
+
+    expect(snapshot?.text).toBe("has went")
+    const range = document.createRange()
+    range.selectNode(textarea)
+    expect(snapshot?.ranges).toEqual([createRangeSnapshot(range)])
+
+    const input = field(document.createElement("input"), "search words")
+    input.setSelectionRange(0, 6)
+    expect(readTextFieldSelectionSnapshot(input)?.text).toBe("search")
+  })
+
+  it("reads nothing from a collapsed selection, a password, or anything but a text field", () => {
+    const textarea = field(document.createElement("textarea"), "text")
+    textarea.setSelectionRange(2, 2)
+    expect(readTextFieldSelectionSnapshot(textarea)).toBeNull()
+
+    const password = field(document.createElement("input"), "secret")
+    password.type = "password"
+    password.setSelectionRange(0, 6)
+    expect(readTextFieldSelectionSnapshot(password)).toBeNull()
+
+    expect(readTextFieldSelectionSnapshot(document.body)).toBeNull()
+    expect(readTextFieldSelectionSnapshot(null)).toBeNull()
   })
 })

@@ -206,6 +206,51 @@ function readSelectionRangeSnapshots(selection: Selection | null) {
   return snapshots
 }
 
+// The input types whose text can be selected and read. Never a password.
+const SELECTABLE_INPUT_TYPES = new Set(["text", "search", "url", "tel", "email"])
+
+function isSelectableTextField(
+  element: Element | null,
+): element is HTMLInputElement | HTMLTextAreaElement {
+  return (
+    element instanceof HTMLTextAreaElement ||
+    (element instanceof HTMLInputElement && SELECTABLE_INPUT_TYPES.has(element.type))
+  )
+}
+
+/**
+ * The text selected inside a text field, read from the field itself: Firefox keeps a selection
+ * in an `<input>` or `<textarea>` out of `window.getSelection()`, which is empty there. Its
+ * range covers the whole field, which is where the toolbar is placed for it.
+ */
+export function readTextFieldSelectionSnapshot(element: Element | null): SelectionSnapshot | null {
+  if (!isSelectableTextField(element)) {
+    return null
+  }
+
+  let start: number | null
+  let end: number | null
+  try {
+    start = element.selectionStart
+    end = element.selectionEnd
+  } catch {
+    // Some input types refuse to report a selection.
+    return null
+  }
+  if (start === null || end === null || start === end) {
+    return null
+  }
+
+  const text = normalizeSelectedText(element.value.slice(start, end))
+  if (text === "") {
+    return null
+  }
+
+  const range = document.createRange()
+  range.selectNode(element)
+  return { text, ranges: [createRangeSnapshot(range)] }
+}
+
 export function readSelectionSnapshot(selection: Selection | null): SelectionSnapshot | null {
   const text = normalizeSelectedText(selection?.toString())
   if (text === "") {

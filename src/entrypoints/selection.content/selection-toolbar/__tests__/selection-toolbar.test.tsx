@@ -374,6 +374,40 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     spy.mockRestore()
   })
 
+  it("shows the toolbar for a textarea selection the page selection does not report, as in Firefox", async () => {
+    // Firefox keeps a text field's selection out of window.getSelection().
+    setMockSelectionText("")
+    render(
+      <div>
+        <SelectionToolbar />
+        <SelectionSessionProbe />
+        <textarea data-testid="test-element" defaultValue="i has went to the store" />
+      </div>,
+    )
+
+    const element = screen.getByTestId<HTMLTextAreaElement>("test-element")
+    element.setSelectionRange(2, 10)
+    const spy = vi.spyOn(document, "activeElement", "get").mockReturnValue(element)
+
+    await triggerMouseUpWithSelection(element)
+    await waitFor(() => expectToolbarVisible())
+    expect(screen.getByTestId("selection-session")).toHaveTextContent("has went")
+
+    // Nor does a selectionchange clear it while the field still holds the selection.
+    await act(async () => {
+      document.dispatchEvent(new Event("selectionchange"))
+    })
+    expect(screen.getByTestId("selection-session")).toHaveTextContent("has went")
+
+    element.setSelectionRange(4, 4)
+    await act(async () => {
+      document.dispatchEvent(new Event("selectionchange"))
+    })
+    expect(screen.getByTestId("selection-session")).toHaveTextContent("empty")
+
+    spy.mockRestore()
+  })
+
   it("should not show toolbar when input is activeElement but click target is outside", async () => {
     render(
       <div>
