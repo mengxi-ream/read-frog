@@ -548,7 +548,7 @@ options:
       title: "AI eylemleri"
       description: "Seçili metin üzerinde bir AI eylemi çalıştırır. Özel eylemlerin, burada atayana kadar kısayolu yoktur."
     turnedOff: "Kapalı olduğu için bu kısayol, tekrar açılana kadar hiçbir şey yapmaz."
-    clash: "“$1” ile aynı kısayol. Basınca ikisi de çalışır, bu yüzden birini değiştirin."
+    clash: "“$1” ile aynı kısayol. Birini değiştirin."
     taken: "$1 zaten “$2” tarafından kullanılıyor."
   overlayTools:
     title: Kaplama Araçları

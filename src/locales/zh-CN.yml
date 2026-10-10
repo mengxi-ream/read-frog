@@ -549,7 +549,7 @@ options:
       title: "AI 指令"
       description: "对选中的文本运行 AI 指令。自定义指令默认没有快捷键，在这里设置即可。"
     turnedOff: "该功能已关闭，重新开启前快捷键不会生效。"
-    clash: "与「$1」的快捷键相同，按下会同时触发，请修改其中一个。"
+    clash: "与「$1」的快捷键相同，请修改其中一个。"
     taken: "$1 已被「$2」使用。"
   overlayTools:
     title: 悬浮工具

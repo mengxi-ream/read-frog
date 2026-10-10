@@ -2,7 +2,7 @@
 import type { SelectionSession } from "../atoms"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { fakeBrowser } from "wxt/testing/fake-browser"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { configAtom } from "@/utils/atoms/config"
@@ -16,10 +16,6 @@ const tts = vi.hoisted(() => ({
   isPlaying: true,
   play: vi.fn<(text: string, ttsConfig: unknown, options?: { surface?: string }) => void>(),
   stop: vi.fn<(instance: number) => void>(),
-}))
-
-const hotkeys = vi.hoisted(() => ({
-  register: vi.fn<(...args: any[]) => { unregister: () => void }>(),
 }))
 
 const toastAdd = vi.hoisted(() => vi.fn<(toast: unknown) => void>())
@@ -41,23 +37,13 @@ vi.mock("@/hooks/use-text-to-speech", async () => {
   }
 })
 
-vi.mock("@tanstack/hotkeys", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@tanstack/hotkeys")>()),
-  HotkeyManager: { getInstance: () => ({ register: hotkeys.register }) },
-}))
-
 vi.mock("@/components/ui/base-ui/toast", () => ({ toastManager: { add: toastAdd } }))
-
-beforeEach(() => {
-  hotkeys.register.mockReturnValue({ unregister: vi.fn<() => void>() })
-})
 
 afterEach(() => {
   tts.instances = 0
   tts.isPlaying = true
   tts.play.mockClear()
   tts.stop.mockClear()
-  hotkeys.register.mockReset()
   toastAdd.mockClear()
   fakeBrowser.reset()
 })
@@ -94,13 +80,19 @@ function selectText(store: ReturnType<typeof createStore>, text: string) {
   store.set(selectionSessionAtom, session)
 }
 
+// Presses Alt+Shift+R on the page and returns the event: claimed when speak ran.
 function pressSpeakKey() {
-  const registration = hotkeys.register.mock.calls.findLast((call) => call[0] === "Alt+Shift+R")
-  if (!registration) {
-    throw new Error("The speak key is not bound")
-  }
-  const event = new KeyboardEvent("keydown", { cancelable: true })
-  ;(registration[1] as (event: KeyboardEvent) => void)(event)
+  const event = new KeyboardEvent("keydown", {
+    key: "R",
+    code: "KeyR",
+    altKey: true,
+    shiftKey: true,
+    bubbles: true,
+    cancelable: true,
+  })
+  act(() => {
+    document.body.dispatchEvent(event)
+  })
   return event
 }
 
@@ -150,7 +142,7 @@ describe("SelectionSpeechProvider", () => {
     expect(event.defaultPrevented).toBe(false)
   })
 
-  it("binds no key while speak is turned off", async () => {
+  it("leaves the key to the page while speak is turned off", async () => {
     const store = createStore()
     const config = structuredClone(DEFAULT_CONFIG)
     config.selectionToolbar.features.speak.enabled = false
@@ -160,6 +152,7 @@ describe("SelectionSpeechProvider", () => {
     renderSpeech(store)
     await act(() => new Promise((resolve) => setTimeout(resolve, 0)))
 
-    expect(hotkeys.register.mock.calls.map((call) => call[0])).not.toContain("Alt+Shift+R")
+    expect(pressSpeakKey().defaultPrevented).toBe(false)
+    expect(tts.stop).not.toHaveBeenCalled()
   })
 })

@@ -31,23 +31,8 @@ const getOrCreateWebPageContextMock = vi.fn<(...args: any[]) => any>().mockResol
 const getOrGenerateWebPageSummaryMock = vi.fn<(...args: any[]) => any>()
 const toastAddMock = vi.fn<(...args: any[]) => any>()
 const onMessageMock = vi.fn<(...args: any[]) => any>()
-const hotkeyRegisterMock = vi.fn<(...args: any[]) => any>()
-const hotkeyUnregisterMock = vi.fn<(...args: any[]) => any>()
 const originalGetSelection = window.getSelection
 const DEFAULT_DICTIONARY_ACTION = getBuiltInDictionaryAction(DEFAULT_CONFIG.selectionToolbar)
-
-vi.mock("@tanstack/hotkeys", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@tanstack/hotkeys")>()
-
-  return {
-    ...actual,
-    HotkeyManager: {
-      getInstance: () => ({
-        register: hotkeyRegisterMock,
-      }),
-    },
-  }
-})
 
 vi.mock("@/utils/auth/auth-client", () => ({
   authClient: {
@@ -463,22 +448,31 @@ function getRegisteredMessageHandler(name: string): (message: { data: unknown })
   return registration[1] as (message: { data: unknown }) => void
 }
 
-async function getRegisteredShortcutCallback(shortcut = "Alt+T") {
-  await waitFor(() => {
-    expect(hotkeyRegisterMock.mock.calls.some((call) => call[0] === shortcut)).toBe(true)
+// Presses `shortcut` ("Alt+Shift+D") on the page, as the browser fires it, and returns the
+// event: a shortcut that ran claims it (default prevented).
+function pressShortcut(shortcut = "Alt+T") {
+  const parts = shortcut.split("+")
+  const key = parts.at(-1)!
+  const event = new KeyboardEvent("keydown", {
+    key: parts.includes("Shift") ? key.toUpperCase() : key.toLowerCase(),
+    code: `Key${key.toUpperCase()}`,
+    altKey: parts.includes("Alt"),
+    shiftKey: parts.includes("Shift"),
+    ctrlKey: parts.includes("Control"),
+    metaKey: parts.includes("Meta"),
+    bubbles: true,
+    cancelable: true,
   })
-
-  const registration = hotkeyRegisterMock.mock.calls.findLast((call) => call[0] === shortcut)
-  if (!registration) {
-    throw new Error(`Shortcut not registered: ${shortcut}`)
-  }
-
-  const callback = registration[1] as (event: KeyboardEvent) => void
-  return (event = new KeyboardEvent("keydown", { cancelable: true })) => callback(event)
+  document.body.dispatchEvent(event)
+  return event
 }
 
-function getRegisteredShortcuts() {
-  return hotkeyRegisterMock.mock.calls.map((call) => call[0] as string)
+function pressShortcutInAct(shortcut?: string) {
+  let event!: KeyboardEvent
+  act(() => {
+    event = pressShortcut(shortcut)
+  })
+  return event
 }
 
 function createRect({
@@ -613,9 +607,6 @@ async function openTooltip(trigger: HTMLElement) {
 
 describe("selection toolbar requests", () => {
   beforeEach(() => {
-    hotkeyRegisterMock.mockReturnValue({
-      unregister: hotkeyUnregisterMock,
-    })
     getOrCreateWebPageContextMock.mockResolvedValue(null)
     getOrGenerateWebPageSummaryMock.mockResolvedValue(undefined)
   })
@@ -1188,7 +1179,7 @@ describe("selection toolbar requests", () => {
     setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
     renderWithProviders(<TranslateButton />, store)
 
-    const shortcutCallback = await getRegisteredShortcutCallback()
+    const shortcutCallback = () => pressShortcut()
 
     await act(async () => {
       shortcutCallback()
@@ -1232,7 +1223,7 @@ describe("selection toolbar requests", () => {
 
     expect(screen.queryByRole("button", { name: "action.translation" })).toBeNull()
 
-    const shortcutCallback = await getRegisteredShortcutCallback()
+    const shortcutCallback = () => pressShortcut()
 
     await act(async () => {
       shortcutCallback()
@@ -1253,11 +1244,10 @@ describe("selection toolbar requests", () => {
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     renderWithProviders(<TranslateButton />, store)
 
-    const shortcutCallback = await getRegisteredShortcutCallback()
-    const event = new KeyboardEvent("keydown", { cancelable: true })
+    let event!: KeyboardEvent
 
     act(() => {
-      shortcutCallback(event)
+      event = pressShortcut()
     })
 
     expect(translateTextCoreMock).not.toHaveBeenCalled()
@@ -1266,26 +1256,31 @@ describe("selection toolbar requests", () => {
     expect(event.defaultPrevented).toBe(false)
   })
 
-  it("does not register an empty or invalid selection translation shortcut", () => {
+  it("binds no key for an empty or invalid selection translation shortcut", () => {
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
     const emptyShortcutConfig = cloneConfig(DEFAULT_CONFIG)
     emptyShortcutConfig.selectionToolbar.features.translate.shortcut = ""
     const emptyStore = createStore()
     emptyStore.set(configAtom, emptyShortcutConfig)
+    setSelectionState(emptyStore, { text: "Selected text", range: createRangeFor(paragraph) })
     const emptyView = renderWithProviders(<TranslateButton />, emptyStore)
-    expect(getRegisteredShortcuts()).not.toContain("")
-    expect(getRegisteredShortcuts()).not.toContain("Alt+T")
+    expect(pressShortcutInAct("Alt+T").defaultPrevented).toBe(false)
     emptyView.unmount()
 
     cleanup()
-    hotkeyRegisterMock.mockClear()
 
     const invalidShortcutConfig = cloneConfig(DEFAULT_CONFIG)
     invalidShortcutConfig.selectionToolbar.features.translate.shortcut = "T"
     const invalidStore = createStore()
     invalidStore.set(configAtom, invalidShortcutConfig)
+    setSelectionState(invalidStore, { text: "Selected text", range: createRangeFor(paragraph) })
     renderWithProviders(<TranslateButton />, invalidStore)
 
-    expect(getRegisteredShortcuts()).not.toContain("T")
+    expect(pressShortcutInAct("T").defaultPrevented).toBe(false)
+    expect(translateTextCoreMock).not.toHaveBeenCalled()
   })
 
   it("positions shortcut selection translation near the selected range", async () => {
@@ -1313,7 +1308,7 @@ describe("selection toolbar requests", () => {
     ])
 
     try {
-      const shortcutCallback = await getRegisteredShortcutCallback()
+      const shortcutCallback = () => pressShortcut()
 
       await act(async () => {
         shortcutCallback()
@@ -1358,7 +1353,7 @@ describe("selection toolbar requests", () => {
     const restoreCreateRange = mockLiveRangeRects([])
 
     try {
-      const shortcutCallback = await getRegisteredShortcutCallback()
+      const shortcutCallback = () => pressShortcut()
 
       await act(async () => {
         shortcutCallback()
@@ -1556,7 +1551,7 @@ describe("selection toolbar requests", () => {
     renderWithProviders(<TranslateButton />, store)
 
     await act(async () => {
-      ;(await getRegisteredShortcutCallback())()
+      pressShortcut()
       await Promise.resolve()
     })
 
@@ -1581,7 +1576,7 @@ describe("selection toolbar requests", () => {
     })
 
     await act(async () => {
-      ;(await getRegisteredShortcutCallback())()
+      pressShortcut()
       await Promise.resolve()
     })
 
@@ -1619,7 +1614,7 @@ describe("selection toolbar requests", () => {
     setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
     renderWithProviders(<TranslateButton />, store)
 
-    const shortcutCallback = await getRegisteredShortcutCallback()
+    const shortcutCallback = () => pressShortcut()
 
     await act(async () => {
       shortcutCallback()
@@ -1824,11 +1819,10 @@ describe("selection toolbar requests", () => {
     renderWithProviders(<SelectionToolbarPinnedItems />, store)
 
     const action = DEFAULT_DICTIONARY_ACTION
-    const shortcutCallback = await getRegisteredShortcutCallback("Alt+Shift+D")
-    const event = new KeyboardEvent("keydown", { cancelable: true })
+    let event!: KeyboardEvent
 
     await act(async () => {
-      shortcutCallback(event)
+      event = pressShortcut("Alt+Shift+D")
       await Promise.resolve()
     })
 
@@ -1849,16 +1843,37 @@ describe("selection toolbar requests", () => {
     )
   })
 
+  it("claims a key it runs ahead of the page's own handlers", () => {
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+    const pageHandler = vi.fn<(event: KeyboardEvent) => void>()
+    document.addEventListener("keydown", pageHandler)
+    document.body.addEventListener("keydown", pageHandler)
+
+    try {
+      const store = createStore()
+      store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+      setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+      renderWithProviders(<SelectionToolbarPinnedItems />, store)
+
+      expect(pressShortcutInAct("Alt+Shift+D").defaultPrevented).toBe(true)
+      expect(pageHandler).not.toHaveBeenCalled()
+    } finally {
+      document.removeEventListener("keydown", pageHandler)
+      document.body.removeEventListener("keydown", pageHandler)
+    }
+  })
+
   it("leaves a custom action's key to the page when nothing is selected", async () => {
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     renderWithProviders(<SelectionToolbarPinnedItems />, store)
 
-    const shortcutCallback = await getRegisteredShortcutCallback("Alt+Shift+D")
-    const event = new KeyboardEvent("keydown", { cancelable: true })
+    let event!: KeyboardEvent
 
     act(() => {
-      shortcutCallback(event)
+      event = pressShortcut("Alt+Shift+D")
     })
 
     expect(event.defaultPrevented).toBe(false)
@@ -1876,14 +1891,20 @@ describe("selection toolbar requests", () => {
     ]
     await fakeBrowser.storage.local.set({ [CONFIG_STORAGE_KEY]: config })
 
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
     try {
       const store = createStore()
       store.set(configAtom, config)
+      setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
       renderWithProviders(<SelectionToolbarPinnedItems />, store)
 
-      await getRegisteredShortcutCallback("Alt+Shift+K")
-      expect(getRegisteredShortcuts()).toContain("Alt+Shift+G")
-      expect(getRegisteredShortcuts()).not.toContain("Alt+Shift+D")
+      // Dictionary is off, so its key is the page's.
+      expect(pressShortcutInAct("Alt+Shift+D").defaultPrevented).toBe(false)
+      expect(pressShortcutInAct("Alt+Shift+K").defaultPrevented).toBe(true)
+      expect(pressShortcutInAct("Alt+Shift+G").defaultPrevented).toBe(true)
     } finally {
       await fakeBrowser.storage.local.remove(CONFIG_STORAGE_KEY)
     }

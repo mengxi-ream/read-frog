@@ -549,7 +549,7 @@ options:
       title: "AI actions"
       description: "Run an AI action on the text you selected. Custom actions have no key until you set one here."
     turnedOff: "Turned off, so this key does nothing until you turn it back on."
-    clash: "Same key as “$1”. Pressing it runs both, so change one of them."
+    clash: "Same key as “$1”. Change one of them."
     taken: "$1 is already used by “$2”."
   overlayTools:
     title: Overlay Tools

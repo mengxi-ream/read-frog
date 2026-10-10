@@ -28,15 +28,50 @@ function isRecord(value: unknown): value is Record<string, any> {
   return !!value && typeof value === "object" && !Array.isArray(value)
 }
 
+const MODIFIER_ALIASES: Record<string, string> = {
+  alt: "alt",
+  option: "alt",
+  opt: "alt",
+  shift: "shift",
+  control: "control",
+  ctrl: "control",
+  meta: "meta",
+  cmd: "meta",
+  command: "meta",
+  mod: "mod",
+}
+
+// A shortcut as the keys it presses, however it is written: "Shift+Alt+d"
+// and "Alt+Shift+D" give the same. Modifiers are sorted and their aliases
+// folded; the last part is the key ("Alt++" is the "+" key).
 function toKey(shortcut: unknown): string | null {
   if (typeof shortcut !== "string") {
     return null
   }
-  const key = shortcut.trim().toLowerCase()
-  return key === "" ? null : key
+  let text = shortcut.trim().toLowerCase()
+  if (text === "") {
+    return null
+  }
+
+  let key: string
+  if (text.endsWith("++")) {
+    key = "+"
+    text = text.slice(0, -2)
+  } else {
+    const lastPlus = text.lastIndexOf("+")
+    key = text.slice(lastPlus + 1).trim()
+    text = lastPlus === -1 ? "" : text.slice(0, lastPlus)
+  }
+
+  const modifiers = text
+    .split("+")
+    .map((part) => part.trim())
+    .filter((part) => part !== "")
+    .map((part) => MODIFIER_ALIASES[part] ?? part)
+  return [...[...new Set(modifiers)].sort(), key].join("+")
 }
 
-// The keys the reader's existing shortcuts hold, as stored.
+// The keys the reader's existing shortcuts press.
 function collectTakenKeys(config: Record<string, any>): Set<string> {
   const shortcuts = [
     config.pageTranslation?.page?.shortcut,
@@ -56,7 +91,7 @@ export function migrate(oldConfig: any): any {
   const selectionToolbar = oldConfig.selectionToolbar
   const takenKeys = collectTakenKeys(oldConfig)
   const claim = (shortcut: string) => {
-    const key = shortcut.toLowerCase()
+    const key = toKey(shortcut)!
     if (takenKeys.has(key)) {
       return ""
     }

@@ -549,7 +549,7 @@ options:
       title: "Acciones AI"
       description: "Ejecuta una acción AI sobre el texto seleccionado. Las acciones personalizadas no tienen atajo hasta que les asignes uno aquí."
     turnedOff: "Está desactivado, así que este atajo no hace nada hasta que lo vuelvas a activar."
-    clash: "Mismo atajo que «$1». Al pulsarlo se ejecutan ambos, así que cambia uno de ellos."
+    clash: "Mismo atajo que «$1». Cambia uno de ellos."
     taken: "«$2» ya usa $1."
   overlayTools:
     title: Herramientas superpuestas

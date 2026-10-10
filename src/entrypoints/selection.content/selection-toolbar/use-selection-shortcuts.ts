@@ -1,5 +1,5 @@
 import type { Hotkey } from "@tanstack/hotkeys"
-import { HotkeyManager } from "@tanstack/hotkeys"
+import { matchesKeyboardEvent } from "@tanstack/hotkeys"
 import { useEffect, useEffectEvent } from "react"
 import { isShortcutEmpty, isValidShortcut } from "@/utils/shortcut"
 import { shadowWrapper } from ".."
@@ -29,6 +29,10 @@ function isTypingInOwnUi() {
  * clash with a site's own shortcut to the moments the user meant ours. The keys also work in
  * the page's text fields — a selection made there is one to act on too (Improve Writing is
  * mostly used on it) — but not in the extension's own.
+ *
+ * The listener is on `window` in the capture phase, ahead of the page's own: a claimed key
+ * never reaches an editor's handler on the field, its ancestors or `document`. A held key's
+ * repeats run nothing, so holding it does not toggle reading over and over.
  */
 export function useSelectionShortcuts(
   shortcuts: Record<string, string | undefined>,
@@ -41,29 +45,28 @@ export function useSelectionShortcuts(
   const bindingsKey = JSON.stringify(bindings)
 
   useEffect(() => {
-    const registrations = (JSON.parse(bindingsKey) as [string, string][]).map(([id, shortcut]) =>
-      HotkeyManager.getInstance().register(
-        shortcut as Hotkey,
-        (event) => {
-          if (isTypingInOwnUi() || !onRun(id)) {
-            return
-          }
-          event.preventDefault()
-          event.stopPropagation()
-        },
-        {
-          ignoreInputs: false,
-          preventDefault: false,
-          stopPropagation: false,
-          // The options page turns down a key another shortcut has; one saved before that
-          // check runs both, which is no reason to warn on every page.
-          conflictBehavior: "allow",
-        },
-      ),
-    )
+    const keyBindings = JSON.parse(bindingsKey) as [string, string][]
+    if (keyBindings.length === 0) {
+      return undefined
+    }
 
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.repeat || isTypingInOwnUi()) {
+        return
+      }
+      const binding = keyBindings.find(([, shortcut]) =>
+        matchesKeyboardEvent(event, shortcut as Hotkey),
+      )
+      if (!binding || !onRun(binding[0])) {
+        return
+      }
+      event.preventDefault()
+      event.stopImmediatePropagation()
+    }
+
+    window.addEventListener("keydown", handleKeydown, { capture: true })
     return () => {
-      registrations.forEach((registration) => registration.unregister())
+      window.removeEventListener("keydown", handleKeydown, { capture: true })
     }
   }, [bindingsKey])
 }

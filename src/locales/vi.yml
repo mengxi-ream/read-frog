@@ -548,7 +548,7 @@ options:
       title: "Hành động AI"
       description: "Chạy một hành động AI trên văn bản đã chọn. Hành động tùy chỉnh chưa có phím tắt cho đến khi bạn đặt ở đây."
     turnedOff: "Tính năng đang tắt nên phím tắt này không có tác dụng cho đến khi bạn bật lại."
-    clash: "Trùng phím tắt với “$1”. Khi nhấn, cả hai sẽ cùng chạy, hãy đổi một trong hai."
+    clash: "Trùng phím tắt với “$1”. Hãy đổi một trong hai."
     taken: "$1 đã được dùng cho “$2”."
   overlayTools:
     title: Công cụ nổi
