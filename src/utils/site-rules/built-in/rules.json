@@ -39,7 +39,7 @@
   },
   {
     "id": "readfrog-atom-defaults",
-    "description": "Keep rendered inline formulas as opaque atoms inside bilingual translations",
+    "description": "Keep rendered inline formulas and LaTeXML inline code as opaque atoms inside translations",
     "matches": "*",
     "atomSelectors": [
       "span.katex",
@@ -53,6 +53,7 @@
       "[aria-labelledby^=\"MathJax-SVG\"]",
       ".mwe-math-element",
       ".ltx_Math",
+      "span.ltx_lstlisting:not(.ltx_listing)",
       "span.math.inline",
       "span.math.display",
       ".mathjax-block",
@@ -3292,7 +3293,6 @@
     ],
     "excludeSelectors.add": [
       ".desktop_header",
-      "[class*='ltx_lst_language_']",
       "div.package-alerts",
       ".ltx_toclist",
       ".ltx_authors",
