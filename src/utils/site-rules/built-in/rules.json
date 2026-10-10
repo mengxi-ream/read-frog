@@ -3292,12 +3292,13 @@
     ],
     "excludeSelectors.add": [
       ".desktop_header",
-      "[class*='ltx_lst_language_']",
+      ".ltx_listing",
       "div.package-alerts",
       ".ltx_toclist",
       ".ltx_authors",
       ".ltx_bibliography"
-    ]
+    ],
+    "atomSelectors.add": ["span.ltx_lstlisting:not(.ltx_listing)"]
   },
   {
     "id": "ar5iv",

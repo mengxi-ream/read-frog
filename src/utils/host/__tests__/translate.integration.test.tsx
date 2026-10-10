@@ -78,17 +78,17 @@ function bilingualConfigWithSiteRule(rule: Omit<SiteRule, "id" | "matches">): Co
   return config
 }
 
-function setHost(host: string) {
+function setHost(host: string, pathname = "/some/path") {
   Object.defineProperty(window, "location", {
-    value: new URL(`https://${host}/some/path`),
+    value: new URL(`https://${host}${pathname}`),
     writable: true,
     configurable: true,
   })
 }
 
-async function withHost(host: string, callback: () => Promise<void>) {
+async function withHost(host: string, callback: () => Promise<void>, pathname = "/some/path") {
   const originalLocation = window.location
-  setHost(host)
+  setHost(host, pathname)
   try {
     await callback()
   } finally {
@@ -2623,6 +2623,121 @@ describe("translate", () => {
       expect(textFormat).toBe("html")
       expect(request).toContain("<math")
       expect(request).not.toContain("{{0}}")
+    })
+  })
+
+  describe("arXiv inline code", () => {
+    // LaTeXML markup from https://arxiv.org/html/2609.26891, including the
+    // language class shared by inline identifiers and standalone listings.
+    const inlineCode = (id: string) =>
+      `<span id="${id}" class="ltx_text ltx_lst_emph ltx_lst_language_Python ltx_lstlisting ltx_font_typewriter" style="--ltx-fg-color:#FF00A6;">invoke</span>`
+
+    beforeEach(() => {
+      vi.mocked(translateTextForPage).mockReset().mockResolvedValue(MOCK_TRANSLATION)
+    })
+
+    afterEach(() => {
+      vi.mocked(translateTextForPage).mockReset().mockResolvedValue(MOCK_TRANSLATION)
+    })
+
+    it.each(["arxiv.org", "browse.arxiv.org"])(
+      "preserves repeated inline identifiers in bilingual translations on %s",
+      async (host) => {
+        await withHost(
+          host,
+          async () => {
+            vi.mocked(translateTextForPage).mockResolvedValue(
+              "核心原语 {{0}} 使用 {{1}} 增强的语言。{{2}} 保留历史。",
+            )
+            render(<p data-testid="test-node" />)
+            const node = screen.getByTestId("test-node")
+            node.innerHTML = `The core primitive ${inlineCode("S1.p2.1.2")} uses an ${inlineCode("S1.p2.1.3")}-augmented language. ${inlineCode("S1.p2.1.5")} preserves history.`
+            const sourceCode = [...node.querySelectorAll("span")]
+
+            await removeOrShowPageTranslation("bilingual", true)
+
+            expect(translateTextForPage).toHaveBeenCalledExactlyOnceWith(
+              "The core primitive {{0}} uses an {{1}}-augmented language. {{2}} preserves history.",
+              "plain",
+              DEFAULT_PAGE_TRANSLATION_OPTIONS,
+            )
+            const wrapper = expectTranslationWrapper(node, "bilingual")!
+            const clones = [...wrapper.querySelectorAll<HTMLElement>(`.${INLINE_ATOM_CLASS}`)]
+            expect(clones).toHaveLength(3)
+            expect(wrapper.textContent).toBe(
+              "核心原语 invoke 使用 invoke 增强的语言。invoke 保留历史。",
+            )
+            expect(
+              clones.every(
+                (clone) =>
+                  clone.textContent === "invoke" &&
+                  clone.classList.contains("ltx_font_typewriter") &&
+                  clone.style.getPropertyValue("--ltx-fg-color") === "#FF00A6" &&
+                  !clone.hasAttribute("id"),
+              ),
+            ).toBe(true)
+            expect(sourceCode.every((code) => code.isConnected && code.hasAttribute("id"))).toBe(
+              true,
+            )
+
+            await removeOrShowPageTranslation("bilingual", true)
+
+            expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeNull()
+            expect([...node.querySelectorAll("span")]).toEqual(sourceCode)
+          },
+          "/html/2609.26891",
+        )
+      },
+    )
+
+    it("keeps inline code in the translationOnly HTML request and restores the original", async () => {
+      await withHost(
+        "arxiv.org",
+        async () => {
+          vi.mocked(translateTextForPage).mockImplementation(async (text) =>
+            text
+              .replace("On top of the ", "在 ")
+              .replace(" primitive, JAZ provides utilities.", " 原语之上，JAZ 提供实用工具。"),
+          )
+          render(<p data-testid="test-node" />)
+          const node = screen.getByTestId("test-node")
+          node.innerHTML = `On top of the ${inlineCode("S1.p3.1.1")} primitive, JAZ provides utilities.`
+          const originalHtml = node.innerHTML
+          const sourceCode = node.querySelector("span")!
+
+          await removeOrShowPageTranslation("translationOnly", true)
+
+          expect(translateTextForPage).toHaveBeenCalledOnce()
+          const [request, textFormat] = vi.mocked(translateTextForPage).mock.calls[0]!
+          expect(textFormat).toBe("html")
+          expect(request).toContain(">invoke</span>")
+          expect(node.textContent).toBe("在 invoke 原语之上，JAZ 提供实用工具。")
+          expect(node.querySelector("span")).toBe(sourceCode)
+
+          await removeOrShowPageTranslation("translationOnly", true)
+
+          expect(node.innerHTML).toBe(originalHtml)
+        },
+        "/html/2609.26891",
+      )
+    })
+
+    it.each(["div", "span"])("still skips standalone %s code listings", async (tag) => {
+      await withHost(
+        "arxiv.org",
+        async () => {
+          render(<div data-testid="test-node" />)
+          const node = screen.getByTestId("test-node")
+          node.innerHTML = `<${tag} class="ltx_listing ltx_lst_language_Python ltx_lstlisting"><span class="ltx_lst_line">${inlineCode("listing-code")}(task="Use subagents to find papers.")</span></${tag}>`
+          const originalHtml = node.innerHTML
+
+          await removeOrShowPageTranslation("bilingual", true)
+
+          expect(translateTextForPage).not.toHaveBeenCalled()
+          expect(node.innerHTML).toBe(originalHtml)
+        },
+        "/html/2609.26891",
+      )
     })
   })
 
