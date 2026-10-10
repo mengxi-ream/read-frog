@@ -521,7 +521,7 @@ options:
         description: バグの特定や UI レイアウトの改善などを通じて Read Frog をより良くします
   shortcuts:
     title: ショートカット
-    pageDescription: 読みながら翻訳を実行するキーを設定します。
+    pageDescription: 読みながら翻訳・読み上げ・AI アクションを実行するキーを設定します。
     setShortcut: ショートカットを設定
     pageTranslation:
       title: ページ翻訳
@@ -541,6 +541,15 @@ options:
     translationHub:
       title: 翻訳ハブ
       description: 翻訳ハブを新しいタブで開きます。
+    selectionSpeak:
+      title: "選択範囲の読み上げ"
+      description: "選択したテキストを読み上げます。もう一度押すと停止します。"
+    actions:
+      title: "AI アクション"
+      description: "選択したテキストに AI アクションを実行します。カスタムアクションには最初はショートカットがないので、ここで設定してください。"
+    turnedOff: "この機能はオフのため、オンに戻すまでこのキーは何もしません。"
+    clash: "「$1」と同じキーです。どちらかを変更してください。"
+    taken: "$1 はすでに「$2」で使われています。"
   overlayTools:
     title: オーバーレイツール
   inputTranslation:

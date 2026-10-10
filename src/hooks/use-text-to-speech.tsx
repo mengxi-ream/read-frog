@@ -313,13 +313,19 @@ export function useTextToSpeech(
     }
   }
 
-  const play = (text: string, ttsConfig: TTSConfig, options?: { forcedVoice?: string }) => {
+  // `options.surface` reports a play started from somewhere other than the
+  // hook's own surface (a keyboard shortcut for the toolbar's reader).
+  const play = (
+    text: string,
+    ttsConfig: TTSConfig,
+    options?: { forcedVoice?: string; surface?: SurfaceByFeature["text_to_speech"] },
+  ) => {
     return playMutation.mutateAsync({
       text,
       ttsConfig,
       forcedVoice: options?.forcedVoice,
       analyticsContext: {
-        ...createFeatureUsageContext(ANALYTICS_FEATURE.TEXT_TO_SPEECH, surface),
+        ...createFeatureUsageContext(ANALYTICS_FEATURE.TEXT_TO_SPEECH, options?.surface ?? surface),
         ...EDGE_TTS_FEATURE_PROVIDER,
       },
     })

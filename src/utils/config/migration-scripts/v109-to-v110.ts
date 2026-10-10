@@ -1,0 +1,154 @@
+/**
+ * Migration script from v109 to v110
+ * - Adds `selectionToolbar.features.speak.shortcut` ("Alt+Shift+R") and a
+ *   `shortcut` to each built-in action's state in
+ *   `selectionToolbar.builtInActions`: dictionary "Alt+Shift+D", sentence
+ *   analysis "Alt+Shift+G", improve writing "Alt+Shift+W".
+ * - A key the reader already gave another shortcut (page translation,
+ *   translation mode, selection translation, subtitles, Translation Hub) is
+ *   not taken from it: the new shortcut starts empty instead.
+ * - Custom actions get no field: a custom action without one has no key.
+ *
+ * Idempotent: a shortcut already present keeps its value, and a config with
+ * nothing to add is returned by identity.
+ *
+ * IMPORTANT: The defaults are hardcoded inline. Migration scripts are frozen
+ * snapshots - never import constants, helpers, or shared types.
+ */
+
+const SPEAK_SHORTCUT = "Alt+Shift+R"
+
+const BUILT_IN_ACTION_SHORTCUTS: [key: string, shortcut: string][] = [
+  ["dictionary", "Alt+Shift+D"],
+  ["sentenceAnalysis", "Alt+Shift+G"],
+  ["improveWriting", "Alt+Shift+W"],
+]
+
+function isRecord(value: unknown): value is Record<string, any> {
+  return !!value && typeof value === "object" && !Array.isArray(value)
+}
+
+const MODIFIER_ALIASES: Record<string, string> = {
+  alt: "alt",
+  option: "alt",
+  opt: "alt",
+  shift: "shift",
+  control: "control",
+  ctrl: "control",
+  meta: "meta",
+  cmd: "meta",
+  command: "meta",
+  mod: "mod",
+}
+
+// A shortcut as the keys it presses, however it is written: "Shift+Alt+d"
+// and "Alt+Shift+D" give the same. Modifiers are sorted and their aliases
+// folded; the last part is the key ("Alt++" is the "+" key).
+function toKey(shortcut: unknown): string | null {
+  if (typeof shortcut !== "string") {
+    return null
+  }
+  let text = shortcut.trim().toLowerCase()
+  if (text === "") {
+    return null
+  }
+
+  let key: string
+  if (text.endsWith("++")) {
+    key = "+"
+    text = text.slice(0, -2)
+  } else {
+    const lastPlus = text.lastIndexOf("+")
+    key = text.slice(lastPlus + 1).trim()
+    text = lastPlus === -1 ? "" : text.slice(0, lastPlus)
+  }
+
+  const modifiers = text
+    .split("+")
+    .map((part) => part.trim())
+    .filter((part) => part !== "")
+    .map((part) => MODIFIER_ALIASES[part] ?? part)
+  return [...[...new Set(modifiers)].sort(), key].join("+")
+}
+
+// The keys the reader's existing shortcuts press, the new ones included: a
+// newer options page can save one (Speak's, an action's) before this runs.
+function collectTakenKeys(config: Record<string, any>): Set<string> {
+  const selectionToolbar = config.selectionToolbar
+  const builtInActions = isRecord(selectionToolbar?.builtInActions)
+    ? Object.values(selectionToolbar.builtInActions)
+    : []
+  const customActions = Array.isArray(selectionToolbar?.customActions)
+    ? selectionToolbar.customActions
+    : []
+  const shortcuts = [
+    config.pageTranslation?.page?.shortcut,
+    config.pageTranslation?.modeShortcut,
+    selectionToolbar?.features?.translate?.shortcut,
+    selectionToolbar?.features?.speak?.shortcut,
+    config.videoSubtitles?.toggleShortcut,
+    config.translationHub?.shortcut,
+    ...builtInActions.map((state: any) => (isRecord(state) ? state.shortcut : undefined)),
+    ...customActions.map((action: any) => (isRecord(action) ? action.shortcut : undefined)),
+  ]
+  return new Set(shortcuts.map(toKey).filter((key): key is string => key !== null))
+}
+
+export function migrate(oldConfig: any): any {
+  if (!isRecord(oldConfig) || !isRecord(oldConfig.selectionToolbar)) {
+    return oldConfig
+  }
+
+  const selectionToolbar = oldConfig.selectionToolbar
+  const takenKeys = collectTakenKeys(oldConfig)
+  const claim = (shortcut: string) => {
+    const key = toKey(shortcut)!
+    if (takenKeys.has(key)) {
+      return ""
+    }
+    takenKeys.add(key)
+    return shortcut
+  }
+
+  let changed = false
+  let features = selectionToolbar.features
+  if (
+    isRecord(features) &&
+    isRecord(features.speak) &&
+    typeof features.speak.shortcut !== "string"
+  ) {
+    features = {
+      ...features,
+      speak: { ...features.speak, shortcut: claim(SPEAK_SHORTCUT) },
+    }
+    changed = true
+  }
+
+  let builtInActions = selectionToolbar.builtInActions
+  if (isRecord(builtInActions)) {
+    for (const [key, shortcut] of BUILT_IN_ACTION_SHORTCUTS) {
+      const state = builtInActions[key]
+      if (!isRecord(state) || typeof state.shortcut === "string") {
+        continue
+      }
+      builtInActions = {
+        ...builtInActions,
+        [key]: { ...state, shortcut: claim(shortcut) },
+      }
+      changed = true
+    }
+  }
+
+  if (!changed) {
+    return oldConfig
+  }
+
+  return {
+    ...oldConfig,
+    selectionToolbar: {
+      ...selectionToolbar,
+      features,
+      builtInActions,
+    },
+  }
+}

@@ -371,6 +371,22 @@ export function unregisterBilingualTranslationState(state: BilingualTranslationS
   state.status = "disposed"
 }
 
+/**
+ * Re-key a live state onto an identical copy of its layout source, after its
+ * wrapper has been moved into that copy (see carryTranslationsAcrossRewrite).
+ * The wrapper index needs no update: the wrapper object itself moved.
+ */
+export function rebindBilingualTranslationState(
+  state: BilingualTranslationState,
+  layoutSource: HTMLElement,
+): void {
+  if (bilingualTranslationsBySource.get(state.layoutSource) === state) {
+    bilingualTranslationsBySource.delete(state.layoutSource)
+  }
+  state.layoutSource = layoutSource
+  bilingualTranslationsBySource.set(layoutSource, state)
+}
+
 // Capitulation counter for wrapper-content fights (#1918): a site script that
 // deterministically rewrites our wrapper content (NBSP normalizers, truncation
 // scripts) would otherwise loop the budgeted retranslation forever — the
