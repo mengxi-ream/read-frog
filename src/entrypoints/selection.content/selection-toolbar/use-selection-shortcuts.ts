@@ -85,7 +85,8 @@ function readLiveSelectionSession(): SelectionSession | null {
  *
  * The listener is on `window` in the capture phase, ahead of the page's own: a claimed key
  * never reaches an editor's handler on the field, its ancestors or `document`. A held key's
- * repeats run nothing, so holding it does not toggle reading over and over.
+ * repeats follow its first press: a claimed key's are kept from the page too but run nothing
+ * (holding it does not toggle reading over and over), a key left to the page stays the page's.
  */
 export function useSelectionShortcuts(
   shortcuts: Record<string, string | undefined>,
@@ -106,8 +107,23 @@ export function useSelectionShortcuts(
       return undefined
     }
 
+    // The key the last press claimed, while it is held.
+    let claimed: { code: string; shortcut: string } | null = null
+
     const handleKeydown = (event: KeyboardEvent) => {
-      if (event.repeat || isTypingInOwnUi()) {
+      if (event.repeat) {
+        if (
+          claimed &&
+          event.code === claimed.code &&
+          matchesKeyboardEvent(event, claimed.shortcut as Hotkey)
+        ) {
+          event.preventDefault()
+          event.stopImmediatePropagation()
+        }
+        return
+      }
+      claimed = null
+      if (isTypingInOwnUi()) {
         return
       }
       const binding = keyBindings.find(([, shortcut]) =>
@@ -116,15 +132,24 @@ export function useSelectionShortcuts(
       if (!binding || !onRun(binding[0])) {
         return
       }
+      claimed = { code: event.code, shortcut: binding[1] }
       event.preventDefault()
       event.stopImmediatePropagation()
       // The key no longer reaches the paragraph hotkey's listener: tell it.
       window.dispatchEvent(new Event(SELECTION_SHORTCUT_CLAIMED_EVENT))
     }
 
+    const handleKeyup = (event: KeyboardEvent) => {
+      if (event.code === claimed?.code) {
+        claimed = null
+      }
+    }
+
     window.addEventListener("keydown", handleKeydown, { capture: true })
+    window.addEventListener("keyup", handleKeyup, { capture: true })
     return () => {
       window.removeEventListener("keydown", handleKeydown, { capture: true })
+      window.removeEventListener("keyup", handleKeyup, { capture: true })
     }
   }, [bindingsKey])
 }

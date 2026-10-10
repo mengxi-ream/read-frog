@@ -22,12 +22,13 @@ function Bindings() {
   return null
 }
 
-function pressFrom(target: Element) {
-  const event = new KeyboardEvent("keydown", {
+function pressFrom(target: Element, { repeat = false, type = "keydown" } = {}) {
+  const event = new KeyboardEvent(type, {
     key: "D",
     code: "KeyD",
     altKey: true,
     shiftKey: true,
+    repeat,
     bubbles: true,
     composed: true,
     cancelable: true,
@@ -64,6 +65,26 @@ describe("useSelectionShortcuts", () => {
     } finally {
       window.removeEventListener(SELECTION_SHORTCUT_CLAIMED_EVENT, claimed)
     }
+  })
+
+  it("keeps a held key's repeats from the page when its first press ran, without running again", () => {
+    render(
+      <Provider store={createStore()}>
+        <Bindings />
+      </Provider>,
+    )
+
+    expect(pressFrom(document.body).defaultPrevented).toBe(true)
+    expect(pressFrom(document.body, { repeat: true }).defaultPrevented).toBe(true)
+    expect(pressFrom(document.body, { repeat: true }).defaultPrevented).toBe(true)
+    expect(run).toHaveBeenCalledTimes(1)
+
+    // Released, then held where nothing ran: its repeats stay the page's.
+    pressFrom(document.body, { type: "keyup" })
+    run.mockReturnValueOnce(false)
+    expect(pressFrom(document.body).defaultPrevented).toBe(false)
+    expect(pressFrom(document.body, { repeat: true }).defaultPrevented).toBe(false)
+    expect(run).toHaveBeenCalledTimes(2)
   })
 
   it("leaves the keys to a field in a shadow root nested in the extension's own UI", () => {
