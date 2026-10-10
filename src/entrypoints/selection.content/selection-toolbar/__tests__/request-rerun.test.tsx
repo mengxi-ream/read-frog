@@ -473,7 +473,12 @@ async function getRegisteredShortcutCallback(shortcut = "Alt+T") {
     throw new Error(`Shortcut not registered: ${shortcut}`)
   }
 
-  return registration[1] as () => void
+  const callback = registration[1] as (event: KeyboardEvent) => void
+  return (event = new KeyboardEvent("keydown", { cancelable: true })) => callback(event)
+}
+
+function getRegisteredShortcuts() {
+  return hotkeyRegisterMock.mock.calls.map((call) => call[0] as string)
 }
 
 function createRect({
@@ -1249,13 +1254,16 @@ describe("selection toolbar requests", () => {
     renderWithProviders(<TranslateButton />, store)
 
     const shortcutCallback = await getRegisteredShortcutCallback()
+    const event = new KeyboardEvent("keydown", { cancelable: true })
 
     act(() => {
-      shortcutCallback()
+      shortcutCallback(event)
     })
 
     expect(translateTextCoreMock).not.toHaveBeenCalled()
     expect(toastAddMock).not.toHaveBeenCalled()
+    // The page gets the key as if there were no shortcut on it.
+    expect(event.defaultPrevented).toBe(false)
   })
 
   it("does not register an empty or invalid selection translation shortcut", () => {
@@ -1264,7 +1272,8 @@ describe("selection toolbar requests", () => {
     const emptyStore = createStore()
     emptyStore.set(configAtom, emptyShortcutConfig)
     const emptyView = renderWithProviders(<TranslateButton />, emptyStore)
-    expect(hotkeyRegisterMock).not.toHaveBeenCalled()
+    expect(getRegisteredShortcuts()).not.toContain("")
+    expect(getRegisteredShortcuts()).not.toContain("Alt+T")
     emptyView.unmount()
 
     cleanup()
@@ -1276,7 +1285,7 @@ describe("selection toolbar requests", () => {
     invalidStore.set(configAtom, invalidShortcutConfig)
     renderWithProviders(<TranslateButton />, invalidStore)
 
-    expect(hotkeyRegisterMock).not.toHaveBeenCalled()
+    expect(getRegisteredShortcuts()).not.toContain("T")
   })
 
   it("positions shortcut selection translation near the selected range", async () => {
@@ -1798,6 +1807,86 @@ describe("selection toolbar requests", () => {
         action_name: action.name,
       }),
     )
+  })
+
+  it("opens a custom action from its shortcut and tracks the shortcut surface", async () => {
+    streamBackgroundStructuredObjectMock.mockResolvedValue(
+      createStructuredObjectSnapshot({ summary: "Shortcut result" }),
+    )
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
+
+    const action = DEFAULT_DICTIONARY_ACTION
+    const shortcutCallback = await getRegisteredShortcutCallback("Alt+Shift+D")
+    const event = new KeyboardEvent("keydown", { cancelable: true })
+
+    await act(async () => {
+      shortcutCallback(event)
+      await Promise.resolve()
+    })
+
+    expect(event.defaultPrevented).toBe(true)
+    await waitFor(() => {
+      expect(screen.getByText('{"summary":"Shortcut result"}')).toBeInTheDocument()
+    })
+
+    const { sendMessage } = await import("@/utils/message")
+    expect(vi.mocked(sendMessage)).toHaveBeenCalledWith(
+      "trackFeatureUsedEvent",
+      expect.objectContaining({
+        feature: "custom_ai_action",
+        surface: "shortcut",
+        outcome: "success",
+        action_id: action.id,
+      }),
+    )
+  })
+
+  it("leaves a custom action's key to the page when nothing is selected", async () => {
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
+
+    const shortcutCallback = await getRegisteredShortcutCallback("Alt+Shift+D")
+    const event = new KeyboardEvent("keydown", { cancelable: true })
+
+    act(() => {
+      shortcutCallback(event)
+    })
+
+    expect(event.defaultPrevented).toBe(false)
+    expect(streamBackgroundStructuredObjectMock).not.toHaveBeenCalled()
+    expect(toastAddMock).not.toHaveBeenCalled()
+  })
+
+  it("binds keys only for the enabled actions that have one", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.selectionToolbar.builtInActions.dictionary.enabled = false
+    const { shortcut: _shortcut, ...withoutKey } = DEFAULT_DICTIONARY_ACTION
+    config.selectionToolbar.customActions = [
+      { ...withoutKey, id: "custom-with-key", name: "With key", shortcut: "Alt+Shift+K" },
+      { ...withoutKey, id: "custom-without-key", name: "Without key" },
+    ]
+    await fakeBrowser.storage.local.set({ [CONFIG_STORAGE_KEY]: config })
+
+    try {
+      const store = createStore()
+      store.set(configAtom, config)
+      renderWithProviders(<SelectionToolbarPinnedItems />, store)
+
+      await getRegisteredShortcutCallback("Alt+Shift+K")
+      expect(getRegisteredShortcuts()).toContain("Alt+Shift+G")
+      expect(getRegisteredShortcuts()).not.toContain("Alt+Shift+D")
+    } finally {
+      await fakeBrowser.storage.local.remove(CONFIG_STORAGE_KEY)
+    }
   })
 
   it("renders a custom action footer tool button that opens the action options", async () => {

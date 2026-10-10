@@ -25,7 +25,11 @@ import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { classifyResolvedProvider, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { getSourceDocumentTitle } from "@/utils/content/document-title"
-import { findSelectionToolbarAction, patchSelectionToolbarAction } from "@/utils/custom-actions"
+import {
+  findSelectionToolbarAction,
+  getSelectionToolbarActions,
+  patchSelectionToolbarAction,
+} from "@/utils/custom-actions"
 import { onMessage } from "@/utils/message"
 import {
   getSelectableProvidersForCapability,
@@ -41,12 +45,18 @@ import {
 } from "../atoms"
 import { ReviewDueTab } from "../review-due-tab"
 import { useSelectionOpenRequestResolver } from "../use-selection-open-request"
+import { useSelectionShortcuts } from "../use-selection-shortcuts"
+
+type SelectionCustomActionSurface =
+  | typeof ANALYTICS_SURFACE.SELECTION_TOOLBAR
+  | typeof ANALYTICS_SURFACE.CONTEXT_MENU
+  | typeof ANALYTICS_SURFACE.SHORTCUT
 
 interface SelectionCustomActionPendingOpenRequest {
   actionId: string
   anchor?: { x: number; y: number }
   session: SelectionSession | null
-  surface: typeof ANALYTICS_SURFACE.SELECTION_TOOLBAR | typeof ANALYTICS_SURFACE.CONTEXT_MENU
+  surface: SelectionCustomActionSurface
 }
 
 interface SelectionCustomActionContextValue {
@@ -91,9 +101,9 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
   const [rerunNonce, setRerunNonce] = useState(0)
   const [activeSession, setActiveSession] = useState<SelectionSession | null>(null)
   const [activeActionId, setActiveActionId] = useState<string | null>(null)
-  const [sourceSurface, setSourceSurface] = useState<
-    typeof ANALYTICS_SURFACE.SELECTION_TOOLBAR | typeof ANALYTICS_SURFACE.CONTEXT_MENU
-  >(ANALYTICS_SURFACE.SELECTION_TOOLBAR)
+  const [sourceSurface, setSourceSurface] = useState<SelectionCustomActionSurface>(
+    ANALYTICS_SURFACE.SELECTION_TOOLBAR,
+  )
   const selectionSession = useAtomValue(selectionSessionAtom)
   const selection = useAtomValue(selectionAtom)
   const context = useAtomValue(contextAtom)
@@ -108,7 +118,8 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
   const popoverActionsRef = useRef<SelectionPopoverActions | null>(null)
   const nextEphemeralSessionIdRef = useRef(0)
   const trackedPrecheckErrorKeyRef = useRef<string | null>(null)
-  const { resolveContextMenuOpenRequest } = useSelectionOpenRequestResolver(selectionSession)
+  const { resolveContextMenuOpenRequest, resolveShortcutOpenRequest } =
+    useSelectionOpenRequestResolver(selectionSession)
   const selectionText = activeSession?.selectionSnapshot.text ?? null
   const cleanSelection = useMemo(() => normalizeSelectedText(selectionText), [selectionText])
   const paragraphsText = useMemo(() => {
@@ -308,6 +319,31 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
     },
     [openActionRequest, providersConfig, resolveContextMenuOpenRequest, selectionToolbarConfig],
   )
+
+  // An action switched off has no key, whatever it was given.
+  const actionShortcuts = useMemo(
+    () =>
+      Object.fromEntries(
+        getSelectionToolbarActions(selectionToolbarConfig)
+          .filter((action) => action.enabled !== false)
+          .map((action) => [action.id, action.shortcut]),
+      ),
+    [selectionToolbarConfig],
+  )
+
+  useSelectionShortcuts(actionShortcuts, (actionId) => {
+    const request = resolveShortcutOpenRequest()
+    if (!request) {
+      return false
+    }
+    openActionRequest({
+      actionId,
+      anchor: request.anchor,
+      session: request.session,
+      surface: ANALYTICS_SURFACE.SHORTCUT,
+    })
+    return true
+  })
 
   const handleProviderChange = useCallback(
     (providerId: string) => {

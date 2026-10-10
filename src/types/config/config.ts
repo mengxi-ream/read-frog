@@ -7,6 +7,7 @@ import {
 } from "@/utils/constants/custom-action"
 import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
 import {
+  DEFAULT_SELECTION_SPEAK_SHORTCUT_KEY,
   MAX_SELECTION_OVERLAY_OPACITY,
   MIN_SELECTION_OVERLAY_OPACITY,
 } from "@/utils/constants/selection"
@@ -44,6 +45,9 @@ const selectionToolbarFeatureSchema = z.object({
 
 const selectionToolbarSpeakFeatureSchema = z.object({
   enabled: z.boolean(),
+  // `.default()` lets a config stored before v110 parse in UI contexts that
+  // load ahead of the background migration.
+  shortcut: pageTranslationShortcutSchema.default(DEFAULT_SELECTION_SPEAK_SHORTCUT_KEY),
 })
 
 // Text selection toolbar schema

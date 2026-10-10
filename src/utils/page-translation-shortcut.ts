@@ -104,6 +104,22 @@ export function normalizePageTranslationShortcut(
   return modifiers.join("+")
 }
 
+// Whether two configured shortcuts press the same keys, however each is
+// written ("Shift+Alt+d" and "Alt+Shift+D" do). An empty one matches nothing.
+export function isSameShortcut(
+  left: string | null | undefined,
+  right: string | null | undefined,
+  platform: HotkeyPlatform = detectPlatform(),
+): boolean {
+  if (isPageTranslationShortcutEmpty(left) || isPageTranslationShortcutEmpty(right)) {
+    return false
+  }
+
+  const normalizedLeft = normalizePageTranslationShortcut(left!, platform)
+  const normalizedRight = normalizePageTranslationShortcut(right!, platform)
+  return !!normalizedLeft && normalizedLeft.toLowerCase() === normalizedRight?.toLowerCase()
+}
+
 export function keyboardEventToPageTranslationShortcut(
   event: KeyboardEvent,
   platform: HotkeyPlatform = detectPlatform(),

@@ -10,6 +10,7 @@ import {
   createDefaultSentenceAnalysisAction,
 } from "@/utils/constants/config"
 import {
+  BUILT_IN_ACTION_DEFAULT_SHORTCUTS,
   BUILT_IN_ACTION_IDS,
   BUILT_IN_ACTION_KEYS,
   BUILT_IN_DICTIONARY_ACTION_ID,
@@ -29,7 +30,8 @@ const BUILT_IN_ACTION_DEFINITIONS: Record<BuiltInActionId, () => SelectionToolba
 }
 
 // A built-in action as it reads: its code-owned definition in the current UI
-// language, with the persisted enabled/provider/Notebase state merged on.
+// language, with the persisted enabled/provider/Notebase/shortcut state merged
+// on. A state without a shortcut has the action's default key.
 export function getBuiltInAction(
   selectionToolbar: SelectionToolbarConfig,
   id: BuiltInActionId,
@@ -43,6 +45,7 @@ export function getBuiltInAction(
     ...definition,
     enabled: state.enabled,
     providerId: state.providerId,
+    shortcut: state.shortcut ?? BUILT_IN_ACTION_DEFAULT_SHORTCUTS[id],
     ...(state.notebaseConnection ? { notebaseConnection: state.notebaseConnection } : {}),
   }
 }
@@ -93,6 +96,7 @@ function toBuiltInState(action: SelectionToolbarCustomAction): SelectionToolbarB
     enabled: action.enabled !== false,
     providerId: action.providerId,
     notebaseConnection: action.notebaseConnection,
+    shortcut: action.shortcut,
   }
 }
 
@@ -122,7 +126,7 @@ export function patchSelectionToolbarAction(
   selectionToolbar: SelectionToolbarConfig,
   actionId: string,
   patch: Partial<
-    Pick<SelectionToolbarCustomAction, "enabled" | "providerId" | "notebaseConnection">
+    Pick<SelectionToolbarCustomAction, "enabled" | "providerId" | "notebaseConnection" | "shortcut">
   >,
 ): SelectionToolbarConfig {
   const action = findSelectionToolbarAction(selectionToolbar, actionId)
@@ -133,12 +137,14 @@ export function patchSelectionToolbarAction(
   return replaceSelectionToolbarAction(selectionToolbar, { ...action, ...patch })
 }
 
+// A copy starts without a key: one key runs one action.
 export function duplicateSelectionToolbarAction(
   action: SelectionToolbarCustomAction,
   allActions: SelectionToolbarCustomAction[],
 ): SelectionToolbarCustomAction {
+  const { shortcut: _shortcut, ...copy } = structuredClone(action)
   return {
-    ...structuredClone(action),
+    ...copy,
     id: getRandomUUID(),
     name: getUniqueName(action.name, new Set(allActions.map((candidate) => candidate.name))),
   }

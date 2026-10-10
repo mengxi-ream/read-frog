@@ -3,6 +3,7 @@ import { pageTranslationShortcutSchema } from "@/types/config/translate"
 import {
   formatPageTranslationShortcut,
   formatPageTranslationShortcutParts,
+  isSameShortcut,
   isValidConfiguredPageTranslationShortcut,
   normalizePageTranslationShortcut,
 } from "../page-translation-shortcut"
@@ -43,6 +44,15 @@ describe("page translation shortcut helpers", () => {
     expect(isValidConfiguredPageTranslationShortcut("Mod+K", "mac")).toBe(true)
     expect(isValidConfiguredPageTranslationShortcut("K", "windows")).toBe(false)
     expect(isValidConfiguredPageTranslationShortcut("Mod", "windows")).toBe(false)
+  })
+
+  it("compares shortcuts by the keys they press, never matching an empty one", () => {
+    expect(isSameShortcut("Alt+Shift+D", "Shift+Alt+d", "windows")).toBe(true)
+    expect(isSameShortcut("Ctrl+K", "Mod+K", "windows")).toBe(true)
+    expect(isSameShortcut("Meta+K", "Mod+K", "mac")).toBe(true)
+    expect(isSameShortcut("Alt+D", "Alt+Shift+D", "mac")).toBe(false)
+    expect(isSameShortcut("", "", "mac")).toBe(false)
+    expect(isSameShortcut("Alt+D", undefined, "mac")).toBe(false)
   })
 
   it("accepts valid shortcuts in the schema and rejects incomplete ones", () => {

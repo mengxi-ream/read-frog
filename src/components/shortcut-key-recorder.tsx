@@ -16,7 +16,8 @@ export function ShortcutKeyRecorder({
   className,
 }: {
   shortcutKey: string
-  onChange?: (shortcutKey: string) => void
+  /** Returning `false` turns the recorded keys down: the field goes back to its key. */
+  onChange?: (shortcutKey: string) => boolean | void
   className?: string
 }) {
   const [inRecording, setInRecording] = useState(false)
@@ -30,10 +31,9 @@ export function ShortcutKeyRecorder({
       isRecordingRef.current = false
       setInRecording(false)
 
-      if (nextShortcut !== null) {
+      if (nextShortcut !== null && onChange?.(nextShortcut) !== false) {
         setDraftShortcut(nextShortcut)
         setOptimisticShortcut(nextShortcut)
-        onChange?.(nextShortcut)
       } else {
         setDraftShortcut("")
       }

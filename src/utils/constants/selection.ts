@@ -29,3 +29,7 @@ declare global {
 // beside the actions' ids.
 export const SELECTION_TOOLBAR_FEATURE_IDS = ["translate", "speak"] as const
 export type SelectionToolbarFeatureId = (typeof SELECTION_TOOLBAR_FEATURE_IDS)[number]
+
+// Reads the selection aloud. Alt+Shift, like the built-in actions' keys (see
+// BUILT_IN_ACTION_DEFAULT_SHORTCUTS); S is taken by ChromeOS, so R, for "read".
+export const DEFAULT_SELECTION_SPEAK_SHORTCUT_KEY = "Alt+Shift+R"
