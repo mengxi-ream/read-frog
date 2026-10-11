@@ -705,6 +705,8 @@ options:
         save: Lưu
         defaultFieldName: kết quả
         fieldNamePlaceholder: tên_trường
+        selectionField: "Văn bản đã chọn"
+        selectionFieldDescription: "Văn bản bạn đã chọn, được lưu nguyên văn. AI không viết phần này."
         autoFieldPrefix: trường
         addFieldDialog:
           title: Thêm trường đầu ra
@@ -925,6 +927,7 @@ options:
         sentenceAnalysis:
           name: "Phân tích câu"
           description: "Đánh dấu câu dài như giáo viên: nòng cốt, từng mệnh đề và chỗ khó"
+          fieldSentence: "Câu"
           fieldAnnotations: "Chú thích"
           fieldTranslation: "Bản dịch"
           roles:
@@ -990,6 +993,7 @@ options:
         improveWriting:
           name: "Cải thiện bài viết"
           description: "Chấm như giáo viên: đánh dấu lỗi và cách diễn đạt chưa tự nhiên, sửa lại cho hợp hoàn cảnh"
+          fieldOriginal: "Bản gốc"
           fieldSetting: "Ngữ cảnh"
           fieldAnnotations: "Chú thích"
           fieldImproved: "Bản đã sửa"

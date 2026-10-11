@@ -21,6 +21,7 @@ import {
 } from "@/types/config/selection-toolbar"
 import {
   getSelectionToolbarCustomActionTokenCellText,
+  isSelectionOutputField,
   SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS,
 } from "@/utils/constants/custom-action"
 import { i18n, translateIn } from "@/utils/i18n"
@@ -178,6 +179,9 @@ function buildCurrentAction(
   const layoutNote = layout === DEFAULT_LAYOUT ? " (the default field list)" : ""
   const fields = action.outputSchema
     .map((field, index) => {
+      if (isSelectionOutputField(field)) {
+        return `${index + 1}. Name: \`${field.name}\` · Holds the selected text itself: Read Frog fills it in, the model never writes it`
+      }
       const description = field.description.trim()
         ? `\n${fence(field.description, "text")}`
         : " (no description)"
@@ -313,6 +317,7 @@ The fields of the JSON object the model returns, in order. At least one. Each ha
 - **Field name**: the JSON key, and the label the default layout shows above the value, so name it in the language I read. Unique within the action. ${reservedNames} are reserved in layouts; don't use them.
 - **Field type**: ${fieldTypes}. There is no boolean, array or object type. For a list or anything structured, use a \`string\` field whose description asks for **a compact JSON array serialized as a string**, spells out each item's keys, and gives a one-line example; the layout parses it with \`parse_json\`. For yes/no or a category, use a \`string\` with fixed values listed in the description. A \`number\` field reaches the layout as a real number.
 - **Description**: exactly what goes in the field, and in which language. Tokens are allowed.
+A field that holds the selected text itself (the built-in Sentence Analysis and Improve Writing start with one, so the Notebase keeps the sentence) is filled in by Read Frog and never sent to the model: keep it as it is, and leave it out of the System prompt.
 Fields stream in this order, so put what I want to read first at the top. Fewer fields make faster, more reliable answers; aim for no more than about eight. Any value may come back empty.
 In the editor, ${addField} adds a field, clicking a field edits it, and each field can be deleted. Renaming a field there also updates the layout's references to it.
 

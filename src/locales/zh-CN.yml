@@ -711,6 +711,8 @@ options:
         save: 保存
         defaultFieldName: 结果
         fieldNamePlaceholder: 字段名
+        selectionField: "选中的文字"
+        selectionFieldDescription: "你选中的原文，原样保存，不由 AI 生成。"
         autoFieldPrefix: 字段
         addFieldDialog:
           title: 添加输出字段
@@ -933,6 +935,7 @@ options:
         sentenceAnalysis:
           name: "长难句分析"
           description: "像老师一样批注长难句：主干、从句和难点一目了然"
+          fieldSentence: "原句"
           fieldAnnotations: "标注"
           fieldTranslation: "译文"
           roles:
@@ -998,6 +1001,7 @@ options:
         improveWriting:
           name: "写作改进"
           description: "像老师一样批改：标出错误和不地道的表达，按场合给出改后版本"
+          fieldOriginal: "原文"
           fieldSetting: "场合"
           fieldAnnotations: "标注"
           fieldImproved: "改后"

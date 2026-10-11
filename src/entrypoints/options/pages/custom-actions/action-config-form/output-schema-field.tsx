@@ -44,9 +44,11 @@ import { toastManager } from "@/components/ui/base-ui/toast"
 import { selectionToolbarCustomActionOutputTypeSchema } from "@/types/config/selection-toolbar"
 import {
   createOutputSchemaField,
+  getModelOutputFields,
   getNextOutputFieldName,
   getOutputSchemaFieldNameError,
   getSelectionToolbarCustomActionTokenCellText,
+  isSelectionOutputField,
   normalizeOutputSchemaFieldName,
   SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS,
 } from "@/utils/constants/custom-action"
@@ -71,6 +73,8 @@ type CustomActionFormKey =
   | "addField"
   | "addFieldDialog.title"
   | "editFieldDialog.title"
+  | "selectionField"
+  | "selectionFieldDescription"
 
 function t(key: CustomActionFormKey) {
   return i18n.t(`options.selectionToolbar.customActions.form.${key}`)
@@ -157,44 +161,50 @@ function FieldDialog({
                 </FieldContext>
               )}
             </form.Field>
-            <form.Field name="type">
-              {(typeField) => (
-                <FieldContext value={typeField}>
-                  <SelectField
-                    label={t("fieldType")}
-                    items={selectionToolbarCustomActionOutputTypeSchema.options.map((type) => ({
-                      value: type,
-                      label: i18n.t(`dataTypes.${type}`),
-                    }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {selectionToolbarCustomActionOutputTypeSchema.options.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {i18n.t(`dataTypes.${type}`)}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </SelectField>
-                </FieldContext>
-              )}
-            </form.Field>
-            <form.Field name="description">
-              {(descriptionField) => (
-                <FieldContext value={descriptionField}>
-                  <QuickInsertableTextareaField
-                    label={t("fieldDescription")}
-                    placeholder={t("fieldDescriptionPlaceholder")}
-                    className="min-h-20"
-                    insertCells={customActionInsertCells}
-                  />
-                </FieldContext>
-              )}
-            </form.Field>
+            {/* A selection field is always text, and the model never reads its
+                description: only its name is the user's to set. */}
+            {!isSelectionOutputField(outputField) && (
+              <form.Field name="type">
+                {(typeField) => (
+                  <FieldContext value={typeField}>
+                    <SelectField
+                      label={t("fieldType")}
+                      items={selectionToolbarCustomActionOutputTypeSchema.options.map((type) => ({
+                        value: type,
+                        label: i18n.t(`dataTypes.${type}`),
+                      }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {selectionToolbarCustomActionOutputTypeSchema.options.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {i18n.t(`dataTypes.${type}`)}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </SelectField>
+                  </FieldContext>
+                )}
+              </form.Field>
+            )}
+            {!isSelectionOutputField(outputField) && (
+              <form.Field name="description">
+                {(descriptionField) => (
+                  <FieldContext value={descriptionField}>
+                    <QuickInsertableTextareaField
+                      label={t("fieldDescription")}
+                      placeholder={t("fieldDescriptionPlaceholder")}
+                      className="min-h-20"
+                      insertCells={customActionInsertCells}
+                    />
+                  </FieldContext>
+                )}
+              </form.Field>
+            )}
           </FieldGroup>
           <DialogFooter>
             <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
@@ -257,12 +267,25 @@ function OutputSchemaRow({
     <div className="flex items-center gap-2 rounded-lg border bg-card p-2">
       {leading}
       <span className="shrink-0 text-sm font-medium">{outputField.name}</span>
-      <Badge variant="secondary" className="shrink-0">
-        {i18n.t(`dataTypes.${outputField.type}`)}
-      </Badge>
-      <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
-        {outputField.description || "—"}
-      </span>
+      {isSelectionOutputField(outputField) ? (
+        <>
+          <Badge variant="secondary" className="shrink-0">
+            {t("selectionField")}
+          </Badge>
+          <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+            {t("selectionFieldDescription")}
+          </span>
+        </>
+      ) : (
+        <>
+          <Badge variant="secondary" className="shrink-0">
+            {i18n.t(`dataTypes.${outputField.type}`)}
+          </Badge>
+          <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+            {outputField.description || "—"}
+          </span>
+        </>
+      )}
       {actions}
     </div>
   )
@@ -302,7 +325,8 @@ export const OutputSchemaField = withForm({
         validators={{
           onChange: ({ value }) => {
             const outputSchema = Array.isArray(value) ? value : []
-            if (outputSchema.length === 0) {
+            // The model has to write something: a selection field alone asks it nothing.
+            if (getModelOutputFields(outputSchema).length === 0) {
               return i18n.t("options.selectionToolbar.customActions.errors.outputSchemaRequired")
             }
 
@@ -379,7 +403,10 @@ export const OutputSchemaField = withForm({
                           className="size-7"
                           onClick={() => setDeletingFieldId(outputField.id)}
                           onPointerDown={(e) => e.stopPropagation()}
-                          disabled={outputSchema.length === 1}
+                          disabled={
+                            !isSelectionOutputField(outputField) &&
+                            getModelOutputFields(outputSchema).length === 1
+                          }
                         >
                           <Icon icon="tabler:trash" className="size-3.5" />
                         </Button>

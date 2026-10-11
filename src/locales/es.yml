@@ -706,6 +706,8 @@ options:
         save: Guardar
         defaultFieldName: Resultado
         fieldNamePlaceholder: Nombre del campo
+        selectionField: "Texto seleccionado"
+        selectionFieldDescription: "El texto que seleccionaste, guardado tal cual. La IA no lo escribe."
         autoFieldPrefix: Campo
         addFieldDialog:
           title: Añadir campo de salida
@@ -928,6 +930,7 @@ options:
         sentenceAnalysis:
           name: "Análisis de oraciones"
           description: "Marca una oración larga como un profesor: su núcleo, cada cláusula y lo que la hace difícil"
+          fieldSentence: "Oración"
           fieldAnnotations: "Anotaciones"
           fieldTranslation: "Traducción"
           roles:
@@ -993,6 +996,7 @@ options:
         improveWriting:
           name: "Mejorar escritura"
           description: "Marca errores y expresiones poco naturales como un profesor, y los corrige según la situación"
+          fieldOriginal: "Versión original"
           fieldSetting: "Contexto"
           fieldAnnotations: "Anotaciones"
           fieldImproved: "Versión mejorada"

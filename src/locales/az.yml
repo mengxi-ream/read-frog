@@ -706,6 +706,8 @@ options:
         save: Yadda saxla
         defaultFieldName: Nəticə
         fieldNamePlaceholder: Sahənin adı
+        selectionField: "Seçilmiş mətn"
+        selectionFieldDescription: "Seçdiyiniz mətn olduğu kimi saxlanılır. Süni intellekt onu yazmır."
         autoFieldPrefix: Sahə
         addFieldDialog:
           title: Nəticə sahəsi əlavə et
@@ -928,6 +930,7 @@ options:
         sentenceAnalysis:
           name: "Cümlə təhlili"
           description: "Uzun cümləni müəllim kimi işarələyir: əsası, hər budaq cümləni və çətin yerləri"
+          fieldSentence: "Cümlə"
           fieldAnnotations: "Annotasiyalar"
           fieldTranslation: "Tərcümə"
           roles:
@@ -993,6 +996,7 @@ options:
         improveWriting:
           name: "Yazını təkmilləşdir"
           description: "Müəllim kimi səhvləri və qeyri-təbii ifadələri işarələyir, mətni vəziyyətə uyğun düzəldir"
+          fieldOriginal: "Orijinal mətn"
           fieldSetting: "Kontekst"
           fieldAnnotations: "Qeydlər"
           fieldImproved: "Düzəldilmiş mətn"

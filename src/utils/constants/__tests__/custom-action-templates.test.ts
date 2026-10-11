@@ -114,11 +114,12 @@ describe("custom action template layouts", () => {
     expect(createFromTemplate("blank").layout).toBe(DEFAULT_LAYOUT)
   })
 
-  it("gives the improve writing preset its card, built for its four stable fields", () => {
+  it("gives the improve writing preset its card, built for its stable fields", () => {
     const action = createFromTemplate("improve-writing")
 
     expect(action.icon).toBe("streamline-color:ai-edit-spark-flat")
     expect(action.outputSchema.map((field) => [field.id, field.type])).toEqual([
+      ["improve-writing-original", "string"],
       ["improve-writing-setting", "string"],
       ["improve-writing-annotations", "string"],
       ["improve-writing-improved", "string"],
@@ -126,10 +127,17 @@ describe("custom action template layouts", () => {
     ])
     // i18n is mocked to return the key, so this checks the wiring, not the text.
     const prefix = "options.selectionToolbar.customActions.templates.improveWriting"
-    expect(action.outputSchema[1]).toMatchObject({
+    // The writer's own text is the selection, kept for the notebase; the model
+    // writes the rest.
+    expect(action.outputSchema[0]).toMatchObject({
+      name: `${prefix}.fieldOriginal`,
+      source: "selection",
+    })
+    expect(action.outputSchema[2]).toMatchObject({
       name: `${prefix}.fieldAnnotations`,
       description: `${prefix}.fieldAnnotationsDescription`,
     })
+    expect(action.outputSchema.slice(1).every((field) => field.source === undefined)).toBe(true)
     expect(action.systemPrompt).toBe(`${prefix}.systemPrompt`)
     expect(action.prompt).toBe(`${prefix}.prompt`)
     expect(action.layout).toBe(buildImproveWritingActionLayout(action.outputSchema))
@@ -149,17 +157,24 @@ describe("custom action template layouts", () => {
     expect(action.layout).not.toBe(DEFAULT_LAYOUT)
   })
 
-  it("gives the sentence analysis preset its card, built for its two stable fields", () => {
+  it("gives the sentence analysis preset its card, built for its stable fields", () => {
     const action = createFromTemplate("sentence-analysis")
 
     expect(action.icon).toBe("streamline-color:search-visual-flat")
     expect(action.outputSchema.map((field) => [field.id, field.type])).toEqual([
+      ["sentence-analysis-sentence", "string"],
       ["sentence-analysis-annotations", "string"],
       ["sentence-analysis-translation", "string"],
     ])
     // i18n is mocked to return the key, so this checks the wiring, not the text.
     const prefix = "options.selectionToolbar.customActions.templates.sentenceAnalysis"
+    // The sentence is the selection, kept for the notebase; the model writes
+    // the rest.
     expect(action.outputSchema[0]).toMatchObject({
+      name: `${prefix}.fieldSentence`,
+      source: "selection",
+    })
+    expect(action.outputSchema[1]).toMatchObject({
       name: `${prefix}.fieldAnnotations`,
       description: `${prefix}.fieldAnnotationsDescription`,
     })

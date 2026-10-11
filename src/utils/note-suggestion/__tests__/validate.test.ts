@@ -73,6 +73,7 @@ describe("validateNoteSuggestion", () => {
     return validateNoteSuggestion({
       envelope: { notes, summaryFieldName },
       action,
+      selection: "The ephemeral beauty of cherry blossoms.",
     })
   }
 
@@ -158,7 +159,28 @@ describe("validateNoteSuggestion", () => {
       validateNoteSuggestion({
         envelope: { notes: [note([{ name: "Score", value: 8 }])] },
         action: numericAction,
+        selection: "eight",
       }),
     ).toEqual({ notes: [{ Score: 8 }], summaryFieldName: null })
+  })
+
+  it("keeps the selected text in a selection field, which the model does not write", () => {
+    const sentenceAction = createAction({
+      outputSchema: [
+        { id: "sentence", name: "Sentence", type: "string", description: "", source: "selection" },
+        { id: "annotations", name: "Annotations", type: "string", description: "" },
+      ],
+    })
+
+    expect(
+      validateNoteSuggestion({
+        envelope: { notes: [note([{ name: "Annotations", value: "[]" }])] },
+        action: sentenceAction,
+        selection: "  Only then did she turn it down.  ",
+      }),
+    ).toEqual({
+      notes: [{ Annotations: "[]", Sentence: "Only then did she turn it down." }],
+      summaryFieldName: null,
+    })
   })
 })

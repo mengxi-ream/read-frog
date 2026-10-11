@@ -705,6 +705,8 @@ options:
         save: 저장
         defaultFieldName: 결과
         fieldNamePlaceholder: 필드명
+        selectionField: "선택한 텍스트"
+        selectionFieldDescription: "선택한 텍스트를 그대로 저장합니다. AI가 작성하지 않습니다."
         autoFieldPrefix: 필드
         addFieldDialog:
           title: 출력 필드 추가
@@ -925,6 +927,7 @@ options:
         sentenceAnalysis:
           name: "문장 구조 분석"
           description: "긴 문장을 선생님처럼 표시해 뼈대, 절, 어려운 부분을 한눈에 보여 줍니다"
+          fieldSentence: "원문"
           fieldAnnotations: "주석"
           fieldTranslation: "번역"
           roles:
@@ -990,6 +993,7 @@ options:
         improveWriting:
           name: "글쓰기 첨삭"
           description: "선생님처럼 첨삭해요: 틀린 곳과 어색한 표현을 표시하고 상황에 맞게 고쳐 줍니다"
+          fieldOriginal: "원래 글"
           fieldSetting: "상황"
           fieldAnnotations: "첨삭"
           fieldImproved: "고친 글"

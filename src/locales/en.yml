@@ -711,6 +711,8 @@ options:
         save: Save
         defaultFieldName: Result
         fieldNamePlaceholder: Field name
+        selectionField: "Selected text"
+        selectionFieldDescription: "The text you selected, saved as it is. The AI doesn't write it."
         autoFieldPrefix: Field
         addFieldDialog:
           title: Add output field
@@ -986,6 +988,7 @@ options:
             Selection: {{selection}}
             Paragraphs: {{paragraphs}}
             Target language: {{targetLanguage}}
+          fieldSentence: "Sentence"
           fieldAnnotations: "Annotations"
           fieldAnnotationsDescription: 'A compact JSON array serialized as a string. Each item has "text" and "type", plus only the optional keys that apply ("form", "sense", "head", "obstacle", "restore", "note", "occurrence").'
           fieldTranslation: "Translation"
@@ -1131,6 +1134,7 @@ options:
             Page title: {{webTitle}}
             Page URL: {{webUrl}}
             Target language: {{targetLanguage}}
+          fieldOriginal: "Original"
           fieldSetting: "Setting"
           fieldSettingDescription: 'How formal the setting is and what the text is, in {{targetLanguage}}: "<formality> · <what it is>", at most 16 characters.'
           fieldAnnotations: "Annotations"

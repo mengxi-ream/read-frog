@@ -306,6 +306,7 @@ describe("useNoteSuggestion", () => {
     expect(validateNoteSuggestionMock).toHaveBeenCalledWith({
       envelope: expect.any(Object),
       action: customAction,
+      selection: "ephemeral",
     })
     expect(result.current.suggestion?.actionSnapshot.id).toBe(customAction.id)
   })

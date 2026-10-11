@@ -211,6 +211,7 @@ export function useNoteSuggestion() {
         ? validateNoteSuggestion({
             envelope: envelope.data,
             action: actionSnapshot,
+            selection: input.selectionText,
           })
         : null
 
