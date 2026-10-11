@@ -760,6 +760,8 @@ options:
             condition: Muestra el contenido solo cuando el campo tiene un valor.
             loop: Se repite para cada campo, en orden. Puedes usar f.name, f.value y f.type.
             speak: Cualquier elemento con data-speak lee en voz alta el valor (o su propio texto si el valor está vacío) cuando la respuesta termina.
+            speakLang: data-speak-lang indica el idioma de lectura (un código como es o en-US) para usar la voz de ese idioma. Sin él, el idioma se detecta, algo que suele fallar con una sola palabra.
+            speakAutoplay: Un elemento con data-speak-autoplay se lee en voz alta por sí solo cuando la respuesta termina. Solo suena el primero.
             status: Aplica estilos según el estado. El data-status del contenedor es streaming, done o error.
             filters: newline_to_br conserva los saltos de línea (úsalo al final); lines divide el texto en una lista de líneas.
             styles: El CSS de un bloque <style> solo se aplica dentro de este resultado. Los colores --rf-* siguen los temas claro y oscuro.
