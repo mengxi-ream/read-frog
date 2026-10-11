@@ -22,7 +22,11 @@ describe("word lookup atoms", () => {
 
     subtitlesStore.set(openWordLookupAtom, SESSION)
 
-    expect(subtitlesStore.get(wordLookupAtom)).toEqual({ ...SESSION, cueStart: 0 })
+    expect(subtitlesStore.get(wordLookupAtom)).toEqual({
+      cueStart: 0,
+      tokenIndex: 2,
+      anchor: SESSION.anchor,
+    })
     expect(subtitlesStore.get(customActionRequestAtom)).toMatchObject({
       actionId: "default-dictionary",
       selectionText: "patience",

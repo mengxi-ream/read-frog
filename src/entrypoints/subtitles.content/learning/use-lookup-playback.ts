@@ -1,44 +1,37 @@
+import { useAtomValue } from "jotai"
 import { useEffect, useRef } from "react"
 import { useSubtitlesUI } from "../ui/subtitles-ui-context"
+import { wordLookupAtom } from "./atoms"
 
-/**
- * Dismissing the card by pressing on the player, or on another word, closes
- * and (for a word) reopens the lookup within one click. Resuming after this
- * delay lets a reopen cancel the resume, and lets the host player's own
- * click-to-toggle settle first instead of racing it.
- */
-const RESUME_DELAY_MS = 200
+const RESUME_AFTER_CLOSE_DELAY_MS = 200
 
-/**
- * Pauses the video while a word is being looked up and resumes it on close,
- * but only when this hook paused it and the viewer did not press play in
- * between.
- */
-export function useLookupPlayback(open: boolean) {
-  const { pauseVideo, playVideo, isVideoPaused } = useSubtitlesUI()
+export function useLookupPlayback() {
+  const open = useAtomValue(wordLookupAtom) !== null
+  const { getVideoElement } = useSubtitlesUI()
   const pausedByLookupRef = useRef(false)
   const pendingResumeRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    if (!open) {
+    const video = getVideoElement()
+    if (!open || !video) {
       return undefined
     }
 
     if (pendingResumeRef.current !== null) {
       clearTimeout(pendingResumeRef.current)
       pendingResumeRef.current = null
-    } else if (!isVideoPaused()) {
-      pauseVideo()
+    } else if (!video.paused) {
+      video.pause()
       pausedByLookupRef.current = true
     }
 
     const handlePlay = () => {
       pausedByLookupRef.current = false
     }
-    document.addEventListener("play", handlePlay, true)
+    video.addEventListener("play", handlePlay)
 
     return () => {
-      document.removeEventListener("play", handlePlay, true)
+      video.removeEventListener("play", handlePlay)
       if (!pausedByLookupRef.current) {
         return
       }
@@ -46,10 +39,10 @@ export function useLookupPlayback(open: boolean) {
       pendingResumeRef.current = setTimeout(() => {
         pendingResumeRef.current = null
         pausedByLookupRef.current = false
-        if (isVideoPaused()) {
-          playVideo()
+        if (video.paused) {
+          void video.play()
         }
-      }, RESUME_DELAY_MS)
+      }, RESUME_AFTER_CLOSE_DELAY_MS)
     }
-  }, [isVideoPaused, open, pauseVideo, playVideo])
+  }, [getVideoElement, open])
 }

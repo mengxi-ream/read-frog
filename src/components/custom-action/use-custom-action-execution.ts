@@ -348,9 +348,6 @@ export function useCustomActionExecution({
   executionRequestRef.current = executionRequest
   const executionRequestKey = executionRequest?.key ?? null
 
-  // Every session or reuse starts from a blank card, including one whose
-  // request fails precheck and never reaches run(). Adjusted during render so
-  // the reset lands before the run effect of the same commit.
   const resetKey = `${popoverSessionKey}:${rerunNonce}`
   const [appliedResetKey, setAppliedResetKey] = useState(resetKey)
   if (appliedResetKey !== resetKey) {

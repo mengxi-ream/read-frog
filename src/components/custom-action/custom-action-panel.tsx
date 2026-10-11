@@ -1,5 +1,5 @@
 import type { ComponentProps } from "react"
-import { useAtomValue, useSetAtom } from "jotai"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
 import { SelectionPopover } from "@/components/ui/selection-popover"
@@ -17,7 +17,7 @@ import {
   getSelectableProvidersForCapability,
   resolveProviderRefForCapability,
 } from "@/utils/providers/provider-registry"
-import { customActionRequestAtom, rerunCustomActionAtom } from "./atoms"
+import { customActionRequestAtom } from "./atoms"
 import { CustomActionContent } from "./custom-action-content"
 import { CustomActionToolButton } from "./custom-action-tool-button"
 import { SaveToNotebaseButton } from "./save-to-notebase-button"
@@ -41,18 +41,12 @@ function CustomActionFooterContent({
   return <SelectionToolbarFooterContent providers={customActionProviders} {...props} />
 }
 
-/**
- * Runs and renders the custom action described by `customActionRequestAtom`.
- * Hosts own the popover shell and decide when to write the request; the panel
- * only knows the action, the text and the context it was handed.
- */
 export function CustomActionPanel() {
-  const request = useAtomValue(customActionRequestAtom)
+  const [request, setRequest] = useAtom(customActionRequestAtom)
   const selectionToolbarConfig = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const language = useAtomValue(configFieldsAtomMap.language)
   const setConfig = useSetAtom(writeConfigAtom)
-  const rerun = useSetAtom(rerunCustomActionAtom)
   const bodyRef = useRef<HTMLDivElement>(null)
   const trackedPrecheckErrorKeyRef = useRef<string | null>(null)
   const open = request !== null
@@ -197,7 +191,7 @@ export function CustomActionPanel() {
         titleText={titleText}
         value={customActionRequest.provider?.id ?? ""}
         onProviderChange={handleProviderChange}
-        onRegenerate={rerun}
+        onRegenerate={() => setRequest({ ...request, rerunNonce: request.rerunNonce + 1 })}
       >
         {activeAction && (
           <>

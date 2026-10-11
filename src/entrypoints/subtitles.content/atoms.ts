@@ -27,7 +27,6 @@ export const adPlayingAtom = atom<boolean>(false)
 /** Scheduler’s current *translated* cue only (null when no translated cue covers now). */
 export const currentSubtitleAtom = atom<SubtitlesFragment | null>(null)
 
-/** Source language of the current track, normalized to ISO 639-3; null until the fetcher knows it. */
 export const sourceLanguageAtom = atom<LangCodeISO6393 | null>(null)
 
 /** Best original track (baseline or AI-segmented). Read-only for display/coordinator consumers. */
