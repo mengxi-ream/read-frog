@@ -17,6 +17,9 @@ interface SubtitlesUIContextValue {
   hasSubtitlesAvailable: () => Promise<boolean>
   ensureSourceTrackPublished: () => Promise<void>
   seekTo: (seconds: number) => void
+  pauseVideo: () => void
+  playVideo: () => void
+  isVideoPaused: () => boolean
   downloadSourceSubtitles: () => Promise<void>
   downloadTranslatedSubtitles: () => Promise<void>
   controlsConfig?: ControlsConfig
@@ -54,6 +57,9 @@ export function SubtitlesProviders({
       hasSubtitlesAvailable: adapter.hasSubtitlesAvailable,
       ensureSourceTrackPublished: adapter.ensureSourceTrackPublished,
       seekTo: adapter.seekTo,
+      pauseVideo: adapter.pauseVideo,
+      playVideo: adapter.playVideo,
+      isVideoPaused: adapter.isVideoPaused,
       downloadSourceSubtitles: adapter.downloadSourceSubtitles,
       downloadTranslatedSubtitles: adapter.downloadTranslatedSubtitles,
       controlsConfig: adapter.getControlsConfig(),

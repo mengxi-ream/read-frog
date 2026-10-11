@@ -13,6 +13,7 @@ vi.mock("@/utils/atoms/config", async () => {
   return {
     configFieldsAtomMap: {
       language: atom(DEFAULT_CONFIG.language),
+      selectionToolbar: atom(DEFAULT_CONFIG.selectionToolbar),
       videoSubtitles: atom(DEFAULT_CONFIG.videoSubtitles),
     },
   }
