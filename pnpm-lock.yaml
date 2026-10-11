@@ -290,14 +290,14 @@ importers:
         specifier: ^1.4.0
         version: 1.4.0(@types/react@19.3.0)(react@19.3.0)
       '@read-frog/api-contract':
-        specifier: 0.19.0
-        version: 0.19.0(@opentelemetry/api@1.9.1)
+        specifier: 0.21.0
+        version: 0.21.0(@opentelemetry/api@1.9.1)
       '@read-frog/definitions':
-        specifier: 0.8.0
-        version: 0.8.0
+        specifier: 0.10.0
+        version: 0.10.0
       '@read-frog/layout-engine':
-        specifier: 0.4.0
-        version: 0.4.0(@codemirror/lang-liquid@6.3.3)(@codemirror/lint@6.9.7)(@codemirror/state@6.7.6)(@codemirror/view@6.43.14)(dompurify@3.4.16)(liquidjs@10.30.0)(morphdom@2.7.8)(react@19.3.0)
+        specifier: 0.5.0
+        version: 0.5.0(@codemirror/lang-liquid@6.3.3)(@codemirror/lint@6.9.7)(@codemirror/state@6.7.6)(@codemirror/view@6.43.14)(dompurify@3.4.16)(liquidjs@10.30.0)(morphdom@2.7.8)(react@19.3.0)
       '@remixicon/react':
         specifier: ^4.9.0
         version: 4.9.0(react@19.3.0)
@@ -2471,14 +2471,14 @@ packages:
       '@types/react':
         optional: true
 
-  '@read-frog/api-contract@0.19.0':
-    resolution: {integrity: sha512-P6TQCBOtXvIzqvHHMH5vCrdKVvFjuHwzqRElzjZ75xGWTl42k4DR+CTEq9V6QAjbB2p4u55gwaSkwN1n2Ary+g==}
+  '@read-frog/api-contract@0.21.0':
+    resolution: {integrity: sha512-FyHPm/IaXwGEFMgUFIhhem2RJD+gQA1i4QZLNbKRhwovBOQULRof52PWo+5nxrV4AbPgUZWp1TSgSMzIpo7dhg==}
 
-  '@read-frog/definitions@0.8.0':
-    resolution: {integrity: sha512-OoGGFXYUq7mC7blCbK48rDq5ZK5pY5H1eF32iJ4D1yFTcFCOCOoD4xDkr5YkHurLY/po7k85I8LC35xoBSYS9Q==}
+  '@read-frog/definitions@0.10.0':
+    resolution: {integrity: sha512-djrZEq3SzmTOiqTQzn8b4D1HXczyocdepuW8XNd0ZAN+bCFVaLJIcngSZWxvXe9uc59sbPtsRYvkm5igpTdW+A==}
 
-  '@read-frog/layout-engine@0.4.0':
-    resolution: {integrity: sha512-jDsoxg1MG38TpagcAM1dmlYOP3vaBZrqavlCiKJxwXbY8acOtTp6pHlpUYYlUDjFpiIsTSLxrjuIfLq5oCA1AQ==}
+  '@read-frog/layout-engine@0.5.0':
+    resolution: {integrity: sha512-EmPrzJ+YBYxyGUM4p3EQCT4U9sSGUUWMpIHPfmu4zKsBKPuMVhSy3tPv8aL1giEAZweD8kvCl7xJKCHUA1CWQA==}
     peerDependencies:
       '@codemirror/lang-liquid': ^6.3.3
       '@codemirror/lint': ^6.9.7
@@ -6684,6 +6684,15 @@ packages:
     resolution: {integrity: sha512-GLNEdf5qBWux3adbOxFus4jlds8nCdEIkkKq99m/4GGTfqnsjlVlK/i371Ux7yYSg/WNmOyAkNT/GJlZoJ0v+w==}
     engines: {node: '>=18.13.0'}
 
+  temporal-polyfill@1.0.5:
+    resolution: {integrity: sha512-+H/mmY74i6wXCMcjIhGuSnODcyZnc4eois2myhOyX0UqRAKNXQY5m9iB1en5jQ/n4SXtjLXo1ElBI5bmn8tZwQ==}
+
+  temporal-spec@1.0.1:
+    resolution: {integrity: sha512-wxVoanmDeavXie1vu2JaQ3WIc3JZnWAOYFBsJyATaVsXsycKYUflGsyBmrRSnoCpZJpwPyr38VpgSUlQ8CbFxg==}
+
+  temporal-utils@1.0.3:
+    resolution: {integrity: sha512-9jbTSX3HvkOWvDpNpFzwX/d1mkCrgQgwLmVTOEiuocZGKHsrQJtttGZFmybJ2zYP5zCSZuU5ZyeS8+eOEPABiQ==}
+
   thread-stream@4.2.0:
     resolution: {integrity: sha512-e2zZ96wSChazBsbENf/Pcm/4swHt2cEKQ92rhUjkL9GCKiTDJIaTBenjE/m9DXi0QBmTMDkFDdOomUy20A1tDQ==}
     engines: {node: '>=20'}
@@ -8199,7 +8208,8 @@ snapshots:
 
   '@csstools/css-tokenizer@4.0.2': {}
 
-  '@date-fns/tz@1.5.0': {}
+  '@date-fns/tz@1.5.0':
+    optional: true
 
   '@devicefarmer/adbkit-logcat@2.1.3': {}
 
@@ -9130,21 +9140,20 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.3.0
 
-  '@read-frog/api-contract@0.19.0(@opentelemetry/api@1.9.1)':
+  '@read-frog/api-contract@0.21.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@orpc/contract': 1.15.5(@opentelemetry/api@1.9.1)
-      '@read-frog/definitions': 0.8.0
+      '@read-frog/definitions': 0.10.0
       zod: 4.6.5
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@read-frog/definitions@0.8.0':
+  '@read-frog/definitions@0.10.0':
     dependencies:
-      '@date-fns/tz': 1.5.0
-      date-fns: 4.4.0
+      temporal-polyfill: 1.0.5
       zod: 4.6.5
 
-  '@read-frog/layout-engine@0.4.0(@codemirror/lang-liquid@6.3.3)(@codemirror/lint@6.9.7)(@codemirror/state@6.7.6)(@codemirror/view@6.43.14)(dompurify@3.4.16)(liquidjs@10.30.0)(morphdom@2.7.8)(react@19.3.0)':
+  '@read-frog/layout-engine@0.5.0(@codemirror/lang-liquid@6.3.3)(@codemirror/lint@6.9.7)(@codemirror/state@6.7.6)(@codemirror/view@6.43.14)(dompurify@3.4.16)(liquidjs@10.30.0)(morphdom@2.7.8)(react@19.3.0)':
     dependencies:
       liquidjs: 10.30.0
     optionalDependencies:
@@ -10517,7 +10526,8 @@ snapshots:
 
   dataloader@2.2.3: {}
 
-  date-fns@4.4.0: {}
+  date-fns@4.4.0:
+    optional: true
 
   debounce@1.2.1: {}
 
@@ -13232,6 +13242,15 @@ snapshots:
 
   temml@0.13.3:
     optional: true
+
+  temporal-polyfill@1.0.5:
+    dependencies:
+      temporal-spec: 1.0.1
+      temporal-utils: 1.0.3
+
+  temporal-spec@1.0.1: {}
+
+  temporal-utils@1.0.3: {}
 
   thread-stream@4.2.0:
     dependencies:

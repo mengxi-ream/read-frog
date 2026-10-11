@@ -759,6 +759,8 @@ options:
             condition: フィールドに値があるときだけ中身を表示します。
             loop: すべてのフィールドについて順に繰り返します。f.name、f.value、f.type が使えます。
             speak: data-speak を付けた要素は、回答の完了後にその値（空なら要素自身のテキスト）を読み上げます。
+            speakLang: data-speak-lang で読み上げる言語（es、en-US など）を指定すると、その言語の音声で読み上げます。指定しない場合は言語を自動判定しますが、単語だけだとよく外れます。
+            speakAutoplay: data-speak-autoplay を付けた要素は、回答の完了後に自動で読み上げます。再生されるのは最初の 1 つだけです。
             status: 状態ごとにスタイルを設定します。ホストの data-status は streaming、done、error のいずれかです。
             filters: newline_to_br は改行を保持します（最後に置いてください）。lines はテキストを行のリストに分けます。
             styles: <style> ブロックの CSS はこの結果の中だけに適用されます。--rf-* の色はライト／ダークテーマに追従します。
