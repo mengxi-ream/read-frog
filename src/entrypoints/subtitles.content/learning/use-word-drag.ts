@@ -20,6 +20,31 @@ interface WordDrag {
   focusIndex: number
 }
 
+function getWordRects(line: HTMLElement, start: number, end: number) {
+  return [...line.querySelectorAll<HTMLElement>(WORD_SELECTOR)]
+    .filter((el) => {
+      const index = Number(el.dataset.index)
+      return index >= start && index <= end
+    })
+    .map((el) => el.getBoundingClientRect())
+}
+
+function getLookupAnchor(line: HTMLElement, wordRect: DOMRect) {
+  const boxTop = line.closest(`.${SUBTITLES_BOX_CLASS}`)?.getBoundingClientRect().top
+  return {
+    x: wordRect.left + wordRect.width / 2,
+    y: (boxTop ?? wordRect.top) - CARD_GAP_ABOVE_SUBTITLES_PX,
+  }
+}
+
+function joinWordText(tokens: WordToken[], start: number, end: number) {
+  return tokens
+    .slice(start, end + 1)
+    .map((token) => token.text)
+    .join("")
+    .trim()
+}
+
 function unionRect(rects: DOMRect[]) {
   const top = Math.min(...rects.map((rect) => rect.top))
   const left = Math.min(...rects.map((rect) => rect.left))
@@ -48,26 +73,17 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
       const { anchorIndex, focusIndex } = drag
       const start = Math.min(anchorIndex, focusIndex)
       const end = Math.max(anchorIndex, focusIndex)
-      const wordRects = [...line.querySelectorAll<HTMLElement>(WORD_SELECTOR)]
-        .filter((el) => {
-          const index = Number(el.dataset.index)
-          return index >= start && index <= end
-        })
-        .map((el) => el.getBoundingClientRect())
+      const wordRects = getWordRects(line, start, end)
       const firstRect = wordRects[0]
       if (!firstRect) {
         return
       }
 
       if (start === end) {
-        const boxTop = line.closest(`.${SUBTITLES_BOX_CLASS}`)?.getBoundingClientRect().top
         openLookup({
           tokenIndex: start,
           term: tokens[start]?.text ?? "",
-          anchor: {
-            x: firstRect.left + firstRect.width / 2,
-            y: (boxTop ?? firstRect.top) - CARD_GAP_ABOVE_SUBTITLES_PX,
-          },
+          anchor: getLookupAnchor(line, firstRect),
         })
         return
       }
@@ -75,11 +91,7 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
       selectWords({
         start,
         end,
-        text: tokens
-          .slice(start, end + 1)
-          .map((token) => token.text)
-          .join("")
-          .trim(),
+        text: joinWordText(tokens, start, end),
         rect: unionRect(wordRects),
         anchor: { x: event.clientX, y: event.clientY },
         direction: focusIndex >= anchorIndex ? "bottom-right" : "bottom-left",
