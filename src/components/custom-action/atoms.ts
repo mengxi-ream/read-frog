@@ -1,7 +1,7 @@
 import type { SurfaceByFeature } from "@/types/analytics"
 import { atom } from "jotai"
 
-interface CustomActionRequest {
+export interface CustomActionRequest {
   actionId: string
   selectionText: string
   contextText: string
