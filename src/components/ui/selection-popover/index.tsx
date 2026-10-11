@@ -323,6 +323,7 @@ type SelectionPopoverShellProps = Omit<
   }
 
 function SelectionPopoverShell({
+  bounds,
   children,
   className,
   defaultLayout,
@@ -332,6 +333,7 @@ function SelectionPopoverShell({
   handleResizeStop,
   handleWheel,
   isDragging: _isDragging,
+  maxSize,
   minHeight,
   minWidth,
   onMouseDown,
@@ -362,13 +364,13 @@ function SelectionPopoverShell({
   return (
     <Rnd
       ref={assignRndRef}
-      bounds="window"
+      bounds={bounds}
       default={defaultLayout}
       position={position}
       minWidth={minWidth}
       minHeight={minHeight}
-      maxWidth="100vw"
-      maxHeight="100vh"
+      maxWidth={maxSize.width}
+      maxHeight={maxSize.height}
       dragHandleClassName={SELECTION_POPOVER_DRAG_HANDLE_CLASS}
       cancel={SELECTION_POPOVER_NO_DRAG_SELECTOR}
       enableResizing={SELECTION_POPOVER_RESIZE_HANDLES}
@@ -391,8 +393,8 @@ function SelectionPopoverShell({
         display: "flex",
         ...style,
         opacity: "var(--rf-selection-opacity, 1)",
-        maxWidth: "100vw",
-        maxHeight: "100vh",
+        maxWidth: maxSize.width,
+        maxHeight: maxSize.height,
       }}
       onDragStart={() => {
         handleDragStart()
@@ -417,12 +419,14 @@ function SelectionPopoverContent({
   className,
   children,
   container,
+  boundary,
   finalFocus,
   render,
   ...props
 }: useRender.ComponentProps<"div"> &
   React.ComponentProps<"div"> & {
     container?: SelectionPopoverPortalContainer
+    boundary?: HTMLElement | null
     finalFocus?: DialogPrimitive.Popup.Props["finalFocus"]
   }) {
   const { open, setOpen, anchor, triggerElement } = useSelectionPopoverRootContext()
@@ -438,6 +442,8 @@ function SelectionPopoverContent({
     defaultLayout,
     minWidth,
     minHeight,
+    bounds,
+    maxSize,
     handleDragStart,
     handleDrag,
     handleDragStop,
@@ -446,6 +452,7 @@ function SelectionPopoverContent({
   } = useSelectionPopoverLayout({
     anchor,
     isVisible: open,
+    boundary,
   })
 
   const handleClose = React.useCallback(() => {
@@ -510,6 +517,8 @@ function SelectionPopoverContent({
           defaultLayout={defaultLayout}
           minWidth={minWidth}
           minHeight={minHeight}
+          bounds={bounds}
+          maxSize={maxSize}
           handleDragStart={handleDragStart}
           handleDrag={handleDrag}
           handleDragStop={handleDragStop}

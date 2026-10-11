@@ -1,5 +1,3 @@
-import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
-import { Icon } from "@iconify/react"
 import { useAtom } from "jotai"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { useFeatureProvider } from "@/components/llm-providers/use-feature-providers"
@@ -15,16 +13,8 @@ import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { getSelectionToolbarActions, resolveNoteSuggestionAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
+import { ActionIdentity } from "../../../components/action-identity"
 import { ConfigItem } from "../../../components/config-item"
-
-function ActionIdentity({ action }: { action: SelectionToolbarCustomAction }) {
-  return (
-    <span className="flex min-w-0 items-center gap-2">
-      <Icon icon={action.icon} className="size-4 shrink-0 text-muted-foreground" />
-      <span className="truncate">{action.name}</span>
-    </span>
-  )
-}
 
 /**
  * Whether translating a selection offers to save what it found, and which action does the

@@ -9,6 +9,8 @@ import { SelectionPopover } from "@/components/ui/selection-popover"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { closeWordLookupAtom, wordLookupAtom } from "./atoms"
 import { useLookupPlayback } from "./use-lookup-playback"
+import { useLookupShortcuts } from "./use-lookup-shortcuts"
+import { useWordSelectionDismiss } from "./use-word-selection-dismiss"
 
 function useCardLayer() {
   const shadowWrapper = use(ShadowWrapperContext)
@@ -38,9 +40,16 @@ export function WordLookupCard() {
   const closeLookup = useSetAtom(closeWordLookupAtom)
   const isSaveToNotebaseDialogOpen = useAtomValue(isSaveToNotebaseDialogOpenAtom)
   const layer = useCardLayer()
+  const shadowRoot = use(ShadowWrapperContext)?.getRootNode()
+  const player =
+    shadowRoot instanceof ShadowRoot && shadowRoot.host instanceof HTMLElement
+      ? shadowRoot.host
+      : null
   const open = lookup !== null
 
   useLookupPlayback()
+  useLookupShortcuts()
+  useWordSelectionDismiss()
 
   return (
     <ShadowWrapperContext value={layer}>
@@ -55,7 +64,11 @@ export function WordLookupCard() {
           anchor={lookup?.anchor ?? null}
           disablePointerDismissal={isSaveToNotebaseDialogOpen}
         >
-          <SelectionPopover.Content key={request?.sessionKey ?? 0} container={layer}>
+          <SelectionPopover.Content
+            key={request?.sessionKey ?? 0}
+            container={layer}
+            boundary={player}
+          >
             <CustomActionPanel />
           </SelectionPopover.Content>
         </SelectionPopover.Root>

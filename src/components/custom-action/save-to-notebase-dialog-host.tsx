@@ -352,9 +352,9 @@ export function SaveToNotebaseDialogHost() {
     >
       <DialogContent
         container={shadowWrapper ?? document.body}
-        className={`${SELECTION_CONTENT_OVERLAY_LAYERS.popoverOverlay} sm:max-w-lg`}
+        className={`${SELECTION_CONTENT_OVERLAY_LAYERS.popoverOverlay} pointer-events-auto sm:max-w-lg`}
         forceRenderOverlay
-        overlayClassName={SELECTION_CONTENT_OVERLAY_LAYERS.popoverOverlay}
+        overlayClassName={`${SELECTION_CONTENT_OVERLAY_LAYERS.popoverOverlay} pointer-events-auto`}
         showCloseButton={false}
       >
         <DialogHeader>
