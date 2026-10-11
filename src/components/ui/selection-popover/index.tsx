@@ -1,5 +1,6 @@
 "use client"
 
+import type { SelectionPopoverAnchorPoint } from "./use-selection-popover-layout"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
@@ -323,7 +324,6 @@ type SelectionPopoverShellProps = Omit<
   }
 
 function SelectionPopoverShell({
-  bounds,
   children,
   className,
   defaultLayout,
@@ -333,7 +333,6 @@ function SelectionPopoverShell({
   handleResizeStop,
   handleWheel,
   isDragging: _isDragging,
-  maxSize,
   minHeight,
   minWidth,
   onMouseDown,
@@ -364,13 +363,13 @@ function SelectionPopoverShell({
   return (
     <Rnd
       ref={assignRndRef}
-      bounds={bounds}
+      bounds="window"
       default={defaultLayout}
       position={position}
       minWidth={minWidth}
       minHeight={minHeight}
-      maxWidth={maxSize.width}
-      maxHeight={maxSize.height}
+      maxWidth="100vw"
+      maxHeight="100vh"
       dragHandleClassName={SELECTION_POPOVER_DRAG_HANDLE_CLASS}
       cancel={SELECTION_POPOVER_NO_DRAG_SELECTOR}
       enableResizing={SELECTION_POPOVER_RESIZE_HANDLES}
@@ -393,8 +392,8 @@ function SelectionPopoverShell({
         display: "flex",
         ...style,
         opacity: "var(--rf-selection-opacity, 1)",
-        maxWidth: maxSize.width,
-        maxHeight: maxSize.height,
+        maxWidth: "100vw",
+        maxHeight: "100vh",
       }}
       onDragStart={() => {
         handleDragStart()
@@ -419,14 +418,14 @@ function SelectionPopoverContent({
   className,
   children,
   container,
-  boundary,
+  anchorPoint,
   finalFocus,
   render,
   ...props
 }: useRender.ComponentProps<"div"> &
   React.ComponentProps<"div"> & {
     container?: SelectionPopoverPortalContainer
-    boundary?: HTMLElement | null
+    anchorPoint?: SelectionPopoverAnchorPoint
     finalFocus?: DialogPrimitive.Popup.Props["finalFocus"]
   }) {
   const { open, setOpen, anchor, triggerElement } = useSelectionPopoverRootContext()
@@ -442,8 +441,6 @@ function SelectionPopoverContent({
     defaultLayout,
     minWidth,
     minHeight,
-    bounds,
-    maxSize,
     handleDragStart,
     handleDrag,
     handleDragStop,
@@ -451,8 +448,8 @@ function SelectionPopoverContent({
     handleWheel,
   } = useSelectionPopoverLayout({
     anchor,
+    anchorPoint,
     isVisible: open,
-    boundary,
   })
 
   const handleClose = React.useCallback(() => {
@@ -517,8 +514,6 @@ function SelectionPopoverContent({
           defaultLayout={defaultLayout}
           minWidth={minWidth}
           minHeight={minHeight}
-          bounds={bounds}
-          maxSize={maxSize}
           handleDragStart={handleDragStart}
           handleDrag={handleDrag}
           handleDragStop={handleDragStop}

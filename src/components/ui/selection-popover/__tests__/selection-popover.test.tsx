@@ -938,33 +938,67 @@ describe("selectionPopover", () => {
     )
   })
 
-  it("keeps the card inside a boundary element instead of the window", async () => {
-    const boundary = document.createElement("div")
-    vi.spyOn(boundary, "getBoundingClientRect").mockReturnValue(
-      buildTriggerRect({ left: 100, top: 50, width: 800, height: 600 }),
+  it("opens a bottom-center anchored popover above its anchor and grows upward from there", async () => {
+    const actionsRef = React.createRef<{
+      requestOpen: (anchor?: { x: number; y: number } | null) => void
+    }>()
+    render(
+      <SelectionPopover.Root actionsRef={actionsRef} onOpenChange={onOpenChangeSpy}>
+        <SelectionPopover.Content anchorPoint="bottom-center">
+          <SelectionPopover.Body>
+            <div>Popover content</div>
+          </SelectionPopover.Body>
+        </SelectionPopover.Content>
+      </SelectionPopover.Root>,
     )
-    const { element } = renderPopover({ contentProps: { boundary } })
 
+    act(() => {
+      actionsRef.current?.requestOpen({ x: 600, y: 700 })
+    })
     await act(async () => {
       await Promise.resolve()
     })
 
-    expect(latestRndProps?.bounds).toBe(boundary)
-    expect(latestRndProps?.maxWidth).toBe("800px")
-    expect(latestRndProps?.maxHeight).toBe("600px")
+    expect(latestRndProps?.default).toMatchObject({ x: 350, y: 520 })
 
-    mockRect(element, { left: 120, top: 140, width: 500, height: 220 })
-    act(() => {
-      latestRndProps?.onDragStop?.(new MouseEvent("mouseup"), { x: 700, y: 500 })
-    })
+    const element = screen.getByTestId("mock-rnd")
+    mockRect(element, { left: 350, top: 520, width: 500, height: 220 })
+    triggerResizeObserver()
     flushRaf()
-    expectLatestPosition({ x: 400, y: 430 })
+    expectLatestPosition({ x: 350, y: 480 })
+
+    mockRect(element, { left: 350, top: 480, width: 500, height: 300 })
+    triggerResizeObserver()
+    flushRaf()
+    expectLatestPosition({ x: 350, y: 400 })
+  })
+
+  it("keeps a bottom-center anchored popover above its anchor even when it first overflows the viewport", async () => {
+    const actionsRef = React.createRef<{
+      requestOpen: (anchor?: { x: number; y: number } | null) => void
+    }>()
+    render(
+      <SelectionPopover.Root actionsRef={actionsRef} onOpenChange={onOpenChangeSpy}>
+        <SelectionPopover.Content anchorPoint="bottom-center">
+          <SelectionPopover.Body>
+            <div>Popover content</div>
+          </SelectionPopover.Body>
+        </SelectionPopover.Content>
+      </SelectionPopover.Root>,
+    )
 
     act(() => {
-      latestRndProps?.onDragStop?.(new MouseEvent("mouseup"), { x: 0, y: 0 })
+      actionsRef.current?.requestOpen({ x: 600, y: 860 })
     })
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    const element = screen.getByTestId("mock-rnd")
+    mockRect(element, { left: 350, top: 680, width: 500, height: 300 })
+    triggerResizeObserver()
     flushRaf()
-    expectLatestPosition({ x: 100, y: 50 })
+    expectLatestPosition({ x: 350, y: 560 })
   })
 
   it("keeps growing downward until streamed content reaches the viewport bottom", async () => {

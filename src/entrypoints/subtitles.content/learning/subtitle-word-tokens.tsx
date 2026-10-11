@@ -2,6 +2,7 @@ import type { MouseEvent, PointerEvent } from "react"
 import { useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useMemo, useRef } from "react"
 import { configAtom } from "@/utils/atoms/config"
+import { SUBTITLES_BOX_CLASS } from "@/utils/constants/subtitles"
 import { resolveWordLookupAction } from "@/utils/custom-actions"
 import { cn } from "@/utils/styles/utils"
 import { segmentWords } from "@/utils/subtitles/segment-words"
@@ -14,7 +15,7 @@ import {
   wordSelectionAtom,
 } from "./atoms"
 
-const CARD_INSET_FROM_PLAYER_TOP_PX = 12
+const CARD_GAP_ABOVE_SUBTITLES_PX = 8
 
 const WORD_SELECTOR = '[data-slot="subtitle-word"]'
 
@@ -77,14 +78,13 @@ export function SubtitleWordTokens() {
       }
 
       if (start === end) {
-        const root = line.getRootNode()
-        const playerTop = root instanceof ShadowRoot ? root.host.getBoundingClientRect().top : 0
+        const boxTop = line.closest(`.${SUBTITLES_BOX_CLASS}`)?.getBoundingClientRect().top
         openLookup({
           tokenIndex: start,
           term: tokens[start]?.text ?? "",
           anchor: {
-            x: firstRect.left,
-            y: playerTop + CARD_INSET_FROM_PLAYER_TOP_PX,
+            x: firstRect.left + firstRect.width / 2,
+            y: (boxTop ?? firstRect.top) - CARD_GAP_ABOVE_SUBTITLES_PX,
           },
         })
         return

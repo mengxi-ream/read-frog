@@ -1,5 +1,4 @@
 import { useAtomValue, useSetAtom } from "jotai"
-import { use, useLayoutEffect, useState } from "react"
 import { customActionRequestAtom } from "@/components/custom-action/atoms"
 import { CustomActionPanel } from "@/components/custom-action/custom-action-panel"
 import { isSaveToNotebaseDialogOpenAtom } from "@/components/custom-action/save-to-notebase-dialog-atom"
@@ -10,50 +9,25 @@ import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-ho
 import { closeWordLookupAtom, wordLookupAtom } from "./atoms"
 import { useLookupPlayback } from "./use-lookup-playback"
 import { useLookupShortcuts } from "./use-lookup-shortcuts"
+import { useTopLayerPortalContainer } from "./use-top-layer-portal-container"
 import { useWordSelectionDismiss } from "./use-word-selection-dismiss"
-
-function useCardLayer() {
-  const shadowWrapper = use(ShadowWrapperContext)
-  const [layer] = useState(() => {
-    const element = document.createElement("div")
-    element.style.position = "absolute"
-    element.style.inset = "0"
-    element.style.pointerEvents = "none"
-    return element
-  })
-
-  useLayoutEffect(() => {
-    const root = shadowWrapper?.getRootNode()
-    if (!(root instanceof ShadowRoot)) {
-      return undefined
-    }
-    root.appendChild(layer)
-    return () => layer.remove()
-  }, [layer, shadowWrapper])
-
-  return layer
-}
 
 export function WordLookupCard() {
   const lookup = useAtomValue(wordLookupAtom)
   const request = useAtomValue(customActionRequestAtom)
   const closeLookup = useSetAtom(closeWordLookupAtom)
   const isSaveToNotebaseDialogOpen = useAtomValue(isSaveToNotebaseDialogOpenAtom)
-  const layer = useCardLayer()
-  const shadowRoot = use(ShadowWrapperContext)?.getRootNode()
-  const player =
-    shadowRoot instanceof ShadowRoot && shadowRoot.host instanceof HTMLElement
-      ? shadowRoot.host
-      : null
   const open = lookup !== null
+  const cardOrDialogOpen = open || isSaveToNotebaseDialogOpen
+  const container = useTopLayerPortalContainer(cardOrDialogOpen)
 
   useLookupPlayback()
   useLookupShortcuts()
   useWordSelectionDismiss()
 
   return (
-    <ShadowWrapperContext value={layer}>
-      <ThemeProvider container={layer}>
+    <ShadowWrapperContext value={container}>
+      <ThemeProvider container={container}>
         <SelectionPopover.Root
           open={open}
           onOpenChange={(nextOpen) => {
@@ -66,13 +40,13 @@ export function WordLookupCard() {
         >
           <SelectionPopover.Content
             key={request?.sessionKey ?? 0}
-            container={layer}
-            boundary={player}
+            container={container}
+            anchorPoint="bottom-center"
           >
             <CustomActionPanel />
           </SelectionPopover.Content>
         </SelectionPopover.Root>
-        {(open || isSaveToNotebaseDialogOpen) && <SaveToNotebaseDialogHost />}
+        {cardOrDialogOpen && <SaveToNotebaseDialogHost />}
       </ThemeProvider>
     </ShadowWrapperContext>
   )
