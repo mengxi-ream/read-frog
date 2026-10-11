@@ -19,6 +19,11 @@ export function WordLookupCard() {
   const closeLookup = useSetAtom(closeWordLookupAtom)
   const isSaveToNotebaseDialogOpen = useAtomValue(isSaveToNotebaseDialogOpenAtom)
   const shadowWrapper = use(ShadowWrapperContext)
+  const shadowRoot = shadowWrapper?.getRootNode()
+  const player =
+    shadowRoot instanceof ShadowRoot && shadowRoot.host instanceof HTMLElement
+      ? shadowRoot.host
+      : null
   const open = lookup !== null
 
   useLookupPlayback()
@@ -40,6 +45,7 @@ export function WordLookupCard() {
         <SelectionPopover.Content
           key={request?.sessionKey ?? 0}
           container={shadowWrapper ?? document.body}
+          boundary={player}
         >
           <CustomActionPanel />
         </SelectionPopover.Content>

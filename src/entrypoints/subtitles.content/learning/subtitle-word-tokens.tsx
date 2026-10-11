@@ -1,7 +1,6 @@
 import type { MouseEvent, PointerEvent } from "react"
 import { useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useMemo, useRef } from "react"
-import { SELECTION_POPOVER_DEFAULT_WIDTH } from "@/components/ui/selection-popover/use-selection-popover-layout"
 import { configAtom } from "@/utils/atoms/config"
 import { SUBTITLES_BOX_CLASS } from "@/utils/constants/subtitles"
 import { resolveWordLookupAction } from "@/utils/custom-actions"
@@ -29,11 +28,6 @@ function tokenIndexFromEvent(event: Event) {
     .composedPath()
     .find((node): node is HTMLElement => node instanceof HTMLElement && node.matches(WORD_SELECTOR))
   return target ? Number(target.dataset.index) : null
-}
-
-function getOverlayBounds(line: HTMLElement) {
-  const root = line.getRootNode()
-  return root instanceof ShadowRoot ? root.host.getBoundingClientRect() : null
 }
 
 function unionRect(rects: DOMRect[]) {
@@ -85,22 +79,12 @@ export function SubtitleWordTokens() {
 
       if (start === end) {
         const boxTop = line.closest(`.${SUBTITLES_BOX_CLASS}`)?.getBoundingClientRect().top
-        const bounds = getOverlayBounds(line)
-        const x = bounds
-          ? Math.max(
-              bounds.left,
-              Math.min(firstRect.left, bounds.right - SELECTION_POPOVER_DEFAULT_WIDTH),
-            )
-          : firstRect.left
         openLookup({
           tokenIndex: start,
           term: tokens[start]?.text ?? "",
           anchor: {
-            x,
-            y: Math.max(
-              bounds?.top ?? 0,
-              (boxTop ?? firstRect.top) - CARD_CLEARANCE_ABOVE_SUBTITLES_PX,
-            ),
+            x: firstRect.left,
+            y: (boxTop ?? firstRect.top) - CARD_CLEARANCE_ABOVE_SUBTITLES_PX,
           },
         })
         return

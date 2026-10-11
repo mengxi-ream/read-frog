@@ -938,6 +938,35 @@ describe("selectionPopover", () => {
     )
   })
 
+  it("keeps the card inside a boundary element instead of the window", async () => {
+    const boundary = document.createElement("div")
+    vi.spyOn(boundary, "getBoundingClientRect").mockReturnValue(
+      buildTriggerRect({ left: 100, top: 50, width: 800, height: 600 }),
+    )
+    const { element } = renderPopover({ contentProps: { boundary } })
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(latestRndProps?.bounds).toBe(boundary)
+    expect(latestRndProps?.maxWidth).toBe("800px")
+    expect(latestRndProps?.maxHeight).toBe("600px")
+
+    mockRect(element, { left: 120, top: 140, width: 500, height: 220 })
+    act(() => {
+      latestRndProps?.onDragStop?.(new MouseEvent("mouseup"), { x: 700, y: 500 })
+    })
+    flushRaf()
+    expectLatestPosition({ x: 400, y: 430 })
+
+    act(() => {
+      latestRndProps?.onDragStop?.(new MouseEvent("mouseup"), { x: 0, y: 0 })
+    })
+    flushRaf()
+    expectLatestPosition({ x: 100, y: 50 })
+  })
+
   it("keeps growing downward until streamed content reaches the viewport bottom", async () => {
     const { element } = renderPopover()
 
