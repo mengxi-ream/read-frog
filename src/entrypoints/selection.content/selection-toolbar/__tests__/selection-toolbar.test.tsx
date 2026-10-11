@@ -276,7 +276,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
           ...DEFAULT_SELECTION_TOOLBAR_CONFIG.features.translate,
           enabled: false,
         },
-        speak: { enabled: false },
+        speak: { ...DEFAULT_SELECTION_TOOLBAR_CONFIG.features.speak, enabled: false },
       },
       builtInActions: {
         dictionary: {

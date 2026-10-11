@@ -2,11 +2,7 @@ import { isModifierKey } from "@tanstack/hotkeys"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Input } from "@/components/ui/base-ui/input"
 import { i18n } from "@/utils/i18n"
-import {
-  formatPageTranslationShortcut,
-  isValidConfiguredPageTranslationShortcut,
-  keyboardEventToPageTranslationShortcut,
-} from "@/utils/page-translation-shortcut"
+import { formatShortcut, isValidShortcut, keyboardEventToShortcut } from "@/utils/shortcut"
 
 const CLEAR_KEYS = new Set(["Backspace", "Delete"])
 
@@ -16,7 +12,8 @@ export function ShortcutKeyRecorder({
   className,
 }: {
   shortcutKey: string
-  onChange?: (shortcutKey: string) => void
+  /** Returning `false` turns the recorded keys down: the field goes back to its key. */
+  onChange?: (shortcutKey: string) => boolean | void
   className?: string
 }) {
   const [inRecording, setInRecording] = useState(false)
@@ -30,10 +27,9 @@ export function ShortcutKeyRecorder({
       isRecordingRef.current = false
       setInRecording(false)
 
-      if (nextShortcut !== null) {
+      if (nextShortcut !== null && onChange?.(nextShortcut) !== false) {
         setDraftShortcut(nextShortcut)
         setOptimisticShortcut(nextShortcut)
-        onChange?.(nextShortcut)
       } else {
         setDraftShortcut("")
       }
@@ -111,9 +107,9 @@ export function ShortcutKeyRecorder({
         return
       }
 
-      const normalizedHotkey = keyboardEventToPageTranslationShortcut(event)
+      const normalizedHotkey = keyboardEventToShortcut(event)
 
-      if (!normalizedHotkey || !isValidConfiguredPageTranslationShortcut(normalizedHotkey)) {
+      if (!normalizedHotkey || !isValidShortcut(normalizedHotkey)) {
         return
       }
 
@@ -137,7 +133,7 @@ export function ShortcutKeyRecorder({
       className={className}
       onFocus={startRecord}
       onBlur={handleBlur}
-      value={formatPageTranslationShortcut(inRecording ? draftShortcut : shortcutKey)}
+      value={formatShortcut(inRecording ? draftShortcut : shortcutKey)}
       placeholder={i18n.t("shortcutKeySelector.placeholder")}
       readOnly
     />

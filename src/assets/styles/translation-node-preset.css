@@ -38,17 +38,8 @@
 .read-frog-translated-content-wrapper[lang="zh"]
   *:not(:where(.read-frog-inline-atom, .read-frog-inline-atom *)) {
   font-family:
-    "PingFang SC",
-    "Microsoft YaHei",
-    "Source Han Sans SC",
-    "Noto Sans SC",
-    "Heiti SC",
-    "WenQuanYi Micro Hei",
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Helvetica,
-    Arial,
+    "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans SC", "Heiti SC",
+    "WenQuanYi Micro Hei", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
     sans-serif;
 }
 
@@ -57,21 +48,9 @@
 .read-frog-translated-content-wrapper[lang="zh-TW"]
   *:not(:where(.read-frog-inline-atom, .read-frog-inline-atom *)) {
   font-family:
-    "PingFang TC",
-    "Microsoft JhengHei",
-    "Source Han Sans TC",
-    "Noto Sans TC",
-    "Heiti TC",
-    "STHeiti",
-    "STXihei",
-    "Hiragino Sans TC",
-    "WenQuanYi Zen Hei",
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Helvetica,
-    Arial,
-    sans-serif;
+    "PingFang TC", "Microsoft JhengHei", "Source Han Sans TC", "Noto Sans TC", "Heiti TC",
+    "STHeiti", "STXihei", "Hiragino Sans TC", "WenQuanYi Zen Hei", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
 /* Japanese - macOS/Windows high-quality > Cross-platform > Legacy > Fallback */
@@ -79,21 +58,9 @@
 .read-frog-translated-content-wrapper[lang="ja"]
   *:not(:where(.read-frog-inline-atom, .read-frog-inline-atom *)) {
   font-family:
-    "Hiragino Kaku Gothic ProN",
-    "Yu Gothic",
-    "YuGothic",
-    "Meiryo",
-    "Noto Sans JP",
-    "Source Han Sans JP",
-    "MS PGothic",
-    "MS Gothic",
-    "IPAexGothic",
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Arial,
-    Helvetica,
-    sans-serif;
+    "Hiragino Kaku Gothic ProN", "Yu Gothic", "YuGothic", "Meiryo", "Noto Sans JP",
+    "Source Han Sans JP", "MS PGothic", "MS Gothic", "IPAexGothic", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Arial, Helvetica, sans-serif;
 }
 
 /* Arabic script languages - common typography features */

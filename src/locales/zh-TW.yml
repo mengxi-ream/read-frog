@@ -522,7 +522,7 @@ options:
         description: 透過協助我們定位 bug、最佳化介面配置等改善陪讀蛙
   shortcuts:
     title: 快速鍵
-    pageDescription: 設定閱讀時觸發翻譯的按鍵。
+    pageDescription: 設定閱讀時觸發翻譯、朗讀和 AI 指令的按鍵。
     setShortcut: 設定快速鍵
     pageTranslation:
       title: 網頁翻譯
@@ -542,6 +542,15 @@ options:
     translationHub:
       title: 翻譯中心
       description: 在新分頁中開啟翻譯中心。
+    selectionSpeak:
+      title: "選取文字朗讀"
+      description: "朗讀選取的文字，再按一次停止。"
+    actions:
+      title: "AI 指令"
+      description: "對選取的文字執行 AI 指令。自訂指令預設沒有快速鍵，在這裡設定即可。"
+    turnedOff: "此功能已關閉，重新開啟前快速鍵不會生效。"
+    clash: "與「$1」的快速鍵相同，請修改其中一個。"
+    taken: "$1 已被「$2」使用。"
   overlayTools:
     title: 懸浮工具
   inputTranslation:
@@ -1387,7 +1396,7 @@ options:
       title: 基礎設定
       enable:
         title: 開啟影片字幕
-        description: 在影片播放器控制列加上翻譯按鈕。目前只支援 YouTube。
+        description: 在 YouTube、X 和 Netflix 的影片播放器控制列加上翻譯按鈕。
       autoStart:
         title: 打開影片就翻譯
         description: 影片載入完成後自動開始翻譯字幕，不用再點按鈕。
@@ -1662,9 +1671,10 @@ subtitles:
     httpUnknown: HTTP 錯誤 $1
     invalidResponse: YouTube 字幕回應格式無效
     networkError: 取得字幕時發生網路錯誤
-    fetchSubTimeout: 取得 YouTube 字幕逾時
+    fetchSubTimeout: 取得字幕逾時
     buttonNotFound: 找不到字幕按鈕
     noSubtitlesFound: 這部影片沒有字幕
+    trackFileNotLoaded: 字幕載入失敗，請重新整理頁面後再試一次
     videoNotFound: 找不到影片元素
     controlsBarNotFound: 找不到控制列
     aiRateLimited: 請求過於頻繁，請稍後再試

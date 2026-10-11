@@ -18,10 +18,7 @@ import {
   MIN_WORDS_PER_NODE,
 } from "@/utils/constants/translate"
 import { TRANSLATION_NODE_STYLE } from "@/utils/constants/translation-node-style"
-import {
-  isPageTranslationShortcutEmpty,
-  isValidConfiguredPageTranslationShortcut,
-} from "@/utils/page-translation-shortcut"
+import { shortcutSchema } from "./shortcut"
 
 export const requestQueueConfigSchema = z.object({
   capacity: z.number().gte(MIN_TRANSLATE_CAPACITY),
@@ -174,24 +171,10 @@ export const pageCustomPromptsConfigSchema = createCustomPromptsConfigSchema(
 // translation is the only surface with more than one built-in prompt.
 export const customPromptsConfigSchema = pageCustomPromptsConfigSchema
 
-export const pageTranslationShortcutSchema = z.string().superRefine((shortcut, ctx) => {
-  if (isPageTranslationShortcutEmpty(shortcut)) {
-    return
-  }
-
-  if (!isValidConfiguredPageTranslationShortcut(shortcut)) {
-    ctx.addIssue({
-      code: "custom",
-      message:
-        "Page translation shortcut must include at least one modifier key and one non-modifier key.",
-    })
-  }
-})
-
 export const translateConfigSchema = z.object({
   providerId: z.string().nonempty(),
   mode: translationModeSchema,
-  modeShortcut: pageTranslationShortcutSchema,
+  modeShortcut: shortcutSchema,
   node: z.object({
     enabled: z.boolean(),
     hotkey: z.enum(HOTKEYS),
@@ -212,7 +195,7 @@ export const translateConfigSchema = z.object({
     autoTranslatePatterns: z.array(z.string()),
     neverAutoTranslatePatterns: z.array(z.string()),
     autoTranslateLanguages: z.array(langCodeISO6393Schema),
-    shortcut: pageTranslationShortcutSchema,
+    shortcut: shortcutSchema,
     preload: preloadConfigSchema,
     minCharactersPerNode: z.number().min(MIN_CHARACTERS_PER_NODE),
     minWordsPerNode: z.number().min(MIN_WORDS_PER_NODE),

@@ -92,11 +92,16 @@ export interface SurfaceByFeature {
     | "shortcut"
     | "touch_gesture"
   selection_translation: "selection_toolbar" | "context_menu" | "shortcut"
-  custom_ai_action: "selection_toolbar" | "context_menu" | "video_subtitles"
+  custom_ai_action: "selection_toolbar" | "context_menu" | "shortcut" | "video_subtitles"
   input_translation: "input_translation"
   translation_hub: "translation_hub"
   video_subtitles: "video_subtitles" | "video_subtitles_auto" | "shortcut"
-  text_to_speech: "selection_toolbar" | "context_menu" | "tts_settings" | "translation_hub"
+  text_to_speech:
+    | "selection_toolbar"
+    | "context_menu"
+    | "shortcut"
+    | "tts_settings"
+    | "translation_hub"
   note_suggestion: "selection_toolbar"
   note_save: "selection_toolbar"
   glossary: "page_translation" | "video_subtitles" | "selection_toolbar" | "input_translation"
@@ -119,7 +124,7 @@ export interface ObservedByFeature {
   input_translation: { char_count: number; target_language: LangCodeISO6393 }
   translation_hub: { char_count: number; target_language: LangCodeISO6393 }
   video_subtitles: { target_language: LangCodeISO6393 }
-  text_to_speech: Record<never, never>
+  text_to_speech: unknown
   note_suggestion:
     | { action_id: "suggestion_shown" }
     | { action_id: "suggestion_accepted"; action_name: string }

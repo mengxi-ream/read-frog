@@ -29,6 +29,17 @@ export function isBuiltInActionId(id: string): id is BuiltInActionId {
   return Object.hasOwn(BUILT_IN_ACTION_KEYS, id)
 }
 
+// The keys the built-in actions start with; a custom action starts with none.
+// Alt+Shift because a bare Alt+<letter> is what the reading shortcuts use, and
+// these letters because Chrome, Edge and ChromeOS keep Alt+Shift+A, B, I, L,
+// M, N, S and T for themselves, and the translation mode and the Translation
+// Hub already have M and H.
+export const BUILT_IN_ACTION_DEFAULT_SHORTCUTS: Record<BuiltInActionId, string> = {
+  [BUILT_IN_DICTIONARY_ACTION_ID]: "Alt+Shift+D",
+  [BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID]: "Alt+Shift+G",
+  [BUILT_IN_IMPROVE_WRITING_ACTION_ID]: "Alt+Shift+W",
+}
+
 export function createOutputSchemaField(
   name: string,
   type: SelectionToolbarCustomActionOutputType = "string",

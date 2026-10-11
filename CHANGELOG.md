@@ -1,5 +1,23 @@
 # @read-frog/extension
 
+## 1.50.3
+
+### Patch Changes
+
+- [#2323](https://github.com/mengxi-ream/read-frog/pull/2323) [`411fb44`](https://github.com/mengxi-ream/read-frog/commit/411fb44feeacf8c1ca25deb92e6cb85f92056a26) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(providers): add Claude Haiku, Sonnet, and Opus 5.5 models for Anthropic and Bedrock, default new Anthropic configurations to Haiku 5.5, and update the SDK adapters for their thinking modes.
+
+- [#2324](https://github.com/mengxi-ream/read-frog/pull/2324) [`50842cf`](https://github.com/mengxi-ream/read-frog/commit/50842cf205267b15e19e28b4c8ccb2882e5dd043) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translation): prevent translated text from overlapping on Kaggle Learn guides
+
+- [#2304](https://github.com/mengxi-ream/read-frog/pull/2304) [`490221d`](https://github.com/mengxi-ream/read-frog/commit/490221d734d2d4ce9848bc4007ef00843615ae39) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(subtitles): stop cutting off slow Netflix subtitle loads and misreporting failed ones
+
+- [#2305](https://github.com/mengxi-ream/read-frog/pull/2305) [`83eb7a2`](https://github.com/mengxi-ream/read-frog/commit/83eb7a2de219ec6a87cc9bb5f9b10ea4e2b04afb) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(subtitles): keep Netflix subtitle errors on screen instead of retrying every second
+
+- [#2303](https://github.com/mengxi-ream/read-frog/pull/2303) [`9494f75`](https://github.com/mengxi-ream/read-frog/commit/9494f753d17b99115773218e00e23c8bd2b1f189) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(subtitles): stop blaming YouTube when Netflix subtitles time out
+
+- [#2316](https://github.com/mengxi-ream/read-frog/pull/2316) [`56f29ed`](https://github.com/mengxi-ream/read-frog/commit/56f29eddb13ff5b8b31b17667cbcf862144a507d) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - style(ui): raise the corner radius base to 10px and frame tables with rounded-lg, matching the website
+
+- [#2302](https://github.com/mengxi-ream/read-frog/pull/2302) [`5456e4b`](https://github.com/mengxi-ream/read-frog/commit/5456e4b709f9d2b1f9afc4c92d14d2f5623a56e1) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(subtitles): name YouTube, X and Netflix in the video subtitles setting
+
 ## 1.50.2
 
 ### Patch Changes

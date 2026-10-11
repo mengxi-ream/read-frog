@@ -28,6 +28,25 @@ describe("shortcut key recorder", () => {
     })
   })
 
+  it("goes back to its key when the recorded one is turned down", async () => {
+    const onChange = vi.fn<(...args: any[]) => any>(() => false)
+
+    render(<ShortcutKeyRecorder shortcutKey="Alt+E" onChange={onChange} />)
+
+    const input = screen.getByPlaceholderText("shortcutKeySelector.placeholder")
+    if (!(input instanceof HTMLInputElement)) {
+      throw new TypeError("Shortcut key input is missing")
+    }
+    const shownBefore = input.value
+    fireEvent.focus(input)
+    fireEvent.keyDown(document, { key: "K", ctrlKey: true, shiftKey: true })
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith("Mod+Shift+K")
+    })
+    expect(input.value).toBe(shownBefore)
+  })
+
   it("uses the physical digit key for mac option combinations", async () => {
     const onChange = vi.fn<(...args: any[]) => any>()
 

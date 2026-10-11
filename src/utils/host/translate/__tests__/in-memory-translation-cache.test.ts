@@ -1,6 +1,17 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
+import { sendMessage } from "@/utils/message"
+import { TranslationCancelledError } from "@/utils/request/cancellation"
+import {
+  clearInMemoryTranslationCache,
+  getInMemoryTranslation,
+  IN_MEMORY_TRANSLATION_CACHE_MAX_ENTRIES,
+  storeInMemoryTranslation,
+} from "../in-memory-translation-cache"
+import { translateTextCore } from "../translate-text"
+import { beginPageTranslationSession, endPageTranslationSession } from "../translation-session"
 
 vi.mock("@/utils/message", () => ({
   sendMessage: vi.fn<(...args: any[]) => any>(),
@@ -26,13 +37,9 @@ const langConfig = {
   level: "intermediate" as const,
 }
 
-async function setup() {
-  const { sendMessage } = await import("@/utils/message")
-  const { translateTextCore } = await import("../translate-text")
-  const { beginPageTranslationSession, endPageTranslationSession } =
-    await import("../translation-session")
-  const { clearInMemoryTranslationCache } = await import("../in-memory-translation-cache")
+const sendMessageMock = vi.mocked(sendMessage)
 
+function setup() {
   // Module-level state survives across tests in this file: drop any session
   // and cached entries a previous test left behind.
   endPageTranslationSession()
@@ -49,7 +56,7 @@ async function setup() {
       ...overrides,
     })
 
-  return { sendMessage: vi.mocked(sendMessage), translate, sessionId, endPageTranslationSession }
+  return { translate }
 }
 
 describe("in-memory translation tier in translateTextCore", () => {
@@ -58,42 +65,42 @@ describe("in-memory translation tier in translateTextCore", () => {
   })
 
   it("serves a repeated page request from memory without a second background round trip", async () => {
-    const { sendMessage, translate } = await setup()
-    sendMessage.mockResolvedValue("你好")
+    const { translate } = setup()
+    sendMessageMock.mockResolvedValue("你好")
 
     await expect(translate("Hello")).resolves.toBe("你好")
     await expect(translate("Hello")).resolves.toBe("你好")
 
     // A virtualized page recreating its nodes re-runs this exact call; the
     // second run must not pay the message round trip again.
-    expect(sendMessage).toHaveBeenCalledTimes(1)
+    expect(sendMessageMock).toHaveBeenCalledTimes(1)
   })
 
   it("misses when the request identity differs", async () => {
-    const { sendMessage, translate } = await setup()
-    sendMessage.mockResolvedValueOnce("你好").mockResolvedValueOnce("こんにちは")
+    const { translate } = setup()
+    sendMessageMock.mockResolvedValueOnce("你好").mockResolvedValueOnce("こんにちは")
 
     await expect(translate("Hello")).resolves.toBe("你好")
     await expect(
       translate("Hello", { langConfig: { ...langConfig, targetCode: "jpn" as const } }),
     ).resolves.toBe("こんにちは")
 
-    expect(sendMessage).toHaveBeenCalledTimes(2)
+    expect(sendMessageMock).toHaveBeenCalledTimes(2)
   })
 
   it("does not cache outside a page-translation session", async () => {
-    const { sendMessage, translate } = await setup()
-    sendMessage.mockResolvedValue("你好")
+    const { translate } = setup()
+    sendMessageMock.mockResolvedValue("你好")
 
     await expect(translate("Hello", { sessionId: undefined })).resolves.toBe("你好")
     await expect(translate("Hello", { sessionId: undefined })).resolves.toBe("你好")
 
-    expect(sendMessage).toHaveBeenCalledTimes(2)
+    expect(sendMessageMock).toHaveBeenCalledTimes(2)
   })
 
   it("forceRetranslation bypasses the read but refreshes the stored entry", async () => {
-    const { sendMessage, translate } = await setup()
-    sendMessage.mockResolvedValueOnce("旧译文").mockResolvedValueOnce("新译文")
+    const { translate } = setup()
+    sendMessageMock.mockResolvedValueOnce("旧译文").mockResolvedValueOnce("新译文")
 
     await expect(translate("Hello")).resolves.toBe("旧译文")
     await expect(translate("Hello", { forceRetranslation: true })).resolves.toBe("新译文")
@@ -101,56 +108,48 @@ describe("in-memory translation tier in translateTextCore", () => {
     // would resurrect the translation the user explicitly replaced.
     await expect(translate("Hello")).resolves.toBe("新译文")
 
-    expect(sendMessage).toHaveBeenCalledTimes(2)
+    expect(sendMessageMock).toHaveBeenCalledTimes(2)
   })
 
   it("remembers the no-translation sentinel as an empty result", async () => {
-    const { sendMessage, translate } = await setup()
-    const { NO_TRANSLATION_SENTINEL } = await import("@/utils/constants/prompt")
-    sendMessage.mockResolvedValue(NO_TRANSLATION_SENTINEL)
+    const { translate } = setup()
+    sendMessageMock.mockResolvedValue(NO_TRANSLATION_SENTINEL)
 
     await expect(translate("Hello")).resolves.toBe("")
     await expect(translate("Hello")).resolves.toBe("")
 
-    expect(sendMessage).toHaveBeenCalledTimes(1)
+    expect(sendMessageMock).toHaveBeenCalledTimes(1)
   })
 
   it("does not memorize empty results", async () => {
-    const { sendMessage, translate } = await setup()
-    sendMessage.mockResolvedValue("")
+    const { translate } = setup()
+    sendMessageMock.mockResolvedValue("")
 
     await expect(translate("Hello")).resolves.toBe("")
     await expect(translate("Hello")).resolves.toBe("")
 
     // An empty result must stay retryable, mirroring the background's
     // truthy-only cache write.
-    expect(sendMessage).toHaveBeenCalledTimes(2)
+    expect(sendMessageMock).toHaveBeenCalledTimes(2)
   })
 
   it("throws for a cancelled session instead of serving from memory", async () => {
-    const { sendMessage, translate, endPageTranslationSession } = await setup()
-    const { TranslationCancelledError } = await import("@/utils/request/cancellation")
-    sendMessage.mockResolvedValue("你好")
+    const { translate } = setup()
+    sendMessageMock.mockResolvedValue("你好")
 
     await expect(translate("Hello")).resolves.toBe("你好")
     endPageTranslationSession()
 
     await expect(translate("Hello")).rejects.toBeInstanceOf(TranslationCancelledError)
-    expect(sendMessage).toHaveBeenCalledTimes(1)
+    expect(sendMessageMock).toHaveBeenCalledTimes(1)
   })
 })
 
 describe("in-memory translation cache store", () => {
-  it("evicts the least recently used entry past the cap", async () => {
-    const {
-      clearInMemoryTranslationCache,
-      getInMemoryTranslation,
-      storeInMemoryTranslation,
-      IN_MEMORY_TRANSLATION_CACHE_MAX_ENTRIES: cap,
-    } = await import("../in-memory-translation-cache")
+  it("evicts the least recently used entry past the cap", () => {
     clearInMemoryTranslationCache()
 
-    for (let i = 0; i < cap; i++) {
+    for (let i = 0; i < IN_MEMORY_TRANSLATION_CACHE_MAX_ENTRIES; i++) {
       storeInMemoryTranslation(`hash-${i}`, `t-${i}`)
     }
     // Touch the oldest entry so recency, not insertion order, decides.
@@ -163,9 +162,7 @@ describe("in-memory translation cache store", () => {
     expect(getInMemoryTranslation("hash-overflow")).toBe("t-overflow")
   })
 
-  it("ignores empty translations", async () => {
-    const { clearInMemoryTranslationCache, getInMemoryTranslation, storeInMemoryTranslation } =
-      await import("../in-memory-translation-cache")
+  it("ignores empty translations", () => {
     clearInMemoryTranslationCache()
 
     storeInMemoryTranslation("hash-empty", "")

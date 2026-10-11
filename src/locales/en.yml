@@ -522,7 +522,7 @@ options:
         description: Improve Read Frog by helping us locate bugs, refine layouts, and more
   shortcuts:
     title: Shortcuts
-    pageDescription: Set the keys that trigger translation while you read.
+    pageDescription: Set the keys that translate, read aloud and run AI actions while you read.
     setShortcut: Set shortcut
     pageTranslation:
       title: Page translation
@@ -542,6 +542,15 @@ options:
     translationHub:
       title: Translation Hub
       description: Open the Translation Hub in a new tab.
+    selectionSpeak:
+      title: "Read aloud"
+      description: "Read the text you selected aloud. Press again to stop."
+    actions:
+      title: "AI actions"
+      description: "Run an AI action on the text you selected. Custom actions have no key until you set one here."
+    turnedOff: "Turned off, so this key does nothing until you turn it back on."
+    clash: "Same key as “$1”. Change one of them."
+    taken: "$1 is already used by “$2”."
   overlayTools:
     title: Overlay Tools
   inputTranslation:
@@ -1524,7 +1533,7 @@ options:
       title: Basics
       enable:
         title: Enable video subtitles
-        description: Puts a translate button in the video player's controls. YouTube only, for now.
+        description: Puts a translate button in the video player's controls on YouTube, X and Netflix.
       autoStart:
         title: Translate on open
         description: Start translating as soon as a video loads, without pressing the button.
@@ -1799,9 +1808,10 @@ subtitles:
     httpUnknown: HTTP error $1
     invalidResponse: Invalid Youtube subtitle response format
     networkError: Network error occurred when fetching captions
-    fetchSubTimeout: Fetching youtube captions timed out
+    fetchSubTimeout: Fetching captions timed out
     buttonNotFound: Subtitle button not found
     noSubtitlesFound: No subtitles available for this video
+    trackFileNotLoaded: Subtitles failed to load, please try refreshing the page
     videoNotFound: Video element not found
     controlsBarNotFound: Controls bar not found
     aiRateLimited: Too many requests, please try again later

@@ -13,6 +13,7 @@ const OPENAI_COMPATIBLE_OPTION_ALIASES = {
 } as const satisfies Record<string, string>
 
 const REASONING_PROVIDER_OPTION_KEYS = new Set([
+  "effort",
   "enableThinking",
   "reasoningEffort",
   "reasoningHistory",
