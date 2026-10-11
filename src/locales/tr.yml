@@ -761,6 +761,8 @@ options:
             condition: İçeriği yalnızca alanın bir değeri olduğunda gösterir.
             loop: Her alan için sırayla tekrarlanır. f.name, f.value ve f.type kullanılabilir.
             speak: data-speak içeren her öğe, yanıt tamamlandığında değeri (değer boşsa kendi metnini) sesli okur.
+            speakLang: data-speak-lang okuma dilini belirtir (es veya en-US gibi bir kod), böylece o dilin sesi kullanılır. Belirtilmezse dil otomatik algılanır; tek bir kelimede bu çoğu zaman yanılır.
+            speakAutoplay: data-speak-autoplay içeren öğe, yanıt tamamlandığında kendiliğinden sesli okunur. Yalnızca ilk böyle öğe çalınır.
             status: Duruma göre stil verir. Kapsayıcının data-status değeri streaming, done veya error olur.
             filters: newline_to_br satır sonlarını korur (en sona koyun); lines metni satır listesine böler.
             styles: <style> bloğundaki CSS yalnızca bu sonucun içinde geçerlidir. --rf-* renkleri açık ve koyu temayı izler.

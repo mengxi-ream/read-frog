@@ -767,6 +767,8 @@ options:
             condition: Shows the content only when the field has a value.
             loop: Repeats for every field, in order. f.name, f.value and f.type are available.
             speak: Any element with data-speak reads the value aloud (or its own text if the value is empty) once the answer is done.
+            speakLang: data-speak-lang names the language to read in (a code such as es or en-US), so it gets that language's voice. Without it the language is detected, which often fails for a single word.
+            speakAutoplay: An element with data-speak-autoplay is read aloud on its own once the answer is done. Only the first such element plays.
             status: Styles by state. The host's data-status is streaming, done or error.
             filters: newline_to_br keeps line breaks (use it last); lines splits text into a list of lines.
             styles: CSS in a <style> block only applies inside this result. The --rf-* colors follow the light and dark themes.

@@ -762,6 +762,8 @@ options:
             condition: Məzmunu yalnız sahənin dəyəri olduqda göstərir.
             loop: Hər sahə üçün ardıcıl təkrarlanır. f.name, f.value və f.type istifadə edilə bilər.
             speak: data-speak olan istənilən element cavab hazır olduqda dəyəri (dəyər boşdursa, öz mətnini) səsli oxuyur.
+            speakLang: data-speak-lang oxunuş dilini göstərir (es və ya en-US kimi kod), beləliklə həmin dilin səsi istifadə olunur. Göstərilməsə, dil avtomatik təyin edilir; tək söz üçün bu çox vaxt səhv olur.
+            speakAutoplay: data-speak-autoplay olan element cavab hazır olduqda özü səsli oxunur. Yalnız ilk belə element səslənir.
             status: Vəziyyətə görə üslub verir. Konteynerin data-status dəyəri streaming, done və ya error olur.
             filters: newline_to_br sətir keçidlərini saxlayır (sonda istifadə edin); lines mətni sətir siyahısına bölür.
             styles: <style> blokundakı CSS yalnız bu nəticənin daxilində tətbiq olunur. --rf-* rəngləri açıq və tünd temaya uyğunlaşır.

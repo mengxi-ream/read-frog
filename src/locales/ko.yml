@@ -761,6 +761,8 @@ options:
             condition: 필드에 값이 있을 때만 내용을 표시합니다.
             loop: 모든 필드에 대해 순서대로 반복합니다. f.name, f.value, f.type을 사용할 수 있습니다.
             speak: data-speak가 있는 요소는 응답이 완료된 후 값(비어 있으면 요소 자신의 텍스트)을 읽어 줍니다.
+            speakLang: data-speak-lang에 언어 코드(es, en-US 등)를 지정하면 그 언어의 음성으로 읽어 줍니다. 지정하지 않으면 언어를 자동으로 감지하는데, 단어 하나는 잘못 감지되는 경우가 많습니다.
+            speakAutoplay: data-speak-autoplay가 있는 요소는 응답이 완료되면 자동으로 읽어 줍니다. 이런 요소가 여러 개면 첫 번째만 재생됩니다.
             status: 상태별로 스타일을 지정합니다. 호스트의 data-status는 streaming, done, error 중 하나입니다.
             filters: newline_to_br는 줄바꿈을 유지하고(마지막에 사용), lines는 텍스트를 줄 목록으로 나눕니다.
             styles: <style> 블록의 CSS는 이 결과 안에서만 적용됩니다. --rf-* 색상은 라이트/다크 테마를 따릅니다.

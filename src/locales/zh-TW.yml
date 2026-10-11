@@ -767,6 +767,8 @@ options:
             condition: 僅當欄位有值時顯示其中的內容。
             loop: 依序對每個欄位重複一次，可使用 f.name、f.value 和 f.type。
             speak: 帶有 data-speak 的任何元素會在回答完成後朗讀該值（值為空時朗讀元素本身的文字）。
+            speakLang: data-speak-lang 指定朗讀語言（如 es、en-US），會用該語言的聲音朗讀；未指定時自動辨識語言，單一詞語常常辨識不準。
+            speakAutoplay: 帶有 data-speak-autoplay 的元素會在回答完成後自動朗讀，只有第一個這樣的元素會播放。
             status: 依狀態設定樣式，宿主的 data-status 為 streaming、done 或 error。
             filters: newline_to_br 保留換行（需放在最後）；lines 將文字拆成逐行的清單。
             styles: <style> 中的 CSS 只作用於此結果。--rf-* 色彩會跟隨淺色和深色主題。
