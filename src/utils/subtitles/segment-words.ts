@@ -1,4 +1,4 @@
-interface WordToken {
+export interface WordToken {
   text: string
   isWord: boolean
 }
