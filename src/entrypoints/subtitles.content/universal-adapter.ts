@@ -87,9 +87,7 @@ export interface SubtitlesProvidersAdapter {
   hasSubtitlesAvailable: () => Promise<boolean>
   ensureSourceTrackPublished: () => Promise<void>
   seekTo: (seconds: number) => void
-  pauseVideo: () => void
-  playVideo: () => void
-  isVideoPaused: () => boolean
+  getVideoElement: () => HTMLVideoElement | null
   toggleSubtitlesManually: (enabled: boolean) => void
   toggleSubtitlesByShortcut: (enabled: boolean) => void
   requestAiSubtitles: () => Promise<void>
@@ -263,17 +261,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     }
   }
 
-  pauseVideo = () => {
-    this.subtitlesScheduler?.getVideoElement()?.pause()
-  }
-
-  playVideo = () => {
-    void this.subtitlesScheduler?.getVideoElement()?.play()
-  }
-
-  isVideoPaused = () => {
-    return this.subtitlesScheduler?.getVideoElement()?.paused ?? true
-  }
+  getVideoElement = () => this.subtitlesScheduler?.getVideoElement() ?? null
 
   downloadSourceSubtitles = async () => {
     await this.getOrLoadSourceSubtitles()

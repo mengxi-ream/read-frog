@@ -33,6 +33,10 @@ vi.mock("@/utils/atoms/config", () => ({
   },
 }))
 
+vi.mock("../preference/word-lookup-action-item", () => ({
+  WordLookupActionItem: () => null,
+}))
+
 function renderInRouter(ui: ReactNode) {
   return render(<MemoryRouter>{ui}</MemoryRouter>)
 }

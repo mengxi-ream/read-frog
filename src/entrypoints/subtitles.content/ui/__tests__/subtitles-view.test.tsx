@@ -16,6 +16,7 @@ vi.mock("@/utils/atoms/config", async () => {
       selectionToolbar: atom(DEFAULT_CONFIG.selectionToolbar),
       videoSubtitles: atom(DEFAULT_CONFIG.videoSubtitles),
     },
+    configAtom: atom(DEFAULT_CONFIG),
   }
 })
 

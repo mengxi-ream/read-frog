@@ -10,21 +10,25 @@ import { SUBTITLES_THEME } from "@/utils/constants/subtitles"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { closeWordLookupAtom, wordLookupAtom } from "./atoms"
 import { useLookupPlayback } from "./use-lookup-playback"
+import { useLookupShortcuts } from "./use-lookup-shortcuts"
+import { useWordSelectionDismiss } from "./use-word-selection-dismiss"
 
-/**
- * The custom action card for a clicked subtitle word. It renders inside the
- * subtitles shadow root, which sits in the player, so it stays visible in
- * fullscreen where the selection toolbar's own card would not.
- */
 export function WordLookupCard() {
   const lookup = useAtomValue(wordLookupAtom)
   const request = useAtomValue(customActionRequestAtom)
   const closeLookup = useSetAtom(closeWordLookupAtom)
   const isSaveToNotebaseDialogOpen = useAtomValue(isSaveToNotebaseDialogOpenAtom)
   const shadowWrapper = use(ShadowWrapperContext)
+  const shadowRoot = shadowWrapper?.getRootNode()
+  const player =
+    shadowRoot instanceof ShadowRoot && shadowRoot.host instanceof HTMLElement
+      ? shadowRoot.host
+      : null
   const open = lookup !== null
 
-  useLookupPlayback(open)
+  useLookupPlayback()
+  useLookupShortcuts()
+  useWordSelectionDismiss()
 
   return (
     <ThemeProvider container={shadowWrapper ?? undefined} forcedTheme={SUBTITLES_THEME}>
@@ -41,12 +45,11 @@ export function WordLookupCard() {
         <SelectionPopover.Content
           key={request?.sessionKey ?? 0}
           container={shadowWrapper ?? document.body}
+          boundary={player}
         >
           <CustomActionPanel />
         </SelectionPopover.Content>
       </SelectionPopover.Root>
-      {/* The dialog host asks for the auth session on mount; keep that off the
-          page-load path and only pay for it once a lookup exists. */}
       {(open || isSaveToNotebaseDialogOpen) && <SaveToNotebaseDialogHost />}
     </ThemeProvider>
   )

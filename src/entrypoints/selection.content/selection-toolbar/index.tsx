@@ -1,9 +1,9 @@
-import type {
-  EbookBridgeSelectionDirection,
-  EbookBridgeSelectionPayload,
-} from "@read-frog/definitions"
 import type { ModalDialogHostController } from "./modal-dialog-host"
 import type { DeferredSelectionOpenDetail } from "@/utils/constants/selection"
+import type {
+  ExternalSelectionDirection,
+  ExternalSelectionRequest,
+} from "@/utils/external-selection"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 import {
@@ -39,13 +39,12 @@ import {
   viewportPointToHostPoint,
 } from "./positioning"
 
-const EXTERNAL_SELECTION_DIRECTION_MAP: Record<EbookBridgeSelectionDirection, SelectionDirection> =
-  {
-    "top-left": SelectionDirection.TOP_LEFT,
-    "top-right": SelectionDirection.TOP_RIGHT,
-    "bottom-left": SelectionDirection.BOTTOM_LEFT,
-    "bottom-right": SelectionDirection.BOTTOM_RIGHT,
-  }
+const EXTERNAL_SELECTION_DIRECTION_MAP: Record<ExternalSelectionDirection, SelectionDirection> = {
+  "top-left": SelectionDirection.TOP_LEFT,
+  "top-right": SelectionDirection.TOP_RIGHT,
+  "bottom-left": SelectionDirection.BOTTOM_LEFT,
+  "bottom-right": SelectionDirection.BOTTOM_RIGHT,
+}
 
 const SELECTION_GUARD_INTERACTIVE_SELECTOR = [
   "button",
@@ -554,7 +553,7 @@ export function SelectionToolbar() {
   // through CustomEvents and reuse the same state mutations as handleMouseUp
   useEffect(() => {
     const handleExternalSelectionOpen = (e: Event) => {
-      const detail = (e as CustomEvent<EbookBridgeSelectionPayload>).detail
+      const detail = (e as CustomEvent<ExternalSelectionRequest>).detail
       if (!detail) {
         return
       }

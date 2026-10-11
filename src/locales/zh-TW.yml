@@ -1403,6 +1403,9 @@ options:
       aiSegmentation:
         title: AI 智慧斷句
         description: 讓 AI 把字幕重新切成讀起來完整的句子。時間軸也由 AI 判斷，可能出現錯位。需要設定 LLM 翻譯服務。
+      wordLookupAction:
+        title: 點詞查詢指令
+        description: 點擊字幕裡的單字時執行的 AI 指令。預設是詞典，也可以換成你自己的指令。
     aiQuota:
       title: AI 字幕額度
       description: AI 利用語音轉文字技術取得任何影片的準確字幕
