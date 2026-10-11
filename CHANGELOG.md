@@ -1,5 +1,27 @@
 # @read-frog/extension
 
+## 1.51.0
+
+### Minor Changes
+
+- [#2335](https://github.com/mengxi-ream/read-frog/pull/2335) [`6bb2e0a`](https://github.com/mengxi-ream/read-frog/commit/6bb2e0a19566628a00fa8785c6ce8c2528e57191) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(selection-toolbar): add keyboard shortcuts for speak and AI actions, managed on the Shortcuts page
+
+### Patch Changes
+
+- [#2337](https://github.com/mengxi-ream/read-frog/pull/2337) [`eab2f3c`](https://github.com/mengxi-ream/read-frog/commit/eab2f3caf04353f8f37efea7fbea3dd04c83947a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translation): stop React 19 articles like ISC2 from flickering and jumping after translation
+
+- [#2338](https://github.com/mengxi-ream/read-frog/pull/2338) [`4bf7398`](https://github.com/mengxi-ream/read-frog/commit/4bf739875d0f37f0c0feb096eac9c437633c0d3d) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(selection-toolbar): show field references as pills in the custom action layout editor
+
+- [#2336](https://github.com/mengxi-ream/read-frog/pull/2336) [`3f8a2ac`](https://github.com/mengxi-ream/read-frog/commit/3f8a2acf7cd4a7a1ceae76b30b14af2534b55929) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(selection-toolbar): use input and textarea values as AI action context
+  
+  Text selected inside an `<input>` or `<textarea>` now uses the field's current value as its paragraph context instead of the page title and stylesheet text. For a textarea, only the paragraphs that contain the selection are used. Password field values are never read. Text inside `<head>`, `<style>`, `<script>`, `<noscript>` and `<title>` is no longer collected as page context.
+
+- [#2334](https://github.com/mengxi-ream/read-frog/pull/2334) [`ea7eab2`](https://github.com/mengxi-ream/read-frog/commit/ea7eab204757f5531911fd97f2e6ff68aade90d3) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(analytics): record text-to-speech usage from the Translation Hub instead of silently dropping it in the background whitelist
+
+- [#2330](https://github.com/mengxi-ream/read-frog/pull/2330) [`2651576`](https://github.com/mengxi-ream/read-frog/commit/265157686f3d2140343b8f660ff5ba332688492b) Thanks [@1thomasdavison](https://github.com/1thomasdavison)! - fix(page-translation): keep arXiv and ar5iv inline code identifiers untranslated in bilingual and translation-only modes while continuing to skip standalone code listings.
+  
+  Apply the same prose-only paragraph filters in both modes, avoiding unnecessary translation requests for code-only content.
+
 ## 1.50.3
 
 ### Patch Changes
